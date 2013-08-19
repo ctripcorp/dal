@@ -1,0 +1,87 @@
+
+<div id="dashboard">
+	<br>
+	<div class="row-fluid">
+		<div class="span12">
+			<div class="portlet box green tasks-widget">
+
+				<!-- BEGIN Portlet Title -->
+				<div class="portlet-title">
+					<div class="caption"><i class="icon-check"></i>Projects</div>
+					<div class="tools">
+						<a href="#" class="icon-refresh reload"></a>
+					</div>
+					<div class="actions">
+						<div class="btn-group">
+							<a class="btn mini" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+							Actions
+							<i class="icon-angle-down"></i>
+							</a>
+							<ul class="dropdown-menu pull-right">
+								<li><a href="#" role="button" class="btn" data-toggle="modal" onclick="toggle_modal();">Add Project</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<!-- End Portlet Title -->
+
+				<!--BEGIN Portlet Body-->
+				<div class="portlet-body">
+					<div class="task-content">
+						<div class="scroller" style="height:750px" data-always-visible="1" data-rail-visible1="1">
+							<!-- START TASK LIST -->
+							<ul class="task-list unstyled">
+								<li>
+									<div class="task-title">
+										<span class="task-title-sp">Present 2013 Year IPO Statistics at Board Meeting</span>
+									</div>
+									<div class="task-config">
+										<div class="task-config-btn btn-group">
+											<a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">More <i class="icon-angle-down"></i></a>
+											<ul class="dropdown-menu pull-right">
+												<li><a href="#"><i class="icon-sun"></i> Tasks</a></li>
+												<li><a href="#"><i class="icon-twitter"></i> Codes</a></li>
+												<li><a href="#"><i class="icon-pencil"></i> Edit</a></li>
+												<li><a href="#"><i class="icon-trash"></i> Delete</a></li>
+											</ul>
+										</div>
+									</div>
+								</li>
+								
+							
+							</ul>
+							<!-- END START TASK LIST -->
+						</div>
+					</div>
+				</div>
+				<!--END Portlet Body-->
+
+			</div>
+		</div>
+	</div>
+
+
+ 	
+	<!-- Modal -->
+	<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-header">
+	    <button type="button" class="icon-remove close" data-dismiss="modal" aria-hidden="true" style="width: auto;height: auto;" onclick="toggle_modal();"></button>
+	    <h3 id="myModalLabel">Add a project</h3>
+	  </div>
+	  <div class="modal-body">
+	    
+	    <form class="form-inline">
+		  Product Line:<input type="text" class="input-block-level">
+		  Domain:<input type="text" class="input-block-level">
+		  App/Service Name:<input type="text" class="input-block-level">
+		</form>
+
+	  </div>
+	  <div class="modal-footer">
+	    <button class="btn" data-dismiss="modal" aria-hidden="true" onclick="toggle_modal();">Close</button>
+	    <button class="btn btn-primary">Save changes</button>
+	  </div>
+	</div>
+	
+
+</div>

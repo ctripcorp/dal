@@ -12,3 +12,8 @@ Netty101/
 *.class
 
 *.jar
+
+*.pyc
+*.log
+*.sqlite
+*.db

@@ -1,0 +1,14 @@
+
+
+#Folders
+JavaProjectCleaner/
+
+Netty101/
+
+.metadata/
+
+*.zip
+
+*.class
+
+*.jar

@@ -2,6 +2,36 @@ Main entry of dal project
 
 Its the demo branch, mainly for review use
 
+How to clone?
+
+#Clone the demo branch
+git clone git@git.dev.sh.ctripcorp.com:tools/dal.git -b demo
+
+#Clone the develop branch
+git clone git@git.dev.sh.ctripcorp.com:tools/dal.git -b develop
+
+#Clone the master branch
+git clone git@git.dev.sh.ctripcorp.com:tools/dal.git -b master
+
+How to pull?
+
+#pull the demo branch
+git pull origin demo
+
+#pull the develop branch
+git pull origin develop
+
+#pull the master branch
+git pull origin master
+
+
+How to change branch?
+
+git checkout demo/develop/master
+
+how to new branch?
+
+git branch <branch_name_here>
 
 How to develop?
 

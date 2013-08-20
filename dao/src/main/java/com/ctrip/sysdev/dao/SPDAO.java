@@ -29,18 +29,25 @@ public class SPDAO extends BaseDAO {
 	
 	public static void main(String[] args) throws Exception {
 		
-		AvailableType inputParam = new <Integer> AvailableType(1, 1);
+		//AvailableType inputParam = new <Integer> AvailableType(1, 1);
 		
 		SPDAO spDAO = new SPDAO();
 		
 		spDAO.setDbClient(true);
 		
-		ResultSet rs = spDAO.fetchBySp(null, "demoSelectSp",
-				0, inputParam);
+		AvailableType nameParam = new <String> AvailableType(1, "gawu");
+		AvailableType addrParam = new <String> AvailableType(2, "shanghai");
 		
-		while(rs.next()){
-			logger.debug(rs.getString(1));
-		}
+		int row = spDAO.executeSp(null, "demoInsertSp", 0, nameParam, addrParam);
+		
+		logger.debug(String.valueOf(row));
+		
+//		ResultSet rs = spDAO.fetchBySp(null, "demoSelectSp",
+//				0, inputParam);
+//		
+//		while(rs.next()){
+//			logger.debug(rs.getString(1));
+//		}
 		
 	}
 

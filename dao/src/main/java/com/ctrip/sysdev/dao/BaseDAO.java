@@ -4,9 +4,11 @@ import java.sql.ResultSet;
 import java.util.List;
 
 import com.ctrip.sysdev.client.DBClient;
+import com.ctrip.sysdev.log.Log4jAdapter;
+import com.ctrip.sysdev.log.LogAdapter;
 import com.ctrip.sysdev.msg.AvailableType;
 
-public class BaseDAO{ //implements IDAO {
+public class BaseDAO { // implements IDAO {
 
 	/*
 	 * Free Form SQL Example:
@@ -17,6 +19,8 @@ public class BaseDAO{ //implements IDAO {
 	 * 
 	 * AND Gender IN {int[]}
 	 */
+
+	static LogAdapter logger = Log4jAdapter.getLogger(BaseDAO.class);
 
 	private boolean useDBClient;
 	private DBClient dbClient;
@@ -33,19 +37,8 @@ public class BaseDAO{ //implements IDAO {
 		this.useDBClient = dbClient;
 	}
 
-	public ResultSet fetch(String tnxCtxt,
-			DAOFunction statement, List<AvailableType> params, int flag)
-			throws Exception {
-
-//		for (int i = 0; i < params.size(); i++) {
-//			if (statement.getRequiredParams().get(i) != params.get(i)
-//					.getCurrentClass()) {
-//				throw new ParametersInvalidException(String.format(
-//						"Expect type of %s but got %s!", statement
-//								.getRequiredParams().get(i), params.get(i)
-//								.getCurrentClass()));
-//			}
-//		}
+	public ResultSet fetch(String tnxCtxt, String statement, int flag,
+			AvailableType... params) throws Exception {
 
 		// all the parameters required are now provided
 		if (useDBClient) {
@@ -53,7 +46,7 @@ public class BaseDAO{ //implements IDAO {
 				dbClient = new DBClient();
 				dbClient.init();
 			}
-			return dbClient.fetch(null, statement, params, 0);
+			return dbClient.fetch(null, statement, 0, params);
 		} else {
 
 		}
@@ -61,37 +54,69 @@ public class BaseDAO{ //implements IDAO {
 		return null;
 	}
 
-	public <T> List<T> fetchByORM(String tnxCtxt, DAOFunction statement,
+	public <T> List<T> fetchByORM(String tnxCtxt, String statement,
 			List<AvailableType> params, int flag) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public ResultSet fetchBySp(String tnxCtxt, DAOFunction sp,
+	public ResultSet fetchBySp(String tnxCtxt, String sp, int flag,
+			AvailableType... params) throws Exception {
+		// all the parameters required are now provided
+		if (useDBClient) {
+			if (dbClient == null) {
+				dbClient = new DBClient();
+				dbClient.init();
+			}
+			return dbClient.fetchBySp(null, sp, 0, params);
+		} else {
+
+		}
+
+		return null;
+	}
+
+	public <T> List<T> fetchBySpByORM(String tnxCtxt, String sp,
 			List<AvailableType> params, int flag) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public <T> List<T> fetchBySpByORM(String tnxCtxt, DAOFunction sp,
-			List<AvailableType> params, int flag) {
-		// TODO Auto-generated method stub
-		return null;
+	public int execute(String tnxCtxt, String statement, int flag,
+			AvailableType... params) throws Exception {
+
+		// all the parameters required are now provided
+		if (useDBClient) {
+			if (dbClient == null) {
+				dbClient = new DBClient();
+				dbClient.init();
+			}
+			return dbClient.execute(null, statement, flag, params);
+		} else {
+
+		}
+
+		return 0;
+
 	}
 
-	public int execute(String tnxCtxt, DAOFunction statement,
-			List<AvailableType> params, int flag) {
-		// TODO Auto-generated method stub
+	public int executeSp(String tnxCtxt, String sp, int flag,
+			AvailableType... params) throws Exception {
+		// all the parameters required are now provided
+		if (useDBClient) {
+			if (dbClient == null) {
+				dbClient = new DBClient();
+				dbClient.init();
+			}
+			return dbClient.executeSp(tnxCtxt, sp, flag, params);
+		} else {
+
+		}
+
 		return 0;
 	}
 
-	public int executeSp(String tnxCtxt, DAOFunction sp,
-			List<AvailableType> params, int flag) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public int bulkInsert(String tnxCtxt, DAOFunction statement,
+	public int bulkInsert(String tnxCtxt, String statement,
 			List<AvailableType> params, int flag) {
 		// TODO Auto-generated method stub
 		return 0;

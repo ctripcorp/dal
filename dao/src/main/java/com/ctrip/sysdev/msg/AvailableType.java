@@ -1,14 +1,72 @@
 package com.ctrip.sysdev.msg;
 
 import java.math.BigDecimal;
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 
 import com.ctrip.sysdev.enums.AvailableTypeEnum;
 
-public class AvailableType {
+/**
+ * 
+ * @author gawu
+ *
+ */
+public class AvailableType{
+	
+	public AvailableType(){
+		
+	}
+	
+	public <T> AvailableType(T value){
+		this(1, value);
+	}
+	
+	public <T> AvailableType(int paramIndex, T value){
+		this.paramIndex = paramIndex;
+		
+		this.currentType = AvailableTypeEnum.fromClass(value.getClass());
+		switch(currentType){
+		case BOOL:
+			this.bool_arg = (Boolean) value;
+			break;
+		case BYTE:
+			this.byte_arg = (Byte) value;
+			break;
+		case SHORT:
+			this.short_arg = (Short) value;
+			break;
+		case INT:
+			this.int_arg = (Integer) value;
+			break;
+		case LONG:
+			this.long_arg = (Long) value;
+			break;
+		case FLOAT:
+			this.float_arg = (Float) value;
+			break;
+		case DOUBLE:
+			this.double_arg = (Double) value;
+			break;
+		case DECIMAL:
+			this.decimal_arg = (BigDecimal) value;
+			break;
+		case STRING:
+			this.string_arg = (String) value;
+			break;
+		case DATETIME:
+			this.datetime_arg = (Timestamp) value;
+			break;
+		case BYTEARR:
+			this.bytearr_arg = (byte[]) value;
+			break;
+		}
+	}
+	
+	public int paramIndex;
 	public AvailableTypeEnum currentType;
+	
 	public boolean bool_arg;
 	public byte byte_arg;
 	public short short_arg;
@@ -60,42 +118,82 @@ public class AvailableType {
 	 * @param ps
 	 * @return
 	 */
-	public void setPreparedStatement(PreparedStatement ps, int index)
+	public void setPreparedStatement(PreparedStatement ps)
 			throws Exception{
 		
 		switch(currentType){
 		case BOOL:
-			ps.setBoolean(index, bool_arg);
+			ps.setBoolean(paramIndex, bool_arg);
 			break;
 		case BYTE:
-			ps.setByte(index, byte_arg);
+			ps.setByte(paramIndex, byte_arg);
 			break;
 		case SHORT:
-			ps.setShort(index, short_arg);
+			ps.setShort(paramIndex, short_arg);
 			break;
 		case INT:
-			ps.setInt(index, int_arg);
+			ps.setInt(paramIndex, int_arg);
 			break;
 		case LONG:
-			ps.setLong(index, long_arg);
+			ps.setLong(paramIndex, long_arg);
 			break;
 		case FLOAT:
-			ps.setFloat(index, float_arg);
+			ps.setFloat(paramIndex, float_arg);
 			break;
 		case DOUBLE:
-			ps.setDouble(index, double_arg);
+			ps.setDouble(paramIndex, double_arg);
 			break;
 		case DECIMAL:
-			ps.setBigDecimal(index, decimal_arg);
+			ps.setBigDecimal(paramIndex, decimal_arg);
 			break;
 		case STRING:
-			ps.setString(index, string_arg);
+			ps.setString(paramIndex, string_arg);
 			break;
 		case DATETIME:
-			ps.setTimestamp(index, datetime_arg);
+			ps.setTimestamp(paramIndex, datetime_arg);
 			break;
 		case BYTEARR:
-			ps.setBytes(index, bytearr_arg);
+			ps.setBytes(paramIndex, bytearr_arg);
+			break;
+		}
+	}
+	
+	public void setCallableStatement(CallableStatement cs)
+			throws Exception{
+		
+		switch(currentType){
+		case BOOL:
+			cs.setBoolean(paramIndex, bool_arg);
+			break;
+		case BYTE:
+			cs.setByte(paramIndex, byte_arg);
+			break;
+		case SHORT:
+			cs.setShort(paramIndex, short_arg);
+			break;
+		case INT:
+			cs.setInt(paramIndex, int_arg);
+			break;
+		case LONG:
+			cs.setLong(paramIndex, long_arg);
+			break;
+		case FLOAT:
+			cs.setFloat(paramIndex, float_arg);
+			break;
+		case DOUBLE:
+			cs.setDouble(paramIndex, double_arg);
+			break;
+		case DECIMAL:
+			cs.setBigDecimal(paramIndex, decimal_arg);
+			break;
+		case STRING:
+			cs.setString(paramIndex, string_arg);
+			break;
+		case DATETIME:
+			cs.setTimestamp(paramIndex, datetime_arg);
+			break;
+		case BYTEARR:
+			cs.setBytes(paramIndex, bytearr_arg);
 			break;
 		}
 	}

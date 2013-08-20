@@ -6,7 +6,11 @@ import java.util.Map;
 import com.ctrip.sysdev.das.enums.ActionType;
 import com.ctrip.sysdev.das.enums.MessageType;
 
-
+/****
+ * 
+ * @author gawu
+ *
+ */
 public class MessageObject {
 
   // public MyEnum action;
@@ -31,8 +35,8 @@ public class MessageObject {
   
   public int flags; //always
   
-  /**
-   * Get the count of valid properties
+  /****
+   * 
    * @return
    */
   public int propertyCount(){

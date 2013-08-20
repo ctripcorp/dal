@@ -2,12 +2,8 @@ package com.ctrip.sysdev.dao;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
-import com.ctrip.sysdev.enums.AvailableTypeEnum;
 import com.ctrip.sysdev.msg.AvailableType;
 
 public class PersonDAO extends BaseDAO {
@@ -24,59 +20,62 @@ public class PersonDAO extends BaseDAO {
 	 * 
 	 * @return The DAO function object to validate the parameter
 	 */
-	public ResultSet SelAddrTelByNameEqGenderEq(String name, int gender)
+	public ResultSet SelAddrTelByNameEqGenderEq(AvailableType... params)
 			throws Exception {
+		
+		final int paramCount = 2;
 
-		String sql = "SELECT Address, Telephone FROM Person WHERE Name = ? AND Gender = ?";
+		final String sql = "SELECT Address, Telephone FROM Person WHERE Name = ? AND Gender = ?";
+		
+		if(params.length != paramCount){
+			throw new Exception(String.format(
+					"Required %d parameter(s), but got %d!", 
+					paramCount, params.length));
+		}
 
-		DAOFunction func = new DAOFunction();
-
-		// func.setFields(new String[]{ "Address", "Telephone" });
-		//
-		// Map<Integer, Class<?>> requiredParams = new TreeMap<Integer,
-		// Class<?>>();
-		// requiredParams.put(0, String.class);
-		// requiredParams.put(1, int.class);
-		//
-		Map<Integer, AvailableTypeEnum> resultFields = new TreeMap<Integer, AvailableTypeEnum>();
-		resultFields.put(1, AvailableTypeEnum.STRING);
-		resultFields.put(2, AvailableTypeEnum.STRING);
-
-		//
-		// func.setRequiredParams(requiredParams);
-		func.setResultFields(resultFields);
-		//
-		func.setSql(sql);
-
-		// return func;
-
-		LinkedList<AvailableType> params = new LinkedList<AvailableType>();
-
-		AvailableType nameType = new AvailableType();
-		nameType.currentType = AvailableTypeEnum.STRING;
-		nameType.string_arg = "1";
-
-		AvailableType genderType = new AvailableType();
-		genderType.currentType = AvailableTypeEnum.LONG;
-		genderType.long_arg = 1;
-
-		params.add(nameType);
-		params.add(genderType);
-
-		return super.fetch(null, func, params, 0);
-
+		return super.fetch(null, sql, 0, params);
+	}
+	
+	/**
+	 * 
+	 * @param params
+	 * @return
+	 * @throws Exception
+	 */
+	public int SetAddrByName(AvailableType... params)
+			throws Exception{
+		
+		final int paramCount = 2;
+		
+		final String sql = "UPDATE Person SET Address = ? WHERE Name = ?";
+		
+		if(params.length != paramCount){
+			throw new Exception(String.format(
+					"Required %d parameter(s), but got %d!", 
+					paramCount, params.length));
+		}
+		
+		return super.execute(null, sql, 0, params);
 	}
 
 	public static void main(String[] args) throws Exception {
 		PersonDAO person = new PersonDAO();
 
 		person.setDbClient(true);
+		
+		AvailableType addrParam = new <String> AvailableType(1, "world");
+		AvailableType nameParam = new <String> AvailableType(2, "1");
+//		AvailableType genderParam = new <Integer> AvailableType(2, 1);
+		
+		int row = person.SetAddrByName(addrParam, nameParam);
+		
+		logger.debug(String.valueOf(row));
 
-		ResultSet rs = person.SelAddrTelByNameEqGenderEq("1", 1);
-		while (rs.next()) {
-			System.out.println(rs.getString(1));
-			System.out.println(rs.getString(2));
-		}
+//		ResultSet rs = person.SelAddrTelByNameEqGenderEq(nameParam, genderParam);
+//		while (rs.next()) {
+//			System.out.println(rs.getString(1));
+//			System.out.println(rs.getString(2));
+//		}
 	}
 
 }

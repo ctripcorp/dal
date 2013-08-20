@@ -22,14 +22,12 @@ public class MessageObject {
   public boolean useCache; //always
 
   public String SPName;
-
-  public Map<String, AvailableType> SPKVParams;
   
   public boolean batchOperation;
 
   public String SQL;
   
-  public List<AvailableType> singleArgs;
+  public List<AvailableType> singleArgs; //always
   
   public List<List<AvailableType>> batchArgs;
   

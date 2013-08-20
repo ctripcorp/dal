@@ -33,7 +33,7 @@ public class SPDAO extends BaseDAO {
 		
 		SPDAO spDAO = new SPDAO();
 		
-		spDAO.setDbClient(true);
+		spDAO.setUseDBClient(true);
 		
 		AvailableType nameParam = new <String> AvailableType(1, "gawu");
 		AvailableType addrParam = new <String> AvailableType(2, "shanghai");

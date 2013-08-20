@@ -29,12 +29,12 @@ public class BaseDAO { // implements IDAO {
 
 	}
 
-	public boolean getDbClient() {
+	public boolean getUseDBClient() {
 		return this.useDBClient;
 	}
 
-	public void setDbClient(boolean dbClient) {
-		this.useDBClient = dbClient;
+	public void setUseDBClient(boolean useDBClient) {
+		this.useDBClient = useDBClient;
 	}
 
 	public ResultSet fetch(String tnxCtxt, String statement, int flag,

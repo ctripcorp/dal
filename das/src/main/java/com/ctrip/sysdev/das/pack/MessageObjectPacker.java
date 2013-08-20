@@ -33,16 +33,14 @@ public class MessageObjectPacker {
 			
 			packer.write(msg.SPName);
 
-			// BEGIN stored procedure params pack ----------------------
-			packer.writeMapBegin(msg.SPKVParams.size());
-			for (String key : msg.SPKVParams.keySet()) {
-				packer.write(key);
-
-				AvailableType availableType = msg.SPKVParams.get(key);
-				packAvailableType(packer, availableType);
+			packer.writeArrayBegin(msg.singleArgs.size());
+			
+			for(AvailableType at: msg.singleArgs){
+				packAvailableType(packer, at);
 			}
-			packer.writeMapEnd();
-			// END stored procedure params pack ----------------------
+			
+			packer.writeArrayEnd();
+			
 		}else{
 			
 			packer.write(msg.batchOperation);

@@ -49,15 +49,14 @@ public class MessageObjectUnPacker {
 			
 			myMessage.SPName = unpacker.readString();
 			
-			int spParamCount = unpacker.readMapBegin();
-			
-			myMessage.SPKVParams = new TreeMap<String, AvailableType>();
-			for(int i=0;i<spParamCount;i++){
-				myMessage.SPKVParams.put(unpacker.readString(), 
-						unpackAvailableType(unpacker));
+			List<AvailableType> singleArgs = new LinkedList<AvailableType>();
+			int argsSize = unpacker.readArrayBegin();
+			for(int j=0;j<argsSize;j++){
+				singleArgs.add(unpackAvailableType(unpacker));
 			}
+			unpacker.readArrayEnd();
 			
-			unpacker.readMapEnd();
+			myMessage.singleArgs = singleArgs;
 			
 		}else{
 			myMessage.batchOperation = unpacker.readBoolean();
@@ -86,14 +85,14 @@ public class MessageObjectUnPacker {
 				
 			}else{
 				
-				List<AvailableType> batchArg = new LinkedList<AvailableType>();
+				List<AvailableType> singleArgs = new LinkedList<AvailableType>();
 				int argsSize = unpacker.readArrayBegin();
 				for(int j=0;j<argsSize;j++){
-					batchArg.add(unpackAvailableType(unpacker));
+					singleArgs.add(unpackAvailableType(unpacker));
 				}
 				unpacker.readArrayEnd();
 				
-				myMessage.singleArgs = batchArg;
+				myMessage.singleArgs = singleArgs;
 			}
 			
 		}
@@ -153,6 +152,8 @@ public class MessageObjectUnPacker {
 		case BYTEARR:
 			at.bytearr_arg = unpacker.readByteArray();
 			break;
+		default:
+			at.object_arg = unpacker.readValue();
 		}
 		unpacker.readArrayEnd();
 		

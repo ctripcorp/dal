@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ctrip.sysdev.exception.ParametersInvalidException;
 import com.ctrip.sysdev.msg.AvailableType;
 
 public class PersonDAO extends BaseDAO {
@@ -28,7 +29,7 @@ public class PersonDAO extends BaseDAO {
 		final String sql = "SELECT Address, Telephone FROM Person WHERE Name = ? AND Gender = ?";
 		
 		if(params.length != paramCount){
-			throw new Exception(String.format(
+			throw new ParametersInvalidException(String.format(
 					"Required %d parameter(s), but got %d!", 
 					paramCount, params.length));
 		}
@@ -50,7 +51,7 @@ public class PersonDAO extends BaseDAO {
 		final String sql = "UPDATE Person SET Address = ? WHERE Name = ?";
 		
 		if(params.length != paramCount){
-			throw new Exception(String.format(
+			throw new ParametersInvalidException(String.format(
 					"Required %d parameter(s), but got %d!", 
 					paramCount, params.length));
 		}
@@ -61,7 +62,7 @@ public class PersonDAO extends BaseDAO {
 	public static void main(String[] args) throws Exception {
 		PersonDAO person = new PersonDAO();
 
-		person.setDbClient(true);
+		person.setUseDBClient(true);
 		
 		AvailableType addrParam = new <String> AvailableType(1, "world");
 		AvailableType nameParam = new <String> AvailableType(2, "1");

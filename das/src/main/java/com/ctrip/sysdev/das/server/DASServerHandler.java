@@ -99,8 +99,8 @@ public class DASServerHandler extends ChannelInboundHandlerAdapter {
 
 				MessageObject myMessage = new MessageObjectUnPacker()
 						.unpack(payload_array);
-
-				// System.out.println(payload.toString(io.netty.util.CharsetUtil.US_ASCII));
+				
+				
 
 				System.out
 						.println("A single request object read finish--------------------------------------");

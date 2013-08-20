@@ -5,15 +5,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.HashMap;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
-import com.ctrip.sysdev.dao.DAOFunction;
 import com.ctrip.sysdev.enums.ActionType;
-import com.ctrip.sysdev.enums.AvailableTypeEnum;
+import com.ctrip.sysdev.enums.Flags;
 import com.ctrip.sysdev.enums.MessageType;
 import com.ctrip.sysdev.msg.AvailableType;
 import com.ctrip.sysdev.msg.MessageObject;
@@ -25,15 +23,29 @@ public class DALClient {
 	DataOutputStream out;
  	DataInputStream in;
  	
- 	public ResultSet fetch(String tnxCtxt, DAOFunction statement, 
-			List<AvailableType> params, int flag) throws Exception{
+ 	public ResultSet fetch(String tnxCtxt, String statement, int flag, 
+			AvailableType... params) throws Exception{
 		
+		MessageObject message = new MessageObject();
+		
+		message.messageType = MessageType.SQL;
+		message.actionType = ActionType.SELECT;
+		message.useCache = false;
+		
+		message.batchOperation = false;
+		message.SQL = statement;
+		message.singleArgs = new ArrayList<AvailableType>(
+				Arrays.asList(params));
+		
+		message.flags = Flags.TEST.getIntVal();
+		
+		run(message);
 		
 		
 		return null;
  	}
 
-	void run()
+	void run(MessageObject message)
 	{
 		try{
 			//1. creating a socket to connect to the server
@@ -46,43 +58,21 @@ public class DALClient {
 			in = new DataInputStream(requestSocket.getInputStream());
 			//3: Communicating with the server
 			
-			MessageObject mo = new MessageObject();
-			
-			mo.messageType = MessageType.SQL;
-			mo.actionType = ActionType.INSERT;
-			mo.useCache = false;
-//			mo.SPName = "what";
-//			mo.SPKVParams = new HashMap<String, AvailableType>();
-//			mo.BulkSQL = new HashMap<String, List<AvailableType>>();
-			
-//			AvailableType at = new AvailableType();
-//			at.currentType = AvailableTypeEnum.BOOL;
-//			at.bool_arg = true;
-//			
-//			mo.SPKVParams.put("hello", at);
-			
-			byte[] payload = new MessageObjectPacker().pack(mo);
+			byte[] payload = new MessageObjectPacker().pack(message);
 			
 			int wholeLength = 4 + 16 + 2 + 2 + 2 + 4 
 					 + Consts.credential.length() + payload.length;
 			
-//			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-//			
-//			outStream.write(b);
-			
+			//Step 1: Write whole length
 			out.writeInt(wholeLength);
 			
-			System.out.println(out.size());
-			
+			//Step 1: Write the uuid
 			byte[] uuid = asByteArray(UUID.randomUUID());
 			
 			out.write(uuid, 0, uuid.length);
 			
-			System.out.println(out.size());
-			
+			//Step 1: Write database id
 			out.writeShort(Consts.databaseId);
-			
-			System.out.println(out.size());
 			
 			out.writeShort(Consts.credential.length());
 			
@@ -137,7 +127,7 @@ public class DALClient {
 	}
 	
 	public static void main(String[] args) {
-		new DALClient().run();
+		new DALClient();
 	}
 	
 

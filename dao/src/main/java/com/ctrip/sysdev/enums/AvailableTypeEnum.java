@@ -19,7 +19,8 @@ public enum AvailableTypeEnum {
 //	CHAR(8),
 	STRING(8),
 	DATETIME(9),
-	BYTEARR(10); 
+	BYTEARR(10),
+	OBJECT(11); 
 
 	private int intVal;
 
@@ -53,6 +54,7 @@ public enum AvailableTypeEnum {
         classToEnum.put(String.class, STRING);
         classToEnum.put(Timestamp.class, DATETIME);
         classToEnum.put(byte[].class, BYTEARR);
+        classToEnum.put(Object.class, OBJECT);
     }
     
     public static AvailableTypeEnum fromInt(int symbol) {

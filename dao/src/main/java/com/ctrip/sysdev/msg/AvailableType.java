@@ -61,6 +61,9 @@ public class AvailableType{
 		case BYTEARR:
 			this.bytearr_arg = (byte[]) value;
 			break;
+		default:
+			this.object_arg = value;
+			break;
 		}
 	}
 	
@@ -79,6 +82,7 @@ public class AvailableType{
 	public String string_arg;
 	public Timestamp datetime_arg;
 	public byte[] bytearr_arg;
+	public Object object_arg;
 	
 	/**
 	 * Get the class of current active variable
@@ -155,6 +159,9 @@ public class AvailableType{
 		case BYTEARR:
 			ps.setBytes(paramIndex, bytearr_arg);
 			break;
+		default:
+			ps.setObject(paramIndex, object_arg);
+			break;
 		}
 	}
 	
@@ -194,6 +201,9 @@ public class AvailableType{
 			break;
 		case BYTEARR:
 			cs.setBytes(paramIndex, bytearr_arg);
+			break;
+		default:
+			cs.setObject(paramIndex, object_arg);
 			break;
 		}
 	}
@@ -246,6 +256,9 @@ public class AvailableType{
 		case BYTEARR:
 			at.bytearr_arg = rs.getBytes(index);
 			break;
+		default:
+			at.object_arg = rs.getObject(index);
+			break;
 		}
 		
 		return at;
@@ -279,7 +292,7 @@ public class AvailableType{
 		case BYTEARR:
 			return String.valueOf(bytearr_arg);
 		default:
-			return "";
+			return object_arg.toString();
 		}
 	}
 	

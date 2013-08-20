@@ -9,8 +9,6 @@ import com.ctrip.sysdev.enums.MessageType;
 
 public class MessageObject {
 
-  // public MyEnum action;
-
   public MessageType messageType; //always
 
   public ActionType actionType; //always
@@ -18,8 +16,6 @@ public class MessageObject {
   public boolean useCache; //always
 
   public String SPName;
-
-  public Map<String, AvailableType> SPKVParams;
   
   public boolean batchOperation;
 

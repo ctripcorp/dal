@@ -32,16 +32,15 @@ public class MessageObjectPacker {
 		if(msg.messageType == MessageType.SP){
 			
 			packer.write(msg.SPName);
-
-			// BEGIN stored procedure params pack ----------------------
-			packer.writeMapBegin(msg.SPKVParams.size());
-			for (String key : msg.SPKVParams.keySet()) {
-				packer.write(key);
-
-				AvailableType availableType = msg.SPKVParams.get(key);
-				packAvailableType(packer, availableType);
+			
+			packer.writeArrayBegin(msg.singleArgs.size());
+			
+			for(AvailableType at: msg.singleArgs){
+				packAvailableType(packer, at);
 			}
-			packer.writeMapEnd();
+			
+			packer.writeArrayEnd();
+
 			// END stored procedure params pack ----------------------
 		}else{
 			
@@ -89,6 +88,7 @@ public class MessageObjectPacker {
 			throws Exception{
 		
 		packer.writeArrayBegin(2);
+		packer.write(availableType.paramIndex);
 		packer.write(availableType.currentType.getIntVal());
 		switch(availableType.currentType){
 		case BOOL:
@@ -123,6 +123,9 @@ public class MessageObjectPacker {
 			break;
 		case BYTEARR:
 			packer.write(availableType.bytearr_arg);
+			break;
+		default:
+			packer.write(availableType.object_arg);
 			break;
 		}
 		packer.writeArrayEnd();

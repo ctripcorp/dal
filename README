@@ -1,3 +1,15 @@
 Main entry of dal project
 
 Its the demo branch, mainly for review use
+
+
+How to develop?
+
+
+1. When add a new function, create a new branch
+
+2. When the new function is finished, merge to branch develop
+
+3. Test the develop branch, if OK, merge to master brach
+
+4. Master branch is always a stable release, and is locked by default

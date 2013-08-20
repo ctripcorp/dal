@@ -1,0 +1,26 @@
+How to use the generated DAO?
+
+For example, you have a DAO named PersonDAO, and you got a function named "GetAddrTelByNameGender"
+
+You already know the parameters to pass into the function:
+
+//Now you got a parameter, it will set the first parameter with String value 'gawu'
+AvailableType nameParam = new <String> AvailableType(1, "gawu");
+
+//Now you got a parameter, it will set the second parameter with Integer value 2
+AvailableType genderParam = new <Integer> AvailableType(2, 2);
+
+Now, pass in the parameter
+
+PersonDAO person = new PersonDAO();
+
+//Connect to db directly, set to false to use DAL-Client
+person.setDbClient(true);
+
+//Now you got a ResultSet object, you can iterator it to get what you want
+ResultSet rs = pserson.GetAddrTelByNameGender(nameParam, genderParam);
+
+while(rs.next()){
+    System.out.println(rs.GetString(1));
+    System.out.println(rs.GetString(2));
+}

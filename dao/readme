@@ -15,7 +15,7 @@ Now, pass in the parameter
 PersonDAO person = new PersonDAO();
 
 //Connect to db directly, set to false to use DAL-Client
-person.setDbClient(true);
+person.setUseDBClient(true);
 
 //Now you got a ResultSet object, you can iterator it to get what you want
 ResultSet rs = pserson.GetAddrTelByNameGender(nameParam, genderParam);

@@ -3,7 +3,7 @@ package com.ctrip.sysdev.das.utils;
 public class Consts {
 
 	//For Data Access Service client
-	public static final String serverAddr = "127.0.0.1";
+	public static final String serverAddr = "0.0.0.0";
 	public static final int serverPort = 9000;
 	public static final int protocolVersion = 1;
 	public static final int databaseId = 32;

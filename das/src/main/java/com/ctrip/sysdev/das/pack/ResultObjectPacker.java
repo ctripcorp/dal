@@ -1,80 +1,42 @@
 package com.ctrip.sysdev.das.pack;
 
 import java.io.ByteArrayOutputStream;
-import java.util.List;
 
 import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
 
-import com.ctrip.sysdev.das.enums.MessageType;
+import com.ctrip.sysdev.das.enums.ResultType;
 import com.ctrip.sysdev.das.msg.AvailableType;
-import com.ctrip.sysdev.das.msg.MessageObject;
+import com.ctrip.sysdev.das.msg.ResultObject;
 
-public class MessageObjectPacker {
-
-	public byte[] pack(MessageObject msg) throws Exception {
-
+public class ResultObjectPacker {
+	
+	public byte[] pack(ResultObject result) throws Exception{
+		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 		MessagePack msgpack = new MessagePack();
 
 		Packer packer = msgpack.createPacker(out);
 
-		packer.writeArrayBegin(msg.propertyCount());
+		packer.writeArrayBegin(result.propertyCount());
 
-		packer.write(msg.messageType.getIntVal());
-
-		packer.write(msg.actionType.getIntVal());
-
-		packer.write(msg.useCache);
+		packer.write(result.resultType.getIntVal());
 		
 		//Write the information of sp
-		if(msg.messageType == MessageType.SP){
+		if(result.resultType == ResultType.RETRIEVE){
 			
-			packer.write(msg.SPName);
-
-			packer.writeArrayBegin(msg.singleArgs.size());
+			packer.writeArrayBegin(result.resultSet.size());
 			
-			for(AvailableType at: msg.singleArgs){
-				packAvailableType(packer, at);
+			for(int i=0;i<result.resultSet.size();i++){
+				packAvailableType(packer, result.resultSet.get(i));
 			}
 			
 			packer.writeArrayEnd();
 			
 		}else{
 			
-			packer.write(msg.batchOperation);
-			
-			packer.write(msg.SQL);
-			
-			if(msg.batchOperation){
-				
-				packer.writeArrayBegin(msg.batchArgs.size());
-				
-				for(List<AvailableType> arg : msg.batchArgs){
-					
-					packer.writeArrayBegin(arg.size());
-					
-					for(AvailableType at: arg){
-						packAvailableType(packer, at);
-					}
-					packer.writeArrayEnd();
-					
-				}
-				
-				packer.writeArrayEnd();
-				
-			}else{
-				
-				packer.writeArrayBegin(msg.singleArgs.size());
-				
-				for(AvailableType at: msg.singleArgs){
-					packAvailableType(packer, at);
-				}
-				
-				packer.writeArrayEnd();
-				
-			}
+			packer.write(result.affectRowCount);
 			
 		}
 
@@ -93,7 +55,8 @@ public class MessageObjectPacker {
 	private void packAvailableType(Packer packer, AvailableType availableType) 
 			throws Exception{
 		
-		packer.writeArrayBegin(2);
+		packer.writeArrayBegin(3);
+		packer.write(availableType.paramIndex);
 		packer.write(availableType.currentType.getIntVal());
 		switch(availableType.currentType){
 		case BOOL:
@@ -128,6 +91,9 @@ public class MessageObjectPacker {
 			break;
 		case BYTEARR:
 			packer.write(availableType.bytearr_arg);
+			break;
+		default:
+			packer.write(availableType.object_arg);
 			break;
 		}
 		packer.writeArrayEnd();

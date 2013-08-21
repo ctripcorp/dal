@@ -11,5 +11,9 @@ public class ResultObject {
 	public int affectRowCount;
 	
 	public List<AvailableType> resultSet;
+	
+	public int propertyCount(){
+		return 2;
+	}
 
 }

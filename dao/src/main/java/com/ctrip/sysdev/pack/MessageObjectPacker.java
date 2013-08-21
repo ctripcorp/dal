@@ -11,14 +11,22 @@ import com.ctrip.sysdev.msg.AvailableType;
 import com.ctrip.sysdev.msg.MessageObject;
 
 public class MessageObjectPacker {
-
-	public byte[] pack(MessageObject msg) throws Exception {
-
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+	
+	private static Packer packer;
+	
+	private static ByteArrayOutputStream out;
+	
+	static{
+		out = new ByteArrayOutputStream();
 
 		MessagePack msgpack = new MessagePack();
 
-		Packer packer = msgpack.createPacker(out);
+		packer = msgpack.createPacker(out);
+	}
+
+	public static byte[] pack(MessageObject msg) throws Exception {
+
+		out.reset();
 
 		packer.writeArrayBegin(msg.propertyCount());
 
@@ -84,10 +92,10 @@ public class MessageObjectPacker {
 		return out.toByteArray();
 	}
 	
-	private void packAvailableType(Packer packer, AvailableType availableType) 
+	private static void packAvailableType(Packer packer, AvailableType availableType) 
 			throws Exception{
 		
-		packer.writeArrayBegin(2);
+		packer.writeArrayBegin(3);
 		packer.write(availableType.paramIndex);
 		packer.write(availableType.currentType.getIntVal());
 		switch(availableType.currentType){

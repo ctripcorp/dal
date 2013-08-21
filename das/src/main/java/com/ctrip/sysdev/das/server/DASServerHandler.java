@@ -8,7 +8,9 @@ import io.netty.util.ReferenceCountUtil;
 
 import java.util.UUID;
 
+import com.ctrip.sysdev.das.handler.MessageDispatcher;
 import com.ctrip.sysdev.das.msg.MessageObject;
+import com.ctrip.sysdev.das.msg.ResultObject;
 import com.ctrip.sysdev.das.pack.MessageObjectUnPacker;
 
 public class DASServerHandler extends ChannelInboundHandlerAdapter {
@@ -99,6 +101,8 @@ public class DASServerHandler extends ChannelInboundHandlerAdapter {
 
 				MessageObject myMessage = new MessageObjectUnPacker()
 						.unpack(payload_array);
+				
+				ResultObject result = new MessageDispatcher().dispatch(myMessage);
 				
 				
 

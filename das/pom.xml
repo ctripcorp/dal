@@ -4,12 +4,20 @@
 	<groupId>das</groupId>
 	<artifactId>das</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	
 	<properties>
 		<package.environment>local</package.environment>
 
 		<java_source_version>1.6</java_source_version>
 		<java_target_version>1.6</java_target_version>
 		<file_encoding>UTF-8</file_encoding>
+
+
+		<netty.version>4.0.4</netty.version>
+		<javassist.version>3.16.1-GA</javassist.version>
+		<msgpack.version>0.6.8-SNAPSHOT</msgpack.version>
+		<mysql.version>5.1.25</mysql.version>
+		<sqljdbc.version>4.0</sqljdbc.version>
 
 		<slf4j.version>1.7.5</slf4j.version>
 		<log4j.version>1.2.17</log4j.version>
@@ -32,8 +40,8 @@
 			</properties>
 		</profile>
 	</profiles>
-	
-	<build> 
+
+	<build>
 		<resources>
 			<resource>
 				<directory>src/main/resources/${package.environment}</directory>
@@ -45,8 +53,18 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>${java_source_version}</source>
+					<target>${java_source_version}</target>
+					<encoding>${file_encoding}</encoding>
+					<showDeprecation>true</showDeprecation>
+					<showWarnings>true</showWarnings>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<encoding>${file_encoding}</encoding>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -58,27 +76,27 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
-			<version>4.0.4</version>
+			<version>${netty.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
-			<version>3.16.1-GA</version>
+			<version>${javassist.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.msgpack</groupId>
 			<artifactId>msgpack</artifactId>
-			<version>0.6.8-SNAPSHOT</version>
+			<version>${msgpack.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.25</version>
+			<version>${mysql.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.microsoft.sqlserver</groupId>
 			<artifactId>sqljdbc</artifactId>
-			<version>4.0</version>
+			<version>${sqljdbc.version}</version>
 		</dependency>
 
 		<dependency>

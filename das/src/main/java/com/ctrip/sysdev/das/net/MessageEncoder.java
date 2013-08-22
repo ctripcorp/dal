@@ -5,7 +5,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
 import com.ctrip.sysdev.das.msg.MessageObject;
-import com.ctrip.sysdev.das.pack.MessageObjectPacker;
 
 /**
  * 
@@ -14,12 +13,12 @@ import com.ctrip.sysdev.das.pack.MessageObjectPacker;
  */
 public class MessageEncoder extends MessageToByteEncoder<MessageObject> {
 
-	private static MessageObjectPacker messageObjectPacker = new MessageObjectPacker();
+//	private static MessageObjectPacker messageObjectPacker = new MessageObjectPacker();
 
 	@Override
 	public void encode(ChannelHandlerContext ctx, MessageObject msg, ByteBuf out)
 			throws Exception {
-		out.writeBytes(messageObjectPacker.pack(msg));
+//		out.writeBytes(messageObjectPacker.pack(msg));
 		ctx.flush();
 	}
 }

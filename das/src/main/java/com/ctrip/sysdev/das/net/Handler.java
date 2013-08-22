@@ -1,5 +1,7 @@
 package com.ctrip.sysdev.das.net;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -10,14 +12,15 @@ import io.netty.channel.group.ChannelGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.msg.MessageObject;
+import com.ctrip.sysdev.das.enums.ResultType;
+import com.ctrip.sysdev.das.msg.RequestObject;
 
 /**
  * 
  * @author weiw
  * 
  */
-public class Handler extends SimpleChannelInboundHandler<MessageObject> {
+public class Handler extends SimpleChannelInboundHandler<RequestObject> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Handler.class);
 	private ChannelGroup allChannels;
@@ -27,11 +30,11 @@ public class Handler extends SimpleChannelInboundHandler<MessageObject> {
 	}
 
 	@Override
-	public void channelRead0(ChannelHandlerContext ctx, MessageObject message) {
+	public void channelRead0(ChannelHandlerContext ctx, RequestObject request) {
 		try {
 			logger.debug("channelRead0 from {} message = '{}'", ctx.channel(),
-					message);
-			processIncomingMessage(ctx.channel(), message);
+					request);
+			processIncomingMessage(ctx.channel(), request);
 		} catch (Exception e) {
 			logger.warn("channelRead0", e);
 			ctx.channel().close();
@@ -39,15 +42,26 @@ public class Handler extends SimpleChannelInboundHandler<MessageObject> {
 	}
 
 	private void processIncomingMessage(Channel channel,
-			final MessageObject message) {
+			final RequestObject request) {
 		// ..dboperator.....
-		ChannelFuture wf = channel.writeAndFlush(message);// 回写返回结果
+		
+		ByteBuf buf = Unpooled.buffer(10);
+		
+		buf.writeShort(1);
+		buf.writeInt(ResultType.CUD.getIntVal());
+		buf.writeInt(1);
+		
+//		channel.write(1);
+//		channel.write(ResultType.CUD);
+		ChannelFuture wf =  channel.writeAndFlush(buf);
+		
+		//ChannelFuture wf = channel.writeAndFlush(request);// 回写返回结果
 		wf.addListener(new ChannelFutureListener() {
 			public void operationComplete(ChannelFuture future)
 					throws Exception {
 				if (!future.isSuccess()) {
 					logger.error("server write response error,request = "
-							+ message);
+							+ request);
 				}
 			}
 		});

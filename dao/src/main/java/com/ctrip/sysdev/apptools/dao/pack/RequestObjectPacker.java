@@ -105,6 +105,8 @@ public class RequestObjectPacker {
 			}
 
 		}
+		
+		packer.write(msg.flags);
 
 		packer.writeArrayEnd();
 	}

@@ -68,7 +68,7 @@ public class PersonDAO extends AbstractDAO {
 	public static void main(String[] args) throws Exception {
 		PersonDAO person = new PersonDAO();
 
-		person.setUseDBClient(true);
+		person.setUseDBClient(false);
 		
 		AvailableType addrParam = new <String> AvailableType(1, "world");
 		AvailableType nameParam = new <String> AvailableType(2, "1");

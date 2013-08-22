@@ -15,7 +15,7 @@ import com.ctrip.sysdev.das.enums.MessageType;
 import com.ctrip.sysdev.das.enums.ResultType;
 import com.ctrip.sysdev.das.msg.AvailableType;
 import com.ctrip.sysdev.das.msg.MessageObject;
-import com.ctrip.sysdev.das.msg.ResultObject;
+import com.ctrip.sysdev.das.msg.ResponseObject;
 
 public class MessageDispatcher {
 
@@ -23,9 +23,9 @@ public class MessageDispatcher {
 
 	private SPHandler spHandler;
 
-	public ResultObject dispatch(MessageObject message) throws Exception {
+	public ResponseObject dispatch(MessageObject message) throws Exception {
 		
-		ResultObject result = new ResultObject();
+		ResponseObject result = new ResponseObject();
 		
 		// If the message type is sql, we call SQLHandler
 		if (message.messageType == MessageType.SQL) {
@@ -43,7 +43,7 @@ public class MessageDispatcher {
 						message.flags, message.singleArgs);
 				result.resultType = ResultType.RETRIEVE;
 
-				result.resultSet = getFromResultSet(rs);
+//				result.resultSet = getFromResultSet(rs);
 
 			} else {
 				int rowCount = sqlHandler.execute(null, message.SQL,
@@ -68,7 +68,7 @@ public class MessageDispatcher {
 						message.flags, message.singleArgs);
 				result.resultType = ResultType.RETRIEVE;
 
-				result.resultSet = getFromResultSet(rs);
+//				result.resultSet = getFromResultSet(rs);
 
 			} else {
 				int rowCount = spHandler.executeSp(null, message.SPName,

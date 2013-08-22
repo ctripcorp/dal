@@ -10,8 +10,8 @@ import java.util.UUID;
 
 import com.ctrip.sysdev.das.handler.MessageDispatcher;
 import com.ctrip.sysdev.das.msg.MessageObject;
-import com.ctrip.sysdev.das.msg.ResultObject;
-import com.ctrip.sysdev.das.pack.MessageObjectUnPacker;
+import com.ctrip.sysdev.das.msg.ResponseObject;
+//import com.ctrip.sysdev.das.pack.MessageObjectUnPacker;
 
 public class DASServerHandler extends ChannelInboundHandlerAdapter {
 	
@@ -99,10 +99,10 @@ public class DASServerHandler extends ChannelInboundHandlerAdapter {
 
 				byte[] payload_array = payload.array();
 
-				MessageObject myMessage = new MessageObjectUnPacker()
-						.unpack(payload_array);
-				
-				ResultObject result = new MessageDispatcher().dispatch(myMessage);
+//				MessageObject myMessage = new MessageObjectUnPacker()
+//						.unpack(payload_array);
+//				
+//				ResultObject result = new MessageDispatcher().dispatch(myMessage);
 				
 				
 

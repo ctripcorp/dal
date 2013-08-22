@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ctrip.sysdev.apptools.dao.client.DALClient;
 import com.ctrip.sysdev.apptools.dao.client.DBClient;
 import com.ctrip.sysdev.apptools.dao.msg.AvailableType;
 
@@ -25,6 +26,7 @@ public class AbstractDAO { // implements IDAO {
 
 	private boolean useDBClient;
 	private DBClient dbClient;
+	private DALClient dalClient;
 
 	public AbstractDAO() {
 
@@ -94,11 +96,11 @@ public class AbstractDAO { // implements IDAO {
 			}
 			return dbClient.execute(null, statement, flag, params);
 		} else {
-
+			if(dalClient == null){
+				dalClient = new DALClient();
+			}
+			return dalClient.execute(null, statement, flag, params);
 		}
-
-		return 0;
-
 	}
 
 	public int executeSp(String tnxCtxt, String sp, int flag,

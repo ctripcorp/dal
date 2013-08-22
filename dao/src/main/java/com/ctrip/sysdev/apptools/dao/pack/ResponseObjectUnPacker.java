@@ -5,6 +5,7 @@ import static org.msgpack.template.Templates.TBigDecimal;
 import java.io.ByteArrayInputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.msgpack.MessagePack;
 import org.msgpack.unpacker.Unpacker;
@@ -12,47 +13,64 @@ import org.msgpack.unpacker.Unpacker;
 import com.ctrip.sysdev.apptools.dao.enums.AvailableTypeEnum;
 import com.ctrip.sysdev.apptools.dao.enums.ResultType;
 import com.ctrip.sysdev.apptools.dao.msg.AvailableType;
-import com.ctrip.sysdev.apptools.dao.msg.ResultObject;
+import com.ctrip.sysdev.apptools.dao.msg.ResponseObject;
 
-public class ResultObjectUnPacker {
+public class ResponseObjectUnPacker {
 
-	public ResultObject unpack(byte[] payload) throws Exception {
+	public static ResponseObject unpack(byte[] payload) throws Exception {
 
 		MessagePack packer = new MessagePack();
-	    
-	    //The object to return
-	    ResultObject result = new ResultObject();
-	    
-	    ByteArrayInputStream in = new ByteArrayInputStream(payload);
-	    Unpacker unpacker = packer.createUnpacker(in);
-	    
-	    //The count of the object properties
-	    int propertyCount = unpacker.readArrayBegin();
 
-	    //The first if an integer, 0 represents SQL, 1 represents SP
-	    result.resultType = ResultType.fromInt(unpacker.readInt());
-		
-		//Write the information of sp
-		if(result.resultType == ResultType.CUD){
-			
+		// The object to return
+		ResponseObject result = new ResponseObject();
+
+		ByteArrayInputStream in = new ByteArrayInputStream(payload);
+		Unpacker unpacker = packer.createUnpacker(in);
+
+		// The count of the object properties
+		int propertyCount = unpacker.readArrayBegin();
+
+		// The first if an integer, 0 represents SQL, 1 represents SP
+		result.resultType = ResultType.fromInt(unpacker.readInt());
+
+		// Write the information of sp
+		if (result.resultType == ResultType.CUD) {
+
 			result.affectRowCount = unpacker.readInt();
-			
-		}else{
-			
-			int resultCount = unpacker.readArrayBegin();
-			
-			result.resultSet = new ArrayList<AvailableType>(resultCount);
-			for(int i=0;i<resultCount;i++){
-				
-			}
-			
+
+		} else {
+			result.chunkCount = unpacker.readInt();
+			result.recordPerChunk = unpacker.readInt();
+
 		}
 
 		unpacker.readArrayEnd();
 
 		return result;
 	}
-	
+
+	public static List<AvailableType> unpackChunk(byte[] payload) throws Exception {
+
+		MessagePack packer = new MessagePack();
+		ByteArrayInputStream in = new ByteArrayInputStream(payload);
+		Unpacker unpacker = packer.createUnpacker(in);
+
+		// The count of the object properties
+		int propertyCount = unpacker.readArrayBegin();
+
+		List<AvailableType> results = new ArrayList<AvailableType>(
+				propertyCount);
+
+		for (int i = 0; i < propertyCount; i++) {
+			results.add(unpackAvailableType(unpacker));
+		}
+
+		unpacker.readArrayEnd();
+
+		return results;
+
+	}
+
 	/**
 	 * Convert AvailableType to MsgPack format
 	 * 
@@ -60,16 +78,16 @@ public class ResultObjectUnPacker {
 	 * @param availableType
 	 * @throws Exception
 	 */
-	private AvailableType unpackAvailableType(Unpacker unpacker) 
-			throws Exception{
-		
+	private static AvailableType unpackAvailableType(Unpacker unpacker)
+			throws Exception {
+
 		AvailableType at = new AvailableType();
-		
+
 		int propertyCount = unpacker.readArrayBegin();
-		
+
 		at.currentType = AvailableTypeEnum.fromInt(unpacker.readInt());
 
-		switch(at.currentType){
+		switch (at.currentType) {
 		case BOOL:
 			at.bool_arg = unpacker.readBoolean();
 			break;
@@ -107,8 +125,8 @@ public class ResultObjectUnPacker {
 			at.object_arg = unpacker.readValue();
 		}
 		unpacker.readArrayEnd();
-		
+
 		return at;
 	}
-	
+
 }

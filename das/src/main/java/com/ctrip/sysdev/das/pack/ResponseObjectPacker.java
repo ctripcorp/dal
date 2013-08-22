@@ -1,23 +1,31 @@
 package com.ctrip.sysdev.das.pack;
 
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
 
 import com.ctrip.sysdev.das.enums.ResultType;
 import com.ctrip.sysdev.das.msg.AvailableType;
-import com.ctrip.sysdev.das.msg.ResultObject;
+import com.ctrip.sysdev.das.msg.ResponseObject;
 
-public class ResultObjectPacker {
+public class ResponseObjectPacker {
 	
-	public byte[] pack(ResultObject result) throws Exception{
-		
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+	private static Packer packer;
+	
+	private static ByteArrayOutputStream out;
+	
+	static{
+		out = new ByteArrayOutputStream();
 		MessagePack msgpack = new MessagePack();
 
-		Packer packer = msgpack.createPacker(out);
+		packer = msgpack.createPacker(out);
+	}
+	
+	public static byte[] pack(ResponseObject result) throws Exception{
+		
+		out.reset();
 
 		packer.writeArrayBegin(result.propertyCount());
 
@@ -26,13 +34,8 @@ public class ResultObjectPacker {
 		//Write the information of sp
 		if(result.resultType == ResultType.RETRIEVE){
 			
-			packer.writeArrayBegin(result.resultSet.size());
-			
-			for(int i=0;i<result.resultSet.size();i++){
-				packAvailableType(packer, result.resultSet.get(i));
-			}
-			
-			packer.writeArrayEnd();
+			packer.write(result.chunkCount);
+			packer.write(result.recordPerChunk);
 			
 		}else{
 			
@@ -46,13 +49,34 @@ public class ResultObjectPacker {
 	}
 	
 	/**
-	 * Convert AvailableType to MsgPack format
+	 * 
+	 * @param chunk
+	 * @return
+	 * @throws Exception
+	 */
+	public static byte[] packChunk(List<AvailableType> chunk) 
+			throws Exception{
+		out.reset();
+
+		packer.writeArrayBegin(chunk.size());
+		
+		for(int i=0;i<chunk.size();i++){
+			packAvailableType(packer, chunk.get(i));
+		}
+
+		packer.writeArrayEnd();
+
+		return out.toByteArray();
+	}
+	
+	/**
 	 * 
 	 * @param packer
 	 * @param availableType
 	 * @throws Exception
 	 */
-	private void packAvailableType(Packer packer, AvailableType availableType) 
+	private static void packAvailableType(Packer packer, 
+			AvailableType availableType) 
 			throws Exception{
 		
 		packer.writeArrayBegin(3);

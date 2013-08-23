@@ -4,8 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
-import com.ctrip.sysdev.das.msg.RequestObject;
-import com.ctrip.sysdev.das.pack.RequestObjectUnPacker;
+import com.ctrip.sysdev.das.request.DefaultRequest;
 
 public class MessageDecode2 extends LengthFieldBasedFrameDecoder {
 
@@ -22,10 +21,10 @@ public class MessageDecode2 extends LengthFieldBasedFrameDecoder {
 	}
 
 	@Override
-	protected RequestObject decode(ChannelHandlerContext ctx, ByteBuf in)
+	protected DefaultRequest decode(ChannelHandlerContext ctx, ByteBuf in)
 			throws Exception {
 		ByteBuf buffs = (ByteBuf) super.decode(ctx, in);
-		RequestObject request = RequestObjectUnPacker.unpack(buffs.array());
+		DefaultRequest request = DefaultRequest.unpackFromBytes(buffs.array());
 		return request;
 	}
 }

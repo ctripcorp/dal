@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>e09beec0-ad18-467f-a004-0fd5ef9dcbdd</ProjectGuid>
+    <ProjectGuid>{A35A13A7-0969-49DA-BF3E-845DB00F11FC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>com.ctrip.sysdev.apptools.DemoDAO</RootNamespace>
@@ -40,9 +40,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="client\DALClient.cs" />
+    <Compile Include="client\DBClient.cs" />
+    <Compile Include="common\AbstractDAO.cs" />
+    <Compile Include="common\IDAO.cs" />
+    <Compile Include="common\SPDAO.cs" />
+    <Compile Include="entity\PersonEntity.cs" />
+    <Compile Include="enums\ActionType.cs" />
+    <Compile Include="enums\AvailableTypeEnum.cs" />
+    <Compile Include="enums\Flags.cs" />
+    <Compile Include="enums\MessageType.cs" />
+    <Compile Include="enums\ResultType.cs" />
+    <Compile Include="exception\ParametersInvalidException.cs" />
+    <Compile Include="msg\AvailableType.cs" />
+    <Compile Include="msg\MessageObject.cs" />
+    <Compile Include="msg\RequestObject.cs" />
+    <Compile Include="msg\ResponseObject.cs" />
+    <Compile Include="pack\RequestObjectPacker.cs" />
+    <Compile Include="pack\ResponseObjectUnpacker.cs" />
+    <Compile Include="PersonDAO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="utils\Consts.cs" />
+    <Compile Include="utils\DAOResultSet.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

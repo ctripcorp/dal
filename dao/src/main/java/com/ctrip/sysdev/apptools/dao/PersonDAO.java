@@ -75,10 +75,6 @@ public class PersonDAO extends AbstractDAO {
 //		AvailableType genderParam = new <Integer> AvailableType(2, 1);
 		
 		int row = person.SetAddrByName(addrParam, nameParam);
-		
-		logger.info(logger.getClass().getName());
-		
-		logger.info(String.valueOf(row));
 
 //		ResultSet rs = person.SelAddrTelByNameEqGenderEq(nameParam, genderParam);
 //		while (rs.next()) {

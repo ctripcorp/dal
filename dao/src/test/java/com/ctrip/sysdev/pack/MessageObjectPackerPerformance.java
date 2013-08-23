@@ -1,13 +1,5 @@
 package com.ctrip.sysdev.pack;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.ctrip.sysdev.apptools.dao.enums.ActionType;
-import com.ctrip.sysdev.apptools.dao.enums.Flags;
-import com.ctrip.sysdev.apptools.dao.enums.MessageType;
-import com.ctrip.sysdev.apptools.dao.msg.AvailableType;
-import com.ctrip.sysdev.apptools.dao.msg.MessageObject;
 //import com.ctrip.sysdev.apptools.dao.pack.MessageObjectPacker;
 
 public class MessageObjectPackerPerformance {

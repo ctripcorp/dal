@@ -3,18 +3,13 @@ import tornado.ioloop
 import tornado.web
 import os
 import json
-
-class MainHandler(tornado.web.RequestHandler):
-	def get(self):
-		self.render("templates/index.html")
+from daogen.handler.task_handler import TaskHandler
+from daogen.handler.project_handler import ProjectHandler
+from daogen.handler.file_handler import FileHandler
 
 class LoginHandler(tornado.web.RequestHandler):
 	def get(self):
 		self.render("templates/login.html")
-
-class BodyHandler(tornado.web.RequestHandler):
-	def get(self, body_name):
-		self.render("templates/%s.html" % body_name)
 
 class SqlQueueHandler(tornado.web.RequestHandler):
 	def get(self):
@@ -28,8 +23,9 @@ settings = {
     "xsrf_cookies": True,
 }
 application = tornado.web.Application([
-	(r"/", MainHandler),
-	(r"/body/(.*)", BodyHandler),
+	(r"/", ProjectHandler),
+	(r"/task", TaskHandler),
+	(r"/file", FileHandler),
 	(r"/login", LoginHandler),
 	(r"/sql_queue", SqlQueueHandler),
 	(r'/static/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),

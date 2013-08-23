@@ -32,7 +32,7 @@ public class AbstractDAO { // implements IDAO {
 
 	}
 
-	public boolean getUseDBClient() {
+	public boolean isUseDBClient() {
 		return this.useDBClient;
 	}
 

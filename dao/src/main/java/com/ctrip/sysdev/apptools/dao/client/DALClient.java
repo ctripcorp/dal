@@ -11,15 +11,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import com.ctrip.sysdev.apptools.dao.enums.ActionType;
-import com.ctrip.sysdev.apptools.dao.enums.Flags;
-import com.ctrip.sysdev.apptools.dao.enums.MessageType;
-import com.ctrip.sysdev.apptools.dao.enums.ResultType;
+import com.ctrip.sysdev.apptools.dao.enums.ActionTypeEnum;
+import com.ctrip.sysdev.apptools.dao.enums.FlagsEnum;
+import com.ctrip.sysdev.apptools.dao.enums.MessageTypeEnum;
+import com.ctrip.sysdev.apptools.dao.enums.ResultTypeEnum;
 import com.ctrip.sysdev.apptools.dao.msg.AvailableType;
-import com.ctrip.sysdev.apptools.dao.msg.MessageObject;
-import com.ctrip.sysdev.apptools.dao.msg.RequestObject;
-import com.ctrip.sysdev.apptools.dao.pack.RequestObjectPacker;
-import com.ctrip.sysdev.apptools.dao.pack.ResponseObjectUnPacker;
+import com.ctrip.sysdev.apptools.dao.msg.Message;
+import com.ctrip.sysdev.apptools.dao.request.DefaultRequest;
+import com.ctrip.sysdev.apptools.dao.response.DefaultResponse;
 import com.ctrip.sysdev.apptools.dao.utils.Consts;
 
 public class DALClient {
@@ -30,27 +29,28 @@ public class DALClient {
 	public ResultSet fetch(String tnxCtxt, String statement, int flag,
 			AvailableType... params) throws Exception {
 
-		MessageObject message = new MessageObject();
+		Message message = new Message();
 
-		message.messageType = MessageType.SQL;
-		message.actionType = ActionType.SELECT;
-		message.useCache = false;
+		message.setMessageType(MessageTypeEnum.SQL);
+		message.setActionType(ActionTypeEnum.SELECT);
+		message.setUseCache(false);
 
-		message.batchOperation = false;
-		message.SQL = statement;
-		message.singleArgs = new ArrayList<AvailableType>(Arrays.asList(params));
+		message.setSql(statement);
+		List<List<AvailableType>> finalParams =  new ArrayList<List<AvailableType>>();
+		finalParams.add(new ArrayList<AvailableType>(Arrays.asList(params)));
+		message.setArgs(finalParams);
 
-		message.flags = Flags.TEST.getIntVal();
+		message.setFlags(FlagsEnum.TEST.getIntVal());
 
-		RequestObject request = new RequestObject();
+		DefaultRequest request = new DefaultRequest();
 
-		request.taskid = UUID.randomUUID();
+		request.setTaskid(UUID.randomUUID());
 
-		request.dbName = Consts.databaseName;
+		request.setDbName(Consts.databaseName);
 
-		request.credential = Consts.credential;
+		request.setCredential(Consts.credential);
 
-		request.message = message;
+		request.setMessage(message);
 
 		run(request);
 
@@ -60,34 +60,36 @@ public class DALClient {
 	public int execute(String tnxCtxt, String statement, int flag,
 			AvailableType... params) throws Exception {
 
-		MessageObject message = new MessageObject();
+		Message message = new Message();
 
-		message.messageType = MessageType.SQL;
-		message.actionType = ActionType.SELECT;
-		message.useCache = false;
+		message.setMessageType(MessageTypeEnum.SQL);
+		message.setActionType(ActionTypeEnum.SELECT);
+		message.setUseCache(false);
 
-		message.batchOperation = false;
-		message.SQL = statement;
-		message.singleArgs = new ArrayList<AvailableType>(Arrays.asList(params));
+		message.setSql(statement);
+		List<List<AvailableType>> finalParams =  new ArrayList<List<AvailableType>>();
+		finalParams.add(new ArrayList<AvailableType>(Arrays.asList(params)));
+		message.setArgs(finalParams);
 
-		message.flags = Flags.TEST.getIntVal();
 
-		RequestObject request = new RequestObject();
+		message.setFlags(FlagsEnum.TEST.getIntVal());
 
-		request.taskid = UUID.randomUUID();
+		DefaultRequest request = new DefaultRequest();
 
-		request.dbName = Consts.databaseName;
+		request.setTaskid(UUID.randomUUID());
 
-		request.credential = Consts.credential;
+		request.setDbName(Consts.databaseName);
 
-		request.message = message;
+		request.setCredential(Consts.credential);
+
+		request.setMessage(message);
 
 		run(request);
 
 		return 0;
 	}
 
-	void run(RequestObject request) {
+	void run(DefaultRequest request) {
 		try {
 			// 1. creating a socket to connect to the server
 			requestSocket = new Socket("localhost", 9000);
@@ -98,42 +100,30 @@ public class DALClient {
 			in = new DataInputStream(requestSocket.getInputStream());
 			// 3: Communicating with the server
 
-			byte[] payload = RequestObjectPacker.pack(request);
+			byte[] payload = request.packToByteArray();
+			
+			out.writeInt(payload.length + 2);
 
 			out.writeShort(Consts.protocolVersion);
-
-			out.writeInt(payload.length);
 
 			out.write(payload, 0, payload.length);
 
 			out.flush();
+			
+			int leftLength = in.readInt();
 
 			short protocolVersion = in.readShort();
-
-			int resultTypeInt = in.readInt();
 			
-			ResultType resultType = ResultType.fromInt(resultTypeInt);
+			byte[] leftData = new byte[leftLength - 2];
 			
-			int rowCount = in.readInt();
+			in.read(leftData, 0, leftLength - 2);
+			
+			DefaultResponse response = DefaultResponse.unpack(leftData);
 
-			if (resultType == ResultType.CUD) {
-				System.out.println(rowCount);
+			if (response.getResultType() == ResultTypeEnum.CUD) {
+				System.out.println("affect row count: "+response.getAffectRowCount());
 			}else{
-				for(int i=0;i<rowCount;i++){
-					int chunkSize = in.readInt();
-					byte[] chunkData = new byte[chunkSize];
-					int readLen = in.read(chunkData, 0, chunkSize);
-					if(readLen != chunkSize){
-						throw new Exception("protocol invalid");
-					}
-					
-					List<AvailableType> results = ResponseObjectUnPacker.unpackChunk(chunkData);
-					
-					for(AvailableType at : results){
-						System.out.println(at);
-					}
-					
-				}
+				
 			}
 
 		} catch (UnknownHostException unknownHost) {

@@ -117,6 +117,9 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 			<!-- BEGIN PAGE CONTAINER-->
 			<div id="main_container" class="container-fluid">
 
+			<div id="proj_id" project="{{ project_id }}" style="display:none;">
+			</div>
+
 <!--  The main container field -->
 <div id="dashboard">
 	<br>
@@ -141,31 +144,31 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 						</ul>
 						<div class="tab-content">
 							<div class="tab-pane active" id="tab_1_1">
-								<div class="scroller" style="height:300px" data-always-visible="1" data-rail-visible="0">
+								<div class="scroller" style="height:480px" data-always-visible="1" data-rail-visible="0">
 									<select id="databases">
 					                  {% for item in databases %}
          								<option>{{ escape(item) }}</option>
        									{% end %}
 					                </select>
 
-				                    <select style="margin-left:20px;">
-				                      <option>Table/View/Join 1</option>
-				                      <option>Table/View/Join 2</option>
+				                    <select id="tables" style="margin-left:20px;">
+				                     
 				                    </select>
 
 				                    Function Name:<input type="text">
 
 				                    <div class="row-fluid btn-group" data-toggle="buttons-radio" style="margin-left:80px;">
-								      <button type="button" class="btn btn-primary active">Select</button>
-								      <button type="button" class="btn btn-primary">Insert</button>
-								      <button type="button" class="btn btn-primary">Update</button>
-								      <button type="button" class="btn btn-primary">Delete</button>
+								      <button type="button" class="btn btn-primary active" btn_type="select">Select</button>
+								      <button type="button" class="btn btn-primary"  btn_type="insert">Insert</button>
+								      <button type="button" class="btn btn-primary"  btn_type="update">Update</button>
+								      <button type="button" class="btn btn-primary"  btn_type="delete">Delete</button>
     								</div>
 
     <br>
     <br>
 
      <div class="row-fluid bootstrap-duallistbox-container">
+     <div id="select_fields">
       <div class="span3 box1 filtered">
         <div class="btn-group buttons">
           <button type="button" class="btn moveall" title="Move all">
@@ -177,10 +180,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
           </button>
         </div>
 
-        <select id="left_select" multiple="multiple" data-duallistbox_generated="true" name="duallistbox_demo2_helper1" style="height: 169px;">
-          <option value="option7">Name</option>
-          <option value="option8">Age</option>
-          <option value="option9">Gender</option>
+        <select id="left_select" multiple="multiple" data-duallistbox_generated="true" name="duallistbox_demo2_helper1" style="height: 320px;">
         </select>
       </div>
 
@@ -194,25 +194,30 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
           </button>
         </div>
 
-        <select id="right_select" multiple="multiple" data-duallistbox_generated="true" name="duallistbox_demo2_helper2" style="height: 169px;">
-          <option value="option3" selected="selected">Address</option>
-          <option value="option6" selected="selected">Telephone</option>
+        <select id="right_select" multiple="multiple" data-duallistbox_generated="true" name="duallistbox_demo2_helper2" style="height: 320px;">
         </select>
       </div>
 
-      <div class="span3 box1 filtered">
-
-        <select id="left_select" multiple="multiple" data-duallistbox_generated="true" name="duallistbox_demo2_helper1" style="height: 200px;">
-           <option value="option7">Name</option>
-          <option value="option8">Age</option>
-          <option value="option9">Gender</option>
-           <option value="option3" selected="selected">Address</option>
-          <option value="option6" selected="selected">Telephone</option>
-        </select>
+      <div class="span1">
       </div>
+  </div>
 
-       <div style="float:left;">
-      <select name="duallistbox_demo2_helper2" style="height:25px;width:120px;margin-left:30px;">
+      <!-- <div class="span3 box1 filtered"> -->
+
+       <!-- 	<div class="multiselect">
+		</div> -->
+		<div id="where_fields" class="scroller" style="height:350px" data-always-visible="1" data-rail-visible1="1">
+							<!-- START TASK LIST -->
+							<ul id="where_condition" class="task-list unstyled">
+								
+							</ul>
+							<!-- END START TASK LIST -->
+		</div>
+
+      <!-- </div> -->
+
+     <!--   <div style="float:left;">
+      <select name="duallistbox_demo2_helper2" style="height:25px;width:120px;margin-left:50px;">
             <option value="option3" selected="selected">Equal</option>
             <option value="option3" selected="selected">Not Equal</option>
             <option value="option3" selected="selected">Great Than</option>
@@ -223,49 +228,59 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
             <option value="option3" selected="selected">Like</option>
             <option value="option3" selected="selected">In</option>
       </select>
-    </div>
+    </div> -->
 
     </div>
 
 								</div>
 							</div>
 							<div class="tab-pane" id="tab_1_2">
-								<div class="scroller" style="height:320px" data-always-visible="1" data-rail-visible1="1">
-									<ul class="feeds">
-										
-										
-									
-										<li>
-											<a href="#">
-												<div class="col1">
-													<div class="cont">
-														<div class="cont-col1">
-															<div class="label label-success">                        
-																<i class="icon-bell"></i>
-															</div>
-														</div>
-														<div class="cont-col2">
-															<div class="desc">
-																New user registered
-															</div>
-														</div>
-													</div>
-												</div>
-												<div class="col2">
-													<div class="date">
-														Just now
-													</div>
-												</div>
-											</a>
-										</li>
-									</ul>
+								<div class="scroller" style="height:500px" data-always-visible="1" data-rail-visible1="1">
+									<select id="sp_databases">
+					                  {% for item in databases %}
+         								<option>{{ escape(item) }}</option>
+       									{% end %}
+					                </select>
+
+					                <select id="sp_names" style="margin-left:20px;">
+				                     
+				                    </select>
+
+				                    <select id="sp_action" style="margin-left:20px;">
+				                     <option>Fetch</option>
+				                     <option>Execute</option>
+				                    </select>
+
+				                    <div id="sp_editor" style="height:400px;">		</div>
+				                    <br>
+				                    	<div class="row-fluid">
+											<div class="span3 offset5">
+													<button type="button" class="btn">Save</button>
+											</div>
+
+										</div>
 								</div>
+								
 							</div>
 							<div class="tab-pane" id="tab_1_3">
-								<div class="scroller" style="height:320px" data-always-visible="1" data-rail-visible1="1">
-									 <div id="editor" style="height:320px;">SELECT Address, Telephone FROM Person
+								<div class="scroller" style="height:500px" data-always-visible="1" data-rail-visible1="1">
+									<select id="sql_databases">
+					                  {% for item in databases %}
+         								<option>{{ escape(item) }}</option>
+       									{% end %}
+					                </select>
+									 <div id="sql_editor" style="height:400px;">SELECT Address, Telephone FROM Person
 WHERE Name = {string} AND Age BETWEEN {int} AND {int}
 AND Gender IN {int[]}</div>
+										<br>
+				                    	<div class="row-fluid">
+											<div class="span3 offset4">
+													<button type="button" class="btn">Query</button>
+													&nbsp;&nbsp;&nbsp;&nbsp;
+													<button type="button" class="btn">Auto Replace</button>
+											</div>
+
+										</div>
 								</div>
 							</div>
 						</div>
@@ -313,6 +328,8 @@ AND Gender IN {int[]}</div>
 						<div class="scroller" style="height:258px" data-always-visible="1" data-rail-visible1="1">
 							<!-- START TASK LIST -->
 							<ul class="task-list unstyled">
+								{% for task in tasks %}
+       									
 								<li>
 									<div class="task-title">
 										<span class="task-title-sp">Present 2013 Year IPO Statistics at Board Meeting</span>
@@ -321,14 +338,13 @@ AND Gender IN {int[]}</div>
 										<div class="task-config-btn btn-group">
 											<a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">More <i class="icon-angle-down"></i></a>
 											<ul class="dropdown-menu pull-right">
-												<li><a href="#"><i class="icon-ok"></i> Preview</a></li>
 												<li><a href="#"><i class="icon-pencil"></i> Edit</a></li>
-												<li><a href="#"><i class="icon-trash"></i> Cancel</a></li>
+												<li><a href="#"><i class="icon-trash"></i> Delete</a></li>
 											</ul>
 										</div>
 									</div>
 								</li>
-								
+								{% end %}
 							
 							</ul>
 							<!-- END START TASK LIST -->
@@ -384,31 +400,6 @@ AND Gender IN {int[]}</div>
 	<script src="/static/js/task.js" type="text/javascript"></script> 
 	<script src="/static/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>     
 	<!-- END PAGE LEVEL SCRIPTS -->  
-	
-	<script type="text/javascript">
-
-		jQuery(document).ready(function() {    
-
-			App.init(); // initlayout and core plugins
-				   
-			// Tasks.initDashboardWidget();
-
-			jQuery('body').on('click', '.portlet > .portlet-title > .tools > .icon-collapse, .portlet .portlet-title > .tools > .icon-collapse-top', function (e) {
-				// e.preventDefault();
-		        if (jQuery(this).hasClass("icon-collapse")) {
-		            jQuery(this).removeClass("icon-collapse").addClass("icon-collapse-top");
-		        } else {
-		            jQuery(this).removeClass("icon-collapse-top").addClass("icon-collapse");
-		        }
-			});
-
-			var editor = ace.edit("editor");
-    		editor.setTheme("ace/theme/monokai");
-    		editor.getSession().setMode("ace/mode/mysql");
-
-		});
-
-	</script>
 
 	<!-- END JAVASCRIPTS -->
 </body>

@@ -128,7 +128,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				<div class="portlet-title">
 					<div class="caption"><i class="icon-check"></i>Projects</div>
 					<div class="tools">
-						<a href="#" class="icon-refresh reload"></a>
+						<a href="#" class="icon-refresh"></a>
 					</div>
 					<div class="actions">
 						<div class="btn-group">
@@ -150,24 +150,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 						<div class="scroller" style="height:750px" data-always-visible="1" data-rail-visible1="1">
 							<!-- START TASK LIST -->
 							<ul class="task-list unstyled">
-								<li>
-									<div class="task-title">
-										<span class="task-title-sp">Present 2013 Year IPO Statistics at Board Meeting</span>
-									</div>
-									<div class="task-config">
-										<div class="task-config-btn btn-group">
-											<a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">More <i class="icon-angle-down"></i></a>
-											<ul class="dropdown-menu pull-right">
-												<li><a href="#"><i class="icon-sun"></i> Tasks</a></li>
-												<li><a href="#"><i class="icon-twitter"></i> Codes</a></li>
-												<li><a href="#"><i class="icon-pencil"></i> Edit</a></li>
-												<li><a href="#"><i class="icon-trash"></i> Delete</a></li>
-											</ul>
-										</div>
-									</div>
-								</li>
-								
-							
+
 							</ul>
 							<!-- END START TASK LIST -->
 						</div>
@@ -190,15 +173,16 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 	  <div class="modal-body">
 	    
 	    <form class="form-inline">
-		  Product Line:<input type="text" class="input-block-level">
-		  Domain:<input type="text" class="input-block-level">
-		  App/Service Name:<input type="text" class="input-block-level">
+		  Product Line:<input id="product_line" type="text" class="input-block-level">
+		  Domain:<input id="domain" type="text" class="input-block-level">
+		  App/Service Name:<input id="service" type="text" class="input-block-level">
+		  Alias:<input id="alias" type="text" class="input-block-level">
 		</form>
 
 	  </div>
 	  <div class="modal-footer">
 	    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-	    <button class="btn btn-primary">Save changes</button>
+	    <button id="save_project" class="btn btn-primary">Save changes</button>
 	  </div>
 	</div>
 	

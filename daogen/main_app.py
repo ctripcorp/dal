@@ -3,8 +3,8 @@ import tornado.ioloop
 import tornado.web
 import os
 import json
-from daogen.handler.task_handler import TaskHandler
-from daogen.handler.project_handler import ProjectHandler
+from daogen.handler.task_handler import TaskHandler, TableHandler
+from daogen.handler.project_handler import ProjectHandler, ProjectsHandler
 from daogen.handler.file_handler import FileHandler
 
 class LoginHandler(tornado.web.RequestHandler):
@@ -20,11 +20,13 @@ settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
     "cookie_secret": "__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
     "login_url": "/login",
-    "xsrf_cookies": True,
+    "xsrf_cookies": False,
 }
 application = tornado.web.Application([
 	(r"/", ProjectHandler),
+	(r"/project/projects", ProjectsHandler),
 	(r"/task", TaskHandler),
+	(r"/metadata",TableHandler),
 	(r"/file", FileHandler),
 	(r"/login", LoginHandler),
 	(r"/sql_queue", SqlQueueHandler),

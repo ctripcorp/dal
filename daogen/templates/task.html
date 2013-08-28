@@ -138,9 +138,9 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 					<!--BEGIN TABS-->
 					<div class="tabbable tabbable-custom">
 						<ul class="nav nav-tabs">
-							<li class="active"><a href="#tab_1_1" data-toggle="tab">Table/View</a></li>
-							<li><a href="#tab_1_2" data-toggle="tab">Stored Procedure</a></li>
-							<li><a href="#tab_1_3" data-toggle="tab">Free Form SQL</a></li>
+							<li class="active"><a href="#tab_1_1" task_type="autosql" data-toggle="tab">Table/View</a></li>
+							<li><a href="#tab_1_2"  task_type="sp" data-toggle="tab">Stored Procedure</a></li>
+							<li><a href="#tab_1_3"  task_type="freesql" data-toggle="tab">Free Form SQL</a></li>
 						</ul>
 						<div class="tab-content">
 							<div class="tab-pane active" id="tab_1_1">
@@ -155,7 +155,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 				                     
 				                    </select>
 
-				                    Function Name:<input type="text">
+				                    Function Name:<input id="func_name" type="text" value="GetBy">
 
 				                    <div class="row-fluid btn-group" data-toggle="buttons-radio" style="margin-left:80px;">
 								      <button type="button" class="btn btn-primary active" btn_type="select">Select</button>
@@ -296,7 +296,7 @@ AND Gender IN {int[]}</div>
 
 	<div class="row-fluid">
 		<div class="span3 offset2">
-				<button type="button" class="btn" onclick="save_task()">Add Task</button>
+				<button id="add_task" type="button" class="btn">Add Task</button>
 		</div>
 		<div class="span3">
           <select>
@@ -306,7 +306,7 @@ AND Gender IN {int[]}</div>
           </select>
          </div>
 		<div class="span3">
-			 <button type="button" class="btn" onclick="save_task()">Generate Code</button>
+			 <button id="generate_code" type="button" class="btn">Generate Code</button>
 		</div>
 	</div>
 
@@ -316,10 +316,10 @@ AND Gender IN {int[]}</div>
 		<div class="span12">
 			<div class="portlet box blue tasks-widget">
 				<div class="portlet-title">
-					<div class="caption"><i class="icon-check"></i>Tasks</div>
+					<div class="caption"><i class="icon-check"></i>{{project_name}} Tasks</div>
 					<div class="tools">
-						<a href="" class="icon-collapse collapse"></a>
-						<a href="" class="icon-refresh reload"></a>
+						<a href="#" class="icon-collapse collapse"></a>
+						<a id="reload_tasks" href="#" class="icon-refresh"></a>
 					</div>
 
 				</div>
@@ -327,24 +327,8 @@ AND Gender IN {int[]}</div>
 					<div class="task-content">
 						<div class="scroller" style="height:258px" data-always-visible="1" data-rail-visible1="1">
 							<!-- START TASK LIST -->
-							<ul class="task-list unstyled">
-								{% for task in tasks %}
-       									
-								<li>
-									<div class="task-title">
-										<span class="task-title-sp">Present 2013 Year IPO Statistics at Board Meeting</span>
-									</div>
-									<div class="task-config">
-										<div class="task-config-btn btn-group">
-											<a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">More <i class="icon-angle-down"></i></a>
-											<ul class="dropdown-menu pull-right">
-												<li><a href="#"><i class="icon-pencil"></i> Edit</a></li>
-												<li><a href="#"><i class="icon-trash"></i> Delete</a></li>
-											</ul>
-										</div>
-									</div>
-								</li>
-								{% end %}
+							<ul id="all_tasks" class="task-list unstyled">
+							
 							
 							</ul>
 							<!-- END START TASK LIST -->
@@ -356,8 +340,11 @@ AND Gender IN {int[]}</div>
 	</div>
 	
 
+
 </div>
 <!-- End of main container-->
+
+
 
 </div>
 			<!-- END PAGE CONTAINER-->    

@@ -150,21 +150,15 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 						<div class="scroller" style="height:332px" data-always-visible="1" data-rail-visible1="1">
 							<!-- START TASK LIST -->
 							<ul class="task-list unstyled">
+								{% for f in files %}
 								<li>
 									<div class="task-title">
-										<span class="task-title-sp">Present 2013 Year IPO Statistics at Board Meeting</span>
-									</div>
-									<div class="task-config">
-										<div class="task-config-btn btn-group">
-											<a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">More <i class="icon-angle-down"></i></a>
-											<ul class="dropdown-menu pull-right">
-												<li><a href="#"><i class="icon-pencil"></i> Edit</a></li>
-												<li><a href="#"><i class="icon-trash"></i> Delete</a></li>
-											</ul>
-										</div>
+										<span class="task-title-sp">
+											<a href="/projects/{{f}}">{{f}}</a>
+										</span>
 									</div>
 								</li>
-								
+								{% end %}
 							
 							</ul>
 							<!-- END START TASK LIST -->

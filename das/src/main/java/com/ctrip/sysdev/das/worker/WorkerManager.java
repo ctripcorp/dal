@@ -6,10 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import com.ctrip.sysdev.das.msg.Message;
+import com.ctrip.sysdev.das.domain.msg.Message;
 
 /*
  * One manager will handles one request queue. The Netty entry code will responsible for 

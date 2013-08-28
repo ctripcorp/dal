@@ -3,15 +3,14 @@ package com.ctrip.sysdev.das.worker;
 import java.sql.Connection;
 import java.util.Queue;
 
-import com.ctrip.sysdev.das.handler.RequestDispatcher;
-import com.ctrip.sysdev.das.msg.Message;
+import com.ctrip.sysdev.das.domain.msg.Message;
 
 public class Worker extends Thread {
 	private String name;
 	private boolean stop;
 	private ConnectionPool connPool;
 	private Queue<Message> reqQueue;
-	private RequestDispatcher dispatcher;
+//	private RequestDispatcher dispatcher;
 	
 	public Worker(
 			String name, 
@@ -20,7 +19,7 @@ public class Worker extends Thread {
 		super(name);
 		this.connPool = connPool;
 		this.reqQueue = reqQueue;
-		dispatcher = new RequestDispatcher();
+//		dispatcher = new RequestDispatcher();
 	}
 	
 	public void setStopFlag() {
@@ -47,7 +46,7 @@ public class Worker extends Thread {
 	 */
 	private void processRequest(Message request) {
 		try {
-			dispatcher.dispatch(request);
+//			dispatcher.dispatch(request);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

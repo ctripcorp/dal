@@ -1,11 +1,11 @@
 package com.ctrip.sysdev.das.server;
 
 import com.ctrip.sysdev.das.exception.ServerException;
-import com.ctrip.sysdev.das.jmx.DasServerInfoMBean;
 import com.ctrip.sysdev.das.jmx.MBeanUtil;
 import com.ctrip.sysdev.das.jmx.ServerInfoMXBean;
 import com.ctrip.sysdev.das.utils.SingleInstanceDaemonTool;
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
+import com.google.inject.Inject;
 
 /**
  * 
@@ -16,11 +16,13 @@ public abstract class AbstractServer extends AbstractExecutionThreadService {
 
 	public abstract void doStartup() throws ServerException;
 
+	@Inject
+	private ServerInfoMXBean serverInfoMXBean;
+
 	@Override
 	protected void startUp() {
 		try {
 			doStartup();
-			ServerInfoMXBean serverInfoMXBean = new DasServerInfoMBean();
 			SingleInstanceDaemonTool watcher = SingleInstanceDaemonTool
 					.createInstance(serverInfoMXBean.getName());
 			watcher.init();

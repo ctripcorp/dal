@@ -4,7 +4,7 @@
 	<groupId>das</groupId>
 	<artifactId>das</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	
+
 	<properties>
 		<package.environment>local</package.environment>
 
@@ -13,17 +13,25 @@
 		<file_encoding>UTF-8</file_encoding>
 
 
-		<netty.version>4.0.4</netty.version>
-		<javassist.version>3.16.1-GA</javassist.version>
-		<msgpack.version>0.6.8-SNAPSHOT</msgpack.version>
-		<mysql.version>5.1.25</mysql.version>
-		<sqljdbc.version>4.0</sqljdbc.version>
+		<netty-version>4.0.4</netty-version>
+		<javassist-version>3.16.1-GA</javassist-version>
+		<msgpack-version>0.6.8-SNAPSHOT</msgpack-version>
+		<mysql-version>5.1.25</mysql-version>
+		<sqljdbc-version>4.0</sqljdbc-version>
+		<jtds-version>1.2.8</jtds-version>
+		<druid-version>0.2.25</druid-version>
 
-		<slf4j.version>1.7.5</slf4j.version>
-		<log4j.version>1.2.17</log4j.version>
-		<logback.version>1.0.11</logback.version>
-		<commons-logging.version>1.1</commons-logging.version>
-		<guava.version>14.0.1</guava.version>
+
+		<slf4j-version>1.7.5</slf4j-version>
+		<log4j-version>1.2.17</log4j-version>
+		<logback-version>1.0.11</logback-version>
+		<commons-logging-version>1.1</commons-logging-version>
+
+		<guava-version>14.0.1</guava-version>
+		<guice-version>4.0-beta</guice-version>
+		<reflections-version>0.9.8</reflections-version>
+		
+		<druid-version>0.2.25</druid-version>
 	</properties>
 
 	<profiles>
@@ -76,73 +84,107 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
-			<version>${netty.version}</version>
+			<version>${netty-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
-			<version>${javassist.version}</version>
+			<version>${javassist-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.msgpack</groupId>
 			<artifactId>msgpack</artifactId>
-			<version>${msgpack.version}</version>
+			<version>${msgpack-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>${mysql.version}</version>
+			<version>${mysql-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.microsoft.sqlserver</groupId>
 			<artifactId>sqljdbc</artifactId>
-			<version>${sqljdbc.version}</version>
+			<version>${sqljdbc-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.jtds</groupId>
+			<artifactId>jtds</artifactId>
+			<version>${jtds-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid</artifactId>
+			<version>${druid-version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>${guava.version}</version>
-		</dependency>
+
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
+			<version>${slf4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
-			<version>${slf4j.version}</version>
+			<version>${slf4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jul-to-slf4j</artifactId>
-			<version>${slf4j.version}</version>
+			<version>${slf4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>${log4j.version}</version>
+			<version>${log4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
-			<version>${commons-logging.version}</version>
+			<version>${commons-logging-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>${logback.version}</version>
+			<version>${logback-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
-			<version>${logback.version}</version>
+			<version>${logback-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-access</artifactId>
-			<version>${logback.version}</version>
+			<version>${logback-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>${guice-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>${reflections-version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid</artifactId>
+			<version>${druid-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid</artifactId>
+			<version>0.2.6</version>
 		</dependency>
 	</dependencies>
 </project>

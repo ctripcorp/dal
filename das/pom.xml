@@ -144,5 +144,10 @@
 			<artifactId>logback-access</artifactId>
 			<version>${logback.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid</artifactId>
+			<version>0.2.6</version>
+		</dependency>
 	</dependencies>
 </project>

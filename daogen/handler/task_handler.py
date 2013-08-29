@@ -63,6 +63,7 @@ class TaskHandler(tornado.web.RequestHandler):
 class TasksHandler(tornado.web.RequestHandler):
 	def get(self):
 		project_id = self.get_argument("project_id", default="521c116928afd21e3c124d69", strip=False)
+		print project_id
 		results = []
 		for p in task_model_obj.get_by_project(project_id):
 			if isinstance(p["_id"], bson.objectid.ObjectId):

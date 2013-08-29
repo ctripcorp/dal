@@ -22,8 +22,10 @@ public class Response extends BaseDomain {
 	private ResultTypeEnum resultType;
 
 	private int affectRowCount;
+	
+	private int chunkCount;
 
-	private List<List<AvailableType>> resultSet;
+	//private List<List<AvailableType>> resultSet;
 	
 
 	/**
@@ -32,13 +34,29 @@ public class Response extends BaseDomain {
 	public static Packer getPacker() {
 		return packer;
 	}
-
+	
 	/**
 	 * @param packer
 	 *            the packer to set
 	 */
 	public static void setPacker(Packer packer) {
 		Response.packer = packer;
+	}
+	
+	/**
+	 * 
+	 * @return the chunk count
+	 */
+	public int getChunkCount() {
+		return chunkCount;
+	}
+	
+	/**
+	 * 
+	 * @param chunkCount
+	 */
+	public void setChunkCount(int chunkCount) {
+		this.chunkCount = chunkCount;
 	}
 
 	/**
@@ -86,20 +104,20 @@ public class Response extends BaseDomain {
 		this.affectRowCount = affectRowCount;
 	}
 
-	/**
-	 * @return the resultSet
-	 */
-	public List<List<AvailableType>> getResultSet() {
-		return resultSet;
-	}
-
-	/**
-	 * @param resultSet
-	 *            the resultSet to set
-	 */
-	public void setResultSet(List<List<AvailableType>> resultSet) {
-		this.resultSet = resultSet;
-	}
+//	/**
+//	 * @return the resultSet
+//	 */
+//	public List<List<AvailableType>> getResultSet() {
+//		return resultSet;
+//	}
+//
+//	/**
+//	 * @param resultSet
+//	 *            the resultSet to set
+//	 */
+//	public void setResultSet(List<List<AvailableType>> resultSet) {
+//		this.resultSet = resultSet;
+//	}
 
 	/**
 	 * @return the serialversionuid

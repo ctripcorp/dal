@@ -13,9 +13,11 @@ class FileHandler(tornado.web.RequestHandler):
 	def get(self):
 		files = glob.iglob(os.path.join(projects_dir, "*.jar"))
 
+		#pom = glob.iglob(os.path.join(projects_dir, "*.xml"))
+
 		names = [os.path.basename(f) for f in files]
 
-		print names
+		#names.extend([os.path.basename(p) for p in pom])
 
 		self.render("../templates/file.html", files=names)
 

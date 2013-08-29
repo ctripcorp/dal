@@ -1,4 +1,4 @@
-package {{product_line}}.{{domain}}.{{app_name}}.dao;
+package {{product_line}}.{{domain}}.{{app_name}}.dao.sp;
 
 import java.sql.ResultSet;
 import java.util.HashMap;

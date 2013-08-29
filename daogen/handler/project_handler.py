@@ -3,6 +3,8 @@ import tornado.web
 import json, bson
 from daogen.model.project_model import project_model_obj
 
+#TODO: Add version to project
+
 class ProjectHandler(tornado.web.RequestHandler):
 	def get(self):
 		self.render("../templates/project.html")

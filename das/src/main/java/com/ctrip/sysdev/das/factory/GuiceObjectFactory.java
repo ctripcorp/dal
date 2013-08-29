@@ -2,7 +2,7 @@ package com.ctrip.sysdev.das.factory;
 
 import java.util.Set;
 
-import com.ctrip.sysdev.das.conf.Conf;
+import com.ctrip.sysdev.das.utils.Configuration;
 import com.ctrip.sysdev.das.utils.ReflectionUtil;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
@@ -19,7 +19,7 @@ public class GuiceObjectFactory implements ObjectFactory {
 
 	public GuiceObjectFactory() {
 		// init conf
-		Conf.initConfiguration();
+		initConfiguration();
 
 		Set<Module> modulesInterFaceImpl = ReflectionUtil
 				.newInstanceFromPackage(
@@ -39,5 +39,9 @@ public class GuiceObjectFactory implements ObjectFactory {
 	@Override
 	public <T> T getInstance(Class<T> clazz) throws Exception {
 		return injector.getInstance(clazz);
+	}
+
+	private static void initConfiguration() {
+		Configuration.addResource("conf.properties");
 	}
 }

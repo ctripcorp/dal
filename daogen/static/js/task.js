@@ -1,11 +1,14 @@
 
 
+var filedTypeMap = {};
+
 jQuery(document).ready(function(){  
 
 	App.init(); // initlayout and core plugins
 				   
 	// Tasks.initDashboardWidget();
 
+	//collapse or expand the portlet
 	jQuery('body').on('click', '.portlet > .portlet-title > .tools > .icon-collapse, .portlet .portlet-title > .tools > .icon-collapse-top', function (e) {
 		// e.preventDefault();
         if (jQuery(this).hasClass("icon-collapse")) {
@@ -15,10 +18,12 @@ jQuery(document).ready(function(){
         }
 	});
 
+	//initialize the sql editor
 	var editor = ace.edit("sql_editor");
 	editor.setTheme("ace/theme/monokai");
 	editor.getSession().setMode("ace/mode/mysql");
 
+	//initialize the stored procedure editor
 	var sp_editor = ace.edit("sp_editor");
 	sp_editor.setTheme("ace/theme/monokai");
 	sp_editor.getSession().setMode("ace/mode/mysql");
@@ -107,6 +112,86 @@ jQuery(document).ready(function(){
 		}
 	});
 
+	$("#add_task").click(function(){
+		var project_id = $("#proj_id").attr("project");
+
+		var post_data = {};
+
+		var task_object = {};
+
+		var task_type = $("li.active > a[data-toggle='tab']").attr("task_type");
+
+		task_object["func_name"] = $("#func_name").val();
+
+		if(task_type == "autosql"){
+
+			task_object["database"] = $("#databases").val();
+
+			task_object["table"] = $("#tables").val();
+
+			task_object["crud"] = $("button.btn-primary").attr("btn_type");
+
+			var fields = [];
+
+			$("#right_select > option").each(function() {
+    			fields.push(this.value);
+			});
+
+			task_object["fields"] = fields;
+
+			var where_condition = {};
+
+			$("#where_condition > li > .task-config > .task-config-btn > .dropdown-menu  > li > a[value!='-1'] > i.icon-ok").each(function() {
+				var condition = $(this).parent().attr("value");
+				var field = $(this).parent().parent().parent().parent().parent().parent().find(".task-title > .task-title-sp").text();
+				where_condition[field] = condition;
+			});
+
+			task_object["where"] = where_condition;
+
+			task_object["field_type"] = filedTypeMap;
+
+		}else if(task_type == "sp"){
+
+			task_object["database"] = $("#sp_databases").val();
+
+			task_object["sp_name"] = $("#sp_names").val();
+
+		}else{
+			task_object["database"] = $("#sql_databases").val();
+
+			task_object["sql"] = editor.getValue();
+		}
+
+		post_data["project_id"] = project_id;
+		post_data["task_type"] = task_type;
+		post_data["task_object"] = JSON.stringify(task_object);
+
+		$.post("/task", post_data, function(data){
+			getTasks();
+		});
+
+	});
+
+	$("#reload_tasks").click(function(){
+		getTasks();
+	});
+
+	$("#generate_code").click(function(){
+		var post_data = {};
+		var project_id = $("#proj_id").attr("project");
+		post_data["project_id"] = project_id;
+
+		var el = $(document.body);
+		App.blockUI(el);
+		$.post("/generate", post_data, function(data){
+			App.unblockUI(el);
+			window.location.replace("/file");
+		});
+	});
+
+	getTasks();
+
 });
 
 var table_change = function(){
@@ -120,32 +205,95 @@ var table_change = function(){
 		+'<div class="task-config-btn btn-group">'
 		+'<a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">Operator<i class="icon-angle-down"></i></a>'
 		+'<ul class="dropdown-menu pull-right">'
-		+'<li><a href="#"><i class="icon-ok"></i> None</a></li>'
-		+'<li><a href="#"><i></i> Equal</a></li>'	
-		+'<li><a href="#"><i></i> Not Equal</a></li>'
-		+'<li><a href="#"><i></i> Greater Than</a></li>'
-		+'<li><a href="#"><i></i> Less Than</a></li>'
-		+'<li><a href="#"><i></i> Greater Equal Than</a></li>'
-		+'<li><a href="#"><i></i> Less Equal Than</a></li>'
-		+'<li><a href="#"><i></i> Between</a></li>'
-		+'<li><a href="#"><i></i> Like</a></li>'
-		+'<li><a href="#"><i></i> In</a></li>'
+		+'<li><a href="#" value="-1"><i class="icon-ok"></i> None</a></li>'
+		+'<li><a href="#" value="0"><i></i> Equal</a></li>'	
+		+'<li><a href="#" value="1"><i></i> Not Equal</a></li>'
+		+'<li><a href="#" value="2"><i></i> Greater Than</a></li>'
+		+'<li><a href="#" value="3"><i></i> Less Than</a></li>'
+		+'<li><a href="#" value="4"><i></i> Greater Equal Than</a></li>'
+		+'<li><a href="#" value="5"><i></i> Less Equal Than</a></li>'
+		+'<li><a href="#" value="6"><i></i> Between</a></li>'
+		+'<li><a href="#" value="7"><i></i> Like</a></li>'
+		+'<li><a href="#" value="8"><i></i> In</a></li>'
 		+'</ul></div></div>';
 		var where_condition = '';
 		$.each(data, function(index, value) {
-				html_data += "<option>" + value + "</option>";
-				where_condition += "<li><div class='task-title'><span class='task-title-sp'>"+value+"</span></div>"+operator+"</li>";
+				filedTypeMap[value.name] = value.type;
+				html_data += "<option>" + value.name + "</option>";
+				where_condition += 
+				"<li><div class='task-title'><span class='task-title-sp'>"
+				+value.name
+				+"</span></div>"
+				+operator
+				+"</li>";
 		});
 		$("#left_select").html(html_data);
 		$("#where_condition").html(where_condition);
 
-		$(".task-config > .task-config-btn > .dropdown-menu  > li > a").click(function(){
+		$("#where_condition > li > .task-config > .task-config-btn > .dropdown-menu  > li > a").click(function(){
 			$(this).parent().parent().find("li > a > i.icon-ok").toggleClass("icon-ok");
 			$(this).find("i").toggleClass("icon-ok");
 		});
 
 		// $(".multiselect").multiselect();
 		App.unblockUI(el);
+	});
+
+};
+
+var getTasks = function(){
+	var el = $("#reload_tasks").closest(".portlet").children(".portlet-body");
+    App.blockUI(el);
+	$.get("/task/tasks", function(data){
+
+		data = JSON.parse(data);
+
+		var suffix = '</div><div class="task-config">'
+		+'<div class="task-config-btn btn-group">'
+		+'<a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">More <i class="icon-angle-down"></i></a>'
+		+'<ul class="dropdown-menu pull-right">'
+		+'<li><a href="#"><i class="icon-twitter"></i> To another project</a></li>'
+		+'<li><a href="#"><i class="icon-pencil"></i> Edit</a></li>'
+		+'<li><a href="#"><i class="icon-trash"></i> Delete</a></li>'
+		+'</ul>'
+		+'</div>'
+		+'</div>';
+
+		var html_data = "";
+		$.each(data, function(index, value) {
+			var meaningful = "USE "+ value.database;
+
+			if(value.task_type == "autosql"){
+				if(value.crud == "select"){
+					meaningful += " SELECT " + value.fields.join(",") +
+					" FROM " + value.table;
+				}else if(value.crud == "insert"){
+					meaningful += " INSERT INTO " +
+					value.table;
+				}else if(value.crud == "update"){
+					meaningful += " UPDATE " + value.table;
+				}else{
+					meaningful += " DELETE FROM " + value.table;
+				}
+			}else if(value.task_type == "sp"){
+				meaningful += " EXEC " + value.sp_name;
+			}else{
+				meaningful += " " + value.sql;
+			}
+
+			html_data +=  '<li><div class="task-title"><span id="'
+			+value._id
+			+'" class="task-title-sp">'
+			+meaningful
+			+'</span>'
+			+suffix 
+			+'</li>';
+		});
+
+		$("#all_tasks").html(html_data);
+
+		App.unblockUI(el);
+
 	});
 
 };

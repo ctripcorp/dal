@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.apptools.dao;
+package com.ctrip.sysdev.apptools.dao.tableview;
 
 import java.sql.ResultSet;
 import java.util.HashMap;

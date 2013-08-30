@@ -25,7 +25,7 @@ public class Response extends BaseDomain {
 	
 	private int chunkCount;
 
-	//private List<List<AvailableType>> resultSet;
+	private List<List<AvailableType>> resultSet;
 	
 
 	/**
@@ -104,20 +104,20 @@ public class Response extends BaseDomain {
 		this.affectRowCount = affectRowCount;
 	}
 
-//	/**
-//	 * @return the resultSet
-//	 */
-//	public List<List<AvailableType>> getResultSet() {
-//		return resultSet;
-//	}
-//
-//	/**
-//	 * @param resultSet
-//	 *            the resultSet to set
-//	 */
-//	public void setResultSet(List<List<AvailableType>> resultSet) {
-//		this.resultSet = resultSet;
-//	}
+	/**
+	 * @return the resultSet
+	 */
+	public List<List<AvailableType>> getResultSet() {
+		return resultSet;
+	}
+
+	/**
+	 * @param resultSet
+	 *            the resultSet to set
+	 */
+	public void setResultSet(List<List<AvailableType>> resultSet) {
+		this.resultSet = resultSet;
+	}
 
 	/**
 	 * @return the serialversionuid

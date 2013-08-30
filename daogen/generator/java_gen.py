@@ -15,6 +15,8 @@ class Method(object):
 	sql = ""
 	action = "fetch"
 
+
+
 class JavaGenerator(object):
 
 	def __init__(self):
@@ -128,13 +130,14 @@ class JavaGenerator(object):
 				method.sql = self.format_sql(sql)
 				method.action = "fetch" if sql["crud"] == "select" else "execute"
 				methods.append(method)
-			with open(os.path.join(dao_dir,"tableview/%sDAO.java" % k), "w") as f:
+			with open(os.path.join(dao_dir,"tabledao/%sDAO.java" % k), "w") as f:
 				f.write(self.table_dao_template.generate(
 					product_line="com.ctrip."+project["product_line"],
 					domain=project["domain"],
 					app_name=project["service"],
-					TableName=k,
-					methods=methods
+					table_name=k,
+					methods=methods,
+					sp_methods = []
 					))
 
 	def format_sql(self, sql_meta):
@@ -165,7 +168,7 @@ class JavaGenerator(object):
 		
 		#project = project_model_obj.retrieve_alias(project_id)
 		self.tmpl_loader = Loader(os.path.join(templates_dir, "java/tmpl"))
-		self.table_dao_template = self.tmpl_loader.load("TableViewTemplate.java")
+		self.table_dao_template = self.tmpl_loader.load("TableDAOTemplate.java")
 		self.sp_dao_template = self.tmpl_loader.load("SPTemplate.java")
 		self.freesql_dao_template = self.tmpl_loader.load("FreeSQLTemplate.java")
 		self.entity_template = self.tmpl_loader.load("EntityTemplate.java")

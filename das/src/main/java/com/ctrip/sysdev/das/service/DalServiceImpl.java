@@ -38,6 +38,9 @@ public class DalServiceImpl implements DalService {
 		} catch (SerDeException e) {
 			e.printStackTrace();
 		}
+		
+		
+		
 		return buf;
 	}
 }

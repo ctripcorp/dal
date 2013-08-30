@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.apptools.daogen.dao.tableview;
+package com.ctrip.sysdev.apptools.daogen.dao.tabledao;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
@@ -15,16 +15,9 @@ public class PersonDAO extends AbstractDAO {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PersonDAO.class);
 
-	private Map<String, String> dbField2POJOField;
-
-	public PersonDAO() {
-		dbField2POJOField = new HashMap<String, String>();
-		// dbField2POJOField.put("Name", "name");
-	}
-
 	
 	//None									
-	public ResultSet getByAll(AvailableType... params)
+	public  ResultSet  getByAll(AvailableType... params)
 			throws Exception {
 		
 		final int paramCount = 1;
@@ -39,6 +32,8 @@ public class PersonDAO extends AbstractDAO {
 
 		return super.fetch(null, sql, 0, params);
 	}
+	
+
 	
 
 }

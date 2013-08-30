@@ -16,11 +16,7 @@ public class PersonDAO extends AbstractDAO {
 	private static final Logger logger = LoggerFactory
 			.getLogger(PersonDAO.class);
 
-	private Map<String, String> dbField2POJOField;
-
 	public PersonDAO() {
-		dbField2POJOField = new HashMap<String, String>();
-		// dbField2POJOField.put("Name", "name");
 	}
 
 	/**

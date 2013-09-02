@@ -117,10 +117,12 @@ public class DefaultResponse extends AbstractResponse {
 				for (int j = 0; j < innerArrayLength; j++) {
 					innerArray.add(unpackAvailableType(unpacker));
 				}
+				unpacker.readArrayEnd();
 				
 				outerArray.add(innerArray);
 
 			}
+			unpacker.readArrayEnd();
 			
 			response.setResultSet(outerArray);
 

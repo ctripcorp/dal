@@ -31,14 +31,14 @@ public class DalServiceImpl extends AbstractDalService implements DalService {
 		this.getDataSourceWrapper();
 		
 		ByteBuf buf = Unpooled.buffer(10);
-		buf.writeInt(26);
-		buf.writeShort(1);
+		
 		Response response = executor.execute(getDataSourceWrapper(), request.getMessage());
 		response.setTaskid(request.getTaskid());
-		response.setResultType(ResultTypeEnum.CUD);
-		response.setAffectRowCount(1);
 		try {
-			buf.writeBytes(msgPackSerDe.serialize(response));
+			byte[] msgpack_payload = msgPackSerDe.serialize(response);
+			buf.writeInt(msgpack_payload.length + 2);
+			buf.writeShort(1);
+			buf.writeBytes(msgpack_payload);
 		} catch (SerDeException e) {
 			e.printStackTrace();
 		}

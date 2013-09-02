@@ -52,9 +52,13 @@ public class AbstractDAO { // implements IDAO {
 			return dbClient.fetch(null, statement, 0, params);
 		} else {
 
+			if(dalClient == null){
+				dalClient = new DALClient();
+			}
+			return dalClient.fetch(null, statement, flag, params);
 		}
 
-		return null;
+//		return null;
 	}
 
 	public <T> List<T> fetchByORM(String tnxCtxt, String statement,

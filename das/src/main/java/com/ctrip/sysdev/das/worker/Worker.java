@@ -5,6 +5,11 @@ import java.util.Queue;
 import com.ctrip.sysdev.das.commons.DataSourceWrapper;
 import com.ctrip.sysdev.das.domain.msg.Message;
 
+/**
+ * @deprecated
+ * @author jhhe
+ *
+ */
 public class Worker extends Thread {
 	private String name;
 	private volatile boolean stop;

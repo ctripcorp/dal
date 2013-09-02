@@ -10,9 +10,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.ctrip.sysdev.das.commons.DataSourceWrapper;
 import com.ctrip.sysdev.das.domain.msg.Message;
 
-/*
- * One manager will handles one request queue. The Netty entry code will responsible for 
- * the initial dispatch. 
+/**
+ * @deprecated
+ * @author jhhe
+ *
  */
 public class WorkerManager {
 	private DataSourceWrapper dataSource;

@@ -143,22 +143,53 @@
                                        </ul>
                                        <div class="tab-content">
                                           <div class="tab-pane active" id="tab_1_1">
-                                             <div class="scroller" style="height:480px" data-always-visible="1" data-rail-visible="0">
-                                                <select id="databases">
+                                             <div class="scroller" data-always-visible="1" data-rail-visible="0">
+                                                 <div class="row-fluid">
+                                                   <div class="span6">
+                                                      <div class="control-group">
+                                                         <label class="control-label">Databases</label>
+                                                <select id="databases" class="span10">
                                                    {% for item in databases %}
                                                    <option>{{ escape(item) }}</option>
                                                    {% end %}
                                                 </select>
-                                                <select id="tables" style="margin-left:20px;">
+                                                </div>
+                                             </div>
+                                             <div class="span6">
+                                                <div class="control-group">
+                                                         <label class="control-label">Tables</label>
+                                                <select id="tables" class="span10">
                                                 </select>
-                                                Function Name:<input id="func_name" type="text" value="GetBy">
-                                                <div class="row-fluid btn-group" data-toggle="buttons-radio" style="margin-left:80px;">
+                                                </div>
+                                             </div>
+                                             </div>
+                                                <div class="row-fluid">
+                                                   <div class="span6">
+                                                      <div class="control-group">
+                                                         <label class="control-label">DAO Class Name</label>
+                                                <input id="auto_dao_name" class="span10" type="text" value="PersonDAO">
+                                                   </div>
+                                                   </div>
+                                                <div class="span6">
+                                                      <div class="control-group">
+                                                         <label class="control-label">Function Name</label>
+                                                <input id="auto_func_name" class="span10" type="text" value="getByName">
+                                                   </div>
+                                                   </div>
+                                                </div>
+                                                <div class="row-fluid">
+                                                   <div id="crud_action" class="btn-group" data-toggle="buttons-radio" style="margin-left:80px;">
                                                    <button type="button" class="btn btn-primary active" btn_type="select">Select</button>
                                                    <button type="button" class="btn btn-primary"  btn_type="insert">Insert</button>
                                                    <button type="button" class="btn btn-primary"  btn_type="update">Update</button>
                                                    <button type="button" class="btn btn-primary"  btn_type="delete">Delete</button>
+                                                   </div>
+                                                    <div id="cud_type" class="btn-group" data-toggle="buttons-radio" style="margin-left:50px;display:none;">
+                                                   <button type="button" class="btn btn-primary active" btn_type="spa">SPA</button>
+                                                   <button type="button" class="btn btn-primary"  btn_type="sp3">SP3</button>
+                                                   <button type="button" class="btn btn-primary"  btn_type="sql">SQL</button>
+                                                   </div>
                                                 </div>
-                                                <br>
                                                 <br>
                                                 <div class="row-fluid bootstrap-duallistbox-container">
                                                    <div id="select_fields">
@@ -172,7 +203,7 @@
                                                             <i class="icon-arrow-right"></i>
                                                             </button>
                                                          </div>
-                                                         <select id="left_select" multiple="multiple" data-duallistbox_generated="true" name="duallistbox_demo2_helper1" style="height: 320px;">
+                                                         <select id="left_select" multiple="multiple" data-duallistbox_generated="true" name="duallistbox_demo2_helper1">
                                                          </select>
                                                       </div>
                                                       <div class="span3 box1 filtered">
@@ -184,7 +215,7 @@
                                                             <i class="icon-arrow-left"></i>
                                                             </button>
                                                          </div>
-                                                         <select id="right_select" multiple="multiple" data-duallistbox_generated="true" name="duallistbox_demo2_helper2" style="height: 320px;">
+                                                         <select id="right_select" multiple="multiple" data-duallistbox_generated="true" name="duallistbox_demo2_helper2">
                                                          </select>
                                                       </div>
                                                       <div class="span1">
@@ -199,37 +230,54 @@
                                                       </ul>
                                                       <!-- END START TASK LIST -->
                                                    </div>
-                                                   <!-- </div> -->
-                                                   <!--   <div style="float:left;">
-                                                      <select name="duallistbox_demo2_helper2" style="height:25px;width:120px;margin-left:50px;">
-                                                            <option value="option3" selected="selected">Equal</option>
-                                                            <option value="option3" selected="selected">Not Equal</option>
-                                                            <option value="option3" selected="selected">Great Than</option>
-                                                            <option value="option3" selected="selected">Less Than</option>
-                                                            <option value="option3" selected="selected">Great Equal Than</option>
-                                                            <option value="option3" selected="selected">Less Equal Than</option>
-                                                            <option value="option3" selected="selected">Between</option>
-                                                            <option value="option3" selected="selected">Like</option>
-                                                            <option value="option3" selected="selected">In</option>
-                                                      </select>
-                                                      </div> -->
                                                 </div>
                                              </div>
                                           </div>
                                           <div class="tab-pane" id="tab_1_2">
-                                             <div class="scroller" style="height:500px" data-always-visible="1" data-rail-visible1="1">
+                                             <div class="scroller" style="height:558px;" data-always-visible="1" data-rail-visible1="1">
+                                                <div class="row-fluid">
+                                                   <div class="span4">
+                                                      <div class="control-group">
+                                                          <label class="control-label">Databases</label>
                                                 <select id="sp_databases">
                                                    {% for item in databases %}
                                                    <option>{{ escape(item) }}</option>
                                                    {% end %}
                                                 </select>
-                                                <select id="sp_names" style="margin-left:20px;">
+                                             </div>
+                                             </div>
+                                              <div class="span4">
+                                                      <div class="control-group">
+                                                          <label class="control-label">Stored Procedures</label>
+                                                <select id="sp_names">
                                                 </select>
-                                                <select id="sp_action" style="margin-left:20px;">
-                                                   <option>Fetch</option>
+                                                </div>
+                                             </div>
+                                             <div class="span4">
+                                                      <div class="control-group">
+                                                          <label class="control-label">Action Type</label>
+                                                <select id="sp_action">
                                                    <option>Execute</option>
+                                                   <option>Fetch</option>
                                                 </select>
-                                                <div id="sp_editor" style="height:400px;">		</div>
+                                                </div>
+                                             </div>
+                                             <div class="row-fluid">
+                                                   <div class="span6">
+                                                     <div class="control-group">
+                                                           <label class="control-label">DAO Class Name</label>
+                                                <input id="sp_dao_name" class="span10" type="text" value="PersonDAO">
+                                                </div>
+                                                   </div>
+                                                   <div class="span6">
+                                                     <div class="control-group">
+                                                           <label class="control-label">Function Name</label>
+                                                <input id="sp_func_name" class="span10" type="text" value="PersonDAO">
+                                                </div>
+                                                   </div>
+                                             </div>
+                                             </div>
+                                                <div id="sp_editor" style="height:340px;">		</div>
                                                 <br>
                                                 <div class="row-fluid">
                                                    <div class="span3 offset5">
@@ -239,15 +287,35 @@
                                              </div>
                                           </div>
                                           <div class="tab-pane" id="tab_1_3">
-                                             <div class="scroller" style="height:500px" data-always-visible="1" data-rail-visible1="1">
-                                                <select id="sql_databases">
+                                             <div class="scroller" style="height:558px" data-always-visible="1" data-rail-visible1="1">
+                                                <div class="row-fluid">
+                                                   <div class="span3">
+                                                     <div class="control-group">
+                                                      <label class="control-label">DAO Class Name</label>
+                                                   <select id="sql_databases">
                                                    {% for item in databases %}
                                                    <option>{{ escape(item) }}</option>
                                                    {% end %}
                                                 </select>
-                                                <div id="sql_editor" style="height:400px;">SELECT Address, Telephone FROM Person
-                                                   WHERE Name = {string} AND Age BETWEEN {int} AND {int}
-                                                   AND Gender IN {int[]}
+                                                </div>
+                                                   </div>
+                                                   <div class="span4">
+                                                     <div class="control-group">
+                                                           <label class="control-label">DAO Class Name</label>
+                                                <input id="sql_dao_name" class="span10" type="text" value="PersonDAO">
+                                                </div>
+                                                   </div>
+                                                   <div class="span4">
+                                                     <div class="control-group">
+                                                           <label class="control-label">Function Name</label>
+                                                <input id="sql_func_name" class="span10" type="text" value="PersonDAO">
+                                                </div>
+                                                   </div>
+                                                </div>
+                                                
+                                                <div id="sql_editor" style="height:420px;">SELECT Address, Telephone FROM Person
+                                                   WHERE Name = @Name AND
+                                                   AND Gender IN @Gender
                                                 </div>
                                                 <br>
                                                 <div class="row-fluid">

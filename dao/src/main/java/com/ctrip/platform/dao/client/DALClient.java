@@ -20,6 +20,7 @@ import com.ctrip.platform.dao.msg.Message;
 import com.ctrip.platform.dao.request.DefaultRequest;
 import com.ctrip.platform.dao.response.DefaultResponse;
 import com.ctrip.platform.dao.utils.Consts;
+import com.ctrip.platform.dao.utils.DAOResultSet;
 
 public class DALClient {
 	Socket requestSocket;
@@ -51,10 +52,12 @@ public class DALClient {
 		request.setCredential(Consts.credential);
 
 		request.setMessage(message);
+		
+		DAOResultSet rs = new DAOResultSet(this.<List<List<AvailableType>>>run(request));
+		
+		return rs;
 
-		this.<List<List<AvailableType>>>run(request);
-
-		return null;
+//		return null;
 	}
 
 	public int execute(String tnxCtxt, String statement, int flag,
@@ -63,7 +66,7 @@ public class DALClient {
 		Message message = new Message();
 
 		message.setMessageType(MessageTypeEnum.SQL);
-		message.setActionType(ActionTypeEnum.SELECT);
+		message.setActionType(ActionTypeEnum.DELETE);
 		message.setUseCache(false);
 
 		message.setSql(statement);
@@ -84,9 +87,9 @@ public class DALClient {
 
 		request.setMessage(message);
 
-		this.<Integer>run(request);
+		return this.<Integer>run(request);
 
-		return 0;
+//		return 0;
 	}
 
 	<T> T run(DefaultRequest request) {
@@ -119,26 +122,32 @@ public class DALClient {
 			in.read(leftData, 0, leftLength - 2);
 			
 			DefaultResponse response = DefaultResponse.unpack(leftData);
-
-			if (response.getResultType() == ResultTypeEnum.CUD) {
-				//System.out.println("affect row count: "+response.getAffectRowCount());
+			
+			if(response.getResultType() == ResultTypeEnum.CUD){
 				return (T) new Integer(response.getAffectRowCount());
 			}else{
-				
-				List<List<AvailableType>> resultSet = new ArrayList<List<AvailableType>>();
-				
-				for(int i=0;i< response.getChunkCount();i++){
-					int currentChunkSize = in.readInt();
-					
-					byte[] currentChunkData = new byte[currentChunkSize];
-					in.read(currentChunkData, 0, currentChunkSize);
-					
-					resultSet.addAll(DefaultResponse.unpackChunk(currentChunkData));
-				}
-				
-				return (T) resultSet;
-				
+				return (T) response.getResultSet();
 			}
+
+//			if (response.getResultType() == ResultTypeEnum.CUD) {
+//				//System.out.println("affect row count: "+response.getAffectRowCount());
+//				return (T) new Integer(response.getAffectRowCount());
+//			}else{
+//				
+//				List<List<AvailableType>> resultSet = new ArrayList<List<AvailableType>>();
+//				
+//				for(int i=0;i< response.getChunkCount();i++){
+//					int currentChunkSize = in.readInt();
+//					
+//					byte[] currentChunkData = new byte[currentChunkSize];
+//					in.read(currentChunkData, 0, currentChunkSize);
+//					
+//					resultSet.addAll(DefaultResponse.unpackChunk(currentChunkData));
+//				}
+//				
+//				return (T) resultSet;
+//				
+//			}
 
 		} catch (UnknownHostException unknownHost) {
 			System.err.println("You are trying to connect to an unknown host!");

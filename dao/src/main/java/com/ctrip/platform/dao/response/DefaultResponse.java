@@ -26,7 +26,7 @@ public class DefaultResponse extends AbstractResponse {
 	private ResultTypeEnum resultType;
 
 	private int affectRowCount;
-	
+
 	private int chunkCount;
 
 	private List<List<AvailableType>> resultSet;
@@ -62,7 +62,7 @@ public class DefaultResponse extends AbstractResponse {
 	public void setAffectRowCount(int affectRowCount) {
 		this.affectRowCount = affectRowCount;
 	}
-	
+
 	public int getChunkCount() {
 		return chunkCount;
 	}
@@ -104,6 +104,26 @@ public class DefaultResponse extends AbstractResponse {
 
 		if (response.getResultType() == ResultTypeEnum.RETRIEVE) {
 			response.setChunkCount(unpacker.readInt());
+
+			int outerArrayLength = unpacker.readArrayBegin();
+			
+			List<List<AvailableType>> outerArray = new ArrayList<List<AvailableType>>(outerArrayLength);
+
+			for (int i = 0; i < outerArrayLength; i++) {
+				int innerArrayLength = unpacker.readArrayBegin();
+				List<AvailableType> innerArray = new ArrayList<AvailableType>(
+						innerArrayLength);
+
+				for (int j = 0; j < innerArrayLength; j++) {
+					innerArray.add(unpackAvailableType(unpacker));
+				}
+				
+				outerArray.add(innerArray);
+
+			}
+			
+			response.setResultSet(outerArray);
+
 		} else {
 			response.setAffectRowCount(unpacker.readInt());
 		}
@@ -164,6 +184,8 @@ public class DefaultResponse extends AbstractResponse {
 		AvailableType at = new AvailableType();
 
 		int propertyCount = unpacker.readArrayBegin();
+
+		at.paramIndex = unpacker.readInt();
 
 		at.currentType = AvailableTypeEnum.fromInt(unpacker.readInt());
 

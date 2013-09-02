@@ -11,9 +11,9 @@ import {{product_line}}.{{domain}}.{{app_name}}.dao.common.AbstractDAO;
 import {{product_line}}.{{domain}}.{{app_name}}.dao.exception.ParametersInvalidException;
 import {{product_line}}.{{domain}}.{{app_name}}.dao.msg.AvailableType;
 
-public class {{table_name}}DAO extends AbstractDAO {
+public class {{dao_name}} extends AbstractDAO {
 	
-	private static final Logger logger = LoggerFactory.getLogger({{table_name}}DAO.class);
+	private static final Logger logger = LoggerFactory.getLogger({{dao_name}}.class);
 
 	{% for method in methods %}
 	//{{method.comment}}									

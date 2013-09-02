@@ -1,20 +1,22 @@
 var filedTypeMap = {};
 
-jQuery(document).ready(function () {
+var whereKeyValuemap = {};
+
+$(document).ready(function () {
+
+    whereKeyValuemap["0"] = "=";
+    whereKeyValuemap["1"] = "!=";
+    whereKeyValuemap["2"] = ">";
+    whereKeyValuemap["3"] = "<";
+    whereKeyValuemap["4"] = ">=";
+    whereKeyValuemap["5"] = "<=";
+    whereKeyValuemap["6"] = "Between";
+    whereKeyValuemap["7"] = "Like";
+    whereKeyValuemap["8"] = "In";
 
     App.init(); // initlayout and core plugins
 
     // Tasks.initDashboardWidget();
-
-    //collapse or expand the portlet
-    jQuery('body').on('click', '.portlet > .portlet-title > .tools > .icon-collapse, .portlet .portlet-title > .tools > .icon-collapse-top', function (e) {
-        // e.preventDefault();
-        if (jQuery(this).hasClass("icon-collapse")) {
-            jQuery(this).removeClass("icon-collapse").addClass("icon-collapse-top");
-        } else {
-            jQuery(this).removeClass("icon-collapse-top").addClass("icon-collapse");
-        }
-    });
 
     //initialize the sql editor
     var editor = ace.edit("sql_editor");
@@ -26,8 +28,19 @@ jQuery(document).ready(function () {
     sp_editor.setTheme("ace/theme/monokai");
     sp_editor.getSession().setMode("ace/mode/mysql");
 
+    //collapse or expand the portlet
+    $('body').on('click', '.portlet > .portlet-title > .tools > .icon-collapse, .portlet .portlet-title > .tools > .icon-collapse-top', function (e) {
+        // e.preventDefault();
+        if ($(this).hasClass("icon-collapse")) {
+            $(this).removeClass("icon-collapse").addClass("icon-collapse-top");
+        } else {
+            $(this).removeClass("icon-collapse-top").addClass("icon-collapse");
+        }
+    });
+
+    //Get all tables/views of a selected database
     $("#databases").change(function (event) {
-        var el = jQuery(this).closest(".portlet").children(".portlet-body");
+        var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
         $.get("/metadata?meta_type=tables&meta_value=" + $(this).val(), function (data) {
             data = JSON.parse(data);
@@ -36,19 +49,50 @@ jQuery(document).ready(function () {
                 html_data += "<option>" + value + "</option>";
             });
             $("#tables").html(html_data);
-            table_change();
-            //App.unblockUI(el);
+            App.unblockUI(el);
+            $("#tables").trigger('change');
         });
     });
 
+    //Get all fields of a selected table/view
     $("#tables").change(function (event) {
-        var el = jQuery(this).closest(".portlet").children(".portlet-body");
-        App.blockUI(el);
-        table_change();
-    });
 
+        $("#auto_dao_name").val(sprintf("%sDAO", $(this).val()));
+
+        var el = $(this).closest(".portlet").children(".portlet-body");
+        App.blockUI(el);
+
+        var url = sprintf("/metadata?meta_type=fields&meta_value=%s&db_name=%s", $(this).val(), $("#databases").val());
+
+        $.get(url, function (data) {
+            data = JSON.parse(data);
+            var html_data = "";
+            var operator = '<div class="task-config"><div class="task-config-btn btn-group"><a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">Operator<i class="icon-angle-down"></i></a><ul class="dropdown-menu pull-right"><li><a href="#" value="-1"><i class="icon-ok"></i> None</a></li><li><a href="#" value="0"><i></i> Equal</a></li><li><a href="#" value="1"><i></i> Not Equal</a></li><li><a href="#" value="2"><i></i> Greater Than</a></li><li><a href="#" value="3"><i></i> Less Than</a></li><li><a href="#" value="4"><i></i> Greater Equal Than</a></li><li><a href="#" value="5"><i></i> Less Equal Than</a></li><li><a href="#" value="6"><i></i> Between</a></li><li><a href="#" value="7"><i></i> Like</a></li><li><a href="#" value="8"><i></i> In</a></li></ul></div></div>';
+            var where_condition = '';
+            $.each(data, function (index, value) {
+
+                filedTypeMap[value.name] = value.type;
+
+                html_data += "<option>" + value.name + "</option>";
+
+                where_condition = sprintf(
+                    "%s<li><div class='task-title'><span class='task-title-sp'>%s</span></div>%s</li>", where_condition, value.name, operator);
+            });
+            $("#left_select").html(html_data);
+            $("#where_condition").html(where_condition);
+
+            $("#where_condition > li > .task-config > .task-config-btn > .dropdown-menu  > li > a").click(function () {
+                $(this).parent().parent().find("li > a > i.icon-ok").toggleClass("icon-ok");
+                $(this).find("i").toggleClass("icon-ok");
+            });
+
+            App.unblockUI(el);
+        });
+    });
+    
+    //Get all stored procedures of a selected database
     $("#sp_databases").change(function (event) {
-        var el = jQuery(this).closest(".portlet").children(".portlet-body");
+        var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
         $.get("/metadata?meta_type=sp&meta_value=" + $(this).val(), function (data) {
             data = JSON.parse(data);
@@ -57,17 +101,26 @@ jQuery(document).ready(function () {
                 html_data += "<option>" + value + "</option>";
             });
             $("#sp_names").html(html_data);
-            sp_change();
-            //App.unblockUI(el);
+            App.unblockUI(el);
+            $("#sp_names").trigger('change');
         });
     });
 
+    //Get the code of a stored procedure
     $("#sp_names").change(function (event) {
-        var el = jQuery(this).closest(".portlet").children(".portlet-body");
+
+         $("#sp_dao_name").val(sprintf("%sDAO", $(this).val()));
+
+        var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        sp_change();
+        $.get("/metadata?meta_type=sp_code&meta_value=" + $(this).val() + "&db_name=" + $("#sp_databases").val(), function (data) {
+            data = JSON.parse(data);
+            ace.edit("sp_editor").setValue(data);
+            App.unblockUI(el);
+        });
     });
 
+    //Move selected fields to query selection
     $("button.btn.move").click(function () {
 
         $.each($('#left_select').find(":selected"), function (index, value) {
@@ -76,6 +129,7 @@ jQuery(document).ready(function () {
         });
     });
 
+    //Move all fields as query selection
     $("button.btn.moveall").click(function () {
         $("#right_select").html($("#left_select").html());
         $("#left_select").html("");
@@ -93,23 +147,49 @@ jQuery(document).ready(function () {
         $("#right_select").html("");
     });
 
-    $("button.btn-primary").click(function () {
+    //Show or hide something according to current selected information
+    $(".btn-group > button.btn-primary").click(function () {
         var btn_type = $(this).attr("btn_type");
-        if (btn_type == "select") {
-            $("#select_fields").show();
-            $("#where_fields").show();
-        } else if (btn_type == "insert") {
-            $("#select_fields").show();
-            $("#where_fields").hide();
-        } else if (btn_type == "update") {
-            $("#select_fields").show();
-            $("#where_fields").show();
-        } else if (btn_type == "delete") {
-            $("#select_fields").hide();
-            $("#where_fields").show();
+        switch(btn_type){
+            case "select":
+                $("#select_fields").show();
+                $("#where_fields").show();
+                $("#cud_type").hide();
+                break;
+            case "insert":
+            case "update":
+            case "delete":
+                $("#cud_type > button[btn_type='spa']").trigger('click');
+                $("#select_fields").hide();
+                $("#where_fields").hide();
+                $("#cud_type").show();
+                break;
+            case "spa":
+            case "sp3":
+                $("#select_fields").hide();
+                $("#where_fields").hide();
+                break;
+            case "sql":
+                var current_action = $("#crud_action > button.active").attr("btn_type");
+                if(current_action == "select"){
+                    $("#select_fields").show();
+                    $("#where_fields").show();
+                }else if(current_action == "insert"){
+                    $("#select_fields").show();
+                    $("#where_fields").hide();
+                }else if(current_action == "update"){
+                    $("#select_fields").show();
+                    $("#where_fields").show();
+                }else{
+                    $("#select_fields").hide();
+                    $("#where_fields").show()();
+                }
+                
+                break;
         }
     });
 
+    //Add the sql to current project
     $("#add_task").click(function () {
         var project_id = $("#proj_id").attr("project");
 
@@ -119,43 +199,70 @@ jQuery(document).ready(function () {
 
         var task_type = $("li.active > a[data-toggle='tab']").attr("task_type");
 
-        task_object["func_name"] = $("#func_name").val();
-
         if (task_type == "autosql") {
+
+            function pack_sql_params(){
+                var fields = [];
+
+                $("#right_select > option").each(function () {
+                    fields.push(this.value);
+                });
+
+                task_object["fields"] = fields;
+
+                var where_condition = {};
+
+                $("#where_condition > li > .task-config > .task-config-btn > .dropdown-menu  > li > a[value!='-1'] > i.icon-ok").each(function () {
+                    var condition = $(this).parent().attr("value");
+                    var field = $(this).parent().parent().parent().parent().parent().parent().find(".task-title > .task-title-sp").text();
+                    where_condition[field] = condition;
+                });
+
+                task_object["where"] = where_condition;
+
+                task_object["field_type"] = filedTypeMap;
+            };
+
+            task_object["dao_name"] = $("#auto_dao_name").val();
+
+            task_object["func_name"] = $("#auto_func_name").val();
 
             task_object["database"] = $("#databases").val();
 
             task_object["table"] = $("#tables").val();
 
-            task_object["crud"] = $("button.btn-primary").attr("btn_type");
+            task_object["crud"] = $("#crud_action > button.active").attr("btn_type");
 
-            var fields = [];
-
-            $("#right_select > option").each(function () {
-                fields.push(this.value);
-            });
-
-            task_object["fields"] = fields;
-
-            var where_condition = {};
-
-            $("#where_condition > li > .task-config > .task-config-btn > .dropdown-menu  > li > a[value!='-1'] > i.icon-ok").each(function () {
-                var condition = $(this).parent().attr("value");
-                var field = $(this).parent().parent().parent().parent().parent().parent().find(".task-title > .task-title-sp").text();
-                where_condition[field] = condition;
-            });
-
-            task_object["where"] = where_condition;
-
-            task_object["field_type"] = filedTypeMap;
-
+            switch(task_object["crud"]){
+                case "select":
+                    pack_sql_params();
+                    break;
+                case "insert":
+                case "update":
+                case "delete": {
+                        task_object["cud"] = $("#cud_type > button.active").attr("btn_type");
+                        if(task_object["cud"] == "sql"){
+                            pack_sql_params();
+                        }
+                    }
+                    break;
+            }
         } else if (task_type == "sp") {
+
+            task_object["dao_name"] = $("#sp_dao_name").val();
+
+            task_object["func_name"] = $("#sp_func_name").val();
 
             task_object["database"] = $("#sp_databases").val();
 
             task_object["sp_name"] = $("#sp_names").val();
 
         } else {
+
+            task_object["dao_name"] = $("#sql_dao_name").val();
+
+            task_object["func_name"] = $("#sql_func_name").val();
+
             task_object["database"] = $("#sql_databases").val();
 
             task_object["sql"] = editor.getValue();
@@ -166,15 +273,97 @@ jQuery(document).ready(function () {
         post_data["task_object"] = JSON.stringify(task_object);
 
         $.post("/task", post_data, function (data) {
-            getTasks();
+            $("#reload_tasks").trigger('click');
         });
 
     });
-
+    
+    //Get all tasks of the project
     $("#reload_tasks").click(function () {
-        getTasks();
-    });
+        var el = $(this).closest(".portlet").children(".portlet-body");
+        App.blockUI(el);
+        $.get("/task/tasks?project_id=" + $("#proj_id").attr("project"), function (data) {
 
+            data = JSON.parse(data);
+
+            var suffix = '</div><div class="task-config"><div class="task-config-btn btn-group"><a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">More <i class="icon-angle-down"></i></a><ul class="dropdown-menu pull-right"><li><a href="#"><i class="icon-twitter"></i> To another project</a></li><li><a href="#"><i class="icon-pencil"></i> Edit</a></li><li><a href="#"><i class="icon-trash"></i> Delete</a></li></ul></div></div>';
+
+            var html_data = "";
+            $.each(data, function (index, value) {
+                var meaningful = sprintf("USE %s ", value.database);
+
+                if (value.task_type == "autosql") {
+
+                    var where_meaningful = "";
+
+                    if(value.where != undefined){
+                        where_meaningful = " WHERE ";
+                        for(var key in value.where){
+                            where_meaningful = sprintf("%s %s %s ? AND "
+                                , where_meaningful
+                                , key
+                                , whereKeyValuemap[value.where[key]]);
+                        }
+                        if(where_meaningful.substring(where_meaningful.length-4, where_meaningful.length) == "AND "){
+                            where_meaningful= where_meaningful.substring(0, where_meaningful.length - 4);
+                        }
+                    }
+
+                    switch(value.crud){
+                        case "select":
+                            meaningful = sprintf("%s SELECT %s FROM %s %s"
+                                ,meaningful
+                                ,value.fields.join(",")
+                                ,value.table
+                                ,where_meaningful);
+                            break;
+                        case "insert":
+                            var place_holder = "";
+                            for(var i=0;i<value.fields.length;i++){
+                                place_holder = sprintf("%s ?,", place_holder);
+                            }
+                            place_holder = place_holder.substring(0, place_holder.length-1);
+                            meaningful = sprintf("%s INSERT INTO %s (%s) VALUES (%s)"
+                                ,meaningful
+                                ,value.table
+                                ,value.fields.join(",")
+                                ,place_holder);
+                            break;
+                        case "update":
+                            meaningful = sprintf("%s UDPATE %s SET %s %s"
+                                ,meaningful
+                                ,value.table
+                                ,sprintf("%s = ?",value.fields.join(" = ?, "))
+                                ,where_meaningful);
+                            break;
+                        case "delete":
+                            meaningful = sprintf("%s DELETE FROM %s %s"
+                                ,meaningful
+                                ,value.table
+                                ,where_meaningful);
+                            break;
+                    }
+
+                } else if (value.task_type == "sp") {
+
+                    meaningful += " EXEC " + value.sp_name;
+
+                } else {
+
+                    meaningful += " " + value.sql;
+                }
+
+                html_data += '<li><div class="task-title"><span id="' + value._id + '" class="task-title-sp">' + meaningful + '</span>' + suffix + '</li>';
+            });
+
+            $("#all_tasks").html(html_data);
+
+            App.unblockUI(el);
+
+        });
+    });
+    
+    //Generate code of current project according to the language selection
     $("#generate_code").click(function () {
         var post_data = {};
         var project_id = $("#proj_id").attr("project");
@@ -188,112 +377,6 @@ jQuery(document).ready(function () {
         });
     });
 
-    getTasks();
+    $("#reload_tasks").trigger('click');
 
 });
-
-var table_change = function () {
-    var event_obj = $("#tables");
-    var el = jQuery(event_obj).closest(".portlet").children(".portlet-body");
-
-    var url = sprintf("/metadata?meta_type=fields&meta_value=%s&db_name=%s", $(event_obj).val(), $("#databases").val());
-
-    $.get(url, function (data) {
-        data = JSON.parse(data);
-        var html_data = "";
-        var operator = '<div class="task-config"><div class="task-config-btn btn-group"><a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">Operator<i class="icon-angle-down"></i></a><ul class="dropdown-menu pull-right"><li><a href="#" value="-1"><i class="icon-ok"></i> None</a></li><li><a href="#" value="0"><i></i> Equal</a></li><li><a href="#" value="1"><i></i> Not Equal</a></li><li><a href="#" value="2"><i></i> Greater Than</a></li><li><a href="#" value="3"><i></i> Less Than</a></li><li><a href="#" value="4"><i></i> Greater Equal Than</a></li><li><a href="#" value="5"><i></i> Less Equal Than</a></li><li><a href="#" value="6"><i></i> Between</a></li><li><a href="#" value="7"><i></i> Like</a></li><li><a href="#" value="8"><i></i> In</a></li></ul></div></div>';
-        var where_condition = '';
-        $.each(data, function (index, value) {
-
-            filedTypeMap[value.name] = value.type;
-
-            html_data += "<option>" + value.name + "</option>";
-
-            where_condition = sprintf(
-                "%s<li><div class='task-title'><span class='task-title-sp'>%s</span></div>%s</li>", where_condition, value.name, operator);
-        });
-        $("#left_select").html(html_data);
-        $("#where_condition").html(where_condition);
-
-        $("#where_condition > li > .task-config > .task-config-btn > .dropdown-menu  > li > a").click(function () {
-            $(this).parent().parent().find("li > a > i.icon-ok").toggleClass("icon-ok");
-            $(this).find("i").toggleClass("icon-ok");
-        });
-
-        // $(".multiselect").multiselect();
-        App.unblockUI(el);
-    });
-
-};
-
-var getTasks = function () {
-    var el = $("#reload_tasks").closest(".portlet").children(".portlet-body");
-    App.blockUI(el);
-    $.get("/task/tasks?project_id=" + $("#proj_id").attr("project"), function (data) {
-
-        data = JSON.parse(data);
-
-        var suffix = '</div><div class="task-config"><div class="task-config-btn btn-group"><a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">More <i class="icon-angle-down"></i></a><ul class="dropdown-menu pull-right"><li><a href="#"><i class="icon-twitter"></i> To another project</a></li><li><a href="#"><i class="icon-pencil"></i> Edit</a></li><li><a href="#"><i class="icon-trash"></i> Delete</a></li></ul></div></div>';
-
-        var html_data = "";
-        $.each(data, function (index, value) {
-            var meaningful = "USE " + value.database;
-
-            if (value.task_type == "autosql") {
-                if (value.crud == "select") {
-                    meaningful += " SELECT " + value.fields.join(",") +
-                        " FROM " + value.table;
-                } else if (value.crud == "insert") {
-                    meaningful += " INSERT INTO " +
-                        value.table;
-                } else if (value.crud == "update") {
-                    meaningful += " UPDATE " + value.table;
-                } else {
-                    meaningful += " DELETE FROM " + value.table;
-                }
-            } else if (value.task_type == "sp") {
-                meaningful += " EXEC " + value.sp_name;
-            } else {
-                meaningful += " " + value.sql;
-            }
-
-            html_data += '<li><div class="task-title"><span id="' + value._id + '" class="task-title-sp">' + meaningful + '</span>' + suffix + '</li>';
-        });
-
-        $("#all_tasks").html(html_data);
-
-        App.unblockUI(el);
-
-    });
-
-};
-
-var sp_change = function () {
-    var event_obj = $("#sp_names");
-    var el = jQuery(event_obj).closest(".portlet").children(".portlet-body");
-    $.get("/metadata?meta_type=sp_code&meta_value=" + $(event_obj).val() + "&db_name=" + $("#sp_databases").val(), function (data) {
-        data = JSON.parse(data);
-        ace.edit("sp_editor").setValue(data);
-        App.unblockUI(el);
-    });
-};
-
-jQuery.fn.multiselect = function () {
-    $(this).each(function () {
-        var checkboxes = $(this).find("input:checkbox");
-        checkboxes.each(function () {
-            var checkbox = $(this);
-            // Highlight pre-selected checkboxes
-            if (checkbox.attr("checked"))
-                checkbox.parent().addClass("multiselect-on");
-
-            // Highlight checkboxes that the user selects
-            checkbox.click(function () {
-                // if (checkbox.attr("checked"))
-                //     checkbox.parent().addClass("multiselect-on");
-                // else
-                //     checkbox.parent().removeClass("multiselect-on");
-            });
-        });
-    });
-};

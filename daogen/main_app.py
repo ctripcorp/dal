@@ -4,7 +4,7 @@ import tornado.web
 import os
 import json
 from daogen.handler.task_handler import TaskHandler,TasksHandler, TableHandler
-from daogen.handler.project_handler import ProjectHandler, ProjectsHandler
+from daogen.handler.project_handler import ProjectHandler, ProjectsHandler, ProjectDeleteHandler
 from daogen.handler.file_handler import FileHandler, GenerateHandler
 
 class LoginHandler(tornado.web.RequestHandler):
@@ -26,6 +26,7 @@ settings = {
 application = tornado.web.Application([
 	(r"/", ProjectHandler),
 	(r"/project/projects", ProjectsHandler),
+	(r"/project/delete", ProjectDeleteHandler),
 	(r"/task/tasks", TasksHandler),
 	(r"/task", TaskHandler),
 	(r"/metadata",TableHandler),

@@ -34,7 +34,13 @@ class GenerateHandler(tornado.web.RequestHandler):
 			shell=True, 
 			stdout=PIPE, 
 			stderr=PIPE)
-		p.communicate()
+		output, error = p.communicate()
+		result = {
+			"output": output,
+			"error": error
+		}
+
+		print result
 
 		files = glob.iglob(os.path.join(
 			os.path.join(working_dir,"target"),
@@ -44,5 +50,5 @@ class GenerateHandler(tornado.web.RequestHandler):
 			if os.path.isfile(f):
 				shutil.copy2(f, projects_dir)
 
-		self.write(json.dumps({"success": True}))
+		self.write(json.dumps(result, encoding="GB2312"))
 		self.finish()

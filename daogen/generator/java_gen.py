@@ -34,6 +34,18 @@ class JavaGenerator(object):
 					os.path.dirname(__file__))),
 			"projects")
 
+		self.mkdir_if_not_exists(self.projects_dir)
+		
+		#project = project_model_obj.retrieve_alias(project_id)
+		self.tmpl_loader = Loader(os.path.join(templates_dir, "java/tmpl"))
+		self.table_dao_template = self.tmpl_loader.load("TableDAOTemplate.java")
+		self.sp_dao_template = self.tmpl_loader.load("SPTemplate.java")
+		self.freesql_dao_template = self.tmpl_loader.load("FreeSQLTemplate.java")
+		self.entity_template = self.tmpl_loader.load("EntityTemplate.java")
+		self.pom_template = self.tmpl_loader.load("pom.xml")
+
+		self.common_loader = Loader(os.path.join(templates_dir, "java/dao"))
+
 	def mkdir_if_not_exists(self, parent, child=None):
 		whole_path = parent
 		if child:
@@ -96,7 +108,8 @@ class JavaGenerator(object):
 			f.write(self.pom_template.generate(
 					product_line="com.ctrip."+project["product_line"],
 					domain=project["domain"],
-					app_name=project["service"]
+					app_name=project["service"],
+					version=project["version"]
 				))
 
 		product_line_dir = self.mkdir_if_not_exists(ctrip_dir, project["product_line"])
@@ -113,10 +126,10 @@ class JavaGenerator(object):
 
 		group_by_table = {}
 		for s in auto_sql:
-			if s["table"] in group_by_table:
-				group_by_table[s["table"]].append(s)
+			if s["dao_name"] in group_by_table:
+				group_by_table[s["dao_name"]].append(s)
 			else:
-				group_by_table[s["table"]]= [s,]
+				group_by_table[s["dao_name"]]= [s,]
 
 		print group_by_table
 
@@ -130,12 +143,12 @@ class JavaGenerator(object):
 				method.sql = self.format_sql(sql)
 				method.action = "fetch" if sql["crud"] == "select" else "execute"
 				methods.append(method)
-			with open(os.path.join(dao_dir,"tabledao/%sDAO.java" % k), "w") as f:
+			with open(os.path.join(dao_dir,"tabledao/%s.java" % k), "w") as f:
 				f.write(self.table_dao_template.generate(
 					product_line="com.ctrip."+project["product_line"],
 					domain=project["domain"],
 					app_name=project["service"],
-					table_name=k,
+					dao_name=k,
 					methods=methods,
 					sp_methods = []
 					))
@@ -164,18 +177,6 @@ class JavaGenerator(object):
 		"""
 		Entry point of java generator
 		"""
-		self.mkdir_if_not_exists(self.projects_dir)
-		
-		#project = project_model_obj.retrieve_alias(project_id)
-		self.tmpl_loader = Loader(os.path.join(templates_dir, "java/tmpl"))
-		self.table_dao_template = self.tmpl_loader.load("TableDAOTemplate.java")
-		self.sp_dao_template = self.tmpl_loader.load("SPTemplate.java")
-		self.freesql_dao_template = self.tmpl_loader.load("FreeSQLTemplate.java")
-		self.entity_template = self.tmpl_loader.load("EntityTemplate.java")
-		self.pom_template = self.tmpl_loader.load("pom.xml")
-
-		self.common_loader = Loader(os.path.join(templates_dir, "java/dao"))
-
 		self.generate_concrete_code(project_id, self.generate_proj_struct(project_id))
 
 generator = JavaGenerator()

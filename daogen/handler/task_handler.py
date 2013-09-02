@@ -14,7 +14,7 @@ cursor = connection.cursor()
 class TaskHandler(tornado.web.RequestHandler):
 
 	def get(self):
-		project_id = self.get_argument("project_id", default="521c116928afd21e3c124d69", strip=False)
+		project_id = self.get_argument("project_id", default="5223f7ae28afd214e875aca5", strip=False)
 		tasks = []
 		project_alias = project_model_obj.retrieve_alias(project_id)["alias"]
 		tasks = task_model_obj.get_by_project(project_id)
@@ -62,7 +62,7 @@ class TaskHandler(tornado.web.RequestHandler):
 
 class TasksHandler(tornado.web.RequestHandler):
 	def get(self):
-		project_id = self.get_argument("project_id", default="521c116928afd21e3c124d69", strip=False)
+		project_id = self.get_argument("project_id", default="5223f7ae28afd214e875aca5", strip=False)
 		print project_id
 		results = []
 		for p in task_model_obj.get_by_project(project_id):

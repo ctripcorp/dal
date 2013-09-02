@@ -42,4 +42,9 @@ class TaskModel(BaseModel):
 	def get_free_sql(self, project_id):
 		return self.db.task_free.find({"project_id": project_id})
 
+	def delete_by_project(self, project_id):
+		self.db.task_auto.remove({"project_id": project_id})
+		self.db.task_free.remove({"project_id": project_id})
+		self.db.task_sp.remove({"project_id": project_id})
+
 task_model_obj = TaskModel()

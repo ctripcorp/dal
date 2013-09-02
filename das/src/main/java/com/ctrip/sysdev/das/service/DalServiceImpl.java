@@ -6,7 +6,6 @@ import io.netty.buffer.Unpooled;
 import com.ctrip.sysdev.das.DalService;
 import com.ctrip.sysdev.das.domain.Request;
 import com.ctrip.sysdev.das.domain.Response;
-import com.ctrip.sysdev.das.domain.enums.ResultTypeEnum;
 import com.ctrip.sysdev.das.exception.SerDeException;
 import com.ctrip.sysdev.das.serde.MsgPackSerDe;
 import com.ctrip.sysdev.das.worker.QueryExecutor;
@@ -29,8 +28,9 @@ public class DalServiceImpl extends AbstractDalService implements DalService {
 	 */
 	public ByteBuf dalService(Request request) {
 		this.getDataSourceWrapper();
-		
-		ByteBuf buf = Unpooled.buffer(10);
+
+		ByteBuf buf = Unpooled.buffer();
+
 		
 		Response response = executor.execute(getDataSourceWrapper(), request.getMessage());
 		response.setTaskid(request.getTaskid());

@@ -67,7 +67,7 @@ $(document).ready(function () {
         $.get(url, function (data) {
             data = JSON.parse(data);
             var html_data = "";
-            var operator = '<div class="task-config"><div class="task-config-btn btn-group"><a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">Operator<i class="icon-angle-down"></i></a><ul class="dropdown-menu pull-right"><li><a href="#" value="-1"><i class="icon-ok"></i> None</a></li><li><a href="#" value="0"><i></i> Equal</a></li><li><a href="#" value="1"><i></i> Not Equal</a></li><li><a href="#" value="2"><i></i> Greater Than</a></li><li><a href="#" value="3"><i></i> Less Than</a></li><li><a href="#" value="4"><i></i> Greater Equal Than</a></li><li><a href="#" value="5"><i></i> Less Equal Than</a></li><li><a href="#" value="6"><i></i> Between</a></li><li><a href="#" value="7"><i></i> Like</a></li><li><a href="#" value="8"><i></i> In</a></li></ul></div></div>';
+            var operator = '<div class="task-config"><div class="task-config-btn btn-group"><a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">Operator<i class="icon-angle-down"></i></a><ul class="dropdown-menu pull-right"><li><a href="#" value="-1"><i class="icon-check"></i> None</a></li><li><a href="#" value="0"><i class="icon-check-empty"></i> Equal</a></li><li><a href="#" value="1"><i class="icon-check-empty"></i> Not Equal</a></li><li><a href="#" value="2"><i class="icon-check-empty"></i> Greater Than</a></li><li><a href="#" value="3"><i class="icon-check-empty"></i> Less Than</a></li><li><a href="#" value="4"><i class="icon-check-empty"></i> Greater Equal Than</a></li><li><a href="#" value="5"><i class="icon-check-empty"></i> Less Equal Than</a></li><li><a href="#" value="6"><i class="icon-check-empty"></i> Between</a></li><li><a href="#" value="7"><i class="icon-check-empty"></i> Like</a></li><li><a href="#" value="8"><i class="icon-check-empty"></i> In</a></li></ul></div></div>';
             var where_condition = '';
             $.each(data, function (index, value) {
 
@@ -81,10 +81,20 @@ $(document).ready(function () {
             $("#left_select").html(html_data);
             $("#where_condition").html(where_condition);
 
-            $("#where_condition > li > .task-config > .task-config-btn > .dropdown-menu  > li > a").click(function () {
-                $(this).parent().parent().find("li > a > i.icon-ok").toggleClass("icon-ok");
-                $(this).find("i").toggleClass("icon-ok");
+            $(".icon-check-empty, .icon-check").each(function(){
+                $(this).parent().bind('click', function(event){
+                    var current_el = $(this).children().get(0);
+                    if(!$(current_el).hasClass(".icon-check")){
+                        $(current_el).closest('ul').find("li > a > i.icon-check").removeClass("icon-check").addClass("icon-check-empty");
+                        $(current_el).removeClass("icon-check-empty").addClass("icon-check");
+                    }
+                });
             });
+
+            // $("#where_condition > li > .task-config > .task-config-btn > .dropdown-menu  > li > a").click(function () {
+            //     $(this).parent().parent().find("li > a > i.icon-ok").toggleClass("icon-ok");
+            //     $(this).find("i").toggleClass("icon-ok");
+            // });
 
             App.unblockUI(el);
         });
@@ -212,9 +222,15 @@ $(document).ready(function () {
 
                 var where_condition = {};
 
-                $("#where_condition > li > .task-config > .task-config-btn > .dropdown-menu  > li > a[value!='-1'] > i.icon-ok").each(function () {
+                // $("#where_condition > li > .task-config > .task-config-btn > .dropdown-menu  > li > a[value!='-1'] > i.icon-ok").each(function () {
+                //     var condition = $(this).parent().attr("value");
+                //     var field = $(this).parent().parent().parent().parent().parent().parent().find(".task-title > .task-title-sp").text();
+                //     where_condition[field] = condition;
+                // });
+
+                $(".icon-check").each(function(){
                     var condition = $(this).parent().attr("value");
-                    var field = $(this).parent().parent().parent().parent().parent().parent().find(".task-title > .task-title-sp").text();
+                    var field = $(this).closest("div[class='task-config']").prev().children().text();
                     where_condition[field] = condition;
                 });
 

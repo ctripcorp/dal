@@ -40,7 +40,7 @@ public class ResponseSerDe extends AbstractMsgPackSerDe<Response> {
 			packer.write(obj.getResultType().getIntVal());
 			if (obj.getResultType() == ResultTypeEnum.RETRIEVE) {
 				// means chunk
-				packer.write(obj.getChunkCount());
+//				packer.write(obj.getChunkCount());
 				packer.writeArrayBegin(obj.getResultSet().size());
 				for(List<AvailableType> outer : obj.getResultSet()){
 					packer.writeArrayBegin(outer.size());

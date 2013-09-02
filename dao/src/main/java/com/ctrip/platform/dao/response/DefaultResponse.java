@@ -11,6 +11,8 @@ import java.util.UUID;
 
 import org.msgpack.MessagePack;
 import org.msgpack.unpacker.Unpacker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dao.enums.AvailableTypeEnum;
 import com.ctrip.platform.dao.enums.ResultTypeEnum;
@@ -18,6 +20,8 @@ import com.ctrip.platform.dao.exception.ProtocolInvalidException;
 import com.ctrip.platform.dao.msg.AvailableType;
 
 public class DefaultResponse extends AbstractResponse {
+	
+	private static Logger logger = LoggerFactory.getLogger(DefaultResponse.class);
 
 	private static final int currentPropertyCount = 3;
 
@@ -99,11 +103,13 @@ public class DefaultResponse extends AbstractResponse {
 		}
 
 		response.setTaskid(UUID.nameUUIDFromBytes(unpacker.readByteArray()));
+		
+		logger.info(response.getTaskid().toString());
 
 		response.setResultType(ResultTypeEnum.fromInt(unpacker.readInt()));
 
 		if (response.getResultType() == ResultTypeEnum.RETRIEVE) {
-			response.setChunkCount(unpacker.readInt());
+//			response.setChunkCount(unpacker.readInt());
 
 			int outerArrayLength = unpacker.readArrayBegin();
 			

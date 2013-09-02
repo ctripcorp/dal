@@ -1,25 +1,24 @@
 package com.ctrip.sysdev.das.worker;
 
-import java.sql.Connection;
 import java.util.Queue;
 
+import com.ctrip.sysdev.das.commons.DataSourceWrapper;
 import com.ctrip.sysdev.das.domain.msg.Message;
 
 public class Worker extends Thread {
 	private String name;
-	private boolean stop;
-	private ConnectionPool connPool;
+	private volatile boolean stop;
+	private DataSourceWrapper dataSource;
 	private Queue<Message> reqQueue;
-//	private RequestDispatcher dispatcher;
+	private QueryExecutor executor;
 	
 	public Worker(
 			String name, 
-			ConnectionPool connPool, 
+			DataSourceWrapper dataSource, 
 			Queue<Message> reqQueue) {
 		super(name);
-		this.connPool = connPool;
+		this.dataSource = dataSource;
 		this.reqQueue = reqQueue;
-//		dispatcher = new RequestDispatcher();
 	}
 	
 	public void setStopFlag() {
@@ -29,55 +28,12 @@ public class Worker extends Thread {
 	@Override
 	public void run() {
 		while(stop == false) {
-			Message request = reqQueue.poll();
-			if(request == null || stop)
+			// TODO check if we have any unblocking version of get
+			Message message = reqQueue.poll();
+			if(message == null || stop)
 				return;
 
-			Connection conn = connPool.getConnection();
-			if(conn == null || stop)
-				return;
-			
-			processRequest(request);
+			executor.execute(dataSource, message);
 		}
-	}
-	
-	/**
-	 * Note: we should first get request, then get connection
-	 */
-	private void processRequest(Message request) {
-		try {
-//			dispatcher.dispatch(request);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// Do fancy stuff here
-	}
-	
-	private void process(Connection conn) {
-		try {
-			
-		} catch(Throwable e) {
-			
-		} finally {
-			// Return connection and do clean up
-			connPool.returnConnection(conn);
-		}
-	}
-
-	private void select() {
-
-	}
-
-	private void insert() {
-
-	}
-
-	private void delete() {
-
-	}
-	
-	private void update() {
-
 	}
 }

@@ -12,7 +12,7 @@ import com.ctrip.sysdev.das.serde.MsgPackSerDe;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-public class DalServiceImpl implements DalService {
+public class DalServiceImpl extends AbstractDalService implements DalService {
 
 	private MsgPackSerDe<Response> msgPackSerDe;
 
@@ -26,6 +26,8 @@ public class DalServiceImpl implements DalService {
 	 * @param args
 	 */
 	public ByteBuf dalService(Request request) {
+		this.getDataSourceWrapper();
+		
 		ByteBuf buf = Unpooled.buffer(10);
 		buf.writeInt(26);
 		buf.writeShort(1);
@@ -38,9 +40,7 @@ public class DalServiceImpl implements DalService {
 		} catch (SerDeException e) {
 			e.printStackTrace();
 		}
-		
-		
-		
+
 		return buf;
 	}
 }

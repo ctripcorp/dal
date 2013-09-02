@@ -138,6 +138,8 @@ public class RequestSerDe extends AbstractMsgPackSerDe<Request> {
 		AvailableType at = new AvailableType();
 
 		int propertyCount = unpacker.readArrayBegin();
+		
+		at.paramIndex = unpacker.readInt();
 
 		at.currentType = AvailableTypeEnum.fromInt(unpacker.readInt());
 

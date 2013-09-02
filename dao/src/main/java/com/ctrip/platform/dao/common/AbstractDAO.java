@@ -55,6 +55,7 @@ public class AbstractDAO { // implements IDAO {
 				dalClient = new DALClient();
 			}
 			return dalClient.fetch(tnxCtxt, statement, flag, params);
+
 		}
 
 //		return null;

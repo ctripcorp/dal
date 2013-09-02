@@ -11,7 +11,7 @@ public class SelectPersonBLL {
 			System.out.println(".......a....");
 			PersonDAO person = new PersonDAO();
 
-			person.setUseDBClient(true);
+			person.setUseDBClient(false);
 
 			AvailableType addrParam = new<String> AvailableType(1, "1");
 			AvailableType nameParam = new<Integer> AvailableType(2, 1);

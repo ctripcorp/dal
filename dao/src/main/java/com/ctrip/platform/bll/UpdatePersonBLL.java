@@ -9,9 +9,9 @@ public class UpdatePersonBLL {
 			System.out.println(".......a....");
 			PersonDAO person = new PersonDAO();
 
-			person.setUseDBClient(true);
+			person.setUseDBClient(false);
 
-			AvailableType addrParam = new<String> AvailableType(1, "world");
+			AvailableType addrParam = new<String> AvailableType(1, "hihihi");
 			AvailableType nameParam = new<String> AvailableType(2, "1");
 			// AvailableType genderParam = new <Integer> AvailableType(2, 1);
 			System.out.println(".......a1....");

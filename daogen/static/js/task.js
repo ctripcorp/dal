@@ -1,8 +1,10 @@
-var filedTypeMap = {};
-
-var whereKeyValuemap = {};
-
 $(document).ready(function () {
+
+    var whereKeyValuemap = {};
+
+    var filedTypeMap = {};
+
+    var cud_shortcut = {};
 
     whereKeyValuemap["0"] = "=";
     whereKeyValuemap["1"] = "!=";
@@ -13,6 +15,10 @@ $(document).ready(function () {
     whereKeyValuemap["6"] = "Between";
     whereKeyValuemap["7"] = "Like";
     whereKeyValuemap["8"] = "In";
+
+    cud_shortcut["insert"] = "i";
+    cud_shortcut["update"] = "u";
+    cud_shortcut["delete"] = "d";
 
     App.init(); // initlayout and core plugins
 
@@ -81,10 +87,10 @@ $(document).ready(function () {
             $("#left_select").html(html_data);
             $("#where_condition").html(where_condition);
 
-            $(".icon-check-empty, .icon-check").each(function(){
-                $(this).parent().bind('click', function(event){
+            $(".icon-check-empty, .icon-check").each(function () {
+                $(this).parent().bind('click', function (event) {
                     var current_el = $(this).children().get(0);
-                    if(!$(current_el).hasClass(".icon-check")){
+                    if (!$(current_el).hasClass(".icon-check")) {
                         $(current_el).closest('ul').find("li > a > i.icon-check").removeClass("icon-check").addClass("icon-check-empty");
                         $(current_el).removeClass("icon-check-empty").addClass("icon-check");
                     }
@@ -99,7 +105,7 @@ $(document).ready(function () {
             App.unblockUI(el);
         });
     });
-    
+
     //Get all stored procedures of a selected database
     $("#sp_databases").change(function (event) {
         var el = $(this).closest(".portlet").children(".portlet-body");
@@ -119,7 +125,7 @@ $(document).ready(function () {
     //Get the code of a stored procedure
     $("#sp_names").change(function (event) {
 
-         $("#sp_dao_name").val(sprintf("%sDAO", $(this).val()));
+        $("#sp_dao_name").val(sprintf("%sDAO", $(this).val()));
 
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
@@ -160,42 +166,56 @@ $(document).ready(function () {
     //Show or hide something according to current selected information
     $(".btn-group > button.btn-primary").click(function () {
         var btn_type = $(this).attr("btn_type");
-        switch(btn_type){
-            case "select":
+        switch (btn_type) {
+        case "select":
+            $("#select_fields").show();
+            $("#where_fields").show();
+            $("#cud_type").hide();
+            $("#auto_func_name").val("get");
+            break;
+        case "insert":
+            $("#auto_func_name").val("insert");
+            $("#cud_type > button[btn_type='spa']").trigger('click');
+            $("#select_fields").hide();
+            $("#where_fields").hide();
+            $("#cud_type").show();
+            break;
+        case "update":
+            $("#auto_func_name").val("set");
+            $("#cud_type > button[btn_type='spa']").trigger('click');
+            $("#select_fields").hide();
+            $("#where_fields").hide();
+            $("#cud_type").show();
+            break;
+        case "delete":
+            $("#auto_func_name").val("delete");
+            $("#cud_type > button[btn_type='spa']").trigger('click');
+            $("#select_fields").hide();
+            $("#where_fields").hide();
+            $("#cud_type").show();
+            break;
+        case "spa":
+        case "sp3":
+            $("#select_fields").hide();
+            $("#where_fields").hide();
+            break;
+        case "sql":
+            var current_action = $("#crud_action > button.active").attr("btn_type");
+            if (current_action == "select") {
                 $("#select_fields").show();
                 $("#where_fields").show();
-                $("#cud_type").hide();
-                break;
-            case "insert":
-            case "update":
-            case "delete":
-                $("#cud_type > button[btn_type='spa']").trigger('click');
-                $("#select_fields").hide();
+            } else if (current_action == "insert") {
+                $("#select_fields").show();
                 $("#where_fields").hide();
-                $("#cud_type").show();
-                break;
-            case "spa":
-            case "sp3":
+            } else if (current_action == "update") {
+                $("#select_fields").show();
+                $("#where_fields").show();
+            } else {
                 $("#select_fields").hide();
-                $("#where_fields").hide();
-                break;
-            case "sql":
-                var current_action = $("#crud_action > button.active").attr("btn_type");
-                if(current_action == "select"){
-                    $("#select_fields").show();
-                    $("#where_fields").show();
-                }else if(current_action == "insert"){
-                    $("#select_fields").show();
-                    $("#where_fields").hide();
-                }else if(current_action == "update"){
-                    $("#select_fields").show();
-                    $("#where_fields").show();
-                }else{
-                    $("#select_fields").hide();
-                    $("#where_fields").show()();
-                }
-                
-                break;
+                $("#where_fields").show()();
+            }
+
+            break;
         }
     });
 
@@ -211,32 +231,61 @@ $(document).ready(function () {
 
         if (task_type == "autosql") {
 
-            function pack_sql_params(){
+            function pack_sql_params() {
                 var fields = [];
 
                 $("#right_select > option").each(function () {
                     fields.push(this.value);
                 });
 
-                task_object["fields"] = fields;
+                var where_condition = "";
 
-                var where_condition = {};
+                var selected_condition = $("a[value!='-1'] > .icon-check");
 
-                // $("#where_condition > li > .task-config > .task-config-btn > .dropdown-menu  > li > a[value!='-1'] > i.icon-ok").each(function () {
-                //     var condition = $(this).parent().attr("value");
-                //     var field = $(this).parent().parent().parent().parent().parent().parent().find(".task-title > .task-title-sp").text();
-                //     where_condition[field] = condition;
-                // });
+                if ($(selected_condition).length > 0) {
+                    where_condition = "WHERE ";
 
-                $("a[value!='-1'] > .icon-check").each(function(){
-                    var condition = $(this).parent().attr("value");
-                    var field = $(this).closest("div[class='task-config']").prev().children().text();
-                    where_condition[field] = condition;
-                });
+                    $("a[value!='-1'] > .icon-check").each(function () {
+                        var condition = $(this).parent().attr("value");
+                        var field = $(this).closest("div[class='task-config']").prev().children().text();
 
-                task_object["where"] = where_condition;
+                        var current_where_clause = "";
+                        //means BETWEEN
+                        if (condition == 6) {
+                            current_where_clause = "BETWEEN ? AND ?";
+                        } else {
+                            current_where_clause = sprintf("%s ?", whereKeyValuemap[condition]);
+                        }
+
+                        where_condition = sprintf(" %s %s %s AND", where_condition, field, current_where_clause);
+                    });
+
+                    if (where_condition.substring(where_condition.length - 3, where_condition.length) == "AND") {
+                        where_condition = where_condition.substring(0, where_condition.length - 3);
+                    }
+                }
 
                 task_object["field_type"] = filedTypeMap;
+
+                switch (task_object["crud"]) {
+                case "select":
+                    task_object["sql"] = sprintf("SELECT %s FROM %s %s", fields.join(","), task_object["table"], where_condition);
+                    break;
+                case "insert":
+                    var place_holder = [];
+                    for (var i = 0; i < fields.length; i++) {
+                        place_holder.push("?");
+                    }
+                    task_object["sql"] = sprintf("INSERT INTO %s (%s) VALUES (%s)", task_object["table"], fields.join(","), place_holder.join(","));
+                    break;
+                case "update":
+                    task_object["sql"] = sprintf("UPDATE %s SET %s %s", task_object["table"], sprintf("%s = ?", fields.join(" = ?, ")), where_condition);
+                    break;
+                case "delete":
+                    task_object["sql"] = sprintf("DELETE FROM %s %s", task_object["table"], where_condition);
+                    break;
+                }
+
             };
 
             task_object["dao_name"] = $("#auto_dao_name").val();
@@ -249,27 +298,17 @@ $(document).ready(function () {
 
             task_object["crud"] = $("#crud_action > button.active").attr("btn_type");
 
-            switch(task_object["crud"]){
-                case "select":
+            if (task_object["crud"] == "select") {
+                pack_sql_params();
+            } else {
+                task_object["cud"] = $("#cud_type > button.active").attr("btn_type");
+                if (task_object["cud"] == "sql") {
                     pack_sql_params();
-                    break;
-                case "insert":
-                case "update":
-                case "delete": {
-                        task_object["cud"] = $("#cud_type > button.active").attr("btn_type");
-                        if(task_object["cud"] == "sql"){
-                            pack_sql_params();
-                        }else{
-                            if(task_object["crud"] == "insert"){
-                                task_object["param_count"] = $("#left_select option").length
-                                + $("#right_select option").length - 1;
-                            }else{
-                                task_object["param_count"] = 1;
-                            }
-                        }
-                    }
-                    break;
+                } else {
+                    task_object["sp_name"] = sprintf("%s_%s_%s", task_object["cud"], task_object["table"], cud_shortcut[task_object["crud"]]);
+                }
             }
+
         } else if (task_type == "sp") {
 
             task_object["dao_name"] = $("#sp_dao_name").val();
@@ -300,7 +339,7 @@ $(document).ready(function () {
         });
 
     });
-    
+
     //Get all tasks of the project
     $("#reload_tasks").click(function () {
         var el = $(this).closest(".portlet").children(".portlet-body");
@@ -313,100 +352,34 @@ $(document).ready(function () {
 
             var html_data = "";
             $.each(data, function (index, value) {
-                var meaningful = sprintf("USE %s ", value.database);
+                var result_sql = sprintf("USE %s ", value.database);
 
                 if (value.task_type == "autosql") {
 
-                    var where_meaningful = "";
-
-                    if(value.where != undefined){
-                        where_meaningful = " WHERE ";
-                        for(var key in value.where){
-                            where_meaningful = sprintf("%s %s %s ? AND "
-                                , where_meaningful
-                                , key
-                                , whereKeyValuemap[value.where[key]]);
-                        }
-                        if(where_meaningful.substring(where_meaningful.length-4, where_meaningful.length) == "AND "){
-                            where_meaningful= where_meaningful.substring(0, where_meaningful.length - 4);
-                        }
+                    if (value.crud == "select" || value.cud == "sql") {
+                        result_sql = sprintf("%s %s", result_sql, value.sql);
+                    } else {
+                        result_sql = sprintf("%s EXEC %s", result_sql, value.sp_name);
                     }
-
-                    switch(value.crud){
-                        case "select":
-                            meaningful = sprintf("%s SELECT %s FROM %s %s"
-                                ,meaningful
-                                ,value.fields.join(",")
-                                ,value.table
-                                ,where_meaningful);
-                            break;
-                        case "insert":
-                            if(value.cud == "sql"){
-                                var place_holder = "";
-                                for(var i=0;i<value.fields.length;i++){
-                                    place_holder = sprintf("%s ?,", place_holder);
-                                }
-                                place_holder = place_holder.substring(0, place_holder.length-1);
-                                meaningful = sprintf("%s INSERT INTO %s (%s) VALUES (%s)"
-                                    ,meaningful
-                                    ,value.table
-                                    ,value.fields.join(",")
-                                    ,place_holder);
-                            }else{
-                                meaningful = sprintf("%s EXEC %s_%s_i"
-                                    ,meaningful
-                                    ,value.cud
-                                    ,value.table);
-                            }
-                            break;
-                        case "update":
-                            if(value.cud == "sql"){
-                                meaningful = sprintf("%s UDPATE %s SET %s %s"
-                                    ,meaningful
-                                    ,value.table
-                                    ,sprintf("%s = ?",value.fields.join(" = ?, "))
-                                    ,where_meaningful);
-                            }else{
-                                meaningful = sprintf("%s EXEC %s_%s_u"
-                                    ,meaningful
-                                    ,value.cud
-                                    ,value.table);
-                            }
-                            break;
-                        case "delete":
-                            if(value.cud == "sql"){
-                                meaningful = sprintf("%s DELETE FROM %s %s"
-                                    ,meaningful
-                                    ,value.table
-                                    ,where_meaningful);
-                            }else{
-                                meaningful = sprintf("%s EXEC %s_%s_d"
-                                    ,meaningful
-                                    ,value.cud
-                                    ,value.table);
-                            }
-                            break;
-                    }
-
                 } else if (value.task_type == "sp") {
 
-                    meaningful += " EXEC " + value.sp_name;
+                    result_sql += " EXEC " + value.sp_name;
 
                 } else {
 
-                    meaningful += " " + value.sql;
+                    result_sql += " " + value.sql;
                 }
 
-                html_data += '<li><div class="task-title"><span id="' + value._id + '" class="task-title-sp">' + meaningful + '</span>' + suffix + '</li>';
+                html_data += '<li><div class="task-title"><span id="' + value._id + '" class="task-title-sp">' + result_sql + '</span>' + suffix + '</li>';
             });
 
             $("#all_tasks").html(html_data);
 
-            $(".icon-trash").each(function(){
-                $(this).parent().bind('click', function(event){
+            $(".icon-trash").each(function () {
+                $(this).parent().bind('click', function (event) {
                     if (confirm("Are you sure?")) {
                         var id = $(this).closest('div[class="task-config"]').prev().children().attr("id");
-                        $.get("/task/delete?task_id="+id, function(data){
+                        $.get("/task/delete?task_id=" + id, function (data) {
                             $("#reload_tasks").trigger('click');
                         });
                     }
@@ -418,27 +391,27 @@ $(document).ready(function () {
         });
     });
 
-    $('#reload_ops').click(function(){
-        $.get("/database/databases", function(data){
+    $('#reload_ops').click(function () {
+        $.get("/database/databases", function (data) {
             data = JSON.parse(data);
 
-            $.each(data, function(index, value){
-                $('#databases').append($('<option>', { 
+            $.each(data, function (index, value) {
+                $('#databases').append($('<option>', {
                     value: value,
-                    text : value
+                    text: value
                 }));
-                $('#sp_databases').append($('<option>', { 
+                $('#sp_databases').append($('<option>', {
                     value: value,
-                    text : value
+                    text: value
                 }));
-                $('#sql_databases').append($('<option>', { 
+                $('#sql_databases').append($('<option>', {
                     value: value,
-                    text : value
+                    text: value
                 }));
             });
         });
     });
-    
+
     //Generate code of current project according to the language selection
     $("#generate_code").click(function () {
         var post_data = {};
@@ -453,7 +426,7 @@ $(document).ready(function () {
         });
     });
 
-    $("#save_sp").click(function(){
+    $("#save_sp").click(function () {
         var db_name = $("#sp_databases").val();
         var sp_code = sp_editor.getValue();
 

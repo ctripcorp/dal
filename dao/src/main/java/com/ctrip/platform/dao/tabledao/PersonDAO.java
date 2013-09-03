@@ -24,7 +24,7 @@ public class PersonDAO extends AbstractDAO {
 	 * 
 	 * @return The DAO function object to validate the parameter
 	 */
-	public ResultSet SelAddrTelByNameEqGenderEq(AvailableType... params)
+	public ResultSet getAddrAndTel(AvailableType... params)
 			throws Exception {
 
 		final int paramCount = 2;

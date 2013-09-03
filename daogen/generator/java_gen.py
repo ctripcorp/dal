@@ -8,29 +8,15 @@ import os, shutil
 templates_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
 	"templates")
 
-operators = {}
-
-operators["0"] = "=";
-operators["1"] = "!=";
-operators["2"] = ">";
-operators["3"] = "<";
-operators["4"] = ">=";
-operators["5"] = "<=";
-operators["6"] = "Between";
-operators["7"] = "Like";
-operators["8"] = "In";
-
 class Method(object):
 	comment = None
 	method_name = None
-	paramCount= 0
 	sql = ""
 	action = "fetch"
 
 class SPMethods(object):
 	comment = None
 	method_name = None
-	paramCount = 0
 	sp_name = None
 	action = "fetch"
 
@@ -139,74 +125,43 @@ class JavaGenerator(object):
 
 		self.generate_tree(project, os.path.join(templates_dir, "java/dao"), dao_dir)
 
-		auto_sql = task_model_obj.get_auto_sql(project_id)
+		auto_task = task_model_obj.get_auto_sql(project_id)
 
 		group_by_table = {}
-		for s in auto_sql:
+		for s in auto_task:
 			if s["dao_name"] in group_by_table:
 				group_by_table[s["dao_name"]].append(s)
 			else:
 				group_by_table[s["dao_name"]]= [s,]
 
-		for k, v in group_by_table.items():
+		for dao_class, tasks in group_by_table.items():
 			methods = []
 			sp_methods = []
-			for sql in v:
-				sql_or_sp = sql["crud"] == "select" or sql["cud"] == "sql"
+			for task in tasks:
+				sql_or_sp = task["crud"] == "select" or task["cud"] == "sql"
 				method = Method() if sql_or_sp else SPMethods()
 				method.comment = None
-				method.method_name = sql["func_name"]
-				method.paramCount = len(sql["where"]) if sql_or_sp else sql["param_count"]
+				method.method_name = task["func_name"]
 				if sql_or_sp:
-					method.sql = self.format_sql(sql)
+					method.sql = task["sql"]
 				else:
-					method.sp_name = self.format_sp(sql)
-				method.action = "fetch" if sql["crud"] == "select" else "execute"
+					method.sp_name = task["sp_name"]
+				method.action = "fetch" if task["crud"] == "select" else "execute"
 
 				if sql_or_sp:
 					methods.append(method)
 				else:
 					sp_methods.append(method)
 
-			with open(os.path.join(dao_dir,"tabledao/%s.java" % k), "w") as f:
+			with open(os.path.join(dao_dir,"tabledao/%s.java" % dao_class), "w") as f:
 				f.write(self.table_dao_template.generate(
 					product_line="com.ctrip."+project["product_line"],
 					domain=project["domain"],
 					app_name=project["service"],
-					dao_name=k,
+					dao_name=dao_class,
 					methods=methods,
 					sp_methods = sp_methods
 					))
-
-	def format_sql(self, sql_meta):
-		if sql_meta["crud"] == "select":
-			return "SELECT %s FROM %s WHERE %s" % (
-				",".join(sql_meta["fields"]),
-				sql_meta["table"], 
-				"%s ?" % ' ? AND '.join(['%s %s' % (key,operators[value]) for (key, value) in sql_meta["where"].items()]))
-		elif sql_meta["crud"] == "insert":
-			return "INSERT INTO %s (%s) VALUES (%s)" % (sql_meta["table"], 
-				",".join(sql_meta["fields"]), 
-				",".join(["?" for i in range(len(sql_meta["fields"]))]))
-		elif sql_meta["crud"] == "update":
-			return "UPDATE %s SET %s WHERE %s" % (
-					sql_meta["table"],
-					"%s = ?" % " = ? ".join(sql_meta["fields"]),
-					"%s ?" % ' ? AND '.join(['%s %s' % (key,operators[value]) for (key, value) in sql_meta["where"].items()])
-				)
-		else:
-			return "DELETE FROM %s WHERE %s" % (
-				sql_meta["table"],
-				"%s ?" % ' ? AND '.join(['%s %s' % (key,operators[value]) for (key, value) in sql_meta["where"].items()])
-				)
-
-	def format_sp(self, sql_meta):
-		if sql_meta["crud"] == "insert":
-			return "%s_%s_i" % (sql_meta["cud"], sql_meta["table"])
-		elif sql_meta["crud"] == "update":
-			return "%s_%s_u" % (sql_meta["cud"], sql_meta["table"])
-		else:
-			return "%s_%s_d" % (sql_meta["cud"], sql_meta["table"])
 
 	def generate(self, project_id):
 		"""

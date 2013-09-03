@@ -17,37 +17,32 @@ public class PersonDAO extends AbstractDAO {
 
 	
 	//None									
-	public  ResultSet  getByName(AvailableType... params)
+	public  ResultSet  getByID(AvailableType... params)
 			throws Exception {
-		
-		final int paramCount = 3;
 
-		final String sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person WHERE Address != ? AND Name > ? AND ID = ?";
-		
-		if(params.length != paramCount){
-			throw new ParametersInvalidException(String.format(
-					"Required %d parameter(s), but got %d!", 
-					paramCount, params.length));
-		}
+		final String sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person  WHERE  ID = ? ";
 
 		return super.fetch(null, sql, 0, params);
+	}
+	
+	//None									
+	public  int  setByID(AvailableType... params)
+			throws Exception {
+
+		final String sql = "UPDATE Person SET ID = ?, Address = ?, Name = ?, Telephone = ?, Age = ?, Gender = ?, Birth = ?  WHERE  ID = ? ";
+
+		return super.execute(null, sql, 0, params);
 	}
 	
 
 	
 	//None									
-	public  int  insertPerson(AvailableType... params)
+	public  int  insert(AvailableType... params)
 			throws Exception {
 		
-		final int paramCount = 6;
 
 		final String spName = "spa_Person_i";
-		
-		if(params.length != paramCount){
-			throw new ParametersInvalidException(String.format(
-					"Required %d parameter(s), but got %d!", 
-					paramCount, params.length));
-		}
+	
 
 		
 			return super.executeSp(null, spName, 0, params);
@@ -55,18 +50,12 @@ public class PersonDAO extends AbstractDAO {
 	}
 	
 	//None									
-	public  int  deletePerson(AvailableType... params)
+	public  int  delete(AvailableType... params)
 			throws Exception {
 		
-		final int paramCount = 1;
 
 		final String spName = "spa_Person_d";
-		
-		if(params.length != paramCount){
-			throw new ParametersInvalidException(String.format(
-					"Required %d parameter(s), but got %d!", 
-					paramCount, params.length));
-		}
+	
 
 		
 			return super.executeSp(null, spName, 0, params);

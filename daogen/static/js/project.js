@@ -34,7 +34,7 @@ jQuery(document).ready(function () {
         post_data["service"] = $("#service").val();
         post_data["alias"] = $("#alias").val();
 
-        $.post("/project/projects", post_data, function (data) {
+        $.post("/project/add", post_data, function (data) {
 
             $("[data-dismiss='modal'").trigger('click');
 
@@ -67,7 +67,7 @@ jQuery(document).ready(function () {
 
             $(".scroller > .task-list").html(html_data);
 
-             $(".icon-trash").each(function(){
+            $(".icon-trash").each(function(){
                 $(this).parent().bind('click', function(event){
                     if (confirm("Are you sure?")) {
                         var id = $(this).closest('div[class="task-config"]').prev().children().attr("id");

@@ -96,14 +96,14 @@
                         </a>
                      </li>
                      <li class="sidebar active" sidename="task">
-                        <a href="/task">
+                        <a href="/task/">
                         <i class="icon-sun"></i> 
                         <span class="title">Tasks</span>
                         <span class="selected"></span>
                         </a>
                      </li>
                      <li class="sidebar" sidename="code">
-                        <a href="/file">
+                        <a href="/file/">
                         <i class="icon-twitter"></i> 
                         <span class="title">Files</span>
                         <span class="selected"></span>
@@ -128,11 +128,14 @@
                               <div class="portlet box blue tasks-widget">
                                  <div class="portlet-title line">
                                     <div class="caption"><i class="icon-reorder"></i>Operation Area</div>
-                                    
+                                    <div class="tools"> 
+                                       <a href="#" class="icon-collapse collapse"></a>
+                                      <a id="reload_ops" href="#" class="icon-refresh"></a>   
+                                    </div>
                                  </div>
                                  <div class="portlet-body">
                                     <!--BEGIN TABS-->
-                                    <div class="tabbable portlet-tabs">
+                                     <div class="tabbable tabbable-custom">
                                        <ul class="nav nav-tabs">
                                           <li class="active"><a href="#tab_1_1" task_type="autosql" data-toggle="tab">Table/View</a></li>
                                           <li><a href="#tab_1_2"  task_type="sp" data-toggle="tab">Stored Procedure</a></li>
@@ -146,9 +149,7 @@
                                                       <div class="control-group">
                                                          <label class="control-label">Databases</label>
                                                 <select id="databases" class="span10">
-                                                   {% for item in databases %}
-                                                   <option>{{ escape(item) }}</option>
-                                                   {% end %}
+                                                   
                                                 </select>
                                                 </div>
                                              </div>
@@ -164,13 +165,13 @@
                                                    <div class="span6">
                                                       <div class="control-group">
                                                          <label class="control-label">DAO Class Name</label>
-                                                <input id="auto_dao_name" class="span10" type="text" value="PersonDAO">
+                                                <input id="auto_dao_name" class="span10" type="text">
                                                    </div>
                                                    </div>
                                                 <div class="span6">
                                                       <div class="control-group">
                                                          <label class="control-label">Function Name</label>
-                                                <input id="auto_func_name" class="span10" type="text" value="getByName">
+                                                <input id="auto_func_name" class="span10" type="text" value="get">
                                                    </div>
                                                    </div>
                                                 </div>
@@ -237,9 +238,7 @@
                                                       <div class="control-group">
                                                           <label class="control-label">Databases</label>
                                                 <select id="sp_databases">
-                                                   {% for item in databases %}
-                                                   <option>{{ escape(item) }}</option>
-                                                   {% end %}
+                                                   
                                                 </select>
                                              </div>
                                              </div>
@@ -263,13 +262,13 @@
                                                    <div class="span6">
                                                      <div class="control-group">
                                                            <label class="control-label">DAO Class Name</label>
-                                                <input id="sp_dao_name" class="span10" type="text" value="PersonDAO">
+                                                <input id="sp_dao_name" class="span10" type="text">
                                                 </div>
                                                    </div>
                                                    <div class="span6">
                                                      <div class="control-group">
                                                            <label class="control-label">Function Name</label>
-                                                <input id="sp_func_name" class="span10" type="text" value="PersonDAO">
+                                                <input id="sp_func_name" class="span10" type="text">
                                                 </div>
                                                    </div>
                                              </div>
@@ -278,7 +277,7 @@
                                                 <br>
                                                 <div class="row-fluid">
                                                    <div class="span3 offset5">
-                                                      <button type="button" class="btn">Save</button>
+                                                      <button id="save_sp" type="button" class="btn">Save</button>
                                                    </div>
                                                 </div>
                                              </div>
@@ -290,22 +289,20 @@
                                                      <div class="control-group">
                                                       <label class="control-label">DAO Class Name</label>
                                                    <select id="sql_databases">
-                                                   {% for item in databases %}
-                                                   <option>{{ escape(item) }}</option>
-                                                   {% end %}
+                                                  
                                                 </select>
                                                 </div>
                                                    </div>
                                                    <div class="span4">
                                                      <div class="control-group">
                                                            <label class="control-label">DAO Class Name</label>
-                                                <input id="sql_dao_name" class="span10" type="text" value="PersonDAO">
+                                                <input id="sql_dao_name" class="span10" type="text">
                                                 </div>
                                                    </div>
                                                    <div class="span4">
                                                      <div class="control-group">
                                                            <label class="control-label">Function Name</label>
-                                                <input id="sql_func_name" class="span10" type="text" value="PersonDAO">
+                                                <input id="sql_func_name" class="span10" type="text">
                                                 </div>
                                                    </div>
                                                 </div>

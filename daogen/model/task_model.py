@@ -47,4 +47,9 @@ class TaskModel(BaseModel):
 		self.db.task_free.remove({"project_id": project_id})
 		self.db.task_sp.remove({"project_id": project_id})
 
+	def delete_by_id(self, task_id):
+		self.db.task_auto.remove({"_id": bson.objectid.ObjectId(task_id)})
+		self.db.task_free.remove({"_id": bson.objectid.ObjectId(task_id)})
+		self.db.task_sp.remove({"_id": bson.objectid.ObjectId(task_id)})
+
 task_model_obj = TaskModel()

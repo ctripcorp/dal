@@ -30,6 +30,7 @@ public class DBClient {
 
 		PreparedStatement ps = connection.prepareStatement(statement);
 
+		
 		for (int i = 0; i < params.length; i++) {
 			params[i].setPreparedStatement(ps);
 		}

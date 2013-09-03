@@ -1,16 +1,17 @@
 
-import tornado.web
 import subprocess
 from subprocess import PIPE
 import glob, os, shutil, json
 from daogen.generator.java_gen import generator
+from daogen.handler.base import RequestDispatcher
 
 projects_dir = os.path.join(
 				os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
 				"projects")
 
-class FileHandler(tornado.web.RequestHandler):
-	def get(self):
+class FileHandler(RequestDispatcher):
+
+	def index(self):
 		files = glob.iglob(os.path.join(projects_dir, "*.jar"))
 
 		#pom = glob.iglob(os.path.join(projects_dir, "*.xml"))
@@ -21,9 +22,7 @@ class FileHandler(tornado.web.RequestHandler):
 
 		self.render("../templates/file.html", files=names)
 
-class GenerateHandler(tornado.web.RequestHandler):
-	
-	def post(self):
+	def generate(self):
 		project_id = self.get_argument("project_id", default=None, strip=False)
 		generator.generate(project_id)
 

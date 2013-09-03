@@ -8,14 +8,31 @@ import os, shutil
 templates_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
 	"templates")
 
+operators = {}
+
+operators["0"] = "=";
+operators["1"] = "!=";
+operators["2"] = ">";
+operators["3"] = "<";
+operators["4"] = ">=";
+operators["5"] = "<=";
+operators["6"] = "Between";
+operators["7"] = "Like";
+operators["8"] = "In";
+
 class Method(object):
 	comment = None
-	name = None
+	method_name = None
 	paramCount= 0
 	sql = ""
 	action = "fetch"
 
-
+class SPMethods(object):
+	comment = None
+	method_name = None
+	paramCount = 0
+	sp_name = None
+	action = "fetch"
 
 class JavaGenerator(object):
 
@@ -41,7 +58,7 @@ class JavaGenerator(object):
 		self.table_dao_template = self.tmpl_loader.load("TableDAOTemplate.java")
 		self.sp_dao_template = self.tmpl_loader.load("SPTemplate.java")
 		self.freesql_dao_template = self.tmpl_loader.load("FreeSQLTemplate.java")
-		self.entity_template = self.tmpl_loader.load("EntityTemplate.java")
+		self.entity_template = self.tmpl_loader.load("POJOTemplate.java")
 		self.pom_template = self.tmpl_loader.load("pom.xml")
 
 		self.common_loader = Loader(os.path.join(templates_dir, "java/dao"))
@@ -131,18 +148,26 @@ class JavaGenerator(object):
 			else:
 				group_by_table[s["dao_name"]]= [s,]
 
-		print group_by_table
-
 		for k, v in group_by_table.items():
 			methods = []
+			sp_methods = []
 			for sql in v:
-				method = Method()
+				sql_or_sp = sql["crud"] == "select" or sql["cud"] == "sql"
+				method = Method() if sql_or_sp else SPMethods()
 				method.comment = None
-				method.name = sql["func_name"]
-				method.paramCount = len(sql["where"])
-				method.sql = self.format_sql(sql)
+				method.method_name = sql["func_name"]
+				method.paramCount = len(sql["where"]) if sql_or_sp else sql["param_count"]
+				if sql_or_sp:
+					method.sql = self.format_sql(sql)
+				else:
+					method.sp_name = self.format_sp(sql)
 				method.action = "fetch" if sql["crud"] == "select" else "execute"
-				methods.append(method)
+
+				if sql_or_sp:
+					methods.append(method)
+				else:
+					sp_methods.append(method)
+
 			with open(os.path.join(dao_dir,"tabledao/%s.java" % k), "w") as f:
 				f.write(self.table_dao_template.generate(
 					product_line="com.ctrip."+project["product_line"],
@@ -150,13 +175,15 @@ class JavaGenerator(object):
 					app_name=project["service"],
 					dao_name=k,
 					methods=methods,
-					sp_methods = []
+					sp_methods = sp_methods
 					))
 
 	def format_sql(self, sql_meta):
 		if sql_meta["crud"] == "select":
-			return "SELECT %s FROM %s WHERE %s" % (",".join(sql_meta["fields"]),
-				sql_meta["table"], "%s = ?" % " = ? ".join(sql_meta["where"].keys()))
+			return "SELECT %s FROM %s WHERE %s" % (
+				",".join(sql_meta["fields"]),
+				sql_meta["table"], 
+				"%s ?" % ' ? AND '.join(['%s %s' % (key,operators[value]) for (key, value) in sql_meta["where"].items()]))
 		elif sql_meta["crud"] == "insert":
 			return "INSERT INTO %s (%s) VALUES (%s)" % (sql_meta["table"], 
 				",".join(sql_meta["fields"]), 
@@ -165,13 +192,21 @@ class JavaGenerator(object):
 			return "UPDATE %s SET %s WHERE %s" % (
 					sql_meta["table"],
 					"%s = ?" % " = ? ".join(sql_meta["fields"]),
-					"%s = ?" % " = ? ".join(sql_meta["where"].keys())
+					"%s ?" % ' ? AND '.join(['%s %s' % (key,operators[value]) for (key, value) in sql_meta["where"].items()])
 				)
 		else:
 			return "DELETE FROM %s WHERE %s" % (
 				sql_meta["table"],
-				"%s = ?" % " = ? ".join(sql_meta["where"].keys())
+				"%s ?" % ' ? AND '.join(['%s %s' % (key,operators[value]) for (key, value) in sql_meta["where"].items()])
 				)
+
+	def format_sp(self, sql_meta):
+		if sql_meta["crud"] == "insert":
+			return "%s_%s_i" % (sql_meta["cud"], sql_meta["table"])
+		elif sql_meta["crud"] == "update":
+			return "%s_%s_u" % (sql_meta["cud"], sql_meta["table"])
+		else:
+			return "%s_%s_d" % (sql_meta["cud"], sql_meta["table"])
 
 	def generate(self, project_id):
 		"""

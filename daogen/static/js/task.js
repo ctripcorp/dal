@@ -42,7 +42,7 @@ $(document).ready(function () {
     $("#databases").change(function (event) {
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/metadata?meta_type=tables&meta_value=" + $(this).val(), function (data) {
+        $.get("/database/tables?db_name=" + $(this).val(), function (data) {
             data = JSON.parse(data);
             var html_data = "";
             $.each(data, function (index, value) {
@@ -62,7 +62,7 @@ $(document).ready(function () {
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
 
-        var url = sprintf("/metadata?meta_type=fields&meta_value=%s&db_name=%s", $(this).val(), $("#databases").val());
+        var url = sprintf("/database/fields?table_name=%s&db_name=%s", $(this).val(), $("#databases").val());
 
         $.get(url, function (data) {
             data = JSON.parse(data);
@@ -104,7 +104,7 @@ $(document).ready(function () {
     $("#sp_databases").change(function (event) {
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/metadata?meta_type=sp&meta_value=" + $(this).val(), function (data) {
+        $.get("/database/sps?db_name=" + $(this).val(), function (data) {
             data = JSON.parse(data);
             var html_data = "";
             $.each(data, function (index, value) {
@@ -123,7 +123,7 @@ $(document).ready(function () {
 
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/metadata?meta_type=sp_code&meta_value=" + $(this).val() + "&db_name=" + $("#sp_databases").val(), function (data) {
+        $.get("/database/sp_code?sp_name=" + $(this).val() + "&db_name=" + $("#sp_databases").val(), function (data) {
             data = JSON.parse(data);
             ace.edit("sp_editor").setValue(data);
             App.unblockUI(el);
@@ -228,7 +228,7 @@ $(document).ready(function () {
                 //     where_condition[field] = condition;
                 // });
 
-                $(".icon-check").each(function(){
+                $("a[value!='-1'] > .icon-check").each(function(){
                     var condition = $(this).parent().attr("value");
                     var field = $(this).closest("div[class='task-config']").prev().children().text();
                     where_condition[field] = condition;
@@ -259,6 +259,13 @@ $(document).ready(function () {
                         task_object["cud"] = $("#cud_type > button.active").attr("btn_type");
                         if(task_object["cud"] == "sql"){
                             pack_sql_params();
+                        }else{
+                            if(task_object["crud"] == "insert"){
+                                task_object["param_count"] = $("#left_select option").length
+                                + $("#right_select option").length - 1;
+                            }else{
+                                task_object["param_count"] = 1;
+                            }
                         }
                     }
                     break;
@@ -288,7 +295,7 @@ $(document).ready(function () {
         post_data["task_type"] = task_type;
         post_data["task_object"] = JSON.stringify(task_object);
 
-        $.post("/task", post_data, function (data) {
+        $.post("/task/add", post_data, function (data) {
             $("#reload_tasks").trigger('click');
         });
 
@@ -334,29 +341,50 @@ $(document).ready(function () {
                                 ,where_meaningful);
                             break;
                         case "insert":
-                            var place_holder = "";
-                            for(var i=0;i<value.fields.length;i++){
-                                place_holder = sprintf("%s ?,", place_holder);
+                            if(value.cud == "sql"){
+                                var place_holder = "";
+                                for(var i=0;i<value.fields.length;i++){
+                                    place_holder = sprintf("%s ?,", place_holder);
+                                }
+                                place_holder = place_holder.substring(0, place_holder.length-1);
+                                meaningful = sprintf("%s INSERT INTO %s (%s) VALUES (%s)"
+                                    ,meaningful
+                                    ,value.table
+                                    ,value.fields.join(",")
+                                    ,place_holder);
+                            }else{
+                                meaningful = sprintf("%s EXEC %s_%s_i"
+                                    ,meaningful
+                                    ,value.cud
+                                    ,value.table);
                             }
-                            place_holder = place_holder.substring(0, place_holder.length-1);
-                            meaningful = sprintf("%s INSERT INTO %s (%s) VALUES (%s)"
-                                ,meaningful
-                                ,value.table
-                                ,value.fields.join(",")
-                                ,place_holder);
                             break;
                         case "update":
-                            meaningful = sprintf("%s UDPATE %s SET %s %s"
-                                ,meaningful
-                                ,value.table
-                                ,sprintf("%s = ?",value.fields.join(" = ?, "))
-                                ,where_meaningful);
+                            if(value.cud == "sql"){
+                                meaningful = sprintf("%s UDPATE %s SET %s %s"
+                                    ,meaningful
+                                    ,value.table
+                                    ,sprintf("%s = ?",value.fields.join(" = ?, "))
+                                    ,where_meaningful);
+                            }else{
+                                meaningful = sprintf("%s EXEC %s_%s_u"
+                                    ,meaningful
+                                    ,value.cud
+                                    ,value.table);
+                            }
                             break;
                         case "delete":
-                            meaningful = sprintf("%s DELETE FROM %s %s"
-                                ,meaningful
-                                ,value.table
-                                ,where_meaningful);
+                            if(value.cud == "sql"){
+                                meaningful = sprintf("%s DELETE FROM %s %s"
+                                    ,meaningful
+                                    ,value.table
+                                    ,where_meaningful);
+                            }else{
+                                meaningful = sprintf("%s EXEC %s_%s_d"
+                                    ,meaningful
+                                    ,value.cud
+                                    ,value.table);
+                            }
                             break;
                     }
 
@@ -374,8 +402,40 @@ $(document).ready(function () {
 
             $("#all_tasks").html(html_data);
 
+            $(".icon-trash").each(function(){
+                $(this).parent().bind('click', function(event){
+                    if (confirm("Are you sure?")) {
+                        var id = $(this).closest('div[class="task-config"]').prev().children().attr("id");
+                        $.get("/task/delete?task_id="+id, function(data){
+                            $("#reload_tasks").trigger('click');
+                        });
+                    }
+                });
+            });
+
             App.unblockUI(el);
 
+        });
+    });
+
+    $('#reload_ops').click(function(){
+        $.get("/database/databases", function(data){
+            data = JSON.parse(data);
+
+            $.each(data, function(index, value){
+                $('#databases').append($('<option>', { 
+                    value: value,
+                    text : value
+                }));
+                $('#sp_databases').append($('<option>', { 
+                    value: value,
+                    text : value
+                }));
+                $('#sql_databases').append($('<option>', { 
+                    value: value,
+                    text : value
+                }));
+            });
         });
     });
     
@@ -387,12 +447,26 @@ $(document).ready(function () {
 
         var el = $(document.body);
         App.blockUI(el);
-        $.post("/generate", post_data, function (data) {
+        $.post("/file/generate", post_data, function (data) {
             App.unblockUI(el);
-            window.location.replace("/file");
+            window.location.replace("/file/");
         });
     });
 
-    $("#reload_tasks").trigger('click');
+    $("#save_sp").click(function(){
+        var db_name = $("#sp_databases").val();
+        var sp_code = sp_editor.getValue();
+
+        var post_data = {};
+
+        post_data["db_name"] = db_name;
+        post_data["sp_code"] = JSON.stringify(sp_code);
+
+        $.post("/database/save_sp", post_data, function (data) {
+            $("#sp_databases").trigger('change');
+        });
+    });
+
+    $(".icon-refresh").trigger('click');
 
 });

@@ -17,12 +17,12 @@ public class {{dao_name}} extends AbstractDAO {
 
 	{% for method in methods %}
 	//{{method.comment}}									
-	public {% if method.action == 'fetch' %} ResultSet {% else %} int {% end %} {{method.name}}(AvailableType... params)
+	public {% if method.action == 'fetch' %} ResultSet {% else %} int {% end %} {{method.method_name}}(AvailableType... params)
 			throws Exception {
 		
 		final int paramCount = {{method.paramCount}};
 
-		final String sql = "{{method.sql}}";
+		final String sql = "{% raw method.sql %}";
 		
 		if(params.length != paramCount){
 			throw new ParametersInvalidException(String.format(
@@ -36,12 +36,12 @@ public class {{dao_name}} extends AbstractDAO {
 
 	{% for sp in sp_methods %}
 	//{{sp.comment}}									
-	public {% if method.action == 'fetch' %} ResultSet {% else %} int {% end %} {{sp.method_name}}(AvailableType... params)
+	public {% if sp.action == 'fetch' %} ResultSet {% else %} int {% end %} {{sp.method_name}}(AvailableType... params)
 			throws Exception {
 		
 		final int paramCount = {{sp.paramCount}};
 
-		final String spName = "{{sp.name}}";
+		final String spName = "{{sp.sp_name}}";
 		
 		if(params.length != paramCount){
 			throw new ParametersInvalidException(String.format(

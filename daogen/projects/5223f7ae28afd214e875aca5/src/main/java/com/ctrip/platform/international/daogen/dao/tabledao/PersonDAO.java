@@ -20,9 +20,9 @@ public class PersonDAO extends AbstractDAO {
 	public  ResultSet  getByName(AvailableType... params)
 			throws Exception {
 		
-		final int paramCount = 1;
+		final int paramCount = 3;
 
-		final String sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person WHERE ID = ?";
+		final String sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person WHERE Address != ? AND Name > ? AND ID = ?";
 		
 		if(params.length != paramCount){
 			throw new ParametersInvalidException(String.format(
@@ -34,6 +34,44 @@ public class PersonDAO extends AbstractDAO {
 	}
 	
 
+	
+	//None									
+	public  int  insertPerson(AvailableType... params)
+			throws Exception {
+		
+		final int paramCount = 6;
+
+		final String spName = "spa_Person_i";
+		
+		if(params.length != paramCount){
+			throw new ParametersInvalidException(String.format(
+					"Required %d parameter(s), but got %d!", 
+					paramCount, params.length));
+		}
+
+		
+			return super.executeSp(null, spName, 0, params);
+		
+	}
+	
+	//None									
+	public  int  deletePerson(AvailableType... params)
+			throws Exception {
+		
+		final int paramCount = 1;
+
+		final String spName = "spa_Person_d";
+		
+		if(params.length != paramCount){
+			throw new ParametersInvalidException(String.format(
+					"Required %d parameter(s), but got %d!", 
+					paramCount, params.length));
+		}
+
+		
+			return super.executeSp(null, spName, 0, params);
+		
+	}
 	
 
 }

@@ -3,15 +3,13 @@ import tornado.web
 import json, bson
 from daogen.model.project_model import project_model_obj
 from daogen.model.task_model import task_model_obj
+from daogen.handler.base import RequestDispatcher
 
 #TODO: Add version to project
 
-class ProjectHandler(tornado.web.RequestHandler):
-	def get(self):
-		self.render("../templates/project.html")
+class ProjectHandler(RequestDispatcher):
 
-class ProjectDeleteHandler(tornado.web.RequestHandler):
-	def get(self):
+	def delete(self):
 		project_id = self.get_argument("project_id", default=None, strip = None)
 		project_model_obj.delete(project_id)
 		task_model_obj.delete_by_project(project_id)
@@ -19,9 +17,7 @@ class ProjectDeleteHandler(tornado.web.RequestHandler):
 		self.write(json.dumps({"success": True}))
 		self.finish()
 
-
-class ProjectsHandler(tornado.web.RequestHandler):
-	def get(self):
+	def projects(self):
 		results = []
 		for p in project_model_obj.retrieve():
 			if isinstance(p["_id"], bson.objectid.ObjectId):
@@ -31,7 +27,7 @@ class ProjectsHandler(tornado.web.RequestHandler):
 		self.write(json.dumps(results))
 		self.finish()
 
-	def post(self):
+	def add(self):
 		product_line = self.get_argument("product_line", default=None, strip = None)
 		domain = self.get_argument("domain", default=None, strip = None)
 		service = self.get_argument("service", default=None, strip = None)
@@ -42,7 +38,3 @@ class ProjectsHandler(tornado.web.RequestHandler):
 
 		self.write(json.dumps({"success": True}))
 		self.finish()
-
-if __name__ == '__main__':
-	for p in project_model_obj.retrieve():
-		print type(p["_id"])

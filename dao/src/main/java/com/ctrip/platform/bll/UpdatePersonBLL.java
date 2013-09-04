@@ -10,8 +10,8 @@ public class UpdatePersonBLL {
 
 			person.setUseDBClient(false);
 
-			AvailableType addrParam = new<String> AvailableType(1, "hihihi");
-			AvailableType nameParam = new<String> AvailableType(2, "1");
+			AvailableType addrParam = new AvailableType(1, "hihihi");
+			AvailableType nameParam = new AvailableType(2, "1");
 
 			int row = person.SetAddrByName(addrParam, nameParam);
 			System.out.println("Affect row count: " + row);

@@ -36,8 +36,8 @@ public class SPDAO extends AbstractDAO {
 		
 		spDAO.setUseDBClient(true);
 		
-		AvailableType nameParam = new <String> AvailableType(1, "gawu");
-		AvailableType addrParam = new <String> AvailableType(2, "shanghai");
+		AvailableType nameParam = new AvailableType(1, "gawu");
+		AvailableType addrParam = new AvailableType(2, "shanghai");
 		
 		int row = spDAO.executeSp(null, "demoInsertSp", 0, nameParam, addrParam);
 		

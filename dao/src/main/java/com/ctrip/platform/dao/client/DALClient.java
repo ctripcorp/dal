@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +60,38 @@ public class DALClient {
 
 //		return null;
 	}
+	
+	public ResultSet fetchBySp(String tnxCtxt, String sp, int flag,
+			AvailableType... params) throws Exception {
+		
+		Message msg = new Message();
+
+		msg.setMessageType(MessageTypeEnum.SP);
+		msg.setActionType(ActionTypeEnum.SELECT);
+		msg.setUseCache(false);
+		
+		msg.setSpName(sp);
+		
+		List<List<AvailableType>> finalParams =  new ArrayList<List<AvailableType>>();
+		finalParams.add(new ArrayList<AvailableType>(Arrays.asList(params)));
+		msg.setArgs(finalParams);
+
+		msg.setFlags(FlagsEnum.TEST.getIntVal());
+
+		DefaultRequest request = new DefaultRequest();
+
+		request.setTaskid(UUID.randomUUID());
+
+		request.setDbName(Consts.databaseName);
+
+		request.setCredential(Consts.credential);
+
+		request.setMessage(msg);
+		
+		DAOResultSet rs = new DAOResultSet(this.<List<List<AvailableType>>>run(request));
+		
+		return rs;
+	}
 
 	public int execute(String tnxCtxt, String statement, int flag,
 			AvailableType... params) throws Exception {
@@ -90,6 +123,37 @@ public class DALClient {
 		return this.<Integer>run(request);
 
 //		return 0;
+	}
+	
+	public int executeSp(String tnxCtxt, String sp, int flag,
+			AvailableType... params) throws Exception {
+		
+		Message message = new Message();
+
+		message.setMessageType(MessageTypeEnum.SP);
+		message.setActionType(ActionTypeEnum.DELETE);
+		message.setUseCache(false);
+
+		message.setSpName(sp);
+		List<List<AvailableType>> finalParams =  new ArrayList<List<AvailableType>>();
+		finalParams.add(new ArrayList<AvailableType>(Arrays.asList(params)));
+		message.setArgs(finalParams);
+
+
+		message.setFlags(FlagsEnum.TEST.getIntVal());
+
+		DefaultRequest request = new DefaultRequest();
+
+		request.setTaskid(UUID.randomUUID());
+
+		request.setDbName(Consts.databaseName);
+
+		request.setCredential(Consts.credential);
+
+		request.setMessage(message);
+
+		return this.<Integer>run(request);
+
 	}
 
 	<T> T run(DefaultRequest request) {

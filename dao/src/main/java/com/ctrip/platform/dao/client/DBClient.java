@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.List;
 
 import com.ctrip.platform.dao.msg.AvailableType;
@@ -30,29 +31,17 @@ public class DBClient {
 
 		PreparedStatement ps = connection.prepareStatement(statement);
 
-		
+//		int currentParameterIndex = 1;
+//		Arrays.sort(params);
 		for (int i = 0; i < params.length; i++) {
+//			params[i].paramIndex = currentParameterIndex;
 			params[i].setPreparedStatement(ps);
+//			currentParameterIndex= params[i].paramIndex + 1;
 		}
 
 		ResultSet rs = ps.executeQuery();
 
 		return rs;
-
-		// List<List<AvailableType>> results = new
-		// LinkedList<List<AvailableType>>();
-		//
-		// while(rs.next()){
-		// List<AvailableType> result = new LinkedList<AvailableType>();
-		// for(int key : statement.getResultFields().keySet()){
-		// result.add(AvailableType.getResultSet(
-		// rs, statement.getResultFields().get(key), key)
-		// );
-		// }
-		// results.add(result);
-		// }
-		//
-		// return new DAOResultSet(results);
 	}
 
 	public int bulkInsert(String tnxCtxt, String statement,

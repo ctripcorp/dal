@@ -12,8 +12,8 @@ public class SelectPersonBLL {
 
 			person.setUseDBClient(false);
 
-			AvailableType addrParam = new<String> AvailableType(1, "1");
-			AvailableType nameParam = new<Integer> AvailableType(2, 1);
+			AvailableType addrParam = new AvailableType(1, "1");
+			AvailableType nameParam = new AvailableType(2, 1);
 
 			ResultSet rs = person.getAddrAndTel(addrParam,
 					nameParam);

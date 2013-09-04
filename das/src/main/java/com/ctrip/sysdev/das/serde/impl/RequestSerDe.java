@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.msgpack.MessagePack;
+import org.msgpack.type.Value;
 import org.msgpack.unpacker.Unpacker;
 
 import com.ctrip.sysdev.das.domain.Request;
@@ -138,7 +139,7 @@ public class RequestSerDe extends AbstractMsgPackSerDe<Request> {
 		AvailableType at = new AvailableType();
 
 		int propertyCount = unpacker.readArrayBegin();
-		
+
 		at.paramIndex = unpacker.readInt();
 
 		at.currentType = AvailableTypeEnum.fromInt(unpacker.readInt());
@@ -178,7 +179,12 @@ public class RequestSerDe extends AbstractMsgPackSerDe<Request> {
 			at.bytearr_arg = unpacker.readByteArray();
 			break;
 		default:
-			at.object_arg = unpacker.readValue();
+			Value v = unpacker.readValue();
+			if (v.isArrayValue()) {
+				at.object_arg = v.asArrayValue().toArray();
+			} else {
+				at.object_arg = v;
+			}
 		}
 		unpacker.readArrayEnd();
 

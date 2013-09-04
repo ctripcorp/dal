@@ -77,10 +77,14 @@ public class AbstractDAO { // implements IDAO {
 			}
 			return dbClient.fetchBySp(null, sp, 0, params);
 		} else {
+			if(dalClient == null){
+				dalClient = new DALClient();
+			}
+			return dalClient.fetchBySp(tnxCtxt, sp, flag, params);
 
 		}
 
-		return null;
+//		return null;
 	}
 
 	public <T> List<T> fetchBySpByORM(String tnxCtxt, String sp,
@@ -117,10 +121,13 @@ public class AbstractDAO { // implements IDAO {
 			}
 			return dbClient.executeSp(tnxCtxt, sp, flag, params);
 		} else {
-
+			if(dalClient == null){
+				dalClient = new DALClient();
+			}
+			return dalClient.executeSp(tnxCtxt, sp, flag, params);
 		}
 
-		return 0;
+//		return 0;
 	}
 
 	public int bulkInsert(String tnxCtxt, String statement,

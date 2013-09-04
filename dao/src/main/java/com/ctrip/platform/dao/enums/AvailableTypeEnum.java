@@ -6,12 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-
 public enum AvailableTypeEnum {
 	
 	BOOL(0),
@@ -26,7 +20,8 @@ public enum AvailableTypeEnum {
 	STRING(8),
 	DATETIME(9),
 	BYTEARR(10),
-	OBJECT(11); 
+	OBJECT(11),
+	ARRAY(12); 
 
 	private int intVal;
 

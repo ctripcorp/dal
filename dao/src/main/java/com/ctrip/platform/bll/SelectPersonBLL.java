@@ -2,8 +2,8 @@ package com.ctrip.platform.bll;
 
 import java.sql.ResultSet;
 
+import com.ctrip.platform.dao.PersonDAO;
 import com.ctrip.platform.dao.msg.AvailableType;
-import com.ctrip.platform.dao.tabledao.PersonDAO;
 
 public class SelectPersonBLL {
 	public static void main(String[] args) throws Exception {

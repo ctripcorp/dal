@@ -1,4 +1,4 @@
-package com.ctrip.platform.dao.tabledao;
+package com.ctrip.platform.dao;
 
 import java.sql.ResultSet;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dao.sqldao;
+package com.ctrip.platform.dao;
 
 import java.lang.reflect.Array;
 import java.sql.ResultSet;

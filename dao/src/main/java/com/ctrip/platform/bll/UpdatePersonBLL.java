@@ -1,7 +1,7 @@
 package com.ctrip.platform.bll;
 
+import com.ctrip.platform.dao.PersonDAO;
 import com.ctrip.platform.dao.msg.AvailableType;
-import com.ctrip.platform.dao.tabledao.PersonDAO;
 
 public class UpdatePersonBLL {
 	public static void main(String[] args) throws Exception {

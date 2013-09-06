@@ -1,10 +1,10 @@
-package com.ctrip.platform.dao.entity;
+package com.ctrip.platform.dao.pojo;
 
 import java.sql.Timestamp;
 
-import com.ctrip.platform.dao.common.TableColumn;
+import com.ctrip.platform.dao.annotation.TableColumn;
 
-public class PersonEntity {
+public class Person {
 	
 	@TableColumn(columnName="ID")
 	private int iD;

@@ -1,18 +1,18 @@
-package com.ctrip.platform.dao.common;
+package com.ctrip.platform.dao;
 
 import java.sql.ResultSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ctrip.platform.dao.common.AbstractDAO;
 import com.ctrip.platform.dao.msg.AvailableType;
 
-public class SPDAO extends AbstractDAO {
-	
+public class GeneratorDAOSPDAO extends AbstractDAO {
 	/**
 	 * The logger 
 	 */
-	private static final Logger logger = LoggerFactory.getLogger(SPDAO.class);
+	private static final Logger logger = LoggerFactory.getLogger(GeneratorDAOSPDAO.class);
 	
 	public ResultSet fetchBySp(String ctnCtxt, String sp, int flag, 
 			AvailableType... params) throws Exception{
@@ -32,7 +32,7 @@ public class SPDAO extends AbstractDAO {
 		
 		//AvailableType inputParam = new <Integer> AvailableType(1, 1);
 		
-		SPDAO spDAO = new SPDAO();
+		GeneratorDAOSPDAO spDAO = new GeneratorDAOSPDAO();
 		
 		spDAO.setUseDBClient(true);
 		
@@ -51,5 +51,4 @@ public class SPDAO extends AbstractDAO {
 //		}
 		
 	}
-
 }

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dao.common;
+package com.ctrip.platform.dao.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

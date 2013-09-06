@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,9 +15,9 @@ import com.ctrip.platform.dao.enums.ActionTypeEnum;
 import com.ctrip.platform.dao.enums.FlagsEnum;
 import com.ctrip.platform.dao.enums.MessageTypeEnum;
 import com.ctrip.platform.dao.enums.ResultTypeEnum;
-import com.ctrip.platform.dao.msg.AvailableType;
-import com.ctrip.platform.dao.msg.Message;
+import com.ctrip.platform.dao.param.Parameter;
 import com.ctrip.platform.dao.request.DefaultRequest;
+import com.ctrip.platform.dao.request.RequestMessage;
 import com.ctrip.platform.dao.response.DefaultResponse;
 import com.ctrip.platform.dao.utils.Consts;
 import com.ctrip.platform.dao.utils.DAOResultSet;
@@ -29,17 +28,17 @@ public class DALClient {
 	DataInputStream in;
 
 	public ResultSet fetch(String tnxCtxt, String statement, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 
-		Message message = new Message();
+		RequestMessage message = new RequestMessage();
 
 		message.setMessageType(MessageTypeEnum.SQL);
 		message.setActionType(ActionTypeEnum.SELECT);
 		message.setUseCache(false);
 
 		message.setSql(statement);
-		List<List<AvailableType>> finalParams =  new ArrayList<List<AvailableType>>();
-		finalParams.add(new ArrayList<AvailableType>(Arrays.asList(params)));
+		List<List<Parameter>> finalParams =  new ArrayList<List<Parameter>>();
+		finalParams.add(new ArrayList<Parameter>(Arrays.asList(params)));
 		message.setArgs(finalParams);
 
 		message.setFlags(FlagsEnum.TEST.getIntVal());
@@ -54,7 +53,7 @@ public class DALClient {
 
 		request.setMessage(message);
 		
-		DAOResultSet rs = new DAOResultSet(this.<List<List<AvailableType>>>run(request));
+		DAOResultSet rs = new DAOResultSet(this.<List<List<Parameter>>>run(request));
 		
 		return rs;
 
@@ -62,9 +61,9 @@ public class DALClient {
 	}
 	
 	public ResultSet fetchBySp(String tnxCtxt, String sp, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 		
-		Message msg = new Message();
+		RequestMessage msg = new RequestMessage();
 
 		msg.setMessageType(MessageTypeEnum.SP);
 		msg.setActionType(ActionTypeEnum.SELECT);
@@ -72,8 +71,8 @@ public class DALClient {
 		
 		msg.setSpName(sp);
 		
-		List<List<AvailableType>> finalParams =  new ArrayList<List<AvailableType>>();
-		finalParams.add(new ArrayList<AvailableType>(Arrays.asList(params)));
+		List<List<Parameter>> finalParams =  new ArrayList<List<Parameter>>();
+		finalParams.add(new ArrayList<Parameter>(Arrays.asList(params)));
 		msg.setArgs(finalParams);
 
 		msg.setFlags(FlagsEnum.TEST.getIntVal());
@@ -88,23 +87,23 @@ public class DALClient {
 
 		request.setMessage(msg);
 		
-		DAOResultSet rs = new DAOResultSet(this.<List<List<AvailableType>>>run(request));
+		DAOResultSet rs = new DAOResultSet(this.<List<List<Parameter>>>run(request));
 		
 		return rs;
 	}
 
 	public int execute(String tnxCtxt, String statement, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 
-		Message message = new Message();
+		RequestMessage message = new RequestMessage();
 
 		message.setMessageType(MessageTypeEnum.SQL);
 		message.setActionType(ActionTypeEnum.DELETE);
 		message.setUseCache(false);
 
 		message.setSql(statement);
-		List<List<AvailableType>> finalParams =  new ArrayList<List<AvailableType>>();
-		finalParams.add(new ArrayList<AvailableType>(Arrays.asList(params)));
+		List<List<Parameter>> finalParams =  new ArrayList<List<Parameter>>();
+		finalParams.add(new ArrayList<Parameter>(Arrays.asList(params)));
 		message.setArgs(finalParams);
 
 
@@ -126,17 +125,17 @@ public class DALClient {
 	}
 	
 	public int executeSp(String tnxCtxt, String sp, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 		
-		Message message = new Message();
+		RequestMessage message = new RequestMessage();
 
 		message.setMessageType(MessageTypeEnum.SP);
 		message.setActionType(ActionTypeEnum.DELETE);
 		message.setUseCache(false);
 
 		message.setSpName(sp);
-		List<List<AvailableType>> finalParams =  new ArrayList<List<AvailableType>>();
-		finalParams.add(new ArrayList<AvailableType>(Arrays.asList(params)));
+		List<List<Parameter>> finalParams =  new ArrayList<List<Parameter>>();
+		finalParams.add(new ArrayList<Parameter>(Arrays.asList(params)));
 		message.setArgs(finalParams);
 
 
@@ -198,7 +197,7 @@ public class DALClient {
 //				return (T) new Integer(response.getAffectRowCount());
 //			}else{
 //				
-//				List<List<AvailableType>> resultSet = new ArrayList<List<AvailableType>>();
+//				List<List<Parameter>> resultSet = new ArrayList<List<Parameter>>();
 //				
 //				for(int i=0;i< response.getChunkCount();i++){
 //					int currentChunkSize = in.readInt();

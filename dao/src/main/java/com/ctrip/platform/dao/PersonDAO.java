@@ -1,15 +1,13 @@
 package com.ctrip.platform.dao;
 
 import java.sql.ResultSet;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dao.common.AbstractDAO;
 import com.ctrip.platform.dao.exception.ParametersInvalidException;
-import com.ctrip.platform.dao.msg.AvailableType;
+import com.ctrip.platform.dao.param.Parameter;
 
 public class PersonDAO extends AbstractDAO {
 
@@ -24,7 +22,7 @@ public class PersonDAO extends AbstractDAO {
 	 * 
 	 * @return The DAO function object to validate the parameter
 	 */
-	public ResultSet getAddrAndTel(AvailableType... params)
+	public ResultSet getAddrAndTel(Parameter... params)
 			throws Exception {
 
 		final int paramCount = 2;
@@ -46,7 +44,7 @@ public class PersonDAO extends AbstractDAO {
 	 * @return
 	 * @throws Exception
 	 */
-	public int SetAddrByName(AvailableType... params) throws Exception {
+	public int SetAddrByName(Parameter... params) throws Exception {
 
 		final int paramCount = 2;
 

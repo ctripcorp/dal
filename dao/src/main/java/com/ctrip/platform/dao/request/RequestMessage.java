@@ -1,16 +1,17 @@
-package com.ctrip.platform.dao.msg;
+package com.ctrip.platform.dao.request;
 
 import java.util.List;
 
 import com.ctrip.platform.dao.enums.ActionTypeEnum;
 import com.ctrip.platform.dao.enums.MessageTypeEnum;
+import com.ctrip.platform.dao.param.Parameter;
 
 /****
  * 
  * @author gawu
  * 
  */
-public class Message {
+public class RequestMessage {
 
 	private MessageTypeEnum messageType; // always
 
@@ -22,7 +23,7 @@ public class Message {
 
 	private String sql;
 
-	private List<List<AvailableType>> args;// always
+	private List<List<Parameter>> args;// always
 
 	private int flags; // always
 
@@ -66,11 +67,11 @@ public class Message {
 		this.sql = sql;
 	}
 
-	public List<List<AvailableType>> getArgs() {
+	public List<List<Parameter>> getArgs() {
 		return args;
 	}
 
-	public void setArgs(List<List<AvailableType>> args) {
+	public void setArgs(List<List<Parameter>> args) {
 		this.args = args;
 	}
 

@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.commons.DataSourceWrapper;
-import com.ctrip.sysdev.das.domain.msg.Message;
+import com.ctrip.sysdev.das.domain.RequestMessage;
 
 public class QueryExecutorManager {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -30,7 +30,7 @@ public class QueryExecutorManager {
 		executor = Executors.newFixedThreadPool(workerNum);
 	}
 	
-	public boolean handle(Channel channel, Message message) {
+	public boolean handle(Channel channel, RequestMessage message) {
 		executor.submit(QueryExecutorWrapper.wrap(dataSource, message));
 		return true;
 	}

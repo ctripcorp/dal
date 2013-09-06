@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dao.client.DALClient;
 import com.ctrip.platform.dao.client.DBClient;
-import com.ctrip.platform.dao.msg.AvailableType;
+import com.ctrip.platform.dao.param.Parameter;
 
 public class AbstractDAO { // implements IDAO {
 
@@ -41,7 +41,7 @@ public class AbstractDAO { // implements IDAO {
 	}
 
 	public ResultSet fetch(String tnxCtxt, String statement, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 
 		// all the parameters required are now provided
 		if (useDBClient) {
@@ -62,13 +62,13 @@ public class AbstractDAO { // implements IDAO {
 	}
 
 	public <T> List<T> fetchByORM(String tnxCtxt, String statement,
-			List<AvailableType> params, int flag) {
+			List<Parameter> params, int flag) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public ResultSet fetchBySp(String tnxCtxt, String sp, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 		// all the parameters required are now provided
 		if (useDBClient) {
 			if (dbClient == null) {
@@ -88,13 +88,13 @@ public class AbstractDAO { // implements IDAO {
 	}
 
 	public <T> List<T> fetchBySpByORM(String tnxCtxt, String sp,
-			List<AvailableType> params, int flag) {
+			List<Parameter> params, int flag) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public int execute(String tnxCtxt, String statement, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 
 		// all the parameters required are now provided
 		if (useDBClient) {
@@ -112,7 +112,7 @@ public class AbstractDAO { // implements IDAO {
 	}
 
 	public int executeSp(String tnxCtxt, String sp, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 		// all the parameters required are now provided
 		if (useDBClient) {
 			if (dbClient == null) {
@@ -131,7 +131,7 @@ public class AbstractDAO { // implements IDAO {
 	}
 
 	public int bulkInsert(String tnxCtxt, String statement,
-			List<AvailableType> params, int flag) {
+			List<Parameter> params, int flag) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

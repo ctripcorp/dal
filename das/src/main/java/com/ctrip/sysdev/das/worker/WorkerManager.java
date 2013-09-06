@@ -8,7 +8,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.ctrip.sysdev.das.commons.DataSourceWrapper;
-import com.ctrip.sysdev.das.domain.msg.Message;
+import com.ctrip.sysdev.das.domain.RequestMessage;
 
 /**
  * @deprecated
@@ -19,7 +19,7 @@ public class WorkerManager {
 	private DataSourceWrapper dataSource;
 
 	private List<Worker> workers = new ArrayList<Worker>();
-	private Queue<Message> reqQueue;
+	private Queue<RequestMessage> reqQueue;
 
 	public WorkerManager(DataSourceWrapper dataSource) {
 		this(dataSource, Integer.MAX_VALUE, Runtime.getRuntime()
@@ -35,7 +35,7 @@ public class WorkerManager {
 		this.dataSource = dataSource;
 
 		// Use non-blocking queue for better performance
-		reqQueue = new ConcurrentLinkedQueue<Message>();
+		reqQueue = new ConcurrentLinkedQueue<RequestMessage>();
 
 		initWorkers(workerNum);
 	}
@@ -47,7 +47,7 @@ public class WorkerManager {
 		}
 	}
 
-	public boolean handle(Channel channel, Message msg) {
+	public boolean handle(Channel channel, RequestMessage msg) {
 		return reqQueue.offer(msg);
 	}
 

@@ -4,7 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dao.GeneratorDAOSPDAO;
-import com.ctrip.platform.dao.msg.AvailableType;
+import com.ctrip.platform.dao.param.Parameter;
+import com.ctrip.platform.dao.param.ParameterFactory;
 
 public class SPPersonBLL {
 	
@@ -16,8 +17,12 @@ public class SPPersonBLL {
 		
 		spDAO.setUseDBClient(false);
 		
-		AvailableType nameParam = new AvailableType(1, "gawu");
-		AvailableType addrParam = new AvailableType(2, "shanghai");
+		Parameter addrParam = ParameterFactory.createStringParameter(1,
+				"gawu");
+		
+		Parameter nameParam = ParameterFactory.createStringParameter(2,
+				"shanghai");
+		
 		
 		int row = spDAO.executeSp(null, "demoInsertSp", 0, nameParam, addrParam);
 		

@@ -1,6 +1,5 @@
 package com.ctrip.sysdev.das.worker;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -17,22 +16,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.commons.DataSourceWrapper;
+import com.ctrip.sysdev.das.domain.RequestMessage;
 import com.ctrip.sysdev.das.domain.Response;
 import com.ctrip.sysdev.das.domain.enums.ActionTypeEnum;
 import com.ctrip.sysdev.das.domain.enums.MessageTypeEnum;
 import com.ctrip.sysdev.das.domain.enums.ResultTypeEnum;
-import com.ctrip.sysdev.das.domain.msg.AvailableType;
-import com.ctrip.sysdev.das.domain.msg.Message;
+import com.ctrip.sysdev.das.domain.param.Parameter;
+import com.ctrip.sysdev.das.domain.param.ParameterFactory;
 
 public class QueryExecutor implements LogConsts {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private DataSourceWrapper dataSource;
-	private Message message;
+	private RequestMessage message;
 
 	public QueryExecutor() {}
 	
-	public QueryExecutor(DataSourceWrapper dataSource, Message message) {
+	public QueryExecutor(DataSourceWrapper dataSource, RequestMessage message) {
 		this.dataSource = dataSource;
 		this.message = message;
 	}
@@ -41,7 +41,7 @@ public class QueryExecutor implements LogConsts {
 		return execute(dataSource, message);
 	}
 	
-	public Response execute(DataSourceWrapper dataSource, Message message) {
+	public Response execute(DataSourceWrapper dataSource, RequestMessage message) {
 		Response resp = new Response();
 		Connection conn = null;
 		PreparedStatement statement = null;
@@ -65,10 +65,10 @@ public class QueryExecutor implements LogConsts {
 		return resp;
 	}
 
-	private PreparedStatement createStatement(Connection conn, Message message)
+	private PreparedStatement createStatement(Connection conn, RequestMessage message)
 			throws Exception {
 		// TODO: add batch operation
-		List<AvailableType> params = message.getArgs().get(0);
+		List<Parameter> params = message.getArgs().get(0);
 
 		PreparedStatement statement = null;
 		
@@ -87,8 +87,11 @@ public class QueryExecutor implements LogConsts {
 					"{call dbo.%s(%s)}", message.getSpName(), occupy.toString()));
 		}
 		
+		int currentParameterIndex = 1;
 		for (int i = 0; i < params.size(); i++) {
+			params.get(i).setParameterIndex(currentParameterIndex);
 			params.get(i).setPreparedStatement(statement);
+			currentParameterIndex= params.get(i).getParameterIndex() + 1;
 		}
 
 		return statement;
@@ -115,7 +118,7 @@ public class QueryExecutor implements LogConsts {
 	 * @return
 	 * @throws SQLException
 	 */
-	private List<List<AvailableType>> getFromResultSet(ResultSet rs)
+	private List<List<Parameter>> getFromResultSet(ResultSet rs)
 			throws SQLException {
 
 		ResultSetMetaData metaData = rs.getMetaData();
@@ -129,66 +132,61 @@ public class QueryExecutor implements LogConsts {
 			colTypes[i - 1] = currentColType;
 		}
 
-		List<List<AvailableType>> results = new ArrayList<List<AvailableType>>();
+		List<List<Parameter>> results = new ArrayList<List<Parameter>>();
 
-		// Convert ResultSet object to a list of AvailableType
+		// Convert ResultSet object to a list of Parameter
 		while (rs.next()) {
-			List<AvailableType> result = new ArrayList<AvailableType>();
+			List<Parameter> result = new ArrayList<Parameter>();
 			for (int i = 1; i <= totalColumns; i++) {
 				switch (colTypes[i - 1]) {
 				case java.sql.Types.BOOLEAN:
-					result.add(new AvailableType(i, rs.getBoolean(i)));
+					result.add(ParameterFactory.createBooleanParameter(i, rs.getBoolean(i)));
 					break;
 				case java.sql.Types.TINYINT:
-					result.add(new AvailableType(i, rs.getByte(i)));
+					result.add(ParameterFactory.createByteParameter(i, rs.getByte(i)));
 					break;
 				case java.sql.Types.SMALLINT:
-					result.add(new AvailableType(i, rs.getShort(i)));
+					result.add(ParameterFactory.createShortParameter(i, rs.getShort(i)));
 					break;
 				case java.sql.Types.INTEGER:
-					result.add(new AvailableType(i, rs.getInt(i)));
+					result.add(ParameterFactory.createIntParameter(i, rs.getInt(i)));
 					break;
 				case java.sql.Types.BIGINT:
-					result.add(new AvailableType(i, rs.getLong(i)));
+					result.add(ParameterFactory.createLongParameter(i, rs.getLong(i)));
 					break;
 				case java.sql.Types.FLOAT:
-					result.add(new AvailableType(i, rs.getFloat(i)));
+					result.add(ParameterFactory.createFloatParameter(i, rs.getFloat(i)));
 					break;
 				case java.sql.Types.DOUBLE:
-					result.add(new AvailableType(i, rs.getDouble(i)));
+					result.add(ParameterFactory.createDoubleParameter(i, rs.getDouble(i)));
 					break;
 				case java.sql.Types.DECIMAL:
-					result.add(new AvailableType(i, rs
-							.getBigDecimal(i)));
+					result.add(ParameterFactory.createDecimalParameter(i, rs.getBigDecimal(i)));
 					break;
 				case java.sql.Types.VARCHAR:
 				case java.sql.Types.NVARCHAR:
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
-					result.add(new AvailableType(i, rs.getString(i)));
+					result.add(ParameterFactory.createStringParameter(i, rs.getString(i)));
 					break;
 				case java.sql.Types.DATE:
 					Date tempDate = rs.getDate(i);
-					result.add(new AvailableType(i, new Timestamp(
-							tempDate.getTime())));
+					result.add(ParameterFactory.createTimestampParameter(i, new Timestamp(tempDate.getTime())));
 					break;
 				case java.sql.Types.TIME:
 					Time tempTime = rs.getTime(i);
-					result.add(new AvailableType(i, new Timestamp(
-							tempTime.getTime())));
+					result.add(ParameterFactory.createTimestampParameter(i, new Timestamp(tempTime.getTime())));
 					break;
 				case java.sql.Types.TIMESTAMP:
-					result.add(new AvailableType(i, rs
-							.getTimestamp(i)));
+					result.add(ParameterFactory.createTimestampParameter(i, rs.getTimestamp(i)));
 					break;
 				case java.sql.Types.BINARY:
 				case java.sql.Types.BLOB:
 				case java.sql.Types.LONGVARBINARY:
 				case java.sql.Types.VARBINARY:
-					result.add(new AvailableType(i, rs.getBytes(i)));
+					result.add(ParameterFactory.createByteArrayParameter(i, rs.getBytes(i)));
 					break;
 				default:
-					result.add(new AvailableType(i, rs.getObject(i)));
 					break;
 				}
 			}

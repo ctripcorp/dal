@@ -3,7 +3,7 @@ package com.ctrip.sysdev.das.worker;
 import java.util.Queue;
 
 import com.ctrip.sysdev.das.commons.DataSourceWrapper;
-import com.ctrip.sysdev.das.domain.msg.Message;
+import com.ctrip.sysdev.das.domain.RequestMessage;
 
 /**
  * @deprecated
@@ -14,13 +14,13 @@ public class Worker extends Thread {
 	private String name;
 	private volatile boolean stop;
 	private DataSourceWrapper dataSource;
-	private Queue<Message> reqQueue;
+	private Queue<RequestMessage> reqQueue;
 	private QueryExecutor executor;
 	
 	public Worker(
 			String name, 
 			DataSourceWrapper dataSource, 
-			Queue<Message> reqQueue) {
+			Queue<RequestMessage> reqQueue) {
 		super(name);
 		this.dataSource = dataSource;
 		this.reqQueue = reqQueue;
@@ -34,7 +34,7 @@ public class Worker extends Thread {
 	public void run() {
 		while(stop == false) {
 			// TODO check if we have any unblocking version of get
-			Message message = reqQueue.poll();
+			RequestMessage message = reqQueue.poll();
 			if(message == null || stop)
 				return;
 

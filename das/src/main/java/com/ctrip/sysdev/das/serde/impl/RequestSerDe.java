@@ -1,24 +1,20 @@
 package com.ctrip.sysdev.das.serde.impl;
 
-import static org.msgpack.template.Templates.TBigDecimal;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.msgpack.MessagePack;
-import org.msgpack.type.Value;
 import org.msgpack.unpacker.Unpacker;
 
 import com.ctrip.sysdev.das.domain.Request;
+import com.ctrip.sysdev.das.domain.RequestMessage;
 import com.ctrip.sysdev.das.domain.enums.ActionTypeEnum;
-import com.ctrip.sysdev.das.domain.enums.AvailableTypeEnum;
 import com.ctrip.sysdev.das.domain.enums.MessageTypeEnum;
-import com.ctrip.sysdev.das.domain.msg.AvailableType;
-import com.ctrip.sysdev.das.domain.msg.Message;
+import com.ctrip.sysdev.das.domain.param.Parameter;
+import com.ctrip.sysdev.das.domain.param.ParameterFactory;
 import com.ctrip.sysdev.das.exception.ProtocolInvalidException;
 import com.ctrip.sysdev.das.exception.SerDeException;
 import com.ctrip.sysdev.das.serde.MsgPackSerDeType;
@@ -87,12 +83,12 @@ public class RequestSerDe extends AbstractMsgPackSerDe<Request> {
 	 * @throws IOException
 	 * @throws ProtocolInvalidException
 	 */
-	private static Message unpackMessage(Unpacker unpacker) throws IOException,
+	private static RequestMessage unpackMessage(Unpacker unpacker) throws IOException,
 			ProtocolInvalidException {
 
 		int propertyCount = unpacker.readArrayBegin();
 
-		Message message = new Message();
+		RequestMessage message = new RequestMessage();
 
 		message.setMessageType(MessageTypeEnum.fromInt(unpacker.readInt()));
 
@@ -107,14 +103,14 @@ public class RequestSerDe extends AbstractMsgPackSerDe<Request> {
 		}
 
 		int argsLength = unpacker.readArrayBegin();
-		message.setArgs(new ArrayList<List<AvailableType>>(argsLength));
+		message.setArgs(new ArrayList<List<Parameter>>(argsLength));
 
 		for (int i = 0; i < argsLength; i++) {
 
 			int argLength = unpacker.readArrayBegin();
-			List<AvailableType> arg = new ArrayList<AvailableType>(argLength);
+			List<Parameter> arg = new ArrayList<Parameter>(argLength);
 			for (int j = 0; j < argLength; j++) {
-				arg.add(unpackAvailableType(unpacker));
+				arg.add(ParameterFactory.createParameterFromUnpack(unpacker));
 			}
 			unpacker.readArrayEnd();
 			message.getArgs().add(arg);
@@ -127,67 +123,5 @@ public class RequestSerDe extends AbstractMsgPackSerDe<Request> {
 		return message;
 	}
 
-	/**
-	 * 
-	 * @param unpacker
-	 * @return
-	 * @throws IOException
-	 */
-	private static AvailableType unpackAvailableType(Unpacker unpacker)
-			throws IOException {
-
-		AvailableType at = new AvailableType();
-
-		int propertyCount = unpacker.readArrayBegin();
-
-		at.paramIndex = unpacker.readInt();
-
-		at.currentType = AvailableTypeEnum.fromInt(unpacker.readInt());
-
-		switch (at.currentType) {
-		case BOOL:
-			at.bool_arg = unpacker.readBoolean();
-			break;
-		case BYTE:
-			at.byte_arg = unpacker.readByte();
-			break;
-		case SHORT:
-			at.short_arg = unpacker.readShort();
-			break;
-		case INT:
-			at.int_arg = unpacker.readInt();
-			break;
-		case LONG:
-			at.long_arg = unpacker.readLong();
-			break;
-		case FLOAT:
-			at.float_arg = unpacker.readFloat();
-			break;
-		case DOUBLE:
-			at.double_arg = unpacker.readDouble();
-			break;
-		case DECIMAL:
-			at.decimal_arg = unpacker.read(TBigDecimal);
-			break;
-		case STRING:
-			at.string_arg = unpacker.readString();
-			break;
-		case DATETIME:
-			at.datetime_arg = unpacker.read(Timestamp.class);
-			break;
-		case BYTEARR:
-			at.bytearr_arg = unpacker.readByteArray();
-			break;
-		default:
-			Value v = unpacker.readValue();
-			if (v.isArrayValue()) {
-				at.object_arg = v.asArrayValue().toArray();
-			} else {
-				at.object_arg = v;
-			}
-		}
-		unpacker.readArrayEnd();
-
-		return at;
-	}
+	
 }

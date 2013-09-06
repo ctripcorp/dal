@@ -5,13 +5,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
 
+
+import com.ctrip.sysdev.das.domain.RequestMessage;
 import com.ctrip.sysdev.das.domain.Response;
-import com.ctrip.sysdev.das.domain.msg.Message;
 import com.ctrip.sysdev.das.serde.MsgPackSerDe;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-public class Netty4ProtocolEncoder extends MessageToByteEncoder<Message> {
+public class Netty4ProtocolEncoder extends MessageToByteEncoder<RequestMessage> {
 
 	private MsgPackSerDe<Response> msgPackSerDe;
 
@@ -23,7 +24,7 @@ public class Netty4ProtocolEncoder extends MessageToByteEncoder<Message> {
 	}
 
 	@Override
-	protected void encode(ChannelHandlerContext ctx, Message msg, ByteBuf out)
+	protected void encode(ChannelHandlerContext ctx, RequestMessage msg, ByteBuf out)
 			throws Exception {
 		System.out.println("..encode..");
 		ctx.flush();

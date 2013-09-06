@@ -1,6 +1,5 @@
 package com.ctrip.platform.dao;
 
-import java.lang.reflect.Array;
 import java.sql.ResultSet;
 import java.util.Arrays;
 
@@ -8,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dao.common.AbstractDAO;
-import com.ctrip.platform.dao.msg.AvailableType;
+import com.ctrip.platform.dao.param.Parameter;
 
 public class FreeSQLPersonDAO extends AbstractDAO {
 
@@ -23,67 +22,45 @@ public class FreeSQLPersonDAO extends AbstractDAO {
 	 * 
 	 * @return The DAO function object to validate the parameter
 	 */
-	public ResultSet getAddrAndTel(AvailableType... params) throws Exception {
+	public ResultSet getAddrAndTel(Parameter... params) throws Exception {
 
-		final int[] inClauseParamIndex = new int[] { 2 };
-		final String[] inClauseParamPlaceHolder = new String[inClauseParamIndex.length];
+		Arrays.sort(params);
 
-		Arrays.sort(inClauseParamIndex);
+		String[] placeHolder = new String[params.length];
 
-		for (int i = 0; i < inClauseParamIndex.length; i++) {
-			int paramIndex = inClauseParamIndex[i];
-
-			for (AvailableType param : params) {
-				if (param.paramIndex == paramIndex) {
+		for (int i = 0; i < params.length; i++) {
+			//First set the place holder to just on parameter
+			placeHolder[i] = "?";
 			
-					int batchSize = Array.getLength(param.object_arg);
+			//if and only if user pass in valid parameter, we
+			//format the place holder for him
+			if (params[i].getValue().isArrayValue()) {
+				int batchSize = params[i].getValue().asArrayValue().size();
 
-					
+				if (batchSize > 0) {
 					StringBuilder inClause = new StringBuilder();
-
+					inClause.append('(');
 					for (int j = 0; j < batchSize; j++) {
 						inClause.append('?');
-						if(j != batchSize -1){
+						if (j != batchSize - 1) {
 							inClause.append(',');
 						}
 					}
-
-					if (inClause.length() > 0) {
-						inClauseParamPlaceHolder[i] = String.format("(%s)",
-								inClause.toString());
-					}
-
-					break;
+					inClause.append(')');
+					placeHolder[i] = inClause.toString();
 				}
 			}
-
+			
 		}
 
 		final String sql = String
-				.format("SELECT Address, Telephone FROM Person WHERE Name = ? AND Gender IN %s",
-						(Object[])inClauseParamPlaceHolder);
+				.format("SELECT Address, Telephone FROM Person WHERE Name = %s AND Gender IN %s",
+						(Object[]) placeHolder);
 		
-//		String sql = "SELECT Address, Telephone FROM Person WHERE Name = ? AND Gender IN ?";
-		
-		
+		logger.info(sql);
 
 		return super.fetch(null, sql, 0, params);
 	}
 
-	public static void main(String[] args) {
-
-		Object[] origial = new Object[] { 1 };
-		int batchSize = 2;
-		int realPassedInParamsLength = 1;
-
-		if (batchSize > realPassedInParamsLength) {
-			Object[] newArray = new Object[batchSize];
-			System.arraycopy(origial, 0, newArray, 0, realPassedInParamsLength);
-			for (Object obj : newArray) {
-				System.out.println(obj.getClass());
-				System.out.println(obj);
-			}
-		}
-	}
 
 }

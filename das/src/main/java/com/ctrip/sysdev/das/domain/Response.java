@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.msgpack.packer.Packer;
 
 import com.ctrip.sysdev.das.domain.enums.ResultTypeEnum;
-import com.ctrip.sysdev.das.domain.msg.AvailableType;
+import com.ctrip.sysdev.das.domain.param.Parameter;
 
 public class Response extends BaseDomain {
 
@@ -25,7 +25,7 @@ public class Response extends BaseDomain {
 	
 	private int chunkCount;
 
-	private List<List<AvailableType>> resultSet;
+	private List<List<Parameter>> resultSet;
 	
 
 	/**
@@ -107,7 +107,7 @@ public class Response extends BaseDomain {
 	/**
 	 * @return the resultSet
 	 */
-	public List<List<AvailableType>> getResultSet() {
+	public List<List<Parameter>> getResultSet() {
 		return resultSet;
 	}
 
@@ -115,7 +115,7 @@ public class Response extends BaseDomain {
 	 * @param resultSet
 	 *            the resultSet to set
 	 */
-	public void setResultSet(List<List<AvailableType>> resultSet) {
+	public void setResultSet(List<List<Parameter>> resultSet) {
 		this.resultSet = resultSet;
 	}
 

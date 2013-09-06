@@ -1,4 +1,4 @@
-package com.ctrip.platform.dao.param;
+package com.ctrip.sysdev.das.domain.param;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -11,7 +11,7 @@ import org.msgpack.type.Value;
 import org.msgpack.type.ValueFactory;
 import org.msgpack.unpacker.Unpacker;
 
-import com.ctrip.platform.dao.enums.ParameterType;
+import com.ctrip.sysdev.das.domain.enums.ParameterType;
 
 class DefaultParameter extends AbstractParameter {
 

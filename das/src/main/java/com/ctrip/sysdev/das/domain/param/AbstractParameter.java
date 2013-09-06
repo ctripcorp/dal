@@ -1,4 +1,4 @@
-package com.ctrip.platform.dao.param;
+package com.ctrip.sysdev.das.domain.param;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import org.msgpack.packer.Packer;
 import org.msgpack.type.Value;
 
-import com.ctrip.platform.dao.enums.ParameterType;
+import com.ctrip.sysdev.das.domain.enums.ParameterType;
 
 public class AbstractParameter implements Parameter {
 	
@@ -41,7 +41,7 @@ public class AbstractParameter implements Parameter {
 	}
 
 	@Override
-	public PreparedStatement setPreparedStatement(PreparedStatement ps) throws SQLException {
+	public PreparedStatement setPreparedStatement(PreparedStatement ps)  throws SQLException{
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -3,8 +3,8 @@ package com.ctrip.sysdev.das.worker;
 import java.util.concurrent.Callable;
 
 import com.ctrip.sysdev.das.commons.DataSourceWrapper;
+import com.ctrip.sysdev.das.domain.RequestMessage;
 import com.ctrip.sysdev.das.domain.Response;
-import com.ctrip.sysdev.das.domain.msg.Message;
 
 public class QueryExecutorWrapper implements Callable<Response> {
 	private QueryExecutor executor;
@@ -18,7 +18,7 @@ public class QueryExecutorWrapper implements Callable<Response> {
 	}
 	
 	
-	public static QueryExecutorWrapper wrap(DataSourceWrapper dataSource, Message message) {
+	public static QueryExecutorWrapper wrap(DataSourceWrapper dataSource, RequestMessage message) {
 		return new QueryExecutorWrapper(new QueryExecutor(dataSource, message));
 	}
 	

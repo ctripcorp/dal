@@ -1,4 +1,4 @@
-package com.ctrip.platform.dao.enums;
+package com.ctrip.sysdev.das.domain.enums;
 
 import java.util.HashMap;
 import java.util.Map;

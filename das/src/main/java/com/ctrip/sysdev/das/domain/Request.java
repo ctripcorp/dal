@@ -2,8 +2,6 @@ package com.ctrip.sysdev.das.domain;
 
 import java.util.UUID;
 
-import com.ctrip.sysdev.das.domain.msg.Message;
-
 public class Request extends BaseDomain {
 	/**
 	 * 
@@ -38,7 +36,7 @@ public class Request extends BaseDomain {
 
 	private String credential;
 
-	private Message message;
+	private RequestMessage message;
 
 	/**
 	 * @return the taskid
@@ -88,7 +86,7 @@ public class Request extends BaseDomain {
 	/**
 	 * @return the message
 	 */
-	public Message getMessage() {
+	public RequestMessage getMessage() {
 		return message;
 	}
 
@@ -96,7 +94,7 @@ public class Request extends BaseDomain {
 	 * @param message
 	 *            the message to set
 	 */
-	public void setMessage(Message message) {
+	public void setMessage(RequestMessage message) {
 		this.message = message;
 	}
 

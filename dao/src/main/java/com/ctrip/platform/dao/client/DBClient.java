@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.List;
 
 import com.ctrip.platform.dao.param.Parameter;
@@ -31,7 +32,7 @@ public class DBClient {
 		PreparedStatement ps = connection.prepareStatement(statement);
 
 		int currentParameterIndex = 1;
-//		Arrays.sort(params);
+		Arrays.sort(params);
 		for (int i = 0; i < params.length; i++) {
 			params[i].setParameterIndex(currentParameterIndex);
 			params[i].setPreparedStatement(ps);

@@ -10,6 +10,8 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -87,6 +89,9 @@ public class QueryExecutor implements LogConsts {
 					"{call dbo.%s(%s)}", message.getSpName(), occupy.toString()));
 		}
 		
+		
+		
+		Collections.sort(params);
 		int currentParameterIndex = 1;
 		for (int i = 0; i < params.size(); i++) {
 			params.get(i).setParameterIndex(currentParameterIndex);

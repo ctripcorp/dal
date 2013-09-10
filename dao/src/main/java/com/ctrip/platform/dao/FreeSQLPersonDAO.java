@@ -29,7 +29,7 @@ public class FreeSQLPersonDAO extends AbstractDAO {
 		String[] placeHolder = new String[params.length];
 
 		for (int i = 0; i < params.length; i++) {
-			//First set the place holder to just on parameter
+			//First set the place holder to just one parameter
 			placeHolder[i] = "?";
 			
 			//if and only if user pass in valid parameter, we

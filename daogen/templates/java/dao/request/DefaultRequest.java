@@ -10,8 +10,7 @@ import org.msgpack.packer.Packer;
 
 import {{product_line}}.{{domain}}.{{app_name}}.dao.enums.MessageTypeEnum;
 import {{product_line}}.{{domain}}.{{app_name}}.dao.exception.ProtocolInvalidException;
-import {{product_line}}.{{domain}}.{{app_name}}.dao.msg.AvailableType;
-import {{product_line}}.{{domain}}.{{app_name}}.dao.msg.Message;
+import {{product_line}}.{{domain}}.{{app_name}}.dao.param.Parameter;
 import {{product_line}}.{{domain}}.{{app_name}}.dao.utils.UUID2ByteArray;
 
 /**
@@ -22,11 +21,11 @@ import {{product_line}}.{{domain}}.{{app_name}}.dao.utils.UUID2ByteArray;
  */
 public class DefaultRequest extends AbstractRequest {
 
-	public Message getMessage() {
+	public RequestMessage getMessage() {
 		return message;
 	}
 
-	public void setMessage(Message message) {
+	public void setMessage(RequestMessage message) {
 		this.message = message;
 	}
 
@@ -67,7 +66,7 @@ public class DefaultRequest extends AbstractRequest {
 
 	private String credential;
 
-	private Message message;
+	private RequestMessage message;
 
 	public UUID getTaskid() {
 		return taskid;
@@ -121,7 +120,7 @@ public class DefaultRequest extends AbstractRequest {
 	 * @throws IOException
 	 * @throws ProtocolInvalidException
 	 */
-	private void packMessage(Packer packer, Message message)
+	private void packMessage(Packer packer, RequestMessage message)
 			throws IOException, ProtocolInvalidException {
 
 		packer.writeArrayBegin(message.propertyCount());
@@ -140,12 +139,12 @@ public class DefaultRequest extends AbstractRequest {
 
 		packer.writeArrayBegin(message.getArgs().size());
 
-		for (List<AvailableType> row : message.getArgs()) {
+		for (List<Parameter> row : message.getArgs()) {
 
 			packer.writeArrayBegin(row.size());
 
-			for (AvailableType col : row) {
-				packAvailableType(packer, col);
+			for (Parameter col : row) {
+				col.pack(packer);
 			}
 
 			packer.writeArrayEnd();
@@ -158,58 +157,5 @@ public class DefaultRequest extends AbstractRequest {
 		packer.writeArrayEnd();
 	}
 
-	/**
-	 * 
-	 * @param packer
-	 * @param availableType
-	 * @throws Exception
-	 */
-	private void packAvailableType(Packer packer, AvailableType availableType)
-			throws IOException {
-
-		packer.writeArrayBegin(3);
-		packer.write(availableType.paramIndex);
-		packer.write(availableType.currentType.getIntVal());
-		switch (availableType.currentType) {
-		case BOOL:
-			packer.write(availableType.bool_arg);
-			break;
-		case BYTE:
-			packer.write(availableType.byte_arg);
-			break;
-		case SHORT:
-			packer.write(availableType.short_arg);
-			break;
-		case INT:
-			packer.write(availableType.int_arg);
-			break;
-		case LONG:
-			packer.write(availableType.long_arg);
-			break;
-		case FLOAT:
-			packer.write(availableType.float_arg);
-			break;
-		case DOUBLE:
-			packer.write(availableType.double_arg);
-			break;
-		case DECIMAL:
-			packer.write(availableType.decimal_arg);
-			break;
-		case STRING:
-			packer.write(availableType.string_arg);
-			break;
-		case DATETIME:
-			packer.write(availableType.datetime_arg);
-			break;
-		case BYTEARR:
-			packer.write(availableType.bytearr_arg);
-			break;
-		default:
-			packer.write(availableType.object_arg);
-			break;
-		}
-		packer.writeArrayEnd();
-
-	}
-
+	
 }

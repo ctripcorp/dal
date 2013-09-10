@@ -1,4 +1,4 @@
-package {{product_line}}.{{domain}}.{{app_name}}.dao.sp;
+package {{product_line}}.{{domain}}.{{app_name}}.dao;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
@@ -9,35 +9,27 @@ import org.slf4j.LoggerFactory;
 
 import {{product_line}}.{{domain}}.{{app_name}}.dao.common.AbstractDAO;
 import {{product_line}}.{{domain}}.{{app_name}}.dao.exception.ParametersInvalidException;
-import {{product_line}}.{{domain}}.{{app_name}}.dao.msg.AvailableType;
+import {{product_line}}.{{domain}}.{{app_name}}.dao.param.Parameter;
 
-public class {{TableName}}DAO extends AbstractDAO {
+public class {{database_name}} extends AbstractDAO {
 	
-	private static final Logger logger = LoggerFactory.getLogger({{TableName}}DAO.class);
+	private static final Logger logger = LoggerFactory.getLogger({{database_name}}.class);
 
-	private Map<String, String> dbField2POJOField;
-
-	public {{TableName}}DAO() {
-		dbField2POJOField = new HashMap<String, String>();
-		// dbField2POJOField.put("Name", "name");
+	public {{database_name}}() {
 	}
 
-	{% for method in methods %}
-	//{{method.comment}}									
-	public ResultSet {{method.name}}(AvailableType... params)
+	{% for sp in sp_methods %}
+	//{{sp.comment}}									
+	public {% if sp.action == 'fetch' %} ResultSet {% else %} int {% end %} {{sp.method_name}}(Parameter... params)
 			throws Exception {
 		
-		final int paramCount = {{method.paramCount}};
-
-		final String sql = {{method.sql}};
-		
-		if(params.length != paramCount){
-			throw new ParametersInvalidException(String.format(
-					"Required %d parameter(s), but got %d!", 
-					paramCount, params.length));
-		}
-
-		return super.{{method.action}}(null, sql, 0, params);
+		final String spName = "{{sp.sp_name}}";
+	
+		{% if sp.action == 'fetch' %}
+			return super.fetchBySp(null, spName, 0, params);
+		{% else %}
+			return super.executeSp(null, spName, 0, params);
+		{% end %}
 	}
 	{% end %}
 

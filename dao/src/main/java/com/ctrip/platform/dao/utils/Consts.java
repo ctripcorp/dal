@@ -15,7 +15,7 @@ public class Consts {
 //	public static final String password = "123456";
 	
 	//For SQL Server DB Client
-	public static final String connectionString = "jdbc:sqlserver://testdb.dev.sh.ctriptravel.com:28747;DatabaseName=GeneratorDAO;integratedSecurity=true";
+	public static final String connectionString = "jdbc:sqlserver://testdb.dev.sh.ctriptravel.com:28747;DatabaseName=SysDalTest;integratedSecurity=true";
 	public static final String user = "";
 	public static final String password = "";
 

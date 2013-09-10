@@ -164,4 +164,17 @@
 		</dependency>
 
 	</dependencies>
+
+	<distributionManagement>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>nexus</id>
+      <url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/sysdevrelease/</url>
+    </repository>
+    <snapshotRepository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>nexus</id>
+      <url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/sysdevsnapshot/</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>

@@ -6,9 +6,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.List;
 
-import com.ctrip.platform.international.daogen.dao.msg.AvailableType;
+import com.ctrip.platform.international.daogen.dao.param.Parameter;
 import com.ctrip.platform.international.daogen.dao.utils.Consts;
 
 public class DBClient {
@@ -26,42 +27,31 @@ public class DBClient {
 	 * @throws Exception
 	 */
 	public ResultSet fetch(String tnxCtxt, String statement, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 
 		PreparedStatement ps = connection.prepareStatement(statement);
 
+		int currentParameterIndex = 1;
+		Arrays.sort(params);
 		for (int i = 0; i < params.length; i++) {
+			params[i].setParameterIndex(currentParameterIndex);
 			params[i].setPreparedStatement(ps);
+			currentParameterIndex= params[i].getParameterIndex() + 1;
 		}
 
 		ResultSet rs = ps.executeQuery();
 
 		return rs;
-
-		// List<List<AvailableType>> results = new
-		// LinkedList<List<AvailableType>>();
-		//
-		// while(rs.next()){
-		// List<AvailableType> result = new LinkedList<AvailableType>();
-		// for(int key : statement.getResultFields().keySet()){
-		// result.add(AvailableType.getResultSet(
-		// rs, statement.getResultFields().get(key), key)
-		// );
-		// }
-		// results.add(result);
-		// }
-		//
-		// return new DAOResultSet(results);
 	}
 
 	public int bulkInsert(String tnxCtxt, String statement,
-			List<AvailableType> params, int flag) {
+			List<Parameter> params, int flag) {
 
 		return 0;
 	}
 
 	public int execute(String tnxCtxt, String statement, int flag,
-			AvailableType... params) throws Exception{
+			Parameter... params) throws Exception{
 
 		PreparedStatement ps = connection.prepareStatement(statement);
 
@@ -73,7 +63,7 @@ public class DBClient {
 	}
 
 	public ResultSet fetchBySp(String tnxCtxt, String sp, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 
 		StringBuffer occupy = new StringBuffer();
 
@@ -87,7 +77,7 @@ public class DBClient {
 				"{call dbo.%s(%s)}", sp, occupy.toString()));
 
 		for (int i = 0; i < params.length; i++) {
-			params[i].setCallableStatement(callableStmt);
+			params[i].setPreparedStatement(callableStmt);
 		}
 
 		return callableStmt.executeQuery();
@@ -102,7 +92,7 @@ public class DBClient {
 	 * @return
 	 */
 	public int executeSp(String tnxCtxt, String sp, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 		
 		StringBuffer occupy = new StringBuffer();
 
@@ -116,7 +106,7 @@ public class DBClient {
 				"{call dbo.%s(%s)}", sp, occupy.toString()));
 
 		for (int i = 0; i < params.length; i++) {
-			params[i].setCallableStatement(callableStmt);
+			params[i].setPreparedStatement(callableStmt);
 		}
 
 		return callableStmt.executeUpdate();

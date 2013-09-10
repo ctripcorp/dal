@@ -112,11 +112,12 @@ $(document).ready(function () {
         App.blockUI(el);
         $.get("/database/sps?db_name=" + $(this).val(), function (data) {
             data = JSON.parse(data);
-            var html_data = "";
             $.each(data, function (index, value) {
-                html_data += "<option>" + value + "</option>";
+                $('#sp_names').append($('<option>', {
+                    value: value,
+                    text: value
+                }));
             });
-            $("#sp_names").html(html_data);
             App.unblockUI(el);
             $("#sp_names").trigger('change');
         });
@@ -147,8 +148,13 @@ $(document).ready(function () {
 
     //Move all fields as query selection
     $("button.btn.moveall").click(function () {
-        $("#right_select").html($("#left_select").html());
-        $("#left_select").html("");
+
+        $("#left_select option").each(function(){
+            $("#right_select").append($(this));
+        });
+
+        // $("#right_select").html($("#left_select").html());
+        // $("#left_select").html("");
     });
 
     $("button.btn.remove").click(function () {
@@ -159,8 +165,11 @@ $(document).ready(function () {
     });
 
     $("button.btn.removeall").click(function () {
-        $("#left_select").html($("#right_select").html());
-        $("#right_select").html("");
+         $("#right_select option").each(function(){
+            $("#left_select").append($(this));
+        });
+        // $("#left_select").html($("#right_select").html());
+        // $("#right_select").html("");
     });
 
     //Show or hide something according to current selected information
@@ -288,8 +297,6 @@ $(document).ready(function () {
 
             };
 
-            task_object["dao_name"] = $("#auto_dao_name").val();
-
             task_object["func_name"] = $("#auto_func_name").val();
 
             task_object["database"] = $("#databases").val();
@@ -310,24 +317,21 @@ $(document).ready(function () {
             }
 
         } else if (task_type == "sp") {
-
-            task_object["dao_name"] = $("#sp_dao_name").val();
-
             task_object["func_name"] = $("#sp_func_name").val();
 
             task_object["database"] = $("#sp_databases").val();
 
             task_object["sp_name"] = $("#sp_names").val();
 
+            task_object["sp_action"] = $("#sp_action").val();
         } else {
-
             task_object["dao_name"] = $("#sql_dao_name").val();
 
             task_object["func_name"] = $("#sql_func_name").val();
 
             task_object["database"] = $("#sql_databases").val();
 
-            task_object["sql"] = editor.getValue();
+            task_object["sql"] = editor.getValue().replace(/\n/g, " ");
         }
 
         post_data["project_id"] = project_id;
@@ -355,18 +359,14 @@ $(document).ready(function () {
                 var result_sql = sprintf("USE %s ", value.database);
 
                 if (value.task_type == "autosql") {
-
                     if (value.crud == "select" || value.cud == "sql") {
                         result_sql = sprintf("%s %s", result_sql, value.sql);
                     } else {
                         result_sql = sprintf("%s EXEC %s", result_sql, value.sp_name);
                     }
                 } else if (value.task_type == "sp") {
-
                     result_sql += " EXEC " + value.sp_name;
-
                 } else {
-
                     result_sql += " " + value.sql;
                 }
 
@@ -394,7 +394,6 @@ $(document).ready(function () {
     $('#reload_ops').click(function () {
         $.get("/database/databases", function (data) {
             data = JSON.parse(data);
-
             $.each(data, function (index, value) {
                 $('#databases').append($('<option>', {
                     value: value,

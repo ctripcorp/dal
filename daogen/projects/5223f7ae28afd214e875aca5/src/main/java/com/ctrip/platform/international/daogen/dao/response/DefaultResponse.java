@@ -11,13 +11,17 @@ import java.util.UUID;
 
 import org.msgpack.MessagePack;
 import org.msgpack.unpacker.Unpacker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.ctrip.platform.international.daogen.dao.enums.AvailableTypeEnum;
 import com.ctrip.platform.international.daogen.dao.enums.ResultTypeEnum;
 import com.ctrip.platform.international.daogen.dao.exception.ProtocolInvalidException;
-import com.ctrip.platform.international.daogen.dao.msg.AvailableType;
+import com.ctrip.platform.international.daogen.dao.param.Parameter;
+import com.ctrip.platform.international.daogen.dao.param.ParameterFactory;
 
 public class DefaultResponse extends AbstractResponse {
+	
+	private static Logger logger = LoggerFactory.getLogger(DefaultResponse.class);
 
 	private static final int currentPropertyCount = 3;
 
@@ -27,13 +31,15 @@ public class DefaultResponse extends AbstractResponse {
 
 	private int affectRowCount;
 
-	private List<List<AvailableType>> resultSet;
+	private int chunkCount;
 
-	public List<List<AvailableType>> getResultSet() {
+	private List<List<Parameter>> resultSet;
+
+	public List<List<Parameter>> getResultSet() {
 		return resultSet;
 	}
 
-	public void setResultSet(List<List<AvailableType>> resultSet) {
+	public void setResultSet(List<List<Parameter>> resultSet) {
 		this.resultSet = resultSet;
 	}
 
@@ -59,6 +65,14 @@ public class DefaultResponse extends AbstractResponse {
 
 	public void setAffectRowCount(int affectRowCount) {
 		this.affectRowCount = affectRowCount;
+	}
+
+	public int getChunkCount() {
+		return chunkCount;
+	}
+
+	public void setChunkCount(int chunkCount) {
+		this.chunkCount = chunkCount;
 	}
 
 	/**
@@ -89,11 +103,35 @@ public class DefaultResponse extends AbstractResponse {
 		}
 
 		response.setTaskid(UUID.nameUUIDFromBytes(unpacker.readByteArray()));
+		
+		logger.info(response.getTaskid().toString());
 
 		response.setResultType(ResultTypeEnum.fromInt(unpacker.readInt()));
 
 		if (response.getResultType() == ResultTypeEnum.RETRIEVE) {
-			unpacker.readInt();
+//			response.setChunkCount(unpacker.readInt());
+
+			int outerArrayLength = unpacker.readArrayBegin();
+			
+			List<List<Parameter>> outerArray = new ArrayList<List<Parameter>>(outerArrayLength);
+
+			for (int i = 0; i < outerArrayLength; i++) {
+				int innerArrayLength = unpacker.readArrayBegin();
+				List<Parameter> innerArray = new ArrayList<Parameter>(
+						innerArrayLength);
+
+				for (int j = 0; j < innerArrayLength; j++) {
+					innerArray.add(ParameterFactory.createParameterFromUnpack(unpacker));
+				}
+				unpacker.readArrayEnd();
+				
+				outerArray.add(innerArray);
+
+			}
+			unpacker.readArrayEnd();
+			
+			response.setResultSet(outerArray);
+
 		} else {
 			response.setAffectRowCount(unpacker.readInt());
 		}
@@ -112,7 +150,7 @@ public class DefaultResponse extends AbstractResponse {
 	 * @return
 	 * @throws IOException
 	 */
-	public static List<List<AvailableType>> unpackChunk(byte[] payload)
+	public static List<List<Parameter>> unpackChunk(byte[] payload)
 			throws IOException {
 
 		MessagePack packer = new MessagePack();
@@ -122,16 +160,16 @@ public class DefaultResponse extends AbstractResponse {
 
 		int propertyCount = unpacker.readArrayBegin();
 
-		List<List<AvailableType>> results = new ArrayList<List<AvailableType>>();
+		List<List<Parameter>> results = new ArrayList<List<Parameter>>();
 
 		for (int i = 0; i < propertyCount; i++) {
 
-			List<AvailableType> result = new ArrayList<AvailableType>();
+			List<Parameter> result = new ArrayList<Parameter>();
 
 			int columnCount = unpacker.readArrayBegin();
 
 			for (int j = 0; j < columnCount; j++) {
-				result.add(unpackAvailableType(unpacker));
+				result.add(ParameterFactory.createParameterFromUnpack(unpacker));
 			}
 			unpacker.readArrayEnd();
 
@@ -142,61 +180,6 @@ public class DefaultResponse extends AbstractResponse {
 
 	}
 
-	/**
-	 * 
-	 * @param unpacker
-	 * @return
-	 * @throws IOException
-	 */
-	private static AvailableType unpackAvailableType(Unpacker unpacker)
-			throws IOException {
 
-		AvailableType at = new AvailableType();
-
-		int propertyCount = unpacker.readArrayBegin();
-
-		at.currentType = AvailableTypeEnum.fromInt(unpacker.readInt());
-
-		switch (at.currentType) {
-		case BOOL:
-			at.bool_arg = unpacker.readBoolean();
-			break;
-		case BYTE:
-			at.byte_arg = unpacker.readByte();
-			break;
-		case SHORT:
-			at.short_arg = unpacker.readShort();
-			break;
-		case INT:
-			at.int_arg = unpacker.readInt();
-			break;
-		case LONG:
-			at.long_arg = unpacker.readLong();
-			break;
-		case FLOAT:
-			at.float_arg = unpacker.readFloat();
-			break;
-		case DOUBLE:
-			at.double_arg = unpacker.readDouble();
-			break;
-		case DECIMAL:
-			at.decimal_arg = unpacker.read(TBigDecimal);
-			break;
-		case STRING:
-			at.string_arg = unpacker.readString();
-			break;
-		case DATETIME:
-			at.datetime_arg = unpacker.read(Timestamp.class);
-			break;
-		case BYTEARR:
-			at.bytearr_arg = unpacker.readByteArray();
-			break;
-		default:
-			at.object_arg = unpacker.readValue();
-		}
-		unpacker.readArrayEnd();
-
-		return at;
-	}
 
 }

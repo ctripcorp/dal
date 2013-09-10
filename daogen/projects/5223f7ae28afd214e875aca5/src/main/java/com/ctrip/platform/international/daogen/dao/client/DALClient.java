@@ -15,11 +15,12 @@ import com.ctrip.platform.international.daogen.dao.enums.ActionTypeEnum;
 import com.ctrip.platform.international.daogen.dao.enums.FlagsEnum;
 import com.ctrip.platform.international.daogen.dao.enums.MessageTypeEnum;
 import com.ctrip.platform.international.daogen.dao.enums.ResultTypeEnum;
-import com.ctrip.platform.international.daogen.dao.msg.AvailableType;
-import com.ctrip.platform.international.daogen.dao.msg.Message;
+import com.ctrip.platform.international.daogen.dao.param.Parameter;
 import com.ctrip.platform.international.daogen.dao.request.DefaultRequest;
+import com.ctrip.platform.international.daogen.dao.request.RequestMessage;
 import com.ctrip.platform.international.daogen.dao.response.DefaultResponse;
 import com.ctrip.platform.international.daogen.dao.utils.Consts;
+import com.ctrip.platform.international.daogen.dao.utils.DAOResultSet;
 
 public class DALClient {
 	Socket requestSocket;
@@ -27,17 +28,17 @@ public class DALClient {
 	DataInputStream in;
 
 	public ResultSet fetch(String tnxCtxt, String statement, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 
-		Message message = new Message();
+		RequestMessage message = new RequestMessage();
 
 		message.setMessageType(MessageTypeEnum.SQL);
 		message.setActionType(ActionTypeEnum.SELECT);
 		message.setUseCache(false);
 
 		message.setSql(statement);
-		List<List<AvailableType>> finalParams =  new ArrayList<List<AvailableType>>();
-		finalParams.add(new ArrayList<AvailableType>(Arrays.asList(params)));
+		List<List<Parameter>> finalParams =  new ArrayList<List<Parameter>>();
+		finalParams.add(new ArrayList<Parameter>(Arrays.asList(params)));
 		message.setArgs(finalParams);
 
 		message.setFlags(FlagsEnum.TEST.getIntVal());
@@ -51,24 +52,58 @@ public class DALClient {
 		request.setCredential(Consts.credential);
 
 		request.setMessage(message);
+		
+		DAOResultSet rs = new DAOResultSet(this.<List<List<Parameter>>>run(request));
+		
+		return rs;
 
-		run(request);
+//		return null;
+	}
+	
+	public ResultSet fetchBySp(String tnxCtxt, String sp, int flag,
+			Parameter... params) throws Exception {
+		
+		RequestMessage msg = new RequestMessage();
 
-		return null;
+		msg.setMessageType(MessageTypeEnum.SP);
+		msg.setActionType(ActionTypeEnum.SELECT);
+		msg.setUseCache(false);
+		
+		msg.setSpName(sp);
+		
+		List<List<Parameter>> finalParams =  new ArrayList<List<Parameter>>();
+		finalParams.add(new ArrayList<Parameter>(Arrays.asList(params)));
+		msg.setArgs(finalParams);
+
+		msg.setFlags(FlagsEnum.TEST.getIntVal());
+
+		DefaultRequest request = new DefaultRequest();
+
+		request.setTaskid(UUID.randomUUID());
+
+		request.setDbName(Consts.databaseName);
+
+		request.setCredential(Consts.credential);
+
+		request.setMessage(msg);
+		
+		DAOResultSet rs = new DAOResultSet(this.<List<List<Parameter>>>run(request));
+		
+		return rs;
 	}
 
 	public int execute(String tnxCtxt, String statement, int flag,
-			AvailableType... params) throws Exception {
+			Parameter... params) throws Exception {
 
-		Message message = new Message();
+		RequestMessage message = new RequestMessage();
 
 		message.setMessageType(MessageTypeEnum.SQL);
-		message.setActionType(ActionTypeEnum.SELECT);
+		message.setActionType(ActionTypeEnum.DELETE);
 		message.setUseCache(false);
 
 		message.setSql(statement);
-		List<List<AvailableType>> finalParams =  new ArrayList<List<AvailableType>>();
-		finalParams.add(new ArrayList<AvailableType>(Arrays.asList(params)));
+		List<List<Parameter>> finalParams =  new ArrayList<List<Parameter>>();
+		finalParams.add(new ArrayList<Parameter>(Arrays.asList(params)));
 		message.setArgs(finalParams);
 
 
@@ -84,12 +119,43 @@ public class DALClient {
 
 		request.setMessage(message);
 
-		run(request);
+		return this.<Integer>run(request);
 
-		return 0;
+//		return 0;
+	}
+	
+	public int executeSp(String tnxCtxt, String sp, int flag,
+			Parameter... params) throws Exception {
+		
+		RequestMessage message = new RequestMessage();
+
+		message.setMessageType(MessageTypeEnum.SP);
+		message.setActionType(ActionTypeEnum.DELETE);
+		message.setUseCache(false);
+
+		message.setSpName(sp);
+		List<List<Parameter>> finalParams =  new ArrayList<List<Parameter>>();
+		finalParams.add(new ArrayList<Parameter>(Arrays.asList(params)));
+		message.setArgs(finalParams);
+
+
+		message.setFlags(FlagsEnum.TEST.getIntVal());
+
+		DefaultRequest request = new DefaultRequest();
+
+		request.setTaskid(UUID.randomUUID());
+
+		request.setDbName(Consts.databaseName);
+
+		request.setCredential(Consts.credential);
+
+		request.setMessage(message);
+
+		return this.<Integer>run(request);
+
 	}
 
-	void run(DefaultRequest request) {
+	<T> T run(DefaultRequest request) {
 		try {
 			// 1. creating a socket to connect to the server
 			requestSocket = new Socket("localhost", 9000);
@@ -119,12 +185,32 @@ public class DALClient {
 			in.read(leftData, 0, leftLength - 2);
 			
 			DefaultResponse response = DefaultResponse.unpack(leftData);
-
-			if (response.getResultType() == ResultTypeEnum.CUD) {
-				System.out.println("affect row count: "+response.getAffectRowCount());
+			
+			if(response.getResultType() == ResultTypeEnum.CUD){
+				return (T) new Integer(response.getAffectRowCount());
 			}else{
-				
+				return (T) response.getResultSet();
 			}
+
+//			if (response.getResultType() == ResultTypeEnum.CUD) {
+//				//System.out.println("affect row count: "+response.getAffectRowCount());
+//				return (T) new Integer(response.getAffectRowCount());
+//			}else{
+//				
+//				List<List<Parameter>> resultSet = new ArrayList<List<Parameter>>();
+//				
+//				for(int i=0;i< response.getChunkCount();i++){
+//					int currentChunkSize = in.readInt();
+//					
+//					byte[] currentChunkData = new byte[currentChunkSize];
+//					in.read(currentChunkData, 0, currentChunkSize);
+//					
+//					resultSet.addAll(DefaultResponse.unpackChunk(currentChunkData));
+//				}
+//				
+//				return (T) resultSet;
+//				
+//			}
 
 		} catch (UnknownHostException unknownHost) {
 			System.err.println("You are trying to connect to an unknown host!");
@@ -142,6 +228,8 @@ public class DALClient {
 				ioException.printStackTrace();
 			}
 		}
+		
+		return null;
 	}
 
 	public static void main(String[] args) {

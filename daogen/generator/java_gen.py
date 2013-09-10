@@ -3,16 +3,19 @@ from daogen.model.project_model import project_model_obj
 from daogen.model.task_model import task_model_obj
 
 from daogen.template import Loader
-import os, shutil
+import os, shutil, re
 
 templates_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
 	"templates")
+
+in_pattern = re.compile(r"\sIN\s", re.I)
 
 class Method(object):
 	comment = None
 	method_name = None
 	sql = ""
 	action = "fetch"
+	extra = None
 
 class SPMethods(object):
 	comment = None
@@ -105,6 +108,13 @@ class JavaGenerator(object):
 						))
 
 	def generate_concrete_code(self, project_id, ctrip_dir):
+
+		def replace_holder(match_obj):
+			return "%s"
+
+		def normalize_holder(match_obj):
+			return "?"
+
 		project = project_model_obj.retrieve_alias(project_id)
 
 		with open(os.path.join(os.path.join(self.projects_dir, project_id), "pom.xml"), "w") as f:
@@ -125,16 +135,18 @@ class JavaGenerator(object):
 
 		self.generate_tree(project, os.path.join(templates_dir, "java/dao"), dao_dir)
 
+		#auto generated sql tasks here
+
 		auto_task = task_model_obj.get_auto_sql(project_id)
 
 		group_by_table = {}
 		for s in auto_task:
-			if s["dao_name"] in group_by_table:
-				group_by_table[s["dao_name"]].append(s)
+			if s["table"] in group_by_table:
+				group_by_table[s["table"]].append(s)
 			else:
-				group_by_table[s["dao_name"]]= [s,]
+				group_by_table[s["table"]]= [s,]
 
-		for dao_class, tasks in group_by_table.items():
+		for table, tasks in group_by_table.items():
 			methods = []
 			sp_methods = []
 			for task in tasks:
@@ -143,7 +155,11 @@ class JavaGenerator(object):
 				method.comment = None
 				method.method_name = task["func_name"]
 				if sql_or_sp:
-					method.sql = task["sql"]
+					if in_pattern.search(task["sql"]):
+						method.extra = True
+						method.sql = re.sub(r"\?", replace_holder, task["sql"])
+					else:
+						method.sql = task["sql"]
 				else:
 					method.sp_name = task["sp_name"]
 				method.action = "fetch" if task["crud"] == "select" else "execute"
@@ -153,14 +169,75 @@ class JavaGenerator(object):
 				else:
 					sp_methods.append(method)
 
-			with open(os.path.join(dao_dir,"tabledao/%s.java" % dao_class), "w") as f:
+			with open(os.path.join(dao_dir,"%sDAO.java" % table), "w") as f:
 				f.write(self.table_dao_template.generate(
 					product_line="com.ctrip."+project["product_line"],
 					domain=project["domain"],
 					app_name=project["service"],
-					dao_name=dao_class,
+					dao_name="%sDAO" % table,
 					methods=methods,
 					sp_methods = sp_methods
+					))
+
+		#execute or fetch from stored procedure
+		sp_task = task_model_obj.get_sp(project_id)
+		group_by_database = {}
+		for t in sp_task:
+			if t["database"] in group_by_database:
+				group_by_database[t["database"]].append(t)
+			else:
+				group_by_database[t["database"]]= [t,]
+
+		for db, tasks in group_by_database.items():
+			sp_methods = []
+			for task in tasks:
+				method = SPMethods()
+				method.comment = None
+				method.method_name = task["sp_name"][task["sp_name"].find(".")+1:]
+				method.sp_name = task["sp_name"]
+				method.action = task["sp_action"]
+				sp_methods.append(method)
+
+			with open(os.path.join(dao_dir,"%sSPDAO.java" % db), "w") as f:
+				f.write(self.sp_dao_template.generate(
+					product_line="com.ctrip."+project["product_line"],
+					domain=project["domain"],
+					app_name=project["service"],
+					database_name="%sSPDAO" % db,
+					sp_methods = sp_methods
+					))
+
+		#free form sql here
+		free_task = task_model_obj.get_free_sql(project_id)
+		group_by_daoname = {}
+		for t in free_task:
+			if t["dao_name"] in group_by_daoname:
+				group_by_daoname[t["dao_name"]].append(t)
+			else:
+				group_by_daoname[t["dao_name"]]= [t,]
+
+		for dao_name, tasks in group_by_daoname.items():
+			methods = []
+			for task in tasks:
+				method = Method()
+				method.comment = None
+				method.method_name = task["func_name"]
+				sql = re.sub(r"[@|:]\w+", normalize_holder, task["sql"])
+				if in_pattern.search(task["sql"]):
+					method.extra = True
+					method.sql = re.sub(r"\?", replace_holder, sql)
+				else:
+					method.sql = sql
+
+				methods.append(method)
+
+			with open(os.path.join(dao_dir,"%s.java" % dao_name), "w") as f:
+				f.write(self.freesql_dao_template.generate(
+					product_line="com.ctrip."+project["product_line"],
+					domain=project["domain"],
+					app_name=project["service"],
+					dao_name=dao_name,
+					methods = methods
 					))
 
 	def generate(self, project_id):

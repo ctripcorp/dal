@@ -91,21 +91,21 @@
                      <li class="sidebar" sidename="project">
                         <a href="/">
                         <i class="icon-windows"></i> 
-                        <span class="title">Projects</span>
+                        <span class="title">我的项目</span>
                         <span class="selected"></span>
                         </a>
                      </li>
                      <li class="sidebar active" sidename="task">
                         <a href="/task/">
                         <i class="icon-sun"></i> 
-                        <span class="title">Tasks</span>
+                        <span class="title">生成DAO</span>
                         <span class="selected"></span>
                         </a>
                      </li>
                      <li class="sidebar" sidename="code">
                         <a href="/file/">
                         <i class="icon-twitter"></i> 
-                        <span class="title">Files</span>
+                        <span class="title">项目文件</span>
                         <span class="selected"></span>
                         </a>
                      </li>
@@ -127,7 +127,7 @@
                               <!-- BEGIN PORTLET-->
                               <div class="portlet box blue tasks-widget">
                                  <div class="portlet-title line">
-                                    <div class="caption"><i class="icon-reorder"></i>Operation Area</div>
+                                    <div class="caption"><i class="icon-reorder"></i>选择一个选项</div>
                                     <div class="tools"> 
                                        <a href="#" class="icon-collapse collapse"></a>
                                       <a id="reload_ops" href="#" class="icon-refresh"></a>   
@@ -137,50 +137,43 @@
                                     <!--BEGIN TABS-->
                                      <div class="tabbable tabbable-custom">
                                        <ul class="nav nav-tabs">
-                                          <li class="active"><a href="#tab_1_1" task_type="autosql" data-toggle="tab">Table/View</a></li>
-                                          <li><a href="#tab_1_2"  task_type="sp" data-toggle="tab">Stored Procedure</a></li>
-                                          <li><a href="#tab_1_3"  task_type="freesql" data-toggle="tab">Free Form SQL</a></li>
+                                          <li class="active"><a href="#tab_1_1" task_type="autosql" data-toggle="tab">表/视图</a></li>
+                                          <li><a href="#tab_1_2"  task_type="sp" data-toggle="tab">存储过程</a></li>
+                                          <li><a href="#tab_1_3"  task_type="freesql" data-toggle="tab">自定义查询</a></li>
                                        </ul>
                                        <div class="tab-content">
                                           <div class="tab-pane active" id="tab_1_1">
                                              <div class="scroller" data-always-visible="1" data-rail-visible="0">
                                                  <div class="row-fluid">
-                                                   <div class="span6">
+                                                   <div class="span4">
                                                       <div class="control-group">
-                                                         <label class="control-label">Databases</label>
+                                                         <label class="control-label">数据库</label>
                                                 <select id="databases" class="span10">
                                                    
                                                 </select>
                                                 </div>
                                              </div>
-                                             <div class="span6">
+                                             <div class="span4">
                                                 <div class="control-group">
-                                                         <label class="control-label">Tables</label>
+                                                         <label class="control-label">表/视图</label>
                                                 <select id="tables" class="span10">
                                                 </select>
                                                 </div>
                                              </div>
-                                             </div>
-                                                <div class="row-fluid">
-                                                   <div class="span6">
+                                             <div class="span4">
                                                       <div class="control-group">
-                                                         <label class="control-label">DAO Class Name</label>
-                                                <input id="auto_dao_name" class="span10" type="text">
-                                                   </div>
-                                                   </div>
-                                                <div class="span6">
-                                                      <div class="control-group">
-                                                         <label class="control-label">Function Name</label>
+                                                         <label class="control-label">生成DAO时使用的方法名</label>
                                                 <input id="auto_func_name" class="span10" type="text" value="get">
                                                    </div>
                                                    </div>
-                                                </div>
+                                             </div>
+                                                
                                                 <div class="row-fluid">
                                                    <div id="crud_action" class="btn-group" data-toggle="buttons-radio" style="margin-left:80px;">
-                                                   <button type="button" class="btn btn-primary active" btn_type="select">Select</button>
-                                                   <button type="button" class="btn btn-primary"  btn_type="insert">Insert</button>
-                                                   <button type="button" class="btn btn-primary"  btn_type="update">Update</button>
-                                                   <button type="button" class="btn btn-primary"  btn_type="delete">Delete</button>
+                                                   <button type="button" class="btn btn-primary active" btn_type="select">查询</button>
+                                                   <button type="button" class="btn btn-primary"  btn_type="insert">插入</button>
+                                                   <button type="button" class="btn btn-primary"  btn_type="update">更新</button>
+                                                   <button type="button" class="btn btn-primary"  btn_type="delete">删除</button>
                                                    </div>
                                                     <div id="cud_type" class="btn-group" data-toggle="buttons-radio" style="margin-left:50px;display:none;">
                                                    <button type="button" class="btn btn-primary active" btn_type="spa">SPA</button>
@@ -236,7 +229,7 @@
                                                 <div class="row-fluid">
                                                    <div class="span4">
                                                       <div class="control-group">
-                                                          <label class="control-label">Databases</label>
+                                                          <label class="control-label">数据库</label>
                                                 <select id="sp_databases">
                                                    
                                                 </select>
@@ -244,40 +237,27 @@
                                              </div>
                                               <div class="span4">
                                                       <div class="control-group">
-                                                          <label class="control-label">Stored Procedures</label>
+                                                          <label class="control-label">存储过程</label>
                                                 <select id="sp_names">
                                                 </select>
                                                 </div>
                                              </div>
                                              <div class="span4">
                                                       <div class="control-group">
-                                                          <label class="control-label">Action Type</label>
+                                                          <label class="control-label">查询或增删改</label>
                                                 <select id="sp_action">
-                                                   <option>Execute</option>
-                                                   <option>Fetch</option>
+                                                   <option value="execute">增删改</option>
+                                                   <option value="fetch">查询</option>
                                                 </select>
                                                 </div>
                                              </div>
-                                             <div class="row-fluid">
-                                                   <div class="span6">
-                                                     <div class="control-group">
-                                                           <label class="control-label">DAO Class Name</label>
-                                                <input id="sp_dao_name" class="span10" type="text">
-                                                </div>
-                                                   </div>
-                                                   <div class="span6">
-                                                     <div class="control-group">
-                                                           <label class="control-label">Function Name</label>
-                                                <input id="sp_func_name" class="span10" type="text">
-                                                </div>
-                                                   </div>
-                                             </div>
+
                                              </div>
                                                 <div id="sp_editor" style="height:340px;">		</div>
                                                 <br>
                                                 <div class="row-fluid">
                                                    <div class="span3 offset5">
-                                                      <button id="save_sp" type="button" class="btn">Save</button>
+                                                      <button id="save_sp" type="button" class="btn">保存存储过程</button>
                                                    </div>
                                                 </div>
                                              </div>
@@ -287,7 +267,7 @@
                                                 <div class="row-fluid">
                                                    <div class="span3">
                                                      <div class="control-group">
-                                                      <label class="control-label">DAO Class Name</label>
+                                                      <label class="control-label">数据库</label>
                                                    <select id="sql_databases">
                                                   
                                                 </select>
@@ -295,30 +275,27 @@
                                                    </div>
                                                    <div class="span4">
                                                      <div class="control-group">
-                                                           <label class="control-label">DAO Class Name</label>
+                                                           <label class="control-label">生成的DAO类名</label>
                                                 <input id="sql_dao_name" class="span10" type="text">
                                                 </div>
                                                    </div>
                                                    <div class="span4">
                                                      <div class="control-group">
-                                                           <label class="control-label">Function Name</label>
+                                                           <label class="control-label">生成DAO时对应的方法名</label>
                                                 <input id="sql_func_name" class="span10" type="text">
                                                 </div>
                                                    </div>
                                                 </div>
                                                 
-                                                <div id="sql_editor" style="height:420px;">SELECT Address, Telephone FROM Person
-                                                   WHERE Name = @Name AND
-                                                   AND Gender IN @Gender
-                                                </div>
-                                                <br>
+                                                <div id="sql_editor" style="height:420px;">SELECT Address, Telephone FROM Person WHERE Name = @Name AND Gender IN @Gender</div>
+                                                <!-- <br>
                                                 <div class="row-fluid">
                                                    <div class="span3 offset4">
-                                                      <button type="button" class="btn">Query</button>
+                                                      <button type="button" class="btn">查询</button>
                                                       &nbsp;&nbsp;&nbsp;&nbsp;
                                                       <button type="button" class="btn">Auto Replace</button>
                                                    </div>
-                                                </div>
+                                                </div> -->
                                              </div>
                                           </div>
                                        </div>
@@ -332,7 +309,7 @@
                         <!--End Feeds-->
                         <div class="row-fluid">
                            <div class="span3 offset2">
-                              <button id="add_task" type="button" class="btn">Add Task</button>
+                              <button id="add_task" type="button" class="btn">添加DAO方法</button>
                            </div>
                            <div class="span3">
                               <select>
@@ -342,7 +319,7 @@
                               </select>
                            </div>
                            <div class="span3">
-                              <button id="generate_code" type="button" class="btn">Generate Code</button>
+                              <button id="generate_code" type="button" class="btn">生成代码</button>
                            </div>
                         </div>
                         <!-- <div class="clearfix"></div> -->
@@ -350,7 +327,7 @@
                            <div class="span12">
                               <div class="portlet box green tasks-widget">
                                  <div class="portlet-title">
-                                    <div class="caption"><i class="icon-check"></i>{{project_name}} Tasks</div>
+                                    <div class="caption"><i class="icon-check"></i>{{project_name}}对应的DAO方法</div>
                                     <div class="tools">
                                        <a href="#" class="icon-collapse collapse"></a>
                                        <a id="reload_tasks" href="#" class="icon-refresh"></a>

@@ -52,7 +52,7 @@ public class Netty4Handler extends SimpleChannelInboundHandler<Request> {
 					if (!future.isSuccess()) {
 						logger.error("server write response error ");
 					} else {
-						logger.error("server write response ok ");
+						logger.info("server write response ok ");
 					}
 				}
 			});

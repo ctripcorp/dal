@@ -9,12 +9,12 @@ import com.ctrip.platform.dao.common.AbstractDAO;
 import com.ctrip.platform.dao.param.Parameter;
 import com.ctrip.platform.dao.param.ParameterFactory;
 
-public class GeneratorDAOSPDAO extends AbstractDAO {
+public class SysDalTestSPDAO extends AbstractDAO {
 	/**
 	 * The logger
 	 */
 	private static final Logger logger = LoggerFactory
-			.getLogger(GeneratorDAOSPDAO.class);
+			.getLogger(SysDalTestSPDAO.class);
 
 	public ResultSet fetchBySp(String ctnCtxt, String sp, int flag,
 			Parameter... params) throws Exception {
@@ -34,7 +34,7 @@ public class GeneratorDAOSPDAO extends AbstractDAO {
 
 		// AvailableType inputParam = new <Integer> AvailableType(1, 1);
 
-		GeneratorDAOSPDAO spDAO = new GeneratorDAOSPDAO();
+		SysDalTestSPDAO spDAO = new SysDalTestSPDAO();
 
 		spDAO.setUseDBClient(true);
 

@@ -28,7 +28,7 @@ class FileHandler(RequestDispatcher):
 
 		working_dir = os.path.join(projects_dir,project_id)
 
-		p = subprocess.Popen("mvn package",
+		p = subprocess.Popen("mvn deploy",
 			cwd=working_dir,
 			shell=True, 
 			stdout=PIPE, 
@@ -41,13 +41,13 @@ class FileHandler(RequestDispatcher):
 
 		print result
 
-		files = glob.iglob(os.path.join(
-			os.path.join(working_dir,"target"),
-			 "*.jar"))
+		# files = glob.iglob(os.path.join(
+		# 	os.path.join(working_dir,"target"),
+		# 	 "*.jar"))
 
-		for f in files:
-			if os.path.isfile(f):
-				shutil.copy2(f, projects_dir)
+		# for f in files:
+		# 	if os.path.isfile(f):
+		# 		shutil.copy2(f, projects_dir)
 
 		self.write(json.dumps(result, encoding="GB2312"))
 		self.finish()

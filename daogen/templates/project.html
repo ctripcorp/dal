@@ -91,21 +91,21 @@
                      <li class="sidebar active" sidename="project">
                         <a href="/">
                         <i class="icon-windows"></i> 
-                        <span class="title">Projects</span>
+                        <span class="title">我的项目</span>
                         <span class="selected"></span>
                         </a>
                      </li>
                      <li class="sidebar" sidename="task">
                         <a href="/task/">
                         <i class="icon-sun"></i> 
-                        <span class="title">Tasks</span>
+                        <span class="title">生成DAO</span>
                         <span class="selected"></span>
                         </a>
                      </li>
                      <li class="sidebar" sidename="code">
                         <a href="/file/">
                         <i class="icon-twitter"></i> 
-                        <span class="title">Files</span>
+                        <span class="title">项目文件</span>
                         <span class="selected"></span>
                         </a>
                      </li>
@@ -125,18 +125,18 @@
                               <div class="portlet box green tasks-widget">
                                  <!-- BEGIN Portlet Title -->
                                  <div class="portlet-title">
-                                    <div class="caption"><i class="icon-check"></i>Projects</div>
+                                    <div class="caption"><i class="icon-check"></i>所有项目</div>
                                     <div class="tools">
                                        <a href="#" class="icon-refresh"></a>
                                     </div>
                                     <div class="actions">
                                        <div class="btn-group">
                                           <a class="btn mini" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                                          Actions
+                                          操作
                                           <i class="icon-angle-down"></i>
                                           </a>
                                           <ul class="dropdown-menu pull-right">
-                                             <li><a href="#" role="button" class="btn" data-dismiss="modal">Add Project</a></li>
+                                             <li><a href="#" role="button" class="btn" data-dismiss="modal">添加项目</a></li>
                                           </ul>
                                        </div>
                                     </div>
@@ -161,20 +161,20 @@
                         <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                            <div class="modal-header">
                               <button type="button" class="icon-remove close" data-dismiss="modal" aria-hidden="true" style="width: auto;height: auto;"></button>
-                              <h3 id="myModalLabel">Add a project</h3>
+                              <h3 id="myModalLabel">添加新项目</h3>
                            </div>
                            <div class="modal-body">
                               <form class="form-inline">
-                                 Product Line:<input id="product_line" type="text" class="input-block-level" value="platform">
-                                 Domain:<input id="domain" type="text" class="input-block-level" value="international">
-                                 App/Service Name:<input id="service" type="text" class="input-block-level" value="daogen">
-                                 App/Service Version:<input id="version" type="text" class="input-block-level" value="1.0.0.0-SNAPSHOT">
-                                 Alias:<input id="alias" type="text" class="input-block-level">
+                                 产品线<input id="product_line" type="text" class="input-block-level" value="platform">
+                                 域名<input id="domain" type="text" class="input-block-level" value="international">
+                                 项目名称<input id="service" type="text" class="input-block-level" value="daogen">
+                                 版本号<input id="version" type="text" class="input-block-level" value="1.0.0.0-SNAPSHOT">
+                                 别名<input id="alias" type="text" class="input-block-level">
                               </form>
                            </div>
                            <div class="modal-footer">
-                              <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                              <button id="save_project" class="btn btn-primary">Save changes</button>
+                              <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+                              <button id="save_project" class="btn btn-primary">保存</button>
                            </div>
                         </div>
                      </div>

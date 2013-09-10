@@ -3,7 +3,7 @@ package com.ctrip.platform.bll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.platform.dao.GeneratorDAOSPDAO;
+import com.ctrip.platform.dao.SysDalTestSPDAO;
 import com.ctrip.platform.dao.param.Parameter;
 import com.ctrip.platform.dao.param.ParameterFactory;
 
@@ -13,7 +13,7 @@ public class SPPersonBLL {
 	
 	public static void main(String[] args) throws Exception {
 		
-		GeneratorDAOSPDAO spDAO = new GeneratorDAOSPDAO();
+		SysDalTestSPDAO spDAO = new SysDalTestSPDAO();
 		
 		spDAO.setUseDBClient(false);
 		

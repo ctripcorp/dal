@@ -50,7 +50,7 @@ jQuery(document).ready(function () {
 
             data = JSON.parse(data);
 
-            var suffix = '</div><div class="task-config">' + '<div class="task-config-btn btn-group">' + '<a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">More <i class="icon-angle-down"></i></a>' + '<ul class="dropdown-menu pull-right">' + '<li><a href="/task?project_id=%s"><i class="icon-sun"></i> Tasks</a></li>' + '<li><a href="/file?project_id=%s"><i class="icon-twitter"></i> Files</a></li>' + '<li><a href="#"><i class="icon-pencil"></i> Edit</a></li>' + '<li><a href="#"><i class="icon-trash"></i> Delete</a></li>' + '</ul>' + '</div>' + '</div>';
+            var suffix = '</div><div class="task-config">' + '<div class="task-config-btn btn-group">' + '<a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">操作 <i class="icon-angle-down"></i></a>' + '<ul class="dropdown-menu pull-right">' + '<li><a href="/task/index?project_id=%s"><i class="icon-sun"></i> 对应DAO</a></li>' + '<li><a href="/file/?project_id=%s"><i class="icon-twitter"></i> 对应文件</a></li>' + '<li><a href="#"><i class="icon-pencil"></i> 编辑</a></li>' + '<li><a href="#"><i class="icon-trash"></i> 删除</a></li>' + '</ul>' + '</div>' + '</div>';
 
             var html_data = "";
             $.each(data, function (index, value) {

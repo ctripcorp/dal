@@ -23,28 +23,27 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-import {{product_line}}.{{domain}}.{{app_name}}.dao.enums.AvailableTypeEnum;
-import {{product_line}}.{{domain}}.{{app_name}}.dao.msg.AvailableType;
+import {{product_line}}.{{domain}}.{{app_name}}.dao.param.Parameter;
 
 public class DAOResultSet implements ResultSet {
 	
-	public DAOResultSet(List<List<AvailableType>> resultSet){
+	public DAOResultSet(List<List<Parameter>> resultSet){
 		this.resultSet = resultSet;
 	}
 
-	private List<List<AvailableType>> resultSet;
+	private List<List<Parameter>> resultSet;
 
-	private List<AvailableType> current;
+	private List<Parameter> current;
 	
 	private Map<String, Integer> lableIndexMap;
 
 	private int cursor = 0;
 
-	public List<List<AvailableType>> getResultSet() {
+	public List<List<Parameter>> getResultSet() {
 		return this.resultSet;
 	}
 
-	public void setResultSet(List<List<AvailableType>> resultSet) {
+	public void setResultSet(List<List<Parameter>> resultSet) {
 		this.resultSet = resultSet;
 	}
 
@@ -82,134 +81,95 @@ public class DAOResultSet implements ResultSet {
 	}
 
 	public String getString(int columnIndex) throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.STRING) {
-			throw new SQLException("This column is not of type STRING!");
-		}
 		cursor++;
-		return column.string_arg;
+		return column.getValue().asRawValue().getString();
 	}
 
 	public boolean getBoolean(int columnIndex) throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.BOOL) {
-			throw new SQLException("This column is not of type BOOL!");
-		}
 		cursor++;
-		return column.bool_arg;
+		return column.getValue().asBooleanValue().getBoolean();
 	}
 
 	public byte getByte(int columnIndex) throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.BYTE) {
-			throw new SQLException("This column is not of type BYTE!");
-		}
 		cursor++;
-		return column.byte_arg;
+		return column.getValue().asIntegerValue().getByte();
 	}
 
 	public short getShort(int columnIndex) throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.SHORT) {
-			throw new SQLException("This column is not of type SHORT!");
-		}
 		cursor++;
-		return column.short_arg;
+		return column.getValue().asIntegerValue().getShort();
 	}
 
 	public int getInt(int columnIndex) throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.INT) {
-			throw new SQLException("This column is not of type INT!");
-		}
 		cursor++;
-		return column.int_arg;
+		return column.getValue().asIntegerValue().getInt();
 	}
 
 	public long getLong(int columnIndex) throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.LONG) {
-			throw new SQLException("This column is not of type LONG!");
-		}
 		cursor++;
-		return column.long_arg;
+		return column.getValue().asIntegerValue().getLong();
 	}
 
 	public float getFloat(int columnIndex) throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.FLOAT) {
-			throw new SQLException("This column is not of type FLOAT!");
-		}
 		cursor++;
-		return column.float_arg;
+		return column.getValue().asFloatValue().getFloat();
 	}
 
 	public double getDouble(int columnIndex) throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.DOUBLE) {
-			throw new SQLException("This column is not of type DOUBLE!");
-		}
 		cursor++;
-		return column.double_arg;
+		return column.getValue().asFloatValue().getDouble();
 	}
 
 	public BigDecimal getBigDecimal(int columnIndex, int scale)
 			throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.DECIMAL) {
-			throw new SQLException("This column is not of type DECIMAL!");
-		}
 		cursor++;
-		return column.decimal_arg;
+		return BigDecimal.valueOf(column.getValue().asFloatValue().getDouble());
 	}
 
 	public byte[] getBytes(int columnIndex) throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.BYTEARR) {
-			throw new SQLException("This column is not of type BYTE ARRAY!");
-		}
 		cursor++;
-		return column.bytearr_arg;
+		return column.getValue().asRawValue().getByteArray();
 	}
 
 	public Date getDate(int columnIndex) throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.DATETIME) {
-			throw new SQLException("This column is not of type DATETIME!");
-		}
 		cursor++;
-		return new Date(column.datetime_arg.getTime());
+		return new Date(column.getValue().asIntegerValue().getLong());
 	}
 
 	public Time getTime(int columnIndex) throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.DATETIME) {
-			throw new SQLException("This column is not of type DATETIME!");
-		}
 		cursor++;
-		return new Time(column.datetime_arg.getTime());
+		return new Time(column.getValue().asIntegerValue().getLong());
 	}
 
 	public Timestamp getTimestamp(int columnIndex) throws SQLException {
-		AvailableType column = current.get(columnIndex-1);
+		Parameter column = current.get(columnIndex-1);
 
-		if (column.currentType != AvailableTypeEnum.DATETIME) {
-			throw new SQLException("This column is not of type DATETIME!");
-		}
 		cursor++;
-		return column.datetime_arg;
+		return new Timestamp(column.getValue().asIntegerValue().getLong());
 	}
 
 	public InputStream getAsciiStream(int columnIndex) throws SQLException {

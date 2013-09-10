@@ -23,7 +23,7 @@ public class RequestMessage {
 
 	private String sql;
 
-	private List<List<Parameter>> args;// always
+	private List<Parameter> args;// always
 
 	private int flags; // always
 
@@ -67,11 +67,11 @@ public class RequestMessage {
 		this.sql = sql;
 	}
 
-	public List<List<Parameter>> getArgs() {
+	public List<Parameter> getArgs() {
 		return args;
 	}
 
-	public void setArgs(List<List<Parameter>> args) {
+	public void setArgs(List<Parameter> args) {
 		this.args = args;
 	}
 

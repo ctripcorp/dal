@@ -3,7 +3,9 @@ package com.ctrip.platform.bll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ctrip.platform.dao.DAOFactory;
 import com.ctrip.platform.dao.SysDalTestSPDAO;
+import com.ctrip.platform.dao.enums.FlagsEnum;
 import com.ctrip.platform.dao.param.Parameter;
 import com.ctrip.platform.dao.param.ParameterFactory;
 
@@ -13,7 +15,7 @@ public class SPPersonBLL {
 	
 	public static void main(String[] args) throws Exception {
 		
-		SysDalTestSPDAO spDAO = new SysDalTestSPDAO();
+		SysDalTestSPDAO spDAO = DAOFactory.createSysDalTestSPDAO();
 		
 		spDAO.setUseDBClient(false);
 		
@@ -24,7 +26,7 @@ public class SPPersonBLL {
 				"shanghai");
 		
 		
-		int row = spDAO.executeSp(null, "demoInsertSp", 0, nameParam, addrParam);
+		int row = spDAO.demoInsertSp(FlagsEnum.TEST.getIntVal(), addrParam, nameParam);
 		
 		logger.debug(String.valueOf(row));
 		

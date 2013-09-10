@@ -7,13 +7,18 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import org.msgpack.packer.Packer;
+import org.msgpack.type.ArrayValue;
 import org.msgpack.type.Value;
 import org.msgpack.type.ValueFactory;
 import org.msgpack.unpacker.Unpacker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.domain.enums.ParameterType;
 
 class DefaultParameter extends AbstractParameter {
+
+	private static Logger logger = LoggerFactory.getLogger(DefaultParameter.class);
 
 	/**
 	 * Initialize AvailableType with a boolean value
@@ -173,17 +178,17 @@ class DefaultParameter extends AbstractParameter {
 		this.parameterType = parameterType;
 		this.value = value;
 	}
-	
+
 	@Override
-	public PreparedStatement setPreparedStatement(PreparedStatement ps) 
+	public PreparedStatement setPreparedStatement(PreparedStatement ps)
 			throws SQLException {
-		
-		if(value.isNilValue()){
+
+		if (value.isNilValue()) {
 			ps.setNull(parameterIndex, ParameterType.getSqlType(parameterType));
 			return ps;
 		}
-		
-		switch(parameterType){
+
+		switch (parameterType) {
 		case BOOL:
 			ps.setBoolean(parameterIndex, value.asBooleanValue().getBoolean());
 			break;
@@ -194,10 +199,12 @@ class DefaultParameter extends AbstractParameter {
 			ps.setBytes(parameterIndex, value.asRawValue().getByteArray());
 			break;
 		case DATETIME:
-			ps.setTimestamp(parameterIndex, new Timestamp(value.asIntegerValue().getLong()));
+			ps.setTimestamp(parameterIndex, new Timestamp(value
+					.asIntegerValue().getLong()));
 			break;
 		case DECIMAL:
-			ps.setBigDecimal(parameterIndex, BigDecimal.valueOf(value.asFloatValue().getDouble()));
+			ps.setBigDecimal(parameterIndex,
+					BigDecimal.valueOf(value.asFloatValue().getDouble()));
 			break;
 		case DOUBLE:
 			ps.setDouble(parameterIndex, value.asFloatValue().getDouble());
@@ -209,11 +216,11 @@ class DefaultParameter extends AbstractParameter {
 			ps.setInt(parameterIndex, value.asIntegerValue().getInt());
 			break;
 		case INTARRAY:
-			for(Value v : value.asArrayValue().getElementArray()){
+			for (Value v : value.asArrayValue().getElementArray()) {
 				ps.setInt(parameterIndex, v.asIntegerValue().getInt());
 				parameterIndex++;
 			}
-			if(value.asArrayValue().size() > 0){
+			if (value.asArrayValue().size() > 0) {
 				parameterIndex--;
 			}
 			break;
@@ -227,20 +234,37 @@ class DefaultParameter extends AbstractParameter {
 			ps.setString(parameterIndex, value.asRawValue().getString());
 			break;
 		case STRINGARRAY:
-			for(Value v : value.asArrayValue().getElementArray()){
+			for (Value v : value.asArrayValue().getElementArray()) {
 				ps.setString(parameterIndex, v.asRawValue().getString());
 				parameterIndex++;
 			}
-			if(value.asArrayValue().size() > 0){
+			if (value.asArrayValue().size() > 0) {
 				parameterIndex--;
 			}
+			break;
+		case PARAMARRAY:
+			ArrayValue array = value.asArrayValue();
+			if (array.size() % 3 != 0) {
+				throw new SQLException("Parameter invalid!");
+			}
+			for (int i = 0; i < array.size() / 3; i++) {
+				int j= i*3;
+				int currentParamIndex = array.get(j).asIntegerValue().getInt();
+				ParameterType currentParamType = ParameterType.fromInt(array
+						.get(j + 1).asIntegerValue().getInt());
+				Value currentValue = array.get(j + 2);
+
+				ps = new DefaultParameter(currentParamIndex, currentParamType,
+						currentValue).setPreparedStatement(ps);	
+			}
+			ps.addBatch();
 			break;
 		default:
 			break;
 		}
-		
+
 		return ps;
-		
+
 	}
 
 	public static Parameter unpack(Unpacker unpacker) throws IOException {
@@ -257,20 +281,20 @@ class DefaultParameter extends AbstractParameter {
 
 		return new DefaultParameter(parameterIndex, parameterType, value);
 	}
-	
+
 	@Override
-	public void pack(Packer packer) throws IOException{
-		
+	public void pack(Packer packer) throws IOException {
+
 		packer.writeArrayBegin(3);
-		
+
 		packer.write(parameterIndex);
-		
+
 		packer.write(parameterType.getIntVal());
-		
+
 		packer.write(value);
-		
+
 		packer.writeArrayEnd();
-		
+
 	}
 
 }

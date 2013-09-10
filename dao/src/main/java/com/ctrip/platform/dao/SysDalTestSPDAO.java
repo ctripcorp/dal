@@ -10,49 +10,24 @@ import com.ctrip.platform.dao.param.Parameter;
 import com.ctrip.platform.dao.param.ParameterFactory;
 
 public class SysDalTestSPDAO extends AbstractDAO {
+	
+	SysDalTestSPDAO() {
+		// TODO Auto-generated constructor stub
+	}
+	
 	/**
 	 * The logger
 	 */
 	private static final Logger logger = LoggerFactory
 			.getLogger(SysDalTestSPDAO.class);
 
-	public ResultSet fetchBySp(String ctnCtxt, String sp, int flag,
-			Parameter... params) throws Exception {
-
-		return super.fetchBySp(null, sp, 0, params);
-
+	public int demoInsertSp(int flag, Parameter... params) throws Exception{
+		return super.executeSp(null, flag, "demoInsertSp", params);
+	}
+	
+	public ResultSet demoSelectSp(int flag, Parameter... params) throws Exception{
+		return super.fetchBySp(null, flag, "demoSelectSp", params);
 	}
 
-	public int executeSp(String tnxCtxt, String sp, int flag,
-			Parameter... params) throws Exception {
 
-		return super.executeSp(tnxCtxt, sp, flag, params);
-
-	}
-
-	public static void main(String[] args) throws Exception {
-
-		// AvailableType inputParam = new <Integer> AvailableType(1, 1);
-
-		SysDalTestSPDAO spDAO = new SysDalTestSPDAO();
-
-		spDAO.setUseDBClient(true);
-
-		Parameter nameParam = ParameterFactory.createStringParameter(1, "gawu");
-		Parameter addrParam = ParameterFactory.createStringParameter(2,
-				"shanghai");
-
-		int row = spDAO
-				.executeSp(null, "demoInsertSp", 0, nameParam, addrParam);
-
-		logger.debug(String.valueOf(row));
-
-		// ResultSet rs = spDAO.fetchBySp(null, "demoSelectSp",
-		// 0, inputParam);
-		//
-		// while(rs.next()){
-		// logger.debug(rs.getString(1));
-		// }
-
-	}
 }

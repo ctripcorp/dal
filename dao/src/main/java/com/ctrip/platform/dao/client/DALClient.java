@@ -27,21 +27,20 @@ public class DALClient {
 	DataOutputStream out;
 	DataInputStream in;
 
-	public ResultSet fetch(String tnxCtxt, String statement, int flag,
+	public ResultSet fetch(String tnxCtxt, int flag, String statement,
 			Parameter... params) throws Exception {
 
-		RequestMessage message = new RequestMessage();
+		RequestMessage msg = new RequestMessage();
 
-		message.setMessageType(MessageTypeEnum.SQL);
-		message.setActionType(ActionTypeEnum.SELECT);
-		message.setUseCache(false);
+		msg.setMessageType(MessageTypeEnum.SQL);
+		msg.setActionType(ActionTypeEnum.SELECT);
+		msg.setUseCache(false);
 
-		message.setSql(statement);
-		List<List<Parameter>> finalParams =  new ArrayList<List<Parameter>>();
-		finalParams.add(new ArrayList<Parameter>(Arrays.asList(params)));
-		message.setArgs(finalParams);
+		msg.setSql(statement);
 
-		message.setFlags(FlagsEnum.TEST.getIntVal());
+		msg.setArgs(new ArrayList<Parameter>(Arrays.asList(params)));
+
+		msg.setFlags(FlagsEnum.TEST.getIntVal());
 
 		DefaultRequest request = new DefaultRequest();
 
@@ -51,7 +50,7 @@ public class DALClient {
 
 		request.setCredential(Consts.credential);
 
-		request.setMessage(message);
+		request.setMessage(msg);
 		
 		DAOResultSet rs = new DAOResultSet(this.<List<List<Parameter>>>run(request));
 		
@@ -60,7 +59,7 @@ public class DALClient {
 //		return null;
 	}
 	
-	public ResultSet fetchBySp(String tnxCtxt, String sp, int flag,
+	public ResultSet fetchBySp(String tnxCtxt, int flag, String sp,
 			Parameter... params) throws Exception {
 		
 		RequestMessage msg = new RequestMessage();
@@ -71,9 +70,7 @@ public class DALClient {
 		
 		msg.setSpName(sp);
 		
-		List<List<Parameter>> finalParams =  new ArrayList<List<Parameter>>();
-		finalParams.add(new ArrayList<Parameter>(Arrays.asList(params)));
-		msg.setArgs(finalParams);
+		msg.setArgs(new ArrayList<Parameter>(Arrays.asList(params)));
 
 		msg.setFlags(FlagsEnum.TEST.getIntVal());
 
@@ -95,19 +92,17 @@ public class DALClient {
 	public int execute(String tnxCtxt, String statement, int flag,
 			Parameter... params) throws Exception {
 
-		RequestMessage message = new RequestMessage();
+		RequestMessage msg = new RequestMessage();
 
-		message.setMessageType(MessageTypeEnum.SQL);
-		message.setActionType(ActionTypeEnum.DELETE);
-		message.setUseCache(false);
+		msg.setMessageType(MessageTypeEnum.SQL);
+		msg.setActionType(ActionTypeEnum.DELETE);
+		msg.setUseCache(false);
 
-		message.setSql(statement);
-		List<List<Parameter>> finalParams =  new ArrayList<List<Parameter>>();
-		finalParams.add(new ArrayList<Parameter>(Arrays.asList(params)));
-		message.setArgs(finalParams);
+		msg.setSql(statement);
+		
+		msg.setArgs(new ArrayList<Parameter>(Arrays.asList(params)));
 
-
-		message.setFlags(FlagsEnum.TEST.getIntVal());
+		msg.setFlags(FlagsEnum.TEST.getIntVal());
 
 		DefaultRequest request = new DefaultRequest();
 
@@ -117,7 +112,7 @@ public class DALClient {
 
 		request.setCredential(Consts.credential);
 
-		request.setMessage(message);
+		request.setMessage(msg);
 
 		return this.<Integer>run(request);
 
@@ -127,19 +122,17 @@ public class DALClient {
 	public int executeSp(String tnxCtxt, String sp, int flag,
 			Parameter... params) throws Exception {
 		
-		RequestMessage message = new RequestMessage();
+		RequestMessage msg = new RequestMessage();
 
-		message.setMessageType(MessageTypeEnum.SP);
-		message.setActionType(ActionTypeEnum.DELETE);
-		message.setUseCache(false);
+		msg.setMessageType(MessageTypeEnum.SP);
+		msg.setActionType(ActionTypeEnum.DELETE);
+		msg.setUseCache(false);
 
-		message.setSpName(sp);
-		List<List<Parameter>> finalParams =  new ArrayList<List<Parameter>>();
-		finalParams.add(new ArrayList<Parameter>(Arrays.asList(params)));
-		message.setArgs(finalParams);
+		msg.setSpName(sp);
+		
+		msg.setArgs(new ArrayList<Parameter>(Arrays.asList(params)));
 
-
-		message.setFlags(FlagsEnum.TEST.getIntVal());
+		msg.setFlags(FlagsEnum.TEST.getIntVal());
 
 		DefaultRequest request = new DefaultRequest();
 
@@ -149,7 +142,7 @@ public class DALClient {
 
 		request.setCredential(Consts.credential);
 
-		request.setMessage(message);
+		request.setMessage(msg);
 
 		return this.<Integer>run(request);
 

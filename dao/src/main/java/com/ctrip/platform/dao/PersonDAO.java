@@ -14,7 +14,7 @@ public class PersonDAO extends AbstractDAO {
 	private static final Logger logger = LoggerFactory
 			.getLogger(PersonDAO.class);
 
-	public PersonDAO() {
+	PersonDAO() {
 	}
 
 	/**
@@ -22,7 +22,7 @@ public class PersonDAO extends AbstractDAO {
 	 * 
 	 * @return The DAO function object to validate the parameter
 	 */
-	public ResultSet getAddrAndTel(Parameter... params)
+	public ResultSet getAddrAndTel(int flag, Parameter... params)
 			throws Exception {
 
 		final int paramCount = 2;
@@ -35,7 +35,7 @@ public class PersonDAO extends AbstractDAO {
 					params.length));
 		}
 
-		return super.fetch(null, sql, 0, params);
+		return super.fetch(null,flag, sql, params);
 	}
 
 	/**
@@ -44,7 +44,7 @@ public class PersonDAO extends AbstractDAO {
 	 * @return
 	 * @throws Exception
 	 */
-	public int SetAddrByName(Parameter... params) throws Exception {
+	public int SetAddrByName(int flag, Parameter... params) throws Exception {
 
 		final int paramCount = 2;
 
@@ -56,7 +56,13 @@ public class PersonDAO extends AbstractDAO {
 					params.length));
 		}
 
-		return super.execute(null, sql, 0, params);
+		return super.execute(null, flag, sql, params);
+	}
+	
+	public int BatchInsertData(int flag, Parameter... params) throws Exception{
+		final String sql = "Insert into Person (Address, Name) Values (?,?)";
+
+		return super.execute(null, flag, sql, params);
 	}
 
 	

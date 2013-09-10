@@ -10,7 +10,6 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,6 +21,7 @@ import com.ctrip.sysdev.das.domain.RequestMessage;
 import com.ctrip.sysdev.das.domain.Response;
 import com.ctrip.sysdev.das.domain.enums.ActionTypeEnum;
 import com.ctrip.sysdev.das.domain.enums.MessageTypeEnum;
+import com.ctrip.sysdev.das.domain.enums.ParameterType;
 import com.ctrip.sysdev.das.domain.enums.ResultTypeEnum;
 import com.ctrip.sysdev.das.domain.param.Parameter;
 import com.ctrip.sysdev.das.domain.param.ParameterFactory;
@@ -32,8 +32,9 @@ public class QueryExecutor implements LogConsts {
 	private DataSourceWrapper dataSource;
 	private RequestMessage message;
 
-	public QueryExecutor() {}
-	
+	public QueryExecutor() {
+	}
+
 	public QueryExecutor(DataSourceWrapper dataSource, RequestMessage message) {
 		this.dataSource = dataSource;
 		this.message = message;
@@ -42,7 +43,7 @@ public class QueryExecutor implements LogConsts {
 	public Response execute() {
 		return execute(dataSource, message);
 	}
-	
+
 	public Response execute(DataSourceWrapper dataSource, RequestMessage message) {
 		Response resp = new Response();
 		Connection conn = null;
@@ -51,12 +52,26 @@ public class QueryExecutor implements LogConsts {
 		long start = System.currentTimeMillis();
 		try {
 			conn = dataSource.getConnection();
+			conn.setAutoCommit(false);
+			
 			statement = createStatement(conn, message);
 
 			if (message.getActionType() == ActionTypeEnum.SELECT) {
 				executeQuery(resp, statement);
 			} else {
-				executeUpdate(resp, statement);
+				boolean batchOperation = false;
+				for (Parameter p : message.getArgs()) {
+					if (p.getParameterType() == ParameterType.PARAMARRAY) {
+						batchOperation = true;
+						break;
+					}
+				}
+				if (batchOperation) {
+					executeBatch(resp, statement);
+				} else {
+					executeUpdate(resp, statement);
+				}
+				conn.commit();
 			}
 		} catch (Exception e) {
 			logger.error(QUERY_EXECUTION_EXCEPTION, e);
@@ -67,14 +82,14 @@ public class QueryExecutor implements LogConsts {
 		return resp;
 	}
 
-	private PreparedStatement createStatement(Connection conn, RequestMessage message)
-			throws Exception {
+	private PreparedStatement createStatement(Connection conn,
+			RequestMessage message) throws Exception {
 		// TODO: add batch operation
-		List<Parameter> params = message.getArgs().get(0);
+		List<Parameter> params = message.getArgs();
 
 		PreparedStatement statement = null;
-		
-		if (message.getMessageType() == MessageTypeEnum.SQL){
+
+		if (message.getMessageType() == MessageTypeEnum.SQL) {
 			statement = conn.prepareStatement(message.getSql());
 		} else {
 			StringBuffer occupy = new StringBuffer();
@@ -82,43 +97,56 @@ public class QueryExecutor implements LogConsts {
 			for (int i = 0; i < params.size(); i++) {
 				occupy.append("?").append(",");
 			}
-			
+
 			occupy.deleteCharAt(occupy.length() - 1);
 
-			statement = conn.prepareCall(String.format(
-					"{call dbo.%s(%s)}", message.getSpName(), occupy.toString()));
+			statement = conn.prepareCall(String.format("{call dbo.%s(%s)}",
+					message.getSpName(), occupy.toString()));
 		}
-		
-		
-		
+
 		Collections.sort(params);
 		int currentParameterIndex = 1;
 		for (int i = 0; i < params.size(); i++) {
 			params.get(i).setParameterIndex(currentParameterIndex);
 			params.get(i).setPreparedStatement(statement);
-			currentParameterIndex= params.get(i).getParameterIndex() + 1;
+			currentParameterIndex = params.get(i).getParameterIndex() + 1;
 		}
 
 		return statement;
 	}
-	
-	private void executeQuery(Response resp, PreparedStatement statement) throws SQLException {
+
+	private void executeQuery(Response resp, PreparedStatement statement)
+			throws SQLException {
 		resp.setResultType(ResultTypeEnum.RETRIEVE);
-		
+
 		ResultSet rs = statement.executeQuery();
 		resp.setResultSet(getFromResultSet(rs));
 	}
-	
-	private void executeUpdate(Response resp, PreparedStatement statement) throws SQLException {
+
+	private void executeUpdate(Response resp, PreparedStatement statement)
+			throws SQLException {
 		resp.setResultType(ResultTypeEnum.CUD);
-		
+
 		int rowCount = statement.executeUpdate();
+		resp.setAffectRowCount(rowCount);
+	}
+
+	private void executeBatch(Response resp, PreparedStatement statement)
+			throws SQLException {
+		resp.setResultType(ResultTypeEnum.CUD);
+
+		int[] rowCounts = statement.executeBatch();
+		int rowCount = 0;
+		for (int r : rowCounts) {
+			rowCount += r;
+		}
 		resp.setAffectRowCount(rowCount);
 	}
 
 	/**
 	 * TODO Shall we simply use getObject to allow best match for data type?
-	 * TODO Shall we send data back even before iterate the whole result set 
+	 * TODO Shall we send data back even before iterate the whole result set
+	 * 
 	 * @param rs
 	 * @return
 	 * @throws SQLException
@@ -145,51 +173,64 @@ public class QueryExecutor implements LogConsts {
 			for (int i = 1; i <= totalColumns; i++) {
 				switch (colTypes[i - 1]) {
 				case java.sql.Types.BOOLEAN:
-					result.add(ParameterFactory.createBooleanParameter(i, rs.getBoolean(i)));
+					result.add(ParameterFactory.createBooleanParameter(i,
+							rs.getBoolean(i)));
 					break;
 				case java.sql.Types.TINYINT:
-					result.add(ParameterFactory.createByteParameter(i, rs.getByte(i)));
+					result.add(ParameterFactory.createByteParameter(i,
+							rs.getByte(i)));
 					break;
 				case java.sql.Types.SMALLINT:
-					result.add(ParameterFactory.createShortParameter(i, rs.getShort(i)));
+					result.add(ParameterFactory.createShortParameter(i,
+							rs.getShort(i)));
 					break;
 				case java.sql.Types.INTEGER:
-					result.add(ParameterFactory.createIntParameter(i, rs.getInt(i)));
+					result.add(ParameterFactory.createIntParameter(i,
+							rs.getInt(i)));
 					break;
 				case java.sql.Types.BIGINT:
-					result.add(ParameterFactory.createLongParameter(i, rs.getLong(i)));
+					result.add(ParameterFactory.createLongParameter(i,
+							rs.getLong(i)));
 					break;
 				case java.sql.Types.FLOAT:
-					result.add(ParameterFactory.createFloatParameter(i, rs.getFloat(i)));
+					result.add(ParameterFactory.createFloatParameter(i,
+							rs.getFloat(i)));
 					break;
 				case java.sql.Types.DOUBLE:
-					result.add(ParameterFactory.createDoubleParameter(i, rs.getDouble(i)));
+					result.add(ParameterFactory.createDoubleParameter(i,
+							rs.getDouble(i)));
 					break;
 				case java.sql.Types.DECIMAL:
-					result.add(ParameterFactory.createDecimalParameter(i, rs.getBigDecimal(i)));
+					result.add(ParameterFactory.createDecimalParameter(i,
+							rs.getBigDecimal(i)));
 					break;
 				case java.sql.Types.VARCHAR:
 				case java.sql.Types.NVARCHAR:
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
-					result.add(ParameterFactory.createStringParameter(i, rs.getString(i)));
+					result.add(ParameterFactory.createStringParameter(i,
+							rs.getString(i)));
 					break;
 				case java.sql.Types.DATE:
 					Date tempDate = rs.getDate(i);
-					result.add(ParameterFactory.createTimestampParameter(i, new Timestamp(tempDate.getTime())));
+					result.add(ParameterFactory.createTimestampParameter(i,
+							new Timestamp(tempDate.getTime())));
 					break;
 				case java.sql.Types.TIME:
 					Time tempTime = rs.getTime(i);
-					result.add(ParameterFactory.createTimestampParameter(i, new Timestamp(tempTime.getTime())));
+					result.add(ParameterFactory.createTimestampParameter(i,
+							new Timestamp(tempTime.getTime())));
 					break;
 				case java.sql.Types.TIMESTAMP:
-					result.add(ParameterFactory.createTimestampParameter(i, rs.getTimestamp(i)));
+					result.add(ParameterFactory.createTimestampParameter(i,
+							rs.getTimestamp(i)));
 					break;
 				case java.sql.Types.BINARY:
 				case java.sql.Types.BLOB:
 				case java.sql.Types.LONGVARBINARY:
 				case java.sql.Types.VARBINARY:
-					result.add(ParameterFactory.createByteArrayParameter(i, rs.getBytes(i)));
+					result.add(ParameterFactory.createByteArrayParameter(i,
+							rs.getBytes(i)));
 					break;
 				default:
 					break;
@@ -201,7 +242,8 @@ public class QueryExecutor implements LogConsts {
 		return results;
 	}
 
-	private void cleanUp(Response resp, Connection conn, Statement statement, long start) {
+	private void cleanUp(Response resp, Connection conn, Statement statement,
+			long start) {
 		// TODO should add a field to response to indicate exceptional case
 		// happens
 		if (statement != null) {
@@ -219,7 +261,7 @@ public class QueryExecutor implements LogConsts {
 				logger.error(CLOSE_STATEMENT_EXCEPTION, e);
 			}
 		}
-		
+
 		logger.warn(DURATION
 				+ String.valueOf(System.currentTimeMillis() - start));
 	}

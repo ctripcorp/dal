@@ -14,7 +14,7 @@ public class FreeSQLPersonDAO extends AbstractDAO {
 	private static final Logger logger = LoggerFactory
 			.getLogger(FreeSQLPersonDAO.class);
 
-	public FreeSQLPersonDAO() {
+	FreeSQLPersonDAO() {
 	}
 
 	/**
@@ -22,7 +22,7 @@ public class FreeSQLPersonDAO extends AbstractDAO {
 	 * 
 	 * @return The DAO function object to validate the parameter
 	 */
-	public ResultSet getAddrAndTel(Parameter... params) throws Exception {
+	public ResultSet getAddrAndTel(int flag, Parameter... params) throws Exception {
 
 		Arrays.sort(params);
 
@@ -59,7 +59,7 @@ public class FreeSQLPersonDAO extends AbstractDAO {
 		
 		logger.info(sql);
 
-		return super.fetch(null, sql, 0, params);
+		return super.fetch(null,flag, sql, params);
 	}
 
 

@@ -18,7 +18,8 @@ public enum ParameterType {
 	DATETIME(9),
 	BYTEARRAY(10),
 	INTARRAY(11),
-	STRINGARRAY(12);
+	STRINGARRAY(12),
+	PARAMARRAY(13);
 	
 	private int intVal;
 

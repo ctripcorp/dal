@@ -83,8 +83,8 @@ public class RequestSerDe extends AbstractMsgPackSerDe<Request> {
 	 * @throws IOException
 	 * @throws ProtocolInvalidException
 	 */
-	private static RequestMessage unpackMessage(Unpacker unpacker) throws IOException,
-			ProtocolInvalidException {
+	private static RequestMessage unpackMessage(Unpacker unpacker)
+			throws IOException, ProtocolInvalidException {
 
 		int propertyCount = unpacker.readArrayBegin();
 
@@ -102,26 +102,21 @@ public class RequestSerDe extends AbstractMsgPackSerDe<Request> {
 			message.setSql(unpacker.readString());
 		}
 
-		int argsLength = unpacker.readArrayBegin();
-		message.setArgs(new ArrayList<List<Parameter>>(argsLength));
+		int argLength = unpacker.readArrayBegin();
 
-		for (int i = 0; i < argsLength; i++) {
-
-			int argLength = unpacker.readArrayBegin();
-			List<Parameter> arg = new ArrayList<Parameter>(argLength);
-			for (int j = 0; j < argLength; j++) {
-				arg.add(ParameterFactory.createParameterFromUnpack(unpacker));
-			}
-			unpacker.readArrayEnd();
-			message.getArgs().add(arg);
+		List<Parameter> args = new ArrayList<Parameter>(argLength);
+		for (int i = 0; i < argLength; i++) {
+			args.add(ParameterFactory.createParameterFromUnpack(unpacker));
 		}
-
 		unpacker.readArrayEnd();
+		
+		message.setArgs(args);
 
 		message.setFlags(unpacker.readInt());
+		
+		unpacker.readArrayEnd();
 
 		return message;
 	}
 
-	
 }

@@ -10,23 +10,15 @@ import com.ctrip.platform.dao.client.DALClient;
 import com.ctrip.platform.dao.client.DBClient;
 import com.ctrip.platform.dao.param.Parameter;
 
-public class AbstractDAO { // implements IDAO {
-
-	/*
-	 * Free Form SQL Example:
-	 * 
-	 * SELECT Address, Telephone FROM Person
-	 * 
-	 * WHERE Name = {string} AND Age BETWEEN {int} AND {int}
-	 * 
-	 * AND Gender IN {int[]}
-	 */
+public class AbstractDAO  implements DAO {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractDAO.class);
 
 	private boolean useDBClient;
-	private DBClient dbClient;
-	private DALClient dalClient;
+	
+	//all the sub class instance share the same instance of DBClient or DALClient
+	private static DBClient dbClient;
+	private static DALClient dalClient;
 
 	public AbstractDAO() {
 
@@ -40,163 +32,86 @@ public class AbstractDAO { // implements IDAO {
 		this.useDBClient = useDBClient;
 	}
 
-	public ResultSet fetch(String tnxCtxt, String statement, int flag,
+	@Override
+	public ResultSet fetch(String tnxCtxt, int flag, String statement,
 			Parameter... params) throws Exception {
-
-		// all the parameters required are now provided
 		if (useDBClient) {
 			if (dbClient == null) {
 				dbClient = new DBClient();
 				dbClient.init();
 			}
-			return dbClient.fetch(tnxCtxt, statement, flag, params);
+			return dbClient.fetch(tnxCtxt, flag, statement, params);
 		} else {
-			if(dalClient == null){
+			if (dalClient == null) {
 				dalClient = new DALClient();
 			}
-			return dalClient.fetch(tnxCtxt, statement, flag, params);
-
+			return dalClient.fetch(tnxCtxt, flag, statement, params);
 		}
-
-//		return null;
 	}
 
-	public <T> List<T> fetchByORM(String tnxCtxt, String statement,
-			List<Parameter> params, int flag) {
+	@Override
+	public <T> List<T> fetchVO(String tnxCtxt, int flag, String statement,
+			Parameter... params) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public ResultSet fetchBySp(String tnxCtxt, String sp, int flag,
+	@Override
+	public ResultSet fetchBySp(String tnxCtxt, int flag, String sp,
 			Parameter... params) throws Exception {
-		// all the parameters required are now provided
 		if (useDBClient) {
 			if (dbClient == null) {
 				dbClient = new DBClient();
 				dbClient.init();
 			}
-			return dbClient.fetchBySp(null, sp, 0, params);
+			return dbClient.fetchBySp(tnxCtxt, flag, sp, params);
 		} else {
-			if(dalClient == null){
+			if (dalClient == null) {
 				dalClient = new DALClient();
 			}
-			return dalClient.fetchBySp(tnxCtxt, sp, flag, params);
-
+			return dalClient.fetchBySp(tnxCtxt, flag, sp, params);
 		}
-
-//		return null;
 	}
 
-	public <T> List<T> fetchBySpByORM(String tnxCtxt, String sp,
-			List<Parameter> params, int flag) {
+	@Override
+	public <T> List<T> fetchVOBySp(String tnxCtxt, int flag, String sp,
+			Parameter... params) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public int execute(String tnxCtxt, String statement, int flag,
+	@Override
+	public int execute(String tnxCtxt, int flag, String statement,
 			Parameter... params) throws Exception {
-
-		// all the parameters required are now provided
 		if (useDBClient) {
 			if (dbClient == null) {
 				dbClient = new DBClient();
 				dbClient.init();
 			}
-			return dbClient.execute(null, statement, flag, params);
+			return dbClient.execute(tnxCtxt, flag, statement, params);
 		} else {
-			if(dalClient == null){
+			if (dalClient == null) {
 				dalClient = new DALClient();
 			}
-			return dalClient.execute(null, statement, flag, params);
+			return dalClient.execute(tnxCtxt, statement, flag, params);
 		}
 	}
 
-	public int executeSp(String tnxCtxt, String sp, int flag,
+	@Override
+	public int executeSp(String tnxCtxt, int flag, String sp,
 			Parameter... params) throws Exception {
-		// all the parameters required are now provided
 		if (useDBClient) {
 			if (dbClient == null) {
 				dbClient = new DBClient();
 				dbClient.init();
 			}
-			return dbClient.executeSp(tnxCtxt, sp, flag, params);
+			return dbClient.executeSp(tnxCtxt, flag, sp, params);
 		} else {
-			if(dalClient == null){
+			if (dalClient == null) {
 				dalClient = new DALClient();
 			}
 			return dalClient.executeSp(tnxCtxt, sp, flag, params);
 		}
-
-//		return 0;
-	}
-
-	public int bulkInsert(String tnxCtxt, String statement,
-			List<Parameter> params, int flag) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public static void main(String[] args) throws Exception {
-
-		// new BaseDAO().fetch(null, null, null, (Flags.TEST.getIntVal() |
-		// Flags.COMMIT.getIntVal()));
-		// new BaseDAO().fetch(null, null, null,Flags.COMMIT.getIntVal());
-		// new BaseDAO().fetch(null, null, null,Flags.TEST.getIntVal());
-
-		// Statement stmt;
-		//
-		// Class.forName("com.mysql.jdbc.Driver");
-		//
-		// String url = "jdbc:mysql://192.168.83.132:3306/dao_test";
-		//
-		// Connection conn = DriverManager.getConnection(url, "root", "123456");
-		//
-		// stmt = conn.createStatement();
-		//
-		// //PreparedStatement ps =
-		// conn.prepareStatement("SELECT * FROM Person WHERE Gender = ?");
-		//
-		// PreparedStatement ps =
-		// conn.prepareStatement("SELECT * FROM Person WHERE Gender in ?");
-		//
-		// //ps.setInt(1, 1);
-		// Date d = new Date();
-		//
-		// System.out.println(d.toString());
-		//
-		// ResultSet rs = ps.executeQuery();
-		//
-		// //ResultSet rs = stmt.executeQuery("SELECT * FROM Person");
-		//
-		// ResultSetMetaData rsmd = rs.getMetaData();
-		//
-		// int totalColumns = rsmd.getColumnCount();
-		//
-		// int[] colTypes = new int[totalColumns];
-		//
-		// for (int i = 1; i <= totalColumns; i++) {
-		// int currentColType = rsmd.getColumnType(i);
-		// colTypes[i - 1] = currentColType;
-		// }
-		//
-		// while (rs.next()) {
-		// for (int i = 1; i <= totalColumns; i++) {
-		// switch (colTypes[i-1]) {
-		// case java.sql.Types.INTEGER:
-		// System.out.println(rs.getInt(i));
-		// break;
-		// case java.sql.Types.VARCHAR:
-		// System.out.println(rs.getString(i));
-		// break;
-		// default:
-		// System.out.println("---------begin default----------");
-		// System.out.println(rs.getObject(i));
-		// System.out.println("----------end default----------");
-		// break;
-		// }
-		// }
-		// }
-
 	}
 
 }

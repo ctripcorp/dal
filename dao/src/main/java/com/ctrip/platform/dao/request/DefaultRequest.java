@@ -2,6 +2,8 @@ package com.ctrip.platform.dao.request;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -139,15 +141,8 @@ public class DefaultRequest extends AbstractRequest {
 
 		packer.writeArrayBegin(message.getArgs().size());
 
-		for (List<Parameter> row : message.getArgs()) {
-
-			packer.writeArrayBegin(row.size());
-
-			for (Parameter col : row) {
-				col.pack(packer);
-			}
-
-			packer.writeArrayEnd();
+		for (Parameter col : message.getArgs()) {
+			col.pack(packer);
 		}
 
 		packer.writeArrayEnd();
@@ -157,5 +152,4 @@ public class DefaultRequest extends AbstractRequest {
 		packer.writeArrayEnd();
 	}
 
-	
 }

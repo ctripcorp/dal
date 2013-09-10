@@ -90,5 +90,23 @@ public final class ParameterFactory {
 			throws IOException {
 		return DefaultParameter.unpack(unpacker);
 	}
+	
+	public static Parameter createParameterList(Parameter... params) {
+
+		Value[] valueArray = new Value[params.length * 3];
+
+		for (int i = 0; i < params.length; i++) {
+			int j = i * 3;
+			valueArray[j] = ValueFactory.createIntegerValue(params[i]
+					.getParameterIndex());
+			valueArray[j + 1] = ValueFactory.createIntegerValue(params[i]
+					.getParameterType().getIntVal());
+			valueArray[j + 2] = params[i].getValue();
+		}
+
+		return new DefaultParameter(-1, ParameterType.PARAMARRAY,
+				ValueFactory.createArrayValue(valueArray));
+
+	}
 
 }

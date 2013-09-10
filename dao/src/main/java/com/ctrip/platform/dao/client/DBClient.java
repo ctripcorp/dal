@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 
+import com.ctrip.platform.dao.enums.ParameterType;
 import com.ctrip.platform.dao.param.Parameter;
 import com.ctrip.platform.dao.utils.Consts;
 
@@ -26,7 +27,7 @@ public class DBClient {
 	 * @return
 	 * @throws Exception
 	 */
-	public ResultSet fetch(String tnxCtxt, String statement, int flag,
+	public ResultSet fetch(String tnxCtxt, int flag, String statement,
 			Parameter... params) throws Exception {
 
 		PreparedStatement ps = connection.prepareStatement(statement);
@@ -36,7 +37,7 @@ public class DBClient {
 		for (int i = 0; i < params.length; i++) {
 			params[i].setParameterIndex(currentParameterIndex);
 			params[i].setPreparedStatement(ps);
-			currentParameterIndex= params[i].getParameterIndex() + 1;
+			currentParameterIndex = params[i].getParameterIndex() + 1;
 		}
 
 		ResultSet rs = ps.executeQuery();
@@ -44,25 +45,45 @@ public class DBClient {
 		return rs;
 	}
 
-	public int bulkInsert(String tnxCtxt, String statement,
-			List<Parameter> params, int flag) {
+	public int execute(String tnxCtxt, int flag, String statement,
+			Parameter... params) throws Exception {
 
-		return 0;
-	}
+		boolean batchOperation = false;
 
-	public int execute(String tnxCtxt, String statement, int flag,
-			Parameter... params) throws Exception{
+		for (Parameter p : params) {
+			if (p.getParameterType() == ParameterType.PARAMARRAY) {
+				batchOperation = true;
+				break;
+			}
+		}
 
 		PreparedStatement ps = connection.prepareStatement(statement);
 
+		int currentParameterIndex = 1;
+		Arrays.sort(params);
 		for (int i = 0; i < params.length; i++) {
-			params[i].setPreparedStatement(ps);
+			params[i].setParameterIndex(currentParameterIndex);
+			ps = params[i].setPreparedStatement(ps);
+			currentParameterIndex = params[i].getParameterIndex() + 1;
+		}
+		
+		int count= 0;
+		
+		if(batchOperation){
+			int[] counts = ps.executeBatch();
+			for(int c : counts){
+				count += c;
+			}
+		}else{
+			count = ps.executeUpdate();
 		}
 
-		return ps.executeUpdate();
+		connection.commit();
+
+		return count;
 	}
 
-	public ResultSet fetchBySp(String tnxCtxt, String sp, int flag,
+	public ResultSet fetchBySp(String tnxCtxt, int flag, String sp,
 			Parameter... params) throws Exception {
 
 		StringBuffer occupy = new StringBuffer();
@@ -91,9 +112,9 @@ public class DBClient {
 	 * @param params
 	 * @return
 	 */
-	public int executeSp(String tnxCtxt, String sp, int flag,
+	public int executeSp(String tnxCtxt, int flag, String sp,
 			Parameter... params) throws Exception {
-		
+
 		StringBuffer occupy = new StringBuffer();
 
 		for (int i = 0; i < params.length; i++) {
@@ -123,6 +144,8 @@ public class DBClient {
 		// Consts.user, Consts.password);
 		connection = DriverManager.getConnection(Consts.connectionString);
 
+		connection.setAutoCommit(false);
+
 		statement = connection.createStatement();
 
 	}
@@ -137,13 +160,6 @@ public class DBClient {
 			connection.close();
 		}
 
-	}
-
-	public static void main(String[] args) throws Exception {
-		// DBClient db = new DBClient();
-		// db.init();
-		// db.fetchBySp(null, null, null, 0);
-		// db.close();
 	}
 
 }

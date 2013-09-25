@@ -1,6 +1,7 @@
 package com.ctrip.platform.dao.common;
 
 import java.sql.ResultSet;
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ public class AbstractDAO  implements DAO {
 	private static DALClient dalClient;
 
 	public AbstractDAO() {
-
+			Collection
 	}
 
 	public boolean isUseDBClient() {

@@ -11,10 +11,9 @@ import org.msgpack.unpacker.Unpacker;
 
 import com.ctrip.sysdev.das.domain.Request;
 import com.ctrip.sysdev.das.domain.RequestMessage;
-import com.ctrip.sysdev.das.domain.enums.ActionTypeEnum;
-import com.ctrip.sysdev.das.domain.enums.MessageTypeEnum;
-import com.ctrip.sysdev.das.domain.param.Parameter;
-import com.ctrip.sysdev.das.domain.param.ParameterFactory;
+import com.ctrip.sysdev.das.domain.enums.OperationType;
+import com.ctrip.sysdev.das.domain.enums.StatementType;
+import com.ctrip.sysdev.das.domain.param.StatementParameter;
 import com.ctrip.sysdev.das.exception.ProtocolInvalidException;
 import com.ctrip.sysdev.das.exception.SerDeException;
 import com.ctrip.sysdev.das.serde.MsgPackSerDeType;
@@ -90,13 +89,13 @@ public class RequestSerDe extends AbstractMsgPackSerDe<Request> {
 
 		RequestMessage message = new RequestMessage();
 
-		message.setMessageType(MessageTypeEnum.fromInt(unpacker.readInt()));
+		message.setStatementType(StatementType.fromInt(unpacker.readInt()));
 
-		message.setActionType(ActionTypeEnum.fromInt(unpacker.readInt()));
+		message.setOperationType(OperationType.fromInt(unpacker.readInt()));
 
 		message.setUseCache(unpacker.readBoolean());
 
-		if (message.getMessageType() == MessageTypeEnum.SP) {
+		if (message.getStatementType() == StatementType.StoredProcedure) {
 			message.setSpName(unpacker.readString());
 		} else {
 			message.setSql(unpacker.readString());
@@ -104,9 +103,9 @@ public class RequestSerDe extends AbstractMsgPackSerDe<Request> {
 
 		int argLength = unpacker.readArrayBegin();
 
-		List<Parameter> args = new ArrayList<Parameter>(argLength);
+		List<StatementParameter> args = new ArrayList<StatementParameter>(argLength);
 		for (int i = 0; i < argLength; i++) {
-			args.add(ParameterFactory.createParameterFromUnpack(unpacker));
+			args.add(StatementParameter.createFromUnpack(unpacker));
 		}
 		unpacker.readArrayEnd();
 		

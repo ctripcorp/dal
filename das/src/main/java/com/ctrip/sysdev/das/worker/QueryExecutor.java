@@ -13,18 +13,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.msgpack.type.ValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.commons.DataSourceWrapper;
 import com.ctrip.sysdev.das.domain.RequestMessage;
 import com.ctrip.sysdev.das.domain.Response;
-import com.ctrip.sysdev.das.domain.enums.ActionTypeEnum;
-import com.ctrip.sysdev.das.domain.enums.MessageTypeEnum;
-import com.ctrip.sysdev.das.domain.enums.ParameterType;
-import com.ctrip.sysdev.das.domain.enums.ResultTypeEnum;
+import com.ctrip.sysdev.das.domain.enums.DbType;
+import com.ctrip.sysdev.das.domain.enums.OperationType;
+import com.ctrip.sysdev.das.domain.enums.StatementType;
 import com.ctrip.sysdev.das.domain.param.Parameter;
 import com.ctrip.sysdev.das.domain.param.ParameterFactory;
+import com.ctrip.sysdev.das.domain.param.StatementParameter;
 
 public class QueryExecutor implements LogConsts {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -52,26 +53,26 @@ public class QueryExecutor implements LogConsts {
 		long start = System.currentTimeMillis();
 		try {
 			conn = dataSource.getConnection();
-			conn.setAutoCommit(false);
-			
+			// conn.setAutoCommit(false);
+
 			statement = createStatement(conn, message);
 
-			if (message.getActionType() == ActionTypeEnum.SELECT) {
+			if (message.getOperationType() == OperationType.Read) {
 				executeQuery(resp, statement);
 			} else {
-				boolean batchOperation = false;
-				for (Parameter p : message.getArgs()) {
-					if (p.getParameterType() == ParameterType.PARAMARRAY) {
-						batchOperation = true;
-						break;
-					}
-				}
-				if (batchOperation) {
-					executeBatch(resp, statement);
-				} else {
-					executeUpdate(resp, statement);
-				}
-				conn.commit();
+				// boolean batchOperation = false;
+				// for (Parameter p : message.getArgs()) {
+				// if (p.getParameterType() == ParameterType.PARAMARRAY) {
+				// batchOperation = true;
+				// break;
+				// }
+				// }
+				// if (batchOperation) {
+				// executeBatch(resp, statement);
+				// } else {
+				executeUpdate(resp, statement);
+				// }
+				// conn.commit();
 			}
 		} catch (Exception e) {
 			logger.error(QUERY_EXECUTION_EXCEPTION, e);
@@ -85,11 +86,11 @@ public class QueryExecutor implements LogConsts {
 	private PreparedStatement createStatement(Connection conn,
 			RequestMessage message) throws Exception {
 		// TODO: add batch operation
-		List<Parameter> params = message.getArgs();
+		List<StatementParameter> params = message.getArgs();
 
 		PreparedStatement statement = null;
 
-		if (message.getMessageType() == MessageTypeEnum.SQL) {
+		if (message.getStatementType() == StatementType.SQL) {
 			statement = conn.prepareStatement(message.getSql());
 		} else {
 			StringBuffer occupy = new StringBuffer();
@@ -104,12 +105,10 @@ public class QueryExecutor implements LogConsts {
 					message.getSpName(), occupy.toString()));
 		}
 
-		Collections.sort(params);
-		int currentParameterIndex = 1;
+		// Collections.sort(params);
+
 		for (int i = 0; i < params.size(); i++) {
-			params.get(i).setParameterIndex(currentParameterIndex);
 			params.get(i).setPreparedStatement(statement);
-			currentParameterIndex = params.get(i).getParameterIndex() + 1;
 		}
 
 		return statement;
@@ -117,7 +116,7 @@ public class QueryExecutor implements LogConsts {
 
 	private void executeQuery(Response resp, PreparedStatement statement)
 			throws SQLException {
-		resp.setResultType(ResultTypeEnum.RETRIEVE);
+		resp.setResultType(OperationType.Read);
 
 		ResultSet rs = statement.executeQuery();
 		resp.setResultSet(getFromResultSet(rs));
@@ -125,7 +124,7 @@ public class QueryExecutor implements LogConsts {
 
 	private void executeUpdate(Response resp, PreparedStatement statement)
 			throws SQLException {
-		resp.setResultType(ResultTypeEnum.CUD);
+		resp.setResultType(OperationType.Write);
 
 		int rowCount = statement.executeUpdate();
 		resp.setAffectRowCount(rowCount);
@@ -133,7 +132,7 @@ public class QueryExecutor implements LogConsts {
 
 	private void executeBatch(Response resp, PreparedStatement statement)
 			throws SQLException {
-		resp.setResultType(ResultTypeEnum.CUD);
+		resp.setResultType(OperationType.Write);
 
 		int[] rowCounts = statement.executeBatch();
 		int rowCount = 0;
@@ -151,7 +150,7 @@ public class QueryExecutor implements LogConsts {
 	 * @return
 	 * @throws SQLException
 	 */
-	private List<List<Parameter>> getFromResultSet(ResultSet rs)
+	private List<List<StatementParameter>> getFromResultSet(ResultSet rs)
 			throws SQLException {
 
 		ResultSetMetaData metaData = rs.getMetaData();
@@ -159,78 +158,94 @@ public class QueryExecutor implements LogConsts {
 		int totalColumns = metaData.getColumnCount();
 
 		int[] colTypes = new int[totalColumns];
+		String[] colNames = new String[totalColumns];
 
 		for (int i = 1; i <= totalColumns; i++) {
 			int currentColType = metaData.getColumnType(i);
 			colTypes[i - 1] = currentColType;
+			colNames[i-1] = metaData.getColumnLabel(i);
 		}
 
-		List<List<Parameter>> results = new ArrayList<List<Parameter>>();
+		List<List<StatementParameter>> results = new ArrayList<List<StatementParameter>>();
 
 		// Convert ResultSet object to a list of Parameter
 		while (rs.next()) {
-			List<Parameter> result = new ArrayList<Parameter>();
+			List<StatementParameter> result = new ArrayList<StatementParameter>();
 			for (int i = 1; i <= totalColumns; i++) {
 				switch (colTypes[i - 1]) {
 				case java.sql.Types.BOOLEAN:
-					result.add(ParameterFactory.createBooleanParameter(i,
-							rs.getBoolean(i)));
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.Boolean,
+							ValueFactory.createBooleanValue(rs.getBoolean(i))));
 					break;
 				case java.sql.Types.TINYINT:
-					result.add(ParameterFactory.createByteParameter(i,
-							rs.getByte(i)));
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.Byte,
+							ValueFactory.createIntegerValue(rs.getByte(i))));
 					break;
 				case java.sql.Types.SMALLINT:
-					result.add(ParameterFactory.createShortParameter(i,
-							rs.getShort(i)));
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.Int16,
+							ValueFactory.createIntegerValue(rs.getShort(i))));
 					break;
 				case java.sql.Types.INTEGER:
-					result.add(ParameterFactory.createIntParameter(i,
-							rs.getInt(i)));
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.Int32,
+							ValueFactory.createIntegerValue(rs.getInt(i))));
 					break;
 				case java.sql.Types.BIGINT:
-					result.add(ParameterFactory.createLongParameter(i,
-							rs.getLong(i)));
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.Int64,
+							ValueFactory.createIntegerValue(rs.getLong(i))));
 					break;
 				case java.sql.Types.FLOAT:
-					result.add(ParameterFactory.createFloatParameter(i,
-							rs.getFloat(i)));
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.Single,
+							ValueFactory.createFloatValue(rs.getFloat(i))));
 					break;
 				case java.sql.Types.DOUBLE:
-					result.add(ParameterFactory.createDoubleParameter(i,
-							rs.getDouble(i)));
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.Double,
+							ValueFactory.createFloatValue(rs.getDouble(i))));
 					break;
 				case java.sql.Types.DECIMAL:
-					result.add(ParameterFactory.createDecimalParameter(i,
-							rs.getBigDecimal(i)));
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.Double,
+							ValueFactory.createFloatValue(rs.getBigDecimal(i).doubleValue())));
 					break;
 				case java.sql.Types.VARCHAR:
 				case java.sql.Types.NVARCHAR:
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
-					result.add(ParameterFactory.createStringParameter(i,
-							rs.getString(i)));
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.String,
+							ValueFactory.createRawValue(rs.getString(i))));
 					break;
 				case java.sql.Types.DATE:
 					Date tempDate = rs.getDate(i);
-					result.add(ParameterFactory.createTimestampParameter(i,
-							new Timestamp(tempDate.getTime())));
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.Date,
+							ValueFactory.createIntegerValue(tempDate.getTime())));
 					break;
 				case java.sql.Types.TIME:
 					Time tempTime = rs.getTime(i);
-					result.add(ParameterFactory.createTimestampParameter(i,
-							new Timestamp(tempTime.getTime())));
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.Time,
+							ValueFactory.createIntegerValue(tempTime.getTime())));
 					break;
 				case java.sql.Types.TIMESTAMP:
-					result.add(ParameterFactory.createTimestampParameter(i,
-							rs.getTimestamp(i)));
+					Timestamp tempTimestamp = rs.getTimestamp(i);
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.DateTime,
+							ValueFactory.createIntegerValue(tempTimestamp.getTime())));
 					break;
 				case java.sql.Types.BINARY:
 				case java.sql.Types.BLOB:
 				case java.sql.Types.LONGVARBINARY:
 				case java.sql.Types.VARBINARY:
-					result.add(ParameterFactory.createByteArrayParameter(i,
-							rs.getBytes(i)));
+					result.add(StatementParameter.createFromValue(i,colNames[i-1],
+							DbType.Binary,
+							ValueFactory.createRawValue(rs.getBytes(i))));
 					break;
 				default:
 					break;

@@ -2,9 +2,9 @@ $(document).ready(function () {
 
     var whereKeyValuemap = {};
 
-    var filedTypeMap = {};
-
     var cud_shortcut = {};
+
+    var tasks = {};
 
     whereKeyValuemap["0"] = "=";
     whereKeyValuemap["1"] = "!=";
@@ -44,8 +44,13 @@ $(document).ready(function () {
         }
     });
 
+    var user_change = true;
+
     //Get all tables/views of a selected database
-    $("#databases").change(function (event) {
+    $("#databases").change(function (event, callback) {
+        if (event.originalEvent) {
+            user_change = true;
+        }
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
         $.get("/database/tables?db_name=" + $(this).val(), function (data) {
@@ -56,12 +61,19 @@ $(document).ready(function () {
             });
             $("#tables").html(html_data);
             App.unblockUI(el);
-            $("#tables").trigger('change');
+
+            if(user_change){
+                $("#tables").trigger('change');
+            }
+
+            if(typeof callback == "function"){
+                callback.apply($(this));
+            }
         });
     });
 
     //Get all fields of a selected table/view
-    $("#tables").change(function (event) {
+    $("#tables").change(function (event, callback) {
 
         $("#auto_dao_name").val(sprintf("%sDAO", $(this).val()));
 
@@ -73,41 +85,44 @@ $(document).ready(function () {
         $.get(url, function (data) {
             data = JSON.parse(data);
             var html_data = "";
-            var operator = '<div class="task-config"><div class="task-config-btn btn-group"><a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">Operator<i class="icon-angle-down"></i></a><ul class="dropdown-menu pull-right"><li><a href="#" value="-1"><i class="icon-check"></i> None</a></li><li><a href="#" value="0"><i class="icon-check-empty"></i> Equal</a></li><li><a href="#" value="1"><i class="icon-check-empty"></i> Not Equal</a></li><li><a href="#" value="2"><i class="icon-check-empty"></i> Greater Than</a></li><li><a href="#" value="3"><i class="icon-check-empty"></i> Less Than</a></li><li><a href="#" value="4"><i class="icon-check-empty"></i> Greater Equal Than</a></li><li><a href="#" value="5"><i class="icon-check-empty"></i> Less Equal Than</a></li><li><a href="#" value="6"><i class="icon-check-empty"></i> Between</a></li><li><a href="#" value="7"><i class="icon-check-empty"></i> Like</a></li><li><a href="#" value="8"><i class="icon-check-empty"></i> In</a></li></ul></div></div>';
+            var operator = "<div class='span6' style='float: right;'><select style='height:30px;' class='span6'><option value='-1'>Null</option><option value='0'>=</option><option value='1'>!=</option><option value='2'>></option><option value='3'><</option><option value='4'>>=</option><option value='5'><=</option><option value='6'>Between</option><option value='7'>Like</option><option value='8'>In</option></select></div>";
             var where_condition = '';
+
+            var localFieldTypeMap = {};
+
             $.each(data, function (index, value) {
 
-                filedTypeMap[value.name] = value.type;
+                if (value.indexed) {
+                    html_data = sprintf("%s<option value='%s'>%s*</option>", html_data, value.name, value.name);
+                    where_condition = sprintf(
+                        "%s<li><div class='task-title'><span style='float: left;' class='task-title-sp' real_name='%s'>%s(indexed)</span>%s</div></li>", where_condition, value.name,value.name, operator);
+                } else {
+                    html_data = sprintf("%s<option value='%s'>%s</option>", html_data, value.name, value.name);
+                    where_condition = sprintf(
+                        "%s<li><div class='task-title'><span style='float: left;' class='task-title-sp' real_name='%s'>%s</span>%s</div></li>", where_condition, value.name,value.name, operator);
+                }
 
-                html_data += "<option>" + value.name + "</option>";
-
-                where_condition = sprintf(
-                    "%s<li><div class='task-title'><span class='task-title-sp'>%s</span></div>%s</li>", where_condition, value.name, operator);
             });
+
             $("#left_select").html(html_data);
             $("#where_condition").html(where_condition);
 
-            $(".icon-check-empty, .icon-check").each(function () {
-                $(this).parent().bind('click', function (event) {
-                    var current_el = $(this).children().get(0);
-                    if (!$(current_el).hasClass(".icon-check")) {
-                        $(current_el).closest('ul').find("li > a > i.icon-check").removeClass("icon-check").addClass("icon-check-empty");
-                        $(current_el).removeClass("icon-check-empty").addClass("icon-check");
-                    }
-                });
-            });
-
-            // $("#where_condition > li > .task-config > .task-config-btn > .dropdown-menu  > li > a").click(function () {
-            //     $(this).parent().parent().find("li > a > i.icon-ok").toggleClass("icon-ok");
-            //     $(this).find("i").toggleClass("icon-ok");
-            // });
-
             App.unblockUI(el);
+
+            if(typeof callback == "function"){
+                callback.apply($(this));
+            }
+
         });
     });
 
     //Get all stored procedures of a selected database
-    $("#sp_databases").change(function (event) {
+    $("#sp_databases").change(function (event, callback) {
+
+        if (event.originalEvent) {
+            user_change = true;
+        }
+
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
         $.get("/database/sps?db_name=" + $(this).val(), function (data) {
@@ -119,7 +134,15 @@ $(document).ready(function () {
                 }));
             });
             App.unblockUI(el);
-            $("#sp_names").trigger('change');
+
+            if(user_change){
+                $("#sp_names").trigger('change');
+            }
+
+            if(typeof callback == "function"){
+                callback.apply($(this));
+            }
+
         });
     });
 
@@ -149,7 +172,7 @@ $(document).ready(function () {
     //Move all fields as query selection
     $("button.btn.moveall").click(function () {
 
-        $("#left_select option").each(function(){
+        $("#left_select option").each(function () {
             $("#right_select").append($(this));
         });
 
@@ -165,7 +188,7 @@ $(document).ready(function () {
     });
 
     $("button.btn.removeall").click(function () {
-         $("#right_select option").each(function(){
+        $("#right_select option").each(function () {
             $("#left_select").append($(this));
         });
         // $("#left_select").html($("#right_select").html());
@@ -223,7 +246,6 @@ $(document).ready(function () {
                 $("#select_fields").hide();
                 $("#where_fields").show()();
             }
-
             break;
         }
     });
@@ -247,23 +269,29 @@ $(document).ready(function () {
                     fields.push(this.value);
                 });
 
+                task_object["fields"] = fields;
+
                 var where_condition = "";
 
-                var selected_condition = $("a[value!='-1'] > .icon-check");
+                var selected_condition = $("#where_condition > li > div > div > select > option[value!='-1']:selected");
+
+                var where_fields = {};
 
                 if ($(selected_condition).length > 0) {
                     where_condition = "WHERE ";
 
-                    $("a[value!='-1'] > .icon-check").each(function () {
-                        var condition = $(this).parent().attr("value");
-                        var field = $(this).closest("div[class='task-config']").prev().children().text();
+                    $(selected_condition).each(function () {
+                        var condition = $(this).val();
+                        var field = $(this).closest("div[class='task-title']").children(".task-title-sp").attr("real_name");
+
+                        where_fields[field] = condition;
 
                         var current_where_clause = "";
                         //means BETWEEN
                         if (condition == 6) {
-                            current_where_clause = "BETWEEN ? AND ?";
+                            current_where_clause = sprintf("BETWEEN @%s_start AND @%s_end", field, field);
                         } else {
-                            current_where_clause = sprintf("%s ?", whereKeyValuemap[condition]);
+                            current_where_clause = sprintf("%s @%s", whereKeyValuemap[condition], field);
                         }
 
                         where_condition = sprintf(" %s %s %s AND", where_condition, field, current_where_clause);
@@ -274,7 +302,7 @@ $(document).ready(function () {
                     }
                 }
 
-                task_object["field_type"] = filedTypeMap;
+                task_object["where"] = where_fields;
 
                 switch (task_object["crud"]) {
                 case "select":
@@ -283,18 +311,35 @@ $(document).ready(function () {
                 case "insert":
                     var place_holder = [];
                     for (var i = 0; i < fields.length; i++) {
-                        place_holder.push("?");
+                        place_holder.push(sprintf("@%s", fields[i]));
                     }
                     task_object["sql"] = sprintf("INSERT INTO %s (%s) VALUES (%s)", task_object["table"], fields.join(","), place_holder.join(","));
                     break;
                 case "update":
-                    task_object["sql"] = sprintf("UPDATE %s SET %s %s", task_object["table"], sprintf("%s = ?", fields.join(" = ?, ")), where_condition);
+                    var place_holder = [];
+                    for (var i = 0; i < fields.length; i++) {
+                        place_holder.push(sprintf("%s = @%s", fields[i], fields[i]));
+                    }
+                    task_object["sql"] = sprintf("UPDATE %s SET %s %s", task_object["table"], place_holder.join(","), where_condition);
                     break;
                 case "delete":
                     task_object["sql"] = sprintf("DELETE FROM %s %s", task_object["table"], where_condition);
                     break;
                 }
 
+            };
+
+            function pack_sp_params(){
+                var fields = [];
+                $("#left_select > option").each(function () {
+                    fields.push(this.value);
+                });
+
+                $("#right_select > option").each(function () {
+                    fields.push(this.value);
+                });
+
+                task_object["fields"] = fields;
             };
 
             task_object["func_name"] = $("#auto_func_name").val();
@@ -313,6 +358,7 @@ $(document).ready(function () {
                     pack_sql_params();
                 } else {
                     task_object["sp_name"] = sprintf("%s_%s_%s", task_object["cud"], task_object["table"], cud_shortcut[task_object["crud"]]);
+                    pack_sp_params();
                 }
             }
 
@@ -346,44 +392,115 @@ $(document).ready(function () {
 
     //Get all tasks of the project
     $("#reload_tasks").click(function () {
+
+        if($('#main_area').children().length > 0){
+            $('#dao_tasks').dataTable().fnClearTable();    
+        }
+        
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
         $.get("/task/tasks?project_id=" + $("#proj_id").attr("project"), function (data) {
 
             data = JSON.parse(data);
 
-            var suffix = '</div><div class="task-config"><div class="task-config-btn btn-group"><a class="btn mini blue" href="#" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">More <i class="icon-angle-down"></i></a><ul class="dropdown-menu pull-right"><li><a href="#"><i class="icon-twitter"></i> To another project</a></li><li><a href="#"><i class="icon-pencil"></i> Edit</a></li><li><a href="#"><i class="icon-trash"></i> Delete</a></li></ul></div></div>';
+             $.each(data, function (index, value) {
+                var dao_name = "";
+                var func_name = "";
 
-            var html_data = "";
-            $.each(data, function (index, value) {
-                var result_sql = sprintf("USE %s ", value.database);
+                tasks[value._id] = value;
 
-                if (value.task_type == "autosql") {
-                    if (value.crud == "select" || value.cud == "sql") {
-                        result_sql = sprintf("%s %s", result_sql, value.sql);
-                    } else {
-                        result_sql = sprintf("%s EXEC %s", result_sql, value.sp_name);
+                if(value.dao_name != undefined){
+                    dao_name = value.dao_name;
+                }else{
+                    if(value.task_type == "sp"){
+                        dao_name = sprintf("%sSPDAO", value.database);
+                    }else{
+                        dao_name = sprintf("%sDAO", value.table);
                     }
-                } else if (value.task_type == "sp") {
-                    result_sql += " EXEC " + value.sp_name;
-                } else {
-                    result_sql += " " + value.sql;
                 }
 
-                html_data += '<li><div class="task-title"><span id="' + value._id + '" class="task-title-sp">' + result_sql + '</span>' + suffix + '</li>';
+                if(value.func_name != undefined){
+                    func_name = value.func_name;
+                }else{
+                    func_name = value.sp_name.substring(
+                        value.sp_name.indexOf(".")+1, value.sp_name.length);
+                }
+
+                var title = "";
+                if(value.task_type == "sp"){
+                    title = sprintf("EXEC %s", value.sp_name);
+                }else{
+                    title = value.sql;
+                }
+
+                $('#dao_tasks').dataTable().fnAddData( 
+                    [value.database, dao_name, func_name, 
+                    sprintf("<a rel='tooltip' title='%s' class='btn'><i class='icon-question'></i></a>&nbsp;<button type='button' class='btn btn-success modify'>修改</button><input type='hidden' value='%s'>&nbsp;<button type='button' class='btn btn-danger delete'>删除</button>"
+                        , title
+                        , value._id)]
+                    );
+             });
+
+            $(".delete.btn-danger").click(function(){
+                if (confirm("Are you sure?")) {
+                    var id = $(this).prev().val();
+                    $.get("/task/delete?task_id=" + id, function (data) {
+                        $("#reload_tasks").trigger('click');
+                    });
+                }
             });
 
-            $("#all_tasks").html(html_data);
+            $(".modify.btn-success").click(function(){
+                if (confirm("Are you sure?")) {
+                    var id = $(this).next().val();
+                    var value = tasks[id];
 
-            $(".icon-trash").each(function () {
-                $(this).parent().bind('click', function (event) {
-                    if (confirm("Are you sure?")) {
-                        var id = $(this).closest('div[class="task-config"]').prev().children().attr("id");
-                        $.get("/task/delete?task_id=" + id, function (data) {
-                            $("#reload_tasks").trigger('click');
-                        });
+                    var current_tab = $("#task_tab > ul > li > a[task_type='"+value.task_type+"']").parent();
+
+                    if(!$(current_tab).hasClass("active")){
+                        //$("#task_tab > ul > li.active").toggleClass("active");
+                        //$(current_tab).addClass("active");
+                        $(current_tab).children().trigger('click');
                     }
-                });
+
+                    switch(value.task_type){
+                        case "autosql":
+                            $("#databases").val(value.database);
+                            $("#auto_func_name").val(value.func_name);
+                            user_change = false;
+                            $("#databases").trigger('change', function(){
+                                $("#tables").val(value.table);
+                                $("#tables").trigger('change', function(){
+                                     $("#right_select").html("");
+                                    $.each( value.fields, function(index, field){
+                                        $("#right_select").append($(sprintf("#left_select option[value='%s']",field)));
+                                    });
+
+                                    $.each( value.where, function(name, value){
+                                       $(sprintf(".task-title-sp[real_name='%s']", name)).next().children().val(value);
+                                    });
+                                });
+                            });
+                            break;
+                        case "sp":
+                            $("#sp_databases").val(value.database);
+                            $("#sp_action").val(value.sp_action);
+                            user_change = false;
+                            $("#sp_databases").trigger('change', function(){
+                                $("#sp_names").val(value.sp_name);
+                                $("#sp_names").trigger('change');
+                            });
+                            break;
+                        case "freesql":
+                            $("#sql_databases").val(value.database);
+                            $("#sql_dao_name").val(value.dao_name);
+                            $("#sql_func_name").val(value.func_name);
+                            editor.setValue(value.sql);
+                            break;
+                    }
+                    
+
+                }
             });
 
             App.unblockUI(el);
@@ -435,10 +552,46 @@ $(document).ready(function () {
         post_data["sp_code"] = JSON.stringify(sp_code);
 
         $.post("/database/save_sp", post_data, function (data) {
+            user_change = true;
             $("#sp_databases").trigger('change');
         });
     });
 
     $(".icon-refresh").trigger('click');
+
+    $('#dao_tasks').dataTable({
+        "aoColumns": [{
+            "bSortable": false
+        }, {
+            "bSortable": false
+        }, {
+            "bSortable": false
+        }, {
+            "bSortable": false
+        }],
+        "aLengthMenu": [
+            [5, 15, 20, -1],
+            [5, 15, 20, "所有"] // change per page values here
+        ],
+        // set the initial value
+        "iDisplayLength": 5,
+        // "sDom": "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
+        "sPaginationType": "bootstrap",
+        "oLanguage": {
+            "sLengthMenu": "每页显示_MENU_",
+            "sZeroRecords": "抱歉-未找到任何数据",
+            "sInfo": "共 _TOTAL_ 条数据，当前显示 _START_ 到 _END_ ",
+            "sInfoEmpty": "共 0 条数据，当前显示 0 到 0 ",
+            "sSearch": "查找",
+            "oPaginate": {
+                "sPrevious": "上一页",
+                "sNext": "下一页"
+            }
+        },
+        "aoColumnDefs": [{
+            'bSortable': false,
+            'aTargets': [0]
+        }]
+    });
 
 });

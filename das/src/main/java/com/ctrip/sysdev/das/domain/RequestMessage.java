@@ -2,9 +2,10 @@ package com.ctrip.sysdev.das.domain;
 
 import java.util.List;
 
-import com.ctrip.sysdev.das.domain.enums.ActionTypeEnum;
-import com.ctrip.sysdev.das.domain.enums.MessageTypeEnum;
+import com.ctrip.sysdev.das.domain.enums.OperationType;
+import com.ctrip.sysdev.das.domain.enums.StatementType;
 import com.ctrip.sysdev.das.domain.param.Parameter;
+import com.ctrip.sysdev.das.domain.param.StatementParameter;
 
 /****
  * 
@@ -13,9 +14,9 @@ import com.ctrip.sysdev.das.domain.param.Parameter;
  */
 public class RequestMessage {
 
-	private MessageTypeEnum messageType; // always
+	private StatementType statementType; // always
 
-	private ActionTypeEnum actionType; // always
+	private OperationType operationType; // always
 
 	private boolean useCache; // always
 
@@ -23,24 +24,24 @@ public class RequestMessage {
 
 	private String sql;
 
-	private List<Parameter> args;// always
+	private List<StatementParameter> args;// always
 
 	private int flags; // always
 
-	public MessageTypeEnum getMessageType() {
-		return messageType;
+	public StatementType getStatementType() {
+		return statementType;
 	}
 
-	public void setMessageType(MessageTypeEnum messageType) {
-		this.messageType = messageType;
+	public void setStatementType(StatementType statementType) {
+		this.statementType = statementType;
 	}
 
-	public ActionTypeEnum getActionType() {
-		return actionType;
+	public OperationType getOperationType() {
+		return operationType;
 	}
 
-	public void setActionType(ActionTypeEnum actionType) {
-		this.actionType = actionType;
+	public void setOperationType(OperationType operationType) {
+		this.operationType = operationType;
 	}
 
 	public boolean isUseCache() {
@@ -67,11 +68,11 @@ public class RequestMessage {
 		this.sql = sql;
 	}
 
-	public List<Parameter> getArgs() {
+	public List<StatementParameter> getArgs() {
 		return args;
 	}
 
-	public void setArgs(List<Parameter> args) {
+	public void setArgs(List<StatementParameter> args) {
 		this.args = args;
 	}
 

@@ -8,8 +8,8 @@ import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
 
 import com.ctrip.sysdev.das.domain.Response;
-import com.ctrip.sysdev.das.domain.enums.ResultTypeEnum;
-import com.ctrip.sysdev.das.domain.param.Parameter;
+import com.ctrip.sysdev.das.domain.enums.OperationType;
+import com.ctrip.sysdev.das.domain.param.StatementParameter;
 import com.ctrip.sysdev.das.exception.SerDeException;
 import com.ctrip.sysdev.das.serde.MsgPackSerDeType;
 import com.ctrip.sysdev.das.utils.UUID2ByteArray;
@@ -38,13 +38,13 @@ public class ResponseSerDe extends AbstractMsgPackSerDe<Response> {
 			packer.writeArrayBegin(currentPropertyCount);
 			packer.write(UUID2ByteArray.asByteArray(obj.getTaskid()));
 			packer.write(obj.getResultType().getIntVal());
-			if (obj.getResultType() == ResultTypeEnum.RETRIEVE) {
+			if (obj.getResultType() == OperationType.Read) {
 				// means chunk
 //				packer.write(obj.getChunkCount());
 				packer.writeArrayBegin(obj.getResultSet().size());
-				for(List<Parameter> outer : obj.getResultSet()){
+				for(List<StatementParameter> outer : obj.getResultSet()){
 					packer.writeArrayBegin(outer.size());
-					for(Parameter inner : outer){
+					for(StatementParameter inner : outer){
 						inner.pack(packer);
 					}
 					packer.writeArrayEnd();

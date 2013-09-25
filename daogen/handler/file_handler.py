@@ -2,7 +2,8 @@
 import subprocess
 from subprocess import PIPE
 import glob, os, shutil, json
-from daogen.generator.java_gen import generator
+#from daogen.generator.java_gen import generator
+from daogen.generator.csharp_gen import generator
 from daogen.handler.base import RequestDispatcher
 
 projects_dir = os.path.join(
@@ -26,20 +27,22 @@ class FileHandler(RequestDispatcher):
 		project_id = self.get_argument("project_id", default=None, strip=False)
 		generator.generate(project_id)
 
-		working_dir = os.path.join(projects_dir,project_id)
+		# working_dir = os.path.join(projects_dir,project_id)
 
-		p = subprocess.Popen("mvn deploy",
-			cwd=working_dir,
-			shell=True, 
-			stdout=PIPE, 
-			stderr=PIPE)
-		output, error = p.communicate()
-		result = {
-			"output": output,
-			"error": error
-		}
+		# p = subprocess.Popen("mvn deploy",
+		# 	cwd=working_dir,
+		# 	shell=True, 
+		# 	stdout=PIPE, 
+		# 	stderr=PIPE)
+		# output, error = p.communicate()
+		# result = {
+		# 	"output": output,
+		# 	"error": error
+		# }
 
-		print result
+		result = {"success": True}
+
+		# print result
 
 		# files = glob.iglob(os.path.join(
 		# 	os.path.join(working_dir,"target"),

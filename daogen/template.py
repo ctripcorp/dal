@@ -242,7 +242,8 @@ class Template(object):
                 "exec", dont_inherit=True)
         except Exception:
             formatted_code = _format_code(self.code).rstrip()
-            app_log.error("%s code:\n%s", self.name, formatted_code)
+            #app_log.error("%s code:\n%s", self.name, formatted_code)
+            #print self.name, formatted_code
             raise
 
     def generate(self, **kwargs):

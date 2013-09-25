@@ -5,8 +5,9 @@ import java.util.UUID;
 
 import org.msgpack.packer.Packer;
 
-import com.ctrip.sysdev.das.domain.enums.ResultTypeEnum;
+import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.param.Parameter;
+import com.ctrip.sysdev.das.domain.param.StatementParameter;
 
 public class Response extends BaseDomain {
 
@@ -19,13 +20,13 @@ public class Response extends BaseDomain {
 
 	private UUID taskid;
 
-	private ResultTypeEnum resultType;
+	private OperationType resultType;
 
 	private int affectRowCount;
 	
 	private int chunkCount;
 
-	private List<List<Parameter>> resultSet;
+	private List<List<StatementParameter>> resultSet;
 	
 
 	/**
@@ -77,7 +78,7 @@ public class Response extends BaseDomain {
 	/**
 	 * @return the resultType
 	 */
-	public ResultTypeEnum getResultType() {
+	public OperationType getResultType() {
 		return resultType;
 	}
 
@@ -85,7 +86,7 @@ public class Response extends BaseDomain {
 	 * @param resultType
 	 *            the resultType to set
 	 */
-	public void setResultType(ResultTypeEnum resultType) {
+	public void setResultType(OperationType resultType) {
 		this.resultType = resultType;
 	}
 
@@ -107,7 +108,7 @@ public class Response extends BaseDomain {
 	/**
 	 * @return the resultSet
 	 */
-	public List<List<Parameter>> getResultSet() {
+	public List<List<StatementParameter>> getResultSet() {
 		return resultSet;
 	}
 
@@ -115,7 +116,7 @@ public class Response extends BaseDomain {
 	 * @param resultSet
 	 *            the resultSet to set
 	 */
-	public void setResultSet(List<List<Parameter>> resultSet) {
+	public void setResultSet(List<List<StatementParameter>> resultSet) {
 		this.resultSet = resultSet;
 	}
 

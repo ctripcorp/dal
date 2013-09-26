@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.msgpack.type.Value;
 import org.msgpack.type.ValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +76,7 @@ public class QueryExecutor implements LogConsts {
 				// conn.commit();
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			logger.error(QUERY_EXECUTION_EXCEPTION, e);
 		} finally {
 			cleanUp(resp, conn, statement, start);
@@ -163,7 +165,7 @@ public class QueryExecutor implements LogConsts {
 		for (int i = 1; i <= totalColumns; i++) {
 			int currentColType = metaData.getColumnType(i);
 			colTypes[i - 1] = currentColType;
-			colNames[i-1] = metaData.getColumnLabel(i);
+			colNames[i - 1] = metaData.getColumnLabel(i);
 		}
 
 		List<List<StatementParameter>> results = new ArrayList<List<StatementParameter>>();
@@ -172,79 +174,87 @@ public class QueryExecutor implements LogConsts {
 		while (rs.next()) {
 			List<StatementParameter> result = new ArrayList<StatementParameter>();
 			for (int i = 1; i <= totalColumns; i++) {
+				Value v;
 				switch (colTypes[i - 1]) {
 				case java.sql.Types.BOOLEAN:
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.Boolean,
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.Boolean,
 							ValueFactory.createBooleanValue(rs.getBoolean(i))));
 					break;
 				case java.sql.Types.TINYINT:
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.Byte,
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.Byte,
 							ValueFactory.createIntegerValue(rs.getByte(i))));
 					break;
 				case java.sql.Types.SMALLINT:
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.Int16,
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.Int16,
 							ValueFactory.createIntegerValue(rs.getShort(i))));
 					break;
 				case java.sql.Types.INTEGER:
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.Int32,
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.Int32,
 							ValueFactory.createIntegerValue(rs.getInt(i))));
 					break;
 				case java.sql.Types.BIGINT:
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.Int64,
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.Int64,
 							ValueFactory.createIntegerValue(rs.getLong(i))));
 					break;
 				case java.sql.Types.FLOAT:
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.Single,
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.Single,
 							ValueFactory.createFloatValue(rs.getFloat(i))));
 					break;
 				case java.sql.Types.DOUBLE:
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.Double,
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.Double,
 							ValueFactory.createFloatValue(rs.getDouble(i))));
 					break;
 				case java.sql.Types.DECIMAL:
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.Double,
-							ValueFactory.createFloatValue(rs.getBigDecimal(i).doubleValue())));
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.Double, ValueFactory
+									.createFloatValue(rs.getBigDecimal(i)
+											.doubleValue())));
 					break;
 				case java.sql.Types.VARCHAR:
 				case java.sql.Types.NVARCHAR:
 				case java.sql.Types.LONGVARCHAR:
 				case java.sql.Types.LONGNVARCHAR:
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.String,
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.String,
 							ValueFactory.createRawValue(rs.getString(i))));
 					break;
 				case java.sql.Types.DATE:
 					Date tempDate = rs.getDate(i);
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.Date,
-							ValueFactory.createIntegerValue(tempDate.getTime())));
+					v = tempDate == null ? ValueFactory
+							.createNilValue() : ValueFactory.createIntegerValue(tempDate.getTime());
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.Date,v
+							));
 					break;
 				case java.sql.Types.TIME:
 					Time tempTime = rs.getTime(i);
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.Time,
-							ValueFactory.createIntegerValue(tempTime.getTime())));
+					v = tempTime == null ? ValueFactory
+							.createNilValue() : ValueFactory.createIntegerValue(tempTime.getTime());
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.Time,v
+							));
 					break;
 				case java.sql.Types.TIMESTAMP:
 					Timestamp tempTimestamp = rs.getTimestamp(i);
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.DateTime,
-							ValueFactory.createIntegerValue(tempTimestamp.getTime())));
+					v = tempTimestamp == null ? ValueFactory
+							.createNilValue() : ValueFactory
+							.createIntegerValue(tempTimestamp.getTime());
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.DateTime, v));
 					break;
 				case java.sql.Types.BINARY:
 				case java.sql.Types.BLOB:
 				case java.sql.Types.LONGVARBINARY:
 				case java.sql.Types.VARBINARY:
-					result.add(StatementParameter.createFromValue(i,colNames[i-1],
-							DbType.Binary,
+					result.add(StatementParameter.createFromValue(i,
+							colNames[i - 1], DbType.Binary,
 							ValueFactory.createRawValue(rs.getBytes(i))));
 					break;
 				default:

@@ -39,7 +39,7 @@ namespace platform.dao.client
             }
             catch
             {
-                
+
             }
         }
 
@@ -80,9 +80,9 @@ namespace platform.dao.client
         /// <returns></returns>
         private DefaultResponse ReadResponse()
         {
-            int totalLength = (networkStream.ReadByte() << 24) | 
-                (networkStream.ReadByte() << 16) | 
-                (networkStream.ReadByte() << 8) | 
+            int totalLength = (networkStream.ReadByte() << 24) |
+                (networkStream.ReadByte() << 16) |
+                (networkStream.ReadByte() << 8) |
                 (networkStream.ReadByte() << 0);
 
             int protocolVersion = (networkStream.ReadByte() << 8) |
@@ -107,7 +107,7 @@ namespace platform.dao.client
             return response;
 
         }
-       
+
         /// <summary>
         /// 将查询请求转发到DAS服务，并获取返回结果
         /// </summary>
@@ -115,13 +115,13 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override IDataReader Fetch(string sql, StatementParameterCollection parameters, IDictionary extraOptions = null)
+        public override IDataReader Fetch(string sql, StatementParameterCollection parameters)
         {
             MatchCollection mc = paramRegex.Matches(sql);
             int i = 1;
             foreach (Match ma in mc)
             {
-                for (int j = 0; j < parameters.Count;j++ )
+                for (int j = 0; j < parameters.Count; j++)
                 {
                     if (ma.Groups["paramName"].Value.Equals(parameters[j].Name))
                     {
@@ -144,7 +144,8 @@ namespace platform.dao.client
                 Flags = 1
             };
 
-            DefaultRequest request = new DefaultRequest() {
+            DefaultRequest request = new DefaultRequest()
+            {
                 Taskid = System.Guid.NewGuid(),
                 DbName = dbName,
                 Credential = credential,
@@ -155,7 +156,8 @@ namespace platform.dao.client
 
             DefaultResponse response = ReadResponse();
 
-            IDataReader reader = new DasDataReader() { 
+            IDataReader reader = new DasDataReader()
+            {
                 ResultSet = response.ResultSet
             };
 
@@ -170,7 +172,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override int Execute(string sql, StatementParameterCollection parameters, IDictionary extraOptions = null)
+        public override int Execute(string sql, StatementParameterCollection parameters)
         {
             MatchCollection mc = paramRegex.Matches(sql);
             int i = 1;
@@ -221,7 +223,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override IDataReader FetchBySp(string sp, StatementParameterCollection parameters, IDictionary extraOptions = null)
+        public override IDataReader FetchBySp(string sp, StatementParameterCollection parameters)
         {
 
             RequestMessage message = new RequestMessage()
@@ -261,8 +263,15 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override int ExecuteSp(string sp, StatementParameterCollection parameters, IDictionary extraOptions = null)
+        public override int ExecuteSp(string sp, StatementParameterCollection parameters)
         {
+            int i = 1;
+            for (int j = 0; j < parameters.Count; j++)
+            {
+                parameters[j].Index = i;
+                i++;
+            }
+
             RequestMessage message = new RequestMessage()
             {
                 StatementType = enums.StatementType.StoredProcedure,

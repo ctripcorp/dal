@@ -22,12 +22,12 @@ namespace platform.international.daogen
 
                 //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@ID", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.Int32, 
-                        Value = iD 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@ID", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.Int32, 
+                    Value = iD 
+                    });
                 
                 
                 string sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person  WHERE  ID = @ID "   ;
@@ -52,61 +52,61 @@ namespace platform.international.daogen
 
                 //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@ID", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.Int32, 
-                        Value = setId 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@ID", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.Int32, 
+                    Value = setId 
+                    });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@Address", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.String, 
-                        Value = setAddress 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@Address", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.String, 
+                    Value = setAddress 
+                    });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@Name", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.String, 
-                        Value = setName 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@Name", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.String, 
+                    Value = setName 
+                    });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@Telephone", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.String, 
-                        Value = setTelephone 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@Telephone", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.String, 
+                    Value = setTelephone 
+                    });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@Age", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.Int32, 
-                        Value = setAge 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@Age", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.Int32, 
+                    Value = setAge 
+                    });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@Gender", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.Int32, 
-                        Value = setGender 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@Gender", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.Int32, 
+                    Value = setGender 
+                    });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@Birth", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.DateTime, 
-                        Value = setBirth 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@Birth", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.DateTime, 
+                    Value = setBirth 
+                    });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@ID", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.Int32, 
-                        Value = whereId 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@ID", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.Int32, 
+                    Value = whereId 
+                    });
                 
                 
                 string sql = "UPDATE Person SET ID = @ID,Address = @Address,Name = @Name,Telephone = @Telephone,Age = @Age,Gender = @Gender,Birth = @Birth  WHERE  ID = @ID "   ;
@@ -114,6 +114,29 @@ namespace platform.international.daogen
                 //return client.Fetch(sql, parameters);
                 
                 return dasClient.Execute(sql, parameters);
+                
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        
+        // None
+        public IDataReader getAll()
+        {
+            try
+            {
+                StatementParameterCollection parameters = new StatementParameterCollection();
+
+                //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
+                
+                
+                string sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person "   ;
+
+                //return client.Fetch(sql, parameters);
+                
+                return dasClient.Fetch(sql, parameters);
                 
             }
             catch (Exception ex)

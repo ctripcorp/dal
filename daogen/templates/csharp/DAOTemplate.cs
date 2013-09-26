@@ -22,12 +22,12 @@ namespace {{dao.namespace}}
 
                 //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
                 {% for p in method.parameters %}
-                    parameters.Add(new StatementParameter { 
-                        Name = "@{{p.fieldName}}", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.{{value_type[p.ptype]}}, 
-                        Value = {{p.name}} 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@{{p.fieldName}}", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.{{value_type[p.ptype]}}, 
+                    Value = {{p.name}} 
+                    });
                 {% end %}
                 
                 string sql = "{{method.sql}}"   ;

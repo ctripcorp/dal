@@ -22,19 +22,19 @@ namespace platform.international.daogen
 
                 //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@Name", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.String, 
-                        Value = Name 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@Name", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.String, 
+                    Value = Name 
+                    });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@Gender", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.String, 
-                        Value = Gender 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@Gender", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.String, 
+                    Value = Gender 
+                    });
                 
                 
                 string sql = "SELECT Address, Telephone FROM Person WHERE Name = @Name AND Gender IN @Gender"   ;

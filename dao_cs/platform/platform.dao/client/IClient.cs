@@ -13,23 +13,23 @@ namespace platform.dao.client
     {
         void SetCredential(string credential);
 
-        IDataReader Fetch(string sql, StatementParameterCollection parameters, IDictionary extraOptions=null);
+        IDataReader Fetch(string sql, StatementParameterCollection parameters);
 
-        int Execute(string sql, StatementParameterCollection parameters, IDictionary extraOptions = null);
+        int Execute(string sql, StatementParameterCollection parameters);
 
-        IDataReader FetchBySp(string sp, StatementParameterCollection parameters, IDictionary extraOptions = null);
+        IDataReader FetchBySp(string sp, StatementParameterCollection parameters);
 
-        int ExecuteSp(string sp, StatementParameterCollection parameters, IDictionary extraOptions = null);
+        int ExecuteSp(string sp, StatementParameterCollection parameters);
 
         //Begin orm
 
-        IList<T> Fetch<T>(IQuery query, IDictionary extraOptions = null);
+        IList<T> Fetch<T>(IQuery query);
 
-        int Insert<T>(IList<T> lists, IDictionary extraOptions = null);
+        int Insert<T>(IList<T> lists);
 
-        int Upadte<T>(IList<T> lists, IQuery query, IDictionary extraOptions = null);
+        int Upadte<T>(IList<T> lists, IQuery query);
 
-        int Delete<T>(IQuery query, IDictionary extraOptions = null);
+        int Delete<T>(IQuery query);
 
     }
 }

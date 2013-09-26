@@ -185,14 +185,19 @@ namespace platform.dao.client
             get
             {
                 object result = null;
+                StatementParameter param = null;
                 foreach (var p in current)
                 {
                     if (p.Name.Equals(name))
                     {
-                        result = p.Value;
+                        param = p;
                         break;
                     }
                 }
+
+                if (param != null)
+                    result = MsgPack.MessagePackObject.FromObject(param.Value).ToObject();
+                
                 return result;
             }
         }

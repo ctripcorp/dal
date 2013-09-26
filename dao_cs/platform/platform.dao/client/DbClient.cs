@@ -42,7 +42,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override IDataReader Fetch(string sql, StatementParameterCollection parameters, IDictionary extraOptions=null)
+        public override IDataReader Fetch(string sql, StatementParameterCollection parameters)
         {
             if (this.connection.State != System.Data.ConnectionState.Open)
             {
@@ -53,14 +53,6 @@ namespace platform.dao.client
 
             command.CommandText = sql;
             command.CommandType = System.Data.CommandType.Text;
-
-            if (extraOptions != null && extraOptions.Count > 0)
-            {
-                if (extraOptions.Contains("timeout"))
-                {
-                    command.CommandTimeout = int.Parse("" + extraOptions["timeout"]);
-                }
-            }
 
             foreach (StatementParameter p in parameters)
             {
@@ -93,7 +85,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override int Execute(string sql, StatementParameterCollection parameters, IDictionary extraOptions = null)
+        public override int Execute(string sql, StatementParameterCollection parameters)
         {
             if (this.connection.State != System.Data.ConnectionState.Open)
             {
@@ -104,14 +96,6 @@ namespace platform.dao.client
 
             command.CommandText = sql;
             command.CommandType = System.Data.CommandType.Text;
-
-            if (extraOptions != null && extraOptions.Count > 0)
-            {
-                if (extraOptions.Contains("timeout"))
-                {
-                    command.CommandTimeout = int.Parse("" + extraOptions["timeout"]);
-                }
-            }
 
             foreach (StatementParameter p in parameters)
             {
@@ -143,7 +127,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override IDataReader FetchBySp(string sp, StatementParameterCollection parameters, IDictionary extraOptions = null)
+        public override IDataReader FetchBySp(string sp, StatementParameterCollection parameters)
         {
             if (this.connection.State != System.Data.ConnectionState.Open)
             {
@@ -154,14 +138,6 @@ namespace platform.dao.client
 
             command.CommandText = sp;
             command.CommandType = System.Data.CommandType.StoredProcedure;
-
-            if (extraOptions != null && extraOptions.Count > 0)
-            {
-                if (extraOptions.Contains("timeout"))
-                {
-                    command.CommandTimeout = int.Parse("" + extraOptions["timeout"]);
-                }
-            }
 
             foreach (StatementParameter p in parameters)
             {
@@ -193,7 +169,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override int ExecuteSp(string sp, StatementParameterCollection parameters, IDictionary extraOptions = null)
+        public override int ExecuteSp(string sp, StatementParameterCollection parameters)
         {
             if (this.connection.State != System.Data.ConnectionState.Open)
             {
@@ -204,14 +180,6 @@ namespace platform.dao.client
 
             command.CommandText = sp;
             command.CommandType = System.Data.CommandType.StoredProcedure;
-
-            if (extraOptions != null && extraOptions.Count > 0)
-            {
-                if (extraOptions.Contains("timeout"))
-                {
-                    command.CommandTimeout = int.Parse("" + extraOptions["timeout"]);
-                }
-            }
 
             foreach (StatementParameter p in parameters)
             {

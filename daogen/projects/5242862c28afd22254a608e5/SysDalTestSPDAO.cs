@@ -22,19 +22,19 @@ namespace platform.international.daogen
 
                 //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@name", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.String, 
-                        Value = name 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@name", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.String, 
+                    Value = name 
+                    });
                 
-                    parameters.Add(new StatementParameter { 
-                        Name = "@address", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.String, 
-                        Value = address 
-                        });
+                parameters.Add(new StatementParameter { 
+                    Name = "@address", 
+                    Direction = ParameterDirection.Input, 
+                    DbType = DbType.String, 
+                    Value = address 
+                    });
                 
                 
                 string sp = "dbo.demoInsertSp"   ;

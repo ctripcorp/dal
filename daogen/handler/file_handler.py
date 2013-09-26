@@ -5,6 +5,7 @@ import glob, os, shutil, json
 #from daogen.generator.java_gen import generator
 from daogen.generator.csharp_gen import generator
 from daogen.handler.base import RequestDispatcher
+from daogen.model.project_model import project_model_obj
 
 projects_dir = os.path.join(
 				os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -13,15 +14,56 @@ projects_dir = os.path.join(
 class FileHandler(RequestDispatcher):
 
 	def index(self):
-		files = glob.iglob(os.path.join(projects_dir, "*.jar"))
+		# files = glob.iglob(os.path.join(projects_dir, "*.jar"))
 
-		#pom = glob.iglob(os.path.join(projects_dir, "*.xml"))
+		# #pom = glob.iglob(os.path.join(projects_dir, "*.xml"))
 
-		names = [os.path.basename(f) for f in files]
+		# names = [os.path.basename(f) for f in files]
 
-		#names.extend([os.path.basename(p) for p in pom])
+		# #names.extend([os.path.basename(p) for p in pom])
 
-		self.render("../templates/file.html", files=names)
+		self.render("../templates/file.html")
+
+	def projects(self):
+		request_id = self.get_argument("id", default=None, strip=False)
+		request_type = self.get_argument("type", default=None, strip=False)
+		request_name = self.get_argument("name", default=None, strip=False)
+		results = []
+		if request_type == "all":
+			projects = []
+			for p in project_model_obj.retrieve():
+				projects.append({
+					"id": str(p["_id"]),
+					"name": p["alias"],
+					"isParent": True,
+					"type": "project"
+					})
+			results = projects
+		elif request_type == "project":
+			files = glob.iglob(os.path.join(
+			os.path.join(projects_dir, request_id),"*.*"))
+			for f in files:
+				results.append({
+					"id": request_id,
+					"name": os.path.basename(f),
+					"isParent": False,
+					"type": "file"
+					})
+		self.write(json.dumps(results))
+		self.finish()
+
+	def content(self):
+		request_id = self.get_argument("id", default=None, strip=False)
+		request_name = self.get_argument("name", default=None, strip=False)
+
+		file_path = os.path.join(os.path.join(projects_dir, request_id), request_name)
+		result = ""
+		if os.path.exists(file_path):
+			with open(file_path, "r") as f:
+				result = f.read()
+		
+		self.write(json.dumps(result))
+		self.finish()
 
 	def generate(self):
 		project_id = self.get_argument("project_id", default=None, strip=False)

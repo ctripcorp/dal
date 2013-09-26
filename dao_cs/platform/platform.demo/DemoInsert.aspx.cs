@@ -17,14 +17,21 @@ namespace platform.demo
 
             //List<object> results = new List<object>();
 
-            var address = this.Request.QueryString["address"];
-            var name = this.Request.QueryString["name"];
-            var telephone = this.Request.QueryString["telephone"];
-            var age = this.Request.QueryString["age"];
-            var gender = this.Request.QueryString["gender"];
-            var birth = this.Request.QueryString["birth"];
-            
-            
+            //var address = this.Request.QueryString["address"];
+            //var name = this.Request.QueryString["name"];
+            //var telephone = this.Request.QueryString["telephone"];
+            //var age = this.Request.QueryString["age"];
+            //var gender = this.Request.QueryString["gender"];
+            //var birth = this.Request.QueryString["birth"];
+
+            var address = this.Request.Form["address"];
+            var name = this.Request.Form["name"];
+            var telephone = this.Request.Form["telephone"];
+            var age = this.Request.Form["age"];
+            var gender = this.Request.Form["gender"];
+            var birth = this.Request.Form["birth"];
+
+            person.insertAll(0, address, name, telephone, int.Parse(age), int.Parse(gender), DateTime.Parse(birth));
 
             string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(new { Success = true});
             Response.Clear();

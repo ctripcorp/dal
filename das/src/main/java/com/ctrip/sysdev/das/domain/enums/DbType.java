@@ -181,5 +181,9 @@ public enum DbType {
 	public static DbType fromInt(int symbol) {
         return intToEnum.get(symbol);
     }
+	
+	public static int getFromDbType(DbType t){
+		return netDbTypeToJava.get(t);
+	}
     
 }

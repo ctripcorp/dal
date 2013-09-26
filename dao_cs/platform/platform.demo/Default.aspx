@@ -15,13 +15,13 @@
 <script type="text/javascript" src="Scripts/Default.js"></script>
 </asp:Content>
 <asp:Content ID="BodyContent" runat="server" ContentPlaceHolderID="MainContent">
-<div class="span4"><div class="control-group"><label class="control-label">Address</label><input type="text"/></div></div>
-<div class="span4"><div class="control-group"><label class="control-label">Name</label><input type="text"/></div></div>
-<div class="span4"><div class="control-group"><label class="control-label">Telephone</label><input type="text"/></div></div>
-<div class="span4"><div class="control-group"><label class="control-label">Age</label><input type="text"/></div></div>
-<div class="span4"><div class="control-group"><label class="control-label">Gender</label><input type="text"/></div></div>
-<div class="span4"><div class="control-group"><label class="control-label">Birth</label><input type="text"/></div></div>
-<div class="span1 offset3"><input type="button" value="Insert"/></div>
+<div class="span4"><div class="control-group"><label class="control-label">Address</label><input id="address" type="text"/></div></div>
+<div class="span4"><div class="control-group"><label class="control-label">Name</label><input id="name" type="text"/></div></div>
+<div class="span4"><div class="control-group"><label class="control-label">Telephone</label><input id="telephone" type="text"/></div></div>
+<div class="span4"><div class="control-group"><label class="control-label">Age</label><input id="age" type="text"/></div></div>
+<div class="span4"><div class="control-group"><label class="control-label">Gender</label><input id="gender" type="text"/></div></div>
+<div class="span4"><div class="control-group"><label class="control-label">Birth</label><input id="birth" type="text"/></div></div>
+<div class="span1 offset3"><input id="insert_data" type="button" value="Insert"/></div>
 
 <div class="span8">
 

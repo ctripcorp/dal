@@ -1,5 +1,6 @@
 package com.ctrip.sysdev.das.worker;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -10,7 +11,6 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.msgpack.type.Value;
@@ -24,8 +24,6 @@ import com.ctrip.sysdev.das.domain.Response;
 import com.ctrip.sysdev.das.domain.enums.DbType;
 import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.enums.StatementType;
-import com.ctrip.sysdev.das.domain.param.Parameter;
-import com.ctrip.sysdev.das.domain.param.ParameterFactory;
 import com.ctrip.sysdev.das.domain.param.StatementParameter;
 
 public class QueryExecutor implements LogConsts {
@@ -58,22 +56,26 @@ public class QueryExecutor implements LogConsts {
 
 			statement = createStatement(conn, message);
 
-			if (message.getOperationType() == OperationType.Read) {
-				executeQuery(resp, statement);
+			if (message.getStatementType() == StatementType.StoredProcedure) {
+				executeSP(resp, statement);
 			} else {
-				// boolean batchOperation = false;
-				// for (Parameter p : message.getArgs()) {
-				// if (p.getParameterType() == ParameterType.PARAMARRAY) {
-				// batchOperation = true;
-				// break;
-				// }
-				// }
-				// if (batchOperation) {
-				// executeBatch(resp, statement);
-				// } else {
-				executeUpdate(resp, statement);
-				// }
-				// conn.commit();
+				if (message.getOperationType() == OperationType.Read) {
+					executeQuery(resp, statement);
+				} else {
+					// boolean batchOperation = false;
+					// for (Parameter p : message.getArgs()) {
+					// if (p.getParameterType() == ParameterType.PARAMARRAY) {
+					// batchOperation = true;
+					// break;
+					// }
+					// }
+					// if (batchOperation) {
+					// executeBatch(resp, statement);
+					// } else {
+					executeUpdate(resp, statement);
+					// }
+					// conn.commit();
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -128,7 +130,47 @@ public class QueryExecutor implements LogConsts {
 			throws SQLException {
 		resp.setResultType(OperationType.Write);
 
-		int rowCount = statement.executeUpdate();
+		int rowCount = 0;
+		// try{
+		rowCount = statement.executeUpdate();
+		// ResultSet rs = statement.executeQuery();
+		// CallableStatement cst = (CallableStatement) statement;
+		// cst.getMoreResults();
+		// System.out.println(((CallableStatement) statement).getInt(1));
+
+		// statement.execute();
+		// CallableStatement cst = (CallableStatement) statement;
+		// ResultSet rs = cst.getResultSet();
+		// while (rs.next()) {
+		// System.out.println("**");
+		// }
+		// }catch(SQLException ex){
+		//
+		// }
+		resp.setAffectRowCount(rowCount);
+	}
+
+	private void executeSP(Response resp, PreparedStatement statement)
+			throws SQLException {
+		resp.setResultType(OperationType.Write);
+
+		int rowCount = 0;
+		// try{
+		// rowCount = statement.executeUpdate();
+		statement.executeQuery();
+		// CallableStatement cst = (CallableStatement) statement;
+		// cst.getMoreResults();
+		// System.out.println(((CallableStatement) statement).getInt(1));
+
+		// statement.execute();
+		// CallableStatement cst = (CallableStatement) statement;
+		// ResultSet rs = cst.getResultSet();
+		// while (rs.next()) {
+		// System.out.println("**");
+		// }
+		// }catch(SQLException ex){
+		//
+		// }
 		resp.setAffectRowCount(rowCount);
 	}
 
@@ -227,25 +269,25 @@ public class QueryExecutor implements LogConsts {
 					break;
 				case java.sql.Types.DATE:
 					Date tempDate = rs.getDate(i);
-					v = tempDate == null ? ValueFactory
-							.createNilValue() : ValueFactory.createIntegerValue(tempDate.getTime());
+					v = tempDate == null ? ValueFactory.createNilValue()
+							: ValueFactory.createIntegerValue(tempDate
+									.getTime());
 					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Date,v
-							));
+							colNames[i - 1], DbType.Date, v));
 					break;
 				case java.sql.Types.TIME:
 					Time tempTime = rs.getTime(i);
-					v = tempTime == null ? ValueFactory
-							.createNilValue() : ValueFactory.createIntegerValue(tempTime.getTime());
+					v = tempTime == null ? ValueFactory.createNilValue()
+							: ValueFactory.createIntegerValue(tempTime
+									.getTime());
 					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Time,v
-							));
+							colNames[i - 1], DbType.Time, v));
 					break;
 				case java.sql.Types.TIMESTAMP:
 					Timestamp tempTimestamp = rs.getTimestamp(i);
-					v = tempTimestamp == null ? ValueFactory
-							.createNilValue() : ValueFactory
-							.createIntegerValue(tempTimestamp.getTime());
+					v = tempTimestamp == null ? ValueFactory.createNilValue()
+							: ValueFactory.createIntegerValue(tempTimestamp
+									.getTime());
 					result.add(StatementParameter.createFromValue(i,
 							colNames[i - 1], DbType.DateTime, v));
 					break;

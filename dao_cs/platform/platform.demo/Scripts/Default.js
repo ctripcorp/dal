@@ -41,6 +41,19 @@
         }]
     });
 
+    $("#insert_data").click(function () {
+        var post_data = {};
+        post_data["address"] = $("#address").val();
+        post_data["name"] = $("#name").val();
+        post_data["telephone"] = $("#telephone").val();
+        post_data["age"] = $("#age").val();
+        post_data["gender"] = $("#gender").val();
+        post_data["birth"] = $("#birth").val();
+        $.post("/DemoInsert.aspx", post_data, function (data) {
+            ttt();
+        });
+    });
+
     ttt();
 
 });

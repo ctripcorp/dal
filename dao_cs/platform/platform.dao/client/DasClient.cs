@@ -275,7 +275,7 @@ namespace platform.dao.client
             RequestMessage message = new RequestMessage()
             {
                 StatementType = enums.StatementType.StoredProcedure,
-                OperationType = enums.OperationType.Read,
+                OperationType = enums.OperationType.Write,
                 UseCache = false,
                 SpName = sp,
                 Parameters = parameters,

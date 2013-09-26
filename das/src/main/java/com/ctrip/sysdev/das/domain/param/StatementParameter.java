@@ -2,6 +2,7 @@ package com.ctrip.sysdev.das.domain.param;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.CallableStatement;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -235,6 +236,11 @@ public class StatementParameter implements Comparable<StatementParameter> {
 
 	public PreparedStatement setPreparedStatement(PreparedStatement ps)
 			throws SQLException {
+		
+		if(direction == ParameterDirection.Output && ps instanceof CallableStatement){
+			((CallableStatement)ps).registerOutParameter(index, DbType.getFromDbType(dbType));
+			return ps;
+		}
 
 		switch (dbType) {
 		case AnsiString:

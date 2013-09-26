@@ -198,7 +198,7 @@ namespace platform.demo.DAO
                 parameters.Add(new StatementParameter
                 {
                     Name = "@ID",
-                    Direction = ParameterDirection.Input,
+                    Direction = ParameterDirection.Output,
                     DbType = DbType.Int32,
                     Value = iD
                 });

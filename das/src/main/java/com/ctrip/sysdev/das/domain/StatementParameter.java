@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.das.domain.param;
+package com.ctrip.sysdev.das.domain;
 
 import java.io.IOException;
 import java.math.BigDecimal;

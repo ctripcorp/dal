@@ -8,8 +8,8 @@ import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
 
 import com.ctrip.sysdev.das.domain.Response;
+import com.ctrip.sysdev.das.domain.StatementParameter;
 import com.ctrip.sysdev.das.domain.enums.OperationType;
-import com.ctrip.sysdev.das.domain.param.StatementParameter;
 import com.ctrip.sysdev.das.exception.SerDeException;
 import com.ctrip.sysdev.das.serde.MsgPackSerDeType;
 import com.ctrip.sysdev.das.utils.UUID2ByteArray;

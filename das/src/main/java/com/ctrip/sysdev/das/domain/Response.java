@@ -6,8 +6,6 @@ import java.util.UUID;
 import org.msgpack.packer.Packer;
 
 import com.ctrip.sysdev.das.domain.enums.OperationType;
-import com.ctrip.sysdev.das.domain.param.Parameter;
-import com.ctrip.sysdev.das.domain.param.StatementParameter;
 
 public class Response extends BaseDomain {
 

@@ -21,10 +21,10 @@ import org.slf4j.LoggerFactory;
 import com.ctrip.sysdev.das.commons.DataSourceWrapper;
 import com.ctrip.sysdev.das.domain.RequestMessage;
 import com.ctrip.sysdev.das.domain.Response;
+import com.ctrip.sysdev.das.domain.StatementParameter;
 import com.ctrip.sysdev.das.domain.enums.DbType;
 import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.enums.StatementType;
-import com.ctrip.sysdev.das.domain.param.StatementParameter;
 
 public class QueryExecutor implements LogConsts {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());

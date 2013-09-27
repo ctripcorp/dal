@@ -11,9 +11,9 @@ import org.msgpack.unpacker.Unpacker;
 
 import com.ctrip.sysdev.das.domain.Request;
 import com.ctrip.sysdev.das.domain.RequestMessage;
+import com.ctrip.sysdev.das.domain.StatementParameter;
 import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.enums.StatementType;
-import com.ctrip.sysdev.das.domain.param.StatementParameter;
 import com.ctrip.sysdev.das.exception.ProtocolInvalidException;
 import com.ctrip.sysdev.das.exception.SerDeException;
 import com.ctrip.sysdev.das.serde.MsgPackSerDeType;

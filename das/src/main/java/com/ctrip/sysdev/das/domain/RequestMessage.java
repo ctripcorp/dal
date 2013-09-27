@@ -4,8 +4,6 @@ import java.util.List;
 
 import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.enums.StatementType;
-import com.ctrip.sysdev.das.domain.param.Parameter;
-import com.ctrip.sysdev.das.domain.param.StatementParameter;
 
 /****
  * 

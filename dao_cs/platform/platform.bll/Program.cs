@@ -6,6 +6,8 @@ using System.Xml;
 using System.IO;
 using System.Data;
 using System.Data.SqlClient;
+using platform.bll.DAO;
+using platform.bll.Entity;
 
 namespace platform.bll
 {
@@ -16,20 +18,30 @@ namespace platform.bll
 
             PersonDAO person = new PersonDAO();
 
-            while (Console.ReadKey().Key != ConsoleKey.Escape)
-            {
+            Person p = person.FindByPk(37);
 
-                using (IDataReader reader = person.GetAddrNameByPk(21))
-                {
-                    while (reader.Read())
-                    {
-                        Console.WriteLine(reader["Address"]);
-                        Console.WriteLine(reader["Name"]);
+            Console.WriteLine(p.ID);
+            Console.WriteLine(p.Address);
+            Console.WriteLine(p.Name);
+            Console.WriteLine(p.Telephone);
+            Console.WriteLine(p.Age);
+            Console.WriteLine(p.Gender);
+            Console.WriteLine(p.Birth.Value.ToString());
 
-                    }
-                }
-            }
-            //Console.Read();
+            //while (Console.ReadKey().Key != ConsoleKey.Escape)
+            //{
+
+            //    using (IDataReader reader = person.GetAddrNameByPk(21))
+            //    {
+            //        while (reader.Read())
+            //        {
+            //            Console.WriteLine(reader["Address"]);
+            //            Console.WriteLine(reader["Name"]);
+
+            //        }
+            //    }
+            //}
+            Console.Read();
 
         }
     }

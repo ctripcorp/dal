@@ -44,11 +44,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="client\AbstractClient.cs" />
+    <Compile Include="client\AbstractDAO.cs" />
     <Compile Include="client\ClientFactory.cs" />
     <Compile Include="client\DasClient.cs" />
     <Compile Include="client\DasDataReader.cs" />
     <Compile Include="client\DbClient.cs" />
     <Compile Include="client\IClient.cs" />
+    <Compile Include="client\IDAO.cs" />
     <Compile Include="Consts.cs" />
     <Compile Include="enums\DbDialect.cs" />
     <Compile Include="enums\OperationType.cs" />
@@ -58,6 +60,11 @@
     <Compile Include="log\AbstractLoggerAdapter.cs" />
     <Compile Include="log\Log4NetAdapter.cs" />
     <Compile Include="log\LogFactory.cs" />
+    <Compile Include="orm\attribute\AutoIncrementAttribute.cs" />
+    <Compile Include="orm\attribute\ColumnAttribute.cs" />
+    <Compile Include="orm\attribute\NullableAttribute.cs" />
+    <Compile Include="orm\attribute\PrimaryKeyAttribute.cs" />
+    <Compile Include="orm\attribute\TableAttribute.cs" />
     <Compile Include="param\StatementParameter.cs" />
     <Compile Include="param\StatementParameterCollection.cs" />
     <Compile Include="enums\StatementType.cs" />

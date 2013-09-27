@@ -2,16 +2,26 @@
 using System.Data;
 using platform.dao.client;
 using platform.dao.param;
+using platform.demo.Entity;
 
 namespace platform.demo.DAO
 {
-    public class PersonDAO
+    public class PersonDAO : AbstractDAO<Person>
     {
-        public static IClient client = ClientFactory.CreateDbClient("platform.dao.providers.SqlDatabaseProvider,platform.dao",
-            "Server=testdb.dev.sh.ctriptravel.com,28747;Integrated Security=sspi;database=SysDalTest;");
+        //public static IClient client = ClientFactory.CreateDbClient("platform.dao.providers.SqlDatabaseProvider,platform.dao",
+        //    "Server=testdb.dev.sh.ctriptravel.com,28747;Integrated Security=sspi;database=SysDalTest;");
 
-        public static IClient dasClient = ClientFactory.CreateDasClient("SysDalTest", "user=kevin;password=kevin");
+        public static IClient client;
 
+        static PersonDAO()
+        {
+            client = ClientFactory.CreateDasClient("SysDalTest", "user=kevin;password=kevin");
+        }
+
+        public override IDataReader FetchBySql(string sql)
+        {
+            return client.Fetch(sql, null);
+        }
 
         // None
         public IDataReader getAllByPk(int iD)
@@ -35,7 +45,7 @@ namespace platform.demo.DAO
 
                 //return client.Fetch(sql, parameters);
 
-                return dasClient.Fetch(sql, parameters);
+                return client.Fetch(sql, parameters);
 
             }
             catch (Exception ex)
@@ -122,7 +132,7 @@ namespace platform.demo.DAO
 
                 //return client.Fetch(sql, parameters);
 
-                return dasClient.Execute(sql, parameters);
+                return client.Execute(sql, parameters);
 
             }
             catch (Exception ex)
@@ -145,7 +155,7 @@ namespace platform.demo.DAO
 
                 //return client.Fetch(sql, parameters);
 
-                return dasClient.Fetch(sql, parameters);
+                return client.Fetch(sql, parameters);
 
             }
             catch (Exception ex)
@@ -178,7 +188,7 @@ namespace platform.demo.DAO
 
                 //return client.Execute(sql, parameters);
 
-                return dasClient.ExecuteSp(sp, parameters);
+                return client.ExecuteSp(sp, parameters);
             }
             catch (Exception ex)
             {
@@ -256,7 +266,7 @@ namespace platform.demo.DAO
 
                 //return client.Execute(sql, parameters);
 
-                return dasClient.ExecuteSp(sp, parameters);
+                return client.ExecuteSp(sp, parameters);
             }
             catch (Exception ex)
             {

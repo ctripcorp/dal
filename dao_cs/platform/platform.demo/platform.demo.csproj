@@ -152,6 +152,7 @@
     <Compile Include="DemoGet.aspx.designer.cs">
       <DependentUpon>DemoGet.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Entity\Person.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -188,7 +189,7 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>60369</DevelopmentServerPort>
+          <DevelopmentServerPort>59964</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>
           </IISUrl>

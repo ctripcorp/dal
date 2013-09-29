@@ -37,7 +37,7 @@ namespace platform.dao.request
         /// <summary>
         /// 参数
         /// </summary>
-        public StatementParameterCollection Parameters { get; set; }
+        public IList<IParameter> Parameters { get; set; }
 
         /// <summary>
         /// 标识

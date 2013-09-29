@@ -6,6 +6,8 @@ using platform.dao.orm.attribute;
 using System.Reflection;
 using System.Data;
 using platform.dao.log;
+using platform.dao.orm;
+using platform.dao.utils;
 
 namespace platform.dao.client
 {
@@ -19,11 +21,14 @@ namespace platform.dao.client
 
         public abstract IDataReader FetchBySql(string sql);
 
+        /// <summary>
+        /// 根据自增主键，获取对应的实体对象
+        /// </summary>
+        /// <param name="iD">自增主键</param>
+        /// <returns>实体对象</returns>
         public virtual T FindByPk(int iD)
         {
             Type type = typeof(T);
-
-            StringBuilder sql = new StringBuilder("SELECT ");
 
             PropertyInfo[] fields = type.GetProperties(
                 BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
@@ -31,6 +36,7 @@ namespace platform.dao.client
             Dictionary<string, PropertyInfo> columnFieldsMap = new Dictionary<string, PropertyInfo>();
 
             string pk = "";
+            IList<SqlColumn> columns = new List<SqlColumn>();
 
             foreach (PropertyInfo field in fields)
             {
@@ -42,29 +48,16 @@ namespace platform.dao.client
 
                 columnFieldsMap.Add(colAttr.Name, field);
 
-                sql.Append(colAttr.Name);
-                sql.Append(",");
+                SqlColumn column = new SqlColumn() { Name=colAttr.Name, Alias = colAttr.Alias};
+                columns.Add(column);
             }
-
-            if (fields.Length > 0)
-                sql.Remove(sql.Length - 1, 1);
-
-            sql.Append(" FROM ");
 
             //Get table name
             TableAttribute tableAttr = (TableAttribute) type.GetCustomAttributes(typeof(TableAttribute), false)[0];
-            
-            if (!string.IsNullOrEmpty(tableAttr.Schema))
-            {
-                sql.Append(tableAttr.Schema);
-            }
-            else
-            {
-                sql.Append("dbo");
-            }
-            sql.Append(".");
 
-            sql.Append(tableAttr.Name);
+            SqlTable table = new SqlTable() { Schema = tableAttr.Schema, Name = tableAttr.Name, Columns = columns};
+
+            StringBuilder sql = new StringBuilder(table.GetSelectAllSql());
 
             sql.Append(" WHERE ");
 
@@ -74,7 +67,7 @@ namespace platform.dao.client
 
             sql.Append(iD);
 
-            T obj = Activator.CreateInstance<T>();
+            T obj = default(T);
 
             logger.Warn(sql.ToString());
 
@@ -82,31 +75,17 @@ namespace platform.dao.client
             {
                 if (reader.Read())
                 {
+                    obj = Activator.CreateInstance<T>();
                     foreach (var key in columnFieldsMap.Keys)
                     {
                         PropertyInfo p = columnFieldsMap[key];
                         object convertedValue = reader[key];
-                        Type underlyingType = Nullable.GetUnderlyingType(p.PropertyType);
+                        //Type underlyingType = Nullable.GetUnderlyingType(p.PropertyType);
 
-                        if (underlyingType != null)
-                        {
-                            try
-                            {
-                                convertedValue = System.Convert.ChangeType(convertedValue,
-                                    underlyingType);
-                            }
-                            catch (Exception ex)
-                            {
-                                // the input string could not be converted to the target type - abort
-                                logger.Error(ex.StackTrace);
-                                if (underlyingType == typeof(DateTime))
-                                {
-                                    ulong milliseconds = (ulong)convertedValue;
-                                    DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                                    convertedValue = dtDateTime.AddMilliseconds(milliseconds);
-                                }
-                            }
-                        }
+                        //if (underlyingType != null)
+                        //{
+                        //    convertedValue = TypeConverter.ConvertToUnderlyingType(underlyingType, convertedValue);
+                        //}
                         p.SetValue(obj, convertedValue, null);
                     }
                 }

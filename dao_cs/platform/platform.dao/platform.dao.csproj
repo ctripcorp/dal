@@ -54,6 +54,7 @@
     <Compile Include="Consts.cs" />
     <Compile Include="enums\DbDialect.cs" />
     <Compile Include="enums\OperationType.cs" />
+    <Compile Include="exception\DAOException.cs" />
     <Compile Include="log\CLogAdapter.cs" />
     <Compile Include="log\ConsoleLoggerAdapter.cs" />
     <Compile Include="log\ILoggerAdapter.cs" />
@@ -65,6 +66,10 @@
     <Compile Include="orm\attribute\NullableAttribute.cs" />
     <Compile Include="orm\attribute\PrimaryKeyAttribute.cs" />
     <Compile Include="orm\attribute\TableAttribute.cs" />
+    <Compile Include="orm\SqlColumn.cs" />
+    <Compile Include="orm\SqlTable.cs" />
+    <Compile Include="param\IParameter.cs" />
+    <Compile Include="param\ParameterFactory.cs" />
     <Compile Include="param\StatementParameter.cs" />
     <Compile Include="param\StatementParameterCollection.cs" />
     <Compile Include="enums\StatementType.cs" />
@@ -99,6 +104,7 @@
     <Compile Include="type\StringRawValueImpl.cs" />
     <Compile Include="type\ValueFactory.cs" />
     <Compile Include="type\ValueType.cs" />
+    <Compile Include="utils\TypeConverter.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

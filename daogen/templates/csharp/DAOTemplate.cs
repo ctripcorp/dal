@@ -7,10 +7,10 @@ namespace {{dao.namespace}}
 {
     public class {{dao.class_name}}
     {
-        public static IClient client = ClientFactory.CreateDbClient("platform.dao.providers.SqlDatabaseProvider,platform.dao",
-            "Server=testdb.dev.sh.ctriptravel.com,28747;Integrated Security=sspi;database={{dao.db_name}};");
+        //public static IClient client = ClientFactory.CreateDbClient("platform.dao.providers.SqlDatabaseProvider,platform.dao",
+        //   "Server=testdb.dev.sh.ctriptravel.com,28747;Integrated Security=sspi;database={{dao.db_name}};");
 
-        public static IClient dasClient = ClientFactory.CreateDasClient("{{dao.db_name}}", "user=kevin;password=kevin");
+        public static IClient client = ClientFactory.CreateDasClient("{{dao.db_name}}", "user=kevin;password=kevin");
 
         {% for method in dao.methods %}
         // {{method.comment}}
@@ -18,25 +18,27 @@ namespace {{dao.namespace}}
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
-
-                //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
-                {% for p in method.parameters %}
-                parameters.Add(new StatementParameter { 
-                    Name = "@{{p.fieldName}}", 
-                    Direction = ParameterDirection.Input, 
-                    DbType = DbType.{{value_type[p.ptype]}}, 
-                    Value = {{p.name}} 
-                    });
+                {% set result_params = [] %}
+                {% for p in method.parameters  %}
+                {% set result_params.append("%sParam" % p.name) %}
+                IParameter {{p.name}}Param = ParameterFactory.CreateValue(
+                        "@{{p.fieldName}}",
+                        {{p.name}},
+                        direction : ParameterDirection.Input,
+                        index : 0,
+                        nullable :false,
+                        sensitive : false,
+                        size  :50
+                    );
                 {% end %}
                 
                 string sql = "{{method.sql}}"   ;
 
                 //return client.Fetch(sql, parameters);
                 {% if method.action == "select" %}
-                return dasClient.Fetch(sql, parameters);
+                return client.Fetch(sql, {{",".join(result_params)}});
                 {% else %}
-                return dasClient.Execute(sql, parameters);
+                return client.Execute(sql, {{",".join(result_params)}});
                 {% end %}
             }
             catch (Exception ex)
@@ -52,23 +54,25 @@ namespace {{dao.namespace}}
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
-
-                //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
+                {% set result_params = [] %}
                 {% for p in method.parameters %}
-                    parameters.Add(new StatementParameter { 
-                        Name = "@{{p.fieldName}}", 
-                        Direction = ParameterDirection.Input, 
-                        DbType = DbType.{{value_type[p.ptype]}}, 
-                        Value = {{p.name}} 
-                        });
+                {% set result_params.append("%sParam" % p.name) %}
+                IParameter {{p.name}}Param = ParameterFactory.CreateValue(
+                        "@{{p.fieldName}}",
+                        {{p.name}},
+                        direction : ParameterDirection.Input,
+                        index  :0,
+                        nullable :false,
+                        sensitive : false,
+                        size  :50
+                    );
                 {% end %}
                 
                 string sp = "{{method.sp_name}}"   ;
 
                 //return client.Execute(sql, parameters);
 
-                return dasClient.ExecuteSp(sp, parameters);
+                return client.ExecuteSp(sp, {{",".join(result_params)}});
             }
             catch (Exception ex)
             {

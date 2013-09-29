@@ -115,21 +115,24 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override IDataReader Fetch(string sql, StatementParameterCollection parameters)
+        public override IDataReader Fetch(string sql, params IParameter[] parameters)
         {
-            MatchCollection mc = paramRegex.Matches(sql);
-            int i = 1;
-            foreach (Match ma in mc)
+            if (null != parameters && parameters.Length > 0)
             {
-                for (int j = 0; j < parameters.Count; j++)
+                MatchCollection mc = paramRegex.Matches(sql);
+                int i = 1;
+                foreach (Match ma in mc)
                 {
-                    if (ma.Groups["paramName"].Value.Equals(parameters[j].Name))
+                    for (int j = 0; j < parameters.Length; j++)
                     {
-                        parameters[j].Index = i;
-                        break;
+                        if (ma.Groups["paramName"].Value.Equals(parameters[j].Name))
+                        {
+                            parameters[j].Index = i;
+                            break;
+                        }
                     }
+                    i++;
                 }
-                i++;
             }
 
             sql = Regex.Replace(sql, @"[@|:]\w+", "?");
@@ -140,7 +143,7 @@ namespace platform.dao.client
                 OperationType = enums.OperationType.Read,
                 UseCache = false,
                 Sql = sql,
-                Parameters = parameters,
+                Parameters =  (null != parameters && parameters.Length > 0) ? parameters : new IParameter[0],
                 Flags = 1
             };
 
@@ -172,21 +175,24 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override int Execute(string sql, StatementParameterCollection parameters)
+        public override int Execute(string sql, params IParameter[] parameters)
         {
-            MatchCollection mc = paramRegex.Matches(sql);
-            int i = 1;
-            foreach (Match ma in mc)
+            if (null != parameters && parameters.Length > 0)
             {
-                for (int j = 0; j < parameters.Count; j++)
+                MatchCollection mc = paramRegex.Matches(sql);
+                int i = 1;
+                foreach (Match ma in mc)
                 {
-                    if (ma.Groups["paramName"].Value.Equals(parameters[j].Name))
+                    for (int j = 0; j < parameters.Length; j++)
                     {
-                        parameters[j].Index = i;
-                        break;
+                        if (ma.Groups["paramName"].Value.Equals(parameters[j].Name))
+                        {
+                            parameters[j].Index = i;
+                            break;
+                        }
                     }
+                    i++;
                 }
-                i++;
             }
 
             sql = Regex.Replace(sql, @"[@|:]\w+", "?");
@@ -197,7 +203,7 @@ namespace platform.dao.client
                 OperationType = enums.OperationType.Write,
                 UseCache = false,
                 Sql = sql,
-                Parameters = parameters,
+                Parameters = (null != parameters && parameters.Length > 0) ? parameters : new IParameter[0],
                 Flags = 1
             };
 
@@ -223,7 +229,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override IDataReader FetchBySp(string sp, StatementParameterCollection parameters)
+        public override IDataReader FetchBySp(string sp, params IParameter[] parameters)
         {
 
             RequestMessage message = new RequestMessage()
@@ -232,7 +238,7 @@ namespace platform.dao.client
                 OperationType = enums.OperationType.Read,
                 UseCache = false,
                 SpName = sp,
-                Parameters = parameters,
+                Parameters = (null != parameters && parameters.Length > 0) ? parameters : new IParameter[0],
                 Flags = 1
             };
 
@@ -263,13 +269,16 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override int ExecuteSp(string sp, StatementParameterCollection parameters)
+        public override int ExecuteSp(string sp, params IParameter[] parameters)
         {
-            int i = 1;
-            for (int j = 0; j < parameters.Count; j++)
+            if (null != parameters && parameters.Length > 0)
             {
-                parameters[j].Index = i;
-                i++;
+                int i = 1;
+                for (int j = 0; j < parameters.Length; j++)
+                {
+                    parameters[j].Index = i;
+                    i++;
+                }
             }
 
             RequestMessage message = new RequestMessage()
@@ -278,7 +287,7 @@ namespace platform.dao.client
                 OperationType = enums.OperationType.Write,
                 UseCache = false,
                 SpName = sp,
-                Parameters = parameters,
+                Parameters = (null != parameters && parameters.Length > 0) ? parameters : new IParameter[0],
                 Flags = 1
             };
 

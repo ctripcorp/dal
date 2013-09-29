@@ -49,6 +49,7 @@ public class QueryExecutor implements LogConsts {
 		Connection conn = null;
 		PreparedStatement statement = null;
 
+		
 		long start = System.currentTimeMillis();
 		try {
 			conn = dataSource.getConnection();
@@ -255,9 +256,8 @@ public class QueryExecutor implements LogConsts {
 					break;
 				case java.sql.Types.DECIMAL:
 					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Double, ValueFactory
-									.createFloatValue(rs.getBigDecimal(i)
-											.doubleValue())));
+							colNames[i - 1], DbType.Double, 
+							ValueFactory.createRawValue(rs.getBigDecimal(i).toString())));
 					break;
 				case java.sql.Types.VARCHAR:
 				case java.sql.Types.NVARCHAR:
@@ -273,7 +273,7 @@ public class QueryExecutor implements LogConsts {
 							: ValueFactory.createIntegerValue(tempDate
 									.getTime());
 					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Date, v));
+							colNames[i - 1], DbType.DateTime, v));
 					break;
 				case java.sql.Types.TIME:
 					Time tempTime = rs.getTime(i);
@@ -281,7 +281,7 @@ public class QueryExecutor implements LogConsts {
 							: ValueFactory.createIntegerValue(tempTime
 									.getTime());
 					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Time, v));
+							colNames[i - 1], DbType.DateTime, v));
 					break;
 				case java.sql.Types.TIMESTAMP:
 					Timestamp tempTimestamp = rs.getTimestamp(i);

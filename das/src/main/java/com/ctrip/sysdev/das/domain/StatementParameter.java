@@ -243,12 +243,13 @@ public class StatementParameter implements Comparable<StatementParameter> {
 		}
 
 		switch (dbType) {
-		case AnsiString:
-
-			break;
-		case AnsiStringFixedLength:
-			break;
+//		case AnsiString:
+//
+//			break;
+//		case AnsiStringFixedLength:
+//			break;
 		case Binary:
+			ps.setBytes(index, value.asRawValue().getByteArray());
 			break;
 		case Boolean:
 			ps.setBoolean(index, value.asBooleanValue().getBoolean());
@@ -257,25 +258,25 @@ public class StatementParameter implements Comparable<StatementParameter> {
 		case SByte:
 			ps.setByte(index, value.asIntegerValue().getByte());
 			break;
-		case Currency:
+//		case Currency:
 		case Decimal:
-			ps.setBigDecimal(index, new BigDecimal(value.asFloatValue()
-					.getDouble()));
+			ps.setBigDecimal(index, new BigDecimal(value.asRawValue().getString()));
 			break;
-		case Date:
-			ps.setDate(index, new Date(value.asIntegerValue().getLong()));
-			break;
+//		case Date:
+//			ps.setDate(index, new Date(value.asIntegerValue().getLong()));
+//			break;
 		case DateTime:
-		case DateTime2:
+//		case DateTime2:
 			ps.setTimestamp(index, new Timestamp(value.asIntegerValue()
 					.getLong()));
 			break;
-		case DateTimeOffset:
-			break;
+//		case DateTimeOffset:
+//			break;
 		case Double:
 			ps.setDouble(index, value.asFloatValue().getDouble());
 			break;
 		case Guid:
+			ps.setBytes(index, value.asRawValue().getByteArray());
 			break;
 		case Int16:
 		case UInt16:
@@ -289,8 +290,8 @@ public class StatementParameter implements Comparable<StatementParameter> {
 		case UInt64:
 			ps.setLong(index, value.asIntegerValue().getLong());
 			break;
-		case Object:
-			break;
+//		case Object:
+//			break;
 		case Single:
 			ps.setFloat(index, value.asFloatValue().getFloat());
 			break;
@@ -298,15 +299,15 @@ public class StatementParameter implements Comparable<StatementParameter> {
 		case StringFixedLength:
 			ps.setString(index, value.asRawValue().getString());
 			break;
-		case Time:
-			ps.setTime(index, new Time(value.asIntegerValue().getLong()));
-			break;
-		case VarNumeric:
-			ps.setDouble(index, value.asFloatValue().getDouble());
-			break;
-		case Xml:
-			ps.setString(index, value.asRawValue().getString());
-			break;
+//		case Time:
+//			ps.setTime(index, new Time(value.asIntegerValue().getLong()));
+//			break;
+//		case VarNumeric:
+//			ps.setDouble(index, value.asFloatValue().getDouble());
+//			break;
+//		case Xml:
+//			ps.setString(index, value.asRawValue().getString());
+//			break;
 		default:
 			break;
 		}

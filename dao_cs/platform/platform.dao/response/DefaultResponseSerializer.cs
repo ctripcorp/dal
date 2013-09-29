@@ -36,10 +36,7 @@ namespace platform.dao.response
             //当前有多少元素需要反序列化
             //long arrayLength;
 
-
-
             //unpacker.ReadArrayLength(out arrayLength);
-
 
             //int arrayLength;
 
@@ -75,13 +72,13 @@ namespace platform.dao.response
             return response;
         }
 
-        public List<List<StatementParameter>> UnpackStatementParamenterCollection(Unpacker unpacker)
+        public List<List<IParameter>> UnpackStatementParamenterCollection(Unpacker unpacker)
         {
             long arrayLength;
 
             unpacker.ReadArrayLength(out arrayLength);
 
-            List<List<StatementParameter>> results = new List<List<StatementParameter>>((int)arrayLength);
+            List<List<IParameter>> results = new List<List<IParameter>>((int)arrayLength);
 
             for (int i = 0; i < arrayLength; i++)
             {
@@ -89,7 +86,7 @@ namespace platform.dao.response
 
                 unpacker.ReadArrayLength(out currentLength);
 
-                List<StatementParameter> result = new List<StatementParameter>((int)currentLength);
+                List<IParameter> result = new List<IParameter>((int)currentLength);
 
                 for (int j = 0; j < currentLength; j++)
                 {
@@ -104,7 +101,7 @@ namespace platform.dao.response
 
         }
 
-        public StatementParameter UnpackStatementParameter(Unpacker unpacker)
+        public IParameter UnpackStatementParameter(Unpacker unpacker)
         {
             long arrayLength;
 

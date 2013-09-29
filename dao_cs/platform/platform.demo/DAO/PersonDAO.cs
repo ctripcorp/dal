@@ -2,50 +2,41 @@
 using System.Data;
 using platform.dao.client;
 using platform.dao.param;
-using platform.demo.Entity;
 
 namespace platform.demo.DAO
 {
-    public class PersonDAO : AbstractDAO<Person>
+    public class PersonDAO
     {
         //public static IClient client = ClientFactory.CreateDbClient("platform.dao.providers.SqlDatabaseProvider,platform.dao",
-        //    "Server=testdb.dev.sh.ctriptravel.com,28747;Integrated Security=sspi;database=SysDalTest;");
+        //   "Server=testdb.dev.sh.ctriptravel.com,28747;Integrated Security=sspi;database=SysDalTest;");
 
-        public static IClient client;
+        public static IClient client = ClientFactory.CreateDasClient("SysDalTest", "user=kevin;password=kevin");
 
-        static PersonDAO()
-        {
-            client = ClientFactory.CreateDasClient("SysDalTest", "user=kevin;password=kevin");
-        }
-
-        public override IDataReader FetchBySql(string sql)
-        {
-            return client.Fetch(sql, null);
-        }
 
         // None
         public IDataReader getAllByPk(int iD)
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
 
-                //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@ID",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.Int32,
-                    Value = iD
-                });
+
+                IParameter iDParam = ParameterFactory.CreateValue(
+                        "@ID",
+                        iD,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
 
 
                 string sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person  WHERE  ID = @ID ";
 
                 //return client.Fetch(sql, parameters);
 
-                return client.Fetch(sql, parameters);
+                return client.Fetch(sql, iDParam);
 
             }
             catch (Exception ex)
@@ -59,80 +50,102 @@ namespace platform.demo.DAO
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
 
-                //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@ID",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.Int32,
-                    Value = setId
-                });
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@Address",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.String,
-                    Value = setAddress
-                });
+                IParameter setIdParam = ParameterFactory.CreateValue(
+                        "@ID",
+                        setId,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@Name",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.String,
-                    Value = setName
-                });
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@Telephone",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.String,
-                    Value = setTelephone
-                });
+                IParameter setAddressParam = ParameterFactory.CreateValue(
+                        "@Address",
+                        setAddress,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@Age",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.Int32,
-                    Value = setAge
-                });
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@Gender",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.Int32,
-                    Value = setGender
-                });
+                IParameter setNameParam = ParameterFactory.CreateValue(
+                        "@Name",
+                        setName,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@Birth",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.DateTime,
-                    Value = setBirth
-                });
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@ID",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.Int32,
-                    Value = whereId
-                });
+                IParameter setTelephoneParam = ParameterFactory.CreateValue(
+                        "@Telephone",
+                        setTelephone,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
+
+
+                IParameter setAgeParam = ParameterFactory.CreateValue(
+                        "@Age",
+                        setAge,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
+
+
+                IParameter setGenderParam = ParameterFactory.CreateValue(
+                        "@Gender",
+                        setGender,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
+
+
+                IParameter setBirthParam = ParameterFactory.CreateValue(
+                        "@Birth",
+                        setBirth,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
+
+
+                IParameter whereIdParam = ParameterFactory.CreateValue(
+                        "@ID",
+                        whereId,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
 
 
                 string sql = "UPDATE Person SET ID = @ID,Address = @Address,Name = @Name,Telephone = @Telephone,Age = @Age,Gender = @Gender,Birth = @Birth  WHERE  ID = @ID ";
 
                 //return client.Fetch(sql, parameters);
 
-                return client.Execute(sql, parameters);
+                return client.Execute(sql, setIdParam, setAddressParam, setNameParam, setTelephoneParam, setAgeParam, setGenderParam, setBirthParam, whereIdParam);
 
             }
             catch (Exception ex)
@@ -146,17 +159,15 @@ namespace platform.demo.DAO
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
-
-                //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
-
-
-                string sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person ";
+                
+                
+                
+                string sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person "   ;
 
                 //return client.Fetch(sql, parameters);
-
-                return client.Fetch(sql, parameters);
-
+                
+                return client.Fetch(sql);
+                
             }
             catch (Exception ex)
             {
@@ -171,24 +182,25 @@ namespace platform.demo.DAO
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
 
-                //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@ID",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.Int32,
-                    Value = iD
-                });
+
+                IParameter iDParam = ParameterFactory.CreateValue(
+                        "@ID",
+                        iD,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
 
 
                 string sp = "spa_Person_d";
 
                 //return client.Execute(sql, parameters);
 
-                return client.ExecuteSp(sp, parameters);
+                return client.ExecuteSp(sp, iDParam);
             }
             catch (Exception ex)
             {
@@ -201,72 +213,91 @@ namespace platform.demo.DAO
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
 
-                //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@ID",
-                    Direction = ParameterDirection.Output,
-                    DbType = DbType.Int32,
-                    Value = iD
-                });
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@Address",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.String,
-                    Value = address
-                });
+                IParameter iDParam = ParameterFactory.CreateValue(
+                        "@ID",
+                        iD,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@Name",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.String,
-                    Value = name
-                });
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@Telephone",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.String,
-                    Value = telephone
-                });
+                IParameter addressParam = ParameterFactory.CreateValue(
+                        "@Address",
+                        address,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@Age",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.Int32,
-                    Value = age
-                });
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@Gender",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.Int32,
-                    Value = gender
-                });
+                IParameter nameParam = ParameterFactory.CreateValue(
+                        "@Name",
+                        name,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
 
-                parameters.Add(new StatementParameter
-                {
-                    Name = "@Birth",
-                    Direction = ParameterDirection.Input,
-                    DbType = DbType.DateTime,
-                    Value = birth
-                });
+
+                IParameter telephoneParam = ParameterFactory.CreateValue(
+                        "@Telephone",
+                        telephone,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
+
+
+                IParameter ageParam = ParameterFactory.CreateValue(
+                        "@Age",
+                        age,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
+
+
+                IParameter genderParam = ParameterFactory.CreateValue(
+                        "@Gender",
+                        gender,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
+
+
+                IParameter birthParam = ParameterFactory.CreateValue(
+                        "@Birth",
+                        birth,
+                        direction: ParameterDirection.Input,
+                        index: 0,
+                        nullable: false,
+                        sensitive: false,
+                        size: 50
+                    );
 
 
                 string sp = "spa_Person_i";
 
                 //return client.Execute(sql, parameters);
 
-                return client.ExecuteSp(sp, parameters);
+                return client.ExecuteSp(sp, iDParam, addressParam, nameParam, telephoneParam, ageParam, genderParam, birthParam);
             }
             catch (Exception ex)
             {

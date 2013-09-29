@@ -67,14 +67,14 @@ namespace platform.dao.request
 
         }
 
-        private void PackStatementParameterCollection(Packer packer, StatementParameterCollection value)
+        private void PackStatementParameterCollection(Packer packer, IList<IParameter> value)
         {
 
             //总共多少个属性需要序列化
             packer.PackArrayHeader(value.Count);
 
             //int i = 1;
-            foreach (StatementParameter p in value)
+            foreach (IParameter p in value)
             {
                 packer.PackArrayHeader(7);
                 packer.Pack((int)p.DbType);

@@ -12,51 +12,113 @@ namespace platform.dao.param
     /// 填入相应数量的？，传向DAS或者DbClient
     /// 其他参数直接替换为？，传向DAS或者DbClient
     /// </summary>
-    public sealed class StatementParameter
+    internal sealed class StatementParameter : IParameter
     {
-        /// <summary>
-        /// 数据类型
-        /// </summary>
-        public DbType DbType { get; set; }
 
-        ParameterDirection _direction = ParameterDirection.Input;
-        /// <summary>
-        /// 参数方向
-        /// </summary>
-        public ParameterDirection Direction
+        private DbType dbType = DbType.Boolean;
+        private ParameterDirection direction = ParameterDirection.Input;
+        private bool isNullable = false;
+        private string name;
+        private int index;
+        private int size;
+        private MsgPack.MessagePackObject value;
+        private bool isSensitive = false;
+
+        public DbType DbType
         {
-            get { return _direction; }
-            set { this._direction = value; }
+            get
+            {
+                return dbType;
+            }
+            set
+            {
+                dbType = value;   
+            }
         }
 
-        /// <summary>
-        /// 是否可空
-        /// </summary>
-        public bool IsNullable { get; set; }
+        public ParameterDirection Direction
+        {
+            get
+            {
+                return direction;
+            }
+            set
+            {
+                direction = value;
+            }
+        }
 
-        /// <summary>
-        /// 参数名称
-        /// </summary>
-        public string Name { get; set; }
+        public bool IsNullable
+        {
+            get
+            {
+                return isNullable;
+            }
+            set
+            {
+                isNullable = value;
+            }
+        }
 
-        /// <summary>
-        /// 与参数名称对应的参数序号
-        /// </summary>
-        public int Index { get; set; }
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = value;
+            }
+        }
 
-        /// <summary>
-        /// 字段的大小，如Varchar（50）
-        /// </summary>
-        public int Size { get; set; }
+        public int Index
+        {
+            get
+            {
+                return index;
+            }
+            set
+            {
+                index = value;
+            }
+        }
 
-        /// <summary>
-        /// 参数值
-        /// </summary>
-        public object Value { get; set; }
+        public int Size
+        {
+            get
+            {
+                return size;
+            }
+            set
+            {
+                size = value;
+            }
+        }
 
-        /// <summary>
-        /// 参数是否包含敏感字符
-        /// </summary>
-        public bool IsSensitive { get; set; }
+        public MsgPack.MessagePackObject Value
+        {
+            get
+            {
+                return value;
+            }
+            set
+            {
+                this.value = value;
+            }
+        }
+
+        public bool IsSensitive
+        {
+            get
+            {
+                return isSensitive;
+            }
+            set
+            {
+                isSensitive = value;
+            }
+        }
+
     }
 }

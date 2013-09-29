@@ -119,6 +119,7 @@
     <Compile Include="Account\Register.aspx.designer.cs">
       <DependentUpon>Register.aspx</DependentUpon>
     </Compile>
+    <Compile Include="DAO\PersonDAO.cs" />
     <Compile Include="DemoInsert.aspx.cs">
       <DependentUpon>DemoInsert.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -133,7 +134,6 @@
     <Compile Include="DemoDelete.aspx.designer.cs">
       <DependentUpon>DemoDelete.aspx</DependentUpon>
     </Compile>
-    <Compile Include="DAO\PersonDAO.cs" />
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
+using platform.dao.param;
 
 namespace platform.dao.client
 {
@@ -16,22 +17,22 @@ namespace platform.dao.client
             throw new NotImplementedException();
         }
 
-        public virtual System.Data.IDataReader Fetch(string sql, param.StatementParameterCollection parameters)
+        public virtual System.Data.IDataReader Fetch(string sql, params IParameter[] parameters)
         {
             throw new NotImplementedException();
         }
 
-        public virtual int Execute(string sql, param.StatementParameterCollection parameters)
+        public virtual int Execute(string sql, params IParameter[] parameters)
         {
             throw new NotImplementedException();
         }
 
-        public virtual System.Data.IDataReader FetchBySp(string sp, param.StatementParameterCollection parameters)
+        public virtual System.Data.IDataReader FetchBySp(string sp, params IParameter[] parameters)
         {
             throw new NotImplementedException();
         }
 
-        public virtual int ExecuteSp(string sp, param.StatementParameterCollection parameters)
+        public virtual int ExecuteSp(string sp, params IParameter[] parameters)
         {
             throw new NotImplementedException();
         }

@@ -67,6 +67,10 @@ public class ResponseSerDe extends AbstractMsgPackSerDe<Response> {
 	@Override
 	public Response doDeserialize(byte[] source) throws SerDeException {
 		throw new SerDeException("ResponseSerDe not support doDeserialize");
+		
+		
+        
+		
 	}
 
 }

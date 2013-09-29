@@ -42,7 +42,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override IDataReader Fetch(string sql, StatementParameterCollection parameters)
+        public override IDataReader Fetch(string sql, params IParameter[] parameters)
         {
             if (this.connection.State != System.Data.ConnectionState.Open)
             {
@@ -85,7 +85,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override int Execute(string sql, StatementParameterCollection parameters)
+        public override int Execute(string sql, params IParameter[] parameters)
         {
             if (this.connection.State != System.Data.ConnectionState.Open)
             {
@@ -127,7 +127,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override IDataReader FetchBySp(string sp, StatementParameterCollection parameters)
+        public override IDataReader FetchBySp(string sp, params IParameter[] parameters)
         {
             if (this.connection.State != System.Data.ConnectionState.Open)
             {
@@ -169,7 +169,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override int ExecuteSp(string sp, StatementParameterCollection parameters)
+        public override int ExecuteSp(string sp, params IParameter[] parameters)
         {
             if (this.connection.State != System.Data.ConnectionState.Open)
             {

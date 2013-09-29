@@ -13,13 +13,13 @@ namespace platform.dao.client
     {
         void SetCredential(string credential);
 
-        IDataReader Fetch(string sql, StatementParameterCollection parameters);
+        IDataReader Fetch(string sql, params IParameter[] parameters);
 
-        int Execute(string sql, StatementParameterCollection parameters);
+        int Execute(string sql, params IParameter[] parameters);
 
-        IDataReader FetchBySp(string sp, StatementParameterCollection parameters);
+        IDataReader FetchBySp(string sp, params IParameter[] parameters);
 
-        int ExecuteSp(string sp, StatementParameterCollection parameters);
+        int ExecuteSp(string sp, params IParameter[] parameters);
 
         //Begin orm
 

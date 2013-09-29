@@ -9,12 +9,18 @@ namespace platform.dao.client
 {
     public class DasDataReader : IDataReader
     {
+        private static readonly DateTime utcStartTime;
+
+        static DasDataReader()
+        {
+            utcStartTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+        }
 
         private int cursor = 0;
 
-        private List<StatementParameter> current;
+        private List<IParameter> current;
 
-        public List<List<StatementParameter>> ResultSet { get; set; }
+        public List<List<IParameter>> ResultSet { get; set; }
 
         public void Close()
         {
@@ -185,7 +191,7 @@ namespace platform.dao.client
             get
             {
                 object result = null;
-                StatementParameter param = null;
+                IParameter param = null;
                 foreach (var p in current)
                 {
                     if (p.Name.Equals(name))
@@ -196,7 +202,18 @@ namespace platform.dao.client
                 }
 
                 if (param != null)
-                    result = MsgPack.MessagePackObject.FromObject(param.Value).ToObject();
+                {
+                    if (param.DbType == DbType.Decimal)
+                        result = decimal.Parse(param.Value.AsString());
+                    else if (param.DbType == DbType.StringFixedLength)
+                        result = (char)param.Value.AsUInt16();
+                    else if (param.DbType == DbType.Guid)
+                        result = new Guid(param.Value.AsBinary());
+                    else if (param.DbType == DbType.DateTime)
+                        result = utcStartTime.AddMilliseconds(param.Value.AsUInt64());
+                    else
+                        result = param.Value.ToObject();
+                }
                 
                 return result;
             }

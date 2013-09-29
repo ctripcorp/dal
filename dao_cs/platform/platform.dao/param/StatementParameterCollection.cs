@@ -11,7 +11,7 @@ namespace platform.dao.param
     /// <summary>
     /// 指令参数
     /// </summary>
-    public sealed class StatementParameterCollection : KeyedCollection<string, StatementParameter>
+    internal sealed class StatementParameterCollection : KeyedCollection<string, IParameter>
     {
         public StatementParameterCollection()
             : base(StringComparer.CurrentCultureIgnoreCase)
@@ -37,7 +37,7 @@ namespace platform.dao.param
             });
         }
 
-        public void AddInParameter(string name, DbType dbType, IValue value, bool sensi = false)
+        public void AddInParameter(string name, DbType dbType, MsgPack.MessagePackObject value, bool sensi = false)
         {
             Add(new StatementParameter()
             {
@@ -75,7 +75,7 @@ namespace platform.dao.param
 
         }
 
-        public void AddParameter(string name, DbType dbType, object value, int size, ParameterDirection dir, bool sensi = false)
+        public void AddParameter(string name, DbType dbType, MsgPack.MessagePackObject value, int size, ParameterDirection dir, bool sensi = false)
         {
             Add(new StatementParameter()
             {
@@ -89,7 +89,7 @@ namespace platform.dao.param
 
         }
 
-        protected override string GetKeyForItem(StatementParameter item)
+        protected override string GetKeyForItem(IParameter item)
         {
             return item.Name;
         }

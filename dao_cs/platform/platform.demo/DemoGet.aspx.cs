@@ -29,7 +29,7 @@ namespace platform.demo
                         Telephone = reader["Telephone"],
                         Age = reader["Age"],
                         Gender = reader["Gender"],
-                        Birth = reader["Birth"]
+                        Birth = reader["Birth"].ToString()
                     });
                 }
             }

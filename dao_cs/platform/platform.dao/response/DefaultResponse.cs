@@ -23,7 +23,7 @@ namespace platform.dao.response
 
         public int AffectRowCount { get; set; }
 
-        public List<List<StatementParameter>> ResultSet { get; set; }
+        public List<List<IParameter>> ResultSet { get; set; }
 
         public static DefaultResponse UnpackFromByteArray(byte[] payload)
         {

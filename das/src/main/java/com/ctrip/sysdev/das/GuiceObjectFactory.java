@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.das.factory;
+package com.ctrip.sysdev.das;
 
 import java.util.Set;
 
@@ -12,7 +12,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 
-public class GuiceObjectFactory implements ObjectFactory {
+public class GuiceObjectFactory {
 
 	private static final String GUICE_MODEL_PACKAGES = "com.ctrip.sysdev.das.guice";
 	private Injector injector;
@@ -36,7 +36,6 @@ public class GuiceObjectFactory implements ObjectFactory {
 				union.toArray(new Module[union.size()]));
 	}
 
-	@Override
 	public <T> T getInstance(Class<T> clazz) throws Exception {
 		return injector.getInstance(clazz);
 	}

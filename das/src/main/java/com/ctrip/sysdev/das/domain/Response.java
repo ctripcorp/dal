@@ -7,7 +7,7 @@ import org.msgpack.packer.Packer;
 
 import com.ctrip.sysdev.das.domain.enums.OperationType;
 
-public class Response extends BaseDomain {
+public class Response extends Domain {
 
 	/**
 	 * 

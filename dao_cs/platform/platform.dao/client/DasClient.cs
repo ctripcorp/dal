@@ -8,6 +8,7 @@ using platform.dao.response;
 using System.Collections.Generic;
 using platform.dao.log;
 using System.Diagnostics;
+using System;
 
 namespace platform.dao.client
 {
@@ -31,15 +32,29 @@ namespace platform.dao.client
 
         static DasClient()
         {
-            sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
-            {
-                sock.Connect(Consts.serverIp, Consts.serverPort);
-                networkStream = new NetworkStream(sock);
-            }
-            catch
-            {
+            Connect();
+        }
 
+        private static void Connect()
+        {
+            if (sock != null)
+            {
+                sock.Disconnect(true);
+                sock = null;
+            }
+            sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            while (!sock.Connected)
+            {
+                try
+                {
+                    //sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    sock.Connect(Consts.serverIp, Consts.serverPort);
+                    networkStream = new NetworkStream(sock);
+                }
+                catch(Exception ex)
+                {
+                    logger.Error(ex.StackTrace);
+                }
             }
         }
 
@@ -61,17 +76,30 @@ namespace platform.dao.client
 
             int totalLength = 2 + payload.Length;
 
-            //相当于向服务器端写入一个Int类型的数据,4字节
-            networkStream.WriteByte((byte)(totalLength >> 24));
-            networkStream.WriteByte((byte)(totalLength >> 16));
-            networkStream.WriteByte((byte)(totalLength >> 8));
-            networkStream.WriteByte((byte)(totalLength >> 0));
+            bool success = false;
+            while (!success)
+            {
+                try
+                {
+                    //相当于向服务器端写入一个Int类型的数据,4字节
+                    networkStream.WriteByte((byte)(totalLength >> 24));
+                    networkStream.WriteByte((byte)(totalLength >> 16));
+                    networkStream.WriteByte((byte)(totalLength >> 8));
+                    networkStream.WriteByte((byte)(totalLength >> 0));
 
-            //相当于向服务器端写入一个Short类型的数据， 2字节
-            networkStream.WriteByte((byte)(protocolVersion >> 8));
-            networkStream.WriteByte((byte)(protocolVersion >> 0));
+                    //相当于向服务器端写入一个Short类型的数据， 2字节
+                    networkStream.WriteByte((byte)(protocolVersion >> 8));
+                    networkStream.WriteByte((byte)(protocolVersion >> 0));
 
-            networkStream.Write(payload, 0, payload.Length);
+                    networkStream.Write(payload, 0, payload.Length);
+                    success = true;
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex.StackTrace);
+                    Connect();
+                }
+            }
         }
 
         /// <summary>
@@ -80,29 +108,44 @@ namespace platform.dao.client
         /// <returns></returns>
         private DefaultResponse ReadResponse()
         {
-            int totalLength = (networkStream.ReadByte() << 24) |
-                (networkStream.ReadByte() << 16) |
-                (networkStream.ReadByte() << 8) |
-                (networkStream.ReadByte() << 0);
+            DefaultResponse response = null;
+            bool success = false;
 
-            int protocolVersion = (networkStream.ReadByte() << 8) |
-                (networkStream.ReadByte() << 0);
-
-            byte[] buffer = new byte[totalLength - 2];
-
-            int realCount = networkStream.Read(buffer, 0, buffer.Length);
-
-            if (realCount != buffer.Length)
+            while (!success)
             {
+                try
+                {
+                    int totalLength = (networkStream.ReadByte() << 24) |
+                        (networkStream.ReadByte() << 16) |
+                        (networkStream.ReadByte() << 8) |
+                        (networkStream.ReadByte() << 0);
+
+                    int protocolVersion = (networkStream.ReadByte() << 8) |
+                        (networkStream.ReadByte() << 0);
+
+                    byte[] buffer = new byte[totalLength - 2];
+
+                    int realCount = networkStream.Read(buffer, 0, buffer.Length);
+                    if (realCount != buffer.Length)
+                    {
+                    }
+
+                    Stopwatch watch = new Stopwatch();
+
+                    watch.Start();
+                    response = DefaultResponse.UnpackFromByteArray(buffer);
+                    watch.Stop();
+
+                    logger.Info(string.Format("Deserialization time: {0} ms", watch.ElapsedMilliseconds));
+
+                    success = true;
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex.StackTrace);
+                    Connect();
+                }
             }
-
-            Stopwatch watch = new Stopwatch();
-
-            watch.Start();
-            DefaultResponse response = DefaultResponse.UnpackFromByteArray(buffer);
-            watch.Stop();
-
-            logger.Info(string.Format("Deserialization time: {0} ms", watch.ElapsedMilliseconds));
 
             return response;
 

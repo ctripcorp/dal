@@ -1,17 +1,23 @@
 package com.ctrip.sysdev.das.netty4;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.DalService;
+import com.ctrip.sysdev.das.dataSource.DataSourceWrapper;
 import com.ctrip.sysdev.das.domain.Request;
+import com.ctrip.sysdev.das.domain.Response;
+import com.ctrip.sysdev.das.exception.SerDeException;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -20,21 +26,44 @@ import com.google.inject.name.Named;
  * @author weiw
  * 
  */
-public class Netty4Handler extends SimpleChannelInboundHandler<Request> {
+public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(Netty4Handler.class);
+			.getLogger(DalServiceHandler.class);
 
 	@Inject
-	public Netty4Handler(@Named("ChannelGroup") ChannelGroup allChannels,
-			DalService dalServiceImpl) {
+	public DalServiceHandler(@Named("ChannelGroup") ChannelGroup allChannels, ResponseSerializer msgPackSerDe) {
 		this.allChannels = allChannels;
-		this.dalServiceImpl = dalServiceImpl;
+		this.msgPackSerDe = msgPackSerDe;
 	}
 
 	private ChannelGroup allChannels;
+	private ResponseSerializer msgPackSerDe;
+	private QueryExecutor executor = new QueryExecutor();
 
-	private DalService dalServiceImpl;
+	@Inject
+	private DataSourceWrapper dataSourceWrapper;
+
+	/**
+	 * @param args
+	 */
+	public ByteBuf dalService(Request request) {
+		ByteBuf buf = Unpooled.buffer();
+
+		Response response = executor.execute(dataSourceWrapper,
+				request.getMessage());
+		response.setTaskid(request.getTaskid());
+		try {
+			byte[] msgpack_payload = msgPackSerDe.serialize(response);
+			buf.writeInt(msgpack_payload.length + 2);
+			buf.writeShort(1);
+			buf.writeBytes(msgpack_payload);
+		} catch (SerDeException e) {
+			e.printStackTrace();
+		}
+
+		return buf;
+	}
 
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, Request request) {
@@ -42,7 +71,7 @@ public class Netty4Handler extends SimpleChannelInboundHandler<Request> {
 			logger.info("channelRead0 from {} message = '{}'", ctx.channel(),
 					request);
 
-			ByteBuf buf = dalServiceImpl.dalService(request);
+			ByteBuf buf = dalService(request);
 			ChannelFuture wf = ctx.channel().writeAndFlush(buf);
 
 			// ChannelFuture wf = channel.writeAndFlush(request);// 回写返回结果

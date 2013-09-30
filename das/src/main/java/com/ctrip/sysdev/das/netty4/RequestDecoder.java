@@ -1,4 +1,8 @@
-package com.ctrip.sysdev.das.serde.impl;
+package com.ctrip.sysdev.das.netty4;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -16,30 +20,42 @@ import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.enums.StatementType;
 import com.ctrip.sysdev.das.exception.ProtocolInvalidException;
 import com.ctrip.sysdev.das.exception.SerDeException;
-import com.ctrip.sysdev.das.serde.MsgPackSerDeType;
 
-public class RequestSerDe extends AbstractMsgPackSerDe<Request> {
-
+public class RequestDecoder extends ByteToMessageDecoder {
 	@Override
-	public MsgPackSerDeType getSerDeType() {
-		return MsgPackSerDeType.REQUEST_OBJECT;
-	}
+	protected void decode(ChannelHandlerContext ctx, ByteBuf in,
+			List<Object> out) throws Exception {
+		Request request = null; 
 
-	@Override
-	public void accept(Class<?> c) throws SerDeException {
-		if (!Request.class.isAssignableFrom(c)) {
-			throw new SerDeException(
-					"RequestObjectSerDe only accept object that implements Request");
+		if (in.readableBytes() < 4) {// available byte < packe head
+			return;
+		}
+		in.markReaderIndex();// mark position=0
+
+		int dataLength = in.readInt();// packe size
+
+		if (in.readableBytes() < dataLength) {
+
+			in.resetReaderIndex();// go to mark
+			return;
+		}
+		short protocolVersion = in.readShort();
+
+		byte[] decoded = new byte[dataLength - 2];
+		in.readBytes(decoded);
+ 
+		try {
+			request = deserialize(decoded);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		if (request != null) {
+			out.add(request); 
 		}
 	}
 
-	@Override
-	public byte[] doSerialize(Request obj) throws SerDeException {
-		throw new SerDeException("RequestObjectSerDe not support doSerialize");
-	}
 
-	@Override
-	public Request doDeserialize(byte[] source) throws SerDeException {
+	public Request deserialize(byte[] source) throws SerDeException {
 		Request request = Request.getNewInstance();
 		try {
 			MessagePack packer = new MessagePack();

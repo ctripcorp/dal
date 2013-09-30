@@ -2,7 +2,7 @@ package com.ctrip.sysdev.das.domain;
 
 import java.util.UUID;
 
-public class Request extends BaseDomain {
+public class Request extends Domain {
 	/**
 	 * 
 	 */

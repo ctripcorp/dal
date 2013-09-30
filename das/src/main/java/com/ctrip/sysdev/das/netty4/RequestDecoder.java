@@ -21,7 +21,7 @@ import com.ctrip.sysdev.das.domain.enums.StatementType;
 import com.ctrip.sysdev.das.exception.ProtocolInvalidException;
 import com.ctrip.sysdev.das.exception.SerDeException;
 
-public class RequestSerDe extends ByteToMessageDecoder {
+public class RequestDecoder extends ByteToMessageDecoder {
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in,
 			List<Object> out) throws Exception {

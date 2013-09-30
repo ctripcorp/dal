@@ -39,7 +39,7 @@ public class Netty4ChannelInitializer extends ChannelInitializer<Channel> {
 				.get();
 
 		p.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
-		p.addLast("decoder", new RequestSerDe());
+		p.addLast("decoder", new RequestDecoder());
 		p.addLast(businessGroupProvider.get(), "handler", netty4Handler);
 
 	}

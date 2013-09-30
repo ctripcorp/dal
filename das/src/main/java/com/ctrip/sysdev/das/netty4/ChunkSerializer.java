@@ -10,7 +10,7 @@ import org.msgpack.packer.Packer;
 import com.ctrip.sysdev.das.domain.StatementParameter;
 import com.ctrip.sysdev.das.exception.SerDeException;
 
-public class ChunkSerDe {
+public class ChunkSerializer {
 
 	public byte[] serialize(List<List<StatementParameter>> obj)
 			throws SerDeException {

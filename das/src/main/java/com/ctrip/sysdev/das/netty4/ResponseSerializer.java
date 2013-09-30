@@ -13,7 +13,7 @@ import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.exception.SerDeException;
 import com.ctrip.sysdev.das.utils.UUID2ByteArray;
 
-public class ResponseSerDe {
+public class ResponseSerializer {
 	private static final int currentPropertyCount = 3;
 
 	public byte[] serialize(Response obj) throws SerDeException {

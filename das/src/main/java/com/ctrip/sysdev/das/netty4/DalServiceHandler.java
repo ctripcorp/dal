@@ -26,19 +26,19 @@ import com.google.inject.name.Named;
  * @author weiw
  * 
  */
-public class Netty4Handler extends SimpleChannelInboundHandler<Request> {
+public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(Netty4Handler.class);
+			.getLogger(DalServiceHandler.class);
 
 	@Inject
-	public Netty4Handler(@Named("ChannelGroup") ChannelGroup allChannels, ResponseSerDe msgPackSerDe) {
+	public DalServiceHandler(@Named("ChannelGroup") ChannelGroup allChannels, ResponseSerializer msgPackSerDe) {
 		this.allChannels = allChannels;
 		this.msgPackSerDe = msgPackSerDe;
 	}
 
 	private ChannelGroup allChannels;
-	private ResponseSerDe msgPackSerDe;
+	private ResponseSerializer msgPackSerDe;
 	private QueryExecutor executor = new QueryExecutor();
 
 	@Inject

@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.netty4.Netty4ChannelInitializer;
-import com.ctrip.sysdev.das.netty4.Netty4Handler;
+import com.ctrip.sysdev.das.netty4.DalServiceHandler;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
@@ -29,7 +29,7 @@ public class NettyModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(SimpleChannelInboundHandler.class).to(Netty4Handler.class);
+		bind(SimpleChannelInboundHandler.class).to(DalServiceHandler.class);
 		bind(ChannelInitializer.class).to(Netty4ChannelInitializer.class).in(
 				Scopes.SINGLETON);
 		logger.info("NettyModule loaded");

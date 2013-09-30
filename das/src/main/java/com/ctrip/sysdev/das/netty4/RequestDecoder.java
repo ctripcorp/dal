@@ -56,7 +56,7 @@ public class RequestDecoder extends ByteToMessageDecoder {
 
 
 	public Request deserialize(byte[] source) throws SerDeException {
-		Request request = Request.getNewInstance();
+		Request request = new Request();
 		try {
 			MessagePack packer = new MessagePack();
 			// The object to return
@@ -76,7 +76,6 @@ public class RequestDecoder extends ByteToMessageDecoder {
 			request.setMessage(unpackMessage(unpacker));
 			unpacker.readArrayEnd();
 			unpacker.close();
-
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new SerDeException("RequestObjectSerDe  doDeserialize error",
@@ -86,6 +85,7 @@ public class RequestDecoder extends ByteToMessageDecoder {
 			throw new SerDeException("RequestObjectSerDe  doDeserialize error",
 					e);
 		}
+		request.endDecode();
 		return request;
 	}
 
@@ -98,7 +98,7 @@ public class RequestDecoder extends ByteToMessageDecoder {
 	 * @throws IOException
 	 * @throws ProtocolInvalidException
 	 */
-	private static RequestMessage unpackMessage(Unpacker unpacker)
+	private RequestMessage unpackMessage(Unpacker unpacker)
 			throws IOException, ProtocolInvalidException {
 
 		int propertyCount = unpacker.readArrayBegin();

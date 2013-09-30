@@ -23,7 +23,6 @@ public class Netty4Server {
 
 	private AtomicBoolean startFlag = new AtomicBoolean(false);
 	private String inetHost;
-	private int inetPort;
 	private NioEventLoopGroup bossGroup;
 	private NioEventLoopGroup ioGroup;
 	private EventExecutorGroup businessGroup;
@@ -32,19 +31,18 @@ public class Netty4Server {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Inject
 	public Netty4Server(@Named("InetHost") String inetHost,
-			@Named("InetPort") int inetPort,
 			@Named("bossGroup") NioEventLoopGroup bossGroup,
 			@Named("ioGroup") NioEventLoopGroup ioGroup,
 			@Named("businessGroup") EventExecutorGroup businessGroup,
 			ChannelInitializer channelInitializer) {
 		this.inetHost = inetHost;
-		this.inetPort = inetPort;
 		this.bossGroup = bossGroup;
 		this.ioGroup = ioGroup;
 		this.channelInitializer = channelInitializer;
+		this.businessGroup = businessGroup;
 	}
 
-	public void start() throws Exception {
+	public void start(int inetPort) throws Exception {
 		if (!startFlag.compareAndSet(false, true)) {
 			return;
 		}

@@ -16,19 +16,20 @@ import com.ctrip.sysdev.das.utils.UUID2ByteArray;
 public class ResponseSerializer {
 	private static final int currentPropertyCount = 3;
 
-	public byte[] serialize(Response obj) throws SerDeException {
+	public byte[] serialize(Response resp) throws SerDeException {
+		long start = System.currentTimeMillis();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		MessagePack msgpack = new MessagePack();
 		Packer packer = msgpack.createPacker(out);
 		try {
 			packer.writeArrayBegin(currentPropertyCount);
-			packer.write(UUID2ByteArray.asByteArray(obj.getTaskid()));
-			packer.write(obj.getResultType().getIntVal());
-			if (obj.getResultType() == OperationType.Read) {
+			packer.write(UUID2ByteArray.asByteArray(resp.getTaskid()));
+			packer.write(resp.getResultType().getIntVal());
+			if (resp.getResultType() == OperationType.Read) {
 				// means chunk
 //				packer.write(obj.getChunkCount());
-				packer.writeArrayBegin(obj.getResultSet().size());
-				for(List<StatementParameter> outer : obj.getResultSet()){
+				packer.writeArrayBegin(resp.getResultSet().size());
+				for(List<StatementParameter> outer : resp.getResultSet()){
 					packer.writeArrayBegin(outer.size());
 					for(StatementParameter inner : outer){
 						inner.pack(packer);
@@ -37,13 +38,16 @@ public class ResponseSerializer {
 				}
 				packer.writeArrayEnd();
 			} else {
-				packer.write(obj.getAffectRowCount());
+				packer.write(resp.getAffectRowCount());
 			}
 			packer.writeArrayEnd();
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new SerDeException("ResponseSerDe doSerialize exception ", e);
 		}
-		return out.toByteArray();
+		
+		byte[] bytes = out.toByteArray();
+		resp.setEncodeResponseTime(System.currentTimeMillis() - start);
+		return bytes;
 	}
 }

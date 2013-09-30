@@ -1,91 +1,107 @@
 package com.ctrip.sysdev.das;
 
-import com.ctrip.sysdev.das.exception.ServerException;
-import com.ctrip.sysdev.das.jmx.MBeanUtil;
-import com.ctrip.sysdev.das.jmx.ServerInfoMXBean;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.ZooDefs.Ids;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ctrip.sysdev.das.controller.DasService;
 import com.ctrip.sysdev.das.netty4.Netty4Server;
-import com.ctrip.sysdev.das.utils.SingleInstanceDaemonTool;
-import com.google.common.util.concurrent.AbstractExecutionThreadService;
-import com.google.common.util.concurrent.Service;
-import com.google.inject.Inject;
 
-public class DalServer extends AbstractExecutionThreadService  {
+public class DalServer extends DasService {
+	private static Logger logger = LoggerFactory.getLogger(DalServer.class);
 
-	private Netty4Server tcpServer;
+	private static final String hostPort = "csm-haddop02.dev.sh.ctripcorp.com:2181,csm-haddop03.dev.sh.ctripcorp.com:2181,csm-haddop04.dev.sh.ctripcorp.com:2181";
+	private String path;
+	private String port;
+	private String parent;
 
-	@Inject
-	private ServerInfoMXBean serverInfoMXBean;
+	private Netty4Server dasService;
+//	private ServerInfoMXBean serverInfoMXBean;
 
-	@Override
-	protected void startUp() {
+	public DalServer(String port, String parent) throws Exception {
+		super(hostPort);
+		this.parent = parent;
+		this.port = port;
+	}
+
+	protected void initService() {
+		path = pathOf(pathOf(WORKER, ip), port);
+		watch(path);
+		watch(pathOf(PORT, port));
+		watch(pathOf(NODE, ip));
+	}
+
+	protected boolean validate() {
 		try {
-			doStartup();
-			SingleInstanceDaemonTool watcher = SingleInstanceDaemonTool
-					.createInstance(serverInfoMXBean.getName());
-			watcher.init();
-			MBeanUtil.registerMBean(serverInfoMXBean.getName(),
-					serverInfoMXBean.getName(), serverInfoMXBean);
-		} catch (Throwable e) {
-			System.out.print("Throwable,server will shutdown!");
-			e.printStackTrace();
-			SingleInstanceDaemonTool.bailout(-1);
+			return zk.exists(path, this) == null;
+		} catch (Exception e) {
+			logger.error("Error during validate worker path", e);
+			return false;
 		}
 	}
 
-	@Inject
-	public DalServer(Netty4Server tcpServer) {
-		this.tcpServer = tcpServer;
+	protected boolean register() {
+		try {
+			zk.create(path, parent.getBytes(), Ids.OPEN_ACL_UNSAFE,
+					CreateMode.EPHEMERAL);
+
+			dasService = new GuiceObjectFactory().getInstance(Netty4Server.class);
+			dasService.start(Integer.parseInt(port));
+//			SingleInstanceDaemonTool watcher = SingleInstanceDaemonTool
+//					.createInstance(serverInfoMXBean.getName());
+//			watcher.init();
+//			MBeanUtil.registerMBean(serverInfoMXBean.getName(),
+//			serverInfoMXBean.getName(), serverInfoMXBean);
+			
+			return true;
+		} catch (Exception e) {
+			logger.error("Error during register worker path", e);
+			// SingleInstanceDaemonTool.bailout(-1);
+			return false;
+		}
 	}
 
-	public void doStartup() throws ServerException {
+	protected void shutdown() {
 		try {
-			tcpServer.start();
+			logger.info("Stopping worker");
+			dasService.stop();
+			if (zk.exists(path, false) != null)
+				zk.delete(path, -1);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ServerException("start dal tcpserver error", e);
 		}
 	}
 
-	@Override
-	protected void run() throws Exception {
-		while (isRunning()) {
+	protected boolean isDead(WatchedEvent event) {
+		switch (event.getType()) {
+		case None:
+			return event.getState() == Event.KeeperState.Expired;
+		case NodeDeleted:
+			return contains(event.getPath());
+		default:
 			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
+				if (!event.getPath().equals(path))
+					return false;
+
+				byte[] data = zk.getData(path, false, null);
+				return (data == null)
+						|| (new String(data).equals(parent) == false);
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			return false;
 		}
 	}
 
-	@Override
-	protected void triggerShutdown() {
-		try {
-			tcpServer.stop();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		System.out.println("dal tcpserver Stopped.");
-	}
-
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
-		GuiceObjectFactory aGuiceObjectFactory = new GuiceObjectFactory();
-
+		logger.info("Started at port " + args[0]);
 		try {
-			final Service server = aGuiceObjectFactory.getInstance(DalServer.class);
-			server.start();
-
-			Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-				@Override
-				public void run() {
-					server.stopAndWait();
-				}
-			}));
+			new DalServer(args[0], args[1]).run();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error starting server", e);
 		}
+		logger.info("End");
 	}
-
 }

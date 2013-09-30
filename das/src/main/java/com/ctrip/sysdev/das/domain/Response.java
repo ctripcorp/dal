@@ -26,7 +26,11 @@ public class Response extends Domain {
 
 	private List<List<StatementParameter>> resultSet;
 	
-
+	private long totalTime;
+	private long decodeRequestTime;
+	private long dbTime;
+	private long encodeResponseTime;
+	
 	/**
 	 * @return the packer
 	 */
@@ -125,4 +129,35 @@ public class Response extends Domain {
 		return serialVersionUID;
 	}
 
+	public long getTotalTime() {
+		return totalTime;
+	}
+
+	public void setTotalTime(long totalTime) {
+		this.totalTime = totalTime;
+	}
+
+	public long getDecodeRequestTime() {
+		return decodeRequestTime;
+	}
+
+	public void setDecodeRequestTime(long decodeRequestTime) {
+		this.decodeRequestTime = decodeRequestTime;
+	}
+
+	public long getDbTime() {
+		return dbTime;
+	}
+
+	public void setDbTime(long dbTime) {
+		this.dbTime = dbTime;
+	}
+
+	public long getEncodeResponseTime() {
+		return encodeResponseTime;
+	}
+
+	public void setEncodeResponseTime(long encodeResponseTime) {
+		this.encodeResponseTime = encodeResponseTime;
+	}
 }

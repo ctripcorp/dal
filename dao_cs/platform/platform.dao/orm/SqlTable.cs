@@ -57,5 +57,9 @@ namespace platform.dao.orm
             return sb.ToString();
         }
 
+        public static SqlTable CreateInstance(Type type)
+        {
+        }
+
     }
 }

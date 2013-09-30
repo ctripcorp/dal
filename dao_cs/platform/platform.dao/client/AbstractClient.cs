@@ -10,8 +10,6 @@ namespace platform.dao.client
     public abstract class AbstractClient : IClient
     {
 
-
-
         public virtual void SetCredential(string credential)
         {
             throw new NotImplementedException();
@@ -37,22 +35,27 @@ namespace platform.dao.client
             throw new NotImplementedException();
         }
 
-        public virtual IList<T> Fetch<T>(orm.query.IQuery query)
+        public virtual IList<T> Fetch<T>(string sql, params IParameter[] parameters)
         {
             throw new NotImplementedException();
         }
 
-        public virtual int Insert<T>(IList<T> lists)
+        public virtual int Insert<T>(T entity)
         {
             throw new NotImplementedException();
         }
 
-        public virtual int Upadte<T>(IList<T> lists, orm.query.IQuery query)
+        public virtual int BatchInsert<T>(IList<T> entities)
         {
             throw new NotImplementedException();
         }
 
-        public virtual int Delete<T>(orm.query.IQuery query)
+        public virtual int Upadte<T>(string sql, params IParameter[] parameters)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual int Delete<T>(T entity)
         {
             throw new NotImplementedException();
         }

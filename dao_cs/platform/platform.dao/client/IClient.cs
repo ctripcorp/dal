@@ -23,13 +23,15 @@ namespace platform.dao.client
 
         //Begin orm
 
-        IList<T> Fetch<T>(IQuery query);
+        IList<T> Fetch<T>(string sql, params IParameter[] parameters);
 
-        int Insert<T>(IList<T> lists);
+        int Insert<T>(T entity);
 
-        int Upadte<T>(IList<T> lists, IQuery query);
+        int BatchInsert<T>(IList<T> entities);
 
-        int Delete<T>(IQuery query);
+        int Upadte<T>(string sql, params IParameter[] parameters);
+
+        int Delete<T>(T entity);
 
     }
 }

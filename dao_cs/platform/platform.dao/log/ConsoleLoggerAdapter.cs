@@ -2,45 +2,71 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using platform.dao.enums;
 
 namespace platform.dao.log
 {
-    public class ConsoleLoggerAdapter : AbstractLoggerAdapter
+    internal class ConsoleLoggerAdapter : AbstractLoggerAdapter
     {
 
-        private string FormatLogMessage(string level, string message)
+        private static ConsoleLoggerAdapter instance = new ConsoleLoggerAdapter();
+
+        private ConsoleLoggerAdapter()
         {
-            return string.Format("[{0}]----[{1}]----{2}",level, DateTime.Now, message);
+        }
+
+        public static ConsoleLoggerAdapter GetInstance(string name, LogLevel level)
+        {
+            instance.Init(name, level);
+            return instance;
         }
 
         public override void Trace(string message)
         {
-            Console.WriteLine(FormatLogMessage("Trace", message));
+            if (this.level <= LogLevel.Trace)
+            {
+                Console.WriteLine(FormatLogMessage("Trace", message));
+            }
         }
 
         public override void Debug(string message)
         {
-            Console.WriteLine(FormatLogMessage("Debug", message));
+            if (this.level <= LogLevel.Debug)
+            {
+                Console.WriteLine(FormatLogMessage("Debug", message));
+            }
         }
 
         public override void Info(string message)
         {
-            Console.WriteLine(FormatLogMessage("Info", message));
+            if (this.level <= LogLevel.Info)
+            {
+                Console.WriteLine(FormatLogMessage("Info", message));
+            }
         }
 
         public override void Warn(string message)
         {
-            Console.WriteLine(FormatLogMessage("Warn", message));
+            if (this.level <= LogLevel.Warn)
+            {
+                Console.WriteLine(FormatLogMessage("Warn", message));
+            }
         }
 
         public override void Error(string message)
         {
-            Console.WriteLine(FormatLogMessage("Error", message));
+            if (this.level <= LogLevel.Error)
+            {
+                Console.WriteLine(FormatLogMessage("Error", message));
+            }
         }
 
         public override void Fatal(string message)
         {
-            Console.WriteLine(FormatLogMessage("Fatal", message));
+            if (this.level <= LogLevel.Fatal)
+            {
+                Console.WriteLine(FormatLogMessage("Fatal", message));
+            }
         }
 
     }

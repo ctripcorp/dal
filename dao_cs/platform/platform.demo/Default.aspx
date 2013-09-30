@@ -15,6 +15,9 @@
 <script type="text/javascript" src="Scripts/Default.js"></script>
 </asp:Content>
 <asp:Content ID="BodyContent" runat="server" ContentPlaceHolderID="MainContent">
+
+<div class="row"><div class="span4"><input id="port_num" type="text" value="9000"/><input id="change_port" type="button" value="Change Port" /></div></div>
+
 <div class="span4"><div class="control-group"><label class="control-label">Address</label><input id="address" type="text"/></div></div>
 <div class="span4"><div class="control-group"><label class="control-label">Name</label><input id="name" type="text"/></div></div>
 <div class="span4"><div class="control-group"><label class="control-label">Telephone</label><input id="telephone" type="text"/></div></div>

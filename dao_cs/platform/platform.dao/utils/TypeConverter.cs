@@ -68,15 +68,15 @@ namespace platform.dao.utils
         public static object ConvertToUnderlyingType(Type type, object originalValue)
         {
             object convertedValue = null;
-            if (type == typeof(DateTime))
-            {
-                ulong milliseconds = (ulong)originalValue;
-                convertedValue = utcStartTime.AddMilliseconds(milliseconds);
-            }
-            else
-            {
+            //if (type == typeof(DateTime))
+            //{
+            //    ulong milliseconds = (ulong)originalValue;
+            //    convertedValue = utcStartTime.AddMilliseconds(milliseconds);
+            //}
+            //else
+            //{
                 convertedValue = System.Convert.ChangeType(originalValue, type);
-            }
+            //}
 
             return convertedValue;
         }

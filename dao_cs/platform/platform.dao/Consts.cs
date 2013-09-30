@@ -9,9 +9,9 @@ namespace platform.dao
     public class Consts
     {
 
-        public static readonly string serverIp = "localhost";
+        public static  string ServerIp = "localhost";
 
-        public static readonly int serverPort = 9000;
+        public static  int ServerPort = 9000;
 
         public static readonly IList<DbType> validDbType;
 

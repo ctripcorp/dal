@@ -5,61 +5,61 @@ using System.Text;
 
 namespace platform.dao.client
 {
-    public interface IDAO<T>
+    public interface IDAO
     {
         /// <summary>
         /// 根据自增主键查找
         /// </summary>
         /// <param name="iD"></param>
         /// <returns></returns>
-        T FindByPk(int iD);
+        T FindByPk<T>(int iD);
 
         /// <summary>
         /// 根据自增主键删除
         /// </summary>
         /// <param name="iD"></param>
         /// <returns></returns>
-        int DeleteByPk(int iD);
+        int DeleteByPk<T>(int iD);
 
         /// <summary>
         /// 删除一个跟Entity匹配的
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        int Delete(T entity);
+        int Delete<T>(T entity);
 
         /// <summary>
         /// 插入一条数据
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        int Insert(T entity);
+        int Insert<T>(T entity);
 
         /// <summary>
         /// 批量插入数据
         /// </summary>
         /// <param name="entities"></param>
         /// <returns></returns>
-        int BatchInsert(IList<T> entities);
+        int BatchInsert<T>(IList<T> entities);
 
         /// <summary>
         /// 更新一条数据
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        int Update(T entity);
+        int Update<T>(T entity);
 
         /// <summary>
         /// 获取所有的数据
         /// </summary>
         /// <returns></returns>
-        IList<T> GetAll();
+        IList<T> GetAll<T>();
 
         /// <summary>
         /// 删除所有数据
         /// </summary>
         /// <returns></returns>
-        int DeleteAll();
+        int DeleteAll<T>();
 
     }
 }

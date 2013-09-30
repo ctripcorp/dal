@@ -15,57 +15,38 @@ namespace platform.dao.client
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class AbstractDAO<T> : IDAO<T>
+    public abstract class AbstractDAO : IDAO
     {
-        private static ILoggerAdapter logger = LogFactory.GetLogger(typeof(AbstractDAO<T>).Name);
+        private static ILoggerAdapter logger = LogFactory.GetLogger(typeof(AbstractDAO).Name);
 
         public abstract IDataReader FetchBySql(string sql);
+
+        public abstract int ExecuteSql(string sql);
 
         /// <summary>
         /// 根据自增主键，获取对应的实体对象
         /// </summary>
         /// <param name="iD">自增主键</param>
         /// <returns>实体对象</returns>
-        public virtual T FindByPk(int iD)
+        public virtual T FindByPk<T>(int iD)
         {
             Type type = typeof(T);
 
-            PropertyInfo[] fields = type.GetProperties(
-                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-
-            Dictionary<string, PropertyInfo> columnFieldsMap = new Dictionary<string, PropertyInfo>();
-
-            string pk = "";
-            IList<SqlColumn> columns = new List<SqlColumn>();
-
-            foreach (PropertyInfo field in fields)
-            {
-                ColumnAttribute colAttr = (ColumnAttribute)
-                    field.GetCustomAttributes(typeof(ColumnAttribute), false)[0];
-
-                if (field.IsDefined(typeof(PrimaryKeyAttribute), false))
-                    pk = colAttr.Name;
-
-                columnFieldsMap.Add(colAttr.Name, field);
-
-                SqlColumn column = new SqlColumn() { Name=colAttr.Name, Alias = colAttr.Alias};
-                columns.Add(column);
-            }
-
-            //Get table name
-            TableAttribute tableAttr = (TableAttribute) type.GetCustomAttributes(typeof(TableAttribute), false)[0];
-
-            SqlTable table = new SqlTable() { Schema = tableAttr.Schema, Name = tableAttr.Name, Columns = columns};
+            SqlTable table = SqlTable.CreateInstance(type);
 
             StringBuilder sql = new StringBuilder(table.GetSelectAllSql());
 
-            sql.Append(" WHERE ");
-
-            sql.Append(pk);
-
-            sql.Append(" = ");
-
-            sql.Append(iD);
+            foreach(SqlColumn col in table.Columns)
+            {
+                if (col.IsPrimaryKey)
+                {
+                    sql.Append(" WHERE ");
+                    sql.Append(col.Name);
+                    sql.Append(" = ");
+                    sql.Append(iD);
+                    break;
+                }
+            }
 
             T obj = default(T);
 
@@ -76,17 +57,10 @@ namespace platform.dao.client
                 if (reader.Read())
                 {
                     obj = Activator.CreateInstance<T>();
-                    foreach (var key in columnFieldsMap.Keys)
+                    foreach (var col in table.Columns)
                     {
-                        PropertyInfo p = columnFieldsMap[key];
-                        object convertedValue = reader[key];
-                        //Type underlyingType = Nullable.GetUnderlyingType(p.PropertyType);
-
-                        //if (underlyingType != null)
-                        //{
-                        //    convertedValue = TypeConverter.ConvertToUnderlyingType(underlyingType, convertedValue);
-                        //}
-                        p.SetValue(obj, convertedValue, null);
+                        object convertedValue = reader[col.Name];
+                        col.SetValue(obj, convertedValue);
                     }
                 }
             }
@@ -94,37 +68,63 @@ namespace platform.dao.client
             return obj;
         }
 
-        public virtual int DeleteByPk(int iD)
+        /// <summary>
+        /// 根据自增主键，删除数据
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="iD"></param>
+        /// <returns></returns>
+        public virtual int DeleteByPk<T>(int iD)
+        {
+            Type type = typeof(T);
+
+            SqlTable table = SqlTable.CreateInstance(type);
+
+            StringBuilder sql = new StringBuilder(table.GetDeleteSql());
+
+            foreach (SqlColumn col in table.Columns)
+            {
+                if (col.IsPrimaryKey)
+                {
+                    sql.Append(" WHERE ");
+                    sql.Append(col.Name);
+                    sql.Append(" = ");
+                    sql.Append(iD);
+                    break;
+                }
+            }
+
+            logger.Warn(sql.ToString());
+
+            return this.ExecuteSql(sql.ToString());
+        }
+
+        public virtual int Delete<T>(T entity)
         {
             throw new NotImplementedException();
         }
 
-        public virtual int Delete(T entity)
+        public virtual int Insert<T>(T entity)
         {
             throw new NotImplementedException();
         }
 
-        public virtual int Insert(T entity)
+        public virtual int BatchInsert<T>(IList<T> entities)
         {
             throw new NotImplementedException();
         }
 
-        public virtual int BatchInsert(IList<T> entities)
+        public virtual int Update<T>(T entity)
         {
             throw new NotImplementedException();
         }
 
-        public virtual int Update(T entity)
+        public virtual IList<T> GetAll<T>()
         {
             throw new NotImplementedException();
         }
 
-        public virtual IList<T> GetAll()
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual int DeleteAll()
+        public virtual int DeleteAll<T>()
         {
             throw new NotImplementedException();
         }

@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using platform.dao.enums;
 
 namespace platform.dao.log
 {
-    public interface ILoggerAdapter
+    public interface ILoggerAdapter : IDisposable
     {
+        void Init(string name, LogLevel level);
+
         void Trace(string message);
 
         void Debug(string message);

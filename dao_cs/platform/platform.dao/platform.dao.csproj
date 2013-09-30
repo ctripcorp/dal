@@ -59,8 +59,9 @@
     <Compile Include="log\ConsoleLoggerAdapter.cs" />
     <Compile Include="log\ILoggerAdapter.cs" />
     <Compile Include="log\AbstractLoggerAdapter.cs" />
-    <Compile Include="log\Log4NetAdapter.cs" />
+    <Compile Include="log\FileLoggerAdapter.cs" />
     <Compile Include="log\LogFactory.cs" />
+    <Compile Include="enums\LogLevel.cs" />
     <Compile Include="orm\attribute\AutoIncrementAttribute.cs" />
     <Compile Include="orm\attribute\ColumnAttribute.cs" />
     <Compile Include="orm\attribute\NullableAttribute.cs" />
@@ -74,7 +75,6 @@
     <Compile Include="param\StatementParameterCollection.cs" />
     <Compile Include="enums\StatementType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="orm\query\IQuery.cs" />
     <Compile Include="providers\IDatabaseProvider.cs" />
     <Compile Include="providers\SqlDatabaseProvider.cs" />
     <Compile Include="request\AbstractRequest.cs" />

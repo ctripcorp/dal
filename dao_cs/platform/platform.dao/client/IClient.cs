@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Data;
 using platform.dao.param;
-using platform.dao.orm.query;
 using System.Collections;
 
 namespace platform.dao.client

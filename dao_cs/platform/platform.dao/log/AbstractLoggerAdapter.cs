@@ -2,11 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using platform.dao.enums;
 
 namespace platform.dao.log
 {
     public class AbstractLoggerAdapter : ILoggerAdapter
     {
+        protected string name;
+        protected LogLevel level;
+
+
+
         public virtual void Trace(string message)
         {
             throw new NotImplementedException();
@@ -36,5 +42,37 @@ namespace platform.dao.log
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// 日志名称，级别初始化日志
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="level"></param>
+        public virtual void Init(string name, LogLevel level)
+        {
+            this.name = name;
+            this.level = level;
+        }
+
+        protected string FormatLogMessage(string level, string message)
+        {
+            return string.Format("[{0}]--[{1}]--[{2}]--{3}", level, name, DateTime.Now, message);
+        }
+
+
+        public virtual void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// 真正的资源释放程序
+        /// </summary>
+        /// <param name="isDisposing">是否正在释放</param>
+        protected virtual void Dispose(bool isDisposing)
+        {
+        }
+
     }
 }

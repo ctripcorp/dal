@@ -48,7 +48,7 @@ namespace platform.dao.client
                 try
                 {
                     //sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    sock.Connect(Consts.serverIp, Consts.serverPort);
+                    sock.Connect(Consts.ServerIp, Consts.ServerPort);
                     networkStream = new NetworkStream(sock);
                 }
                 catch(Exception ex)
@@ -70,7 +70,7 @@ namespace platform.dao.client
             byte[] payload = request.Pack2ByteArray();
             watch.Stop();
 
-            logger.Info(string.Format("Serialization time: {0} ms", watch.ElapsedMilliseconds));
+            logger.Info(string.Format("Serialization time: {0} Ticks(divide 10,000 to get milliseconds)", watch.ElapsedTicks));
 
             int protocolVersion = request.GetProtocolVersion();
 
@@ -136,7 +136,7 @@ namespace platform.dao.client
                     response = DefaultResponse.UnpackFromByteArray(buffer);
                     watch.Stop();
 
-                    logger.Info(string.Format("Deserialization time: {0} ms", watch.ElapsedMilliseconds));
+                    logger.Info(string.Format("Deserialization time: {0} Ticks(divide 10,000 to get milliseconds)", watch.ElapsedTicks));
 
                     success = true;
                 }

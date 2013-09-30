@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using platform.dao.orm.attribute;
 
-namespace platform.bll.Entity
+namespace platform.bll
 {
     [Serializable]
     [Table(Schema="dbo",Name="Person")]

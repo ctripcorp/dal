@@ -54,6 +54,12 @@
         });
     });
 
+    $("#change_port").click(function () {
+        $.get("/Default.aspx?port=" + $("#port_num").val(), function (data) {
+            ttt();
+        });
+    });
+
     ttt();
 
 });

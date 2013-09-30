@@ -23,11 +23,6 @@ public class Netty4ChannelInitializer extends ChannelInitializer<Channel> {
 	private static final Logger logger = LoggerFactory
 			.getLogger(Netty4ChannelInitializer.class);
 
-	@Inject
-	private Provider<ByteToMessageDecoder> netty4ProtocolDecoderProvider;
-	@SuppressWarnings("rawtypes")
-	@Inject
-	private Provider<MessageToByteEncoder> netty4ProtocolEncoderProvider;
 	@SuppressWarnings("rawtypes")
 	@Inject
 	private Provider<SimpleChannelInboundHandler> netty4HandlerProvider;
@@ -40,18 +35,13 @@ public class Netty4ChannelInitializer extends ChannelInitializer<Channel> {
 	protected void initChannel(Channel ch) throws Exception {
 
 		ChannelPipeline p = ch.pipeline();
-		ByteToMessageDecoder netty4ProtocolDecoder = netty4ProtocolDecoderProvider
-				.get();
-		MessageToByteEncoder<Object> netty4ProtocolEncoder = netty4ProtocolEncoderProvider
-				.get();
 		SimpleChannelInboundHandler<Request> netty4Handler = netty4HandlerProvider
 				.get();
 
 		p.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
-		p.addLast("decoder", netty4ProtocolDecoder);
-		p.addLast("encoder", netty4ProtocolEncoder);
+		p.addLast("decoder", new Netty4ProtocolDecoder());
+		p.addLast("encoder", new Netty4ProtocolEncoder());
 		p.addLast(businessGroupProvider.get(), "handler", netty4Handler);
 
 	}
-
 }

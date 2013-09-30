@@ -13,11 +13,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.commons.TcpServer;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-public class Netty4Server implements TcpServer {
+public class Netty4Server {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(Netty4Server.class);

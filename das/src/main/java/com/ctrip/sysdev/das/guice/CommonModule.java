@@ -3,7 +3,7 @@ package com.ctrip.sysdev.das.guice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.commons.DataSourceWrapper;
+import com.ctrip.sysdev.das.dataSource.DataSourceWrapper;
 import com.ctrip.sysdev.das.dataSource.DruidDataSourceWrapper;
 import com.ctrip.sysdev.das.jmx.DasServerInfoMBean;
 import com.ctrip.sysdev.das.jmx.ServerInfoMXBean;
@@ -30,15 +30,15 @@ public class CommonModule implements Module {
 		binder.bind(DataSourceWrapper.class).to(DruidDataSourceWrapper.class)
 				.asEagerSingleton();
 		// serde
-		binder.bind(MsgPackSerDe.class)
-				.annotatedWith(Names.named("RequestSerDe"))
-				.to(RequestSerDe.class).in(Scopes.SINGLETON);
-		binder.bind(MsgPackSerDe.class)
-				.annotatedWith(Names.named("ResponseSerDe"))
-				.to(ResponseSerDe.class).in(Scopes.SINGLETON);
-		binder.bind(MsgPackSerDe.class)
-				.annotatedWith(Names.named("ChunkSerDe")).to(ChunkSerDe.class)
-				.in(Scopes.SINGLETON);
+//		binder.bind(MsgPackSerDe.class)
+//				.annotatedWith(Names.named("RequestSerDe"))
+//				.to(RequestSerDe.class).in(Scopes.SINGLETON);
+//		binder.bind(MsgPackSerDe.class)
+//				.annotatedWith(Names.named("ResponseSerDe"))
+//				.to(ResponseSerDe.class).in(Scopes.SINGLETON);
+//		binder.bind(MsgPackSerDe.class)
+//				.annotatedWith(Names.named("ChunkSerDe")).to(ChunkSerDe.class)
+//				.in(Scopes.SINGLETON);
 
 		logger.info("CommonModule loaded");
 	}

@@ -7,20 +7,11 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import java.util.List;
 
 import com.ctrip.sysdev.das.domain.Request;
-import com.ctrip.sysdev.das.serde.MsgPackSerDe;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import com.ctrip.sysdev.das.serde.impl.RequestSerDe;
 
 public class Netty4ProtocolDecoder extends ByteToMessageDecoder {
 
-	private MsgPackSerDe<Request> msgPackSerDe;
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Inject
-	public Netty4ProtocolDecoder(
-			@Named("RequestSerDe") MsgPackSerDe msgPackSerDe) {
-		this.msgPackSerDe = msgPackSerDe;
-	}
+	private RequestSerDe msgPackSerDe = new RequestSerDe();
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in,

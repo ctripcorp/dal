@@ -18,7 +18,7 @@ import org.msgpack.type.ValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.commons.DataSourceWrapper;
+import com.ctrip.sysdev.das.dataSource.DataSourceWrapper;
 import com.ctrip.sysdev.das.domain.RequestMessage;
 import com.ctrip.sysdev.das.domain.Response;
 import com.ctrip.sysdev.das.domain.StatementParameter;
@@ -28,21 +28,6 @@ import com.ctrip.sysdev.das.domain.enums.StatementType;
 
 public class QueryExecutor implements LogConsts {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-	private DataSourceWrapper dataSource;
-	private RequestMessage message;
-
-	public QueryExecutor() {
-	}
-
-	public QueryExecutor(DataSourceWrapper dataSource, RequestMessage message) {
-		this.dataSource = dataSource;
-		this.message = message;
-	}
-
-	public Response execute() {
-		return execute(dataSource, message);
-	}
 
 	public Response execute(DataSourceWrapper dataSource, RequestMessage message) {
 		Response resp = new Response();

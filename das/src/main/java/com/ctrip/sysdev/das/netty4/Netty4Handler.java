@@ -1,17 +1,25 @@
 package com.ctrip.sysdev.das.netty4;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.DalService;
+import com.ctrip.sysdev.das.dataSource.DataSourceWrapper;
 import com.ctrip.sysdev.das.domain.Request;
+import com.ctrip.sysdev.das.domain.Response;
+import com.ctrip.sysdev.das.exception.SerDeException;
+import com.ctrip.sysdev.das.serde.impl.ResponseSerDe;
+import com.ctrip.sysdev.das.worker.QueryExecutor;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -26,15 +34,52 @@ public class Netty4Handler extends SimpleChannelInboundHandler<Request> {
 			.getLogger(Netty4Handler.class);
 
 	@Inject
-	public Netty4Handler(@Named("ChannelGroup") ChannelGroup allChannels,
-			DalService dalServiceImpl) {
+	public Netty4Handler(@Named("ChannelGroup") ChannelGroup allChannels, ResponseSerDe msgPackSerDe) {
 		this.allChannels = allChannels;
-		this.dalServiceImpl = dalServiceImpl;
+		this.msgPackSerDe = msgPackSerDe;
 	}
 
 	private ChannelGroup allChannels;
+	private ResponseSerDe msgPackSerDe;
+	private QueryExecutor executor = new QueryExecutor();
 
-	private DalService dalServiceImpl;
+	@Inject
+	private DataSourceWrapper dataSourceWrapper;
+
+	public Connection getConnection() throws SQLException {
+		return dataSourceWrapper.getConnection();
+	}
+
+	public DataSourceWrapper getDataSourceWrapper() {
+		return dataSourceWrapper;
+	}
+
+	public void setDataSourceWrapper(DataSourceWrapper dataSourceWrapper) {
+		this.dataSourceWrapper = dataSourceWrapper;
+	}
+
+	/**
+	 * @param args
+	 */
+	public ByteBuf dalService(Request request) {
+		this.getDataSourceWrapper();
+
+		ByteBuf buf = Unpooled.buffer();
+
+		Response response = executor.execute(getDataSourceWrapper(),
+				request.getMessage());
+		response.setTaskid(request.getTaskid());
+		try {
+			byte[] msgpack_payload = msgPackSerDe.serialize(response);
+			buf.writeInt(msgpack_payload.length + 2);
+			buf.writeShort(1);
+			buf.writeBytes(msgpack_payload);
+		} catch (SerDeException e) {
+			e.printStackTrace();
+		}
+
+		return buf;
+	}
 
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, Request request) {
@@ -42,7 +87,7 @@ public class Netty4Handler extends SimpleChannelInboundHandler<Request> {
 			logger.info("channelRead0 from {} message = '{}'", ctx.channel(),
 					request);
 
-			ByteBuf buf = dalServiceImpl.dalService(request);
+			ByteBuf buf = dalService(request);
 			ChannelFuture wf = ctx.channel().writeAndFlush(buf);
 
 			// ChannelFuture wf = channel.writeAndFlush(request);// 回写返回结果

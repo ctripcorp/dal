@@ -9,18 +9,17 @@ import org.msgpack.packer.Packer;
 
 import com.ctrip.sysdev.das.domain.StatementParameter;
 import com.ctrip.sysdev.das.exception.SerDeException;
+import com.ctrip.sysdev.das.serde.MsgPackSerDe;
 import com.ctrip.sysdev.das.serde.MsgPackSerDeType;
 
-public class ChunkSerDe extends AbstractMsgPackSerDe<List<List<StatementParameter>>> {
+public class ChunkSerDe implements MsgPackSerDe {
 
 	@Override
 	public MsgPackSerDeType getSerDeType() {
-		// TODO Auto-generated method stub
-		return null;
+		return MsgPackSerDeType.CHUNK;
 	}
 
-	@Override
-	public byte[] doSerialize(List<List<StatementParameter>> obj)
+	public byte[] serialize(List<List<StatementParameter>> obj)
 			throws SerDeException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		MessagePack msgpack = new MessagePack();
@@ -41,16 +40,4 @@ public class ChunkSerDe extends AbstractMsgPackSerDe<List<List<StatementParamete
 		}
 		return out.toByteArray();
 	}
-
-	@Override
-	public List<List<StatementParameter>> doDeserialize(byte[] source)
-			throws SerDeException {
-		throw new SerDeException("ChunkSerDe not support doDeserialize");
-	}
-
-	@Override
-	public void accept(Class<?> c) throws SerDeException {
-	}
-
-
 }

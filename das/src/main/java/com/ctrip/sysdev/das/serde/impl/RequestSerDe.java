@@ -16,30 +16,17 @@ import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.enums.StatementType;
 import com.ctrip.sysdev.das.exception.ProtocolInvalidException;
 import com.ctrip.sysdev.das.exception.SerDeException;
+import com.ctrip.sysdev.das.serde.MsgPackSerDe;
 import com.ctrip.sysdev.das.serde.MsgPackSerDeType;
 
-public class RequestSerDe extends AbstractMsgPackSerDe<Request> {
+public class RequestSerDe implements MsgPackSerDe {
 
 	@Override
 	public MsgPackSerDeType getSerDeType() {
 		return MsgPackSerDeType.REQUEST_OBJECT;
 	}
 
-	@Override
-	public void accept(Class<?> c) throws SerDeException {
-		if (!Request.class.isAssignableFrom(c)) {
-			throw new SerDeException(
-					"RequestObjectSerDe only accept object that implements Request");
-		}
-	}
-
-	@Override
-	public byte[] doSerialize(Request obj) throws SerDeException {
-		throw new SerDeException("RequestObjectSerDe not support doSerialize");
-	}
-
-	@Override
-	public Request doDeserialize(byte[] source) throws SerDeException {
+	public Request deserialize(byte[] source) throws SerDeException {
 		Request request = Request.getNewInstance();
 		try {
 			MessagePack packer = new MessagePack();

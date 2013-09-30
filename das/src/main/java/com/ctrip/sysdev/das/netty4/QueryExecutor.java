@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.das.worker;
+package com.ctrip.sysdev.das.netty4;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -26,7 +26,12 @@ import com.ctrip.sysdev.das.domain.enums.DbType;
 import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.enums.StatementType;
 
-public class QueryExecutor implements LogConsts {
+public class QueryExecutor {
+	public static final String QUERY_EXECUTION_EXCEPTION = "Query execution exception";
+	public static final String CLOSE_CONNECTION_EXCEPTION = "Connection close exception";
+	public static final String CLOSE_STATEMENT_EXCEPTION = "Statement close exception";
+	public static final String DURATION = "duration";
+
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public Response execute(DataSourceWrapper dataSource, RequestMessage message) {

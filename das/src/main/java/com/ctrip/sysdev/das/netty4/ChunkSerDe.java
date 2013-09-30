@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.das.serde.impl;
+package com.ctrip.sysdev.das.netty4;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,15 +9,8 @@ import org.msgpack.packer.Packer;
 
 import com.ctrip.sysdev.das.domain.StatementParameter;
 import com.ctrip.sysdev.das.exception.SerDeException;
-import com.ctrip.sysdev.das.serde.MsgPackSerDe;
-import com.ctrip.sysdev.das.serde.MsgPackSerDeType;
 
-public class ChunkSerDe implements MsgPackSerDe {
-
-	@Override
-	public MsgPackSerDeType getSerDeType() {
-		return MsgPackSerDeType.CHUNK;
-	}
+public class ChunkSerDe {
 
 	public byte[] serialize(List<List<StatementParameter>> obj)
 			throws SerDeException {

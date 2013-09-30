@@ -7,14 +7,8 @@ import com.ctrip.sysdev.das.dataSource.DataSourceWrapper;
 import com.ctrip.sysdev.das.dataSource.DruidDataSourceWrapper;
 import com.ctrip.sysdev.das.jmx.DasServerInfoMBean;
 import com.ctrip.sysdev.das.jmx.ServerInfoMXBean;
-import com.ctrip.sysdev.das.serde.MsgPackSerDe;
-import com.ctrip.sysdev.das.serde.impl.ChunkSerDe;
-import com.ctrip.sysdev.das.serde.impl.RequestSerDe;
-import com.ctrip.sysdev.das.serde.impl.ResponseSerDe;
 import com.google.inject.Binder;
 import com.google.inject.Module;
-import com.google.inject.Scopes;
-import com.google.inject.name.Names;
 
 public class CommonModule implements Module {
 
@@ -29,16 +23,6 @@ public class CommonModule implements Module {
 		// db connection pool
 		binder.bind(DataSourceWrapper.class).to(DruidDataSourceWrapper.class)
 				.asEagerSingleton();
-		// serde
-//		binder.bind(MsgPackSerDe.class)
-//				.annotatedWith(Names.named("RequestSerDe"))
-//				.to(RequestSerDe.class).in(Scopes.SINGLETON);
-//		binder.bind(MsgPackSerDe.class)
-//				.annotatedWith(Names.named("ResponseSerDe"))
-//				.to(ResponseSerDe.class).in(Scopes.SINGLETON);
-//		binder.bind(MsgPackSerDe.class)
-//				.annotatedWith(Names.named("ChunkSerDe")).to(ChunkSerDe.class)
-//				.in(Scopes.SINGLETON);
 
 		logger.info("CommonModule loaded");
 	}

@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.das.serde.impl;
+package com.ctrip.sysdev.das.netty4;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,17 +11,10 @@ import com.ctrip.sysdev.das.domain.Response;
 import com.ctrip.sysdev.das.domain.StatementParameter;
 import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.exception.SerDeException;
-import com.ctrip.sysdev.das.serde.MsgPackSerDe;
-import com.ctrip.sysdev.das.serde.MsgPackSerDeType;
 import com.ctrip.sysdev.das.utils.UUID2ByteArray;
 
-public class ResponseSerDe implements MsgPackSerDe {
+public class ResponseSerDe {
 	private static final int currentPropertyCount = 3;
-
-	@Override
-	public MsgPackSerDeType getSerDeType() {
-		return MsgPackSerDeType.RESPONSE_OBJECT;
-	}
 
 	public byte[] serialize(Response obj) throws SerDeException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

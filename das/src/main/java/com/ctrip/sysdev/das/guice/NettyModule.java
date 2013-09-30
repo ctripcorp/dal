@@ -5,8 +5,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -16,8 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.netty4.Netty4ChannelInitializer;
 import com.ctrip.sysdev.das.netty4.Netty4Handler;
-import com.ctrip.sysdev.das.netty4.Netty4ProtocolDecoder;
-import com.ctrip.sysdev.das.netty4.Netty4ProtocolEncoder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
@@ -33,8 +29,6 @@ public class NettyModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(ByteToMessageDecoder.class).to(Netty4ProtocolDecoder.class);
-		bind(MessageToByteEncoder.class).to(Netty4ProtocolEncoder.class);
 		bind(SimpleChannelInboundHandler.class).to(Netty4Handler.class);
 		bind(ChannelInitializer.class).to(Netty4ChannelInitializer.class).in(
 				Scopes.SINGLETON);

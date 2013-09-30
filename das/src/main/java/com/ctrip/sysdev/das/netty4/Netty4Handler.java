@@ -18,8 +18,6 @@ import com.ctrip.sysdev.das.dataSource.DataSourceWrapper;
 import com.ctrip.sysdev.das.domain.Request;
 import com.ctrip.sysdev.das.domain.Response;
 import com.ctrip.sysdev.das.exception.SerDeException;
-import com.ctrip.sysdev.das.serde.impl.ResponseSerDe;
-import com.ctrip.sysdev.das.worker.QueryExecutor;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -46,27 +44,13 @@ public class Netty4Handler extends SimpleChannelInboundHandler<Request> {
 	@Inject
 	private DataSourceWrapper dataSourceWrapper;
 
-	public Connection getConnection() throws SQLException {
-		return dataSourceWrapper.getConnection();
-	}
-
-	public DataSourceWrapper getDataSourceWrapper() {
-		return dataSourceWrapper;
-	}
-
-	public void setDataSourceWrapper(DataSourceWrapper dataSourceWrapper) {
-		this.dataSourceWrapper = dataSourceWrapper;
-	}
-
 	/**
 	 * @param args
 	 */
 	public ByteBuf dalService(Request request) {
-		this.getDataSourceWrapper();
-
 		ByteBuf buf = Unpooled.buffer();
 
-		Response response = executor.execute(getDataSourceWrapper(),
+		Response response = executor.execute(dataSourceWrapper,
 				request.getMessage());
 		response.setTaskid(request.getTaskid());
 		try {

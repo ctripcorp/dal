@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooKeeper;
-import org.apache.zookeeper.ZooDefs.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,15 +17,16 @@ public class DasWorkerManager implements DasControllerConstants {
 	private String maximumHeapSizeInMegabytes = "100";
 	private String javaRuntime = "java";
 
-	private String mainClass = "com.ctrip.sysdev.das.controller.TestWorker";
-	private String mainJar = "D:/Users/jhhe/git/dal/das_ctrl/target/controller-0.0.1-SNAPSHOT.jar";
+	private String mainClass = "com.ctrip.sysdev.das.DalServer";
 	
 	private ZooKeeper zk;
 	private String workerRoot;
+	private String workerJarLocation;
 	
-	public DasWorkerManager(ZooKeeper zk, String workerPath) {
+	public DasWorkerManager(ZooKeeper zk, String workerPath, String workerJarLocation) {
 		this.zk = zk;
 		this.workerRoot = workerPath;
+		this.workerJarLocation = workerJarLocation;
 	}
 	
 	public void startAll(Collection<String> workerPorts, String monitorId) {
@@ -48,7 +47,7 @@ public class DasWorkerManager implements DasControllerConstants {
 		argumentsList.add(MessageFormat.format("-Xmx{0}M",
 				String.valueOf(this.maximumHeapSizeInMegabytes)));
 		argumentsList.add("-classpath");
-		argumentsList.add(mainJar);
+		argumentsList.add(workerJarLocation);
 		argumentsList.add(this.mainClass);
 
 		argumentsList.add(port);

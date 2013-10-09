@@ -7,7 +7,6 @@ public class Request extends Domain {
 	private static final int CURRENT_VERSION = 1;
 
 	private UUID taskid;
-	private String dbName;
 	private String credential;
 	private RequestMessage message;
 	
@@ -34,14 +33,6 @@ public class Request extends Domain {
 		this.taskid = taskid;
 	}
 
-	public String getDbName() {
-		return dbName;
-	}
-
-	public void setDbName(String dbName) {
-		this.dbName = dbName;
-	}
-
 	public String getCredential() {
 		return credential;
 	}
@@ -61,7 +52,7 @@ public class Request extends Domain {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Request [taskid=").append(taskid).append(", dbName=")
-				.append(dbName).append(", credential=").append(credential)
+				.append(message.getDbName()).append(", credential=").append(credential)
 				.append(", message=").append(message).append("]");
 		return builder.toString();
 	}

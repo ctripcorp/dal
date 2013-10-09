@@ -11,6 +11,7 @@ import com.ctrip.sysdev.das.domain.enums.StatementType;
  * 
  */
 public class RequestMessage {
+	private String dbName;
 
 	private StatementType statementType; // always
 
@@ -25,6 +26,15 @@ public class RequestMessage {
 	private List<StatementParameter> args;// always
 
 	private int flags; // always
+
+	
+	public String getDbName() {
+		return dbName;
+	}
+
+	public void setDbName(String dbName) {
+		this.dbName = dbName;
+	}
 
 	public StatementType getStatementType() {
 		return statementType;

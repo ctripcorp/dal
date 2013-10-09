@@ -71,9 +71,10 @@ public class RequestDecoder extends ByteToMessageDecoder {
 						currentPropertyCount, propertyCount));
 			}
 			request.setTaskid(UUID.nameUUIDFromBytes(unpacker.readByteArray()));
-			request.setDbName(unpacker.readString());
+			String dbName = unpacker.readString();
 			request.setCredential(unpacker.readString());
 			request.setMessage(unpackMessage(unpacker));
+			request.getMessage().setDbName(dbName);
 			unpacker.readArrayEnd();
 			unpacker.close();
 		} catch (IOException e) {

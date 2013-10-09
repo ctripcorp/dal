@@ -4,9 +4,13 @@ public interface DasControllerConstants {
 	// ZK path separator
 	String SEPARATOR = "/";
 	
-	// Under db, the node name is logic DB name, the value is connection string
+	// Logic DB to physical DB mapping, sub nodes are logic DB
 	String DB = "/dal/das/configure/db";
-
+	
+	// Driver and JDBC URL is under logic DB node. e.g. /dal/das/configure/db/testdb
+	String DRIVER = "driver";
+	String JDBC_URL = "jdbcUrl";
+	
 	// Under port, the node name is port number , the value is logic DB name
 	String PORT = "/dal/das/configure/port";
 

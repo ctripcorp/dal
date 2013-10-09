@@ -9,7 +9,8 @@ from daogen.handler.base import RequestDispatcher
 class TaskHandler(RequestDispatcher):
 
 	def index(self):
-		project_id = self.get_argument("project_id", default="5242862c28afd22254a608e5", strip=False)
+		project_id = self.get_argument("project_id", 
+			default=str(project_model_obj.retrieve_default()["_id"]), strip=False)
 		tasks = []
 		project_alias = project_model_obj.retrieve_alias(project_id)["alias"]
 		tasks = task_model_obj.get_by_project(project_id)
@@ -39,7 +40,8 @@ class TaskHandler(RequestDispatcher):
 		self.finish()
 
 	def tasks(self):
-		project_id = self.get_argument("project_id", default="5242862c28afd22254a608e5", strip=False)
+		project_id = self.get_argument("project_id", 
+			default=str(project_model_obj.retrieve_default()["_id"]), strip=False)
 		results = []
 		for p in task_model_obj.get_by_project(project_id):
 			if isinstance(p["_id"], bson.objectid.ObjectId):

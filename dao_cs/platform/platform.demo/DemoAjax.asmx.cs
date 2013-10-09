@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Services;
 using platform.demo.DAO;
 using System.Data;
+using platform.demo.Entity;
 
 namespace platform.demo
 {
@@ -19,25 +20,25 @@ namespace platform.demo
         {
             PersonDAO person = new PersonDAO();
 
-            List<object> results = new List<object>();
+            //List<object> results = new List<object>();
 
-            using (IDataReader reader = person.getAll())
-            {
-                while (reader.Read())
-                {
-                    results.Add(new { 
-                        ID=reader["ID"],
-                        Address = reader["Address"],
-                        Name = reader["Name"],
-                        Telephone = reader["Telephone"],
-                        Age = reader["Age"],
-                        Gender = reader["Gender"],
-                        Birth = reader["Birth"]
-                    });
-                }
-            }
+            //using (IDataReader reader = person.getAll())
+            //{
+            //    while (reader.Read())
+            //    {
+            //        results.Add(new { 
+            //            ID=reader["ID"],
+            //            Address = reader["Address"],
+            //            Name = reader["Name"],
+            //            Telephone = reader["Telephone"],
+            //            Age = reader["Age"],
+            //            Gender = reader["Gender"],
+            //            Birth = reader["Birth"]
+            //        });
+            //    }
+            //}
 
-            return results;
+            return person.FetchAll<Person>().ToList<object>();
         }
     }
 }

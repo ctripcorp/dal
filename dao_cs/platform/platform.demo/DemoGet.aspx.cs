@@ -6,6 +6,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Data;
 using platform.demo.DAO;
+using platform.demo.Entity;
 
 namespace platform.demo
 {
@@ -17,7 +18,7 @@ namespace platform.demo
 
             List<object> results = new List<object>();
 
-            using (IDataReader reader = person.getAll())
+            using (IDataReader reader = person.FetchAllRecords())
             {
                 while (reader.Read())
                 {
@@ -33,6 +34,9 @@ namespace platform.demo
                     });
                 }
             }
+
+            //IList<Person> results = person.FetchAll<Person>();
+
             string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(results);
             Response.Clear();
             Response.ContentType = "application/json; charset=utf-8";

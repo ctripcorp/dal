@@ -170,7 +170,8 @@ namespace platform.dao.client
                     {
                         if (ma.Groups["paramName"].Value.Equals(parameters[j].Name))
                         {
-                            parameters[j].Index = i;
+                            if(parameters[j].Index == 0)
+                                parameters[j].Index = i;
                             break;
                         }
                     }
@@ -230,7 +231,8 @@ namespace platform.dao.client
                     {
                         if (ma.Groups["paramName"].Value.Equals(parameters[j].Name))
                         {
-                            parameters[j].Index = i;
+                            if (parameters[j].Index == 0)
+                                parameters[j].Index = i;
                             break;
                         }
                     }
@@ -319,7 +321,8 @@ namespace platform.dao.client
                 int i = 1;
                 for (int j = 0; j < parameters.Length; j++)
                 {
-                    parameters[j].Index = i;
+                    if (parameters[j].Index == 0)
+                        parameters[j].Index = i;
                     i++;
                 }
             }

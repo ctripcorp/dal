@@ -6,6 +6,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Data;
 using platform.demo.DAO;
+using platform.demo.Entity;
 
 namespace platform.demo
 {
@@ -31,7 +32,16 @@ namespace platform.demo
             var gender = this.Request.Form["gender"];
             var birth = this.Request.Form["birth"];
 
-            person.insertAll(0, address, name, telephone, int.Parse(age), int.Parse(gender), DateTime.Parse(birth));
+            //person.insertAll(0, address, name, telephone, int.Parse(age), int.Parse(gender), DateTime.Parse(birth));
+            person.Insert<Person>(new Person() { 
+            ID = 0,
+            Address =address,
+            Name = name,
+            Telephone=telephone,
+            Age=int.Parse(age),
+            Gender=int.Parse(gender),
+            Birth=DateTime.Parse(birth)
+            });
 
             string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(new { Success = true});
             Response.Clear();

@@ -1,5 +1,7 @@
 package com.ctrip.platform.dao.utils;
 
+import java.util.ArrayList;
+
 public class Consts {
 
 	//For Data Access Service client
@@ -18,5 +20,12 @@ public class Consts {
 	public static final String connectionString = "jdbc:sqlserver://testdb.dev.sh.ctriptravel.com:28747;DatabaseName=SysDalTest;integratedSecurity=true";
 	public static final String user = "";
 	public static final String password = "";
+	
+	public static void main(String[] args) {
+		String a,b;
+		a="1";
+		b="2";
+		System.out.println(a+":"+b);
+	}
 
 }

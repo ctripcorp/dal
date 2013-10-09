@@ -21,6 +21,11 @@ namespace platform.dao.orm
         public string Alias { get; set; }
 
         /// <summary>
+        /// 字段在sql语句中的位置
+        /// </summary>
+        public int Index { get; set; }
+
+        /// <summary>
         /// 是否是主键
         /// </summary>
         public bool IsPrimaryKey { get; set; }
@@ -46,6 +51,16 @@ namespace platform.dao.orm
             {
                 PropertyInfo.SetValue(obj, value, null);
             }
+        }
+
+        /// <summary>
+        /// 获取obj该属性的值
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public object GetValue(object obj)
+        {
+            return PropertyInfo.GetValue(obj, null);
         }
 
     }

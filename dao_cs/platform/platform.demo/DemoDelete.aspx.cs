@@ -6,6 +6,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Data;
 using platform.demo.DAO;
+using platform.demo.Entity;
 
 namespace platform.demo
 {
@@ -20,7 +21,8 @@ namespace platform.demo
             var id= this.Request.QueryString["task_id"];
 
 
-            person.deleteById(int.Parse(id));
+            //person.deleteById(int.Parse(id));
+            person.DeleteByPk<Person>(int.Parse(id));
 
             string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(new { Success = true});
             Response.Clear();

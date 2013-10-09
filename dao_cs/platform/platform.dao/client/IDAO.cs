@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data;
+using platform.dao.param;
 
 namespace platform.dao.client
 {
-    public interface IDAO
+    public interface IDAO : IClient
     {
+
         /// <summary>
         /// 根据自增主键查找
         /// </summary>
         /// <param name="iD"></param>
         /// <returns></returns>
-        T FindByPk<T>(int iD);
+        T FetchByPk<T>(int iD);
 
         /// <summary>
         /// 根据自增主键删除
@@ -20,13 +23,6 @@ namespace platform.dao.client
         /// <param name="iD"></param>
         /// <returns></returns>
         int DeleteByPk<T>(int iD);
-
-        /// <summary>
-        /// 删除一个跟Entity匹配的
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <returns></returns>
-        int Delete<T>(T entity);
 
         /// <summary>
         /// 插入一条数据
@@ -53,7 +49,7 @@ namespace platform.dao.client
         /// 获取所有的数据
         /// </summary>
         /// <returns></returns>
-        IList<T> GetAll<T>();
+        IList<T> FetchAll<T>();
 
         /// <summary>
         /// 删除所有数据

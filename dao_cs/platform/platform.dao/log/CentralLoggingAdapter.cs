@@ -5,7 +5,7 @@ using System.Text;
 
 namespace platform.dao.log
 {
-    class CLogAdapter
+    class CentralLoggingAdapter
     {
     }
 }

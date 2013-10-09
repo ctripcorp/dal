@@ -8,8 +8,12 @@ using platform.dao.orm.attribute;
 
 namespace platform.dao.orm
 {
-    public class SqlTable
+    public sealed class SqlTable
     {
+        protected SqlTable()
+        {
+        }
+
         /// <summary>
         /// 数据库表的所有字段
         /// </summary>
@@ -79,6 +83,64 @@ namespace platform.dao.orm
         }
 
         /// <summary>
+        /// 获取插入语句
+        /// </summary>
+        /// <returns></returns>
+        public string GetInsertSql()
+        {
+            StringBuilder sb = new StringBuilder("INSERT INTO ");
+
+            if (!string.IsNullOrEmpty(Schema))
+            {
+                sb.Append(Schema);
+                sb.Append(".");
+            }
+
+            sb.Append(Name).Append(" ").Append("(");
+            StringBuilder valuesSb = new StringBuilder();
+            foreach (SqlColumn col in Columns)
+            {
+                sb.Append(col.Name).Append(",");
+                valuesSb.Append("@").Append(col.Name).Append(",");
+            }
+            sb.Remove(sb.Length - 1, 0);
+            valuesSb.Remove(valuesSb.Length - 1, 0);
+
+            sb.Append(") Values (");
+
+            sb.Append(valuesSb.ToString());
+
+            sb.Append(")");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// 获取更新语句
+        /// </summary>
+        /// <returns></returns>
+        public string GetUpdateSql()
+        {
+            StringBuilder sb = new StringBuilder("UPDATE ");
+
+            if (!string.IsNullOrEmpty(Schema))
+            {
+                sb.Append(Schema);
+                sb.Append(".");
+            }
+
+            sb.Append(Name).Append(" SET ");
+
+            foreach (SqlColumn col in Columns)
+            {
+                sb.Append(col.Name).Append("=@").Append(col.Name).Append(",");
+
+            }
+            sb.Remove(sb.Length - 1, 0);
+
+            return sb.ToString();
+        }
+
+        /// <summary>
         /// 从类型创建SqlTable
         /// </summary>
         /// <param name="type"></param>
@@ -90,17 +152,19 @@ namespace platform.dao.orm
 
             IList<SqlColumn> columns = new List<SqlColumn>();
 
+            int index = 1;
             foreach (PropertyInfo field in fields)
             {
                 ColumnAttribute colAttr = (ColumnAttribute)
                     field.GetCustomAttributes(typeof(ColumnAttribute), false)[0];
 
-                SqlColumn column = new SqlColumn() { Name = colAttr.Name, Alias = colAttr.Alias, PropertyInfo=field};
+                SqlColumn column = new SqlColumn() { Name = colAttr.Name, Alias = colAttr.Alias, PropertyInfo=field, Index=index};
 
                 if (field.IsDefined(typeof(PrimaryKeyAttribute), false))
                     column.IsPrimaryKey = true;
 
                 columns.Add(column);
+                index++;
             }
 
             //Get table name

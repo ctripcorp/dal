@@ -3,7 +3,7 @@ from daogen.model.project_model import project_model_obj
 from daogen.model.task_model import task_model_obj
 from daogen.model.field_type_model import field_type_model_obj, sp_param_type_model_obj
 
-from daogen.template import Loader
+from tornado.template import Loader
 import os, shutil, re
 
 templates_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 

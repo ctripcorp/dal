@@ -15,7 +15,7 @@ namespace platform.dao.log
          private string m_FileNamePattern;
          private object m_SyncLock = new object();
          private StreamWriter m_Writer;
-         private int m_FileSize;
+         private long m_FileSize;
 
          private FileLoggerAdapter()
         {
@@ -44,7 +44,7 @@ namespace platform.dao.log
              base.Init(name, level);
              //parse setting
              m_FileNamePattern = "{0:yyyy_MM_dd}{1}.log";
-             m_FileSize = 2;
+             m_FileSize = 4 * 1024 * 1024;
          }
 
          private StreamWriter CreateStreamWriter()
@@ -58,7 +58,7 @@ namespace platform.dao.log
                  try
                  {
                      int i = 1;
-                     while (File.Exists(fileName) && (new FileInfo(fileName).Length > (long)m_FileSize * 1024 * 1024))
+                     while (File.Exists(fileName) && (new FileInfo(fileName).Length > m_FileSize))
                      {
                          fileName = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, string.Format(m_FileNamePattern, now, string.Format("_{0}",i))));
                          i++;
@@ -85,7 +85,7 @@ namespace platform.dao.log
                  {
                      m_Writer = CreateStreamWriter();
                  }
-                 else if (m_Writer.BaseStream.Position > (long)m_FileSize * 1024 * 1024)
+                 else if (m_Writer.BaseStream.Position > m_FileSize)
                  {
                      m_Writer.Close();
                      m_Writer.Dispose();

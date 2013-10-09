@@ -60,6 +60,12 @@
         });
     });
 
+    $("#change_db").click(function () {
+        $.get("/Default.aspx?db=" + $("#db_name").val(), function (data) {
+            ttt();
+        });
+    });
+
     ttt();
 
 });

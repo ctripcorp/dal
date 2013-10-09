@@ -28,7 +28,7 @@ namespace platform.dao.client
         public static IClient CreateDasClient(string dbName, string credential)
         {
             //TODO: thread safety
-            if (dbClients.ContainsKey(dbName))
+            if (dasClients.ContainsKey(dbName))
             {
                 return dbClients[dbName];
             }

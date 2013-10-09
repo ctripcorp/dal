@@ -100,8 +100,11 @@ namespace platform.dao.orm
             StringBuilder valuesSb = new StringBuilder();
             foreach (SqlColumn col in Columns)
             {
-                sb.Append(col.Name).Append(",");
-                valuesSb.Append("@").Append(col.Name).Append(",");
+                if (!col.IsPrimaryKey)
+                {
+                    sb.Append(col.Name).Append(",");
+                    valuesSb.Append("@").Append(col.Name).Append(",");
+                }
             }
             sb.Remove(sb.Length - 1, 1);
             valuesSb.Remove(valuesSb.Length - 1, 1);

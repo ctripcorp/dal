@@ -26,7 +26,10 @@ namespace platform.demo
             }
             if (!string.IsNullOrEmpty(dbName))
             {
-                AbstractDAO.Reload(true, dbName);
+                //AbstractDAO.Reload(true, dbName);
+                ClientPool.GetInstance().CreateDasClient(dbName, null);
+                ClientPool.GetInstance().DefaultName = dbName;
+                ClientPool.GetInstance().Hello = ClientPool.GetInstance().Hello + 1;
                 string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(new { Success=true});
                 Response.Clear();
                 Response.ContentType = "application/json; charset=utf-8";

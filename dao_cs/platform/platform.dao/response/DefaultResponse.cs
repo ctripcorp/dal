@@ -25,6 +25,11 @@ namespace platform.dao.response
 
         public List<List<IParameter>> ResultSet { get; set; }
 
+        public long TotalTime { get; set; }
+        public long DecodeRequestTime { get; set; }
+        public long DbTime { get; set; }
+        public long EncodeResponseTime { get; set; }
+
         public static DefaultResponse UnpackFromByteArray(byte[] payload)
         {
             return serializer.UnpackSingleObject(payload);

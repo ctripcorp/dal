@@ -64,13 +64,12 @@ namespace platform.dao.client
         /// <param name="request"></param>
         private void WriteRequest(DefaultRequest request)
         {
-            Stopwatch watch = new Stopwatch();
-
             watch.Start();
             byte[] payload = request.Pack2ByteArray();
             watch.Stop();
 
             logger.Info(string.Format("Serialization time: {0} Ticks(divide 10,000 to get milliseconds)", watch.ElapsedTicks));
+            logger.Info(request.Message.Sql);
 
             int protocolVersion = request.GetProtocolVersion();
 
@@ -130,8 +129,6 @@ namespace platform.dao.client
                     {
                     }
 
-                    Stopwatch watch = new Stopwatch();
-
                     watch.Start();
                     response = DefaultResponse.UnpackFromByteArray(buffer);
                     watch.Stop();
@@ -160,6 +157,9 @@ namespace platform.dao.client
         /// <returns></returns>
         public override IDataReader Fetch(string sql, params IParameter[] parameters)
         {
+            //begin watch
+            //watch.Start();
+
             if (null != parameters && parameters.Length > 0)
             {
                 MatchCollection mc = paramRegex.Matches(sql);
@@ -195,7 +195,7 @@ namespace platform.dao.client
             {
                 Taskid = System.Guid.NewGuid(),
                 DbName = dbName,
-                Credential = credential,
+                Credential = credential ?? string.Empty,
                 Message = message
             };
 
@@ -207,6 +207,11 @@ namespace platform.dao.client
             {
                 ResultSet = response.ResultSet
             };
+
+            //end watch
+            //watch.Stop();
+
+            //logger.Info(string.Format("Total time of fetch: {0}", watch.ElapsedTicks));
 
             return reader;
 
@@ -256,7 +261,7 @@ namespace platform.dao.client
             {
                 Taskid = System.Guid.NewGuid(),
                 DbName = dbName,
-                Credential = credential,
+                Credential = credential ?? string.Empty,
                 Message = message
             };
 

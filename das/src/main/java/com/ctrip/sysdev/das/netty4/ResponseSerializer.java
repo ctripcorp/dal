@@ -40,6 +40,10 @@ public class ResponseSerializer {
 			} else {
 				packer.write(resp.getAffectRowCount());
 			}
+			packer.write(resp.getTotalTime());
+			packer.write(resp.getDecodeRequestTime());
+			packer.write(resp.getDbTime());
+			packer.write(resp.getEncodeResponseTime());
 			packer.writeArrayEnd();
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -1,6 +1,6 @@
 package com.ctrip.platform.dao.utils;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Consts {
 
@@ -22,10 +22,7 @@ public class Consts {
 	public static final String password = "";
 	
 	public static void main(String[] args) {
-		String a,b;
-		a="1";
-		b="2";
-		System.out.println(a+":"+b);
+
 	}
 
 }

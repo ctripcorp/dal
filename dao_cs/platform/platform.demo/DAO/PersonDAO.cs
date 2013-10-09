@@ -9,10 +9,6 @@ namespace platform.demo.DAO
 {
     public class PersonDAO : AbstractDAO
     {
-        public PersonDAO()
-        {
-            base.Init(true);
-        }
 
 
         // None

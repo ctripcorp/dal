@@ -46,7 +46,7 @@
   <ItemGroup>
     <Compile Include="client\AbstractClient.cs" />
     <Compile Include="client\AbstractDAO.cs" />
-    <Compile Include="client\ClientFactory.cs" />
+    <Compile Include="client\ClientPool.cs" />
     <Compile Include="client\DasClient.cs" />
     <Compile Include="client\DasDataReader.cs" />
     <Compile Include="client\DbClient.cs" />

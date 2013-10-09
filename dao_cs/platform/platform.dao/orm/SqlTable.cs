@@ -103,8 +103,8 @@ namespace platform.dao.orm
                 sb.Append(col.Name).Append(",");
                 valuesSb.Append("@").Append(col.Name).Append(",");
             }
-            sb.Remove(sb.Length - 1, 0);
-            valuesSb.Remove(valuesSb.Length - 1, 0);
+            sb.Remove(sb.Length - 1, 1);
+            valuesSb.Remove(valuesSb.Length - 1, 1);
 
             sb.Append(") Values (");
 
@@ -135,7 +135,7 @@ namespace platform.dao.orm
                 sb.Append(col.Name).Append("=@").Append(col.Name).Append(",");
 
             }
-            sb.Remove(sb.Length - 1, 0);
+            sb.Remove(sb.Length - 1, 1);
 
             return sb.ToString();
         }

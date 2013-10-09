@@ -1400,3 +1400,416 @@
 [Info]--[DasClient]--[2013/10/9 14:47:17]--Serialization time: 163449 Ticks(divide 10,000 to get milliseconds)
 [Info]--[DasClient]--[2013/10/9 14:47:17]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
 [Info]--[DasClient]--[2013/10/9 14:47:17]--Deserialization time: 163846 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:11:52]--Serialization time: 30705 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:11:52]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:11:56]--Deserialization time: 159529 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:13:12]--Serialization time: 178691 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:13:12]--INSERT INTO Person (ID,Address,Name,Telephone,Age,Gender,Birth) Values (?,?,?,?,?,?,?)
+[Error]--[DasClient]--[2013/10/9 15:13:14]--   at platform.dao.client.DasClient.ReadResponse() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 125
+[Error]--[DasClient]--[2013/10/9 15:14:08]--   at System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   at System.IO.Stream.ReadByte()
+   at platform.dao.client.DasClient.ReadResponse() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 117
+[Error]--[DasClient]--[2013/10/9 15:14:09]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:10]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:11]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:12]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:13]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:14]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:15]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:16]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:17]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:18]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:19]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:20]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:21]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:22]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:23]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:24]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:25]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:26]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:27]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:28]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:29]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:30]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:31]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:32]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:33]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:34]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:14:35]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Info]--[DasClient]--[2013/10/9 15:15:21]--Serialization time: 32275 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:15:21]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:15:25]--Deserialization time: 105726 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:15:35]--Serialization time: 128330 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:15:35]--INSERT INTO Person (ID,Address,Name,Telephone,Age,Gender,Birth) Values (?,?,?,?,?,?,?)
+[Error]--[DasClient]--[2013/10/9 15:15:35]--   at platform.dao.client.DasClient.ReadResponse() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 125
+[Info]--[DasClient]--[2013/10/9 15:17:47]--Serialization time: 33358 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:17:47]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:17:57]--Deserialization time: 141654 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:18:08]--Serialization time: 158403 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:18:08]--INSERT INTO Person (ID,Address,Name,Telephone,Age,Gender,Birth) Values (?,?,?,?,?,?,?)
+[Error]--[DasClient]--[2013/10/9 15:18:12]--   at platform.dao.client.DasClient.ReadResponse() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 125
+[Info]--[DasClient]--[2013/10/9 15:18:48]--Serialization time: 31638 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:18:48]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:18:50]--Deserialization time: 149300 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:18:56]--Serialization time: 166568 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:18:56]--INSERT INTO Person (ID,Address,Name,Telephone,Age,Gender,Birth) Values (?,?,?,?,?,?,?)
+[Error]--[DasClient]--[2013/10/9 15:19:28]--   at platform.dao.client.DasClient.ReadResponse() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 125
+[Error]--[DasClient]--[2013/10/9 15:19:36]--   at System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   at System.IO.Stream.ReadByte()
+   at platform.dao.client.DasClient.ReadResponse() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 117
+[Error]--[DasClient]--[2013/10/9 15:19:37]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:38]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:39]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:40]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:41]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:42]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:43]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:44]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:45]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:46]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:47]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:48]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:49]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:50]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:51]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:52]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:53]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:54]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:55]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:56]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:57]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:58]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:19:59]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Info]--[DasClient]--[2013/10/9 15:20:23]--Serialization time: 33913 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:20:23]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:20:26]--Deserialization time: 105585 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:20:30]--Serialization time: 139523 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:20:30]--INSERT INTO Person (ID,Address,Name,Telephone,Age,Gender,Birth) Values (?,?,?,?,?,?,?)
+[Error]--[DasClient]--[2013/10/9 15:21:46]--   at platform.dao.client.DasClient.ReadResponse() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 125
+[Info]--[DasClient]--[2013/10/9 15:23:47]--Serialization time: 29862 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:23:47]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Error]--[DasClient]--[2013/10/9 15:23:47]--   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   at System.IO.Stream.WriteByte(Byte value)
+   at platform.dao.client.DasClient.WriteRequest(DefaultRequest request) in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 84
+[Info]--[DasClient]--[2013/10/9 15:23:51]--Deserialization time: 150418 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:23:55]--Serialization time: 184434 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:23:55]--INSERT INTO Person (ID,Address,Name,Telephone,Age,Gender,Birth) Values (?,?,?,?,?,?,?)
+[Info]--[DasClient]--[2013/10/9 15:26:48]--Serialization time: 30436 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:26:48]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:27:03]--Deserialization time: 142960 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:27:12]--Serialization time: 172784 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:27:12]--INSERT INTO Person (ID,Address,Name,Telephone,Age,Gender,Birth) Values (?,?,?,?,?,?,?)
+[Error]--[DasClient]--[2013/10/9 15:28:14]--   at platform.dao.client.DasClient.ReadResponse() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 125
+[Error]--[DasClient]--[2013/10/9 15:28:16]--   at System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   at System.IO.Stream.ReadByte()
+   at platform.dao.client.DasClient.ReadResponse() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 117
+[Error]--[DasClient]--[2013/10/9 15:28:17]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:18]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:19]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:20]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:21]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:22]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:23]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:24]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:25]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:26]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:27]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:28]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:29]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:30]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:31]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:32]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:33]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:34]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:35]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:36]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:37]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:38]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:39]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:40]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:41]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:42]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:43]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:44]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:45]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:46]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:47]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:48]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:49]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:50]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:51]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:28:52]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Info]--[DasClient]--[2013/10/9 15:29:33]--Serialization time: 30410 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:29:33]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:29:36]--Deserialization time: 102180 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:29:48]--Serialization time: 656 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:29:48]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:29:50]--Deserialization time: 859 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:30:03]--Serialization time: 35441 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:30:03]--INSERT INTO Person (ID,Address,Name,Telephone,Age,Gender,Birth) Values (?,?,?,?,?,?,?)
+[Error]--[DasClient]--[2013/10/9 15:30:11]--   at platform.dao.client.DasClient.ReadResponse() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 125
+[Error]--[DasClient]--[2013/10/9 15:31:33]--   at System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   at System.IO.Stream.ReadByte()
+   at platform.dao.client.DasClient.ReadResponse() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 117
+[Error]--[DasClient]--[2013/10/9 15:31:34]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:35]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:36]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:37]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:38]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:39]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:40]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:41]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:42]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:43]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:44]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:45]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:46]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:47]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:48]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:49]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:50]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Error]--[DasClient]--[2013/10/9 15:31:51]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
+   at System.Net.Sockets.Socket.Connect(String host, Int32 port)
+   at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+[Info]--[DasClient]--[2013/10/9 15:32:03]--Serialization time: 29811 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:32:03]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:32:03]--Deserialization time: 103065 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:32:06]--Serialization time: 135651 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:32:06]--INSERT INTO Person (ID,Address,Name,Telephone,Age,Gender,Birth) Values (?,?,?,?,?,?,?)
+[Error]--[DasClient]--[2013/10/9 15:32:06]--   at platform.dao.client.DasClient.ReadResponse() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 125
+[Info]--[DasClient]--[2013/10/9 15:44:27]--Serialization time: 33212 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:44:27]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:44:35]--Deserialization time: 109928 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:44:35]--Serialization time: 110411 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:44:35]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:44:36]--Deserialization time: 110712 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:44:44]--Serialization time: 111181 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:44:44]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:44:44]--Deserialization time: 111325 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:44:46]--Serialization time: 111626 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:44:46]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:44:46]--Deserialization time: 111788 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:45:22]--Serialization time: 131422 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:45:22]--INSERT INTO Person (ID,Address,Name,Telephone,Age,Gender,Birth) Values (?,?,?,?,?,?,?)
+[Info]--[DasClient]--[2013/10/9 15:45:42]--Deserialization time: 131880 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:45:43]--Serialization time: 132180 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:45:43]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:45:43]--Deserialization time: 132330 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:48:15]--Serialization time: 132931 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:48:15]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Error]--[DasClient]--[2013/10/9 15:48:15]--   at System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   at System.IO.Stream.WriteByte(Byte value)
+   at platform.dao.client.DasClient.WriteRequest(DefaultRequest request) in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 84
+[Info]--[DasClient]--[2013/10/9 15:48:15]--Deserialization time: 133107 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:48:28]--Serialization time: 133509 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:48:28]--INSERT INTO Person (ID,Address,Name,Telephone,Age,Gender,Birth) Values (?,?,?,?,?,?,?)
+[Info]--[DasClient]--[2013/10/9 15:48:28]--Deserialization time: 133539 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:48:28]--Serialization time: 133816 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/9 15:48:28]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person 
+[Info]--[DasClient]--[2013/10/9 15:48:28]--Deserialization time: 134138 Ticks(divide 10,000 to get milliseconds)

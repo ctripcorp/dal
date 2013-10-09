@@ -23,15 +23,17 @@ public class DasController extends DasService {
 	private String controllerPath;
 	private String workerPath;
 	private DasWorkerManager workerManager;
+	private String workerJarLocation;
 	
 	private Set<String> startingWorker = new HashSet<String>(); 
 
-	public DasController(String hostPort) throws Exception {
+	public DasController(String hostPort, String workerJarLocation) throws Exception {
 		super(hostPort);
+		this.workerJarLocation = workerJarLocation;
 	}
 
 	protected void initService() {
-		workerManager = new DasWorkerManager(zk, workerPath);
+		workerManager = new DasWorkerManager(zk, workerPath, workerJarLocation);
 
 		availableServerPath = pathOf(NODE, ip);
 		controllerPath = pathOf(CONTROLLER, ip);
@@ -134,15 +136,16 @@ public class DasController extends DasService {
 	}
 
 	public static void main(String[] args) {
-		if (args.length != 1) {
-			logger.error("No zookeeper host:port assigned.");
+		if (args.length != 2) {
+			logger.error("Error: parameter incorrect. Parameters: 1. zookeeper host:port 2. Das worker jar path");
 			return;
 		}
 
 		logger.info("The zookeeper host:port: " + args[0]);
-
+		logger.info("Das worker jar path: " + args[1]);
+		
 		try {
-			new DasController(args[0]).run();
+			new DasController(args[0], args[1]).run();
 		} catch (Exception e) {
 			logger.error("Can not start DAS controller: ", e);
 			return;

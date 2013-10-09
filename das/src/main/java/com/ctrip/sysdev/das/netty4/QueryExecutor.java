@@ -319,7 +319,8 @@ public class QueryExecutor {
 			}
 		}
 
+		resp.setDbTime(System.currentTimeMillis() - start);
 		logger.warn(DURATION
-				+ String.valueOf(System.currentTimeMillis() - start));
+				+ String.valueOf(resp.getDbTime()));
 	}
 }

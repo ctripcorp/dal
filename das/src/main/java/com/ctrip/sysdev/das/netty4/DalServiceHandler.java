@@ -52,6 +52,7 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 
 		Response response = executor.execute(dataSourceWrapper,
 				request.getMessage());
+		response.setDecodeRequestTime(request.getDecodeTime());
 		response.setTaskid(request.getTaskid());
 		try {
 			byte[] msgpack_payload = msgPackSerDe.serialize(response);

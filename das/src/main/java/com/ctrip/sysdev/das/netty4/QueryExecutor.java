@@ -1,6 +1,5 @@
 package com.ctrip.sysdev.das.netty4;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -18,7 +17,7 @@ import org.msgpack.type.ValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.dataSource.DataSourceWrapper;
+import com.ctrip.sysdev.das.DruidDataSourceWrapper;
 import com.ctrip.sysdev.das.domain.RequestMessage;
 import com.ctrip.sysdev.das.domain.Response;
 import com.ctrip.sysdev.das.domain.StatementParameter;
@@ -34,7 +33,7 @@ public class QueryExecutor {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	public Response execute(DataSourceWrapper dataSource, RequestMessage message) {
+	public Response execute(DruidDataSourceWrapper dataSource, RequestMessage message) {
 		Response resp = new Response();
 		Connection conn = null;
 		PreparedStatement statement = null;
@@ -42,7 +41,7 @@ public class QueryExecutor {
 		
 		long start = System.currentTimeMillis();
 		try {
-			conn = dataSource.getConnection();
+			conn = dataSource.getConnection(message.getDbName());
 			// conn.setAutoCommit(false);
 
 			statement = createStatement(conn, message);

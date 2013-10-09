@@ -4,14 +4,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.EventExecutorGroup;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.domain.Request;
 import com.google.inject.Inject;
@@ -19,10 +14,6 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 public class Netty4ChannelInitializer extends ChannelInitializer<Channel> {
-
-	private static final Logger logger = LoggerFactory
-			.getLogger(Netty4ChannelInitializer.class);
-
 	@SuppressWarnings("rawtypes")
 	@Inject
 	private Provider<SimpleChannelInboundHandler> netty4HandlerProvider;

@@ -47,7 +47,11 @@ public class DalServer extends DasService {
 			zk.create(path, parent.getBytes(), Ids.OPEN_ACL_UNSAFE,
 					CreateMode.EPHEMERAL);
 
-			dasService = new GuiceObjectFactory().getInstance(Netty4Server.class);
+			GuiceObjectFactory factory = new GuiceObjectFactory();
+			DruidDataSourceWrapper ds = factory.getInstance(DruidDataSourceWrapper.class);
+			ds.initDataSourceWrapper(zk);
+			
+			dasService = factory.getInstance(Netty4Server.class);
 			dasService.start(Integer.parseInt(port));
 //			SingleInstanceDaemonTool watcher = SingleInstanceDaemonTool
 //					.createInstance(serverInfoMXBean.getName());

@@ -8,13 +8,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.dataSource.DataSourceWrapper;
+import com.ctrip.sysdev.das.DruidDataSourceWrapper;
 import com.ctrip.sysdev.das.domain.Request;
 import com.ctrip.sysdev.das.domain.Response;
 import com.ctrip.sysdev.das.exception.SerDeException;
@@ -35,14 +32,15 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 	public DalServiceHandler(@Named("ChannelGroup") ChannelGroup allChannels, ResponseSerializer msgPackSerDe) {
 		this.allChannels = allChannels;
 		this.msgPackSerDe = msgPackSerDe;
+		dataSourceWrapper = DruidDataSourceWrapper.dataSource;
 	}
 
 	private ChannelGroup allChannels;
 	private ResponseSerializer msgPackSerDe;
 	private QueryExecutor executor = new QueryExecutor();
 
-	@Inject
-	private DataSourceWrapper dataSourceWrapper;
+//	@Inject
+	private DruidDataSourceWrapper dataSourceWrapper;
 
 	/**
 	 * @param args
@@ -59,6 +57,7 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 			buf.writeInt(msgpack_payload.length + 2);
 			buf.writeShort(1);
 			buf.writeBytes(msgpack_payload);
+			logTime(response);
 		} catch (SerDeException e) {
 			e.printStackTrace();
 		}
@@ -90,6 +89,11 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 			logger.warn("channelRead0", e);
 			ctx.channel().close();
 		}
+	}
+	
+	private void logTime(Response response) {
+		// This is not the most correct time cost for each stage.
+		logger.info("Decode/Execution/Encode: " + response.getDecodeRequestTime() + "/" + response.getDbTime() + "/" + response.getEncodeResponseTime());
 	}
 
 	@Override

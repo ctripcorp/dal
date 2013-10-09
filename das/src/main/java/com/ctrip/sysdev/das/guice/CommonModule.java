@@ -3,8 +3,6 @@ package com.ctrip.sysdev.das.guice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.dataSource.DataSourceWrapper;
-import com.ctrip.sysdev.das.dataSource.DruidDataSourceWrapper;
 import com.ctrip.sysdev.das.jmx.DasServerInfoMBean;
 import com.ctrip.sysdev.das.jmx.ServerInfoMXBean;
 import com.google.inject.Binder;
@@ -21,8 +19,8 @@ public class CommonModule implements Module {
 		binder.bind(ServerInfoMXBean.class).to(DasServerInfoMBean.class)
 				.asEagerSingleton();
 		// db connection pool
-		binder.bind(DataSourceWrapper.class).to(DruidDataSourceWrapper.class)
-				.asEagerSingleton();
+//		binder.bind(DataSourceWrapper.class).to(DruidDataSourceWrapper.class)
+//				.asEagerSingleton();
 
 		logger.info("CommonModule loaded");
 	}

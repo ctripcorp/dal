@@ -164,7 +164,11 @@ namespace platform.dao.orm
                 SqlColumn column = new SqlColumn() { Name = colAttr.Name, Alias = colAttr.Alias, PropertyInfo=field, Index=index};
 
                 if (field.IsDefined(typeof(PrimaryKeyAttribute), false))
+                {
                     column.IsPrimaryKey = true;
+                    column.Index = -1;
+                    index--;
+                }
 
                 columns.Add(column);
                 index++;

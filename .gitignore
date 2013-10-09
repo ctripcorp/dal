@@ -1,5 +1,3 @@
-
-
 #Other nosense Folders(only apply on gawu's machine)
 
 JavaProjectCleaner/
@@ -32,6 +30,7 @@ local.properties
 .idea/
 logs/
 *.pid
+*.log
 
 # External tool builders
 .externalToolBuilders/

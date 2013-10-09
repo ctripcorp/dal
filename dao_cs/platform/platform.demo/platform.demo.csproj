@@ -167,13 +167,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Config\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Account\Web.config" />
     <Content Include="Site.Master" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Config\AppSetting.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\platform.dao\platform.dao.csproj">

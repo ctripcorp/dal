@@ -7,7 +7,7 @@ using platform.dao.orm.attribute;
 namespace platform.bll
 {
     [Serializable]
-    [Table(Schema="dbo",Name="Person")]
+    [Table(Name="Person")]
     public class Person
     {
         /// <summary>

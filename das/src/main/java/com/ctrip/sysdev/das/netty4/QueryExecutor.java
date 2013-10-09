@@ -38,6 +38,17 @@ public class QueryExecutor {
 		Connection conn = null;
 		PreparedStatement statement = null;
 
+		int i = 30;
+		synchronized (this) {
+			while (i-- > 0) {
+				try {
+					wait(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
 		
 		long start = System.currentTimeMillis();
 		try {

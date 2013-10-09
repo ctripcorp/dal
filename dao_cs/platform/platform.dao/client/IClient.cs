@@ -10,8 +10,6 @@ namespace platform.dao.client
 {
     public interface IClient
     {
-        void SetCredential(string credential);
-
         IDataReader Fetch(string sql, params IParameter[] parameters);
 
         int Execute(string sql, params IParameter[] parameters);
@@ -22,15 +20,15 @@ namespace platform.dao.client
 
         //Begin orm
 
-        IList<T> Fetch<T>(string sql, params IParameter[] parameters);
+        //IList<T> Fetch<T>(string sql, params IParameter[] parameters);
 
-        int Insert<T>(T entity);
+        //int Insert<T>(T entity);
 
-        int BatchInsert<T>(IList<T> entities);
+        //int BatchInsert<T>(IList<T> entities);
 
-        int Upadte<T>(string sql, params IParameter[] parameters);
+        //int Upadte<T>(string sql, params IParameter[] parameters);
 
-        int Delete<T>(T entity);
+        //int Delete<T>(T entity);
 
     }
 }

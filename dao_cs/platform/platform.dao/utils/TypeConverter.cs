@@ -60,6 +60,24 @@ namespace platform.dao.utils
         }
 
         /// <summary>
+        /// 从数据库类型获取对应的字段类型
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static Type ResolveDbType(DbType type)
+        {
+            if (type != null)
+            {
+                foreach (Type t in typemap.Keys)
+                {
+                    if (type.Equals(typemap[t]))
+                        return t;
+                }
+            }
+            return typeof(string);
+        }
+
+        /// <summary>
         /// 将原始值转换为相应的类型
         /// </summary>
         /// <param name="type"></param>

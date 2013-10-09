@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class DasWorkerManager implements DasControllerConstants {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	private String workingDirectory = "D:/Users/jhhe/Documents/worker/4888";
+	private String workingDirectory = "D:/Users/gawu/Documents/worker/4888";
 	private String startingHeapSizeInMegabytes = "50";
 	private String maximumHeapSizeInMegabytes = "100";
 	private String javaRuntime = "java";

@@ -25,15 +25,15 @@ namespace platform.dao.client
             this.connection.ConnectionString = credential;
         }
 
-        /// <summary>
-        /// 设置连接字符串（或者DAS的用户名和密码对）
-        /// </summary>
-        /// <param name="credential"></param>
-        /// <returns></returns>
-        public override void SetCredential(string credential)
-        {
-            this.connection.ConnectionString = credential;
-        }
+        ///// <summary>
+        ///// 设置连接字符串（或者DAS的用户名和密码对）
+        ///// </summary>
+        ///// <param name="credential"></param>
+        ///// <returns></returns>
+        //public override void SetCredential(string credential)
+        //{
+        //    this.connection.ConnectionString = credential;
+        //}
 
         /// <summary>
         /// 

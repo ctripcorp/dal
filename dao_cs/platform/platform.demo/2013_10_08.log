@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿[Error]--[DasClient]--[2013/10/8 13:59:20]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
    at System.Net.Sockets.Socket.Connect(String host, Int32 port)
    at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
@@ -17756,3 +17757,18 @@
 [Error]--[DasClient]--[2013/10/9 15:04:15]--   at System.Net.Sockets.Socket.Connect(IPAddress[] addresses, Int32 port)
    at System.Net.Sockets.Socket.Connect(String host, Int32 port)
    at platform.dao.client.DasClient.Connect() in D:\Users\jhhe\git\dal\dao_cs\platform\platform.dao\client\DasClient.cs:line 51
+=======
+﻿[Warn]--[AbstractDAO]--[2013/10/8 13:58:52]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM dbo.Person
+[Warn]--[AbstractDAO]--[2013/10/8 13:59:04]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM dbo.Person
+[Warn]--[AbstractDAO]--[2013/10/8 13:59:30]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM dbo.Person
+[Warn]--[DasClient]--[2013/10/8 14:03:13]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM dbo.Person
+[Info]--[DasClient]--[2013/10/8 14:03:14]--Serialization time: 37991 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/8 14:03:17]--Deserialization time: 120573 Ticks(divide 10,000 to get milliseconds)
+[Warn]--[DasClient]--[2013/10/8 14:10:04]--SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM dbo.Person
+[Info]--[DasClient]--[2013/10/8 14:10:04]--Serialization time: 30694 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/8 14:10:04]--Deserialization time: 74989 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/8 14:55:10]--Serialization time: 29684 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/8 14:55:10]--Deserialization time: 66154 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/8 14:56:17]--Serialization time: 32130 Ticks(divide 10,000 to get milliseconds)
+[Info]--[DasClient]--[2013/10/8 14:56:17]--Deserialization time: 71819 Ticks(divide 10,000 to get milliseconds)
+>>>>>>> 83cb79f61833dc32e162cebf53970c085effa92c

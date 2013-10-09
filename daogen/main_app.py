@@ -8,6 +8,7 @@ from daogen.handler.task_handler import TaskHandler
 from daogen.handler.project_handler import ProjectHandler
 from daogen.handler.file_handler import FileHandler
 from daogen.handler.database_handler import DatabaseHandler
+from daogen.bootstrap import init_all
 
 class IndexHandler(RequestDispatcher):
 	def index(self):
@@ -37,5 +38,6 @@ application = tornado.web.Application([
 ], debug=True,**settings)
 
 if __name__ == "__main__":
+	init_all()
 	application.listen(8888)
 	tornado.ioloop.IOLoop.instance().start()

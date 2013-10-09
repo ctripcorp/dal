@@ -4,16 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 using platform.dao.param;
+using System.Diagnostics;
 
 namespace platform.dao.client
 {
     public abstract class AbstractClient : IClient
     {
-
-        public virtual void SetCredential(string credential)
-        {
-            throw new NotImplementedException();
-        }
+        /// <summary>
+        /// 性能监视
+        /// </summary>
+        protected Stopwatch watch = new Stopwatch();
 
         public virtual System.Data.IDataReader Fetch(string sql, params IParameter[] parameters)
         {
@@ -35,29 +35,5 @@ namespace platform.dao.client
             throw new NotImplementedException();
         }
 
-        public virtual IList<T> Fetch<T>(string sql, params IParameter[] parameters)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual int Insert<T>(T entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual int BatchInsert<T>(IList<T> entities)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual int Upadte<T>(string sql, params IParameter[] parameters)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual int Delete<T>(T entity)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

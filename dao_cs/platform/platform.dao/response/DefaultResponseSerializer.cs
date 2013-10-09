@@ -69,6 +69,26 @@ namespace platform.dao.response
                 response.AffectRowCount = affectCount;
             }
 
+            long totalTime;
+            unpacker.ReadInt64(out totalTime);
+
+            response.TotalTime = totalTime;
+
+            long decodeRequestTime;
+            unpacker.ReadInt64(out decodeRequestTime);
+
+            response.DecodeRequestTime = decodeRequestTime;
+
+            long dbtime;
+            unpacker.ReadInt64(out dbtime);
+
+            response.DbTime = dbtime;
+
+            long encodeResponse;
+            unpacker.ReadInt64(out encodeResponse);
+
+            response.EncodeResponseTime = encodeResponse;
+
             return response;
         }
 

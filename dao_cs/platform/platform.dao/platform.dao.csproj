@@ -35,6 +35,7 @@
       <HintPath>..\..\referdll\MsgPack.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -45,7 +46,7 @@
   <ItemGroup>
     <Compile Include="client\AbstractClient.cs" />
     <Compile Include="client\AbstractDAO.cs" />
-    <Compile Include="client\ClientFactory.cs" />
+    <Compile Include="client\ClientPool.cs" />
     <Compile Include="client\DasClient.cs" />
     <Compile Include="client\DasDataReader.cs" />
     <Compile Include="client\DbClient.cs" />
@@ -54,8 +55,9 @@
     <Compile Include="Consts.cs" />
     <Compile Include="enums\DbDialect.cs" />
     <Compile Include="enums\OperationType.cs" />
+    <Compile Include="exception\DAOConfigException.cs" />
     <Compile Include="exception\DAOException.cs" />
-    <Compile Include="log\CLogAdapter.cs" />
+    <Compile Include="log\CentralLoggingAdapter.cs" />
     <Compile Include="log\ConsoleLoggerAdapter.cs" />
     <Compile Include="log\ILoggerAdapter.cs" />
     <Compile Include="log\AbstractLoggerAdapter.cs" />

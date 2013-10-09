@@ -17,7 +17,7 @@ namespace platform.bll
 
             PersonDAO person = new PersonDAO();
 
-            Person p = person.FindByPk<Person>(37);
+            Person p = person.FetchByPk<Person>(37);
 
             if (null != p)
             {

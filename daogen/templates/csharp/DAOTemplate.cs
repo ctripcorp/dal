@@ -1,16 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using platform.dao.client;
 using platform.dao.param;
 
 namespace {{dao.namespace}}
 {
-    public class {{dao.class_name}}
+    public class {{dao.class_name}} : AbstractDAO
     {
-        //public static IClient client = ClientFactory.CreateDbClient("platform.dao.providers.SqlDatabaseProvider,platform.dao",
-        //   "Server=testdb.dev.sh.ctriptravel.com,28747;Integrated Security=sspi;database={{dao.db_name}};");
-
-        public static IClient client = ClientFactory.CreateDasClient("{{dao.db_name}}", "user=kevin;password=kevin");
+        public PersonDAO()
+        {
+            base.Init();
+        }
 
         {% for method in dao.methods %}
         // {{method.comment}}
@@ -18,9 +20,8 @@ namespace {{dao.namespace}}
         {
             try
             {
-                {% set result_params = [] %}
+                IList<IParameter> parameters = new List<IParameter>();
                 {% for p in method.parameters  %}
-                {% set result_params.append("%sParam" % p.name) %}
                 IParameter {{p.name}}Param = ParameterFactory.CreateValue(
                         "@{{p.fieldName}}",
                         {{p.name}},
@@ -30,15 +31,16 @@ namespace {{dao.namespace}}
                         sensitive : false,
                         size  :50
                     );
+                parameters.Add({{p.name}}Param);
                 {% end %}
                 
                 string sql = "{{method.sql}}"   ;
 
                 //return client.Fetch(sql, parameters);
                 {% if method.action == "select" %}
-                return client.Fetch(sql, {{",".join(result_params)}});
+                return this.Fetch(sql, parameters.ToArray());
                 {% else %}
-                return client.Execute(sql, {{",".join(result_params)}});
+                return this.Execute(sql, parameters.ToArray());
                 {% end %}
             }
             catch (Exception ex)
@@ -54,9 +56,8 @@ namespace {{dao.namespace}}
         {
             try
             {
-                {% set result_params = [] %}
-                {% for p in method.parameters %}
-                {% set result_params.append("%sParam" % p.name) %}
+                IList<IParameter> parameters = new List<IParameter>();
+                {% for p in method.parameters  %}
                 IParameter {{p.name}}Param = ParameterFactory.CreateValue(
                         "@{{p.fieldName}}",
                         {{p.name}},
@@ -66,13 +67,14 @@ namespace {{dao.namespace}}
                         sensitive : false,
                         size  :50
                     );
+                parameters.Add({{p.name}}Param);
                 {% end %}
                 
                 string sp = "{{method.sp_name}}"   ;
 
                 //return client.Execute(sql, parameters);
 
-                return client.ExecuteSp(sp, {{",".join(result_params)}});
+                return this.ExecuteSp(sp, parameters.ToArray());
             }
             catch (Exception ex)
             {

@@ -176,8 +176,11 @@ namespace platform.dao.client
             IList<IParameter> parameters = new List<IParameter>();
             foreach (SqlColumn col in table.Columns)
             {
-                parameters.Add(ParameterFactory.CreateValue(string.Format("@{0}", col.Name),
-                    col.GetValue(entity), index: col.Index));
+                if (!col.IsPrimaryKey)
+                {
+                    parameters.Add(ParameterFactory.CreateValue(string.Format("@{0}", col.Name),
+                        col.GetValue(entity), index: col.Index));
+                }
             }
 
             return ClientPool.GetInstance().GetCurrentClient().Execute(table.GetInsertSql(), parameters.ToArray());

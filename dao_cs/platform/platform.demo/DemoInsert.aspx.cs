@@ -34,7 +34,6 @@ namespace platform.demo
 
             //person.insertAll(0, address, name, telephone, int.Parse(age), int.Parse(gender), DateTime.Parse(birth));
             person.Insert<Person>(new Person() { 
-            ID = 0,
             Address =address,
             Name = name,
             Telephone=telephone,

@@ -58,7 +58,8 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 			buf.writeShort(1);
 			buf.writeBytes(msgpack_payload);
 			logTime(response);
-		} catch (SerDeException e) {
+		} catch (Throwable e) {
+			// Need to add error message here
 			e.printStackTrace();
 		}
 
@@ -85,7 +86,7 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 					}
 				}
 			});
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			logger.warn("channelRead0", e);
 			ctx.channel().close();
 		}

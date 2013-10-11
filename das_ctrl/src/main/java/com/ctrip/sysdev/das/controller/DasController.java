@@ -119,12 +119,13 @@ public class DasController extends DasService {
 			// Remove existing worker
 			// TODO add time out for long run start up
 			workerCandidate.removeAll(workers);
-			startingWorker.removeAll(workers);
-			workerCandidate.removeAll(startingWorker);
-			startingWorker.addAll(workerCandidate);
-			
-			workerManager.startAll(workerCandidate, String.valueOf(this.hashCode()));
-
+			synchronized(this) {
+				startingWorker.removeAll(workers);
+				workerCandidate.removeAll(startingWorker);
+				startingWorker.addAll(workerCandidate);
+				
+				workerManager.startAll(startingWorker, workerCandidate, String.valueOf(this.hashCode()));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;

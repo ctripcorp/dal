@@ -42,7 +42,7 @@ public class Netty4Server {
 		this.businessGroup = businessGroup;
 	}
 
-	public void start(int inetPort) throws Exception {
+	public void start(int inetPort) {
 		if (!startFlag.compareAndSet(false, true)) {
 			return;
 		}
@@ -58,14 +58,34 @@ public class Netty4Server {
 						Boolean.parseBoolean(System.getProperty(
 								"dal.tcp.reuseaddress", "true")))
 				.childHandler(channelInitializer);
-		b.bind(inetHost, inetPort).sync();
+		
+		bindPort(inetPort, b);
 		logger.info("Server started,listen at: " + inetHost + "," + inetPort);
 	}
 
+	private void bindPort(int inetPort, ServerBootstrap b) {
+		boolean binded = false;
+		while(binded == false){
+			try {
+				logger.info("Try to bind to port: "+ inetPort);
+				b.bind(inetHost, inetPort).sync();
+				binded = true;
+			} catch (Throwable e) {
+				logger.error("Faild binding to port: " + inetPort, e);
+				try {
+					logger.info("Delay 5 second before retry.");
+					Thread.sleep(5000);
+				} catch (Throwable e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
 	public void stop() throws Exception {
-		businessGroup.shutdownGracefully().await();
-		bossGroup.shutdownGracefully();
+		businessGroup.shutdownGracefully();//.await();
 		ioGroup.shutdownGracefully();
+		bossGroup.shutdownGracefully();
 		logger.warn("Server stop!");
 		startFlag.set(false);
 	}

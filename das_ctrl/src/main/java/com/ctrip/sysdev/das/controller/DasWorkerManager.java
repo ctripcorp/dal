@@ -39,12 +39,13 @@ public class DasWorkerManager implements DasControllerConstants {
 		this.workingDirectory=  getWithDefault(pathOf(availableServerPath, DIRECTORY), System.getProperty(USER_HOME));
 	}
 	
-	public void startAll(Collection<String> workerPorts, String monitorId) {
+	public void startAll(Collection<String> startingWorker, Collection<String> workerPorts, String monitorId) {
 		for(String port: workerPorts) {
 			try {
 				startWorker(port, monitorId);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				logger.error("Error during start worker at port: " + port, e);
+				startingWorker.remove(port);
 			}
 		}
 	}

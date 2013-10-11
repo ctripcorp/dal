@@ -34,8 +34,13 @@ public class DalServer extends DasService {
 
 	protected boolean validate() {
 		try {
-			return zk.exists(path, this) == null;
-		} catch (Exception e) {
+			if(zk.exists(path, this) == null)
+				return true;
+			
+			logger.error("Worker's corresponding path is already in use: " + path);
+			
+			return false;
+		} catch (Throwable e) {
 			logger.error("Error during validate worker path", e);
 			return false;
 		}
@@ -43,9 +48,11 @@ public class DalServer extends DasService {
 
 	protected boolean register() {
 		try {
+			logger.info("Registering: " + path);
 			zk.create(path, parent.getBytes(), Ids.OPEN_ACL_UNSAFE,
 					CreateMode.EPHEMERAL);
-
+			logger.info("Register success.");
+			
 			GuiceObjectFactory factory = new GuiceObjectFactory();
 			DruidDataSourceWrapper ds = factory.getInstance(DruidDataSourceWrapper.class);
 			ds.initDataSourceWrapper(zk);
@@ -59,7 +66,7 @@ public class DalServer extends DasService {
 //			serverInfoMXBean.getName(), serverInfoMXBean);
 			
 			return true;
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			logger.error("Error during register worker path", e);
 			// SingleInstanceDaemonTool.bailout(-1);
 			return false;
@@ -69,11 +76,18 @@ public class DalServer extends DasService {
 	protected void shutdown() {
 		try {
 			logger.info("Stopping worker");
+			// This node must be deleted first, otherwise it may delete the node created by others 
+			if (zk.exists(path, false) != null){
+				String parentId = new String(zk.getData(path, false, null));
+				if(parentId.equals(parent)){
+					logger.info("Removing worker path: " + path);
+					zk.delete(path, -1);
+				}
+			}
+			zk.close();
 			dasService.stop();
-			if (zk.exists(path, false) != null)
-				zk.delete(path, -1);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Throwable e) {
+			logger.error("Error during shutdown worker", e);
 		}
 	}
 

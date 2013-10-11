@@ -68,6 +68,11 @@ public abstract class DasService implements DasControllerConstants, Watcher {
 	}
 
 	public void process(WatchedEvent event) {
+		if(dead){
+			logger.info("Server is in close stage while recieving event from ZK: " + event);
+			return;
+		}
+		
 		if (dead = isDead(event)) {
 			synchronized (this) {
 				notifyAll();

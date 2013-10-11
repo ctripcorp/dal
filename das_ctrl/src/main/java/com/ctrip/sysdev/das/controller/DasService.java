@@ -4,7 +4,6 @@ import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
@@ -38,7 +37,8 @@ public abstract class DasService implements DasControllerConstants, Watcher {
 	public void run() {
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			public void run() {
-				shutdown();
+				if(!dead)
+					shutdown();
 			}
 		}));
 

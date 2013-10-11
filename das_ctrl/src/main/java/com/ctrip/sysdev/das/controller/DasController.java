@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 public class DasController extends DasService {
 	private static Logger logger = LoggerFactory.getLogger(DasController.class);
 
+	private String hostPort;
 	private String availableServerPath;
 	private String controllerPath;
 	private String workerPath;
@@ -29,6 +30,7 @@ public class DasController extends DasService {
 
 	public DasController(String hostPort, String workerJarLocation) throws Exception {
 		super(hostPort);
+		this.hostPort = hostPort;
 		this.workerJarLocation = workerJarLocation;
 	}
 
@@ -37,7 +39,7 @@ public class DasController extends DasService {
 		controllerPath = pathOf(CONTROLLER, ip);
 		workerPath = pathOf(WORKER, ip);
 
-		workerManager = new DasWorkerManager(zk, availableServerPath, workerPath, workerJarLocation);
+		workerManager = new DasWorkerManager(zk, availableServerPath, workerPath, workerJarLocation, hostPort);
 
 		watch(availableServerPath).watch(controllerPath)
 				.watchChildren(workerPath).watchChildren(PORT);

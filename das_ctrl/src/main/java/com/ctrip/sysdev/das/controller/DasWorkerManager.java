@@ -23,13 +23,14 @@ public class DasWorkerManager implements DasControllerConstants {
 	private String availableServerPath;
 	private String workerRoot;
 	private String workerJarLocation;
+	private String hostPort;
 	
-	public DasWorkerManager(ZooKeeper zk, String availableServerPath, String workerPath, String workerJarLocation) {
+	public DasWorkerManager(ZooKeeper zk, String availableServerPath, String workerPath, String workerJarLocation, String hostPort) {
 		this.zk = zk;
 		this.availableServerPath = availableServerPath;
 		this.workerRoot = workerPath;
 		this.workerJarLocation = workerJarLocation;
-		
+		this.hostPort = hostPort;
 	}
 	
 	public void initWorkerManager() {
@@ -59,6 +60,7 @@ public class DasWorkerManager implements DasControllerConstants {
 		argumentsList.add(workerJarLocation);
 		argumentsList.add(this.mainClass);
 
+		argumentsList.add(hostPort);
 		argumentsList.add(port);
 		argumentsList.add(monitorId);
 

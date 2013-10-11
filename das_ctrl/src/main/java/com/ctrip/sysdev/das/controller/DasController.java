@@ -33,11 +33,11 @@ public class DasController extends DasService {
 	}
 
 	protected void initService() {
-		workerManager = new DasWorkerManager(zk, workerPath, workerJarLocation);
-
 		availableServerPath = pathOf(NODE, ip);
 		controllerPath = pathOf(CONTROLLER, ip);
 		workerPath = pathOf(WORKER, ip);
+
+		workerManager = new DasWorkerManager(zk, availableServerPath, workerPath, workerJarLocation);
 
 		watch(availableServerPath).watch(controllerPath)
 				.watchChildren(workerPath).watchChildren(PORT);
@@ -54,6 +54,9 @@ public class DasController extends DasService {
 			if (zk.exists(controllerPath, null) != null)
 				return errorByFalse("The ip: " + ip
 						+ " is already exist under " + controllerPath);
+			
+			workerManager.initWorkerManager();
+			
 			return true;
 		} catch (Exception e) {
 			logger.error("Error during validate controller and worker path", e);
@@ -112,6 +115,7 @@ public class DasController extends DasService {
 			// Start all workers on the available list but not on the running
 			// list
 			// Remove existing worker
+			// TODO add time out for long run start up
 			workerCandidate.removeAll(workers);
 			startingWorker.removeAll(workers);
 			workerCandidate.removeAll(startingWorker);
@@ -137,7 +141,10 @@ public class DasController extends DasService {
 
 	public static void main(String[] args) {
 		if (args.length != 2) {
-			logger.error("Error: parameter incorrect. Parameters: 1. zookeeper host:port 2. Das worker jar path");
+			logger.error("Error: incorrect parameter number.");
+			logger.error("Parameters:");
+			logger.error("\t1. zookeeper host:port");
+			logger.error("\t2. Das worker jar path");
 			return;
 		}
 

@@ -79,7 +79,7 @@ public class QueryExecutor {
 	}
 
 	private void addDelay() {
-		int i = 6;
+		int i = 3;
 		synchronized (this) {
 			while (i-- > 0) {
 				try {

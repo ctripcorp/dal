@@ -12,7 +12,6 @@ import com.ctrip.sysdev.das.netty4.Netty4Server;
 public class DalServer extends DasService {
 	private static Logger logger = LoggerFactory.getLogger(DalServer.class);
 
-	private static final String hostPort = "csm-haddop02.dev.sh.ctripcorp.com:2181,csm-haddop03.dev.sh.ctripcorp.com:2181,csm-haddop04.dev.sh.ctripcorp.com:2181";
 	private String path;
 	private String port;
 	private String parent;
@@ -20,7 +19,7 @@ public class DalServer extends DasService {
 	private Netty4Server dasService;
 //	private ServerInfoMXBean serverInfoMXBean;
 
-	public DalServer(String port, String parent) throws Exception {
+	public DalServer(String hostPort, String port, String parent) throws Exception {
 		super(hostPort);
 		this.parent = parent;
 		this.port = port;
@@ -100,9 +99,10 @@ public class DalServer extends DasService {
 	}
 
 	public static void main(String[] args) {
-		logger.info("Started at port " + args[0]);
+		logger.info("ZK host:port" + args[0]);
+		logger.info("Started at port " + args[1]);
 		try {
-			new DalServer(args[0], args[1]).run();
+			new DalServer(args[0], args[1], args[2]).run();
 		} catch (Exception e) {
 			logger.error("Error starting server", e);
 		}

@@ -64,8 +64,8 @@ public class Netty4Server {
 
 	public void stop() throws Exception {
 		businessGroup.shutdownGracefully().await();
-		ioGroup.shutdownGracefully();
 		bossGroup.shutdownGracefully();
+		ioGroup.shutdownGracefully();
 		logger.warn("Server stop!");
 		startFlag.set(false);
 	}

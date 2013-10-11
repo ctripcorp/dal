@@ -136,7 +136,6 @@ public class DasController extends DasService {
 			logger.info("Stopping controller");
 			if (zk.exists(controllerPath, false) != null)
 				zk.delete(controllerPath, -1);
-			zk.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

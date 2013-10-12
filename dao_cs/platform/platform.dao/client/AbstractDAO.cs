@@ -29,18 +29,6 @@ namespace platform.dao.client
             bool initSuccess = false;
             try
             {
-                string dbName = ConfigurationManager.AppSettings["DbName"];
-                string cred = ConfigurationManager.AppSettings["Credential"];
-
-                ClientPool.GetInstance().CreateDasClient(dbName, cred);
-                ClientPool.GetInstance().DefaultName = dbName;
-                initSuccess = true;
-            }
-            catch
-            {
-            }
-            try
-            {
                 string providername = ConfigurationManager.ConnectionStrings["platform"].ProviderName;
                 string connString = ConfigurationManager.ConnectionStrings["platform"].ConnectionString;
 
@@ -51,6 +39,19 @@ namespace platform.dao.client
             catch
             {
             }
+            try
+            {
+                string dbName = ConfigurationManager.AppSettings["DbName"];
+                string cred = ConfigurationManager.AppSettings["Credential"];
+
+                ClientPool.GetInstance().CreateDasClient(dbName, cred);
+                ClientPool.GetInstance().DefaultName = dbName;
+                initSuccess = true;
+            }
+            catch
+            {
+            }
+           
             if(!initSuccess)
                 throw new DAOConfigException(
                     "Please ensure appSettings and connectionStrings of name platform exists!");

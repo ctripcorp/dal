@@ -1,14 +1,12 @@
-﻿using System.Collections;
+﻿using System;
 using System.Data;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
+using platform.dao.log;
 using platform.dao.param;
 using platform.dao.request;
 using platform.dao.response;
-using System.Collections.Generic;
-using platform.dao.log;
-using System.Diagnostics;
-using System;
 
 namespace platform.dao.client
 {
@@ -64,11 +62,12 @@ namespace platform.dao.client
         /// <param name="request"></param>
         private void WriteRequest(DefaultRequest request)
         {
+            watch.Reset();
             watch.Start();
             byte[] payload = request.Pack2ByteArray();
             watch.Stop();
 
-            logger.Info(string.Format("Serialization time: {0} Ticks(divide 10,000 to get milliseconds)", watch.ElapsedTicks));
+            logger.Info(string.Format("Client encode request time: {0} MilliSeconds", watch.ElapsedTicks/10000.0));
             logger.Info(request.Message.Sql);
 
             int protocolVersion = request.GetProtocolVersion();
@@ -128,12 +127,24 @@ namespace platform.dao.client
                     if (realCount != buffer.Length)
                     {
                     }
-
+                    watch.Reset();
                     watch.Start();
                     response = DefaultResponse.UnpackFromByteArray(buffer);
                     watch.Stop();
 
-                    logger.Info(string.Format("Deserialization time: {0} Ticks(divide 10,000 to get milliseconds)", watch.ElapsedTicks));
+                    logger.Info(string.Format("Server total time: {0} MilliSeconds",
+                        response.TotalTime));
+
+                    logger.Info(string.Format("Server decode request time: {0} MilliSeconds",
+                        response.DecodeRequestTime));
+
+                    logger.Info(string.Format("Server db time: {0} MilliSeconds",
+                        response.DbTime));
+
+                    logger.Info(string.Format("Server encode response time: {0} MilliSeconds",
+                       response.EncodeResponseTime));
+
+                    logger.Info(string.Format("Client decode response time: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
 
                     success = true;
                 }
@@ -158,7 +169,9 @@ namespace platform.dao.client
         public override IDataReader Fetch(string sql, params IParameter[] parameters)
         {
             //begin watch
-            //watch.Start();
+            Stopwatch watch = new Stopwatch();
+            watch.Reset();
+            watch.Start();
 
             if (null != parameters && parameters.Length > 0)
             {
@@ -209,9 +222,9 @@ namespace platform.dao.client
             };
 
             //end watch
-            //watch.Stop();
+            watch.Stop();
 
-            //logger.Info(string.Format("Total time of fetch: {0}", watch.ElapsedTicks));
+            logger.Info(string.Format("Total time of fetch: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
 
             return reader;
 

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>Mvc2Test</groupId>
+  <artifactId>Mvc2Test-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>Mvc2Test : Mvc2Test-parent</name>
+  <version>1.0.0.0-SNAPSHOT</version>
+  <modules>
+    <module>Mvc2Test</module>
+  </modules>
+  <distributionManagement>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>nexus</id>
+      <url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>nexus</id>
+      <url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+</project>

@@ -10,7 +10,7 @@ namespace platform.dao.orm
 {
     public sealed class SqlTable
     {
-        protected SqlTable()
+        internal SqlTable()
         {
         }
 

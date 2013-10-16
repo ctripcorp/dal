@@ -76,6 +76,7 @@ public class DalServer extends DasService {
 	protected void shutdown() {
 		try {
 			logger.info("Stopping worker");
+			
 			// This node must be deleted first, otherwise it may delete the node created by others 
 			if (zk.exists(path, false) != null){
 				String parentId = new String(zk.getData(path, false, null));
@@ -85,6 +86,11 @@ public class DalServer extends DasService {
 				}
 			}
 			zk.close();
+		} catch (Throwable e) {
+			logger.error("Error during shutdown worker", e);
+		}
+		
+		try{
 			dasService.stop();
 		} catch (Throwable e) {
 			logger.error("Error during shutdown worker", e);

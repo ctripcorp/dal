@@ -1,7 +1,9 @@
 package com.ctrip.sysdev.das.console.domain;
 
+import javax.xml.bind.annotation.XmlRootElement;
 
-//@XmlRootElement
+
+@XmlRootElement
 public class DbSetting {
 	private String driver;
 	private String jdbcUrl;

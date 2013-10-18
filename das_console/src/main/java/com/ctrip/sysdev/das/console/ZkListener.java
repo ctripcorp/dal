@@ -10,9 +10,9 @@ import org.apache.zookeeper.ZooKeeper;
 
 public class ZkListener implements ServletContextListener, DasConsoleConstants {
 	
-	public void contextDestroyed(ServletContextEvent sce) {
+	public void contextInitialized(ServletContextEvent sce) {
 		ServletContext context = sce.getServletContext();
-		String hostPorts = context.getInitParameter("ZkHostPorts");
+		String hostPorts = context.getInitParameter("com.ctrip.sysdev.das.console.zk");
 		try {
 			ZooKeeper zk = new ZooKeeper(hostPorts, 30 * 1000, null);
 			context.setAttribute(ZK, zk);
@@ -21,7 +21,7 @@ public class ZkListener implements ServletContextListener, DasConsoleConstants {
 		}
 	}
 
-	public void contextInitialized(ServletContextEvent sce) {
+	public void contextDestroyed(ServletContextEvent sce) {
 		ServletContext context = sce.getServletContext();
 		ZooKeeper zk = (ZooKeeper)context.getAttribute(ZK);
 		if(zk != null)

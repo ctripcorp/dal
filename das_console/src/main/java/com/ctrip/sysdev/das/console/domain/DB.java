@@ -1,5 +1,7 @@
 package com.ctrip.sysdev.das.console.domain;
 
+
+//@XmlRootElement
 public class DB {
 	private String name;
 	private DbSetting setting;

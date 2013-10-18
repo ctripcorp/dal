@@ -14,6 +14,22 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-moxy</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
 			<version>${jettyVersion}</version>
@@ -53,7 +69,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>org.example.HelloWorld</mainClass>
+					<mainClass>com.ctrip.sysdev.das.console.DasConsoleApplication</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>

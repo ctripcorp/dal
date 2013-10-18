@@ -1,5 +1,7 @@
 package com.ctrip.sysdev.das.console.domain;
 
+
+//@XmlRootElement
 public class DbSetting {
 	private String driver;
 	private String jdbcUrl;

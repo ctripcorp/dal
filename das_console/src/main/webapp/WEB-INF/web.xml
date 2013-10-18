@@ -12,12 +12,16 @@
 	</listener>
 
 	<servlet>
-		<servlet-name>DasConsole</servlet-name>
-		<servlet-class>com.ctrip.sysdev.das.console.DasConsoleServlet</servlet-class>
+		<servlet-name>DasConsoleApplication</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>com.ctrip.sysdev.das.console.DasConsoleApplication</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>DasConsole</servlet-name>
-		<url-pattern>/dal/das/*</url-pattern>
+		<servlet-name>DasConsoleApplication</servlet-name>
+		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
-
 </web-app>

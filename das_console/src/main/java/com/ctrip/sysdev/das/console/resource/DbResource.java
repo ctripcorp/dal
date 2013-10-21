@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -14,10 +15,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import org.glassfish.jersey.server.JSONP;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooKeeper;
 
 import com.ctrip.sysdev.das.console.domain.DB;
 import com.ctrip.sysdev.das.console.domain.DbSetting;
@@ -26,18 +28,29 @@ import com.ctrip.sysdev.das.console.domain.DbSetting;
 @Path("configure/db")
 @Singleton
 public class DbResource {
-
+	@Context
+	private ServletContext sContext;
+	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<DB> getDb() {
 		List<DB> dbList = new ArrayList<DB>();
-		DB db = new DB();
-		db.setName("aaa");
-		DbSetting setting = new DbSetting();
-		setting.setDriver("aaa");
-		setting.setJdbcUrl("mmm");
-		db.setSetting(setting);
-		dbList.add(db);
+		ZooKeeper zk = (ZooKeeper)sContext.getAttribute("com.ctrip.sysdev.das.console.zk");
+		try {
+			List<String> dbNameList = zk.getChildren("/dal/das/configure/db", false);
+			for(String dbName: dbNameList) {
+				String dbNodeName = "/dal/das/configure/db" + "/" + dbName;
+				DB db = new DB();
+				db.setName(dbName);
+				DbSetting setting = new DbSetting();
+				setting.setDriver(new String(zk.getData(dbNodeName + "/driver", false, null)));
+				setting.setJdbcUrl(new String(zk.getData(dbNodeName + "/jdbcUrl", false, null)));
+				db.setSetting(setting);
+				dbList.add(db);
+			}				
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return dbList;
 	}
 	
@@ -45,17 +58,6 @@ public class DbResource {
 	@Path("{name}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public DbSetting getDbSetting() {
-		DbSetting setting = new DbSetting();
-		setting.setDriver("aaa");
-		setting.setJdbcUrl("mmm");
-		return setting;
-	}
-
-	@GET
-	@Path("test/{name}")
-	@JSONP(queryParam = JSONP.DEFAULT_QUERY)
-	@Produces(MediaType.APPLICATION_JSON)
-	public DbSetting getJsonPDbSetting(@QueryParam(JSONP.DEFAULT_QUERY) String callback) {
 		DbSetting setting = new DbSetting();
 		setting.setDriver("aaa");
 		setting.setJdbcUrl("mmm");

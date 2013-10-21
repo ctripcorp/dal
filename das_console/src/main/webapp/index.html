@@ -12,7 +12,7 @@
     --></style>
     <script language="javascript">//<![CDATA[
     function callback(data) {
-        data = data["changeRecordBeans"]["change"];
+        data = data["db1"]["jdbcUrl"];
         var len = data.length;
         var resultDiv = document.getElementById("writehere");
         resultDiv.innerHTML = "";
@@ -92,7 +92,7 @@ mvn clean compile exec:java</pre></blockquote>
     var headLoc = document.getElementById("scriptComesHere");
     var scriptObj = document.createElement("script");
     scriptObj.setAttribute("type", "application/x-javascript");
-    scriptObj.setAttribute("src", "http://localhost:8080/console/dal/das/configure/db/test/aaa?__callback=eval");
+    scriptObj.setAttribute("src", "http://localhost:8080/console/dal/das/configure/db");
     headLoc.appendChild(scriptObj);
     //]]</script>
     You need to run the service first!

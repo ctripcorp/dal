@@ -16,6 +16,15 @@ public interface DasControllerConstants {
 
 	// Under node, the node name is server IP
 	String NODE = "/dal/das/configure/node";
+	String STARTING_HEAP_SIZE = "startingHeapSize";
+	String DEFAULT_STARTING_HEAP_SIZE = String.valueOf(50);
+	
+	String MAX_HEAP_SIZE = "maxHeapSize";
+	String DEFAULT_MAX_HEAP_SIZE = String.valueOf(100);
+
+	// Worker's working directory
+	String DIRECTORY = "directory";
+	String USER_HOME = "user.home";
 
 	// The value of startup is how we start a DAS worker
 	String START_CMD = "/dal/das/configure/startup";

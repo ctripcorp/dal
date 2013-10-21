@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 public class DasController extends DasService {
 	private static Logger logger = LoggerFactory.getLogger(DasController.class);
 
+	private String hostPort;
 	private String availableServerPath;
 	private String controllerPath;
 	private String workerPath;
@@ -29,15 +30,16 @@ public class DasController extends DasService {
 
 	public DasController(String hostPort, String workerJarLocation) throws Exception {
 		super(hostPort);
+		this.hostPort = hostPort;
 		this.workerJarLocation = workerJarLocation;
 	}
 
 	protected void initService() {
-		workerManager = new DasWorkerManager(zk, workerPath, workerJarLocation);
-
 		availableServerPath = pathOf(NODE, ip);
 		controllerPath = pathOf(CONTROLLER, ip);
 		workerPath = pathOf(WORKER, ip);
+
+		workerManager = new DasWorkerManager(zk, availableServerPath, workerPath, workerJarLocation, hostPort);
 
 		watch(availableServerPath).watch(controllerPath)
 				.watchChildren(workerPath).watchChildren(PORT);
@@ -54,6 +56,9 @@ public class DasController extends DasService {
 			if (zk.exists(controllerPath, null) != null)
 				return errorByFalse("The ip: " + ip
 						+ " is already exist under " + controllerPath);
+			
+			workerManager.initWorkerManager();
+			
 			return true;
 		} catch (Exception e) {
 			logger.error("Error during validate controller and worker path", e);
@@ -112,13 +117,15 @@ public class DasController extends DasService {
 			// Start all workers on the available list but not on the running
 			// list
 			// Remove existing worker
+			// TODO add time out for long run start up
 			workerCandidate.removeAll(workers);
-			startingWorker.removeAll(workers);
-			workerCandidate.removeAll(startingWorker);
-			startingWorker.addAll(workerCandidate);
-			
-			workerManager.startAll(workerCandidate, String.valueOf(this.hashCode()));
-
+			synchronized(this) {
+				startingWorker.removeAll(workers);
+				workerCandidate.removeAll(startingWorker);
+				startingWorker.addAll(workerCandidate);
+				
+				workerManager.startAll(startingWorker, workerCandidate, String.valueOf(this.hashCode()));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
@@ -130,6 +137,7 @@ public class DasController extends DasService {
 			logger.info("Stopping controller");
 			if (zk.exists(controllerPath, false) != null)
 				zk.delete(controllerPath, -1);
+			zk.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -137,7 +145,10 @@ public class DasController extends DasService {
 
 	public static void main(String[] args) {
 		if (args.length != 2) {
-			logger.error("Error: parameter incorrect. Parameters: 1. zookeeper host:port 2. Das worker jar path");
+			logger.error("Error: incorrect parameter number.");
+			logger.error("Parameters:");
+			logger.error("\t1. zookeeper host:port");
+			logger.error("\t2. Das worker jar path");
 			return;
 		}
 

@@ -38,6 +38,7 @@ public class QueryExecutor {
 		Connection conn = null;
 		PreparedStatement statement = null;
 
+//		addDelay();
 		
 		long start = System.currentTimeMillis();
 		try {
@@ -67,7 +68,7 @@ public class QueryExecutor {
 					// conn.commit();
 				}
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			logger.error(QUERY_EXECUTION_EXCEPTION, e);
 		} finally {
@@ -75,6 +76,19 @@ public class QueryExecutor {
 		}
 
 		return resp;
+	}
+
+	private void addDelay() {
+		int i = 3;
+		synchronized (this) {
+			while (i-- > 0) {
+				try {
+					wait(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	private PreparedStatement createStatement(Connection conn,

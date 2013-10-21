@@ -12,7 +12,6 @@ import com.ctrip.sysdev.das.netty4.Netty4Server;
 public class DalServer extends DasService {
 	private static Logger logger = LoggerFactory.getLogger(DalServer.class);
 
-	private static final String hostPort = "csm-haddop02.dev.sh.ctripcorp.com:2181,csm-haddop03.dev.sh.ctripcorp.com:2181,csm-haddop04.dev.sh.ctripcorp.com:2181";
 	private String path;
 	private String port;
 	private String parent;
@@ -20,7 +19,7 @@ public class DalServer extends DasService {
 	private Netty4Server dasService;
 //	private ServerInfoMXBean serverInfoMXBean;
 
-	public DalServer(String port, String parent) throws Exception {
+	public DalServer(String hostPort, String port, String parent) throws Exception {
 		super(hostPort);
 		this.parent = parent;
 		this.port = port;
@@ -35,8 +34,13 @@ public class DalServer extends DasService {
 
 	protected boolean validate() {
 		try {
-			return zk.exists(path, this) == null;
-		} catch (Exception e) {
+			if(zk.exists(path, this) == null)
+				return true;
+			
+			logger.error("Worker's corresponding path is already in use: " + path);
+			
+			return false;
+		} catch (Throwable e) {
 			logger.error("Error during validate worker path", e);
 			return false;
 		}
@@ -44,9 +48,11 @@ public class DalServer extends DasService {
 
 	protected boolean register() {
 		try {
+			logger.info("Registering: " + path);
 			zk.create(path, parent.getBytes(), Ids.OPEN_ACL_UNSAFE,
 					CreateMode.EPHEMERAL);
-
+			logger.info("Register success.");
+			
 			GuiceObjectFactory factory = new GuiceObjectFactory();
 			DruidDataSourceWrapper ds = factory.getInstance(DruidDataSourceWrapper.class);
 			ds.initDataSourceWrapper(zk);
@@ -60,7 +66,7 @@ public class DalServer extends DasService {
 //			serverInfoMXBean.getName(), serverInfoMXBean);
 			
 			return true;
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			logger.error("Error during register worker path", e);
 			// SingleInstanceDaemonTool.bailout(-1);
 			return false;
@@ -70,11 +76,24 @@ public class DalServer extends DasService {
 	protected void shutdown() {
 		try {
 			logger.info("Stopping worker");
+			
+			// This node must be deleted first, otherwise it may delete the node created by others 
+			if (zk.exists(path, false) != null){
+				String parentId = new String(zk.getData(path, false, null));
+				if(parentId.equals(parent)){
+					logger.info("Removing worker path: " + path);
+					zk.delete(path, -1);
+				}
+			}
+			zk.close();
+		} catch (Throwable e) {
+			logger.error("Error during shutdown worker", e);
+		}
+		
+		try{
 			dasService.stop();
-			if (zk.exists(path, false) != null)
-				zk.delete(path, -1);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Throwable e) {
+			logger.error("Error during shutdown worker", e);
 		}
 	}
 
@@ -100,9 +119,10 @@ public class DalServer extends DasService {
 	}
 
 	public static void main(String[] args) {
-		logger.info("Started at port " + args[0]);
+		logger.info("ZK host:port" + args[0]);
+		logger.info("Started at port " + args[1]);
 		try {
-			new DalServer(args[0], args[1]).run();
+			new DalServer(args[0], args[1], args[2]).run();
 		} catch (Exception e) {
 			logger.error("Error starting server", e);
 		}

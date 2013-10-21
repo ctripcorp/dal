@@ -1,7 +1,6 @@
 package com.ctrip.sysdev.das.netty4;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 import org.msgpack.MessagePack;
@@ -45,7 +44,7 @@ public class ResponseSerializer {
 			packer.write(resp.getDbTime());
 			packer.write(resp.getEncodeResponseTime());
 			packer.writeArrayEnd();
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			throw new SerDeException("ResponseSerDe doSerialize exception ", e);
 		}

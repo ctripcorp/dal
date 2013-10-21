@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	metadata-complete="false" version="3.0">
+	<context-param>
+		<param-name>com.ctrip.sysdev.das.console.zk</param-name>
+		<param-value>csm-haddop02.dev.sh.ctripcorp.com:2181,csm-haddop03.dev.sh.ctripcorp.com:2181,csm-haddop04.dev.sh.ctripcorp.com:2181</param-value>
+	</context-param>
+
+	<listener>
+		<listener-class>com.ctrip.sysdev.das.console.ZkListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>DasConsoleApplication</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>com.ctrip.sysdev.das.console.DasConsoleApplication</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DasConsoleApplication</servlet-name>
+		<url-pattern>/dal/das/*</url-pattern>
+	</servlet-mapping>
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+</web-app>

@@ -6,9 +6,11 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
+import com.ctrip.sysdev.das.console.resource.ControllerResource;
 import com.ctrip.sysdev.das.console.resource.DbResource;
 import com.ctrip.sysdev.das.console.resource.NodeResource;
 import com.ctrip.sysdev.das.console.resource.PortResource;
+import com.ctrip.sysdev.das.console.resource.WorkerResource;
 
 @ApplicationPath("/")
 public class DasConsoleApplication extends Application {
@@ -19,6 +21,8 @@ public class DasConsoleApplication extends Application {
         classes.add(DbResource.class);
         classes.add(NodeResource.class);
         classes.add(PortResource.class);
+        classes.add(WorkerResource.class);
+        classes.add(ControllerResource.class);
         return classes;
     }
 }

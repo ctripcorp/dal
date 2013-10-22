@@ -15,10 +15,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.zookeeper.ZooKeeper;
+import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.Node;
 import com.ctrip.sysdev.das.console.domain.NodeSetting;
@@ -31,7 +33,8 @@ public class NodeResource {
 	private ServletContext sContext;
 
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	@JSONP(queryParam = "jsonpCallback")
+	@Produces("application/x-javascript")
 	public List<Node> getNode() {
 		List<Node> nodeList = new ArrayList<Node>();
 		ZooKeeper zk = (ZooKeeper) sContext.getAttribute("com.ctrip.sysdev.das.console.zk");
@@ -56,8 +59,9 @@ public class NodeResource {
 
 	@GET
 	@Path("{name}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public NodeSetting getDbSetting() {
+	@JSONP(queryParam = "jsonpCallback")
+	@Produces("application/x-javascript")
+	public NodeSetting getNodeSetting() {
 		NodeSetting setting = new NodeSetting();
 		setting.setDirectory("direc");
 		setting.setMaxHeapSize("123");
@@ -67,7 +71,7 @@ public class NodeResource {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void addDb(@FormParam("name") String name,
+	public void addNode(@FormParam("name") String name,
 			@FormParam("directory") String directory,
 			@FormParam("maxHeapSize") String maxHeapSize,
 			@FormParam("startingHeapSize") String startingHeapSize) {
@@ -77,7 +81,7 @@ public class NodeResource {
 	@PUT
 	@Path("{name}")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void updateDB(@PathParam("name") String name,
+	public void updateNode(@PathParam("name") String name,
 			@FormParam("directory") String directory,
 			@FormParam("maxHeapSize") String maxHeapSize,
 			@FormParam("startingHeapSize") String startingHeapSize) {
@@ -86,7 +90,7 @@ public class NodeResource {
 
 	@DELETE
 	@Path("{name}")
-	public void deleteDb(@PathParam("name") String name) {
+	public void deleteNode(@PathParam("name") String name) {
 		System.out.printf("Delete node: " + name);
 	}
 }

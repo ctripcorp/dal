@@ -15,13 +15,16 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.zookeeper.ZooKeeper;
+import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.DB;
 import com.ctrip.sysdev.das.console.domain.DbSetting;
+import com.ctrip.sysdev.das.console.domain.Node;
 
 @Resource
 @Path("configure/db")
@@ -31,8 +34,9 @@ public class DbResource {
 	private ServletContext sContext;
 	
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<DB> getDb() {
+	@JSONP(queryParam = "jsonpCallback")
+	@Produces("application/x-javascript")
+	public List<DB> getDb(@QueryParam("jsonpCallback") String callback) {
 		List<DB> dbList = new ArrayList<DB>();
 		ZooKeeper zk = (ZooKeeper)sContext.getAttribute("com.ctrip.sysdev.das.console.zk");
 		try {
@@ -55,8 +59,9 @@ public class DbResource {
 	
 	@GET
 	@Path("{name}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public DbSetting getDbSetting() {
+	@JSONP(queryParam = "jsonpCallback")
+	@Produces("application/x-javascript")
+	public DbSetting getDbSetting(@QueryParam("jsonpCallback") String callback) {
 		DbSetting setting = new DbSetting();
 		setting.setDriver("aaa");
 		setting.setJdbcUrl("mmm");

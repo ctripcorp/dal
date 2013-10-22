@@ -61,7 +61,7 @@
                      <ul class="nav pull-right">
                         <!-- BEGIN USER LOGIN DROPDOWN -->
                         <li class="dropdown user">
-                           <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                           <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
                            <span class="username">Link Wu</span>
                            <i class="icon-angle-down"></i>
                            </a>
@@ -83,32 +83,101 @@
                <!-- BEGIN SIDEBAR -->
                <div class="page-sidebar nav-collapse collapse">
                   <!-- BEGIN SIDEBAR MENU -->        
-                  <ul class="page-sidebar-menu">
+                                    <ul class="page-sidebar-menu">
                      <li>
                         <!-- BEGIN SIDEBAR TOGGLER BUTTON -->
                         <div class="sidebar-toggler hidden-phone"></div>
                         <!-- BEGIN SIDEBAR TOGGLER BUTTON -->
                      </li>
-                     <li class="sidebar" sidename="project">
-                        <a href="/">
-                        <i class="icon-windows"></i> 
-                        <span class="title">我的项目</span>
-                        <span class="selected"></span>
+                     <li id="daogen" class="">
+                        <a href="javascript:;">
+                        <i class="icon-bookmark-empty"></i> 
+                        <span class="title">DAO生成器</span>
+                        <span class="arrow "></span>
                         </a>
+                        <ul class="sub-menu">
+                           <li class="sidebar" sidename="project">
+                              <a href="/">
+                              <i class="icon-windows"></i> 
+                              <span class="title">我的项目</span>
+                              <span class="selected"></span>
+                              </a>
+                           </li>
+                           <li class="sidebar active" sidename="task">
+                              <a href="/task/">
+                              <i class="icon-sun"></i> 
+                              <span class="title">生成DAO</span>
+                              <span class="selected"></span>
+                              </a>
+                           </li>
+                           <li class="sidebar" sidename="code">
+                              <a href="/file/">
+                              <i class="icon-twitter"></i> 
+                              <span class="title">项目文件</span>
+                              <span class="selected"></span>
+                              </a>
+                           </li>
+                        </ul>
                      </li>
-                     <li class="sidebar active" sidename="task">
-                        <a href="/task/">
-                        <i class="icon-sun"></i> 
-                        <span class="title">生成DAO</span>
-                        <span class="selected"></span>
+                     <li id="configCenter" class="">
+                        <a href="javascript:;">
+                        <i class="icon-bookmark-empty"></i> 
+                        <span class="title">配置中心</span>
+                        <span class="arrow "></span>
                         </a>
+                        <ul class="sub-menu">
+                           <li class="sidebar" sidename="project">
+                              <a href="/config_center/">
+                              <i class="icon-laptop"></i> 
+                              <span class="title">数据库配置</span>
+                              <span class="selected"></span>
+                              </a>
+                           </li>
+                           <li class="sidebar" sidename="project">
+                              <a href="/config_center/machine">
+                              <i class="icon-hdd"></i> 
+                              <span class="title">机器配置</span>
+                              <span class="selected"></span>
+                              </a>
+                           </li>
+                           <li class="sidebar" sidename="project">
+                              <a href="/config_center/port">
+                              <i class="icon-circle-blank"></i> 
+                              <span class="title">端口配置</span>
+                              <span class="selected"></span>
+                              </a>
+                           </li>
+                           <li class="sidebar" sidename="project">
+                              <a href="/config_center/worker">
+                              <i class="icon-male"></i> 
+                              <span class="title">Worker配置</span>
+                              <span class="selected"></span>
+                              </a>
+                           </li>
+                           <li class="sidebar" sidename="project">
+                              <a href="/config_center/controller">
+                              <i class="icon-female"></i> 
+                              <span class="title">Controller配置</span>
+                              <span class="selected"></span>
+                              </a>
+                           </li>
+                        </ul>
                      </li>
-                     <li class="sidebar" sidename="code">
-                        <a href="/file/">
-                        <i class="icon-twitter"></i> 
-                        <span class="title">项目文件</span>
-                        <span class="selected"></span>
+                     <li id="performance" class="">
+                        <a href="javascript:;">
+                        <i class="icon-bookmark-empty"></i> 
+                        <span class="title">监控</span>
+                        <span class="arrow "></span>
                         </a>
+                        <ul class="sub-menu">
+                           <li class="sidebar" sidename="project">
+                              <a href="/performance/">
+                              <i class="icon-windows"></i> 
+                              <span class="title">性能查看</span>
+                              <span class="selected"></span>
+                              </a>
+                           </li>
+                        </ul>
                      </li>
                   </ul>
                   <!-- END SIDEBAR MENU -->
@@ -130,8 +199,8 @@
                                  <div class="portlet-title line">
                                     <div class="caption"><i class="icon-reorder"></i>选择一个选项</div>
                                     <div class="tools"> 
-                                       <a href="#" class="icon-collapse collapse"></a>
-                                       <a id="reload_ops" href="#" class="icon-refresh"></a>   
+                                       <a href="javascript:;" class="icon-collapse collapse"></a>
+                                       <a id="reload_ops" href="javascript:;" class="icon-refresh"></a>   
                                     </div>
                                  </div>
                                  <div class="portlet-body">
@@ -323,8 +392,8 @@
                                  <div class="portlet-title">
                                     <div class="caption"><i class="icon-check"></i>{{project_name}}对应的DAO方法</div>
                                     <div class="tools">
-                                       <a href="#" class="icon-collapse collapse"></a>
-                                       <a id="reload_tasks" href="#" class="icon-refresh"></a>
+                                       <a href="javascript:;" class="icon-collapse collapse"></a>
+                                       <a id="reload_tasks" href="javascript:;" class="icon-refresh"></a>
                                     </div>
                                  </div>
                                  <div class="portlet-body">

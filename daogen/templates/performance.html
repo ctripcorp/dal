@@ -34,7 +34,7 @@
             <!-- END GLOBAL MANDATORY STYLES -->
             <!-- BEGIN PAGE LEVEL STYLES --> 
             <link href="/static/css/tasks.css" rel="stylesheet" type="text/css" media="screen"/>
-            <link href="/static/css/index.css" rel="stylesheet" type="text/css" media="screen"/>
+
             <!-- END PAGE LEVEL STYLES -->
             <link rel="shortcut icon" href="favicon.ico" />
          </head>
@@ -82,7 +82,7 @@
                <!-- BEGIN SIDEBAR -->
                <div class="page-sidebar nav-collapse collapse">
                   <!-- BEGIN SIDEBAR MENU -->        
-                                    <ul class="page-sidebar-menu">
+                  <ul class="page-sidebar-menu">
                      <li>
                         <!-- BEGIN SIDEBAR TOGGLER BUTTON -->
                         <div class="sidebar-toggler hidden-phone"></div>
@@ -95,7 +95,7 @@
                         <span class="arrow "></span>
                         </a>
                         <ul class="sub-menu">
-                           <li class="sidebar active" sidename="project">
+                           <li class="sidebar" sidename="project">
                               <a href="/">
                               <i class="icon-windows"></i> 
                               <span class="title">我的项目</span>
@@ -169,7 +169,7 @@
                         <span class="arrow "></span>
                         </a>
                         <ul class="sub-menu">
-                           <li class="sidebar" sidename="project">
+                           <li class="sidebar active" sidename="project">
                               <a href="/performance/">
                               <i class="icon-windows"></i> 
                               <span class="title">性能查看</span>
@@ -188,64 +188,8 @@
                   <div id="main_container" class="container-fluid">
                      <!--  The main container field -->
                      <div id="dashboard">
-                        <br>
-                        <div class="row-fluid">
-                           <div class="span12">
-                              <div class="portlet box green tasks-widget">
-                                 <!-- BEGIN Portlet Title -->
-                                 <div class="portlet-title">
-                                    <div class="caption"><i class="icon-check"></i>所有项目</div>
-                                    <div class="tools">
-                                       <a href="javascript:;" class="icon-refresh"></a>
-                                    </div>
-                                    <div class="actions">
-                                       <div class="btn-group">
-                                          <a class="btn mini" href="javascript:;" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                                          操作
-                                          <i class="icon-angle-down"></i>
-                                          </a>
-                                          <ul class="dropdown-menu pull-right">
-                                             <li><a href="javascript:;" role="button" class="btn" data-dismiss="modal">添加项目</a></li>
-                                          </ul>
-                                       </div>
-                                    </div>
-                                 </div>
-                                 <!-- End Portlet Title -->
-                                 <!--BEGIN Portlet Body-->
-                                 <div class="portlet-body">
-                                    <div class="task-content">
-                                       <div class="scroller" style="height:750px" data-always-visible="1" data-rail-visible1="1">
-                                          <!-- START TASK LIST -->
-                                          <ul class="task-list unstyled">
-                                          </ul>
-                                          <!-- END START TASK LIST -->
-                                       </div>
-                                    </div>
-                                 </div>
-                                 <!--END Portlet Body-->
-                              </div>
-                           </div>
-                        </div>
-                        <!-- Modal -->
-                        <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                           <div class="modal-header">
-                              <button type="button" class="icon-remove close" data-dismiss="modal" aria-hidden="true" style="width: auto;height: auto;"></button>
-                              <h3 id="myModalLabel">添加新项目</h3>
-                           </div>
-                           <div class="modal-body">
-                              <form class="form-inline">
-                                 产品线<input id="product_line" type="text" class="input-block-level" value="platform">
-                                 域名<input id="domain" type="text" class="input-block-level" value="international">
-                                 项目名称<input id="service" type="text" class="input-block-level" value="daogen">
-                                 版本号<input id="version" type="text" class="input-block-level" value="1.0.0.0-SNAPSHOT">
-                                 别名<input id="alias" type="text" class="input-block-level">
-                              </form>
-                           </div>
-                           <div class="modal-footer">
-                              <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-                              <button id="save_project" class="btn btn-primary">保存</button>
-                           </div>
-                        </div>
+                        <!--End Feeds-->
+                        <div id="pie_container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
                      </div>
                      <!-- End of main container-->
                   </div>
@@ -286,7 +230,9 @@
             <!-- BEGIN PAGE LEVEL SCRIPTS -->
             <script src="/static/js/app.js" type="text/javascript"></script>
             <script src="/static/js/sprintf.js" type="text/javascript"></script>
-            <script src="/static/js/project.js" type="text/javascript"></script> 
+            <script src="/static/js/performance.js" type="text/javascript"></script>     
+            <script src="/static/js/highcharts.js" type="text/javascript"></script>
+            <script src="/static/js/modules/exporting.js" type="text/javascript"></script>
             <!-- END PAGE LEVEL SCRIPTS -->  
             <!-- END JAVASCRIPTS -->
          </body>

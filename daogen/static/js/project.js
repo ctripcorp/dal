@@ -86,4 +86,8 @@ jQuery(document).ready(function () {
 
     $(".icon-refresh").trigger('click');
 
+    $("#daogen").toggleClass('open');
+
+    $("#daogen .sub-menu").show();
+
 });

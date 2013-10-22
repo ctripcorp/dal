@@ -15,6 +15,8 @@ namespace platform.dao
 
         public static readonly IList<DbType> validDbType;
 
+        public static int RetryTimesWhenError = 3;
+
         static Consts()
         {
             validDbType = new List<DbType>();

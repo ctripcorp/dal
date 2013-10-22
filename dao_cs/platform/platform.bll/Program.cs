@@ -6,9 +6,10 @@ using System.Xml;
 using System.IO;
 using System.Data;
 using System.Data.SqlClient;
-using platform.dao.log;
+//using platform.dao.log;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
+using RDSys.Tools.ConfigGen.Core;
 
 namespace platform.bll
 {
@@ -16,6 +17,10 @@ namespace platform.bll
     {
         static void Main(string[] args)
         {
+            string saveFolder = Consts.DefaultConfigFolder;
+            ConfigGenEngine engine = new ConfigGenEngine(@"E:\codes\xuntu_pto_ddxt");
+            saveFolder = engine.GenerateAllConfigs(new ConfigEnv("dev", "sh", "iis6","net4", "dev") , saveFolder);
+
 
             //FileInfo f = new FileInfo("E:/eclipse/workspace");
 
@@ -28,7 +33,7 @@ namespace platform.bll
 
             //AddPomFileToSlnFile("E:/test.sln", "xxx.xml");
 
-            string addText = string.Format("EndProject\r\nProject(\"{{2150E333-8FDC-42A3-9474-1A3956D46DE8}}\") = \"Solution Items\", \"Solution Items\", \"{0}\"\r\n\tProjectSection(SolutionItems) = preProject\r\n\t\t{1} = {2}\r\n\tEndProjectSection\r\nEndProject", 1, 2, 3);
+            //string addText = string.Format("EndProject\r\nProject(\"{{2150E333-8FDC-42A3-9474-1A3956D46DE8}}\") = \"Solution Items\", \"Solution Items\", \"{0}\"\r\n\tProjectSection(SolutionItems) = preProject\r\n\t\t{1} = {2}\r\n\tEndProjectSection\r\nEndProject", 1, 2, 3);
 
             //BackgroundWorker bw = new BackgroundWorker();
 
@@ -68,7 +73,7 @@ namespace platform.bll
             //        }
             //    }
             //}
-            Console.Read();
+            //Console.Read();
 
         }
 

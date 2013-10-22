@@ -8,6 +8,8 @@ from daogen.handler.task_handler import TaskHandler
 from daogen.handler.project_handler import ProjectHandler
 from daogen.handler.file_handler import FileHandler
 from daogen.handler.database_handler import DatabaseHandler
+from daogen.handler.config_handler import ConfigHandler
+from daogen.handler.monitor_handler import PerformanceHandler
 from daogen.bootstrap import init_all
 
 class IndexHandler(RequestDispatcher):
@@ -32,6 +34,8 @@ application = tornado.web.Application([
 	(r"/task/.*", TaskHandler),
 	(r"/file/.*", FileHandler),
 	(r"/database/.*",DatabaseHandler),
+	(r"/config_center/.*",ConfigHandler),
+	(r"/performance/.*",PerformanceHandler),
 	(r'/projects/(.*)', tornado.web.StaticFileHandler, {'path': settings['projects_path']}),
 	(r'/static/img/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(settings['static_path'], "img")}),
 	(r"/(favicon\.ico)", tornado.web.StaticFileHandler,{'path': settings['static_path']}),

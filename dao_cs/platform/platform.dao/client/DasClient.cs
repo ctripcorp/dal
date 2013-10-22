@@ -41,13 +41,15 @@ namespace platform.dao.client
                 sock = null;
             }
             sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            while (!sock.Connected)
+            int currentRetry = 0;
+            while (!sock.Connected && currentRetry < Consts.RetryTimesWhenError)
             {
                 try
                 {
                     //sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     sock.Connect(Consts.ServerIp, Consts.ServerPort);
                     networkStream = new NetworkStream(sock);
+                    currentRetry++;
                 }
                 catch(Exception ex)
                 {
@@ -75,7 +77,8 @@ namespace platform.dao.client
             int totalLength = 2 + payload.Length;
 
             bool success = false;
-            while (!success)
+            int currentRetry = 0;
+            while (!success && currentRetry < Consts.RetryTimesWhenError)
             {
                 try
                 {
@@ -91,6 +94,7 @@ namespace platform.dao.client
 
                     networkStream.Write(payload, 0, payload.Length);
                     success = true;
+                    currentRetry++;
                 }
                 catch (Exception ex)
                 {
@@ -108,8 +112,8 @@ namespace platform.dao.client
         {
             DefaultResponse response = null;
             bool success = false;
-
-            while (!success)
+            int currentRetry = 0;
+            while (!success && currentRetry < Consts.RetryTimesWhenError)
             {
                 try
                 {
@@ -147,6 +151,7 @@ namespace platform.dao.client
                     logger.Info(string.Format("Client decode response time: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
 
                     success = true;
+                    currentRetry++;
                 }
                 catch (Exception ex)
                 {

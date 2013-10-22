@@ -594,4 +594,8 @@ $(document).ready(function () {
         }]
     });
 
+    $("#daogen").toggleClass('open');
+
+    $("#daogen .sub-menu").show();
+
 });

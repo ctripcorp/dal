@@ -15,10 +15,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.zookeeper.ZooKeeper;
+import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.Port;
 
@@ -30,8 +32,9 @@ public class PortResource {
 	private ServletContext sContext;
 
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public Port getPort() {
+	@JSONP(queryParam = "jsonpCallback")
+	@Produces({ "application/x-javascript" })
+	public Port getPort(@QueryParam("jsonpCallback") String callback) {
 		Port port = new Port();
 		Set<Integer> ports = new HashSet<Integer>();
 		port.setPorts(ports);

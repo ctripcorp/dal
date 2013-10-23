@@ -25,6 +25,7 @@ import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.Node;
 import com.ctrip.sysdev.das.console.domain.NodeSetting;
+import com.ctrip.sysdev.das.console.domain.Status;
 
 @Resource
 @Path("configure/node")
@@ -78,7 +79,7 @@ public class NodeResource extends DalBaseResource {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void addNode(@FormParam("name") String name,
+	public Status addNode(@FormParam("name") String name,
 			@FormParam("directory") String directory,
 			@FormParam("maxHeapSize") String maxHeapSize,
 			@FormParam("startingHeapSize") String startingHeapSize) {
@@ -92,9 +93,10 @@ public class NodeResource extends DalBaseResource {
 			zk.create(nodePath + "/directory", directory.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 			zk.create(nodePath + "/maxHeapSize", maxHeapSize.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 			zk.create(nodePath + "/startingHeapSize", startingHeapSize.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-			
+			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return Status.ERROR;
 		}
 	}
 

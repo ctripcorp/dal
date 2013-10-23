@@ -8,13 +8,15 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.DruidDataSourceWrapper;
 import com.ctrip.sysdev.das.domain.Request;
 import com.ctrip.sysdev.das.domain.Response;
-import com.ctrip.sysdev.das.exception.SerDeException;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -38,13 +40,9 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 	private ChannelGroup allChannels;
 	private ResponseSerializer msgPackSerDe;
 	private QueryExecutor executor = new QueryExecutor();
-
-//	@Inject
+	private Executor timeCostSender = Executors.newSingleThreadExecutor();
 	private DruidDataSourceWrapper dataSourceWrapper;
 
-	/**
-	 * @param args
-	 */
 	public ByteBuf dalService(Request request) {
 		ByteBuf buf = Unpooled.buffer();
 
@@ -95,6 +93,7 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 	private void logTime(Response response) {
 		// This is not the most correct time cost for each stage.
 		logger.info("Decode/Execution/Encode: " + response.getDecodeRequestTime() + "/" + response.getDbTime() + "/" + response.getEncodeResponseTime());
+		timeCostSender.execute(new TimeCostSendTask(response)); 
 	}
 
 	@Override

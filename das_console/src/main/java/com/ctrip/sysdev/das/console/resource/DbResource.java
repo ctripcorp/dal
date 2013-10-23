@@ -15,39 +15,39 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.DB;
 import com.ctrip.sysdev.das.console.domain.DbSetting;
-import com.ctrip.sysdev.das.console.domain.Node;
 
 @Resource
 @Path("configure/db")
 @Singleton
-public class DbResource {
+public class DbResource extends DalBaseResource {
 	@Context
 	private ServletContext sContext;
 	
 	@GET
 	@JSONP(queryParam = "jsonpCallback")
 	@Produces("application/x-javascript")
-	public List<DB> getDb(@QueryParam("jsonpCallback") String callback) {
+	public List<DB> getDb() {
 		List<DB> dbList = new ArrayList<DB>();
-		ZooKeeper zk = (ZooKeeper)sContext.getAttribute("com.ctrip.sysdev.das.console.zk");
+		ZooKeeper zk = getZk();
 		try {
 			List<String> dbNameList = zk.getChildren("/dal/das/configure/db", false);
 			for(String dbName: dbNameList) {
-				String dbNodeName = "/dal/das/configure/db" + "/" + dbName;
+				String dbNodePath = "/dal/das/configure/db" + "/" + dbName;
 				DB db = new DB();
 				db.setName(dbName);
 				DbSetting setting = new DbSetting();
-				setting.setDriver(new String(zk.getData(dbNodeName + "/driver", false, null)));
-				setting.setJdbcUrl(new String(zk.getData(dbNodeName + "/jdbcUrl", false, null)));
+				setting.setDriver(new String(zk.getData(dbNodePath + "/driver", false, null)));
+				setting.setJdbcUrl(new String(zk.getData(dbNodePath + "/jdbcUrl", false, null)));
 				db.setSetting(setting);
 				dbList.add(db);
 			}				
@@ -61,17 +61,34 @@ public class DbResource {
 	@Path("{name}")
 	@JSONP(queryParam = "jsonpCallback")
 	@Produces("application/x-javascript")
-	public DbSetting getDbSetting(@QueryParam("jsonpCallback") String callback) {
+	public DbSetting getDbSetting(@PathParam("name") String name) {
 		DbSetting setting = new DbSetting();
-		setting.setDriver("aaa");
-		setting.setJdbcUrl("mmm");
+		ZooKeeper zk = getZk();
+		try {
+			String dbNodePath = "/dal/das/configure/db" + "/" + name;
+			setting.setDriver(new String(zk.getData(dbNodePath + "/driver", false, null)));
+			setting.setJdbcUrl(new String(zk.getData(dbNodePath + "/jdbcUrl", false, null)));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return setting;
 	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public void addDb(@FormParam("name") String name, @FormParam("driver") String driver, @FormParam("jdbcUrl") String jdbcUrl) {
-		System.out.printf("add DB: " +name);
+		System.out.printf("Add DB: " +name);
+		ZooKeeper zk = getZk();
+		String dbNodePath = "/dal/das/configure/db" + "/" + name;
+		
+		try {
+			zk.create(dbNodePath, new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			
+			zk.create(dbNodePath + "/driver", driver.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			zk.create(dbNodePath + "/jdbcUrl", jdbcUrl.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@PUT
@@ -79,11 +96,27 @@ public class DbResource {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public void updateDB(@PathParam("name") String name, @FormParam("driver") String driver, @FormParam("jdbcUrl") String jdbcUrl) {
 		System.out.printf("Update DB: " +name);
+		ZooKeeper zk = getZk();
+		String dbNodePath = "/dal/das/configure/db" + "/" + name;
+		
+		try {
+			zk.setData(dbNodePath + "/driver", driver.getBytes(), -1);
+			zk.setData(dbNodePath + "/jdbcUrl", jdbcUrl.getBytes(), -1);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@DELETE
 	@Path("{name}")
 	public void deleteDb(@PathParam("name") String name) {
 		System.out.printf("Delete DB: " +name);
+		ZooKeeper zk = getZk();
+		String dbNodePath = "/dal/das/configure/db" + "/" + name;
+		try {
+			zk.delete(dbNodePath, -1);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

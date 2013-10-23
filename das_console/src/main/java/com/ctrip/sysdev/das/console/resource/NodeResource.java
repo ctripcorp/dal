@@ -15,10 +15,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.glassfish.jersey.server.JSONP;
 
@@ -28,7 +29,7 @@ import com.ctrip.sysdev.das.console.domain.NodeSetting;
 @Resource
 @Path("configure/node")
 @Singleton
-public class NodeResource {
+public class NodeResource extends DalBaseResource {
 	@Context
 	private ServletContext sContext;
 
@@ -37,7 +38,7 @@ public class NodeResource {
 	@Produces("application/x-javascript")
 	public List<Node> getNode() {
 		List<Node> nodeList = new ArrayList<Node>();
-		ZooKeeper zk = (ZooKeeper) sContext.getAttribute("com.ctrip.sysdev.das.console.zk");
+		ZooKeeper zk = getZk();
 		try {
 			List<String> nodeNameList = zk.getChildren("/dal/das/configure/node", false);
 			for (String nodeName : nodeNameList) {
@@ -61,11 +62,17 @@ public class NodeResource {
 	@Path("{name}")
 	@JSONP(queryParam = "jsonpCallback")
 	@Produces("application/x-javascript")
-	public NodeSetting getNodeSetting() {
+	public NodeSetting getNodeSetting(@PathParam("name") String name) {
 		NodeSetting setting = new NodeSetting();
-		setting.setDirectory("direc");
-		setting.setMaxHeapSize("123");
-		setting.setStartingHeapSize("25");
+		ZooKeeper zk = getZk();
+		try {
+			String nodePath = "/dal/das/configure/node" + "/" + name;
+			setting.setDirectory(new String(zk.getData(nodePath+ "/directory", false, null)));
+			setting.setMaxHeapSize(new String(zk.getData(nodePath+ "/maxHeapSize", false, null)));
+			setting.setStartingHeapSize(new String(zk.getData(nodePath+ "/startingHeapSize", false, null)));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return setting;
 	}
 
@@ -75,7 +82,20 @@ public class NodeResource {
 			@FormParam("directory") String directory,
 			@FormParam("maxHeapSize") String maxHeapSize,
 			@FormParam("startingHeapSize") String startingHeapSize) {
-		System.out.printf("add node: " + name);
+		System.out.printf("Add node: " + name);
+		ZooKeeper zk = getZk();
+		String nodePath = "/dal/das/configure/node" + "/" + name;
+		
+		try {
+			zk.create(nodePath, new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			
+			zk.create(nodePath + "/directory", directory.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			zk.create(nodePath + "/maxHeapSize", maxHeapSize.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			zk.create(nodePath + "/startingHeapSize", startingHeapSize.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@PUT
@@ -86,11 +106,29 @@ public class NodeResource {
 			@FormParam("maxHeapSize") String maxHeapSize,
 			@FormParam("startingHeapSize") String startingHeapSize) {
 		System.out.printf("Update node: " + name);
+		ZooKeeper zk = getZk();
+		String nodePath = "/dal/das/configure/node" + "/" + name;
+		
+		try {
+			zk.setData(nodePath + "/directory", directory.getBytes(), -1);
+			zk.setData(nodePath + "/maxHeapSize", maxHeapSize.getBytes(), -1);
+			zk.setData(nodePath + "/startingHeapSize", startingHeapSize.getBytes(), -1);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@DELETE
 	@Path("{name}")
 	public void deleteNode(@PathParam("name") String name) {
 		System.out.printf("Delete node: " + name);
+		ZooKeeper zk = getZk();
+		String nodePath = "/dal/das/configure/node" + "/" + name;
+		try {
+			zk.delete(nodePath, -1);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

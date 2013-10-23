@@ -19,7 +19,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.ZooDefs.Ids;
 import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.Port;
@@ -27,7 +29,7 @@ import com.ctrip.sysdev.das.console.domain.Port;
 @Resource
 @Path("configure/port")
 @Singleton
-public class PortResource {
+public class PortResource extends DalBaseResource {
 	@Context
 	private ServletContext sContext;
 
@@ -39,7 +41,7 @@ public class PortResource {
 		Set<Integer> ports = new HashSet<Integer>();
 		port.setPorts(ports);
 
-		ZooKeeper zk = (ZooKeeper)sContext.getAttribute("com.ctrip.sysdev.das.console.zk");
+		ZooKeeper zk = getZk();
 		try {
 			List<String> portNumberList = zk.getChildren("/dal/das/configure/port", false);
 			for(String number: portNumberList)
@@ -54,11 +56,27 @@ public class PortResource {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public void addDb(@FormParam("number") String number) {
 		System.out.printf("Add port: " +number);
+		ZooKeeper zk = getZk();
+		String portPath = "/dal/das/configure/port" + "/" + number;
+		
+		try {
+			zk.create(portPath, number.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@DELETE
 	@Path("{name}")
 	public void deleteDb(@PathParam("number") String number) {
 		System.out.printf("Delete port: " +number);
+		ZooKeeper zk = getZk();
+		String portPath = "/dal/das/configure/port" + "/" + number;
+		
+		try {
+			zk.delete(portPath, -1);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

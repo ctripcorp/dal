@@ -8,13 +8,16 @@ import java.util.Set;
 import javax.annotation.Resource;
 import javax.inject.Singleton;
 import javax.servlet.ServletContext;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.zookeeper.ZooKeeper;
+import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.Port;
 import com.ctrip.sysdev.das.console.domain.Worker;
@@ -22,15 +25,16 @@ import com.ctrip.sysdev.das.console.domain.Worker;
 @Resource
 @Path("instance/worker")
 @Singleton
-public class WorkerResource {
+public class WorkerResource extends DalBaseResource {
 	@Context
 	private ServletContext sContext;
 	
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	@JSONP(queryParam = "jsonpCallback")
+	@Produces("application/x-javascript")
 	public List<Worker> getWorkerInstance() {
 		List<Worker> workerList = new ArrayList<Worker>();
-		ZooKeeper zk = (ZooKeeper)sContext.getAttribute("com.ctrip.sysdev.das.console.zk");
+		ZooKeeper zk = getZk();
 		try {
 			List<String> workerNameList = zk.getChildren("/dal/das/instance/worker", false);
 			for(String workerName: workerNameList) {
@@ -51,4 +55,16 @@ public class WorkerResource {
 		return workerList;
 	}
 
+	@DELETE
+	@Path("{name}/{number}")
+	public void deleteNode(@PathParam("name") String name, @PathParam("number") String number) {
+		System.out.printf("Delete node: " + name);
+		ZooKeeper zk = getZk();
+		String workerPath = "/dal/das/instance/worker" + "/" + name + "/" + number;
+		try {
+			zk.delete(workerPath, -1);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

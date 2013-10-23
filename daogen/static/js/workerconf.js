@@ -4,16 +4,6 @@ jQuery(document).ready(function () {
 
     App.init(); // initlayout and core plugins
 
-    // Tasks.initDashboardWidget();
-
-    jQuery('body').on('click', '.portlet > .portlet-title > .tools > .icon-collapse, .portlet .portlet-title > .tools > .icon-collapse-top', function (e) {
-        // e.preventDefault();
-        if (jQuery(this).hasClass("icon-collapse")) {
-            jQuery(this).removeClass("icon-collapse").addClass("icon-collapse-top");
-        } else {
-            jQuery(this).removeClass("icon-collapse-top").addClass("icon-collapse");
-        }
-    });
 
     $("#configCenter").toggleClass('open');
 
@@ -65,12 +55,14 @@ jQuery(document).ready(function () {
             $.each(data, function (index, value) {
                 $('#configs').dataTable().fnAddData( 
                     [value.ip, 
-                    "<button type='button' class='btn btn-success modify'>修改</button>&nbsp;<button type='button' class='btn btn-danger delete'>删除</button>"]
+                    "<button type='button' class='btn btn-danger delete'>删除</button>"]
                     );
             });            
         }).fail(function(data, status, event){
 
         });
     });
+
+    $(".icon-refresh").trigger('click');
 
 });

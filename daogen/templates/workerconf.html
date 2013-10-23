@@ -150,14 +150,14 @@
                            <li class="sidebar active" sidename="project">
                               <a href="/config_center/worker">
                               <i class="icon-male"></i> 
-                              <span class="title">Worker配置</span>
+                              <span class="title">Worker状态</span>
                               <span class="selected"></span>
                               </a>
                            </li>
                            <li class="sidebar" sidename="project">
                               <a href="/config_center/controller">
                               <i class="icon-female"></i> 
-                              <span class="title">Controller配置</span>
+                              <span class="title">Controller状态</span>
                               <span class="selected"></span>
                               </a>
                            </li>
@@ -190,47 +190,14 @@
                      <!--  The main container field -->
                      <div id="dashboard">
                         <br>
-                        <div class="row-fluid">
-                           <div class="span12">
-                              <!-- BEGIN PORTLET-->
-                              <div class="portlet box blue tasks-widget">
-                                 <div class="portlet-title line">
-                                    <div class="caption"><i class="icon-reorder"></i>添加Worker</div>
-                                    <div class="tools"> 
-                                       <a href="javascript:;" class="icon-collapse collapse"></a>
-                                    </div>
-                                 </div>
-                                 <div class="portlet-body">
-                                    <!--BEGIN TABS-->
-                                    <div class="row-fluid">
-                                       <div class="span4">
-                                          <div class="control-group">
-                                             <label class="control-label">Worker地址</label>
-                                             <input id="worker_ip" class="span10" type="text" value="172.16.155.151">
-                                          </div>
-                                       </div>
-                                    </div>
-                                    <div class="row-fluid">
-                                       <div class="offset5 span4">
-                                          <input id="save_worker" type="button" value="Save Worker">
-                                       </div>
-                                    </div>
-                                    <!--END TABS-->
-                                 </div>
-                              </div>
-                              <!-- END PORTLET-->
-                           </div>
-                        </div>
-                        <!--End Feeds-->
 
                         <!-- <div class="clearfix"></div> -->
                         <div class="row-fluid">
                            <div class="span12">
                               <div class="portlet box green tasks-widget">
                                  <div class="portlet-title">
-                                    <div class="caption"><i class="icon-check"></i>Worker信息</div>
+                                    <div class="caption"><i class="icon-check"></i>在线的Worker</div>
                                     <div class="tools">
-                                       <a href="javascript:;" class="icon-collapse collapse"></a>
                                        <a id="reload_worker" href="javascript:;" class="icon-refresh"></a>
                                     </div>
                                  </div>

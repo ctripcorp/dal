@@ -80,4 +80,6 @@ jQuery(document).ready(function () {
         });
     });
 
+    $(".icon-refresh").trigger('click');
+
 });

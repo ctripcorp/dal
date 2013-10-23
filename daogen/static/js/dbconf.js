@@ -1,4 +1,3 @@
-var projects_array = {};
 
 jQuery(document).ready(function () {
 
@@ -76,5 +75,7 @@ jQuery(document).ready(function () {
 
         });
     });
+
+    $(".icon-refresh").trigger('click');
 
 });

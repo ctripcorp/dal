@@ -65,12 +65,49 @@ jQuery(document).ready(function () {
             $.each(data.ports, function (index, value) {
                 $('#configs').dataTable().fnAddData( 
                     [value, 
-                    "<button type='button' class='btn btn-success modify'>修改</button>&nbsp;<button type='button' class='btn btn-danger delete'>删除</button>"]
+                    sprintf("<button type='button' class='btn btn-danger delete' del_value='%s'>删除</button>",
+                        value)]
                     );
-            });            
+            }); 
+            $(".delete").click(function(){
+                var number = $(this).attr('del_value');
+                $.ajax({
+                    type: 'DELETE',
+                    url: 'http://localhost:8080/console/dal/das/configure/port',
+                    crossDomain: true,
+                    data: {"number": number},
+                    //dataType: 'json',
+                    success: function(responseData, textStatus, jqXHR) {
+                        console.log("success");
+                    },
+                    error: function (responseData, textStatus, errorThrown) {
+                        console.log("fail");
+                    }
+                });
+            });           
         }).fail(function(data, status, event){
 
         });
     });
+
+    $("#save_port").click(function(){
+        $.ajax({
+            type: 'POST',
+            url: 'http://localhost:8080/console/dal/das/configure/port',
+            crossDomain: true,
+            data: {"number": $("#port").val()},
+            //dataType: 'json',
+            success: function(responseData, textStatus, jqXHR) {
+                console.log("success");
+            },
+            error: function (responseData, textStatus, errorThrown) {
+                console.log("fail");
+            }
+        });
+    });
+
+
+
+    $(".icon-refresh").trigger('click');
 
 });

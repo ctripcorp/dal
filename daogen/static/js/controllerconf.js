@@ -4,16 +4,6 @@ jQuery(document).ready(function () {
 
     App.init(); // initlayout and core plugins
 
-    // Tasks.initDashboardWidget();
-
-    jQuery('body').on('click', '.portlet > .portlet-title > .tools > .icon-collapse, .portlet .portlet-title > .tools > .icon-collapse-top', function (e) {
-        // e.preventDefault();
-        if (jQuery(this).hasClass("icon-collapse")) {
-            jQuery(this).removeClass("icon-collapse").addClass("icon-collapse-top");
-        } else {
-            jQuery(this).removeClass("icon-collapse-top").addClass("icon-collapse");
-        }
-    });
 
     $("#configCenter").toggleClass('open');
 
@@ -50,21 +40,29 @@ jQuery(document).ready(function () {
         }]
     });
 
-    $('#reload_db').click(function () {
+    $('#reload_ctrl').click(function () {
         // $.get("http://localhost:8080/console/dal/das/configure/db", function (data) {
         //     //data = JSON.parse(data);
         //     console.log(data);
         // });
         $.ajax({
             type: 'GET',
-            url: "http://localhost:8080/console/dal/das/configure/db",
+            url: "http://localhost:8080/console/dal/das/instance/controller",
             dataType: "jsonp",
             crossDomain: true,
-        }).done(function(){
-            console.log(arguments.length);
-        }).fail(function(error){
-            console.log(arguments.length);
+            jsonp: "jsonpCallback",
+        }).done(function(data, status, event){
+            $.each(data.ips, function (index, value) {
+                $('#configs').dataTable().fnAddData( 
+                    [value, 
+                    "<button type='button' class='btn btn-danger delete'>删除</button>"]
+                    );
+            });            
+        }).fail(function(data, status, event){
+
         });
     });
+
+    $(".icon-refresh").trigger('click');
 
 });

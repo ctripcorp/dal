@@ -50,20 +50,26 @@ jQuery(document).ready(function () {
         }]
     });
 
-    $('#reload_db').click(function () {
+    $('#reload_worker').click(function () {
         // $.get("http://localhost:8080/console/dal/das/configure/db", function (data) {
         //     //data = JSON.parse(data);
         //     console.log(data);
         // });
-        $.ajax({
+       $.ajax({
             type: 'GET',
-            url: "http://localhost:8080/console/dal/das/configure/db",
+            url: "http://localhost:8080/console/dal/das/instance/worker",
             dataType: "jsonp",
             crossDomain: true,
-        }).done(function(){
-            console.log(arguments.length);
-        }).fail(function(error){
-            console.log(arguments.length);
+            jsonp: "jsonpCallback",
+        }).done(function(data, status, event){
+            $.each(data, function (index, value) {
+                $('#configs').dataTable().fnAddData( 
+                    [value.ip, 
+                    "<button type='button' class='btn btn-success modify'>修改</button>&nbsp;<button type='button' class='btn btn-danger delete'>删除</button>"]
+                    );
+            });            
+        }).fail(function(data, status, event){
+
         });
     });
 

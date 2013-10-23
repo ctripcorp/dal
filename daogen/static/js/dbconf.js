@@ -64,10 +64,16 @@ jQuery(document).ready(function () {
             url: "http://localhost:8080/console/dal/das/configure/db",
             dataType: "jsonp",
             crossDomain: true,
-        }).done(function(){
-            console.log(arguments.length);
-        }).fail(function(error){
-            console.log(arguments.length);
+            jsonp: "jsonpCallback",
+        }).done(function(data, status, event){
+            $.each(data, function (index, value) {
+                $('#configs').dataTable().fnAddData( 
+                    [value.name, value.setting.driver, value.setting.jdbcUrl, 
+                    "<button type='button' class='btn btn-success modify'>修改</button>&nbsp;<button type='button' class='btn btn-danger delete'>删除</button>"]
+                    );
+            });            
+        }).fail(function(data, status, event){
+
         });
     });
 

@@ -25,6 +25,7 @@ import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.DB;
 import com.ctrip.sysdev.das.console.domain.DbSetting;
+import com.ctrip.sysdev.das.console.domain.Status;
 
 @Resource
 @Path("configure/db")
@@ -76,7 +77,7 @@ public class DbResource extends DalBaseResource {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void addDb(@FormParam("name") String name, @FormParam("driver") String driver, @FormParam("jdbcUrl") String jdbcUrl) {
+	public Status addDb(@FormParam("name") String name, @FormParam("driver") String driver, @FormParam("jdbcUrl") String jdbcUrl) {
 		System.out.printf("Add DB: " +name);
 		ZooKeeper zk = getZk();
 		String dbNodePath = "/dal/das/configure/db" + "/" + name;
@@ -86,8 +87,10 @@ public class DbResource extends DalBaseResource {
 			
 			zk.create(dbNodePath + "/driver", driver.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 			zk.create(dbNodePath + "/jdbcUrl", jdbcUrl.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return Status.ERROR;
 		}
 	}
 	

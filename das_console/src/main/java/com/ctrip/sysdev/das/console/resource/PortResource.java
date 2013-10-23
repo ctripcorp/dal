@@ -20,11 +20,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.ZooDefs.Ids;
+import org.apache.zookeeper.ZooKeeper;
 import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.Port;
+import com.ctrip.sysdev.das.console.domain.Status;
 
 @Resource
 @Path("configure/port")
@@ -54,21 +55,24 @@ public class PortResource extends DalBaseResource {
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void addDb(@FormParam("number") String number) {
+	@Produces({ "application/json" })
+	public Status addDb(@FormParam("number") String number) {
 		System.out.printf("Add port: " +number);
 		ZooKeeper zk = getZk();
 		String portPath = "/dal/das/configure/port" + "/" + number;
 		
 		try {
 			zk.create(portPath, number.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return Status.ERROR;
 		}
 		
 	}
 	
 	@DELETE
-	@Path("{name}")
+	@Path("{number}")
 	public void deleteDb(@PathParam("number") String number) {
 		System.out.printf("Delete port: " +number);
 		ZooKeeper zk = getZk();

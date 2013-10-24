@@ -51,17 +51,13 @@ jQuery(document).ready(function () {
     });
 
     $('#reload_port').click(function () {
-        // $.get("http://localhost:8080/console/dal/das/configure/db", function (data) {
-        //     //data = JSON.parse(data);
-        //     console.log(data);
-        // });
-         $.ajax({
-            type: 'GET',
-            url: "http://localhost:8080/console/dal/das/configure/port",
-            dataType: "jsonp",
-            crossDomain: true,
-            jsonp: "jsonpCallback",
-        }).done(function(data, status, event){
+
+        if($('#main_area').children().length > 0){
+            $('#configs').dataTable().fnClearTable();    
+        }
+
+        $.get("/console/dal/das/configure/port", function (data) {
+            //data = JSON.parse(data);
             $.each(data.ports, function (index, value) {
                 $('#configs').dataTable().fnAddData( 
                     [value, 
@@ -73,9 +69,7 @@ jQuery(document).ready(function () {
                 var number = $(this).attr('del_value');
                 $.ajax({
                     type: 'DELETE',
-                    url: 'http://localhost:8080/console/dal/das/configure/port',
-                    crossDomain: true,
-                    data: {"number": number},
+                    url: sprintf('/console/dal/das/configure/port/%s', number),
                     //dataType: 'json',
                     success: function(responseData, textStatus, jqXHR) {
                         console.log("success");
@@ -84,30 +78,18 @@ jQuery(document).ready(function () {
                         console.log("fail");
                     }
                 });
-            });           
-        }).fail(function(data, status, event){
-
+            });       
         });
     });
 
     $("#save_port").click(function(){
-        $.ajax({
-            type: 'POST',
-            url: 'http://localhost:8080/console/dal/das/configure/port',
-            crossDomain: true,
-            dataType : 'jsonp',
-            contentType : 'application/json; charset=UTF-8',
-            data: {"number": $("#port").val()},
-            //dataType: 'json',
-            success: function(responseData, textStatus, jqXHR) {
-                console.log("success");
-            },
-            error: function (responseData, textStatus, errorThrown) {
-                console.log("fail");
-            }
+        $.post("/console/dal/das/configure/port",
+            {"number": $("#port").val()}, function (data, status, event) {
+                if(data.code == 'OK'){
+                    $(".icon-refresh").trigger('click');
+                }
         });
     });
-
 
 
     $(".icon-refresh").trigger('click');

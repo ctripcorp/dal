@@ -100,7 +100,8 @@ public class NodeResource extends DalBaseResource {
 	@PUT
 	@Path("{name}")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void updateNode(@PathParam("name") String name,
+	@Produces(MediaType.APPLICATION_JSON)
+	public Status updateNode(@PathParam("name") String name,
 			@FormParam("directory") String directory,
 			@FormParam("maxHeapSize") String maxHeapSize,
 			@FormParam("startingHeapSize") String startingHeapSize) {
@@ -112,9 +113,10 @@ public class NodeResource extends DalBaseResource {
 			zk.setData(nodePath + "/directory", directory.getBytes(), -1);
 			zk.setData(nodePath + "/maxHeapSize", maxHeapSize.getBytes(), -1);
 			zk.setData(nodePath + "/startingHeapSize", startingHeapSize.getBytes(), -1);
-			
+			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return Status.ERROR;
 		}
 	}
 
@@ -123,10 +125,9 @@ public class NodeResource extends DalBaseResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Status deleteNode(@PathParam("name") String name) {
 		System.out.printf("Delete node: " + name);
-		ZooKeeper zk = getZk();
 		String nodePath = "/dal/das/configure/node" + "/" + name;
 		try {
-			zk.delete(nodePath, -1);
+			deleteNodeNested(nodePath);
 			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();

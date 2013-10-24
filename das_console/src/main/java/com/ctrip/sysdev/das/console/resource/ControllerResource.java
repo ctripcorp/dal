@@ -18,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.zookeeper.ZooKeeper;
 
 import com.ctrip.sysdev.das.console.domain.Controller;
+import com.ctrip.sysdev.das.console.domain.Status;
 
 @Resource
 @Path("instance/controller")
@@ -46,14 +47,17 @@ public class ControllerResource extends DalBaseResource {
 
 	@DELETE
 	@Path("{name}")
-	public void deleteNode(@PathParam("name") String name) {
+	@Produces(MediaType.APPLICATION_JSON)
+	public Status deleteNode(@PathParam("name") String name) {
 		System.out.printf("Delete node: " + name);
 		ZooKeeper zk = getZk();
 		String controllerPath = "/dal/das/instance/controller" + "/" + name;
 		try {
 			zk.delete(controllerPath, -1);
+			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return Status.ERROR;
 		}
 	}
 }

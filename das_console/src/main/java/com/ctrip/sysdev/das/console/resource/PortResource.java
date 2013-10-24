@@ -71,15 +71,18 @@ public class PortResource extends DalBaseResource {
 	
 	@DELETE
 	@Path("{number}")
-	public void deleteDb(@PathParam("number") String number) {
+	@Produces(MediaType.APPLICATION_JSON)
+	public Status deleteDb(@PathParam("number") String number) {
 		System.out.printf("Delete port: " +number);
 		ZooKeeper zk = getZk();
 		String portPath = "/dal/das/configure/port" + "/" + number;
 		
 		try {
 			zk.delete(portPath, -1);
+			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return Status.ERROR;
 		}
 	}
 }

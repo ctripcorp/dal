@@ -21,7 +21,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
-import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.Node;
 import com.ctrip.sysdev.das.console.domain.NodeSetting;
@@ -121,14 +120,17 @@ public class NodeResource extends DalBaseResource {
 
 	@DELETE
 	@Path("{name}")
-	public void deleteNode(@PathParam("name") String name) {
+	@Produces(MediaType.APPLICATION_JSON)
+	public Status deleteNode(@PathParam("name") String name) {
 		System.out.printf("Delete node: " + name);
 		ZooKeeper zk = getZk();
 		String nodePath = "/dal/das/configure/node" + "/" + name;
 		try {
 			zk.delete(nodePath, -1);
+			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return Status.ERROR;
 		}
 	}
 }

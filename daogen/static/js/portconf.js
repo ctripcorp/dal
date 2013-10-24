@@ -95,6 +95,8 @@ jQuery(document).ready(function () {
             type: 'POST',
             url: 'http://localhost:8080/console/dal/das/configure/port',
             crossDomain: true,
+            dataType : 'jsonp',
+            contentType : 'application/json; charset=UTF-8',
             data: {"number": $("#port").val()},
             //dataType: 'json',
             success: function(responseData, textStatus, jqXHR) {

@@ -87,7 +87,7 @@ jQuery(document).ready(function () {
         if($.data(document.body, "modify") == $("#machine_ip").val()){
             $.ajax({
                 type: 'PUT',
-                url: "/console/dal/das/configure/node",
+                url: sprintf("/console/dal/das/configure/node/%s", postData["name"]),
                 //dataType: 'json',
                 data: postData,
                 success: function(data, status, event) {

@@ -83,7 +83,7 @@ jQuery(document).ready(function () {
         if($.data(document.body, "modify") == $("#physic_db").val()){
             $.ajax({
                 type: 'PUT',
-                url: "/console/dal/das/configure/db",
+                url: sprintf("/console/dal/das/configure/db/%s", postData["name"]),
                 //dataType: 'json',
                 data: postData,
                 success: function(data, status, event) {

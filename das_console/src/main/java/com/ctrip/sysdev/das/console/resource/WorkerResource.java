@@ -63,7 +63,7 @@ public class WorkerResource extends DalBaseResource {
 		ZooKeeper zk = getZk();
 		String workerPath = "/dal/das/instance/worker" + "/" + name + "/" + number;
 		try {
-			zk.delete(workerPath, -1);
+			deleteNodeNested(workerPath);
 			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();

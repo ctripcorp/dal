@@ -94,7 +94,8 @@ public class DbResource extends DalBaseResource {
 	@PUT
 	@Path("{name}")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void updateDB(@PathParam("name") String name, @FormParam("driver") String driver, @FormParam("jdbcUrl") String jdbcUrl) {
+	@Produces(MediaType.APPLICATION_JSON)
+	public Status updateDB(@PathParam("name") String name, @FormParam("driver") String driver, @FormParam("jdbcUrl") String jdbcUrl) {
 		System.out.printf("Update DB: " +name);
 		ZooKeeper zk = getZk();
 		String dbNodePath = "/dal/das/configure/db" + "/" + name;
@@ -102,8 +103,10 @@ public class DbResource extends DalBaseResource {
 		try {
 			zk.setData(dbNodePath + "/driver", driver.getBytes(), -1);
 			zk.setData(dbNodePath + "/jdbcUrl", jdbcUrl.getBytes(), -1);
+			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return Status.ERROR;
 		}
 	}
 	
@@ -112,10 +115,9 @@ public class DbResource extends DalBaseResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Status deleteDb(@PathParam("name") String name) {
 		System.out.printf("Delete DB: " +name);
-		ZooKeeper zk = getZk();
 		String dbNodePath = "/dal/das/configure/db" + "/" + name;
 		try {
-			zk.delete(dbNodePath, -1);
+			deleteNodeNested(dbNodePath);
 			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();

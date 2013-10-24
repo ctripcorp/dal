@@ -14,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import com.ctrip.sysdev.das.console.domain.Status;
 import com.ctrip.sysdev.das.console.domain.TimeCost;
 import com.ctrip.sysdev.das.console.domain.TimeCostIdList;
 
@@ -42,11 +43,13 @@ public class DalMonitorResource extends DalBaseResource {
 	}
 
 	@POST
-	public void addTimeCost(@FormParam("id") String id, @FormParam("timeCost") String timeCost) {
+	@Produces(MediaType.APPLICATION_JSON)
+	public Status addTimeCost(@FormParam("id") String id, @FormParam("timeCost") String timeCost) {
 		// TimeCost looks like: name0:value0;name1:value1
 		TimeCost tc = new TimeCost(id, timeCost);
 		TimeCost oldTc = store.get(id);
 		tc.merge(oldTc);
 		store.put(id, tc);
+		return Status.OK;
 	}
 }

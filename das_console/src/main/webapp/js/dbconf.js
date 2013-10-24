@@ -54,28 +54,80 @@ jQuery(document).ready(function () {
     });
 
     $('#reload_db').click(function () {
-        // $.get("http://localhost:8080/console/dal/das/configure/db", function (data) {
-        //     //data = JSON.parse(data);
-        //     console.log(data);
-        // });
-        $.ajax({
-            type: 'GET',
-            url: "http://localhost:8080/console/dal/das/configure/db",
-            dataType: "jsonp",
-            crossDomain: true,
-            jsonp: "jsonpCallback",
-        }).done(function(data, status, event){
+         if($('#main_area').children().length > 0){
+            $('#configs').dataTable().fnClearTable();    
+        }
+
+        $.get("/console/dal/das/configure/db", function (data) {
+            //data = JSON.parse(data);
             $.each(data, function (index, value) {
                 $('#configs').dataTable().fnAddData( 
-                    [value.name, value.setting.driver, value.setting.jdbcUrl, 
-                    "<button type='button' class='btn btn-success modify'>修改</button>&nbsp;<button type='button' class='btn btn-danger delete'>删除</button>"]
+                    [value.name, value.setting.driver, value.setting.jdbcUrl,
+                    sprintf("<button type='button' class='btn btn-success modify' onclick='mod_db(this);' mod_id='%s'>修改</button>&nbsp;<button type='button' class='btn btn-danger delete' onclick='del_db(\"%s\");'>删除</button>",
+                        value.name, value.name)]
                     );
-            });            
-        }).fail(function(data, status, event){
-
+                $.data(document.body, value.name, value);
+            });    
         });
+
+    });
+
+     $("#save_db").click(function(){
+
+        var postData = {
+                "name": $("#physic_db").val(),
+                "driver": $("#driver_class").val(),
+                "jdbcUrl": $("#connect_str").val()
+            };
+
+        if($.data(document.body, "modify") == $("#physic_db").val()){
+            $.ajax({
+                type: 'PUT',
+                url: "/console/dal/das/configure/db",
+                //dataType: 'json',
+                data: postData,
+                success: function(data, status, event) {
+                    if(data.code == 'OK'){
+                        $(".icon-refresh").trigger('click');
+                    }
+                },
+                error: function (data, status, event) {
+                }
+            });
+        }else{
+            $.post("/console/dal/das/configure/db",
+            postData, 
+            function (data, status, event) {
+                if(data.code == 'OK'){
+                    $(".icon-refresh").trigger('click');
+                }
+            });
+        }
     });
 
     $(".icon-refresh").trigger('click');
 
 });
+
+var del_db = function(name){
+    $.ajax({
+        type: 'DELETE',
+        url: sprintf('/console/dal/das/configure/db/%s', name),
+        //dataType: 'json',
+        success: function(data, status, event) {
+            if(data.code == 'OK'){
+                $(".icon-refresh").trigger('click');
+            }
+        },
+        error: function (data, status, event) {
+        }
+    });
+};
+
+var mod_db = function(obj){
+    var value = $.data(document.body, $(obj).attr('mod_id'));
+    $("#physic_db").val(value.name);
+    $("#driver_class").val(value.setting.driver);
+    $("#connect_str").val(value.setting.jdbcUrl);
+    $.data(document.body, "modify", value.name);
+};

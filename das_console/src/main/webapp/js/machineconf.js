@@ -1,4 +1,3 @@
-var projects_array = {};
 
 jQuery(document).ready(function () {
 
@@ -58,28 +57,95 @@ jQuery(document).ready(function () {
     });
 
     $('#reload_machine').click(function () {
-        // $.get("http://localhost:8080/console/dal/das/configure/db", function (data) {
-        //     //data = JSON.parse(data);
-        //     console.log(data);
-        // });
-        $.ajax({
-            type: 'GET',
-            url: "http://localhost:8080/console/dal/das/configure/node",
-            dataType: "jsonp",
-            crossDomain: true,
-            jsonp: "jsonpCallback",
-        }).done(function(data, status, event){
+
+        if($('#main_area').children().length > 0){
+            $('#configs').dataTable().fnClearTable();    
+        }
+
+        $.get("/console/dal/das/configure/node", function (data) {
+            //data = JSON.parse(data);
             $.each(data, function (index, value) {
                 $('#configs').dataTable().fnAddData( 
                     [value.name, value.setting.directory, value.setting.maxHeapSize, value.setting.startingHeapSize, 
-                    "<button type='button' class='btn btn-success modify'>修改</button>&nbsp;<button type='button' class='btn btn-danger delete'>删除</button>"]
+                    sprintf("<button type='button' class='btn btn-success modify' onclick='mod_machine(this);' mod_id='%s'>修改</button>&nbsp;<button type='button' class='btn btn-danger delete' onclick='del_machine(\"%s\");'>删除</button>",
+                        value.name, value.name)]
                     );
-            });            
-        }).fail(function(data, status, event){
-
+                $.data(document.body, value.name, value);
+            });    
         });
+    });
+
+    $("#save_machine").click(function(){
+
+        var postData = {
+                "name": $("#machine_ip").val(),
+                "directory": $("#workspace").val(),
+                "maxHeapSize": $("#max_heap").val(),
+                "startingHeapSize": $("#default_heap").val()
+            };
+
+        if($.data(document.body, "modify") == $("#machine_ip").val()){
+            $.ajax({
+                type: 'PUT',
+                url: "/console/dal/das/configure/node",
+                //dataType: 'json',
+                data: postData,
+                success: function(data, status, event) {
+                    if(data.code == 'OK'){
+                        $(".icon-refresh").trigger('click');
+                    }
+                },
+                error: function (data, status, event) {
+                }
+            });
+        }else{
+            $.post("/console/dal/das/configure/node",
+            postData, 
+            function (data, status, event) {
+                if(data.code == 'OK'){
+                    $(".icon-refresh").trigger('click');
+                }
+            });
+        }
     });
 
     $(".icon-refresh").trigger('click');
 
 });
+
+var del_machine = function(ip){
+    $.ajax({
+        type: 'DELETE',
+        url: sprintf('/console/dal/das/configure/node/%s', ip),
+        //dataType: 'json',
+        success: function(data, status, event) {
+            if(data.code == 'OK'){
+                $(".icon-refresh").trigger('click');
+            }
+        },
+        error: function (data, status, event) {
+        }
+    });
+};
+
+var mod_machine = function(obj){
+    var value = $.data(document.body, $(obj).attr('mod_id'));
+    $("#machine_ip").val(value.name);
+    $("#workspace").val(value.setting.directory);
+    $("#max_heap").val(value.setting.maxHeapSize);
+    $("#default_heap").val(value.setting.startingHeapSize);
+    $.data(document.body, "modify", value.name);
+    // $.ajax({
+    //     type: 'PUT',
+    //     url: '/console/dal/das/configure/node/',
+    //     data: {},
+    //     //dataType: 'json',
+    //     success: function(data, status, event) {
+    //         if(data.code == 'OK'){
+    //             $(".icon-refresh").trigger('click');
+    //         }
+    //     },
+    //     error: function (data, status, event) {
+    //     }
+    // });
+};

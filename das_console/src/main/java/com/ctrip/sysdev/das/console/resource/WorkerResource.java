@@ -46,6 +46,7 @@ public class WorkerResource extends DalBaseResource {
 				List<String> portNumberList = zk.getChildren(workerPath, false);
 				for(String number: portNumberList)
 					ports.add(new Integer(number));
+				worker.setPorts(port);
 				workerList.add(worker);
 			}				
 		} catch (Exception e) {

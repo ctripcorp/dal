@@ -41,28 +41,37 @@ jQuery(document).ready(function () {
     });
 
     $('#reload_ctrl').click(function () {
-        // $.get("http://localhost:8080/console/dal/das/configure/db", function (data) {
-        //     //data = JSON.parse(data);
-        //     console.log(data);
-        // });
-        $.ajax({
-            type: 'GET',
-            url: "http://localhost:8080/console/dal/das/instance/controller",
-            dataType: "jsonp",
-            crossDomain: true,
-            jsonp: "jsonpCallback",
-        }).done(function(data, status, event){
+       if($('#main_area').children().length > 0){
+            $('#configs').dataTable().fnClearTable();    
+        }
+
+        $.get("/console/dal/das/instance/controller", function (data) {
+            //data = JSON.parse(data);
             $.each(data.ips, function (index, value) {
                 $('#configs').dataTable().fnAddData( 
                     [value, 
-                    "<button type='button' class='btn btn-danger delete'>删除</button>"]
+                    sprintf("<button type='button' class='btn btn-danger delete' onclick='delete_ctrl(\"%s\");'>删除</button>",
+                        value)]
                     );
-            });            
-        }).fail(function(data, status, event){
-
+            });    
         });
     });
 
     $(".icon-refresh").trigger('click');
 
 });
+
+var delete_ctrl = function(ctrl){
+    $.ajax({
+        type: 'DELETE',
+        url: sprintf('/console/dal/das/instance/controller/%s', ctrl),
+        //dataType: 'json',
+        success: function(data, status, event) {
+            if(data.code == 'OK'){
+                $(".icon-refresh").trigger('click');
+            }
+        },
+        error: function (data, status, event) {
+        }
+    });
+};

@@ -1,4 +1,3 @@
-var projects_array = {};
 
 jQuery(document).ready(function () {
 
@@ -11,6 +10,8 @@ jQuery(document).ready(function () {
 
      $('#configs').dataTable({
         "aoColumns": [{
+            "bSortable": false
+        }, {
             "bSortable": false
         }, {
             "bSortable": false
@@ -41,28 +42,41 @@ jQuery(document).ready(function () {
     });
 
     $('#reload_worker').click(function () {
-        // $.get("http://localhost:8080/console/dal/das/configure/db", function (data) {
-        //     //data = JSON.parse(data);
-        //     console.log(data);
-        // });
-       $.ajax({
-            type: 'GET',
-            url: "http://localhost:8080/console/dal/das/instance/worker",
-            dataType: "jsonp",
-            crossDomain: true,
-            jsonp: "jsonpCallback",
-        }).done(function(data, status, event){
-            $.each(data, function (index, value) {
-                $('#configs').dataTable().fnAddData( 
-                    [value.ip, 
-                    "<button type='button' class='btn btn-danger delete'>删除</button>"]
-                    );
-            });            
-        }).fail(function(data, status, event){
+        if($('#main_area').children().length > 0){
+            $('#configs').dataTable().fnClearTable();    
+        }
 
+        $.get("/console/dal/das/instance/worker", function (data) {
+            //data = JSON.parse(data);
+            $.each(data, function (index, value) {
+                var ip = value.ip;
+                $.each(value.ports.ports, function(index,value){
+                    $('#configs').dataTable().fnAddData( 
+                        [ip, value, 
+                        sprintf("<button type='button' class='btn btn-danger delete' onclick='delete_worker(\"%s\", %s);'>删除</button>",
+                            ip, value)]
+                    );
+                }); 
+            });    
         });
     });
 
     $(".icon-refresh").trigger('click');
 
 });
+
+
+var delete_worker = function(ip, port){
+    $.ajax({
+        type: 'DELETE',
+        url: sprintf('/console/dal/das/instance/worker/%s/%s', ip, port),
+        //dataType: 'json',
+        success: function(data, status, event) {
+            if(data.code == 'OK'){
+                $(".icon-refresh").trigger('click');
+            }
+        },
+        error: function (data, status, event) {
+        }
+    });
+};

@@ -1,4 +1,3 @@
-var projects_array = {};
 
 jQuery(document).ready(function () {
 
@@ -50,6 +49,8 @@ jQuery(document).ready(function () {
         }]
     });
 
+
+
     $('#reload_port').click(function () {
 
         if($('#main_area').children().length > 0){
@@ -61,24 +62,10 @@ jQuery(document).ready(function () {
             $.each(data.ports, function (index, value) {
                 $('#configs').dataTable().fnAddData( 
                     [value, 
-                    sprintf("<button type='button' class='btn btn-danger delete' del_value='%s'>删除</button>",
+                    sprintf("<button type='button' class='btn btn-danger delete' onclick='delete_port(%s);'>删除</button>",
                         value)]
                     );
-            }); 
-            $(".delete").click(function(){
-                var number = $(this).attr('del_value');
-                $.ajax({
-                    type: 'DELETE',
-                    url: sprintf('/console/dal/das/configure/port/%s', number),
-                    //dataType: 'json',
-                    success: function(responseData, textStatus, jqXHR) {
-                        console.log("success");
-                    },
-                    error: function (responseData, textStatus, errorThrown) {
-                        console.log("fail");
-                    }
-                });
-            });       
+            });    
         });
     });
 
@@ -95,3 +82,18 @@ jQuery(document).ready(function () {
     $(".icon-refresh").trigger('click');
 
 });
+
+var delete_port = function(number){
+    $.ajax({
+        type: 'DELETE',
+        url: sprintf('/console/dal/das/configure/port/%s', number),
+        //dataType: 'json',
+        success: function(data, status, event) {
+            if(data.code == 'OK'){
+                $(".icon-refresh").trigger('click');
+            }
+        },
+        error: function (data, status, event) {
+        }
+    });
+};

@@ -17,7 +17,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.zookeeper.ZooKeeper;
-import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.Port;
 import com.ctrip.sysdev.das.console.domain.Worker;
@@ -30,8 +29,7 @@ public class WorkerResource extends DalBaseResource {
 	private ServletContext sContext;
 	
 	@GET
-	@JSONP(queryParam = "jsonpCallback")
-	@Produces("application/x-javascript")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Worker> getWorkerInstance() {
 		List<Worker> workerList = new ArrayList<Worker>();
 		ZooKeeper zk = getZk();

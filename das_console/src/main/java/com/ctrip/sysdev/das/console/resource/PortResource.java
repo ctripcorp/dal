@@ -22,7 +22,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
-import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.Port;
 import com.ctrip.sysdev.das.console.domain.Status;
@@ -35,8 +34,7 @@ public class PortResource extends DalBaseResource {
 	private ServletContext sContext;
 
 	@GET
-	@JSONP(queryParam = "jsonpCallback")
-	@Produces({ "application/x-javascript" })
+	@Produces(MediaType.APPLICATION_JSON)
 	public Port getPort(@QueryParam("jsonpCallback") String callback) {
 		Port port = new Port();
 		Set<Integer> ports = new HashSet<Integer>();
@@ -55,7 +53,7 @@ public class PortResource extends DalBaseResource {
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces({ "application/json" })
+	@Produces(MediaType.APPLICATION_JSON)
 	public Status addDb(@FormParam("number") String number) {
 		System.out.printf("Add port: " +number);
 		ZooKeeper zk = getZk();

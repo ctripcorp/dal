@@ -35,8 +35,7 @@ public class DbResource extends DalBaseResource {
 	private ServletContext sContext;
 	
 	@GET
-	@JSONP(queryParam = "jsonpCallback")
-	@Produces("application/x-javascript")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<DB> getDb() {
 		List<DB> dbList = new ArrayList<DB>();
 		ZooKeeper zk = getZk();
@@ -60,8 +59,7 @@ public class DbResource extends DalBaseResource {
 	
 	@GET
 	@Path("{name}")
-	@JSONP(queryParam = "jsonpCallback")
-	@Produces("application/x-javascript")
+	@Produces(MediaType.APPLICATION_JSON)
 	public DbSetting getDbSetting(@PathParam("name") String name) {
 		DbSetting setting = new DbSetting();
 		ZooKeeper zk = getZk();

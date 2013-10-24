@@ -13,9 +13,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.zookeeper.ZooKeeper;
-import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.Controller;
 
@@ -27,8 +27,7 @@ public class ControllerResource extends DalBaseResource {
 	private ServletContext sContext;
 	
 	@GET
-	@JSONP(queryParam = "jsonpCallback")
-	@Produces("application/x-javascript")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Controller getController() {
 		Controller controller = new Controller();
 		Set<String> ips = new HashSet<String>();

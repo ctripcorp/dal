@@ -35,8 +35,7 @@ public class NodeResource extends DalBaseResource {
 	private ServletContext sContext;
 
 	@GET
-	@JSONP(queryParam = "jsonpCallback")
-	@Produces("application/x-javascript")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Node> getNode() {
 		List<Node> nodeList = new ArrayList<Node>();
 		ZooKeeper zk = getZk();
@@ -61,8 +60,7 @@ public class NodeResource extends DalBaseResource {
 
 	@GET
 	@Path("{name}")
-	@JSONP(queryParam = "jsonpCallback")
-	@Produces("application/x-javascript")
+	@Produces(MediaType.APPLICATION_JSON)
 	public NodeSetting getNodeSetting(@PathParam("name") String name) {
 		NodeSetting setting = new NodeSetting();
 		ZooKeeper zk = getZk();

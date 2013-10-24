@@ -19,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.zookeeper.ZooKeeper;
 
 import com.ctrip.sysdev.das.console.domain.Port;
+import com.ctrip.sysdev.das.console.domain.Status;
 import com.ctrip.sysdev.das.console.domain.Worker;
 
 @Resource
@@ -55,14 +56,17 @@ public class WorkerResource extends DalBaseResource {
 
 	@DELETE
 	@Path("{name}/{number}")
-	public void deleteNode(@PathParam("name") String name, @PathParam("number") String number) {
+	@Produces(MediaType.APPLICATION_JSON)
+	public Status deleteNode(@PathParam("name") String name, @PathParam("number") String number) {
 		System.out.printf("Delete node: " + name);
 		ZooKeeper zk = getZk();
 		String workerPath = "/dal/das/instance/worker" + "/" + name + "/" + number;
 		try {
 			zk.delete(workerPath, -1);
+			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return Status.ERROR;
 		}
 	}
 }

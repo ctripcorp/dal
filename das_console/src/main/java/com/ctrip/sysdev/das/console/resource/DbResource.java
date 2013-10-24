@@ -21,7 +21,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
-import org.glassfish.jersey.server.JSONP;
 
 import com.ctrip.sysdev.das.console.domain.DB;
 import com.ctrip.sysdev.das.console.domain.DbSetting;
@@ -110,14 +109,17 @@ public class DbResource extends DalBaseResource {
 	
 	@DELETE
 	@Path("{name}")
-	public void deleteDb(@PathParam("name") String name) {
+	@Produces(MediaType.APPLICATION_JSON)
+	public Status deleteDb(@PathParam("name") String name) {
 		System.out.printf("Delete DB: " +name);
 		ZooKeeper zk = getZk();
 		String dbNodePath = "/dal/das/configure/db" + "/" + name;
 		try {
 			zk.delete(dbNodePath, -1);
+			return Status.OK;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return Status.ERROR;
 		}
 	}
 }

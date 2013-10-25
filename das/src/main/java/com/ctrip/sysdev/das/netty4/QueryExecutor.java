@@ -1,5 +1,7 @@
 package com.ctrip.sysdev.das.netty4;
 
+import io.netty.channel.ChannelHandlerContext;
+
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -32,11 +34,22 @@ public class QueryExecutor {
 	public static final String DURATION = "duration";
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private ResponseSerializer responseSerializer = new ResponseSerializer();
 
-	public Response execute(DruidDataSourceWrapper dataSource, RequestMessage message) {
+	private DruidDataSourceWrapper dataSource;
+	private RequestMessage message;
+	private ChannelHandlerContext ctx;
+	public QueryExecutor(DruidDataSourceWrapper dataSource, RequestMessage message, ChannelHandlerContext ctx) {
+		this.dataSource = dataSource;
+		this.message = message;
+		this.ctx = ctx;
+	}
+	
+	public Response execute() {
 		Response resp = new Response();
 		Connection conn = null;
 		PreparedStatement statement = null;
+
 
 //		addDelay();
 		
@@ -123,20 +136,25 @@ public class QueryExecutor {
 	}
 
 	private void executeQuery(Response resp, PreparedStatement statement)
-			throws SQLException {
+			throws Exception {
 		resp.setResultType(OperationType.Read);
 
 		ResultSet rs = statement.executeQuery();
-		resp.setResultSet(getFromResultSet(rs));
+		// Mark start encoding
+		resp.setEncodeResponseTime(System.currentTimeMillis());
+		getFromResultSet(rs, resp);
+//		resp.setResultSet(null);
 	}
 
 	private void executeUpdate(Response resp, PreparedStatement statement)
-			throws SQLException {
+			throws Exception {
 		resp.setResultType(OperationType.Write);
 
 		int rowCount = 0;
 		// try{
 		rowCount = statement.executeUpdate();
+		// Mark start encoding
+		resp.setEncodeResponseTime(System.currentTimeMillis());
 		// ResultSet rs = statement.executeQuery();
 		// CallableStatement cst = (CallableStatement) statement;
 		// cst.getMoreResults();
@@ -152,6 +170,7 @@ public class QueryExecutor {
 		//
 		// }
 		resp.setAffectRowCount(rowCount);
+		responseSerializer.writeRowCount(ctx, resp);
 	}
 
 	private void executeSP(Response resp, PreparedStatement statement)
@@ -198,8 +217,8 @@ public class QueryExecutor {
 	 * @return
 	 * @throws SQLException
 	 */
-	private List<List<StatementParameter>> getFromResultSet(ResultSet rs)
-			throws SQLException {
+	private void getFromResultSet(ResultSet rs, Response resp)
+			throws Exception {
 
 		ResultSetMetaData metaData = rs.getMetaData();
 
@@ -215,8 +234,8 @@ public class QueryExecutor {
 		}
 
 		List<List<StatementParameter>> results = new ArrayList<List<StatementParameter>>();
-
-		// Convert ResultSet object to a list of Parameter
+		final int bucket = 1000;
+		int rowCount = 0;
 		while (rs.next()) {
 			List<StatementParameter> result = new ArrayList<StatementParameter>();
 			for (int i = 1; i <= totalColumns; i++) {
@@ -307,9 +326,16 @@ public class QueryExecutor {
 				}
 			}
 			results.add(result);
+			// check for chunk
+			rowCount++;
+			if(rowCount == bucket) {
+				responseSerializer.write(ctx, results, false, resp);
+				results.clear();
+				rowCount = 0;
+			}
 		}
-
-		return results;
+		responseSerializer.write(ctx, results, true, resp);
+		results.clear();
 	}
 
 	private void cleanUp(Response resp, Connection conn, Statement statement,

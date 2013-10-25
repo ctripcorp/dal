@@ -37,7 +37,13 @@ namespace platform.dao.client
         {
             if (sock != null)
             {
-                sock.Disconnect(true);
+                try
+                {
+                    sock.Disconnect(true);
+                }
+                catch
+                {
+                }
                 sock = null;
             }
             sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -49,12 +55,12 @@ namespace platform.dao.client
                     //sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     sock.Connect(Consts.ServerIp, Consts.ServerPort);
                     networkStream = new NetworkStream(sock);
-                    currentRetry++;
                 }
                 catch(Exception ex)
                 {
                     logger.Error(ex.StackTrace);
                 }
+                currentRetry++;
             }
         }
 
@@ -94,13 +100,14 @@ namespace platform.dao.client
 
                     networkStream.Write(payload, 0, payload.Length);
                     success = true;
-                    currentRetry++;
+                   
                 }
                 catch (Exception ex)
                 {
                     logger.Error(ex.StackTrace);
                     Connect();
                 }
+                currentRetry++;
             }
         }
 
@@ -154,13 +161,14 @@ namespace platform.dao.client
                     //logger.Info(string.Format("Client decode response time: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
 
                     success = true;
-                    currentRetry++;
+                    
                 }
                 catch (Exception ex)
                 {
                     logger.Error(ex.StackTrace);
                     Connect();
                 }
+                currentRetry++;
             }
 
             return response;

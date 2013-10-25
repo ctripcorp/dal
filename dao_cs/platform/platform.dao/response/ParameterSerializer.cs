@@ -30,11 +30,15 @@ namespace platform.dao.response
 
         protected override List<List<IParameter>> UnpackFromCore(Unpacker unpacker)
         {
-            long arrayLength;
+            //long arrayLength;
 
-            unpacker.ReadArrayLength(out arrayLength);
+            //unpacker.ReadArrayLength(out arrayLength);
 
-            List<List<IParameter>> results = new List<List<IParameter>>((int)arrayLength);
+            //List<List<IParameter>> results = new List<List<IParameter>>((int)arrayLength);
+
+            int arrayLength = (int)unpacker.ItemsCount;
+
+            List<List<IParameter>> results = new List<List<IParameter>>(arrayLength);
 
             for (int i = 0; i < arrayLength; i++)
             {

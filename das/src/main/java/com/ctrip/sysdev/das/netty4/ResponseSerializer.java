@@ -43,14 +43,14 @@ public class ResponseSerializer {
 				.writeBytes(UUID2ByteArray.asByteArray(request.getTaskid()))
 				.writeInt(request.getMessage().getOperationType().getIntVal());
 		
-		ctx.channel().write(buffer);
+		ctx.channel().writeAndFlush(buffer);
 	}
 
 	public void writeRowCount(ChannelHandlerContext ctx, Response resp) {
 		ByteBuf buffer = ctx.alloc().buffer();
 		
 		buffer.writeInt(resp.getAffectRowCount());
-		ctx.write(buffer).addListener(writeCompleteListener);
+		ctx.writeAndFlush(buffer).addListener(writeCompleteListener);
 		
 		resp.setEncodeResponseTime(System.currentTimeMillis()
 				- resp.getEncodeResponseTime());
@@ -65,7 +65,7 @@ public class ResponseSerializer {
 		bf.writeInt(bytes.length + 1);
 		bf.writeByte(isLast? 1 : 0);
 		bf.writeBytes(bytes);
-		ChannelFuture wf = ctx.write(bytes);
+		ChannelFuture wf = ctx.writeAndFlush(bf);
 		if (!isLast)
 			return;
 

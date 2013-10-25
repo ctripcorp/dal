@@ -28,8 +28,9 @@ namespace platform.demo.DAO
             }
             catch (Exception ex)
             {
-                throw ex;
+                
             }
+            return null;
         }
 
 

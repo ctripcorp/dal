@@ -63,7 +63,8 @@ namespace platform.dao.client
         public bool Read()
         {
             //如果没有读取完成，且剩余的不足100个，则再次读取
-            if (!readFinished && ResultSet.Count - cursor < 100 && this.NetworkStream != null)
+            if (!readFinished && this.NetworkStream != null &&
+                (ResultSet == null || (ResultSet.Count - cursor < 100)))
             {
                 int blockSize = (NetworkStream.ReadByte() << 24) |
                         (NetworkStream.ReadByte() << 16) |
@@ -74,12 +75,23 @@ namespace platform.dao.client
 
                 byte[] buffer = new byte[blockSize - 1];
 
-                List<List<IParameter>> results = new List<List<IParameter>>(ResultSet.GetRange(cursor, ResultSet.Count - cursor));
+                NetworkStream.Read(buffer, 0, buffer.Length);
+
+                List<List<IParameter>> results = new List<List<IParameter>>();
+
+                if (ResultSet != null && ResultSet.Count > 0)
+                {
+                    results.AddRange(ResultSet.GetRange(cursor, ResultSet.Count - cursor));
+                }
 
                 results.AddRange(serializer.UnpackSingleObject(buffer));
 
-                ResultSet.Clear();
+                if (ResultSet != null)
+                {
+                    ResultSet.Clear();
+                }
                 ResultSet = results;
+                cursor = 0;
             }
 
             var result = cursor < ResultSet.Count;

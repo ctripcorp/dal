@@ -10,7 +10,18 @@ namespace platform.dao.log
     public class MonitorSender
     {
 
-        public static void Send()
+        private static MonitorSender instance = new MonitorSender();
+
+        private MonitorSender()
+        {
+        }
+
+        public static MonitorSender GetInstance()
+        {
+            return instance;
+        }
+
+        public void Send(string name, long milliSeconds)
         {
             HttpWebRequest httpWReq =
     (HttpWebRequest)WebRequest.Create("http://localhost:8080/console/dal/das/monitor/timeCosts");

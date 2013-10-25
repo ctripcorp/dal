@@ -3,63 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MsgPack.Serialization;
-using MsgPack;
 using platform.dao.param;
+using MsgPack;
 using System.Data;
 
 namespace platform.dao.response
 {
-    public class DefaultResponseSerializer : MessagePackSerializer<DefaultResponse>
+    public class ParameterSerializer : MessagePackSerializer<List<List<IParameter>>>
     {
 
-        public DefaultResponseSerializer()
+        public ParameterSerializer()
             : this(SerializationContext.Default) { }
 
-        public DefaultResponseSerializer(SerializationContext context)
+        public ParameterSerializer(SerializationContext context)
         {
             // If the target objects has complex (non-primitive) objects,
             // you can get serializers which can handle complex type fields.
             // And then, you can cache them to instance fields of this custom serializer.
-            context.Serializers.Register<DefaultResponse>(this);
+            context.Serializers.Register<List<List<IParameter>>>(this);
         }
 
-        protected override void PackToCore(Packer packer, DefaultResponse value)
+        protected override void PackToCore(Packer packer, List<List<IParameter>> value)
         {
 
-
         }
 
-        protected override DefaultResponse UnpackFromCore(Unpacker unpacker)
-        {
-            DefaultResponse response = new DefaultResponse();
-
-            //当前有多少元素需要反序列化
-            //long arrayLength;
-
-            //unpacker.ReadArrayLength(out arrayLength);
-
-            //int arrayLength;
-
-            //unpacker.ReadInt32(out arrayLength);
-
-            //任务ID
-            byte[] taskid;
-
-            unpacker.ReadBinary(out taskid);
-
-            response.Taskid = new Guid(taskid);
-
-            //读或是写
-            int operationType;
-
-            unpacker.ReadInt32(out operationType);
-
-            response.ResultType = (enums.OperationType)operationType;
-
-            return response;
-        }
-
-        public List<List<IParameter>> UnpackStatementParamenterCollection(Unpacker unpacker)
+        protected override List<List<IParameter>> UnpackFromCore(Unpacker unpacker)
         {
             long arrayLength;
 
@@ -85,7 +54,6 @@ namespace platform.dao.response
             }
 
             return results;
-
         }
 
         public IParameter UnpackStatementParameter(Unpacker unpacker)
@@ -139,6 +107,7 @@ namespace platform.dao.response
             };
 
         }
+
 
     }
 }

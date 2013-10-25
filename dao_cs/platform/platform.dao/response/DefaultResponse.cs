@@ -21,14 +21,14 @@ namespace platform.dao.response
 
         public OperationType ResultType { get; set; }
 
-        public int AffectRowCount { get; set; }
+        //public int AffectRowCount { get; set; }
 
-        public List<List<IParameter>> ResultSet { get; set; }
+        //public List<List<IParameter>> ResultSet { get; set; }
 
-        public long TotalTime { get; set; }
-        public long DecodeRequestTime { get; set; }
-        public long DbTime { get; set; }
-        public long EncodeResponseTime { get; set; }
+        //public long TotalTime { get; set; }
+        //public long DecodeRequestTime { get; set; }
+        //public long DbTime { get; set; }
+        //public long EncodeResponseTime { get; set; }
 
         public static DefaultResponse UnpackFromByteArray(byte[] payload)
         {

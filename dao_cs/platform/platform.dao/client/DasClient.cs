@@ -117,38 +117,41 @@ namespace platform.dao.client
             {
                 try
                 {
-                    int totalLength = (networkStream.ReadByte() << 24) |
-                        (networkStream.ReadByte() << 16) |
-                        (networkStream.ReadByte() << 8) |
-                        (networkStream.ReadByte() << 0);
 
                     int protocolVersion = (networkStream.ReadByte() << 8) |
                         (networkStream.ReadByte() << 0);
 
-                    byte[] buffer = new byte[totalLength - 2];
+                    byte[] taskidBuffer = new byte[16];
 
-                    int realCount = networkStream.Read(buffer, 0, buffer.Length);
-                    if (realCount != buffer.Length)
-                    {
-                    }
-                    watch.Reset();
-                    watch.Start();
-                    response = DefaultResponse.UnpackFromByteArray(buffer);
-                    watch.Stop();
+                    int taskidLen = networkStream.Read(taskidBuffer, 0, taskidBuffer.Length);
 
-                    logger.Info(string.Format("Server total time: {0} MilliSeconds",
-                        response.TotalTime));
+                    if (taskidLen != taskidBuffer.Length)
+                        throw new Exception();
 
-                    logger.Info(string.Format("Server decode request time: {0} MilliSeconds",
-                        response.DecodeRequestTime));
+                    int resultType = (networkStream.ReadByte() << 24) |
+                        (networkStream.ReadByte() << 16) |
+                        (networkStream.ReadByte() << 8) |
+                        (networkStream.ReadByte() << 0);
 
-                    logger.Info(string.Format("Server db time: {0} MilliSeconds",
-                        response.DbTime));
+                    response = new DefaultResponse();
 
-                    logger.Info(string.Format("Server encode response time: {0} MilliSeconds",
-                       response.EncodeResponseTime));
+                    response.Taskid = new Guid(taskidBuffer);
 
-                    logger.Info(string.Format("Client decode response time: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
+                    response.ResultType = (enums.OperationType)resultType;
+
+                    //byte[] buffer = new byte[totalLength - 2];
+
+                    //int realCount = networkStream.Read(buffer, 0, buffer.Length);
+                    //if (realCount != buffer.Length)
+                    //{
+                    //}
+                    //watch.Reset();
+                    //watch.Start();
+                    //response = DefaultResponse.UnpackFromByteArray(buffer);
+                    //watch.Stop();
+
+
+                    //logger.Info(string.Format("Client decode response time: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
 
                     success = true;
                     currentRetry++;
@@ -165,6 +168,38 @@ namespace platform.dao.client
         }
 
         /// <summary>
+        /// 从网络中读取影响的行数 
+        /// </summary>
+        /// <returns></returns>
+        private int ReadAffectRowCount()
+        {
+            int rowCount = 0;
+            bool success = false;
+            int currentRetry = 0;
+            while (!success && currentRetry < Consts.RetryTimesWhenError)
+            {
+                try
+                {
+
+                    rowCount = (networkStream.ReadByte() << 24) |
+                       (networkStream.ReadByte() << 16) |
+                       (networkStream.ReadByte() << 8) |
+                       (networkStream.ReadByte() << 0);
+
+                    success = true;
+                    currentRetry++;
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex.StackTrace);
+                    Connect();
+                }
+            }
+
+            return rowCount;
+        }
+
+        /// <summary>
         /// 将查询请求转发到DAS服务，并获取返回结果
         /// </summary>
         /// <param name="sql"></param>
@@ -174,9 +209,9 @@ namespace platform.dao.client
         public override IDataReader Fetch(string sql, params IParameter[] parameters)
         {
             //begin watch
-            Stopwatch watch = new Stopwatch();
-            watch.Reset();
-            watch.Start();
+            //Stopwatch watch = new Stopwatch();
+            //watch.Reset();
+            //watch.Start();
 
             if (null != parameters && parameters.Length > 0)
             {
@@ -223,13 +258,13 @@ namespace platform.dao.client
 
             IDataReader reader = new DasDataReader()
             {
-                ResultSet = response.ResultSet
+                NetworkStream = networkStream
             };
 
             //end watch
-            watch.Stop();
+            //watch.Stop();
 
-            logger.Info(string.Format("Total time of fetch: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
+            //logger.Info(string.Format("Total time of fetch: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
 
             return reader;
 
@@ -287,7 +322,9 @@ namespace platform.dao.client
 
             DefaultResponse response = ReadResponse();
 
-            return response.AffectRowCount;
+            int rowCount = ReadAffectRowCount();
+
+            return rowCount;
         }
 
         /// <summary>
@@ -324,7 +361,7 @@ namespace platform.dao.client
 
             IDataReader reader = new DasDataReader()
             {
-                ResultSet = response.ResultSet
+                NetworkStream = networkStream
             };
 
             return reader;
@@ -372,7 +409,9 @@ namespace platform.dao.client
 
             DefaultResponse response = ReadResponse();
 
-            return response.AffectRowCount;
+            int rowCount = ReadAffectRowCount();
+
+            return rowCount;
         }
 
     }

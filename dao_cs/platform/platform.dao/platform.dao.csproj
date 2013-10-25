@@ -64,6 +64,7 @@
     <Compile Include="log\FileLoggerAdapter.cs" />
     <Compile Include="log\LogFactory.cs" />
     <Compile Include="enums\LogLevel.cs" />
+    <Compile Include="log\MonitorSender.cs" />
     <Compile Include="orm\attribute\AutoIncrementAttribute.cs" />
     <Compile Include="orm\attribute\ColumnAttribute.cs" />
     <Compile Include="orm\attribute\NullableAttribute.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="response\DefaultResponseSerializer.cs" />
     <Compile Include="response\DefaultResponse.cs" />
     <Compile Include="response\IResponse.cs" />
+    <Compile Include="response\ParameterSerializer.cs" />
     <Compile Include="type\AbstractRawValue.cs" />
     <Compile Include="type\AbstractValue.cs" />
     <Compile Include="type\ArrayValueImpl.cs" />

@@ -1,9 +1,5 @@
 package com.ctrip.sysdev.das.netty4;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
@@ -39,51 +35,19 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 
 	private ChannelGroup allChannels;
 	private ResponseSerializer msgPackSerDe;
-	private QueryExecutor executor = new QueryExecutor();
 	private Executor timeCostSender = Executors.newSingleThreadExecutor();
 	private DruidDataSourceWrapper dataSourceWrapper;
-
-	public ByteBuf dalService(Request request) {
-		ByteBuf buf = Unpooled.buffer();
-
-		Response response = executor.execute(dataSourceWrapper,
-				request.getMessage());
-		response.setDecodeRequestTime(request.getDecodeTime());
-		response.setTaskid(request.getTaskid());
-		try {
-			byte[] msgpack_payload = msgPackSerDe.serialize(response);
-			buf.writeInt(msgpack_payload.length + 2);
-			buf.writeShort(1);
-			buf.writeBytes(msgpack_payload);
-			logTime(response);
-		} catch (Throwable e) {
-			// Need to add error message here
-			e.printStackTrace();
-		}
-
-		return buf;
-	}
-
+	
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, Request request) {
 		try {
-			logger.info("channelRead0 from {} message = '{}'", ctx.channel(),
-					request);
+			logger.info("channelRead0 from {} message = '{}'", ctx.channel(), request);
 
-			ByteBuf buf = dalService(request);
-			ChannelFuture wf = ctx.channel().writeAndFlush(buf);
-
-			// ChannelFuture wf = channel.writeAndFlush(request);// 回写返回结果
-			wf.addListener(new ChannelFutureListener() {
-				public void operationComplete(ChannelFuture future)
-						throws Exception {
-					if (!future.isSuccess()) {
-						logger.error("server write response error ");
-					} else {
-						logger.info("server write response ok ");
-					}
-				}
-			});
+			msgPackSerDe.writeResponseHeader(ctx, request);
+			Response response = new QueryExecutor(dataSourceWrapper,request.getMessage(), ctx).execute();
+			response.setDecodeRequestTime(request.getDecodeTime());
+			response.setTaskid(request.getTaskid());
+			logTime(response);
 		} catch (Throwable e) {
 			logger.warn("channelRead0", e);
 			ctx.channel().close();

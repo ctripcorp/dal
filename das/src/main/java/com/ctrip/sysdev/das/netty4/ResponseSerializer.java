@@ -53,8 +53,6 @@ public class ResponseSerializer {
 		buffer.writeInt(resp.getAffectRowCount());
 		ctx.writeAndFlush(buffer).addListener(writeCompleteListener);
 		
-		resp.setEncodeResponseTime(System.currentTimeMillis()
-				- resp.getEncodeResponseTime());
 	}
 
 	public void write(ChannelHandlerContext ctx,
@@ -70,8 +68,6 @@ public class ResponseSerializer {
 		if (!isLast)
 			return;
 
-		resp.setEncodeResponseTime(System.currentTimeMillis()
-				- resp.getEncodeResponseTime());
 		wf.addListener(writeCompleteListener);
 	}
 
@@ -138,7 +134,6 @@ public class ResponseSerializer {
 		}
 
 		byte[] bytes = out.toByteArray();
-		resp.setEncodeResponseTime(System.currentTimeMillis() - start);
 		return bytes;
 	}
 }

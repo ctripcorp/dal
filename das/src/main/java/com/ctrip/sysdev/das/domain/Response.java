@@ -1,5 +1,7 @@
 package com.ctrip.sysdev.das.domain;
 
+import io.netty.util.AttributeKey;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -9,6 +11,8 @@ import com.ctrip.sysdev.das.domain.enums.OperationType;
 
 public class Response extends Domain {
 	private static final long serialVersionUID = 3910719585739700494L;
+	public static final AttributeKey<Response> RESPONSE_KEY =
+	            new AttributeKey<Response>("RESPONSE_KEY");
 
 	private static Packer packer;
 
@@ -22,10 +26,35 @@ public class Response extends Domain {
 
 	private List<List<StatementParameter>> resultSet;
 	
-	private long totalTime;
-	private long decodeRequestTime;
-	private long dbTime;
-	private long encodeResponseTime;
+	private long decodeStart;
+	private long decodeEnd;
+	private long dbStart;
+	private long dbEnd;
+	private long encodeStart;
+	private long encodeEnd;
+	
+	public Response() {
+		decodeStart();
+	}
+	
+	public void decodeStart() {
+		decodeStart = System.currentTimeMillis();
+	}
+	public void decodeEnd() {
+		decodeEnd = System.currentTimeMillis();
+	}
+	public void dbStart() {
+		dbStart = System.currentTimeMillis();
+	}
+	public void dbEnd() {
+		dbEnd = System.currentTimeMillis();
+	}
+	public void encodeStart() {
+		encodeStart = System.currentTimeMillis();
+	}
+	public void encodeEnd() {
+		encodeEnd = System.currentTimeMillis();
+	}
 	
 	public static Packer getPacker() {
 		return packer;
@@ -80,34 +109,18 @@ public class Response extends Domain {
 	}
 
 	public long getTotalTime() {
-		return totalTime;
-	}
-
-	public void setTotalTime(long totalTime) {
-		this.totalTime = totalTime;
+		return encodeEnd - decodeStart;
 	}
 
 	public long getDecodeRequestTime() {
-		return decodeRequestTime;
-	}
-
-	public void setDecodeRequestTime(long decodeRequestTime) {
-		this.decodeRequestTime = decodeRequestTime;
+		return decodeEnd - decodeStart;
 	}
 
 	public long getDbTime() {
-		return dbTime;
-	}
-
-	public void setDbTime(long dbTime) {
-		this.dbTime = dbTime;
+		return dbEnd - dbStart;
 	}
 
 	public long getEncodeResponseTime() {
-		return encodeResponseTime;
-	}
-
-	public void setEncodeResponseTime(long encodeResponseTime) {
-		this.encodeResponseTime = encodeResponseTime;
+		return encodeEnd - encodeStart;
 	}
 }

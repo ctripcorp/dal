@@ -45,7 +45,6 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 
 			msgPackSerDe.writeResponseHeader(ctx, request);
 			Response response = new QueryExecutor(dataSourceWrapper,request.getMessage(), ctx).execute();
-			response.setDecodeRequestTime(request.getDecodeTime());
 			response.setTaskid(request.getTaskid());
 			logTime(response);
 		} catch (Throwable e) {
@@ -64,6 +63,7 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
 		logger.debug("channelRegistered {}", ctx.channel());
 		allChannels.add(ctx.channel());
+		ctx.attr(Response.RESPONSE_KEY).set(new Response());
 	}
 
 	@Override

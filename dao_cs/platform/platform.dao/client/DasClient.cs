@@ -205,13 +205,14 @@ namespace platform.dao.client
                        (networkStream.ReadByte() << 0);
 
                     success = true;
-                    currentRetry++;
+                    
                 }
                 catch (Exception ex)
                 {
                     logger.Error(ex.StackTrace);
                     Connect();
                 }
+                currentRetry++;
             }
 
             return rowCount;

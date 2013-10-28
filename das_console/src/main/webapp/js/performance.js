@@ -30,7 +30,13 @@ jQuery(document).ready(function () {
 
     $("#tasks").change(function(){
 
-        $.get("/console/dal/das/monitor/timeCosts/"+$(this).val(),function(data){
+        var selectedTask = $(this).val();
+
+        if(undefined == selectedTask || "" == selectedTask){
+            return;
+        }
+
+        $.get("/console/dal/das/monitor/timeCosts/"+selectedTask,function(data){
 
             var entries = data.entries;
 
@@ -44,6 +50,10 @@ jQuery(document).ready(function () {
             var decodeRequestTime = 0;
             var dbTime = 0;
             var encodeResponseTime = 0;
+
+            if(undefined == entries){
+                return;
+            }
 
             $.each(entries, function(index, value){
                 switch(value.stage){

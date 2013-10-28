@@ -63,7 +63,6 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
 		logger.debug("channelRegistered {}", ctx.channel());
 		allChannels.add(ctx.channel());
-		ctx.attr(Response.RESPONSE_KEY).set(new Response());
 	}
 
 	@Override

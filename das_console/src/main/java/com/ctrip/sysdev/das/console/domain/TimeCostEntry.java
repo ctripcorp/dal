@@ -2,7 +2,7 @@ package com.ctrip.sysdev.das.console.domain;
 
 public class TimeCostEntry {
 	private String stage;
-	private Integer cost;
+	private Long cost;
 
 	public TimeCostEntry() {
 	}
@@ -10,10 +10,10 @@ public class TimeCostEntry {
 	public TimeCostEntry(String segment) {
 		String[] pair = segment.split(":");
 		stage = pair[0];
-		cost = Integer.parseInt(pair[1]);
+		cost = Long.parseLong(pair[1]);
 	}
 
-	public TimeCostEntry(String stage, Integer cost) {
+	public TimeCostEntry(String stage, Long cost) {
 		this.stage = stage;
 		this.cost = cost;
 	}
@@ -26,11 +26,11 @@ public class TimeCostEntry {
 		this.stage = stage;
 	}
 
-	public Integer getCost() {
+	public Long getCost() {
 		return cost;
 	}
 
-	public void setCost(Integer cost) {
+	public void setCost(Long cost) {
 		this.cost = cost;
 	}
 

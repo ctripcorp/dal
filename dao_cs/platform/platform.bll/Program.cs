@@ -17,9 +17,35 @@ namespace platform.bll
     {
         static void Main(string[] args)
         {
-            string saveFolder = Consts.DefaultConfigFolder;
-            ConfigGenEngine engine = new ConfigGenEngine(@"E:\codes\xuntu_pto_ddxt");
-            saveFolder = engine.GenerateAllConfigs(new ConfigEnv("dev", "sh", "iis6","net4", "dev") , saveFolder);
+            //string saveFolder = Consts.DefaultConfigFolder;
+            //ConfigGenEngine engine = new ConfigGenEngine(@"E:\codes\xuntu_pto_ddxt");
+            //saveFolder = engine.GenerateAllConfigs(new ConfigEnv("dev", "sh", "iis6","net4", "dev") , saveFolder);
+
+            Guid guid = new Guid("6c14eaf0-af41-4997-9878-6fb7076e6b3c");
+
+            byte[] taskidArray = guid.ToByteArray();
+
+            int firstAndForth = taskidArray[0] + taskidArray[3];
+
+            taskidArray[0] = (byte)(firstAndForth - taskidArray[0]);
+            taskidArray[3] = (byte)(firstAndForth - taskidArray[0]);
+
+            firstAndForth = taskidArray[1] + taskidArray[2];
+
+            taskidArray[1] = (byte)(firstAndForth - taskidArray[1]);
+            taskidArray[2] = (byte)(firstAndForth - taskidArray[1]);
+
+            firstAndForth = taskidArray[4] + taskidArray[5];
+
+            taskidArray[4] = (byte)(firstAndForth - taskidArray[4]);
+            taskidArray[5] = (byte)(firstAndForth - taskidArray[4]);
+
+            firstAndForth = taskidArray[6] + taskidArray[7];
+
+            taskidArray[6] = (byte)(firstAndForth - taskidArray[6]);
+            taskidArray[7] = (byte)(firstAndForth - taskidArray[6]);
+
+            Console.Read();
 
 
             //FileInfo f = new FileInfo("E:/eclipse/workspace");

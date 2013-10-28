@@ -11,6 +11,7 @@ namespace platform.dao.log
     {
 
         private static MonitorSender instance = new MonitorSender();
+        private static readonly long utcStartTime  = new DateTime(1970, 1, 1, 0, 0, 0, 0).Ticks/ 10000;
 
         private MonitorSender()
         {
@@ -21,29 +22,38 @@ namespace platform.dao.log
             return instance;
         }
 
-        public void Send(string name, long milliSeconds)
+        public void Send(string id, string name, long milliSeconds)
         {
-            HttpWebRequest httpWReq =
-    (HttpWebRequest)WebRequest.Create("http://localhost:8080/console/dal/das/monitor/timeCosts");
-
-            ASCIIEncoding encoding = new ASCIIEncoding();
-            string postData = "username=user";
-            postData += "&password=pass";
-            byte[] data = encoding.GetBytes(postData);
-
-            httpWReq.Method = "POST";
-            httpWReq.ContentType = "application/x-www-form-urlencoded";
-            httpWReq.ContentLength = data.Length;
-            httpWReq.Proxy = null;
-
-            using (Stream stream = httpWReq.GetRequestStream())
+            try
             {
-                stream.Write(data, 0, data.Length);
+                HttpWebRequest httpWReq =
+        (HttpWebRequest)WebRequest.Create("http://localhost:8080/console/dal/das/monitor/timeCosts");
+
+                ASCIIEncoding encoding = new ASCIIEncoding();
+                string postData = string.Format("id={0}&timeCost={1}:{2}",id, name, milliSeconds-utcStartTime);
+                byte[] data = encoding.GetBytes(postData);
+
+                httpWReq.Method = "POST";
+                httpWReq.ContentType = "application/x-www-form-urlencoded";
+                httpWReq.ContentLength = data.Length;
+                httpWReq.Proxy = null;
+
+                using (Stream stream = httpWReq.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+
+                using (HttpWebResponse response = (HttpWebResponse)httpWReq.GetResponse())
+                {
+                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    {
+                        string responseString = sr.ReadToEnd();
+                    }
+                }
             }
-
-            HttpWebResponse response = (HttpWebResponse)httpWReq.GetResponse();
-
-            string responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            catch
+            {
+            }
         }
 
     }

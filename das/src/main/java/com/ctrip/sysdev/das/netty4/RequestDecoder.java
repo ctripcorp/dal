@@ -15,6 +15,7 @@ import org.msgpack.unpacker.Unpacker;
 
 import com.ctrip.sysdev.das.domain.Request;
 import com.ctrip.sysdev.das.domain.RequestMessage;
+import com.ctrip.sysdev.das.domain.Response;
 import com.ctrip.sysdev.das.domain.StatementParameter;
 import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.enums.StatementType;
@@ -52,10 +53,12 @@ public class RequestDecoder extends ByteToMessageDecoder {
 		if (request != null) {
 			out.add(request); 
 		}
+		Response resp = ctx.attr(Response.RESPONSE_KEY).get();
+		resp.decodeEnd();
 	}
 
 
-	public Request deserialize(byte[] source) throws SerDeException {
+	private Request deserialize(byte[] source) throws SerDeException {
 		Request request = new Request();
 		try {
 			MessagePack packer = new MessagePack();

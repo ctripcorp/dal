@@ -46,7 +46,7 @@ public class QueryExecutor {
 	}
 	
 	public Response execute() {
-		Response resp = new Response();
+		Response resp = ctx.attr(Response.RESPONSE_KEY).get();
 		Connection conn = null;
 		PreparedStatement statement = null;
 
@@ -60,6 +60,7 @@ public class QueryExecutor {
 
 			statement = createStatement(conn, message);
 
+			resp.dbStart();
 			if (message.getStatementType() == StatementType.StoredProcedure) {
 				executeSP(resp, statement);
 			} else {
@@ -140,10 +141,13 @@ public class QueryExecutor {
 		resp.setResultType(OperationType.Read);
 
 		ResultSet rs = statement.executeQuery();
+		resp.dbEnd();
+
 		// Mark start encoding
-		resp.setEncodeResponseTime(System.currentTimeMillis());
+		resp.encodeStart();
 		getFromResultSet(rs, resp);
 //		resp.setResultSet(null);
+		resp.encodeEnd();
 	}
 
 	private void executeUpdate(Response resp, PreparedStatement statement)
@@ -153,8 +157,9 @@ public class QueryExecutor {
 		int rowCount = 0;
 		// try{
 		rowCount = statement.executeUpdate();
+		resp.dbEnd();
+
 		// Mark start encoding
-		resp.setEncodeResponseTime(System.currentTimeMillis());
 		// ResultSet rs = statement.executeQuery();
 		// CallableStatement cst = (CallableStatement) statement;
 		// cst.getMoreResults();
@@ -170,7 +175,9 @@ public class QueryExecutor {
 		//
 		// }
 		resp.setAffectRowCount(rowCount);
+		resp.encodeStart();
 		responseSerializer.writeRowCount(ctx, resp);
+		resp.encodeEnd();
 	}
 
 	private void executeSP(Response resp, PreparedStatement statement)
@@ -181,6 +188,8 @@ public class QueryExecutor {
 		// try{
 		// rowCount = statement.executeUpdate();
 		statement.executeQuery();
+		resp.dbEnd();
+
 		// CallableStatement cst = (CallableStatement) statement;
 		// cst.getMoreResults();
 		// System.out.println(((CallableStatement) statement).getInt(1));
@@ -194,7 +203,9 @@ public class QueryExecutor {
 		// }catch(SQLException ex){
 		//
 		// }
+		resp.encodeStart();
 		resp.setAffectRowCount(rowCount);
+		resp.encodeEnd();
 	}
 
 	private void executeBatch(Response resp, PreparedStatement statement)
@@ -358,7 +369,6 @@ public class QueryExecutor {
 			}
 		}
 
-		resp.setDbTime(System.currentTimeMillis() - start);
 		logger.warn(DURATION
 				+ String.valueOf(resp.getDbTime()));
 	}

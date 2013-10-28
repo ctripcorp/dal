@@ -85,6 +85,7 @@ public class QueryExecutor {
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
+			resp.dbEnd();
 			logger.error(QUERY_EXECUTION_EXCEPTION, e);
 		} finally {
 			cleanUp(resp, conn, statement, start);
@@ -246,7 +247,7 @@ public class QueryExecutor {
 		}
 
 		List<List<StatementParameter>> results = new ArrayList<List<StatementParameter>>();
-		final int bucket = 2;
+		final int bucket = 2000;
 		int rowCount = 0;
 		while (rs.next()) {
 			List<StatementParameter> result = new ArrayList<StatementParameter>();

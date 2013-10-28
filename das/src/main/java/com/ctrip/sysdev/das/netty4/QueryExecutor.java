@@ -46,7 +46,7 @@ public class QueryExecutor {
 	}
 	
 	public Response execute() {
-		Response resp = ctx.attr(Response.RESPONSE_KEY).get();
+		Response resp = ctx.channel().attr(Response.RESPONSE_KEY).get();
 		Connection conn = null;
 		PreparedStatement statement = null;
 

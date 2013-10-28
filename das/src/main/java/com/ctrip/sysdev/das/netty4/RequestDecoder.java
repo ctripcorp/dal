@@ -26,6 +26,9 @@ public class RequestDecoder extends ByteToMessageDecoder {
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in,
 			List<Object> out) throws Exception {
+		if(ctx.channel().attr(Response.RESPONSE_KEY).get() == null)
+			ctx.channel().attr(Response.RESPONSE_KEY).set(new Response());
+
 		Request request = null; 
 
 		if (in.readableBytes() < 4) {// available byte < packe head
@@ -53,7 +56,7 @@ public class RequestDecoder extends ByteToMessageDecoder {
 		if (request != null) {
 			out.add(request); 
 		}
-		Response resp = ctx.attr(Response.RESPONSE_KEY).get();
+		Response resp = ctx.channel().attr(Response.RESPONSE_KEY).get();
 		resp.decodeEnd();
 	}
 

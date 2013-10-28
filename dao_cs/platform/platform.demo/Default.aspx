@@ -20,6 +20,12 @@
 <div class="span4"><input id="db_name" type="text" value="SysDalTest"/><input id="change_db" type="button" value="Change Database" /></div>
 </div>
 
+<div class="row">
+<div class="span4"><input id="sql" type="text" value="select * from xxx"/><input id="execute_sql" type="button" value="ExecuteSql" /><input id="count" type="text" /></div>
+</div>
+
+<hr />
+
 <div class="span4"><div class="control-group"><label class="control-label">Address</label><input id="address" type="text"/></div></div>
 <div class="span4"><div class="control-group"><label class="control-label">Name</label><input id="name" type="text"/></div></div>
 <div class="span4"><div class="control-group"><label class="control-label">Telephone</label><input id="telephone" type="text"/></div></div>

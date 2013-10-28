@@ -234,7 +234,7 @@ namespace platform.dao.client
 
             Guid taskid = System.Guid.NewGuid();
 
-            MonitorSender.GetInstance().Send(taskid.ToString(), "taskBegin", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+            //MonitorSender.GetInstance().Send(taskid.ToString(), "taskBegin", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
 
             if (null != parameters && parameters.Length > 0)
             {
@@ -281,14 +281,15 @@ namespace platform.dao.client
 
             IDataReader reader = new DasDataReader()
             {
-                NetworkStream = networkStream
+                NetworkStream = networkStream,
+                Taskid = taskid
             };
 
             //end watch
             //watch.Stop();
 
             //logger.Info(string.Format("Total time of fetch: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
-            MonitorSender.GetInstance().Send(taskid.ToString(), "taskEnd", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+            //MonitorSender.GetInstance().Send(taskid.ToString(), "taskEnd", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
             return reader;
 
         }

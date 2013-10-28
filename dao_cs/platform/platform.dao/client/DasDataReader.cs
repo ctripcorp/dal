@@ -35,6 +35,8 @@ namespace platform.dao.client
 
         public NetworkStream NetworkStream { get; set; }
 
+        public Guid Taskid { get; set; }
+
         public void Close()
         {
             this.Dispose();
@@ -110,8 +112,10 @@ namespace platform.dao.client
 
         public void Dispose()
         {
-            this.current.Clear();
-            this.ResultSet.Clear();
+            if(null != this.current)
+                this.current.Clear();
+            if(null != this.ResultSet)
+                this.ResultSet.Clear();
             this.current = null;
             this.ResultSet = null;
         }

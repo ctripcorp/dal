@@ -6,6 +6,9 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using platform.dao;
 using platform.dao.client;
+using platform.demo.DAO;
+using System.Data;
+using platform.dao.log;
 
 namespace platform.demo
 {
@@ -15,6 +18,7 @@ namespace platform.demo
         {
             string port = Request.QueryString["port"];
             string dbName = Request.QueryString["db"];
+            string sql = Request.QueryString["sql"];
             if (!string.IsNullOrEmpty(port))
             {
                 Consts.ServerPort = int.Parse(port);
@@ -35,6 +39,36 @@ namespace platform.demo
                 Response.ContentType = "application/json; charset=utf-8";
                 Response.Write(jsonData);
                 Response.End();
+            }
+            if (!string.IsNullOrEmpty(sql))
+            {
+                PersonDAO person = new PersonDAO();
+
+                List<object> results = new List<object>();
+
+                int count = 0;
+
+                using (IDataReader reader = person.ExecuteSql(sql))
+                {
+                    DasDataReader ddr = reader as DasDataReader;
+
+                    MonitorSender.GetInstance().Send(ddr.Taskid.ToString(), "taskBegin", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+
+                    while (reader.Read())
+                    {
+                        count++;
+                    }
+
+                    MonitorSender.GetInstance().Send(ddr.Taskid.ToString(), "taskEnd", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+                }
+
+
+                string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(new { Count = count });
+                Response.Clear();
+                Response.ContentType = "application/json; charset=utf-8";
+                Response.Write(jsonData);
+                Response.End();
+
             }
         }
     }

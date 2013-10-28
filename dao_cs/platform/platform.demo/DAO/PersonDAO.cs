@@ -33,6 +33,23 @@ namespace platform.demo.DAO
             return null;
         }
 
+        public IDataReader ExecuteSql(string sql)
+        {
+            try
+            {
+                IList<IParameter> parameters = new List<IParameter>();
+
+
+                return this.Fetch(sql, parameters.ToArray());
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return null;
+        }
+
 
 
     }

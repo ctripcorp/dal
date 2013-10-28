@@ -62,7 +62,13 @@
 
     $("#change_db").click(function () {
         $.get("/Default.aspx?db=" + $("#db_name").val(), function (data) {
-            ttt();
+            //ttt();
+        });
+    });
+
+    $("#execute_sql").click(function () {
+        $.get("/Default.aspx?sql=" + $("#sql").val(), function (data) {
+            $("#count").val(data.Count);
         });
     });
 

@@ -55,7 +55,7 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 	
 	private void logTime(Response response) {
 		// This is not the most correct time cost for each stage.
-		logger.info("Decode/Execution/Encode: " + response.getDecodeRequestTime() + "/" + response.getDbTime() + "/" + response.getEncodeResponseTime());
+		logger.info("Total row count: " + response.totalCount + "  Decode/Execution/Encode: " + response.getDecodeRequestTime() + "/" + response.getDbTime() + "/" + response.getEncodeResponseTime());
 		timeCostSender.execute(new TimeCostSendTask(response)); 
 	}
 

@@ -43,9 +43,13 @@ namespace platform.dao.response
             //unpacker.ReadInt32(out arrayLength);
 
             //任务ID
-            byte[] taskid;
+            //byte[] taskid;
 
-            unpacker.ReadBinary(out taskid);
+            //unpacker.ReadBinary(out taskid);
+
+            string taskid;
+            
+            unpacker.ReadString(out taskid);
 
             response.Taskid = new Guid(taskid);
 

@@ -14,50 +14,128 @@ jQuery(document).ready(function () {
         }
     });
 
-    $("#performance").toggleClass('open');
-    $("#performance .sub-menu").show();
+    
+    $.get("/console/dal/das/monitor/timeCosts", function(data){
 
-    $('#pie_container').highcharts({
-        chart: {
-            plotBackgroundColor: null,
-            plotBorderWidth: null,
-            plotShadow: false
-        },
-        title: {
-            text: 'Browser market shares at a specific website, 2010'
-        },
-        tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-        },
-        plotOptions: {
-            pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                    enabled: true,
-                    color: '#000000',
-                    connectorColor: '#000000',
-                    format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+        $.each(data.ids, function(index, value){
+            $("#tasks").append($('<option>', {
+                    value: value,
+                    text: value
+                }));
+        });
+
+        $("#tasks").trigger('change');
+
+    });
+
+    $("#tasks").change(function(){
+
+        $.get("/console/dal/das/monitor/timeCosts/"+$(this).val(),function(data){
+
+            var entries = data.entries;
+
+            var taskBegin = 0;
+            var taskEnd = 0;
+            var beforeRequest = 0;
+            var endRequest = 0;
+            var beforeResponse = 0;
+            var endResponse = 0;
+
+            var decodeRequestTime = 0;
+            var dbTime = 0;
+            var encodeResponseTime = 0;
+
+            $.each(entries, function(index, value){
+                switch(value.stage){
+                    case "taskBegin":
+                    taskBegin = value.cost;
+                    break;
+                    case "taskEnd":
+                    taskEnd = value.cost;
+                    break;
+                    case "beforeRequest":
+                    beforeRequest = value.cost;
+                    break;
+                    case "endRequest":
+                    endRequest = value.cost;
+                    break;
+                    case "beforeResponse":
+                    beforeResponse = value.cost;
+                    break;
+                    case "endResponse":
+                    endResponse = value.cost;
+                    break;
+                    case "decodeRequestTime":
+                    decodeRequestTime = value.cost;
+                    break;
+                    case "dbTime":
+                    dbTime = value.cost;
+                    break;
+                    case "encodeResponseTime":
+                    encodeResponseTime = value.cost;
+                    break;
                 }
-            }
-        },
-        series: [{
-            type: 'pie',
-            name: 'Browser share',
-            data: [
-                ['Firefox',   45.0],
-                ['IE',       26.8],
-                {
-                    name: 'Chrome',
-                    y: 12.8,
-                    sliced: true,
-                    selected: true
+            });
+
+            var totalTime = taskEnd - taskBegin;
+            var clientEncodeRequest = endRequest - beforeRequest;
+            var clientDecodeResponse = endResponse - beforeResponse;
+
+            // console.log(totalTime);
+            // console.log(clientEncodeRequest);
+            // console.log(decodeRequestTime);
+            // console.log(dbTime);
+            // console.log(encodeResponseTime);
+            // console.log(clientDecodeResponse);
+
+            var otherTime = totalTime -clientEncodeRequest - decodeRequestTime -dbTime - encodeResponseTime - clientDecodeResponse;
+
+            $('#pie_container').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
                 },
-                ['Safari',    8.5],
-                ['Opera',     6.2],
-                ['Others',   0.7]
-            ]
-        }]
+                title: {
+                    text: sprintf('Total time of task: %s milliseconds', totalTime)
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            color: '#000000',
+                            connectorColor: '#000000',
+                            format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                        }
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: 'Time cost percentage',
+                    data: [
+                        [sprintf('Client Encode Request: %s milliseconds', clientEncodeRequest),   clientEncodeRequest/totalTime],
+                        [sprintf('Server Decode Request: %s milliseconds', decodeRequestTime),    decodeRequestTime/totalTime],
+                        // {
+                        //     name: sprintf('Other time: %s milliseconds', 
+                        //         ),
+                        //     y: 12.8,
+                        //     sliced: true,
+                        //     selected: true
+                        // },
+                        [sprintf('Other time: %s milliseconds', otherTime), otherTime / totalTime],
+                        [sprintf('DbTime: %s milliseconds', dbTime),    dbTime/totalTime],
+                        [sprintf('Server Encode Response: %s milliseconds', encodeResponseTime),    encodeResponseTime/totalTime],
+                        [sprintf('Client Decode Response: %s milliseconds', clientDecodeResponse),   clientDecodeResponse/totalTime]
+                    ]
+                }]
+            });
+        });
+
     });
 
 });

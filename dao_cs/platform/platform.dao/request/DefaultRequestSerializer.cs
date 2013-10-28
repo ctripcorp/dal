@@ -28,7 +28,12 @@ namespace platform.dao.request
             //总共多少个属性需要序列化
             packer.PackArrayHeader(value.GetPropertyCount());
 
-            packer.Pack(value.Taskid.ToByteArray());
+            //for (int i = 0; i < taskidArray.Length/2; i++)
+            //{
+            //    taskidArray[i] = 
+            //}
+
+            packer.Pack(value.Taskid.ToString());
 
             packer.Pack(value.DbName);
 

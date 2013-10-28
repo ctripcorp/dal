@@ -21,6 +21,7 @@ import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.enums.StatementType;
 import com.ctrip.sysdev.das.exception.ProtocolInvalidException;
 import com.ctrip.sysdev.das.exception.SerDeException;
+import com.ctrip.sysdev.das.utils.UUID2ByteArray;
 
 public class RequestDecoder extends ByteToMessageDecoder {
 	@Override
@@ -76,7 +77,11 @@ public class RequestDecoder extends ByteToMessageDecoder {
 						"Expect property count %d, but got %d instead!",
 						currentPropertyCount, propertyCount));
 			}
-			request.setTaskid(UUID.nameUUIDFromBytes(unpacker.readByteArray()));
+			//byte[] taskidByteArray = unpacker.readByteArray();
+			
+			String taskid = unpacker.readString();
+			
+			request.setTaskid(UUID.fromString(taskid));
 			String dbName = unpacker.readString();
 			request.setCredential(unpacker.readString());
 			request.setMessage(unpackMessage(unpacker));
@@ -140,5 +145,10 @@ public class RequestDecoder extends ByteToMessageDecoder {
 
 		return message;
 	}
+	
+	public static void main(String[] args) {
+		byte[] xxx = UUID.fromString("6c14eaf0-af41-4997-9878-6fb7076e6b3c").toString().getBytes();
+	}
+	
 
 }

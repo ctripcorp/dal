@@ -7,6 +7,7 @@ using platform.dao.log;
 using platform.dao.param;
 using platform.dao.request;
 using platform.dao.response;
+using System.Text;
 
 namespace platform.dao.client
 {
@@ -70,12 +71,16 @@ namespace platform.dao.client
         /// <param name="request"></param>
         private void WriteRequest(DefaultRequest request)
         {
-            watch.Reset();
-            watch.Start();
+            //watch.Reset();
+            //watch.Start();
+            MonitorSender.GetInstance().Send(request.Taskid.ToString(), "beforeRequest", DateTime.Now.Ticks / 10000);
             byte[] payload = request.Pack2ByteArray();
-            watch.Stop();
+            //watch.Stop();
 
-            logger.Info(string.Format("Client encode request time: {0} MilliSeconds", watch.ElapsedTicks/10000.0));
+            //logger.Info(string.Format("Client encode request time: {0} MilliSeconds", watch.ElapsedTicks/10000.0));
+
+            
+
             logger.Info(request.Message.Sql);
 
             int protocolVersion = request.GetProtocolVersion();
@@ -109,13 +114,14 @@ namespace platform.dao.client
                 }
                 currentRetry++;
             }
+            MonitorSender.GetInstance().Send(request.Taskid.ToString(), "endRequest", DateTime.Now.Ticks / 10000);
         }
 
         /// <summary>
         /// 从Das服务读出响应结果
         /// </summary>
         /// <returns></returns>
-        private DefaultResponse ReadResponse()
+        private DefaultResponse ReadResponse(Guid taskid)
         {
             DefaultResponse response = null;
             bool success = false;
@@ -124,11 +130,13 @@ namespace platform.dao.client
             {
                 try
                 {
+                    MonitorSender.GetInstance().Send(taskid.ToString(), "beforeResponse", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+
 
                     int protocolVersion = (networkStream.ReadByte() << 8) |
                         (networkStream.ReadByte() << 0);
 
-                    byte[] taskidBuffer = new byte[16];
+                    byte[] taskidBuffer = new byte[36];
 
                     int taskidLen = networkStream.Read(taskidBuffer, 0, taskidBuffer.Length);
 
@@ -142,9 +150,11 @@ namespace platform.dao.client
 
                     response = new DefaultResponse();
 
-                    response.Taskid = new Guid(taskidBuffer);
+                    response.Taskid = new Guid(Encoding.Default.GetString(taskidBuffer));
 
                     response.ResultType = (enums.OperationType)resultType;
+
+                    MonitorSender.GetInstance().Send(taskid.ToString(), "endResponse", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
 
                     //byte[] buffer = new byte[totalLength - 2];
 
@@ -195,13 +205,14 @@ namespace platform.dao.client
                        (networkStream.ReadByte() << 0);
 
                     success = true;
-                    currentRetry++;
+                    
                 }
                 catch (Exception ex)
                 {
                     logger.Error(ex.StackTrace);
                     Connect();
                 }
+                currentRetry++;
             }
 
             return rowCount;
@@ -220,6 +231,10 @@ namespace platform.dao.client
             //Stopwatch watch = new Stopwatch();
             //watch.Reset();
             //watch.Start();
+
+            Guid taskid = System.Guid.NewGuid();
+
+            MonitorSender.GetInstance().Send(taskid.ToString(), "taskBegin", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
 
             if (null != parameters && parameters.Length > 0)
             {
@@ -254,7 +269,7 @@ namespace platform.dao.client
 
             DefaultRequest request = new DefaultRequest()
             {
-                Taskid = System.Guid.NewGuid(),
+                Taskid = taskid,
                 DbName = dbName,
                 Credential = credential ?? string.Empty,
                 Message = message
@@ -262,7 +277,7 @@ namespace platform.dao.client
 
             WriteRequest(request);
 
-            DefaultResponse response = ReadResponse();
+            DefaultResponse response = ReadResponse(taskid);
 
             IDataReader reader = new DasDataReader()
             {
@@ -273,7 +288,7 @@ namespace platform.dao.client
             //watch.Stop();
 
             //logger.Info(string.Format("Total time of fetch: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
-
+            MonitorSender.GetInstance().Send(taskid.ToString(), "taskEnd", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
             return reader;
 
         }
@@ -287,6 +302,10 @@ namespace platform.dao.client
         /// <returns></returns>
         public override int Execute(string sql, params IParameter[] parameters)
         {
+            Guid taskid = System.Guid.NewGuid();
+
+            MonitorSender.GetInstance().Send(taskid.ToString(), "taskBegin", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+
             if (null != parameters && parameters.Length > 0)
             {
                 MatchCollection mc = paramRegex.Matches(sql);
@@ -320,7 +339,7 @@ namespace platform.dao.client
 
             DefaultRequest request = new DefaultRequest()
             {
-                Taskid = System.Guid.NewGuid(),
+                Taskid = taskid,
                 DbName = dbName,
                 Credential = credential ?? string.Empty,
                 Message = message
@@ -328,9 +347,11 @@ namespace platform.dao.client
 
             WriteRequest(request);
 
-            DefaultResponse response = ReadResponse();
+            DefaultResponse response = ReadResponse(taskid);
 
             int rowCount = ReadAffectRowCount();
+
+            MonitorSender.GetInstance().Send(taskid.ToString(), "taskEnd", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
 
             return rowCount;
         }
@@ -345,6 +366,8 @@ namespace platform.dao.client
         public override IDataReader FetchBySp(string sp, params IParameter[] parameters)
         {
 
+            Guid taskid = System.Guid.NewGuid();
+
             RequestMessage message = new RequestMessage()
             {
                 StatementType = enums.StatementType.StoredProcedure,
@@ -357,7 +380,7 @@ namespace platform.dao.client
 
             DefaultRequest request = new DefaultRequest()
             {
-                Taskid = System.Guid.NewGuid(),
+                Taskid = taskid,
                 DbName = dbName,
                 Credential = credential,
                 Message = message
@@ -365,7 +388,7 @@ namespace platform.dao.client
 
             WriteRequest(request);
 
-            DefaultResponse response = ReadResponse();
+            DefaultResponse response = ReadResponse(taskid);
 
             IDataReader reader = new DasDataReader()
             {
@@ -384,6 +407,8 @@ namespace platform.dao.client
         /// <returns></returns>
         public override int ExecuteSp(string sp, params IParameter[] parameters)
         {
+            Guid taskid = System.Guid.NewGuid();
+
             if (null != parameters && parameters.Length > 0)
             {
                 int i = 1;
@@ -407,7 +432,7 @@ namespace platform.dao.client
 
             DefaultRequest request = new DefaultRequest()
             {
-                Taskid = System.Guid.NewGuid(),
+                Taskid = taskid,
                 DbName = dbName,
                 Credential = credential,
                 Message = message
@@ -415,7 +440,7 @@ namespace platform.dao.client
 
             WriteRequest(request);
 
-            DefaultResponse response = ReadResponse();
+            DefaultResponse response = ReadResponse(taskid);
 
             int rowCount = ReadAffectRowCount();
 

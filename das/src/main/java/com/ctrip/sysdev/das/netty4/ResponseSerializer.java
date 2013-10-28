@@ -40,7 +40,8 @@ public class ResponseSerializer {
 		ByteBuf buffer = ctx.alloc().buffer();
 		
 		buffer.writeShort(1)
-				.writeBytes(UUID2ByteArray.asByteArray(request.getTaskid()))
+				//.writeBytes(UUID2ByteArray.asByteArray(request.getTaskid()))
+				.writeBytes(request.getTaskid().toString().getBytes())
 				.writeInt(request.getMessage().getOperationType().getIntVal());
 		
 		ctx.channel().writeAndFlush(buffer);

@@ -71,9 +71,12 @@ namespace platform.dao.client
         /// <param name="request"></param>
         private void WriteRequest(DefaultRequest request)
         {
-            //watch.Reset();
-            //watch.Start();
-            MonitorSender.GetInstance().Send(request.Taskid.ToString(), "beforeRequest", DateTime.Now.Ticks / 10000);
+            watch.Reset();
+            watch.Start();
+            //MonitorSender.GetInstance().Send(request.Taskid.ToString(), "beforeRequest", DateTime.Now.Ticks / 10000);
+
+            //long beforeReqeust = DateTime.Now.Ticks / 10000;
+
             byte[] payload = request.Pack2ByteArray();
             //watch.Stop();
 
@@ -114,7 +117,13 @@ namespace platform.dao.client
                 }
                 currentRetry++;
             }
-            MonitorSender.GetInstance().Send(request.Taskid.ToString(), "endRequest", DateTime.Now.Ticks / 10000);
+            //MonitorSender.GetInstance().Send(request.Taskid.ToString(), "endRequest", DateTime.Now.Ticks / 10000);
+            watch.Stop();
+
+            MonitorData data  = MonitorData.GetInstance(request.Taskid.ToString());
+
+            data.EncodeRequestTime = watch.ElapsedMilliseconds;
+
         }
 
         /// <summary>
@@ -123,6 +132,8 @@ namespace platform.dao.client
         /// <returns></returns>
         private DefaultResponse ReadResponse(Guid taskid)
         {
+            watch.Reset();
+            watch.Start();
             DefaultResponse response = null;
             bool success = false;
             int currentRetry = 0;
@@ -130,7 +141,7 @@ namespace platform.dao.client
             {
                 try
                 {
-                    MonitorSender.GetInstance().Send(taskid.ToString(), "beforeResponse", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+                    //MonitorSender.GetInstance().Send(taskid.ToString(), "beforeResponse", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
 
 
                     int protocolVersion = (networkStream.ReadByte() << 8) |
@@ -154,7 +165,7 @@ namespace platform.dao.client
 
                     response.ResultType = (enums.OperationType)resultType;
 
-                    MonitorSender.GetInstance().Send(taskid.ToString(), "endResponse", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+                    //MonitorSender.GetInstance().Send(taskid.ToString(), "endResponse", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
 
                     //byte[] buffer = new byte[totalLength - 2];
 
@@ -180,6 +191,12 @@ namespace platform.dao.client
                 }
                 currentRetry++;
             }
+
+            watch.Stop();
+
+            MonitorData data = MonitorData.GetInstance(taskid.ToString());
+
+            data.DecodeResponseTime = watch.ElapsedMilliseconds;
 
             return response;
 
@@ -251,6 +268,7 @@ namespace platform.dao.client
                             break;
                         }
                     }
+
                     i++;
                 }
             }
@@ -281,8 +299,8 @@ namespace platform.dao.client
 
             IDataReader reader = new DasDataReader()
             {
-                NetworkStream = networkStream,
-                Taskid = taskid
+                NetworkStream = networkStream//,
+                //Taskid = taskid
             };
 
             //end watch
@@ -290,6 +308,11 @@ namespace platform.dao.client
 
             //logger.Info(string.Format("Total time of fetch: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
             //MonitorSender.GetInstance().Send(taskid.ToString(), "taskEnd", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+
+            //MonitorData data  = MonitorData.GetInstance(taskid.ToString());
+
+            //data.TotalTime = watch.ElapsedMilliseconds;
+
             return reader;
 
         }
@@ -305,7 +328,7 @@ namespace platform.dao.client
         {
             Guid taskid = System.Guid.NewGuid();
 
-            MonitorSender.GetInstance().Send(taskid.ToString(), "taskBegin", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+            //MonitorSender.GetInstance().Send(taskid.ToString(), "taskBegin", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
 
             if (null != parameters && parameters.Length > 0)
             {
@@ -352,7 +375,7 @@ namespace platform.dao.client
 
             int rowCount = ReadAffectRowCount();
 
-            MonitorSender.GetInstance().Send(taskid.ToString(), "taskEnd", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+            //MonitorSender.GetInstance().Send(taskid.ToString(), "taskEnd", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
 
             return rowCount;
         }

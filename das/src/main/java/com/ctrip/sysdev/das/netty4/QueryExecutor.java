@@ -247,7 +247,7 @@ public class QueryExecutor {
 		}
 
 		List<List<StatementParameter>> results = new ArrayList<List<StatementParameter>>();
-		final int bucket = 2000;
+		final int bucket =2;
 		int rowCount = 0;
 		while (rs.next()) {
 			List<StatementParameter> result = new ArrayList<StatementParameter>();

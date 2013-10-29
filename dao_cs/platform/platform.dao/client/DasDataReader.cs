@@ -8,6 +8,8 @@ using platform.dao.param;
 using platform.dao.exception;
 using platform.dao.utils;
 using platform.dao.response;
+using System.Diagnostics;
+using platform.dao.log;
 
 namespace platform.dao.client
 {
@@ -34,8 +36,6 @@ namespace platform.dao.client
         public List<List<IParameter>> ResultSet { get; set; }
 
         public NetworkStream NetworkStream { get; set; }
-
-        public Guid Taskid { get; set; }
 
         public void Close()
         {
@@ -68,6 +68,10 @@ namespace platform.dao.client
             if (!readFinished && this.NetworkStream != null &&
                 (ResultSet == null || (ResultSet.Count - cursor < 100)))
             {
+
+                Stopwatch watch = new Stopwatch();
+                watch.Start();
+
                 int blockSize = (NetworkStream.ReadByte() << 24) |
                         (NetworkStream.ReadByte() << 16) |
                         (NetworkStream.ReadByte() << 8) |
@@ -86,7 +90,19 @@ namespace platform.dao.client
                     results.AddRange(ResultSet.GetRange(cursor, ResultSet.Count - cursor));
                 }
 
-                results.AddRange(serializer.UnpackSingleObject(buffer));
+                List<List<IParameter>> readerResults = serializer.UnpackSingleObject(buffer);
+
+                watch.Stop();
+
+                MonitorData data = MonitorData.GetInstance();
+
+                if (data != null)
+                {
+                    //data.TotalTime += watch.ElapsedMilliseconds;
+                    data.DecodeResponseTime += watch.ElapsedMilliseconds;
+                }
+
+                results.AddRange(readerResults);
 
                 if (ResultSet != null)
                 {

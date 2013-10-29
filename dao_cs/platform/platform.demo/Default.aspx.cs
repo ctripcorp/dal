@@ -9,6 +9,7 @@ using platform.dao.client;
 using platform.demo.DAO;
 using System.Data;
 using platform.dao.log;
+using System.Diagnostics;
 
 namespace platform.demo
 {
@@ -48,18 +49,26 @@ namespace platform.demo
 
                 int count = 0;
 
+                Stopwatch watch = new Stopwatch();
+
+                watch.Start();
+
                 using (IDataReader reader = person.ExecuteSql(sql))
                 {
-                    DasDataReader ddr = reader as DasDataReader;
-
-                    MonitorSender.GetInstance().Send(ddr.Taskid.ToString(), "taskBegin", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
-
                     while (reader.Read())
                     {
                         count++;
                     }
+                }
 
-                    MonitorSender.GetInstance().Send(ddr.Taskid.ToString(), "taskEnd", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+                watch.Stop();
+
+                MonitorData data = MonitorData.GetInstance();
+
+                if (data != null)
+                {
+                    data.TotalTime = watch.ElapsedMilliseconds;
+                    MonitorSender.GetInstance().Send(data);
                 }
 
 

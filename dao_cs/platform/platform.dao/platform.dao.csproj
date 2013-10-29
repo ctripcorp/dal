@@ -64,6 +64,7 @@
     <Compile Include="log\FileLoggerAdapter.cs" />
     <Compile Include="log\LogFactory.cs" />
     <Compile Include="enums\LogLevel.cs" />
+    <Compile Include="log\MonitorData.cs" />
     <Compile Include="log\MonitorSender.cs" />
     <Compile Include="orm\attribute\AutoIncrementAttribute.cs" />
     <Compile Include="orm\attribute\ColumnAttribute.cs" />

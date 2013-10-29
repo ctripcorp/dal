@@ -22,6 +22,13 @@ namespace platform.dao.log
             return instance;
         }
 
+        public void Send(MonitorData data)
+        {
+            this.Send(data.Taskid, "totalTime", data.TotalTime);
+            this.Send(data.Taskid, "encodeRequestTime", data.EncodeRequestTime);
+            this.Send(data.Taskid, "decodeResponseTime", data.DecodeResponseTime);
+        }
+
         public void Send(string id, string name, long milliSeconds)
         {
             try
@@ -30,7 +37,7 @@ namespace platform.dao.log
         (HttpWebRequest)WebRequest.Create("http://localhost:8080/console/dal/das/monitor/timeCosts");
 
                 ASCIIEncoding encoding = new ASCIIEncoding();
-                string postData = string.Format("id={0}&timeCost={1}:{2}",id, name, milliSeconds-utcStartTime);
+                string postData = string.Format("id={0}&timeCost={1}:{2}",id, name, milliSeconds);
                 byte[] data = encoding.GetBytes(postData);
 
                 httpWReq.Method = "POST";

@@ -50,21 +50,30 @@ namespace platform.dao.response
 
                 for (int j = 0; j < currentLength; j++)
                 {
-                    result.Add(UnpackStatementParameter(unpacker));
+                    try
+                    {
+                        result.Add(UnpackStatementParameter(unpacker));
+                    }
+                    catch
+                    {
+
+                    }
                 }
 
                 results.Add(result);
 
             }
 
+            
+
             return results;
         }
 
         public IParameter UnpackStatementParameter(Unpacker unpacker)
         {
-            long arrayLength;
+            //long arrayLength;
 
-            unpacker.ReadArrayLength(out arrayLength);
+            //unpacker.ReadArrayLength(out arrayLength);
 
             int dbType;
 

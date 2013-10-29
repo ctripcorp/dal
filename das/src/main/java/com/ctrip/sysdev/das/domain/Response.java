@@ -33,6 +33,8 @@ public class Response extends Domain {
 	private long encodeStart;
 	private long encodeEnd;
 	
+	public long totalCount;
+	
 	public Response() {
 		decodeStart();
 	}

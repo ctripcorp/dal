@@ -247,8 +247,10 @@ public class QueryExecutor {
 		}
 
 		List<List<StatementParameter>> results = new ArrayList<List<StatementParameter>>();
+
 		final int bucket =2;
 		int rowCount = 0;
+		int totalCount = 0;
 		while (rs.next()) {
 			List<StatementParameter> result = new ArrayList<StatementParameter>();
 			for (int i = 1; i <= totalColumns; i++) {
@@ -340,6 +342,7 @@ public class QueryExecutor {
 			}
 			results.add(result);
 			// check for chunk
+			totalCount++;
 			rowCount++;
 			if(rowCount == bucket) {
 				responseSerializer.write(ctx, results, false, resp);
@@ -347,6 +350,7 @@ public class QueryExecutor {
 				rowCount = 0;
 			}
 		}
+		resp.totalCount = totalCount;
 		responseSerializer.write(ctx, results, true, resp);
 		results.clear();
 	}

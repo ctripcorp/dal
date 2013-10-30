@@ -10,8 +10,19 @@ message Response {
     CUD = 1;
   }
 
+  message ResponseHeader{
+    repeated int32 indexes = 1;
+    repeated string lables = 2;
+    repeated int32 types = 3;
+  }
+
+  message Row{
+    repeated bytes columns = 1;
+  }
+
   message ResponseMessage {
-    
+    optional ResponseHeader header = 1;
+    repeated Row rows = 2;
   }
 
   optional ResponseMessage msg = 3;

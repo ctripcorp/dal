@@ -10,6 +10,7 @@ using platform.dao.utils;
 using platform.dao.response;
 using System.Diagnostics;
 using platform.dao.log;
+using platform.dao.enums;
 
 namespace platform.dao.client
 {
@@ -19,10 +20,13 @@ namespace platform.dao.client
 
         private static ParameterSerializer serializer;
 
+        private static ResultSetHeaderSerializer headerSerializer;
+
         static DasDataReader()
         {
             utcStartTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             serializer = new ParameterSerializer();
+            headerSerializer = new ResultSetHeaderSerializer();
         }
 
         private int cursor = 0;
@@ -31,9 +35,13 @@ namespace platform.dao.client
 
         private int rowCursor = 0;
 
-        private List<IParameter> current;
+        //private List<IParameter> current;
+        private byte[][] current;
 
-        public List<List<IParameter>> ResultSet { get; set; }
+        //private List<List<IParameter>> ResultSet;
+        private List<byte[][]> ResultSet;
+
+        private ResultSetHeader header;
 
         public NetworkStream NetworkStream { get; set; }
 
@@ -64,11 +72,28 @@ namespace platform.dao.client
 
         public bool Read()
         {
-            //如果没有读取完成，且剩余的不足100个，则再次读取
-            if (!readFinished && this.NetworkStream != null &&
-                (ResultSet == null || (ResultSet.Count - cursor < 100)))
-            {
 
+            if (null == this.NetworkStream)
+                return false;
+
+            //如果是第一次读取
+            if (header == null)
+            {
+                int headerSize = (NetworkStream.ReadByte() << 24) |
+                       (NetworkStream.ReadByte() << 16) |
+                       (NetworkStream.ReadByte() << 8) |
+                       (NetworkStream.ReadByte() << 0);
+
+                byte[] buffer = new byte[headerSize];
+
+                NetworkStream.Read(buffer, 0, buffer.Length);
+
+                header = headerSerializer.UnpackSingleObject(buffer);
+
+            }
+            //如果没有读取完成，且剩余的不足100个，则再次读取
+            if (!readFinished &&  ((ResultSet == null) || (ResultSet.Count - cursor < 100)))
+            {
                 Stopwatch watch = new Stopwatch();
                 watch.Start();
 
@@ -83,14 +108,16 @@ namespace platform.dao.client
 
                 NetworkStream.Read(buffer, 0, buffer.Length);
 
-                List<List<IParameter>> results = new List<List<IParameter>>();
+                //List<List<IParameter>> results = new List<List<IParameter>>();
+                List<byte[][]> results = new List<byte[][]>();
 
                 if (ResultSet != null && ResultSet.Count > 0)
                 {
                     results.AddRange(ResultSet.GetRange(cursor, ResultSet.Count - cursor));
                 }
 
-                List<List<IParameter>> readerResults = serializer.UnpackSingleObject(buffer);
+                //List<List<IParameter>> readerResults = serializer.UnpackSingleObject(buffer);
+                List<byte[][]> readerResults = serializer.UnpackSingleObject(buffer);
 
                 watch.Stop();
 
@@ -115,7 +142,7 @@ namespace platform.dao.client
             var result = cursor < ResultSet.Count;
             if (result)
             {
-                current = ResultSet[cursor].OrderBy(o => o.Index).ToList();
+                current = ResultSet[cursor];
                 cursor++;
             }
             return result;
@@ -128,8 +155,8 @@ namespace platform.dao.client
 
         public void Dispose()
         {
-            if(null != this.current)
-                this.current.Clear();
+            //if(null != this.current)
+            //    this.current.Clear();
             if(null != this.ResultSet)
                 this.ResultSet.Clear();
             this.current = null;
@@ -141,23 +168,26 @@ namespace platform.dao.client
         /// </summary>
         public int FieldCount
         {
-            get { return current.Count; }
+            //get { return current.Count; }
+            get { return current.Length; }
         }
 
         public bool GetBoolean(int i)
         {
-            if (i > FieldCount)
-                throw new DAOException("Index out of bound!");
+            throw new NotImplementedException();
+            //if (i > FieldCount)
+            //    throw new DAOException("Index out of bound!");
 
-            return current[i].Value.AsBoolean();
+            //return current[i].Value.AsBoolean();
         }
 
         public byte GetByte(int i)
         {
-            if (i > FieldCount)
-                throw new DAOException("Index out of bound!");
+            throw new NotImplementedException();
+            //if (i > FieldCount)
+            //    throw new DAOException("Index out of bound!");
 
-            return current[i].Value.AsByte();
+            //return current[i].Value.AsByte();
         }
 
         public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
@@ -167,10 +197,11 @@ namespace platform.dao.client
 
         public char GetChar(int i)
         {
-            if (i > FieldCount)
-                throw new DAOException("Index out of bound!");
+            throw new NotImplementedException();
+            //if (i > FieldCount)
+            //    throw new DAOException("Index out of bound!");
 
-            return (char)current[i].Value.AsUInt16();
+            //return (char)current[i].Value.AsUInt16();
         }
 
         public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
@@ -190,108 +221,121 @@ namespace platform.dao.client
 
         public DateTime GetDateTime(int i)
         {
-            if (i > FieldCount)
-                throw new DAOException("Index out of bound!");
+            throw new NotImplementedException();
+            //if (i > FieldCount)
+            //    throw new DAOException("Index out of bound!");
 
-            return utcStartTime.AddMilliseconds(current[i].Value.AsUInt64());
+            //return utcStartTime.AddMilliseconds(current[i].Value.AsUInt64());
         }
 
         public decimal GetDecimal(int i)
         {
-            if (i > FieldCount)
-                throw new DAOException("Index out of bound!");
+            throw new NotImplementedException();
+            //if (i > FieldCount)
+            //    throw new DAOException("Index out of bound!");
 
-            return decimal.Parse(current[i].Value.AsString());
+            //return decimal.Parse(current[i].Value.AsString());
         }
 
         public double GetDouble(int i)
         {
-            if (i > FieldCount)
-                throw new DAOException("Index out of bound!");
+            throw new NotImplementedException();
+            //if (i > FieldCount)
+            //    throw new DAOException("Index out of bound!");
 
-            return current[i].Value.AsDouble();
+            //return current[i].Value.AsDouble();
         }
 
         public Type GetFieldType(int i)
         {
-            return TypeConverter.ResolveDbType(current[i].DbType);
+            throw new NotImplementedException();
+            //return TypeConverter.ResolveDbType(current[i].DbType);
         }
 
         public float GetFloat(int i)
         {
-            if (i > FieldCount)
-                throw new DAOException("Index out of bound!");
+            throw new NotImplementedException();
+            //if (i > FieldCount)
+            //    throw new DAOException("Index out of bound!");
 
-            return current[i].Value.AsSingle();
+            //return current[i].Value.AsSingle();
         }
 
         public Guid GetGuid(int i)
         {
-            if (i > FieldCount)
-                throw new DAOException("Index out of bound!");
+            throw new NotImplementedException();
+            //if (i > FieldCount)
+            //    throw new DAOException("Index out of bound!");
 
-            return new Guid(current[i].Value.AsBinary());
+            //return new Guid(current[i].Value.AsBinary());
         }
 
         public short GetInt16(int i)
         {
-            if (i > FieldCount)
-                throw new DAOException("Index out of bound!");
+            throw new NotImplementedException();
+            //if (i > FieldCount)
+            //    throw new DAOException("Index out of bound!");
 
-            return current[i].Value.AsInt16();
+            //return current[i].Value.AsInt16();
         }
 
         public int GetInt32(int i)
         {
-            if (i > FieldCount)
-                throw new DAOException("Index out of bound!");
+            throw new NotImplementedException();
+            //if (i > FieldCount)
+            //    throw new DAOException("Index out of bound!");
 
-            return current[i].Value.AsInt32();
+            //return current[i].Value.AsInt32();
         }
 
         public long GetInt64(int i)
         {
-            if (i > FieldCount)
-                throw new DAOException("Index out of bound!");
+            throw new NotImplementedException();
+            //if (i > FieldCount)
+            //    throw new DAOException("Index out of bound!");
 
-            return current[i].Value.AsInt64();
+            //return current[i].Value.AsInt64();
         }
 
         public string GetName(int i)
         {
-            foreach (var p in current)
-            {
-                if (p.Index.Equals(i))
-                {
-                    return p.Name;
-                }
-            }
-            return null;
+            throw new NotImplementedException();
+            //foreach (var p in current)
+            //{
+            //    if (p.Index.Equals(i))
+            //    {
+            //        return p.Name;
+            //    }
+            //}
+            //return null;
         }
 
         public int GetOrdinal(string name)
         {
-            foreach (var p in current)
-            {
-                if (p.Name.Equals(name))
-                {
-                    return p.Index;
-                }
-            }
-            return -1;
+            throw new NotImplementedException();
+            //foreach (var p in current)
+            //{
+            //    if (p.Name.Equals(name))
+            //    {
+            //        return p.Index;
+            //    }
+            //}
+            //return -1;
         }
 
         public string GetString(int i)
         {
-            if (i > FieldCount)
-                throw new DAOException("Index out of bound!");
+            throw new NotImplementedException();
+            //if (i > FieldCount)
+            //    throw new DAOException("Index out of bound!");
 
-            return current[i].Value.AsString();
+            //return current[i].Value.AsString();
         }
 
         public object GetValue(int i)
         {
-            return current[i].Value.ToObject();
+            throw new NotImplementedException();
+            //return current[i].Value.ToObject();
         }
 
         public int GetValues(object[] values)
@@ -301,7 +345,8 @@ namespace platform.dao.client
 
         public bool IsDBNull(int i)
         {
-            return current[i].Value.IsNil;
+            throw new NotImplementedException();
+            //return current[i].Value.IsNil;
         }
 
         public object this[string name]
@@ -309,29 +354,77 @@ namespace platform.dao.client
             get
             {
                 object result = null;
-                IParameter param = null;
-                foreach (var p in current)
+
+                if (header == null || current == null)
+                    return null;
+
+                int lableIndex = -1;
+
+                //获取当前列名的索引位置
+                for (int i=0;i<header.Lables.Length;i++)
                 {
-                    if (p.Name.Equals(name))
+                    var p = header.Lables[i];
+                    if (p.Equals(name))
                     {
-                        param = p;
+                        lableIndex = i;
                         break;
                     }
                 }
 
-                if (param != null)
+                int currentIndex = header.Indexes[lableIndex];
+
+                int currentType = header.Types[lableIndex];
+
+                byte[] currentValue = current[lableIndex];
+
+                switch (currentType)
                 {
-                    if (param.DbType == DbType.Decimal)
-                        result = decimal.Parse(param.Value.AsString());
-                    else if (param.DbType == DbType.StringFixedLength)
-                        result = (char)param.Value.AsUInt16();
-                    else if (param.DbType == DbType.Guid)
-                        result = new Guid(param.Value.AsBinary());
-                    else if (param.DbType == DbType.DateTime)
-                        result = utcStartTime.AddMilliseconds(param.Value.AsUInt64());
-                    else
-                        result = param.Value.ToObject();
+                    case Types.SMALLINT:
+                    case Types.TINYINT:
+                    case Types.INTEGER:
+                        result = BitConverter.ToInt32(currentValue, 0);
+                        break;
+                    case Types.BIGINT:
+                        result = BitConverter.ToInt64(currentValue, 0);
+                        break;
+                    case Types.FLOAT:
+                    case Types.DOUBLE:
+                        result = BitConverter.ToDouble(currentValue, 0);
+                        break;
+                    case Types.BINARY:
+                        result = currentValue;
+                        break;
+                    case Types.TIMESTAMP:
+                        result = utcStartTime.AddMilliseconds(BitConverter.ToUInt64(currentValue, 0));
+                        break;
+                    default:
+                        result = BitConverter.ToString(currentValue);
+                        break;
                 }
+
+                //IParameter param = null;
+                //foreach (var p in current)
+                //{
+                //    if (p.Name.Equals(name))
+                //    {
+                //        param = p;
+                //        break;
+                //    }
+                //}
+
+                //if (param != null)
+                //{
+                //    if (param.DbType == DbType.Decimal)
+                //        result = decimal.Parse(param.Value.AsString());
+                //    else if (param.DbType == DbType.StringFixedLength)
+                //        result = (char)param.Value.AsUInt16();
+                //    else if (param.DbType == DbType.Guid)
+                //        result = new Guid(param.Value.AsBinary());
+                //    else if (param.DbType == DbType.DateTime)
+                //        result = utcStartTime.AddMilliseconds(param.Value.AsUInt64());
+                //    else
+                //        result = param.Value.ToObject();
+                //}
                 
                 return result;
             }
@@ -342,21 +435,69 @@ namespace platform.dao.client
             get
             {
                 object result = null;
-                IParameter param = current[i];
 
-                if (param != null)
+                if (header == null || current == null)
+                    return null;
+
+                int lableIndex = -1;
+
+                //获取当前列名的索引位置
+                for (int j = 0; j < header.Lables.Length; j++)
                 {
-                    if (param.DbType == DbType.Decimal)
-                        result = decimal.Parse(param.Value.AsString());
-                    else if (param.DbType == DbType.StringFixedLength)
-                        result = (char)param.Value.AsUInt16();
-                    else if (param.DbType == DbType.Guid)
-                        result = new Guid(param.Value.AsBinary());
-                    else if (param.DbType == DbType.DateTime)
-                        result = utcStartTime.AddMilliseconds(param.Value.AsUInt64());
-                    else
-                        result = param.Value.ToObject();
+                    var p = header.Indexes[j];
+                    if (p.Equals(i))
+                    {
+                        lableIndex = j;
+                        break;
+                    }
                 }
+
+                int currentIndex = lableIndex;
+
+                int currentType = header.Types[lableIndex];
+
+                byte[] currentValue = current[lableIndex];
+
+                switch (currentType)
+                {
+                    case Types.SMALLINT:
+                    case Types.TINYINT:
+                    case Types.INTEGER:
+                        result = BitConverter.ToInt32(currentValue, 0);
+                        break;
+                    case Types.BIGINT:
+                        result = BitConverter.ToInt64(currentValue, 0);
+                        break;
+                    case Types.FLOAT:
+                    case Types.DOUBLE:
+                        result = BitConverter.ToDouble(currentValue, 0);
+                        break;
+                    case Types.BINARY:
+                        result = currentValue;
+                        break;
+                    case Types.TIMESTAMP:
+                        result = utcStartTime.AddMilliseconds(BitConverter.ToUInt64(currentValue, 0));
+                        break;
+                    default:
+                        result = BitConverter.ToString(currentValue);
+                        break;
+                }
+
+                //IParameter param = current[i];
+
+                //if (param != null)
+                //{
+                //    if (param.DbType == DbType.Decimal)
+                //        result = decimal.Parse(param.Value.AsString());
+                //    else if (param.DbType == DbType.StringFixedLength)
+                //        result = (char)param.Value.AsUInt16();
+                //    else if (param.DbType == DbType.Guid)
+                //        result = new Guid(param.Value.AsBinary());
+                //    else if (param.DbType == DbType.DateTime)
+                //        result = utcStartTime.AddMilliseconds(param.Value.AsUInt64());
+                //    else
+                //        result = param.Value.ToObject();
+                //}
 
                 return result;
             }

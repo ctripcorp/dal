@@ -1,0 +1,43 @@
+
+message Request {
+  required int32 version = 1;
+  required string id = 2;
+  optional string db = 3;
+  optional string cred = 4;
+
+  enum StatementType {
+    SQL = 0;
+    SP = 1;
+  }
+
+  enum OperationType{
+    //读/写主库
+    DEFAULT = 0;
+    //读分库
+    READ = 1;
+    //写主库
+    WRITE = 2;
+  }
+
+  enum CRUD{
+    //SELECT 操作
+    GET = 0;
+    //增删改操作
+    CUD = 1;
+  }
+
+  message RequestMessage {
+    optional StatementType stateType = 1;
+    optional OperationType opeType = 2 [default = HOME];
+    optional CRUD crud = 3;
+
+    //When statement type is SQL, the name is a sql statement
+    //else the name is a sp name
+    optional string name = 4;
+
+    optional int32 flags = 5;
+
+  }
+
+  optional RequestMessage msg = 5;
+}

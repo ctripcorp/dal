@@ -55,6 +55,7 @@
     <Compile Include="Consts.cs" />
     <Compile Include="enums\DbDialect.cs" />
     <Compile Include="enums\OperationType.cs" />
+    <Compile Include="enums\Types.cs" />
     <Compile Include="exception\DAOConfigException.cs" />
     <Compile Include="exception\DAOException.cs" />
     <Compile Include="log\CentralLoggingAdapter.cs" />
@@ -91,6 +92,8 @@
     <Compile Include="response\DefaultResponse.cs" />
     <Compile Include="response\IResponse.cs" />
     <Compile Include="response\ParameterSerializer.cs" />
+    <Compile Include="response\ResetSetHeaderSerializer.cs" />
+    <Compile Include="response\ResultSetHeader.cs" />
     <Compile Include="type\AbstractRawValue.cs" />
     <Compile Include="type\AbstractValue.cs" />
     <Compile Include="type\ArrayValueImpl.cs" />

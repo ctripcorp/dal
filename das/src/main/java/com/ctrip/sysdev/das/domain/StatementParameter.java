@@ -179,7 +179,7 @@ public class StatementParameter implements Comparable<StatementParameter> {
 
 	public void pack(Packer packer) throws IOException {
 
-		packer.writeArrayBegin(7);
+//		packer.writeArrayBegin(7);
 
 		packer.write(dbType.getIntVal());
 
@@ -200,7 +200,7 @@ public class StatementParameter implements Comparable<StatementParameter> {
 
 		packer.write(value);
 
-		packer.writeArrayEnd();
+//		packer.writeArrayEnd();
 
 	}
 

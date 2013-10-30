@@ -40,13 +40,9 @@ jQuery(document).ready(function () {
 
             var entries = data.entries;
 
-            var taskBegin = 0;
-            var taskEnd = 0;
-            var beforeRequest = 0;
-            var endRequest = 0;
-            var beforeResponse = 0;
-            var endResponse = 0;
-
+            var totalTime = 0;
+            var decodeResponseTime = 0;
+            var encodeRequestTime = 0;
             var decodeRequestTime = 0;
             var dbTime = 0;
             var encodeResponseTime = 0;
@@ -57,23 +53,14 @@ jQuery(document).ready(function () {
 
             $.each(entries, function(index, value){
                 switch(value.stage){
-                    case "taskBegin":
-                    taskBegin = value.cost;
+                    case "totalTime":
+                    totalTime = value.cost;
                     break;
-                    case "taskEnd":
-                    taskEnd = value.cost;
+                   case "decodeResponseTime":
+                    decodeResponseTime = value.cost;
                     break;
-                    case "beforeRequest":
-                    beforeRequest = value.cost;
-                    break;
-                    case "endRequest":
-                    endRequest = value.cost;
-                    break;
-                    case "beforeResponse":
-                    beforeResponse = value.cost;
-                    break;
-                    case "endResponse":
-                    endResponse = value.cost;
+                    case "encodeRequestTime":
+                    encodeRequestTime = value.cost;
                     break;
                     case "decodeRequestTime":
                     decodeRequestTime = value.cost;
@@ -87,18 +74,13 @@ jQuery(document).ready(function () {
                 }
             });
 
-            var totalTime = taskEnd - taskBegin;
-            var clientEncodeRequest = endRequest - beforeRequest;
-            var clientDecodeResponse = endResponse - beforeResponse;
+            var otherTime = totalTime -encodeRequestTime - decodeResponseTime -dbTime - encodeResponseTime - decodeRequestTime;
 
-            // console.log(totalTime);
-            // console.log(clientEncodeRequest);
-            // console.log(decodeRequestTime);
-            // console.log(dbTime);
-            // console.log(encodeResponseTime);
-            // console.log(clientDecodeResponse);
-
-            var otherTime = totalTime -clientEncodeRequest - decodeRequestTime -dbTime - encodeResponseTime - clientDecodeResponse;
+            if(totalTime <= 0 || encodeRequestTime < 0 ||
+                decodeResponseTime < 0 || dbTime < 0||
+                encodeResponseTime < 0 || decodeRequestTime < 0){
+                return;
+            }
 
             $('#pie_container').highcharts({
                 chart: {
@@ -128,7 +110,7 @@ jQuery(document).ready(function () {
                     type: 'pie',
                     name: 'Time cost percentage',
                     data: [
-                        [sprintf('Client Encode Request: %s milliseconds', clientEncodeRequest),   clientEncodeRequest/totalTime],
+                        [sprintf('Client Encode Request: %s milliseconds', encodeRequestTime),   encodeRequestTime/totalTime],
                         [sprintf('Server Decode Request: %s milliseconds', decodeRequestTime),    decodeRequestTime/totalTime],
                         // {
                         //     name: sprintf('Other time: %s milliseconds', 
@@ -140,7 +122,7 @@ jQuery(document).ready(function () {
                         [sprintf('Other time: %s milliseconds', otherTime), otherTime / totalTime],
                         [sprintf('DbTime: %s milliseconds', dbTime),    dbTime/totalTime],
                         [sprintf('Server Encode Response: %s milliseconds', encodeResponseTime),    encodeResponseTime/totalTime],
-                        [sprintf('Client Decode Response: %s milliseconds', clientDecodeResponse),   clientDecodeResponse/totalTime]
+                        [sprintf('Client Decode Response: %s milliseconds', decodeResponseTime),   decodeResponseTime/totalTime]
                     ]
                 }]
             });

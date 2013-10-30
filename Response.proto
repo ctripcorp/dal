@@ -1,0 +1,21 @@
+
+message Response {
+  required int32 version = 1;
+  required string id = 2;
+
+  enum CRUD{
+    //SELECT 操作
+    GET = 0;
+    //增删改操作
+    CUD = 1;
+  }
+
+  message ResponseMessage {
+    
+  }
+
+  optional ResponseMessage msg = 3;
+
+  optional int32 affectRows = 4;
+
+}

@@ -7,6 +7,9 @@ using System.Web.UI.WebControls;
 using System.Data;
 using platform.demo.DAO;
 using platform.demo.Entity;
+using platform.dao.log;
+using platform.dao.client;
+using System.Diagnostics;
 
 namespace platform.demo
 {
@@ -17,6 +20,10 @@ namespace platform.demo
             PersonDAO person = new PersonDAO();
 
             List<object> results = new List<object>();
+
+            Stopwatch watch = new Stopwatch();
+
+            watch.Start();
 
             using (IDataReader reader = person.FetchAllRecords())
             {
@@ -33,6 +40,16 @@ namespace platform.demo
                         Birth = reader["Birth"].ToString()
                     });
                 }
+            }
+
+            watch.Stop();
+
+            MonitorData data = MonitorData.GetInstance();
+
+            if (data != null)
+            {
+                data.TotalTime = watch.ElapsedMilliseconds;
+                MonitorSender.GetInstance().Send(data);
             }
 
             //IList<Person> results = person.FetchAll<Person>();

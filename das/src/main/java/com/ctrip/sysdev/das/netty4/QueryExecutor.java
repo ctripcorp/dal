@@ -256,9 +256,11 @@ public class QueryExecutor {
 		}
 
 		List<List<StatementParameter>> results = new ArrayList<List<StatementParameter>>();
+
 		int bucket = 300;
 		if(count > 20000)
 			bucket = 2;
+
 		int rowCount = 0;
 		int totalCount = 0;
 		while (rs.next()) {

@@ -9,7 +9,8 @@ using System.Data;
 
 namespace platform.dao.response
 {
-    public class ParameterSerializer : MessagePackSerializer<List<List<IParameter>>>
+    public class ParameterSerializer : MessagePackSerializer<List<byte[][]>>
+    //public class ParameterSerializer : MessagePackSerializer<List<List<IParameter>>>
     {
 
         public ParameterSerializer()
@@ -20,51 +21,88 @@ namespace platform.dao.response
             // If the target objects has complex (non-primitive) objects,
             // you can get serializers which can handle complex type fields.
             // And then, you can cache them to instance fields of this custom serializer.
-            context.Serializers.Register<List<List<IParameter>>>(this);
+            context.Serializers.Register<List<byte[][]>>(this);
+            //context.Serializers.Register<List<List<IParameter>>>(this);
         }
 
-        protected override void PackToCore(Packer packer, List<List<IParameter>> value)
+        //protected override void PackToCore(Packer packer, List<List<IParameter>> value)
+        protected override void PackToCore(Packer packer, List<byte[][]> value)
         {
 
         }
 
-        protected override List<List<IParameter>> UnpackFromCore(Unpacker unpacker)
+        //protected override List<List<IParameter>> UnpackFromCore(Unpacker unpacker)
+        protected override List<byte[][]> UnpackFromCore(Unpacker unpacker)
         {
-            //long arrayLength;
-
-            //unpacker.ReadArrayLength(out arrayLength);
-
-            //List<List<IParameter>> results = new List<List<IParameter>>((int)arrayLength);
-
+            //共有多少行
             int arrayLength = (int)unpacker.ItemsCount;
 
-            List<List<IParameter>> results = new List<List<IParameter>>(arrayLength);
+            List<byte[][]> results = new List<byte[][]>(arrayLength);
 
             for (int i = 0; i < arrayLength; i++)
             {
-                long currentLength;
+                //每行有多少列
+                long fieldCount;
 
-                unpacker.ReadArrayLength(out currentLength);
+                unpacker.ReadArrayLength(out fieldCount);
 
-                List<IParameter> result = new List<IParameter>((int)currentLength);
+                List<byte[]> row = new List<byte[]>((int)fieldCount);
 
-                for (int j = 0; j < currentLength; j++)
+                for (int j = 0; j < fieldCount; j++)
                 {
-                    result.Add(UnpackStatementParameter(unpacker));
+                    byte[] result;
+                    //获取每一列的值
+                    if (unpacker.ReadBinary(out result))
+                    {
+                        row.Add(result);
+                    }
+
                 }
 
-                results.Add(result);
+                results.Add(row.ToArray());
 
             }
 
             return results;
+
+            //int arrayLength = (int)unpacker.ItemsCount;
+
+            //List<List<IParameter>> results = new List<List<IParameter>>(arrayLength);
+
+            //for (int i = 0; i < arrayLength; i++)
+            //{
+            //    long currentLength;
+
+            //    unpacker.ReadArrayLength(out currentLength);
+
+            //    List<IParameter> result = new List<IParameter>((int)currentLength);
+
+            //    for (int j = 0; j < currentLength; j++)
+            //    {
+            //        try
+            //        {
+            //            result.Add(UnpackStatementParameter(unpacker));
+            //        }
+            //        catch
+            //        {
+
+            //        }
+            //    }
+
+            //    results.Add(result);
+
+            //}
+
+            
+
+            //return results;
         }
 
         public IParameter UnpackStatementParameter(Unpacker unpacker)
         {
-            long arrayLength;
+            //long arrayLength;
 
-            unpacker.ReadArrayLength(out arrayLength);
+            //unpacker.ReadArrayLength(out arrayLength);
 
             int dbType;
 

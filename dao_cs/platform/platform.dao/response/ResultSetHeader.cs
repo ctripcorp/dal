@@ -8,11 +8,9 @@ namespace platform.dao.response
     public class ResultSetHeader
     {
 
-        public int[] Indexes { get; set; }
+        public string ColumnName { get; set; }
 
-        public string[] Lables { get; set; }
-
-        public int[] Types { get; set; }
+        public int ColumnType { get; set; }
 
     }
 }

@@ -41,7 +41,7 @@ namespace platform.dao.client
         //private List<List<IParameter>> ResultSet;
         private List<byte[][]> ResultSet;
 
-        private ResultSetHeader header;
+        private List<ResultSetHeader> header;
 
         public NetworkStream NetworkStream { get; set; }
 
@@ -361,19 +361,17 @@ namespace platform.dao.client
                 int lableIndex = -1;
 
                 //获取当前列名的索引位置
-                for (int i=0;i<header.Lables.Length;i++)
+                for (int i=0;i<header.Count;i++)
                 {
-                    var p = header.Lables[i];
-                    if (p.Equals(name))
+                    var p = header[i];
+                    if (p.ColumnName.Equals(name))
                     {
                         lableIndex = i;
                         break;
                     }
                 }
 
-                int currentIndex = header.Indexes[lableIndex];
-
-                int currentType = header.Types[lableIndex];
+                int currentType = header[lableIndex].ColumnType;
 
                 byte[] currentValue = current[lableIndex];
 
@@ -439,22 +437,9 @@ namespace platform.dao.client
                 if (header == null || current == null)
                     return null;
 
-                int lableIndex = -1;
+                int lableIndex = i;
 
-                //获取当前列名的索引位置
-                for (int j = 0; j < header.Lables.Length; j++)
-                {
-                    var p = header.Indexes[j];
-                    if (p.Equals(i))
-                    {
-                        lableIndex = j;
-                        break;
-                    }
-                }
-
-                int currentIndex = lableIndex;
-
-                int currentType = header.Types[lableIndex];
+                int currentType = header[lableIndex].ColumnType;
 
                 byte[] currentValue = current[lableIndex];
 

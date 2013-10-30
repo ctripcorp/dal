@@ -15,22 +15,17 @@ import org.msgpack.unpacker.Unpacker;
 
 import com.ctrip.sysdev.das.domain.Request;
 import com.ctrip.sysdev.das.domain.RequestMessage;
-import com.ctrip.sysdev.das.domain.Response;
 import com.ctrip.sysdev.das.domain.StatementParameter;
 import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.enums.StatementType;
 import com.ctrip.sysdev.das.exception.ProtocolInvalidException;
 import com.ctrip.sysdev.das.exception.SerDeException;
-import com.ctrip.sysdev.das.utils.UUID2ByteArray;
 
+//TODO revise exception
 public class RequestDecoder extends ByteToMessageDecoder {
 	@Override
-	protected void decode(ChannelHandlerContext ctx, ByteBuf in,
-			List<Object> out) throws Exception {
-		if(ctx.channel().attr(Response.RESPONSE_KEY).get() == null)
-			ctx.channel().attr(Response.RESPONSE_KEY).set(new Response());
-
-		Request request = null; 
+	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
+		decodeStart(ctx);
 
 		if (in.readableBytes() < 4) {// available byte < packe head
 			return;
@@ -49,19 +44,30 @@ public class RequestDecoder extends ByteToMessageDecoder {
 		byte[] decoded = new byte[dataLength - 2];
 		in.readBytes(decoded);
  
+		Request request = null; 
 		try {
 			request = deserialize(decoded);
+			request.endDecode(ctx.channel().attr(Request.DECODE_START).get());
 		} catch (Exception e) {
 			e.printStackTrace();
-		} 
+		} finally {
+			clearDecodeStart(ctx);
+		}
+		
 		if (request != null) {
 			out.add(request); 
 		}
-		Response resp = ctx.channel().attr(Response.RESPONSE_KEY).get();
-		resp.decodeEnd();
 	}
-
-
+	
+	private void decodeStart(ChannelHandlerContext ctx) {
+		if(ctx.channel().attr(Request.DECODE_START).get() == null)
+			ctx.channel().attr(Request.DECODE_START).set(System.currentTimeMillis());
+	}
+	
+	private void clearDecodeStart(ChannelHandlerContext ctx) {
+		ctx.channel().attr(Request.DECODE_START).set(null);
+	}
+	
 	private Request deserialize(byte[] source) throws SerDeException {
 		Request request = new Request();
 		try {
@@ -97,7 +103,6 @@ public class RequestDecoder extends ByteToMessageDecoder {
 			throw new SerDeException("RequestObjectSerDe  doDeserialize error",
 					e);
 		}
-		request.endDecode();
 		return request;
 	}
 

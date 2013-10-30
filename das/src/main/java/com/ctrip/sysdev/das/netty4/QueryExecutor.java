@@ -13,6 +13,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.msgpack.type.Value;
 import org.msgpack.type.ValueFactory;
@@ -20,12 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.DruidDataSourceWrapper;
+import com.ctrip.sysdev.das.domain.Request;
 import com.ctrip.sysdev.das.domain.RequestMessage;
 import com.ctrip.sysdev.das.domain.Response;
 import com.ctrip.sysdev.das.domain.StatementParameter;
 import com.ctrip.sysdev.das.domain.enums.DbType;
 import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.enums.StatementType;
+import com.ctrip.sysdev.das.exception.SerDeException;
 
 public class QueryExecutor {
 	public static final String QUERY_EXECUTION_EXCEPTION = "Query execution exception";
@@ -34,26 +39,23 @@ public class QueryExecutor {
 	public static final String DURATION = "duration";
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	private ResponseSerializer responseSerializer = new ResponseSerializer();
-
+	
 	private DruidDataSourceWrapper dataSource;
-	private RequestMessage message;
-	private ChannelHandlerContext ctx;
-	public QueryExecutor(DruidDataSourceWrapper dataSource, RequestMessage message, ChannelHandlerContext ctx) {
+	private ResponseSerializer responseSerializer = new ResponseSerializer();
+	
+	public QueryExecutor(DruidDataSourceWrapper dataSource) {
 		this.dataSource = dataSource;
-		this.message = message;
-		this.ctx = ctx;
 	}
 	
-	public Response execute() {
-		Response resp = ctx.channel().attr(Response.RESPONSE_KEY).get();
-		ctx.channel().attr(Response.RESPONSE_KEY).set(null);
+	public void execute(Request request, ChannelHandlerContext ctx) {
+		responseSerializer.writeResponseHeader(ctx, request);
+
+		Response resp = new Response(request);
 		Connection conn = null;
 		PreparedStatement statement = null;
-
-
-//		addDelay();
+		RequestMessage message = request.getMessage();
 		
+		addDelay();
 		long start = System.currentTimeMillis();
 		try {
 			conn = dataSource.getConnection(message.getDbName());
@@ -66,7 +68,7 @@ public class QueryExecutor {
 				executeSP(resp, statement);
 			} else {
 				if (message.getOperationType() == OperationType.Read) {
-					executeQuery(resp, statement);
+					executeQuery(ctx, resp, statement);
 				} else {
 					// boolean batchOperation = false;
 					// for (Parameter p : message.getArgs()) {
@@ -78,7 +80,7 @@ public class QueryExecutor {
 					// if (batchOperation) {
 					// executeBatch(resp, statement);
 					// } else {
-					executeUpdate(resp, statement);
+					executeUpdate(ctx, resp, statement);
 					// }
 					// conn.commit();
 				}
@@ -90,11 +92,13 @@ public class QueryExecutor {
 		} finally {
 			cleanUp(resp, conn, statement, start);
 		}
-
-		return resp;
 	}
 
+	private boolean debug = false;
 	private void addDelay() {
+		if(!debug)
+			return;
+		
 		int i = 3;
 		synchronized (this) {
 			while (i-- > 0) {
@@ -115,7 +119,9 @@ public class QueryExecutor {
 		PreparedStatement statement = null;
 
 		if (message.getStatementType() == StatementType.SQL) {
-			statement = conn.prepareStatement(message.getSql());
+			statement = conn.prepareStatement(message.getSql(), 
+					ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_READ_ONLY);
 		} else {
 			StringBuffer occupy = new StringBuffer();
 
@@ -138,7 +144,7 @@ public class QueryExecutor {
 		return statement;
 	}
 
-	private void executeQuery(Response resp, PreparedStatement statement)
+	private void executeQuery(ChannelHandlerContext ctx, Response resp, PreparedStatement statement)
 			throws Exception {
 		resp.setResultType(OperationType.Read);
 
@@ -147,12 +153,12 @@ public class QueryExecutor {
 
 		// Mark start encoding
 		resp.encodeStart();
-		getFromResultSet(rs, resp);
+		getFromResultSet(ctx, rs, resp);
 //		resp.setResultSet(null);
 		resp.encodeEnd();
 	}
 
-	private void executeUpdate(Response resp, PreparedStatement statement)
+	private void executeUpdate(ChannelHandlerContext ctx, Response resp, PreparedStatement statement)
 			throws Exception {
 		resp.setResultType(OperationType.Write);
 
@@ -230,9 +236,12 @@ public class QueryExecutor {
 	 * @return
 	 * @throws SQLException
 	 */
-	private void getFromResultSet(ResultSet rs, Response resp)
+	private void getFromResultSet(ChannelHandlerContext ctx,  ResultSet rs, Response resp)
 			throws Exception {
-
+		rs.last();
+		int count = rs.getRow();
+		rs.beforeFirst();
+		
 		ResultSetMetaData metaData = rs.getMetaData();
 
 		int totalColumns = metaData.getColumnCount();
@@ -247,7 +256,9 @@ public class QueryExecutor {
 		}
 
 		List<List<StatementParameter>> results = new ArrayList<List<StatementParameter>>();
-		final int bucket = 300;
+		int bucket = 300;
+		if(count > 20000)
+			bucket = 2;
 		int rowCount = 0;
 		int totalCount = 0;
 		while (rs.next()) {
@@ -344,13 +355,13 @@ public class QueryExecutor {
 			totalCount++;
 			rowCount++;
 			if(rowCount == bucket) {
-				responseSerializer.write(ctx, results, false, resp);
-				results.clear();
+				responseSerializer.write(ctx, results, null);
+				results = new ArrayList<List<StatementParameter>>();
 				rowCount = 0;
 			}
 		}
 		resp.totalCount = totalCount;
-		responseSerializer.write(ctx, results, true, resp);
+		responseSerializer.write(ctx, results, resp);
 		results.clear();
 	}
 
@@ -373,8 +384,5 @@ public class QueryExecutor {
 				logger.error(CLOSE_STATEMENT_EXCEPTION, e);
 			}
 		}
-
-		logger.warn(DURATION
-				+ String.valueOf(resp.getDbTime()));
 	}
 }

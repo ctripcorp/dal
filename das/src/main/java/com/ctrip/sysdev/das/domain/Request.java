@@ -1,8 +1,12 @@
 package com.ctrip.sysdev.das.domain;
 
+import io.netty.util.AttributeKey;
+
 import java.util.UUID;
 
 public class Request extends Domain {
+	public static final AttributeKey<Long> DECODE_START = new AttributeKey<Long>("DECODE_START");
+	
 	private static final long serialVersionUID = 4914609946446456152L;
 	private static final int CURRENT_VERSION = 1;
 
@@ -10,19 +14,27 @@ public class Request extends Domain {
 	private String credential;
 	private RequestMessage message;
 	
-	private long decodeTime;
+	private long decodeStart;
+	private long decodeEnd;
 
 	public Request() {
 		protocolVersion = CURRENT_VERSION;
-		decodeTime = System.currentTimeMillis();
 	}
 
-	public void endDecode() {
-		decodeTime = System.currentTimeMillis() - decodeTime;
+	public void setDecodeStart(long decodeStart) {
+		this.decodeStart = decodeStart;
 	}
 
-	public long getDecodeTime() {
-		return decodeTime;
+	public void endDecode(long decodeStart) {
+		decodeEnd = System.currentTimeMillis();
+	}
+
+	public long getDecodeStart() {
+		return decodeStart;
+	}
+	
+	public long getDecodeEnd() {
+		return decodeEnd;
 	}
 
 	public UUID getTaskid() {

@@ -3,27 +3,22 @@ package com.ctrip.sysdev.das.netty4;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.msgpack.type.Value;
-import org.msgpack.type.ValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.DruidDataSourceWrapper;
+import com.ctrip.sysdev.das.domain.Request;
 import com.ctrip.sysdev.das.domain.RequestMessage;
 import com.ctrip.sysdev.das.domain.Response;
 import com.ctrip.sysdev.das.domain.StatementParameter;
-import com.ctrip.sysdev.das.domain.enums.DbType;
 import com.ctrip.sysdev.das.domain.enums.OperationType;
 import com.ctrip.sysdev.das.domain.enums.StatementType;
 
@@ -34,26 +29,23 @@ public class QueryExecutor {
 	public static final String DURATION = "duration";
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	private ResponseSerializer responseSerializer = new ResponseSerializer();
-
+	
 	private DruidDataSourceWrapper dataSource;
-	private RequestMessage message;
-	private ChannelHandlerContext ctx;
-	public QueryExecutor(DruidDataSourceWrapper dataSource, RequestMessage message, ChannelHandlerContext ctx) {
+	private ResponseSerializer responseSerializer = new ResponseSerializer();
+	
+	public QueryExecutor(DruidDataSourceWrapper dataSource) {
 		this.dataSource = dataSource;
-		this.message = message;
-		this.ctx = ctx;
 	}
 	
-	public Response execute() {
-		Response resp = ctx.channel().attr(Response.RESPONSE_KEY).get();
-		ctx.channel().attr(Response.RESPONSE_KEY).set(null);
+	public void execute(Request request, ChannelHandlerContext ctx) {
+		responseSerializer.writeResponseHeader(ctx, request);
+
+		Response resp = new Response(request);
 		Connection conn = null;
 		PreparedStatement statement = null;
-
-
-//		addDelay();
+		RequestMessage message = request.getMessage();
 		
+		addDelay();
 		long start = System.currentTimeMillis();
 		try {
 			conn = dataSource.getConnection(message.getDbName());
@@ -66,7 +58,7 @@ public class QueryExecutor {
 				executeSP(resp, statement);
 			} else {
 				if (message.getOperationType() == OperationType.Read) {
-					executeQuery(resp, statement);
+					executeQuery(ctx, resp, statement);
 				} else {
 					// boolean batchOperation = false;
 					// for (Parameter p : message.getArgs()) {
@@ -78,7 +70,7 @@ public class QueryExecutor {
 					// if (batchOperation) {
 					// executeBatch(resp, statement);
 					// } else {
-					executeUpdate(resp, statement);
+					executeUpdate(ctx, resp, statement);
 					// }
 					// conn.commit();
 				}
@@ -90,11 +82,13 @@ public class QueryExecutor {
 		} finally {
 			cleanUp(resp, conn, statement, start);
 		}
-
-		return resp;
 	}
 
+	private boolean debug = false;
 	private void addDelay() {
+		if(!debug)
+			return;
+		
 		int i = 3;
 		synchronized (this) {
 			while (i-- > 0) {
@@ -115,7 +109,9 @@ public class QueryExecutor {
 		PreparedStatement statement = null;
 
 		if (message.getStatementType() == StatementType.SQL) {
-			statement = conn.prepareStatement(message.getSql());
+			statement = conn.prepareStatement(message.getSql(), 
+					ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_READ_ONLY);
 		} else {
 			StringBuffer occupy = new StringBuffer();
 
@@ -138,7 +134,7 @@ public class QueryExecutor {
 		return statement;
 	}
 
-	private void executeQuery(Response resp, PreparedStatement statement)
+	private void executeQuery(ChannelHandlerContext ctx, Response resp, PreparedStatement statement)
 			throws Exception {
 		resp.setResultType(OperationType.Read);
 
@@ -147,12 +143,12 @@ public class QueryExecutor {
 
 		// Mark start encoding
 		resp.encodeStart();
-		getFromResultSet(rs, resp);
+		getFromResultSet(ctx, rs, resp);
 //		resp.setResultSet(null);
 		resp.encodeEnd();
 	}
 
-	private void executeUpdate(Response resp, PreparedStatement statement)
+	private void executeUpdate(ChannelHandlerContext ctx, Response resp, PreparedStatement statement)
 			throws Exception {
 		resp.setResultType(OperationType.Write);
 
@@ -230,129 +226,47 @@ public class QueryExecutor {
 	 * @return
 	 * @throws SQLException
 	 */
-	private void getFromResultSet(ResultSet rs, Response resp)
+	private void getFromResultSet(ChannelHandlerContext ctx,  ResultSet rs, Response resp)
 			throws Exception {
-
+		rs.last();
+		int count = rs.getRow();
+		rs.beforeFirst();
+		
 		ResultSetMetaData metaData = rs.getMetaData();
 
 		int totalColumns = metaData.getColumnCount();
 
-		int[] colTypes = new int[totalColumns];
-		String[] colNames = new String[totalColumns];
+		List<byte[][]> rows = new ArrayList<byte[][]>();
 
-		for (int i = 1; i <= totalColumns; i++) {
-			int currentColType = metaData.getColumnType(i);
-			colTypes[i - 1] = currentColType;
-			colNames[i - 1] = metaData.getColumnLabel(i);
-		}
+		int bucket = getBucketCount(count);
 
-		List<List<StatementParameter>> results = new ArrayList<List<StatementParameter>>();
-
-		final int bucket =2;
 		int rowCount = 0;
 		int totalCount = 0;
 		while (rs.next()) {
-			List<StatementParameter> result = new ArrayList<StatementParameter>();
-			for (int i = 1; i <= totalColumns; i++) {
-				Value v;
-				switch (colTypes[i - 1]) {
-				case java.sql.Types.BOOLEAN:
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Boolean,
-							ValueFactory.createBooleanValue(rs.getBoolean(i))));
-					break;
-				case java.sql.Types.TINYINT:
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Byte,
-							ValueFactory.createIntegerValue(rs.getByte(i))));
-					break;
-				case java.sql.Types.SMALLINT:
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Int16,
-							ValueFactory.createIntegerValue(rs.getShort(i))));
-					break;
-				case java.sql.Types.INTEGER:
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Int32,
-							ValueFactory.createIntegerValue(rs.getInt(i))));
-					break;
-				case java.sql.Types.BIGINT:
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Int64,
-							ValueFactory.createIntegerValue(rs.getLong(i))));
-					break;
-				case java.sql.Types.FLOAT:
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Single,
-							ValueFactory.createFloatValue(rs.getFloat(i))));
-					break;
-				case java.sql.Types.DOUBLE:
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Double,
-							ValueFactory.createFloatValue(rs.getDouble(i))));
-					break;
-				case java.sql.Types.DECIMAL:
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Double, 
-							ValueFactory.createRawValue(rs.getBigDecimal(i).toString())));
-					break;
-				case java.sql.Types.VARCHAR:
-				case java.sql.Types.NVARCHAR:
-				case java.sql.Types.LONGVARCHAR:
-				case java.sql.Types.LONGNVARCHAR:
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.String,
-							ValueFactory.createRawValue(rs.getString(i))));
-					break;
-				case java.sql.Types.DATE:
-					Date tempDate = rs.getDate(i);
-					v = tempDate == null ? ValueFactory.createNilValue()
-							: ValueFactory.createIntegerValue(tempDate
-									.getTime());
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.DateTime, v));
-					break;
-				case java.sql.Types.TIME:
-					Time tempTime = rs.getTime(i);
-					v = tempTime == null ? ValueFactory.createNilValue()
-							: ValueFactory.createIntegerValue(tempTime
-									.getTime());
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.DateTime, v));
-					break;
-				case java.sql.Types.TIMESTAMP:
-					Timestamp tempTimestamp = rs.getTimestamp(i);
-					v = tempTimestamp == null ? ValueFactory.createNilValue()
-							: ValueFactory.createIntegerValue(tempTimestamp
-									.getTime());
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.DateTime, v));
-					break;
-				case java.sql.Types.BINARY:
-				case java.sql.Types.BLOB:
-				case java.sql.Types.LONGVARBINARY:
-				case java.sql.Types.VARBINARY:
-					result.add(StatementParameter.createFromValue(i,
-							colNames[i - 1], DbType.Binary,
-							ValueFactory.createRawValue(rs.getBytes(i))));
-					break;
-				default:
-					break;
-				}
+			byte[][] row = new byte[totalColumns][];
+			
+			for (int i = 0; i < totalColumns; i++) {
+				row[i] = rs.getBytes(i + 1);
 			}
-			results.add(result);
+			rows.add(row);
 			// check for chunk
 			totalCount++;
 			rowCount++;
 			if(rowCount == bucket) {
-				responseSerializer.write(ctx, results, false, resp);
-				results.clear();
+				responseSerializer.write(ctx, rows, null);
+				rows = new ArrayList<byte[][]>();
 				rowCount = 0;
 			}
 		}
 		resp.totalCount = totalCount;
-		responseSerializer.write(ctx, results, true, resp);
-		results.clear();
+		responseSerializer.write(ctx, rows, resp);
+	}
+
+	private int getBucketCount(int count) {
+		int bucket = 300;
+		if(count > 20000)
+			bucket = 2;
+		return bucket;
 	}
 
 	private void cleanUp(Response resp, Connection conn, Statement statement,
@@ -374,8 +288,5 @@ public class QueryExecutor {
 				logger.error(CLOSE_STATEMENT_EXCEPTION, e);
 			}
 		}
-
-		logger.warn(DURATION
-				+ String.valueOf(resp.getDbTime()));
 	}
 }

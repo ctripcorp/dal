@@ -28,5 +28,4 @@ message Response {
   optional ResponseMessage msg = 3;
 
   optional int32 affectRows = 4;
-
 }

@@ -7,9 +7,18 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ctrip.sysdev.das.domain.Response;
 
+/**
+ *  @deprecated
+ * @author jhhe
+ *
+ */
 public class TimeCostSendTask implements Runnable {
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	private UUID taskId;
 	private long decodeRequestTime;
 	private long dbTime;
@@ -25,6 +34,7 @@ public class TimeCostSendTask implements Runnable {
 	@Override
 	public void run() {
 		URL url;
+		String result = "";
 		try {
 			url = new URL("http://localhost:8080/console/dal/das/monitor/timeCosts");
 			URLConnection conn = url.openConnection();
@@ -39,6 +49,7 @@ public class TimeCostSendTask implements Runnable {
 				append(";dbTime:").append(dbTime).
 				append(";encodeResponseTime:").append(encodeResponseTime);
 			
+			result = sb.toString();
 			writer.write(sb.toString());
 			writer.flush();
 			writer.close();
@@ -48,7 +59,7 @@ public class TimeCostSendTask implements Runnable {
 	        while ((breader.readLine()) != null) {}
 	        breader.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error sending statistics: " + result, e);
 		}
 	}
 }

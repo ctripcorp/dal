@@ -28,11 +28,13 @@ namespace platform.dao.response
          protected override List<ResultSetHeader> UnpackFromCore(MsgPack.Unpacker unpacker)
         {
 
-            long counts;
+            int counts;
 
-            unpacker.ReadArrayLength(out counts);
+            //unpacker.ReadArrayLength(out counts);
+            counts = (int)unpacker.ItemsCount;
 
-            List<ResultSetHeader> results = new List<ResultSetHeader>((int)counts);
+
+            List<ResultSetHeader> results = new List<ResultSetHeader>(counts);
 
             for (int i = 0; i < counts; i++)
             {

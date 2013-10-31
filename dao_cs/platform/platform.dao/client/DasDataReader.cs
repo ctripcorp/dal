@@ -11,6 +11,7 @@ using platform.dao.response;
 using System.Diagnostics;
 using platform.dao.log;
 using platform.dao.enums;
+using MsgPack;
 
 namespace platform.dao.client
 {
@@ -36,10 +37,12 @@ namespace platform.dao.client
         private int rowCursor = 0;
 
         //private List<IParameter> current;
-        private byte[][] current;
+        //private byte[][] current;
+        private List<MessagePackObject> current;
 
         //private List<List<IParameter>> ResultSet;
-        private List<byte[][]> ResultSet;
+        //private List<byte[][]> ResultSet;
+        private List<List<MessagePackObject>> ResultSet;
 
         private List<ResultSetHeader> header;
 
@@ -109,7 +112,8 @@ namespace platform.dao.client
                 NetworkStream.Read(buffer, 0, buffer.Length);
 
                 //List<List<IParameter>> results = new List<List<IParameter>>();
-                List<byte[][]> results = new List<byte[][]>();
+                //List<byte[][]> results = new List<byte[][]>();
+                List<List<MessagePackObject>> results = new List<List<MessagePackObject>>();
 
                 if (ResultSet != null && ResultSet.Count > 0)
                 {
@@ -117,7 +121,7 @@ namespace platform.dao.client
                 }
 
                 //List<List<IParameter>> readerResults = serializer.UnpackSingleObject(buffer);
-                List<byte[][]> readerResults = serializer.UnpackSingleObject(buffer);
+                List<List<MessagePackObject>> readerResults = serializer.UnpackSingleObject(buffer);
 
                 watch.Stop();
 
@@ -168,8 +172,8 @@ namespace platform.dao.client
         /// </summary>
         public int FieldCount
         {
-            //get { return current.Count; }
-            get { return current.Length; }
+            get { return current.Count; }
+            //get { return current.Length; }
         }
 
         public bool GetBoolean(int i)
@@ -373,30 +377,18 @@ namespace platform.dao.client
 
                 int currentType = header[lableIndex].ColumnType;
 
-                byte[] currentValue = current[lableIndex];
+                MessagePackObject currentValue = current[lableIndex];
 
                 switch (currentType)
                 {
-                    case Types.SMALLINT:
-                    case Types.TINYINT:
-                    case Types.INTEGER:
-                        result = BitConverter.ToInt32(currentValue, 0);
-                        break;
-                    case Types.BIGINT:
-                        result = BitConverter.ToInt64(currentValue, 0);
-                        break;
-                    case Types.FLOAT:
-                    case Types.DOUBLE:
-                        result = BitConverter.ToDouble(currentValue, 0);
-                        break;
-                    case Types.BINARY:
-                        result = currentValue;
+                    case Types.DECIMAL:
+                        result = decimal.Parse(currentValue.AsString());
                         break;
                     case Types.TIMESTAMP:
-                        result = utcStartTime.AddMilliseconds(BitConverter.ToUInt64(currentValue, 0));
+                        result = utcStartTime.AddMilliseconds(currentValue.AsUInt64());
                         break;
                     default:
-                        result = BitConverter.ToString(currentValue);
+                        result = currentValue.ToObject();
                         break;
                 }
 
@@ -441,30 +433,18 @@ namespace platform.dao.client
 
                 int currentType = header[lableIndex].ColumnType;
 
-                byte[] currentValue = current[lableIndex];
+                MessagePackObject currentValue = current[lableIndex];
 
                 switch (currentType)
                 {
-                    case Types.SMALLINT:
-                    case Types.TINYINT:
-                    case Types.INTEGER:
-                        result = BitConverter.ToInt32(currentValue, 0);
-                        break;
-                    case Types.BIGINT:
-                        result = BitConverter.ToInt64(currentValue, 0);
-                        break;
-                    case Types.FLOAT:
-                    case Types.DOUBLE:
-                        result = BitConverter.ToDouble(currentValue, 0);
-                        break;
-                    case Types.BINARY:
-                        result = currentValue;
+                    case Types.DECIMAL:
+                        result = decimal.Parse(currentValue.AsString());
                         break;
                     case Types.TIMESTAMP:
-                        result = utcStartTime.AddMilliseconds(BitConverter.ToUInt64(currentValue, 0));
+                        result = utcStartTime.AddMilliseconds(currentValue.AsUInt64());
                         break;
                     default:
-                        result = BitConverter.ToString(currentValue);
+                        result = currentValue.ToObject();
                         break;
                 }
 
@@ -488,39 +468,7 @@ namespace platform.dao.client
             }
         }
 
-        private object GetFromByteArray(int currentType, byte[] currentValue)
-        {
-            object result = null;
-            switch (currentType)
-            {
-                case Types.BOOLEAN:
-                    break;
-                case Types.SMALLINT:
-                case Types.TINYINT:
-                case Types.INTEGER:
-                    result = BitConverter.ToInt32(currentValue, 0);
-                    break;
-                case Types.BIGINT:
-                    result = BitConverter.ToInt64(currentValue, 0);
-                    break;
-                case Types.FLOAT:
-                case Types.DOUBLE:
-                    result = BitConverter.ToDouble(currentValue, 0);
-                    break;
-                case Types.BINARY:
-                    result = currentValue;
-                    break;
-                case Types.TIMESTAMP:
-                    result = utcStartTime.AddMilliseconds(BitConverter.ToUInt64(currentValue, 0));
-                    break;
-                default:
-                    result = BitConverter.ToString(currentValue);
-                    break;
-            }
-
-            return result;
-
-        }
+     
 
     }
 }

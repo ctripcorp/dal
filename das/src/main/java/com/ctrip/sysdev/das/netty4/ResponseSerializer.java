@@ -70,7 +70,11 @@ public class ResponseSerializer {
 			packer.write(metaData.getColumnType(i+1));
 		}
 		packer.writeArrayEnd();
-		ctx.writeAndFlush(out.toByteArray());
+		byte[] payload = out.toByteArray();
+		ByteBuf buf = ctx.alloc().buffer();
+		buf.writeInt(payload.length);
+		buf.writeBytes(payload);
+		ctx.writeAndFlush(buf);
 	}
 
 	/**

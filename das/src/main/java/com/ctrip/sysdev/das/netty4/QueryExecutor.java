@@ -239,6 +239,8 @@ public class QueryExecutor {
 		for (int i = 0; i < totalColumns; i++) {
 			columnTypes[i] = metaData.getColumnType(i + 1);
 		}
+		
+		responseSerializer.writeResultSetHeader(ctx, rs);
 
 		List<Value[]> rows = new ArrayList<Value[]>();
 

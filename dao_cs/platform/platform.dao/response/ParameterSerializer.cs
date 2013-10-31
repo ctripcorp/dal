@@ -9,7 +9,8 @@ using System.Data;
 
 namespace platform.dao.response
 {
-    public class ParameterSerializer : MessagePackSerializer<List<byte[][]>>
+    public class ParameterSerializer : MessagePackSerializer<List<List<MessagePackObject>>>
+    //public class ParameterSerializer : MessagePackSerializer<List<byte[][]>>
     //public class ParameterSerializer : MessagePackSerializer<List<List<IParameter>>>
     {
 
@@ -21,23 +22,26 @@ namespace platform.dao.response
             // If the target objects has complex (non-primitive) objects,
             // you can get serializers which can handle complex type fields.
             // And then, you can cache them to instance fields of this custom serializer.
-            context.Serializers.Register<List<byte[][]>>(this);
+            //context.Serializers.Register<List<byte[][]>>(this);
+            context.Serializers.Register<List<List<MessagePackObject>>>(this);
             //context.Serializers.Register<List<List<IParameter>>>(this);
         }
 
         //protected override void PackToCore(Packer packer, List<List<IParameter>> value)
-        protected override void PackToCore(Packer packer, List<byte[][]> value)
+        //protected override void PackToCore(Packer packer, List<byte[][]> value)
+        protected override void PackToCore(Packer packer, List<List<MessagePackObject>> value)
         {
 
         }
 
         //protected override List<List<IParameter>> UnpackFromCore(Unpacker unpacker)
-        protected override List<byte[][]> UnpackFromCore(Unpacker unpacker)
+       // protected override List<byte[][]> UnpackFromCore(Unpacker unpacker)
+        protected override List<List<MessagePackObject>> UnpackFromCore(Unpacker unpacker)
         {
             //共有多少行
             int arrayLength = (int)unpacker.ItemsCount;
 
-            List<byte[][]> results = new List<byte[][]>(arrayLength);
+            List<List<MessagePackObject>> results = new List<List<MessagePackObject>>(arrayLength);
 
             for (int i = 0; i < arrayLength; i++)
             {
@@ -46,24 +50,53 @@ namespace platform.dao.response
 
                 unpacker.ReadArrayLength(out fieldCount);
 
-                List<byte[]> row = new List<byte[]>((int)fieldCount);
+                List<MessagePackObject> row = new List<MessagePackObject>((int)fieldCount);
 
                 for (int j = 0; j < fieldCount; j++)
                 {
-                    byte[] result;
-                    //获取每一列的值
-                    if (unpacker.ReadBinary(out result))
-                    {
-                        row.Add(result);
-                    }
+                    MessagePackObject value;
 
+                    unpacker.ReadObject(out value);
+                    row.Add(value);
                 }
 
-                results.Add(row.ToArray());
+                results.Add(row);
 
             }
 
             return results;
+
+
+            ////共有多少行
+            //int arrayLength = (int)unpacker.ItemsCount;
+
+            //List<byte[][]> results = new List<byte[][]>(arrayLength);
+
+            //for (int i = 0; i < arrayLength; i++)
+            //{
+            //    //每行有多少列
+            //    long fieldCount;
+
+            //    unpacker.ReadArrayLength(out fieldCount);
+
+            //    List<byte[]> row = new List<byte[]>((int)fieldCount);
+
+            //    for (int j = 0; j < fieldCount; j++)
+            //    {
+            //        byte[] result;
+            //        //获取每一列的值
+            //        if (unpacker.ReadBinary(out result))
+            //        {
+            //            row.Add(result);
+            //        }
+
+            //    }
+
+            //    results.Add(row.ToArray());
+
+            //}
+
+            //return results;
 
             //int arrayLength = (int)unpacker.ItemsCount;
 

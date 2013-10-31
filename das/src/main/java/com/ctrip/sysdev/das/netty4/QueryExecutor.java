@@ -114,7 +114,7 @@ public class QueryExecutor {
 
 		if (message.getStatementType() == StatementType.SQL) {
 			statement = conn.prepareStatement(message.getSql(),
-					ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.TYPE_FORWARD_ONLY,
 					ResultSet.CONCUR_READ_ONLY);
 		} else {
 			StringBuffer occupy = new StringBuffer();
@@ -245,10 +245,8 @@ public class QueryExecutor {
 
 		List<Value[]> rows = new ArrayList<Value[]>();
 
-		int bucket = getBucketCount(rs, 2);
+		int bucket = 2000;
 		
-		
-
 		int rowCount = 0;
 		int totalCount = 0;
 		while (rs.next()) {
@@ -269,29 +267,6 @@ public class QueryExecutor {
 		}
 		resp.totalCount = totalCount;
 		responseSerializer.write(ctx, rows, resp);
-	}
-
-	private int getBucketCount(ResultSet rs, int hint) throws Exception {
-		checkRsLoopTime(rs, false);
-		if(hint != 0)
-			return hint;
-		
-		rs.last();
-		int count = rs.getRow();
-		rs.beforeFirst();
-
-		int bucket = 300;
-		if (count > 20000)
-			bucket = 3000;
-		return bucket;
-	}
-
-	private void checkRsLoopTime(ResultSet rs, boolean tt) throws SQLException {
-		if(!tt)
-			return;
-		long t = System.currentTimeMillis();
-		while(rs.next());
-		logger.info("RS loop in ms: " + (System.currentTimeMillis() - t));
 	}
 
 	private void cleanUp(Response resp, Connection conn, Statement statement,

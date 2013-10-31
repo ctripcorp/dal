@@ -17,6 +17,7 @@ namespace platform.demo
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            
             string port = Request.QueryString["port"];
             string dbName = Request.QueryString["db"];
             string sql = Request.QueryString["sql"];
@@ -32,9 +33,7 @@ namespace platform.demo
             if (!string.IsNullOrEmpty(dbName))
             {
                 //AbstractDAO.Reload(true, dbName);
-                ClientPool.GetInstance().CreateDasClient(dbName, null);
-                ClientPool.GetInstance().DefaultName = dbName;
-                ClientPool.GetInstance().Hello = ClientPool.GetInstance().Hello + 1;
+                ClientPool.GetInstance().ChangeClient(dbName);
                 string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(new { Success=true});
                 Response.Clear();
                 Response.ContentType = "application/json; charset=utf-8";

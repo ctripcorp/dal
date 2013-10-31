@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Configuration;
 
 namespace platform.dao.client
 {
@@ -9,71 +10,78 @@ namespace platform.dao.client
     {
 
         private static ClientPool pool = new ClientPool();
+        private IClient currentClient;
+        private  bool directConnect;
+
         private Dictionary<string, IClient> clients;
+        private IList<string> logicDbs;
         private object lock_obj = new object();
-        //private string defaultName = string.Empty;
-
-        public string DefaultName { get; set; }
-
-        public int Hello { get; set; }
 
         private ClientPool()
         {
-            clients = new Dictionary<string, IClient>();
+            //是否直连数据库
+            directConnect = bool.Parse(ConfigurationManager.AppSettings["UseDirectConnection"]);
+            if (directConnect)
+            {
+                string dbName = ConfigurationManager.AppSettings["DirectDbName"];
+                string providername = ConfigurationManager.ConnectionStrings[dbName].ProviderName;
+                string connString = ConfigurationManager.ConnectionStrings[dbName].ConnectionString;
+
+                currentClient = new DbClient(providername, connString);
+            }
+            else
+            {
+                string logicDbNames = ConfigurationManager.AppSettings["LogicDbNames"];
+                string defaultDbName = ConfigurationManager.AppSettings["DefaultDb"];
+                string dasCredential = ConfigurationManager.AppSettings["DasCredential"];
+
+                logicDbs = new List<string>();
+
+                clients = new Dictionary<string, IClient>();
+                foreach (var db in logicDbNames.Split(';'))
+                {
+                    logicDbs.Add(db);
+                    IClient client = new DasClient(db, dasCredential);
+                    if (currentClient == null)
+                    {
+                        currentClient = client;
+                    }
+                    clients.Add(db, client);
+                }
+
+                if (clients.ContainsKey(defaultDbName))
+                {
+                    currentClient = clients[defaultDbName];
+                }
+
+            }
         }
 
+        /// <summary>
+        /// 获取单例对象
+        /// </summary>
+        /// <returns></returns>
         public static ClientPool GetInstance()
         {
             return pool;
         }
 
-        public IClient GetCurrentClient(string dbName=null)
+        public IClient CurrentClient { get { return currentClient;} }
+
+        public IList<string> LogicDbNames
+        {
+            get { return logicDbs;}
+        }
+
+        public IClient ChangeClient(string dbName)
         {
             lock (lock_obj)
             {
-                if (string.IsNullOrEmpty(dbName))
-                    dbName = DefaultName;
-                return clients[dbName];
+                currentClient = clients[dbName];
+                return currentClient;
             }
         }
 
-        public bool CreateDasClient(string dbName, string credential)
-        {
-            lock (lock_obj)
-            {
-                //defaultName = dbName;
-                //TODO: thread safety
-                if (clients.ContainsKey(dbName))
-                {
-                    return false;
-                }
-                else
-                {
-                    DasClient dasClient = new DasClient(dbName, credential);
-                    clients.Add(dbName, dasClient);
-                    return true;
-                }
-            }
-        }
-
-        public bool CreateDbClient(string connectName, string providerType, string credential)
-        {
-            lock (lock_obj)
-            {
-                //defaultName = connectName;
-                //TODO: thread safety
-                if (clients.ContainsKey(connectName))
-                {
-                    return false;
-                }
-                else
-                {
-                    DbClient dbClient = new DbClient(providerType, credential);
-                    clients.Add(connectName, dbClient);
-                    return true;
-                }
-            }
-        }
 
     }
 }

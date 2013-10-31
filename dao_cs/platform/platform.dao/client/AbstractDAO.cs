@@ -23,39 +23,6 @@ namespace platform.dao.client
 
         //protected void Init(bool useDas = true, string DbName = null, string credential = null,
         //    string provider = null, string connectString = null)
-        static AbstractDAO()
-        {
-            //Reload(useDas, DbName, credential, provider, connectString);
-            bool initSuccess = false;
-            try
-            {
-                string providername = ConfigurationManager.ConnectionStrings["platform"].ProviderName;
-                string connString = ConfigurationManager.ConnectionStrings["platform"].ConnectionString;
-
-                ClientPool.GetInstance().CreateDbClient("platform", providername, connString);
-                ClientPool.GetInstance().DefaultName = "platform";
-                initSuccess = true;
-            }
-            catch
-            {
-            }
-            try
-            {
-                string dbName = ConfigurationManager.AppSettings["DbName"];
-                string cred = ConfigurationManager.AppSettings["Credential"];
-
-                ClientPool.GetInstance().CreateDasClient(dbName, cred);
-                ClientPool.GetInstance().DefaultName = dbName;
-                initSuccess = true;
-            }
-            catch
-            {
-            }
-           
-            if(!initSuccess)
-                throw new DAOConfigException(
-                    "Please ensure appSettings and connectionStrings of name platform exists!");
-        }
 
         ///// <summary>
         ///// 重新加载配置
@@ -115,7 +82,7 @@ namespace platform.dao.client
 
             logger.Warn(sql.ToString());
 
-            using (IDataReader reader = ClientPool.GetInstance().GetCurrentClient().Fetch(sql.ToString()))
+            using (IDataReader reader = ClientPool.GetInstance().CurrentClient.Fetch(sql.ToString()))
             {
                 if (reader.Read())
                 {
@@ -159,7 +126,7 @@ namespace platform.dao.client
 
             logger.Warn(sql.ToString());
 
-            return ClientPool.GetInstance().GetCurrentClient().Execute(sql.ToString());
+            return ClientPool.GetInstance().CurrentClient.Execute(sql.ToString());
         }
 
         /// <summary>
@@ -184,7 +151,7 @@ namespace platform.dao.client
                 }
             }
 
-            return ClientPool.GetInstance().GetCurrentClient().Execute(table.GetInsertSql(), parameters.ToArray());
+            return ClientPool.GetInstance().CurrentClient.Execute(table.GetInsertSql(), parameters.ToArray());
             ;
         }
 
@@ -227,7 +194,7 @@ namespace platform.dao.client
 
             logger.Warn(sql.ToString());
 
-            return ClientPool.GetInstance().GetCurrentClient().Execute(sql.ToString());
+            return ClientPool.GetInstance().CurrentClient.Execute(sql.ToString());
         }
 
         /// <summary>
@@ -247,7 +214,7 @@ namespace platform.dao.client
 
             logger.Warn(sql.ToString());
 
-            using (IDataReader reader = ClientPool.GetInstance().GetCurrentClient().Fetch(sql.ToString()))
+            using (IDataReader reader = ClientPool.GetInstance().CurrentClient.Fetch(sql.ToString()))
             {
                 while (reader.Read())
                 {
@@ -278,12 +245,12 @@ namespace platform.dao.client
 
             logger.Warn(table.GetDeleteSql());
 
-            return ClientPool.GetInstance().GetCurrentClient().Execute(table.GetDeleteSql());
+            return ClientPool.GetInstance().CurrentClient.Execute(table.GetDeleteSql());
         }
 
         public IDataReader Fetch(string sql, params IParameter[] parameters)
         {
-            return ClientPool.GetInstance().GetCurrentClient().Fetch(sql, parameters);
+            return ClientPool.GetInstance().CurrentClient.Fetch(sql, parameters);
         }
 
         /// <summary>
@@ -301,7 +268,7 @@ namespace platform.dao.client
 
             IList<T> results = new List<T>();
 
-            using (IDataReader dr = ClientPool.GetInstance().GetCurrentClient().Fetch(sql, parameters))
+            using (IDataReader dr = ClientPool.GetInstance().CurrentClient.Fetch(sql, parameters))
             {
                 while (dr.Read())
                 {
@@ -320,12 +287,12 @@ namespace platform.dao.client
 
         public int Execute(string sql, params IParameter[] parameters)
         {
-            return ClientPool.GetInstance().GetCurrentClient().Execute(sql, parameters);
+            return ClientPool.GetInstance().CurrentClient.Execute(sql, parameters);
         }
 
         public IDataReader FetchBySp(string sp, params IParameter[] parameters)
         {
-            return ClientPool.GetInstance().GetCurrentClient().FetchBySp(sp, parameters);
+            return ClientPool.GetInstance().CurrentClient.FetchBySp(sp, parameters);
         }
 
         /// <summary>
@@ -343,7 +310,7 @@ namespace platform.dao.client
 
             IList<T> results = new List<T>();
 
-            using (IDataReader dr = ClientPool.GetInstance().GetCurrentClient().FetchBySp(sp, parameters))
+            using (IDataReader dr = ClientPool.GetInstance().CurrentClient.FetchBySp(sp, parameters))
             {
                 while (dr.Read())
                 {
@@ -362,7 +329,7 @@ namespace platform.dao.client
 
         public int ExecuteSp(string sp, params IParameter[] parameters)
         {
-            return ClientPool.GetInstance().GetCurrentClient().ExecuteSp(sp, parameters);
+            return ClientPool.GetInstance().CurrentClient.ExecuteSp(sp, parameters);
         }
     }
 }

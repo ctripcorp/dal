@@ -487,5 +487,40 @@ namespace platform.dao.client
                 return result;
             }
         }
+
+        private object GetFromByteArray(int currentType, byte[] currentValue)
+        {
+            object result = null;
+            switch (currentType)
+            {
+                case Types.BOOLEAN:
+                    break;
+                case Types.SMALLINT:
+                case Types.TINYINT:
+                case Types.INTEGER:
+                    result = BitConverter.ToInt32(currentValue, 0);
+                    break;
+                case Types.BIGINT:
+                    result = BitConverter.ToInt64(currentValue, 0);
+                    break;
+                case Types.FLOAT:
+                case Types.DOUBLE:
+                    result = BitConverter.ToDouble(currentValue, 0);
+                    break;
+                case Types.BINARY:
+                    result = currentValue;
+                    break;
+                case Types.TIMESTAMP:
+                    result = utcStartTime.AddMilliseconds(BitConverter.ToUInt64(currentValue, 0));
+                    break;
+                default:
+                    result = BitConverter.ToString(currentValue);
+                    break;
+            }
+
+            return result;
+
+        }
+
     }
 }

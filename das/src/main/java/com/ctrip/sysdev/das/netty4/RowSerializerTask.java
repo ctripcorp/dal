@@ -53,10 +53,10 @@ public class RowSerializerTask implements Runnable {
 	
 
 	private byte[] serialize(List<Value[]> rows) throws Exception {
-		BufferPacker packer = ctx.channel().attr(ResponseSerializer.MESSAGE_PACK_KEY).get();
-		packer.clear();
-//		MessagePack msgpack = new MessagePack();
-//		BufferPacker packer = msgpack.createBufferPacker();
+//		BufferPacker packer = ctx.channel().attr(ResponseSerializer.MESSAGE_PACK_KEY).get();
+//		packer.clear();
+		MessagePack msgpack = new MessagePack();
+		BufferPacker packer = msgpack.createBufferPacker();
 		packer.writeArrayBegin(rows.size());
 		for (Value[] row : rows) {
 			packer.writeArrayBegin(row.length);

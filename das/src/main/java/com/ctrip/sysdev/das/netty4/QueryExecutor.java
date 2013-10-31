@@ -114,7 +114,7 @@ public class QueryExecutor {
 
 		if (message.getStatementType() == StatementType.SQL) {
 			statement = conn.prepareStatement(message.getSql(),
-					ResultSet.TYPE_FORWARD_ONLY,
+					ResultSet.TYPE_SCROLL_INSENSITIVE,
 					ResultSet.CONCUR_READ_ONLY);
 		} else {
 			StringBuffer occupy = new StringBuffer();

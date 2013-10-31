@@ -13,6 +13,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import org.msgpack.MessagePack;
+import org.msgpack.packer.BufferPacker;
 import org.msgpack.packer.Packer;
 import org.msgpack.type.Value;
 
@@ -21,17 +22,14 @@ import com.ctrip.sysdev.das.domain.Response;
 
 public class ResponseSerializer {
 	public static final AttributeKey<Executor> EXECUTOR_KEY = new AttributeKey<Executor>("EXECUTOR_KEY");
-	public static final AttributeKey<Packer> MESSAGE_PACK_KEY = new AttributeKey<Packer>("MESSAGE_PACK_KEY");
-	public static final AttributeKey<ByteArrayOutputStream> OUT_KEY = new AttributeKey<ByteArrayOutputStream>("OUT_KEY");
+	public static final AttributeKey<BufferPacker> MESSAGE_PACK_KEY = new AttributeKey<BufferPacker>("MESSAGE_PACK_KEY");
 	
 	public static void initChannel(ChannelHandlerContext ctx) {
 		ctx.channel().attr(EXECUTOR_KEY).set(Executors.newSingleThreadExecutor());
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		MessagePack msgpack = new MessagePack();
-		Packer packer = msgpack.createPacker(out);
+		BufferPacker packer = msgpack.createBufferPacker();
 
-		ctx.channel().attr(OUT_KEY).set(out);
 		ctx.channel().attr(MESSAGE_PACK_KEY).set(packer);
 	}
 	

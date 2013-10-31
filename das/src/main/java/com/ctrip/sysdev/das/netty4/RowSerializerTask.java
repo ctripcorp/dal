@@ -4,11 +4,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import org.msgpack.MessagePack;
-import org.msgpack.packer.Packer;
+import org.msgpack.packer.BufferPacker;
 import org.msgpack.type.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,13 +53,10 @@ public class RowSerializerTask implements Runnable {
 	
 
 	private byte[] serialize(List<Value[]> rows) throws Exception {
-//		ByteArrayOutputStream out = ctx.channel().attr(ResponseSerializer.OUT_KEY).get();
-//		out.reset();
-//		Packer packer = ctx.channel().attr(ResponseSerializer.MESSAGE_PACK_KEY).get();
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+//		BufferPacker packer = ctx.channel().attr(ResponseSerializer.MESSAGE_PACK_KEY).get();
+//		packer.clear();
 		MessagePack msgpack = new MessagePack();
-		Packer packer = msgpack.createPacker(out);
-
+		BufferPacker packer = msgpack.createBufferPacker();
 		packer.writeArrayBegin(rows.size());
 		for (Value[] row : rows) {
 			packer.writeArrayBegin(row.length);
@@ -70,7 +66,7 @@ public class RowSerializerTask implements Runnable {
 			packer.writeArrayEnd();
 		}
 		packer.writeArrayEnd();
-		return out.toByteArray();
+		return packer.toByteArray();
 	}
 
 }

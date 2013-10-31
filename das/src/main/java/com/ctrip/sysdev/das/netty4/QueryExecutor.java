@@ -9,8 +9,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.msgpack.type.Value;
+import org.msgpack.type.ValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,14 +32,14 @@ public class QueryExecutor {
 	public static final String DURATION = "duration";
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+
 	private DruidDataSourceWrapper dataSource;
 	private ResponseSerializer responseSerializer = new ResponseSerializer();
-	
+
 	public QueryExecutor(DruidDataSourceWrapper dataSource) {
 		this.dataSource = dataSource;
 	}
-	
+
 	public void execute(Request request, ChannelHandlerContext ctx) {
 		responseSerializer.writeResponseHeader(ctx, request);
 
@@ -44,7 +47,7 @@ public class QueryExecutor {
 		Connection conn = null;
 		PreparedStatement statement = null;
 		RequestMessage message = request.getMessage();
-		
+
 		addDelay();
 		long start = System.currentTimeMillis();
 		try {
@@ -85,10 +88,11 @@ public class QueryExecutor {
 	}
 
 	private boolean debug = false;
+
 	private void addDelay() {
-		if(!debug)
+		if (!debug)
 			return;
-		
+
 		int i = 3;
 		synchronized (this) {
 			while (i-- > 0) {
@@ -109,7 +113,7 @@ public class QueryExecutor {
 		PreparedStatement statement = null;
 
 		if (message.getStatementType() == StatementType.SQL) {
-			statement = conn.prepareStatement(message.getSql(), 
+			statement = conn.prepareStatement(message.getSql(),
 					ResultSet.TYPE_SCROLL_INSENSITIVE,
 					ResultSet.CONCUR_READ_ONLY);
 		} else {
@@ -134,8 +138,8 @@ public class QueryExecutor {
 		return statement;
 	}
 
-	private void executeQuery(ChannelHandlerContext ctx, Response resp, PreparedStatement statement)
-			throws Exception {
+	private void executeQuery(ChannelHandlerContext ctx, Response resp,
+			PreparedStatement statement) throws Exception {
 		resp.setResultType(OperationType.Read);
 
 		ResultSet rs = statement.executeQuery();
@@ -144,12 +148,12 @@ public class QueryExecutor {
 		// Mark start encoding
 		resp.encodeStart();
 		getFromResultSet(ctx, rs, resp);
-//		resp.setResultSet(null);
+		// resp.setResultSet(null);
 		resp.encodeEnd();
 	}
 
-	private void executeUpdate(ChannelHandlerContext ctx, Response resp, PreparedStatement statement)
-			throws Exception {
+	private void executeUpdate(ChannelHandlerContext ctx, Response resp,
+			PreparedStatement statement) throws Exception {
 		resp.setResultType(OperationType.Write);
 
 		int rowCount = 0;
@@ -226,35 +230,35 @@ public class QueryExecutor {
 	 * @return
 	 * @throws SQLException
 	 */
-	private void getFromResultSet(ChannelHandlerContext ctx,  ResultSet rs, Response resp)
-			throws Exception {
-		rs.last();
-		int count = rs.getRow();
-		rs.beforeFirst();
-		
+	private void getFromResultSet(ChannelHandlerContext ctx, ResultSet rs,
+			Response resp) throws Exception {
 		ResultSetMetaData metaData = rs.getMetaData();
 
 		int totalColumns = metaData.getColumnCount();
+		int[] columnTypes = new int[totalColumns];
+		for (int i = 0; i < totalColumns; i++) {
+			columnTypes[i] = metaData.getColumnType(i + 1);
+		}
 
-		List<byte[][]> rows = new ArrayList<byte[][]>();
+		List<Value[]> rows = new ArrayList<Value[]>();
 
-		int bucket = getBucketCount(count);
+		int bucket = getBucketCount(rs);
 
 		int rowCount = 0;
 		int totalCount = 0;
 		while (rs.next()) {
-			byte[][] row = new byte[totalColumns][];
-			
+			Value[] row = new Value[totalColumns];
+
 			for (int i = 0; i < totalColumns; i++) {
-				row[i] = rs.getBytes(i + 1);
+				row[i] = getColumnValue(rs, i, columnTypes[i]);
 			}
 			rows.add(row);
 			// check for chunk
 			totalCount++;
 			rowCount++;
-			if(rowCount == bucket) {
+			if (rowCount == bucket) {
 				responseSerializer.write(ctx, rows, null);
-				rows = new ArrayList<byte[][]>();
+				rows = new ArrayList<Value[]>();
 				rowCount = 0;
 			}
 		}
@@ -262,9 +266,13 @@ public class QueryExecutor {
 		responseSerializer.write(ctx, rows, resp);
 	}
 
-	private int getBucketCount(int count) {
+	private int getBucketCount(ResultSet rs) throws Exception {
+		rs.last();
+		int count = rs.getRow();
+		rs.beforeFirst();
+
 		int bucket = 300;
-		if(count > 20000)
+		if (count > 20000)
 			bucket = 2;
 		return bucket;
 	}
@@ -288,5 +296,54 @@ public class QueryExecutor {
 				logger.error(CLOSE_STATEMENT_EXCEPTION, e);
 			}
 		}
+	}
+
+	private Value getColumnValue(ResultSet rs, int index, int type) throws Exception {
+		int i = index + 1;
+
+		switch (type) {
+		case java.sql.Types.BOOLEAN:
+			return ValueFactory.createBooleanValue(rs.getBoolean(i));
+		case java.sql.Types.TINYINT:
+			return ValueFactory.createIntegerValue(rs.getByte(i));
+		case java.sql.Types.SMALLINT:
+			return ValueFactory.createIntegerValue(rs.getShort(i));
+		case java.sql.Types.INTEGER:
+			return ValueFactory.createIntegerValue(rs.getInt(i));
+		case java.sql.Types.BIGINT:
+			return ValueFactory.createIntegerValue(rs.getLong(i));
+		case java.sql.Types.FLOAT:
+			return ValueFactory.createFloatValue(rs.getFloat(i));
+		case java.sql.Types.DOUBLE:
+			return ValueFactory.createFloatValue(rs.getDouble(i));
+		case java.sql.Types.DECIMAL:
+			return ValueFactory.createRawValue(rs.getBigDecimal(i).toString());
+		case java.sql.Types.VARCHAR:
+		case java.sql.Types.NVARCHAR:
+		case java.sql.Types.LONGVARCHAR:
+		case java.sql.Types.LONGNVARCHAR:
+			return ValueFactory.createRawValue(rs.getString(i));
+		case java.sql.Types.DATE:
+			return getDateTypeValue(rs.getDate(i));
+		case java.sql.Types.TIME:
+			return getDateTypeValue(rs.getTime(i));
+		case java.sql.Types.TIMESTAMP:
+			return getDateTypeValue(rs.getTimestamp(i));
+		case java.sql.Types.BINARY:
+		case java.sql.Types.BLOB:
+		case java.sql.Types.LONGVARBINARY:
+		case java.sql.Types.VARBINARY:
+			return ValueFactory.createRawValue(rs.getBytes(i));
+		default:
+			break;
+		}
+
+		return ValueFactory.createNilValue();
+	}
+	
+	private Value getDateTypeValue(Date tempDate) {
+		return tempDate == null ? 
+				ValueFactory.createNilValue() :
+				ValueFactory.createIntegerValue(tempDate.getTime());
 	}
 }

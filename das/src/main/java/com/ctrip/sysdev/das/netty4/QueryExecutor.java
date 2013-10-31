@@ -275,9 +275,9 @@ public class QueryExecutor {
 		int count = rs.getRow();
 		rs.beforeFirst();
 
-		int bucket = 300;
-		if (count > 20000)
-			bucket = 300;
+		int bucket = 3000;
+//		if (count > 20000)
+//			bucket = 300;
 		return bucket;
 	}
 

@@ -450,6 +450,7 @@ namespace platform.dao.client
                         break;
                 }
 
+
                 //IParameter param = current[i];
 
                 //if (param != null)

@@ -50,6 +50,8 @@ namespace platform.dao.response
                 results.Add(new ResultSetHeader() { ColumnName = columnName, ColumnType = columnType});
             }
 
+            unpacker.Dispose();
+
             return results;
 
             ////读取下标索引

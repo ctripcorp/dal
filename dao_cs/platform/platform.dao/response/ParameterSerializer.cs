@@ -64,6 +64,8 @@ namespace platform.dao.response
 
             }
 
+            unpacker.Dispose();
+
             return results;
 
 

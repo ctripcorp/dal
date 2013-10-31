@@ -21,6 +21,9 @@ public class RowSerializerTask implements Runnable {
 	private ChannelHandlerContext ctx;
 	private List<Value[]> rows;
 	private Response response;
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
+	MessagePack msgpack = new MessagePack();
+	Packer packer = msgpack.createPacker(out);
 	
 	public RowSerializerTask(ChannelHandlerContext ctx, List<Value[]> rows, Response response) {
 		this.ctx = ctx;
@@ -54,9 +57,7 @@ public class RowSerializerTask implements Runnable {
 	
 
 	private byte[] serialize(List<Value[]> rows) throws Exception {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		MessagePack msgpack = new MessagePack();
-		Packer packer = msgpack.createPacker(out);
+		out.reset();
 		packer.writeArrayBegin(rows.size());
 		for (Value[] row : rows) {
 			packer.writeArrayBegin(row.length);

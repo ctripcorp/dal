@@ -123,6 +123,8 @@ namespace platform.dao.client
                 //List<List<IParameter>> readerResults = serializer.UnpackSingleObject(buffer);
                 List<List<MessagePackObject>> readerResults = serializer.UnpackSingleObject(buffer);
 
+                
+
                 watch.Stop();
 
                 MonitorData data = MonitorData.GetInstance();

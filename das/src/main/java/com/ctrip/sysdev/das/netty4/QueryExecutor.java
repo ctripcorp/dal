@@ -245,6 +245,8 @@ public class QueryExecutor {
 		List<Value[]> rows = new ArrayList<Value[]>();
 
 		int bucket = getBucketCount(rs);
+		
+		
 
 		int rowCount = 0;
 		int totalCount = 0;

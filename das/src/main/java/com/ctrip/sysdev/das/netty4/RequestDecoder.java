@@ -47,6 +47,7 @@ public class RequestDecoder extends ByteToMessageDecoder {
 		Request request = null; 
 		try {
 			request = deserialize(decoded);
+			request.setDecodeStart(ctx.channel().attr(Request.DECODE_START).get());
 			request.endDecode(ctx.channel().attr(Request.DECODE_START).get());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -150,10 +151,4 @@ public class RequestDecoder extends ByteToMessageDecoder {
 
 		return message;
 	}
-	
-	public static void main(String[] args) {
-		byte[] xxx = UUID.fromString("6c14eaf0-af41-4997-9878-6fb7076e6b3c").toString().getBytes();
-	}
-	
-
 }

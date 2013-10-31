@@ -87,6 +87,7 @@ public class ResponseSerializer {
 	 * For row, we send to sender thread to parallel read and send process.
 	 */
 	public void write(ChannelHandlerContext ctx, List<Value[]> rows, Response resp) {
-		ctx.channel().attr(EXECUTOR_KEY).get().execute(new RowSerializerTask(ctx, rows, resp));
+		new RowSerializerTask(ctx, rows, resp).run();
+//		ctx.channel().attr(EXECUTOR_KEY).get().execute(new RowSerializerTask(ctx, rows, resp));
 	}
 }

@@ -277,7 +277,7 @@ public class QueryExecutor {
 
 		int bucket = 300;
 		if (count > 20000)
-			bucket = 2;
+			bucket = 300;
 		return bucket;
 	}
 

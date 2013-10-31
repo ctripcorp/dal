@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 
 import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
+import org.msgpack.type.Value;
 
 import com.ctrip.sysdev.das.domain.Request;
 import com.ctrip.sysdev.das.domain.Response;
@@ -75,7 +76,7 @@ public class ResponseSerializer {
 	/**
 	 * For row, we send to sender thread to parallel read and send process.
 	 */
-	public void write(ChannelHandlerContext ctx, List<byte[][]> rows, Response resp) {
+	public void write(ChannelHandlerContext ctx, List<Value[]> rows, Response resp) {
 		ctx.channel().attr(EXECUTOR_KEY).get().execute(new RowSerializerTask(ctx, rows, resp));
 	}
 }

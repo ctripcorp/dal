@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
+import org.msgpack.type.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,10 +19,10 @@ public class RowSerializerTask implements Runnable {
 	private static final Logger logger = LoggerFactory
 			.getLogger(RowSerializerTask.class);
 	private ChannelHandlerContext ctx;
-	private List<byte[][]> rows;
+	private List<Value[]> rows;
 	private Response response;
 	
-	public RowSerializerTask(ChannelHandlerContext ctx, List<byte[][]> rows, Response response) {
+	public RowSerializerTask(ChannelHandlerContext ctx, List<Value[]> rows, Response response) {
 		this.ctx = ctx;
 		this.rows = rows;
 		this.response = response;
@@ -52,14 +53,14 @@ public class RowSerializerTask implements Runnable {
 	}
 	
 
-	private byte[] serialize(List<byte[][]> rows) throws Exception {
+	private byte[] serialize(List<Value[]> rows) throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		MessagePack msgpack = new MessagePack();
 		Packer packer = msgpack.createPacker(out);
 		packer.writeArrayBegin(rows.size());
-		for (byte[][] row : rows) {
+		for (Value[] row : rows) {
 			packer.writeArrayBegin(row.length);
-			for(byte[] column: row) {
+			for(Value column: row) {
 				packer.write(column);
 			}
 			packer.writeArrayEnd();

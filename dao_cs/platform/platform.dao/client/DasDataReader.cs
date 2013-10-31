@@ -12,6 +12,7 @@ using System.Diagnostics;
 using platform.dao.log;
 using platform.dao.enums;
 using MsgPack;
+using MsgPack.Serialization;
 
 namespace platform.dao.client
 {
@@ -121,9 +122,11 @@ namespace platform.dao.client
                 }
 
                 //List<List<IParameter>> readerResults = serializer.UnpackSingleObject(buffer);
-                List<List<MessagePackObject>> readerResults = serializer.UnpackSingleObject(buffer);
+                //List<List<MessagePackObject>> readerResults = serializer.UnpackSingleObject(buffer);
 
-                
+                var se = MessagePackSerializer.Create<List<List<MessagePackObject>>>();
+
+                var readerResults = se.UnpackSingleObject(buffer);
 
                 watch.Stop();
 

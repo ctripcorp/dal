@@ -5,7 +5,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -19,14 +18,21 @@ import org.msgpack.type.Value;
 
 import com.ctrip.sysdev.das.domain.Request;
 import com.ctrip.sysdev.das.domain.Response;
-import com.ctrip.sysdev.das.domain.StatementParameter;
-import com.ctrip.sysdev.das.exception.SerDeException;
 
 public class ResponseSerializer {
 	public static final AttributeKey<Executor> EXECUTOR_KEY = new AttributeKey<Executor>("EXECUTOR_KEY");
-
+	public static final AttributeKey<Packer> MESSAGE_PACK_KEY = new AttributeKey<Packer>("MESSAGE_PACK_KEY");
+	public static final AttributeKey<ByteArrayOutputStream> OUT_KEY = new AttributeKey<ByteArrayOutputStream>("OUT_KEY");
+	
 	public static void initChannel(ChannelHandlerContext ctx) {
 		ctx.channel().attr(EXECUTOR_KEY).set(Executors.newSingleThreadExecutor());
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		MessagePack msgpack = new MessagePack();
+		Packer packer = msgpack.createPacker(out);
+
+		ctx.channel().attr(OUT_KEY).set(out);
+		ctx.channel().attr(MESSAGE_PACK_KEY).set(packer);
 	}
 	
 	/**

@@ -7,7 +7,6 @@ import io.netty.channel.ChannelHandlerContext;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 
-import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
 import org.msgpack.type.Value;
 import org.slf4j.Logger;
@@ -54,9 +53,9 @@ public class RowSerializerTask implements Runnable {
 	
 
 	private byte[] serialize(List<Value[]> rows) throws Exception {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		MessagePack msgpack = new MessagePack();
-		Packer packer = msgpack.createPacker(out);
+		ByteArrayOutputStream out = ctx.channel().attr(ResponseSerializer.OUT_KEY).get();
+		out.reset();
+		Packer packer = ctx.channel().attr(ResponseSerializer.MESSAGE_PACK_KEY).get();
 		packer.writeArrayBegin(rows.size());
 		for (Value[] row : rows) {
 			packer.writeArrayBegin(row.length);

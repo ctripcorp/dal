@@ -20,14 +20,14 @@ namespace platform.dao.client
     {
         private static readonly DateTime utcStartTime;
 
-        private static ParameterSerializer serializer;
+        //private static ParameterSerializer serializer;
 
         private static ResultSetHeaderSerializer headerSerializer;
 
         static DasDataReader()
         {
             utcStartTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            serializer = new ParameterSerializer();
+            //serializer = new ParameterSerializer();
             headerSerializer = new ResultSetHeaderSerializer();
         }
 

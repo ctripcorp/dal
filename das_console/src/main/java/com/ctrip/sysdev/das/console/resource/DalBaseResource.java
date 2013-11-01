@@ -22,7 +22,7 @@ public class DalBaseResource {
 		List<String> children = zk.getChildren(path, false);
 		if(children!= null){
 			for(String c: children){
-				zk.delete(c, -1);
+				deleteNodeNested(path + "/" + c);
 			}
 		}
 		zk.delete(path, -1);

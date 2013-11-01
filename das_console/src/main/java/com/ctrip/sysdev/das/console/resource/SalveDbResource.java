@@ -20,7 +20,7 @@ import com.ctrip.sysdev.das.console.domain.Status;
 
 
 @Resource
-@Path("configure/db/{master}")
+@Path("configure/db/{master}/slave")
 @Singleton
 public class SalveDbResource extends DbResource {
 	@GET

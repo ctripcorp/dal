@@ -25,6 +25,9 @@ public class DbResource extends DalBaseResource {
 	public List<DB> getDBs(String root) throws Exception {
 		List<DB> dbList = new ArrayList<DB>();
 		ZooKeeper zk = getZk();
+		if(zk.exists(root, false) == null)
+			return dbList;
+		
 		List<String> dbNameList = zk.getChildren(root, false);
 		for(String dbName: dbNameList) {
 			dbList.add(getDB(root, dbName));

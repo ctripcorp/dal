@@ -33,5 +33,4 @@ public class TimeCostEntry {
 	public void setCost(Long cost) {
 		this.cost = cost;
 	}
-
 }

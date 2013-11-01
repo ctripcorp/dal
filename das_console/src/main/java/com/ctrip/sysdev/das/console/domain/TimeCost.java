@@ -8,32 +8,35 @@ public class TimeCost {
 	private List<TimeCostEntry> entries = new ArrayList<TimeCostEntry>();
 
 	public TimeCost() {
-		
+
 	}
-	
+
 	public TimeCost(String id, String values) {
 		this.id = id;
 		String[] segments = values.split(";");
-		for(String segment: segments) {
+		for (String segment : segments) {
 			entries.add(new TimeCostEntry(segment));
 		}
 	}
-	
+
 	public String getId() {
 		return id;
 	}
+
 	public void setId(String id) {
 		this.id = id;
 	}
+
 	public List<TimeCostEntry> getEntries() {
 		return entries;
 	}
+
 	public void setEntries(List<TimeCostEntry> entries) {
 		this.entries = entries;
 	}
-	
+
 	public void merge(TimeCost oldTc) {
-		if(oldTc != null)
+		if (oldTc != null)
 			entries.addAll(oldTc.entries);
 	}
 }

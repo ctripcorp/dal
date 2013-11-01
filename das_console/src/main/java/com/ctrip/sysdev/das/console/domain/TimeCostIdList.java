@@ -12,5 +12,4 @@ public class TimeCostIdList {
 	public void setIds(Set<String> ids) {
 		this.ids = ids;
 	}
-	
 }

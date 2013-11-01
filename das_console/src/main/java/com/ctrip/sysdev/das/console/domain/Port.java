@@ -12,5 +12,4 @@ public class Port {
 	public void setPorts(Set<Integer> ports) {
 		this.ports = ports;
 	}
-	
 }

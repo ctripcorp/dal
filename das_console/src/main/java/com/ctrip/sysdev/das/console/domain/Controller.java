@@ -12,5 +12,4 @@ public class Controller {
 	public void setIps(Set<String> ips) {
 		this.ips = ips;
 	}
-	
 }

@@ -2,20 +2,20 @@ package com.ctrip.sysdev.das.console;
 
 import java.util.List;
 
-import com.ctrip.sysdev.das.console.domain.DB;
+import com.ctrip.sysdev.das.console.domain.SalveDB;
 import com.ctrip.sysdev.das.console.domain.Node;
 import com.ctrip.sysdev.das.console.domain.Port;
 
 public class DasConfigureManager {
-	public List<DB> getAllDB(){
+	public List<SalveDB> getAllDB(){
 		return null;
 	}
 	
-	public DB getDBByName(String dbLogicName){
+	public SalveDB getDBByName(String dbLogicName){
 		return null;
 	}
 
-	public void updateDB(DB db){
+	public void updateDB(SalveDB db){
 		
 	}
 	

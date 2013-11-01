@@ -1,17 +1,8 @@
 package com.ctrip.sysdev.das.console.domain;
 
-public class DB {
+public class SalveDB {
 	private String name;
 	private DbSetting setting;
-	private DB[] slave;
-
-	public DB[] getSlave() {
-		return slave;
-	}
-
-	public void setSlave(DB[] slave) {
-		this.slave = slave;
-	}
 
 	public String getName() {
 		return name;

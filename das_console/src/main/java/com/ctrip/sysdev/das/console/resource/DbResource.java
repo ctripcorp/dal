@@ -22,7 +22,7 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 
-import com.ctrip.sysdev.das.console.domain.DB;
+import com.ctrip.sysdev.das.console.domain.SalveDB;
 import com.ctrip.sysdev.das.console.domain.DbSetting;
 import com.ctrip.sysdev.das.console.domain.Status;
 
@@ -35,14 +35,14 @@ public class DbResource extends DalBaseResource {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DB> getDb() {
-		List<DB> dbList = new ArrayList<DB>();
+	public List<SalveDB> getDb() {
+		List<SalveDB> dbList = new ArrayList<SalveDB>();
 		ZooKeeper zk = getZk();
 		try {
 			List<String> dbNameList = zk.getChildren("/dal/das/configure/db", false);
 			for(String dbName: dbNameList) {
 				String dbNodePath = "/dal/das/configure/db" + "/" + dbName;
-				DB db = new DB();
+				SalveDB db = new SalveDB();
 				db.setName(dbName);
 				DbSetting setting = new DbSetting();
 				setting.setDriver(new String(zk.getData(dbNodePath + "/driver", false, null)));

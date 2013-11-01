@@ -13,6 +13,7 @@ using platform.dao.log;
 using platform.dao.enums;
 using MsgPack;
 using MsgPack.Serialization;
+using System.Threading;
 
 namespace platform.dao.client
 {
@@ -128,10 +129,16 @@ namespace platform.dao.client
 
                  results.AddRange(se.UnpackSingleObject(buffer));
 
+                
+
                 buffer = null;
                 se = null;
 
+
                 watch.Stop();
+
+                //Thread.Sleep(1);
+                //GC.Collect();
 
                 MonitorData data = MonitorData.GetInstance();
 

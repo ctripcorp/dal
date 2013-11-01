@@ -246,7 +246,8 @@ public class QueryExecutor {
 		//List<Value[]> rows = new ArrayList<Value[]>();
 		List<List<Value>> rows = new ArrayList<List<Value>>();
 
-		int bucket = 2000;
+		//int bucket = 2000;
+		int bucket  = 2;
 		
 		int rowCount = 0;
 		int totalCount = 0;

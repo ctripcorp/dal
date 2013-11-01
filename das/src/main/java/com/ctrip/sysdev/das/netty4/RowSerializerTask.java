@@ -36,7 +36,7 @@ public class RowSerializerTask implements Runnable {
 			ByteBuf bf = ctx.alloc().buffer();
 
 			bf.writeInt(bytes.length + 1);
-//			logger.info("total length: "+ bytes.length);
+//			Thread.sleep(1);
 			bf.writeByte(response == null? 0 : 1);
 			bf.writeBytes(bytes);
 			ChannelFuture wf = ctx.writeAndFlush(bf);

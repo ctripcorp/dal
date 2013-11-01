@@ -243,7 +243,8 @@ public class QueryExecutor {
 		
 		responseSerializer.writeResultSetHeader(ctx, rs);
 
-		List<Value[]> rows = new ArrayList<Value[]>();
+		//List<Value[]> rows = new ArrayList<Value[]>();
+		List<List<Value>> rows = new ArrayList<List<Value>>();
 
 		int bucket = getBucketCount(rs, 2);
 		
@@ -252,10 +253,12 @@ public class QueryExecutor {
 		int rowCount = 0;
 		int totalCount = 0;
 		while (rs.next()) {
-			Value[] row = new Value[totalColumns];
+			//Value[] row = new Value[totalColumns];
+			List<Value> row= new ArrayList<Value>();
 
 			for (int i = 0; i < totalColumns; i++) {
-				row[i] = getColumnValue(rs, i, columnTypes[i]);
+				//row[i] = getColumnValue(rs, i, columnTypes[i]);
+				row.add(getColumnValue(rs, i, columnTypes[i]));
 			}
 			rows.add(row);
 			// check for chunk
@@ -263,7 +266,8 @@ public class QueryExecutor {
 			rowCount++;
 			if (rowCount == bucket) {
 				responseSerializer.write(ctx, rows, null);
-				rows = new ArrayList<Value[]>();
+				//rows = new ArrayList<Value[]>();
+				rows = new ArrayList<List<Value>>();
 				rowCount = 0;
 			}
 		}

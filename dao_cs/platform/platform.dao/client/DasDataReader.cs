@@ -126,7 +126,10 @@ namespace platform.dao.client
 
                 var se = MessagePackSerializer.Create<List<List<MessagePackObject>>>();
 
-                var readerResults = se.UnpackSingleObject(buffer);
+                 results.AddRange(se.UnpackSingleObject(buffer));
+
+                buffer = null;
+                se = null;
 
                 watch.Stop();
 
@@ -137,8 +140,6 @@ namespace platform.dao.client
                     //data.TotalTime += watch.ElapsedMilliseconds;
                     data.DecodeResponseTime += watch.ElapsedMilliseconds;
                 }
-
-                results.AddRange(readerResults);
 
                 if (ResultSet != null)
                 {

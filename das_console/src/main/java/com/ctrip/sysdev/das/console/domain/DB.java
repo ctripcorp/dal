@@ -1,6 +1,6 @@
 package com.ctrip.sysdev.das.console.domain;
 
-public class SalveDB {
+public class DB {
 	private String name;
 	private DbSetting setting;
 

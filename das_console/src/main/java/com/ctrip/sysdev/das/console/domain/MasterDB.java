@@ -1,31 +1,15 @@
 package com.ctrip.sysdev.das.console.domain;
 
-public class MasterDB {
-	private String name;
-	private DbSetting setting;
-	private SalveDB[] slave;
+import java.util.List;
 
-	public SalveDB[] getSlave() {
-		return slave;
+public class MasterDB extends DB{
+	private List<DB> slaves;
+
+	public List<DB> getSlaves() {
+		return slaves;
 	}
 
-	public void setSlave(SalveDB[] slave) {
-		this.slave = slave;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public DbSetting getSetting() {
-		return setting;
-	}
-
-	public void setSetting(DbSetting setting) {
-		this.setting = setting;
+	public void setSlaves(List<DB> slaves) {
+		this.slaves = slaves;
 	}
 }

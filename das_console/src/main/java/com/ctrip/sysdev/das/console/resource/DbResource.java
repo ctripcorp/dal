@@ -22,8 +22,9 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 
-import com.ctrip.sysdev.das.console.domain.SalveDB;
+import com.ctrip.sysdev.das.console.domain.DB;
 import com.ctrip.sysdev.das.console.domain.DbSetting;
+import com.ctrip.sysdev.das.console.domain.MasterDB;
 import com.ctrip.sysdev.das.console.domain.Status;
 
 @Resource
@@ -35,20 +36,36 @@ public class DbResource extends DalBaseResource {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<SalveDB> getDb() {
-		List<SalveDB> dbList = new ArrayList<SalveDB>();
+	public List<DB> getDb() {
+		List<DB> dbList = new ArrayList<DB>();
 		ZooKeeper zk = getZk();
 		try {
 			List<String> dbNameList = zk.getChildren("/dal/das/configure/db", false);
 			for(String dbName: dbNameList) {
 				String dbNodePath = "/dal/das/configure/db" + "/" + dbName;
-				SalveDB db = new SalveDB();
-				db.setName(dbName);
-				DbSetting setting = new DbSetting();
-				setting.setDriver(new String(zk.getData(dbNodePath + "/driver", false, null)));
-				setting.setJdbcUrl(new String(zk.getData(dbNodePath + "/jdbcUrl", false, null)));
-				db.setSetting(setting);
-				dbList.add(db);
+				MasterDB master = new MasterDB();
+				master.setName(dbName);
+				master.setSetting(readSetting(dbNodePath));
+				master.setSlaves(readSlaves(dbNodePath));
+				dbList.add(master);
+			}				
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dbList;
+	}
+	
+	private List<DB> readSlaves(String masterPath) {
+		List<DB> dbList = new ArrayList<DB>();
+		ZooKeeper zk = getZk();
+		try {
+			List<String> dbNameList = zk.getChildren(masterPath, false);
+			for(String dbName: dbNameList) {
+				String dbNodePath = masterPath + "/" + dbName;
+				DB slave = new DB();
+				slave.setName(dbName);
+				slave.setSetting(readSetting(dbNodePath));
+				dbList.add(slave);
 			}				
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -61,11 +78,9 @@ public class DbResource extends DalBaseResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public DbSetting getDbSetting(@PathParam("name") String name) {
 		DbSetting setting = new DbSetting();
-		ZooKeeper zk = getZk();
 		try {
 			String dbNodePath = "/dal/das/configure/db" + "/" + name;
-			setting.setDriver(new String(zk.getData(dbNodePath + "/driver", false, null)));
-			setting.setJdbcUrl(new String(zk.getData(dbNodePath + "/jdbcUrl", false, null)));
+			setting = readSetting(dbNodePath);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -124,4 +139,14 @@ public class DbResource extends DalBaseResource {
 			return Status.ERROR;
 		}
 	}
+
+	private DbSetting readSetting(String path) throws Exception {
+		ZooKeeper zk = getZk();
+		DbSetting setting = new DbSetting();
+		
+		setting.setDriver(new String(zk.getData(path + "/driver", false, null)));
+		setting.setJdbcUrl(new String(zk.getData(path + "/jdbcUrl", false, null)));
+		
+		return setting;
+	}	
 }

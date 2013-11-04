@@ -19,21 +19,28 @@ public class RequestMessage {
 
 	private boolean useCache; // always
 
+	private boolean masterOnly;
+
 	private String spName;
 
 	private String sql;
 
 	private List<StatementParameter> args;// always
 
-	private int flags; // always
-
-	
 	public String getDbName() {
 		return dbName;
 	}
 
 	public void setDbName(String dbName) {
 		this.dbName = dbName;
+	}
+
+	public boolean isMasterOnly() {
+		return masterOnly;
+	}
+
+	public void setMasterOnly(boolean masterOnly) {
+		this.masterOnly = masterOnly;
 	}
 
 	public StatementType getStatementType() {
@@ -83,21 +90,4 @@ public class RequestMessage {
 	public void setArgs(List<StatementParameter> args) {
 		this.args = args;
 	}
-
-	public int getFlags() {
-		return flags;
-	}
-
-	public void setFlags(int flags) {
-		this.flags = flags;
-	}
-
-	/****
-	 * 
-	 * @return
-	 */
-	public int propertyCount() {
-		return 6;
-	}
-
 }

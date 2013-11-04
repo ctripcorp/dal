@@ -128,6 +128,8 @@ public class RequestDecoder extends ByteToMessageDecoder {
 		message.setOperationType(OperationType.fromInt(unpacker.readInt()));
 
 		message.setUseCache(unpacker.readBoolean());
+		
+		message.setMasterOnly(unpacker.readBoolean());
 
 		if (message.getStatementType() == StatementType.StoredProcedure) {
 			message.setSpName(unpacker.readString());
@@ -145,8 +147,6 @@ public class RequestDecoder extends ByteToMessageDecoder {
 		
 		message.setArgs(args);
 
-		message.setFlags(unpacker.readInt());
-		
 		unpacker.readArrayEnd();
 
 		return message;

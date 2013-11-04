@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +21,9 @@ import com.google.inject.name.Named;
 public class DruidDataSourceWrapper implements DasControllerConstants {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	// Should we make it thread safe? Currently, it is just read-only. If we want to support hot depoly
-	// We need to consider make it thread safe.
-	private Map<String, DruidDataSource> dsMap = new HashMap<String, DruidDataSource>();
+	private Map<String, DruidDataSource> masterMap = new HashMap<String, DruidDataSource>();
+	
+	private Map<String, DruidDataSource[]> slaveMap = new HashMap<String, DruidDataSource[]>();
 	
 	public static DruidDataSourceWrapper dataSource;
 
@@ -57,54 +56,88 @@ public class DruidDataSourceWrapper implements DasControllerConstants {
 	String validationQuery;
 
 	public void initDataSourceWrapper(ZooKeeper zk) throws Exception {
-		List<String> logicDBs = zk.getChildren(DB, false);
-		for(String logicDB: logicDBs) {
-			String logicDBPath = StringKit.buildPath(DB, logicDB);
-			String driverClass = new String(zk.getData(StringKit.buildPath(logicDBPath, DRIVER), false, null));
-			String jdbcUrl = new String(zk.getData(StringKit.buildPath(logicDBPath, JDBC_URL), false, null));
-			String user = Configuration.get(StringKit.buildKey(logicDB, "user"));
-			String password = Configuration.get(StringKit.buildKey(logicDB, "password"));;
-			create(logicDB, driverClass, jdbcUrl, user, password);
-		}
-
-		for (DruidDataSource ds : dsMap.values()) {
-
-			ds.setInitialSize(initialSize);
-			ds.setMinIdle(minIdle);
-			ds.setMaxActive(maxActive);
-			ds.setMaxWait(maxWait);
-
-			ds.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
-			ds.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
-			ds.setValidationQuery(validationQuery);
-			ds.setTestWhileIdle(true);
-			ds.setTestOnBorrow(false);
-			ds.setTestOnReturn(false);
-			ds.init();
-			try {
-				Connection connection = ds.getConnection();
-				connection.close();
-				logger.info("数据连接池已经建立:jdbcUrl=" + ds.getUrl());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		
+		createMaster(zk);		
 		dataSource = this;
 	}
-
-	private void create(String ligicDb, String driverClass, String jdbcUrl,
-			String user, String password) {
-		DruidDataSource dataSource = new DruidDataSource();
-		dsMap.put(ligicDb, dataSource);
-		dataSource.setDriverClassName(driverClass);
-		dataSource.setUrl(jdbcUrl);
-		dataSource.setUsername(user);
-		dataSource.setPassword(password);
+	
+	private void createMaster(ZooKeeper zk) throws Exception {
+		List<String> logicDBs = zk.getChildren(DB, false);
+		for(String logicDB: logicDBs) {
+			createMaster(zk, logicDB);
+			createSlave(zk, logicDB);
+		}
 	}
 
-	public Connection getConnection(String logicDb) throws SQLException {
-//		logicDb = "testMsSql";
-		return dsMap.get(logicDb).getConnection();
+	private void createMaster(ZooKeeper zk, String logicDB) throws Exception {
+		String logicDBPath = StringKit.buildPath(DB, logicDB);
+		String driverClass = new String(zk.getData(StringKit.buildPath(logicDBPath, DRIVER), false, null));
+		String jdbcUrl = new String(zk.getData(StringKit.buildPath(logicDBPath, JDBC_URL), false, null));
+		String user = Configuration.get(StringKit.buildKey(logicDB, "user"));
+		String password = Configuration.get(StringKit.buildKey(logicDB, "password"));;
+		masterMap.put(logicDB, create(logicDB, driverClass, jdbcUrl, user, password));
+	}
+
+	private void createSlave(ZooKeeper zk, String logicDB) throws Exception {
+		String slavePath = StringKit.buildPath(StringKit.buildPath(DB, logicDB), "slave");
+		if(zk.exists(slavePath, false) == null)
+			return;
+		
+		List<String> slaveDBs = zk.getChildren(slavePath, false);
+		DruidDataSource[] slaveDSs = new DruidDataSource[slaveDBs.size()];
+		
+		int i = 0;
+		for(String slaveDB: slaveDBs){
+			String slaveDBPath = StringKit.buildPath(slavePath, logicDB);
+			String driverClass = new String(zk.getData(StringKit.buildPath(slaveDBPath, DRIVER), false, null));
+			String jdbcUrl = new String(zk.getData(StringKit.buildPath(slaveDBPath, JDBC_URL), false, null));
+			String user = Configuration.get(StringKit.buildKey(logicDB, StringKit.buildKey(slaveDB, "user")));
+			String password = Configuration.get(StringKit.buildKey(logicDB, StringKit.buildKey(slaveDB, "password")));
+			slaveDSs[i++] = create(logicDB, driverClass, jdbcUrl, user, password);
+		}
+	}
+
+	private DruidDataSource create(String ligicDb, String driverClass, String jdbcUrl,
+			String user, String password) throws Exception {
+		DruidDataSource ds = new DruidDataSource();
+		
+		ds.setDriverClassName(driverClass);
+		ds.setUrl(jdbcUrl);
+		ds.setUsername(user);
+		ds.setPassword(password);
+
+		ds.setInitialSize(initialSize);
+		ds.setMinIdle(minIdle);
+		ds.setMaxActive(maxActive);
+		ds.setMaxWait(maxWait);
+
+		ds.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
+		ds.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
+		ds.setValidationQuery(validationQuery);
+		ds.setTestWhileIdle(true);
+		ds.setTestOnBorrow(false);
+		ds.setTestOnReturn(false);
+		ds.init();
+		
+		try {
+			Connection connection = ds.getConnection();
+			connection.close();
+			logger.info("Connection initilized: jdbcUrl=" + ds.getUrl());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ds;
+	}
+
+	public Connection getMasterConnection(String logicDb) throws SQLException {
+		return masterMap.get(logicDb).getConnection();
+	}
+
+	public Connection getSlaveConnection(String logicDb) throws SQLException {
+		DruidDataSource[] slaves = slaveMap.get(logicDb);
+		if(slaves == null)
+			return getMasterConnection(logicDb);
+		
+		int i = (int)(Math.random() * slaves.length);
+		return slaves[i].getConnection();
 	}
 }

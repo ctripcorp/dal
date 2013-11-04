@@ -51,7 +51,7 @@ public class QueryExecutor {
 		addDelay();
 		long start = System.currentTimeMillis();
 		try {
-			conn = dataSource.getConnection(message.getDbName());
+			conn = getConnection(message);
 			// conn.setAutoCommit(false);
 
 			statement = createStatement(conn, message);
@@ -85,6 +85,17 @@ public class QueryExecutor {
 		} finally {
 			cleanUp(resp, conn, statement, start);
 		}
+	}
+
+	private Connection getConnection(RequestMessage message)
+			throws SQLException {
+		if(message.isMasterOnly())
+			return dataSource.getMasterConnection(message.getDbName());
+
+		if(message.getOperationType() == OperationType.Read)
+			return dataSource.getSlaveConnection(message.getDbName());
+
+		return dataSource.getMasterConnection(message.getDbName());
 	}
 
 	private boolean debug = false;

@@ -20,14 +20,14 @@ public class EnvConstsModul implements Module {
 		binder.bindConstant().annotatedWith(Names.named("InetPort"))
 				.to(Configuration.getInt("serverPort"));
 
-		binder.bindConstant().annotatedWith(Names.named("driverClass"))
-				.to(Configuration.get("driverClass"));
-		binder.bindConstant().annotatedWith(Names.named("jdbcUrl"))
-				.to(Configuration.get("jdbcUrl"));
-		binder.bindConstant().annotatedWith(Names.named("user"))
-				.to(Configuration.get("user"));
-		binder.bindConstant().annotatedWith(Names.named("password"))
-				.to(Configuration.get("password"));
+//		binder.bindConstant().annotatedWith(Names.named("driverClass"))
+//				.to(Configuration.get("driverClass"));
+//		binder.bindConstant().annotatedWith(Names.named("jdbcUrl"))
+//				.to(Configuration.get("jdbcUrl"));
+//		binder.bindConstant().annotatedWith(Names.named("user"))
+//				.to(Configuration.get("user"));
+//		binder.bindConstant().annotatedWith(Names.named("password"))
+//				.to(Configuration.get("password"));
 		binder.bindConstant().annotatedWith(Names.named("initialSize"))
 				.to(Configuration.getInt("initialSize"));
 		binder.bindConstant().annotatedWith(Names.named("maxActive"))

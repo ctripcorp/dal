@@ -109,13 +109,6 @@ public class RequestDecoder extends ByteToMessageDecoder {
 
 	private static final int currentPropertyCount = 4;
 
-	/**
-	 * 
-	 * @param unpacker
-	 * @return
-	 * @throws IOException
-	 * @throws ProtocolInvalidException
-	 */
 	private RequestMessage unpackMessage(Unpacker unpacker)
 			throws IOException, ProtocolInvalidException {
 

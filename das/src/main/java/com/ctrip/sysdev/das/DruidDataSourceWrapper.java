@@ -87,7 +87,7 @@ public class DruidDataSourceWrapper implements DasControllerConstants {
 		
 		int i = 0;
 		for(String slaveDB: slaveDBs){
-			String slaveDBPath = StringKit.buildPath(slavePath, logicDB);
+			String slaveDBPath = StringKit.buildPath(slavePath, slaveDB);
 			String driverClass = new String(zk.getData(StringKit.buildPath(slaveDBPath, DRIVER), false, null));
 			String jdbcUrl = new String(zk.getData(StringKit.buildPath(slaveDBPath, JDBC_URL), false, null));
 			String user = Configuration.get(StringKit.buildKey(logicDB, StringKit.buildKey(slaveDB, "user")));

@@ -5,61 +5,83 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.UUID;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.domain.Response;
-
 /**
- *  @deprecated
- * @author jhhe
- *
+ * 
+ * @author gawu
+ * 
  */
-public class TimeCostSendTask implements Runnable {
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	private UUID taskId;
-	private long decodeRequestTime;
-	private long dbTime;
-	private long encodeResponseTime;
-	
-	public TimeCostSendTask(Response response) {
-		taskId = response.getTaskid();
-		decodeRequestTime = response.getDecodeRequestTime();
-		dbTime = response.getDbTime();
-		encodeResponseTime = response.getEncodeResponseTime();
+public class TimeCostSendTask extends Thread {
+
+	private static TimeCostSendTask instance = new TimeCostSendTask();
+
+	private ConcurrentLinkedQueue<String> queue;
+
+	public ConcurrentLinkedQueue<String> getQueue() {
+		return queue;
 	}
-	
+
+	private TimeCostSendTask() {
+		queue = new ConcurrentLinkedQueue<String>();
+		this.start();
+	}
+
+	public static TimeCostSendTask getInstance() {
+		return instance;
+	}
+
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	// private UUID taskId;
+	// private long decodeRequestTime;
+	// private long dbTime;
+	// private long encodeResponseTime;
+	//
+	// public TimeCostSendTask(Response response) {
+	// taskId = response.getTaskid();
+	// decodeRequestTime = response.getDecodeRequestTime();
+	// dbTime = response.getDbTime();
+	// encodeResponseTime = response.getEncodeResponseTime();
+	// }
+	//
 	@Override
 	public void run() {
 		URL url;
 		String result = "";
-		try {
-			url = new URL("http://localhost:8080/console/dal/das/monitor/timeCosts");
-			URLConnection conn = url.openConnection();
-			conn.setDoOutput(true);
 
-			OutputStreamWriter writer = new OutputStreamWriter(
-					conn.getOutputStream());
+		while (true) {
+			try {
+				String timeCost = queue.poll();
+				if (null == timeCost) {
+					Thread.sleep(100);
+					continue;
+				}
+				url = new URL(
+						"http://localhost:8080/console/dal/das/monitor/timeCosts");
+				URLConnection conn = url.openConnection();
+				conn.setDoOutput(true);
 
-			StringBuilder sb = new StringBuilder();
-			sb.append("id=").append(taskId).
-				append("&timeCost=decodeRequestTime:").append(decodeRequestTime).
-				append(";dbTime:").append(dbTime).
-				append(";encodeResponseTime:").append(encodeResponseTime);
-			
-			result = sb.toString();
-			writer.write(sb.toString());
-			writer.flush();
-			writer.close();
-			
-			InputStreamReader reder = new InputStreamReader(conn.getInputStream(), "utf-8");  
-	        BufferedReader breader = new BufferedReader(reder);  
-	        while ((breader.readLine()) != null) {}
-	        breader.close();
-		} catch (Exception e) {
-			logger.error("Error sending statistics: " + result, e);
+				OutputStreamWriter writer = new OutputStreamWriter(
+						conn.getOutputStream());
+
+				writer.write(timeCost);
+				writer.flush();
+				writer.close();
+
+				InputStreamReader reder = new InputStreamReader(
+						conn.getInputStream(), "utf-8");
+				BufferedReader breader = new BufferedReader(reder);
+				while ((breader.readLine()) != null) {
+				}
+				breader.close();
+			} catch (Exception e) {
+				logger.error("Error sending statistics: " + result, e);
+			}
 		}
 	}
 }

@@ -8,14 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.DruidDataSourceWrapper;
-import com.ctrip.sysdev.das.domain.Request;
+import com.ctrip.sysdev.das.domain.DasProto;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 /**
  * @author weiw
  */
-public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
+public class DalServiceHandler extends SimpleChannelInboundHandler<DasProto.Request> {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(DalServiceHandler.class);
@@ -30,7 +30,7 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 	}
 
 	@Override
-	public void channelRead0(ChannelHandlerContext ctx, Request request) {
+	public void channelRead0(ChannelHandlerContext ctx, DasProto.Request request) {
 		try {
 			logger.info("channelRead0 from {} message = '{}'", ctx.channel(), request);
 			queryExecutor.execute(request, ctx);
@@ -44,7 +44,6 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<Request> {
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
 		logger.debug("channelRegistered {}", ctx.channel());
 		allChannels.add(ctx.channel());
-		ResponseSerializer.initChannel(ctx);
 	}
 
 	@Override

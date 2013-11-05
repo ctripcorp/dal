@@ -5,9 +5,10 @@ using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using platform.dao.log;
 using platform.dao.param;
-using platform.dao.request;
-using platform.dao.response;
 using System.Text;
+using System.Collections.Generic;
+using ProtoBuf;
+using System.IO;
 
 namespace platform.dao.client
 {
@@ -57,7 +58,7 @@ namespace platform.dao.client
                     sock.Connect(Consts.ServerIp, Consts.ServerPort);
                     networkStream = new NetworkStream(sock);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logger.Error(ex.StackTrace);
                 }
@@ -69,24 +70,24 @@ namespace platform.dao.client
         /// 向Das服务写入请求
         /// </summary>
         /// <param name="request"></param>
-        private void WriteRequest(DefaultRequest request)
+        private void WriteRequest(param.Request request)
         {
-            watch.Reset();
-            watch.Start();
-            //MonitorSender.GetInstance().Send(request.Taskid.ToString(), "beforeRequest", DateTime.Now.Ticks / 10000);
 
-            //long beforeReqeust = DateTime.Now.Ticks / 10000;
+            //Log the sql
+            logger.Info(request.msg.name);
 
-            byte[] payload = request.Pack2ByteArray();
-            //watch.Stop();
+            byte[] payload = null;
 
-            //logger.Info(string.Format("Client encode request time: {0} MilliSeconds", watch.ElapsedTicks/10000.0));
+            using (MemoryStream ms = new MemoryStream())
+            {
+                Serializer.Serialize<param.Request>(ms, request);
 
-            
+                payload = new byte[ms.Position];
+                var fullB = ms.GetBuffer();
+                Array.Copy(fullB, payload, payload.Length);
+            }
 
-            logger.Info(request.Message.Sql);
-
-            int protocolVersion = request.GetProtocolVersion();
+            int protocolVersion = 1;
 
             int totalLength = 2 + payload.Length;
 
@@ -108,7 +109,7 @@ namespace platform.dao.client
 
                     networkStream.Write(payload, 0, payload.Length);
                     success = true;
-                   
+
                 }
                 catch (Exception ex)
                 {
@@ -117,12 +118,6 @@ namespace platform.dao.client
                 }
                 currentRetry++;
             }
-            //MonitorSender.GetInstance().Send(request.Taskid.ToString(), "endRequest", DateTime.Now.Ticks / 10000);
-            watch.Stop();
-
-            MonitorData data  = MonitorData.GetInstance(request.Taskid.ToString());
-
-            data.EncodeRequestTime = watch.ElapsedMilliseconds;
 
         }
 
@@ -130,59 +125,38 @@ namespace platform.dao.client
         /// 从Das服务读出响应结果
         /// </summary>
         /// <returns></returns>
-        private DefaultResponse ReadResponse(Guid taskid)
+        private param.Response ReadResponse(Guid taskid)
         {
-            watch.Reset();
-            watch.Start();
-            DefaultResponse response = null;
+            param.Response response = null;
             bool success = false;
             int currentRetry = 0;
             while (!success && currentRetry < Consts.RetryTimesWhenError)
             {
                 try
                 {
-                    //MonitorSender.GetInstance().Send(taskid.ToString(), "beforeResponse", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
 
-
-                    int protocolVersion = (networkStream.ReadByte() << 8) |
-                        (networkStream.ReadByte() << 0);
-
-                    byte[] taskidBuffer = new byte[36];
-
-                    int taskidLen = networkStream.Read(taskidBuffer, 0, taskidBuffer.Length);
-
-                    if (taskidLen != taskidBuffer.Length)
-                        throw new Exception();
-
-                    int resultType = (networkStream.ReadByte() << 24) |
+                    int totalLength = (networkStream.ReadByte() << 24) |
                         (networkStream.ReadByte() << 16) |
                         (networkStream.ReadByte() << 8) |
                         (networkStream.ReadByte() << 0);
 
-                    response = new DefaultResponse();
+                    int protocolVersion = (networkStream.ReadByte() << 8) |
+                        (networkStream.ReadByte() << 0);
 
-                    response.Taskid = new Guid(Encoding.Default.GetString(taskidBuffer));
+                    byte[] header = new byte[totalLength - 2];
 
-                    response.ResultType = (enums.OperationType)resultType;
+                    int taskidLen = networkStream.Read(header, 0, header.Length);
 
-                    //MonitorSender.GetInstance().Send(taskid.ToString(), "endResponse", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+                    if (taskidLen != header.Length)
+                        throw new Exception();
 
-                    //byte[] buffer = new byte[totalLength - 2];
-
-                    //int realCount = networkStream.Read(buffer, 0, buffer.Length);
-                    //if (realCount != buffer.Length)
-                    //{
-                    //}
-                    //watch.Reset();
-                    //watch.Start();
-                    //response = DefaultResponse.UnpackFromByteArray(buffer);
-                    //watch.Stop();
-
-
-                    //logger.Info(string.Format("Client decode response time: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
+                    using (MemoryStream ms = new MemoryStream(header))
+                    {
+                        response = Serializer.Deserialize<param.Response>(ms);
+                    }
 
                     success = true;
-                    
+
                 }
                 catch (Exception ex)
                 {
@@ -191,12 +165,6 @@ namespace platform.dao.client
                 }
                 currentRetry++;
             }
-
-            watch.Stop();
-
-            MonitorData data = MonitorData.GetInstance(taskid.ToString());
-
-            data.DecodeResponseTime = watch.ElapsedMilliseconds;
 
             return response;
 
@@ -222,7 +190,7 @@ namespace platform.dao.client
                        (networkStream.ReadByte() << 0);
 
                     success = true;
-                    
+
                 }
                 catch (Exception ex)
                 {
@@ -245,90 +213,15 @@ namespace platform.dao.client
         public override IDataReader Fetch(string sql, params IParameter[] parameters)
         {
             //begin watch
-            //Stopwatch watch = new Stopwatch();
+            Stopwatch watch = new Stopwatch();
             //watch.Reset();
-            //watch.Start();
+            
 
             Guid taskid = System.Guid.NewGuid();
 
             //MonitorSender.GetInstance().Send(taskid.ToString(), "taskBegin", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
 
-            if (null != parameters && parameters.Length > 0)
-            {
-                MatchCollection mc = paramRegex.Matches(sql);
-                int i = 1;
-                foreach (Match ma in mc)
-                {
-                    for (int j = 0; j < parameters.Length; j++)
-                    {
-                        if (ma.Groups["paramName"].Value.Equals(parameters[j].Name))
-                        {
-                            if(parameters[j].Index == 0)
-                                parameters[j].Index = i;
-                            break;
-                        }
-                    }
-
-                    i++;
-                }
-            }
-
-            sql = Regex.Replace(sql, @"[@|:]\w+", "?");
-
-            RequestMessage message = new RequestMessage()
-            {
-                StatementType = enums.StatementType.Sql,
-                OperationType = enums.OperationType.Read,
-                UseCache = false,
-                Sql = sql,
-                Parameters =  (null != parameters && parameters.Length > 0) ? parameters : new IParameter[0],
-                Flags = 1
-            };
-
-            DefaultRequest request = new DefaultRequest()
-            {
-                Taskid = taskid,
-                DbName = dbName,
-                Credential = credential ?? string.Empty,
-                Message = message
-            };
-
-            WriteRequest(request);
-
-            DefaultResponse response = ReadResponse(taskid);
-
-            IDataReader reader = new DasDataReader()
-            {
-                NetworkStream = networkStream//,
-                //Taskid = taskid
-            };
-
-            //end watch
-            //watch.Stop();
-
-            //logger.Info(string.Format("Total time of fetch: {0} MilliSeconds", watch.ElapsedTicks / 10000.0));
-            //MonitorSender.GetInstance().Send(taskid.ToString(), "taskEnd", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
-
-            //MonitorData data  = MonitorData.GetInstance(taskid.ToString());
-
-            //data.TotalTime = watch.ElapsedMilliseconds;
-
-            return reader;
-
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sql"></param>
-        /// <param name="parameters"></param>
-        /// <param name="extraOptions"></param>
-        /// <returns></returns>
-        public override int Execute(string sql, params IParameter[] parameters)
-        {
-            Guid taskid = System.Guid.NewGuid();
-
-            //MonitorSender.GetInstance().Send(taskid.ToString(), "taskBegin", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+            //MonitorData data = MonitorData.GetInstance(taskid.ToString());
 
             if (null != parameters && parameters.Length > 0)
             {
@@ -345,39 +238,86 @@ namespace platform.dao.client
                             break;
                         }
                     }
+
                     i++;
                 }
             }
 
             sql = Regex.Replace(sql, @"[@|:]\w+", "?");
 
-            RequestMessage message = new RequestMessage()
+            param.RequestMessage msg = new param.RequestMessage
             {
-                StatementType = enums.StatementType.Sql,
-                OperationType = enums.OperationType.Write,
-                UseCache = false,
-                Sql = sql,
-                Parameters = (null != parameters && parameters.Length > 0) ? parameters : new IParameter[0],
-                Flags = 1
+                stateType = param.StatementType.SQL,
+                crud = param.CRUD.GET,
+                flags = 1,
+                master = true,
+                name = sql
+            };
+            if (null != parameters && parameters.Length > 0)
+            {
+                foreach (IParameter p in parameters)
+                {
+                    msg.parameters.Add(new param.SqlParameters
+                    {
+                        dbType = (int)p.DbType,
+                        direction = (int)p.Direction,
+                        index = p.Index,
+                        isNull = p.IsNullable,
+                        name = p.Name,
+                        value = p.GetFromObject(),
+                        sensitive = p.IsSensitive
+                    });
+                }
+            }
+
+            param.Request request = new param.Request
+            {
+                msg = msg,
+                id = taskid.ToString(),
+                db = dbName,
+                cred =
+                    credential ?? string.Empty
             };
 
-            DefaultRequest request = new DefaultRequest()
-            {
-                Taskid = taskid,
-                DbName = dbName,
-                Credential = credential ?? string.Empty,
-                Message = message
-            };
+            watch.Start();
 
             WriteRequest(request);
 
-            DefaultResponse response = ReadResponse(taskid);
+            watch.Stop();
 
-            int rowCount = ReadAffectRowCount();
+            MonitorData data = MonitorData.GetInstance(taskid.ToString());
 
-            //MonitorSender.GetInstance().Send(taskid.ToString(), "taskEnd", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+            if (data != null)
+            {
+                data.EncodeRequestTime = watch.ElapsedMilliseconds;
+            }
 
-            return rowCount;
+            param.Response response = ReadResponse(taskid);
+
+            IDataReader reader = new DasDataReader()
+            {
+                NetworkStream = networkStream,
+                Header = response.header
+            };
+
+           
+
+            //MonitorSender.GetInstance().Send(taskid.ToString(), "encodeRequestTime", watch.ElapsedMilliseconds);
+
+            return reader;
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="parameters"></param>
+        /// <param name="extraOptions"></param>
+        /// <returns></returns>
+        public override int Execute(string sql, params IParameter[] parameters)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -390,36 +330,7 @@ namespace platform.dao.client
         public override IDataReader FetchBySp(string sp, params IParameter[] parameters)
         {
 
-            Guid taskid = System.Guid.NewGuid();
-
-            RequestMessage message = new RequestMessage()
-            {
-                StatementType = enums.StatementType.StoredProcedure,
-                OperationType = enums.OperationType.Read,
-                UseCache = false,
-                SpName = sp,
-                Parameters = (null != parameters && parameters.Length > 0) ? parameters : new IParameter[0],
-                Flags = 1
-            };
-
-            DefaultRequest request = new DefaultRequest()
-            {
-                Taskid = taskid,
-                DbName = dbName,
-                Credential = credential,
-                Message = message
-            };
-
-            WriteRequest(request);
-
-            DefaultResponse response = ReadResponse(taskid);
-
-            IDataReader reader = new DasDataReader()
-            {
-                NetworkStream = networkStream
-            };
-
-            return reader;
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -431,44 +342,7 @@ namespace platform.dao.client
         /// <returns></returns>
         public override int ExecuteSp(string sp, params IParameter[] parameters)
         {
-            Guid taskid = System.Guid.NewGuid();
-
-            if (null != parameters && parameters.Length > 0)
-            {
-                int i = 1;
-                for (int j = 0; j < parameters.Length; j++)
-                {
-                    if (parameters[j].Index == 0)
-                        parameters[j].Index = i;
-                    i++;
-                }
-            }
-
-            RequestMessage message = new RequestMessage()
-            {
-                StatementType = enums.StatementType.StoredProcedure,
-                OperationType = enums.OperationType.Write,
-                UseCache = false,
-                SpName = sp,
-                Parameters = (null != parameters && parameters.Length > 0) ? parameters : new IParameter[0],
-                Flags = 1
-            };
-
-            DefaultRequest request = new DefaultRequest()
-            {
-                Taskid = taskid,
-                DbName = dbName,
-                Credential = credential,
-                Message = message
-            };
-
-            WriteRequest(request);
-
-            DefaultResponse response = ReadResponse(taskid);
-
-            int rowCount = ReadAffectRowCount();
-
-            return rowCount;
+            throw new NotImplementedException();
         }
 
     }

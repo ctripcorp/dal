@@ -9,7 +9,7 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.EventExecutorGroup;
 
-import com.ctrip.sysdev.das.domain.Request;
+import com.ctrip.sysdev.das.domain.DasProto;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
@@ -27,7 +27,7 @@ public class Netty4ChannelInitializer extends ChannelInitializer<Channel> {
 	protected void initChannel(Channel ch) throws Exception {
 
 		ChannelPipeline p = ch.pipeline();
-		SimpleChannelInboundHandler<Request> netty4Handler = netty4HandlerProvider
+		SimpleChannelInboundHandler<DasProto.Request> netty4Handler = netty4HandlerProvider
 				.get();
 
 		p.addLast("logger", new DasLoggingHandler(LogLevel.DEBUG));

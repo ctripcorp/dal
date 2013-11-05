@@ -12,7 +12,7 @@ namespace platform.dao.param
     /// 填入相应数量的？，传向DAS或者DbClient
     /// 其他参数直接替换为？，传向DAS或者DbClient
     /// </summary>
-    internal sealed class StatementParameter : IParameter
+    public sealed class StatementParameter : IParameter
     {
 
         private DbType dbType = DbType.Boolean;
@@ -21,7 +21,7 @@ namespace platform.dao.param
         private string name;
         private int index;
         private int size;
-        private MsgPack.MessagePackObject value;
+        private object value;
         private bool isSensitive = false;
 
         public DbType DbType
@@ -96,7 +96,7 @@ namespace platform.dao.param
             }
         }
 
-        public MsgPack.MessagePackObject Value
+        public object Value
         {
             get
             {
@@ -120,5 +120,41 @@ namespace platform.dao.param
             }
         }
 
+
+        public param.AvailableType GetFromObject()
+        {
+            switch (dbType)
+            {
+                case System.Data.DbType.Boolean:
+                    return new param.AvailableType() { current = 0, bool_arg = (bool)value};
+                case System.Data.DbType.Byte:
+                case System.Data.DbType.SByte:
+                case System.Data.DbType.UInt16:
+                case System.Data.DbType.Int16:
+                case System.Data.DbType.Int32:
+                case System.Data.DbType.UInt32:
+                case System.Data.DbType.StringFixedLength:
+                    return new param.AvailableType(){current = 1, int32_arg = (int)value};
+                case System.Data.DbType.Int64:
+                case System.Data.DbType.UInt64:
+                    return new param.AvailableType() { current = 2, int64_arg = (long)value};
+                case System.Data.DbType.DateTime:
+                    return new param.AvailableType() { current = 2, int64_arg = ((DateTime)value).Ticks / TimeSpan.TicksPerMillisecond };
+                case System.Data.DbType.Single:
+                case System.Data.DbType.Double:
+                    return new param.AvailableType() { current = 3, double_arg = (double)value };
+                case System.Data.DbType.AnsiString:
+                case System.Data.DbType.AnsiStringFixedLength:
+                case System.Data.DbType.String:
+                case System.Data.DbType.Decimal:
+                    return new param.AvailableType() { current = 4, string_arg = value.ToString()};
+                case System.Data.DbType.Binary:
+                    return new param.AvailableType() { current = 5, bytes_arg = (byte[])value};
+                case System.Data.DbType.Guid:
+                    return new param.AvailableType() { current = 5, bytes_arg = ((Guid)value).ToByteArray() };
+                default:
+                    return new param.AvailableType() { current = 4, string_arg = value.ToString() };
+            }
+        }
     }
 }

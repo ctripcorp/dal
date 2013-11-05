@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data;
-using MsgPack;
 
 namespace platform.dao.param
 {
@@ -42,12 +41,15 @@ namespace platform.dao.param
         /// <summary>
         /// 参数值
         /// </summary>
-        MessagePackObject Value { get; set; }
+        //MessagePackObject Value { get; set; }
+        object Value { get; set; }
         
         /// <summary>
         /// 是否包含敏感字符
         /// </summary>
         bool IsSensitive { get; set; }
+
+        param.AvailableType GetFromObject();
 
     }
 }

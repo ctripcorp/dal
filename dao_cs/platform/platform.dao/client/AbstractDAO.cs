@@ -146,8 +146,12 @@ namespace platform.dao.client
             {
                 if (!col.IsPrimaryKey)
                 {
-                    parameters.Add(ParameterFactory.CreateValue(string.Format("@{0}", col.Name),
-                        col.GetValue(entity), index: col.Index));
+                    parameters.Add(new StatementParameter()
+                    {
+                        Name = string.Format("@{0}", col.Name),
+                        Value = col.GetValue(entity),
+                        Index = col.Index
+                    });
                 }
             }
 
@@ -188,8 +192,12 @@ namespace platform.dao.client
                          .Append(" = ")
                          .Append(col.GetValue(entity));
                 }
-                parameters.Add(ParameterFactory.CreateValue(string.Format("@{0}", col.Name),
-                   col.GetValue(entity), index: col.Index));
+                parameters.Add(new StatementParameter()
+                {
+                    Name = string.Format("@{0}", col.Name),
+                    Value = col.GetValue(entity),
+                    Index = col.Index
+                });
             }
 
             logger.Warn(sql.ToString());

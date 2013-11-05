@@ -32,6 +32,7 @@
 		<reflections-version>0.9.8</reflections-version>
 		
 		<druid-version>0.2.25</druid-version>
+		<protobuf-version>2.5.0</protobuf-version>
 	</properties>
 
 	<profiles>
@@ -204,6 +205,11 @@
 			<artifactId>guava</artifactId>
 			<version>${guava-version}</version>
 		</dependency>
+		<dependency>
+  <groupId>com.google.protobuf</groupId>
+  <artifactId>protobuf-java</artifactId>
+  <version>${protobuf-version}</version>
+	</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>

@@ -41,7 +41,7 @@ jQuery(document).ready(function () {
             var entries = data.entries;
 
             var totalTime = 0;
-            var decodeResponseTime = 0;
+            // var decodeResponseTime = 0;
             var encodeRequestTime = 0;
             var decodeRequestTime = 0;
             var dbTime = 0;
@@ -56,9 +56,9 @@ jQuery(document).ready(function () {
                     case "totalTime":
                     totalTime = value.cost;
                     break;
-                   case "decodeResponseTime":
-                    decodeResponseTime = value.cost;
-                    break;
+                   // case "decodeResponseTime":
+                   //  decodeResponseTime = value.cost;
+                   //  break;
                     case "encodeRequestTime":
                     encodeRequestTime = value.cost;
                     break;
@@ -74,10 +74,10 @@ jQuery(document).ready(function () {
                 }
             });
 
-            var otherTime = totalTime -encodeRequestTime - decodeResponseTime -dbTime - encodeResponseTime - decodeRequestTime;
+            var otherTime = totalTime -encodeRequestTime -dbTime - encodeResponseTime - decodeRequestTime;
 
             if(totalTime <= 0 || encodeRequestTime < 0 ||
-                decodeResponseTime < 0 || dbTime < 0||
+                dbTime < 0||
                 encodeResponseTime < 0 || decodeRequestTime < 0){
                 return;
             }
@@ -121,8 +121,7 @@ jQuery(document).ready(function () {
                         // },
                         [sprintf('Other time: %s milliseconds', otherTime), otherTime / totalTime],
                         [sprintf('DbTime: %s milliseconds', dbTime),    dbTime/totalTime],
-                        [sprintf('Server Encode Response: %s milliseconds', encodeResponseTime),    encodeResponseTime/totalTime],
-                        [sprintf('Client Decode Response: %s milliseconds', decodeResponseTime),   decodeResponseTime/totalTime]
+                        [sprintf('Encode/Decode Response: %s milliseconds', encodeResponseTime),    encodeResponseTime/totalTime]
                     ]
                 }]
             });

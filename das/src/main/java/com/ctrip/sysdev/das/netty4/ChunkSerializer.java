@@ -10,7 +10,6 @@ import java.util.List;
 import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
 
-import com.ctrip.sysdev.das.domain.StatementParameter;
 import com.ctrip.sysdev.das.exception.SerDeException;
 
 /**

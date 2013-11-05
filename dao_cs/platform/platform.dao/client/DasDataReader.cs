@@ -7,13 +7,12 @@ using System.Net.Sockets;
 using platform.dao.param;
 using platform.dao.exception;
 using platform.dao.utils;
-using platform.dao.response;
 using System.Diagnostics;
 using platform.dao.log;
 using platform.dao.enums;
-using MsgPack;
-using MsgPack.Serialization;
 using System.Threading;
+using System.IO;
+using ProtoBuf;
 
 namespace platform.dao.client
 {
@@ -21,15 +20,9 @@ namespace platform.dao.client
     {
         private static readonly DateTime utcStartTime;
 
-        //private static ParameterSerializer serializer;
-
-        private static ResultSetHeaderSerializer headerSerializer;
-
         static DasDataReader()
         {
             utcStartTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            //serializer = new ParameterSerializer();
-            headerSerializer = new ResultSetHeaderSerializer();
         }
 
         private int cursor = 0;
@@ -40,13 +33,13 @@ namespace platform.dao.client
 
         //private List<IParameter> current;
         //private byte[][] current;
-        private List<MessagePackObject> current;
+        private param.Row current;
 
         //private List<List<IParameter>> ResultSet;
         //private List<byte[][]> ResultSet;
-        private List<List<MessagePackObject>> ResultSet;
+        private List<param.Row> ResultSet;
 
-        private List<ResultSetHeader> header;
+        public List<param.ResponseHeader> Header { get; set; }
 
         public NetworkStream NetworkStream { get; set; }
 
@@ -81,21 +74,6 @@ namespace platform.dao.client
             if (null == this.NetworkStream)
                 return false;
 
-            //如果是第一次读取
-            if (header == null)
-            {
-                int headerSize = (NetworkStream.ReadByte() << 24) |
-                       (NetworkStream.ReadByte() << 16) |
-                       (NetworkStream.ReadByte() << 8) |
-                       (NetworkStream.ReadByte() << 0);
-
-                byte[] buffer = new byte[headerSize];
-
-                NetworkStream.Read(buffer, 0, buffer.Length);
-
-                header = headerSerializer.UnpackSingleObject(buffer);
-
-            }
             //如果没有读取完成，且剩余的不足100个，则再次读取
             if (!readFinished &&  ((ResultSet == null) || (ResultSet.Count - cursor < 100)))
             {
@@ -107,46 +85,26 @@ namespace platform.dao.client
                         (NetworkStream.ReadByte() << 8) |
                         (NetworkStream.ReadByte() << 0);
 
-                readFinished = 1 == NetworkStream.ReadByte();
-
-                byte[] buffer = new byte[blockSize - 1];
+                byte[] buffer = new byte[blockSize];
 
                 NetworkStream.Read(buffer, 0, buffer.Length);
 
-                //List<List<IParameter>> results = new List<List<IParameter>>();
-                //List<byte[][]> results = new List<byte[][]>();
-                List<List<MessagePackObject>> results = new List<List<MessagePackObject>>();
+                List<param.Row> results = new List<param.Row>();
 
                 if (ResultSet != null && ResultSet.Count > 0)
                 {
                     results.AddRange(ResultSet.GetRange(cursor, ResultSet.Count - cursor));
                 }
 
-                //List<List<IParameter>> readerResults = serializer.UnpackSingleObject(buffer);
-                //List<List<MessagePackObject>> readerResults = serializer.UnpackSingleObject(buffer);
-
-                var se = MessagePackSerializer.Create<List<List<MessagePackObject>>>();
-
-                 results.AddRange(se.UnpackSingleObject(buffer));
-
-                
-
-                buffer = null;
-                se = null;
-
+                using (MemoryStream ms = new MemoryStream(buffer))
+                {
+                        param.InnerResultSet resultSet = Serializer.Deserialize<param.InnerResultSet>(ms);
+                        results.AddRange(resultSet.rows);
+                        readFinished = resultSet.last;
+                    
+                }
 
                 watch.Stop();
-
-                //Thread.Sleep(1);
-                //GC.Collect();
-
-                MonitorData data = MonitorData.GetInstance();
-
-                if (data != null)
-                {
-                    //data.TotalTime += watch.ElapsedMilliseconds;
-                    data.DecodeResponseTime += watch.ElapsedMilliseconds;
-                }
 
                 if (ResultSet != null)
                 {
@@ -185,8 +143,8 @@ namespace platform.dao.client
         /// </summary>
         public int FieldCount
         {
-            get { return current.Count; }
-            //get { return current.Length; }
+            //get { return current.Count; }
+            get { return current.columns.Count; }
         }
 
         public bool GetBoolean(int i)
@@ -372,36 +330,47 @@ namespace platform.dao.client
             {
                 object result = null;
 
-                if (header == null || current == null)
+                if (Header == null || current == null)
                     return null;
 
                 int lableIndex = -1;
 
                 //获取当前列名的索引位置
-                for (int i=0;i<header.Count;i++)
+                for (int i = 0; i < Header.Count; i++)
                 {
-                    var p = header[i];
-                    if (p.ColumnName.Equals(name))
+                    var p = Header[i];
+                    if (p.name.Equals(name))
                     {
                         lableIndex = i;
                         break;
                     }
                 }
 
-                int currentType = header[lableIndex].ColumnType;
+                int currentType = Header[lableIndex].type;
 
-                MessagePackObject currentValue = current[lableIndex];
+                param.AvailableType currentValue = current.columns[lableIndex];
+
+                if (currentValue.current < 0)
+                    return null;
 
                 switch (currentType)
                 {
+                    case Types.INTEGER:
+                        result = currentValue.int32_arg;
+                        break;
+                    case Types.VARCHAR:
+                    case Types.NVARCHAR:
+                    case Types.LONGVARCHAR:
+                    case Types.LONGNVARCHAR:
+                        result = currentValue.string_arg;
+                        break;
                     case Types.DECIMAL:
-                        result = decimal.Parse(currentValue.AsString());
+                        result = decimal.Parse(currentValue.string_arg);
                         break;
                     case Types.TIMESTAMP:
-                        result = utcStartTime.AddMilliseconds(currentValue.AsUInt64());
+                        result = utcStartTime.AddMilliseconds(currentValue.int64_arg);
                         break;
                     default:
-                        result = currentValue.ToObject();
                         break;
                 }
 
@@ -439,25 +408,36 @@ namespace platform.dao.client
             {
                 object result = null;
 
-                if (header == null || current == null)
+                if (Header == null || current == null)
                     return null;
 
                 int lableIndex = i;
 
-                int currentType = header[lableIndex].ColumnType;
+                int currentType = Header[lableIndex].type;
 
-                MessagePackObject currentValue = current[lableIndex];
+                param.AvailableType currentValue = current.columns[lableIndex];
+
+                if (currentValue.current < 0)
+                    return null;
 
                 switch (currentType)
                 {
+                    case Types.INTEGER:
+                        result = currentValue.int32_arg;
+                        break;
+                    case Types.VARCHAR:
+                    case Types.NVARCHAR:
+                    case Types.LONGVARCHAR:
+                    case Types.LONGNVARCHAR:
+                        result = currentValue.string_arg;
+                        break;
                     case Types.DECIMAL:
-                        result = decimal.Parse(currentValue.AsString());
+                        result = decimal.Parse(currentValue.string_arg);
                         break;
                     case Types.TIMESTAMP:
-                        result = utcStartTime.AddMilliseconds(currentValue.AsUInt64());
+                        result = utcStartTime.AddMilliseconds(currentValue.int64_arg);
                         break;
                     default:
-                        result = currentValue.ToObject();
                         break;
                 }
 

@@ -5,10 +5,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PerformanceHistorySet {
 	private ConcurrentHashMap<String, PerformanceHistory> performanceHistoryMap = new ConcurrentHashMap<String, PerformanceHistory>();
 
-	public ConcurrentHashMap<String, PerformanceHistory> getperformanceHistoryMap() {
+	public ConcurrentHashMap<String, PerformanceHistory> getPerformanceHistoryMap() {
 		return performanceHistoryMap;
 	}
-	
+
+	public void setPerformanceHistoryMap(
+			ConcurrentHashMap<String, PerformanceHistory> performanceHistoryMap) {
+		this.performanceHistoryMap = performanceHistoryMap;
+	}
+
 	public PerformanceHistory getPerformanceHistory(String id) {
 		return performanceHistoryMap.get(id);
 	}

@@ -66,8 +66,6 @@ public class DasPerformanceResource {
 			) {
 		Performance p = new Performance();
 		
-		p.setIp(ip);
-		p.setId(id);
 		p.setSystemCpuUsage(systemCpuUsage);
 		p.setProcessCpuUsage(processCpuUsage);
 		p.setStart(start);
@@ -80,12 +78,12 @@ public class DasPerformanceResource {
 			phs = new PerformanceHistorySet();
 			PerformanceHistorySet oldPhs = store.putIfAbsent(ip, phs);
 			if(oldPhs == null){
-				phs.add(p);
+				phs.add(id, p);
 			}else{
-				oldPhs.add(p);
+				oldPhs.add(id, p);
 			}
 		}else{
-			phs.add(p);
+			phs.add(id, p);
 		}
 			
 		return Status.OK;

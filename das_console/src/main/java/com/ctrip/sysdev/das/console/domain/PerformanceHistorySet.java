@@ -13,11 +13,11 @@ public class PerformanceHistorySet {
 		return performanceHistoryMap.get(id);
 	}
 	
-	public void add(Performance p) {
-		PerformanceHistory history = performanceHistoryMap.get(p.getId());
+	public void add(String id, Performance p) {
+		PerformanceHistory history = performanceHistoryMap.get(id);
 		if(history == null){
 			history = new PerformanceHistory();
-			PerformanceHistory oldHistory =  performanceHistoryMap.putIfAbsent(p.getId(), history);
+			PerformanceHistory oldHistory =  performanceHistoryMap.putIfAbsent(id, history);
 			if(oldHistory == null)
 				history.add(p);
 			else

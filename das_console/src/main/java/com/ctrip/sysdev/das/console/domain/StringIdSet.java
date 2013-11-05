@@ -2,7 +2,7 @@ package com.ctrip.sysdev.das.console.domain;
 
 import java.util.Set;
 
-public class TimeCostIdList {
+public class StringIdSet {
 	private Set<String> ids;
 
 	public Set<String> getIds() {

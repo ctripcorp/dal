@@ -17,26 +17,27 @@ public class PerformanceMonitorTask implements Runnable {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@SuppressWarnings("restriction")
-	private static com.sun.management.OperatingSystemMXBean osMBean;
-	private static String workerId;
-	private static String ip;
-	private static long lastSystemTime;
-	private static long lastProcessorCpuTime;
+	private com.sun.management.OperatingSystemMXBean osMBean;
+	private long lastSystemTime;
+	private long lastProcessorCpuTime;
+	private String workerId;
+	private String ip;
 	
 	private static ScheduledExecutorService sender;
-	public PerformanceMonitorTask(String workerId) {
+	
+	@SuppressWarnings("restriction")
+	public PerformanceMonitorTask(String ip, String workerId) {
 		this.workerId = workerId;
+		this.ip = ip;
+		osMBean = (com.sun.management.OperatingSystemMXBean)ManagementFactory.getOperatingSystemMXBean();
+		lastSystemTime = System.nanoTime();
+		lastProcessorCpuTime = osMBean.getProcessCpuTime();
 	}
 
 	@SuppressWarnings("restriction")
 	public static void start(String workerId, String ip) {
-		PerformanceMonitorTask.workerId = workerId;
-		PerformanceMonitorTask.ip = ip;
 		sender = Executors.newSingleThreadScheduledExecutor();
-		osMBean = (com.sun.management.OperatingSystemMXBean)ManagementFactory.getOperatingSystemMXBean();
-		sender.scheduleAtFixedRate(new PerformanceMonitorTask("aaa"), 1, 1, TimeUnit.SECONDS);
-		lastSystemTime = System.nanoTime();
-		lastProcessorCpuTime = osMBean.getProcessCpuTime();
+		sender.scheduleAtFixedRate(new PerformanceMonitorTask(ip, workerId), 1, 1, TimeUnit.SECONDS);
 	}
 	
 	public static void shutdown() {
@@ -49,9 +50,10 @@ public class PerformanceMonitorTask implements Runnable {
 		URL url;
 		String result = "";
 		
-		
+		long start = lastSystemTime;
 		double systemCpuUsage = osMBean.getSystemCpuLoad();
 		double processCpuUsage = getProcessorCpuUsage();
+		long end = lastSystemTime;
 		long freeMemory = Runtime.getRuntime().freeMemory();
 		long totalMemory = Runtime.getRuntime().totalMemory();
 		
@@ -70,6 +72,8 @@ public class PerformanceMonitorTask implements Runnable {
 				append("&ip=").append(ip).
 				append("&processCpuUsage=").append(processCpuUsage).
 				append("&systemCpuUsage=").append(systemCpuUsage).
+				append("&start=").append(start).
+				append("&end=").append(end).
 				append("&freeMemory=").append(freeMemory).
 				append("&totalMemory=").append(totalMemory);
 			

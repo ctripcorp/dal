@@ -15,8 +15,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import com.ctrip.sysdev.das.console.domain.Status;
+import com.ctrip.sysdev.das.console.domain.StringIdSet;
 import com.ctrip.sysdev.das.console.domain.TimeCost;
-import com.ctrip.sysdev.das.console.domain.TimeCostIdList;
 
 @Resource
 @Path("monitor/timeCosts")
@@ -28,8 +28,8 @@ public class DalTimeCostsResource extends DalBaseResource {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public TimeCostIdList getTimeCosts() {
-		TimeCostIdList ids = new TimeCostIdList();
+	public StringIdSet getTimeCosts() {
+		StringIdSet ids = new StringIdSet();
 		ids.setIds(store.keySet());
 		return ids;
 	}

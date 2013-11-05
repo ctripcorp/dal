@@ -1,8 +1,5 @@
 package com.ctrip.sysdev.das.console.resource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
@@ -21,6 +18,7 @@ import com.ctrip.sysdev.das.console.domain.Performance;
 import com.ctrip.sysdev.das.console.domain.PerformanceHistory;
 import com.ctrip.sysdev.das.console.domain.PerformanceHistorySet;
 import com.ctrip.sysdev.das.console.domain.Status;
+import com.ctrip.sysdev.das.console.domain.StringIdSet;
 
 @Resource
 @Path("monitor/performance")
@@ -32,14 +30,17 @@ public class DasPerformanceResource {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Set<String> getPerformance() {
-		return store.keySet();
+	public StringIdSet getPerformance() {
+		StringIdSet ids = new StringIdSet();
+		ids.setIds(store.keySet());
+		return ids;
 	}
 	
 	@GET
 	@Path("{ip}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public PerformanceHistorySet getPerformanceHistorySet(@PathParam("ip") String ip) {
+		PerformanceHistorySet hs = store.get(ip);
 		return store.get(ip);
 	}
 
@@ -47,7 +48,8 @@ public class DasPerformanceResource {
 	@Path("{ip}/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public PerformanceHistory getPerformanceHistory(@PathParam("ip") String ip, @PathParam("id") String id) {
-		return store.get(ip).getPerformanceHistory(id);
+		PerformanceHistorySet hs = store.get(ip);
+		return hs.getPerformanceHistory(id);
 	}
 
 	@POST
@@ -57,6 +59,8 @@ public class DasPerformanceResource {
 			@FormParam("ip") String ip, 
 			@FormParam("systemCpuUsage") double systemCpuUsage, 
 			@FormParam("processCpuUsage") double processCpuUsage, 
+			@FormParam("start") long start, 
+			@FormParam("end") long end, 
 			@FormParam("freeMemory") long freeMemory, 
 			@FormParam("totalMemory") long totalMemory
 			) {
@@ -66,6 +70,8 @@ public class DasPerformanceResource {
 		p.setId(id);
 		p.setSystemCpuUsage(systemCpuUsage);
 		p.setProcessCpuUsage(processCpuUsage);
+		p.setStart(start);
+		p.setEnd(end);
 		p.setFreeMemory(freeMemory);
 		p.setTotalMemory(totalMemory);
 		
@@ -78,6 +84,8 @@ public class DasPerformanceResource {
 			}else{
 				oldPhs.add(p);
 			}
+		}else{
+			phs.add(p);
 		}
 			
 		return Status.OK;

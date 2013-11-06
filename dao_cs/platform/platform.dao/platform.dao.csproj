@@ -46,7 +46,7 @@
   <ItemGroup>
     <Compile Include="AbstractDAO.cs" />
     <Compile Include="client\DasClient.cs" />
-    <Compile Include="sql\DasDataReader.cs" />
+    <Compile Include="reader\DasDataReader.cs" />
     <Compile Include="client\DbClient.cs" />
     <Compile Include="client\IClient.cs" />
     <Compile Include="IDAO.cs" />

@@ -119,6 +119,7 @@
     <Compile Include="Account\Register.aspx.designer.cs">
       <DependentUpon>Register.aspx</DependentUpon>
     </Compile>
+    <Compile Include="DAO\CommonDAO.cs" />
     <Compile Include="DAO\PersonDAO.cs" />
     <Compile Include="DemoInsert.aspx.cs">
       <DependentUpon>DemoInsert.aspx</DependentUpon>

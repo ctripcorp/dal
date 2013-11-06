@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data;
 
-namespace platform.dao.type
+namespace platform.dao.utils
 {
-    public enum ValueType
+    public class Consts
     {
-        NULL, BOOL, INTEGER, FLOAT, RAW, ARRAY
+
+     
+
     }
 }

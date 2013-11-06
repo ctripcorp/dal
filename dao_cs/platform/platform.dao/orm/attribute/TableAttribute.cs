@@ -27,5 +27,6 @@ namespace platform.dao.orm.attribute
             get { return schema; }
             set { schema = value; }
         }
+
     }
 }

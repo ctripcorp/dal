@@ -51,7 +51,8 @@ public class PerformanceMonitorTask implements Runnable {
 		String result = "";
 		
 		long start = lastSystemTime;
-		double systemCpuUsage = osMBean.getSystemCpuLoad();
+		//double systemCpuUsage = osMBean.getSystemCpuLoad();
+		double systemCpuUsage = 0.0;
 		double processCpuUsage = getProcessorCpuUsage();
 		long end = lastSystemTime;
 		long freeMemory = Runtime.getRuntime().freeMemory();

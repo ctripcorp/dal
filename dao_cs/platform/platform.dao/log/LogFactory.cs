@@ -9,7 +9,7 @@ namespace platform.dao.log
     public sealed class LogFactory
     {
 
-        public static ILoggerAdapter GetLogger(string name, LogLevel level=LogLevel.Debug)
+        public static ILogAdapter GetLogger(string name, LogLevel level=LogLevel.Debug)
         {
             //return ConsoleLoggerAdapter.GetInstance(name, level);
             return FileLoggerAdapter.GetInstance(name, level);

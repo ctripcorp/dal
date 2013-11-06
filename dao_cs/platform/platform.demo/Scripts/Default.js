@@ -82,6 +82,10 @@ var ttt = function () {
     }
 
     $.get("DemoGet.aspx", function (data, status) {
+        if (status != "success") {
+            alert("Error occured!");
+            return;
+        }
         //var real_data = JSON.parse(data);
         var real_data = data;
 
@@ -101,5 +105,7 @@ var ttt = function () {
                 });
             }
         });
+
+
     });
 };

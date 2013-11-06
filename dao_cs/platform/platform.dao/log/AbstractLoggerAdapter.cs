@@ -6,7 +6,7 @@ using platform.dao.enums;
 
 namespace platform.dao.log
 {
-    public class AbstractLoggerAdapter : ILoggerAdapter
+    public class AbstractLoggerAdapter : ILogAdapter
     {
         protected string name;
         protected LogLevel level;

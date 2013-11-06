@@ -16,10 +16,6 @@
 </asp:Content>
 <asp:Content ID="BodyContent" runat="server" ContentPlaceHolderID="MainContent">
 
-<div class="row"><div class="span4"><input id="port_num" type="text" value="9000"/><input id="change_port" type="button" value="Change Port" /></div>
-<div class="span4"><input id="db_name" type="text" value="SysDalTest"/><input id="change_db" type="button" value="Change Database" /></div>
-</div>
-
 <div class="row">
 <div class="span4"><input id="sql" type="text" value="select * from xxx"/><input id="execute_sql" type="button" value="ExecuteSql" /><input id="count" type="text" /></div>
 </div>

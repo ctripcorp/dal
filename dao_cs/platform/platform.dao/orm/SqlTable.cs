@@ -161,7 +161,7 @@ namespace platform.dao.orm
                 ColumnAttribute colAttr = (ColumnAttribute)
                     field.GetCustomAttributes(typeof(ColumnAttribute), false)[0];
 
-                SqlColumn column = new SqlColumn() { Name = colAttr.Name, Alias = colAttr.Alias, PropertyInfo=field, Index=index};
+                SqlColumn column = new SqlColumn() { Name = colAttr.Name, Alias = colAttr.Alias, PropertyInfo = field, Index = index };
 
                 if (field.IsDefined(typeof(PrimaryKeyAttribute), false))
                 {
@@ -177,7 +177,12 @@ namespace platform.dao.orm
             //Get table name
             TableAttribute tableAttr = (TableAttribute)type.GetCustomAttributes(typeof(TableAttribute), false)[0];
 
-            SqlTable table = new SqlTable() { Schema = tableAttr.Schema, Name = tableAttr.Name, Columns = columns };
+            SqlTable table = new SqlTable()
+            {
+                Schema = tableAttr.Schema,
+                Name = tableAttr.Name,
+                Columns = columns
+            };
 
             return table;
         }

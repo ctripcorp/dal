@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using platform.dao.log;
 using platform.dao.param;
+using platform.dao.sql;
 using System.Text;
 using System.Collections.Generic;
 using ProtoBuf;
@@ -12,67 +13,29 @@ using System.IO;
 
 namespace platform.dao.client
 {
-    internal class DasClient : AbstractClient
+    internal class DasClient : IClient
     {
+        private static ILogAdapter logger = LogFactory.GetLogger(typeof(DasClient).Name);
 
-        private string dbName;
-        private string credential;
+        public string PhysicDbName { get; set; }
+        public string CredentialID { get; set; }
+        public int ServicePort { get; set; }
 
-        private static ILoggerAdapter logger = LogFactory.GetLogger(typeof(DasClient).Name);
+        private SocketPool socketPool;
 
-        internal DasClient(string dbName, string credential)
-        {
-            this.dbName = dbName;
-            this.credential = credential;
-        }
-
-        private static Socket sock;
-        private static NetworkStream networkStream;
         private Regex paramRegex = new Regex(@"(?<paramName>[@|:]\w+)");
 
-        static DasClient()
+        public void Init()
         {
-            Connect();
-        }
-
-        private static void Connect()
-        {
-            if (sock != null)
-            {
-                try
-                {
-                    sock.Disconnect(true);
-                }
-                catch
-                {
-                }
-                sock = null;
-            }
-            sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            int currentRetry = 0;
-            while (!sock.Connected && currentRetry < Consts.RetryTimesWhenError)
-            {
-                try
-                {
-                    //sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    sock.Connect(Consts.ServerIp, Consts.ServerPort);
-                    networkStream = new NetworkStream(sock);
-                }
-                catch (Exception ex)
-                {
-                    logger.Error(ex.StackTrace);
-                }
-                currentRetry++;
-            }
+            socketPool = new SocketPool("127.0.0.1", ServicePort);
         }
 
         /// <summary>
         /// 向Das服务写入请求
         /// </summary>
         /// <param name="request"></param>
-        private void WriteRequest(param.Request request)
+        private PooledSocket WriteRequest(param.Request request)
         {
-
             //Log the sql
             logger.Info(request.msg.name);
 
@@ -87,37 +50,20 @@ namespace platform.dao.client
                 Array.Copy(fullB, payload, payload.Length);
             }
 
-            int protocolVersion = 1;
-
-            int totalLength = 2 + payload.Length;
-
-            bool success = false;
-            int currentRetry = 0;
-            while (!success && currentRetry < Consts.RetryTimesWhenError)
+            return socketPool.Execute<PooledSocket>(delegate(PooledSocket socket)
             {
-                try
-                {
-                    //相当于向服务器端写入一个Int类型的数据,4字节
-                    networkStream.WriteByte((byte)(totalLength >> 24));
-                    networkStream.WriteByte((byte)(totalLength >> 16));
-                    networkStream.WriteByte((byte)(totalLength >> 8));
-                    networkStream.WriteByte((byte)(totalLength >> 0));
+                short protocolVersion = 1;
 
-                    //相当于向服务器端写入一个Short类型的数据， 2字节
-                    networkStream.WriteByte((byte)(protocolVersion >> 8));
-                    networkStream.WriteByte((byte)(protocolVersion >> 0));
+                int totalLength = 2 + payload.Length;
 
-                    networkStream.Write(payload, 0, payload.Length);
-                    success = true;
+                socket.WriteInt(totalLength);
 
-                }
-                catch (Exception ex)
-                {
-                    logger.Error(ex.StackTrace);
-                    Connect();
-                }
-                currentRetry++;
-            }
+                socket.WriteShort(protocolVersion);
+
+                socket.WriteBytes(payload);
+
+                return socket;
+            });
 
         }
 
@@ -125,82 +71,25 @@ namespace platform.dao.client
         /// 从Das服务读出响应结果
         /// </summary>
         /// <returns></returns>
-        private param.Response ReadResponse(Guid taskid)
+        private param.Response ReadResponse(PooledSocket sock)
         {
-            param.Response response = null;
-            bool success = false;
-            int currentRetry = 0;
-            while (!success && currentRetry < Consts.RetryTimesWhenError)
+            return socketPool.Execute<param.Response>(delegate(PooledSocket socket)
             {
-                try
+                param.Response response = null;
+
+                int totalLength = socket.ReadInt();
+                short protocolVersion = socket.ReadShort();
+
+                byte[] payload = socket.ReadBytes(totalLength - 2);
+
+                using (MemoryStream ms = new MemoryStream(payload))
                 {
-
-                    int totalLength = (networkStream.ReadByte() << 24) |
-                        (networkStream.ReadByte() << 16) |
-                        (networkStream.ReadByte() << 8) |
-                        (networkStream.ReadByte() << 0);
-
-                    int protocolVersion = (networkStream.ReadByte() << 8) |
-                        (networkStream.ReadByte() << 0);
-
-                    byte[] header = new byte[totalLength - 2];
-
-                    int taskidLen = networkStream.Read(header, 0, header.Length);
-
-                    if (taskidLen != header.Length)
-                        throw new Exception();
-
-                    using (MemoryStream ms = new MemoryStream(header))
-                    {
-                        response = Serializer.Deserialize<param.Response>(ms);
-                    }
-
-                    success = true;
-
+                    response = Serializer.Deserialize<param.Response>(ms);
                 }
-                catch (Exception ex)
-                {
-                    logger.Error(ex.StackTrace);
-                    Connect();
-                }
-                currentRetry++;
-            }
 
-            return response;
+                return response;
+            }, sock);
 
-        }
-
-        /// <summary>
-        /// 从网络中读取影响的行数 
-        /// </summary>
-        /// <returns></returns>
-        private int ReadAffectRowCount()
-        {
-            int rowCount = 0;
-            bool success = false;
-            int currentRetry = 0;
-            while (!success && currentRetry < Consts.RetryTimesWhenError)
-            {
-                try
-                {
-
-                    rowCount = (networkStream.ReadByte() << 24) |
-                       (networkStream.ReadByte() << 16) |
-                       (networkStream.ReadByte() << 8) |
-                       (networkStream.ReadByte() << 0);
-
-                    success = true;
-
-                }
-                catch (Exception ex)
-                {
-                    logger.Error(ex.StackTrace);
-                    Connect();
-                }
-                currentRetry++;
-            }
-
-            return rowCount;
         }
 
         /// <summary>
@@ -210,7 +99,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override IDataReader Fetch(string sql, params IParameter[] parameters)
+        public IDataReader Fetch(string sql, params IParameter[] parameters)
         {
             //begin watch
             Stopwatch watch = new Stopwatch();
@@ -274,14 +163,13 @@ namespace platform.dao.client
             {
                 msg = msg,
                 id = taskid.ToString(),
-                db = dbName,
-                cred =
-                    credential ?? string.Empty
+                db = PhysicDbName,
+                cred = CredentialID ?? string.Empty
             };
 
             watch.Start();
 
-            WriteRequest(request);
+            PooledSocket sock = WriteRequest(request);
 
             watch.Stop();
 
@@ -292,15 +180,13 @@ namespace platform.dao.client
                 data.EncodeRequestTime = watch.ElapsedMilliseconds;
             }
 
-            param.Response response = ReadResponse(taskid);
+            param.Response response = ReadResponse(sock);
 
             IDataReader reader = new DasDataReader()
             {
-                NetworkStream = networkStream,
+                Sock = sock,
                 Header = response.header
             };
-
-           
 
             //MonitorSender.GetInstance().Send(taskid.ToString(), "encodeRequestTime", watch.ElapsedMilliseconds);
 
@@ -315,7 +201,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override int Execute(string sql, params IParameter[] parameters)
+        public int Execute(string sql, params IParameter[] parameters)
         {
             throw new NotImplementedException();
         }
@@ -327,7 +213,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override IDataReader FetchBySp(string sp, params IParameter[] parameters)
+        public IDataReader FetchBySp(string sp, params IParameter[] parameters)
         {
 
             throw new NotImplementedException();
@@ -340,7 +226,7 @@ namespace platform.dao.client
         /// <param name="parameters"></param>
         /// <param name="extraOptions"></param>
         /// <returns></returns>
-        public override int ExecuteSp(string sp, params IParameter[] parameters)
+        public int ExecuteSp(string sp, params IParameter[] parameters)
         {
             throw new NotImplementedException();
         }

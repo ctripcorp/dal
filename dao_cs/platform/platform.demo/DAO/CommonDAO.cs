@@ -7,40 +7,21 @@ using platform.dao.param;
 
 namespace platform.demo.DAO
 {
-    public class PersonDAO : AbstractDAO
+    public class CommonDAO: AbstractDAO
     {
 
 
-        public PersonDAO()
+        public CommonDAO()
         {
             //注释掉此行或者赋值为string.Empty，然后配置connectionString来直连数据库
-            PhysicDbName = "SysDalTest";
+            PhysicDbName = "HtlProductdb";
             ServicePort = 9000;
             CredentialID = "30303";
             base.Init();
         }
 
         // None
-        public IDataReader FetchAllRecords()
-        {
-            try
-            {
-                IList<IParameter> parameters = new List<IParameter>();
-
-
-                string sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person ";
-
-                //return client.Fetch(sql, parameters);
-
-                return this.Fetch(sql, parameters.ToArray());
-
-            }
-            catch (Exception ex)
-            {
-                
-            }
-            return null;
-        }
+      
 
         public IDataReader ExecuteSql(string sql)
         {
@@ -58,7 +39,6 @@ namespace platform.demo.DAO
             }
             return null;
         }
-
 
 
     }

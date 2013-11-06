@@ -18,31 +18,12 @@ namespace platform.demo
         protected void Page_Load(object sender, EventArgs e)
         {
             
-            string port = Request.QueryString["port"];
-            string dbName = Request.QueryString["db"];
+            
             string sql = Request.QueryString["sql"];
-            if (!string.IsNullOrEmpty(port))
-            {
-                Consts.ServerPort = int.Parse(port);
-                string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(new { Success=true});
-                Response.Clear();
-                Response.ContentType = "application/json; charset=utf-8";
-                Response.Write(jsonData);
-                Response.End();
-            }
-            if (!string.IsNullOrEmpty(dbName))
-            {
-                //AbstractDAO.Reload(true, dbName);
-                ClientPool.GetInstance().ChangeClient(dbName);
-                string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(new { Success=true});
-                Response.Clear();
-                Response.ContentType = "application/json; charset=utf-8";
-                Response.Write(jsonData);
-                Response.End();
-            }
+
             if (!string.IsNullOrEmpty(sql))
             {
-                PersonDAO person = new PersonDAO();
+                CommonDAO person = new CommonDAO();
 
                 List<object> results = new List<object>();
 

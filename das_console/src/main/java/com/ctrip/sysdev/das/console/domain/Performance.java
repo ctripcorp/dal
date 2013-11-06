@@ -5,8 +5,26 @@ public class Performance {
 	private double processCpuUsage;
 	private long freeMemory;
 	private long totalMemory;
+	private long sysFreeMemory;
+	private long sysTotalMemory;
 	private long start;
 	private long end;
+
+	public long getSysFreeMemory() {
+		return sysFreeMemory;
+	}
+
+	public void setSysFreeMemory(long sysFreeMemory) {
+		this.sysFreeMemory = sysFreeMemory;
+	}
+
+	public long getSysTotalMemory() {
+		return sysTotalMemory;
+	}
+
+	public void setSysTotalMemory(long sysTotalMemory) {
+		this.sysTotalMemory = sysTotalMemory;
+	}
 
 	public long getStart() {
 		return start;

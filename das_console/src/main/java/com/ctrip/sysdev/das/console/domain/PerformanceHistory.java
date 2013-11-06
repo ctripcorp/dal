@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PerformanceHistory {
+	private Integer port;
+	
 	private List<Performance> performanceHistory = new ArrayList<Performance>();
 
 	public List<Performance> getPerformanceHistory() {
@@ -14,7 +16,19 @@ public class PerformanceHistory {
 		this.performanceHistory = performanceHistory;
 	}
 
+	public Integer getPort() {
+		return port;
+	}
+
+	public void setPort(Integer port) {
+		this.port = port;
+	}
+
 	public void add(Performance p) {
 		performanceHistory.add(p);
+	}
+	
+	public PerformanceHistory getSub(long start, long end) {
+		return this;
 	}
 }

@@ -40,7 +40,6 @@ public class DasPerformanceResource {
 	@Path("{ip}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public PerformanceHistorySet getPerformanceHistorySet(@PathParam("ip") String ip) {
-		PerformanceHistorySet hs = store.get(ip);
 		return store.get(ip);
 	}
 
@@ -78,6 +77,7 @@ public class DasPerformanceResource {
 			phs = new PerformanceHistorySet();
 			PerformanceHistorySet oldPhs = store.putIfAbsent(ip, phs);
 			if(oldPhs == null){
+				phs.setIp(ip);
 				phs.add(id, p);
 			}else{
 				oldPhs.add(id, p);

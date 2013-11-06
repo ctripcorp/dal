@@ -25,7 +25,13 @@ public class PerformanceHistory {
 	}
 
 	public void add(Performance p) {
-		performanceHistory.add(p);
+//		performanceHistory.add(p);
+		synchronized(performanceHistory) {
+			if(performanceHistory.size() == 0)
+				performanceHistory.add(p);
+			else
+				performanceHistory.set(0, p);
+		}
 	}
 	
 	public PerformanceHistory getSub(long start, long end) {

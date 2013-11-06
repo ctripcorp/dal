@@ -15,7 +15,6 @@
 
 		<netty-version>4.0.4</netty-version>
 		<javassist-version>3.16.1-GA</javassist-version>
-		<msgpack-version>0.6.8-SNAPSHOT</msgpack-version>
 		<mysql-version>5.1.25</mysql-version>
 		<sqljdbc-version>4.0</sqljdbc-version>
 		<jtds-version>1.2.8</jtds-version>
@@ -126,11 +125,6 @@
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
 			<version>${javassist-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.msgpack</groupId>
-			<artifactId>msgpack</artifactId>
-			<version>${msgpack-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>

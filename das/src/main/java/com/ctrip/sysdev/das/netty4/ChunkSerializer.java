@@ -1,17 +1,5 @@
 package com.ctrip.sysdev.das.netty4;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.List;
-
-import org.msgpack.MessagePack;
-import org.msgpack.packer.Packer;
-
-import com.ctrip.sysdev.das.exception.SerDeException;
-
 /**
  * @deprecated
  * @author jhhe

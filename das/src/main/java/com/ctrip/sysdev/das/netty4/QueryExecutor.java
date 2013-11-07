@@ -314,6 +314,8 @@ public class QueryExecutor {
 		TimeCostSendTask.getInstance().getQueue().add(
 				String.format("id=%s&timeCost=encodeResponseTime:%d", resp.getId(), 
 						System.currentTimeMillis() - encodeStart));
+		
+		rs.close();
 	}
 
 	private void WriteResultSet(ChannelHandlerContext ctx,

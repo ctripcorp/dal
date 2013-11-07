@@ -143,17 +143,42 @@
                      <div id="dashboard">
 
                         <br>
-                        <div class="row-fluid">
-                           <div class= "span6">
-                              <div class="control-group">
-                                 <label class="control-label">所有任务</label>
-                                 <select id="tasks" class="span10">
-                                 </select>
+                           <div class="row-fluid">
+                           <div class="span12">
+                              <div class="portlet box green tasks-widget">
+                                 <div class="portlet-title">
+                                    <div class="caption"><i class="icon-check"></i>所有任务</div>
+                                    <div class="tools">
+                                       <a id="reload_worker" href="javascript:;" class="icon-refresh"></a>
+                                    </div>
+                                 </div>
+                                 <div class="portlet-body">
+                                    <div class="task-content">
+                                  
+                           <table class="table table-striped table-bordered table-hover dataTable" id="configs" aria-describedby="dao_tasks_info">
+                              <thead>
+                                 <tr role="row">
+                                    <th class="sorting_disabled" role="columnheader" tabindex="0" aria-controls="configs" rowspan="1" colspan="1" aria-label="Username: activate to sort column ascending" style="width: 155px;">读/写数据量</th>
+                                     <th class="sorting_disabled" role="columnheader" tabindex="0" aria-controls="configs" rowspan="1" colspan="1" aria-label="Username: activate to sort column ascending" style="width: 155px;">影响条数</th>
+                                     <th class="sorting_disabled" role="columnheader" tabindex="0" aria-controls="configs" rowspan="1" colspan="1" aria-label="Username: activate to sort column ascending" style="width: 255px;">总时间(ms)</th>
+                                     <th class="sorting_disabled" role="columnheader" tabindex="0" aria-controls="configs" rowspan="1" colspan="1" aria-label="Username: activate to sort column ascending" style="width: 255px;">序列化时间(ms)</th>
+                                     <th class="sorting_disabled" role="columnheader" tabindex="0" aria-controls="configs" rowspan="1" colspan="1" aria-label="Username: activate to sort column ascending" style="width: 255px;">反序列化时间(ms)</th>
+                                     <th class="sorting_disabled" role="columnheader" tabindex="0" aria-controls="configs" rowspan="1" colspan="1" aria-label="Username: activate to sort column ascending" style="width: 255px;">数据库时间(ms)</th>
+                                     <th class="sorting_disabled" role="columnheader" tabindex="0" aria-controls="configs" rowspan="1" colspan="1" aria-label="Username: activate to sort column ascending" style="width: 255px;">其他时间(ms)</th>
+                                 </tr>
+                              </thead>
+                              <tbody id="main_area" role="alert" aria-live="polite" aria-relevant="all">
+                                 
+                              </tbody>
+                           </table>
+                       <!--  </div> -->
+                                    </div>
+                                 </div>
                               </div>
                            </div>
                         </div>
                         
-                        <div id="pie_container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                   
                      </div>
                      <!-- End of main container-->
                   </div>

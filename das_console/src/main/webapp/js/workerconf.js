@@ -55,14 +55,25 @@ jQuery(document).ready(function () {
                 $.each(value.ports.ports, function(index,value){
 
                     $.get(sprintf("/console/dal/das/monitor/performance/%s/%s", ip,value), function(data){
-                        console.log(data.performanceHistory[0]);
-                    });
+                        var performace = data.performanceHistory[0];
+                        var totalMemoryUse = 
+                        ((performace.sysTotalMemory - performace.sysFreeMemory)/performace.sysTotalMemory)*100;
+                        var jvmMemoryUse = 
+                        ((performace.totalMemory - performace.freeMemory)/performace.totalMemory)*100;
 
-                    $('#configs').dataTable().fnAddData( 
-                        [ip, value, "1",
-                        sprintf("<button type='button' class='btn btn-danger delete' onclick='delete_worker(\"%s\", %s);'>删除</button>",
-                            ip, value)]
-                    );
+                        $('#configs').dataTable().fnAddData( 
+                            [ip, value, 
+                            sprintf("总体：内存-%s, CPU-%s    JVM：内存-%s,CPU-%s", 
+                                totalMemoryUse.toFixed(0) + "%", 
+                                (performace.systemCpuUsage*100).toFixed(0) + "%", 
+                                jvmMemoryUse.toFixed(0) + "%", 
+                                (performace.processCpuUsage*100).toFixed(0) + "%"),
+                            sprintf("<button type='button' class='btn btn-danger delete' onclick='delete_worker(\"%s\", %s);'>删除</button>",
+                                ip, value)]
+                        );
+
+                    });
+                    
                 }); 
             });    
         });

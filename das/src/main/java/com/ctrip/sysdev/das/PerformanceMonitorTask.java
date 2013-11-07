@@ -57,6 +57,8 @@ public class PerformanceMonitorTask implements Runnable {
 		long end = lastSystemTime;
 		long freeMemory = Runtime.getRuntime().freeMemory();
 		long totalMemory = Runtime.getRuntime().totalMemory();
+		long sysTotalMemory = osMBean.getTotalPhysicalMemorySize();
+		long sysFreeMemory = osMBean.getFreePhysicalMemorySize();
 		
 		logger.debug("processCpuUsage/systemCpuUsage/totalMemory/freeMemory" + processCpuUsage + systemCpuUsage + totalMemory + freeMemory);
 		
@@ -76,7 +78,9 @@ public class PerformanceMonitorTask implements Runnable {
 				append("&start=").append(start).
 				append("&end=").append(end).
 				append("&freeMemory=").append(freeMemory).
-				append("&totalMemory=").append(totalMemory);
+				append("&totalMemory=").append(totalMemory).
+				append("&sysFreeMemory=").append(sysFreeMemory).
+				append("&sysTotalMemory=").append(sysTotalMemory);
 			
 			result = sb.toString();
 			writer.write(sb.toString());

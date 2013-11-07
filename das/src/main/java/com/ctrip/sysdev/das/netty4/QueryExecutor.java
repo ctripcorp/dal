@@ -273,6 +273,9 @@ public class QueryExecutor {
 		buf.writeShort(1);
 		buf.writeBytes(headerPayload);
 		ctx.writeAndFlush(buf);
+		
+		//buf.clear();
+		headerPayload = null;
 
 		int bucket = 2;
 
@@ -289,6 +292,7 @@ public class QueryExecutor {
 			}
 
 			builder.addRows(rowBuilder.build());
+			rowBuilder.clear();
 			// check for chunk
 			// totalCount++;
 			rowCount++;
@@ -297,6 +301,7 @@ public class QueryExecutor {
 
 				WriteResultSet(ctx, builder);
 
+				builder.clear();
 				builder = DasProto.InnerResultSet.newBuilder();
 				rowCount = 0;
 			}
@@ -315,13 +320,13 @@ public class QueryExecutor {
 			DasProto.InnerResultSet.Builder builder) throws InvalidProtocolBufferException {
 		byte[] bodyPayload = builder.build().toByteArray();
 		
-		DasProto.InnerResultSet shadow =  DasProto.InnerResultSet.parseFrom(bodyPayload);
-		
 		ByteBuf bf = ctx.alloc().buffer();
 
 		bf.writeInt(bodyPayload.length);
 		bf.writeBytes(bodyPayload);
 		ChannelFuture wf = ctx.writeAndFlush(bf);
+		//bf.clear();
+		bodyPayload = null;
 	}
 
 	private void cleanUp(DasProto.Response.Builder resp, Connection conn,

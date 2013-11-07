@@ -15,6 +15,8 @@ jQuery(document).ready(function () {
             "bSortable": false
         }, {
             "bSortable": false
+        }, {
+            "bSortable": false
         }],
         "aLengthMenu": [
             [5, 15, 20, -1],
@@ -51,8 +53,13 @@ jQuery(document).ready(function () {
             $.each(data, function (index, value) {
                 var ip = value.ip;
                 $.each(value.ports.ports, function(index,value){
+
+                    $.get(sprintf("/console/dal/das/monitor/performance/%s/%s", ip,value), function(data){
+                        console.log(data.performanceHistory[0]);
+                    });
+
                     $('#configs').dataTable().fnAddData( 
-                        [ip, value, 
+                        [ip, value, "1",
                         sprintf("<button type='button' class='btn btn-danger delete' onclick='delete_worker(\"%s\", %s);'>删除</button>",
                             ip, value)]
                     );

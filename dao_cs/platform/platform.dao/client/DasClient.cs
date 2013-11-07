@@ -182,6 +182,9 @@ namespace platform.dao.client
 
             param.Response response = ReadResponse(sock);
 
+            if (null == response)
+                return null;
+
             IDataReader reader = new DasDataReader()
             {
                 Sock = sock,

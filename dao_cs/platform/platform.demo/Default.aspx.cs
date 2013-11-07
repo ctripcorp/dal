@@ -35,9 +35,12 @@ namespace platform.demo
 
                 using (IDataReader reader = person.ExecuteSql(sql))
                 {
-                    while (reader.Read())
+                    if (null != reader)
                     {
-                        count++;
+                        while (reader.Read())
+                        {
+                            count++;
+                        }
                     }
                 }
 

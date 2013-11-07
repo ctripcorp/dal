@@ -61,7 +61,9 @@ public class DasPerformanceResource {
 			@FormParam("start") long start, 
 			@FormParam("end") long end, 
 			@FormParam("freeMemory") long freeMemory, 
-			@FormParam("totalMemory") long totalMemory
+			@FormParam("totalMemory") long totalMemory,
+			@FormParam("sysTotalMemory") long sysTotalMemory,
+			@FormParam("sysFreeMemory") long sysFreeMemory
 			) {
 		Performance p = new Performance();
 		
@@ -71,6 +73,9 @@ public class DasPerformanceResource {
 		p.setEnd(end);
 		p.setFreeMemory(freeMemory);
 		p.setTotalMemory(totalMemory);
+		p.setSysFreeMemory(sysFreeMemory);
+		p.setSysTotalMemory(sysTotalMemory);
+		
 		
 		PerformanceHistorySet phs = store.get(ip);
 		if(phs == null) {

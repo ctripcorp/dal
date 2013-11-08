@@ -284,7 +284,7 @@ public class QueryExecutor {
 
 		DasProto.InnerResultSet.Builder builder = DasProto.InnerResultSet
 				.newBuilder();
-
+		int flush = 10;
 		while (rs.next()) {
 			DasProto.Row.Builder rowBuilder = DasProto.Row.newBuilder();
 			for (int i = 0; i < totalColumns; i++) {
@@ -305,11 +305,17 @@ public class QueryExecutor {
 				builder = DasProto.InnerResultSet.newBuilder();
 				rowCount = 0;
 			}
+			
+			if(flush-- == 0){
+				ctx.flush();
+				flush = 30;
+			}
 		}
 
 		builder.setLast(true);
 
 		WriteResultSet(ctx, builder);
+		ctx.flush();
 		
 		TimeCostSendTask.getInstance().getQueue().add(
 				String.format("id=%s&timeCost=encodeResponseTime:%d", resp.getId(), 
@@ -326,7 +332,7 @@ public class QueryExecutor {
 
 		bf.writeInt(bodyPayload.length);
 		bf.writeBytes(bodyPayload);
-		ChannelFuture wf = ctx.writeAndFlush(bf);
+		ChannelFuture wf = ctx.write(bf);
 		//bf.clear();
 		bodyPayload = null;
 	}

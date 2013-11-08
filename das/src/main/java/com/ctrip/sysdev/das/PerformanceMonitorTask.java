@@ -102,7 +102,7 @@ public class PerformanceMonitorTask implements Runnable {
 //		double processcpuUsage = osMBean.getProcessCpuLoad();
 		long systemTime = System.nanoTime();
 		long processorCpuTime = osMBean.getProcessCpuTime();
-		double processorCpuUsage = (processorCpuTime - lastProcessorCpuTime)/(systemTime - lastSystemTime);
+		double processorCpuUsage = ((double)(processorCpuTime - lastProcessorCpuTime))/(systemTime - lastSystemTime);
 
 		lastSystemTime = systemTime;
 		lastProcessorCpuTime = processorCpuTime;

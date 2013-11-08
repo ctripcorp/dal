@@ -21,6 +21,8 @@ namespace platform.demo
 
             List<object> results = new List<object>();
 
+            int count = 0;
+
             Stopwatch watch = new Stopwatch();
 
             watch.Start();
@@ -29,6 +31,7 @@ namespace platform.demo
             {
                 while (reader.Read())
                 {
+                    count++;
                     results.Add(new
                     {
                         ID = reader["ID"],
@@ -48,6 +51,7 @@ namespace platform.demo
 
             if (data != null)
             {
+                data.TotalCount = count;
                 data.TotalTime = watch.ElapsedMilliseconds;
                 MonitorSender.GetInstance().Send(data);
             }

@@ -17,6 +17,8 @@ jQuery(document).ready(function () {
             "bSortable": false
         }, {
             "bSortable": false
+        }, {
+            "bSortable": false
         }],
         "aLengthMenu": [
             [5, 15, 20, -1],
@@ -63,10 +65,13 @@ jQuery(document).ready(function () {
 
                         $('#configs').dataTable().fnAddData( 
                             [ip, value, 
-                            sprintf("总体：内存-%s, CPU-%s    JVM：内存-%s,CPU-%s", 
-                                totalMemoryUse.toFixed(0) + "%", 
-                                (performace.systemCpuUsage*100).toFixed(0) + "%", 
+                            sprintf("内存：%s（总%sMB）, CPU：%s", 
+                                totalMemoryUse.toFixed(0) + "%",
+                                (performace.sysTotalMemory/1048576).toFixed(0), 
+                                (performace.systemCpuUsage*100).toFixed(0) + "%"),
+                            sprintf("内存：%s（总%sMB）, CPU：%s", 
                                 jvmMemoryUse.toFixed(0) + "%", 
+                                (performace.totalMemory/1048576).toFixed(0), 
                                 (performace.processCpuUsage*100).toFixed(0) + "%"),
                             sprintf("<button type='button' class='btn btn-danger delete' onclick='delete_worker(\"%s\", %s);'>删除</button>",
                                 ip, value)]

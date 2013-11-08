@@ -54,7 +54,7 @@ namespace platform.dao.client
             command.CommandText = sql;
             command.CommandType = System.Data.CommandType.Text;
 
-            foreach (StatementParameter p in parameters)
+            foreach (ConcreteParameter p in parameters)
             {
                 DbParameter param = command.CreateParameter();
 
@@ -97,7 +97,7 @@ namespace platform.dao.client
             command.CommandText = sql;
             command.CommandType = System.Data.CommandType.Text;
 
-            foreach (StatementParameter p in parameters)
+            foreach (ConcreteParameter p in parameters)
             {
                 DbParameter param = command.CreateParameter();
 
@@ -139,7 +139,7 @@ namespace platform.dao.client
             command.CommandText = sp;
             command.CommandType = System.Data.CommandType.StoredProcedure;
 
-            foreach (StatementParameter p in parameters)
+            foreach (ConcreteParameter p in parameters)
             {
                 DbParameter param = command.CreateParameter();
 
@@ -181,7 +181,7 @@ namespace platform.dao.client
             command.CommandText = sp;
             command.CommandType = System.Data.CommandType.StoredProcedure;
 
-            foreach (StatementParameter p in parameters)
+            foreach (ConcreteParameter p in parameters)
             {
                 DbParameter param = command.CreateParameter();
 

@@ -14,12 +14,16 @@ jQuery(document).ready(function () {
         }
     });
 
+    
+
     $("#configCenter").toggleClass('open');
 
     $("#configCenter .sub-menu").show();
 
      $('#configs').dataTable({
         "aoColumns": [{
+            "bSortable": false
+        }, {
             "bSortable": false
         }, {
             "bSortable": false
@@ -54,6 +58,9 @@ jQuery(document).ready(function () {
     });
 
     $('#reload_db').click(function () {
+
+        $(document.body).removeData(); 
+        
          if($('#main_area').children().length > 0){
             $('#configs').dataTable().fnClearTable();    
         }
@@ -62,13 +69,17 @@ jQuery(document).ready(function () {
             //data = JSON.parse(data);
             $.each(data, function (index, value) {
                 $('#configs').dataTable().fnAddData( 
-                    [value.name, value.setting.driver, value.setting.jdbcUrl,
+                    [
+                    '<a href="javascript:;" class="icon-plus" onclick="toggleTr(this);" title="Slaves"></a>',
+                    value.name, value.setting.driver, value.setting.jdbcUrl,
                     sprintf("<button type='button' class='btn btn-success modify' onclick='mod_db(this);' mod_id='%s'>修改</button>&nbsp;<button type='button' class='btn btn-danger delete' onclick='del_db(\"%s\");'>删除</button>",
                         value.name, value.name)]
                     );
                 $.data(document.body, value.name, value);
-            });    
+            });  
         });
+
+
 
     });
 
@@ -81,9 +92,15 @@ jQuery(document).ready(function () {
             };
 
         if($.data(document.body, "modify") == $("#physic_db").val()){
+            var url = sprintf("/console/dal/das/configure/db/%s", postData["name"]);
+            if($("#db_type").val() == "Slave"){
+                url = sprintf("/console/dal/das/configure/db/%s/slave/%s", 
+                    $("#physic_db").val(), $("#slave_name").val());
+                 postData["name"] = $("#slave_name").val();
+            }
             $.ajax({
                 type: 'PUT',
-                url: sprintf("/console/dal/das/configure/db/%s", postData["name"]),
+                url: url,
                 //dataType: 'json',
                 data: postData,
                 success: function(data, status, event) {
@@ -95,24 +112,47 @@ jQuery(document).ready(function () {
                 }
             });
         }else{
-            $.post("/console/dal/das/configure/db",
-            postData, 
-            function (data, status, event) {
-                if(data.code == 'OK'){
-                    $(".icon-refresh").trigger('click');
-                }
+            var url = "/console/dal/das/configure/db";
+            if($("#db_type").val() == "Slave"){
+                url = sprintf("/console/dal/das/configure/db/%s/slave", $("#physic_db").val());
+                postData["name"] = $("#slave_name").val();
+            }
+            $.post(url, postData, function (data, status, event) {
+                    if(data.code == 'OK'){
+                        $(".icon-refresh").trigger('click');
+                    }
             });
         }
     });
+
+    $("#db_type").change(function(){
+        if($("#db_type").val() == "Slave"){
+            $("#slaves").show();
+        }else{
+            $("#slaves").hide();
+        }
+    });
+
+    $("#slaves").hide();
 
     $(".icon-refresh").trigger('click');
 
 });
 
-var del_db = function(name){
+//如果删除Slave，则传入两个参数，第一个为Master名，第二个为Slave的名字
+//如果删除Master，则传入一个参数obj, 为Master的名字
+var del_db = function(name, slave){
+
+    var url = sprintf('/console/dal/das/configure/db/%s', name); 
+
+    if(slave != undefined){
+        url = sprintf('/console/dal/das/configure/db/%s/slave/%s', name, slave);
+    }
+    
+
     $.ajax({
         type: 'DELETE',
-        url: sprintf('/console/dal/das/configure/db/%s', name),
+        url: url,
         //dataType: 'json',
         success: function(data, status, event) {
             if(data.code == 'OK'){
@@ -124,10 +164,70 @@ var del_db = function(name){
     });
 };
 
-var mod_db = function(obj){
+//如果修改Slave，则传入两个参数，第一个为Slave所对应的行，第二个为Slave的名字
+//如果修改Master，则传入一个参数obj, 为Master所对应的行
+var mod_db = function(obj, name){
     var value = $.data(document.body, $(obj).attr('mod_id'));
     $("#physic_db").val(value.name);
     $("#driver_class").val(value.setting.driver);
     $("#connect_str").val(value.setting.jdbcUrl);
+    if(name != undefined){
+        $("#db_type").val("Slave");
+        $("#slave_name").val(name);
+    }else{
+        $("#db_type").val("Master");
+    }
+    $("#db_type").trigger('change');
     $.data(document.body, "modify", value.name);
+};
+
+var toggleTr = function(obj){
+    var nTr = $(obj).parents('tr')[0];
+    if ($(obj).hasClass('icon-plus'))
+    {
+        /* Open this row */
+        $(obj).removeClass('icon-plus').addClass('icon-minus');
+
+        var mod_id = $(obj).parent().next().text();
+
+        var html_data = $.data(document.body, mod_id+"slave");
+
+        if(html_data == undefined){
+            html_data = fnFormatDetails(nTr, mod_id); 
+        }else{
+            $('#configs').dataTable().fnOpen( 
+            nTr, html_data, 'details' );
+        }        
+    }
+    else
+    { 
+        $(obj).removeClass('icon-minus').addClass('icon-plus');
+        $('#configs').dataTable().fnClose( nTr );
+    }
+};
+
+var fnFormatDetails = function(nTr, name)
+{
+    var trdata = "";
+
+    $.get(sprintf('/console/dal/das/configure/db/%s/slave', name),function(data){
+        $.each(data, function (index, value) {
+            trdata = sprintf("%s<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
+                trdata, value.name, value.setting.driver, value.setting.jdbcUrl,
+            sprintf(
+                '<button type="button" class="btn btn-success modify" onclick="mod_db(this, &quot;%s&quot;);" mod_id="%s">修改</button>&nbsp;<button type="button" class="btn btn-danger delete" onclick="del_db(&quot;%s&quot;, &quot;%s&quot;);">删除</button>'
+            ,value.name, name, name, value.name));
+        });
+
+        var html_data = sprintf(
+        '<table class="table table-striped table-bordered table-hover dataTable" aria-describedby="configs_info">%s</table>',
+        trdata);
+
+
+        $.data(document.body, name+"slave", html_data);
+
+        $('#configs').dataTable().fnOpen( 
+            nTr, html_data, 'details' );
+    });
+     
 };

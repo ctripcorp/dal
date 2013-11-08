@@ -51,6 +51,7 @@ namespace platform.demo
                 if (data != null)
                 {
                     data.TotalTime = watch.ElapsedMilliseconds;
+                    data.TotalCount = count;
                     MonitorSender.GetInstance().Send(data);
                 }
 

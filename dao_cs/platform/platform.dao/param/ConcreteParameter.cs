@@ -11,7 +11,7 @@ namespace platform.dao.param
     /// 填入相应数量的？，传向DAS或者DbClient
     /// 其他参数直接替换为？，传向DAS或者DbClient
     /// </summary>
-    public sealed class StatementParameter : IParameter
+    public sealed class ConcreteParameter : IParameter
     {
 
         private DbType dbType = DbType.Boolean;

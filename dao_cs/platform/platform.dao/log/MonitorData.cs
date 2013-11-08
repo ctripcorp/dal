@@ -20,6 +20,22 @@ namespace platform.dao.log
 
         private long decodeResposneTime;
 
+        private int totalCount;
+
+        private long totalDataBytes;
+
+        public int TotalCount
+        {
+            get { return totalCount; }
+            set { lock (lock_obj) { totalCount = value; } }
+        }
+
+        public long TotalDataBytes
+        {
+            get { return totalDataBytes; }
+            set { lock (lock_obj) { totalDataBytes = value; } }
+        }
+
         public long EncodeRequestTime { 
             get {return encodeRequestTime;}
             set { lock (lock_obj) { encodeRequestTime = value; } }

@@ -215,7 +215,7 @@ public class QueryExecutor {
 		// try{
 		// rowCount = statement.executeUpdate();
 		statement.executeQuery();
-		;
+		
 
 		// CallableStatement cst = (CallableStatement) statement;
 		// cst.getMoreResults();

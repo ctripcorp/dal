@@ -97,6 +97,16 @@ namespace platform.dao.sql
 
                 watch.Stop();
 
+                MonitorData data = MonitorData.GetInstance();
+
+                if (data != null)
+                {
+                    data.TotalDataBytes += 4 + payload.Length;
+                    data.DecodeResponseTime += watch.ElapsedMilliseconds;
+                }
+
+                payload = null;
+
                 if (ResultSet != null)
                 {
                     ResultSet.Clear();

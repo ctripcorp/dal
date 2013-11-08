@@ -27,6 +27,8 @@ namespace platform.dao.log
             this.Send(data.Taskid, "totalTime", data.TotalTime);
             this.Send(data.Taskid, "encodeRequestTime", data.EncodeRequestTime);
             this.Send(data.Taskid, "decodeResponseTime", data.DecodeResponseTime);
+            this.Send(data.Taskid, "totalCount", data.TotalCount);
+            this.Send(data.Taskid, "totalBytes", data.TotalDataBytes);
         }
 
         public void Send(string id, string name, long milliSeconds)

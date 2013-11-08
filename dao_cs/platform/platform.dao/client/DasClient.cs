@@ -13,6 +13,15 @@ using System.IO;
 
 namespace platform.dao.client
 {
+    /// <summary>
+    /// 细节TO BE DONE：
+    /// 1. 支持IN类型的参数
+    /// 2. 支持批量操作
+    /// 3. 完善生成工具
+    /// 4. HA
+    /// 5. 事务支持
+    /// 6. 读写分离与Sharding
+    /// </summary>
     internal class DasClient : IClient
     {
         private static ILogAdapter logger = LogFactory.GetLogger(typeof(DasClient).Name);
@@ -24,10 +33,11 @@ namespace platform.dao.client
         private SocketPool socketPool;
 
         private Regex paramRegex = new Regex(@"(?<paramName>[@|:]\w+)");
+        private Regex inRegex = new Regex(@"\sIN\s(?<paramName>[@|:]\w+)", RegexOptions.IgnoreCase);
 
         public void Init()
         {
-            socketPool = new SocketPool("127.0.0.1", ServicePort);
+            socketPool = new SocketPool("192.168.83.132", ServicePort);
         }
 
         /// <summary>
@@ -82,6 +92,13 @@ namespace platform.dao.client
 
                 byte[] payload = socket.ReadBytes(totalLength - 2);
 
+                MonitorData data = MonitorData.GetInstance();
+
+                if (data != null)
+                {
+                    data.TotalDataBytes += 4 + 2 + payload.Length;
+                }
+
                 using (MemoryStream ms = new MemoryStream(payload))
                 {
                     response = Serializer.Deserialize<param.Response>(ms);
@@ -106,6 +123,7 @@ namespace platform.dao.client
             //watch.Reset();
             
 
+
             Guid taskid = System.Guid.NewGuid();
 
             //MonitorSender.GetInstance().Send(taskid.ToString(), "taskBegin", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
@@ -114,6 +132,22 @@ namespace platform.dao.client
 
             if (null != parameters && parameters.Length > 0)
             {
+                //MatchCollection inMatches = inRegex.Matches(sql);
+
+                //foreach (Match ma in inMatches)
+                //{
+                //    for (int j = 0; j < parameters.Length; j++)
+                //    {
+                //        //找到IN对应的参数名
+                //        if (ma.Groups["paramName"].Value.Equals(parameters[j].Name))
+                //        {
+                            
+                //            break;
+                //        }
+                //    }
+                //}
+
+
                 MatchCollection mc = paramRegex.Matches(sql);
                 int i = 1;
                 foreach (Match ma in mc)
@@ -206,7 +240,84 @@ namespace platform.dao.client
         /// <returns></returns>
         public int Execute(string sql, params IParameter[] parameters)
         {
-            throw new NotImplementedException();
+            Stopwatch watch = new Stopwatch();
+
+            Guid taskid = System.Guid.NewGuid();
+
+            if (null != parameters && parameters.Length > 0)
+            {
+                MatchCollection mc = paramRegex.Matches(sql);
+                int i = 1;
+                foreach (Match ma in mc)
+                {
+                    for (int j = 0; j < parameters.Length; j++)
+                    {
+                        if (ma.Groups["paramName"].Value.Equals(parameters[j].Name))
+                        {
+                            if (parameters[j].Index == 0)
+                                parameters[j].Index = i;
+                            break;
+                        }
+                    }
+
+                    i++;
+                }
+            }
+
+            sql = Regex.Replace(sql, @"[@|:]\w+", "?");
+
+            param.RequestMessage msg = new param.RequestMessage
+            {
+                stateType = param.StatementType.SQL,
+                crud = param.CRUD.CUD,
+                flags = 1,
+                master = true,
+                name = sql
+            };
+            if (null != parameters && parameters.Length > 0)
+            {
+                foreach (IParameter p in parameters)
+                {
+                    msg.parameters.Add(new param.SqlParameters
+                    {
+                        dbType = (int)p.DbType,
+                        direction = (int)p.Direction,
+                        index = p.Index,
+                        isNull = p.IsNullable,
+                        name = p.Name,
+                        value = p.GetFromObject(),
+                        sensitive = p.IsSensitive
+                    });
+                }
+            }
+
+            param.Request request = new param.Request
+            {
+                msg = msg,
+                id = taskid.ToString(),
+                db = PhysicDbName,
+                cred = CredentialID ?? string.Empty
+            };
+
+            watch.Start();
+
+            PooledSocket sock = WriteRequest(request);
+
+            watch.Stop();
+
+            MonitorData data = MonitorData.GetInstance(taskid.ToString());
+
+            if (data != null)
+            {
+                data.EncodeRequestTime = watch.ElapsedMilliseconds;
+            }
+
+            param.Response response = ReadResponse(sock);
+
+            if (null == response)
+                return -1;
+
+            return response.affectRows;
         }
 
         /// <summary>
@@ -218,8 +329,88 @@ namespace platform.dao.client
         /// <returns></returns>
         public IDataReader FetchBySp(string sp, params IParameter[] parameters)
         {
+            Stopwatch watch = new Stopwatch();
 
-            throw new NotImplementedException();
+            Guid taskid = System.Guid.NewGuid();
+
+            if (null != parameters && parameters.Length > 0)
+            {
+                int i = 1;
+
+                for (int j = 0; j < parameters.Length; j++)
+                {
+                    if (parameters[j].Index == 0)
+                    {
+                        parameters[j].Index = i;
+                        i++;
+                    }
+                    else
+                    {
+                        i = parameters[j].Index + 1;
+                    }
+                }
+            }
+
+            param.RequestMessage msg = new param.RequestMessage
+            {
+                stateType = param.StatementType.SP,
+                crud = param.CRUD.GET,
+                flags = 1,
+                master = true,
+                name = sp
+            };
+            if (null != parameters && parameters.Length > 0)
+            {
+                foreach (IParameter p in parameters)
+                {
+                    msg.parameters.Add(new param.SqlParameters
+                    {
+                        dbType = (int)p.DbType,
+                        direction = (int)p.Direction,
+                        index = p.Index,
+                        isNull = p.IsNullable,
+                        name = p.Name,
+                        value = p.GetFromObject(),
+                        sensitive = p.IsSensitive
+                    });
+                }
+            }
+
+            param.Request request = new param.Request
+            {
+                msg = msg,
+                id = taskid.ToString(),
+                db = PhysicDbName,
+                cred = CredentialID ?? string.Empty
+            };
+
+            watch.Start();
+
+            PooledSocket sock = WriteRequest(request);
+
+            watch.Stop();
+
+            MonitorData data = MonitorData.GetInstance(taskid.ToString());
+
+            if (data != null)
+            {
+                data.EncodeRequestTime = watch.ElapsedMilliseconds;
+            }
+
+            param.Response response = ReadResponse(sock);
+
+            if (null == response)
+                return null;
+
+            IDataReader reader = new DasDataReader()
+            {
+                Sock = sock,
+                Header = response.header
+            };
+
+            //MonitorSender.GetInstance().Send(taskid.ToString(), "encodeRequestTime", watch.ElapsedMilliseconds);
+
+            return reader;
         }
 
         /// <summary>
@@ -231,7 +422,80 @@ namespace platform.dao.client
         /// <returns></returns>
         public int ExecuteSp(string sp, params IParameter[] parameters)
         {
-            throw new NotImplementedException();
+            Stopwatch watch = new Stopwatch();
+
+            Guid taskid = System.Guid.NewGuid();
+
+            if (null != parameters && parameters.Length > 0)
+            {
+                int i = 1;
+
+                for (int j = 0; j < parameters.Length; j++)
+                {
+                    if (parameters[j].Index == 0)
+                    {
+                        parameters[j].Index = i;
+                        i++;
+                    }
+                    else
+                    {
+                        i = parameters[j].Index + 1;
+                    }
+                }
+            }
+
+            param.RequestMessage msg = new param.RequestMessage
+            {
+                stateType = param.StatementType.SP,
+                crud = param.CRUD.CUD,
+                flags = 1,
+                master = true,
+                name = sp
+            };
+            if (null != parameters && parameters.Length > 0)
+            {
+                foreach (IParameter p in parameters)
+                {
+                    msg.parameters.Add(new param.SqlParameters
+                    {
+                        dbType = (int)p.DbType,
+                        direction = (int)p.Direction,
+                        index = p.Index,
+                        isNull = p.IsNullable,
+                        name = p.Name,
+                        value = p.GetFromObject(),
+                        sensitive = p.IsSensitive
+                    });
+                }
+            }
+
+            param.Request request = new param.Request
+            {
+                msg = msg,
+                id = taskid.ToString(),
+                db = PhysicDbName,
+                cred = CredentialID ?? string.Empty
+            };
+
+            watch.Start();
+
+            PooledSocket sock = WriteRequest(request);
+
+            watch.Stop();
+
+            MonitorData data = MonitorData.GetInstance(taskid.ToString());
+
+            if (data != null)
+            {
+                data.EncodeRequestTime = watch.ElapsedMilliseconds;
+            }
+
+            param.Response response = ReadResponse(sock);
+
+            if (null == response)
+                return -1;
+
+            return response.affectRows;
         }
 
     }

@@ -167,7 +167,7 @@ namespace platform.dao
             {
                 if (!col.IsPrimaryKey)
                 {
-                    parameters.Add(new StatementParameter()
+                    parameters.Add(new ConcreteParameter()
                     {
                         Name = string.Format("@{0}", col.Name),
                         Value = col.GetValue(entity),
@@ -213,7 +213,7 @@ namespace platform.dao
                          .Append(" = ")
                          .Append(col.GetValue(entity));
                 }
-                parameters.Add(new StatementParameter()
+                parameters.Add(new ConcreteParameter()
                 {
                     Name = string.Format("@{0}", col.Name),
                     Value = col.GetValue(entity),

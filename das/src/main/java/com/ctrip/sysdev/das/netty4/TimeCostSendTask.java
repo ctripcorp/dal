@@ -62,7 +62,7 @@ public class TimeCostSendTask extends Thread {
 					continue;
 				}
 				url = new URL(
-						"http://localhost:8080/console/dal/das/monitor/timeCosts");
+						"http://172.16.155.151:8080/console/dal/das/monitor/timeCosts");
 				URLConnection conn = url.openConnection();
 				conn.setDoOutput(true);
 

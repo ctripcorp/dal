@@ -103,7 +103,7 @@ namespace platform.dao
 
             logger.Warn(sql.ToString());
 
-            using (IDataReader reader = GetClient(PhysicDbName).Fetch(sql.ToString()))
+            using (IDataReader reader = GetClient(PhysicDbName).Fetch(sql.ToString(), null))
             {
                 if (reader.Read())
                 {
@@ -147,7 +147,7 @@ namespace platform.dao
 
             logger.Warn(sql.ToString());
 
-            return GetClient(PhysicDbName).Execute(sql.ToString());
+            return GetClient(PhysicDbName).Execute(sql.ToString(), null);
         }
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace platform.dao
 
             logger.Warn(sql.ToString());
 
-            return GetClient(PhysicDbName).Execute(sql.ToString());
+            return GetClient(PhysicDbName).Execute(sql.ToString(), null);
         }
 
         /// <summary>
@@ -243,7 +243,7 @@ namespace platform.dao
 
             logger.Warn(sql.ToString());
 
-            using (IDataReader reader = GetClient(PhysicDbName).Fetch(sql.ToString()))
+            using (IDataReader reader = GetClient(PhysicDbName).Fetch(sql.ToString(), null))
             {
                 while (reader.Read())
                 {
@@ -274,12 +274,12 @@ namespace platform.dao
 
             logger.Warn(table.GetDeleteSql());
 
-            return GetClient(PhysicDbName).Execute(table.GetDeleteSql());
+            return GetClient(PhysicDbName).Execute(table.GetDeleteSql(), null);
         }
 
-        public IDataReader Fetch(string sql, params IParameter[] parameters)
+        public IDataReader Fetch(string sql, IParameter[] parameters, bool masterOnly = true)
         {
-            return GetClient(PhysicDbName).Fetch(sql, parameters);
+            return GetClient(PhysicDbName).Fetch(sql, parameters, masterOnly);
         }
 
         /// <summary>
@@ -289,7 +289,7 @@ namespace platform.dao
         /// <param name="sql"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public IList<T> Fetch<T>(string sql, params IParameter[] parameters)
+        public IList<T> Fetch<T>(string sql, IParameter[] parameters)
         {
             Type type = typeof(T);
 
@@ -314,14 +314,14 @@ namespace platform.dao
             return results;
         }
 
-        public int Execute(string sql, params IParameter[] parameters)
+        public int Execute(string sql, IParameter[] parameters, bool masterOnly = true)
         {
-            return GetClient(PhysicDbName).Execute(sql, parameters);
+            return GetClient(PhysicDbName).Execute(sql, parameters, masterOnly);
         }
 
-        public IDataReader FetchBySp(string sp, params IParameter[] parameters)
+        public IDataReader FetchBySp(string sp, IParameter[] parameters, bool masterOnly = true)
         {
-            return GetClient(PhysicDbName).FetchBySp(sp, parameters);
+            return GetClient(PhysicDbName).FetchBySp(sp, parameters, masterOnly);
         }
 
         /// <summary>
@@ -331,7 +331,7 @@ namespace platform.dao
         /// <param name="sp"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public IList<T> FetchBySp<T>(string sp, params IParameter[] parameters)
+        public IList<T> FetchBySp<T>(string sp, IParameter[] parameters)
         {
             Type type = typeof(T);
 
@@ -356,9 +356,9 @@ namespace platform.dao
             return results;
         }
 
-        public int ExecuteSp(string sp, params IParameter[] parameters)
+        public int ExecuteSp(string sp, IParameter[] parameters, bool masterOnly = true)
         {
-            return GetClient(PhysicDbName).ExecuteSp(sp, parameters);
+            return GetClient(PhysicDbName).ExecuteSp(sp, parameters, masterOnly);
         }
     }
 }

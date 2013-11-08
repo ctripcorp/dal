@@ -10,13 +10,13 @@ namespace platform.dao.client
 {
     public interface IClient
     {
-        IDataReader Fetch(string sql, params IParameter[] parameters);
+        IDataReader Fetch(string sql, IParameter[] parameters, bool masterOnly = true);
 
-        int Execute(string sql, params IParameter[] parameters);
+        int Execute(string sql, IParameter[] parameters, bool masterOnly = true);
 
-        IDataReader FetchBySp(string sp, params IParameter[] parameters);
+        IDataReader FetchBySp(string sp, IParameter[] parameters, bool masterOnly = true);
 
-        int ExecuteSp(string sp, params IParameter[] parameters);
+        int ExecuteSp(string sp, IParameter[] parameters, bool masterOnly = true);
 
         //Begin orm
 

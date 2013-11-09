@@ -1,16 +1,22 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
-using platform.dao.client;
+using System.Linq;
+using platform.dao;
 using platform.dao.param;
 
 namespace {{dao.namespace}}
 {
-    public class {{dao.class_name}}
+    public class {{dao.class_name}} : AbstractDAO
     {
-        public static IClient client = ClientFactory.CreateDbClient("platform.dao.providers.SqlDatabaseProvider,platform.dao",
-            "Server=testdb.dev.sh.ctriptravel.com,28747;Integrated Security=sspi;database={{dao.db_name}};");
-
-        public static IClient dasClient = ClientFactory.CreateDasClient("{{dao.db_name}}", "user=kevin;password=kevin");
+        public {{dao.class_name}}()
+        {
+            //注释掉此行或者赋值为string.Empty，然后配置connectionString来直连数据库
+            PhysicDbName = "{{dao.db_name}}";
+            ServicePort = 9000;
+            CredentialID = "30303";
+            base.Init();
+        }
 
         {% for method in dao.methods %}
         // {{method.comment}}
@@ -18,23 +24,24 @@ namespace {{dao.namespace}}
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
-
-                //parameters.Add(new StatementParameter { Index = 1, DbType = DbType.Int64, Value = pk });
+                IList<IParameter> parameters = new List<IParameter>();
+ 
                 {% for p in method.parameters %}
-                parameters.Add(new StatementParameter { 
-                    Name = "@{{p.fieldName}}", 
-                    Direction = ParameterDirection.Input, 
-                    DbType = DbType.{{value_type[p.ptype]}}, 
-                    Value = {{p.name}} 
+                parameters.Add(new ConcreteParameter() { 
+                    DbType = DbType.{{value_type[p.ptype]}},
+                    Name = "@{{p.fieldName}}",
+                    Direction = ParameterDirection.Input,
+                    Index = 0,
+                    IsNullable =false,
+                    IsSensitive = false,
+                    Size  = 50,
+                    Value = {{p.name}}
                     });
                 {% end %}
                 
-                string sql = "{{method.sql}}"   ;
+                string sql = "{{method.sql}}";
 
-                //return client.Fetch(sql, parameters);
-
-                return dasClient.Fetch(sql, parameters);
+                return this.Fetch(sql, parameters);
             }
             catch (Exception ex)
             {

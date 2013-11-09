@@ -9,8 +9,6 @@ namespace platform.demo.DAO
 {
     public class PersonDAO : AbstractDAO
     {
-
-
         public PersonDAO()
         {
             //注释掉此行或者赋值为string.Empty，然后配置connectionString来直连数据库
@@ -20,13 +18,13 @@ namespace platform.demo.DAO
             base.Init();
         }
 
+
         // None
         public IDataReader FetchAllRecords()
         {
             try
             {
                 IList<IParameter> parameters = new List<IParameter>();
-
 
 
                 string sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person ";
@@ -38,26 +36,42 @@ namespace platform.demo.DAO
             }
             catch (Exception ex)
             {
-                
+                throw ex;
             }
-            return null;
         }
 
-        public IDataReader ExecuteSql(string sql)
+        // None
+        public IDataReader GetByID(int iD)
         {
             try
             {
                 IList<IParameter> parameters = new List<IParameter>();
 
+                IParameter iDParam = new ConcreteParameter()
+                {
+                    DbType = System.Data.DbType.Int32,
+                    Name = "@ID",
+                    Direction = ParameterDirection.Input,
+                    Index = 0,
+                    IsNullable = false,
+                    IsSensitive = false,
+                    Size = 50,
+                    Value = iD
+                };
+                parameters.Add(iDParam);
+
+
+                string sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person  WHERE  ID = @ID ";
+
+                //return client.Fetch(sql, parameters);
 
                 return this.Fetch(sql, parameters.ToArray());
 
             }
             catch (Exception ex)
             {
-
+                throw ex;
             }
-            return null;
         }
 
 

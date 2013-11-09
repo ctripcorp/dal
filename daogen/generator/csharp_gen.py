@@ -12,6 +12,10 @@ templates_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),
 in_pattern = re.compile(r"\sIN\s", re.I)
 
 lower_first = lambda s: s[:1].lower() + s[1:] if s else ''
+upper_first = lambda s: s[:1].upper() + s[1:] if s else ''
+is_value_type = lambda t: True if t in ["int", "DateTime", "long", "double"] else False
+
+#TODO: add nullable detect
 
 csharp_sql_map = {
 	"int": "int",
@@ -55,6 +59,18 @@ class Parameter(object):
 	name = None
 	fieldName = None
 
+class POCO(object):
+	namespace = None
+	class_name = None
+	table_name = None
+	fields = None
+
+class Field(object):
+	name = None
+	is_primary = False
+	ftype = None
+	value_type = False
+
 class DAO(object):
 	namespace = None
 	class_name = None
@@ -91,7 +107,7 @@ class CSharpGenerator(object):
 		self.dao_template = self.tmpl_loader.load("DAOTemplate.cs")
 		self.sp_dao_template = self.tmpl_loader.load("SPTemplate.cs")
 		self.freesql_dao_template = self.tmpl_loader.load("SQLTemplate.cs")
-		#self.poco_template = self.tmpl_loader.load("POCOTemplate.cs")
+		self.poco_template = self.tmpl_loader.load("POCOTemplate.cs")
 
 	def mkdir_if_not_exists(self, parent, child=None):
 		whole_path = parent
@@ -121,8 +137,10 @@ class CSharpGenerator(object):
 				group_by_table[s["table"]]= [s,]
 
 		dao = DAO()
+		poco = POCO()
 
 		dao.namespace = "%s.%s.%s" % (project["product_line"], project["domain"], project["service"])
+		poco.namespace = dao.namespace
 		if len(group_by_table) > 0:
 			first_value = group_by_table[group_by_table.keys()[0]]
 			if len(first_value) > 0:
@@ -131,9 +149,21 @@ class CSharpGenerator(object):
 		for table, tasks in group_by_table.items():
 			methods = []
 			sp_methods = []
+			fields = []
 			types = field_type_model_obj.get_by_table(dao.db_name, table)
 			field_type = types["fields"]
 			pk = types["primary_key"]
+			for f, t in field_type.items():
+				field = Field()
+				field.name = f
+				field.is_primary = (f == pk)
+				field.ftype = csharp_sql_map[t]
+				field.value_type = is_value_type(field.ftype)
+				fields.append(field)
+
+			poco.fields = fields
+			poco.table_name = table
+			poco.class_name = upper_first(table)
 
 			dao.class_name = "%sDAO" % table
 			
@@ -211,6 +241,11 @@ class CSharpGenerator(object):
 				f.write(self.dao_template.generate(
 					dao=dao,
 					value_type = value_type
+					))
+
+			with open(os.path.join(project_dir,"%s.cs" % table), "w") as f:
+				f.write(self.poco_template.generate(
+					dao=poco
 					))
 
 		dao = DAO()

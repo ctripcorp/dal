@@ -2,15 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using platform.dao.client;
+using platform.dao;
 using platform.dao.param;
 
 namespace {{dao.namespace}}
 {
     public class {{dao.class_name}} : AbstractDAO
     {
-        public PersonDAO()
+        public {{dao.class_name}}()
         {
+            //注释掉此行或者赋值为string.Empty，然后配置connectionString来直连数据库
+            PhysicDbName = "{{dao.db_name}}";
+            ServicePort = 9000;
+            CredentialID = "30303";
             base.Init();
         }
 
@@ -22,16 +26,16 @@ namespace {{dao.namespace}}
             {
                 IList<IParameter> parameters = new List<IParameter>();
                 {% for p in method.parameters  %}
-                IParameter {{p.name}}Param = ParameterFactory.CreateValue(
-                        "@{{p.fieldName}}",
-                        {{p.name}},
-                        direction : ParameterDirection.Input,
-                        index : 0,
-                        nullable :false,
-                        sensitive : false,
-                        size  :50
-                    );
-                parameters.Add({{p.name}}Param);
+                parameters.Add(new ConcreteParameter(){
+                        DbType = DbType.{{value_type[p.ptype]}},
+                        Name = "@{{p.fieldName}}",
+                        Direction = ParameterDirection.Input,
+                        Index = 0,
+                        IsNullable =false,
+                        IsSensitive = false,
+                        Size  = 50,
+                        Value = {{p.name}}
+                    });
                 {% end %}
                 
                 string sql = "{{method.sql}}"   ;
@@ -58,15 +62,16 @@ namespace {{dao.namespace}}
             {
                 IList<IParameter> parameters = new List<IParameter>();
                 {% for p in method.parameters  %}
-                IParameter {{p.name}}Param = ParameterFactory.CreateValue(
-                        "@{{p.fieldName}}",
-                        {{p.name}},
-                        direction : ParameterDirection.Input,
-                        index  :0,
-                        nullable :false,
-                        sensitive : false,
-                        size  :50
-                    );
+                IParameter {{p.name}}Param = new ConcreteParameter(){
+                        DbType = System.Data.DbType.{{value_type[p.ftype]}}
+                        Name = "@{{p.fieldName}}",
+                        Direction = ParameterDirection.Input,
+                        Index = 0,
+                        IsNullable =false,
+                        IsSensitive = false,
+                        Size  = 50,
+                        Value = {{p.name}}
+                    };
                 parameters.Add({{p.name}}Param);
                 {% end %}
                 

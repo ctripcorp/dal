@@ -28,6 +28,7 @@ namespace platform.demo.DAO
                 IList<IParameter> parameters = new List<IParameter>();
 
 
+
                 string sql = "SELECT ID,Address,Name,Telephone,Age,Gender,Birth FROM Person ";
 
                 //return client.Fetch(sql, parameters);

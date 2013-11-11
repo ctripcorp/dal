@@ -9,6 +9,7 @@ using platform.dao.log;
 using platform.dao.orm;
 using platform.dao.param;
 using platform.dao.client;
+using platform.dao.utils;
 
 namespace platform.dao
 {
@@ -169,9 +170,11 @@ namespace platform.dao
                 {
                     parameters.Add(new ConcreteParameter()
                     {
+                        DbType = TypeConverter.ResolveType(col.PropertyInfo.PropertyType),
                         Name = string.Format("@{0}", col.Name),
                         Value = col.GetValue(entity),
-                        Index = col.Index
+                        Index = col.Index,
+                        Direction = ParameterDirection.Input
                     });
                 }
             }
@@ -215,6 +218,7 @@ namespace platform.dao
                 }
                 parameters.Add(new ConcreteParameter()
                 {
+                    DbType = TypeConverter.ResolveType(col.PropertyInfo.PropertyType),
                     Name = string.Format("@{0}", col.Name),
                     Value = col.GetValue(entity),
                     Index = col.Index

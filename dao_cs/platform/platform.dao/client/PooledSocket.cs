@@ -166,6 +166,11 @@ namespace platform.dao.client
 
             int taskidLen = stream.Read(header, 0, header.Length);
 
+            while(taskidLen != header.Length)
+            {
+                taskidLen += stream.Read(header, taskidLen, header.Length - taskidLen);
+            }
+
             return header;
 
         }

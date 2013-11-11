@@ -17,18 +17,14 @@
 		<java_target_version>1.6</java_target_version>
 		<file_encoding>UTF-8</file_encoding>
 		
-		<junit.version>4.11</junit.version>
-		<javassist.version>3.16.1-GA</javassist.version>
-		<msgpack.version>0.6.8-SNAPSHOT</msgpack.version>
-		<mysql.version>5.1.25</mysql.version>
-		<sqljdbc.version>4.0</sqljdbc.version>
+
+		<protobuf-version>2.5.0</protobuf-version>
 		
 		<netty-version>4.0.4</netty-version>
 		<slf4j.version>1.7.5</slf4j.version>
 		<log4j.version>1.2.17</log4j.version>
 		<logback.version>1.0.11</logback.version>
 		<commons-logging.version>1.1</commons-logging.version>
-		<guava.version>14.0.1</guava.version>
 	</properties>
 	
 	<profiles>
@@ -96,38 +92,11 @@
 			<version>${netty-version}</version>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-			<scope>test</scope>
+			  <groupId>com.google.protobuf</groupId>
+			  <artifactId>protobuf-java</artifactId>
+			  <version>${protobuf-version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.javassist</groupId>
-			<artifactId>javassist</artifactId>
-			<version>${javassist.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.msgpack</groupId>
-			<artifactId>msgpack</artifactId>
-			<version>${msgpack.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>${mysql.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.microsoft.sqlserver</groupId>
-			<artifactId>sqljdbc</artifactId>
-			<version>${sqljdbc.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>${guava.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>

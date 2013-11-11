@@ -22,6 +22,7 @@ namespace platform.dao.param
         private int size;
         private object value;
         private bool isSensitive = false;
+        private static readonly DateTime utcStartTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
 
         public DbType DbType
         {
@@ -138,7 +139,7 @@ namespace platform.dao.param
                 case System.Data.DbType.UInt64:
                     return new param.AvailableType() { current = 2, int64_arg = (long)value};
                 case System.Data.DbType.DateTime:
-                    return new param.AvailableType() { current = 2, int64_arg = ((DateTime)value).Ticks / TimeSpan.TicksPerMillisecond };
+                    return new param.AvailableType() { current = 2, int64_arg = ((DateTime)value).Subtract(utcStartTime).Ticks / TimeSpan.TicksPerMillisecond };
                 case System.Data.DbType.Single:
                 case System.Data.DbType.Double:
                     return new param.AvailableType() { current = 3, double_arg = (double)value };

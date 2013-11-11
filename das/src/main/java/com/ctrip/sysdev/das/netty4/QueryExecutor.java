@@ -280,12 +280,13 @@ public class QueryExecutor {
 		int bucket = 2;
 
 		int rowCount = 0;
-		// int totalCount = 0;
+		int totalCount = 0;
 
 		DasProto.InnerResultSet.Builder builder = DasProto.InnerResultSet
 				.newBuilder();
 		int flush = 10;
 		while (rs.next()) {
+			totalCount++;
 			DasProto.Row.Builder rowBuilder = DasProto.Row.newBuilder();
 			for (int i = 0; i < totalColumns; i++) {
 				rowBuilder.addColumns(getColumnValue(rs, i, columnTypes[i]));
@@ -322,6 +323,12 @@ public class QueryExecutor {
 						System.currentTimeMillis() - encodeStart));
 		
 		rs.close();
+		
+		if(totalCount > 100000){
+			logger.info("calling GC");
+			Runtime.getRuntime().gc();
+		}
+		logger.info("Finished");
 	}
 
 	private void WriteResultSet(ChannelHandlerContext ctx,

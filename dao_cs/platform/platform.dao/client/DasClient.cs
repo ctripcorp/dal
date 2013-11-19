@@ -37,7 +37,8 @@ namespace platform.dao.client
 
         public void Init()
         {
-            socketPool = new SocketPool("172.16.155.184", ServicePort);
+            socketPool = new SocketPool("192.168.83.132", ServicePort);
+            //socketPool = new SocketPool("127.0.0.1", ServicePort);
         }
 
         /// <summary>

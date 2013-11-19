@@ -65,7 +65,7 @@ public class DalServer extends DasService {
 //			MBeanUtil.registerMBean(serverInfoMXBean.getName(),
 //			serverInfoMXBean.getName(), serverInfoMXBean);
 			
-			PerformanceMonitorTask.start(port, ip);
+			//PerformanceMonitorTask.start(port, ip);
 			return true;
 		} catch (Throwable e) {
 			logger.error("Error during register worker path", e);
@@ -97,7 +97,7 @@ public class DalServer extends DasService {
 			logger.error("Error during shutdown worker", e);
 		}
 		
-		PerformanceMonitorTask.shutdown();
+		//PerformanceMonitorTask.shutdown();
 	}
 
 	protected boolean isDead(WatchedEvent event) {

@@ -20,7 +20,7 @@ public class TestClient {
 		DataOutputStream out;
 		DataInputStream in;
 
-		requestSocket = new Socket("172.16.155.151", 9000);
+		requestSocket = new Socket("192.168.83.132", 9000);
 
 		// 2. get Input and Output streams
 		out = new DataOutputStream(requestSocket.getOutputStream());
@@ -68,8 +68,9 @@ public class TestClient {
 			
 			byte[] bodyData = new byte[bodyLength];
 			
-			in.read(bodyData, 0, bodyLength);
-			
+			//in.read(bodyData, 0, bodyLength);
+			in.readFully(bodyData);
+
 			InnerResultSet result = InnerResultSet.parseFrom(bodyData);
 			readFinish = result.getLast();
 			for(Row row : result.getRowsList()){

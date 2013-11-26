@@ -176,7 +176,7 @@ namespace platform.dao.client
                 flags = 1,
                 master = true,
                 name = sql
-            };
+            }; 
             if (null != parameters && parameters.Length > 0)
             {
                 foreach (IParameter p in parameters)

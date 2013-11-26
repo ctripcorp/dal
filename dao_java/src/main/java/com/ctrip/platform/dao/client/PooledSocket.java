@@ -39,6 +39,22 @@ public class PooledSocket implements Closeable {
 	
 	private DataOutputStream out;
 	
+	public DataInputStream getIn() {
+		return in;
+	}
+
+	public void setIn(DataInputStream in) {
+		this.in = in;
+	}
+
+	public DataOutputStream getOut() {
+		return out;
+	}
+
+	public void setOut(DataOutputStream out) {
+		this.out = out;
+	}
+
 	public boolean isAlive(){
 		return socket != null && socket.isConnected();
 	}

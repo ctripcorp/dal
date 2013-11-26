@@ -1,94 +1,165 @@
 package com.ctrip.platform.dao.param;
 
+import java.util.Date;
+
 import com.ctrip.platform.dao.DasProto;
 import com.ctrip.platform.dao.enums.DbType;
 import com.ctrip.platform.dao.enums.ParameterDirection;
+import com.google.protobuf.ByteString;
 
 public class StatementParameter {
-	
-	private DbType dbType;
-	
-	private ParameterDirection direction;
-	
-	private boolean nullable;
-	
-	private String name;
-	
-	private int index;
-	
-	private int size;
-	
-	private boolean sensitive;
-	
-	private Object value;
 
-	public DbType getDbType() {
-		return dbType;
+	Builder currentBuilder;
+
+	private StatementParameter(Builder builder) {
+		currentBuilder = builder;
 	}
 
-	public void setDbType(DbType dbType) {
-		this.dbType = dbType;
+	public static Builder newBuilder() {
+		return Builder.create();
 	}
 
-	public ParameterDirection getDirection() {
-		return direction;
+	public DasProto.SqlParameters build2SqlParameters() {
+		return currentBuilder.build2SqlParameters();
 	}
 
-	public void setDirection(ParameterDirection direction) {
-		this.direction = direction;
+	public static final class Builder {
+
+		private Builder() {
+
+		}
+
+		public static Builder create() {
+			return new Builder();
+		}
+
+		private DbType dbType_;
+
+		private ParameterDirection direction_;
+
+		private boolean nullable_;
+
+		private String name_;
+
+		private int index_;
+
+		private boolean sensitive_;
+
+		private Object value_;
+
+		public Builder setDbType(DbType dbType) {
+			dbType_ = dbType;
+			return this;
+		}
+
+		public Builder setDirection(ParameterDirection direction) {
+			direction_ = direction;
+			return this;
+		}
+
+		public Builder setNullable(boolean nullable) {
+			nullable_ = nullable;
+			return this;
+		}
+
+		public Builder setName(String name) {
+			name_ = name;
+			return this;
+		}
+
+		public Builder setIndex(int index) {
+			index_ = index;
+			return this;
+		}
+
+		public Builder setSensitive(boolean sensitive) {
+			sensitive_ = sensitive;
+			return this;
+		}
+
+		public Builder setValue(Object value) {
+			value_ = value;
+			return this;
+		}
+
+		public StatementParameter build() {
+			return new StatementParameter(this);
+		}
+
+		DasProto.SqlParameters build2SqlParameters() {
+
+			DasProto.SqlParameters.Builder builder = DasProto.SqlParameters
+					.newBuilder();
+			builder.setDbType(dbType_.getIntVal());
+			builder.setDirection(direction_.getIntVal());
+			builder.setIsNull(nullable_);
+			builder.setName(name_);
+			builder.setIndex(index_);
+			builder.setSensitive(sensitive_);
+
+			DasProto.AvailableType.Builder valueBuilder = DasProto.AvailableType
+					.newBuilder();
+
+			switch (dbType_) {
+			case Binary:
+				builder.setValue(valueBuilder.setCurrent(5)
+						.setBytesArg(ByteString.copyFrom((byte[]) value_))
+						.build());
+				break;
+			case Boolean:
+				builder.setValue(valueBuilder.setCurrent(0)
+						.setBoolArg(Boolean.parseBoolean(value_.toString()))
+						.build());
+				break;
+			case Byte:
+			case SByte:
+			case Int16:
+			case Int32:
+			case UInt16:
+			case UInt32:
+			case StringFixedLength:
+				builder.setValue(valueBuilder.setCurrent(1)
+						.setInt32Arg(Integer.parseInt(value_.toString()))
+						.build());
+				break;
+			case Int64:
+			case UInt64:
+				builder.setValue(valueBuilder.setCurrent(2)
+						.setInt64Arg(Long.parseLong(value_.toString())).build());
+				break;
+			case DateTime:
+				builder.setValue(valueBuilder.setCurrent(2)
+						.setInt64Arg(((Date) value_).getTime()).build());
+				break;
+			case Single:
+			case Double:
+				builder.setValue(valueBuilder.setCurrent(3)
+						.setDoubleArg(Double.parseDouble(value_.toString()))
+						.build());
+				break;
+			case String:
+			case Decimal:
+				builder.setValue(valueBuilder.setCurrent(4)
+						.setStringArg(value_.toString()).build());
+				break;
+			default:
+				builder.setValue(valueBuilder.setCurrent(4)
+						.setStringArg(value_.toString()).build());
+				break;
+			}
+
+			return builder.build();
+		}
 	}
 
-	public boolean isNullable() {
-		return nullable;
-	}
-
-	public void setNullable(boolean nullable) {
-		this.nullable = nullable;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public int getIndex() {
-		return index;
-	}
-
-	public void setIndex(int index) {
-		this.index = index;
-	}
-
-	public int getSize() {
-		return size;
-	}
-
-	public void setSize(int size) {
-		this.size = size;
-	}
-
-	public boolean isSensitive() {
-		return sensitive;
-	}
-
-	public void setSensitive(boolean sensitive) {
-		this.sensitive = sensitive;
-	}
-
-	public Object getValue() {
-		return value;
-	}
-
-	public void setValue(Object value) {
-		this.value = value;
-	}
-	
-	public DasProto.AvailableType getFromObject()
-	{
-		return null;
+	public static void main(String[] args) {
+		StatementParameter.Builder builder = StatementParameter.newBuilder();
+		builder.setDbType(DbType.Boolean)
+				.setDirection(ParameterDirection.Input).setNullable(false)
+				.setIndex(1).setName("").setSensitive(false).setValue(false);
+		StatementParameter instance = builder.build();
+		System.out.println(instance.build2SqlParameters().toByteArray());
+		
 	}
 
 }

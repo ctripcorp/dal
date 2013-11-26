@@ -7,6 +7,16 @@ import java.util.Map;
 import com.ctrip.platform.dao.param.StatementParameter;
 
 public class AbstractDAO implements DAO {
+	
+	protected String physicDbName;
+	
+	protected int servicePort;
+	
+	protected String credentialID;
+	
+	protected void Init(){
+		
+	}
 
 	@Override
 	public ResultSet fetch(String sql, List<StatementParameter> parameters,

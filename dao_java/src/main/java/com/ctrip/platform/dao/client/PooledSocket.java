@@ -8,12 +8,14 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import com.ctrip.platform.dao.Recycleable;
+
 /**
  * 
  * @author gawu
  *
  */
-public class PooledSocket implements Closeable {
+public class PooledSocket implements Closeable, Recycleable {
 
 	public PooledSocket(SocketPool socketPool, String ip, int port,
 			int sendReceiveTimeout, int connectTimeout) throws UnknownHostException, IOException {
@@ -61,7 +63,15 @@ public class PooledSocket implements Closeable {
 
 	@Override
 	public void close() throws IOException {
-		
+//		this.out.close();
+//		this.in.close();
+		this.socket.close();
+	}
+
+	@Override
+	public void recycle(Closeable closeable) throws IllegalArgumentException,
+			IOException {
+		this.pool.recycle(this);
 	}
 	
 	

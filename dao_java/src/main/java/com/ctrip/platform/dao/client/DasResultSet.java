@@ -1,5 +1,6 @@
 package com.ctrip.platform.dao.client;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -19,10 +20,42 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 
+import com.ctrip.platform.dao.DasProto;
+
 public class DasResultSet implements ResultSet {
+
+	private PooledSocket socket;
+
+	private List<DasProto.ResponseHeader> header;
+
+	private List<DasProto.Row> resultSet;
+
+	private DasProto.Row currentRow;
+
+	private int cursor;
+
+	private boolean readFinished = false;
+
+	public PooledSocket getSocket() {
+		return socket;
+	}
+
+	public void setSocket(PooledSocket socket) {
+		this.socket = socket;
+	}
+
+	public List<DasProto.ResponseHeader> getHeader() {
+		return header;
+	}
+
+	public void setHeader(List<DasProto.ResponseHeader> header) {
+		this.header = header;
+	}
 
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
@@ -38,14 +71,66 @@ public class DasResultSet implements ResultSet {
 
 	@Override
 	public boolean next() throws SQLException {
-		// TODO Auto-generated method stub
-		return false;
+
+		if (null == this.socket)
+			return false;
+
+		if (!readFinished
+				&& (resultSet == null || (resultSet.size() - cursor < 100))) {
+
+			int blockSize;
+			try {
+				blockSize = this.socket.getIn().readInt();
+
+				byte[] payload = new byte[blockSize];
+				this.socket.getIn().readFully(payload);
+
+				DasProto.InnerResultSet currentResultSet = DasProto.InnerResultSet
+						.parseFrom(payload);
+
+				if (currentResultSet.getLast()) {
+					this.socket.recycle(null);
+				}
+
+				List<DasProto.Row> tempResultSet = new ArrayList<DasProto.Row>();
+				if (resultSet != null && resultSet.size() > 0) {
+					tempResultSet.addAll(resultSet.subList(cursor,
+							resultSet.size() - 1));
+				}
+
+				readFinished = currentResultSet.getLast();
+				tempResultSet.addAll(currentResultSet.getRowsList());
+
+				payload = null;
+				if (null != resultSet) {
+					resultSet.clear();
+				}
+				resultSet = tempResultSet;
+				cursor = 0;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		boolean result = cursor < resultSet.size();
+		if (result) {
+			currentRow = resultSet.get(cursor);
+			cursor++;
+		}
+		return result;
+
 	}
 
 	@Override
 	public void close() throws SQLException {
-		// TODO Auto-generated method stub
-
+		try {
+			this.socket.recycle(null);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

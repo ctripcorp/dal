@@ -15,8 +15,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.ctrip.sysdev.das.common.Status;
 import com.ctrip.sysdev.das.console.domain.DB;
-import com.ctrip.sysdev.das.console.domain.Status;
 
 @Resource
 @Path("configure/db")

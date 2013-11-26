@@ -23,7 +23,7 @@ namespace platform.dao.client
         private uint minPoolSize = 5; 
         private TimeSpan socketRecycleAge = TimeSpan.FromMinutes(30);
         /// <summary>
-        /// 如果主机不响应，将其标志为暂时宕机，并隔一段时间进行重试，没失败一次
+        /// 如果主机不响应，将其标志为暂时宕机，并隔一段时间进行重试，每失败一次
         /// 时间加倍，如果主机开始响应，将时间重置为1
         /// </summary>
         private int deadEndPointSecondsUntilRetry = 1;

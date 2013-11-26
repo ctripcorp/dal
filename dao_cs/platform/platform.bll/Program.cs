@@ -10,6 +10,8 @@ using System.Data.SqlClient;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
 using platform.dao.enums;
+using System.Diagnostics;
+using Microsoft.Web.Administration;
 
 namespace platform.bll
 {
@@ -18,7 +20,34 @@ namespace platform.bll
         static void Main(string[] args)
         {
 
-           
+            //var category = new PerformanceCounterCategory("ASP.NET Applications");
+
+            //var instances = category.GetInstanceNames();
+
+            //foreach (var instance in instances)
+            //{
+            //    Console.WriteLine(instance);
+            //}
+
+            foreach(var a in System.Web.Hosting.ApplicationManager.GetApplicationManager().GetRunningApplications())
+            {
+                Console.WriteLine(a.ID);
+            }
+
+            using (ServerManager serverManager = new ServerManager())
+            {
+                Console.WriteLine(serverManager.WorkerProcesses.Count);
+                foreach (var w in serverManager.WorkerProcesses)
+                {
+                    
+                    foreach (var a in w.ApplicationDomains)
+                    {
+                        Console.WriteLine(a.Id);
+                    }
+                }
+            }
+
+       
             
             Console.Read();
 

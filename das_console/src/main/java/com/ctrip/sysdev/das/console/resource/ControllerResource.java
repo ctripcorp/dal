@@ -17,8 +17,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.zookeeper.ZooKeeper;
 
+import com.ctrip.sysdev.das.common.Status;
 import com.ctrip.sysdev.das.console.domain.Controller;
-import com.ctrip.sysdev.das.console.domain.Status;
 
 @Resource
 @Path("instance/controller")

@@ -11,9 +11,9 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 
+import com.ctrip.sysdev.das.common.Status;
 import com.ctrip.sysdev.das.console.domain.DB;
 import com.ctrip.sysdev.das.console.domain.DbSetting;
-import com.ctrip.sysdev.das.console.domain.Status;
 
 @Resource
 public class DbResource extends DalBaseResource {

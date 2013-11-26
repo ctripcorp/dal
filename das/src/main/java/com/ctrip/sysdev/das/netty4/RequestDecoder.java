@@ -46,8 +46,8 @@ public class RequestDecoder extends ByteToMessageDecoder {
 			e.printStackTrace();
 		} finally {
 			long decodeTime = System.currentTimeMillis() - decodeStart;
-			TimeCostSendTask.getInstance().getQueue().add(
-					String.format("id=%s&timeCost=decodeRequestTime:%d", request.getId(), decodeTime));
+//			TimeCostSendTask.getInstance().getQueue().add(
+//					String.format("id=%s&timeCost=decodeRequestTime:%d", request.getId(), decodeTime));
 		}
 		
 		if (request != null) {

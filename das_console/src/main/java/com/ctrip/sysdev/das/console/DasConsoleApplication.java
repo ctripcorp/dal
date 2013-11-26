@@ -7,7 +7,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.ctrip.sysdev.das.console.resource.DbResource;
 
-@ApplicationPath("/")
+@ApplicationPath("/console")
 public class DasConsoleApplication extends ResourceConfig {
 	public DasConsoleApplication() {
 		packages(DbResource.class.getPackage().getName());

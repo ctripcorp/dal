@@ -37,7 +37,8 @@ namespace platform.dao.client
 
         public void Init()
         {
-            socketPool = new SocketPool("172.16.155.184", ServicePort);
+            socketPool = new SocketPool("192.168.83.132", ServicePort);
+            //socketPool = new SocketPool("127.0.0.1", ServicePort);
         }
 
         /// <summary>
@@ -175,7 +176,7 @@ namespace platform.dao.client
                 flags = 1,
                 master = true,
                 name = sql
-            };
+            }; 
             if (null != parameters && parameters.Length > 0)
             {
                 foreach (IParameter p in parameters)

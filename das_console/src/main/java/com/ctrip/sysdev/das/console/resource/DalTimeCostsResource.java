@@ -14,7 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import com.ctrip.sysdev.das.console.domain.Status;
+import com.ctrip.sysdev.das.common.Status;
 import com.ctrip.sysdev.das.console.domain.StringIdSet;
 import com.ctrip.sysdev.das.console.domain.TimeCost;
 

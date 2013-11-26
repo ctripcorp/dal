@@ -161,9 +161,9 @@ public class QueryExecutor {
 
 		ResultSet rs = statement.executeQuery();
 		
-		TimeCostSendTask.getInstance().getQueue().add(
-				String.format("id=%s&timeCost=dbTime:%d", resp.getId(), 
-						System.currentTimeMillis() - dbStart));
+//		TimeCostSendTask.getInstance().getQueue().add(
+//				String.format("id=%s&timeCost=dbTime:%d", resp.getId(), 
+//						System.currentTimeMillis() - dbStart));
 
 		// Mark start encoding
 		getFromResultSet(ctx, rs, resp);
@@ -277,7 +277,7 @@ public class QueryExecutor {
 		//buf.clear();
 		headerPayload = null;
 
-		int bucket = 2;
+		int bucket = 2000;
 
 		int rowCount = 0;
 		int totalCount = 0;
@@ -307,20 +307,20 @@ public class QueryExecutor {
 				rowCount = 0;
 			}
 			
-			if(flush-- == 0){
-				ctx.flush();
-				flush = 30;
-			}
+//			if(flush-- == 0){
+//				ctx.flush();
+//				flush = 30;
+//			}
 		}
 
 		builder.setLast(true);
 
 		WriteResultSet(ctx, builder);
-		ctx.flush();
+		//ctx.flush();
 		
-		TimeCostSendTask.getInstance().getQueue().add(
-				String.format("id=%s&timeCost=encodeResponseTime:%d", resp.getId(), 
-						System.currentTimeMillis() - encodeStart));
+//		TimeCostSendTask.getInstance().getQueue().add(
+//				String.format("id=%s&timeCost=encodeResponseTime:%d", resp.getId(), 
+//						System.currentTimeMillis() - encodeStart));
 		
 		rs.close();
 		
@@ -339,7 +339,8 @@ public class QueryExecutor {
 
 		bf.writeInt(bodyPayload.length);
 		bf.writeBytes(bodyPayload);
-		ChannelFuture wf = ctx.write(bf);
+//		ChannelFuture wf = ctx.write(bf);
+		ChannelFuture wf = ctx.writeAndFlush(bf);
 		//bf.clear();
 		bodyPayload = null;
 	}

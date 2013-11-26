@@ -18,8 +18,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.zookeeper.ZooKeeper;
 
+import com.ctrip.sysdev.das.common.Status;
 import com.ctrip.sysdev.das.console.domain.Port;
-import com.ctrip.sysdev.das.console.domain.Status;
 import com.ctrip.sysdev.das.console.domain.Worker;
 
 @Resource

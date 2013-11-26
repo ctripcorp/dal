@@ -164,11 +164,20 @@ namespace platform.dao.client
         {
             byte[] header = new byte[length];
 
-            int taskidLen = stream.Read(header, 0, header.Length);
+            //int taskidLen = stream.Read(header, 0, header.Length);
 
-            while(taskidLen != header.Length)
-            {
-                taskidLen += stream.Read(header, taskidLen, header.Length - taskidLen);
+            //while(taskidLen != header.Length)
+            //{
+            //    taskidLen += stream.Read(header, taskidLen, header.Length - taskidLen);
+            //}
+
+             int n = 0;
+             int off = 0;
+            while (n < length) {
+                int count = stream.Read(header, off + n, length - n);
+                if (count < 0)
+                    throw new Exception("End of File!");
+                n += count;
             }
 
             return header;

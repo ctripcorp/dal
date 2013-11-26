@@ -23,8 +23,8 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 
+import com.ctrip.sysdev.das.common.Status;
 import com.ctrip.sysdev.das.console.domain.Port;
-import com.ctrip.sysdev.das.console.domain.Status;
 
 @Resource
 @Path("configure/port")

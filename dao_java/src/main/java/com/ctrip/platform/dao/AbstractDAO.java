@@ -29,7 +29,7 @@ public class AbstractDAO implements DAO {
 			DasClient client = new DasClient();
 			client.setCredentialId(credentialId);
 			client.setLogicDbName(logicDbName);
-			client.init("192.168.83.132", servicePort);
+			client.init("127.0.0.1", servicePort);
 			clients.put(logicDbName, client);
 		}
 		lock.writeLock().unlock();
@@ -55,7 +55,17 @@ public class AbstractDAO implements DAO {
 	@Override
 	public int execute(String sql, List<StatementParameter> parameters,
 			Map keywordParameters) {
-		// TODO Auto-generated method stub
+		lock.readLock().lock();
+		Client client = null;
+		if(clients.containsKey(logicDbName)){
+			client = clients.get(logicDbName);
+		}
+		lock.readLock().unlock();
+		
+		if(client != null){
+			return client.execute(sql, parameters, keywordParameters);
+		}
+		
 		return 0;
 	}
 

@@ -75,7 +75,7 @@ namespace platform.dao.sql
                 int blockSize = Sock.ReadInt();
 
                 byte[] payload = Sock.ReadBytes(blockSize);
-
+                 
                 param.InnerResultSet resultSet = null;
                 using (MemoryStream ms = new MemoryStream(payload))
                 {

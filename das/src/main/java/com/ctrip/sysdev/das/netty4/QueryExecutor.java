@@ -202,7 +202,7 @@ public class QueryExecutor {
 		buf.writeInt(headerPayload.length + 2);
 
 		// The version
-		buf.writeInt(1);
+		buf.writeShort(1);
 		buf.writeBytes(headerPayload);
 		ctx.writeAndFlush(buf);
 

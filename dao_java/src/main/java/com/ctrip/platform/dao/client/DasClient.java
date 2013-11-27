@@ -119,7 +119,48 @@ public class DasClient implements Client {
 	@Override
 	public int execute(String sql, List<StatementParameter> parameters,
 			Map keywordParameters) {
-		// TODO Auto-generated method stub
+		boolean master = false;
+
+		if (null != keywordParameters && keywordParameters.size() > 0
+				&& keywordParameters.containsKey("master")) {
+			master = Boolean.getBoolean(keywordParameters.get("master")
+					.toString());
+		}
+
+		DasProto.RequestMessage.Builder msgBuilder = DasProto.RequestMessage
+				.newBuilder();
+
+		msgBuilder.setStateType(StatementType.SQL).setCrud(CRUD.CUD)
+				.setFlags(1).setMaster(master).setName(sql);
+
+		if (null != parameters) {
+			for (StatementParameter p : parameters) {
+				msgBuilder.addParameters(p.build2SqlParameters());
+			}
+		}
+
+		DasProto.Request.Builder requestBuilder = DasProto.Request.newBuilder();
+
+		UUID taskid = UUID.randomUUID();
+
+		requestBuilder.setMsg(msgBuilder.build()).setCred(credentialId)
+				.setDb(logicDbName).setId(taskid.toString());
+
+		try {
+			PooledSocket sock = writeRequest(requestBuilder.build());
+			DasProto.Response response = readResponse(sock);
+			
+			sock.recycle(null);
+			
+			return response.getAffectRows();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return 0;
 	}
 

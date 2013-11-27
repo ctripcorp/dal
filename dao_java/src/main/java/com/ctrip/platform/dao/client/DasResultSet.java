@@ -30,6 +30,7 @@ import com.ctrip.platform.dao.DasProto;
 public class DasResultSet implements ResultSet {
 
 	private PooledSocket socket;
+	private boolean recycled = false;
 
 	private List<DasProto.ResponseHeader> header;
 
@@ -89,7 +90,10 @@ public class DasResultSet implements ResultSet {
 						.parseFrom(payload);
 
 				if (currentResultSet.getLast()) {
-					this.socket.recycle(null);
+					if(!recycled){
+						this.socket.recycle(null);
+						recycled = true;
+					}
 				}
 
 				List<DasProto.Row> tempResultSet = new ArrayList<DasProto.Row>();
@@ -125,7 +129,10 @@ public class DasResultSet implements ResultSet {
 	@Override
 	public void close() throws SQLException {
 		try {
+			if(recycled)
+				return;
 			this.socket.recycle(null);
+			recycled = true;
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

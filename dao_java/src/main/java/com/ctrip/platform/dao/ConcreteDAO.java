@@ -52,13 +52,13 @@ public class ConcreteDAO extends AbstractDAO {
 	public static void main(String[] args) throws SQLException {
 		int count = 0;
 		count = new ConcreteDAO().updateNameById(37, "kevin&snow");
-//		ResultSet rs = new ConcreteDAO().fetchAll();
-//		if (null != rs) {
-//			while (rs.next()) {
-//				count++;
-//			}
-//			rs.close();
-//		}
+		ResultSet rs = new ConcreteDAO().fetchAll();
+		if (null != rs) {
+			while (rs.next()) {
+				count++;
+			}
+			rs.close();
+		}
 		System.out.println(count);
 	}
 

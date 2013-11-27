@@ -24,7 +24,7 @@ public class SocketPool implements Recycleable{
 
 	private int sendReceiveTimeout = 2000;
 	private int connectTimeout = 2000;
-	private int maxPoolSize = 10;
+	private int maxPoolSize = 2;
 
 	private String host;
 

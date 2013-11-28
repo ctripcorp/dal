@@ -131,6 +131,9 @@ public class DalServer extends DasService {
 		logger.info("ZK host:port" + args[0]);
 		logger.info("Started at port " + args[1]);
 		try {
+			if(args.length == 4) {
+				DalServer.senderEnabled = Boolean.parseBoolean(args[3]);
+			}
 			new DalServer(args[0], args[1], args[2]).run();
 		} catch (Exception e) {
 			logger.error("Error starting server", e);

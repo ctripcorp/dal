@@ -332,7 +332,7 @@ public class QueryExecutor {
 			logger.info("calling GC");
 			Runtime.getRuntime().gc();
 		}
-		logger.info("Finished");
+		logger.debug("Finished");
 	}
 
 	private void WriteResultSet(ChannelHandlerContext ctx,

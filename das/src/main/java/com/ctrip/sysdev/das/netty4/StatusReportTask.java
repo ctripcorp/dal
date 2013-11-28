@@ -18,12 +18,15 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.PerformanceMonitorTask;
+import com.ctrip.sysdev.das.DalServer;
 
 public class StatusReportTask implements Runnable {
 	private static final String URL_TEMPLATE = "http://%s/console/dal/das/monitor/timeCosts";
+
+	private String DECODE_TIME_TEMPLATE = "id=%s&timeCost=decodeRequestTime:%d";
 	private String DB_TIME_TEMPLATE = "id=%s&timeCost=dbTime:%d";
 	private String ENCODE_TIME_TEMPLATE = "id=%s&timeCost=encodeResponseTime:%d";
+	
 	private static final int DEFAULT_BATCH_COUNT = 100;
 	
 	private static ScheduledExecutorService sender;
@@ -57,6 +60,10 @@ public class StatusReportTask implements Runnable {
 		consoleUrl = new URL(String.format(URL_TEMPLATE, consoleAddr));
 	}
 
+	public void recordDecodeEnd(String id, long start) {
+		addStatus(String.format(DECODE_TIME_TEMPLATE, id, System.currentTimeMillis() - start));
+	}
+	
 	public void recordDbEnd(String id, long start) {
 		addStatus(String.format(DB_TIME_TEMPLATE, id, System.currentTimeMillis() - start));
 	}
@@ -74,6 +81,11 @@ public class StatusReportTask implements Runnable {
 	public void run() {
 		if (statusQueue.isEmpty())
 			return;
+		
+		if(!DalServer.senderEnabled){
+			while(statusQueue.poll() != null);
+			return;
+		}
 
 		URLConnection conn = getURLConnection();
 		if (conn == null)

@@ -47,6 +47,9 @@ public class PerformanceMonitorTask implements Runnable {
 	@SuppressWarnings("restriction")
 	@Override
 	public void run() {
+		if(!DalServer.senderEnabled)
+			return;
+		
 		URL url;
 		String result = "";
 		

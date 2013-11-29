@@ -33,7 +33,7 @@
 	
 	<servlet-mapping>
 		<servlet-name>DasConsoleApplication</servlet-name>
-		<url-pattern>/dal/das/*</url-pattern>
+		<url-pattern>/console/dal/das/*</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>

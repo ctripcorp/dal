@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import com.ctrip.sysdev.das.common.Status;
 import com.ctrip.sysdev.das.console.domain.StringIdSet;
 import com.ctrip.sysdev.das.console.domain.TimeCost;
+import com.ctrip.sysdev.das.console.domain.TimeCostEntry;
 
 @Resource
 @Path("monitor/timeCosts")
@@ -44,12 +45,19 @@ public class DalTimeCostsResource extends DalBaseResource {
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public Status addTimeCost(@FormParam("id") String id, @FormParam("timeCost") String timeCost) {
+	public Status addTimeCost(@FormParam("id") String id, @FormParam("stage") String stage, @FormParam("cost") Long cost) {
 		// TimeCost looks like: name0:value0;name1:value1
-		TimeCost tc = new TimeCost(id, timeCost);
-		TimeCost oldTc = store.putIfAbsent(id, tc);
-		if(oldTc != null)
-			oldTc.merge(tc);
+		TimeCostEntry entry = new TimeCostEntry(stage, cost);
+		
+		TimeCost tc = store.get(id);
+		if(tc == null) {
+			tc = new TimeCost(id);
+			TimeCost oldTc = store.putIfAbsent(id, tc);
+			if(oldTc != null)
+				oldTc.add(entry);
+			else
+				tc.add(entry);
+		}
 		return Status.OK;
 	}
 }

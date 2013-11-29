@@ -7,12 +7,6 @@ public class TimeCostEntry {
 	public TimeCostEntry() {
 	}
 	
-	public TimeCostEntry(String segment) {
-		String[] pair = segment.split(":");
-		stage = pair[0];
-		cost = Long.parseLong(pair[1]);
-	}
-
 	public TimeCostEntry(String stage, Long cost) {
 		this.stage = stage;
 		this.cost = cost;

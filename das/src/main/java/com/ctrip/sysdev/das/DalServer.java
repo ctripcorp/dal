@@ -7,13 +7,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.controller.DasService;
+import com.ctrip.sysdev.das.monitors.ErrorReporter;
+import com.ctrip.sysdev.das.monitors.PerformanceMonitorTask;
+import com.ctrip.sysdev.das.monitors.StatusReportTask;
 import com.ctrip.sysdev.das.netty4.Netty4Server;
-import com.ctrip.sysdev.das.netty4.StatusReportTask;
 
 public class DalServer extends DasService {
 	private static Logger logger = LoggerFactory.getLogger(DalServer.class);
 	public static boolean senderEnabled = true;
-	public static String concoleAddr = "localhost:8080";
+	public static String consoleAddr = "localhost:8080";
 
 	private String path;
 	private String port;
@@ -61,7 +63,8 @@ public class DalServer extends DasService {
 			ds.initDataSourceWrapper(zk);
 			
 //			StatusReportTask.initInstance("http://172.16.155.184:8080", 50);
-			StatusReportTask.initInstance(concoleAddr, 50);
+			StatusReportTask.initInstance(consoleAddr, 50);
+			ErrorReporter.initInstance(ip, port, consoleAddr);
 			
 			dasService = factory.getInstance(Netty4Server.class);
 			dasService.start(Integer.parseInt(port));
@@ -105,6 +108,7 @@ public class DalServer extends DasService {
 		
 		PerformanceMonitorTask.shutdown();
 		StatusReportTask.shutdown();
+		ErrorReporter.shutdown();
 	}
 
 	protected boolean isDead(WatchedEvent event) {
@@ -133,11 +137,11 @@ public class DalServer extends DasService {
 		logger.info("Started at port " + args[1]);
 		try {
 			if(args.length > 3) {
-				DalServer.senderEnabled = Boolean.parseBoolean(args[3]);
+				DalServer.consoleAddr = args[3];
 			}
 			
-			if(args.length 4 3) {
-				DalServer.senderEnabled = Boolean.parseBoolean(args[3]);
+			if(args.length > 4) {
+				DalServer.senderEnabled = Boolean.parseBoolean(args[4]);
 			}
 
 			new DalServer(args[0], args[1], args[2]).run();

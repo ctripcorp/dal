@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.das;
+package com.ctrip.sysdev.das.monitors;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ctrip.sysdev.das.DalServer;
 
 public class PerformanceMonitorTask implements Runnable {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -66,7 +68,7 @@ public class PerformanceMonitorTask implements Runnable {
 		logger.debug("processCpuUsage/systemCpuUsage/totalMemory/freeMemory" + processCpuUsage + systemCpuUsage + totalMemory + freeMemory);
 		
 		try {
-			url = new URL("http://" + DalServer.concoleAddr + "/console/dal/das/monitor/performance");
+			url = new URL("http://" + DalServer.consoleAddr + "/console/dal/das/monitor/performance");
 			URLConnection conn = url.openConnection();
 			conn.setDoOutput(true);
 

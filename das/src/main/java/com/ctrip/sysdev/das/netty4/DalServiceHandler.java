@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.DruidDataSourceWrapper;
 import com.ctrip.sysdev.das.domain.DasProto;
+import com.ctrip.sysdev.das.monitors.ErrorReporter;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -31,13 +32,13 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<DasProto.Requ
 
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, DasProto.Request request) {
-		try {
+//		try {
 			logger.debug("channelRead0 from {} message = '{}'", ctx.channel(), request);
 			queryExecutor.execute(request, ctx);
-		} catch (Throwable e) {
-			logger.warn("channelRead0", e);
-			ctx.channel().close();
-		}
+//		} catch (Throwable e) {
+//			logger.error("channelRead0", e);
+//			ctx.channel().close();
+//		}
 	}
 	
 	@Override
@@ -48,18 +49,19 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<DasProto.Requ
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-		logger.info("channelActive {}", ctx.channel());
+		logger.debug("channelActive {}", ctx.channel());
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-		logger.debug("exceptionCaught {}", ctx.channel(), cause);
+		logger.error("exceptionCaught {}", ctx.channel(), cause);
+		ErrorReporter.reportChannelException(ctx, cause);
 		ctx.channel().close();
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) {
-		logger.info("channelInactive {}", ctx.channel());
+		logger.debug("channelInactive {}", ctx.channel());
 	}
 
 }

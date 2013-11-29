@@ -29,25 +29,25 @@ namespace platform.bll
             //    Console.WriteLine(instance);
             //}
 
-            foreach(var a in System.Web.Hosting.ApplicationManager.GetApplicationManager().GetRunningApplications())
-            {
-                Console.WriteLine(a.ID);
-            }
+            //foreach(var a in System.Web.Hosting.ApplicationManager.GetApplicationManager().GetRunningApplications())
+            //{
+            //    Console.WriteLine(a.ID);
+            //}
 
-            using (ServerManager serverManager = new ServerManager())
-            {
-                Console.WriteLine(serverManager.WorkerProcesses.Count);
-                foreach (var w in serverManager.WorkerProcesses)
-                {
+            //using (ServerManager serverManager = new ServerManager())
+            //{
+            //    Console.WriteLine(serverManager.WorkerProcesses.Count);
+            //    foreach (var w in serverManager.WorkerProcesses)
+            //    {
                     
-                    foreach (var a in w.ApplicationDomains)
-                    {
-                        Console.WriteLine(a.Id);
-                    }
-                }
-            }
+            //        foreach (var a in w.ApplicationDomains)
+            //        {
+            //            Console.WriteLine(a.Id);
+            //        }
+            //    }
+            //}
 
-       
+            Console.WriteLine("app_info".ToUpperInvariant());
             
             Console.Read();
 

@@ -88,9 +88,9 @@ public class DasResultSet implements ResultSet {
 				DasProto.InnerResultSet currentResultSet = DasProto.InnerResultSet
 						.parseFrom(payload);
 
-				if (currentResultSet.getLast()) {
-					this.socket.recycle(null);
-				}
+//				if (currentResultSet.getLast()) {
+//					this.socket.recycle(null);
+//				}
 
 				List<DasProto.Row> tempResultSet = new ArrayList<DasProto.Row>();
 				if (resultSet != null && resultSet.size() > 0) {

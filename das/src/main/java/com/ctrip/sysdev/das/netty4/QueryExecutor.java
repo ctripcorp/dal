@@ -87,6 +87,10 @@ public class QueryExecutor {
 					// conn.commit();
 				}
 			}
+//			if(true)
+//				throw new NullPointerException("abc");
+			
+
 		} catch (Throwable e) {
 			ErrorReporter.reportException(request.getId(), e);
 			logger.error(QUERY_EXECUTION_EXCEPTION, e);
@@ -109,9 +113,6 @@ public class QueryExecutor {
 	private boolean debug = false;
 
 	private void addDelay() {
-		if(true)
-			throw new NullPointerException("abc");
-		
 		if (!debug)
 			return;
 

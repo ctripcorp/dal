@@ -1,7 +1,5 @@
 package com.ctrip.sysdev.das.monitors;
 
-import io.netty.channel.ChannelHandlerContext;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
@@ -24,14 +22,11 @@ import com.ctrip.sysdev.das.DalServer;
 
 public class StatusReportTask implements Runnable {
 	private static final String TIME_COST_URL_TEMPLATE = "http://%s/console/dal/das/monitor/timeCosts";
-	private static final String EXCEPTION_URL_TEMPLATE = "http://%s/console/dal/das/monitor/exceptions";
 
-	private String CHANNEL_EXCEPTION_TEMPLATE = "channedlException=%s";
-	private String EXECUTION_EXCEPTION_TEMPLATE = "id=%s&exception=%s";
-	
-	private String DECODE_TIME_TEMPLATE = "id=%s&timeCost=decodeRequestTime:%d";
-	private String DB_TIME_TEMPLATE = "id=%s&timeCost=dbTime:%d";
-	private String ENCODE_TIME_TEMPLATE = "id=%s&timeCost=encodeResponseTime:%d";
+	// id:state:cost  decodeRequest=dr, dbTime=dt encodeResponseTime=er
+	private static final String DECODE_TIME_TEMPLATE = "%s:dr:%d;";
+	private static final String DB_TIME_TEMPLATE = "%s:dt:%d;";
+	private static final String ENCODE_TIME_TEMPLATE = "%s:er:%d;";
 	
 	private static final int DEFAULT_BATCH_COUNT = 100;
 	
@@ -65,15 +60,6 @@ public class StatusReportTask implements Runnable {
 		consoleUrl = new URL(String.format(TIME_COST_URL_TEMPLATE, consoleAddr));
 	}
 	
-	public void reportChannelException(ChannelHandlerContext ctx, Throwable cause) {
-		addStatus(String.format(CHANNEL_EXCEPTION_TEMPLATE, cause.getMessage()));
-	}
-	
-	// TODO add more detail message
-	public void reportException(String id, Throwable cause) {
-		addStatus(String.format(EXECUTION_EXCEPTION_TEMPLATE, id, cause.getMessage()));
-	}
-	
 	public void recordDecodeEnd(String id, long start) {
 		addStatus(String.format(DECODE_TIME_TEMPLATE, id, System.currentTimeMillis() - start));
 	}
@@ -87,6 +73,7 @@ public class StatusReportTask implements Runnable {
 	}
 
 	public void addStatus(String value) {
+		logger.info(value);
 		statusQueue.offer(value);
 	}
 
@@ -128,6 +115,7 @@ public class StatusReportTask implements Runnable {
 					conn.getOutputStream()));
 
 			int count = 0;
+			writer.write("values=");
 			while (count++ < batchCount) {
 				String value = statusQueue.poll();
 				if (value == null)

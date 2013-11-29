@@ -45,17 +45,21 @@ public class DalTimeCostsResource extends DalBaseResource {
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public Status addTimeCost(@FormParam("id") String id, @FormParam("stage") String stage, @FormParam("cost") Long cost) {
-		// TimeCost looks like: name0:value0;name1:value1
-		TimeCostEntry entry = new TimeCostEntry(stage, cost);
-		
-		TimeCost tc = store.get(id);
-		if(tc == null) {
-			tc = new TimeCost(id);
-			TimeCost oldTc = store.putIfAbsent(id, tc);
-			if(oldTc != null)
-				oldTc.add(entry);
-			else
+	public Status addTimeCost(@FormParam("values") String values) {
+		String[] entries = values.split(";");
+		for(String rawEntry: entries){
+			String[] parts = rawEntry.split(":");
+			TimeCostEntry entry = new TimeCostEntry(parts[1], Long.parseLong(parts[2]));
+			String id = parts[0];
+			TimeCost tc = store.get(id);
+			if(tc == null) {
+				tc = new TimeCost(id);
+				TimeCost oldTc = store.putIfAbsent(id, tc);
+				if(oldTc != null)
+					oldTc.add(entry);
+				else
+					tc.add(entry);
+			}else
 				tc.add(entry);
 		}
 		return Status.OK;

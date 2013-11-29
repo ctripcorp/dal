@@ -37,9 +37,11 @@ public class QueryExecutor {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private DruidDataSourceWrapper dataSource;
+	private StatusReportTask reportTask;
 
 	public QueryExecutor(DruidDataSourceWrapper dataSource) {
 		this.dataSource = dataSource;
+		this.reportTask = StatusReportTask.getInstance();
 	}
 
 	public void execute(DasProto.Request request, ChannelHandlerContext ctx) {
@@ -161,6 +163,7 @@ public class QueryExecutor {
 
 		ResultSet rs = statement.executeQuery();
 		
+		reportTask.recordDbEnd(resp.getId(), dbStart);
 //		TimeCostSendTask.getInstance().getQueue().add(
 //				String.format("id=%s&timeCost=dbTime:%d", resp.getId(), 
 //						System.currentTimeMillis() - dbStart));
@@ -318,6 +321,7 @@ public class QueryExecutor {
 		WriteResultSet(ctx, builder);
 		//ctx.flush();
 		
+		reportTask.recordEncodeEnd(resp.getId(), encodeStart);
 //		TimeCostSendTask.getInstance().getQueue().add(
 //				String.format("id=%s&timeCost=encodeResponseTime:%d", resp.getId(), 
 //						System.currentTimeMillis() - encodeStart));
@@ -328,7 +332,7 @@ public class QueryExecutor {
 			logger.info("calling GC");
 			Runtime.getRuntime().gc();
 		}
-		logger.info("Finished");
+		logger.debug("Finished");
 	}
 
 	private void WriteResultSet(ChannelHandlerContext ctx,

@@ -45,7 +45,8 @@ public class RequestDecoder extends ByteToMessageDecoder {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			long decodeTime = System.currentTimeMillis() - decodeStart;
+			StatusReportTask.getInstance().recordDecodeEnd(request.getId(), decodeStart);
+//			long decodeTime = System.currentTimeMillis() - decodeStart;
 //			TimeCostSendTask.getInstance().getQueue().add(
 //					String.format("id=%s&timeCost=decodeRequestTime:%d", request.getId(), decodeTime));
 		}

@@ -20,6 +20,8 @@ public class PerformanceTester implements Runnable {
 	
 	public void laod(String[] sqls, DalClient dal) {
 		for(String sql: sqls) {
+			if(sql.trim().length() == 0)
+				continue;
 			tasks.add(new SqlTask(sql, dal));
 		}
 	}

@@ -32,7 +32,7 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<DasProto.Requ
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, DasProto.Request request) {
 		try {
-			logger.info("channelRead0 from {} message = '{}'", ctx.channel(), request);
+			logger.debug("channelRead0 from {} message = '{}'", ctx.channel(), request);
 			queryExecutor.execute(request, ctx);
 		} catch (Throwable e) {
 			logger.warn("channelRead0", e);

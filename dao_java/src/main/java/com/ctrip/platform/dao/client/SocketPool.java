@@ -22,8 +22,8 @@ public class SocketPool implements Recycleable{
 
 	private ConcurrentLinkedQueue<PooledSocket> queue;
 
-	private int sendReceiveTimeout = 2000;
-	private int connectTimeout = 2000;
+	private int sendReceiveTimeout = 30000;
+	private int connectTimeout = 30000;
 	private int maxPoolSize = 10;
 
 	private String host;

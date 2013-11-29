@@ -15,21 +15,29 @@ public class DalClient extends AbstractDAO {
 	private List<StatementParameter> parameters = new ArrayList<StatementParameter>();
 	private Map keywordParameters = new HashMap();
 	
-	public void init() {
-		
+	public DalClient() {
+		logicDbName = "SysDalTest";
+		servicePort = 9000;
+		credentialId = "30303";
+		super.init();
 	}
 	
 	public void executeQuery(String sql) {
-		if(true)
-			return;
 		// read result set
 		ResultSet rs = this.fetch(sql, parameters, keywordParameters);
 		try {
 			while(rs.next()){
 				rs.getString(1);
 			}
+			
 		} catch (SQLException e) {
-			e.printStackTrace();
+			System.err.println(e.getMessage());
+		}
+		
+		try {
+			rs.close();
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
 		}
 
 	}

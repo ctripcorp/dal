@@ -8,9 +8,12 @@ import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.controller.DasService;
 import com.ctrip.sysdev.das.netty4.Netty4Server;
+import com.ctrip.sysdev.das.netty4.StatusReportTask;
 
 public class DalServer extends DasService {
 	private static Logger logger = LoggerFactory.getLogger(DalServer.class);
+	public static boolean senderEnabled = true;
+	public static String concoleAddr = "localhost:8080";
 
 	private String path;
 	private String port;
@@ -57,6 +60,9 @@ public class DalServer extends DasService {
 			DruidDataSourceWrapper ds = factory.getInstance(DruidDataSourceWrapper.class);
 			ds.initDataSourceWrapper(zk);
 			
+//			StatusReportTask.initInstance("http://172.16.155.184:8080", 50);
+			StatusReportTask.initInstance(concoleAddr, 50);
+			
 			dasService = factory.getInstance(Netty4Server.class);
 			dasService.start(Integer.parseInt(port));
 //			SingleInstanceDaemonTool watcher = SingleInstanceDaemonTool
@@ -65,7 +71,7 @@ public class DalServer extends DasService {
 //			MBeanUtil.registerMBean(serverInfoMXBean.getName(),
 //			serverInfoMXBean.getName(), serverInfoMXBean);
 			
-			//PerformanceMonitorTask.start(port, ip);
+			PerformanceMonitorTask.start(port, ip);
 			return true;
 		} catch (Throwable e) {
 			logger.error("Error during register worker path", e);
@@ -97,7 +103,8 @@ public class DalServer extends DasService {
 			logger.error("Error during shutdown worker", e);
 		}
 		
-		//PerformanceMonitorTask.shutdown();
+		PerformanceMonitorTask.shutdown();
+		StatusReportTask.shutdown();
 	}
 
 	protected boolean isDead(WatchedEvent event) {
@@ -125,6 +132,14 @@ public class DalServer extends DasService {
 		logger.info("ZK host:port" + args[0]);
 		logger.info("Started at port " + args[1]);
 		try {
+			if(args.length > 3) {
+				DalServer.senderEnabled = Boolean.parseBoolean(args[3]);
+			}
+			
+			if(args.length 4 3) {
+				DalServer.senderEnabled = Boolean.parseBoolean(args[3]);
+			}
+
 			new DalServer(args[0], args[1], args[2]).run();
 		} catch (Exception e) {
 			logger.error("Error starting server", e);

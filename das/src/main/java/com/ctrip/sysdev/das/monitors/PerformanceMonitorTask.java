@@ -36,7 +36,6 @@ public class PerformanceMonitorTask implements Runnable {
 		lastProcessorCpuTime = osMBean.getProcessCpuTime();
 	}
 
-	@SuppressWarnings("restriction")
 	public static void start(String workerId, String ip) {
 		sender = Executors.newSingleThreadScheduledExecutor();
 		sender.scheduleAtFixedRate(new PerformanceMonitorTask(ip, workerId), 1, 1, TimeUnit.SECONDS);

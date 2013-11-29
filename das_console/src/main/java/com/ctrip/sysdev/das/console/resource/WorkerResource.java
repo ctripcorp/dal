@@ -60,7 +60,6 @@ public class WorkerResource extends DalBaseResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Status deleteNode(@PathParam("name") String name, @PathParam("number") String number) {
 		System.out.printf("Delete node: " + name);
-		ZooKeeper zk = getZk();
 		String workerPath = "/dal/das/instance/worker" + "/" + name + "/" + number;
 		try {
 			deleteNodeNested(workerPath);

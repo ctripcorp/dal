@@ -333,11 +333,6 @@ public class QueryExecutor {
 //						System.currentTimeMillis() - encodeStart));
 		
 		rs.close();
-		
-		if(totalCount > 100000){
-			logger.info("calling GC");
-			Runtime.getRuntime().gc();
-		}
 		logger.debug("Finished");
 	}
 

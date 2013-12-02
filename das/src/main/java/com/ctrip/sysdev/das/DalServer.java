@@ -16,6 +16,7 @@ public class DalServer extends DasService {
 	private static Logger logger = LoggerFactory.getLogger(DalServer.class);
 	public static boolean senderEnabled = true;
 	public static String consoleAddr = "localhost:8080";
+	public static double GC_THRESHHOLD = 0.70;
 
 	private String path;
 	private String port;

@@ -73,7 +73,6 @@ public class StatusReportTask implements Runnable {
 	}
 
 	public void addStatus(String value) {
-		logger.info(value);
 		statusQueue.offer(value);
 	}
 

@@ -18,6 +18,7 @@ import com.ctrip.sysdev.das.common.Status;
 import com.ctrip.sysdev.das.console.domain.StringIdSet;
 import com.ctrip.sysdev.das.console.domain.TimeCost;
 import com.ctrip.sysdev.das.console.domain.TimeCostEntry;
+import com.ctrip.sysdev.das.console.domain.TimeCostStatistics;
 
 @Resource
 @Path("monitor/timeCosts")
@@ -25,7 +26,8 @@ import com.ctrip.sysdev.das.console.domain.TimeCostEntry;
 public class DalTimeCostsResource extends DalBaseResource {
 	@Context
 	private ServletContext sContext;
-	private ConcurrentHashMap<String, TimeCost> store = new ConcurrentHashMap<String, TimeCost>();
+	public static ConcurrentHashMap<String, TimeCost> store = new ConcurrentHashMap<String, TimeCost>();
+	private TimeCostStatistics statistics = DalTimeCostStatisticsResource.statistics;
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -49,7 +51,8 @@ public class DalTimeCostsResource extends DalBaseResource {
 		String[] entries = values.split(";");
 		for(String rawEntry: entries){
 			String[] parts = rawEntry.split(":");
-			TimeCostEntry entry = new TimeCostEntry(parts[1], Long.parseLong(parts[2]));
+			long cost = Long.parseLong(parts[2]);
+			TimeCostEntry entry = new TimeCostEntry(getFullName(parts[1], cost), cost);
 			String id = parts[0];
 			TimeCost tc = store.get(id);
 			if(tc == null) {
@@ -63,5 +66,34 @@ public class DalTimeCostsResource extends DalBaseResource {
 				tc.add(entry);
 		}
 		return Status.OK;
+	}
+	
+	//id:state:cost  decodeRequest=dr, dbTime=dt encodeResponseTime=er
+	private static final String dr = "dr";
+	private static final String decodeRequest = "decodeRequest";
+	
+	private static final String dt = "dt";
+	private static final String dbTime = "dbTime";
+	
+	private static final String er = "er";
+	private static final String encodeResponseTime = "encodeResponseTime";
+	
+	private String getFullName(String shortName, long delta) {
+		if(shortName.equals(dr)){
+			statistics.incTotalDecodeCost(delta);
+			return decodeRequest;
+		}
+		
+		if(shortName.equals(dt)){
+			statistics.incTotalDBCost(delta);
+			return dbTime;
+		}
+		
+		if(shortName.equals(er)){
+			statistics.incTotalEncodeCost(delta);
+			return encodeResponseTime;
+		}
+		
+		return shortName;
 	}
 }

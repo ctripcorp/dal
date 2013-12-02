@@ -3,7 +3,7 @@ package com.ctrip.sysdev.das.tester;
 public class SqlRepository {
 	// This is the base one. It will combine with others
 	private String[] baseSqlRep = new String[] {
-			"select * from Person",
+			"select [HotelID],[LatestBookTime],[UID]  from HotelLatestBookInfo hl with(nolock)  Join resource r with(nolock) on r.resource = hl.HotelID  join city c (nolock) on c.city = r.city and c.city in (select city from city (nolock) where Country = 1)",
 			"select * from Person",
 			"select * from Person",
 			"select * from Person",

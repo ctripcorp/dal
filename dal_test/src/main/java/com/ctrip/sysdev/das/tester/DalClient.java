@@ -22,6 +22,13 @@ public class DalClient extends AbstractDAO {
 		super.init();
 	}
 	
+	public DalClient(String logicDbName) {
+		this.logicDbName = logicDbName;
+		servicePort = 9000;
+		credentialId = "30303";
+		super.init();
+	}
+	
 	public void executeQuery(String sql) {
 		// read result set
 		ResultSet rs = this.fetch(sql, parameters, keywordParameters);

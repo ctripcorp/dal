@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.das.netty4;
+package com.ctrip.sysdev.das.monitors;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,11 +21,12 @@ import org.slf4j.LoggerFactory;
 import com.ctrip.sysdev.das.DalServer;
 
 public class StatusReportTask implements Runnable {
-	private static final String URL_TEMPLATE = "http://%s/console/dal/das/monitor/timeCosts";
+	private static final String TIME_COST_URL_TEMPLATE = "http://%s/console/dal/das/monitor/timeCosts";
 
-	private String DECODE_TIME_TEMPLATE = "id=%s&timeCost=decodeRequestTime:%d";
-	private String DB_TIME_TEMPLATE = "id=%s&timeCost=dbTime:%d";
-	private String ENCODE_TIME_TEMPLATE = "id=%s&timeCost=encodeResponseTime:%d";
+	// id:state:cost  decodeRequest=dr, dbTime=dt encodeResponseTime=er
+	private static final String DECODE_TIME_TEMPLATE = "%s:dr:%d;";
+	private static final String DB_TIME_TEMPLATE = "%s:dt:%d;";
+	private static final String ENCODE_TIME_TEMPLATE = "%s:er:%d;";
 	
 	private static final int DEFAULT_BATCH_COUNT = 100;
 	
@@ -37,7 +38,6 @@ public class StatusReportTask implements Runnable {
 	private Queue<String> statusQueue;
 	private int batchCount;
 	private URL consoleUrl;
-	private boolean connectionLost;
 
 	public static void initInstance(String consoleAddr, int batchCount) throws MalformedURLException {
 		instance = new StatusReportTask(consoleAddr, batchCount);
@@ -57,9 +57,9 @@ public class StatusReportTask implements Runnable {
 			throws MalformedURLException {
 		this.statusQueue = new ConcurrentLinkedQueue<String>();
 		this.batchCount = batchCount < 1 ? DEFAULT_BATCH_COUNT : batchCount;
-		consoleUrl = new URL(String.format(URL_TEMPLATE, consoleAddr));
+		consoleUrl = new URL(String.format(TIME_COST_URL_TEMPLATE, consoleAddr));
 	}
-
+	
 	public void recordDecodeEnd(String id, long start) {
 		addStatus(String.format(DECODE_TIME_TEMPLATE, id, System.currentTimeMillis() - start));
 	}
@@ -73,8 +73,7 @@ public class StatusReportTask implements Runnable {
 	}
 
 	public void addStatus(String value) {
-		if (!connectionLost)
-			statusQueue.offer(value);
+		statusQueue.offer(value);
 	}
 
 	@Override
@@ -100,12 +99,10 @@ public class StatusReportTask implements Runnable {
 		try {
 			URLConnection conn = consoleUrl.openConnection();
 			conn.setDoOutput(true);
-			connectionLost = false;
 			return conn;
 		} catch (Throwable e) {
 			logger.error("Cannot create connection to console", e);
 			logger.error("Any new status will be lost", e);
-			connectionLost = true;
 			return null;
 		}
 	}
@@ -117,6 +114,7 @@ public class StatusReportTask implements Runnable {
 					conn.getOutputStream()));
 
 			int count = 0;
+			writer.write("values=");
 			while (count++ < batchCount) {
 				String value = statusQueue.poll();
 				if (value == null)

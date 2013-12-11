@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import com.ctrip.sysdev.das.DruidDataSourceWrapper;
 import com.ctrip.sysdev.das.domain.DasProto;
 import com.ctrip.sysdev.das.domain.enums.DbType;
+import com.ctrip.sysdev.das.monitors.ErrorReporter;
+import com.ctrip.sysdev.das.monitors.StatusReportTask;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -90,8 +92,12 @@ public class QueryExecutor {
 					// conn.commit();
 				}
 			}
+//			if(true)
+//				throw new NullPointerException("abc");
+			
+
 		} catch (Throwable e) {
-			e.printStackTrace();
+			ErrorReporter.reportException(request.getId(), e);
 			logger.error(QUERY_EXECUTION_EXCEPTION, e);
 		} finally {
 			cleanUp(resp, conn, statement, start);
@@ -368,6 +374,7 @@ public class QueryExecutor {
 			logger.info("calling GC");
 			Runtime.getRuntime().gc();
 		}
+
 		logger.debug("Finished");
 	}
 

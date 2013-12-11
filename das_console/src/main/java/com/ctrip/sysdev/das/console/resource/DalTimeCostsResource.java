@@ -17,6 +17,8 @@ import javax.ws.rs.core.MediaType;
 import com.ctrip.sysdev.das.common.Status;
 import com.ctrip.sysdev.das.console.domain.StringIdSet;
 import com.ctrip.sysdev.das.console.domain.TimeCost;
+import com.ctrip.sysdev.das.console.domain.TimeCostEntry;
+import com.ctrip.sysdev.das.console.domain.TimeCostStatistics;
 
 @Resource
 @Path("monitor/timeCosts")
@@ -24,7 +26,8 @@ import com.ctrip.sysdev.das.console.domain.TimeCost;
 public class DalTimeCostsResource extends DalBaseResource {
 	@Context
 	private ServletContext sContext;
-	private ConcurrentHashMap<String, TimeCost> store = new ConcurrentHashMap<String, TimeCost>();
+	public static ConcurrentHashMap<String, TimeCost> store = new ConcurrentHashMap<String, TimeCost>();
+	private TimeCostStatistics statistics = DalTimeCostStatisticsResource.statistics;
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -44,12 +47,53 @@ public class DalTimeCostsResource extends DalBaseResource {
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public Status addTimeCost(@FormParam("id") String id, @FormParam("timeCost") String timeCost) {
-		// TimeCost looks like: name0:value0;name1:value1
-		TimeCost tc = new TimeCost(id, timeCost);
-		TimeCost oldTc = store.putIfAbsent(id, tc);
-		if(oldTc != null)
-			oldTc.merge(tc);
+	public Status addTimeCost(@FormParam("values") String values) {
+		String[] entries = values.split(";");
+		for(String rawEntry: entries){
+			String[] parts = rawEntry.split(":");
+			long cost = Long.parseLong(parts[2]);
+			TimeCostEntry entry = new TimeCostEntry(getFullName(parts[1], cost), cost);
+			String id = parts[0];
+			TimeCost tc = store.get(id);
+			if(tc == null) {
+				tc = new TimeCost(id);
+				TimeCost oldTc = store.putIfAbsent(id, tc);
+				if(oldTc != null)
+					oldTc.add(entry);
+				else
+					tc.add(entry);
+			}else
+				tc.add(entry);
+		}
 		return Status.OK;
+	}
+	
+	//id:state:cost  decodeRequest=dr, dbTime=dt encodeResponseTime=er
+	private static final String dr = "dr";
+	private static final String decodeRequest = "decodeRequest";
+	
+	private static final String dt = "dt";
+	private static final String dbTime = "dbTime";
+	
+	private static final String er = "er";
+	private static final String encodeResponseTime = "encodeResponseTime";
+	
+	private String getFullName(String shortName, long delta) {
+		if(shortName.equals(dr)){
+			statistics.incTotalDecodeCost(delta);
+			return decodeRequest;
+		}
+		
+		if(shortName.equals(dt)){
+			statistics.incTotalDBCost(delta);
+			return dbTime;
+		}
+		
+		if(shortName.equals(er)){
+			statistics.incTotalEncodeCost(delta);
+			return encodeResponseTime;
+		}
+		
+		return shortName;
 	}
 }

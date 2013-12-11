@@ -11,12 +11,8 @@ public class TimeCost {
 
 	}
 
-	public TimeCost(String id, String values) {
+	public TimeCost(String id) {
 		this.id = id;
-		String[] segments = values.split(";");
-		for (String segment : segments) {
-			entries.add(new TimeCostEntry(segment));
-		}
 	}
 
 	public String getId() {
@@ -35,8 +31,7 @@ public class TimeCost {
 		this.entries = entries;
 	}
 
-	public void merge(TimeCost oldTc) {
-		if (oldTc != null)
-			entries.addAll(oldTc.entries);
+	public void add(TimeCostEntry entry) {
+		entries.add(entry);
 	}
 }

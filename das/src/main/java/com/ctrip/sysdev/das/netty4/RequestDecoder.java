@@ -8,6 +8,7 @@ import io.netty.util.AttributeKey;
 import java.util.List;
 
 import com.ctrip.sysdev.das.domain.DasProto;
+import com.ctrip.sysdev.das.monitors.StatusReportTask;
 
 //TODO revise exception
 public class RequestDecoder extends ByteToMessageDecoder {

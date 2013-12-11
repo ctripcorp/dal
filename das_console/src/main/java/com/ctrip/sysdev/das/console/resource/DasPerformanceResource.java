@@ -48,6 +48,8 @@ public class DasPerformanceResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public PerformanceHistory getPerformanceHistory(@PathParam("ip") String ip, @PathParam("id") String id) {
 		PerformanceHistorySet hs = store.get(ip);
+		if(hs == null)
+			return null;
 		return hs.getPerformanceHistory(id);
 	}
 

@@ -135,10 +135,6 @@ public class DalServer extends DasService {
 			if(args.length > 3) {
 				DalServer.senderEnabled = Boolean.parseBoolean(args[3]);
 			}
-			
-			if(args.length 4 3) {
-				DalServer.senderEnabled = Boolean.parseBoolean(args[3]);
-			}
 
 			new DalServer(args[0], args[1], args[2]).run();
 		} catch (Exception e) {

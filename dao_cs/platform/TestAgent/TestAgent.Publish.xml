@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<publishData>
+  <publishProfile publishUrl="E:\cs_code\TestAgent" deleteExistingFiles="True" ftpAnonymousLogin="False" ftpPassiveMode="True" msdeploySite="" msdeploySiteID="" msdeployRemoteSitePhysicalPath="" msdeployAllowUntrustedCertificate="False" msdeploySkipExtraFilesOnServer="True" msdeployMarkAsApp="False" profileName="Profile1" publishMethod="FileSystem" replaceMatchingFiles="False" userName="" savePWD="False" userPWD="" SelectedForPublish="True">
+    <file relUrl="bin/fastJSON.dll" publishTime="11/12/2013 17:19:09" />
+    <file relUrl="bin/TestAgent.dll" publishTime="12/04/2013 17:42:46" />
+    <file relUrl="Scripts/jquery-1.4.1-vsdoc.js" publishTime="12/03/2013 16:24:06" />
+    <file relUrl="bin/TestAgent.pdb" publishTime="12/04/2013 17:42:45" />
+    <file relUrl="Web.config" publishTime="12/04/2013 17:42:50" />
+    <file relUrl="Scripts/jquery-1.4.1.min.js" publishTime="12/03/2013 16:24:06" />
+    <file relUrl="Default.aspx" publishTime="12/03/2013 16:24:06" />
+    <file relUrl="Scripts/jquery-1.4.1.js" publishTime="12/03/2013 16:24:06" />
+  </publishProfile>
+</publishData>

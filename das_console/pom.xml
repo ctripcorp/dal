@@ -18,7 +18,19 @@
 		<jetty.version>9.0.6.v20130930</jetty.version>
 	</properties>
 
+
+
 	<dependencies>
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity</artifactId>
+			<version>1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ctrip.platform</groupId>
+			<artifactId>dao_java</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>javax.ws.rs-api</artifactId>

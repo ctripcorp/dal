@@ -17,6 +17,7 @@ import org.bson.types.ObjectId;
 
 import com.ctrip.sysdev.das.common.Status;
 import com.ctrip.sysdev.das.daogen.DaoGenResources;
+import com.ctrip.sysdev.das.daogen.gen.JavaGenerator;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -27,8 +28,11 @@ import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 
 /**
- * The schema of {daogen.project} { "name": "InternationalFightEntine",
- * "namespace": "com.ctrip.flight.intl.engine" }
+ * The schema of {daogen.project} 
+ * { 
+ * 		"name": "InternationalFightEntine",
+ * 		"namespace": "com.ctrip.flight.intl.engine" 
+ * }
  * 
  * @author gawu
  * 
@@ -41,6 +45,8 @@ public class ProjectResource {
 	private DB daoGenDB;
 
 	private DBCollection projectCollection;
+	
+	private JavaGenerator gen;
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -118,6 +124,20 @@ public class ProjectResource {
 			doc = null;
 		}
 
+	}
+	
+	@POST
+	@Path("generate")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Status generateProject(@FormParam("project_id") String id) {
+	
+		if(gen == null){
+			gen = new JavaGenerator();
+		}
+		
+		gen.generateCode(id);
+		
+		return Status.OK;
 	}
 
 }

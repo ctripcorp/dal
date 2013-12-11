@@ -53,10 +53,10 @@ $(document).ready(function () {
         }
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/database/tables?db_name=" + $(this).val(), function (data) {
-            data = JSON.parse(data);
+        $.get("/codegen/rest/db/tables?db_name=" + $(this).val(), function (data) {
+            //data = JSON.parse(data);
             var html_data = "";
-            $.each(data, function (index, value) {
+            $.each(data.ids, function (index, value) {
                 html_data += "<option>" + value + "</option>";
             });
             $("#tables").html(html_data);
@@ -80,10 +80,10 @@ $(document).ready(function () {
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
 
-        var url = sprintf("/database/fields?table_name=%s&db_name=%s", $(this).val(), $("#databases").val());
+        var url = sprintf("/codegen/rest/db/fields?table_name=%s&db_name=%s", $(this).val(), $("#databases").val());
 
         $.get(url, function (data) {
-            data = JSON.parse(data);
+            //data = JSON.parse(data);
             var html_data = "";
             var operator = "<div class='span6' style='float: right;'><select style='height:30px;' class='span6'><option value='-1'>Null</option><option value='0'>=</option><option value='1'>!=</option><option value='2'>></option><option value='3'><</option><option value='4'>>=</option><option value='5'><=</option><option value='6'>Between</option><option value='7'>Like</option><option value='8'>In</option></select></div>";
             var where_condition = '';
@@ -125,9 +125,9 @@ $(document).ready(function () {
 
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/database/sps?db_name=" + $(this).val(), function (data) {
-            data = JSON.parse(data);
-            $.each(data, function (index, value) {
+        $.get("/codegen/rest/db/sps?db_name=" + $(this).val(), function (data) {
+            //data = JSON.parse(data);
+            $.each(data.ids, function (index, value) {
                 $('#sp_names').append($('<option>', {
                     value: value,
                     text: value
@@ -153,11 +153,19 @@ $(document).ready(function () {
 
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/database/sp_code?sp_name=" + $(this).val() + "&db_name=" + $("#sp_databases").val(), function (data) {
-            data = JSON.parse(data);
-            ace.edit("sp_editor").setValue(data);
+        // $.get("/codegen/rest/db/sp_code?sp_name=" + $(this).val() + "&db_name=" + $("#sp_databases").val(), function (data) {
+        //     //data = JSON.parse(data);
+        //     ace.edit("sp_editor").setValue(data);
+        //     App.unblockUI(el);
+        // });
+    $.ajax({
+        type: "GET",
+        url: "/codegen/rest/db/sp_code?sp_name=" + $(this).val() + "&db_name=" + $("#sp_databases").val(),
+        headers : { "Range" : 'bytes=0-3200' }
+    }).done(function(data){
+        ace.edit("sp_editor").setValue(data);
             App.unblockUI(el);
-        });
+    });
     });
 
     //Move selected fields to query selection
@@ -254,7 +262,7 @@ $(document).ready(function () {
     $("#add_task").click(function () {
         var project_id = $("#proj_id").attr("project");
 
-        var post_data = {};
+        // var post_data = {};
 
         var task_object = {};
 
@@ -269,7 +277,8 @@ $(document).ready(function () {
                     fields.push(this.value);
                 });
 
-                task_object["fields"] = fields;
+                //task_object["fields"] = fields;
+                task_object["fields"] = JSON.stringify(fields);
 
                 var where_condition = "";
 
@@ -302,28 +311,28 @@ $(document).ready(function () {
                     }
                 }
 
-                task_object["where"] = where_fields;
+                task_object["condition"] = JSON.stringify(where_fields);
 
                 switch (task_object["crud"]) {
                 case "select":
-                    task_object["sql"] = sprintf("SELECT %s FROM %s %s", fields.join(","), task_object["table"], where_condition);
+                    task_object["sql_spname"] = sprintf("SELECT %s FROM %s %s", fields.join(","), task_object["table"], where_condition);
                     break;
                 case "insert":
                     var place_holder = [];
                     for (var i = 0; i < fields.length; i++) {
                         place_holder.push(sprintf("@%s", fields[i]));
                     }
-                    task_object["sql"] = sprintf("INSERT INTO %s (%s) VALUES (%s)", task_object["table"], fields.join(","), place_holder.join(","));
+                    task_object["sql_spname"] = sprintf("INSERT INTO %s (%s) VALUES (%s)", task_object["table"], fields.join(","), place_holder.join(","));
                     break;
                 case "update":
                     var place_holder = [];
                     for (var i = 0; i < fields.length; i++) {
                         place_holder.push(sprintf("%s = @%s", fields[i], fields[i]));
                     }
-                    task_object["sql"] = sprintf("UPDATE %s SET %s %s", task_object["table"], place_holder.join(","), where_condition);
+                    task_object["sql_spname"] = sprintf("UPDATE %s SET %s %s", task_object["table"], place_holder.join(","), where_condition);
                     break;
                 case "delete":
-                    task_object["sql"] = sprintf("DELETE FROM %s %s", task_object["table"], where_condition);
+                    task_object["sql_spname"] = sprintf("DELETE FROM %s %s", task_object["table"], where_condition);
                     break;
                 }
 
@@ -339,7 +348,7 @@ $(document).ready(function () {
                     fields.push(this.value);
                 });
 
-                task_object["fields"] = fields;
+                task_object["fields"] =JSON.stringify(fields);
             };
 
             task_object["func_name"] = $("#auto_func_name").val();
@@ -357,7 +366,7 @@ $(document).ready(function () {
                 if (task_object["cud"] == "sql") {
                     pack_sql_params();
                 } else {
-                    task_object["sp_name"] = sprintf("%s_%s_%s", task_object["cud"], task_object["table"], cud_shortcut[task_object["crud"]]);
+                    task_object["sql_spname"] = sprintf("%s_%s_%s", task_object["cud"], task_object["table"], cud_shortcut[task_object["crud"]]);
                     pack_sp_params();
                 }
             }
@@ -367,9 +376,9 @@ $(document).ready(function () {
 
             task_object["database"] = $("#sp_databases").val();
 
-            task_object["sp_name"] = $("#sp_names").val();
+            task_object["sql_spname"] = $("#sp_names").val();
 
-            task_object["sp_action"] = $("#sp_action").val();
+            task_object["crud"] = $("#sp_action").val();
         } else {
             task_object["dao_name"] = $("#sql_dao_name").val();
 
@@ -377,14 +386,14 @@ $(document).ready(function () {
 
             task_object["database"] = $("#sql_databases").val();
 
-            task_object["sql"] = editor.getValue().replace(/\n/g, " ");
+            task_object["sql_spname"] = editor.getValue().replace(/\n/g, " ");
         }
 
-        post_data["project_id"] = project_id;
-        post_data["task_type"] = task_type;
-        post_data["task_object"] = JSON.stringify(task_object);
+        task_object["project_id"] = project_id;
+        task_object["task_type"] = task_type;
+        task_object["action"] = "insert";
 
-        $.post("/task/add", post_data, function (data) {
+        $.post("/codegen/rest/task", task_object, function (data) {
             $("#reload_tasks").trigger('click');
         });
 
@@ -392,6 +401,7 @@ $(document).ready(function () {
 
     //Get all tasks of the project
     $("#reload_tasks").click(function () {
+        // return;
 
         if($('#main_area').children().length > 0){
             $('#dao_tasks').dataTable().fnClearTable();    
@@ -399,9 +409,9 @@ $(document).ready(function () {
         
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/task/tasks?project_id=" + $("#proj_id").attr("project"), function (data) {
+        $.get("/codegen/rest/task?project_id=" + $("#proj_id").attr("project"), function (data) {
 
-            data = JSON.parse(data);
+            //data = JSON.parse(data);
 
              $.each(data, function (index, value) {
                 var dao_name = "";
@@ -428,9 +438,9 @@ $(document).ready(function () {
 
                 var title = "";
                 if(value.task_type == "sp"){
-                    title = sprintf("EXEC %s", value.sp_name);
+                    title = sprintf("EXEC %s", value.sql_spname);
                 }else{
-                    title = value.sql;
+                    title = value.sql_spname;
                 }
 
                 $('#dao_tasks').dataTable().fnAddData( 
@@ -509,9 +519,10 @@ $(document).ready(function () {
     });
 
     $('#reload_ops').click(function () {
-        $.get("/database/databases", function (data) {
-            data = JSON.parse(data);
-            $.each(data, function (index, value) {
+        $.get("/codegen/rest/db/dbs", function (data) {
+            //data = JSON.parse(data);
+
+            $.each(data.ids, function (index, value) {
                 $('#databases').append($('<option>', {
                     value: value,
                     text: value
@@ -536,9 +547,9 @@ $(document).ready(function () {
 
         var el = $(document.body);
         App.blockUI(el);
-        $.post("/file/generate", post_data, function (data) {
+        $.post("/codegen/rest/project/generate", post_data, function (data) {
             App.unblockUI(el);
-            window.location.replace("/file/");
+            //window.location.replace("/file/");
         });
     });
 
@@ -557,7 +568,7 @@ $(document).ready(function () {
         });
     });
 
-    $(".icon-refresh").trigger('click');
+    
 
     $('#dao_tasks').dataTable({
         "aoColumns": [{
@@ -598,4 +609,13 @@ $(document).ready(function () {
 
     $("#daogen .sub-menu").show();
 
+    $("#proj_id").attr("project", getUrlVar("project_id"));
+
+    $(".icon-refresh").trigger('click');
+
 });
+
+var getUrlVar = function(key){
+    var result = new RegExp(key + "=([^&]*)", "i").exec(window.location.search); 
+    return result && unescape(result[1]) || ""; 
+};

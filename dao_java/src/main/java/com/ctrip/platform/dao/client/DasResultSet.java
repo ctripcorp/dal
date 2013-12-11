@@ -148,8 +148,15 @@ public class DasResultSet implements ResultSet {
 
 	@Override
 	public String getString(int columnIndex) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		
+//		int currentType = header.get(columnIndex).getType();
+		
+		DasProto.AvailableType currentValue =  currentRow.getColumns(columnIndex-1);
+		
+		 if (currentValue.getCurrent() < 0)
+             return null;
+		
+		return currentValue.getStringArg();
 	}
 
 	@Override

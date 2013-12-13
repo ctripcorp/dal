@@ -261,7 +261,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 
 		function getUrl(treeId, treeNode) {
 			var param = "id="+treeNode.id + "&type="+treeNode.type + "&name="+treeNode.name;
-			return "/file/projects?" + param;
+			return "/codegen/rest/file?" + param;
 		}
 
 		function onAsyncSuccess(event, treeId, treeNode, msg) {
@@ -280,9 +280,14 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 
 		function zTreeOnClick(event, treeId, treeNode) {
     		if(!treeNode.isParent){
-    			$.get("/file/content?id="+treeNode.id+"&name="+treeNode.name, function(data){
-    				var real_data = JSON.parse(data);
-    				ace.edit("code_editor").setValue(real_data);
+    			$.get("/codegen/rest/file/content?id="+treeNode.id+"&name="+treeNode.name, function(data){
+    				//var real_data = JSON.parse(data);
+    				ace.edit("code_editor").setValue(data);
+    				if(treeNode.name.match(/cs$/)){
+    					ace.edit("code_editor").getSession().setMode("ace/mode/csharp");
+    				}else if(treeNode.name.match(/java$/)){
+    					ace.edit("code_editor").getSession().setMode("ace/mode/java");
+    				}
     			});
     		}
 		}

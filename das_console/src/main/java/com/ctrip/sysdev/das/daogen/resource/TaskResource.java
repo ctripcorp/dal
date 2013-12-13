@@ -1,7 +1,5 @@
 package com.ctrip.sysdev.das.daogen.resource;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +46,7 @@ public class TaskResource {
 
 	private DBCollection taskCollection;
 
-//	private DBCollection taskMetaCollection;
+	// private DBCollection taskMetaCollection;
 
 	private static MasterDAO master;
 
@@ -114,6 +112,16 @@ public class TaskResource {
 		BasicDBObject newDoc = null;
 		BasicDBObject query = null;
 		try {
+
+			if (null != id && !id.isEmpty()) {
+				query = new BasicDBObject().append("_id", new ObjectId(id));
+			}
+
+			if (action.equals("delete")) {
+				taskCollection.remove(query);
+				return Status.OK;
+			}
+
 			doc = new BasicDBObject("project_id", projectId)
 					.append("task_type", taskType).append("database", database)
 					.append("table", table).append("dao_name", daoName)
@@ -121,31 +129,28 @@ public class TaskResource {
 					.append("sql_spname", sqlSpName)
 					.append("fields", JSON.parse(fields))
 					.append("condition", JSON.parse(condition))
-					.append("cud", cud)
-					.append("crud", crud);
-			if (null != id && !id.isEmpty()) {
-				query = new BasicDBObject().append("_id", new ObjectId(id));
-			}
+					.append("cud", cud).append("crud", crud);
 
 			// Add a new project
 			if (action.equals("insert")) {
+
 				taskCollection.insert(doc);
 
-//				if (null == taskMetaCollection) {
-//					taskMetaCollection = daoGenDB.getCollection("task_meta");
-//				}
-//
-//				BasicDBObject metaQuery = new BasicDBObject().append(
-//						"database", database).append("table", table);
-//
-//				if (taskMetaCollection.find(metaQuery) == null) {
-//					ResultSet rs = master.getPrimaryKey(daoName, table);
-//					String primaryKey = "";
-//					if (rs.next()) {
-//						primaryKey = rs.getString(1);
-//					}
-//					metaQuery.append("primary_key", primaryKey);
-//				}
+				// if (null == taskMetaCollection) {
+				// taskMetaCollection = daoGenDB.getCollection("task_meta");
+				// }
+				//
+				// BasicDBObject metaQuery = new BasicDBObject().append(
+				// "database", database).append("table", table);
+				//
+				// if (taskMetaCollection.find(metaQuery) == null) {
+				// ResultSet rs = master.getPrimaryKey(daoName, table);
+				// String primaryKey = "";
+				// if (rs.next()) {
+				// primaryKey = rs.getString(1);
+				// }
+				// metaQuery.append("primary_key", primaryKey);
+				// }
 
 			} else if (action.equals("update")) {
 				// Update an exist project
@@ -153,23 +158,21 @@ public class TaskResource {
 				newDoc.append("$set", doc);
 
 				taskCollection.update(query, newDoc);
-			} else if (action.equals("delete")) {
-				taskCollection.remove(query);
 			}
 			return Status.OK;
 		} catch (MongoException ex) {
-			
-		} 
-//		catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} 
+			ex.printStackTrace();
+		}
+		// catch (SQLException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 		finally {
 			query = null;
 			newDoc = null;
 			doc = null;
 		}
-		
+
 		return Status.ERROR;
 
 	}

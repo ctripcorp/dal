@@ -23,6 +23,7 @@ import com.ctrip.sysdev.das.daogen.DaoGenResources;
 import com.ctrip.sysdev.das.daogen.domain.MasterDAO;
 import com.ctrip.sysdev.das.daogen.domain.SPDAO;
 import com.ctrip.sysdev.das.daogen.domain.TableField;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -56,7 +57,8 @@ public class DatabaseResource {
 			e.printStackTrace();
 		} finally {
 			try {
-				rs.close();
+				if (null != rs)
+					rs.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -159,8 +161,9 @@ public class DatabaseResource {
 				fieldTypeMap.append(columnName, columnType);
 			}
 
+			// TODO: what if table schema changed?
 			DBCursor cursor = taskMetaCollection.find(metaQuery);
-			if ( cursor== null || cursor.size() == 0) {
+			if (cursor == null || cursor.size() == 0) {
 				ResultSet rs = master.getPrimaryKey(dbName, tableName);
 				String primaryKey = "";
 				if (rs.next()) {
@@ -232,9 +235,45 @@ public class DatabaseResource {
 
 		ResultSet rs = sp.getSPCode(dbName, spName);
 
+		if (null == daoGenDB) {
+			MongoClient client = DaoGenResources.getDefaultMongoClient();
+			daoGenDB = client.getDB("daogen");
+		}
+
+		if (null == taskMetaCollection) {
+			taskMetaCollection = daoGenDB.getCollection("task_meta");
+		}
+
+		BasicDBObject metaQuery = new BasicDBObject()
+				.append("database", dbName).append("sp", spName);
+
 		try {
 			while (rs.next()) {
 				sb.append(rs.getString(1));
+			}
+
+			// TODO: what if table schema changed?
+			DBCursor cursor = taskMetaCollection.find(metaQuery);
+			if (cursor == null || cursor.size() == 0) {
+				String schema = "dbo";
+				String spRealName = spName;
+				if(spName.contains(".")){
+					schema = spName.substring(0, spName.indexOf("."));
+					spRealName = spName.substring(spName.indexOf(".")+1);
+				}
+				ResultSet spInfo = master.getSPParams(dbName,  schema, spRealName);
+				List<BasicDBObject> list = new ArrayList<BasicDBObject>();
+				while (spInfo.next()) {
+					BasicDBObject obj = new BasicDBObject();
+					obj.append("name", spInfo.getString(1));
+					obj.append("type", spInfo.getString(2));
+					obj.append("direction", spInfo.getString(3));
+					obj.append("position", spInfo.getInt(4));
+					list.add(obj);
+				}
+				metaQuery.append("params", list);
+
+				taskMetaCollection.insert(metaQuery);
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

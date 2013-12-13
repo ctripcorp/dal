@@ -43,4 +43,13 @@ public class MasterDAO extends AbstractDAO {
 		return this.fetch(sql, null, null);
 	}
 
+	public ResultSet getSPParams(String dbName,String schema, String spName) {
+		String sql = "use "
+				+ dbName
+				+ " select PARAMETER_NAME, DATA_TYPE, PARAMETER_MODE,ORDINAL_POSITION from information_schema.parameters where specific_name='"
+				+ spName + "' AND specific_schema='"+schema+"'";
+		
+		return this.fetch(sql, null, null);
+	}
+
 }

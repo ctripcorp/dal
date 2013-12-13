@@ -161,7 +161,7 @@ public class QueryExecutor {
 ////				statement = conn.prepareCall(String.format("{call dbo.%s %s}",
 ////						request.getMsg().getName(), occupy.toString()));
 //			} else {
-				statement = conn.prepareCall(String.format("{call dbo.%s(%s)}",
+				statement = conn.prepareCall(String.format("{call %s(%s)}",
 						request.getMsg().getName(), occupy.toString()));
 //			}
 		}

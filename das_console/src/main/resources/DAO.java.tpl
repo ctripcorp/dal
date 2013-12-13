@@ -19,10 +19,28 @@ public class $dao_name extends AbstractDAO {
 	}
 
 	#foreach( $method in $methods )
-		#set($parameters = method.getParameters())
-   		public #if($method.getAction() == "select")ResultSet#{else}int#end $method.getMethodName(#foreach($p in $parameters) $p.getType() $p.getName()#if(!{$foreach.count == parameters.size()}),#end) {
-			return this.fetch("use master select * from sysdatabases", null, null);
-		}
+	#set($parameters = $method.getParameters())
+public #if( $method.getAction() == "select" )ResultSet#{else}int#end ${method.getMethodName()}#[[(]]##foreach($p in $parameters)${p.getType()} ${p.getName()}#if($foreach.count != $parameters.size()), #end#end#[[)]]# {
+		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
+		#foreach($p in $parameters)
+parameters.add(StatementParameter.newBuilder().setDbType(DbType.${JavaDbTypeMap.get($p.getType())}).setDirection(ParameterDirection.Input).setNullable(false).setIndex(1).setName("").setSensitive(false).setValue(${p.getName()}).build());
+		#end
+return this.#if( $method.getAction() == "select" )fetch#{else}execute#end("${method.getSqlSPName()}", parameters, null);
+	}
+
+	#end
+
+	#foreach( $method in $sp_methods )
+	#set($parameters = $method.getParameters())
+public int ${method.getMethodName()}#[[(]]##foreach($p in $parameters)${p.getType()} ${p.getName()}#if($foreach.count != $parameters.size()), #end#end#[[)]]# {
+		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
+		#foreach($p in $parameters)
+parameters.add(StatementParameter.newBuilder().setDbType(DbType.${JavaDbTypeMap.get($p.getType())}).setDirection(ParameterDirection.Input).setNullable(false).setIndex(1).setName("").setSensitive(false).setValue(${p.getName()}).build());
+
+		#end
+return this.executeSP("${method.getSqlSPName()}", parameters, null);
+	}
+
 	#end
 
 }

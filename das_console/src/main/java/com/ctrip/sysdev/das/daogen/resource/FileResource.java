@@ -28,7 +28,7 @@ import com.mongodb.MongoClient;
 
 @Resource
 @Singleton
-@Path("rest/file")
+@Path("file")
 public class FileResource {
 
 	private DB daoGenDB;

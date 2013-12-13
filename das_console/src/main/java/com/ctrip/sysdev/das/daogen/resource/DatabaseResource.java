@@ -32,7 +32,7 @@ import com.mongodb.MongoClient;
 
 @Resource
 @Singleton
-@Path("rest/db")
+@Path("db")
 public class DatabaseResource {
 
 	MasterDAO master = new MasterDAO();

@@ -57,7 +57,7 @@ jQuery(document).ready(function () {
             $('#configs').dataTable().fnClearTable();    
         }
 
-        $.get("/console/dal/das/configure/port", function (data) {
+        $.get("/rest/console/configure/port", function (data) {
             //data = JSON.parse(data);
             $.each(data.ports, function (index, value) {
                 $('#configs').dataTable().fnAddData( 
@@ -70,7 +70,7 @@ jQuery(document).ready(function () {
     });
 
     $("#save_port").click(function(){
-        $.post("/console/dal/das/configure/port",
+        $.post("/rest/console/configure/port",
             {"number": $("#port").val()}, function (data, status, event) {
                 if(data.code == 'OK'){
                     $(".icon-refresh").trigger('click');
@@ -86,7 +86,7 @@ jQuery(document).ready(function () {
 var delete_port = function(number){
     $.ajax({
         type: 'DELETE',
-        url: sprintf('/console/dal/das/configure/port/%s', number),
+        url: sprintf('/rest/console/configure/port/%s', number),
         //dataType: 'json',
         success: function(data, status, event) {
             if(data.code == 'OK'){

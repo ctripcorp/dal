@@ -39,7 +39,7 @@ import com.mongodb.util.JSON;
  */
 @Resource
 @Singleton
-@Path("rest/project")
+@Path("project")
 public class ProjectResource {
 
 	private DB daoGenDB;

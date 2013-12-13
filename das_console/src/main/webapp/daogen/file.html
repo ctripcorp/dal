@@ -13,7 +13,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 <!-- BEGIN HEAD -->
 <head>
 	<meta charset="utf-8" />
-	<title>Metronic | Admin Dashboard Template</title>
+	<title>DAO Generator - File Preview</title>
 	<meta content="width=device-width, initial-scale=1.0" name="viewport" />
 	<meta content="" name="description" />
 	<meta content="" name="author" />
@@ -29,11 +29,10 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 	<!-- END GLOBAL MANDATORY STYLES -->
 
 	<!-- BEGIN PAGE LEVEL STYLES --> 
-	<link href="../css/tasks.css" rel="stylesheet" type="text/css" media="screen"/>
-	<link href="../css/index.css" rel="stylesheet" type="text/css" media="screen"/>
+	<link href="../css/tasks-widget.css" rel="stylesheet" type="text/css" media="screen"/>
 	<link rel="stylesheet" href="../css/zTreeStyle.css">
 	<!-- END PAGE LEVEL STYLES -->
-	<link rel="shortcut icon" href="favicon.ico" />
+	<link rel="shortcut icon" href="/img/favicon.ico" />
 </head>
 <!-- END HEAD -->
 
@@ -45,9 +44,10 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 		<div class="navbar-inner">
 			<div class="container-fluid">
 				<!-- BEGIN LOGO -->
-				<a class="brand" href="index.html">
-				<!-- <img src="../img/logo1.png" alt="logo" /> -->
-				</a>
+			<a class="brand" href="/">
+                        <img src="../img/logo.png" alt="logo" style="width:126px;height:43px;" />
+                        <!-- <span>Home</span> -->
+                     </a>
 				<!-- END LOGO -->
 				<!-- BEGIN RESPONSIVE MENU TOGGLER -->
 				<a href="javascript:;" class="btn-navbar collapsed" data-toggle="collapse" data-target=".nav-collapse">
@@ -261,7 +261,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 
 		function getUrl(treeId, treeNode) {
 			var param = "id="+treeNode.id + "&type="+treeNode.type + "&name="+treeNode.name;
-			return "/codegen/rest/file?" + param;
+			return "/rest/daogen/file?" + param;
 		}
 
 		function onAsyncSuccess(event, treeId, treeNode, msg) {
@@ -280,7 +280,7 @@ Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-templa
 
 		function zTreeOnClick(event, treeId, treeNode) {
     		if(!treeNode.isParent){
-    			$.get("/codegen/rest/file/content?id="+treeNode.id+"&name="+treeNode.name, function(data){
+    			$.get("/rest/daogen/file/content?id="+treeNode.id+"&name="+treeNode.name, function(data){
     				//var real_data = JSON.parse(data);
     				ace.edit("code_editor").setValue(data);
     				if(treeNode.name.match(/cs$/)){

@@ -63,11 +63,11 @@ jQuery(document).ready(function () {
         }
 
 
-        $.get("/console/dal/das/monitor/timeCosts", function(data){
+        $.get("/rest/console/monitor/timeCosts", function(data){
 
             $.each(data.ids, function(index, value){
 
-                $.get(sprintf("/console/dal/das/monitor/timeCosts/%s", value), function(data){
+                $.get(sprintf("/rest/console/monitor/timeCosts/%s", value), function(data){
 
                     var totalBytes = 0;
                         var totalCount = 0;

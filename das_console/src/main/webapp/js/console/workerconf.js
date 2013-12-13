@@ -50,13 +50,13 @@ jQuery(document).ready(function () {
             $('#configs').dataTable().fnClearTable();    
         }
 
-        $.get("/console/dal/das/instance/worker", function (data) {
+        $.get("/rest/console/instance/worker", function (data) {
             //data = JSON.parse(data);
             $.each(data, function (index, value) {
                 var ip = value.ip;
                 $.each(value.ports.ports, function(index,value){
 
-                    $.get(sprintf("/console/dal/das/monitor/performance/%s/%s", ip,value), function(data){
+                    $.get(sprintf("/rest/console/monitor/performance/%s/%s", ip,value), function(data){
                         var performace = data.performanceHistory[0];
                         var totalMemoryUse = 
                         ((performace.sysTotalMemory - performace.sysFreeMemory)/performace.sysTotalMemory)*100;
@@ -92,7 +92,7 @@ jQuery(document).ready(function () {
 var delete_worker = function(ip, port){
     $.ajax({
         type: 'DELETE',
-        url: sprintf('/console/dal/das/instance/worker/%s/%s', ip, port),
+        url: sprintf('/rest/console/instance/worker/%s/%s', ip, port),
         //dataType: 'json',
         success: function(data, status, event) {
             if(data.code == 'OK'){

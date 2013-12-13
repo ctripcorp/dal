@@ -45,7 +45,7 @@ jQuery(document).ready(function () {
             $('#configs').dataTable().fnClearTable();    
         }
 
-        $.get("/console/dal/das/instance/controller", function (data) {
+        $.get("/rest/console/instance/controller", function (data) {
             //data = JSON.parse(data);
             $.each(data.ips, function (index, value) {
                 $('#configs').dataTable().fnAddData( 
@@ -64,7 +64,7 @@ jQuery(document).ready(function () {
 var delete_ctrl = function(ctrl){
     $.ajax({
         type: 'DELETE',
-        url: sprintf('/console/dal/das/instance/controller/%s', ctrl),
+        url: sprintf('/rest/console/instance/controller/%s', ctrl),
         //dataType: 'json',
         success: function(data, status, event) {
             if(data.code == 'OK'){

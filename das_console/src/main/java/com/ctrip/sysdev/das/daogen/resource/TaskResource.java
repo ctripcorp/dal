@@ -39,7 +39,7 @@ import com.mongodb.util.JSON;
  */
 @Resource
 @Singleton
-@Path("rest/task")
+@Path("task")
 public class TaskResource {
 
 	private DB daoGenDB;

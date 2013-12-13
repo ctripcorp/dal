@@ -51,7 +51,7 @@ $(document).ready(function () {
         }
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/codegen/rest/db/tables?db_name=" + $(this).val(), function (data) {
+        $.get("/rest/daogen/db/tables?db_name=" + $(this).val(), function (data) {
             //data = JSON.parse(data);
             var html_data = "";
             $.each(data.ids, function (index, value) {
@@ -78,7 +78,7 @@ $(document).ready(function () {
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
 
-        var url = sprintf("/codegen/rest/db/fields?table_name=%s&db_name=%s", $(this).val(), $("#databases").val());
+        var url = sprintf("/rest/daogen/db/fields?table_name=%s&db_name=%s", $(this).val(), $("#databases").val());
 
         $.get(url, function (data) {
             //data = JSON.parse(data);
@@ -123,7 +123,7 @@ $(document).ready(function () {
 
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/codegen/rest/db/sps?db_name=" + $(this).val(), function (data) {
+        $.get("/rest/daogen/db/sps?db_name=" + $(this).val(), function (data) {
             //data = JSON.parse(data);
             $.each(data.ids, function (index, value) {
                 $('#sp_names').append($('<option>', {
@@ -151,14 +151,14 @@ $(document).ready(function () {
 
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        // $.get("/codegen/rest/db/sp_code?sp_name=" + $(this).val() + "&db_name=" + $("#sp_databases").val(), function (data) {
+        // $.get("/rest/daogen/db/sp_code?sp_name=" + $(this).val() + "&db_name=" + $("#sp_databases").val(), function (data) {
         //     //data = JSON.parse(data);
         //     ace.edit("sp_editor").setValue(data);
         //     App.unblockUI(el);
         // });
         $.ajax({
             type: "GET",
-            url: "/codegen/rest/db/sp_code?sp_name=" + $(this).val() + "&db_name=" + $("#sp_databases").val(),
+            url: "/rest/daogen/db/sp_code?sp_name=" + $(this).val() + "&db_name=" + $("#sp_databases").val(),
             headers: {
                 "Range": 'bytes=0-3200'
             }
@@ -393,7 +393,7 @@ $(document).ready(function () {
         task_object["task_type"] = task_type;
         task_object["action"] = "insert";
 
-        $.post("/codegen/rest/task", task_object, function (data) {
+        $.post("/rest/daogen/task", task_object, function (data) {
             $("#reload_tasks").trigger('click');
         });
 
@@ -409,7 +409,7 @@ $(document).ready(function () {
 
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/codegen/rest/task?project_id=" + $("#proj_id").attr("project"), function (data) {
+        $.get("/rest/daogen/task?project_id=" + $("#proj_id").attr("project"), function (data) {
 
             //data = JSON.parse(data);
 
@@ -456,7 +456,7 @@ $(document).ready(function () {
                     var post_data = {};
                     post_data["action"] = "delete";
                     post_data["id"] = id;
-                    $.post("/codegen/rest/task", post_data, function (data) {
+                    $.post("/rest/daogen/task", post_data, function (data) {
                         $("#reload_tasks").trigger('click');
                     });
                 }
@@ -526,7 +526,7 @@ $(document).ready(function () {
     });
 
     $('#reload_ops').click(function () {
-        $.get("/codegen/rest/db/dbs", function (data) {
+        $.get("/rest/daogen/db/dbs", function (data) {
             //data = JSON.parse(data);
 
             $.each(data.ids, function (index, value) {
@@ -554,7 +554,7 @@ $(document).ready(function () {
 
         var el = $(document.body);
         App.blockUI(el);
-        $.post("/codegen/rest/project/generate", post_data, function (data) {
+        $.post("/rest/daogen/project/generate", post_data, function (data) {
             App.unblockUI(el);
             //window.location.replace("/file/");
         });

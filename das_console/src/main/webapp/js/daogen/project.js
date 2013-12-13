@@ -39,7 +39,7 @@ jQuery(document).ready(function () {
         post_data["namespace"] = $("#namespace").val();
         
 
-        $.post("/codegen/rest/project", post_data, function (data) {
+        $.post("/rest/daogen/project", post_data, function (data) {
 
             $("[data-dismiss='modal'").trigger('click');
 
@@ -51,7 +51,7 @@ jQuery(document).ready(function () {
     $(".icon-refresh").click(function () {
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/codegen/rest/project", function (data) {
+        $.get("/rest/daogen/project", function (data) {
 
             //data = JSON.parse(data);
 
@@ -104,7 +104,7 @@ var del_proj = function(obj){
         post_data["name"] = $("#project_name").val();
         post_data["namespace"] = $("#namespace").val();
         post_data["action"] = "delete";
-        $.post("/codegen/rest/project", post_data, function(data){
+        $.post("/rest/daogen/project", post_data, function(data){
             $(".icon-refresh").trigger('click');
         });
     }

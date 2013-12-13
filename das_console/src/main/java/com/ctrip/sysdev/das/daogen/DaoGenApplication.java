@@ -7,7 +7,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.ctrip.sysdev.das.daogen.resource.ProjectResource;
 
-@ApplicationPath("/daogen")
+@ApplicationPath("/rest/daogen")
 public class DaoGenApplication extends ResourceConfig {
 
 	public DaoGenApplication() {

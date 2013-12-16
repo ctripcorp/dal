@@ -403,13 +403,25 @@ $(document).ready(function () {
     $("#reload_tasks").click(function () {
         // return;
 
+        var id = $("#proj_id").attr("project");
+
+        if(undefined == id || id == ""){
+            return;
+        }
+
+        $.get("/rest/daogen/project/project?id="+id, function(data){
+
+            $("#project_desc").html(data.name + "对应的DAO");
+
+        });
+
         if ($('#main_area').children().length > 0) {
             $('#dao_tasks').dataTable().fnClearTable();
         }
 
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/rest/daogen/task?project_id=" + $("#proj_id").attr("project"), function (data) {
+        $.get("/rest/daogen/task?project_id=" + id, function (data) {
 
             //data = JSON.parse(data);
 
@@ -551,6 +563,7 @@ $(document).ready(function () {
         var post_data = {};
         var project_id = $("#proj_id").attr("project");
         post_data["project_id"] = project_id;
+        post_data["language"] = $("#gen_language").val();
 
         var el = $(document.body);
         App.blockUI(el);
@@ -624,5 +637,10 @@ $(document).ready(function () {
 
 var getUrlVar = function (key) {
     var result = new RegExp(key + "=([^&]*)", "i").exec(window.location.search);
-    return result && unescape(result[1]) || "";
+    var returnResult =  result && unescape(result[1]) || "";
+    if(undefined == returnResult || returnResult == ""){
+        alert("没有找到对应的Project，请从\"我的项目\"中的\"对应DAO\"Drill Through到此处！");
+        window.location.href = "/daogen/project.html";
+    }
+    return returnResult;
 };

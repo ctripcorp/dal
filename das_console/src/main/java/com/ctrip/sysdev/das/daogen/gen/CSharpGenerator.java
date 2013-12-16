@@ -15,26 +15,20 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-public class JavaGenerator extends AbstractGenerator {
+public class CSharpGenerator extends AbstractGenerator {
 	
-	private JavaGenerator(){
+	private CSharpGenerator(){
 		
 	}
 	
-	private static JavaGenerator instance = new JavaGenerator();
+	private static CSharpGenerator instance = new CSharpGenerator();
 	
-	public static JavaGenerator getInstance(){
+	public static CSharpGenerator getInstance(){
 		return instance;
 	}
 
-	/**
-	 * 为自动生成的SQL生成相应的代码，A SQL a function, a table a DAO
-	 * 
-	 * @param tasks
-	 */
 	@Override
-	public  void generateAutoSqlCode(List<DBObject> tasks) {
-
+	public void generateAutoSqlCode(List<DBObject> tasks) {
 		Map<String, List<DBObject>> groupByTable = new HashMap<String, List<DBObject>>();
 
 		for (DBObject t : tasks) {
@@ -61,7 +55,7 @@ public class JavaGenerator extends AbstractGenerator {
 				continue;
 			}
 			context.put("dao_name", String.format("%sDAO", table));
-			context.put("JavaDbTypeMap", Consts.JavaDbTypeMap);
+			context.put("CSharpDbTypeMap", Consts.CSharpDbTypeMap);
 
 			BasicDBObject metaQuery = new BasicDBObject().append("database",
 					context.get("database")).append("table", table);
@@ -108,6 +102,7 @@ public class JavaGenerator extends AbstractGenerator {
 					List<Parameter> parameters = new ArrayList<Parameter>();
 					Parameter p = new Parameter();
 					p.setName(primaryKey);
+					p.setFieldName(primaryKey);
 					p.setType(fieldTypeMap.get(primaryKey).toString());
 					parameters.add(p);
 					m.setParameters(parameters);
@@ -129,13 +124,13 @@ public class JavaGenerator extends AbstractGenerator {
 			context.put("sp_methods", spMethods);
 			FileWriter w = null;
 			try {
-				File projectFile = new File(projectId, "java");
+				File projectFile = new File(projectId, "csharp");
 				if(!projectFile.exists()){
 					projectFile.mkdir();
 				}
-				w = new FileWriter(String.format("%s/java/%s.java",projectId,
+				w = new FileWriter(String.format("%s/csharp/%s.cs",projectId,
 						context.get("dao_name")));
-				Velocity.mergeTemplate("DAO.java.tpl", "UTF-8", context, w);
+				Velocity.mergeTemplate("DAO.cs.tpl", "UTF-8", context, w);
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -152,7 +147,6 @@ public class JavaGenerator extends AbstractGenerator {
 			}
 
 		}
-
 	}
 
 	@Override
@@ -184,8 +178,8 @@ public class JavaGenerator extends AbstractGenerator {
 			}
 			context.put("dao_name",
 					String.format("%sSPDAO", context.get("database")));
-			context.put("JavaDbTypeMap", Consts.JavaDbTypeMap);
-			
+			context.put("CSharpDbTypeMap", Consts.CSharpDbTypeMap);
+
 			List<Method> spMethods = new ArrayList<Method>();
 
 			for (DBObject obj : objs) {
@@ -221,8 +215,9 @@ public class JavaGenerator extends AbstractGenerator {
 					if(name.startsWith("@") || name.startsWith(":")){
 						name = name.substring(1);
 					}
+					p.setFieldName(name);
 					p.setName(name);
-					p.setType(Consts.JavaSqlTypeMap.get(bj.get("type")));
+					p.setType(Consts.CSharpSqlTypeMap.get(bj.get("type")));
 					parameters.add(p);
 				}
 				m.setParameters(parameters);
@@ -232,13 +227,13 @@ public class JavaGenerator extends AbstractGenerator {
 			context.put("sp_methods", spMethods);
 			FileWriter w = null;
 			try {
-				File projectFile = new File(projectId, "java");
+				File projectFile = new File(projectId, "csharp");
 				if(!projectFile.exists()){
 					projectFile.mkdir();
 				}
-				w = new FileWriter(String.format("%s/java/%s.java",projectId,
+				w = new FileWriter(String.format("%s/csharp/%s.cs",projectId,
 						context.get("dao_name")));
-				Velocity.mergeTemplate("SPDAO.java.tpl", "UTF-8", context, w);
+				Velocity.mergeTemplate("SPDAO.cs.tpl", "UTF-8", context, w);
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -260,9 +255,10 @@ public class JavaGenerator extends AbstractGenerator {
 
 	@Override
 	public void generateFreeSqlCode(List<DBObject> tasks) {
+		// TODO Auto-generated method stub
 
 	}
-
+	
 	/**
 	 * 取出task表中的fields字段（List类型），组装为Parameter数组
 	 * 
@@ -280,7 +276,8 @@ public class JavaGenerator extends AbstractGenerator {
 			for (Object field : fieldsObj) {
 				Parameter p = new Parameter();
 				p.setName(field.toString());
-				p.setType(Consts.JavaSqlTypeMap.get(fieldTypeMap.get(field
+				p.setFieldName(p.getName());
+				p.setType(Consts.CSharpSqlTypeMap.get(fieldTypeMap.get(field
 						.toString())));
 				parameters.add(p);
 			}
@@ -305,7 +302,8 @@ public class JavaGenerator extends AbstractGenerator {
 			for (String key : conditionObj.keySet()) {
 				Parameter p = new Parameter();
 				p.setName(key);
-				p.setType(Consts.JavaSqlTypeMap.get(fieldTypeMap.get(key)));
+				p.setFieldName(p.getName());
+				p.setType(Consts.CSharpSqlTypeMap.get(fieldTypeMap.get(key)));
 				parameters.add(p);
 			}
 		}

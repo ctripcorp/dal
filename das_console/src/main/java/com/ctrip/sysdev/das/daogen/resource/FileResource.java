@@ -17,6 +17,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.NotFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import com.ctrip.sysdev.das.daogen.DaoGenResources;
 import com.ctrip.sysdev.das.daogen.domain.Project;
@@ -67,17 +70,41 @@ public class FileResource {
 		} else if (null != type && type.equals("project")) {
 			File currentProjectDir = new File(id);
 			if (currentProjectDir.exists()) {
+//				for (File f : FileUtils.listFilesAndDirs(currentProjectDir,
+//						new NotFileFilter(TrueFileFilter.INSTANCE),
+//						DirectoryFileFilter.DIRECTORY)) {
+//					if (!f.getName().equals(id)) {
+//						Project p = new Project();
+//						p.setId(id);
+//						p.setName(f.getName());
+//						p.setType("folder");
+//						p.setIsParent(true);
+//						allProjects.add(p);
+//					}
+//				}
 				for (File f : FileUtils.listFiles(currentProjectDir,
-						new String[] { "cs", "java" }, false)) {
+						new String[] { "cs", "java" }, true)) {
 					Project p = new Project();
 					p.setId(id);
-					p.setName(f.getName());
+					p.setName(String.format("%s/%s", f.getParentFile().getName(), f.getName()));
 					p.setType("file");
 					p.setIsParent(false);
 					allProjects.add(p);
 				}
 			}
 		}
+//		else if (null != type && type.equals("folder")) {
+//			File currentProjectDir = new File(id, name);
+//			for (File f : FileUtils.listFiles(currentProjectDir, new String[] {
+//					"cs", "java" }, false)) {
+//				Project p = new Project();
+//				p.setId(id);
+//				p.setName(String.format("%s/%s", name, f.getName()));
+//				p.setType("file");
+//				p.setIsParent(false);
+//				allProjects.add(p);
+//			}
+//		}
 
 		return allProjects;
 	}
@@ -93,9 +120,9 @@ public class FileResource {
 			BufferedReader reader = null;
 			try {
 				reader = new BufferedReader(new FileReader(f));
-				
+
 				String line = null;
-				while((line = reader.readLine()) != null){
+				while ((line = reader.readLine()) != null) {
 					sb.append(line);
 					sb.append(System.getProperty("line.separator"));
 				}
@@ -116,7 +143,7 @@ public class FileResource {
 				}
 			}
 		}
-		
+
 		return sb.toString();
 	}
 

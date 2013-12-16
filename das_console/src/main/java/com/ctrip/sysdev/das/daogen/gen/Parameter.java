@@ -5,6 +5,16 @@ public class Parameter {
 	private String type;
 	
 	private String name;
+	
+	private String fieldName;
+
+	public String getFieldName() {
+		return fieldName;
+	}
+
+	public void setFieldName(String fieldName) {
+		this.fieldName = fieldName;
+	}
 
 	public String getType() {
 		return type;

@@ -310,10 +310,9 @@
                                <button id="review" type="button" class="btn">申请评审</button>
                            </div>
                            <div class="span3">
-                              <select class="span5">
-                                 <option>C#</option>
-                                 <option>Java</option>
-                                 <option>Python</option>
+                              <select id="gen_language" class="span5">
+                                 <option value="csharp">C#</option>
+                                 <option value="java">Java</option>
                               </select>
                                <button id="generate_code" type="button" class="btn">生成代码</button>
                            </div>
@@ -323,7 +322,7 @@
                            <div class="span12">
                               <div class="portlet box green tasks-widget">
                                  <div class="portlet-title">
-                                    <div class="caption"><i class="icon-check"></i>{{project_name}}对应的DAO方法</div>
+                                    <div id="project_desc" class="caption">对应的DAO方法</div>
                                     <div class="tools">
                                        <a href="javascript:;" class="icon-collapse collapse"></a>
                                        <a id="reload_tasks" href="javascript:;" class="icon-refresh"></a>

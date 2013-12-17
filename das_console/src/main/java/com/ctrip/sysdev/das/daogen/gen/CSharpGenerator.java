@@ -4,43 +4,35 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
+import com.ctrip.sysdev.das.daogen.Consts;
+import com.ctrip.sysdev.das.daogen.domain.PojoField;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 public class CSharpGenerator extends AbstractGenerator {
-	
-	private CSharpGenerator(){
-		
+
+	private CSharpGenerator() {
+
 	}
-	
+
 	private static CSharpGenerator instance = new CSharpGenerator();
-	
-	public static CSharpGenerator getInstance(){
+
+	public static CSharpGenerator getInstance() {
 		return instance;
 	}
 
 	@Override
 	public void generateAutoSqlCode(List<DBObject> tasks) {
-		Map<String, List<DBObject>> groupByTable = new HashMap<String, List<DBObject>>();
-
-		for (DBObject t : tasks) {
-			Object table = t.get("table");
-			if (groupByTable.containsKey(table)) {
-				groupByTable.get(table).add(t);
-			} else {
-				List<DBObject> objs = new ArrayList<DBObject>();
-				objs.add(t);
-				groupByTable.put(table.toString(), objs);
-			}
-		}
+		Map<String, List<DBObject>> groupByTable = groupByCondition(tasks,
+				"table");
 
 		VelocityContext context = new VelocityContext();
 
@@ -56,18 +48,38 @@ public class CSharpGenerator extends AbstractGenerator {
 			}
 			context.put("dao_name", String.format("%sDAO", table));
 			context.put("CSharpDbTypeMap", Consts.CSharpDbTypeMap);
+			context.put("table_name", table);
+			context.put("pojo_name", WordUtils.capitalizeFully(table));
 
 			BasicDBObject metaQuery = new BasicDBObject().append("database",
 					context.get("database")).append("table", table);
 
 			String primaryKey = "";
-			DBObject fieldTypeMap = null;
+			// DBObject fieldTypeMap = null;
+			List<PojoField> fields = new ArrayList<PojoField>();
 
 			DBObject metaData = taskMetaCollection.findOne(metaQuery);
 
 			if (null != metaData) {
 				primaryKey = metaData.get("primary_key").toString();
-				fieldTypeMap = (DBObject) metaData.get("fields");
+				// fieldTypeMap = (DBObject) metaData.get("fields");
+				for (Object field : (BasicDBList) metaData.get("fields")) {
+					DBObject unboxedField = (DBObject) field;
+					PojoField f = new PojoField();
+					f.setName(unboxedField.get("name").toString());
+					f.setType(Consts.CSharpSqlTypeMap.get(unboxedField.get("type").toString()));
+					f.setPrimary(Boolean.valueOf(unboxedField.get("primary")
+							.toString()));
+					f.setNullable(Boolean.valueOf(unboxedField.get("nullable")
+							.toString()));
+					f.setPosition(Integer.valueOf(unboxedField.get("position")
+							.toString()));
+					f.setValueType(Boolean.valueOf(unboxedField
+							.get("valueType").toString()));
+					f.setNullable(f.isNullable() && f.isValueType());
+					fields.add(f);
+				}
+				context.put("fields", fields);
 			}
 
 			List<Method> methods = new ArrayList<Method>();
@@ -85,15 +97,14 @@ public class CSharpGenerator extends AbstractGenerator {
 				// 查询，或者SQL形式的删除
 				if (crud.equals("select")
 						|| (crud.equals("delete") && cud.equals("sql"))) {
-					m.setParameters(getParametersByCondition(obj, fieldTypeMap));
+					m.setParameters(getParametersByCondition(obj, fields));
 					methods.add(m);
 				}
 				// SQL形式的更新
 				else if (crud.equals("update") && cud.equals("sql")) {
 					List<Parameter> parameters = new ArrayList<Parameter>();
-					parameters.addAll(getParametersByCondition(obj,
-							fieldTypeMap));
-					parameters.addAll(getParametersByFields(obj, fieldTypeMap));
+					parameters.addAll(getParametersByCondition(obj, fields));
+					parameters.addAll(getParametersByFields(obj, fields));
 					m.setParameters(parameters);
 					methods.add(m);
 				}
@@ -103,47 +114,61 @@ public class CSharpGenerator extends AbstractGenerator {
 					Parameter p = new Parameter();
 					p.setName(primaryKey);
 					p.setFieldName(primaryKey);
-					p.setType(fieldTypeMap.get(primaryKey).toString());
+					for (PojoField field : fields) {
+						if (field.getName().equals(primaryKey)) {
+							p.setType(field.getType());
+						}
+					}
 					parameters.add(p);
 					m.setParameters(parameters);
 					spMethods.add(m);
 				}
 				// SQL形式的插入
 				else if (crud.equals("insert") && cud.equals("sql")) {
-					m.setParameters(getParametersByFields(obj, fieldTypeMap));
+					m.setParameters(getParametersByFields(obj, fields));
 					methods.add(m);
 				}
 				// SP形式的插入，SP形式的Update
 				else {
-					m.setParameters(getParametersByFields(obj, fieldTypeMap));
+					m.setParameters(getParametersByFields(obj, fields));
 					spMethods.add(m);
 				}
 
 			}
 			context.put("methods", methods);
 			context.put("sp_methods", spMethods);
-			FileWriter w = null;
+			FileWriter daoWriter = null;
+			FileWriter pojoWriter = null;
 			try {
 				File projectFile = new File(projectId, "csharp");
-				if(!projectFile.exists()){
+				if (!projectFile.exists()) {
 					projectFile.mkdir();
 				}
-				w = new FileWriter(String.format("%s/csharp/%s.cs",projectId,
-						context.get("dao_name")));
-				Velocity.mergeTemplate("DAO.cs.tpl", "UTF-8", context, w);
-
+				daoWriter = new FileWriter(String.format("%s/csharp/%s.cs",
+						projectId, context.get("dao_name")));
+				pojoWriter = new FileWriter(String.format("%s/csharp/%s.cs",
+						projectId, context.get("pojo_name")));
+				Velocity.mergeTemplate("DAO.cs.tpl", "UTF-8", context,
+						daoWriter);
+				Velocity.mergeTemplate("POJO.cs.tpl", "UTF-8", context,
+						pojoWriter);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
-				if (null != w) {
-					try {
-						w.close();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+
+				try {
+					if (null != daoWriter) {
+						daoWriter.close();
 					}
+					if (null != pojoWriter) {
+						pojoWriter.close();
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+
 			}
 
 		}
@@ -151,18 +176,8 @@ public class CSharpGenerator extends AbstractGenerator {
 
 	@Override
 	public void generateSPCode(List<DBObject> tasks) {
-		Map<String, List<DBObject>> groupbyDB = new HashMap<String, List<DBObject>>();
-
-		for (DBObject t : tasks) {
-			Object database = t.get("database");
-			if (groupbyDB.containsKey(database)) {
-				groupbyDB.get(database).add(t);
-			} else {
-				List<DBObject> objs = new ArrayList<DBObject>();
-				objs.add(t);
-				groupbyDB.put(database.toString(), objs);
-			}
-		}
+		Map<String, List<DBObject>> groupbyDB = groupByCondition(tasks,
+				"database");
 
 		VelocityContext context = new VelocityContext();
 
@@ -183,9 +198,10 @@ public class CSharpGenerator extends AbstractGenerator {
 			List<Method> spMethods = new ArrayList<Method>();
 
 			for (DBObject obj : objs) {
-				
-				BasicDBObject metaQuery = new BasicDBObject().append("database",
-						context.get("database")).append("sp", obj.get("sql_spname"));
+
+				BasicDBObject metaQuery = new BasicDBObject().append(
+						"database", context.get("database")).append("sp",
+						obj.get("sql_spname"));
 
 				BasicDBList fields = null;
 
@@ -194,25 +210,25 @@ public class CSharpGenerator extends AbstractGenerator {
 				if (null != metaData) {
 					fields = (BasicDBList) metaData.get("fields");
 				}
-				
+
 				Object crud = obj.get("crud");
 				Method m = new Method();
 				m.setAction(crud.toString());
 				String spName = obj.get("sql_spname").toString();
 				if (spName.contains(".")) {
 					m.setMethodName(spName.substring(spName.indexOf(".") + 1));
-				}else{
+				} else {
 					m.setMethodName(spName);
 				}
 				m.setSqlSPName(spName);
-				
-				BasicDBList params = (BasicDBList)metaData.get("params");
+
+				BasicDBList params = (BasicDBList) metaData.get("params");
 				List<Parameter> parameters = new ArrayList<Parameter>();
 				for (Object param : params) {
 					Parameter p = new Parameter();
-					DBObject bj = (DBObject)param;
+					DBObject bj = (DBObject) param;
 					String name = bj.get("name").toString();
-					if(name.startsWith("@") || name.startsWith(":")){
+					if (name.startsWith("@") || name.startsWith(":")) {
 						name = name.substring(1);
 					}
 					p.setFieldName(name);
@@ -223,32 +239,38 @@ public class CSharpGenerator extends AbstractGenerator {
 				m.setParameters(parameters);
 				spMethods.add(m);
 			}
-			
+
 			context.put("sp_methods", spMethods);
-			FileWriter w = null;
+			FileWriter daoWriter = null;
+
 			try {
 				File projectFile = new File(projectId, "csharp");
-				if(!projectFile.exists()){
+				if (!projectFile.exists()) {
 					projectFile.mkdir();
 				}
-				w = new FileWriter(String.format("%s/csharp/%s.cs",projectId,
-						context.get("dao_name")));
-				Velocity.mergeTemplate("SPDAO.cs.tpl", "UTF-8", context, w);
+				daoWriter = new FileWriter(String.format("%s/csharp/%s.cs",
+						projectId, context.get("dao_name")));
+
+				Velocity.mergeTemplate("SPDAO.cs.tpl", "UTF-8", context,
+						daoWriter);
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
-				if (null != w) {
-					try {
-						w.close();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+
+				try {
+					if (null != daoWriter) {
+						daoWriter.close();
 					}
+
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+
 			}
-			
+
 		}
 
 	}
@@ -258,7 +280,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	/**
 	 * 取出task表中的fields字段（List类型），组装为Parameter数组
 	 * 
@@ -267,7 +289,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	 * @return
 	 */
 	private List<Parameter> getParametersByFields(DBObject obj,
-			DBObject fieldTypeMap) {
+			List<PojoField> fieldsMeta) {
 		List<Parameter> parameters = new ArrayList<Parameter>();
 		Object fields = obj.get("fields");
 		if (null != fields && fields instanceof BasicDBList) {
@@ -277,8 +299,13 @@ public class CSharpGenerator extends AbstractGenerator {
 				Parameter p = new Parameter();
 				p.setName(field.toString());
 				p.setFieldName(p.getName());
-				p.setType(Consts.CSharpSqlTypeMap.get(fieldTypeMap.get(field
-						.toString())));
+				for (PojoField fieldMeta : fieldsMeta) {
+					if (fieldMeta.getName().equals(field)) {
+						p.setType(Consts.CSharpSqlTypeMap.get(fieldMeta
+								.getType()));
+						break;
+					}
+				}
 				parameters.add(p);
 			}
 		}
@@ -293,7 +320,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	 * @return
 	 */
 	private List<Parameter> getParametersByCondition(DBObject obj,
-			DBObject fieldTypeMap) {
+			List<PojoField> fieldsMeta) {
 		List<Parameter> parameters = new ArrayList<Parameter>();
 		Object condition = obj.get("condition");
 		if (null != condition && condition instanceof DBObject) {
@@ -303,7 +330,13 @@ public class CSharpGenerator extends AbstractGenerator {
 				Parameter p = new Parameter();
 				p.setName(key);
 				p.setFieldName(p.getName());
-				p.setType(Consts.CSharpSqlTypeMap.get(fieldTypeMap.get(key)));
+				for (PojoField fieldMeta : fieldsMeta) {
+					if (fieldMeta.getName().equals(key)) {
+						p.setType(Consts.CSharpSqlTypeMap.get(fieldMeta
+								.getType()));
+						break;
+					}
+				}
 				parameters.add(p);
 			}
 		}

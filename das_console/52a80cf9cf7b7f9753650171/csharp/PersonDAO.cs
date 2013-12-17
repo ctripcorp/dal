@@ -18,7 +18,7 @@ namespace com.ctrip.flight.intl.engine
             base.Init();
         }
 
-        public int insertAll(int ID, string Address, string Name, string Telephone, int Age, int Gender, DateTime Birth) {
+        public int insertAll(int ID, ${p.getType()} Address, ${p.getType()} Name, ${p.getType()} Telephone, int Age, int Gender, ${p.getType()} Birth) {
         {
             try
             {
@@ -34,7 +34,7 @@ namespace com.ctrip.flight.intl.engine
                         Value = ID
                     });
                                 parameters.Add(new ConcreteParameter(){
-                        DbType = DbType.String,
+                        DbType = DbType.${CSharpDbTypeMap.get($p.getType())},
                         Name = "@Address",
                         Direction = ParameterDirection.Input,
                         Index = 0,
@@ -44,7 +44,7 @@ namespace com.ctrip.flight.intl.engine
                         Value = Address
                     });
                                 parameters.Add(new ConcreteParameter(){
-                        DbType = DbType.String,
+                        DbType = DbType.${CSharpDbTypeMap.get($p.getType())},
                         Name = "@Name",
                         Direction = ParameterDirection.Input,
                         Index = 0,
@@ -54,7 +54,7 @@ namespace com.ctrip.flight.intl.engine
                         Value = Name
                     });
                                 parameters.Add(new ConcreteParameter(){
-                        DbType = DbType.String,
+                        DbType = DbType.${CSharpDbTypeMap.get($p.getType())},
                         Name = "@Telephone",
                         Direction = ParameterDirection.Input,
                         Index = 0,
@@ -84,7 +84,7 @@ namespace com.ctrip.flight.intl.engine
                         Value = Gender
                     });
                                 parameters.Add(new ConcreteParameter(){
-                        DbType = DbType.DateTime,
+                        DbType = DbType.${CSharpDbTypeMap.get($p.getType())},
                         Name = "@Birth",
                         Direction = ParameterDirection.Input,
                         Index = 0,
@@ -102,7 +102,7 @@ namespace com.ctrip.flight.intl.engine
             }
         }
         
-        public int setBySpa(int ID, string Address, string Name, string Telephone, int Age, int Gender, DateTime Birth) {
+        public int setBySpa(int ID, ${p.getType()} Address, ${p.getType()} Name, ${p.getType()} Telephone, int Age, int Gender, ${p.getType()} Birth) {
         {
             try
             {
@@ -118,7 +118,7 @@ namespace com.ctrip.flight.intl.engine
                         Value = ID
                     });
                                 parameters.Add(new ConcreteParameter(){
-                        DbType = System.Data.DbType.String,
+                        DbType = System.Data.DbType.${CSharpDbTypeMap.get($p.getType())},
                         Name = "@Address",
                         Direction = ParameterDirection.Input,
                         Index = 0,
@@ -128,7 +128,7 @@ namespace com.ctrip.flight.intl.engine
                         Value = Address
                     });
                                 parameters.Add(new ConcreteParameter(){
-                        DbType = System.Data.DbType.String,
+                        DbType = System.Data.DbType.${CSharpDbTypeMap.get($p.getType())},
                         Name = "@Name",
                         Direction = ParameterDirection.Input,
                         Index = 0,
@@ -138,7 +138,7 @@ namespace com.ctrip.flight.intl.engine
                         Value = Name
                     });
                                 parameters.Add(new ConcreteParameter(){
-                        DbType = System.Data.DbType.String,
+                        DbType = System.Data.DbType.${CSharpDbTypeMap.get($p.getType())},
                         Name = "@Telephone",
                         Direction = ParameterDirection.Input,
                         Index = 0,
@@ -168,7 +168,7 @@ namespace com.ctrip.flight.intl.engine
                         Value = Gender
                     });
                                 parameters.Add(new ConcreteParameter(){
-                        DbType = System.Data.DbType.DateTime,
+                        DbType = System.Data.DbType.${CSharpDbTypeMap.get($p.getType())},
                         Name = "@Birth",
                         Direction = ParameterDirection.Input,
                         Index = 0,

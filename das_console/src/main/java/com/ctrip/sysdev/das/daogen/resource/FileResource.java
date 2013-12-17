@@ -21,7 +21,7 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
-import com.ctrip.sysdev.das.daogen.DaoGenResources;
+import com.ctrip.sysdev.das.daogen.MongoClientManager;
 import com.ctrip.sysdev.das.daogen.domain.Project;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -44,7 +44,7 @@ public class FileResource {
 			@QueryParam("name") String name, @QueryParam("type") String type) {
 
 		if (null == daoGenDB) {
-			MongoClient client = DaoGenResources.getDefaultMongoClient();
+			MongoClient client = MongoClientManager.getDefaultMongoClient();
 			daoGenDB = client.getDB("daogen");
 		}
 

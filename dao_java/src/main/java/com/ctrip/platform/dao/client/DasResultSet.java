@@ -29,7 +29,10 @@ import com.ctrip.platform.dao.DasProto;
 
 public class DasResultSet implements ResultSet {
 
+	private String currentId;
+	
 	private PooledSocket socket;
+	
 	private boolean recycled = false;
 
 	private List<DasProto.ResponseHeader> header;
@@ -41,6 +44,10 @@ public class DasResultSet implements ResultSet {
 	private int cursor;
 
 	private boolean readFinished = false;
+	
+	private long totalBytes = 0L;
+	private int totalCount = 0;
+	private long start = 0L;
 
 	public PooledSocket getSocket() {
 		return socket;
@@ -56,6 +63,14 @@ public class DasResultSet implements ResultSet {
 
 	public void setHeader(List<DasProto.ResponseHeader> header) {
 		this.header = header;
+	}
+	
+	public String getCurrentId() {
+		return currentId;
+	}
+
+	public void setCurrentId(String currentId) {
+		this.currentId = currentId;
 	}
 
 	@Override
@@ -78,6 +93,10 @@ public class DasResultSet implements ResultSet {
 
 		if (!readFinished
 				&& (resultSet == null || (resultSet.size() - cursor < 100))) {
+			
+			if(0 == start){
+				start = System.currentTimeMillis();
+			}
 
 			int blockSize;
 			try {
@@ -88,8 +107,21 @@ public class DasResultSet implements ResultSet {
 
 				DasProto.InnerResultSet currentResultSet = DasProto.InnerResultSet
 						.parseFrom(payload);
+				
+				totalCount += currentResultSet.getRowsCount();
+				totalBytes += blockSize;
 
 				if (currentResultSet.getLast()) {
+					
+					TimeCostSender.getInstance().getQueue().add(
+							String.format("values=%s:decodeResponseTime:%d;", currentId, System.currentTimeMillis() - start));
+					
+					TimeCostSender.getInstance().getQueue().add(
+							String.format("values=%s:totalCount:%d;", currentId, totalCount));
+					
+					TimeCostSender.getInstance().getQueue().add(
+							String.format("values=%s:totalBytes:%d;", currentId, totalBytes));
+					
 					if(!recycled){
 						this.socket.recycle(null);
 						recycled = true;
@@ -161,8 +193,12 @@ public class DasResultSet implements ResultSet {
 
 	@Override
 	public boolean getBoolean(int columnIndex) throws SQLException {
-		// TODO Auto-generated method stub
-		return false;
+		DasProto.AvailableType currentValue =  currentRow.getColumns(columnIndex-1);
+		
+		 if (currentValue.getCurrent() < 0)
+           return false;
+		
+		return currentValue.getBoolArg();
 	}
 
 	@Override
@@ -179,8 +215,14 @@ public class DasResultSet implements ResultSet {
 
 	@Override
 	public int getInt(int columnIndex) throws SQLException {
-		// TODO Auto-generated method stub
-		return 0;
+		
+		DasProto.AvailableType currentValue =  currentRow.getColumns(columnIndex-1);
+		
+		 if (currentValue.getCurrent() < 0)
+            return 0;
+		
+		return currentValue.getInt32Arg();
+		
 	}
 
 	@Override

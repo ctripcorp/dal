@@ -17,7 +17,7 @@ import javax.ws.rs.core.MediaType;
 import org.bson.types.ObjectId;
 
 import com.ctrip.sysdev.das.common.Status;
-import com.ctrip.sysdev.das.daogen.DaoGenResources;
+import com.ctrip.sysdev.das.daogen.MongoClientManager;
 import com.ctrip.sysdev.das.daogen.gen.CSharpGenerator;
 import com.ctrip.sysdev.das.daogen.gen.JavaGenerator;
 import com.mongodb.BasicDBObject;
@@ -53,7 +53,7 @@ public class ProjectResource {
 	public String getProjects() {
 
 		if (null == daoGenDB) {
-			MongoClient client = DaoGenResources.getDefaultMongoClient();
+			MongoClient client = MongoClientManager.getDefaultMongoClient();
 			daoGenDB = client.getDB("daogen");
 		}
 
@@ -83,7 +83,7 @@ public class ProjectResource {
 	public String getProject(@QueryParam("id") String id) {
 
 		if (null == daoGenDB) {
-			MongoClient client = DaoGenResources.getDefaultMongoClient();
+			MongoClient client = MongoClientManager.getDefaultMongoClient();
 			daoGenDB = client.getDB("daogen");
 		}
 
@@ -108,7 +108,7 @@ public class ProjectResource {
 			@FormParam("action") String action) {
 
 		if (null == daoGenDB) {
-			MongoClient client = DaoGenResources.getDefaultMongoClient();
+			MongoClient client = MongoClientManager.getDefaultMongoClient();
 			daoGenDB = client.getDB("daogen");
 		}
 

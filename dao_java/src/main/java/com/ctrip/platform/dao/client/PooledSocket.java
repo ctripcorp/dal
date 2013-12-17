@@ -58,7 +58,18 @@ public class PooledSocket implements Closeable, Recycleable {
 	}
 
 	public boolean isAlive(){
-		return socket != null && socket.isConnected();
+		boolean result =  socket != null && socket.isConnected();
+		
+		try {
+			out.writeInt(2);
+			out.writeShort(-1);
+			result = result && true;
+		} catch (IOException e) {
+			result = false;
+			e.printStackTrace();
+		}
+		
+		return result;
 	}
 
 	@Override

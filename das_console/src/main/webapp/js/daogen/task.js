@@ -90,15 +90,23 @@ $(document).ready(function () {
 
             $.each(data, function (index, value) {
 
-                if (value.indexed) {
-                    html_data = sprintf("%s<option value='%s'>%s*</option>", html_data, value.name, value.name);
-                    where_condition = sprintf(
-                        "%s<li><div class='task-title'><span style='float: left;' class='task-title-sp' real_name='%s'>%s(indexed)</span>%s</div></li>", where_condition, value.name, value.name, operator);
-                } else {
-                    html_data = sprintf("%s<option value='%s'>%s</option>", html_data, value.name, value.name);
-                    where_condition = sprintf(
-                        "%s<li><div class='task-title'><span style='float: left;' class='task-title-sp' real_name='%s'>%s</span>%s</div></li>", where_condition, value.name, value.name, operator);
+                var indexedMark = "";
+                var indexedText = "";
+                var primaryMark = "";
+                var primaryText = "";
+                if(value.indexed){
+                    indexedMark = "*";
+                    indexedText = "(indexed)";
                 }
+                if(value.primary){
+                    primaryMark = "+";
+                    primaryText = "(Primary)";
+                }
+
+                html_data = sprintf("%s<option value='%s'>%s%s%s</option>", 
+                    html_data, value.name, value.name, indexedMark, primaryMark);
+                where_condition = sprintf(
+                        "%s<li><div class='task-title'><span style='float: left;' class='task-title-sp' real_name='%s'>%s%s%s</span>%s</div></li>", where_condition, value.name, value.name,indexedText,primaryText, operator);
 
             });
 
@@ -569,7 +577,7 @@ $(document).ready(function () {
         App.blockUI(el);
         $.post("/rest/daogen/project/generate", post_data, function (data) {
             App.unblockUI(el);
-            //window.location.replace("/file/");
+            window.location.replace("/daogen/file.html");
         });
     });
 

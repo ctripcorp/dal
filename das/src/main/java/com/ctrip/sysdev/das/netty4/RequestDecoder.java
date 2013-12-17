@@ -11,6 +11,15 @@ import com.ctrip.sysdev.das.domain.DasProto;
 import com.ctrip.sysdev.das.monitors.StatusReportTask;
 
 //TODO revise exception
+/**
+ * About protocol:
+ * 
+ * Normal: totalLength, protocol version(>=1), content
+ * Heart Beat: totalLength, -1 
+ * 
+ * @author gawu
+ *
+ */
 public class RequestDecoder extends ByteToMessageDecoder {
 	
 	static final AttributeKey<Long> DECODE_START = new AttributeKey<Long>("DECODE_START");
@@ -36,6 +45,11 @@ public class RequestDecoder extends ByteToMessageDecoder {
 		
 		//Only use when the protocol change, now unused
 		short protocolVersion = in.readShort();
+		
+		if(protocolVersion == -1){
+			in.discardReadBytes();
+			return;
+		}
 
 		byte[] decoded = new byte[dataLength - 2];
 		in.readBytes(decoded);

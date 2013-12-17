@@ -37,7 +37,7 @@ public class MasterDAO extends AbstractDAO {
 	public ResultSet getAllColumns(String dbName, String tableName) {
 		String sql = "use "
 				+ dbName
-				+ " SELECT COLUMN_NAME,DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS where TABLE_NAME =  '"
+				+ " SELECT COLUMN_NAME,DATA_TYPE,ORDINAL_POSITION,IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS where TABLE_NAME =  '"
 				+ tableName + "'";
 
 		return this.fetch(sql, null, null);

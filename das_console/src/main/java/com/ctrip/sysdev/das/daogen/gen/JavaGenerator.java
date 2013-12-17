@@ -11,6 +11,7 @@ import java.util.Map;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
+import com.ctrip.sysdev.das.daogen.Consts;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -35,18 +36,7 @@ public class JavaGenerator extends AbstractGenerator {
 	@Override
 	public  void generateAutoSqlCode(List<DBObject> tasks) {
 
-		Map<String, List<DBObject>> groupByTable = new HashMap<String, List<DBObject>>();
-
-		for (DBObject t : tasks) {
-			Object table = t.get("table");
-			if (groupByTable.containsKey(table)) {
-				groupByTable.get(table).add(t);
-			} else {
-				List<DBObject> objs = new ArrayList<DBObject>();
-				objs.add(t);
-				groupByTable.put(table.toString(), objs);
-			}
-		}
+		Map<String, List<DBObject>> groupByTable = groupByCondition(tasks, "table");
 
 		VelocityContext context = new VelocityContext();
 
@@ -157,18 +147,7 @@ public class JavaGenerator extends AbstractGenerator {
 
 	@Override
 	public void generateSPCode(List<DBObject> tasks) {
-		Map<String, List<DBObject>> groupbyDB = new HashMap<String, List<DBObject>>();
-
-		for (DBObject t : tasks) {
-			Object database = t.get("database");
-			if (groupbyDB.containsKey(database)) {
-				groupbyDB.get(database).add(t);
-			} else {
-				List<DBObject> objs = new ArrayList<DBObject>();
-				objs.add(t);
-				groupbyDB.put(database.toString(), objs);
-			}
-		}
+		Map<String, List<DBObject>> groupbyDB = groupByCondition(tasks, "database");
 
 		VelocityContext context = new VelocityContext();
 

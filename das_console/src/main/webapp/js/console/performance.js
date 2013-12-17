@@ -73,8 +73,10 @@ jQuery(document).ready(function () {
                         var totalCount = 0;
                         var decodeResponseTime = 0;
                         var encodeResponseTime = 0;
-                        var totalTime = 0;
+                        // var totalTime = 0;
                         var dbTime = 0;
+                        var decodeRequest = 0;
+                        var encodeRequest = 0;
 
 
                     $.each(data.entries, function (index, value) {
@@ -92,9 +94,15 @@ jQuery(document).ready(function () {
                             case "encodeResponseTime":
                             encodeResponseTime = value.cost;
                             break;
-                            case "totalTime":
-                            totalTime = value.cost;
+                            case "decodeRequest":
+                            decodeRequest = value.cost;
                             break;
+                            case "encodeRequest":
+                            encodeRequest = value.cost;
+                            break;
+                            // case "totalTime":
+                            // totalTime = value.cost;
+                            // break;
                             case "dbTime":
                             dbTime = value.cost;
                             break;
@@ -104,9 +112,12 @@ jQuery(document).ready(function () {
                 });
 
                 $('#configs').dataTable().fnAddData( 
-                        [totalBytes, totalCount, totalTime, 
-                        encodeResponseTime,decodeResponseTime, dbTime, 
-                        totalTime - encodeResponseTime - decodeResponseTime - dbTime
+                        [totalBytes, totalCount, 
+                        //totalTime, 
+                        encodeRequest,decodeRequest,
+                        encodeResponseTime,decodeResponseTime, dbTime
+                        //, 
+                        // totalTime - encodeResponseTime - decodeResponseTime - dbTime
                         ]
                         );
                     }); 

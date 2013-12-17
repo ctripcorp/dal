@@ -1,12 +1,14 @@
 package com.ctrip.sysdev.das.daogen.gen;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.velocity.app.Velocity;
 import org.bson.types.ObjectId;
 
-import com.ctrip.sysdev.das.daogen.DaoGenResources;
+import com.ctrip.sysdev.das.daogen.MongoClientManager;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -30,7 +32,7 @@ public abstract class AbstractGenerator implements Generator {
 	
 	static{
 		if (null == daoGenDB) {
-			MongoClient client = DaoGenResources.getDefaultMongoClient();
+			MongoClient client = MongoClientManager.getDefaultMongoClient();
 			daoGenDB = client.getDB("daogen");
 		}
 		
@@ -111,6 +113,29 @@ public abstract class AbstractGenerator implements Generator {
 		return true;
 		
 	}
+	
+	/**
+	 * For a list of DBObject, return a map group by a condition
+	 * @param tasks
+	 * @param condition
+	 * @return
+	 */
+	protected Map<String, List<DBObject>> groupByCondition(List<DBObject> tasks, String condition){
+		Map<String, List<DBObject>> groupBy = new HashMap<String, List<DBObject>>();
+
+		for (DBObject t : tasks) {
+			Object conditionValue = t.get(condition);
+			if (groupBy.containsKey(conditionValue)) {
+				groupBy.get(conditionValue).add(t);
+			} else {
+				List<DBObject> objs = new ArrayList<DBObject>();
+				objs.add(t);
+				groupBy.put(conditionValue.toString(), objs);
+			}
+		}
+
+		return groupBy;
+	}
 
 	@Override
 	public abstract void generateAutoSqlCode(List<DBObject> tasks);
@@ -120,5 +145,6 @@ public abstract class AbstractGenerator implements Generator {
 
 	@Override
 	public abstract void generateFreeSqlCode(List<DBObject> tasks);
+
 
 }

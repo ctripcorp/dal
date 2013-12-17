@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import com.mongodb.MongoClient;
 
-public enum DaoGenResources {
+public enum MongoClientManager {
 
 	INSTANCE;
 
@@ -15,7 +15,7 @@ public enum DaoGenResources {
 		return INSTANCE.client;
 	}
 
-	private DaoGenResources() {
+	private MongoClientManager() {
 		InputStream in = null;
 		props = new Properties();
 
@@ -23,7 +23,7 @@ public enum DaoGenResources {
 			ClassLoader defaultLoader = Thread.currentThread()
 					.getContextClassLoader();
 			if (defaultLoader == null) {
-				defaultLoader = DaoGenResources.class.getClassLoader();
+				defaultLoader = MongoClientManager.class.getClassLoader();
 			}
 
 			classLoader = defaultLoader;

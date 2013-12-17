@@ -3,9 +3,9 @@ package com.ctrip.sysdev.das.console.domain;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class TimeCostStatistics {
-	private AtomicLong totalDecodeCost;
-	private AtomicLong totalDBCost;
-	private AtomicLong totalEncodeCost;
+	private AtomicLong totalDecodeCost = new AtomicLong();
+	private AtomicLong totalDBCost = new AtomicLong();
+	private AtomicLong totalEncodeCost = new AtomicLong();
 
 	public TimeCostStatisticsTO getSnapshot(long totalRequests) {
 		return new TimeCostStatisticsTO(

@@ -19,11 +19,12 @@ import javax.ws.rs.core.MediaType;
 
 import com.ctrip.sysdev.das.common.Status;
 import com.ctrip.sysdev.das.console.domain.StringIdSet;
-import com.ctrip.sysdev.das.daogen.DaoGenResources;
+import com.ctrip.sysdev.das.daogen.Consts;
+import com.ctrip.sysdev.das.daogen.MongoClientManager;
 import com.ctrip.sysdev.das.daogen.domain.MasterDAO;
+import com.ctrip.sysdev.das.daogen.domain.PojoField;
 import com.ctrip.sysdev.das.daogen.domain.SPDAO;
 import com.ctrip.sysdev.das.daogen.domain.TableField;
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -53,14 +54,12 @@ public class DatabaseResource {
 				results.add(rs.getString(1));
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {
 				if (null != rs)
 					rs.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -87,13 +86,11 @@ public class DatabaseResource {
 				results.add(rs.getString(1));
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {
 				rs.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -113,31 +110,29 @@ public class DatabaseResource {
 		Set<String> indexedColumns = new HashSet<String>();
 		List<TableField> fields = new ArrayList<TableField>();
 
-		// ResultSet rs = sp.getIndexedColumns(dbName, tableName);
+		ResultSet rs = sp.getIndexedColumns(dbName, tableName);
 
-		// try {
-		// while (rs.next()) {
-		// for(String col : rs.getString(3).split(",")){
-		// indexedColumns.add(col.trim());
-		// }
-		// }
-		//
-		// } catch (SQLException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } finally {
-		// try {
-		// rs.close();
-		// } catch (SQLException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// }
+		try {
+			while (rs.next()) {
+				for (String col : rs.getString(3).split(",")) {
+					indexedColumns.add(col.trim());
+				}
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 
 		ResultSet allColumns = master.getAllColumns(dbName, tableName);
 
 		if (null == daoGenDB) {
-			MongoClient client = DaoGenResources.getDefaultMongoClient();
+			MongoClient client = MongoClientManager.getDefaultMongoClient();
 			daoGenDB = client.getDB("daogen");
 		}
 
@@ -148,40 +143,56 @@ public class DatabaseResource {
 		BasicDBObject metaQuery = new BasicDBObject()
 				.append("database", dbName).append("table", tableName);
 
-		BasicDBObject fieldTypeMap = new BasicDBObject();
-
 		try {
+			ResultSet primaryKeyResultSet = master.getPrimaryKey(dbName,
+					tableName);
+			String primaryKey = "";
+			if (primaryKeyResultSet.next()) {
+				primaryKey = primaryKeyResultSet.getString(1);
+			}
+
+			List<BasicDBObject> pojoFields = new ArrayList<BasicDBObject>();
+
 			while (allColumns.next()) {
 				String columnName = allColumns.getString(1);
 				String columnType = allColumns.getString(2);
+				int position = allColumns.getInt(3);
+				String nullable = allColumns.getString(4);
+
 				TableField field = new TableField();
+				BasicDBObject pojoField = new BasicDBObject();
+
 				field.setName(columnName);
 				field.setIndexed(indexedColumns.contains(columnName));
+				field.setPrimary(columnName.equals(primaryKey));
 				fields.add(field);
-				fieldTypeMap.append(columnName, columnType);
+				
+				pojoField
+						.append("name", columnName)
+						.append("type", columnType)
+						.append("position", position)
+						.append("nullable", nullable.equalsIgnoreCase("yes"))
+						.append("primary", field.isPrimary())
+						.append("valueType",
+								Consts.CSharpValueTypes.contains(columnType));
+				pojoFields.add(pojoField);
 			}
 
 			// TODO: what if table schema changed?
 			DBCursor cursor = taskMetaCollection.find(metaQuery);
 			if (cursor == null || cursor.size() == 0) {
-				ResultSet rs = master.getPrimaryKey(dbName, tableName);
-				String primaryKey = "";
-				if (rs.next()) {
-					primaryKey = rs.getString(1);
-				}
+
 				metaQuery.append("primary_key", primaryKey);
-				metaQuery.append("fields", fieldTypeMap);
+				metaQuery.append("fields", pojoFields);
 				taskMetaCollection.insert(metaQuery);
 			}
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {
 				allColumns.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -207,13 +218,11 @@ public class DatabaseResource {
 						rs.getString(2)));
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {
 				rs.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -236,7 +245,7 @@ public class DatabaseResource {
 		ResultSet rs = sp.getSPCode(dbName, spName);
 
 		if (null == daoGenDB) {
-			MongoClient client = DaoGenResources.getDefaultMongoClient();
+			MongoClient client = MongoClientManager.getDefaultMongoClient();
 			daoGenDB = client.getDB("daogen");
 		}
 
@@ -257,11 +266,12 @@ public class DatabaseResource {
 			if (cursor == null || cursor.size() == 0) {
 				String schema = "dbo";
 				String spRealName = spName;
-				if(spName.contains(".")){
+				if (spName.contains(".")) {
 					schema = spName.substring(0, spName.indexOf("."));
-					spRealName = spName.substring(spName.indexOf(".")+1);
+					spRealName = spName.substring(spName.indexOf(".") + 1);
 				}
-				ResultSet spInfo = master.getSPParams(dbName,  schema, spRealName);
+				ResultSet spInfo = master.getSPParams(dbName, schema,
+						spRealName);
 				List<BasicDBObject> list = new ArrayList<BasicDBObject>();
 				while (spInfo.next()) {
 					BasicDBObject obj = new BasicDBObject();
@@ -276,13 +286,11 @@ public class DatabaseResource {
 				taskMetaCollection.insert(metaQuery);
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {
 				rs.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

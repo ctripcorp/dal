@@ -35,6 +35,18 @@ public class AbstractDAO implements DAO {
 		lock.writeLock().unlock();
 	}
 
+	protected void init(String host){
+		lock.writeLock().lock();
+		if(!clients.containsKey(logicDbName)){
+			DasClient client = new DasClient();
+			client.setCredentialId(credentialId);
+			client.setLogicDbName(logicDbName);
+			client.init(host, servicePort);
+			clients.put(logicDbName, client);
+		}
+		lock.writeLock().unlock();
+	}
+
 	@Override
 	public ResultSet fetch(String sql, List<StatementParameter> parameters,
 			Map keywordParameters) {

@@ -42,6 +42,9 @@ public class DasClient implements Client {
 
 	private PooledSocket writeRequest(DasProto.Request request)
 			throws UnknownHostException, IOException {
+	
+		long encodeStart = System.currentTimeMillis();
+		
 		PooledSocket sock = pool.acquire();
 
 		if (sock != null) {
@@ -51,18 +54,41 @@ public class DasClient implements Client {
 			sock.getOut().writeShort(1);
 			sock.getOut().write(payload);
 		}
+		
+		long encodeEnd = System.currentTimeMillis();
 
+		TimeCostSender.getInstance().getQueue().add(
+				String.format("values=%s:encodeRequestTime:%d;", request.getId(), encodeEnd - encodeStart));
+		
 		return sock;
 	}
 
 	private DasProto.Response readResponse(PooledSocket sock)
 			throws IOException {
+		
+		long decodeStart = System.currentTimeMillis();
+		
 		int totalLength = sock.getIn().readInt();
 		short version = sock.getIn().readShort();
 		byte[] data = new byte[totalLength - 2];
 
 		sock.getIn().readFully(data);
-		return DasProto.Response.parseFrom(data);
+		DasProto.Response response =  DasProto.Response.parseFrom(data);
+		
+		long decodeEnd = System.currentTimeMillis();
+		
+		if(response.getResultType() == CRUD.CUD){
+			TimeCostSender.getInstance().getQueue().add(
+					String.format("values=%s:decodeResponseTime:%d;", response.getId(), decodeEnd - decodeStart));
+			
+			TimeCostSender.getInstance().getQueue().add(
+					String.format("values=%s:totalCount:%d;", response.getId(), response.getAffectRows()));
+			
+			TimeCostSender.getInstance().getQueue().add(
+					String.format("values=%s:totalBytes:%d;", response.getId(), totalLength));
+		}
+		
+		return response;
 	}
 
 	@Override
@@ -103,6 +129,7 @@ public class DasClient implements Client {
 			DasResultSet resultSet = new DasResultSet();
 			resultSet.setHeader(response.getHeaderList());
 			resultSet.setSocket(sock);
+			resultSet.setCurrentId(response.getId());
 
 			return resultSet;
 		} catch (UnknownHostException e) {
@@ -167,7 +194,50 @@ public class DasClient implements Client {
 	@Override
 	public ResultSet fetchBySp(String sql, List<StatementParameter> parameters,
 			Map keywordParameters) {
-		// TODO Auto-generated method stub
+		boolean master = false;
+
+		if (null != keywordParameters && keywordParameters.size() > 0
+				&& keywordParameters.containsKey("master")) {
+			master = Boolean.getBoolean(keywordParameters.get("master")
+					.toString());
+		}
+
+		DasProto.RequestMessage.Builder msgBuilder = DasProto.RequestMessage
+				.newBuilder();
+
+		msgBuilder.setStateType(StatementType.SP).setCrud(CRUD.GET)
+				.setFlags(1).setMaster(master).setName(sql);
+
+		if (null != parameters) {
+			for (StatementParameter p : parameters) {
+				msgBuilder.addParameters(p.build2SqlParameters());
+			}
+		}
+
+		DasProto.Request.Builder requestBuilder = DasProto.Request.newBuilder();
+
+		UUID taskid = UUID.randomUUID();
+
+		requestBuilder.setMsg(msgBuilder.build()).setCred(credentialId)
+				.setDb(logicDbName).setId(taskid.toString());
+
+		try {
+			PooledSocket sock = writeRequest(requestBuilder.build());
+			DasProto.Response response = readResponse(sock);
+
+			DasResultSet resultSet = new DasResultSet();
+			resultSet.setHeader(response.getHeaderList());
+			resultSet.setSocket(sock);
+
+			return resultSet;
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return null;
 	}
 

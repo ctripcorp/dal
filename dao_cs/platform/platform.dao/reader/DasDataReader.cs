@@ -30,6 +30,10 @@ namespace platform.dao.sql
         private bool readFinished = false;
         private param.Row current;
         private List<param.Row> ResultSet;
+        public string CurrentId { get; set; }
+        private long totalBytes = 0L;
+        private int totalCount = 0;
+        private Stopwatch watch;
 
         public List<param.ResponseHeader> Header { get; set; }
 
@@ -66,11 +70,16 @@ namespace platform.dao.sql
             if (null == this.Sock)
                 return false;
 
+            if (watch == null)
+            {
+                watch = new Stopwatch();
+                watch.Start();
+            }
+
             //如果没有读取完成，且剩余的不足100个，则再次读取
             if (!readFinished && ((ResultSet == null) || (ResultSet.Count - cursor < 100)))
             {
-                Stopwatch watch = new Stopwatch();
-                watch.Start();
+                
 
                 int blockSize = Sock.ReadInt();
 
@@ -95,15 +104,8 @@ namespace platform.dao.sql
                 readFinished = resultSet.last;
                 results.AddRange(resultSet.rows);
 
-                watch.Stop();
-
-                MonitorData data = MonitorData.GetInstance();
-
-                if (data != null)
-                {
-                    data.TotalDataBytes += 4 + payload.Length;
-                    data.DecodeResponseTime += watch.ElapsedMilliseconds;
-                }
+                totalBytes += payload.Length;
+                totalCount += resultSet.rows.Count;
 
                 payload = null;
 
@@ -113,6 +115,14 @@ namespace platform.dao.sql
                 }
                 ResultSet = results;
                 cursor = 0;
+            }
+
+            if (readFinished)
+            {
+                watch.Stop();
+                MonitorSender.GetInstance().Send(CurrentId, "totalBytes", totalBytes);
+                MonitorSender.GetInstance().Send(CurrentId, "totalCount", totalCount);
+                MonitorSender.GetInstance().Send(CurrentId, "decodeResponseTime", watch.ElapsedMilliseconds);
             }
 
             var result = cursor < ResultSet.Count;

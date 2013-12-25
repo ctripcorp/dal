@@ -18,7 +18,7 @@
          <!-- BEGIN HEAD -->
          <head>
             <meta charset="utf-8" />
-            <title>Metronic | Admin Dashboard Template</title>
+            <title>DAO Generator - Projects</title>
             <meta content="width=device-width, initial-scale=1.0" name="viewport" />
             <meta content="" name="description" />
             <meta content="" name="author" />
@@ -33,10 +33,9 @@
             <link href="../css/uniform.default.css" rel="stylesheet" type="text/css"/>
             <!-- END GLOBAL MANDATORY STYLES -->
             <!-- BEGIN PAGE LEVEL STYLES --> 
-            <link href="../css/tasks.css" rel="stylesheet" type="text/css" media="screen"/>
-            <link href="../css/index.css" rel="stylesheet" type="text/css" media="screen"/>
+            <link href="../css/tasks-widget.css" rel="stylesheet" type="text/css" media="screen"/>
             <!-- END PAGE LEVEL STYLES -->
-            <link rel="shortcut icon" href="favicon.ico" />
+            <link rel="shortcut icon" href="/img/favicon.ico" />
          </head>
          <!-- END HEAD -->
          <!-- BEGIN BODY -->
@@ -47,8 +46,9 @@
                <div class="navbar-inner">
                   <div class="container-fluid">
                      <!-- BEGIN LOGO -->
-                     <a class="brand" href="index.html">
-                        <!-- <img src="../img/logo1.png" alt="logo" /> -->
+                     <a class="brand" href="/">
+                        <img src="../img/logo.png" alt="logo" style="width:126px;height:43px;" />
+                        <!-- <span>Home</span> -->
                      </a>
                      <!-- END LOGO -->
                      <!-- BEGIN RESPONSIVE MENU TOGGLER -->
@@ -96,13 +96,13 @@
                         <span class="selected"></span>
                         </a>
                      </li>
-                     <li class="sidebar" sidename="task">
+                    <!--  <li class="sidebar" sidename="task">
                         <a href="./task.html">
                         <i class="icon-sun"></i> 
                         <span class="title">生成DAO</span>
                         <span class="selected"></span>
                         </a>
-                     </li>
+                     </li> -->
                      <li class="sidebar" sidename="code">
                         <a href="./file.html">
                         <i class="icon-twitter"></i> 
@@ -166,7 +166,7 @@
                            </div>
                            <div class="modal-body">
                               <form class="form-inline">
-                                 <input id="project_id" type="hidden" value="id">
+                                 <input id="project_id" type="hidden" value="">
                                  项目名<input id="project_name" type="text" class="input-block-level" value="InternationalFlightEngine">
                                  Namespace<input id="namespace" type="text" class="input-block-level" value="com.ctrip.flight.intl.engine">
                               </form>

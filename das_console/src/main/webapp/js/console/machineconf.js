@@ -62,7 +62,7 @@ jQuery(document).ready(function () {
             $('#configs').dataTable().fnClearTable();    
         }
 
-        $.get("/console/dal/das/configure/node", function (data) {
+        $.get("/rest/console/configure/node", function (data) {
             //data = JSON.parse(data);
             $.each(data, function (index, value) {
                 $('#configs').dataTable().fnAddData( 
@@ -87,7 +87,7 @@ jQuery(document).ready(function () {
         if($.data(document.body, "modify") == $("#machine_ip").val()){
             $.ajax({
                 type: 'PUT',
-                url: sprintf("/console/dal/das/configure/node/%s", postData["name"]),
+                url: sprintf("/rest/console/configure/node/%s", postData["name"]),
                 //dataType: 'json',
                 data: postData,
                 success: function(data, status, event) {
@@ -99,7 +99,7 @@ jQuery(document).ready(function () {
                 }
             });
         }else{
-            $.post("/console/dal/das/configure/node",
+            $.post("/rest/console/configure/node",
             postData, 
             function (data, status, event) {
                 if(data.code == 'OK'){
@@ -116,7 +116,7 @@ jQuery(document).ready(function () {
 var del_machine = function(ip){
     $.ajax({
         type: 'DELETE',
-        url: sprintf('/console/dal/das/configure/node/%s', ip),
+        url: sprintf('/rest/console/configure/node/%s', ip),
         //dataType: 'json',
         success: function(data, status, event) {
             if(data.code == 'OK'){
@@ -137,7 +137,7 @@ var mod_machine = function(obj){
     $.data(document.body, "modify", value.name);
     // $.ajax({
     //     type: 'PUT',
-    //     url: '/console/dal/das/configure/node/',
+    //     url: '/rest/console/configure/node/',
     //     data: {},
     //     //dataType: 'json',
     //     success: function(data, status, event) {

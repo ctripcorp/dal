@@ -65,7 +65,7 @@ jQuery(document).ready(function () {
             $('#configs').dataTable().fnClearTable();    
         }
 
-        $.get("/console/dal/das/configure/db", function (data) {
+        $.get("/rest/console/configure/db", function (data) {
             //data = JSON.parse(data);
             $.each(data, function (index, value) {
                 $('#configs').dataTable().fnAddData( 
@@ -92,9 +92,9 @@ jQuery(document).ready(function () {
             };
 
         if($.data(document.body, "modify") == $("#physic_db").val()){
-            var url = sprintf("/console/dal/das/configure/db/%s", postData["name"]);
+            var url = sprintf("/rest/console/configure/db/%s", postData["name"]);
             if($("#db_type").val() == "Slave"){
-                url = sprintf("/console/dal/das/configure/db/%s/slave/%s", 
+                url = sprintf("/rest/console/configure/db/%s/slave/%s", 
                     $("#physic_db").val(), $("#slave_name").val());
                  postData["name"] = $("#slave_name").val();
             }
@@ -112,9 +112,9 @@ jQuery(document).ready(function () {
                 }
             });
         }else{
-            var url = "/console/dal/das/configure/db";
+            var url = "/rest/console/configure/db";
             if($("#db_type").val() == "Slave"){
-                url = sprintf("/console/dal/das/configure/db/%s/slave", $("#physic_db").val());
+                url = sprintf("/rest/console/configure/db/%s/slave", $("#physic_db").val());
                 postData["name"] = $("#slave_name").val();
             }
             $.post(url, postData, function (data, status, event) {
@@ -143,10 +143,10 @@ jQuery(document).ready(function () {
 //如果删除Master，则传入一个参数obj, 为Master的名字
 var del_db = function(name, slave){
 
-    var url = sprintf('/console/dal/das/configure/db/%s', name); 
+    var url = sprintf('/rest/console/configure/db/%s', name); 
 
     if(slave != undefined){
-        url = sprintf('/console/dal/das/configure/db/%s/slave/%s', name, slave);
+        url = sprintf('/rest/console/configure/db/%s/slave/%s', name, slave);
     }
     
 
@@ -210,7 +210,7 @@ var fnFormatDetails = function(nTr, name)
 {
     var trdata = "";
 
-    $.get(sprintf('/console/dal/das/configure/db/%s/slave', name),function(data){
+    $.get(sprintf('/rest/console/configure/db/%s/slave', name),function(data){
         $.each(data, function (index, value) {
             trdata = sprintf("%s<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
                 trdata, value.name, value.setting.driver, value.setting.jdbcUrl,

@@ -11,6 +11,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ctrip.sysdev.das.DalServer;
+
 /**
  * 
  * @author gawu
@@ -62,7 +64,7 @@ public class TimeCostSendTask extends Thread {
 					continue;
 				}
 				url = new URL(
-						"http://172.16.155.184:8080/console/dal/das/monitor/timeCosts");
+						String.format("http://%s/rest/console/monitor/timeCosts", DalServer.consoleAddr));
 				URLConnection conn = url.openConnection();
 				conn.setDoOutput(true);
 

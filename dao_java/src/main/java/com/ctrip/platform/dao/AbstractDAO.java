@@ -23,6 +23,8 @@ public class AbstractDAO implements DAO {
 	
 	private static ReadWriteLock lock = new ReentrantReadWriteLock();
 	
+	//This is for dev, 在实际的使用时，可能需要在DAO级别切换DB，因为SQL Server执行SQL之后，
+	//Driver会将当前数据库置为该SQL对应的数据库，如果SQL中使用了use [dbname],则容易发生bug
 	protected void init(){
 		lock.writeLock().lock();
 		if(!clients.containsKey(logicDbName)){
@@ -84,7 +86,17 @@ public class AbstractDAO implements DAO {
 	@Override
 	public ResultSet fetchBySp(String sql, List<StatementParameter> parameters,
 			Map keywordParameters) {
-		// TODO Auto-generated method stub
+		lock.readLock().lock();
+		Client client = null;
+		if(clients.containsKey(logicDbName)){
+			client = clients.get(logicDbName);
+		}
+		lock.readLock().unlock();
+		
+		if(client != null){
+			return client.fetchBySp(sql, parameters, keywordParameters);
+		}
+		
 		return null;
 	}
 

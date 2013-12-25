@@ -5,6 +5,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.math.BigDecimal;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -32,7 +33,7 @@ public class QueryExecutor {
 	public static final String CLOSE_CONNECTION_EXCEPTION = "Connection close exception";
 	public static final String CLOSE_STATEMENT_EXCEPTION = "Statement close exception";
 	public static final String DURATION = "duration";
-	
+
 	private long dbStart = 0;
 	private long encodeStart = 0;
 
@@ -61,13 +62,17 @@ public class QueryExecutor {
 			// conn.setAutoCommit(false);
 
 			resp.setId(request.getId());
-			
+
 			dbStart = System.currentTimeMillis();
-			
+
 			statement = createStatement(conn, request);
 
 			if (request.getMsg().getStateType() == DasProto.StatementType.SP) {
-				executeSP(resp, statement);
+				if (request.getMsg().getCrud() == DasProto.CRUD.GET) {
+					executeSPQuery(ctx, resp, statement);
+				} else {
+					executeSP(resp, statement);
+				}
 			} else {
 				if (request.getMsg().getCrud() == DasProto.CRUD.GET) {
 					executeQuery(ctx, resp, statement);
@@ -146,16 +151,25 @@ public class QueryExecutor {
 				occupy.append("?").append(",");
 			}
 
-			occupy.deleteCharAt(occupy.length() - 1);
+			if (params.size() > 0) {
+				occupy.deleteCharAt(occupy.length() - 1);
+			}
 
-			statement = conn.prepareCall(String.format("{call dbo.%s(%s)}",
-					request.getMsg().getName(), occupy.toString()));
+//			if (params.size() == 1) {
+//
+//				statement = conn.prepareStatement(String.format("exec %s ?", request.getMsg().getName()));
+////				statement = conn.prepareCall(String.format("{call dbo.%s %s}",
+////						request.getMsg().getName(), occupy.toString()));
+//			} else {
+				statement = conn.prepareCall(String.format("{call %s(%s)}",
+						request.getMsg().getName(), occupy.toString()));
+//			}
 		}
 
 		// Collections.sort(params);
 
 		for (int i = 0; i < params.size(); i++) {
-			 setSqlParameter(statement, params.get(i));
+			setSqlParameter(statement, params.get(i));
 		}
 
 		return statement;
@@ -168,11 +182,11 @@ public class QueryExecutor {
 		resp.setResultType(DasProto.CRUD.GET);
 
 		ResultSet rs = statement.executeQuery();
-		
+
 		reportTask.recordDbEnd(resp.getId(), dbStart);
-//		TimeCostSendTask.getInstance().getQueue().add(
-//				String.format("id=%s&timeCost=dbTime:%d", resp.getId(), 
-//						System.currentTimeMillis() - dbStart));
+		// TimeCostSendTask.getInstance().getQueue().add(
+		// String.format("id=%s&timeCost=dbTime:%d", resp.getId(),
+		// System.currentTimeMillis() - dbStart));
 
 		// Mark start encoding
 		getFromResultSet(ctx, rs, resp);
@@ -217,6 +231,29 @@ public class QueryExecutor {
 
 	}
 
+	private void executeSPQuery(ChannelHandlerContext ctx,
+			DasProto.Response.Builder resp, PreparedStatement statement)
+			throws Exception {
+
+		// try{
+		// rowCount = statement.executeUpdate();
+		 ResultSet rs = statement.executeQuery();
+//		statement.execute();
+		// statement.executeUpdate();
+
+//		CallableStatement cst = (CallableStatement) statement;
+//		ResultSet rs = cst.getResultSet();
+		// ResultSet rs = statement.getResultSet();
+		resp.setResultType(DasProto.CRUD.GET);
+
+		// reportTask.recordDbEnd(resp.getId(), dbStart);
+
+		getFromResultSet(ctx, rs, resp);
+
+		// TODO: write to client
+
+	}
+
 	private void executeSP(DasProto.Response.Builder resp,
 			PreparedStatement statement) throws SQLException {
 
@@ -224,7 +261,6 @@ public class QueryExecutor {
 		// try{
 		// rowCount = statement.executeUpdate();
 		statement.executeQuery();
-		
 
 		// CallableStatement cst = (CallableStatement) statement;
 		// cst.getMoreResults();
@@ -271,7 +307,7 @@ public class QueryExecutor {
 					headerBuilder.setType(currentType)
 							.setName(metaData.getColumnLabel(i + 1)).build());
 		}
-		
+
 		encodeStart = System.currentTimeMillis();
 
 		// Serialize and write the header
@@ -282,8 +318,8 @@ public class QueryExecutor {
 		buf.writeShort(1);
 		buf.writeBytes(headerPayload);
 		ctx.writeAndFlush(buf);
-		
-		//buf.clear();
+
+		// buf.clear();
 		headerPayload = null;
 
 		int bucket = 2000;
@@ -315,38 +351,45 @@ public class QueryExecutor {
 				builder = DasProto.InnerResultSet.newBuilder();
 				rowCount = 0;
 			}
-			
-//			if(flush-- == 0){
-//				ctx.flush();
-//				flush = 30;
-//			}
+
+			// if(flush-- == 0){
+			// ctx.flush();
+			// flush = 30;
+			// }
 		}
 
 		builder.setLast(true);
 
 		WriteResultSet(ctx, builder);
-		//ctx.flush();
-		
+		// ctx.flush();
+
 		reportTask.recordEncodeEnd(resp.getId(), encodeStart);
-//		TimeCostSendTask.getInstance().getQueue().add(
-//				String.format("id=%s&timeCost=encodeResponseTime:%d", resp.getId(), 
-//						System.currentTimeMillis() - encodeStart));
-		
+		// TimeCostSendTask.getInstance().getQueue().add(
+		// String.format("id=%s&timeCost=encodeResponseTime:%d", resp.getId(),
+		// System.currentTimeMillis() - encodeStart));
+
 		rs.close();
+
+		if (totalCount > 100000) {
+			logger.info("calling GC");
+			Runtime.getRuntime().gc();
+		}
+
 		logger.debug("Finished");
 	}
 
 	private void WriteResultSet(ChannelHandlerContext ctx,
-			DasProto.InnerResultSet.Builder builder) throws InvalidProtocolBufferException {
+			DasProto.InnerResultSet.Builder builder)
+			throws InvalidProtocolBufferException {
 		byte[] bodyPayload = builder.build().toByteArray();
-		
+
 		ByteBuf bf = ctx.alloc().buffer();
 
 		bf.writeInt(bodyPayload.length);
 		bf.writeBytes(bodyPayload);
-//		ChannelFuture wf = ctx.write(bf);
+		// ChannelFuture wf = ctx.write(bf);
 		ChannelFuture wf = ctx.writeAndFlush(bf);
-		//bf.clear();
+		// bf.clear();
 		bodyPayload = null;
 	}
 
@@ -378,49 +421,49 @@ public class QueryExecutor {
 		switch (type) {
 		case java.sql.Types.BOOLEAN:
 			boolean booleanValue = rs.getBoolean(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(0)
 					.setBoolArg(booleanValue).build();
 		case java.sql.Types.TINYINT:
 			byte byteValue = rs.getByte(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(1)
 					.setInt32Arg(byteValue).build();
 		case java.sql.Types.SMALLINT:
 			short shortValue = rs.getShort(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(1)
 					.setInt32Arg(shortValue).build();
 		case java.sql.Types.INTEGER:
 			int intValue = rs.getInt(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(1)
 					.setInt32Arg(intValue).build();
 		case java.sql.Types.BIGINT:
 			long longValue = rs.getLong(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(2)
 					.setInt64Arg(longValue).build();
 		case java.sql.Types.FLOAT:
 			float floatValue = rs.getFloat(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(3)
 					.setDoubleArg(floatValue).build();
 		case java.sql.Types.DOUBLE:
 			double doubleValue = rs.getDouble(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(3)
 					.setDoubleArg(doubleValue).build();
 		case java.sql.Types.DECIMAL:
 			BigDecimal decimalValue = rs.getBigDecimal(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(4)
 					.setStringArg(decimalValue.toString()).build();
@@ -429,25 +472,25 @@ public class QueryExecutor {
 		case java.sql.Types.LONGVARCHAR:
 		case java.sql.Types.LONGNVARCHAR:
 			String stringValue = rs.getString(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(4)
 					.setStringArg(stringValue).build();
 		case java.sql.Types.DATE:
 			Date dateValue = rs.getDate(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(2)
 					.setInt64Arg(dateValue.getTime()).build();
 		case java.sql.Types.TIME:
 			Time timeValue = rs.getTime(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(2)
 					.setInt64Arg(timeValue.getTime()).build();
 		case java.sql.Types.TIMESTAMP:
 			Timestamp timestampValue = rs.getTimestamp(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(2)
 					.setInt64Arg(timestampValue.getTime()).build();
@@ -456,7 +499,7 @@ public class QueryExecutor {
 		case java.sql.Types.LONGVARBINARY:
 		case java.sql.Types.VARBINARY:
 			byte[] bytesValue = rs.getBytes(i);
-			if(rs.wasNull())
+			if (rs.wasNull())
 				break;
 			return DasProto.AvailableType.newBuilder().setCurrent(5)
 					.setBytesArg(ByteString.copyFrom(bytesValue)).build();
@@ -491,29 +534,30 @@ public class QueryExecutor {
 		case Decimal:
 			break;
 		case Double:
-			ps.setDouble(parameter.getIndex(), parameter.getValue().getDoubleArg());
+			ps.setDouble(parameter.getIndex(), parameter.getValue()
+					.getDoubleArg());
 			break;
 		case Guid:
 			break;
 		case Int16:
-			ps.setShort(parameter.getIndex(),  (short)parameter.getValue()
+			ps.setShort(parameter.getIndex(), (short) parameter.getValue()
 					.getInt32Arg());
 			break;
 		case Int32:
-			ps.setInt(parameter.getIndex(),  parameter.getValue()
-					.getInt32Arg());
+			ps.setInt(parameter.getIndex(), parameter.getValue().getInt32Arg());
 			break;
 		case Int64:
-			ps.setLong(parameter.getIndex(),  parameter.getValue()
-					.getInt64Arg());
+			ps.setLong(parameter.getIndex(), parameter.getValue().getInt64Arg());
 			break;
 		case SByte:
 			break;
 		case Single:
-			ps.setFloat(parameter.getIndex(), (float)parameter.getValue().getDoubleArg());
+			ps.setFloat(parameter.getIndex(), (float) parameter.getValue()
+					.getDoubleArg());
 			break;
 		case String:
-			ps.setString(parameter.getIndex(), parameter.getValue().getStringArg());
+			ps.setString(parameter.getIndex(), parameter.getValue()
+					.getStringArg());
 			break;
 		case StringFixedLength:
 			break;

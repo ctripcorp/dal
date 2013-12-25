@@ -29,9 +29,9 @@ namespace platform.demo
 
                 int count = 0;
 
-                Stopwatch watch = new Stopwatch();
+                //Stopwatch watch = new Stopwatch();
 
-                watch.Start();
+                //watch.Start();
 
                 using (IDataReader reader = person.ExecuteSql(sql))
                 {
@@ -44,16 +44,16 @@ namespace platform.demo
                     }
                 }
 
-                watch.Stop();
+                //watch.Stop();
 
-                MonitorData data = MonitorData.GetInstance();
+                //MonitorData data = MonitorData.GetInstance();
 
-                if (data != null)
-                {
-                    data.TotalTime = watch.ElapsedMilliseconds;
-                    data.TotalCount = count;
-                    MonitorSender.GetInstance().Send(data);
-                }
+                //if (data != null)
+                //{
+                //    data.TotalTime = watch.ElapsedMilliseconds;
+                //    data.TotalCount = count;
+                //    MonitorSender.GetInstance().Send(data);
+                //}
 
 
                 string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(new { Count = count });

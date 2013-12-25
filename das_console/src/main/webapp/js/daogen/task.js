@@ -4,8 +4,6 @@ $(document).ready(function () {
 
     var cud_shortcut = {};
 
-    var tasks = {};
-
     whereKeyValuemap["0"] = "=";
     whereKeyValuemap["1"] = "!=";
     whereKeyValuemap["2"] = ">";
@@ -53,20 +51,20 @@ $(document).ready(function () {
         }
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/database/tables?db_name=" + $(this).val(), function (data) {
-            data = JSON.parse(data);
+        $.get("/rest/daogen/db/tables?db_name=" + $(this).val(), function (data) {
+            //data = JSON.parse(data);
             var html_data = "";
-            $.each(data, function (index, value) {
+            $.each(data.ids, function (index, value) {
                 html_data += "<option>" + value + "</option>";
             });
             $("#tables").html(html_data);
             App.unblockUI(el);
 
-            if(user_change){
+            if (user_change) {
                 $("#tables").trigger('change');
             }
 
-            if(typeof callback == "function"){
+            if (typeof callback == "function") {
                 callback.apply($(this));
             }
         });
@@ -80,10 +78,10 @@ $(document).ready(function () {
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
 
-        var url = sprintf("/database/fields?table_name=%s&db_name=%s", $(this).val(), $("#databases").val());
+        var url = sprintf("/rest/daogen/db/fields?table_name=%s&db_name=%s", $(this).val(), $("#databases").val());
 
         $.get(url, function (data) {
-            data = JSON.parse(data);
+            //data = JSON.parse(data);
             var html_data = "";
             var operator = "<div class='span6' style='float: right;'><select style='height:30px;' class='span6'><option value='-1'>Null</option><option value='0'>=</option><option value='1'>!=</option><option value='2'>></option><option value='3'><</option><option value='4'>>=</option><option value='5'><=</option><option value='6'>Between</option><option value='7'>Like</option><option value='8'>In</option></select></div>";
             var where_condition = '';
@@ -92,15 +90,23 @@ $(document).ready(function () {
 
             $.each(data, function (index, value) {
 
-                if (value.indexed) {
-                    html_data = sprintf("%s<option value='%s'>%s*</option>", html_data, value.name, value.name);
-                    where_condition = sprintf(
-                        "%s<li><div class='task-title'><span style='float: left;' class='task-title-sp' real_name='%s'>%s(indexed)</span>%s</div></li>", where_condition, value.name,value.name, operator);
-                } else {
-                    html_data = sprintf("%s<option value='%s'>%s</option>", html_data, value.name, value.name);
-                    where_condition = sprintf(
-                        "%s<li><div class='task-title'><span style='float: left;' class='task-title-sp' real_name='%s'>%s</span>%s</div></li>", where_condition, value.name,value.name, operator);
+                var indexedMark = "";
+                var indexedText = "";
+                var primaryMark = "";
+                var primaryText = "";
+                if(value.indexed){
+                    indexedMark = "*";
+                    indexedText = "(indexed)";
                 }
+                if(value.primary){
+                    primaryMark = "+";
+                    primaryText = "(Primary)";
+                }
+
+                html_data = sprintf("%s<option value='%s'>%s%s%s</option>", 
+                    html_data, value.name, value.name, indexedMark, primaryMark);
+                where_condition = sprintf(
+                        "%s<li><div class='task-title'><span style='float: left;' class='task-title-sp' real_name='%s'>%s%s%s</span>%s</div></li>", where_condition, value.name, value.name,indexedText,primaryText, operator);
 
             });
 
@@ -109,7 +115,7 @@ $(document).ready(function () {
 
             App.unblockUI(el);
 
-            if(typeof callback == "function"){
+            if (typeof callback == "function") {
                 callback.apply($(this));
             }
 
@@ -125,9 +131,9 @@ $(document).ready(function () {
 
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/database/sps?db_name=" + $(this).val(), function (data) {
-            data = JSON.parse(data);
-            $.each(data, function (index, value) {
+        $.get("/rest/daogen/db/sps?db_name=" + $(this).val(), function (data) {
+            //data = JSON.parse(data);
+            $.each(data.ids, function (index, value) {
                 $('#sp_names').append($('<option>', {
                     value: value,
                     text: value
@@ -135,11 +141,11 @@ $(document).ready(function () {
             });
             App.unblockUI(el);
 
-            if(user_change){
+            if (user_change) {
                 $("#sp_names").trigger('change');
             }
 
-            if(typeof callback == "function"){
+            if (typeof callback == "function") {
                 callback.apply($(this));
             }
 
@@ -153,8 +159,18 @@ $(document).ready(function () {
 
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/database/sp_code?sp_name=" + $(this).val() + "&db_name=" + $("#sp_databases").val(), function (data) {
-            data = JSON.parse(data);
+        // $.get("/rest/daogen/db/sp_code?sp_name=" + $(this).val() + "&db_name=" + $("#sp_databases").val(), function (data) {
+        //     //data = JSON.parse(data);
+        //     ace.edit("sp_editor").setValue(data);
+        //     App.unblockUI(el);
+        // });
+        $.ajax({
+            type: "GET",
+            url: "/rest/daogen/db/sp_code?sp_name=" + $(this).val() + "&db_name=" + $("#sp_databases").val(),
+            headers: {
+                "Range": 'bytes=0-3200'
+            }
+        }).done(function (data) {
             ace.edit("sp_editor").setValue(data);
             App.unblockUI(el);
         });
@@ -254,7 +270,7 @@ $(document).ready(function () {
     $("#add_task").click(function () {
         var project_id = $("#proj_id").attr("project");
 
-        var post_data = {};
+        // var post_data = {};
 
         var task_object = {};
 
@@ -269,7 +285,8 @@ $(document).ready(function () {
                     fields.push(this.value);
                 });
 
-                task_object["fields"] = fields;
+                //task_object["fields"] = fields;
+                task_object["fields"] = JSON.stringify(fields);
 
                 var where_condition = "";
 
@@ -302,34 +319,34 @@ $(document).ready(function () {
                     }
                 }
 
-                task_object["where"] = where_fields;
+                task_object["condition"] = JSON.stringify(where_fields);
 
                 switch (task_object["crud"]) {
                 case "select":
-                    task_object["sql"] = sprintf("SELECT %s FROM %s %s", fields.join(","), task_object["table"], where_condition);
+                    task_object["sql_spname"] = sprintf("SELECT %s FROM %s %s", fields.join(","), task_object["table"], where_condition);
                     break;
                 case "insert":
                     var place_holder = [];
                     for (var i = 0; i < fields.length; i++) {
                         place_holder.push(sprintf("@%s", fields[i]));
                     }
-                    task_object["sql"] = sprintf("INSERT INTO %s (%s) VALUES (%s)", task_object["table"], fields.join(","), place_holder.join(","));
+                    task_object["sql_spname"] = sprintf("INSERT INTO %s (%s) VALUES (%s)", task_object["table"], fields.join(","), place_holder.join(","));
                     break;
                 case "update":
                     var place_holder = [];
                     for (var i = 0; i < fields.length; i++) {
                         place_holder.push(sprintf("%s = @%s", fields[i], fields[i]));
                     }
-                    task_object["sql"] = sprintf("UPDATE %s SET %s %s", task_object["table"], place_holder.join(","), where_condition);
+                    task_object["sql_spname"] = sprintf("UPDATE %s SET %s %s", task_object["table"], place_holder.join(","), where_condition);
                     break;
                 case "delete":
-                    task_object["sql"] = sprintf("DELETE FROM %s %s", task_object["table"], where_condition);
+                    task_object["sql_spname"] = sprintf("DELETE FROM %s %s", task_object["table"], where_condition);
                     break;
                 }
 
             };
 
-            function pack_sp_params(){
+            function pack_sp_params() {
                 var fields = [];
                 $("#left_select > option").each(function () {
                     fields.push(this.value);
@@ -339,7 +356,7 @@ $(document).ready(function () {
                     fields.push(this.value);
                 });
 
-                task_object["fields"] = fields;
+                task_object["fields"] = JSON.stringify(fields);
             };
 
             task_object["func_name"] = $("#auto_func_name").val();
@@ -357,7 +374,7 @@ $(document).ready(function () {
                 if (task_object["cud"] == "sql") {
                     pack_sql_params();
                 } else {
-                    task_object["sp_name"] = sprintf("%s_%s_%s", task_object["cud"], task_object["table"], cud_shortcut[task_object["crud"]]);
+                    task_object["sql_spname"] = sprintf("%s_%s_%s", task_object["cud"], task_object["table"], cud_shortcut[task_object["crud"]]);
                     pack_sp_params();
                 }
             }
@@ -367,9 +384,9 @@ $(document).ready(function () {
 
             task_object["database"] = $("#sp_databases").val();
 
-            task_object["sp_name"] = $("#sp_names").val();
+            task_object["sql_spname"] = $("#sp_names").val();
 
-            task_object["sp_action"] = $("#sp_action").val();
+            task_object["crud"] = $("#sp_action").val();
         } else {
             task_object["dao_name"] = $("#sql_dao_name").val();
 
@@ -377,14 +394,14 @@ $(document).ready(function () {
 
             task_object["database"] = $("#sql_databases").val();
 
-            task_object["sql"] = editor.getValue().replace(/\n/g, " ");
+            task_object["sql_spname"] = editor.getValue().replace(/\n/g, " ");
         }
 
-        post_data["project_id"] = project_id;
-        post_data["task_type"] = task_type;
-        post_data["task_object"] = JSON.stringify(task_object);
+        task_object["project_id"] = project_id;
+        task_object["task_type"] = task_type;
+        task_object["action"] = "insert";
 
-        $.post("/task/add", post_data, function (data) {
+        $.post("/rest/daogen/task", task_object, function (data) {
             $("#reload_tasks").trigger('click');
         });
 
@@ -392,113 +409,133 @@ $(document).ready(function () {
 
     //Get all tasks of the project
     $("#reload_tasks").click(function () {
+        // return;
 
-        if($('#main_area').children().length > 0){
-            $('#dao_tasks').dataTable().fnClearTable();    
+        var id = $("#proj_id").attr("project");
+
+        if(undefined == id || id == ""){
+            return;
         }
-        
+
+        $.get("/rest/daogen/project/project?id="+id, function(data){
+
+            $("#project_desc").html(data.name + "对应的DAO");
+
+        });
+
+        if ($('#main_area').children().length > 0) {
+            $('#dao_tasks').dataTable().fnClearTable();
+        }
+
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/task/tasks?project_id=" + $("#proj_id").attr("project"), function (data) {
+        $.get("/rest/daogen/task?project_id=" + id, function (data) {
 
-            data = JSON.parse(data);
+            //data = JSON.parse(data);
 
-             $.each(data, function (index, value) {
+            $.each(data, function (index, value) {
                 var dao_name = "";
                 var func_name = "";
 
-                tasks[value._id] = value;
+                $.data(document.body, value._id.$oid, value);
 
-                if(value.dao_name != undefined){
+                if (value.dao_name != undefined) {
                     dao_name = value.dao_name;
-                }else{
-                    if(value.task_type == "sp"){
+                } else {
+                    if (value.task_type == "sp") {
                         dao_name = sprintf("%sSPDAO", value.database);
-                    }else{
+                    } else {
                         dao_name = sprintf("%sDAO", value.table);
                     }
                 }
 
-                if(value.func_name != undefined){
+                if (value.func_name != undefined) {
                     func_name = value.func_name;
-                }else{
-                    func_name = value.sp_name.substring(
-                        value.sp_name.indexOf(".")+1, value.sp_name.length);
+                } else {
+                    func_name = value.sql_spname.substring(
+                        value.sql_spname.indexOf(".") + 1, value.sql_spname.length);
                 }
 
                 var title = "";
-                if(value.task_type == "sp"){
-                    title = sprintf("EXEC %s", value.sp_name);
-                }else{
-                    title = value.sql;
+                if (value.task_type == "sp") {
+                    title = sprintf("EXEC %s", value.sql_spname);
+                } else {
+                    title = value.sql_spname;
                 }
 
-                $('#dao_tasks').dataTable().fnAddData( 
-                    [value.database, dao_name, func_name, 
-                    sprintf("<a rel='tooltip' title='%s' class='btn'><i class='icon-question'></i></a>&nbsp;<button type='button' class='btn btn-success modify'>修改</button><input type='hidden' value='%s'>&nbsp;<button type='button' class='btn btn-danger delete'>删除</button>"
-                        , title
-                        , value._id)]
-                    );
-             });
+                $('#dao_tasks').dataTable().fnAddData(
+                    [value.database, dao_name, func_name,
+                        sprintf("<a rel='tooltip' title='%s' class='btn'><i class='icon-question'></i></a>&nbsp;<button type='button' class='btn btn-success modify'>修改</button><input type='hidden' value='%s'>&nbsp;<button type='button' class='btn btn-danger delete'>删除</button>", title, value._id.$oid)
+                    ]
+                );
+            });
 
-            $(".delete.btn-danger").click(function(){
+            $(".delete.btn-danger").click(function () {
                 if (confirm("Are you sure?")) {
                     var id = $(this).prev().val();
-                    $.get("/task/delete?task_id=" + id, function (data) {
+                    var post_data = {};
+                    post_data["action"] = "delete";
+                    post_data["id"] = id;
+                    $.post("/rest/daogen/task", post_data, function (data) {
                         $("#reload_tasks").trigger('click');
                     });
                 }
             });
 
-            $(".modify.btn-success").click(function(){
+            $(".modify.btn-success").click(function () {
                 if (confirm("Are you sure?")) {
                     var id = $(this).next().val();
-                    var value = tasks[id];
+                    var value = $.data(document.body, id);
 
-                    var current_tab = $("#task_tab > ul > li > a[task_type='"+value.task_type+"']").parent();
+                    var current_tab = $("#task_tab > ul > li > a[task_type='" + value.task_type + "']").parent();
 
-                    if(!$(current_tab).hasClass("active")){
+                    if (!$(current_tab).hasClass("active")) {
                         //$("#task_tab > ul > li.active").toggleClass("active");
                         //$(current_tab).addClass("active");
                         $(current_tab).children().trigger('click');
                     }
 
-                    switch(value.task_type){
-                        case "autosql":
-                            $("#databases").val(value.database);
-                            $("#auto_func_name").val(value.func_name);
-                            user_change = false;
-                            $("#databases").trigger('change', function(){
-                                $("#tables").val(value.table);
-                                $("#tables").trigger('change', function(){
-                                     $("#right_select").html("");
-                                    $.each( value.fields, function(index, field){
-                                        $("#right_select").append($(sprintf("#left_select option[value='%s']",field)));
+                    switch (value.task_type) {
+                    case "autosql":
+                        $("#databases").val(value.database);
+                        $("#auto_func_name").val(value.func_name);
+                        user_change = false;
+                        $("#databases").trigger('change', function () {
+                            $("#tables").val(value.table);
+                            $("#tables").trigger('change', function () {
+                                $("#right_select").html("");
+                                if (undefined != value.fields) {
+                                    $.each(value.fields, function (index, field) {
+                                        $("#right_select").append($(sprintf("#left_select option[value='%s']", field)));
                                     });
+                                }
 
-                                    $.each( value.where, function(name, value){
-                                       $(sprintf(".task-title-sp[real_name='%s']", name)).next().children().val(value);
+                                if (undefined != value.condition) {
+                                    $.each(value.condition, function (name, value) {
+                                        $(sprintf(".task-title-sp[real_name='%s']", name)).next().children().val(value);
                                     });
-                                });
+                                }
+
                             });
-                            break;
-                        case "sp":
-                            $("#sp_databases").val(value.database);
-                            $("#sp_action").val(value.sp_action);
-                            user_change = false;
-                            $("#sp_databases").trigger('change', function(){
-                                $("#sp_names").val(value.sp_name);
-                                $("#sp_names").trigger('change');
-                            });
-                            break;
-                        case "freesql":
-                            $("#sql_databases").val(value.database);
-                            $("#sql_dao_name").val(value.dao_name);
-                            $("#sql_func_name").val(value.func_name);
-                            editor.setValue(value.sql);
-                            break;
+                        });
+                        break;
+                    case "sp":
+                        $("#sp_databases").val(value.database);
+                        $("#sp_action").val(value.sp_action);
+                        user_change = false;
+                        $("#sp_databases").trigger('change', function () {
+                            $("#sp_names").val(value.sql_spname);
+                            $("#sp_names").trigger('change');
+                        });
+                        break;
+                    case "freesql":
+                        $("#sql_databases").val(value.database);
+                        $("#sql_dao_name").val(value.dao_name);
+                        $("#sql_func_name").val(value.func_name);
+                        editor.setValue(value.sql);
+                        break;
                     }
-                    
+
 
                 }
             });
@@ -509,9 +546,10 @@ $(document).ready(function () {
     });
 
     $('#reload_ops').click(function () {
-        $.get("/database/databases", function (data) {
-            data = JSON.parse(data);
-            $.each(data, function (index, value) {
+        $.get("/rest/daogen/db/dbs", function (data) {
+            //data = JSON.parse(data);
+
+            $.each(data.ids, function (index, value) {
                 $('#databases').append($('<option>', {
                     value: value,
                     text: value
@@ -533,12 +571,13 @@ $(document).ready(function () {
         var post_data = {};
         var project_id = $("#proj_id").attr("project");
         post_data["project_id"] = project_id;
+        post_data["language"] = $("#gen_language").val();
 
         var el = $(document.body);
         App.blockUI(el);
-        $.post("/file/generate", post_data, function (data) {
+        $.post("/rest/daogen/project/generate", post_data, function (data) {
             App.unblockUI(el);
-            window.location.replace("/file/");
+            window.location.replace("/daogen/file.html");
         });
     });
 
@@ -557,7 +596,7 @@ $(document).ready(function () {
         });
     });
 
-    $(".icon-refresh").trigger('click');
+
 
     $('#dao_tasks').dataTable({
         "aoColumns": [{
@@ -598,4 +637,18 @@ $(document).ready(function () {
 
     $("#daogen .sub-menu").show();
 
+    $("#proj_id").attr("project", getUrlVar("project_id"));
+
+    $(".icon-refresh").trigger('click');
+
 });
+
+var getUrlVar = function (key) {
+    var result = new RegExp(key + "=([^&]*)", "i").exec(window.location.search);
+    var returnResult =  result && unescape(result[1]) || "";
+    if(undefined == returnResult || returnResult == ""){
+        alert("没有找到对应的Project，请从\"我的项目\"中的\"对应DAO\"Drill Through到此处！");
+        window.location.href = "/daogen/project.html";
+    }
+    return returnResult;
+};

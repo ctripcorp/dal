@@ -33,12 +33,12 @@
 	
 	<servlet-mapping>
 		<servlet-name>DasConsoleApplication</servlet-name>
-		<url-pattern>/console/dal/das/*</url-pattern>
+		<url-pattern>/rest/console/*</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>
 		<servlet-name>DaoGenApplication</servlet-name>
-		<url-pattern>/codegen/*</url-pattern>
+		<url-pattern>/rest/daogen/*</url-pattern>
 	</servlet-mapping>
 	
 	
@@ -53,6 +53,6 @@
 <!-- 	</servlet-mapping> -->
 	
 	<welcome-file-list>
-		<welcome-file>console/dbconf.html</welcome-file>
+		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
 </web-app>

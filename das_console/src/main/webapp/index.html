@@ -1,91 +1,119 @@
+
 <!DOCTYPE html>
-<html>
-<head id="scriptComesHere">
-    <title>Jsonp Example</title>
-    <style type="text/css"><!--
-    .figure { text-align:center;
-        margin: 20px}
-    .cliSample { background-color:lightgray }
-    .odd { background:lightgray}
-    .even { background:white}
-    .footer {font-size: 8pt; font-style:italic;padding-top:4pt;}
-    --></style>
-    <script language="javascript">
-    function callback(data) {
-        var len = data.ports.length;
-        var resultDiv = document.getElementById("writehere");
-        resultDiv.innerHTML = "";
-        for (i=0; i<len; i++) {
-            var rowObject = document.createElement("div");
-            rowObject.innerHTML = "Number: " + data.ports[i];
-            resultDiv.appendChild(rowObject);
-        }
-        var footerObject = document.createElement("div");
-        footerObject.setAttribute("class", "footer");
-        footerObject.innerHTML = len + " change(s) found";
-        resultDiv.appendChild(footerObject);
-    }</script>
+<!-- 
+Template Name: Metronic - Responsive Admin Dashboard Template build with Twitter Bootstrap 2.3.2
+Version: 1.4
+Author: KeenThemes
+Website: http://www.keenthemes.com/preview/?theme=metronic
+Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-template/4021469
+-->
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+  <meta charset="utf-8" />
+  <title>DAL Portal</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta content="" name="description" />
+  <meta content="" name="author" />
+  <!-- BEGIN GLOBAL MANDATORY STYLES -->        
+  <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+  <link href="../css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css"/>
+  <link href="../css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+ <!--  <link href="../css/style-metro.css" rel="stylesheet" type="text/css"/>
+  <link href="../css/style.css" rel="stylesheet" type="text/css"/>
+  <link href="../css/style-responsive.css" rel="stylesheet" type="text/css"/> -->
+<!--   <link href="../css/themes/default.css" rel="stylesheet" type="text/css" id="style_color"/>
+  <link href="../css/uniform.default.css" rel="stylesheet" type="text/css"/> -->
+  <!-- END GLOBAL MANDATORY STYLES -->
+
+  <!-- BEGIN PAGE LEVEL STYLES --> 
+  <!-- <link href="../css/tasks.css" rel="stylesheet" type="text/css" media="screen"/> -->
+  <link href="../css/index.css" rel="stylesheet" type="text/css" media="screen"/>
+  <!-- <link rel="stylesheet" href="../css/zTreeStyle.css"> -->
+  <!-- END PAGE LEVEL STYLES -->
+  <link rel="shortcut icon" href="/img/favicon.ico" />
 </head>
+<!-- END HEAD -->
+
+<!-- BEGIN BODY -->
 <body>
-<h1>JSONP Example</h1>
-<form name="input" action="dal/das/configure/node" method="post">
-name: 
-<input type="text" name="name" />
-<br />
-directory: 
-<input type="text" name="directory" />
-<br />
-maxHeapSize: 
-<input type="text" name="maxHeapSize" />
-<br />
-startingHeapSize: 
-<input type="text" name="startingHeapSize" />
-<input type="submit" value="Submit" />
-</form>
+  <!-- BEGIN HEADER -->   
+  <!-- END HEADER -->
+  <!-- BEGIN CONTAINER -->
+    <!-- BEGIN PAGE -->
+  <div class="container">
 
-<h1>Port</h1>
-<form name="input" action="dal/das/configure/port" method="post">
-Number: 
-<input type="text" name="number" />
-<br />
-<input type="submit" value="Submit" />
-</form>
+      <form class="form-signin" role="form">
+        <h2 class="form-signin-heading">Choose an entry point</h2>
+        <br>
+        <a href="/daogen/project.html" class="btn btn-lg btn-primary btn-block">DAO Generator</a>
+        <br>
+        <a href="/console/dbconf.html"  class="btn btn-lg btn-primary btn-block">Data Access Service Console</a>
+      </form>
 
-<h1>Time cost</h1>
-<form name="input" action="dal/das/monitor/timeCosts" method="post">
-id: 
-<input type="text" name="id" />
-<br />
-Time costs: 
-<input type="text" name="timeCost" />
-<br />
-<input type="submit" value="Submit" />
-</form>
+    </div>
+    <!-- END PAGE -->
 
-<h1>DB update</h1>
-<form name="input" action="dal/das/configure/db" method="put">
-name: 
-<input type="text" name="name" />
-<br />
-Driver: 
-<input type="text" name="driver" />
-<br />
-JDBC URL: 
-<input type="text" name="jdbcUrl" />
-<br />
-<input type="submit" value="Submit" />
-</form>
+  <!-- END CONTAINER -->
+  <!-- BEGIN FOOTER -->
+<!--  <div class="footer">
+    <div class="footer-inner">
+      2013 &copy; Link
+    </div>
+    <div class="footer-tools">
+      <span class="go-top">
+      <i class="icon-angle-up"></i>
+      </span>
+    </div>
+  </div> -->
+  <!-- END FOOTER -->
+  <!-- BEGIN JAVASCRIPTS(Load javascripts at bottom, this will reduce page load time) -->
+  <!-- BEGIN CORE PLUGINS -->   
+  <script src="../js/jquery-1.10.1.min.js" type="text/javascript"></script>
+  <script src="../js/jquery-migrate-1.2.1.min.js" type="text/javascript"></script>
+  <!-- IMPORTANT! Load jquery-ui-1.10.1.custom.min.js before bootstrap.min.js to fix bootstrap tooltip conflict with jquery ui tooltip -->
+  <script src="../js/jquery-ui-1.10.1.custom.min.js" type="text/javascript"></script>      
+  <script src="../js/bootstrap.min.js" type="text/javascript"></script>
+  <script src="../js/twitter-bootstrap-hover-dropdown.min.js" type="text/javascript" ></script>
+  <!--[if lt IE 9]>
+  <script src="../js/excanvas.min.js"></script>
+  <script src="../js/respond.min.js"></script>  
+  <![endif]-->   
+  <script src="../js/jquery.slimscroll.min.js" type="text/javascript"></script>
+  <script src="../js/jquery.blockui.min.js" type="text/javascript"></script>  
+  <script src="../js/jquery.cookie.min.js" type="text/javascript"></script>
+  <script src="../js/jquery.uniform.min.js" type="text/javascript" ></script>
+  <!-- END CORE js -->
 
-<div id="writehere">
-    <script language="javascript">
-	    var headLoc = document.getElementById("scriptComesHere");
-	    var scriptObj = document.createElement("script");
-	    scriptObj.setAttribute("type", "application/x-javascript");
-	    scriptObj.setAttribute("src", "http://localhost:8080/console/dal/das/configure/port");
-	    headLoc.appendChild(scriptObj);
-    </script>
-    You need to run the service first!
-</div>
+  <!-- BEGIN PAGE LEVEL SCRIPTS -->
+  <script src="../js/app.js" type="text/javascript"></script>
+  <!-- END PAGE LEVEL SCRIPTS -->  
+  
+  <script type="text/javascript">
 
+    jQuery(document).ready(function() {    
+
+      App.init(); // initlayout and core plugins
+           
+      // Tasks.initDashboardWidget();
+
+      jQuery('body').on('click', '.portlet > .portlet-title > .tools > .icon-collapse, .portlet .portlet-title > .tools > .icon-collapse-top', function (e) {
+        // e.preventDefault();
+            if (jQuery(this).hasClass("icon-collapse")) {
+                jQuery(this).removeClass("icon-collapse").addClass("icon-collapse-top");
+            } else {
+                jQuery(this).removeClass("icon-collapse-top").addClass("icon-collapse");
+            }
+      });
+
+
+    });
+
+  </script>
+
+  <!-- END JAVASCRIPTS -->
 </body>
+<!-- END BODY -->
 </html>

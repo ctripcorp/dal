@@ -23,10 +23,6 @@ namespace platform.demo
 
             int count = 0;
 
-            Stopwatch watch = new Stopwatch();
-
-            watch.Start();
-
             using (IDataReader reader = person.FetchAllRecords())
             {
                 while (reader.Read())
@@ -45,16 +41,6 @@ namespace platform.demo
                 }
             }
 
-            watch.Stop();
-
-            MonitorData data = MonitorData.GetInstance();
-
-            if (data != null)
-            {
-                data.TotalCount = count;
-                data.TotalTime = watch.ElapsedMilliseconds;
-                MonitorSender.GetInstance().Send(data);
-            }
 
             //IList<Person> results = person.FetchAll<Person>();
 

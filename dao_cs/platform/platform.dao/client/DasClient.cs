@@ -37,7 +37,7 @@ namespace platform.dao.client
 
         public void Init()
         {
-            socketPool = new SocketPool("192.168.83.132", ServicePort);
+            socketPool = new SocketPool("127.0.0.1", ServicePort);
             //socketPool = new SocketPool("127.0.0.1", ServicePort);
         }
 
@@ -47,6 +47,8 @@ namespace platform.dao.client
         /// <param name="request"></param>
         private PooledSocket WriteRequest(param.Request request)
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
             //Log the sql
             logger.Info(request.msg.name);
 
@@ -73,6 +75,10 @@ namespace platform.dao.client
 
                 socket.WriteBytes(payload);
 
+                watch.Stop();
+
+                MonitorSender.GetInstance().Send(request.id, "encodeRequest", watch.ElapsedMilliseconds);
+
                 return socket;
             });
 
@@ -84,6 +90,8 @@ namespace platform.dao.client
         /// <returns></returns>
         private param.Response ReadResponse(PooledSocket sock)
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
             return socketPool.Execute<param.Response>(delegate(PooledSocket socket)
             {
                 param.Response response = null;
@@ -93,16 +101,16 @@ namespace platform.dao.client
 
                 byte[] payload = socket.ReadBytes(totalLength - 2);
 
-                MonitorData data = MonitorData.GetInstance();
-
-                if (data != null)
-                {
-                    data.TotalDataBytes += 4 + 2 + payload.Length;
-                }
-
                 using (MemoryStream ms = new MemoryStream(payload))
                 {
                     response = Serializer.Deserialize<param.Response>(ms);
+                }
+
+                watch.Stop();
+
+                if (response.resultType == CRUD.CUD)
+                {
+                    MonitorSender.GetInstance().Send(response.id, "encodeRequest", watch.ElapsedMilliseconds);
                 }
 
                 return response;
@@ -119,17 +127,8 @@ namespace platform.dao.client
         /// <returns></returns>
         public IDataReader Fetch(string sql, IParameter[] parameters,bool masterOnly = true)
         {
-            //begin watch
-            Stopwatch watch = new Stopwatch();
-            //watch.Reset();
-            
-
 
             Guid taskid = System.Guid.NewGuid();
-
-            //MonitorSender.GetInstance().Send(taskid.ToString(), "taskBegin", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
-
-            //MonitorData data = MonitorData.GetInstance(taskid.ToString());
 
             if (null != parameters && parameters.Length > 0)
             {
@@ -202,18 +201,7 @@ namespace platform.dao.client
                 cred = CredentialID ?? string.Empty
             };
 
-            watch.Start();
-
             PooledSocket sock = WriteRequest(request);
-
-            watch.Stop();
-
-            MonitorData data = MonitorData.GetInstance(taskid.ToString());
-
-            if (data != null)
-            {
-                data.EncodeRequestTime = watch.ElapsedMilliseconds;
-            }
 
             param.Response response = ReadResponse(sock);
 
@@ -223,7 +211,8 @@ namespace platform.dao.client
             IDataReader reader = new DasDataReader()
             {
                 Sock = sock,
-                Header = response.header
+                Header = response.header,
+                CurrentId = request.id
             };
 
             //MonitorSender.GetInstance().Send(taskid.ToString(), "encodeRequestTime", watch.ElapsedMilliseconds);
@@ -241,8 +230,6 @@ namespace platform.dao.client
         /// <returns></returns>
         public int Execute(string sql, IParameter[] parameters, bool masterOnly = true)
         {
-            Stopwatch watch = new Stopwatch();
-
             Guid taskid = System.Guid.NewGuid();
 
             if (null != parameters && parameters.Length > 0)
@@ -300,18 +287,7 @@ namespace platform.dao.client
                 cred = CredentialID ?? string.Empty
             };
 
-            watch.Start();
-
             PooledSocket sock = WriteRequest(request);
-
-            watch.Stop();
-
-            MonitorData data = MonitorData.GetInstance(taskid.ToString());
-
-            if (data != null)
-            {
-                data.EncodeRequestTime = watch.ElapsedMilliseconds;
-            }
 
             param.Response response = ReadResponse(sock);
 

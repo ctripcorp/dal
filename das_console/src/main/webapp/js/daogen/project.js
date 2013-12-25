@@ -28,11 +28,18 @@ jQuery(document).ready(function () {
 
         var post_data = {};
 
+        var currentid = $("#project_id").val();
+        if(currentid!= undefined && currentid != ""){
+            post_data["action"] = "update";
+            post_data["id"] = currentid;
+        }else{
+            post_data["action"] = "insert";
+        }
         post_data["name"] = $("#project_name").val();
         post_data["namespace"] = $("#namespace").val();
-        post_data["action"] = "insert";
+        
 
-        $.post("/codegen/rest/project", post_data, function (data) {
+        $.post("/rest/daogen/project", post_data, function (data) {
 
             $("[data-dismiss='modal'").trigger('click');
 
@@ -44,7 +51,7 @@ jQuery(document).ready(function () {
     $(".icon-refresh").click(function () {
         var el = $(this).closest(".portlet").children(".portlet-body");
         App.blockUI(el);
-        $.get("/codegen/rest/project", function (data) {
+        $.get("/rest/daogen/project", function (data) {
 
             //data = JSON.parse(data);
 
@@ -93,10 +100,11 @@ var del_proj = function(obj){
     if(confirm("Are you sure to delete this project?")){
         var post_data = {};
 
+        post_data["id"] = id;
         post_data["name"] = $("#project_name").val();
         post_data["namespace"] = $("#namespace").val();
         post_data["action"] = "delete";
-        $.post("/codegen/rest/project", post_data, function(data){
+        $.post("/rest/daogen/project", post_data, function(data){
             $(".icon-refresh").trigger('click');
         });
     }
@@ -104,18 +112,20 @@ var del_proj = function(obj){
 
 var edit_proj = function(obj){
     var id = $(obj).parent().parent().attr("project_id");
-    $("#project_id") = id;
+    $("#project_id").val(id);
     var value = $.data(document.body, id);
-    $("#project_name") = value.name;
-    $("#namespace") = value.namespace;
+    $("#project_name").val(value.name);
+    $("#namespace").val(value.namespace);
 
     $("[data-dismiss='modal'").trigger('click');
 };
 
 var proj_dao = function(obj){
-
+    var id = $(obj).parent().parent().attr("project_id");
+    window.location.href = "/daogen/task.html?project_id="+id;
 };
 
 var proj_file = function(obj){
-
+    var id = $(obj).parent().parent().attr("project_id");
+    window.location.href = "/daogen/file.html?project_id="+id;
 };

@@ -140,7 +140,7 @@ public class DalServer extends DasService {
 			if(args.length > 3) {
 				DalServer.consoleAddr = args[3];
 			}
-			
+
 			if(args.length > 4) {
 				DalServer.senderEnabled = Boolean.parseBoolean(args[4]);
 			}

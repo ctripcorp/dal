@@ -8,20 +8,35 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class OndemandTester extends Thread {
 	private ConcurrentLinkedQueue<String> queue;
-	private DalClient dal = new DalClient("HtlProductdb");
+	private DalClient dal;
+	private boolean done;
+	private long duration;
 	
 	public OndemandTester(ConcurrentLinkedQueue<String> queue) {
 		this.queue = queue;
 	}
 	
+	public OndemandTester init(String logicDbName, int port) {
+		dal = new DalClient(logicDbName, port);
+		return this;
+	}
+	
+	public void done() {
+		done = true;
+	}
+	
+	public long getDuration() {
+		return duration;
+	}
+	
 	@Override
 	public void run() {
 		long start = 0;
-		while(true){
+		while(!done){
 			String sql = queue.poll();
 			if(sql == null){
 				if(start != 0){
-					System.out.println(this.getName() + " done: " + (System.currentTimeMillis() - start));
+					System.out.println(this.getName() + " done: " + (duration = System.currentTimeMillis() - start));
 					start = 0;
 				}
 				yield();
@@ -39,7 +54,7 @@ public class OndemandTester extends Thread {
 		
 		int num = 0;
 		while(num++ < threadNum)
-			new OndemandTester(queue).start();
+			new OndemandTester(queue).init(logicDb, Integer.parseInt(ports[num%ports.length])).start();
 		
 		System.out.println("Type end and return to terminate");
 		
@@ -67,20 +82,24 @@ public class OndemandTester extends Thread {
 		System.exit(0);
 	}
 	
-	private static String logicDb;
-	private static String sql;
 	private static int threadNum;
+	private static String logicDb;
+	private static String[] ports;
+	private static String sql;
 	
 	private static void readConfig() {
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("test_cfg.txt")));
-			String cmd;
-			cmd = reader.readLine();
-			threadNum = Integer.parseInt(cmd);
+			threadNum = Integer.parseInt(reader.readLine());
 			logicDb = reader.readLine();
+			ports = reader.readLine().split(",");
 			sql = reader.readLine();
 			System.out.println("Thread number: " + threadNum);
 			System.out.println("Logic DB: " + logicDb);
+			System.out.print("Ports: ");
+			for(String port: ports)
+				System.out.print(port);
+			System.out.println();
 			System.out.println("Test SQL: " + sql);
 			reader.close();
 		} catch (IOException e1) {

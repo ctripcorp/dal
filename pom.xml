@@ -12,6 +12,7 @@
     <module>das_ctrl</module>
     <module>dao_gen</module>  
     <module>namesvr</module>
+    <module>das_comm</module>
   </modules>  
   <properties>
     <package.environment>local</package.environment>

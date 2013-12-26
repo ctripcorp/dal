@@ -1,0 +1,4 @@
+1
+HtlProductdb
+7001
+select top 10 [HotelID],[LatestBookTime],[UID]  from HotelLatestBookInfo hl with(nolock)  Join resource r with(nolock) on r.resource = hl.HotelID  join city c (nolock) on c.city = r.city and c.city in (select city from city (nolock) where Country = 1)

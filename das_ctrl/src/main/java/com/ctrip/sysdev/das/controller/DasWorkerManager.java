@@ -53,6 +53,7 @@ public class DasWorkerManager implements DasControllerConstants {
 	private void startWorker(String port, String monitorId) throws Exception {
 		List<String> argumentsList = new ArrayList<String>();
 		argumentsList.add(this.javaRuntime);
+		argumentsList.add("-server");
 		argumentsList.add(MessageFormat.format("-Xms{0}M",
 				String.valueOf(this.startingHeapSizeInMegabytes)));
 		argumentsList.add(MessageFormat.format("-Xmx{0}M",

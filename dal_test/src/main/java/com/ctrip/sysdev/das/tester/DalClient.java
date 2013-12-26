@@ -2,8 +2,7 @@ package com.ctrip.sysdev.das.tester;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +11,8 @@ import com.ctrip.platform.dao.param.StatementParameter;
 
 
 public class DalClient extends AbstractDAO {
-	private List<StatementParameter> parameters = new ArrayList<StatementParameter>();
-	private Map keywordParameters = new HashMap();
+	private List<StatementParameter> parameters = Collections.EMPTY_LIST;
+	private Map keywordParameters = Collections.EMPTY_MAP;
 	
 	public DalClient() {
 		logicDbName = "SysDalTest";
@@ -22,9 +21,17 @@ public class DalClient extends AbstractDAO {
 		super.init();
 	}
 	
-	public DalClient(String logicDbName) {
+	public DalClient(String host, String logicDbName, int port) {
 		this.logicDbName = logicDbName;
-		servicePort = 9000;
+		servicePort = port;
+		credentialId = "30303";
+		System.out.println(String.format("Host: %s Port: %s", host, port));
+		super.init(host);
+	}
+	
+	public DalClient(String logicDbName, int port) {
+		this.logicDbName = logicDbName;
+		servicePort = port;
 		credentialId = "30303";
 		super.init();
 	}

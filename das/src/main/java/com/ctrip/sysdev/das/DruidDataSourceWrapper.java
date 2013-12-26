@@ -1,10 +1,13 @@
 package com.ctrip.sysdev.das;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
@@ -57,6 +60,17 @@ public class DruidDataSourceWrapper implements DasControllerConstants {
 
 	public void initDataSourceWrapper(ZooKeeper zk) throws Exception {
 		createMaster(zk);		
+		dataSource = this;
+	}
+	
+	public void initDataSourceWrapper() throws Exception {
+		String logicDB = Configuration.get("logicDB");
+		String driverClass = Configuration.get(StringKit.buildKey(logicDB, "driver"));
+		String jdbcUrl = Configuration.get(StringKit.buildKey(logicDB, "jdbcUrl"));
+		String user = Configuration.get(StringKit.buildKey(logicDB, "user"));
+		String password = Configuration.get(StringKit.buildKey(logicDB, "password"));;
+		masterMap.put(logicDB, create(logicDB, driverClass, jdbcUrl, user, password));
+
 		dataSource = this;
 	}
 	

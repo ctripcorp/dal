@@ -15,6 +15,10 @@ public class DasZkAccesssorFactory {
 		return null;
 	}
 
+	public DasNodeAccessor getDasNodeAccessor() {
+		return null;
+	}
+	
 	public DasWorkerAccessor getDasWorkerAccessor() {
 		return null;
 	}

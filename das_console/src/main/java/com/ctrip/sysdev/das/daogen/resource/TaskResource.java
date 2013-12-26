@@ -19,6 +19,7 @@ import org.bson.types.ObjectId;
 import com.ctrip.sysdev.das.common.Status;
 import com.ctrip.sysdev.das.daogen.MongoClientManager;
 import com.ctrip.sysdev.das.daogen.domain.MasterDAO;
+import com.ctrip.sysdev.das.daogen.domain.ZTreeElement;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;

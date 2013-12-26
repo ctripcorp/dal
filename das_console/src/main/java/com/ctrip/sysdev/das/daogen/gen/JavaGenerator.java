@@ -12,6 +12,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
 import com.ctrip.sysdev.das.daogen.Consts;
+import com.ctrip.sysdev.das.daogen.domain.PojoField;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -57,13 +58,31 @@ public class JavaGenerator extends AbstractGenerator {
 					context.get("database")).append("table", table);
 
 			String primaryKey = "";
-			DBObject fieldTypeMap = null;
+//			DBObject fieldTypeMap = null;
+			List<PojoField> fields = new ArrayList<PojoField>();
 
 			DBObject metaData = taskMetaCollection.findOne(metaQuery);
 
 			if (null != metaData) {
 				primaryKey = metaData.get("primary_key").toString();
-				fieldTypeMap = (DBObject) metaData.get("fields");
+//				fieldTypeMap = (DBObject) metaData.get("fields");
+				for (Object field : (BasicDBList) metaData.get("fields")) {
+					DBObject unboxedField = (DBObject) field;
+					PojoField f = new PojoField();
+					f.setName(unboxedField.get("name").toString());
+					f.setType(unboxedField.get("type").toString());
+					f.setPrimary(Boolean.valueOf(unboxedField.get("primary")
+							.toString()));
+					f.setNullable(Boolean.valueOf(unboxedField.get("nullable")
+							.toString()));
+					f.setPosition(Integer.valueOf(unboxedField.get("position")
+							.toString()));
+					f.setValueType(Boolean.valueOf(unboxedField
+							.get("valueType").toString()));
+					f.setNullable(f.isNullable() && f.isValueType());
+					fields.add(f);
+				}
+				context.put("fields", fields);
 			}
 
 			List<Method> methods = new ArrayList<Method>();
@@ -81,15 +100,15 @@ public class JavaGenerator extends AbstractGenerator {
 				// 查询，或者SQL形式的删除
 				if (crud.equals("select")
 						|| (crud.equals("delete") && cud.equals("sql"))) {
-					m.setParameters(getParametersByCondition(obj, fieldTypeMap));
+					m.setParameters(getParametersByCondition(obj, fields));
 					methods.add(m);
 				}
 				// SQL形式的更新
 				else if (crud.equals("update") && cud.equals("sql")) {
 					List<Parameter> parameters = new ArrayList<Parameter>();
 					parameters.addAll(getParametersByCondition(obj,
-							fieldTypeMap));
-					parameters.addAll(getParametersByFields(obj, fieldTypeMap));
+							fields));
+					parameters.addAll(getParametersByFields(obj, fields));
 					m.setParameters(parameters);
 					methods.add(m);
 				}
@@ -98,19 +117,24 @@ public class JavaGenerator extends AbstractGenerator {
 					List<Parameter> parameters = new ArrayList<Parameter>();
 					Parameter p = new Parameter();
 					p.setName(primaryKey);
-					p.setType(fieldTypeMap.get(primaryKey).toString());
+					p.setFieldName(primaryKey);
+					for (PojoField field : fields) {
+						if (field.getName().equals(primaryKey)) {
+							p.setType(field.getType());
+						}
+					}
 					parameters.add(p);
 					m.setParameters(parameters);
 					spMethods.add(m);
 				}
 				// SQL形式的插入
 				else if (crud.equals("insert") && cud.equals("sql")) {
-					m.setParameters(getParametersByFields(obj, fieldTypeMap));
+					m.setParameters(getParametersByFields(obj, fields));
 					methods.add(m);
 				}
 				// SP形式的插入，SP形式的Update
 				else {
-					m.setParameters(getParametersByFields(obj, fieldTypeMap));
+					m.setParameters(getParametersByFields(obj, fields));
 					spMethods.add(m);
 				}
 
@@ -119,9 +143,13 @@ public class JavaGenerator extends AbstractGenerator {
 			context.put("sp_methods", spMethods);
 			FileWriter w = null;
 			try {
-				File projectFile = new File(projectId, "java");
-				if(!projectFile.exists()){
+				File projectFile = new File(projectId);
+				if (!projectFile.exists()) {
 					projectFile.mkdir();
+				}
+				File csharpFile = new File(projectFile, "java");
+				if (!csharpFile.exists()) {
+					csharpFile.mkdir();
 				}
 				w = new FileWriter(String.format("%s/java/%s.java",projectId,
 						context.get("dao_name")));
@@ -211,9 +239,13 @@ public class JavaGenerator extends AbstractGenerator {
 			context.put("sp_methods", spMethods);
 			FileWriter w = null;
 			try {
-				File projectFile = new File(projectId, "java");
-				if(!projectFile.exists()){
+				File projectFile = new File(projectId);
+				if (!projectFile.exists()) {
 					projectFile.mkdir();
+				}
+				File csharpFile = new File(projectFile, "java");
+				if (!csharpFile.exists()) {
+					csharpFile.mkdir();
 				}
 				w = new FileWriter(String.format("%s/java/%s.java",projectId,
 						context.get("dao_name")));
@@ -250,7 +282,7 @@ public class JavaGenerator extends AbstractGenerator {
 	 * @return
 	 */
 	private List<Parameter> getParametersByFields(DBObject obj,
-			DBObject fieldTypeMap) {
+			List<PojoField> fieldsMeta) {
 		List<Parameter> parameters = new ArrayList<Parameter>();
 		Object fields = obj.get("fields");
 		if (null != fields && fields instanceof BasicDBList) {
@@ -259,8 +291,16 @@ public class JavaGenerator extends AbstractGenerator {
 			for (Object field : fieldsObj) {
 				Parameter p = new Parameter();
 				p.setName(field.toString());
-				p.setType(Consts.JavaSqlTypeMap.get(fieldTypeMap.get(field
-						.toString())));
+				p.setFieldName(p.getName());
+				for (PojoField fieldMeta : fieldsMeta) {
+					if (fieldMeta.getName().equals(field)) {
+						p.setType(Consts.JavaSqlTypeMap.get(fieldMeta
+								.getType()));
+						break;
+					}
+				}
+//				p.setType(Consts.JavaSqlTypeMap.get(fieldTypeMap.get(field
+//						.toString())));
 				parameters.add(p);
 			}
 		}
@@ -275,7 +315,7 @@ public class JavaGenerator extends AbstractGenerator {
 	 * @return
 	 */
 	private List<Parameter> getParametersByCondition(DBObject obj,
-			DBObject fieldTypeMap) {
+			List<PojoField> fieldsMeta) {
 		List<Parameter> parameters = new ArrayList<Parameter>();
 		Object condition = obj.get("condition");
 		if (null != condition && condition instanceof DBObject) {
@@ -284,7 +324,15 @@ public class JavaGenerator extends AbstractGenerator {
 			for (String key : conditionObj.keySet()) {
 				Parameter p = new Parameter();
 				p.setName(key);
-				p.setType(Consts.JavaSqlTypeMap.get(fieldTypeMap.get(key)));
+				p.setFieldName(p.getName());
+				for (PojoField fieldMeta : fieldsMeta) {
+					if (fieldMeta.getName().equals(key)) {
+						p.setType(Consts.JavaSqlTypeMap.get(fieldMeta
+								.getType()));
+						break;
+					}
+				}
+//				p.setType(Consts.JavaSqlTypeMap.get(fieldTypeMap.get(key)));
 				parameters.add(p);
 			}
 		}

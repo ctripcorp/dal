@@ -67,7 +67,7 @@ public class CSharpGenerator extends AbstractGenerator {
 					DBObject unboxedField = (DBObject) field;
 					PojoField f = new PojoField();
 					f.setName(unboxedField.get("name").toString());
-					f.setType(Consts.CSharpSqlTypeMap.get(unboxedField.get("type").toString()));
+					f.setType(unboxedField.get("type").toString());
 					f.setPrimary(Boolean.valueOf(unboxedField.get("primary")
 							.toString()));
 					f.setNullable(Boolean.valueOf(unboxedField.get("nullable")
@@ -140,9 +140,13 @@ public class CSharpGenerator extends AbstractGenerator {
 			FileWriter daoWriter = null;
 			FileWriter pojoWriter = null;
 			try {
-				File projectFile = new File(projectId, "csharp");
+				File projectFile = new File(projectId);
 				if (!projectFile.exists()) {
 					projectFile.mkdir();
+				}
+				File csharpFile = new File(projectFile, "csharp");
+				if (!csharpFile.exists()) {
+					csharpFile.mkdir();
 				}
 				daoWriter = new FileWriter(String.format("%s/csharp/%s.cs",
 						projectId, context.get("dao_name")));
@@ -244,9 +248,13 @@ public class CSharpGenerator extends AbstractGenerator {
 			FileWriter daoWriter = null;
 
 			try {
-				File projectFile = new File(projectId, "csharp");
+				File projectFile = new File(projectId);
 				if (!projectFile.exists()) {
 					projectFile.mkdir();
+				}
+				File csharpFile = new File(projectFile, "csharp");
+				if (!csharpFile.exists()) {
+					csharpFile.mkdir();
 				}
 				daoWriter = new FileWriter(String.format("%s/csharp/%s.cs",
 						projectId, context.get("dao_name")));

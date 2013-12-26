@@ -24,17 +24,43 @@ namespace platform.bll
 
         static void Main(string[] args)
         {
+            //Version v = new Version("1.0.0.1-net40");
+            //Version v1 = new Version("1.0.0.1-net20");
+            Console.WriteLine(string.CompareOrdinal("1.0.0.0-net40", "1.0.0.0-net20"));
+            // string mvn_file = Path.Combine(System.Environment.GetEnvironmentVariable("M2_HOME"), @"bin\mvn.bat");
 
+
+            //System.Diagnostics.ProcessStartInfo procInfo = new System.Diagnostics.ProcessStartInfo(mvn_file);
+            //procInfo.Arguments = string.Format("org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact={0}:{1}:{2}:dll", "com.google", "protobuf-net", "1.0.0.282");
+            ////procInfo.WorkingDirectory = Path.GetDirectoryName(pomFile);
+
+            //procInfo.RedirectStandardOutput = true;
+            //procInfo.RedirectStandardError = true;
+            //procInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            //procInfo.CreateNoWindow = true;
+            //procInfo.UseShellExecute = false;
+
+            //using (System.Diagnostics.Process process = new System.Diagnostics.Process())
+            //{
+            //    process.StartInfo = procInfo;
+
+            //    process.EnableRaisingEvents = true;
+
+            //    process.Start();
+
+            //    process.WaitForExit();
+            //    Console.WriteLine(process.StandardOutput.ReadToEnd());
+            //}
             //SummaryInterface iface = createInstance();
 
-            List<Hello> l = new List<Hello>();
-            l.Add(new Hello() { a = 1, b = 2 });
+            //List<Hello> l = new List<Hello>();
+            //l.Add(new Hello() { a = 1, b = 2 });
 
 
-            Hello h = new Hello() { a=1, b=3};
-            Console.WriteLine(l.Contains(h));
+            //Hello h = new Hello() { a=1, b=3};
+            //Console.WriteLine(l.Contains(h));
 
-            Console.WriteLine(l.Find((entity) => { return entity.a == h.a; }).a);
+            //Console.WriteLine(l.Find((entity) => { return entity.a == h.a; }).a);
 
             //CTimer.Run(SummaryInfo.GetMetrics, 1000);
 
@@ -91,8 +117,8 @@ namespace platform.bll
                 //Console.WriteLine(iface.GetRequestsTimedOutByPid(744));
                
                 //_LM_W3SVC_3_ROOT
-                Console.WriteLine(SummaryInfo.AllInfo);
-                Console.WriteLine(SummaryInfo.MachineInfo);
+                //Console.WriteLine(SummaryInfo.AllInfo);
+                //Console.WriteLine(SummaryInfo.MachineInfo);
             }
         }
 

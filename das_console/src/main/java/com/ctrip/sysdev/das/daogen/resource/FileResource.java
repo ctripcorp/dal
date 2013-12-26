@@ -22,7 +22,7 @@ import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import com.ctrip.sysdev.das.daogen.MongoClientManager;
-import com.ctrip.sysdev.das.daogen.domain.Project;
+import com.ctrip.sysdev.das.daogen.domain.ZTreeElement;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -40,8 +40,9 @@ public class FileResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Project> getProjects(@QueryParam("id") String id,
-			@QueryParam("name") String name, @QueryParam("type") String type) {
+	public List<ZTreeElement> getProjects(@QueryParam("id") String id,
+			@QueryParam("name") String name, @QueryParam("type") String type,
+			@QueryParam("parent") String parent) {
 
 		if (null == daoGenDB) {
 			MongoClient client = MongoClientManager.getDefaultMongoClient();
@@ -52,21 +53,21 @@ public class FileResource {
 			projectCollection = daoGenDB.getCollection("project");
 		}
 
-		List<Project> allProjects = new ArrayList<Project>();
+		List<ZTreeElement> allElements = new ArrayList<ZTreeElement>();
 
 		if (null != type && type.equals("all")) {
 
 			DBCursor projects = projectCollection.find();
 			while (projects.hasNext()) {
 				DBObject current = projects.next();
-				Project p = new Project();
+				ZTreeElement p = new ZTreeElement();
 				p.setId(current.get("_id").toString());
 				p.setName(current.get("name").toString());
 				p.setType("project");
-				p.setIsParent(true);
-				allProjects.add(p);
+				p.setIsParent(null == parent ? true : Boolean.valueOf(parent));
+				allElements.add(p);
 			}
-			return allProjects;
+			return allElements;
 		} else if (null != type && type.equals("project")) {
 			File currentProjectDir = new File(id);
 			if (currentProjectDir.exists()) {
@@ -84,12 +85,12 @@ public class FileResource {
 //				}
 				for (File f : FileUtils.listFiles(currentProjectDir,
 						new String[] { "cs", "java" }, true)) {
-					Project p = new Project();
+					ZTreeElement p = new ZTreeElement();
 					p.setId(id);
 					p.setName(String.format("%s/%s", f.getParentFile().getName(), f.getName()));
 					p.setType("file");
 					p.setIsParent(false);
-					allProjects.add(p);
+					allElements.add(p);
 				}
 			}
 		}
@@ -106,7 +107,7 @@ public class FileResource {
 //			}
 //		}
 
-		return allProjects;
+		return allElements;
 	}
 
 	@GET

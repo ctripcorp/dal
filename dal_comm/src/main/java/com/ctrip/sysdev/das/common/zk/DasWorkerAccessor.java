@@ -1,15 +1,16 @@
 package com.ctrip.sysdev.das.common.zk;
 
-public class DasWorkerAccessor {
+public class DasWorkerAccessor extends DasZkAccessor {
+
 	public boolean addNode(String ip) {
 		return true;
 	}
 	
-	public boolean removeNode(String ip) {
+	public boolean removeDasNode(String ip) {
 		return true;
 	}
 	
-	public String[] getNodes() {
+	public String[] listDasNodes() {
 		return null;
 	}
 	
@@ -19,6 +20,12 @@ public class DasWorkerAccessor {
 	
 	public String[] getLogicDb(String logicDbName) {
 		return null;
+	}
+
+	@Override
+	public void initialize() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

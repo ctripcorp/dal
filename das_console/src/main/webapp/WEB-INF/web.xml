@@ -8,7 +8,7 @@
 	</context-param>
 
 	<listener>
-		<listener-class>com.ctrip.sysdev.das.console.ZkListener</listener-class>
+		<listener-class>com.ctrip.platform.dasconsole.ZkListener</listener-class>
 	</listener>
 
 	<servlet>
@@ -16,41 +16,15 @@
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
-			<param-value>com.ctrip.sysdev.das.console.DasConsoleApplication</param-value>
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-	
-	<servlet>
-		<servlet-name>DaoGenApplication</servlet-name>
-		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-		<init-param>
-			<param-name>javax.ws.rs.Application</param-name>
-			<param-value>com.ctrip.sysdev.das.daogen.DaoGenApplication</param-value>
+			<param-value>com.ctrip.platform.dasconsole.DasConsoleApplication</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	
 	<servlet-mapping>
 		<servlet-name>DasConsoleApplication</servlet-name>
-		<url-pattern>/rest/console/*</url-pattern>
+		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>DaoGenApplication</servlet-name>
-		<url-pattern>/rest/daogen/*</url-pattern>
-	</servlet-mapping>
-	
-	
-<!-- 	<servlet-mapping>    -->
-<!--     	<servlet-name>default</servlet-name> -->
-<!--     	<url-pattern>*.html</url-pattern> -->
-<!--     	<url-pattern>*.js</url-pattern> -->
-<!--     	<url-pattern>*.css</url-pattern> -->
-<!--     	<url-pattern>*.png</url-pattern> -->
-<!--     	<url-pattern>*.jpg</url-pattern> -->
-<!--     	<url-pattern>*.gif</url-pattern> -->
-<!-- 	</servlet-mapping> -->
 	
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>

@@ -13,10 +13,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.velocity</groupId>
-      <artifactId>velocity</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.ctrip.platform</groupId>
       <artifactId>dao_java</artifactId>
       <version>0.0.1-SNAPSHOT</version>
@@ -101,10 +97,6 @@
       <groupId>org.eclipse.jetty.orbit</groupId>
       <artifactId>javax.el</artifactId>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mongodb</groupId>
-      <artifactId>mongo-java-driver</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

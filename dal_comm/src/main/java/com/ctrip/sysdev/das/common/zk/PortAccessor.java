@@ -1,5 +1,23 @@
 package com.ctrip.sysdev.das.common.zk;
 
-public class PortAccessor {
+import org.apache.zookeeper.ZooKeeper;
 
+public class PortAccessor extends DasZkAccessor {
+	public String[] getPorts() {
+		return null;
+	}
+	
+	public void add(int port) {
+		
+	}
+	
+	public void remove(int port) {
+		
+	}
+
+	@Override
+	public void initialize() {
+		// TODO Auto-generated method stub
+		
+	}
 }

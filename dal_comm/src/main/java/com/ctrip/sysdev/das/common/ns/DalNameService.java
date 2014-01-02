@@ -4,4 +4,8 @@ public class DalNameService {
 	public DasWorker[] getDasWorkers(String logicDb) {
 		return null;
 	}
+	
+	public void createSnapshot() {
+		
+	}
 }

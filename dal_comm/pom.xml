@@ -8,4 +8,11 @@
   </parent>
   <groupId>com.ctrip.platform</groupId>
   <artifactId>das_common</artifactId>
+  
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.zookeeper</groupId>
+        <artifactId>zookeeper</artifactId>
+      </dependency>
+  </dependencies>
 </project>

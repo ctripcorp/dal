@@ -11,7 +11,7 @@
     <module>das_console</module>  
     <module>das_ctrl</module>
     <module>dao_gen</module>  
-    <module>namesvr</module>
+    <module>name_srv</module>
     <module>das_comm</module>
   </modules>  
   <properties>

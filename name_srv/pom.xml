@@ -7,6 +7,6 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <groupId>com.ctrip.platform</groupId>
-  <artifactId>namesvr</artifactId>
+  <artifactId>name_srv</artifactId>
   <packaging>war</packaging>
 </project>

@@ -11,7 +11,8 @@ public class BaseStructureInitializer {
 		factory.getLogicDbGroupAccessor().initialize();
 		factory.getPortAccessor().initialize();
 		factory.getDeploymentAccessor().initialize();
-		factory.getDasWorkerAccessor().initialize();
 		factory.getDasNodeAccessor().initialize();
+		factory.getDasWorkerAccessor().initialize();
+		factory.getDasControllerAccessor().initialize();
 	}
 }

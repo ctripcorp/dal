@@ -1,6 +1,5 @@
 package com.ctrip.sysdev.das.common.zk;
 
-import org.apache.zookeeper.ZooKeeper;
 
 public class LogicDbAccessor extends DasZkAccessor {
 	public void addLogicDB(String name, String driver, String jdbcUrl) {
@@ -14,8 +13,7 @@ public class LogicDbAccessor extends DasZkAccessor {
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
-		
+		createPath(DB);
+		createPath(DB_NODE);
 	}
-
 }

@@ -28,7 +28,6 @@ public class DasNodeAccessor extends DasZkAccessor {
 	
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
-		
+		createPath(NODE);
 	}
 }

@@ -35,8 +35,6 @@ public class DasWorkerAccessor extends DasZkAccessor {
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
-		
+		createPath(WORKER);
 	}
-
 }

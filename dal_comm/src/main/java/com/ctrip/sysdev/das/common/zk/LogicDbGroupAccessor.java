@@ -26,7 +26,7 @@ public class LogicDbGroupAccessor extends DasZkAccessor {
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
-		
+		createPath(DB_GROUP);
+		createPath(DB_GROUP__NODE);
 	}
 }

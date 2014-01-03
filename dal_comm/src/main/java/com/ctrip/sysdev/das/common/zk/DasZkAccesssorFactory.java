@@ -23,6 +23,10 @@ public class DasZkAccesssorFactory {
 		return null;
 	}
 	
+	public DasControllerAccessor getDasControllerAccessor() {
+		return null;
+	}
+	
 	public LogicDbGroupAccessor getLogicDbGroupAccessor() {
 		return null;
 	}

@@ -1,29 +1,43 @@
 package com.ctrip.sysdev.das.common.zk;
 
-import com.ctrip.sysdev.das.common.zk.to.DasNode;
+import java.util.List;
+
 import com.ctrip.sysdev.das.common.zk.to.DasNodeSetting;
 
 public class DasNodeAccessor extends DasZkAccessor {
 
-	public String[] listDasNodes() {
-		return null;
+	public List<String> list() throws Exception {
+		return getChildren(NODE);
 	}
 	
-	public DasNode getDasNode(String ip) {
-		return null;
+	public DasNodeSetting getDasNodeSetting(String id) throws Exception {
+		DasNodeSetting setting = new DasNodeSetting();
+		String nodePath = pathOf(NODE, id);
+		setting.setDirectory(getStringValue(nodePath, DIRECTORY));
+		setting.setMaxHeapSize(getStringValue(nodePath, MAX_HEAP_SIZE));
+		setting.setStartingHeapSize(getStringValue(nodePath, STARTING_HEAP_SIZE));
+		return setting;
 	}
 	
-	public boolean createDasNode(String ip, DasNodeSetting setting) {
-		return true;
+	public void createDasNode(String id, DasNodeSetting setting) throws Exception {
+		String nodePath = pathOf(NODE, id);
+		create(nodePath);
+		
+		create(nodePath, DIRECTORY, setting.getDirectory());
+		create(nodePath, MAX_HEAP_SIZE, setting.getMaxHeapSize());
+		create(nodePath, STARTING_HEAP_SIZE, setting.getStartingHeapSize());
 	}
 	
-	public boolean removeDasNode(String ip) {
+	 public void removeDasNode(String id) throws Exception {
 		// When there is running Das Worker, this operation is denied
-		return true;
+		deleteNodeNested(pathOf(NODE, id));
 	}
 	
-	public boolean modifyDasNode(String ip, DasNodeSetting setting) {
-		return true;
+	public void updateDasNode(String id, DasNodeSetting setting) throws Exception {
+		String nodePath = pathOf(NODE, id);
+		setValue(nodePath, DIRECTORY, setting.getDirectory());
+		setValue(nodePath, MAX_HEAP_SIZE, setting.getMaxHeapSize());
+		setValue(nodePath, STARTING_HEAP_SIZE, setting.getStartingHeapSize());
 	}
 	
 	@Override

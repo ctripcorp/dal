@@ -1,9 +1,11 @@
 package com.ctrip.sysdev.das.common.zk;
 
+import java.util.List;
+
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.ZooDefs.Ids;
+import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,20 +22,50 @@ public abstract class DasZkAccessor implements DasZkPathConstants {
 		this.zk = zk;
 	}
 
-	public void create(String path, String value) {
-
+	public void create(String parentPath, String node, String value) throws Exception {
+		create(pathOf(parentPath, node), value);
+	}
+	
+	public void create(String path, String value) throws Exception {
+		zk.create(path, value.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+	}
+	
+	public void create(String path) throws Exception {
+		zk.create(path, new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 	}
 
-	public void remove(String path) throws Exception {
+	public void delete(String path) throws Exception {
+		zk.delete(path, -1);
+	}
+	
+	public void deleteNodeNested(String path) throws Exception {
+		List<String> children = zk.getChildren(path, false);
+		if(children!= null){
+			for(String c: children){
+				deleteNodeNested(pathOf(path, c));
+			}
+		}
 		zk.delete(path, -1);
 	}
 
-	public void setValue(String path, String value) {
-
+	public void setValue(String parentPath, String node, String value) throws Exception {
+		setValue(pathOf(parentPath, node), value);
 	}
 
-	public String[] getChildren() {
-		return null;
+	public void setValue(String path, String value) throws Exception {
+		zk.setData(path, value.getBytes(), -1);
+	}
+
+	public String getStringValue(String parentPath, String node) throws Exception {
+		return getStringValue(pathOf(parentPath, node));
+	}
+
+	public String getStringValue(String path) throws Exception {
+		return new String(zk.getData(path, false, null));
+	}
+
+	public List<String> getChildren(String path) throws Exception {
+		return zk.getChildren(path, false);
 	}
 
 	protected String pathOf(String parent, String child) {

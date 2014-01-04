@@ -58,7 +58,7 @@ public class DasControllerAccessor extends DasZkAccessor {
 	
 	public boolean removeDasController(String ip) {
 		try {
-			remove(pathOf(CONTROLLER, ip));
+			delete(pathOf(CONTROLLER, ip));
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();

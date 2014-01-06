@@ -8,6 +8,11 @@ import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * All ZK related code should be here. the sub class should only call method in this class.
+ * @author jhhe
+ *
+ */
 public abstract class DasZkAccessor implements DasZkPathConstants {
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -96,6 +101,11 @@ public abstract class DasZkAccessor implements DasZkPathConstants {
 				.toString();
 	}
 
+	protected String pathOf(String parent, int child) {
+		return new StringBuilder(parent).append(SEPARATOR).append(child)
+				.toString();
+	}
+	
 	protected boolean errorByFalse(String msg) {
 		logger.error(msg);
 		return false;

@@ -29,20 +29,36 @@ public class DasWorkerAccessor extends DasZkAccessor {
 		return exists(pathOf(WORKER, String.valueOf(id)), String.valueOf(port));
 	}
 	
+	public boolean isRegisterByLogicDB(String id, int port, String logicDb) throws Exception {
+		return exists(pathOf(pathOf(DB_NODE, logicDb), getId(id, port)));
+	}
+	
+	public boolean isRegisterByLogicDbGroup(String id, int port, String logicDbGroup) throws Exception {
+		return exists(pathOf(pathOf(DB_GROUP_NODE, logicDbGroup), getId(id, port)));
+	}
+
 	public void register(String id, int port) throws Exception {
-		this.register(pathOf(WORKER, String.valueOf(id)));
+		register(pathOf(WORKER, String.valueOf(id)));
 	}
 	
 	public void registerByLogicDB(String id, int port, String logicDb) throws Exception {
-		this.register(pathOf(pathOf(DB_NODE, logicDb), getId(id, port)));
+		register(pathOf(pathOf(DB_NODE, logicDb), getId(id, port)));
 	}
 	
 	public void registerByLogicDbGroup(String id, int port, String logicDbGroup) throws Exception {
-		this.register(pathOf(pathOf(DB_GROUP_NODE, logicDbGroup), getId(id, port)));
+		register(pathOf(pathOf(DB_GROUP_NODE, logicDbGroup), getId(id, port)));
 	}
 	
-	public boolean removeDasNode(String id) {
-		return true;
+	public void unregister(String id, int port) throws Exception {
+		delete(pathOf(WORKER, String.valueOf(id)));
+	}
+	
+	public void unregisterByLogicDB(String id, int port, String logicDb) throws Exception {
+		delete(pathOf(pathOf(DB_NODE, logicDb), getId(id, port)));
+	}
+	
+	public void unregisterByLogicDbGroup(String id, int port, String logicDbGroup) throws Exception {
+		delete(pathOf(pathOf(DB_GROUP_NODE, logicDbGroup), getId(id, port)));
 	}
 	
 	public String[] getLogicDBs() {

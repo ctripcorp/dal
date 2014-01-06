@@ -1,7 +1,13 @@
 package com.ctrip.sysdev.das.common.zk;
 
+import org.apache.zookeeper.ZooKeeper;
+
 
 public class LogicDbAccessor extends DasZkAccessor {
+	public LogicDbAccessor(ZooKeeper zk) {
+		super(zk);
+	}
+	
 	public void addLogicDB(String name, String driver, String jdbcUrl) {
 	}
 	

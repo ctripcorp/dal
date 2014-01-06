@@ -2,68 +2,41 @@ package com.ctrip.sysdev.das.common.zk;
 
 import java.util.List;
 
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.ZooDefs.Ids;
+import org.apache.zookeeper.ZooKeeper;
 
 public class DasControllerAccessor extends DasZkAccessor {
 
-	public List<String> list() {
-		try {
-			return zk.getChildren(CONTROLLER, false);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return null;
+	public DasControllerAccessor(ZooKeeper zk) {
+		super(zk);
 	}
 	
-	public boolean register(String ip) {
-		try {
-			zk.create(pathOf(CONTROLLER, ip), new byte[0], Ids.OPEN_ACL_UNSAFE,
-					CreateMode.EPHEMERAL);
+	public List<String> list() throws Exception {
+		return getChildren(CONTROLLER);
+	}
+	
+	public void registerController(String ip) throws Exception {
+		register(CONTROLLER, ip);
 
-			String workerPath = pathOf(WORKER, ip);
-			if (zk.exists(workerPath, null) == null) {
-				logger.info("No worker path for ip " + ip
-						+ " found. Create path at " + workerPath);
-				zk.create(workerPath, new byte[0], Ids.OPEN_ACL_UNSAFE,
-						CreateMode.PERSISTENT);
-			}
-
-			return true;
-		} catch (Exception e) {
-			logger.error("Error during register controller path", e);
-			return false;
+		String workerPath = pathOf(WORKER, ip);
+		if (!exists(workerPath)) {
+			logger.info("No worker path for ip " + ip
+					+ " found. Create path at " + workerPath);
+			
+			create(workerPath);
 		}
 	}
 	
-	public boolean isValidate(String ip) {
-		try {
-			return zk.exists(pathOf(NODE, ip), null) != null;
-		} catch (Exception e) {
-			logger.error("Error during validate controller path", e);
-			return false;
-		}
+	public boolean isValidate(String ip) throws Exception {
+		return exists(NODE, ip);
 	}
 	
-	public boolean isRegistered(String ip) {
-		try {
-			return zk.exists(pathOf(CONTROLLER, ip), null) != null;
-		} catch (Exception e) {
-			logger.error("Error during validate controller path", e);
-			return false;
-		}
+	public boolean isRegistered(String ip) throws Exception {
+		return exists(CONTROLLER, ip);
 	}
 
 	
-	public boolean removeDasController(String ip) {
-		try {
-			delete(pathOf(CONTROLLER, ip));
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+	public void removeDasController(String ip) throws Exception {
+		delete(CONTROLLER, ip);
 	}
 
 	@Override

@@ -1,8 +1,14 @@
 package com.ctrip.sysdev.das.common.zk;
 
+import org.apache.zookeeper.ZooKeeper;
+
 import com.ctrip.sysdev.das.common.zk.to.LogicDbGroup;
 
 public class LogicDbGroupAccessor extends DasZkAccessor {
+	public LogicDbGroupAccessor(ZooKeeper zk) {
+		super(zk);
+	}
+	
 	public String[] listGroups() {
 		String[] logicDBs = null;
 		return logicDBs;
@@ -27,6 +33,6 @@ public class LogicDbGroupAccessor extends DasZkAccessor {
 	@Override
 	public void initialize() {
 		createPath(DB_GROUP);
-		createPath(DB_GROUP__NODE);
+		createPath(DB_GROUP_NODE);
 	}
 }

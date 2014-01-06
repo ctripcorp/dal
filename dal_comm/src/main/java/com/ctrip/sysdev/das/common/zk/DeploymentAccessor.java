@@ -3,6 +3,11 @@ package com.ctrip.sysdev.das.common.zk;
 import org.apache.zookeeper.ZooKeeper;
 
 public class DeploymentAccessor extends DasZkAccessor {
+
+	public DeploymentAccessor(ZooKeeper zk) {
+		super(zk);
+	}
+	
 	public void bindShared(String dasNodeIp, int port, String[] groupNames) {
 		
 	}

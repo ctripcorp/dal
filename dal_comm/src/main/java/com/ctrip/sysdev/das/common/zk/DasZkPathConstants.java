@@ -32,12 +32,16 @@ public interface DasZkPathConstants {
 	
 	String DB_NODE = "/dal/das/instance/db_node";
 	
-	String DB_GROUP__NODE = "/dal/das/instance/db_group_node";
+	String DB_GROUP_NODE = "/dal/das/instance/db_group_node";
 	
 	// Start of runtime registration
 	
 	// ZK path separator
 	String SEPARATOR = "/";
+	
+	// Worker id port separator. e.g. 123.456.789.1:1234
+	String WORKER_ID_PORT_SEPARATOR = ":";
+
 
 	// Value separator
 	String VALUE_SEPARATOR = ",";

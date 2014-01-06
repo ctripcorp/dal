@@ -2,10 +2,16 @@ package com.ctrip.sysdev.das.common.zk;
 
 import java.util.List;
 
+import org.apache.zookeeper.ZooKeeper;
+
 import com.ctrip.sysdev.das.common.zk.to.DasNodeSetting;
 
 public class DasNodeAccessor extends DasZkAccessor {
 
+	public DasNodeAccessor(ZooKeeper zk) {
+		super(zk);
+	}
+	
 	public List<String> list() throws Exception {
 		return getChildren(NODE);
 	}

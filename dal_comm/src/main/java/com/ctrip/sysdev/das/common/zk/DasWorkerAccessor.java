@@ -1,36 +1,57 @@
 package com.ctrip.sysdev.das.common.zk;
 
+import java.util.List;
+
+import org.apache.zookeeper.ZooKeeper;
+
 public class DasWorkerAccessor extends DasZkAccessor {
 
-	public String[] listDasWorkers() {
-		return null;
+	public DasWorkerAccessor(ZooKeeper zk) {
+		super(zk);
 	}
 	
-	public String[] listDasWorkersByLogicDB(String logicDbName) {
-		return null;
+	public List<String> list() throws Exception {
+		return getChildren(WORKER);
 	}
 	
-	public String[] listDasWorkersByLogicDBGroup(String logicDbGroupName) {
-		return null;
+	public List<String> listByLogicDB(String logicDbName) throws Exception {
+		return getChildren(DB_NODE, logicDbName);
 	}
 	
-	public boolean registerDasWorker(String ip, int port) {
-		// Add node to all workers' directory
-		// Add node to db_node directory
-		// Add node to db_group_node directory
+	public List<String> listByLogicDBGroup(String logicDbGroupName) throws Exception {
+		return getChildren(DB_GROUP_NODE, logicDbGroupName);
+	}
+	
+	public boolean isRegistered(String id, int port) throws Exception {
+		return exists(pathOf(WORKER, String.valueOf(id)), String.valueOf(port));
+	}
+	
+	public void register(String id, int port) throws Exception {
+		this.register(pathOf(WORKER, String.valueOf(id)));
+	}
+	
+	public void registerByLogicDB(String id, int port, String logicDb) throws Exception {
+		this.register(pathOf(pathOf(DB_NODE, logicDb), getId(id, port)));
+	}
+	
+	public void registerByLogicDbGroup(String id, int port, String logicDbGroup) throws Exception {
+		this.register(pathOf(pathOf(DB_GROUP_NODE, logicDbGroup), getId(id, port)));
+	}
+	
+	public boolean removeDasNode(String id) {
 		return true;
 	}
 	
-	public boolean removeDasNode(String ip) {
-		return true;
-	}
-	
-	public String[] getLogicDbs() {
+	public String[] getLogicDBs() {
 		return null;
 	}
 	
-	public String[] getLogicDb(String logicDbName) {
+	public String[] getLogicDB(String logicDbName) {
 		return null;
+	}
+	
+	private String getId(String id, int port) {
+		return new StringBuilder(id).append(WORKER_ID_PORT_SEPARATOR).append(port).toString();
 	}
 
 	@Override

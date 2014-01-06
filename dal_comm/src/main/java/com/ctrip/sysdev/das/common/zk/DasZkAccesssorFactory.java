@@ -8,38 +8,38 @@ public class DasZkAccesssorFactory {
 	private ZooKeeper zk;
 	
 	public DasZkAccesssorFactory(String hostPorts) throws IOException {
-		ZooKeeper zk = new ZooKeeper(hostPorts, 30 * 1000, null);
+		this.zk = new ZooKeeper(hostPorts, 30 * 1000, null);
 	}
 	
 	public BaseStructureInitializer getBaseStructureInitializer() {
-		return null;
+		return new BaseStructureInitializer(this);
 	}
 
 	public DasNodeAccessor getDasNodeAccessor() {
-		return null;
+		return new DasNodeAccessor(zk);
 	}
 	
 	public DasWorkerAccessor getDasWorkerAccessor() {
-		return null;
+		return new DasWorkerAccessor(zk);
 	}
 	
 	public DasControllerAccessor getDasControllerAccessor() {
-		return null;
+		return new DasControllerAccessor(zk);
 	}
 	
 	public LogicDbGroupAccessor getLogicDbGroupAccessor() {
-		return null;
+		return new LogicDbGroupAccessor(zk);
 	}
 	
 	public DeploymentAccessor getDeploymentAccessor() {
-		return null;
+		return new DeploymentAccessor(zk);
 	}
 	
 	public LogicDbAccessor getLogicDbAccessor() {
-		return null;
+		return new LogicDbAccessor(zk);
 	}
 	
 	public PortAccessor getPortAccessor() {
-		return null;
+		return new PortAccessor(zk);
 	}
 }

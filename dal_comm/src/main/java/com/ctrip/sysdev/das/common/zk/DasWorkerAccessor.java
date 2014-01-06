@@ -1,8 +1,11 @@
 package com.ctrip.sysdev.das.common.zk;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.zookeeper.ZooKeeper;
+
+import com.ctrip.sysdev.das.common.zk.to.DasWorker;
 
 public class DasWorkerAccessor extends DasZkAccessor {
 
@@ -10,16 +13,16 @@ public class DasWorkerAccessor extends DasZkAccessor {
 		super(zk);
 	}
 	
-	public List<String> list() throws Exception {
-		return getChildren(WORKER);
+	public List<DasWorker> list() throws Exception {
+		return convertToWorker(getChildren(WORKER));
 	}
 	
-	public List<String> listByLogicDB(String logicDbName) throws Exception {
-		return getChildren(DB_NODE, logicDbName);
+	public List<DasWorker> listByLogicDB(String logicDbName) throws Exception {
+		return convertToWorker(getChildren(DB_NODE, logicDbName));
 	}
 	
-	public List<String> listByLogicDBGroup(String logicDbGroupName) throws Exception {
-		return getChildren(DB_GROUP_NODE, logicDbGroupName);
+	public List<DasWorker> listByLogicDBGroup(String logicDbGroupName) throws Exception {
+		return convertToWorker(getChildren(DB_GROUP_NODE, logicDbGroupName));
 	}
 	
 	public boolean isRegistered(String id, int port) throws Exception {
@@ -52,6 +55,13 @@ public class DasWorkerAccessor extends DasZkAccessor {
 	
 	private String getId(String id, int port) {
 		return new StringBuilder(id).append(WORKER_ID_PORT_SEPARATOR).append(port).toString();
+	}
+	
+	private List<DasWorker> convertToWorker(List<String> idPorts) {
+		List<DasWorker> workers = new ArrayList<DasWorker>();
+		for(String idPort: idPorts)
+			workers.add(new DasWorker(idPort));
+		return workers;
 	}
 
 	@Override

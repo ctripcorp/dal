@@ -1,5 +1,7 @@
 package com.ctrip.sysdev.das.common.zk;
 
+import java.util.List;
+
 import org.apache.zookeeper.ZooKeeper;
 
 public class PortAccessor extends DasZkAccessor {
@@ -7,21 +9,20 @@ public class PortAccessor extends DasZkAccessor {
 		super(zk);
 	}
 	
-	public String[] getPorts() {
-		return null;
+	public List<String> list() throws Exception {
+		return getChildren(PORT);
 	}
 	
-	public void add(int port) {
-		
+	public void add(int port) throws Exception {
+		create(PORT, String.valueOf(port), "");
 	}
 	
-	public void remove(int port) {
-		
+	public void remove(int port) throws Exception {
+		delete(PORT, String.valueOf(port));
 	}
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
-		
+		createPath(PORT);
 	}
 }

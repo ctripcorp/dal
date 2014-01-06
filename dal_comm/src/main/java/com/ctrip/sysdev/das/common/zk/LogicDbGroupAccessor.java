@@ -1,33 +1,41 @@
 package com.ctrip.sysdev.das.common.zk;
 
-import org.apache.zookeeper.ZooKeeper;
+import java.util.List;
 
-import com.ctrip.sysdev.das.common.zk.to.LogicDbGroup;
+import org.apache.zookeeper.ZooKeeper;
 
 public class LogicDbGroupAccessor extends DasZkAccessor {
 	public LogicDbGroupAccessor(ZooKeeper zk) {
 		super(zk);
 	}
 	
-	public String[] listGroups() {
-		String[] logicDBs = null;
-		return logicDBs;
+	public List<String> list() throws Exception {
+		return getChildren(DB_GROUP);
 	}
 	
-	public LogicDbGroup getGroup(String name) {
-		return null;
+	public String[] getGroup(String name) throws Exception {
+		return getStringValue(DB_GROUP_NODE, name).split(VALUE_SEPARATOR);
 	}
 	
-	public void createGroup(String name, String[] logicDBs) {
-		
+	public void createGroup(String name, String[] logicDBs) throws Exception {
+		create(DB_GROUP_NODE, name, combine(logicDBs));
 	}
 
-	public void modifyGroup(String oldName, String newName, String[] logicDBs) {
-		
+	public void modifyGroup(String name, String[] logicDBs) throws Exception {
+		setValue(DB_GROUP_NODE, name, combine(logicDBs));
 	}
 
-	public void removeGroup(String name) {
+	public void removeGroup(String name) throws Exception {
+		delete(DB_GROUP_NODE, name);
+	}
+	
+	private String combine(String[] logicDBs) {
+		StringBuilder sb = new StringBuilder();
+		for(String db: logicDBs) {
+			sb.append(db).append(VALUE_SEPARATOR);
+		}
 		
+		return sb.deleteCharAt(sb.length() - 1).toString();
 	}
 
 	@Override

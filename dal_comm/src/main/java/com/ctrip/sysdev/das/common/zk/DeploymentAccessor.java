@@ -28,16 +28,16 @@ public class DeploymentAccessor extends DasZkAccessor {
 		return  isShared(rawValue) ? new SharedDeployment(value) : new DedicateDeployment(value); 
 	}
 	
-	public void bindShared(String id, int port, String[] groupNames) {
-		
+	public void bindShared(String id, int port, String[] groupNames) throws Exception {
+		setValue(pathOf(pathOf(DEPLOYMENT, id), port), new SharedDeployment(groupNames).toString());
 	}
 	
-	public void bindDedicate(String id, int port, String logicDbName) {
-		
+	public void bindDedicate(String id, int port, String logicDbName) throws Exception {
+		setValue(pathOf(pathOf(DEPLOYMENT, id), port), new DedicateDeployment(logicDbName).toString());
 	}
 	
 	public void clearBinding(String id, int port) throws Exception {
-		setValue(pathOf(DEPLOYMENT, id), String.valueOf(port), "");
+		setValue(pathOf(DEPLOYMENT, id), String.valueOf(port), Deployment.EMPTY_VALUE);
 	}
 	
 	public boolean isShared(String rawValue) {

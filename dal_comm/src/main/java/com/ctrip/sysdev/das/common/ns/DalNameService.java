@@ -9,17 +9,29 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DalNameService {
-	private String URL_TEMPLATE = "http://%s/rest/instance/dbNode/";
-	private String url;
+	private String DB_URL_TEMPLATE = "http://%s/rest/instance/dbNode/";
+	private String DB_GROUP_URL_TEMPLATE = "http://%s/rest/instance/dbGroupNode/";
+	private String dbUrl;
+	private String dbGroupUrl;
 	private ObjectMapper mapper = new ObjectMapper();
 	
 	public DalNameService(String host) {
-		this.url = String.format(URL_TEMPLATE, host);
+		this.dbUrl = String.format(DB_URL_TEMPLATE, host);
+		this.dbGroupUrl = String.format(DB_GROUP_URL_TEMPLATE, host);
 	}
 	
-	public List<DasWorker> getDasWorkers(String logicDb) {
+	public List<DasWorker> getByLogicDbGroup(String logicDbGroup) {
 		try {
-			return mapper.readValue(new URL(url + logicDb), new TypeReference<List<DasWorker>>(){});
+			return mapper.readValue(new URL(dbGroupUrl + logicDbGroup), new TypeReference<List<DasWorker>>(){});
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Collections.emptyList();
+		}
+	}
+	
+	public List<DasWorker> getByLogicDb(String logicDb) {
+		try {
+			return mapper.readValue(new URL(dbUrl + logicDb), new TypeReference<List<DasWorker>>(){});
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Collections.emptyList();
@@ -36,9 +48,15 @@ public class DalNameService {
 	}
 	public static void main(String[] args) {
 		DalNameService ns = new DalNameService(args[0]);
-		List<DasWorker> workers = ns.getDasWorkers(args[1]);
+		List<DasWorker> workers = ns.getByLogicDb(args[1]);
 		for(DasWorker worker: workers) {
 			System.out.println(String.format("Id: %s  Ports: %d", worker.getId(), worker.getPort()));
 		}
+		
+		workers = ns.getByLogicDbGroup(args[2]);
+		for(DasWorker worker: workers) {
+			System.out.println(String.format("Id: %s  Ports: %d", worker.getId(), worker.getPort()));
+		}
+
 	}
 }

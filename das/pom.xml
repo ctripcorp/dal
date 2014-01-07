@@ -7,7 +7,6 @@
     <version>0.0.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <groupId>com.ctrip.platform</groupId>
   <artifactId>das</artifactId>
  
   <dependencies>
@@ -88,8 +87,13 @@
       <artifactId>zookeeper</artifactId>
     </dependency>
     <dependency>
-      <groupId>das</groupId>
+      <groupId>com.ctrip.platform</groupId>
       <artifactId>controller</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+        <dependency>
+      <groupId>com.ctrip.platform</groupId>
+      <artifactId>das_common</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>

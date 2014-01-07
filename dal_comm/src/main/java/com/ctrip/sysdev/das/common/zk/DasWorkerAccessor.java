@@ -53,12 +53,12 @@ public class DasWorkerAccessor extends DasZkAccessor {
 		delete(pathOf(WORKER, String.valueOf(id)));
 	}
 	
-	public void unregisterByLogicDB(String id, int port, String logicDb) throws Exception {
-		delete(pathOf(pathOf(DB_NODE, logicDb), getId(id, port)));
+	public void unregisterByLogicDB(String id, String logicDb) throws Exception {
+		delete(pathOf(pathOf(DB_NODE, logicDb), id));
 	}
 	
-	public void unregisterByLogicDbGroup(String id, int port, String logicDbGroup) throws Exception {
-		delete(pathOf(pathOf(DB_GROUP_NODE, logicDbGroup), getId(id, port)));
+	public void unregisterByLogicDbGroup(String id, String logicDbGroup) throws Exception {
+		delete(pathOf(pathOf(DB_GROUP_NODE, logicDbGroup), id));
 	}
 	
 	public String[] getLogicDBs() {

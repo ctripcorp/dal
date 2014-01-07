@@ -11,6 +11,10 @@ public class DasZkAccesssorFactory {
 		this.zk = new ZooKeeper(hostPorts, 30 * 1000, null);
 	}
 	
+	public DasZkAccesssorFactory(ZooKeeper zk) {
+		this.zk = zk;
+	}
+
 	public BaseStructureInitializer getBaseStructureInitializer() {
 		return new BaseStructureInitializer(this);
 	}

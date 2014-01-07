@@ -1,6 +1,7 @@
 package com.ctrip.platform.dasconsole.resource;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,17 +22,19 @@ import org.apache.zookeeper.ZooKeeper;
 import com.ctrip.platform.dasconsole.common.Status;
 import com.ctrip.platform.dasconsole.domain.Port;
 import com.ctrip.platform.dasconsole.domain.Worker;
+import com.ctrip.sysdev.das.common.zk.to.DasWorker;
 
 @Resource
-@Path("instance/worker")
+@Path("instance")
 @Singleton
 public class WorkerResource extends DalBaseResource {
 	@Context
 	private ServletContext sContext;
 	
 	@GET
+	@Path("worker")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Worker> getWorkerInstance() {
+	public List<Worker> getWorkers() {
 		List<Worker> workerList = new ArrayList<Worker>();
 		ZooKeeper zk = getZk();
 		try {
@@ -55,17 +58,68 @@ public class WorkerResource extends DalBaseResource {
 		return workerList;
 	}
 
+	@GET
+	@Path("dbNode/{logicDbName}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<DasWorker> getWorkersByLogicDb(@PathParam("logicDbName") String logicDbName) {
+		try {
+			return getFactory().getDasWorkerAccessor().listByLogicDB(logicDbName);
+		} catch (Exception e) {
+			logger.error("error during get worker by logic DB: " + logicDbName, e);
+			return Collections.emptyList();
+		}
+	}
+
+	@GET
+	@Path("dbGroupNode/{logicDbGroupName}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<DasWorker> getWorkersByLogicDbGroup(@PathParam("logicDbGroupName") String logicDbGroupName) {
+		try {
+			return getFactory().getDasWorkerAccessor().listByLogicDBGroup(logicDbGroupName);
+		} catch (Exception e) {
+			logger.error("Error during get worker by logic DB: " + logicDbGroupName, e);
+			return Collections.emptyList();
+		}
+	}
+
 	@DELETE
-	@Path("{name}/{number}")
+	@Path("worker/{name}/{number}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Status deleteNode(@PathParam("name") String name, @PathParam("number") String number) {
 		System.out.printf("Delete node: " + name);
-		String workerPath = "/dal/das/instance/worker" + "/" + name + "/" + number;
 		try {
-			deleteNodeNested(workerPath);
+			getFactory().getDasWorkerAccessor().unregister(name, Integer.parseInt(number));
 			return Status.OK;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(String.format("Error during delete worker for %s,port: %s ", name, number), e);
+			return Status.ERROR;
+		}
+	}
+	
+	@DELETE
+	@Path("dbNode/{logicDbName}/{name}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Status deleteWorkerByLogicDb(@PathParam("logicDbName") String logicDbName, @PathParam("name") String name) {
+		System.out.printf("Delete node: " + name);
+		try {
+			getFactory().getDasWorkerAccessor().unregisterByLogicDB(name, logicDbName);
+			return Status.OK;
+		} catch (Exception e) {
+			logger.error(String.format("Error during delete worker %s for logic DB %s", name, logicDbName), e);
+			return Status.ERROR;
+		}
+	}
+
+	@DELETE
+	@Path("dbGroupNode/{logicDbGroupName}/{name}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Status deleteWorkerByLogicDbGroup(@PathParam("logicDbGroupName") String logicDbGroupName, @PathParam("name") String name) {
+		System.out.printf("Delete node: " + name);
+		try {
+			getFactory().getDasWorkerAccessor().unregisterByLogicDB(name, logicDbGroupName);
+			return Status.OK;
+		} catch (Exception e) {
+			logger.error(String.format("Error during delete worker %s for DB group %s", name, logicDbGroupName), e);
 			return Status.ERROR;
 		}
 	}

@@ -3,6 +3,8 @@ package com.ctrip.sysdev.das.common.zk.to;
 public class DedicateDeployment implements Deployment {
 	private String logicDb;
 
+	public DedicateDeployment() {}
+	
 	public DedicateDeployment(String logicDb) {
 		this.logicDb = logicDb;
 	}

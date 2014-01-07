@@ -6,6 +6,8 @@ public class DasWorker {
 	// Not used right now, should store worker's status
 	private String status;
 	
+	public DasWorker() {}
+	
 	public DasWorker(String id, int port) {
 		this.id = id;
 		this.port = port;

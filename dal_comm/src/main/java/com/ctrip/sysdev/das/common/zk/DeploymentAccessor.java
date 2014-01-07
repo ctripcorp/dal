@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.apache.zookeeper.ZooKeeper;
 
-import com.ctrip.sysdev.das.common.zk.to.DedicateDeployment;
-import com.ctrip.sysdev.das.common.zk.to.Deployment;
-import com.ctrip.sysdev.das.common.zk.to.SharedDeployment;
+import com.ctrip.sysdev.das.common.to.DedicateDeployment;
+import com.ctrip.sysdev.das.common.to.Deployment;
+import com.ctrip.sysdev.das.common.to.SharedDeployment;
 
 public class DeploymentAccessor extends DasZkAccessor {
 

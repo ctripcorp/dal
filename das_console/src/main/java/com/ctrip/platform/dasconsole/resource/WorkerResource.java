@@ -22,7 +22,7 @@ import org.apache.zookeeper.ZooKeeper;
 import com.ctrip.platform.dasconsole.common.Status;
 import com.ctrip.platform.dasconsole.domain.Port;
 import com.ctrip.platform.dasconsole.domain.Worker;
-import com.ctrip.sysdev.das.common.zk.to.DasWorker;
+import com.ctrip.sysdev.das.common.to.DasWorker;
 
 @Resource
 @Path("instance")

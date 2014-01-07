@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.das.common.zk.to;
+package com.ctrip.sysdev.das.common.to;
 
 public class DedicateDeployment implements Deployment {
 	private String logicDb;

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.zookeeper.ZooKeeper;
 
-import com.ctrip.sysdev.das.common.zk.to.DasWorker;
+import com.ctrip.sysdev.das.common.to.DasWorker;
 
 public class DasWorkerAccessor extends DasZkAccessor {
 

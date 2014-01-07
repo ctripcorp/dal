@@ -1,6 +1,7 @@
 package com.ctrip.sysdev.das.common.ns;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 
 import com.ctrip.sysdev.das.common.to.DasWorker;
@@ -18,11 +19,11 @@ public class DalNameService {
 	
 	public List<DasWorker> getDasWorkers(String logicDb) {
 		try {
-			List<DasWorker> l = mapper.readValue(new URL(url + logicDb), new TypeReference<List<DasWorker>>(){});
+			return mapper.readValue(new URL(url + logicDb), new TypeReference<List<DasWorker>>(){});
 		} catch (Exception e) {
 			e.printStackTrace();
+			return Collections.emptyList();
 		}
-		return null;
 	}
 	
 	public void createSnapshot() {

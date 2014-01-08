@@ -3,6 +3,8 @@ package com.ctrip.sysdev.das.common.to;
 import java.util.List;
 
 public class MasterLogicDB extends LogicDB {
+	private String name;
+	private LogicDbSetting setting;
 	private List<LogicDB> slave;
 
 	public List<LogicDB> getSlave() {
@@ -11,5 +13,21 @@ public class MasterLogicDB extends LogicDB {
 
 	public void setSlave(List<LogicDB> slave) {
 		this.slave = slave;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public LogicDbSetting getSetting() {
+		return setting;
+	}
+
+	public void setSetting(LogicDbSetting setting) {
+		this.setting = setting;
 	}
 }

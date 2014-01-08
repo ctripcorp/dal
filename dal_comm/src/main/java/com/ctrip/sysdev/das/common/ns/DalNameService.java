@@ -51,7 +51,8 @@ public class DalNameService {
 	public void createSnapshot() {
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		try {
-			mapper.writeValue(snapshotFile, mapper.readValue(new URL(snapshotUrl), DasConfigure.class));
+			snapshot = mapper.readValue(new URL(snapshotUrl), DasConfigure.class);
+			mapper.writeValue(snapshotFile, snapshot);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

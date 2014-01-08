@@ -19,7 +19,7 @@ import com.ctrip.platform.dasconsole.common.Status;
 import com.ctrip.platform.dasconsole.domain.DB;
 
 @Resource
-@Path("configure/db")
+//@Path("configure/db")
 @Singleton
 public class MasterDbResource extends DbResource {
 	@GET

@@ -96,6 +96,13 @@ public abstract class DasZkAccessor implements DasZkPathConstants {
 		return zk.getChildren(path, false);
 	}
 
+	protected String pathOf(String...nodes) {
+		StringBuilder sb = new StringBuilder();
+		for(String node: nodes)
+			sb.append(node).append(SEPARATOR);
+		return sb.deleteCharAt(sb.length() - 1).toString();
+	}
+	
 	protected String pathOf(String parent, String child) {
 		return new StringBuilder(parent).append(SEPARATOR).append(child)
 				.toString();

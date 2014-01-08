@@ -1,12 +1,12 @@
 package com.ctrip.sysdev.das.common.zk;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.zookeeper.ZooKeeper;
 
-import com.ctrip.sysdev.das.common.to.DedicateDeployment;
 import com.ctrip.sysdev.das.common.to.Deployment;
-import com.ctrip.sysdev.das.common.to.SharedDeployment;
+import com.ctrip.sysdev.das.common.to.NodeDeployment;
 
 public class DeploymentAccessor extends DasZkAccessor {
 
@@ -14,34 +14,50 @@ public class DeploymentAccessor extends DasZkAccessor {
 		super(zk);
 	}
 	
-	public List<String> list() throws Exception {
+	public List<String> listName() throws Exception {
 		return getChildren(DEPLOYMENT);
 	}
 	
-	public List<String> listById(String id) throws Exception {
+	public List<NodeDeployment> list() throws Exception {
+		List<String> names = listName();
+		List<NodeDeployment> nodeDeployments = new ArrayList<NodeDeployment>();
+		for(String name: names) {
+			NodeDeployment nodeDeployment = new NodeDeployment();
+			nodeDeployment.setId(name);
+			nodeDeployment.setPort(listById(name));
+			nodeDeployments.add(nodeDeployment);
+		}
+		return nodeDeployments;
+	}
+	
+	public List<String> listNameById(String id) throws Exception {
 		return getChildren(pathOf(DEPLOYMENT, id));
+	}
+	
+	public List<Deployment> listById(String id) throws Exception {
+		List<String> names = listNameById(id);
+		List<Deployment> deployments = new ArrayList<Deployment>();
+		for(String name: names) {
+			deployments.add(getDeployment(id, name));
+		}
+		return deployments;
 	}
 	
 	public Deployment getDeployment(String id, String port) throws Exception {
 		String rawValue = getStringValue(pathOf(pathOf(DEPLOYMENT, id), port));
-		String value = rawValue.split(Deployment.SEPARATOR)[1];
-		return  isShared(rawValue) ? new SharedDeployment(value) : new DedicateDeployment(value); 
+		return Deployment.create(Integer.parseInt(port), rawValue); 
 	}
 	
-	public void bindShared(String id, int port, String[] groupNames) throws Exception {
-		setValue(pathOf(pathOf(DEPLOYMENT, id), port), new SharedDeployment(groupNames).toString());
+	public void bindShared(String id, int port, String groupNames) throws Exception {
+		setValue(pathOf(pathOf(DEPLOYMENT, id), port), SHARED + DEPLOYMENT_SEPARATOR + groupNames);
 	}
 	
 	public void bindDedicate(String id, int port, String logicDbName) throws Exception {
-		setValue(pathOf(pathOf(DEPLOYMENT, id), port), new DedicateDeployment(logicDbName).toString());
+		setValue(pathOf(pathOf(DEPLOYMENT, id), port), DEDICATE + DEPLOYMENT_SEPARATOR + logicDbName);
 	}
 	
 	public void clearBinding(String id, int port) throws Exception {
-		setValue(pathOf(DEPLOYMENT, id), String.valueOf(port), Deployment.EMPTY_VALUE);
-	}
-	
-	public boolean isShared(String rawValue) {
-		return rawValue.startsWith(Deployment.SHARED);
+		setValue(pathOf(DEPLOYMENT, id), String.valueOf(port), EMPTY_VALUE);
 	}
 
 	@Override

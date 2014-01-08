@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.das.common.zk.to;
+package com.ctrip.sysdev.das.common.to;
 
 public class LogicDbGroup {
 	private String name;

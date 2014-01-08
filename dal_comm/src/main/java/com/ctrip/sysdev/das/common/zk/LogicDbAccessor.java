@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.zookeeper.ZooKeeper;
 
-import com.ctrip.sysdev.das.common.zk.to.LogicDbSetting;
+import com.ctrip.sysdev.das.common.to.LogicDbSetting;
 
 
 public class LogicDbAccessor extends DasZkAccessor {

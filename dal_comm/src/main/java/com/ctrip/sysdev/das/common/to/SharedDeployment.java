@@ -1,8 +1,10 @@
-package com.ctrip.sysdev.das.common.zk.to;
+package com.ctrip.sysdev.das.common.to;
 
 public class SharedDeployment implements Deployment {
 	private String[] logicDbGroups;
 
+	public SharedDeployment() {}
+	
 	public SharedDeployment(String logicDbGroupsStr) {
 		logicDbGroups = logicDbGroupsStr.split(",");
 	}

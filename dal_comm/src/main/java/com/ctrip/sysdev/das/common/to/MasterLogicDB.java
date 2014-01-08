@@ -2,7 +2,7 @@ package com.ctrip.sysdev.das.common.to;
 
 import java.util.List;
 
-public class MasterLogicDB extends LogicDB {
+public class MasterLogicDB {
 	private String name;
 	private LogicDbSetting setting;
 	private List<LogicDB> slave;

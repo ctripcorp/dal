@@ -71,17 +71,18 @@ public class DalNameService {
 	
 	public static void main(String[] args) {
 		DalNameService ns = new DalNameService(args[0], new File("e:/test.json"));
-		List<DasWorker> workers = ns.getByLogicDb(args[1]);
-		for(DasWorker worker: workers) {
-			System.out.println(String.format("Id: %s  Ports: %d", worker.getId(), worker.getPort()));
-		}
-		
-		ns.createSnapshot();
 		ns.loadSnapshot();
-		workers = ns.getByLogicDbGroup(args[2]);
-		for(DasWorker worker: workers) {
-			System.out.println(String.format("Id: %s  Ports: %d", worker.getId(), worker.getPort()));
-		}
+//		List<DasWorker> workers = ns.getByLogicDb(args[1]);
+//		for(DasWorker worker: workers) {
+//			System.out.println(String.format("Id: %s  Ports: %d", worker.getId(), worker.getPort()));
+//		}
+//		
+//		ns.createSnapshot();
+//		ns.loadSnapshot();
+//		workers = ns.getByLogicDbGroup(args[2]);
+//		for(DasWorker worker: workers) {
+//			System.out.println(String.format("Id: %s  Ports: %d", worker.getId(), worker.getPort()));
+//		}
 
 	}
 }

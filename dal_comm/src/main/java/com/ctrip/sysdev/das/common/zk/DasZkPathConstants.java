@@ -59,4 +59,10 @@ public interface DasZkPathConstants {
 	String DIRECTORY = "directory";
 	String USER_HOME = "user.home";
 	
+	String EMPTY_VALUE = "";
+	String DEPLOYMENT_SEPARATOR = ":";
+	String DEPLOYMENT_VALUE_SEPARATOR = ",";
+	String SHARED = "shared";
+	String DEDICATE = "dedicate";
+	
 }

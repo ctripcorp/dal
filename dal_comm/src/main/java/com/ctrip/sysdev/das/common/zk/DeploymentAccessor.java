@@ -4,9 +4,7 @@ import java.util.List;
 
 import org.apache.zookeeper.ZooKeeper;
 
-import com.ctrip.sysdev.das.common.to.DedicateDeployment;
 import com.ctrip.sysdev.das.common.to.Deployment;
-import com.ctrip.sysdev.das.common.to.SharedDeployment;
 
 public class DeploymentAccessor extends DasZkAccessor {
 
@@ -24,24 +22,19 @@ public class DeploymentAccessor extends DasZkAccessor {
 	
 	public Deployment getDeployment(String id, String port) throws Exception {
 		String rawValue = getStringValue(pathOf(pathOf(DEPLOYMENT, id), port));
-		String value = rawValue.split(Deployment.SEPARATOR)[1];
-		return  isShared(rawValue) ? new SharedDeployment(value) : new DedicateDeployment(value); 
+		return Deployment.create(Integer.parseInt(port), rawValue); 
 	}
 	
-	public void bindShared(String id, int port, String[] groupNames) throws Exception {
-		setValue(pathOf(pathOf(DEPLOYMENT, id), port), new SharedDeployment(groupNames).toString());
+	public void bindShared(String id, int port, String groupNames) throws Exception {
+		setValue(pathOf(pathOf(DEPLOYMENT, id), port), SHARED + DEPLOYMENT_SEPARATOR + groupNames);
 	}
 	
 	public void bindDedicate(String id, int port, String logicDbName) throws Exception {
-		setValue(pathOf(pathOf(DEPLOYMENT, id), port), new DedicateDeployment(logicDbName).toString());
+		setValue(pathOf(pathOf(DEPLOYMENT, id), port), DEDICATE + DEPLOYMENT_SEPARATOR + logicDbName);
 	}
 	
 	public void clearBinding(String id, int port) throws Exception {
-		setValue(pathOf(DEPLOYMENT, id), String.valueOf(port), Deployment.EMPTY_VALUE);
-	}
-	
-	public boolean isShared(String rawValue) {
-		return rawValue.startsWith(Deployment.SHARED);
+		setValue(pathOf(DEPLOYMENT, id), String.valueOf(port), EMPTY_VALUE);
 	}
 
 	@Override

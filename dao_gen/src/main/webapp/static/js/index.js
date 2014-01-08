@@ -23,67 +23,47 @@ jQuery(document).ready(function () {
     w2ui['main_layout'].content('left', $().w2sidebar({
         name: 'sidebar',
         img: null,
-        topHTML: '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a href="javascript:;"><i class="fa fa-plus"></i>添加项目</a>&nbsp;&nbsp;<a href="javascript:;"><i class="fa fa-refresh"></i>刷新</a></div>',
+        topHTML: '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a id="addProj" href="javascript:;"><i class="fa fa-plus"></i>添加项目</a>&nbsp;&nbsp;<a href="javascript:;" onclick="reloadProjects();"><i class="fa fa-refresh"></i>刷新</a></div>',
         menu: [{
-            id: 1,
+            id: "edit_proj",
             text: 'Edit',
             icon: 'fa fa-edit'
         }, {
-            id: 2,
+            id: "del_proj",
             text: 'Delete',
             icon: 'fa fa-times'
         }],
+        onMenuClick: function(event){
+           switch(event.menuItem.id){
+            case "edit_proj":
+                $("#project_id").val(event.target);
+                var project = w2ui['sidebar'].get(event.target);
+                if(project != undefined){
+                    $("#name").val(project.text);
+                    $("#namespace").val(project.namespace);
+                }
+                $("#projectModal").attr("is_update", "1");
+                $("#projectModal").modal();
+                break;
+            case "del_proj":
+                if(confirm("Are you sure to delete this project?")){
+                    var post_data = {};
+
+                    post_data["id"] = event.target;
+                    post_data["action"] = "delete";
+                    $.post("/rest/project", post_data, function(data){
+                        reloadProjects();
+                    });
+                }
+                break;
+           }
+        },
         nodes: [{
             id: 'all_projects',
-            text: 'All Projects',
+            text: '所有项目',
             icon: 'fa fa-folder-o',
-            plus: true,
-            onExpand: function (event) {
-                // var centerY = null;
-                $("#main_layout").block({
-                    message: '<img src="/static/images/ajax-loading.gif" align="">',
-                    // centerY: centerY != undefined ? centerY : true,
-                    css: {
-                        top: '10%',
-                        border: 'none',
-                        padding: '2px',
-                        backgroundColor: 'none'
-                    },
-                    overlayCSS: {
-                        backgroundColor: '#000',
-                        opacity: 0.05,
-                        cursor: 'wait'
-                    }
-                });
-                var currentElement = this;
-                currentElement.nodes[0].icon = "fa fa-folder-open-o";
-                if(undefined != this.nodes && this.nodes.length > 0){
-                    
-                    if(undefined == currentElement.nodes[0].nodes || currentElement.nodes[0].nodes.length == 0){
-                        // this.add('all_projects', {
-                        //     id: 'level-2',
-                        //     text: 'All Projects',
-                        //     icon: 'fa fa-folder-o'
-                        // });
-                        $.get("/rest/file?type=all", function(data){
-                            $.each(data, function(index,value){
-                                currentElement.add('all_projects',{
-                                    id: value.id,
-                                    text: value.name,
-                                    icon: 'fa fa-play'
-                                });
-                            });
-                        });
-                    }
-                }
-                $("#main_layout").unblock();
-                currentElement.refresh();
-            },
-            onCollapse: function(event){
-                //console.log(this == w2ui["sidebar"]);
-                this.nodes[0].icon = "fa fa-folder-o";
-                this.refresh();
-            },
+            // plus: true,
+            group: true,
         }],
     }));
     //End tree side bar
@@ -93,10 +73,51 @@ jQuery(document).ready(function () {
         show: { 
             toolbar: true,
             footer: true,
-            toolbarAdd: true,
-            toolbarDelete: true,
+            toolbarReload: false,
+            toolbarColumns: false,
+            //toolbarSearch: false,
+            toolbarAdd: false,
+            toolbarDelete: false,
             //toolbarSave: true,
-            toolbarEdit: true
+            toolbarEdit: false
+        },
+        toolbar: {
+                items: [{
+                    type: 'break'
+                }, {
+                    type: 'button',
+                    id: 'refreshDAO',
+                    caption: '刷新',
+                    icon: 'fa fa-refresh'
+                }, {
+                    type: 'button',
+                    id: 'addDAO',
+                    caption: '添加DAO',
+                    icon: 'fa fa-plus'
+                }, {
+                    type: 'button',
+                    id: 'editDAO',
+                    caption: '修改DAO',
+                    icon: 'fa fa-edit'
+                }, {
+                    type: 'button',
+                    id: 'delDAO',
+                    caption: '删除DAO',
+                    icon: 'fa fa-times'
+                }, ],
+                onClick: function (target, data) {
+                    switch (target) {
+                    case 'refreshDAO':
+                        break;
+                    case 'addDAO':
+                        $("#page1").modal();
+                        break;
+                    case 'editDAO':
+                        break;
+                    case 'delDAO':
+                        break;
+                    }
+                }
         },
         searches: [             
             { field: 'dbname', caption: 'Database', type: 'text' },
@@ -125,5 +146,73 @@ jQuery(document).ready(function () {
         records: []
     })); 
 
+    $(document.body).on('click', '#addProj', function(event){
+         $("#projectModal").attr("is_update", "0");
+         $("#projectModal").modal();
+    });
+
+    $(document.body).on('click', '#save_proj', function(event){
+        var post_data = {};
+
+        var currentid = $("#project_id").val();
+        if($("#projectModal").attr("is_update") == "1" && 
+            currentid!= undefined && currentid != ""){
+            post_data["action"] = "update";
+            post_data["id"] = currentid;
+        }else{
+            post_data["action"] = "insert";
+        }
+        post_data["name"] = $("#name").val();
+        post_data["namespace"] = $("#namespace").val();
+        
+
+        $.post("/rest/project", post_data, function (data) {
+            $("#projectModal").modal('hide');
+            reloadProjects();
+        });
+    });    
+
+    reloadProjects();
 
 });
+
+
+var reloadProjects = function(){
+    $("body").block({
+        message: '<img src="/static/images/ajax-loading.gif" align="">',
+        // centerY: centerY != undefined ? centerY : true,
+        css: {
+            top: '10%',
+            border: 'none',
+            padding: '2px',
+            backgroundColor: 'none'
+        },
+        overlayCSS: {
+            backgroundColor: '#000',
+            opacity: 0.05,
+            cursor: 'wait'
+        }
+    });
+    var currentElement = w2ui['sidebar'];
+    var nodes = [];
+    $.each(currentElement.nodes[0].nodes, function(index, value){
+        nodes.push(value.id);
+    });
+    currentElement.remove.apply(currentElement, nodes);
+    $.get("/rest/project", function(data){
+        var new_nodes = [];
+        //data = JSON.parse(data);
+        $.each(data, function(index,value){
+            new_nodes.push({
+                id: value._id.$oid,
+                text: value.name,
+                namespace: value.namespace,
+                icon: 'fa fa-tasks'
+            });
+        });
+        currentElement.add('all_projects',new_nodes);
+        currentElement.nodes[0].expanded=true;
+        currentElement.refresh();
+        $("body").unblock();
+    });
+};

@@ -25,6 +25,7 @@ public class DasNodeAccessor extends DasZkAccessor {
 			DasNode node = new DasNode();
 			node.setName(name);
 			node.setSetting(getDasNodeSetting(name));
+			nodes.add(node);
 		}
 		return nodes;
 	}

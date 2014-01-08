@@ -29,6 +29,7 @@ public class LogicDbAccessor extends DasZkAccessor {
 			db.setName(name);
 			db.setSetting(getSetting(name));
 			db.setSlave(listSlave(name));
+			dbs.add(db);
 		}
 		return dbs;
 	}
@@ -75,6 +76,7 @@ public class LogicDbAccessor extends DasZkAccessor {
 			LogicDB db = new LogicDB();
 			db.setName(name);
 			db.setSetting(getSalveSetting(masterName, name));
+			dbs.add(db);
 		}
 		return dbs;
 	}

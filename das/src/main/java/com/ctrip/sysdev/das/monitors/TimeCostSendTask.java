@@ -64,7 +64,7 @@ public class TimeCostSendTask extends Thread {
 					continue;
 				}
 				url = new URL(
-						String.format("http://%s/rest/console/monitor/timeCosts", DalServer.consoleAddr));
+						String.format("http://%s/rest/monitor/timeCosts", DalServer.consoleAddr));
 				URLConnection conn = url.openConnection();
 				conn.setDoOutput(true);
 

@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.ctrip.sysdev.das.DalServer;
 
 public class ErrorReporter implements Runnable {
-	private static final String EXCEPTION_URL_TEMPLATE = "http://%s/rest/console/monitor/exceptions";
+	private static final String EXCEPTION_URL_TEMPLATE = "http://%s/rest/monitor/exceptions";
 
 	private static String CHANNEL_EXCEPTION_TEMPLATE = "ip=%s&id=%s&msg=%s&ts=%d";
 	private static String EXECUTION_EXCEPTION_TEMPLATE = "reqId=%s&" + CHANNEL_EXCEPTION_TEMPLATE;

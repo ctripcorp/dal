@@ -1,10 +1,13 @@
 package com.ctrip.sysdev.das.common.zk;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.zookeeper.ZooKeeper;
 
+import com.ctrip.sysdev.das.common.to.LogicDB;
 import com.ctrip.sysdev.das.common.to.LogicDbSetting;
+import com.ctrip.sysdev.das.common.to.MasterLogicDB;
 
 
 public class LogicDbAccessor extends DasZkAccessor {
@@ -12,8 +15,20 @@ public class LogicDbAccessor extends DasZkAccessor {
 		super(zk);
 	}
 	
-	public List<String> list() throws Exception {
+	public List<String> listName() throws Exception {
 		return getChildren(DB_NODE);
+	}
+	
+	public List<MasterLogicDB> list() throws Exception {
+		List<String> names = listName();
+		List<MasterLogicDB> dbs = new ArrayList<MasterLogicDB>();
+		for(String name: names) {
+			MasterLogicDB db = new MasterLogicDB();
+			db.setName(name);
+			db.setSetting(getSetting(name));
+			db.setSlave(listSlave(name));
+		}
+		return dbs;
 	}
 	
 	public LogicDbSetting getSetting(String name) throws Exception {
@@ -43,8 +58,19 @@ public class LogicDbAccessor extends DasZkAccessor {
 		setValue(pathOf(dbNodePath, JDBC_URL), jdbcUrl);
 	}
 
-	public List<String> listSlave(String masterName) throws Exception {
+	public List<String> listSlaveName(String masterName) throws Exception {
 		return getChildren(pathOf(DB_NODE,masterName));
+	}
+	
+	public List<LogicDB> listSlave(String masterName) throws Exception {
+		List<String> names = listName();
+		List<LogicDB> dbs = new ArrayList<LogicDB>();
+		for(String name: names) {
+			LogicDB db = new LogicDB();
+			db.setName(name);
+			db.setSetting(getSalveSetting(masterName, name));
+		}
+		return dbs;
 	}
 	
 	public LogicDbSetting getSalveSetting(String masterName, String name) throws Exception {

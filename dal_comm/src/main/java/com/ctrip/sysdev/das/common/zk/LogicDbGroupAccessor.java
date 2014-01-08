@@ -1,16 +1,30 @@
 package com.ctrip.sysdev.das.common.zk;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.zookeeper.ZooKeeper;
+
+import com.ctrip.sysdev.das.common.to.LogicDbGroup;
 
 public class LogicDbGroupAccessor extends DasZkAccessor {
 	public LogicDbGroupAccessor(ZooKeeper zk) {
 		super(zk);
 	}
 	
-	public List<String> list() throws Exception {
+	public List<String> listName() throws Exception {
 		return getChildren(DB_GROUP);
+	}
+	
+	public List<LogicDbGroup> list() throws Exception {
+		List<String> names = listName();
+		List<LogicDbGroup> dbs = new ArrayList<LogicDbGroup>();
+		for(String name: names) {
+			LogicDbGroup dbGroup = new LogicDbGroup();
+			dbGroup.setName(name);
+			dbGroup.setLogicDBs(getGroup(name));
+		}
+		return dbs;
 	}
 	
 	public String[] getGroup(String name) throws Exception {

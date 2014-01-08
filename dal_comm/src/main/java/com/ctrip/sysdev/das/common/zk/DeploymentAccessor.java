@@ -1,10 +1,12 @@
 package com.ctrip.sysdev.das.common.zk;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.zookeeper.ZooKeeper;
 
 import com.ctrip.sysdev.das.common.to.Deployment;
+import com.ctrip.sysdev.das.common.to.NodeDeployment;
 
 public class DeploymentAccessor extends DasZkAccessor {
 
@@ -12,12 +14,33 @@ public class DeploymentAccessor extends DasZkAccessor {
 		super(zk);
 	}
 	
-	public List<String> list() throws Exception {
+	public List<String> listName() throws Exception {
 		return getChildren(DEPLOYMENT);
 	}
 	
-	public List<String> listById(String id) throws Exception {
+	public List<NodeDeployment> list() throws Exception {
+		List<String> names = listName();
+		List<NodeDeployment> nodeDeployments = new ArrayList<NodeDeployment>();
+		for(String name: names) {
+			NodeDeployment nodeDeployment = new NodeDeployment();
+			nodeDeployment.setId(name);
+			nodeDeployment.setPort(listById(name));
+			nodeDeployments.add(nodeDeployment);
+		}
+		return nodeDeployments;
+	}
+	
+	public List<String> listNameById(String id) throws Exception {
 		return getChildren(pathOf(DEPLOYMENT, id));
+	}
+	
+	public List<Deployment> listById(String id) throws Exception {
+		List<String> names = listNameById(id);
+		List<Deployment> deployments = new ArrayList<Deployment>();
+		for(String name: names) {
+			deployments.add(getDeployment(id, name));
+		}
+		return deployments;
 	}
 	
 	public Deployment getDeployment(String id, String port) throws Exception {

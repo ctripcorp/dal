@@ -1,9 +1,11 @@
 package com.ctrip.sysdev.das.common.zk;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.zookeeper.ZooKeeper;
 
+import com.ctrip.sysdev.das.common.to.DasNode;
 import com.ctrip.sysdev.das.common.to.DasNodeSetting;
 
 public class DasNodeAccessor extends DasZkAccessor {
@@ -12,10 +14,21 @@ public class DasNodeAccessor extends DasZkAccessor {
 		super(zk);
 	}
 	
-	public List<String> list() throws Exception {
+	public List<String> listName() throws Exception {
 		return getChildren(NODE);
 	}
 	
+	public List<DasNode> list() throws Exception {
+		List<String> names = listName();
+		List<DasNode> nodes = new ArrayList<DasNode>();
+		for(String name: names) {
+			DasNode node = new DasNode();
+			node.setName(name);
+			node.setSetting(getDasNodeSetting(name));
+		}
+		return nodes;
+	}
+
 	public DasNodeSetting getDasNodeSetting(String id) throws Exception {
 		DasNodeSetting setting = new DasNodeSetting();
 		String nodePath = pathOf(NODE, id);

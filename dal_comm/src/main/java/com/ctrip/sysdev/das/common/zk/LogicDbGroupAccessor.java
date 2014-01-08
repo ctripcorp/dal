@@ -28,19 +28,19 @@ public class LogicDbGroupAccessor extends DasZkAccessor {
 	}
 	
 	public String[] getGroup(String name) throws Exception {
-		return getStringValue(DB_GROUP_NODE, name).split(VALUE_SEPARATOR);
+		return getStringValue(DB_GROUP, name).split(VALUE_SEPARATOR);
 	}
 	
 	public void createGroup(String name, String[] logicDBs) throws Exception {
-		create(DB_GROUP_NODE, name, combine(logicDBs));
+		create(DB_GROUP, name, combine(logicDBs));
 	}
 
 	public void modifyGroup(String name, String[] logicDBs) throws Exception {
-		setValue(DB_GROUP_NODE, name, combine(logicDBs));
+		setValue(DB_GROUP, name, combine(logicDBs));
 	}
 
 	public void removeGroup(String name) throws Exception {
-		delete(DB_GROUP_NODE, name);
+		delete(DB_GROUP, name);
 	}
 	
 	private String combine(String[] logicDBs) {

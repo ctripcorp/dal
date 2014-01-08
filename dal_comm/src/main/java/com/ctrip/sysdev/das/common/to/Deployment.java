@@ -35,7 +35,7 @@ public class Deployment {
 		deployment.setPort(port);
 		String[] values = rawValue.split(DasZkPathConstants.DEPLOYMENT_SEPARATOR);
 		deployment.setShared(values[0].equals(DasZkPathConstants.SHARED));
-		deployment.setValue(values[1]);
+		deployment.setValue(values.length == 1 ? null: values[1]);
 		return deployment; 
 	}
 }

@@ -1,22 +1,18 @@
 package com.ctrip.sysdev.das.common.ns;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
 import com.ctrip.sysdev.das.common.to.DasConfigure;
 import com.ctrip.sysdev.das.common.to.DasWorker;
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class DalNameService {
-	private String SNAPSHOT_URL_TEMPLATE = "http://%s/rest/instance/snapshot";
+	private String SNAPSHOT_URL_TEMPLATE = "http://%s/rest/configure/snapshot";
 	private String DB_URL_TEMPLATE = "http://%s/rest/instance/dbNode/";
 	private String DB_GROUP_URL_TEMPLATE = "http://%s/rest/instance/dbGroupNode/";
 	private String dbUrl;
@@ -62,13 +58,14 @@ public class DalNameService {
 		}
 	}
 	
-	public void loadSnapshot() {
+	public DasConfigure loadSnapshot() {
 		try {
 			snapshot = mapper.readValue(snapshotFile, DasConfigure.class);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return snapshot;
 	}
 	
 	public static void main(String[] args) {

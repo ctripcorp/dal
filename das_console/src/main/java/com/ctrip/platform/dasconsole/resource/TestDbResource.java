@@ -75,6 +75,7 @@ public class TestDbResource extends DalBaseResource {
 	}
 	
 	@GET
+	@Path("configure/db/{master}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<String> getSalves(@PathParam("master") String master) throws Exception {
 		return getFactory().getLogicDbAccessor().listSlaveName(master);

@@ -49,6 +49,7 @@ public interface DasZkPathConstants {
 	// Driver and JDBC URL is under logic DB node. e.g. /dal/das/configure/db/testdb
 	String DRIVER = "driver";
 	String JDBC_URL = "jdbcUrl";
+	String SLAVE = "slave";
 	
 	String STARTING_HEAP_SIZE = "startingHeapSize";
 	String DEFAULT_STARTING_HEAP_SIZE = String.valueOf(1024);

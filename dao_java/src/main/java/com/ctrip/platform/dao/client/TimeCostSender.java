@@ -50,7 +50,7 @@ public class TimeCostSender extends Thread {
 					continue;
 				}
 				url = new URL(
-						String.format("http://%s/rest/console/monitor/timeCosts", "localhost:8080"));
+						String.format("http://%s/rest/monitor/timeCosts", "localhost:8080"));
 				URLConnection conn = url.openConnection();
 				conn.setDoOutput(true);
 

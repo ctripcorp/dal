@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 .dal-navbar {
   background-color: #205081;
@@ -159,3 +160,41 @@ height: 40px;
 background-color: #f5f5f5;
 }
 */
+=======
+body {
+    padding-top: 30px;
+}
+
+.dal-navbar {
+    background-color: #205081;
+}
+
+.navbar-inverse .navbar-nav>.active>a,
+.navbar-inverse .navbar-nav>.active>a:hover,
+.navbar-inverse .navbar-nav>.active>a:focus,
+.navbar-inverse .navbar-nav>.open>a,
+.navbar-inverse .navbar-nav>.open>a:hover,
+.navbar-inverse .navbar-nav>.open>a:focus{
+	background-color: #3b73af;
+}
+
+#main_layout {
+    height: 100 % ;
+    padding-top: 20px;
+}
+
+.logo{
+	padding:5px;
+	float:left;
+}
+
+.popup_text{
+	float: right !important;
+}
+
+.popup_label{
+	float:left;
+	min-height:30px;
+	line-height:30px;
+}
+>>>>>>> 74155e24cf75320bccb10f3a16d9676823e54f80

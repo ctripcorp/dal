@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.ctrip.sysdev.das.DalServer;
 
 public class StatusReportTask implements Runnable {
-	private static final String TIME_COST_URL_TEMPLATE = "http://%s/rest/console/monitor/timeCosts";
+	private static final String TIME_COST_URL_TEMPLATE = "http://%s/rest/monitor/timeCosts";
 
 	// id:state:cost  decodeRequest=dr, dbTime=dt encodeResponseTime=er
 	private static final String DECODE_TIME_TEMPLATE = "%s:dr:%d;";

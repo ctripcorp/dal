@@ -67,7 +67,7 @@ public class PerformanceMonitorTask implements Runnable {
 		logger.debug("processCpuUsage/systemCpuUsage/totalMemory/freeMemory" + processCpuUsage + systemCpuUsage + totalMemory + freeMemory);
 		
 		try {
-			url = new URL("http://" + DalServer.consoleAddr + "/rest/console/monitor/performance");
+			url = new URL("http://" + DalServer.consoleAddr + "/rest/monitor/performance");
 			URLConnection conn = url.openConnection();
 			conn.setDoOutput(true);
 

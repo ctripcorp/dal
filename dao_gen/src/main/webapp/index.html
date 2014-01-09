@@ -161,24 +161,91 @@
                     <h4 class="modal-title" id="page1_label">Select a type</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="btn-group" data-toggle="buttons">
-                      <label class="btn btn-default active">
-                          <input type="radio" name="inputWalls" id="inputWalls" value="Excellent" checked>自动生成SQL</label>
-                      <label class="btn btn-default">
-                          <input type="radio" name="inputWalls" id="inputWalls" value="Good">执行存储过程</label>
-                      <label class="btn btn-default">
-                          <input type="radio" name="inputWalls" id="inputWalls" value="Poor">我自己写SQL</label>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label">选择一个数据库：</label>
+                            <Select class="span9 popup_text">
+                              <option>--请选择--</option>
+                            </Select>
+                        </div>
+                    </div>
+                    <div class="row-fluid">
+                      <ul id="myTab" class="nav nav-tabs">
+                        <li class="active"><a href="#auto_sql" data-toggle="tab">自动生成SQL</a></li>
+                        <li class=""><a href="#sp" data-toggle="tab">执行存储过程</a></li>
+                        <li class=""><a href="#free_sql" data-toggle="tab">我要自己写查询</a></li>
+                      </ul>
+                      <div id="myTabContent" class="tab-content">
+                        <div class="tab-pane fade active in" id="auto_sql">
+                          <br>
+                          <div class="row-fluid">
+                            <div class="control-group">
+                              <label class="control-label popup_label">选择一个表/视图：</label>
+                              <Select class="span9 popup_text">
+                                <option>--请选择--</option>
+                              </Select>
+                            </div>
+                          </div>
+                          <div class="row-fluid">
+                            <div class="control-group">
+                              <label class="control-label popup_label">生成的类名：</label>
+                              <input class="span9 popup_text">
+                            </div>
+                          </div>
+                          <div class="row-fluid">
+                            <div class="control-group">
+                              <label class="control-label popup_label">操作类型：</label>
+                              <div class="btn-group popup_text span9" data-toggle="buttons">
+                                  <label class="btn btn-default active">
+                                      <input type="radio" name="inputWalls" id="inputWalls" value="Excellent" checked>查询(Select)</label>
+                                  <label class="btn btn-default">
+                                      <input type="radio" name="inputWalls" id="inputWalls" value="Good">新增(Insert)</label>
+                                  <label class="btn btn-default">
+                                      <input type="radio" name="inputWalls" id="inputWalls" value="Poor">修改(Update)</label>
+                                      <label class="btn btn-default">
+                                      <input type="radio" name="inputWalls" id="inputWalls" value="Delte">删除(Delete)</label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row-fluid">
+                            <div class="control-group">
+                              <label class="control-label popup_label">增删改方式：</label>
+                              <div class="btn-group popup_text span9" data-toggle="buttons">
+                                  <label class="btn btn-default active">
+                                      <input type="radio" name="inputWalls" id="inputWalls" value="Excellent" checked>SPA或SP3（SQL Server）</label>
+                                  <label class="btn btn-default">
+                                      <input type="radio" name="inputWalls" id="inputWalls" value="Good">SQL（MySQL）</label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row-fluid">
+                            <div class="control-group">
+                              <label class="control-label popup_label">选择SQL风格：</label>
+                              <Select class="span9 popup_text">
+                                <option>C#风格(参数形式为@Name)</option>
+                                <option>JAVA风格(参数形式为?)</option>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="tab-pane fade" id="sp">
+                        
+                        </div>
+                        <div class="tab-pane fade" id="free_sql">
+                        
+                        </div>
+                      </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary">Next</button>
+                    <button  type="button" class="btn btn-primary">Next</button>
                 </div>
             </div>
             <!-- /.modal-content -->
         </div>
         <!-- /.modal-dialog -->
     </div>
-    
+
     <!--End wizard-->
        
 

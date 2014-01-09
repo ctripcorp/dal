@@ -27,10 +27,15 @@ body {
 
 .popup_text{
 	float: right !important;
+	padding-top: 1px;
 }
 
 .popup_label{
 	float:left;
 	min-height:30px;
 	line-height:30px;
+}
+
+label.btn{
+	height: 30px;
 }

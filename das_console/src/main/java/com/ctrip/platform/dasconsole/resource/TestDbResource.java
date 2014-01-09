@@ -19,7 +19,7 @@ import com.ctrip.platform.dasconsole.common.Status;
 import com.ctrip.sysdev.das.common.to.LogicDbSetting;
 
 @Resource
-@Path("configure/db")
+//@Path("configure/db")
 @Singleton
 public class TestDbResource extends DalBaseResource {
 	@GET

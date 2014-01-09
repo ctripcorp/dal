@@ -164,7 +164,7 @@
                     <div class="row-fluid">
                         <div class="control-group">
                             <label class="control-label popup_label">选择一个数据库：</label>
-                            <Select class="span9 popup_text">
+                            <Select id="databases" class="span9 popup_text">
                               <option>--请选择--</option>
                             </Select>
                         </div>
@@ -238,7 +238,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button  type="button" class="btn btn-primary">Next</button>
+                    <label class="popup_label"><input type="checkbox">保存时生成代码</label>
+                    <button  type="button" class="btn btn-primary">保存</button>
                 </div>
             </div>
             <!-- /.modal-content -->

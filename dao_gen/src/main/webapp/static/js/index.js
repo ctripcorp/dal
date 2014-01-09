@@ -111,6 +111,15 @@ jQuery(document).ready(function () {
                         break;
                     case 'addDAO':
                         $("#page1").modal();
+                        $.get("/rest/db/dbs", function (data) {
+                            //data = JSON.parse(data);
+                            $.each(data.ids, function (index, value) {
+                                $('#databases').append($('<option>', {
+                                    value: value,
+                                    text: value
+                                }));
+                            });
+                        });
                         break;
                     case 'editDAO':
                         break;
@@ -147,8 +156,8 @@ jQuery(document).ready(function () {
     })); 
 
     $(document.body).on('click', '#addProj', function(event){
-         $("#projectModal").attr("is_update", "0");
-         $("#projectModal").modal();
+        $("#projectModal").attr("is_update", "0");
+        $("#projectModal").modal();
     });
 
     $(document.body).on('click', '#save_proj', function(event){

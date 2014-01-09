@@ -51,7 +51,8 @@ public class DalNameService {
 	public void createSnapshot() {
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		try {
-			mapper.writeValue(snapshotFile, mapper.readValue(new URL(snapshotUrl), DasConfigure.class));
+			snapshot = mapper.readValue(new URL(snapshotUrl), DasConfigure.class);
+			mapper.writeValue(snapshotFile, snapshot);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -70,17 +71,18 @@ public class DalNameService {
 	
 	public static void main(String[] args) {
 		DalNameService ns = new DalNameService(args[0], new File("e:/test.json"));
-		List<DasWorker> workers = ns.getByLogicDb(args[1]);
-		for(DasWorker worker: workers) {
-			System.out.println(String.format("Id: %s  Ports: %d", worker.getId(), worker.getPort()));
-		}
-		
-		ns.createSnapshot();
 		ns.loadSnapshot();
-		workers = ns.getByLogicDbGroup(args[2]);
-		for(DasWorker worker: workers) {
-			System.out.println(String.format("Id: %s  Ports: %d", worker.getId(), worker.getPort()));
-		}
+//		List<DasWorker> workers = ns.getByLogicDb(args[1]);
+//		for(DasWorker worker: workers) {
+//			System.out.println(String.format("Id: %s  Ports: %d", worker.getId(), worker.getPort()));
+//		}
+//		
+//		ns.createSnapshot();
+//		ns.loadSnapshot();
+//		workers = ns.getByLogicDbGroup(args[2]);
+//		for(DasWorker worker: workers) {
+//			System.out.println(String.format("Id: %s  Ports: %d", worker.getId(), worker.getPort()));
+//		}
 
 	}
 }

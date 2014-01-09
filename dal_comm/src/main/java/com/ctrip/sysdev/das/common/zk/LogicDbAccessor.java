@@ -29,6 +29,7 @@ public class LogicDbAccessor extends DasZkAccessor {
 			db.setName(name);
 			db.setSetting(getSetting(name));
 			db.setSlave(listSlave(name));
+			dbs.add(db);
 		}
 		return dbs;
 	}
@@ -37,7 +38,7 @@ public class LogicDbAccessor extends DasZkAccessor {
 		LogicDbSetting setting = new LogicDbSetting();
 		String path = pathOf(DB, name);
 		setting.setDriver(getStringValue(path, DRIVER));
-		setting.setDriver(getStringValue(path, JDBC_URL));
+		setting.setJdbcUrl(getStringValue(path, JDBC_URL));
 		return setting;
 	}
 	
@@ -75,6 +76,7 @@ public class LogicDbAccessor extends DasZkAccessor {
 			LogicDB db = new LogicDB();
 			db.setName(name);
 			db.setSetting(getSalveSetting(masterName, name));
+			dbs.add(db);
 		}
 		return dbs;
 	}
@@ -83,7 +85,7 @@ public class LogicDbAccessor extends DasZkAccessor {
 		LogicDbSetting setting = new LogicDbSetting();
 		String path = pathOf(DB, masterName, SLAVE, name);
 		setting.setDriver(getStringValue(path, DRIVER));
-		setting.setDriver(getStringValue(path, JDBC_URL));
+		setting.setJdbcUrl(getStringValue(path, JDBC_URL));
 		return setting;
 	}
 	

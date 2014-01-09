@@ -18,13 +18,14 @@ public class LogicDbGroupAccessor extends DasZkAccessor {
 	
 	public List<LogicDbGroup> list() throws Exception {
 		List<String> names = listName();
-		List<LogicDbGroup> dbs = new ArrayList<LogicDbGroup>();
+		List<LogicDbGroup> dbGroups = new ArrayList<LogicDbGroup>();
 		for(String name: names) {
 			LogicDbGroup dbGroup = new LogicDbGroup();
 			dbGroup.setName(name);
 			dbGroup.setLogicDBs(getGroup(name));
+			dbGroups.add(dbGroup);
 		}
-		return dbs;
+		return dbGroups;
 	}
 	
 	public String[] getGroup(String name) throws Exception {

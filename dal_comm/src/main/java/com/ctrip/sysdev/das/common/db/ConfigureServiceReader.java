@@ -2,7 +2,7 @@ package com.ctrip.sysdev.das.common.db;
 
 import com.ctrip.sysdev.das.common.cfg.DasConfigureService;
 import com.ctrip.sysdev.das.common.to.DasConfigure;
-import com.ctrip.sysdev.das.common.to.Deployment;
+import com.ctrip.sysdev.das.common.to.LogicDbGroup;
 import com.ctrip.sysdev.das.common.to.MasterLogicDB;
 
 public class ConfigureServiceReader implements DasConfigureReader {
@@ -23,7 +23,11 @@ public class ConfigureServiceReader implements DasConfigureReader {
 
 	@Override
 	public String[] getLogicDbsByGroup(String logicDbGroupName) {
-		// TODO Auto-generated method stub
+		DasConfigure conf = cs.getSnapshot();
+		
+		for(LogicDbGroup group: conf.getDbGroup())
+			if(group.getName().equals(logicDbGroupName))
+				return group.getLogicDBs();
 		return null;
 	}
 }

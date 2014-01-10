@@ -2,6 +2,8 @@ package com.ctrip.sysdev.das.common.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,10 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.ctrip.sysdev.das.common.to.Deployment;
 import com.ctrip.sysdev.das.common.to.LogicDB;
 import com.ctrip.sysdev.das.common.to.LogicDbSetting;
 import com.ctrip.sysdev.das.common.to.MasterLogicDB;
 
+// TODO  handle configure change
 public class DruidDataSourceWrapper {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -32,16 +36,42 @@ public class DruidDataSourceWrapper {
 	
 	private DasConfigureReader reader;
 	
+	/**
+	 * For Das worker
+	 */
+	public DruidDataSourceWrapper(Deployment deployment, DasConfigureReader reader) throws Exception {
+		this(reader, getLogicDbs(deployment, reader));
+	}
+	
+	public static String[] getLogicDbs(Deployment deployment, DasConfigureReader reader) throws Exception { 
+		String[] logicDbs;
+		
+		if(deployment.isShared()) {
+			List<String> dbs = new ArrayList<String>();
+			for(String logicDbGroupName: deployment.convertToDbGroups()) {
+				dbs.addAll(Arrays.asList(reader.getLogicDbsByGroup(logicDbGroupName)));
+			}
+			logicDbs = dbs.toArray(new String[0]);
+		} else {
+			logicDbs = new String[] {deployment.getValue()};
+		}
+		
+		return logicDbs;
+	}
+	
+	/**
+	 * For direct client
+	 */
 	public DruidDataSourceWrapper(DasConfigureReader reader, String...logicDbs) throws Exception {
 		this.reader = reader;
-		createMaster(logicDbs);
+		initialize(logicDbs);
 		dataSource = this;
 	}
 	
-	private void createMaster(String...logicDbs) throws Exception {
+	private void initialize(String...logicDbs) throws Exception {
 		for(String logicDb: logicDbs) {
 			MasterLogicDB db = reader.getMasterLogicDB(logicDb);
-			createMaster(logicDb);
+			createMaster(db);
 			createSlave(db.getName(), db.getSlave());
 		}
 	}
@@ -120,5 +150,4 @@ public class DruidDataSourceWrapper {
 	private String getConfig(String key) {
 		return null;
 	}
-
 }

@@ -19,6 +19,10 @@ public class Deployment {
 	public void setShared(boolean shared) {
 		this.shared = shared;
 	}
+	
+	/**
+	 * @return logic Db for dedicate deployment, or db groups for shared deployment
+	 */
 	public String getValue() {
 		return value;
 	}

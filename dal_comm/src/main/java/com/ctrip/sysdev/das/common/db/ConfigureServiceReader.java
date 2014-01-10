@@ -2,11 +2,12 @@ package com.ctrip.sysdev.das.common.db;
 
 import com.ctrip.sysdev.das.common.cfg.DasConfigureService;
 import com.ctrip.sysdev.das.common.to.DasConfigure;
+import com.ctrip.sysdev.das.common.to.Deployment;
 import com.ctrip.sysdev.das.common.to.MasterLogicDB;
 
-public class NsDasConfigureReader implements DasConfigureReader {
+public class ConfigureServiceReader implements DasConfigureReader {
 	private DasConfigureService cs;
-	public NsDasConfigureReader(DasConfigureService cs) {
+	public ConfigureServiceReader(DasConfigureService cs) {
 		this.cs = cs;
 	}
 	
@@ -17,6 +18,12 @@ public class NsDasConfigureReader implements DasConfigureReader {
 			if(db.getName().equals(logicdbName))
 				return db;
 		}
+		return null;
+	}
+
+	@Override
+	public String[] getLogicDbsByGroup(String logicDbGroupName) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

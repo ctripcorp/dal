@@ -19,21 +19,27 @@ public class DasConfigureService implements Runnable {
 	private ObjectMapper mapper = new ObjectMapper();
 	private ScheduledExecutorService reader;
 	
+	// Sync every 5 minutes
+	private static int PERIOD = 60 *1000 * 5;
+	
 	// TODO add shutdown hook
 	public DasConfigureService(String host, File snapshot) {
 		snapshotUrl = String.format(SNAPSHOT_URL_TEMPLATE, host);
 		this.snapshotFile = snapshot;
 		reader = Executors.newSingleThreadScheduledExecutor();
-		reader.scheduleAtFixedRate(this, 1, 1, TimeUnit.SECONDS);
+		reader.scheduleAtFixedRate(this, 1, PERIOD, TimeUnit.SECONDS);
+		
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {reader.shutdown();}
+		});
 	}
 
-	public void createSnapshot() {
+	public void syncSnapshot() {
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		try {
 			snapshot = mapper.readValue(new URL(snapshotUrl), DasConfigure.class);
 			mapper.writeValue(snapshotFile, snapshot);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -46,20 +52,19 @@ public class DasConfigureService implements Runnable {
 		try {
 			snapshot = mapper.readValue(snapshotFile, DasConfigure.class);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return snapshot;
 	}
 	
-	public static void main(String[] args) {
-		DasConfigureService ns = new DasConfigureService(args[0], new File("e:/test.json"));
-		ns.createSnapshot();
-		ns.loadSnapshot();
-	}
-
 	@Override
 	public void run() {
-		createSnapshot();
+		syncSnapshot();
+	}
+	
+	public static void main(String[] args) {
+		DasConfigureService ns = new DasConfigureService(args[0], new File("e:/test.json"));
+		ns.syncSnapshot();
+		ns.loadSnapshot();
 	}
 }

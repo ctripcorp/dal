@@ -4,27 +4,40 @@ import javax.annotation.Resource;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
 import com.ctrip.sysdev.das.common.to.DasConfigure;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Resource
 @Path("configure/snapshot")
 @Singleton
 public class ConfigureResource extends DalBaseResource {
-
+	public static ConfigureResource SINGLETON;
+	private ObjectMapper mapper = new ObjectMapper();
+	private String latestConfig;
+	
+	public ConfigureResource() {
+		buildLatest();
+		SINGLETON = this;
+	}
+	
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public DasConfigure get() throws Exception {
+	public String get() {
+		return latestConfig;
+	}
+	
+	private void buildLatest() {
 		DasConfigure config = new DasConfigure();
 		
-		config.setPort(getFactory().getPortAccessor().list());
-		config.setNode(getFactory().getDasNodeAccessor().list());
-		config.setDb(getFactory().getLogicDbAccessor().list());
-		config.setDbGroup(getFactory().getLogicDbGroupAccessor().list());
-		config.setDeployment(getFactory().getDeploymentAccessor().list());
-		
-		return config;
+		try {
+			config.setPort(getFactory().getPortAccessor().list());
+			config.setNode(getFactory().getDasNodeAccessor().list());
+			config.setDb(getFactory().getLogicDbAccessor().list());
+			config.setDbGroup(getFactory().getLogicDbGroupAccessor().list());
+			config.setDeployment(getFactory().getDeploymentAccessor().list());
+			latestConfig = mapper.writeValueAsString(config);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

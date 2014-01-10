@@ -24,8 +24,6 @@ public class DruidDataSourceWrapper {
 	private Map<String, DruidDataSource> masterMap = new ConcurrentHashMap<String, DruidDataSource>();
 	private Map<String, DruidDataSource[]> slaveMap = new ConcurrentHashMap<String, DruidDataSource[]>();
 	
-	public static DruidDataSourceWrapper dataSource;
-
 	int initialSize = 1;
 	int maxActive = 10;
 	int minIdle = 1;
@@ -65,7 +63,6 @@ public class DruidDataSourceWrapper {
 	public DruidDataSourceWrapper(DasConfigureReader reader, String...logicDbs) throws Exception {
 		this.reader = reader;
 		initialize(logicDbs);
-		dataSource = this;
 	}
 	
 	private void initialize(String...logicDbs) throws Exception {
@@ -128,14 +125,25 @@ public class DruidDataSourceWrapper {
 		return ds;
 	}
 
-	public Connection getMasterConnection(String logicDb) throws SQLException {
-		return masterMap.get(logicDb).getConnection();
+	public Connection getConnection(String logicDbName, boolean isMaster, boolean isSelect)
+			throws SQLException {
+		if (isMaster)
+			return getMasterConnection(logicDbName);
+
+		if (isSelect)
+			return getSlaveConnection(logicDbName);
+
+		return getMasterConnection(logicDbName);
 	}
 
-	public Connection getSlaveConnection(String logicDb) throws SQLException {
-		DruidDataSource[] slaves = slaveMap.get(logicDb);
+	public Connection getMasterConnection(String logicDbName) throws SQLException {
+		return masterMap.get(logicDbName).getConnection();
+	}
+
+	public Connection getSlaveConnection(String logicDbName) throws SQLException {
+		DruidDataSource[] slaves = slaveMap.get(logicDbName);
 		if(slaves == null)
-			return getMasterConnection(logicDb);
+			return getMasterConnection(logicDbName);
 		
 		int i = (int)(Math.random() * slaves.length);
 		return slaves[i].getConnection();

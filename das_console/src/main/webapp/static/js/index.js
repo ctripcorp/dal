@@ -312,12 +312,8 @@ var loadDbConfig = function () {
                 resizable: true,
             }, ],
             onDblClick: function (event) {
-                var masterRecords = w2ui['dbConfig'].getSelection();
-                if (masterRecords.length < 1) {
-                    return;
-                }
                 w2ui['subDbConfig'].clear();
-                var masterName = w2ui['dbConfig'].get(masterRecords[0]).logicName;
+                var masterName = w2ui['dbConfig'].get(event.recid).logicName;
                 $.get(sprintf("/rest/configure/db/%s/slave", masterName), function (data) {
                     var records = [];
                     $.each(data, function (index, value) {

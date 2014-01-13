@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 /**
  * 
  * @author gawu
- * 
+ * @deprecated need to revise for production
  */
 public class TimeCostSender extends Thread {
 

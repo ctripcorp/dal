@@ -25,13 +25,17 @@ public class LogicDbAccessor extends DasZkAccessor {
 		List<String> names = listName();
 		List<MasterLogicDB> dbs = new ArrayList<MasterLogicDB>();
 		for(String name: names) {
-			MasterLogicDB db = new MasterLogicDB();
-			db.setName(name);
-			db.setSetting(getSetting(name));
-			db.setSlave(listSlave(name));
-			dbs.add(db);
+			dbs.add(getMasterByName(name));
 		}
 		return dbs;
+	}
+	
+	public MasterLogicDB getMasterByName(String name) throws Exception {
+		MasterLogicDB db = new MasterLogicDB();
+		db.setName(name);
+		db.setSetting(getSetting(name));
+		db.setSlave(listSlave(name));
+		return db;
 	}
 	
 	public LogicDbSetting getSetting(String name) throws Exception {

@@ -104,6 +104,12 @@ public class QueryExecutor {
 		}
 	}
 
+	/**
+	 * @Deprecated should use the one in conn pool
+	 * @param request
+	 * @return
+	 * @throws SQLException
+	 */
 	private Connection getConnection(DasProto.Request request)
 			throws SQLException {
 		if (request.getMsg().getMaster())

@@ -22,6 +22,35 @@ public class StatementParameter {
 	public DasProto.SqlParameters build2SqlParameters() {
 		return currentBuilder.build2SqlParameters();
 	}
+	
+	// TODO use builder to build parameter can be optimized 
+	public DbType getDbType() {
+		return currentBuilder.dbType_;
+	}
+
+	public ParameterDirection getDirection() {
+		return currentBuilder.direction_;
+	}
+
+	public boolean isNullable() {
+		return currentBuilder.nullable_;
+	}
+
+	public String getName() {
+		return currentBuilder.name_;
+	}
+
+	public int getIndex() {
+		return currentBuilder.index_;
+	}
+
+	public boolean isSensitive() {
+		return currentBuilder.sensitive_;
+	}
+
+	public Object getValue() {
+		return currentBuilder.value_;
+	}
 
 	public static final class Builder {
 

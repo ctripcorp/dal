@@ -9,7 +9,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.ctrip.platform.dao.client.Client;
 import com.ctrip.platform.dao.client.DasClient;
+import com.ctrip.platform.dao.client.DirectClient;
 import com.ctrip.platform.dao.param.StatementParameter;
+import com.ctrip.sysdev.das.common.db.DasConfigureReader;
 
 public class AbstractDAO implements DAO {
 	
@@ -45,6 +47,20 @@ public class AbstractDAO implements DAO {
 			client.setLogicDbName(logicDbName);
 			client.init(host, servicePort);
 			clients.put(logicDbName, client);
+		}
+		lock.writeLock().unlock();
+	}
+
+	// For a given logic DB name, only one client an be registered
+	protected void init(DasConfigureReader reader) throws Exception {
+		lock.writeLock().lock();
+		if(!clients.containsKey(logicDbName)){
+			try {
+				DirectClient client = new DirectClient(reader, logicDbName);
+				clients.put(logicDbName, client);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		lock.writeLock().unlock();
 	}

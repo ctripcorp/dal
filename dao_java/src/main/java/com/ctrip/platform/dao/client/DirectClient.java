@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -64,53 +66,43 @@ public class DirectClient implements Client {
 	
 	private PreparedStatement setSqlParameter(PreparedStatement ps,
 			StatementParameter parameter) throws SQLException {
-/*		parameter.
-		DbType type = DbType.fromInt(parameter.getDbType());
-
-		switch (type) {
+		Object value = parameter.getValue();
+		switch (parameter.getDbType()) {
 		case Boolean:
-			ps.setBoolean(parameter.getIndex(), parameter.getValue()
-					.getBoolArg());
+			ps.setBoolean(parameter.getIndex(), (Boolean)value);
 			break;
 		case Binary:
-			ps.setBytes(parameter.getIndex(), parameter.getValue()
-					.getBytesArg().toByteArray());
+			ps.setBytes(parameter.getIndex(), (byte[])value);
 			break;
 		case Byte:
-			ps.setByte(parameter.getIndex(), (byte) parameter.getValue()
-					.getInt32Arg());
+			ps.setByte(parameter.getIndex(), (byte)Integer.parseInt(value.toString()));
 			break;
 		case DateTime:
-			ps.setTimestamp(parameter.getIndex(), new Timestamp(parameter
-					.getValue().getInt64Arg()));
+			ps.setTimestamp(parameter.getIndex(), new Timestamp(((Date)value).getTime()));
 			break;
 		case Decimal:
 			break;
 		case Double:
-			ps.setDouble(parameter.getIndex(), parameter.getValue()
-					.getDoubleArg());
+			ps.setDouble(parameter.getIndex(), Double.parseDouble(value.toString()));
 			break;
 		case Guid:
 			break;
 		case Int16:
-			ps.setShort(parameter.getIndex(), (short) parameter.getValue()
-					.getInt32Arg());
+			ps.setShort(parameter.getIndex(), (short) Integer.parseInt(value.toString()));
 			break;
 		case Int32:
-			ps.setInt(parameter.getIndex(), parameter.getValue().getInt32Arg());
+			ps.setInt(parameter.getIndex(), Integer.parseInt(value.toString()));
 			break;
 		case Int64:
-			ps.setLong(parameter.getIndex(), parameter.getValue().getInt64Arg());
+			ps.setLong(parameter.getIndex(), Long.parseLong(value.toString()));
 			break;
 		case SByte:
 			break;
 		case Single:
-			ps.setFloat(parameter.getIndex(), (float) parameter.getValue()
-					.getDoubleArg());
+			ps.setFloat(parameter.getIndex(), (float)Double.parseDouble(value.toString()));
 			break;
 		case String:
-			ps.setString(parameter.getIndex(), parameter.getValue()
-					.getStringArg());
+			ps.setString(parameter.getIndex(), value.toString());
 			break;
 		case StringFixedLength:
 			break;
@@ -123,7 +115,6 @@ public class DirectClient implements Client {
 		default:
 			break;
 		}
-*/
 		return ps;
 	}
 

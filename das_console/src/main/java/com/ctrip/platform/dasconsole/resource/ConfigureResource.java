@@ -12,17 +12,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Path("configure/snapshot")
 @Singleton
 public class ConfigureResource extends DalBaseResource {
-	public static ConfigureResource SINGLETON;
 	private ObjectMapper mapper = new ObjectMapper();
 	private String latestConfig;
 	
-	public ConfigureResource() {
-		buildLatest();
-		SINGLETON = this;
-	}
-	
 	@GET
 	public String get() {
+		if(latestConfig == null)
+			buildLatest();
 		return latestConfig;
 	}
 	

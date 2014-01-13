@@ -1,5 +1,6 @@
 package com.ctrip.platform.daogen.resource;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,6 +17,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.ctrip.platform.daogen.Consts;
 import com.ctrip.platform.daogen.MongoClientManager;
@@ -42,29 +50,54 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("dbs")
-	public StringIdSet getDbNames() {
-		Set<String> results = new HashSet<String>();
+	public String getDbNames() {
+		HttpClient httpclient = new DefaultHttpClient();
+        try {
+            HttpGet httpget = new HttpGet("http://localhost:8080/rest/configure/db");
 
-		ResultSet rs = master.getAllDbNames();
-
-		try {
-			while (rs.next()) {
-				results.add(rs.getString(1));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
+            // Create a response handler
+            ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            // Body contains your json stirng
+            //String responseBody;
 			try {
-				if (null != rs)
-					rs.close();
-			} catch (SQLException e) {
+				return httpclient.execute(httpget, responseHandler);
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
 
-		StringIdSet returnResults = new StringIdSet();
-		returnResults.setIds(results);
-		return returnResults;
+        } finally {
+            // When HttpClient instance is no longer needed,
+            // shut down the connection manager to ensure
+            // immediate deallocation of all system resources
+            httpclient.getConnectionManager().shutdown();
+        }
+        return null;
+//		Set<String> results = new HashSet<String>();
+//
+//		ResultSet rs = master.getAllDbNames();
+//
+//		try {
+//			while (rs.next()) {
+//				results.add(rs.getString(1));
+//			}
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		} finally {
+//			try {
+//				if (null != rs)
+//					rs.close();
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//
+//		StringIdSet returnResults = new StringIdSet();
+//		returnResults.setIds(results);
+//		return returnResults;
 
 	}
 

@@ -13,6 +13,8 @@ public class Consts {
 	public static Map<String, String> CSharpSqlTypeMap;
 	public static Map<String, String> CSharpDbTypeMap;
 	
+	public static Map<String, String> WhereConditionMap;
+	
 	public static List<String> CSharpValueTypes;
 	
 	static{
@@ -21,6 +23,8 @@ public class Consts {
 		CSharpSqlTypeMap = new HashMap<String, String>();
 		CSharpDbTypeMap = new HashMap<String, String>();
 		CSharpValueTypes = new ArrayList<String>();
+		
+		WhereConditionMap = new HashMap<String, String>();
 		
 		JavaSqlTypeMap.put("int", "int");
 		JavaSqlTypeMap.put("varchar", "String");
@@ -44,6 +48,17 @@ public class Consts {
 		//CSharpValueTypes.add("DateTime");
 		CSharpValueTypes.add("int");
 		CSharpValueTypes.add("datetime");
+		
+		WhereConditionMap.put("0", "=");
+		WhereConditionMap.put("1", "!=");
+		WhereConditionMap.put("2", ">");
+		WhereConditionMap.put("3", "<");
+		WhereConditionMap.put("4", ">=");
+		WhereConditionMap.put("5", "<=");
+		WhereConditionMap.put("6", "Between");
+		WhereConditionMap.put("7", "Like");
+		WhereConditionMap.put("8", "In");
+		
 	}
 	
 

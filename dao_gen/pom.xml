@@ -10,6 +10,10 @@
   <artifactId>dao_gen</artifactId>
   <packaging>war</packaging>
 <dependencies>
+	<dependency>
+		<groupId>org.apache.httpcomponents</groupId>
+		<artifactId>httpclient</artifactId>
+	</dependency>
     <dependency>
       <groupId>org.apache.velocity</groupId>
       <artifactId>velocity</artifactId>

@@ -127,7 +127,9 @@ public class DirectClient implements Client {
 			conn = connPool.getConnection(logicDbName, isMaster(keywordParameters), true);
 			PreparedStatement statement = createSqlStatement(conn, sql, parameters);
 		
-			return statement.executeQuery();
+			ResultSet rs = statement.executeQuery();
+			rs.setFetchSize(20000);
+			return rs;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -157,7 +159,9 @@ public class DirectClient implements Client {
 			conn = connPool.getConnection(logicDbName, isMaster(keywordParameters), true);
 			PreparedStatement statement = createSpStatement(conn, sql, parameters);
 		
-			return statement.executeQuery();
+			ResultSet rs = statement.executeQuery();
+			rs.setFetchSize(20000);
+			return rs;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

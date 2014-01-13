@@ -21,7 +21,7 @@ public class DasConfigureService implements Runnable {
 	private String snapshotUrl;
 	
 	private File snapshotFile;
-	private AtomicReference<DasConfigure> snapshot;
+	private AtomicReference<DasConfigure> snapshot = new AtomicReference<DasConfigure>();
 	
 	private ObjectMapper mapper = new ObjectMapper();
 	private ScheduledExecutorService reader;
@@ -53,7 +53,7 @@ public class DasConfigureService implements Runnable {
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		try {
 			snapshot.set(mapper.readValue(new URL(snapshotUrl), DasConfigure.class));
-			mapper.writeValue(snapshotFile, snapshot);
+			mapper.writeValue(snapshotFile, getSnapshot());
 		} catch (Exception e) {
 			logger.error("Unable to sychronize with configure service:" + snapshotUrl, e);
 		}
@@ -74,11 +74,5 @@ public class DasConfigureService implements Runnable {
 	@Override
 	public void run() {
 		syncSnapshot();
-	}
-	
-	public static void main(String[] args) {
-		DasConfigureService ns = new DasConfigureService(args[0], new File("e:/test.json"));
-		ns.syncSnapshot();
-		ns.loadSnapshot();
 	}
 }

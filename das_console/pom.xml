@@ -11,11 +11,13 @@
   <packaging>war</packaging>
 
   <dependencies>
+  <!-- 
     <dependency>
       <groupId>com.ctrip.platform</groupId>
       <artifactId>dao_java</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+  -->
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>

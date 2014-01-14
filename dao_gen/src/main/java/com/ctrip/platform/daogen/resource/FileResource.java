@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,51 +20,39 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.FileUtils;
 
-import com.ctrip.platform.daogen.MongoClientManager;
+import com.ctrip.platform.daogen.domain.ProjectDAO;
 import com.ctrip.platform.daogen.domain.ZTreeElement;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 
 @Resource
 @Singleton
 @Path("file")
 public class FileResource {
 
-	private DB daoGenDB;
-
-	private DBCollection projectCollection;
-
+	private static ProjectDAO projectDao = new ProjectDAO();
+	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<ZTreeElement> getProjects(@QueryParam("id") String id,
 			@QueryParam("name") String name, @QueryParam("type") String type,
 			@QueryParam("parent") String parent) {
 
-		if (null == daoGenDB) {
-			MongoClient client = MongoClientManager.getDefaultMongoClient();
-			daoGenDB = client.getDB("daogen");
-		}
-
-		if (null == projectCollection) {
-			projectCollection = daoGenDB.getCollection("project");
-		}
-
 		List<ZTreeElement> allElements = new ArrayList<ZTreeElement>();
 
 		if (null != type && type.equals("all")) {
 
-			DBCursor projects = projectCollection.find();
-			while (projects.hasNext()) {
-				DBObject current = projects.next();
-				ZTreeElement p = new ZTreeElement();
-				p.setId(current.get("_id").toString());
-				p.setName(current.get("name").toString());
-				p.setType("project");
-				p.setIsParent(null == parent ? true : Boolean.valueOf(parent));
-				allElements.add(p);
+			ResultSet results = projectDao.getAllProjects();
+			try {
+				while (results.next()) {
+					ZTreeElement p = new ZTreeElement();
+					p.setId(results.getInt(1));
+					p.setName(results.getString(3));
+					p.setType("project");
+					p.setIsParent(null == parent ? true : Boolean.valueOf(parent));
+					allElements.add(p);
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			return allElements;
 		} else if (null != type && type.equals("project")) {
@@ -83,7 +73,7 @@ public class FileResource {
 				for (File f : FileUtils.listFiles(currentProjectDir,
 						new String[] { "cs", "java" }, true)) {
 					ZTreeElement p = new ZTreeElement();
-					p.setId(id);
+					p.setId(Integer.valueOf(id));
 					p.setName(String.format("%s/%s", f.getParentFile().getName(), f.getName()));
 					p.setType("file");
 					p.setIsParent(false);

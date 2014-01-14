@@ -7,7 +7,15 @@ import java.util.Map;
 
 public class Consts {
 	
+	/**
+	 * Key: 数据库类型
+	 * Value: 对应Java数据类型
+	 */
 	public static Map<String, String> JavaSqlTypeMap;
+	/**
+	 * Key: Java数据类型
+	 * Value: 对应的的DbType，DbType参照C#
+	 */
 	public static Map<String, String> JavaDbTypeMap;
 	
 	public static Map<String, String> CSharpSqlTypeMap;

@@ -2,7 +2,7 @@ package com.ctrip.platform.daogen.domain;
 
 public class ZTreeElement {
 	
-	private String id;
+	private int id;
 	
 //	private String namespace;
 	
@@ -12,11 +12,11 @@ public class ZTreeElement {
 	
 	private String type;
 
-	public String getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 

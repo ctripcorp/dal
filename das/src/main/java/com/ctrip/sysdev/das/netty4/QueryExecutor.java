@@ -5,7 +5,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.math.BigDecimal;
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -21,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.sysdev.das.DruidDataSourceWrapper;
+import com.ctrip.sysdev.das.common.enums.DbType;
 import com.ctrip.sysdev.das.domain.DasProto;
-import com.ctrip.sysdev.das.domain.enums.DbType;
 import com.ctrip.sysdev.das.monitors.ErrorReporter;
 import com.ctrip.sysdev.das.monitors.StatusReportTask;
 import com.google.protobuf.ByteString;

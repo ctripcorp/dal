@@ -7,7 +7,8 @@ import io.netty.channel.group.ChannelGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.DruidDataSourceWrapper;
+import com.ctrip.sysdev.das.DalServer;
+import com.ctrip.sysdev.das.common.db.DruidDataSourceWrapper;
 import com.ctrip.sysdev.das.domain.DasProto;
 import com.ctrip.sysdev.das.monitors.ErrorReporter;
 import com.google.inject.Inject;
@@ -27,9 +28,9 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<DasProto.Requ
 	@Inject
 	public DalServiceHandler(@Named("ChannelGroup") ChannelGroup allChannels) {
 		this.allChannels = allChannels;
-		queryExecutor = new QueryExecutor(DruidDataSourceWrapper.dataSource);
+		queryExecutor = new QueryExecutor(DalServer.DATA_SOURCE);
 	}
-
+	
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, DasProto.Request request) {
 		logger.debug("channelRead0 from {} message = '{}'", ctx.channel(), request);
@@ -58,5 +59,4 @@ public class DalServiceHandler extends SimpleChannelInboundHandler<DasProto.Requ
 	public void channelInactive(ChannelHandlerContext ctx) {
 		logger.debug("channelInactive {}", ctx.channel());
 	}
-
 }

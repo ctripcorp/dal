@@ -6,11 +6,17 @@ import java.net.UnknownHostException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ctrip.sysdev.das.common.db.DruidDataSourceWrapper;
 import com.ctrip.sysdev.das.monitors.ErrorReporter;
 import com.ctrip.sysdev.das.monitors.PerformanceMonitorTask;
 import com.ctrip.sysdev.das.monitors.StatusReportTask;
 import com.ctrip.sysdev.das.netty4.Netty4Server;
 
+/**
+ * @deprecated this is only for stress test
+ * @author jhhe
+ *
+ */
 public class ZklessDas {
 	private static Logger logger = LoggerFactory.getLogger(DalServer.class);
 	public static boolean senderEnabled = true;
@@ -32,8 +38,8 @@ public class ZklessDas {
 	protected boolean register() {
 		try {
 			GuiceObjectFactory factory = new GuiceObjectFactory();
-			DruidDataSourceWrapper ds = factory.getInstance(DruidDataSourceWrapper.class);
-			ds.initDataSourceWrapper();
+//			DruidDataSourceWrapper ds = factory.getInstance(DruidDataSourceWrapper.class);
+//			ds.initDataSourceWrapper();
 			
 			StatusReportTask.initInstance(consoleAddr, 50);
 			ErrorReporter.initInstance(ip, port, consoleAddr);

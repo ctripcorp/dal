@@ -19,7 +19,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.DruidDataSourceWrapper;
+import com.ctrip.sysdev.das.common.db.DruidDataSourceWrapper;
 import com.ctrip.sysdev.das.common.enums.DbType;
 import com.ctrip.sysdev.das.domain.DasProto;
 import com.ctrip.sysdev.das.monitors.ErrorReporter;

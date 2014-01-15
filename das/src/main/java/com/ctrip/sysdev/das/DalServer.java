@@ -1,11 +1,18 @@
 package com.ctrip.sysdev.das;
 
+import java.io.File;
+
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ctrip.sysdev.das.common.cfg.DasConfigureService;
+import com.ctrip.sysdev.das.common.db.DasWorkerConfigureReader;
+import com.ctrip.sysdev.das.common.db.DruidDataSourceWrapper;
+import com.ctrip.sysdev.das.common.to.Deployment;
+import com.ctrip.sysdev.das.common.zk.DasZkAccesssorFactory;
 import com.ctrip.sysdev.das.controller.DasService;
 import com.ctrip.sysdev.das.monitors.ErrorReporter;
 import com.ctrip.sysdev.das.monitors.PerformanceMonitorTask;
@@ -17,6 +24,7 @@ public class DalServer extends DasService {
 	public static boolean senderEnabled = true;
 	public static String consoleAddr = "localhost:8080";
 	public static double GC_THRESHHOLD = 0.70;
+	public static DruidDataSourceWrapper DATA_SOURCE;
 
 	private String path;
 	private String port;
@@ -54,28 +62,21 @@ public class DalServer extends DasService {
 
 	protected boolean register() {
 		try {
+			// TODO clear all ZK related
 			logger.info("Registering: " + path);
 			zk.create(path, parent.getBytes(), Ids.OPEN_ACL_UNSAFE,
 					CreateMode.EPHEMERAL);
 			logger.info("Register success.");
 			
+			initDataSource();
+			initMonitors();
+			
 			GuiceObjectFactory factory = new GuiceObjectFactory();
-			DruidDataSourceWrapper ds = factory.getInstance(DruidDataSourceWrapper.class);
-			ds.initDataSourceWrapper(zk);
-			
-//			StatusReportTask.initInstance("http://172.16.155.184:8080", 50);
-			StatusReportTask.initInstance(consoleAddr, 50);
-			ErrorReporter.initInstance(ip, port, consoleAddr);
-			
 			dasService = factory.getInstance(Netty4Server.class);
 			dasService.start(Integer.parseInt(port));
-//			SingleInstanceDaemonTool watcher = SingleInstanceDaemonTool
-//					.createInstance(serverInfoMXBean.getName());
-//			watcher.init();
-//			MBeanUtil.registerMBean(serverInfoMXBean.getName(),
-//			serverInfoMXBean.getName(), serverInfoMXBean);
 			
-			PerformanceMonitorTask.start(port, ip);
+			initJMX();
+			
 			return true;
 		} catch (Throwable e) {
 			logger.error("Error during register worker path", e);
@@ -83,7 +84,30 @@ public class DalServer extends DasService {
 			return false;
 		}
 	}
+	
+	private void initDataSource() throws Exception {
+		DasConfigureService cs = new DasConfigureService("localhost:8080", new File("e:/snapshot.json"));
+		DasZkAccesssorFactory af = new DasZkAccesssorFactory(zk);
+		DasWorkerConfigureReader reader = new DasWorkerConfigureReader(cs, af);
+		Deployment d = af.getDeploymentAccessor().getDeployment(ip, port);
+		DATA_SOURCE = new DruidDataSourceWrapper(d, reader);
+	}
+	
+	private void initMonitors() throws Exception {
+//		StatusReportTask.initInstance("http://172.16.155.184:8080", 50);
+		StatusReportTask.initInstance(consoleAddr, 50);
+		ErrorReporter.initInstance(ip, port, consoleAddr);
+		PerformanceMonitorTask.start(port, ip);
+	}
 
+	private void initJMX() throws Exception {
+//		SingleInstanceDaemonTool watcher = SingleInstanceDaemonTool
+//		.createInstance(serverInfoMXBean.getName());
+//		watcher.init();
+//		MBeanUtil.registerMBean(serverInfoMXBean.getName(),
+//		serverInfoMXBean.getName(), serverInfoMXBean);
+	}
+	
 	protected void shutdown() {
 		try {
 			logger.info("Stopping worker");

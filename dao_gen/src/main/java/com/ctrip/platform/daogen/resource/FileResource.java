@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,81 +18,31 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.FileUtils;
 
-import com.ctrip.platform.daogen.domain.ProjectDAO;
-import com.ctrip.platform.daogen.domain.ZTreeElement;
+import com.ctrip.platform.daogen.pojo.Project;
 
 @Resource
 @Singleton
 @Path("file")
 public class FileResource {
 
-	private static ProjectDAO projectDao = new ProjectDAO();
-	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<ZTreeElement> getProjects(@QueryParam("id") String id,
-			@QueryParam("name") String name, @QueryParam("type") String type,
-			@QueryParam("parent") String parent) {
+	public List<Project> getFiles(@QueryParam("id") String id) {
+		List<Project> files = new ArrayList<Project>();
 
-		List<ZTreeElement> allElements = new ArrayList<ZTreeElement>();
-
-		if (null != type && type.equals("all")) {
-
-			ResultSet results = projectDao.getAllProjects();
-			try {
-				while (results.next()) {
-					ZTreeElement p = new ZTreeElement();
-					p.setId(results.getInt(1));
-					p.setName(results.getString(3));
-					p.setType("project");
-					p.setIsParent(null == parent ? true : Boolean.valueOf(parent));
-					allElements.add(p);
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return allElements;
-		} else if (null != type && type.equals("project")) {
-			File currentProjectDir = new File(id);
-			if (currentProjectDir.exists()) {
-//				for (File f : FileUtils.listFilesAndDirs(currentProjectDir,
-//						new NotFileFilter(TrueFileFilter.INSTANCE),
-//						DirectoryFileFilter.DIRECTORY)) {
-//					if (!f.getName().equals(id)) {
-//						Project p = new Project();
-//						p.setId(id);
-//						p.setName(f.getName());
-//						p.setType("folder");
-//						p.setIsParent(true);
-//						allProjects.add(p);
-//					}
-//				}
-				for (File f : FileUtils.listFiles(currentProjectDir,
-						new String[] { "cs", "java" }, true)) {
-					ZTreeElement p = new ZTreeElement();
-					p.setId(Integer.valueOf(id));
-					p.setName(String.format("%s/%s", f.getParentFile().getName(), f.getName()));
-					p.setType("file");
-					p.setIsParent(false);
-					allElements.add(p);
-				}
+		File currentProjectDir = new File(id);
+		if (currentProjectDir.exists()) {
+			for (File f : FileUtils.listFiles(currentProjectDir, new String[] {
+					"cs", "java" }, true)) {
+				Project p = new Project();
+				p.setId(Integer.valueOf(id));
+				p.setName(String.format("%s/%s", f.getParentFile().getName(),
+						f.getName()));
+				files.add(p);
 			}
 		}
-//		else if (null != type && type.equals("folder")) {
-//			File currentProjectDir = new File(id, name);
-//			for (File f : FileUtils.listFiles(currentProjectDir, new String[] {
-//					"cs", "java" }, false)) {
-//				Project p = new Project();
-//				p.setId(id);
-//				p.setName(String.format("%s/%s", name, f.getName()));
-//				p.setType("file");
-//				p.setIsParent(false);
-//				allProjects.add(p);
-//			}
-//		}
 
-		return allElements;
+		return files;
 	}
 
 	@GET

@@ -1,4 +1,4 @@
-package com.ctrip.platform.daogen.gen;
+package com.ctrip.platform.daogen.pojo;
 
 public class Parameter {
 	
@@ -7,6 +7,26 @@ public class Parameter {
 	private String name;
 	
 	private String fieldName;
+	
+	private int position;
+	
+	private String paramMode;
+
+	public int getPosition() {
+		return position;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
+	}
+
+	public String getParamMode() {
+		return paramMode;
+	}
+
+	public void setParamMode(String paramMode) {
+		this.paramMode = paramMode;
+	}
 
 	public String getFieldName() {
 		return fieldName;

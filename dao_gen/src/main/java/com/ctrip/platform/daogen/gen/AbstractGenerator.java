@@ -10,16 +10,17 @@ import java.util.Map;
 import org.apache.velocity.app.Velocity;
 
 import com.ctrip.platform.daogen.Consts;
-import com.ctrip.platform.daogen.domain.AutoTaskDAO;
-import com.ctrip.platform.daogen.domain.MasterDAO;
-import com.ctrip.platform.daogen.domain.ProjectDAO;
-import com.ctrip.platform.daogen.domain.SPTaskDAO;
-import com.ctrip.platform.daogen.domain.SqlTaskDAO;
+import com.ctrip.platform.daogen.dao.AutoTaskDAO;
+import com.ctrip.platform.daogen.dao.MasterDAO;
+import com.ctrip.platform.daogen.dao.ProjectDAO;
+import com.ctrip.platform.daogen.dao.SPTaskDAO;
+import com.ctrip.platform.daogen.dao.SqlTaskDAO;
 import com.ctrip.platform.daogen.pojo.AutoTask;
 import com.ctrip.platform.daogen.pojo.FieldMeta;
 import com.ctrip.platform.daogen.pojo.Project;
 import com.ctrip.platform.daogen.pojo.SpTask;
 import com.ctrip.platform.daogen.pojo.SqlTask;
+import com.ctrip.platform.daogen.pojo.Task;
 
 public abstract class AbstractGenerator implements Generator {
 
@@ -74,7 +75,7 @@ public abstract class AbstractGenerator implements Generator {
 			this.projectId = projectId;
 		}
 
-		List<AutoTask> autoTasks = new ArrayList<AutoTask>();
+		List<Task> autoTasks = new ArrayList<Task>();
 		ResultSet autoSqlResultSet = autoTaskDao.getTasksByProjectId(proj
 				.getId());
 		try {
@@ -100,11 +101,30 @@ public abstract class AbstractGenerator implements Generator {
 		generateAutoSqlCode(autoTasks);
 
 		// 存储过程
-		List<SpTask> sp = new ArrayList<SpTask>();
+		List<Task> sp = new ArrayList<Task>();
+		ResultSet spResultSet = spTaskDao.getTasksByProjectId(proj
+				.getId());
+		try {
+			while (spResultSet.next()) {
+				SpTask task = new SpTask();
+				task.setId(spResultSet.getInt(1));
+				task.setProject_id(spResultSet.getInt(2));
+				task.setDb_name(spResultSet.getString(3));
+				task.setClass_name(spResultSet.getString(4));
+				task.setSp_schema(spResultSet.getString(5));
+				task.setSp_name(spResultSet.getString(6));
+				task.setSql_style(spResultSet.getString(7));
+				task.setCrud_type(spResultSet.getString(8));
+				task.setSp_content(spResultSet.getString(9));
+				sp.add(task);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		generateSPCode(sp);
 
 		// 手工编写的SQL
-		List<SqlTask> freeSql = new ArrayList<SqlTask>();
+		List<Task> freeSql = new ArrayList<Task>();
 		generateFreeSqlCode(freeSql);
 
 		return true;
@@ -157,14 +177,14 @@ public abstract class AbstractGenerator implements Generator {
 	 * @param condition
 	 * @return
 	 */
-	protected Map<String, List<AutoTask>> groupByDbName(List<AutoTask> tasks) {
-		Map<String, List<AutoTask>> groupBy = new HashMap<String, List<AutoTask>>();
+	protected Map<String, List<Task>> groupByDbName(List<Task> tasks) {
+		Map<String, List<Task>> groupBy = new HashMap<String, List<Task>>();
 
-		for (AutoTask t : tasks) {
+		for (Task t : tasks) {
 			if (groupBy.containsKey(t.getDb_name())) {
 				groupBy.get(t.getDb_name()).add(t);
 			} else {
-				List<AutoTask> objs = new ArrayList<AutoTask>();
+				List<Task> objs = new ArrayList<Task>();
 				objs.add(t);
 				groupBy.put(t.getDb_name(), objs);
 			}
@@ -173,14 +193,14 @@ public abstract class AbstractGenerator implements Generator {
 		return groupBy;
 	};
 
-	protected Map<String, List<AutoTask>> groupByTableName(List<AutoTask> tasks) {
-		Map<String, List<AutoTask>> groupBy = new HashMap<String, List<AutoTask>>();
+	protected Map<String, List<Task>> groupByTableName(List<Task> tasks) {
+		Map<String, List<Task>> groupBy = new HashMap<String, List<Task>>();
 
-		for (AutoTask t : tasks) {
+		for (Task t : tasks) {
 			if (groupBy.containsKey(t.getTable_name())) {
 				groupBy.get(t.getTable_name()).add(t);
 			} else {
-				List<AutoTask> objs = new ArrayList<AutoTask>();
+				List<Task> objs = new ArrayList<Task>();
 				objs.add(t);
 				groupBy.put(t.getTable_name(), objs);
 			}
@@ -190,12 +210,12 @@ public abstract class AbstractGenerator implements Generator {
 	};
 
 	@Override
-	public abstract void generateAutoSqlCode(List<AutoTask> tasks);
+	public abstract void generateAutoSqlCode(List<Task> tasks);
 
 	@Override
-	public abstract void generateSPCode(List<SpTask> tasks);
+	public abstract void generateSPCode(List<Task> tasks);
 
 	@Override
-	public abstract void generateFreeSqlCode(List<SqlTask> tasks);
+	public abstract void generateFreeSqlCode(List<Task> tasks);
 
 }

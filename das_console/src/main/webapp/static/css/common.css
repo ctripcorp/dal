@@ -35,3 +35,7 @@ body {
 	min-height:30px;
 	line-height:30px;
 }
+
+.w2ui-reset * {
+    font-size: 12px;
+}

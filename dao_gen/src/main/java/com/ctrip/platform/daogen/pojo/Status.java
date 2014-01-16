@@ -1,4 +1,4 @@
-package com.ctrip.platform.daogen.resource;
+package com.ctrip.platform.daogen.pojo;
 
 public class Status {
 	private String code;

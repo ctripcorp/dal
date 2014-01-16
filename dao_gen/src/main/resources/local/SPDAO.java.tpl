@@ -23,7 +23,7 @@ public class $dao_name extends AbstractDAO {
 public #if( $method.getAction() == "select" )ResultSet#{else}int#end ${method.getMethodName()}#[[(]]##foreach($p in $parameters)${p.getType()} ${p.getName()}#if($foreach.count != $parameters.size()), #end#end#[[)]]#{
 		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
 		#foreach($p in $parameters)
-parameters.add(StatementParameter.newBuilder().setDbType(DbType.${JavaDbTypeMap.get($p.getType())}).setDirection(ParameterDirection.Input).setNullable(false).setIndex(1).setName("").setSensitive(false).setValue(${p.getName()}).build());
+parameters.add(StatementParameter.newBuilder().setDbType(DbType.${JavaDbTypeMap.get($p.getType())}).setDirection(#if( $p.getParamMode() == "OUT" )ParameterDirection.InputOutput#{else}ParameterDirection.Input#end).setNullable(false).setIndex(${p.getPosition()}).setName("").setSensitive(false).setValue(${p.getName()}).build());
 
 		#end
 return this.#if( $method.getAction() == "select" )fetchBySP#{else}executeSP#end("${method.getSqlSPName()}", parameters, null);

@@ -46,21 +46,7 @@ jQuery(document).ready(function () {
 
 
 var reloadProjects = function () {
-    $("body").block({
-        message: '<img src="/static/images/ajax-loading.gif" align="">',
-        // centerY: centerY != undefined ? centerY : true,
-        css: {
-            top: '10%',
-            border: 'none',
-            padding: '2px',
-            backgroundColor: 'none'
-        },
-        overlayCSS: {
-            backgroundColor: '#000',
-            opacity: 0.05,
-            cursor: 'wait'
-        }
-    });
+    cblock($("body"));
     var currentElement = w2ui['sidebar'];
     var nodes = [];
     $.each(currentElement.nodes[0].nodes, function (index, value) {
@@ -85,26 +71,12 @@ var reloadProjects = function () {
                 plus: true,
                 onExpand: function (event) {
                     // var centerY = null;
-                    $("#main_layout").block({
-                        message: '<img src="/static/images/ajax-loading.gif" align="">',
-                        // centerY: centerY != undefined ? centerY : true,
-                        css: {
-                            top: '10%',
-                            border: 'none',
-                            padding: '2px',
-                            backgroundColor: 'none'
-                        },
-                        overlayCSS: {
-                            backgroundColor: '#000',
-                            opacity: 0.05,
-                            cursor: 'wait'
-                        }
-                    });
+                    cblock($("#main_layout"));
                     var currentElement = event.object;
                     currentElement.icon = "fa fa-folder-open-o";
 
                     if (undefined == currentElement.nodes || currentElement.nodes.length == 0) {
-                        $.get("/rest/file?type=project&id=" + currentElement.id, function (data) {
+                        $.get("/rest/file?id=" + currentElement.id, function (data) {
                             var allNodes = [];
                             $.each(data, function (index, value) {
                                 allNodes.push({
@@ -129,9 +101,9 @@ var reloadProjects = function () {
                                 });
                             });
                             w2ui['sidebar'].add(currentElement, allNodes);
+                            $("#main_layout").unblock();
                         });
                     }
-                    $("#main_layout").unblock();
                     w2ui['sidebar'].refresh();
                 },
                 onCollapse: function (event) {

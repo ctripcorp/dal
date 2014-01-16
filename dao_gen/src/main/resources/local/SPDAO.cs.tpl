@@ -29,8 +29,8 @@ public #if( $method.getAction() == "select" )IDataReader#{else}int#end ${method.
                 parameters.Add(new ConcreteParameter(){
                         DbType = System.Data.DbType.${CSharpDbTypeMap.get($p.getType())},
                         Name = "@${p.getFieldName()}",
-                        Direction = ParameterDirection.Input,
-                        Index = 0,
+                        Direction = #if( $p.getParamMode() == "OUT" )ParameterDirection.InputOutput#{else}ParameterDirection.Input#end,
+                        Index = ${p.getPosition()},
                         IsNullable =false,
                         IsSensitive = false,
                         Size  = 50,

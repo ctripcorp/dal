@@ -50,7 +50,8 @@ public class DasWorkerAccessor extends DasZkAccessor {
 	}
 	
 	public void unregister(String id, int port) throws Exception {
-		delete(pathOf(WORKER, String.valueOf(id)));
+		delete(pathOf(pathOf(WORKER, String.valueOf(id), String.valueOf(port))));
+//		deleteNodeNested(pathOf(WORKER, String.valueOf(id)));
 	}
 	
 	public void unregisterByLogicDB(String id, String logicDb) throws Exception {

@@ -3,6 +3,8 @@ package com.ctrip.platform.daogen.gen;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +17,11 @@ import org.apache.velocity.app.Velocity;
 import com.ctrip.platform.daogen.Consts;
 import com.ctrip.platform.daogen.pojo.AutoTask;
 import com.ctrip.platform.daogen.pojo.FieldMeta;
+import com.ctrip.platform.daogen.pojo.Method;
+import com.ctrip.platform.daogen.pojo.Parameter;
 import com.ctrip.platform.daogen.pojo.SpTask;
 import com.ctrip.platform.daogen.pojo.SqlTask;
+import com.ctrip.platform.daogen.pojo.Task;
 
 public class JavaGenerator extends AbstractGenerator {
 	
@@ -36,17 +41,16 @@ public class JavaGenerator extends AbstractGenerator {
 	 * @param tasks
 	 */
 	@Override
-	public  void generateAutoSqlCode(List<AutoTask> tasks) {
-
-		Map<String, List<AutoTask>> groupByTable = groupByTableName(tasks);
-
+	public void generateAutoSqlCode(List<Task> tasks) {
+		Map<String, List<Task>> groupByTable = groupByTableName(tasks);
+	
 		VelocityContext context = new VelocityContext();
 
 		context.put("namespace", namespace);
 
-		for (Map.Entry<String, List<AutoTask>> entry : groupByTable.entrySet()) {
+		for (Map.Entry<String, List<Task>> entry : groupByTable.entrySet()) {
 			String table = entry.getKey();
-			List<AutoTask> objs = entry.getValue();
+			List<Task> objs = entry.getValue();
 			if (objs.size() > 0) {
 				context.put("database", objs.get(0).getDb_name());
 			} else {
@@ -71,7 +75,13 @@ public class JavaGenerator extends AbstractGenerator {
 			List<Method> methods = new ArrayList<Method>();
 			List<Method> spMethods = new ArrayList<Method>();
 
-			for (AutoTask obj : objs) {
+			for (Task task : objs) {
+				AutoTask obj = (AutoTask)task;
+				
+				if(null == obj.getMethod_name() || obj.getMethod_name().isEmpty()){
+					continue;
+				}
+				
 				Method m = new Method();
 				m.setAction(obj.getCrud_type().toLowerCase());
 				m.setMethodName(obj.getMethod_name());
@@ -100,6 +110,9 @@ public class JavaGenerator extends AbstractGenerator {
 					for (FieldMeta field : fieldsMeta) {
 						if (field.getName().equalsIgnoreCase(primaryKey)) {
 							p.setType(field.getType());
+							p.setParamMode("IN");
+							p.setPosition(1);
+							break;
 						}
 					}
 					parameters.add(p);
@@ -117,7 +130,16 @@ public class JavaGenerator extends AbstractGenerator {
 					for(FieldMeta meta : fieldsMeta){
 						allFields.add(meta.getName());
 					}
-					m.setParameters(getParametersByFields(StringUtils.join(allFields.toArray(), ","), fieldsMeta));
+					List<Parameter> parameters = getParametersByFields(StringUtils.join(allFields.toArray(), ","), fieldsMeta);
+					
+					for(Parameter p : parameters){
+						if(p.getName().equals(primaryKey)){
+							p.setParamMode("OUT");
+							break;
+						}
+					}
+					
+					m.setParameters(parameters);
 					spMethods.add(m);
 				}
 
@@ -137,11 +159,11 @@ public class JavaGenerator extends AbstractGenerator {
 				}
 				daoWriter = new FileWriter(String.format("%s/java/%s.java",
 						projectId, context.get("dao_name")));
-//				pojoWriter = new FileWriter(String.format("%s/java/%s.java",
+//				pojoWriter = new FileWriter(String.format("%s/csharp/%s.cs",
 //						projectId, context.get("pojo_name")));
 				Velocity.mergeTemplate("DAO.java.tpl", "UTF-8", context,
 						daoWriter);
-//				Velocity.mergeTemplate("POJO.java.tpl", "UTF-8", context,
+//				Velocity.mergeTemplate("POJO.cs.tpl", "UTF-8", context,
 //						pojoWriter);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -166,103 +188,104 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public void generateSPCode(List<SpTask> tasks) {
-//		Map<String, List<DBObject>> groupbyDB = groupByCondition(tasks, "database");
-//
-//		VelocityContext context = new VelocityContext();
-//
-//		context.put("namespace", namespace);
-//
-//		for (Map.Entry<String, List<DBObject>> entry : groupbyDB.entrySet()) {
-//			String sp = entry.getKey();
-//			List<DBObject> objs = entry.getValue();
-//			if (objs.size() > 0) {
-//				context.put("database", objs.get(0).get("database"));
-//			} else {
-//				continue;
-//			}
-//			context.put("dao_name",
-//					String.format("%sSPDAO", context.get("database")));
-//			context.put("JavaDbTypeMap", Consts.JavaDbTypeMap);
-//			
-//			List<Method> spMethods = new ArrayList<Method>();
-//
-//			for (DBObject obj : objs) {
-//				
-//				BasicDBObject metaQuery = new BasicDBObject().append("database",
-//						context.get("database")).append("sp", obj.get("sql_spname"));
-//
-//				BasicDBList fields = null;
-//
-//				DBObject metaData = taskMetaCollection.findOne(metaQuery);
-//
-//				if (null != metaData) {
-//					fields = (BasicDBList) metaData.get("fields");
-//				}
-//				
-//				Object crud = obj.get("crud");
-//				Method m = new Method();
-//				m.setAction(crud.toString());
-//				String spName = obj.get("sql_spname").toString();
-//				if (spName.contains(".")) {
-//					m.setMethodName(spName.substring(spName.indexOf(".") + 1));
-//				}else{
-//					m.setMethodName(spName);
-//				}
-//				m.setSqlSPName(spName);
-//				
-//				BasicDBList params = (BasicDBList)metaData.get("params");
-//				List<Parameter> parameters = new ArrayList<Parameter>();
-//				for (Object param : params) {
-//					Parameter p = new Parameter();
-//					DBObject bj = (DBObject)param;
-//					String name = bj.get("name").toString();
-//					if(name.startsWith("@") || name.startsWith(":")){
-//						name = name.substring(1);
-//					}
-//					p.setName(name);
-//					p.setType(Consts.JavaSqlTypeMap.get(bj.get("type")));
-//					parameters.add(p);
-//				}
-//				m.setParameters(parameters);
-//				spMethods.add(m);
-//			}
-//			
-//			context.put("sp_methods", spMethods);
-//			FileWriter w = null;
-//			try {
-//				File projectFile = new File(projectId);
-//				if (!projectFile.exists()) {
-//					projectFile.mkdir();
-//				}
-//				File csharpFile = new File(projectFile, "java");
-//				if (!csharpFile.exists()) {
-//					csharpFile.mkdir();
-//				}
-//				w = new FileWriter(String.format("%s/java/%s.java",projectId,
-//						context.get("dao_name")));
-//				Velocity.mergeTemplate("SPDAO.java.tpl", "UTF-8", context, w);
-//
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} finally {
-//				if (null != w) {
-//					try {
-//						w.close();
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//			
-//		}
+	public void generateSPCode(List<Task> tasks) {
+		Map<String, List<Task>> groupbyDB = groupByDbName(tasks);
+
+		VelocityContext context = new VelocityContext();
+
+		context.put("namespace", namespace);
+
+		for (Map.Entry<String, List<Task>> entry : groupbyDB.entrySet()) {
+			String sp = entry.getKey();
+			List<Task> objs = entry.getValue();
+			if (objs.size() > 0) {
+				context.put("database", objs.get(0).getDb_name());
+			} else {
+				continue;
+			}
+			context.put("dao_name",
+					String.format("%sSPDAO", context.get("database")));
+			context.put("JavaDbTypeMap", Consts.JavaDbTypeMap);
+			context.put("JavaSqlTypeMap", Consts.JavaSqlTypeMap);
+
+			List<Method> spMethods = new ArrayList<Method>();
+
+			for (Task task : objs) {
+				
+				SpTask obj = (SpTask)task;
+
+				Method m = new Method();
+				m.setAction(obj.getCrud_type());
+				m.setMethodName(obj.getSp_name());
+				m.setSqlSPName(String.format("%s.%s", obj.getSp_schema(), obj.getSp_name()));
+				
+				ResultSet spParams = masterDao.getSPParams(obj.getDb_name(), obj.getSp_schema(), obj.getSp_name());
+				
+				List<Parameter> parameters = new ArrayList<Parameter>();
+				try {
+					while(spParams.next()){
+						Parameter p = new Parameter();
+						String name = spParams.getString(1);
+						if (name.startsWith("@") || name.startsWith(":")) {
+							name = name.substring(1);
+						}
+						p.setName(name);
+						p.setFieldName(name);
+						p.setType(Consts.JavaSqlTypeMap.get(spParams.getString(2)));
+						p.setParamMode(spParams.getString(3));
+						p.setPosition(spParams.getInt(4));
+						parameters.add(p);
+					}
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				m.setParameters(parameters);
+				spMethods.add(m);
+			}
+
+			context.put("sp_methods", spMethods);
+			FileWriter daoWriter = null;
+
+			try {
+				File projectFile = new File(projectId);
+				if (!projectFile.exists()) {
+					projectFile.mkdir();
+				}
+				File csharpFile = new File(projectFile, "java");
+				if (!csharpFile.exists()) {
+					csharpFile.mkdir();
+				}
+				daoWriter = new FileWriter(String.format("%s/java/%s.java",
+						projectId, context.get("dao_name")));
+
+				Velocity.mergeTemplate("SPDAO.java.tpl", "UTF-8", context,
+						daoWriter);
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+
+				try {
+					if (null != daoWriter) {
+						daoWriter.close();
+					}
+
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+
+		}
 
 	}
 
 	@Override
-	public void generateFreeSqlCode(List<SqlTask> tasks) {
+	public void generateFreeSqlCode(List<Task> tasks) {
 
 	}
 
@@ -285,6 +308,7 @@ public class JavaGenerator extends AbstractGenerator {
 			for(FieldMeta meta : fieldsMeta){
 				if(meta.getName().equalsIgnoreCase(field)){
 					p.setType(Consts.JavaSqlTypeMap.get(meta.getType()));
+					p.setPosition(meta.getPosition());
 					break;
 				}
 			}
@@ -317,6 +341,7 @@ public class JavaGenerator extends AbstractGenerator {
 			for(FieldMeta meta : fieldsMeta){
 				if(meta.getName().equalsIgnoreCase(p.getName())){
 					p.setType(Consts.JavaSqlTypeMap.get(meta.getType()));
+					p.setPosition(meta.getPosition());
 					break;
 				}
 			}

@@ -16,10 +16,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.ctrip.platform.daogen.domain.ProjectDAO;
+import com.ctrip.platform.daogen.dao.ProjectDAO;
 import com.ctrip.platform.daogen.gen.CSharpGenerator;
 import com.ctrip.platform.daogen.gen.JavaGenerator;
 import com.ctrip.platform.daogen.pojo.Project;
+import com.ctrip.platform.daogen.pojo.Status;
 
 /**
  * The schema of {daogen.project} 

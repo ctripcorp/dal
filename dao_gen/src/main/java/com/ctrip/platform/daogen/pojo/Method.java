@@ -1,4 +1,4 @@
-package com.ctrip.platform.daogen.gen;
+package com.ctrip.platform.daogen.pojo;
 
 import java.util.List;
 

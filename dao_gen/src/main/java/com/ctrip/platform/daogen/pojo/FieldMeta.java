@@ -13,6 +13,16 @@ public class FieldMeta {
 	private boolean primary;
 	
 	private boolean valueType;
+	
+	private boolean indexed;
+
+	public boolean isIndexed() {
+		return indexed;
+	}
+
+	public void setIndexed(boolean indexed) {
+		this.indexed = indexed;
+	}
 
 	public String getName() {
 		return name;

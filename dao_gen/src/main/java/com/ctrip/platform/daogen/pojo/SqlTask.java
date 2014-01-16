@@ -1,6 +1,6 @@
 package com.ctrip.platform.daogen.pojo;
 
-public class SqlTask {
+public class SqlTask  extends AbstractTask{
 
 	private int id;
 	

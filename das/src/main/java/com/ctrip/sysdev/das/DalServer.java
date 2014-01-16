@@ -139,7 +139,9 @@ public class DalServer extends DasService {
 	protected boolean isDead(WatchedEvent event) {
 		switch (event.getType()) {
 		case None:
-			return event.getState() == Event.KeeperState.Expired;
+			// TODO shall we keep this instance?
+			// return event.getState() == Event.KeeperState.Expired;
+			return false;
 		case NodeDeleted:
 			return contains(event.getPath());
 		default:

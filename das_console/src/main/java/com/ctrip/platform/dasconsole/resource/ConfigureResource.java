@@ -9,13 +9,18 @@ import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+
 import com.ctrip.sysdev.das.common.to.DasConfigure;
+import com.ctrip.sysdev.das.common.zk.DasZkPathConstants;
+import com.ctrip.sysdev.das.common.zk.ZkWatcherDelegator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Resource
 @Path("configure/snapshot")
 @Singleton
-public class ConfigureResource extends DalBaseResource implements Runnable {
+public class ConfigureResource extends DalBaseResource implements Runnable, DasZkPathConstants {
 	private ScheduledExecutorService reader;
 	// Sync every 5 minutes
 	private static int PERIOD = 60 *1000 * 5;
@@ -27,6 +32,7 @@ public class ConfigureResource extends DalBaseResource implements Runnable {
 	public ConfigureResource() {
 		super();
 		initZk();
+		initTimer();
 		buildLatest();
 	}
 	
@@ -53,7 +59,17 @@ public class ConfigureResource extends DalBaseResource implements Runnable {
 	}
 	
 	private void initZk() {
-//		getZk().
+		ZkWatcherDelegator d = new ZkWatcherDelegator(getZk(), new Watcher() {
+			public void process(WatchedEvent event) {
+				buildLatest();
+			}
+		});
+		
+		d.watchChildren(PORT);
+		d.watchChildren(DB);
+		d.watchChildren(NODE);
+		d.watchChildren(DEPLOYMENT);
+		d.watchChildren(DB_GROUP);
 	}
 	
 	private void initTimer() {

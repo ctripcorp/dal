@@ -29,17 +29,10 @@ public class ConfigureResource extends DalBaseResource implements Runnable, DasZ
 	
 	private String latestConfig;
 	
-	public ConfigureResource() {
-		super();
-		initZk();
-		initTimer();
-		buildLatest();
-	}
-	
 	@GET
 	public String get() {
 		if(latestConfig == null)
-			buildLatest();
+			init();
 		return latestConfig;
 	}
 	
@@ -56,6 +49,12 @@ public class ConfigureResource extends DalBaseResource implements Runnable, DasZ
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private void init() {
+		initZk();
+		initTimer();
+		buildLatest();
 	}
 	
 	private void initZk() {

@@ -12,6 +12,7 @@ import com.ctrip.sysdev.das.common.cfg.DasConfigureService;
 import com.ctrip.sysdev.das.common.db.DasWorkerConfigureReader;
 import com.ctrip.sysdev.das.common.db.DruidDataSourceWrapper;
 import com.ctrip.sysdev.das.common.to.Deployment;
+import com.ctrip.sysdev.das.common.util.Configuration;
 import com.ctrip.sysdev.das.common.zk.DasZkAccesssorFactory;
 import com.ctrip.sysdev.das.controller.DasService;
 import com.ctrip.sysdev.das.monitors.ErrorReporter;
@@ -68,6 +69,7 @@ public class DalServer extends DasService {
 					CreateMode.EPHEMERAL);
 			logger.info("Register success.");
 			
+			initConfigure();
 			initDataSource();
 			initMonitors();
 			
@@ -83,6 +85,10 @@ public class DalServer extends DasService {
 			// SingleInstanceDaemonTool.bailout(-1);
 			return false;
 		}
+	}
+	
+	private void initConfigure() {
+		Configuration.addResource("conf.properties");
 	}
 	
 	private void initDataSource() throws Exception {

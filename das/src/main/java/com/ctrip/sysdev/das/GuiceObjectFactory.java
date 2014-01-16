@@ -2,8 +2,7 @@ package com.ctrip.sysdev.das;
 
 import java.util.Set;
 
-import com.ctrip.sysdev.das.utils.Configuration;
-import com.ctrip.sysdev.das.utils.ReflectionUtil;
+import com.ctrip.sysdev.das.common.util.ReflectionUtil;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.google.inject.AbstractModule;
@@ -18,9 +17,6 @@ public class GuiceObjectFactory {
 	private Injector injector;
 
 	public GuiceObjectFactory() {
-		// init conf
-		initConfiguration();
-
 		Set<Module> modulesInterFaceImpl = ReflectionUtil
 				.newInstanceFromPackage(
 						System.getProperty("guicemodule", GUICE_MODEL_PACKAGES),
@@ -38,9 +34,5 @@ public class GuiceObjectFactory {
 
 	public <T> T getInstance(Class<T> clazz) throws Exception {
 		return injector.getInstance(clazz);
-	}
-
-	private static void initConfiguration() {
-		Configuration.addResource("conf.properties");
 	}
 }

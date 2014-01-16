@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.das.utils;
+package com.ctrip.sysdev.das.common.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;

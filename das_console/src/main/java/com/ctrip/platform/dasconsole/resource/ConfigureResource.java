@@ -53,7 +53,7 @@ public class ConfigureResource extends DalBaseResource implements Runnable {
 	}
 	
 	private void initZk() {
-		getZk().
+//		getZk().
 	}
 	
 	private void initTimer() {

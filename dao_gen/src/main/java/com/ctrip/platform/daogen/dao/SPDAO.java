@@ -1,4 +1,4 @@
-package com.ctrip.platform.daogen.domain;
+package com.ctrip.platform.daogen.dao;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;

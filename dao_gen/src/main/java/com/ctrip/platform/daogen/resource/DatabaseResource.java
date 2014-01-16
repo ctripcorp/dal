@@ -25,10 +25,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import com.ctrip.platform.daogen.domain.MasterDAO;
-import com.ctrip.platform.daogen.domain.SPDAO;
-import com.ctrip.platform.daogen.domain.StringIdSet;
-import com.ctrip.platform.daogen.domain.TableField;
+import com.ctrip.platform.daogen.dao.MasterDAO;
+import com.ctrip.platform.daogen.dao.SPDAO;
+import com.ctrip.platform.daogen.dao.StringIdSet;
+import com.ctrip.platform.daogen.pojo.FieldMeta;
+import com.ctrip.platform.daogen.pojo.Status;
 
 @Resource
 @Singleton
@@ -126,11 +127,11 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("fields")
-	public List<TableField> getFieldNames(@QueryParam("db_name") String dbName,
+	public List<FieldMeta> getFieldNames(@QueryParam("db_name") String dbName,
 			@QueryParam("table_name") String tableName) {
 
 		Set<String> indexedColumns = new HashSet<String>();
-		List<TableField> fields = new ArrayList<TableField>();
+		List<FieldMeta> fields = new ArrayList<FieldMeta>();
 
 		ResultSet rs = sp.getIndexedColumns(dbName, tableName);
 
@@ -164,7 +165,7 @@ public class DatabaseResource {
 			while (allColumns.next()) {
 				String columnName = allColumns.getString(1);
 
-				TableField field = new TableField();
+				FieldMeta field = new FieldMeta();
 
 				field.setName(columnName);
 				field.setIndexed(indexedColumns.contains(columnName));

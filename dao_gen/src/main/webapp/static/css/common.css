@@ -116,3 +116,6 @@ label.btn{
     width: 100%;
 }
 
+.w2ui-reset * {
+    font-size: 12px;
+}

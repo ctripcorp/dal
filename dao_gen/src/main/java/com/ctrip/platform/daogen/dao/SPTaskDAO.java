@@ -1,4 +1,4 @@
-package com.ctrip.platform.daogen.domain;
+package com.ctrip.platform.daogen.dao;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -9,11 +9,11 @@ import com.ctrip.platform.dao.enums.DbType;
 import com.ctrip.platform.dao.enums.ParameterDirection;
 import com.ctrip.platform.dao.param.StatementParameter;
 import com.ctrip.platform.daogen.pojo.AutoTask;
-import com.ctrip.platform.daogen.pojo.Project;
+import com.ctrip.platform.daogen.pojo.SpTask;
 
-public class AutoTaskDAO extends AbstractDAO {
-	
-	public AutoTaskDAO() {
+public class SPTaskDAO extends AbstractDAO {
+
+	public SPTaskDAO() {
 		logicDbName = "daogen";
 		servicePort = 9000;
 		credentialId = "30303";
@@ -21,7 +21,7 @@ public class AutoTaskDAO extends AbstractDAO {
 	}
 	
 	public ResultSet getAllTasks() {
-		return this.fetch("select id, project_id, db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,condition,sql_content from task_auto",
+		return this.fetch("select id, project_id, db_name,class_name,sp_schema,sp_name,sql_style,crud_type,sp_content from task_sp",
 				null, null);
 	}
 
@@ -35,11 +35,11 @@ public class AutoTaskDAO extends AbstractDAO {
 				.build());
 
 		return this.fetch(
-				"select id, project_id, db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,where_condition,sql_content from task_auto where project_id=?",
+				"select id, project_id, db_name,class_name,sp_schema,sp_name,sql_style,crud_type,sp_content from task_sp where project_id=?",
 				parameters, null);
 	}
 
-	public int insertTask(AutoTask task) {
+	public int insertTask(SpTask task) {
 
 		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
 
@@ -56,17 +56,17 @@ public class AutoTaskDAO extends AbstractDAO {
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
 				.setDirection(ParameterDirection.Input).setNullable(false)
 				.setIndex(3).setName("").setSensitive(false)
-				.setValue(task.getTable_name()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(4).setName("").setSensitive(false)
 				.setValue(task.getClass_name()).build());
 		
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
 				.setDirection(ParameterDirection.Input).setNullable(false)
+				.setIndex(4).setName("").setSensitive(false)
+				.setValue(task.getSp_schema()).build());
+		
+		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
+				.setDirection(ParameterDirection.Input).setNullable(false)
 				.setIndex(5).setName("").setSensitive(false)
-				.setValue(task.getMethod_name()).build());
+				.setValue(task.getSp_name()).build());
 		
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
 				.setDirection(ParameterDirection.Input).setNullable(false)
@@ -76,41 +76,24 @@ public class AutoTaskDAO extends AbstractDAO {
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
 				.setDirection(ParameterDirection.Input).setNullable(false)
 				.setIndex(7).setName("").setSensitive(false)
-				.setValue(task.getSql_type()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(8).setName("").setSensitive(false)
 				.setValue(task.getCrud_type()).build());
 		
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
 				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(9).setName("").setSensitive(false)
-				.setValue(task.getFields()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(10).setName("").setSensitive(false)
-				.setValue(task.getCondition()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(11).setName("").setSensitive(false)
-				.setValue(task.getSql_content()).build());
+				.setIndex(8).setName("").setSensitive(false)
+				.setValue(task.getSp_content()).build());
 
 		return this
 				.execute(
-						"insert into task_auto (project_id, db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,where_condition,sql_content) values (?,?,?,?,?,?,?,?,?,?,?)",
+						"insert into task_sp ( project_id, db_name,class_name,sp_schema,sp_name,sql_style,crud_type,sp_content) values (?,?,?,?,?,?,?,?)",
 						parameters, null);
 
 	}
 
-	public int updateTask(AutoTask task) {
+	public int updateTask(SpTask task) {
 
 		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
 		
-		
-
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
 				.setDirection(ParameterDirection.Input).setNullable(false)
 				.setIndex(1).setName("").setSensitive(false)
@@ -124,17 +107,17 @@ public class AutoTaskDAO extends AbstractDAO {
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
 				.setDirection(ParameterDirection.Input).setNullable(false)
 				.setIndex(3).setName("").setSensitive(false)
-				.setValue(task.getTable_name()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(4).setName("").setSensitive(false)
 				.setValue(task.getClass_name()).build());
 		
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
 				.setDirection(ParameterDirection.Input).setNullable(false)
+				.setIndex(4).setName("").setSensitive(false)
+				.setValue(task.getSp_schema()).build());
+		
+		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
+				.setDirection(ParameterDirection.Input).setNullable(false)
 				.setIndex(5).setName("").setSensitive(false)
-				.setValue(task.getMethod_name()).build());
+				.setValue(task.getSp_name()).build());
 		
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
 				.setDirection(ParameterDirection.Input).setNullable(false)
@@ -144,41 +127,26 @@ public class AutoTaskDAO extends AbstractDAO {
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
 				.setDirection(ParameterDirection.Input).setNullable(false)
 				.setIndex(7).setName("").setSensitive(false)
-				.setValue(task.getSql_type()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(8).setName("").setSensitive(false)
 				.setValue(task.getCrud_type()).build());
 		
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
 				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(9).setName("").setSensitive(false)
-				.setValue(task.getFields()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(10).setName("").setSensitive(false)
-				.setValue(task.getCondition()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(11).setName("").setSensitive(false)
-				.setValue(task.getSql_content()).build());
+				.setIndex(8).setName("").setSensitive(false)
+				.setValue(task.getSp_content()).build());
 		
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
 				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(12).setName("").setSensitive(false)
+				.setIndex(9).setName("").setSensitive(false)
 				.setValue(task.getId()).build());
 
 		return this
 				.execute(
-						"udpate task_auto set project_id=?, db_name=?, table_name=?,class_name=?,method_name=?,sql_style=?,sql_type=?,crud_type=?,fields=?,where_condition=?,sql_content=? where id=?",
+						"update task_sp set project_id=?, db_name=?, class_name=?,sp_schema=?,sp_name=?,sql_style=?,crud_type=?,sp_content=? where id=?",
 						parameters, null);
 
 	}
 
-	public int deleteTask(AutoTask task) {
+	public int deleteTask(SpTask task) {
 		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
 
 		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
@@ -186,8 +154,7 @@ public class AutoTaskDAO extends AbstractDAO {
 				.setIndex(1).setName("").setSensitive(false)
 				.setValue(task.getId()).build());
 
-		return this.execute("delete from task_auto where id=?", parameters, null);
+		return this.execute("delete from task_sp where id=?", parameters, null);
 	}
-
-
+	
 }

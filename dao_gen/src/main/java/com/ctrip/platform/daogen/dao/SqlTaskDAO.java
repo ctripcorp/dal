@@ -1,4 +1,4 @@
-package com.ctrip.platform.daogen.domain;
+package com.ctrip.platform.daogen.dao;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public class SqlTaskDAO extends AbstractDAO {
 
 		return this
 				.execute(
-						"insert into task_sql (project_id, db_name,class_name,method_name,crud_type,sql_content) values (,?,?,?,?,?,?)",
+						"insert into task_sql (project_id, db_name,class_name,method_name,crud_type,sql_content) values (?,?,?,?,?,?)",
 						parameters, null);
 
 	}
@@ -124,7 +124,7 @@ public class SqlTaskDAO extends AbstractDAO {
 
 		return this
 				.execute(
-						"udpate task_sql set project_id=?, db_name=?,class_name=?,method_name=?,crud_type=?,sql_content=? where id=?",
+						"update task_sql set project_id=?, db_name=?,class_name=?,method_name=?,crud_type=?,sql_content=? where id=?",
 						parameters, null);
 
 	}

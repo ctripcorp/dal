@@ -94,6 +94,7 @@ public class DruidDataSourceWrapper {
 			String password = getConfig(masterName, slaveName, "password");
 			slaveDSs[i++] = create(slaveDb.getSetting(), user, password);
 		}
+		slaveMap.put(masterName, slaveDSs);
 	}
 
 	private DruidDataSource create(LogicDbSetting setting, String user, String password) throws Exception {
@@ -149,6 +150,17 @@ public class DruidDataSourceWrapper {
 		
 		int i = (int)(Math.random() * slaves.length);
 		return slaves[i].getConnection();
+	}
+	
+	public void close() {
+		// TODO the close has bug, it seems some thread is not closed
+		for(DruidDataSource ds: masterMap.values()){
+			ds.close();
+		}
+		
+		for(DruidDataSource[] slaveDss: slaveMap.values())
+			for(DruidDataSource ds: slaveDss)
+				ds.close();
 	}
 	
 	private String getConfig(String...keys) {

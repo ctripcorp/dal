@@ -140,6 +140,7 @@ public class DalServer extends DasService {
 		PerformanceMonitorTask.shutdown();
 		StatusReportTask.shutdown();
 		ErrorReporter.shutdown();
+		DATA_SOURCE.close();
 	}
 
 	protected boolean isDead(WatchedEvent event) {

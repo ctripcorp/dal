@@ -67,6 +67,15 @@ public class DruidDataSourceWrapper {
 		initialize(logicDbs);
 	}
 	
+	/**
+	 * Used for direct client. Only used when reader is initialized.
+	 * @param logicDbs
+	 * @throws Exception
+	 */
+	public DruidDataSourceWrapper(String...logicDbs) throws Exception {
+		initialize(logicDbs);
+	}
+	
 	private void initialize(String...logicDbs) throws Exception {
 		for(String logicDb: logicDbs) {
 			MasterLogicDB db = reader.getMasterLogicDB(logicDb);

@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.ctrip.platform.dao.AbstractDAO;
 import com.ctrip.platform.dao.param.StatementParameter;
-import com.ctrip.sysdev.das.common.db.DasConfigureReader;
 
 
 public class DalClient extends AbstractDAO {
@@ -36,12 +35,6 @@ public class DalClient extends AbstractDAO {
 		credentialId = "30303";
 		super.init();
 	}
-	
-	public DalClient(DasConfigureReader reader, String logicDbName) throws Exception {
-		this.logicDbName = logicDbName;
-		credentialId = "30303";
-		super.init(reader);
-	}	
 	
 	public void executeQuery(String sql) {
 		// read result set

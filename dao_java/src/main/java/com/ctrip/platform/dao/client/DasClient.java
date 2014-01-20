@@ -3,6 +3,7 @@ package com.ctrip.platform.dao.client;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -12,6 +13,11 @@ import com.ctrip.platform.dao.DasProto.CRUD;
 import com.ctrip.platform.dao.DasProto.StatementType;
 import com.ctrip.platform.dao.param.StatementParameter;
 
+/**
+ * TODO support exception report
+ * @author jhhe
+ *
+ */
 public class DasClient implements Client {
 
 	private String logicDbName;
@@ -248,4 +254,8 @@ public class DasClient implements Client {
 		return 0;
 	}
 
+	@Override
+	public void closeConnection() {
+		// For DAS, we do nothing for now
+	}
 }

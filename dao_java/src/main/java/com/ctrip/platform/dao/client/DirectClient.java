@@ -10,23 +10,19 @@ import java.util.List;
 import java.util.Map;
 
 import com.ctrip.platform.dao.param.StatementParameter;
-import com.ctrip.sysdev.das.common.db.DasConfigureReader;
 import com.ctrip.sysdev.das.common.db.DruidDataSourceWrapper;
 
 public class DirectClient implements Client {
 	private String logicDbName;
 
 	private DruidDataSourceWrapper connPool;
+	private Connection conn;
 
-	public DirectClient(DasConfigureReader reader, String logicDbName) throws Exception {
+	public DirectClient(DruidDataSourceWrapper connPool, String logicDbName) {
 		this.logicDbName = logicDbName;
-		initConnPool(reader);
+		this.connPool = connPool;
 	}
 	
-	private void initConnPool(DasConfigureReader reader) throws Exception {
-		connPool = new DruidDataSourceWrapper(reader, new String[]{logicDbName});
-	}
-
 	public String getLogicDbName() {
 		return logicDbName;
 	}
@@ -121,65 +117,62 @@ public class DirectClient implements Client {
 	
 	@Override
 	public ResultSet fetch(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
-		Connection conn;
+			Map keywordParameters) throws SQLException {
 		try {
-			conn = connPool.getConnection(logicDbName, isMaster(keywordParameters), true);
+			getConnection(keywordParameters, true);
 			PreparedStatement statement = createSqlStatement(conn, sql, parameters);
 		
 			ResultSet rs = statement.executeQuery();
 			rs.setFetchSize(20000);
 			return rs;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+		} catch (Throwable e) {
+			throw(handleException(e));
 		}
 	}
 
 	@Override
 	public int execute(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
-		Connection conn;
+			Map keywordParameters) throws SQLException {
 		try {
-			conn = connPool.getConnection(logicDbName, isMaster(keywordParameters), true);
+			getConnection(keywordParameters, false);
 			PreparedStatement statement = createSqlStatement(conn, sql, parameters);
 		
-			return statement.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 0;
+			int result = statement.executeUpdate();
+			
+			closeConnection();
+			return result;
+		} catch (Throwable e) {
+			throw(handleException(e));
 		}
 	}
 
 	@Override
 	public ResultSet fetchBySp(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
-		Connection conn;
+			Map keywordParameters) throws SQLException {
 		try {
-			conn = connPool.getConnection(logicDbName, isMaster(keywordParameters), true);
+			getConnection(keywordParameters, true);
 			PreparedStatement statement = createSpStatement(conn, sql, parameters);
 		
 			ResultSet rs = statement.executeQuery();
 			rs.setFetchSize(20000);
 			return rs;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+		} catch (Throwable e) {
+			throw(handleException(e));
 		}
 	}
 
 	@Override
 	public int executeSp(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
-		Connection conn;
+			Map keywordParameters) throws SQLException {
+		getConnection(keywordParameters, false);
 		try {
-			conn = connPool.getConnection(logicDbName, isMaster(keywordParameters), true);
 			PreparedStatement statement = createSqlStatement(conn, sql, parameters);
-		
-			return statement.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 0;
+			int result = statement.executeUpdate();
+			
+			closeConnection();
+			return result;
+		} catch (Throwable e) {
+			throw(handleException(e));
 		}
 	}
 	
@@ -191,5 +184,33 @@ public class DirectClient implements Client {
 		}
 		
 		return false;
+	}
+
+	private void getConnection(Map keywordParameters, boolean isSelect) throws SQLException {
+		// Close existing connection before get new one
+		// Can be optimized here, e.g. reuse connection if it is the sam type
+		closeConnection();
+		conn = connPool.getConnection(logicDbName, isMaster(keywordParameters), isSelect);
+	}
+
+	@Override
+	public void closeConnection() throws SQLException {
+		if(conn == null) 
+			return;
+
+		Connection tConn = conn;
+		conn = null;
+		tConn.close();
+	}
+	
+	private SQLException handleException(Throwable e) throws SQLException {
+		try {
+			closeConnection();
+		} catch (Throwable e1) {
+			e1.printStackTrace();
+		}
+		if(e instanceof SQLException)
+			return (SQLException)e;
+		return new SQLException(e);
 	}
 }

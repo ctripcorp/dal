@@ -3,8 +3,8 @@ package com.ctrip.platform.dao.param;
 import java.util.Date;
 
 import com.ctrip.platform.dao.DasProto;
-import com.ctrip.platform.dao.enums.DbType;
-import com.ctrip.platform.dao.enums.ParameterDirection;
+import com.ctrip.sysdev.das.common.enums.DbType;
+import com.ctrip.sysdev.das.common.enums.ParameterDirection;
 import com.google.protobuf.ByteString;
 
 public class StatementParameter {

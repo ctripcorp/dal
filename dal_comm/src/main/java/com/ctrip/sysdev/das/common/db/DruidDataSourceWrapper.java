@@ -2,10 +2,11 @@ package com.ctrip.sysdev.das.common.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import com.ctrip.sysdev.das.common.to.Deployment;
 import com.ctrip.sysdev.das.common.to.LogicDB;
 import com.ctrip.sysdev.das.common.to.LogicDbSetting;
 import com.ctrip.sysdev.das.common.to.MasterLogicDB;
+import com.ctrip.sysdev.das.common.util.Configuration;
 
 // TODO  handle configure change
 public class DruidDataSourceWrapper {
@@ -45,7 +47,7 @@ public class DruidDataSourceWrapper {
 		String[] logicDbs;
 		
 		if(deployment.isShared()) {
-			List<String> dbs = new ArrayList<String>();
+			Set<String> dbs = new HashSet<String>();
 			for(String logicDbGroupName: deployment.convertToDbGroups()) {
 				dbs.addAll(Arrays.asList(reader.getLogicDbsByGroup(logicDbGroupName)));
 			}
@@ -65,6 +67,15 @@ public class DruidDataSourceWrapper {
 		initialize(logicDbs);
 	}
 	
+	/**
+	 * Used for direct client. Only used when reader is initialized.
+	 * @param logicDbs
+	 * @throws Exception
+	 */
+	public DruidDataSourceWrapper(String...logicDbs) throws Exception {
+		initialize(logicDbs);
+	}
+	
 	private void initialize(String...logicDbs) throws Exception {
 		for(String logicDb: logicDbs) {
 			MasterLogicDB db = reader.getMasterLogicDB(logicDb);
@@ -74,8 +85,8 @@ public class DruidDataSourceWrapper {
 	}
 
 	private void createMaster(MasterLogicDB db) throws Exception {
-		String user = getConfig(buildKey(db.getName(), "user"));
-		String password = getConfig(buildKey(db.getName(), "password"));;
+		String user = getConfig(db.getName(), "user");
+		String password = getConfig(db.getName(), "password");
 		masterMap.put(db.getName(), create(db.getSetting(), user, password));
 	}
 
@@ -88,10 +99,11 @@ public class DruidDataSourceWrapper {
 		int i = 0;
 		for(LogicDB slaveDb: slaveDbs){
 			String slaveName = slaveDb.getName();
-			String user = getConfig(buildKey(masterName, buildKey(slaveName, "user")));
-			String password = getConfig(buildKey(masterName, buildKey(slaveName, "password")));
+			String user = getConfig(masterName, slaveName, "user");
+			String password = getConfig(masterName, slaveName, "password");
 			slaveDSs[i++] = create(slaveDb.getSetting(), user, password);
 		}
+		slaveMap.put(masterName, slaveDSs);
 	}
 
 	private DruidDataSource create(LogicDbSetting setting, String user, String password) throws Exception {
@@ -149,13 +161,18 @@ public class DruidDataSourceWrapper {
 		return slaves[i].getConnection();
 	}
 	
-	public final static String KEY_SEPARATOR = ".";
-
-	public String buildKey(String parent, String key) {
-		return new StringBuilder(parent).append(KEY_SEPARATOR).append(key).toString();
+	public void close() {
+		// TODO the close has bug, it seems some thread is not closed
+		for(DruidDataSource ds: masterMap.values()){
+			ds.close();
+		}
+		
+		for(DruidDataSource[] slaveDss: slaveMap.values())
+			for(DruidDataSource ds: slaveDss)
+				ds.close();
 	}
 	
-	private String getConfig(String key) {
-		return null;
+	private String getConfig(String...keys) {
+		return Configuration.get(Configuration.buildKey(keys));
 	}
 }

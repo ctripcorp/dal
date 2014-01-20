@@ -1,24 +1,38 @@
 package com.ctrip.platform.dasconsole.resource;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import javax.annotation.Resource;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+
 import com.ctrip.sysdev.das.common.to.DasConfigure;
+import com.ctrip.sysdev.das.common.zk.DasZkPathConstants;
+import com.ctrip.sysdev.das.common.zk.ZkWatcherDelegator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Resource
 @Path("configure/snapshot")
 @Singleton
-public class ConfigureResource extends DalBaseResource {
+public class ConfigureResource extends DalBaseResource implements Runnable, DasZkPathConstants {
+	private ScheduledExecutorService reader;
+	// Sync every 5 minutes
+	private static int PERIOD = 60 *1000 * 5;
+	
 	private ObjectMapper mapper = new ObjectMapper();
+	
 	private String latestConfig;
 	
 	@GET
 	public String get() {
 		if(latestConfig == null)
-			buildLatest();
+			init();
 		return latestConfig;
 	}
 	
@@ -35,5 +49,44 @@ public class ConfigureResource extends DalBaseResource {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private void init() {
+		initZk();
+		initTimer();
+		buildLatest();
+	}
+	
+	private void initZk() {
+		ZkWatcherDelegator d = new ZkWatcherDelegator(getZk(), new Watcher() {
+			public void process(WatchedEvent event) {
+				buildLatest();
+			}
+		});
+		
+		d.watchChildren(PORT);
+		d.watchChildren(DB);
+		d.watchChildren(NODE);
+		d.watchChildren(DEPLOYMENT);
+		d.watchChildren(DB_GROUP);
+	}
+	
+	private void initTimer() {
+		reader = Executors.newSingleThreadScheduledExecutor();
+		reader.scheduleAtFixedRate(this, PERIOD, PERIOD, TimeUnit.SECONDS);
+		
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {reader.shutdown();}
+		});
+	}
+	
+	private void configureChanged() {
+		// TODO shall we refresh by different entity?
+		buildLatest();
+	}
+	
+	@Override
+	public void run() {
+		buildLatest();
 	}
 }

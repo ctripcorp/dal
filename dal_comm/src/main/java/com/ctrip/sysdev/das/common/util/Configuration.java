@@ -1,4 +1,4 @@
-package com.ctrip.sysdev.das.utils;
+package com.ctrip.sysdev.das.common.util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,8 +13,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
 
 public class Configuration {
 	private static final Logger LOGGER = LoggerFactory
@@ -33,7 +31,7 @@ public class Configuration {
 	}
 
 	public static Map<String, String> getAllConfig() {
-		return ImmutableMap.copyOf(configMap);
+		return new HashMap<String, String>(configMap);
 	}
 
 	public static void addResource(String name) {
@@ -130,7 +128,7 @@ public class Configuration {
 
 	public static String[] getStrings(String name) {
 		String valueString = get(name);
-		return StringKit.getTrimmedStrings(valueString);
+		return getTrimmedStrings(valueString);
 	}
 
 	public static Class<?> getClass(String name) throws ClassNotFoundException {
@@ -174,4 +172,20 @@ public class Configuration {
 		}
 	}
 
+	public final static String[] emptyStringArray = {};
+	public static String[] getTrimmedStrings(String str) {
+		if (null == str || "".equals(str.trim())) {
+			return emptyStringArray;
+		}
+		return str.trim().split("\\s*,\\s*");
+	}
+	
+	public final static String KEY_SEPARATOR = ".";
+
+	public static String buildKey(String...keys) {
+		StringBuilder sb = new StringBuilder();
+		for(String key: keys)
+			sb.append(key).append(KEY_SEPARATOR);
+		return sb.deleteCharAt(sb.length() - 1).toString();
+	}
 }

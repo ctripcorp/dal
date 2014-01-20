@@ -1,6 +1,7 @@
 package com.ctrip.platform.dao;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,9 +10,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.ctrip.platform.dao.client.Client;
 import com.ctrip.platform.dao.client.DasClient;
-import com.ctrip.platform.dao.client.DirectClient;
 import com.ctrip.platform.dao.param.StatementParameter;
-import com.ctrip.sysdev.das.common.db.DasConfigureReader;
 
 public class AbstractDAO implements DAO {
 	
@@ -28,15 +27,7 @@ public class AbstractDAO implements DAO {
 	//This is for dev, 在实际的使用时，可能需要在DAO级别切换DB，因为SQL Server执行SQL之后，
 	//Driver会将当前数据库置为该SQL对应的数据库，如果SQL中使用了use [dbname],则容易发生bug
 	protected void init(){
-		lock.writeLock().lock();
-		if(!clients.containsKey(logicDbName)){
-			DasClient client = new DasClient();
-			client.setCredentialId(credentialId);
-			client.setLogicDbName(logicDbName);
-			client.init("127.0.0.1", servicePort);
-			clients.put(logicDbName, client);
-		}
-		lock.writeLock().unlock();
+		init("127.0.0.1");
 	}
 
 	protected void init(String host){
@@ -51,57 +42,51 @@ public class AbstractDAO implements DAO {
 		lock.writeLock().unlock();
 	}
 
-	// For a given logic DB name, only one client an be registered
-	protected void init(DasConfigureReader reader) throws Exception {
-		lock.writeLock().lock();
-		if(!clients.containsKey(logicDbName)){
-			try {
-				DirectClient client = new DirectClient(reader, logicDbName);
-				clients.put(logicDbName, client);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		lock.writeLock().unlock();
-	}
-
 	@Override
 	public ResultSet fetch(String sql, List<StatementParameter> parameters,
 			Map keywordParameters) {
-		lock.readLock().lock();
-		Client client = null;
-		if(clients.containsKey(logicDbName)){
-			client = clients.get(logicDbName);
+		try {
+			return getClient().fetch(sql, parameters, keywordParameters);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
 		}
-		lock.readLock().unlock();
-		
-		if(client != null){
-			return client.fetch(sql, parameters, keywordParameters);
-		}
-		
-		return null;
 	}
 
 	@Override
 	public int execute(String sql, List<StatementParameter> parameters,
 			Map keywordParameters) {
-		lock.readLock().lock();
-		Client client = null;
-		if(clients.containsKey(logicDbName)){
-			client = clients.get(logicDbName);
+		try {
+			return getClient().execute(sql, parameters, keywordParameters);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
 		}
-		lock.readLock().unlock();
-		
-		if(client != null){
-			return client.execute(sql, parameters, keywordParameters);
-		}
-		
-		return 0;
 	}
 
 	@Override
 	public ResultSet fetchBySp(String sql, List<StatementParameter> parameters,
 			Map keywordParameters) {
+		try {
+			return getClient().fetchBySp(sql, parameters, keywordParameters);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@Override
+	public int executeSp(String sql, List<StatementParameter> parameters,
+			Map keywordParameters) {
+		try {
+			return getClient().executeSp(sql, parameters, keywordParameters);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
+	
+	private Client getClient() throws SQLException {
 		lock.readLock().lock();
 		Client client = null;
 		if(clients.containsKey(logicDbName)){
@@ -109,20 +94,14 @@ public class AbstractDAO implements DAO {
 		}
 		lock.readLock().unlock();
 		
-		if(client != null){
-			return client.fetchBySp(sql, parameters, keywordParameters);
-		}
+		if(client == null)
+			throw new SQLException(String.format("Database %s is not initilized properly", logicDbName));
 		
-		return null;
+		return client;
 	}
 
 	@Override
-	public int executeSp(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
-		// TODO Auto-generated method stub
-		return 0;
+	public void closeConnection() throws SQLException {
+		getClient().closeConnection();
 	}
-	
-	
-
 }

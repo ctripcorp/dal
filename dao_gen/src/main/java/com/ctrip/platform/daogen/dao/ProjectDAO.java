@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ctrip.platform.dao.AbstractDAO;
-import com.ctrip.platform.dao.enums.DbType;
-import com.ctrip.platform.dao.enums.ParameterDirection;
 import com.ctrip.platform.dao.param.StatementParameter;
 import com.ctrip.platform.daogen.pojo.Project;
+import com.ctrip.sysdev.das.common.enums.DbType;
+import com.ctrip.sysdev.das.common.enums.ParameterDirection;
 
 public class ProjectDAO extends AbstractDAO {
 

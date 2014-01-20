@@ -3,7 +3,7 @@ package com.ctrip.sysdev.das.guice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.sysdev.das.utils.Configuration;
+import com.ctrip.sysdev.das.common.util.Configuration;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.name.Names;

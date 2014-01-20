@@ -9,7 +9,6 @@ import com.ctrip.platform.dao.enums.DbType;
 import com.ctrip.platform.dao.enums.ParameterDirection;
 import com.ctrip.platform.dao.param.StatementParameter;
 import com.ctrip.platform.daogen.pojo.AutoTask;
-import com.ctrip.platform.daogen.pojo.Project;
 
 public class AutoTaskDAO extends AbstractDAO {
 	

@@ -8,6 +8,12 @@ import java.util.Map;
 
 import com.ctrip.platform.dao.param.StatementParameter;
 
+/**
+ * TODO Separate single table dao and readonly dao.
+ * 
+ * @author jhhe
+ * 
+ */
 public class DefaultDao {
 	private static final String SQL_FIND_BY_PK = "SELECT * FROM %s WHERE %s";
 	private DirectClientFactory factory;
@@ -70,4 +76,22 @@ public class DefaultDao {
 		client.closeConnection();
 		return pojoList;
 	}
+
+	public List<DaoPojo> selectFrom(String sql,
+			List<StatementParameter> parameters, Map keywordParameters,
+			int start, int count) throws SQLException {
+		Client client = factory.getClient();
+
+		ResultSet rs = client.fetch(sql, parameters, keywordParameters);
+
+		List<DaoPojo> pojoList = new ArrayList<DaoPojo>();
+		rs.absolute(start - 1);
+		int i = 0;
+		while (i++ < count && rs.next()) {
+			pojoList.add(rsVisitor.visit(rs));
+		}
+		client.closeConnection();
+		return pojoList;
+	}
+
 }

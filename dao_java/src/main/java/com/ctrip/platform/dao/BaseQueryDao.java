@@ -1,4 +1,4 @@
-package com.ctrip.platform.dao.client;
+package com.ctrip.platform.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -6,21 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.platform.dao.param.StatementParameter;
+import com.ctrip.platform.dao.client.Client;
 
-/**
- * TODO Separate single table dao and readonly dao.
- * 
- * @author jhhe
- * 
- */
-public class DefaultDao {
+
+public class BaseQueryDao {
 	private static final String SQL_FIND_BY_PK = "SELECT * FROM %s WHERE %s";
 	private DirectClientFactory factory;
 	private ResultSetVisitor rsVisitor;
 	private PojoParser pojoParser;
 
-	public DefaultDao(DirectClientFactory factory, PojoParser pojoParser,
+	public BaseQueryDao(DirectClientFactory factory, PojoParser pojoParser,
 			ResultSetVisitor rsVisitor) {
 		this.factory = factory;
 		this.pojoParser = pojoParser;
@@ -31,6 +26,21 @@ public class DefaultDao {
 			throws SQLException {
 		return selectFisrt(SQL_FIND_BY_PK, pojoParser.getPk(pk),
 				keywordParameters);
+	}
+
+	public List<DaoPojo> selectAll(String sql,
+			List<StatementParameter> parameters, Map keywordParameters)
+			throws SQLException {
+		Client client = factory.getClient();
+
+		ResultSet rs = client.fetch(sql, parameters, keywordParameters);
+
+		List<DaoPojo> pojoList = new ArrayList<DaoPojo>();
+		while (rs.next()) {
+			pojoList.add(rsVisitor.visit(rs));
+		}
+		client.closeConnection();
+		return pojoList;
 	}
 
 	public DaoPojo selectFisrt(String sql, List<StatementParameter> parameters,
@@ -44,21 +54,6 @@ public class DefaultDao {
 
 		client.closeConnection();
 		return pojo;
-	}
-
-	public List<DaoPojo> select(String sql,
-			List<StatementParameter> parameters, Map keywordParameters)
-			throws SQLException {
-		Client client = factory.getClient();
-
-		ResultSet rs = client.fetch(sql, parameters, keywordParameters);
-
-		List<DaoPojo> pojoList = new ArrayList<DaoPojo>();
-		while (rs.next()) {
-			pojoList.add(rsVisitor.visit(rs));
-		}
-		client.closeConnection();
-		return pojoList;
 	}
 
 	public List<DaoPojo> selectTop(String sql,
@@ -93,5 +88,4 @@ public class DefaultDao {
 		client.closeConnection();
 		return pojoList;
 	}
-
 }

@@ -10,9 +10,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.ctrip.platform.dao.client.Client;
 import com.ctrip.platform.dao.client.DasClient;
-import com.ctrip.platform.dao.param.StatementParameter;
 
-public class AbstractDAO implements DAO {
+public class AbstractDAO implements Client {
 	
 	protected String logicDbName;
 	

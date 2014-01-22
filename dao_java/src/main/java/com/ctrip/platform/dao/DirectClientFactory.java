@@ -1,5 +1,6 @@
-package com.ctrip.platform.dao.client;
+package com.ctrip.platform.dao;
 
+import com.ctrip.platform.dao.client.DirectClient;
 import com.ctrip.sysdev.das.common.db.DasConfigureReader;
 import com.ctrip.sysdev.das.common.db.DruidDataSourceWrapper;
 

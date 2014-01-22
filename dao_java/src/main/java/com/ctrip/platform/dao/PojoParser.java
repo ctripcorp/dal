@@ -1,8 +1,6 @@
-package com.ctrip.platform.dao.client;
+package com.ctrip.platform.dao;
 
 import java.util.List;
-
-import com.ctrip.platform.dao.param.StatementParameter;
 
 public interface PojoParser {
 	List<StatementParameter> getPk(DaoPojo pojo);

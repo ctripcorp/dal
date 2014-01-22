@@ -1,4 +1,4 @@
-package com.ctrip.platform.dao.client;
+package com.ctrip.platform.dao;
 
 import java.sql.ResultSet;
 

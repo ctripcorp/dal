@@ -17,11 +17,16 @@ public class DalClientFactory {
 		return new DirectClient(connPool, logicDbName);
 	}
 	
-	public static void initDirectClient() {
+	public static void initDirectClient(String logicDbName) {
 		
 	}
 	
-	public static void initDasClient() {
+	public static void initDasClient(String logicDbName) {
 		
 	}
+	
+	public static void init(DasConfigureReader reader) {
+		
+	}
+	
 }

@@ -8,5 +8,5 @@ public interface ResultSetVisitor {
 	 * @param rs
 	 * @return
 	 */
-	DaoPojo visit(ResultSet rs);
+	DaoPojo visitRow(ResultSet rs);
 }

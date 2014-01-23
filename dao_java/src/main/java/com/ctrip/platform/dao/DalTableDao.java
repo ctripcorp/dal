@@ -11,8 +11,16 @@ import java.util.Map;
  *
  */
 public class DalTableDao extends DalQueryDao {
-	private static final String SQL_FIND_BY_PK = "SELECT * FROM %s WHERE %s";
+	private static final String TMPL_SQL_FIND_BY_PK = "SELECT * FROM %s WHERE %s";
+	private static final String TMPL_SQL_INSERT = "SELECT * FROM %s WHERE %s";
+	private static final String TMPL_SQL_DELETE = "SELECT * FROM %s WHERE %s";
+	private static final String TMPL_SQL_UPDATE = "SELECT * FROM %s WHERE %s";
 
+	private static String SQL_FIND_BY_PK;
+	private static String SQL_INSERT;
+	private static String SQL_DELETE;
+	private static String SQL_UPDATE;
+	
 	private DalTableParser pojoParser;
 
 	public DalTableDao(DalClientFactory factory, DalTableParser pojoParser) {
@@ -20,10 +28,18 @@ public class DalTableDao extends DalQueryDao {
 		this.pojoParser = pojoParser;
 	}
 	
+	private void initSql() {
+		SQL_FIND_BY_PK = "";
+		SQL_INSERT = "";
+		SQL_DELETE = "";
+		SQL_UPDATE = "";
+	}
+	
 	public DaoPojo selectByPk(DaoPojo pk, Map<DaoHintEnum, Object> hints)
 			throws SQLException {
-		return selectFisrt(SQL_FIND_BY_PK, pojoParser.getPk(pk),
-				hints);
+//		return selectFisrt(SQL_FIND_BY_PK, pojoParser.getPk(pk),
+//				hints);
+		return null;
 	}
 	
 	/**
@@ -59,7 +75,7 @@ public class DalTableDao extends DalQueryDao {
 	}
 	
 	public void executeBatch(List<DaoCommand> commands, Map<DaoHintEnum, Object> hints) {
-		// conn.setAutoCommit(false)
+
 	}
 	
 	void test() throws SQLException {

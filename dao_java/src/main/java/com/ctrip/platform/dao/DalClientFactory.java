@@ -21,12 +21,21 @@ public class DalClientFactory {
 		
 	}
 	
+	/*
 	public static void initDasClient(String logicDbName) {
 		
 	}
 	
-	public static void init(DasConfigureReader reader) {
+	public static void initDirectClient(DasConfigureReader reader, String logicDbName) {
 		
 	}
+	
+	public static void initDasClient(DasConfigureReader reader, String logicDbName) {
+		
+	}
+	
+	public static void init(DasConfigureReader reader, String logicDbName) {
+		
+	}*/
 	
 }

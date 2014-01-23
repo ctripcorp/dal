@@ -10,16 +10,14 @@ import com.ctrip.platform.dao.client.Client;
 
 public class DalQueryDao {
 	private DalClientFactory factory;
-	private ResultSetVisitor rsVisitor;
 
 	public DalQueryDao(DalClientFactory factory, ResultSetVisitor rsVisitor) {
 		this.factory = factory;
-		this.rsVisitor = rsVisitor;
 	}
 
 	public List<DaoPojo> selectAll(String sql,
-			List<StatementParameter> parameters, Map keywordParameters)
-			throws SQLException {
+			List<StatementParameter> parameters, ResultSetVisitor rsVisitor,
+			Map keywordParameters) throws SQLException {
 		Client client = factory.getClient();
 
 		ResultSet rs = client.fetch(sql, parameters, keywordParameters);
@@ -33,7 +31,8 @@ public class DalQueryDao {
 	}
 
 	public DaoPojo selectFisrt(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) throws SQLException {
+			ResultSetVisitor rsVisitor, Map keywordParameters)
+			throws SQLException {
 		DaoPojo pojo = null;
 		Client client = factory.getClient();
 
@@ -47,7 +46,7 @@ public class DalQueryDao {
 
 	public List<DaoPojo> selectTop(String sql,
 			List<StatementParameter> parameters, Map keywordParameters,
-			int count) throws SQLException {
+			ResultSetVisitor rsVisitor, int count) throws SQLException {
 		Client client = factory.getClient();
 
 		ResultSet rs = client.fetch(sql, parameters, keywordParameters);
@@ -63,7 +62,8 @@ public class DalQueryDao {
 
 	public List<DaoPojo> selectFrom(String sql,
 			List<StatementParameter> parameters, Map keywordParameters,
-			int start, int count) throws SQLException {
+			ResultSetVisitor rsVisitor, int start, int count)
+			throws SQLException {
 		Client client = factory.getClient();
 
 		ResultSet rs = client.fetch(sql, parameters, keywordParameters);

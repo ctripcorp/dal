@@ -25,8 +25,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.platform.dao.DasProto;
-
 public class DasResultSet implements ResultSet {
 
 	private String currentId;

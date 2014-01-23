@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.platform.dao.DirectClientFactory;
+import com.ctrip.platform.dao.DalClientFactory;
 import com.ctrip.platform.dao.StatementParameter;
 import com.ctrip.platform.dao.client.Client;
 import com.ctrip.sysdev.das.common.cfg.DasConfigureService;
@@ -26,7 +26,7 @@ public class DirectClientDaoTest {
 	public void test() {
 		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
 		try {
-			DirectClientFactory factory = new DirectClientFactory(reader, "HtlProductdb");
+			DalClientFactory factory = new DalClientFactory(reader, "HtlProductdb");
 			Client client = factory.getClient();
 
 			ResultSet rs = client.fetch(sql, parameters, keywordParameters);
@@ -57,7 +57,7 @@ public class DirectClientDaoTest {
 	public void test2() {
 		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
 		try {
-			DirectClientFactory factory = new DirectClientFactory(reader, "dao_test");
+			DalClientFactory factory = new DalClientFactory(reader, "dao_test");
 			Client client = factory.getClient();
 
 			selectPerson(client);

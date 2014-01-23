@@ -2,7 +2,7 @@ package com.ctrip.platform.daogen.dao;
 
 import java.sql.ResultSet;
 
-import com.ctrip.platform.dao.AbstractDAO;
+import com.ctrip.platform.dao.client.AbstractDAO;
 
 public class MasterDAO extends AbstractDAO {
 

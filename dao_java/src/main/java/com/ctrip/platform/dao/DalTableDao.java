@@ -1,14 +1,17 @@
 package com.ctrip.platform.dao;
 
-import java.sql.ResultSet;
-import java.util.List;
 
 /**
  * TODO support batch
  * @author jhhe
  *
  */
-public class BaseTableDao extends BaseQueryDao {
+public class DalTableDao extends DalQueryDao {
+	public DalTableDao(DalClientFactory factory, PojoParser pojoParser,
+			ResultSetVisitor rsVisitor) {
+		super(factory, pojoParser, rsVisitor);
+	}
+	
 	public DaoPojo selectByPk(DaoPojo pojo) {
 		return null;
 	}

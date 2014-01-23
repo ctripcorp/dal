@@ -9,13 +9,13 @@ import java.util.Map;
 import com.ctrip.platform.dao.client.Client;
 
 
-public class BaseQueryDao {
+public class DalQueryDao {
 	private static final String SQL_FIND_BY_PK = "SELECT * FROM %s WHERE %s";
-	private DirectClientFactory factory;
+	private DalClientFactory factory;
 	private ResultSetVisitor rsVisitor;
 	private PojoParser pojoParser;
 
-	public BaseQueryDao(DirectClientFactory factory, PojoParser pojoParser,
+	public DalQueryDao(DalClientFactory factory, PojoParser pojoParser,
 			ResultSetVisitor rsVisitor) {
 		this.factory = factory;
 		this.pojoParser = pojoParser;

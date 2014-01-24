@@ -13,9 +13,9 @@ import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.util.Configuration;
-import com.ctrip.platform.dao.DalClientFactory;
-import com.ctrip.platform.dao.StatementParameter;
-import com.ctrip.platform.dao.client.Client;
+import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.StatementParameter;
+import com.ctrip.platform.dal.dao.client.Client;
 
 public class DirectClientDaoTest {
 	private List<StatementParameter> parameters = Collections.EMPTY_LIST;

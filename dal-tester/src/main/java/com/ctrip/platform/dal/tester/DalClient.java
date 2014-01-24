@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.platform.dao.StatementParameter;
-import com.ctrip.platform.dao.client.AbstractDAO;
+import com.ctrip.platform.dal.dao.StatementParameter;
+import com.ctrip.platform.dal.dao.client.AbstractDAO;
 
 
 public class DalClient extends AbstractDAO {

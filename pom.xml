@@ -2,17 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ctrip.platform</groupId>
-  <artifactId>dal</artifactId>
+  <artifactId>dal-all</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules> 
-    <module>dao_java</module>  
-    <module>das</module>  
-    <module>das_console</module>  
-    <module>das_ctrl</module>
-    <module>dao_gen</module>  
-    <module>name_srv</module>
-    <module>das_comm</module>
+    <module>dal-java-client</module>  
+    <module>dal-das</module>  
+    <module>dal-console</module>  
+    <module>dal-ctrl</module>
+    <module>dal-dao-gen</module>  
+    <!-- <module>dal-name-srv</module> -->
+    <module>dal-common</module>
+    <!-- <module>dal-tester</module> -->
   </modules>  
   <properties>
     <package.environment>local</package.environment>

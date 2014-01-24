@@ -1,8 +1,8 @@
-package com.ctrip.platform.dao.param;
+package com.ctrip.platform.dao;
 
 import java.util.Date;
 
-import com.ctrip.platform.dao.DasProto;
+import com.ctrip.platform.dao.client.DasProto;
 import com.ctrip.sysdev.das.common.enums.DbType;
 import com.ctrip.sysdev.das.common.enums.ParameterDirection;
 import com.google.protobuf.ByteString;

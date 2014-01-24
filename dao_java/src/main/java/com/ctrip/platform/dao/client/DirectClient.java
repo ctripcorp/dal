@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.platform.dao.param.StatementParameter;
+import com.ctrip.platform.dao.StatementParameter;
 import com.ctrip.sysdev.das.common.db.DruidDataSourceWrapper;
 
 public class DirectClient implements Client {

@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.ctrip.platform.dao.Recycleable;
-
 /**
  * Manage a pool of socket
  * @author gawu

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dao;
+package com.ctrip.platform.dao.client;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,11 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.ctrip.platform.dao.client.Client;
-import com.ctrip.platform.dao.client.DasClient;
-import com.ctrip.platform.dao.param.StatementParameter;
+import com.ctrip.platform.dao.StatementParameter;
 
-public class AbstractDAO implements DAO {
+public class AbstractDAO implements Client {
 	
 	protected String logicDbName;
 	

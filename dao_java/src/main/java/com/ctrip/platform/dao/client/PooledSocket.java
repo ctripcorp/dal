@@ -8,8 +8,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import com.ctrip.platform.dao.Recycleable;
-
 /**
  * 
  * @author gawu

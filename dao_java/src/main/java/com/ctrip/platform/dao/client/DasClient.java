@@ -8,10 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.ctrip.platform.dao.DasProto;
-import com.ctrip.platform.dao.DasProto.CRUD;
-import com.ctrip.platform.dao.DasProto.StatementType;
-import com.ctrip.platform.dao.param.StatementParameter;
+import com.ctrip.platform.dao.StatementParameter;
+import com.ctrip.platform.dao.client.DasProto.CRUD;
+import com.ctrip.platform.dao.client.DasProto.StatementType;
 
 /**
  * TODO support exception report

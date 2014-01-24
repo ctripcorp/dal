@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.platform.dao.param.StatementParameter;
+import com.ctrip.platform.dao.StatementParameter;
 
 public interface Client {
 	

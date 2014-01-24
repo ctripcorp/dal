@@ -29,7 +29,7 @@
     </dependency>
     <dependency>
       <groupId>com.ctrip.platform</groupId>
-      <artifactId>dao_java</artifactId>
+      <artifactId>dal_java_client</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>

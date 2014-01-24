@@ -7,5 +7,4 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>dal-name-srv</artifactId>
-  <packaging>war</packaging>
 </project>

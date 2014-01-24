@@ -1,0 +1,7 @@
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.dao\bin\Debug\platform.dao.dll
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.dao\bin\Debug\platform.dao.pdb
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.dao\bin\Debug\protobuf-net.dll
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.dao\bin\Debug\protobuf-net.xml
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.dao\obj\Debug\ResolveAssemblyReference.cache
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.dao\obj\Debug\platform.dao.dll
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.dao\obj\Debug\platform.dao.pdb

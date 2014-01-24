@@ -1,0 +1,7 @@
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.bll\bin\Debug\platform.bll.exe.config
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.bll\bin\Debug\platform.bll.exe
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.bll\bin\Debug\platform.bll.pdb
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.bll\bin\Debug\fastJSON.dll
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.bll\obj\x86\Debug\ResolveAssemblyReference.cache
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.bll\obj\x86\Debug\platform.bll.exe
+E:\linkwork\src\java_src\dal\dao_cs\platform\platform.bll\obj\x86\Debug\platform.bll.pdb

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<!-- 
+   Template Name: Metronic - Responsive Admin Dashboard Template build with Twitter Bootstrap 2.3.2
+   Version: 1.4
+   Author: KeenThemes
+   Website: http://www.keenthemes.com/preview/?theme=metronic
+   Purchase: http://themeforest.net/item/metronic-responsive-admin-dashboard-template/4021469
+   -->
+<!--[if IE 8]> 
+<html lang="en" class="ie8 no-js">
+   <![endif]-->
+   <!--[if IE 9]> 
+   <html lang="en" class="ie9 no-js">
+      <![endif]-->
+      <!--[if !IE]><!--> 
+      <html lang="en" class="no-js">
+         <!--<![endif]-->
+         <!-- BEGIN HEAD -->
+         <head>
+            <meta charset="utf-8" />
+            <title>DAO Generator - Projects</title>
+            <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+            <meta content="" name="description" />
+            <meta content="" name="author" />
+            <!-- BEGIN GLOBAL MANDATORY STYLES -->        
+            <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+            <link href="../css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css"/>
+            <link href="../css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+            <link href="../css/style-metro.css" rel="stylesheet" type="text/css"/>
+            <link href="../css/style.css" rel="stylesheet" type="text/css"/>
+            <link href="../css/style-responsive.css" rel="stylesheet" type="text/css"/>
+            <link href="../css/themes/default.css" rel="stylesheet" type="text/css" id="style_color"/>
+            <link href="../css/uniform.default.css" rel="stylesheet" type="text/css"/>
+            <!-- END GLOBAL MANDATORY STYLES -->
+            <!-- BEGIN PAGE LEVEL STYLES --> 
+            <link href="../css/tasks-widget.css" rel="stylesheet" type="text/css" media="screen"/>
+            <!-- END PAGE LEVEL STYLES -->
+            <link rel="shortcut icon" href="/img/favicon.ico" />
+         </head>
+         <!-- END HEAD -->
+         <!-- BEGIN BODY -->
+         <body class="page-header-fixed">
+            <!-- BEGIN HEADER -->   
+            <div class="header navbar navbar-inverse navbar-fixed-top">
+               <!-- BEGIN TOP NAVIGATION BAR -->
+               <div class="navbar-inner">
+                  <div class="container-fluid">
+                     <!-- BEGIN LOGO -->
+                     <a class="brand" href="/">
+                        <img src="../img/logo.png" alt="logo" style="width:126px;height:43px;" />
+                        <!-- <span>Home</span> -->
+                     </a>
+                     <!-- END LOGO -->
+                     <!-- BEGIN RESPONSIVE MENU TOGGLER -->
+                     <a href="javascript:;" class="btn-navbar collapsed" data-toggle="collapse" data-target=".nav-collapse">
+                     <img src="../img/menu-toggler.png" alt="" />
+                     </a>          
+                     <!-- END RESPONSIVE MENU TOGGLER -->            
+                     <!-- BEGIN TOP NAVIGATION MENU -->              
+                     <ul class="nav pull-right">
+                        <!-- BEGIN USER LOGIN DROPDOWN -->
+                        <li class="dropdown user">
+                           <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                           <span class="username">Link Wu</span>
+                           <i class="icon-angle-down"></i>
+                           </a>
+                           <ul class="dropdown-menu">
+                              <li><a href="extra_profile.html"><i class="icon-user"></i> My Profile</a></li>
+                              <li><a href="login.html"><i class="icon-key"></i> Log Out</a></li>
+                           </ul>
+                        </li>
+                        <!-- END USER LOGIN DROPDOWN -->
+                     </ul>
+                     <!-- END TOP NAVIGATION MENU --> 
+                  </div>
+               </div>
+               <!-- END TOP NAVIGATION BAR -->
+            </div>
+            <!-- END HEADER -->
+            <!-- BEGIN CONTAINER -->
+            <div class="page-container">
+               <!-- BEGIN SIDEBAR -->
+               <div class="page-sidebar nav-collapse collapse">
+                  <!-- BEGIN SIDEBAR MENU -->        
+                  <ul class="page-sidebar-menu">
+                     <li>
+                        <!-- BEGIN SIDEBAR TOGGLER BUTTON -->
+                        <div class="sidebar-toggler hidden-phone"></div>
+                        <!-- BEGIN SIDEBAR TOGGLER BUTTON -->
+                     </li>
+                     
+                     <li class="sidebar active" sidename="project">
+                        <a href="./project.html">
+                        <i class="icon-windows"></i> 
+                        <span class="title">我的项目</span>
+                        <span class="selected"></span>
+                        </a>
+                     </li>
+                    <!--  <li class="sidebar" sidename="task">
+                        <a href="./task.html">
+                        <i class="icon-sun"></i> 
+                        <span class="title">生成DAO</span>
+                        <span class="selected"></span>
+                        </a>
+                     </li> -->
+                     <li class="sidebar" sidename="code">
+                        <a href="./file.html">
+                        <i class="icon-twitter"></i> 
+                        <span class="title">项目文件</span>
+                        <span class="selected"></span>
+                        </a>
+                     </li>
+                  </ul>
+                  <!-- END SIDEBAR MENU -->
+               </div>
+               <!-- END SIDEBAR -->
+               <!-- BEGIN PAGE -->
+               <div class="page-content">
+                  <!-- BEGIN PAGE CONTAINER-->
+                  <div id="main_container" class="container-fluid">
+                     <!--  The main container field -->
+                     <div id="dashboard">
+                        <br>
+                        <div class="row-fluid">
+                           <div class="span12">
+                              <div class="portlet box green tasks-widget">
+                                 <!-- BEGIN Portlet Title -->
+                                 <div class="portlet-title">
+                                    <div class="caption"><i class="icon-check"></i>所有项目</div>
+                                    <div class="tools">
+                                       <a href="javascript:;" class="icon-refresh"></a>
+                                    </div>
+                                    <div class="actions">
+                                       <div class="btn-group">
+                                          <a class="btn mini" href="javascript:;" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                                          操作
+                                          <i class="icon-angle-down"></i>
+                                          </a>
+                                          <ul class="dropdown-menu pull-right">
+                                             <li><a href="javascript:;" role="button" class="btn" data-dismiss="modal">添加项目</a></li>
+                                          </ul>
+                                       </div>
+                                    </div>
+                                 </div>
+                                 <!-- End Portlet Title -->
+                                 <!--BEGIN Portlet Body-->
+                                 <div class="portlet-body">
+                                    <div class="task-content">
+                                       <div class="scroller" style="height:750px" data-always-visible="1" data-rail-visible1="1">
+                                          <!-- START TASK LIST -->
+                                          <ul class="task-list unstyled">
+                                          </ul>
+                                          <!-- END START TASK LIST -->
+                                       </div>
+                                    </div>
+                                 </div>
+                                 <!--END Portlet Body-->
+                              </div>
+                           </div>
+                        </div>
+                        <!-- Modal -->
+                        <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                           <div class="modal-header">
+                              <button type="button" class="icon-remove close" data-dismiss="modal" aria-hidden="true" style="width: auto;height: auto;"></button>
+                              <h3 id="myModalLabel">添加新项目</h3>
+                           </div>
+                           <div class="modal-body">
+                              <form class="form-inline">
+                                 <input id="project_id" type="hidden" value="">
+                                 项目名<input id="project_name" type="text" class="input-block-level" value="InternationalFlightEngine">
+                                 Namespace<input id="namespace" type="text" class="input-block-level" value="com.ctrip.flight.intl.engine">
+                              </form>
+                           </div>
+                           <div class="modal-footer">
+                              <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+                              <button id="save_project" class="btn btn-primary">保存</button>
+                           </div>
+                        </div>
+                     </div>
+                     <!-- End of main container-->
+                  </div>
+                  <!-- END PAGE CONTAINER-->    
+               </div>
+               <!-- END PAGE -->
+            </div>
+            <!-- END CONTAINER -->
+            <!-- BEGIN FOOTER -->
+            <!--  <div class="footer">
+               <div class="footer-inner">
+                  2013 &copy; Link
+               </div>
+               <div class="footer-tools">
+                  <span class="go-top">
+                  <i class="icon-angle-up"></i>
+                  </span>
+               </div>
+               </div> -->
+            <!-- END FOOTER -->
+            <!-- BEGIN JAVASCRIPTS(Load javascripts at bottom, this will reduce page load time) -->
+            <!-- BEGIN CORE PLUGINS -->   
+            <script src="../js/jquery-1.10.1.min.js" type="text/javascript"></script>
+            <script src="../js/jquery-migrate-1.2.1.min.js" type="text/javascript"></script>
+            <!-- IMPORTANT! Load jquery-ui-1.10.1.custom.min.js before bootstrap.min.js to fix bootstrap tooltip conflict with jquery ui tooltip -->
+            <script src="../js/jquery-ui-1.10.1.custom.min.js" type="text/javascript"></script>      
+            <script src="../js/bootstrap.min.js" type="text/javascript"></script>
+            <script src="../js/twitter-bootstrap-hover-dropdown.min.js" type="text/javascript" ></script>
+            <!--[if lt IE 9]>
+            <script src="../js/excanvas.min.js"></script>
+            <script src="../js/respond.min.js"></script>  
+            <![endif]-->   
+            <script src="../js/jquery.slimscroll.min.js" type="text/javascript"></script>
+            <script src="../js/jquery.blockui.min.js" type="text/javascript"></script>  
+            <script src="../js/jquery.cookie.min.js" type="text/javascript"></script>
+            <script src="../js/jquery.uniform.min.js" type="text/javascript" ></script>
+            <!-- END CORE js -->
+            <!-- BEGIN PAGE LEVEL SCRIPTS -->
+            <script src="../js/app.js" type="text/javascript"></script>
+            <script src="../js/sprintf.js" type="text/javascript"></script>
+            <script src="../js/daogen/project.js" type="text/javascript"></script> 
+            <!-- END PAGE LEVEL SCRIPTS -->  
+            <!-- END JAVASCRIPTS -->
+         </body>
+         <!-- END BODY -->
+      </html>

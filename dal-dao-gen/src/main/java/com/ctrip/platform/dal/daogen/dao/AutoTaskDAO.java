@@ -26,20 +26,7 @@ public class AutoTaskDAO {
 						new RowMapper<AutoTask>() {
 							public AutoTask mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
-								AutoTask task = new AutoTask();
-								task.setId(rs.getInt(1));
-								task.setProject_id(rs.getInt(2));
-								task.setDb_name(rs.getString(3));
-								task.setTable_name(rs.getString(4));
-								task.setClass_name(rs.getString(5));
-								task.setMethod_name(rs.getString(6));
-								task.setSql_style(rs.getString(7));
-								task.setSql_type(rs.getString(8));
-								task.setCrud_type(rs.getString(9));
-								task.setFields(rs.getString(10));
-								task.setCondition(rs.getString(11));
-								task.setSql_content(rs.getString(12));
-								return task;
+								return AutoTask.visitRow(rs);
 							}
 						});
 
@@ -52,20 +39,7 @@ public class AutoTaskDAO {
 						new Object[] { iD }, new RowMapper<AutoTask>() {
 							public AutoTask mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
-								AutoTask task = new AutoTask();
-								task.setId(rs.getInt(1));
-								task.setProject_id(rs.getInt(2));
-								task.setDb_name(rs.getString(3));
-								task.setTable_name(rs.getString(4));
-								task.setClass_name(rs.getString(5));
-								task.setMethod_name(rs.getString(6));
-								task.setSql_style(rs.getString(7));
-								task.setSql_type(rs.getString(8));
-								task.setCrud_type(rs.getString(9));
-								task.setFields(rs.getString(10));
-								task.setCondition(rs.getString(11));
-								task.setSql_content(rs.getString(12));
-								return task;
+								return AutoTask.visitRow(rs);
 							}
 						});
 	}
@@ -73,12 +47,13 @@ public class AutoTaskDAO {
 	public int insertTask(AutoTask task) {
 
 		return this.jdbcTemplate
-				.update("insert into task_auto ( project_id, db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,where_condition,sql_content) values (?,?,?,?,?,?,?,?,?,?,?,?)",
+				.update("insert into task_auto ( project_id, db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,where_condition,sql_content) values (?,?,?,?,?,?,?,?,?,?,?)",
 						task.getProject_id(), task.getDb_name(),
 						task.getTable_name(), task.getClass_name(),
 						task.getMethod_name(), task.getSql_style(),
 						task.getSql_type(), task.getCrud_type(),
-						task.getFields(), task.getCondition());
+						task.getFields(), task.getCondition(),
+						task.getSql_content());
 
 	}
 
@@ -90,7 +65,8 @@ public class AutoTaskDAO {
 						task.getTable_name(), task.getClass_name(),
 						task.getMethod_name(), task.getSql_style(),
 						task.getSql_type(), task.getCrud_type(),
-						task.getFields(), task.getCondition(), task.getId());
+						task.getFields(), task.getCondition(),
+						task.getSql_content(), task.getId());
 
 	}
 

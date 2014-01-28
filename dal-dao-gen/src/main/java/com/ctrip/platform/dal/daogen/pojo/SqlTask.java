@@ -1,5 +1,8 @@
 package com.ctrip.platform.dal.daogen.pojo;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class SqlTask  extends AbstractTask{
 
 	private int id;
@@ -11,6 +14,10 @@ public class SqlTask  extends AbstractTask{
 	private String class_name;
 	
 	private String method_name;
+	
+	private String crud_type;
+	
+	private String sql_content;
 	
 	public int getId() {
 		return id;
@@ -68,8 +75,16 @@ public class SqlTask  extends AbstractTask{
 		this.sql_content = sql_content;
 	}
 
-	private String crud_type;
-	
-	private String sql_content;
+	public static SqlTask visitRow(ResultSet rs) throws SQLException {
+		SqlTask task = new SqlTask();
+		task.setId(rs.getInt(1));
+		task.setProject_id(rs.getInt(2));
+		task.setDb_name(rs.getString(3));
+		task.setClass_name(rs.getString(4));
+		task.setMethod_name(rs.getString(5));
+		task.setCrud_type(rs.getString(6));
+		task.setSql_content(rs.getString(7));
+		return task;
+	}
 	
 }

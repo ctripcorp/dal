@@ -11,11 +11,9 @@ import com.ctrip.platform.dal.daogen.resource.ProjectResource;
 public class DaoGenApplication extends ResourceConfig {
 
 	public DaoGenApplication() {
+		//将与ProjectResource同Package的所有Class均注册为Jersey的Resource
 		packages(ProjectResource.class.getPackage().getName());
 		this.register(EntityFilteringFeature.class);
-		
-//		ApplicationContext appContext =
-//                new ClassPathXmlApplicationContext("spring.xml");
 		
 	}
 

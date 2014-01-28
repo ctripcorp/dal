@@ -24,13 +24,9 @@ jQuery(document).ready(function () {
         name: 'sidebar',
         img: null,
         topHTML: '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a id="addProj" href="javascript:;"><i class="fa fa-plus"></i>添加项目</a>&nbsp;&nbsp;<a href="javascript:;" onclick="reloadProjects();"><i class="fa fa-refresh"></i>刷新</a></div>',
-        menu: [{
-            id: "gen_code",
-            text: 'C# Code',
-            icon: 'fa fa-play'
-        }, {
+        menu: [ {
             id: "java_code",
-            text: 'Java Code',
+            text: 'Generate Java Code',
             icon: 'fa fa-play'
         }, {
             id: "edit_proj",
@@ -43,20 +39,12 @@ jQuery(document).ready(function () {
         }],
         onMenuClick: function (event) {
             switch (event.menuItem.id) {
-            case "gen_code":
-                $.post("/rest/project/generate", {
-                    "project_id": event.target,
-                    "language": "csharp"
-                }, function (data) {
-                    window.location.href = "/file.html";
-                });
-                break;
             case "java_code":
                 $.post("/rest/project/generate", {
                     "project_id": event.target,
                     "language": "java"
                 }, function (data) {
-                    window.location.href = "/file.html";
+                    window.location.href = "/file.jsp";
                 });
                 break;
             case "edit_proj":
@@ -607,11 +595,6 @@ var renderGrid = function () {
                 type: 'break'
             }, {
                 type: 'button',
-                id: 'csharpCode',
-                caption: 'c#代码',
-                icon: 'fa fa-play'
-            }, {
-                type: 'button',
                 id: 'javaCode',
                 caption: 'Java代码',
                 icon: 'fa fa-play'
@@ -629,19 +612,19 @@ var renderGrid = function () {
                     $.get("/rest/task?project_id=" + current_project, function (data) {
                         var allTasks = [];
                         $.each(data.autoTasks, function (index, value) {
-                            value.recid = allTasks.length;
+                            value.recid = allTasks.length+1;
                             value.task_type = "auto";
                             allTasks.push(value);
                         });
                         $.each(data.spTasks, function (index, value) {
-                            value.recid = allTasks.length;
+                            value.recid = allTasks.length+1;
                             value.sql_content = value.sp_content;
                             value.task_type = "sp";
                             value.sql_type = "/";
                             allTasks.push(value);
                         });
                         $.each(data.sqlTasks, function (index, value) {
-                            value.recid = allTasks.length;
+                            value.recid = allTasks.length+1;
                             value.task_type = "sql";
                             value.sql_type = "/";
                             allTasks.push(value);
@@ -701,20 +684,12 @@ var renderGrid = function () {
                             });
                     }
                     break;
-                case 'csharpCode':
-                    $.post("/rest/project/generate", {
-                        "project_id": w2ui['grid'].current_project,
-                        "language": "csharp"
-                    }, function (data) {
-                        window.location.href = "/file.html";
-                    });
-                    break;
                 case 'javaCode':
                     $.post("/rest/project/generate", {
                         "project_id": w2ui['grid'].current_project,
                         "language": "java"
                     }, function (data) {
-                        window.location.href = "/file.html";
+                        window.location.href = "/file.jsp";
                     });
                     break;
                 }
@@ -787,6 +762,7 @@ var addDao = function () {
     } else {
         postData["action"] = "insert";
     }
+    postData["server"] = $("#servers").val();
 
     if ($(".gen_style.active").children().val() == "auto") {
         postData["task_type"] = "auto";

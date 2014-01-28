@@ -1,5 +1,8 @@
 package com.ctrip.platform.dal.daogen.pojo;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class Project {
 	
 	private int id;
@@ -40,6 +43,15 @@ public class Project {
 
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
+	}
+	
+	public static Project visitRow(ResultSet rs) throws SQLException {
+		Project project = new Project();
+        project.setId(rs.getInt(1));
+        project.setUser_id(rs.getString(2));
+        project.setName(rs.getString(3));
+        project.setNamespace(rs.getString(4));
+         return project;
 	}
 
 }

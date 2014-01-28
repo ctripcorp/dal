@@ -1,5 +1,8 @@
 package com.ctrip.platform.dal.daogen.pojo;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class ServerDbMap {
 	
 	private int id;
@@ -30,6 +33,14 @@ public class ServerDbMap {
 
 	public void setDb_name(String db_name) {
 		this.db_name = db_name;
+	}
+	
+	public static ServerDbMap visitRow(ResultSet rs) throws SQLException {
+		ServerDbMap map = new ServerDbMap();
+		map.setId(rs.getInt(1));
+		map.setServer_id(rs.getInt(2));
+		map.setDb_name(rs.getString(3));
+		return map;
 	}
 
 }

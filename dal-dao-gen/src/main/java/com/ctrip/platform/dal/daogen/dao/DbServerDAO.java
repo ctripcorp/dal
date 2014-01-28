@@ -32,14 +32,7 @@ public class DbServerDAO {
 						new RowMapper<DbServer>() {
 							public DbServer mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
-								DbServer data = new DbServer();
-								data.setId(rs.getInt(1));
-								data.setDriver(rs.getString(2));
-								data.setUrl(rs.getString(3));
-								data.setUser(rs.getString(4));
-								data.setPassword(rs.getString(5));
-								data.setDb_type(rs.getString(6));
-								return data;
+								return DbServer.visitRow(rs);
 							}
 						});
 	}
@@ -52,23 +45,12 @@ public class DbServerDAO {
 						new Object[] { iD }, new RowMapper<DbServer>() {
 							public DbServer mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
-								DbServer data = new DbServer();
-								data.setId(rs.getInt(1));
-								data.setDriver(rs.getString(2));
-								data.setUrl(rs.getString(3));
-								data.setUser(rs.getString(4));
-								data.setPassword(rs.getString(5));
-								data.setDb_type(rs.getString(6));
-								return data;
+								return DbServer.visitRow(rs);
 							}
 						});
 	}
 
 	public int insertDbServer(final DbServer data) {
-
-		// return
-		// this.jdbcTemplate.update("insert into data_source ( driver, url, user,password, db_type) values (?,?,?,?,?);select LAST_INSERT_ID();",
-		// data.getDriver(),data.getUrl(),data.getUser(),data.getPassword(),data.getDb_type());
 
 		KeyHolder holder = new GeneratedKeyHolder();
 

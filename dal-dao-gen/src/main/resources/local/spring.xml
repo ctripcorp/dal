@@ -16,7 +16,7 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
     
-     <bean id="spTaskDao" class="com.ctrip.platform.dal.daogen.dao.SPTaskDAO">
+     <bean id="spTaskDao" class="com.ctrip.platform.dal.daogen.dao.SpTaskDAO">
         <property name="dataSource" ref="dataSource"/>
     </bean>
     

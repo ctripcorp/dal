@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.ctrip.platform.dal.daogen.pojo.SpTask;
 
-public class SPTaskDAO {
+public class SpTaskDAO {
 
 	private JdbcTemplate jdbcTemplate;
 
@@ -27,17 +27,7 @@ public class SPTaskDAO {
 				new RowMapper<SpTask>() {
 					public SpTask mapRow(ResultSet rs, int rowNum)
 							throws SQLException {
-						SpTask task = new SpTask();
-						task.setId(rs.getInt(1));
-						task.setProject_id(rs.getInt(2));
-						task.setDb_name(rs.getString(3));
-						task.setClass_name(rs.getString(4));
-						task.setSp_schema(rs.getString(5));
-						task.setSp_name(rs.getString(6));
-						task.setSql_style(rs.getString(7));
-						task.setCrud_type(rs.getString(8));
-						task.setSp_content(rs.getString(9));
-						return task;
+						return SpTask.visitRow(rs);
 					}
 				});
 	}
@@ -49,17 +39,7 @@ public class SPTaskDAO {
 						new Object[] { iD }, new RowMapper<SpTask>() {
 							public SpTask mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
-								SpTask task = new SpTask();
-								task.setId(rs.getInt(1));
-								task.setProject_id(rs.getInt(2));
-								task.setDb_name(rs.getString(3));
-								task.setClass_name(rs.getString(4));
-								task.setSp_schema(rs.getString(5));
-								task.setSp_name(rs.getString(6));
-								task.setSql_style(rs.getString(7));
-								task.setCrud_type(rs.getString(8));
-								task.setSp_content(rs.getString(9));
-								return task;
+								return SpTask.visitRow(rs);
 							}
 						});
 	}

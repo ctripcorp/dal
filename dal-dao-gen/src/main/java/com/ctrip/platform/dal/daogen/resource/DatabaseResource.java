@@ -27,7 +27,7 @@ import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.Status;
-import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,11 +37,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Path("db")
 public class DatabaseResource {
 
-	private static DbServerDAO dbServerDao;
+	
 	private static ObjectMapper mapper = new ObjectMapper();
+	private static DbServerDAO dbServerDao;
 
 	static {
-		dbServerDao = BeanGetter.getDBServerDao();
+		dbServerDao = SpringBeanGetter.getDBServerDao();
 	}
 
 	@GET
@@ -81,7 +82,8 @@ public class DatabaseResource {
 			dbServer.setPassword(password);
 			dbServer.setDb_type(db_type);
 			int generatedId = dbServerDao.insertDbServer(dbServer);
-			if (DataSourceLRUCache.newInstance().getDataSource(generatedId) == null) {
+			dbServer.setId(generatedId);
+			if (DataSourceLRUCache.newInstance().putDataSource(dbServer) == null) {
 				dbServerDao.deleteDbServer(generatedId);
 				return Status.ERROR;
 			}
@@ -99,11 +101,17 @@ public class DatabaseResource {
 		List<String> results = new ArrayList<String>();
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
+		if(ds == null){
+			DbServer dbServer = dbServerDao.getDbServerByID(server);
+			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+		}
 
 		if (ds != null) {
 			ResultSet rs = null;
+			Connection connection = null;
 			try {
-				rs = ds.getConnection().getMetaData().getCatalogs();
+				connection = ds.getConnection();
+				rs = connection.getMetaData().getCatalogs();
 				while (rs.next()) {
 					results.add(rs.getString("TABLE_CAT"));
 				}
@@ -112,6 +120,7 @@ public class DatabaseResource {
 				e.printStackTrace();
 			} finally {
 				JdbcUtils.closeResultSet(rs);
+				JdbcUtils.closeConnection(connection);
 			}
 		}
 
@@ -132,6 +141,10 @@ public class DatabaseResource {
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
 
 		DbServer dbServer = dbServerDao.getDbServerByID(server);
+		
+		if(ds == null){
+			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+		}
 
 		List<String> results = new ArrayList<String>();
 
@@ -155,9 +168,11 @@ public class DatabaseResource {
 				&& dbServer.getDb_type().equalsIgnoreCase("mysql")) {
 			String[] types = { "TABLE", "VIEW" };
 			ResultSet rs = null;
+			Connection connection = null;
 			try {
-				rs = ds.getConnection().getMetaData()
-						.getTables(dbName, null, "%", types);
+				connection = ds.getConnection();
+				rs = connection.getMetaData().getTables(dbName, null, "%",
+						types);
 				while (rs.next()) {
 					results.add(rs.getString("TABLE_NAME"));
 				}
@@ -165,6 +180,7 @@ public class DatabaseResource {
 				e.printStackTrace();
 			} finally {
 				JdbcUtils.closeResultSet(rs);
+				JdbcUtils.closeConnection(connection);
 			}
 		}
 
@@ -186,6 +202,10 @@ public class DatabaseResource {
 			@QueryParam("table_name") String tableName) {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
+		if(ds == null){
+			DbServer dbServer = dbServerDao.getDbServerByID(server);
+			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+		}
 
 		List<FieldMeta> fields = new ArrayList<FieldMeta>();
 
@@ -194,11 +214,6 @@ public class DatabaseResource {
 			Connection connection = null;
 			try {
 				connection = ds.getConnection();
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			if (connection != null) {
-
 				Set<String> indexedColumns = new HashSet<String>();
 				Set<String> primaryKeys = new HashSet<String>();
 				Set<String> allColumns = new HashSet<String>();
@@ -258,7 +273,12 @@ public class DatabaseResource {
 					field.setPrimary(primaryKeys.contains(str));
 					fields.add(field);
 				}
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			} finally {
+				JdbcUtils.closeConnection(connection);
 			}
+
 		}
 
 		return fields;
@@ -272,14 +292,18 @@ public class DatabaseResource {
 			@QueryParam("db_name") String dbName) {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-
-		DbServer genDataSource = dbServerDao.getDbServerByID(server);
+		
+		DbServer dbServer = dbServerDao.getDbServerByID(server);
+		
+		if(ds == null){
+			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+		}
 
 		List<String> results = new ArrayList<String>();
 
 		// 如果是Sql Server，通过Sql语句获取所有表和视图的名称
-		if (genDataSource != null
-				&& genDataSource.getDb_type().equalsIgnoreCase("sqlserver")) {
+		if (dbServer != null
+				&& dbServer.getDb_type().equalsIgnoreCase("sqlserver")) {
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
 			String sql = String
@@ -313,6 +337,11 @@ public class DatabaseResource {
 			@QueryParam("sp_name") String spName) {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
+		
+		if(ds == null){
+			DbServer dbServer = dbServerDao.getDbServerByID(server);
+			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+		}
 
 		JdbcTemplate template = new JdbcTemplate(ds);
 
@@ -339,6 +368,11 @@ public class DatabaseResource {
 			@QueryParam("sp_code") String spCode) {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
+		
+		if(ds == null){
+			DbServer dbServer = dbServerDao.getDbServerByID(server);
+			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+		}
 
 		JdbcTemplate template = new JdbcTemplate(ds);
 

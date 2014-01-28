@@ -1,5 +1,8 @@
 package com.ctrip.platform.dal.daogen.pojo;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class DbServer {
 	
 	private int id;
@@ -60,6 +63,17 @@ public class DbServer {
 
 	public void setDb_type(String db_type) {
 		this.db_type = db_type;
+	}
+	
+	public static DbServer visitRow(ResultSet rs) throws SQLException {
+		DbServer data = new DbServer();
+		data.setId(rs.getInt(1));
+		data.setDriver(rs.getString(2));
+		data.setUrl(rs.getString(3));
+		data.setUser(rs.getString(4));
+		data.setPassword(rs.getString(5));
+		data.setDb_type(rs.getString(6));
+		return data;
 	}
 
 }

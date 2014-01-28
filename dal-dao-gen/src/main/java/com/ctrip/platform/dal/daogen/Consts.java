@@ -12,6 +12,7 @@ public class Consts {
 	 * Value: 对应Java数据类型
 	 */
 	public static Map<String, String> JavaSqlTypeMap;
+	
 	/**
 	 * Key: Java数据类型
 	 * Value: 对应的的DbType，DbType参照C#
@@ -21,6 +22,10 @@ public class Consts {
 	public static Map<String, String> CSharpSqlTypeMap;
 	public static Map<String, String> CSharpDbTypeMap;
 	
+	/**
+	 * Key：数字
+	 * Value：对应的数据库表达式，如等于表达式为'='
+	 */
 	public static Map<String, String> WhereConditionMap;
 	
 	public static List<String> CSharpValueTypes;

@@ -19,7 +19,7 @@ import com.ctrip.platform.dal.daogen.dao.ProjectDAO;
 import com.ctrip.platform.dal.daogen.gen.JavaGenerator;
 import com.ctrip.platform.dal.daogen.pojo.Project;
 import com.ctrip.platform.dal.daogen.pojo.Status;
-import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
  * The schema of {daogen.project} { "name": "InternationalFightEntine",
@@ -36,7 +36,7 @@ public class ProjectResource {
 	private static ProjectDAO projectDao;
 
 	static {
-		projectDao = BeanGetter.getProjectDao();
+		projectDao = SpringBeanGetter.getProjectDao();
 	}
 
 	@GET

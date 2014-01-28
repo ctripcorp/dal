@@ -6,11 +6,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.ctrip.platform.dal.daogen.dao.AutoTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
 import com.ctrip.platform.dal.daogen.dao.ProjectDAO;
-import com.ctrip.platform.dal.daogen.dao.SPTaskDAO;
+import com.ctrip.platform.dal.daogen.dao.SpTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.ServerDbMapDAO;
 import com.ctrip.platform.dal.daogen.dao.SqlTaskDAO;
 
-public class BeanGetter {
+public class SpringBeanGetter {
 
 	private static ApplicationContext context = new ClassPathXmlApplicationContext(
 			"spring.xml");
@@ -23,8 +23,8 @@ public class BeanGetter {
 		return (AutoTaskDAO)context.getBean("autoTaskDao");
 	}
 	
-	public static SPTaskDAO getSpTaskDao(){
-		return (SPTaskDAO)context.getBean("spTaskDao");
+	public static SpTaskDAO getSpTaskDao(){
+		return (SpTaskDAO)context.getBean("spTaskDao");
 	}
 	
 	public static SqlTaskDAO getSqlTaskDao(){

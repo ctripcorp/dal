@@ -1,25 +1,28 @@
 package com.ctrip.platform.dal.daogen.pojo;
 
-public class AutoTask extends AbstractTask{
-	
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class AutoTask extends AbstractTask {
+
 	private int id;
-	
+
 	private int project_id;
-	
+
 	private String class_name;
-	
+
 	private String method_name;
-	
+
 	private String sql_style;
-	
+
 	private String sql_type;
-	
+
 	private String crud_type;
-	
+
 	private String fields;
-	
+
 	private String condition;
-	
+
 	private String sql_content;
 
 	public String getFields() {
@@ -66,6 +69,7 @@ public class AutoTask extends AbstractTask{
 	public String getDb_name() {
 		return db_name;
 	}
+
 	@Override
 	public void setDb_name(String db_name) {
 		this.db_name = db_name;
@@ -75,6 +79,7 @@ public class AutoTask extends AbstractTask{
 	public String getTable_name() {
 		return table_name;
 	}
+
 	@Override
 	public void setTable_name(String table_name) {
 		this.table_name = table_name;
@@ -118,6 +123,24 @@ public class AutoTask extends AbstractTask{
 
 	public void setCrud_type(String crud_type) {
 		this.crud_type = crud_type;
+	}
+
+	public static AutoTask visitRow(ResultSet rs) throws SQLException {
+		AutoTask task = new AutoTask();
+		task.setId(rs.getInt(1));
+		task.setProject_id(rs.getInt(2));
+		task.setDb_name(rs.getString(3));
+		task.setTable_name(rs.getString(4));
+		task.setClass_name(rs.getString(5));
+		task.setMethod_name(rs.getString(6));
+		task.setSql_style(rs.getString(7));
+		task.setSql_type(rs.getString(8));
+		task.setCrud_type(rs.getString(9));
+		task.setFields(rs.getString(10));
+		task.setCondition(rs.getString(11));
+		task.setSql_content(rs.getString(12));
+
+		return task;
 	}
 
 }

@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.daogen.utils;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
@@ -28,30 +26,54 @@ public class DataSourceLRUCache {
 	}
 
 	private static DataSourceLRUCache cache = new DataSourceLRUCache();
-	private static DbServerDAO dataSourceDao;
+	private static DbServerDAO dbServerDao;
 
 	static {
-		dataSourceDao = BeanGetter.getDBServerDao();
+		dbServerDao = SpringBeanGetter.getDBServerDao();
 	}
+
+	private long timeout = 30 * 60 * 1000;
 
 	public static DataSourceLRUCache newInstance() {
 		return cache;
 	}
 
+	public long getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(long _timeout) {
+		synchronized (dataSources) {
+			timeout = _timeout;
+		}
+	}
+
 	private ConcurrentHashMap<Integer, InnerDataSource> dataSources = new ConcurrentHashMap<Integer, DataSourceLRUCache.InnerDataSource>();
 
+	/**
+	 * 根据server的id获取连接池，调用者需要判断是否为null的情况
+	 * @param id
+	 * @return 获得的连接池，如果不存在，返回null
+	 */
 	public DataSource getDataSource(int id) {
-		long current = System.currentTimeMillis();
-
-		Iterator<Map.Entry<Integer, InnerDataSource>> iter = dataSources
-				.entrySet().iterator();
-
+		// 用synchronized，此处的性能堪忧，但是是线程安全的
 		synchronized (dataSources) {
+			long current = System.currentTimeMillis();
+
+			Iterator<Map.Entry<Integer, InnerDataSource>> iter = dataSources
+					.entrySet().iterator();
+
 			while (iter.hasNext()) {
 				Map.Entry<Integer, InnerDataSource> entry = iter.next();
-				// 现在写死为30分钟
+				// 现在是在返回连接池之前回收，后续可以考虑放在后台线程中进行释放，类似于GC
 				if (!entry.getKey().equals(id)
-						&& (current - entry.getValue().getLastAccessTime()) > 30 * 60 * 1000) {
+						&& (current - entry.getValue().getLastAccessTime()) > timeout) {
+					try {
+						// 关闭所有的Idle连接，也可以考虑直接关闭active的连接，暂不实现
+						entry.getValue().dataSource.close();
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
 					iter.remove();
 				}
 			}
@@ -59,32 +81,51 @@ public class DataSourceLRUCache {
 			if (dataSources.containsKey(id)) {
 				dataSources.get(id).setLastAccessTime(current);
 				return dataSources.get(id).getDataSource();
-			} else {
-				DbServer dataSource = dataSourceDao.getDbServerByID(id);
-				if (null != dataSource) {
-					InnerDataSource innerDataSource = new InnerDataSource();
-					innerDataSource.setLastAccessTime(current);
+			}
 
-					BasicDataSource dbDataSource = new BasicDataSource();
-					dbDataSource.setDriverClassName(dataSource.getDriver());
-					dbDataSource.setUrl(dataSource.getUrl());
-					dbDataSource.setUsername(dataSource.getUser());
-					dbDataSource.setPassword(dataSource.getPassword());
+			return null;
+		}
 
-					try {
-						dbDataSource.getConnection();
-					} catch (SQLException e) {
-						e.printStackTrace();
-						return null;
-					}
+	}
+	
+	public DataSource putDataSource(int id){
+		DbServer dbServer = dbServerDao.getDbServerByID(id);
+		
+		return putDataSource(dbServer);
+	}
 
-					innerDataSource.setDataSource(dbDataSource);
+	public DataSource putDataSource(DbServer server) {
 
-					dataSources.put(id, innerDataSource);
-					return dbDataSource;
-				}
+		// get和put会不会出现死锁？
+		synchronized (dataSources) {
+
+			if (dataSources.containsKey(server.getId())) {
+				dataSources.get(server.getId()).setLastAccessTime(
+						System.currentTimeMillis());
+				return dataSources.get(server.getId()).getDataSource();
+			}
+
+			BasicDataSource dbDataSource = new BasicDataSource();
+			dbDataSource.setDriverClassName(server.getDriver());
+			dbDataSource.setUrl(server.getUrl());
+			dbDataSource.setUsername(server.getUser());
+			dbDataSource.setPassword(server.getPassword());
+
+			try {
+				dbDataSource.getConnection();
+
+				InnerDataSource innerDataSource = new InnerDataSource();
+				innerDataSource.setLastAccessTime(System.currentTimeMillis());
+				innerDataSource.setDataSource(dbDataSource);
+
+				dataSources.put(server.getId(), innerDataSource);
+
+			} catch (SQLException e) {
+				e.printStackTrace();
 				return null;
 			}
+
+			return dbDataSource;
 		}
 
 	}
@@ -114,29 +155,6 @@ public class DataSourceLRUCache {
 		public void setDataSource(BasicDataSource dataSource) {
 			this.dataSource = dataSource;
 		}
-	}
-
-	public static void main(String[] args) throws SQLException {
-		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(6);
-		Connection connection = ds.getConnection();
-
-		// ResultSet rs = connection.getMetaData().getColumns("dao_test", null,
-		// "Person", null);
-		//
-		// while(rs.next()){
-		// System.out.println(rs.getString("COLUMN_NAME"));
-		// }
-		//
-		// rs.close();
-
-		ResultSet rs = connection.getMetaData().getIndexInfo("SysDalTest", null,
-				"Person", false, false);
-
-		while (rs.next()) {
-			System.out.println(rs.getString("COLUMN_NAME"));
-		}
-
-		rs.close();
 	}
 
 }

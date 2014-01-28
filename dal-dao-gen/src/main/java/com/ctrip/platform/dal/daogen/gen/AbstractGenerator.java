@@ -16,30 +16,33 @@ import org.apache.velocity.app.Velocity;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.daogen.dao.AutoTaskDAO;
+import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
 import com.ctrip.platform.dal.daogen.dao.ProjectDAO;
-import com.ctrip.platform.dal.daogen.dao.SPTaskDAO;
+import com.ctrip.platform.dal.daogen.dao.SpTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.ServerDbMapDAO;
 import com.ctrip.platform.dal.daogen.dao.SqlTaskDAO;
 import com.ctrip.platform.dal.daogen.pojo.AutoTask;
+import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.Project;
 import com.ctrip.platform.dal.daogen.pojo.SpTask;
 import com.ctrip.platform.dal.daogen.pojo.Task;
-import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
 
 public abstract class AbstractGenerator implements Generator {
-
 
 	protected static ProjectDAO projectDao;
 
 	protected static AutoTaskDAO autoTaskDao;
 
-	protected static SPTaskDAO spTaskDao;
+	protected static SpTaskDAO spTaskDao;
 
 	protected static SqlTaskDAO sqlTaskDao;
-	
+
 	protected static ServerDbMapDAO serverDbMapDao;
+	
+	private static DbServerDAO dbServerDao;
 
 	protected String namespace;
 
@@ -47,11 +50,12 @@ public abstract class AbstractGenerator implements Generator {
 
 	static {
 
-		projectDao = BeanGetter.getProjectDao();
-		autoTaskDao = BeanGetter.getAutoTaskDao();
-		spTaskDao = BeanGetter.getSpTaskDao();
-		sqlTaskDao = BeanGetter.getSqlTaskDao();
-		serverDbMapDao = BeanGetter.getServerDbMapDao();
+		projectDao = SpringBeanGetter.getProjectDao();
+		autoTaskDao = SpringBeanGetter.getAutoTaskDao();
+		spTaskDao = SpringBeanGetter.getSpTaskDao();
+		sqlTaskDao = SpringBeanGetter.getSqlTaskDao();
+		serverDbMapDao = SpringBeanGetter.getServerDbMapDao();
+		dbServerDao = SpringBeanGetter.getDBServerDao();
 
 		java.util.Properties pr = new java.util.Properties();
 		pr.setProperty("resource.loader", "class");
@@ -99,17 +103,18 @@ public abstract class AbstractGenerator implements Generator {
 			String tableName) {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
+		
+		if(ds == null){
+			DbServer dbServer = dbServerDao.getDbServerByID(server);
+			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+		}
 
 		Set<String> primaryKeys = new HashSet<String>();
 		List<FieldMeta> fields = new ArrayList<FieldMeta>();
-		
+
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		if (connection != null) {
 			// 获取所有主键
 			ResultSet primaryKeyRs = null;
 			try {
@@ -135,15 +140,15 @@ public abstract class AbstractGenerator implements Generator {
 					String columnName = allColumnsRs.getString("COLUMN_NAME");
 					String columnType = allColumnsRs.getString("TYPE_NAME ");
 					int position = allColumnsRs.getInt("ORDINAL_POSITION");
-//					String nullable = allColumnsRs.getString(4);
+					// String nullable = allColumnsRs.getString(4);
 
 					meta.setName(columnName);
 					meta.setType(columnType);
 					meta.setPosition(position);
 					meta.setPrimary(primaryKeys.contains(columnName));
-//					meta.setNullable(nullable.equalsIgnoreCase("yes")
-//							&& Consts.CSharpValueTypes.contains(columnType));
-//					meta.setValueType(Consts.CSharpValueTypes.contains(columnType));
+					// meta.setNullable(nullable.equalsIgnoreCase("yes")
+					// && Consts.CSharpValueTypes.contains(columnType));
+					// meta.setValueType(Consts.CSharpValueTypes.contains(columnType));
 
 					fields.add(meta);
 				}
@@ -152,6 +157,10 @@ public abstract class AbstractGenerator implements Generator {
 			} finally {
 				JdbcUtils.closeResultSet(allColumnsRs);
 			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		} finally {
+			JdbcUtils.closeConnection(connection);
 		}
 
 		return fields;

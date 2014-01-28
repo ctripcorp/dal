@@ -16,9 +16,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.daogen.Consts;
+import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
 import com.ctrip.platform.dal.daogen.pojo.AutoTask;
+import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.Method;
 import com.ctrip.platform.dal.daogen.pojo.Parameter;
@@ -26,6 +29,7 @@ import com.ctrip.platform.dal.daogen.pojo.ServerDbMap;
 import com.ctrip.platform.dal.daogen.pojo.SpTask;
 import com.ctrip.platform.dal.daogen.pojo.Task;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 public class JavaGenerator extends AbstractGenerator {
 
@@ -34,6 +38,11 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	private static JavaGenerator instance = new JavaGenerator();
+	private static DbServerDAO dbServerDao;
+
+	static {
+		dbServerDao = SpringBeanGetter.getDBServerDao();
+	}
 
 	public static JavaGenerator getInstance() {
 		return instance;
@@ -216,7 +225,7 @@ public class JavaGenerator extends AbstractGenerator {
 		context.put("namespace", namespace);
 
 		for (Map.Entry<String, List<Task>> entry : groupbyDB.entrySet()) {
-			//String sp = entry.getKey();
+			// String sp = entry.getKey();
 			List<Task> objs = entry.getValue();
 			if (objs.size() > 0) {
 				context.put("database", objs.get(0).getDb_name());
@@ -245,42 +254,41 @@ public class JavaGenerator extends AbstractGenerator {
 
 				DataSource ds = DataSourceLRUCache.newInstance().getDataSource(
 						serverDbMap.getServer_id());
+				
+				if(ds == null){
+					DbServer dbServer = dbServerDao.getDbServerByID(serverDbMap.getServer_id());
+					ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+				}
 
 				Connection connection = null;
 				try {
 					connection = ds.getConnection();
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-				if (connection != null) {
 					List<Parameter> parameters = new ArrayList<Parameter>();
 
-					try {
-						ResultSet spParams = connection.getMetaData()
-								.getProcedureColumns(obj.getDb_name(),
-										obj.getSp_schema(), obj.getSp_name(),
-										null);
+					ResultSet spParams = connection.getMetaData()
+							.getProcedureColumns(obj.getDb_name(),
+									obj.getSp_schema(), obj.getSp_name(), null);
 
-						while (spParams.next()) {
-							Parameter p = new Parameter();
-							String name = spParams.getString("COLUMN_NAME");
-							if (name.startsWith("@") || name.startsWith(":")) {
-								name = name.substring(1);
-							}
-							p.setName(name);
-							p.setFieldName(name);
-							p.setType(Consts.JavaSqlTypeMap.get(spParams
-									.getString("TYPE_NAME")));
-							p.setParamMode(spParams.getString("COLUMN_TYPE"));
-							p.setPosition(spParams.getInt("ORDINAL_POSITION"));
-							parameters.add(p);
+					while (spParams.next()) {
+						Parameter p = new Parameter();
+						String name = spParams.getString("COLUMN_NAME");
+						if (name.startsWith("@") || name.startsWith(":")) {
+							name = name.substring(1);
 						}
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						p.setName(name);
+						p.setFieldName(name);
+						p.setType(Consts.JavaSqlTypeMap.get(spParams
+								.getString("TYPE_NAME")));
+						p.setParamMode(spParams.getString("COLUMN_TYPE"));
+						p.setPosition(spParams.getInt("ORDINAL_POSITION"));
+						parameters.add(p);
 					}
 					m.setParameters(parameters);
 					spMethods.add(m);
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				} finally {
+					JdbcUtils.closeConnection(connection);
 				}
 
 			}

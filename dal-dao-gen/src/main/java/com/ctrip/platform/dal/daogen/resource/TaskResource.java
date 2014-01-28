@@ -18,14 +18,16 @@ import org.apache.commons.lang.StringUtils;
 
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.dao.AutoTaskDAO;
-import com.ctrip.platform.dal.daogen.dao.SPTaskDAO;
+import com.ctrip.platform.dal.daogen.dao.ServerDbMapDAO;
+import com.ctrip.platform.dal.daogen.dao.SpTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.SqlTaskDAO;
 import com.ctrip.platform.dal.daogen.pojo.AutoTask;
+import com.ctrip.platform.dal.daogen.pojo.ServerDbMap;
 import com.ctrip.platform.dal.daogen.pojo.SpTask;
 import com.ctrip.platform.dal.daogen.pojo.SqlTask;
 import com.ctrip.platform.dal.daogen.pojo.Status;
 import com.ctrip.platform.dal.daogen.pojo.TaskAggeragation;
-import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
  * The schema of {daogen.task} { "project_id": , "task_type": , "database" : ,
@@ -43,14 +45,17 @@ public class TaskResource {
 
 	private static AutoTaskDAO autoTask;
 
-	private static SPTaskDAO spTask;
+	private static SpTaskDAO spTask;
 
 	private static SqlTaskDAO sqlTask;
+	
+	private static ServerDbMapDAO serverDbMapDao;
 
 	static {
-		autoTask = BeanGetter.getAutoTaskDao();
-		spTask = BeanGetter.getSpTaskDao();
-		sqlTask = BeanGetter.getSqlTaskDao();
+		autoTask = SpringBeanGetter.getAutoTaskDao();
+		spTask = SpringBeanGetter.getSpTaskDao();
+		sqlTask = SpringBeanGetter.getSqlTaskDao();
+		serverDbMapDao = SpringBeanGetter.getServerDbMapDao();
 	}
 
 	@GET
@@ -78,6 +83,7 @@ public class TaskResource {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Status addTask(
 			@FormParam("id") String id,
+			@FormParam("server") int server,
 			@FormParam("project_id") String project_id,
 			@FormParam("task_type") String task_type,
 			@FormParam("db_name") String db_name,
@@ -109,6 +115,12 @@ public class TaskResource {
 				t.setCondition(condition);
 				t.setSql_content(formatSql(t));
 				autoTask.insertTask(t);
+				
+				ServerDbMap map = new ServerDbMap();
+				map.setServer_id(server);
+				map.setDb_name(db_name);
+				serverDbMapDao.insertServerDbMap(map);
+				
 			} else if (action.equals("update")) {
 				AutoTask t = new AutoTask();
 				t.setId(Integer.valueOf(id));

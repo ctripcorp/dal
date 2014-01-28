@@ -26,11 +26,7 @@ public class ServerDbMapDAO {
 				new RowMapper<ServerDbMap>() {
 					public ServerDbMap mapRow(ResultSet rs, int rowNum)
 							throws SQLException {
-						ServerDbMap map = new ServerDbMap();
-						map.setId(rs.getInt(1));
-						map.setServer_id(rs.getInt(2));
-						map.setDb_name(rs.getString(3));
-						return map;
+						return ServerDbMap.visitRow(rs);
 					}
 				});
 
@@ -44,11 +40,7 @@ public class ServerDbMapDAO {
 						new Object[] { dbName }, new RowMapper<ServerDbMap>() {
 							public ServerDbMap mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
-								ServerDbMap map = new ServerDbMap();
-								map.setId(rs.getInt(1));
-								map.setServer_id(rs.getInt(2));
-								map.setDb_name(rs.getString(3));
-								return map;
+								return ServerDbMap.visitRow(rs);
 							}
 						});
 

@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +18,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.dao.AutoTaskDAO;
-import com.ctrip.platform.dal.daogen.dao.MasterDAO;
 import com.ctrip.platform.dal.daogen.dao.SPTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.SqlTaskDAO;
 import com.ctrip.platform.dal.daogen.pojo.AutoTask;
@@ -28,6 +25,7 @@ import com.ctrip.platform.dal.daogen.pojo.SpTask;
 import com.ctrip.platform.dal.daogen.pojo.SqlTask;
 import com.ctrip.platform.dal.daogen.pojo.Status;
 import com.ctrip.platform.dal.daogen.pojo.TaskAggeragation;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 
 /**
  * The schema of {daogen.task} { "project_id": , "task_type": , "database" : ,
@@ -43,8 +41,6 @@ import com.ctrip.platform.dal.daogen.pojo.TaskAggeragation;
 @Path("task")
 public class TaskResource {
 
-	private static MasterDAO master;
-
 	private static AutoTaskDAO autoTask;
 
 	private static SPTaskDAO spTask;
@@ -52,90 +48,24 @@ public class TaskResource {
 	private static SqlTaskDAO sqlTask;
 
 	static {
-		master = new MasterDAO();
-		autoTask = new AutoTaskDAO();
-		spTask = new SPTaskDAO();
-		sqlTask = new SqlTaskDAO();
+		autoTask = BeanGetter.getAutoTaskDao();
+		spTask = BeanGetter.getSpTaskDao();
+		sqlTask = BeanGetter.getSqlTaskDao();
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public TaskAggeragation getTasks(@QueryParam("project_id") String id) {
 
-		ResultSet autoTaskResultSet = autoTask.getTasksByProjectId(Integer
+		List<AutoTask> autoTasks = autoTask.getTasksByProjectId(Integer
 				.valueOf(id));
 
-		ResultSet spTaskResultSet = spTask.getTasksByProjectId(Integer
+		List<SpTask> spTasks = spTask.getTasksByProjectId(Integer.valueOf(id));
+
+		List<SqlTask> sqlTasks = sqlTask.getTasksByProjectId(Integer
 				.valueOf(id));
-
-		ResultSet sqlTaskResultSet = sqlTask.getTasksByProjectId(Integer
-				.valueOf(id));
-
-		List<AutoTask> autoTasks = new ArrayList<AutoTask>();
-
-		List<SpTask> spTasks = new ArrayList<SpTask>();
-
-		List<SqlTask> sqlTasks = new ArrayList<SqlTask>();
 
 		TaskAggeragation allTasks = new TaskAggeragation();
-
-		try {
-			while (autoTaskResultSet.next()) {
-				AutoTask t = new AutoTask();
-				t.setId(autoTaskResultSet.getInt(1));
-				t.setProject_id(autoTaskResultSet.getInt(2));
-				t.setDb_name(autoTaskResultSet.getString(3));
-				t.setTable_name(autoTaskResultSet.getString(4));
-				t.setClass_name(autoTaskResultSet.getString(5));
-				t.setMethod_name(autoTaskResultSet.getString(6));
-				t.setSql_style(autoTaskResultSet.getString(7));
-				t.setSql_type(autoTaskResultSet.getString(8));
-				t.setCrud_type(autoTaskResultSet.getString(9));
-				t.setFields(autoTaskResultSet.getString(10));
-				t.setCondition(autoTaskResultSet.getString(11));
-				t.setSql_content(autoTaskResultSet.getString(12));
-				autoTasks.add(t);
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		try {
-			while (spTaskResultSet.next()) {
-				SpTask t = new SpTask();
-				t.setId(spTaskResultSet.getInt(1));
-				t.setProject_id(spTaskResultSet.getInt(2));
-				t.setDb_name(spTaskResultSet.getString(3));
-				t.setClass_name(spTaskResultSet.getString(4));
-				t.setSp_schema(spTaskResultSet.getString(5));
-				t.setSp_name(spTaskResultSet.getString(6));
-				t.setSql_style(spTaskResultSet.getString(7));
-				t.setCrud_type(spTaskResultSet.getString(8));
-				t.setSp_content(spTaskResultSet.getString(9));
-				spTasks.add(t);
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		try {
-			while (sqlTaskResultSet.next()) {
-				SqlTask t = new SqlTask();
-				t.setId(sqlTaskResultSet.getInt(1));
-				t.setProject_id(sqlTaskResultSet.getInt(2));
-				t.setDb_name(sqlTaskResultSet.getString(3));
-				t.setClass_name(sqlTaskResultSet.getString(4));
-				t.setMethod_name(sqlTaskResultSet.getString(5));
-				t.setCrud_type(sqlTaskResultSet.getString(6));
-				t.setSql_content(sqlTaskResultSet.getString(7));
-				sqlTasks.add(t);
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
 		allTasks.setAutoTasks(autoTasks);
 		allTasks.setSpTasks(spTasks);
@@ -205,7 +135,7 @@ public class TaskResource {
 		if (task_type.equals("sp")) {
 			// sp_schema = sp_name.split(".")[0];
 			// sp_name = sp_name.split(".")[1];
-			if(null != sp_name){
+			if (null != sp_name) {
 				String[] split_names = StringUtils.split(sp_name, ".");
 				sp_schema = split_names[0];
 				sp_name = split_names[1];
@@ -387,13 +317,15 @@ public class TaskResource {
 		return "";
 
 	}
-	
-	private String formatSp(SpTask task){
-		if(task.getCrud_type().equalsIgnoreCase("select")){
-			return String.format(" Select * FROM EXEC %s.%s ", task.getSp_schema(), task.getSp_name());
-		}else{
-			return String.format(" EXEC %s.%s ", task.getSp_schema(), task.getSp_name());
+
+	private String formatSp(SpTask task) {
+		if (task.getCrud_type().equalsIgnoreCase("select")) {
+			return String.format(" Select * FROM EXEC %s.%s ",
+					task.getSp_schema(), task.getSp_name());
+		} else {
+			return String.format(" EXEC %s.%s ", task.getSp_schema(),
+					task.getSp_name());
 		}
 	}
-	
+
 }

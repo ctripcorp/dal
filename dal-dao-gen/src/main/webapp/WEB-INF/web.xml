@@ -6,8 +6,7 @@
 	 <listener>  
         <listener-class>org.jasig.cas.client.session.SingleSignOutHttpSessionListener</listener-class>  
     </listener>  
-  
-    <!-- 该过滤器用于实现单点登出功能，可选配置。 -->  
+
     <filter>  
         <filter-name>CAS Single Sign Out Filter</filter-name>  
         <filter-class>org.jasig.cas.client.session.SingleSignOutFilter</filter-class>  
@@ -17,14 +16,12 @@
         <url-pattern>/*</url-pattern>  
     </filter-mapping>  
   
-    <!-- 该过滤器负责用户的认证工作，必须启用它 -->  
     <filter>  
         <filter-name>CASFilter</filter-name>  
         <filter-class>org.jasig.cas.client.authentication.AuthenticationFilter</filter-class>  
         <init-param>  
             <param-name>casServerLoginUrl</param-name>  
             <param-value>http://192.168.93.59:8085/caso/login</param-value>  
-            <!--这里的server是服务端的IP -->  
         </init-param>  
         <init-param>  
             <param-name>serverName</param-name>  
@@ -36,7 +33,7 @@
         <url-pattern>/*</url-pattern>  
     </filter-mapping>  
   
-    <!-- 该过滤器负责对Ticket的校验工作，必须启用它 -->  
+
     <filter>  
         <filter-name>CAS Validation Filter</filter-name>  
         <filter-class>  
@@ -58,8 +55,7 @@
         <filter-name>CAS Validation Filter</filter-name>  
         <url-pattern>/*</url-pattern>  
     </filter-mapping>  
-  
-    <!-- 该过滤器负责实现HttpServletRequest请求的包裹， 比如允许开发者通过HttpServletRequest的getRemoteUser()方法获得SSO登录用户的登录名，可选配置。 -->  
+    
     <filter>  
         <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>  
         <filter-class>  
@@ -70,7 +66,7 @@
         <url-pattern>/*</url-pattern>  
     </filter-mapping>   
   
-    <!-- 该过滤器使得开发者可以通过org.jasig.cas.client.util.AssertionHolder来获取用户的登录名。 比如AssertionHolder.getAssertion().getPrincipal().getName()。 -->  
+   
     <filter>  
         <filter-name>CAS Assertion Thread Local Filter</filter-name>  
         <filter-class>org.jasig.cas.client.util.AssertionThreadLocalFilter</filter-class>  
@@ -85,7 +81,7 @@
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
-			<param-value>com.ctrip.platform.daogen.DaoGenApplication</param-value>
+			<param-value>com.ctrip.platform.dal.daogen.DaoGenApplication</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
@@ -96,6 +92,6 @@
 	</servlet-mapping>
 	
 	<welcome-file-list>
-		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
 </web-app>

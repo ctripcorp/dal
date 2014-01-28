@@ -1,3 +1,5 @@
+<%@page pageEncoding="UTF-8"%>
+<%@ page import="org.jasig.cas.client.util.AssertionHolder" %>
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -49,7 +51,7 @@
             <ul class="nav navbar-nav">
                <li class="active dropdown">
                   <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                  <span class="username">
+                  <span class="dao_gen">
                   DAO Generator
                   </span>
                   <i class="fa fa-angle-down">
@@ -57,14 +59,14 @@
                   </a>
                   <ul class="dropdown-menu">
                      <li>
-                        <a href="index.html">
+                        <a href="index.jsp">
                         <i class="fa fa-tasks">
                         </i>
                         DAO
                         </a>
                      </li>
                      <li>
-                        <a href="file.html">
+                        <a href="file.jsp">
                         <i class="fa fa-eye">
                         </i>
                         Preview
@@ -82,14 +84,14 @@
                <li class="dropdown user">
                   <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
                   <span class="username">
-                  Link Wu
+                  <%=AssertionHolder.getAssertion().getPrincipal().getAttributes().get("sn")%>
                   </span>
                   <i class="fa fa-angle-down">
                   </i>
                   </a>
                   <ul class="dropdown-menu">
                      <li>
-                        <a href="login.html">
+                        <a href="/logout.jsp">
                         <i class="fa fa-power-off">
                         </i>
                         Log Out
@@ -143,6 +145,62 @@
                   <h4 class="modal-title" id="page1_label">DAO生成向导</h4>
                </div>
                <div class="modal-body" style="position: relative;overflow: auto;width: auto;">
+                  <div class="steps step0 row-fluid">
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">数据库服务器：</label>
+                           <Select id="servers" class="span7">
+                              <option value="_please_select">--请选择--</option>
+                           </Select>
+                           <button id="del_server" type="button" class="btn btn-danger popup_text">删除选中</button>
+                        </div>
+                     </div>
+                     <br>
+                     <div class="row-fluid">
+                        <button id="toggle_add_server" class="offset5 btn-primary fa fa-angle-down"></button>
+                     </div>
+                     <br>
+                     <div id="add_server_row" class="row-fluid" style="display:none;">
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">驱动类：</label>
+                           <input id="driver" type="text" class="span9 popup_text">
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">URL地址：</label>
+                           <input id="url" type="text" class="span9 popup_text">
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">用户名：</label>
+                           <input id="username" type="text" class="span9 popup_text">
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">密码：</label>
+                           <input id="password" type="password" class="span9 popup_text">
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">数据库类型：</label>
+                           <Select id="db_types" class="span9 popup_text">
+                              <option value="_please_select">--请选择--</option>
+                              <option value="mysql">My Sql</option>
+                              <option value="sqlserver">Sql Server</option>
+                           </Select>
+                        </div>
+                     </div>
+                     <br>
+                     <div class="row-fluid">
+                        <button id="add_server" type="button" class="offset5 btn btn-primary">添加服务器</button>
+                     </div>
+                  </div>
+                  </div>
                   <div class="steps step1 row-fluid">
                      <div class="control-group">
                         <label class="control-label popup_label">选择一个数据库：</label>

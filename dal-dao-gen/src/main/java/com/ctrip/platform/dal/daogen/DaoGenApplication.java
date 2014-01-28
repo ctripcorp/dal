@@ -13,6 +13,10 @@ public class DaoGenApplication extends ResourceConfig {
 	public DaoGenApplication() {
 		packages(ProjectResource.class.getPackage().getName());
 		this.register(EntityFilteringFeature.class);
+		
+//		ApplicationContext appContext =
+//                new ClassPathXmlApplicationContext("spring.xml");
+		
 	}
 
 }

@@ -1,113 +1,91 @@
 package com.ctrip.platform.dal.daogen.dao;
 
 import java.sql.ResultSet;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
 
-import com.ctrip.platform.dal.common.enums.DbType;
-import com.ctrip.platform.dal.common.enums.ParameterDirection;
-import com.ctrip.platform.dal.dao.StatementParameter;
-import com.ctrip.platform.dal.dao.client.AbstractDAO;
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
 import com.ctrip.platform.dal.daogen.pojo.Project;
 
-public class ProjectDAO extends AbstractDAO {
+public class ProjectDAO {
+	
+	private JdbcTemplate jdbcTemplate;
 
-	public ProjectDAO() {
-		logicDbName = "daogen";
-		servicePort = 9000;
-		credentialId = "30303";
-		super.init();
+    public void setDataSource(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+	public List<Project> getAllProjects() {
+		
+		return this.jdbcTemplate.query(
+		        "select id, user_id, name, namespace from project",
+		        new RowMapper<Project>() {
+		            public Project mapRow(ResultSet rs, int rowNum) throws SQLException {
+		            	Project project = new Project();
+		               project.setId(rs.getInt(1));
+		               project.setUser_id(rs.getString(2));
+		               project.setName(rs.getString(3));
+		               project.setNamespace(rs.getString(4));
+		                return project;
+		            }
+		        });
+	}
+	
+	public List<Project> getProjectsByUserID(String userID){
+		return this.jdbcTemplate.query(
+		        "select id, user_id, name, namespace from project where user_id=?",
+		        new Object[]{userID},
+		        new RowMapper<Project>() {
+		            public Project mapRow(ResultSet rs, int rowNum) throws SQLException {
+		            	Project project = new Project();
+		               project.setId(rs.getInt(1));
+		               project.setUser_id(rs.getString(2));
+		               project.setName(rs.getString(3));
+		               project.setNamespace(rs.getString(4));
+		                return project;
+		            }
+		        });
 	}
 
-	public ResultSet getAllProjects() {
-		return this.fetch("select id, user_id, name, namespace from project",
-				null, null);
-	}
-
-	public ResultSet getProjectByID(int iD) {
-
-		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(1).setName("").setSensitive(false).setValue(iD)
-				.build());
-
-		return this.fetch(
-				"select id, user_id, name, namespace from project where id=?",
-				parameters, null);
+	public Project getProjectByID(int iD) {
+		
+		return this.jdbcTemplate.queryForObject(
+		        "select id, user_id, name, namespace from project where id=?",
+		        new Object[]{iD},
+		        new RowMapper<Project>() {
+		            public Project mapRow(ResultSet rs, int rowNum) throws SQLException {
+		            	Project project = new Project();
+		               project.setId(rs.getInt(1));
+		               project.setUser_id(rs.getString(2));
+		               project.setName(rs.getString(3));
+		               project.setNamespace(rs.getString(4));
+		                return project;
+		            }
+		        });
 	}
 
 	public int insertProject(Project project) {
-
-		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
-
-//		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
-//				.setDirection(ParameterDirection.Input).setNullable(false)
-//				.setIndex(1).setName("").setSensitive(false)
-//				.setValue(project.getId()).build());
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(1).setName("").setSensitive(false)
-				.setValue(project.getUser_id()).build());
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(2).setName("").setSensitive(false)
-				.setValue(project.getName()).build());
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(3).setName("").setSensitive(false)
-				.setValue(project.getNamespace()).build());
-
-		return this
-				.execute(
-						"insert into project (user_id, name, namespace) values (?,?,?)",
-						parameters, null);
+		
+		return this.jdbcTemplate.update("insert into project (user_id, name, namespace) values (?,?,?)", 
+				project.getUser_id(), project.getName(), project.getNamespace());
 
 	}
 
 	public int updateProject(Project project) {
-
-		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(4).setName("").setSensitive(false)
-				.setValue(project.getId()).build());
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(1).setName("").setSensitive(false)
-				.setValue(project.getUser_id()).build());
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(2).setName("").setSensitive(false)
-				.setValue(project.getName()).build());
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(3).setName("").setSensitive(false)
-				.setValue(project.getNamespace()).build());
-
-		return this.execute(
-				"update project set user_id=?, name=?, namespace=? where id=?",
-				parameters, null);
+		
+		return this.jdbcTemplate.update("update project set user_id=?, name=?, namespace=? where id=?",
+				project.getUser_id(), project.getName(), project.getNamespace(), project.getId());
 
 	}
 
 	public int deleteProject(Project project) {
-		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(1).setName("").setSensitive(false)
-				.setValue(project.getId()).build());
-
-		return this.execute("delete from project where id=?", parameters, null);
+		
+		return this.jdbcTemplate.update("delete from project where id=?", project.getId());
 	}
+
 
 }

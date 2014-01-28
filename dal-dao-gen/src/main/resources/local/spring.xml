@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean id="projectDao" class="com.ctrip.platform.dal.daogen.dao.ProjectDAO">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="autoTaskDao" class="com.ctrip.platform.dal.daogen.dao.AutoTaskDAO">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+     <bean id="spTaskDao" class="com.ctrip.platform.dal.daogen.dao.SPTaskDAO">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+     <bean id="sqlTaskDao" class="com.ctrip.platform.dal.daogen.dao.SqlTaskDAO">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="serverDbmapDao" class="com.ctrip.platform.dal.daogen.dao.ServerDbMapDAO">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+     <bean id="dataSourceDao" class="com.ctrip.platform.dal.daogen.dao.DbServerDAO">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <context:property-placeholder location="jdbc.properties"/>
+
+</beans>

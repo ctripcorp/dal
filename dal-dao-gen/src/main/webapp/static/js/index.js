@@ -172,7 +172,8 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', "#view_sp_code", function (event) {
-        $.get(sprintf("/rest/db/sp_code?db_name=%s&sp_name=%s",
+        $.get(sprintf("/rest/db/sp_code?server=%s&db_name=%s&sp_name=%s",
+            $("#servers").val(),
             $("#databases").val(), $("#sps").val()), function (data) {
             $("#sp_editor").height(300);
             var editor = ace.edit("sp_editor");
@@ -184,8 +185,19 @@ jQuery(document).ready(function () {
 
     $(document.body).on('click', "#next_step", function (event) {
         var current_step = $("div.steps:visible");
-        current_step.hide();
-        if (current_step.hasClass("step1")) {
+        if(current_step.hasClass("step0")){
+            $("select[id$=databases] > option:gt(0)").remove();
+            $.get("/rest/db/dbs?server="+$("#servers").val(), function(data){
+                $.each(data, function(index, value){
+                    $("#databases").append($('<option>', {
+                        value: value,
+                        text: value
+                    }));
+                });
+                current_step.hide();
+                $(".step1").show();  
+            });
+        }else if (current_step.hasClass("step1")) {
             //在显示下一页之前，清空下一页的信息
             var defaultActive = $(".gen_style > input[value='auto']").parent();
             if (!defaultActive.hasClass("active")) {
@@ -202,6 +214,7 @@ jQuery(document).ready(function () {
                     parentToActive.addClass("active");
                 }
             }
+            current_step.hide();
             $(".step2").show();
         } else if (current_step.hasClass("step2")) {
             var gen_style = $(".gen_style.active").children().val();
@@ -239,17 +252,21 @@ jQuery(document).ready(function () {
                             parentToActive.addClass("active");
                         }
                     }
-
+                    current_step.hide();
                     $(".step2-1-1").show();
                 } else {
                     cblock($("body"));
-                    $.get("/rest/db/tables?db_name=" + $("#databases").val(), function (data) {
-                        $.each(data.ids, function (index, value) {
+                    $.get(
+                        sprintf("/rest/db/tables?server=%s&db_name=%s", 
+                            $("#servers").val(),
+                            $("#databases").val()), function (data) {
+                        $.each(data, function (index, value) {
                             $('#tables').append($('<option>', {
                                 value: value,
                                 text: value
                             }));
                         });
+                        current_step.hide();
                         $(".step2-1-1").show();
                         $("body").unblock();
                     });
@@ -267,23 +284,27 @@ jQuery(document).ready(function () {
                     $("#sps").val(sprintf("%s.%s", record.sp_schema, record.sp_name));
 
                     $("#sp_type").val(record.crud_type);
+                    current_step.hide();
                     $(".step2-2").show();
                 } else {
                     cblock($("body"));
-                    $.get("/rest/db/sps?db_name=" + $("#databases").val(), function (data) {
-                        $.each(data.ids, function (index, value) {
+
+                    $.get(sprintf("/rest/db/sps?server=%s&db_name=%s", 
+                            $("#servers").val(),
+                            $("#databases").val()), function (data) {
+                        $.each(data, function (index, value) {
                             $('#sps').append($('<option>', {
                                 value: value,
                                 text: value
                             }));
                         });
+                        current_step.hide();
                         $(".step2-2").show();
                         $("body").unblock();
                     });
                 }
                 break;
             case "sql":
-                $(".step2-3").show();
                 $("#sql_editor").height(300);
                 var editor = ace.edit("sql_editor");
                 editor.setTheme("ace/theme/monokai");
@@ -302,10 +323,13 @@ jQuery(document).ready(function () {
                 } else {
                     editor.setValue("SELECT * FROM Table");
                 }
+                current_step.hide();
+                $(".step2-3").show();
                 break;
             }
         } else if (current_step.hasClass("step2-1-1")) {
             if ($("#only_template").is(":checked")) {
+                current_step.hide();
                 $(".step3").show();
                 $(".step3").attr('from', current_step.attr('class'));
                 return;
@@ -320,7 +344,11 @@ jQuery(document).ready(function () {
 
             $("select[id$=fields_condition] > option:gt(0)").remove();
 
-            var url = sprintf("/rest/db/fields?table_name=%s&db_name=%s", $("#tables").val(), $("#databases").val());
+            var url = sprintf(
+                "/rest/db/fields?server=%s&table_name=%s&db_name=%s", 
+                $("#servers").val(),
+                $("#tables").val(), 
+                $("#databases").val());
 
             $.get(url, function (data) {
                 $.each(data, function (index, value) {
@@ -352,6 +380,7 @@ jQuery(document).ready(function () {
                         }));
                     });
                 }
+                current_step.hide();
                 $("body").unblock();
             });
 
@@ -376,9 +405,11 @@ jQuery(document).ready(function () {
                 }
             }
         } else if (current_step.hasClass("step2-1-3") || current_step.hasClass("step2-1-3-add")) {
+            current_step.hide();
             $(".step3").show();
             $(".step3").attr('from', current_step.attr('class'));
         } else if (current_step.hasClass("step2-2") || current_step.hasClass("step2-3")) {
+            current_step.hide();
             $(".step3").show();
             $(".step3").attr('from', current_step.attr('class'));
         } else if (current_step.hasClass("step3")) {
@@ -388,7 +419,7 @@ jQuery(document).ready(function () {
 
     $(document.body).on('click', "#prev_step", function (event) {
         var current_step = $("div.steps:visible");
-        if (current_step.hasClass("step1")) {
+        if (current_step.hasClass("step0")) {
             return;
         }
         current_step.hide();
@@ -399,7 +430,10 @@ jQuery(document).ready(function () {
             return;
         }
 
-        if (current_step.hasClass("step2")) {
+        if (current_step.hasClass("step1")) {
+            $(".step0").show();
+        } 
+        else if (current_step.hasClass("step2")) {
             $(".step1").show();
         } else if (current_step.hasClass("step2-1-1")) {
             $(".step2").show();
@@ -412,7 +446,60 @@ jQuery(document).ready(function () {
         }
     });
 
+    $(document.body).on('click', "#add_server", function (event) {
+        var postData = {};
+        postData["driver"] = $("#driver").val();
+        postData["url"] = $("#url").val();
+        postData["user"] = $("#username").val();
+        postData["password"] = $("#password").val();
+        postData["db_type"] = $("#db_types").val();
+        postData["action"] = "insert";
+        $.post("/rest/db/servers", postData, function(data){
+            if(data.code == "OK"){
+                alert("保存成功！");
+                reloadServers();
+            }else{
+                alert("保存失败，请检查连接信息是否合法!");
+            }
+        });
+    });
+
+    $(document.body).on('click', "#toggle_add_server", function (event) {
+       if($("#toggle_add_server").hasClass("fa-angle-down")){
+            $("#toggle_add_server").removeClass("fa-angle-down");
+            $("#toggle_add_server").addClass("fa-angle-up");
+            $("#add_server_row").show();
+       }else{
+             $("#toggle_add_server").removeClass("fa-angle-up");
+            $("#toggle_add_server").addClass("fa-angle-down");
+            $("#add_server_row").hide();
+       }
+    });
+
+    $(document.body).on('click', "#del_server", function (event) {
+       var currentServer = $("#servers").val();
+       if(currentServer == "_please_select"){
+            return;
+       }
+       var postData = {};
+        postData["action"] = "delete";
+        postData["id"] = currentServer;
+        $.post("/rest/db/servers", postData, function(data){
+            if(data.code == "OK"){
+                alert("删除成功！");
+                reloadServers();
+            }else{
+                alert("删除失败!");
+            }
+        });
+    });
+
     reloadProjects();
+    // $.get("/rest/user", function(data){
+    //     if(data != undefined && data.sn != undefined){
+    //         $(".username").text(data.sn);    
+    //     }
+    // });
 
 });
 
@@ -447,6 +534,26 @@ var reloadProjects = function () {
         currentElement.add('all_projects', new_nodes);
         currentElement.nodes[0].expanded = true;
         currentElement.refresh();
+        $("body").unblock();
+    });
+};
+
+var reloadServers = function(){
+    cblock($("body"));
+   
+    $.get("/rest/db/servers", function (data) {
+        $("select[id$=servers] > option:gt(0)").remove();
+        $.each(data, function(index, value){
+            $("#servers").append($('<option>', {
+                value: value.id,
+                text: value.url
+            }));
+        });
+        if(undefined != data && data.length > 0){
+            $("#servers").val(data[0].id);    
+        }
+        
+       
         $("body").unblock();
     });
 };
@@ -543,8 +650,9 @@ var renderGrid = function () {
                     });
                     break;
                 case 'addDAO':
-                    $("select[id$=databases] > option:gt(0)").remove();
-                    $(".step1").show();
+                    $("select[id$=servers] > option:gt(0)").remove();
+                    $(".step0").show();
+                    $(".step1").hide();
                     $(".step2").hide();
                     $(".step2-1-1").hide();
                     $(".step2-1-2").hide();
@@ -555,15 +663,7 @@ var renderGrid = function () {
                     $(".step3").hide();
                     $("#page1").attr('is_update', '0');
                     $("#page1").modal();
-                    $.get("/rest/db/dbs", function (data) {
-                        //data = JSON.parse(data);
-                        $.each(data, function (index, value) {
-                            $('#databases').append($('<option>', {
-                                value: value.name,
-                                text: value.name
-                            }));
-                        });
-                    });
+                    reloadServers();
                     break;
                 case 'editDAO':
                     $("select[id$=databases] > option:gt(0)").remove();

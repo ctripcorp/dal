@@ -1,3 +1,5 @@
+<%@page pageEncoding="UTF-8"%>
+<%@ page import="org.jasig.cas.client.util.AssertionHolder" %>
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -57,14 +59,14 @@
                   </a>
                   <ul class="dropdown-menu">
                      <li>
-                        <a href="index.html">
+                        <a href="index.jsp">
                         <i class="fa fa-tasks">
                         </i>
                         DAO
                         </a>
                      </li>
                      <li>
-                        <a href="file.html">
+                        <a href="file.jsp">
                         <i class="fa fa-eye">
                         </i>
                         Preview
@@ -82,14 +84,14 @@
                <li class="dropdown user">
                   <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
                   <span class="username">
-                  Link Wu
+                  <%=AssertionHolder.getAssertion().getPrincipal().getAttributes().get("sn")%>
                   </span>
                   <i class="fa fa-angle-down">
                   </i>
                   </a>
                   <ul class="dropdown-menu">
                      <li>
-                        <a href="login.html">
+                        <a href="/logout.jsp">
                         <i class="fa fa-power-off">
                         </i>
                         Log Out

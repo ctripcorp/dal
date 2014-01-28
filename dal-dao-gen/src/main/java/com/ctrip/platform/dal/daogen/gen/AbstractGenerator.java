@@ -1,30 +1,35 @@
 package com.ctrip.platform.dal.daogen.gen;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.sql.DataSource;
 
 import org.apache.velocity.app.Velocity;
+import org.springframework.jdbc.support.JdbcUtils;
 
-import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.dao.AutoTaskDAO;
-import com.ctrip.platform.dal.daogen.dao.MasterDAO;
 import com.ctrip.platform.dal.daogen.dao.ProjectDAO;
 import com.ctrip.platform.dal.daogen.dao.SPTaskDAO;
+import com.ctrip.platform.dal.daogen.dao.ServerDbMapDAO;
 import com.ctrip.platform.dal.daogen.dao.SqlTaskDAO;
 import com.ctrip.platform.dal.daogen.pojo.AutoTask;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.Project;
 import com.ctrip.platform.dal.daogen.pojo.SpTask;
-import com.ctrip.platform.dal.daogen.pojo.SqlTask;
 import com.ctrip.platform.dal.daogen.pojo.Task;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
 
 public abstract class AbstractGenerator implements Generator {
 
-	protected static MasterDAO masterDao;
 
 	protected static ProjectDAO projectDao;
 
@@ -33,6 +38,8 @@ public abstract class AbstractGenerator implements Generator {
 	protected static SPTaskDAO spTaskDao;
 
 	protected static SqlTaskDAO sqlTaskDao;
+	
+	protected static ServerDbMapDAO serverDbMapDao;
 
 	protected String namespace;
 
@@ -40,11 +47,11 @@ public abstract class AbstractGenerator implements Generator {
 
 	static {
 
-		masterDao = new MasterDAO();
-		projectDao = new ProjectDAO();
-		autoTaskDao = new AutoTaskDAO();
-		spTaskDao = new SPTaskDAO();
-		sqlTaskDao = new SqlTaskDAO();
+		projectDao = BeanGetter.getProjectDao();
+		autoTaskDao = BeanGetter.getAutoTaskDao();
+		spTaskDao = BeanGetter.getSpTaskDao();
+		sqlTaskDao = BeanGetter.getSqlTaskDao();
+		serverDbMapDao = BeanGetter.getServerDbMapDao();
 
 		java.util.Properties pr = new java.util.Properties();
 		pr.setProperty("resource.loader", "class");
@@ -56,72 +63,29 @@ public abstract class AbstractGenerator implements Generator {
 	@Override
 	public boolean generateCode(String projectId) {
 
-		ResultSet projectsResultSet = projectDao.getProjectByID(Integer
-				.valueOf(projectId));
-		Project proj = new Project();
-		try {
-			if (projectsResultSet.next()) {
-				proj.setId(projectsResultSet.getInt(1));
-				proj.setUser_id(projectsResultSet.getInt(2));
-				proj.setName(projectsResultSet.getString(3));
-				proj.setNamespace(projectsResultSet.getString(4));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		Project proj = projectDao.getProjectByID(Integer.valueOf(projectId));
 
 		if (null != proj) {
 			namespace = proj.getNamespace();
 			this.projectId = projectId;
 		}
 
-		List<Task> autoTasks = new ArrayList<Task>();
-		ResultSet autoSqlResultSet = autoTaskDao.getTasksByProjectId(proj
-				.getId());
-		try {
-			while (autoSqlResultSet.next()) {
-				AutoTask task = new AutoTask();
-				task.setId(autoSqlResultSet.getInt(1));
-				task.setProject_id(autoSqlResultSet.getInt(2));
-				task.setDb_name(autoSqlResultSet.getString(3));
-				task.setTable_name(autoSqlResultSet.getString(4));
-				task.setClass_name(autoSqlResultSet.getString(5));
-				task.setMethod_name(autoSqlResultSet.getString(6));
-				task.setSql_style(autoSqlResultSet.getString(7));
-				task.setSql_type(autoSqlResultSet.getString(8));
-				task.setCrud_type(autoSqlResultSet.getString(9));
-				task.setFields(autoSqlResultSet.getString(10));
-				task.setCondition(autoSqlResultSet.getString(11));
-				task.setSql_content(autoSqlResultSet.getString(12));
-				autoTasks.add(task);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		List<AutoTask> autoTasks = autoTaskDao.getTasksByProjectId(Integer
+				.valueOf(projectId));
+		List<Task> _autoTasks = new ArrayList<Task>();
+		for (AutoTask t : autoTasks) {
+			_autoTasks.add(t);
 		}
-		generateAutoSqlCode(autoTasks);
+		generateAutoSqlCode(_autoTasks);
 
 		// 存储过程
-		List<Task> sp = new ArrayList<Task>();
-		ResultSet spResultSet = spTaskDao.getTasksByProjectId(proj
-				.getId());
-		try {
-			while (spResultSet.next()) {
-				SpTask task = new SpTask();
-				task.setId(spResultSet.getInt(1));
-				task.setProject_id(spResultSet.getInt(2));
-				task.setDb_name(spResultSet.getString(3));
-				task.setClass_name(spResultSet.getString(4));
-				task.setSp_schema(spResultSet.getString(5));
-				task.setSp_name(spResultSet.getString(6));
-				task.setSql_style(spResultSet.getString(7));
-				task.setCrud_type(spResultSet.getString(8));
-				task.setSp_content(spResultSet.getString(9));
-				sp.add(task);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		List<SpTask> sp = spTaskDao.getTasksByProjectId(Integer
+				.valueOf(projectId));
+		List<Task> _sp = new ArrayList<Task>();
+		for (SpTask t : sp) {
+			_sp.add(t);
 		}
-		generateSPCode(sp);
+		generateSPCode(_sp);
 
 		// 手工编写的SQL
 		List<Task> freeSql = new ArrayList<Task>();
@@ -131,42 +95,65 @@ public abstract class AbstractGenerator implements Generator {
 
 	}
 
-	protected List<FieldMeta> getMetaData(String dbName, String tableName) {
-		ResultSet allColumns = masterDao.getAllColumns(dbName, tableName);
-		ResultSet primaryKeyResultSet = masterDao.getPrimaryKey(dbName,
-				tableName);
-		String primaryKey = "";
+	protected List<FieldMeta> getMetaData(int server, String dbName,
+			String tableName) {
+
+		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
+
+		Set<String> primaryKeys = new HashSet<String>();
+		List<FieldMeta> fields = new ArrayList<FieldMeta>();
+		
+		Connection connection = null;
 		try {
-			if (primaryKeyResultSet.next()) {
-				primaryKey = primaryKeyResultSet.getString(1);
-			}
+			connection = ds.getConnection();
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		List<FieldMeta> fields = new ArrayList<FieldMeta>();
-		try {
-			while (allColumns.next()) {
-				FieldMeta meta = new FieldMeta();
-
-				String columnName = allColumns.getString(1);
-				String columnType = allColumns.getString(2);
-				int position = allColumns.getInt(3);
-				String nullable = allColumns.getString(4);
-
-				meta.setName(columnName);
-				meta.setType(columnType);
-				meta.setPosition(position);
-				meta.setPrimary(columnName.equals(primaryKey));
-				meta.setNullable(nullable.equalsIgnoreCase("yes") && Consts.CSharpValueTypes.contains(columnType));
-				meta.setValueType(Consts.CSharpValueTypes.contains(columnType));
-
-				fields.add(meta);
+		if (connection != null) {
+			// 获取所有主键
+			ResultSet primaryKeyRs = null;
+			try {
+				primaryKeyRs = connection.getMetaData().getPrimaryKeys(dbName,
+						null, tableName);
+				while (primaryKeyRs.next()) {
+					primaryKeys.add(primaryKeyRs.getString("COLUMN_NAME"));
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				JdbcUtils.closeResultSet(primaryKeyRs);
 			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+			// 获取所有列
+			ResultSet allColumnsRs = null;
+			try {
+				allColumnsRs = connection.getMetaData().getColumns(dbName,
+						null, tableName, null);
+				while (allColumnsRs.next()) {
+					FieldMeta meta = new FieldMeta();
+
+					String columnName = allColumnsRs.getString("COLUMN_NAME");
+					String columnType = allColumnsRs.getString("TYPE_NAME ");
+					int position = allColumnsRs.getInt("ORDINAL_POSITION");
+//					String nullable = allColumnsRs.getString(4);
+
+					meta.setName(columnName);
+					meta.setType(columnType);
+					meta.setPosition(position);
+					meta.setPrimary(primaryKeys.contains(columnName));
+//					meta.setNullable(nullable.equalsIgnoreCase("yes")
+//							&& Consts.CSharpValueTypes.contains(columnType));
+//					meta.setValueType(Consts.CSharpValueTypes.contains(columnType));
+
+					fields.add(meta);
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				JdbcUtils.closeResultSet(allColumnsRs);
+			}
 		}
+
 		return fields;
 	}
 

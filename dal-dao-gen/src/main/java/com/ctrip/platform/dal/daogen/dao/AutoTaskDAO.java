@@ -1,193 +1,103 @@
 package com.ctrip.platform.dal.daogen.dao;
 
 import java.sql.ResultSet;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
 
-import com.ctrip.platform.dal.common.enums.DbType;
-import com.ctrip.platform.dal.common.enums.ParameterDirection;
-import com.ctrip.platform.dal.dao.StatementParameter;
-import com.ctrip.platform.dal.dao.client.AbstractDAO;
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
 import com.ctrip.platform.dal.daogen.pojo.AutoTask;
 
+public class AutoTaskDAO {
 
-public class AutoTaskDAO extends AbstractDAO {
-	
-	public AutoTaskDAO() {
-		logicDbName = "daogen";
-		servicePort = 9000;
-		credentialId = "30303";
-		super.init();
-	}
-	
-	public ResultSet getAllTasks() {
-		return this.fetch("select id, project_id, db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,condition,sql_content from task_auto",
-				null, null);
+	private JdbcTemplate jdbcTemplate;
+
+	public void setDataSource(DataSource dataSource) {
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-	public ResultSet getTasksByProjectId(int iD) {
+	public List<AutoTask> getAllTasks() {
 
-		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
+		return this.jdbcTemplate
+				.query("select id, project_id, db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,condition,sql_content from task_auto",
+						new RowMapper<AutoTask>() {
+							public AutoTask mapRow(ResultSet rs, int rowNum)
+									throws SQLException {
+								AutoTask task = new AutoTask();
+								task.setId(rs.getInt(1));
+								task.setProject_id(rs.getInt(2));
+								task.setDb_name(rs.getString(3));
+								task.setTable_name(rs.getString(4));
+								task.setClass_name(rs.getString(5));
+								task.setMethod_name(rs.getString(6));
+								task.setSql_style(rs.getString(7));
+								task.setSql_type(rs.getString(8));
+								task.setCrud_type(rs.getString(9));
+								task.setFields(rs.getString(10));
+								task.setCondition(rs.getString(11));
+								task.setSql_content(rs.getString(12));
+								return task;
+							}
+						});
 
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(1).setName("").setSensitive(false).setValue(iD)
-				.build());
+	}
 
-		return this.fetch(
-				"select id, project_id, db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,where_condition,sql_content from task_auto where project_id=?",
-				parameters, null);
+	public List<AutoTask> getTasksByProjectId(int iD) {
+
+		return this.jdbcTemplate
+				.query("select id, project_id, db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,where_condition,sql_content from task_auto where project_id=?",
+						new Object[] { iD }, new RowMapper<AutoTask>() {
+							public AutoTask mapRow(ResultSet rs, int rowNum)
+									throws SQLException {
+								AutoTask task = new AutoTask();
+								task.setId(rs.getInt(1));
+								task.setProject_id(rs.getInt(2));
+								task.setDb_name(rs.getString(3));
+								task.setTable_name(rs.getString(4));
+								task.setClass_name(rs.getString(5));
+								task.setMethod_name(rs.getString(6));
+								task.setSql_style(rs.getString(7));
+								task.setSql_type(rs.getString(8));
+								task.setCrud_type(rs.getString(9));
+								task.setFields(rs.getString(10));
+								task.setCondition(rs.getString(11));
+								task.setSql_content(rs.getString(12));
+								return task;
+							}
+						});
 	}
 
 	public int insertTask(AutoTask task) {
 
-		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(1).setName("").setSensitive(false)
-				.setValue(task.getProject_id()).build());
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(2).setName("").setSensitive(false)
-				.setValue(task.getDb_name()).build());
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(3).setName("").setSensitive(false)
-				.setValue(task.getTable_name()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(4).setName("").setSensitive(false)
-				.setValue(task.getClass_name()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(5).setName("").setSensitive(false)
-				.setValue(task.getMethod_name()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(6).setName("").setSensitive(false)
-				.setValue(task.getSql_style()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(7).setName("").setSensitive(false)
-				.setValue(task.getSql_type()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(8).setName("").setSensitive(false)
-				.setValue(task.getCrud_type()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(9).setName("").setSensitive(false)
-				.setValue(task.getFields()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(10).setName("").setSensitive(false)
-				.setValue(task.getCondition()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(11).setName("").setSensitive(false)
-				.setValue(task.getSql_content()).build());
-
-		return this
-				.execute(
-						"insert into task_auto (project_id, db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,where_condition,sql_content) values (?,?,?,?,?,?,?,?,?,?,?)",
-						parameters, null);
+		return this.jdbcTemplate
+				.update("insert into task_auto ( project_id, db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,where_condition,sql_content) values (?,?,?,?,?,?,?,?,?,?,?,?)",
+						task.getProject_id(), task.getDb_name(),
+						task.getTable_name(), task.getClass_name(),
+						task.getMethod_name(), task.getSql_style(),
+						task.getSql_type(), task.getCrud_type(),
+						task.getFields(), task.getCondition());
 
 	}
 
 	public int updateTask(AutoTask task) {
 
-		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
-		
-		
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(1).setName("").setSensitive(false)
-				.setValue(task.getProject_id()).build());
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(2).setName("").setSensitive(false)
-				.setValue(task.getDb_name()).build());
-
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(3).setName("").setSensitive(false)
-				.setValue(task.getTable_name()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(4).setName("").setSensitive(false)
-				.setValue(task.getClass_name()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(5).setName("").setSensitive(false)
-				.setValue(task.getMethod_name()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(6).setName("").setSensitive(false)
-				.setValue(task.getSql_style()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(7).setName("").setSensitive(false)
-				.setValue(task.getSql_type()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(8).setName("").setSensitive(false)
-				.setValue(task.getCrud_type()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(9).setName("").setSensitive(false)
-				.setValue(task.getFields()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(10).setName("").setSensitive(false)
-				.setValue(task.getCondition()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.String)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(11).setName("").setSensitive(false)
-				.setValue(task.getSql_content()).build());
-		
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(12).setName("").setSensitive(false)
-				.setValue(task.getId()).build());
-
-		return this
-				.execute(
-						"update task_auto set project_id=?, db_name=?, table_name=?,class_name=?,method_name=?,sql_style=?,sql_type=?,crud_type=?,fields=?,where_condition=?,sql_content=? where id=?",
-						parameters, null);
+		return this.jdbcTemplate
+				.update("update task_auto set  project_id=?, db_name=?, table_name=?,class_name=?,method_name=?,sql_style=?,sql_type=?,crud_type=?,fields=?,where_condition=?,sql_content=? where id=?",
+						task.getProject_id(), task.getDb_name(),
+						task.getTable_name(), task.getClass_name(),
+						task.getMethod_name(), task.getSql_style(),
+						task.getSql_type(), task.getCrud_type(),
+						task.getFields(), task.getCondition(), task.getId());
 
 	}
 
 	public int deleteTask(AutoTask task) {
-		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
 
-		parameters.add(StatementParameter.newBuilder().setDbType(DbType.Int32)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(1).setName("").setSensitive(false)
-				.setValue(task.getId()).build());
-
-		return this.execute("delete from task_auto where id=?", parameters, null);
+		return this.jdbcTemplate.update("delete from task_auto where id=?",
+				task.getId());
 	}
-
 
 }

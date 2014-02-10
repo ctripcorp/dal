@@ -40,10 +40,12 @@ jQuery(document).ready(function () {
         onMenuClick: function (event) {
             switch (event.menuItem.id) {
             case "java_code":
+                cblock($("body"));
                 $.post("/rest/project/generate", {
                     "project_id": event.target,
                     "language": "java"
                 }, function (data) {
+                    $("body").unblock();
                     window.location.href = "/file.jsp";
                 });
                 break;
@@ -153,9 +155,11 @@ jQuery(document).ready(function () {
 
     $(document.body).on('change', "#only_template", function (event) {
         if ($("#only_template").is(":checked")) {
-            $("#method_name").attr("disabled", "disabled");
+            $(".op_type_class").hide();
+            $(".method_name_class").hide();
         } else {
-            $("#method_name").attr("disabled", false);
+            $(".op_type_class").show();
+            $(".method_name_class").show();
         }
     });
 
@@ -173,6 +177,11 @@ jQuery(document).ready(function () {
 
     $(document.body).on('click', "#next_step", function (event) {
         var current_step = $("div.steps:visible");
+        var records = w2ui['grid'].getSelection();
+        var record = null;
+        if(records.length > 0)
+            record = w2ui['grid'].get(records[0]);
+
         if(current_step.hasClass("step0")){
             $("select[id$=databases] > option:gt(0)").remove();
             $.get("/rest/db/dbs?server="+$("#servers").val(), function(data){
@@ -182,9 +191,13 @@ jQuery(document).ready(function () {
                         text: value
                     }));
                 });
+                if ($("#page1").attr('is_update') == "1") {
+                    $("#databases").val(record.db_name);
+                }
                 current_step.hide();
                 $(".step1").show();  
             });
+            
         }else if (current_step.hasClass("step1")) {
             //在显示下一页之前，清空下一页的信息
             var defaultActive = $(".gen_style > input[value='auto']").parent();
@@ -194,8 +207,6 @@ jQuery(document).ready(function () {
             }
 
             if ($("#page1").attr('is_update') == "1") {
-                var records = w2ui['grid'].getSelection();
-                var record = w2ui['grid'].get(records[0]);
                 var parentToActive = $(sprintf(".gen_style > input[value='%s']", record.task_type)).parent();
                 if (!parentToActive.hasClass("active")) {
                     $(".gen_style.active").removeClass("active");
@@ -219,10 +230,12 @@ jQuery(document).ready(function () {
                     $(".op_type.active").removeClass("active");
                     defaultActive.addClass("active");
                 }
+                $(".op_type_class").show();
+                $(".method_name_class").show();
 
-                if ($("#page1").attr('is_update') == "1") {
-                    var records = w2ui['grid'].getSelection();
-                    var record = w2ui['grid'].get(records[0]);
+                if ($("#page1").attr('is_update') == "1" 
+                    && record != undefined
+                    && record.task_type == "auto") {
                     $('#tables').append($('<option>', {
                         value: record.table_name,
                         text: record.table_name
@@ -232,6 +245,8 @@ jQuery(document).ready(function () {
                     $("#cud_by_sp").prop('checked', record.sql_type == "spa_sp3");
                     if (record.method_name == undefined || record.method_name == "") {
                         $("#only_template").prop('checked', true);
+                        $(".op_type_class").hide();
+                        $(".method_name_class").hide();
                     } else {
                         $("#method_name").val(record.method_name);
                         var parentToActive = $(sprintf(".op_type > input[value='%s']", record.crud_type)).parent();
@@ -262,9 +277,9 @@ jQuery(document).ready(function () {
                 break;
             case "sp":
                 $("select[id$=sps] > option:gt(0)").remove();
-                if ($("#page1").attr('is_update') == "1") {
-                    var records = w2ui['grid'].getSelection();
-                    var record = w2ui['grid'].get(records[0]);
+                if ($("#page1").attr('is_update') == "1"
+                    && record != undefined
+                    && record.task_type == "sp") {
                     $('#sps').append($('<option>', {
                         value: sprintf("%s.%s", record.sp_schema, record.sp_name),
                         text: sprintf("%s.%s", record.sp_schema, record.sp_name)
@@ -302,9 +317,9 @@ jQuery(document).ready(function () {
                 $("#sql_class_name").val("");
                 $("#sql_method_name").val("");
 
-                if ($("#page1").attr('is_update') == "1") {
-                    var records = w2ui['grid'].getSelection();
-                    var record = w2ui['grid'].get(records[0]);
+                if ($("#page1").attr('is_update') == "1"
+                    && record != undefined
+                    && record.task_type == "sql") {
                     $("#sql_class_name").val(record.class_name);
                     $("#sql_method_name").val(record.method_name);
                     editor.setValue(record.sql_content);
@@ -352,8 +367,6 @@ jQuery(document).ready(function () {
                     }));
                 });
                 if ($("#page1").attr('is_update') == "1") {
-                    var records = w2ui['grid'].getSelection();
-                    var record = w2ui['grid'].get(records[0]);
                     var selectedFields = record.fields.split(",");
                     $.each(selectedFields, function (index, value) {
                         $("#fields_right").append(
@@ -469,17 +482,20 @@ jQuery(document).ready(function () {
        if(currentServer == "_please_select"){
             return;
        }
-       var postData = {};
-        postData["action"] = "delete";
-        postData["id"] = currentServer;
-        $.post("/rest/db/servers", postData, function(data){
-            if(data.code == "OK"){
-                alert("删除成功！");
-                reloadServers();
-            }else{
-                alert("删除失败!");
-            }
-        });
+
+       if(confirm("确认要删除此服务器信息吗？")){
+           var postData = {};
+            postData["action"] = "delete";
+            postData["id"] = currentServer;
+            $.post("/rest/db/servers", postData, function(data){
+                if(data.code == "OK"){
+                    alert("删除成功！");
+                    reloadServers();
+                }else{
+                    alert("删除失败!");
+                }
+            });
+        }
     });
 
     reloadProjects();
@@ -526,7 +542,7 @@ var reloadProjects = function () {
     });
 };
 
-var reloadServers = function(){
+var reloadServers = function(callback){
     cblock($("body"));
    
     $.get("/rest/db/servers", function (data) {
@@ -541,6 +557,9 @@ var reloadServers = function(){
             $("#servers").val(data[0].id);    
         }
         
+        if(callback != undefined){
+            callback();
+        }
        
         $("body").unblock();
     });
@@ -596,12 +615,13 @@ var renderGrid = function () {
             }, {
                 type: 'button',
                 id: 'javaCode',
-                caption: 'Java代码',
+                caption: '生成Java代码',
                 icon: 'fa fa-play'
             }, ],
             onClick: function (target, data) {
                 switch (target) {
                 case 'refreshDAO':
+
                     w2ui['grid'].clear();
                     var current_project = w2ui['grid'].current_project;
                     if (current_project == undefined) {
@@ -609,6 +629,7 @@ var renderGrid = function () {
                             return;
                         current_project = w2ui['sidebar'].nodes[0].nodes[0].id;
                     }
+                    cblock($("body"));
                     $.get("/rest/task?project_id=" + current_project, function (data) {
                         var allTasks = [];
                         $.each(data.autoTasks, function (index, value) {
@@ -630,10 +651,10 @@ var renderGrid = function () {
                             allTasks.push(value);
                         });
                         w2ui['grid'].add(allTasks);
+                        $("body").unblock();
                     });
                     break;
                 case 'addDAO':
-                    $("select[id$=servers] > option:gt(0)").remove();
                     $(".step0").show();
                     $(".step1").hide();
                     $(".step2").hide();
@@ -649,25 +670,28 @@ var renderGrid = function () {
                     reloadServers();
                     break;
                 case 'editDAO':
-                    $("select[id$=databases] > option:gt(0)").remove();
-                    $(".step1").show();
-                    $(".step2").hide();
-                    $(".step2-1-1").hide();
-                    $(".step2-1-2").hide();
-                    $(".step2-1-3").hide();
-                    $(".step2-1-3-add").hide();
-                    $(".step2-2").hide();
-                    $(".step2-3").hide();
-                    $(".step3").hide();
                     var records = w2ui['grid'].getSelection();
-                    var record = w2ui['grid'].get(records[0]);
-                    $("#databases").append($('<option>', {
-                        value: record.db_name,
-                        text: record.db_name
-                    }));
-                    $("#databases").val(record.db_name);
-                    $("#page1").attr('is_update', '1');
-                    $("#page1").modal();
+                    if(records.length > 0){
+                        var record = w2ui['grid'].get(records[0]);
+                        if(record != undefined){
+                            $("select[id$=servers] > option:gt(0)").remove();
+                            $(".step0").show();
+                            $(".step1").hide();
+                            $(".step2").hide();
+                            $(".step2-1-1").hide();
+                            $(".step2-1-2").hide();
+                            $(".step2-1-3").hide();
+                            $(".step2-1-3-add").hide();
+                            $(".step2-2").hide();
+                            $(".step2-3").hide();
+                            $(".step3").hide();
+                            reloadServers(function(){
+                                $("#servers").val(record.server_id);
+                            });
+                            $("#page1").attr('is_update', '1');
+                            $("#page1").modal();
+                        }
+                    }
                     break;
                 case 'delDAO':
                     if (confirm("Are you sure to delete?")) {
@@ -685,10 +709,12 @@ var renderGrid = function () {
                     }
                     break;
                 case 'javaCode':
+                    cblock($("body"));
                     $.post("/rest/project/generate", {
                         "project_id": w2ui['grid'].current_project,
                         "language": "java"
                     }, function (data) {
+                        $("body").unblock();
                         window.location.href = "/file.jsp";
                     });
                     break;

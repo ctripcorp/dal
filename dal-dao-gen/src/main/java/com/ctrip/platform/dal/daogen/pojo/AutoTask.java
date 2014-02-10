@@ -24,6 +24,16 @@ public class AutoTask extends AbstractTask {
 	private String condition;
 
 	private String sql_content;
+	
+	private int server_id;
+
+	public int getServer_id() {
+		return server_id;
+	}
+
+	public void setServer_id(int server_id) {
+		this.server_id = server_id;
+	}
 
 	public String getFields() {
 		return fields;

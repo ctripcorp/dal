@@ -71,11 +71,10 @@ var reloadProjects = function () {
                 plus: true,
                 onExpand: function (event) {
                     // var centerY = null;
-                    cblock($("#main_layout"));
                     var currentElement = event.object;
-                    currentElement.icon = "fa fa-folder-open-o";
 
                     if (undefined == currentElement.nodes || currentElement.nodes.length == 0) {
+                        cblock($("#main_layout"));
                         $.get("/rest/file?id=" + currentElement.id, function (data) {
                             var allNodes = [];
                             $.each(data, function (index, value) {
@@ -100,6 +99,8 @@ var reloadProjects = function () {
                                     }
                                 });
                             });
+                            if(allNodes.length > 0)
+                                currentElement.icon = "fa fa-folder-open-o";
                             w2ui['sidebar'].add(currentElement, allNodes);
                             $("#main_layout").unblock();
                         });

@@ -53,8 +53,8 @@ public class DatabaseResource {
 		List<DbServer> dbServers = dbServerDao.getAllDbServers();
 
 		for (DbServer dataSource : dbServers) {
-			dataSource.setUser("");
-			dataSource.setPassword("");
+			dataSource.setUser("不告诉你");
+			dataSource.setPassword("不告诉你");
 		}
 
 		return dbServers;

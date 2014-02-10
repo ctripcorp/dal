@@ -13,8 +13,8 @@ import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 
 /**
- * 如果一个连接在一定时间内都没有访问，则将其关闭并移除, 触发时间：有其他连接被访问，或者其他连接加入Cache，对性能可能有一定影响，但是
- * 可以消除僵尸连接带来的隐患
+ * 如果一个连接在一定时间内都没有访问，则将其关闭并移除, 移除的时机：有其他连接被访问时，或者其他连接加入Cache时，
+ * 对性能可能有一定影响，但是可以消除僵尸连接带来的隐患
  * 
  * @author gawu
  * 
@@ -32,6 +32,7 @@ public class DataSourceLRUCache {
 		dbServerDao = SpringBeanGetter.getDBServerDao();
 	}
 
+	//默认30分钟
 	private long timeout = 30 * 60 * 1000;
 
 	public static DataSourceLRUCache newInstance() {
@@ -52,6 +53,7 @@ public class DataSourceLRUCache {
 
 	/**
 	 * 根据server的id获取连接池，调用者需要判断是否为null的情况
+	 * 
 	 * @param id
 	 * @return 获得的连接池，如果不存在，返回null
 	 */
@@ -87,13 +89,25 @@ public class DataSourceLRUCache {
 		}
 
 	}
-	
-	public DataSource putDataSource(int id){
+
+	/**
+	 * 根据数据库信息新建一个连接池，如果已存在，则直接返回，如果不存在，且新建失败，返回null
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public DataSource putDataSource(int id) {
 		DbServer dbServer = dbServerDao.getDbServerByID(id);
-		
+
 		return putDataSource(dbServer);
 	}
 
+	/**
+	 * 根据数据库信息新建一个连接池，如果已存在，则直接返回，如果不存在，且新建失败，返回null
+	 * 
+	 * @param server
+	 * @return
+	 */
 	public DataSource putDataSource(DbServer server) {
 
 		// get和put会不会出现死锁？
@@ -155,6 +169,10 @@ public class DataSourceLRUCache {
 		public void setDataSource(BasicDataSource dataSource) {
 			this.dataSource = dataSource;
 		}
+	}
+	
+	public static void main(String[] args) {
+		
 	}
 
 }

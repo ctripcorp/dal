@@ -64,6 +64,17 @@ public class TaskResource {
 
 		List<AutoTask> autoTasks = autoTask.getTasksByProjectId(Integer
 				.valueOf(id));
+		
+		List<ServerDbMap> serverDbMaps = serverDbMapDao.getServerDbs();
+		
+		for(AutoTask task : autoTasks){
+			for(ServerDbMap map : serverDbMaps){
+				if(map.getDb_name().equalsIgnoreCase(task.getDb_name())){
+					task.setServer_id(map.getServer_id());
+					break;
+				}
+			}
+		}
 
 		List<SpTask> spTasks = spTask.getTasksByProjectId(Integer.valueOf(id));
 
@@ -99,6 +110,15 @@ public class TaskResource {
 			@FormParam("condition") String condition,
 			@FormParam("sql_content") String sql_content,
 			@FormParam("action") String action) {
+		
+		ServerDbMap map = serverDbMapDao.getServerByDbname(db_name);
+		
+		if(map == null){
+			map = new ServerDbMap();
+			map.setServer_id(server);
+			map.setDb_name(db_name);
+			serverDbMapDao.insertServerDbMap(map);
+		}
 
 		if (task_type.equals("auto")) {
 			if (action.equals("insert")) {
@@ -115,12 +135,6 @@ public class TaskResource {
 				t.setCondition(condition);
 				t.setSql_content(formatSql(t));
 				autoTask.insertTask(t);
-				
-				ServerDbMap map = new ServerDbMap();
-				map.setServer_id(server);
-				map.setDb_name(db_name);
-				serverDbMapDao.insertServerDbMap(map);
-				
 			} else if (action.equals("update")) {
 				AutoTask t = new AutoTask();
 				t.setId(Integer.valueOf(id));
@@ -203,7 +217,10 @@ public class TaskResource {
 				t.setMethod_name(method_name);
 				t.setCrud_type(crud_type);
 				t.setSql_content(sql_content);
-				sqlTask.updateTask(t);
+				if(sqlTask.updateTask(t) > 0)
+					return Status.OK;
+				else
+					return Status.ERROR;
 			} else if (action.equals("delete")) {
 				SqlTask t = new SqlTask();
 				t.setId(Integer.valueOf(id));

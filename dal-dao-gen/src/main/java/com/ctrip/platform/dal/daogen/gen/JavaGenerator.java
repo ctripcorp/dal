@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
@@ -29,6 +30,7 @@ import com.ctrip.platform.dal.daogen.pojo.ServerDbMap;
 import com.ctrip.platform.dal.daogen.pojo.SpTask;
 import com.ctrip.platform.dal.daogen.pojo.Task;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
+import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 public class JavaGenerator extends AbstractGenerator {
@@ -55,17 +57,19 @@ public class JavaGenerator extends AbstractGenerator {
 	 */
 	@Override
 	public void generateAutoSqlCode(List<Task> tasks) {
-		Map<String, List<Task>> groupByTable = groupByTableName(tasks);
 
 		VelocityContext context = new VelocityContext();
 
 		context.put("namespace", namespace);
 
+		// 每个表生成一个DAO文件，可能有潜在的问题，即两个不同的数据库中有相同的表，后期需要修改
+		Map<String, List<Task>> groupByTable = groupByTableName(tasks);
+
 		for (Map.Entry<String, List<Task>> entry : groupByTable.entrySet()) {
 			String table = entry.getKey();
-			List<Task> objs = entry.getValue();
-			if (objs.size() > 0) {
-				context.put("database", objs.get(0).getDb_name());
+			List<Task> groupedTasks = entry.getValue();
+			if (groupedTasks.size() > 0) {
+				context.put("database", groupedTasks.get(0).getDb_name());
 			} else {
 				continue;
 			}
@@ -81,139 +85,136 @@ public class JavaGenerator extends AbstractGenerator {
 			List<FieldMeta> fieldsMeta = getMetaData(
 					serverDbMap.getServer_id(), context.get("database")
 							.toString(), table);
-			String primaryKey = "";
-			for (FieldMeta meta : fieldsMeta) {
-				if (meta.isPrimary()) {
-					primaryKey = meta.getName();
-					break;
-				}
-			}
-			context.put("fields", fieldsMeta);
 
-			List<Method> methods = new ArrayList<Method>();
-			List<Method> spMethods = new ArrayList<Method>();
+			putMethods2Velocity(context, fieldsMeta, groupedTasks);
 
-			for (Task task : objs) {
-				AutoTask obj = (AutoTask) task;
-
-				if (null == obj.getMethod_name()
-						|| obj.getMethod_name().isEmpty()) {
-					continue;
-				}
-
-				Method m = new Method();
-				m.setAction(obj.getCrud_type().toLowerCase());
-				m.setMethodName(obj.getMethod_name());
-				m.setSqlSPName(obj.getSql_content());
-
-				// 查询，或者SQL形式的删除
-				if (m.getAction().equalsIgnoreCase("select")
-						|| (m.getAction().equalsIgnoreCase("delete") && obj
-								.getSql_type().equalsIgnoreCase("sql"))) {
-					m.setParameters(getParametersByCondition(
-							obj.getCondition(), fieldsMeta));
-					methods.add(m);
-				}
-				// SQL形式的更新
-				else if (m.getAction().equalsIgnoreCase("update")
-						&& obj.getSql_type().equalsIgnoreCase("sql")) {
-					List<Parameter> parameters = new ArrayList<Parameter>();
-					parameters.addAll(getParametersByCondition(
-							obj.getCondition(), fieldsMeta));
-					parameters.addAll(getParametersByFields(obj.getFields(),
-							fieldsMeta));
-					m.setParameters(parameters);
-					methods.add(m);
-				}
-				// SP形式的删除
-				else if (m.getAction().equalsIgnoreCase("delete")
-						&& !obj.getSql_type().equalsIgnoreCase("sql")) {
-					List<Parameter> parameters = new ArrayList<Parameter>();
-					Parameter p = new Parameter();
-					p.setName(primaryKey);
-					p.setFieldName(primaryKey);
-					for (FieldMeta field : fieldsMeta) {
-						if (field.getName().equalsIgnoreCase(primaryKey)) {
-							p.setType(field.getType());
-							p.setParamMode("IN");
-							p.setPosition(1);
-							break;
-						}
-					}
-					parameters.add(p);
-					m.setParameters(parameters);
-					spMethods.add(m);
-				}
-				// SQL形式的插入
-				else if (m.getAction().equalsIgnoreCase("insert")
-						&& obj.getSql_type().equalsIgnoreCase("sql")) {
-					m.setParameters(getParametersByFields(obj.getFields(),
-							fieldsMeta));
-					methods.add(m);
-				}
-				// SP形式的插入，SP形式的Update
-				else {
-					List<String> allFields = new ArrayList<String>();
-					for (FieldMeta meta : fieldsMeta) {
-						allFields.add(meta.getName());
-					}
-					List<Parameter> parameters = getParametersByFields(
-							StringUtils.join(allFields.toArray(), ","),
-							fieldsMeta);
-
-					for (Parameter p : parameters) {
-						if (p.getName().equals(primaryKey)) {
-							p.setParamMode("OUT");
-							break;
-						}
-					}
-
-					m.setParameters(parameters);
-					spMethods.add(m);
-				}
-
-			}
-			context.put("methods", methods);
-			context.put("sp_methods", spMethods);
 			FileWriter daoWriter = null;
+			FileWriter pomWriter = null;
 			FileWriter pojoWriter = null;
 			try {
-				File projectFile = new File(projectId);
-				if (!projectFile.exists()) {
-					projectFile.mkdir();
-				}
-				File csharpFile = new File(projectFile, "java");
-				if (!csharpFile.exists()) {
-					csharpFile.mkdir();
-				}
-				daoWriter = new FileWriter(String.format("%s/java/%s.java",
-						projectId, context.get("dao_name")));
-				// pojoWriter = new FileWriter(String.format("%s/csharp/%s.cs",
-				// projectId, context.get("pojo_name")));
-				Velocity.mergeTemplate("DAO.java.tpl", "UTF-8", context,
+				File mavenLikeDir = new File(String.format("gen/%s/src/main/java/%s",
+						projectId, namespace.replace(".", "/")));
+				FileUtils.forceMkdir(mavenLikeDir);
+
+				daoWriter = new FileWriter(
+						String.format("%s/%s.java",
+								mavenLikeDir.getAbsolutePath(),
+								context.get("dao_name")));
+				pomWriter = new FileWriter(String.format("gen/%s/pom.xml",
+						projectId));
+				
+				Velocity.mergeTemplate("templates/DAO.java.tpl", "UTF-8", context,
 						daoWriter);
-				// Velocity.mergeTemplate("POJO.cs.tpl", "UTF-8", context,
-				// pojoWriter);
+				Velocity.mergeTemplate("templates/pom.xml.tpl", "UTF-8", context,
+						pomWriter);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
+				JavaIOUtils.closeWriter(daoWriter);
+				JavaIOUtils.closeWriter(pojoWriter);
+				JavaIOUtils.closeWriter(pomWriter);
+			}
+		}
+	}
 
-				try {
-					if (null != daoWriter) {
-						daoWriter.close();
+	private void putMethods2Velocity(VelocityContext context,
+			List<FieldMeta> fieldsMeta, List<Task> groupedTasks) {
+
+		String primaryKey = "";
+		for (FieldMeta meta : fieldsMeta) {
+			if (meta.isPrimary()) {
+				primaryKey = meta.getName();
+				break;
+			}
+		}
+		context.put("fields", fieldsMeta);
+
+		List<Method> methods = new ArrayList<Method>();
+		List<Method> spMethods = new ArrayList<Method>();
+
+		for (Task task : groupedTasks) {
+			AutoTask groupedTask = (AutoTask) task;
+
+			if (null == groupedTask.getMethod_name()
+					|| groupedTask.getMethod_name().isEmpty()) {
+				continue;
+			}
+
+			Method m = new Method();
+			m.setAction(groupedTask.getCrud_type().toLowerCase());
+			m.setMethodName(groupedTask.getMethod_name());
+			m.setSqlSPName(groupedTask.getSql_content());
+
+			// 查询，或者SQL形式的删除
+			if (m.getAction().equalsIgnoreCase("select")
+					|| (m.getAction().equalsIgnoreCase("delete") && groupedTask
+							.getSql_type().equalsIgnoreCase("sql"))) {
+				m.setParameters(getParametersByCondition(
+						groupedTask.getCondition(), fieldsMeta));
+				methods.add(m);
+			}
+			// SQL形式的更新
+			else if (m.getAction().equalsIgnoreCase("update")
+					&& groupedTask.getSql_type().equalsIgnoreCase("sql")) {
+				List<Parameter> parameters = new ArrayList<Parameter>();
+				parameters.addAll(getParametersByCondition(
+						groupedTask.getCondition(), fieldsMeta));
+				parameters.addAll(getParametersByFields(
+						groupedTask.getFields(), fieldsMeta));
+				m.setParameters(parameters);
+				methods.add(m);
+			}
+			// SP形式的删除
+			else if (m.getAction().equalsIgnoreCase("delete")
+					&& !groupedTask.getSql_type().equalsIgnoreCase("sql")) {
+				List<Parameter> parameters = new ArrayList<Parameter>();
+				Parameter p = new Parameter();
+				p.setName(primaryKey);
+				p.setFieldName(primaryKey);
+				for (FieldMeta field : fieldsMeta) {
+					if (field.getName().equalsIgnoreCase(primaryKey)) {
+						p.setType(field.getType());
+						p.setParamMode("IN");
+						p.setPosition(1);
+						break;
 					}
-					if (null != pojoWriter) {
-						pojoWriter.close();
+				}
+				parameters.add(p);
+				m.setParameters(parameters);
+				spMethods.add(m);
+			}
+			// SQL形式的插入
+			else if (m.getAction().equalsIgnoreCase("insert")
+					&& groupedTask.getSql_type().equalsIgnoreCase("sql")) {
+				m.setParameters(getParametersByFields(groupedTask.getFields(),
+						fieldsMeta));
+				methods.add(m);
+			}
+			// SP形式的插入，SP形式的Update
+			else {
+				List<String> allFields = new ArrayList<String>();
+				for (FieldMeta meta : fieldsMeta) {
+					allFields.add(meta.getName());
+				}
+				List<Parameter> parameters = getParametersByFields(
+						StringUtils.join(allFields.toArray(), ","), fieldsMeta);
+
+				for (Parameter p : parameters) {
+					if (p.getName().equals(primaryKey)) {
+						p.setParamMode("OUT");
+						break;
 					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 
+				m.setParameters(parameters);
+				spMethods.add(m);
 			}
 
 		}
+
+		context.put("methods", methods);
+		context.put("sp_methods", spMethods);
+
 	}
 
 	@Override
@@ -254,10 +255,12 @@ public class JavaGenerator extends AbstractGenerator {
 
 				DataSource ds = DataSourceLRUCache.newInstance().getDataSource(
 						serverDbMap.getServer_id());
-				
-				if(ds == null){
-					DbServer dbServer = dbServerDao.getDbServerByID(serverDbMap.getServer_id());
-					ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+
+				if (ds == null) {
+					DbServer dbServer = dbServerDao.getDbServerByID(serverDbMap
+							.getServer_id());
+					ds = DataSourceLRUCache.newInstance().putDataSource(
+							dbServer);
 				}
 
 				Connection connection = null;

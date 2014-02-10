@@ -12,13 +12,13 @@ import com.ctrip.platform.dao.param.StatementParameter;
 public class PersonDAO extends AbstractDAO {
 
 	public PersonDAO() {
-		logicDbName = "SysDalTest";
+		logicDbName = "dao_test";
 		servicePort = 9000;
 		credentialId = "30303";
 		super.init();
 	}
 
-	public ResultSet getAll() {
+	public ResultSet GetAll111() {
 		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
 		return this.fetch("SELECT Birth,Name,Age,Telephone,Gender,Address,ID FROM Person", parameters, null);
 	}

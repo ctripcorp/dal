@@ -243,14 +243,15 @@
                            <input id="class_name" class="span9 popup_text">
                         </div>
                      </div>
-                     <div class="row-fluid">
+                     <div class="row-fluid method_name_class">
                         <div class="control-group">
                            <label class="control-label popup_label">生成的方法名：</label>
                            <input id="method_name" class="span9 popup_text">
                         </div>
                      </div>
-                     <hr>
-                     <div class="row-fluid">
+                     
+                     <div class="row-fluid op_type_class">
+                        <hr>
                         <div class="control-group">
                            <label class="control-label popup_label">操作类型：</label>
                            <div class="btn-group popup_text span9" data-toggle="buttons">

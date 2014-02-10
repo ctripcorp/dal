@@ -1,7 +1,10 @@
 package com.ctrip.platform.dal.daogen.gen;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,14 +15,15 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.velocity.app.Velocity;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.daogen.dao.AutoTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
 import com.ctrip.platform.dal.daogen.dao.ProjectDAO;
-import com.ctrip.platform.dal.daogen.dao.SpTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.ServerDbMapDAO;
+import com.ctrip.platform.dal.daogen.dao.SpTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.SqlTaskDAO;
 import com.ctrip.platform.dal.daogen.pojo.AutoTask;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
@@ -27,8 +31,8 @@ import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.Project;
 import com.ctrip.platform.dal.daogen.pojo.SpTask;
 import com.ctrip.platform.dal.daogen.pojo.Task;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 public abstract class AbstractGenerator implements Generator {
 
@@ -41,7 +45,7 @@ public abstract class AbstractGenerator implements Generator {
 	protected static SqlTaskDAO sqlTaskDao;
 
 	protected static ServerDbMapDAO serverDbMapDao;
-	
+
 	private static DbServerDAO dbServerDao;
 
 	protected String namespace;
@@ -103,8 +107,8 @@ public abstract class AbstractGenerator implements Generator {
 			String tableName) {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-		
-		if(ds == null){
+
+		if (ds == null) {
 			DbServer dbServer = dbServerDao.getDbServerByID(server);
 			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
 		}
@@ -134,11 +138,12 @@ public abstract class AbstractGenerator implements Generator {
 			try {
 				allColumnsRs = connection.getMetaData().getColumns(dbName,
 						null, tableName, null);
+
 				while (allColumnsRs.next()) {
 					FieldMeta meta = new FieldMeta();
 
 					String columnName = allColumnsRs.getString("COLUMN_NAME");
-					String columnType = allColumnsRs.getString("TYPE_NAME ");
+					String columnType = allColumnsRs.getString("TYPE_NAME");
 					int position = allColumnsRs.getInt("ORDINAL_POSITION");
 					// String nullable = allColumnsRs.getString(4);
 

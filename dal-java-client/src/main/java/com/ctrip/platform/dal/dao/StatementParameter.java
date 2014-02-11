@@ -51,7 +51,15 @@ public class StatementParameter {
 	public Object getValue() {
 		return currentBuilder.value_;
 	}
+	
+	public boolean isResultsParameter() {
+		return currentBuilder.resultsParameter_;
+	}
 
+	public DalResultSetExtractor<?> getResultSetExtractor() {
+		return currentBuilder.resultSetExtractor_;
+	}
+	
 	public static final class Builder {
 
 		private Builder() {
@@ -75,6 +83,9 @@ public class StatementParameter {
 		private boolean sensitive_;
 
 		private Object value_;
+		
+		private boolean resultsParameter_;
+		private DalResultSetExtractor resultSetExtractor_;
 
 		public Builder setDbType(DbType dbType) {
 			dbType_ = dbType;

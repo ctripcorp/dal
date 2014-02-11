@@ -1,12 +1,13 @@
 package com.ctrip.platform.dal.dao;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public interface ResultSetVisitor {
+public interface DalRowMapper<T> {
 	/**
 	 * Convert current row in result set to application pojo 
 	 * @param rs
 	 * @return
 	 */
-	DaoPojo visitRow(ResultSet rs);
+	T map(ResultSet rs, int rowNum) throws SQLException;
 }

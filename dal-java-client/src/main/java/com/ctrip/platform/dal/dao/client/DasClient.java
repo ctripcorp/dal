@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.dao.client;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -97,8 +96,7 @@ public class DasClient implements Client {
 	}
 
 	@Override
-	public ResultSet fetch(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
+	public ResultSet fetch(String sql, List<StatementParameter> parameters, Map keywordParameters) {
 
 		boolean master = false;
 
@@ -149,8 +147,7 @@ public class DasClient implements Client {
 	}
 
 	@Override
-	public int execute(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
+	public int execute(String sql, List<StatementParameter> parameters, Map keywordParameters) {
 		boolean master = false;
 
 		if (null != keywordParameters && keywordParameters.size() > 0
@@ -197,8 +194,7 @@ public class DasClient implements Client {
 	}
 
 	@Override
-	public ResultSet fetchBySp(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
+	public ResultSet fetchBySp(String sql, List<StatementParameter> parameters, Map keywordParameters) {
 		boolean master = false;
 
 		if (null != keywordParameters && keywordParameters.size() > 0
@@ -247,8 +243,7 @@ public class DasClient implements Client {
 	}
 
 	@Override
-	public int executeSp(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
+	public int executeSp(String sql, List<StatementParameter> parameters, Map keywordParameters) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

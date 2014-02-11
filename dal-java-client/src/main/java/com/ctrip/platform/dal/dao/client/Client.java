@@ -7,24 +7,25 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.dao.StatementParameter;
 
+/**
+ * @deprecated
+ * @author jhhe
+ *
+ */
 public interface Client {
 	
-	@SuppressWarnings("rawtypes")
-	ResultSet fetch(String sql, List<StatementParameter> parameters, Map keywordParameters) throws SQLException;
+	ResultSet fetch(String sql, List<StatementParameter> parameters, Map keywordParameters);
 	
-	@SuppressWarnings("rawtypes")
-	int execute(String sql, List<StatementParameter> parameters, Map keywordParameters) throws SQLException;
+	int execute(String sql, List<StatementParameter> parameters, Map keywordParameters);
 	
-	@SuppressWarnings("rawtypes")
-	ResultSet fetchBySp(String sql, List<StatementParameter> parameters, Map keywordParameters) throws SQLException;
+	ResultSet fetchBySp(String sql, List<StatementParameter> parameters, Map keywordParameters);
 	
-	@SuppressWarnings("rawtypes")
-	int executeSp(String sql, List<StatementParameter> parameters, Map keywordParameters) throws SQLException;
+	int executeSp(String sql, List<StatementParameter> parameters, Map keywordParameters);
 
 	/**
 	 * After each fetch operation, connection need to be closed explicitly.
 	 * For execute, we don't need to do it
 	 * @throws SQLException
 	 */
-	void closeConnection() throws SQLException ;
+	void closeConnection();
 }

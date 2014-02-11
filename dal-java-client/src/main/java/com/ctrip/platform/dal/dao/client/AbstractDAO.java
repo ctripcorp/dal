@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.client;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,50 +40,26 @@ public class AbstractDAO implements Client {
 	}
 
 	@Override
-	public ResultSet fetch(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
-		try {
-			return getClient().fetch(sql, parameters, keywordParameters);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
-		}
+	public ResultSet fetch(String sql, List<StatementParameter> parameters, Map keywordParameters) {
+		return getClient().fetch(sql, parameters, keywordParameters);
 	}
 
 	@Override
-	public int execute(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
-		try {
-			return getClient().execute(sql, parameters, keywordParameters);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return 0;
-		}
+	public int execute(String sql, List<StatementParameter> parameters, Map keywordParameters) {
+		return getClient().execute(sql, parameters, keywordParameters);
 	}
 
 	@Override
-	public ResultSet fetchBySp(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
-		try {
-			return getClient().fetchBySp(sql, parameters, keywordParameters);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
-		}
+	public ResultSet fetchBySp(String sql, List<StatementParameter> parameters, Map keywordParameters) {
+		return getClient().fetchBySp(sql, parameters, keywordParameters);
 	}
 
 	@Override
-	public int executeSp(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) {
-		try {
-			return getClient().executeSp(sql, parameters, keywordParameters);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return 0;
-		}
+	public int executeSp(String sql, List<StatementParameter> parameters, Map keywordParameters) {
+		return getClient().executeSp(sql, parameters, keywordParameters);
 	}
 	
-	private Client getClient() throws SQLException {
+	private Client getClient() {
 		lock.readLock().lock();
 		Client client = null;
 		if(clients.containsKey(logicDbName)){
@@ -93,13 +68,13 @@ public class AbstractDAO implements Client {
 		lock.readLock().unlock();
 		
 		if(client == null)
-			throw new SQLException(String.format("Database %s is not initilized properly", logicDbName));
+			throw new RuntimeException(String.format("Database %s is not initilized properly", logicDbName));
 		
 		return client;
 	}
 
 	@Override
-	public void closeConnection() throws SQLException {
+	public void closeConnection() {
 		getClient().closeConnection();
 	}
 }

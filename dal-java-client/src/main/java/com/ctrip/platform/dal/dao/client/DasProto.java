@@ -710,7 +710,7 @@ public final class DasProto {
                 com.ctrip.platform.dal.dao.client.DasProto.AvailableType.class, com.ctrip.platform.dal.dao.client.DasProto.AvailableType.Builder.class);
       }
 
-      // Construct using com.ctrip.platform.dao.DasProto.AvailableType.newBuilder()
+      // Construct using com.ctrip.platform.dal.dao.DasProto.AvailableType.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -1698,7 +1698,7 @@ public final class DasProto {
                 com.ctrip.platform.dal.dao.client.DasProto.SqlParameters.class, com.ctrip.platform.dal.dao.client.DasProto.SqlParameters.Builder.class);
       }
 
-      // Construct using com.ctrip.platform.dao.DasProto.SqlParameters.newBuilder()
+      // Construct using com.ctrip.platform.dal.dao.DasProto.SqlParameters.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -2804,7 +2804,7 @@ public final class DasProto {
                 com.ctrip.platform.dal.dao.client.DasProto.RequestMessage.class, com.ctrip.platform.dal.dao.client.DasProto.RequestMessage.Builder.class);
       }
 
-      // Construct using com.ctrip.platform.dao.DasProto.RequestMessage.newBuilder()
+      // Construct using com.ctrip.platform.dal.dao.DasProto.RequestMessage.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -4006,7 +4006,7 @@ public final class DasProto {
                 com.ctrip.platform.dal.dao.client.DasProto.Request.class, com.ctrip.platform.dal.dao.client.DasProto.Request.Builder.class);
       }
 
-      // Construct using com.ctrip.platform.dao.DasProto.Request.newBuilder()
+      // Construct using com.ctrip.platform.dal.dao.DasProto.Request.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -4869,7 +4869,7 @@ public final class DasProto {
                 com.ctrip.platform.dal.dao.client.DasProto.ResponseHeader.class, com.ctrip.platform.dal.dao.client.DasProto.ResponseHeader.Builder.class);
       }
 
-      // Construct using com.ctrip.platform.dao.DasProto.ResponseHeader.newBuilder()
+      // Construct using com.ctrip.platform.dal.dao.DasProto.ResponseHeader.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -5644,7 +5644,7 @@ public final class DasProto {
                 com.ctrip.platform.dal.dao.client.DasProto.Response.class, com.ctrip.platform.dal.dao.client.DasProto.Response.Builder.class);
       }
 
-      // Construct using com.ctrip.platform.dao.DasProto.Response.newBuilder()
+      // Construct using com.ctrip.platform.dal.dao.DasProto.Response.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -6620,7 +6620,7 @@ public final class DasProto {
                 com.ctrip.platform.dal.dao.client.DasProto.Row.class, com.ctrip.platform.dal.dao.client.DasProto.Row.Builder.class);
       }
 
-      // Construct using com.ctrip.platform.dao.DasProto.Row.newBuilder()
+      // Construct using com.ctrip.platform.dal.dao.DasProto.Row.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -7350,7 +7350,7 @@ public final class DasProto {
                 com.ctrip.platform.dal.dao.client.DasProto.InnerResultSet.class, com.ctrip.platform.dal.dao.client.DasProto.InnerResultSet.Builder.class);
       }
 
-      // Construct using com.ctrip.platform.dao.DasProto.InnerResultSet.newBuilder()
+      // Construct using com.ctrip.platform.dal.dao.DasProto.InnerResultSet.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -7859,7 +7859,7 @@ public final class DasProto {
       "ype\"=\n\016InnerResultSet\022\014\n\004last\030\001 \002(\010\022\035\n\004r" +
       "ows\030\002 \003(\0132\017.sysdev.das.Row*\030\n\004CRUD\022\007\n\003GE" +
       "T\020\000\022\007\n\003CUD\020\001* \n\rStatementType\022\007\n\003SQL\020\000\022\006" +
-      "\n\002SP\020\001B\035\n\033com.ctrip.platform.dao"
+      "\n\002SP\020\001B\035\n\033com.ctrip.platform.dal.dao"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

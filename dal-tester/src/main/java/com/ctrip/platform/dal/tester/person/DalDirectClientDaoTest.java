@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.tester;
+package com.ctrip.platform.dal.tester.person;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,13 +10,13 @@ import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.DalClient;
 
-public class DirectClientDaoTest {
+public class DalDirectClientDaoTest {
 	private StatementParameters parameters = new StatementParameters();
 	private DalHints hints = new DalHints();
 	private String sql = "select [HotelID],[LatestBookTime],[UID]  from HotelLatestBookInfo hl with(nolock)  Join resource r with(nolock) on r.resource = hl.HotelID join city c (nolock) on c.city = r.city and c.city in (select city from city (nolock) where Country = 1) ";
@@ -106,7 +106,7 @@ public class DirectClientDaoTest {
 
 	public static void main(String[] args) {
 		Configuration.addResource("conf.properties");
-		DirectClientDaoTest test = new DirectClientDaoTest();
+		DalDirectClientDaoTest test = new DalDirectClientDaoTest();
 		test.test();
 		test.test2();
 		System.exit(0);

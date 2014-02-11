@@ -116,8 +116,7 @@ public class DirectClient implements Client {
 
 	
 	@Override
-	public ResultSet fetch(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) throws SQLException {
+	public ResultSet fetch(String sql, List<StatementParameter> parameters, Map keywordParameters) {
 		try {
 			getConnection(keywordParameters, true);
 			PreparedStatement statement = createSqlStatement(conn, sql, parameters);
@@ -131,8 +130,7 @@ public class DirectClient implements Client {
 	}
 
 	@Override
-	public int execute(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) throws SQLException {
+	public int execute(String sql, List<StatementParameter> parameters, Map keywordParameters) {
 		try {
 			getConnection(keywordParameters, false);
 			PreparedStatement statement = createSqlStatement(conn, sql, parameters);
@@ -147,8 +145,7 @@ public class DirectClient implements Client {
 	}
 
 	@Override
-	public ResultSet fetchBySp(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) throws SQLException {
+	public ResultSet fetchBySp(String sql, List<StatementParameter> parameters, Map keywordParameters) {
 		try {
 			getConnection(keywordParameters, true);
 			PreparedStatement statement = createSpStatement(conn, sql, parameters);
@@ -162,8 +159,7 @@ public class DirectClient implements Client {
 	}
 
 	@Override
-	public int executeSp(String sql, List<StatementParameter> parameters,
-			Map keywordParameters) throws SQLException {
+	public int executeSp(String sql, List<StatementParameter> parameters, Map keywordParameters) {
 		getConnection(keywordParameters, false);
 		try {
 			PreparedStatement statement = createSqlStatement(conn, sql, parameters);
@@ -186,31 +182,37 @@ public class DirectClient implements Client {
 		return false;
 	}
 
-	private void getConnection(Map keywordParameters, boolean isSelect) throws SQLException {
+	private void getConnection(Map keywordParameters, boolean isSelect) {
 		// Close existing connection before get new one
 		// Can be optimized here, e.g. reuse connection if it is the sam type
 		closeConnection();
-		conn = connPool.getConnection(logicDbName, isMaster(keywordParameters), isSelect);
+		try {
+			conn = connPool.getConnection(logicDbName, isMaster(keywordParameters), isSelect);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public void closeConnection() throws SQLException {
+	public void closeConnection() {
 		if(conn == null) 
 			return;
 
 		Connection tConn = conn;
 		conn = null;
-		tConn.close();
+		try {
+			tConn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	private SQLException handleException(Throwable e) throws SQLException {
+	private RuntimeException handleException(Throwable e) {
 		try {
 			closeConnection();
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 		}
-		if(e instanceof SQLException)
-			return (SQLException)e;
-		return new SQLException(e);
+		return new RuntimeException(e);
 	}
 }

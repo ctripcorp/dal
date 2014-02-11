@@ -1,80 +1,61 @@
 package com.ctrip.platform.dal.dao;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import com.ctrip.platform.dal.dao.client.Client;
+import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
+import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 
-public class DalQueryDao {
-	private DalClientFactory factory;
+public final class DalQueryDao {
+	private DalClient client;
 
-	public DalQueryDao(DalClientFactory factory, ResultSetVisitor rsVisitor) {
-		this.factory = factory;
+	public DalQueryDao(String logicDbName) {
+		this.client = DalClientFactory.getClient(logicDbName);
 	}
 
-	public List<DaoPojo> selectAll(String sql,
-			List<StatementParameter> parameters, ResultSetVisitor rsVisitor,
-			Map keywordParameters) throws SQLException {
-		Client client = factory.getClient();
-
-		ResultSet rs = client.fetch(sql, parameters, keywordParameters);
-
-		List<DaoPojo> pojoList = new ArrayList<DaoPojo>();
-		while (rs.next()) {
-			pojoList.add(rsVisitor.visitRow(rs));
-		}
-		client.closeConnection();
-		return pojoList;
-	}
-
-	public DaoPojo selectFisrt(String sql, List<StatementParameter> parameters,
-			ResultSetVisitor rsVisitor, Map keywordParameters)
+	<T> List<T> query(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
-		DaoPojo pojo = null;
-		Client client = factory.getClient();
-
-		ResultSet rs = client.fetch(sql, parameters, keywordParameters);
-		if (rs.next())
-			pojo = rsVisitor.visitRow(rs);
-
-		client.closeConnection();
-		return pojo;
+		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper));
 	}
 
-	public List<DaoPojo> selectTop(String sql,
-			List<StatementParameter> parameters, Map keywordParameters,
-			ResultSetVisitor rsVisitor, int count) throws SQLException {
-		Client client = factory.getClient();
-
-		ResultSet rs = client.fetch(sql, parameters, keywordParameters);
-
-		List<DaoPojo> pojoList = new ArrayList<DaoPojo>();
-		int i = 0;
-		while (i++ < count && rs.next()) {
-			pojoList.add(rsVisitor.visitRow(rs));
-		}
-		client.closeConnection();
-		return pojoList;
-	}
-
-	public List<DaoPojo> selectFrom(String sql,
-			List<StatementParameter> parameters, Map keywordParameters,
-			ResultSetVisitor rsVisitor, int start, int count)
+	public void query(String sql, StatementParameters parameters, DalHints hints, DalRowCallback callback) 
 			throws SQLException {
-		Client client = factory.getClient();
+		client.query(sql, parameters, hints, new DalRowCallbackExtractor(callback));
+	}
 
-		ResultSet rs = client.fetch(sql, parameters, keywordParameters);
+	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
+			throws SQLException {
+		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper));
+		assertCount(1, result.size());
+		return result.get(0);
+	}
 
-		List<DaoPojo> pojoList = new ArrayList<DaoPojo>();
-		rs.absolute(start - 1);
-		int i = 0;
-		while (i++ < count && rs.next()) {
-			pojoList.add(rsVisitor.visitRow(rs));
-		}
-		client.closeConnection();
-		return pojoList;
+	/**
+	 *  executeScalar
+	 * @throws SQLException
+	 */
+	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
+			throws SQLException {
+		// TODO support
+		return null;
+	}
+	
+	private void assertCount(int expected, int actual) throws SQLException{
+		if(expected != actual)
+			throw new SQLException(String.format("The expected count %d does not equal to actual count %d", expected, actual));
+	}
+
+	public <T> T queryFisrt(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
+			throws SQLException {
+		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, 1)).get(0);
+	}
+
+	public <T> List<T> queryTop(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int count) 
+			throws SQLException {
+		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, count));
+	}
+
+	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count) throws SQLException {
+		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, start, count));
 	}
 }

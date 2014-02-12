@@ -262,6 +262,36 @@ public class DirectClientDaoTest {
 			e.printStackTrace();
 		}
 	}
+	
+	public void testConnectionException() {
+		DalClient client = DalClientFactory.getClient("dao_test");
+		
+		try {
+			client.query(sql, parameters, hints, new DalResultSetExtractor<Object>() {
+				@Override
+				public Object extract(ResultSet rs) throws SQLException {
+					throw new RuntimeException("test");
+				}
+				
+			});
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void testTransactionException() {
+		try {
+			DalClient client = DalClientFactory.getClient("dao_test");
+
+			String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
+			String update = "update xPerson set name='abcde' where id > 2000";
+			String[] sqls = new String[]{insert, insert, insert, update};
+
+			System.out.println(client.batchUpdate(sqls, hints));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	private void selectPerson(DalClient client) throws SQLException {
 		client.query(sql2, parameters, hints, new DalResultSetExtractor<Object>() {
@@ -317,9 +347,12 @@ public class DirectClientDaoTest {
 //		test.testAutoIncrement();
 //		test.testBatch();
 //		test.testBatch2();
-		test.testCommand();
+//		test.testCommand();
 //		test.testSP();
 //		test.testSPInOut();
+		// TODO check negative case, exception and transaction rollback
+		test.testConnectionException();
+		test.testTransactionException();
 		System.exit(0);
 	}
 }

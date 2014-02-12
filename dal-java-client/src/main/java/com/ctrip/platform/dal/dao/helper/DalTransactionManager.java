@@ -147,7 +147,7 @@ public class DalTransactionManager {
 			}
 			
 			if(--level == 0)
-				cleanup();
+				cleanup(true);
 		}
 		
 		public void rollbackTransaction(int startLevel) throws SQLException {
@@ -156,10 +156,19 @@ public class DalTransactionManager {
 
 			rolledBack = true;
 			// Even the rollback fails, we still set the flag to true;
-			cleanup();
+			cleanup(false);
 		}
 		
-		private void cleanup() {
+		private void cleanup(boolean commit) {
+			try {
+				if(commit)
+					conn.commit();
+				else
+					conn.rollback();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+
 			try {
 				conn.setAutoCommit(false);
 			} catch (Throwable e) {

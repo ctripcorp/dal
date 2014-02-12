@@ -32,6 +32,9 @@ public enum DalHintEnum {
 	columns,
 	// TODO do we need separate operation type like Dal Fx?
 	
+	/* for logging */
+	callingUrl,
+	
 	/* Allow customization */
 	userDefined,
 }

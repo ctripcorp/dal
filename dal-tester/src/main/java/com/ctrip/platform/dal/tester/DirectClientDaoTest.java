@@ -9,12 +9,15 @@ import java.sql.SQLException;
 import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
+import com.ctrip.platform.dal.common.enums.DbType;
+import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
+import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.DalClient;
 
 public class DirectClientDaoTest {
 	private StatementParameters parameters = new StatementParameters();
@@ -66,6 +69,31 @@ public class DirectClientDaoTest {
 		}
 	}
 	
+	public void testSP() {
+		DalClient client = DalClientFactory.getClient("dao_test");
+		StatementParameter.Builder builder = StatementParameter.newBuilder();
+		builder.setDbType(DbType.Int32)
+				.setDirection(ParameterDirection.Input).setNullable(false)
+				.setIndex(1).setName("").setSensitive(false).setValue(false);
+		StatementParameter instance = builder.build();
+		System.out.println(instance.build2SqlParameters().toByteArray());
+		StatementParameters parameters = new StatementParameters();
+		parameters.add(instance);
+		
+		try {
+			String insert = "insert into Person values(100, 'aaa', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
+			client.update(insert, parameters, hints);
+			client.call("call getPersonById(?)", parameters, hints);
+			
+			String delete = "delete from Person where id = 100";
+			client.update(delete, parameters, hints);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
 	private void selectPerson(DalClient client) throws SQLException {
 		client.query(sql2, parameters, hints, new DalResultSetExtractor<Object>() {
 			private boolean headerDisplayed;
@@ -109,6 +137,7 @@ public class DirectClientDaoTest {
 		DirectClientDaoTest test = new DirectClientDaoTest();
 		test.test();
 		test.test2();
+		test.testSP();
 		System.exit(0);
 	}
 }

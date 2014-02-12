@@ -16,7 +16,7 @@ public class DalTransactionManager {
 	private String logicDbName;
 	private DruidDataSourceWrapper connPool;
 
-	private final ThreadLocal<ConnectionCache> connectionCacheHolder = new ThreadLocal<ConnectionCache>();
+	private static final ThreadLocal<ConnectionCache> connectionCacheHolder = new ThreadLocal<ConnectionCache>();
 
 	public DalTransactionManager(String logicDbName, DruidDataSourceWrapper connPool) {
 		this.connPool = connPool;
@@ -28,6 +28,7 @@ public class DalTransactionManager {
 		
 		if(connCache == null) {
 			Connection conn = connPool.getConnection(logicDbName, isMaster(hints), UPDATE);
+			conn.setAutoCommit(false);
 			connCache = new ConnectionCache(conn);
 			connectionCacheHolder.set(connCache);
 		}
@@ -108,13 +109,16 @@ public class DalTransactionManager {
 		closeConnection(conn);
 	}
 	
-	public SQLException handleException(Throwable e) {
+	public SQLException handleException(Throwable e, int startLevel) {
 		try {
-			rollbackTransaction(-1);
+			rollbackTransaction(startLevel);
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 		}
-		
+		return e instanceof SQLException ? (SQLException)e : new SQLException(e);
+	}
+	
+	public SQLException handleException(Throwable e) {
 		return e instanceof SQLException ? (SQLException)e : new SQLException(e);
 	}
 	
@@ -133,21 +137,17 @@ public class DalTransactionManager {
 		}
 		
 		public int startTransaction() throws SQLException {
-			if(level == 0)
-				conn.setAutoCommit(false);
 			return level++;
 		}
 		
 		public void endTransaction(int startLevel) throws SQLException {
-			if(startLevel != level) {
+			if(startLevel != (level - 1)) {
 				rollbackTransaction(startLevel);
 				throw new SQLException(String.format("Transaction level mismatch. Expected: %d Actual: %d", level, startLevel));
 			}
 			
-			if(--level == 0){
-				conn.commit();
-				conn.setAutoCommit(false);
-			}
+			if(--level == 0)
+				cleanup();
 		}
 		
 		public void rollbackTransaction(int startLevel) throws SQLException {
@@ -156,7 +156,23 @@ public class DalTransactionManager {
 
 			rolledBack = true;
 			// Even the rollback fails, we still set the flag to true;
-			conn.rollback();
+			cleanup();
+		}
+		
+		private void cleanup() {
+			try {
+				conn.setAutoCommit(false);
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+			
+			try {
+				conn.close();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+			
+			connectionCacheHolder.set(null);
 		}
 	}
 

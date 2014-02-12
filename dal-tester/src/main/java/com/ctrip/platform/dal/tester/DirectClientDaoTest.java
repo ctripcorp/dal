@@ -96,6 +96,53 @@ public class DirectClientDaoTest {
 		}
 	}
 
+	public void testBatch() {
+		try {
+			DalClient client = DalClientFactory.getClient("dao_test");
+
+			String delete = "delete from Person where id > 2000";
+			String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
+			String update = "update Person set name='abcde' where id > 2000";
+			String[] sqls = new String[]{insert, insert, insert, update};
+
+			System.out.println(client.batchUpdate(sqls, hints));
+
+			client.update(delete, parameters, hints);
+			selectPerson(client);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void testBatch2() {
+		try {
+			DalClient client = DalClientFactory.getClient("dao_test");
+
+			String insert = "insert into Person values(NULL, ?, ?, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
+
+			StatementParameters[] parameterList = new StatementParameters[3];
+			
+			for (int i = 0; i < parameterList.length; i++) {
+				StatementParameters parameters = new StatementParameters();
+				StatementParameter param;
+				
+				param = StatementParameter.newBuilder().setDbType(DbType.String).setValue("abcde" + i).setIndex(1).build();
+				parameters.add(param);
+				
+				param  = StatementParameter.newBuilder().setDbType(DbType.Int32).setValue(i).setIndex(2).build();
+				parameters.add(param);
+
+				parameterList[i] = parameters;	
+			}
+			
+			System.out.println(client.batchUpdate(insert, parameterList, hints));
+			selectPerson(client);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public void testSP() {
 		DalClient client = DalClientFactory.getClient("dao_test");
@@ -221,7 +268,9 @@ public class DirectClientDaoTest {
 		
 //		test.test();
 //		test.test2();
-		test.testAutoIncrement();
+//		test.testAutoIncrement();
+		test.testBatch();
+		test.testBatch2();
 //		test.testSP();
 //		test.testSPInOut();
 		System.exit(0);

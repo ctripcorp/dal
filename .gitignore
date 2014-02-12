@@ -7,7 +7,6 @@ Netty101/
 #Java related ignore
 *.class
 *.jar
-conf.properties
 
 /bin
 /target

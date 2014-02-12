@@ -103,7 +103,7 @@ public class DalDirectClient implements DalClient {
 				return rows;
 			
 			DalRowMapperExtractor<Map<String, Object>> rse =
-					new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper(keys), 1);
+					new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper(), 1);
 			generatedKeys.addAll(rse.extract(keys));
 
 //			if (logger.isDebugEnabled()) {
@@ -190,8 +190,8 @@ public class DalDirectClient implements DalClient {
 			for (StatementParameter parameter : parameters.values()) {
 				if (parameter.isResultsParameter()) {
 					resultParameters.add(parameter);
-				}
-				else {
+				} else 
+				if(parameter.isOutParameter()){
 					callParameters.add(parameter);
 				}
 			}
@@ -299,7 +299,7 @@ public class DalDirectClient implements DalClient {
 		transManager.cleanup(rs, statement, conn);
 	}
 	
-	private RuntimeException handleException(Throwable e) {
+	private SQLException handleException(Throwable e) {
 		return transManager.handleException(e);
 	}
 	

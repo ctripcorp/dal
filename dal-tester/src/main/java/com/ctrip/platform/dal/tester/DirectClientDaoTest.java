@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Map;
 
 import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.enums.DbType;
-import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -18,6 +18,8 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
+import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 
 public class DirectClientDaoTest {
 	private StatementParameters parameters = new StatementParameters();
@@ -26,9 +28,7 @@ public class DirectClientDaoTest {
 	private String sql2 = "select * from Person";
 	
 	public void test() {
-		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
 		try {
-			DalClientFactory.initDirectClientFactory(reader, "HtlProductdb", "dao_test");
 			DalClient client = DalClientFactory.getClient("HtlProductdb");
 
 			client.query(sql, parameters, hints, new DalResultSetExtractor<Object>() {
@@ -47,20 +47,20 @@ public class DirectClientDaoTest {
 	}
 
 	public void test2() {
-		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
 		try {
-			DalClientFactory.initDirectClientFactory(reader, "dao_test");
 			DalClient client = DalClientFactory.getClient("dao_test");
 
+			String delete = "delete from Person where id = 100";
+			String insert = "insert into Person values(100, 'aaa', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
+
+			System.out.println("Executing" + delete);
+			client.update(delete, parameters, hints);
 			selectPerson(client);
 			
-			String insert = "insert into Person values(100, 'aaa', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
 			System.out.println("Executing" + insert);
 			client.update(insert, parameters, hints);
 			selectPerson(client);
 			
-			String delete = "delete from Person where id = 100";
-			System.out.println("Executing" + delete);
 			client.update(delete, parameters, hints);
 			selectPerson(client);
 			
@@ -71,23 +71,39 @@ public class DirectClientDaoTest {
 	
 	public void testSP() {
 		DalClient client = DalClientFactory.getClient("dao_test");
-		StatementParameter.Builder builder = StatementParameter.newBuilder();
-		builder.setDbType(DbType.Int32)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(1).setName("").setSensitive(false).setValue(false);
-		StatementParameter instance = builder.build();
-		System.out.println(instance.build2SqlParameters().toByteArray());
-		StatementParameters parameters = new StatementParameters();
-		parameters.add(instance);
 		
 		try {
-			String insert = "insert into Person values(100, 'aaa', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
-			client.update(insert, parameters, hints);
-			client.call("call getPersonById(?)", parameters, hints);
+			int testId = 1000;
+			StatementParameters parameters = new StatementParameters();
 			
-			String delete = "delete from Person where id = 100";
+			StatementParameter param  = StatementParameter.newBuilder().setDbType(DbType.Int32).setValue(testId).setIndex(1).setName("").build();
+			parameters.add(param);
+
+			// clean up
+			String delete = "delete from Person where id = ?";
 			client.update(delete, parameters, hints);
-		} catch (SQLException e) {
+			
+			String insert = "insert into Person values(?, 'aaa', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
+			client.update(insert, parameters, hints);
+			//================
+
+			parameters = new StatementParameters();
+			param  = StatementParameter.newBuilder().setDbType(DbType.Int32).setValue(testId).setIndex(1).setName("").build();
+			parameters.add(param);
+			
+			DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
+			param = StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName("result").build();
+			parameters.add(param);
+
+			param  = StatementParameter.newBuilder().setResultsParameter(true).setName("count").build();
+			parameters.add(param);
+			
+			System.out.print(client.call("call getPersonById(?)", parameters, hints));
+			
+			// clean up
+			delete = "delete from Person where id = ?";
+			client.update(delete, parameters, hints);
+		} catch (Throwable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -134,9 +150,16 @@ public class DirectClientDaoTest {
 
 	public static void main(String[] args) {
 		Configuration.addResource("conf.properties");
+		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
+		try {
+			DalClientFactory.initDirectClientFactory(reader, "HtlProductdb", "dao_test");
+		} catch (Exception e) {
+			System.exit(0);
+		}
+		
 		DirectClientDaoTest test = new DirectClientDaoTest();
-		test.test();
-		test.test2();
+//		test.test();
+//		test.test2();
 		test.testSP();
 		System.exit(0);
 	}

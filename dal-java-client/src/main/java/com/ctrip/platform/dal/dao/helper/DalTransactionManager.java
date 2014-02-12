@@ -108,13 +108,14 @@ public class DalTransactionManager {
 		closeConnection(conn);
 	}
 	
-	public RuntimeException handleException(Throwable e) {
+	public SQLException handleException(Throwable e) {
 		try {
 			rollbackTransaction(-1);
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 		}
-		return new RuntimeException(e);
+		
+		return e instanceof SQLException ? (SQLException)e : new SQLException(e);
 	}
 	
 	private static final class ConnectionCache {

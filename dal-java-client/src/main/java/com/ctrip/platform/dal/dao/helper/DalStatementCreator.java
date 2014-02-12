@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -78,10 +79,10 @@ public class DalStatementCreator {
 		}
 	}
 	
-	private void registerOutParameters(PreparedStatement statement, StatementParameters parameters) throws Exception {
+	private void registerOutParameters(CallableStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
 			if(parameter.isOutParameter())
-				setSqlParameter(statement, parameter);
+				statement.registerOutParameter(parameter.getIndex(), DbType.getFromDbType(parameter.getDbType()));
 		}
 	}
 	

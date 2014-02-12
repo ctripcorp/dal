@@ -209,7 +209,7 @@ public class DalDirectClient implements DalClient {
 			if (retVal || updateCount != -1) {
 				returnedResults.putAll(extractReturnedResults(statement, resultParameters, updateCount, hints));
 			}
-			extractOutputParameters(statement, callParameters);
+			returnedResults.putAll(extractOutputParameters(statement, callParameters));
 			return returnedResults;
 		} catch (Throwable e) {
 			throw(handleException(e));
@@ -252,13 +252,12 @@ public class DalDirectClient implements DalClient {
 			throws SQLException {
 
 		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
-		int index = 1;
-		for (StatementParameter param : callParameters) {
-			Object value = statement.getObject(index);
+		for (StatementParameter parameter : callParameters) {
+			Object value = statement.getObject(parameter.getIndex());
 			if (value instanceof ResultSet) {
-				value = param.getResultSetExtractor().extract(statement.getResultSet());
+				value = parameter.getResultSetExtractor().extract(statement.getResultSet());
 			}
-			returnedResults.put(param.getName(), value);
+			returnedResults.put(parameter.getName(), value);
 		}
 		return returnedResults;
 	}

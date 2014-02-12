@@ -11,6 +11,7 @@ import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.enums.DbType;
+import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -91,6 +92,9 @@ public class DirectClientDaoTest {
 			param  = StatementParameter.newBuilder().setDbType(DbType.Int32).setValue(testId).setIndex(1).setName("").build();
 			parameters.add(param);
 			
+			param  = StatementParameter.newBuilder().setDbType(DbType.String).setIndex(2).setName("name").setDirection(ParameterDirection.Output).build();
+			parameters.add(param);
+
 			DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
 			param = StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName("result").build();
 			parameters.add(param);
@@ -98,16 +102,45 @@ public class DirectClientDaoTest {
 			param  = StatementParameter.newBuilder().setResultsParameter(true).setName("count").build();
 			parameters.add(param);
 			
-			System.out.print(client.call("call getPersonById(?)", parameters, hints));
+
+			System.out.println(client.call("call getPersonById(?, ?)", parameters, hints));
 			
 			// clean up
 			delete = "delete from Person where id = ?";
 			client.update(delete, parameters, hints);
-		} catch (Throwable e) {
+		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public void testSPInOut() {
+		DalClient client = DalClientFactory.getClient("dao_test");
+		
+		try {
+			int testId = 100;
+			StatementParameters parameters = new StatementParameters();
+			
+			StatementParameter param  = StatementParameter.newBuilder().setDbType(DbType.String).setIndex(1).setName("version").setDirection(ParameterDirection.Output).build();
+			parameters.add(param);
+
+			param  = StatementParameter.newBuilder().setDbType(DbType.Int32).setValue(testId).setIndex(2).setName("increment").setDirection(ParameterDirection.InputOutput).build();
+			parameters.add(param);
+
+			DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
+			param = StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName("result").build();
+			parameters.add(param);
+
+			param  = StatementParameter.newBuilder().setResultsParameter(true).setName("count").build();
+			parameters.add(param);
+
+			System.out.println(client.call("call inOutTest(?, ?)", parameters, hints));
+			
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void selectPerson(DalClient client) throws SQLException {
@@ -160,7 +193,8 @@ public class DirectClientDaoTest {
 		DirectClientDaoTest test = new DirectClientDaoTest();
 //		test.test();
 //		test.test2();
-		test.testSP();
+//		test.testSP();
+		test.testSPInOut();
 		System.exit(0);
 	}
 }

@@ -13,6 +13,7 @@ import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
@@ -36,6 +37,15 @@ public class DalStatementCreator {
 		return statement;
 	}
 	
+	public PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters parameters, DalHints hints, KeyHolder keyHolder) throws Exception {
+		PreparedStatement statement = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+		
+		applyHints(statement, hints);
+		setParameter(statement, parameters);
+		
+		return statement;
+	}
+	
 	public PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters[] parametersList, DalHints hints) throws Exception {
 		PreparedStatement statement = conn.prepareStatement(sql,
 					ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -50,17 +60,6 @@ public class DalStatementCreator {
 	}
 	
 	public CallableStatement createCallableStatement(Connection conn,  String sql, StatementParameters parameters, DalHints hints) throws Exception {
-		StringBuffer occupy = new StringBuffer();
-
-//		for (int i = 0; i < parameters.size(); i++) {
-//			occupy.append("?").append(",");
-//		}
-//
-//		if (parameters.size() > 0) {
-//			occupy.deleteCharAt(occupy.length() - 1);
-//		}
-		
-//		CallableStatement statement = conn.prepareCall(String.format("{call %s(%s)}", parameters, occupy.toString()));
 		CallableStatement statement = conn.prepareCall(sql);
 		
 		applyHints(statement, hints);

@@ -17,6 +17,7 @@ import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
+import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
@@ -69,6 +70,32 @@ public class DirectClientDaoTest {
 			e.printStackTrace();
 		}
 	}
+	
+	public void testAutoIncrement() {
+		try {
+			DalClient client = DalClientFactory.getClient("dao_test");
+
+			String delete = "delete from Person where id = ?";
+			String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
+
+			System.out.println("Executing" + insert);
+			KeyHolder kh = new KeyHolder();
+			client.update(insert, parameters, hints, kh);
+			
+			long id = kh.getKey().longValue();
+			
+			StatementParameters parameters = new StatementParameters();
+			StatementParameter param  = StatementParameter.newBuilder().setDbType(DbType.Int32).setValue(id).setIndex(1).setName("").build();
+			parameters.add(param);
+
+			client.update(delete, parameters, hints);
+			selectPerson(client);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	
 	public void testSP() {
 		DalClient client = DalClientFactory.getClient("dao_test");
@@ -191,10 +218,12 @@ public class DirectClientDaoTest {
 		}
 		
 		DirectClientDaoTest test = new DirectClientDaoTest();
+		
 //		test.test();
 //		test.test2();
+		test.testAutoIncrement();
 //		test.testSP();
-		test.testSPInOut();
+//		test.testSPInOut();
 		System.exit(0);
 	}
 }

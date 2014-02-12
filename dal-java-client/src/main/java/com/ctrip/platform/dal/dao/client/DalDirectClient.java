@@ -93,7 +93,7 @@ public class DalDirectClient implements DalClient {
 		try {
 			conn = getConnection(hints, UPDATE);
 			
-			statement = createPreparedStatement(conn, sql, parameters, hints);
+			statement = createPreparedStatement(conn, sql, parameters, hints, generatedKeyHolder);
 			int rows = statement.executeUpdate();
 			
 			List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
@@ -268,6 +268,10 @@ public class DalDirectClient implements DalClient {
 
 	private PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters parameters, DalHints hints) throws Exception {
 		return stmtCreator.createPreparedStatement(conn, sql, parameters, hints);
+	}
+	
+	public PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters parameters, DalHints hints, KeyHolder keyHolder) throws Exception {
+		return stmtCreator.createPreparedStatement(conn, sql, parameters, hints, keyHolder);
 	}
 	
 	private PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters[] parametersList, DalHints hints) throws Exception {

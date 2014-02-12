@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import com.ctrip.platform.dal.common.cfg.DasConfigureService;
@@ -15,6 +17,7 @@ import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.KeyHolder;
@@ -217,6 +220,49 @@ public class DirectClientDaoTest {
 		}
 	}
 	
+	public void testCommand() {
+		try {
+			DalClient client = DalClientFactory.getClient("dao_test");
+			List<DalCommand> cmds = new LinkedList<DalCommand>();
+			cmds.add(new DalCommand() {
+				@Override
+				public boolean execute(DalClient client) throws SQLException {
+					String delete = "delete from Person where id > 2000";
+					String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
+					String update = "update Person set name='abcde' where id > 2000";
+					String[] sqls = new String[]{insert, insert, insert, update};
+
+					System.out.println(client.batchUpdate(sqls, hints));
+
+					client.update(delete, parameters, hints);
+					selectPerson(client);
+					return true;
+				}
+			});
+			
+			cmds.add(new DalCommand() {
+				@Override
+				public boolean execute(DalClient client) throws SQLException {
+					selectPerson(client);
+					return false;
+				}
+			});
+
+			cmds.add(new DalCommand() {
+				@Override
+				public boolean execute(DalClient client) throws SQLException {
+					selectPerson(client);
+					return true;
+				}
+			});
+
+			client.execute(cmds, hints);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	private void selectPerson(DalClient client) throws SQLException {
 		client.query(sql2, parameters, hints, new DalResultSetExtractor<Object>() {
 			private boolean headerDisplayed;
@@ -269,8 +315,9 @@ public class DirectClientDaoTest {
 //		test.test();
 //		test.test2();
 //		test.testAutoIncrement();
-		test.testBatch();
-		test.testBatch2();
+//		test.testBatch();
+//		test.testBatch2();
+		test.testCommand();
 //		test.testSP();
 //		test.testSPInOut();
 		System.exit(0);

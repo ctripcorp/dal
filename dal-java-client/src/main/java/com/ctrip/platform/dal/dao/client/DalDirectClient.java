@@ -179,8 +179,10 @@ public class DalDirectClient implements DalClient {
 		try {
 			level = startTransaction(hints);
 			
-			for(DalCommand cmd: commands)
-				cmd.execute(this);
+			for(DalCommand cmd: commands) {
+				if(!cmd.execute(this))
+					break;
+			}
 			
 			endTransaction(level);
 		} catch (Throwable e) {

@@ -85,34 +85,51 @@ public class JavaGenerator extends AbstractGenerator {
 			List<FieldMeta> fieldsMeta = getMetaData(
 					serverDbMap.getServer_id(), context.get("database")
 							.toString(), table);
+			
+			boolean hasIdentity = false;
+			String identityColumn = null;
+			for(FieldMeta meta : fieldsMeta){
+				if(!hasIdentity && meta.isIdentity()){
+					hasIdentity = true;
+					identityColumn = meta.getName();
+				}
+				meta.setType(Consts.JavaSqlTypeMap.get(meta.getDbType().toLowerCase()));
+			}
+		
+			context.put("fields", fieldsMeta);
+			context.put("hasIdentity", hasIdentity);
+			context.put("identityColumn", identityColumn);
+			context.put("WordUtils", WordUtils.class);
 
-			putMethods2Velocity(context, fieldsMeta, groupedTasks);
+			//putMethods2Velocity(context, fieldsMeta, groupedTasks);
 
 			FileWriter daoWriter = null;
-			FileWriter pomWriter = null;
 			FileWriter pojoWriter = null;
 			try {
-				File mavenLikeDir = new File(String.format("gen/%s/src/main/java/%s",
-						projectId, namespace.replace(".", "/")));
+				File mavenLikeDir = new File(String.format("gen/%s/java",
+						projectId));
 				FileUtils.forceMkdir(mavenLikeDir);
 
 				daoWriter = new FileWriter(
+						String.format("%s/Dal%sParser.java",
+								mavenLikeDir.getAbsolutePath(),
+								context.get("table_name")));
+				
+				pojoWriter = new FileWriter(
 						String.format("%s/%s.java",
 								mavenLikeDir.getAbsolutePath(),
-								context.get("dao_name")));
-				pomWriter = new FileWriter(String.format("gen/%s/pom.xml",
-						projectId));
+								context.get("table_name")));
 				
-				Velocity.mergeTemplate("templates/DAO.java.tpl", "UTF-8", context,
+				Velocity.mergeTemplate("templates/Parser.java.tpl", "UTF-8", context,
 						daoWriter);
-				Velocity.mergeTemplate("templates/pom.xml.tpl", "UTF-8", context,
-						pomWriter);
+				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8", context,
+						pojoWriter);
+				
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
 				JavaIOUtils.closeWriter(daoWriter);
 				JavaIOUtils.closeWriter(pojoWriter);
-				JavaIOUtils.closeWriter(pomWriter);
 			}
 		}
 	}
@@ -144,6 +161,8 @@ public class JavaGenerator extends AbstractGenerator {
 			m.setAction(groupedTask.getCrud_type().toLowerCase());
 			m.setMethodName(groupedTask.getMethod_name());
 			m.setSqlSPName(groupedTask.getSql_content());
+			
+			
 
 			// 查询，或者SQL形式的删除
 			if (m.getAction().equalsIgnoreCase("select")
@@ -358,7 +377,7 @@ public class JavaGenerator extends AbstractGenerator {
 			p.setFieldName(field);
 			for (FieldMeta meta : fieldsMeta) {
 				if (meta.getName().equalsIgnoreCase(field)) {
-					p.setType(Consts.JavaSqlTypeMap.get(meta.getType()));
+					p.setType(meta.getType());
 					p.setPosition(meta.getPosition());
 					break;
 				}
@@ -391,7 +410,7 @@ public class JavaGenerator extends AbstractGenerator {
 			p.setFieldName(p.getName());
 			for (FieldMeta meta : fieldsMeta) {
 				if (meta.getName().equalsIgnoreCase(p.getName())) {
-					p.setType(Consts.JavaSqlTypeMap.get(meta.getType()));
+					p.setType(meta.getType());
 					p.setPosition(meta.getPosition());
 					break;
 				}

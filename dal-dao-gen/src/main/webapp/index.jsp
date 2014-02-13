@@ -416,6 +416,7 @@
       <script src="/static/js/sprintf.js"></script>
       <script src="/static/js/cblock.js"></script>
       <script src="/static/ace/ace.js"></script>
+      <script src="/static/js/wizzard.js"></script>
       <script src="/static/js/index.js"></script>
    </body>
 </html>

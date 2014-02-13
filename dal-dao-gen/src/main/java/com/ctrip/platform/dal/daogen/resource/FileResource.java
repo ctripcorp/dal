@@ -30,7 +30,7 @@ public class FileResource {
 	public List<Project> getFiles(@QueryParam("id") String id) {
 		List<Project> files = new ArrayList<Project>();
 
-		File currentProjectDir = new File(id);
+		File currentProjectDir = new File("gen", id);
 		if (currentProjectDir.exists()) {
 			for (File f : FileUtils.listFiles(currentProjectDir, new String[] {
 					"cs", "java" }, true)) {
@@ -50,7 +50,7 @@ public class FileResource {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getFileContent(@QueryParam("id") String id,
 			@QueryParam("name") String name) {
-		File f = new File(id, name);
+		File f = new File(new File("gen", id), name);
 		StringBuilder sb = new StringBuilder();
 		if (f.exists()) {
 			BufferedReader reader = null;

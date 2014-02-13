@@ -4,14 +4,36 @@ public class FieldMeta {
 	
 	private String name;
 	
+	//指Java或者CSharp的数据类型
 	private String type;
 	
+	//指对应的数据库类型，如varchar
+	private String dbType;
+	
+	public String getDbType() {
+		return dbType;
+	}
+
+	public void setDbType(String dbType) {
+		this.dbType = dbType;
+	}
+
 	private int position;
 	
 	private boolean nullable;
 	
 	private boolean primary;
 	
+	private boolean identity;
+	
+	public boolean isIdentity() {
+		return identity;
+	}
+
+	public void setIdentity(boolean identity) {
+		this.identity = identity;
+	}
+
 	private boolean valueType;
 	
 	private boolean indexed;

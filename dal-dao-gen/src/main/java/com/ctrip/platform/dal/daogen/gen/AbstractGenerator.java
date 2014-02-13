@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.velocity.app.Velocity;
 import org.springframework.jdbc.support.JdbcUtils;
 
+import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.dao.AutoTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
 import com.ctrip.platform.dal.daogen.dao.ProjectDAO;
@@ -143,12 +144,14 @@ public abstract class AbstractGenerator implements Generator {
 					FieldMeta meta = new FieldMeta();
 
 					String columnName = allColumnsRs.getString("COLUMN_NAME");
+					//获取出来的数据类型是varchar这一类的
 					String columnType = allColumnsRs.getString("TYPE_NAME");
 					int position = allColumnsRs.getInt("ORDINAL_POSITION");
-					// String nullable = allColumnsRs.getString(4);
-
+					String isIdentity = allColumnsRs.getString("IS_AUTOINCREMENT");
+					
+					meta.setIdentity(isIdentity.equalsIgnoreCase("yes"));
 					meta.setName(columnName);
-					meta.setType(columnType);
+					meta.setDbType(columnType);
 					meta.setPosition(position);
 					meta.setPrimary(primaryKeys.contains(columnName));
 					// meta.setNullable(nullable.equalsIgnoreCase("yes")

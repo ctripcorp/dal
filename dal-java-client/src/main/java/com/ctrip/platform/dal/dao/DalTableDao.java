@@ -10,10 +10,13 @@ import java.util.List;
  */
 public final class DalTableDao<T> {
 	public static final String TMPL_SQL_FIND_BY_PK = "SELECT %s FROM %s WHERE %s";
-	public static final String TMPL_SQL_INSERT = "INSERT INTO %s WHERE %s";
+	public static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
 	public static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
-	public static final String TMPL_SQL_UPDATE = "UPDATE TABLE %s WHERE %s";
-
+	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
+	
+	private static final String COLUMN_SEPARATOR = ", ";
+	private static final String PLACE_HOLDER = "?";
+	
 	private DalClient client;
 	private DalQueryDao queryDao;
 	private DalParser<T> parser;
@@ -68,7 +71,7 @@ public final class DalTableDao<T> {
 	 * @param pojo
 	 */
 	public void insert(T...daoPojos) throws SQLException {
-		
+		// Assumption: all pojo will try to insert all columns, even the auto gen and nullable column
 	}
 
 	public void delete(T...daoPojos) throws SQLException {
@@ -95,8 +98,59 @@ public final class DalTableDao<T> {
 	
 	private void initSql() {
 		SQL_FIND_BY_PK = "";
-		SQL_INSERT = "";
-		SQL_DELETE = "";
-		SQL_UPDATE = "";
+		SQL_INSERT = initInsertSql();
+		SQL_DELETE = initDeleteSql();
+		SQL_UPDATE = initUpdateSql();
+	}
+	
+	private String initInsertSql() {
+		StringBuilder cloumnsSb = new StringBuilder();
+		StringBuilder valuesSb = new StringBuilder();
+		
+		int i = 0;
+		for(String column: parser.getColumnNames()) {
+			cloumnsSb.append(column);
+			valuesSb.append(PLACE_HOLDER);
+			if(++i < parser.getColumnNames().length){
+				cloumnsSb.append(COLUMN_SEPARATOR);
+				valuesSb.append(COLUMN_SEPARATOR);
+			}
+		}
+		
+		return String.format(TMPL_SQL_INSERT, parser.getTableName(), cloumnsSb.toString(), valuesSb.toString());
+	}
+	
+	private String initDeleteSql() {
+		StringBuilder cloumnsSb = new StringBuilder();
+		StringBuilder valuesSb = new StringBuilder();
+		
+		int i = 0;
+		for(String column: parser.getColumnNames()) {
+			cloumnsSb.append(column);
+			valuesSb.append(PLACE_HOLDER);
+			if(++i < parser.getColumnNames().length){
+				cloumnsSb.append(COLUMN_SEPARATOR);
+				valuesSb.append(COLUMN_SEPARATOR);
+			}
+		}
+		
+		return String.format(TMPL_SQL_DELETE, parser.getTableName(), cloumnsSb.toString(), valuesSb.toString());
+	}
+
+	private String initUpdateSql() {
+		StringBuilder cloumnsSb = new StringBuilder();
+		StringBuilder valuesSb = new StringBuilder();
+		
+		int i = 0;
+		for(String column: parser.getColumnNames()) {
+			cloumnsSb.append(column);
+			valuesSb.append(PLACE_HOLDER);
+			if(++i < parser.getColumnNames().length){
+				cloumnsSb.append(COLUMN_SEPARATOR);
+				valuesSb.append(COLUMN_SEPARATOR);
+			}
+		}
+		
+		return String.format(TMPL_SQL_DELETE, parser.getTableName(), cloumnsSb.toString(), valuesSb.toString());
 	}
 }

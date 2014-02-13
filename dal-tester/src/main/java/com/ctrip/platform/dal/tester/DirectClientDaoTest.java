@@ -282,12 +282,41 @@ public class DirectClientDaoTest {
 	public void testTransactionException() {
 		try {
 			DalClient client = DalClientFactory.getClient("dao_test");
+			List<DalCommand> cmds = new LinkedList<DalCommand>();
 
-			String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
-			String update = "update xPerson set name='abcde' where id > 2000";
-			String[] sqls = new String[]{insert, insert, insert, update};
+			cmds.add(new DalCommand() {
+				@Override
+				public boolean execute(DalClient client) throws SQLException {
+					selectPerson(client);
 
-			System.out.println(client.batchUpdate(sqls, hints));
+					String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
+					String update = "update Person set name='abcde' where id > 2000";
+					String[] sqls = new String[]{insert, insert, insert, update};
+
+					System.out.println(client.batchUpdate(sqls, hints));
+					List<DalCommand> cmds = new LinkedList<DalCommand>();
+					cmds.add(new DalCommand() {
+						@Override
+						public boolean execute(DalClient client) throws SQLException {
+							String delete = "delete from xPerson where id > 2000";
+							String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
+							String update = "update Person set name='abcde' where id > 2000";
+							String[] sqls = new String[]{insert, insert, insert, update};
+
+							System.out.println(client.batchUpdate(sqls, hints));
+
+							client.update(delete, parameters, hints);
+							selectPerson(client);
+							return true;
+						}
+					});
+
+					client.execute(cmds, hints);
+					return true;
+				}
+			});
+
+			client.execute(cmds, hints);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -351,7 +380,7 @@ public class DirectClientDaoTest {
 //		test.testSP();
 //		test.testSPInOut();
 		// TODO check negative case, exception and transaction rollback
-		test.testConnectionException();
+//		test.testConnectionException();
 		test.testTransactionException();
 		System.exit(0);
 	}

@@ -49,6 +49,7 @@ public class DalTransactionManager {
 		ConnectionCache connCache = connectionCacheHolder.get();
 		
 		if(connCache == null) {
+			// Already handled in deeper level
 //			throw new SQLException("calling endTransaction with empty ConnectionCache");
 			return;
 		}

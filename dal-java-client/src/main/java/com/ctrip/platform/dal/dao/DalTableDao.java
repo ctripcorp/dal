@@ -1,7 +1,13 @@
 package com.ctrip.platform.dal.dao;
 
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -16,6 +22,9 @@ public final class DalTableDao<T> {
 	
 	private static final String COLUMN_SEPARATOR = ", ";
 	private static final String PLACE_HOLDER = "?";
+	private static final String TMPL_SET_VALUE = "%s=?";
+	private static final String AND = "AND";
+	private static final String OR = "OR";
 	
 	private DalClient client;
 	private DalQueryDao queryDao;
@@ -66,30 +75,82 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * TODO Support auto incremental id.
+	 * TODO Support auto incremental id. 
+	 * TODO add hints to set batch or non batch
 	 * The generated id if any will be set into the pojos
 	 * @param pojo
 	 */
-	public void insert(T...daoPojos) throws SQLException {
-		// Assumption: all pojo will try to insert all columns, even the auto gen and nullable column
+	public void insert(DalHints hints, T...daoPojos) throws SQLException {
+		// Try to insert one by one
+		insert(hints, null, daoPojos);
 	}
 
-	public void delete(T...daoPojos) throws SQLException {
+	public void insert(DalHints hints, KeyHolder keyHolder, T...daoPojos) throws SQLException {
+		if(hints.isUsingBatch()){
+			// TODO should revise for batch
+		}
 		
+		// Try to insert one by one
+		for(T pojo: daoPojos) {
+			Map<String, ?> fields = parser.getFields(pojo);
+			String insertSql = buildInsertSql(fields.keySet());
+
+			StatementParameters parameters = new StatementParameters();
+			addParameters(parameters, fields);
+			
+			if(keyHolder == null)
+				client.update(insertSql, parameters, hints);
+			else
+				client.update(insertSql, parameters, hints, keyHolder);
+		}
 	}
 	
-	public void update(T...daoPojos) throws SQLException {
-		
+	public void delete(DalHints hints, T...daoPojos) throws SQLException {
+		for(T pojo: daoPojos) {
+			String deleteSql = buildDeleteSql(pojo);
+
+			StatementParameters parameters = new StatementParameters();
+			addParameters(parameters, parser.getPk(pojo));
+			
+			client.update(deleteSql, parameters, hints);
+		}
+	}
+	
+	public void update(DalHints hints, T...daoPojos) throws SQLException {
+		for(T pojo: daoPojos) {
+			Map<String, ?> fields = parser.getFields(pojo);
+			Map<String, ?> pk = parser.getPk(pojo);
+			
+			String updateSql = buildUpdateSql(fields);
+			if(parser.hasIdentityColumn()) {
+				fields.remove(parser.getIdentityColumnName());
+			} else {
+				for(String key: pk.keySet())
+					fields.remove(key);
+			}
+
+			StatementParameters parameters = new StatementParameters();
+			addParameters(parameters, fields);
+			addParameters(parameters, pk);
+			
+			client.update(updateSql, parameters, hints);
+		}
 	}
 	
 	public void delete(String whereClause, StatementParameters parameters, DalHints hints) throws SQLException {
-		
+		client.update(String.format(TMPL_SQL_DELETE, parser.getTableName(), whereClause), parameters, hints);
 	}
 	
 	public void update(String sql, StatementParameters parameters, DalHints hints) throws SQLException {
-		
+		client.update(sql, parameters, hints);
 	}
-
+	
+	private void addParameters(StatementParameters parameters, Map<String, ?> entries) {
+		int index = parameters.size() + 1;
+		for(Map.Entry<String, ?> entry: entries.entrySet()) {
+			parameters.add(StatementParameter.Builder.create().setIndex(index).setName(entry.getKey()).setValue(entry.getValue()).build());
+		}
+	}
 	
 	private String SQL_FIND_BY_PK;
 	private String SQL_INSERT;
@@ -97,60 +158,72 @@ public final class DalTableDao<T> {
 	private String SQL_UPDATE;
 	
 	private void initSql() {
-		SQL_FIND_BY_PK = "";
-		SQL_INSERT = initInsertSql();
-		SQL_DELETE = initDeleteSql();
-		SQL_UPDATE = initUpdateSql();
+//		SQL_FIND_BY_PK = "";
+//		SQL_INSERT = initInsertSql();
+//		SQL_DELETE = initDeleteSql();
+//		SQL_UPDATE = initUpdateSql();
 	}
 	
-	private String initInsertSql() {
-		StringBuilder cloumnsSb = new StringBuilder();
-		StringBuilder valuesSb = new StringBuilder();
+	private String buildInsertSql(Collection<String> columns) {
+		String cloumns = combine(columns, COLUMN_SEPARATOR);
+		String values = combine(PLACE_HOLDER, columns.size(), COLUMN_SEPARATOR);
 		
-		int i = 0;
-		for(String column: parser.getColumnNames()) {
-			cloumnsSb.append(column);
-			valuesSb.append(PLACE_HOLDER);
-			if(++i < parser.getColumnNames().length){
-				cloumnsSb.append(COLUMN_SEPARATOR);
-				valuesSb.append(COLUMN_SEPARATOR);
-			}
-		}
-		
-		return String.format(TMPL_SQL_INSERT, parser.getTableName(), cloumnsSb.toString(), valuesSb.toString());
+		return String.format(TMPL_SQL_INSERT, parser.getTableName(), cloumns, values);
 	}
 	
-	private String initDeleteSql() {
-		StringBuilder cloumnsSb = new StringBuilder();
-		StringBuilder valuesSb = new StringBuilder();
-		
-		int i = 0;
-		for(String column: parser.getColumnNames()) {
-			cloumnsSb.append(column);
-			valuesSb.append(PLACE_HOLDER);
-			if(++i < parser.getColumnNames().length){
-				cloumnsSb.append(COLUMN_SEPARATOR);
-				valuesSb.append(COLUMN_SEPARATOR);
-			}
-		}
-		
-		return String.format(TMPL_SQL_DELETE, parser.getTableName(), cloumnsSb.toString(), valuesSb.toString());
+	private String buildDeleteSql(T pojo) {
+		return String.format(TMPL_SQL_DELETE, parser.getTableName(), buildPkSql());
 	}
 
-	private String initUpdateSql() {
-		StringBuilder cloumnsSb = new StringBuilder();
-		StringBuilder valuesSb = new StringBuilder();
+	private String buildUpdateSql(Map<String, ?> fields) {
+		// Build SET
+		List<String> nonNullColumns = new LinkedList<String>();
+		Set<String> pkSet = new HashSet<String>();
+		Collections.addAll(pkSet, parser.getPrimaryKeyNames());
 		
-		int i = 0;
 		for(String column: parser.getColumnNames()) {
-			cloumnsSb.append(column);
-			valuesSb.append(PLACE_HOLDER);
-			if(++i < parser.getColumnNames().length){
-				cloumnsSb.append(COLUMN_SEPARATOR);
-				valuesSb.append(COLUMN_SEPARATOR);
-			}
+			// For null value, we just keep it the same
+			if(fields.get(column) == null || pkSet.contains(column))
+				continue;
+			nonNullColumns.add(column);
 		}
 		
-		return String.format(TMPL_SQL_DELETE, parser.getTableName(), cloumnsSb.toString(), valuesSb.toString());
+		String columns = String.format(combine(TMPL_SET_VALUE, nonNullColumns.size(), COLUMN_SEPARATOR), nonNullColumns);
+		
+		return String.format(TMPL_SQL_UPDATE, parser.getTableName(), columns, buildPkSql());
+	}
+	
+	private String pkSql;
+	private String buildPkSql() {
+		if(pkSql != null)
+			return pkSql;
+		
+		if(parser.hasIdentityColumn())
+			return pkSql = String.format(TMPL_SET_VALUE, parser.getIdentityColumnName());
+		
+		// For complex keys
+		return pkSql = String.format(combine(TMPL_SET_VALUE, parser.getPrimaryKeyNames().length, AND), (Object[])parser.getPrimaryKeyNames());
+	}
+	
+	private String combine(String[] values, String separator) {
+		StringBuilder valuesSb = new StringBuilder();
+		int i = 0;
+		for(String value: values) {
+			valuesSb.append(value);
+			if(++i < parser.getColumnNames().length)
+				valuesSb.append(separator);
+		}
+		return valuesSb.toString();
+	}
+	
+	private String combine(Collection<String> values, String separator) {
+		return combine(values.toArray(new String[values.size()]), separator);
+	}
+
+	private String combine(String value, int count, String separator) {
+		String[] values = new String[count];
+		for(int i = 0; i < count; i++)
+			values[i] = value;
+		return combine(values, separator);
 	}
 }

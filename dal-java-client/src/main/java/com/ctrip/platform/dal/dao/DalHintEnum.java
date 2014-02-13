@@ -35,6 +35,12 @@ public enum DalHintEnum {
 	/* for logging */
 	callingUrl,
 	
+	/* For insert, delete, update multiple pojos */ 
+	usingBatch,
+	
+	/* For insert, delete, update multiple pojos */ 
+	stopOnError,
+	
 	/* Allow customization */
 	userDefined,
 }

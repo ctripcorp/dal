@@ -53,4 +53,24 @@ public class DalHints {
 		
 		return this;
 	}
+	
+	public DalHints usingBatch() {
+		
+		return this;
+	}
+	
+	public boolean isUsingBatch() {
+		return hints.containsKey(DalHintEnum.usingBatch);
+	}
+	
+	
+	public DalHints stopOnError() {
+		
+		return this;
+	}
+	
+	public boolean isStoponError() {
+		return hints.containsKey(DalHintEnum.stopOnError);
+	}
+	
 }

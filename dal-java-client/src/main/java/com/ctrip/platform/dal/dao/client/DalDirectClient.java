@@ -97,7 +97,6 @@ public class DalDirectClient implements DalClient {
 			int rows = statement.executeUpdate();
 			
 			List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-			generatedKeys.clear();
 			keys = statement.getGeneratedKeys();
 			if (keys == null)
 				return rows;

@@ -1,17 +1,34 @@
 package com.ctrip.platform.dal.tester.person;
 
+import java.io.File;
+
+import com.ctrip.platform.dal.common.cfg.DasConfigureService;
+import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
+import com.ctrip.platform.dal.common.db.DasConfigureReader;
+import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalTableDao;
 
 public class PersonTest {
 	public static void main(String[] args) {
+		Configuration.addResource("conf.properties");
+		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
 		try {
-			DalClientFactory.initDirectClientFactory(null, "htlpr", "sss", "abc");
+			DalClientFactory.initDirectClientFactory(reader, "HtlProductdb", "dao_test");
+		} catch (Exception e) {
+			System.exit(0);
+		}
+
+		try {
+			DalHints hints = new DalHints();
 			
-			DalTableDao<Person> dao = new DalTableDao<Person>(new DalPersonParser());
-			
-			dao.insert(null);
-			dao.query(null, null, null);
+			DalTableDao<Person> dao = new DalTableDao<Person>(new DalPersonParser1());
+			Person p = new Person();
+			p.setAddress("Address");
+			p.setName("Name");
+			dao.insert(hints, p, p, p);
+//			dao.query(null, null, null);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

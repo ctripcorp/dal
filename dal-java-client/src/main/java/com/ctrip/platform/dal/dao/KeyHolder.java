@@ -7,24 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class KeyHolder {
-	private final List<Map<String, Object>> keyList;
-
-
-	/**
-	 * Create a new GeneratedKeyHolder with a default list.
-	 */
-	public KeyHolder() {
-		this.keyList = new LinkedList<Map<String, Object>>();
-	}
-
-	/**
-	 * Create a new GeneratedKeyHolder with a given list.
-	 * @param keyList a list to hold maps of keys
-	 */
-	public KeyHolder(List<Map<String, Object>> keyList) {
-		this.keyList = keyList;
-	}
-
+	private final List<Map<String, Object>> keyList = new LinkedList<Map<String, Object>>();;
 
 	public Number getKey() throws SQLException {
 		if (this.keyList.size() == 0) {

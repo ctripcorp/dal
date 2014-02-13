@@ -7,25 +7,23 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalParser;
 
-public class DalPersonParser implements DalParser<Person> {
-	public static final String DATABASE_NAME = "person";
-	public static final String TABLE_NAME = "person";
-	public static final String COLUMN_ID = "id";
-	public static final String COLUMN_NAME = "name";
-	public static final String COLUMN_GENDER = "gender";
-	private static final String[] COLUMNS = new String[]{
-		COLUMN_ID,
-		COLUMN_NAME,
-		COLUMN_GENDER,
-	};
-	
-	private static final String IDENTITY_COLUMN_NAME = "id";
-	
+public class DalPersonParser1 implements DalParser<Person> {
+	public static final String DATABASE_NAME = "dao_test";
+	public static final String TABLE_NAME = "Person";
+	private static final String[] COLUMNS = new String[] { "ID", "Address",
+			"Telephone", "Name", "Age", "Gender", "Birth" };
+
 	@Override
 	public Person map(ResultSet rs, int rowNum) throws SQLException {
-		Person person = new Person();
-		// person.setId(rs.getInt());
-		return person;
+		Person vo = new Person();
+		vo.setID(rs.getInt("ID"));
+		vo.setAddress(rs.getString("Address"));
+		vo.setTelephone(rs.getString("Telephone"));
+		vo.setName(rs.getString("Name"));
+		vo.setAge(rs.getInt("Age"));
+		vo.setGender(rs.getInt("Gender"));
+		vo.setBirth(rs.getTimestamp("Birth"));
+		return vo;
 	}
 
 	@Override
@@ -46,29 +44,35 @@ public class DalPersonParser implements DalParser<Person> {
 	@Override
 	public Map<String, ?> getFields(Person pojo) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		// map.put(COLUMN_ID, pojo.getId());
+		map.put("ID", pojo.getID());
+		map.put("Address", pojo.getAddress());
+		map.put("Telephone", pojo.getTelephone());
+		map.put("Name", pojo.getName());
+		map.put("Age", pojo.getAge());
+		map.put("Gender", pojo.getGender());
+		map.put("Birth", pojo.getBirth());
 		return map;
 	}
 
 	@Override
 	public boolean hasIdentityColumn() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public String getIdentityColumnName() {
-		return IDENTITY_COLUMN_NAME;
+		return "ID";
 	}
 
 	@Override
 	public Number getIdentityValue(Person pojo) {
-		return 1; //pojo.getId();
+		return pojo.getID();
 	}
 
 	@Override
 	public Map<String, ?> getPk(Person pojo) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		// map.put(COLUMN_ID, pojo.getId());
+		map.put("ID", pojo.getID());
 		return map;
 	}
 

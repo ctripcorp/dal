@@ -60,6 +60,12 @@ public class StatementParameter {
 		return currentBuilder.resultSetExtractor_;
 	}
 	
+	public boolean isOutParameter() {
+		if(currentBuilder.resultsParameter_ || currentBuilder.direction_ == null)
+			return false;
+		return 	currentBuilder.direction_ == ParameterDirection.Output || currentBuilder.direction_ == ParameterDirection.InputOutput;
+	}
+	
 	public static final class Builder {
 
 		private Builder() {
@@ -85,7 +91,7 @@ public class StatementParameter {
 		private Object value_;
 		
 		private boolean resultsParameter_;
-		private DalResultSetExtractor resultSetExtractor_;
+		private DalResultSetExtractor<?> resultSetExtractor_;
 
 		public Builder setDbType(DbType dbType) {
 			dbType_ = dbType;
@@ -119,6 +125,16 @@ public class StatementParameter {
 
 		public Builder setValue(Object value) {
 			value_ = value;
+			return this;
+		}
+		
+		public Builder setResultsParameter(boolean resultsParameter) {
+			resultsParameter_ = resultsParameter;
+			return this;
+		}
+
+		public Builder setResultSetExtractor(DalResultSetExtractor<?> resultSetExtractor) {
+			resultSetExtractor_ = resultSetExtractor;
 			return this;
 		}
 

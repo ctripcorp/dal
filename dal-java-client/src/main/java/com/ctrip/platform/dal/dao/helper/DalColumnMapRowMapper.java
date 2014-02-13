@@ -10,7 +10,10 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
 
 public class DalColumnMapRowMapper implements DalRowMapper<Map<String, Object>> {
 	private String[] columns;
-	public DalColumnMapRowMapper(ResultSet rs) throws SQLException {
+	
+	private void initColumns(ResultSet rs) throws SQLException {
+		if(columns != null)
+			return;
 		ResultSetMetaData rsmd = rs.getMetaData();
 		
 		columns = new String[rsmd.getColumnCount()];
@@ -19,6 +22,7 @@ public class DalColumnMapRowMapper implements DalRowMapper<Map<String, Object>> 
 	}
 
 	public Map<String, Object> map(ResultSet rs, int rowNum) throws SQLException {
+		initColumns(rs);
 		Map<String, Object> mapOfColValues = new LinkedHashMap<String, Object>(columns.length);
 		for (int i = 0; i < columns.length; i++) {
 			Object obj = rs.getObject(i + 1);

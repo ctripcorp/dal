@@ -93,7 +93,7 @@ public class DalDirectClient implements DalClient {
 		try {
 			conn = getConnection(hints, UPDATE);
 			
-			statement = createPreparedStatement(conn, sql, parameters, hints);
+			statement = createPreparedStatement(conn, sql, parameters, hints, generatedKeyHolder);
 			int rows = statement.executeUpdate();
 			
 			List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
@@ -103,7 +103,7 @@ public class DalDirectClient implements DalClient {
 				return rows;
 			
 			DalRowMapperExtractor<Map<String, Object>> rse =
-					new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper(keys), 1);
+					new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper(), 1);
 			generatedKeys.addAll(rse.extract(keys));
 
 //			if (logger.isDebugEnabled()) {
@@ -119,21 +119,26 @@ public class DalDirectClient implements DalClient {
 		}
 	}
 
+	// TODO wrap into command
 	@Override
 	public int[] batchUpdate(String[] sqls, DalHints hints) throws SQLException {
 		Connection conn = null;
 		Statement statement = null;
-		
+		int level = 0;
 		try {
-			conn = getConnection(hints, UPDATE);
+			level = startTransaction(hints);
 			
+			conn = getConnection(hints, UPDATE);
 			statement = createStatement(conn, hints);
 			for(String sql: sqls)
 				statement.addBatch(sql);
 			
-			return statement.executeBatch();
+			int[] rows = statement.executeBatch();
+			endTransaction(level);
+			
+			return rows;
 		} catch (Throwable e) {
-			throw(handleException(e));
+			throw(handleException(e, level));
 		} finally {
 			cleanup(statement, conn);
 			statement = null;
@@ -146,15 +151,20 @@ public class DalDirectClient implements DalClient {
 			DalHints hints) throws SQLException {
 		Connection conn = null;
 		PreparedStatement statement = null;
-		
+		int level = 0;
 		try {
+			level = startTransaction(hints);
+			
 			conn = getConnection(hints, UPDATE);
 			
 			statement = createPreparedStatement(conn, sql, parametersList, hints);
 			
-			return statement.executeBatch();
+			int[] rows = statement.executeBatch();
+			endTransaction(level);
+			
+			return rows;
 		} catch (Throwable e) {
-			throw(handleException(e));
+			throw(handleException(e, level));
 		} finally {
 			cleanup(statement, conn);
 			statement = null;
@@ -165,16 +175,18 @@ public class DalDirectClient implements DalClient {
 	@Override
 	public void execute(List<DalCommand> commands, DalHints hints)
 			throws SQLException {
-		int level;
+		int level = 0;
 		try {
 			level = startTransaction(hints);
 			
-			for(DalCommand cmd: commands)
-				cmd.execute(this);
+			for(DalCommand cmd: commands) {
+				if(!cmd.execute(this))
+					break;
+			}
 			
 			endTransaction(level);
 		} catch (Throwable e) {
-			throw(handleException(e));
+			throw handleException(e, level);
 		}
 	}
 
@@ -190,8 +202,8 @@ public class DalDirectClient implements DalClient {
 			for (StatementParameter parameter : parameters.values()) {
 				if (parameter.isResultsParameter()) {
 					resultParameters.add(parameter);
-				}
-				else {
+				} else 
+				if(parameter.isOutParameter()){
 					callParameters.add(parameter);
 				}
 			}
@@ -209,7 +221,7 @@ public class DalDirectClient implements DalClient {
 			if (retVal || updateCount != -1) {
 				returnedResults.putAll(extractReturnedResults(statement, resultParameters, updateCount, hints));
 			}
-			extractOutputParameters(statement, callParameters);
+			returnedResults.putAll(extractOutputParameters(statement, callParameters));
 			return returnedResults;
 		} catch (Throwable e) {
 			throw(handleException(e));
@@ -252,13 +264,12 @@ public class DalDirectClient implements DalClient {
 			throws SQLException {
 
 		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
-		int index = 1;
-		for (StatementParameter param : callParameters) {
-			Object value = statement.getObject(index);
+		for (StatementParameter parameter : callParameters) {
+			Object value = statement.getObject(parameter.getIndex());
 			if (value instanceof ResultSet) {
-				value = param.getResultSetExtractor().extract(statement.getResultSet());
+				value = parameter.getResultSetExtractor().extract(statement.getResultSet());
 			}
-			returnedResults.put(param.getName(), value);
+			returnedResults.put(parameter.getName(), value);
 		}
 		return returnedResults;
 	}
@@ -269,6 +280,10 @@ public class DalDirectClient implements DalClient {
 
 	private PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters parameters, DalHints hints) throws Exception {
 		return stmtCreator.createPreparedStatement(conn, sql, parameters, hints);
+	}
+	
+	private PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters parameters, DalHints hints, KeyHolder keyHolder) throws Exception {
+		return stmtCreator.createPreparedStatement(conn, sql, parameters, hints, keyHolder);
 	}
 	
 	private PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters[] parametersList, DalHints hints) throws Exception {
@@ -287,7 +302,7 @@ public class DalDirectClient implements DalClient {
 		transManager.endTransaction(startLevel);
 	}
 
-		private Connection getConnection(DalHints hints, boolean isSelect) throws SQLException {
+	private Connection getConnection(DalHints hints, boolean isSelect) throws SQLException {
 		return transManager.getConnection(hints, isSelect);
 	}
 
@@ -299,12 +314,21 @@ public class DalDirectClient implements DalClient {
 		transManager.cleanup(rs, statement, conn);
 	}
 	
-	private RuntimeException handleException(Throwable e) {
+	private SQLException handleException(Throwable e) {
 		return transManager.handleException(e);
 	}
 	
-	// TODO Should be used to wrap all try/catch statement in the public methods 
-	private class JdbcOperation {
-		
+	private SQLException handleException(Throwable e, int startLevel) {
+		return transManager.handleException(e, startLevel);
 	}
+	
+	// TODO Should be used to wrap all try/catch statement in the public methods 
+	private abstract class DalConnectionOperation<T> {
+		public abstract T doInConnection() ;
+	}
+	
+	private abstract class DalTransactionOperation<T> {
+		public abstract T doInTransaction() ;
+	}
+
 }

@@ -32,7 +32,7 @@ public enum DalHintEnum {
 	SPA,
 	
 	/* SQL Server flag, for batch CUD operation. Using table as parameter */
-	SPT,
+	// SPT,
 	
 	/*  */
 	columns,

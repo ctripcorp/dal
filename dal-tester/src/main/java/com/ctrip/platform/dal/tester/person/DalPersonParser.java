@@ -51,24 +51,19 @@ public class DalPersonParser implements DalParser<Person> {
 	}
 
 	@Override
-	public boolean hasIdentityColumn() {
+	public boolean isAutoIncrement() {
 		return false;
 	}
 
 	@Override
-	public String getIdentityColumnName() {
-		return IDENTITY_COLUMN_NAME;
-	}
-
-	@Override
 	public Number getIdentityValue(Person pojo) {
-		return 1; //pojo.getId();
+		return pojo.getID();
 	}
 
 	@Override
-	public Map<String, ?> getPk(Person pojo) {
+	public Map<String, ?> getPrimaryKeys(Person pojo) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		// map.put(COLUMN_ID, pojo.getId());
+		map.put(COLUMN_ID, pojo.getID());
 		return map;
 	}
 
@@ -76,5 +71,11 @@ public class DalPersonParser implements DalParser<Person> {
 	public String[] getPrimaryKeyNames() {
 		// TODO Auto-generated method stub
 		return new String[] {"ID"};
+	}
+
+	@Override
+	public int[] getColumnTypes() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

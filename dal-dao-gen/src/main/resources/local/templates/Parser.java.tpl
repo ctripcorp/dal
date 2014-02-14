@@ -50,14 +50,14 @@ return map;
 	}
 
 	@Override
-	public boolean hasIdentityColumn() {
+	public boolean isAutoIncrement() {
 		return $hasIdentity;
 	}
 
-	@Override
+/*	@Override
 	public String getIdentityColumnName() {
 		return #if($hasIdentity)"$identityColumn"#{else}null#end;
-	}
+	}*/
 
 	@Override
 	public Number getIdentityValue(Person pojo) {

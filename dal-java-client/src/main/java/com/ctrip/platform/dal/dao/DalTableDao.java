@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,11 +31,15 @@ public final class DalTableDao<T> {
 	private DalQueryDao queryDao;
 	private DalParser<T> parser;
 
+	private final String pkSql;
+	private Set<String> pkColumns;
+	private Map<String, Integer> columnTypes = new HashMap<String, Integer>();
+
 	public DalTableDao(DalParser<T> parser) {
 		this.client = DalClientFactory.getClient(parser.getDatabaseName());
 		this.parser = parser;
 		queryDao = new DalQueryDao(parser.getDatabaseName());
-		initSql();
+		pkSql = initSql();
 	}
 	
 	public T queryByPk(Number id, DalHints hints)
@@ -86,7 +91,7 @@ public final class DalTableDao<T> {
 	}
 
 	public void insert(DalHints hints, KeyHolder keyHolder, T...daoPojos) throws SQLException {
-		if(hints.isUsingBatch()){
+		if(hints.is(DalHintEnum.usingBatch)){
 			// TODO should revise for batch
 		}
 		
@@ -110,7 +115,7 @@ public final class DalTableDao<T> {
 			String deleteSql = buildDeleteSql(pojo);
 
 			StatementParameters parameters = new StatementParameters();
-			addParameters(parameters, parser.getPk(pojo));
+			addParameters(parameters, parser.getPrimaryKeys(pojo));
 			
 			client.update(deleteSql, parameters, hints);
 		}
@@ -119,15 +124,13 @@ public final class DalTableDao<T> {
 	public void update(DalHints hints, T...daoPojos) throws SQLException {
 		for(T pojo: daoPojos) {
 			Map<String, ?> fields = parser.getFields(pojo);
-			Map<String, ?> pk = parser.getPk(pojo);
+			Map<String, ?> pk = parser.getPrimaryKeys(pojo);
 			
 			String updateSql = buildUpdateSql(fields);
-			if(parser.hasIdentityColumn()) {
-				fields.remove(parser.getIdentityColumnName());
-			} else {
-				for(String key: pk.keySet())
-					fields.remove(key);
-			}
+			
+			// Remove primary keys from set values
+			for(String key: pk.keySet())
+				fields.remove(key);
 
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
@@ -148,20 +151,31 @@ public final class DalTableDao<T> {
 	private void addParameters(StatementParameters parameters, Map<String, ?> entries) {
 		int index = parameters.size() + 1;
 		for(Map.Entry<String, ?> entry: entries.entrySet()) {
-			parameters.add(StatementParameter.Builder.create().setIndex(index).setName(entry.getKey()).setValue(entry.getValue()).build());
+			parameters.set(index, getColumnType(entry.getKey()), entry.getValue());
 		}
 	}
 	
-	private String SQL_FIND_BY_PK;
-	private String SQL_INSERT;
-	private String SQL_DELETE;
-	private String SQL_UPDATE;
+	private int getColumnType(String columnName) {
+		return columnTypes.get(columnName);
+	}
 	
-	private void initSql() {
-//		SQL_FIND_BY_PK = "";
-//		SQL_INSERT = initInsertSql();
-//		SQL_DELETE = initDeleteSql();
-//		SQL_UPDATE = initUpdateSql();
+	private String initSql() {
+		pkColumns = new HashSet<String>();
+		Collections.addAll(pkColumns, parser.getPrimaryKeyNames());
+		
+		// Build a lookup table
+		String[] cloumnNames = parser.getColumnNames();
+		int[] columnsTypes = parser.getColumnTypes();
+		for (int i = 0; i < cloumnNames.length; i++) {
+			columnTypes.put(cloumnNames[i], columnsTypes[i]);
+		}
+		
+		// Build primary key template
+		String template = parser.isAutoIncrement() ? 
+				TMPL_SET_VALUE :
+				combine(TMPL_SET_VALUE, parser.getPrimaryKeyNames().length, AND);
+		
+		return String.format(template, (Object[])parser.getPrimaryKeyNames());
 	}
 	
 	private String buildInsertSql(Collection<String> columns) {
@@ -172,37 +186,23 @@ public final class DalTableDao<T> {
 	}
 	
 	private String buildDeleteSql(T pojo) {
-		return String.format(TMPL_SQL_DELETE, parser.getTableName(), buildPkSql());
+		return String.format(TMPL_SQL_DELETE, parser.getTableName(), pkSql);
 	}
 
 	private String buildUpdateSql(Map<String, ?> fields) {
 		// Build SET
 		List<String> nonNullColumns = new LinkedList<String>();
-		Set<String> pkSet = new HashSet<String>();
-		Collections.addAll(pkSet, parser.getPrimaryKeyNames());
 		
 		for(String column: parser.getColumnNames()) {
 			// For null value, we just keep it the same
-			if(fields.get(column) == null || pkSet.contains(column))
+			if(fields.get(column) == null || pkColumns.contains(column))
 				continue;
 			nonNullColumns.add(column);
 		}
 		
 		String columns = String.format(combine(TMPL_SET_VALUE, nonNullColumns.size(), COLUMN_SEPARATOR), nonNullColumns);
 		
-		return String.format(TMPL_SQL_UPDATE, parser.getTableName(), columns, buildPkSql());
-	}
-	
-	private String pkSql;
-	private String buildPkSql() {
-		if(pkSql != null)
-			return pkSql;
-		
-		if(parser.hasIdentityColumn())
-			return pkSql = String.format(TMPL_SET_VALUE, parser.getIdentityColumnName());
-		
-		// For complex keys
-		return pkSql = String.format(combine(TMPL_SET_VALUE, parser.getPrimaryKeyNames().length, AND), (Object[])parser.getPrimaryKeyNames());
+		return String.format(TMPL_SQL_UPDATE, parser.getTableName(), columns, pkSql);
 	}
 	
 	private String combine(String[] values, String separator) {
@@ -210,7 +210,7 @@ public final class DalTableDao<T> {
 		int i = 0;
 		for(String value: values) {
 			valuesSb.append(value);
-			if(++i < parser.getColumnNames().length)
+			if(++i < values.length)
 				valuesSb.append(separator);
 		}
 		return valuesSb.toString();
@@ -221,9 +221,13 @@ public final class DalTableDao<T> {
 	}
 
 	private String combine(String value, int count, String separator) {
-		String[] values = new String[count];
-		for(int i = 0; i < count; i++)
-			values[i] = value;
-		return combine(values, separator);
+		StringBuilder valuesSb = new StringBuilder();
+		;
+		for(int i = 1; i <= count; i++) {
+			valuesSb.append(value);
+			if(i < count)
+				valuesSb.append(separator);
+		}
+		return valuesSb.toString();
 	}
 }

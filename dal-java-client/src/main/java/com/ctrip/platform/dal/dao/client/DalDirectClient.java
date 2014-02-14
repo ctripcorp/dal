@@ -235,7 +235,7 @@ public class DalDirectClient implements DalClient {
 
 		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
 		boolean moreResults;
-		if(hints != null && hints.contains(DalHintEnum.skipResultsProcessing))
+		if(hints != null && hints.is(DalHintEnum.skipResultsProcessing))
 			return null;
 
 //		boolean skipUndeclaredResults = hints != null && hints.contains(DalHintEnum.skipUndeclaredResults);

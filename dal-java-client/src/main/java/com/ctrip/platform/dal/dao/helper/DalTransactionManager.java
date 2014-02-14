@@ -188,6 +188,6 @@ public class DalTransactionManager {
 
 	private boolean isMaster(DalHints hints) {
 		// TODO add more check here
-		return null != hints && hints.contains(DalHintEnum.masterOnly);
+		return null != hints && hints.is(DalHintEnum.masterOnly);
 	}
 }

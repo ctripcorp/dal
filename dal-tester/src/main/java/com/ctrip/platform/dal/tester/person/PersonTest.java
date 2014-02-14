@@ -29,9 +29,10 @@ public class PersonTest {
 			p.setName("Name");
 			dao.insert(hints, p, p, p);
 //			dao.query(null, null, null);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+		
+		System.exit(0);
 	}
 }

@@ -143,6 +143,7 @@ public abstract class AbstractGenerator implements Generator {
 				while (allColumnsRs.next()) {
 					FieldMeta meta = new FieldMeta();
 
+					// DATA_TYPE
 					String columnName = allColumnsRs.getString("COLUMN_NAME");
 					//获取出来的数据类型是varchar这一类的
 					String columnType = allColumnsRs.getString("TYPE_NAME");

@@ -12,17 +12,25 @@ public class Dal${table_name}Parser implements DalParser<$table_name> {
 	public static final String TABLE_NAME = "$table_name";
 	private static final String[] COLUMNS = new String[]{
 		#foreach( $field in $fields )
-		"${field.getName()}"#if($foreach.count != $fields.size()), #end
+	"${field.getName()}",
 		#end
-	};
+};
+	
+	private static final int[] COLUMN_TYPES = new int[]{
+		#foreach( $field in $fields )
+	"${field.getDataType()}",
+		#end
+};
 	
 	@Override
 	public $table_name map(ResultSet rs, int rowNum) throws SQLException {
-		$table_name vo = new $table_name();
+		$table_name pojo = new $table_name();
+		
 		#foreach( $field in $fields )
-vo.set${field.getName()}(rs.get$WordUtils.capitalize($field.getType())("${field.getName()}"));
+pojo.set${field.getName()}(rs.get$WordUtils.capitalize($field.getType())("${field.getName()}"));
 		#end
-return vo;
+		
+		return pojo;
 	}
 
 	@Override
@@ -39,14 +47,10 @@ return vo;
 	public String[] getColumnNames() {
 		return COLUMNS;
 	}
-
+	
 	@Override
-	public Map<String, ?> getFields(Person pojo) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		#foreach( $field in $fields )
-map.put("${field.getName()}", pojo.get${field.getName()}());
-		#end
-return map;
+	public int[] getColumnTypes() {
+		return COLUMN_TYPES;
 	}
 
 	@Override
@@ -54,22 +58,30 @@ return map;
 		return $hasIdentity;
 	}
 
-/*	@Override
-	public String getIdentityColumnName() {
-		return #if($hasIdentity)"$identityColumn"#{else}null#end;
-	}*/
-
 	@Override
 	public Number getIdentityValue(Person pojo) {
 		return #if($hasIdentity)pojo.get${identityColumn}()#{else}null#end;
 	}
 
 	@Override
-	public Map<String, ?> getPk(Person pojo) {
-		Map<String, Object> map = new HashMap<String, Object>();
+	public Map<String, ?> getPrimaryKeys(Person pojo) {
+		Map<String, Object> primaryKeys = new HashMap<String, Object>();
+		
 		#foreach( $field in $fields )
-#if($field.isPrimary())map.put("${field.getName()}", pojo.get${field.getName()}());#end
+#if($field.isPrimary())primaryKeys.put("${field.getName()}", pojo.get${field.getName()}());#end
 		#end
-return map;
+
+		return primaryKeys;
+	}
+	
+	@Override
+	public Map<String, ?> getFields(Person pojo) {
+		Map<String, Object> fields = new HashMap<String, Object>();
+		
+		#foreach( $field in $fields )
+fields.put("${field.getName()}", pojo.get${field.getName()}());
+		#end
+
+		return fields;
 	}
 }

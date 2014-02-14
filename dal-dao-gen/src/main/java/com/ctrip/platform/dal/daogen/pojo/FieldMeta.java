@@ -10,7 +10,7 @@ public class FieldMeta {
 	//指对应的数据库类型，如varchar
 	private String dbType;
 	
-	private int sqlType;
+	private int dataType;
 	
 	public String getDbType() {
 		return dbType;
@@ -96,12 +96,12 @@ public class FieldMeta {
 		this.valueType = valueType;
 	}
 
-	public int getSqlType() {
-		return sqlType;
+	public int getDataType() {
+		return dataType;
 	}
 
-	public void setSqlType(int sqlType) {
-		this.sqlType = sqlType;
+	public void setDataType(int dataType) {
+		this.dataType = dataType;
 	}
 	
 	

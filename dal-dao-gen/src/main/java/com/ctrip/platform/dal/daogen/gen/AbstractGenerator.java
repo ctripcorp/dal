@@ -155,7 +155,7 @@ public abstract class AbstractGenerator implements Generator {
 					meta.setDbType(columnType);
 					meta.setPosition(position);
 					meta.setPrimary(primaryKeys.contains(columnName));
-					meta.setSqlType(dataType);
+					meta.setDataType(dataType);
 					// meta.setNullable(nullable.equalsIgnoreCase("yes")
 					// && Consts.CSharpValueTypes.contains(columnType));
 					// meta.setValueType(Consts.CSharpValueTypes.contains(columnType));

@@ -10,7 +10,8 @@ import com.ctrip.platform.dal.dao.DalParser;
 public class DalPersonParser1 implements DalParser<Person> {
 	public static final String DATABASE_NAME = "dao_test";
 	public static final String TABLE_NAME = "Person";
-	private static final String[] COLUMNS = new String[] { "ID", "Address",
+	private static final String[] COLUMNS = new String[] { 
+		"ID", "Address",
 			"Telephone", "Name", "Age", "Gender", "Birth" };
 
 	@Override

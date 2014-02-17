@@ -23,7 +23,7 @@ public class PersonTest {
 		try {
 			DalHints hints = new DalHints();
 			
-			DalTableDao<Person> dao = new DalTableDao<Person>(new DalPersonParser1());
+			DalTableDao<Person> dao = new DalTableDao<Person>(new DalPersonParser());
 			Person p = new Person();
 			p.setAddress("Address");
 			p.setName("Name");

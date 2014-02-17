@@ -8,24 +8,45 @@ import java.util.Map;
 import com.ctrip.platform.dal.dao.DalParser;
 
 public class DalPersonParser implements DalParser<Person> {
-	public static final String DATABASE_NAME = "person";
-	public static final String TABLE_NAME = "person";
-	public static final String COLUMN_ID = "id";
-	public static final String COLUMN_NAME = "name";
-	public static final String COLUMN_GENDER = "gender";
+	public static final String DATABASE_NAME = "dao_test";
+	public static final String TABLE_NAME = "Person";
 	private static final String[] COLUMNS = new String[]{
-		COLUMN_ID,
-		COLUMN_NAME,
-		COLUMN_GENDER,
+		"ID",
+		"Address",
+		"Telephone",
+		"Name",
+		"Age",
+		"Gender",
+		"Birth",
 	};
 	
-	private static final String IDENTITY_COLUMN_NAME = "id";
+	private static final String[] PRIMARY_KEYS = new String[]{
+		"ID",
+	};
+	
+	private static final int[] COLUMN_TYPES = new int[]{
+		4,
+		12,
+		12,
+		12,
+		4,
+		4,
+		93,
+	};
 	
 	@Override
 	public Person map(ResultSet rs, int rowNum) throws SQLException {
-		Person person = new Person();
-		// person.setId(rs.getInt());
-		return person;
+		Person pojo = new Person();
+		
+		pojo.setID(rs.getInt("ID"));
+		pojo.setAddress(rs.getString("Address"));
+		pojo.setTelephone(rs.getString("Telephone"));
+		pojo.setName(rs.getString("Name"));
+		pojo.setAge(rs.getInt("Age"));
+		pojo.setGender(rs.getInt("Gender"));
+		pojo.setBirth(rs.getTimestamp("Birth"));
+		
+		return pojo;
 	}
 
 	@Override
@@ -42,17 +63,20 @@ public class DalPersonParser implements DalParser<Person> {
 	public String[] getColumnNames() {
 		return COLUMNS;
 	}
-
+	
 	@Override
-	public Map<String, ?> getFields(Person pojo) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		// map.put(COLUMN_ID, pojo.getId());
-		return map;
+	public String[] getPrimaryKeyNames() {
+		return PRIMARY_KEYS;
+	}
+	
+	@Override
+	public int[] getColumnTypes() {
+		return COLUMN_TYPES;
 	}
 
 	@Override
 	public boolean isAutoIncrement() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -62,20 +86,25 @@ public class DalPersonParser implements DalParser<Person> {
 
 	@Override
 	public Map<String, ?> getPrimaryKeys(Person pojo) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(COLUMN_ID, pojo.getID());
-		return map;
-	}
+		Map<String, Object> primaryKeys = new HashMap<String, Object>();
+		
+		primaryKeys.put("ID", pojo.getID());
 
-	@Override
-	public String[] getPrimaryKeyNames() {
-		// TODO Auto-generated method stub
-		return new String[] {"ID"};
+		return primaryKeys;
 	}
-
+	
 	@Override
-	public int[] getColumnTypes() {
-		// TODO Auto-generated method stub
-		return null;
+	public Map<String, ?> getFields(Person pojo) {
+		Map<String, Object> fields = new HashMap<String, Object>();
+		
+		fields.put("ID", pojo.getID());
+		fields.put("Address", pojo.getAddress());
+		fields.put("Telephone", pojo.getTelephone());
+		fields.put("Name", pojo.getName());
+		fields.put("Age", pojo.getAge());
+		fields.put("Gender", pojo.getGender());
+		fields.put("Birth", pojo.getBirth());
+
+		return fields;
 	}
 }

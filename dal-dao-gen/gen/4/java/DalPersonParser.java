@@ -11,17 +11,28 @@ public class DalPersonParser implements DalParser<Person> {
 	public static final String DATABASE_NAME = "dao_test";
 	public static final String TABLE_NAME = "Person";
 	private static final String[] COLUMNS = new String[]{
-			"ID",	"Address",	"Telephone",	"Name",	"Age",	"Gender",	"Birth",};
+		"ID",
+		"Address",
+		"Telephone",
+		"Name",
+		"Age",
+		"Gender",
+		"Birth",
+	};
+	
+	private static final String[] PRIMARY_KEYS = new String[]{
+		"ID",
+	};
 	
 	private static final int[] COLUMN_TYPES = new int[]{
-			"4",
-			"12",
-			"12",
-			"12",
-			"4",
-			"4",
-			"93",
-		};
+		4,
+		12,
+		12,
+		12,
+		4,
+		4,
+		93,
+	};
 	
 	@Override
 	public Person map(ResultSet rs, int rowNum) throws SQLException {
@@ -34,7 +45,7 @@ public class DalPersonParser implements DalParser<Person> {
 		pojo.setAge(rs.getInt("Age"));
 		pojo.setGender(rs.getInt("Gender"));
 		pojo.setBirth(rs.getTimestamp("Birth"));
-				
+		
 		return pojo;
 	}
 
@@ -51,6 +62,11 @@ public class DalPersonParser implements DalParser<Person> {
 	@Override
 	public String[] getColumnNames() {
 		return COLUMNS;
+	}
+	
+	@Override
+	public String[] getPrimaryKeyNames() {
+		return PRIMARY_KEYS;
 	}
 	
 	@Override
@@ -72,7 +88,8 @@ public class DalPersonParser implements DalParser<Person> {
 	public Map<String, ?> getPrimaryKeys(Person pojo) {
 		Map<String, Object> primaryKeys = new HashMap<String, Object>();
 		
-		primaryKeys.put("ID", pojo.getID());														
+		primaryKeys.put("ID", pojo.getID());
+
 		return primaryKeys;
 	}
 	
@@ -87,7 +104,7 @@ public class DalPersonParser implements DalParser<Person> {
 		fields.put("Age", pojo.getAge());
 		fields.put("Gender", pojo.getGender());
 		fields.put("Birth", pojo.getBirth());
-		
+
 		return fields;
 	}
 }

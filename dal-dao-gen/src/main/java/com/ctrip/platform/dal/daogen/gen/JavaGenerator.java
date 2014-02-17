@@ -93,7 +93,7 @@ public class JavaGenerator extends AbstractGenerator {
 					hasIdentity = true;
 					identityColumn = meta.getName();
 				}
-				meta.setType(Consts.JavaSqlTypeMap.get(meta.getDbType().toLowerCase()));
+				meta.setJavaClass(Consts.JavaSqlTypeMap.get(meta.getDataType()));
 			}
 		
 			context.put("fields", fieldsMeta);
@@ -299,8 +299,8 @@ public class JavaGenerator extends AbstractGenerator {
 						}
 						p.setName(name);
 						p.setFieldName(name);
-						p.setType(Consts.JavaSqlTypeMap.get(spParams
-								.getString("TYPE_NAME")));
+						p.setType("Fix it");//Consts.JavaSqlTypeMap.get(spParams
+								//.getString("TYPE_NAME")));
 						p.setParamMode(spParams.getString("COLUMN_TYPE"));
 						p.setPosition(spParams.getInt("ORDINAL_POSITION"));
 						parameters.add(p);

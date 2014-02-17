@@ -11,7 +11,7 @@ public class Person implements DalPojo {
 	private int Age;
 	private int Gender;
 	private Timestamp Birth;
-			
+
 	public int getID(){
 		return ID;
 	}
@@ -19,7 +19,7 @@ public class Person implements DalPojo {
 	public void setID(int ID){
 		this.ID = ID;
 	}
-		
+
 	public String getAddress(){
 		return Address;
 	}
@@ -27,7 +27,7 @@ public class Person implements DalPojo {
 	public void setAddress(String Address){
 		this.Address = Address;
 	}
-		
+
 	public String getTelephone(){
 		return Telephone;
 	}
@@ -35,7 +35,7 @@ public class Person implements DalPojo {
 	public void setTelephone(String Telephone){
 		this.Telephone = Telephone;
 	}
-		
+
 	public String getName(){
 		return Name;
 	}
@@ -43,7 +43,7 @@ public class Person implements DalPojo {
 	public void setName(String Name){
 		this.Name = Name;
 	}
-		
+
 	public int getAge(){
 		return Age;
 	}
@@ -51,7 +51,7 @@ public class Person implements DalPojo {
 	public void setAge(int Age){
 		this.Age = Age;
 	}
-		
+
 	public int getGender(){
 		return Gender;
 	}
@@ -59,7 +59,7 @@ public class Person implements DalPojo {
 	public void setGender(int Gender){
 		this.Gender = Gender;
 	}
-		
+
 	public Timestamp getBirth(){
 		return Birth;
 	}
@@ -67,5 +67,5 @@ public class Person implements DalPojo {
 	public void setBirth(Timestamp Birth){
 		this.Birth = Birth;
 	}
-	
+
 }

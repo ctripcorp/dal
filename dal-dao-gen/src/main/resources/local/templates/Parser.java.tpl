@@ -2,7 +2,7 @@ package $namespace;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalParser;
@@ -78,7 +78,7 @@ public class Dal${table_name}Parser implements DalParser<$table_name> {
 
 	@Override
 	public Map<String, ?> getPrimaryKeys(Person pojo) {
-		Map<String, Object> primaryKeys = new HashMap<String, Object>();
+		Map<String, Object> primaryKeys = new LinkedHashMap<String, Object>();
 		
 #foreach( $field in $fields )
 #if($field.isPrimary())
@@ -91,7 +91,7 @@ public class Dal${table_name}Parser implements DalParser<$table_name> {
 	
 	@Override
 	public Map<String, ?> getFields(Person pojo) {
-		Map<String, Object> fields = new HashMap<String, Object>();
+		Map<String, Object> fields = new LinkedHashMap<String, Object>();
 		
 #foreach( $field in $fields )
 		fields.put("${field.getName()}", pojo.get${field.getName()}());

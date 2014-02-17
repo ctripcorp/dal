@@ -171,7 +171,7 @@ public final class DalTableDao<T> {
 		}
 		
 		// Build primary key template
-		String template = parser.isAutoIncrement() ? 
+ 		String template = parser.isAutoIncrement() ? 
 				TMPL_SET_VALUE :
 				combine(TMPL_SET_VALUE, parser.getPrimaryKeyNames().length, AND);
 		

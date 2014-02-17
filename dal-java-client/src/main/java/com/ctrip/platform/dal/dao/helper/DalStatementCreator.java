@@ -103,6 +103,15 @@ public class DalStatementCreator {
 	private PreparedStatement setSqlParameter(PreparedStatement ps,
 			StatementParameter parameter) throws SQLException {
 		Object value = parameter.getValue();
+		
+		// TODO revise timestamp and date processing
+		ps.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+		
+		
+		// The floowing will be deprecated
+		if (true == true)
+			return ps;
+
 		switch (parameter.getDbType()) {
 		case Boolean:
 			ps.setBoolean(parameter.getIndex(), (Boolean)value);

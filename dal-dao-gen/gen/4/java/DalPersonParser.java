@@ -1,8 +1,8 @@
-package com.ctrip.platform.dal.tester.person;
+package hjhTest;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalParser;
@@ -86,7 +86,7 @@ public class DalPersonParser implements DalParser<Person> {
 
 	@Override
 	public Map<String, ?> getPrimaryKeys(Person pojo) {
-		Map<String, Object> primaryKeys = new HashMap<String, Object>();
+		Map<String, Object> primaryKeys = new LinkedHashMap<String, Object>();
 		
 		primaryKeys.put("ID", pojo.getID());
 
@@ -95,7 +95,7 @@ public class DalPersonParser implements DalParser<Person> {
 	
 	@Override
 	public Map<String, ?> getFields(Person pojo) {
-		Map<String, Object> fields = new HashMap<String, Object>();
+		Map<String, Object> fields = new LinkedHashMap<String, Object>();
 		
 		fields.put("ID", pojo.getID());
 		fields.put("Address", pojo.getAddress());

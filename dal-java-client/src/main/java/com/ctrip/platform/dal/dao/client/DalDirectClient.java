@@ -97,7 +97,6 @@ public class DalDirectClient implements DalClient {
 			int rows = statement.executeUpdate();
 			
 			List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-			generatedKeys.clear();
 			keys = statement.getGeneratedKeys();
 			if (keys == null)
 				return rows;
@@ -236,7 +235,7 @@ public class DalDirectClient implements DalClient {
 
 		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
 		boolean moreResults;
-		if(hints != null && hints.contains(DalHintEnum.skipResultsProcessing))
+		if(hints != null && hints.is(DalHintEnum.skipResultsProcessing))
 			return null;
 
 //		boolean skipUndeclaredResults = hints != null && hints.contains(DalHintEnum.skipUndeclaredResults);

@@ -1,3 +1,4 @@
+
 package ${pojoHost.getDaoNamespace()};
 
 import java.sql.ResultSet;

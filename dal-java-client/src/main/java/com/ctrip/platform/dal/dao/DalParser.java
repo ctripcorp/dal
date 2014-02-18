@@ -5,12 +5,26 @@ import java.util.Map;
 public interface DalParser<T> extends DalRowMapper<T> {
 	String getDatabaseName();
 	String getTableName();
-	String[] getColumnNames();
-	Map<String, ?> getFields(T pojo);
 	
-	boolean hasIdentityColumn();
-	String getIdentityColumnName();
+	String[] getColumnNames();
+	String[] getPrimaryKeyNames();
+	int[] getColumnTypes();
+	
+	/**
+	 * Assumption: the auto incremental column is also the primary key. 
+	 * @return
+	 */
+	boolean isAutoIncrement();
+
 	Number getIdentityValue(T pojo);
 	
-	Map<String, ?> getPk(T pojo);
+	/**
+	 * For building where clause for update/delete operation
+	 */
+	Map<String, ?> getPrimaryKeys(T pojo);
+
+	/**
+	 * For insert/update/delete operation
+	 */
+	Map<String, ?> getFields(T pojo);
 }

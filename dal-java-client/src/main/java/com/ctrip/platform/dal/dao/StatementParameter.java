@@ -28,6 +28,10 @@ public class StatementParameter {
 		return currentBuilder.dbType_;
 	}
 
+	public int getSqlType() {
+		return currentBuilder.sqlType_;
+	}
+
 	public ParameterDirection getDirection() {
 		return currentBuilder.direction_;
 	}
@@ -76,7 +80,46 @@ public class StatementParameter {
 			return new Builder();
 		}
 
+		public static Builder set(int index, int sqlType, Object value) {
+			Builder builder = new Builder();
+			
+			builder.index_ = index;
+			builder.sqlType_ = sqlType;
+			builder.value_ = value;
+			
+			return builder;
+		}
+		
+		public static Builder set(int index, DbType dbType, Object value) {
+			return set(index, DbType.getFromDbType(dbType), value);
+		}
+		
+		public static Builder registerInOut(int index, int sqlType, String name, Object value) {
+			Builder builder = new Builder();
+			
+			builder.index_ = index;
+			builder.sqlType_ = sqlType;
+			builder.name_ = name;
+			builder.value_ = value;
+			builder.direction_ = ParameterDirection.InputOutput;
+			
+			return builder;
+		}
+		
+		public static Builder registerOut(int index, int sqlType, String name) {
+			Builder builder = new Builder();
+			
+			builder.index_ = index;
+			builder.sqlType_ = sqlType;
+			builder.name_ = name;
+			builder.direction_ = ParameterDirection.Output;
+			
+			return builder;
+		}
+		
 		private DbType dbType_;
+		
+		private int sqlType_;
 
 		private ParameterDirection direction_;
 
@@ -97,6 +140,12 @@ public class StatementParameter {
 			dbType_ = dbType;
 			return this;
 		}
+		
+		public Builder setSqlType(int sqlType) {
+			sqlType_ = sqlType;
+			return this;
+		}
+		
 
 		public Builder setDirection(ParameterDirection direction) {
 			direction_ = direction;

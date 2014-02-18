@@ -18,11 +18,9 @@ import org.apache.commons.lang.StringUtils;
 
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.dao.AutoTaskDAO;
-import com.ctrip.platform.dal.daogen.dao.ServerDbMapDAO;
 import com.ctrip.platform.dal.daogen.dao.SpTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.SqlTaskDAO;
 import com.ctrip.platform.dal.daogen.pojo.AutoTask;
-import com.ctrip.platform.dal.daogen.pojo.ServerDbMap;
 import com.ctrip.platform.dal.daogen.pojo.SpTask;
 import com.ctrip.platform.dal.daogen.pojo.SqlTask;
 import com.ctrip.platform.dal.daogen.pojo.Status;
@@ -48,14 +46,11 @@ public class TaskResource {
 	private static SpTaskDAO spTask;
 
 	private static SqlTaskDAO sqlTask;
-	
-	private static ServerDbMapDAO serverDbMapDao;
 
 	static {
 		autoTask = SpringBeanGetter.getAutoTaskDao();
 		spTask = SpringBeanGetter.getSpTaskDao();
 		sqlTask = SpringBeanGetter.getSqlTaskDao();
-		serverDbMapDao = SpringBeanGetter.getServerDbMapDao();
 	}
 
 	@GET
@@ -64,17 +59,6 @@ public class TaskResource {
 
 		List<AutoTask> autoTasks = autoTask.getTasksByProjectId(Integer
 				.valueOf(id));
-		
-		List<ServerDbMap> serverDbMaps = serverDbMapDao.getServerDbs();
-		
-		for(AutoTask task : autoTasks){
-			for(ServerDbMap map : serverDbMaps){
-				if(map.getDb_name().equalsIgnoreCase(task.getDb_name())){
-					task.setServer_id(map.getServer_id());
-					break;
-				}
-			}
-		}
 
 		List<SpTask> spTasks = spTask.getTasksByProjectId(Integer.valueOf(id));
 
@@ -93,9 +77,9 @@ public class TaskResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Status addTask(
-			@FormParam("id") String id,
+			@FormParam("id") int id,
 			@FormParam("server") int server,
-			@FormParam("project_id") String project_id,
+			@FormParam("project_id") int project_id,
 			@FormParam("task_type") String task_type,
 			@FormParam("db_name") String db_name,
 			@FormParam("table_name") String table_name,
@@ -109,21 +93,14 @@ public class TaskResource {
 			@FormParam("fields") String fields,
 			@FormParam("condition") String condition,
 			@FormParam("sql_content") String sql_content,
+			@FormParam("params") String params,
 			@FormParam("action") String action) {
-		
-		ServerDbMap map = serverDbMapDao.getServerByDbname(db_name);
-		
-		if(map == null){
-			map = new ServerDbMap();
-			map.setServer_id(server);
-			map.setDb_name(db_name);
-			serverDbMapDao.insertServerDbMap(map);
-		}
 
 		if (task_type.equals("auto")) {
 			if (action.equals("insert")) {
 				AutoTask t = new AutoTask();
-				t.setProject_id(Integer.valueOf(project_id));
+				t.setProject_id(project_id);
+				t.setServer_id(server);
 				t.setDb_name(db_name);
 				t.setTable_name(table_name);
 				t.setClass_name(class_name);
@@ -137,8 +114,9 @@ public class TaskResource {
 				autoTask.insertTask(t);
 			} else if (action.equals("update")) {
 				AutoTask t = new AutoTask();
-				t.setId(Integer.valueOf(id));
-				t.setProject_id(Integer.valueOf(project_id));
+				t.setId(id);
+				t.setServer_id(server);
+				t.setProject_id(project_id);
 				t.setDb_name(db_name);
 				t.setTable_name(table_name);
 				t.setClass_name(class_name);
@@ -152,7 +130,7 @@ public class TaskResource {
 				autoTask.updateTask(t);
 			} else if (action.equals("delete")) {
 				AutoTask t = new AutoTask();
-				t.setId(Integer.valueOf(id));
+				t.setId(id);
 				autoTask.deleteTask(t);
 			}
 			return Status.OK;
@@ -169,7 +147,8 @@ public class TaskResource {
 			}
 			if (action.equals("insert")) {
 				SpTask t = new SpTask();
-				t.setProject_id(Integer.valueOf(project_id));
+				t.setProject_id(project_id);
+				t.setServer_id(server);
 				t.setDb_name(db_name);
 				t.setClass_name(class_name);
 				t.setSp_schema(sp_schema);
@@ -180,8 +159,9 @@ public class TaskResource {
 				spTask.insertTask(t);
 			} else if (action.equals("update")) {
 				SpTask t = new SpTask();
-				t.setId(Integer.valueOf(id));
-				t.setProject_id(Integer.valueOf(project_id));
+				t.setId(id);
+				t.setServer_id(server);
+				t.setProject_id(project_id);
 				t.setDb_name(db_name);
 				t.setClass_name(class_name);
 				t.setSp_schema(sp_schema);
@@ -192,7 +172,7 @@ public class TaskResource {
 				spTask.updateTask(t);
 			} else if (action.equals("delete")) {
 				SpTask t = new SpTask();
-				t.setId(Integer.valueOf(id));
+				t.setId(id);
 				spTask.deleteTask(t);
 			}
 			return Status.OK;
@@ -201,29 +181,33 @@ public class TaskResource {
 		if (task_type.equals("sql")) {
 			if (action.equals("insert")) {
 				SqlTask t = new SqlTask();
-				t.setProject_id(Integer.valueOf(project_id));
+				t.setProject_id(project_id);
+				t.setServer_id(server);
 				t.setDb_name(db_name);
 				t.setClass_name(class_name);
 				t.setMethod_name(method_name);
 				t.setCrud_type(crud_type);
 				t.setSql_content(sql_content);
+				t.setParameters(params);
 				sqlTask.insertTask(t);
 			} else if (action.equals("update")) {
 				SqlTask t = new SqlTask();
-				t.setId(Integer.valueOf(id));
-				t.setProject_id(Integer.valueOf(project_id));
+				t.setId(id);
+				t.setServer_id(server);
+				t.setProject_id(project_id);
 				t.setDb_name(db_name);
 				t.setClass_name(class_name);
 				t.setMethod_name(method_name);
 				t.setCrud_type(crud_type);
 				t.setSql_content(sql_content);
+				t.setParameters(params);
 				if(sqlTask.updateTask(t) > 0)
 					return Status.OK;
 				else
 					return Status.ERROR;
 			} else if (action.equals("delete")) {
 				SqlTask t = new SqlTask();
-				t.setId(Integer.valueOf(id));
+				t.setId(id);
 				sqlTask.deleteTask(t);
 			}
 			return Status.OK;

@@ -7,23 +7,25 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalParser;
 
-public class DalPersonParser implements DalParser<Person> {
+public class PersonDalParser implements DalParser<Person> {
 	public static final String DATABASE_NAME = "dao_test";
 	public static final String TABLE_NAME = "Person";
 	private static final String[] COLUMNS = new String[]{
-				"ID", 				"Address", 				"Telephone", 				"Name", 				"Age", 				"Gender", 				"Birth"			};
+	$set($sepatate = ,
+)
+		"ID"${sepatate}		"Address"${sepatate}		"Telephone"${sepatate}		"Name"${sepatate}		"Age"${sepatate}		"Gender"${sepatate}		"Birth"${sepatate}	};
 	
 	@Override
 	public Person map(ResultSet rs, int rowNum) throws SQLException {
-		Person vo = new Person();
-		vo.setID(rs.getInt("ID"));
-		vo.setAddress(rs.getString("Address"));
-		vo.setTelephone(rs.getString("Telephone"));
-		vo.setName(rs.getString("Name"));
-		vo.setAge(rs.getInt("Age"));
-		vo.setGender(rs.getInt("Gender"));
-		vo.setBirth(rs.getTimestamp("Birth"));
-		return vo;
+		Person pojo = new Person;
+		pojo.setID(rs.getInt("ID"));
+		pojo.setAddress(rs.getString("Address"));
+		pojo.setTelephone(rs.getString("Telephone"));
+		pojo.setName(rs.getString("Name"));
+		pojo.setAge(rs.getInt("Age"));
+		pojo.setGender(rs.getInt("Gender"));
+		pojo.setBirth(rs.getTimestamp("Birth"));
+		return pojo;
 	}
 
 	@Override
@@ -72,6 +74,7 @@ public class DalPersonParser implements DalParser<Person> {
 	@Override
 	public Map<String, ?> getPk(Person pojo) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("ID", pojo.getID());														return map;
+		map.put("ID",pojo.getID());
+		return map;
 	}
 }

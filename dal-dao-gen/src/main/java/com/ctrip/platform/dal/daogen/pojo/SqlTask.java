@@ -19,6 +19,16 @@ public class SqlTask  extends AbstractTask{
 	
 	private String sql_content;
 	
+	private String parameters;
+
+	public String getParameters() {
+		return parameters;
+	}
+
+	public void setParameters(String parameters) {
+		this.parameters = parameters;
+	}
+
 	public int getId() {
 		return id;
 	}
@@ -79,11 +89,12 @@ public class SqlTask  extends AbstractTask{
 		SqlTask task = new SqlTask();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		task.setDb_name(rs.getString(3));
-		task.setClass_name(rs.getString(4));
-		task.setMethod_name(rs.getString(5));
-		task.setCrud_type(rs.getString(6));
-		task.setSql_content(rs.getString(7));
+		task.setServer_id(rs.getInt(3));
+		task.setDb_name(rs.getString(4));
+		task.setClass_name(rs.getString(5));
+		task.setMethod_name(rs.getString(6));
+		task.setCrud_type(rs.getString(7));
+		task.setSql_content(rs.getString(8));
 		return task;
 	}
 	

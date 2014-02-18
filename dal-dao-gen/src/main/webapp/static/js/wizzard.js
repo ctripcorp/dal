@@ -63,7 +63,7 @@
                 case "auto":
                     //在显示下一页之前，清空下一页的信息
                     $("select[id$=tables] > option:gt(0)").remove();
-                    $("#only_template").prop("checked", false);
+                    $("#only_template").prop("checked", true);
                     $("#cud_by_sp").prop("checked", true);
                     $("#class_name").val("");
                     $("#method_name").val("");
@@ -72,8 +72,9 @@
                         $(".op_type.active").removeClass("active");
                         defaultActive.addClass("active");
                     }
-                    $(".op_type_class").show();
-                    $(".method_name_class").show();
+                    
+                    $(".op_type_class").hide();
+                    $(".method_name_class").hide();
 
                     if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "auto") {
                         $('#tables').append($('<option>', {
@@ -85,9 +86,10 @@
                         $("#cud_by_sp").prop('checked', record.sql_type == "spa_sp3");
                         if (record.method_name == undefined || record.method_name == "") {
                             $("#only_template").prop('checked', true);
-                            $(".op_type_class").hide();
-                            $(".method_name_class").hide();
                         } else {
+                            $("#only_template").prop('checked', false);
+                            $(".op_type_class").show();
+                            $(".method_name_class").show();
                             $("#method_name").val(record.method_name);
                             var parentToActive = $(sprintf(".op_type > input[value='%s']", record.crud_type)).parent();
                             if (!parentToActive.hasClass("active")) {
@@ -146,7 +148,7 @@
                     }
                     break;
                 case "sql":
-                    $("#sql_editor").height(300);
+                    $("#sql_editor").height(250);
                     var editor = ace.edit("sql_editor");
                     editor.setTheme("ace/theme/monokai");
                     editor.getSession().setMode("ace/mode/sql");
@@ -304,6 +306,7 @@
                     postData["method_name"] = $("#sql_method_name").val();
                     postData["crud_type"] = "select";
                     postData["sql_content"] = ace.edit("sql_editor").getValue();
+                    postData["params"] = $.makeArray($("#selected_variable>option").map(function() { return $(this).val(); })).join(",");
                 }
 
                 $.post("/rest/task", postData, function (data) {

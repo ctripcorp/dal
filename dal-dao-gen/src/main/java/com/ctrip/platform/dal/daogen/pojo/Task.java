@@ -10,4 +10,8 @@ public interface Task {
 	
 	public void setTable_name(String table_name);
 	
+	public int getServer_id();
+	
+	public void setServer_id(int server_id);
+	
 }

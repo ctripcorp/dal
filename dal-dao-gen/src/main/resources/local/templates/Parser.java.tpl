@@ -1,4 +1,4 @@
-package $namespace;
+package ${pojoHost.getDaoNamespace()};
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,22 +7,22 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalParser;
 
-public class Dal${table_name}Parser implements DalParser<$table_name> {
-	public static final String DATABASE_NAME = "$database";
-	public static final String TABLE_NAME = "$table_name";
+public class ${parserHost.getClassName()} implements DalParser<${pojoHost.getClassName()}> {
+	public static final String DATABASE_NAME = "${parserHost.getDbName()}";
+	public static final String TABLE_NAME = "${parserHost.getTableName()}";
 	private static final String[] COLUMNS = new String[]{
-		#foreach( $field in $fields )
-		"${field.getName()}"#if($foreach.count != $fields.size()), #end
-		#end
+#foreach( $field in ${pojoHost.getFields()} )
+$tab$tab"${field.getName()}"#if($foreach.count != $fields.size()),${newline}#end
+#end
 	};
 	
 	@Override
-	public $table_name map(ResultSet rs, int rowNum) throws SQLException {
-		$table_name vo = new $table_name();
-		#foreach( $field in $fields )
-vo.set${field.getName()}(rs.get$WordUtils.capitalize($field.getType())("${field.getName()}"));
-		#end
-return vo;
+	public ${pojoHost.getClassName()} map(ResultSet rs, int rowNum) throws SQLException {
+		${pojoHost.getClassName()} pojo = new ${pojoHost.getClassName()};
+#foreach( $field in ${pojoHost.getFields()} )
+${tab}${tab}pojo.set${field.getName()}(rs.get$WordUtils.capitalize($field.getType())("${field.getName()}"));
+#end
+		return pojo;
 	}
 
 	@Override
@@ -41,35 +41,35 @@ return vo;
 	}
 
 	@Override
-	public Map<String, ?> getFields(Person pojo) {
+	public Map<String, ?> getFields(${pojoHost.getClassName()} pojo) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		#foreach( $field in $fields )
-map.put("${field.getName()}", pojo.get${field.getName()}());
-		#end
-return map;
+#foreach( $field in ${pojoHost.getFields()} )
+		map.put("${field.getName()}", pojo.get${field.getName()}());
+#end
+		return map;
 	}
 
 	@Override
 	public boolean hasIdentityColumn() {
-		return $hasIdentity;
+		return ${parserHost.isHasIdentity()};
 	}
 
 	@Override
 	public String getIdentityColumnName() {
-		return #if($hasIdentity)"$identityColumn"#{else}null#end;
+		return #if($parserHost.isHasIdentity())"${parserHost.getIdentityColumnName()}"#{else}null#end;
 	}
 
 	@Override
-	public Number getIdentityValue(Person pojo) {
-		return #if($hasIdentity)pojo.get${identityColumn}()#{else}null#end;
+	public Number getIdentityValue(${pojoHost.getClassName()} pojo) {
+		return #if($parserHost.isHasIdentity())pojo.get${parserHost.getIdentityColumnName()}()#{else}null#end;
 	}
 
 	@Override
-	public Map<String, ?> getPk(Person pojo) {
+	public Map<String, ?> getPk(${pojoHost.getClassName()} pojo) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		#foreach( $field in $fields )
-#if($field.isPrimary())map.put("${field.getName()}", pojo.get${field.getName()}());#end
-		#end
-return map;
+#foreach( $field in ${pojoHost.getFields()} )
+#if($field.isPrimary())${tab}${tab}map.put("${field.getName()}",pojo.get${field.getName()}());#end
+#end
+${newline}${tab}${tab}return map;
 	}
 }

@@ -1,10 +1,7 @@
 package com.ctrip.platform.dal.daogen.gen;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,15 +12,12 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.velocity.app.Velocity;
 import org.springframework.jdbc.support.JdbcUtils;
 
-import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.dao.AutoTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
 import com.ctrip.platform.dal.daogen.dao.ProjectDAO;
-import com.ctrip.platform.dal.daogen.dao.ServerDbMapDAO;
 import com.ctrip.platform.dal.daogen.dao.SpTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.SqlTaskDAO;
 import com.ctrip.platform.dal.daogen.pojo.AutoTask;
@@ -31,6 +25,7 @@ import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.Project;
 import com.ctrip.platform.dal.daogen.pojo.SpTask;
+import com.ctrip.platform.dal.daogen.pojo.SqlTask;
 import com.ctrip.platform.dal.daogen.pojo.Task;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -45,8 +40,6 @@ public abstract class AbstractGenerator implements Generator {
 
 	protected static SqlTaskDAO sqlTaskDao;
 
-	protected static ServerDbMapDAO serverDbMapDao;
-
 	private static DbServerDAO dbServerDao;
 
 	protected String namespace;
@@ -59,7 +52,6 @@ public abstract class AbstractGenerator implements Generator {
 		autoTaskDao = SpringBeanGetter.getAutoTaskDao();
 		spTaskDao = SpringBeanGetter.getSpTaskDao();
 		sqlTaskDao = SpringBeanGetter.getSqlTaskDao();
-		serverDbMapDao = SpringBeanGetter.getServerDbMapDao();
 		dbServerDao = SpringBeanGetter.getDBServerDao();
 
 		java.util.Properties pr = new java.util.Properties();
@@ -97,7 +89,12 @@ public abstract class AbstractGenerator implements Generator {
 		generateSPCode(_sp);
 
 		// 手工编写的SQL
+		List<SqlTask> _freeSql = sqlTaskDao.getTasksByProjectId(Integer
+				.valueOf(projectId));
 		List<Task> freeSql = new ArrayList<Task>();
+		for (SqlTask t : _freeSql) {
+			freeSql.add(t);
+		}
 		generateFreeSqlCode(freeSql);
 
 		return true;

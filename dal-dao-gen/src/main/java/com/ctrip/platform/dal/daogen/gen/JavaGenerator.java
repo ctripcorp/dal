@@ -26,7 +26,6 @@ import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.Method;
 import com.ctrip.platform.dal.daogen.pojo.Parameter;
-import com.ctrip.platform.dal.daogen.pojo.ServerDbMap;
 import com.ctrip.platform.dal.daogen.pojo.SpTask;
 import com.ctrip.platform.dal.daogen.pojo.Task;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
@@ -60,7 +59,9 @@ public class JavaGenerator extends AbstractGenerator {
 
 		VelocityContext context = new VelocityContext();
 
-		context.put("namespace", namespace);
+		JavaPojoGenHost pojoHost = new JavaPojoGenHost();
+		JavaParserGenHost parserHost = new JavaParserGenHost();
+		pojoHost.setDaoNamespace(namespace);
 
 		// 每个表生成一个DAO文件，可能有潜在的问题，即两个不同的数据库中有相同的表，后期需要修改
 		Map<String, List<Task>> groupByTable = groupByTableName(tasks);
@@ -68,67 +69,75 @@ public class JavaGenerator extends AbstractGenerator {
 		for (Map.Entry<String, List<Task>> entry : groupByTable.entrySet()) {
 			String table = entry.getKey();
 			List<Task> groupedTasks = entry.getValue();
+			int serverId = -1;
 			if (groupedTasks.size() > 0) {
-				context.put("database", groupedTasks.get(0).getDb_name());
+				Task currentTask = groupedTasks.get(0); 
+				// context.put("database", groupedTasks.get(0).getDb_name());
+				parserHost.setDbName(currentTask.getDb_name());
+				serverId = currentTask.getServer_id();
 			} else {
 				continue;
 			}
-			context.put("dao_name", String.format("%sDAO", table));
-			context.put("JavaDbTypeMap", Consts.JavaDbTypeMap);
-			context.put("JavaSqlTypeMap", Consts.JavaSqlTypeMap);
-			context.put("table_name", table);
-			context.put("pojo_name", WordUtils.capitalizeFully(table));
+			
+			parserHost.setTableName(table);
 
-			ServerDbMap serverDbMap = serverDbMapDao.getServerByDbname(context
-					.get("database").toString());
+			pojoHost.setClassName(WordUtils.capitalizeFully(table));
+			parserHost.setClassName(String.format("%sDalParser",
+					pojoHost.getClassName()));
 
 			List<FieldMeta> fieldsMeta = getMetaData(
-					serverDbMap.getServer_id(), context.get("database")
-							.toString(), table);
-			
+					serverId, parserHost.getDbName(), table);
+
 			boolean hasIdentity = false;
 			String identityColumn = null;
-			for(FieldMeta meta : fieldsMeta){
-				if(!hasIdentity && meta.isIdentity()){
+			for (FieldMeta meta : fieldsMeta) {
+				if (!hasIdentity && meta.isIdentity()) {
 					hasIdentity = true;
 					identityColumn = meta.getName();
 				}
-				meta.setType(Consts.JavaSqlTypeMap.get(meta.getDbType().toLowerCase()));
+				meta.setType(Consts.JavaSqlTypeMap.get(meta.getDbType()
+						.toLowerCase()));
 			}
-		
-			context.put("fields", fieldsMeta);
-			context.put("hasIdentity", hasIdentity);
-			context.put("identityColumn", identityColumn);
+			
+			pojoHost.setFields(fieldsMeta);
+			
+			parserHost.setHasIdentity(hasIdentity);
+			parserHost.setIdentityColumnName(identityColumn);
+
 			context.put("WordUtils", WordUtils.class);
+			context.put("newline", "\n");
+			context.put("tab", "\t");
 
-			//putMethods2Velocity(context, fieldsMeta, groupedTasks);
+			context.put("pojoHost", pojoHost);
+			context.put("parserHost", parserHost);
 
-			FileWriter daoWriter = null;
+			// putMethods2Velocity(context, fieldsMeta, groupedTasks);
+
+			FileWriter parserWriter = null;
 			FileWriter pojoWriter = null;
 			try {
 				File mavenLikeDir = new File(String.format("gen/%s/java",
 						projectId));
 				FileUtils.forceMkdir(mavenLikeDir);
 
-				daoWriter = new FileWriter(
-						String.format("%s/Dal%sParser.java",
-								mavenLikeDir.getAbsolutePath(),
-								context.get("table_name")));
-				
+				parserWriter = new FileWriter(String.format("%s/%s.java",
+						mavenLikeDir.getAbsolutePath(),
+						parserHost.getClassName()));
+
 				pojoWriter = new FileWriter(
 						String.format("%s/%s.java",
 								mavenLikeDir.getAbsolutePath(),
-								context.get("table_name")));
-				
-				Velocity.mergeTemplate("templates/Parser.java.tpl", "UTF-8", context,
-						daoWriter);
-				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8", context,
-						pojoWriter);
-				
+								pojoHost.getClassName()));
+
+				Velocity.mergeTemplate("templates/Parser.java.tpl", "UTF-8",
+						context, parserWriter);
+				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
+						context, pojoWriter);
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
-				JavaIOUtils.closeWriter(daoWriter);
+				JavaIOUtils.closeWriter(parserWriter);
 				JavaIOUtils.closeWriter(pojoWriter);
 			}
 		}
@@ -161,8 +170,6 @@ public class JavaGenerator extends AbstractGenerator {
 			m.setAction(groupedTask.getCrud_type().toLowerCase());
 			m.setMethodName(groupedTask.getMethod_name());
 			m.setSqlSPName(groupedTask.getSql_content());
-			
-			
 
 			// 查询，或者SQL形式的删除
 			if (m.getAction().equalsIgnoreCase("select")
@@ -247,8 +254,10 @@ public class JavaGenerator extends AbstractGenerator {
 		for (Map.Entry<String, List<Task>> entry : groupbyDB.entrySet()) {
 			// String sp = entry.getKey();
 			List<Task> objs = entry.getValue();
+			int serverId = -1;
 			if (objs.size() > 0) {
 				context.put("database", objs.get(0).getDb_name());
+				serverId = objs.get(0).getServer_id();
 			} else {
 				continue;
 			}
@@ -269,15 +278,11 @@ public class JavaGenerator extends AbstractGenerator {
 				m.setSqlSPName(String.format("%s.%s", obj.getSp_schema(),
 						obj.getSp_name()));
 
-				ServerDbMap serverDbMap = serverDbMapDao
-						.getServerByDbname(context.get("database").toString());
-
 				DataSource ds = DataSourceLRUCache.newInstance().getDataSource(
-						serverDbMap.getServer_id());
+						serverId);
 
 				if (ds == null) {
-					DbServer dbServer = dbServerDao.getDbServerByID(serverDbMap
-							.getServer_id());
+					DbServer dbServer = dbServerDao.getDbServerByID(serverId);
 					ds = DataSourceLRUCache.newInstance().putDataSource(
 							dbServer);
 				}
@@ -356,7 +361,10 @@ public class JavaGenerator extends AbstractGenerator {
 
 	@Override
 	public void generateFreeSqlCode(List<Task> tasks) {
-
+		Map<String, List<Task>> tasksGroupByDb = groupByDbName(tasks);
+		
+		
+		
 	}
 
 	/**

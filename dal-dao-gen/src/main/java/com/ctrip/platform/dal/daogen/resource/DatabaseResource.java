@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -27,8 +28,8 @@ import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.Status;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,7 +38,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Path("db")
 public class DatabaseResource {
 
-	
 	private static ObjectMapper mapper = new ObjectMapper();
 	private static DbServerDAO dbServerDao;
 
@@ -53,8 +53,8 @@ public class DatabaseResource {
 		List<DbServer> dbServers = dbServerDao.getAllDbServers();
 
 		for (DbServer dataSource : dbServers) {
-			dataSource.setUser("不告诉你");
-			dataSource.setPassword("不告诉你");
+			dataSource.setUser("xxx");
+			dataSource.setPassword("xxx");
 		}
 
 		return dbServers;
@@ -101,7 +101,7 @@ public class DatabaseResource {
 		List<String> results = new ArrayList<String>();
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-		if(ds == null){
+		if (ds == null) {
 			DbServer dbServer = dbServerDao.getDbServerByID(server);
 			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
 		}
@@ -141,8 +141,8 @@ public class DatabaseResource {
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
 
 		DbServer dbServer = dbServerDao.getDbServerByID(server);
-		
-		if(ds == null){
+
+		if (ds == null) {
 			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
 		}
 
@@ -202,7 +202,7 @@ public class DatabaseResource {
 			@QueryParam("table_name") String tableName) {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-		if(ds == null){
+		if (ds == null) {
 			DbServer dbServer = dbServerDao.getDbServerByID(server);
 			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
 		}
@@ -292,10 +292,10 @@ public class DatabaseResource {
 			@QueryParam("db_name") String dbName) {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-		
+
 		DbServer dbServer = dbServerDao.getDbServerByID(server);
-		
-		if(ds == null){
+
+		if (ds == null) {
 			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
 		}
 
@@ -337,8 +337,8 @@ public class DatabaseResource {
 			@QueryParam("sp_name") String spName) {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-		
-		if(ds == null){
+
+		if (ds == null) {
 			DbServer dbServer = dbServerDao.getDbServerByID(server);
 			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
 		}
@@ -363,13 +363,14 @@ public class DatabaseResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	// @Produces(MediaType.TEXT_PLAIN)
-	public Status saveSp(@QueryParam("server") int server,
+
+	public Status saveSp(@FormParam("server") int server,
 			@FormParam("db_name") String dbName,
-			@QueryParam("sp_code") String spCode) {
+			@FormParam("sp_code") String spCode) {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-		
-		if(ds == null){
+
+		if (ds == null) {
 			DbServer dbServer = dbServerDao.getDbServerByID(server);
 			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
 		}
@@ -380,6 +381,51 @@ public class DatabaseResource {
 
 		return Status.OK;
 
+	}
+
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("test_sql")
+	public Status verifyQuery(@FormParam("server") int server,
+			@FormParam("db_name") String dbName, @FormParam("sql") String sql,
+			@FormParam("params") String params) {
+
+		String[] parameters = params.split(",");
+
+		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
+
+		if (ds == null) {
+			DbServer dbServer = dbServerDao.getDbServerByID(server);
+			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+		}
+
+		Connection connection = null;
+		ResultSet rs = null;
+		try {
+			connection = ds.getConnection();
+
+			PreparedStatement ps = connection.prepareStatement(sql);
+
+			for (String param : parameters) {
+				String[] tuple = param.split("_");
+				ps.setObject(Integer.valueOf(tuple[0]), tuple[2],
+						Integer.valueOf(tuple[1]));
+			}
+
+			rs = ps.executeQuery();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return Status.ERROR;
+		} catch (Throwable e) {
+			e.printStackTrace();
+			return Status.ERROR;
+		} finally {
+			JdbcUtils.closeResultSet(rs);
+			JdbcUtils.closeConnection(connection);
+		}
+
+		return Status.OK;
 	}
 
 }

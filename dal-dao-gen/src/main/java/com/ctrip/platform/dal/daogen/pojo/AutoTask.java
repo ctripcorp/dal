@@ -24,16 +24,6 @@ public class AutoTask extends AbstractTask {
 	private String condition;
 
 	private String sql_content;
-	
-	private int server_id;
-
-	public int getServer_id() {
-		return server_id;
-	}
-
-	public void setServer_id(int server_id) {
-		this.server_id = server_id;
-	}
 
 	public String getFields() {
 		return fields;
@@ -139,16 +129,17 @@ public class AutoTask extends AbstractTask {
 		AutoTask task = new AutoTask();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		task.setDb_name(rs.getString(3));
-		task.setTable_name(rs.getString(4));
-		task.setClass_name(rs.getString(5));
-		task.setMethod_name(rs.getString(6));
-		task.setSql_style(rs.getString(7));
-		task.setSql_type(rs.getString(8));
-		task.setCrud_type(rs.getString(9));
-		task.setFields(rs.getString(10));
-		task.setCondition(rs.getString(11));
-		task.setSql_content(rs.getString(12));
+		task.setServer_id(rs.getInt(3));
+		task.setDb_name(rs.getString(4));
+		task.setTable_name(rs.getString(5));
+		task.setClass_name(rs.getString(6));
+		task.setMethod_name(rs.getString(7));
+		task.setSql_style(rs.getString(8));
+		task.setSql_type(rs.getString(9));
+		task.setCrud_type(rs.getString(10));
+		task.setFields(rs.getString(11));
+		task.setCondition(rs.getString(12));
+		task.setSql_content(rs.getString(13));
 
 		return task;
 	}

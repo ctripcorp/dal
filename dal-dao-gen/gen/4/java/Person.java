@@ -1,22 +1,25 @@
 
 package hjhTest;
 
+import java.sql.Timestamp;
+
 import com.ctrip.platform.dal.dao.DalPojo;
 
 public class Person implements DalPojo {
-	private int ID;
+
+	private Integer ID;
 	private String Address;
 	private String Telephone;
 	private String Name;
-	private int Age;
-	private int Gender;
+	private Integer Age;
+	private Integer Gender;
 	private Timestamp Birth;
 
-	public int getID(){
+	public Integer getID(){
 		return ID;
 	}
 
-	public void setID(int ID){
+	public void setID(Integer ID){
 		this.ID = ID;
 	}
 
@@ -44,19 +47,19 @@ public class Person implements DalPojo {
 		this.Name = Name;
 	}
 
-	public int getAge(){
+	public Integer getAge(){
 		return Age;
 	}
 
-	public void setAge(int Age){
+	public void setAge(Integer Age){
 		this.Age = Age;
 	}
 
-	public int getGender(){
+	public Integer getGender(){
 		return Gender;
 	}
 
-	public void setGender(int Gender){
+	public void setGender(Integer Gender){
 		this.Gender = Gender;
 	}
 

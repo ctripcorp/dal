@@ -1,5 +1,11 @@
 package com.ctrip.platform.dal.daogen.gen;
 
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
+
 
 public class JavaParserGenHost {
 	
@@ -12,6 +18,10 @@ public class JavaParserGenHost {
 	private boolean hasIdentity;
 	
 	private String identityColumnName;
+	
+	private List<FieldMeta> fields;
+	
+	private Set<String> imports = new TreeSet<String>();
 
 	public String getDbName() {
 		return dbName;
@@ -51,6 +61,35 @@ public class JavaParserGenHost {
 
 	public void setIdentityColumnName(String identityColumnName) {
 		this.identityColumnName = identityColumnName;
+	}
+	
+	public List<FieldMeta> getFields() {
+		return fields;
+	}
+
+	public void setFields(List<FieldMeta> fields) {
+		this.fields = fields;
+		buildImports();
+	}
+	
+	private void buildImports() {
+		imports.add(java.sql.ResultSet.class.getName());
+		imports.add(java.sql.SQLException.class.getName());
+		imports.add(java.util.Map.class.getName());
+		imports.add(java.util.LinkedHashMap.class.getName());
+		
+		for(FieldMeta field: fields) {
+			Class clazz = field.getJavaClass();
+			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))
+				continue;
+			if(byte[].class.equals(clazz))
+				continue;
+			imports.add(clazz.getName());
+		}
+	}
+	
+	public Set<String> getImports() {
+		return imports;
 	}
 
 }

@@ -1,7 +1,9 @@
+
 package hjhTest;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -36,16 +38,16 @@ public class DalPersonParser implements DalParser<Person> {
 	
 	@Override
 	public Person map(ResultSet rs, int rowNum) throws SQLException {
-		Person pojo = new Person();
+		Person pojo = new Person;
 		
-		pojo.setID(rs.getInt("ID"));
-		pojo.setAddress(rs.getString("Address"));
-		pojo.setTelephone(rs.getString("Telephone"));
-		pojo.setName(rs.getString("Name"));
-		pojo.setAge(rs.getInt("Age"));
-		pojo.setGender(rs.getInt("Gender"));
-		pojo.setBirth(rs.getTimestamp("Birth"));
-		
+		pojo.setID((Integer)rs.getObject("ID");
+		pojo.setAddress((String)rs.getObject("Address");
+		pojo.setTelephone((String)rs.getObject("Telephone");
+		pojo.setName((String)rs.getObject("Name");
+		pojo.setAge((Integer)rs.getObject("Age");
+		pojo.setGender((Integer)rs.getObject("Gender");
+		pojo.setBirth((Timestamp)rs.getObject("Birth");
+
 		return pojo;
 	}
 
@@ -63,7 +65,7 @@ public class DalPersonParser implements DalParser<Person> {
 	public String[] getColumnNames() {
 		return COLUMNS;
 	}
-	
+
 	@Override
 	public String[] getPrimaryKeyNames() {
 		return PRIMARY_KEYS;
@@ -92,19 +94,19 @@ public class DalPersonParser implements DalParser<Person> {
 
 		return primaryKeys;
 	}
-	
+
 	@Override
 	public Map<String, ?> getFields(Person pojo) {
-		Map<String, Object> fields = new LinkedHashMap<String, Object>();
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		
-		fields.put("ID", pojo.getID());
-		fields.put("Address", pojo.getAddress());
-		fields.put("Telephone", pojo.getTelephone());
-		fields.put("Name", pojo.getName());
-		fields.put("Age", pojo.getAge());
-		fields.put("Gender", pojo.getGender());
-		fields.put("Birth", pojo.getBirth());
+		map.put("ID", pojo.getID());
+		map.put("Address", pojo.getAddress());
+		map.put("Telephone", pojo.getTelephone());
+		map.put("Name", pojo.getName());
+		map.put("Age", pojo.getAge());
+		map.put("Gender", pojo.getGender());
+		map.put("Birth", pojo.getBirth());
 
-		return fields;
+		return map;
 	}
 }

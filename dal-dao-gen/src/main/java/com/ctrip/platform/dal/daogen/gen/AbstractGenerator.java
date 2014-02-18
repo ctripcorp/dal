@@ -15,6 +15,7 @@ import javax.sql.DataSource;
 import org.apache.velocity.app.Velocity;
 import org.springframework.jdbc.support.JdbcUtils;
 
+import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.dao.AutoTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
 import com.ctrip.platform.dal.daogen.dao.ProjectDAO;
@@ -153,6 +154,7 @@ public abstract class AbstractGenerator implements Generator {
 					meta.setPosition(position);
 					meta.setPrimary(primaryKeys.contains(columnName));
 					meta.setDataType(dataType);
+					meta.setJavaClass(Consts.JavaSqlTypeMap.get(dataType));
 					// meta.setNullable(nullable.equalsIgnoreCase("yes")
 					// && Consts.CSharpValueTypes.contains(columnType));
 					// meta.setValueType(Consts.CSharpValueTypes.contains(columnType));

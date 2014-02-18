@@ -82,7 +82,7 @@ public class JavaGenerator extends AbstractGenerator {
 			parserHost.setTableName(table);
 
 			pojoHost.setClassName(WordUtils.capitalizeFully(table));
-			parserHost.setClassName(String.format("%sDalParser",
+			parserHost.setClassName(String.format("Dal%sParser",
 					pojoHost.getClassName()));
 
 			List<FieldMeta> fieldsMeta = getMetaData(
@@ -95,12 +95,12 @@ public class JavaGenerator extends AbstractGenerator {
 					hasIdentity = true;
 					identityColumn = meta.getName();
 				}
-				meta.setType(Consts.JavaSqlTypeMap.get(meta.getDbType()
-						.toLowerCase()).getName());
+				meta.setType(Consts.JavaSqlTypeMap.get(meta.getDataType()).getName());
 			}
 			
 			pojoHost.setFields(fieldsMeta);
-			
+
+			parserHost.setFields(fieldsMeta);
 			parserHost.setHasIdentity(hasIdentity);
 			parserHost.setIdentityColumnName(identityColumn);
 
@@ -305,7 +305,7 @@ public class JavaGenerator extends AbstractGenerator {
 						p.setName(name);
 						p.setFieldName(name);
 						p.setType(Consts.JavaSqlTypeMap.get(spParams
-								.getString("TYPE_NAME")).getName());
+								.getString("DATA_TYPE")).getName());
 						p.setParamMode(spParams.getString("COLUMN_TYPE"));
 						p.setPosition(spParams.getInt("ORDINAL_POSITION"));
 						parameters.add(p);

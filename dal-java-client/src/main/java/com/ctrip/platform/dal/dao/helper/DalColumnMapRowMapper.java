@@ -17,8 +17,9 @@ public class DalColumnMapRowMapper implements DalRowMapper<Map<String, Object>> 
 		ResultSetMetaData rsmd = rs.getMetaData();
 		
 		columns = new String[rsmd.getColumnCount()];
-		for(int i = 0; i < columns.length; i++)
+		for(int i = 0; i < columns.length; i++) {
 			columns[i] = rsmd.getColumnName(i + 1);
+		}
 	}
 
 	public Map<String, Object> map(ResultSet rs, int rowNum) throws SQLException {

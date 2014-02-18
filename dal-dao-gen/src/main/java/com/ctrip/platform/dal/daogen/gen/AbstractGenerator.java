@@ -139,7 +139,8 @@ public abstract class AbstractGenerator implements Generator {
 			try {
 				allColumnsRs = connection.getMetaData().getColumns(dbName,
 						null, tableName, null);
-
+				mapType(connection);
+				
 				while (allColumnsRs.next()) {
 					FieldMeta meta = new FieldMeta();
 
@@ -175,6 +176,16 @@ public abstract class AbstractGenerator implements Generator {
 
 		return fields;
 	}
+	
+	private void mapType(Connection conn) {
+		try {
+			System.out.println(conn.getTypeMap());
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 
 	/**
 	 * For a list of DBObject, return a map group by a condition

@@ -1,14 +1,15 @@
 
-package $namespace;
+package ${pojoHost.getDaoNamespace()};
 
 import com.ctrip.platform.dal.dao.DalPojo;
 
-public class $table_name implements DalPojo {
-#foreach( $field in $fields )
+public class ${pojoHost.getClassName()} implements DalPojo {
+
+#foreach( $field in ${pojoHost.getFields()} )
 	private ${field.getType()} ${field.getName()};
 #end
 
-#foreach( $field in $fields )
+#foreach( $field in ${pojoHost.getFields()} )
 	public ${field.getType()} get${field.getName()}#[[(){]]#
 		return ${field.getName()};
 	#[[}]]#
@@ -18,4 +19,5 @@ public class $table_name implements DalPojo {
 	#[[}]]#
 
 #end
+
 }

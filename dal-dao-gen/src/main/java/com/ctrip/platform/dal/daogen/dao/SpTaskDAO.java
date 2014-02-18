@@ -22,7 +22,7 @@ public class SpTaskDAO {
 	public List<SpTask> getAllTasks() {
 
 		return this.jdbcTemplate
-				.query("select id, project_id, db_name,class_name,sp_schema,sp_name,sql_style,crud_type,sp_content from task_sp",
+				.query("select id, project_id,server_id,  db_name,class_name,sp_schema,sp_name,sql_style,crud_type,sp_content from task_sp",
 
 				new RowMapper<SpTask>() {
 					public SpTask mapRow(ResultSet rs, int rowNum)
@@ -35,7 +35,7 @@ public class SpTaskDAO {
 	public List<SpTask> getTasksByProjectId(int iD) {
 
 		return this.jdbcTemplate
-				.query("select id, project_id, db_name,class_name,sp_schema,sp_name,sql_style,crud_type,sp_content from task_sp where project_id=?",
+				.query("select id, project_id, server_id, db_name,class_name,sp_schema,sp_name,sql_style,crud_type,sp_content from task_sp where project_id=?",
 						new Object[] { iD }, new RowMapper<SpTask>() {
 							public SpTask mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
@@ -47,8 +47,8 @@ public class SpTaskDAO {
 	public int insertTask(SpTask task) {
 
 		return this.jdbcTemplate
-				.update("insert into task_sp ( project_id, db_name,class_name,sp_schema,sp_name,sql_style,crud_type,sp_content) values (?,?,?,?,?,?,?,?)",
-						task.getProject_id(), task.getDb_name(),
+				.update("insert into task_sp ( project_id,server_id,  db_name,class_name,sp_schema,sp_name,sql_style,crud_type,sp_content) values (?,?,?,?,?,?,?,?,?)",
+						task.getProject_id(),task.getServer_id(), task.getDb_name(),
 						task.getClass_name(), task.getSp_schema(),
 						task.getSp_name(), task.getSql_style(),
 						task.getCrud_type(), task.getSp_content());
@@ -58,9 +58,9 @@ public class SpTaskDAO {
 	public int updateTask(SpTask task) {
 
 		return this.jdbcTemplate
-				.update("update task_sp set project_id=?, db_name=?, class_name=?,sp_schema=?,sp_name=?,sql_style=?,crud_type=?,sp_content=? where id=?",
+				.update("update task_sp set project_id=?,server_id=?,  db_name=?, class_name=?,sp_schema=?,sp_name=?,sql_style=?,crud_type=?,sp_content=? where id=?",
 					
-						task.getProject_id(), task.getDb_name(),
+						task.getProject_id(),task.getServer_id(), task.getDb_name(),
 						task.getClass_name(), task.getSp_schema(),
 						task.getSp_name(), task.getSql_style(),
 						task.getCrud_type(), task.getSp_content(), task.getId());

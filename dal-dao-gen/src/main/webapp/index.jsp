@@ -144,7 +144,7 @@
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                   <h4 class="modal-title" id="page1_label">DAO生成向导</h4>
                </div>
-               <div class="modal-body" style="position: relative;overflow: auto;width: auto;">
+               <div class="modal-body" style="position: relative;overflow: auto;width: auto;max-height:350px;">
                   <div class="steps step0 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
@@ -383,6 +383,65 @@
                         <div id="sql_editor" class="span12">
                         </div>
                      </div>
+                     <br>
+                     <div class="row-fluid">
+                        <div class="row-fluid">
+                           <div class="span12">
+                              <input id="variable" type="text" class="span3" value="">
+                              <select id="variable_types" class="span3">
+                                 <option value='_please_select'>--参数类型--</option>
+                                 <option value='-7'>Bit</option>
+                                 <option value='16'>Boolean</option>
+                                 <option value='-6'>TinyInt</option>
+                                 <option value='5'>SmallInt</option>
+                                 <option value='4'>Integer</option>
+                                 <option value='-5'>BigInt</option>
+                                 <option value='6'>Float</option>
+                                 <option value='7'>Real</option>
+                                 <option value='8'>Double</option>
+                                 <option value='2'>Numeric</option>
+                                 <option value='3'>Decimal</option>
+                                 <option value='1'>Char</option>
+                                 <option value='12'>Varchar</option>
+                                 <option value='-1'>LongVarchar</option>
+                                 <option value='-15'>Nchar</option>
+                                 <option value='-9'>NVarchar</option>
+                                 <option value='-16'>LongNVarchar</option>
+                                 <option value='91'>Date</option>
+                                 <option value='92'>Time</option>
+                                 <option value='93'>Timestamp</option>
+                                 <option value='-2'>Binary</option>
+                                 <option value='-3'>Varbinary</option>
+                                 <option value='-4'>LongVarbinary</option>
+                                 <option value='0'>Null</option>
+                                 <option value='1111'>Other</option>
+                                 <option value='2000'>JavaObject</option>
+                                 <option value='2001'>Distinct</option>
+                                 <option value='2002'>Struct</option>
+                                 <option value='2003'>Array</option>
+                                 <option value='2004'>Blob</option>
+                                 <option value='2005'>Clob</option>
+                                 <option value='2006'>Ref</option>
+                                 <option value='70'>DataLink</option>
+                                 <option value='-8'>Rowid</option>
+                                 <option value='2011'>NClob</option>
+                                 <option value='2009'>SqlXml</option>
+                              </select>
+                              <input id="variable_values" type="text" class="span4" value="">
+                              <input id="add_variable" type="button" class="span2 btn btn-primary" value="添加">
+                           </div>
+                        </div>
+                        <br>
+                        <div class="row-fluid">
+                           <div class="span12">
+                              <select class="span10" id="selected_variable" multiple="multiple">
+                              </select>
+                              <input id="del_variable" type="button" class="span2 btn btn-danger" value="删除">
+                           </div>
+                        </div>
+                        <br>
+                        <input id="test_sql" type="button" class="offset3 span3 btn btn-primary" value="验证查询">
+                     </div>
                   </div>
                   <div class="steps step3 row-fluid" from="">
                      <div class="control-group">
@@ -395,8 +454,8 @@
                   </div>
                </div>
                <div class="modal-footer">
-                  <button id="prev_step"  type="button" class="btn btn-default">Previous</button>
-                  <button id="next_step"  type="button" class="btn btn-primary">Next</button>
+                  <button id="prev_step"  type="button" class="btn btn-default">上一步</button>
+                  <button id="next_step"  type="button" class="btn btn-primary">下一步</button>
                   <!-- <label class="popup_label"><input type="checkbox">保存时生成代码</label>
                      <button id="save_dao"  type="button" class="btn btn-primary">保存</button> -->
                </div>

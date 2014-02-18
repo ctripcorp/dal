@@ -99,13 +99,14 @@ public class SpTask  extends AbstractTask{
 		SpTask task = new SpTask();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		task.setDb_name(rs.getString(3));
-		task.setClass_name(rs.getString(4));
-		task.setSp_schema(rs.getString(5));
-		task.setSp_name(rs.getString(6));
-		task.setSql_style(rs.getString(7));
-		task.setCrud_type(rs.getString(8));
-		task.setSp_content(rs.getString(9));
+		task.setServer_id(rs.getInt(3));
+		task.setDb_name(rs.getString(4));
+		task.setClass_name(rs.getString(5));
+		task.setSp_schema(rs.getString(6));
+		task.setSp_name(rs.getString(7));
+		task.setSql_style(rs.getString(8));
+		task.setCrud_type(rs.getString(9));
+		task.setSp_content(rs.getString(10));
 		return task;
 	}
 }

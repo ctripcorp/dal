@@ -1,13 +1,18 @@
 package com.ctrip.platform.dal.daogen.utils;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.BasicDataSource;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
@@ -32,7 +37,7 @@ public class DataSourceLRUCache {
 		dbServerDao = SpringBeanGetter.getDBServerDao();
 	}
 
-	//默认30分钟
+	// 默认30分钟
 	private long timeout = 30 * 60 * 1000;
 
 	public static DataSourceLRUCache newInstance() {
@@ -170,8 +175,29 @@ public class DataSourceLRUCache {
 			this.dataSource = dataSource;
 		}
 	}
-	
+
 	public static void main(String[] args) {
+		NamedParameterJdbcTemplate tmpl = new NamedParameterJdbcTemplate(
+				DataSourceLRUCache.newInstance().putDataSource(5));
+		
+		String sql = "select id, driver, url, user,password, db_type from daogen.data_source WHERE id = :id";
+		
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("id", 5);
+		
+		List<DbServer> servers = tmpl.query(sql, parameters, new RowMapper<DbServer>(){
+
+			@Override
+			public DbServer mapRow(ResultSet rs, int rowNum)
+					throws SQLException {
+				return DbServer.visitRow(rs);
+			}
+			
+		});
+		
+		for(DbServer server : servers){
+			System.out.println(server.getDb_type());
+		}
 		
 	}
 

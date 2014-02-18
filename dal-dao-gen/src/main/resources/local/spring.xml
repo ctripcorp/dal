@@ -24,10 +24,6 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
     
-    <bean id="serverDbmapDao" class="com.ctrip.platform.dal.daogen.dao.ServerDbMapDAO">
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
-    
      <bean id="dataSourceDao" class="com.ctrip.platform.dal.daogen.dao.DbServerDAO">
         <property name="dataSource" ref="dataSource"/>
     </bean>

@@ -7,7 +7,6 @@ import com.ctrip.platform.dal.daogen.dao.AutoTaskDAO;
 import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
 import com.ctrip.platform.dal.daogen.dao.ProjectDAO;
 import com.ctrip.platform.dal.daogen.dao.SpTaskDAO;
-import com.ctrip.platform.dal.daogen.dao.ServerDbMapDAO;
 import com.ctrip.platform.dal.daogen.dao.SqlTaskDAO;
 
 public class SpringBeanGetter {
@@ -34,9 +33,6 @@ public class SpringBeanGetter {
 	public static DbServerDAO getDBServerDao(){
 		return (DbServerDAO)context.getBean("dataSourceDao");
 	}
-	
-	public static ServerDbMapDAO getServerDbMapDao(){
-		return (ServerDbMapDAO)context.getBean("serverDbmapDao");
-	}
+
 
 }

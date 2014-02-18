@@ -234,6 +234,36 @@ jQuery(document).ready(function () {
         }
     });
 
+    $(document.body).on('click', "#add_variable", function (event) {
+        $("#selected_variable").append($('<option>', {
+            value: sprintf("%s_%s_%s", 
+                $("#variable").val(),
+                $("#variable_types").val(),
+                $("#variable_values").val() ),
+            text: sprintf("%s = %s", 
+                $("#variable").val(), $("#variable_values").val())
+        }));
+    });
+
+    $(document.body).on('click', "#del_variable", function (event) {
+        $("#selected_variable").remove($("#selected_variable").val());
+    });
+
+    $(document.body).on('click', "#test_sql", function (event) {
+        var postData = {};
+        postData["server"] = $("#servers").val();
+        postData["db_name"] = $("#databases").val();
+        postData["sql"] = ace.edit("sql_editor").getValue();
+        postData["params"] = $.makeArray($("#selected_variable>option").map(function() { return $(this).val(); })).join(",");
+        $.post("/rest/db/test_sql", postData).done(function(data){
+            if(data.code == "OK"){
+                alert("查询语句正常执行");
+            }else{
+                alert("执行异常，请检查sql及对应参数！");
+            }
+        });
+    });
+
     reloadProjects();
 });
 
@@ -275,7 +305,7 @@ var reloadProjects = function () {
 var reloadServers = function (callback) {
     cblock($("body"));
 
-    $.get("/rest/db/servers", function (data) {
+    $.get("/rest/db/servers").done(function(data){
         $("select[id$=servers] > option:gt(0)").remove();
         $.each(data, function (index, value) {
             $("#servers").append($('<option>', {
@@ -286,24 +316,20 @@ var reloadServers = function (callback) {
         if (undefined != data && data.length > 0) {
             $("#servers").val(data[0].id);
         }
-
         if (callback != undefined) {
             callback();
         }
-
+        $("body").unblock();
+    }).fail(function(data){
         $("body").unblock();
     });
 };
 
-
 var renderGrid = function () {
-
     var existsGrid = w2ui['grid'];
-
     if (existsGrid != undefined) {
         return;
     }
-
     w2ui['main_layout'].content('main', $().w2grid({
         name: 'grid',
         show: {
@@ -396,7 +422,7 @@ var renderGrid = function () {
                     $(".step2-3").hide();
                     $(".step3").hide();
                     $("#page1").attr('is_update', '0');
-                    $("#page1").modal();
+                    $("#page1").modal({"backdrop": "static"});
                     reloadServers();
                     break;
                 case 'editDAO':
@@ -419,7 +445,7 @@ var renderGrid = function () {
                                 $("#servers").val(record.server_id);
                             });
                             $("#page1").attr('is_update', '1');
-                            $("#page1").modal();
+                            $("#page1").modal({"backdrop": "static"});
                         }
                     }
                     break;

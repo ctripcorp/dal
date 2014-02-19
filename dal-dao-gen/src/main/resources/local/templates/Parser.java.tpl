@@ -32,10 +32,10 @@ public class ${parserHost.getClassName()} implements DalParser<${pojoHost.getCla
 	
 	@Override
 	public ${pojoHost.getClassName()} map(ResultSet rs, int rowNum) throws SQLException {
-		${pojoHost.getClassName()} pojo = new ${pojoHost.getClassName()};
+		${pojoHost.getClassName()} pojo = new ${pojoHost.getClassName()}();
 		
 #foreach( $field in ${pojoHost.getFields()} )
-		pojo.set${field.getName()}((${field.getJavaClass().getSimpleName()})rs.getObject("${field.getName()}");
+		pojo.set${field.getName()}((${field.getJavaClass().getSimpleName()})rs.getObject("${field.getName()}"));
 ##${tab}${tab}pojo.set${field.getName()}(rs.get$WordUtils.capitalize($field.getType())("${field.getName()}"));
 #end
 

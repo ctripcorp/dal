@@ -38,15 +38,15 @@ public class DalPersonParser implements DalParser<Person> {
 	
 	@Override
 	public Person map(ResultSet rs, int rowNum) throws SQLException {
-		Person pojo = new Person;
+		Person pojo = new Person();
 		
-		pojo.setID((Integer)rs.getObject("ID");
-		pojo.setAddress((String)rs.getObject("Address");
-		pojo.setTelephone((String)rs.getObject("Telephone");
-		pojo.setName((String)rs.getObject("Name");
-		pojo.setAge((Integer)rs.getObject("Age");
-		pojo.setGender((Integer)rs.getObject("Gender");
-		pojo.setBirth((Timestamp)rs.getObject("Birth");
+		pojo.setID((Integer)rs.getObject("ID"));
+		pojo.setAddress((String)rs.getObject("Address"));
+		pojo.setTelephone((String)rs.getObject("Telephone"));
+		pojo.setName((String)rs.getObject("Name"));
+		pojo.setAge((Integer)rs.getObject("Age"));
+		pojo.setGender((Integer)rs.getObject("Gender"));
+		pojo.setBirth((Timestamp)rs.getObject("Birth"));
 
 		return pojo;
 	}

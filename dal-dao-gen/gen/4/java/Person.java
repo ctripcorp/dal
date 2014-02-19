@@ -1,6 +1,9 @@
 
 package hjhTest;
 
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 
 import com.ctrip.platform.dal.dao.DalPojo;

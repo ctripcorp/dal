@@ -80,9 +80,9 @@ public class JavaParserGenHost {
 		
 		for(FieldMeta field: fields) {
 			Class clazz = field.getJavaClass();
-			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))
-				continue;
 			if(byte[].class.equals(clazz))
+				continue;
+			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))
 				continue;
 			imports.add(clazz.getName());
 		}

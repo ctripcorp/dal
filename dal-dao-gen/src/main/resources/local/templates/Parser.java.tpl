@@ -73,12 +73,12 @@ public class ${parserHost.getClassName()} implements DalParser<${pojoHost.getCla
 	}
 
 	@Override
-	public Number getIdentityValue(Person pojo) {
+	public Number getIdentityValue(${pojoHost.getClassName()} pojo) {
 		return #if($parserHost.isHasIdentity())pojo.get${parserHost.getIdentityColumnName()}()#{else}null#end;
 	}
 
 	@Override
-	public Map<String, ?> getPrimaryKeys(Person pojo) {
+	public Map<String, ?> getPrimaryKeys(${pojoHost.getClassName()} pojo) {
 		Map<String, Object> primaryKeys = new LinkedHashMap<String, Object>();
 		
 #foreach( $field in ${pojoHost.getFields()} )

@@ -47,11 +47,12 @@ public class Consts {
 		
 		// Initialize java SQL type to class mapping
 		{
+			// Refer to http://docs.oracle.com/javase/6/docs/technotes/guides/jdbc/getstart/mapping.html
 			JavaSqlTypeMap.put(java.sql.Types.BIT, Boolean.class);
 			
 			// Recommended using Short for Byte
-			JavaSqlTypeMap.put(java.sql.Types.TINYINT, Byte.class);
-			JavaSqlTypeMap.put(java.sql.Types.SMALLINT, Short.class);
+			JavaSqlTypeMap.put(java.sql.Types.TINYINT, Integer.class);
+			JavaSqlTypeMap.put(java.sql.Types.SMALLINT, Integer.class);
 			JavaSqlTypeMap.put(java.sql.Types.INTEGER, Integer.class);
 			JavaSqlTypeMap.put(java.sql.Types.BIGINT, Long.class);
 			
@@ -78,18 +79,18 @@ public class Consts {
 			// Used as an argument to CallableStatement.registerOutParameter
 			//JavaSqlTypeMap.put(java.sql.Types.OTHER, "Object");
 			
-			JavaSqlTypeMap.put(java.sql.Types.JAVA_OBJECT, Object.class);
-			JavaSqlTypeMap.put(java.sql.Types.DISTINCT, Object.class);
-			
-			JavaSqlTypeMap.put(java.sql.Types.STRUCT, Struct.class);
-			JavaSqlTypeMap.put(java.sql.Types.ARRAY, Array.class);
-			JavaSqlTypeMap.put(java.sql.Types.BLOB, Blob.class);
-			JavaSqlTypeMap.put(java.sql.Types.CLOB, Clob.class);
-			JavaSqlTypeMap.put(java.sql.Types.REF, Ref.class);
-			// should it be URL?
-			JavaSqlTypeMap.put(java.sql.Types.DATALINK, Object.class);
-			
-			JavaSqlTypeMap.put(java.sql.Types.BOOLEAN, Boolean.class);
+//			JavaSqlTypeMap.put(java.sql.Types.JAVA_OBJECT, Object.class);
+//			JavaSqlTypeMap.put(java.sql.Types.DISTINCT, Object.class);
+//			
+//			JavaSqlTypeMap.put(java.sql.Types.STRUCT, Struct.class);
+//			JavaSqlTypeMap.put(java.sql.Types.ARRAY, Array.class);
+//			JavaSqlTypeMap.put(java.sql.Types.BLOB, Blob.class);
+//			JavaSqlTypeMap.put(java.sql.Types.CLOB, Clob.class);
+//			JavaSqlTypeMap.put(java.sql.Types.REF, Ref.class);
+//			// should it be URL?
+//			JavaSqlTypeMap.put(java.sql.Types.DATALINK, Object.class);
+//			
+//			JavaSqlTypeMap.put(java.sql.Types.BOOLEAN, Boolean.class);
 			/*
 			JavaSqlTypeMap.put(java.sql.Types.ROWID, "Integer");
 			JavaSqlTypeMap.put(java.sql.Types.NCHAR, "Integer");

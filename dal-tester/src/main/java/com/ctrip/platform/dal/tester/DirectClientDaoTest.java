@@ -361,11 +361,11 @@ public class DirectClientDaoTest {
 		}
 	}
 
-	public void testType() {
+	public void testType(String db, String table) {
 		try {
-			DalClient client = DalClientFactory.getClient("HtlProductdb");
+			DalClient client = DalClientFactory.getClient(db);
 
-			client.query(sql, parameters, hints, new ColumnTypeExtractor());
+			client.query("select * from " + table, parameters, hints, new ColumnTypeExtractor());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -382,7 +382,7 @@ public class DirectClientDaoTest {
 		
 		DirectClientDaoTest test = new DirectClientDaoTest();
 		
-		test.testType();
+		test.testType("dao_test", "ManyTypes");
 //		test.test();
 //		test.test2();
 //		test.testAutoIncrement();

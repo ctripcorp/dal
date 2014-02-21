@@ -17,7 +17,7 @@ import org.springframework.jdbc.support.KeyHolder;
 
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 
-public class DbServerDAO {
+public class DaoOfDbServer {
 
 	private JdbcTemplate jdbcTemplate;
 

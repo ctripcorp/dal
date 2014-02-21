@@ -19,15 +19,17 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.springframework.jdbc.support.JdbcUtils;
 
+import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.Consts;
-import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
-import com.ctrip.platform.dal.daogen.pojo.AutoTask;
+import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.pojo.Method;
 import com.ctrip.platform.dal.daogen.pojo.Parameter;
-import com.ctrip.platform.dal.daogen.pojo.SpTask;
-import com.ctrip.platform.dal.daogen.pojo.Task;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskBySP;
+import com.ctrip.platform.dal.daogen.pojo.GenTask;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -39,7 +41,7 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	private static JavaGenerator instance = new JavaGenerator();
-	private static DbServerDAO dbServerDao;
+	private static DaoOfDbServer dbServerDao;
 
 	static {
 		dbServerDao = SpringBeanGetter.getDBServerDao();
@@ -54,97 +56,97 @@ public class JavaGenerator extends AbstractGenerator {
 	 * 
 	 * @param tasks
 	 */
-	@Override
-	public void generateAutoSqlCode(List<Task> tasks) {
-
-		VelocityContext context = new VelocityContext();
-
-		JavaPojoGenHost pojoHost = new JavaPojoGenHost();
-		JavaParserGenHost parserHost = new JavaParserGenHost();
-		pojoHost.setDaoNamespace(namespace);
-
-		// 每个表生成一个DAO文件，可能有潜在的问题，即两个不同的数据库中有相同的表，后期需要修改
-		Map<String, List<Task>> groupByTable = groupByTableName(tasks);
-
-		for (Map.Entry<String, List<Task>> entry : groupByTable.entrySet()) {
-			String table = entry.getKey();
-			List<Task> groupedTasks = entry.getValue();
-			int serverId = -1;
-			if (groupedTasks.size() > 0) {
-				Task currentTask = groupedTasks.get(0); 
-				// context.put("database", groupedTasks.get(0).getDb_name());
-				parserHost.setDbName(currentTask.getDb_name());
-				serverId = currentTask.getServer_id();
-			} else {
-				continue;
-			}
-			
-			parserHost.setTableName(table);
-
-			pojoHost.setClassName(WordUtils.capitalizeFully(table));
-			parserHost.setClassName(String.format("%sDalParser",
-					pojoHost.getClassName()));
-
-			List<FieldMeta> fieldsMeta = getMetaData(
-					serverId, parserHost.getDbName(), table);
-
-			boolean hasIdentity = false;
-			String identityColumn = null;
-			for (FieldMeta meta : fieldsMeta) {
-				if (!hasIdentity && meta.isIdentity()) {
-					hasIdentity = true;
-					identityColumn = meta.getName();
-				}
-				meta.setType(Consts.JavaSqlTypeMap.get(meta.getDbType()
-						.toLowerCase()));
-			}
-			
-			pojoHost.setFields(fieldsMeta);
-			
-			parserHost.setHasIdentity(hasIdentity);
-			parserHost.setIdentityColumnName(identityColumn);
-
-			context.put("WordUtils", WordUtils.class);
-			context.put("newline", "\n");
-			context.put("tab", "\t");
-
-			context.put("pojoHost", pojoHost);
-			context.put("parserHost", parserHost);
-
-			// putMethods2Velocity(context, fieldsMeta, groupedTasks);
-
-			FileWriter parserWriter = null;
-			FileWriter pojoWriter = null;
-			try {
-				File mavenLikeDir = new File(String.format("gen/%s/java",
-						projectId));
-				FileUtils.forceMkdir(mavenLikeDir);
-
-				parserWriter = new FileWriter(String.format("%s/%s.java",
-						mavenLikeDir.getAbsolutePath(),
-						parserHost.getClassName()));
-
-				pojoWriter = new FileWriter(
-						String.format("%s/%s.java",
-								mavenLikeDir.getAbsolutePath(),
-								pojoHost.getClassName()));
-
-				Velocity.mergeTemplate("templates/Parser.java.tpl", "UTF-8",
-						context, parserWriter);
-				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
-						context, pojoWriter);
-
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				JavaIOUtils.closeWriter(parserWriter);
-				JavaIOUtils.closeWriter(pojoWriter);
-			}
-		}
-	}
+//	public void generateByTableView(List<GenTask> tasks) {
+//
+//		VelocityContext context = new VelocityContext();
+//
+//		JavaPojoGenHost pojoHost = new JavaPojoGenHost();
+//		JavaParserGenHost parserHost = new JavaParserGenHost();
+//		pojoHost.setDaoNamespace(namespace);
+//
+//		// 每个表生成一个DAO文件，可能有潜在的问题，即两个不同的数据库中有相同的表，后期需要修改
+//		Map<String, List<GenTask>> groupByTable = groupByTableName(tasks);
+//
+//		for (Map.Entry<String, List<GenTask>> entry : groupByTable.entrySet()) {
+//			String table = entry.getKey();
+//			List<GenTask> groupedTasks = entry.getValue();
+//			int serverId = -1;
+//			if (groupedTasks.size() > 0) {
+//				GenTask currentTask = groupedTasks.get(0); 
+//				// context.put("database", groupedTasks.get(0).getDb_name());
+//				parserHost.setDbName(currentTask.getDb_name());
+//				serverId = currentTask.getServer_id();
+//			} else {
+//				continue;
+//			}
+//			
+//			parserHost.setTableName(table);
+//			
+//			pojoHost.setClassName(WordUtils.capitalizeFully(table));
+//			parserHost.setClassName(String.format("%sDalParser",
+//					pojoHost.getClassName()));
+//
+//			List<FieldMeta> fieldsMeta = getMetaData(
+//					serverId, parserHost.getDbName(), table);
+//
+//			boolean hasIdentity = false;
+//			String identityColumn = null;
+//			for (FieldMeta meta : fieldsMeta) {
+//				if (!hasIdentity && meta.isIdentity()) {
+//					hasIdentity = true;
+//					identityColumn = meta.getName();
+//				}
+//				meta.setType(Consts.JavaSqlTypeMap.get(meta.getDbType()
+//						.toLowerCase()));
+//			}
+//			
+//			pojoHost.setFields(fieldsMeta);
+//			
+//			parserHost.setHasIdentity(hasIdentity);
+//			parserHost.setIdentityColumnName(identityColumn);
+//			
+//			context.put("WordUtils", WordUtils.class);
+//			context.put("StringUtils", StringUtils.class);
+//			context.put("newline", "\n");
+//			context.put("tab", "\t");
+//
+//			context.put("pojoHost", pojoHost);
+//			context.put("parserHost", parserHost);
+//
+//			// putMethods2Velocity(context, fieldsMeta, groupedTasks);
+//
+//			FileWriter parserWriter = null;
+//			FileWriter pojoWriter = null;
+//			try {
+//				File mavenLikeDir = new File(String.format("gen/%s/java",
+//						projectId));
+//				FileUtils.forceMkdir(mavenLikeDir);
+//
+//				parserWriter = new FileWriter(String.format("%s/%s.java",
+//						mavenLikeDir.getAbsolutePath(),
+//						parserHost.getClassName()));
+//
+//				pojoWriter = new FileWriter(
+//						String.format("%s/%s.java",
+//								mavenLikeDir.getAbsolutePath(),
+//								pojoHost.getClassName()));
+//
+//				Velocity.mergeTemplate("templates/Parser.java.tpl", "UTF-8",
+//						context, parserWriter);
+//				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
+//						context, pojoWriter);
+//
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			} finally {
+//				JavaIOUtils.closeWriter(parserWriter);
+//				JavaIOUtils.closeWriter(pojoWriter);
+//			}
+//		}
+//	}
 
 	private void putMethods2Velocity(VelocityContext context,
-			List<FieldMeta> fieldsMeta, List<Task> groupedTasks) {
+			List<FieldMeta> fieldsMeta, List<GenTask> groupedTasks) {
 
 		String primaryKey = "";
 		for (FieldMeta meta : fieldsMeta) {
@@ -158,8 +160,8 @@ public class JavaGenerator extends AbstractGenerator {
 		List<Method> methods = new ArrayList<Method>();
 		List<Method> spMethods = new ArrayList<Method>();
 
-		for (Task task : groupedTasks) {
-			AutoTask groupedTask = (AutoTask) task;
+		for (GenTask task : groupedTasks) {
+			GenTaskBySqlBuilder groupedTask = (GenTaskBySqlBuilder) task;
 
 			if (null == groupedTask.getMethod_name()
 					|| groupedTask.getMethod_name().isEmpty()) {
@@ -244,16 +246,16 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public void generateSPCode(List<Task> tasks) {
-		Map<String, List<Task>> groupbyDB = groupByDbName(tasks);
+	public void generateBySP(List<GenTask> tasks) {
+		Map<String, List<GenTask>> groupbyDB = groupByDbName(tasks);
 
 		VelocityContext context = new VelocityContext();
 
 		context.put("namespace", namespace);
 
-		for (Map.Entry<String, List<Task>> entry : groupbyDB.entrySet()) {
+		for (Map.Entry<String, List<GenTask>> entry : groupbyDB.entrySet()) {
 			// String sp = entry.getKey();
-			List<Task> objs = entry.getValue();
+			List<GenTask> objs = entry.getValue();
 			int serverId = -1;
 			if (objs.size() > 0) {
 				context.put("database", objs.get(0).getDb_name());
@@ -268,9 +270,9 @@ public class JavaGenerator extends AbstractGenerator {
 
 			List<Method> spMethods = new ArrayList<Method>();
 
-			for (Task task : objs) {
+			for (GenTask task : objs) {
 
-				SpTask obj = (SpTask) task;
+				GenTaskBySP obj = (GenTaskBySP) task;
 
 				Method m = new Method();
 				m.setAction(obj.getCrud_type());
@@ -324,7 +326,7 @@ public class JavaGenerator extends AbstractGenerator {
 			FileWriter daoWriter = null;
 
 			try {
-				File projectFile = new File(projectId);
+				File projectFile = new File(String.valueOf(projectId));
 				if (!projectFile.exists()) {
 					projectFile.mkdir();
 				}
@@ -360,10 +362,14 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public void generateFreeSqlCode(List<Task> tasks) {
-		Map<String, List<Task>> tasksGroupByDb = groupByDbName(tasks);
+	public void generateByFreeSql(List<GenTask> tasks) {
+		Map<String, List<GenTask>> tasksGroupByDb = groupByDbName(tasks);
 		
-		
+		for(Map.Entry<String, List<GenTask>> entry : tasksGroupByDb.entrySet()){
+			String currentDb = entry.getKey();
+			List<GenTask> currentTasks = entry.getValue();
+			
+		}
 		
 	}
 
@@ -427,6 +433,18 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 
 		return parameters;
+	}
+
+	@Override
+	public void generateBySqlBuilder(List<GenTask> tasks) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void generateByTableView(List<GenTaskByTableViewSp> tasks) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

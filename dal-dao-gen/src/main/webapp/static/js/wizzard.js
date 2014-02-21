@@ -15,6 +15,14 @@
 
             //向导首先显示所有数据库服务器，点击下一步后，获取此服务器所有的数据库列表 
             if (current.hasClass("step0")) {
+
+                if($("#servers").val() == "_please_select"){
+                    $("#error_msg").text("请选择或者添加一个服务器！");
+                    return;
+                }
+
+                $("#error_msg").text("");
+
                 //首先蒙板化整个body,在后续get成功或者失败时，取消蒙板化
                 cblock($("body"));
 
@@ -34,13 +42,22 @@
                     $(".step1").show();
                     $("body").unblock();
                 }).fail(function (data) {
+                    $("#error_msg").text("获取数据库列表失败，请单击上一步后重试！");
                     $("body").unblock();
                 });
             }
             //选择数据库之后，选择自动生成、存储过程或者自己写查询
             else if (current.hasClass("step1")) {
+
+                if($("#databases").val() == "_please_select"){
+                    $("#error_msg").text("请选择一个数据库！");
+                    return;
+                }
+
+                $("#error_msg").text("");
+
                 //在显示下一页之前，清空下一页的信息
-                var defaultActive = $(".gen_style > input[value='auto']").parent();
+                var defaultActive = $(".gen_style > input[value='table_view_sp']").parent();
                 if (!defaultActive.hasClass("active")) {
                     $(".gen_style.active").removeClass("active");
                     defaultActive.addClass("active");
@@ -60,11 +77,40 @@
             else if (current.hasClass("step2")) {
                 var gen_style = $(".gen_style.active").children().val();
                 switch (gen_style) {
+                case "table_view_sp":
+                    cblock($("body"));
+                    $.get(
+                        sprintf("/rest/db/table_sps?server=%s&db_name=%s",
+                                $("#servers").val(),
+                                $("#databases").val()), function (data) {
+                                $("select[id$=table_list] > option").remove();
+                                $("select[id$=sp_list] > option").remove();
+                                var tableList = [];
+                                var spList = [];
+                                $.each(data.tables, function (index, value) {
+                                    tableList.push($('<option>', {
+                                        value: value,
+                                        text: value
+                                    }));
+                                });
+                                $.each(data.sps, function (index, value) {
+                                    spList.push($('<option>', {
+                                        value: value,
+                                        text: value
+                                    }));
+                                });
+                                $("#table_list").append(tableList).multipleSelect("refresh");
+                                $("#sp_list").append(spList).multipleSelect("refresh");
+                                current.hide();
+                                $(".step2-1-0").show();
+                                $("body").unblock();
+                    }).fail(function(data){
+                                $("body").unblock();
+                    });
+                    break;
                 case "auto":
                     //在显示下一页之前，清空下一页的信息
                     $("select[id$=tables] > option:gt(0)").remove();
-                    $("#only_template").prop("checked", true);
-                    $("#cud_by_sp").prop("checked", true);
                     $("#class_name").val("");
                     $("#method_name").val("");
                     var defaultActive = $(".op_type > input[value='select']").parent();
@@ -73,9 +119,6 @@
                         defaultActive.addClass("active");
                     }
                     
-                    $(".op_type_class").hide();
-                    $(".method_name_class").hide();
-
                     if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "auto") {
                         $('#tables').append($('<option>', {
                             value: record.table_name,
@@ -83,19 +126,11 @@
                         }));
                         $("#tables").val(record.table_name);
                         $("#class_name").val(record.class_name);
-                        $("#cud_by_sp").prop('checked', record.sql_type == "spa_sp3");
-                        if (record.method_name == undefined || record.method_name == "") {
-                            $("#only_template").prop('checked', true);
-                        } else {
-                            $("#only_template").prop('checked', false);
-                            $(".op_type_class").show();
-                            $(".method_name_class").show();
-                            $("#method_name").val(record.method_name);
-                            var parentToActive = $(sprintf(".op_type > input[value='%s']", record.crud_type)).parent();
-                            if (!parentToActive.hasClass("active")) {
-                                $(".op_type.active").removeClass("active");
-                                parentToActive.addClass("active");
-                            }
+                        $("#method_name").val(record.method_name);
+                        var parentToActive = $(sprintf(".op_type > input[value='%s']", record.crud_type)).parent();
+                        if (!parentToActive.hasClass("active")) {
+                            $(".op_type.active").removeClass("active");
+                            parentToActive.addClass("active");
                         }
                         current.hide();
                         $(".step2-1-1").show();
@@ -171,12 +206,6 @@
             }
             //选择基础数据
             else if (current.hasClass("step2-1-1")) {
-                if ($("#only_template").is(":checked")) {
-                    current.hide();
-                    $(".step3").show();
-                    $(".step3").attr('from', current.attr('class'));
-                    return;
-                }
                 var op_type = $(".op_type.active").children().val();
                 cblock($("body"));
 
@@ -249,6 +278,10 @@
                 current.hide();
                 $(".step3").show();
                 $(".step3").attr('from', current.attr('class'));
+            }else if (current.hasClass("step2-1-0")) {
+                current.hide();
+                $(".step3").show();
+                $(".step3").attr('from', current.attr('class'));
             } else if (current.hasClass("step2-2") || current.hasClass("step2-3")) {
                 current.hide();
                 $(".step3").show();
@@ -307,12 +340,20 @@
                     postData["crud_type"] = "select";
                     postData["sql_content"] = ace.edit("sql_editor").getValue();
                     postData["params"] = $.makeArray($("#selected_variable>option").map(function() { return $(this).val(); })).join(",");
+                }else if ($(".gen_style.active").children().val() == "table_view_sp") {
+                    postData["table_names"] = $('#table_list').multipleSelect('getSelects').join(",");
+                    postData["sp_names"] = $('#sp_list').multipleSelect('getSelects').join(",");
+                    postData["prefix"] = $("#prefix").val();
+                    postData["suffix"] = $("#suffix").val();
+                    postData["cud_by_sp"] = $("#cud_by_sp").is(":checked");
+                    postData["pagination"] = $("#pagination").is(":checked");
+                    $.post("/rest/task/table", postData, function (data) {
+                        $("#page1").modal('hide');
+                        w2ui["grid_toolbar"].click('refreshDAO', null);
+                    });
                 }
 
-                $.post("/rest/task", postData, function (data) {
-                    $("#page1").modal('hide');
-                    w2ui["grid_toolbar"].click('refreshDAO', null);
-                });
+                
             }
         },
         previous: function (current) {
@@ -331,6 +372,8 @@
                 $(".step0").show();
             } else if (current.hasClass("step2")) {
                 $(".step1").show();
+            } else if (current.hasClass("step2-1-0")) {
+                $(".step2").show();
             } else if (current.hasClass("step2-1-1")) {
                 $(".step2").show();
             } else if (current.hasClass("step2-1-3") || current.hasClass("step2-1-3-add")) {

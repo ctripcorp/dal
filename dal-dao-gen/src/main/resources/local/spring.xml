@@ -8,23 +8,27 @@
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <bean id="projectDao" class="com.ctrip.platform.dal.daogen.dao.ProjectDAO">
+    <bean id="projectDao" class="com.ctrip.platform.dal.daogen.dao.DaoOfProject">
         <property name="dataSource" ref="dataSource"/>
     </bean>
     
-    <bean id="autoTaskDao" class="com.ctrip.platform.dal.daogen.dao.AutoTaskDAO">
+     <bean id="daoByTableViewSp" class="com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp">
         <property name="dataSource" ref="dataSource"/>
     </bean>
     
-     <bean id="spTaskDao" class="com.ctrip.platform.dal.daogen.dao.SpTaskDAO">
+    <bean id="autoTaskDao" class="com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder">
         <property name="dataSource" ref="dataSource"/>
     </bean>
     
-     <bean id="sqlTaskDao" class="com.ctrip.platform.dal.daogen.dao.SqlTaskDAO">
+     <bean id="spTaskDao" class="com.ctrip.platform.dal.daogen.dao.DaoBySp">
         <property name="dataSource" ref="dataSource"/>
     </bean>
     
-     <bean id="dataSourceDao" class="com.ctrip.platform.dal.daogen.dao.DbServerDAO">
+     <bean id="sqlTaskDao" class="com.ctrip.platform.dal.daogen.dao.DaoByFreeSql">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+     <bean id="dataSourceDao" class="com.ctrip.platform.dal.daogen.dao.DaoOfDbServer">
         <property name="dataSource" ref="dataSource"/>
     </bean>
 

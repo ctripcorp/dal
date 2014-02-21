@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.daogen.pojo;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class SqlTask  extends AbstractTask{
+public class GenTaskBySP  extends GenTaskAbstract{
 
 	private int id;
 	
@@ -13,21 +13,15 @@ public class SqlTask  extends AbstractTask{
 	
 	private String class_name;
 	
-	private String method_name;
+	private String sp_schema;
+	
+	private String sp_name;
+	
+	private String sql_style;
 	
 	private String crud_type;
 	
-	private String sql_content;
-	
-	private String parameters;
-
-	public String getParameters() {
-		return parameters;
-	}
-
-	public void setParameters(String parameters) {
-		this.parameters = parameters;
-	}
+	private String sp_content;
 
 	public int getId() {
 		return id;
@@ -61,12 +55,28 @@ public class SqlTask  extends AbstractTask{
 		this.class_name = class_name;
 	}
 
-	public String getMethod_name() {
-		return method_name;
+	public String getSp_schema() {
+		return sp_schema;
 	}
 
-	public void setMethod_name(String method_name) {
-		this.method_name = method_name;
+	public void setSp_schema(String sp_schema) {
+		this.sp_schema = sp_schema;
+	}
+
+	public String getSp_name() {
+		return sp_name;
+	}
+
+	public void setSp_name(String sp_name) {
+		this.sp_name = sp_name;
+	}
+
+	public String getSql_style() {
+		return sql_style;
+	}
+
+	public void setSql_style(String sql_style) {
+		this.sql_style = sql_style;
 	}
 
 	public String getCrud_type() {
@@ -77,25 +87,26 @@ public class SqlTask  extends AbstractTask{
 		this.crud_type = crud_type;
 	}
 
-	public String getSql_content() {
-		return sql_content;
+	public String getSp_content() {
+		return sp_content;
 	}
 
-	public void setSql_content(String sql_content) {
-		this.sql_content = sql_content;
+	public void setSp_content(String sp_content) {
+		this.sp_content = sp_content;
 	}
-
-	public static SqlTask visitRow(ResultSet rs) throws SQLException {
-		SqlTask task = new SqlTask();
+	
+	public static GenTaskBySP visitRow(ResultSet rs) throws SQLException {
+		GenTaskBySP task = new GenTaskBySP();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
 		task.setServer_id(rs.getInt(3));
 		task.setDb_name(rs.getString(4));
 		task.setClass_name(rs.getString(5));
-		task.setMethod_name(rs.getString(6));
-		task.setCrud_type(rs.getString(7));
-		task.setSql_content(rs.getString(8));
+		task.setSp_schema(rs.getString(6));
+		task.setSp_name(rs.getString(7));
+		task.setSql_style(rs.getString(8));
+		task.setCrud_type(rs.getString(9));
+		task.setSp_content(rs.getString(10));
 		return task;
 	}
-	
 }

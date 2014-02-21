@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.daogen.pojo;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class AutoTask extends AbstractTask {
+public class GenTaskBySqlBuilder extends GenTaskAbstract {
 
 	private int id;
 
@@ -125,8 +125,8 @@ public class AutoTask extends AbstractTask {
 		this.crud_type = crud_type;
 	}
 
-	public static AutoTask visitRow(ResultSet rs) throws SQLException {
-		AutoTask task = new AutoTask();
+	public static GenTaskBySqlBuilder visitRow(ResultSet rs) throws SQLException {
+		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
 		task.setServer_id(rs.getInt(3));

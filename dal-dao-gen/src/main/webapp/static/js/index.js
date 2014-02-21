@@ -151,15 +151,6 @@ jQuery(document).ready(function () {
         $("#selected_condition").find(":selected").remove();
     });
 
-    $(document.body).on('change', "#only_template", function (event) {
-        if ($("#only_template").is(":checked")) {
-            $(".op_type_class").hide();
-            $(".method_name_class").hide();
-        } else {
-            $(".op_type_class").show();
-            $(".method_name_class").show();
-        }
-    });
 
     $(document.body).on('click', "#view_sp_code", function (event) {
         $.get(sprintf("/rest/db/sp_code?server=%s&db_name=%s&sp_name=%s",
@@ -202,15 +193,12 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', "#toggle_add_server", function (event) {
-        if ($("#toggle_add_server").hasClass("fa-angle-down")) {
-            $("#toggle_add_server").removeClass("fa-angle-down");
-            $("#toggle_add_server").addClass("fa-angle-up");
-            $("#add_server_row").show();
-        } else {
-            $("#toggle_add_server").removeClass("fa-angle-up");
-            $("#toggle_add_server").addClass("fa-angle-down");
-            $("#add_server_row").hide();
+        if($("#add_server_row").is(":visible")){
+            $("#toggle_add_server").val("添加数据库服务器");
+        }else{
+            $("#toggle_add_server").val("取消添加服务器");
         }
+        $("#add_server_row").toggle();
     });
 
     $(document.body).on('click', "#del_server", function (event) {
@@ -298,6 +286,9 @@ var reloadProjects = function () {
         currentElement.add('all_projects', new_nodes);
         currentElement.nodes[0].expanded = true;
         currentElement.refresh();
+        $("body").unblock();
+    }).fail(function(data){
+        alert("超时，请刷新页面重试！");
         $("body").unblock();
     });
 };
@@ -414,6 +405,7 @@ var renderGrid = function () {
                     $(".step0").show();
                     $(".step1").hide();
                     $(".step2").hide();
+                    $(".step2-1-0").hide();
                     $(".step2-1-1").hide();
                     $(".step2-1-2").hide();
                     $(".step2-1-3").hide();

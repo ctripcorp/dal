@@ -14,7 +14,7 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
+import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 
 /**
@@ -31,7 +31,7 @@ public class DataSourceLRUCache {
 	}
 
 	private static DataSourceLRUCache cache = new DataSourceLRUCache();
-	private static DbServerDAO dbServerDao;
+	private static DaoOfDbServer dbServerDao;
 
 	static {
 		dbServerDao = SpringBeanGetter.getDBServerDao();

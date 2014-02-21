@@ -9,9 +9,9 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.ctrip.platform.dal.daogen.pojo.SqlTask;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;
 
-public class SqlTaskDAO {
+public class DaoByFreeSql {
 
 	private JdbcTemplate jdbcTemplate;
 
@@ -19,32 +19,32 @@ public class SqlTaskDAO {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-	public List<SqlTask> getAllTasks() {
+	public List<GenTaskByFreeSql> getAllTasks() {
 
 		return this.jdbcTemplate
 				.query("select id, project_id,server_id,  db_name,class_name,method_name,crud_type,sql_content,parameters from task_sql",
 
-				new RowMapper<SqlTask>() {
-					public SqlTask mapRow(ResultSet rs, int rowNum)
+				new RowMapper<GenTaskByFreeSql>() {
+					public GenTaskByFreeSql mapRow(ResultSet rs, int rowNum)
 							throws SQLException {
-						return SqlTask.visitRow(rs);
+						return GenTaskByFreeSql.visitRow(rs);
 					}
 				});
 	}
 
-	public List<SqlTask> getTasksByProjectId(int iD) {
+	public List<GenTaskByFreeSql> getTasksByProjectId(int iD) {
 
 		return this.jdbcTemplate
 				.query("select id, project_id,server_id,  db_name,class_name,method_name,crud_type,sql_content,parameters from task_sql where project_id=?",
-						new Object[] { iD }, new RowMapper<SqlTask>() {
-							public SqlTask mapRow(ResultSet rs, int rowNum)
+						new Object[] { iD }, new RowMapper<GenTaskByFreeSql>() {
+							public GenTaskByFreeSql mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
-								return SqlTask.visitRow(rs);
+								return GenTaskByFreeSql.visitRow(rs);
 							}
 						});
 	}
 
-	public int insertTask(SqlTask task) {
+	public int insertTask(GenTaskByFreeSql task) {
 
 		return this.jdbcTemplate
 				.update("insert into task_sql (project_id,server_id,  db_name,class_name,method_name,crud_type,sql_content,parameters) values (?,?,?,?,?,?,?,?)",
@@ -54,7 +54,7 @@ public class SqlTaskDAO {
 
 	}
 
-	public int updateTask(SqlTask task) {
+	public int updateTask(GenTaskByFreeSql task) {
 
 		return this.jdbcTemplate
 				.update("update task_sql set project_id=?,server_id=?,  db_name=?,class_name=?,method_name=?,crud_type=?,sql_content=?,parameters=? where id=?",
@@ -65,7 +65,7 @@ public class SqlTaskDAO {
 
 	}
 
-	public int deleteTask(SqlTask task) {
+	public int deleteTask(GenTaskByFreeSql task) {
 		return this.jdbcTemplate.update("delete from task_sql where id=?",
 				task.getId());
 	}

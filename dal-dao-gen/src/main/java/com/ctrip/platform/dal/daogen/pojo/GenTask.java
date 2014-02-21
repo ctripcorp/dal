@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.pojo;
 
-public interface Task {
+public interface GenTask {
 
 	public String getDb_name();
 	
@@ -13,5 +13,9 @@ public interface Task {
 	public int getServer_id();
 	
 	public void setServer_id(int server_id);
+	
+	public int getProject_id();
+	
+	public void setProject_id(int project_id);
 	
 }

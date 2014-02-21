@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.ctrip.platform.dal.daogen.pojo.Project;
 
-public class ProjectDAO {
+public class DaoOfProject {
 
 	private JdbcTemplate jdbcTemplate;
 

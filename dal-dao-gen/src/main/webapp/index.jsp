@@ -15,6 +15,7 @@
       <link href="/static/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
       <link href="/static/w2ui/w2ui-1.3.min.css" rel="stylesheet"/>
       <link href="/static/font-awesome/css/font-awesome.css" rel="stylesheet">
+      <link href="/static/css/multiple-select.css" rel="stylesheet">
       <link href="/static/css/common.css" rel="stylesheet">
       <style type="text/css">
          body {
@@ -144,7 +145,7 @@
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                   <h4 class="modal-title" id="page1_label">DAO生成向导</h4>
                </div>
-               <div class="modal-body" style="position: relative;overflow: auto;width: auto;max-height:350px;">
+               <div class="modal-body" style="position: relative;overflow: auto;width: auto;max-height:420px;">
                   <div class="steps step0 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
@@ -157,7 +158,7 @@
                      </div>
                      <br>
                      <div class="row-fluid">
-                        <button id="toggle_add_server" class="offset5 btn-primary fa fa-angle-down"></button>
+                        <input type="button" id="toggle_add_server" class="offset4 btn btn-primary" value="添加数据库服务器"/>
                      </div>
                      <br>
                      <div id="add_server_row" class="row-fluid" style="display:none;">
@@ -197,7 +198,7 @@
                      </div>
                      <br>
                      <div class="row-fluid">
-                        <button id="add_server" type="button" class="offset5 btn btn-primary">添加服务器</button>
+                        <button id="add_server" type="button" class="offset5 btn btn-primary">保存</button>
                      </div>
                   </div>
                   </div>
@@ -214,12 +215,46 @@
                         <label class="control-label popup_label">DAO生成方式:</label>
                         <div class="btn-group popup_text span9" data-toggle="buttons">
                            <label class="gen_style btn btn-default active">
-                           <input type="radio" name="dao_gen_style" id="dao_gen_style" value="auto" checked>自动生成SQL</label>
+                           <input type="radio" name="dao_gen_style" id="dao_gen_style" value="table_view_sp" checked>表/视图/存储过程</label>
                            <label class="gen_style btn btn-default">
-                           <input type="radio" name="dao_gen_style" id="dao_gen_style" value="sp">执行存储过程</label>
+                           <input type="radio" name="dao_gen_style" id="dao_gen_style" value="auto">构建Sql</label>
                            <label class="gen_style btn btn-default">
-                           <input type="radio" name="dao_gen_style" id="dao_gen_style" value="sql">我要自己写查询</label>
+                           <input type="radio" name="dao_gen_style" id="dao_gen_style" value="sql">自己写查询</label>
                         </div>
+                     </div>
+                  </div>
+                  <div class="steps step2-1-0 row-fluid" style="height:280px;">
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">选择表/视图：</label>
+                           <select id="table_list" multiple="multiple" class="popup_text" style="width:420px;">
+                           </select>
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">选择存储过程：</label>
+                           <select id="sp_list" multiple="multiple" class="popup_text" style="width:420px;">
+                           </select>
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">生成时移除前缀：</label>
+                           <input type="text" id="prefix" class="span9 popup_text">
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">生成时加上后缀：</label>
+                           <input type="text" id="suffix" class="span9 popup_text" value="_gen">
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <label class="popup_label"><input id="cud_by_sp" type="checkbox" checked="true">增删改使用SPA或SP3（Sql Server请勾选，MySql请去除）</label>
+                     </div>
+                     <div class="row-fluid">
+                        <label class="popup_label"><input id="pagination" type="checkbox" checked="true">增加分页方法</label>
                      </div>
                   </div>
                   <div class="steps step2-1-1 row-fluid">
@@ -230,12 +265,6 @@
                               <option value="_please_select">--请选择--</option>
                            </Select>
                         </div>
-                     </div>
-                     <div class="row-fluid">
-                        <label class="popup_label"><input id="only_template" type="checkbox">仅生成DAO模板和Entity（无需任何编码，可以满足常规需求）</label>
-                     </div>
-                     <div class="row-fluid">
-                        <label class="popup_label"><input id="cud_by_sp" type="checkbox" checked="true">增删改使用SPA或SP3（Sql Server请勾选，MySql请去除）</label>
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
@@ -249,9 +278,8 @@
                            <input id="method_name" class="span9 popup_text">
                         </div>
                      </div>
-                     
+                     <hr>
                      <div class="row-fluid op_type_class">
-                        <hr>
                         <div class="control-group">
                            <label class="control-label popup_label">操作类型：</label>
                            <div class="btn-group popup_text span9" data-toggle="buttons">
@@ -454,6 +482,7 @@
                   </div>
                </div>
                <div class="modal-footer">
+                  <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
                   <button id="prev_step"  type="button" class="btn btn-default">上一步</button>
                   <button id="next_step"  type="button" class="btn btn-primary">下一步</button>
                   <!-- <label class="popup_label"><input type="checkbox">保存时生成代码</label>
@@ -475,6 +504,7 @@
       <script src="/static/js/sprintf.js"></script>
       <script src="/static/js/cblock.js"></script>
       <script src="/static/ace/ace.js"></script>
+      <script src="/static/jquery/jquery.multiple.select.js"></script>
       <script src="/static/js/wizzard.js"></script>
       <script src="/static/js/index.js"></script>
    </body>

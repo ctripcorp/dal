@@ -9,9 +9,9 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.ctrip.platform.dal.daogen.pojo.AutoTask;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
 
-public class AutoTaskDAO {
+public class DaoBySqlBuilder {
 
 	private JdbcTemplate jdbcTemplate;
 
@@ -19,32 +19,32 @@ public class AutoTaskDAO {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-	public List<AutoTask> getAllTasks() {
+	public List<GenTaskBySqlBuilder> getAllTasks() {
 
 		return this.jdbcTemplate
 				.query("select id, project_id,server_id, db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,condition,sql_content from task_auto",
-						new RowMapper<AutoTask>() {
-							public AutoTask mapRow(ResultSet rs, int rowNum)
+						new RowMapper<GenTaskBySqlBuilder>() {
+							public GenTaskBySqlBuilder mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
-								return AutoTask.visitRow(rs);
+								return GenTaskBySqlBuilder.visitRow(rs);
 							}
 						});
 
 	}
 
-	public List<AutoTask> getTasksByProjectId(int iD) {
+	public List<GenTaskBySqlBuilder> getTasksByProjectId(int iD) {
 
 		return this.jdbcTemplate
 				.query("select id, project_id,server_id,  db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,where_condition,sql_content from task_auto where project_id=?",
-						new Object[] { iD }, new RowMapper<AutoTask>() {
-							public AutoTask mapRow(ResultSet rs, int rowNum)
+						new Object[] { iD }, new RowMapper<GenTaskBySqlBuilder>() {
+							public GenTaskBySqlBuilder mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
-								return AutoTask.visitRow(rs);
+								return GenTaskBySqlBuilder.visitRow(rs);
 							}
 						});
 	}
 
-	public int insertTask(AutoTask task) {
+	public int insertTask(GenTaskBySqlBuilder task) {
 
 		return this.jdbcTemplate
 				.update("insert into task_auto ( project_id,server_id,  db_name, table_name,class_name,method_name,sql_style,sql_type,crud_type,fields,where_condition,sql_content) values (?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -57,7 +57,7 @@ public class AutoTaskDAO {
 
 	}
 
-	public int updateTask(AutoTask task) {
+	public int updateTask(GenTaskBySqlBuilder task) {
 
 		return this.jdbcTemplate
 				.update("update task_auto set  project_id=?,server_id=?,  db_name=?, table_name=?,class_name=?,method_name=?,sql_style=?,sql_type=?,crud_type=?,fields=?,where_condition=?,sql_content=? where id=?",
@@ -70,7 +70,7 @@ public class AutoTaskDAO {
 
 	}
 
-	public int deleteTask(AutoTask task) {
+	public int deleteTask(GenTaskBySqlBuilder task) {
 
 		return this.jdbcTemplate.update("delete from task_auto where id=?",
 				task.getId());

@@ -17,12 +17,12 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 
 import com.ctrip.platform.dal.daogen.Consts;
-import com.ctrip.platform.dal.daogen.dao.AutoTaskDAO;
-import com.ctrip.platform.dal.daogen.dao.SpTaskDAO;
-import com.ctrip.platform.dal.daogen.dao.SqlTaskDAO;
-import com.ctrip.platform.dal.daogen.pojo.AutoTask;
-import com.ctrip.platform.dal.daogen.pojo.SpTask;
-import com.ctrip.platform.dal.daogen.pojo.SqlTask;
+import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
+import com.ctrip.platform.dal.daogen.dao.DaoBySp;
+import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskBySP;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.pojo.Status;
 import com.ctrip.platform.dal.daogen.pojo.TaskAggeragation;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -41,11 +41,11 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 @Path("task")
 public class TaskResource {
 
-	private static AutoTaskDAO autoTask;
+	private static DaoBySqlBuilder autoTask;
 
-	private static SpTaskDAO spTask;
+	private static DaoBySp spTask;
 
-	private static SqlTaskDAO sqlTask;
+	private static DaoByFreeSql sqlTask;
 
 	static {
 		autoTask = SpringBeanGetter.getAutoTaskDao();
@@ -57,12 +57,12 @@ public class TaskResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public TaskAggeragation getTasks(@QueryParam("project_id") String id) {
 
-		List<AutoTask> autoTasks = autoTask.getTasksByProjectId(Integer
+		List<GenTaskBySqlBuilder> autoTasks = autoTask.getTasksByProjectId(Integer
 				.valueOf(id));
 
-		List<SpTask> spTasks = spTask.getTasksByProjectId(Integer.valueOf(id));
+		List<GenTaskBySP> spTasks = spTask.getTasksByProjectId(Integer.valueOf(id));
 
-		List<SqlTask> sqlTasks = sqlTask.getTasksByProjectId(Integer
+		List<GenTaskByFreeSql> sqlTasks = sqlTask.getTasksByProjectId(Integer
 				.valueOf(id));
 
 		TaskAggeragation allTasks = new TaskAggeragation();
@@ -98,7 +98,7 @@ public class TaskResource {
 
 		if (task_type.equals("auto")) {
 			if (action.equals("insert")) {
-				AutoTask t = new AutoTask();
+				GenTaskBySqlBuilder t = new GenTaskBySqlBuilder();
 				t.setProject_id(project_id);
 				t.setServer_id(server);
 				t.setDb_name(db_name);
@@ -113,7 +113,7 @@ public class TaskResource {
 				t.setSql_content(formatSql(t));
 				autoTask.insertTask(t);
 			} else if (action.equals("update")) {
-				AutoTask t = new AutoTask();
+				GenTaskBySqlBuilder t = new GenTaskBySqlBuilder();
 				t.setId(id);
 				t.setServer_id(server);
 				t.setProject_id(project_id);
@@ -129,7 +129,7 @@ public class TaskResource {
 				t.setSql_content(formatSql(t));
 				autoTask.updateTask(t);
 			} else if (action.equals("delete")) {
-				AutoTask t = new AutoTask();
+				GenTaskBySqlBuilder t = new GenTaskBySqlBuilder();
 				t.setId(id);
 				autoTask.deleteTask(t);
 			}
@@ -146,7 +146,7 @@ public class TaskResource {
 				class_name = sp_name;
 			}
 			if (action.equals("insert")) {
-				SpTask t = new SpTask();
+				GenTaskBySP t = new GenTaskBySP();
 				t.setProject_id(project_id);
 				t.setServer_id(server);
 				t.setDb_name(db_name);
@@ -158,7 +158,7 @@ public class TaskResource {
 				t.setSp_content(formatSp(t));
 				spTask.insertTask(t);
 			} else if (action.equals("update")) {
-				SpTask t = new SpTask();
+				GenTaskBySP t = new GenTaskBySP();
 				t.setId(id);
 				t.setServer_id(server);
 				t.setProject_id(project_id);
@@ -171,7 +171,7 @@ public class TaskResource {
 				t.setSp_content(formatSp(t));
 				spTask.updateTask(t);
 			} else if (action.equals("delete")) {
-				SpTask t = new SpTask();
+				GenTaskBySP t = new GenTaskBySP();
 				t.setId(id);
 				spTask.deleteTask(t);
 			}
@@ -180,7 +180,7 @@ public class TaskResource {
 
 		if (task_type.equals("sql")) {
 			if (action.equals("insert")) {
-				SqlTask t = new SqlTask();
+				GenTaskByFreeSql t = new GenTaskByFreeSql();
 				t.setProject_id(project_id);
 				t.setServer_id(server);
 				t.setDb_name(db_name);
@@ -191,7 +191,7 @@ public class TaskResource {
 				t.setParameters(params);
 				sqlTask.insertTask(t);
 			} else if (action.equals("update")) {
-				SqlTask t = new SqlTask();
+				GenTaskByFreeSql t = new GenTaskByFreeSql();
 				t.setId(id);
 				t.setServer_id(server);
 				t.setProject_id(project_id);
@@ -206,7 +206,7 @@ public class TaskResource {
 				else
 					return Status.ERROR;
 			} else if (action.equals("delete")) {
-				SqlTask t = new SqlTask();
+				GenTaskByFreeSql t = new GenTaskByFreeSql();
 				t.setId(id);
 				sqlTask.deleteTask(t);
 			}
@@ -217,7 +217,7 @@ public class TaskResource {
 
 	}
 
-	private String formatSql(AutoTask task) {
+	private String formatSql(GenTaskBySqlBuilder task) {
 
 		// 数据库中存储的模式： ID_0,Name_1 表示"ID = "以及"Name != "
 		String[] conditions = task.getCondition().split(",");
@@ -331,7 +331,7 @@ public class TaskResource {
 
 	}
 
-	private String formatSp(SpTask task) {
+	private String formatSp(GenTaskBySP task) {
 		if (task.getCrud_type().equalsIgnoreCase("select")) {
 			return String.format(" Select * FROM EXEC %s.%s ",
 					task.getSp_schema(), task.getSp_name());

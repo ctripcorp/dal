@@ -24,10 +24,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 
-import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
+import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.Status;
+import com.ctrip.platform.dal.daogen.pojo.TableSpNames;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,10 +40,60 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DatabaseResource {
 
 	private static ObjectMapper mapper = new ObjectMapper();
-	private static DbServerDAO dbServerDao;
+	private static DaoOfDbServer dbServerDao;
 
 	static {
 		dbServerDao = SpringBeanGetter.getDBServerDao();
+	}
+	
+	private List<String> getAllTableNames(int server, String dbName){
+		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
+
+		DbServer dbServer = dbServerDao.getDbServerByID(server);
+
+		if (ds == null) {
+			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+		}
+		
+		List<String> results = new ArrayList<String>();
+
+		// 如果是Sql Server，通过Sql语句获取所有表和视图的名称
+		if (dbServer != null
+				&& dbServer.getDb_type().equalsIgnoreCase("sqlserver")) {
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+
+			String sql = String
+					.format("use %s select Name from sysobjects where xtype in ('v','u') and status>=0 order by name",
+							dbName);
+			results = jdbcTemplate.query(sql, new RowMapper<String>() {
+				public String mapRow(ResultSet rs, int rowNum)
+						throws SQLException {
+					return rs.getString(1);
+				}
+			});
+		}
+		// 如果是MySql，通过JDBC标准方式获取所有表和视图的名称
+		else if (dbServer != null
+				&& dbServer.getDb_type().equalsIgnoreCase("mysql")) {
+			String[] types = { "TABLE", "VIEW" };
+			ResultSet rs = null;
+			Connection connection = null;
+			try {
+				connection = ds.getConnection();
+				rs = connection.getMetaData().getTables(dbName, null, "%",
+						types);
+				while (rs.next()) {
+					results.add(rs.getString("TABLE_NAME"));
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				JdbcUtils.closeResultSet(rs);
+				JdbcUtils.closeConnection(connection);
+			}
+		}
+		
+		return results;
 	}
 
 	@GET
@@ -137,61 +188,12 @@ public class DatabaseResource {
 	@Path("tables")
 	public String getTableNames(@QueryParam("server") int server,
 			@QueryParam("db_name") String dbName) {
-
-		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-
-		DbServer dbServer = dbServerDao.getDbServerByID(server);
-
-		if (ds == null) {
-			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
-		}
-
-		List<String> results = new ArrayList<String>();
-
-		// 如果是Sql Server，通过Sql语句获取所有表和视图的名称
-		if (dbServer != null
-				&& dbServer.getDb_type().equalsIgnoreCase("sqlserver")) {
-			JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-
-			String sql = String
-					.format("use %s select Name from sysobjects where xtype in ('v','u') and status>=0 order by name",
-							dbName);
-			results = jdbcTemplate.query(sql, new RowMapper<String>() {
-				public String mapRow(ResultSet rs, int rowNum)
-						throws SQLException {
-					return rs.getString(1);
-				}
-			});
-		}
-		// 如果是MySql，通过JDBC标准方式获取所有表和视图的名称
-		else if (dbServer != null
-				&& dbServer.getDb_type().equalsIgnoreCase("mysql")) {
-			String[] types = { "TABLE", "VIEW" };
-			ResultSet rs = null;
-			Connection connection = null;
-			try {
-				connection = ds.getConnection();
-				rs = connection.getMetaData().getTables(dbName, null, "%",
-						types);
-				while (rs.next()) {
-					results.add(rs.getString("TABLE_NAME"));
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
-				JdbcUtils.closeResultSet(rs);
-				JdbcUtils.closeConnection(connection);
-			}
-		}
-
 		try {
-			return mapper.writeValueAsString(results);
+			return mapper.writeValueAsString(getAllTableNames(server, dbName));
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
+			return null;
 		}
-
-		return null;
-
 	}
 
 	@GET
@@ -287,8 +289,8 @@ public class DatabaseResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("sps")
-	public String getSPNames(@QueryParam("server") int server,
+	@Path("table_sps")
+	public TableSpNames getTableSPNames(@QueryParam("server") int server,
 			@QueryParam("db_name") String dbName) {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
@@ -317,14 +319,12 @@ public class DatabaseResource {
 				}
 			});
 		}
+		
+		TableSpNames tableSpNames = new TableSpNames();
+		tableSpNames.setSps(results);
+		tableSpNames.setTables(getAllTableNames(server, dbName));
 
-		try {
-			return mapper.writeValueAsString(results);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-
-		return null;
+		return tableSpNames;
 
 	}
 

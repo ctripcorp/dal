@@ -1,18 +1,21 @@
 using System;
-using platform.dao.orm.attribute;
+using Arch.Data.Orm;
 
-namespace $namespace
+namespace ${host.getNameSpaceDao()}
 {
+    /// <summary>
+    /// ${host.getTableName()}
+    /// </summary>
     [Serializable]
-    [Table(Name="$table_name")]
-    public class $pojo_name
+    [Table(Name = "${host.getTableName()}")]
+    public partial class ${host.getClassName()}
     {
-        #foreach( $field in $fields )
+#foreach($column in $host.getColumns())
         /// <summary>
-        /// ${field.getName()}
+        /// 获取或设置${column.getName()}
         /// </summary>
-        [Column(Name="${field.getName()}")#if( ${field.isPrimary()} ), PrimaryKey#end]
-        public ${CSharpSqlTypeMap.get($field.getType())}#if( $field.isNullable() )?#end ${field.getName()} { get; set; }
-        #end
+        [Column(Name = "${column.getName()}")#if($column.isIdentity()),ID#end#if($column.isPrimary()),PK#end]
+        public ${column.getType()}#if($column.isNullable())?#end #if($WordUtils.capitalizeFully($column.getName()) == $host.getClassName())${host.getClassName()}_Gen#{else}${WordUtils.capitalizeFully($column.getName())}#end { get; set; }
+#end
     }
 }

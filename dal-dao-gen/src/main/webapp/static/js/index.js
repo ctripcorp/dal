@@ -364,7 +364,12 @@ var renderGrid = function () {
                 id: 'javaCode',
                 caption: '生成Java代码',
                 icon: 'fa fa-play'
-            }, ],
+            }, {
+                type: 'button',
+                id: 'csharpCode',
+                caption: '生成C#代码',
+                icon: 'fa fa-play'
+            }],
             onClick: function (target, data) {
                 switch (target) {
                 case 'refreshDAO':
@@ -464,6 +469,18 @@ var renderGrid = function () {
                     }, function (data) {
                         $("body").unblock();
                         window.location.href = "/file.jsp";
+                    });
+                    break;
+                case 'csharpCode':
+                    cblock($("body"));
+                    $.post("/rest/project/generate", {
+                        "project_id": w2ui['grid'].current_project,
+                        "language": "csharp"
+                    }, function (data) {
+                        $("body").unblock();
+                        window.location.href = "/file.jsp";
+                    }).fail(function(data){
+                        $("body").unblock();
                     });
                     break;
                 }

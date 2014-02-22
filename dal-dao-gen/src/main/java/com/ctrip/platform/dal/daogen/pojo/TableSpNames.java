@@ -6,7 +6,7 @@ public class TableSpNames {
 	
 	private List<String> tables;
 	
-	private List<String> sps;
+	private List<StoredProcedure> sps;
 
 	public List<String> getTables() {
 		return tables;
@@ -16,11 +16,11 @@ public class TableSpNames {
 		this.tables = tables;
 	}
 
-	public List<String> getSps() {
+	public List<StoredProcedure> getSps() {
 		return sps;
 	}
 
-	public void setSps(List<String> sps) {
+	public void setSps(List<StoredProcedure> sps) {
 		this.sps = sps;
 	}
 

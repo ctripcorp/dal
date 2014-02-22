@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.daogen.gen.cs;
 import java.util.List;
 
 import com.ctrip.platform.dal.daogen.pojo.DatabaseCategory;
-import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 
 public class CSharpTableHost {
 
@@ -45,7 +44,7 @@ public class CSharpTableHost {
 
 	private List<CSharpParameterHost> primaryKeys;
 
-	private List<FieldMeta> columns;
+	private List<CSharpParameterHost> columns;
 	
 	private boolean hasPagination;
 
@@ -56,6 +55,26 @@ public class CSharpTableHost {
 	private boolean hasSptD;
 
 	private boolean hasSptU;
+	
+	private String spName;
+	
+	private List<CSharpParameterHost> spParams;
+
+	public String getSpName() {
+		return spName;
+	}
+
+	public void setSpName(String spName) {
+		this.spName = spName;
+	}
+
+	public List<CSharpParameterHost> getSpParams() {
+		return spParams;
+	}
+
+	public void setSpParams(List<CSharpParameterHost> spParams) {
+		this.spParams = spParams;
+	}
 
 	public String getNameSpaceEntity() {
 		return nameSpaceEntity;
@@ -212,11 +231,11 @@ public class CSharpTableHost {
 		this.primaryKeys = primaryKeys;
 	}
 
-	public List<FieldMeta> getColumns() {
+	public List<CSharpParameterHost> getColumns() {
 		return columns;
 	}
 
-	public void setColumns(List<FieldMeta> columns) {
+	public void setColumns(List<CSharpParameterHost> columns) {
 		this.columns = columns;
 	}
 	

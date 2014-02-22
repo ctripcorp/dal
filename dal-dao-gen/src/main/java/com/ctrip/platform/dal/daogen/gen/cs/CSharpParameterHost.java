@@ -2,16 +2,49 @@ package com.ctrip.platform.dal.daogen.gen.cs;
 
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
+import com.ctrip.platform.dal.daogen.gen.AbstractParameterHost;
 
-public class CSharpParameterHost {
+public class CSharpParameterHost extends AbstractParameterHost {
 	
 	private String name;
 	
 	private ParameterDirection direction;
 	
+	//C#的DbType
 	private DbType dbType;
 	
+	//C#的数据类型
 	private String type;
+	
+	private boolean identity;
+	
+	private boolean primary;
+	
+	private boolean nullable;
+
+	public boolean isPrimary() {
+		return primary;
+	}
+
+	public void setPrimary(boolean primary) {
+		this.primary = primary;
+	}
+
+	public boolean isNullable() {
+		return nullable;
+	}
+
+	public void setNullable(boolean nullable) {
+		this.nullable = nullable;
+	}
+
+	public boolean isIdentity() {
+		return identity;
+	}
+
+	public void setIdentity(boolean identity) {
+		this.identity = identity;
+	}
 
 	public String getName() {
 		return name;
@@ -43,6 +76,11 @@ public class CSharpParameterHost {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+	
+	@Override
+	public String toString() {
+		return this.getName().toString();
 	}
 
 }

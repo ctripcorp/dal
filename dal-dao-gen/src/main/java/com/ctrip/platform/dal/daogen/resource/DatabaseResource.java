@@ -30,6 +30,7 @@ import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.Status;
 import com.ctrip.platform.dal.daogen.pojo.TableSpNames;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
+import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,56 +45,6 @@ public class DatabaseResource {
 
 	static {
 		dbServerDao = SpringBeanGetter.getDBServerDao();
-	}
-	
-	private List<String> getAllTableNames(int server, String dbName){
-		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-
-		DbServer dbServer = dbServerDao.getDbServerByID(server);
-
-		if (ds == null) {
-			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
-		}
-		
-		List<String> results = new ArrayList<String>();
-
-		// 如果是Sql Server，通过Sql语句获取所有表和视图的名称
-		if (dbServer != null
-				&& dbServer.getDb_type().equalsIgnoreCase("sqlserver")) {
-			JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-
-			String sql = String
-					.format("use %s select Name from sysobjects where xtype in ('v','u') and status>=0 order by name",
-							dbName);
-			results = jdbcTemplate.query(sql, new RowMapper<String>() {
-				public String mapRow(ResultSet rs, int rowNum)
-						throws SQLException {
-					return rs.getString(1);
-				}
-			});
-		}
-		// 如果是MySql，通过JDBC标准方式获取所有表和视图的名称
-		else if (dbServer != null
-				&& dbServer.getDb_type().equalsIgnoreCase("mysql")) {
-			String[] types = { "TABLE", "VIEW" };
-			ResultSet rs = null;
-			Connection connection = null;
-			try {
-				connection = ds.getConnection();
-				rs = connection.getMetaData().getTables(dbName, null, "%",
-						types);
-				while (rs.next()) {
-					results.add(rs.getString("TABLE_NAME"));
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
-				JdbcUtils.closeResultSet(rs);
-				JdbcUtils.closeConnection(connection);
-			}
-		}
-		
-		return results;
 	}
 
 	@GET
@@ -189,7 +140,7 @@ public class DatabaseResource {
 	public String getTableNames(@QueryParam("server") int server,
 			@QueryParam("db_name") String dbName) {
 		try {
-			return mapper.writeValueAsString(getAllTableNames(server, dbName));
+			return mapper.writeValueAsString(DbUtils.getAllTableNames(server, dbName));
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 			return null;
@@ -292,40 +243,11 @@ public class DatabaseResource {
 	@Path("table_sps")
 	public TableSpNames getTableSPNames(@QueryParam("server") int server,
 			@QueryParam("db_name") String dbName) {
-
-		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-
-		DbServer dbServer = dbServerDao.getDbServerByID(server);
-
-		if (ds == null) {
-			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
-		}
-
-		List<String> results = new ArrayList<String>();
-
-		// 如果是Sql Server，通过Sql语句获取所有表和视图的名称
-		if (dbServer != null
-				&& dbServer.getDb_type().equalsIgnoreCase("sqlserver")) {
-			JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-
-			String sql = String
-					.format("use %s select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE'",
-							dbName);
-			results = jdbcTemplate.query(sql, new RowMapper<String>() {
-				public String mapRow(ResultSet rs, int rowNum)
-						throws SQLException {
-					return String.format("%s.%s", rs.getString(1),
-							rs.getString(2));
-				}
-			});
-		}
-		
 		TableSpNames tableSpNames = new TableSpNames();
-		tableSpNames.setSps(results);
-		tableSpNames.setTables(getAllTableNames(server, dbName));
+		tableSpNames.setSps(DbUtils.getAllSpNames(server, dbName));
+		tableSpNames.setTables(DbUtils.getAllTableNames(server, dbName));
 
 		return tableSpNames;
-
 	}
 
 	@GET

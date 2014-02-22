@@ -2,49 +2,47 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using platform.dao;
-using platform.dao.param;
+using System.Text;
+using Arch.Data;
+using Arch.Data.DbEngine;
+using ${host.getNameSpaceEntity()};
 
-namespace $namespace
+namespace ${host.getNameSpaceDao()}
 {
-    public class $dao_name : AbstractDAO
+    public partial class ${host.getClassName()}Dao
     {
-        public $dao_name()
-        {
-            //注释掉此行或者赋值为string.Empty，然后配置connectionString来直连数据库
-            PhysicDbName = "$database";
-            ServicePort = 9000;
-            CredentialID = "30303";
-            base.Init();
-        }
+        readonly BaseDao baseDao = BaseDaoFactory.CreateBaseDao("");
 
-        #foreach( $method in $sp_methods )
-        #set($parameters = $method.getParameters())
-public #if( $method.getAction() == "select" )IDataReader#{else}int#end ${method.getMethodName()}#[[(]]##foreach($p in $parameters)${p.getType()} ${p.getName()}#if($foreach.count != $parameters.size()), #end#end#[[)]]# {
+        /// <summary>
+        ///  执行SP${host.getClassName()}
+        /// </summary>
+        /// <param name="${WordUtils.uncapitalize(${host.getClassName()})}">${host.getClassName()}实体对象</param>
+        /// <returns>影响的行数</returns>
+        public int Exec${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize(${host.getClassName()})})
         {
             try
             {
-                IList<IParameter> parameters = new List<IParameter>();
-                #foreach($p in $parameters)
-                parameters.Add(new ConcreteParameter(){
-                        DbType = System.Data.DbType.${CSharpDbTypeMap.get($p.getType())},
-                        Name = "@${p.getFieldName()}",
-                        Direction = #if( $p.getParamMode() == "OUT" )ParameterDirection.InputOutput#{else}ParameterDirection.Input#end,
-                        Index = ${p.getPosition()},
-                        IsNullable =false,
-                        IsSensitive = false,
-                        Size  = 50,
-                        Value = ${p.getName()}
-                    });
-                #end
-                
-                return this.#if( $method.getAction() == "select" )FetchBySP#{else}ExecuteSP#end("${method.getSqlSPName()}", parameters.ToArray());
+                StatementParameterCollection parameters = new StatementParameterCollection();
+#foreach($p in $host.getSpParams())
+                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalizeFully($p.getName().replace("@",""))}});
+#end
+                parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
+
+                baseDao.ExecSp("${host.getSpName()}", parameters);
+
+#foreach ($p in $host.getSpParams())
+#if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
+                ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalizeFully($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
+#end
+#end
+                return (int)parameters["@return"].Value;
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new DalException("调用${host.getClassName()}Dao时，访问Exec${host.getClassName()}时出错", ex);
             }
-        }
-        #end
+
+       }
+
     }
 }

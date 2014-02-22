@@ -8,14 +8,14 @@ using Arch.Data.DbEngine;
 using ${host.getNameSpaceEntity()};
 using ${host.getNameSpaceIDao()};
 
-namespace ${host.getNamespaceDao()}
+namespace ${host.getNameSpaceDao()}
 {
    /// <summary>
     /// 更多DALFx接口功能，请参阅DALFx Confluence，地址：
     /// http://conf.ctripcorp.com/display/ARCH/Dal+Fx+API
     /// </summary>
-	public partial class ${host.getClassName()}Dao : I${host.getClassName()}Dao
-	{
+    public partial class ${host.getClassName()}Dao : I${host.getClassName()}Dao
+    {
         readonly BaseDao baseDao = BaseDaoFactory.CreateBaseDao("${host.getDbSetName()}");
         
 #if($host.isTable())
@@ -28,16 +28,15 @@ namespace ${host.getNamespaceDao()}
 #else
         /// <returns>新增的主键</returns>
 #end
-#end
-		public int Insert${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize(host.getClassName())})
+        public int Insert${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())})
         {
 #if($host.isSpa())
 #if($host.isHasInsertMethod())
-			try
+            try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
 #foreach ($p in $host.getInsertParameterList())
-                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize(host.getClassName())}.${WordUtils.capitalizeFully(p.getName().replace("@",""))}});
+                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalizeFully($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
@@ -45,7 +44,7 @@ namespace ${host.getNamespaceDao()}
 
 #foreach ($p in $host.getInsertParameterList())
 #if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
-               ${WordUtils.uncapitalize(host.getClassName())}.${WordUtils.capitalizeFully(p.getName().replace("@",""))} = (${p.getDbType()})parameters["${p.getName()}"].Value;
+               ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalizeFully($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
 #end
 #end
                 return (int)parameters["@return"].Value;
@@ -55,13 +54,13 @@ namespace ${host.getNamespaceDao()}
                 throw new DalException("调用${host.getClassName()}Dao时，访问Insert时出错", ex);
             }
 #else
-			//没有Insert相关SP,请检查数据库后重新生成。
-			return 0;
-#end        	
+            //没有Insert相关SP,请检查数据库后重新生成。
+            return 0;
+#end            
 #else
-			try
+            try
             {
-                Object result = baseDao.Insert<${host.getClassName()}>(${WordUtils.uncapitalize(host.getClassName())});
+                Object result = baseDao.Insert<${host.getClassName()}>(${WordUtils.uncapitalize($host.getClassName())});
                 int iReturn = Convert.ToInt32(result);
 
                 return iReturn;
@@ -73,23 +72,23 @@ namespace ${host.getNamespaceDao()}
 #end
         }
         
-#if($host.isHasPK() == false)
-		/*由于没有PK，不能生成Update和Delete方法
+#if($host.getPrimaryKeys().size() == 0)
+        /*由于没有PK，不能生成Update和Delete方法
 #end
-		/// <summary>
+        /// <summary>
         /// 修改${host.getClassName()}
         /// </summary>
-        /// <param name="${WordUtils.uncapitalize(host.getClassName())}">${host.getClassName()}实体对象</param>
+        /// <param name="${WordUtils.uncapitalize($host.getClassName())}">${host.getClassName()}实体对象</param>
         /// <returns>状态代码</returns>
-        public int Update${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize(host.getClassName())})
+        public int Update${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())})
         {
 #if($host.isSpa())
 #if($host.isHasUpdateMethod())
-			try
+            try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
 #foreach ($p in $host.getUpdateParameterList())
-                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize(host.getClassName())}.${WordUtils.capitalizeFully(p.getName().replace("@",""))}});
+                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalizeFully($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
@@ -97,7 +96,7 @@ namespace ${host.getNamespaceDao()}
 
 #foreach ($p in $host.getUpdateParameterList())
 #if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
-               ${WordUtils.uncapitalize(host.getClassName())}.${WordUtils.capitalizeFully(p.getName().replace("@",""))} = (${p.getDbType()})parameters["${p.getName()}"].Value;
+               ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalizeFully($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
 #end
 #end
                 return (int)parameters["@return"].Value;
@@ -107,13 +106,13 @@ namespace ${host.getNamespaceDao()}
                 throw new DalException("调用${host.getClassName()}Dao时，访问Update时出错", ex);
             }
 #else
-			//没有Update相关SP,请检查数据库后重新生成。
-			return 0;
-#end        	
+            //没有Update相关SP,请检查数据库后重新生成。
+            return 0;
+#end            
 #else
-			try
+            try
             {
-                Object result = baseDao.Update<${host.getClassName()}>(${WordUtils.uncapitalize(host.getClassName())});
+                Object result = baseDao.Update<${host.getClassName()}>(${WordUtils.uncapitalize($host.getClassName())});
                 int iReturn = Convert.ToInt32(result);
 
                 return iReturn;
@@ -128,17 +127,17 @@ namespace ${host.getNamespaceDao()}
         /// <summary>
         /// 删除${host.getClassName()}
         /// </summary>
-        /// <param name="${WordUtils.uncapitalize(host.getClassName())}">${host.getClassName()}实体对象</param>
+        /// <param name="${WordUtils.uncapitalize($host.getClassName())}">${host.getClassName()}实体对象</param>
         /// <returns>状态代码</returns>
-        public int Delete${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize(host.getClassName())})
+        public int Delete${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())})
         {
 #if($host.isSpa())
 #if($host.isHasDeleteMethod())
-			try
+            try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
 #foreach ($p in $host.getDeleteParameterList())
-                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize(host.getClassName())}.${WordUtils.capitalizeFully(p.getName().replace("@",""))}});
+                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalizeFully($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
@@ -151,11 +150,11 @@ namespace ${host.getNamespaceDao()}
                 throw new DalException("调用${host.getClassName()}Dao时，访问Delete时出错", ex);
             }
 #else
-			//没有Delete相关SP,请检查数据库后重新生成。
-			return 0;
-#end        	
+            //没有Delete相关SP,请检查数据库后重新生成。
+            return 0;
+#end            
 #else
-			try
+            try
             {
                 Object result = baseDao.Delete<${host.getClassName()}>(${WordUtils.uncapitalize($host.getClassName())});
                 int iReturn = Convert.ToInt32(result);
@@ -171,20 +170,20 @@ namespace ${host.getNamespaceDao()}
         
 #if($host.isSpa())
 #if($host.isHasDeleteMethod())
-		/// <summary>
+        /// <summary>
         /// 删除<#= className #>
         /// </summary>
 #foreach ($p in $host.getDeleteParameterList())
-		/// <param name="${WordUtils.uncapitalize($p.getName().replace("@", ""))">${WordUtils.uncapitalize($p.getName()) #></param>
+        /// <param name="${WordUtils.uncapitalize($p.getName().replace('@', ''))}">${WordUtils.uncapitalize($p.getName())} #></param>
 #end
-		/// <returns>状态代码</returns>
-		public int Delete${host.getClassName()}(#foreach ($p in $host.getDeleteParameterList())${p.getType()} ${WordUtils.uncapitalize(p.getName())}#if($foreach.count != $host.getDeleteParameterList().size()),#end#end)
+        /// <returns>状态代码</returns>
+        public int Delete${host.getClassName()}(#foreach ($p in $host.getDeleteParameterList())${p.getType()} ${WordUtils.uncapitalize($p.getName().replace("@",""))}#if($foreach.count != $host.getDeleteParameterList().size()),#end#end)
         {
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
 #foreach ($p in $host.getDeleteParameterList())
-                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize(p.getName().replace("@",""))}});
+                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
@@ -200,18 +199,18 @@ namespace ${host.getNamespaceDao()}
 #end
 #end
         
-#if($host.isHasPK() == false)
-		*/
+#if($host.getPrimaryKeys().size() == 0)
+        */
 #end
 
 #if($host.getPrimaryKeys().size() == 1)
-		/// <summary>
+        /// <summary>
         /// 根据主键获取${host.getClassName()}信息
         /// </summary>
-#set($pk = $.host.getPrimaryKeys().get(0))
+#set($pk = $host.getPrimaryKeys().get(0))
         /// <param name="${WordUtils.uncapitalize($pk.getName())}"></param>
-		/// <returns>${host.getClassName()}信息</returns>
-		public ${host.getClassName()} FindByPk(${pk.getType()} ${WordUtils.uncapitalize($pk.getName())} )
+        /// <returns>${host.getClassName()}信息</returns>
+        public ${host.getClassName()} FindByPk(${pk.getType()} ${WordUtils.uncapitalize($pk.getName())} )
         {
             try
             {
@@ -223,25 +222,26 @@ namespace ${host.getNamespaceDao()}
             }
         }
 #elseif($host.getPrimaryKeys().size() >= 2)
-		/// <summary>
+        /// <summary>
         /// 根据主键获取${host.getClassName()}信息
         /// </summary>
-#foreach ($cpk in $.host.getPrimaryKeys())
+#foreach ($cpk in $host.getPrimaryKeys())
         /// <param name="${WordUtils.uncapitalize($cpk.getName())}"></param>
 #end
-		/// <returns>${host.getClassName()}信息</returns>
-		public ${host.getClassName()} FindByPk(#foreach ($cpk in $.host.getPrimaryKeys())${cpk.getType()} ${WordUtils.uncapitalize(cpk.getName())}#if($foreach.count != $host.getPrimaryKeys().size()),#end#end)
+        /// <returns>${host.getClassName()}信息</returns>
+        public ${host.getClassName()} FindByPk(#foreach ($cpk in $host.getPrimaryKeys())${cpk.getType()} ${WordUtils.uncapitalize($cpk.getName())}#if($foreach.count != $host.getPrimaryKeys().size()),#end#end)
         {
             try
             {
 #set($array = [])
-#foreach ($cpk in $.host.getPrimaryKeys())
-$array.add($cpk.getName() + " = @" + $cpk.getName())
+#foreach ($cpk in $host.getPrimaryKeys())
+#set($current = $cpk.getName() + " = @" + $cpk.getName())
+#set($success = $array.add($current))
 #end
-                string sql = @"select ${StringUtils.join(host.getColumns(), "\r\n\t\t\t\t, ")} from ${host.getTableName()} (nolock) where ${StringUtils.join(array, " and ")}";
+                string sql = @"select ${StringUtils.join($host.getColumns(), ", ")} from ${host.getTableName()} (nolock) where ${StringUtils.join($array, " and ")}";
                 StatementParameterCollection parameters = new StatementParameterCollection();
-#foreach ($cpk in $.host.getPrimaryKeys())
-                parameters.Add(new StatementParameter{Name = "${cpk.getName()}", DbType = DbType.${cpk.getDbType()}, Value = ${WordUtils.uncapitalize(cpk.getName())}});
+#foreach ($cpk in $host.getPrimaryKeys())
+                parameters.Add(new StatementParameter{Name = "${cpk.getName()}", DbType = DbType.${cpk.getDbType()}, Value = ${WordUtils.uncapitalize($cpk.getName())}});
 #end
 
                 return baseDao.SelectFirst<${host.getClassName()}>(sql, parameters);
@@ -252,8 +252,9 @@ $array.add($cpk.getName() + " = @" + $cpk.getName())
             }
         }
 #end
+#end
 
-		/// <summary>
+        /// <summary>
         /// 获取所有${host.getClassName()}信息
         /// </summary>
         /// <returns>${host.getClassName()}列表</returns>
@@ -277,7 +278,7 @@ $array.add($cpk.getName() + " = @" + $cpk.getName())
         {
             try
             {
-                String sql = "SELECT count(1) from ${host.getTableName()} #if(host.getDatabaseCategory().name() == "MySql" ) #{else} with (nolock)#end  ";
+                String sql = "SELECT count(1) from ${host.getTableName()} #if($host.getDatabaseCategory().name() == "MySql" ) #{else} with (nolock)#end  ";
 
                 object obj = baseDao.ExecScalar(sql);
                 long ret = Convert.ToInt64(obj);
@@ -290,7 +291,7 @@ $array.add($cpk.getName() + " = @" + $cpk.getName())
         }
         
 #if($host.isHasPagination())
-		/// <summary>
+        /// <summary>
         ///  检索${host.getClassName()}，带翻页
         /// </summary>
         /// <param name="obj">${host.getClassName()}实体对象检索条件</param>
@@ -299,18 +300,19 @@ $array.add($cpk.getName() + " = @" + $cpk.getName())
         /// <returns>检索结果</returns>
         public IList<${host.getClassName()}> GetListByPage(${host.getClassName()} obj, int pagesize, int pageNo)
         {
-        	 try
+             try
             {
                 var dic = new StatementParameterCollection();
                 StringBuilder sbSql = new StringBuilder(200);
-                
+
 #set($array = [])
-#foreach ($cpk in $.host.getPrimaryKeys())
-$array.add($cpk.getName() + " desc")
+#foreach ($cpk in $host.getPrimaryKeys())
+#set($current = $cpk.getName() + " desc")
+#set($success = $array.add($current))
 #end
                 
-#if(host.getDatabaseCategory().name() == "MySql" )
-                sbSql.Append(@"select ${StringUtils.join(host.getColumns(), "\r\n\t\t\t\t\t\t\t, ")} from ${host.getTableName()} ");
+#if($host.getDatabaseCategory().name() == "MySql" )
+                sbSql.Append(@"select ${StringUtils.join($host.getColumns(), ", ")} from ${host.getTableName()} ");
                 //包含查询条件
                 //StringBuilder whereCondition = new StringBuilder();
                 //if (!string.IsNullOrEmpty(obj.Name))
@@ -320,23 +322,23 @@ $array.add($cpk.getName() + " desc")
                 //    dic.AddInParameter("@Name", DbType.String, "%" + obj.Name + "%");
                 //}
                 //sbSql.Append(whereCondition);
-#if(host.getPrimaryKeys().size() > 0)
-                sbSql.Append(" order by ${StringUtils.join(array, ", ")} ");
+#if($host.getPrimaryKeys().size() > 0)
+                sbSql.Append(" order by ${StringUtils.join($array, ", ")} ");
 #else
-				sbSql.Append(" order by ${host.getColumns().get(0)}  desc");
+                sbSql.Append(" order by ${host.getColumns().get(0)}  desc");
 #end
                 sbSql.Append( string.Format("limit {0}, {1} ", (pageNo - 1) * pagesize, pagesize));
 #else
-				 //计算ROWNUM
+                 //计算ROWNUM
                 int fromRownum = (pageNo - 1) * pagesize + 1;
                 int endRownum = pagesize * pageNo;
                  sbSql.Append("WITH CTE AS ("); //WITH CTE 开始
-#if(host.getPrimaryKeys().size() > 0)
-                sbSql.Append("select row_number() over(order by ${StringUtils.join(array, ", ")} ) as rownum, ");
+#if($host.getPrimaryKeys().size() > 0)
+                sbSql.Append("select row_number() over(order by ${StringUtils.join($array, ", ")} ) as rownum, ");
 #else
                 sbSql.Append("select row_number() over(order by ${host.getColumns().get(0)} desc ) as rownum, ");
 #end
-                sbSql.Append(@"${StringUtils.join($host.getColums(),"\r\n\t\t\t\t\t\t\t, ")} from ${host.getTableName()} (nolock) ");
+                sbSql.Append(@"${StringUtils.join($host.getColumns(),", ")} from ${host.getTableName()} (nolock) ");
 
                 //包含查询条件
                 //StringBuilder whereCondition = new StringBuilder();
@@ -351,7 +353,7 @@ $array.add($cpk.getName() + " desc")
                 sbSql.Append(")"); //WITH CTE 结束
 
                 // 用 CTE 完成分页
-                sbSql.Append(@"select ${StringUtils.join($host.getColums(),"\r\n\t\t\t\t\t\t\t, ")} from CTE Where rownum between @from and @end");
+                sbSql.Append(@"select ${StringUtils.join($host.getColumns(),", ")} from CTE Where rownum between @from and @end");
                 dic.AddInParameter("@from", DbType.Int32, fromRownum);
                 dic.AddInParameter("@end", DbType.Int32, endRownum);
 #end
@@ -377,7 +379,7 @@ $array.add($cpk.getName() + " desc")
         {
             DataTable dt = new DataTable();
 #foreach($column in $host.getColumns())
-            dt.Columns.Add("${WordUtils.capitalizeFully($column)}", typeof(${column.getType()}));
+            dt.Columns.Add("${WordUtils.capitalizeFully($column.getName())}", typeof(${column.getType()}));
 #end
 
             int i = 0;
@@ -386,9 +388,9 @@ $array.add($cpk.getName() + " desc")
                 DataRow row = dt.NewRow();
 #foreach($column in $host.getColumns())
 #if($column.isIdentity())
-		        row["${WordUtils.capitalizeFully($column)}"] = insert ? ++i : ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalizeFully($column)};
+                row["${WordUtils.capitalizeFully($column.getName())}"] = insert ? ++i : ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalizeFully($column.getName())};
 #else
-                row["${WordUtils.capitalizeFully($column)}"] = ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalizeFully($column)};
+                row["${WordUtils.capitalizeFully($column.getName())}"] = ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalizeFully($column.getName())};
 #end
 #end
                 dt.Rows.Add(row);
@@ -479,5 +481,5 @@ $array.add($cpk.getName() + " desc")
         }
 #end
         
-	}
+    }
 }

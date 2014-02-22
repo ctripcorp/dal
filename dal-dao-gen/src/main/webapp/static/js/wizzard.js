@@ -95,8 +95,8 @@
                                 });
                                 $.each(data.sps, function (index, value) {
                                     spList.push($('<option>', {
-                                        value: value,
-                                        text: value
+                                        value: value.schema + "." + value.name,
+                                        text: value.schema + "." + value.name
                                     }));
                                 });
                                 $("#table_list").append(tableList).multipleSelect("refresh");

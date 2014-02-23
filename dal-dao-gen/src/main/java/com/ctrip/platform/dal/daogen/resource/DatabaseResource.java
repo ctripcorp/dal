@@ -20,8 +20,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
@@ -67,7 +65,9 @@ public class DatabaseResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("servers")
 	public Status saveDbServer(@FormParam("id") int id,
-			@FormParam("driver") String driver, @FormParam("url") String url,
+			@FormParam("server") String server,
+			@FormParam("port") int port,
+			@FormParam("domain") String domain,
 			@FormParam("user") String user,
 			@FormParam("password") String password,
 			@FormParam("db_type") String db_type,
@@ -78,8 +78,23 @@ public class DatabaseResource {
 			dbServer.setId(id);
 			dbServerDao.deleteDbServer(dbServer);
 		} else {
-			dbServer.setDriver(driver);
-			dbServer.setUrl(url);
+//			dbServer.setDriver(driver);
+			if (db_type.equalsIgnoreCase("mysql")) {
+				dbServer.setDriver("com.mysql.jdbc.Driver");
+			} else {
+				dbServer.setDriver("net.sourceforge.jtds.jdbc.Driver");
+			}
+			dbServer.setServer(server);
+			if(port == 0){
+				if (db_type.equalsIgnoreCase("mysql")) {
+					dbServer.setPort(3306);
+				} else {
+					dbServer.setPort(1433);
+				}
+			}else{
+				dbServer.setPort(port);
+			}
+			dbServer.setDomain(domain);
 			dbServer.setUser(user);
 			dbServer.setPassword(password);
 			dbServer.setDb_type(db_type);
@@ -248,61 +263,6 @@ public class DatabaseResource {
 		tableSpNames.setTables(DbUtils.getAllTableNames(server, dbName));
 
 		return tableSpNames;
-	}
-
-	@GET
-	// @Produces(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.TEXT_PLAIN)
-	@Path("sp_code")
-	public String getSPCode(@QueryParam("server") int server,
-			@QueryParam("db_name") String dbName,
-			@QueryParam("sp_name") String spName) {
-
-		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-
-		if (ds == null) {
-			DbServer dbServer = dbServerDao.getDbServerByID(server);
-			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
-		}
-
-		JdbcTemplate template = new JdbcTemplate(ds);
-
-		final StringBuilder spCode = new StringBuilder();
-
-		template.query(String.format("use %s exec sp_helptext ?", dbName),
-				new Object[] { spName }, new RowMapper<Integer>() {
-					public Integer mapRow(ResultSet rs, int rowNum)
-							throws SQLException {
-						spCode.append(rs.getString(1));
-						return spCode.length();
-					}
-				});
-
-		return spCode.toString();
-
-	}
-
-	@POST
-	@Produces(MediaType.APPLICATION_JSON)
-	// @Produces(MediaType.TEXT_PLAIN)
-
-	public Status saveSp(@FormParam("server") int server,
-			@FormParam("db_name") String dbName,
-			@FormParam("sp_code") String spCode) {
-
-		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-
-		if (ds == null) {
-			DbServer dbServer = dbServerDao.getDbServerByID(server);
-			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
-		}
-
-		JdbcTemplate template = new JdbcTemplate(ds);
-
-		template.update(spCode);
-
-		return Status.OK;
-
 	}
 
 	@POST

@@ -11,9 +11,9 @@ namespace ${host.getNameSpaceEntity()}
 	{
 #foreach($p in $host.getSpParams())
         /// <summary>
-        /// ${WordUtils.capitalizeFully($p.getName().replace("@",""))}
+        /// ${WordUtils.capitalize($p.getName().replace("@",""))}
         /// </summary>
-		public ${p.getType()}#if($p.isNullable())?#end #if($WordUtils.capitalizeFully($p.getName()) == $host.getClassName())${host.getClassName()}_${host.getClassName()}:${WordUtils.capitalizeFully($p.getName().replace("@",""))} { get; set; }
+		public ${p.getType()}#if($p.isNullable())?#end #if($WordUtils.capitalize($p.getName()) == $host.getClassName())${host.getClassName()}_${host.getClassName()}#{else}${WordUtils.capitalize($p.getName().replace("@",""))}#end { get; set; }
 #end
 	}
 }

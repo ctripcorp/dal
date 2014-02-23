@@ -126,7 +126,22 @@ public class DataSourceLRUCache {
 
 			BasicDataSource dbDataSource = new BasicDataSource();
 			dbDataSource.setDriverClassName(server.getDriver());
-			dbDataSource.setUrl(server.getUrl());
+			// dbDataSource.setUrl(server.getUrl());
+			String url = "";
+			if (server.getDb_type().equalsIgnoreCase("mysql")) {
+				url = String.format("jdbc:mysql://%s:%d", server.getServer(),
+						server.getPort());
+			} else {
+				if (null == server.getDomain() || server.getDomain().isEmpty())
+					url = String.format("jdbc:jtds:sqlserver://%s:%d",
+							server.getServer(), server.getPort());
+				else
+					url = String.format(
+							"jdbc:jtds:sqlserver://%s:%d;domain=%s;",
+							server.getServer(), server.getPort(),
+							server.getDomain());
+			}
+			dbDataSource.setUrl(url);
 			dbDataSource.setUsername(server.getUser());
 			dbDataSource.setPassword(server.getPassword());
 
@@ -179,26 +194,27 @@ public class DataSourceLRUCache {
 	public static void main(String[] args) {
 		NamedParameterJdbcTemplate tmpl = new NamedParameterJdbcTemplate(
 				DataSourceLRUCache.newInstance().putDataSource(5));
-		
+
 		String sql = "select id, driver, url, user,password, db_type from daogen.data_source WHERE id = :id";
-		
+
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("id", 5);
-		
-		List<DbServer> servers = tmpl.query(sql, parameters, new RowMapper<DbServer>(){
 
-			@Override
-			public DbServer mapRow(ResultSet rs, int rowNum)
-					throws SQLException {
-				return DbServer.visitRow(rs);
-			}
-			
-		});
-		
-		for(DbServer server : servers){
+		List<DbServer> servers = tmpl.query(sql, parameters,
+				new RowMapper<DbServer>() {
+
+					@Override
+					public DbServer mapRow(ResultSet rs, int rowNum)
+							throws SQLException {
+						return DbServer.visitRow(rs);
+					}
+
+				});
+
+		for (DbServer server : servers) {
 			System.out.println(server.getDb_type());
 		}
-		
+
 	}
 
 }

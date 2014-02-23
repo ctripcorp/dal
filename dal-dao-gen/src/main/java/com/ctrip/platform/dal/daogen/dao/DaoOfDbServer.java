@@ -28,7 +28,7 @@ public class DaoOfDbServer {
 	public List<DbServer> getAllDbServers() {
 
 		return this.jdbcTemplate
-				.query("select id, driver, url, user,password, db_type from data_source",
+				.query("select id, driver, server,port,domain, user,password, db_type from data_source",
 						new RowMapper<DbServer>() {
 							public DbServer mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
@@ -41,7 +41,7 @@ public class DaoOfDbServer {
 
 		return this.jdbcTemplate
 				.queryForObject(
-						"select id, driver, url, user,password, db_type from data_source where id=?",
+						"select id, driver,  server,port,domain, user,password, db_type from data_source where id=?",
 						new Object[] { iD }, new RowMapper<DbServer>() {
 							public DbServer mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
@@ -61,13 +61,15 @@ public class DaoOfDbServer {
 					Connection connection) throws SQLException {
 				PreparedStatement ps = connection
 						.prepareStatement(
-								"insert into data_source ( driver, url, user,password, db_type) values (?,?,?,?,?)",
+								"insert into data_source ( driver,  server,port,domain, user,password, db_type) values (?,?,?,?,?,?,?)",
 								Statement.RETURN_GENERATED_KEYS);
 				ps.setString(1, data.getDriver());
-				ps.setString(2, data.getUrl());
-				ps.setString(3, data.getUser());
-				ps.setString(4, data.getPassword());
-				ps.setString(5, data.getDb_type());
+				ps.setString(2, data.getServer());
+				ps.setInt(3, data.getPort());
+				ps.setString(4, data.getDomain());
+				ps.setString(5, data.getUser());
+				ps.setString(6, data.getPassword());
+				ps.setString(7, data.getDb_type());
 				return ps;
 			}
 		}, holder);
@@ -79,8 +81,8 @@ public class DaoOfDbServer {
 	public int DataSource(DbServer data) {
 
 		return this.jdbcTemplate
-				.update("update data_source set driver=?, url=?, user=?,password=?,db_type=? where id=?",
-						data.getDriver(), data.getUrl(), data.getUser(),
+				.update("update data_source set driver=?,  server=?,port=?,domain=?, user=?,password=?,db_type=? where id=?",
+						data.getDriver(), data.getServer(),data.getPort(),data.getDomain(), data.getUser(),
 						data.getPassword(), data.getDb_type(), data.getId());
 
 	}

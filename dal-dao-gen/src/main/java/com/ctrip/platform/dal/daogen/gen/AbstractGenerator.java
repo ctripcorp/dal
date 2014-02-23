@@ -16,7 +16,6 @@ import org.apache.velocity.app.Velocity;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
-import com.ctrip.platform.dal.daogen.dao.DaoBySp;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
@@ -24,9 +23,6 @@ import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.GenTask;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskBySP;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.pojo.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.pojo.Project;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
@@ -37,8 +33,6 @@ public abstract class AbstractGenerator implements Generator {
 	protected static DaoOfProject projectDao;
 
 	protected static DaoBySqlBuilder autoTaskDao;
-
-	protected static DaoBySp spTaskDao;
 
 	protected static DaoByFreeSql sqlTaskDao;
 
@@ -53,9 +47,8 @@ public abstract class AbstractGenerator implements Generator {
 	static {
 
 		projectDao = SpringBeanGetter.getProjectDao();
-		autoTaskDao = SpringBeanGetter.getAutoTaskDao();
-		spTaskDao = SpringBeanGetter.getSpTaskDao();
-		sqlTaskDao = SpringBeanGetter.getSqlTaskDao();
+		autoTaskDao = SpringBeanGetter.getDaoBySqlBuilder();
+		sqlTaskDao = SpringBeanGetter.getDaoByFreeSql();
 		dbServerDao = SpringBeanGetter.getDBServerDao();
 		daoByTableViewSp = SpringBeanGetter.getDaoByTableViewSp();
 
@@ -213,9 +206,6 @@ public abstract class AbstractGenerator implements Generator {
 
 	@Override
 	public abstract void generateByTableView(List<GenTaskByTableViewSp> tasks);
-
-	@Override
-	public abstract void generateBySP(List<GenTask> tasks);
 
 	@Override
 	public abstract void generateByFreeSql(List<GenTask> tasks);

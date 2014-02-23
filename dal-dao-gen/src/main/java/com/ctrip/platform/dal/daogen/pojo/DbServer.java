@@ -9,13 +9,41 @@ public class DbServer {
 	
 	private String driver;
 	
-	private String url;
+	private String server;
+	
+	private int port;
+	
+	private String domain;
 	
 	private String user;
 	
 	private String password;
 	
 	private String db_type;
+
+	public String getServer() {
+		return server;
+	}
+
+	public void setServer(String server) {
+		this.server = server;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public String getDomain() {
+		return domain;
+	}
+
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
 
 	public int getId() {
 		return id;
@@ -32,15 +60,7 @@ public class DbServer {
 	public void setDriver(String driver) {
 		this.driver = driver;
 	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
+	
 	public String getUser() {
 		return user;
 	}
@@ -69,10 +89,12 @@ public class DbServer {
 		DbServer data = new DbServer();
 		data.setId(rs.getInt(1));
 		data.setDriver(rs.getString(2));
-		data.setUrl(rs.getString(3));
-		data.setUser(rs.getString(4));
-		data.setPassword(rs.getString(5));
-		data.setDb_type(rs.getString(6));
+		data.setServer(rs.getString(3));
+		data.setPort(rs.getInt(4));
+		data.setDomain(rs.getString(5));
+		data.setUser(rs.getString(6));
+		data.setPassword(rs.getString(7));
+		data.setDb_type(rs.getString(8));
 		return data;
 	}
 

@@ -5,9 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -262,6 +260,10 @@ public class DbUtils {
 				host.setType(DbType.getCSharpType(host.getDbType()));
 				host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
 				host.setNullable(allColumnsRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
+				//仅获取String类型的长度
+				if(host.getType().equalsIgnoreCase("string"))
+					host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
+				//COLUMN_SIZE
 				allColumns.add(host);
 			}
 		} catch (SQLException e) {

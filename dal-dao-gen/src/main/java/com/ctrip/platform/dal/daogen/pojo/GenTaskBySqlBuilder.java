@@ -15,8 +15,6 @@ public class GenTaskBySqlBuilder extends GenTaskAbstract {
 
 	private String sql_style;
 
-	private String sql_type;
-
 	private String crud_type;
 
 	private String fields;
@@ -109,14 +107,6 @@ public class GenTaskBySqlBuilder extends GenTaskAbstract {
 		this.sql_style = sql_style;
 	}
 
-	public String getSql_type() {
-		return sql_type;
-	}
-
-	public void setSql_type(String sql_type) {
-		this.sql_type = sql_type;
-	}
-
 	public String getCrud_type() {
 		return crud_type;
 	}
@@ -135,7 +125,6 @@ public class GenTaskBySqlBuilder extends GenTaskAbstract {
 		task.setClass_name(rs.getString(6));
 		task.setMethod_name(rs.getString(7));
 		task.setSql_style(rs.getString(8));
-		task.setSql_type(rs.getString(9));
 		task.setCrud_type(rs.getString(10));
 		task.setFields(rs.getString(11));
 		task.setCondition(rs.getString(12));

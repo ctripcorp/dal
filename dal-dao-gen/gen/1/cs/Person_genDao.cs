@@ -28,15 +28,15 @@ namespace com.ctrip.platform.tools.Dao
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
-                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.InputOutput, DbType = DbType.Int32, Value = person_gen.Id});
+                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.InputOutput, DbType = DbType.UInt32, Value = person_gen.ID});
                 parameters.Add(new StatementParameter{ Name = "@Name", Direction = ParameterDirection.Input, DbType = DbType.AnsiString, Value = person_gen.Name});
-                parameters.Add(new StatementParameter{ Name = "@Age", Direction = ParameterDirection.Input, DbType = DbType.Int32, Value = person_gen.Age});
+                parameters.Add(new StatementParameter{ Name = "@Age", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value = person_gen.Age});
                 parameters.Add(new StatementParameter{ Name = "@Birth", Direction = ParameterDirection.Input, DbType = DbType.DateTime, Value = person_gen.Birth});
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
                 baseDao.ExecSp("spA_Person_i", parameters);
 
-               person_gen.Id = (int)parameters["@ID"].Value;
+               person_gen.ID = (uint)parameters["@ID"].Value;
                 return (int)parameters["@return"].Value;
             }
             catch (Exception ex)
@@ -55,15 +55,15 @@ namespace com.ctrip.platform.tools.Dao
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
-                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.InputOutput, DbType = DbType.Int32, Value = person_gen.Id});
+                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.InputOutput, DbType = DbType.UInt32, Value = person_gen.ID});
                 parameters.Add(new StatementParameter{ Name = "@Name", Direction = ParameterDirection.Input, DbType = DbType.AnsiString, Value = person_gen.Name});
-                parameters.Add(new StatementParameter{ Name = "@Age", Direction = ParameterDirection.Input, DbType = DbType.Int32, Value = person_gen.Age});
+                parameters.Add(new StatementParameter{ Name = "@Age", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value = person_gen.Age});
                 parameters.Add(new StatementParameter{ Name = "@Birth", Direction = ParameterDirection.Input, DbType = DbType.DateTime, Value = person_gen.Birth});
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
                 baseDao.ExecSp("spA_Person_u", parameters);
 
-               person_gen.Id = (int)parameters["@ID"].Value;
+               person_gen.ID = (uint)parameters["@ID"].Value;
                 return (int)parameters["@return"].Value;
             }
             catch (Exception ex)
@@ -82,7 +82,7 @@ namespace com.ctrip.platform.tools.Dao
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
-                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.Input, DbType = DbType.Int32, Value = person_gen.Id});
+                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value = person_gen.ID});
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
                 baseDao.ExecSp("spA_Person_d", parameters);
@@ -100,12 +100,12 @@ namespace com.ctrip.platform.tools.Dao
         /// </summary>
         /// <param name="iD">@ID #></param>
         /// <returns>状态代码</returns>
-        public int DeletePerson_gen(int iD)
+        public int DeletePerson_gen(uint iD)
         {
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
-                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.Input, DbType = DbType.Int32, Value = iD});
+                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value = iD});
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
                 baseDao.ExecSp("spA_Person_d", parameters);
@@ -124,7 +124,7 @@ namespace com.ctrip.platform.tools.Dao
         /// </summary>
         /// <param name="iD"></param>
         /// <returns>Person_gen信息</returns>
-        public Person_gen FindByPk(int iD )
+        public Person_gen FindByPk(uint iD )
         {
             try
             {
@@ -172,6 +172,53 @@ namespace com.ctrip.platform.tools.Dao
             }
         }
         
+        /// <summary>
+        ///  检索Person_gen，带翻页
+        /// </summary>
+        /// <param name="obj">Person_gen实体对象检索条件</param>
+        /// <param name="pagesize">每页记录数</param>
+        /// <param name="pageNo">页码</param>
+        /// <returns>检索结果</returns>
+        public IList<Person_gen> GetListByPage(Person_gen obj, int pagesize, int pageNo)
+        {
+             try
+            {
+                var dic = new StatementParameterCollection();
+                StringBuilder sbSql = new StringBuilder(200);
+
+                
+                 //计算ROWNUM
+                int fromRownum = (pageNo - 1) * pagesize + 1;
+                int endRownum = pagesize * pageNo;
+                 sbSql.Append("WITH CTE AS ("); //WITH CTE 开始
+                sbSql.Append("select row_number() over(order by ID desc ) as rownum, ");
+                sbSql.Append(@"ID, Name, Age, Birth from Person (nolock) ");
+
+                //包含查询条件
+                //StringBuilder whereCondition = new StringBuilder();
+                //if (!string.IsNullOrEmpty(obj.Name))
+                //{
+                //    //人名
+                //    whereCondition.Append("Where Name like @Name ");
+                //    dic.AddInParameter("@Name", DbType.String, "%" + obj.Name + "%");
+                //}
+                //sbSql.Append(whereCondition);
+
+                sbSql.Append(")"); //WITH CTE 结束
+
+                // 用 CTE 完成分页
+                sbSql.Append(@"select ID, Name, Age, Birth from CTE Where rownum between @from and @end");
+                dic.AddInParameter("@from", DbType.Int32, fromRownum);
+                dic.AddInParameter("@end", DbType.Int32, endRownum);
+                IList<Person_gen> list = baseDao.SelectList<Person_gen>(sbSql.ToString(), dic);
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                throw new DalException("调用Person_genDao时，访问GetListByPage时出错", ex);
+            }
+        }
 
         /// <summary>
         ///  转换List为DataTable
@@ -182,16 +229,16 @@ namespace com.ctrip.platform.tools.Dao
         private DataTable ToDataTable(IList<Person_gen> person_genList , bool insert)
         {
             DataTable dt = new DataTable();
-            dt.Columns.Add("Id", typeof(int));
+            dt.Columns.Add("ID", typeof(uint));
             dt.Columns.Add("Name", typeof(string));
-            dt.Columns.Add("Age", typeof(int));
+            dt.Columns.Add("Age", typeof(uint));
             dt.Columns.Add("Birth", typeof(DateTime));
 
             int i = 0;
             foreach (Person_gen person_genInfo in person_genList)
             {
                 DataRow row = dt.NewRow();
-                row["Id"] = insert ? ++i : person_genInfo.Id;
+                row["ID"] = insert ? ++i : person_genInfo.ID;
                 row["Name"] = person_genInfo.Name;
                 row["Age"] = person_genInfo.Age;
                 row["Birth"] = person_genInfo.Birth;

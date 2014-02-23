@@ -36,7 +36,7 @@ namespace ${host.getNameSpaceDao()}
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
 #foreach ($p in $host.getInsertParameterList())
-                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalizeFully($p.getName().replace("@",""))}});
+                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalize($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
@@ -44,7 +44,7 @@ namespace ${host.getNameSpaceDao()}
 
 #foreach ($p in $host.getInsertParameterList())
 #if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
-               ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalizeFully($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
+               ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalize($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
 #end
 #end
                 return (int)parameters["@return"].Value;
@@ -88,7 +88,7 @@ namespace ${host.getNameSpaceDao()}
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
 #foreach ($p in $host.getUpdateParameterList())
-                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalizeFully($p.getName().replace("@",""))}});
+                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalize($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
@@ -96,7 +96,7 @@ namespace ${host.getNameSpaceDao()}
 
 #foreach ($p in $host.getUpdateParameterList())
 #if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
-               ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalizeFully($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
+               ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalize($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
 #end
 #end
                 return (int)parameters["@return"].Value;
@@ -137,7 +137,7 @@ namespace ${host.getNameSpaceDao()}
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
 #foreach ($p in $host.getDeleteParameterList())
-                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalizeFully($p.getName().replace("@",""))}});
+                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalize($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
@@ -379,7 +379,7 @@ namespace ${host.getNameSpaceDao()}
         {
             DataTable dt = new DataTable();
 #foreach($column in $host.getColumns())
-            dt.Columns.Add("${WordUtils.capitalizeFully($column.getName())}", typeof(${column.getType()}));
+            dt.Columns.Add("${WordUtils.capitalize($column.getName())}", typeof(${column.getType()}));
 #end
 
             int i = 0;
@@ -388,9 +388,9 @@ namespace ${host.getNameSpaceDao()}
                 DataRow row = dt.NewRow();
 #foreach($column in $host.getColumns())
 #if($column.isIdentity())
-                row["${WordUtils.capitalizeFully($column.getName())}"] = insert ? ++i : ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalizeFully($column.getName())};
+                row["${WordUtils.capitalize($column.getName())}"] = insert ? ++i : ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalize($column.getName())};
 #else
-                row["${WordUtils.capitalizeFully($column.getName())}"] = ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalizeFully($column.getName())};
+                row["${WordUtils.capitalize($column.getName())}"] = ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalize($column.getName())};
 #end
 #end
                 dt.Rows.Add(row);

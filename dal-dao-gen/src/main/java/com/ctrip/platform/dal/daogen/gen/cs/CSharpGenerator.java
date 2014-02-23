@@ -36,12 +36,6 @@ public class CSharpGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public void generateBySP(List<GenTask> tasks) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void generateByFreeSql(List<GenTask> tasks) {
 		// TODO Auto-generated method stub
 
@@ -181,7 +175,7 @@ public class CSharpGenerator extends AbstractGenerator {
 				currentSp.setName(realSpName);
 				
 				CSharpTableHost tableHost = new CSharpTableHost();
-				String className = realSpName;
+				String className = realSpName.replace("_", "");
 				if (null != prefix && !prefix.isEmpty()) {
 					className = className.substring(prefix.length());
 				}
@@ -213,6 +207,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		VelocityContext context = new VelocityContext();
 		context.put("WordUtils", WordUtils.class);
 		context.put("StringUtils", StringUtils.class);
+
 		for (CSharpTableHost host : tableHosts) {
 			context.put("host", host);
 

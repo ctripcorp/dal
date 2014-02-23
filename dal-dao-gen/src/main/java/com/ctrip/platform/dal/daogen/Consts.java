@@ -8,21 +8,6 @@ import java.util.Map;
 public class Consts {
 	
 	/**
-	 * Key: 数据库类型
-	 * Value: 对应Java数据类型
-	 */
-	public static Map<String, String> JavaSqlTypeMap;
-	
-	/**
-	 * Key: Java数据类型
-	 * Value: 对应的的DbType，DbType参照C#
-	 */
-	public static Map<String, String> JavaDbTypeMap;
-	
-	public static Map<String, String> CSharpSqlTypeMap;
-	public static Map<String, String> CSharpDbTypeMap;
-	
-	/**
 	 * Key：数字
 	 * Value：对应的数据库表达式，如等于表达式为'='
 	 */
@@ -31,36 +16,12 @@ public class Consts {
 	public static List<String> CSharpValueTypes;
 	
 	static{
-		JavaSqlTypeMap = new HashMap<String, String>();
-		JavaDbTypeMap = new HashMap<String, String>();
-		CSharpSqlTypeMap = new HashMap<String, String>();
-		CSharpDbTypeMap = new HashMap<String, String>();
 		CSharpValueTypes = new ArrayList<String>();
-		
 		WhereConditionMap = new HashMap<String, String>();
+
 		
-		JavaSqlTypeMap.put("int", "int");
-		JavaSqlTypeMap.put("varchar", "String");
-		JavaSqlTypeMap.put("datetime", "Timestamp");
-		JavaSqlTypeMap.put("nvarchar", "String");
-		
-		JavaDbTypeMap.put("int", "Int32");
-		JavaDbTypeMap.put("String", "String");
-		JavaDbTypeMap.put("Timestamp", "DateTime");
-		
-		CSharpSqlTypeMap.put("int", "int");
-		CSharpSqlTypeMap.put("varchar", "string");
-		CSharpSqlTypeMap.put("datetime", "DateTime");
-		CSharpSqlTypeMap.put("nvarchar", "string");
-		
-		CSharpDbTypeMap.put("int", "Int32");
-		CSharpDbTypeMap.put("string", "String");
-		CSharpDbTypeMap.put("DateTime", "DateTime");
-		
-		//CSharpValueTypes.add("int");
-		//CSharpValueTypes.add("DateTime");
 		CSharpValueTypes.add("int");
-		CSharpValueTypes.add("datetime");
+		CSharpValueTypes.add("DateTime");
 		
 		WhereConditionMap.put("0", "=");
 		WhereConditionMap.put("1", "!=");

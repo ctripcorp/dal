@@ -1,37 +1,18 @@
 package com.ctrip.platform.dal.daogen.gen;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import javax.sql.DataSource;
-
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
-import org.springframework.jdbc.support.JdbcUtils;
 
-import com.ctrip.platform.dal.common.enums.ParameterDirection;
-import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
-import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
+import com.ctrip.platform.dal.daogen.pojo.GenTask;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.pojo.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.pojo.Method;
 import com.ctrip.platform.dal.daogen.pojo.Parameter;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskBySP;
-import com.ctrip.platform.dal.daogen.pojo.GenTask;
-import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
-import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 public class JavaGenerator extends AbstractGenerator {
@@ -145,233 +126,105 @@ public class JavaGenerator extends AbstractGenerator {
 //		}
 //	}
 
-	private void putMethods2Velocity(VelocityContext context,
-			List<FieldMeta> fieldsMeta, List<GenTask> groupedTasks) {
-
-		String primaryKey = "";
-		for (FieldMeta meta : fieldsMeta) {
-			if (meta.isPrimary()) {
-				primaryKey = meta.getName();
-				break;
-			}
-		}
-		context.put("fields", fieldsMeta);
-
-		List<Method> methods = new ArrayList<Method>();
-		List<Method> spMethods = new ArrayList<Method>();
-
-		for (GenTask task : groupedTasks) {
-			GenTaskBySqlBuilder groupedTask = (GenTaskBySqlBuilder) task;
-
-			if (null == groupedTask.getMethod_name()
-					|| groupedTask.getMethod_name().isEmpty()) {
-				continue;
-			}
-
-			Method m = new Method();
-			m.setAction(groupedTask.getCrud_type().toLowerCase());
-			m.setMethodName(groupedTask.getMethod_name());
-			m.setSqlSPName(groupedTask.getSql_content());
-
-			// 查询，或者SQL形式的删除
-			if (m.getAction().equalsIgnoreCase("select")
-					|| (m.getAction().equalsIgnoreCase("delete") && groupedTask
-							.getSql_type().equalsIgnoreCase("sql"))) {
-				m.setParameters(getParametersByCondition(
-						groupedTask.getCondition(), fieldsMeta));
-				methods.add(m);
-			}
-			// SQL形式的更新
-			else if (m.getAction().equalsIgnoreCase("update")
-					&& groupedTask.getSql_type().equalsIgnoreCase("sql")) {
-				List<Parameter> parameters = new ArrayList<Parameter>();
-				parameters.addAll(getParametersByCondition(
-						groupedTask.getCondition(), fieldsMeta));
-				parameters.addAll(getParametersByFields(
-						groupedTask.getFields(), fieldsMeta));
-				m.setParameters(parameters);
-				methods.add(m);
-			}
-			// SP形式的删除
-			else if (m.getAction().equalsIgnoreCase("delete")
-					&& !groupedTask.getSql_type().equalsIgnoreCase("sql")) {
-				List<Parameter> parameters = new ArrayList<Parameter>();
-				Parameter p = new Parameter();
-				p.setName(primaryKey);
-				p.setFieldName(primaryKey);
-				for (FieldMeta field : fieldsMeta) {
-					if (field.getName().equalsIgnoreCase(primaryKey)) {
-						p.setType(field.getType());
-						p.setParamMode("IN");
-						p.setPosition(1);
-						break;
-					}
-				}
-				parameters.add(p);
-				m.setParameters(parameters);
-				spMethods.add(m);
-			}
-			// SQL形式的插入
-			else if (m.getAction().equalsIgnoreCase("insert")
-					&& groupedTask.getSql_type().equalsIgnoreCase("sql")) {
-				m.setParameters(getParametersByFields(groupedTask.getFields(),
-						fieldsMeta));
-				methods.add(m);
-			}
-			// SP形式的插入，SP形式的Update
-			else {
-				List<String> allFields = new ArrayList<String>();
-				for (FieldMeta meta : fieldsMeta) {
-					allFields.add(meta.getName());
-				}
-				List<Parameter> parameters = getParametersByFields(
-						StringUtils.join(allFields.toArray(), ","), fieldsMeta);
-
-				for (Parameter p : parameters) {
-					if (p.getName().equals(primaryKey)) {
-						p.setParamMode("OUT");
-						break;
-					}
-				}
-
-				m.setParameters(parameters);
-				spMethods.add(m);
-			}
-
-		}
-
-		context.put("methods", methods);
-		context.put("sp_methods", spMethods);
-
-	}
-
-	@Override
-	public void generateBySP(List<GenTask> tasks) {
-		Map<String, List<GenTask>> groupbyDB = groupByDbName(tasks);
-
-		VelocityContext context = new VelocityContext();
-
-		context.put("namespace", namespace);
-
-		for (Map.Entry<String, List<GenTask>> entry : groupbyDB.entrySet()) {
-			// String sp = entry.getKey();
-			List<GenTask> objs = entry.getValue();
-			int serverId = -1;
-			if (objs.size() > 0) {
-				context.put("database", objs.get(0).getDb_name());
-				serverId = objs.get(0).getServer_id();
-			} else {
-				continue;
-			}
-			context.put("dao_name",
-					String.format("%sSPDAO", context.get("database")));
-			context.put("JavaDbTypeMap", Consts.JavaDbTypeMap);
-			context.put("JavaSqlTypeMap", Consts.JavaSqlTypeMap);
-
-			List<Method> spMethods = new ArrayList<Method>();
-
-			for (GenTask task : objs) {
-
-				GenTaskBySP obj = (GenTaskBySP) task;
-
-				Method m = new Method();
-				m.setAction(obj.getCrud_type());
-				m.setMethodName(obj.getSp_name());
-				m.setSqlSPName(String.format("%s.%s", obj.getSp_schema(),
-						obj.getSp_name()));
-
-				DataSource ds = DataSourceLRUCache.newInstance().getDataSource(
-						serverId);
-
-				if (ds == null) {
-					DbServer dbServer = dbServerDao.getDbServerByID(serverId);
-					ds = DataSourceLRUCache.newInstance().putDataSource(
-							dbServer);
-				}
-
-				Connection connection = null;
-				try {
-					connection = ds.getConnection();
-					List<Parameter> parameters = new ArrayList<Parameter>();
-
-					ResultSet spParams = connection.getMetaData()
-							.getProcedureColumns(obj.getDb_name(),
-									obj.getSp_schema(), obj.getSp_name(), null);
-
-					while (spParams.next()) {
-						Parameter p = new Parameter();
-						String name = spParams.getString("COLUMN_NAME");
-						if (name.startsWith("@") || name.startsWith(":")) {
-							name = name.substring(1);
-						}
-						p.setName(name);
-						p.setFieldName(name);
-						p.setType(Consts.JavaSqlTypeMap.get(spParams
-								.getString("TYPE_NAME")));
-						p.setParamMode(spParams.getString("COLUMN_TYPE"));
-						p.setPosition(spParams.getInt("ORDINAL_POSITION"));
-						parameters.add(p);
-					}
-					m.setParameters(parameters);
-					spMethods.add(m);
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				} finally {
-					JdbcUtils.closeConnection(connection);
-				}
-
-			}
-
-			context.put("sp_methods", spMethods);
-			FileWriter daoWriter = null;
-
-			try {
-				File projectFile = new File(String.valueOf(projectId));
-				if (!projectFile.exists()) {
-					projectFile.mkdir();
-				}
-				File csharpFile = new File(projectFile, "java");
-				if (!csharpFile.exists()) {
-					csharpFile.mkdir();
-				}
-				daoWriter = new FileWriter(String.format("%s/java/%s.java",
-						projectId, context.get("dao_name")));
-
-				Velocity.mergeTemplate("SPDAO.java.tpl", "UTF-8", context,
-						daoWriter);
-
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} finally {
-
-				try {
-					if (null != daoWriter) {
-						daoWriter.close();
-					}
-
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-			}
-
-		}
-
-	}
-
-	@Override
-	public void generateByFreeSql(List<GenTask> tasks) {
-		Map<String, List<GenTask>> tasksGroupByDb = groupByDbName(tasks);
-		
-		for(Map.Entry<String, List<GenTask>> entry : tasksGroupByDb.entrySet()){
-			String currentDb = entry.getKey();
-			List<GenTask> currentTasks = entry.getValue();
-			
-		}
-		
-	}
+//	private void putMethods2Velocity(VelocityContext context,
+//			List<FieldMeta> fieldsMeta, List<GenTask> groupedTasks) {
+//
+//		String primaryKey = "";
+//		for (FieldMeta meta : fieldsMeta) {
+//			if (meta.isPrimary()) {
+//				primaryKey = meta.getName();
+//				break;
+//			}
+//		}
+//		context.put("fields", fieldsMeta);
+//
+//		List<Method> methods = new ArrayList<Method>();
+//		List<Method> spMethods = new ArrayList<Method>();
+//
+//		for (GenTask task : groupedTasks) {
+//			GenTaskBySqlBuilder groupedTask = (GenTaskBySqlBuilder) task;
+//
+//			if (null == groupedTask.getMethod_name()
+//					|| groupedTask.getMethod_name().isEmpty()) {
+//				continue;
+//			}
+//
+//			Method m = new Method();
+//			m.setAction(groupedTask.getCrud_type().toLowerCase());
+//			m.setMethodName(groupedTask.getMethod_name());
+//			m.setSqlSPName(groupedTask.getSql_content());
+//
+//			// 查询，或者SQL形式的删除
+//			if (m.getAction().equalsIgnoreCase("select")
+//					|| (m.getAction().equalsIgnoreCase("delete") && groupedTask
+//							.getSql_type().equalsIgnoreCase("sql"))) {
+//				m.setParameters(getParametersByCondition(
+//						groupedTask.getCondition(), fieldsMeta));
+//				methods.add(m);
+//			}
+//			// SQL形式的更新
+//			else if (m.getAction().equalsIgnoreCase("update")
+//					&& groupedTask.getSql_type().equalsIgnoreCase("sql")) {
+//				List<Parameter> parameters = new ArrayList<Parameter>();
+//				parameters.addAll(getParametersByCondition(
+//						groupedTask.getCondition(), fieldsMeta));
+//				parameters.addAll(getParametersByFields(
+//						groupedTask.getFields(), fieldsMeta));
+//				m.setParameters(parameters);
+//				methods.add(m);
+//			}
+//			// SP形式的删除
+//			else if (m.getAction().equalsIgnoreCase("delete")
+//					&& !groupedTask.getSql_type().equalsIgnoreCase("sql")) {
+//				List<Parameter> parameters = new ArrayList<Parameter>();
+//				Parameter p = new Parameter();
+//				p.setName(primaryKey);
+//				p.setFieldName(primaryKey);
+//				for (FieldMeta field : fieldsMeta) {
+//					if (field.getName().equalsIgnoreCase(primaryKey)) {
+//						p.setType(field.getType());
+//						p.setParamMode("IN");
+//						p.setPosition(1);
+//						break;
+//					}
+//				}
+//				parameters.add(p);
+//				m.setParameters(parameters);
+//				spMethods.add(m);
+//			}
+//			// SQL形式的插入
+//			else if (m.getAction().equalsIgnoreCase("insert")
+//					&& groupedTask.getSql_type().equalsIgnoreCase("sql")) {
+//				m.setParameters(getParametersByFields(groupedTask.getFields(),
+//						fieldsMeta));
+//				methods.add(m);
+//			}
+//			// SP形式的插入，SP形式的Update
+//			else {
+//				List<String> allFields = new ArrayList<String>();
+//				for (FieldMeta meta : fieldsMeta) {
+//					allFields.add(meta.getName());
+//				}
+//				List<Parameter> parameters = getParametersByFields(
+//						StringUtils.join(allFields.toArray(), ","), fieldsMeta);
+//
+//				for (Parameter p : parameters) {
+//					if (p.getName().equals(primaryKey)) {
+//						p.setParamMode("OUT");
+//						break;
+//					}
+//				}
+//
+//				m.setParameters(parameters);
+//				spMethods.add(m);
+//			}
+//
+//		}
+//
+//		context.put("methods", methods);
+//		context.put("sp_methods", spMethods);
+//
+//	}
 
 	/**
 	 * 取出task表中的fields字段（List类型），组装为Parameter数组
@@ -443,6 +296,12 @@ public class JavaGenerator extends AbstractGenerator {
 
 	@Override
 	public void generateByTableView(List<GenTaskByTableViewSp> tasks) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void generateByFreeSql(List<GenTask> tasks) {
 		// TODO Auto-generated method stub
 		
 	}

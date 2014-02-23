@@ -4,11 +4,20 @@ import java.util.List;
 
 public class TaskAggeragation {
 	
+	private List<GenTaskByTableViewSp> tableViewSpTasks;
+	
 	private List<GenTaskBySqlBuilder> autoTasks;
 	
-	private List<GenTaskBySP> spTasks;
 	
 	private List<GenTaskByFreeSql> sqlTasks;
+
+	public List<GenTaskByTableViewSp> getTableViewSpTasks() {
+		return tableViewSpTasks;
+	}
+
+	public void setTableViewSpTasks(List<GenTaskByTableViewSp> tableViewSpTasks) {
+		this.tableViewSpTasks = tableViewSpTasks;
+	}
 
 	public List<GenTaskBySqlBuilder> getAutoTasks() {
 		return autoTasks;
@@ -16,14 +25,6 @@ public class TaskAggeragation {
 
 	public void setAutoTasks(List<GenTaskBySqlBuilder> autoTasks) {
 		this.autoTasks = autoTasks;
-	}
-
-	public List<GenTaskBySP> getSpTasks() {
-		return spTasks;
-	}
-
-	public void setSpTasks(List<GenTaskBySP> spTasks) {
-		this.spTasks = spTasks;
 	}
 
 	public List<GenTaskByFreeSql> getSqlTasks() {

@@ -33,14 +33,14 @@ namespace com.ctrip.platform.tools.Interface.IDao
         /// </summary>
         /// <param name="iD">@ID #></param>
         /// <returns>状态代码</returns>
-        int DeletePerson_gen(int iD);
+        int DeletePerson_gen(uint iD);
 
         /// <summary>
         /// 根据主键获取Person_gen信息
         /// </summary>
         /// <param name="iD"></param>
         /// <returns>Person_gen信息</returns>
-        Person_gen FindByPk(int iD);
+        Person_gen FindByPk(uint iD);
 
         /// <summary>
         /// 获取所有Person_gen信息
@@ -75,5 +75,13 @@ namespace com.ctrip.platform.tools.Interface.IDao
         /// <returns>记录数</returns>
         long Count();
 
+        /// <summary>
+        ///  检索Person_gen，带翻页
+        /// </summary>
+        /// <param name="obj">Person_gen实体对象检索条件</param>
+        /// <param name="pagesize">每页记录数</param>
+        /// <param name="pageNo">页码</param>
+        /// <returns>检索结果</returns>
+        IList<Person_gen> GetListByPage(Person_gen obj, int pagesize, int pageNo);
 	}
 }

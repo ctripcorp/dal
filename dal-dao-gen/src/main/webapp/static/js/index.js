@@ -112,56 +112,19 @@ jQuery(document).ready(function () {
         $("#class_name").val($(this).val());
     });
 
-    $("button.move").click(function () {
-        $.each($('#fields_left').find(":selected"), function (index, value) {
-            $("#fields_right").append(value);
-        });
-    });
-
-    $("button.moveall").click(function () {
-        $("#fields_left option").each(function () {
-            $("#fields_right").append($(this));
-        });
-    });
-
-    $("button.remove").click(function () {
-        $.each($('#fields_right').find(":selected"), function (index, value) {
-            $("#fields_left").append(value);
-        });
-    });
-
-    $("button.removeall").click(function () {
-        $("#fields_right option").each(function () {
-            $("#fields_left").append($(this));
-        });
-    });
-
     $("#add_condition").click(function () {
-        var selectedField = $("#fields_condition").val();
+        var selectedField = $("#conditions").val();
         var selectedCondition = $("#condition_values").val();
         if (selectedField != "-1" && selectedCondition != "-1") {
             $("#selected_condition").append($('<option>', {
                 value: sprintf("%s_%s", selectedField, selectedCondition),
-                text: sprintf("%s %s", $("#fields_condition").find(":selected").text(), $("#condition_values").find(":selected").text())
+                text: sprintf("%s %s", $("#conditions").find(":selected").text(), $("#condition_values").find(":selected").text())
             }));
         }
     });
 
     $("#del_condition").click(function () {
         $("#selected_condition").find(":selected").remove();
-    });
-
-
-    $(document.body).on('click', "#view_sp_code", function (event) {
-        $.get(sprintf("/rest/db/sp_code?server=%s&db_name=%s&sp_name=%s",
-            $("#servers").val(),
-            $("#databases").val(), $("#sps").val()), function (data) {
-            $("#sp_editor").height(300);
-            var editor = ace.edit("sp_editor");
-            editor.setTheme("ace/theme/monokai");
-            editor.getSession().setMode("ace/mode/sql");
-            editor.setValue(data);
-        });
     });
 
     $(document.body).on('click', "#next_step", function (event) {
@@ -176,12 +139,22 @@ jQuery(document).ready(function () {
 
     $(document.body).on('click', "#add_server", function (event) {
         var postData = {};
-        postData["driver"] = $("#driver").val();
-        postData["url"] = $("#url").val();
+        postData["server"] = $("#server").val();
+        if($("#port").val() == ""){
+           postData["port"] = 0;
+        }else{
+           postData["port"] = $("#port").val();
+        }
         postData["user"] = $("#username").val();
         postData["password"] = $("#password").val();
         postData["db_type"] = $("#db_types").val();
         postData["action"] = "insert";
+        if($("#db_types").val() == "sqlserver" 
+            && $("#use_ntlm").is(":checked")){
+            postData["domain"] = $("#domains").val();
+        }else{
+            postData["domain"] = "";
+        }
         $.post("/rest/db/servers", postData, function (data) {
             if (data.code == "OK") {
                 alert("保存成功！");
@@ -190,6 +163,24 @@ jQuery(document).ready(function () {
                 alert("保存失败，请检查连接信息是否合法!");
             }
         });
+    });
+
+    $(document.body).on('change', "#db_types", function (event) {
+        if($("#db_types").val() == "sqlserver"){
+            $(".domain_verify").show();
+        }else{
+            $(".domain_verify").hide();
+        }
+    });
+
+    $('#use_ntlm').click(function() {
+        var $this = $(this);
+        // $this will contain a reference to the checkbox   
+        if ($this.is(':checked')) {
+            $("#domains").prop("disabled", false);
+        } else {
+            $("#domains").prop("disabled", "disabled");
+        }
     });
 
     $(document.body).on('click', "#toggle_add_server", function (event) {
@@ -301,7 +292,7 @@ var reloadServers = function (callback) {
         $.each(data, function (index, value) {
             $("#servers").append($('<option>', {
                 value: value.id,
-                text: value.url
+                text: sprintf("%s:%s",value.server, value.port)
             }));
         });
         if (undefined != data && data.length > 0) {
@@ -384,22 +375,25 @@ var renderGrid = function () {
                     cblock($("body"));
                     $.get("/rest/task?project_id=" + current_project, function (data) {
                         var allTasks = [];
+                        $.each(data.tableViewSpTasks, function (index, value) {
+                            value.recid = allTasks.length + 1;
+                            value.task_type = "table_view_sp";
+                            if(value.table_names != null && value.table_names != ""){
+                                value.sql_content = value.table_names;
+                            }
+                            if(value.sp_names != null && value.sp_names != ""){
+                                if(value.sql_content == null || value.sql_content == "")
+                                    value.sql_content = value.sp_names;
+                                else
+                                    value.sql_content = value.sql_content + "," + value.sp_names;
+                            }
+                            value.class_name = "/";
+                            value.method_name = "/";
+                            allTasks.push(value);
+                        });
                         $.each(data.autoTasks, function (index, value) {
                             value.recid = allTasks.length + 1;
-                            value.task_type = "auto";
-                            allTasks.push(value);
-                        });
-                        $.each(data.spTasks, function (index, value) {
-                            value.recid = allTasks.length + 1;
-                            value.sql_content = value.sp_content;
-                            value.task_type = "sp";
-                            value.sql_type = "/";
-                            allTasks.push(value);
-                        });
-                        $.each(data.sqlTasks, function (index, value) {
-                            value.recid = allTasks.length + 1;
-                            value.task_type = "sql";
-                            value.sql_type = "/";
+                            value.task_type = "sql_builder";
                             allTasks.push(value);
                         });
                         w2ui['grid'].add(allTasks);
@@ -414,9 +408,9 @@ var renderGrid = function () {
                     $(".step2-1-1").hide();
                     $(".step2-1-2").hide();
                     $(".step2-1-3").hide();
-                    $(".step2-1-3-add").hide();
-                    $(".step2-2").hide();
-                    $(".step2-3").hide();
+                    $(".step_fields").hide();
+                    $(".step2-3-1").hide();
+                    $(".step2-3-2").hide();
                     $(".step3").hide();
                     $("#page1").attr('is_update', '0');
                     $("#page1").modal({"backdrop": "static"});
@@ -431,12 +425,13 @@ var renderGrid = function () {
                             $(".step0").show();
                             $(".step1").hide();
                             $(".step2").hide();
+                            $(".step2-1-0").hide();
                             $(".step2-1-1").hide();
                             $(".step2-1-2").hide();
                             $(".step2-1-3").hide();
-                            $(".step2-1-3-add").hide();
-                            $(".step2-2").hide();
-                            $(".step2-3").hide();
+                            $(".step_fields").hide();
+                            $(".step2-3-1").hide();
+                            $(".step2-3-2").hide();
                             $(".step3").hide();
                             reloadServers(function () {
                                 $("#servers").val(record.server_id);
@@ -450,10 +445,13 @@ var renderGrid = function () {
                     if (confirm("Are you sure to delete?")) {
                         var records = w2ui['grid'].getSelection();
                         var record = w2ui['grid'].get(records[0]);
-                        $.post("/rest/task", {
+                        var url = "";
+                        if(record.task_type == "table_view_sp"){
+                            url = "rest/task/table";
+                        }
+                        $.post(url, {
                                 "action": "delete",
-                                "id": record.id,
-                                "task_type": record.task_type
+                                "id": record.id
                             },
                             function (data) {
                                 //$("#page1").modal('hide');
@@ -492,7 +490,7 @@ var renderGrid = function () {
             type: 'text'
         }, {
             field: 'table_name',
-            caption: '表名',
+            caption: '表/视图/存储过程名',
             type: 'text'
         }, {
             field: 'method_name',
@@ -506,8 +504,8 @@ var renderGrid = function () {
             sortable: true,
             attr: 'align=center'
         }, {
-            field: 'table_name',
-            caption: '表名',
+            field: 'class_name',
+            caption: '类名',
             size: '10%',
             sortable: true
         }, {
@@ -515,14 +513,6 @@ var renderGrid = function () {
             caption: '方法名',
             size: '10%',
             sortable: true
-        }, {
-            field: 'sql_type',
-            caption: '增删改方式',
-            size: '10%'
-        }, {
-            field: 'crud_type',
-            caption: '增删改查',
-            size: '10%'
         }, {
             field: 'sql_content',
             caption: '预览',

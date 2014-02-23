@@ -21,6 +21,16 @@ public class CSharpParameterHost extends AbstractParameterHost {
 	private boolean primary;
 	
 	private boolean nullable;
+	
+	private int length;
+
+	public int getLength() {
+		return length;
+	}
+
+	public void setLength(int length) {
+		this.length = length;
+	}
 
 	public boolean isPrimary() {
 		return primary;

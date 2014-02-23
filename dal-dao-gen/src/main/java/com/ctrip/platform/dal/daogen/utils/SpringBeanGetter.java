@@ -3,12 +3,11 @@ package com.ctrip.platform.dal.daogen.utils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
 import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
-import com.ctrip.platform.dal.daogen.dao.DaoBySp;
-import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 
 public class SpringBeanGetter {
 
@@ -19,15 +18,11 @@ public class SpringBeanGetter {
 		return (DaoOfProject) context.getBean("projectDao");
 	}
 	
-	public static DaoBySqlBuilder getAutoTaskDao(){
+	public static DaoBySqlBuilder getDaoBySqlBuilder(){
 		return (DaoBySqlBuilder)context.getBean("autoTaskDao");
 	}
 	
-	public static DaoBySp getSpTaskDao(){
-		return (DaoBySp)context.getBean("spTaskDao");
-	}
-	
-	public static DaoByFreeSql getSqlTaskDao(){
+	public static DaoByFreeSql getDaoByFreeSql(){
 		return (DaoByFreeSql)context.getBean("sqlTaskDao");
 	}
 	

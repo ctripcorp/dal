@@ -13,8 +13,6 @@ public interface Generator {
 	
 	public void generateBySqlBuilder(List<GenTask> tasks);
 	
-	public void generateBySP(List<GenTask> tasks);
-	
 	public void generateByFreeSql(List<GenTask> tasks);
 
 }

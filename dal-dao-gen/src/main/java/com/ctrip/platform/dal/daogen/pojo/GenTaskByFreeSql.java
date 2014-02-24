@@ -3,11 +3,13 @@ package com.ctrip.platform.dal.daogen.pojo;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class GenTaskByFreeSql  extends GenTaskAbstract{
+public class GenTaskByFreeSql  {
 
 	private int id;
 	
 	private int project_id;
+	
+	private int server_id;
 	
 	private String db_name;
 	
@@ -43,6 +45,14 @@ public class GenTaskByFreeSql  extends GenTaskAbstract{
 
 	public void setProject_id(int project_id) {
 		this.project_id = project_id;
+	}
+
+	public int getServer_id() {
+		return server_id;
+	}
+
+	public void setServer_id(int server_id) {
+		this.server_id = server_id;
 	}
 
 	public String getDb_name() {
@@ -95,6 +105,7 @@ public class GenTaskByFreeSql  extends GenTaskAbstract{
 		task.setMethod_name(rs.getString(6));
 		task.setCrud_type(rs.getString(7));
 		task.setSql_content(rs.getString(8));
+		task.setParameters(rs.getString(9));
 		return task;
 	}
 	

@@ -4,6 +4,48 @@
 
     };
 
+    var variableHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">';
+    var variable_typesHtml = '<select %s class="span3">'
+                              +"<option value='_please_select'>--参数类型--</option>"
+                              +"<option value='-7'>Bit</option>"
+                              +"<option value='16'>Boolean</option>"
+                              +"<option value='-6'>TinyInt</option>"
+                              +"<option value='5'>SmallInt</option>"
+                              +"<option value='4'>Integer</option>"
+                              +"<option value='-5'>BigInt</option>"
+                              +"<option value='6'>Float</option>"
+                              +"<option value='7'>Real</option>"
+                              +"<option value='8'>Double</option>"
+                              +"<option value='2'>Numeric</option>"
+                              +"<option value='3'>Decimal</option>"
+                              +"<option value='1'>Char</option>"
+                              +"<option value='12'>Varchar</option>"
+                              +"<option value='-1'>LongVarchar</option>"
+                              +"<option value='-15'>Nchar</option>"
+                              +"<option value='-9'>NVarchar</option>"
+                              +"<option value='-16'>LongNVarchar</option>"
+                              +"<option value='91'>Date</option>"
+                              +"<option value='92'>Time</option>"
+                              +"<option value='93'>Timestamp</option>"
+                              +"<option value='-2'>Binary</option>"
+                              +"<option value='-3'>Varbinary</option>"
+                              +"<option value='-4'>LongVarbinary</option>"
+                              +"<option value='0'>Null</option>"
+                              +"<option value='1111'>Other</option>"
+                              +"<option value='2000'>JavaObject</option>"
+                              +"<option value='2001'>Distinct</option>"
+                              +"<option value='2002'>Struct</option>"
+                              +"<option value='2003'>Array</option>"
+                              +"<option value='2004'>Blob</option>"
+                              +"<option value='2005'>Clob</option>"
+                              +"<option value='2006'>Ref</option>"
+                              +"<option value='70'>DataLink</option>"
+                              +"<option value='-8'>Rowid</option>"
+                              +"<option value='2011'>NClob</option>"
+                              +"<option value='2009'>SqlXml</option>"
+                           +"</select>";
+    var variable_valuesHtml = '<input type="text" class="span4" value="%s"></div><br>';
+
     wizzard.prototype = {
 
         next: function (current) {
@@ -37,11 +79,11 @@
                         }));
                     });
                     $("#databases").append(results);
-                    if(results.length > 0){
-                        $("#databases").val(data[0]);
-                    }
+
                     if ($("#page1").attr('is_update') == "1") {
                         $("#databases").val(record.db_name);
+                    }else if(data.length > 0){
+                        $("#databases").val(data[0]);
                     }
                     current.hide();
                     $(".step1").show();
@@ -127,7 +169,9 @@
                         defaultActive.addClass("active");
                     }
                     
-                    if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "auto") {
+                    if ($("#page1").attr('is_update') == "1" 
+                        && record != undefined 
+                        && record.task_type == "auto") {
                         $('#tables').append($('<option>', {
                             value: record.table_name,
                             text: record.table_name
@@ -179,7 +223,7 @@
                         $("#sql_method_name").val(record.method_name);
                         editor.setValue(record.sql_content);
                     } else {
-                        editor.setValue("--在此输入SQL，占位符：Java请使用?或者:Name形式，对于c#请使用@Name形式");
+                        editor.setValue("");
                     }
                     current.hide();
                     $(".step2-3-1").show();
@@ -220,19 +264,18 @@
                     });
                     $("#fields").append(fieldList).multipleSelect("refresh");
                     if ($("#page1").attr('is_update') == "1") {
-                        var selectedFields = record.fields.split(",");
-                        $.each(selectedFields, function (index, value) {
-                            $("#fields_right").append(
-                                $(sprintf("#fields_left > option[value='%s']", value)));
-                        });
-                        var selectedConditions = record.condition.split(",");
-                        $.each(selectedConditions, function (index, value) {
-                            $("#selected_condition").append($('<option>', {
-                                value: value,
-                                text: sprintf("%s %s", value.split('_')[0],
-                                    $(sprintf("#condition_values > option[value='%s']", value.split('_')[1])).text())
-                            }));
-                        });
+                        $('#fields').multipleSelect('setSelects', record.fields.split(","));
+                        if(record.condition != undefined && record.condition != ""){
+                            var selectedConditions = record.condition.split(",");
+                            $.each(selectedConditions, function (index, value) {
+                                $("#selected_condition").append($('<option>', {
+                                    value: value,
+                                    text: sprintf("%s %s", value.split('_')[0],
+                                        $(sprintf("#condition_values > option[value='%s']", 
+                                            value.split('_')[1])).text())
+                                }));
+                            });
+                        }
                     }
                     current.hide();
                     
@@ -263,6 +306,48 @@
                 $(".step3").show();
                 $(".step3").attr('from', current.attr('class'));
             } else if(current.hasClass("step2-3-1")){
+                if ($("#page1").attr('is_update') == "1") {
+                    var splitedParams = record.parameters.split(",");
+                    var htmls = "";
+                    var i = 0;
+                    var id_values = {};
+                    $.each(splitedParams, function(index, value){
+                        var resultParams = value.split("_");
+                        htmls = htmls 
+                         + sprintf(variableHtml, resultParams[0])
+                         + sprintf(variable_typesHtml, sprintf("id='db_type_%s'", ++i))
+                         + sprintf(variable_valuesHtml, resultParams[2]);
+                        id_values["db_type_"+i] = resultParams[1];
+                    });
+                    
+                    $("#param_list").html(htmls);
+                    $.each(id_values, function(key, value){
+                        $("#"+key).val(value);
+                    });
+                }else{
+                    //首先解析Sql语句，提取出参数
+                    var regexIndex = /(\?{1})/igm;
+                    var regexNames = /[@:](\w+)/igm;
+                    var sqlContent = ace.edit("sql_editor").getValue(), result;
+                    var htmls = "";
+                    var i = 0;
+                    while((result = regexIndex.exec(sqlContent))){
+                        htmls = htmls 
+                        + sprintf(variableHtml, ++i) 
+                        + sprintf(variable_typesHtml, "") 
+                        + sprintf(variable_valuesHtml, "");
+                    }
+                    if(htmls.length == 0){
+                        while((result = regexNames.exec(sqlContent))){
+                            htmls = htmls 
+                            + sprintf(variableHtml, result[1]) 
+                            + sprintf(variable_typesHtml, "") 
+                            + sprintf(variable_valuesHtml, "");
+                        }
+                    }
+                    $("#param_list").html(htmls);
+                }
+                
                 current.hide();
                 $(".step2-3-2").show();
             }
@@ -317,7 +402,25 @@
                     postData["method_name"] = $("#sql_method_name").val();
                     postData["crud_type"] = "select";
                     postData["sql_content"] = ace.edit("sql_editor").getValue();
-                    postData["params"] = $.makeArray($("#selected_variable>option").map(function() { return $(this).val(); })).join(",");
+                    var paramList = [];
+                    $.each($("#param_list").children("div"), function(index, value){
+                        var first = $(value).children("input").eq(0);
+                        var second = $(value).children("select").eq(0);
+                        var third = $(value).children("input").eq(1);
+                        paramList.push(sprintf("%s_%s_%s", $(first).val(), $(second).val(), $(third).val()));
+                    });
+                    postData["params"] = paramList.join(",");
+
+                    $.post("/rest/db/test_sql", postData).done(function(data){
+                        if(data.code == "OK"){
+                            $.post("/rest/task/sql", postData, function (data) {
+                                $("#page1").modal('hide');
+                                w2ui["grid_toolbar"].click('refreshDAO', null);
+                            });
+                        }else{
+                            $("error_msg").text("执行异常，请检查sql及对应参数！");
+                        }
+                    });
                 }else if ($(".gen_style.active").children().val() == "table_view_sp") {
                     postData["table_names"] = $('#table_list').multipleSelect('getSelects').join(",");
                     postData["sp_names"] = $('#sp_list').multipleSelect('getSelects').join(",");
@@ -330,14 +433,10 @@
                         w2ui["grid_toolbar"].click('refreshDAO', null);
                     });
                 }
-
-                
             }
         },
         previous: function (current) {
-
             $("#error_msg").text("");
-
             if (current.hasClass("step0")) {
                 return;
             }

@@ -58,6 +58,16 @@ public class CSharpTableHost {
 	
 	private String spName;
 	
+	private List<CSharpMethodHost> extraMethods;
+	
+	public List<CSharpMethodHost> getExtraMethods() {
+		return extraMethods;
+	}
+
+	public void setExtraMethods(List<CSharpMethodHost> extraMethods) {
+		this.extraMethods = extraMethods;
+	}
+
 	private List<CSharpParameterHost> spParams;
 
 	public String getSpName() {

@@ -14,7 +14,7 @@ namespace com.ctrip.platform.tools.Dao
         /// 获取或设置ID
         /// </summary>
         [Column(Name = "ID"),ID,PK]
-        public uint ID { get; set; }
+        public int ID { get; set; }
         /// <summary>
         /// 获取或设置Name
         /// </summary>
@@ -24,7 +24,7 @@ namespace com.ctrip.platform.tools.Dao
         /// 获取或设置Age
         /// </summary>
         [Column(Name = "Age")]
-        public uint Age { get; set; }
+        public int? Age { get; set; }
         /// <summary>
         /// 获取或设置Birth
         /// </summary>

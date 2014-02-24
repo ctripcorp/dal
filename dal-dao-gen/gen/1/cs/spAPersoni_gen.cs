@@ -12,7 +12,7 @@ namespace com.ctrip.platform.tools.Entity.DataModel
         /// <summary>
         /// ID
         /// </summary>
-		public uint ID { get; set; }
+		public int ID { get; set; }
         /// <summary>
         /// Name
         /// </summary>
@@ -20,7 +20,7 @@ namespace com.ctrip.platform.tools.Entity.DataModel
         /// <summary>
         /// Age
         /// </summary>
-		public uint Age { get; set; }
+		public int Age { get; set; }
         /// <summary>
         /// Birth
         /// </summary>

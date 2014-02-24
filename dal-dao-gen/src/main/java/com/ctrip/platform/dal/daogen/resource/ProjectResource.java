@@ -37,7 +37,7 @@ public class ProjectResource {
 	private static DaoOfProject projectDao;
 
 	static {
-		projectDao = SpringBeanGetter.getProjectDao();
+		projectDao = SpringBeanGetter.getDaoOfProject();
 	}
 
 	@GET

@@ -61,7 +61,7 @@ public class GenTaskBySqlBuilderResource {
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);
-				task.setSql_content(sql_content);
+				task.setSql_content(SqlBuilder.formatSql(task));
 				if (0 >= daoBySqlBuilder.updateTask(task)) {
 					return Status.ERROR;
 				}

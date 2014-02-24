@@ -11,7 +11,7 @@ namespace com.ctrip.platform.tools.Interface.IDao
         ///  插入Person_gen
         /// </summary>
         /// <param name="person_gen">Person_gen实体对象</param>
-        /// <returns>状态代码</returns>
+        /// <returns>新增的主键</returns>
         int InsertPerson_gen(Person_gen person_gen);
 
         /// <summary>
@@ -28,19 +28,13 @@ namespace com.ctrip.platform.tools.Interface.IDao
         /// <returns>状态代码</returns>
         int DeletePerson_gen(Person_gen person_gen);
 
-        /// <summary>
-        /// 删除Person_gen
-        /// </summary>
-        /// <param name="iD">@ID #></param>
-        /// <returns>状态代码</returns>
-        int DeletePerson_gen(uint iD);
 
         /// <summary>
         /// 根据主键获取Person_gen信息
         /// </summary>
         /// <param name="iD"></param>
         /// <returns>Person_gen信息</returns>
-        Person_gen FindByPk(uint iD);
+        Person_gen FindByPk(int iD);
 
         /// <summary>
         /// 获取所有Person_gen信息
@@ -83,5 +77,18 @@ namespace com.ctrip.platform.tools.Interface.IDao
         /// <param name="pageNo">页码</param>
         /// <returns>检索结果</returns>
         IList<Person_gen> GetListByPage(Person_gen obj, int pagesize, int pageNo);
+
+        /// <summary>
+        ///  GetNameByID
+        /// </summary>
+        /// <param name="iD"></param>
+        /// <returns></returns>
+        public IList<Person_gen> GetNameByID(int iD);
+        /// <summary>
+        ///  deleteByName
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public int deleteByName(string name);
 	}
 }

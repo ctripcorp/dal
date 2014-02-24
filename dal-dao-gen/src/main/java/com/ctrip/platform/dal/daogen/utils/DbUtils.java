@@ -2,7 +2,9 @@ package com.ctrip.platform.dal.daogen.utils;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +29,7 @@ public class DbUtils {
 	private static List<Integer> validMode;
 
 	static {
-		dbServerDao = SpringBeanGetter.getDBServerDao();
+		dbServerDao = SpringBeanGetter.getDaoOfDbServer();
 		validMode = new ArrayList<Integer>();
 		validMode.add(DatabaseMetaData.procedureColumnIn);
 		validMode.add(DatabaseMetaData.procedureColumnInOut);
@@ -274,6 +276,66 @@ public class DbUtils {
 		}
 		
 		return allColumns;
+	}
+	
+	/**
+	 * 测试查询SQL是否合法
+	 * @param server
+	 * @param dbName
+	 * @param sql
+	 * @param params
+	 * @return
+	 */
+	public static ResultSetMetaData testAQuerySql(int server, String dbName, String sql,
+			String params){
+		String[] parameters = params.split(",");
+
+		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
+
+		if (ds == null) {
+			DbServer dbServer = dbServerDao.getDbServerByID(server);
+			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+		}
+
+		Connection connection = null;
+		ResultSet rs = null;
+		try {
+			
+			String replacedSql = sql.replaceAll("[@:]\\w+", "?");
+			
+			connection = ds.getConnection();
+			
+			connection.setCatalog(dbName);
+
+			PreparedStatement ps = connection.prepareStatement(replacedSql);
+
+			int index = 0;
+			for (String param : parameters) {
+				String[] tuple = param.split("_");
+				
+				try{
+					index = Integer.valueOf(tuple[0]);
+				}catch(NumberFormatException ex){
+					index++;
+				}
+				ps.setObject(index, tuple[2],
+						Integer.valueOf(tuple[1]));
+			}
+
+			rs = ps.executeQuery();
+			
+			return rs.getMetaData();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Throwable e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtils.closeResultSet(rs);
+			JdbcUtils.closeConnection(connection);
+		}
+		
+		return null;
 	}
 
 }

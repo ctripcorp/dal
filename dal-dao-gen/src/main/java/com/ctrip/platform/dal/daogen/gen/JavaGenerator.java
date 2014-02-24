@@ -3,15 +3,11 @@ package com.ctrip.platform.dal.daogen.gen;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.velocity.VelocityContext;
-
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.GenTask;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.pojo.GenTaskByTableViewSp;
-import com.ctrip.platform.dal.daogen.pojo.Method;
 import com.ctrip.platform.dal.daogen.pojo.Parameter;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
@@ -25,7 +21,7 @@ public class JavaGenerator extends AbstractGenerator {
 	private static DaoOfDbServer dbServerDao;
 
 	static {
-		dbServerDao = SpringBeanGetter.getDBServerDao();
+		dbServerDao = SpringBeanGetter.getDaoOfDbServer();
 	}
 
 	public static JavaGenerator getInstance() {
@@ -301,7 +297,7 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public void generateByFreeSql(List<GenTask> tasks) {
+	public void generateByFreeSql(List<GenTaskByFreeSql> tasks) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -22,26 +22,19 @@ namespace com.ctrip.platform.tools.Dao
         ///  插入Person_gen
         /// </summary>
         /// <param name="person_gen">Person_gen实体对象</param>
-        /// <returns>状态代码</returns>
+        /// <returns>新增的主键</returns>
         public int InsertPerson_gen(Person_gen person_gen)
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
-                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.InputOutput, DbType = DbType.UInt32, Value = person_gen.ID});
-                parameters.Add(new StatementParameter{ Name = "@Name", Direction = ParameterDirection.Input, DbType = DbType.AnsiString, Value = person_gen.Name});
-                parameters.Add(new StatementParameter{ Name = "@Age", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value = person_gen.Age});
-                parameters.Add(new StatementParameter{ Name = "@Birth", Direction = ParameterDirection.Input, DbType = DbType.DateTime, Value = person_gen.Birth});
-                parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
+                Object result = baseDao.Insert<Person_gen>(person_gen);
+                int iReturn = Convert.ToInt32(result);
 
-                baseDao.ExecSp("spA_Person_i", parameters);
-
-               person_gen.ID = (uint)parameters["@ID"].Value;
-                return (int)parameters["@return"].Value;
+                return iReturn;
             }
             catch (Exception ex)
             {
-                throw new DalException("调用Person_genDao时，访问Insert时出错", ex);
+                throw new DalException("调用Person_gen时，访问Insert时出错", ex);
             }
         }
         
@@ -54,21 +47,14 @@ namespace com.ctrip.platform.tools.Dao
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
-                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.InputOutput, DbType = DbType.UInt32, Value = person_gen.ID});
-                parameters.Add(new StatementParameter{ Name = "@Name", Direction = ParameterDirection.Input, DbType = DbType.AnsiString, Value = person_gen.Name});
-                parameters.Add(new StatementParameter{ Name = "@Age", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value = person_gen.Age});
-                parameters.Add(new StatementParameter{ Name = "@Birth", Direction = ParameterDirection.Input, DbType = DbType.DateTime, Value = person_gen.Birth});
-                parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
+                Object result = baseDao.Update<Person_gen>(person_gen);
+                int iReturn = Convert.ToInt32(result);
 
-                baseDao.ExecSp("spA_Person_u", parameters);
-
-               person_gen.ID = (uint)parameters["@ID"].Value;
-                return (int)parameters["@return"].Value;
+                return iReturn;
             }
             catch (Exception ex)
             {
-                throw new DalException("调用Person_genDao时，访问Update时出错", ex);
+                throw new DalException("调用Person_gen时，访问Update时出错", ex);
             }
         }
         
@@ -81,42 +67,17 @@ namespace com.ctrip.platform.tools.Dao
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
-                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value = person_gen.ID});
-                parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
+                Object result = baseDao.Delete<Person_gen>(person_gen);
+                int iReturn = Convert.ToInt32(result);
 
-                baseDao.ExecSp("spA_Person_d", parameters);
-
-                return (int)parameters["@return"].Value;
+                return iReturn;
             }
             catch (Exception ex)
             {
-                throw new DalException("调用Person_genDao时，访问Delete时出错", ex);
+                throw new DalException("调用Person_gen时，访问Delete时出错", ex);
             }
         }
         
-        /// <summary>
-        /// 删除<#= className #>
-        /// </summary>
-        /// <param name="iD">@ID #></param>
-        /// <returns>状态代码</returns>
-        public int DeletePerson_gen(uint iD)
-        {
-            try
-            {
-                StatementParameterCollection parameters = new StatementParameterCollection();
-                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value = iD});
-                parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
-
-                baseDao.ExecSp("spA_Person_d", parameters);
-
-                return (int)parameters["@return"].Value;
-            }
-            catch (Exception ex)
-            {
-                throw new DalException("调用Person_genDao时，访问DeletePerson_gen时出错", ex);
-            }
-        }
         
 
         /// <summary>
@@ -124,7 +85,7 @@ namespace com.ctrip.platform.tools.Dao
         /// </summary>
         /// <param name="iD"></param>
         /// <returns>Person_gen信息</returns>
-        public Person_gen FindByPk(uint iD )
+        public Person_gen FindByPk(int iD )
         {
             try
             {
@@ -229,9 +190,9 @@ namespace com.ctrip.platform.tools.Dao
         private DataTable ToDataTable(IList<Person_gen> person_genList , bool insert)
         {
             DataTable dt = new DataTable();
-            dt.Columns.Add("ID", typeof(uint));
+            dt.Columns.Add("ID", typeof(int));
             dt.Columns.Add("Name", typeof(string));
-            dt.Columns.Add("Age", typeof(uint));
+            dt.Columns.Add("Age", typeof(int));
             dt.Columns.Add("Birth", typeof(DateTime));
 
             int i = 0;
@@ -320,6 +281,49 @@ namespace com.ctrip.platform.tools.Dao
             catch (Exception ex)
             {
                 throw new DalException("调用Person_genDao时，访问BulkDelete时出错", ex);
+            }
+        }
+
+		/// <summary>
+        ///  GetNameByID
+        /// </summary>
+        /// <param name="iD"></param>
+        /// <returns></returns>
+        public IList<Person_gen> GetNameByID(int iD)
+        {
+        	try
+            {
+            	string sql = "SELECT Name FROM Person WHERE  ID = @ID ";
+                StatementParameterCollection parameters = new StatementParameterCollection();
+                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.Input, DbType = DbType.Int32, Value =iD });
+
+                return baseDao.SelectList<Person_gen>(sql, parameters);
+
+            }
+            catch (Exception ex)
+            {
+                throw new DalException("调用Person_genDao时，访问GetNameByID时出错", ex);
+            }
+        }
+		/// <summary>
+        ///  deleteByName
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public int deleteByName(string name)
+        {
+        	try
+            {
+            	string sql = "Delete FROM Person WHERE  Name = @Name ";
+                StatementParameterCollection parameters = new StatementParameterCollection();
+                parameters.Add(new StatementParameter{ Name = "@Name", Direction = ParameterDirection.Input, DbType = DbType.AnsiString, Value =name });
+
+				return baseDao.ExecNonQuery(sql, parameters);
+
+            }
+            catch (Exception ex)
+            {
+                throw new DalException("调用Person_genDao时，访问deleteByName时出错", ex);
             }
         }
         

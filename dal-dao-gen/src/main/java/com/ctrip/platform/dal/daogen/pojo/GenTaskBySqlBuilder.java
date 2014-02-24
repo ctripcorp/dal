@@ -3,11 +3,17 @@ package com.ctrip.platform.dal.daogen.pojo;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class GenTaskBySqlBuilder extends GenTaskAbstract {
+public class GenTaskBySqlBuilder {
 
 	private int id;
 
 	private int project_id;
+	
+	private int server_id;
+	
+	private String db_name;
+	
+	private String table_name;
 
 	private String class_name;
 
@@ -63,22 +69,26 @@ public class GenTaskBySqlBuilder extends GenTaskAbstract {
 		this.project_id = project_id;
 	}
 
-	@Override
+	public int getServer_id() {
+		return server_id;
+	}
+
+	public void setServer_id(int server_id) {
+		this.server_id = server_id;
+	}
+
 	public String getDb_name() {
 		return db_name;
 	}
 
-	@Override
 	public void setDb_name(String db_name) {
 		this.db_name = db_name;
 	}
 
-	@Override
 	public String getTable_name() {
 		return table_name;
 	}
 
-	@Override
 	public void setTable_name(String table_name) {
 		this.table_name = table_name;
 	}
@@ -125,10 +135,10 @@ public class GenTaskBySqlBuilder extends GenTaskAbstract {
 		task.setClass_name(rs.getString(6));
 		task.setMethod_name(rs.getString(7));
 		task.setSql_style(rs.getString(8));
-		task.setCrud_type(rs.getString(10));
-		task.setFields(rs.getString(11));
-		task.setCondition(rs.getString(12));
-		task.setSql_content(rs.getString(13));
+		task.setCrud_type(rs.getString(9));
+		task.setFields(rs.getString(10));
+		task.setCondition(rs.getString(11));
+		task.setSql_content(rs.getString(12));
 
 		return task;
 	}

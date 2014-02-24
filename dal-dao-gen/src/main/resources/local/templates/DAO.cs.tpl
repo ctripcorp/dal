@@ -480,6 +480,38 @@ namespace ${host.getNameSpaceDao()}
             }
         }
 #end
+
+#foreach($method in $host.getExtraMethods())
+		/// <summary>
+        ///  ${method.getName()}
+        /// </summary>
+#foreach($p in $method.getParameters())
+        /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
+#end
+        /// <returns></returns>
+        public #if($method.getCrud_type() == "select")IList<${host.getClassName()}>#{else}int#end ${method.getName()}(#foreach($p in $method.getParameters())${p.getType()} ${WordUtils.uncapitalize($p.getName())}#if($foreach.count != $method.getParameters().size()),#end#end)
+        {
+        	try
+            {
+            	string sql = "${method.getSql()}";
+                StatementParameterCollection parameters = new StatementParameterCollection();
+#foreach($p in $method.getParameters())  
+                parameters.Add(new StatementParameter{ Name = "@${p.getName()}", Direction = ParameterDirection.Input, DbType = DbType.${p.getDbType()}, Value =${WordUtils.uncapitalize($p.getName())} });
+#end
+
+#if($method.getCrud_type() == "select")
+                return baseDao.SelectList<${host.getClassName()}>(sql, parameters);
+#else
+				return baseDao.ExecNonQuery(sql, parameters);
+#end
+
+            }
+            catch (Exception ex)
+            {
+                throw new DalException("调用${host.getClassName()}Dao时，访问${method.getName()}时出错", ex);
+            }
+        }
+#end
         
     }
 }

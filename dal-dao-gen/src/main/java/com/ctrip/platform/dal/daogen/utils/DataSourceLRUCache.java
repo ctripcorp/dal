@@ -34,7 +34,7 @@ public class DataSourceLRUCache {
 	private static DaoOfDbServer dbServerDao;
 
 	static {
-		dbServerDao = SpringBeanGetter.getDBServerDao();
+		dbServerDao = SpringBeanGetter.getDaoOfDbServer();
 	}
 
 	// 默认30分钟

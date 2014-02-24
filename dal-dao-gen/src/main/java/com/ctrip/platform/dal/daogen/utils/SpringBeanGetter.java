@@ -14,7 +14,7 @@ public class SpringBeanGetter {
 	private static ApplicationContext context = new ClassPathXmlApplicationContext(
 			"spring.xml");
 
-	public static DaoOfProject getProjectDao() {
+	public static DaoOfProject getDaoOfProject() {
 		return (DaoOfProject) context.getBean("projectDao");
 	}
 	
@@ -26,7 +26,7 @@ public class SpringBeanGetter {
 		return (DaoByFreeSql)context.getBean("sqlTaskDao");
 	}
 	
-	public static DaoOfDbServer getDBServerDao(){
+	public static DaoOfDbServer getDaoOfDbServer(){
 		return (DaoOfDbServer)context.getBean("dataSourceDao");
 	}
 	

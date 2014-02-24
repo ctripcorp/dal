@@ -42,7 +42,7 @@ public class DatabaseResource {
 	private static DaoOfDbServer dbServerDao;
 
 	static {
-		dbServerDao = SpringBeanGetter.getDBServerDao();
+		dbServerDao = SpringBeanGetter.getDaoOfDbServer();
 	}
 
 	@GET
@@ -269,45 +269,11 @@ public class DatabaseResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("test_sql")
 	public Status verifyQuery(@FormParam("server") int server,
-			@FormParam("db_name") String dbName, @FormParam("sql") String sql,
+			@FormParam("db_name") String dbName, @FormParam("sql_content") String sql,
 			@FormParam("params") String params) {
 
-		String[] parameters = params.split(",");
-
-		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-
-		if (ds == null) {
-			DbServer dbServer = dbServerDao.getDbServerByID(server);
-			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
-		}
-
-		Connection connection = null;
-		ResultSet rs = null;
-		try {
-			connection = ds.getConnection();
-
-			PreparedStatement ps = connection.prepareStatement(sql);
-
-			for (String param : parameters) {
-				String[] tuple = param.split("_");
-				ps.setObject(Integer.valueOf(tuple[0]), tuple[2],
-						Integer.valueOf(tuple[1]));
-			}
-
-			rs = ps.executeQuery();
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return Status.ERROR;
-		} catch (Throwable e) {
-			e.printStackTrace();
-			return Status.ERROR;
-		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
-		}
-
-		return Status.OK;
+		return DbUtils.testAQuerySql(server, dbName, sql, params) == null ? Status.ERROR : Status.OK;
+		
 	}
 
 }

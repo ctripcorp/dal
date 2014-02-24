@@ -23,15 +23,15 @@ namespace com.ctrip.platform.tools.Dao
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
-                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.InputOutput, DbType = DbType.UInt32, Value = spAPersoni_gen.ID});
+                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.InputOutput, DbType = DbType.Int32, Value = spAPersoni_gen.ID});
                 parameters.Add(new StatementParameter{ Name = "@Name", Direction = ParameterDirection.Input, DbType = DbType.AnsiString, Value = spAPersoni_gen.Name});
-                parameters.Add(new StatementParameter{ Name = "@Age", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value = spAPersoni_gen.Age});
+                parameters.Add(new StatementParameter{ Name = "@Age", Direction = ParameterDirection.Input, DbType = DbType.Int32, Value = spAPersoni_gen.Age});
                 parameters.Add(new StatementParameter{ Name = "@Birth", Direction = ParameterDirection.Input, DbType = DbType.DateTime, Value = spAPersoni_gen.Birth});
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
                 baseDao.ExecSp("dbo.spA_Person_i", parameters);
 
-                spAPersoni_gen.ID = (uint)parameters["@ID"].Value;
+                spAPersoni_gen.ID = (int)parameters["@ID"].Value;
                 return (int)parameters["@return"].Value;
             }
             catch (Exception ex)

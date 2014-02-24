@@ -362,6 +362,8 @@
                         </div>
                      </div>
                      <br>
+                     <label class="control-label popup_label">在此输入SQL，占位符：Java请使用?或者:Name形式，对于c#请使用@Name形式</label>
+                     
                      <div class="row-fluid">
                         <div id="sql_editor" class="span12">
                         </div>
@@ -371,48 +373,8 @@
                      <div class="row-fluid">
                            <label class="control-label popup_label">填写参数名/参数Index，以及参数类型和值</label>
                      </div>  
-                     <div class="row-fluid">                         
-                           <input id="variable" type="text" class="span3" value="">
-                           <select id="variable_types" class="span3">
-                              <option value='_please_select'>--参数类型--</option>
-                              <option value='-7'>Bit</option>
-                              <option value='16'>Boolean</option>
-                              <option value='-6'>TinyInt</option>
-                              <option value='5'>SmallInt</option>
-                              <option value='4'>Integer</option>
-                              <option value='-5'>BigInt</option>
-                              <option value='6'>Float</option>
-                              <option value='7'>Real</option>
-                              <option value='8'>Double</option>
-                              <option value='2'>Numeric</option>
-                              <option value='3'>Decimal</option>
-                              <option value='1'>Char</option>
-                              <option value='12'>Varchar</option>
-                              <option value='-1'>LongVarchar</option>
-                              <option value='-15'>Nchar</option>
-                              <option value='-9'>NVarchar</option>
-                              <option value='-16'>LongNVarchar</option>
-                              <option value='91'>Date</option>
-                              <option value='92'>Time</option>
-                              <option value='93'>Timestamp</option>
-                              <option value='-2'>Binary</option>
-                              <option value='-3'>Varbinary</option>
-                              <option value='-4'>LongVarbinary</option>
-                              <option value='0'>Null</option>
-                              <option value='1111'>Other</option>
-                              <option value='2000'>JavaObject</option>
-                              <option value='2001'>Distinct</option>
-                              <option value='2002'>Struct</option>
-                              <option value='2003'>Array</option>
-                              <option value='2004'>Blob</option>
-                              <option value='2005'>Clob</option>
-                              <option value='2006'>Ref</option>
-                              <option value='70'>DataLink</option>
-                              <option value='-8'>Rowid</option>
-                              <option value='2011'>NClob</option>
-                              <option value='2009'>SqlXml</option>
-                           </select>
-                           <input id="variable_values" type="text" class="span4" value="">
+                     <div id="param_list" class="row-fluid">      
+                           
                      </div>
                   </div>
                   <div class="steps step3 row-fluid" from="">

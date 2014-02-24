@@ -23,6 +23,7 @@ import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.GenTask;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.pojo.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.pojo.Project;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
@@ -30,13 +31,13 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 public abstract class AbstractGenerator implements Generator {
 
-	protected static DaoOfProject projectDao;
+	protected static DaoOfProject daoOfProject;
 
-	protected static DaoBySqlBuilder autoTaskDao;
+	protected static DaoBySqlBuilder daoBySqlBuilder;
 
-	protected static DaoByFreeSql sqlTaskDao;
+	protected static DaoByFreeSql daoByFreeSql;
 
-	protected static DaoOfDbServer dbServerDao;
+	protected static DaoOfDbServer daoOfDbServer;
 	
 	protected static DaoByTableViewSp daoByTableViewSp;
 
@@ -46,10 +47,10 @@ public abstract class AbstractGenerator implements Generator {
 
 	static {
 
-		projectDao = SpringBeanGetter.getProjectDao();
-		autoTaskDao = SpringBeanGetter.getDaoBySqlBuilder();
-		sqlTaskDao = SpringBeanGetter.getDaoByFreeSql();
-		dbServerDao = SpringBeanGetter.getDBServerDao();
+		daoOfProject = SpringBeanGetter.getDaoOfProject();
+		daoBySqlBuilder = SpringBeanGetter.getDaoBySqlBuilder();
+		daoByFreeSql = SpringBeanGetter.getDaoByFreeSql();
+		daoOfDbServer = SpringBeanGetter.getDaoOfDbServer();
 		daoByTableViewSp = SpringBeanGetter.getDaoByTableViewSp();
 
 		java.util.Properties pr = new java.util.Properties();
@@ -62,7 +63,7 @@ public abstract class AbstractGenerator implements Generator {
 	@Override
 	public boolean generateCode(int projectId) {
 
-		Project proj = projectDao.getProjectByID(projectId);
+		Project proj = daoOfProject.getProjectByID(projectId);
 
 		if (null != proj) {
 			namespace = proj.getNamespace();
@@ -80,14 +81,10 @@ public abstract class AbstractGenerator implements Generator {
 //		}
 //		generateBySP(_sp);
 //
-//		// 手工编写的SQL
-//		List<GenTaskByFreeSql> _freeSql = sqlTaskDao.getTasksByProjectId(Integer
-//				.valueOf(projectId));
-//		List<GenTask> freeSql = new ArrayList<GenTask>();
-//		for (GenTaskByFreeSql t : _freeSql) {
-//			freeSql.add(t);
-//		}
-//		generateByFreeSql(freeSql);
+		// 手工编写的SQL
+		List<GenTaskByFreeSql> freeSql = daoByFreeSql.getTasksByProjectId(projectId);
+
+		generateByFreeSql(freeSql);
 
 		return true;
 
@@ -99,7 +96,7 @@ public abstract class AbstractGenerator implements Generator {
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
 
 		if (ds == null) {
-			DbServer dbServer = dbServerDao.getDbServerByID(server);
+			DbServer dbServer = daoOfDbServer.getDbServerByID(server);
 			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
 		}
 
@@ -208,7 +205,7 @@ public abstract class AbstractGenerator implements Generator {
 	public abstract void generateByTableView(List<GenTaskByTableViewSp> tasks);
 
 	@Override
-	public abstract void generateByFreeSql(List<GenTask> tasks);
+	public abstract void generateByFreeSql(List<GenTaskByFreeSql> tasks);
 	
 	@Override
 	public abstract void generateBySqlBuilder(List<GenTask> tasks);

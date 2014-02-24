@@ -23,7 +23,7 @@ jQuery(document).ready(function () {
     w2ui['main_layout'].content('left', $().w2sidebar({
         name: 'sidebar',
         img: null,
-        topHTML: '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a id="addProj" href="javascript:;"><i class="fa fa-plus"></i>添加项目</a>&nbsp;&nbsp;<a href="javascript:;" onclick="reloadProjects();"><i class="fa fa-refresh"></i>刷新</a></div>',
+        topHTML: '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a id="addProj" href="javascript:;"><i class="fa fa-plus"></i>添加项目</a>&nbsp;&nbsp;<a href="javascript:;" onclick="reloadProjects();"><i class="fa fa-refresh"></i>刷新项目</a></div>',
         menu: [{
             id: "java_code",
             text: 'Generate Java Code',
@@ -213,41 +213,12 @@ jQuery(document).ready(function () {
         }
     });
 
-    $(document.body).on('click', "#add_variable", function (event) {
-        $("#selected_variable").append($('<option>', {
-            value: sprintf("%s_%s_%s", 
-                $("#variable").val(),
-                $("#variable_types").val(),
-                $("#variable_values").val() ),
-            text: sprintf("%s = %s", 
-                $("#variable").val(), $("#variable_values").val())
-        }));
-    });
-
-    $(document.body).on('click', "#del_variable", function (event) {
-        $("#selected_variable").remove($("#selected_variable").val());
-    });
-
-    $(document.body).on('click', "#test_sql", function (event) {
-        var postData = {};
-        postData["server"] = $("#servers").val();
-        postData["db_name"] = $("#databases").val();
-        postData["sql"] = ace.edit("sql_editor").getValue();
-        postData["params"] = $.makeArray($("#selected_variable>option").map(function() { return $(this).val(); })).join(",");
-        $.post("/rest/db/test_sql", postData).done(function(data){
-            if(data.code == "OK"){
-                alert("查询语句正常执行");
-            }else{
-                alert("执行异常，请检查sql及对应参数！");
-            }
-        });
-    });
-
     reloadProjects();
 });
 
 
 var reloadProjects = function () {
+
     cblock($("body"));
     var currentElement = w2ui['sidebar'];
     var nodes = [];
@@ -364,7 +335,7 @@ var renderGrid = function () {
             onClick: function (target, data) {
                 switch (target) {
                 case 'refreshDAO':
-
+                    
                     w2ui['grid'].clear();
                     var current_project = w2ui['grid'].current_project;
                     if (current_project == undefined) {
@@ -378,6 +349,7 @@ var renderGrid = function () {
                         $.each(data.tableViewSpTasks, function (index, value) {
                             value.recid = allTasks.length + 1;
                             value.task_type = "table_view_sp";
+                            value.task_desc = "表/视图/存储过程";
                             if(value.table_names != null && value.table_names != ""){
                                 value.sql_content = value.table_names;
                             }
@@ -393,7 +365,14 @@ var renderGrid = function () {
                         });
                         $.each(data.autoTasks, function (index, value) {
                             value.recid = allTasks.length + 1;
-                            value.task_type = "sql_builder";
+                            value.task_type = "auto";
+                            value.task_desc = "SQL构建";
+                            allTasks.push(value);
+                        });
+                        $.each(data.sqlTasks, function (index, value) {
+                            value.recid = allTasks.length + 1;
+                            value.task_type = "sql";
+                            value.task_desc = "自定义查询";
                             allTasks.push(value);
                         });
                         w2ui['grid'].add(allTasks);
@@ -448,6 +427,10 @@ var renderGrid = function () {
                         var url = "";
                         if(record.task_type == "table_view_sp"){
                             url = "rest/task/table";
+                        }else if(record.task_type == "auto"){
+                            url = "rest/task/auto";
+                        }else if(record.task_type == "sql"){
+                            url = "rest/task/sql";
                         }
                         $.post(url, {
                                 "action": "delete",
@@ -514,6 +497,11 @@ var renderGrid = function () {
             size: '10%',
             sortable: true
         }, {
+            field: 'task_desc',
+            caption: '类型',
+            size: '10%',
+            sortable: true
+        },{
             field: 'sql_content',
             caption: '预览',
             size: '50%'

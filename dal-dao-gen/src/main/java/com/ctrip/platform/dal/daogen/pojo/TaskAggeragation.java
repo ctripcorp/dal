@@ -1,36 +1,38 @@
+
 package com.ctrip.platform.dal.daogen.pojo;
 
 import java.util.List;
 
 public class TaskAggeragation {
 	
-	private List<AutoTask> autoTasks;
+	private List<GenTaskByTableViewSp> tableViewSpTasks;
 	
-	private List<SpTask> spTasks;
+	private List<GenTaskBySqlBuilder> autoTasks;
 	
-	private List<SqlTask> sqlTasks;
+	
+	private List<GenTaskByFreeSql> sqlTasks;
 
-	public List<AutoTask> getAutoTasks() {
+	public List<GenTaskByTableViewSp> getTableViewSpTasks() {
+		return tableViewSpTasks;
+	}
+
+	public void setTableViewSpTasks(List<GenTaskByTableViewSp> tableViewSpTasks) {
+		this.tableViewSpTasks = tableViewSpTasks;
+	}
+
+	public List<GenTaskBySqlBuilder> getAutoTasks() {
 		return autoTasks;
 	}
 
-	public void setAutoTasks(List<AutoTask> autoTasks) {
+	public void setAutoTasks(List<GenTaskBySqlBuilder> autoTasks) {
 		this.autoTasks = autoTasks;
 	}
 
-	public List<SpTask> getSpTasks() {
-		return spTasks;
-	}
-
-	public void setSpTasks(List<SpTask> spTasks) {
-		this.spTasks = spTasks;
-	}
-
-	public List<SqlTask> getSqlTasks() {
+	public List<GenTaskByFreeSql> getSqlTasks() {
 		return sqlTasks;
 	}
 
-	public void setSqlTasks(List<SqlTask> sqlTasks) {
+	public void setSqlTasks(List<GenTaskByFreeSql> sqlTasks) {
 		this.sqlTasks = sqlTasks;
 	}
 

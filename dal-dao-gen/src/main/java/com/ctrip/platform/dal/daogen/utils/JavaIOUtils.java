@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.utils;
 
 import java.io.IOException;
@@ -43,5 +44,6 @@ public abstract class JavaIOUtils {
 			}
 		}
 	}
+
 
 }

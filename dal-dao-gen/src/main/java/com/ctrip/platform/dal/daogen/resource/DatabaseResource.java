@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.sql.Connection;
@@ -20,15 +21,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 
-import com.ctrip.platform.dal.daogen.dao.DbServerDAO;
+import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.Status;
+import com.ctrip.platform.dal.daogen.pojo.TableSpNames;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
+import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,10 +40,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DatabaseResource {
 
 	private static ObjectMapper mapper = new ObjectMapper();
-	private static DbServerDAO dbServerDao;
+	private static DaoOfDbServer dbServerDao;
 
 	static {
-		dbServerDao = SpringBeanGetter.getDBServerDao();
+		dbServerDao = SpringBeanGetter.getDaoOfDbServer();
 	}
 
 	@GET
@@ -65,7 +66,9 @@ public class DatabaseResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("servers")
 	public Status saveDbServer(@FormParam("id") int id,
-			@FormParam("driver") String driver, @FormParam("url") String url,
+			@FormParam("server") String server,
+			@FormParam("port") int port,
+			@FormParam("domain") String domain,
 			@FormParam("user") String user,
 			@FormParam("password") String password,
 			@FormParam("db_type") String db_type,
@@ -76,8 +79,23 @@ public class DatabaseResource {
 			dbServer.setId(id);
 			dbServerDao.deleteDbServer(dbServer);
 		} else {
-			dbServer.setDriver(driver);
-			dbServer.setUrl(url);
+//			dbServer.setDriver(driver);
+			if (db_type.equalsIgnoreCase("mysql")) {
+				dbServer.setDriver("com.mysql.jdbc.Driver");
+			} else {
+				dbServer.setDriver("net.sourceforge.jtds.jdbc.Driver");
+			}
+			dbServer.setServer(server);
+			if(port == 0){
+				if (db_type.equalsIgnoreCase("mysql")) {
+					dbServer.setPort(3306);
+				} else {
+					dbServer.setPort(1433);
+				}
+			}else{
+				dbServer.setPort(port);
+			}
+			dbServer.setDomain(domain);
 			dbServer.setUser(user);
 			dbServer.setPassword(password);
 			dbServer.setDb_type(db_type);
@@ -137,61 +155,12 @@ public class DatabaseResource {
 	@Path("tables")
 	public String getTableNames(@QueryParam("server") int server,
 			@QueryParam("db_name") String dbName) {
-
-		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-
-		DbServer dbServer = dbServerDao.getDbServerByID(server);
-
-		if (ds == null) {
-			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
-		}
-
-		List<String> results = new ArrayList<String>();
-
-		// 如果是Sql Server，通过Sql语句获取所有表和视图的名称
-		if (dbServer != null
-				&& dbServer.getDb_type().equalsIgnoreCase("sqlserver")) {
-			JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-
-			String sql = String
-					.format("use %s select Name from sysobjects where xtype in ('v','u') and status>=0 order by name",
-							dbName);
-			results = jdbcTemplate.query(sql, new RowMapper<String>() {
-				public String mapRow(ResultSet rs, int rowNum)
-						throws SQLException {
-					return rs.getString(1);
-				}
-			});
-		}
-		// 如果是MySql，通过JDBC标准方式获取所有表和视图的名称
-		else if (dbServer != null
-				&& dbServer.getDb_type().equalsIgnoreCase("mysql")) {
-			String[] types = { "TABLE", "VIEW" };
-			ResultSet rs = null;
-			Connection connection = null;
-			try {
-				connection = ds.getConnection();
-				rs = connection.getMetaData().getTables(dbName, null, "%",
-						types);
-				while (rs.next()) {
-					results.add(rs.getString("TABLE_NAME"));
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
-				JdbcUtils.closeResultSet(rs);
-				JdbcUtils.closeConnection(connection);
-			}
-		}
-
 		try {
-			return mapper.writeValueAsString(results);
+			return mapper.writeValueAsString(DbUtils.getAllTableNames(server, dbName));
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
+			return null;
 		}
-
-		return null;
-
 	}
 
 	@GET
@@ -287,145 +256,25 @@ public class DatabaseResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("sps")
-	public String getSPNames(@QueryParam("server") int server,
+	@Path("table_sps")
+	public TableSpNames getTableSPNames(@QueryParam("server") int server,
 			@QueryParam("db_name") String dbName) {
+		TableSpNames tableSpNames = new TableSpNames();
+		tableSpNames.setSps(DbUtils.getAllSpNames(server, dbName));
+		tableSpNames.setTables(DbUtils.getAllTableNames(server, dbName));
 
-		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-
-		DbServer dbServer = dbServerDao.getDbServerByID(server);
-
-		if (ds == null) {
-			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
-		}
-
-		List<String> results = new ArrayList<String>();
-
-		// 如果是Sql Server，通过Sql语句获取所有表和视图的名称
-		if (dbServer != null
-				&& dbServer.getDb_type().equalsIgnoreCase("sqlserver")) {
-			JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-
-			String sql = String
-					.format("use %s select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE'",
-							dbName);
-			results = jdbcTemplate.query(sql, new RowMapper<String>() {
-				public String mapRow(ResultSet rs, int rowNum)
-						throws SQLException {
-					return String.format("%s.%s", rs.getString(1),
-							rs.getString(2));
-				}
-			});
-		}
-
-		try {
-			return mapper.writeValueAsString(results);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-
-		return null;
-
-	}
-
-	@GET
-	// @Produces(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.TEXT_PLAIN)
-	@Path("sp_code")
-	public String getSPCode(@QueryParam("server") int server,
-			@QueryParam("db_name") String dbName,
-			@QueryParam("sp_name") String spName) {
-
-		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-
-		if (ds == null) {
-			DbServer dbServer = dbServerDao.getDbServerByID(server);
-			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
-		}
-
-		JdbcTemplate template = new JdbcTemplate(ds);
-
-		final StringBuilder spCode = new StringBuilder();
-
-		template.query(String.format("use %s exec sp_helptext ?", dbName),
-				new Object[] { spName }, new RowMapper<Integer>() {
-					public Integer mapRow(ResultSet rs, int rowNum)
-							throws SQLException {
-						spCode.append(rs.getString(1));
-						return spCode.length();
-					}
-				});
-
-		return spCode.toString();
-
-	}
-
-	@POST
-	@Produces(MediaType.APPLICATION_JSON)
-	// @Produces(MediaType.TEXT_PLAIN)
-
-	public Status saveSp(@FormParam("server") int server,
-			@FormParam("db_name") String dbName,
-			@FormParam("sp_code") String spCode) {
-
-		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-
-		if (ds == null) {
-			DbServer dbServer = dbServerDao.getDbServerByID(server);
-			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
-		}
-
-		JdbcTemplate template = new JdbcTemplate(ds);
-
-		template.update(spCode);
-
-		return Status.OK;
-
+		return tableSpNames;
 	}
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("test_sql")
 	public Status verifyQuery(@FormParam("server") int server,
-			@FormParam("db_name") String dbName, @FormParam("sql") String sql,
+			@FormParam("db_name") String dbName, @FormParam("sql_content") String sql,
 			@FormParam("params") String params) {
 
-		String[] parameters = params.split(",");
-
-		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
-
-		if (ds == null) {
-			DbServer dbServer = dbServerDao.getDbServerByID(server);
-			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
-		}
-
-		Connection connection = null;
-		ResultSet rs = null;
-		try {
-			connection = ds.getConnection();
-
-			PreparedStatement ps = connection.prepareStatement(sql);
-
-			for (String param : parameters) {
-				String[] tuple = param.split("_");
-				ps.setObject(Integer.valueOf(tuple[0]), tuple[2],
-						Integer.valueOf(tuple[1]));
-			}
-
-			rs = ps.executeQuery();
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return Status.ERROR;
-		} catch (Throwable e) {
-			e.printStackTrace();
-			return Status.ERROR;
-		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
-		}
-
-		return Status.OK;
+		return DbUtils.testAQuerySql(server, dbName, sql, params) == null ? Status.ERROR : Status.OK;
+		
 	}
 
 }

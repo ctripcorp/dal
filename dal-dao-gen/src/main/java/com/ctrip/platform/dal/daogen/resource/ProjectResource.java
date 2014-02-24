@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.util.List;
@@ -15,8 +16,9 @@ import javax.ws.rs.core.MediaType;
 
 import org.jasig.cas.client.util.AssertionHolder;
 
-import com.ctrip.platform.dal.daogen.dao.ProjectDAO;
-import com.ctrip.platform.dal.daogen.gen.JavaGenerator;
+import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
+import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
+import com.ctrip.platform.dal.daogen.java.JavaGenerator;
 import com.ctrip.platform.dal.daogen.pojo.Project;
 import com.ctrip.platform.dal.daogen.pojo.Status;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -33,10 +35,10 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 @Path("project")
 public class ProjectResource {
 
-	private static ProjectDAO projectDao;
+	private static DaoOfProject projectDao;
 
 	static {
-		projectDao = SpringBeanGetter.getProjectDao();
+		projectDao = SpringBeanGetter.getDaoOfProject();
 	}
 
 	@GET
@@ -93,9 +95,9 @@ public class ProjectResource {
 			@FormParam("language") String language) {
 
 		if (language.equals("java"))
-			JavaGenerator.getInstance().generateCode(id);
+			JavaGenerator.getInstance().generateCode(Integer.valueOf(id));
 		else if (language.equals("csharp"))
-			;
+			CSharpGenerator.getInstance().generateCode(Integer.valueOf(id));
 		else if (language.equals("python"))
 			;
 

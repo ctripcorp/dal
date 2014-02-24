@@ -111,10 +111,11 @@ public class JavaGenerator extends AbstractGenerator {
 			context.put("pojoHost", pojoHost);
 			context.put("parserHost", parserHost);
 
-			// putMethods2Velocity(context, fieldsMeta, groupedTasks);
+			 putMethods2Velocity(context, fieldsMeta, groupedTasks);
 
 			FileWriter parserWriter = null;
 			FileWriter pojoWriter = null;
+			FileWriter daoWriter = null;
 			try {
 				File mavenLikeDir = new File(String.format("gen/%s/java",
 						projectId));
@@ -128,17 +129,24 @@ public class JavaGenerator extends AbstractGenerator {
 						String.format("%s/%s.java",
 								mavenLikeDir.getAbsolutePath(),
 								pojoHost.getClassName()));
+				
+				daoWriter = new FileWriter(String.format("%s/%sDao.java",
+						mavenLikeDir.getAbsolutePath(),
+						parserHost.getClassName()));
 
 				Velocity.mergeTemplate("templates/Parser.java.tpl", "UTF-8",
 						context, parserWriter);
 				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
 						context, pojoWriter);
+				Velocity.mergeTemplate("templates/DAO.java.tpl", "UTF-8",
+						context, daoWriter);
 
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
 				JavaIOUtils.closeWriter(parserWriter);
 				JavaIOUtils.closeWriter(pojoWriter);
+				JavaIOUtils.closeWriter(daoWriter);
 			}
 		}
 	}

@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.tester.manyTypes;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
@@ -9,10 +11,13 @@ import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalTableDao;
-import com.ctrip.platform.dal.tester.person.DalPersonParser;
-import com.ctrip.platform.dal.tester.person.Person;
+import com.ctrip.platform.dal.dao.KeyHolder;
+import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class ManyuTypesTest {
+	private static StatementParameters parameters = new StatementParameters();
+	private static DalHints hints = new DalHints();
+
 	public static void main(String[] args) {
 		Configuration.addResource("conf.properties");
 		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
@@ -27,10 +32,24 @@ public class ManyuTypesTest {
 			
 			DalTableDao<Manytypes> dao = new DalTableDao<Manytypes>(new DalManytypesParser());
 			Manytypes p = new Manytypes();
+			ret = p.setNameAndAddress(name,address);
+			
 			p.setBigIntCol(1L);
 			p.setBinaryCol("BinaryCol".getBytes());
 			dao.insert(hints, p, p, p);
-			dao.query("id > 0", null, null);
+			
+			KeyHolder kh = new KeyHolder();
+			dao.insert(hints, kh, p, p, p);
+			List<Map<String, Object>> k = kh.getKeyList();
+			
+			p.setId((Integer)k.get(0).get(DalTableDao.GENERATED_KEY));
+			
+			p.setBitCol(true);
+			dao.update(hints, p);
+			
+			List<Manytypes> mts = dao.query("id > 0", parameters, hints);
+			
+			
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}

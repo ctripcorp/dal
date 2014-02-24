@@ -391,9 +391,7 @@ public class DirectClientDaoTest {
 //		test.testCommand();
 //		test.testSP();
 //		test.testSPInOut();
-		// TODO check negative case, exception and transaction rollback
 //		test.testConnectionException();
-		
 //		test.testTransactionException();
 		System.exit(0);
 	}

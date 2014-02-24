@@ -255,6 +255,13 @@
         <version>2.2.0.v201108011116</version>
         <scope>provided</scope>
       </dependency>
+      <!-- Centrologging dependency -->
+      <dependency>  
+        <groupId>com.ctrip.freeway</groupId>
+        <artifactId>central-logging-agent</artifactId>
+        <version>2.1.7</version>
+      </dependency>
+      <!-- End Centrologging dependency -->
     </dependencies>
   </dependencyManagement>
 </project>

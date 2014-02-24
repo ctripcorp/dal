@@ -20,6 +20,7 @@ public final class DalTableDao<T> {
 	public static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
 	public static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
 	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
+	public static final String GENERATED_KEY = "GENERATED_KEY";
 	
 	private static final String COLUMN_SEPARATOR = ", ";
 	private static final String PLACE_HOLDER = "?";

@@ -1,10 +1,5 @@
 package com.ctrip.platform.dal.dao.logging;
 
-import com.ctrip.freeway.config.LogConfig;
-import com.ctrip.freeway.metrics.IMetric;
-import com.ctrip.freeway.metrics.MetricManager;
-
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -12,6 +7,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import com.ctrip.freeway.metrics.IMetric;
+import com.ctrip.freeway.metrics.MetricManager;
 
 
 public class MetricsLogger {

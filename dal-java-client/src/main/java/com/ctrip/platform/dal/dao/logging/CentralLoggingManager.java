@@ -4,6 +4,8 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 
 
 public class CentralLoggingManager {
+	public static final int DAL_APP_ID = 930201;
+	
 	public static final String TAG_APPID = "APPID";
 	public static final String TAG_HOST = "Host";
 	public static final String TAG_DAO = "DAO";

@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.tester;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -10,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.ctrip.freeway.config.LogConfig;
 import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
@@ -372,6 +372,11 @@ public class DirectClientDaoTest {
 	}
 	
 	public static void main(String[] args) {
+        LogConfig.setAppID("929143");
+//      LogConfig.setLoggingServerIP("localhost");
+        LogConfig.setLoggingServerIP("192.168.82.58");
+        LogConfig.setLoggingServerPort("63100");
+
 		Configuration.addResource("conf.properties");
 		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
 		try {

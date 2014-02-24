@@ -67,8 +67,7 @@ public class MetricsLogger {
 		if (statusQueue.isEmpty())
 			return;
 
-		MetricsData md = statusQueue.poll();
-	
+		MetricsData md;
 		// 1. Aggregate
 		while((md = statusQueue.poll())!= null) {
 	        String key = new StringBuilder().append(md.dao).

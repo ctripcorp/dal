@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.daogen.gen.cs;
+package com.ctrip.platform.dal.daogen.cs;
 
 import java.util.List;
 

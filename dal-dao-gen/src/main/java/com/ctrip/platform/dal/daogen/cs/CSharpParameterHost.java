@@ -1,8 +1,8 @@
-package com.ctrip.platform.dal.daogen.gen.cs;
+package com.ctrip.platform.dal.daogen.cs;
 
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
-import com.ctrip.platform.dal.daogen.gen.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 
 public class CSharpParameterHost extends AbstractParameterHost {
 	

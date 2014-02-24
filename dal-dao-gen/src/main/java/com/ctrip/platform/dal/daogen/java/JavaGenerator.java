@@ -1,7 +1,8 @@
-package com.ctrip.platform.dal.daogen.gen;
+package com.ctrip.platform.dal.daogen.java;
 
 import java.util.List;
 
+import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
 import com.ctrip.platform.dal.daogen.pojo.GenTask;
 import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;

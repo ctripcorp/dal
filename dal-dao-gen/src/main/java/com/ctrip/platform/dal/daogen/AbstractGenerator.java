@@ -1,31 +1,18 @@
-package com.ctrip.platform.dal.daogen.gen;
+package com.ctrip.platform.dal.daogen;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.sql.DataSource;
 
 import org.apache.velocity.app.Velocity;
-import org.springframework.jdbc.support.JdbcUtils;
+
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
 import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
-import com.ctrip.platform.dal.daogen.pojo.DbServer;
-import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
 import com.ctrip.platform.dal.daogen.pojo.GenTask;
 import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.pojo.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.pojo.Project;
-import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 public abstract class AbstractGenerator implements Generator {

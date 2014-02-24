@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.daogen.pojo;
 
-import com.ctrip.platform.dal.daogen.gen.cs.CSharpTableHost;
 
 public class StoredProcedure {
 	

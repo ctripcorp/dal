@@ -7,7 +7,7 @@ jQuery(document).ready(function () {
         name: 'main_layout',
         panels: [{
             type: 'left',
-            size: 270,
+            size: 271,
             resizable: true,
             style: 'border-right: 1px solid silver;'
         }, {

@@ -1,9 +1,9 @@
-package com.ctrip.platform.dal.daogen.gen.cs;
+package com.ctrip.platform.dal.daogen.cs;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ctrip.platform.dal.daogen.gen.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.pojo.StoredProcedure;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 

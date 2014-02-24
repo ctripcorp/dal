@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.daogen.gen.cs;
+package com.ctrip.platform.dal.daogen.cs;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -17,9 +17,9 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
 import com.ctrip.platform.dal.common.enums.DbType;
+import com.ctrip.platform.dal.daogen.AbstractGenerator;
+import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
-import com.ctrip.platform.dal.daogen.gen.AbstractGenerator;
-import com.ctrip.platform.dal.daogen.gen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.pojo.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.GenTask;

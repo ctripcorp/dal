@@ -17,9 +17,9 @@ import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
+import com.ctrip.platform.dal.daogen.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.cs.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
-import com.ctrip.platform.dal.daogen.gen.AbstractParameterHost;
-import com.ctrip.platform.dal.daogen.gen.cs.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.StoredProcedure;
 

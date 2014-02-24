@@ -16,9 +16,9 @@ import javax.ws.rs.core.MediaType;
 
 import org.jasig.cas.client.util.AssertionHolder;
 
+import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
 import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
-import com.ctrip.platform.dal.daogen.gen.JavaGenerator;
-import com.ctrip.platform.dal.daogen.gen.cs.CSharpGenerator;
+import com.ctrip.platform.dal.daogen.java.JavaGenerator;
 import com.ctrip.platform.dal.daogen.pojo.Project;
 import com.ctrip.platform.dal.daogen.pojo.Status;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;

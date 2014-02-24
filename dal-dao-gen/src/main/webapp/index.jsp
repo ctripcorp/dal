@@ -51,35 +51,11 @@
          </div>
          <div class="collapse navbar-collapse in dal-navbar-collapse" role="navigation">
             <ul class="nav navbar-nav">
-               <li class="active dropdown">
-                  <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                  <span class="dao_gen">
-                  DAO Generator
-                  </span>
-                  <i class="fa fa-angle-down">
-                  </i>
-                  </a>
-                  <ul class="dropdown-menu">
-                     <li>
-                        <a href="index.jsp">
-                        <i class="fa fa-tasks">
-                        </i>
-                        DAO
-                        </a>
-                     </li>
-                     <li>
-                        <a href="file.jsp">
-                        <i class="fa fa-eye">
-                        </i>
-                        Preview
-                        </a>
-                     </li>
-                  </ul>
+               <li class="active">
+                  <a href="index.jsp">数据访问层生成器</a>
                </li>
                <li>
-                  <a href="http://localhost:8080">
-                  DAS Console
-                  </a>
+                  <a href="file.jsp">已生成代码预览</a>
                </li>
             </ul>
             <ul class="nav navbar-nav pull-right">
@@ -92,6 +68,13 @@
                   </i>
                   </a>
                   <ul class="dropdown-menu">
+                     <li style="border-bottom:thick solid #000000;border-bottom-width:1px;">
+                        <a href="javascript:;">
+                        <i class="fa fa-info-circle">
+                        </i>
+                        About
+                        </a>
+                     </li>
                      <li>
                         <a href="/logout.jsp">
                         <i class="fa fa-power-off">

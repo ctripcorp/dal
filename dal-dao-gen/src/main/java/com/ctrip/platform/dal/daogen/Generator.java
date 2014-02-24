@@ -1,5 +1,5 @@
 
-package com.ctrip.platform.dal.daogen.gen;
+package com.ctrip.platform.dal.daogen;
 
 import java.util.List;
 

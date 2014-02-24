@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.gen;
 
 import java.util.List;
@@ -17,3 +18,4 @@ public interface Generator {
 	public void generateByFreeSql(List<GenTaskByFreeSql> tasks);
 
 }
+

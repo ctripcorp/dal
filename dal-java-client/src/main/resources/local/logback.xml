@@ -15,10 +15,19 @@
 		</encoder>
 	</appender>
 
- 
-
+	<!--Output to central logging -->
+	<appender name="CentralLogging"
+		class="com.ctrip.freeway.appender.CentralLoggingAppender">
+		<appId>920201</appId><!--这是你应用的appId -->
+		<serverIp>192.168.82.58</serverIp><!--这是centralLogging的地址，这是uat环境的，如果是生产环境，请换成相应的地址:collector.logging.sh.ctriptravel.com -->
+		<serverPort>63100</serverPort><!--central logging端口号 -->
+	</appender>
+	<root level="INFO">
+		<appender-ref ref="CentralLogging" />
+	</root>
+	<!-- 
 	<root level="info">
 		<appender-ref ref="stdout" />
 	</root>
-
+ 	-->
 </configuration>

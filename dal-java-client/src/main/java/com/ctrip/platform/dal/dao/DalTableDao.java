@@ -16,10 +16,11 @@ import java.util.Set;
  * @author jhhe
  */
 public final class DalTableDao<T> {
-	public static final String TMPL_SQL_FIND_BY_PK = "SELECT %s FROM %s WHERE %s";
+	public static final String TMPL_SQL_FIND_BY_PK = "SELECT * FROM %s WHERE %s";
 	public static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
 	public static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
 	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
+	public static final String GENERATED_KEY = "GENERATED_KEY";
 	
 	private static final String COLUMN_SEPARATOR = ", ";
 	private static final String PLACE_HOLDER = "?";
@@ -44,14 +45,25 @@ public final class DalTableDao<T> {
 	
 	public T queryByPk(Number id, DalHints hints)
 			throws SQLException {
-//		queryDao.q
-		return null;
+		if(parser.getPrimaryKeyNames().length != 1)
+			throw new SQLException("The primary key of this table is consists of more than one column");
+
+		StatementParameters parameters = new StatementParameters();
+		parameters.set(1, getColumnType(parser.getPrimaryKeyNames()[0]), id);
+		
+		String selectSql = String.format(TMPL_SQL_FIND_BY_PK, parser.getTableName(), pkSql);
+
+		return queryDao.queryForObject(selectSql, parameters, hints, parser);
 	}
 
 	public T queryByPk(T pk, DalHints hints)
 			throws SQLException {
-//		queryDao.q
-		return null;
+		StatementParameters parameters = new StatementParameters();
+		addParameters(parameters, parser.getPrimaryKeys(pk));
+		
+		String selectSql = String.format(TMPL_SQL_FIND_BY_PK, parser.getTableName(), pkSql);
+
+		return queryDao.queryForObject(selectSql, parameters, hints, parser);
 	}
 	
 	public List<T> queryLike(T pk, DalHints hints)
@@ -61,22 +73,26 @@ public final class DalTableDao<T> {
 	
 	public List<T> query(String whereClause, StatementParameters parameters, DalHints hints)
 			throws SQLException {
-		return null;
+		String selectSql = String.format(TMPL_SQL_FIND_BY_PK, parser.getTableName(), whereClause);
+		return queryDao.query(selectSql, parameters, hints, parser);
 	}
 	
 	public T queryFirst(String whereClause, StatementParameters parameters, DalHints hints)
 			throws SQLException {
-		return null;
+		String selectSql = String.format(TMPL_SQL_FIND_BY_PK, parser.getTableName(), whereClause);
+		return queryDao.queryFisrt(selectSql, parameters, hints, parser);
 	}
 
-	public T queryTop(String whereClause, StatementParameters parameters, DalHints hints, int count)
+	public List<T> queryTop(String whereClause, StatementParameters parameters, DalHints hints, int count)
 			throws SQLException {
-		return null;
+		String selectSql = String.format(TMPL_SQL_FIND_BY_PK, parser.getTableName(), whereClause);
+		return queryDao.queryTop(selectSql, parameters, hints, parser, count);
 	}
 	
-	public T queryFrom(String whereClause, StatementParameters parameters, DalHints hints, int start, int count)
+	public List<T> queryFrom(String whereClause, StatementParameters parameters, DalHints hints, int start, int count)
 			throws SQLException {
-		return null;
+		String selectSql = String.format(TMPL_SQL_FIND_BY_PK, parser.getTableName(), whereClause);
+		return queryDao.queryFrom(selectSql, parameters, hints, parser, start, count);
 	}
 	
 	/**
@@ -98,7 +114,8 @@ public final class DalTableDao<T> {
 		// Try to insert one by one
 		for(T pojo: daoPojos) {
 			Map<String, ?> fields = parser.getFields(pojo);
-			String insertSql = buildInsertSql(fields.keySet());
+			// TODO revise and improve performance
+			String insertSql = buildInsertSql(fields);
 
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
@@ -151,12 +168,19 @@ public final class DalTableDao<T> {
 	private void addParameters(StatementParameters parameters, Map<String, ?> entries) {
 		int index = parameters.size() + 1;
 		for(Map.Entry<String, ?> entry: entries.entrySet()) {
-			parameters.set(index, getColumnType(entry.getKey()), entry.getValue());
+			parameters.set(index++, getColumnType(entry.getKey()), entry.getValue());
 		}
 	}
 	
 	private int getColumnType(String columnName) {
 		return columnTypes.get(columnName);
+	}
+	
+	private void filterNullFileds(Map<String, ?> fields) {
+		for(String columnName: parser.getColumnNames()) {
+			if(fields.get(columnName) == null)
+				fields.remove(columnName);
+		}
 	}
 	
 	private String initSql() {
@@ -178,9 +202,11 @@ public final class DalTableDao<T> {
 		return String.format(template, (Object[])parser.getPrimaryKeyNames());
 	}
 	
-	private String buildInsertSql(Collection<String> columns) {
-		String cloumns = combine(columns, COLUMN_SEPARATOR);
-		String values = combine(PLACE_HOLDER, columns.size(), COLUMN_SEPARATOR);
+	private String buildInsertSql(Map<String, ?> fields) {
+		filterNullFileds(fields);
+		Set<String> remainedColumns = fields.keySet();
+		String cloumns = combine(remainedColumns, COLUMN_SEPARATOR);
+		String values = combine(PLACE_HOLDER, remainedColumns.size(), COLUMN_SEPARATOR);
 		
 		return String.format(TMPL_SQL_INSERT, parser.getTableName(), cloumns, values);
 	}

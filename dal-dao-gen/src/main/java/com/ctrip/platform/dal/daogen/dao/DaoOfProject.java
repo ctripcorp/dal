@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.dao;
 
 import java.sql.ResultSet;
@@ -102,5 +103,4 @@ public class DaoOfProject {
 			return -1;
 		}
 	}
-
 }

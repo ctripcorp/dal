@@ -1,10 +1,9 @@
 
 package ${pojoHost.getDaoNamespace()};
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
+#foreach( $field in ${parserHost.getImports()} )
+import ${field};
+#end
 
 import com.ctrip.platform.dal.dao.DalParser;
 
@@ -13,16 +12,33 @@ public class ${parserHost.getClassName()} implements DalParser<${pojoHost.getCla
 	public static final String TABLE_NAME = "${parserHost.getTableName()}";
 	private static final String[] COLUMNS = new String[]{
 #foreach( $field in ${pojoHost.getFields()} )
-$tab$tab"${field.getName()}"#if($foreach.count != $fields.size()),${newline}#end
+		"${field.getName()}",
+#end
+	};
+	
+	private static final String[] PRIMARY_KEYS = new String[]{
+#foreach( $field in ${pojoHost.getFields()} )
+#if($field.isPrimary())
+		"${field.getName()}",
+#end
+#end
+	};
+	
+	private static final int[] COLUMN_TYPES = new int[]{
+#foreach( $field in ${pojoHost.getFields()} )
+		${field.getDataType()},
 #end
 	};
 	
 	@Override
 	public ${pojoHost.getClassName()} map(ResultSet rs, int rowNum) throws SQLException {
-		${pojoHost.getClassName()} pojo = new ${pojoHost.getClassName()};
+		${pojoHost.getClassName()} pojo = new ${pojoHost.getClassName()}();
+		
 #foreach( $field in ${pojoHost.getFields()} )
-${tab}${tab}pojo.set${field.getName()}(rs.get$WordUtils.capitalize($field.getType())("${field.getName()}"));
+		pojo.set${field.getName()}((${field.getJavaClass().getSimpleName()})rs.getObject("${field.getName()}"));
+##${tab}${tab}pojo.set${field.getName()}(rs.get$WordUtils.capitalize($field.getType())("${field.getName()}"));
 #end
+
 		return pojo;
 	}
 
@@ -42,22 +58,18 @@ ${tab}${tab}pojo.set${field.getName()}(rs.get$WordUtils.capitalize($field.getTyp
 	}
 
 	@Override
-	public Map<String, ?> getFields(${pojoHost.getClassName()} pojo) {
-		Map<String, Object> map = new HashMap<String, Object>();
-#foreach( $field in ${pojoHost.getFields()} )
-		map.put("${field.getName()}", pojo.get${field.getName()}());
-#end
-		return map;
+	public String[] getPrimaryKeyNames() {
+		return PRIMARY_KEYS;
+	}
+	
+	@Override
+	public int[] getColumnTypes() {
+		return COLUMN_TYPES;
 	}
 
 	@Override
-	public boolean hasIdentityColumn() {
+	public boolean isAutoIncrement() {
 		return ${parserHost.isHasIdentity()};
-	}
-
-	@Override
-	public String getIdentityColumnName() {
-		return #if($parserHost.isHasIdentity())"${parserHost.getIdentityColumnName()}"#{else}null#end;
 	}
 
 	@Override
@@ -66,11 +78,26 @@ ${tab}${tab}pojo.set${field.getName()}(rs.get$WordUtils.capitalize($field.getTyp
 	}
 
 	@Override
-	public Map<String, ?> getPk(${pojoHost.getClassName()} pojo) {
-		Map<String, Object> map = new HashMap<String, Object>();
+	public Map<String, ?> getPrimaryKeys(${pojoHost.getClassName()} pojo) {
+		Map<String, Object> primaryKeys = new LinkedHashMap<String, Object>();
+		
 #foreach( $field in ${pojoHost.getFields()} )
-#if($field.isPrimary())${tab}${tab}map.put("${field.getName()}",pojo.get${field.getName()}());#end
+#if($field.isPrimary())
+		primaryKeys.put("${field.getName()}", pojo.get${field.getName()}());
 #end
-${newline}${tab}${tab}return map;
+#end
+
+		return primaryKeys;
+	}
+
+	@Override
+	public Map<String, ?> getFields(${pojoHost.getClassName()} pojo) {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+		
+#foreach( $field in ${pojoHost.getFields()} )
+		map.put("${field.getName()}", pojo.get${field.getName()}());
+#end
+
+		return map;
 	}
 }

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.tester;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -360,6 +361,16 @@ public class DirectClientDaoTest {
 		}
 	}
 
+	public void testType(String db, String table) {
+		try {
+			DalClient client = DalClientFactory.getClient(db);
+
+			client.query("select * from " + table, parameters, hints, new ColumnTypeExtractor());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void main(String[] args) {
 		Configuration.addResource("conf.properties");
 		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
@@ -371,6 +382,7 @@ public class DirectClientDaoTest {
 		
 		DirectClientDaoTest test = new DirectClientDaoTest();
 		
+		test.testType("dao_test", "ManyTypes");
 //		test.test();
 //		test.test2();
 //		test.testAutoIncrement();
@@ -379,9 +391,8 @@ public class DirectClientDaoTest {
 //		test.testCommand();
 //		test.testSP();
 //		test.testSPInOut();
-		// TODO check negative case, exception and transaction rollback
 //		test.testConnectionException();
-		test.testTransactionException();
+//		test.testTransactionException();
 		System.exit(0);
 	}
 }

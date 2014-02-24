@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.dao;
 
 import java.sql.ResultSet;
@@ -69,5 +70,6 @@ public class DaoByFreeSql {
 		return this.jdbcTemplate.update("delete from task_sql where id=?",
 				task.getId());
 	}
+
 
 }

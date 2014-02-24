@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -24,7 +25,7 @@ namespace ${host.getNameSpaceDao()}
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
 #foreach($p in $host.getSpParams())
-                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalize($p.getName().replace("@",""))}});
+                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalizeFully($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
@@ -32,7 +33,7 @@ namespace ${host.getNameSpaceDao()}
 
 #foreach ($p in $host.getSpParams())
 #if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
-                ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalize($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
+                ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalizeFully($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
 #end
 #end
                 return (int)parameters["@return"].Value;

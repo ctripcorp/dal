@@ -7,6 +7,8 @@ public class FieldMeta {
 	//指Java或者CSharp的数据类型
 	private String type;
 	
+	private Class javaClass;
+
 	//指对应的数据库类型，如varchar
 	private String dbType;
 	
@@ -105,5 +107,12 @@ public class FieldMeta {
 	}
 	
 	
+	public Class getJavaClass() {
+		return javaClass;
+	}
+
+	public void setJavaClass(Class javaClass) {
+		this.javaClass = javaClass;
+	}
 
 }

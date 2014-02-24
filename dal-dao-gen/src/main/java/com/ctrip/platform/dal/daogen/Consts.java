@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen;
 
 import java.util.ArrayList;
@@ -37,3 +38,4 @@ public class Consts {
 	
 
 }
+

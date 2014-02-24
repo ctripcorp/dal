@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.pojo;
 
 public class GenTaskAbstract implements GenTask {

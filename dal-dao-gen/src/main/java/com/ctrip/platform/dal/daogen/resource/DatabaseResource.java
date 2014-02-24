@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.sql.Connection;

@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.utils;
 
 import java.sql.ResultSet;

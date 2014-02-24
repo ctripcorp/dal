@@ -47,7 +47,7 @@ public class DalDirectClient implements DalClient {
 		
 		try {
 			conn = getConnection(hints, SELECTE);
-			
+
 			statement = createPreparedStatement(conn, sql, parameters, hints);
 			rs = statement.executeQuery();
 			

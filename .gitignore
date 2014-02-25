@@ -1,9 +1,5 @@
 #Other nosense Folders(only apply on gawu's machine)
 
-JavaProjectCleaner/
-Netty101/
-.metadata/
-
 #Java related ignore
 *.class
 *.jar

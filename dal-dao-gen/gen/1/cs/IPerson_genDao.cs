@@ -8,74 +8,74 @@ namespace com.ctrip.platform.tools.Interface.IDao
 	{
 
 	       /// <summary>
-        ///  æ’å…¥Person_gen
+        ///  ²åÈëPerson_gen
         /// </summary>
-        /// <param name="person_gen">Person_genå®ä½“å¯¹è±¡</param>
-        /// <returns>æ–°å¢çš„ä¸»é”®</returns>
+        /// <param name="person_gen">Person_genÊµÌå¶ÔÏó</param>
+        /// <returns>ĞÂÔöµÄÖ÷¼ü</returns>
         int InsertPerson_gen(Person_gen person_gen);
 
         /// <summary>
-        /// ä¿®æ”¹Person_gen
+        /// ĞŞ¸ÄPerson_gen
         /// </summary>
-        /// <param name="person_gen">Person_genå®ä½“å¯¹è±¡</param>
-        /// <returns>çŠ¶æ€ä»£ç </returns>
+        /// <param name="person_gen">Person_genÊµÌå¶ÔÏó</param>
+        /// <returns>×´Ì¬´úÂë</returns>
         int UpdatePerson_gen(Person_gen person_gen);
 
         /// <summary>
-        /// åˆ é™¤Person_gen
+        /// É¾³ıPerson_gen
         /// </summary>
-        /// <param name="person_gen">Person_genå®ä½“å¯¹è±¡</param>
-        /// <returns>çŠ¶æ€ä»£ç </returns>
+        /// <param name="person_gen">Person_genÊµÌå¶ÔÏó</param>
+        /// <returns>×´Ì¬´úÂë</returns>
         int DeletePerson_gen(Person_gen person_gen);
 
 
         /// <summary>
-        /// æ ¹æ®ä¸»é”®è·å–Person_genä¿¡æ¯
+        /// ¸ù¾İÖ÷¼ü»ñÈ¡Person_genĞÅÏ¢
         /// </summary>
         /// <param name="iD"></param>
-        /// <returns>Person_genä¿¡æ¯</returns>
-        Person_gen FindByPk(int iD);
+        /// <returns>Person_genĞÅÏ¢</returns>
+        Person_gen FindByPk(uint iD);
 
         /// <summary>
-        /// è·å–æ‰€æœ‰Person_genä¿¡æ¯
+        /// »ñÈ¡ËùÓĞPerson_genĞÅÏ¢
         /// </summary>
-        /// <returns>Person_genåˆ—è¡¨</returns>
+        /// <returns>Person_genÁĞ±í</returns>
         IList<Person_gen> GetAll();
 
         /// <summary>
-        ///  æ‰¹é‡æ’å…¥Person_gen
+        ///  ÅúÁ¿²åÈëPerson_gen
         /// </summary>
-        /// <param name="person_gen">Person_genå®ä½“å¯¹è±¡åˆ—è¡¨</param>
-        /// <returns>çŠ¶æ€ä»£ç </returns>
+        /// <param name="person_gen">Person_genÊµÌå¶ÔÏóÁĞ±í</param>
+        /// <returns>×´Ì¬´úÂë</returns>
         int BulkInsertPeople(IList<Person_gen> person_genList);
 
         /// <summary>
-        ///  æ‰¹é‡æ›´æ–°Person_gen
+        ///  ÅúÁ¿¸üĞÂPerson_gen
         /// </summary>
-        /// <param name="person_gen">Person_genå®ä½“å¯¹è±¡åˆ—è¡¨</param>
-        /// <returns>çŠ¶æ€ä»£ç </returns>
+        /// <param name="person_gen">Person_genÊµÌå¶ÔÏóÁĞ±í</param>
+        /// <returns>×´Ì¬´úÂë</returns>
         int BulkUpdatePeople(IList<Person_gen> person_genList);
 
         /// <summary>
-        ///  æ‰¹é‡åˆ é™¤Person_gen
+        ///  ÅúÁ¿É¾³ıPerson_gen
         /// </summary>
-        /// <param name="person_gen">Person_genå®ä½“å¯¹è±¡åˆ—è¡¨</param>
-        /// <returns>çŠ¶æ€ä»£ç </returns>
+        /// <param name="person_gen">Person_genÊµÌå¶ÔÏóÁĞ±í</param>
+        /// <returns>×´Ì¬´úÂë</returns>
         int BulkDeletePeople(IList<Person_gen> person_genList);
 
         /// <summary>
-        /// å–å¾—æ€»è®°å½•æ•°
+        /// È¡µÃ×Ü¼ÇÂ¼Êı
         /// </summary>
-        /// <returns>è®°å½•æ•°</returns>
+        /// <returns>¼ÇÂ¼Êı</returns>
         long Count();
 
         /// <summary>
-        ///  æ£€ç´¢Person_genï¼Œå¸¦ç¿»é¡µ
+        ///  ¼ìË÷Person_gen£¬´ø·­Ò³
         /// </summary>
-        /// <param name="obj">Person_genå®ä½“å¯¹è±¡æ£€ç´¢æ¡ä»¶</param>
-        /// <param name="pagesize">æ¯é¡µè®°å½•æ•°</param>
-        /// <param name="pageNo">é¡µç </param>
-        /// <returns>æ£€ç´¢ç»“æœ</returns>
+        /// <param name="obj">Person_genÊµÌå¶ÔÏó¼ìË÷Ìõ¼ş</param>
+        /// <param name="pagesize">Ã¿Ò³¼ÇÂ¼Êı</param>
+        /// <param name="pageNo">Ò³Âë</param>
+        /// <returns>¼ìË÷½á¹û</returns>
         IList<Person_gen> GetListByPage(Person_gen obj, int pagesize, int pageNo);
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace com.ctrip.platform.tools.Interface.IDao
         /// </summary>
         /// <param name="iD"></param>
         /// <returns></returns>
-        public IList<Person_gen> GetNameByID(int iD);
+        public IList<Person_gen> GetNameByID(uint iD);
         /// <summary>
         ///  deleteByName
         /// </summary>

@@ -15,10 +15,10 @@ namespace com.ctrip.platform.tools.Dao
         readonly BaseDao baseDao = BaseDaoFactory.CreateBaseDao("");
 
         /// <summary>
-        ///  Ö´ĞĞSPspAPersoni_gen
+        ///  æ‰§è¡ŒSPspAPersoni_gen
         /// </summary>
-        /// <param name="spAPersoni_gen">spAPersoni_genÊµÌå¶ÔÏó</param>
-        /// <returns>Ó°ÏìµÄĞĞÊı</returns>
+        /// <param name="spAPersoni_gen">spAPersoni_genå®ä½“å¯¹è±¡</param>
+        /// <returns>å½±å“çš„è¡Œæ•°</returns>
         public int ExecspAPersoni_gen(spAPersoni_gen spAPersoni_gen)
         {
             try
@@ -37,7 +37,7 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃspAPersoni_genDaoÊ±£¬·ÃÎÊExecspAPersoni_genÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨spAPersoni_genDaoæ—¶ï¼Œè®¿é—®ExecspAPersoni_genæ—¶å‡ºé”™", ex);
             }
 
        }

@@ -22,6 +22,7 @@ public class CSharpTableHost {
 
 	private boolean isTable;
 
+	//spa or sp3
 	private boolean isSpa;
 
 	private boolean hasInsertMethod;

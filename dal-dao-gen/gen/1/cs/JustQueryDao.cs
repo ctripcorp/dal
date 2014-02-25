@@ -27,14 +27,14 @@ namespace com.ctrip.platform.tools.Dao
                 StatementParameterCollection parameters = new StatementParameterCollection();
                 parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value =iD });
                 parameters.Add(new StatementParameter{ Name = "@Name", Direction = ParameterDirection.Input, DbType = DbType.AnsiString, Value =name });
-				//Èç¹ûÖ»ĞèÒªÒ»Ìõ¼ÇÂ¼£¬½¨ÒéÊ¹ÓÃlimit 1»òÕßtop 1£¬²¢Ê¹ÓÃSelectFirstÌá¸ßĞÔÄÜ
+				//å¦‚æœåªéœ€è¦ä¸€æ¡è®°å½•ï¼Œå»ºè®®ä½¿ç”¨limit 1æˆ–è€…top 1ï¼Œå¹¶ä½¿ç”¨SelectFirstæé«˜æ€§èƒ½
 				//return baseDao.SelectFirst<JustQuery>(sql, parameters);
                 return baseDao.SelectList<JustQuery>(sql, parameters);
 
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃJustQueryDaoÊ±£¬·ÃÎÊGetBirthByIDNameÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨JustQueryDaoæ—¶ï¼Œè®¿é—®GetBirthByIDNameæ—¶å‡ºé”™", ex);
             }
         }
 

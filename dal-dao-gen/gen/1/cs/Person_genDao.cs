@@ -11,7 +11,7 @@ using com.ctrip.platform.tools.Interface.IDao;
 namespace com.ctrip.platform.tools.Dao
 {
    /// <summary>
-    /// ¸ü¶àDALFx½Ó¿Ú¹¦ÄÜ£¬Çë²ÎÔÄDALFx Confluence£¬µØÖ·£º
+    /// æ›´å¤šDALFxæ¥å£åŠŸèƒ½ï¼Œè¯·å‚é˜…DALFx Confluenceï¼Œåœ°å€ï¼š
     /// http://conf.ctripcorp.com/display/ARCH/Dal+Fx+API
     /// </summary>
     public partial class Person_genDao : IPerson_genDao
@@ -19,10 +19,10 @@ namespace com.ctrip.platform.tools.Dao
         readonly BaseDao baseDao = BaseDaoFactory.CreateBaseDao("PerformanceTest");
         
         /// <summary>
-        ///  ²åÈëPerson_gen
+        ///  æ’å…¥Person_gen
         /// </summary>
-        /// <param name="person_gen">Person_genÊµÌå¶ÔÏó</param>
-        /// <returns>ĞÂÔöµÄÖ÷¼ü</returns>
+        /// <param name="person_gen">Person_genå®ä½“å¯¹è±¡</param>
+        /// <returns>æ–°å¢çš„ä¸»é”®</returns>
         public int InsertPerson_gen(Person_gen person_gen)
         {
             try
@@ -34,15 +34,15 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃPerson_genÊ±£¬·ÃÎÊInsertÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨Person_genæ—¶ï¼Œè®¿é—®Insertæ—¶å‡ºé”™", ex);
             }
         }
         
         /// <summary>
-        /// ĞŞ¸ÄPerson_gen
+        /// ä¿®æ”¹Person_gen
         /// </summary>
-        /// <param name="person_gen">Person_genÊµÌå¶ÔÏó</param>
-        /// <returns>×´Ì¬´úÂë</returns>
+        /// <param name="person_gen">Person_genå®ä½“å¯¹è±¡</param>
+        /// <returns>çŠ¶æ€ä»£ç </returns>
         public int UpdatePerson_gen(Person_gen person_gen)
         {
             try
@@ -54,15 +54,15 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃPerson_genÊ±£¬·ÃÎÊUpdateÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨Person_genæ—¶ï¼Œè®¿é—®Updateæ—¶å‡ºé”™", ex);
             }
         }
         
         /// <summary>
-        /// É¾³ıPerson_gen
+        /// åˆ é™¤Person_gen
         /// </summary>
-        /// <param name="person_gen">Person_genÊµÌå¶ÔÏó</param>
-        /// <returns>×´Ì¬´úÂë</returns>
+        /// <param name="person_gen">Person_genå®ä½“å¯¹è±¡</param>
+        /// <returns>çŠ¶æ€ä»£ç </returns>
         public int DeletePerson_gen(Person_gen person_gen)
         {
             try
@@ -74,17 +74,17 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃPerson_genÊ±£¬·ÃÎÊDeleteÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨Person_genæ—¶ï¼Œè®¿é—®Deleteæ—¶å‡ºé”™", ex);
             }
         }
         
         
 
         /// <summary>
-        /// ¸ù¾İÖ÷¼ü»ñÈ¡Person_genĞÅÏ¢
+        /// æ ¹æ®ä¸»é”®è·å–Person_genä¿¡æ¯
         /// </summary>
         /// <param name="iD"></param>
-        /// <returns>Person_genĞÅÏ¢</returns>
+        /// <returns>Person_genä¿¡æ¯</returns>
         public Person_gen FindByPk(uint iD )
         {
             try
@@ -93,14 +93,14 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃPerson_genDaoÊ±£¬·ÃÎÊFindByPkÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨Person_genDaoæ—¶ï¼Œè®¿é—®FindByPkæ—¶å‡ºé”™", ex);
             }
         }
 
         /// <summary>
-        /// »ñÈ¡ËùÓĞPerson_genĞÅÏ¢
+        /// è·å–æ‰€æœ‰Person_genä¿¡æ¯
         /// </summary>
-        /// <returns>Person_genÁĞ±í</returns>
+        /// <returns>Person_genåˆ—è¡¨</returns>
         public IList<Person_gen> GetAll()
         {
             try
@@ -109,14 +109,14 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃPerson_genDaoÊ±£¬·ÃÎÊGetAllÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨Person_genDaoæ—¶ï¼Œè®¿é—®GetAllæ—¶å‡ºé”™", ex);
             }
         }
         
         /// <summary>
-        /// È¡µÃ×Ü¼ÇÂ¼Êı
+        /// å–å¾—æ€»è®°å½•æ•°
         /// </summary>
-        /// <returns>¼ÇÂ¼Êı</returns>
+        /// <returns>è®°å½•æ•°</returns>
         public long Count()
         {
             try
@@ -129,17 +129,17 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃPerson_genDaoÊ±£¬·ÃÎÊCountÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨Person_genDaoæ—¶ï¼Œè®¿é—®Countæ—¶å‡ºé”™", ex);
             }
         }
         
         /// <summary>
-        ///  ¼ìË÷Person_gen£¬´ø·­Ò³
+        ///  æ£€ç´¢Person_genï¼Œå¸¦ç¿»é¡µ
         /// </summary>
-        /// <param name="obj">Person_genÊµÌå¶ÔÏó¼ìË÷Ìõ¼ş</param>
-        /// <param name="pagesize">Ã¿Ò³¼ÇÂ¼Êı</param>
-        /// <param name="pageNo">Ò³Âë</param>
-        /// <returns>¼ìË÷½á¹û</returns>
+        /// <param name="obj">Person_genå®ä½“å¯¹è±¡æ£€ç´¢æ¡ä»¶</param>
+        /// <param name="pagesize">æ¯é¡µè®°å½•æ•°</param>
+        /// <param name="pageNo">é¡µç </param>
+        /// <returns>æ£€ç´¢ç»“æœ</returns>
         public IList<Person_gen> GetListByPage(Person_gen obj, int pagesize, int pageNo)
         {
              try
@@ -148,26 +148,26 @@ namespace com.ctrip.platform.tools.Dao
                 StringBuilder sbSql = new StringBuilder(200);
 
                 
-                 //¼ÆËãROWNUM
+                 //è®¡ç®—ROWNUM
                 int fromRownum = (pageNo - 1) * pagesize + 1;
                 int endRownum = pagesize * pageNo;
-                 sbSql.Append("WITH CTE AS ("); //WITH CTE ¿ªÊ¼
+                 sbSql.Append("WITH CTE AS ("); //WITH CTE å¼€å§‹
                 sbSql.Append("select row_number() over(order by ID desc ) as rownum, ");
                 sbSql.Append(@"ID, Name, Age, Birth from Person (nolock) ");
 
-                //°üº¬²éÑ¯Ìõ¼ş
+                //åŒ…å«æŸ¥è¯¢æ¡ä»¶
                 //StringBuilder whereCondition = new StringBuilder();
                 //if (!string.IsNullOrEmpty(obj.Name))
                 //{
-                //    //ÈËÃû
+                //    //äººå
                 //    whereCondition.Append("Where Name like @Name ");
                 //    dic.AddInParameter("@Name", DbType.String, "%" + obj.Name + "%");
                 //}
                 //sbSql.Append(whereCondition);
 
-                sbSql.Append(")"); //WITH CTE ½áÊø
+                sbSql.Append(")"); //WITH CTE ç»“æŸ
 
-                // ÓÃ CTE Íê³É·ÖÒ³
+                // ç”¨ CTE å®Œæˆåˆ†é¡µ
                 sbSql.Append(@"select ID, Name, Age, Birth from CTE Where rownum between @from and @end");
                 dic.AddInParameter("@from", DbType.Int32, fromRownum);
                 dic.AddInParameter("@end", DbType.Int32, endRownum);
@@ -177,15 +177,15 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃPerson_genDaoÊ±£¬·ÃÎÊGetListByPageÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨Person_genDaoæ—¶ï¼Œè®¿é—®GetListByPageæ—¶å‡ºé”™", ex);
             }
         }
 
         /// <summary>
-        ///  ×ª»»ListÎªDataTable
+        ///  è½¬æ¢Listä¸ºDataTable
         /// </summary>
-        /// <param name="person_genlist">Person_genÊµÌå¶ÔÏóÁĞ±í</param>
-        /// <param name="isInsert">Person_genÊµÌå¶ÔÏóÁĞ±í</param>
+        /// <param name="person_genlist">Person_genå®ä½“å¯¹è±¡åˆ—è¡¨</param>
+        /// <param name="isInsert">Person_genå®ä½“å¯¹è±¡åˆ—è¡¨</param>
         /// <returns>DataTable</returns>
         private DataTable ToDataTable(IList<Person_gen> person_genList , bool insert)
         {
@@ -210,10 +210,10 @@ namespace com.ctrip.platform.tools.Dao
 
 
         /// <summary>
-        ///  ÅúÁ¿²åÈëPerson_gen
+        ///  æ‰¹é‡æ’å…¥Person_gen
         /// </summary>
-        /// <param name="person_gen">Person_genÊµÌå¶ÔÏóÁĞ±í</param>
-        /// <returns>×´Ì¬´úÂë</returns>
+        /// <param name="person_gen">Person_genå®ä½“å¯¹è±¡åˆ—è¡¨</param>
+        /// <returns>çŠ¶æ€ä»£ç </returns>
         public int BulkInsertPeople(IList<Person_gen> person_genList)
         {
             try
@@ -230,15 +230,15 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃPerson_genDaoÊ±£¬·ÃÎÊBulkInsertÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨Person_genDaoæ—¶ï¼Œè®¿é—®BulkInsertæ—¶å‡ºé”™", ex);
             }
         }
 
         /// <summary>
-        ///  ÅúÁ¿ĞŞ¸ÄPerson_gen
+        ///  æ‰¹é‡ä¿®æ”¹Person_gen
         /// </summary>
-        /// <param name="person_gen">Person_genÊµÌå¶ÔÏóÁĞ±í</param>
-        /// <returns>×´Ì¬´úÂë</returns>
+        /// <param name="person_gen">Person_genå®ä½“å¯¹è±¡åˆ—è¡¨</param>
+        /// <returns>çŠ¶æ€ä»£ç </returns>
         public int BulkUpdatePeople(IList<Person_gen> person_genList)
         {
             try
@@ -255,15 +255,15 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃPerson_genDaoÊ±£¬·ÃÎÊBulkUpdateÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨Person_genDaoæ—¶ï¼Œè®¿é—®BulkUpdateæ—¶å‡ºé”™", ex);
             }
         }
 
         /// <summary>
-        ///  ÅúÁ¿É¾³ıPerson_gen
+        ///  æ‰¹é‡åˆ é™¤Person_gen
         /// </summary>
-        /// <param name="person_gen">Person_genÊµÌå¶ÔÏóÁĞ±í</param>
-        /// <returns>×´Ì¬´úÂë</returns>
+        /// <param name="person_gen">Person_genå®ä½“å¯¹è±¡åˆ—è¡¨</param>
+        /// <returns>çŠ¶æ€ä»£ç </returns>
         public int BulkDeletePeople(IList<Person_gen> person_genList)
         {
             try
@@ -280,7 +280,7 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃPerson_genDaoÊ±£¬·ÃÎÊBulkDeleteÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨Person_genDaoæ—¶ï¼Œè®¿é—®BulkDeleteæ—¶å‡ºé”™", ex);
             }
         }
 
@@ -302,7 +302,7 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃPerson_genDaoÊ±£¬·ÃÎÊGetNameByIDÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨Person_genDaoæ—¶ï¼Œè®¿é—®GetNameByIDæ—¶å‡ºé”™", ex);
             }
         }
 		/// <summary>
@@ -323,7 +323,7 @@ namespace com.ctrip.platform.tools.Dao
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃPerson_genDaoÊ±£¬·ÃÎÊdeleteByNameÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨Person_genDaoæ—¶ï¼Œè®¿é—®deleteByNameæ—¶å‡ºé”™", ex);
             }
         }
         

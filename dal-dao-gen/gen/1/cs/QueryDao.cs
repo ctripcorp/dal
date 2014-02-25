@@ -25,14 +25,14 @@ namespace com.ctrip.platform.tools.Dao
             	string sql = "select id, driver, server,port,domain, user,password, db_type from daogen.data_source WHERE id = ?";
                 StatementParameterCollection parameters = new StatementParameterCollection();
                 parameters.Add(new StatementParameter{ Name = "@1", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value =1 });
-				//Èç¹ûÖ»ĞèÒªÒ»Ìõ¼ÇÂ¼£¬½¨ÒéÊ¹ÓÃlimit 1»òÕßtop 1£¬²¢Ê¹ÓÃSelectFirstÌá¸ßĞÔÄÜ
+				//å¦‚æœåªéœ€è¦ä¸€æ¡è®°å½•ï¼Œå»ºè®®ä½¿ç”¨limit 1æˆ–è€…top 1ï¼Œå¹¶ä½¿ç”¨SelectFirstæé«˜æ€§èƒ½
 				//return baseDao.SelectFirst<Query>(sql, parameters);
                 return baseDao.SelectList<Query>(sql, parameters);
 
             }
             catch (Exception ex)
             {
-                throw new DalException("µ÷ÓÃQueryDaoÊ±£¬·ÃÎÊgetServerByIdÊ±³ö´í", ex);
+                throw new DalException("è°ƒç”¨QueryDaoæ—¶ï¼Œè®¿é—®getServerByIdæ—¶å‡ºé”™", ex);
             }
         }
 

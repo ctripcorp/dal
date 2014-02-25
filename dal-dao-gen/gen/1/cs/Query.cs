@@ -11,42 +11,42 @@ namespace com.ctrip.platform.tools.Dao
     public partial class Query
     {
         /// <summary>
-        /// 获取或设置id
+        /// 鑾峰彇鎴栬缃甶d
         /// </summary>
         [Column(Name = "id",Length=11)]
         public uint Id { get; set; }
         /// <summary>
-        /// 获取或设置driver
+        /// 鑾峰彇鎴栬缃甦river
         /// </summary>
         [Column(Name = "driver",Length=255)]
         public string Driver { get; set; }
         /// <summary>
-        /// 获取或设置server
+        /// 鑾峰彇鎴栬缃畇erver
         /// </summary>
         [Column(Name = "server",Length=255)]
         public string Server { get; set; }
         /// <summary>
-        /// 获取或设置port
+        /// 鑾峰彇鎴栬缃畃ort
         /// </summary>
         [Column(Name = "port",Length=11)]
         public uint Port { get; set; }
         /// <summary>
-        /// 获取或设置domain
+        /// 鑾峰彇鎴栬缃甦omain
         /// </summary>
         [Column(Name = "domain",Length=45)]
         public string Domain { get; set; }
         /// <summary>
-        /// 获取或设置user
+        /// 鑾峰彇鎴栬缃畊ser
         /// </summary>
         [Column(Name = "user",Length=255)]
         public string User { get; set; }
         /// <summary>
-        /// 获取或设置password
+        /// 鑾峰彇鎴栬缃畃assword
         /// </summary>
         [Column(Name = "password",Length=255)]
         public string Password { get; set; }
         /// <summary>
-        /// 获取或设置db_type
+        /// 鑾峰彇鎴栬缃甦b_type
         /// </summary>
         [Column(Name = "db_type",Length=45)]
         public string Db_type { get; set; }

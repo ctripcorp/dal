@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.pojo;
 
-public class FieldMeta {
+public class ColumnMetaData {
 	
 	private String name;
 	

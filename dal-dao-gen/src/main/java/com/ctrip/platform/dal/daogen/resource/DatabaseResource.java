@@ -25,7 +25,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
-import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
+import com.ctrip.platform.dal.daogen.pojo.ColumnMetaData;
 import com.ctrip.platform.dal.daogen.pojo.Status;
 import com.ctrip.platform.dal.daogen.pojo.TableSpNames;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
@@ -166,7 +166,7 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("fields")
-	public List<FieldMeta> getFieldNames(@QueryParam("server") int server,
+	public List<ColumnMetaData> getFieldNames(@QueryParam("server") int server,
 			@QueryParam("db_name") String dbName,
 			@QueryParam("table_name") String tableName) {
 
@@ -176,7 +176,7 @@ public class DatabaseResource {
 			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
 		}
 
-		List<FieldMeta> fields = new ArrayList<FieldMeta>();
+		List<ColumnMetaData> fields = new ArrayList<ColumnMetaData>();
 
 		if (ds != null) {
 
@@ -235,7 +235,7 @@ public class DatabaseResource {
 				}
 
 				for (String str : allColumns) {
-					FieldMeta field = new FieldMeta();
+					ColumnMetaData field = new ColumnMetaData();
 
 					field.setName(str);
 					field.setIndexed(indexedColumns.contains(str));

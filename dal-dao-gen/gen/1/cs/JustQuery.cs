@@ -11,7 +11,7 @@ namespace com.ctrip.platform.tools.Dao
     public partial class JustQuery
     {
         /// <summary>
-        /// 获取或设置Birth
+        /// 鑾峰彇鎴栬缃瓸irth
         /// </summary>
         [Column(Name = "Birth",Length=23)]
         public DateTime Birth { get; set; }

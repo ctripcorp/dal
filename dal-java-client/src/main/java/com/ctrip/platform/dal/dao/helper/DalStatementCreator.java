@@ -81,7 +81,7 @@ public class DalStatementCreator {
 	private void registerOutParameters(CallableStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
 			if(parameter.isOutParameter())
-				statement.registerOutParameter(parameter.getIndex(), DbType.getFromDbType(parameter.getDbType()));
+				statement.registerOutParameter(parameter.getIndex(), parameter.getSqlType());
 		}
 	}
 	

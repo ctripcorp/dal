@@ -90,10 +90,6 @@ public class StatementParameter {
 			return builder;
 		}
 		
-		public static Builder set(int index, DbType dbType, Object value) {
-			return set(index, DbType.getFromDbType(dbType), value);
-		}
-		
 		public static Builder registerInOut(int index, int sqlType, String name, Object value) {
 			Builder builder = new Builder();
 			

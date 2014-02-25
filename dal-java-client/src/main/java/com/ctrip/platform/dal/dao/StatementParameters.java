@@ -3,8 +3,6 @@ package com.ctrip.platform.dal.dao;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.ctrip.platform.dal.common.enums.DbType;
-
 public class StatementParameters {
 	private List<StatementParameter> parameters = new LinkedList<StatementParameter>();
 	
@@ -17,11 +15,6 @@ public class StatementParameters {
 		return add(StatementParameter.Builder.set(index, sqlType, value).build());
 	}
 
-	
-	public StatementParameters set(int index, DbType dbType, Object value) {
-		return add(StatementParameter.Builder.set(index, dbType, value).build());
-	}
-	
 	public StatementParameters registerInOut(int index, int sqlType, String name, Object value) {
 		return add(StatementParameter.Builder.registerInOut(index, sqlType, name, value).build());
 	}

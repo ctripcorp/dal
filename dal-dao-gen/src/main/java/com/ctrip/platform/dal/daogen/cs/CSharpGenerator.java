@@ -506,9 +506,9 @@ public class CSharpGenerator extends AbstractGenerator {
 				pojoWriter = new FileWriter(String.format("%s/%s.cs",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
 
-				Velocity.mergeTemplate("templates/SpDAO.cs.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/DAOBySp.cs.tpl", "UTF-8",
 						context, daoWriter);
-				Velocity.mergeTemplate("templates/SpPojo.cs.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/PojoBySp.cs.tpl", "UTF-8",
 						context, pojoWriter);
 			} catch (IOException e) {
 				e.printStackTrace();

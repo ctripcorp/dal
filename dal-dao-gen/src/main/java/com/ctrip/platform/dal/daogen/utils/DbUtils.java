@@ -18,6 +18,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.cs.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
 import com.ctrip.platform.dal.daogen.java.JavaParameterHost;
@@ -285,16 +286,12 @@ public class DbUtils {
 					
 					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
-					host.setType(DbType.getCSharpType(host.getDbType()));
+					host.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType()));
+					host.setIndex(allColumnsRs.getInt("ORDINAL_POSITION"));
 					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
 							.equalsIgnoreCase("YES"));
-					host.setNullable(allColumnsRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
-					// 仅获取String类型的长度
-					if (host.getType().equalsIgnoreCase("string"))
-						host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
-					// COLUMN_SIZE
-					allColumns.add(host);
 					
+					allColumns.add(host);
 				}
 			}
 		} catch (SQLException e) {

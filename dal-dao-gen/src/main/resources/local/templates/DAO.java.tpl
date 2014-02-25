@@ -44,21 +44,10 @@ public class ${host.getPojoClassName()}Dao {
 		client.update(hints, daoPojos);
 	}
 
-	#foreach( $method in $host.getMethods() )
-	#set($parameters = $method.getParameters())
-public #if( $method.getAction() == "select" )ResultSet#{else}int#end ${method.getMethodName()}#[[(]]##foreach($p in $parameters)${p.getJavaClass().getSimpleName()} ${p.getName()}#if($foreach.count != $parameters.size()), #end#end#[[)]]# {
-		StatementParameters parameters = new StatementParameters();
-		#foreach($p in $parameters)
-		parameters.set(${p.getIndex()}, ${p.getSqlType()}, ${p.getName()});
-		#end
-return this.#if( $method.getAction() == "select" )fetch#{else}execute#end("${method.getSpName()}", parameters, null);
-	}
-
-	#end
 
 	private static class ${host.getPojoClassName()}Parser implements DalParser<${host.getPojoClassName()}> {
-		public static final String DATABASE_NAME = "${host.getDb_name()}";
-		public static final String TABLE_NAME = "${host.getTable_name()}";
+		public static final String DATABASE_NAME = "${host.getDbName()}";
+		public static final String TABLE_NAME = "${host.getTableName()}";
 		private static final String[] COLUMNS = new String[]{
 #foreach( $field in ${host.getFields()} )
 			"${field.getName()}",
@@ -75,7 +64,7 @@ return this.#if( $method.getAction() == "select" )fetch#{else}execute#end("${met
 		
 		private static final int[] COLUMN_TYPES = new int[]{
 #foreach( $field in ${host.getFields()} )
-			${field.getDataType()},
+			${field.getSqlType()},
 #end
 		};
 		
@@ -85,7 +74,6 @@ return this.#if( $method.getAction() == "select" )fetch#{else}execute#end("${met
 			
 #foreach( $field in ${host.getFields()} )
 			pojo.set${field.getName()}((${field.getJavaClass().getSimpleName()})rs.getObject("${field.getName()}"));
-##${tab}${tab}pojo.set${field.getName()}(rs.get$WordUtils.capitalize($field.getType())("${field.getName()}"));
 #end
 	
 			return pojo;

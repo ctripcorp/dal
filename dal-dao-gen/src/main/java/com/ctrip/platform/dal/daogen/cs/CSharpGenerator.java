@@ -20,6 +20,8 @@ import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
+import com.ctrip.platform.dal.daogen.java.JavaParameterHost;
+import com.ctrip.platform.dal.daogen.pojo.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.pojo.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.GenTask;
@@ -230,9 +232,14 @@ public class CSharpGenerator extends AbstractGenerator {
 				// 主键及所有列
 				List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
 						tableViewSp.getServer_id(), dbName, table);
-				List<CSharpParameterHost> allColumns = DbUtils
+				List<AbstractParameterHost> allColumnsAbstract = DbUtils
 						.getAllColumnNames(tableViewSp.getServer_id(), dbName,
-								table);
+								table, CurrentLanguage.CSharp);
+				
+				List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
+				for(AbstractParameterHost h : allColumnsAbstract){
+					allColumns.add((CSharpParameterHost)h);
+				}
 
 				List<CSharpParameterHost> primaryKeys = new ArrayList<CSharpParameterHost>();
 				for (CSharpParameterHost h : allColumns) {

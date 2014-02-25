@@ -20,6 +20,8 @@ import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.cs.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
+import com.ctrip.platform.dal.daogen.java.JavaParameterHost;
+import com.ctrip.platform.dal.daogen.pojo.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.StoredProcedure;
 
@@ -162,26 +164,27 @@ public class DbUtils {
 			if (language == 0) {
 				while (spParams.next()) {
 					int paramMode = spParams.getShort("COLUMN_TYPE");
-					
-					if(!validMode.contains(paramMode)){
+
+					if (!validMode.contains(paramMode)) {
 						continue;
 					}
-					
+
 					CSharpParameterHost host = new CSharpParameterHost();
-					DbType dbType = DbType.getDbTypeFromJdbcType(spParams.getInt("DATA_TYPE"));
+					DbType dbType = DbType.getDbTypeFromJdbcType(spParams
+							.getInt("DATA_TYPE"));
 					host.setDbType(dbType);
-					
-					if(paramMode == DatabaseMetaData.procedureColumnIn){
+
+					if (paramMode == DatabaseMetaData.procedureColumnIn) {
 						host.setDirection(ParameterDirection.Input);
-					}else if(paramMode == DatabaseMetaData.procedureColumnInOut){
+					} else if (paramMode == DatabaseMetaData.procedureColumnInOut) {
 						host.setDirection(ParameterDirection.InputOutput);
-					}else{
+					} else {
 						host.setDirection(ParameterDirection.Output);
 					}
-					
+
 					host.setName(spParams.getString("COLUMN_NAME"));
 					host.setType(DbType.getCSharpType(host.getDbType()));
-					
+
 					parameters.add(host);
 				}
 			}
@@ -194,14 +197,16 @@ public class DbUtils {
 		return parameters;
 
 	}
-	
+
 	/**
 	 * 由调用者负责Connection的生命周期！！！！
+	 * 
 	 * @param connection
 	 * @return
 	 */
-	public static List<String> getPrimaryKeyNames(int server, String dbName, String tableName){
-		
+	public static List<String> getPrimaryKeyNames(int server, String dbName,
+			String tableName) {
+
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
 
 		if (ds == null) {
@@ -210,14 +215,14 @@ public class DbUtils {
 		}
 
 		Connection connection = null;
-		
+
 		// 获取所有主键
 		ResultSet primaryKeyRs = null;
 		List<String> primaryKeys = new ArrayList<String>();
 		try {
 			connection = ds.getConnection();
-			primaryKeyRs = connection.getMetaData().getPrimaryKeys(
-					dbName, null, tableName);
+			primaryKeyRs = connection.getMetaData().getPrimaryKeys(dbName,
+					null, tableName);
 
 			while (primaryKeyRs.next()) {
 				primaryKeys.add(primaryKeyRs.getString("COLUMN_NAME"));
@@ -228,16 +233,18 @@ public class DbUtils {
 			JdbcUtils.closeResultSet(primaryKeyRs);
 			JdbcUtils.closeConnection(connection);
 		}
-		
+
 		return primaryKeys;
 	}
-	
+
 	/**
 	 * 由调用者负责Connection的生命周期！！！！
+	 * 
 	 * @param connection
 	 * @return
 	 */
-	public static List<CSharpParameterHost> getAllColumnNames(int server, String dbName, String tableName){
+	public static List<AbstractParameterHost> getAllColumnNames(int server,
+			String dbName, String tableName, CurrentLanguage language) {
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
 
 		if (ds == null) {
@@ -246,27 +253,49 @@ public class DbUtils {
 		}
 
 		Connection connection = null;
-		
+
 		// 获取所有列
 		ResultSet allColumnsRs = null;
-		List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
+		List<AbstractParameterHost> allColumns = new ArrayList<AbstractParameterHost>();
 		try {
 			connection = ds.getConnection();
-			allColumnsRs = connection.getMetaData().getColumns(dbName,
-					null, tableName, null);
-			while (allColumnsRs.next()) {
-				CSharpParameterHost host = new CSharpParameterHost();
-				DbType dbType = DbType.getDbTypeFromJdbcType(allColumnsRs.getInt("DATA_TYPE"));
-				host.setDbType(dbType);
-				host.setName(allColumnsRs.getString("COLUMN_NAME"));
-				host.setType(DbType.getCSharpType(host.getDbType()));
-				host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
-				host.setNullable(allColumnsRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
-				//仅获取String类型的长度
-				if(host.getType().equalsIgnoreCase("string"))
-					host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
-				//COLUMN_SIZE
-				allColumns.add(host);
+			allColumnsRs = connection.getMetaData().getColumns(dbName, null,
+					tableName, null);
+
+			if (language == CurrentLanguage.CSharp) {
+				while (allColumnsRs.next()) {
+					CSharpParameterHost host = new CSharpParameterHost();
+					DbType dbType = DbType.getDbTypeFromJdbcType(allColumnsRs
+							.getInt("DATA_TYPE"));
+					host.setDbType(dbType);
+					host.setName(allColumnsRs.getString("COLUMN_NAME"));
+					host.setType(DbType.getCSharpType(host.getDbType()));
+					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
+							.equalsIgnoreCase("YES"));
+					host.setNullable(allColumnsRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
+					// 仅获取String类型的长度
+					if (host.getType().equalsIgnoreCase("string"))
+						host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
+					// COLUMN_SIZE
+					allColumns.add(host);
+				}
+			}else if(language == CurrentLanguage.Java){
+				while (allColumnsRs.next()) {
+					JavaParameterHost host = new JavaParameterHost();
+					
+					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
+					host.setName(allColumnsRs.getString("COLUMN_NAME"));
+					host.setType(DbType.getCSharpType(host.getDbType()));
+					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
+							.equalsIgnoreCase("YES"));
+					host.setNullable(allColumnsRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
+					// 仅获取String类型的长度
+					if (host.getType().equalsIgnoreCase("string"))
+						host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
+					// COLUMN_SIZE
+					allColumns.add(host);
+					
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -274,20 +303,21 @@ public class DbUtils {
 			JdbcUtils.closeResultSet(allColumnsRs);
 			JdbcUtils.closeConnection(connection);
 		}
-		
+
 		return allColumns;
 	}
-	
+
 	/**
 	 * 测试查询SQL是否合法
+	 * 
 	 * @param server
 	 * @param dbName
 	 * @param sql
 	 * @param params
 	 * @return
 	 */
-	public static ResultSetMetaData testAQuerySql(int server, String dbName, String sql,
-			String params){
+	public static ResultSetMetaData testAQuerySql(int server, String dbName,
+			String sql, String params) {
 		String[] parameters = params.split(",");
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
@@ -300,11 +330,11 @@ public class DbUtils {
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
-			
+
 			String replacedSql = sql.replaceAll("[@:]\\w+", "?");
-			
+
 			connection = ds.getConnection();
-			
+
 			connection.setCatalog(dbName);
 
 			PreparedStatement ps = connection.prepareStatement(replacedSql);
@@ -312,18 +342,17 @@ public class DbUtils {
 			int index = 0;
 			for (String param : parameters) {
 				String[] tuple = param.split("_");
-				
-				try{
+
+				try {
 					index = Integer.valueOf(tuple[0]);
-				}catch(NumberFormatException ex){
+				} catch (NumberFormatException ex) {
 					index++;
 				}
-				ps.setObject(index, tuple[2],
-						Integer.valueOf(tuple[1]));
+				ps.setObject(index, tuple[2], Integer.valueOf(tuple[1]));
 			}
 
 			rs = ps.executeQuery();
-			
+
 			return rs.getMetaData();
 
 		} catch (SQLException e) {
@@ -334,7 +363,7 @@ public class DbUtils {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
 		}
-		
+
 		return null;
 	}
 

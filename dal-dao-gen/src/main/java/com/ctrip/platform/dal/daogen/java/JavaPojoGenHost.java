@@ -6,7 +6,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang.WordUtils;
 
-import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
+import com.ctrip.platform.dal.daogen.pojo.ColumnMetaData;
 
 public class JavaPojoGenHost {
 	public static enum NamingStyle {
@@ -20,7 +20,7 @@ public class JavaPojoGenHost {
 	
 	private String className;
 	
-	private List<FieldMeta> fields;
+	private List<ColumnMetaData> fields;
 	
 	private NamingStyle style = NamingStyle.abcDef;
 
@@ -40,11 +40,11 @@ public class JavaPojoGenHost {
 		this.className = className;
 	}
 
-	public List<FieldMeta> getFields() {
+	public List<ColumnMetaData> getFields() {
 		return fields;
 	}
 
-	public void setFields(List<FieldMeta> fields) {
+	public void setFields(List<ColumnMetaData> fields) {
 		this.fields = fields;
 		buildImports();
 	}
@@ -65,7 +65,7 @@ public class JavaPojoGenHost {
 	private Set<String> imports = new TreeSet<String>();
 	private void buildImports() {
 		
-		for(FieldMeta field: fields) {
+		for(ColumnMetaData field: fields) {
 			Class clazz = field.getJavaClass();
 			if(byte[].class.equals(clazz))
 				continue;

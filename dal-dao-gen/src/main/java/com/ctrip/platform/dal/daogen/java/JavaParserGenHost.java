@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.ctrip.platform.dal.daogen.pojo.FieldMeta;
+import com.ctrip.platform.dal.daogen.pojo.ColumnMetaData;
 
 
 public class JavaParserGenHost {
@@ -19,7 +19,7 @@ public class JavaParserGenHost {
 	
 	private String identityColumnName;
 	
-	private List<FieldMeta> fields;
+	private List<ColumnMetaData> fields;
 	
 	private Set<String> imports = new TreeSet<String>();
 
@@ -63,11 +63,11 @@ public class JavaParserGenHost {
 		this.identityColumnName = identityColumnName;
 	}
 	
-	public List<FieldMeta> getFields() {
+	public List<ColumnMetaData> getFields() {
 		return fields;
 	}
 
-	public void setFields(List<FieldMeta> fields) {
+	public void setFields(List<ColumnMetaData> fields) {
 		this.fields = fields;
 		buildImports();
 	}
@@ -78,7 +78,7 @@ public class JavaParserGenHost {
 		imports.add(java.util.Map.class.getName());
 		imports.add(java.util.LinkedHashMap.class.getName());
 		
-		for(FieldMeta field: fields) {
+		for(ColumnMetaData field: fields) {
 			Class clazz = field.getJavaClass();
 			if(byte[].class.equals(clazz))
 				continue;

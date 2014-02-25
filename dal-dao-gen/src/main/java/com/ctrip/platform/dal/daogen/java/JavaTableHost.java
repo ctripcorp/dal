@@ -16,11 +16,21 @@ public class JavaTableHost {
 	
 	private List<JavaMethodHost> methods;
 	
-	private List<ColumnMetaData> fields;
+	private List<JavaParameterHost> fields;
 	
 	private boolean hasIdentity;
 	
 	private String identityColumnName;
+	
+	private boolean isSpa;
+
+	public boolean isSpa() {
+		return isSpa;
+	}
+
+	public void setSpa(boolean isSpa) {
+		this.isSpa = isSpa;
+	}
 
 	public String getNamespace() {
 		return namespace;
@@ -62,11 +72,11 @@ public class JavaTableHost {
 		this.methods = methods;
 	}
 
-	public List<ColumnMetaData> getFields() {
+	public List<JavaParameterHost> getFields() {
 		return fields;
 	}
 
-	public void setFields(List<ColumnMetaData> fields) {
+	public void setFields(List<JavaParameterHost> fields) {
 		this.fields = fields;
 	}
 

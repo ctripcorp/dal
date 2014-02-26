@@ -7,8 +7,6 @@ public class Project {
 	
 	private int id;
 	
-	private String user_id;
-	
 	private String name;
 	
 	private String namespace;
@@ -21,13 +19,6 @@ public class Project {
 		this.id = id;
 	}
 
-	public String getUser_id() {
-		return user_id;
-	}
-
-	public void setUser_id(String user_id) {
-		this.user_id = user_id;
-	}
 
 	public String getName() {
 		return name;
@@ -48,9 +39,8 @@ public class Project {
 	public static Project visitRow(ResultSet rs) throws SQLException {
 		Project project = new Project();
         project.setId(rs.getInt(1));
-        project.setUser_id(rs.getString(2));
-        project.setName(rs.getString(3));
-        project.setNamespace(rs.getString(4));
+        project.setName(rs.getString(2));
+        project.setNamespace(rs.getString(3));
          return project;
 	}
 

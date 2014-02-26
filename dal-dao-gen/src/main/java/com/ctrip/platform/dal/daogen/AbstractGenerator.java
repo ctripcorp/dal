@@ -1,7 +1,10 @@
 package com.ctrip.platform.dal.daogen;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.velocity.app.Velocity;
 
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
@@ -54,6 +57,24 @@ public abstract class AbstractGenerator implements Generator {
 		if (null != proj) {
 			namespace = proj.getNamespace();
 			this.projectId = projectId;
+		}
+		
+		
+		File mavenLikeDir = new File(String.format("gen/%s/cs",
+				projectId));
+		
+		try {
+			FileUtils.forceDelete(mavenLikeDir);
+			//FileUtils.forceMkdir(mavenLikeDir);
+			File daoMavenLike = new File(mavenLikeDir, "Dao");
+			File entityMavenLike = new File(mavenLikeDir, "Entity");
+			File idaoMavenLike = new File(mavenLikeDir, "IDao");
+			
+			FileUtils.forceMkdir(daoMavenLike);
+			FileUtils.forceMkdir(entityMavenLike);
+			FileUtils.forceMkdir(idaoMavenLike);
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
 
 		generateByTableView(daoByTableViewSp.getTasksByProjectId(projectId));

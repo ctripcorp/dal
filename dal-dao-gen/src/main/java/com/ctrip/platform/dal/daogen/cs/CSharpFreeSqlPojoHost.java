@@ -6,6 +6,16 @@ public class CSharpFreeSqlPojoHost {
 	
 	private String nameSpaceDao;
 	
+	private String nameSpaceEntity;
+	
+	public String getNameSpaceEntity() {
+		return nameSpaceEntity;
+	}
+
+	public void setNameSpaceEntity(String nameSpaceEntity) {
+		this.nameSpaceEntity = nameSpaceEntity;
+	}
+
 	private String tableName;
 	
 	private String className;

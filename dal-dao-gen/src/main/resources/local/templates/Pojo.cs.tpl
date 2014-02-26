@@ -1,7 +1,7 @@
 using System;
 using Arch.Data.Orm;
 
-namespace ${host.getNameSpaceDao()}
+namespace ${host.getNameSpaceEntity()}
 {
     /// <summary>
     /// ${host.getTableName()}

@@ -31,6 +31,31 @@ jQuery(document).ready(function () {
             // plus: true,
             group: true,
         }],
+        menu: [{
+            id: "download",
+            text: '下载Zip包',
+            icon: 'fa fa-play'
+        }],
+        onMenuClick: function (event) {
+            switch (event.menuItem.id) {
+            case "download":
+                cblock($("body"));
+                var obj = w2ui['sidebar'].get(event.target);
+                var url  = "/rest/file/download?id=" + obj.project_id+
+                    "&name=" + obj.relativeName;
+                if(obj.project_id == undefined){
+                    url =  "/rest/file/download?id=" + obj.id;
+
+                }
+
+                $.get(url
+                , function (data) {
+                    $("body").unblock();
+                    window.location.href = data;
+                });
+                break;
+            }
+        },
     }));
 
     w2ui['main_layout'].content('main', '<div id="code_editor" class="code_edit" style="height:100%"></div>');
@@ -68,44 +93,8 @@ var reloadProjects = function () {
                 onClick: function (event) {
                     var id = event.target;
                 },
-                plus: true,
                 onExpand: function (event) {
-                    // var centerY = null;
-                    var currentElement = event.object;
-
-                    if (undefined == currentElement.nodes || currentElement.nodes.length == 0) {
-                        cblock($("#main_layout"));
-                        $.get("/rest/file?id=" + currentElement.id, function (data) {
-                            var allNodes = [];
-                            $.each(data, function (index, value) {
-                                allNodes.push({
-                                    id: sprintf("%s_file_%s", currentElement.id, allNodes.length),
-                                    real_id: value.id,
-                                    text: value.name,
-                                    icon: 'fa fa-file',
-                                    type: "file",
-                                    onClick: function (event) {
-                                        if (event.object.type == "file") {
-                                            $.get("/rest/file/content?id=" + event.object.real_id + "&name=" + event.object.text, function (data) {
-                                                //var real_data = JSON.parse(data);
-                                                ace.edit("code_editor").setValue(data);
-                                                if (event.object.text.match(/cs$/)) {
-                                                    ace.edit("code_editor").getSession().setMode("ace/mode/csharp");
-                                                } else if (event.object.text.match(/java$/)) {
-                                                    ace.edit("code_editor").getSession().setMode("ace/mode/java");
-                                                }
-                                            });
-                                        }
-                                    }
-                                });
-                            });
-                            if(allNodes.length > 0)
-                                currentElement.icon = "fa fa-folder-open-o";
-                            w2ui['sidebar'].add(currentElement, allNodes);
-                            $("#main_layout").unblock();
-                        });
-                    }
-                    w2ui['sidebar'].refresh();
+                    expandNode(event, value.id, true);
                 },
                 onCollapse: function (event) {
                     //console.log(this == w2ui["sidebar"]);
@@ -119,4 +108,69 @@ var reloadProjects = function () {
         currentElement.refresh();
         $("body").unblock();
     });
+};
+
+var expandNode =  function(event, project_id, from_root){
+     var currentElement = event.object;
+
+    if (undefined == currentElement.nodes || currentElement.nodes.length == 0) {
+        var url = "/rest/file?parent=true&id=" + project_id;
+        if(currentElement.relativeName != undefined){
+            url = url + "&name="+currentElement.relativeName;
+        }
+        if(from_root != undefined){
+            url = url + "&root=" + from_root;
+        }
+        cblock($("#main_layout"));
+        $.get(url, function (data) {
+            var allNodes = [];
+            $.each(data, function (index, value) {
+                if(value.parent){
+                    allNodes.push({
+                        id: value.currentId,
+                        project_id: project_id,
+                        text: value.name,
+                        relativeName: value.relativeName,
+                        icon: 'fa fa-folder-o',
+                        type: 'folder',
+                        group1: true,
+                        plus: true,
+                        onExpand: function (event) {
+                            expandNode(event, project_id, false);
+                        },
+                        onCollapse: function (event) {
+                            event.object.icon = "fa fa-folder-o";
+                            w2ui['sidebar'].refresh();
+                        }
+                    });
+                }else{
+                    allNodes.push({
+                        id: value.currentId,
+                        project_id: project_id,
+                        text: value.name,
+                        relativeName: value.relativeName,
+                        icon: 'fa fa-file',
+                        type: "file",
+                        onClick: function (event) {
+                            $.get("/rest/file/content?id=" + project_id + "&name=" + event.object.relativeName, function (data) {
+                                //var real_data = JSON.parse(data);
+                                ace.edit("code_editor").setValue(data);
+                                if (event.object.text.match(/cs$/)) {
+                                    ace.edit("code_editor").getSession().setMode("ace/mode/csharp");
+                                } else if (event.object.text.match(/java$/)) {
+                                    ace.edit("code_editor").getSession().setMode("ace/mode/java");
+                                }
+                            });
+                        }
+                    });
+                }
+                
+            });
+            if(allNodes.length > 0)
+                currentElement.icon = "fa fa-folder-open-o";
+            w2ui['sidebar'].add(currentElement, allNodes);
+            $("#main_layout").unblock();
+        });
+    }
+    w2ui['sidebar'].refresh();
 };

@@ -1,7 +1,7 @@
 using System;
 using Arch.Data.Orm;
 
-namespace com.ctrip.platform.tools.Dao
+namespace com.ctrip.platform.tools.Entity.DataModel
 {
     /// <summary>
     /// 

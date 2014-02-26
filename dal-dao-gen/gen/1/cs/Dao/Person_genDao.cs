@@ -85,7 +85,7 @@ namespace com.ctrip.platform.tools.Dao
         /// </summary>
         /// <param name="iD"></param>
         /// <returns>Person_gen信息</returns>
-        public Person_gen FindByPk(uint iD )
+        public Person_gen FindByPk(int iD )
         {
             try
             {
@@ -190,9 +190,9 @@ namespace com.ctrip.platform.tools.Dao
         private DataTable ToDataTable(IList<Person_gen> person_genList , bool insert)
         {
             DataTable dt = new DataTable();
-            dt.Columns.Add("ID", typeof(uint));
+            dt.Columns.Add("ID", typeof(int));
             dt.Columns.Add("Name", typeof(string));
-            dt.Columns.Add("Age", typeof(uint));
+            dt.Columns.Add("Age", typeof(int));
             dt.Columns.Add("Birth", typeof(DateTime));
 
             int i = 0;
@@ -289,13 +289,13 @@ namespace com.ctrip.platform.tools.Dao
         /// </summary>
         /// <param name="iD"></param>
         /// <returns></returns>
-        public IList<Person_gen> GetNameByID(uint iD)
+        public IList<Person_gen> GetNameByID(int iD)
         {
         	try
             {
             	string sql = "SELECT Name FROM Person WHERE  ID = @ID ";
                 StatementParameterCollection parameters = new StatementParameterCollection();
-                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value =iD });
+                parameters.Add(new StatementParameter{ Name = "@ID", Direction = ParameterDirection.Input, DbType = DbType.Int32, Value =iD });
 
                 return baseDao.SelectList<Person_gen>(sql, parameters);
 

@@ -34,7 +34,7 @@ namespace com.ctrip.platform.tools.Interface.IDao
         /// </summary>
         /// <param name="iD"></param>
         /// <returns>Person_gen信息</returns>
-        Person_gen FindByPk(uint iD);
+        Person_gen FindByPk(int iD);
 
         /// <summary>
         /// 获取所有Person_gen信息
@@ -83,7 +83,7 @@ namespace com.ctrip.platform.tools.Interface.IDao
         /// </summary>
         /// <param name="iD"></param>
         /// <returns></returns>
-        public IList<Person_gen> GetNameByID(uint iD);
+        public IList<Person_gen> GetNameByID(int iD);
         /// <summary>
         ///  deleteByName
         /// </summary>

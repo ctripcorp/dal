@@ -1,7 +1,7 @@
 using System;
 using Arch.Data.Orm;
 
-namespace com.ctrip.platform.tools.Dao
+namespace com.ctrip.platform.tools.Entity.DataModel
 {
     /// <summary>
     /// 
@@ -14,7 +14,7 @@ namespace com.ctrip.platform.tools.Dao
         /// 获取或设置id
         /// </summary>
         [Column(Name = "id",Length=11)]
-        public uint Id { get; set; }
+        public int Id { get; set; }
         /// <summary>
         /// 获取或设置driver
         /// </summary>
@@ -29,7 +29,7 @@ namespace com.ctrip.platform.tools.Dao
         /// 获取或设置port
         /// </summary>
         [Column(Name = "port",Length=11)]
-        public uint Port { get; set; }
+        public int Port { get; set; }
         /// <summary>
         /// 获取或设置domain
         /// </summary>

@@ -127,6 +127,7 @@ public class CSharpGenerator extends AbstractGenerator {
 							freeSqlHost.setTableName("");
 							freeSqlHost.setClassName(task.getClass_name());
 							freeSqlHost.setNameSpaceDao(host.getNameSpaceDao());
+							freeSqlHost.setNameSpaceEntity(host.getNameSpaceEntity());
 
 							pojoHosts.put(task.getClass_name(), freeSqlHost);
 						} catch (SQLException e) {
@@ -145,16 +146,15 @@ public class CSharpGenerator extends AbstractGenerator {
 		context.put("WordUtils", WordUtils.class);
 		context.put("StringUtils", StringUtils.class);
 		
+		File mavenLikeDir = new File(String.format("gen/%s/cs",
+				projectId));
+		
 		for(CSharpFreeSqlPojoHost host : pojoHosts.values()){
 			context.put("host", host);
 
 			FileWriter pojoWriter = null;
 			try {
-				File mavenLikeDir = new File(String.format("gen/%s/cs",
-						projectId));
-				FileUtils.forceMkdir(mavenLikeDir);
-
-				pojoWriter = new FileWriter(String.format("%s/%s.cs",
+				pojoWriter = new FileWriter(String.format("%s/Entity/%s.cs",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
 
 				Velocity.mergeTemplate("templates/Pojo.cs.tpl", "UTF-8",
@@ -171,11 +171,8 @@ public class CSharpGenerator extends AbstractGenerator {
 
 			FileWriter daoWriter = null;
 			try {
-				File mavenLikeDir = new File(String.format("gen/%s/cs",
-						projectId));
-				FileUtils.forceMkdir(mavenLikeDir);
 
-				daoWriter = new FileWriter(String.format("%s/%sDao.cs",
+				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.cs",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
 
 				Velocity.mergeTemplate("templates/FreeSqlDAO.cs.tpl", "UTF-8",
@@ -464,6 +461,10 @@ public class CSharpGenerator extends AbstractGenerator {
 		VelocityContext context = new VelocityContext();
 		context.put("WordUtils", WordUtils.class);
 		context.put("StringUtils", StringUtils.class);
+		
+		File mavenLikeDir = new File(String.format("gen/%s/cs",
+				projectId));
+		
 
 		for (CSharpTableHost host : tableHosts) {
 			context.put("host", host);
@@ -472,15 +473,12 @@ public class CSharpGenerator extends AbstractGenerator {
 			FileWriter iDaoWriter = null;
 			FileWriter pojoWriter = null;
 			try {
-				File mavenLikeDir = new File(String.format("gen/%s/cs",
-						projectId));
-				FileUtils.forceMkdir(mavenLikeDir);
-
-				daoWriter = new FileWriter(String.format("%s/%sDao.cs",
+			
+				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.cs",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
-				pojoWriter = new FileWriter(String.format("%s/%s.cs",
+				pojoWriter = new FileWriter(String.format("%s/Entity/%s.cs",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
-				iDaoWriter = new FileWriter(String.format("%s/I%sDao.cs",
+				iDaoWriter = new FileWriter(String.format("%s/IDao/I%sDao.cs",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
 
 				Velocity.mergeTemplate("templates/DAO.cs.tpl", "UTF-8",
@@ -504,13 +502,10 @@ public class CSharpGenerator extends AbstractGenerator {
 			FileWriter daoWriter = null;
 			FileWriter pojoWriter = null;
 			try {
-				File mavenLikeDir = new File(String.format("gen/%s/cs",
-						projectId));
-				FileUtils.forceMkdir(mavenLikeDir);
 
-				daoWriter = new FileWriter(String.format("%s/%sDao.cs",
+				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.cs",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
-				pojoWriter = new FileWriter(String.format("%s/%s.cs",
+				pojoWriter = new FileWriter(String.format("%s/Entity/%s.cs",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
 
 				Velocity.mergeTemplate("templates/DAOBySp.cs.tpl", "UTF-8",

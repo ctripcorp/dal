@@ -95,9 +95,9 @@ public enum DbType {
     	jdbcTypeToNetDbType.put(java.sql.Types.TIMESTAMP,DateTime2);
     	jdbcTypeToNetDbType.put(microsoft.sql.Types.DATETIMEOFFSET,DateTimeOffset);
     	jdbcTypeToNetDbType.put(java.sql.Types.TINYINT,SByte);
-    	jdbcTypeToNetDbType.put(java.sql.Types.SMALLINT,UInt16);
-    	jdbcTypeToNetDbType.put(java.sql.Types.INTEGER,UInt32);
-    	jdbcTypeToNetDbType.put(java.sql.Types.BIGINT,UInt64);
+    	//jdbcTypeToNetDbType.put(java.sql.Types.SMALLINT,UInt16);
+    	//jdbcTypeToNetDbType.put(java.sql.Types.INTEGER,UInt32);
+    	//jdbcTypeToNetDbType.put(java.sql.Types.BIGINT,UInt64);
     	jdbcTypeToNetDbType.put(java.sql.Types.NUMERIC,VarNumeric);
     	
     	netDbTypeToNetType.put(AnsiString, "string");

@@ -8,7 +8,9 @@ import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
+import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
 import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
+import com.ctrip.platform.dal.daogen.dao.DaoOfUserProject;
 
 public class SpringBeanGetter {
 
@@ -35,7 +37,13 @@ public class SpringBeanGetter {
 		return (DaoByTableViewSp)context.getBean("daoByTableViewSp");
 	}
 	
+	public static DaoOfLoginUser getDaoOfLoginUser(){
+		return (DaoOfLoginUser)context.getBean("loginUserDao");
+	}
 	
+	public static DaoOfUserProject getDaoOfUserProject(){
+		return (DaoOfUserProject)context.getBean("userProjectDao");
+	}
 
 
 }

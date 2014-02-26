@@ -18,13 +18,13 @@ namespace com.ctrip.platform.tools.Dao
         /// </summary>
         /// <param name="1"></param>
         /// <returns></returns>
-        public IList<Query> getServerById(uint 1)
+        public IList<Query> getServerById(int 1)
         {
         	try
             {
             	string sql = "select id, driver, server,port,domain, user,password, db_type from daogen.data_source WHERE id = ?";
                 StatementParameterCollection parameters = new StatementParameterCollection();
-                parameters.Add(new StatementParameter{ Name = "@1", Direction = ParameterDirection.Input, DbType = DbType.UInt32, Value =1 });
+                parameters.Add(new StatementParameter{ Name = "@1", Direction = ParameterDirection.Input, DbType = DbType.Int32, Value =1 });
 				//如果只需要一条记录，建议使用limit 1或者top 1，并使用SelectFirst提高性能
 				//return baseDao.SelectFirst<Query>(sql, parameters);
                 return baseDao.SelectList<Query>(sql, parameters);

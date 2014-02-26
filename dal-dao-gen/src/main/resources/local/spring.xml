@@ -27,6 +27,14 @@
      <bean id="projectDao" class="com.ctrip.platform.dal.daogen.dao.DaoOfProject">
         <property name="dataSource" ref="dataSource"/>
     </bean>
+    
+    <bean id="loginUserDao" class="com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+     <bean id="userProjectDao" class="com.ctrip.platform.dal.daogen.dao.DaoOfUserProject">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
 
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="${jdbc.driverClassName}"/>

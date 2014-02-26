@@ -71,9 +71,7 @@ public class DalStatementCreator {
 
 	private void setParameter(PreparedStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
-			if(parameter.isResultsParameter())
-				continue;
-			if(parameter.getDirection() == null || parameter.getDirection() == ParameterDirection.InputOutput)
+			if(parameter.isInputParameter())
 				setSqlParameter(statement, parameter);
 		}
 	}
@@ -102,64 +100,7 @@ public class DalStatementCreator {
 	
 	private PreparedStatement setSqlParameter(PreparedStatement ps,
 			StatementParameter parameter) throws SQLException {
-		Object value = parameter.getValue();
-		
-		// TODO revise timestamp and date processing
 		ps.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
-		
-		
-		// The floowing will be deprecated
-		if (true == true)
-			return ps;
-
-		switch (parameter.getDbType()) {
-		case Boolean:
-			ps.setBoolean(parameter.getIndex(), (Boolean)value);
-			break;
-		case Binary:
-			ps.setBytes(parameter.getIndex(), (byte[])value);
-			break;
-		case Byte:
-			ps.setByte(parameter.getIndex(), (byte)Integer.parseInt(value.toString()));
-			break;
-		case DateTime:
-			ps.setTimestamp(parameter.getIndex(), new Timestamp(((Date)value).getTime()));
-			break;
-		case Decimal:
-			break;
-		case Double:
-			ps.setDouble(parameter.getIndex(), Double.parseDouble(value.toString()));
-			break;
-		case Guid:
-			break;
-		case Int16:
-			ps.setShort(parameter.getIndex(), (short) Integer.parseInt(value.toString()));
-			break;
-		case Int32:
-			ps.setInt(parameter.getIndex(), Integer.parseInt(value.toString()));
-			break;
-		case Int64:
-			ps.setLong(parameter.getIndex(), Long.parseLong(value.toString()));
-			break;
-		case SByte:
-			break;
-		case Single:
-			ps.setFloat(parameter.getIndex(), (float)Double.parseDouble(value.toString()));
-			break;
-		case String:
-			ps.setString(parameter.getIndex(), value.toString());
-			break;
-		case StringFixedLength:
-			break;
-		case UInt16:
-			break;
-		case UInt32:
-			break;
-		case UInt64:
-			break;
-		default:
-			break;
-		}
 		return ps;
 	}
 }

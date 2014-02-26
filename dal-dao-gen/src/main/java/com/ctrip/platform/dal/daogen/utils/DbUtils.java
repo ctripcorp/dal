@@ -27,7 +27,8 @@ import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.StoredProcedure;
 
 public class DbUtils {
-
+	public static final int CSHARP = 0;
+	public static final int JAVA = 1;
 	private static DaoOfDbServer dbServerDao;
 	private static List<Integer> validMode;
 
@@ -162,7 +163,7 @@ public class DbUtils {
 			ResultSet spParams = connection.getMetaData().getProcedureColumns(
 					dbName, sp.getSchema(), sp.getName(), null);
 
-			if (language == 0) {
+			if (language == CSHARP) {
 				while (spParams.next()) {
 					int paramMode = spParams.getShort("COLUMN_TYPE");
 
@@ -188,7 +189,33 @@ public class DbUtils {
 
 					parameters.add(host);
 				}
-			}
+			}else// TODO replace with CurrentLanguage
+				if (language == JAVA) {
+					while (spParams.next()) {
+						int paramMode = spParams.getShort("COLUMN_TYPE");
+
+						if (!validMode.contains(paramMode)) {
+							continue;
+						}
+
+						JavaParameterHost host = new JavaParameterHost();
+						host.setSqlType(spParams.getInt("DATA_TYPE"));
+
+						if (paramMode == DatabaseMetaData.procedureColumnIn) {
+							host.setDirection(ParameterDirection.Input);
+						} else if (paramMode == DatabaseMetaData.procedureColumnInOut) {
+							host.setDirection(ParameterDirection.InputOutput);
+						} else {
+							host.setDirection(ParameterDirection.Output);
+						}
+
+						host.setName(spParams.getString("COLUMN_NAME"));
+						host.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType()));
+
+						parameters.add(host);
+					}
+				}
+
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		} finally {

@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.dao.logging;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 
-public class CentralLoggingManager {
+public class Logger {
 	public static final int DAL_APP_ID = 930201;
 	
 	public static final String TAG_APPID = "APPID";
@@ -13,7 +13,11 @@ public class CentralLoggingManager {
 	public static final String TAG_SIZE = "Size";
 	public static final String TAG_STATUS = "Status";
 	
+	public static boolean encryptIn;
+	public static boolean encryptOut;
+	
 	void log(String className, String sql, StatementParameters parameters) {
 		
 	}
+	
 }

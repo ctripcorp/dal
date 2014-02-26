@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.java;
 
+import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 
 public class JavaParameterHost extends AbstractParameterHost {
@@ -8,6 +9,8 @@ public class JavaParameterHost extends AbstractParameterHost {
 	
 	private int sqlType;
 	
+	private int length;
+
 	private Class<?> javaClass;
 	
 	private String name;
@@ -15,6 +18,34 @@ public class JavaParameterHost extends AbstractParameterHost {
 	private boolean identity;
 	
 	private boolean primary;
+	
+	private boolean nullable;
+	
+	private ParameterDirection direction;
+
+	public boolean isNullable() {
+		return nullable;
+	}
+
+	public void setNullable(boolean nullable) {
+		this.nullable = nullable;
+	}
+
+	public ParameterDirection getDirection() {
+		return direction;
+	}
+
+	public int getLength() {
+		return length;
+	}
+
+	public void setLength(int length) {
+		this.length = length;
+	}
+
+	public void setDirection(ParameterDirection direction) {
+		this.direction = direction;
+	}
 
 	public int getIndex() {
 		return index;

@@ -120,6 +120,32 @@
          </div>
          <!-- /.modal-dialog -->
       </div>
+
+      <div class="modal fade" id="shareProject" tabindex="-1" role="dialog" aria-labelledby="shareProjectLabel" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h4 class="modal-title" id="myModalLabel">与他人共享项目</h4>
+               </div>
+               <div class="modal-body">
+                  <div class="row-fluid">
+                     <div class="control-group">
+                       <select id="users" class="span7">
+                           <option value="_please_select">--请选择--</option>
+                        </select>
+                     </div>
+                  </div>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                  <button id="share_proj" type="button" class="btn btn-primary">共享</button>
+               </div>
+            </div>
+            <!-- /.modal-content -->
+         </div>
+         <!-- /.modal-dialog -->
+      </div>
       <!-- /.modal -->
       <!--Begin wizard-->
       <div class="modal fade" id="page1" tabindex="-1" role="dialog" aria-labelledby="page1_label" aria-hidden="true" is_update="0">

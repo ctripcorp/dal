@@ -26,21 +26,51 @@ jQuery(document).ready(function () {
         img: null,
         topHTML: '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a id="addProj" href="javascript:;"><i class="fa fa-plus"></i>添加项目</a>&nbsp;&nbsp;<a href="javascript:;" onclick="reloadProjects();"><i class="fa fa-refresh"></i>刷新项目</a></div>',
         menu: [{
-            id: "java_code",
-            text: 'Generate Java Code',
+            id: "share",
+            text: '与他人共享',
+            icon: 'fa fa-twitter'
+        },{
+            id: "csharpCode",
+            text: '生成C#代码',
             icon: 'fa fa-play'
         }, {
+            id: "javaCode",
+            text: '生成Java代码',
+            icon: 'fa fa-play'
+        },{
             id: "edit_proj",
-            text: 'Edit',
+            text: '编辑名称',
             icon: 'fa fa-edit'
         }, {
             id: "del_proj",
-            text: 'Delete',
+            text: '删除项目',
             icon: 'fa fa-times'
         }],
         onMenuClick: function (event) {
             switch (event.menuItem.id) {
-            case "java_code":
+            case "share":
+                $("#users > option:gt(0)").remove();
+                $.get("/rest/project/users", function(data){
+                    $.each(data, function(index, value){
+                        $("#users").append($('<option>',{
+                            text: value.userName + "(" + value.userNo + ")",
+                            value: value.userNo
+                        }));
+                    });
+                    $("#shareProject").modal();
+                });
+                break;
+            case "csharpCode":
+                cblock($("body"));
+                $.post("/rest/project/generate", {
+                    "project_id": event.target,
+                    "language": "csharp"
+                }, function (data) {
+                    $("body").unblock();
+                    window.location.href = "/file.jsp";
+                });
+                break;
+            case "javaCode":
                 cblock($("body"));
                 $.post("/rest/project/generate", {
                     "project_id": event.target,
@@ -111,6 +141,19 @@ jQuery(document).ready(function () {
 
     $(document.body).on('change', '#tables', function (event) {
         $("#class_name").val($(this).val());
+    });
+
+    $(document.body).on('click', '#share_proj', function (event) {
+        $.post("/rest/project/share_proj", {"id": w2ui['grid'].current_project,
+            "userNo": $("#users").val()}, function(data){
+                if(data.code == "OK"){
+                    alert("分享成功！");
+                }else{
+                    alert("分享失败，此用户可能已经可以操作该项目了!");
+                }
+                
+                $("#shareProject").modal("hide");
+            });
     });
 
     $("#add_condition").click(function () {

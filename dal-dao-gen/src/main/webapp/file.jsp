@@ -55,6 +55,15 @@
                <li class="active">
                   <a href="file.jsp">已生成代码预览</a>
                </li>
+               <li>
+                  <a href="javascript:;" onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">帮助</a>
+               </li>
+               <li>
+                  <a href="mailto:gawu@ctrip.com">DAL for .NET</a>
+               </li>
+               <li>
+                  <a href="mailto:jhhe@ctrip.com">DAL for JAVA</a>
+               </li>
             </ul>
             <ul class="nav navbar-nav pull-right">
                <li class="dropdown user">

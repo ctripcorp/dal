@@ -24,8 +24,11 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
 import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
+import com.ctrip.platform.dal.daogen.pojo.Project;
 import com.ctrip.platform.dal.daogen.pojo.W2uiElement;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.ZipFolder;
 
 @Resource
@@ -33,8 +36,12 @@ import com.ctrip.platform.dal.daogen.utils.ZipFolder;
 @Path("file")
 public class FileResource {
 	
+	private static DaoOfProject daoOfProject;
+	
+	
 	static{
 		Configuration.addResource("conf.properties");
+		daoOfProject = SpringBeanGetter.getDaoOfProject();
 	}
 
 	@GET
@@ -125,8 +132,10 @@ public class FileResource {
 		} else {
 			f = new File("gen", id);
 		}
+		
+		Project proj = 	daoOfProject.getProjectByID(Integer.valueOf(id));
 
-		String zipFileName = f.getName() + ".zip";
+		String zipFileName = proj.getName() + "-" + System.currentTimeMillis() + ".zip";
 
 		if (f.isFile()) {
 			zipFile(f, zipFileName);
@@ -173,7 +182,7 @@ public class FileResource {
 		    }
 		}
 
-		return String.format("ftp://%s:%d/%s", ftp_server, ftp_port, zipFileName);
+		return String.format("ftp://dal@%s:%d/%s", ftp_server, ftp_port, zipFileName);
 	}
 
 	private void zipFile(File fileToZip, String zipFileName) {

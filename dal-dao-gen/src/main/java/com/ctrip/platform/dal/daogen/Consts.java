@@ -24,8 +24,20 @@ public class Consts {
 		WhereConditionMap = new HashMap<String, String>();
 		jdbcSqlTypeToJavaClass= new HashMap<Integer, Class>();
 		
+		CSharpValueTypes.add("sbyte");
+		CSharpValueTypes.add("byte");
+		CSharpValueTypes.add("char");
+		CSharpValueTypes.add("short");
+		CSharpValueTypes.add("ushort");
 		CSharpValueTypes.add("int");
+		CSharpValueTypes.add("uint");
+		CSharpValueTypes.add("long");
+		CSharpValueTypes.add("ulong");
+		CSharpValueTypes.add("float");
+		CSharpValueTypes.add("double");
 		CSharpValueTypes.add("DateTime");
+		CSharpValueTypes.add("decimal");
+		CSharpValueTypes.add("bool");
 		
 		WhereConditionMap.put("0", "=");
 		WhereConditionMap.put("1", "!=");

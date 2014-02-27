@@ -1,4 +1,5 @@
-using ${namespace}IDao;
+using ${namespace}.Interface.IDao;
+using ${namespace}.Dao;
 
 namespace ${namespace}
 {

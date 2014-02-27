@@ -73,7 +73,8 @@ public abstract class AbstractGenerator implements Generator {
 				projectId));
 		
 		try {
-			FileUtils.forceDelete(mavenLikeDir);
+			if(mavenLikeDir.exists())
+				FileUtils.forceDelete(mavenLikeDir);
 			//FileUtils.forceMkdir(mavenLikeDir);
 			File daoMavenLike = new File(mavenLikeDir, "Dao");
 			File entityMavenLike = new File(mavenLikeDir, "Entity");
@@ -113,7 +114,14 @@ public abstract class AbstractGenerator implements Generator {
 			}
 			for(String t : StringUtils.split(task.getTable_names(), ",")){
 				if(!clazz.contains(t)){
-					clazz.add(t);
+					String className = t;
+					if (null != task.getPrefix() && !task.getPrefix().isEmpty()) {
+						className = className.substring(task.getPrefix().length());
+					}
+					if (null != task.getSuffix() && !task.getSuffix() .isEmpty()) {
+						className = className + task.getSuffix() ;
+					}
+					clazz.add(className);
 				}
 			}
 		}

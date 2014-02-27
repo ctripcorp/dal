@@ -7,6 +7,16 @@ public class TableSpNames {
 	private List<String> tables;
 	
 	private List<StoredProcedure> sps;
+	
+	private List<String> views;
+
+	public List<String> getViews() {
+		return views;
+	}
+
+	public void setViews(List<String> views) {
+		this.views = views;
+	}
 
 	public List<String> getTables() {
 		return tables;

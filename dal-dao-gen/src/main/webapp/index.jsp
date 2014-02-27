@@ -255,6 +255,13 @@
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
+                           <label class="control-label popup_label">选择视图：</label>
+                           <select id="view_list" multiple="multiple" class="popup_text" style="width:420px;">
+                           </select>
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
                            <label class="control-label popup_label">选择存储过程：</label>
                            <select id="sp_list" multiple="multiple" class="popup_text" style="width:420px;">
                            </select>

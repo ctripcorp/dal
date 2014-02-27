@@ -406,7 +406,7 @@ namespace ${host.getNameSpaceDao()}
         /// </summary>
         /// <param name="${WordUtils.uncapitalize($host.getClassName())}">${host.getClassName()}实体对象列表</param>
         /// <returns>状态代码</returns>
-        public int BulkInsertPeople(IList<${host.getClassName()}> ${WordUtils.uncapitalize($host.getClassName())}List)
+        public int BulkInsert${host.getClassName()}(IList<${host.getClassName()}> ${WordUtils.uncapitalize($host.getClassName())}List)
         {
             try
             {
@@ -433,7 +433,7 @@ namespace ${host.getNameSpaceDao()}
         /// </summary>
         /// <param name="${WordUtils.uncapitalize($host.getClassName())}">${host.getClassName()}实体对象列表</param>
         /// <returns>状态代码</returns>
-        public int BulkUpdatePeople(IList<${host.getClassName()}> ${WordUtils.uncapitalize($host.getClassName())}List)
+        public int BulkUpdate${host.getClassName()}(IList<${host.getClassName()}> ${WordUtils.uncapitalize($host.getClassName())}List)
         {
             try
             {
@@ -460,7 +460,7 @@ namespace ${host.getNameSpaceDao()}
         /// </summary>
         /// <param name="${WordUtils.uncapitalize($host.getClassName())}">${host.getClassName()}实体对象列表</param>
         /// <returns>状态代码</returns>
-        public int BulkDeletePeople(IList<${host.getClassName()}> ${WordUtils.uncapitalize($host.getClassName())}List)
+        public int BulkDelete${host.getClassName()}(IList<${host.getClassName()}> ${WordUtils.uncapitalize($host.getClassName())}List)
         {
             try
             {

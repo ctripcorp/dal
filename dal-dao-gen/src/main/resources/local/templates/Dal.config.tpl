@@ -1,8 +1,10 @@
 <dal name="dal.prize.test">
   <databaseSets>
-    <databaseSet name="${host.getDbName()}" provider="${host.getProvider()}">
-      <add  name="${host.getDbName()}_M" databaseType="Master" sharding="" connectionString="请将这段字符串替换为All-In-One中的name或者Database.config中的name"/>
+#foreach($db in $dbs.keySet())
+    <databaseSet name="$db" provider="${dbs.get($db)}">
+      <add  name="${db}_M" databaseType="Master" sharding="" connectionString="请将这段字符串替换为All-In-One中的name或者Database.config中的name"/>
     </databaseSet>
+#end
   </databaseSets>
 
   <databaseProviders>

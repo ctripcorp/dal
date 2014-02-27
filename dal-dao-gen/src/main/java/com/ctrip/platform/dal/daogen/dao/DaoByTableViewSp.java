@@ -29,11 +29,12 @@ public class DaoByTableViewSp {
 	public List<GenTaskByTableViewSp> getTasksByProjectId(int iD) {
 		try {
 			return this.jdbcTemplate
-					.query("select id, project_id, server_id, db_name,table_names,sp_names,prefix,suffix,cud_by_sp,pagination from task_table where project_id=?",
+					.query("select id, project_id, server_id, db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination from task_table where project_id=?",
 							new Object[] { iD },
 							new RowMapper<GenTaskByTableViewSp>() {
-								public GenTaskByTableViewSp mapRow(ResultSet rs,
-										int rowNum) throws SQLException {
+								public GenTaskByTableViewSp mapRow(
+										ResultSet rs, int rowNum)
+										throws SQLException {
 									return GenTaskByTableViewSp.visitRow(rs);
 								}
 							});
@@ -46,11 +47,12 @@ public class DaoByTableViewSp {
 	public int insertTask(GenTaskByTableViewSp task) {
 		try {
 			return this.jdbcTemplate
-					.update("insert into task_table ( project_id,server_id,  db_name,table_names,sp_names,prefix,suffix,cud_by_sp,pagination) values (?,?,?,?,?,?,?,?,?)",
+					.update("insert into task_table ( project_id,server_id,  db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination) values (?,?,?,?,?,?,?,?,?,?)",
 							task.getProject_id(), task.getServer_id(),
-							task.getDb_name(), task.getTable_names(),task.getSp_names(),
-							task.getPrefix(),task.getSuffix(),
-							 task.isCud_by_sp(),task.isPagination());
+							task.getDb_name(), task.getTable_names(),
+							task.getView_names(), task.getSp_names(),
+							task.getPrefix(), task.getSuffix(),
+							task.isCud_by_sp(), task.isPagination());
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
 			return -1;
@@ -60,12 +62,13 @@ public class DaoByTableViewSp {
 	public int updateTask(GenTaskByTableViewSp task) {
 		try {
 			return this.jdbcTemplate
-					.update("update task_table set project_id=?,server_id=?,  db_name=?, table_names=?,sp_names=?,prefix=?,suffix=?,cud_by_sp=?,pagination=? where id=?",
+					.update("update task_table set project_id=?,server_id=?,  db_name=?,view_names=?, table_names=?,sp_names=?,prefix=?,suffix=?,cud_by_sp=?,pagination=? where id=?",
 
 					task.getProject_id(), task.getServer_id(),
-							task.getDb_name(), task.getTable_names(),task.getSp_names(),
-							task.getPrefix(),task.getSuffix(),
-							task.isCud_by_sp(),task.isPagination(),
+							task.getDb_name(), task.getTable_names(),
+							task.getView_names(), task.getSp_names(),
+							task.getPrefix(), task.getSuffix(),
+							task.isCud_by_sp(), task.isPagination(),
 							task.getId());
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();

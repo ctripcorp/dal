@@ -13,7 +13,7 @@ public final class DalQueryDao {
 		this.client = DalClientFactory.getClient(logicDbName);
 	}
 
-	<T> List<T> query(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
+	public <T> List<T> query(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
 		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper));
 	}

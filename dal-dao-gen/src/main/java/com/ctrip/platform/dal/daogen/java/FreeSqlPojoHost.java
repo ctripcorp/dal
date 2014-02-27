@@ -1,33 +1,23 @@
 package com.ctrip.platform.dal.daogen.java;
 
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import com.ctrip.platform.dal.daogen.pojo.ColumnMetaData;
 
 public class FreeSqlPojoHost {
-	
-	private String nameSpaceDao;
-	
-	private String nameSpaceEntity;
-	
-	public String getNameSpaceEntity() {
-		return nameSpaceEntity;
-	}
-
-	public void setNameSpaceEntity(String nameSpaceEntity) {
-		this.nameSpaceEntity = nameSpaceEntity;
-	}
-
+	private String packageName;
 	private String tableName;
-	
 	private String className;
-	
 	private List<JavaParameterHost> columns;
 
-	public String getNameSpaceDao() {
-		return nameSpaceDao;
+	public String getPackageName() {
+		return packageName;
 	}
 
-	public void setNameSpaceDao(String nameSpaceDao) {
-		this.nameSpaceDao = nameSpaceDao;
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
 	}
 
 	public String getTableName() {
@@ -52,7 +42,24 @@ public class FreeSqlPojoHost {
 
 	public void setColumns(List<JavaParameterHost> columns) {
 		this.columns = columns;
+		buildImports();
 	}
 
+	private Set<String> imports = new TreeSet<String>();
+	private void buildImports() {
+		
+		for(JavaParameterHost field: columns) {
+			Class clazz = field.getJavaClass();
+			if(byte[].class.equals(clazz))
+				continue;
+			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))
+				continue;
+			imports.add(clazz.getName());
+		}
+	}
+	
+	public Set<String> getImports() {
+		return imports;
+	}
 
 }

@@ -38,7 +38,7 @@ public class ManyuTypesTest {
 			
 			DalTableDao<Manytypes> dao = new DalTableDao<Manytypes>(new DalManytypesParser());
 			Manytypes p = new Manytypes();
-			ret = p.setNameAndAddress(name,address);
+//			ret = p.setNameAndAddress(name,address);
 			
 			p.setBigIntCol(1L);
 			p.setBinaryCol("BinaryCol".getBytes());

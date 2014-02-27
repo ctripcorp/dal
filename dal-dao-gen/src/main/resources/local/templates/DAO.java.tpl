@@ -4,13 +4,16 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ctrip.platform.dao.AbstractDAO;
-import com.ctrip.platform.dao.enums.DbType;
 import com.ctrip.platform.dao.enums.ParameterDirection;
 import com.ctrip.platform.dao.param.StatementParameter;
 
+#foreach( $field in ${host.getImports()} )
+import ${field};
+#end
+
 public class ${host.getPojoClassName()}Dao {
 	private DalTableDao<${host.getPojoClassName()}> client = new DalTableDao<${host.getPojoClassName()}>(new ${host.getPojoClassName()}Parser());
+	private DalClient baseClient = DalClientFactory.getClient(parser.getDatabaseName());
 
 	public ${host.getPojoClassName()} queryByPk(Number id, DalHints hints)
 			throws SQLException {
@@ -44,6 +47,22 @@ public class ${host.getPojoClassName()}Dao {
 		client.update(hints, daoPojos);
 	}
 
+#foreach($method in $host.getExtraMethods())
+    public #if($method.getCrud_type() == "select")List<${host.getClassName()}>#{else}int#end ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+		int i = 1;
+#foreach($p in $method.getParameters())  
+		parameters.set(i++, ${p.getSqlType()}, ${p.getName());
+#end
+#if($method.getCrud_type() == "select")
+		return queryDao.query(sql, parameters, hints, personRowMapper);
+#else
+		return baseClient.update(sql, parameters, hint);
+#end
+	}
+#end
 
 	private static class ${host.getPojoClassName()}Parser implements DalParser<${host.getPojoClassName()}> {
 		public static final String DATABASE_NAME = "${host.getDbName()}";

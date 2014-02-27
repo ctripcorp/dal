@@ -1,5 +1,46 @@
 package com.ctrip.platform.dal.daogen.java;
 
-public class JavaMethodHost {
+import java.util.List;
 
+public class JavaMethodHost {
+	
+	private String crud_type;
+	
+	private String name;
+	
+	private String sql;
+	
+	private List<JavaParameterHost> parameters;
+
+	public String getCrud_type() {
+		return crud_type;
+	}
+
+	public void setCrud_type(String crud_type) {
+		this.crud_type = crud_type;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getSql() {
+		return sql;
+	}
+
+	public void setSql(String sql) {
+		this.sql = sql;
+	}
+
+	public List<JavaParameterHost> getParameters() {
+		return parameters;
+	}
+
+	public void setParameters(List<JavaParameterHost> parameters) {
+		this.parameters = parameters;
+	}
 }

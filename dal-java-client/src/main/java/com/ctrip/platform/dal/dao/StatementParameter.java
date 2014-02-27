@@ -64,6 +64,12 @@ public class StatementParameter {
 		return currentBuilder.resultSetExtractor_;
 	}
 	
+	public boolean isInputParameter() {
+		if(isResultsParameter())
+			return false;
+		return 	currentBuilder.direction_ == ParameterDirection.Input || currentBuilder.direction_ == ParameterDirection.InputOutput;
+	}
+	
 	public boolean isOutParameter() {
 		if(currentBuilder.resultsParameter_ || currentBuilder.direction_ == null)
 			return false;
@@ -86,6 +92,7 @@ public class StatementParameter {
 			builder.index_ = index;
 			builder.sqlType_ = sqlType;
 			builder.value_ = value;
+			builder.direction_ = ParameterDirection.Input;
 			
 			return builder;
 		}

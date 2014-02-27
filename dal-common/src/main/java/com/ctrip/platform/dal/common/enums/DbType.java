@@ -1,4 +1,3 @@
-
 package com.ctrip.platform.dal.common.enums;
 
 import java.util.HashMap;

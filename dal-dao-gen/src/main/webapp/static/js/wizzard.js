@@ -131,9 +131,16 @@
                         $("select[id$=table_list] > option").remove();
                         $("select[id$=sp_list] > option").remove();
                         var tableList = [];
+                        var viewList = [];
                         var spList = [];
                         $.each(data.tables, function (index, value) {
                             tableList.push($('<option>', {
+                                value: value,
+                                text: value
+                            }));
+                        });
+                        $.each(data.views, function (index, value) {
+                            viewList.push($('<option>', {
                                 value: value,
                                 text: value
                             }));
@@ -145,12 +152,17 @@
                             }));
                         });
                         $("#table_list").append(tableList).multipleSelect("refresh");
+                        $("#view_list").append(viewList).multipleSelect("refresh");
                         $("#sp_list").append(spList).multipleSelect("refresh");
                         if ($("#page1").attr('is_update') == "1" 
                             && record != undefined 
                             && record.task_type == "table_view_sp") {
-                            $('#table_list').multipleSelect('setSelects', record.table_names.split(","));
-                            $('#sp_list').multipleSelect('setSelects', record.sp_names.split(","));
+                            if(record.table_names != undefined)
+                                $('#table_list').multipleSelect('setSelects', record.table_names.split(","));
+                            if(record.view_names != undefined)
+                                $('#view_list').multipleSelect('setSelects', record.view_names.split(","));
+                            if(record.sp_names != undefined)
+                                $('#sp_list').multipleSelect('setSelects', record.sp_names.split(","));
                         }
                         current.hide();
                         $(".step2-1-0").show();
@@ -424,6 +436,7 @@
                     });
                 }else if ($(".gen_style.active").children().val() == "table_view_sp") {
                     postData["table_names"] = $('#table_list').multipleSelect('getSelects').join(",");
+                    postData["view_names"] = $('#view_list').multipleSelect('getSelects').join(",");
                     postData["sp_names"] = $('#sp_list').multipleSelect('getSelects').join(",");
                     postData["prefix"] = $("#prefix").val();
                     postData["suffix"] = $("#suffix").val();

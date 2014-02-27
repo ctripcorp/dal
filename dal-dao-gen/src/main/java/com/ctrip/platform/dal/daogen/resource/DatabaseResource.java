@@ -261,6 +261,7 @@ public class DatabaseResource {
 			@QueryParam("db_name") String dbName) {
 		TableSpNames tableSpNames = new TableSpNames();
 		tableSpNames.setSps(DbUtils.getAllSpNames(server, dbName));
+		tableSpNames.setViews(DbUtils.getAllViewNames(server, dbName));
 		tableSpNames.setTables(DbUtils.getAllTableNames(server, dbName));
 
 		return tableSpNames;

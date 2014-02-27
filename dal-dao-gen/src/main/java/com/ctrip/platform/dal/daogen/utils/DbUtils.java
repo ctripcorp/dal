@@ -58,13 +58,70 @@ public class DbUtils {
 
 		List<String> results = new ArrayList<String>();
 
-		// 如果是Sql Server，通过Sql语句获取所有表和视图的名称
+		// 如果是Sql Server，通过Sql语句获取所有表名称
 		if (dbServer != null
 				&& dbServer.getDb_type().equalsIgnoreCase("sqlserver")) {
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
 			String sql = String
-					.format("use %s select Name from sysobjects where xtype in ('v','u') and status>=0 order by name",
+					.format("use %s select Name from sysobjects where xtype  = 'u' and status>=0",
+							dbName);
+			results = jdbcTemplate.query(sql, new RowMapper<String>() {
+				public String mapRow(ResultSet rs, int rowNum)
+						throws SQLException {
+					return rs.getString(1);
+				}
+			});
+		}
+		// 如果是MySql，通过JDBC标准方式获取所有表的名称
+		else if (dbServer != null
+				&& dbServer.getDb_type().equalsIgnoreCase("mysql")) {
+			String[] types = { "TABLE"};
+			ResultSet rs = null;
+			Connection connection = null;
+			try {
+				connection = ds.getConnection();
+				rs = connection.getMetaData().getTables(dbName, null, "%",
+						types);
+				while (rs.next()) {
+					results.add(rs.getString("TABLE_NAME"));
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				JdbcUtils.closeResultSet(rs);
+				JdbcUtils.closeConnection(connection);
+			}
+		}
+
+		return results;
+	}
+	
+	/**
+	 * 获取所有视图
+	 * 
+	 * @param server
+	 * @param dbName
+	 * @return
+	 */
+	public static List<String> getAllViewNames(int server, String dbName) {
+		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
+
+		DbServer dbServer = dbServerDao.getDbServerByID(server);
+
+		if (ds == null) {
+			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
+		}
+
+		List<String> results = new ArrayList<String>();
+
+		// 如果是Sql Server，通过Sql语句获取所有视图的名称
+		if (dbServer != null
+				&& dbServer.getDb_type().equalsIgnoreCase("sqlserver")) {
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+
+			String sql = String
+					.format("use %s select Name from sysobjects where xtype ='v' and status>=0",
 							dbName);
 			results = jdbcTemplate.query(sql, new RowMapper<String>() {
 				public String mapRow(ResultSet rs, int rowNum)
@@ -76,7 +133,7 @@ public class DbUtils {
 		// 如果是MySql，通过JDBC标准方式获取所有表和视图的名称
 		else if (dbServer != null
 				&& dbServer.getDb_type().equalsIgnoreCase("mysql")) {
-			String[] types = { "TABLE", "VIEW" };
+			String[] types = {"VIEW" };
 			ResultSet rs = null;
 			Connection connection = null;
 			try {
@@ -302,7 +359,7 @@ public class DbUtils {
 							.equalsIgnoreCase("YES"));
 					host.setNullable(allColumnsRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
 					// 仅获取String类型的长度
-					if (host.getType().equalsIgnoreCase("string"))
+//					if (host.getType().equalsIgnoreCase("string"))
 						host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
 					// COLUMN_SIZE
 					allColumns.add(host);

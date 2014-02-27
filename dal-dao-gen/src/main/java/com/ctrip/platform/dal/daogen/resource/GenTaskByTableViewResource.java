@@ -31,6 +31,7 @@ public class GenTaskByTableViewResource {
 			@FormParam("project_id") int project_id,
 			@FormParam("db_name") String db_name,
 			@FormParam("table_names") String table_names,
+			@FormParam("view_names") String view_names,
 			@FormParam("sp_names") String sp_names,
 			@FormParam("prefix") String prefix,
 			@FormParam("suffix") String suffix,
@@ -49,6 +50,7 @@ public class GenTaskByTableViewResource {
 			task.setProject_id(project_id);
 			task.setDb_name(db_name);
 			task.setTable_names(table_names);
+			task.setView_names(view_names);
 			task.setSp_names(sp_names);
 			task.setPrefix(prefix);
 			task.setSuffix(suffix);

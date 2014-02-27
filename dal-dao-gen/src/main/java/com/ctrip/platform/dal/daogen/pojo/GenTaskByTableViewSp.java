@@ -15,6 +15,8 @@ public class GenTaskByTableViewSp {
 	
 	private String table_names;
 	
+	private String view_names;
+	
 	private String sp_names;
 
 	private String prefix;
@@ -63,6 +65,14 @@ public class GenTaskByTableViewSp {
 
 	public void setTable_names(String table_names) {
 		this.table_names = table_names;
+	}
+
+	public String getView_names() {
+		return view_names;
+	}
+
+	public void setView_names(String view_names) {
+		this.view_names = view_names;
 	}
 
 	public String getSp_names() {
@@ -118,11 +128,12 @@ public class GenTaskByTableViewSp {
 		task.setServer_id(rs.getInt(3));
 		task.setDb_name(rs.getString(4));
 		task.setTable_names(rs.getString(5));
-		task.setSp_names(rs.getString(6));
-		task.setPrefix(rs.getString(7));
-		task.setSuffix(rs.getString(8));
-		task.setCud_by_sp(rs.getBoolean(9));
-		task.setPagination(rs.getBoolean(10));
+		task.setView_names(rs.getString(6));
+		task.setSp_names(rs.getString(7));
+		task.setPrefix(rs.getString(8));
+		task.setSuffix(rs.getString(9));
+		task.setCud_by_sp(rs.getBoolean(10));
+		task.setPagination(rs.getBoolean(11));
 		return task;
 	}
 

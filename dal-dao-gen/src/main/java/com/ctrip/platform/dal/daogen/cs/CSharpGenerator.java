@@ -49,7 +49,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		// 首先按照ServerID, DbName以及ClassName做一次GroupBy
 		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();
-
+		
 		for (GenTaskByFreeSql task : tasks) {
 			String key = String.format("%s_%s_%s", task.getServer_id(),
 					task.getDb_name(), task.getClass_name());
@@ -205,6 +205,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		for (GenTaskByTableViewSp tableViewSp : tasks) {
 
 			String dbName = tableViewSp.getDb_name();
+			String[] viewNames = StringUtils.split(tableViewSp.getView_names(), ",");
 			String[] tableNames = StringUtils.split(
 					tableViewSp.getTable_names(), ",");
 			String[] spNames = StringUtils
@@ -410,6 +411,56 @@ public class CSharpGenerator extends AbstractGenerator {
 				tableHost.setHasSptD(allSpNames.contains(expectSptD));
 				tableHost.setHasSpt(tableHost.isHasSptI()
 						|| tableHost.isHasSptU() || tableHost.isHasSptD());
+
+				tableHosts.add(tableHost);
+			}
+			
+			for (String view : viewNames) {
+
+				List<AbstractParameterHost> allColumnsAbstract = DbUtils
+						.getAllColumnNames(tableViewSp.getServer_id(), dbName,
+								view, CurrentLanguage.CSharp);
+				
+				List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
+				for(AbstractParameterHost h : allColumnsAbstract){
+					allColumns.add((CSharpParameterHost)h);
+				}
+
+				for (CSharpParameterHost h : allColumns) {
+					if (h.isNullable()
+							&& Consts.CSharpValueTypes.contains(h.getType())) {
+						h.setNullable(true);
+					} else {
+						h.setNullable(false);
+					}
+				}
+				
+				CSharpTableHost tableHost = new CSharpTableHost();
+
+				String className = view;
+				if (null != prefix && !prefix.isEmpty()) {
+					className = className.substring(prefix.length());
+				}
+				if (null != suffix && !suffix.isEmpty()) {
+					className = className + suffix;
+				}
+
+				tableHost.setNameSpaceEntity(String.format(
+						"%s.Entity.DataModel", super.namespace));
+				tableHost.setNameSpaceIDao(String.format("%s.Interface.IDao",
+						super.namespace));
+				tableHost.setNameSpaceDao(String.format("%s.Dao",
+						super.namespace));
+				tableHost.setDatabaseCategory(dbCategory);
+				tableHost.setDbSetName(dbName);
+				tableHost.setTableName(view);
+				tableHost.setClassName(className);
+				tableHost.setTable(false);
+				tableHost.setSpa(false);
+		
+				tableHost.setColumns(allColumns);
+
+				tableHost.setHasPagination(pagination);
 
 				tableHosts.add(tableHost);
 			}

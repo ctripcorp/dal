@@ -57,6 +57,15 @@
                <li>
                   <a href="file.jsp">已生成代码预览</a>
                </li>
+               <li>
+                  <a href="javascript:;" onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">帮助</a>
+               </li>
+               <li>
+                  <a href="mailto:gawu@ctrip.com">DAL for .NET</a>
+               </li>
+               <li>
+                  <a href="mailto:jhhe@ctrip.com">DAL for JAVA</a>
+               </li>
             </ul>
             <ul class="nav navbar-nav pull-right">
                <li class="dropdown user">
@@ -68,13 +77,6 @@
                   </i>
                   </a>
                   <ul class="dropdown-menu">
-                     <li style="border-bottom:thick solid #000000;border-bottom-width:1px;">
-                        <a href="javascript:;">
-                        <i class="fa fa-info-circle">
-                        </i>
-                        About
-                        </a>
-                     </li>
                      <li>
                         <a href="/logout.jsp">
                         <i class="fa fa-power-off">
@@ -250,6 +252,13 @@
                         <div class="control-group">
                            <label class="control-label popup_label">选择表/视图：</label>
                            <select id="table_list" multiple="multiple" class="popup_text" style="width:420px;">
+                           </select>
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">选择视图：</label>
+                           <select id="view_list" multiple="multiple" class="popup_text" style="width:420px;">
                            </select>
                         </div>
                      </div>

@@ -40,7 +40,6 @@ public class FileResource {
 	
 	
 	static{
-		Configuration.addResource("conf.properties");
 		daoOfProject = SpringBeanGetter.getDaoOfProject();
 	}
 

@@ -1,16 +1,21 @@
-package com.ctrip.platform.tools;
+package ${host.getNamespace()};
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ctrip.platform.dao.AbstractDAO;
-import com.ctrip.platform.dao.enums.DbType;
 import com.ctrip.platform.dao.enums.ParameterDirection;
 import com.ctrip.platform.dao.param.StatementParameter;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class Person_genDao {
 	private DalTableDao<Person_gen> client = new DalTableDao<Person_gen>(new Person_genParser());
+	private DalClient baseClient = DalClientFactory.getClient(parser.getDatabaseName());
 
 	public Person_gen queryByPk(Number id, DalHints hints)
 			throws SQLException {

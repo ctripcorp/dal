@@ -17,10 +17,6 @@ public class SqlBuilder {
 		// 数据库中存储的模式： ID,Name
 		String[] fields = task.getFields().split(",");
 
-		if (null == task.getMethod_name() || task.getMethod_name().isEmpty()) {
-			return "";
-		}
-
 		List<String> formatedConditions = new ArrayList<String>();
 		// 将所有WHERE条件拼接，如ID_0,Name_1，for循环后将变为一个数组： [" ID = ", " Name != "]
 		for (String con : conditions) {

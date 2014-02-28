@@ -297,12 +297,6 @@
                            </select>
                         </div>
                      </div>
-                     <div class="row-fluid">
-                        <div class="control-group">
-                           <label class="control-label popup_label">生成的类名：</label>
-                           <input id="class_name" class="span9 popup_text">
-                        </div>
-                     </div>
                      <div class="row-fluid method_name_class">
                         <div class="control-group">
                            <label class="control-label popup_label">生成的方法名：</label>
@@ -326,8 +320,8 @@
                         </div>
                      </div>
                   </div>
-                  <div class="row-fluid step_fields" style="height:280px;">
-                  <div id="operation_fields" class="steps step2-1-2 row-fluid">
+                  <div class="row-fluid steps step_fields" style="height:280px;">
+                  <div id="operation_fields" class="step2-1-2 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">选择字段：</label>
@@ -337,7 +331,7 @@
                      </div>
                   </div>
                   <br>
-                  <div id="where_condition" class="steps step2-1-3">
+                  <div id="where_condition" class="step2-1-3">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">选择条件：</label>

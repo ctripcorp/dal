@@ -178,18 +178,6 @@ public abstract class AbstractGenerator implements Generator {
 
 		generateByTableView(tableViewSps);
 
-//		// 存储过程
-//		List<GenTaskBySP> sp = spTaskDao.getTasksByProjectId(Integer
-//				.valueOf(projectId));
-//		List<GenTask> _sp = new ArrayList<GenTask>();
-//		for (GenTaskBySP t : sp) {
-//			_sp.add(t);
-//		}
-//		generateBySP(_sp);
-//
-		// 手工编写的SQL
-		
-
 		generateByFreeSql(freeSqls);
 
 		return true;

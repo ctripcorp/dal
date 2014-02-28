@@ -3,12 +3,13 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Iterator" %>
 <%@ page import="org.jasig.cas.client.authentication.AttributePrincipal" %>
+<%@ page import="com.ctrip.platform.dal.common.util.Configuration" %>
  
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
    "http://www.w3.org/TR/html4/loose.dtd">
  
 <%
         session.invalidate();
-        String redirectURL = "http://192.168.93.59:8085/caso/logout?service=http://localhost:9090"; 
+        String redirectURL =Configuration.get("cas_url") + "/caso/logout?service=" + Configuration.get("codegen_url"); 
         response.sendRedirect(redirectURL);
 %>

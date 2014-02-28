@@ -174,7 +174,6 @@
                 case "auto":
                     //在显示下一页之前，清空下一页的信息
                     $("select[id$=tables] > option:gt(0)").remove();
-                    $("#class_name").val("");
                     $("#method_name").val("");
                     var defaultActive = $(".op_type > input[value='select']").parent();
                     if (!defaultActive.hasClass("active")) {
@@ -190,7 +189,6 @@
                             text: record.table_name
                         }));
                         $("#tables").val(record.table_name);
-                        $("#class_name").val(record.class_name);
                         $("#method_name").val(record.method_name);
                         var parentToActive = $(sprintf(".op_type > input[value='%s']", record.crud_type)).parent();
                         if (!parentToActive.hasClass("active")) {
@@ -213,7 +211,6 @@
                                 });
                                 if(data.length > 0){
                                     $("#tables").val(data[0]);
-                                    $("#class_name").val(data[0]);
                                 }
                                 current.hide();
                                 $(".step2-1-1").show();
@@ -309,8 +306,8 @@
                     $("body").unblock();
                 });
                 
-            } else if (current.hasClass("step2-1-2") || current.hasClass("step2-1-3")) {
-                $(".step_fields").hide();
+            } else if (current.hasClass("step_fields")) {
+                //$(".step_fields").hide();
                 current.hide();
                 $(".step3").show();
                 $(".step3").attr('from', current.attr('class'));
@@ -391,7 +388,6 @@
 
                 if ($(".gen_style.active").children().val() == "auto") {
                     postData["table_name"] = $("#tables").val();
-                    postData["class_name"] = $("#class_name").val();
                     postData["method_name"] = $("#method_name").val();
                     //C#风格或者Java风格，@Name or ?
                     postData["sql_style"] = $("#sql_style").val();
@@ -457,6 +453,9 @@
             current.hide();
             var from_class = current.attr("from");
             if (from_class != undefined && from_class != "") {
+                // if(from_class.indexOf("step2-1-2") != -1 || from_class.indexOf("step2-1-3") != -1){
+                //     $(".step_fields").show();
+                // }
                 var classes = from_class.split(" ").join(".");
                 $("." + classes).show();
                 return;
@@ -470,8 +469,7 @@
                 $(".step2").show();
             } else if (current.hasClass("step2-1-1")) {
                 $(".step2").show();
-            } else if (current.hasClass("step2-1-2") || current.hasClass("step2-1-2")) {
-                $(".step_fields").hide();
+            } else if (current.hasClass("step_fields")) {
                 $(".step2-1-1").show();
             } else if (current.hasClass("step2-2")) {
                 $(".step2").show();

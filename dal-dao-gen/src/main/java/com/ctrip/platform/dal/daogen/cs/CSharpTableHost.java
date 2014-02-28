@@ -6,60 +6,31 @@ import com.ctrip.platform.dal.daogen.pojo.DatabaseCategory;
 
 public class CSharpTableHost {
 
-	private String nameSpaceEntity;
-
-	private String nameSpaceIDao;
-
-	private String nameSpaceDao;
-	
+	private String nameSpace;
 	private DatabaseCategory databaseCategory;
-
 	private String dbSetName;
-
 	private String tableName;
-	
 	private String className;
-
 	private boolean isTable;
 
 	//spa or sp3
 	private boolean isSpa;
-
-	private boolean hasInsertMethod;
-
-	private List<CSharpParameterHost> insertParameterList;
-
-	private String insertMethodName;
-
-	private boolean hasUpdateMethod;
-
-	private List<CSharpParameterHost> updateParameterList;
-
-	private String updateMethodName;
-
-	private boolean hasDeleteMethod;
-
-	private List<CSharpParameterHost> deleteParameterList;
-
-	private String deleteMethodName;
-
+	private CSharpSpaOperationHost spaInsert;
+	private CSharpSpaOperationHost spaUpdate;
+	private CSharpSpaOperationHost spaDelete;
+	private List<CSharpMethodHost> extraMethods;
+	
 	private List<CSharpParameterHost> primaryKeys;
 
 	private List<CSharpParameterHost> columns;
 	
 	private boolean hasPagination;
-
 	private boolean hasSpt;
-
 	private boolean hasSptI;
-
 	private boolean hasSptD;
-
 	private boolean hasSptU;
 	
 	private String spName;
-	
-	private List<CSharpMethodHost> extraMethods;
 	
 	public List<CSharpMethodHost> getExtraMethods() {
 		return extraMethods;
@@ -87,28 +58,12 @@ public class CSharpTableHost {
 		this.spParams = spParams;
 	}
 
-	public String getNameSpaceEntity() {
-		return nameSpaceEntity;
+	public String getNameSpace() {
+		return nameSpace;
 	}
 
-	public void setNameSpaceEntity(String nameSpaceEntity) {
-		this.nameSpaceEntity = nameSpaceEntity;
-	}
-
-	public String getNameSpaceIDao() {
-		return nameSpaceIDao;
-	}
-
-	public void setNameSpaceIDao(String nameSpaceIDao) {
-		this.nameSpaceIDao = nameSpaceIDao;
-	}
-
-	public String getNameSpaceDao() {
-		return nameSpaceDao;
-	}
-
-	public void setNameSpaceDao(String nameSpaceDao) {
-		this.nameSpaceDao = nameSpaceDao;
+	public void setNameSpace(String nameSpace) {
+		this.nameSpace= nameSpace;
 	}
 
 	public String getClassName() {
@@ -159,79 +114,28 @@ public class CSharpTableHost {
 		this.isSpa = isSpa;
 	}
 
-	public boolean isHasInsertMethod() {
-		return hasInsertMethod;
+	public CSharpSpaOperationHost getSpaInsert() {
+		return spaInsert;
 	}
 
-	public void setHasInsertMethod(boolean hasInsertMethod) {
-		this.hasInsertMethod = hasInsertMethod;
+	public void setSpaInsert(CSharpSpaOperationHost spaInsert) {
+		this.spaInsert = spaInsert;
 	}
 
-	public List<CSharpParameterHost> getInsertParameterList() {
-		return insertParameterList;
+	public CSharpSpaOperationHost getSpaUpdate() {
+		return spaUpdate;
 	}
 
-	public void setInsertParameterList(
-			List<CSharpParameterHost> insertParameterList) {
-		this.insertParameterList = insertParameterList;
+	public void setSpaUpdate(CSharpSpaOperationHost spaUpdate) {
+		this.spaUpdate = spaUpdate;
 	}
 
-	public String getInsertMethodName() {
-		return insertMethodName;
+	public CSharpSpaOperationHost getSpaDelete() {
+		return spaDelete;
 	}
 
-	public void setInsertMethodName(String insertMethodName) {
-		this.insertMethodName = insertMethodName;
-	}
-
-	public boolean isHasUpdateMethod() {
-		return hasUpdateMethod;
-	}
-
-	public void setHasUpdateMethod(boolean hasUpdateMethod) {
-		this.hasUpdateMethod = hasUpdateMethod;
-	}
-
-	public List<CSharpParameterHost> getUpdateParameterList() {
-		return updateParameterList;
-	}
-
-	public void setUpdateParameterList(
-			List<CSharpParameterHost> updateParameterList) {
-		this.updateParameterList = updateParameterList;
-	}
-
-	public String getUpdateMethodName() {
-		return updateMethodName;
-	}
-
-	public void setUpdateMethodName(String updateMethodName) {
-		this.updateMethodName = updateMethodName;
-	}
-
-	public boolean isHasDeleteMethod() {
-		return hasDeleteMethod;
-	}
-
-	public void setHasDeleteMethod(boolean hasDeleteMethod) {
-		this.hasDeleteMethod = hasDeleteMethod;
-	}
-
-	public List<CSharpParameterHost> getDeleteParameterList() {
-		return deleteParameterList;
-	}
-
-	public void setDeleteParameterList(
-			List<CSharpParameterHost> deleteParameterList) {
-		this.deleteParameterList = deleteParameterList;
-	}
-
-	public String getDeleteMethodName() {
-		return deleteMethodName;
-	}
-
-	public void setDeleteMethodName(String deleteMethodName) {
-		this.deleteMethodName = deleteMethodName;
+	public void setSpaDelete(CSharpSpaOperationHost spaDelete) {
+		this.spaDelete = spaDelete;
 	}
 
 	public List<CSharpParameterHost> getPrimaryKeys() {

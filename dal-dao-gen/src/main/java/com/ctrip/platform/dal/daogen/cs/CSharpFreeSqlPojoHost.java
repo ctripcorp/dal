@@ -4,17 +4,7 @@ import java.util.List;
 
 public class CSharpFreeSqlPojoHost {
 	
-	private String nameSpaceDao;
-	
-	private String nameSpaceEntity;
-	
-	public String getNameSpaceEntity() {
-		return nameSpaceEntity;
-	}
-
-	public void setNameSpaceEntity(String nameSpaceEntity) {
-		this.nameSpaceEntity = nameSpaceEntity;
-	}
+	private String nameSpace;
 
 	private String tableName;
 	
@@ -22,12 +12,12 @@ public class CSharpFreeSqlPojoHost {
 	
 	private List<CSharpParameterHost> columns;
 
-	public String getNameSpaceDao() {
-		return nameSpaceDao;
+	public String getNameSpace() {
+		return nameSpace;
 	}
 
-	public void setNameSpaceDao(String nameSpaceDao) {
-		this.nameSpaceDao = nameSpaceDao;
+	public void setNameSpace(String nameSpace) {
+		this.nameSpace = nameSpace;
 	}
 
 	public String getTableName() {

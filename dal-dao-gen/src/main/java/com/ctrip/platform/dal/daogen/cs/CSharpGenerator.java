@@ -10,9 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
@@ -20,7 +18,6 @@ import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
-import com.ctrip.platform.dal.daogen.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.pojo.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.pojo.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
@@ -49,7 +46,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		// 首先按照ServerID, DbName以及ClassName做一次GroupBy
 		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();
-		
+
 		for (GenTaskByFreeSql task : tasks) {
 			String key = String.format("%s_%s_%s", task.getServer_id(),
 					task.getDb_name(), task.getClass_name());
@@ -76,9 +73,7 @@ public class CSharpGenerator extends AbstractGenerator {
 			CSharpFreeSqlHost host = new CSharpFreeSqlHost();
 			host.setDbSetName(currentTasks.get(0).getDb_name());
 			host.setClassName(currentTasks.get(0).getClass_name());
-			host.setNameSpaceEntity(String.format("%s.Entity.DataModel",
-					super.namespace));
-			host.setNameSpaceDao(String.format("%s.Dao", super.namespace));
+			host.setNameSpace(super.namespace);
 
 			List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
 			// 每个Method可能就有一个Pojo
@@ -126,8 +121,8 @@ public class CSharpGenerator extends AbstractGenerator {
 							freeSqlHost.setColumns(pHosts);
 							freeSqlHost.setTableName("");
 							freeSqlHost.setClassName(task.getClass_name());
-							freeSqlHost.setNameSpaceDao(host.getNameSpaceDao());
-							freeSqlHost.setNameSpaceEntity(host.getNameSpaceEntity());
+							freeSqlHost.setNameSpace(host
+									.getNameSpace());
 
 							pojoHosts.put(task.getClass_name(), freeSqlHost);
 						} catch (SQLException e) {
@@ -135,23 +130,17 @@ public class CSharpGenerator extends AbstractGenerator {
 						}
 					}
 				}
-
 			}
 			host.setMethods(methods);
 			hosts.add(host);
-
 		}
 
-		VelocityContext context = new VelocityContext();
-		context.put("WordUtils", WordUtils.class);
-		context.put("StringUtils", StringUtils.class);
-		
-		File mavenLikeDir = new File(String.format("gen/%s/cs",
-				projectId));
-		
-		for(CSharpFreeSqlPojoHost host : pojoHosts.values()){
-			context.put("host", host);
+		VelocityContext context = buildDefaultVelocityContext();
 
+		File mavenLikeDir = new File(String.format("gen/%s/cs", projectId));
+
+		for (CSharpFreeSqlPojoHost host : pojoHosts.values()) {
+			context.put("host", host);
 			FileWriter pojoWriter = null;
 			try {
 				pojoWriter = new FileWriter(String.format("%s/Entity/%s.cs",
@@ -168,13 +157,10 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		for (CSharpFreeSqlHost host : hosts) {
 			context.put("host", host);
-
 			FileWriter daoWriter = null;
 			try {
-
 				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.cs",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
-
 				Velocity.mergeTemplate("templates/FreeSqlDAO.cs.tpl", "UTF-8",
 						context, daoWriter);
 			} catch (IOException e) {
@@ -198,14 +184,12 @@ public class CSharpGenerator extends AbstractGenerator {
 		List<CSharpTableHost> tableHosts = new ArrayList<CSharpTableHost>();
 		List<CSharpTableHost> spHosts = new ArrayList<CSharpTableHost>();
 
-		List<GenTaskBySqlBuilder> sqlBuilders = daoBySqlBuilder
-				.getTasksByProjectId(projectId);
-
 		// 首先为所有表/存储过程生成DAO
 		for (GenTaskByTableViewSp tableViewSp : tasks) {
 
 			String dbName = tableViewSp.getDb_name();
-			String[] viewNames = StringUtils.split(tableViewSp.getView_names(), ",");
+			String[] viewNames = StringUtils.split(tableViewSp.getView_names(),
+					",");
 			String[] tableNames = StringUtils.split(
 					tableViewSp.getTable_names(), ",");
 			String[] spNames = StringUtils
@@ -214,7 +198,6 @@ public class CSharpGenerator extends AbstractGenerator {
 			String prefix = tableViewSp.getPrefix();
 			String suffix = tableViewSp.getSuffix();
 			boolean pagination = tableViewSp.isPagination();
-			boolean cud_by_sp = tableViewSp.isCud_by_sp();
 			DbServer dbServer = daoOfDbServer.getDbServerByID(tableViewSp
 					.getServer_id());
 			DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
@@ -226,204 +209,18 @@ public class CSharpGenerator extends AbstractGenerator {
 					tableViewSp.getServer_id(), dbName);
 
 			for (String table : tableNames) {
-
-				// 主键及所有列
-				List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
-						tableViewSp.getServer_id(), dbName, table);
-				List<AbstractParameterHost> allColumnsAbstract = DbUtils
-						.getAllColumnNames(tableViewSp.getServer_id(), dbName,
-								table, CurrentLanguage.CSharp);
-				
-				List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
-				for(AbstractParameterHost h : allColumnsAbstract){
-					allColumns.add((CSharpParameterHost)h);
-				}
-
-				List<CSharpParameterHost> primaryKeys = new ArrayList<CSharpParameterHost>();
-				for (CSharpParameterHost h : allColumns) {
-					if (h.isNullable()
-							&& Consts.CSharpValueTypes.contains(h.getType())) {
-						h.setNullable(true);
-					} else {
-						h.setNullable(false);
-					}
-					if (primaryKeyNames.contains(h.getName())) {
-						h.setPrimary(true);
-						primaryKeys.add(h);
-					}
-				}
-
-				List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
-
-				// 首先设置SqlBuilder的所有方法
-				// size每次都会进行一次计算
-				int wholeSize = sqlBuilders.size();
-				List<Integer> itemsToRemove = new ArrayList<Integer>();
-				for (int i = 0; i < wholeSize; i++) {
-					GenTaskBySqlBuilder currentSqlBuilder = sqlBuilders.get(i);
-					if (currentSqlBuilder.getDb_name().equals(dbName)
-							&& currentSqlBuilder.getTable_name().equals(table)) {
-						currentTableBuilders.add(currentSqlBuilder);
-						itemsToRemove.add(i);
-					}
-				}
-
-				for (Integer i : itemsToRemove) {
-					sqlBuilders.remove(i);
-				}
-
-				List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
-
-				for (GenTaskBySqlBuilder builder : currentTableBuilders) {
-					CSharpMethodHost method = new CSharpMethodHost();
-					method.setCrud_type(builder.getCrud_type());
-					method.setName(builder.getMethod_name());
-					method.setSql(builder.getSql_content());
-					List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
-					if (method.getCrud_type().equals("select")
-							|| method.getCrud_type().equals("delete")) {
-						String[] conditions = StringUtils.split(
-								builder.getCondition(), ",");
-						for (String condition : conditions) {
-							String name = StringUtils.split(condition, "_")[0];
-							for (CSharpParameterHost pHost : allColumns) {
-								if (pHost.getName().equals(name)) {
-									parameters.add(pHost);
-									break;
-								}
-							}
-						}
-					} else if (method.getCrud_type().equals("insert")) {
-						String[] fields = StringUtils.split(
-								builder.getFields(), ",");
-						for (String field : fields) {
-							for (CSharpParameterHost pHost : allColumns) {
-								if (pHost.getName().equals(field)) {
-									parameters.add(pHost);
-									break;
-								}
-							}
-						}
-					} else {
-						String[] fields = StringUtils.split(
-								builder.getFields(), ",");
-						String[] conditions = StringUtils.split(
-								builder.getCondition(), ",");
-						for (CSharpParameterHost pHost : allColumns) {
-							for (String field : fields) {
-								if (pHost.getName().equals(field)) {
-									parameters.add(pHost);
-									break;
-								}
-							}
-							for (String condition : conditions) {
-								String name = StringUtils.split(condition, "_")[0];
-								if (pHost.getName().equals(name)) {
-									parameters.add(pHost);
-									break;
-								}
-							}
-						}
-					}
-					method.setParameters(parameters);
-					methods.add(method);
-				}
-
-				CSharpTableHost tableHost = new CSharpTableHost();
-
-				tableHost.setExtraMethods(methods);
-
-				String className = table;
-				if (null != prefix && !prefix.isEmpty()) {
-					className = className.substring(prefix.length());
-				}
-				if (null != suffix && !suffix.isEmpty()) {
-					className = className + suffix;
-				}
-
-				tableHost.setNameSpaceEntity(String.format(
-						"%s.Entity.DataModel", super.namespace));
-				tableHost.setNameSpaceIDao(String.format("%s.Interface.IDao",
-						super.namespace));
-				tableHost.setNameSpaceDao(String.format("%s.Dao",
-						super.namespace));
-				tableHost.setDatabaseCategory(dbCategory);
-				tableHost.setDbSetName(dbName);
-				tableHost.setTableName(table);
-				tableHost.setClassName(className);
-				tableHost.setTable(true);
-				tableHost.setSpa(cud_by_sp);
-				// SP方式增删改
-				if (tableHost.isSpa()) {
-					CSharpSpInsertHost insertHost = CSharpSpInsertHost
-							.getInsertSp(tableViewSp.getServer_id(), dbName,
-									table, allSpNames);
-					tableHost
-							.setHasInsertMethod(insertHost.isHasInsertMethod());
-					if (tableHost.isHasInsertMethod()) {
-						tableHost.setInsertMethodName(insertHost
-								.getInsertMethodName());
-						tableHost.setInsertParameterList(insertHost
-								.getInsertParameterList());
-					}
-
-					CSharpSpUpdateHost updateHost = CSharpSpUpdateHost
-							.getUpdateSp(tableViewSp.getServer_id(), dbName,
-									table, allSpNames);
-					tableHost
-							.setHasUpdateMethod(updateHost.isHasUpdateMethod());
-					if (tableHost.isHasUpdateMethod()) {
-						tableHost.setUpdateMethodName(updateHost
-								.getUpdateMethodName());
-						tableHost.setUpdateParameterList(updateHost
-								.getUpdateParameterList());
-					}
-
-					CSharpSpDeleteHost deleteHost = CSharpSpDeleteHost
-							.getDeleteSp(tableViewSp.getServer_id(), dbName,
-									table, allSpNames);
-					tableHost
-							.setHasDeleteMethod(deleteHost.isHasDeleteMethod());
-					if (tableHost.isHasDeleteMethod()) {
-						tableHost.setDeleteMethodName(deleteHost
-								.getDeleteMethodName());
-						tableHost.setDeleteParameterList(deleteHost
-								.getDeleteParameterList());
-					}
-				}
-
-				tableHost.setPrimaryKeys(primaryKeys);
-				tableHost.setColumns(allColumns);
-
-				tableHost.setHasPagination(pagination);
-
-				StoredProcedure expectSptI = new StoredProcedure();
-				expectSptI.setName(String.format("spT_%s_i", table));
-
-				StoredProcedure expectSptU = new StoredProcedure();
-				expectSptU.setName(String.format("spT_%s_u", table));
-
-				StoredProcedure expectSptD = new StoredProcedure();
-				expectSptD.setName(String.format("spT_%s_d", table));
-
-				tableHost.setHasSptI(allSpNames.contains(expectSptI));
-				tableHost.setHasSptU(allSpNames.contains(expectSptU));
-				tableHost.setHasSptD(allSpNames.contains(expectSptD));
-				tableHost.setHasSpt(tableHost.isHasSptI()
-						|| tableHost.isHasSptU() || tableHost.isHasSptD());
-
-				tableHosts.add(tableHost);
+				tableHosts.add(buildTableHost(tableViewSp, table, dbCategory,
+						allSpNames));
 			}
-			
-			for (String view : viewNames) {
 
+			for (String view : viewNames) {
 				List<AbstractParameterHost> allColumnsAbstract = DbUtils
 						.getAllColumnNames(tableViewSp.getServer_id(), dbName,
 								view, CurrentLanguage.CSharp);
-				
+
 				List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
-				for(AbstractParameterHost h : allColumnsAbstract){
-					allColumns.add((CSharpParameterHost)h);
+				for (AbstractParameterHost h : allColumnsAbstract) {
+					allColumns.add((CSharpParameterHost) h);
 				}
 
 				for (CSharpParameterHost h : allColumns) {
@@ -434,34 +231,17 @@ public class CSharpGenerator extends AbstractGenerator {
 						h.setNullable(false);
 					}
 				}
-				
+
 				CSharpTableHost tableHost = new CSharpTableHost();
-
-				String className = view;
-				if (null != prefix && !prefix.isEmpty()) {
-					className = className.substring(prefix.length());
-				}
-				if (null != suffix && !suffix.isEmpty()) {
-					className = className + suffix;
-				}
-
-				tableHost.setNameSpaceEntity(String.format(
-						"%s.Entity.DataModel", super.namespace));
-				tableHost.setNameSpaceIDao(String.format("%s.Interface.IDao",
-						super.namespace));
-				tableHost.setNameSpaceDao(String.format("%s.Dao",
-						super.namespace));
+				tableHost.setNameSpace(super.namespace);
 				tableHost.setDatabaseCategory(dbCategory);
 				tableHost.setDbSetName(dbName);
 				tableHost.setTableName(view);
-				tableHost.setClassName(className);
+				tableHost.setClassName(getPojoClassName(prefix, suffix, view));
 				tableHost.setTable(false);
 				tableHost.setSpa(false);
-		
 				tableHost.setColumns(allColumns);
-
 				tableHost.setHasPagination(pagination);
-
 				tableHosts.add(tableHost);
 			}
 
@@ -478,45 +258,243 @@ public class CSharpGenerator extends AbstractGenerator {
 				currentSp.setSchema(schema);
 				currentSp.setName(realSpName);
 
-				CSharpTableHost tableHost = new CSharpTableHost();
-				String className = realSpName.replace("_", "");
-				if (null != prefix && !prefix.isEmpty()) {
-					className = className.substring(prefix.length());
-				}
-				if (null != suffix && !suffix.isEmpty()) {
-					className = className + suffix;
-				}
-
-				tableHost.setNameSpaceEntity(String.format(
-						"%s.Entity.DataModel", super.namespace));
-				tableHost.setNameSpaceDao(String.format("%s.Dao",
-						super.namespace));
-				tableHost.setDatabaseCategory(dbCategory);
-				tableHost.setDbSetName(dbName);
-				tableHost.setClassName(className);
-				tableHost.setTable(false);
-				tableHost.setSpName(spName);
 				List<AbstractParameterHost> params = DbUtils.getSpParams(
-						tableViewSp.getServer_id(), dbName, currentSp, 0);
+						tableViewSp.getServer_id(), dbName, currentSp,CurrentLanguage.CSharp);
 				List<CSharpParameterHost> realParams = new ArrayList<CSharpParameterHost>();
 				for (AbstractParameterHost p : params) {
 					realParams.add((CSharpParameterHost) p);
 				}
-				tableHost.setSpParams(realParams);
 
+				CSharpTableHost tableHost = new CSharpTableHost();
+				tableHost.setNameSpace(super.namespace);
+				tableHost.setDatabaseCategory(dbCategory);
+				tableHost.setDbSetName(dbName);
+				tableHost.setClassName(getPojoClassName(prefix, suffix,
+						realSpName.replace("_", "")));
+				tableHost.setTable(false);
+				tableHost.setSpName(spName);
+				tableHost.setSpParams(realParams);
 				spHosts.add(tableHost);
 			}
 
 		}
 
-		VelocityContext context = new VelocityContext();
-		context.put("WordUtils", WordUtils.class);
-		context.put("StringUtils", StringUtils.class);
-		
-		File mavenLikeDir = new File(String.format("gen/%s/cs",
-				projectId));
-		
+		if (sqlBuilders.size() > 0) {
+			List<GenTaskBySqlBuilder> _tableNames = new ArrayList<GenTaskBySqlBuilder>();
+			for (GenTaskBySqlBuilder sqlBuilder : sqlBuilders) {
+				_tableNames.add(sqlBuilder);
 
+			}
+			for (GenTaskBySqlBuilder _table : _tableNames) {
+				GenTaskByTableViewSp tableViewSp = new GenTaskByTableViewSp();
+				tableViewSp.setCud_by_sp(false);
+				tableViewSp.setPagination(false);
+				tableViewSp.setDb_name(_table.getDb_name());
+				tableViewSp.setServer_id(_table.getServer_id());
+				tableViewSp.setPrefix("");
+				tableViewSp.setSuffix("_gen");
+
+				DbServer dbServer = daoOfDbServer.getDbServerByID(tableViewSp
+						.getServer_id());
+				DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
+				if (dbServer.getDb_type().equalsIgnoreCase("mysql")) {
+					dbCategory = DatabaseCategory.MySql;
+				}
+
+				List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(
+						tableViewSp.getServer_id(), _table.getDb_name());
+
+				tableHosts.add(buildTableHost(tableViewSp,
+						_table.getTable_name(), dbCategory, allSpNames));
+			}
+		}
+
+		VelocityContext context = buildDefaultVelocityContext();
+
+		File mavenLikeDir = new File(String.format("gen/%s/cs", projectId));
+
+		generateTableDao(tableHosts, context, mavenLikeDir);
+
+		generateSpDao(spHosts, context, mavenLikeDir);
+
+	}
+
+	private CSharpTableHost buildTableHost(GenTaskByTableViewSp tableViewSp,
+			String table, DatabaseCategory dbCategory,
+			List<StoredProcedure> allSpNames) {
+		// 主键及所有列
+		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
+				tableViewSp.getServer_id(), tableViewSp.getDb_name(), table);
+		List<AbstractParameterHost> allColumnsAbstract = DbUtils
+				.getAllColumnNames(tableViewSp.getServer_id(),
+						tableViewSp.getDb_name(), table, CurrentLanguage.CSharp);
+
+		List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
+		for (AbstractParameterHost h : allColumnsAbstract) {
+			allColumns.add((CSharpParameterHost) h);
+		}
+
+		List<CSharpParameterHost> primaryKeys = new ArrayList<CSharpParameterHost>();
+		for (CSharpParameterHost h : allColumns) {
+			if (h.isNullable() && Consts.CSharpValueTypes.contains(h.getType())) {
+				h.setNullable(true);
+			} else {
+				h.setNullable(false);
+			}
+			if (primaryKeyNames.contains(h.getName())) {
+				h.setPrimary(true);
+				primaryKeys.add(h);
+			}
+		}
+
+		List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(
+				sqlBuilders, tableViewSp.getDb_name(), table);
+
+		List<CSharpMethodHost> methods = buildMethodHosts(allColumns,
+				currentTableBuilders);
+
+		CSharpTableHost tableHost = new CSharpTableHost();
+		tableHost.setExtraMethods(methods);
+		tableHost.setNameSpace(super.namespace);
+		tableHost.setDatabaseCategory(dbCategory);
+		tableHost.setDbSetName(tableViewSp.getDb_name());
+		tableHost.setTableName(table);
+		tableHost.setClassName(getPojoClassName(tableViewSp.getPrefix(),
+				tableViewSp.getSuffix(), table));
+		tableHost.setTable(true);
+		tableHost.setSpa(tableViewSp.isCud_by_sp());
+		// SP方式增删改
+		if (tableHost.isSpa()) {
+			tableHost.setSpaInsert(CSharpSpaOperationHost.getSpaOperation(
+					tableViewSp.getServer_id(), tableViewSp.getDb_name(),
+					table, allSpNames, "i"));
+			tableHost.setSpaUpdate(CSharpSpaOperationHost.getSpaOperation(
+					tableViewSp.getServer_id(), tableViewSp.getDb_name(),
+					table, allSpNames, "u"));
+			tableHost.setSpaDelete(CSharpSpaOperationHost.getSpaOperation(
+					tableViewSp.getServer_id(), tableViewSp.getDb_name(),
+					table, allSpNames, "d"));
+		}
+
+		tableHost.setPrimaryKeys(primaryKeys);
+		tableHost.setColumns(allColumns);
+
+		tableHost.setHasPagination(tableViewSp.isPagination());
+
+		StoredProcedure expectSptI = new StoredProcedure();
+		expectSptI.setName(String.format("spT_%s_i", table));
+
+		StoredProcedure expectSptU = new StoredProcedure();
+		expectSptU.setName(String.format("spT_%s_u", table));
+
+		StoredProcedure expectSptD = new StoredProcedure();
+		expectSptD.setName(String.format("spT_%s_d", table));
+
+		tableHost.setHasSptI(allSpNames.contains(expectSptI));
+		tableHost.setHasSptU(allSpNames.contains(expectSptU));
+		tableHost.setHasSptD(allSpNames.contains(expectSptD));
+		tableHost.setHasSpt(tableHost.isHasSptI() || tableHost.isHasSptU()
+				|| tableHost.isHasSptD());
+
+		return tableHost;
+	}
+
+	private List<GenTaskBySqlBuilder> filterExtraMethods(
+			List<GenTaskBySqlBuilder> sqlBuilders, String dbName, String table) {
+		List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
+
+		// 首先设置SqlBuilder的所有方法
+		// size每次都会进行一次计算
+		int wholeSize = sqlBuilders.size();
+		List<Integer> itemsToRemove = new ArrayList<Integer>();
+		for (int i = 0; i < wholeSize; i++) {
+			GenTaskBySqlBuilder currentSqlBuilder = sqlBuilders.get(i);
+			if (currentSqlBuilder.getDb_name().equals(dbName)
+					&& currentSqlBuilder.getTable_name().equals(table)) {
+				currentTableBuilders.add(currentSqlBuilder);
+				itemsToRemove.add(i);
+			}
+		}
+
+		for (Integer i : itemsToRemove) {
+			sqlBuilders.remove(i);
+		}
+		return currentTableBuilders;
+	}
+
+	private List<CSharpMethodHost> buildMethodHosts(
+			List<CSharpParameterHost> allColumns,
+			List<GenTaskBySqlBuilder> currentTableBuilders) {
+		List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
+
+		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
+			CSharpMethodHost method = new CSharpMethodHost();
+			method.setCrud_type(builder.getCrud_type());
+			method.setName(builder.getMethod_name());
+			method.setSql(builder.getSql_content());
+			List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
+			if (method.getCrud_type().equals("select")
+					|| method.getCrud_type().equals("delete")) {
+				String[] conditions = StringUtils.split(builder.getCondition(),
+						",");
+				for (String condition : conditions) {
+					String name = StringUtils.split(condition, "_")[0];
+					for (CSharpParameterHost pHost : allColumns) {
+						if (pHost.getName().equals(name)) {
+							parameters.add(pHost);
+							break;
+						}
+					}
+				}
+			} else if (method.getCrud_type().equals("insert")) {
+				String[] fields = StringUtils.split(builder.getFields(), ",");
+				for (String field : fields) {
+					for (CSharpParameterHost pHost : allColumns) {
+						if (pHost.getName().equals(field)) {
+							parameters.add(pHost);
+							break;
+						}
+					}
+				}
+			} else {
+				String[] fields = StringUtils.split(builder.getFields(), ",");
+				String[] conditions = StringUtils.split(builder.getCondition(),
+						",");
+				for (CSharpParameterHost pHost : allColumns) {
+					for (String field : fields) {
+						if (pHost.getName().equals(field)) {
+							parameters.add(pHost);
+							break;
+						}
+					}
+					for (String condition : conditions) {
+						String name = StringUtils.split(condition, "_")[0];
+						if (pHost.getName().equals(name)) {
+							parameters.add(pHost);
+							break;
+						}
+					}
+				}
+			}
+			method.setParameters(parameters);
+			methods.add(method);
+		}
+		return methods;
+	}
+	
+	private String getPojoClassName(String prefix, String suffix, String table) {
+		String className = table;
+		if (null != prefix && !prefix.isEmpty()) {
+			className = className.substring(prefix.length());
+		}
+		if (null != suffix && !suffix.isEmpty()) {
+			className = className + suffix;
+		}
+		return className;
+	}
+
+	private void generateTableDao(List<CSharpTableHost> tableHosts,
+			VelocityContext context, File mavenLikeDir) {
 		for (CSharpTableHost host : tableHosts) {
 			context.put("host", host);
 
@@ -524,7 +502,7 @@ public class CSharpGenerator extends AbstractGenerator {
 			FileWriter iDaoWriter = null;
 			FileWriter pojoWriter = null;
 			try {
-			
+
 				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.cs",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
 				pojoWriter = new FileWriter(String.format("%s/Entity/%s.cs",
@@ -546,7 +524,10 @@ public class CSharpGenerator extends AbstractGenerator {
 				JavaIOUtils.closeWriter(iDaoWriter);
 			}
 		}
+	}
 
+	private void generateSpDao(List<CSharpTableHost> spHosts,
+			VelocityContext context, File mavenLikeDir) {
 		for (CSharpTableHost host : spHosts) {
 			context.put("host", host);
 
@@ -570,7 +551,6 @@ public class CSharpGenerator extends AbstractGenerator {
 				JavaIOUtils.closeWriter(pojoWriter);
 			}
 		}
-
 	}
 
 }

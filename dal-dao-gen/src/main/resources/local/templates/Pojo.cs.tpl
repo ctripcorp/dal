@@ -1,7 +1,7 @@
 using System;
 using Arch.Data.Orm;
 
-namespace ${host.getNameSpaceEntity()}
+namespace ${host.getNameSpace()}.Entity.DataModel
 {
     /// <summary>
     /// ${host.getTableName()}

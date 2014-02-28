@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.pojo.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.pojo.StoredProcedure;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 
@@ -61,7 +62,7 @@ public class SpaOperationHost {
 		}
 		
 		if(host.exist){
-			List<AbstractParameterHost> params =  DbUtils.getSpParams(server, dbName, currentSp, 1);
+			List<AbstractParameterHost> params =  DbUtils.getSpParams(server, dbName, currentSp, CurrentLanguage.Java);
 			List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 			for(AbstractParameterHost p : params){
 				realParams.add((JavaParameterHost) p);

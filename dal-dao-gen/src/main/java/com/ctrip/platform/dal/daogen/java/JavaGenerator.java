@@ -162,7 +162,7 @@ public class JavaGenerator extends AbstractGenerator {
 				spHost.setClassName(className);
 				spHost.setSpName(spName);
 				List<AbstractParameterHost> params = DbUtils.getSpParams(
-						tableViewSp.getServer_id(), dbName, currentSp, 1);
+						tableViewSp.getServer_id(), dbName, currentSp, CurrentLanguage.Java);
 				List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 				for (AbstractParameterHost p : params) {
 					realParams.add((JavaParameterHost) p);

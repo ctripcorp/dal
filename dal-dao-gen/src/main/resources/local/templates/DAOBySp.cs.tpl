@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using Arch.Data;
 using Arch.Data.DbEngine;
-using ${host.getNameSpaceEntity()};
+using ${host.getNameSpace()}.Entity.DataModel;
 
-namespace ${host.getNameSpaceDao()}
+namespace ${host.getNameSpace()}.Dao
 {
     public partial class ${host.getClassName()}Dao
     {

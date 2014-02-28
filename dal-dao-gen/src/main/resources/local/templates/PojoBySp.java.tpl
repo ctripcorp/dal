@@ -1,6 +1,6 @@
 package ${host.getDaoNamespace()};
 
-#foreach( $field in ${host.getImports()} )
+#foreach( $field in ${host.getPojoImports()} )
 import ${field};
 #end
 

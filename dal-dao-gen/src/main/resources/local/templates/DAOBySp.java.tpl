@@ -1,13 +1,13 @@
 package ${host.getPackageName()};
 
-import java.sql.SQLException;
-import java.util.Map;
+#foreach( $field in ${host.getDaoImports()} )
+import ${field};
+#end
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.tester.person.Person;
 
 public class ${host.getClassName()}Dao {
 	private DalClient client;
@@ -22,16 +22,16 @@ public class ${host.getClassName()}Dao {
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;
 #foreach($p in $host.getParameters())
-#if(ParameterDirection.${p.getDirection() == ParameterDirection.Input})
+#if($p.getDirection().name() == "Input")
 		parameters.set(i, ${p.getJavaTypeDisplay()}, param.get${p.getCapitalizedName()});
 #end
-#if(ParameterDirection.${p.getDirection() == ParameterDirection.InputOutput})
+#if($p.getDirection().name() == "InputOutput")
 		parameters.registerInOut(i, ${p.getJavaTypeDisplay()}, ${p.getName()}, param.get${p.getCapitalizedName()});
 #end
-#if(ParameterDirection.${p.getDirection() == ParameterDirection.Output})
+#if($p.getDirection().name() == "Output")
 		parameters.registerOut(i, ${p.getJavaTypeDisplay()}, ${p.getName()});
 #end
-
+#end
 		/* To specify returned result(not the output or inputoutput parameter)
 		DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
 		param = StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName("result").build();

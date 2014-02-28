@@ -1,11 +1,6 @@
 package ${host.getPackageName()};
 
-import java.sql.ResultSet;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
-
-#foreach( $field in ${host.getImports()} )
+#foreach( $field in ${host.getDaoImports()} )
 import ${field};
 #end
 
@@ -108,7 +103,7 @@ public class ${host.getPojoClassName()}Dao {
 			${host.getPojoClassName()} pojo = new ${host.getPojoClassName()}();
 			
 #foreach( $field in ${host.getFields()} )
-			pojo.set${field.getName()}((${field.getClassDisplayName()})rs.getObject("${field.getName()}"));
+			pojo.set${field.getCapitalizedName()}((${field.getClassDisplayName()})rs.getObject("${field.getName()}"));
 #end
 	
 			return pojo;
@@ -146,7 +141,7 @@ public class ${host.getPojoClassName()}Dao {
 	
 		@Override
 		public Number getIdentityValue(${host.getPojoClassName()} pojo) {
-			return #if($host.isHasIdentity())pojo.get${host.getIdentityColumnName()}()#{else}null#end;
+			return #if($host.isHasIdentity())pojo.get${WordUtils.capitalized(${host.getIdentityColumnName()})}()#{else}null#end;
 		}
 	
 		@Override
@@ -155,7 +150,7 @@ public class ${host.getPojoClassName()}Dao {
 			
 #foreach( $field in ${host.getFields()} )
 #if($field.isPrimary())
-			primaryKeys.put("${field.getName()}", pojo.get${field.getName()}());
+			primaryKeys.put("${field.getName()}", pojo.get${field.getCapitalizedName()}());
 #end
 #end
 	
@@ -167,7 +162,7 @@ public class ${host.getPojoClassName()}Dao {
 			Map<String, Object> map = new LinkedHashMap<String, Object>();
 			
 #foreach( $field in ${host.getFields()} )
-			map.put("${field.getName()}", pojo.get${field.getName()}());
+			map.put("${field.getName()}", pojo.get${field.getCapitalizedName()}());
 #end
 	
 			return map;

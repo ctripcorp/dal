@@ -179,6 +179,13 @@ public class JavaGenerator extends AbstractGenerator {
 		File mavenLikeDir = new File(String.format("gen/%s/java",
 				projectId));
 
+		try {
+			FileUtils.forceMkdir(mavenLikeDir);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		generateTableDao(tableHosts, context, mavenLikeDir);
 		generateSpDao(spHosts, context, mavenLikeDir);
 	}
@@ -189,18 +196,25 @@ public class JavaGenerator extends AbstractGenerator {
 			context.put("host", host);
 
 			FileWriter daoWriter = null;
+			FileWriter pojoWriter = null;
+			
 			try {
 				FileUtils.forceMkdir(mavenLikeDir);
 
-				daoWriter = new FileWriter(String.format("%s/%sDao.java",
+				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.java",
+						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
+				pojoWriter = new FileWriter(String.format("%s/Entity/%s.java",
 						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
 
 				Velocity.mergeTemplate("templates/DAO.java.tpl", "UTF-8",
 						context, daoWriter);
+				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
+						context, pojoWriter);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
 				JavaIOUtils.closeWriter(daoWriter);
+				JavaIOUtils.closeWriter(pojoWriter);
 			}
 		}
 	}
@@ -221,7 +235,7 @@ public class JavaGenerator extends AbstractGenerator {
 
 				Velocity.mergeTemplate("templates/DAOBySp.java.tpl", "UTF-8",
 						context, daoWriter);
-				Velocity.mergeTemplate("templates/PojoBySp.java.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
 						context, pojoWriter);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -240,7 +254,7 @@ public class JavaGenerator extends AbstractGenerator {
 		if (null != suffix && !suffix.isEmpty()) {
 			className = className + suffix;
 		}
-		return className;
+		return WordUtils.capitalize(className);
 	}
 
 	private List<GenTaskBySqlBuilder> filterExtraMethods(

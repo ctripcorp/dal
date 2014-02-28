@@ -53,13 +53,22 @@ public class SpHost {
 		this.parameters = parameters;
 	}
 	
-	private void buildImports() {
-//		imports.add(java.sql.ResultSet.class.getName());
-//		imports.add(java.sql.SQLException.class.getName());
-//		imports.add(java.util.Map.class.getName());
-//		imports.add(java.util.LinkedHashMap.class.getName());
+	public Set<String> getDaoImports() {
+		Set<String> imports = new TreeSet<String>();
 		
-		for(JavaParameterHost field: parameters) {
+		imports.add(java.sql.SQLException.class.getName());
+		imports.add(java.util.Map.class.getName());
+		imports.add(java.sql.Types.class.getName());
+		imports.addAll(getPojoImports());
+
+		return imports;
+	}
+	
+	public Set<String> getPojoImports() {
+		Set<String> imports = new TreeSet<String>();
+
+		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(parameters);
+		for(JavaParameterHost field: allTypes) {
 			Class<?> clazz = field.getJavaClass();
 			if(byte[].class.equals(clazz))
 				continue;
@@ -67,9 +76,7 @@ public class SpHost {
 				continue;
 			imports.add(clazz.getName());
 		}
-	}
-	
-	public Set<String> getImports() {
+		
 		return imports;
-	}	
+	}
 }

@@ -1,26 +1,25 @@
+package ${host.getPackageName()};
 
-package ${pojoHost.getDaoNamespace()};
-
-#foreach( $field in ${pojoHost.getImports()} )
+#foreach( $field in ${host.getPojoImports()} )
 import ${field};
 #end
 
 import com.ctrip.platform.dal.dao.DalPojo;
 
-public class ${pojoHost.getClassName()} implements DalPojo {
+public class ${host.getPojoClassName()} implements DalPojo {
 
-#foreach( $field in ${pojoHost.getFields()} )
-	private ${field.getJavaClass().getSimpleName()} ${field.getName()};
+#foreach( $field in ${host.getFields()} )
+	private ${field.getClassDisplayName()} ${field.getUncapitalizedName()};
 #end
 
-#foreach( $field in ${pojoHost.getFields()} )
-	public ${field.getJavaClass().getSimpleName()} get${field.getName()}#[[(){]]#
-		return ${field.getName()};
-	#[[}]]#
+#foreach( $field in ${host.getFields()} )
+	public ${field.getClassDisplayName()} get${field.getCapitalizedName()}() {
+		return ${field.getUncapitalizedName()};
+	}
 
-	public void set${field.getName()}#[[(]]#${field.getJavaClass().getSimpleName()} ${field.getName()}#[[)]]##[[{]]#
-		this.${field.getName()} = ${field.getName()};
-	#[[}]]#
+	public void set${field.getCapitalizedName()}(${field.getClassDisplayName()} ${field.getUncapitalizedName()}) {
+		this.${field.getUncapitalizedName()} = ${field.getUncapitalizedName()};
+	}
 
 #end
 }

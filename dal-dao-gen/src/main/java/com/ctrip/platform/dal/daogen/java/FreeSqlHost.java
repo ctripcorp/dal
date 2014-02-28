@@ -1,12 +1,13 @@
 package com.ctrip.platform.dal.daogen.java;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FreeSqlHost {
 	private String packageName;
 	private String dbName;
 	private String className;
-	private List<JavaMethodHost> methods;
+	private List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 
 	
 	public String getPackageName() {

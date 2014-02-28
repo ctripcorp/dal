@@ -70,7 +70,7 @@ public class ${host.getPojoClassName()}Dao {
 		DalHints hints = new DalHints();
 		int i = 1;
 #foreach($p in $method.getParameters())  
-		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName());
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
 #end
 #if($method.getCrud_type() == "select")
 		return queryDao.query(sql, parameters, hints, personRowMapper);

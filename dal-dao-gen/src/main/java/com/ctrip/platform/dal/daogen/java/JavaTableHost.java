@@ -20,7 +20,7 @@ public class JavaTableHost {
 	private SpaOperationHost spaInsert;
 	private SpaOperationHost spaDelete;
 	private SpaOperationHost spaUpdate;
-	private List<JavaMethodHost> methods;
+	private List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 	private Set<String> imports = new TreeSet<String>();
 
 	public String getPackageName() {
@@ -77,7 +77,6 @@ public class JavaTableHost {
 
 	public void setFields(List<JavaParameterHost> fields) {
 		this.fields = fields;
-		buildImports();
 	}
 
 	public boolean isHasIdentity() {
@@ -138,8 +137,13 @@ public class JavaTableHost {
 		for(JavaMethodHost method: methods) {
 			allTypes.addAll(method.getParameters());
 		}
+		allTypes.addAll(fields);
 		
-		for(JavaParameterHost field: fields) {
+		allTypes.addAll(spaInsert.getParameters());
+		allTypes.addAll(spaDelete.getParameters());
+		allTypes.addAll(spaUpdate.getParameters());
+		
+		for(JavaParameterHost field: allTypes) {
 			Class<?> clazz = field.getJavaClass();
 			if(byte[].class.equals(clazz))
 				continue;
@@ -150,6 +154,7 @@ public class JavaTableHost {
 	}
 	
 	public Set<String> getImports() {
+		buildImports();
 		return imports;
 	}
 }

@@ -10,7 +10,7 @@ import com.ctrip.platform.dal.daogen.utils.DbUtils;
 
 public class SpaOperationHost {
 	private boolean exist;
-	private List<JavaParameterHost> parameters;
+	private List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
 	private String methodName;
 	
 	public boolean isExist() {

@@ -11,16 +11,16 @@ public class SpHost {
 	private DatabaseCategory databaseCategory;
 	private String packageName;
 	private String dbName;
-	private String className;
+	private String pojoClassName;
 	private String spName;
-	private List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
+	private List<JavaParameterHost> fields = new ArrayList<JavaParameterHost>();
 	private Set<String> imports = new TreeSet<String>();
 	
-	public String getClassName() {
-		return className;
+	public String getPojoClassName() {
+		return pojoClassName;
 	}
-	public void setClassName(String className) {
-		this.className = className;
+	public void setPojoClassName(String pojoClassName) {
+		this.pojoClassName = pojoClassName;
 	}
 	public DatabaseCategory getDatabaseCategory() {
 		return databaseCategory;
@@ -46,13 +46,12 @@ public class SpHost {
 	public void setSpName(String spName) {
 		this.spName = spName;
 	}
-	public List<JavaParameterHost> getParameters() {
-		return parameters;
+	public List<JavaParameterHost> getFields() {
+		return fields;
 	}
-	public void setParameters(List<JavaParameterHost> parameters) {
-		this.parameters = parameters;
+	public void setFields(List<JavaParameterHost> fields) {
+		this.fields = fields;
 	}
-	
 	public Set<String> getDaoImports() {
 		Set<String> imports = new TreeSet<String>();
 		
@@ -67,7 +66,7 @@ public class SpHost {
 	public Set<String> getPojoImports() {
 		Set<String> imports = new TreeSet<String>();
 
-		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(parameters);
+		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(fields);
 		for(JavaParameterHost field: allTypes) {
 			Class<?> clazz = field.getJavaClass();
 			if(byte[].class.equals(clazz))

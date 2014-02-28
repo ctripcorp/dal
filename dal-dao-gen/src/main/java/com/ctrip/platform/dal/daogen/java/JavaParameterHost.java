@@ -99,18 +99,19 @@ public class JavaParameterHost extends AbstractParameterHost {
 	}
 	
 	public String getCapitalizedName() {
-		if(name.contains("_")) {
-			return WordUtils.capitalizeFully(name.replace('_', ' ')).replace(" ", "");
+		String tempName = name.replace("@", "");
+		if(tempName.contains("_")) {
+			tempName = WordUtils.capitalizeFully(name.replace('_', ' ')).replace(" ", "");
 		}
-		return WordUtils.capitalize(name);
+		return WordUtils.capitalize(tempName);
 	}
 	
 	public String getUncapitalizedName() {
-		if(name.contains("_")) {
-			String tempName = WordUtils.capitalizeFully(name.replace('_', ' ')).replace(" ", "");
-			return WordUtils.uncapitalize(tempName);
+		String tempName = name.replace("@", "");
+		if(tempName.contains("_")) {
+			tempName = WordUtils.capitalizeFully(name.replace('_', ' ')).replace(" ", "");
 		}
-		return WordUtils.uncapitalize(name);
+		return WordUtils.uncapitalize(tempName);
 	}
 	
 	public String getClassDisplayName() {

@@ -26,8 +26,8 @@ public class ${host.getClassName()}Dao {
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
 		int i = 1;
-#foreach($p in $method.getParameters())  
-		parameters.set(i++, ${p.getSqlType()}, ${p.getName());
+#foreach($p in $method.getParameters())
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
 #end
 		//如果只需要一条记录，建议使用limit 1或者top 1，并使用SelectFirst提高性能
 		return queryDao.query(sql, parameters, hints, personRowMapper);

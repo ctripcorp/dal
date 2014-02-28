@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using Arch.Data;
 using Arch.Data.DbEngine;
-using ${host.getNameSpaceEntity()};
-using ${host.getNameSpaceIDao()};
+using ${host.getNameSpace()}.Entity.DataModel;
+using ${host.getNameSpace()}.IDao;
 
-namespace ${host.getNameSpaceDao()}
+namespace ${host.getNameSpace()}
 {
    /// <summary>
     /// 更多DALFx接口功能，请参阅DALFx Confluence，地址：
@@ -31,18 +31,18 @@ namespace ${host.getNameSpaceDao()}
         public int Insert${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())})
         {
 #if($host.isSpa())
-#if($host.isHasInsertMethod())
+#if($host.getSpaInsert().exists())
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
-#foreach ($p in $host.getInsertParameterList())
+#foreach ($p in $host.getSpaInsert().getParameters())
                 parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalize($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
                 baseDao.ExecSp("${host.getInsertMethodName()}", parameters);
 
-#foreach ($p in $host.getInsertParameterList())
+#foreach ($p in $host.getSpaInsert().getParameters())
 #if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
                ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalize($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
 #end
@@ -83,18 +83,18 @@ namespace ${host.getNameSpaceDao()}
         public int Update${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())})
         {
 #if($host.isSpa())
-#if($host.isHasUpdateMethod())
+#if($host.getSpUpdate().exists())
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
-#foreach ($p in $host.getUpdateParameterList())
+#foreach ($p in $host.getSpaUpdate().getParameters())
                 parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalize($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
                 baseDao.ExecSp("${host.getUpdateMethodName()}", parameters);
 
-#foreach ($p in $host.getUpdateParameterList())
+#foreach ($p in $host.getSpaUpdate().getParameters())
 #if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
                ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalize($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
 #end
@@ -132,11 +132,11 @@ namespace ${host.getNameSpaceDao()}
         public int Delete${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())})
         {
 #if($host.isSpa())
-#if($host.isHasDeleteMethod())
+#if($host.getSpaDelete().exists())
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
-#foreach ($p in $host.getDeleteParameterList())
+#foreach ($p in $host.getSpaDelete().getParameters())
                 parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($host.getClassName())}.${WordUtils.capitalize($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
@@ -169,20 +169,20 @@ namespace ${host.getNameSpaceDao()}
         }
         
 #if($host.isSpa())
-#if($host.isHasDeleteMethod())
+#if($host.getSpaDelete().exists())
         /// <summary>
         /// 删除<#= className #>
         /// </summary>
-#foreach ($p in $host.getDeleteParameterList())
+#foreach ($p in $host.getSpaDelete().getParameters())
         /// <param name="${WordUtils.uncapitalize($p.getName().replace('@', ''))}">${WordUtils.uncapitalize($p.getName())} #></param>
 #end
         /// <returns>状态代码</returns>
-        public int Delete${host.getClassName()}(#foreach ($p in $host.getDeleteParameterList())${p.getType()} ${WordUtils.uncapitalize($p.getName().replace("@",""))}#if($foreach.count != $host.getDeleteParameterList().size()),#end#end)
+        public int Delete${host.getClassName()}(#foreach ($p in $host.getSpaDelete().getParameters())${p.getType()} ${WordUtils.uncapitalize($p.getName().replace("@",""))}#if($foreach.count != $host.getDeleteParameterList().size()),#end#end)
         {
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
-#foreach ($p in $host.getDeleteParameterList())
+#foreach ($p in $host.getSpaDelete().getParameters())
                 parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});

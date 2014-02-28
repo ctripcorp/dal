@@ -64,6 +64,14 @@ public abstract class AbstractGenerator implements Generator {
 				"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 		Velocity.init(pr);
 	}
+	
+	protected VelocityContext buildDefaultVelocityContext(){
+		VelocityContext context = new VelocityContext();
+		context.put("WordUtils", WordUtils.class);
+		context.put("StringUtils", StringUtils.class);
+		
+		return context;
+	}
 
 	@Override
 	public boolean generateCode(int projectId) {

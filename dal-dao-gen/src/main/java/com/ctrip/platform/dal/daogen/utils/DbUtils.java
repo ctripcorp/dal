@@ -27,8 +27,6 @@ import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.StoredProcedure;
 
 public class DbUtils {
-	public static final int CSHARP = 0;
-	public static final int JAVA = 1;
 	private static DaoOfDbServer dbServerDao;
 	private static List<Integer> validMode;
 
@@ -203,7 +201,7 @@ public class DbUtils {
 	 * @return
 	 */
 	public static List<AbstractParameterHost> getSpParams(int server,
-			String dbName, StoredProcedure sp, int language) {
+			String dbName, StoredProcedure sp, CurrentLanguage language) {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
 
@@ -220,7 +218,7 @@ public class DbUtils {
 			ResultSet spParams = connection.getMetaData().getProcedureColumns(
 					dbName, sp.getSchema(), sp.getName(), null);
 
-			if (language == CSHARP) {
+			if (language == CurrentLanguage.CSharp) {
 				while (spParams.next()) {
 					int paramMode = spParams.getShort("COLUMN_TYPE");
 
@@ -247,7 +245,7 @@ public class DbUtils {
 					parameters.add(host);
 				}
 			}else// TODO replace with CurrentLanguage
-				if (language == JAVA) {
+				if (language == CurrentLanguage.Java) {
 					while (spParams.next()) {
 						int paramMode = spParams.getShort("COLUMN_TYPE");
 

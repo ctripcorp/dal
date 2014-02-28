@@ -4,9 +4,7 @@ import java.util.List;
 
 public class CSharpFreeSqlHost {
 
-	private String nameSpaceEntity;
-
-	private String nameSpaceDao;
+	private String nameSpace;
 	
 	private String dbSetName;
 	
@@ -14,20 +12,12 @@ public class CSharpFreeSqlHost {
 	
 	private List<CSharpMethodHost> methods;
 
-	public String getNameSpaceEntity() {
-		return nameSpaceEntity;
+	public String getNameSpace() {
+		return nameSpace;
 	}
 
-	public void setNameSpaceEntity(String nameSpaceEntity) {
-		this.nameSpaceEntity = nameSpaceEntity;
-	}
-
-	public String getNameSpaceDao() {
-		return nameSpaceDao;
-	}
-
-	public void setNameSpaceDao(String nameSpaceDao) {
-		this.nameSpaceDao = nameSpaceDao;
+	public void setNameSpace(String nameSpace) {
+		this.nameSpace = nameSpace;
 	}
 
 	public String getDbSetName() {

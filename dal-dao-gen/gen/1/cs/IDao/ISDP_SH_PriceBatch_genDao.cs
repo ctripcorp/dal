@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using com.ctrip.platform.tools.Entity.DataModel;
 
-namespace com.ctrip.platform.tools.Interface.IDao
+namespace using com.ctrip.platform.tools.IDao
 {
 	public partial interface ISDP_SH_PriceBatch_genDao
 	{
@@ -57,6 +57,6 @@ namespace com.ctrip.platform.tools.Interface.IDao
         /// </summary>
         /// <param name="iD"></param>
         /// <returns></returns>
-        public IList<SDP_SH_PriceBatch_gen> getAllByID(long iD);
+        IList<SDP_SH_PriceBatch_gen> getAllByID(long iD);
 	}
 }

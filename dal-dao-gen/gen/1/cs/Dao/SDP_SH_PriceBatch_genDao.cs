@@ -6,9 +6,9 @@ using System.Text;
 using Arch.Data;
 using Arch.Data.DbEngine;
 using com.ctrip.platform.tools.Entity.DataModel;
-using com.ctrip.platform.tools.Interface.IDao;
+using com.ctrip.platform.tools.IDao;
 
-namespace com.ctrip.platform.tools.Dao
+namespace com.ctrip.platform.tools
 {
    /// <summary>
     /// 更多DALFx接口功能，请参阅DALFx Confluence，地址：

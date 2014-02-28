@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using ${host.getNameSpaceEntity()};
+using ${host.getNameSpace()}.Entity.DataModel;
 
-namespace ${host.getNameSpaceIDao()}
+namespace using ${host.getNameSpace()}.IDao
 {
 	public partial interface I${host.getClassName()}Dao
 	{
@@ -37,15 +37,15 @@ namespace ${host.getNameSpaceIDao()}
         int Delete${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize(${host.getClassName()})});
 
 #if($host.isSpa())
-#if($host.isHasDeleteMethod())
+#if($host.getSpaDelete().exists())
         /// <summary>
         /// 删除${host.getClassName()}
         /// </summary>
-#foreach ($p in $host.getDeleteParameterList())
+#foreach ($p in $host.getSpaDelete().getParameters())
         /// <param name="${WordUtils.uncapitalize($p.getName().replace('@', ''))}">${WordUtils.uncapitalize($p.getName())} #></param>
 #end
         /// <returns>状态代码</returns>
-        int Delete${host.getClassName()}(#foreach ($p in $host.getDeleteParameterList())${p.getType()} ${WordUtils.uncapitalize($p.getName().replace("@",""))}#if($foreach.count != $host.getDeleteParameterList().size()),#end#end);
+        int Delete${host.getClassName()}(#foreach ($p in $host.getSpaDelete().getParameters()))${p.getType()} ${WordUtils.uncapitalize($p.getName().replace("@",""))}#if($foreach.count != $host.getDeleteParameterList().size()),#end#end);
 #end
 #end
 #if($host.getPrimaryKeys().size() == 0)
@@ -133,7 +133,7 @@ namespace ${host.getNameSpaceIDao()}
         /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
 #end
         /// <returns></returns>
-        public #if($method.getCrud_type() == "select")IList<${host.getClassName()}>#{else}int#end ${method.getName()}(#foreach($p in $method.getParameters())${p.getType()} ${WordUtils.uncapitalize($p.getName())}#if($foreach.count != $method.getParameters().size()),#end#end);
+        #if($method.getCrud_type() == "select")IList<${host.getClassName()}>#{else}int#end ${method.getName()}(#foreach($p in $method.getParameters())${p.getType()} ${WordUtils.uncapitalize($p.getName())}#if($foreach.count != $method.getParameters().size()),#end#end);
 #end
 	}
 }

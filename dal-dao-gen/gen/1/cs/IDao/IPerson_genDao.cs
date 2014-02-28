@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using com.ctrip.platform.tools.Entity.DataModel;
 
-namespace com.ctrip.platform.tools.Interface.IDao
+namespace using com.ctrip.platform.tools.IDao
 {
 	public partial interface IPerson_genDao
 	{
@@ -75,12 +75,12 @@ namespace com.ctrip.platform.tools.Interface.IDao
         /// </summary>
         /// <param name="iD"></param>
         /// <returns></returns>
-        public IList<Person_gen> GetNameByID(int iD);
+        IList<Person_gen> GetNameByID(int iD);
         /// <summary>
         ///  deleteByName
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public int deleteByName(string name);
+        int deleteByName(string name);
 	}
 }

@@ -10,9 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
@@ -20,7 +18,6 @@ import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
-import com.ctrip.platform.dal.daogen.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.pojo.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.pojo.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
@@ -76,9 +73,7 @@ public class CSharpGenerator extends AbstractGenerator {
 			CSharpFreeSqlHost host = new CSharpFreeSqlHost();
 			host.setDbSetName(currentTasks.get(0).getDb_name());
 			host.setClassName(currentTasks.get(0).getClass_name());
-			host.setNameSpaceEntity(String.format("%s.Entity.DataModel",
-					super.namespace));
-			host.setNameSpaceDao(String.format("%s.Dao", super.namespace));
+			host.setNameSpace(super.namespace);
 
 			List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
 			// 每个Method可能就有一个Pojo
@@ -126,9 +121,8 @@ public class CSharpGenerator extends AbstractGenerator {
 							freeSqlHost.setColumns(pHosts);
 							freeSqlHost.setTableName("");
 							freeSqlHost.setClassName(task.getClass_name());
-							freeSqlHost.setNameSpaceDao(host.getNameSpaceDao());
-							freeSqlHost.setNameSpaceEntity(host
-									.getNameSpaceEntity());
+							freeSqlHost.setNameSpace(host
+									.getNameSpace());
 
 							pojoHosts.put(task.getClass_name(), freeSqlHost);
 						} catch (SQLException e) {
@@ -136,22 +130,17 @@ public class CSharpGenerator extends AbstractGenerator {
 						}
 					}
 				}
-
 			}
 			host.setMethods(methods);
 			hosts.add(host);
-
 		}
 
-		VelocityContext context = new VelocityContext();
-		context.put("WordUtils", WordUtils.class);
-		context.put("StringUtils", StringUtils.class);
+		VelocityContext context = buildDefaultVelocityContext();
 
 		File mavenLikeDir = new File(String.format("gen/%s/cs", projectId));
 
 		for (CSharpFreeSqlPojoHost host : pojoHosts.values()) {
 			context.put("host", host);
-
 			FileWriter pojoWriter = null;
 			try {
 				pojoWriter = new FileWriter(String.format("%s/Entity/%s.cs",
@@ -168,13 +157,10 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		for (CSharpFreeSqlHost host : hosts) {
 			context.put("host", host);
-
 			FileWriter daoWriter = null;
 			try {
-
 				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.cs",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
-
 				Velocity.mergeTemplate("templates/FreeSqlDAO.cs.tpl", "UTF-8",
 						context, daoWriter);
 			} catch (IOException e) {
@@ -223,11 +209,11 @@ public class CSharpGenerator extends AbstractGenerator {
 					tableViewSp.getServer_id(), dbName);
 
 			for (String table : tableNames) {
-				tableHosts.add(buildTableHost(tableViewSp, table, dbCategory, allSpNames));
+				tableHosts.add(buildTableHost(tableViewSp, table, dbCategory,
+						allSpNames));
 			}
-			
-			for (String view : viewNames) {
 
+			for (String view : viewNames) {
 				List<AbstractParameterHost> allColumnsAbstract = DbUtils
 						.getAllColumnNames(tableViewSp.getServer_id(), dbName,
 								view, CurrentLanguage.CSharp);
@@ -247,32 +233,15 @@ public class CSharpGenerator extends AbstractGenerator {
 				}
 
 				CSharpTableHost tableHost = new CSharpTableHost();
-
-				String className = view;
-				if (null != prefix && !prefix.isEmpty()) {
-					className = className.substring(prefix.length());
-				}
-				if (null != suffix && !suffix.isEmpty()) {
-					className = className + suffix;
-				}
-
-				tableHost.setNameSpaceEntity(String.format(
-						"%s.Entity.DataModel", super.namespace));
-				tableHost.setNameSpaceIDao(String.format("%s.Interface.IDao",
-						super.namespace));
-				tableHost.setNameSpaceDao(String.format("%s.Dao",
-						super.namespace));
+				tableHost.setNameSpace(super.namespace);
 				tableHost.setDatabaseCategory(dbCategory);
 				tableHost.setDbSetName(dbName);
 				tableHost.setTableName(view);
-				tableHost.setClassName(className);
+				tableHost.setClassName(getPojoClassName(prefix, suffix, view));
 				tableHost.setTable(false);
 				tableHost.setSpa(false);
-
 				tableHost.setColumns(allColumns);
-
 				tableHost.setHasPagination(pagination);
-
 				tableHosts.add(tableHost);
 			}
 
@@ -289,44 +258,34 @@ public class CSharpGenerator extends AbstractGenerator {
 				currentSp.setSchema(schema);
 				currentSp.setName(realSpName);
 
-				CSharpTableHost tableHost = new CSharpTableHost();
-				String className = realSpName.replace("_", "");
-				if (null != prefix && !prefix.isEmpty()) {
-					className = className.substring(prefix.length());
-				}
-				if (null != suffix && !suffix.isEmpty()) {
-					className = className + suffix;
-				}
-
-				tableHost.setNameSpaceEntity(String.format(
-						"%s.Entity.DataModel", super.namespace));
-				tableHost.setNameSpaceDao(String.format("%s.Dao",
-						super.namespace));
-				tableHost.setDatabaseCategory(dbCategory);
-				tableHost.setDbSetName(dbName);
-				tableHost.setClassName(className);
-				tableHost.setTable(false);
-				tableHost.setSpName(spName);
 				List<AbstractParameterHost> params = DbUtils.getSpParams(
-						tableViewSp.getServer_id(), dbName, currentSp, 0);
+						tableViewSp.getServer_id(), dbName, currentSp,CurrentLanguage.CSharp);
 				List<CSharpParameterHost> realParams = new ArrayList<CSharpParameterHost>();
 				for (AbstractParameterHost p : params) {
 					realParams.add((CSharpParameterHost) p);
 				}
-				tableHost.setSpParams(realParams);
 
+				CSharpTableHost tableHost = new CSharpTableHost();
+				tableHost.setNameSpace(super.namespace);
+				tableHost.setDatabaseCategory(dbCategory);
+				tableHost.setDbSetName(dbName);
+				tableHost.setClassName(getPojoClassName(prefix, suffix,
+						realSpName.replace("_", "")));
+				tableHost.setTable(false);
+				tableHost.setSpName(spName);
+				tableHost.setSpParams(realParams);
 				spHosts.add(tableHost);
 			}
 
 		}
-		
-		if(sqlBuilders.size() > 0){
+
+		if (sqlBuilders.size() > 0) {
 			List<GenTaskBySqlBuilder> _tableNames = new ArrayList<GenTaskBySqlBuilder>();
-			for(GenTaskBySqlBuilder sqlBuilder : sqlBuilders){
+			for (GenTaskBySqlBuilder sqlBuilder : sqlBuilders) {
 				_tableNames.add(sqlBuilder);
-				
+
 			}
-			for(GenTaskBySqlBuilder _table : _tableNames){
+			for (GenTaskBySqlBuilder _table : _tableNames) {
 				GenTaskByTableViewSp tableViewSp = new GenTaskByTableViewSp();
 				tableViewSp.setCud_by_sp(false);
 				tableViewSp.setPagination(false);
@@ -334,7 +293,7 @@ public class CSharpGenerator extends AbstractGenerator {
 				tableViewSp.setServer_id(_table.getServer_id());
 				tableViewSp.setPrefix("");
 				tableViewSp.setSuffix("_gen");
-				
+
 				DbServer dbServer = daoOfDbServer.getDbServerByID(tableViewSp
 						.getServer_id());
 				DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
@@ -344,70 +303,19 @@ public class CSharpGenerator extends AbstractGenerator {
 
 				List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(
 						tableViewSp.getServer_id(), _table.getDb_name());
-				
-				tableHosts.add(buildTableHost(tableViewSp, _table.getTable_name(), dbCategory, allSpNames));
+
+				tableHosts.add(buildTableHost(tableViewSp,
+						_table.getTable_name(), dbCategory, allSpNames));
 			}
 		}
 
-		VelocityContext context = new VelocityContext();
-		context.put("WordUtils", WordUtils.class);
-		context.put("StringUtils", StringUtils.class);
+		VelocityContext context = buildDefaultVelocityContext();
 
 		File mavenLikeDir = new File(String.format("gen/%s/cs", projectId));
 
-		for (CSharpTableHost host : tableHosts) {
-			context.put("host", host);
+		generateTableDao(tableHosts, context, mavenLikeDir);
 
-			FileWriter daoWriter = null;
-			FileWriter iDaoWriter = null;
-			FileWriter pojoWriter = null;
-			try {
-
-				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.cs",
-						mavenLikeDir.getAbsolutePath(), host.getClassName()));
-				pojoWriter = new FileWriter(String.format("%s/Entity/%s.cs",
-						mavenLikeDir.getAbsolutePath(), host.getClassName()));
-				iDaoWriter = new FileWriter(String.format("%s/IDao/I%sDao.cs",
-						mavenLikeDir.getAbsolutePath(), host.getClassName()));
-
-				Velocity.mergeTemplate("templates/DAO.cs.tpl", "UTF-8",
-						context, daoWriter);
-				Velocity.mergeTemplate("templates/Pojo.cs.tpl", "UTF-8",
-						context, pojoWriter);
-				Velocity.mergeTemplate("templates/IDAO.cs.tpl", "UTF-8",
-						context, iDaoWriter);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				JavaIOUtils.closeWriter(daoWriter);
-				JavaIOUtils.closeWriter(pojoWriter);
-				JavaIOUtils.closeWriter(iDaoWriter);
-			}
-		}
-
-		for (CSharpTableHost host : spHosts) {
-			context.put("host", host);
-
-			FileWriter daoWriter = null;
-			FileWriter pojoWriter = null;
-			try {
-
-				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.cs",
-						mavenLikeDir.getAbsolutePath(), host.getClassName()));
-				pojoWriter = new FileWriter(String.format("%s/Entity/%s.cs",
-						mavenLikeDir.getAbsolutePath(), host.getClassName()));
-
-				Velocity.mergeTemplate("templates/DAOBySp.cs.tpl", "UTF-8",
-						context, daoWriter);
-				Velocity.mergeTemplate("templates/PojoBySp.cs.tpl", "UTF-8",
-						context, pojoWriter);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				JavaIOUtils.closeWriter(daoWriter);
-				JavaIOUtils.closeWriter(pojoWriter);
-			}
-		}
+		generateSpDao(spHosts, context, mavenLikeDir);
 
 	}
 
@@ -439,6 +347,60 @@ public class CSharpGenerator extends AbstractGenerator {
 			}
 		}
 
+		List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(
+				sqlBuilders, tableViewSp.getDb_name(), table);
+
+		List<CSharpMethodHost> methods = buildMethodHosts(allColumns,
+				currentTableBuilders);
+
+		CSharpTableHost tableHost = new CSharpTableHost();
+		tableHost.setExtraMethods(methods);
+		tableHost.setNameSpace(super.namespace);
+		tableHost.setDatabaseCategory(dbCategory);
+		tableHost.setDbSetName(tableViewSp.getDb_name());
+		tableHost.setTableName(table);
+		tableHost.setClassName(getPojoClassName(tableViewSp.getPrefix(),
+				tableViewSp.getSuffix(), table));
+		tableHost.setTable(true);
+		tableHost.setSpa(tableViewSp.isCud_by_sp());
+		// SP方式增删改
+		if (tableHost.isSpa()) {
+			tableHost.setSpaInsert(CSharpSpaOperationHost.getSpaOperation(
+					tableViewSp.getServer_id(), tableViewSp.getDb_name(),
+					table, allSpNames, "i"));
+			tableHost.setSpaUpdate(CSharpSpaOperationHost.getSpaOperation(
+					tableViewSp.getServer_id(), tableViewSp.getDb_name(),
+					table, allSpNames, "u"));
+			tableHost.setSpaDelete(CSharpSpaOperationHost.getSpaOperation(
+					tableViewSp.getServer_id(), tableViewSp.getDb_name(),
+					table, allSpNames, "d"));
+		}
+
+		tableHost.setPrimaryKeys(primaryKeys);
+		tableHost.setColumns(allColumns);
+
+		tableHost.setHasPagination(tableViewSp.isPagination());
+
+		StoredProcedure expectSptI = new StoredProcedure();
+		expectSptI.setName(String.format("spT_%s_i", table));
+
+		StoredProcedure expectSptU = new StoredProcedure();
+		expectSptU.setName(String.format("spT_%s_u", table));
+
+		StoredProcedure expectSptD = new StoredProcedure();
+		expectSptD.setName(String.format("spT_%s_d", table));
+
+		tableHost.setHasSptI(allSpNames.contains(expectSptI));
+		tableHost.setHasSptU(allSpNames.contains(expectSptU));
+		tableHost.setHasSptD(allSpNames.contains(expectSptD));
+		tableHost.setHasSpt(tableHost.isHasSptI() || tableHost.isHasSptU()
+				|| tableHost.isHasSptD());
+
+		return tableHost;
+	}
+
+	private List<GenTaskBySqlBuilder> filterExtraMethods(
+			List<GenTaskBySqlBuilder> sqlBuilders, String dbName, String table) {
 		List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
 
 		// 首先设置SqlBuilder的所有方法
@@ -447,7 +409,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		List<Integer> itemsToRemove = new ArrayList<Integer>();
 		for (int i = 0; i < wholeSize; i++) {
 			GenTaskBySqlBuilder currentSqlBuilder = sqlBuilders.get(i);
-			if (currentSqlBuilder.getDb_name().equals(tableViewSp.getDb_name())
+			if (currentSqlBuilder.getDb_name().equals(dbName)
 					&& currentSqlBuilder.getTable_name().equals(table)) {
 				currentTableBuilders.add(currentSqlBuilder);
 				itemsToRemove.add(i);
@@ -457,7 +419,12 @@ public class CSharpGenerator extends AbstractGenerator {
 		for (Integer i : itemsToRemove) {
 			sqlBuilders.remove(i);
 		}
+		return currentTableBuilders;
+	}
 
+	private List<CSharpMethodHost> buildMethodHosts(
+			List<CSharpParameterHost> allColumns,
+			List<GenTaskBySqlBuilder> currentTableBuilders) {
 		List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
 
 		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
@@ -512,86 +479,78 @@ public class CSharpGenerator extends AbstractGenerator {
 			method.setParameters(parameters);
 			methods.add(method);
 		}
-
-		CSharpTableHost tableHost = new CSharpTableHost();
-
-		tableHost.setExtraMethods(methods);
-
+		return methods;
+	}
+	
+	private String getPojoClassName(String prefix, String suffix, String table) {
 		String className = table;
-		if (null != tableViewSp.getPrefix()
-				&& !tableViewSp.getPrefix().isEmpty()) {
-			className = className.substring(tableViewSp.getPrefix().length());
+		if (null != prefix && !prefix.isEmpty()) {
+			className = className.substring(prefix.length());
 		}
-		if (null != tableViewSp.getSuffix()
-				&& !tableViewSp.getSuffix().isEmpty()) {
-			className = className + tableViewSp.getSuffix();
+		if (null != suffix && !suffix.isEmpty()) {
+			className = className + suffix;
 		}
+		return className;
+	}
 
-		tableHost.setNameSpaceEntity(String.format("%s.Entity.DataModel",
-				super.namespace));
-		tableHost.setNameSpaceIDao(String.format("%s.Interface.IDao",
-				super.namespace));
-		tableHost.setNameSpaceDao(String.format("%s.Dao", super.namespace));
-		tableHost.setDatabaseCategory(dbCategory);
-		tableHost.setDbSetName(tableViewSp.getDb_name());
-		tableHost.setTableName(table);
-		tableHost.setClassName(className);
-		tableHost.setTable(true);
-		tableHost.setSpa(tableViewSp.isCud_by_sp());
-		// SP方式增删改
-		if (tableHost.isSpa()) {
-			CSharpSpInsertHost insertHost = CSharpSpInsertHost.getInsertSp(
-					tableViewSp.getServer_id(), tableViewSp.getDb_name(),
-					table, allSpNames);
-			tableHost.setHasInsertMethod(insertHost.isHasInsertMethod());
-			if (tableHost.isHasInsertMethod()) {
-				tableHost.setInsertMethodName(insertHost.getInsertMethodName());
-				tableHost.setInsertParameterList(insertHost
-						.getInsertParameterList());
-			}
+	private void generateTableDao(List<CSharpTableHost> tableHosts,
+			VelocityContext context, File mavenLikeDir) {
+		for (CSharpTableHost host : tableHosts) {
+			context.put("host", host);
 
-			CSharpSpUpdateHost updateHost = CSharpSpUpdateHost.getUpdateSp(
-					tableViewSp.getServer_id(), tableViewSp.getDb_name(),
-					table, allSpNames);
-			tableHost.setHasUpdateMethod(updateHost.isHasUpdateMethod());
-			if (tableHost.isHasUpdateMethod()) {
-				tableHost.setUpdateMethodName(updateHost.getUpdateMethodName());
-				tableHost.setUpdateParameterList(updateHost
-						.getUpdateParameterList());
-			}
+			FileWriter daoWriter = null;
+			FileWriter iDaoWriter = null;
+			FileWriter pojoWriter = null;
+			try {
 
-			CSharpSpDeleteHost deleteHost = CSharpSpDeleteHost.getDeleteSp(
-					tableViewSp.getServer_id(), tableViewSp.getDb_name(),
-					table, allSpNames);
-			tableHost.setHasDeleteMethod(deleteHost.isHasDeleteMethod());
-			if (tableHost.isHasDeleteMethod()) {
-				tableHost.setDeleteMethodName(deleteHost.getDeleteMethodName());
-				tableHost.setDeleteParameterList(deleteHost
-						.getDeleteParameterList());
+				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.cs",
+						mavenLikeDir.getAbsolutePath(), host.getClassName()));
+				pojoWriter = new FileWriter(String.format("%s/Entity/%s.cs",
+						mavenLikeDir.getAbsolutePath(), host.getClassName()));
+				iDaoWriter = new FileWriter(String.format("%s/IDao/I%sDao.cs",
+						mavenLikeDir.getAbsolutePath(), host.getClassName()));
+
+				Velocity.mergeTemplate("templates/DAO.cs.tpl", "UTF-8",
+						context, daoWriter);
+				Velocity.mergeTemplate("templates/Pojo.cs.tpl", "UTF-8",
+						context, pojoWriter);
+				Velocity.mergeTemplate("templates/IDAO.cs.tpl", "UTF-8",
+						context, iDaoWriter);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				JavaIOUtils.closeWriter(daoWriter);
+				JavaIOUtils.closeWriter(pojoWriter);
+				JavaIOUtils.closeWriter(iDaoWriter);
 			}
 		}
+	}
 
-		tableHost.setPrimaryKeys(primaryKeys);
-		tableHost.setColumns(allColumns);
+	private void generateSpDao(List<CSharpTableHost> spHosts,
+			VelocityContext context, File mavenLikeDir) {
+		for (CSharpTableHost host : spHosts) {
+			context.put("host", host);
 
-		tableHost.setHasPagination(tableViewSp.isPagination());
+			FileWriter daoWriter = null;
+			FileWriter pojoWriter = null;
+			try {
 
-		StoredProcedure expectSptI = new StoredProcedure();
-		expectSptI.setName(String.format("spT_%s_i", table));
+				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.cs",
+						mavenLikeDir.getAbsolutePath(), host.getClassName()));
+				pojoWriter = new FileWriter(String.format("%s/Entity/%s.cs",
+						mavenLikeDir.getAbsolutePath(), host.getClassName()));
 
-		StoredProcedure expectSptU = new StoredProcedure();
-		expectSptU.setName(String.format("spT_%s_u", table));
-
-		StoredProcedure expectSptD = new StoredProcedure();
-		expectSptD.setName(String.format("spT_%s_d", table));
-
-		tableHost.setHasSptI(allSpNames.contains(expectSptI));
-		tableHost.setHasSptU(allSpNames.contains(expectSptU));
-		tableHost.setHasSptD(allSpNames.contains(expectSptD));
-		tableHost.setHasSpt(tableHost.isHasSptI() || tableHost.isHasSptU()
-				|| tableHost.isHasSptD());
-
-		return tableHost;
+				Velocity.mergeTemplate("templates/DAOBySp.cs.tpl", "UTF-8",
+						context, daoWriter);
+				Velocity.mergeTemplate("templates/PojoBySp.cs.tpl", "UTF-8",
+						context, pojoWriter);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				JavaIOUtils.closeWriter(daoWriter);
+				JavaIOUtils.closeWriter(pojoWriter);
+			}
+		}
 	}
 
 }

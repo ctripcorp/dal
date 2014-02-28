@@ -7,8 +7,8 @@ import java.util.TreeSet;
 import com.ctrip.platform.dal.daogen.pojo.ColumnMetaData;
 
 
-public class JavaParserGenHost {
 	
+public class JavaParserGenHost {
 	private String dbName;
 
 	private String className;

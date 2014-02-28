@@ -16,7 +16,6 @@ import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
-import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
@@ -26,6 +25,7 @@ import com.ctrip.platform.dal.daogen.pojo.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.GenTask;
 import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.pojo.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.pojo.StoredProcedure;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
@@ -51,8 +51,10 @@ public class JavaGenerator extends AbstractGenerator {
 
 	@Override
 	public void generateByTableView(List<GenTaskByTableViewSp> tasks) {
-		
 		List<JavaTableHost> tableHosts = new ArrayList<JavaTableHost>();
+		List<SpHost> spHosts = new ArrayList<SpHost>();
+		List<GenTaskBySqlBuilder> sqlBuilders = daoBySqlBuilder
+				.getTasksByProjectId(projectId);
 
 		// 首先为所有表/存储过程生成DAO
 		for (GenTaskByTableViewSp tableViewSp : tasks) {
@@ -60,9 +62,12 @@ public class JavaGenerator extends AbstractGenerator {
 			String dbName = tableViewSp.getDb_name();
 			String[] tableNames = StringUtils.split(
 					tableViewSp.getTable_names(), ",");
+			String[] spNames = StringUtils
+					.split(tableViewSp.getSp_names(), ",");
 
 			String prefix = tableViewSp.getPrefix();
 			String suffix = tableViewSp.getSuffix();
+			boolean pagination = tableViewSp.isPagination();
 			boolean cud_by_sp = tableViewSp.isCud_by_sp();
 			DbServer dbServer = daoOfDbServer.getDbServerByID(tableViewSp
 					.getServer_id());
@@ -75,6 +80,13 @@ public class JavaGenerator extends AbstractGenerator {
 					tableViewSp.getServer_id(), dbName);
 
 			for (String table : tableNames) {
+				JavaTableHost tableHost = new JavaTableHost();
+				tableHost.setPackageName(super.namespace);
+				tableHost.setDatabaseCategory(dbCategory);
+				tableHost.setDbName(dbName);
+				tableHost.setTableName(table);
+				tableHost.setPojoClassName(getPojoClassName(prefix, suffix, table));
+				tableHost.setSpa(cud_by_sp);
 
 				// 主键及所有列
 				List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
@@ -102,39 +114,82 @@ public class JavaGenerator extends AbstractGenerator {
 					}
 				}
 
-				String className = table;
-				if (null != prefix && !prefix.isEmpty()) {
-					className = className.substring(prefix.length());
-				}
-				if (null != suffix && !suffix.isEmpty()) {
-					className = className + suffix;
-				}
+				List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(
+						sqlBuilders, dbName, table);
 
-				JavaTableHost tableHost = new JavaTableHost();
-				tableHost.setNamespace(super.namespace);
-				tableHost.setDbName(dbName);
-				tableHost.setTableName(table);
-				tableHost.setPojoClassName(className);
+				List<JavaMethodHost> methods = buildMethodHosts(allColumns,
+						currentTableBuilders);
+				
 				tableHost.setFields(allColumns);
 				tableHost.setHasIdentity(hasIdentity);
 				tableHost.setIdentityColumnName(identityColumnName);
-				tableHost.setSpa(cud_by_sp);
+				tableHost.setMethods(methods);
 
+//				tableHost.setTable(true);
+				// SP方式增删改
+				if (tableHost.isSpa()) {
+					tableHost.setSpaInsert(SpaOperationHost.getSpaOperation(
+							tableViewSp.getServer_id(), dbName, table, allSpNames,"i"));
+					tableHost.setSpaUpdate(SpaOperationHost.getSpaOperation(
+							tableViewSp.getServer_id(), dbName, table, allSpNames,"u"));
+					tableHost.setSpaDelete(SpaOperationHost.getSpaOperation(
+							tableViewSp.getServer_id(), dbName, table, allSpNames,"d"));
+				}
+				
 				tableHosts.add(tableHost);
 			}
-		}
 		
+			for (String spName : spNames) {
+				String schema = "dbo";
+				String realSpName = spName;
+				if (spName.contains(".")) {
+					String[] splitSp = StringUtils.split(spName, '.');
+					schema = splitSp[0];
+					realSpName = splitSp[1];
+				}
+	
+				StoredProcedure currentSp = new StoredProcedure();
+				currentSp.setSchema(schema);
+				currentSp.setName(realSpName);
+	
+				SpHost spHost = new SpHost();
+				String className = realSpName.replace("_", "");
+				className = getPojoClassName(prefix, suffix, className);
+				
+				spHost.setPackageName(super.namespace);
+				spHost.setDatabaseCategory(dbCategory);
+				spHost.setDbName(dbName);
+				spHost.setPojoClassName(className);
+				spHost.setSpName(spName);
+				List<AbstractParameterHost> params = DbUtils.getSpParams(
+						tableViewSp.getServer_id(), dbName, currentSp, 1);
+				List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
+				for (AbstractParameterHost p : params) {
+					realParams.add((JavaParameterHost) p);
+				}
+				spHost.setParameters(realParams);
+	
+				spHosts.add(spHost);
+			}
+
+		}
 		VelocityContext context = new VelocityContext();
 		context.put("WordUtils", WordUtils.class);
 		context.put("StringUtils", StringUtils.class);
+		File mavenLikeDir = new File(String.format("gen/%s/java",
+				projectId));
 
+		generateTableDao(tableHosts, context, mavenLikeDir);
+		generateSpDao(spHosts, context, mavenLikeDir);
+	}
+
+	private void generateTableDao(List<JavaTableHost> tableHosts,
+			VelocityContext context, File mavenLikeDir) {
 		for (JavaTableHost host : tableHosts) {
 			context.put("host", host);
 
 			FileWriter daoWriter = null;
 			try {
-				File mavenLikeDir = new File(String.format("gen/%s/java",
-						projectId));
 				FileUtils.forceMkdir(mavenLikeDir);
 
 				daoWriter = new FileWriter(String.format("%s/%sDao.java",
@@ -148,7 +203,129 @@ public class JavaGenerator extends AbstractGenerator {
 				JavaIOUtils.closeWriter(daoWriter);
 			}
 		}
-		
+	}
+
+	private void generateSpDao(List<SpHost> spHosts, VelocityContext context,
+			File mavenLikeDir) {
+		for (SpHost host : spHosts) {
+			context.put("host", host);
+
+			FileWriter daoWriter = null;
+			FileWriter pojoWriter = null;
+			try {
+
+				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.java",
+						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
+				pojoWriter = new FileWriter(String.format("%s/Entity/%s.java",
+						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
+
+				Velocity.mergeTemplate("templates/DAOBySp.java.tpl", "UTF-8",
+						context, daoWriter);
+				Velocity.mergeTemplate("templates/PojoBySp.java.tpl", "UTF-8",
+						context, pojoWriter);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				JavaIOUtils.closeWriter(daoWriter);
+				JavaIOUtils.closeWriter(pojoWriter);
+			}
+		}
+	}
+
+	private String getPojoClassName(String prefix, String suffix, String table) {
+		String className = table;
+		if (null != prefix && !prefix.isEmpty()) {
+			className = className.substring(prefix.length());
+		}
+		if (null != suffix && !suffix.isEmpty()) {
+			className = className + suffix;
+		}
+		return className;
+	}
+
+	private List<GenTaskBySqlBuilder> filterExtraMethods(
+			List<GenTaskBySqlBuilder> sqlBuilders, String dbName, String table) {
+		List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
+
+		// 首先设置SqlBuilder的所有方法
+		// size每次都会进行一次计算
+		int wholeSize = sqlBuilders.size();
+		List<Integer> itemsToRemove = new ArrayList<Integer>();
+		for (int i = 0; i < wholeSize; i++) {
+			GenTaskBySqlBuilder currentSqlBuilder = sqlBuilders.get(i);
+			if (currentSqlBuilder.getDb_name().equals(dbName)
+					&& currentSqlBuilder.getTable_name().equals(table)) {
+				currentTableBuilders.add(currentSqlBuilder);
+				itemsToRemove.add(i);
+			}
+		}
+
+		for (Integer i : itemsToRemove) {
+			sqlBuilders.remove(i);
+		}
+		return currentTableBuilders;
+	}
+	
+	private List<JavaMethodHost> buildMethodHosts(
+			List<JavaParameterHost> allColumns,
+			List<GenTaskBySqlBuilder> currentTableBuilders) {
+		List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
+
+		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
+			JavaMethodHost method = new JavaMethodHost();
+			method.setCrud_type(builder.getCrud_type());
+			method.setName(builder.getMethod_name());
+			method.setSql(builder.getSql_content());
+			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
+			if (method.getCrud_type().equals("select")
+					|| method.getCrud_type().equals("delete")) {
+				String[] conditions = StringUtils.split(
+						builder.getCondition(), ",");
+				for (String condition : conditions) {
+					String name = StringUtils.split(condition, "_")[0];
+					for (JavaParameterHost pHost : allColumns) {
+						if (pHost.getName().equals(name)) {
+							parameters.add(pHost);
+							break;
+						}
+					}
+				}
+			} else if (method.getCrud_type().equals("insert")) {
+				String[] fields = StringUtils.split(
+						builder.getFields(), ",");
+				for (String field : fields) {
+					for (JavaParameterHost pHost : allColumns) {
+						if (pHost.getName().equals(field)) {
+							parameters.add(pHost);
+							break;
+						}
+					}
+				}
+			} else {
+				String[] fields = StringUtils.split(
+						builder.getFields(), ",");
+				String[] conditions = StringUtils.split(
+						builder.getCondition(), ",");
+				for (JavaParameterHost pHost : allColumns) {
+					for (String field : fields) {
+						if (pHost.getName().equals(field)) {
+							parameters.add(pHost);
+							break;
+						}
+					}
+					for (String condition : conditions) {
+						String name = StringUtils.split(condition, "_")[0];
+						if (pHost.getName().equals(name)) {
+							parameters.add(pHost);
+							break;
+						}
+					}
+				}
+			}
+			method.setParameters(parameters);
+			methods.add(method);
+		}
+		return methods;
 	}
 
 	@Override
@@ -181,11 +358,9 @@ public class JavaGenerator extends AbstractGenerator {
 				continue;
 
 			FreeSqlHost host = new FreeSqlHost();
-			host.setDbSetName(currentTasks.get(0).getDb_name());
+			host.setDbName(currentTasks.get(0).getDb_name());
 			host.setClassName(currentTasks.get(0).getClass_name());
-			host.setNameSpaceEntity(String.format("%s.Entity.DataModel",
-					super.namespace));
-			host.setNameSpaceDao(String.format("%s.Dao", super.namespace));
+			host.setPackageName(super.namespace);
 
 			List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 			// 每个Method可能就有一个Pojo
@@ -229,8 +404,7 @@ public class JavaGenerator extends AbstractGenerator {
 							freeSqlHost.setColumns(pHosts);
 							freeSqlHost.setTableName("");
 							freeSqlHost.setClassName(task.getClass_name());
-							freeSqlHost.setNameSpaceDao(host.getNameSpaceDao());
-							freeSqlHost.setNameSpaceEntity(host.getNameSpaceEntity());
+							freeSqlHost.setPackageName(host.getPackageName());
 
 							pojoHosts.put(task.getClass_name(), freeSqlHost);
 						} catch (SQLException e) {
@@ -249,7 +423,7 @@ public class JavaGenerator extends AbstractGenerator {
 		context.put("WordUtils", WordUtils.class);
 		context.put("StringUtils", StringUtils.class);
 		
-		File mavenLikeDir = new File(String.format("gen/%s/cs",
+		File mavenLikeDir = new File(String.format("gen/%s/java",
 				projectId));
 		
 		for(FreeSqlPojoHost host : pojoHosts.values()){
@@ -257,10 +431,10 @@ public class JavaGenerator extends AbstractGenerator {
 
 			FileWriter pojoWriter = null;
 			try {
-				pojoWriter = new FileWriter(String.format("%s/Entity/%s.cs",
+				pojoWriter = new FileWriter(String.format("%s/Entity/%s.java",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
 
-				Velocity.mergeTemplate("templates/Pojo.cs.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
 						context, pojoWriter);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -275,10 +449,10 @@ public class JavaGenerator extends AbstractGenerator {
 			FileWriter daoWriter = null;
 			try {
 
-				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.cs",
+				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.java",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
 
-				Velocity.mergeTemplate("templates/FreeSqlDAO.cs.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/FreeSqlDAO.java.tpl", "UTF-8",
 						context, daoWriter);
 			} catch (IOException e) {
 				e.printStackTrace();

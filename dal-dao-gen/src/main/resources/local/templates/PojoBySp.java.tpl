@@ -1,19 +1,26 @@
-using System;
-using Arch.Data.Orm;
+package ${host.getDaoNamespace()};
 
-namespace ${host.getNameSpaceEntity()}
-{
-	/// <summary>
-    /// ${host.getSpName()}
-    /// </summary>
-	[Serializable]
-	public partial class ${host.getClassName()}
-	{
-#foreach($p in $host.getSpParams())
-        /// <summary>
-        /// ${WordUtils.capitalize($p.getName().replace("@",""))}
-        /// </summary>
-		public ${p.getType()}#if($p.isNullable())?#end #if($WordUtils.capitalize($p.getName()) == $host.getClassName())${host.getClassName()}_${host.getClassName()}#{else}${WordUtils.capitalize($p.getName().replace("@",""))}#end { get; set; }
+#foreach( $field in ${host.getImports()} )
+import ${field};
 #end
-	}
+
+import com.ctrip.platform.dal.dao.DalPojo;
+
+// ${host.getSpName()}
+public class ${host.getClassName()} implements DalPojo {
+
+#foreach( $field in ${host.getFields()} )
+	private ${field.getJavaClass().getSimpleName()} ${field.getName()};
+#end
+
+#foreach( $field in ${host.getFields()} )
+	public ${field.getJavaClass().getSimpleName()} get${field.getName()}#[[(){]]#
+		return ${field.getName()};
+	#[[}]]#
+
+	public void set${field.getName()}#[[(]]#${field.getJavaClass().getSimpleName()} ${field.getName()}#[[)]]##[[{]]#
+		this.${field.getName()} = ${field.getName()};
+	#[[}]]#
+
+#end
 }

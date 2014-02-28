@@ -2,14 +2,13 @@ package com.ctrip.platform.dal.daogen.java;
 
 import java.util.List;
 
+import org.apache.commons.lang.WordUtils;
+
 public class JavaMethodHost {
-	
 	private String crud_type;
-	
 	private String name;
-	
 	private String sql;
-	
+	private String className;
 	private List<JavaParameterHost> parameters;
 
 	public String getCrud_type() {
@@ -42,5 +41,28 @@ public class JavaMethodHost {
 
 	public void setParameters(List<JavaParameterHost> parameters) {
 		this.parameters = parameters;
+	}
+	
+	public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
+	}
+	
+	public String getVariableName() {
+		return WordUtils.uncapitalize(className);
+	}
+	
+	public String getParameterDeclaration() {
+		StringBuilder sb = new StringBuilder();
+		for(JavaParameterHost parameter: parameters) {
+			sb.append(parameter.getClassDisplayName()).append(' ').append(parameter.getName()).append(", ");
+		}
+		
+		sb.delete(sb.length() - 2, sb.length() - 1);
+		
+		return sb.toString();
 	}
 }

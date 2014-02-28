@@ -3,39 +3,26 @@ package com.ctrip.platform.dal.daogen.java;
 import java.util.List;
 
 public class FreeSqlHost {
-
-	private String nameSpaceEntity;
-
-	private String nameSpaceDao;
-	
-	private String dbSetName;
-	
+	private String packageName;
+	private String dbName;
 	private String className;
-	
 	private List<JavaMethodHost> methods;
 
-	public String getNameSpaceEntity() {
-		return nameSpaceEntity;
+	
+	public String getPackageName() {
+		return packageName;
 	}
 
-	public void setNameSpaceEntity(String nameSpaceEntity) {
-		this.nameSpaceEntity = nameSpaceEntity;
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
 	}
 
-	public String getNameSpaceDao() {
-		return nameSpaceDao;
+	public String getDbName() {
+		return dbName;
 	}
 
-	public void setNameSpaceDao(String nameSpaceDao) {
-		this.nameSpaceDao = nameSpaceDao;
-	}
-
-	public String getDbSetName() {
-		return dbSetName;
-	}
-
-	public void setDbSetName(String dbSetName) {
-		this.dbSetName = dbSetName;
+	public void setDbName(String dbName) {
+		this.dbName = dbName;
 	}
 
 	public String getClassName() {

@@ -95,6 +95,9 @@ public class JavaParameterHost extends AbstractParameterHost {
 		this.primary = primary;
 	}
 	
-	
-
+	public String getClassDisplayName() {
+		if(byte[].class.equals(javaClass))
+			return "byte[]";
+		return javaClass.getSimpleName();
+	}
 }

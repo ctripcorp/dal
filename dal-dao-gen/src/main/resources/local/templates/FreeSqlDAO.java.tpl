@@ -1,33 +1,55 @@
-package $namespace;
+package ${host.getNameSpaceDao()};
 
 import java.sql.ResultSet;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
 
-import com.ctrip.platform.dao.AbstractDAO;
-import com.ctrip.platform.dao.enums.DbType;
-import com.ctrip.platform.dao.enums.ParameterDirection;
-import com.ctrip.platform.dao.param.StatementParameter;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalQueryDao;
+import com.ctrip.platform.dal.dao.DalRowMapper;
+import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class $dao_name extends AbstractDAO {
+import com.ctrip.platform.dal.tester.person.Person;
 
-	public $dao_name() {
-		logicDbName = "$database";
-		servicePort = 9000;
-		credentialId = "30303";
-		super.init();
+public class ${host.getClassName()} {
+	private DalQueryDao queryDao;
+
+#foreach($p in $method.getParameters())
+	private ${method.getClassName()}RowMapper ${method.getVariableName()}RowMapper = new ${method.getClassName()}RowMapper();
+#end
+
+	public ${host.getClassName()}(String logicDbName) {
+		queryDao = new DalQueryDao(logicDbName);
+	}
+    
+#foreach($method in $host.getMethods())
+	public List<${method.getClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+		int i = 1;
+#foreach($p in $method.getParameters())  
+		parameters.set(i++, ${p.getSqlType()}, ${p.getName());
+#end
+		//如果只需要一条记录，建议使用limit 1或者top 1，并使用SelectFirst提高性能
+		return queryDao.query(sql, parameters, hints, personRowMapper);
 	}
 
-	#foreach( $method in $methods )
-	#set($parameters = $method.getParameters())
-public ResultSet ${method.getMethodName()}#[[(]]##foreach($p in $parameters)${p.getType()} ${p.getName()}#if($foreach.count != $parameters.size()), #end#end#[[)]]# {
-		List<StatementParameter> parameters = new ArrayList<StatementParameter>();
-		#foreach($p in $parameters)
-parameters.add(StatementParameter.newBuilder().setDbType(DbType.${JavaDbTypeMap.get($p.getType())}).setDirection(ParameterDirection.Input).setNullable(false).setIndex(1).setName("").setSensitive(false).setValue(${p.getName()}).build());
-		#end
-return this.fetch("${method.getSqlSPName()}", parameters, null);
+#end
+#foreach($method in $host.getMethods())
+	private class ${method.getClassName()}RowMapper implements DalRowMapper<${method.getClassName()}> {
+
+		@Override
+		public ${method.getClassName()} map(ResultSet rs, int rowNum) throws SQLException {
+			${method.getClassName()} pojo = new ${method.getClassName()}();
+			
+#foreach( $field in ${method.getFields()} )
+			pojo.set${field.getName()}((${field.getJavaClass().getSimpleName()})rs.getObject("${field.getName()}"));
+#end
+
+			return pojo;
+		}
 	}
 
-	#end
-
+#end
 }

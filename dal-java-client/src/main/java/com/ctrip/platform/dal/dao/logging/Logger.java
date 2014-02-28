@@ -13,8 +13,12 @@ public class Logger {
 	public static final String TAG_SIZE = "Size";
 	public static final String TAG_STATUS = "Status";
 	
-	public static boolean encryptIn;
-	public static boolean encryptOut;
+	public static boolean encryptIn = true;
+	public static boolean encryptOut = true;
+	
+	public static int getAppId() {
+		return DAL_APP_ID;
+	}
 	
 	void log(String className, String sql, StatementParameters parameters) {
 		

@@ -1,49 +1,48 @@
+package ${host.getPackageName()};
 
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using Arch.Data;
-using Arch.Data.DbEngine;
-using ${host.getNameSpaceEntity()};
+import java.sql.SQLException;
+import java.util.Map;
 
-namespace ${host.getNameSpaceDao()}
-{
-    public partial class ${host.getClassName()}Dao
-    {
-        readonly BaseDao baseDao = BaseDaoFactory.CreateBaseDao("");
+import com.ctrip.platform.dal.dao.DalClient;
+import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.tester.person.Person;
 
-        /// <summary>
-        ///  执行SP${host.getClassName()}
-        /// </summary>
-        /// <param name="${WordUtils.uncapitalize(${host.getClassName()})}">${host.getClassName()}实体对象</param>
-        /// <returns>影响的行数</returns>
-        public int Exec${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize(${host.getClassName()})})
-        {
-            try
-            {
-                StatementParameterCollection parameters = new StatementParameterCollection();
-#foreach($p in $host.getSpParams())
-                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalizeFully($p.getName().replace("@",""))}});
+public class ${host.getClassName()}Dao {
+	private DalClient client;
+
+	public ${host.getClassName()}Dao(String logicDbName) {
+		this.client = DalClientFactory.getClient(logicDbName);
+	}
+	
+	public Map<String, ?> call${host.getClassName()}(${host.getClassName()} param) throws SQLException {
+		String callString = "${host.getSpName()}";
+		
+		StatementParameters parameters = new StatementParameters();
+		int i = 1;
+#foreach($p in $host.getParameters())
+#if(ParameterDirection.${p.getDirection() == ParameterDirection.Input})
+		parameters.set(i, ${p.getJavaTypeDisplay()}, param.get${p.getCapitalizedName()});
 #end
-                parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
-
-                baseDao.ExecSp("${host.getSpName()}", parameters);
-
-#foreach ($p in $host.getSpParams())
-#if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
-                ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalizeFully($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
+#if(ParameterDirection.${p.getDirection() == ParameterDirection.InputOutput})
+		parameters.registerInOut(i, ${p.getJavaTypeDisplay()}, ${p.getName()}, param.get${p.getCapitalizedName()});
 #end
+#if(ParameterDirection.${p.getDirection() == ParameterDirection.Output})
+		parameters.registerOut(i, ${p.getJavaTypeDisplay()}, ${p.getName()});
 #end
-                return (int)parameters["@return"].Value;
-            }
-            catch (Exception ex)
-            {
-                throw new DalException("调用${host.getClassName()}Dao时，访问Exec${host.getClassName()}时出错", ex);
-            }
 
-       }
+		/* To specify returned result(not the output or inputoutput parameter)
+		DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
+		param = StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName("result").build();
+		parameters.add(param);
 
-    }
+		param  = StatementParameter.newBuilder().setResultsParameter(true).setName("count").build();
+		parameters.add(param);
+		*/
+		
+		DalHints hints = new DalHints();
+		
+		return client.call(callString, parameters, hints);
+	}
 }

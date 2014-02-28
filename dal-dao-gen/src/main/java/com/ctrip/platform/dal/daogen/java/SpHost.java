@@ -8,9 +8,16 @@ public class SpHost {
 	private DatabaseCategory databaseCategory;
 	private String packageName;
 	private String dbName;
-	private String pojoClassName;
+	private String className;
 	private String spName;
 	private List<JavaParameterHost> parameters;
+	
+	public String getClassName() {
+		return className;
+	}
+	public void setClassName(String className) {
+		this.className = className;
+	}
 	public DatabaseCategory getDatabaseCategory() {
 		return databaseCategory;
 	}
@@ -28,12 +35,6 @@ public class SpHost {
 	}
 	public void setDbName(String dbName) {
 		this.dbName = dbName;
-	}
-	public String getPojoClassName() {
-		return pojoClassName;
-	}
-	public void setPojoClassName(String pojoClassName) {
-		this.pojoClassName = pojoClassName;
 	}
 	public String getSpName() {
 		return spName;

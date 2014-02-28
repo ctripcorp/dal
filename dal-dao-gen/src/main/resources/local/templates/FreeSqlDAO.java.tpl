@@ -9,9 +9,7 @@ import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-import com.ctrip.platform.dal.tester.person.Person;
-
-public class ${host.getClassName()} {
+public class ${host.getClassName()}Dao {
 	private DalQueryDao queryDao;
 
 #foreach($p in $method.getParameters())

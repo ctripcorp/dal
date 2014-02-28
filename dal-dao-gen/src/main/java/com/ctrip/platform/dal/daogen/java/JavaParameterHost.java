@@ -1,7 +1,10 @@
 package com.ctrip.platform.dal.daogen.java;
 
+import org.apache.commons.lang.WordUtils;
+
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.Consts;
 
 public class JavaParameterHost extends AbstractParameterHost {
 	
@@ -95,9 +98,21 @@ public class JavaParameterHost extends AbstractParameterHost {
 		this.primary = primary;
 	}
 	
+	public String getCapitalizedName() {
+		return WordUtils.capitalize(name);
+	}
+	
+	public String getUncapitalizedName() {
+		return WordUtils.uncapitalize(name);
+	}
+	
 	public String getClassDisplayName() {
 		if(byte[].class.equals(javaClass))
 			return "byte[]";
 		return javaClass.getSimpleName();
+	}
+	
+	public String getJavaTypeDisplay() {
+		return Consts.jdbcSqlTypeDisplay.get(sqlType);
 	}
 }

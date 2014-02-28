@@ -159,7 +159,7 @@ public class JavaGenerator extends AbstractGenerator {
 				spHost.setPackageName(super.namespace);
 				spHost.setDatabaseCategory(dbCategory);
 				spHost.setDbName(dbName);
-				spHost.setPojoClassName(className);
+				spHost.setClassName(className);
 				spHost.setSpName(spName);
 				List<AbstractParameterHost> params = DbUtils.getSpParams(
 						tableViewSp.getServer_id(), dbName, currentSp, 1);
@@ -215,9 +215,9 @@ public class JavaGenerator extends AbstractGenerator {
 			try {
 
 				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.java",
-						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
+						mavenLikeDir.getAbsolutePath(), host.getClassName()));
 				pojoWriter = new FileWriter(String.format("%s/Entity/%s.java",
-						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
+						mavenLikeDir.getAbsolutePath(), host.getClassName()));
 
 				Velocity.mergeTemplate("templates/DAOBySp.java.tpl", "UTF-8",
 						context, daoWriter);

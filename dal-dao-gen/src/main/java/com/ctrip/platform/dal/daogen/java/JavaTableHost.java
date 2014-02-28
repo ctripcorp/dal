@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.java;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -132,6 +133,11 @@ public class JavaTableHost {
 		imports.add(java.sql.SQLException.class.getName());
 		imports.add(java.util.Map.class.getName());
 		imports.add(java.util.LinkedHashMap.class.getName());
+		
+		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(fields);
+		for(JavaMethodHost method: methods) {
+			allTypes.addAll(method.getParameters());
+		}
 		
 		for(JavaParameterHost field: fields) {
 			Class<?> clazz = field.getJavaClass();

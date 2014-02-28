@@ -22,6 +22,7 @@ import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
 import com.ctrip.platform.dal.daogen.pojo.DbServer;
 import com.ctrip.platform.dal.daogen.pojo.GenTask;
 import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;
+import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.pojo.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.pojo.Project;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
@@ -42,6 +43,12 @@ public abstract class AbstractGenerator implements Generator {
 	protected String namespace;
 
 	protected int projectId;
+	
+	protected List<GenTaskByFreeSql> freeSqls;
+	
+	protected List<GenTaskByTableViewSp> tableViewSps;
+	
+	protected List<GenTaskBySqlBuilder> sqlBuilders;
 
 	static {
 
@@ -90,10 +97,11 @@ public abstract class AbstractGenerator implements Generator {
 		Map<String,String> dbs = new HashMap<String, String>();
 		List<String> clazz = new ArrayList<String>();
 		
-		List<GenTaskByFreeSql> freeSql = daoByFreeSql.getTasksByProjectId(projectId);
-		List<GenTaskByTableViewSp> tableViewSps = daoByTableViewSp.getTasksByProjectId(projectId);
+		freeSqls = daoByFreeSql.getTasksByProjectId(projectId);
+		tableViewSps = daoByTableViewSp.getTasksByProjectId(projectId);
+		sqlBuilders = daoBySqlBuilder.getTasksByProjectId(projectId);
 		
-		for(GenTaskByFreeSql task : freeSql){
+		for(GenTaskByFreeSql task : freeSqls){
 			if(!dbs.containsKey(task.getDb_name())){
 				DbServer dbServer = daoOfDbServer.getDbServerByID(task.getServer_id());
 				String provider = "sqlProvider";
@@ -173,7 +181,7 @@ public abstract class AbstractGenerator implements Generator {
 		// 手工编写的SQL
 		
 
-		generateByFreeSql(freeSql);
+		generateByFreeSql(freeSqls);
 
 		return true;
 

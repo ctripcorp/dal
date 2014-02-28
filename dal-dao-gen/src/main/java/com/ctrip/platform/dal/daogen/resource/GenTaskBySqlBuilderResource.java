@@ -32,7 +32,6 @@ public class GenTaskBySqlBuilderResource {
 			@FormParam("project_id") int project_id,
 			@FormParam("db_name") String db_name,
 			@FormParam("table_name") String table_name,
-			@FormParam("class_name") String class_name,
 			@FormParam("method_name") String method_name,
 			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
 			@FormParam("crud_type") String crud_type,
@@ -52,7 +51,6 @@ public class GenTaskBySqlBuilderResource {
 			task.setProject_id(project_id);
 			task.setDb_name(db_name);
 			task.setTable_name(table_name);
-			task.setClass_name(class_name);
 			task.setMethod_name(method_name);
 			task.setSql_style(sql_style);
 			task.setCrud_type(crud_type);

@@ -139,10 +139,6 @@ jQuery(document).ready(function () {
         });
     });
 
-    $(document.body).on('change', '#tables', function (event) {
-        $("#class_name").val($(this).val());
-    });
-
     $(document.body).on('click', '#share_proj', function (event) {
         $.post("/rest/project/share_proj", {"id": w2ui['grid'].current_project,
             "userNo": $("#users").val()}, function(data){

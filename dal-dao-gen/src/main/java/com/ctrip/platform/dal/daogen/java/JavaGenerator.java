@@ -360,8 +360,9 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 
 		List<FreeSqlHost> hosts = new ArrayList<FreeSqlHost>();
-		Map<String, FreeSqlPojoHost> pojoHosts = new HashMap<String, FreeSqlPojoHost>();
-
+//		Map<String, FreeSqlPojoHost> pojoHosts = new HashMap<String, FreeSqlPojoHost>();
+		Map<String, JavaMethodHost> pojoHosts = new HashMap<String, JavaMethodHost>();
+		
 		// 随后，以ServerID, DbName以及ClassName为维度，为每个维度生成一个DAO类
 		for (Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy
 				.entrySet()) {
@@ -382,6 +383,8 @@ public class JavaGenerator extends AbstractGenerator {
 				JavaMethodHost method = new JavaMethodHost();
 				method.setSql(task.getSql_content());
 				method.setName(task.getMethod_name());
+				method.setPackageName(namespace);
+				method.setPojoClassName(WordUtils.capitalize(task.getMethod_name()) + "Pojo");
 				List<JavaParameterHost> params = new ArrayList<JavaParameterHost>();
 				for (String param : StringUtils
 						.split(task.getParameters(), ",")) {
@@ -395,32 +398,37 @@ public class JavaGenerator extends AbstractGenerator {
 				method.setParameters(params);
 				methods.add(method);
 
-				if (!pojoHosts.containsKey(task.getClass_name())) {
+				// Need to specify Pojo class name for each method. or allow Map<Sting, Object> as row
+//				if (!pojoHosts.containsKey(task.getClass_name())) {
+				if (!pojoHosts.containsKey(method.getPojoClassName())) {
 					ResultSetMetaData rsMeta = DbUtils.testAQuerySql(
 							task.getServer_id(), task.getDb_name(),
 							task.getSql_content(), task.getParameters());
 
 					if (rsMeta != null) {
 						try {
-							List<JavaParameterHost> pHosts = new ArrayList<JavaParameterHost>();
+							List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
 							for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-								JavaParameterHost pHost = new JavaParameterHost();
-								pHost.setName(rsMeta.getColumnName(i));
-								pHost.setSqlType(rsMeta.getColumnType(i));
-								pHost.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(pHost.getSqlType()));
-								pHost.setIdentity(false);
-								pHost.setNullable(false);
-								pHost.setPrimary(false);
-								pHost.setLength(rsMeta.getColumnDisplaySize(i));
-								pHosts.add(pHost);
+								JavaParameterHost paramHost = new JavaParameterHost();
+								paramHost.setName(rsMeta.getColumnName(i));
+								paramHost.setSqlType(rsMeta.getColumnType(i));
+								paramHost.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType()));
+								paramHost.setIdentity(false);
+								paramHost.setNullable(false);
+								paramHost.setPrimary(false);
+								paramHost.setLength(rsMeta.getColumnDisplaySize(i));
+								paramHosts.add(paramHost);
 							}
-							FreeSqlPojoHost freeSqlHost = new FreeSqlPojoHost();
-							freeSqlHost.setColumns(pHosts);
-							freeSqlHost.setTableName("");
-							freeSqlHost.setClassName(task.getClass_name());
-							freeSqlHost.setPackageName(host.getPackageName());
-
-							pojoHosts.put(task.getClass_name(), freeSqlHost);
+							
+							method.setFields(paramHosts);
+							/*
+							FreeSqlPojoHost pojoHost = new FreeSqlPojoHost();
+							pojoHost.setColumns(paramHosts);
+							pojoHost.setTableName("");
+							pojoHost.setClassName(task.getClass_name());
+							pojoHost.setPackageName(host.getPackageName());
+							*/
+							pojoHosts.put(method.getPojoClassName(), method);
 						} catch (SQLException e) {
 							e.printStackTrace();
 						}
@@ -440,13 +448,14 @@ public class JavaGenerator extends AbstractGenerator {
 		File mavenLikeDir = new File(String.format("gen/%s/java",
 				projectId));
 		
-		for(FreeSqlPojoHost host : pojoHosts.values()){
+//		for(FreeSqlPojoHost host : pojoHosts.values()){
+		for(JavaMethodHost host : pojoHosts.values()){
 			context.put("host", host);
 
 			FileWriter pojoWriter = null;
 			try {
 				pojoWriter = new FileWriter(String.format("%s/Entity/%s.java",
-						mavenLikeDir.getAbsolutePath(), host.getClassName()));
+						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
 
 				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
 						context, pojoWriter);

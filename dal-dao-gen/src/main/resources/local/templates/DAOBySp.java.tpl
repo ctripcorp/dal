@@ -23,13 +23,13 @@ public class ${host.getPojoClassName()}Dao {
 		int i = 1;
 #foreach($p in $host.getFields())
 #if($p.getDirection().name() == "Input")
-		parameters.set(i, ${p.getJavaTypeDisplay()}, param.get${p.getCapitalizedName()}());
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, param.get${p.getCapitalizedName()}());
 #end
 #if($p.getDirection().name() == "InputOutput")
-		parameters.registerInOut(i, ${p.getJavaTypeDisplay()}, "${p.getName()}", param.get${p.getCapitalizedName()}());
+		parameters.registerInOut(i++, ${p.getJavaTypeDisplay()}, "${p.getName()}", param.get${p.getCapitalizedName()}());
 #end
 #if($p.getDirection().name() == "Output")
-		parameters.registerOut(i, ${p.getJavaTypeDisplay()}, "${p.getName()}");
+		parameters.registerOut(i++, ${p.getJavaTypeDisplay()}, "${p.getName()}");
 #end
 #end
 		/* To specify returned result(not the output or inputoutput parameter)

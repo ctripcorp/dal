@@ -39,13 +39,16 @@ public class ${host.getPojoClassName()}DaoTest {
 			int affectedRows = 0;
 			List<${host.getPojoClassName()}> results = null;
 #foreach($method in $host.getMethods())
+			// Test ${method.getName()}
 #foreach($p in $method.getParameters())  
 		${p.getName()} = null;
 #end
 #if($method.getCrud_type() == "select")
-		    results = dao.${method.getName()}($method.getParameterNames()}); 
+		    results = dao.${method.getName()}($method.getParameterNames()});
+
 #else
     		affectedRows = dao.${method.getName()}($method.getParameterNames()});
+
 #end
 		} catch (SQLException e) {
 			e.printStackTrace();

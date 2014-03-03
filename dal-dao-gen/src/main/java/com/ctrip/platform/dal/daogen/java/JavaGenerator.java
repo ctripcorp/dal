@@ -209,11 +209,11 @@ public class JavaGenerator extends AbstractGenerator {
 				testWriter = new FileWriter(String.format("%s/Test/%sTest.java",
 						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
 
-				Velocity.mergeTemplate("templates/DAO.java.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/java/DAO.java.tpl", "UTF-8",
 						context, daoWriter);
-				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/java/Pojo.java.tpl", "UTF-8",
 						context, pojoWriter);
-				Velocity.mergeTemplate("templates/DAOTest.java.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/java/DAOTest.java.tpl", "UTF-8",
 						context, testWriter);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -243,11 +243,11 @@ public class JavaGenerator extends AbstractGenerator {
 				testWriter = new FileWriter(String.format("%s/Test/%sTest.java",
 						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
 
-				Velocity.mergeTemplate("templates/DAOBySp.java.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/java/DAOBySp.java.tpl", "UTF-8",
 						context, daoWriter);
-				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/java/Pojo.java.tpl", "UTF-8",
 						context, pojoWriter);
-				Velocity.mergeTemplate("templates/DAOBySpTest.java.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/java/DAOBySpTest.java.tpl", "UTF-8",
 						context, testWriter);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -470,7 +470,7 @@ public class JavaGenerator extends AbstractGenerator {
 				pojoWriter = new FileWriter(String.format("%s/Entity/%s.java",
 						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
 
-				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/java/Pojo.java.tpl", "UTF-8",
 						context, pojoWriter);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -483,17 +483,24 @@ public class JavaGenerator extends AbstractGenerator {
 			context.put("host", host);
 
 			FileWriter daoWriter = null;
+			FileWriter testWriter = null;
+			
 			try {
 
 				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.java",
 						mavenLikeDir.getAbsolutePath(), host.getClassName()));
+				testWriter = new FileWriter(String.format("%s/Test/%sTest.java",
+						mavenLikeDir.getAbsolutePath(), host.getClassName()));
 
-				Velocity.mergeTemplate("templates/FreeSqlDAO.java.tpl", "UTF-8",
+				Velocity.mergeTemplate("templates/java/FreeSqlDAO.java.tpl", "UTF-8",
 						context, daoWriter);
+				Velocity.mergeTemplate("templates/java/FreeSqlDAOTest.java.tpl", "UTF-8",
+						context, testWriter);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
 				JavaIOUtils.closeWriter(daoWriter);
+				JavaIOUtils.closeWriter(testWriter);
 			}
 		}
 	}

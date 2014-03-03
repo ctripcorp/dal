@@ -16,10 +16,12 @@ public class ${host.getClassName()}TestDao {
 		${host.getClassName()}Dao dao = new ${host.getClassName()}Dao();
 		try {
 #foreach( $method in ${host.getMethods()} )
+			// Test ${method.getName()}
 #foreach($p in $method.getParameters())
 			${p.getJavaTypeDisplay()} ${p.getName()} = null;// Test value here
 #end
 			List<${method.getPojoClassName()}> ${method.getPojoClassName()}s = dao.${method.getName()}(${method.getParameterNames()});
+
 #end
 		} catch (SQLException e) {
 			e.printStackTrace();

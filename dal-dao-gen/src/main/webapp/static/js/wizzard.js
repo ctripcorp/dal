@@ -129,6 +129,7 @@
                     $.get(sprintf("/rest/db/table_sps?server=%s&db_name=%s",
                         $("#servers").val(),$("#databases").val())).done(function (data) {
                         $("select[id$=table_list] > option").remove();
+                        $("select[id$=view_list] > option").remove();
                         $("select[id$=sp_list] > option").remove();
                         var tableList = [];
                         var viewList = [];
@@ -242,6 +243,17 @@
             }
             //选择基础数据
             else if (current.hasClass("step2-1-1")) {
+
+                if($("#tables").val() == "_please_select"){
+                    $("#error_msg").text("请选择一个表！");
+                    return;
+                }
+                if($("#method_name").val() == ""){
+                    $("#error_msg").text("请填写方法名！");
+                    return;
+                }
+                $("#error_msg").text("");
+
                 var op_type = $(".op_type.active").children().val();
                 cblock($("body"));
 
@@ -307,6 +319,11 @@
                 });
                 
             } else if (current.hasClass("step_fields")) {
+                if($("#operation_type").val() != "delete" && $('#fields').multipleSelect('getSelects').length < 1){
+                    $("#error_msg").text("请选择至少一个字段！");
+                    return;
+                }
+                $("#error_msg").text("");
                 //$(".step_fields").hide();
                 current.hide();
                 $(".step3").show();

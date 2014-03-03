@@ -107,20 +107,5 @@ public class SqlBuilder {
 		return "";
 
 	}
-	
-	public static void main(String[] args) {
-		List<Integer> values = new ArrayList<Integer>();
-		values.add(1);
-		values.add(2);
-		values.add(3);
-		values.add(4);
-		for (int i = 0; i < values.size(); i++) {
-			if(i == 2){
-				values.remove(i);
-				System.out.println(values.size());
-			}
-			System.out.println(i + values.get(i).toString());
-		}
-	}
 
 }

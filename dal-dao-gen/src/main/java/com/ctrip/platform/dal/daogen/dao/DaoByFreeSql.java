@@ -23,7 +23,7 @@ public class DaoByFreeSql {
 	public List<GenTaskByFreeSql> getAllTasks() {
 
 		return this.jdbcTemplate
-				.query("select id, project_id,server_id,  db_name,class_name,method_name,crud_type,sql_content,parameters from task_sql",
+				.query("select id, project_id,server_id,  db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters from task_sql",
 
 				new RowMapper<GenTaskByFreeSql>() {
 					public GenTaskByFreeSql mapRow(ResultSet rs, int rowNum)
@@ -36,7 +36,7 @@ public class DaoByFreeSql {
 	public List<GenTaskByFreeSql> getTasksByProjectId(int iD) {
 
 		return this.jdbcTemplate
-				.query("select id, project_id,server_id,  db_name,class_name,method_name,crud_type,sql_content,parameters from task_sql where project_id=?",
+				.query("select id, project_id,server_id,  db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters from task_sql where project_id=?",
 						new Object[] { iD }, new RowMapper<GenTaskByFreeSql>() {
 							public GenTaskByFreeSql mapRow(ResultSet rs, int rowNum)
 									throws SQLException {
@@ -48,9 +48,9 @@ public class DaoByFreeSql {
 	public int insertTask(GenTaskByFreeSql task) {
 
 		return this.jdbcTemplate
-				.update("insert into task_sql (project_id,server_id,  db_name,class_name,method_name,crud_type,sql_content,parameters) values (?,?,?,?,?,?,?,?)",
+				.update("insert into task_sql (project_id,server_id,  db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters) values (?,?,?,?,?,?,?,?,?)",
 						task.getProject_id(), task.getServer_id(),task.getDb_name(),
-						task.getClass_name(), task.getMethod_name(),
+						task.getClass_name(),task.getPojo_name(), task.getMethod_name(),
 						task.getCrud_type(), task.getSql_content(),task.getParameters());
 
 	}
@@ -58,9 +58,9 @@ public class DaoByFreeSql {
 	public int updateTask(GenTaskByFreeSql task) {
 
 		return this.jdbcTemplate
-				.update("update task_sql set project_id=?,server_id=?,  db_name=?,class_name=?,method_name=?,crud_type=?,sql_content=?,parameters=? where id=?",
+				.update("update task_sql set project_id=?,server_id=?,  db_name=?,class_name=?,pojo_name=?,method_name=?,crud_type=?,sql_content=?,parameters=? where id=?",
 						task.getProject_id(), task.getServer_id(),task.getDb_name(),
-						task.getClass_name(), task.getMethod_name(),
+						task.getClass_name(), task.getPojo_name(),task.getMethod_name(),
 						task.getCrud_type(), task.getSql_content(),task.getParameters(),
 						task.getId());
 

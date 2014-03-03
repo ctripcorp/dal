@@ -365,7 +365,19 @@
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">生成的类名：</label>
-                           <input id="sql_class_name" class="span9 popup_text" type="text">
+                           <select id="sql_class_name" class="span9 popup_text">
+
+                           </select>
+                           <!-- <input id="sql_class_name" class="span9 popup_text" type="text"> -->
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">实体类名：</label>
+                          <!--  <select id="sql_pojo_name" class="span9 popup_text">
+                              
+                           </select> -->
+                           <input id="sql_pojo_name" class="span9 popup_text" type="text">
                         </div>
                      </div>
                      <div class="row-fluid">

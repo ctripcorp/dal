@@ -16,6 +16,7 @@ public class Consts {
 	public static Map<String, String> WhereConditionMap;
 	
 	public static Map<Integer, Class> jdbcSqlTypeToJavaClass;
+	public static Map<Integer, String> jdbcSqlTypeDisplay;
 	
 	public static List<String> CSharpValueTypes;
 	
@@ -101,6 +102,34 @@ public class Consts {
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.SQLXML, "Integer");
 		*/
 		
+		jdbcSqlTypeDisplay = new HashMap<Integer, String>();
+		jdbcSqlTypeDisplay.put(java.sql.Types.BIT, "Types.BIT");
+		
+		// Recommended using Short for Byte
+		jdbcSqlTypeDisplay.put(java.sql.Types.TINYINT, "Types.TINYINT");
+		jdbcSqlTypeDisplay.put(java.sql.Types.SMALLINT, "Types.SMALLINT");
+		jdbcSqlTypeDisplay.put(java.sql.Types.INTEGER, "Types.INTEGER");
+		jdbcSqlTypeDisplay.put(java.sql.Types.BIGINT, "Types.BIGINT");
+		
+		jdbcSqlTypeDisplay.put(java.sql.Types.FLOAT, "Types.FLOAT");
+		jdbcSqlTypeDisplay.put(java.sql.Types.REAL, "Types.REAL");
+		jdbcSqlTypeDisplay.put(java.sql.Types.DOUBLE, "Types.DOUBLE");
+		jdbcSqlTypeDisplay.put(java.sql.Types.NUMERIC, "Types.NUMERIC");
+		jdbcSqlTypeDisplay.put(java.sql.Types.DECIMAL, "Types.DECIMAL");
+		
+		jdbcSqlTypeDisplay.put(java.sql.Types.CHAR, "Types.CHAR");
+		jdbcSqlTypeDisplay.put(java.sql.Types.VARCHAR, "Types.VARCHAR");
+		//getAsciiStream  getUnicodeStream
+		jdbcSqlTypeDisplay.put(java.sql.Types.LONGVARCHAR, "Types.LONGVARCHAR");
+		
+		jdbcSqlTypeDisplay.put(java.sql.Types.DATE, "Types.DATE");
+		jdbcSqlTypeDisplay.put(java.sql.Types.TIME, "Types.TIME");
+		jdbcSqlTypeDisplay.put(java.sql.Types.TIMESTAMP, "Types.TIMESTAMP");
+		
+		jdbcSqlTypeDisplay.put(java.sql.Types.BINARY, "Types.BINARY");
+		jdbcSqlTypeDisplay.put(java.sql.Types.VARBINARY, "Types.VARBINARY");
+		// getBinaryStream 
+		jdbcSqlTypeDisplay.put(java.sql.Types.LONGVARBINARY, "Types.LONGVARBINARY");
 	}
 	
 

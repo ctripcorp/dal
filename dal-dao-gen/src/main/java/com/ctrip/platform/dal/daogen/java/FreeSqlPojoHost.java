@@ -1,16 +1,15 @@
 package com.ctrip.platform.dal.daogen.java;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
-import com.ctrip.platform.dal.daogen.pojo.ColumnMetaData;
 
 public class FreeSqlPojoHost {
 	private String packageName;
 	private String tableName;
 	private String className;
-	private List<JavaParameterHost> columns;
+	private List<JavaParameterHost> columns = new ArrayList<JavaParameterHost>();
 
 	public String getPackageName() {
 		return packageName;

@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.java;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -19,8 +20,7 @@ public class JavaTableHost {
 	private SpaOperationHost spaInsert;
 	private SpaOperationHost spaDelete;
 	private SpaOperationHost spaUpdate;
-	private List<JavaMethodHost> methods;
-	private Set<String> imports = new TreeSet<String>();
+	private List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 
 	public String getPackageName() {
 		return packageName;
@@ -76,7 +76,6 @@ public class JavaTableHost {
 
 	public void setFields(List<JavaParameterHost> fields) {
 		this.fields = fields;
-		buildImports();
 	}
 
 	public boolean isHasIdentity() {
@@ -127,13 +126,29 @@ public class JavaTableHost {
 		this.databaseCategory = databaseCategory;
 	}
 
-	private void buildImports() {
+	public Set<String> getDaoImports() {
+		Set<String> imports = new TreeSet<String>();
 		imports.add(java.sql.ResultSet.class.getName());
 		imports.add(java.sql.SQLException.class.getName());
 		imports.add(java.util.Map.class.getName());
 		imports.add(java.util.LinkedHashMap.class.getName());
+		imports.add( java.sql.Types.class.getName());
+		imports.add( java.util.ArrayList.class.getName());
+		imports.add( java.util.List.class.getName());
+
+		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(fields);
+		for(JavaMethodHost method: methods) {
+			allTypes.addAll(method.getParameters());
+		}
 		
-		for(JavaParameterHost field: fields) {
+		if(spaInsert != null)
+			allTypes.addAll(spaInsert.getParameters());
+		if(spaDelete != null)
+			allTypes.addAll(spaDelete.getParameters());
+		if(spaUpdate != null)
+			allTypes.addAll(spaUpdate.getParameters());
+		
+		for(JavaParameterHost field: allTypes) {
 			Class<?> clazz = field.getJavaClass();
 			if(byte[].class.equals(clazz))
 				continue;
@@ -141,9 +156,22 @@ public class JavaTableHost {
 				continue;
 			imports.add(clazz.getName());
 		}
-	}
-	
-	public Set<String> getImports() {
 		return imports;
 	}
+	
+	public Set<String> getPojoImports() {
+		Set<String> imports = new TreeSet<String>();
+
+		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(fields);
+		for(JavaParameterHost field: allTypes) {
+			Class<?> clazz = field.getJavaClass();
+			if(byte[].class.equals(clazz))
+				continue;
+			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))
+				continue;
+			imports.add(clazz.getName());
+		}
+		return imports;
+	}
+
 }

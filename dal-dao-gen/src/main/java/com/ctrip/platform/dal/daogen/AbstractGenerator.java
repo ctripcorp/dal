@@ -83,7 +83,6 @@ public abstract class AbstractGenerator implements Generator {
 			this.projectId = projectId;
 		}
 		
-		
 		File mavenLikeDir = new File(String.format("gen/%s/cs",
 				projectId));
 		
@@ -101,6 +100,8 @@ public abstract class AbstractGenerator implements Generator {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
+		
+		prepareFolder(projectId, "java");
 		
 		Map<String,String> dbs = new HashMap<String, String>();
 		List<String> clazz = new ArrayList<String>();
@@ -180,6 +181,29 @@ public abstract class AbstractGenerator implements Generator {
 		generateByFreeSql(freeSqls);
 
 		return true;
+
+	}
+	
+	private void prepareFolder(int projectId, String lang) {
+		File mavenLikeDir = new File(String.format("gen/%s/%s",
+				projectId, lang));
+
+		try {
+			if(mavenLikeDir.exists())
+				FileUtils.forceDelete(mavenLikeDir);
+			//FileUtils.forceMkdir(mavenLikeDir);
+			File daoMavenLike = new File(mavenLikeDir, "Dao");
+			File entityMavenLike = new File(mavenLikeDir, "Entity");
+			File idaoMavenLike = new File(mavenLikeDir, "IDao");
+			File testMavenLike = new File(mavenLikeDir, "Test");
+			
+			FileUtils.forceMkdir(daoMavenLike);
+			FileUtils.forceMkdir(entityMavenLike);
+			FileUtils.forceMkdir(idaoMavenLike);
+			FileUtils.forceMkdir(testMavenLike);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 
 	}
 

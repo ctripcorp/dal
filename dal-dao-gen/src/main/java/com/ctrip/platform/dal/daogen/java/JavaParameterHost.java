@@ -1,7 +1,10 @@
 package com.ctrip.platform.dal.daogen.java;
 
+import org.apache.commons.lang.WordUtils;
+
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.Consts;
 
 public class JavaParameterHost extends AbstractParameterHost {
 	
@@ -22,6 +25,8 @@ public class JavaParameterHost extends AbstractParameterHost {
 	private boolean nullable;
 	
 	private ParameterDirection direction;
+	
+	private Object validationValue;
 
 	public boolean isNullable() {
 		return nullable;
@@ -95,9 +100,37 @@ public class JavaParameterHost extends AbstractParameterHost {
 		this.primary = primary;
 	}
 	
+	public String getCapitalizedName() {
+		String tempName = name.replace("@", "");
+		if(tempName.contains("_")) {
+			tempName = WordUtils.capitalizeFully(name.replace('_', ' ')).replace(" ", "");
+		}
+		return WordUtils.capitalize(tempName);
+	}
+	
+	public String getUncapitalizedName() {
+		String tempName = name.replace("@", "");
+		if(tempName.contains("_")) {
+			tempName = WordUtils.capitalizeFully(name.replace('_', ' ')).replace(" ", "");
+		}
+		return WordUtils.uncapitalize(tempName);
+	}
+	
 	public String getClassDisplayName() {
 		if(byte[].class.equals(javaClass))
 			return "byte[]";
 		return javaClass.getSimpleName();
+	}
+	
+	public String getJavaTypeDisplay() {
+		return Consts.jdbcSqlTypeDisplay.get(sqlType);
+	}
+
+	public Object getValidationValue() {
+		return validationValue;
+	}
+
+	public void setValidationValue(Object validationValue) {
+		this.validationValue = validationValue;
 	}
 }

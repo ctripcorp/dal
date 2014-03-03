@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
@@ -72,7 +73,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 			CSharpFreeSqlHost host = new CSharpFreeSqlHost();
 			host.setDbSetName(currentTasks.get(0).getDb_name());
-			host.setClassName(currentTasks.get(0).getClass_name());
+			host.setClassName(WordUtils.capitalize(currentTasks.get(0).getClass_name()));
 			host.setNameSpace(super.namespace);
 
 			List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
@@ -120,7 +121,7 @@ public class CSharpGenerator extends AbstractGenerator {
 							CSharpFreeSqlPojoHost freeSqlHost = new CSharpFreeSqlPojoHost();
 							freeSqlHost.setColumns(pHosts);
 							freeSqlHost.setTableName("");
-							freeSqlHost.setClassName(task.getClass_name());
+							freeSqlHost.setClassName(WordUtils.capitalize(task.getClass_name()));
 							freeSqlHost.setNameSpace(host
 									.getNameSpace());
 
@@ -490,7 +491,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		if (null != suffix && !suffix.isEmpty()) {
 			className = className + suffix;
 		}
-		return className;
+		return WordUtils.capitalize(className);
 	}
 
 	private void generateTableDao(List<CSharpTableHost> tableHosts,

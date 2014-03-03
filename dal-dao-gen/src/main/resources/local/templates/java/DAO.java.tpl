@@ -1,60 +1,76 @@
-package ${host.getNamespace()};
+package ${host.getPackageName()};
 
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.ctrip.platform.dao.enums.ParameterDirection;
-import com.ctrip.platform.dao.param.StatementParameter;
-
-#foreach( $field in ${host.getImports()} )
+#foreach( $field in ${host.getDaoImports()} )
 import ${field};
 #end
 
-public class ${host.getPojoClassName()}Dao {
-	private DalTableDao<${host.getPojoClassName()}> client = new DalTableDao<${host.getPojoClassName()}>(new ${host.getPojoClassName()}Parser());
-	private DalClient baseClient = DalClientFactory.getClient(parser.getDatabaseName());
+import com.ctrip.platform.dal.dao.*;
 
-	public ${host.getPojoClassName()} queryByPk(Number id, DalHints hints)
-			throws SQLException {
-		return client.queryByPk(id, hints);
+public class ${host.getPojoClassName()}Dao {
+	private DalTableDao<${host.getPojoClassName()}> client;
+	private DalClient baseClient = DalClientFactory.getClient(${host.getDbName()});
+
+	public ${host.getPojoClassName()}Dao() {
+		this.client = new DalTableDao<${host.getPojoClassName()}>(new ${host.getPojoClassName()}Parser());
+		this.baseClient = DalClientFactory.getClient(${host.getDbName()});
 	}
 
-	public ${host.getPojoClassName()} queryByPk(${host.getPojoClassName()} pk, DalHints hints)
+#if($host.isHasIdentity())
+	public ${host.getPojoClassName()} queryByPk(Number id)
 			throws SQLException {
+		DalHints hints = new DalHints();
+		return client.queryByPk(id, hints);
+	}
+#end
+
+	public ${host.getPojoClassName()} queryByPk(${host.getPojoClassName()} pk)
+			throws SQLException {
+		DalHints hints = new DalHints();
 		return client.queryByPk(pk, hints);
 	}
 	
-	public List<${host.getPojoClassName()}> queryByPage(${host.getPojoClassName()} pk, int pageSize, int pageNo, DalHints hints)
+	// TODO add query by PK column list
+	
+	public List<${host.getPojoClassName()}> queryByPage(${host.getPojoClassName()} pk, int pageSize, int pageNo)
 			throws SQLException {
 		// TODO to be implemented
+		DalHints hints = new DalHints();
 		return null;
 	}
 	
-	public void insert(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public void insert(${host.getPojoClassName()}...daoPojos) throws SQLException {
+		DalHints hints = new DalHints();
 		client.insert(hints, null, daoPojos);
 	}
 
-	public void insert(DalHints hints, KeyHolder keyHolder, ${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public void insert(KeyHolder keyHolder, ${host.getPojoClassName()}...daoPojos) throws SQLException {
+		DalHints hints = new DalHints();
 		client.insert(hints, keyHolder, daoPojos);
 	}
 	
-	public void delete(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public void delete(${host.getPojoClassName()}...daoPojos) throws SQLException {
+		DalHints hints = new DalHints();
 		client.delete(hints, daoPojos);
 	}
 	
-	public void update(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public void update(${host.getPojoClassName()}...daoPojos) throws SQLException {
+		DalHints hints = new DalHints();
 		client.update(hints, daoPojos);
 	}
 
-#foreach($method in $host.getExtraMethods())
-    public #if($method.getCrud_type() == "select")List<${host.getClassName()}>#{else}int#end ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+#foreach($method in $host.getMethods())
+#if($method.getCrud_type() == "select")
+    public List<${host.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) 
+			throws SQLException {
+#else
+    public int ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+#end
 		String sql = "${method.getSql()}";
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
 		int i = 1;
 #foreach($p in $method.getParameters())  
-		parameters.set(i++, ${p.getSqlType()}, ${p.getName());
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
 #end
 #if($method.getCrud_type() == "select")
 		return queryDao.query(sql, parameters, hints, personRowMapper);
@@ -83,7 +99,7 @@ public class ${host.getPojoClassName()}Dao {
 		
 		private static final int[] COLUMN_TYPES = new int[]{
 #foreach( $field in ${host.getFields()} )
-			${field.getSqlType()},
+			${field.getJavaTypeDisplay()},
 #end
 		};
 		
@@ -92,7 +108,7 @@ public class ${host.getPojoClassName()}Dao {
 			${host.getPojoClassName()} pojo = new ${host.getPojoClassName()}();
 			
 #foreach( $field in ${host.getFields()} )
-			pojo.set${field.getName()}((${field.getJavaClass().getSimpleName()})rs.getObject("${field.getName()}"));
+			pojo.set${field.getCapitalizedName()}((${field.getClassDisplayName()})rs.getObject("${field.getName()}"));
 #end
 	
 			return pojo;
@@ -130,7 +146,7 @@ public class ${host.getPojoClassName()}Dao {
 	
 		@Override
 		public Number getIdentityValue(${host.getPojoClassName()} pojo) {
-			return #if($host.isHasIdentity())pojo.get${host.getIdentityColumnName()}()#{else}null#end;
+			return #if($host.isHasIdentity())pojo.get${WordUtils.capitalized(${host.getIdentityColumnName()})}()#{else}null#end;
 		}
 	
 		@Override
@@ -139,7 +155,7 @@ public class ${host.getPojoClassName()}Dao {
 			
 #foreach( $field in ${host.getFields()} )
 #if($field.isPrimary())
-			primaryKeys.put("${field.getName()}", pojo.get${field.getName()}());
+			primaryKeys.put("${field.getName()}", pojo.get${field.getCapitalizedName()}());
 #end
 #end
 	
@@ -151,7 +167,7 @@ public class ${host.getPojoClassName()}Dao {
 			Map<String, Object> map = new LinkedHashMap<String, Object>();
 			
 #foreach( $field in ${host.getFields()} )
-			map.put("${field.getName()}", pojo.get${field.getName()}());
+			map.put("${field.getName()}", pojo.get${field.getCapitalizedName()}());
 #end
 	
 			return map;

@@ -14,8 +14,8 @@ public class ${host.getClassName()}Dao {
 #foreach( $method in ${host.getMethods()} )
 	private ${method.getPojoClassName()}RowMapper ${method.getVariableName()}RowMapper = new ${method.getPojoClassName()}RowMapper();
 #end
-	public ${host.getClassName()}(String logicDbName) {
-		queryDao = new DalQueryDao(logicDbName);
+	public ${host.getClassName()}() {
+		queryDao = new DalQueryDao(${host.getDbName()});
 	}
     
 #foreach($method in $host.getMethods())

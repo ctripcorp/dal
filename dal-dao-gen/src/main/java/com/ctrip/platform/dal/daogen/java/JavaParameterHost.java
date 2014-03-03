@@ -25,6 +25,8 @@ public class JavaParameterHost extends AbstractParameterHost {
 	private boolean nullable;
 	
 	private ParameterDirection direction;
+	
+	private Object validationValue;
 
 	public boolean isNullable() {
 		return nullable;
@@ -122,5 +124,13 @@ public class JavaParameterHost extends AbstractParameterHost {
 	
 	public String getJavaTypeDisplay() {
 		return Consts.jdbcSqlTypeDisplay.get(sqlType);
+	}
+
+	public Object getValidationValue() {
+		return validationValue;
+	}
+
+	public void setValidationValue(Object validationValue) {
+		this.validationValue = validationValue;
 	}
 }

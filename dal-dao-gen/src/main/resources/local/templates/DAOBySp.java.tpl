@@ -12,8 +12,8 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 public class ${host.getPojoClassName()}Dao {
 	private DalClient client;
 
-	public ${host.getPojoClassName()}Dao(String logicDbName) {
-		this.client = DalClientFactory.getClient(logicDbName);
+	public ${host.getPojoClassName()}Dao() {
+		this.client = DalClientFactory.getClient(${host.getDbName()});
 	}
 	
 	public Map<String, ?> call${host.getPojoClassName()}(${host.getPojoClassName()} param) throws SQLException {

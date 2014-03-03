@@ -195,10 +195,12 @@ public abstract class AbstractGenerator implements Generator {
 			File daoMavenLike = new File(mavenLikeDir, "Dao");
 			File entityMavenLike = new File(mavenLikeDir, "Entity");
 			File idaoMavenLike = new File(mavenLikeDir, "IDao");
+			File testMavenLike = new File(mavenLikeDir, "Test");
 			
 			FileUtils.forceMkdir(daoMavenLike);
 			FileUtils.forceMkdir(entityMavenLike);
 			FileUtils.forceMkdir(idaoMavenLike);
+			FileUtils.forceMkdir(testMavenLike);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}

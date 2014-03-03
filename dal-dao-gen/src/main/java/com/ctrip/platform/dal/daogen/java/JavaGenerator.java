@@ -197,6 +197,7 @@ public class JavaGenerator extends AbstractGenerator {
 
 			FileWriter daoWriter = null;
 			FileWriter pojoWriter = null;
+			FileWriter testWriter = null;
 			
 			try {
 				FileUtils.forceMkdir(mavenLikeDir);
@@ -205,16 +206,21 @@ public class JavaGenerator extends AbstractGenerator {
 						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
 				pojoWriter = new FileWriter(String.format("%s/Entity/%s.java",
 						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
+				testWriter = new FileWriter(String.format("%s/Test/%sTest.java",
+						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
 
 				Velocity.mergeTemplate("templates/DAO.java.tpl", "UTF-8",
 						context, daoWriter);
 				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
 						context, pojoWriter);
+				Velocity.mergeTemplate("templates/DAOTest.java.tpl", "UTF-8",
+						context, testWriter);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
 				JavaIOUtils.closeWriter(daoWriter);
 				JavaIOUtils.closeWriter(pojoWriter);
+				JavaIOUtils.closeWriter(testWriter);
 			}
 		}
 	}
@@ -226,22 +232,29 @@ public class JavaGenerator extends AbstractGenerator {
 
 			FileWriter daoWriter = null;
 			FileWriter pojoWriter = null;
+			FileWriter testWriter = null;
+			
 			try {
 
 				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.java",
 						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
 				pojoWriter = new FileWriter(String.format("%s/Entity/%s.java",
 						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
+				testWriter = new FileWriter(String.format("%s/Test/%sTest.java",
+						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
 
 				Velocity.mergeTemplate("templates/DAOBySp.java.tpl", "UTF-8",
 						context, daoWriter);
 				Velocity.mergeTemplate("templates/Pojo.java.tpl", "UTF-8",
 						context, pojoWriter);
+				Velocity.mergeTemplate("templates/DAOBySpTest.java.tpl", "UTF-8",
+						context, testWriter);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
 				JavaIOUtils.closeWriter(daoWriter);
 				JavaIOUtils.closeWriter(pojoWriter);
+				JavaIOUtils.closeWriter(testWriter);
 			}
 		}
 	}

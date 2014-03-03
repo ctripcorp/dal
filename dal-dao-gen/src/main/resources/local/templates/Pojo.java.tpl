@@ -7,7 +7,6 @@ import ${field};
 import com.ctrip.platform.dal.dao.DalPojo;
 
 public class ${host.getPojoClassName()} implements DalPojo {
-
 #foreach( $field in ${host.getFields()} )
 	private ${field.getClassDisplayName()} ${field.getUncapitalizedName()};
 #end

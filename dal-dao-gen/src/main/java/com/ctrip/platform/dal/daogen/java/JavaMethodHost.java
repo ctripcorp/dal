@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 
 public class JavaMethodHost {
@@ -85,6 +86,16 @@ public class JavaMethodHost {
 	
 	public String getVariableName() {
 		return WordUtils.uncapitalize(pojoClassName);
+	}
+	
+	public String getParameterNames() {
+		String[] params = new String[parameters.size()];
+		int i = 0;
+		for(JavaParameterHost parameter: parameters) {
+			params[i++] = parameter.getName();
+		}
+		
+		return StringUtils.join(params, ", ");
 	}
 	
 	public String getParameterDeclaration() {

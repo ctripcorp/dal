@@ -31,6 +31,7 @@ public class GenTaskByFreeSqlResource {
 			@FormParam("project_id") int project_id,
 			@FormParam("db_name") String db_name,
 			@FormParam("class_name") String class_name,
+			@FormParam("pojo_name") String pojo_name,
 			@FormParam("method_name") String method_name,
 			@FormParam("crud_type") String crud_type,
 			@FormParam("sql_content") String sql_content,
@@ -48,6 +49,7 @@ public class GenTaskByFreeSqlResource {
 			task.setProject_id(project_id);
 			task.setDb_name(db_name);
 			task.setClass_name(class_name);
+			task.setPojo_name(pojo_name);
 			task.setMethod_name(method_name);
 			task.setCrud_type(crud_type);
 			task.setSql_content(sql_content);

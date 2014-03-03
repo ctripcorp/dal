@@ -82,6 +82,7 @@ public class CSharpGenerator extends AbstractGenerator {
 				CSharpMethodHost method = new CSharpMethodHost();
 				method.setSql(task.getSql_content());
 				method.setName(task.getMethod_name());
+				method.setPojoName(task.getPojo_name());
 				List<CSharpParameterHost> params = new ArrayList<CSharpParameterHost>();
 				for (String param : StringUtils
 						.split(task.getParameters(), ",")) {

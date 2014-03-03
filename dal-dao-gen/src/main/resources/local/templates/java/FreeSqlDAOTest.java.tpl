@@ -18,7 +18,7 @@ public class ${host.getClassName()}TestDao {
 #foreach( $method in ${host.getMethods()} )
 			// Test ${method.getName()}
 #foreach($p in $method.getParameters())
-			${p.getJavaTypeDisplay()} ${p.getName()} = null;// Test value here
+			${p.getClassDisplayName()} ${p.getName()} = null;// Test value here
 #end
 			List<${method.getPojoClassName()}> ${method.getPojoClassName()}s = dao.${method.getName()}(${method.getParameterNames()});
 

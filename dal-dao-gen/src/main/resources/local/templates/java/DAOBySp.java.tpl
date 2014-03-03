@@ -10,10 +10,11 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class ${host.getPojoClassName()}Dao {
+	private static final String DATA_BASE = "${host.getDbName()}";
 	private DalClient client;
 
 	public ${host.getPojoClassName()}Dao() {
-		this.client = DalClientFactory.getClient(${host.getDbName()});
+		this.client = DalClientFactory.getClient(DATA_BASE);
 	}
 	
 	public Map<String, ?> call${host.getPojoClassName()}(${host.getPojoClassName()} param) throws SQLException {

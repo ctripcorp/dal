@@ -7,12 +7,13 @@ import ${field};
 import com.ctrip.platform.dal.dao.*;
 
 public class ${host.getPojoClassName()}Dao {
+	private static final String DATA_BASE = "${host.getDbName()}";
 	private DalTableDao<${host.getPojoClassName()}> client;
-	private DalClient baseClient = DalClientFactory.getClient(${host.getDbName()});
+	private DalClient baseClient;
 
 	public ${host.getPojoClassName()}Dao() {
 		this.client = new DalTableDao<${host.getPojoClassName()}>(new ${host.getPojoClassName()}Parser());
-		this.baseClient = DalClientFactory.getClient(${host.getDbName()});
+		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}
 
 #if($host.isHasIdentity())

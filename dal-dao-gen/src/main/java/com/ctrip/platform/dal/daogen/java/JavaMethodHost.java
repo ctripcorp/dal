@@ -99,14 +99,13 @@ public class JavaMethodHost {
 	}
 	
 	public String getParameterDeclaration() {
-		StringBuilder sb = new StringBuilder();
+		String[] paramsDeclaration = new String[parameters.size()];
+		int i = 0;
 		for(JavaParameterHost parameter: parameters) {
-			sb.append(parameter.getClassDisplayName()).append(' ').append("param" + parameter.getName()).append(", ");
+			paramsDeclaration[i++] = String.format("%s %s", parameter.getClassDisplayName(), parameter.getName());
 		}
 		
-		sb.delete(sb.length() - 2, sb.length() - 1);
-		
-		return sb.toString();
+		return StringUtils.join(paramsDeclaration, ", ");
 	}
 
 	public Set<String> getPojoImports() {

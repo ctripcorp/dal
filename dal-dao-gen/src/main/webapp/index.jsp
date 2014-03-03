@@ -365,13 +365,27 @@
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">生成的类名：</label>
-                           <input id="sql_class_name" class="span9 popup_text" type="text">
+                           <input id="sql_class_name" class="span7" type="text">
+                            <select id="sql_class_name_select" class="span7" style="display:none;">
+                              <option value='_please_select'>--请选择--</option>
+                           </select>
+                           <button id="class_choose"  type="button" class="span2 btn btn-primary">选择</button>
                         </div>
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
-                           <label class="control-label popup_label">生成的方法名：</label>
-                           <input id="sql_method_name" class="span9 popup_text" type="text">
+                           <label class="control-label popup_label">实体的类名：</label>
+                           <input id="sql_pojo_name" class="span7" type="text">
+                            <select id="sql_pojo_name_select" class="span7" style="display:none;">
+                              <option value='_please_select'>--请选择--</option>
+                           </select>
+                           <button id="pojo_choose"  type="button" class="span2 btn btn-primary">选择</button>
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">生成方法名：</label>
+                           <input id="sql_method_name" class="span9" type="text">
                         </div>
                      </div>
                      <br>

@@ -74,7 +74,7 @@ public class DbUtils {
 		// 如果是MySql，通过JDBC标准方式获取所有表的名称
 		else if (dbServer != null
 				&& dbServer.getDb_type().equalsIgnoreCase("mysql")) {
-			String[] types = { "TABLE"};
+			String[] types = { "TABLE" };
 			ResultSet rs = null;
 			Connection connection = null;
 			try {
@@ -94,7 +94,7 @@ public class DbUtils {
 
 		return results;
 	}
-	
+
 	/**
 	 * 获取所有视图
 	 * 
@@ -131,7 +131,7 @@ public class DbUtils {
 		// 如果是MySql，通过JDBC标准方式获取所有表和视图的名称
 		else if (dbServer != null
 				&& dbServer.getDb_type().equalsIgnoreCase("mysql")) {
-			String[] types = {"VIEW" };
+			String[] types = { "VIEW" };
 			ResultSet rs = null;
 			Connection connection = null;
 			try {
@@ -244,32 +244,33 @@ public class DbUtils {
 
 					parameters.add(host);
 				}
-			}else// TODO replace with CurrentLanguage
-				if (language == CurrentLanguage.Java) {
-					while (spParams.next()) {
-						int paramMode = spParams.getShort("COLUMN_TYPE");
+			} else // TODO replace with CurrentLanguage
+			if (language == CurrentLanguage.Java) {
+				while (spParams.next()) {
+					int paramMode = spParams.getShort("COLUMN_TYPE");
 
-						if (!validMode.contains(paramMode)) {
-							continue;
-						}
-
-						JavaParameterHost host = new JavaParameterHost();
-						host.setSqlType(spParams.getInt("DATA_TYPE"));
-
-						if (paramMode == DatabaseMetaData.procedureColumnIn) {
-							host.setDirection(ParameterDirection.Input);
-						} else if (paramMode == DatabaseMetaData.procedureColumnInOut) {
-							host.setDirection(ParameterDirection.InputOutput);
-						} else {
-							host.setDirection(ParameterDirection.Output);
-						}
-
-						host.setName(spParams.getString("COLUMN_NAME"));
-						host.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType()));
-
-						parameters.add(host);
+					if (!validMode.contains(paramMode)) {
+						continue;
 					}
+
+					JavaParameterHost host = new JavaParameterHost();
+					host.setSqlType(spParams.getInt("DATA_TYPE"));
+
+					if (paramMode == DatabaseMetaData.procedureColumnIn) {
+						host.setDirection(ParameterDirection.Input);
+					} else if (paramMode == DatabaseMetaData.procedureColumnInOut) {
+						host.setDirection(ParameterDirection.InputOutput);
+					} else {
+						host.setDirection(ParameterDirection.Output);
+					}
+
+					host.setName(spParams.getString("COLUMN_NAME"));
+					host.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(host
+							.getSqlType()));
+
+					parameters.add(host);
 				}
+			}
 
 		} catch (SQLException e1) {
 			e1.printStackTrace();
@@ -357,22 +358,23 @@ public class DbUtils {
 							.equalsIgnoreCase("YES"));
 					host.setNullable(allColumnsRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
 					// 仅获取String类型的长度
-//					if (host.getType().equalsIgnoreCase("string"))
-						host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
+					// if (host.getType().equalsIgnoreCase("string"))
+					host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
 					// COLUMN_SIZE
 					allColumns.add(host);
 				}
-			}else if(language == CurrentLanguage.Java){
+			} else if (language == CurrentLanguage.Java) {
 				while (allColumnsRs.next()) {
 					JavaParameterHost host = new JavaParameterHost();
-					
+
 					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
-					host.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType()));
+					host.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(host
+							.getSqlType()));
 					host.setIndex(allColumnsRs.getInt("ORDINAL_POSITION"));
 					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
 							.equalsIgnoreCase("YES"));
-					
+
 					allColumns.add(host);
 				}
 			}
@@ -420,14 +422,16 @@ public class DbUtils {
 
 			int index = 0;
 			for (String param : parameters) {
-				String[] tuple = param.split("_");
+				if (param != null && !param.isEmpty()) {
+					String[] tuple = param.split("_");
 
-				try {
-					index = Integer.valueOf(tuple[0]);
-				} catch (NumberFormatException ex) {
-					index++;
+					try {
+						index = Integer.valueOf(tuple[0]);
+					} catch (NumberFormatException ex) {
+						index++;
+					}
+					ps.setObject(index, tuple[2], Integer.valueOf(tuple[1]));
 				}
-				ps.setObject(index, tuple[2], Integer.valueOf(tuple[1]));
 			}
 
 			rs = ps.executeQuery();

@@ -51,12 +51,15 @@ public class Person_genDao {
 
 
 	private static class Person_genParser implements DalParser<Person_gen> {
-		public static final String DATABASE_NAME = "PerformanceTest";
+		public static final String DATABASE_NAME = "dao_test";
 		public static final String TABLE_NAME = "Person";
 		private static final String[] COLUMNS = new String[]{
 			"ID",
+			"Address",
+			"Telephone",
 			"Name",
 			"Age",
+			"Gender",
 			"Birth",
 		};
 		
@@ -67,6 +70,9 @@ public class Person_genDao {
 		private static final int[] COLUMN_TYPES = new int[]{
 			4,
 			12,
+			12,
+			12,
+			4,
 			4,
 			93,
 		};
@@ -76,8 +82,11 @@ public class Person_genDao {
 			Person_gen pojo = new Person_gen();
 			
 			pojo.setID((Integer)rs.getObject("ID"));
+			pojo.setAddress((String)rs.getObject("Address"));
+			pojo.setTelephone((String)rs.getObject("Telephone"));
 			pojo.setName((String)rs.getObject("Name"));
 			pojo.setAge((Integer)rs.getObject("Age"));
+			pojo.setGender((Integer)rs.getObject("Gender"));
 			pojo.setBirth((Timestamp)rs.getObject("Birth"));
 	
 			return pojo;
@@ -132,8 +141,11 @@ public class Person_genDao {
 			Map<String, Object> map = new LinkedHashMap<String, Object>();
 			
 			map.put("ID", pojo.getID());
+			map.put("Address", pojo.getAddress());
+			map.put("Telephone", pojo.getTelephone());
 			map.put("Name", pojo.getName());
 			map.put("Age", pojo.getAge());
+			map.put("Gender", pojo.getGender());
 			map.put("Birth", pojo.getBirth());
 	
 			return map;

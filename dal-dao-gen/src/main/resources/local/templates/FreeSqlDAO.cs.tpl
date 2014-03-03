@@ -21,7 +21,7 @@ namespace ${host.getNameSpace()}.Dao
         /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
 #end
         /// <returns></returns>
-        public IList<${host.getClassName()}> ${method.getName()}(#foreach($p in $method.getParameters())${p.getType()} ${WordUtils.uncapitalize($p.getName())}#if($foreach.count != $method.getParameters().size()),#end#end)
+        public IList<${method.getPojoName()}> ${method.getName()}(#foreach($p in $method.getParameters())${p.getType()} ${WordUtils.uncapitalize($p.getName())}#if($foreach.count != $method.getParameters().size()),#end#end)
         {
         	try
             {
@@ -31,8 +31,8 @@ namespace ${host.getNameSpace()}.Dao
                 parameters.Add(new StatementParameter{ Name = "@${p.getName()}", Direction = ParameterDirection.Input, DbType = DbType.${p.getDbType()}, Value =${WordUtils.uncapitalize($p.getName())} });
 #end
 				//如果只需要一条记录，建议使用limit 1或者top 1，并使用SelectFirst提高性能
-				//return baseDao.SelectFirst<${host.getClassName()}>(sql, parameters);
-                return baseDao.SelectList<${host.getClassName()}>(sql, parameters);
+				//return baseDao.SelectFirst<${method.getPojoName()}>(sql, parameters);
+                return baseDao.SelectList<${method.getPojoName()}>(sql, parameters);
 
             }
             catch (Exception ex)

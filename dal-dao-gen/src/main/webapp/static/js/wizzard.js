@@ -129,6 +129,7 @@
                     $.get(sprintf("/rest/db/table_sps?server=%s&db_name=%s",
                         $("#servers").val(),$("#databases").val())).done(function (data) {
                         $("select[id$=table_list] > option").remove();
+                        $("select[id$=view_list] > option").remove();
                         $("select[id$=sp_list] > option").remove();
                         var tableList = [];
                         var viewList = [];
@@ -219,13 +220,37 @@
                     }
                     break;
                 case "sql":
-                    $("#sql_editor").height(250);
+                    $("#sql_editor").height(200);
                     var editor = ace.edit("sql_editor");
                     editor.setTheme("ace/theme/monokai");
                     editor.getSession().setMode("ace/mode/sql");
 
+                    $("select[id$=sql_class_name_select] > option:gt(0)").remove();
+                    $("select[id$=sql_pojo_name_select] > option:gt(0)").remove();
+
+                    $.get("/rest/task/sql_class?project_id="
+                        +w2ui['grid'].current_project 
+                        + "&server_id="+$("#servers").val()
+                        + "&db_name="+$("#databases").val(), function(data){
+                        $.each(data.classes, function(index, value){
+                            $("#sql_class_name_select").append($('<option>', {
+                                text: value, 
+                                value: value
+                            }));
+                        });
+                        $.each(data.pojos, function(index, value){
+                            $("#sql_pojo_name_select").append($('<option>', {
+                                text: value, 
+                                value: value
+                            }));
+                        });
+                    }).fail(function(data){
+
+                    });
+
                     //在显示下一页之前，清空下一页的信息
                     $("#sql_class_name").val("");
+                    $("#sql_pojo_name").val("");
                     $("#sql_method_name").val("");
 
                     if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "sql") {
@@ -242,6 +267,17 @@
             }
             //选择基础数据
             else if (current.hasClass("step2-1-1")) {
+
+                if($("#tables").val() == "_please_select"){
+                    $("#error_msg").text("请选择一个表！");
+                    return;
+                }
+                if($("#method_name").val() == ""){
+                    $("#error_msg").text("请填写方法名！");
+                    return;
+                }
+                $("#error_msg").text("");
+
                 var op_type = $(".op_type.active").children().val();
                 cblock($("body"));
 
@@ -307,6 +343,11 @@
                 });
                 
             } else if (current.hasClass("step_fields")) {
+                if($("#operation_type").val() != "delete" && $('#fields').multipleSelect('getSelects').length < 1){
+                    $("#error_msg").text("请选择至少一个字段！");
+                    return;
+                }
+                $("#error_msg").text("");
                 //$(".step_fields").hide();
                 current.hide();
                 $(".step3").show();
@@ -329,6 +370,13 @@
                          + sprintf(variable_valuesHtml, resultParams[2]);
                         id_values["db_type_"+i] = resultParams[1];
                     });
+
+                    if(htmls.length == 0){
+                        current.hide();
+                        $(".step3").show();
+                        $(".step3").attr('from', current.attr('class'));
+                        return;
+                    }
                     
                     $("#param_list").html(htmls);
                     $.each(id_values, function(key, value){
@@ -343,7 +391,7 @@
                     var i = 0;
                     while((result = regexIndex.exec(sqlContent))){
                         htmls = htmls 
-                        + sprintf(variableHtml, ++i) 
+                        + sprintf(variableHtml, sprintf("param%s",++i))
                         + sprintf(variable_typesHtml, "") 
                         + sprintf(variable_valuesHtml, "");
                     }
@@ -355,13 +403,25 @@
                             + sprintf(variable_valuesHtml, "");
                         }
                     }
+
+                    if(htmls.length == 0){
+                        current.hide();
+                        $(".step3").show();
+                        $(".step3").attr('from', current.attr('class'));
+                        return;
+                    }
+
                     $("#param_list").html(htmls);
                 }
                 
                 current.hide();
                 $(".step2-3-2").show();
             }
-            else if (current.hasClass("step2-2") || current.hasClass("step2-3-2")) {
+            else if (current.hasClass("step2-2")) {
+                current.hide();
+                $(".step3").show();
+                $(".step3").attr('from', current.attr('class'));
+            } else if (current.hasClass("step2-3-2")) {
                 current.hide();
                 $(".step3").show();
                 $(".step3").attr('from', current.attr('class'));
@@ -407,7 +467,17 @@
                     });
 
                 } else if ($(".gen_style.active").children().val() == "sql") {
-                    postData["class_name"] = $("#sql_class_name").val();
+                    if($("#sql_class_name").is(":visible")){
+                        postData["class_name"] = $("#sql_class_name").val();    
+                    }else{
+                        postData["class_name"] = $("#sql_class_name_select").val();    
+                    }
+                    if($("#sql_pojo_name").is(":visible")){
+                        postData["pojo_name"] = $("#sql_pojo_name").val();    
+                    }else{
+                        postData["pojo_name"] = $("#sql_pojo_name_select").val();    
+                    }
+                    
                     postData["method_name"] = $("#sql_method_name").val();
                     postData["crud_type"] = "select";
                     postData["sql_content"] = ace.edit("sql_editor").getValue();
@@ -427,7 +497,7 @@
                                 w2ui["grid_toolbar"].click('refreshDAO', null);
                             });
                         }else{
-                            $("error_msg").text("执行异常，请检查sql及对应参数！");
+                            $("#error_msg").text("执行异常，请检查sql及对应参数！");
                         }
                     });
                 }else if ($(".gen_style.active").children().val() == "table_view_sp") {

@@ -16,6 +16,8 @@ public class GenTaskByFreeSql  {
 	
 	private String class_name;
 	
+	private String pojo_name;
+	
 	private String method_name;
 	
 	private String crud_type;
@@ -72,6 +74,14 @@ public class GenTaskByFreeSql  {
 		this.class_name = class_name;
 	}
 
+	public String getPojo_name() {
+		return pojo_name;
+	}
+
+	public void setPojo_name(String pojo_name) {
+		this.pojo_name = pojo_name;
+	}
+
 	public String getMethod_name() {
 		return method_name;
 	}
@@ -103,10 +113,11 @@ public class GenTaskByFreeSql  {
 		task.setServer_id(rs.getInt(3));
 		task.setDb_name(rs.getString(4));
 		task.setClass_name(rs.getString(5));
-		task.setMethod_name(rs.getString(6));
-		task.setCrud_type(rs.getString(7));
-		task.setSql_content(rs.getString(8));
-		task.setParameters(rs.getString(9));
+		task.setPojo_name(rs.getString(6));
+		task.setMethod_name(rs.getString(7));
+		task.setCrud_type(rs.getString(8));
+		task.setSql_content(rs.getString(9));
+		task.setParameters(rs.getString(10));
 		return task;
 	}
 	

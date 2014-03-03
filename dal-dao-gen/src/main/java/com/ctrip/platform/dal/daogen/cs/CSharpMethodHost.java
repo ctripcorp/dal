@@ -11,6 +11,8 @@ public class CSharpMethodHost {
 	private String sql;
 	
 	private List<CSharpParameterHost> parameters;
+	
+	private String pojoName;
 
 	public String getCrud_type() {
 		return crud_type;
@@ -42,6 +44,14 @@ public class CSharpMethodHost {
 
 	public void setParameters(List<CSharpParameterHost> parameters) {
 		this.parameters = parameters;
+	}
+
+	public String getPojoName() {
+		return pojoName;
+	}
+
+	public void setPojoName(String pojoName) {
+		this.pojoName = pojoName;
 	}
 
 }

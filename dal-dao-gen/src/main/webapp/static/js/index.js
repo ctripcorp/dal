@@ -253,7 +253,31 @@ jQuery(document).ready(function () {
         }
     });
 
+    $(document.body).on('click', "#pojo_choose", function (event) {
+        if($("#sql_pojo_name").is(":visible")){
+            $("#pojo_choose").text("填写");
+        }else{
+            $("#pojo_choose").text("选择");
+        }
+
+        $("#sql_pojo_name").toggle();
+        $("#sql_pojo_name_select").toggle();
+    });
+
+    $(document.body).on('click', "#class_choose", function (event) {
+        if($("#sql_class_name").is(":visible")){
+            $("#class_choose").text("填写");
+        }else{
+            $("#class_choose").text("选择");
+        }
+
+        $("#sql_class_name").toggle();
+        $("#sql_class_name_select").toggle();
+    });
+
     reloadProjects();
+
+    
 });
 
 

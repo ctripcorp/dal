@@ -391,7 +391,7 @@
                     var i = 0;
                     while((result = regexIndex.exec(sqlContent))){
                         htmls = htmls 
-                        + sprintf(variableHtml, ++i) 
+                        + sprintf(variableHtml, sprintf("param%s",++i))
                         + sprintf(variable_typesHtml, "") 
                         + sprintf(variable_valuesHtml, "");
                     }

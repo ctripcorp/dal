@@ -363,12 +363,15 @@
                     var i = 0;
                     var id_values = {};
                     $.each(splitedParams, function(index, value){
+                        if(value != ""){
                         var resultParams = value.split("_");
                         htmls = htmls 
                          + sprintf(variableHtml, resultParams[0])
                          + sprintf(variable_typesHtml, sprintf("id='db_type_%s'", ++i))
                          + sprintf(variable_valuesHtml, resultParams[2]);
                         id_values["db_type_"+i] = resultParams[1];
+                        }
+                        
                     });
 
                     if(htmls.length == 0){
@@ -467,12 +470,12 @@
                     });
 
                 } else if ($(".gen_style.active").children().val() == "sql") {
-                    if($("#sql_class_name").is(":visible")){
+                    if($("#class_choose").text() == "选择"){
                         postData["class_name"] = $("#sql_class_name").val();    
                     }else{
                         postData["class_name"] = $("#sql_class_name_select").val();    
                     }
-                    if($("#sql_pojo_name").is(":visible")){
+                    if($("#pojo_choose").text() == "选择"){
                         postData["pojo_name"] = $("#sql_pojo_name").val();    
                     }else{
                         postData["pojo_name"] = $("#sql_pojo_name_select").val();    

@@ -10,7 +10,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.ctrip.platform.dal.daogen.pojo.GenTaskByTableViewSp;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 
 public class DaoByTableViewSp {
 

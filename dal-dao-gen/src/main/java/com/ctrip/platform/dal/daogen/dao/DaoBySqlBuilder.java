@@ -9,7 +9,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
+import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 
 public class DaoBySqlBuilder {
 

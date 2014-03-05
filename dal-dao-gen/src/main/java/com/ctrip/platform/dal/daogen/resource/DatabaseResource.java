@@ -24,10 +24,10 @@ import javax.ws.rs.core.MediaType;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
-import com.ctrip.platform.dal.daogen.pojo.DbServer;
-import com.ctrip.platform.dal.daogen.pojo.ColumnMetaData;
-import com.ctrip.platform.dal.daogen.pojo.Status;
-import com.ctrip.platform.dal.daogen.pojo.TableSpNames;
+import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
+import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.domain.TableSpNames;
+import com.ctrip.platform.dal.daogen.entity.DbServer;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;

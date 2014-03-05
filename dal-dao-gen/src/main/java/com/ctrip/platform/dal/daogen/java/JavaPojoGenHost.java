@@ -6,7 +6,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang.WordUtils;
 
-import com.ctrip.platform.dal.daogen.pojo.ColumnMetaData;
+import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
 
 public class JavaPojoGenHost {
 	public static enum NamingStyle {

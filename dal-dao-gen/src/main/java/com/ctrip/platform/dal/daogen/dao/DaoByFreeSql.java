@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 
 public class DaoByFreeSql {
 

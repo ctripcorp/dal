@@ -20,5 +20,17 @@ namespace com.ctrip.platform.tools
                 return person_genDao;
             }
         }
+        private static readonly Isysdiagrams_genDao sysdiagrams_genDao = new sysdiagrams_genDao();
+
+		/// <summary>
+        /// Property sysdiagrams_genDao
+        /// </summary>
+		public static Isysdiagrams_genDao sysdiagrams_genDao
+        {
+            get
+            {
+                return sysdiagrams_genDao;
+            }
+        }
 	}
 }

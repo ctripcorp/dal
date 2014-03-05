@@ -50,7 +50,7 @@ jQuery(document).ready(function () {
             switch (event.menuItem.id) {
             case "share":
                 $("#users > option:gt(0)").remove();
-                $.get("/rest/project/users", function(data){
+                $.get("/rest/project/users?rand="+Math.random(), function(data){
                     $.each(data, function(index, value){
                         $("#users").append($('<option>',{
                             text: value.userName + "(" + value.userNo + ")",
@@ -290,7 +290,7 @@ var reloadProjects = function () {
         nodes.push(value.id);
     });
     currentElement.remove.apply(currentElement, nodes);
-    $.get("/rest/project", function (data) {
+    $.get("/rest/project?rand="+Math.random(), function (data) {
         var new_nodes = [];
         //data = JSON.parse(data);
         $.each(data, function (index, value) {
@@ -322,7 +322,7 @@ var reloadProjects = function () {
 var reloadServers = function (callback) {
     cblock($("body"));
 
-    $.get("/rest/db/servers").done(function(data){
+    $.get("/rest/db/servers?rand="+Math.random()).done(function(data){
         $("select[id$=servers] > option:gt(0)").remove();
         $.each(data, function (index, value) {
             $("#servers").append($('<option>', {
@@ -408,7 +408,7 @@ var renderGrid = function () {
                         current_project = w2ui['sidebar'].nodes[0].nodes[0].id;
                     }
                     cblock($("body"));
-                    $.get("/rest/task?project_id=" + current_project, function (data) {
+                    $.get("/rest/task?project_id=" + current_project+"&rand="+Math.random(), function (data) {
                         var allTasks = [];
                         $.each(data.tableViewSpTasks, function (index, value) {
                             value.recid = allTasks.length + 1;

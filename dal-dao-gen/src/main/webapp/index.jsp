@@ -250,7 +250,7 @@
                   <div class="steps step2-1-0 row-fluid" style="height:280px;">
                      <div class="row-fluid">
                         <div class="control-group">
-                           <label class="control-label popup_label">选择表/视图：</label>
+                           <label class="control-label popup_label">选择表：</label>
                            <select id="table_list" multiple="multiple" class="popup_text" style="width:420px;">
                            </select>
                         </div>
@@ -291,7 +291,7 @@
                   <div class="steps step2-1-1 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
-                           <label class="control-label popup_label">选择一个表/视图：</label>
+                           <label class="control-label popup_label">选择一个表：</label>
                            <select id="tables" class="span9 popup_text">
                               <option value="_please_select">--请选择--</option>
                            </select>

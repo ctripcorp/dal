@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 import com.ctrip.platform.dal.daogen.Consts;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
+import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 
 public class SqlBuilder {
 	

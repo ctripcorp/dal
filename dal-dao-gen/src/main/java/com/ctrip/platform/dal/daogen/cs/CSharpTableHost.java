@@ -2,7 +2,7 @@ package com.ctrip.platform.dal.daogen.cs;
 
 import java.util.List;
 
-import com.ctrip.platform.dal.daogen.pojo.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 
 public class CSharpTableHost {
 

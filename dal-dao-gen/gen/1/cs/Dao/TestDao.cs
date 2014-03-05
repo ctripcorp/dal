@@ -35,6 +35,88 @@ namespace com.ctrip.platform.tools.Dao
                 throw new DalException("调用TestDao时，访问selectAbc时出错", ex);
             }
         }
+		/// <summary>
+        ///  testQuery
+        /// </summary>
+        /// <returns></returns>
+        public IList<user> testQuery()
+        {
+        	try
+            {
+            	string sql = "select * from person";
+                StatementParameterCollection parameters = new StatementParameterCollection();
+				//如果只需要一条记录，建议使用limit 1或者top 1，并使用SelectFirst提高性能
+				//return baseDao.SelectFirst<user>(sql, parameters);
+                return baseDao.SelectList<user>(sql, parameters);
+
+            }
+            catch (Exception ex)
+            {
+                throw new DalException("调用TestDao时，访问testQuery时出错", ex);
+            }
+        }
+		/// <summary>
+        ///  getByID
+        /// </summary>
+        /// <returns></returns>
+        public IList<person> getByID()
+        {
+        	try
+            {
+            	string sql = "select * from person";
+                StatementParameterCollection parameters = new StatementParameterCollection();
+				//如果只需要一条记录，建议使用limit 1或者top 1，并使用SelectFirst提高性能
+				//return baseDao.SelectFirst<person>(sql, parameters);
+                return baseDao.SelectList<person>(sql, parameters);
+
+            }
+            catch (Exception ex)
+            {
+                throw new DalException("调用TestDao时，访问getByID时出错", ex);
+            }
+        }
+		/// <summary>
+        ///  getByID
+        /// </summary>
+        /// <returns></returns>
+        public IList<person> getByID()
+        {
+        	try
+            {
+            	string sql = "select * from person";
+                StatementParameterCollection parameters = new StatementParameterCollection();
+				//如果只需要一条记录，建议使用limit 1或者top 1，并使用SelectFirst提高性能
+				//return baseDao.SelectFirst<person>(sql, parameters);
+                return baseDao.SelectList<person>(sql, parameters);
+
+            }
+            catch (Exception ex)
+            {
+                throw new DalException("调用TestDao时，访问getByID时出错", ex);
+            }
+        }
+		/// <summary>
+        ///  getByName
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public IList<Test> getByName(string name)
+        {
+        	try
+            {
+            	string sql = "select * from person where name= @name";
+                StatementParameterCollection parameters = new StatementParameterCollection();
+                parameters.Add(new StatementParameter{ Name = "@name", Direction = ParameterDirection.Input, DbType = DbType.AnsiString, Value =name });
+				//如果只需要一条记录，建议使用limit 1或者top 1，并使用SelectFirst提高性能
+				//return baseDao.SelectFirst<Test>(sql, parameters);
+                return baseDao.SelectList<Test>(sql, parameters);
+
+            }
+            catch (Exception ex)
+            {
+                throw new DalException("调用TestDao时，访问getByName时出错", ex);
+            }
+        }
 
     }
 }

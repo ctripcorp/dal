@@ -27,6 +27,15 @@ namespace com.ctrip.platform.tools
             //IList<Person_gen> entities = person_genDao.GetAll();
             //long count = person_genDao.Count();
             //IList<Person_gen> listByPage = person_genDao.GetListByPage(obj, pagesize, pageno);
+            Isysdiagrams_genDao sysdiagrams_genDao = DALFactory.sysdiagrams_genDao;
+
+            //int result = sysdiagrams_genDao.Insertsysdiagrams_gen(new sysdiagrams_gen());
+            //int result = sysdiagrams_genDao.Updatesysdiagrams_gen(new sysdiagrams_gen());
+            //int result = sysdiagrams_genDao.Deletesysdiagrams_gen(new sysdiagrams_gen());
+            //sysdiagrams_gen entity = sysdiagrams_genDao.FindByPk(id);
+            //IList<sysdiagrams_gen> entities = sysdiagrams_genDao.GetAll();
+            //long count = sysdiagrams_genDao.Count();
+            //IList<sysdiagrams_gen> listByPage = sysdiagrams_genDao.GetListByPage(obj, pagesize, pageno);
         }
     }
 }

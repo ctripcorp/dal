@@ -15,11 +15,11 @@ import javax.ws.rs.core.MediaType;
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
-import com.ctrip.platform.dal.daogen.pojo.FreeSqlClassPojoNames;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskByTableViewSp;
-import com.ctrip.platform.dal.daogen.pojo.TaskAggeragation;
+import com.ctrip.platform.dal.daogen.domain.FreeSqlClassPojoNames;
+import com.ctrip.platform.dal.daogen.domain.TaskAggeragation;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
+import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**

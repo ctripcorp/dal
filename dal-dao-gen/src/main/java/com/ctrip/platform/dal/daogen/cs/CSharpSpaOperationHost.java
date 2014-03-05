@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
-import com.ctrip.platform.dal.daogen.pojo.CurrentLanguage;
-import com.ctrip.platform.dal.daogen.pojo.StoredProcedure;
+import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
+import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 
 public class CSharpSpaOperationHost {

@@ -25,8 +25,8 @@ import org.apache.commons.net.ftp.FTPClient;
 
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
-import com.ctrip.platform.dal.daogen.pojo.Project;
-import com.ctrip.platform.dal.daogen.pojo.W2uiElement;
+import com.ctrip.platform.dal.daogen.domain.W2uiElement;
+import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.ZipFolder;

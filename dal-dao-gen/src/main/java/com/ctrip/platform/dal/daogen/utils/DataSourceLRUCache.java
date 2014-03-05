@@ -16,7 +16,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
-import com.ctrip.platform.dal.daogen.pojo.DbServer;
+import com.ctrip.platform.dal.daogen.entity.DbServer;
 
 /**
  * 如果一个连接在一定时间内都没有访问，则将其关闭并移除, 移除的时机：有其他连接被访问时，或者其他连接加入Cache时，

@@ -8,19 +8,19 @@ public class DataSourceLRUCacheTest extends TestCase {
 	
 	public void testGetDataSource() throws InterruptedException{
 		
-		DataSource mysqlInitDs = DataSourceLRUCache.newInstance().getDataSource(5);
+		DataSource mysqlInitDs = DataSourceLRUCache.newInstance().getDataSource(14);
 		
 		assertNull(mysqlInitDs);
 		
-		DataSource sqlserverInitDs = DataSourceLRUCache.newInstance().getDataSource(10);
+		DataSource sqlserverInitDs = DataSourceLRUCache.newInstance().getDataSource(15);
 		
 		assertNull(sqlserverInitDs);
 		
-		mysqlInitDs = DataSourceLRUCache.newInstance().putDataSource(5);
+		mysqlInitDs = DataSourceLRUCache.newInstance().putDataSource(14);
 		
 		assertNotNull(mysqlInitDs);
 		
-		sqlserverInitDs = DataSourceLRUCache.newInstance().putDataSource(10);
+		sqlserverInitDs = DataSourceLRUCache.newInstance().putDataSource(15);
 		
 		assertNotNull(sqlserverInitDs);
 		
@@ -29,15 +29,15 @@ public class DataSourceLRUCacheTest extends TestCase {
 		
 		Thread.sleep(4*1000);
 		
-		mysqlInitDs = DataSourceLRUCache.newInstance().getDataSource(5);
+		mysqlInitDs = DataSourceLRUCache.newInstance().getDataSource(14);
 		assertNotNull(mysqlInitDs);
 		
 		Thread.sleep(4*1000);
 		
-		mysqlInitDs = DataSourceLRUCache.newInstance().getDataSource(5);
+		mysqlInitDs = DataSourceLRUCache.newInstance().getDataSource(14);
 		assertNotNull(mysqlInitDs);
 		
-		sqlserverInitDs = DataSourceLRUCache.newInstance().getDataSource(10);
+		sqlserverInitDs = DataSourceLRUCache.newInstance().getDataSource(15);
 		
 		assertNull(sqlserverInitDs);
 		

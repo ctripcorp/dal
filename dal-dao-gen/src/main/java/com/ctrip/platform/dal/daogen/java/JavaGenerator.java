@@ -406,6 +406,7 @@ public class JavaGenerator extends AbstractGenerator {
 					p.setName(splitedParam[0]);
 					p.setSqlType(Integer.valueOf(splitedParam[1]));
 					p.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(p.getSqlType()));
+					p.setValidationValue(splitedParam[2]);
 					params.add(p);
 				}
 				method.setParameters(params);

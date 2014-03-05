@@ -1,5 +1,8 @@
 package com.ctrip.platform.dal.daogen.java;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.lang.WordUtils;
 
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
@@ -126,7 +129,16 @@ public class JavaParameterHost extends AbstractParameterHost {
 		return Consts.jdbcSqlTypeDisplay.get(sqlType);
 	}
 
+	private static Set<Integer> stringTypes = new HashSet<Integer>();
+	static {
+		stringTypes.add(java.sql.Types.CHAR);
+		stringTypes.add(java.sql.Types.VARCHAR);
+		stringTypes.add(java.sql.Types.LONGVARCHAR);
+	}
+	
 	public Object getValidationValue() {
+		if(stringTypes.contains(sqlType))
+			return "\"" + validationValue + "\"";
 		return validationValue;
 	}
 

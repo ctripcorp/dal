@@ -8,12 +8,14 @@ import com.ctrip.platform.dal.dao.*;
 
 public class ${host.getPojoClassName()}DaoTest {
 	public static void main(String[] args) {
-		// Initialize DalClientFactory
 		
-		${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 		try {
+			// Initialize DalClientFactory
+			DalClientFactory.initClientFactory("${host.getDbName()}");
+			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
+		
 #if($host.isHasIdentity())
-			${host.getPojoClassName() pk = dao.queryByPk(null);// you value here
+			${host.getPojoClassName()} pk = dao.queryByPk(null);// you value here
 #end
 			
 			pk = dao.queryByPk(pk);
@@ -41,7 +43,7 @@ public class ${host.getPojoClassName()}DaoTest {
 #foreach($method in $host.getMethods())
 			// Test ${method.getName()}
 #foreach($p in $method.getParameters())  
-		${p.getName()} = null;
+			${p.getClassDisplayName()} ${p.getName()} = ${p.getValidationValue()};
 #end
 #if($method.getCrud_type() == "select")
 		    results = dao.${method.getName()}($method.getParameterNames()});
@@ -49,6 +51,7 @@ public class ${host.getPojoClassName()}DaoTest {
 #else
     		affectedRows = dao.${method.getName()}($method.getParameterNames()});
 
+#end
 #end
 		} catch (SQLException e) {
 			e.printStackTrace();

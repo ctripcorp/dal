@@ -248,12 +248,17 @@ public class DbUtils {
 			if (language == CurrentLanguage.Java) {
 				while (spParams.next()) {
 					int paramMode = spParams.getShort("COLUMN_TYPE");
-
+//					for (int i = 1; i<= spParams.getMetaData().getColumnCount(); i++) {
+//						System.out.println(spParams.getMetaData().getColumnName(i));
+//					}
+//					For My Sql, there is no ORDINAL_POSITION
+//					int paramIndex = spParams.getInt("ORDINAL_POSITION");
 					if (!validMode.contains(paramMode)) {
 						continue;
 					}
 
 					JavaParameterHost host = new JavaParameterHost();
+//					host.setIndex(paramIndex);
 					host.setSqlType(spParams.getInt("DATA_TYPE"));
 
 					if (paramMode == DatabaseMetaData.procedureColumnIn) {

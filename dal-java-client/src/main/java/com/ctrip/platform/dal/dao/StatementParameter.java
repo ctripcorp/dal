@@ -97,10 +97,22 @@ public class StatementParameter {
 			return builder;
 		}
 		
-		public static Builder registerInOut(int index, int sqlType, String name, Object value) {
+		public static Builder set(String name, int sqlType, Object value) {
 			Builder builder = new Builder();
 			
-			builder.index_ = index;
+			builder.index_ = -1;
+			builder.name_ = name;
+			builder.sqlType_ = sqlType;
+			builder.value_ = value;
+			builder.direction_ = ParameterDirection.Input;
+			
+			return builder;
+		}
+		
+		public static Builder registerInOut(String name, int sqlType, Object value) {
+			Builder builder = new Builder();
+			
+			builder.index_ = -1;
 			builder.sqlType_ = sqlType;
 			builder.name_ = name;
 			builder.value_ = value;
@@ -109,10 +121,10 @@ public class StatementParameter {
 			return builder;
 		}
 		
-		public static Builder registerOut(int index, int sqlType, String name) {
+		public static Builder registerOut(String name, int sqlType) {
 			Builder builder = new Builder();
 			
-			builder.index_ = index;
+			builder.index_ = -1;
 			builder.sqlType_ = sqlType;
 			builder.name_ = name;
 			builder.direction_ = ParameterDirection.Output;

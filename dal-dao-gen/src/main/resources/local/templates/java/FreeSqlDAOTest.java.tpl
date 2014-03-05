@@ -11,14 +11,15 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class ${host.getClassName()}TestDao {
 	public static void main(String[] args) {
-		// Initialize DalClientFactory
-		
-		${host.getClassName()}Dao dao = new ${host.getClassName()}Dao();
 		try {
+			// Initialize DalClientFactory
+			DalClientFactory.initClientFactory("${host.getDbName()}");
+			${host.getClassName()}Dao dao = new ${host.getClassName()}Dao();
+		
 #foreach( $method in ${host.getMethods()} )
 			// Test ${method.getName()}
 #foreach($p in $method.getParameters())
-			${p.getClassDisplayName()} ${p.getName()} = null;// Test value here
+			${p.getClassDisplayName()} ${p.getName()} = ${p.getValidationValue()};// Test value here
 #end
 			List<${method.getPojoClassName()}> ${method.getPojoClassName()}s = dao.${method.getName()}(${method.getParameterNames()});
 

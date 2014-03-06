@@ -17,9 +17,6 @@ import javax.ws.rs.core.MediaType;
 import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
-import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
-import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
-import com.ctrip.platform.dal.daogen.dao.DaoOfUserProject;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Project;
@@ -39,23 +36,11 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 @Path("project")
 public class ProjectResource {
 
-	private static DaoOfProject projectDao;
-
-	private static DaoOfLoginUser daoOfLoginUser;
-
-	private static DaoOfUserProject daoOfUserProject;
-
-	static {
-		projectDao = SpringBeanGetter.getDaoOfProject();
-		daoOfLoginUser = SpringBeanGetter.getDaoOfLoginUser();
-		daoOfUserProject = SpringBeanGetter.getDaoOfUserProject();
-	}
-
 	@GET
 	@Path("users")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<LoginUser> getUsers() {
-		return daoOfLoginUser.getAllUsers();
+		return SpringBeanGetter.getDaoOfLoginUser().getAllUsers();
 	}
 
 	@POST
@@ -63,12 +48,12 @@ public class ProjectResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Status shareProject(@FormParam("id") int id,
 			@FormParam("userNo") String userNo) {
-		UserProject userProject = daoOfUserProject.getUserProject(id, userNo);
+		UserProject userProject = SpringBeanGetter.getDaoOfUserProject().getUserProject(id, userNo);
 		if (null == userProject) {
 			UserProject project = new UserProject();
 			project.setProject_id(id);
 			project.setUserNo(userNo);
-			daoOfUserProject.insertUserProject(project);
+			SpringBeanGetter.getDaoOfUserProject().insertUserProject(project);
 			return Status.OK;
 		} else {
 			return Status.ERROR;
@@ -83,17 +68,17 @@ public class ProjectResource {
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
 		
-		if (daoOfLoginUser.getUserByNo(userNo) == null) {
+		if (SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo) == null) {
 			LoginUser user = new LoginUser();
 			user.setUserNo(userNo);
 			user.setUserName(AssertionHolder.getAssertion().getPrincipal()
 					.getAttributes().get("sn").toString());
 			user.setUserEmail(AssertionHolder.getAssertion().getPrincipal()
 					.getAttributes().get("mail").toString());
-			daoOfLoginUser.insertUser(user);
+			SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
 		}
 		
-		List<UserProject> projects = daoOfUserProject
+		List<UserProject> projects = SpringBeanGetter.getDaoOfUserProject()
 				.getUserProjectsByUser(userNo);
 
 		List<Integer> ids = new ArrayList<Integer>();
@@ -103,7 +88,7 @@ public class ProjectResource {
 		}
 
 		if (ids.size() > 0)
-			return projectDao.getProjectByIDS(ids.toArray());
+			return SpringBeanGetter.getDaoOfProject().getProjectByIDS(ids.toArray());
 		else
 			return new ArrayList<Project>();
 
@@ -113,9 +98,7 @@ public class ProjectResource {
 	@Path("project")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Project getProject(@QueryParam("id") String id) {
-
-		return projectDao.getProjectByID(Integer.valueOf(id));
-
+		return SpringBeanGetter.getDaoOfProject().getProjectByID(Integer.valueOf(id));
 	}
 
 	@POST
@@ -130,26 +113,26 @@ public class ProjectResource {
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
 
-		
-
 		if (action.equals("insert")) {
 			proj.setName(name);
 			proj.setNamespace(namespace);
-			int pk = projectDao.insertProject(proj);
+			int pk = SpringBeanGetter.getDaoOfProject().insertProject(proj);
 
 			shareProject(pk, userNo);
-
 		} else if (action.equals("update")) {
 			proj.setId(id);
 			proj.setName(name);
 			proj.setNamespace(namespace);
-			projectDao.updateProject(proj);
+			SpringBeanGetter.getDaoOfProject().updateProject(proj);
 
 			shareProject(id, userNo);
 		} else if (action.equals("delete")) {
 			proj.setId(Integer.valueOf(id));
-			if (projectDao.deleteProject(proj) > 0) {
-				daoOfUserProject.deleteUserProject(id, userNo);
+			if (SpringBeanGetter.getDaoOfProject().deleteProject(proj) > 0) {
+				SpringBeanGetter.getDaoOfUserProject().deleteUserProject(id);
+				SpringBeanGetter.getDaoByFreeSql().deleteByProjectId(id);
+				SpringBeanGetter.getDaoBySqlBuilder().deleteByProjectId(id);
+				SpringBeanGetter.getDaoByTableViewSp().deleteByProjectId(id);
 			}
 		}
 		return Status.OK;

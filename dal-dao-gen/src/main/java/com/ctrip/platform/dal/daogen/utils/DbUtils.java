@@ -241,6 +241,11 @@ public class DbUtils {
 
 					host.setName(spParams.getString("COLUMN_NAME"));
 					host.setType(DbType.getCSharpType(host.getDbType()));
+					
+					if(host.getType() == null){
+						host.setType("string");
+						host.setDbType(DbType.AnsiString);
+					}
 
 					parameters.add(host);
 				}

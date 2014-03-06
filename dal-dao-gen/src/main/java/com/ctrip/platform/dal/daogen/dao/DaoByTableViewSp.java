@@ -85,5 +85,13 @@ public class DaoByTableViewSp {
 			return -1;
 		}
 	}
+	
+	public int deleteByProjectId(int id){
+		return this.jdbcTemplate.update("delete from task_table where project_id=?", id);
+	}
+	
+	public int deleteByServerId(int id){
+		return this.jdbcTemplate.update("delete from task_table where server_id=?", id);
+	}
 
 }

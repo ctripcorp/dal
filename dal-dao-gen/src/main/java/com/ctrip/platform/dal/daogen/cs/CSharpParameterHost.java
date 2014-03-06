@@ -23,6 +23,16 @@ public class CSharpParameterHost extends AbstractParameterHost {
 	private boolean nullable;
 	
 	private int length;
+	
+	private Object value;
+
+	public Object getValue() {
+		return value;
+	}
+
+	public void setValue(Object value) {
+		this.value = value;
+	}
 
 	public int getLength() {
 		return length;

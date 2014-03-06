@@ -77,5 +77,13 @@ public class DaoBySqlBuilder {
 		return this.jdbcTemplate.update("delete from task_auto where id=?",
 				task.getId());
 	}
+	
+	public int deleteByProjectId(int id){
+		return this.jdbcTemplate.update("delete from task_auto where project_id=?", id);
+	}
 
+	public int deleteByServerId(int id){
+		return this.jdbcTemplate.update("delete from task_auto where server_id=?", id);
+	}
+	
 }

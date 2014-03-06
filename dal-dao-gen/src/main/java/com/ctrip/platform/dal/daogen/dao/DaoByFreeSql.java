@@ -70,6 +70,14 @@ public class DaoByFreeSql {
 		return this.jdbcTemplate.update("delete from task_sql where id=?",
 				task.getId());
 	}
+	
+	public int deleteByProjectId(int id){
+		return this.jdbcTemplate.update("delete from task_sql where project_id=?", id);
+	}
+	
+	public int deleteByServerId(int id){
+		return this.jdbcTemplate.update("delete from task_sql where server_id=?", id);
+	}
 
 
 }

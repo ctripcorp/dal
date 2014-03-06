@@ -278,7 +278,7 @@
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">生成时加上后缀：</label>
-                           <input type="text" id="suffix" class="span9 popup_text" value="_gen">
+                           <input type="text" id="suffix" class="span9 popup_text" value="Gen">
                         </div>
                      </div>
                      <div class="row-fluid">

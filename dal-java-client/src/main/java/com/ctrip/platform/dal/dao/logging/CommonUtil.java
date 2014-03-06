@@ -1,29 +1,32 @@
 package com.ctrip.platform.dal.dao.logging;
 
-import java.io.UnsupportedEncodingException;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 
 public class CommonUtil {
-    private static final String APPIDComment = "/* " + Logger.getAppId() + ", ";
-    private static String machine;
+    private static final String APPID_COMMENT;
+    public static String MACHINE;
     private static String key = "dalctripcn";
 
     static {
+        StringBuilder sb = new StringBuilder();
+        sb.append("/* ").append(Logger.getAppId()).append(", ");
         try
         {
-            machine = System.getenv("Host");
+        	MACHINE = System.getenv("Host");
+        	sb.append(MACHINE);
         }
-        catch (Exception e)
+        catch (Throwable e)
         {
-        	machine = "UNKNOW";
+        	MACHINE = "UNKNOW";
+            sb.append(MACHINE);
         }
+        sb.append("*/\n");
+        APPID_COMMENT = sb.toString();
     }
     
     public static String getHashCode4SQLString(String sql)
@@ -32,22 +35,14 @@ public class CommonUtil {
 		return new String(Base64.encodeBase64(md5Byte));
     }
 
-    public static String GetTaggedSQLText(String sql)
+    /**
+     * Only add this tag to SQL. No tag for stored procedure.
+     * @param sql
+     * @return
+     */
+    public static String tagSql(String sql)
     {
-        StringBuilder sb = new StringBuilder();
-        sb.append(APPIDComment);
-        try
-        {
-            sb.append(machine);
-        }
-        catch (Exception e)
-        {
-            sb.append("UNKNOW");
-        }
-        sb.append("*/\n");
-        sb.append(sql);
-        return sb.toString();
-
+        return APPID_COMMENT + sql;
     }
 
 

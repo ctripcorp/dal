@@ -28,9 +28,9 @@ public class Logger {
 	private static Map<Integer, Date> sqlLogCache = Collections.synchronizedMap(new WeakHashMap<Integer, Date>());
 	
 	// Timeout threshold for low frequency SQL. In minutes
-	private int low;
+	private static int low;
 	// Timeout threshold for high frequency SQL. In minutes 
-	private int high;
+	private static int high;
 	// Cache size
 	private static final int CACHE_SIZE_LIMIT = 5000;
 	
@@ -38,7 +38,7 @@ public class Logger {
 		return DAL_APP_ID;
 	}
 	
-	void log(String sql, StatementParameters parameters) {
+	public static void log(String sql, StatementParameters parameters) {
 		if(!validate(sql, parameters)) 
 			return;
 		
@@ -50,10 +50,10 @@ public class Logger {
 	 * @param entry
 	 * @return
 	 */
-	private boolean validate(String sql, StatementParameters parameters) {
+	public static boolean validate(String sql, StatementParameters parameters) {
 		Date now  = new Date();
 		clearCache(now, low);
-		if(sqlLogCache)
+//		if(sqlLogCache)
 		return true;
 	}
 	
@@ -61,7 +61,7 @@ public class Logger {
 	 * @param now
 	 * @param interval in minutes
 	 */
-	private void clearCache(Date now, int interval) {
+	private static void clearCache(Date now, int interval) {
 		//no clear if the number in control
         if (CACHE_SIZE_LIMIT > sqlLogCache.size()) return;
         Set<Integer> keys = sqlLogCache.keySet();

@@ -18,6 +18,9 @@ public enum DalHintEnum {
 
 	/*  */
 	shardCol, 
+	
+	/* Is the SQL sensitive */
+	sensitive,
 
 	/*  */
 	masterOnly, 

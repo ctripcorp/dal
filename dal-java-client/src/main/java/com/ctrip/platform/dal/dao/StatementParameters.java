@@ -27,6 +27,22 @@ public class StatementParameters {
 		return add(StatementParameter.Builder.registerOut(name, sqlType).build());
 	}
 	
+	public StatementParameters setSensitive(int index, int sqlType, Object value) {
+		return add(StatementParameter.Builder.set(index, sqlType, value).setSensitive(true).build());
+	}
+
+	public StatementParameters setSensitive(String name, int sqlType, Object value) {
+		return add(StatementParameter.Builder.set(name, sqlType, value).setSensitive(true).build());
+	}
+
+	public StatementParameters registerInOutSensitive(String name, int sqlType, Object value) {
+		return add(StatementParameter.Builder.registerInOut(name, sqlType, value).setSensitive(true).build());
+	}
+	
+	public StatementParameters registerOutSensitive(String name, int sqlType) {
+		return add(StatementParameter.Builder.registerOut(name, sqlType).setSensitive(true).build());
+	}
+	
 	public int size() {
 		return parameters.size();
 	}

@@ -16,7 +16,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import com.ctrip.platform.dal.daogen.pojo.UserProject;
+import com.ctrip.platform.dal.daogen.entity.UserProject;
 
 public class DaoOfUserProject {
 
@@ -93,12 +93,12 @@ public class DaoOfUserProject {
 
 	}
 
-	public int deleteUserProject(int project_id, String userNo) {
+	public int deleteUserProject(int project_id) {
 
 		try {
 			return this.jdbcTemplate.update(
-					"delete from user_project where project_id=?,user_no = ?",
-					new Object[] { project_id, userNo });
+					"delete from user_project where project_id=?",
+					new Object[] { project_id });
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
 			return -1;

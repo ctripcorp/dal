@@ -2,7 +2,6 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -23,11 +22,10 @@ import javax.ws.rs.core.MediaType;
 
 import org.springframework.jdbc.support.JdbcUtils;
 
-import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
-import com.ctrip.platform.dal.daogen.pojo.DbServer;
-import com.ctrip.platform.dal.daogen.pojo.ColumnMetaData;
-import com.ctrip.platform.dal.daogen.pojo.Status;
-import com.ctrip.platform.dal.daogen.pojo.TableSpNames;
+import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
+import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.domain.TableSpNames;
+import com.ctrip.platform.dal.daogen.entity.DbServer;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -40,18 +38,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DatabaseResource {
 
 	private static ObjectMapper mapper = new ObjectMapper();
-	private static DaoOfDbServer dbServerDao;
-
-	static {
-		dbServerDao = SpringBeanGetter.getDaoOfDbServer();
-	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("servers")
 	public List<DbServer> getDbServers() {
 
-		List<DbServer> dbServers = dbServerDao.getAllDbServers();
+		List<DbServer> dbServers = SpringBeanGetter.getDaoOfDbServer().getAllDbServers();
 
 		for (DbServer dataSource : dbServers) {
 			dataSource.setUser("xxx");
@@ -77,7 +70,11 @@ public class DatabaseResource {
 		DbServer dbServer = new DbServer();
 		if (action.equalsIgnoreCase("delete")) {
 			dbServer.setId(id);
-			dbServerDao.deleteDbServer(dbServer);
+			if(SpringBeanGetter.getDaoOfDbServer().deleteDbServer(dbServer) > 0){
+				SpringBeanGetter.getDaoByFreeSql().deleteByServerId(id);
+				SpringBeanGetter.getDaoBySqlBuilder().deleteByServerId(id);
+				SpringBeanGetter.getDaoByTableViewSp().deleteByServerId(id);
+			}
 		} else {
 //			dbServer.setDriver(driver);
 			if (db_type.equalsIgnoreCase("mysql")) {
@@ -99,10 +96,10 @@ public class DatabaseResource {
 			dbServer.setUser(user);
 			dbServer.setPassword(password);
 			dbServer.setDb_type(db_type);
-			int generatedId = dbServerDao.insertDbServer(dbServer);
+			int generatedId = SpringBeanGetter.getDaoOfDbServer().insertDbServer(dbServer);
 			dbServer.setId(generatedId);
 			if (DataSourceLRUCache.newInstance().putDataSource(dbServer) == null) {
-				dbServerDao.deleteDbServer(generatedId);
+				SpringBeanGetter.getDaoOfDbServer().deleteDbServer(generatedId);
 				return Status.ERROR;
 			}
 		}
@@ -120,7 +117,7 @@ public class DatabaseResource {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
 		if (ds == null) {
-			DbServer dbServer = dbServerDao.getDbServerByID(server);
+			DbServer dbServer = SpringBeanGetter.getDaoOfDbServer().getDbServerByID(server);
 			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
 		}
 
@@ -172,7 +169,7 @@ public class DatabaseResource {
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
 		if (ds == null) {
-			DbServer dbServer = dbServerDao.getDbServerByID(server);
+			DbServer dbServer = SpringBeanGetter.getDaoOfDbServer().getDbServerByID(server);
 			ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
 		}
 

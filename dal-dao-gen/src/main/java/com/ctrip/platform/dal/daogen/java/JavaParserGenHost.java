@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.ctrip.platform.dal.daogen.pojo.ColumnMetaData;
+import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
 
 
 	

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.daogen.pojo;
+package com.ctrip.platform.dal.daogen.entity;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

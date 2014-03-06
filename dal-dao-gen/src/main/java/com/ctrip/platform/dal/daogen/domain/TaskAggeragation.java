@@ -1,7 +1,11 @@
 
-package com.ctrip.platform.dal.daogen.pojo;
+package com.ctrip.platform.dal.daogen.domain;
 
 import java.util.List;
+
+import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
+import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 
 public class TaskAggeragation {
 	

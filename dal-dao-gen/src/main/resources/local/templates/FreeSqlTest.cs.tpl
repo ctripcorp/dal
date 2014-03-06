@@ -1,0 +1,22 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+using Arch.Data;
+using Arch.Data.DbEngine;
+using ${host.getNameSpace()}.Entity.DataModel;
+
+namespace ${host.getNameSpace()}.Test
+{
+    public class ${host.getClassName()}Test
+    {
+        public static void Test()
+        {
+#foreach($method in $host.getMethods())
+            IList<${method.getPojoName()}> ${method.getName()}Result = ${method.getName()}(#foreach($p in $method.getParameters())${p.getValue()}#if($foreach.count != $method.getParameters().size()),#end#end);
+
+#end
+        }
+    }
+}

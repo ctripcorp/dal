@@ -9,8 +9,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
-import com.ctrip.platform.dal.daogen.pojo.Status;
+import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 

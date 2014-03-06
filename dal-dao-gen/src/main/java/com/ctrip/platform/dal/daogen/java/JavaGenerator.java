@@ -20,14 +20,13 @@ import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
-import com.ctrip.platform.dal.daogen.pojo.CurrentLanguage;
-import com.ctrip.platform.dal.daogen.pojo.DatabaseCategory;
-import com.ctrip.platform.dal.daogen.pojo.DbServer;
-import com.ctrip.platform.dal.daogen.pojo.GenTask;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskBySqlBuilder;
-import com.ctrip.platform.dal.daogen.pojo.GenTaskByTableViewSp;
-import com.ctrip.platform.dal.daogen.pojo.StoredProcedure;
+import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
+import com.ctrip.platform.dal.daogen.entity.DbServer;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
+import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
+import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -504,12 +503,6 @@ public class JavaGenerator extends AbstractGenerator {
 				JavaIOUtils.closeWriter(testWriter);
 			}
 		}
-	}
-
-	@Override
-	public void generateBySqlBuilder(List<GenTask> tasks) {
-		// TODO Auto-generated method stub
-		
 	}
 	
 }

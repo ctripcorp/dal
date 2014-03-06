@@ -71,7 +71,7 @@
 
                 $("select[id$=databases] > option:gt(0)").remove();
 
-                $.get("/rest/db/dbs?server=" + $("#servers").val()).done(function (data) {
+                $.get("/rest/db/dbs?server=" + $("#servers").val()+"&rand="+Math.random()).done(function (data) {
                     var results = [];
                     $.each(data, function (index, value) {
                         results.push($('<option>', {
@@ -126,8 +126,8 @@
                 switch (gen_style) {
                 case "table_view_sp":
                     cblock($("body"));
-                    $.get(sprintf("/rest/db/table_sps?server=%s&db_name=%s",
-                        $("#servers").val(),$("#databases").val())).done(function (data) {
+                    $.get(sprintf("/rest/db/table_sps?server=%s&db_name=%s&rand=%s",
+                        $("#servers").val(),$("#databases").val(), Math.random())).done(function (data) {
                         $("select[id$=table_list] > option").remove();
                         $("select[id$=view_list] > option").remove();
                         $("select[id$=sp_list] > option").remove();
@@ -201,9 +201,9 @@
                     } else {
                         cblock($("body"));
                         $.get(
-                            sprintf("/rest/db/tables?server=%s&db_name=%s",
+                            sprintf("/rest/db/tables?server=%s&db_name=%s&rand=%s",
                                 $("#servers").val(),
-                                $("#databases").val()), function (data) {
+                                $("#databases").val(),Math.random()), function (data) {
                                 $.each(data, function (index, value) {
                                     $('#tables').append($('<option>', {
                                         value: value,
@@ -231,7 +231,7 @@
                     $.get("/rest/task/sql_class?project_id="
                         +w2ui['grid'].current_project 
                         + "&server_id="+$("#servers").val()
-                        + "&db_name="+$("#databases").val(), function(data){
+                        + "&db_name="+$("#databases").val()+"&rand="+Math.random(), function(data){
                         $.each(data.classes, function(index, value){
                             $("#sql_class_name_select").append($('<option>', {
                                 text: value, 
@@ -288,10 +288,10 @@
                 $("select[id$=conditions] > option:gt(0)").remove();
 
                 var url = sprintf(
-                    "/rest/db/fields?server=%s&table_name=%s&db_name=%s",
+                    "/rest/db/fields?server=%s&table_name=%s&db_name=%s&rand=%s",
                     $("#servers").val(),
                     $("#tables").val(),
-                    $("#databases").val());
+                    $("#databases").val(),Math.random());
 
                 $.get(url, function (data) {
                     var fieldList = [];

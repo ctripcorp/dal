@@ -18,7 +18,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import com.ctrip.platform.dal.daogen.pojo.Project;
+import com.ctrip.platform.dal.daogen.entity.Project;
 
 public class DaoOfProject {
 

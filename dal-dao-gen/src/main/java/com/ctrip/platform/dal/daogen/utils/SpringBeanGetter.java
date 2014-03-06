@@ -16,34 +16,58 @@ public class SpringBeanGetter {
 
 	private static ApplicationContext context = new ClassPathXmlApplicationContext(
 			"spring.xml");
+	
+	private static DaoOfProject daoOfProject;
+
+	private static DaoBySqlBuilder daoBySqlBuilder;
+
+	private static DaoByFreeSql daoByFreeSql;
+
+	private static DaoOfDbServer daoOfDbServer;
+	
+	private static DaoByTableViewSp daoByTableViewSp;
+
+	private static DaoOfLoginUser daoOfLoginUser;
+
+	private static DaoOfUserProject daoOfUserProject;
+	
+	static {
+		daoOfProject = (DaoOfProject) context.getBean("projectDao");
+		daoOfDbServer = (DaoOfDbServer)context.getBean("dataSourceDao");
+		
+		daoBySqlBuilder = (DaoBySqlBuilder)context.getBean("autoTaskDao");
+		daoByFreeSql = (DaoByFreeSql)context.getBean("sqlTaskDao");
+		daoByTableViewSp =  (DaoByTableViewSp)context.getBean("daoByTableViewSp");
+		daoOfLoginUser =  (DaoOfLoginUser)context.getBean("loginUserDao");
+		daoOfUserProject = (DaoOfUserProject)context.getBean("userProjectDao");
+	}
 
 	public static DaoOfProject getDaoOfProject() {
-		return (DaoOfProject) context.getBean("projectDao");
-	}
-	
-	public static DaoBySqlBuilder getDaoBySqlBuilder(){
-		return (DaoBySqlBuilder)context.getBean("autoTaskDao");
-	}
-	
-	public static DaoByFreeSql getDaoByFreeSql(){
-		return (DaoByFreeSql)context.getBean("sqlTaskDao");
+		return daoOfProject;
 	}
 	
 	public static DaoOfDbServer getDaoOfDbServer(){
-		return (DaoOfDbServer)context.getBean("dataSourceDao");
+		return daoOfDbServer;
+	}
+	
+	public static DaoBySqlBuilder getDaoBySqlBuilder(){
+		return daoBySqlBuilder;
+	}
+	
+	public static DaoByFreeSql getDaoByFreeSql(){
+		return daoByFreeSql;
 	}
 	
 	public static DaoByTableViewSp getDaoByTableViewSp(){
-		return (DaoByTableViewSp)context.getBean("daoByTableViewSp");
+		return daoByTableViewSp;
 	}
 	
 	public static DaoOfLoginUser getDaoOfLoginUser(){
-		return (DaoOfLoginUser)context.getBean("loginUserDao");
+		return daoOfLoginUser;
 	}
 	
 	public static DaoOfUserProject getDaoOfUserProject(){
-		return (DaoOfUserProject)context.getBean("userProjectDao");
+		return daoOfUserProject;
 	}
-
 
 }

@@ -21,10 +21,10 @@ import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.cs.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
+import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
+import com.ctrip.platform.dal.daogen.entity.DbServer;
+import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.java.JavaParameterHost;
-import com.ctrip.platform.dal.daogen.pojo.CurrentLanguage;
-import com.ctrip.platform.dal.daogen.pojo.DbServer;
-import com.ctrip.platform.dal.daogen.pojo.StoredProcedure;
 
 public class DbUtils {
 	private static DaoOfDbServer dbServerDao;
@@ -241,6 +241,11 @@ public class DbUtils {
 
 					host.setName(spParams.getString("COLUMN_NAME"));
 					host.setType(DbType.getCSharpType(host.getDbType()));
+					
+					if(host.getType() == null){
+						host.setType("string");
+						host.setDbType(DbType.AnsiString);
+					}
 
 					parameters.add(host);
 				}

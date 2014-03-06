@@ -10,7 +10,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.ctrip.platform.dal.daogen.pojo.GenTaskByTableViewSp;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 
 public class DaoByTableViewSp {
 
@@ -84,6 +84,14 @@ public class DaoByTableViewSp {
 			ex.printStackTrace();
 			return -1;
 		}
+	}
+	
+	public int deleteByProjectId(int id){
+		return this.jdbcTemplate.update("delete from task_table where project_id=?", id);
+	}
+	
+	public int deleteByServerId(int id){
+		return this.jdbcTemplate.update("delete from task_table where server_id=?", id);
 	}
 
 }

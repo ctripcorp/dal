@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.daogen.pojo;
+package com.ctrip.platform.dal.daogen.domain;
 
 public class Status {
 	private String code;

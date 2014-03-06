@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.ctrip.platform.dal.daogen.pojo.GenTaskByFreeSql;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 
 public class DaoByFreeSql {
 
@@ -69,6 +69,14 @@ public class DaoByFreeSql {
 	public int deleteTask(GenTaskByFreeSql task) {
 		return this.jdbcTemplate.update("delete from task_sql where id=?",
 				task.getId());
+	}
+	
+	public int deleteByProjectId(int id){
+		return this.jdbcTemplate.update("delete from task_sql where project_id=?", id);
+	}
+	
+	public int deleteByServerId(int id){
+		return this.jdbcTemplate.update("delete from task_sql where server_id=?", id);
 	}
 
 

@@ -88,7 +88,11 @@ public abstract class AbstractGenerator implements Generator {
 		try {
 			if(mavenLikeDir.exists())
 				FileUtils.forceDelete(mavenLikeDir);
-
+			
+			if(lang.equals("cs")){
+				File idaoMavenLike = new File(mavenLikeDir, "IDao");
+				FileUtils.forceMkdir(idaoMavenLike);
+			}
 			File daoMavenLike = new File(mavenLikeDir, "Dao");
 			File entityMavenLike = new File(mavenLikeDir, "Entity");
 			File testMavenLike = new File(mavenLikeDir, "Test");

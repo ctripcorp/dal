@@ -33,7 +33,7 @@ public class ${host.getPojoClassName()}DaoTest {
 				System.out.print("Key: " + key);
 				System.out.println(" Value: " + result.get(Key));
 			}
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		} 
 	}

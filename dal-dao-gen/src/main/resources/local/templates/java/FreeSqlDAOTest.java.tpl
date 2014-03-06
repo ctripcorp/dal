@@ -1,13 +1,10 @@
-package ${host.getNameSpaceDao()};
+package ${host.getPackageName()};
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
+#foreach( $field in ${host.getDaoImports()} )
+import ${field};
+#end
 
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
-import com.ctrip.platform.dal.dao.DalRowMapper;
-import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 
 public class ${host.getClassName()}TestDao {
 	public static void main(String[] args) {
@@ -24,7 +21,7 @@ public class ${host.getClassName()}TestDao {
 			List<${method.getPojoClassName()}> ${method.getPojoClassName()}s = dao.${method.getName()}(${method.getParameterNames()});
 
 #end
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		} 
 	}

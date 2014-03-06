@@ -1,8 +1,8 @@
-package ${host.getNameSpaceDao()};
+package ${host.getPackageName()};
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
+#foreach( $field in ${host.getDaoImports()} )
+import ${field};
+#end
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalQueryDao;
@@ -17,7 +17,7 @@ public class ${host.getClassName()}Dao {
 	private ${method.getPojoClassName()}RowMapper ${method.getVariableName()}RowMapper = new ${method.getPojoClassName()}RowMapper();
 
 #end
-	public ${host.getClassName()}() {
+	public ${host.getClassName()}Dao() {
 		queryDao = new DalQueryDao(DATA_BASE);
 	}
     
@@ -33,7 +33,7 @@ public class ${host.getClassName()}Dao {
 #end
 
 		//如果只需要一条记录，建议使用limit 1或者top 1，并使用SelectFirst提高性能
-		return queryDao.query(sql, parameters, hints, personRowMapper);
+		return queryDao.query(sql, parameters, hints, ${method.getVariableName()}RowMapper);
 	}
 
 #end

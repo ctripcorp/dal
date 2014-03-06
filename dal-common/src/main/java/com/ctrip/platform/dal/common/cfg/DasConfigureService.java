@@ -67,7 +67,8 @@ public class DasConfigureService implements Runnable {
 		try {
 			snapshot.set(mapper.readValue(snapshotFile, DasConfigure.class));
 		} catch (Exception e) {
-			logger.error("Unable to load configure snapshot from :" + snapshotFile.getName(), e);
+//			logger.error("Unable to load configure snapshot from :" + snapshotFile.getName(), e);
+			logger.info("Unable to load configure snapshot from :" + snapshotFile.getName());
 		}
 	}
 	

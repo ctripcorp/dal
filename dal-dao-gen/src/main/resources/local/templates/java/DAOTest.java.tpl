@@ -53,7 +53,7 @@ public class ${host.getPojoClassName()}DaoTest {
 
 #end
 #end
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		} 
 	}

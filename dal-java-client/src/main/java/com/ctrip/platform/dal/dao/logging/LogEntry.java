@@ -35,7 +35,12 @@ public class LogEntry {
 
         this.statement = statement;
         this.level = LogLevel.Info;
-        this.source = statement.getDao() + "." + statement.getMethod();
+//        this.source = statement.getDao() + "." + statement.getMethod();
+        // Is there any performance concern for the following?
+        // We should first check if we need to log before actually log
+        StackTraceElement caller = Thread.currentThread().getStackTrace()[1];
+        this.source = String.format("%s.%s.%d", caller.getClassName(), caller.getMethodName(), caller.getLineNumber());
+        
         this.eventID = eID;
         this.name = name;
         this.message = message;

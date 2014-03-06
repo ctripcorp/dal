@@ -10,26 +10,27 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class ${host.getPojoClassName()}Dao {
+	private static final String DATA_BASE = "${host.getDbName()}";
 	private DalClient client;
 
 	public ${host.getPojoClassName()}Dao() {
-		this.client = DalClientFactory.getClient(${host.getDbName()});
+		this.client = DalClientFactory.getClient(DATA_BASE);
 	}
 	
 	public Map<String, ?> call${host.getPojoClassName()}(${host.getPojoClassName()} param) throws SQLException {
 		String callString = "${host.getSpName()}";
 		
 		StatementParameters parameters = new StatementParameters();
-		int i = 1;
+
 #foreach($p in $host.getFields())
 #if($p.getDirection().name() == "Input")
-		parameters.set(i++, ${p.getJavaTypeDisplay()}, param.get${p.getCapitalizedName()}());
+		parameters.set("${p.getName()}", ${p.getJavaTypeDisplay()}, param.get${p.getCapitalizedName()}());
 #end
 #if($p.getDirection().name() == "InputOutput")
-		parameters.registerInOut(i++, ${p.getJavaTypeDisplay()}, "${p.getName()}", param.get${p.getCapitalizedName()}());
+		parameters.registerInOut("${p.getName()}", ${p.getJavaTypeDisplay()}, param.get${p.getCapitalizedName()}());
 #end
 #if($p.getDirection().name() == "Output")
-		parameters.registerOut(i++, ${p.getJavaTypeDisplay()}, "${p.getName()}");
+		parameters.registerOut("${p.getName()}", ${p.getJavaTypeDisplay()});
 #end
 #end
 		/* To specify returned result(not the output or inputoutput parameter)

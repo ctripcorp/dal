@@ -15,12 +15,16 @@ public class StatementParameters {
 		return add(StatementParameter.Builder.set(index, sqlType, value).build());
 	}
 
-	public StatementParameters registerInOut(int index, int sqlType, String name, Object value) {
-		return add(StatementParameter.Builder.registerInOut(index, sqlType, name, value).build());
+	public StatementParameters set(String name, int sqlType, Object value) {
+		return add(StatementParameter.Builder.set(name, sqlType, value).build());
+	}
+
+	public StatementParameters registerInOut(String name, int sqlType, Object value) {
+		return add(StatementParameter.Builder.registerInOut(name, sqlType, value).build());
 	}
 	
-	public StatementParameters registerOut(int index, int sqlType, String name) {
-		return add(StatementParameter.Builder.registerOut(index, sqlType, name).build());
+	public StatementParameters registerOut(String name, int sqlType) {
+		return add(StatementParameter.Builder.registerOut(name, sqlType).build());
 	}
 	
 	public int size() {

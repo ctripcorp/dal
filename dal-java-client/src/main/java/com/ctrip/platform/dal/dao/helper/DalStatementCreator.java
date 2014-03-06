@@ -100,7 +100,14 @@ public class DalStatementCreator {
 	
 	private PreparedStatement setSqlParameter(PreparedStatement ps,
 			StatementParameter parameter) throws SQLException {
-		ps.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+		if(parameter.getIndex() > 0) {
+			ps.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+		} else {
+			if(ps instanceof CallableStatement) {
+				CallableStatement cs = (CallableStatement)ps;
+				cs.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
+			}
+		}
 		return ps;
 	}
 }

@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,27 @@ public class DalDirectClient implements DalClient {
 	private static final boolean SELECTE = true;
 	private static final boolean UPDATE = false;
 	
+	private static final int QUERY = 2001;
+	private static final int UPDATE_SIMPLE = 2002;
+	private static final int UPDATE_KH = 2003;
+	private static final int BATCH_UPDATE = 2004;
+	private static final int BATCH_UPDATE_PARAM = 2005;
+	private static final int EXECUTE = 2006;
+	private static final int CALL = 2007;
+
+	
+	private static final Map<Integer, String> EVENT_MESSAGE_MAP;
+	static {
+		EVENT_MESSAGE_MAP = new HashMap<Integer, String>();
+		EVENT_MESSAGE_MAP.put(QUERY, "query");
+		EVENT_MESSAGE_MAP.put(UPDATE_SIMPLE, "update");
+		EVENT_MESSAGE_MAP.put(UPDATE_KH, "update(KeyHolder)");
+		EVENT_MESSAGE_MAP.put(BATCH_UPDATE, "batchUpdate(sqls)");
+		EVENT_MESSAGE_MAP.put(BATCH_UPDATE_PARAM, "batchUpdate(params)");
+		EVENT_MESSAGE_MAP.put(EXECUTE, "execute");
+		EVENT_MESSAGE_MAP.put(CALL, "call");
+	}
+	
 	private DalStatementCreator stmtCreator = new DalStatementCreator();
 	private DalTransactionManager transManager;
 	private String logicDbName;
@@ -56,7 +78,7 @@ public class DalDirectClient implements DalClient {
 		};
 		action.populate(sql, parameters);
 		
-		return doInConnection(action, 2001);
+		return doInConnection(action, QUERY);
 //		Connection conn = null;
 //		PreparedStatement statement = null;
 //		ResultSet rs = null;
@@ -93,7 +115,7 @@ public class DalDirectClient implements DalClient {
 		};
 		action.populate(sql, parameters);
 		
-		return doInConnection(action, 2002);
+		return doInConnection(action, UPDATE_SIMPLE);
 //		Connection conn = null;
 //		PreparedStatement statement = null;
 //		
@@ -140,7 +162,7 @@ public class DalDirectClient implements DalClient {
 		};
 		action.populate(sql, parameters);
 		
-		return doInConnection(action, 2003);
+		return doInConnection(action, UPDATE_KH);
 //		Connection conn = null;
 //		PreparedStatement statement = null;
 //		ResultSet keys = null;
@@ -189,7 +211,7 @@ public class DalDirectClient implements DalClient {
 		};
 		action.populate(sqls);
 		
-		return doInTransaction(action, hints, 2004);
+		return doInTransaction(action, hints, BATCH_UPDATE);
 //		Connection conn = null;
 //		Statement statement = null;
 //		int level = 0;
@@ -229,7 +251,7 @@ public class DalDirectClient implements DalClient {
 		};
 		action.populate(sql, parametersList);
 		
-		return doInTransaction(action, hints, 2005);
+		return doInTransaction(action, hints, BATCH_UPDATE_PARAM);
 //		Connection conn = null;
 //		PreparedStatement statement = null;
 //		int level = 0;
@@ -269,7 +291,7 @@ public class DalDirectClient implements DalClient {
 			}
 		};
 		
-		doInTransaction(action, hints, 2006);
+		doInTransaction(action, hints, EXECUTE);
 //		int level = 0;
 //		try {
 //			level = startTransaction(hints);
@@ -321,7 +343,7 @@ public class DalDirectClient implements DalClient {
 		};
 		action.populateSp(callString, parameters);
 		
-		return doInConnection(action, 2001);
+		return doInConnection(action, CALL);
 //		Connection conn = null;
 //		CallableStatement statement = null;
 //		
@@ -409,7 +431,7 @@ public class DalDirectClient implements DalClient {
 		long start = start();
 		try {
 			//conn.getSchema()
-			entry = Logger.create(action.sql, action.parameters, logicDbName, "TBI", eventId);
+			entry = Logger.create(action.sql, action.parameters, logicDbName, "TBI", eventId, EVENT_MESSAGE_MAP.get(eventId));
 			
 			T result = action.execute();
 			
@@ -433,7 +455,7 @@ public class DalDirectClient implements DalClient {
 		try {
 			//conn.getSchema()
 			level = startTransaction(hints);
-			entry = Logger.create(action.sql, action.parameters, logicDbName, "TBI", eventId);
+			entry = Logger.create(action.sql, action.parameters, logicDbName, "TBI", eventId, EVENT_MESSAGE_MAP.get(eventId));
 			
 			T result = action.execute();
 			

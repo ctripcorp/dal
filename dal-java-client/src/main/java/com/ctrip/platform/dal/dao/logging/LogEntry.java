@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.dao.logging;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalTableDao;
@@ -37,8 +39,9 @@ public class LogEntry {
      * @param eId
      * @param message
      */
-    public LogEntry(String sql, StatementParameters parameters, String logicDbName, String realDbName, int eId)
+    public LogEntry(String sql, StatementParameters parameters, String logicDbName, String realDbName, int eId, String message)
     {
+    	this.sql = sql;
         timeStamp = new Date();
         machine = CommonUtil.MACHINE;
 
@@ -47,6 +50,7 @@ public class LogEntry {
         this.eventId = eId;
         this.logicDbName = logicDbName;
         this.realDbName = realDbName;
+        this.message = message;
         inputParamStr = getInputParameterPrint(parameters);
     }
     
@@ -78,21 +82,34 @@ public class LogEntry {
 		return sql.length();
 	}
 
+	public String getSql() {
+		return sql;
+	}
+
+	public String getInputParamStr() {
+		return inputParamStr;
+	}
+
+	private static Set<String> execludedClasses;
+	static {
+		execludedClasses = new HashSet<String>();
+		execludedClasses.add(DalDirectClient.class.getName());
+		execludedClasses.add(DalTableDao.class.getName());
+		execludedClasses.add(DalQueryDao.class.getName());
+	}
+	
 	private void getSourceAndMessage() {
     	StackTraceElement[] callers = Thread.currentThread().getStackTrace();
-    	for(StackTraceElement caller: callers) {
-    		// Message
-    		if(message == null && caller.getClassName().endsWith(DalDirectClient.class.getSimpleName())){
-    			message = caller.getMethodName();
-    			continue;
-    		}
-    		
-        	if(caller.getClassName().equalsIgnoreCase(DalTableDao.class.getName()) || caller.getClassName().equalsIgnoreCase(DalQueryDao.class.getName()))
+
+    	for(int i = 4; i < callers.length; i++) {
+    		StackTraceElement caller = callers[i];
+        	if(execludedClasses.contains(caller.getClassName()))
         		continue;
         	
         	dao = caller.getClassName();
         	method = caller.getMethodName();
-        	source = String.format("%s.%s.%d", dao, method, caller.getLineNumber());
+        	source = caller.toString();
+//        	source = String.format("%s.%s.%d", dao, method, caller.getLineNumber());
         	break;
     	}
     }
@@ -143,18 +160,18 @@ public class LogEntry {
     {
     	StringBuilder sb = new StringBuilder();
         sb.append('\n');
-        sb.append(String.format("Log Name:{0}\r\n", getName()));
-        sb.append(String.format("Log Source:{0}\r\n", source));
-        sb.append(String.format("Level:{0}\r\n", level));
-        sb.append(String.format("DateTime:{0}\r\n", timeStamp));
-        sb.append(String.format("Event:{0}\r\n", eventId));
-        sb.append(String.format("Machine:{0}\r\n", machine));
-        sb.append(String.format("Message:{0}\r\n", message));
+        sb.append(String.format("Log Name:%s\r\n", getName()));
+        sb.append(String.format("Log Source:%s\r\n", source));
+        sb.append(String.format("Level:%s\r\n", level));
+        sb.append(String.format("DateTime:%s\r\n", timeStamp.toString()));
+        sb.append(String.format("Event:%d\r\n", eventId));
+        sb.append(String.format("Machine:%s\r\n", machine));
+        sb.append(String.format("Message:%s\r\n", message));
         if (sql != null)
         {
             sb.append(String.format("Duration:%d\r\n", duration));
             sb.append(String.format("SQL Text:%s\r\n", sensitive? SQLHIDDENString : sql));
-            sb.append(String.format("SQL Hash:{0}\r\n", sqlHash));
+            sb.append(String.format("SQL Hash:%s\r\n", sqlHash));
             sb.append("Input Parameters:").append(inputParamStr).append("\r\n");
             sb.append("Output Parameters:").append(outputParamStr).append("\r\n");
         }
@@ -170,17 +187,17 @@ public class LogEntry {
     	StringBuilder sb = new StringBuilder();
         if (sql != null)
         {
-            sb.append(String.format("Event:{0}\r\n", eventId));
-            sb.append(String.format("Message:{0}\r\n", message));
-            sb.append(String.format("SQL Text:{0}\r\n", sensitive? SQLHIDDENString : sql));
+            sb.append(String.format("Event:%d\r\n", eventId));
+            sb.append(String.format("Message:%s\r\n", message));
+            sb.append(String.format("SQL Text:%s\r\n", sensitive? SQLHIDDENString : sql));
             sb.append("Input Parameters:").append(inputParamStr).append("\r\n");
             sb.append("Output Parameters:").append(outputParamStr).append("\r\n");
         } 
         else {
-            sb.append(String.format("Log Name:{0}\r\n", getName()));
-            sb.append(String.format("Log Source:{0}\r\n", source));
-            sb.append(String.format("Event:{0}\r\n", eventId));
-            sb.append(String.format("Message:{0}\r\n", message));
+            sb.append(String.format("Log Name:%s\r\n", getName()));
+            sb.append(String.format("Log Source:%s\r\n", source));
+            sb.append(String.format("Event:%d\r\n", eventId));
+            sb.append(String.format("Message:%s\r\n", message));
         }
         sb.append('\n');
         return sb.toString();

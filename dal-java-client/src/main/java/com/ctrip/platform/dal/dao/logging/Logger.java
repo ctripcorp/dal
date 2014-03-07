@@ -32,45 +32,64 @@ public class Logger {
 	// Cache size
 	private static final int CACHE_SIZE_LIMIT = 5000;
 	
+	private static long MINUTE = 60 * 1000;
+	
 	public static int getAppId() {
 		return DAL_APP_ID;
 	}
 	
 	private static ILog logger = LogManager.getLogger("DAL Java Client");
 	
-	public static LogEntry create(String sql, StatementParameters parameters, String logicDbName, String realDbName, int eId) {
-		// Don't log
-		if(!validate(sql, parameters))
-			return null;
-		
-		return new LogEntry(sql, parameters, logicDbName, realDbName, eId);
+	public static LogEntry create(String sql, StatementParameters parameters, String logicDbName, String realDbName, int eId, String message) {
+		return new LogEntry(sql, parameters, logicDbName, realDbName, eId, message);
 	}
 	
 	public static void log(LogEntry log) {
 		if(log == null) 
 			return;
+		// Don't log
+		if(!validate(log.getSql(), log.getInputParamStr()))
+			return;
+		
 		
 		logger.info(log.toBrief());
 	}
 	
 	public static void log(LogEntry log, Throwable e) {
-		if(log == null) 
-			return;
-		
 		logger.error(log.toBrief(), e);
 	}
 	
 	/**
-	 * Check if this entry need to be logged
+	 * Check if this entry need to be logged. For level abve information, we always log
 	 * @param entry
 	 * @return
 	 */
-	public static boolean validate(String sql, StatementParameters parameters) {
+	private static boolean validate(String sql, String inputParamStr) {
 		Date now  = new Date();
 		clearCache(now, low);
-//		if(sqlLogCache)
-		return true;
-	}
+        if (sql == null) {
+            return true;
+        }
+        
+        Integer key = CommonUtil.getSqlHashCodeForCache(sql);
+
+        Date value = sqlLogCache.get(key);
+        if (value != null) { //含'@'情况，用low
+            if (inputParamStr != null && inputParamStr.trim().length() > 0) {
+                if ((now.getTime() - value.getTime())/MINUTE < low) {//时间不够
+                    return false;
+                }
+            }
+            else { //不包含参数，用high
+                if ((now.getTime() - value.getTime())/MINUTE < high)//时间不够
+                {
+                    return false;
+                }
+            }
+        }
+        sqlLogCache.put(key, now);
+        return true;
+    }
 	
 	/**
 	 * @param now

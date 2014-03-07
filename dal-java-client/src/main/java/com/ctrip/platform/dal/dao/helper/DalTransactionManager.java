@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.helper;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;

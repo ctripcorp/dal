@@ -16,6 +16,8 @@ public class MetricsLogger {
 	
 	public static final String COUNT = "arch.dal.sql.count";
 	public static final String COST = "arch.dal.sql.cost";
+    public static String SUCCESS = "success";
+    public static String FAIL = "fail";
 
 	private static final String DAO = "DAO";
 	private static final String METHOD = "Method";
@@ -33,7 +35,16 @@ public class MetricsLogger {
 		sender.scheduleAtFixedRate(new MetrixReporter(), 1, 1, TimeUnit.MINUTES);
 	}
 	
-    public static void report(String dao, String method, int size, String status, long cost) {
+	public static void success(LogEntry entry, long start) {
+		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), SUCCESS, start);
+	}
+	
+	public static void fail(LogEntry entry, long start) {
+		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), FAIL, start);
+	}
+	
+	private static void report(String dao, String method, int size, String status, long start) {
+		long cost = System.currentTimeMillis() - start;
         if (size < 200)
         {
             size = 200;

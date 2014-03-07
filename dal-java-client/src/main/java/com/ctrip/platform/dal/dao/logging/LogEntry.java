@@ -21,17 +21,13 @@ public class LogEntry {
     
     private String logicDbName;
     private String realDbName;
+    private String dao;
+    private String method;
     private String source;
     private int eventId;
     private String message;
     private String level;
     private long duration;
-
-    public LogEntry()
-    {
-        timeStamp = new Date();
-        machine = CommonUtil.MACHINE;
-    }
 
     /**
      * 
@@ -41,19 +37,16 @@ public class LogEntry {
      * @param eId
      * @param message
      */
-    public LogEntry(String sql, StatementParameters parameters, String logicDbName, int eId)
+    public LogEntry(String sql, StatementParameters parameters, String logicDbName, String realDbName, int eId)
     {
-        this();
-        
-        // Don't waste time for the rest
-        if(!Logger.validate(sql, parameters))
-        	return;
+        timeStamp = new Date();
+        machine = CommonUtil.MACHINE;
 
         getSourceAndMessage();
         sqlHash = CommonUtil.getHashCode4SQLString(sql);
         this.eventId = eId;
         this.logicDbName = logicDbName;
-
+        this.realDbName = realDbName;
         inputParamStr = getInputParameterPrint(parameters);
     }
     
@@ -73,6 +66,18 @@ public class LogEntry {
 		this.duration = duration;
 	}
 
+	public String getDao() {
+		return dao;
+	}
+
+	public String getMethod() {
+		return method;
+	}
+	
+	public int getSqlSize() {
+		return sql.length();
+	}
+
 	private void getSourceAndMessage() {
     	StackTraceElement[] callers = Thread.currentThread().getStackTrace();
     	for(StackTraceElement caller: callers) {
@@ -85,7 +90,9 @@ public class LogEntry {
         	if(caller.getClassName().equalsIgnoreCase(DalTableDao.class.getName()) || caller.getClassName().equalsIgnoreCase(DalQueryDao.class.getName()))
         		continue;
         	
-        	source = String.format("%s.%s.%d", caller.getClassName(), caller.getMethodName(), caller.getLineNumber());
+        	dao = caller.getClassName();
+        	method = caller.getMethodName();
+        	source = String.format("%s.%s.%d", dao, method, caller.getLineNumber());
         	break;
     	}
     }

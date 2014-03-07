@@ -6,11 +6,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
-
+import com.ctrip.freeway.logging.ILog;
+import com.ctrip.freeway.logging.LogManager;
 import com.ctrip.platform.dal.dao.StatementParameters;
-
 
 public class Logger {
 	public static final int DAL_APP_ID = 930201;
@@ -38,11 +36,28 @@ public class Logger {
 		return DAL_APP_ID;
 	}
 	
-	public static void log(String sql, StatementParameters parameters) {
-		if(!validate(sql, parameters)) 
+	private static ILog logger = LogManager.getLogger("DAL Java Client");
+	
+	public static LogEntry create(String sql, StatementParameters parameters, String logicDbName, String realDbName, int eId) {
+		// Don't log
+		if(!validate(sql, parameters))
+			return null;
+		
+		return new LogEntry(sql, parameters, logicDbName, realDbName, eId);
+	}
+	
+	public static void log(LogEntry log) {
+		if(log == null) 
 			return;
 		
-		StackTraceElement [] trace = Thread.currentThread().getStackTrace();
+		logger.info(log.toBrief());
+	}
+	
+	public static void log(LogEntry log, Throwable e) {
+		if(log == null) 
+			return;
+		
+		logger.error(log.toBrief(), e);
 	}
 	
 	/**

@@ -86,6 +86,14 @@ public class JavaTableHost {
 		this.hasIdentity = hasIdentity;
 	}
 
+	public String getCapitalizedIdentityColumnName() {
+		for(JavaParameterHost field: fields) {
+			if(field.getName().equals(identityColumnName))
+				return field.getCapitalizedName();
+		}
+		return null;
+	}
+
 	public String getIdentityColumnName() {
 		return identityColumnName;
 	}

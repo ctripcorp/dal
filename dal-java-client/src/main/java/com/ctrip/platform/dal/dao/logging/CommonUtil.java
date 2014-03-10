@@ -35,6 +35,15 @@ public class CommonUtil {
 		return new String(Base64.encodeBase64(md5Byte));
     }
 
+	public static int getSqlHashCodeForCache(String sql) { 
+		String[] sqlSections = sql.split("where");
+		// Probably use WHERE instead of where
+		if(sqlSections.length == 1) {
+			sqlSections = sql.split("WHERE");
+		}
+		return sqlSections[0].hashCode();
+	}
+
     /**
      * Only add this tag to SQL. No tag for stored procedure.
      * @param sql
@@ -44,6 +53,7 @@ public class CommonUtil {
     {
         return APPID_COMMENT + sql;
     }
+    
 
 
     /**

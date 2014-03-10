@@ -398,6 +398,12 @@ public class DirectClientDaoTest {
 //		test.testSPInOut();
 //		test.testConnectionException();
 //		test.testTransactionException();
+		try {
+			Thread.sleep(30 * 1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.exit(0);
 	}
 }

@@ -16,7 +16,7 @@ public class JavaTableHost {
 	private List<JavaParameterHost> fields;
 	private boolean hasIdentity;
 	private String identityColumnName;
-	private boolean isSpa;
+	private boolean spa;
 	private SpaOperationHost spaInsert;
 	private SpaOperationHost spaDelete;
 	private SpaOperationHost spaUpdate;
@@ -31,11 +31,11 @@ public class JavaTableHost {
 	}
 
 	public boolean isSpa() {
-		return isSpa;
+		return spa;
 	}
 
 	public void setSpa(boolean isSpa) {
-		this.isSpa = isSpa;
+		this.spa = isSpa;
 	}
 
 	public String getDbName() {

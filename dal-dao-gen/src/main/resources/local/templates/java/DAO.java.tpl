@@ -38,7 +38,21 @@ public class ${host.getPojoClassName()}Dao {
 		DalHints hints = new DalHints();
 		return null;
 	}
-	
+
+#if($host.getSpaInsert().isExist())
+	/*
+	 * Using SPA to insert
+	 */
+	public int insert(T daoPojo) throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		addSpaParameters(parameters, parser.getFields(daoPojo));
+		parameters.registerOut("@result", Types.INTEGER);
+		DalHints hints = new DalHints();
+		Map<String, ?> results = baseClient.call("${host.getSpaInsert().getMethodName()}", parameters, hints);
+		//parameters.get();
+		return (Integer)results.get("result");
+	}
+#{else}
 	public void insert(${host.getPojoClassName()}...daoPojos) throws SQLException {
 		DalHints hints = new DalHints();
 		client.insert(hints, null, daoPojos);
@@ -48,16 +62,34 @@ public class ${host.getPojoClassName()}Dao {
 		DalHints hints = new DalHints();
 		client.insert(hints, keyHolder, daoPojos);
 	}
-	
+#end
+
+#if($host.getSpaDelete().isExist())	
+	public void delete(${host.getPojoClassName()} daoPojo) throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		addSpaParameters(parameters, parser.getPrimaryKeys(daoPojo));
+		baseClient.call("${host.getSpaDelete().getMethodName()}", parameters, hints);
+	}
+#{else}
 	public void delete(${host.getPojoClassName()}...daoPojos) throws SQLException {
 		DalHints hints = new DalHints();
 		client.delete(hints, daoPojos);
 	}
-	
+#end
+
+#if($host.getSpaUpdate().isExist())	
+	public void update(${host.getPojoClassName()} daoPojo) throws SQLException {
+		addSpaParameters(parameters, parser.getFields(daoPojo));
+		DalHints hints = new DalHints();
+		baseClient.call("${host.getSpaUpdate().getMethodName()}", parameters, hints);
+		return 1;
+	}
+#{else}
 	public void update(${host.getPojoClassName()}...daoPojos) throws SQLException {
 		DalHints hints = new DalHints();
 		client.update(hints, daoPojos);
 	}
+#end
 
 #foreach($method in $host.getMethods())
 #if($method.getCrud_type() == "select")
@@ -81,6 +113,12 @@ public class ${host.getPojoClassName()}Dao {
 	}
 #end
 
+	private void addSpaParameters(StatementParameters parameters, Map<String, ?> entries) {
+		for(Map.Entry<String, ?> entry: entries.entrySet()) {
+			parameters.set("@" + entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
+		}
+	}
+	
 	private static class ${host.getPojoClassName()}Parser implements DalParser<${host.getPojoClassName()}> {
 		public static final String DATABASE_NAME = "${host.getDbName()}";
 		public static final String TABLE_NAME = "${host.getTableName()}";

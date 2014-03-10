@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.logging;
 
+import java.net.InetAddress;
 import java.security.Key;
 
 import javax.crypto.Cipher;
@@ -17,7 +18,8 @@ public class CommonUtil {
         sb.append("/* ").append(Logger.getAppId()).append(", ");
         try
         {
-        	MACHINE = System.getenv("Host");
+    		InetAddress s = InetAddress.getLocalHost();
+    		MACHINE = s.getHostName();
         	sb.append(MACHINE);
         }
         catch (Throwable e)

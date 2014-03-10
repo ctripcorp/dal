@@ -31,7 +31,7 @@ namespace ${host.getNameSpace()}
         public int Insert${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())})
         {
 #if($host.isSpa())
-#if($host.getSpaInsert().exists())
+#if($host.getSpaInsert().isExist())
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
@@ -83,7 +83,7 @@ namespace ${host.getNameSpace()}
         public int Update${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())})
         {
 #if($host.isSpa())
-#if($host.getSpUpdate().exists())
+#if($host.getSpUpdate().isExist())
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
@@ -132,7 +132,7 @@ namespace ${host.getNameSpace()}
         public int Delete${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())})
         {
 #if($host.isSpa())
-#if($host.getSpaDelete().exists())
+#if($host.getSpaDelete().isExist())
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();

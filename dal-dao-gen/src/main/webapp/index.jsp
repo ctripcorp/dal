@@ -158,7 +158,7 @@
                   <h4 class="modal-title" id="page1_label">DAO生成向导</h4>
                </div>
                <div class="modal-body" style="position: relative;overflow: auto;width: auto;max-height:420px;">
-                  <div class="steps step0 row-fluid">
+                  <div class="steps step1 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">数据库服务器：</label>
@@ -226,15 +226,17 @@
                      </div>
                   </div>
                   </div>
-                  <div class="steps step1 row-fluid">
+                  <div class="steps step2 row-fluid">
+                     <div class="row-fluid">
                      <div class="control-group">
                         <label class="control-label popup_label">选择一个数据库：</label>
                         <select id="databases" class="span9 popup_text">
                            <option value="_please_select">--请选择--</option>
                         </select>
                      </div>
-                  </div>
-                  <div class="steps step2 row-fluid">
+                     </div>
+                     <hr>
+                     <div class="row-fluid">
                      <div class="control-group">
                         <label class="control-label popup_label">DAO生成方式:</label>
                         <div class="btn-group popup_text span9" data-toggle="buttons">
@@ -246,8 +248,9 @@
                            <input type="radio" name="dao_gen_style" id="dao_gen_style" value="sql">自己写查询</label>
                         </div>
                      </div>
+                     </div>
                   </div>
-                  <div class="steps step2-1-0 row-fluid" style="height:280px;">
+                  <div class="steps step3-1 row-fluid" style="height:280px;">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">选择表：</label>
@@ -262,7 +265,7 @@
                            </select>
                         </div>
                      </div>
-                     <div class="row-fluid">
+                     <div class="row-fluid mysql_hide">
                         <div class="control-group">
                            <label class="control-label popup_label">选择存储过程：</label>
                            <select id="sp_list" multiple="multiple" class="popup_text" style="width:420px;">
@@ -278,17 +281,17 @@
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">生成时加上后缀：</label>
-                           <input type="text" id="suffix" class="span9 popup_text" value="Gen">
+                           <input type="text" id="suffix" class="span9 popup_text">
                         </div>
                      </div>
-                     <div class="row-fluid">
+                     <div class="row-fluid mysql_hide">
                         <label class="popup_label"><input id="cud_by_sp" type="checkbox" checked="true">增删改使用SPA或SP3（Sql Server请勾选，MySql请去除）</label>
                      </div>
                      <div class="row-fluid">
                         <label class="popup_label"><input id="pagination" type="checkbox" checked="true">增加分页方法</label>
                      </div>
                   </div>
-                  <div class="steps step2-1-1 row-fluid">
+                  <div class="steps step3-2 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">选择一个表：</label>
@@ -320,8 +323,8 @@
                         </div>
                      </div>
                   </div>
-                  <div class="row-fluid steps step_fields" style="height:280px;">
-                  <div id="operation_fields" class="step2-1-2 row-fluid">
+                  <div class="row-fluid steps step3-2-1" style="height:280px;">
+                  <div id="operation_fields" class="step3-2-1-1 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">选择字段：</label>
@@ -331,7 +334,7 @@
                      </div>
                   </div>
                   <br>
-                  <div id="where_condition" class="step2-1-3">
+                  <div id="where_condition" class="step3-2-1-2">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">选择条件：</label>
@@ -361,7 +364,16 @@
                      </div>
                   </div>
                </div>
-                  <div class="steps step2-3-1 row-fluid" from="">
+               <div class="steps step3-2-2 row-fluid" from="">
+                     <div class="control-group">
+                        <label class="control-label popup_label">选择SQL风格：</label>
+                        <select id="sql_style" class="span9 popup_text">
+                           <option value="csharp">C#风格(参数形式为@Name)</option>
+                           <option value="java">JAVA风格(参数形式为?)</option>
+                        </select>
+                     </div>
+                  </div>
+                  <div class="steps step3-3 row-fluid" from="">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">生成的类名：</label>
@@ -390,27 +402,16 @@
                      </div>
                      <br>
                      <label class="control-label popup_label">在此输入SQL，占位符：Java请使用?或者:Name形式，对于c#请使用@Name形式</label>
-                     
                      <div class="row-fluid">
                         <div id="sql_editor" class="span12">
                         </div>
                      </div>
                   </div>
-                  <div class="steps step2-3-2 row-fluid" from="">
+                  <div class="steps step3-3-1 row-fluid" from="">
                      <div class="row-fluid">
                            <label class="control-label popup_label">填写参数名/参数Index，以及参数类型和值</label>
                      </div>  
                      <div id="param_list" class="row-fluid">      
-                           
-                     </div>
-                  </div>
-                  <div class="steps step3 row-fluid" from="">
-                     <div class="control-group">
-                        <label class="control-label popup_label">选择SQL风格：</label>
-                        <select id="sql_style" class="span9 popup_text">
-                           <option value="csharp">C#风格(参数形式为@Name)</option>
-                           <option value="java">JAVA风格(参数形式为?)</option>
-                        </select>
                      </div>
                   </div>
                </div>
@@ -418,8 +419,7 @@
                   <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
                   <button id="prev_step"  type="button" class="btn btn-default">上一步</button>
                   <button id="next_step"  type="button" class="btn btn-primary">下一步</button>
-                  <!-- <label class="popup_label"><input type="checkbox">保存时生成代码</label>
-                     <button id="save_dao"  type="button" class="btn btn-primary">保存</button> -->
+                  <label class="popup_label"><input id="gen_on_save" type="checkbox">保存时生成<select id="gen_language"><option value="csharp">C#</option><option value="java">Java</option></select>代码</label>
                </div>
             </div>
          </div>
@@ -435,9 +435,11 @@
       <script src="/static/w2ui/w2ui-1.3.js"></script>
       <script src="/static/jquery/jquery.blockui.min.js"></script>
       <script src="/static/js/sprintf.js"></script>
-      <script src="/static/js/cblock.js"></script>
       <script src="/static/ace/ace.js"></script>
       <script src="/static/jquery/jquery.multiple.select.js"></script>
+      <script src="/static/js/cblock.js"></script>
+      <script src="/static/js/ajaxutil.js"></script>
+      <script src="/static/js/ui_render.js"></script>
       <script src="/static/js/wizzard.js"></script>
       <script src="/static/js/index.js"></script>
    </body>

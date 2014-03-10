@@ -71,33 +71,43 @@ public enum DbType {
          	intToEnum.put(blah.getIntVal(), blah);
          }
     	 
-    	jdbcTypeToNetDbType.put(java.sql.Types.VARCHAR,AnsiString);
-    	jdbcTypeToNetDbType.put(java.sql.Types.VARBINARY,Binary);
-    	jdbcTypeToNetDbType.put(java.sql.Types.TINYINT,Byte);
-    	jdbcTypeToNetDbType.put(java.sql.Types.BIT,Boolean);
-    	jdbcTypeToNetDbType.put(java.sql.Types.DECIMAL,Currency);
-    	jdbcTypeToNetDbType.put(java.sql.Types.DATE,Date);
-    	jdbcTypeToNetDbType.put(java.sql.Types.TIMESTAMP,DateTime);
-    	jdbcTypeToNetDbType.put(java.sql.Types.DECIMAL,Decimal);
+    	 jdbcTypeToNetDbType.put(java.sql.Types.BIT,Boolean);
+    	 jdbcTypeToNetDbType.put(java.sql.Types.TINYINT,Byte);
+    	 jdbcTypeToNetDbType.put(java.sql.Types.SMALLINT,Int16);
+    	 jdbcTypeToNetDbType.put(java.sql.Types.INTEGER,Int32);
+     	jdbcTypeToNetDbType.put(java.sql.Types.BIGINT,Int64);
+     	jdbcTypeToNetDbType.put(java.sql.Types.FLOAT,Double);
+     	jdbcTypeToNetDbType.put(java.sql.Types.REAL,Single);
     	jdbcTypeToNetDbType.put(java.sql.Types.DOUBLE,Double);
-    	jdbcTypeToNetDbType.put(java.sql.Types.CHAR,Guid);
-    	jdbcTypeToNetDbType.put(java.sql.Types.SMALLINT,Int16);
-    	jdbcTypeToNetDbType.put(java.sql.Types.INTEGER,Int32);
-    	jdbcTypeToNetDbType.put(java.sql.Types.BIGINT,Int64);
-    	jdbcTypeToNetDbType.put(java.sql.Types.JAVA_OBJECT,Object);
-    	jdbcTypeToNetDbType.put(java.sql.Types.REAL,Single);
-    	jdbcTypeToNetDbType.put(java.sql.Types.NVARCHAR,String);
-    	jdbcTypeToNetDbType.put(java.sql.Types.TIMESTAMP,Time);
+    	jdbcTypeToNetDbType.put(java.sql.Types.NUMERIC,Decimal);
+    	jdbcTypeToNetDbType.put(java.sql.Types.DECIMAL,Currency);
     	jdbcTypeToNetDbType.put(java.sql.Types.CHAR,AnsiStringFixedLength);
-    	jdbcTypeToNetDbType.put(java.sql.Types.NCHAR,StringFixedLength);
-    	jdbcTypeToNetDbType.put(java.sql.Types.LONGNVARCHAR,Xml);
-    	jdbcTypeToNetDbType.put(java.sql.Types.TIMESTAMP,DateTime2);
-    	jdbcTypeToNetDbType.put(microsoft.sql.Types.DATETIMEOFFSET,DateTimeOffset);
-    	jdbcTypeToNetDbType.put(java.sql.Types.TINYINT,SByte);
-    	//jdbcTypeToNetDbType.put(java.sql.Types.SMALLINT,UInt16);
-    	//jdbcTypeToNetDbType.put(java.sql.Types.INTEGER,UInt32);
-    	//jdbcTypeToNetDbType.put(java.sql.Types.BIGINT,UInt64);
-    	jdbcTypeToNetDbType.put(java.sql.Types.NUMERIC,VarNumeric);
+    	jdbcTypeToNetDbType.put(java.sql.Types.VARCHAR,AnsiString);
+    	jdbcTypeToNetDbType.put(java.sql.Types.LONGVARCHAR,String);
+    	jdbcTypeToNetDbType.put(java.sql.Types.DATE,Date);
+    	jdbcTypeToNetDbType.put(java.sql.Types.TIME,Time);
+    	jdbcTypeToNetDbType.put(java.sql.Types.TIMESTAMP,DateTime);
+    	jdbcTypeToNetDbType.put(java.sql.Types.BINARY,Binary);
+    	jdbcTypeToNetDbType.put(java.sql.Types.VARBINARY,Binary);
+    	jdbcTypeToNetDbType.put(java.sql.Types.LONGVARBINARY,Binary);
+    	/*
+    	jdbcTypeToNetDbType.put(java.sql.Types.NULL,Binary);
+    	jdbcTypeToNetDbType.put(java.sql.Types.OTHER,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.DISTINCT,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.STRUCT,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.ARRAY,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.BLOB,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.CLOB,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.REF,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.DATALINK,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.BOOLEAN,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.NCHAR,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.NVARCHAR,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.LONGNVARCHAR,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.NCLOB,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.SQLXML,Object);
+    	jdbcTypeToNetDbType.put(java.sql.Types.JAVA_OBJECT,Object);
+    	*/
     	
     	netDbTypeToNetType.put(AnsiString, "string");
     	netDbTypeToNetType.put(Binary, "byte[]");
@@ -113,19 +123,20 @@ public enum DbType {
     	netDbTypeToNetType.put(Int32, "int");
     	netDbTypeToNetType.put(Int64, "long");
     	netDbTypeToNetType.put(Object, "object");
+    	netDbTypeToNetType.put(SByte, "sbyte");
     	netDbTypeToNetType.put(Single, "float");
     	netDbTypeToNetType.put(String, "string");
-    	netDbTypeToNetType.put(Time, "DateTime");
+    	netDbTypeToNetType.put(Time, "TimeSpan");
+    	netDbTypeToNetType.put(UInt16, "ushort");
+    	netDbTypeToNetType.put(UInt32, "uint");
+    	netDbTypeToNetType.put(UInt64, "ulong");
+    	netDbTypeToNetType.put(VarNumeric, "decimal");
     	netDbTypeToNetType.put(AnsiStringFixedLength, "char");
     	netDbTypeToNetType.put(StringFixedLength, "char");
     	netDbTypeToNetType.put(Xml, "string");
     	netDbTypeToNetType.put(DateTime2, "DateTime");
-    	netDbTypeToNetType.put(DateTimeOffset, "DateTime");
-    	netDbTypeToNetType.put(SByte, "short");
-    	netDbTypeToNetType.put(UInt16, "ushort");
-    	netDbTypeToNetType.put(UInt32, "uint");
-    	netDbTypeToNetType.put(UInt64, "ulong");
-    	netDbTypeToNetType.put(VarNumeric, "");
+    	netDbTypeToNetType.put(DateTimeOffset, "DateTimeOffset");
+    	
     }
 
 	DbType(int intVal) {

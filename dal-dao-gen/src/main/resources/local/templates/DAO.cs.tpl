@@ -6,13 +6,13 @@ using System.Text;
 using Arch.Data;
 using Arch.Data.DbEngine;
 using ${host.getNameSpace()}.Entity.DataModel;
-using ${host.getNameSpace()}.IDao;
+using ${host.getNameSpace()}.Interface.IDao;
 
-namespace ${host.getNameSpace()}
+namespace ${host.getNameSpace()}.Dao
 {
    /// <summary>
-    /// 更多DALFx接口功能，请参阅DALFx Confluence，地址：
-    /// http://conf.ctripcorp.com/display/ARCH/Dal+Fx+API
+    /// 更多DAL接口功能，请参阅DAL Confluence，地址：
+    /// http://conf.ctripcorp.com/display/SysDev/Dal+Fx+API
     /// </summary>
     public partial class ${host.getClassName()}Dao : I${host.getClassName()}Dao
     {
@@ -40,7 +40,7 @@ namespace ${host.getNameSpace()}
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
-                baseDao.ExecSp("${host.getInsertMethodName()}", parameters);
+                baseDao.ExecSp("${host.getSpaInsert().getMethodName()}", parameters);
 
 #foreach ($p in $host.getSpaInsert().getParameters())
 #if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
@@ -92,7 +92,7 @@ namespace ${host.getNameSpace()}
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
-                baseDao.ExecSp("${host.getUpdateMethodName()}", parameters);
+                baseDao.ExecSp("${host.getSpaUpdate().getMethodName()}", parameters);
 
 #foreach ($p in $host.getSpaUpdate().getParameters())
 #if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
@@ -141,7 +141,7 @@ namespace ${host.getNameSpace()}
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
-                baseDao.ExecSp("${host.getDeleteMethodName()}", parameters);
+                baseDao.ExecSp("${host.getSpaDelete().getMethodName()}", parameters);
 
                 return (int)parameters["@return"].Value;
             }
@@ -169,7 +169,7 @@ namespace ${host.getNameSpace()}
         }
         
 #if($host.isSpa())
-#if($host.getSpaDelete().exists())
+#if($host.getSpaDelete().isExist())
         /// <summary>
         /// 删除<#= className #>
         /// </summary>
@@ -187,7 +187,7 @@ namespace ${host.getNameSpace()}
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 
-                baseDao.ExecSp("${host.getDeleteMethodName()}", parameters);
+                baseDao.ExecSp("${host.getSpaDelete().getMethodName()}", parameters);
 
                 return (int)parameters["@return"].Value;
             }

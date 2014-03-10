@@ -66,10 +66,6 @@ public abstract class AbstractGenerator implements Generator {
 			this.projectId = projectId;
 		}
 		
-		prepareFolder(projectId, "cs");
-		
-		prepareFolder(projectId, "java");
-		
 		freeSqls = daoByFreeSql.getTasksByProjectId(projectId);
 		tableViewSps = daoByTableViewSp.getTasksByProjectId(projectId);
 		sqlBuilders = daoBySqlBuilder.getTasksByProjectId(projectId);
@@ -81,7 +77,7 @@ public abstract class AbstractGenerator implements Generator {
 		return true;
 	}
 	
-	private void prepareFolder(int projectId, String lang) {
+	protected void prepareFolder(int projectId, String lang) {
 		File mavenLikeDir = new File(String.format("gen/%s/%s",
 				projectId, lang));
 

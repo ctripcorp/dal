@@ -37,7 +37,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	public static CSharpGenerator getInstance() {
 		return instance;
 	}
-	
+
 	private List<CSharpTableHost> tableHosts;
 	private List<CSharpTableHost> spHosts;
 	private List<CSharpFreeSqlHost> freeSqlHosts;
@@ -50,33 +50,41 @@ public class CSharpGenerator extends AbstractGenerator {
 		VelocityContext context = GenUtils.buildDefaultVelocityContext();
 
 		File csMavenLikeDir = new File(String.format("gen/%s/cs", projectId));
-		
+
 		for (CSharpFreeSqlPojoHost host : freeSqlPojoHosts) {
 			context.put("host", host);
-			GenUtils.mergeVelocityContext(context, String.format(
-					"%s/Entity/%s.cs", csMavenLikeDir.getAbsolutePath(),
-					host.getClassName()), "templates/Pojo.cs.tpl");
+			GenUtils.mergeVelocityContext(
+					context,
+					String.format("%s/Entity/%s.cs",
+							csMavenLikeDir.getAbsolutePath(),
+							host.getClassName()), "templates/Pojo.cs.tpl");
 		}
 
 		for (CSharpFreeSqlHost host : freeSqlHosts) {
 			context.put("host", host);
-			GenUtils.mergeVelocityContext(context, String.format(
-					"%s/Dao/%sDao.cs", csMavenLikeDir.getAbsolutePath(),
-					host.getClassName()), "templates/FreeSqlDAO.cs.tpl");
-			
-			GenUtils.mergeVelocityContext(context, String.format(
-					"%s/Test/%sTest.cs", csMavenLikeDir.getAbsolutePath(),
-					host.getClassName()), "templates/FreeSqlTest.cs.tpl");
+			GenUtils.mergeVelocityContext(
+					context,
+					String.format("%s/Dao/%sDao.cs",
+							csMavenLikeDir.getAbsolutePath(),
+							host.getClassName()), "templates/FreeSqlDAO.cs.tpl");
+
+			GenUtils.mergeVelocityContext(
+					context,
+					String.format("%s/Test/%sTest.cs",
+							csMavenLikeDir.getAbsolutePath(),
+							host.getClassName()),
+					"templates/FreeSqlTest.cs.tpl");
 		}
-		
+
 		generateTableDao(tableHosts, context, csMavenLikeDir);
 		generateSpDao(spHosts, context, csMavenLikeDir);
-		
+
 		buildCSharpCommonVelocity(context, csMavenLikeDir);
-		
+
 	}
 
-	private void buildCSharpCommonVelocity(VelocityContext context, File csMavenLikeDir) {
+	private void buildCSharpCommonVelocity(VelocityContext context,
+			File csMavenLikeDir) {
 		Map<String, String> dbs = new HashMap<String, String>();
 
 		for (GenTaskByFreeSql task : freeSqls) {
@@ -102,6 +110,18 @@ public class CSharpGenerator extends AbstractGenerator {
 			}
 		}
 		
+		for (GenTaskBySqlBuilder task : sqlBuilders) {
+			if (!dbs.containsKey(task.getDb_name())) {
+				DbServer dbServer = daoOfDbServer.getDbServerByID(task
+						.getServer_id());
+				String provider = "sqlProvider";
+				if (dbServer.getDb_type().equalsIgnoreCase("mysql")) {
+					provider = "mySqlProvider";
+				}
+				dbs.put(task.getDb_name(), provider);
+			}
+		}
+
 		context.put("dbs", dbs);
 		context.put("namespace", namespace);
 		context.put("freeSqlHosts", freeSqlHosts);
@@ -117,8 +137,8 @@ public class CSharpGenerator extends AbstractGenerator {
 						csMavenLikeDir.getAbsolutePath()),
 				"templates/DalFactory.cs.tpl");
 
-//		GenUtils.mergeVelocityContext(context, String.format("%s/Program.cs",
-//				csMavenLikeDir.getAbsolutePath()), "templates/Program.cs.tpl");
+		// GenUtils.mergeVelocityContext(context, String.format("%s/Program.cs",
+		// csMavenLikeDir.getAbsolutePath()), "templates/Program.cs.tpl");
 	}
 
 	// -----------------------------------------------Free Sql generate
@@ -151,36 +171,19 @@ public class CSharpGenerator extends AbstractGenerator {
 			for (GenTaskByFreeSql task : currentTasks) {
 				methods.add(buildFreeSqlMethodHost(task));
 				if (!pojoHosts.containsKey(task.getClass_name())) {
-					pojoHosts.put(task.getClass_name(),
-							buildFreeSqlPojoHost(task));
+					CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(task);
+					if (null != freeSqlPojoHost) {
+						pojoHosts.put(task.getClass_name(), freeSqlPojoHost);
+					}
 				}
 			}
 			host.setMethods(methods);
 			freeSqlHosts.add(host);
 		}
-		
+
 		freeSqlPojoHosts.addAll(pojoHosts.values());
-		
+
 		generateCSharpCode();
-
-//		VelocityContext context = GenUtils.buildDefaultVelocityContext();
-
-//		File mavenLikeDir = new File(String.format("gen/%s/cs", projectId));
-
-//		for (CSharpFreeSqlPojoHost host : pojoHosts.values()) {
-//			context.put("host", host);
-//			GenUtils.mergeVelocityContext(context, String.format(
-//					"%s/Entity/%s.cs", mavenLikeDir.getAbsolutePath(),
-//					host.getClassName()), "templates/Pojo.cs.tpl");
-//		}
-
-//		for (CSharpFreeSqlHost host : hosts) {
-//			context.put("host", host);
-//			GenUtils.mergeVelocityContext(context, String.format(
-//					"%s/Dao/%sDao.cs", mavenLikeDir.getAbsolutePath(),
-//					host.getClassName()), "templates/FreeSqlDAO.cs.tpl");
-//		}
-
 	}
 
 	private Map<String, List<GenTaskByFreeSql>> freeSqlGroupBy(
@@ -213,9 +216,9 @@ public class CSharpGenerator extends AbstractGenerator {
 			p.setDbType(DbType.getDbTypeFromJdbcType(Integer
 					.valueOf(splitedParam[1])));
 			p.setType(DbType.getCSharpType(p.getDbType()));
-			if(p.getType().equals("string") || p.getType().equals("DateTime")){
+			if (p.getType().equals("string") || p.getType().equals("DateTime")) {
 				p.setValue("\"" + splitedParam[2] + "\"");
-			}else{
+			} else {
 				p.setValue(splitedParam[2]);
 			}
 			params.add(p);
@@ -225,6 +228,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	}
 
 	private CSharpFreeSqlPojoHost buildFreeSqlPojoHost(GenTaskByFreeSql task) {
+
 		ResultSetMetaData rsMeta = DbUtils.testAQuerySql(task.getServer_id(),
 				task.getDb_name(), task.getSql_content(), task.getParameters());
 		CSharpFreeSqlPojoHost freeSqlHost = new CSharpFreeSqlPojoHost();
@@ -251,13 +255,15 @@ public class CSharpGenerator extends AbstractGenerator {
 						.getClass_name()));
 				freeSqlHost.setNameSpace(super.namespace);
 
+				return freeSqlHost;
+
 				// pojoHosts.put(task.getClass_name(), freeSqlHost);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
 
-		return freeSqlHost;
+		return null;
 	}
 
 	// -----------------------------------------------Free Sql generate
@@ -265,6 +271,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 	@Override
 	public void generateByTableView(List<GenTaskByTableViewSp> tasks) {
+		prepareFolder(projectId, "cs");
 		
 		tableHosts = new ArrayList<CSharpTableHost>();
 		spHosts = new ArrayList<CSharpTableHost>();
@@ -288,14 +295,25 @@ public class CSharpGenerator extends AbstractGenerator {
 			List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(
 					tableViewSp.getServer_id(), tableViewSp.getDb_name());
 			for (String table : tableNames) {
-				tableHosts.add(buildTableHost(tableViewSp, table, dbCategory,
-						allSpNames));
+				CSharpTableHost currentTableHost = buildTableHost(tableViewSp,
+						table, dbCategory, allSpNames);
+				if (null != currentTableHost) {
+					tableHosts.add(currentTableHost);
+				}
 			}
 			for (String view : viewNames) {
-				tableHosts.add(buildViewHost(tableViewSp, dbCategory, view));
+				CSharpTableHost currentViewHost = buildViewHost(tableViewSp,
+						dbCategory, view);
+				if (null != currentViewHost) {
+					tableHosts.add(currentViewHost);
+				}
 			}
 			for (String spName : spNames) {
-				spHosts.add(buildSpHost(tableViewSp, dbCategory, spName));
+				CSharpTableHost currentSpHost = buildSpHost(tableViewSp,
+						dbCategory, spName);
+				if (null != currentSpHost) {
+					spHosts.add(currentSpHost);
+				}
 			}
 		}
 
@@ -305,26 +323,28 @@ public class CSharpGenerator extends AbstractGenerator {
 				_tableNames.add(sqlBuilder);
 			}
 			for (GenTaskBySqlBuilder _table : _tableNames) {
-				tableHosts.add(buildExtraSqlBuilderHost(_table));
+				CSharpTableHost extraTableHost = buildExtraSqlBuilderHost(_table);
+				if (null != extraTableHost) {
+					tableHosts.add(extraTableHost);
+				}
 			}
 		}
-
-//		VelocityContext context = GenUtils.buildDefaultVelocityContext();
-//		File mavenLikeDir = new File(String.format("gen/%s/cs", projectId));
-//		generateTableDao(tableHosts, context, mavenLikeDir);
-//		generateSpDao(spHosts, context, mavenLikeDir);
-		
 	}
 
 	private CSharpTableHost buildTableHost(GenTaskByTableViewSp tableViewSp,
 			String table, DatabaseCategory dbCategory,
 			List<StoredProcedure> allSpNames) {
 		// 主键及所有列
-		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
-				tableViewSp.getServer_id(), tableViewSp.getDb_name(), table);
 		List<AbstractParameterHost> allColumnsAbstract = DbUtils
 				.getAllColumnNames(tableViewSp.getServer_id(),
 						tableViewSp.getDb_name(), table, CurrentLanguage.CSharp);
+
+		if (null == allColumnsAbstract) {
+			return null;
+		}
+
+		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
+				tableViewSp.getServer_id(), tableViewSp.getDb_name(), table);
 
 		List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
 		for (AbstractParameterHost h : allColumnsAbstract) {
@@ -413,6 +433,11 @@ public class CSharpGenerator extends AbstractGenerator {
 		List<AbstractParameterHost> params = DbUtils.getSpParams(
 				tableViewSp.getServer_id(), tableViewSp.getDb_name(),
 				currentSp, CurrentLanguage.CSharp);
+
+		if (null == params) {
+			return null;
+		}
+
 		List<CSharpParameterHost> realParams = new ArrayList<CSharpParameterHost>();
 		for (AbstractParameterHost p : params) {
 			realParams.add((CSharpParameterHost) p);
@@ -436,6 +461,10 @@ public class CSharpGenerator extends AbstractGenerator {
 		List<AbstractParameterHost> allColumnsAbstract = DbUtils
 				.getAllColumnNames(tableViewSp.getServer_id(),
 						tableViewSp.getDb_name(), view, CurrentLanguage.CSharp);
+
+		if (null == allColumnsAbstract) {
+			return null;
+		}
 
 		List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
 		for (AbstractParameterHost h : allColumnsAbstract) {
@@ -579,12 +608,12 @@ public class CSharpGenerator extends AbstractGenerator {
 		if (null != suffix && !suffix.isEmpty()) {
 			className = className + WordUtils.capitalize(suffix);
 		}
-		
+
 		StringBuilder result = new StringBuilder();
-		for(String str : StringUtils.split(className, "_")){
+		for (String str : StringUtils.split(className, "_")) {
 			result.append(WordUtils.capitalize(str));
 		}
-		
+
 		return WordUtils.capitalize(result.toString());
 	}
 
@@ -604,7 +633,7 @@ public class CSharpGenerator extends AbstractGenerator {
 			GenUtils.mergeVelocityContext(context, String.format(
 					"%s/IDao/I%sDao.cs", mavenLikeDir.getAbsolutePath(),
 					host.getClassName()), "templates/IDAO.cs.tpl");
-			
+
 			GenUtils.mergeVelocityContext(context, String.format(
 					"%s/Test/%sTest.cs", mavenLikeDir.getAbsolutePath(),
 					host.getClassName()), "templates/DAOTest.cs.tpl");
@@ -623,7 +652,7 @@ public class CSharpGenerator extends AbstractGenerator {
 			GenUtils.mergeVelocityContext(context, String.format(
 					"%s/Entity/%s.cs", mavenLikeDir.getAbsolutePath(),
 					host.getClassName()), "templates/PojoBySp.cs.tpl");
-			
+
 			GenUtils.mergeVelocityContext(context, String.format(
 					"%s/Test/%sTest.cs", mavenLikeDir.getAbsolutePath(),
 					host.getClassName()), "templates/SpTest.cs.tpl");

@@ -281,14 +281,14 @@ public class DbUtils {
 					parameters.add(host);
 				}
 			}
-
+			return parameters;
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		} finally {
 			JdbcUtils.closeConnection(connection);
 		}
 
-		return parameters;
+		return null;
 
 	}
 
@@ -359,8 +359,11 @@ public class DbUtils {
 			if (language == CurrentLanguage.CSharp) {
 				while (allColumnsRs.next()) {
 					CSharpParameterHost host = new CSharpParameterHost();
-					DbType dbType = DbType.getDbTypeFromJdbcType(allColumnsRs
-							.getInt("DATA_TYPE"));
+					int dataType = allColumnsRs
+							.getInt("DATA_TYPE");
+					
+					DbType dbType = DbType.getDbTypeFromJdbcType(dataType);
+
 					host.setDbType(dbType);
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
 					host.setType(DbType.getCSharpType(host.getDbType()));
@@ -371,6 +374,7 @@ public class DbUtils {
 					// if (host.getType().equalsIgnoreCase("string"))
 					host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
 					// COLUMN_SIZE
+
 					allColumns.add(host);
 				}
 			} else if (language == CurrentLanguage.Java) {
@@ -384,10 +388,12 @@ public class DbUtils {
 					host.setIndex(allColumnsRs.getInt("ORDINAL_POSITION"));
 					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
 							.equalsIgnoreCase("YES"));
-
+					
 					allColumns.add(host);
 				}
 			}
+			
+			return allColumns;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -395,7 +401,7 @@ public class DbUtils {
 			JdbcUtils.closeConnection(connection);
 		}
 
-		return allColumns;
+		return null;
 	}
 
 	/**

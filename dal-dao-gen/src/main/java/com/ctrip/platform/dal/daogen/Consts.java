@@ -37,8 +37,11 @@ public class Consts {
 		CSharpValueTypes.add("float");
 		CSharpValueTypes.add("double");
 		CSharpValueTypes.add("DateTime");
+		CSharpValueTypes.add("TimeSpan");
 		CSharpValueTypes.add("decimal");
 		CSharpValueTypes.add("bool");
+		CSharpValueTypes.add("Guid");
+		CSharpValueTypes.add("DateTimeOffset");
 		
 		WhereConditionMap.put("0", "=");
 		WhereConditionMap.put("1", "!=");

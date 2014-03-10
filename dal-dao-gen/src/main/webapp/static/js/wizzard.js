@@ -1,4 +1,8 @@
 
+//向导注释
+//step1
+//step2
+//step3-1 -> step3-2
 (function (window, undefined) {
 
     var wizzard = function () {
@@ -57,7 +61,7 @@
                 record = w2ui['grid'].get(records[0]);
 
             //向导首先显示所有数据库服务器，点击下一步后，获取此服务器所有的数据库列表 
-            if (current.hasClass("step0")) {
+            if (current.hasClass("step1")) {
 
                 if($("#servers").val() == "_please_select"){
                     $("#error_msg").text("请选择或者添加一个服务器！");
@@ -83,11 +87,22 @@
 
                     if ($("#page1").attr('is_update') == "1") {
                         $("#databases").val(record.db_name);
+                        var parentToActive = $(sprintf(".gen_style > input[value='%s']", record.task_type)).parent();
+                        if (!parentToActive.hasClass("active")) {
+                            $(".gen_style.active").removeClass("active");
+                            parentToActive.addClass("active");
+                        }
                     }else if(data.length > 0){
                         $("#databases").val(data[0]);
+                        var defaultActive = $(".gen_style > input[value='table_view_sp']").parent();
+                        if (!defaultActive.hasClass("active")) {
+                            $(".gen_style.active").removeClass("active");
+                            defaultActive.addClass("active");
+                        }
                     }
+
                     current.hide();
-                    $(".step1").show();
+                    $(".step2").show();
                     $("body").unblock();
                 }).fail(function (data) {
                     $("#error_msg").text("获取数据库列表失败，请单击上一步后重试！");
@@ -95,7 +110,7 @@
                 });
             }
             //选择数据库之后，选择自动生成、存储过程或者自己写查询
-            else if (current.hasClass("step1")) {
+            else if (current.hasClass("step2")) {
 
                 if($("#databases").val() == "_please_select"){
                     $("#error_msg").text("请选择一个数据库！");
@@ -103,25 +118,6 @@
                 }
                 $("#error_msg").text("");
 
-                //在显示下一页之前，清空下一页的信息
-                if ($("#page1").attr('is_update') == "1") {
-                    var parentToActive = $(sprintf(".gen_style > input[value='%s']", record.task_type)).parent();
-                    if (!parentToActive.hasClass("active")) {
-                        $(".gen_style.active").removeClass("active");
-                        parentToActive.addClass("active");
-                    }
-                }else{
-                    var defaultActive = $(".gen_style > input[value='table_view_sp']").parent();
-                    if (!defaultActive.hasClass("active")) {
-                        $(".gen_style.active").removeClass("active");
-                        defaultActive.addClass("active");
-                    }
-                }
-                current.hide();
-                $(".step2").show();
-            }
-            //最为复杂的一步
-            else if (current.hasClass("step2")) {
                 var gen_style = $(".gen_style.active").children().val();
                 switch (gen_style) {
                 case "table_view_sp":
@@ -155,6 +151,16 @@
                         $("#table_list").append(tableList).multipleSelect("refresh");
                         $("#view_list").append(viewList).multipleSelect("refresh");
                         $("#sp_list").append(spList).multipleSelect("refresh");
+
+                        var currentOption = $("#servers").find(":selected");
+                        if(currentOption.attr("serverType") == "mysql"){
+                            $("#cud_by_sp").attr("checked", false);
+                            $(".mysql_hide").hide();
+                        }else{
+                            $("#cud_by_sp").attr("checked", true);
+                            $(".mysql_hide").show();
+                        }
+
                         if ($("#page1").attr('is_update') == "1" 
                             && record != undefined 
                             && record.task_type == "table_view_sp") {
@@ -166,7 +172,8 @@
                                 $('#sp_list').multipleSelect('setSelects', record.sp_names.split(","));
                         }
                         current.hide();
-                        $(".step2-1-0").show();
+                        $("#suffix").val("Gen");
+                        $(".step3-1").show();
                         $("body").unblock();
                     }).fail(function(data){
                         $("body").unblock();
@@ -197,7 +204,7 @@
                             parentToActive.addClass("active");
                         }
                         current.hide();
-                        $(".step2-1-1").show();
+                        $(".step3-2").show();
                     } else {
                         cblock($("body"));
                         $.get(
@@ -214,7 +221,7 @@
                                     $("#tables").val(data[0]);
                                 }
                                 current.hide();
-                                $(".step2-1-1").show();
+                                $(".step3-2").show();
                                 $("body").unblock();
                             });
                     }
@@ -261,12 +268,12 @@
                         editor.setValue("");
                     }
                     current.hide();
-                    $(".step2-3-1").show();
+                    $(".step3-3").show();
                     break;
                 }
             }
             //选择基础数据
-            else if (current.hasClass("step2-1-1")) {
+            else if (current.hasClass("step3-2")) {
 
                 if($("#tables").val() == "_please_select"){
                     $("#error_msg").text("请选择一个表！");
@@ -325,24 +332,24 @@
                     }
                     current.hide();
                     
-                    $(".step_fields").show();
+                    $(".step3-2-1").show();
                     if (op_type == "select") {
-                        $(".step2-1-2").show();
-                        $(".step2-1-3").show();
+                        $(".step3-2-1-1").show();
+                        $(".step3-2-1-2").show();
                     } else if (op_type == "update") {
-                        $(".step2-1-2").show();
-                        $(".step2-1-3").show();
+                        $(".step3-2-1-1").show();
+                        $(".step3-2-1-2").show();
                     } else if (op_type == "insert") {
-                        $(".step2-1-2").show();
-                        $(".step2-1-3").hide();
+                        $(".step3-2-1-1").show();
+                        $(".step3-2-1-2").hide();
                     } else {
-                        $(".step2-1-2").hide();
-                        $(".step2-1-3").show();
+                        $(".step3-2-1-1").hide();
+                        $(".step3-2-1-2").show();
                     }
                     $("body").unblock();
                 });
                 
-            } else if (current.hasClass("step_fields")) {
+            } else if (current.hasClass("step3-2-1")) {
                 if($("#operation_type").val() != "delete" && $('#fields').multipleSelect('getSelects').length < 1){
                     $("#error_msg").text("请选择至少一个字段！");
                     return;
@@ -350,13 +357,13 @@
                 $("#error_msg").text("");
                 //$(".step_fields").hide();
                 current.hide();
-                $(".step3").show();
-                $(".step3").attr('from', current.attr('class'));
-            }else if (current.hasClass("step2-1-0")) {
-                current.hide();
-                $(".step3").show();
-                $(".step3").attr('from', current.attr('class'));
-            } else if(current.hasClass("step2-3-1")){
+                $(".step3-2-2").show();
+            }else if (current.hasClass("step3-1")) {
+                window.ajaxutil.post_task();
+                if($("#gen_on_save").is(":checked")){
+                    window.ajaxutil.generate_code($("#gen_language").val());
+                }
+            } else if(current.hasClass("step3-3")){
                 if ($("#page1").attr('is_update') == "1") {
                     var splitedParams = record.parameters.split(",");
                     var htmls = "";
@@ -375,9 +382,10 @@
                     });
 
                     if(htmls.length == 0){
-                        current.hide();
-                        $(".step3").show();
-                        $(".step3").attr('from', current.attr('class'));
+                        window.ajaxutil.post_task();
+                        if($("#gen_on_save").is(":checked")){
+                            window.ajaxutil.generate_code($("#gen_language").val());
+                        }
                         return;
                     }
                     
@@ -408,9 +416,10 @@
                     }
 
                     if(htmls.length == 0){
-                        current.hide();
-                        $(".step3").show();
-                        $(".step3").attr('from', current.attr('class'));
+                        window.ajaxutil.post_task();
+                        if($("#gen_on_save").is(":checked")){
+                            window.ajaxutil.generate_code($("#gen_language").val());
+                        }
                         return;
                     }
 
@@ -418,138 +427,41 @@
                 }
                 
                 current.hide();
-                $(".step2-3-2").show();
+                $(".step3-3-1").show();
             }
-            else if (current.hasClass("step2-2")) {
-                current.hide();
-                $(".step3").show();
-                $(".step3").attr('from', current.attr('class'));
-            } else if (current.hasClass("step2-3-2")) {
-                current.hide();
-                $(".step3").show();
-                $(".step3").attr('from', current.attr('class'));
-            } else if (current.hasClass("step3")) {
-                var postData = {};
-                var current_project = w2ui['grid'].current_project;
-                if (current_project == undefined) {
-                    if (w2ui['sidebar'].nodes.length < 1 || w2ui['sidebar'].nodes[0].nodes.length < 1)
-                        return;
-                    current_project = w2ui['sidebar'].nodes[0].nodes[0].id;
+            else if (current.hasClass("step3-2-2")) {
+                window.ajaxutil.post_task();
+                if($("#gen_on_save").is(":checked")){
+                    window.ajaxutil.generate_code($("#gen_language").val());
                 }
-
-                postData["project_id"] = current_project;
-                postData["db_name"] = $("#databases").val();
-                if ($("#page1").attr('is_update') == "1") {
-                    postData["action"] = "update";
-                    var records = w2ui['grid'].getSelection();
-                    var record = w2ui['grid'].get(records[0]);
-                    postData["id"] = record.id;
-                } else {
-                    postData["action"] = "insert";
-                }
-                postData["server"] = $("#servers").val();
-
-                if ($(".gen_style.active").children().val() == "auto") {
-                    postData["table_name"] = $("#tables").val();
-                    postData["method_name"] = $("#method_name").val();
-                    //C#风格或者Java风格，@Name or ?
-                    postData["sql_style"] = $("#sql_style").val();
-                    postData["crud_type"] = $(".op_type.active").children().val();;
-                    var selectedConditions = [];
-
-                    $.each($("#selected_condition option"), function (index, value) {
-                        selectedConditions.push($(value).val());
-                    });
-
-                    postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
-                    postData["condition"] = selectedConditions.join(",");
-
-                    $.post("/rest/task/auto", postData, function (data) {
-                        $("#page1").modal('hide');
-                        w2ui["grid_toolbar"].click('refreshDAO', null);
-                    });
-
-                } else if ($(".gen_style.active").children().val() == "sql") {
-                    if($("#class_choose").text() == "选择"){
-                        postData["class_name"] = $("#sql_class_name").val();    
-                    }else{
-                        postData["class_name"] = $("#sql_class_name_select").val();    
-                    }
-                    if($("#pojo_choose").text() == "选择"){
-                        postData["pojo_name"] = $("#sql_pojo_name").val();    
-                    }else{
-                        postData["pojo_name"] = $("#sql_pojo_name_select").val();    
-                    }
-                    
-                    postData["method_name"] = $("#sql_method_name").val();
-                    postData["crud_type"] = "select";
-                    postData["sql_content"] = ace.edit("sql_editor").getValue();
-                    var paramList = [];
-                    $.each($("#param_list").children("div"), function(index, value){
-                        var first = $(value).children("input").eq(0);
-                        var second = $(value).children("select").eq(0);
-                        var third = $(value).children("input").eq(1);
-                        paramList.push(sprintf("%s_%s_%s", $(first).val(), $(second).val(), $(third).val()));
-                    });
-                    postData["params"] = paramList.join(",");
-
-                    $.post("/rest/db/test_sql", postData).done(function(data){
-                        if(data.code == "OK"){
-                            $.post("/rest/task/sql", postData, function (data) {
-                                $("#page1").modal('hide');
-                                w2ui["grid_toolbar"].click('refreshDAO', null);
-                            });
-                        }else{
-                            $("#error_msg").text("执行异常，请检查sql及对应参数！");
-                        }
-                    });
-                }else if ($(".gen_style.active").children().val() == "table_view_sp") {
-                    postData["table_names"] = $('#table_list').multipleSelect('getSelects').join(",");
-                    postData["view_names"] = $('#view_list').multipleSelect('getSelects').join(",");
-                    postData["sp_names"] = $('#sp_list').multipleSelect('getSelects').join(",");
-                    postData["prefix"] = $("#prefix").val();
-                    postData["suffix"] = $("#suffix").val();
-                    postData["cud_by_sp"] = $("#cud_by_sp").is(":checked");
-                    postData["pagination"] = $("#pagination").is(":checked");
-                    $.post("/rest/task/table", postData, function (data) {
-                        $("#page1").modal('hide');
-                        w2ui["grid_toolbar"].click('refreshDAO', null);
-                    });
+            }
+            else if (current.hasClass("step3-3-1")) {
+                window.ajaxutil.post_task();
+                if($("#gen_on_save").is(":checked")){
+                    window.ajaxutil.generate_code($("#gen_language").val());
                 }
             }
         },
         previous: function (current) {
             $("#error_msg").text("");
-            if (current.hasClass("step0")) {
+            if (current.hasClass("step1")) {
                 return;
             }
             current.hide();
-            var from_class = current.attr("from");
-            if (from_class != undefined && from_class != "") {
-                // if(from_class.indexOf("step2-1-2") != -1 || from_class.indexOf("step2-1-3") != -1){
-                //     $(".step_fields").show();
-                // }
-                var classes = from_class.split(" ").join(".");
-                $("." + classes).show();
-                return;
-            }
 
-            if (current.hasClass("step1")) {
-                $(".step0").show();
-            } else if (current.hasClass("step2")) {
+            if (current.hasClass("step2")) {
                 $(".step1").show();
-            } else if (current.hasClass("step2-1-0")) {
+            } else if (current.hasClass("step3-1") 
+                ||　current.hasClass("step3-2") 
+                ||　current.hasClass("step3-3")) {
                 $(".step2").show();
-            } else if (current.hasClass("step2-1-1")) {
-                $(".step2").show();
-            } else if (current.hasClass("step_fields")) {
-                $(".step2-1-1").show();
-            } else if (current.hasClass("step2-2")) {
-                $(".step2").show();
-            } else if (current.hasClass("step2-3-1")) {
-                $(".step2").show();
-            }else if (current.hasClass("step2-3-2")) {
-                $(".step2-3-1").show();
+            } else if (current.hasClass("step3-2-1")) {
+                $(".step3-1").show();
+                $("#suffix").val("Gen");
+            } else if (current.hasClass("step3-2-2")) {
+                $(".step3-2-1").show();
+            } else if (current.hasClass("step3-3-1")) {
+                $(".step3-3").show();
             }
         }
     };

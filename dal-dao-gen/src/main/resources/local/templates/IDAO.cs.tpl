@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using ${host.getNameSpace()}.Entity.DataModel;
 
-namespace using ${host.getNameSpace()}.IDao
+namespace ${host.getNameSpace()}.Interface.IDao
 {
 	public partial interface I${host.getClassName()}Dao
 	{

@@ -50,6 +50,9 @@ public class JavaGenerator extends AbstractGenerator {
 
 	@Override
 	public void generateByTableView(List<GenTaskByTableViewSp> tasks) {
+		
+		prepareFolder(projectId, "java");
+		
 		List<JavaTableHost> tableHosts = new ArrayList<JavaTableHost>();
 		List<SpHost> spHosts = new ArrayList<SpHost>();
 		List<GenTaskBySqlBuilder> sqlBuilders = daoBySqlBuilder

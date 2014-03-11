@@ -388,21 +388,28 @@ public class DalDirectClient implements DalClient {
 		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
 		boolean moreResults;
 		if(hints != null && hints.is(DalHintEnum.skipResultsProcessing))
-			return null;
+			return returnedResults;
 
 //		boolean skipUndeclaredResults = hints != null && hints.contains(DalHintEnum.skipUndeclaredResults);
+		if(resultParameters.size() == 0) {
+			// Just filter out all return values
+			do {
+				moreResults = statement.getMoreResults();
+				updateCount = statement.getUpdateCount();
+			}
+			while (moreResults || updateCount != -1);
+			return returnedResults;
+		}
 		
 		int index = 0;
 		do {
+			
 			String key = resultParameters.get(index).getName();
 			Object value = updateCount == -1?
 				resultParameters.get(index).getResultSetExtractor().extract(statement.getResultSet()) :
 				updateCount;
 			moreResults = statement.getMoreResults();
 			updateCount = statement.getUpdateCount();
-//			if (logger.isDebugEnabled()) {
-//				logger.debug("CallableStatement.getUpdateCount() returned " + updateCount);
-//			}
 			index++;
 			returnedResults.put(key, value);
 		}
@@ -416,7 +423,8 @@ public class DalDirectClient implements DalClient {
 
 		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
 		for (StatementParameter parameter : callParameters) {
-			Object value = statement.getObject(parameter.getIndex());
+			Object value = statement.getObject(parameter.getName());
+			parameter.setValue(value);
 			if (value instanceof ResultSet) {
 				value = parameter.getResultSetExtractor().extract(statement.getResultSet());
 			}
@@ -431,7 +439,7 @@ public class DalDirectClient implements DalClient {
 		long start = start();
 		try {
 			//conn.getSchema()
-			entry = Logger.create(action.sql, action.parameters, logicDbName, "TBI", eventId, EVENT_MESSAGE_MAP.get(eventId));
+			entry = Logger.create(action.getSqlLog(), action.parameters, logicDbName, "TBI", eventId, EVENT_MESSAGE_MAP.get(eventId));
 			
 			T result = action.execute();
 			
@@ -506,6 +514,10 @@ public class DalDirectClient implements DalClient {
 		void populateSp(String callString, StatementParameters parameters) {
 			this.callString = callString;
 			this.parameters = parameters;
+		}
+		
+		String getSqlLog() {
+			return sql == null? callString : sql;
 		}
 		
 		abstract T execute() throws Exception;

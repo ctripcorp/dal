@@ -27,6 +27,7 @@ public final class DalTableDao<T> {
 	private static final String TMPL_SET_VALUE = "%s=?";
 	private static final String AND = "AND";
 	private static final String OR = "OR";
+	private static final String TMPL_CALL = "call %s(%s)";
 	
 	private DalClient client;
 	private DalQueryDao queryDao;
@@ -172,15 +173,25 @@ public final class DalTableDao<T> {
 		}
 	}
 	
+	public void addParametersByName(StatementParameters parameters, Map<String, ?> entries) {
+		for(Map.Entry<String, ?> entry: entries.entrySet()) {
+			parameters.set(entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
+		}
+	}
+	
 	public int getColumnType(String columnName) {
 		return columnTypes.get(columnName);
 	}
 	
-	private void filterNullFileds(Map<String, ?> fields) {
+	public void filterNullFileds(Map<String, ?> fields) {
 		for(String columnName: parser.getColumnNames()) {
 			if(fields.get(columnName) == null)
 				fields.remove(columnName);
 		}
+	}
+	
+	public String buildCallSql(String spName, int paramCount) {
+		return String.format(TMPL_CALL, spName, combine(PLACE_HOLDER, paramCount, COLUMN_SEPARATOR));
 	}
 	
 	private String initSql() {

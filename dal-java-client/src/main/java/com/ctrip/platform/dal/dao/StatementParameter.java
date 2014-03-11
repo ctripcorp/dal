@@ -56,6 +56,10 @@ public class StatementParameter {
 		return currentBuilder.value_;
 	}
 	
+	public void setValue(Object value) {
+		currentBuilder.value_ = value;;
+	}
+	
 	public boolean isResultsParameter() {
 		return currentBuilder.resultsParameter_;
 	}

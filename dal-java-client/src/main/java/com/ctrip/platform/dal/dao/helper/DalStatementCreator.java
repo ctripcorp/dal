@@ -72,14 +72,25 @@ public class DalStatementCreator {
 	private void setParameter(PreparedStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
 			if(parameter.isInputParameter())
-				setSqlParameter(statement, parameter);
+				statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+		}
+	}
+	
+	private void setParameter(CallableStatement statement, StatementParameters parameters) throws Exception {
+		for (StatementParameter parameter: parameters.values()) {
+			if(parameter.isInputParameter()) {
+				if(parameter.getValue() == null)
+					statement.setNull(parameter.getName(), parameter.getSqlType());
+				else
+					statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
+			}
 		}
 	}
 	
 	private void registerOutParameters(CallableStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
 			if(parameter.isOutParameter())
-				statement.registerOutParameter(parameter.getIndex(), parameter.getSqlType());
+				statement.registerOutParameter(parameter.getName(), parameter.getSqlType());
 		}
 	}
 	
@@ -96,18 +107,5 @@ public class DalStatementCreator {
 		Integer timeout = (Integer)hints.get(DalHintEnum.timeout);
 		if (timeout != null && timeout > 0)
 			statement.setQueryTimeout(timeout);
-	}
-	
-	private PreparedStatement setSqlParameter(PreparedStatement ps,
-			StatementParameter parameter) throws SQLException {
-		if(parameter.getIndex() > 0) {
-			ps.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
-		} else {
-			if(ps instanceof CallableStatement) {
-				CallableStatement cs = (CallableStatement)ps;
-				cs.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
-			}
-		}
-		return ps;
 	}
 }

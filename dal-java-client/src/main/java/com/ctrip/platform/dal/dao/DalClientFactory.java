@@ -19,6 +19,7 @@ public class DalClientFactory {
 		try {
 			DalClientFactory.initDirectClientFactory(reader, logicDbNames);
 		} catch (Exception e) {
+			System.err.println("Cannot initilize DB: " + logicDbNames);
 			System.exit(0);
 		}
 	}

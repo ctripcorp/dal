@@ -25,7 +25,7 @@
         </init-param>  
         <init-param>  
             <param-name>serverName</param-name>  
-            <param-value>http://172.16.155.184:9090</param-value>  
+            <param-value>http://localhost:9090</param-value>  
         </init-param>  
     </filter>  
     <filter-mapping>  
@@ -44,7 +44,7 @@
         </init-param>  
         <init-param>  
             <param-name>serverName</param-name>  
-            <param-value>http://172.16.155.184:9090</param-value>  
+            <param-value>http://localhost:9090</param-value>  
         </init-param> 
         <init-param>  
             <param-name>encoding</param-name>  
@@ -90,6 +90,11 @@
 		<servlet-name>DaoGenApplication</servlet-name>
 		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
+	
+	<session-config>
+	<!-- Default to 5 minute session timeouts -->
+	<session-timeout>40</session-timeout>
+	</session-config>
 	
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>

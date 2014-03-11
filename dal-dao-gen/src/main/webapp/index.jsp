@@ -409,7 +409,7 @@
                   </div>
                   <div class="steps step3-3-1 row-fluid" from="">
                      <div class="row-fluid">
-                           <label class="control-label popup_label">填写参数名/参数Index，以及参数类型和值</label>
+                           <label class="control-label popup_label">填写参数名/参数Index，以及参数类型和值，字符串不需要引号</label>
                      </div>  
                      <div id="param_list" class="row-fluid">      
                      </div>

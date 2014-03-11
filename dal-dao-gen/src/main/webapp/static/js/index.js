@@ -55,7 +55,7 @@ jQuery(document).ready(function () {
         var selectedCondition = $("#condition_values").val();
         if (selectedField != "-1" && selectedCondition != "-1") {
             $("#selected_condition").append($('<option>', {
-                value: sprintf("%s_%s", selectedField, selectedCondition),
+                value: sprintf("%s,%s", selectedField, selectedCondition),
                 text: sprintf("%s %s", $("#conditions").find(":selected").text(), $("#condition_values").find(":selected").text())
             }));
         }

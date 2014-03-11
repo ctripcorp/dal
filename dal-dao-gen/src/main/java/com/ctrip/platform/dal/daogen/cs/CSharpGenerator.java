@@ -209,8 +209,8 @@ public class CSharpGenerator extends AbstractGenerator {
 		method.setName(task.getMethod_name());
 		method.setPojoName(task.getPojo_name());
 		List<CSharpParameterHost> params = new ArrayList<CSharpParameterHost>();
-		for (String param : StringUtils.split(task.getParameters(), ",")) {
-			String[] splitedParam = StringUtils.split(param, "_");
+		for (String param : StringUtils.split(task.getParameters(), ";")) {
+			String[] splitedParam = StringUtils.split(param, ",");
 			CSharpParameterHost p = new CSharpParameterHost();
 			p.setName(splitedParam[0]);
 			p.setDbType(DbType.getDbTypeFromJdbcType(Integer
@@ -554,9 +554,9 @@ public class CSharpGenerator extends AbstractGenerator {
 			if (method.getCrud_type().equals("select")
 					|| method.getCrud_type().equals("delete")) {
 				String[] conditions = StringUtils.split(builder.getCondition(),
-						",");
+						";");
 				for (String condition : conditions) {
-					String name = StringUtils.split(condition, "_")[0];
+					String name = StringUtils.split(condition, ",")[0];
 					for (CSharpParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
 							parameters.add(pHost);
@@ -577,7 +577,7 @@ public class CSharpGenerator extends AbstractGenerator {
 			} else {
 				String[] fields = StringUtils.split(builder.getFields(), ",");
 				String[] conditions = StringUtils.split(builder.getCondition(),
-						",");
+						";");
 				for (CSharpParameterHost pHost : allColumns) {
 					for (String field : fields) {
 						if (pHost.getName().equals(field)) {
@@ -586,7 +586,7 @@ public class CSharpGenerator extends AbstractGenerator {
 						}
 					}
 					for (String condition : conditions) {
-						String name = StringUtils.split(condition, "_")[0];
+						String name = StringUtils.split(condition, ",")[0];
 						if (pHost.getName().equals(name)) {
 							parameters.add(pHost);
 							break;

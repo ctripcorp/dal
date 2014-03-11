@@ -44,11 +44,14 @@
                     });
 
                     postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
-                    postData["condition"] = selectedConditions.join(",");
+                    postData["condition"] = selectedConditions.join(";");
 
                     $.post("/rest/task/auto", postData, function (data) {
                         $("#page1").modal('hide');
                         w2ui["grid_toolbar"].click('refreshDAO', null);
+                        if($("#gen_on_save").is(":checked")){
+                            window.ajaxutil.generate_code($("#gen_language").val());
+                        }
                     });
 
                 } else if ($(".gen_style.active").children().val() == "sql") {
@@ -71,15 +74,18 @@
                         var first = $(value).children("input").eq(0);
                         var second = $(value).children("select").eq(0);
                         var third = $(value).children("input").eq(1);
-                        paramList.push(sprintf("%s_%s_%s", $(first).val(), $(second).val(), $(third).val()));
+                        paramList.push(sprintf("%s,%s,%s", $(first).val(), $(second).val(), $(third).val()));
                     });
-                    postData["params"] = paramList.join(",");
+                    postData["params"] = paramList.join(";");
 
                     $.post("/rest/db/test_sql", postData).done(function(data){
                         if(data.code == "OK"){
                             $.post("/rest/task/sql", postData, function (data) {
                                 $("#page1").modal('hide');
                                 w2ui["grid_toolbar"].click('refreshDAO', null);
+                                if($("#gen_on_save").is(":checked")){
+                                    window.ajaxutil.generate_code($("#gen_language").val());
+                                }
                             });
                         }else{
                             $("#error_msg").text("执行异常，请检查sql及对应参数！");
@@ -96,6 +102,9 @@
                     $.post("/rest/task/table", postData, function (data) {
                         $("#page1").modal('hide');
                         w2ui["grid_toolbar"].click('refreshDAO', null);
+                        if($("#gen_on_save").is(":checked")){
+                            window.ajaxutil.generate_code($("#gen_language").val());
+                        }
                     });
                 }
         },

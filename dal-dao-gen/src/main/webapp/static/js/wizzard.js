@@ -350,7 +350,7 @@
                 });
                 
             } else if (current.hasClass("step3-2-1")) {
-                if($("#operation_type").val() != "delete" && $('#fields').multipleSelect('getSelects').length < 1){
+                if($(".op_type.active").children().val() != "delete" && $('#fields').multipleSelect('getSelects').length < 1){
                     $("#error_msg").text("请选择至少一个字段！");
                     return;
                 }
@@ -360,9 +360,6 @@
                 $(".step3-2-2").show();
             }else if (current.hasClass("step3-1")) {
                 window.ajaxutil.post_task();
-                if($("#gen_on_save").is(":checked")){
-                    window.ajaxutil.generate_code($("#gen_language").val());
-                }
             } else if(current.hasClass("step3-3")){
                 if ($("#page1").attr('is_update') == "1") {
                     var splitedParams = record.parameters.split(",");
@@ -383,9 +380,6 @@
 
                     if(htmls.length == 0){
                         window.ajaxutil.post_task();
-                        if($("#gen_on_save").is(":checked")){
-                            window.ajaxutil.generate_code($("#gen_language").val());
-                        }
                         return;
                     }
                     
@@ -417,9 +411,6 @@
 
                     if(htmls.length == 0){
                         window.ajaxutil.post_task();
-                        if($("#gen_on_save").is(":checked")){
-                            window.ajaxutil.generate_code($("#gen_language").val());
-                        }
                         return;
                     }
 
@@ -431,15 +422,9 @@
             }
             else if (current.hasClass("step3-2-2")) {
                 window.ajaxutil.post_task();
-                if($("#gen_on_save").is(":checked")){
-                    window.ajaxutil.generate_code($("#gen_language").val());
-                }
             }
             else if (current.hasClass("step3-3-1")) {
                 window.ajaxutil.post_task();
-                if($("#gen_on_save").is(":checked")){
-                    window.ajaxutil.generate_code($("#gen_language").val());
-                }
             }
         },
         previous: function (current) {
@@ -456,8 +441,7 @@
                 ||　current.hasClass("step3-3")) {
                 $(".step2").show();
             } else if (current.hasClass("step3-2-1")) {
-                $(".step3-1").show();
-                $("#suffix").val("Gen");
+                $(".step3-2").show();
             } else if (current.hasClass("step3-2-2")) {
                 $(".step3-2-1").show();
             } else if (current.hasClass("step3-3-1")) {

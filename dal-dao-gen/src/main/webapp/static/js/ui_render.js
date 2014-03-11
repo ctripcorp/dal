@@ -157,6 +157,9 @@
                         caption: '生成C#代码',
                         icon: 'fa fa-play'
                     }],
+                    onDblClick: function(target, data){
+                        console.log("double");
+                    },
                     onClick: function (target, data) {
                         switch (target) {
                         case 'refreshDAO':

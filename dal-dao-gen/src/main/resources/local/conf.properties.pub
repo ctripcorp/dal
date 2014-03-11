@@ -1,0 +1,7 @@
+ftp_server=172.16.155.151
+ftp_port=21
+ftp_user=codegen
+ftp_pass=123456
+
+codegen_url=http://csm-haddop04.dev.sh.ctripcorp.com:9090
+cas_url=http://192.168.93.59:8085

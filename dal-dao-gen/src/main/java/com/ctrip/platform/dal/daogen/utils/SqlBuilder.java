@@ -12,15 +12,15 @@ public class SqlBuilder {
 	
 	public static String formatSql(GenTaskBySqlBuilder task) {
 
-		// 数据库中存储的模式： ID_0,Name_1 表示"ID = "以及"Name != "
-		String[] conditions = task.getCondition().split(",");
+		// 数据库中存储的模式： ID,0;Name,1; 表示"ID = "以及"Name != "
+		String[] conditions = task.getCondition().split(";");
 		// 数据库中存储的模式： ID,Name
 		String[] fields = task.getFields().split(",");
 
 		List<String> formatedConditions = new ArrayList<String>();
 		// 将所有WHERE条件拼接，如ID_0,Name_1，for循环后将变为一个数组： [" ID = ", " Name != "]
 		for (String con : conditions) {
-			String[] keyValue = con.split("_");
+			String[] keyValue = con.split(",");
 			if (keyValue.length != 2) {
 				continue;
 			}

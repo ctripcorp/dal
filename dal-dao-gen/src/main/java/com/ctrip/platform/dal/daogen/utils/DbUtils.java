@@ -415,7 +415,7 @@ public class DbUtils {
 	 */
 	public static ResultSetMetaData testAQuerySql(int server, String dbName,
 			String sql, String params) {
-		String[] parameters = params.split(",");
+		String[] parameters = params.split(";");
 
 		DataSource ds = DataSourceLRUCache.newInstance().getDataSource(server);
 
@@ -439,7 +439,7 @@ public class DbUtils {
 			int index = 0;
 			for (String param : parameters) {
 				if (param != null && !param.isEmpty()) {
-					String[] tuple = param.split("_");
+					String[] tuple = param.split(",");
 
 					try {
 						index = Integer.valueOf(tuple[0]);

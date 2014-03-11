@@ -165,14 +165,14 @@ public final class DalTableDao<T> {
 		client.update(sql, parameters, hints);
 	}
 	
-	private void addParameters(StatementParameters parameters, Map<String, ?> entries) {
+	public void addParameters(StatementParameters parameters, Map<String, ?> entries) {
 		int index = parameters.size() + 1;
 		for(Map.Entry<String, ?> entry: entries.entrySet()) {
 			parameters.set(index++, getColumnType(entry.getKey()), entry.getValue());
 		}
 	}
 	
-	private int getColumnType(String columnName) {
+	public int getColumnType(String columnName) {
 		return columnTypes.get(columnName);
 	}
 	

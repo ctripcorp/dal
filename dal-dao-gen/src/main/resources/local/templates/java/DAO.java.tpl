@@ -8,11 +8,21 @@ import com.ctrip.platform.dal.dao.*;
 
 public class ${host.getPojoClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbName()}";
+#if($host.getSpaInsert().isExist())
+	private static final String INSERT_SPA_NAME = "${host.getSpaInsert().getMethodName()}";
+#end
+#if($host.getSpaDelete().isExist())
+	private static final String DELETE_SPA_NAME = "${host.getSpaDelete().getMethodName()}";
+#end
+#if($host.getSpaUpdate().isExist())
+	private static final String UPDATE_SPA_NAME = "${host.getSpaUpdate().getMethodName()}";
+#end
+	private DalParser<${host.getPojoClassName()}> parser = new ${host.getPojoClassName()}Parser();
 	private DalTableDao<${host.getPojoClassName()}> client;
 	private DalClient baseClient;
 
 	public ${host.getPojoClassName()}Dao() {
-		this.client = new DalTableDao<${host.getPojoClassName()}>(new ${host.getPojoClassName()}Parser());
+		this.client = new DalTableDao<${host.getPojoClassName()}>(parser);
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}
 
@@ -38,7 +48,21 @@ public class ${host.getPojoClassName()}Dao {
 		DalHints hints = new DalHints();
 		return null;
 	}
-	
+
+#if($host.getSpaInsert().isExist())
+	/*
+	 * Using SPA to insert
+	 */
+	public int insert(${host.getPojoClassName()} daoPojo) throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		addSpaParameters(parameters, parser.getFields(daoPojo));
+		parameters.registerOut("@result", Types.INTEGER);
+		DalHints hints = new DalHints();
+		Map<String, ?> results = baseClient.call(INSERT_SPA_NAME, parameters, hints);
+		//parameters.get();
+		return (Integer)results.get("result");
+	}
+#{else}
 	public void insert(${host.getPojoClassName()}...daoPojos) throws SQLException {
 		DalHints hints = new DalHints();
 		client.insert(hints, null, daoPojos);
@@ -48,16 +72,37 @@ public class ${host.getPojoClassName()}Dao {
 		DalHints hints = new DalHints();
 		client.insert(hints, keyHolder, daoPojos);
 	}
-	
+#end
+
+#if($host.getSpaDelete().isExist())	
+	public int delete(${host.getPojoClassName()} daoPojo) throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		addSpaParameters(parameters, parser.getPrimaryKeys(daoPojo));
+		DalHints hints = new DalHints();
+		baseClient.call(DELETE_SPA_NAME, parameters, hints);
+		return 1;
+	}
+#{else}
 	public void delete(${host.getPojoClassName()}...daoPojos) throws SQLException {
 		DalHints hints = new DalHints();
 		client.delete(hints, daoPojos);
 	}
-	
+#end
+
+#if($host.getSpaUpdate().isExist())	
+	public int update(${host.getPojoClassName()} daoPojo) throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		addSpaParameters(parameters, parser.getFields(daoPojo));
+		DalHints hints = new DalHints();
+		baseClient.call(UPDATE_SPA_NAME, parameters, hints);
+		return 1;
+	}
+#{else}
 	public void update(${host.getPojoClassName()}...daoPojos) throws SQLException {
 		DalHints hints = new DalHints();
 		client.update(hints, daoPojos);
 	}
+#end
 
 #foreach($method in $host.getMethods())
 #if($method.getCrud_type() == "select")
@@ -81,6 +126,14 @@ public class ${host.getPojoClassName()}Dao {
 	}
 #end
 
+#if($host.isSpa())
+	private void addSpaParameters(StatementParameters parameters, Map<String, ?> entries) {
+		for(Map.Entry<String, ?> entry: entries.entrySet()) {
+			parameters.set("@" + entry.getKey(), client.getColumnType(entry.getKey()), entry.getValue());
+		}
+	}
+	
+#end
 	private static class ${host.getPojoClassName()}Parser implements DalParser<${host.getPojoClassName()}> {
 		public static final String DATABASE_NAME = "${host.getDbName()}";
 		public static final String TABLE_NAME = "${host.getTableName()}";
@@ -147,7 +200,7 @@ public class ${host.getPojoClassName()}Dao {
 	
 		@Override
 		public Number getIdentityValue(${host.getPojoClassName()} pojo) {
-			return #if($host.isHasIdentity())pojo.get${WordUtils.capitalized(${host.getIdentityColumnName()})}()#{else}null#end;
+			return #if($host.isHasIdentity())pojo.get${host.getCapitalizedIdentityColumnName()}()#{else}null#end;
 		}
 	
 		@Override

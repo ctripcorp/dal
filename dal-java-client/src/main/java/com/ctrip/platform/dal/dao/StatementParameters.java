@@ -3,6 +3,8 @@ package com.ctrip.platform.dal.dao;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.ctrip.platform.dal.common.enums.ParameterDirection;
+
 public class StatementParameters {
 	private List<StatementParameter> parameters = new LinkedList<StatementParameter>();
 	
@@ -43,6 +45,14 @@ public class StatementParameters {
 		return add(StatementParameter.Builder.registerOut(name, sqlType).setSensitive(true).build());
 	}
 	
+	public StatementParameters setResultsParameter(String name) {
+		return add(StatementParameter.newBuilder().setResultsParameter(true).setName(name).build());
+	}
+	
+	public StatementParameters setResultsParameter(String name, DalResultSetExtractor<?> extractor) {
+		return add(StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName(name).build());
+	}
+	
 	public int size() {
 		return parameters.size();
 	}
@@ -51,6 +61,17 @@ public class StatementParameters {
 		return parameters.get(i);
 	}
 	
+	public StatementParameter get(String name, ParameterDirection direction) {
+		if(name == null)
+			return null;
+		
+		for(StatementParameter parameter: parameters) {
+			if(parameter.getName() != null && parameter.getName().equalsIgnoreCase(name) && direction == parameter.getDirection())
+				return parameter;
+		}
+		return null;
+	}
+
 	public List<StatementParameter> values() {
 		return parameters;
 	}

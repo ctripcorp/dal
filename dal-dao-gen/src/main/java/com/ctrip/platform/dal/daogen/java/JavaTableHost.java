@@ -141,7 +141,6 @@ public class JavaTableHost {
 		imports.add(java.util.Map.class.getName());
 		imports.add(java.util.LinkedHashMap.class.getName());
 		imports.add( java.sql.Types.class.getName());
-		imports.add( java.util.ArrayList.class.getName());
 		imports.add( java.util.List.class.getName());
 
 		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(fields);

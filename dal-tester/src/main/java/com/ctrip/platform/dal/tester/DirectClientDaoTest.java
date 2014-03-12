@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -155,9 +156,7 @@ public class DirectClientDaoTest {
 			int testId = 1000;
 			StatementParameters parameters = new StatementParameters();
 			
-			StatementParameter param  = StatementParameter.newBuilder().setDbType(DbType.Int32).setValue(testId).setIndex(1).setName("").build();
-			parameters.add(param);
-
+			parameters.set(1, Types.INTEGER, testId);
 			// clean up
 			String delete = "delete from Person where id = ?";
 			client.update(delete, parameters, hints);
@@ -167,23 +166,18 @@ public class DirectClientDaoTest {
 			//================
 
 			parameters = new StatementParameters();
-			param  = StatementParameter.newBuilder().setDbType(DbType.Int32).setValue(testId).setIndex(1).setName("").build();
-			parameters.add(param);
+			parameters.set("userId", Types.INTEGER, testId);
+			parameters.registerOut("pName", Types.VARCHAR);
 			
-			param  = StatementParameter.newBuilder().setDbType(DbType.String).setIndex(2).setName("name").setDirection(ParameterDirection.Output).build();
-			parameters.add(param);
-
 			DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
-			param = StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName("result").build();
-			parameters.add(param);
-
-			param  = StatementParameter.newBuilder().setResultsParameter(true).setName("count").build();
-			parameters.add(param);
-			
+			parameters.add(StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName("result").build());
+			parameters.add(StatementParameter.newBuilder().setResultsParameter(true).setName("count").build());
 
 			System.out.println(client.call("call getPersonById(?, ?)", parameters, hints));
 			
 			// clean up
+			parameters = new StatementParameters();
+			parameters.set(1, Types.INTEGER, testId);
 			delete = "delete from Person where id = ?";
 			client.update(delete, parameters, hints);
 		} catch (SQLException e) {
@@ -372,7 +366,7 @@ public class DirectClientDaoTest {
 	}
 	
 	public static void main(String[] args) {
-        LogConfig.setAppID("929143");
+        LogConfig.setAppID("930201");
 //      LogConfig.setLoggingServerIP("localhost");
         LogConfig.setLoggingServerIP("192.168.82.58");
         LogConfig.setLoggingServerPort("63100");
@@ -394,7 +388,7 @@ public class DirectClientDaoTest {
 //		test.testBatch();
 //		test.testBatch2();
 //		test.testCommand();
-//		test.testSP();
+		test.testSP();
 //		test.testSPInOut();
 //		test.testConnectionException();
 //		test.testTransactionException();

@@ -4,10 +4,23 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
-import com.ctrip.platform.dal.dao.*;
+#if($host.isSpa())
+import com.ctrip.platform.dal.common.enums.ParameterDirection;
+#end
+import com.ctrip.platform.dal.dao.DalClient;
+import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.StatementParameters;
+#if($host.isSpa())
+import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
+#end
 
 public class ${host.getPojoClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbName()}";
+#if($host.isSpa())
+
 #if($host.getSpaInsert().isExist())
 	private static final String INSERT_SPA_NAME = "${host.getSpaInsert().getMethodName()}";
 #end
@@ -16,6 +29,12 @@ public class ${host.getPojoClassName()}Dao {
 #end
 #if($host.getSpaUpdate().isExist())
 	private static final String UPDATE_SPA_NAME = "${host.getSpaUpdate().getMethodName()}";
+#end
+
+	private static final String RET_CODE = "retcode";
+	private static final String UPDATE_COUNT = "update_count";
+	private DalScalarExtractor extractor = new DalScalarExtractor();
+
 #end
 	private DalParser<${host.getPojoClassName()}> parser = new ${host.getPojoClassName()}Parser();
 	private DalTableDao<${host.getPojoClassName()}> client;
@@ -50,17 +69,33 @@ public class ${host.getPojoClassName()}Dao {
 	}
 
 #if($host.getSpaInsert().isExist())
-	/*
-	 * Using SPA to insert
-	 */
 	public int insert(${host.getPojoClassName()} daoPojo) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
-		addSpaParameters(parameters, parser.getFields(daoPojo));
-		parameters.registerOut("@result", Types.INTEGER);
 		DalHints hints = new DalHints();
-		Map<String, ?> results = baseClient.call(INSERT_SPA_NAME, parameters, hints);
-		//parameters.get();
-		return (Integer)results.get("result");
+		
+		String callSql = prepareSpaCall(INSERT_SPA_NAME, parameters, parser.getFields(daoPojo));
+
+#foreach($p in $host.getSpaInsert().getParameters())
+#if($p.getDirection().name() == "InputOutput")
+		parameters.registerInOut("${p.getName()}", ${p.getJavaTypeDisplay()}, daoPojo.get${p.getCapitalizedName()}());
+#end
+#if($p.getDirection().name() == "Output")
+		parameters.registerOut("${p.getName()}", ${p.getJavaTypeDisplay()});
+#end
+#end
+
+		Map<String, ?> results = baseClient.call(callSql, parameters, hints);
+
+#foreach($p in $host.getSpaInsert().getParameters())
+#if($p.getDirection().name() == "InputOutput")
+		${p.getClassDisplayName()} ${p.getUncapitalizedName()} = (${p.getClassDisplayName()})parameters.get("${p.getName()}", ParameterDirection.InputOutput).getValue();
+#end
+#if($p.getDirection().name() == "Output")
+		${p.getClassDisplayName()} ${p.getUncapitalizedName()} = (${p.getClassDisplayName()})parameters.get("${p.getName()}", ParameterDirection.Output).getValue();
+#end
+#end
+		
+		return (Integer)results.get(RET_CODE);
 	}
 #{else}
 	public void insert(${host.getPojoClassName()}...daoPojos) throws SQLException {
@@ -77,10 +112,29 @@ public class ${host.getPojoClassName()}Dao {
 #if($host.getSpaDelete().isExist())	
 	public int delete(${host.getPojoClassName()} daoPojo) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
-		addSpaParameters(parameters, parser.getPrimaryKeys(daoPojo));
 		DalHints hints = new DalHints();
-		baseClient.call(DELETE_SPA_NAME, parameters, hints);
-		return 1;
+		
+		String callSql = prepareSpaCall(DELETE_SPA_NAME, parameters, parser.getPrimaryKeys(daoPojo));
+#foreach($p in $host.getSpaDelete().getParameters())
+#if($p.getDirection().name() == "InputOutput")
+		parameters.registerInOut("${p.getName()}", ${p.getJavaTypeDisplay()}, daoPojo.get${p.getCapitalizedName()}());
+#end
+#if($p.getDirection().name() == "Output")
+		parameters.registerOut("${p.getName()}", ${p.getJavaTypeDisplay()});
+#end
+#end
+
+		Map<String, ?> results = baseClient.call(callSql, parameters, hints);
+#foreach($p in $host.getSpaDelete().getParameters())
+#if($p.getDirection().name() == "InputOutput")
+		${p.getClassDisplayName()} ${p.getUncapitalizedName()} = (${p.getClassDisplayName()})parameters.get("${p.getName()}", ParameterDirection.InputOutput).getValue();
+#end
+#if($p.getDirection().name() == "Output")
+		${p.getClassDisplayName()} ${p.getUncapitalizedName()} = (${p.getClassDisplayName()})parameters.get("${p.getName()}", ParameterDirection.Output).getValue();
+#end
+#end
+		
+		return (Integer)results.get(RET_CODE);
 	}
 #{else}
 	public void delete(${host.getPojoClassName()}...daoPojos) throws SQLException {
@@ -92,10 +146,29 @@ public class ${host.getPojoClassName()}Dao {
 #if($host.getSpaUpdate().isExist())	
 	public int update(${host.getPojoClassName()} daoPojo) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
-		addSpaParameters(parameters, parser.getFields(daoPojo));
 		DalHints hints = new DalHints();
-		baseClient.call(UPDATE_SPA_NAME, parameters, hints);
-		return 1;
+		
+		String callSql = prepareSpaCall(UPDATE_SPA_NAME, parameters, parser.getFields(daoPojo));
+#foreach($p in $host.getSpaUpdate().getParameters())
+#if($p.getDirection().name() == "InputOutput")
+		parameters.registerInOut("${p.getName()}", ${p.getJavaTypeDisplay()}, daoPojo.get${p.getCapitalizedName()}());
+#end
+#if($p.getDirection().name() == "Output")
+		parameters.registerOut("${p.getName()}", ${p.getJavaTypeDisplay()});
+#end
+#end
+
+		Map<String, ?> results = baseClient.call(callSql, parameters, hints);
+#foreach($p in $host.getSpaUpdate().getParameters())
+#if($p.getDirection().name() == "InputOutput")
+		${p.getClassDisplayName()} ${p.getUncapitalizedName()} = (${p.getClassDisplayName()})parameters.get("${p.getName()}", ParameterDirection.InputOutput).getValue();
+#end
+#if($p.getDirection().name() == "Output")
+		${p.getClassDisplayName()} ${p.getUncapitalizedName()} = (${p.getClassDisplayName()})parameters.get("${p.getName()}", ParameterDirection.Output).getValue();
+#end
+#end
+		
+		return (Integer)results.get(RET_CODE);
 	}
 #{else}
 	public void update(${host.getPojoClassName()}...daoPojos) throws SQLException {
@@ -127,10 +200,12 @@ public class ${host.getPojoClassName()}Dao {
 #end
 
 #if($host.isSpa())
-	private void addSpaParameters(StatementParameters parameters, Map<String, ?> entries) {
-		for(Map.Entry<String, ?> entry: entries.entrySet()) {
-			parameters.set("@" + entry.getKey(), client.getColumnType(entry.getKey()), entry.getValue());
-		}
+	private String prepareSpaCall(String spaName, StatementParameters parameters, Map<String, ?> fields) {
+		client.addParametersByName(parameters, fields);
+		String callSql = client.buildCallSql(spaName, fields.size());
+		parameters.setResultsParameter(UPDATE_COUNT);
+		parameters.setResultsParameter(RET_CODE, extractor);
+		return callSql;
 	}
 	
 #end

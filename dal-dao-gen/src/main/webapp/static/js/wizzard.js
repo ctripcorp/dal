@@ -24,7 +24,7 @@
     + "<option value='-1'>LongVarchar----String</option>" 
     + "<option value='-15'>Nchar----String</option>" 
     + "<option value='-9'>NVarchar----String</option>" 
-    + "<option value='-16'>LongNVarchar/String</option>" 
+    + "<option value='-16'>LongNVarchar----String</option>" 
     + "<option value='91'>Date</option>" 
     + "<option value='92'>Time----TimeSpan</option>" 
     + "<option value='93'>Timestamp----DateTime</option>"  

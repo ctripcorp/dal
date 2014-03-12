@@ -44,4 +44,7 @@ label.btn{
     font-size: 12px;
 }
 
+.selectize-dropdown{
+	margin-left: 0 !important;
+}
 

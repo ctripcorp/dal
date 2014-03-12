@@ -446,7 +446,7 @@ public class DbUtils {
 					} catch (NumberFormatException ex) {
 						index++;
 					}
-					ps.setObject(index, tuple[2], Integer.valueOf(tuple[1]));
+					ps.setObject(index, mockATest(Integer.valueOf(tuple[1])), Integer.valueOf(tuple[1]));
 				}
 			}
 
@@ -464,6 +464,32 @@ public class DbUtils {
 		}
 
 		return null;
+	}
+	
+	public  static Object mockATest(int javaSqlTypes){
+		switch(javaSqlTypes){
+		case java.sql.Types.BIT:
+			return true;
+		case java.sql.Types.TINYINT:
+		case java.sql.Types.SMALLINT:
+		case java.sql.Types.INTEGER:
+		case java.sql.Types.BIGINT:
+			return 1;
+		case java.sql.Types.REAL:
+		case java.sql.Types.DOUBLE:
+		case java.sql.Types.DECIMAL:
+			return 1.0;
+		case java.sql.Types.CHAR:
+			return 't';
+		case java.sql.Types.DATE:
+			return "2012-01-01";
+		case java.sql.Types.TIME:
+			return "10:00:00";
+		case java.sql.Types.TIMESTAMP:
+			return "2012-01-01 10:00:00";
+		default:
+			return "test";
+		}
 	}
 
 }

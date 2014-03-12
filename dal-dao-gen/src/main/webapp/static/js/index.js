@@ -1,4 +1,3 @@
-
 jQuery(document).ready(function () {
 
     $('#main_layout').height($(document).height() - 50);
@@ -38,16 +37,18 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', '#share_proj', function (event) {
-        $.post("/rest/project/share_proj", {"id": w2ui['grid'].current_project,
-            "userNo": $("#users").val()}, function(data){
-                if(data.code == "OK"){
-                    alert("分享成功！");
-                }else{
-                    alert("分享失败，此用户可能已经可以操作该项目了!");
-                }
-                
-                $("#shareProject").modal("hide");
-            });
+        $.post("/rest/project/share_proj", {
+            "id": w2ui['grid'].current_project,
+            "userNo": $("#users").val()
+        }, function (data) {
+            if (data.code == "OK") {
+                alert("分享成功！");
+            } else {
+                alert("分享失败，此用户可能已经可以操作该项目了!");
+            }
+
+            $("#shareProject").modal("hide");
+        });
     });
 
     $("#add_condition").click(function () {
@@ -78,19 +79,18 @@ jQuery(document).ready(function () {
     $(document.body).on('click', "#add_server", function (event) {
         var postData = {};
         postData["server"] = $("#server").val();
-        if($("#port").val() == ""){
-           postData["port"] = 0;
-        }else{
-           postData["port"] = $("#port").val();
+        if ($("#port").val() == "") {
+            postData["port"] = 0;
+        } else {
+            postData["port"] = $("#port").val();
         }
         postData["user"] = $("#username").val();
         postData["password"] = $("#password").val();
         postData["db_type"] = $("#db_types").val();
         postData["action"] = "insert";
-        if($("#db_types").val() == "sqlserver" 
-            && $("#use_ntlm").is(":checked")){
+        if ($("#db_types").val() == "sqlserver" && $("#use_ntlm").is(":checked")) {
             postData["domain"] = $("#domains").val();
-        }else{
+        } else {
             postData["domain"] = "";
         }
         $.post("/rest/db/servers", postData, function (data) {
@@ -104,14 +104,14 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('change', "#db_types", function (event) {
-        if($("#db_types").val() == "sqlserver"){
+        if ($("#db_types").val() == "sqlserver") {
             $(".domain_verify").show();
-        }else{
+        } else {
             $(".domain_verify").hide();
         }
     });
 
-    $('#use_ntlm').click(function() {
+    $('#use_ntlm').click(function () {
         var $this = $(this);
         // $this will contain a reference to the checkbox   
         if ($this.is(':checked')) {
@@ -122,12 +122,13 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', "#toggle_add_server", function (event) {
-        if($("#add_server_row").is(":visible")){
-            $("#toggle_add_server").val("添加数据库服务器");
-        }else{
-            $("#toggle_add_server").val("取消添加服务器");
+        if ($("#add_server_row").is(":visible")) {
+            $("#toggle_add_server").text("添加数据库服务器");
+        } else {
+            $("#toggle_add_server").text("取消添加服务器");
         }
         $("#add_server_row").toggle();
+        $("#add_server").toggle();
     });
 
     $(document.body).on('click', "#del_server", function (event) {
@@ -149,28 +150,6 @@ jQuery(document).ready(function () {
                 }
             });
         }
-    });
-
-    $(document.body).on('click', "#pojo_choose", function (event) {
-        if($("#sql_pojo_name").is(":visible")){
-            $("#pojo_choose").text("填写");
-        }else{
-            $("#pojo_choose").text("选择");
-        }
-
-        $("#sql_pojo_name").toggle();
-        $("#sql_pojo_name_select").toggle();
-    });
-
-    $(document.body).on('click', "#class_choose", function (event) {
-        if($("#sql_class_name").is(":visible")){
-            $("#class_choose").text("填写");
-        }else{
-            $("#class_choose").text("选择");
-        }
-
-        $("#sql_class_name").toggle();
-        $("#sql_class_name_select").toggle();
     });
 
     window.ajaxutil.reload_projects();

@@ -103,6 +103,7 @@ public class SqlBuilder {
 							.format("Delete FROM %s", task.getTable_name());
 				}
 		}
+	
 
 		return "";
 

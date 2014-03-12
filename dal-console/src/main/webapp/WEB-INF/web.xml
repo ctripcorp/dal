@@ -8,7 +8,7 @@
 	</context-param>
 
 	<listener>
-		<listener-class>com.ctrip.platform.dasconsole.ZkListener</listener-class>
+		<listener-class>com.ctrip.platform.dal.console.ZkListener</listener-class>
 	</listener>
 
 	<servlet>
@@ -16,7 +16,7 @@
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
-			<param-value>com.ctrip.platform.dasconsole.DasConsoleApplication</param-value>
+			<param-value>com.ctrip.platform.dal.console.DasConsoleApplication</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

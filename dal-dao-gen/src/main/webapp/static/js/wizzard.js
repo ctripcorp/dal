@@ -9,7 +9,7 @@
     };
 
     var variableHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">';
-    var variable_typesHtml = '<select class="span3">' 
+    var variable_typesHtml = '<select %s class="span5">' 
     + "<option value='_please_select'>--参数类型--</option>" 
     + "<option value='-7'>Bit----Boolean</option>"  
     + "<option value='-6'>TinyInt----Byte</option>" 
@@ -234,7 +234,7 @@
                     } else {
                         $("#sql_class_name").selectize({
                             //maxItems: null,
-                            valueField: 'id',
+                            valueField: 'value',
                             labelField: 'title',
                             searchField: 'title',
                             options: [],
@@ -246,7 +246,7 @@
                     } else {
                         $("#sql_pojo_name").selectize({
                             //maxItems: null,
-                            valueField: 'id',
+                            valueField: 'value',
                             labelField: 'title',
                             searchField: 'title',
                             options: [],
@@ -254,18 +254,27 @@
                         });
                     }
 
+                    //在显示下一页之前，清空下一页的信息
+                    $("#sql_class_name").val("");
+                    $("#sql_pojo_name").val("");
+                    $("#sql_method_name").val("");
+
                     $.get("/rest/task/sql_class?project_id=" + w2ui['grid'].current_project + "&server_id=" + $("#servers").val() + "&db_name=" + $("#databases").val() + "&rand=" + Math.random(), function (data) {
+
+                        var update = $("#page1").attr('is_update') == "1" 
+                            && record != undefined 
+                            && record.task_type == "sql";
                         var clazz = [];
                         var pojos = [];
                         $.each(data.classes, function (index, value) {
                             clazz.push({
-                                id: clazz.length + pojos.length,
+                                value: value,
                                 title: value
                             });
                         });
                         $.each(data.pojos, function (index, value) {
                             pojos.push({
-                                id: clazz.length + pojos.length,
+                                value: value,
                                 title: value
                             });
                         });
@@ -275,22 +284,19 @@
                         $("#sql_class_name")[0].selectize.refreshOptions(false);
                         $("#sql_pojo_name")[0].selectize.refreshOptions(false);
 
+                        if (update) {
+                            $("#sql_class_name")[0].selectize.setValue(record.class_name);
+                            $("#sql_pojo_name")[0].selectize.setValue(record.pojo_name);
+                            $("#sql_method_name").val(record.method_name);
+                            editor.setValue(record.sql_content);
+                        } else {
+                            editor.setValue("");
+                        }
+
                     }).fail(function (data) {
 
                     });
-
-                    //在显示下一页之前，清空下一页的信息
-                    $("#sql_class_name").val("");
-                    $("#sql_pojo_name").val("");
-                    $("#sql_method_name").val("");
-
-                    if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "sql") {
-                        $("#sql_class_name").val(record.class_name);
-                        $("#sql_method_name").val(record.method_name);
-                        editor.setValue(record.sql_content);
-                    } else {
-                        editor.setValue("");
-                    }
+                    
                     current.hide();
                     $(".step3-3").show();
                     break;
@@ -389,10 +395,12 @@
                     var splitedParams = record.parameters.split(";");
                     var htmls = "";
                     var i = 0;
+                     var id_values = {};
                     $.each(splitedParams, function (index, value) {
                         if (value != "") {
                             var resultParams = value.split(",");
-                            htmls = htmls + sprintf(variableHtml, resultParams[0]) + variable_typesHtml;
+                            htmls = htmls + sprintf(variableHtml, resultParams[0]) + sprintf(variable_typesHtml, sprintf("id='db_type_%s'", ++i));
+                             id_values["db_type_"+i] = resultParams[1];
                         }
 
                     });
@@ -403,6 +411,9 @@
                     }
 
                     $("#param_list").html(htmls);
+                     $.each(id_values, function(key, value){
+                        $("#"+key).val(value);
+                    });
 
                 } else {
                     //首先解析Sql语句，提取出参数

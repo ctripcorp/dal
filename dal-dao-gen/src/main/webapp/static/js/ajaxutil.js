@@ -64,7 +64,7 @@
                     $("#error_msg").text("DAO类名，实体类名以及方法名需要填写！");
                     return;
                 }
-                $("#error_msg").text("DAO类名，实体类名以及方法名需要填写！");
+                $("#error_msg").text("");
 
                 postData["crud_type"] = "select";
                 postData["sql_content"] = ace.edit("sql_editor").getValue();

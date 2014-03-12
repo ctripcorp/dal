@@ -156,9 +156,7 @@
                         caption: '生成C#代码',
                         icon: 'fa fa-play'
                     }],
-                    onDblClick: function (target, data) {
-                        console.log("double");
-                    },
+                    
                     onClick: function (target, data) {
                         switch (target) {
                         case 'refreshDAO':
@@ -225,28 +223,8 @@
                             break;
                         case 'editDAO':
                             var records = w2ui['grid'].getSelection();
-                            if (records.length > 0) {
-                                var record = w2ui['grid'].get(records[0]);
-                                if (record != undefined) {
-                                    $("select[id$=servers] > option:gt(0)").remove();
-                                    $(".step1").show();
-                                    $(".step2").hide();
-                                    $(".step3-1").hide();
-                                    $(".step3-2").hide();
-                                    $(".step3-2-2").hide();
-                                    $(".step3-2-1").hide();
-                                    $(".step3-2-1-1").hide();
-                                    $(".step3-2-1-2").hide();
-                                    $(".step3-3").hide();
-                                    $(".step3-3-1").hide();
-                                    window.ajaxutil.reload_dbservers(function () {
-                                        $("#servers")[0].selectize.setValue(record.server_id);
-                                    });
-                                    $("#page1").attr('is_update', '1');
-                                    $("#page1").modal({
-                                        "backdrop": "static"
-                                    });
-                                }
+                            if(records.length > 0){
+                                window.render.editDAO(records[0]);    
                             }
                             break;
                         case 'delDAO':
@@ -319,9 +297,36 @@
                     caption: '预览',
                     size: '50%'
                 }, ],
-                records: []
+                records: [],
+                onDblClick: function (target, data) {
+                    window.render.editDAO(data.recid);
+                },
             }));
 
+        },
+        editDAO: function(recid){
+            var record = w2ui['grid'].get(recid);
+            if (record != undefined) {
+                $("select[id$=servers] > option:gt(0)").remove();
+                $(".step1").show();
+                $(".step2").hide();
+                $(".step3-1").hide();
+                $(".step3-2").hide();
+                $(".step3-2-2").hide();
+                $(".step3-2-1").hide();
+                $(".step3-2-1-1").hide();
+                $(".step3-2-1-2").hide();
+                $(".step3-3").hide();
+                $(".step3-3-1").hide();
+                window.ajaxutil.reload_dbservers(function () {
+                    $("#servers")[0].selectize.setValue(record.server_id);
+                });
+                $("#page1").attr('is_update', '1');
+                $("#page1").modal({
+                    "backdrop": "static"
+                });
+            }
+            
         },
     };
 

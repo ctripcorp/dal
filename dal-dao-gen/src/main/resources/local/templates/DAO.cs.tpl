@@ -83,7 +83,7 @@ namespace ${host.getNameSpace()}.Dao
         public int Update${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())})
         {
 #if($host.isSpa())
-#if($host.getSpUpdate().isExist())
+#if($host.getSpaUpdate().isExist())
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();

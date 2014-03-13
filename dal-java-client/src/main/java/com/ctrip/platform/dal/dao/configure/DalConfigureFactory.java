@@ -54,6 +54,8 @@ public class DalConfigureFactory {
 	private static String DATABASE_TYPE = "databaseType";
 	private static String SHARDING = "sharding";
 	private static String CONNECTION_STRING = "connectionString";
+	private static String MASTER = "Master";
+	private static String SLAVE = "Slave";
 
 	public static DalConfigure load() throws Exception {
 		if(System.getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1&& System.getProperty("opath.separator").equals("\\"))
@@ -114,27 +116,26 @@ public class DalConfigureFactory {
 	}
 	
 	private DatabaseSet readDatabaseSet(Node databaseSetNode) {
-		DatabaseSet databaseSet = new DatabaseSet();
-		databaseSet.setName(getAttribute(databaseSetNode, NAME));
-		databaseSet.setProvider(getAttribute(databaseSetNode, PROVIDER));
-		databaseSet.setShardStrategy(getAttribute(databaseSetNode, SHARD_STRATEGY));
-
 		NodeList databaseList = databaseSetNode.getChildNodes();
 		Map<String, DataBase> databases = new HashMap<String, DataBase>();
 		for(int i = 0;i < databaseList.getLength(); i++) {
 			DataBase database = readDataBase(databaseList.item(i));
 			databases.put(database.getName(), database);
 		}
-		return databaseSet;
+		
+		return new DatabaseSet(
+				getAttribute(databaseSetNode, NAME),
+				getAttribute(databaseSetNode, PROVIDER),
+				getAttribute(databaseSetNode, SHARD_STRATEGY),
+				databases );
 	}
 	
 	private DataBase readDataBase(Node dataBaseNode) {
-		DataBase dataBase = new DataBase();
-		dataBase.setName(getAttribute(dataBaseNode, NAME));
-		dataBase.setDatabaseType(getAttribute(dataBaseNode, DATABASE_TYPE));
-		dataBase.setSharding(getAttribute(dataBaseNode, SHARDING));
-		dataBase.setConnectionString(getAttribute(dataBaseNode, CONNECTION_STRING));
-		return dataBase;
+		return new DataBase(
+				getAttribute(dataBaseNode, NAME),
+				getAttribute(dataBaseNode, MASTER).equals(MASTER),
+				getAttribute(dataBaseNode, SHARDING),
+				getAttribute(dataBaseNode, CONNECTION_STRING));
 	}
 	
 	private Node getChildNode(Node node, String name) {

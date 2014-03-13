@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.configure;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalHints;
 
@@ -12,6 +13,17 @@ public class DalConfigure {
 	public DalConfigure(String name, Map<String, DatabaseSet> databaseSets) {
 		this.name = name;
 		this.databaseSets = databaseSets;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public Set<String> getShards(String logicDbName) {
+		DatabaseSet dbSet = databaseSets.get(logicDbName);
+		if(dbSet == null)
+			return null;
+		return dbSet.getAllShards();
 	}
 	
 	public String locateDbName(String logicDbName, String realDbName) {
@@ -35,7 +47,8 @@ public class DalConfigure {
 		if(dbSet == null)
 			return null;
 		
-		return dbSet.getDatabases().get(realDbName).getName();
+//		return dbSet.getDatabases().get(realDbName).getName();
+		return null;
 	}
 
 	/**

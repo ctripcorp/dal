@@ -1,4 +1,3 @@
-
 //向导注释
 //step1
 //step2
@@ -10,7 +9,7 @@
     };
 
     Render.prototype = {
-    	render_layout : function(render_obj){
+        render_layout: function (render_obj) {
             $(render_obj).w2layout({
                 name: 'main_layout',
                 panels: [{
@@ -24,7 +23,7 @@
                 }]
             });
         },
-        render_sidebar : function(){
+        render_sidebar: function () {
             //Begin tree side bar
             w2ui['main_layout'].content('left', $().w2sidebar({
                 name: 'sidebar',
@@ -34,7 +33,7 @@
                     id: "share",
                     text: '与他人共享',
                     icon: 'fa fa-twitter'
-                },{
+                }, {
                     id: "csharpCode",
                     text: '生成C#代码',
                     icon: 'fa fa-play'
@@ -42,7 +41,7 @@
                     id: "javaCode",
                     text: '生成Java代码',
                     icon: 'fa fa-play'
-                },{
+                }, {
                     id: "edit_proj",
                     text: '编辑名称',
                     icon: 'fa fa-edit'
@@ -55,9 +54,9 @@
                     switch (event.menuItem.id) {
                     case "share":
                         $("#users > option:gt(0)").remove();
-                        $.get("/rest/project/users?rand="+Math.random(), function(data){
-                            $.each(data, function(index, value){
-                                $("#users").append($('<option>',{
+                        $.get("/rest/project/users?rand=" + Math.random(), function (data) {
+                            $.each(data, function (index, value) {
+                                $("#users").append($('<option>', {
                                     text: value.userName + "(" + value.userNo + ")",
                                     value: value.userNo
                                 }));
@@ -103,7 +102,7 @@
                 }],
             }));
         },
-        render_grid : function () {
+        render_grid: function () {
             var existsGrid = w2ui['grid'];
             if (existsGrid != undefined) {
                 return;
@@ -157,13 +156,11 @@
                         caption: '生成C#代码',
                         icon: 'fa fa-play'
                     }],
-                    onDblClick: function(target, data){
-                        console.log("double");
-                    },
+                    
                     onClick: function (target, data) {
                         switch (target) {
                         case 'refreshDAO':
-                            
+
                             w2ui['grid'].clear();
                             var current_project = w2ui['grid'].current_project;
                             if (current_project == undefined) {
@@ -172,17 +169,17 @@
                                 current_project = w2ui['sidebar'].nodes[0].nodes[0].id;
                             }
                             cblock($("body"));
-                            $.get("/rest/task?project_id=" + current_project+"&rand="+Math.random(), function (data) {
+                            $.get("/rest/task?project_id=" + current_project + "&rand=" + Math.random(), function (data) {
                                 var allTasks = [];
                                 $.each(data.tableViewSpTasks, function (index, value) {
                                     value.recid = allTasks.length + 1;
                                     value.task_type = "table_view_sp";
                                     value.task_desc = "表/视图/存储过程";
-                                    if(value.table_names != null && value.table_names != ""){
+                                    if (value.table_names != null && value.table_names != "") {
                                         value.sql_content = value.table_names;
                                     }
-                                    if(value.sp_names != null && value.sp_names != ""){
-                                        if(value.sql_content == null || value.sql_content == "")
+                                    if (value.sp_names != null && value.sp_names != "") {
+                                        if (value.sql_content == null || value.sql_content == "")
                                             value.sql_content = value.sp_names;
                                         else
                                             value.sql_content = value.sql_content + "," + value.sp_names;
@@ -219,31 +216,15 @@
                             $(".step3-3").hide();
                             $(".step3-3-1").hide();
                             $("#page1").attr('is_update', '0');
-                            $("#page1").modal({"backdrop": "static"});
+                            $("#page1").modal({
+                                "backdrop": "static"
+                            });
                             window.ajaxutil.reload_dbservers();
                             break;
                         case 'editDAO':
                             var records = w2ui['grid'].getSelection();
-                            if (records.length > 0) {
-                                var record = w2ui['grid'].get(records[0]);
-                                if (record != undefined) {
-                                    $("select[id$=servers] > option:gt(0)").remove();
-                                    $(".step1").show();
-                                    $(".step2").hide();
-                                    $(".step3-1").hide();
-                                    $(".step3-2").hide();
-                                    $(".step3-2-2").hide();
-                                    $(".step3-2-1").hide();
-                                    $(".step3-2-1-1").hide();
-                                    $(".step3-2-1-2").hide();
-                                    $(".step3-3").hide();
-                                    $(".step3-3-1").hide();
-                                    window.ajaxutil.reload_dbservers(function () {
-                                        $("#servers").val(record.server_id);
-                                    });
-                                    $("#page1").attr('is_update', '1');
-                                    $("#page1").modal({"backdrop": "static"});
-                                }
+                            if(records.length > 0){
+                                window.render.editDAO(records[0]);    
                             }
                             break;
                         case 'delDAO':
@@ -251,11 +232,11 @@
                                 var records = w2ui['grid'].getSelection();
                                 var record = w2ui['grid'].get(records[0]);
                                 var url = "";
-                                if(record.task_type == "table_view_sp"){
+                                if (record.task_type == "table_view_sp") {
                                     url = "rest/task/table";
-                                }else if(record.task_type == "auto"){
+                                } else if (record.task_type == "auto") {
                                     url = "rest/task/auto";
-                                }else if(record.task_type == "sql"){
+                                } else if (record.task_type == "sql") {
                                     url = "rest/task/sql";
                                 }
                                 $.post(url, {
@@ -272,7 +253,7 @@
                             window.ajaxutil.generate_code("java");
                             break;
                         case 'csharpCode':
-                           window.ajaxutil.generate_code("csharp");
+                            window.ajaxutil.generate_code("csharp");
                             break;
                         }
                     }
@@ -311,14 +292,41 @@
                     caption: '类型',
                     size: '10%',
                     sortable: true
-                },{
+                }, {
                     field: 'sql_content',
                     caption: '预览',
                     size: '50%'
                 }, ],
-                records: []
+                records: [],
+                onDblClick: function (target, data) {
+                    window.render.editDAO(data.recid);
+                },
             }));
 
+        },
+        editDAO: function(recid){
+            var record = w2ui['grid'].get(recid);
+            if (record != undefined) {
+                $("select[id$=servers] > option:gt(0)").remove();
+                $(".step1").show();
+                $(".step2").hide();
+                $(".step3-1").hide();
+                $(".step3-2").hide();
+                $(".step3-2-2").hide();
+                $(".step3-2-1").hide();
+                $(".step3-2-1-1").hide();
+                $(".step3-2-1-2").hide();
+                $(".step3-3").hide();
+                $(".step3-3-1").hide();
+                window.ajaxutil.reload_dbservers(function () {
+                    $("#servers")[0].selectize.setValue(record.server_id);
+                });
+                $("#page1").attr('is_update', '1');
+                $("#page1").modal({
+                    "backdrop": "static"
+                });
+            }
+            
         },
     };
 

@@ -94,7 +94,7 @@ var reloadProjects = function () {
                     var id = event.target;
                 },
                 onExpand: function (event) {
-                    expandNode(event, value.id, true);
+                    expandNode(event.object, value.id, true);
                 },
                 onCollapse: function (event) {
                     //console.log(this == w2ui["sidebar"]);
@@ -107,11 +107,45 @@ var reloadProjects = function () {
         currentElement.nodes[0].expanded = true;
         currentElement.refresh();
         $("body").unblock();
+
+        var currentUrl = window.location.href;
+
+        if(currentUrl.indexOf("#") != -1){
+            var currentFile = currentUrl.substring(currentUrl.indexOf("#")+1);
+            var splitedFile = currentFile.split("&");
+            var project_id, name;
+            $.each(splitedFile, function(index,value){
+                if(value.indexOf("=") != -1){
+                    var lastStep = value.split("=");
+                    if(lastStep.length == 2){
+                        if(lastStep[0] == "id"){
+                            project_id = lastStep[1];
+                        }else if(lastStep[0] == "name"){
+                            name = lastStep[1];
+                        }
+                    }
+                }
+            });
+            if(project_id != undefined && name != undefined){
+
+                //expandNode(w2ui['sidebar'].get(project_id), project_id, true);
+                w2ui['sidebar'].expand(project_id);
+                
+                $.get("/rest/file/content?" + currentFile, function (data) {
+                    //var real_data = JSON.parse(data);
+                    ace.edit("code_editor").setValue(data);
+                    if (name.match(/cs$/)) {
+                        ace.edit("code_editor").getSession().setMode("ace/mode/csharp");
+                    } else if (name.match(/java$/)) {
+                        ace.edit("code_editor").getSession().setMode("ace/mode/java");
+                    }
+                });
+            }
+        }
     });
 };
 
-var expandNode =  function(event, project_id, from_root){
-     var currentElement = event.object;
+var expandNode =  function(currentElement, project_id, from_root){
 
     if (undefined == currentElement.nodes || currentElement.nodes.length == 0) {
         var url = "/rest/file?parent=true&id=" + project_id;
@@ -136,7 +170,7 @@ var expandNode =  function(event, project_id, from_root){
                         group1: true,
                         plus: true,
                         onExpand: function (event) {
-                            expandNode(event, project_id, false);
+                            expandNode(event.object, project_id, false);
                         },
                         onCollapse: function (event) {
                             event.object.icon = "fa fa-folder-o";
@@ -152,6 +186,7 @@ var expandNode =  function(event, project_id, from_root){
                         icon: 'fa fa-file',
                         type: "file",
                         onClick: function (event) {
+                            window.location.href = "file.jsp#id=" + project_id + "&name=" + event.object.relativeName;
                             $.get("/rest/file/content?id=" + project_id + "&name=" + event.object.relativeName, function (data) {
                                 //var real_data = JSON.parse(data);
                                 ace.edit("code_editor").setValue(data);

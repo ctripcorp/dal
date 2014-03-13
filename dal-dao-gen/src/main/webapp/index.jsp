@@ -17,12 +17,9 @@
       <link href="/static/w2ui/w2ui-1.3.min.css" rel="stylesheet"/>
       <link href="/static/font-awesome/css/font-awesome.css" rel="stylesheet">
       <link href="/static/css/multiple-select.css" rel="stylesheet">
+      <link href="/static/css/selectize.bootstrap3.css" rel="stylesheet">
       <link href="/static/css/common.css" rel="stylesheet">
-      <style type="text/css">
-         body {
-         /*padding-top: 32px;*/
-         }
-      </style>
+     
       <!-- Documentation extras -->
       <!-- 
          <link href="../css/docs.css" rel="stylesheet">
@@ -158,21 +155,15 @@
                   <h4 class="modal-title" id="page1_label">DAO生成向导</h4>
                </div>
                <div class="modal-body" style="position: relative;overflow: auto;width: auto;max-height:420px;">
-                  <div class="steps step1 row-fluid">
+                  <div class="steps step1 row-fluid" style="height:348px;">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">数据库服务器：</label>
                            <select id="servers" class="span7">
-                              <option value="_please_select">--请选择--</option>
                            </select>
                            <button id="del_server" type="button" class="btn btn-danger popup_text">删除选中</button>
                         </div>
                      </div>
-                     <br>
-                     <div class="row-fluid">
-                        <input type="button" id="toggle_add_server" class="offset4 btn btn-primary" value="添加数据库服务器"/>
-                     </div>
-                     <br>
                      <div id="add_server_row" class="row-fluid" style="display:none;">
                      <div class="row-fluid">
                         <div class="control-group">
@@ -220,18 +211,18 @@
                            </select>
                         </div>
                      </div>
-                     <br>
+                  </div>
+                  <br>
                      <div class="row-fluid">
-                        <button id="add_server" type="button" class="offset5 btn btn-primary">保存</button>
+                        <button id="toggle_add_server" type="button" class="offset4 btn btn-info">添加数据库服务器</button>
+                        <button id="add_server" type="button" class="offset1 btn btn-success" style="display:none;">保存</button>
                      </div>
                   </div>
-                  </div>
-                  <div class="steps step2 row-fluid">
+                  <div class="steps step2 row-fluid" style="height:348px;">
                      <div class="row-fluid">
                      <div class="control-group">
                         <label class="control-label popup_label">选择一个数据库：</label>
                         <select id="databases" class="span9 popup_text">
-                           <option value="_please_select">--请选择--</option>
                         </select>
                      </div>
                      </div>
@@ -250,7 +241,7 @@
                      </div>
                      </div>
                   </div>
-                  <div class="steps step3-1 row-fluid" style="height:280px;">
+                  <div class="steps step3-1 row-fluid" style="height:348px;">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">选择表：</label>
@@ -291,12 +282,11 @@
                         <label class="popup_label"><input id="pagination" type="checkbox" checked="true">增加分页方法</label>
                      </div>
                   </div>
-                  <div class="steps step3-2 row-fluid">
+                  <div class="steps step3-2 row-fluid" style="height:348px;">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">选择一个表：</label>
                            <select id="tables" class="span9 popup_text">
-                              <option value="_please_select">--请选择--</option>
                            </select>
                         </div>
                      </div>
@@ -323,7 +313,7 @@
                         </div>
                      </div>
                   </div>
-                  <div class="row-fluid steps step3-2-1" style="height:280px;">
+                  <div class="row-fluid steps step3-2-1" style="height:348px;">
                   <div id="operation_fields" class="step3-2-1-1 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
@@ -364,7 +354,7 @@
                      </div>
                   </div>
                </div>
-               <div class="steps step3-2-2 row-fluid" from="">
+               <div class="steps step3-2-2 row-fluid" from="" style="height:348px;">
                      <div class="control-group">
                         <label class="control-label popup_label">选择SQL风格：</label>
                         <select id="sql_style" class="span9 popup_text">
@@ -373,35 +363,30 @@
                         </select>
                      </div>
                   </div>
-                  <div class="steps step3-3 row-fluid" from="">
+                  <div class="steps step3-3 row-fluid" from="" style="height:348px;">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">生成的类名：</label>
-                           <input id="sql_class_name" class="span7" type="text">
-                            <select id="sql_class_name_select" class="span7" style="display:none;">
-                              <option value='_please_select'>--请选择--</option>
-                           </select>
-                           <button id="class_choose"  type="button" class="span2 btn btn-primary">选择</button>
+
+                            <select id="sql_class_name" class="span9"></select>
+                          
                         </div>
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">实体的类名：</label>
-                           <input id="sql_pojo_name" class="span7" type="text">
-                            <select id="sql_pojo_name_select" class="span7" style="display:none;">
-                              <option value='_please_select'>--请选择--</option>
-                           </select>
-                           <button id="pojo_choose"  type="button" class="span2 btn btn-primary">选择</button>
+                          
+                            <select id="sql_pojo_name" class="span9"></select>
+                           
                         </div>
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">生成方法名：</label>
-                           <input id="sql_method_name" class="span9" type="text">
+                           <input  id="sql_method_name" class="span9" type="text">
                         </div>
                      </div>
-                     <br>
-                     <label class="control-label popup_label">在此输入SQL，占位符：Java请使用?或者:Name形式，对于c#请使用@Name形式</label>
+                     <label class="control-label popup_label">输入查询SQL，占位符：Java请使用?或者:Name形式，c#请使用@Name形式</label>
                      <div class="row-fluid">
                         <div id="sql_editor" class="span12">
                         </div>
@@ -409,7 +394,7 @@
                   </div>
                   <div class="steps step3-3-1 row-fluid" from="">
                      <div class="row-fluid">
-                           <label class="control-label popup_label">填写参数名/参数Index，以及参数类型和值，字符串不需要引号</label>
+                           <label class="control-label popup_label">填写参数名/参数Index，并选择数据类型</label>
                      </div>  
                      <div id="param_list" class="row-fluid">      
                      </div>
@@ -437,6 +422,7 @@
       <script src="/static/js/sprintf.js"></script>
       <script src="/static/ace/ace.js"></script>
       <script src="/static/jquery/jquery.multiple.select.js"></script>
+      <script src="/static/js/selectize.min.js"></script>
       <script src="/static/js/cblock.js"></script>
       <script src="/static/js/ajaxutil.js"></script>
       <script src="/static/js/ui_render.js"></script>

@@ -20,6 +20,7 @@ namespace ${host.getNameSpace()}.Test
             //-------其他可用的方法，VS的intellisense会告诉您的---------
             I${host.getClassName()}Dao ${WordUtils.uncapitalize($host.getClassName())}Dao = DALFactory.${host.getClassName()}Dao;
 
+#if($host.isTable())
             int insertResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Insert${host.getClassName()}(new ${host.getClassName()}());
 
 #if($host.getPrimaryKeys().size() == 0)
@@ -35,7 +36,7 @@ namespace ${host.getNameSpace()}.Test
 #if($host.getPrimaryKeys().size() >= 1)
             var resultsByPk = FindByPk(null);
 #end
-
+#end
             var entities = ${WordUtils.uncapitalize($host.getClassName())}Dao.GetAll();
 
             long count = ${WordUtils.uncapitalize($host.getClassName())}Dao.Count();

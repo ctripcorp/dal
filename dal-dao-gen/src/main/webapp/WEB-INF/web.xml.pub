@@ -91,6 +91,12 @@
 		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
 	
+	<session-config>
+	<!-- Default to 5 minute session timeouts -->
+	<session-timeout>40</session-timeout>
+	</session-config>
+	
+	
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>

@@ -37,7 +37,7 @@ namespace ${host.getNameSpace()}.Interface.IDao
         int Delete${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize(${host.getClassName()})});
 
 #if($host.isSpa())
-#if($host.getSpaDelete().exists())
+#if($host.getSpaDelete().isExist())
         /// <summary>
         /// 删除${host.getClassName()}
         /// </summary>
@@ -45,7 +45,7 @@ namespace ${host.getNameSpace()}.Interface.IDao
         /// <param name="${WordUtils.uncapitalize($p.getName().replace('@', ''))}">${WordUtils.uncapitalize($p.getName())} #></param>
 #end
         /// <returns>状态代码</returns>
-        int Delete${host.getClassName()}(#foreach ($p in $host.getSpaDelete().getParameters()))${p.getType()} ${WordUtils.uncapitalize($p.getName().replace("@",""))}#if($foreach.count != $host.getDeleteParameterList().size()),#end#end);
+        int Delete${host.getClassName()}(#foreach ($p in $host.getSpaDelete().getParameters())${p.getType()} ${WordUtils.uncapitalize($p.getName().replace("@",""))}#if($foreach.count != $host.getSpaDelete().getParameters().size()),#end#end);
 #end
 #end
 #if($host.getPrimaryKeys().size() == 0)

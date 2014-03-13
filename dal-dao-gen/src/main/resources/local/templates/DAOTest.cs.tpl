@@ -29,6 +29,9 @@ namespace ${host.getNameSpace()}.Test
             int updateResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Update${host.getClassName()}(new ${host.getClassName()}());
 
             int deleteResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Delete${host.getClassName()}(new ${host.getClassName()}());
+
+            int deleteByFieldResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Delete${host.getClassName()}(#foreach($p in $host.getPrimaryKeys())#if($p.isValueType())0#{else}null#if($foreach.count != $host.getPrimaryKeys().size()),#end#end#end);
+
 #if($host.getPrimaryKeys().size() == 0)
         */
 #end

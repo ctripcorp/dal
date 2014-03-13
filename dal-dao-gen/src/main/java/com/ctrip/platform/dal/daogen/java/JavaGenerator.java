@@ -28,6 +28,7 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
+import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
@@ -196,34 +197,15 @@ public class JavaGenerator extends AbstractGenerator {
 			VelocityContext context, File mavenLikeDir) {
 		for (JavaTableHost host : tableHosts) {
 			context.put("host", host);
-
-			FileWriter daoWriter = null;
-			FileWriter pojoWriter = null;
-			FileWriter testWriter = null;
 			
-			try {
-				FileUtils.forceMkdir(mavenLikeDir);
-
-				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.java",
-						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
-				pojoWriter = new FileWriter(String.format("%s/Entity/%s.java",
-						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
-				testWriter = new FileWriter(String.format("%s/Test/%sTest.java",
-						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
-
-				Velocity.mergeTemplate("templates/java/DAO.java.tpl", "UTF-8",
-						context, daoWriter);
-				Velocity.mergeTemplate("templates/java/Pojo.java.tpl", "UTF-8",
-						context, pojoWriter);
-				Velocity.mergeTemplate("templates/java/DAOTest.java.tpl", "UTF-8",
-						context, testWriter);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				JavaIOUtils.closeWriter(daoWriter);
-				JavaIOUtils.closeWriter(pojoWriter);
-				JavaIOUtils.closeWriter(testWriter);
-			}
+			GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sDao.java",
+					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAO.java.tpl");
+			
+			GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
+					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
+			
+			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sTest.java",
+					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAOTest.java.tpl");
 		}
 	}
 
@@ -231,33 +213,15 @@ public class JavaGenerator extends AbstractGenerator {
 			File mavenLikeDir) {
 		for (SpHost host : spHosts) {
 			context.put("host", host);
-
-			FileWriter daoWriter = null;
-			FileWriter pojoWriter = null;
-			FileWriter testWriter = null;
 			
-			try {
-
-				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.java",
-						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
-				pojoWriter = new FileWriter(String.format("%s/Entity/%s.java",
-						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
-				testWriter = new FileWriter(String.format("%s/Test/%sTest.java",
-						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
-
-				Velocity.mergeTemplate("templates/java/DAOBySp.java.tpl", "UTF-8",
-						context, daoWriter);
-				Velocity.mergeTemplate("templates/java/Pojo.java.tpl", "UTF-8",
-						context, pojoWriter);
-				Velocity.mergeTemplate("templates/java/DAOBySpTest.java.tpl", "UTF-8",
-						context, testWriter);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				JavaIOUtils.closeWriter(daoWriter);
-				JavaIOUtils.closeWriter(pojoWriter);
-				JavaIOUtils.closeWriter(testWriter);
-			}
+			GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sDao.java",
+					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAOBySp.java.tpl");
+			
+			GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
+					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
+			
+			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sTest.java",
+					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAOBySpTest.java.tpl");
 		}
 	}
 
@@ -309,9 +273,9 @@ public class JavaGenerator extends AbstractGenerator {
 			if (method.getCrud_type().equals("select")
 					|| method.getCrud_type().equals("delete")) {
 				String[] conditions = StringUtils.split(
-						builder.getCondition(), ",");
+						builder.getCondition(), ";");
 				for (String condition : conditions) {
-					String name = StringUtils.split(condition, "_")[0];
+					String name = StringUtils.split(condition, ",")[0];
 					for (JavaParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
 							parameters.add(pHost);
@@ -334,7 +298,7 @@ public class JavaGenerator extends AbstractGenerator {
 				String[] fields = StringUtils.split(
 						builder.getFields(), ",");
 				String[] conditions = StringUtils.split(
-						builder.getCondition(), ",");
+						builder.getCondition(), ";");
 				for (JavaParameterHost pHost : allColumns) {
 					for (String field : fields) {
 						if (pHost.getName().equals(field)) {
@@ -343,7 +307,7 @@ public class JavaGenerator extends AbstractGenerator {
 						}
 					}
 					for (String condition : conditions) {
-						String name = StringUtils.split(condition, "_")[0];
+						String name = StringUtils.split(condition, ",")[0];
 						if (pHost.getName().equals(name)) {
 							parameters.add(pHost);
 							break;
@@ -402,13 +366,14 @@ public class JavaGenerator extends AbstractGenerator {
 				method.setPojoClassName(WordUtils.capitalize(task.getMethod_name()) + "Pojo");
 				List<JavaParameterHost> params = new ArrayList<JavaParameterHost>();
 				for (String param : StringUtils
-						.split(task.getParameters(), ",")) {
-					String[] splitedParam = StringUtils.split(param, "_");
+						.split(task.getParameters(), ";")) {
+					String[] splitedParam = StringUtils.split(param, ",");
 					JavaParameterHost p = new JavaParameterHost();
 					p.setName(splitedParam[0]);
 					p.setSqlType(Integer.valueOf(splitedParam[1]));
 					p.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(p.getSqlType()));
-					p.setValidationValue(splitedParam[2]);
+					//p.setValidationValue(splitedParam[2]);
+					p.setValidationValue(DbUtils.mockATest(p.getSqlType()));
 					params.add(p);
 				}
 				method.setParameters(params);
@@ -450,11 +415,9 @@ public class JavaGenerator extends AbstractGenerator {
 						}
 					}
 				}
-
 			}
 			host.setMethods(methods);
 			hosts.add(host);
-
 		}
 
 		VelocityContext context = new VelocityContext();
@@ -468,43 +431,18 @@ public class JavaGenerator extends AbstractGenerator {
 		for(JavaMethodHost host : pojoHosts.values()){
 			context.put("host", host);
 
-			FileWriter pojoWriter = null;
-			try {
-				pojoWriter = new FileWriter(String.format("%s/Entity/%s.java",
-						mavenLikeDir.getAbsolutePath(), host.getPojoClassName()));
-
-				Velocity.mergeTemplate("templates/java/Pojo.java.tpl", "UTF-8",
-						context, pojoWriter);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				JavaIOUtils.closeWriter(pojoWriter);
-			}
+			GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
+					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
 		}
 
 		for (FreeSqlHost host : hosts) {
 			context.put("host", host);
-
-			FileWriter daoWriter = null;
-			FileWriter testWriter = null;
 			
-			try {
-
-				daoWriter = new FileWriter(String.format("%s/Dao/%sDao.java",
-						mavenLikeDir.getAbsolutePath(), host.getClassName()));
-				testWriter = new FileWriter(String.format("%s/Test/%sTest.java",
-						mavenLikeDir.getAbsolutePath(), host.getClassName()));
-
-				Velocity.mergeTemplate("templates/java/FreeSqlDAO.java.tpl", "UTF-8",
-						context, daoWriter);
-				Velocity.mergeTemplate("templates/java/FreeSqlDAOTest.java.tpl", "UTF-8",
-						context, testWriter);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				JavaIOUtils.closeWriter(daoWriter);
-				JavaIOUtils.closeWriter(testWriter);
-			}
+			GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sDao.java",
+						mavenLikeDir.getAbsolutePath(), host.getClassName()), "templates/java/FreeSqlDAO.java.tpl");
+			
+			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sTest.java",
+					mavenLikeDir.getAbsolutePath(), host.getClassName()), "templates/java/FreeSqlDAOTest.java.tpl");
 		}
 	}
 	

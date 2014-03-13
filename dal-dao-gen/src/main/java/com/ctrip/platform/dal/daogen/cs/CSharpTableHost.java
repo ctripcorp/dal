@@ -13,7 +13,7 @@ public class CSharpTableHost {
 	private String className;
 	private boolean isTable;
 
-	//spa or sp3
+	//spa/sp3 or cud by sql
 	private boolean isSpa;
 	private CSharpSpaOperationHost spaInsert;
 	private CSharpSpaOperationHost spaUpdate;

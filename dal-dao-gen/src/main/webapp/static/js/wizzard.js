@@ -349,13 +349,13 @@
                     if ($("#page1").attr('is_update') == "1") {
                         $('#fields').multipleSelect('setSelects', record.fields.split(","));
                         if (record.condition != undefined && record.condition != "") {
-                            var selectedConditions = record.condition.split(",");
+                            var selectedConditions = record.condition.split(";");
                             $.each(selectedConditions, function (index, value) {
                                 $("#selected_condition").append($('<option>', {
                                     value: value,
-                                    text: sprintf("%s %s", value.split('_')[0],
+                                    text: sprintf("%s %s", value.split(',')[0],
                                         $(sprintf("#condition_values > option[value='%s']",
-                                            value.split('_')[1])).text())
+                                            value.split(',')[1])).text())
                                 }));
                             });
                         }

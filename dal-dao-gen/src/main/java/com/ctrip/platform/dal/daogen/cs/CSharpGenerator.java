@@ -5,6 +5,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -216,10 +217,12 @@ public class CSharpGenerator extends AbstractGenerator {
 			p.setDbType(DbType.getDbTypeFromJdbcType(Integer
 					.valueOf(splitedParam[1])));
 			p.setType(DbType.getCSharpType(p.getDbType()));
+			Object mockValue = DbUtils.mockATest(Integer
+					.valueOf(splitedParam[1]));
 			if (p.getType().equals("string") || p.getType().equals("DateTime")) {
-				p.setValue("\"" + splitedParam[2] + "\"");
+				p.setValue("\"" +mockValue + "\"");
 			} else {
-				p.setValue(splitedParam[2]);
+				p.setValue(mockValue);
 			}
 			params.add(p);
 		}
@@ -353,11 +356,6 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		List<CSharpParameterHost> primaryKeys = new ArrayList<CSharpParameterHost>();
 		for (CSharpParameterHost h : allColumns) {
-			if (h.isNullable() && Consts.CSharpValueTypes.contains(h.getType())) {
-				h.setNullable(true);
-			} else {
-				h.setNullable(false);
-			}
 			if (primaryKeyNames.contains(h.getName())) {
 				h.setPrimary(true);
 				primaryKeys.add(h);
@@ -471,14 +469,6 @@ public class CSharpGenerator extends AbstractGenerator {
 			allColumns.add((CSharpParameterHost) h);
 		}
 
-		for (CSharpParameterHost h : allColumns) {
-			if (h.isNullable() && Consts.CSharpValueTypes.contains(h.getType())) {
-				h.setNullable(true);
-			} else {
-				h.setNullable(false);
-			}
-		}
-
 		CSharpTableHost tableHost = new CSharpTableHost();
 		tableHost.setNameSpace(super.namespace);
 		tableHost.setDatabaseCategory(dbCategory);
@@ -521,22 +511,16 @@ public class CSharpGenerator extends AbstractGenerator {
 			List<GenTaskBySqlBuilder> sqlBuilders, String dbName, String table) {
 		List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
 
-		// 首先设置SqlBuilder的所有方法
-		// size每次都会进行一次计算
-		int wholeSize = sqlBuilders.size();
-		List<Integer> itemsToRemove = new ArrayList<Integer>();
-		for (int i = 0; i < wholeSize; i++) {
-			GenTaskBySqlBuilder currentSqlBuilder = sqlBuilders.get(i);
+		Iterator<GenTaskBySqlBuilder> iter = sqlBuilders.iterator();
+		while (iter.hasNext()) {
+			GenTaskBySqlBuilder currentSqlBuilder =iter.next();
 			if (currentSqlBuilder.getDb_name().equals(dbName)
 					&& currentSqlBuilder.getTable_name().equals(table)) {
 				currentTableBuilders.add(currentSqlBuilder);
-				itemsToRemove.add(i);
+				iter.remove();
 			}
 		}
 
-		for (Integer i : itemsToRemove) {
-			sqlBuilders.remove(i);
-		}
 		return currentTableBuilders;
 	}
 

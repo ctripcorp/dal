@@ -34,7 +34,7 @@ namespace ${host.getNameSpace()}.Test
 #end
 
 #if($host.getPrimaryKeys().size() >= 1)
-            var resultsByPk = FindByPk(null);
+            var resultsByPk = ${WordUtils.uncapitalize($host.getClassName())}Dao.FindByPk(#foreach($p in $host.getPrimaryKeys())#if($p.isValueType())0#{else}null#if($foreach.count != $host.getPrimaryKeys().size()),#end#end#end);
 #end
 #end
             var entities = ${WordUtils.uncapitalize($host.getClassName())}Dao.GetAll();
@@ -58,7 +58,7 @@ namespace ${host.getNameSpace()}.Test
 
 #end
 #foreach($method in $host.getExtraMethods())
-            var ${method.getName()}Result =  ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach($p in $method.getParameters())null#if($foreach.count != $method.getParameters().size()),#end#end);
+            var ${method.getName()}Result =  ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach($p in $method.getParameters())#if($p.isValueType())0#{else}null#if($foreach.count != $host.getPrimaryKeys().size()),#end#end#end);
 
 #end
         }

@@ -171,13 +171,13 @@ namespace ${host.getNameSpace()}.Dao
 #if($host.isSpa())
 #if($host.getSpaDelete().isExist())
         /// <summary>
-        /// 删除<#= className #>
+        /// 删除${host.getClassName()}
         /// </summary>
 #foreach ($p in $host.getSpaDelete().getParameters())
         /// <param name="${WordUtils.uncapitalize($p.getName().replace('@', ''))}">${WordUtils.uncapitalize($p.getName())} #></param>
 #end
         /// <returns>状态代码</returns>
-        public int Delete${host.getClassName()}(#foreach ($p in $host.getSpaDelete().getParameters())${p.getType()} ${WordUtils.uncapitalize($p.getName().replace("@",""))}#if($foreach.count != $host.getDeleteParameterList().size()),#end#end)
+        public int Delete${host.getClassName()}(#foreach ($p in $host.getSpaDelete().getParameters())${p.getType()} ${WordUtils.uncapitalize($p.getName().replace("@",""))}#if($foreach.count != $host.getSpaDelete().getParameters().size()),#end#end)
         {
             try
             {

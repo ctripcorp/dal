@@ -4,11 +4,11 @@ using ${host.getNameSpace()}.Entity.DataModel;
 
 namespace ${host.getNameSpace()}.Interface.IDao
 {
-	public partial interface I${host.getClassName()}Dao
-	{
+        public partial interface I${host.getClassName()}Dao
+        {
 
 #if($host.isTable())
-	       /// <summary>
+               /// <summary>
         ///  插入${host.getClassName()}
         /// </summary>
         /// <param name="${WordUtils.uncapitalize(${host.getClassName()})}">${host.getClassName()}实体对象</param>
@@ -76,7 +76,7 @@ namespace ${host.getNameSpace()}.Interface.IDao
         /// </summary>
         /// <param name="${WordUtils.uncapitalize(${host.getClassName()})}">${host.getClassName()}实体对象列表</param>
         /// <returns>状态代码</returns>
-        int BulkInsertPeople(IList<${host.getClassName()}> ${WordUtils.uncapitalize(${host.getClassName()})}List);
+        int BulkInsert${host.getClassName()}(IList<${host.getClassName()}> ${WordUtils.uncapitalize(${host.getClassName()})}List);
 #end
 
 #if($host.isHasSptU())
@@ -85,7 +85,7 @@ namespace ${host.getNameSpace()}.Interface.IDao
         /// </summary>
         /// <param name="${WordUtils.uncapitalize(${host.getClassName()})}">${host.getClassName()}实体对象列表</param>
         /// <returns>状态代码</returns>
-        int BulkUpdatePeople(IList<${host.getClassName()}> ${WordUtils.uncapitalize(${host.getClassName()})}List);
+        int BulkUpdate${host.getClassName()}(IList<${host.getClassName()}> ${WordUtils.uncapitalize(${host.getClassName()})}List);
 #end
 
 #if($host.isHasSptD())
@@ -94,7 +94,7 @@ namespace ${host.getNameSpace()}.Interface.IDao
         /// </summary>
         /// <param name="${WordUtils.uncapitalize(${host.getClassName()})}">${host.getClassName()}实体对象列表</param>
         /// <returns>状态代码</returns>
-        int BulkDeletePeople(IList<${host.getClassName()}> ${WordUtils.uncapitalize(${host.getClassName()})}List);
+        int BulkDelete${host.getClassName()}(IList<${host.getClassName()}> ${WordUtils.uncapitalize(${host.getClassName()})}List);
 #end
 
         /// <summary>
@@ -135,5 +135,5 @@ namespace ${host.getNameSpace()}.Interface.IDao
         /// <returns></returns>
         #if($method.getCrud_type() == "select")IList<${host.getClassName()}>#{else}int#end ${method.getName()}(#foreach($p in $method.getParameters())${p.getType()} ${WordUtils.uncapitalize($p.getName())}#if($foreach.count != $method.getParameters().size()),#end#end);
 #end
-	}
+        }
 }

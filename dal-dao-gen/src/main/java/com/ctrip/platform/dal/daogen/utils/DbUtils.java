@@ -370,9 +370,11 @@ public class DbUtils {
 					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
 							.equalsIgnoreCase("YES"));
 					host.setNullable(allColumnsRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
+					host.setValueType(Consts.CSharpValueTypes.contains(host.getType()));
 					// 仅获取String类型的长度
 					// if (host.getType().equalsIgnoreCase("string"))
 					host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
+					
 					// COLUMN_SIZE
 
 					allColumns.add(host);

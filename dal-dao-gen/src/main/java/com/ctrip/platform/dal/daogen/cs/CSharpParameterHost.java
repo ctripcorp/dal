@@ -22,6 +22,16 @@ public class CSharpParameterHost extends AbstractParameterHost {
 	
 	private boolean nullable;
 	
+	private boolean valueType;
+	
+	public boolean isValueType() {
+		return valueType;
+	}
+
+	public void setValueType(boolean valueType) {
+		this.valueType = valueType;
+	}
+
 	private int length;
 	
 	private Object value;

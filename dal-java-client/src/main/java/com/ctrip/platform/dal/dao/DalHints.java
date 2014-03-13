@@ -61,12 +61,7 @@ public class DalHints {
 	}
 	
 	public DalHints stopOnError() {
-		set(DalHintEnum.SPA);
-		return this;
-	}
-	
-	public DalHints SPA() {
-		hints.put(DalHintEnum.SPA, new Object());
+		set(DalHintEnum.stopOnError);
 		return this;
 	}
 }

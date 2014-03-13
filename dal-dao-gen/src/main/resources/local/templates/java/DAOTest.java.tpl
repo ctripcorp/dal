@@ -21,22 +21,27 @@ public class ${host.getPojoClassName()}DaoTest {
 			pk = dao.queryByPk(pk);
 			List<${host.getPojoClassName()}> pojos = dao.queryByPage(pk, 100, 0);
 			
+#if($host.getSpaInsert().isExist() == false)
+			// Test SPA related CUD
 			// test insert
+			${host.getPojoClassName()} pojo = new ${host.getPojoClassName()}();
+			// Set pojo attribute value here
+			dao.insert(pojo1);
+			// make some change to the pojo. set primary key
+			dao.update(pojo);
+			
+			// remove the pojo
+			dao.delete(pojo);
+#else
+			// Test normal CUD (non SPA) 
+			KeyHolder keyHolder = new KeyHolder();
 			${host.getPojoClassName()} pojo1 = new ${host.getPojoClassName()}();
 			${host.getPojoClassName()} pojo2 = new ${host.getPojoClassName()}();
 			${host.getPojoClassName()} pojo3 = new ${host.getPojoClassName()}();
-			pojos.add(pojo1, pojo2, pojo3);
-			
-			KeyHolder keyHolder = new KeyHolder();
-			${host.getPojoClassName()} pojo4 = new ${host.getPojoClassName()}();
-			${host.getPojoClassName()} pojo5 = new ${host.getPojoClassName()}();
-			${host.getPojoClassName()} pojo6 = new ${host.getPojoClassName()}();
-			dao.insert(keyHolder, pojo4, pojo5, pojo6);
-			
+			dao.insert(keyHolder, pojo1, pojo2, pojo3);
 			dao.delete(pojo1, pojo2, pojo3);
-			dao.update(pojo4, pojo5, pojo6);
-			Map<String, ?> result = dao.call${host.getPojoClassName()}(param);
-
+			dao.update(pojo1, pojo2, pojo3);
+#end
 			// Test additional customized method
 			int affectedRows = 0;
 			List<${host.getPojoClassName()}> results = null;

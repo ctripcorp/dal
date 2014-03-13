@@ -1,7 +1,23 @@
 package com.ctrip.platform.dal.dao;
 
 public enum DalHintEnum {
-	/*  */
+	/* All the parameters for each Dal client call. Used for locating real database */
+	operation, //DalClient.operation
+	
+	sql,
+	
+	sqls,
+	
+	callString,
+	
+	parameters,
+	
+	parametersList,
+	
+	commands,
+	/* End of parameters for each Dal client call */
+	
+	/* Settings for initialize connection and statement*/
 	timeout,
 	
 	/*  */
@@ -15,7 +31,8 @@ public enum DalHintEnum {
 	maxRows,
 	
 	maxFieldSize,
-
+	/* End of settings for initialize connection and statement*/
+	
 	/*  */
 	shardCol, 
 	
@@ -31,15 +48,8 @@ public enum DalHintEnum {
 	/*  */
 	rowCount,
 	
-	/* SQL Server flag. For CUD operation. Using string as parameter */
-	SPA,
-	
 	/* SQL Server flag, for batch CUD operation. Using table as parameter */
 	// SPT,
-	
-	/*  */
-	columns,
-	// TODO do we need separate operation type like Dal Fx?
 	
 	/* for logging */
 	callingUrl,
@@ -54,5 +64,25 @@ public enum DalHintEnum {
 	isolationLevel,
 	
 	/* Allow customization */
-	userDefined,
+	userDefined0,
+	
+	userDefined1,
+	
+	userDefined2,
+	
+	userDefined3,
+	
+	userDefined4,
+	
+	userDefined5,
+	
+	userDefined6,
+	
+	userDefined7,
+	
+	userDefined8,
+	
+	userDefined9,
+	
+	userDefined10,
 }

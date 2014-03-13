@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
+import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 
@@ -58,11 +59,11 @@ public class DalTransactionManager {
 		connCache.rollbackTransaction(startLevel);
 	}
 
-	public Connection getConnection(DalHints hints, boolean isSelect) throws SQLException {
+	public Connection getConnection(DalHints hints) throws SQLException {
 		ConnectionCache connCache = connectionCacheHolder.get();
 		
 		if(connCache == null) {
-			Connection conn = connPool.getConnection(logicDbName, isMaster(hints), isSelect);
+			Connection conn = connPool.getConnection(logicDbName, isMaster(hints), hints.get(DalHintEnum.operation) == DalClient.OperationEnum.QUERY);
 			conn.setAutoCommit(true);
 			return conn;
 		} else {

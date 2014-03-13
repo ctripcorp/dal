@@ -25,10 +25,10 @@ public class DatabaseSet {
 		
 		// Init map by shard
 		for(DataBase db: databases.values()) {
-			List<DataBase> dbList = databaseByShard.get(db.getName());
+			List<DataBase> dbList = databaseByShard.get(db.getSharding());
 			if(dbList == null) {
 				dbList = new ArrayList<DataBase>();
-				databaseByShard.put(db.getName(), dbList);
+				databaseByShard.put(db.getSharding(), dbList);
 			}
 			dbList.add(db);
 		}

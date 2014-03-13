@@ -31,7 +31,7 @@ public class ShardColModShardStrategy implements DalShardStrategy {
 		
 		Map<String, Integer> shardColValues = (Map<String, Integer>)hints.get(DalHintEnum.shardColValues);
 		
-		if(shardColValues != null)
+		if(shardColValues == null)
 			//configure.getShards(logicDbName);
 			return null;//
 		

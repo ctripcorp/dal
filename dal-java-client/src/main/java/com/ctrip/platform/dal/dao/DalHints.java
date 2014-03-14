@@ -14,6 +14,14 @@ public class DalHints {
 		return hints.get(hint);
 	}
 	
+	public String getString(DalHintEnum hint) {
+		return (String)hints.get(hint);
+	}
+
+	public String[] getStrings(DalHintEnum hint) {
+		return (String[])hints.get(hint);
+	}
+
 	public DalHints set(DalHintEnum hint) {
 		set(hint, null);
 		return this;

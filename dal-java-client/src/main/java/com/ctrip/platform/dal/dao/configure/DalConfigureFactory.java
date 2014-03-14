@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -48,12 +50,14 @@ public class DalConfigureFactory {
 	private static String CONFIGURE_LINUX_LOCATION = "";
 	private static String NAME = "name";
 	private static String DATABASE_SETS = "databaseSets";
-//	private static String DATABASE_SET = "databaseSet";
+	private static String DATABASE_SET = "databaseSet";
+	private static String ADD = "add";
 	private static String PROVIDER = "provider";
 	private static String SHARD_STRATEGY = "shardStrategy";
 	private static String DATABASE_TYPE = "databaseType";
 	private static String SHARDING = "sharding";
 	private static String CONNECTION_STRING = "connectionString";
+	private static String MASTER = "Master";
 
 	public static DalConfigure load() throws Exception {
 		if(System.getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1&& System.getProperty("opath.separator").equals("\\"))
@@ -74,27 +78,24 @@ public class DalConfigureFactory {
 		return load(new FileInputStream(model));
 	}
 	
-	public static DalConfigure load(InputStream in) {
+	public static DalConfigure load(InputStream in) throws Exception {
 		
 		try{
 			Document doc= DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
 			DalConfigure def = factory.getFromDocument(doc);
 			in.close();
 			return def;
-		}catch(Throwable e){
+		} finally {
 			if(in != null)
 				try{
 					in.close();
 				}catch(Throwable e1){
 					
 				}
-			e.printStackTrace();
 		}
-
-		return null;
 	}
 
-	public DalConfigure getFromDocument(Document doc){
+	public DalConfigure getFromDocument(Document doc) throws Exception{
 		Element root = doc.getDocumentElement();
 
 		String name = getAttribute(root, NAME);
@@ -103,38 +104,37 @@ public class DalConfigureFactory {
 		return new DalConfigure(name, databaseSets);
 	}
 	
-	private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode) {
-		NodeList databaseSetList = databaseSetsNode.getChildNodes();
+	private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode) throws Exception {
+		List<Node> databaseSetList = getChildNodes(databaseSetsNode, DATABASE_SET);
 		Map<String, DatabaseSet> databaseSets = new HashMap<String, DatabaseSet>();
-		for(int i = 0;i < databaseSetList.getLength(); i++) {
-			DatabaseSet databaseSet = readDatabaseSet(databaseSetList.item(i));
+		for(int i = 0;i < databaseSetList.size(); i++) {
+			DatabaseSet databaseSet = readDatabaseSet(databaseSetList.get(i));
 			databaseSets.put(databaseSet.getName(), databaseSet);
 		}
 		return databaseSets;
 	}
 	
-	private DatabaseSet readDatabaseSet(Node databaseSetNode) {
-		DatabaseSet databaseSet = new DatabaseSet();
-		databaseSet.setName(getAttribute(databaseSetNode, NAME));
-		databaseSet.setProvider(getAttribute(databaseSetNode, PROVIDER));
-		databaseSet.setShardStrategy(getAttribute(databaseSetNode, SHARD_STRATEGY));
-
-		NodeList databaseList = databaseSetNode.getChildNodes();
+	private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {
+		List<Node> databaseList = getChildNodes(databaseSetNode, ADD);
 		Map<String, DataBase> databases = new HashMap<String, DataBase>();
-		for(int i = 0;i < databaseList.getLength(); i++) {
-			DataBase database = readDataBase(databaseList.item(i));
+		for(int i = 0;i < databaseList.size(); i++) {
+			DataBase database = readDataBase(databaseList.get(i));
 			databases.put(database.getName(), database);
 		}
-		return databaseSet;
+		
+		return new DatabaseSet(
+				getAttribute(databaseSetNode, NAME),
+				getAttribute(databaseSetNode, PROVIDER),
+				getAttribute(databaseSetNode, SHARD_STRATEGY),
+				databases );
 	}
 	
 	private DataBase readDataBase(Node dataBaseNode) {
-		DataBase dataBase = new DataBase();
-		dataBase.setName(getAttribute(dataBaseNode, NAME));
-		dataBase.setDatabaseType(getAttribute(dataBaseNode, DATABASE_TYPE));
-		dataBase.setSharding(getAttribute(dataBaseNode, SHARDING));
-		dataBase.setConnectionString(getAttribute(dataBaseNode, CONNECTION_STRING));
-		return dataBase;
+		return new DataBase(
+				getAttribute(dataBaseNode, NAME),
+				getAttribute(dataBaseNode, DATABASE_TYPE).equals(MASTER),
+				getAttribute(dataBaseNode, SHARDING),
+				getAttribute(dataBaseNode, CONNECTION_STRING));
 	}
 	
 	private Node getChildNode(Node node, String name) {
@@ -149,12 +149,25 @@ public class DalConfigureFactory {
 		return found;
 	}
 	
-	private String getAttribute(Node node, String attributeName){
-		NamedNodeMap map = node.getAttributes();
-		for(int i = 0; i < map.getLength(); i++)
-			if(attributeName.equals(map.item(i).getNodeName()))
-				return map.item(i).getNodeValue();
+	private List<Node> getChildNodes(Node node, String name) {
+		List<Node> nodes = new ArrayList<Node>();
+		NodeList children = node.getChildNodes();
+		for(int i = 0; i < children.getLength(); i++){
+			if(!children.item(i).getNodeName().equalsIgnoreCase(name))
+				continue;
+			nodes.add(children.item(i));
+		}
+		return nodes;
+	}
 
-		return null;
+	
+	private String getAttribute(Node node, String attributeName){
+		return node.getAttributes().getNamedItem(attributeName).getNodeValue();
+//		NamedNodeMap map = node.getAttributes();
+//		for(int i = 0; i < map.getLength(); i++)
+//			if(attributeName.equals(map.item(i).getNodeName()))
+//				return map.item(i).getNodeValue();
+//
+//		return null;
 	}
 }

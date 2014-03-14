@@ -1,7 +1,10 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.Map;
+import java.util.Set;
+
 public enum DalHintEnum {
-	/* All the parameters for each Dal client call. Used for locating real database */
+	/* All the parameters for each Dal client call. Used for locating shard, real database */
 	operation, //DalClient.operation
 	
 	sql,
@@ -15,9 +18,15 @@ public enum DalHintEnum {
 	parametersList,
 	
 	commands,
+
+	shardColValues,// Map<String, Integer> of column name value pair
+	
+	shard, // String
+	
+	shards, // Set<String>
 	/* End of parameters for each Dal client call */
 	
-	/* Settings for initialize connection and statement*/
+	/* Settings for initialize statement */
 	timeout,
 	
 	/*  */
@@ -32,9 +41,6 @@ public enum DalHintEnum {
 	
 	maxFieldSize,
 	/* End of settings for initialize connection and statement*/
-	
-	/*  */
-	shardCol, 
 	
 	/* Is the SQL sensitive */
 	sensitive,

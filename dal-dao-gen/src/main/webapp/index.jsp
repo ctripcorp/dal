@@ -312,13 +312,23 @@
                            </div>
                         </div>
                      </div>
+                     <br>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                        <label class="control-label popup_label">选择SQL风格：</label>
+                        <select id="sql_style" class="span9 popup_text">
+                           <option value="csharp">C#风格(参数形式为@Name)</option>
+                           <option value="java">JAVA风格(参数形式为?)</option>
+                        </select>
+                     </div>
+                     </div>
                   </div>
                   <div class="row-fluid steps step3-2-1" style="height:348px;">
                   <div id="operation_fields" class="step3-2-1-1 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">选择字段：</label>
-                           <select id="fields" multiple="multiple" class="popup_text" style="width:420px;">
+                           <select id="fields" multiple="multiple" class="popup_text" style="width:440px;">
                            </select>
                         </div>
                      </div>
@@ -327,15 +337,15 @@
                   <div id="where_condition" class="step3-2-1-2">
                      <div class="row-fluid">
                         <div class="control-group">
-                           <label class="control-label popup_label">选择条件：</label>
+                           <label class="control-label popup_label">Where条件：</label>
                            <select id="conditions" class="span4">
                               <option value='-1'>--请选择--</option>
                            </select>
-                           <select id="condition_values" class='span4'>
+                           <select id="condition_values" class='span3'>
                               <option value='-1'>--请选择--</option>
                               <option value='0'>=</option>
                               <option value='1'>!=</option>
-                              <option value='2'>&gl;</option>
+                              <option value='2'>&gt;</option>
                               <option value='3'>&lt;</option>
                               <option value='4'>&ge;</option>
                               <option value='5'>&le;</option>
@@ -348,21 +358,18 @@
                      </div>
                      <br>
                      <div class="row-fluid">
-                           <select class="span10" id="selected_condition" multiple="multiple" style="height:180px;">
+                           <select class="span10" id="selected_condition" multiple="multiple" style="height:120px;">
                            </select>
                            <input id="del_condition" type="button" class="span2 btn btn-danger popup_text" value="删除">
                      </div>
                   </div>
-               </div>
-               <div class="steps step3-2-2 row-fluid" from="" style="height:348px;">
-                     <div class="control-group">
-                        <label class="control-label popup_label">选择SQL风格：</label>
-                        <select id="sql_style" class="span9 popup_text">
-                           <option value="csharp">C#风格(参数形式为@Name)</option>
-                           <option value="java">JAVA风格(参数形式为?)</option>
-                        </select>
-                     </div>
+                  <br>
+                  <div class="row-fluid">
+                        <div id="sql_builder" class="span12">
+                        </div>
                   </div>
+               </div>
+               
                   <div class="steps step3-3 row-fluid" from="" style="height:348px;">
                      <div class="row-fluid">
                         <div class="control-group">
@@ -426,6 +433,7 @@
       <script src="/static/js/cblock.js"></script>
       <script src="/static/js/ajaxutil.js"></script>
       <script src="/static/js/ui_render.js"></script>
+      <script src="/static/js/sql_builder.js"></script>
       <script src="/static/js/wizzard.js"></script>
       <script src="/static/js/index.js"></script>
    </body>

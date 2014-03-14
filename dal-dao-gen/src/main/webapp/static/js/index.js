@@ -37,18 +37,20 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', '#share_proj', function (event) {
-        $.post("/rest/project/share_proj", {
+        if($("#users").val() != "_please_select"){
+            $.post("/rest/project/share_proj", {
             "id": w2ui['grid'].current_project,
             "userNo": $("#users").val()
-        }, function (data) {
-            if (data.code == "OK") {
-                alert("分享成功！");
-            } else {
-                alert("分享失败，此用户可能已经可以操作该项目了!");
-            }
+            }, function (data) {
+                if (data.code == "OK") {
+                    alert("分享成功！");
+                } else {
+                    alert("分享失败，此用户可能已经可以操作该项目了!");
+                }
 
-            $("#shareProject").modal("hide");
-        });
+                $("#shareProject").modal("hide");
+            });
+        }
     });
 
     $("#add_condition").click(function () {
@@ -59,11 +61,13 @@ jQuery(document).ready(function () {
                 value: sprintf("%s,%s", selectedField, selectedCondition),
                 text: sprintf("%s %s", $("#conditions").find(":selected").text(), $("#condition_values").find(":selected").text())
             }));
+            window.sql_builder.build();
         }
     });
 
     $("#del_condition").click(function () {
         $("#selected_condition").find(":selected").remove();
+        window.sql_builder.build();
     });
 
     $(document.body).on('click', "#next_step", function (event) {

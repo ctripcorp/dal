@@ -62,6 +62,10 @@ public class GenTaskResource {
 				.valueOf(id));
 
 		TaskAggeragation allTasks = new TaskAggeragation();
+		
+		java.util.Collections.sort(autoTasks);
+		java.util.Collections.sort(tableViewSpTasks);
+		java.util.Collections.sort(sqlTasks);
 
 		allTasks.setAutoTasks(autoTasks);
 		allTasks.setTableViewSpTasks(tableViewSpTasks);

@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.daogen.entity;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class GenTaskByTableViewSp {
+public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	
 	private int id;
 	
@@ -135,6 +135,11 @@ public class GenTaskByTableViewSp {
 		task.setCud_by_sp(rs.getBoolean(10));
 		task.setPagination(rs.getBoolean(11));
 		return task;
+	}
+
+	@Override
+	public int compareTo(GenTaskByTableViewSp o) {
+		return this.getDb_name().compareTo(o.getDb_name());
 	}
 
 }

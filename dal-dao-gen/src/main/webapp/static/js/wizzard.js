@@ -60,6 +60,7 @@
                         valueField: 'id',
                         labelField: 'title',
                         searchField: 'title',
+                        sortField: 'title',
                         options: [],
                         create: false
                     });
@@ -179,6 +180,7 @@
                             valueField: 'id',
                             labelField: 'title',
                             searchField: 'title',
+                            sortField: 'title',
                             options: [],
                             create: false
                         });
@@ -201,6 +203,7 @@
                                     id: value,
                                     title: value
                                 });
+                                console.log(value);
                             });
                             $("#tables")[0].selectize.addOption(results);
                             $("#tables")[0].selectize.refreshOptions(false);
@@ -237,6 +240,7 @@
                             valueField: 'value',
                             labelField: 'title',
                             searchField: 'title',
+                            sortField: 'value',
                             options: [],
                             create: true
                         });
@@ -249,6 +253,7 @@
                             valueField: 'value',
                             labelField: 'title',
                             searchField: 'title',
+                            sortField: 'value',
                             options: [],
                             create: true
                         });
@@ -336,8 +341,8 @@
                         fieldList.push($('<option>', {
                             value: value.name,
                             text: sprintf("%s%s%s",
-                                value.name, value.indexed ? "*" : "",
-                                value.primary ? "+" : "")
+                                value.name, value.indexed ? "(索引)" : "",
+                                value.primary ? "(主键)" : "")
                         }));
 
                         $("#conditions").append($('<option>', {
@@ -345,7 +350,23 @@
                             text: value.name
                         }));
                     });
-                    $("#fields").append(fieldList).multipleSelect("refresh");
+                    $("#sql_builder").height(100);
+                    var sql_builder = ace.edit("sql_builder");
+                    sql_builder.setTheme("ace/theme/monokai");
+                    sql_builder.getSession().setMode("ace/mode/sql");
+
+                    $("#fields").append(fieldList).multipleSelect({
+                        "refresh": true,
+                        onCheckAll: function() {
+                            window.sql_builder.build();
+                        },
+                        onUncheckAll: function() {
+                            ace.edit("sql_builder").setValue("");
+                        },
+                        onClick: function(view) {
+                            window.sql_builder.build();
+                        }
+                    });
                     if ($("#page1").attr('is_update') == "1") {
                         $('#fields').multipleSelect('setSelects', record.fields.split(","));
                         if (record.condition != undefined && record.condition != "") {
@@ -359,10 +380,13 @@
                                 }));
                             });
                         }
+                        ace.edit("sql_builder").setValue(record.sql_content);
                     }
                     current.hide();
 
                     $(".step3-2-1").show();
+                    
+
                     if (op_type == "select") {
                         $(".step3-2-1-1").show();
                         $(".step3-2-1-2").show();
@@ -386,64 +410,73 @@
                 }
                 $("#error_msg").text("");
                 //$(".step_fields").hide();
-                current.hide();
-                $(".step3-2-2").show();
+
+                window.ajaxutil.post_task();
             } else if (current.hasClass("step3-1")) {
                 window.ajaxutil.post_task();
             } else if (current.hasClass("step3-3")) {
+
+                //首先解析Sql语句，提取出参数
+                var regexIndex = /(\?{1})/igm;
+                var regexNames = /[@:](\w+)/igm;
+                var sqlContent = ace.edit("sql_editor").getValue(),
+                    result;
+                var htmls = "";
+                var i = 0;
+                var id_values = {};
+
                 if ($("#page1").attr('is_update') == "1") {
                     var splitedParams = record.parameters.split(";");
-                    var htmls = "";
-                    var i = 0;
-                     var id_values = {};
+                     
                     $.each(splitedParams, function (index, value) {
                         if (value != "") {
                             var resultParams = value.split(",");
-                            htmls = htmls + sprintf(variableHtml, resultParams[0]) + sprintf(variable_typesHtml, sprintf("id='db_type_%s'", ++i));
-                             id_values["db_type_"+i] = resultParams[1];
+                            id_values["db_type_"+ resultParams[0]] = resultParams[1];
                         }
-
                     });
-
-                    if (htmls.length == 0) {
-                        window.ajaxutil.post_task();
-                        return;
-                    }
-
-                    $("#param_list").html(htmls);
-                     $.each(id_values, function(key, value){
-                        $("#"+key).val(value);
-                    });
-
-                } else {
-                    //首先解析Sql语句，提取出参数
-                    var regexIndex = /(\?{1})/igm;
-                    var regexNames = /[@:](\w+)/igm;
-                    var sqlContent = ace.edit("sql_editor").getValue(),
-                        result;
-                    var htmls = "";
-                    var i = 0;
-                    while ((result = regexIndex.exec(sqlContent))) {
-                        htmls = htmls + sprintf(variableHtml, sprintf("param%s", ++i)) + variable_typesHtml;
-                    }
-                    if (htmls.length == 0) {
-                        while ((result = regexNames.exec(sqlContent))) {
-                            htmls = htmls + sprintf(variableHtml, result[1]) + variable_typesHtml;
-                        }
-                    }
-
-                    if (htmls.length == 0) {
-                        window.ajaxutil.post_task();
-                        return;
-                    }
-
-                    $("#param_list").html(htmls);
                 }
+
+                while ((result = regexIndex.exec(sqlContent))) {
+                    i++;
+                    if(id_values[sprintf("param%s", i)] != undefined){
+                        htmls = htmls 
+                        + sprintf(variableHtml, sprintf("param%s", i)) 
+                        + sprintf(variable_typesHtml, 
+                            sprintf("id='db_type_%s'", sprintf("param%s", i)));    
+                    }else{
+                        htmls = htmls 
+                        + sprintf(variableHtml, sprintf("param%s", i)) 
+                        + variable_typesHtml;
+                    }
+                }
+                if (htmls.length == 0) {
+                    while ((result = regexNames.exec(sqlContent))) {
+                        var realName = result[1];
+                        if(id_values[realName] != undefined){
+                            htmls = htmls 
+                            + sprintf(variableHtml, realName) 
+                            + sprintf(variable_typesHtml, 
+                                sprintf("id='db_type_%s'", realName));    
+                        }else{
+                            htmls = htmls 
+                            + sprintf(variableHtml, realName) 
+                            + variable_typesHtml;
+                        }
+                    }
+                }
+
+                if (htmls.length == 0) {
+                    window.ajaxutil.post_task();
+                    return;
+                }
+
+                $("#param_list").html(htmls);
+                $.each(id_values, function(key, value){
+                    $("#"+key).val(value);
+                });
 
                 current.hide();
                 $(".step3-3-1").show();
-            } else if (current.hasClass("step3-2-2")) {
-                window.ajaxutil.post_task();
             } else if (current.hasClass("step3-3-1")) {
                 window.ajaxutil.post_task();
             }
@@ -461,9 +494,7 @@
                 $(".step2").show();
             } else if (current.hasClass("step3-2-1")) {
                 $(".step3-2").show();
-            } else if (current.hasClass("step3-2-2")) {
-                $(".step3-2-1").show();
-            } else if (current.hasClass("step3-3-1")) {
+            }  else if (current.hasClass("step3-3-1")) {
                 $(".step3-3").show();
             }
         }

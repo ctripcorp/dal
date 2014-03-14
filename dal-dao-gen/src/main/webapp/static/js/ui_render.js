@@ -192,6 +192,7 @@
                                     value.recid = allTasks.length + 1;
                                     value.task_type = "auto";
                                     value.task_desc = "SQL构建";
+                                    value.class_name= value.table_name;
                                     allTasks.push(value);
                                 });
                                 $.each(data.sqlTasks, function (index, value) {
@@ -210,7 +211,6 @@
                             $(".step3-1").hide();
                             $(".step3-2").hide();
                             $(".step3-2-1").hide();
-                            $(".step3-2-2").hide();
                             $(".step3-2-1-1").hide();
                             $(".step3-2-1-2").hide();
                             $(".step3-3").hide();
@@ -311,8 +311,7 @@
                 $(".step1").show();
                 $(".step2").hide();
                 $(".step3-1").hide();
-                $(".step3-2").hide();
-                $(".step3-2-2").hide();
+                $(".step3-2").hide();;
                 $(".step3-2-1").hide();
                 $(".step3-2-1-1").hide();
                 $(".step3-2-1-2").hide();

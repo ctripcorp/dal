@@ -24,6 +24,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
 import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.domain.TableSpNames;
 import com.ctrip.platform.dal.daogen.entity.DbServer;
 import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
@@ -50,6 +51,8 @@ public class DatabaseResource {
 			dataSource.setUser("xxx");
 			dataSource.setPassword("xxx");
 		}
+		
+		java.util.Collections.sort(dbServers);
 
 		return dbServers;
 
@@ -140,6 +143,7 @@ public class DatabaseResource {
 		}
 
 		try {
+			java.util.Collections.sort(results);
 			return mapper.writeValueAsString(results);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
@@ -153,7 +157,9 @@ public class DatabaseResource {
 	public String getTableNames(@QueryParam("server") int server,
 			@QueryParam("db_name") String dbName) {
 		try {
-			return mapper.writeValueAsString(DbUtils.getAllTableNames(server, dbName));
+			List<String> results = DbUtils.getAllTableNames(server, dbName);
+			java.util.Collections.sort(results);
+			return mapper.writeValueAsString(results);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 			return null;
@@ -246,6 +252,8 @@ public class DatabaseResource {
 			}
 
 		}
+		
+		java.util.Collections.sort(fields);
 
 		return fields;
 
@@ -257,9 +265,17 @@ public class DatabaseResource {
 	public TableSpNames getTableSPNames(@QueryParam("server") int server,
 			@QueryParam("db_name") String dbName) {
 		TableSpNames tableSpNames = new TableSpNames();
-		tableSpNames.setSps(DbUtils.getAllSpNames(server, dbName));
-		tableSpNames.setViews(DbUtils.getAllViewNames(server, dbName));
-		tableSpNames.setTables(DbUtils.getAllTableNames(server, dbName));
+		List<String> views = DbUtils.getAllViewNames(server, dbName);
+		List<String> tables = DbUtils.getAllTableNames(server, dbName);
+		List<StoredProcedure> sps = DbUtils.getAllSpNames(server, dbName);
+		
+		java.util.Collections.sort(views);
+		java.util.Collections.sort(tables);
+		java.util.Collections.sort(sps);
+		
+		tableSpNames.setSps(sps);
+		tableSpNames.setViews(views);
+		tableSpNames.setTables(tables);
 
 		return tableSpNames;
 	}

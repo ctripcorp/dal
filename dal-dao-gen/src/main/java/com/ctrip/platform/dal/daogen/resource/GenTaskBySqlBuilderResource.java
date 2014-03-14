@@ -59,12 +59,12 @@ public class GenTaskBySqlBuilderResource {
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);
-				task.setSql_content(SqlBuilder.formatSql(task));
+				task.setSql_content(sql_content);
 				if (0 >= daoBySqlBuilder.updateTask(task)) {
 					return Status.ERROR;
 				}
 			}else{
-				task.setSql_content(SqlBuilder.formatSql(task));
+				task.setSql_content(sql_content);
 				if (0 >= daoBySqlBuilder.insertTask(task)) {
 					return Status.ERROR;
 				}

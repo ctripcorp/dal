@@ -76,33 +76,21 @@ public class DalStatementCreator {
 		}
 	}
 	
-	/**
-	 * TODO: Need to consider situation which the parameter is set from name, not index
-	 * @param statement
-	 * @param parameters
-	 * @throws Exception
-	 */
 	private void setParameter(CallableStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
 			if(parameter.isInputParameter()) {
 				if(parameter.getValue() == null)
-					statement.setNull(parameter.getIndex(), parameter.getSqlType());
+					statement.setNull(parameter.getName(), parameter.getSqlType());
 				else
-					statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+					statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
 			}
 		}
 	}
 	
-	/**
-	 * TODO: Need to consider situation which the parameter is set from name, not index
-	 * @param statement
-	 * @param parameters
-	 * @throws Exception
-	 */
 	private void registerOutParameters(CallableStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
 			if(parameter.isOutParameter())
-				statement.registerOutParameter(parameter.getIndex(), parameter.getSqlType());
+				statement.registerOutParameter(parameter.getName(), parameter.getSqlType());
 		}
 	}
 	

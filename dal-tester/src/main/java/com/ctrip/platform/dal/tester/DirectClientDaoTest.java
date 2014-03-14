@@ -184,8 +184,8 @@ public class DirectClientDaoTest {
 		try {
 			int testId = 100;
 			StatementParameters parameters = new StatementParameters();
-			parameters.set(1, Types.VARCHAR, "version");
-			parameters.set(2, Types.INTEGER, testId);
+			parameters.set("version", Types.VARCHAR, "version");
+			parameters.set("increment", Types.INTEGER, testId);
 
 			DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
 			parameters.setResultsParameter("result", extractor);
@@ -277,7 +277,7 @@ public class DirectClientDaoTest {
 					cmds.add(new DalCommand() {
 						@Override
 						public boolean execute(DalClient client) throws SQLException {
-							String delete = "delete from xPerson where id > 2000";
+							String delete = "delete from Person where id > 2000";
 							String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
 							String update = "update Person set name='abcde' where id > 2000";
 							String[] sqls = new String[]{insert, insert, insert, update};
@@ -368,13 +368,13 @@ public class DirectClientDaoTest {
 		//test.testType("dao_test", "ManyTypes");
 		//test.test();
 //		test.test2();
-		//test.testAutoIncrement();
-		//test.testBatch();
-		//test.testBatch2();
-		//test.testCommand();
-		//test.testSP();
-		//test.testSPInOut();
-		//test.testConnectionException();
+		test.testAutoIncrement();
+		test.testBatch();
+		test.testBatch2();
+		test.testCommand();
+		test.testSP();
+		test.testSPInOut();
+		test.testConnectionException();
 		test.testTransactionException();
 		try {
 			Thread.sleep(30 * 1000);

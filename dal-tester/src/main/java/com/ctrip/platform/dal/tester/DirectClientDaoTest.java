@@ -14,8 +14,6 @@ import com.ctrip.freeway.config.LogConfig;
 import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
-import com.ctrip.platform.dal.common.enums.DbType;
-import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -90,8 +88,7 @@ public class DirectClientDaoTest {
 			long id = kh.getKey().longValue();
 			
 			StatementParameters parameters = new StatementParameters();
-			StatementParameter param  = StatementParameter.newBuilder().setDbType(DbType.Int32).setValue(id).setIndex(1).setName("").build();
-			parameters.add(param);
+			parameters.set(1, Types.INTEGER, id);
 
 			client.update(delete, parameters, hints);
 			selectPerson(client);
@@ -130,14 +127,8 @@ public class DirectClientDaoTest {
 			
 			for (int i = 0; i < parameterList.length; i++) {
 				StatementParameters parameters = new StatementParameters();
-				StatementParameter param;
-				
-				param = StatementParameter.newBuilder().setDbType(DbType.String).setValue("abcde" + i).setIndex(1).build();
-				parameters.add(param);
-				
-				param  = StatementParameter.newBuilder().setDbType(DbType.Int32).setValue(i).setIndex(2).build();
-				parameters.add(param);
-
+				parameters.set(1, Types.VARCHAR, "abcde" + i);
+				parameters.set(2, Types.INTEGER, i);
 				parameterList[i] = parameters;	
 			}
 			
@@ -193,19 +184,12 @@ public class DirectClientDaoTest {
 		try {
 			int testId = 100;
 			StatementParameters parameters = new StatementParameters();
-			
-			StatementParameter param  = StatementParameter.newBuilder().setDbType(DbType.String).setIndex(1).setName("version").setDirection(ParameterDirection.Output).build();
-			parameters.add(param);
-
-			param  = StatementParameter.newBuilder().setDbType(DbType.Int32).setValue(testId).setIndex(2).setName("increment").setDirection(ParameterDirection.InputOutput).build();
-			parameters.add(param);
+			parameters.set(1, Types.VARCHAR, "version");
+			parameters.set(2, Types.INTEGER, testId);
 
 			DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
-			param = StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName("result").build();
-			parameters.add(param);
-
-			param  = StatementParameter.newBuilder().setResultsParameter(true).setName("count").build();
-			parameters.add(param);
+			parameters.setResultsParameter("result", extractor);
+			parameters.setResultsParameter("count");
 
 			System.out.println(client.call("call inOutTest(?, ?)", parameters, hints));
 			
@@ -262,7 +246,7 @@ public class DirectClientDaoTest {
 		DalClient client = DalClientFactory.getClient("dao_test");
 		
 		try {
-			client.query(sql, parameters, hints, new DalResultSetExtractor<Object>() {
+			client.query(sql2, parameters, hints, new DalResultSetExtractor<Object>() {
 				@Override
 				public Object extract(ResultSet rs) throws SQLException {
 					throw new RuntimeException("test");
@@ -374,24 +358,24 @@ public class DirectClientDaoTest {
 		Configuration.addResource("conf.properties");
 		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
 		try {
-			DalClientFactory.initDirectClientFactory(reader, "HtlProductdb", "dao_test");
+			DalClientFactory.initDirectClientFactory(reader, "dao_test");
 		} catch (Exception e) {
 			System.exit(0);
 		}
 		
 		DirectClientDaoTest test = new DirectClientDaoTest();
 		
-		test.testType("dao_test", "ManyTypes");
-//		test.test();
+		//test.testType("dao_test", "ManyTypes");
+		//test.test();
 //		test.test2();
-//		test.testAutoIncrement();
-//		test.testBatch();
-//		test.testBatch2();
-//		test.testCommand();
-		test.testSP();
-//		test.testSPInOut();
-//		test.testConnectionException();
-//		test.testTransactionException();
+		//test.testAutoIncrement();
+		//test.testBatch();
+		//test.testBatch2();
+		//test.testCommand();
+		//test.testSP();
+		//test.testSPInOut();
+		//test.testConnectionException();
+		test.testTransactionException();
 		try {
 			Thread.sleep(30 * 1000);
 		} catch (InterruptedException e) {

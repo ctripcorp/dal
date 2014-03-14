@@ -9,10 +9,24 @@ import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
+import com.ctrip.platform.dal.dao.configure.DalConfigure;
+import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 
 public class DalClientFactory {
 	private static AtomicReference<DruidDataSourceWrapper> connPool = new AtomicReference<DruidDataSourceWrapper>();
+	private static AtomicReference<DalConfigure> configureRef = new AtomicReference<DalConfigure>();
 
+	public static void initClientFactory() throws Exception {
+		if(configureRef.get() != null)
+			return;
+		
+		synchronized(DalClientFactory.class) {
+			if(configureRef.get() != null)
+				return;
+			configureRef.set(DalConfigureFactory.load("e:/Dal.config"));
+		}
+	}
+	
 	public static void initClientFactory(String...logicDbNames) throws Exception {
 		Configuration.addResource("conf.properties");
 		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));

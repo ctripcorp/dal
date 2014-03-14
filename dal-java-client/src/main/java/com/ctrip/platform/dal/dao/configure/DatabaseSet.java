@@ -19,7 +19,8 @@ public class DatabaseSet {
 	private DalShardStrategy strategy;
 	private Map<String, DataBase> databases;
 	// Key is shard id, value is all database under in this shard
-	private Map<String, List<DataBase>> databaseByShard = new HashMap<String, List<DataBase>>();
+	private Map<String, List<DataBase>> masterDbByShard = new HashMap<String, List<DataBase>>();
+	private Map<String, List<DataBase>> slaveDbByShard = new HashMap<String, List<DataBase>>();
 
 	public DatabaseSet(String name, String provider, String shardStrategy, Map<String, DataBase> databases) throws Exception {
 		this.name = name;
@@ -33,10 +34,13 @@ public class DatabaseSet {
 	private void initShards() throws Exception {
 		// Init map by shard
 		for(DataBase db: databases.values()) {
-			List<DataBase> dbList = databaseByShard.get(db.getSharding());
+			Map<String, List<DataBase>> dbByShard = db.isMaster() ?
+					masterDbByShard : slaveDbByShard;
+				
+			List<DataBase> dbList = dbByShard.get(db.getSharding());
 			if(dbList == null) {
 				dbList = new ArrayList<DataBase>();
-				databaseByShard.put(db.getSharding(), dbList);
+				dbByShard.put(db.getSharding(), dbList);
 			}
 			dbList.add(db);
 		}
@@ -74,11 +78,36 @@ public class DatabaseSet {
 	public Map<String, DataBase> getDatabases() {
 		return databases;
 	}
-	public void setDatabases(Map<String, DataBase> databases) {
-		this.databases = databases;
-	}
 	
 	public Set<String> getAllShards() {
-		return databaseByShard.keySet();
+		return masterDbByShard.keySet();
+	}
+
+	public DalShardStrategy getStrategy() {
+		return strategy;
+	}
+	
+	public List<DataBase> getMasterDbs(String shard) {
+		return masterDbByShard.get(shard);
+	}
+
+	public List<DataBase> getSlaveDbs(String shard) {
+		return slaveDbByShard.get(shard);
+	}
+	
+	public String getRandomRealDbName(String shard, boolean isMaster, boolean isSelect) {
+		List<DataBase> dbs;
+		if (isMaster)
+			return getRandomRealDbName(getMasterDbs(shard));
+		
+		if (isSelect)
+			getRandomRealDbName(getSlaveDbs(shard));
+
+		return getRandomRealDbName(getMasterDbs(shard));
+	}
+	
+	private String getRandomRealDbName(List<DataBase> dbs) {
+		int index = (int)(Math.random() * dbs.size());
+		return dbs.get(index).getConnectionString();
 	}
 }

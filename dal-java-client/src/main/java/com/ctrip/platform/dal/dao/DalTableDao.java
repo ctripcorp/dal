@@ -16,7 +16,7 @@ import java.util.Set;
  * @author jhhe
  */
 public final class DalTableDao<T> {
-	public static final String TMPL_SQL_FIND_BY_PK = "SELECT * FROM %s WHERE %s";
+	public static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
 	public static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
 	public static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
 	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
@@ -52,7 +52,7 @@ public final class DalTableDao<T> {
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, getColumnType(parser.getPrimaryKeyNames()[0]), id);
 		
-		String selectSql = String.format(TMPL_SQL_FIND_BY_PK, parser.getTableName(), pkSql);
+		String selectSql = String.format(TMPL_SQL_FIND_BY, parser.getTableName(), pkSql);
 
 		return queryDao.queryForObject(selectSql, parameters, hints, parser);
 	}
@@ -62,7 +62,7 @@ public final class DalTableDao<T> {
 		StatementParameters parameters = new StatementParameters();
 		addParameters(parameters, parser.getPrimaryKeys(pk));
 		
-		String selectSql = String.format(TMPL_SQL_FIND_BY_PK, parser.getTableName(), pkSql);
+		String selectSql = String.format(TMPL_SQL_FIND_BY, parser.getTableName(), pkSql);
 
 		return queryDao.queryForObject(selectSql, parameters, hints, parser);
 	}
@@ -74,25 +74,25 @@ public final class DalTableDao<T> {
 	
 	public List<T> query(String whereClause, StatementParameters parameters, DalHints hints)
 			throws SQLException {
-		String selectSql = String.format(TMPL_SQL_FIND_BY_PK, parser.getTableName(), whereClause);
+		String selectSql = String.format(TMPL_SQL_FIND_BY, parser.getTableName(), whereClause);
 		return queryDao.query(selectSql, parameters, hints, parser);
 	}
 	
 	public T queryFirst(String whereClause, StatementParameters parameters, DalHints hints)
 			throws SQLException {
-		String selectSql = String.format(TMPL_SQL_FIND_BY_PK, parser.getTableName(), whereClause);
+		String selectSql = String.format(TMPL_SQL_FIND_BY, parser.getTableName(), whereClause);
 		return queryDao.queryFisrt(selectSql, parameters, hints, parser);
 	}
 
 	public List<T> queryTop(String whereClause, StatementParameters parameters, DalHints hints, int count)
 			throws SQLException {
-		String selectSql = String.format(TMPL_SQL_FIND_BY_PK, parser.getTableName(), whereClause);
+		String selectSql = String.format(TMPL_SQL_FIND_BY, parser.getTableName(), whereClause);
 		return queryDao.queryTop(selectSql, parameters, hints, parser, count);
 	}
 	
 	public List<T> queryFrom(String whereClause, StatementParameters parameters, DalHints hints, int start, int count)
 			throws SQLException {
-		String selectSql = String.format(TMPL_SQL_FIND_BY_PK, parser.getTableName(), whereClause);
+		String selectSql = String.format(TMPL_SQL_FIND_BY, parser.getTableName(), whereClause);
 		return queryDao.queryFrom(selectSql, parameters, hints, parser, start, count);
 	}
 	

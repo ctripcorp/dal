@@ -46,11 +46,23 @@ public class ${host.getPojoClassName()}Dao {
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}
 
-#if($host.isHasIdentity())
+#if($host.isIntegerPk())
 	public ${host.getPojoClassName()} queryByPk(Number id)
 			throws SQLException {
 		DalHints hints = new DalHints();
 		return client.queryByPk(id, hints);
+	}
+#else
+	public ${host.getPojoClassName()} queryByPk(${host.getPkParameterDeclaration()})
+			throws SQLException {
+		DalHints hints = new DalHints();
+		${host.getPojoClassName()} pk = new ${host.getPojoClassName()}();
+			
+#foreach( $field in ${host.getPrimaryKeys()} )
+		pojo.set${field.getCapitalizedName()}(${field.getUncapitalizedName()});
+#end
+
+		return client.queryByPk(pk, hints);
 	}
 #end
 
@@ -59,8 +71,6 @@ public class ${host.getPojoClassName()}Dao {
 		DalHints hints = new DalHints();
 		return client.queryByPk(pk, hints);
 	}
-	
-	// TODO add query by PK column list
 	
 	public List<${host.getPojoClassName()}> queryByPage(${host.getPojoClassName()} pk, int pageSize, int pageNo)
 			throws SQLException {

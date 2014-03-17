@@ -4,7 +4,7 @@ package com.ctrip.platform.dal.daogen.entity;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class DbServer {
+public class DbServer implements Comparable<DbServer> {
 	
 	private int id;
 	
@@ -97,6 +97,11 @@ public class DbServer {
 		data.setPassword(rs.getString(7));
 		data.setDb_type(rs.getString(8));
 		return data;
+	}
+
+	@Override
+	public int compareTo(DbServer o) {
+		return this.getServer().compareTo(o.getServer());
 	}
 
 }

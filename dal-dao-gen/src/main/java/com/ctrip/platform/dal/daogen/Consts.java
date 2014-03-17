@@ -15,6 +15,11 @@ public class Consts {
 	 */
 	public static Map<String, String> WhereConditionMap;
 	
+	/**
+	 * 系统数据库，如master, tempdb等
+	 */
+	public static List<String> SystemDatabases;
+	
 	public static Map<Integer, Class> jdbcSqlTypeToJavaClass;
 	public static Map<Integer, String> jdbcSqlTypeDisplay;
 	
@@ -24,6 +29,7 @@ public class Consts {
 		CSharpValueTypes = new ArrayList<String>();
 		WhereConditionMap = new HashMap<String, String>();
 		jdbcSqlTypeToJavaClass= new HashMap<Integer, Class>();
+		SystemDatabases = new ArrayList<String>();
 		
 		CSharpValueTypes.add("sbyte");
 		CSharpValueTypes.add("byte");
@@ -52,6 +58,17 @@ public class Consts {
 		WhereConditionMap.put("6", "Between");
 		WhereConditionMap.put("7", "Like");
 		WhereConditionMap.put("8", "In");
+		
+		SystemDatabases.add("master");
+		SystemDatabases.add("model");
+		SystemDatabases.add("msdb");
+		SystemDatabases.add("Resource");
+		SystemDatabases.add("tempdb");
+		SystemDatabases.add("distribution");
+		
+		SystemDatabases.add("information_schema");
+		SystemDatabases.add("performance_schema");
+		SystemDatabases.add("mysql");
 		
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.BIT, Boolean.class);
 		

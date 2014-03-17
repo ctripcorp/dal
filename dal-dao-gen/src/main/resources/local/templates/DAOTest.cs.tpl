@@ -30,7 +30,9 @@ namespace ${host.getNameSpace()}.Test
 
             int deleteResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Delete${host.getClassName()}(new ${host.getClassName()}());
 
+#if($host.isSpa())
             int deleteByFieldResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Delete${host.getClassName()}(#foreach($p in $host.getPrimaryKeys())#if($p.isValueType())0#{else}null#if($foreach.count != $host.getPrimaryKeys().size()),#end#end#end);
+#end
 
 #if($host.getPrimaryKeys().size() == 0)
         */

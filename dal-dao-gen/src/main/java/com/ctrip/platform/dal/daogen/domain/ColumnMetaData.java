@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.domain;
 
-public class ColumnMetaData {
+public class ColumnMetaData implements Comparable<ColumnMetaData> {
 	
 	private String name;
 	
@@ -113,6 +113,11 @@ public class ColumnMetaData {
 
 	public void setJavaClass(Class javaClass) {
 		this.javaClass = javaClass;
+	}
+
+	@Override
+	public int compareTo(ColumnMetaData o) {
+		return this.getName().compareTo(o.getName());
 	}
 
 }

@@ -44,6 +44,7 @@
 
                 postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
                 postData["condition"] = selectedConditions.join(";");
+                postData["sql_content"] = ace.edit("sql_builder").getValue();
 
                 $.post("/rest/task/auto", postData, function (data) {
                     $("#page1").modal('hide');
@@ -120,6 +121,7 @@
                         valueField: 'id',
                         labelField: 'title',
                         searchField: 'title',
+                        sortField: 'title',
                         options: [],
                         create: false
                     });
@@ -191,6 +193,9 @@
             }, function (data) {
                 $("body").unblock();
                 window.location.href = "/file.jsp";
+            }).fail(function(data){
+                alert("生成异常！");
+                $("body").unblock();
             });
         }
     };

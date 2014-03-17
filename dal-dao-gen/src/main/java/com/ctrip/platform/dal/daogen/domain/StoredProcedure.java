@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.daogen.domain;
 
 
-public class StoredProcedure {
+public class StoredProcedure implements Comparable<StoredProcedure> {
 	
 	private String schema;
 	
@@ -39,6 +39,18 @@ public class StoredProcedure {
 		}
 
 		return false;
+	}
+
+	@Override
+	public int compareTo(StoredProcedure o) {
+		
+		int schemaCompare = this.getSchema().compareTo(o.getSchema());
+		
+		if(0 != schemaCompare){
+			return schemaCompare;
+		}
+		
+		return this.getName().compareTo(o.getName());
 	}
 
 }

@@ -4,7 +4,7 @@ package com.ctrip.platform.dal.daogen.entity;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class GenTaskByFreeSql  {
+public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
 	private int id;
 	
@@ -119,6 +119,21 @@ public class GenTaskByFreeSql  {
 		task.setSql_content(rs.getString(9));
 		task.setParameters(rs.getString(10));
 		return task;
+	}
+
+	@Override
+	public int compareTo(GenTaskByFreeSql o) {
+		int result =  this.getDb_name().compareTo(o.getDb_name());
+		if(result != 0){
+			return result;
+		}
+		
+		result = this.getClass_name().compareTo(o.getClass_name());
+		if(result != 0){
+			return result;
+		}
+		
+		return this.getMethod_name().compareTo(o.getMethod_name());
 	}
 	
 }

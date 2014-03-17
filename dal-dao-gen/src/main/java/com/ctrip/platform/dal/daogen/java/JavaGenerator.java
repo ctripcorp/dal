@@ -1,12 +1,12 @@
 package com.ctrip.platform.dal.daogen.java;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -14,12 +14,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
 
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
-import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.entity.DbServer;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
@@ -29,8 +27,6 @@ import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
-import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 public class JavaGenerator extends AbstractGenerator {
 
@@ -39,11 +35,6 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	private static JavaGenerator instance = new JavaGenerator();
-	private static DaoOfDbServer dbServerDao;
-
-	static {
-		dbServerDao = SpringBeanGetter.getDaoOfDbServer();
-	}
 
 	public static JavaGenerator getInstance() {
 		return instance;
@@ -70,7 +61,7 @@ public class JavaGenerator extends AbstractGenerator {
 
 			String prefix = tableViewSp.getPrefix();
 			String suffix = tableViewSp.getSuffix();
-			boolean pagination = tableViewSp.isPagination();
+			
 			boolean cud_by_sp = tableViewSp.isCud_by_sp();
 			DbServer dbServer = daoOfDbServer.getDbServerByID(tableViewSp
 					.getServer_id());
@@ -240,22 +231,16 @@ public class JavaGenerator extends AbstractGenerator {
 			List<GenTaskBySqlBuilder> sqlBuilders, String dbName, String table) {
 		List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
 
-		// 首先设置SqlBuilder的所有方法
-		// size每次都会进行一次计算
-		int wholeSize = sqlBuilders.size();
-		List<Integer> itemsToRemove = new ArrayList<Integer>();
-		for (int i = 0; i < wholeSize; i++) {
-			GenTaskBySqlBuilder currentSqlBuilder = sqlBuilders.get(i);
+		Iterator<GenTaskBySqlBuilder> iter = sqlBuilders.iterator();
+		while (iter.hasNext()) {
+			GenTaskBySqlBuilder currentSqlBuilder =iter.next();
 			if (currentSqlBuilder.getDb_name().equals(dbName)
 					&& currentSqlBuilder.getTable_name().equals(table)) {
 				currentTableBuilders.add(currentSqlBuilder);
-				itemsToRemove.add(i);
+				iter.remove();
 			}
 		}
-
-		for (Integer i : itemsToRemove) {
-			sqlBuilders.remove(i);
-		}
+		
 		return currentTableBuilders;
 	}
 	

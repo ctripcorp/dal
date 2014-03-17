@@ -16,7 +16,6 @@ import org.apache.velocity.VelocityContext;
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
-import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.entity.DbServer;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
@@ -43,6 +42,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	private List<CSharpTableHost> spHosts;
 	private List<CSharpFreeSqlHost> freeSqlHosts;
 	private List<CSharpFreeSqlPojoHost> freeSqlPojoHosts;
+	private Map<String, String> dbs = new HashMap<String, String>();
 
 	/**
 	 * 生成C#的公共部分，如Dal.config，Program.cs以及DALFactory.cs
@@ -77,16 +77,26 @@ public class CSharpGenerator extends AbstractGenerator {
 					"templates/FreeSqlTest.cs.tpl");
 		}
 
+		context.put("dbs", dbs);
+		context.put("namespace", namespace);
+		context.put("freeSqlHosts", freeSqlHosts);
+		context.put("tableHosts", tableHosts);
+		context.put("spHosts", spHosts);
+
+		GenUtils.mergeVelocityContext(context, String.format("%s/Dal.config",
+				csMavenLikeDir.getAbsolutePath()), "templates/Dal.config.tpl");
+
+		GenUtils.mergeVelocityContext(
+				context,
+				String.format("%s/DalFactory.cs",
+						csMavenLikeDir.getAbsolutePath()),
+				"templates/DalFactory.cs.tpl");
+
 		generateTableDao(tableHosts, context, csMavenLikeDir);
 		generateSpDao(spHosts, context, csMavenLikeDir);
-
-		buildCSharpCommonVelocity(context, csMavenLikeDir);
-
 	}
 
-	private void buildCSharpCommonVelocity(VelocityContext context,
-			File csMavenLikeDir) {
-		Map<String, String> dbs = new HashMap<String, String>();
+	private void buildCSharpCommonVelocity(File csMavenLikeDir) {
 
 		for (GenTaskByFreeSql task : freeSqls) {
 			if (!dbs.containsKey(task.getDb_name())) {
@@ -110,7 +120,7 @@ public class CSharpGenerator extends AbstractGenerator {
 				dbs.put(task.getDb_name(), provider);
 			}
 		}
-		
+
 		for (GenTaskBySqlBuilder task : sqlBuilders) {
 			if (!dbs.containsKey(task.getDb_name())) {
 				DbServer dbServer = daoOfDbServer.getDbServerByID(task
@@ -123,23 +133,6 @@ public class CSharpGenerator extends AbstractGenerator {
 			}
 		}
 
-		context.put("dbs", dbs);
-		context.put("namespace", namespace);
-		context.put("freeSqlHosts", freeSqlHosts);
-		context.put("tableHosts", tableHosts);
-		context.put("spHosts", spHosts);
-
-		GenUtils.mergeVelocityContext(context, String.format("%s/Dal.config",
-				csMavenLikeDir.getAbsolutePath()), "templates/Dal.config.tpl");
-
-		GenUtils.mergeVelocityContext(
-				context,
-				String.format("%s/DalFactory.cs",
-						csMavenLikeDir.getAbsolutePath()),
-				"templates/DalFactory.cs.tpl");
-
-		// GenUtils.mergeVelocityContext(context, String.format("%s/Program.cs",
-		// csMavenLikeDir.getAbsolutePath()), "templates/Program.cs.tpl");
 	}
 
 	// -----------------------------------------------Free Sql generate
@@ -171,10 +164,10 @@ public class CSharpGenerator extends AbstractGenerator {
 			// 每个Method可能就有一个Pojo
 			for (GenTaskByFreeSql task : currentTasks) {
 				methods.add(buildFreeSqlMethodHost(task));
-				if (!pojoHosts.containsKey(task.getClass_name())) {
+				if (!pojoHosts.containsKey(task.getPojo_name())) {
 					CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(task);
 					if (null != freeSqlPojoHost) {
-						pojoHosts.put(task.getClass_name(), freeSqlPojoHost);
+						pojoHosts.put(task.getPojo_name(), freeSqlPojoHost);
 					}
 				}
 			}
@@ -204,6 +197,21 @@ public class CSharpGenerator extends AbstractGenerator {
 		return groupBy;
 	}
 
+	private Map<String, GenTaskBySqlBuilder> sqlBuilderBroupBy(
+			List<GenTaskBySqlBuilder> builders) {
+		Map<String, GenTaskBySqlBuilder> groupBy = new HashMap<String, GenTaskBySqlBuilder>();
+
+		for (GenTaskBySqlBuilder task : builders) {
+			String key = String.format("%s_%s_%s", task.getServer_id(),
+					task.getDb_name(), task.getTable_name());
+
+			if (!groupBy.containsKey(key)) {
+				groupBy.put(key, task);
+			}
+		}
+		return groupBy;
+	}
+
 	private CSharpMethodHost buildFreeSqlMethodHost(GenTaskByFreeSql task) {
 		CSharpMethodHost method = new CSharpMethodHost();
 		method.setSql(task.getSql_content());
@@ -220,7 +228,7 @@ public class CSharpGenerator extends AbstractGenerator {
 			Object mockValue = DbUtils.mockATest(Integer
 					.valueOf(splitedParam[1]));
 			if (p.getType().equals("string") || p.getType().equals("DateTime")) {
-				p.setValue("\"" +mockValue + "\"");
+				p.setValue("\"" + mockValue + "\"");
 			} else {
 				p.setValue(mockValue);
 			}
@@ -255,7 +263,7 @@ public class CSharpGenerator extends AbstractGenerator {
 				freeSqlHost.setColumns(pHosts);
 				freeSqlHost.setTableName("");
 				freeSqlHost.setClassName(WordUtils.capitalize(task
-						.getClass_name()));
+						.getPojo_name()));
 				freeSqlHost.setNameSpace(super.namespace);
 
 				return freeSqlHost;
@@ -275,7 +283,10 @@ public class CSharpGenerator extends AbstractGenerator {
 	@Override
 	public void generateByTableView(List<GenTaskByTableViewSp> tasks) {
 		prepareFolder(projectId, "cs");
-		
+
+		buildCSharpCommonVelocity(new File(
+				String.format("gen/%s/cs", projectId)));
+
 		tableHosts = new ArrayList<CSharpTableHost>();
 		spHosts = new ArrayList<CSharpTableHost>();
 
@@ -321,12 +332,12 @@ public class CSharpGenerator extends AbstractGenerator {
 		}
 
 		if (sqlBuilders.size() > 0) {
-			List<GenTaskBySqlBuilder> _tableNames = new ArrayList<GenTaskBySqlBuilder>();
-			for (GenTaskBySqlBuilder sqlBuilder : sqlBuilders) {
-				_tableNames.add(sqlBuilder);
-			}
-			for (GenTaskBySqlBuilder _table : _tableNames) {
-				CSharpTableHost extraTableHost = buildExtraSqlBuilderHost(_table);
+			Map<String, GenTaskBySqlBuilder> _sqlBuildres = sqlBuilderBroupBy(sqlBuilders);
+
+			for (Map.Entry<String, GenTaskBySqlBuilder> _table : _sqlBuildres
+					.entrySet()) {
+				CSharpTableHost extraTableHost = buildExtraSqlBuilderHost(_table
+						.getValue());
 				if (null != extraTableHost) {
 					tableHosts.add(extraTableHost);
 				}
@@ -513,7 +524,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		Iterator<GenTaskBySqlBuilder> iter = sqlBuilders.iterator();
 		while (iter.hasNext()) {
-			GenTaskBySqlBuilder currentSqlBuilder =iter.next();
+			GenTaskBySqlBuilder currentSqlBuilder = iter.next();
 			if (currentSqlBuilder.getDb_name().equals(dbName)
 					&& currentSqlBuilder.getTable_name().equals(table)) {
 				currentTableBuilders.add(currentSqlBuilder);

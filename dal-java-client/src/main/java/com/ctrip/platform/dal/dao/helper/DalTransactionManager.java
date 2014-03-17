@@ -1,25 +1,35 @@
 package com.ctrip.platform.dal.dao.helper;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Set;
 
+import javax.sql.DataSource;
+
+import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.configure.DalConfigure;
 
 public class DalTransactionManager {
 	public static final boolean SELECTE = true;
 	public static final boolean UPDATE = false;
 
+	private DalConfigure config;
 	private String logicDbName;
 	private DruidDataSourceWrapper connPool;
 
 	private static final ThreadLocal<ConnectionCache> connectionCacheHolder = new ThreadLocal<ConnectionCache>();
 
+	public DalTransactionManager(DalConfigure config, String logicDbName) {
+		this.config = config;
+		this.logicDbName = logicDbName;
+	}
+	
 	public DalTransactionManager(String logicDbName, DruidDataSourceWrapper connPool) {
 		this.connPool = connPool;
 		this.logicDbName = logicDbName;
@@ -63,14 +73,31 @@ public class DalTransactionManager {
 		ConnectionCache connCache = connectionCacheHolder.get();
 		
 		if(connCache == null) {
-			Connection conn = connPool.getConnection(logicDbName, isMaster(hints), hints.get(DalHintEnum.operation) == DalClient.OperationEnum.QUERY);
+			Connection conn = null;
+			if(config != null) {
+				Set<String> shards = config.getDatabaseSet(logicDbName).getStrategy().locateShards(config, logicDbName, hints);
+				// For now, we only access one shard
+				String shard = shards.toArray(new String[1])[0];
+				conn = getConnection(logicDbName, shard, isMaster(hints), hints.get(DalHintEnum.operation) == DalClient.OperationEnum.QUERY);
+			}else {
+				conn = connPool.getConnection(logicDbName, isMaster(hints), hints.get(DalHintEnum.operation) == DalClient.OperationEnum.QUERY);
+			}
 			conn.setAutoCommit(true);
 			return conn;
 		} else {
 			return connCache.getConnection();
 		}
 	}
-
+	
+	private Connection getConnection(String logicDbName, String shard, boolean isMaster, boolean isSelect) throws SQLException {
+		String realDbName = config.getDatabaseSet(logicDbName).getRandomRealDbName(shard, isMaster, isSelect);
+		try {
+			return DataSourceLocator.newInstance().getDataSource(realDbName).getConnection();
+		} catch (Exception e) {
+			throw new SQLException(e);
+		}
+	}
+	
 	public void closeConnection(Connection conn) {
 		if(conn == null) 
 			return;

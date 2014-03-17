@@ -4,7 +4,7 @@ package com.ctrip.platform.dal.daogen.entity;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class GenTaskBySqlBuilder {
+public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 
 	private int id;
 
@@ -142,6 +142,22 @@ public class GenTaskBySqlBuilder {
 		task.setSql_content(rs.getString(12));
 
 		return task;
+	}
+
+	@Override
+	public int compareTo(GenTaskBySqlBuilder o) {
+		int result =  this.getDb_name().compareTo(o.getDb_name());
+		if(result != 0){
+			return result;
+		}
+		
+		result = this.getTable_name().compareTo(o.getTable_name());
+		if(result != 0){
+			return result;
+		}
+		
+		return this.getMethod_name().compareTo(o.getMethod_name());
+		
 	}
 
 }

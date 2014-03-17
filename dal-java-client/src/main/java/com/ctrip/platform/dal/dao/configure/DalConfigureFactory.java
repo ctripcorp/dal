@@ -78,27 +78,24 @@ public class DalConfigureFactory {
 		return load(new FileInputStream(model));
 	}
 	
-	public static DalConfigure load(InputStream in) {
+	public static DalConfigure load(InputStream in) throws Exception {
 		
 		try{
 			Document doc= DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
 			DalConfigure def = factory.getFromDocument(doc);
 			in.close();
 			return def;
-		}catch(Throwable e){
+		} finally {
 			if(in != null)
 				try{
 					in.close();
 				}catch(Throwable e1){
 					
 				}
-			e.printStackTrace();
 		}
-
-		return null;
 	}
 
-	public DalConfigure getFromDocument(Document doc){
+	public DalConfigure getFromDocument(Document doc) throws Exception{
 		Element root = doc.getDocumentElement();
 
 		String name = getAttribute(root, NAME);
@@ -107,7 +104,7 @@ public class DalConfigureFactory {
 		return new DalConfigure(name, databaseSets);
 	}
 	
-	private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode) {
+	private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode) throws Exception {
 		List<Node> databaseSetList = getChildNodes(databaseSetsNode, DATABASE_SET);
 		Map<String, DatabaseSet> databaseSets = new HashMap<String, DatabaseSet>();
 		for(int i = 0;i < databaseSetList.size(); i++) {
@@ -117,7 +114,7 @@ public class DalConfigureFactory {
 		return databaseSets;
 	}
 	
-	private DatabaseSet readDatabaseSet(Node databaseSetNode) {
+	private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {
 		List<Node> databaseList = getChildNodes(databaseSetNode, ADD);
 		Map<String, DataBase> databases = new HashMap<String, DataBase>();
 		for(int i = 0;i < databaseList.size(); i++) {

@@ -14,9 +14,7 @@ public class ${host.getPojoClassName()}DaoTest {
 			DalClientFactory.initClientFactory("${host.getDbName()}");
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 		
-#if($host.isHasIdentity())
 			${host.getPojoClassName()} pk = dao.queryByPk(null);// you value here
-#end
 			
 			pk = dao.queryByPk(pk);
 			List<${host.getPojoClassName()}> pojos = dao.queryByPage(pk, 100, 0);
@@ -26,7 +24,7 @@ public class ${host.getPojoClassName()}DaoTest {
 			// test insert
 			${host.getPojoClassName()} pojo = new ${host.getPojoClassName()}();
 			// Set pojo attribute value here
-			dao.insert(pojo1);
+			dao.insert(pojo);
 #else
 			// Test normal CUD (non SPA) 
 			KeyHolder keyHolder = new KeyHolder();

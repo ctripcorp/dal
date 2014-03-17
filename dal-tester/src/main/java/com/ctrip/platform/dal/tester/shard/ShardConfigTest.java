@@ -18,7 +18,7 @@ public class ShardConfigTest {
 		try {
 			DalConfigure cfg = DalConfigureFactory.load("e:/Dal.config");
 			System.out.println(cfg.getName());
-			System.out.println(cfg.getShards("shardingtestMaster"));
+			System.out.println(cfg.getDatabaseSet("shardingtestMaster").getAllShards());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

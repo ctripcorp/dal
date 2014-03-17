@@ -20,6 +20,7 @@ import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalStatementCreator;
@@ -39,6 +40,11 @@ public class DalDirectClient implements DalClient {
 		this.logicDbName = logicDbName;
 	}
 	
+	public DalDirectClient(DalConfigure config, String logicDbName) {
+		transManager = new DalTransactionManager(config, logicDbName);
+		this.logicDbName = logicDbName;
+	}
+
 	@Override
 	public <T> T query(String sql, StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor)
 			throws SQLException {

@@ -14,6 +14,7 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 #if($host.isSpa())
+import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 #end
 
@@ -209,7 +210,7 @@ public class ${host.getPojoClassName()}Dao {
 	}
 	
 #end
-	private static class ${host.getPojoClassName()}Parser implements DalParser<${host.getPojoClassName()}> {
+	private static class ${host.getPojoClassName()}Parser extends AbstractDalParser<${host.getPojoClassName()}> {
 		public static final String DATABASE_NAME = "${host.getDbName()}";
 		public static final String TABLE_NAME = "${host.getTableName()}";
 		private static final String[] COLUMNS = new String[]{
@@ -232,6 +233,10 @@ public class ${host.getPojoClassName()}Dao {
 #end
 		};
 		
+		public ${host.getPojoClassName()}Parser() {
+			super(DATABASE_NAME, TABLE_NAME, COLUMNS, PRIMARY_KEYS, COLUMN_TYPES);
+		}
+		
 		@Override
 		public ${host.getPojoClassName()} map(ResultSet rs, int rowNum) throws SQLException {
 			${host.getPojoClassName()} pojo = new ${host.getPojoClassName()}();
@@ -241,31 +246,6 @@ public class ${host.getPojoClassName()}Dao {
 #end
 	
 			return pojo;
-		}
-	
-		@Override
-		public String getDatabaseName() {
-			return DATABASE_NAME;
-		}
-	
-		@Override
-		public String getTableName() {
-			return TABLE_NAME;
-		}
-	
-		@Override
-		public String[] getColumnNames() {
-			return COLUMNS;
-		}
-	
-		@Override
-		public String[] getPrimaryKeyNames() {
-			return PRIMARY_KEYS;
-		}
-		
-		@Override
-		public int[] getColumnTypes() {
-			return COLUMN_TYPES;
 		}
 	
 		@Override

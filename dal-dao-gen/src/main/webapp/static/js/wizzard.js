@@ -203,7 +203,6 @@
                                     id: value,
                                     title: value
                                 });
-                                console.log(value);
                             });
                             $("#tables")[0].selectize.addOption(results);
                             $("#tables")[0].selectize.refreshOptions(false);

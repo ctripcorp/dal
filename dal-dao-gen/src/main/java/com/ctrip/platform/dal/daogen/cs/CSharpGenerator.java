@@ -164,10 +164,10 @@ public class CSharpGenerator extends AbstractGenerator {
 			// 每个Method可能就有一个Pojo
 			for (GenTaskByFreeSql task : currentTasks) {
 				methods.add(buildFreeSqlMethodHost(task));
-				if (!pojoHosts.containsKey(task.getClass_name())) {
+				if (!pojoHosts.containsKey(task.getPojo_name())) {
 					CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(task);
 					if (null != freeSqlPojoHost) {
-						pojoHosts.put(task.getClass_name(), freeSqlPojoHost);
+						pojoHosts.put(task.getPojo_name(), freeSqlPojoHost);
 					}
 				}
 			}
@@ -263,7 +263,7 @@ public class CSharpGenerator extends AbstractGenerator {
 				freeSqlHost.setColumns(pHosts);
 				freeSqlHost.setTableName("");
 				freeSqlHost.setClassName(WordUtils.capitalize(task
-						.getClass_name()));
+						.getPojo_name()));
 				freeSqlHost.setNameSpace(super.namespace);
 
 				return freeSqlHost;

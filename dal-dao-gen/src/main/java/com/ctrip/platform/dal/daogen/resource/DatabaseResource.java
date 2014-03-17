@@ -22,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.springframework.jdbc.support.JdbcUtils;
 
+import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
@@ -131,7 +132,10 @@ public class DatabaseResource {
 				connection = ds.getConnection();
 				rs = connection.getMetaData().getCatalogs();
 				while (rs.next()) {
-					results.add(rs.getString("TABLE_CAT"));
+					String dbName = rs.getString("TABLE_CAT");
+					if(!Consts.SystemDatabases.contains(dbName)){
+						results.add(dbName);	
+					}
 				}
 				rs.close();
 			} catch (SQLException e) {

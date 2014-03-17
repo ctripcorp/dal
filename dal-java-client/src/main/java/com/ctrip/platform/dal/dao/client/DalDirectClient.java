@@ -11,6 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalCommand;
@@ -146,9 +148,9 @@ public class DalDirectClient implements DalClient {
 				conn = getConnection(hints, entry);
 				statement = createStatement(conn, hints);
 				for(String sql: sqls)
-					preparedStatement.addBatch(sql);
+					statement.addBatch(sql);
 				
-				return preparedStatement.executeBatch();
+				return statement.executeBatch();
 			}
 		};
 		action.populate(sqls);
@@ -368,7 +370,7 @@ public class DalDirectClient implements DalClient {
 		try {
 			//conn.getSchema()
 			level = startTransaction(hints);
-			entry = Logger.create(action.sql, action.parameters, logicDbName, "TBI", action.operation.getEventId(), action.operation.getOperation());
+			entry = Logger.create(action.getSqlLog(), action.parameters, logicDbName, "TBI", action.operation.getEventId(), action.operation.getOperation());
 			action.entry = entry;
 			
 			T result = action.execute();
@@ -434,8 +436,19 @@ public class DalDirectClient implements DalClient {
 			this.parameters = parameters;
 		}
 		
+		/**
+		 * TODO: How to display batch SQLs
+		 * @return
+		 */
 		String getSqlLog() {
-			return sql == null? callString : sql;
+			if(null != sql)
+				return sql;
+			else if(null != callString)
+				return callString;
+			else if(sqls != null)
+				return StringUtils.join(sqls, ";");
+			else
+				return "";
 		}
 		
 		abstract T execute() throws Exception;

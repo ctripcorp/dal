@@ -33,6 +33,8 @@ public class CommonUtil {
     
     public static String getHashCode4SQLString(String sql)
     {
+    	if(null == sql)
+    		return "";
 		byte[] md5Byte = DigestUtils.md5(sql.trim());
 		return new String(Base64.encodeBase64(md5Byte));
     }

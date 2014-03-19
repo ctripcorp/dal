@@ -2,8 +2,6 @@ package com.ctrip.platform.dal.daogen.java;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,9 +16,7 @@ import org.apache.velocity.VelocityContext;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
-import com.ctrip.platform.dal.daogen.cs.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
-import com.ctrip.platform.dal.daogen.entity.DbServer;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
@@ -179,56 +175,8 @@ public class JavaGenerator extends AbstractGenerator {
 			e.printStackTrace();
 		}
 
-		buildCommonVelocity(mavenLikeDir);
 		generateTableDao(tableHosts, context, mavenLikeDir);
 		generateSpDao(spHosts, context, mavenLikeDir);
-	}
-	
-	private void buildCommonVelocity(File mavenLikeDir) {
-		Map<String, String> dbs = new HashMap<String, String>();
-
-		for (GenTaskByFreeSql task : freeSqls) {
-			if (!dbs.containsKey(task.getDb_name())) {
-				DbServer dbServer = daoOfDbServer.getDbServerByID(task
-						.getServer_id());
-				String provider = "sqlProvider";
-				if (dbServer.getDb_type().equalsIgnoreCase("mysql")) {
-					provider = "mySqlProvider";
-				}
-				dbs.put(task.getDb_name(), provider);
-			}
-		}
-		for (GenTaskByTableViewSp task : tableViewSps) {
-			if (!dbs.containsKey(task.getDb_name())) {
-				DbServer dbServer = daoOfDbServer.getDbServerByID(task
-						.getServer_id());
-				String provider = "sqlProvider";
-				if (dbServer.getDb_type().equalsIgnoreCase("mysql")) {
-					provider = "mySqlProvider";
-				}
-				dbs.put(task.getDb_name(), provider);
-			}
-		}
-
-		for (GenTaskBySqlBuilder task : sqlBuilders) {
-			if (!dbs.containsKey(task.getDb_name())) {
-				DbServer dbServer = daoOfDbServer.getDbServerByID(task
-						.getServer_id());
-				String provider = "sqlProvider";
-				if (dbServer.getDb_type().equalsIgnoreCase("mysql")) {
-					provider = "mySqlProvider";
-				}
-				dbs.put(task.getDb_name(), provider);
-			}
-		}
-
-	}
-	
-	private void generateDalConfig(VelocityContext context, File mavenLikeDir) {
-		
-		GenUtils.mergeVelocityContext(context, String.format("%s/Dal.config",
-				mavenLikeDir.getAbsolutePath()), "templates/Dal.config.tpl");
-
 	}
 
 	private void generateTableDao(List<JavaTableHost> tableHosts,
@@ -463,5 +411,4 @@ public class JavaGenerator extends AbstractGenerator {
 					mavenLikeDir.getAbsolutePath(), host.getClassName()), "templates/java/FreeSqlDAOTest.java.tpl");
 		}
 	}
-	
 }

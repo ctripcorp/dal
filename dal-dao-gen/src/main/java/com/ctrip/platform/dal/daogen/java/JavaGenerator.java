@@ -18,6 +18,7 @@ import org.apache.velocity.VelocityContext;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
+import com.ctrip.platform.dal.daogen.cs.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.entity.DbServer;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
@@ -41,7 +42,7 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public void generateByTableView(List<GenTaskByTableViewSp> tasks) {
+	public void generateByTableView(List<GenTaskByTableViewSp> tasks) throws Exception {
 		
 		prepareFolder(projectId, "java");
 		
@@ -63,15 +64,14 @@ public class JavaGenerator extends AbstractGenerator {
 			String suffix = tableViewSp.getSuffix();
 			
 			boolean cud_by_sp = tableViewSp.isCud_by_sp();
-			DbServer dbServer = daoOfDbServer.getDbServerByID(tableViewSp
-					.getServer_id());
+
 			DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
-			if (dbServer.getDb_type().equalsIgnoreCase("mysql")) {
+			if (!DbUtils.getDbType(tableViewSp.getDb_name()).equalsIgnoreCase(
+					"Microsoft SQL Server")) {
 				dbCategory = DatabaseCategory.MySql;
 			}
 
-			List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(
-					tableViewSp.getServer_id(), dbName);
+			List<StoredProcedure> allSpNames = DbUtils.getAllSpNames( dbName);
 
 			for (String table : tableNames) {
 				JavaTableHost tableHost = new JavaTableHost();
@@ -83,10 +83,9 @@ public class JavaGenerator extends AbstractGenerator {
 				tableHost.setSpa(cud_by_sp);
 
 				// 主键及所有列
-				List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
-						tableViewSp.getServer_id(), dbName, table);
+				List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(dbName, table);
 				List<AbstractParameterHost> allColumnsAbstract = DbUtils
-						.getAllColumnNames(tableViewSp.getServer_id(), dbName,
+						.getAllColumnNames(dbName,
 								table, CurrentLanguage.Java);
 				
 				List<JavaParameterHost> allColumns = new ArrayList<JavaParameterHost>();
@@ -156,8 +155,7 @@ public class JavaGenerator extends AbstractGenerator {
 				spHost.setDbName(dbName);
 				spHost.setPojoClassName(className);
 				spHost.setSpName(spName);
-				List<AbstractParameterHost> params = DbUtils.getSpParams(
-						tableViewSp.getServer_id(), dbName, currentSp, CurrentLanguage.Java);
+				List<AbstractParameterHost> params = DbUtils.getSpParams(dbName, currentSp, CurrentLanguage.Java);
 				List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 				for (AbstractParameterHost p : params) {
 					realParams.add((JavaParameterHost) p);
@@ -416,23 +414,13 @@ public class JavaGenerator extends AbstractGenerator {
 				// Need to specify Pojo class name for each method. or allow Map<Sting, Object> as row
 //				if (!pojoHosts.containsKey(task.getClass_name())) {
 				if (!pojoHosts.containsKey(method.getPojoClassName())) {
-					ResultSetMetaData rsMeta = DbUtils.testAQuerySql(
-							task.getServer_id(), task.getDb_name(),
-							task.getSql_content(), task.getParameters());
 
-					if (rsMeta != null) {
-						try {
 							List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
-							for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-								JavaParameterHost paramHost = new JavaParameterHost();
-								paramHost.setName(rsMeta.getColumnName(i));
-								paramHost.setSqlType(rsMeta.getColumnType(i));
-								paramHost.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType()));
-								paramHost.setIdentity(false);
-								paramHost.setNullable(false);
-								paramHost.setPrimary(false);
-								paramHost.setLength(rsMeta.getColumnDisplaySize(i));
-								paramHosts.add(paramHost);
+							
+							for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(
+									task.getDb_name(), task.getSql_content(), task.getParameters(),
+									CurrentLanguage.Java, false)) {
+								paramHosts.add((JavaParameterHost) _ahost);
 							}
 							
 							method.setFields(paramHosts);
@@ -444,10 +432,6 @@ public class JavaGenerator extends AbstractGenerator {
 							pojoHost.setPackageName(host.getPackageName());
 							*/
 							pojoHosts.put(method.getPojoClassName(), method);
-						} catch (SQLException e) {
-							e.printStackTrace();
-						}
-					}
 				}
 			}
 			host.setMethods(methods);

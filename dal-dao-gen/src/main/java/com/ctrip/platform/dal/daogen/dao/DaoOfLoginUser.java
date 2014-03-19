@@ -68,11 +68,12 @@ public class DaoOfLoginUser {
 					Connection connection) throws SQLException {
 				PreparedStatement ps = connection
 						.prepareStatement(
-								"insert into login_users ( user_no, user_name, user_email ) values (?,?,?)",
+								"insert into login_users ( user_no, user_name, user_email ) values (?,?,?) ON DUPLICATE KEY UPDATE user_no = ?",
 								Statement.RETURN_GENERATED_KEYS);
 				ps.setString(1, data.getUserNo());
 				ps.setString(2, data.getUserName());
 				ps.setString(3, data.getUserEmail());
+				ps.setString(4, data.getUserNo());
 				return ps;
 			}
 		}, holder);

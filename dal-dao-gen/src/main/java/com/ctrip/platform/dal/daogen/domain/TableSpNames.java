@@ -4,11 +4,21 @@ import java.util.List;
 
 public class TableSpNames {
 	
+	private String dbType;
+	
 	private List<String> tables;
 	
 	private List<StoredProcedure> sps;
 	
 	private List<String> views;
+
+	public String getDbType() {
+		return dbType;
+	}
+
+	public void setDbType(String dbType) {
+		this.dbType = dbType;
+	}
 
 	public List<String> getViews() {
 		return views;

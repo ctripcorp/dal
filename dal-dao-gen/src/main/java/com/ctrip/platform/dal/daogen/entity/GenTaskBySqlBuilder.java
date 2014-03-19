@@ -29,6 +29,10 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	private String condition;
 
 	private String sql_content;
+	
+private boolean generated;
+	
+	private int version;
 
 	public String getFields() {
 		return fields;
@@ -126,6 +130,22 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		this.crud_type = crud_type;
 	}
 
+	public boolean isGenerated() {
+		return generated;
+	}
+
+	public void setGenerated(boolean generated) {
+		this.generated = generated;
+	}
+
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
+	}
+
 	public static GenTaskBySqlBuilder visitRow(ResultSet rs) throws SQLException {
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 		task.setId(rs.getInt(1));
@@ -140,7 +160,8 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		task.setFields(rs.getString(10));
 		task.setCondition(rs.getString(11));
 		task.setSql_content(rs.getString(12));
-
+		task.setGenerated(rs.getBoolean(13));
+		task.setVersion(rs.getInt(14));
 		return task;
 	}
 

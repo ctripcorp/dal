@@ -25,17 +25,18 @@
                 var records = w2ui['grid'].getSelection();
                 var record = w2ui['grid'].get(records[0]);
                 postData["id"] = record.id;
+                postData["version"] = record.version;
             } else {
                 postData["action"] = "insert";
             }
-            postData["server"] = $("#servers").val();
+            //postData["server"] = $("#servers").val();
 
-            if ($(".gen_style.active").children().val() == "auto") {
+            if ($("#gen_style").val() == "auto") {
                 postData["table_name"] = $("#tables").val();
                 postData["method_name"] = $("#method_name").val();
                 //C#风格或者Java风格，@Name or ?
                 postData["sql_style"] = $("#sql_style").val();
-                postData["crud_type"] = $(".op_type.active").children().val();;
+                postData["crud_type"] = $("#crud_option").val();;
                 var selectedConditions = [];
 
                 $.each($("#selected_condition option"), function (index, value) {
@@ -47,14 +48,21 @@
                 postData["sql_content"] = ace.edit("sql_builder").getValue();
 
                 $.post("/rest/task/auto", postData, function (data) {
-                    $("#page1").modal('hide');
-                    w2ui["grid_toolbar"].click('refreshDAO', null);
-                    if ($("#gen_on_save").is(":checked")) {
-                        window.ajaxutil.generate_code($("#gen_language").val());
+                    if(data.code == "OK"){
+                        $("#page1").modal('hide');
+                        w2ui["grid_toolbar"].click('refreshDAO', null);
+                        if ($("#gen_on_save").is(":checked")) {
+                            //window.ajaxutil.generate_code($("#gen_language").val());
+                            $("#generateCode").modal();
+                        }
+                    }else{
+                        alert(data.info);
                     }
+                }).fail(function(data){
+                    alert("保存出错！");
                 });
 
-            } else if ($(".gen_style.active").children().val() == "sql") {
+            } else if ($("#gen_style").val() == "sql") {
                 postData["class_name"] = $("#sql_class_name").val();
                 postData["pojo_name"] = $("#sql_pojo_name").val();
                 postData["method_name"] = $("#sql_method_name").val();
@@ -80,17 +88,26 @@
                 $.post("/rest/db/test_sql", postData).done(function (data) {
                     if (data.code == "OK") {
                         $.post("/rest/task/sql", postData, function (data) {
-                            $("#page1").modal('hide');
-                            w2ui["grid_toolbar"].click('refreshDAO', null);
-                            if ($("#gen_on_save").is(":checked")) {
-                                window.ajaxutil.generate_code($("#gen_language").val());
+                            if(data.code == "OK"){
+                                $("#page1").modal('hide');
+                                w2ui["grid_toolbar"].click('refreshDAO', null);
+                                if ($("#gen_on_save").is(":checked")) {
+                                    //window.ajaxutil.generate_code($("#gen_language").val());
+                                    $("#generateCode").modal();
+                                }
+                            }else{
+                                alert(data.info);
                             }
+                        }).fail(function(data){
+                            alert("执行异常，请检查sql及对应参数！");
                         });
                     } else {
                         $("#error_msg").text("执行异常，请检查sql及对应参数！");
                     }
+                }).fail(function(data){
+                    alert("执行异常，请检查sql及对应参数！");
                 });
-            } else if ($(".gen_style.active").children().val() == "table_view_sp") {
+            } else if ($("#gen_style").val() == "table_view_sp") {
                 postData["table_names"] = $('#table_list').multipleSelect('getSelects').join(",");
                 postData["view_names"] = $('#view_list').multipleSelect('getSelects').join(",");
                 postData["sp_names"] = $('#sp_list').multipleSelect('getSelects').join(",");
@@ -102,21 +119,24 @@
                     $("#page1").modal('hide');
                     w2ui["grid_toolbar"].click('refreshDAO', null);
                     if ($("#gen_on_save").is(":checked")) {
-                        window.ajaxutil.generate_code($("#gen_language").val());
+                        //window.ajaxutil.generate_code($("#gen_language").val());
+                        $("#generateCode").modal();
                     }
+                }).fail(function(data){
+                    alert("保存出错！");
                 });
             }
         },
         reload_dbservers: function (callback) {
             cblock($("body"));
 
-            $.get("/rest/db/servers?rand=" + Math.random()).done(function (data) {
+            $.get("/rest/db/dbs?rand=" + Math.random()).done(function (data) {
                 //$("select[id$=servers] > option:gt(0)").remove();
 
-                if ($("#servers")[0] != undefined && $("#servers")[0].selectize != undefined) {
-                    $("#servers")[0].selectize.clearOptions();
+                if ($("#databases")[0] != undefined && $("#databases")[0].selectize != undefined) {
+                    $("#databases")[0].selectize.clearOptions();
                 } else {
-                    $("#servers").selectize({
+                    $("#databases").selectize({
                         //maxItems: null,
                         valueField: 'id',
                         labelField: 'title',
@@ -126,20 +146,26 @@
                         create: false
                     });
                 }
+
+                $("#databases")[0].selectize.on('dropdown_open', function(dropdown){
+                    $(".step1").height(240);
+                });
+
+                $("#databases")[0].selectize.on('dropdown_close', function(dropdown){
+                    $(".step1").height(74);
+                });
+
                 var allServers = [];
                 $.each(data, function (index, value) {
                     allServers.push({
-                        id: value.id,
-                        title: sprintf("%s:%s", value.server, value.port),
-                        serverType: value.db_type
+                        id: value,
+                        title: value
+                        //serverType: value.db_type
                     });
                 });
-                $("#servers")[0].selectize.addOption(allServers);
-                $("#servers")[0].selectize.refreshOptions(false);
+                $("#databases")[0].selectize.addOption(allServers);
+                $("#databases")[0].selectize.refreshOptions(false);
 
-                if (undefined != data && data.length > 0) {
-                    $("#servers")[0].selectize.setValue(data[0].id);
-                }
                 if (callback != undefined) {
                     callback();
                 }
@@ -173,6 +199,7 @@
 
                             w2ui['grid'].current_project = id;
                             w2ui['grid_toolbar'].click('refreshDAO', null);
+                            $("#refreshFiles").trigger('click');
                         }
                     });
                 });
@@ -185,14 +212,22 @@
                 $("body").unblock();
             });
         },
-        generate_code: function (language) {
+        generate_code: function () {
             cblock($("body"));
             $.post("/rest/project/generate", {
                 "project_id": w2ui['grid'].current_project,
-                "language": language
+                "regenerate": $("#regenerate").val() == "regenerate",
+                "language": $("#regen_language").val()
             }, function (data) {
                 $("body").unblock();
-                window.location.href = "/file.jsp";
+                if(data.code == "OK"){
+                    $("#viewCode").val($("#regen_language").val());
+                    $("#refreshFiles").trigger("click");
+                    $("#generateCode").modal('hide');
+                }else{
+                    alert(data.info);
+                }
+                
             }).fail(function(data){
                 alert("生成异常！");
                 $("body").unblock();

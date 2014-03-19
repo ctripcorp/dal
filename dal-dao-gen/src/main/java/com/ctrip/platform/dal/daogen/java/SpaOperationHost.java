@@ -62,7 +62,7 @@ public class SpaOperationHost {
 		}
 		
 		if(host.exist){
-			List<AbstractParameterHost> params =  DbUtils.getSpParams(server, dbName, currentSp, CurrentLanguage.Java);
+			List<AbstractParameterHost> params =  DbUtils.getSpParams(dbName, currentSp, CurrentLanguage.Java);
 			List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 			for(AbstractParameterHost p : params){
 				realParams.add((JavaParameterHost) p);

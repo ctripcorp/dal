@@ -32,6 +32,26 @@
 
     wizzard.prototype = {
 
+        clear: function(){
+            //默认后缀
+            $("#suffix").val("Gen");
+
+            $("#sql_class_name").val("");
+            $("#sql_pojo_name").val("");
+            $("#sql_method_name").val("");
+
+            var sql_builder = ace.edit("sql_builder");
+            sql_builder.setTheme("ace/theme/monokai");
+            sql_builder.getSession().setMode("ace/mode/sql");
+            sql_builder.setValue("");
+
+            $("#method_name").val("");
+
+            var editor = ace.edit("sql_editor");
+            editor.setTheme("ace/theme/monokai");
+            editor.getSession().setMode("ace/mode/sql");
+            editor.setValue("");
+        },
         next: function (current) {
             //首先获取当前Grid选中的行,records是id数组
             var records = w2ui['grid'].getSelection();
@@ -41,82 +61,19 @@
 
             //向导首先显示所有数据库服务器，点击下一步后，获取此服务器所有的数据库列表 
             if (current.hasClass("step1")) {
-
-                if ($("#servers").val() == "") {
-                    $("#error_msg").text("请选择或者添加一个服务器！");
+                if ($("#databases").val() == "") {
+                    $("#error_msg").text("请选择All-In-One数据库！");
                     return;
                 }
-
                 $("#error_msg").text("");
 
                 //首先蒙板化整个body,在后续get成功或者失败时，取消蒙板化
-                cblock($("body"));
-
-                if ($("#databases")[0] != undefined && $("#databases")[0].selectize != undefined) {
-                    $("#databases")[0].selectize.clearOptions();
-                } else {
-                    $("#databases").selectize({
-                        //maxItems: null,
-                        valueField: 'id',
-                        labelField: 'title',
-                        searchField: 'title',
-                        sortField: 'title',
-                        options: [],
-                        create: false
-                    });
-                }
-
-                $.get("/rest/db/dbs?server=" + $("#servers").val() + "&rand=" + Math.random()).done(function (data) {
-                    var results = [];
-                    $.each(data, function (index, value) {
-                        results.push({
-                            id: value,
-                            title: value
-                        });
-                    });
-                    $("#databases")[0].selectize.addOption(results);
-                    $("#databases")[0].selectize.refreshOptions(false);
-
-                    if ($("#page1").attr('is_update') == "1") {
-                        $("#databases")[0].selectize.setValue(record.db_name);
-                        var parentToActive = $(sprintf(".gen_style > input[value='%s']", record.task_type)).parent();
-                        if (!parentToActive.hasClass("active")) {
-                            $(".gen_style.active").removeClass("active");
-                            parentToActive.addClass("active");
-                        }
-                    } else if (data.length > 0) {
-                        $("#databases")[0].selectize.setValue(data[0]);
-                        var defaultActive = $(".gen_style > input[value='table_view_sp']").parent();
-                        if (!defaultActive.hasClass("active")) {
-                            $(".gen_style.active").removeClass("active");
-                            defaultActive.addClass("active");
-                        }
-                    }
-
-                    current.hide();
-                    $(".step2").show();
-                    $("body").unblock();
-                }).fail(function (data) {
-                    $("#error_msg").text("获取数据库列表失败，请上一步后重试！");
-                    $("body").unblock();
-                });
-            }
-            //选择数据库之后，选择自动生成、存储过程或者自己写查询
-            else if (current.hasClass("step2")) {
-
-                if ($("#databases").val() == "") {
-                    $("#error_msg").text("请选择一个数据库！");
-                    return;
-                }
-                $("#error_msg").text("");
-
-                var gen_style = $(".gen_style.active").children().val();
+                var gen_style = $("#gen_style").val();
                 switch (gen_style) {
                 case "table_view_sp":
-
                     cblock($("body"));
-                    $.get(sprintf("/rest/db/table_sps?server=%s&db_name=%s&rand=%s",
-                        $("#servers").val(), $("#databases").val(), Math.random())).done(function (data) {
+                    $.get(sprintf("/rest/db/table_sps?db_name=%s&rand=%s",
+                        $("#databases").val(), Math.random())).done(function (data) {
                         $("select[id$=table_list] > option").remove();
                         $("select[id$=view_list] > option").remove();
                         $("select[id$=sp_list] > option").remove();
@@ -141,18 +98,41 @@
                                 text: value.schema + "." + value.name
                             }));
                         });
-                        $("#table_list").append(tableList).multipleSelect("refresh");
-                        $("#view_list").append(viewList).multipleSelect("refresh");
-                        $("#sp_list").append(spList).multipleSelect("refresh");
-
-                        var currentOption = $("#servers")[0].selectize.options[$("#servers").val()];
-                        if (currentOption.serverType == "mysql") {
-                            $("#cud_by_sp").attr("checked", false);
+                        if(data.dbType == "MySQL"){
+                            $("#cud_by_sp").prop("checked", false);
                             $(".mysql_hide").hide();
-                        } else {
-                            $("#cud_by_sp").attr("checked", true);
+                        }else{
+                            $("#cud_by_sp").prop("checked", true);
                             $(".mysql_hide").show();
                         }
+
+                        $("#table_list").append(tableList).multipleSelect({
+                            "refresh": true,
+                            onOpen: function() {
+                                $(".step2-1").height(330);
+                            },
+                            onClose: function() {
+                                $(".step2-1").height(245);
+                            }
+                        });
+                        $("#view_list").append(viewList).multipleSelect({
+                            "refresh": true,
+                            onOpen: function() {
+                                $(".step2-1").height(330);
+                            },
+                            onClose: function() {
+                                $(".step2-1").height(245);
+                            }
+                        });
+                        $("#sp_list").append(spList).multipleSelect({
+                            "refresh": true,
+                            onOpen: function() {
+                                $(".step2-1").height(330);
+                            },
+                            onClose: function() {
+                                $(".step2-1").height(245);
+                            }
+                        });
 
                         if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "table_view_sp") {
                             if (record.table_names != undefined)
@@ -163,10 +143,11 @@
                                 $('#sp_list').multipleSelect('setSelects', record.sp_names.split(","));
                         }
                         current.hide();
-                        $("#suffix").val("Gen");
-                        $(".step3-1").show();
+                        
+                        $(".step2-1").show();
                         $("body").unblock();
                     }).fail(function (data) {
+                        $("#error_msg").text("获取表/视图列表失败，是否有权限");
                         $("body").unblock();
                     });
                     break;
@@ -184,19 +165,21 @@
                             options: [],
                             create: false
                         });
-                    }
-                    $("#method_name").val("");
-                    var defaultActive = $(".op_type > input[value='select']").parent();
-                    if (!defaultActive.hasClass("active")) {
-                        $(".op_type.active").removeClass("active");
-                        defaultActive.addClass("active");
-                    }
+                    }  
+
+                    $("#tables")[0].selectize.on('dropdown_open', function(dropdown){
+                        $(".step2-2").height(240);
+                    });
+
+                    $("#tables")[0].selectize.on('dropdown_close', function(dropdown){
+                        $(".step2-2").height(145);
+                    });
 
                     cblock($("body"));
                     $.get(
-                        sprintf("/rest/db/tables?server=%s&db_name=%s&rand=%s",
-                            $("#servers").val(),
-                            $("#databases").val(), Math.random()), function (data) {
+                        sprintf("/rest/db/tables?db_name=%s&rand=%s",
+                            $("#databases").val(), 
+                            Math.random()), function (data) {
                             var results = [];
                             $.each(data, function (index, value) {
                                 results.push({
@@ -209,28 +192,17 @@
                             if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "auto") {
                                 $("#tables")[0].selectize.setValue(record.table_name);
                                 $("#method_name").val(record.method_name);
-                                var parentToActive = $(sprintf(".op_type > input[value='%s']", record.crud_type)).parent();
-                                if (!parentToActive.hasClass("active")) {
-                                    $(".op_type.active").removeClass("active");
-                                    parentToActive.addClass("active");
-                                }
-                            } else {
-                                if (data.length > 0) {
-                                    $("#tables")[0].selectize.setValue(data[0]);
-                                }
-                            }
+                                $("#crud_option").val(record.crud_type);
+                            } 
                             current.hide();
-                            $(".step3-2").show();
+                            $(".step2-2").show();
                             $("body").unblock();
+                        }).fail(function(data){
+                             alert("获取所有表失败!");
                         });
 
                     break;
                 case "sql":
-                    $("#sql_editor").height(200);
-                    var editor = ace.edit("sql_editor");
-                    editor.setTheme("ace/theme/monokai");
-                    editor.getSession().setMode("ace/mode/sql");
-
                     if ($("#sql_class_name")[0] != undefined && $("#sql_class_name")[0].selectize != undefined) {
                         $("#sql_class_name")[0].selectize.clearOptions();
                     } else {
@@ -257,14 +229,11 @@
                             create: true
                         });
                     }
-
                     //在显示下一页之前，清空下一页的信息
-                    $("#sql_class_name").val("");
-                    $("#sql_pojo_name").val("");
-                    $("#sql_method_name").val("");
-
-                    $.get("/rest/task/sql_class?project_id=" + w2ui['grid'].current_project + "&server_id=" + $("#servers").val() + "&db_name=" + $("#databases").val() + "&rand=" + Math.random(), function (data) {
-
+                    $.get("/rest/task/sql_class?project_id=" 
+                        + w2ui['grid'].current_project 
+                        + "&db_name=" + $("#databases").val() 
+                        + "&rand=" + Math.random(), function (data) {
                         var update = $("#page1").attr('is_update') == "1" 
                             && record != undefined 
                             && record.task_type == "sql";
@@ -292,23 +261,21 @@
                             $("#sql_class_name")[0].selectize.setValue(record.class_name);
                             $("#sql_pojo_name")[0].selectize.setValue(record.pojo_name);
                             $("#sql_method_name").val(record.method_name);
+                            var editor = ace.edit("sql_editor");
+                            editor.setTheme("ace/theme/monokai");
+                            editor.getSession().setMode("ace/mode/sql");
                             editor.setValue(record.sql_content);
-                        } else {
-                            editor.setValue("");
                         }
-
                     }).fail(function (data) {
-
+                        $("#error_msg").text("获取历史记录失败");
                     });
                     
                     current.hide();
-                    $(".step3-3").show();
+                    $(".step2-3").show();
                     break;
                 }
             }
-            //选择基础数据
-            else if (current.hasClass("step3-2")) {
-
+            else if (current.hasClass("step2-2")) {
                 if ($("#tables").val() == "") {
                     $("#error_msg").text("请选择一个表！");
                     return;
@@ -319,21 +286,16 @@
                 }
                 $("#error_msg").text("");
 
-                var op_type = $(".op_type.active").children().val();
-                cblock($("body"));
-
                 $("select[id$=fields] > option").remove();
-
                 $("select[id$=selected_condition] > option").remove();
-
                 $("select[id$=conditions] > option:gt(0)").remove();
 
                 var url = sprintf(
-                    "/rest/db/fields?server=%s&table_name=%s&db_name=%s&rand=%s",
-                    $("#servers").val(),
+                    "/rest/db/fields?table_name=%s&db_name=%s&rand=%s",
                     $("#tables").val(),
                     $("#databases").val(), Math.random());
 
+                cblock($("body"));
                 $.get(url, function (data) {
                     var fieldList = [];
                     $.each(data, function (index, value) {
@@ -343,17 +305,12 @@
                                 value.name, value.indexed ? "(索引)" : "",
                                 value.primary ? "(主键)" : "")
                         }));
-
                         $("#conditions").append($('<option>', {
                             value: value.name,
                             text: value.name
                         }));
                     });
-                    $("#sql_builder").height(100);
-                    var sql_builder = ace.edit("sql_builder");
-                    sql_builder.setTheme("ace/theme/monokai");
-                    sql_builder.getSession().setMode("ace/mode/sql");
-
+                    
                     $("#fields").append(fieldList).multipleSelect({
                         "refresh": true,
                         onCheckAll: function() {
@@ -379,42 +336,47 @@
                                 }));
                             });
                         }
-                        ace.edit("sql_builder").setValue(record.sql_content);
+                        var sql_builder = ace.edit("sql_builder");
+                        sql_builder.setValue(record.sql_content);
+                        sql_builder.setTheme("ace/theme/monokai");
+                        sql_builder.getSession().setMode("ace/mode/sql");
                     }
                     current.hide();
+                    $(".step2-2-1").show();
 
-                    $(".step3-2-1").show();
-                    
-
+                    var op_type = $("#crud_option").val(); 
                     if (op_type == "select") {
-                        $(".step3-2-1-1").show();
-                        $(".step3-2-1-2").show();
+                        $(".step2-2-1-1").show();
+                        $(".step2-2-1-2").show();
                     } else if (op_type == "update") {
-                        $(".step3-2-1-1").show();
-                        $(".step3-2-1-2").show();
+                        $(".step2-2-1-1").show();
+                        $(".step2-2-1-2").show();
                     } else if (op_type == "insert") {
-                        $(".step3-2-1-1").show();
-                        $(".step3-2-1-2").hide();
+                        $(".step2-2-1-1").show();
+                        $(".step2-2-1-2").hide();
                     } else {
-                        $(".step3-2-1-1").hide();
-                        $(".step3-2-1-2").show();
+                        $(".step2-2-1-1").hide();
+                        $(".step2-2-1-2").show();
                     }
+                    $("body").unblock();
+                }).fail(function(data){
+                    $("#error_msg").text("获取表的信息失败，是否有权限");
                     $("body").unblock();
                 });
 
-            } else if (current.hasClass("step3-2-1")) {
+            } 
+            else if (current.hasClass("step2-1")) {
+                window.ajaxutil.post_task();
+            }
+            else if (current.hasClass("step2-2-1")) {
                 if ($(".op_type.active").children().val() != "delete" && $('#fields').multipleSelect('getSelects').length < 1) {
                     $("#error_msg").text("请选择至少一个字段！");
                     return;
                 }
                 $("#error_msg").text("");
-                //$(".step_fields").hide();
 
                 window.ajaxutil.post_task();
-            } else if (current.hasClass("step3-1")) {
-                window.ajaxutil.post_task();
-            } else if (current.hasClass("step3-3")) {
-
+            }else if (current.hasClass("step2-3")) {
                 //首先解析Sql语句，提取出参数
                 var regexIndex = /(\?{1})/igm;
                 var regexNames = /[@:](\w+)/igm;
@@ -475,8 +437,8 @@
                 });
 
                 current.hide();
-                $(".step3-3-1").show();
-            } else if (current.hasClass("step3-3-1")) {
+                $(".step2-3-1").show();
+            } else if (current.hasClass("step2-3-1")) {
                 window.ajaxutil.post_task();
             }
         },
@@ -487,18 +449,17 @@
             }
             current.hide();
 
-            if (current.hasClass("step2")) {
+            if (current.hasClass("step2-1") 
+                || current.hasClass("step2-2") 
+                || current.hasClass("step2-3")) {
                 $(".step1").show();
-            } else if (current.hasClass("step3-1") || 　current.hasClass("step3-2") || 　current.hasClass("step3-3")) {
-                $(".step2").show();
-            } else if (current.hasClass("step3-2-1")) {
-                $(".step3-2").show();
-            }  else if (current.hasClass("step3-3-1")) {
-                $(".step3-3").show();
+            } else if (current.hasClass("step2-2-1")) {
+                $(".step2-2").show();
+            }  else if (current.hasClass("step2-3-1")) {
+                $(".step2-3").show();
             }
         }
     };
 
     window.wizzard = new wizzard();
-
 })(window);

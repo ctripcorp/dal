@@ -17,8 +17,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import com.ctrip.platform.dal.daogen.entity.DbServer;
+import com.ctrip.platform.dal.daogen.utils.TimeoutCache;
 
 public class DaoOfDbServer {
+	
+	private static TimeoutCache<Integer, DbServer> _cache = new TimeoutCache<Integer, DbServer>();
 
 	private JdbcTemplate jdbcTemplate;
 
@@ -39,8 +42,12 @@ public class DaoOfDbServer {
 	}
 
 	public DbServer getDbServerByID(int iD) {
+		
+		if(_cache.containsKey(iD)){
+			return _cache.get(iD);
+		}
 
-		return this.jdbcTemplate
+		DbServer db =  this.jdbcTemplate
 				.queryForObject(
 						"select id, driver,  server,port,domain, user,password, db_type from data_source where id=?",
 						new Object[] { iD }, new RowMapper<DbServer>() {
@@ -49,6 +56,8 @@ public class DaoOfDbServer {
 								return DbServer.visitRow(rs);
 							}
 						});
+		_cache.put(iD, db);
+		return db;
 	}
 
 	public int insertDbServer(final DbServer data) {

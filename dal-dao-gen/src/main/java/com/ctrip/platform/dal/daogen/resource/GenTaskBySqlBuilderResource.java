@@ -38,6 +38,7 @@ public class GenTaskBySqlBuilderResource {
 			@FormParam("fields") String fields,
 			@FormParam("condition") String condition,
 			@FormParam("sql_content") String sql_content,
+			@FormParam("version") int version,
 			@FormParam("action") String action) {
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 
@@ -59,14 +60,22 @@ public class GenTaskBySqlBuilderResource {
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);
+				task.setVersion(version);
 				task.setSql_content(sql_content);
 				if (0 >= daoBySqlBuilder.updateTask(task)) {
-					return Status.ERROR;
+					Status status = Status.ERROR;
+					status.setInfo("更新出错，数据是否合法？或者已经有同名方法？");
+					return status;
+
 				}
 			}else{
+				task.setGenerated(false);
+				task.setVersion(1);
 				task.setSql_content(sql_content);
 				if (0 >= daoBySqlBuilder.insertTask(task)) {
-					return Status.ERROR;
+					Status status = Status.ERROR;
+					status.setInfo("新增出错，数据是否合法？或者已经有同名方法？");
+					return status;
 				}
 			}
 		}

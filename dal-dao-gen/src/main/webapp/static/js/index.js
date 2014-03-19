@@ -15,6 +15,61 @@ jQuery(document).ready(function () {
         $("#projectModal").modal();
     });
 
+    $(document.body).on('click', '#editProj', function (event) {
+        if(w2ui['grid'] == undefined || w2ui['grid'].current_project == undefined){
+            alert("请单击一个项目，再操作！");
+            return;
+        }
+        $("#project_id").val(w2ui['grid'].current_project);
+        var project = w2ui['sidebar'].get(w2ui['grid'].current_project);
+        if (project != undefined) {
+            $("#name").val(project.text);
+            $("#namespace").val(project.namespace);
+        }
+        $("#projectModal").attr("is_update", "1");
+        $("#projectModal").modal();
+    });
+
+    $(document.body).on('click', '#delProj', function (event) {
+        if(w2ui['grid'] == undefined || w2ui['grid'].current_project == undefined){
+            alert("请单击一个项目，再操作！");
+            return;
+        }
+        if (confirm("Are you sure to delete this project?")) {
+            var post_data = {};
+
+            post_data["id"] = w2ui['grid'].current_project;
+            post_data["action"] = "delete";
+            $.post("/rest/project", post_data, function (data) {
+                window.ajaxutil.reload_projects();
+            }).fail(function(data){
+                alert("删除失败！");
+            });
+        }
+    });
+
+    $(document.body).on('click', '#shareProj', function (event) {
+        if(w2ui['grid'] == undefined || w2ui['grid'].current_project == undefined){
+            alert("请单击一个项目，再操作！");
+            return;
+        }
+
+        $("#users > option:gt(0)").remove();
+        $.get("/rest/project/users?rand=" + Math.random(), function (data) {
+            var allUsers = [];
+            $.each(data, function (index, value) {
+                allUsers.push($('<option>', {
+                    text: value.userName + "(" + value.userNo + ")",
+                    value: value.userNo
+                }));
+            });
+            $("#users").append(allUsers);
+            $("#shareProject").modal();
+        }).fail(function(data){
+            alert("加载用户列表失败，请重试！");
+        });
+    });
+
     $(document.body).on('click', '#save_proj', function (event) {
         var post_data = {};
 
@@ -32,7 +87,9 @@ jQuery(document).ready(function () {
 
         $.post("/rest/project", post_data, function (data) {
             $("#projectModal").modal('hide');
-            reloadProjects();
+            window.ajaxutil.reload_projects();
+        }).fail(function(data){
+            alert("保存失败！");
         });
     });
 
@@ -49,8 +106,14 @@ jQuery(document).ready(function () {
                 }
 
                 $("#shareProject").modal("hide");
+            }).fail(function(data){
+                alert("分享失败!");
             });
         }
+    });
+
+    $(document.body).on('click', '#generate_code', function (event) {
+        window.ajaxutil.generate_code();
     });
 
     $("#add_condition").click(function () {
@@ -104,6 +167,8 @@ jQuery(document).ready(function () {
             } else {
                 alert("保存失败，请检查连接信息是否合法!");
             }
+        }).fail(function(data){
+            alert("保存失败！");
         });
     });
 
@@ -152,9 +217,107 @@ jQuery(document).ready(function () {
                 } else {
                     alert("删除失败!");
                 }
+            }).fail(function(data){
+                 alert("删除失败!");
             });
         }
     });
 
+    $(document.body).on('click', "#refreshFiles", function (event) {
+        var currentElement = w2ui['sub_sidebar'];
+        var nodes = [];
+        $.each(currentElement.nodes[0].nodes, function (index, value) {
+            nodes.push(value.id);
+        });
+        currentElement.remove.apply(currentElement, nodes);
+
+        ajaxGetFiles(w2ui['grid'].current_project, w2ui['sub_sidebar'].nodes[0]);
+    });
+
+    $(document.body).on('click', "#downloadFiles", function (event) {
+         cblock($("body"));
+        $.get("/rest/file/download?id=" + w2ui['grid'].current_project+
+                    "&language=" + $("#viewCode").val(), function (data) {
+                    $("body").unblock();
+                    window.location.href = data;
+        }).fail(function(data){
+             alert("下载失败!");
+        });
+    });
+
+    $(document.body).on('change', "#viewCode", function (event) {
+        $("#refreshFiles").trigger('click');
+    });
+
     window.ajaxutil.reload_projects();
 });
+
+var ajaxGetFiles = function(project_id, currentElement){
+    if (undefined == currentElement.nodes || currentElement.nodes.length == 0) {
+        var url = "/rest/file?id=" 
+        + project_id 
+        + "&language="+ $("#viewCode").val();
+        if(currentElement.relativeName != undefined){
+            url = url + "&name="+currentElement.relativeName;
+        }
+
+        cblock($("#main_layout"));
+        $.get(url, function (data) {
+            var allNodes = [];
+            $.each(data, function (index, value) {
+                if(value.parent){
+                    allNodes.push({
+                        id: value.currentId,
+                        project_id: project_id,
+                        text: value.name,
+                        relativeName: value.relativeName,
+                        icon: 'fa fa-folder-o',
+                        type: 'folder',
+                        group1: true,
+                        plus: true,
+                        onExpand: function (event) {
+                            ajaxGetFiles(project_id, event.object);
+                        },
+                        onCollapse: function (event) {
+                            event.object.icon = "fa fa-folder-o";
+                            //w2ui['sub_sidebar'].refresh();
+                        }
+                    });
+                }else{
+                    allNodes.push({
+                        id: value.currentId,
+                        project_id: project_id,
+                        text: value.name,
+                        relativeName: value.relativeName,
+                        icon: 'fa fa-file',
+                        type: "file",
+                        onClick: function (event) {
+                            $.get("/rest/file/content?id=" + project_id +"&language="+$("#viewCode").val() + "&name=" + event.object.relativeName, function (data) {
+                                //var real_data = JSON.parse(data);
+                                ace.edit("code_editor").setValue(data);
+                                if (event.object.text.match(/cs$/)) {
+                                    ace.edit("code_editor").getSession().setMode("ace/mode/csharp");
+                                } else if (event.object.text.match(/java$/)) {
+                                    ace.edit("code_editor").getSession().setMode("ace/mode/java");
+                                }
+                            }).fail(function(data){
+                                 alert("获取文件内容!");
+                            });
+                        }
+                    });
+                }
+                
+            });
+            if(allNodes.length > 0){
+                currentElement.icon = "fa fa-folder-open-o";
+                currentElement.expanded = true;
+                w2ui['sub_sidebar'].add(currentElement, allNodes);
+            }
+            
+            $("#main_layout").unblock();
+        }).fail(function(data){
+             alert("获取文件失败!");
+        });
+    }
+    //w2ui['sub_sidebar'].nodes[0].refresh();
+};

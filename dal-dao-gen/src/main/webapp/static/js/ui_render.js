@@ -20,6 +20,10 @@
                 }, {
                     type: 'main',
                     style: 'background-color: white;'
+                },{ 
+                    type: 'preview', 
+                    size: '50%', 
+                    resizable: true
                 }]
             });
         },
@@ -28,71 +32,15 @@
             w2ui['main_layout'].content('left', $().w2sidebar({
                 name: 'sidebar',
                 img: null,
-                topHTML: '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a id="addProj" href="javascript:;"><i class="fa fa-plus"></i>添加项目</a>&nbsp;&nbsp;<a href="javascript:;" onclick="window.ajaxutil.reload_projects();;"><i class="fa fa-refresh"></i>刷新项目</a></div>',
-                menu: [{
-                    id: "share",
-                    text: '与他人共享',
-                    icon: 'fa fa-twitter'
-                }, {
-                    id: "csharpCode",
-                    text: '生成C#代码',
-                    icon: 'fa fa-play'
-                }, {
-                    id: "javaCode",
-                    text: '生成Java代码',
-                    icon: 'fa fa-play'
-                }, {
-                    id: "edit_proj",
-                    text: '编辑名称',
-                    icon: 'fa fa-edit'
-                }, {
-                    id: "del_proj",
-                    text: '删除项目',
-                    icon: 'fa fa-times'
-                }],
-                onMenuClick: function (event) {
-                    switch (event.menuItem.id) {
-                    case "share":
-                        $("#users > option:gt(0)").remove();
-                        $.get("/rest/project/users?rand=" + Math.random(), function (data) {
-                            $.each(data, function (index, value) {
-                                $("#users").append($('<option>', {
-                                    text: value.userName + "(" + value.userNo + ")",
-                                    value: value.userNo
-                                }));
-                            });
-                            $("#shareProject").modal();
-                        });
-                        break;
-                    case "csharpCode":
-                        window.ajaxutil.generate_code("csharp");
-                        break;
-                    case "javaCode":
-                        window.ajaxutil.generate_code("java");
-                        break;
-                    case "edit_proj":
-                        $("#project_id").val(event.target);
-                        var project = w2ui['sidebar'].get(event.target);
-                        if (project != undefined) {
-                            $("#name").val(project.text);
-                            $("#namespace").val(project.namespace);
-                        }
-                        $("#projectModal").attr("is_update", "1");
-                        $("#projectModal").modal();
-                        break;
-                    case "del_proj":
-                        if (confirm("Are you sure to delete this project?")) {
-                            var post_data = {};
-
-                            post_data["id"] = event.target;
-                            post_data["action"] = "delete";
-                            $.post("/rest/project", post_data, function (data) {
-                                window.ajaxutil.reload_projects();
-                            });
-                        }
-                        break;
-                    }
-                },
+                topHTML: '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver">'
+                +'<a id="addProj" href="javascript:;">'
+                +'<i class="fa fa-plus"></i>添加</a>'
+                +'&nbsp;&nbsp;<a id="editProj" href="javascript:;">'
+                +'<i class="fa fa-edit"></i>修改</a>'
+                +'&nbsp;&nbsp;<a id="delProj" href="javascript:;">'
+                +'<i class="fa fa-times"></i>删除</a>'
+                +'&nbsp;&nbsp;<a id="shareProj" href="javascript:;">'
+                +'<i class="fa fa-twitter"></i>共享</a></div>',
                 nodes: [{
                     id: 'all_projects',
                     text: '所有项目',
@@ -107,6 +55,49 @@
             if (existsGrid != undefined) {
                 return;
             }
+
+            $().w2layout({
+                name: 'sub_layout',
+                panels: [{ 
+                        type: 'top',  
+                        size: 45, 
+                        resizable: true,
+                    },{ 
+                        type: 'left', 
+                        size: 271, 
+                        resizable: true
+                    },{ 
+                        type: 'main'
+                    }]
+            });
+
+            w2ui['main_layout'].content('preview', w2ui['sub_layout']);
+
+            w2ui['sub_layout'].content('top', 
+                '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a id="refreshFiles" href="javascript:;"><i class="fa fa-refresh"></i>刷新</a>&nbsp;&nbsp;<a id="downloadFiles" href="javascript:;"><i class="fa fa-download"></i>下载Zip包</a>&nbsp;&nbsp;<select id="viewCode"><option value="cs">C#</option><option value="java">Java</option></select></div>')
+
+             //Begin tree side bar
+            w2ui['sub_layout'].content('left', $().w2sidebar({
+                name: 'sub_sidebar',
+                img: null,
+                nodes: [{
+                    id: 'code_preview',
+                    text: '代码预览',
+                    icon: 'fa fa-folder-o',
+                    // plus: true,
+                    group: true,
+                }]
+            }));
+
+
+            w2ui['sub_layout'].content('main',
+             '<div id="code_editor" class="code_edit" style="height:100%"></div>');
+            //End tree side bar
+
+            var editor = ace.edit("code_editor");
+            editor.setTheme("ace/theme/monokai");
+            editor.getSession().setMode("ace/mode/csharp");
+
             w2ui['main_layout'].content('main', $().w2grid({
                 name: 'grid',
                 show: {
@@ -147,13 +138,8 @@
                         type: 'break'
                     }, {
                         type: 'button',
-                        id: 'javaCode',
-                        caption: '生成Java代码',
-                        icon: 'fa fa-play'
-                    }, {
-                        type: 'button',
-                        id: 'csharpCode',
-                        caption: '生成C#代码',
+                        id: 'code',
+                        caption: '生成代码',
                         icon: 'fa fa-play'
                     }],
                     
@@ -203,18 +189,24 @@
                                 });
                                 w2ui['grid'].add(allTasks);
                                 $("body").unblock();
+                                if(allTasks.length == 0){
+                                    w2ui['grid_toolbar'].click('addDAO', null);
+                                }
+                            }).fail(function(data){
+                                 alert("获取所有DAO失败!");
                             });
                             break;
                         case 'addDAO':
+                            window.wizzard.clear();
                             $(".step1").show();
-                            $(".step2").hide();
-                            $(".step3-1").hide();
-                            $(".step3-2").hide();
-                            $(".step3-2-1").hide();
-                            $(".step3-2-1-1").hide();
-                            $(".step3-2-1-2").hide();
-                            $(".step3-3").hide();
-                            $(".step3-3-1").hide();
+                            $(".step2-1").hide();
+                            $(".step2-2").hide();
+                            $(".step2-3").hide();
+                            $(".step2-2-1").hide();
+                            $(".step2-2-1-1").hide();
+                            $(".step2-2-1-2").hide();
+                            $(".step2-3").hide();
+                            $(".step2-3-1").hide();
                             $("#page1").attr('is_update', '0');
                             $("#page1").modal({
                                 "backdrop": "static"
@@ -222,6 +214,7 @@
                             window.ajaxutil.reload_dbservers();
                             break;
                         case 'editDAO':
+                            window.wizzard.clear();
                             var records = w2ui['grid'].getSelection();
                             if(records.length > 0){
                                 window.render.editDAO(records[0]);    
@@ -246,15 +239,18 @@
                                     function (data) {
                                         //$("#page1").modal('hide');
                                         w2ui["grid_toolbar"].click('refreshDAO', null);
+                                    }).fail(function(data){
+                                         alert("删除失败!");
                                     });
                             }
                             break;
-                        case 'javaCode':
-                            window.ajaxutil.generate_code("java");
+                        case 'code':
+                            //window.ajaxutil.generate_code("java");
+                            $("#generateCode").modal();
                             break;
-                        case 'csharpCode':
-                            window.ajaxutil.generate_code("csharp");
-                            break;
+                        // case 'csharpCode':
+                        //     window.ajaxutil.generate_code("csharp");
+                        //     break;
                         }
                     }
                 },
@@ -307,20 +303,20 @@
         editDAO: function(recid){
             var record = w2ui['grid'].get(recid);
             if (record != undefined) {
-                $("select[id$=servers] > option:gt(0)").remove();
                 $(".step1").show();
-                $(".step2").hide();
-                $(".step3-1").hide();
-                $(".step3-2").hide();;
-                $(".step3-2-1").hide();
-                $(".step3-2-1-1").hide();
-                $(".step3-2-1-2").hide();
-                $(".step3-3").hide();
-                $(".step3-3-1").hide();
+                $(".step2-1").hide();
+                $(".step2-2").hide();
+                $(".step2-3").hide();
+                $(".step2-2-1").hide();
+                $(".step2-2-1-1").hide();
+                $(".step2-2-1-2").hide();
+                $(".step2-3").hide();
+                $(".step2-3-1").hide();
                 window.ajaxutil.reload_dbservers(function () {
-                    $("#servers")[0].selectize.setValue(record.server_id);
+                    $("#databases")[0].selectize.setValue(record.db_name);
                 });
                 $("#page1").attr('is_update', '1');
+                $("#gen_style").val(record.task_type);
                 $("#page1").modal({
                     "backdrop": "static"
                 });

@@ -42,7 +42,7 @@
                     }
                 }
             });
-            if ($(".op_type.active").children().val() == "select") {
+            if ($("#crud_option").children().val() == "select") {
                 if (formatedConditions.length > 0) {
                     ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
                         $("#tables").val(), formatedConditions.join(" AND ")));
@@ -50,7 +50,7 @@
                     ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
                         $("#tables").val()));
                 }
-            } else if ($(".op_type.active").children().val() == "insert") {
+            } else if ($("#crud_option").children().val() == "insert") {
 
                 var placeHodler = [];
                 $.each($('#fields').multipleSelect('getSelects'), function (index, value) {
@@ -65,7 +65,7 @@
                     placeHodler.join(",")));
 
 
-            } else if ($(".op_type.active").children().val() == "update") {
+            } else if ($("#crud_option").children().val() == "update") {
                 var placeHodler = [];
                 $.each($('#fields').multipleSelect('getSelects'), function (index, value) {
                     if ($("#sql_style").val() == "csharp") {
@@ -86,7 +86,7 @@
                         placeHodler.join(",")));
                 }
 
-            } else if ($(".op_type.active").children().val() == "delete") {
+            } else if ($("#crud_option").children().val() == "delete") {
                 if (formatedConditions.length > 0) {
                     ace.edit("sql_builder").setValue(sprintf("Delete FROM %s WHERE %s",
                         $("#tables").val(),

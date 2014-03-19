@@ -100,10 +100,10 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		for (GenTaskByFreeSql task : freeSqls) {
 			if (!dbs.containsKey(task.getDb_name())) {
-				DbServer dbServer = daoOfDbServer.getDbServerByID(task
-						.getServer_id());
+
 				String provider = "sqlProvider";
-				if (dbServer.getDb_type().equalsIgnoreCase("mysql")) {
+				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
+						"Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				dbs.put(task.getDb_name(), provider);
@@ -111,10 +111,10 @@ public class CSharpGenerator extends AbstractGenerator {
 		}
 		for (GenTaskByTableViewSp task : tableViewSps) {
 			if (!dbs.containsKey(task.getDb_name())) {
-				DbServer dbServer = daoOfDbServer.getDbServerByID(task
-						.getServer_id());
+
 				String provider = "sqlProvider";
-				if (dbServer.getDb_type().equalsIgnoreCase("mysql")) {
+				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
+						"Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				dbs.put(task.getDb_name(), provider);
@@ -123,10 +123,9 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		for (GenTaskBySqlBuilder task : sqlBuilders) {
 			if (!dbs.containsKey(task.getDb_name())) {
-				DbServer dbServer = daoOfDbServer.getDbServerByID(task
-						.getServer_id());
 				String provider = "sqlProvider";
-				if (dbServer.getDb_type().equalsIgnoreCase("mysql")) {
+				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
+						"Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				dbs.put(task.getDb_name(), provider);
@@ -216,7 +215,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		CSharpMethodHost method = new CSharpMethodHost();
 		method.setSql(task.getSql_content());
 		method.setName(task.getMethod_name());
-		method.setPojoName(task.getPojo_name());
+		method.setPojoName(WordUtils.capitalize(task.getPojo_name()));
 		List<CSharpParameterHost> params = new ArrayList<CSharpParameterHost>();
 		for (String param : StringUtils.split(task.getParameters(), ";")) {
 			String[] splitedParam = StringUtils.split(param, ",");
@@ -240,48 +239,31 @@ public class CSharpGenerator extends AbstractGenerator {
 
 	private CSharpFreeSqlPojoHost buildFreeSqlPojoHost(GenTaskByFreeSql task) {
 
-		ResultSetMetaData rsMeta = DbUtils.testAQuerySql(task.getServer_id(),
-				task.getDb_name(), task.getSql_content(), task.getParameters());
 		CSharpFreeSqlPojoHost freeSqlHost = new CSharpFreeSqlPojoHost();
 
-		if (rsMeta != null) {
-			try {
-				List<CSharpParameterHost> pHosts = new ArrayList<CSharpParameterHost>();
-				for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-					CSharpParameterHost pHost = new CSharpParameterHost();
-					pHost.setName(rsMeta.getColumnName(i));
-					pHost.setDbType(DbType.getDbTypeFromJdbcType(rsMeta
-							.getColumnType(i)));
-					pHost.setType(DbType.getCSharpType(pHost.getDbType()));
-					pHost.setIdentity(false);
-					pHost.setNullable(false);
-					pHost.setPrimary(false);
-					pHost.setLength(rsMeta.getColumnDisplaySize(i));
-					pHosts.add(pHost);
-				}
+		List<CSharpParameterHost> pHosts = new ArrayList<CSharpParameterHost>();
 
-				freeSqlHost.setColumns(pHosts);
-				freeSqlHost.setTableName("");
-				freeSqlHost.setClassName(WordUtils.capitalize(task
-						.getPojo_name()));
-				freeSqlHost.setNameSpace(super.namespace);
-
-				return freeSqlHost;
-
-				// pojoHosts.put(task.getClass_name(), freeSqlHost);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+		for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(
+				task.getDb_name(), task.getSql_content(), task.getParameters(),
+				CurrentLanguage.CSharp, false)) {
+			pHosts.add((CSharpParameterHost) _ahost);
 		}
 
-		return null;
+		freeSqlHost.setColumns(pHosts);
+		freeSqlHost.setTableName("");
+		freeSqlHost.setClassName(WordUtils.capitalize(task.getPojo_name()));
+		freeSqlHost.setNameSpace(super.namespace);
+
+		return freeSqlHost;
 	}
 
 	// -----------------------------------------------Free Sql generate
 	// end---------------------------------------------------
 
 	@Override
-	public void generateByTableView(List<GenTaskByTableViewSp> tasks) {
+	public void generateByTableView(List<GenTaskByTableViewSp> tasks)
+			throws Exception {
+
 		prepareFolder(projectId, "cs");
 
 		buildCSharpCommonVelocity(new File(
@@ -299,15 +281,14 @@ public class CSharpGenerator extends AbstractGenerator {
 			String[] spNames = StringUtils
 					.split(tableViewSp.getSp_names(), ",");
 
-			DbServer dbServer = daoOfDbServer.getDbServerByID(tableViewSp
-					.getServer_id());
 			DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
-			if (dbServer.getDb_type().equalsIgnoreCase("mysql")) {
+			if (!DbUtils.getDbType(tableViewSp.getDb_name()).equalsIgnoreCase(
+					"Microsoft SQL Server")) {
 				dbCategory = DatabaseCategory.MySql;
 			}
 
-			List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(
-					tableViewSp.getServer_id(), tableViewSp.getDb_name());
+			List<StoredProcedure> allSpNames = DbUtils
+					.getAllSpNames(tableViewSp.getDb_name());
 			for (String table : tableNames) {
 				CSharpTableHost currentTableHost = buildTableHost(tableViewSp,
 						table, dbCategory, allSpNames);
@@ -347,18 +328,19 @@ public class CSharpGenerator extends AbstractGenerator {
 
 	private CSharpTableHost buildTableHost(GenTaskByTableViewSp tableViewSp,
 			String table, DatabaseCategory dbCategory,
-			List<StoredProcedure> allSpNames) {
-		// 主键及所有列
-		List<AbstractParameterHost> allColumnsAbstract = DbUtils
-				.getAllColumnNames(tableViewSp.getServer_id(),
-						tableViewSp.getDb_name(), table, CurrentLanguage.CSharp);
+			List<StoredProcedure> allSpNames) throws Exception {
 
-		if (null == allColumnsAbstract) {
-			return null;
+		if (!DbUtils.tableExists(tableViewSp.getDb_name(), table)) {
+			throw new Exception(String.format("表 %s 不存在，请编辑DAO再生成", table));
 		}
 
+		// 主键及所有列
+		List<AbstractParameterHost> allColumnsAbstract = DbUtils
+				.getAllColumnNames(tableViewSp.getDb_name(), table,
+						CurrentLanguage.CSharp);
+
 		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
-				tableViewSp.getServer_id(), tableViewSp.getDb_name(), table);
+				tableViewSp.getDb_name(), table);
 
 		List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
 		for (AbstractParameterHost h : allColumnsAbstract) {
@@ -426,7 +408,8 @@ public class CSharpGenerator extends AbstractGenerator {
 	}
 
 	private CSharpTableHost buildSpHost(GenTaskByTableViewSp tableViewSp,
-			DatabaseCategory dbCategory, String spName) {
+			DatabaseCategory dbCategory, String spName) throws Exception {
+
 		String schema = "dbo";
 		String realSpName = spName;
 		if (spName.contains(".")) {
@@ -439,13 +422,12 @@ public class CSharpGenerator extends AbstractGenerator {
 		currentSp.setSchema(schema);
 		currentSp.setName(realSpName);
 
-		List<AbstractParameterHost> params = DbUtils.getSpParams(
-				tableViewSp.getServer_id(), tableViewSp.getDb_name(),
-				currentSp, CurrentLanguage.CSharp);
-
-		if (null == params) {
-			return null;
+		if (!DbUtils.spExists(tableViewSp.getDb_name(), currentSp)) {
+			throw new Exception(String.format("视图 %s 不存在，请修改DAO后再试！"));
 		}
+
+		List<AbstractParameterHost> params = DbUtils.getSpParams(
+				tableViewSp.getDb_name(), currentSp, CurrentLanguage.CSharp);
 
 		List<CSharpParameterHost> realParams = new ArrayList<CSharpParameterHost>();
 		for (AbstractParameterHost p : params) {
@@ -466,14 +448,15 @@ public class CSharpGenerator extends AbstractGenerator {
 	}
 
 	private CSharpTableHost buildViewHost(GenTaskByTableViewSp tableViewSp,
-			DatabaseCategory dbCategory, String view) {
-		List<AbstractParameterHost> allColumnsAbstract = DbUtils
-				.getAllColumnNames(tableViewSp.getServer_id(),
-						tableViewSp.getDb_name(), view, CurrentLanguage.CSharp);
+			DatabaseCategory dbCategory, String view) throws Exception {
 
-		if (null == allColumnsAbstract) {
-			return null;
+		if (!DbUtils.viewExists(tableViewSp.getDb_name(), view)) {
+			throw new Exception(String.format("视图 %s 不存在，请编辑DAO再生成", view));
 		}
+
+		List<AbstractParameterHost> allColumnsAbstract = DbUtils
+				.getAllColumnNames(tableViewSp.getDb_name(), view,
+						CurrentLanguage.CSharp);
 
 		List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
 		for (AbstractParameterHost h : allColumnsAbstract) {
@@ -495,7 +478,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	}
 
 	private CSharpTableHost buildExtraSqlBuilderHost(
-			GenTaskBySqlBuilder sqlBuilder) {
+			GenTaskBySqlBuilder sqlBuilder) throws Exception {
 		GenTaskByTableViewSp tableViewSp = new GenTaskByTableViewSp();
 		tableViewSp.setCud_by_sp(false);
 		tableViewSp.setPagination(false);
@@ -504,15 +487,14 @@ public class CSharpGenerator extends AbstractGenerator {
 		tableViewSp.setPrefix("");
 		tableViewSp.setSuffix("Gen");
 
-		DbServer dbServer = daoOfDbServer.getDbServerByID(tableViewSp
-				.getServer_id());
 		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
-		if (dbServer.getDb_type().equalsIgnoreCase("mysql")) {
+		if (!DbUtils.getDbType(sqlBuilder.getDb_name()).equalsIgnoreCase(
+				"Microsoft SQL Server")) {
 			dbCategory = DatabaseCategory.MySql;
 		}
 
-		List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(
-				tableViewSp.getServer_id(), sqlBuilder.getDb_name());
+		List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(sqlBuilder
+				.getDb_name());
 
 		return buildTableHost(tableViewSp, sqlBuilder.getTable_name(),
 				dbCategory, allSpNames);

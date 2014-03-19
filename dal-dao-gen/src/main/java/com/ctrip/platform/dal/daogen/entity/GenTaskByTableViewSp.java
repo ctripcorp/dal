@@ -26,6 +26,10 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	private boolean cud_by_sp;
 	
 	private boolean pagination;
+	
+private boolean generated;
+	
+	private int version;
 
 	public int getId() {
 		return id;
@@ -114,6 +118,22 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	public void setPagination(boolean pagination) {
 		this.pagination = pagination;
 	}
+	
+	public boolean isGenerated() {
+		return generated;
+	}
+
+	public void setGenerated(boolean generated) {
+		this.generated = generated;
+	}
+
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
+	}
 
 	/**
 	 * 根据Resultset返回GenTaskByTableView实体对象
@@ -134,6 +154,8 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 		task.setSuffix(rs.getString(9));
 		task.setCud_by_sp(rs.getBoolean(10));
 		task.setPagination(rs.getBoolean(11));
+		task.setGenerated(rs.getBoolean(12));
+		task.setVersion(rs.getInt(13));
 		return task;
 	}
 

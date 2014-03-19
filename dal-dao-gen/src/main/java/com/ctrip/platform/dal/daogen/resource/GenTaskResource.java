@@ -79,7 +79,6 @@ public class GenTaskResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public FreeSqlClassPojoNames getClassPojoNames(
 			@QueryParam("project_id") int id,
-			@QueryParam("server_id") int server,
 			@QueryParam("db_name") String db_name) {
 		List<GenTaskByFreeSql> sqlTasks = sqlTask.getTasksByProjectId(Integer
 				.valueOf(id));
@@ -90,8 +89,7 @@ public class GenTaskResource {
 		Set<String> pojos = new HashSet<String>();
 
 		for (GenTaskByFreeSql freesql : sqlTasks) {
-			if (freesql.getServer_id() == server
-					&& freesql.getDb_name().equals(db_name)) {
+			if (freesql.getDb_name().equals(db_name)) {
 				clazz.add(freesql.getClass_name());
 				pojos.add(freesql.getPojo_name());
 			}

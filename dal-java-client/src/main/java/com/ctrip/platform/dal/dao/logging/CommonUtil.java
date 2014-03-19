@@ -136,6 +136,11 @@ public class CommonUtil {
 //        }
     }
     
+    public static String null2NA(String str)
+    {
+    	return null != str ? str : "NA";
+    }
+    
     public static void main(String[] args) {
     	String sql = "select * from Person where Id = ?";
     	String hash = getHashCode4SQLString(sql);

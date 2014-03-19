@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -300,13 +301,25 @@ public class DirectClientDaoTest {
 			e.printStackTrace();
 		}
 	}
+	
+	public void testSelect()
+	{
+		DalClient client = DalClientFactory.getClient("dao_test");
+		try {	
+			this.selectPerson(client);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	private void selectPerson(DalClient client) throws SQLException {
-		client.query(sql2, parameters, hints, new DalResultSetExtractor<Object>() {
+		client.query(sql2, parameters, hints, new DalResultSetExtractor<List<Integer>>() {
 			private boolean headerDisplayed;
 			private int colCount;
 			@Override
-			public Object extract(ResultSet rs) throws SQLException {
+			public List<Integer> extract(ResultSet rs) throws SQLException {
+				List<Integer> lts = new ArrayList<Integer>();
 				if(!headerDisplayed) {
 					ResultSetMetaData meta = rs.getMetaData();
 					colCount = meta.getColumnCount();
@@ -323,9 +336,10 @@ public class DirectClientDaoTest {
 						System.out.print(rs.getString(i) + "\t");
 					System.out.println();
 					count++;
+					lts.add(count);
 				}
 				System.out.println("Result count: " + count);
-				return null;
+				return lts;
 			}
 			
 		});
@@ -350,7 +364,7 @@ public class DirectClientDaoTest {
 	}
 	
 	public static void main(String[] args) {
-        LogConfig.setAppID("930201");
+        LogConfig.setAppID("9302011");
 //      LogConfig.setLoggingServerIP("localhost");
         LogConfig.setLoggingServerIP("192.168.82.58");
         LogConfig.setLoggingServerPort("63100");
@@ -365,17 +379,18 @@ public class DirectClientDaoTest {
 		
 		DirectClientDaoTest test = new DirectClientDaoTest();
 		
+		test.testSelect();
 		//test.testType("dao_test", "ManyTypes");
 		//test.test();
 //		test.test2();
-		test.testAutoIncrement();
+		/*test.testAutoIncrement();
 		test.testBatch();
 		test.testBatch2();
 		test.testCommand();
 		test.testSP();
 		test.testSPInOut();
 		test.testConnectionException();
-		test.testTransactionException();
+		test.testTransactionException();*/
 		try {
 			Thread.sleep(30 * 1000);
 		} catch (InterruptedException e) {

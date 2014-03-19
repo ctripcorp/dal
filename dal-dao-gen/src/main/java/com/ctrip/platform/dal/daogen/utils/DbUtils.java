@@ -160,7 +160,7 @@ public class DbUtils {
 				JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
 				String sql = String
-						.format(" select Name from sysobjects where xtype ='v' and status>=0 where Name = ?",
+						.format(" select Name from sysobjects where xtype ='v' and status>=0 and Name = ?",
 								dbName);
 				result = jdbcTemplate.query(sql, new Object[] { viewName },
 						new RowMapper<String>() {

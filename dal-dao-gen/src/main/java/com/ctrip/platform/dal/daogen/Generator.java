@@ -8,11 +8,11 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 
 public interface Generator {
 	
-	public boolean generateCode(int projectId);
+	public boolean generateCode(int projectId, boolean regenerate) throws Exception;
 	
-	public void generateByTableView(List<GenTaskByTableViewSp> tasks);
+	public void generateByTableView(List<GenTaskByTableViewSp> tasks) throws Exception;
 	
-	public void generateByFreeSql(List<GenTaskByFreeSql> tasks);
+	public void generateByFreeSql(List<GenTaskByFreeSql> tasks) throws Exception;
 
 }
 

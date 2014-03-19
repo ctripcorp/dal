@@ -2,14 +2,17 @@ package com.ctrip.platform.dal.daogen.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 
+import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 
 public class DaoByTableViewSp {
@@ -29,7 +32,7 @@ public class DaoByTableViewSp {
 	public List<GenTaskByTableViewSp> getTasksByProjectId(int iD) {
 		try {
 			return this.jdbcTemplate
-					.query("select id, project_id, server_id, db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination from task_table where project_id=?",
+					.query("select id, project_id, server_id, db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version from task_table where project_id=?",
 							new Object[] { iD },
 							new RowMapper<GenTaskByTableViewSp>() {
 								public GenTaskByTableViewSp mapRow(
@@ -43,16 +46,58 @@ public class DaoByTableViewSp {
 			return null;
 		}
 	}
+	
+public List<GenTaskByTableViewSp> updateAndGetAllTasks(int projectId) {
+		
+		final List<GenTaskByTableViewSp> tasks = new ArrayList<GenTaskByTableViewSp>();
+		
+		this.jdbcTemplate
+				.query("select id, project_id, server_id, db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version from task_table where project_id=?",
+						new Object[] { projectId },
+						new RowCallbackHandler() {
+							@Override
+							public void processRow(ResultSet rs) throws SQLException {
+								GenTaskByTableViewSp task = GenTaskByTableViewSp.visitRow(rs);
+								
+								task.setGenerated(true);
+								if(updateTask(task) > 0){
+									tasks.add(task);
+								}
+							}
+						});
+		return tasks;
+	}
+	
+public List<GenTaskByTableViewSp> updateAndGetTasks(int projectId) {
+		
+		final List<GenTaskByTableViewSp> tasks = new ArrayList<GenTaskByTableViewSp>();
+		
+		this.jdbcTemplate
+				.query("select id, project_id, server_id, db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version from task_table where project_id=? and generated=false",
+						new Object[] { projectId },
+						new RowCallbackHandler() {
+							@Override
+							public void processRow(ResultSet rs) throws SQLException {
+								GenTaskByTableViewSp task = GenTaskByTableViewSp.visitRow(rs);
+								
+								task.setGenerated(true);
+								if(updateTask(task) > 0){
+									tasks.add(task);
+								}
+							}
+						});
+		return tasks;
+	}
 
 	public int insertTask(GenTaskByTableViewSp task) {
 		try {
 			return this.jdbcTemplate
-					.update("insert into task_table ( project_id,server_id,  db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination) values (?,?,?,?,?,?,?,?,?,?)",
+					.update("insert into task_table ( project_id,server_id,  db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version) values (?,?,?,?,?,?,?,?,?,?,?,?)",
 							task.getProject_id(), task.getServer_id(),
 							task.getDb_name(), task.getTable_names(),
 							task.getView_names(), task.getSp_names(),
 							task.getPrefix(), task.getSuffix(),
-							task.isCud_by_sp(), task.isPagination());
+							task.isCud_by_sp(), task.isPagination(),task.isGenerated(),task.getVersion());
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
 			return -1;
@@ -62,14 +107,15 @@ public class DaoByTableViewSp {
 	public int updateTask(GenTaskByTableViewSp task) {
 		try {
 			return this.jdbcTemplate
-					.update("update task_table set project_id=?,server_id=?,  db_name=?, table_names=?,view_names=?,sp_names=?,prefix=?,suffix=?,cud_by_sp=?,pagination=? where id=?",
+					.update("update task_table set project_id=?,server_id=?,  db_name=?, table_names=?,view_names=?,sp_names=?,prefix=?,suffix=?,cud_by_sp=?,pagination=?,generated=?,version=version+1 where id=? and version=?",
 
 					task.getProject_id(), task.getServer_id(),
 							task.getDb_name(), task.getTable_names(),
 							task.getView_names(), task.getSp_names(),
 							task.getPrefix(), task.getSuffix(),
 							task.isCud_by_sp(), task.isPagination(),
-							task.getId());
+							task.isGenerated(),
+							task.getId(),task.getVersion());
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
 			return -1;

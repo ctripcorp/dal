@@ -36,6 +36,7 @@ public class GenTaskByFreeSqlResource {
 			@FormParam("crud_type") String crud_type,
 			@FormParam("sql_content") String sql_content,
 			@FormParam("params") String params,
+			@FormParam("version") int version,
 			@FormParam("action") String action) {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 
@@ -57,12 +58,19 @@ public class GenTaskByFreeSqlResource {
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);
+				task.setVersion(version);
 				if (0 >= daoByFreeSql.updateTask(task)) {
-					return Status.ERROR;
+					Status status = Status.ERROR;
+					status.setInfo("更新出错，数据是否合法？或者已经有同名方法？");
+					return status;
 				}
 			}else{
+				task.setGenerated(false);
+				task.setVersion(1);
 				if (0 >= daoByFreeSql.insertTask(task)) {
-					return Status.ERROR;
+					Status status = Status.ERROR;
+					status.setInfo("新增出错，数据是否合法？或者已经有同名方法？");
+					return status;
 				}
 			}
 		}

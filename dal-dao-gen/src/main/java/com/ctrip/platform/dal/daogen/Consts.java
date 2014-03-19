@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Consts {
 	
@@ -20,6 +21,8 @@ public class Consts {
 	 */
 	public static List<String> SystemDatabases;
 	
+	public static Map<String, String> databaseType;
+	
 	public static Map<Integer, Class> jdbcSqlTypeToJavaClass;
 	public static Map<Integer, String> jdbcSqlTypeDisplay;
 	
@@ -30,6 +33,7 @@ public class Consts {
 		WhereConditionMap = new HashMap<String, String>();
 		jdbcSqlTypeToJavaClass= new HashMap<Integer, Class>();
 		SystemDatabases = new ArrayList<String>();
+		databaseType = new ConcurrentHashMap<String, String>();
 		
 		CSharpValueTypes.add("sbyte");
 		CSharpValueTypes.add("byte");

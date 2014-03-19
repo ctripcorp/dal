@@ -25,6 +25,10 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	private String sql_content;
 	
 	private String parameters;
+	
+	private boolean generated;
+	
+	private int version;
 
 	public String getParameters() {
 		return parameters;
@@ -106,6 +110,22 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		this.sql_content = sql_content;
 	}
 
+	public boolean isGenerated() {
+		return generated;
+	}
+
+	public void setGenerated(boolean generated) {
+		this.generated = generated;
+	}
+
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
+	}
+
 	public static GenTaskByFreeSql visitRow(ResultSet rs) throws SQLException {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 		task.setId(rs.getInt(1));
@@ -118,6 +138,8 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		task.setCrud_type(rs.getString(8));
 		task.setSql_content(rs.getString(9));
 		task.setParameters(rs.getString(10));
+		task.setGenerated(rs.getBoolean(11));
+		task.setVersion(rs.getInt(12));
 		return task;
 	}
 

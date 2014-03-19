@@ -62,7 +62,7 @@ public class CSharpSpaOperationHost {
 		}
 		
 		if(host.exist){
-			List<AbstractParameterHost> parameters =  DbUtils.getSpParams(server, dbName, currentSp, CurrentLanguage.CSharp);
+			List<AbstractParameterHost> parameters =  DbUtils.getSpParams(dbName, currentSp, CurrentLanguage.CSharp);
 			List<CSharpParameterHost> realParams = new ArrayList<CSharpParameterHost>();
 			for(AbstractParameterHost _host: parameters){
 				realParams.add((CSharpParameterHost)_host);

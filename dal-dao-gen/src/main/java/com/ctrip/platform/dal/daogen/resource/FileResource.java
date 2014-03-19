@@ -35,48 +35,45 @@ import com.ctrip.platform.dal.daogen.utils.ZipFolder;
 @Singleton
 @Path("file")
 public class FileResource {
-	
+
 	private static DaoOfProject daoOfProject;
-	
-	
-	static{
+
+	static {
 		daoOfProject = SpringBeanGetter.getDaoOfProject();
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<W2uiElement> getFiles(@QueryParam("id") String id,
-			@QueryParam("name") String name,
-			@QueryParam("parent") boolean parent,
-			@QueryParam("root") boolean root) {
+			@QueryParam("language") String language,
+			@QueryParam("name") String name) {
 		List<W2uiElement> files = new ArrayList<W2uiElement>();
 
-		File currentProjectDir = new File("gen", id);
+		File currentProjectDir = new File(new File("gen", id), language);
 		if (currentProjectDir.exists()) {
-
-			if (root) {
-				for (File f : currentProjectDir.listFiles()) {
-					W2uiElement element = new W2uiElement();
-					element.setCurrentId(String.format("%s_2_%d", id,
-							files.size()));
-					element.setRelativeName(f.getName());
-					element.setName(f.getName());
-					element.setParent(f.isDirectory());
-					files.add(element);
-				}
-			} else if (parent) {
-				File currentFile = new File(currentProjectDir, name);
-				for (File f : currentFile.listFiles()) {
-					W2uiElement element = new W2uiElement();
+			File currentFile = null;
+			if (null == name || name.isEmpty()) {
+				currentFile = currentProjectDir;
+			} else {
+				currentFile = new File(currentProjectDir, name);
+			}
+			for (File f : currentFile.listFiles()) {
+				W2uiElement element = new W2uiElement();
+				if (null == name || name.isEmpty()) {
+					element.setCurrentId(String.format("%s_%d", id, files.size()));
+				} else {
 					element.setCurrentId(String.format("%s_%s_%d", id,
 							name.replace("\\", ""), files.size()));
-					element.setRelativeName(name + File.separator + f.getName());
-					element.setName(f.getName());
-					element.setParent(f.isDirectory());
-					files.add(element);
 				}
+				if (null == name || name.isEmpty()) {
+					element.setRelativeName(f.getName());
+				} else {
+					element.setRelativeName(name + File.separator + f.getName());
+				}
+				element.setName(f.getName());
+				element.setParent(f.isDirectory());
+				files.add(element);
 			}
-
 		}
 
 		return files;
@@ -86,8 +83,9 @@ public class FileResource {
 	@Path("content")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getFileContent(@QueryParam("id") String id,
+			@QueryParam("language") String language,
 			@QueryParam("name") String name) {
-		File f = new File(new File("gen", id), name);
+		File f = new File(new File(new File("gen", id), language), name);
 		StringBuilder sb = new StringBuilder();
 		if (f.exists()) {
 			BufferedReader reader = null;
@@ -124,64 +122,66 @@ public class FileResource {
 	@Path("download")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String download(@QueryParam("id") String id,
-			@QueryParam("name") String name) {
+			@QueryParam("language") String name) {
 		File f = null;
 		if (null != name && !name.isEmpty()) {
 			f = new File(new File("gen", id), name);
 		} else {
 			f = new File("gen", id);
 		}
-		
-		Project proj = 	daoOfProject.getProjectByID(Integer.valueOf(id));
 
-		String zipFileName = proj.getName() + "-" + System.currentTimeMillis() + ".zip";
+		Project proj = daoOfProject.getProjectByID(Integer.valueOf(id));
+
+		String zipFileName = proj.getName() + "-" + System.currentTimeMillis()
+				+ ".zip";
 
 		if (f.isFile()) {
 			zipFile(f, zipFileName);
 		} else {
 			new ZipFolder(f.getAbsolutePath()).zipIt(zipFileName);
 		}
-		
+
 		FTPClient client = new FTPClient();
 		FileInputStream fis = null;
 
 		String ftp_server = Configuration.get("ftp_server");
 		int ftp_port = Configuration.getInt("ftp_port");
-		
+
 		try {
 			String ftp_user = Configuration.get("ftp_user");
 			String ftp_pass = Configuration.get("ftp_pass");
-		    client.connect(ftp_server, ftp_port);
-		    if(ftp_user != null && !ftp_user.isEmpty()){
-		    	client.login(ftp_user, ftp_pass);
-		    }
-		    
-		    client.setFileType(FTP.BINARY_FILE_TYPE);
+			client.connect(ftp_server, ftp_port);
+			if (ftp_user != null && !ftp_user.isEmpty()) {
+				client.login(ftp_user, ftp_pass);
+			}
 
-		    //
-		    // Create an InputStream of the file to be uploaded
-		    //
-		    fis = new FileInputStream(new File("gen", zipFileName));
+			client.setFileType(FTP.BINARY_FILE_TYPE);
 
-		    //
-		    // Store file to server
-		    //
-		    client.storeFile(zipFileName, fis);
-		    client.logout();
+			//
+			// Create an InputStream of the file to be uploaded
+			//
+			fis = new FileInputStream(new File("gen", zipFileName));
+
+			//
+			// Store file to server
+			//
+			client.storeFile(zipFileName, fis);
+			client.logout();
 		} catch (IOException e) {
-		    e.printStackTrace();
+			e.printStackTrace();
 		} finally {
-		    try {
-		        if (fis != null) {
-		            fis.close();
-		        }
-		        client.disconnect();
-		    } catch (IOException e) {
-		        e.printStackTrace();
-		    }
+			try {
+				if (fis != null) {
+					fis.close();
+				}
+				client.disconnect();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
-		return String.format("ftp://dal@%s:%d/%s", ftp_server, ftp_port, zipFileName);
+		return String.format("ftp://dal@%s:%d/%s", ftp_server, ftp_port,
+				zipFileName);
 	}
 
 	private void zipFile(File fileToZip, String zipFileName) {
@@ -191,7 +191,8 @@ public class FileResource {
 		ZipOutputStream zos = null;
 		try {
 
-			FileOutputStream fos = new FileOutputStream(new File("gen", zipFileName));
+			FileOutputStream fos = new FileOutputStream(new File("gen",
+					zipFileName));
 			zos = new ZipOutputStream(fos);
 			ZipEntry ze = new ZipEntry(fileToZip.getName());
 			zos.putNextEntry(ze);
@@ -210,40 +211,41 @@ public class FileResource {
 			JavaIOUtils.closeOutputStream(zos);
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		FTPClient client = new FTPClient();
 		FileInputStream fis = null;
 
 		try {
-		    client.connect("172.16.155.151", 21);
-		    	System.out.println(client.login("dal", ""));
-		    	
-		    	System.out.println(client.setFileTransferMode(FTP.BINARY_FILE_TYPE));
-		    	System.out.println(client.setFileType(FTP.BINARY_FILE_TYPE));
+			client.connect("172.16.155.151", 21);
+			System.out.println(client.login("dal", ""));
 
-		    //
-		    // Create an InputStream of the file to be uploaded
-		    //
-		    fis = new FileInputStream(new File("gen", "1.zip"));
+			System.out
+					.println(client.setFileTransferMode(FTP.BINARY_FILE_TYPE));
+			System.out.println(client.setFileType(FTP.BINARY_FILE_TYPE));
 
-		    //
-		    // Store file to server
-		    //
-		    
-		    System.out.println(client.storeFile("1.zip", fis));
-		    System.out.println(client.logout());
+			//
+			// Create an InputStream of the file to be uploaded
+			//
+			fis = new FileInputStream(new File("gen", "1.zip"));
+
+			//
+			// Store file to server
+			//
+
+			System.out.println(client.storeFile("1.zip", fis));
+			System.out.println(client.logout());
 		} catch (IOException e) {
-		    e.printStackTrace();
+			e.printStackTrace();
 		} finally {
-		    try {
-		        if (fis != null) {
-		            fis.close();
-		        }
-		        client.disconnect();
-		    } catch (IOException e) {
-		        e.printStackTrace();
-		    }
+			try {
+				if (fis != null) {
+					fis.close();
+				}
+				client.disconnect();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 	}

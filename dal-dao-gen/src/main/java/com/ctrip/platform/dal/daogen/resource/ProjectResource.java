@@ -48,7 +48,8 @@ public class ProjectResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Status shareProject(@FormParam("id") int id,
 			@FormParam("userNo") String userNo) {
-		UserProject userProject = SpringBeanGetter.getDaoOfUserProject().getUserProject(id, userNo);
+		UserProject userProject = SpringBeanGetter.getDaoOfUserProject()
+				.getUserProject(id, userNo);
 		if (null == userProject) {
 			UserProject project = new UserProject();
 			project.setProject_id(id);
@@ -67,7 +68,7 @@ public class ProjectResource {
 
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
-		
+
 		if (SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo) == null) {
 			LoginUser user = new LoginUser();
 			user.setUserNo(userNo);
@@ -77,7 +78,7 @@ public class ProjectResource {
 					.getAttributes().get("mail").toString());
 			SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
 		}
-		
+
 		List<UserProject> projects = SpringBeanGetter.getDaoOfUserProject()
 				.getUserProjectsByUser(userNo);
 
@@ -88,7 +89,8 @@ public class ProjectResource {
 		}
 
 		if (ids.size() > 0)
-			return SpringBeanGetter.getDaoOfProject().getProjectByIDS(ids.toArray());
+			return SpringBeanGetter.getDaoOfProject().getProjectByIDS(
+					ids.toArray());
 		else
 			return new ArrayList<Project>();
 
@@ -98,7 +100,8 @@ public class ProjectResource {
 	@Path("project")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Project getProject(@QueryParam("id") String id) {
-		return SpringBeanGetter.getDaoOfProject().getProjectByID(Integer.valueOf(id));
+		return SpringBeanGetter.getDaoOfProject().getProjectByID(
+				Integer.valueOf(id));
 	}
 
 	@POST
@@ -142,17 +145,26 @@ public class ProjectResource {
 	@POST
 	@Path("generate")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Status generateProject(@FormParam("project_id") String id,
+	public Status generateProject(@FormParam("project_id") int id,
+			@FormParam("regenerate") boolean regen,
 			@FormParam("language") String language) {
-
-		if (language.equals("java"))
-			JavaGenerator.getInstance().generateCode(Integer.valueOf(id));
-		else if (language.equals("csharp"))
-			CSharpGenerator.getInstance().generateCode(Integer.valueOf(id));
-		else if (language.equals("python"))
-			;
-
-		return Status.OK;
+		Status status = null;
+		try {
+			if (language.equals("java"))
+			{
+				JavaGenerator.getInstance().generateCode(id, regen);
+			}
+			else if (language.equals("cs")){
+				CSharpGenerator.getInstance().generateCode(id, regen);
+			}
+			status = Status.OK;
+		} catch (Exception e) {
+			status = Status.ERROR;
+			status.setInfo(e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return status;
 	}
 
 }

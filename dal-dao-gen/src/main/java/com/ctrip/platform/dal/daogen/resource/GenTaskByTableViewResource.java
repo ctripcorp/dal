@@ -37,6 +37,7 @@ public class GenTaskByTableViewResource {
 			@FormParam("suffix") String suffix,
 			@FormParam("cud_by_sp") boolean cud_by_sp,
 			@FormParam("pagination") boolean pagination,
+			@FormParam("version") int version,
 			@FormParam("action") String action) {
 		GenTaskByTableViewSp task = new GenTaskByTableViewSp();
 
@@ -59,10 +60,13 @@ public class GenTaskByTableViewResource {
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);
+				task.setVersion(version);
 				if (0 >= daoByTableViewSp.updateTask(task)) {
 					return Status.ERROR;
 				}
 			}else{
+				task.setGenerated(false);
+				task.setVersion(1);
 				if (0 >= daoByTableViewSp.insertTask(task)) {
 					return Status.ERROR;
 				}

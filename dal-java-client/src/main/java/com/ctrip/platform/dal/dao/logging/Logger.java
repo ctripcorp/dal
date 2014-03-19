@@ -2,10 +2,12 @@ package com.ctrip.platform.dal.dao.logging;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import com.ctrip.freeway.gen.v2.LogLevel;
 import com.ctrip.freeway.logging.ILog;
 import com.ctrip.freeway.logging.LogManager;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -51,8 +53,40 @@ public class Logger {
 		if(!validate(log.getSql(), log.getInputParamStr()))
 			return;
 		
+		Map<String, String> tag = new LinkedHashMap<String, String>();
+		tag.put("InTransaction", log.isTransactional() ? "True" : "False");
+		tag.put("DurationTime", Long.toString(log.getDuration()) + "ms");
+		tag.put("DatabaseName", CommonUtil.null2NA(log.getDatabaseName()));
+		tag.put("ServerAddress", CommonUtil.null2NA(log.getServerAddress()));
+		tag.put("CommandType", CommonUtil.null2NA(log.getCommandType()));
+		tag.put("UserName", CommonUtil.null2NA(log.getUserName()));
+		tag.put("RecordCount", Long.toString(log.getResultCount()));
 		
-		logger.info(log.toBrief());
+		logger.info(CommonUtil.null2NA(log.getTitle()), log.toBrief(), tag);
+	}
+	
+	public static void log(String name, DalEventEnum event, LogLevel level, String msg)
+	{
+		StringBuffer sbuffer = new StringBuffer();
+		sbuffer.append(String.format("Log Name: %s" + System.lineSeparator(), name));
+		sbuffer.append(String.format("Event: %s" + System.lineSeparator(), event.getEventId()));
+		sbuffer.append(String.format("Message: %s " + System.lineSeparator(), msg));
+		
+		switch (level) {
+			case DEBUG:
+				logger.debug(sbuffer.toString());
+			case INFO: 
+				logger.info(sbuffer.toString());
+				break;
+			case ERROR:
+				logger.error(sbuffer.toString());
+				break;
+			case FATAL:
+				logger.fatal(sbuffer.toString());
+				break;
+		default:
+			break;
+		}
 	}
 	
 	public static void log(LogEntry log, Throwable e) {

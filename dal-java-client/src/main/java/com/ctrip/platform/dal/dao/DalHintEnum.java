@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.dao;
 
-import java.util.Map;
-import java.util.Set;
 
 public enum DalHintEnum {
 	/* All the parameters for each Dal client call. Used for locating shard, real database */
@@ -59,6 +57,15 @@ public enum DalHintEnum {
 	
 	/* for logging */
 	callingUrl,
+	
+	/* for logging */
+	userName,
+	
+	/* for logging*/
+	serverAddress,
+	
+	/* for logging */
+	databaseName,
 	
 	/* For insert, delete, update multiple pojos */ 
 	usingBatch,

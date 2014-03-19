@@ -14,6 +14,7 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 #if($host.isSpa())
+import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 #end
 
@@ -45,11 +46,23 @@ public class ${host.getPojoClassName()}Dao {
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}
 
-#if($host.isHasIdentity())
+#if($host.isIntegerPk())
 	public ${host.getPojoClassName()} queryByPk(Number id)
 			throws SQLException {
 		DalHints hints = new DalHints();
 		return client.queryByPk(id, hints);
+	}
+#else
+	public ${host.getPojoClassName()} queryByPk(${host.getPkParameterDeclaration()})
+			throws SQLException {
+		DalHints hints = new DalHints();
+		${host.getPojoClassName()} pk = new ${host.getPojoClassName()}();
+			
+#foreach( $field in ${host.getPrimaryKeys()} )
+		pojo.set${field.getCapitalizedName()}(${field.getUncapitalizedName()});
+#end
+
+		return client.queryByPk(pk, hints);
 	}
 #end
 
@@ -58,8 +71,6 @@ public class ${host.getPojoClassName()}Dao {
 		DalHints hints = new DalHints();
 		return client.queryByPk(pk, hints);
 	}
-	
-	// TODO add query by PK column list
 	
 	public List<${host.getPojoClassName()}> queryByPage(${host.getPojoClassName()} pk, int pageSize, int pageNo)
 			throws SQLException {
@@ -209,7 +220,7 @@ public class ${host.getPojoClassName()}Dao {
 	}
 	
 #end
-	private static class ${host.getPojoClassName()}Parser implements DalParser<${host.getPojoClassName()}> {
+	private static class ${host.getPojoClassName()}Parser extends AbstractDalParser<${host.getPojoClassName()}> {
 		public static final String DATABASE_NAME = "${host.getDbName()}";
 		public static final String TABLE_NAME = "${host.getTableName()}";
 		private static final String[] COLUMNS = new String[]{
@@ -232,6 +243,10 @@ public class ${host.getPojoClassName()}Dao {
 #end
 		};
 		
+		public ${host.getPojoClassName()}Parser() {
+			super(DATABASE_NAME, TABLE_NAME, COLUMNS, PRIMARY_KEYS, COLUMN_TYPES);
+		}
+		
 		@Override
 		public ${host.getPojoClassName()} map(ResultSet rs, int rowNum) throws SQLException {
 			${host.getPojoClassName()} pojo = new ${host.getPojoClassName()}();
@@ -241,31 +256,6 @@ public class ${host.getPojoClassName()}Dao {
 #end
 	
 			return pojo;
-		}
-	
-		@Override
-		public String getDatabaseName() {
-			return DATABASE_NAME;
-		}
-	
-		@Override
-		public String getTableName() {
-			return TABLE_NAME;
-		}
-	
-		@Override
-		public String[] getColumnNames() {
-			return COLUMNS;
-		}
-	
-		@Override
-		public String[] getPrimaryKeyNames() {
-			return PRIMARY_KEYS;
-		}
-		
-		@Override
-		public int[] getColumnTypes() {
-			return COLUMN_TYPES;
 		}
 	
 		@Override

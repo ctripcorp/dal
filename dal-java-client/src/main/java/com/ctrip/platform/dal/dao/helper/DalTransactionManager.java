@@ -6,14 +6,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Set;
 
-import javax.sql.DataSource;
-
 import com.ctrip.datasource.locator.DataSourceLocator;
+import com.ctrip.freeway.gen.v2.LogLevel;
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
-import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
+import com.ctrip.platform.dal.dao.logging.DalEventEnum;
+import com.ctrip.platform.dal.dao.logging.Logger;
 
 public class DalTransactionManager {
 	public static final boolean SELECTE = true;
@@ -68,21 +68,37 @@ public class DalTransactionManager {
 
 		connCache.rollbackTransaction(startLevel);
 	}
-
+	
 	public Connection getConnection(DalHints hints) throws SQLException {
 		ConnectionCache connCache = connectionCacheHolder.get();
 		
 		if(connCache == null) {
 			Connection conn = null;
-			if(config != null) {
-				Set<String> shards = config.getDatabaseSet(logicDbName).getStrategy().locateShards(config, logicDbName, hints);
-				// For now, we only access one shard
-				String shard = shards.toArray(new String[1])[0];
-				conn = getConnection(logicDbName, shard, isMaster(hints), hints.get(DalHintEnum.operation) == DalClient.OperationEnum.QUERY);
-			}else {
-				conn = connPool.getConnection(logicDbName, isMaster(hints), hints.get(DalHintEnum.operation) == DalClient.OperationEnum.QUERY);
+			try
+			{
+				if(config != null) {
+					Set<String> shards = config.getDatabaseSet(logicDbName).getStrategy().locateShards(config, logicDbName, hints);
+					// For now, we only access one shard
+					String shard = shards.toArray(new String[1])[0];
+					conn = getConnection(logicDbName, shard, isMaster(hints), hints.get(DalHintEnum.operation) == DalEventEnum.QUERY);
+				}else {
+					conn = connPool.getConnection(logicDbName, isMaster(hints), hints.get(DalHintEnum.operation) == DalEventEnum.QUERY);
+				}
+				conn.setAutoCommit(true);
+				
+				Logger.log("Get connection", DalEventEnum.CONNECTION_SUCCESS, LogLevel.INFO, 
+						String.format("Connection %s database successfully", logicDbName));
 			}
-			conn.setAutoCommit(true);
+			catch(SQLException ex)
+			{
+				String logMsg = "Connection " + logicDbName + " database failed." +
+						System.lineSeparator() + System.lineSeparator() +
+						"********** Exception Info **********" + System.lineSeparator() +
+						ex.getMessage();
+				Logger.log("Get connection", DalEventEnum.CONNECTION_FAILED, LogLevel.ERROR, logMsg);
+				
+				throw ex;
+			}
 			return conn;
 		} else {
 			return connCache.getConnection();

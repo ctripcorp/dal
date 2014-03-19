@@ -154,11 +154,6 @@ public class StatementParameter {
 		
 		private boolean resultsParameter_;
 		private DalResultSetExtractor<?> resultSetExtractor_;
-
-		public Builder setDbType(DbType dbType) {
-			dbType_ = dbType;
-			return this;
-		}
 		
 		public Builder setSqlType(int sqlType) {
 			sqlType_ = sqlType;
@@ -274,16 +269,6 @@ public class StatementParameter {
 
 			return builder.build();
 		}
-	}
-
-	public static void main(String[] args) {
-		StatementParameter.Builder builder = StatementParameter.newBuilder();
-		builder.setDbType(DbType.Boolean)
-				.setDirection(ParameterDirection.Input).setNullable(false)
-				.setIndex(1).setName("").setSensitive(false).setValue(false);
-		StatementParameter instance = builder.build();
-		System.out.println(instance.build2SqlParameters().toByteArray());
-		
 	}
 
 }

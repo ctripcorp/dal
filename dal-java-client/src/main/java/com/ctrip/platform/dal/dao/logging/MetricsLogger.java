@@ -35,16 +35,16 @@ public class MetricsLogger {
 		sender.scheduleAtFixedRate(new MetrixReporter(), 1, 1, TimeUnit.MINUTES);
 	}
 	
-	public static void success(LogEntry entry, long start) {
-		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), SUCCESS, start);
+	public static void success(LogEntry entry, long duration) {
+		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), SUCCESS, duration);
 	}
 	
 	public static void fail(LogEntry entry, long start) {
-		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), FAIL, start);
+		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), FAIL, System.currentTimeMillis() - start);
 	}
 	
-	private static void report(String dao, String method, int size, String status, long start) {
-		long cost = System.currentTimeMillis() - start;
+	private static void report(String dao, String method, int size, String status, long duration) {
+		long cost = duration;
         if (size < 200)
         {
             size = 200;

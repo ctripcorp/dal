@@ -114,6 +114,7 @@ public class JavaGenerator extends AbstractGenerator {
 						currentTableBuilders);
 				
 				tableHost.setFields(allColumns);
+				tableHost.setPrimaryKeys(primaryKeys);
 				tableHost.setHasIdentity(hasIdentity);
 				tableHost.setIdentityColumnName(identityColumnName);
 				tableHost.setMethods(methods);

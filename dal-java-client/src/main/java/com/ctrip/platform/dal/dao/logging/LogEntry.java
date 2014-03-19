@@ -27,11 +27,41 @@ public class LogEntry {
     private String method;
     private String source;
     private int eventId;
-    private String message;
-    private String level;
-    private long duration;
+    
+    public int getEventId() {
+		return eventId;
+	}
 
-    /**
+	public void setEventId(int eventId) {
+		this.eventId = eventId;
+	}
+
+	private String message;
+    private String level;
+    private String title;
+    public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	private long duration; 
+    private String userName;
+    private String serverAddress;
+    private String databaseName;
+    private boolean transactional;
+    private int resultCount;
+    private String commandType;
+
+    public LogEntry(String logName) 
+    {
+    	this.timeStamp = new Date();
+    	this.machine = CommonUtil.MACHINE;
+    }
+    
+	/**
      * 
      * @param sql
      * @param parameters
@@ -54,7 +84,65 @@ public class LogEntry {
         inputParamStr = getInputParameterPrint(parameters);
     }
     
-    public void setRealDbName(String realDbName) {
+    public void setServerAddress(String serverAddress)
+    {
+    	this.serverAddress = serverAddress;
+    }
+    
+    public long getDuration() {
+		return duration;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public String getServerAddress() {
+		return serverAddress;
+	}
+
+	public String getDatabaseName() {
+		return databaseName;
+	}
+
+	public boolean isTransactional() {
+		return transactional;
+	}
+
+	public String getCommandType() {
+		return commandType;
+	}
+
+	public void setDatabaseName(String databaseName)
+    {
+    	this.databaseName = databaseName;
+    }
+    
+    public void setUserName(String userName)
+    {
+    	this.userName = userName;
+    }
+    
+    public void setCommandType(DalEventEnum operation)
+    {
+    	if(DalEventEnum.CALL == operation)
+    		this.commandType = "StoreProcedure";
+    	else this.commandType = "Text";
+    }
+    
+    public void setTransactional(boolean transactional) {
+		this.transactional = transactional;
+	}
+
+	public void setResultCount(int resultCount) {
+		this.resultCount = resultCount;
+	}
+	
+    public int getResultCount() {
+		return resultCount;
+	}
+
+	public void setRealDbName(String realDbName) {
 		this.realDbName = realDbName;
 	}
 
@@ -88,6 +176,14 @@ public class LogEntry {
 
 	public String getInputParamStr() {
 		return inputParamStr;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 	private static Set<String> execludedClasses;
@@ -156,6 +252,7 @@ public class LogEntry {
     private String getName() {
     	return logicDbName + '.' + realDbName;
     }
+    
     public String ToString()
     {
     	StringBuilder sb = new StringBuilder();

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 
 public class JavaTableHost {
@@ -14,6 +16,7 @@ public class JavaTableHost {
 	private String tableName;
 	private String pojoClassName;
 	private List<JavaParameterHost> fields;
+	private List<JavaParameterHost> primaryKeys;
 	private boolean hasIdentity;
 	private String identityColumnName;
 	private boolean spa;
@@ -78,6 +81,14 @@ public class JavaTableHost {
 		this.fields = fields;
 	}
 
+	public List<JavaParameterHost> getPrimaryKeys() {
+		return primaryKeys;
+	}
+
+	public void setPrimaryKeys(List<JavaParameterHost> primaryKeys) {
+		this.primaryKeys = primaryKeys;
+	}
+
 	public boolean isHasIdentity() {
 		return hasIdentity;
 	}
@@ -132,6 +143,21 @@ public class JavaTableHost {
 
 	public void setDatabaseCategory(DatabaseCategory databaseCategory) {
 		this.databaseCategory = databaseCategory;
+	}
+	
+	
+	public boolean isIntegerPk() {
+		return primaryKeys.size() == 1 && (primaryKeys.get(0).getJavaClass().equals(Integer.class) || primaryKeys.get(0).getJavaClass().equals(Long.class));
+	}
+
+	public String getPkParameterDeclaration() {
+		String[] paramsDeclaration = new String[primaryKeys.size()];
+		int i = 0;
+		for(JavaParameterHost parameter: primaryKeys) {
+			paramsDeclaration[i++] = String.format("%s %s", parameter.getClassDisplayName(), parameter.getUncapitalizedName());
+		}
+		
+		return StringUtils.join(paramsDeclaration, ", ");
 	}
 
 	public Set<String> getDaoImports() {

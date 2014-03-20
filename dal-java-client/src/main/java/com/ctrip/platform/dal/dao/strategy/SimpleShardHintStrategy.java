@@ -8,7 +8,7 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 
-public class SimpleShardHintStrategy implements DalShardStrategy {
+public class SimpleShardHintStrategy extends AbstractRWSeparationStrategy implements DalShardStrategy {
 
 	@Override
 	public void initialize(Map<String, String> settings) {

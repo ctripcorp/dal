@@ -18,7 +18,7 @@ public class ${host.getPojoClassName()}Dao {
 	}
 	
 	public Map<String, ?> call${host.getPojoClassName()}(${host.getPojoClassName()} param) throws SQLException {
-		String callString = "${host.getSpName()}";
+		String callString = "${host.getSpName()}(${host.getCallParameters()})";
 		
 		StatementParameters parameters = new StatementParameters();
 

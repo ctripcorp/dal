@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 
@@ -31,13 +32,14 @@ public final class DalQueryDao {
 	}
 
 	/**
-	 *  executeScalar
+	 * ExecuteScalar
 	 * @throws SQLException
 	 */
 	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		// TODO support
-		return null;
+		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()));
+		assertCount(1, result.size());
+		return result.get(0);
 	}
 	
 	private void assertCount(int expected, int actual) throws SQLException{

@@ -74,8 +74,8 @@ public class DalTransactionManager {
 		
 		
 		//SimpleShardHintStrategy test
-		/*hints.set(DalHintEnum.shard, "0");
-		hints.set(DalHintEnum.masterOnly);*/
+		hints.set(DalHintEnum.shard, "0");
+		hints.set(DalHintEnum.masterOnly);
 		
 		if(connCache == null) {
 			Connection conn = null;

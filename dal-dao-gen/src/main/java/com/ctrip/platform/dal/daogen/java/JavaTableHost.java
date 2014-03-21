@@ -19,10 +19,10 @@ public class JavaTableHost {
 	private List<JavaParameterHost> primaryKeys;
 	private boolean hasIdentity;
 	private String identityColumnName;
-	private boolean spa;
-	private SpaOperationHost spaInsert;
-	private SpaOperationHost spaDelete;
-	private SpaOperationHost spaUpdate;
+	private boolean Sp;
+	private SpOperationHost SpInsert;
+	private SpOperationHost SpDelete;
+	private SpOperationHost SpUpdate;
 	private List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 
 	public String getPackageName() {
@@ -33,12 +33,16 @@ public class JavaTableHost {
 		this.packageName = packageName;
 	}
 
-	public boolean isSpa() {
-		return spa;
+	public boolean isSp() {
+		return Sp;
 	}
 
-	public void setSpa(boolean isSpa) {
-		this.spa = isSpa;
+	public void setSp(boolean isSp) {
+		this.Sp = isSp;
+	}
+
+	public boolean isSpa() {
+		return null != this.SpInsert && this.SpInsert.isSpa();
 	}
 
 	public String getDbName() {
@@ -113,28 +117,28 @@ public class JavaTableHost {
 		this.identityColumnName = identityColumnName;
 	}
 	
-	public SpaOperationHost getSpaInsert() {
-		return spaInsert;
+	public SpOperationHost getSpInsert() {
+		return SpInsert;
 	}
 
-	public void setSpaInsert(SpaOperationHost spaInsert) {
-		this.spaInsert = spaInsert;
+	public void setSpInsert(SpOperationHost SpInsert) {
+		this.SpInsert = SpInsert;
 	}
 
-	public SpaOperationHost getSpaDelete() {
-		return spaDelete;
+	public SpOperationHost getSpDelete() {
+		return SpDelete;
 	}
 
-	public void setSpaDelete(SpaOperationHost spaDelete) {
-		this.spaDelete = spaDelete;
+	public void setSpDelete(SpOperationHost SpDelete) {
+		this.SpDelete = SpDelete;
 	}
 
-	public SpaOperationHost getSpaUpdate() {
-		return spaUpdate;
+	public SpOperationHost getSpUpdate() {
+		return SpUpdate;
 	}
 
-	public void setSpaUpdate(SpaOperationHost spaUpdate) {
-		this.spaUpdate = spaUpdate;
+	public void setSpUpdate(SpOperationHost SpUpdate) {
+		this.SpUpdate = SpUpdate;
 	}
 	
 	public DatabaseCategory getDatabaseCategory() {
@@ -174,12 +178,12 @@ public class JavaTableHost {
 			allTypes.addAll(method.getParameters());
 		}
 		
-		if(spaInsert != null)
-			allTypes.addAll(spaInsert.getParameters());
-		if(spaDelete != null)
-			allTypes.addAll(spaDelete.getParameters());
-		if(spaUpdate != null)
-			allTypes.addAll(spaUpdate.getParameters());
+		if(SpInsert != null)
+			allTypes.addAll(SpInsert.getParameters());
+		if(SpDelete != null)
+			allTypes.addAll(SpDelete.getParameters());
+		if(SpUpdate != null)
+			allTypes.addAll(SpUpdate.getParameters());
 		
 		for(JavaParameterHost field: allTypes) {
 			Class<?> clazz = field.getJavaClass();

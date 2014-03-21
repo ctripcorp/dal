@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.cs;
 
 import java.io.File;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,7 +15,6 @@ import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
-import com.ctrip.platform.dal.daogen.entity.DbServer;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;

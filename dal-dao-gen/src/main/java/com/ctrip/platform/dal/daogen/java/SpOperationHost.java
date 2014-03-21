@@ -8,10 +8,11 @@ import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 
-public class SpaOperationHost {
+public class SpOperationHost {
 	private boolean exist;
 	private List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
 	private String methodName;
+	private boolean spa = false;
 	
 	public boolean isExist() {
 		return exist;
@@ -37,10 +38,18 @@ public class SpaOperationHost {
 		this.methodName = methodName;
 	}
 
-	public static SpaOperationHost getSpaOperation(int server, String dbName,
+	public boolean isSpa() {
+		return spa;
+	}
+
+	public void setSpa(boolean spa) {
+		this.spa = spa;
+	}
+
+	public static SpOperationHost getSpaOperation(int server, String dbName,
 			String tableName, List<StoredProcedure> spNames, String operation) {
 
-		SpaOperationHost host = new SpaOperationHost();
+		SpOperationHost host = new SpOperationHost();
 		
 		StoredProcedure expectSpa = new StoredProcedure();
 		expectSpa.setName(String.format("spA_%s_%s", tableName, operation));
@@ -51,6 +60,7 @@ public class SpaOperationHost {
 		
 		if( (index = spNames.indexOf(expectSpa)) > 0){
 			host.exist = true;
+			host.setSpa(true);
 			host.methodName = expectSpa.getName();
 			currentSp = spNames.get(index);
 		}else if((index = spNames.indexOf(expectSp3)) > 0){

@@ -76,7 +76,7 @@ public class JavaGenerator extends AbstractGenerator {
 				tableHost.setDbName(dbName);
 				tableHost.setTableName(table);
 				tableHost.setPojoClassName(getPojoClassName(prefix, suffix, table));
-				tableHost.setSpa(cud_by_sp);
+				tableHost.setSp(cud_by_sp);
 
 				// 主键及所有列
 				List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(dbName, table);
@@ -117,13 +117,14 @@ public class JavaGenerator extends AbstractGenerator {
 
 //				tableHost.setTable(true);
 				// SP方式增删改
-				if (tableHost.isSpa()) {
-					tableHost.setSpaInsert(SpaOperationHost.getSpaOperation(
+				if (tableHost.isSp()) {
+					tableHost.setSpInsert(SpOperationHost.getSpaOperation(
 							tableViewSp.getServer_id(), dbName, table, allSpNames,"i"));
-					tableHost.setSpaUpdate(SpaOperationHost.getSpaOperation(
+					tableHost.setSpUpdate(SpOperationHost.getSpaOperation(
 							tableViewSp.getServer_id(), dbName, table, allSpNames,"u"));
-					tableHost.setSpaDelete(SpaOperationHost.getSpaOperation(
+					tableHost.setSpDelete(SpOperationHost.getSpaOperation(
 							tableViewSp.getServer_id(), dbName, table, allSpNames,"d"));
+					
 				}
 				
 				tableHosts.add(tableHost);
@@ -343,7 +344,7 @@ public class JavaGenerator extends AbstractGenerator {
 				method.setSql(task.getSql_content());
 				method.setName(task.getMethod_name());
 				method.setPackageName(namespace);
-				method.setPojoClassName(WordUtils.capitalize(task.getMethod_name()) + "Pojo");
+				method.setPojoClassName(WordUtils.capitalize(task.getMethod_name() + "Pojo"));
 				List<JavaParameterHost> params = new ArrayList<JavaParameterHost>();
 				for (String param : StringUtils
 						.split(task.getParameters(), ";")) {

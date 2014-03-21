@@ -42,6 +42,9 @@ public class JavaGenerator extends AbstractGenerator {
 		
 		prepareFolder(projectId, "java");
 		
+		Map<String, String> dbs = buildCommonVelocity(new File(
+				String.format("gen/%s/cs", projectId)), tasks);
+		
 		List<JavaTableHost> tableHosts = new ArrayList<JavaTableHost>();
 		List<SpHost> spHosts = new ArrayList<SpHost>();
 		List<GenTaskBySqlBuilder> sqlBuilders = daoBySqlBuilder
@@ -176,9 +179,52 @@ public class JavaGenerator extends AbstractGenerator {
 			e.printStackTrace();
 		}
 
+		context.put("dbs", dbs);
+		GenUtils.mergeVelocityContext(context, String.format("%s/Dal.config",
+				mavenLikeDir.getAbsolutePath()), "templates/Dal.config.tpl");
+
 		generateTableDao(tableHosts, context, mavenLikeDir);
 		generateSpDao(spHosts, context, mavenLikeDir);
 	}
+	
+	private Map<String, String> buildCommonVelocity(File csMavenLikeDir, List<GenTaskByTableViewSp> tasks) {
+		Map<String, String> dbs = new HashMap<String, String>();
+		for (GenTaskByFreeSql task : freeSqls) {
+			if (!dbs.containsKey(task.getDb_name())) {
+
+				String provider = "sqlProvider";
+				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
+						"Microsoft SQL Server")) {
+					provider = "mySqlProvider";
+				}
+				dbs.put(task.getDb_name(), provider);
+			}
+		}
+		for (GenTaskByTableViewSp task : tableViewSps) {
+			if (!dbs.containsKey(task.getDb_name())) {
+
+				String provider = "sqlProvider";
+				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
+						"Microsoft SQL Server")) {
+					provider = "mySqlProvider";
+				}
+				dbs.put(task.getDb_name(), provider);
+			}
+		}
+
+		for (GenTaskBySqlBuilder task : sqlBuilders) {
+			if (!dbs.containsKey(task.getDb_name())) {
+				String provider = "sqlProvider";
+				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
+						"Microsoft SQL Server")) {
+					provider = "mySqlProvider";
+				}
+				dbs.put(task.getDb_name(), provider);
+			}
+		}
+		return dbs;
+	}
+
 
 	private void generateTableDao(List<JavaTableHost> tableHosts,
 			VelocityContext context, File mavenLikeDir) {

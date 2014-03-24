@@ -11,7 +11,6 @@ public class ViewHost {
 	private String pojoClassName;
 	private String ViewName;
 	private List<JavaParameterHost> fields = new ArrayList<JavaParameterHost>();
-	private List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 	private Set<String> imports = new TreeSet<String>();
 	
 	public String getPackageName() {
@@ -49,11 +48,5 @@ public class ViewHost {
 	}
 	public void setImports(Set<String> imports) {
 		this.imports = imports;
-	}
-	public List<JavaMethodHost> getMethods() {
-		return methods;
-	}
-	public void setMethods(List<JavaMethodHost> methods) {
-		this.methods = methods;
 	}
 }

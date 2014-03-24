@@ -193,14 +193,7 @@ public class JavaGenerator extends AbstractGenerator {
 				{
 					realParams.add((JavaParameterHost)p);
 				}
-				vhost.setFields(realParams);
-				
-				List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(
-						sqlBuilders, dbName, viewName);
-
-				List<JavaMethodHost> methods = buildMethodHosts(realParams,
-						currentTableBuilders);
-				vhost.setMethods(methods);
+				vhost.setFields(realParams);;
 				viewHosts.add(vhost);
 			}
 		}

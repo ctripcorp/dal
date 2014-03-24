@@ -1,4 +1,3 @@
-
 package com.ctrip.platform.dal.daogen;
 
 import java.math.BigDecimal;
@@ -158,4 +157,3 @@ public class Consts {
 	
 
 }
-

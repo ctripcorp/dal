@@ -6,9 +6,8 @@ import ${field};
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.sql.Timestamp;
+import java.util.List;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -16,17 +15,34 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
 public class ${host.getPojoClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbName()}";
+	
 	private DalClient client;
-	private DalRowMapper<${host.getPojoClassName()}> mapper = new ${host.getPojoClassName()}RowMapper();
+	private ${host.getPojoClassName()}RowMapper mapper;
+	private DalRowMapperExtractor<${host.getPojoClassName()}> extractor;
+	private DalScalarExtractor scalarExtractor;
+	
+	/**
+	 * Initialize the instance of Hotel2GenDao
+	 */
 	public ${host.getPojoClassName()}Dao()
 	{
 		this.client = DalClientFactory.getClient(DATA_BASE);
+		this.mapper = new ${host.getPojoClassName()}RowMapper();
+		this.extractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(this.mapper);
+		this.scalarExtractor = new DalScalarExtractor();
 	}
 
-	public List<${host.getPojoClassName()}> GetAll() throws SQLException
+	/**
+	  *Get all ${host.getPojoClassName()} instances
+	  *@return 
+	  *     ${host.getPojoClassName()} collection
+	**/
+	public List<${host.getPojoClassName()}> getAll() throws SQLException
 	{
 		String sql = "SELECT * FROM ${host.getViewName()}";
 		StatementParameters parameters = new StatementParameters();
@@ -35,16 +51,16 @@ public class ${host.getPojoClassName()}Dao {
 		result = this.client.query(sql, parameters, hints, new DalResultSetExtractor<List<${host.getPojoClassName()}>>(){
 			@Override
 			public List<${host.getPojoClassName()}> extract(ResultSet rs) throws SQLException {
-				List<${host.getPojoClassName()}> resultList = new ArrayList<${host.getPojoClassName()}>();
-				while(rs.next())
-				{
-					resultList.add(mapper.map(rs, rs.getRow()));
-				}
-				return resultList;
+				return extractor.extract(rs);
 			}});
 		return result;
 	}
 	
+	/**
+	  *Get the count of ${host.getPojoClassName()} instances
+	  *@return 
+	  *     the ${host.getPojoClassName()} records count
+	**/
 	public int Count() throws SQLException
 	{
 		String sql = "SELECT count(1) from ${host.getViewName()}  with (nolock)";
@@ -53,24 +69,22 @@ public class ${host.getPojoClassName()}Dao {
 		int result = this.client.query(sql, parameters, hints, new DalResultSetExtractor<Integer>(){
 			@Override
 			public Integer extract(ResultSet rs) throws SQLException {
-				int count = 0;
-				while(rs.next())
-				{
-					count = rs.getInt(1);
-				}
-				return count;
+				return (Integer)scalarExtractor.extract(rs);
 			}
 		});
 		return result;
 	}
 	
-	public List<${host.getPojoClassName()}> GetListByPage(${host.getPojoClassName()} obj, int pagesize, int pageNo)
+	public List<${host.getPojoClassName()}> getListByPage(${host.getPojoClassName()} obj, int pagesize, int pageNo)
 	{
 		// TODO to be implemented
 		DalHints hints = new DalHints();
 		return null;
 	}
 
+	/**
+	  * Map the sql result-set to ${host.getPojoClassName()} instance
+	**/
 	private class ${host.getPojoClassName()}RowMapper implements DalRowMapper<${host.getPojoClassName()}> {
 
 		@Override

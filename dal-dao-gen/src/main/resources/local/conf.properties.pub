@@ -3,5 +3,7 @@ ftp_port=21
 ftp_user=codegen
 ftp_pass=123456
 
-codegen_url=http://csm-haddop04.dev.sh.ctripcorp.com:9090
+gen_code_path=/app/dal_ftp
+
+codegen_url=http://10.3.6.187:8080
 cas_url=http://192.168.93.59:8085

@@ -42,7 +42,6 @@ public class CSharpGenerator extends AbstractGenerator {
 	private List<CSharpTableHost> spHosts;
 	private List<CSharpFreeSqlHost> freeSqlHosts;
 	private List<CSharpFreeSqlPojoHost> freeSqlPojoHosts;
-	private Map<String, String> dbs = new HashMap<String, String>();
 
 	/**
 	 * 生成C#的公共部分，如Dal.config，Program.cs以及DALFactory.cs
@@ -50,7 +49,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	private void generateCSharpCode() {
 		VelocityContext context = GenUtils.buildDefaultVelocityContext();
 
-		File csMavenLikeDir = new File(String.format("gen/%s/cs", projectId));
+		File csMavenLikeDir = new File(String.format("%s/%s/cs",generatePath ,projectId));
 
 		for (CSharpFreeSqlPojoHost host : freeSqlPojoHosts) {
 			context.put("host", host);
@@ -77,11 +76,11 @@ public class CSharpGenerator extends AbstractGenerator {
 					"templates/FreeSqlTest.cs.tpl");
 		}
 
-		context.put("dbs", dbs);
+		context.put("dbs", dbHosts.values());
 		context.put("namespace", namespace);
-		context.put("freeSqlHosts", freeSqlHosts);
-		context.put("tableHosts", tableHosts);
-		context.put("spHosts", spHosts);
+		context.put("freeSqlHosts", freeDaos);
+		context.put("tableHosts", tableDaos);
+		context.put("spHosts", spDaos);
 
 		GenUtils.mergeVelocityContext(context, String.format("%s/Dal.config",
 				csMavenLikeDir.getAbsolutePath()), "templates/Dal.config.tpl");
@@ -94,44 +93,6 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		generateTableDao(tableHosts, context, csMavenLikeDir);
 		generateSpDao(spHosts, context, csMavenLikeDir);
-	}
-
-	private void buildCSharpCommonVelocity(File csMavenLikeDir) {
-
-		for (GenTaskByFreeSql task : freeSqls) {
-			if (!dbs.containsKey(task.getDb_name())) {
-
-				String provider = "sqlProvider";
-				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
-						"Microsoft SQL Server")) {
-					provider = "mySqlProvider";
-				}
-				dbs.put(task.getDb_name(), provider);
-			}
-		}
-		for (GenTaskByTableViewSp task : tableViewSps) {
-			if (!dbs.containsKey(task.getDb_name())) {
-
-				String provider = "sqlProvider";
-				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
-						"Microsoft SQL Server")) {
-					provider = "mySqlProvider";
-				}
-				dbs.put(task.getDb_name(), provider);
-			}
-		}
-
-		for (GenTaskBySqlBuilder task : sqlBuilders) {
-			if (!dbs.containsKey(task.getDb_name())) {
-				String provider = "sqlProvider";
-				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
-						"Microsoft SQL Server")) {
-					provider = "mySqlProvider";
-				}
-				dbs.put(task.getDb_name(), provider);
-			}
-		}
-
 	}
 
 	// -----------------------------------------------Free Sql generate
@@ -265,9 +226,6 @@ public class CSharpGenerator extends AbstractGenerator {
 			throws Exception {
 
 		prepareFolder(projectId, "cs");
-
-		buildCSharpCommonVelocity(new File(
-				String.format("gen/%s/cs", projectId)));
 
 		tableHosts = new ArrayList<CSharpTableHost>();
 		spHosts = new ArrayList<CSharpTableHost>();
@@ -577,22 +535,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		return methods;
 	}
 
-	private String getPojoClassName(String prefix, String suffix, String table) {
-		String className = table;
-		if (null != prefix && !prefix.isEmpty()) {
-			className = className.substring(prefix.length());
-		}
-		if (null != suffix && !suffix.isEmpty()) {
-			className = className + WordUtils.capitalize(suffix);
-		}
-
-		StringBuilder result = new StringBuilder();
-		for (String str : StringUtils.split(className, "_")) {
-			result.append(WordUtils.capitalize(str));
-		}
-
-		return WordUtils.capitalize(result.toString());
-	}
+	
 
 	private void generateTableDao(List<CSharpTableHost> tableHosts,
 			VelocityContext context, File mavenLikeDir) {

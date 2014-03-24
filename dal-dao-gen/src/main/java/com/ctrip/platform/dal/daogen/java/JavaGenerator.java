@@ -165,7 +165,7 @@ public class JavaGenerator extends AbstractGenerator {
 		VelocityContext context = new VelocityContext();
 		context.put("WordUtils", WordUtils.class);
 		context.put("StringUtils", StringUtils.class);
-		File mavenLikeDir = new File(String.format("gen/%s/java",
+		File mavenLikeDir = new File(String.format("%s/%s/java",generatePath ,
 				projectId));
 
 		try {
@@ -209,17 +209,6 @@ public class JavaGenerator extends AbstractGenerator {
 			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sTest.java",
 					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAOBySpTest.java.tpl");
 		}
-	}
-
-	private String getPojoClassName(String prefix, String suffix, String table) {
-		String className = table;
-		if (null != prefix && !prefix.isEmpty()) {
-			className = className.substring(prefix.length());
-		}
-		if (null != suffix && !suffix.isEmpty()) {
-			className = className + suffix;
-		}
-		return WordUtils.capitalize(className);
 	}
 
 	private List<GenTaskBySqlBuilder> filterExtraMethods(
@@ -390,7 +379,7 @@ public class JavaGenerator extends AbstractGenerator {
 		context.put("WordUtils", WordUtils.class);
 		context.put("StringUtils", StringUtils.class);
 		
-		File mavenLikeDir = new File(String.format("gen/%s/java",
+		File mavenLikeDir = new File(String.format("%s/%s/java",generatePath ,
 				projectId));
 		
 //		for(FreeSqlPojoHost host : pojoHosts.values()){

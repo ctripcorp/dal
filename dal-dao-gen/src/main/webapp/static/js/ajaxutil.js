@@ -176,41 +176,43 @@
             });
         },
         reload_projects: function () {
-            cblock($("body"));
-            var currentElement = w2ui['sidebar'];
-            var nodes = [];
-            $.each(currentElement.nodes[0].nodes, function (index, value) {
-                nodes.push(value.id);
-            });
-            currentElement.remove.apply(currentElement, nodes);
-            $.get("/rest/project?rand=" + Math.random(), function (data) {
-                var new_nodes = [];
-                //data = JSON.parse(data);
-                $.each(data, function (index, value) {
-                    new_nodes.push({
-                        id: value.id,
-                        text: value.name,
-                        namespace: value.namespace,
-                        icon: 'fa fa-tasks',
-                        onClick: function (event) {
-                            var id = event.target;
+            // cblock($("body"));
+            // var currentElement = w2ui['sidebar'];
+            // var nodes = [];
+            // $.each(currentElement.nodes[0].nodes, function (index, value) {
+            //     nodes.push(value.id);
+            // });
+            // currentElement.remove.apply(currentElement, nodes);
+            // $.get("/rest/project?rand=" + Math.random(), function (data) {
+            //     var new_nodes = [];
+            //     //data = JSON.parse(data);
+            //     $.each(data, function (index, value) {
+            //         new_nodes.push({
+            //             id: value.id,
+            //             text: value.name,
+            //             namespace: value.namespace,
+            //             icon: 'fa fa-tasks',
+            //             onClick: function (event) {
+            //                 var id = event.target;
 
-                            window.render.render_grid();
+            //                 window.render.render_grid();
 
-                            w2ui['grid'].current_project = id;
-                            w2ui['grid_toolbar'].click('refreshDAO', null);
-                            $("#refreshFiles").trigger('click');
-                        }
-                    });
-                });
-                currentElement.add('all_projects', new_nodes);
-                currentElement.nodes[0].expanded = true;
-                currentElement.refresh();
-                $("body").unblock();
-            }).fail(function (data) {
-                alert("超时，请刷新页面重试！");
-                $("body").unblock();
-            });
+            //                 w2ui['grid'].current_project = id;
+            //                 window.render.render_preview();
+            //                 w2ui['grid_toolbar'].click('refreshDAO', null);
+            //                 $("#refreshFiles").trigger('click');
+            //             }
+            //         });
+            //     });
+            //     currentElement.add('all_projects', new_nodes);
+            //     currentElement.nodes[0].expanded = true;
+            //     currentElement.refresh();
+            //     $("body").unblock();
+            // }).fail(function (data) {
+            //     alert("超时，请刷新页面重试！");
+            //     $("body").unblock();
+            // });
+            $.jstree.reference("#jstree_projects").refresh();
         },
         generate_code: function () {
             cblock($("body"));

@@ -15,8 +15,7 @@
       <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
       <link href="/static/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
       <link href="/static/w2ui/w2ui-1.3.2.min.css" rel="stylesheet"/>
-      <link rel="stylesheet" href="/static/jstree/themes/default/style.min.css" />
-      <link href="/static/font-awesome/css/font-awesome.css" rel="stylesheet">
+      <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet">
       <link href="/static/css/multiple-select.css" rel="stylesheet">
       <link href="/static/css/selectize.bootstrap3.css" rel="stylesheet">
       <link href="/static/css/common.css" rel="stylesheet">
@@ -186,20 +185,68 @@
             <div class="modal-content">
                <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <h4 class="modal-title">添加All-In-One配置</h4>
+                  <h4 class="modal-title">生成方式，如果有删除，请选择重新生成</h4>
                </div>
                <div class="modal-body">
-                                       
+                                       <div id="add_server_row" class="row-fluid" style="display:none;">
                      <div class="row-fluid">
                         <div class="control-group">
-                           <label class="control-label popup_label">All-In-One：</label>
-                           <textarea id="all_in_one" class="span9" style="height:100px;">&lt;add name="xxx" connectionString="Server=xxx;port=xxx;UID=xxx;password=xxx;database=xxx;" providerName="System.Data.SqlClient" /&gt;</textarea>
+                           <label class="control-label popup_label">服务器地址：</label>
+                           <input id="server" type="text" class="span9 popup_text">
                         </div>
                      </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">端口号：</label>
+                           <input id="port" type="text" class="span9 popup_text">
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">用户名：</label>
+                           <input id="username" type="text" class="span9 popup_text">
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">密码：</label>
+                           <input id="password" type="password" class="span9 popup_text">
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label">数据库类型：</label>
+                           <select id="db_types" class="span9 popup_text">
+                              <option value="_please_select">--请选择--</option>
+                              <option value="mysql">My Sql</option>
+                              <option value="sqlserver">Sql Server</option>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="domain_verify row-fluid" style="display:none;">
+                        <div class="control-group">
+                           <label class="control-label popup_label"><input id="use_ntlm" type="checkbox" checked="true">提供的用户名使用域验证:</label>
+                           <select id="domains" class="span7 popup_text">
+                              <option value="cn1">CN1</option>
+                              <option value="cn2">CN2</option>
+                              <option value="cn3">CN3</option>
+                              <option value="cn4">CN4</option>
+                              <option value="cn5">CN5</option>
+                           </select>
+                        </div>
+                     </div>
+                  </div>
+
+                                    <br>
+                     <div class="row-fluid">
+                        <button id="toggle_add_server" type="button" class="offset4 btn btn-info">添加数据库服务器</button>
+                        <button id="add_server" type="button" class="offset1 btn btn-success" style="display:none;">保存</button>
+                     </div>
+
                </div>
                <div class="modal-footer">
                   <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                  <button id="add_db" type="button" class="btn btn-primary">保存</button>
+                  <button id="generate_code" type="button" class="btn btn-primary">生成</button>
                </div>
             </div>
             <!-- /.modal-content -->
@@ -219,15 +266,14 @@
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label" style="width:130px;">All-In-One数据库：</label>
-                           <select id="databases" class="span7">
+                           <select id="databases" class="span8">
                            </select>
-                           <a href="javascript:;" onclick="$('#page1').modal('hide');$('#manageDb').modal();">没有找到？</a>
                         </div>
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label" style="width:130px;">DAO代码生成方式:</label>
-                           <select id="gen_style" class="span7">
+                           <select id="gen_style" class="span8">
                               <option value="table_view_sp">生成模板(包含基础的增删改查操作)</option>
                               <option value="auto">构建SQL（生成的代码绑定到模板）</option>
                               <option value="sql">复杂查询（额外生成实体类）</option>
@@ -414,7 +460,6 @@
       <script src="/static/jquery/jquery-1.10.2.min.js"></script>
       <script src="/static/bootstrap/js/bootstrap.min.js"></script>
       <script src="/static/w2ui/w2ui-1.3.2.min.js"></script>
-      <script src="/static/jstree/jstree.js"></script>
       <script src="/static/jquery/jquery.blockui.min.js"></script>
       <script src="/static/js/sprintf.js"></script>
       <script src="/static/ace/ace.js"></script>

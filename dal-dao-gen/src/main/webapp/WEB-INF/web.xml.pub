@@ -25,7 +25,7 @@
         </init-param>  
         <init-param>  
             <param-name>serverName</param-name>  
-            <param-value>http://csm-haddop04.dev.sh.ctripcorp.com:9090</param-value>  
+            <param-value>http://10.3.6.187:8080</param-value>  
         </init-param>  
     </filter>  
     <filter-mapping>  
@@ -44,7 +44,7 @@
         </init-param>  
         <init-param>  
             <param-name>serverName</param-name>  
-            <param-value>http://csm-haddop04.dev.sh.ctripcorp.com:9090</param-value>  
+            <param-value>http://10.3.6.187:8080</param-value>  
         </init-param> 
         <init-param>  
             <param-name>encoding</param-name>  

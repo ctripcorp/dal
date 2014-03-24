@@ -63,8 +63,21 @@ public class ProjectResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Project> getProjects() {
+	public List<Project> getProjects(@QueryParam("root") boolean root) {
 		// return projectDao.getAllProjects();
+		
+		if(root){
+			List<Project> roots = new ArrayList<Project>();
+			Project p = new Project();
+			p.setId(-1);
+			p.setName("所有项目");
+			p.setText("所有项目");
+			p.setNamespace("com.ctrip.platform");
+			p.setIcon("fa fa-folder-o");
+			p.setChildren(true);
+			roots.add(p);
+			return roots;
+		}
 
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();

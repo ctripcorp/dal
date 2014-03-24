@@ -9,53 +9,53 @@ namespace ${namespace}
 	public partial class DALFactory
 	{
 #foreach($host in $tableHosts)
-        private static readonly I${host.getClassName()}Dao ${WordUtils.uncapitalize($host.getClassName())}Dao = new ${host.getClassName()}Dao();
+        private static readonly I${host}Dao ${WordUtils.uncapitalize($host)}Dao = new ${host}Dao();
 
 #end
 #foreach($host in $spHosts)
-        private static readonly ${host.getClassName()}Dao ${WordUtils.uncapitalize($host.getClassName())}Dao = new ${host.getClassName()}Dao();
+        private static readonly ${host}Dao ${WordUtils.uncapitalize($host)}Dao = new ${host}Dao();
 
 #end
 #foreach($host in $freeSqlHosts)
-        private static readonly ${host.getClassName()}Dao ${WordUtils.uncapitalize($host.getClassName())}Dao = new ${host.getClassName()}Dao();
+        private static readonly ${host}Dao ${WordUtils.uncapitalize($host)}Dao = new ${host}Dao();
 
 #end
 
 #foreach($host in $tableHosts)
         /// <summary>
-        /// Property ${host.getClassName()}Dao
+        /// Property ${host}Dao
         /// </summary>
-        public static I${host.getClassName()}Dao ${host.getClassName()}Dao
+        public static I${host}Dao ${host}Dao
         {
             get
             {
-                return ${WordUtils.uncapitalize($host.getClassName())}Dao;
+                return ${WordUtils.uncapitalize($host)}Dao;
             }
         }
 
 #end
 #foreach($host in $spHosts)
         /// <summary>
-        /// Property ${host.getClassName()}Dao
+        /// Property ${host}Dao
         /// </summary>
-        public static ${host.getClassName()}Dao ${host.getClassName()}Dao
+        public static ${host}Dao ${host}Dao
         {
             get
             {
-                return ${WordUtils.uncapitalize($host.getClassName())}Dao;
+                return ${WordUtils.uncapitalize($host)}Dao;
             }
         }
 
 #end
 #foreach($host in $freeSqlHosts)
         /// <summary>
-        /// Property ${host.getClassName()}Dao
+        /// Property ${host}Dao
         /// </summary>
-        public static ${host.getClassName()}Dao ${host.getClassName()}Dao
+        public static ${host}Dao ${host}Dao
         {
             get
             {
-                return ${WordUtils.uncapitalize($host.getClassName())}Dao;
+                return ${WordUtils.uncapitalize($host)}Dao;
             }
         }
 

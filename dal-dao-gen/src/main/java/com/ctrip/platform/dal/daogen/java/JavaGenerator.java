@@ -42,8 +42,7 @@ public class JavaGenerator extends AbstractGenerator {
 		
 		prepareFolder(projectId, "java");
 		
-		Map<String, String> dbs = buildCommonVelocity(new File(
-				String.format("gen/%s/cs", projectId)), tasks);
+		Map<String, String> dbs = buildCommonVelocity(tasks);
 		
 		List<JavaTableHost> tableHosts = new ArrayList<JavaTableHost>();
 		List<SpHost> spHosts = new ArrayList<SpHost>();
@@ -221,7 +220,7 @@ public class JavaGenerator extends AbstractGenerator {
 		generateVeiwDao(viewHosts, context, mavenLikeDir);
 	}
 	
-	private Map<String, String> buildCommonVelocity(File csMavenLikeDir, List<GenTaskByTableViewSp> tasks) {
+	private Map<String, String> buildCommonVelocity(List<GenTaskByTableViewSp> tasks) {
 		Map<String, String> dbs = new HashMap<String, String>();
 		for (GenTaskByFreeSql task : freeSqls) {
 			if (!dbs.containsKey(task.getDb_name())) {

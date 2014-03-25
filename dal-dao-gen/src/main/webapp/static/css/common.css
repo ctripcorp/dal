@@ -48,3 +48,6 @@ label.btn{
 	margin-left: 0 !important;
 }
 
+.jstree-anchor{
+	font-family: Verdana,Arial;
+}

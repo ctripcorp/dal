@@ -7,7 +7,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
-import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
 import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
 import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
 import com.ctrip.platform.dal.daogen.dao.DaoOfUserProject;
@@ -22,8 +21,6 @@ public class SpringBeanGetter {
 	private static DaoBySqlBuilder daoBySqlBuilder;
 
 	private static DaoByFreeSql daoByFreeSql;
-
-	private static DaoOfDbServer daoOfDbServer;
 	
 	private static DaoByTableViewSp daoByTableViewSp;
 
@@ -33,7 +30,6 @@ public class SpringBeanGetter {
 	
 	static {
 		daoOfProject = (DaoOfProject) context.getBean("projectDao");
-		daoOfDbServer = (DaoOfDbServer)context.getBean("dataSourceDao");
 		
 		daoBySqlBuilder = (DaoBySqlBuilder)context.getBean("autoTaskDao");
 		daoByFreeSql = (DaoByFreeSql)context.getBean("sqlTaskDao");
@@ -44,10 +40,6 @@ public class SpringBeanGetter {
 
 	public static DaoOfProject getDaoOfProject() {
 		return daoOfProject;
-	}
-	
-	public static DaoOfDbServer getDaoOfDbServer(){
-		return daoOfDbServer;
 	}
 	
 	public static DaoBySqlBuilder getDaoBySqlBuilder(){

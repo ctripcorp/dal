@@ -15,7 +15,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 
-import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
@@ -24,6 +23,7 @@ import com.ctrip.platform.dal.daogen.cs.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.java.JavaParameterHost;
+import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 
 public class DbUtils {
 	private static List<Integer> validMode;
@@ -41,7 +41,7 @@ public class DbUtils {
 		ResultSet rs = null;
 		Connection connection = null;
 		try {
-			DataSource ds = DataSourceLocator.newInstance().getDataSource(
+			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
 					dbName);
 			connection = ds.getConnection();
 
@@ -93,7 +93,7 @@ public class DbUtils {
 	 * @throws Exception
 	 */
 	public static List<String> getAllTableNames(String dbName) throws Exception {
-		DataSource ds = DataSourceLocator.newInstance().getDataSource(dbName);
+		DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(dbName);
 
 		List<String> results = new ArrayList<String>();
 		Connection connection = null;
@@ -145,7 +145,7 @@ public class DbUtils {
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
-			DataSource ds = DataSourceLocator.newInstance().getDataSource(
+			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
 					dbName);
 			connection = ds.getConnection();
 			String dbType = null;
@@ -196,7 +196,7 @@ public class DbUtils {
 	 * @throws Exception
 	 */
 	public static List<String> getAllViewNames(String dbName) throws Exception {
-		DataSource ds = DataSourceLocator.newInstance().getDataSource(dbName);
+		DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(dbName);
 
 		List<String> results = new ArrayList<String>();
 		Connection connection = null;
@@ -248,7 +248,7 @@ public class DbUtils {
 		boolean result = false;
 		Connection connection = null;
 		try {
-			DataSource ds = DataSourceLocator.newInstance().getDataSource(
+			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
 					dbName);
 
 			connection = ds.getConnection();
@@ -295,7 +295,7 @@ public class DbUtils {
 	public static List<StoredProcedure> getAllSpNames(String dbName)
 			throws Exception {
 
-		DataSource ds = DataSourceLocator.newInstance().getDataSource(dbName);
+		DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(dbName);
 
 		List<StoredProcedure> results = new ArrayList<StoredProcedure>();
 		Connection connection = null;
@@ -349,7 +349,7 @@ public class DbUtils {
 		Connection connection = null;
 		List<AbstractParameterHost> parameters = new ArrayList<AbstractParameterHost>();
 		try {
-			DataSource ds = DataSourceLocator.newInstance().getDataSource(
+			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
 					dbName);
 			connection = ds.getConnection();
 
@@ -447,7 +447,7 @@ public class DbUtils {
 		ResultSet primaryKeyRs = null;
 		List<String> primaryKeys = new ArrayList<String>();
 		try {
-			DataSource ds = DataSourceLocator.newInstance().getDataSource(
+			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
 					dbName);
 			connection = ds.getConnection();
 			primaryKeyRs = connection.getMetaData().getPrimaryKeys(null,
@@ -481,7 +481,7 @@ public class DbUtils {
 		ResultSet allColumnsRs = null;
 		List<AbstractParameterHost> allColumns = new ArrayList<AbstractParameterHost>();
 		try {
-			DataSource ds = DataSourceLocator.newInstance().getDataSource(
+			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
 					dbName);
 			connection = ds.getConnection();
 
@@ -498,7 +498,7 @@ public class DbUtils {
 					DbType dbType = DbType.getDbTypeFromJdbcType(dataType);
 
 					host.setDbType(dbType);
-					host.setName(allColumnsRs.getString("COLUMN_NAME"));
+					host.setName(CommonUtils.normalizeVariable(allColumnsRs.getString("COLUMN_NAME")));
 					host.setType(DbType.getCSharpType(host.getDbType()));
 					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
 							.equalsIgnoreCase("YES"));
@@ -558,7 +558,7 @@ public class DbUtils {
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
-			DataSource ds = DataSourceLocator.newInstance().getDataSource(
+			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
 					dbName);
 
 			String replacedSql = sql.replaceAll("[@:]\\w+", "?");
@@ -675,7 +675,7 @@ public class DbUtils {
 		} else {
 			Connection connection = null;
 			try {
-				DataSource ds = DataSourceLocator.newInstance().getDataSource(
+				DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
 						dbName);
 
 				connection = ds.getConnection();

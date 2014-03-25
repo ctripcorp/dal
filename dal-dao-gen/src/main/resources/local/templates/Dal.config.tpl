@@ -1,9 +1,10 @@
+
 <dal name="dal.prize.test">
   <databaseSets>
-#foreach($db in $dbs.keySet())
-    <databaseSet name="$db" provider="${dbs.get($db)}">
-      <add  name="${db}_M" databaseType="Master" sharding="" connectionString="$db"/>
-      <!--add  name="${db}_S" databaseType="Slave" sharding="" connectionString="$db"/-->
+#foreach($db in $dbs)
+    <databaseSet name="${db.getDatasetName()}" provider="${db.getProviderType()}">
+      <add  name="${db.getDatasetName()}_M" databaseType="Master" sharding="" connectionString="${db.getAllInOneName()}"/>
+      <!--add  name="${db.getDatasetName()}_S" databaseType="Slave" sharding="" connectionString="${db.getAllInOneName()}"/-->
     </databaseSet>
 #end
   </databaseSets>

@@ -1,5 +1,10 @@
+
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,19 +24,24 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
 import org.springframework.jdbc.support.JdbcUtils;
 
-import com.ctrip.datasource.locator.DataSourceLocator;
-import com.ctrip.platform.dal.daogen.Consts;
+import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.domain.TableSpNames;
-import com.ctrip.platform.dal.daogen.entity.DbServer;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
-import com.ctrip.platform.dal.daogen.utils.DataSourceLRUCache;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
+import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -40,118 +50,68 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Path("db")
 public class DatabaseResource {
 
+	private static ClassLoader classLoader;
 	private static ObjectMapper mapper = new ObjectMapper();
-
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("servers")
-	public List<DbServer> getDbServers() {
-
-		List<DbServer> dbServers = SpringBeanGetter.getDaoOfDbServer()
-				.getAllDbServers();
-
-		for (DbServer dataSource : dbServers) {
-			dataSource.setUser("xxx");
-			dataSource.setPassword("xxx");
+	
+	static {
+		classLoader = Thread.currentThread().getContextClassLoader();
+		if (classLoader == null) {
+			classLoader = Configuration.class.getClassLoader();
 		}
-
-		java.util.Collections.sort(dbServers);
-
-		return dbServers;
-
 	}
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("servers")
-	public Status saveDbServer(@FormParam("id") int id,
-			@FormParam("server") String server, @FormParam("port") int port,
-			@FormParam("domain") String domain, @FormParam("user") String user,
-			@FormParam("password") String password,
-			@FormParam("db_type") String db_type,
-			@FormParam("action") String action) {
-
-		DbServer dbServer = new DbServer();
-		if (action.equalsIgnoreCase("delete")) {
-			dbServer.setId(id);
-			if (SpringBeanGetter.getDaoOfDbServer().deleteDbServer(dbServer) > 0) {
-				SpringBeanGetter.getDaoByFreeSql().deleteByServerId(id);
-				SpringBeanGetter.getDaoBySqlBuilder().deleteByServerId(id);
-				SpringBeanGetter.getDaoByTableViewSp().deleteByServerId(id);
+	@Path("all_in_one")
+	public Status saveAllInOne(@FormParam("data") String data) {
+		SAXReader saxReader = new SAXReader();
+		InputStream inStream= null;
+		FileWriter writer = null;
+		Document document;
+		try {
+			
+			if(!LocalDataSourceLocator.newInstance().refresh(data)){
+				Status status = Status.ERROR;
+				status.setInfo("此数据库已存在，或者连接字符串非法，请修改后再保存");
+				return status;
 			}
-		} else {
-			// dbServer.setDriver(driver);
-			if (db_type.equalsIgnoreCase("mysql")) {
-				dbServer.setDriver("com.mysql.jdbc.Driver");
-			} else {
-				dbServer.setDriver("net.sourceforge.jtds.jdbc.Driver");
-			}
-			dbServer.setServer(server);
-			if (port == 0) {
-				if (db_type.equalsIgnoreCase("mysql")) {
-					dbServer.setPort(3306);
-				} else {
-					dbServer.setPort(1433);
-				}
-			} else {
-				dbServer.setPort(port);
-			}
-			dbServer.setDomain(domain);
-			dbServer.setUser(user);
-			dbServer.setPassword(password);
-			dbServer.setDb_type(db_type);
-			int generatedId = SpringBeanGetter.getDaoOfDbServer()
-					.insertDbServer(dbServer);
-			dbServer.setId(generatedId);
-			if (DataSourceLRUCache.newInstance().putDataSource(dbServer) == null) {
-				SpringBeanGetter.getDaoOfDbServer().deleteDbServer(generatedId);
+			
+			//inStream = classLoader.getResourceAsStream("Database.config");
+			URL url = classLoader.getResource("Database.config");
+			if(url == null){
 				return Status.ERROR;
 			}
+			inStream = url.openStream();
+			
+			document = saxReader.read(inStream);
+
+			Element root = document.getRootElement();
+
+			Document temp = DocumentHelper.parseText(data);
+			root.add(temp.getRootElement());
+			writer = new FileWriter(url.getPath());
+			OutputFormat format = OutputFormat.createPrettyPrint();
+			XMLWriter output = new XMLWriter(writer, format);
+			output.write(document);
+			//output.close();
+		} catch (DocumentException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally{
+			JavaIOUtils.closeInputStream(inStream);
+			JavaIOUtils.closeWriter(writer);
 		}
 
 		return Status.OK;
-
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("dbs")
 	public String getDbNames() {
-
-		// List<String> results = new ArrayList<String>();
-		//
-		// DataSource ds =
-		// DataSourceLRUCache.newInstance().getDataSource(server);
-		// if (ds == null) {
-		// DbServer dbServer =
-		// SpringBeanGetter.getDaoOfDbServer().getDbServerByID(server);
-		// ds = DataSourceLRUCache.newInstance().putDataSource(dbServer);
-		// }
-		//
-		// if (ds != null) {
-		// ResultSet rs = null;
-		// Connection connection = null;
-		// try {
-		// connection = ds.getConnection();
-		// rs = connection.getMetaData().getCatalogs();
-		// while (rs.next()) {
-		// String dbName = rs.getString("TABLE_CAT");
-		// if(!Consts.SystemDatabases.contains(dbName)){
-		// results.add(dbName);
-		// }
-		// }
-		// rs.close();
-		// } catch (SQLException e) {
-		// e.printStackTrace();
-		// } finally {
-		// JdbcUtils.closeResultSet(rs);
-		// JdbcUtils.closeConnection(connection);
-		// }
-		// }
-
 		try {
-			// java.util.Collections.sort(results);
-			return mapper.writeValueAsString(DataSourceLocator.newInstance()
+			return mapper.writeValueAsString(LocalDataSourceLocator.newInstance()
 					.getDBNames());
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
@@ -162,8 +122,7 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("tables")
-	public String getTableNames(@QueryParam("server") int server,
-			@QueryParam("db_name") String dbName) {
+	public String getTableNames(@QueryParam("db_name") String dbName) {
 		try {
 
 			List<String> results = DbUtils.getAllTableNames(dbName);
@@ -188,7 +147,7 @@ public class DatabaseResource {
 
 		Connection connection = null;
 		try {
-			DataSource ds = DataSourceLocator.newInstance().getDataSource(
+			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
 					dbName);
 			connection = ds.getConnection();
 			Set<String> indexedColumns = new HashSet<String>();
@@ -213,8 +172,8 @@ public class DatabaseResource {
 			// 获取所有列
 			ResultSet allColumnsRs = null;
 			try {
-				allColumnsRs = connection.getMetaData().getColumns(null,
-						null, tableName, null);
+				allColumnsRs = connection.getMetaData().getColumns(null, null,
+						tableName, null);
 				while (allColumnsRs.next()) {
 					allColumns.add(allColumnsRs.getString("COLUMN_NAME"));
 				}
@@ -288,12 +247,12 @@ public class DatabaseResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("test_sql")
-	public Status verifyQuery(
-			@FormParam("db_name") String dbName,
+	public Status verifyQuery(@FormParam("db_name") String dbName,
 			@FormParam("sql_content") String sql,
 			@FormParam("params") String params) {
 
-		return DbUtils.testAQuerySql(dbName, sql, params, CurrentLanguage.CSharp, true) == null ? Status.ERROR
+		return DbUtils.testAQuerySql(dbName, sql, params,
+				CurrentLanguage.CSharp, true) == null ? Status.ERROR
 				: Status.OK;
 
 	}

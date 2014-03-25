@@ -37,9 +37,12 @@ import com.ctrip.platform.dal.daogen.utils.ZipFolder;
 public class FileResource {
 
 	private static DaoOfProject daoOfProject;
+	
+	private static String generatePath;
 
 	static {
 		daoOfProject = SpringBeanGetter.getDaoOfProject();
+		generatePath = Configuration.get("gen_code_path");
 	}
 
 	@GET
@@ -49,7 +52,7 @@ public class FileResource {
 			@QueryParam("name") String name) {
 		List<W2uiElement> files = new ArrayList<W2uiElement>();
 
-		File currentProjectDir = new File(new File("gen", id), language);
+		File currentProjectDir = new File(new File(generatePath, id), language);
 		if (currentProjectDir.exists()) {
 			File currentFile = null;
 			if (null == name || name.isEmpty()) {
@@ -60,18 +63,25 @@ public class FileResource {
 			for (File f : currentFile.listFiles()) {
 				W2uiElement element = new W2uiElement();
 				if (null == name || name.isEmpty()) {
-					element.setCurrentId(String.format("%s_%d", id, files.size()));
+					element.setId(String.format("%s_%d", id, files.size()));
 				} else {
-					element.setCurrentId(String.format("%s_%s_%d", id,
+					element.setId(String.format("%s_%s_%d", id,
 							name.replace("\\", ""), files.size()));
 				}
 				if (null == name || name.isEmpty()) {
-					element.setRelativeName(f.getName());
+					element.setData(f.getName());
 				} else {
-					element.setRelativeName(name + File.separator + f.getName());
+					element.setData(name + File.separator + f.getName());
 				}
-				element.setName(f.getName());
-				element.setParent(f.isDirectory());
+				element.setText(f.getName());
+				element.setChildren(f.isDirectory());
+				if(element.isChildren()){
+					element.setType("folder");
+					element.setIcon("fa fa-folder-o");
+				}else{
+					element.setType("file");
+					element.setIcon("fa fa-file");
+				}
 				files.add(element);
 			}
 		}
@@ -85,7 +95,7 @@ public class FileResource {
 	public String getFileContent(@QueryParam("id") String id,
 			@QueryParam("language") String language,
 			@QueryParam("name") String name) {
-		File f = new File(new File(new File("gen", id), language), name);
+		File f = new File(new File(new File(generatePath, id), language), name);
 		StringBuilder sb = new StringBuilder();
 		if (f.exists()) {
 			BufferedReader reader = null;
@@ -125,9 +135,9 @@ public class FileResource {
 			@QueryParam("language") String name) {
 		File f = null;
 		if (null != name && !name.isEmpty()) {
-			f = new File(new File("gen", id), name);
+			f = new File(new File(generatePath, id), name);
 		} else {
-			f = new File("gen", id);
+			f = new File(generatePath, id);
 		}
 
 		Project proj = daoOfProject.getProjectByID(Integer.valueOf(id));
@@ -160,7 +170,7 @@ public class FileResource {
 			//
 			// Create an InputStream of the file to be uploaded
 			//
-			fis = new FileInputStream(new File("gen", zipFileName));
+			fis = new FileInputStream(new File(generatePath, zipFileName));
 
 			//
 			// Store file to server
@@ -180,8 +190,7 @@ public class FileResource {
 			}
 		}
 
-		return String.format("ftp://dal@%s:%d/%s", ftp_server, ftp_port,
-				zipFileName);
+		return String.format("%s/files/%s", Configuration.get("codegen_url"), zipFileName);
 	}
 
 	private void zipFile(File fileToZip, String zipFileName) {
@@ -191,7 +200,7 @@ public class FileResource {
 		ZipOutputStream zos = null;
 		try {
 
-			FileOutputStream fos = new FileOutputStream(new File("gen",
+			FileOutputStream fos = new FileOutputStream(new File(generatePath,
 					zipFileName));
 			zos = new ZipOutputStream(fos);
 			ZipEntry ze = new ZipEntry(fileToZip.getName());
@@ -227,7 +236,7 @@ public class FileResource {
 			//
 			// Create an InputStream of the file to be uploaded
 			//
-			fis = new FileInputStream(new File("gen", "1.zip"));
+			fis = new FileInputStream(new File(generatePath, "1.zip"));
 
 			//
 			// Store file to server

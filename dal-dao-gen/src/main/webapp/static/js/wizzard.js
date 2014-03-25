@@ -1,3 +1,4 @@
+
 //向导注释
 //step1
 //step2
@@ -369,7 +370,7 @@
                 window.ajaxutil.post_task();
             }
             else if (current.hasClass("step2-2-1")) {
-                if ($(".op_type.active").children().val() != "delete" && $('#fields').multipleSelect('getSelects').length < 1) {
+                if ($("#crud_option").val() != "delete" && $('#fields').multipleSelect('getSelects').length < 1) {
                     $("#error_msg").text("请选择至少一个字段！");
                     return;
                 }

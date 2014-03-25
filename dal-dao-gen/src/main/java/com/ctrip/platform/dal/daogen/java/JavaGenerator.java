@@ -121,14 +121,10 @@ public class JavaGenerator extends AbstractGenerator {
 
 //				tableHost.setTable(true);
 				// SP方式增删改
-				if (tableHost.isSp()) {
-					tableHost.setSpInsert(SpOperationHost.getSpaOperation(
-							tableViewSp.getServer_id(), dbName, table, allSpNames,"i"));
-					tableHost.setSpUpdate(SpOperationHost.getSpaOperation(
-							tableViewSp.getServer_id(), dbName, table, allSpNames,"u"));
-					tableHost.setSpDelete(SpOperationHost.getSpaOperation(
-							tableViewSp.getServer_id(), dbName, table, allSpNames,"d"));
-					
+				if (tableHost.isSpa()) {
+					tableHost.setSpInsert(SpOperationHost.getSpaOperation(dbName, table, allSpNames,"i"));
+					tableHost.setSpUpdate(SpOperationHost.getSpaOperation(dbName, table, allSpNames,"u"));
+					tableHost.setSpDelete(SpOperationHost.getSpaOperation(dbName, table, allSpNames,"d"));
 				}
 				
 				tableHosts.add(tableHost);
@@ -201,7 +197,7 @@ public class JavaGenerator extends AbstractGenerator {
 		VelocityContext context = new VelocityContext();
 		context.put("WordUtils", WordUtils.class);
 		context.put("StringUtils", StringUtils.class);
-		File mavenLikeDir = new File(String.format("gen/%s/java",
+		File mavenLikeDir = new File(String.format("%s/%s/java",generatePath ,
 				projectId));
 
 		try {
@@ -308,17 +304,6 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 	}
 	
-	private String getPojoClassName(String prefix, String suffix, String table) {
-		String className = table;
-		if (null != prefix && !prefix.isEmpty()) {
-			className = className.substring(prefix.length());
-		}
-		if (null != suffix && !suffix.isEmpty()) {
-			className = className + suffix;
-		}
-		return WordUtils.capitalize(className);
-	}
-
 	private List<GenTaskBySqlBuilder> filterExtraMethods(
 			List<GenTaskBySqlBuilder> sqlBuilders, String dbName, String table) {
 		List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
@@ -405,7 +390,7 @@ public class JavaGenerator extends AbstractGenerator {
 		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();
 
 		for (GenTaskByFreeSql task : tasks) {
-			String key = String.format("%s_%s_%s", task.getServer_id(),
+			String key = String.format("%s_%s", 
 					task.getDb_name(), task.getClass_name());
 			if (groupBy.containsKey(key)) {
 				groupBy.get(key).add(task);
@@ -487,7 +472,7 @@ public class JavaGenerator extends AbstractGenerator {
 		context.put("WordUtils", WordUtils.class);
 		context.put("StringUtils", StringUtils.class);
 		
-		File mavenLikeDir = new File(String.format("gen/%s/java",
+		File mavenLikeDir = new File(String.format("%s/%s/java",generatePath ,
 				projectId));
 		
 //		for(FreeSqlPojoHost host : pojoHosts.values()){

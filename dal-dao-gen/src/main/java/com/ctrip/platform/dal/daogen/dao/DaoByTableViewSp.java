@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.dao;
 
 import java.sql.ResultSet;
@@ -32,7 +33,7 @@ public class DaoByTableViewSp {
 	public List<GenTaskByTableViewSp> getTasksByProjectId(int iD) {
 		try {
 			return this.jdbcTemplate
-					.query("select id, project_id, server_id, db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version from task_table where project_id=?",
+					.query("select id, project_id, db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version from task_table where project_id=?",
 							new Object[] { iD },
 							new RowMapper<GenTaskByTableViewSp>() {
 								public GenTaskByTableViewSp mapRow(
@@ -52,7 +53,7 @@ public List<GenTaskByTableViewSp> updateAndGetAllTasks(int projectId) {
 		final List<GenTaskByTableViewSp> tasks = new ArrayList<GenTaskByTableViewSp>();
 		
 		this.jdbcTemplate
-				.query("select id, project_id, server_id, db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version from task_table where project_id=?",
+				.query("select id, project_id, db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version from task_table where project_id=?",
 						new Object[] { projectId },
 						new RowCallbackHandler() {
 							@Override
@@ -73,7 +74,7 @@ public List<GenTaskByTableViewSp> updateAndGetTasks(int projectId) {
 		final List<GenTaskByTableViewSp> tasks = new ArrayList<GenTaskByTableViewSp>();
 		
 		this.jdbcTemplate
-				.query("select id, project_id, server_id, db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version from task_table where project_id=? and generated=false",
+				.query("select id, project_id, db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version from task_table where project_id=? and generated=false",
 						new Object[] { projectId },
 						new RowCallbackHandler() {
 							@Override
@@ -92,8 +93,8 @@ public List<GenTaskByTableViewSp> updateAndGetTasks(int projectId) {
 	public int insertTask(GenTaskByTableViewSp task) {
 		try {
 			return this.jdbcTemplate
-					.update("insert into task_table ( project_id,server_id,  db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version) values (?,?,?,?,?,?,?,?,?,?,?,?)",
-							task.getProject_id(), task.getServer_id(),
+					.update("insert into task_table ( project_id,  db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version) values (?,?,?,?,?,?,?,?,?,?,?)",
+							task.getProject_id(),
 							task.getDb_name(), task.getTable_names(),
 							task.getView_names(), task.getSp_names(),
 							task.getPrefix(), task.getSuffix(),
@@ -107,9 +108,9 @@ public List<GenTaskByTableViewSp> updateAndGetTasks(int projectId) {
 	public int updateTask(GenTaskByTableViewSp task) {
 		try {
 			return this.jdbcTemplate
-					.update("update task_table set project_id=?,server_id=?,  db_name=?, table_names=?,view_names=?,sp_names=?,prefix=?,suffix=?,cud_by_sp=?,pagination=?,generated=?,version=version+1 where id=? and version=?",
+					.update("update task_table set project_id=?,  db_name=?, table_names=?,view_names=?,sp_names=?,prefix=?,suffix=?,cud_by_sp=?,pagination=?,generated=?,version=version+1 where id=? and version=?",
 
-					task.getProject_id(), task.getServer_id(),
+					task.getProject_id(),
 							task.getDb_name(), task.getTable_names(),
 							task.getView_names(), task.getSp_names(),
 							task.getPrefix(), task.getSuffix(),

@@ -38,15 +38,7 @@ public class SpOperationHost {
 		this.methodName = methodName;
 	}
 
-	public boolean isSpa() {
-		return spa;
-	}
-
-	public void setSpa(boolean spa) {
-		this.spa = spa;
-	}
-
-	public static SpOperationHost getSpaOperation(int server, String dbName,
+	public static SpOperationHost getSpaOperation(String dbName,
 			String tableName, List<StoredProcedure> spNames, String operation) {
 
 		SpOperationHost host = new SpOperationHost();
@@ -60,7 +52,6 @@ public class SpOperationHost {
 		
 		if( (index = spNames.indexOf(expectSpa)) > 0){
 			host.exist = true;
-			host.setSpa(true);
 			host.methodName = expectSpa.getName();
 			currentSp = spNames.get(index);
 		}else if((index = spNames.indexOf(expectSp3)) > 0){

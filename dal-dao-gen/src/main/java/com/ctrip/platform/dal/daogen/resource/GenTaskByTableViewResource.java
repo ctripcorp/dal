@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.resource;
 
 import javax.annotation.Resource;
@@ -27,7 +28,6 @@ public class GenTaskByTableViewResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Status addTask(@FormParam("id") int id,
-			@FormParam("server") int server,
 			@FormParam("project_id") int project_id,
 			@FormParam("db_name") String db_name,
 			@FormParam("table_names") String table_names,
@@ -47,7 +47,6 @@ public class GenTaskByTableViewResource {
 				return Status.ERROR;
 			}	
 		}else{
-			task.setServer_id(server);
 			task.setProject_id(project_id);
 			task.setDb_name(db_name);
 			task.setTable_names(table_names);

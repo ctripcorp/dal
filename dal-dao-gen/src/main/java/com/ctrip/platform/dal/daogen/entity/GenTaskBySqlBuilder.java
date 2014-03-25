@@ -10,8 +10,6 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 
 	private int project_id;
 	
-	private int server_id;
-	
 	private String db_name;
 	
 	private String table_name;
@@ -72,14 +70,6 @@ private boolean generated;
 
 	public void setProject_id(int project_id) {
 		this.project_id = project_id;
-	}
-
-	public int getServer_id() {
-		return server_id;
-	}
-
-	public void setServer_id(int server_id) {
-		this.server_id = server_id;
 	}
 
 	public String getDb_name() {
@@ -150,18 +140,17 @@ private boolean generated;
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		task.setServer_id(rs.getInt(3));
-		task.setDb_name(rs.getString(4));
-		task.setTable_name(rs.getString(5));
-		task.setClass_name(rs.getString(6));
-		task.setMethod_name(rs.getString(7));
-		task.setSql_style(rs.getString(8));
-		task.setCrud_type(rs.getString(9));
-		task.setFields(rs.getString(10));
-		task.setCondition(rs.getString(11));
-		task.setSql_content(rs.getString(12));
-		task.setGenerated(rs.getBoolean(13));
-		task.setVersion(rs.getInt(14));
+		task.setDb_name(rs.getString(3));
+		task.setTable_name(rs.getString(4));
+		task.setClass_name(rs.getString(5));
+		task.setMethod_name(rs.getString(6));
+		task.setSql_style(rs.getString(7));
+		task.setCrud_type(rs.getString(8));
+		task.setFields(rs.getString(9));
+		task.setCondition(rs.getString(10));
+		task.setSql_content(rs.getString(11));
+		task.setGenerated(rs.getBoolean(12));
+		task.setVersion(rs.getInt(13));
 		return task;
 	}
 

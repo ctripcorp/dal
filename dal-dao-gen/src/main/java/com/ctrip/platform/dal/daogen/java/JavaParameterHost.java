@@ -102,7 +102,7 @@ public class JavaParameterHost extends AbstractParameterHost {
 	public void setPrimary(boolean primary) {
 		this.primary = primary;
 	}
-	
+
 	public String getCapitalizedName() {
 		String tempName = name.replace("@", "");
 		if(tempName.contains("_")) {

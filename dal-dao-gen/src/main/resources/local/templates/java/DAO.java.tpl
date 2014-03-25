@@ -32,9 +32,16 @@ public class ${host.getPojoClassName()}Dao {
 	private static final String UPDATE_SP_NAME = "${host.getSpUpdate().getMethodName()}";
 #end
 
+	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getTableName()} with (nolock)";
+	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getTableName()}";
+	private static final String PAGE_MYSQL_PATTERN = "SELECT * FROM ${host.getTableName()} WHERE LIMIT %s, %s";
+	private static final String PAGE_SQL_PATTERN = "WITH CTE AS (select *, row_number() over(order by ${host.getOverColumns()} desc ) as rownum" 
+			+" from ${host.getTableName()} (nolock)) select * from CTE where rownum between %s and %s";
+
 	private static final String RET_CODE = "retcode";
 	private static final String UPDATE_COUNT = "update_count";
 	private DalScalarExtractor extractor = new DalScalarExtractor();
+	private DalRowMapperExtractor<${host.getPojoClassName()}> rowextractor = null;
 
 #end
 	private DalParser<${host.getPojoClassName()}> parser = new ${host.getPojoClassName()}Parser();
@@ -43,6 +50,7 @@ public class ${host.getPojoClassName()}Dao {
 
 	public ${host.getPojoClassName()}Dao() {
 		this.client = new DalTableDao<${host.getPojoClassName()}>(parser);
+		this.rowextractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(parser); 
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}
 
@@ -72,11 +80,31 @@ public class ${host.getPojoClassName()}Dao {
 		return client.queryByPk(pk, hints);
 	}
 	
-	public List<${host.getPojoClassName()}> queryByPage(${host.getPojoClassName()} pk, int pageSize, int pageNo)
-			throws SQLException {
-		// TODO to be implemented
+	public int count()  throws SQLException
+	{
+		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		return null;
+		int result = (int)this.client.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
+		return result;
+	}
+	
+	public List<City> queryByPage(City pk, int pageSize, int pageNo)  throws SQLException
+			throws SQLException {
+		if(pageNo < 1 || pagesize < 1) 
+			throw new SQLException("Illigal pagesize or pageNo, pls check");
+		
+        StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+		
+		String sql = "";
+#if($host.getDatabaseCategory().name() == "MySql" )
+		sql = String.format(PAGE_MYSQL_PATTERN, (pageNo - 1) * pagesize, pagesize);
+#else
+		int fromRownum = (pageNo - 1) * pagesize + 1;
+        int endRownum = pagesize * pageNo;
+		sql = String.format(PAGE_SQL_PATTERN, fromRownum, endRownum);
+#end
+		return this.client.query(sql, parameters, hints, rowextractor);
 	}
 
 #if($host.getSpInsert().isExist())

@@ -12,15 +12,20 @@ import java.util.List;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
 public class ${host.getPojoClassName()}Dao {
+
 	private static final String DATA_BASE = "${host.getDbName()}";
-	
+	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getViewName()}";
+	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getViewName()}  with (nolock)";
+	private static final String PAGE_MYSQL_PATTERN = "SELECT * FROM ${host.getViewName()} WHERE LIMIT %s, %s";
+	private static final String PAGE_SQL_PATTERN = "WITH CTE AS (select *, row_number() over(order by ${host.getOverColumns()} desc ) as rownum" 
+			+" from ${host.getViewName()} (nolock)) select * from CTE where rownum between %s and %s";
+			
 	private DalClient client;
 	private ${host.getPojoClassName()}RowMapper mapper;
 	private DalRowMapperExtractor<${host.getPojoClassName()}> extractor;
@@ -44,15 +49,10 @@ public class ${host.getPojoClassName()}Dao {
 	**/
 	public List<${host.getPojoClassName()}> getAll() throws SQLException
 	{
-		String sql = "SELECT * FROM ${host.getViewName()}";
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
 		List<${host.getPojoClassName()}> result = null;
-		result = this.client.query(sql, parameters, hints, new DalResultSetExtractor<List<${host.getPojoClassName()}>>(){
-			@Override
-			public List<${host.getPojoClassName()}> extract(ResultSet rs) throws SQLException {
-				return extractor.extract(rs);
-			}});
+		result = this.client.query(ALL_SQL_PATTERN, parameters, hints, extractor);
 		return result;
 	}
 	
@@ -63,23 +63,29 @@ public class ${host.getPojoClassName()}Dao {
 	**/
 	public int Count() throws SQLException
 	{
-		String sql = "SELECT count(1) from ${host.getViewName()}  with (nolock)";
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		int result = this.client.query(sql, parameters, hints, new DalResultSetExtractor<Integer>(){
-			@Override
-			public Integer extract(ResultSet rs) throws SQLException {
-				return (Integer)scalarExtractor.extract(rs);
-			}
-		});
+		int result = (int)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
 		return result;
 	}
 	
-	public List<${host.getPojoClassName()}> getListByPage(${host.getPojoClassName()} obj, int pagesize, int pageNo)
+	public List<${host.getPojoClassName()}> getListByPage(${host.getPojoClassName()} obj, int pagesize, int pageNo) throws SQLException
 	{
-		// TODO to be implemented
+		if(pageNo < 1 || pagesize < 1) 
+			throw new SQLException("Illigal pagesize or pageNo, pls check");
+		
+        StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		return null;
+		
+		String sql = "";
+#if($host.getDatabaseCategory().name() == "MySql" )
+		sql = String.format(PAGE_MYSQL_PATTERN, (pageNo - 1) * pagesize, pagesize);
+#else
+		int fromRownum = (pageNo - 1) * pagesize + 1;
+        int endRownum = pagesize * pageNo;
+		sql = String.format(PAGE_SQL_PATTERN, fromRownum, endRownum);
+#end
+		return this.client.query(sql, parameters, hints, extractor);
 	}
 
 	/**

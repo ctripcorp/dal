@@ -42,7 +42,7 @@ public class JavaTableHost {
 	}
 
 	public boolean isSpa() {
-		return null != this.SpInsert && this.SpInsert.isSpa();
+		return null != this.SpInsert && this.SpInsert.isExist();
 	}
 
 	public String getDbName() {

@@ -10,6 +10,20 @@ public class Project {
 	private String name;
 	
 	private String namespace;
+	
+	private String text;
+	
+	private String icon;
+	
+	private boolean children;
+
+	public boolean isChildren() {
+		return children;
+	}
+
+	public void setChildren(boolean children) {
+		this.children = children;
+	}
 
 	public int getId() {
 		return id;
@@ -36,11 +50,30 @@ public class Project {
 		this.namespace = namespace;
 	}
 	
+	public String getText() {
+		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
+	}
+
+	public String getIcon() {
+		return icon;
+	}
+
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+
 	public static Project visitRow(ResultSet rs) throws SQLException {
 		Project project = new Project();
         project.setId(rs.getInt(1));
         project.setName(rs.getString(2));
         project.setNamespace(rs.getString(3));
+        project.setText(project.getName());
+        project.setChildren(false);
+        project.setIcon("fa fa-tasks");
          return project;
 	}
 

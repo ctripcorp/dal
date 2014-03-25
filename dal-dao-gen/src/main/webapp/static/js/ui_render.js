@@ -1,3 +1,4 @@
+
 //向导注释
 //step1
 //step2
@@ -19,20 +20,40 @@
                     style: 'border-right: 1px solid silver;'
                 }, {
                     type: 'main',
-                    style: 'background-color: white;'
+                    //style: 'background-color: white;'
                 },{ 
                     type: 'preview', 
                     size: '50%', 
                     resizable: true
-                }]
+                }],
+                onResizing: function(event) {
+                    //ace.edit("code_editor").resize();
+                }   
             });
         },
         render_sidebar: function () {
-            //Begin tree side bar
-            w2ui['main_layout'].content('left', $().w2sidebar({
-                name: 'sidebar',
-                img: null,
-                topHTML: '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver">'
+            // w2ui['main_layout'].content('left', $().w2sidebar({
+            //     name: 'sidebar',
+            //     img: null,
+            //     topHTML: '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver">'
+            //     +'<a id="addProj" href="javascript:;">'
+            //     +'<i class="fa fa-plus"></i>添加</a>'
+            //     +'&nbsp;&nbsp;<a id="editProj" href="javascript:;">'
+            //     +'<i class="fa fa-edit"></i>修改</a>'
+            //     +'&nbsp;&nbsp;<a id="delProj" href="javascript:;">'
+            //     +'<i class="fa fa-times"></i>删除</a>'
+            //     +'&nbsp;&nbsp;<a id="shareProj" href="javascript:;">'
+            //     +'<i class="fa fa-twitter"></i>共享</a></div>',
+            //     nodes: [{
+            //         id: 'all_projects',
+            //         text: '所有项目',
+            //         icon: 'fa fa-folder-o',
+            //         // plus: true,
+            //         group: true,
+            //     }],
+            // }));
+
+            w2ui['main_layout'].content('left', '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver">'
                 +'<a id="addProj" href="javascript:;">'
                 +'<i class="fa fa-plus"></i>添加</a>'
                 +'&nbsp;&nbsp;<a id="editProj" href="javascript:;">'
@@ -40,63 +61,34 @@
                 +'&nbsp;&nbsp;<a id="delProj" href="javascript:;">'
                 +'<i class="fa fa-times"></i>删除</a>'
                 +'&nbsp;&nbsp;<a id="shareProj" href="javascript:;">'
-                +'<i class="fa fa-twitter"></i>共享</a></div>',
-                nodes: [{
-                    id: 'all_projects',
-                    text: '所有项目',
-                    icon: 'fa fa-folder-o',
-                    // plus: true,
-                    group: true,
-                }],
-            }));
+                +'<i class="fa fa-twitter"></i>共享</a></div>'
+                +'<div id="jstree_projects"></div>');
+
+            $('#jstree_projects').on('select_node.jstree', function (e, obj) {
+                if(obj.node.id != -1){
+                    window.render.render_grid();
+
+                    w2ui['grid'].current_project = obj.node.id;
+                    window.render.render_preview();
+                    w2ui['grid_toolbar'].click('refreshDAO', null);
+                    $("#refreshFiles").trigger('click');
+                }
+            }).jstree({ 
+                'core' : {
+                    'check_callback' : true,
+                    'multiple': false,
+                    'data' : {
+                      'url' : function (node) {
+                        return node.id == "#" ? "/rest/project?root=true&rand=" + Math.random() : "/rest/project?rand=" + Math.random();
+                      }
+                    }
+            }});
         },
-        render_grid: function () {
+        render_grid: function (project_id) {
             var existsGrid = w2ui['grid'];
             if (existsGrid != undefined) {
                 return;
             }
-
-            $().w2layout({
-                name: 'sub_layout',
-                panels: [{ 
-                        type: 'top',  
-                        size: 45, 
-                        resizable: true,
-                    },{ 
-                        type: 'left', 
-                        size: 271, 
-                        resizable: true
-                    },{ 
-                        type: 'main'
-                    }]
-            });
-
-            w2ui['main_layout'].content('preview', w2ui['sub_layout']);
-
-            w2ui['sub_layout'].content('top', 
-                '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a id="refreshFiles" href="javascript:;"><i class="fa fa-refresh"></i>刷新</a>&nbsp;&nbsp;<a id="downloadFiles" href="javascript:;"><i class="fa fa-download"></i>下载Zip包</a>&nbsp;&nbsp;<select id="viewCode"><option value="cs">C#</option><option value="java">Java</option></select></div>')
-
-             //Begin tree side bar
-            w2ui['sub_layout'].content('left', $().w2sidebar({
-                name: 'sub_sidebar',
-                img: null,
-                nodes: [{
-                    id: 'code_preview',
-                    text: '代码预览',
-                    icon: 'fa fa-folder-o',
-                    // plus: true,
-                    group: true,
-                }]
-            }));
-
-
-            w2ui['sub_layout'].content('main',
-             '<div id="code_editor" class="code_edit" style="height:100%"></div>');
-            //End tree side bar
-
-            var editor = ace.edit("code_editor");
-            editor.setTheme("ace/theme/monokai");
-            editor.getSession().setMode("ace/mode/csharp");
 
             w2ui['main_layout'].content('main', $().w2grid({
                 name: 'grid',
@@ -169,6 +161,12 @@
                                             value.sql_content = value.sp_names;
                                         else
                                             value.sql_content = value.sql_content + "," + value.sp_names;
+                                    }
+                                    if (value.view_names != null && value.view_names != "") {
+                                        if (value.sql_content == null || value.sql_content == "")
+                                            value.sql_content = value.view_names;
+                                        else
+                                            value.sql_content = value.sql_content + "," + value.view_names;
                                     }
                                     value.class_name = "/";
                                     value.method_name = "/";
@@ -298,7 +296,6 @@
                     window.render.editDAO(data.recid);
                 },
             }));
-
         },
         editDAO: function(recid){
             var record = w2ui['grid'].get(recid);
@@ -323,8 +320,73 @@
             }
             
         },
+        render_preview:function(){
+            var existsGrid = w2ui['sub_layout'];
+            if (existsGrid != undefined) {
+                return;
+            }
+
+            $().w2layout({
+                name: 'sub_layout',
+                panels: [{ 
+                        type: 'left', 
+                        size: 271, 
+                        resizable: true
+                    },{ 
+                        type: 'main'
+                    }]
+            });
+
+            w2ui['main_layout'].content('preview', w2ui['sub_layout']);
+
+            w2ui['sub_layout'].content('left', '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a id="refreshFiles" href="javascript:;"><i class="fa fa-refresh"></i>刷新</a>&nbsp;&nbsp;<a id="downloadFiles" href="javascript:;"><i class="fa fa-download"></i>下载Zip包</a>&nbsp;&nbsp;<select id="viewCode"><option value="cs">C#</option><option value="java">Java</option></select></div>'+'<div id="jstree_files"></div>');
+
+            $('#jstree_files').on('select_node.jstree', function (e, obj) {
+                if(obj.node.original.type == "file"){
+                    var fileName = obj.node.data;
+                    if (fileName.match(/cs$/)) {
+                        ace.edit("code_editor").getSession().setMode("ace/mode/csharp");
+                    } else if (fileName.match(/java$/)) {
+                        ace.edit("code_editor").getSession().setMode("ace/mode/java");
+                    }
+                    $.get("/rest/file/content?id=" 
+                        + w2ui['grid'].current_project
+                        +"&language="+$("#viewCode").val() 
+                        + "&name=" + fileName, function (data) {
+                        //var real_data = JSON.parse(data);
+                        ace.edit("code_editor").setValue(data);
+                    }).fail(function(data){
+                         alert("获取文件内容失败!");
+                    });
+                }
+            }).jstree({ 
+                'core' : {
+                    'check_callback' : true,
+                    'multiple': false,
+                    'data' : {
+                      'url' : function (node) {
+                        return node.id === '#' ?
+                          sprintf("/rest/file?id=%s&language=%s",
+                            w2ui['grid'].current_project,
+                            $("#viewCode").val()) : 
+                          sprintf("/rest/file?id=%s&language=%s&name=%s",
+                            w2ui['grid'].current_project,
+                            $("#viewCode").val(), node.data);
+                      }
+                    }
+            }});
+
+            w2ui['sub_layout'].content('main',
+             '<div id="code_editor" class="code_edit" style="height:100%"></div>');
+            //End tree side bar
+
+            var editor = ace.edit("code_editor");
+            editor.setTheme("ace/theme/monokai");
+            editor.getSession().setMode("ace/mode/csharp");
+        }
     };
 
     window.render = new Render();
+
 
 })(window);

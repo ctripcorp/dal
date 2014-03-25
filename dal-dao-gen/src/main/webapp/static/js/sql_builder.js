@@ -1,3 +1,4 @@
+
 (function (window, undefined) {
     var sql_builder = function () {
 
@@ -42,7 +43,7 @@
                     }
                 }
             });
-            if ($("#crud_option").children().val() == "select") {
+            if ($("#crud_option").val() == "select") {
                 if (formatedConditions.length > 0) {
                     ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
                         $("#tables").val(), formatedConditions.join(" AND ")));
@@ -50,7 +51,7 @@
                     ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
                         $("#tables").val()));
                 }
-            } else if ($("#crud_option").children().val() == "insert") {
+            } else if ($("#crud_option").val() == "insert") {
 
                 var placeHodler = [];
                 $.each($('#fields').multipleSelect('getSelects'), function (index, value) {
@@ -65,7 +66,7 @@
                     placeHodler.join(",")));
 
 
-            } else if ($("#crud_option").children().val() == "update") {
+            } else if ($("#crud_option").val() == "update") {
                 var placeHodler = [];
                 $.each($('#fields').multipleSelect('getSelects'), function (index, value) {
                     if ($("#sql_style").val() == "csharp") {
@@ -86,7 +87,7 @@
                         placeHodler.join(",")));
                 }
 
-            } else if ($("#crud_option").children().val() == "delete") {
+            } else if ($("#crud_option").val() == "delete") {
                 if (formatedConditions.length > 0) {
                     ace.edit("sql_builder").setValue(sprintf("Delete FROM %s WHERE %s",
                         $("#tables").val(),
@@ -102,4 +103,5 @@
      * export to either browser or node.js
      */
     window.sql_builder = new sql_builder();
+
 })(window);

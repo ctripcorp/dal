@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -58,6 +59,7 @@ public final class DalQueryDao {
 	}
 
 	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count) throws SQLException {
+		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
 		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, start, count));
 	}
 }

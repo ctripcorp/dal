@@ -18,9 +18,11 @@ import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class DalStatementCreator {
+	private static final int DEFAULT_RESULT_SET_TYPE = ResultSet.TYPE_FORWARD_ONLY;
+	private static final int DEFAULT_RESULT_SET_CONCURRENCY = ResultSet.CONCUR_READ_ONLY;
+	
 	public Statement createStatement(Connection conn, DalHints hints) throws Exception {
-		Statement statement = conn.createStatement(
-					ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		Statement statement = conn.createStatement(getResultSetType(hints), getResultSetConcurrency(hints));
 		
 		applyHints(statement, hints);
 		
@@ -28,8 +30,7 @@ public class DalStatementCreator {
 	}
 
 	public PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters parameters, DalHints hints) throws Exception {
-		PreparedStatement statement = conn.prepareStatement(sql,
-					ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		PreparedStatement statement = conn.prepareStatement(sql, getResultSetType(hints), getResultSetConcurrency(hints));
 		
 		applyHints(statement, hints);
 		setParameter(statement, parameters);
@@ -47,8 +48,7 @@ public class DalStatementCreator {
 	}
 	
 	public PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters[] parametersList, DalHints hints) throws Exception {
-		PreparedStatement statement = conn.prepareStatement(sql,
-					ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		PreparedStatement statement = conn.prepareStatement(sql, getResultSetType(hints), getResultSetConcurrency(hints));
 		
 		applyHints(statement, hints);
 		for(StatementParameters parameters: parametersList) {
@@ -107,5 +107,13 @@ public class DalStatementCreator {
 		Integer timeout = (Integer)hints.get(DalHintEnum.timeout);
 		if (timeout != null && timeout > 0)
 			statement.setQueryTimeout(timeout);
+	}
+	
+	private int getResultSetType(DalHints hints) {
+		return hints.getInt(DalHintEnum.resultSetType, DEFAULT_RESULT_SET_TYPE);
+	}
+
+	private int getResultSetConcurrency(DalHints hints) {
+		return hints.getInt(DalHintEnum.resultSetConcurrency, DEFAULT_RESULT_SET_CONCURRENCY);
 	}
 }

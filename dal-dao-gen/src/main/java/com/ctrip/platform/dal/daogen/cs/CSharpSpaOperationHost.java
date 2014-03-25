@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.cs;
 
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class CSharpSpaOperationHost {
 		this.methodName = methodName;
 	}
 
-	public static CSharpSpaOperationHost getSpaOperation(int server, String dbName,
+	public static CSharpSpaOperationHost getSpaOperation(String dbName,
 			String tableName, List<StoredProcedure> spNames, String operation) {
 
 		CSharpSpaOperationHost host = new CSharpSpaOperationHost();

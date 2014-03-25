@@ -9,7 +9,15 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.ctrip.platform.dal.common.util.Configuration;
+
 public class ZipFolder {
+	
+	private static String generatePath;
+	
+	static{
+		generatePath = Configuration.get("gen_code_path");
+	}
 	
 	List<String> fileList;
 	String zipFolder;
@@ -27,7 +35,7 @@ public class ZipFolder {
 	 
 	     try{
 	 
-	    	FileOutputStream fos = new FileOutputStream(new File("gen", zipFile));
+	    	FileOutputStream fos = new FileOutputStream(new File(generatePath, zipFile));
 	    	ZipOutputStream zos = new ZipOutputStream(fos);
 	 
 	    	for(String file : this.fileList){

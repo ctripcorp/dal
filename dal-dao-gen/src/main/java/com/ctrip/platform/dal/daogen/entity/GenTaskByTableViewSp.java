@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.entity;
 
 import java.sql.ResultSet;
@@ -6,8 +7,6 @@ import java.sql.SQLException;
 public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	
 	private int id;
-	
-	private int server_id;
 	
 	private int project_id;
 	
@@ -37,14 +36,6 @@ private boolean generated;
 
 	public void setId(int id) {
 		this.id = id;
-	}
-
-	public int getServer_id() {
-		return server_id;
-	}
-
-	public void setServer_id(int server_id) {
-		this.server_id = server_id;
 	}
 
 	public int getProject_id() {
@@ -145,17 +136,16 @@ private boolean generated;
 		GenTaskByTableViewSp task = new GenTaskByTableViewSp();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		task.setServer_id(rs.getInt(3));
-		task.setDb_name(rs.getString(4));
-		task.setTable_names(rs.getString(5));
-		task.setView_names(rs.getString(6));
-		task.setSp_names(rs.getString(7));
-		task.setPrefix(rs.getString(8));
-		task.setSuffix(rs.getString(9));
-		task.setCud_by_sp(rs.getBoolean(10));
-		task.setPagination(rs.getBoolean(11));
-		task.setGenerated(rs.getBoolean(12));
-		task.setVersion(rs.getInt(13));
+		task.setDb_name(rs.getString(3));
+		task.setTable_names(rs.getString(4));
+		task.setView_names(rs.getString(5));
+		task.setSp_names(rs.getString(6));
+		task.setPrefix(rs.getString(7));
+		task.setSuffix(rs.getString(8));
+		task.setCud_by_sp(rs.getBoolean(9));
+		task.setPagination(rs.getBoolean(10));
+		task.setGenerated(rs.getBoolean(11));
+		task.setVersion(rs.getInt(12));
 		return task;
 	}
 

@@ -2,45 +2,64 @@ package com.ctrip.platform.dal.daogen.domain;
 
 public class W2uiElement {
 	
-	private String currentId;
+	private String id;
 	
-	private boolean isParent;
+	private boolean children;
 	
-	private String relativeName;
+	private String data;
 	
-	private String name;
+	private String text;
 
-
-	public String getName() {
-		return name;
+	private String icon;
+	
+	private String type;
+	
+	public String getType() {
+		return type;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setType(String type) {
+		this.type = type;
 	}
 
-	public String getCurrentId() {
-		return currentId;
+	public String getIcon() {
+		return icon;
 	}
 
-	public void setCurrentId(String currentId) {
-		this.currentId = currentId;
+	public void setIcon(String icon) {
+		this.icon = icon;
 	}
 
-	public boolean isParent() {
-		return isParent;
+	public String getText() {
+		return text;
 	}
 
-	public void setParent(boolean isParent) {
-		this.isParent = isParent;
+	public void setText(String name) {
+		this.text = name;
 	}
 
-	public String getRelativeName() {
-		return relativeName;
+	public String getId() {
+		return id;
 	}
 
-	public void setRelativeName(String relativeName) {
-		this.relativeName = relativeName;
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public boolean isChildren() {
+		return children;
+	}
+
+	public void setChildren(boolean isParent) {
+		this.children = isParent;
+	}
+
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String data) {
+		this.data = data;
 	}
 
 }

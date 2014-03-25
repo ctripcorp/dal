@@ -213,7 +213,7 @@ public class JavaGenerator extends AbstractGenerator {
 
 		context.put("dbs", dbs);
 		GenUtils.mergeVelocityContext(context, String.format("%s/Dal.config",
-				mavenLikeDir.getAbsolutePath()), "templates/Dal.config.tpl");
+				mavenLikeDir.getAbsolutePath()), "templates/java/Dal.config.tpl");
 
 		generateTableDao(tableHosts, context, mavenLikeDir);
 		generateSpDao(spHosts, context, mavenLikeDir);

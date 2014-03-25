@@ -6,14 +6,14 @@ import com.ctrip.platform.dal.dao.DalPojo;
 
 public class Person implements DalPojo {
 
-	private int ID;
+	private Integer ID;
 
-	public int getID() {
+	public Integer getID() {
 		return ID;
 	}
 
 	// (表示(不会被Verlocity解析
-	public void setID(int ID) {
+	public void setID(Integer ID) {
 		this.ID = ID;
 	}
 
@@ -50,25 +50,25 @@ public class Person implements DalPojo {
 		this.Name = Name;
 	}
 
-	private int Age;
+	private Integer Age;
 
-	public int getAge() {
+	public Integer getAge() {
 		return Age;
 	}
 
 	// (表示(不会被Verlocity解析
-	public void setAge(int Age) {
+	public void setAge(Integer Age) {
 		this.Age = Age;
 	}
 
-	private int Gender;
+	private Integer Gender;
 
-	public int getGender() {
+	public Integer getGender() {
 		return Gender;
 	}
 
 	// (表示(不会被Verlocity解析
-	public void setGender(int Gender) {
+	public void setGender(Integer Gender) {
 		this.Gender = Gender;
 	}
 

@@ -14,6 +14,13 @@ public class DalHints {
 		return hints.get(hint);
 	}
 	
+	public Integer getInt(DalHintEnum hint, int defaultValue) {
+		Object value = hints.get(hint);
+		if(value == null)
+			return defaultValue;
+		return (Integer)value;
+	}
+	
 	public String getString(DalHintEnum hint) {
 		return (String)hints.get(hint);
 	}

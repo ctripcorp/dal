@@ -134,9 +134,6 @@ public class DalQueryDaoTest {
 			}, 3, 5);
 			System.out.println(result);
 			
-			dao.queryForObject(sqlList, parameters, hints, Integer.class);
-			
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

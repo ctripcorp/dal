@@ -41,6 +41,7 @@ public final class DalTableDao<T> {
 		this.client = DalClientFactory.getClient(parser.getDatabaseName());
 		this.parser = parser;
 		queryDao = new DalQueryDao(parser.getDatabaseName());
+		initColumnTypes();
 		pkSql = initSql();
 	}
 	
@@ -67,9 +68,14 @@ public final class DalTableDao<T> {
 		return queryDao.queryForObject(selectSql, parameters, hints, parser);
 	}
 	
-	public List<T> queryLike(T pk, DalHints hints)
+	public List<T> queryLike(T sample, DalHints hints)
 			throws SQLException {
-		return null;
+		StatementParameters parameters = new StatementParameters();
+		Map<String, ?> queryCriteria = filterNullFileds(parser.getFields(sample));
+		addParameters(parameters, queryCriteria);
+		String whereClause = buildWhereClause(queryCriteria);
+
+		return query(whereClause, parameters, hints);
 	}
 	
 	public List<T> query(String whereClause, StatementParameters parameters, DalHints hints)
@@ -183,11 +189,12 @@ public final class DalTableDao<T> {
 		return columnTypes.get(columnName);
 	}
 	
-	public void filterNullFileds(Map<String, ?> fields) {
+	public Map<String, ?> filterNullFileds(Map<String, ?> fields) {
 		for(String columnName: parser.getColumnNames()) {
 			if(fields.get(columnName) == null)
 				fields.remove(columnName);
 		}
+		return fields;
 	}
 	
 	public String buildCallSql(String spName, int paramCount) {
@@ -198,19 +205,21 @@ public final class DalTableDao<T> {
 		pkColumns = new HashSet<String>();
 		Collections.addAll(pkColumns, parser.getPrimaryKeyNames());
 		
-		// Build a lookup table
-		String[] cloumnNames = parser.getColumnNames();
-		int[] columnsTypes = parser.getColumnTypes();
-		for (int i = 0; i < cloumnNames.length; i++) {
-			columnTypes.put(cloumnNames[i], columnsTypes[i]);
-		}
-		
 		// Build primary key template
  		String template = parser.isAutoIncrement() ? 
 				TMPL_SET_VALUE :
 				combine(TMPL_SET_VALUE, parser.getPrimaryKeyNames().length, AND);
 		
 		return String.format(template, (Object[])parser.getPrimaryKeyNames());
+	}
+
+	// Build a lookup table
+	private void initColumnTypes() {
+		String[] cloumnNames = parser.getColumnNames();
+		int[] columnsTypes = parser.getColumnTypes();
+		for (int i = 0; i < cloumnNames.length; i++) {
+			columnTypes.put(cloumnNames[i], columnsTypes[i]);
+		}
 	}
 	
 	private String buildInsertSql(Map<String, ?> fields) {
@@ -231,7 +240,7 @@ public final class DalTableDao<T> {
 		List<String> nonNullColumns = new LinkedList<String>();
 		
 		for(String column: parser.getColumnNames()) {
-			// For null value, we just keep it the same
+			// For null value or primary key, we just keep it the same
 			if(fields.get(column) == null || pkColumns.contains(column))
 				continue;
 			nonNullColumns.add(column);
@@ -242,6 +251,10 @@ public final class DalTableDao<T> {
 		return String.format(TMPL_SQL_UPDATE, parser.getTableName(), columns, pkSql);
 	}
 	
+	private String buildWhereClause(Map<String, ?> fields) {
+		return String.format(combine(TMPL_SET_VALUE, fields.size(), AND), fields.keySet());
+	}
+
 	private String combine(String[] values, String separator) {
 		StringBuilder valuesSb = new StringBuilder();
 		int i = 0;

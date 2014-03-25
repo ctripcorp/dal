@@ -54,7 +54,10 @@ public class DalClientFactory {
 	}
 	
 	public static DalClient getClient(String logicDbName) {
-		return new DalDirectClient(connPool.get(), logicDbName);
+		if(configureRef.get() == null)
+			return new DalDirectClient(connPool.get(), logicDbName);
+		
+		return new DalDirectClient(configureRef.get(), logicDbName);
 	}
 	
 }

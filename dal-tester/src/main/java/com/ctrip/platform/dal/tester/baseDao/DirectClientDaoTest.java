@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.tester;
+package com.ctrip.platform.dal.tester.baseDao;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +26,7 @@ import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.tester.ColumnTypeExtractor;
 
 public class DirectClientDaoTest {
 	private StatementParameters parameters = new StatementParameters();

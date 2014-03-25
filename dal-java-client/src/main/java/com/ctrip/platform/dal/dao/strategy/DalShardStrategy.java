@@ -14,7 +14,16 @@ public interface DalShardStrategy {
 	void initialize(Map<String, String> settings);
 
 	/**
-	 * For most of the case, it will return only 1
+	 * Check if master should be used for current operation.
+	 * @param configure
+	 * @param logicDbName
+	 * @param hints
+	 * @return
+	 */
+	boolean useMaster(DalConfigure configure, String logicDbName, DalHints hints);
+
+	/**
+	 * Select all shards that the operation covers. For most of the case, it will return only 1 shard id
 	 * If this operation requires cross shard execution, the method will return multiple shard id.
 	 * @param configure
 	 * @param logicDbName

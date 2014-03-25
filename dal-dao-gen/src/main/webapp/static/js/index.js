@@ -1,3 +1,4 @@
+
 jQuery(document).ready(function () {
 
     $('#main_layout').height($(document).height() - 50);

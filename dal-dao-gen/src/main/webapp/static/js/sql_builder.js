@@ -1,3 +1,4 @@
+
 (function (window, undefined) {
     var sql_builder = function () {
 
@@ -102,4 +103,5 @@
      * export to either browser or node.js
      */
     window.sql_builder = new sql_builder();
+
 })(window);

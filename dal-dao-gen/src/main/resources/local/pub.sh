@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 /app/apache-tomcat-7.0.52/bin/shutdown.sh
@@ -15,3 +16,5 @@ mv /app/apache-tomcat-7.0.52/webapps/ROOT/WEB-INF/classes/conf.properties.pub /a
 mv /app/apache-tomcat-7.0.52/webapps/ROOT/WEB-INF/classes/jdbc.properties.pub /app/apache-tomcat-7.0.52/webapps/ROOT/WEB-INF/classes/jdbc.properties
 
 /app/apache-tomcat-7.0.52/bin/startup.sh
+
+>>>>>>> cf4d3cdcb09d5b497511ea0ac6d40502460106e3

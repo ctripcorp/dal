@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen;
 
 import java.io.File;

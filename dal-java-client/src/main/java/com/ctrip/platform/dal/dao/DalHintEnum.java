@@ -27,6 +27,21 @@ public enum DalHintEnum {
 	/* Settings for initialize statement */
 	timeout,
 	
+	/* 
+	 * resultSetType a result set type; one of
+     *         <code>ResultSet.TYPE_FORWARD_ONLY</code>,
+     *         <code>ResultSet.TYPE_SCROLL_INSENSITIVE</code>, or
+     *         <code>ResultSet.TYPE_SCROLL_SENSITIVE</code> 
+	 */
+	resultSetType,
+	
+	/* 
+	 * resultSetConcurrency a concurrency type; one of
+     *         <code>ResultSet.CONCUR_READ_ONLY</code> or
+     *         <code>ResultSet.CONCUR_UPDATABLE</code>
+	 */
+    resultSetConcurrency,
+    
 	/*  */
 	fetchSize,
 	

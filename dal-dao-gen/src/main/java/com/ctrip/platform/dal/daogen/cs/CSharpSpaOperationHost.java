@@ -1,3 +1,4 @@
+
 package com.ctrip.platform.dal.daogen.cs;
 
 import java.util.ArrayList;

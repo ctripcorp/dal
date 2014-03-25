@@ -1,4 +1,5 @@
 
+
 package com.ctrip.platform.dal.daogen.entity;
 
 import java.sql.ResultSet;

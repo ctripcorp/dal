@@ -1,3 +1,4 @@
+
 //向导注释
 //step1
 //step2
@@ -386,5 +387,6 @@
     };
 
     window.render = new Render();
+
 
 })(window);

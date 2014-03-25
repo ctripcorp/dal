@@ -106,7 +106,7 @@ public class JavaParameterHost extends AbstractParameterHost {
 	public String getCapitalizedName() {
 		String tempName = name.replace("@", "");
 		if(tempName.contains("_")) {
-			tempName = WordUtils.capitalizeFully(name.replace('_', ' ')).replace(" ", "");
+			tempName = WordUtils.capitalizeFully(tempName.replace('_', ' ')).replace(" ", "");
 		}
 		return WordUtils.capitalize(tempName);
 	}
@@ -114,7 +114,7 @@ public class JavaParameterHost extends AbstractParameterHost {
 	public String getUncapitalizedName() {
 		String tempName = name.replace("@", "");
 		if(tempName.contains("_")) {
-			tempName = WordUtils.capitalizeFully(name.replace('_', ' ')).replace(" ", "");
+			tempName = WordUtils.capitalizeFully(tempName.replace('_', ' ')).replace(" ", "");
 		}
 		return WordUtils.uncapitalize(tempName);
 	}

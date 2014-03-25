@@ -72,8 +72,14 @@ public class DalTransactionManager {
 	public Connection getConnection(DalHints hints) throws SQLException {
 		ConnectionCache connCache = connectionCacheHolder.get();
 		
+		
+		//SimpleShardHintStrategy test
+		hints.set(DalHintEnum.shard, "0");
+		hints.set(DalHintEnum.masterOnly);
+		
 		if(connCache == null) {
 			Connection conn = null;
+			String realDbName = logicDbName;
 			try
 			{
 				if(config != null) {
@@ -86,12 +92,14 @@ public class DalTransactionManager {
 				}
 				conn.setAutoCommit(true);
 				
+				realDbName = conn.getCatalog();
+				hints.set(DalHintEnum.databaseName, realDbName);
 				Logger.log("Get connection", DalEventEnum.CONNECTION_SUCCESS, LogLevel.INFO, 
-						String.format("Connection %s database successfully", logicDbName));
+						String.format("Connection %s database successfully", realDbName));
 			}
 			catch(SQLException ex)
 			{
-				String logMsg = "Connection " + logicDbName + " database failed." +
+				String logMsg = "Connection " + realDbName + " database failed." +
 						System.lineSeparator() + System.lineSeparator() +
 						"********** Exception Info **********" + System.lineSeparator() +
 						ex.getMessage();

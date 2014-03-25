@@ -8,7 +8,7 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 
-public class ShardColModShardStrategy implements DalShardStrategy {
+public class ShardColModShardStrategy extends AbstractRWSeparationStrategy implements DalShardStrategy {
 	public static final String COLUMNS = "columns";
 	public static final String MOD = "mod";
 	

@@ -13,6 +13,7 @@ public class SpHost {
 	private String dbName;
 	private String pojoClassName;
 	private String spName;
+	private String callParameters;
 	private List<JavaParameterHost> fields = new ArrayList<JavaParameterHost>();
 	private Set<String> imports = new TreeSet<String>();
 	
@@ -52,6 +53,10 @@ public class SpHost {
 	public void setFields(List<JavaParameterHost> fields) {
 		this.fields = fields;
 	}
+	
+	public void setCallParameters(String callParameters) {
+		this.callParameters = callParameters;
+	}
 	public Set<String> getDaoImports() {
 		Set<String> imports = new TreeSet<String>();
 		
@@ -61,6 +66,22 @@ public class SpHost {
 		imports.addAll(getPojoImports());
 
 		return imports;
+	}
+	
+	public String getCallParameters()
+	{
+		return this.callParameters;
+		/*String params = "";
+		if(null != this.fields)
+		{
+			for (int i = 0; i < this.fields.size(); i++) {
+				if(0 != i)
+					params += ",?"; 
+				else
+					params = "?";
+			}
+		}
+		return params;*/
 	}
 	
 	public Set<String> getPojoImports() {
@@ -75,7 +96,6 @@ public class SpHost {
 				continue;
 			imports.add(clazz.getName());
 		}
-		
 		return imports;
 	}
 }

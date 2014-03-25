@@ -28,7 +28,6 @@ public class GenTaskBySqlBuilderResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Status addTask(@FormParam("id") int id,
-			@FormParam("server") int server,
 			@FormParam("project_id") int project_id,
 			@FormParam("db_name") String db_name,
 			@FormParam("table_name") String table_name,
@@ -48,7 +47,6 @@ public class GenTaskBySqlBuilderResource {
 				return Status.ERROR;
 			}	
 		}else{
-			task.setServer_id(server);
 			task.setProject_id(project_id);
 			task.setDb_name(db_name);
 			task.setTable_name(table_name);

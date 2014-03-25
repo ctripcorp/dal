@@ -175,8 +175,14 @@ jQuery(document).ready(function () {
 
     $(document.body).on('click', "#add_db", function(event){
         $.post("/rest/db/all_in_one", {"data": $("#all_in_one").val()}, function(data){
-            $("#manageDb").modal('hide');
-            $("#page1").modal();
+            if(data.code == "OK"){
+                $("#manageDb").modal('hide');
+                window.ajaxutil.reload_dbservers();
+                $("#page1").modal();
+            }else{
+                alert(data.info);
+            }
+            
         });
     });
 

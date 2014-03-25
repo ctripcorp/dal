@@ -1,9 +1,9 @@
-ftp_server=172.16.155.151
+ftp_server=10.3.6.187
 ftp_port=21
-ftp_user=codegen
-ftp_pass=123456
+ftp_user=dal
+ftp_pass=ftpfordal
 
 gen_code_path=/app/dal_ftp
 
-codegen_url=http://10.3.6.187:8080
+codegen_url=http://dal.dev.nt.ctripcorp.com
 cas_url=http://192.168.93.59:8085

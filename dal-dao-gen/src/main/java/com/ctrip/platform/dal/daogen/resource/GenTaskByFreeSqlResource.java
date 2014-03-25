@@ -27,7 +27,6 @@ public class GenTaskByFreeSqlResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Status addTask(@FormParam("id") int id,
-			@FormParam("server") int server,
 			@FormParam("project_id") int project_id,
 			@FormParam("db_name") String db_name,
 			@FormParam("class_name") String class_name,
@@ -46,7 +45,6 @@ public class GenTaskByFreeSqlResource {
 				return Status.ERROR;
 			}	
 		}else{
-			task.setServer_id(server);
 			task.setProject_id(project_id);
 			task.setDb_name(db_name);
 			task.setClass_name(class_name);

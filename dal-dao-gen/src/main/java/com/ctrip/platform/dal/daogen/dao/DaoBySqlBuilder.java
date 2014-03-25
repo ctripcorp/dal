@@ -25,7 +25,7 @@ public class DaoBySqlBuilder {
 	public List<GenTaskBySqlBuilder> getAllTasks() {
 
 		return this.jdbcTemplate
-				.query("select id, project_id,server_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version from task_auto",
+				.query("select id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version from task_auto",
 						new RowMapper<GenTaskBySqlBuilder>() {
 							public GenTaskBySqlBuilder mapRow(ResultSet rs,
 									int rowNum) throws SQLException {
@@ -38,7 +38,7 @@ public class DaoBySqlBuilder {
 	public List<GenTaskBySqlBuilder> getTasksByProjectId(int iD) {
 
 		return this.jdbcTemplate
-				.query("select id, project_id,server_id,  db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version from task_auto where project_id=?",
+				.query("select id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version from task_auto where project_id=?",
 						new Object[] { iD },
 						new RowMapper<GenTaskBySqlBuilder>() {
 							public GenTaskBySqlBuilder mapRow(ResultSet rs,
@@ -53,7 +53,7 @@ public class DaoBySqlBuilder {
 		final List<GenTaskBySqlBuilder> tasks = new ArrayList<GenTaskBySqlBuilder>();
 
 		this.jdbcTemplate
-				.query("select  id, project_id,server_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version from task_auto where project_id=?",
+				.query("select  id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version from task_auto where project_id=?",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -75,7 +75,7 @@ public class DaoBySqlBuilder {
 		final List<GenTaskBySqlBuilder> tasks = new ArrayList<GenTaskBySqlBuilder>();
 
 		this.jdbcTemplate
-				.query("select  id, project_id,server_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version from task_auto  where project_id=? and generated=false",
+				.query("select  id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version from task_auto  where project_id=? and generated=false",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -96,10 +96,10 @@ public class DaoBySqlBuilder {
 
 		return this.jdbcTemplate
 				.update("insert into task_auto "
-						+ "( project_id,server_id,  db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version)"
+						+ "( project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version)"
 						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,? as p13) tmp where not exists "
 						+ "(select 1 from task_auto where project_id=? and db_name=? and table_name=? and method_name=? limit 1)",
-						task.getProject_id(), task.getServer_id(),
+						task.getProject_id(),
 						task.getDb_name(), task.getTable_name(),
 						task.getClass_name(), task.getMethod_name(),
 						task.getSql_style(), task.getCrud_type(),
@@ -131,8 +131,8 @@ public class DaoBySqlBuilder {
 			return -1;
 
 		return this.jdbcTemplate
-				.update("update task_auto set  project_id=?,server_id=?,  db_name=?, table_name=?,class_name=?,method_name=?,sql_style=?,crud_type=?,fields=?,where_condition=?,sql_content=?,generated=?,version=version+1 where id=? and version = ?",
-						task.getProject_id(), task.getServer_id(),
+				.update("update task_auto set  project_id=?,db_name=?, table_name=?,class_name=?,method_name=?,sql_style=?,crud_type=?,fields=?,where_condition=?,sql_content=?,generated=?,version=version+1 where id=? and version = ?",
+						task.getProject_id(),
 						task.getDb_name(), task.getTable_name(),
 						task.getClass_name(), task.getMethod_name(),
 						task.getSql_style(), task.getCrud_type(),

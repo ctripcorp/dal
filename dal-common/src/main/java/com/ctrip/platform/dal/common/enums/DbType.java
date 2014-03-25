@@ -90,6 +90,9 @@ public enum DbType {
     	jdbcTypeToNetDbType.put(java.sql.Types.BINARY,Binary);
     	jdbcTypeToNetDbType.put(java.sql.Types.VARBINARY,Binary);
     	jdbcTypeToNetDbType.put(java.sql.Types.LONGVARBINARY,Binary);
+    	jdbcTypeToNetDbType.put(java.sql.Types.NCHAR,String);
+    	jdbcTypeToNetDbType.put(java.sql.Types.NVARCHAR,String);
+    	jdbcTypeToNetDbType.put(java.sql.Types.LONGNVARCHAR,String);
     	/*
     	jdbcTypeToNetDbType.put(java.sql.Types.NULL,Binary);
     	jdbcTypeToNetDbType.put(java.sql.Types.OTHER,Object);
@@ -101,9 +104,6 @@ public enum DbType {
     	jdbcTypeToNetDbType.put(java.sql.Types.REF,Object);
     	jdbcTypeToNetDbType.put(java.sql.Types.DATALINK,Object);
     	jdbcTypeToNetDbType.put(java.sql.Types.BOOLEAN,Object);
-    	jdbcTypeToNetDbType.put(java.sql.Types.NCHAR,Object);
-    	jdbcTypeToNetDbType.put(java.sql.Types.NVARCHAR,Object);
-    	jdbcTypeToNetDbType.put(java.sql.Types.LONGNVARCHAR,Object);
     	jdbcTypeToNetDbType.put(java.sql.Types.NCLOB,Object);
     	jdbcTypeToNetDbType.put(java.sql.Types.SQLXML,Object);
     	jdbcTypeToNetDbType.put(java.sql.Types.JAVA_OBJECT,Object);

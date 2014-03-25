@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,11 +27,11 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.springframework.jdbc.support.JdbcUtils;
 
-import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
 import com.ctrip.platform.dal.daogen.domain.Status;
@@ -41,6 +40,7 @@ import com.ctrip.platform.dal.daogen.domain.TableSpNames;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
+import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -68,6 +68,13 @@ public class DatabaseResource {
 		FileWriter writer = null;
 		Document document;
 		try {
+			
+			if(!LocalDataSourceLocator.newInstance().refresh(data)){
+				Status status = Status.ERROR;
+				status.setInfo("此数据库已存在，或者连接字符串非法，请修改后再保存");
+				return status;
+			}
+			
 			//inStream = classLoader.getResourceAsStream("Database.config");
 			URL url = classLoader.getResource("Database.config");
 			if(url == null){
@@ -82,7 +89,8 @@ public class DatabaseResource {
 			Document temp = DocumentHelper.parseText(data);
 			root.add(temp.getRootElement());
 			writer = new FileWriter(url.getPath());
-			XMLWriter output = new XMLWriter(writer);
+			OutputFormat format = OutputFormat.createPrettyPrint();
+			XMLWriter output = new XMLWriter(writer, format);
 			output.write(document);
 			//output.close();
 		} catch (DocumentException e) {
@@ -102,7 +110,7 @@ public class DatabaseResource {
 	@Path("dbs")
 	public String getDbNames() {
 		try {
-			return mapper.writeValueAsString(DataSourceLocator.newInstance()
+			return mapper.writeValueAsString(LocalDataSourceLocator.newInstance()
 					.getDBNames());
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
@@ -138,7 +146,7 @@ public class DatabaseResource {
 
 		Connection connection = null;
 		try {
-			DataSource ds = DataSourceLocator.newInstance().getDataSource(
+			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
 					dbName);
 			connection = ds.getConnection();
 			Set<String> indexedColumns = new HashSet<String>();

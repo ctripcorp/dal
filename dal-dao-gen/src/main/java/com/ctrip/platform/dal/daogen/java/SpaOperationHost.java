@@ -37,7 +37,7 @@ public class SpaOperationHost {
 		this.methodName = methodName;
 	}
 
-	public static SpaOperationHost getSpaOperation(int server, String dbName,
+	public static SpaOperationHost getSpaOperation(String dbName,
 			String tableName, List<StoredProcedure> spNames, String operation) {
 
 		SpaOperationHost host = new SpaOperationHost();

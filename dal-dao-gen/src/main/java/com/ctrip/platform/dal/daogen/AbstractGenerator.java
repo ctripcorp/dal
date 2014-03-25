@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.daogen;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +18,6 @@ import com.ctrip.platform.dal.daogen.cs.DatabaseHost;
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
-import com.ctrip.platform.dal.daogen.dao.DaoOfDbServer;
 import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
@@ -35,8 +33,6 @@ public abstract class AbstractGenerator implements Generator {
 	protected static DaoBySqlBuilder daoBySqlBuilder;
 
 	protected static DaoByFreeSql daoByFreeSql;
-
-	protected static DaoOfDbServer daoOfDbServer;
 
 	protected static DaoByTableViewSp daoByTableViewSp;
 
@@ -64,7 +60,6 @@ public abstract class AbstractGenerator implements Generator {
 
 	static {
 		daoOfProject = SpringBeanGetter.getDaoOfProject();
-		daoOfDbServer = SpringBeanGetter.getDaoOfDbServer();
 
 		daoBySqlBuilder = SpringBeanGetter.getDaoBySqlBuilder();
 		daoByFreeSql = SpringBeanGetter.getDaoByFreeSql();

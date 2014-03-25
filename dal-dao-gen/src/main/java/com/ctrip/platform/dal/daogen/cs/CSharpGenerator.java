@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.cs;
 
 import java.io.File;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,12 +15,12 @@ import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
-import com.ctrip.platform.dal.daogen.entity.DbServer;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 
@@ -57,7 +55,7 @@ public class CSharpGenerator extends AbstractGenerator {
 					context,
 					String.format("%s/Entity/%s.cs",
 							csMavenLikeDir.getAbsolutePath(),
-							host.getClassName()), "templates/Pojo.cs.tpl");
+							CommonUtils.normalizeVariable(host.getClassName())), "templates/Pojo.cs.tpl");
 		}
 
 		for (CSharpFreeSqlHost host : freeSqlHosts) {
@@ -66,13 +64,13 @@ public class CSharpGenerator extends AbstractGenerator {
 					context,
 					String.format("%s/Dao/%sDao.cs",
 							csMavenLikeDir.getAbsolutePath(),
-							host.getClassName()), "templates/FreeSqlDAO.cs.tpl");
+							CommonUtils.normalizeVariable(host.getClassName())), "templates/FreeSqlDAO.cs.tpl");
 
 			GenUtils.mergeVelocityContext(
 					context,
 					String.format("%s/Test/%sTest.cs",
 							csMavenLikeDir.getAbsolutePath(),
-							host.getClassName()),
+							CommonUtils.normalizeVariable(host.getClassName())),
 					"templates/FreeSqlTest.cs.tpl");
 		}
 
@@ -116,8 +114,8 @@ public class CSharpGenerator extends AbstractGenerator {
 
 			CSharpFreeSqlHost host = new CSharpFreeSqlHost();
 			host.setDbSetName(currentTasks.get(0).getDb_name());
-			host.setClassName(WordUtils.capitalize(currentTasks.get(0)
-					.getClass_name()));
+			host.setClassName(CommonUtils.normalizeVariable(WordUtils.capitalize(currentTasks.get(0)
+					.getClass_name())));
 			host.setNameSpace(super.namespace);
 
 			List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
@@ -145,7 +143,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();
 
 		for (GenTaskByFreeSql task : tasks) {
-			String key = String.format("%s_%s_%s", task.getServer_id(),
+			String key = String.format("%s_%s", 
 					task.getDb_name(), task.getClass_name().toLowerCase());
 			if (groupBy.containsKey(key)) {
 				groupBy.get(key).add(task);
@@ -162,7 +160,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		Map<String, GenTaskBySqlBuilder> groupBy = new HashMap<String, GenTaskBySqlBuilder>();
 
 		for (GenTaskBySqlBuilder task : builders) {
-			String key = String.format("%s_%s_%s", task.getServer_id(),
+			String key = String.format("%s_%s", 
 					task.getDb_name(), task.getTable_name());
 
 			if (!groupBy.containsKey(key)) {
@@ -176,7 +174,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		CSharpMethodHost method = new CSharpMethodHost();
 		method.setSql(task.getSql_content());
 		method.setName(task.getMethod_name());
-		method.setPojoName(WordUtils.capitalize(task.getPojo_name()));
+		method.setPojoName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getPojo_name())));
 		List<CSharpParameterHost> params = new ArrayList<CSharpParameterHost>();
 		for (String param : StringUtils.split(task.getParameters(), ";")) {
 			String[] splitedParam = StringUtils.split(param, ",");
@@ -212,7 +210,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		freeSqlHost.setColumns(pHosts);
 		freeSqlHost.setTableName("");
-		freeSqlHost.setClassName(WordUtils.capitalize(task.getPojo_name()));
+		freeSqlHost.setClassName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getPojo_name())));
 		freeSqlHost.setNameSpace(super.namespace);
 
 		return freeSqlHost;
@@ -325,20 +323,17 @@ public class CSharpGenerator extends AbstractGenerator {
 		tableHost.setDatabaseCategory(dbCategory);
 		tableHost.setDbSetName(tableViewSp.getDb_name());
 		tableHost.setTableName(table);
-		tableHost.setClassName(getPojoClassName(tableViewSp.getPrefix(),
-				tableViewSp.getSuffix(), table));
+		tableHost.setClassName(CommonUtils.normalizeVariable(getPojoClassName(tableViewSp.getPrefix(),
+				tableViewSp.getSuffix(), table)));
 		tableHost.setTable(true);
 		tableHost.setSpa(tableViewSp.isCud_by_sp());
 		// SP方式增删改
 		if (tableHost.isSpa()) {
-			tableHost.setSpaInsert(CSharpSpaOperationHost.getSpaOperation(
-					tableViewSp.getServer_id(), tableViewSp.getDb_name(),
+			tableHost.setSpaInsert(CSharpSpaOperationHost.getSpaOperation(tableViewSp.getDb_name(),
 					table, allSpNames, "i"));
-			tableHost.setSpaUpdate(CSharpSpaOperationHost.getSpaOperation(
-					tableViewSp.getServer_id(), tableViewSp.getDb_name(),
+			tableHost.setSpaUpdate(CSharpSpaOperationHost.getSpaOperation(tableViewSp.getDb_name(),
 					table, allSpNames, "u"));
-			tableHost.setSpaDelete(CSharpSpaOperationHost.getSpaOperation(
-					tableViewSp.getServer_id(), tableViewSp.getDb_name(),
+			tableHost.setSpaDelete(CSharpSpaOperationHost.getSpaOperation(tableViewSp.getDb_name(),
 					table, allSpNames, "d"));
 		}
 
@@ -426,8 +421,8 @@ public class CSharpGenerator extends AbstractGenerator {
 		tableHost.setDatabaseCategory(dbCategory);
 		tableHost.setDbSetName(tableViewSp.getDb_name());
 		tableHost.setTableName(view);
-		tableHost.setClassName(getPojoClassName(tableViewSp.getPrefix(),
-				tableViewSp.getSuffix(), view));
+		tableHost.setClassName(CommonUtils.normalizeVariable(getPojoClassName(tableViewSp.getPrefix(),
+				tableViewSp.getSuffix(), view)));
 		tableHost.setTable(false);
 		tableHost.setSpa(false);
 		tableHost.setColumns(allColumns);
@@ -441,7 +436,6 @@ public class CSharpGenerator extends AbstractGenerator {
 		tableViewSp.setCud_by_sp(false);
 		tableViewSp.setPagination(false);
 		tableViewSp.setDb_name(sqlBuilder.getDb_name());
-		tableViewSp.setServer_id(sqlBuilder.getServer_id());
 		tableViewSp.setPrefix("");
 		tableViewSp.setSuffix("Gen");
 

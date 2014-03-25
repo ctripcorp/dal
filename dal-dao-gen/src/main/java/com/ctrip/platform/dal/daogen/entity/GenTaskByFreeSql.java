@@ -10,8 +10,6 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	
 	private int project_id;
 	
-	private int server_id;
-	
 	private String db_name;
 	
 	private String class_name;
@@ -52,14 +50,6 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
 	public void setProject_id(int project_id) {
 		this.project_id = project_id;
-	}
-
-	public int getServer_id() {
-		return server_id;
-	}
-
-	public void setServer_id(int server_id) {
-		this.server_id = server_id;
 	}
 
 	public String getDb_name() {
@@ -130,16 +120,15 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		task.setServer_id(rs.getInt(3));
-		task.setDb_name(rs.getString(4));
-		task.setClass_name(rs.getString(5));
-		task.setPojo_name(rs.getString(6));
-		task.setMethod_name(rs.getString(7));
-		task.setCrud_type(rs.getString(8));
-		task.setSql_content(rs.getString(9));
-		task.setParameters(rs.getString(10));
-		task.setGenerated(rs.getBoolean(11));
-		task.setVersion(rs.getInt(12));
+		task.setDb_name(rs.getString(3));
+		task.setClass_name(rs.getString(4));
+		task.setPojo_name(rs.getString(5));
+		task.setMethod_name(rs.getString(6));
+		task.setCrud_type(rs.getString(7));
+		task.setSql_content(rs.getString(8));
+		task.setParameters(rs.getString(9));
+		task.setGenerated(rs.getBoolean(10));
+		task.setVersion(rs.getInt(11));
 		return task;
 	}
 

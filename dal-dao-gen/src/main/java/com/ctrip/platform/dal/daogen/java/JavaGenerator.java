@@ -118,12 +118,9 @@ public class JavaGenerator extends AbstractGenerator {
 //				tableHost.setTable(true);
 				// SP方式增删改
 				if (tableHost.isSpa()) {
-					tableHost.setSpaInsert(SpaOperationHost.getSpaOperation(
-							tableViewSp.getServer_id(), dbName, table, allSpNames,"i"));
-					tableHost.setSpaUpdate(SpaOperationHost.getSpaOperation(
-							tableViewSp.getServer_id(), dbName, table, allSpNames,"u"));
-					tableHost.setSpaDelete(SpaOperationHost.getSpaOperation(
-							tableViewSp.getServer_id(), dbName, table, allSpNames,"d"));
+					tableHost.setSpaInsert(SpaOperationHost.getSpaOperation(dbName, table, allSpNames,"i"));
+					tableHost.setSpaUpdate(SpaOperationHost.getSpaOperation(dbName, table, allSpNames,"u"));
+					tableHost.setSpaDelete(SpaOperationHost.getSpaOperation(dbName, table, allSpNames,"d"));
 				}
 				
 				tableHosts.add(tableHost);
@@ -297,7 +294,7 @@ public class JavaGenerator extends AbstractGenerator {
 		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();
 
 		for (GenTaskByFreeSql task : tasks) {
-			String key = String.format("%s_%s_%s", task.getServer_id(),
+			String key = String.format("%s_%s", 
 					task.getDb_name(), task.getClass_name());
 			if (groupBy.containsKey(key)) {
 				groupBy.get(key).add(task);

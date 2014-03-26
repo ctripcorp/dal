@@ -4,7 +4,6 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
-import java.sql.Timestamp;
 import com.ctrip.platform.dal.dao.DalPojo;
 
 public class ${host.getPojoClassName()} implements DalPojo {

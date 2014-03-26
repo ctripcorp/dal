@@ -4,22 +4,27 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
-#if($host.isSp())
-import com.ctrip.platform.dal.common.enums.ParameterDirection;
-#end
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
-#if($host.isSp())
 import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
+import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
-#end
 
 public class ${host.getPojoClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbName()}";
+	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getTableName()}";
+	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getTableName()}";
+#if($host.getDatabaseCategory().name() == "MySql")
+	private static final String PAGE_MYSQL_PATTERN = "SELECT * FROM ${host.getTableName()} WHERE LIMIT %s, %s";
+#else
+	private static final String PAGE_SQL_PATTERN = "WITH CTE AS (select *, row_number() over(order by ${host.getOverColumns()} desc ) as rownum" 
+			+" from ${host.getTableName()} (nolock)) select * from CTE where rownum between %s and %s";
+#end
 #if($host.isSp())
 
 #if($host.getSpInsert().isExist())
@@ -31,20 +36,13 @@ public class ${host.getPojoClassName()}Dao {
 #if($host.getSpUpdate().isExist())
 	private static final String UPDATE_SP_NAME = "${host.getSpUpdate().getMethodName()}";
 #end
-
-	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getTableName()} with (nolock)";
-	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getTableName()}";
-	private static final String PAGE_MYSQL_PATTERN = "SELECT * FROM ${host.getTableName()} WHERE LIMIT %s, %s";
-	private static final String PAGE_SQL_PATTERN = "WITH CTE AS (select *, row_number() over(order by ${host.getOverColumns()} desc ) as rownum" 
-			+" from ${host.getTableName()} (nolock)) select * from CTE where rownum between %s and %s";
-
 	private static final String RET_CODE = "retcode";
 	private static final String UPDATE_COUNT = "update_count";
+#end
+	
+	private DalParser<${host.getPojoClassName()}> parser = new ${host.getPojoClassName()}Parser();
 	private DalScalarExtractor extractor = new DalScalarExtractor();
 	private DalRowMapperExtractor<${host.getPojoClassName()}> rowextractor = null;
-
-#end
-	private DalParser<${host.getPojoClassName()}> parser = new ${host.getPojoClassName()}Parser();
 	private DalTableDao<${host.getPojoClassName()}> client;
 	private DalClient baseClient;
 
@@ -84,13 +82,12 @@ public class ${host.getPojoClassName()}Dao {
 	{
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		int result = (int)this.client.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
+		int result = (int)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
 		return result;
 	}
 	
-	public List<City> queryByPage(City pk, int pageSize, int pageNo)  throws SQLException
-			throws SQLException {
-		if(pageNo < 1 || pagesize < 1) 
+	public List<${host.getPojoClassName()}> queryByPage(${host.getPojoClassName()} pk, int pageSize, int pageNo)  throws SQLException {
+		if(pageNo < 1 || pageSize < 1) 
 			throw new SQLException("Illigal pagesize or pageNo, pls check");
 		
         StatementParameters parameters = new StatementParameters();
@@ -98,13 +95,22 @@ public class ${host.getPojoClassName()}Dao {
 		
 		String sql = "";
 #if($host.getDatabaseCategory().name() == "MySql" )
-		sql = String.format(PAGE_MYSQL_PATTERN, (pageNo - 1) * pagesize, pagesize);
+		sql = String.format(PAGE_MYSQL_PATTERN, (pageNo - 1) * pageSize, pageSize);
 #else
-		int fromRownum = (pageNo - 1) * pagesize + 1;
-        int endRownum = pagesize * pageNo;
+		int fromRownum = (pageNo - 1) * pageSize + 1;
+        int endRownum = pageSize * pageNo;
 		sql = String.format(PAGE_SQL_PATTERN, fromRownum, endRownum);
 #end
-		return this.client.query(sql, parameters, hints, rowextractor);
+		return this.baseClient.query(sql, parameters, hints, rowextractor);
+	}
+	
+	public List<${host.getPojoClassName()}> getAll() throws SQLException
+	{
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+		List<${host.getPojoClassName()}> result = null;
+		result = this.baseClient.query(ALL_SQL_PATTERN, parameters, hints, rowextractor);
+		return result;
 	}
 
 #if($host.getSpInsert().isExist())

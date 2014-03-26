@@ -190,8 +190,7 @@ public class FileResource {
 			}
 		}
 
-		return String.format("ftp://dal@%s:%d/%s", ftp_server, ftp_port,
-				zipFileName);
+		return String.format("%s/files/%s", Configuration.get("codegen_url"), zipFileName);
 	}
 
 	private void zipFile(File fileToZip, String zipFileName) {

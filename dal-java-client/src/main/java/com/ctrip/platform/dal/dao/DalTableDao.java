@@ -25,8 +25,8 @@ public final class DalTableDao<T> {
 	private static final String COLUMN_SEPARATOR = ", ";
 	private static final String PLACE_HOLDER = "?";
 	private static final String TMPL_SET_VALUE = "%s=?";
-	private static final String AND = "AND";
-	private static final String OR = "OR";
+	private static final String AND = " AND ";
+	private static final String OR = " OR ";
 	private static final String TMPL_CALL = "call %s(%s)";
 	
 	private DalClient client;
@@ -87,7 +87,7 @@ public final class DalTableDao<T> {
 	public T queryFirst(String whereClause, StatementParameters parameters, DalHints hints)
 			throws SQLException {
 		String selectSql = String.format(TMPL_SQL_FIND_BY, parser.getTableName(), whereClause);
-		return queryDao.queryFisrt(selectSql, parameters, hints, parser);
+		return queryDao.queryFirst(selectSql, parameters, hints, parser);
 	}
 
 	public List<T> queryTop(String whereClause, StatementParameters parameters, DalHints hints, int count)
@@ -252,7 +252,7 @@ public final class DalTableDao<T> {
 	}
 	
 	private String buildWhereClause(Map<String, ?> fields) {
-		return String.format(combine(TMPL_SET_VALUE, fields.size(), AND), fields.keySet());
+		return String.format(combine(TMPL_SET_VALUE, fields.size(), AND), fields.keySet().toArray());
 	}
 
 	private String combine(String[] values, String separator) {

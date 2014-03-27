@@ -14,8 +14,8 @@ public class ${host.getPojoClassName()}DaoTest {
 			DalClientFactory.initClientFactory("${host.getDbName()}");
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 			
-			System.out.printlin(dao.Count());
-			List<${host.getPojoClassName()}> ls = dao.GetAll();
+			System.out.println(dao.Count());
+			List<${host.getPojoClassName()}> ls = dao.getAll();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 

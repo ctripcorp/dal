@@ -2,6 +2,8 @@ package com.ctrip.platform.dal.dao.logging;
 
 import java.net.InetAddress;
 import java.security.Key;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 
@@ -12,6 +14,7 @@ public class CommonUtil {
     private static final String APPID_COMMENT;
     public static String MACHINE;
     private static String key = "dalctripcn";
+    private static Pattern hostRegxPattern = null;
 
     static {
         StringBuilder sb = new StringBuilder();
@@ -29,6 +32,9 @@ public class CommonUtil {
         }
         sb.append("*/\n");
         APPID_COMMENT = sb.toString();
+        
+        String regEx="(?<=://)[\\w\\-_]+(\\.[\\w\\-_]+)+(?=[,|:|;])";
+        hostRegxPattern = Pattern.compile(regEx);
     }
     
     public static String getHashCode4SQLString(String sql)
@@ -139,6 +145,19 @@ public class CommonUtil {
     public static String null2NA(String str)
     {
     	return null != str ? str : "NA";
+    }
+    
+    
+    public static String parseHostFromDBURL(String url)
+    {
+    	Matcher m = hostRegxPattern.matcher(url);
+    	String host = "NA";
+    	while(m.find())
+    	{
+    		host = m.group();
+    		break;
+    	}
+    	return host;
     }
     
     public static void main(String[] args) {

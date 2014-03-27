@@ -210,5 +210,23 @@ public class JavaTableHost {
 		}
 		return imports;
 	}
+	
+	/**
+	 * Get the CTE order by columns to generate row-number
+	 * @return
+	 */
+	public String getOverColumns()
+	{
+		List<String> tokens = new ArrayList<String>();
+		for(JavaParameterHost p : this.fields)
+		{
+			if(p.isPrimary())
+				tokens.add(p.getName());
+		}
+		if(tokens.size() > 0)
+			return StringUtils.join(tokens,",");
+		else
+			return this.fields.get(0).getName();
+	}
 
 }

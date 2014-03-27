@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.java;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -176,18 +177,26 @@ public class JavaGenerator extends AbstractGenerator {
 				className = getPojoClassName(prefix, suffix, className);
 				
 				vhost.setPackageName(super.namespace);
+				vhost.setDatabaseCategory(dbCategory);
 				vhost.setDbName(dbName);
 				vhost.setPojoClassName(className);
 				vhost.setViewName(viewName);
-					
+				
+				List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(dbName, viewName);
 				List<AbstractParameterHost> params = DbUtils
 						.getAllColumnNames(tableViewSp.getDb_name(), viewName,
 								CurrentLanguage.Java);
 				List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 				for(AbstractParameterHost p : params)
 				{
-					realParams.add((JavaParameterHost)p);
+					JavaParameterHost jHost = (JavaParameterHost)p;
+					if(primaryKeyNames.contains(jHost.getName()))
+					{
+						jHost.setPrimary(true);
+					}
+					realParams.add(jHost);
 				}
+				
 				vhost.setFields(realParams);;
 				viewHosts.add(vhost);
 			}

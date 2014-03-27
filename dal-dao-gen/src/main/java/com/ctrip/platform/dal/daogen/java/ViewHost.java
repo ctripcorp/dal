@@ -5,12 +5,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+
 public class ViewHost {
 	private String packageName;
 	private String dbName;
 	private String pojoClassName;
 	private String ViewName;
 	private List<JavaParameterHost> fields = new ArrayList<JavaParameterHost>();
+	private DatabaseCategory databaseCategory;
 	private Set<String> imports = new TreeSet<String>();
 	
 	public String getPackageName() {
@@ -48,5 +53,40 @@ public class ViewHost {
 	}
 	public void setImports(Set<String> imports) {
 		this.imports = imports;
+	}
+	
+	public DatabaseCategory getDatabaseCategory() {
+		return databaseCategory;
+	}
+	public void setDatabaseCategory(DatabaseCategory databaseCategory) {
+		this.databaseCategory = databaseCategory;
+	}
+	
+	/**
+	 * Get the CTE order by columns to generate row-number
+	 * @return
+	 */
+	public String getOverColumns()
+	{
+		List<String> tokens = new ArrayList<String>();
+		for(JavaParameterHost p : this.fields)
+		{
+			if(p.isPrimary())
+				tokens.add(p.getName());
+		}
+		if(tokens.size() > 0)
+			return StringUtils.join(tokens,",");
+		else
+			return this.fields.get(0).getName();
+	}
+	
+	public String getColumns()
+	{
+		List<String> tokens = new ArrayList<String>();
+		for(JavaParameterHost p : this.fields)
+		{
+			tokens.add(p.getName());
+		}
+		return StringUtils.join(tokens,",");
 	}
 }

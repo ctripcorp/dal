@@ -10,7 +10,6 @@ public class ${host.getPojoClassName()} implements DalPojo {
 #foreach( $field in ${host.getFields()} )
 	private ${field.getClassDisplayName()} ${field.getUncapitalizedName()};
 #end
-
 #foreach( $field in ${host.getFields()} )
 	public ${field.getClassDisplayName()} get${field.getCapitalizedName()}() {
 		return ${field.getUncapitalizedName()};

@@ -48,7 +48,7 @@ public final class DalQueryDao {
 			throw new SQLException(String.format("The expected count %d does not equal to actual count %d", expected, actual));
 	}
 
-	public <T> T queryFisrt(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
+	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
 		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, 1)).get(0);
 	}

@@ -73,20 +73,11 @@ public enum DalHintEnum {
 	/* for logging */
 	callingUrl,
 	
-	/* for logging */
-	userName,
-	
-	/* for logging*/
-	serverAddress,
-	
-	/* for logging */
-	databaseName,
-	
 	/* For insert, delete, update multiple pojos */ 
 	usingBatch,
 	
 	/* For insert, delete, update multiple pojos */ 
-	stopOnError,
+	continueOnError,
 	
 	/*  Connection.TRANSACTION_READ_UNCOMMITTED, Connection.TRANSACTION_READ_COMMITTED, Connection.TRANSACTION_REPEATABLE_READ, Connection.TRANSACTION_SERIALIZABLE, or Connection.TRANSACTION_NONE.*/
 	isolationLevel,

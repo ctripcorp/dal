@@ -110,7 +110,7 @@ public class DalQueryDaoTest {
 	public void testRange() {
 		try {
 			DalQueryDao dao = new DalQueryDao("HtlProductdb");
-			Integer id = dao.queryFisrt(sqlList, parameters, hints, new DalRowMapper<Integer>() {
+			Integer id = dao.queryFirst(sqlList, parameters, hints, new DalRowMapper<Integer>() {
 				@Override
 				public Integer map(ResultSet rs, int rowNum) throws SQLException {
 					return rs.getInt("HotelID");

@@ -86,7 +86,7 @@ public enum DalHintEnum {
 	usingBatch,
 	
 	/* For insert, delete, update multiple pojos */ 
-	stopOnError,
+	continueOnError,
 	
 	/*  Connection.TRANSACTION_READ_UNCOMMITTED, Connection.TRANSACTION_READ_COMMITTED, Connection.TRANSACTION_REPEATABLE_READ, Connection.TRANSACTION_SERIALIZABLE, or Connection.TRANSACTION_NONE.*/
 	isolationLevel,

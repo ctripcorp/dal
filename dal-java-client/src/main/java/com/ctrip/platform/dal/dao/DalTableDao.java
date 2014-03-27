@@ -103,17 +103,17 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * TODO Support auto incremental id. 
 	 * TODO add hints to set batch or non batch
 	 * The generated id if any will be set into the pojos
 	 * @param pojo
 	 */
-	public void insert(DalHints hints, T...daoPojos) throws SQLException {
+	public int insert(DalHints hints, T...daoPojos) throws SQLException {
 		// Try to insert one by one
-		insert(hints, null, daoPojos);
+		return insert(hints, null, daoPojos);
 	}
 
-	public void insert(DalHints hints, KeyHolder keyHolder, T...daoPojos) throws SQLException {
+	public int insert(DalHints hints, KeyHolder keyHolder, T...daoPojos) throws SQLException {
+		int count = 0;
 		if(hints.is(DalHintEnum.usingBatch)){
 			// TODO should revise for batch
 		}
@@ -127,49 +127,65 @@ public final class DalTableDao<T> {
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
 			
-			if(keyHolder == null)
-				client.update(insertSql, parameters, hints);
-			else
-				client.update(insertSql, parameters, hints, keyHolder);
+			try {
+				if(keyHolder == null)
+					count += client.update(insertSql, parameters, hints);
+				else
+					count += client.update(insertSql, parameters, hints, keyHolder);
+			} catch (SQLException e) {
+				if(hints.isStopOnError())
+					throw e;
+			}
 		}
+		return count;
 	}
 	
-	public void delete(DalHints hints, T...daoPojos) throws SQLException {
+	public int delete(DalHints hints, T...daoPojos) throws SQLException {
+		int count = 0;
 		for(T pojo: daoPojos) {
 			String deleteSql = buildDeleteSql(pojo);
 
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, parser.getPrimaryKeys(pojo));
 			
-			client.update(deleteSql, parameters, hints);
+			try {
+				count += client.update(deleteSql, parameters, hints);
+			} catch (SQLException e) {
+				if(hints.isStopOnError())
+					throw e;
+			}
 		}
+		return count;
 	}
 	
-	public void update(DalHints hints, T...daoPojos) throws SQLException {
+	public int update(DalHints hints, T...daoPojos) throws SQLException {
+		int count = 0;
 		for(T pojo: daoPojos) {
 			Map<String, ?> fields = parser.getFields(pojo);
 			Map<String, ?> pk = parser.getPrimaryKeys(pojo);
 			
 			String updateSql = buildUpdateSql(fields);
 			
-			// Remove primary keys from set values
-			for(String key: pk.keySet())
-				fields.remove(key);
-
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
 			addParameters(parameters, pk);
 			
-			client.update(updateSql, parameters, hints);
+			try {
+				count += client.update(updateSql, parameters, hints);
+			} catch (SQLException e) {
+				if(hints.isStopOnError())
+					throw e;
+			}
 		}
+		return count;
 	}
 	
-	public void delete(String whereClause, StatementParameters parameters, DalHints hints) throws SQLException {
-		client.update(String.format(TMPL_SQL_DELETE, parser.getTableName(), whereClause), parameters, hints);
+	public int delete(String whereClause, StatementParameters parameters, DalHints hints) throws SQLException {
+		return client.update(String.format(TMPL_SQL_DELETE, parser.getTableName(), whereClause), parameters, hints);
 	}
 	
-	public void update(String sql, StatementParameters parameters, DalHints hints) throws SQLException {
-		client.update(sql, parameters, hints);
+	public int update(String sql, StatementParameters parameters, DalHints hints) throws SQLException {
+		return client.update(sql, parameters, hints);
 	}
 	
 	public void addParameters(StatementParameters parameters, Map<String, ?> entries) {
@@ -236,17 +252,13 @@ public final class DalTableDao<T> {
 	}
 
 	private String buildUpdateSql(Map<String, ?> fields) {
-		// Build SET
-		List<String> nonNullColumns = new LinkedList<String>();
-		
+		// Remove null value or primary key
 		for(String column: parser.getColumnNames()) {
-			// For null value or primary key, we just keep it the same
 			if(fields.get(column) == null || pkColumns.contains(column))
-				continue;
-			nonNullColumns.add(column);
+				fields.remove(column);
 		}
 		
-		String columns = String.format(combine(TMPL_SET_VALUE, nonNullColumns.size(), COLUMN_SEPARATOR), nonNullColumns);
+		String columns = String.format(combine(TMPL_SET_VALUE, fields.size(), COLUMN_SEPARATOR), fields.keySet().toArray());
 		
 		return String.format(TMPL_SQL_UPDATE, parser.getTableName(), columns, pkSql);
 	}

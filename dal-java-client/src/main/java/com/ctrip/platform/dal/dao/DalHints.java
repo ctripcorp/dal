@@ -75,8 +75,13 @@ public class DalHints {
 		return this;
 	}
 	
-	public DalHints stopOnError() {
-		set(DalHintEnum.stopOnError);
+	public DalHints continueOnError() {
+		set(DalHintEnum.continueOnError);
 		return this;
 	}
+	
+	public boolean isStopOnError() {
+		return !is(DalHintEnum.continueOnError);
+	}
+
 }

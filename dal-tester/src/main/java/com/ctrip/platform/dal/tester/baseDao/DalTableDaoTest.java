@@ -4,6 +4,7 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.ctrip.freeway.config.LogConfig;
@@ -30,7 +31,7 @@ public class DalTableDaoTest {
 	public void testQueryByPkNumber() {
 		try {
 			DalTableDao<Person> dao = new DalTableDao<Person>(personParser);
-			Person p = dao.queryByPk(2922, hints);
+			Person p = dao.queryByPk(1000, hints);
 			System.out.println(p.getName());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -41,7 +42,7 @@ public class DalTableDaoTest {
 		try {
 			DalTableDao<Person> dao = new DalTableDao<Person>(personParser);
 			Person p = new Person();
-			p.setID(2922);
+			p.setID(1000);
 			p = dao.queryByPk(p, hints);
 			System.out.println(p.getName());
 		} catch (Exception e) {
@@ -76,7 +77,6 @@ public class DalTableDaoTest {
 			e.printStackTrace();
 		}
 	}
-	
 
 	public void testRange() {
 		try {
@@ -91,6 +91,87 @@ public class DalTableDaoTest {
 			System.out.println(result.size());
 			
 			result = dao.queryFrom("ID > ?", parameters, hints, 3, 5);
+			System.out.println(result.size());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void testInsert() {
+		try {
+			DalTableDao<Person> dao = new DalTableDao<Person>(personParser);
+			
+			Person p = new Person();
+			p.setName("insert test 1");
+			dao.insert(hints, p);
+			p.setName("insert test 2");
+			dao.insert(hints, p);
+			p.setName("insert test 3");
+			dao.insert(hints, p);
+			
+			Person[] pList = new Person[3];
+			p = new Person();
+			p.setName("insert test 4");
+			pList[0] = p;
+			p = new Person();
+			p.setName("insert test 5");
+			pList[1] = p;
+			p = new Person();
+			p.setName("insert test 6");
+			pList[2] = p;
+			
+			dao.insert(hints, pList);			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void testUpdate() {
+		try {
+			DalTableDao<Person> dao = new DalTableDao<Person>(personParser);
+			StatementParameters parameters = new StatementParameters();
+			parameters.set(1, Types.VARCHAR, "insert%");
+			
+			Person p = dao.queryFirst("Name Like ?", parameters, hints);
+			System.out.println(p.getID());
+			p.setAddress("Never mind it");
+			dao.update(hints, p);
+			p = dao.queryByPk(p.getID(), hints);
+			System.out.println(p.getAddress());
+			
+			parameters = new StatementParameters();
+			parameters.set(1, Types.VARCHAR, "update test");
+			parameters.set(2, Types.INTEGER, p.getID());
+			dao.update("update Person set Address = ? where ID >= ?", parameters, hints);
+			p = dao.queryByPk(p.getID(), hints);
+			System.out.println(p.getAddress());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void testDelete() {
+		try {
+			DalTableDao<Person> dao = new DalTableDao<Person>(personParser);
+			StatementParameters parameters = new StatementParameters();
+			parameters.set(1, Types.VARCHAR, "update test");
+			
+			Person p = dao.queryFirst("Address Like ?", parameters, hints);
+			System.out.println(p.getID());
+			dao.delete(hints, p);
+			try{
+				p = dao.queryByPk(p.getID(), hints);
+				System.out.println(p.getAddress());
+			} catch (Exception e) {
+				System.out.println("No longer exists");
+			}
+			
+			parameters = new StatementParameters();
+			parameters.set(1, Types.VARCHAR, "insert");
+			dao.delete("Name LIKE ?", parameters, hints);
+			List<Person> result = dao.query("Name LIKE ?", parameters, hints);
 			System.out.println(result.size());
 			
 		} catch (Exception e) {
@@ -113,12 +194,14 @@ public class DalTableDaoTest {
 		
 		DalTableDaoTest test = new DalTableDaoTest();
 		
-		
-		test.testQueryByPkNumber();
-		test.testQueryByPk();
-		test.testQueryLike();
-		test.testQuery();
-		test.testRange();
+//		test.testQueryByPkNumber();
+//		test.testQueryByPk();
+//		test.testQueryLike();
+//		test.testQuery();
+//		test.testRange();
+//		test.testInsert();
+		test.testUpdate();
+		test.testDelete();
 		try {
 			Thread.sleep(30 * 1000);
 		} catch (InterruptedException e) {

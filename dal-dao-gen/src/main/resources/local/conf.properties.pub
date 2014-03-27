@@ -1,8 +1,3 @@
-ftp_server=10.3.6.187
-ftp_port=21
-ftp_user=dal
-ftp_pass=ftpfordal
-
 gen_code_path=/app/dal_ftp
 
 codegen_url=http://dal.dev.nt.ctripcorp.com

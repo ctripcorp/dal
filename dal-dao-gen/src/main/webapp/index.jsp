@@ -59,7 +59,7 @@
                   <a href="javascript:;" onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">文档</a>
                </li>
                <li>
-                  <a href="mailto:gawu@ctrip.com?cc=jhhe@ctrip.com;wcyuan@ctrip.com">咨询</a>
+                  <a href="mailto:R%26Dsysdev_dal@Ctrip.com">咨询</a>
                </li>
                <li class="dropdown user">
                   <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">

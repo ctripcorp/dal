@@ -40,6 +40,7 @@ import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.domain.TableSpNames;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
+import com.ctrip.platform.dal.daogen.utils.IgnoreCaseCampare;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
 import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -233,6 +234,10 @@ public class DatabaseResource {
 			views = DbUtils.getAllViewNames(dbName);
 			tables = DbUtils.getAllTableNames(dbName);
 			sps = DbUtils.getAllSpNames(dbName);
+			
+			java.util.Collections.sort(views, new IgnoreCaseCampare());
+			java.util.Collections.sort(tables, new IgnoreCaseCampare());
+			java.util.Collections.sort(sps);
 
 			tableSpNames.setSps(sps);
 			tableSpNames.setViews(views);

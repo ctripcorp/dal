@@ -44,13 +44,13 @@ public class StoredProcedure implements Comparable<StoredProcedure> {
 	@Override
 	public int compareTo(StoredProcedure o) {
 		
-		int schemaCompare = this.getSchema().compareTo(o.getSchema());
+		int schemaCompare = this.getSchema().toLowerCase().compareTo(o.getSchema().toLowerCase());
 		
 		if(0 != schemaCompare){
 			return schemaCompare;
 		}
 		
-		return this.getName().compareTo(o.getName());
+		return this.getName().toLowerCase().compareTo(o.getName().toLowerCase());
 	}
 
 }

@@ -20,9 +20,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
 import com.ctrip.platform.dal.daogen.domain.W2uiElement;
@@ -151,45 +148,6 @@ public class FileResource {
 			new ZipFolder(f.getAbsolutePath()).zipIt(zipFileName);
 		}
 
-		FTPClient client = new FTPClient();
-		FileInputStream fis = null;
-
-		String ftp_server = Configuration.get("ftp_server");
-		int ftp_port = Configuration.getInt("ftp_port");
-
-		try {
-			String ftp_user = Configuration.get("ftp_user");
-			String ftp_pass = Configuration.get("ftp_pass");
-			client.connect(ftp_server, ftp_port);
-			if (ftp_user != null && !ftp_user.isEmpty()) {
-				client.login(ftp_user, ftp_pass);
-			}
-
-			client.setFileType(FTP.BINARY_FILE_TYPE);
-
-			//
-			// Create an InputStream of the file to be uploaded
-			//
-			fis = new FileInputStream(new File(generatePath, zipFileName));
-
-			//
-			// Store file to server
-			//
-			client.storeFile(zipFileName, fis);
-			client.logout();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (fis != null) {
-					fis.close();
-				}
-				client.disconnect();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
 		return String.format("%s/files/%s", Configuration.get("codegen_url"), zipFileName);
 	}
 
@@ -219,44 +177,6 @@ public class FileResource {
 			JavaIOUtils.closeInputStream(in);
 			JavaIOUtils.closeOutputStream(zos);
 		}
-	}
-
-	public static void main(String[] args) {
-		FTPClient client = new FTPClient();
-		FileInputStream fis = null;
-
-		try {
-			client.connect("172.16.155.151", 21);
-			System.out.println(client.login("dal", ""));
-
-			System.out
-					.println(client.setFileTransferMode(FTP.BINARY_FILE_TYPE));
-			System.out.println(client.setFileType(FTP.BINARY_FILE_TYPE));
-
-			//
-			// Create an InputStream of the file to be uploaded
-			//
-			fis = new FileInputStream(new File(generatePath, "1.zip"));
-
-			//
-			// Store file to server
-			//
-
-			System.out.println(client.storeFile("1.zip", fis));
-			System.out.println(client.logout());
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (fis != null) {
-					fis.close();
-				}
-				client.disconnect();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
 	}
 
 }

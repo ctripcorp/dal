@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.client;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,6 +29,7 @@ import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalStatementCreator;
 import com.ctrip.platform.dal.dao.helper.DalTransactionManager;
+import com.ctrip.platform.dal.dao.logging.CommonUtil;
 import com.ctrip.platform.dal.dao.logging.DalEventEnum;
 import com.ctrip.platform.dal.dao.logging.LogEntry;
 import com.ctrip.platform.dal.dao.logging.Logger;
@@ -392,12 +394,24 @@ public class DalDirectClient implements DalClient {
 		
 		private void populateLogTag(DalHints hints, long duration, boolean transactional)
 		{
-			this.entry.setServerAddress(hints.getString(DalHintEnum.serverAddress));
-			this.entry.setDatabaseName(hints.getString(DalHintEnum.databaseName));
 			this.entry.setDuration(duration);
 			this.entry.setCommandType(this.operation);
 			this.entry.setTransactional(transactional);
-			this.entry.setUserName(hints.getString(DalHintEnum.userName));
+			if(null != this.conn)
+			{
+				try {
+					this.entry.setDatabaseName(this.conn.getCatalog());
+					DatabaseMetaData meta = this.conn.getMetaData();
+					if(null != meta)
+					{
+						this.entry.setUserName(meta.getUserName());
+						this.entry.setServerAddress(CommonUtil.parseHostFromDBURL(meta.getURL()));
+					}
+				} catch (SQLException e) {
+					this.entry.setMessage(e.getMessage());
+					e.printStackTrace();
+				}
+			}
 		}
 		
 	}

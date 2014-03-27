@@ -93,7 +93,6 @@ public class DalTransactionManager {
 				conn.setAutoCommit(true);
 				
 				realDbName = conn.getCatalog();
-				hints.set(DalHintEnum.databaseName, realDbName);
 				Logger.log("Get connection", DalEventEnum.CONNECTION_SUCCESS, LogLevel.INFO, 
 						String.format("Connection %s database successfully", realDbName));
 			}

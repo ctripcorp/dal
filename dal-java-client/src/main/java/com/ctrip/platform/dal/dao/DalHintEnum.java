@@ -73,15 +73,6 @@ public enum DalHintEnum {
 	/* for logging */
 	callingUrl,
 	
-	/* for logging */
-	userName,
-	
-	/* for logging*/
-	serverAddress,
-	
-	/* for logging */
-	databaseName,
-	
 	/* For insert, delete, update multiple pojos */ 
 	usingBatch,
 	

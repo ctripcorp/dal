@@ -90,12 +90,13 @@ public class JavaGenerator extends AbstractGenerator {
 					viewHosts.add(vhost);
 			}
 			
-			if (sqlBuilders.size() > 0) {
-				for (GenTaskBySqlBuilder _table : sqlBuilders) {
-					JavaTableHost extraTableHost = buildExtraSqlBuilderHost(_table);
-					if (null != extraTableHost) {
-						tableHosts.add(extraTableHost);
-					}
+		}
+		
+		if (sqlBuilders.size() > 0) {
+			for (GenTaskBySqlBuilder _table : sqlBuilders) {
+				JavaTableHost extraTableHost = buildExtraSqlBuilderHost(_table);
+				if (null != extraTableHost) {
+					tableHosts.add(extraTableHost);
 				}
 			}
 		}

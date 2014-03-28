@@ -16,6 +16,13 @@ public class DalClientFactory {
 	private static AtomicReference<DruidDataSourceWrapper> connPool = new AtomicReference<DruidDataSourceWrapper>();
 	private static AtomicReference<DalConfigure> configureRef = new AtomicReference<DalConfigure>();
 
+	private static final String DAL_CONFIG = "Dal.config";
+	private static final String DEFAULT_SNAPSHOT_PATH = "e:/snapshot.json";
+	
+	/**
+	 * Load from classpath
+	 * @throws Exception
+	 */
 	public static void initClientFactory() throws Exception {
 		if(configureRef.get() != null)
 			return;
@@ -23,13 +30,38 @@ public class DalClientFactory {
 		synchronized(DalClientFactory.class) {
 			if(configureRef.get() != null)
 				return;
-			configureRef.set(DalConfigureFactory.load("e:/Dal.config"));
+			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			if (classLoader == null) {
+				classLoader = DalClientFactory.class.getClassLoader();
+			}
+
+			configureRef.set(DalConfigureFactory.load(classLoader.getResource(DAL_CONFIG)));
 		}
 	}
 	
+	/**
+	 * @param path Dal.Config file path
+	 * @throws Exception
+	 */
+	public static void initClientFactory(String path) throws Exception {
+		if(configureRef.get() != null)
+			return;
+		
+		synchronized(DalClientFactory.class) {
+			if(configureRef.get() != null)
+				return;
+			configureRef.set(DalConfigureFactory.load(path));
+		}
+	}
+	
+	/**
+	 * Only for local test
+	 * @param logicDbNames
+	 * @throws Exception
+	 */
 	public static void initClientFactory(String...logicDbNames) throws Exception {
 		Configuration.addResource("conf.properties");
-		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
+		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File(DEFAULT_SNAPSHOT_PATH)));
 		try {
 			DalClientFactory.initDirectClientFactory(reader, logicDbNames);
 		} catch (Exception e) {

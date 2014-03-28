@@ -136,6 +136,8 @@ public class Consts {
 		jdbcSqlTypeDisplay.put(java.sql.Types.INTEGER, "Types.INTEGER");
 		jdbcSqlTypeDisplay.put(java.sql.Types.BIGINT, "Types.BIGINT");
 		
+		jdbcSqlTypeDisplay.put(java.sql.Types.NVARCHAR, "Types.NVARCHAR");
+		
 		jdbcSqlTypeDisplay.put(java.sql.Types.FLOAT, "Types.FLOAT");
 		jdbcSqlTypeDisplay.put(java.sql.Types.REAL, "Types.REAL");
 		jdbcSqlTypeDisplay.put(java.sql.Types.DOUBLE, "Types.DOUBLE");

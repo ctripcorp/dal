@@ -65,7 +65,7 @@ public class ${host.getPojoClassName()}Dao {
 	{
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		long result = (long)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
+		long result = (Long)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
 		return result;
 	}
 	

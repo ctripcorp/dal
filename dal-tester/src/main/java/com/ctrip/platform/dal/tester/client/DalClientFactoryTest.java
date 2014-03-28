@@ -15,7 +15,7 @@ import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 public class DalClientFactoryTest {
 	private void testNoStrategy() {
 		try {
-			DalClientFactory.initClientFactory("e:/DalNoShard.config");
+			DalClientFactory.initClientFactoryBy("e:/DalNoShard.config");
 			DalClient client = DalClientFactory.getClient("AbacusDB_INSERT_1");
 			DalHints hints = new DalHints();
 			//SimpleShardHintStrategy test
@@ -34,7 +34,7 @@ public class DalClientFactoryTest {
 	
 	private void testLoad() {
 		try {
-			DalClientFactory.initClientFactory("e:/DalMult.config");
+			DalClientFactory.initClientFactoryBy("e:/DalMult.config");
 			DalClient client = DalClientFactory.getClient("AbacusDB_INSERT_1");
 			DalHints hints = new DalHints();
 			//SimpleShardHintStrategy test

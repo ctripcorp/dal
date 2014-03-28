@@ -43,7 +43,7 @@ public class DalClientFactory {
 	 * @param path Dal.Config file path
 	 * @throws Exception
 	 */
-	public static void initClientFactory(String path) throws Exception {
+	public static void initClientFactoryBy(String path) throws Exception {
 		if(configureRef.get() != null)
 			return;
 		

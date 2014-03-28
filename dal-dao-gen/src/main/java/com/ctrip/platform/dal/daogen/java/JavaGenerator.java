@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.daogen.java;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,6 +27,16 @@ import com.ctrip.platform.dal.daogen.utils.GenUtils;
 
 public class JavaGenerator extends AbstractGenerator {
 
+	/**
+	 * Cache all Store Procedures indexed by DB Name
+	 * TODO: The DatabaseCategory also can be cached, but these caches must be cleared internally for the db change
+	 */
+	private static HashMap<String, List<StoredProcedure>> allSpCache = null;
+	
+	static {
+		JavaGenerator.allSpCache = new HashMap<String, List<StoredProcedure>>();
+	}
+	
 	private JavaGenerator() {
 
 	}
@@ -53,152 +62,41 @@ public class JavaGenerator extends AbstractGenerator {
 
 		// 首先为所有表/存储过程生成DAO
 		for (GenTaskByTableViewSp tableViewSp : tasks) {
-
-			String dbName = tableViewSp.getDb_name();
 			String[] tableNames = StringUtils.split(
 					tableViewSp.getTable_names(), ",");
 			String[] spNames = StringUtils
 					.split(tableViewSp.getSp_names(), ",");
 			String[] viewNames = StringUtils
 					.split(tableViewSp.getView_names(), ",");
-			String prefix = tableViewSp.getPrefix();
-			String suffix = tableViewSp.getSuffix();
-			
-			boolean cud_by_sp = tableViewSp.isCud_by_sp();
-
-			DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
-			if (!DbUtils.getDbType(tableViewSp.getDb_name()).equalsIgnoreCase(
-					"Microsoft SQL Server")) {
-				dbCategory = DatabaseCategory.MySql;
-			}
-
-			List<StoredProcedure> allSpNames = DbUtils.getAllSpNames( dbName);
 
 			for (String table : tableNames) {
-				JavaTableHost tableHost = new JavaTableHost();
-				tableHost.setPackageName(super.namespace);
-				tableHost.setDatabaseCategory(dbCategory);
-				tableHost.setDbName(dbName);
-				tableHost.setTableName(table);
-				tableHost.setPojoClassName(getPojoClassName(prefix, suffix, table));
-				tableHost.setSp(cud_by_sp);
-
-				// 主键及所有列
-				List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(dbName, table);
-				List<AbstractParameterHost> allColumnsAbstract = DbUtils
-						.getAllColumnNames(dbName,
-								table, CurrentLanguage.Java);
 				
-				List<JavaParameterHost> allColumns = new ArrayList<JavaParameterHost>();
-				for(AbstractParameterHost h : allColumnsAbstract){
-					allColumns.add((JavaParameterHost)h);
-				}
-
-				List<JavaParameterHost> primaryKeys = new ArrayList<JavaParameterHost>();
-				boolean hasIdentity = false;
-				String identityColumnName = null;
-				for (JavaParameterHost h : allColumns) {
-					if(!hasIdentity && h.isIdentity()){
-						hasIdentity = true;
-						identityColumnName = h.getName();
-					}
-					if (primaryKeyNames.contains(h.getName())) {
-						h.setPrimary(true);
-						primaryKeys.add(h);
-					}
-				}
-
-				List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(
-						sqlBuilders, dbName, table);
-
-				List<JavaMethodHost> methods = buildMethodHosts(allColumns,
-						currentTableBuilders);
-				
-				tableHost.setFields(allColumns);
-				tableHost.setPrimaryKeys(primaryKeys);
-				tableHost.setHasIdentity(hasIdentity);
-				tableHost.setIdentityColumnName(identityColumnName);
-				tableHost.setMethods(methods);
-
-//				tableHost.setTable(true);
-				// SP方式增删改
-				if (tableHost.isSpa()) {
-					tableHost.setSpInsert(SpOperationHost.getSpaOperation(dbName, table, allSpNames,"i"));
-					tableHost.setSpUpdate(SpOperationHost.getSpaOperation(dbName, table, allSpNames,"u"));
-					tableHost.setSpDelete(SpOperationHost.getSpaOperation(dbName, table, allSpNames,"d"));
-				}
-				
-				tableHosts.add(tableHost);
+				JavaTableHost tableHost = this.buildTableHost(tableViewSp, table);
+				if(null != tableHost)
+					tableHosts.add(tableHost);
 			}
 		
 			for (String spName : spNames) {
-				String schema = "dbo";
-				String realSpName = spName;
-				if (spName.contains(".")) {
-					String[] splitSp = StringUtils.split(spName, '.');
-					schema = splitSp[0];
-					realSpName = splitSp[1];
-				}
-	
-				StoredProcedure currentSp = new StoredProcedure();
-				currentSp.setSchema(schema);
-				currentSp.setName(realSpName);
-	
-				SpHost spHost = new SpHost();
-				String className = realSpName.replace("_", "");
-				className = getPojoClassName(prefix, suffix, className);
 				
-				spHost.setPackageName(super.namespace);
-				spHost.setDatabaseCategory(dbCategory);
-				spHost.setDbName(dbName);
-				spHost.setPojoClassName(className);
-				spHost.setSpName(spName);
-				List<AbstractParameterHost> params = DbUtils.getSpParams(dbName, currentSp, CurrentLanguage.Java);
-				List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
-				String callParams = "";
-				for (AbstractParameterHost p : params) {
-					callParams += "?,";
-					realParams.add((JavaParameterHost) p);
-				}
-				spHost.setCallParameters(StringUtils.removeEnd(callParams, ","));
-				spHost.setFields(realParams);
-	
-				spHosts.add(spHost);
+				SpHost spHost = this.buildSpHost(tableViewSp, spName);
+				if(null != spHost)
+					spHosts.add(spHost);
 			}
 			
 			for (String viewName : viewNames)
 			{
-				if (!DbUtils.viewExists(tableViewSp.getDb_name(), viewName)) {
-					throw new Exception(String.format("视图 %s 不存在，请编辑DAO再生成", viewName));
-				}				
-				
-				ViewHost vhost = new ViewHost();
-				String className = viewName.replace("_", "");
-				className = getPojoClassName(prefix, suffix, className);
-				
-				vhost.setPackageName(super.namespace);
-				vhost.setDatabaseCategory(dbCategory);
-				vhost.setDbName(dbName);
-				vhost.setPojoClassName(className);
-				vhost.setViewName(viewName);
-				
-				List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(dbName, viewName);
-				List<AbstractParameterHost> params = DbUtils
-						.getAllColumnNames(tableViewSp.getDb_name(), viewName,
-								CurrentLanguage.Java);
-				List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
-				for(AbstractParameterHost p : params)
-				{
-					JavaParameterHost jHost = (JavaParameterHost)p;
-					if(primaryKeyNames.contains(jHost.getName()))
-					{
-						jHost.setPrimary(true);
+				ViewHost vhost = this.buildViewHost(tableViewSp, viewName);
+				if(null != vhost)
+					viewHosts.add(vhost);
+			}
+			
+			if (sqlBuilders.size() > 0) {
+				for (GenTaskBySqlBuilder _table : sqlBuilders) {
+					JavaTableHost extraTableHost = buildExtraSqlBuilderHost(_table);
+					if (null != extraTableHost) {
+						tableHosts.add(extraTableHost);
 					}
-					realParams.add(jHost);
 				}
-				
-				vhost.setFields(realParams);;
-				viewHosts.add(vhost);
 			}
 		}
 		
@@ -313,6 +211,142 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 	}
 	
+	private JavaTableHost buildExtraSqlBuilderHost(GenTaskBySqlBuilder sqlBuilder) throws Exception {
+		GenTaskByTableViewSp tableViewSp = new GenTaskByTableViewSp();
+		tableViewSp.setCud_by_sp(false);
+		tableViewSp.setPagination(false);
+		tableViewSp.setDb_name(sqlBuilder.getDb_name());
+		tableViewSp.setPrefix("");
+		tableViewSp.setSuffix("Gen");
+
+		return buildTableHost(tableViewSp, sqlBuilder.getTable_name());
+	}
+	
+	private JavaTableHost buildTableHost(GenTaskByTableViewSp tableViewSp, String table) throws Exception {
+		JavaTableHost tableHost = new JavaTableHost();
+		tableHost.setPackageName(super.namespace);
+		tableHost.setDatabaseCategory(this.getDatabaseCategory(tableViewSp));
+		tableHost.setDbName(tableViewSp.getDb_name());
+		tableHost.setTableName(table);
+		tableHost.setPojoClassName(getPojoClassName(tableViewSp.getPrefix(), 
+				tableViewSp.getSuffix(), table));
+		tableHost.setSp(tableViewSp.isCud_by_sp());
+
+		// 主键及所有列
+		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(tableViewSp.getDb_name(), table);
+		List<AbstractParameterHost> allColumnsAbstract = DbUtils
+				.getAllColumnNames(tableViewSp.getDb_name(),
+						table, CurrentLanguage.Java);
+		
+		List<JavaParameterHost> allColumns = new ArrayList<JavaParameterHost>();
+		for(AbstractParameterHost h : allColumnsAbstract){
+			allColumns.add((JavaParameterHost)h);
+		}
+
+		List<JavaParameterHost> primaryKeys = new ArrayList<JavaParameterHost>();
+		boolean hasIdentity = false;
+		String identityColumnName = null;
+		for (JavaParameterHost h : allColumns) {
+			if(!hasIdentity && h.isIdentity()){
+				hasIdentity = true;
+				identityColumnName = h.getName();
+			}
+			if (primaryKeyNames.contains(h.getName())) {
+				h.setPrimary(true);
+				primaryKeys.add(h);
+			}
+		}
+
+		List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(
+				sqlBuilders, tableViewSp.getDb_name(), table);
+
+		List<JavaMethodHost> methods = buildMethodHosts(allColumns,
+				currentTableBuilders);
+		
+		tableHost.setFields(allColumns);
+		tableHost.setPrimaryKeys(primaryKeys);
+		tableHost.setHasIdentity(hasIdentity);
+		tableHost.setIdentityColumnName(identityColumnName);
+		tableHost.setMethods(methods);
+
+		if (tableHost.isSp()) {
+			tableHost.setSpInsert(this.getSpaOperation(tableViewSp.getDb_name(), table, "i"));
+			tableHost.setSpUpdate(this.getSpaOperation(tableViewSp.getDb_name(), table, "u"));
+			tableHost.setSpDelete(this.getSpaOperation(tableViewSp.getDb_name(), table, "d"));
+		}
+		return tableHost;
+	}
+	
+	private ViewHost buildViewHost(GenTaskByTableViewSp tableViewSp, String viewName) throws Exception {
+		if (!DbUtils.viewExists(tableViewSp.getDb_name(), viewName)) {
+			throw new Exception(String.format("The view[%s] doesn't exist, pls check", viewName));
+		}				
+		
+		ViewHost vhost = new ViewHost();
+		String className = viewName.replace("_", "");
+		className = getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), className);
+		
+		vhost.setPackageName(super.namespace);
+		vhost.setDatabaseCategory(this.getDatabaseCategory(tableViewSp));
+		vhost.setDbName(tableViewSp.getDb_name());
+		vhost.setPojoClassName(className);
+		vhost.setViewName(viewName);
+		
+		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(tableViewSp.getDb_name(), viewName);
+		List<AbstractParameterHost> params = DbUtils
+				.getAllColumnNames(tableViewSp.getDb_name(), viewName,
+						CurrentLanguage.Java);
+		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
+		for(AbstractParameterHost p : params)
+		{
+			JavaParameterHost jHost = (JavaParameterHost)p;
+			if(primaryKeyNames.contains(jHost.getName()))
+			{
+				jHost.setPrimary(true);
+			}
+			realParams.add(jHost);
+		}
+		
+		vhost.setFields(realParams);
+		return vhost;
+	}
+
+	private SpHost buildSpHost(GenTaskByTableViewSp tableViewSp,  String spName) throws Exception {
+		String schema = "dbo";
+		String realSpName = spName;
+		if (spName.contains(".")) {
+			String[] splitSp = StringUtils.split(spName, '.');
+			schema = splitSp[0];
+			realSpName = splitSp[1];
+		}
+
+		StoredProcedure currentSp = new StoredProcedure();
+		currentSp.setSchema(schema);
+		currentSp.setName(realSpName);
+
+		SpHost spHost = new SpHost();
+		String className = realSpName.replace("_", "");
+		className = getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), className);
+		
+		spHost.setPackageName(super.namespace);
+		spHost.setDatabaseCategory(this.getDatabaseCategory(tableViewSp));
+		spHost.setDbName(tableViewSp.getDb_name());
+		spHost.setPojoClassName(className);
+		spHost.setSpName(spName);
+		List<AbstractParameterHost> params = DbUtils.getSpParams(tableViewSp.getDb_name(), 
+				currentSp, CurrentLanguage.Java);
+		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
+		String callParams = "";
+		for (AbstractParameterHost p : params) {
+			callParams += "?,";
+			realParams.add((JavaParameterHost) p);
+		}
+		spHost.setCallParameters(StringUtils.removeEnd(callParams, ","));
+		spHost.setFields(realParams);
+		
+		return spHost;
+	}
+	
 	private List<GenTaskBySqlBuilder> filterExtraMethods(
 			List<GenTaskBySqlBuilder> sqlBuilders, String dbName, String table) {
 		List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
@@ -392,6 +426,31 @@ public class JavaGenerator extends AbstractGenerator {
 		return methods;
 	}
 
+	private DatabaseCategory getDatabaseCategory(GenTaskByTableViewSp tableViewSp)
+	{
+		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
+		if (!DbUtils.getDbType(tableViewSp.getDb_name()).equalsIgnoreCase(
+				"Microsoft SQL Server")) {
+			dbCategory = DatabaseCategory.MySql;
+		}
+		return dbCategory;
+	}
+	
+	private List<StoredProcedure> getAllSps(String dbName) throws Exception
+	{
+		if(allSpCache.containsKey(dbName))
+			return allSpCache.get(dbName);
+		List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(dbName);
+		allSpCache.put(dbName, allSpNames);
+		return allSpNames;
+	}
+	
+	private SpOperationHost getSpaOperation(String dbName, String tableName, String operation) throws Exception
+	{
+		return SpOperationHost.getSpaOperation(dbName, 
+				tableName, this.getAllSps(dbName), operation);
+	}
+	
 	@Override
 	public void generateByFreeSql(List<GenTaskByFreeSql> tasks) {
 
@@ -438,6 +497,10 @@ public class JavaGenerator extends AbstractGenerator {
 				List<JavaParameterHost> params = new ArrayList<JavaParameterHost>();
 				for (String param : StringUtils
 						.split(task.getParameters(), ";")) {
+					if(param.contains("HotelAddress"))
+					{
+						System.out.println("");
+					}
 					String[] splitedParam = StringUtils.split(param, ",");
 					JavaParameterHost p = new JavaParameterHost();
 					p.setName(splitedParam[0]);

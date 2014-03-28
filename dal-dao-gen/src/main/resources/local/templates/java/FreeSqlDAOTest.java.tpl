@@ -10,7 +10,9 @@ public class ${host.getClassName()}TestDao {
 	public static void main(String[] args) {
 		try {
 			// Initialize DalClientFactory
-			DalClientFactory.initClientFactory("${host.getDbName()}");
+			 
+			// DalClientFactory.initClientFactory("e:/Dal.config");
+			DalClientFactory.initClientFactory(); //load from classpath
 			${host.getClassName()}Dao dao = new ${host.getClassName()}Dao();
 		
 #foreach( $method in ${host.getMethods()} )

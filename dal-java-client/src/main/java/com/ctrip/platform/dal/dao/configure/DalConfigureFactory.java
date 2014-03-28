@@ -121,11 +121,17 @@ public class DalConfigureFactory {
 			databases.put(database.getName(), database);
 		}
 		
-		return new DatabaseSet(
-				getAttribute(databaseSetNode, NAME),
-				getAttribute(databaseSetNode, PROVIDER),
-				getAttribute(databaseSetNode, SHARD_STRATEGY),
-				databases );
+		if(hasAttribute(databaseSetNode, SHARD_STRATEGY))
+			return new DatabaseSet(
+					getAttribute(databaseSetNode, NAME),
+					getAttribute(databaseSetNode, PROVIDER),
+					getAttribute(databaseSetNode, SHARD_STRATEGY),
+					databases );
+		else
+			return new DatabaseSet(
+					getAttribute(databaseSetNode, NAME),
+					getAttribute(databaseSetNode, PROVIDER),
+					databases );
 	}
 	
 	private DataBase readDataBase(Node dataBaseNode) {
@@ -159,6 +165,9 @@ public class DalConfigureFactory {
 		return nodes;
 	}
 
+	private boolean hasAttribute(Node node, String attributeName){
+		return node.getAttributes().getNamedItem(attributeName) != null;		
+	}
 	
 	private String getAttribute(Node node, String attributeName){
 		return node.getAttributes().getNamedItem(attributeName).getNodeValue();

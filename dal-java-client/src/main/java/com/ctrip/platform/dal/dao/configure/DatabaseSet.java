@@ -15,38 +15,36 @@ public class DatabaseSet {
 	
 	private String name;
 	private String provider;
-	private String shardStrategy;
+
 	private DalShardStrategy strategy;
 	private Map<String, DataBase> databases;
 	// Key is shard id, value is all database under in this shard
 	private Map<String, List<DataBase>> masterDbByShard = new HashMap<String, List<DataBase>>();
 	private Map<String, List<DataBase>> slaveDbByShard = new HashMap<String, List<DataBase>>();
 
+	private List<DataBase> masterDbs = new ArrayList<DataBase>();
+	private List<DataBase> slaveDbs = new ArrayList<DataBase>();
+	/**
+	 * The target DB set does not support shard
+	 * @param name
+	 * @param provider
+	 * @param databases
+	 * @throws Exception
+	 */
+	public DatabaseSet(String name, String provider, Map<String, DataBase> databases) throws Exception {
+		this(name, provider, null, databases);
+	}
+	
 	public DatabaseSet(String name, String provider, String shardStrategy, Map<String, DataBase> databases) throws Exception {
 		this.name = name;
 		this.provider = provider;
-		this.shardStrategy = shardStrategy;
 		this.databases = databases;
+
+		initStrategy(shardStrategy);
 		initShards();
-		initStrategy();
 	}
 	
-	private void initShards() throws Exception {
-		// Init map by shard
-		for(DataBase db: databases.values()) {
-			Map<String, List<DataBase>> dbByShard = db.isMaster() ?
-					masterDbByShard : slaveDbByShard;
-				
-			List<DataBase> dbList = dbByShard.get(db.getSharding());
-			if(dbList == null) {
-				dbList = new ArrayList<DataBase>();
-				dbByShard.put(db.getSharding(), dbList);
-			}
-			dbList.add(db);
-		}
-	}
-	
-	private void initStrategy() throws Exception {
+	private void initStrategy(String shardStrategy) throws Exception {
 		if(shardStrategy == null || shardStrategy.length() == 0)
 			return;
 		
@@ -63,6 +61,31 @@ public class DatabaseSet {
 		strategy.initialize(settings);
 	}
 
+	private void initShards() throws Exception {
+		if(strategy == null){
+			// Init with no shard support
+			for(DataBase db: databases.values()) {
+				if(db.isMaster())
+					masterDbs.add(db);
+				else
+					slaveDbs.add(db);
+			}
+		}else{
+			// Init map by shard
+			for(DataBase db: databases.values()) {
+				Map<String, List<DataBase>> dbByShard = db.isMaster() ?
+						masterDbByShard : slaveDbByShard;
+					
+				List<DataBase> dbList = dbByShard.get(db.getSharding());
+				if(dbList == null) {
+					dbList = new ArrayList<DataBase>();
+					dbByShard.put(db.getSharding(), dbList);
+				}
+				dbList.add(db);
+			}
+		}
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -71,8 +94,8 @@ public class DatabaseSet {
 		return provider;
 	}
 
-	public String getShardStrategy() {
-		return shardStrategy;
+	public boolean isShardingSupported() {
+		return strategy != null;
 	}
 
 	public Map<String, DataBase> getDatabases() {
@@ -96,18 +119,26 @@ public class DatabaseSet {
 	}
 	
 	public String getRandomRealDbName(String shard, boolean isMaster, boolean isSelect) {
-		List<DataBase> dbs;
+		return getRandomRealDbName(isMaster, isSelect, getMasterDbs(shard), getSlaveDbs(shard));
+	}
+	
+	public String getRandomRealDbName(boolean isMaster, boolean isSelect) {
+		return getRandomRealDbName(isMaster, isSelect, masterDbs, slaveDbs);
+	}
+	
+	private String getRandomRealDbName(boolean isMaster, boolean isSelect, List<DataBase> masterCandidates, List<DataBase> slaveCandidates) {
 		if (isMaster)
-			return getRandomRealDbName(getMasterDbs(shard));
+			return getRandomRealDbName(masterCandidates);
 		
 		if (isSelect)
-			getRandomRealDbName(getSlaveDbs(shard));
+			getRandomRealDbName(slaveCandidates);
 
-		return getRandomRealDbName(getMasterDbs(shard));
+		return getRandomRealDbName(masterCandidates);
 	}
 	
 	private String getRandomRealDbName(List<DataBase> dbs) {
 		int index = (int)(Math.random() * dbs.size());
 		return dbs.get(index).getConnectionString();
 	}
+
 }

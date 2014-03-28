@@ -65,6 +65,21 @@ public class Logger {
 		logger.info(CommonUtil.null2NA(log.getTitle()), log.toBrief(), tag);
 	}
 	
+	public static void logGetConnectionSuccess(String realDbName)
+	{
+		Logger.log("Get connection", DalEventEnum.CONNECTION_SUCCESS, LogLevel.INFO, 
+				String.format("Connection %s database successfully", realDbName));
+	}
+	
+	public static void logGetConnectionFailed(String realDbName, Throwable e)
+	{
+		String logMsg = "Connection " + realDbName + " database failed." +
+				System.lineSeparator() + System.lineSeparator() +
+				"********** Exception Info **********" + System.lineSeparator() +
+				e.getMessage();
+		Logger.log("Get connection", DalEventEnum.CONNECTION_FAILED, LogLevel.ERROR, logMsg);	
+	}
+	
 	public static void log(String name, DalEventEnum event, LogLevel level, String msg)
 	{
 		StringBuffer sbuffer = new StringBuffer();

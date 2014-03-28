@@ -7,11 +7,11 @@ import java.sql.Statement;
 import java.util.Set;
 
 import com.ctrip.datasource.locator.DataSourceLocator;
-import com.ctrip.freeway.gen.v2.LogLevel;
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
+import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.logging.DalEventEnum;
 import com.ctrip.platform.dal.dao.logging.Logger;
 
@@ -39,7 +39,7 @@ public class DalTransactionManager {
 		ConnectionCache connCache = connectionCacheHolder.get();
 		
 		if(connCache == null) {
-			Connection conn = connPool.getConnection(logicDbName, isMaster(hints), UPDATE);
+			Connection conn = getConnection(hints, true);
 			conn.setAutoCommit(false);
 			connCache = new ConnectionCache(conn);
 			connectionCacheHolder.set(connCache);
@@ -70,40 +70,43 @@ public class DalTransactionManager {
 	}
 	
 	public Connection getConnection(DalHints hints) throws SQLException {
+		return getConnection(hints, false);
+	}
+	
+	private Connection getConnection(DalHints hints, boolean useMaster) throws SQLException {
 		ConnectionCache connCache = connectionCacheHolder.get();
-		
-		
-		//SimpleShardHintStrategy test
-		hints.set(DalHintEnum.shard, "0");
-		hints.set(DalHintEnum.masterOnly);
 		
 		if(connCache == null) {
 			Connection conn = null;
 			String realDbName = logicDbName;
 			try
 			{
-				if(config != null) {
-					Set<String> shards = config.getDatabaseSet(logicDbName).getStrategy().locateShards(config, logicDbName, hints);
-					// For now, we only access one shard
-					String shard = shards.toArray(new String[1])[0];
-					conn = getConnection(logicDbName, shard, isMaster(hints), hints.get(DalHintEnum.operation) == DalEventEnum.QUERY);
+				boolean isMaster = hints.is(DalHintEnum.masterOnly) || useMaster;
+				boolean isSelect = hints.get(DalHintEnum.operation) == DalEventEnum.QUERY;
+				
+				// The internal test path
+				if(config == null) {
+					conn = connPool.getConnection(logicDbName, isMaster, isSelect);
 				}else {
-					conn = connPool.getConnection(logicDbName, isMaster(hints), hints.get(DalHintEnum.operation) == DalEventEnum.QUERY);
+					DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
+					if(dbSet.isShardingSupported()){
+						Set<String> shards = dbSet.getStrategy().locateShards(config, logicDbName, hints);
+						// For now, we only access one shard
+						String shard = shards.toArray(new String[1])[0];
+						realDbName = dbSet.getRandomRealDbName(shard, isMaster, isSelect);
+					} else {
+						realDbName = dbSet.getRandomRealDbName(isMaster, isSelect);
+					}
+					
+					conn = getConnection(realDbName);
 				}
 				conn.setAutoCommit(true);
-				
 				realDbName = conn.getCatalog();
-				Logger.log("Get connection", DalEventEnum.CONNECTION_SUCCESS, LogLevel.INFO, 
-						String.format("Connection %s database successfully", realDbName));
+				Logger.logGetConnectionSuccess(realDbName);
 			}
 			catch(SQLException ex)
 			{
-				String logMsg = "Connection " + realDbName + " database failed." +
-						System.lineSeparator() + System.lineSeparator() +
-						"********** Exception Info **********" + System.lineSeparator() +
-						ex.getMessage();
-				Logger.log("Get connection", DalEventEnum.CONNECTION_FAILED, LogLevel.ERROR, logMsg);
-				
+				Logger.logGetConnectionFailed(conn.getCatalog(), ex);
 				throw ex;
 			}
 			return conn;
@@ -112,15 +115,14 @@ public class DalTransactionManager {
 		}
 	}
 	
-	private Connection getConnection(String logicDbName, String shard, boolean isMaster, boolean isSelect) throws SQLException {
-		String realDbName = config.getDatabaseSet(logicDbName).getRandomRealDbName(shard, isMaster, isSelect);
+	private Connection getConnection(String realDbName) throws SQLException {
 		try {
 			return DataSourceLocator.newInstance().getDataSource(realDbName).getConnection();
 		} catch (Exception e) {
 			throw new SQLException(e);
 		}
 	}
-	
+
 	public void closeConnection(Connection conn) {
 		if(conn == null) 
 			return;
@@ -236,10 +238,5 @@ public class DalTransactionManager {
 			
 			connectionCacheHolder.set(null);
 		}
-	}
-
-	private boolean isMaster(DalHints hints) {
-		// TODO add more check here
-		return null != hints && hints.is(DalHintEnum.masterOnly);
 	}
 }

@@ -61,11 +61,11 @@ public class ${host.getPojoClassName()}Dao {
 	  *@return 
 	  *     the ${host.getPojoClassName()} records count
 	**/
-	public int Count() throws SQLException
+	public long Count() throws SQLException
 	{
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		int result = (int)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
+		long result = (long)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
 		return result;
 	}
 	

@@ -78,11 +78,11 @@ public class ${host.getPojoClassName()}Dao {
 		return client.queryByPk(pk, hints);
 	}
 	
-	public int count()  throws SQLException
+	public long count()  throws SQLException
 	{
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		int result = (int)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
+		long result = (long)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
 		return result;
 	}
 	

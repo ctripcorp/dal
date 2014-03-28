@@ -89,6 +89,8 @@ public class Consts {
 		
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.CHAR, String.class);
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.VARCHAR, String.class);
+		
+		jdbcSqlTypeToJavaClass.put(java.sql.Types.NVARCHAR, String.class);
 		//getAsciiStream  getUnicodeStream
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.LONGVARCHAR, String.class);
 		

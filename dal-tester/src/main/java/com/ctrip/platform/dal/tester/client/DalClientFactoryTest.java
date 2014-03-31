@@ -75,6 +75,24 @@ public class DalClientFactoryTest {
 		}
 	}
 	
+	private void testSqlServer() {
+		try {
+			DalClientFactory.initClientFactory("SysDalTest", "dao_test");
+			DalClient client = DalClientFactory.getClient("SysDalTest");
+			
+			DalHints hints = new DalHints();
+			//SimpleShardHintStrategy test
+//			hints.set(DalHintEnum.shard, "1");
+//			hints.set(DalHintEnum.masterOnly);
+
+			List<Map<String, Object>> result = client.query("SELECT TOP 10 * FROM CreditCardRule", new StatementParameters(), hints, new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper()));
+			System.out.println(result.size());
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}
+	
 	public static void main(String[] args) {
         LogConfig.setAppID("9302011");
         LogConfig.setLoggingServerIP("192.168.82.58");
@@ -82,7 +100,8 @@ public class DalClientFactoryTest {
         DalClientFactoryTest test = new DalClientFactoryTest();
         // The follow test should be be performed in one run. because the factory internally will cache Dal.config.
         // So subsequence call will not do the actual init
-        test.testLoadFromClassPath();
+        test.testSqlServer();
+//        test.testLoadFromClassPath();
 //        test.testLoad();
 //        test.testNoStrategy();
 		System.exit(0);

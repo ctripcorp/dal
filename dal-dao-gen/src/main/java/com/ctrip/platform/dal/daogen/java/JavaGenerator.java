@@ -26,20 +26,8 @@ import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 
 public class JavaGenerator extends AbstractGenerator {
-
-	/**
-	 * Cache all Store Procedures indexed by DB Name
-	 * TODO: The DatabaseCategory also can be cached, but these caches must be cleared internally for the db change
-	 */
-	private static HashMap<String, List<StoredProcedure>> allSpCache = null;
 	
-	static {
-		JavaGenerator.allSpCache = new HashMap<String, List<StoredProcedure>>();
-	}
-	
-	private JavaGenerator() {
-
-	}
+	private JavaGenerator() { }
 
 	private static JavaGenerator instance = new JavaGenerator();
 
@@ -173,7 +161,7 @@ public class JavaGenerator extends AbstractGenerator {
 			GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
 					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
 			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sTest.java",
+			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoTest.java",
 					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAOTest.java.tpl");
 		}
 	}
@@ -189,7 +177,7 @@ public class JavaGenerator extends AbstractGenerator {
 			GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
 					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
 			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sTest.java",
+			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoTest.java",
 					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAOBySpTest.java.tpl");
 		}
 	}
@@ -207,7 +195,7 @@ public class JavaGenerator extends AbstractGenerator {
 			GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
 					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
 			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sTest.java",
+			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoTest.java",
 					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAOByViewTest.java.tpl");
 		}
 	}
@@ -437,19 +425,12 @@ public class JavaGenerator extends AbstractGenerator {
 		return dbCategory;
 	}
 	
-	private List<StoredProcedure> getAllSps(String dbName) throws Exception
-	{
-		if(allSpCache.containsKey(dbName))
-			return allSpCache.get(dbName);
-		List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(dbName);
-		allSpCache.put(dbName, allSpNames);
-		return allSpNames;
-	}
 	
 	private SpOperationHost getSpaOperation(String dbName, String tableName, String operation) throws Exception
 	{
+		List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(dbName);
 		return SpOperationHost.getSpaOperation(dbName, 
-				tableName, this.getAllSps(dbName), operation);
+				tableName, allSpNames, operation);
 	}
 	
 	@Override

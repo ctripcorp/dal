@@ -130,7 +130,7 @@ public class DatabaseSet {
 		if (isMaster)
 			return getRandomRealDbName(masterCandidates);
 		
-		if (isSelect)
+		if (isSelect && slaveCandidates.size() > 0)
 			getRandomRealDbName(slaveCandidates);
 
 		return getRandomRealDbName(masterCandidates);

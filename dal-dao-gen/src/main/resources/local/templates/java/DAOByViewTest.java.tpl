@@ -16,7 +16,7 @@ public class ${host.getPojoClassName()}DaoTest {
 			* One of both need to be enabled.
 			**/			
 			DalClientFactory.initClientFactory(); // load from class-path
-			DalClientFactory.initClientFactory("E:/DalMult.config"); // load from file path
+			DalClientFactory.initClientFactoryBy("E:/DalMult.config"); // load from file path
 			
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 			

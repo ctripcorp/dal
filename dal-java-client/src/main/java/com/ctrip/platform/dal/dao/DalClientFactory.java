@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
+import com.ctrip.platform.dal.common.db.ConnectionPropertyReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
 import com.ctrip.platform.dal.common.util.Configuration;
@@ -14,13 +15,12 @@ import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 
 public class DalClientFactory {
 	private static AtomicReference<DruidDataSourceWrapper> connPool = new AtomicReference<DruidDataSourceWrapper>();
-	private static AtomicReference<DalConfigure> configureRef = new AtomicReference<DalConfigure>();
-
+	
 	private static final String DAL_CONFIG = "Dal.config";
-	private static final String DEFAULT_SNAPSHOT_PATH = "e:/snapshot.json";
+	private static AtomicReference<DalConfigure> configureRef = new AtomicReference<DalConfigure>();
 	
 	/**
-	 * Load from classpath
+	 * Initialize for DB All In One client. Load Dal.config from classpath
 	 * @throws Exception
 	 */
 	public static void initClientFactory() throws Exception {
@@ -40,10 +40,11 @@ public class DalClientFactory {
 	}
 	
 	/**
+	 * Initialize for DB All In One client. Load Dal.config from give path
 	 * @param path Dal.Config file path
 	 * @throws Exception
 	 */
-	public static void initClientFactoryBy(String path) throws Exception {
+	public static void initClientFactoryFrom(String path) throws Exception {
 		if(configureRef.get() != null)
 			return;
 		
@@ -55,13 +56,13 @@ public class DalClientFactory {
 	}
 	
 	/**
-	 * Only for local test
+	 * Initialize from local connections.properties in classpath. For local testing. 
 	 * @param logicDbNames
 	 * @throws Exception
 	 */
 	public static void initClientFactory(String...logicDbNames) throws Exception {
-		Configuration.addResource("conf.properties");
-		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File(DEFAULT_SNAPSHOT_PATH)));
+//		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File(DEFAULT_SNAPSHOT_PATH)));
+		ConnectionPropertyReader reader = new ConnectionPropertyReader();
 		try {
 			DalClientFactory.initDirectClientFactory(reader, logicDbNames);
 		} catch (Exception e) {
@@ -91,5 +92,4 @@ public class DalClientFactory {
 		
 		return new DalDirectClient(configureRef.get(), logicDbName);
 	}
-	
 }

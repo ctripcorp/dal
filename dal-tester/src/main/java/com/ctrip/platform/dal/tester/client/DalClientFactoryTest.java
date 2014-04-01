@@ -73,6 +73,7 @@ public class DalClientFactoryTest {
 	private void testLoadFromClassPath() {
 		try {
 			DalClientFactory.initClientFactory();
+			DalClientFactory.warmUpConnections();
 			DalClient client = DalClientFactory.getClient("AbacusDB_INSERT_1");
 			
 			DalHints hints = new DalHints();
@@ -119,9 +120,9 @@ public class DalClientFactoryTest {
         
         // The follow test should be be performed in one run. because the factory internally will cache Dal.config.
         // So subsequence call will not do the actual init
-        test.testInitPrivateFactory();
+//        test.testInitPrivateFactory();
 //        test.testSqlServer();
-//        test.testLoadFromClassPath();
+        test.testLoadFromClassPath();
 //        test.testLoad();
 //        test.testNoStrategy();
 		System.exit(0);

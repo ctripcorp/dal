@@ -47,6 +47,11 @@ public class SpHost {
 	public void setSpName(String spName) {
 		this.spName = spName;
 	}
+	
+	public boolean isSpA()
+	{
+		return this.spName.contains("spA");
+	}
 	public List<JavaParameterHost> getFields() {
 		return fields;
 	}

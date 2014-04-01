@@ -4,9 +4,10 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
+import java.util.Map;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 
-public class ${host.getPojoClassName()}DaoTest {
+public class ${host.getDbName()}SpDaoTest {
 	public static void main(String[] args) {
 		try {
 			/**
@@ -17,27 +18,21 @@ public class ${host.getPojoClassName()}DaoTest {
 			DalClientFactory.initClientFactory(); // load from class-path
 			DalClientFactory.initClientFactoryBy("E:/DalMult.config"); // load from file path
 			
-			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
-			${host.getPojoClassName()} param = new ${host.getPojoClassName()}();
+			${host.getDbName()}SpDao dao = new ${host.getDbName()}SpDao();
 			
+#foreach($h in $host.getSpHosts())
+			//Test call${h.getPojoClassName()} method
+			${h.getPojoClassName()} param = new ${h.getPojoClassName()}();	
 			// Set test value here
-#foreach($p in $host.getFields())
-#if($p.getDirection().name() == "Input")
-			param.set${p.getCapitalizedName()}(null);
-#end
-#if($p.getDirection().name() == "InputOutput")
-			param.set${p.getCapitalizedName()}(null);
-#end
-#if($p.getDirection().name() == "Output")
-			parameters.registerOut(i++, ${p.getJavaTypeDisplay()}, "${p.getName()}");
-#end
-#end
-
-			Map<String, ?> result = dao.call${host.getPojoClassName()}(param);
+			//param.setXXX(value);
+			
+			Map<String, ?> result = dao.call${h.getPojoClassName()}(param);
 			for(String key: result.keySet()) {
 				System.out.print("Key: " + key);
-				System.out.println(" Value: " + result.get(Key));
+				System.out.println(" Value: " + result.get(key));
 			}
+#break
+#end
 			
 			System.exit(1);
 		} catch (Exception e) {

@@ -43,6 +43,7 @@ public class JavaGenerator extends AbstractGenerator {
 		Map<String, String> dbs = buildCommonVelocity(tasks);
 		
 		List<JavaTableHost> tableHosts = new ArrayList<JavaTableHost>();
+		HashMap<String, SpDbHost> spHostMaps = new HashMap<String, SpDbHost>();
 		List<SpHost> spHosts = new ArrayList<SpHost>();
 		List<ViewHost> viewHosts = new ArrayList<ViewHost>();
 		List<GenTaskBySqlBuilder> sqlBuilders = daoBySqlBuilder
@@ -68,7 +69,15 @@ public class JavaGenerator extends AbstractGenerator {
 				
 				SpHost spHost = this.buildSpHost(tableViewSp, spName);
 				if(null != spHost)
+				{
+					if(!spHostMaps.containsKey(spHost.getDbName()))
+					{
+						SpDbHost spDbHost = new SpDbHost(spHost.getDbName(), spHost.getPackageName());
+						spHostMaps.put(spHost.getDbName(), spDbHost);
+					}
+					spHostMaps.get(spHost.getDbName()).addSpHost(spHost);
 					spHosts.add(spHost);
+				}
 			}
 			
 			for (String viewName : viewNames)
@@ -108,10 +117,11 @@ public class JavaGenerator extends AbstractGenerator {
 				mavenLikeDir.getAbsolutePath()), "templates/java/Dal.config.tpl");
 
 		generateTableDao(tableHosts, context, mavenLikeDir);
-		generateSpDao(spHosts, context, mavenLikeDir);
+		generateSpDao(spHostMaps, context, mavenLikeDir);
+		//generateSpDao(spHosts, context, mavenLikeDir);
 		generateVeiwDao(viewHosts, context, mavenLikeDir);
 	}
-	
+
 	private Map<String, String> buildCommonVelocity(List<GenTaskByTableViewSp> tasks) {
 		Map<String, String> dbs = new HashMap<String, String>();
 		for (GenTaskByFreeSql task : freeSqls) {
@@ -165,23 +175,28 @@ public class JavaGenerator extends AbstractGenerator {
 					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAOTest.java.tpl");
 		}
 	}
-	
-	private void generateSpDao(List<SpHost> spHosts, VelocityContext context,
-			File mavenLikeDir) {
-		for (SpHost host : spHosts) {
-			context.put("host", host);
-			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sDao.java",
-					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAOBySp.java.tpl");
-			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
-					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
-			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoTest.java",
-					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAOBySpTest.java.tpl");
-		}
-	}
 
+	private void generateSpDao(HashMap<String, SpDbHost> spHostMaps,
+			VelocityContext context, File mavenLikeDir) {
+		for(SpDbHost host : spHostMaps.values())
+		{
+			context.put("host", host);
+			GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sSpDao.java",
+					mavenLikeDir.getAbsolutePath(), host.getDbName()), "templates/java/DAOBySp.java.tpl");
+
+			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoTest.java",
+					mavenLikeDir.getAbsolutePath(), host.getDbName()), "templates/java/DAOBySpTest.java.tpl");
+			
+			for(SpHost sp : host.getSpHosts())
+			{
+				context.put("host", sp);
+				GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
+						mavenLikeDir.getAbsolutePath(), sp.getPojoClassName()), "templates/java/Pojo.java.tpl");
+			}
+		}
+		
+	}
+	
 	private void generateVeiwDao(List<ViewHost> viewHosts, VelocityContext context,
 			File mavenLikeDir)
 	{

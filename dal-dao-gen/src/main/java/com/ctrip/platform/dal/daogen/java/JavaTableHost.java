@@ -77,6 +77,11 @@ public class JavaTableHost {
 		this.methods = methods;
 	}
 
+	public boolean hasMethods()
+	{
+		return this.methods != null && !this.methods.isEmpty();
+	}
+	
 	public List<JavaParameterHost> getFields() {
 		return fields;
 	}

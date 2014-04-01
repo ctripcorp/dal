@@ -6,7 +6,7 @@ import ${field};
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 
-public class ${host.getClassName()}TestDao {
+public class ${host.getClassName()}DaoTest {
 	public static void main(String[] args) {
 		try {
 			/**
@@ -15,7 +15,7 @@ public class ${host.getClassName()}TestDao {
 			* One of both need to be enabled.
 			**/			
 			DalClientFactory.initClientFactory(); // load from class-path
-			DalClientFactory.initClientFactoryBy("E:/DalMult.config"); // load from file path
+			//DalClientFactory.initClientFactory("E:/DalMult.config"); // load from file path
 			
 			${host.getClassName()}Dao dao = new ${host.getClassName()}Dao();
 		

@@ -16,7 +16,7 @@ public class ${host.getDbName()}SpDaoTest {
 			* One of both need to be enabled.
 			**/			
 			DalClientFactory.initClientFactory(); // load from class-path
-			DalClientFactory.initClientFactoryBy("E:/DalMult.config"); // load from file path
+			//DalClientFactory.initClientFactory("E:/DalMult.config"); // load from file path
 			
 			${host.getDbName()}SpDao dao = new ${host.getDbName()}SpDao();
 			

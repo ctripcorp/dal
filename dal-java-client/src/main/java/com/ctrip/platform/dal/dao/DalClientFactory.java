@@ -44,7 +44,7 @@ public class DalClientFactory {
 	 * @param path Dal.Config file path
 	 * @throws Exception
 	 */
-	public static void initClientFactoryFrom(String path) throws Exception {
+	public static void initClientFactory(String path) throws Exception {
 		if(configureRef.get() != null)
 			return;
 		
@@ -57,12 +57,13 @@ public class DalClientFactory {
 	
 	/**
 	 * Initialize from local connections.properties in classpath. For local testing. 
-	 * @param logicDbNames
 	 * @throws Exception
 	 */
-	public static void initClientFactory(String...logicDbNames) throws Exception {
+	public static void initPrivateFactory() throws Exception {
 //		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File(DEFAULT_SNAPSHOT_PATH)));
 		ConnectionPropertyReader reader = new ConnectionPropertyReader();
+		Configuration.addResource(reader.DEFAULT_CONF_NAME);
+		String[] logicDbNames = reader.getLogicDbNames();
 		try {
 			DalClientFactory.initDirectClientFactory(reader, logicDbNames);
 		} catch (Exception e) {

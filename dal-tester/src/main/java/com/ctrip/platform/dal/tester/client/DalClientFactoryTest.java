@@ -13,9 +13,27 @@ import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 
 public class DalClientFactoryTest {
+	private void testInitPrivateFactory(){
+		try {
+			DalClientFactory.initPrivateFactory();
+			DalClient client = DalClientFactory.getClient("dao_test");
+			DalHints hints = new DalHints();
+			//SimpleShardHintStrategy test
+			hints.set(DalHintEnum.shard, "1");
+			hints.set(DalHintEnum.masterOnly);
+
+			List<Map<String, Object>> result = client.query("SELECT * FROM Person ", new StatementParameters(), hints, new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper()));
+			for(Map<String, Object> e: result) {
+				System.out.println("ParaTypeID");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	private void testNoStrategy() {
 		try {
-			DalClientFactory.initClientFactoryBy("e:/DalNoShard.config");
+			DalClientFactory.initClientFactory("e:/DalNoShard.config");
 			DalClient client = DalClientFactory.getClient("AbacusDB_INSERT_1");
 			DalHints hints = new DalHints();
 			//SimpleShardHintStrategy test
@@ -34,7 +52,7 @@ public class DalClientFactoryTest {
 	
 	private void testLoad() {
 		try {
-			DalClientFactory.initClientFactoryBy("e:/DalMult.config");
+			DalClientFactory.initClientFactory("e:/DalMult.config");
 			DalClient client = DalClientFactory.getClient("AbacusDB_INSERT_1");
 			DalHints hints = new DalHints();
 			//SimpleShardHintStrategy test
@@ -77,7 +95,7 @@ public class DalClientFactoryTest {
 	
 	private void testSqlServer() {
 		try {
-			DalClientFactory.initClientFactory("SysDalTest", "dao_test");
+			DalClientFactory.initPrivateFactory();
 			DalClient client = DalClientFactory.getClient("SysDalTest");
 			
 			DalHints hints = new DalHints();
@@ -98,9 +116,11 @@ public class DalClientFactoryTest {
         LogConfig.setLoggingServerIP("192.168.82.58");
         LogConfig.setLoggingServerPort("63100");
         DalClientFactoryTest test = new DalClientFactoryTest();
+        
         // The follow test should be be performed in one run. because the factory internally will cache Dal.config.
         // So subsequence call will not do the actual init
-        test.testSqlServer();
+        test.testInitPrivateFactory();
+//        test.testSqlServer();
 //        test.testLoadFromClassPath();
 //        test.testLoad();
 //        test.testNoStrategy();

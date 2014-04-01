@@ -28,6 +28,9 @@ public class LogEntry {
     private String source;
     private int eventId;
     
+    private String appId;
+    private String mechineName;
+    
     public int getEventId() {
 		return eventId;
 	}
@@ -186,6 +189,23 @@ public class LogEntry {
 		this.message = message;
 	}
 
+	public void setAppId(String id)
+	{
+		this.appId = id;
+	}
+	
+	public void setMechineName(String name)
+	{
+		this.machine = name;
+	}
+	
+	public String getAppIdCommon()
+	{
+		return String.format("/*%s, %s*/", 
+				CommonUtil.null2NA(this.appId), 
+				CommonUtil.null2NA(this.mechineName));
+	}
+	
 	private static Set<String> execludedClasses;
 	static {
 		execludedClasses = new HashSet<String>();
@@ -286,7 +306,8 @@ public class LogEntry {
         {
             sb.append(String.format("Event:%d\r\n", eventId));
             sb.append(String.format("Message:%s\r\n", message));
-            sb.append(String.format("SQL Text:%s\r\n", sensitive? SQLHIDDENString : sql));
+            sb.append(String.format("SQL Text: %s\r\n", this.getAppIdCommon()));
+            sb.append(String.format("%s\r\n", sensitive? SQLHIDDENString : sql));
             sb.append("Input Parameters:").append(inputParamStr).append("\r\n");
             sb.append("Output Parameters:").append(outputParamStr).append("\r\n");
         } 
@@ -295,6 +316,7 @@ public class LogEntry {
             sb.append(String.format("Log Source:%s\r\n", source));
             sb.append(String.format("Event:%d\r\n", eventId));
             sb.append(String.format("Message:%s\r\n", message));
+            sb.append(String.format("SQL Text: %s\r\n", this.getAppIdCommon()));
         }
         sb.append('\n');
         return sb.toString();

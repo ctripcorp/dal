@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.ConnectionPropertyReader;
@@ -85,6 +86,16 @@ public class DalClientFactory {
 	
 	public static void initDasClientFactory(DasConfigureReader reader, String...logicDbNames) throws Exception {
 		// TODO to support
+	}
+	
+	/**
+	 * Actively 
+	 */
+	public static void warmUpConnections() {
+		DalConfigure config = configureRef.get();
+		if(config == null)
+			return;
+		config.warmUpConnections();
 	}
 	
 	public static DalClient getClient(String logicDbName) {

@@ -1,11 +1,7 @@
 package com.ctrip.platform.dal.dao;
 
-import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.ctrip.datasource.locator.DataSourceLocator;
-import com.ctrip.platform.dal.common.cfg.DasConfigureService;
-import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.ConnectionPropertyReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
@@ -89,7 +85,7 @@ public class DalClientFactory {
 	}
 	
 	/**
-	 * Actively 
+	 * Actively initialize connection pools for all the logic db in the Dal.config
 	 */
 	public static void warmUpConnections() {
 		DalConfigure config = configureRef.get();

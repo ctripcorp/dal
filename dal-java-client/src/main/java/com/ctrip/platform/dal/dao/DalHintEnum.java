@@ -72,6 +72,11 @@ public enum DalHintEnum {
 	
 	/* for logging */
 	callingUrl,
+	/* for logging */
+	appId,
+	
+	/* for logging */
+	mechineName,
 	
 	/* For insert, delete, update multiple pojos */ 
 	usingBatch,

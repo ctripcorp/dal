@@ -10,8 +10,14 @@ public class ${host.getPojoClassName()}DaoTest {
 	public static void main(String[] args) {
 		
 		try {
-			// Initialize DalClientFactory
-			DalClientFactory.initClientFactory("${host.getDbName()}");
+			/**
+			* Initialize DalClientFactory.
+			* The Dal.config can be specified from class-path or local file path.
+			* One of both need to be enabled.
+			**/			
+			DalClientFactory.initClientFactory(); // load from class-path
+			DalClientFactory.initClientFactoryBy("E:/DalMult.config"); // load from file path
+			
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 		
 			${host.getPojoClassName()} pk = dao.queryByPk(null);// you value here
@@ -62,6 +68,7 @@ public class ${host.getPojoClassName()}DaoTest {
 
 #end
 #end
+			System.exit(1);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 

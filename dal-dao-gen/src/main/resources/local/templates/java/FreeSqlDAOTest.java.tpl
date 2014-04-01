@@ -6,7 +6,7 @@ import ${field};
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 
-public class ${host.getClassName()}TestDao {
+public class ${host.getClassName()}DaoTest {
 	public static void main(String[] args) {
 		try {
 			/**

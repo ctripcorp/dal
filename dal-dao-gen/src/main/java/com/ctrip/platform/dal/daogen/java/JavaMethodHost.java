@@ -61,7 +61,7 @@ public class JavaMethodHost {
 	}
 
 	public String getSql() {
-		return sql;
+		return sql.replace(System.lineSeparator(), " ");
 	}
 
 	public void setSql(String sql) {

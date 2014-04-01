@@ -46,8 +46,6 @@ public class JavaGenerator extends AbstractGenerator {
 		HashMap<String, SpDbHost> spHostMaps = new HashMap<String, SpDbHost>();
 		List<SpHost> spHosts = new ArrayList<SpHost>();
 		List<ViewHost> viewHosts = new ArrayList<ViewHost>();
-		List<GenTaskBySqlBuilder> sqlBuilders = daoBySqlBuilder
-				.getTasksByProjectId(projectId);
 
 		// 首先为所有表/存储过程生成DAO
 		for (GenTaskByTableViewSp tableViewSp : tasks) {
@@ -90,7 +88,8 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 		
 		if (sqlBuilders.size() > 0) {
-			for (GenTaskBySqlBuilder _table : sqlBuilders) {
+			Map<String, GenTaskBySqlBuilder> _sqlBuildres = sqlBuilderBroupBy(sqlBuilders);
+			for (GenTaskBySqlBuilder _table : _sqlBuildres.values()) {
 				JavaTableHost extraTableHost = buildExtraSqlBuilderHost(_table);
 				if (null != extraTableHost) {
 					tableHosts.add(extraTableHost);
@@ -440,6 +439,37 @@ public class JavaGenerator extends AbstractGenerator {
 		return dbCategory;
 	}
 	
+	private Map<String, List<GenTaskByFreeSql>> freeSqlGroupBy(
+			List<GenTaskByFreeSql> tasks) {
+		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();
+
+		for (GenTaskByFreeSql task : tasks) {
+			String key = String.format("%s_%s", 
+					task.getDb_name(), task.getClass_name().toLowerCase());
+			if (groupBy.containsKey(key)) {
+				groupBy.get(key).add(task);
+			} else {
+				groupBy.put(key, new ArrayList<GenTaskByFreeSql>());
+				groupBy.get(key).add(task);
+			}
+		}
+		return groupBy;
+	}
+	
+	private Map<String, GenTaskBySqlBuilder> sqlBuilderBroupBy(
+			List<GenTaskBySqlBuilder> builders) {
+		Map<String, GenTaskBySqlBuilder> groupBy = new HashMap<String, GenTaskBySqlBuilder>();
+
+		for (GenTaskBySqlBuilder task : builders) {
+			String key = String.format("%s_%s", 
+					task.getDb_name(), task.getTable_name());
+
+			if (!groupBy.containsKey(key)) {
+				groupBy.put(key, task);
+			}
+		}
+		return groupBy;
+	}
 	
 	private SpOperationHost getSpaOperation(String dbName, String tableName, String operation) throws Exception
 	{
@@ -452,18 +482,7 @@ public class JavaGenerator extends AbstractGenerator {
 	public void generateByFreeSql(List<GenTaskByFreeSql> tasks) {
 
 		// 首先按照ServerID, DbName以及ClassName做一次GroupBy
-		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();
-
-		for (GenTaskByFreeSql task : tasks) {
-			String key = String.format("%s_%s", 
-					task.getDb_name(), task.getClass_name());
-			if (groupBy.containsKey(key)) {
-				groupBy.get(key).add(task);
-			} else {
-				groupBy.put(key, new ArrayList<GenTaskByFreeSql>());
-				groupBy.get(key).add(task);
-			}
-		}
+		Map<String, List<GenTaskByFreeSql>> groupBy =  freeSqlGroupBy(tasks);
 
 		List<FreeSqlHost> hosts = new ArrayList<FreeSqlHost>();
 //		Map<String, FreeSqlPojoHost> pojoHosts = new HashMap<String, FreeSqlPojoHost>();

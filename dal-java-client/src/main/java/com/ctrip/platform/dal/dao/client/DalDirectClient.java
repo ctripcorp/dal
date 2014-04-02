@@ -282,7 +282,7 @@ public class DalDirectClient implements DalClient {
 			MetricsLogger.fail(entry, start);
 			throw(handleException(e));
 		} finally {
-			cleanup(action);
+			cleanup(hints, action);
 		}
 	}
 	
@@ -323,7 +323,7 @@ public class DalDirectClient implements DalClient {
 			MetricsLogger.fail(entry, start);
 			throw handleException(e, level);
 		} finally {
-			cleanup(action);
+			cleanup(hints, action);
 		}
 	}
 	
@@ -457,12 +457,12 @@ public class DalDirectClient implements DalClient {
 		return transManager.getConnection(hints);
 	}
 	
-	private void cleanup(ConnectionAction<?> action) {
+	private void cleanup(DalHints hints, ConnectionAction<?> action) {
 		Statement statement = action.statement != null? 
 				action.statement : action.preparedStatement != null?
 						action.preparedStatement : action.callableStatement;
 
-		transManager.cleanup(action.rs, statement, action.conn);
+		transManager.cleanup(hints, action.rs, statement, action.conn);
 		
 		action.rs = null;
 		action.statement = null;

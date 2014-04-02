@@ -47,6 +47,7 @@ public class Logger {
 	}
 	
 	public static void log(LogEntry log) {
+
 		if(log == null) 
 			return;
 		// Don't log

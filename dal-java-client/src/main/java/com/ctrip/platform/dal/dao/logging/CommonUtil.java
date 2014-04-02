@@ -10,6 +10,8 @@ import javax.crypto.Cipher;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 
+import com.ctrip.freeway.config.LogConfig;
+
 public class CommonUtil {
     private static final String APPID_COMMENT;
     public static String MACHINE;
@@ -18,7 +20,7 @@ public class CommonUtil {
 
     static {
         StringBuilder sb = new StringBuilder();
-        sb.append("/* ").append(Logger.getAppId()).append(", ");
+        sb.append("/* ").append(LogConfig.getAppID()).append(", ");
         try
         {
     		InetAddress s = InetAddress.getLocalHost();

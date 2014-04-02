@@ -397,8 +397,6 @@ public class DalDirectClient implements DalClient {
 			this.entry.setDuration(duration);
 			this.entry.setCommandType(this.operation);
 			this.entry.setTransactional(transactional);
-			this.entry.setAppId(hints.getString(DalHintEnum.appId));
-			this.entry.setMechineName(hints.getString(DalHintEnum.mechineName));
 			if(null != this.conn)
 			{
 				try {

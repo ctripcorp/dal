@@ -370,7 +370,7 @@ public class DirectClientDaoTest {
 			// Test for simple connection
 			DalClient client = DalClientFactory.getClient("dao_test");
 			final DalHints hints = new DalHints();
-			hints.setIsolationLevel(Connection.TRANSACTION_READ_COMMITTED);
+			hints.setIsolationLevel(Connection.TRANSACTION_REPEATABLE_READ);
 
 			client.query("select * from Person", parameters, hints, new ColumnTypeExtractor());
 			

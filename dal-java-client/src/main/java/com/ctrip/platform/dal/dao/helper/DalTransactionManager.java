@@ -138,18 +138,14 @@ public class DalTransactionManager {
 	private void applyHints(DalHints hints, Connection conn) throws SQLException {
 		Integer level = hints.getInt(DalHintEnum.isolationLevel);
 		
-		if(level == null) {
+		if(level == null || conn.getTransactionIsolation() == level) {
 			// Make sure this hints
 			hints.set(DalHintEnum.oldIsolationLevel, null);
 			return;
 		}
-		
+
 		hints.set(DalHintEnum.oldIsolationLevel, conn.getTransactionIsolation());
 		conn.setTransactionIsolation(level);
-	}
-
-	private void restoreFromHints(DalHints hints, Connection conn) throws SQLException {
-		restoreIsolation(hints.getInt(DalHintEnum.oldIsolationLevel), conn);
 	}
 
 	private static void restoreIsolation(Integer oldLevel, Connection conn) throws SQLException {

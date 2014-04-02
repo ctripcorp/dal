@@ -1,11 +1,10 @@
 package ${host.getPackageName()};
 
-#foreach( $field in ${host.getDaoImports()} )
+#foreach( $field in ${host.getTestImports()} )
 import ${field};
 #end
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import java.util.List;
 
 public class ${host.getPojoClassName()}DaoTest {
 	public static void main(String[] args) {

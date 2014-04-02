@@ -1,9 +1,5 @@
 package ${host.getPackageName()};
 
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Map;
-
 #foreach( $field in ${host.getDaoImports()} )
 import ${field};
 #end

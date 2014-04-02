@@ -183,7 +183,7 @@ public class JavaGenerator extends AbstractGenerator {
 			GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sSpDao.java",
 					mavenLikeDir.getAbsolutePath(), host.getDbName()), "templates/java/DAOBySp.java.tpl");
 
-			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoTest.java",
+			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sSpDaoTest.java",
 					mavenLikeDir.getAbsolutePath(), host.getDbName()), "templates/java/DAOBySpTest.java.tpl");
 			
 			for(SpHost sp : host.getSpHosts())

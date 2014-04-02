@@ -1,6 +1,6 @@
 package ${host.getPackageName()};
 
-#foreach( $field in ${host.getDaoImports()} )
+#foreach( $field in ${host.getTestImports()} )
 import ${field};
 #end
 

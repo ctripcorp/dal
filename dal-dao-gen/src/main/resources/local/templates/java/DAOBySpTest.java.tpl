@@ -1,10 +1,9 @@
 package ${host.getPackageName()};
 
-#foreach( $field in ${host.getDaoImports()} )
+#foreach( $field in ${host.getTestImports()} )
 import ${field};
 #end
 
-import java.util.Map;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 
 public class ${host.getDbName()}SpDaoTest {

@@ -1,6 +1,6 @@
 package ${host.getPackageName()};
 
-#foreach( $field in ${host.getDaoImports()} )
+#foreach( $field in ${host.getTestImports()} )
 import ${field};
 #end
 
@@ -21,7 +21,7 @@ public class ${host.getPojoClassName()}DaoTest {
 			
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 		
-			${host.getPojoClassName()} pk = dao.queryByPk(null);// you value here
+			${host.getPojoClassName()} pk = dao.queryByPk(0);// you value here
 			
 			pk = dao.queryByPk(pk);
 			List<${host.getPojoClassName()}> pojos = dao.queryByPage(pk, 100, 0);
@@ -73,14 +73,14 @@ public class ${host.getPojoClassName()}DaoTest {
 #foreach($method in $host.getMethods())
 			// Test ${method.getName()}
 #foreach($p in $method.getParameters())  
-			${p.getClassDisplayName()} ${p.getName()} = ${p.getValidationValue()};
+			${p.getClassDisplayName()} ${p.getName()} = null; //set you value here
 #end
 
 #if($method.getCrud_type() == "select")
-		    results = dao.${method.getName()}($method.getParameterNames()});
+		    results = dao.${method.getName()}(${method.getParameterNames()});
 
 #else
-    		affectedRows = dao.${method.getName()}($method.getParameterNames()});
+    		affectedRows = dao.${method.getName()}(${method.getParameterNames()});
 
 #end
 #end

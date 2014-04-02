@@ -179,6 +179,26 @@
          </div>
          <!-- /.modal-dialog -->
       </div>
+	  <div class="modal fade" id="generateCodeProcessDiv" tabindex="-1" role="dialog" aria-labelledby="generateCodeProcessLabel" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h4 class="modal-title">代码生成进度</h4>
+               </div>
+               <div class="modal-body">
+                  <div class="progress progress-info progress-striped active">
+				  	<div class="progress-bar" role="progressbar" style="width:0%;"></div>
+				  </div>
+				  <div id="generateCodeProcessMess">
+				  		正在生成***文件...
+				  </div>
+               </div>
+            </div>
+            <!-- /.modal-content -->
+         </div>
+         <!-- /.modal-dialog -->
+      </div>
       <!-- /.modal -->
       <!--Begin wizard-->
 
@@ -427,5 +447,6 @@
       <script src="/static/js/wizzard.js"></script>
       <script src="/static/js/ui_render.js"></script>
       <script src="/static/js/index.js"></script>
+      <script src="/static/js/progress.js"></script>
    </body>
 </html>

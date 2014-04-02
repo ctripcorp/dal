@@ -41,7 +41,7 @@ public class DalTransactionManager {
 		if(connCache == null) {
 			Connection conn = getConnection(hints, true);
 			conn.setAutoCommit(false);
-			connCache = new ConnectionCache(conn);
+			connCache = new ConnectionCache(hints.getInt(DalHintEnum.oldIsolationLevel), conn);
 			connectionCacheHolder.set(connCache);
 		}
 		return connCache.startTransaction();
@@ -77,74 +77,114 @@ public class DalTransactionManager {
 		ConnectionCache connCache = connectionCacheHolder.get();
 		
 		if(connCache == null) {
-			Connection conn = null;
-			String realDbName = logicDbName;
-			try
-			{
-				boolean isMaster = hints.is(DalHintEnum.masterOnly) || useMaster;
-				boolean isSelect = hints.get(DalHintEnum.operation) == DalEventEnum.QUERY;
-				
-				// The internal test path
-				if(config == null) {
-					conn = connPool.getConnection(logicDbName, isMaster, isSelect);
-				}else {
-					DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
-					if(dbSet.isShardingSupported()){
-						Set<String> shards = dbSet.getStrategy().locateShards(config, logicDbName, hints);
-						// For now, we only access one shard
-						String shard = shards.toArray(new String[1])[0];
-						realDbName = dbSet.getRandomRealDbName(shard, isMaster, isSelect);
-					} else {
-						realDbName = dbSet.getRandomRealDbName(isMaster, isSelect);
-					}
-					
-					conn = getConnection(realDbName);
-				}
-				conn.setAutoCommit(true);
-				realDbName = conn.getCatalog();
-				Logger.logGetConnectionSuccess(realDbName);
-			}
-			catch(SQLException ex)
-			{
-				Logger.logGetConnectionFailed(conn.getCatalog(), ex);
-				throw ex;
-			}
-			return conn;
+			return getNewConnection(hints, useMaster);
 		} else {
 			return connCache.getConnection();
 		}
 	}
-	
-	private Connection getConnection(String realDbName) throws SQLException {
+
+	private Connection getNewConnection(DalHints hints, boolean useMaster)
+			throws SQLException {
+		Connection conn = null;
+		String realDbName = logicDbName;
+		try
+		{
+			boolean isMaster = hints.is(DalHintEnum.masterOnly) || useMaster;
+			boolean isSelect = hints.get(DalHintEnum.operation) == DalEventEnum.QUERY;
+			
+			// The internal test path
+			if(config == null) {
+				conn = connPool.getConnection(logicDbName, isMaster, isSelect);
+			}else {
+				conn = getConnectionFromDSLocator(hints, isMaster, isSelect);
+			}
+			
+			conn.setAutoCommit(true);
+			applyHints(hints, conn);
+
+			realDbName = conn.getCatalog();
+			Logger.logGetConnectionSuccess(realDbName);
+		}
+		catch(SQLException ex)
+		{
+			Logger.logGetConnectionFailed(realDbName, ex);
+			throw ex;
+		}
+		return conn;
+	}
+
+	private Connection getConnectionFromDSLocator(DalHints hints,
+			boolean isMaster, boolean isSelect) throws SQLException {
+		Connection conn;
+		String realDbName;
+		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
+		if(dbSet.isShardingSupported()){
+			Set<String> shards = dbSet.getStrategy().locateShards(config, logicDbName, hints);
+			// For now, we only access one shard
+			String shard = shards.toArray(new String[1])[0];
+			realDbName = dbSet.getRandomRealDbName(shard, isMaster, isSelect);
+		} else {
+			realDbName = dbSet.getRandomRealDbName(isMaster, isSelect);
+		}
+		
 		try {
-			return DataSourceLocator.newInstance().getDataSource(realDbName).getConnection();
+			conn = DataSourceLocator.newInstance().getDataSource(realDbName).getConnection();
 		} catch (Exception e) {
 			throw new SQLException(e);
 		}
+		return conn;
+	}
+	
+	private void applyHints(DalHints hints, Connection conn) throws SQLException {
+		Integer level = hints.getInt(DalHintEnum.isolationLevel);
+		
+		if(level == null) {
+			// Make sure this hints
+			hints.set(DalHintEnum.oldIsolationLevel, null);
+			return;
+		}
+		
+		hints.set(DalHintEnum.oldIsolationLevel, conn.getTransactionIsolation());
+		conn.setTransactionIsolation(level);
 	}
 
-	public void closeConnection(Connection conn) {
+	private void restoreFromHints(DalHints hints, Connection conn) throws SQLException {
+		restoreIsolation(hints.getInt(DalHintEnum.oldIsolationLevel), conn);
+	}
+
+	private static void restoreIsolation(Integer oldLevel, Connection conn) throws SQLException {
+		if(oldLevel == null) {
+			return;
+		}
+		
+		conn.setTransactionIsolation(oldLevel);
+	}
+	
+	private static void closeConnection(Integer oldLevel, Connection conn) {
+		try {
+			if(!conn.isClosed()){
+				restoreIsolation(oldLevel, conn);
+				conn.close();
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void closeConnection(DalHints hints, Connection conn) {
 		if(conn == null) 
 			return;
 		
 		ConnectionCache connCache = connectionCacheHolder.get();
 		
 		if(connCache == null) {
-			try {
-				conn.close();
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
+			closeConnection(hints.getInt(DalHintEnum.oldIsolationLevel), conn);
 		} else {
 			//do nothing
 		}
 	}
 	
-	public void cleanup(Statement statement, Connection conn) {
-		cleanup(null, statement, conn);
-	}
-	
-	public void cleanup(ResultSet rs, Statement statement, Connection conn) {
+	public void cleanup(DalHints hints, ResultSet rs, Statement statement, Connection conn) {
 		if(rs != null) {
 			try {
 				rs.close();
@@ -161,7 +201,7 @@ public class DalTransactionManager {
 			}
 		}
 		
-		closeConnection(conn);
+		closeConnection(hints, conn);
 	}
 	
 	public SQLException handleException(Throwable e, int startLevel) {
@@ -179,11 +219,13 @@ public class DalTransactionManager {
 	
 	private static final class ConnectionCache {
 		private Connection conn;
+		private Integer oldLevel;
 		private int level = 0;
 		private boolean rolledBack;
 		
-		public ConnectionCache(Connection conn) throws SQLException{
+		public ConnectionCache(Integer oldLevel, Connection conn) throws SQLException{
 			this.conn = conn;
+			this.oldLevel = oldLevel;
 			conn.setAutoCommit(false);
 		}
 		
@@ -230,12 +272,7 @@ public class DalTransactionManager {
 				e.printStackTrace();
 			}
 			
-			try {
-				conn.close();
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
-			
+			closeConnection(oldLevel, conn);			
 			connectionCacheHolder.set(null);
 		}
 	}

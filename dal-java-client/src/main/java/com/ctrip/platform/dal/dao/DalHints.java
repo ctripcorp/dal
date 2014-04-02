@@ -21,6 +21,10 @@ public class DalHints {
 		return (Integer)value;
 	}
 	
+	public Integer getInt(DalHintEnum hint) {
+		return (Integer)hints.get(hint);
+	}
+	
 	public String getString(DalHintEnum hint) {
 		return (String)hints.get(hint);
 	}
@@ -82,6 +86,11 @@ public class DalHints {
 	
 	public boolean isStopOnError() {
 		return !is(DalHintEnum.continueOnError);
+	}
+
+	public DalHints setIsolationLevel(int isolationLevel) {
+		set(DalHintEnum.isolationLevel, isolationLevel);
+		return this;
 	}
 
 }

@@ -12,32 +12,32 @@ body {
 .navbar-inverse .navbar-nav>.open>a,
 .navbar-inverse .navbar-nav>.open>a:hover,
 .navbar-inverse .navbar-nav>.open>a:focus{
-	background-color: #3b73af;
+    background-color: #3b73af;
 }
 
 #main_layout {
-    height: 100 % ;
+    height: 100% ;
     padding-top: 19px;
 }
 
 .logo{
-	padding:5px;
-	float:left;
+    padding:5px;
+    float:left;
 }
 
 .popup_text{
-	float: right !important;
-	padding-top: 1px;
+    float: right !important;
+    padding-top: 1px;
 }
 
 .popup_label{
-	float:left;
-	min-height:30px;
-	line-height:30px;
+    float:left;
+    min-height:30px;
+    line-height:30px;
 }
 
 label.btn{
-	height: 30px;
+    height: 30px;
 }
 
 .w2ui-reset * {
@@ -45,9 +45,9 @@ label.btn{
 }
 
 .selectize-dropdown{
-	margin-left: 0 !important;
+    margin-left: 0 !important;
 }
 
 .jstree-anchor{
-	font-family: Verdana,Arial;
+    font-family: Verdana,Arial;
 }

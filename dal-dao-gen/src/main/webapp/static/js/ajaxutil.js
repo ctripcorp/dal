@@ -217,7 +217,6 @@
         },
         generate_code: function () {
 //            cblock($("body"));
-            debugger;
             $("#generateCode").modal("hide");
             progress.start($("#generateCodeProcessDiv"));
             $.post("/rest/project/generate", {

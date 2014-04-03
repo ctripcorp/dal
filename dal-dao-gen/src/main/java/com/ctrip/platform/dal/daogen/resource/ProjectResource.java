@@ -20,6 +20,7 @@ import org.jasig.cas.client.util.AssertionHolder;
 import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.java.JavaGenerator;
@@ -163,19 +164,24 @@ public class ProjectResource {
 			@FormParam("regenerate") boolean regen,
 			@FormParam("language") String language) {
 		Status status = null;
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+		Progress progress = ProgressResource.getProgress(userNo, id);
 		try {
 			if (language.equals("java"))
 			{
-				JavaGenerator.getInstance().generateCode(id, regen);
+				JavaGenerator.getInstance().generateCode(id, regen, progress);
 			}
 			else if (language.equals("cs")){
-				CSharpGenerator.getInstance().generateCode(id, regen);
+				CSharpGenerator.getInstance().generateCode(id, regen, progress);
 			}
 			status = Status.OK;
 		} catch (Exception e) {
 			status = Status.ERROR;
 			status.setInfo(e.getMessage());
 			e.printStackTrace();
+		} finally{
+			progress.setStatus(ProgressResource.FINISH);
 		}
 		
 		return status;

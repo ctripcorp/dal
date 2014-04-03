@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.daogen.entity;
 
+import com.ctrip.platform.dal.daogen.resource.ProgressResource;
+
 public class Progress {
 	
 	/**
@@ -10,27 +12,27 @@ public class Progress {
 	/**
 	 * 项目ID
 	 */
-	private String project_id;
+	private int project_id;
 	
 	/**
 	 * 已生成所占百分比
 	 */
-	private int percent;
+	private int percent=0;
 	
 	/**
 	 * 已生成文件数量
 	 */
-	private int doneFiles;
+	private int doneFiles=0;
 	
 	/**
 	 * 需要生成的文件总数
 	 */
-	private int totoalFiles;
+	private int totalFiles=0;
 	
 	/**
 	 * 当前代码生成状态:isDoing,finish
 	 */
-	private String status;
+	private String status = ProgressResource.ISDOING;
 	
 	/**
 	 * 其它信息
@@ -38,69 +40,69 @@ public class Progress {
 	private String otherMessage;
 	
 	private long time = System.currentTimeMillis();
-
-	public String getUserNo() {
+	
+	public synchronized String getUserNo() {
 		return userNo;
 	}
 
-	public void setUserNo(String userNo) {
+	public synchronized void setUserNo(String userNo) {
 		this.userNo = userNo;
 	}
 
-	public String getProject_id() {
+	public synchronized int getProject_id() {
 		return project_id;
 	}
 
-	public void setProject_id(String project_id) {
+	public synchronized void setProject_id(int project_id) {
 		this.project_id = project_id;
 	}
 
-	public int getPercent() {
+	public synchronized int getPercent() {
 		return percent;
 	}
 
-	public void setPercent(int percent) {
+	public synchronized void setPercent(int percent) {
 		this.percent = percent;
 	}
 
-	public int getDoneFiles() {
+	public synchronized int getDoneFiles() {
 		return doneFiles;
 	}
 
-	public void setDoneFiles(int doneFiles) {
+	public synchronized void setDoneFiles(int doneFiles) {
 		this.doneFiles = doneFiles;
 	}
 
-	public int getTotoalFiles() {
-		return totoalFiles;
+	public synchronized int getTotalFiles() {
+		return totalFiles;
 	}
 
-	public void setTotoalFiles(int totoalFiles) {
-		this.totoalFiles = totoalFiles;
+	public synchronized void setTotalFiles(int totalFiles) {
+		this.totalFiles = totalFiles;
 	}
 
-	public String getStatus() {
+	public synchronized String getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public synchronized void setStatus(String status) {
 		this.status = status;
 	}
 
-	public String getOtherMessage() {
+	public synchronized String getOtherMessage() {
 		return otherMessage;
 	}
 
-	public void setOtherMessage(String otherMessage) {
+	public synchronized void setOtherMessage(String otherMessage) {
 		this.otherMessage = otherMessage;
 	}
 
-	public long getTime() {
+	public synchronized long getTime() {
 		return time;
 	}
 
-	public void setTime(long time) {
+	public synchronized void setTime(long time) {
 		this.time = time;
 	}
-	
+
 }

@@ -1,4 +1,3 @@
-
 //向导注释
 //step1
 //step2
@@ -37,7 +36,8 @@
                 postData["method_name"] = $("#method_name").val();
                 //C#风格或者Java风格，@Name or ?
                 postData["sql_style"] = $("#sql_style").val();
-                postData["crud_type"] = $("#crud_option").val();;
+                postData["crud_type"] = $("#crud_option").val();
+                ;
                 var selectedConditions = [];
 
                 $.each($("#selected_condition option"), function (index, value) {
@@ -48,29 +48,29 @@
                 postData["condition"] = selectedConditions.join(";");
                 postData["sql_content"] = ace.edit("sql_builder").getValue();
 
-                $.post("/rest/task/auto", postData, function (data) {
-                    if(data.code == "OK"){
+                $.post("/rest/task/auto", postData,function (data) {
+                    if (data.code == "OK") {
                         $("#page1").modal('hide');
                         w2ui["grid_toolbar"].click('refreshDAO', null);
                         if ($("#gen_on_save").is(":checked")) {
                             //window.ajaxutil.generate_code($("#gen_language").val());
                             $("#generateCode").modal();
                         }
-                    }else{
+                    } else {
                         alert(data.info);
                     }
-                }).fail(function(data){
-                    alert("保存出错！");
-                });
+                }).fail(function (data) {
+                        alert("保存出错！");
+                    });
 
             } else if ($("#gen_style").val() == "sql") {
                 postData["class_name"] = $("#sql_class_name").val();
                 postData["pojo_name"] = $("#sql_pojo_name").val();
                 postData["method_name"] = $("#sql_method_name").val();
 
-                if(postData["class_name"] == "" 
+                if (postData["class_name"] == ""
                     || postData["pojo_name"] == ""
-                    || postData["method_name"] == ""){
+                    || postData["method_name"] == "") {
                     $("#error_msg").text("DAO类名，实体类名以及方法名需要填写！");
                     return;
                 }
@@ -88,26 +88,26 @@
 
                 $.post("/rest/db/test_sql", postData).done(function (data) {
                     if (data.code == "OK") {
-                        $.post("/rest/task/sql", postData, function (data) {
-                            if(data.code == "OK"){
+                        $.post("/rest/task/sql", postData,function (data) {
+                            if (data.code == "OK") {
                                 $("#page1").modal('hide');
                                 w2ui["grid_toolbar"].click('refreshDAO', null);
                                 if ($("#gen_on_save").is(":checked")) {
                                     //window.ajaxutil.generate_code($("#gen_language").val());
                                     $("#generateCode").modal();
                                 }
-                            }else{
+                            } else {
                                 alert(data.info);
                             }
-                        }).fail(function(data){
-                            alert("执行异常，请检查sql及对应参数！");
-                        });
+                        }).fail(function (data) {
+                                alert("执行异常，请检查sql及对应参数！");
+                            });
                     } else {
                         $("#error_msg").text("执行异常，请检查sql及对应参数！");
                     }
-                }).fail(function(data){
-                    alert("执行异常，请检查sql及对应参数！");
-                });
+                }).fail(function (data) {
+                        alert("执行异常，请检查sql及对应参数！");
+                    });
             } else if ($("#gen_style").val() == "table_view_sp") {
                 postData["table_names"] = $('#table_list').multipleSelect('getSelects').join(",");
                 postData["view_names"] = $('#view_list').multipleSelect('getSelects').join(",");
@@ -116,16 +116,16 @@
                 postData["suffix"] = $("#suffix").val();
                 postData["cud_by_sp"] = $("#cud_by_sp").is(":checked");
                 postData["pagination"] = $("#pagination").is(":checked");
-                $.post("/rest/task/table", postData, function (data) {
+                $.post("/rest/task/table", postData,function (data) {
                     $("#page1").modal('hide');
                     w2ui["grid_toolbar"].click('refreshDAO', null);
                     if ($("#gen_on_save").is(":checked")) {
                         //window.ajaxutil.generate_code($("#gen_language").val());
                         $("#generateCode").modal();
                     }
-                }).fail(function(data){
-                    alert("保存出错！");
-                });
+                }).fail(function (data) {
+                        alert("保存出错！");
+                    });
             }
         },
         reload_dbservers: function (callback) {
@@ -148,11 +148,11 @@
                     });
                 }
 
-                $("#databases")[0].selectize.on('dropdown_open', function(dropdown){
+                $("#databases")[0].selectize.on('dropdown_open', function (dropdown) {
                     $(".step1").height(240);
                 });
 
-                $("#databases")[0].selectize.on('dropdown_close', function(dropdown){
+                $("#databases")[0].selectize.on('dropdown_close', function (dropdown) {
                     $(".step1").height(74);
                 });
 
@@ -173,8 +173,8 @@
 
                 $("body").unblock();
             }).fail(function (data) {
-                $("body").unblock();
-            });
+                    $("body").unblock();
+                });
         },
         reload_projects: function () {
             // cblock($("body"));
@@ -216,28 +216,33 @@
             $.jstree.reference("#jstree_projects").refresh();
         },
         generate_code: function () {
-            cblock($("body"));
+//            cblock($("body"));
+            debugger;
+            $("#generateCode").modal("hide");
+            progress.start($("#generateCodeProcessDiv"));
             $.post("/rest/project/generate", {
                 "project_id": w2ui['grid'].current_project,
                 "regenerate": $("#regenerate").val() == "regenerate",
                 "language": $("#regen_language").val()
-            }, function (data) {
-                $("body").unblock();
-                if(data.code == "OK"){
-                    $("#viewCode").val($("#regen_language").val());
-                    $("#refreshFiles").trigger("click");
-                    $("#generateCode").modal('hide');
-                }else{
+            },function (data) {
+//                $("body").unblock();
+                if (data.code == "OK") {
+//                    progress.stop($("#generateCodeProcessDiv"));
+//                    $("#viewCode").val($("#regen_language").val());
+//                    $("#refreshFiles").trigger("click");
+//                    $("#generateCode").modal('hide');
+                } else {
                     alert(data.info);
                 }
-                
-            }).fail(function(data){
-                alert("生成异常！");
-                $("body").unblock();
-            });
+
+            }).fail(function (data) {
+                    alert("生成异常！"+data);
+//                    $("body").unblock();
+                    progress.stop($("#generateCodeProcessDiv"));
+                });
         }
     };
 
     window.ajaxutil = new AjaxUtil();
-    
+
 })(window);

@@ -53,8 +53,8 @@ jQuery(document).ready(function () {
                 ace.edit("code_editor").setValue("");
                 $($("#jstree_files").children()[0]).html("");
             }).fail(function(data){
-                alert("删除失败！");
-            });
+                    alert("删除失败！");
+                });
         }
     });
 
@@ -78,8 +78,8 @@ jQuery(document).ready(function () {
             $("#users").append(allUsers);
             $("#shareProject").modal();
         }).fail(function(data){
-            alert("加载用户列表失败，请重试！");
-        });
+                alert("加载用户列表失败，请重试！");
+            });
     });
 
     $(document.body).on('click', '#save_proj', function (event) {
@@ -101,15 +101,15 @@ jQuery(document).ready(function () {
             $("#projectModal").modal('hide');
             window.ajaxutil.reload_projects();
         }).fail(function(data){
-            alert("保存失败！");
-        });
+                alert("保存失败！");
+            });
     });
 
     $(document.body).on('click', '#share_proj', function (event) {
         if($("#users").val() != "_please_select"){
             $.post("/rest/project/share_proj", {
-            "id": $.jstree.reference("#jstree_projects").get_selected()[0],
-            "userNo": $("#users").val()
+                "id": $.jstree.reference("#jstree_projects").get_selected()[0],
+                "userNo": $("#users").val()
             }, function (data) {
                 if (data.code == "OK") {
                     alert("分享成功！");
@@ -119,8 +119,8 @@ jQuery(document).ready(function () {
 
                 $("#shareProject").modal("hide");
             }).fail(function(data){
-                alert("分享失败!");
-            });
+                    alert("分享失败!");
+                });
         }
     });
 
@@ -161,14 +161,14 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', "#downloadFiles", function (event) {
-         cblock($("body"));
+        cblock($("body"));
         $.get("/rest/file/download?id=" + w2ui['grid'].current_project+
-                    "&language=" + $("#viewCode").val(), function (data) {
-                    $("body").unblock();
-                    window.location.href = data;
+            "&language=" + $("#viewCode").val(), function (data) {
+            $("body").unblock();
+            window.location.href = data;
         }).fail(function(data){
-             alert("下载失败!");
-        });
+                alert("下载失败!");
+            });
     });
 
     $(document.body).on('change', "#viewCode", function (event) {
@@ -184,8 +184,12 @@ jQuery(document).ready(function () {
             }else{
                 alert(data.info);
             }
-            
+
         });
+    });
+
+    $("#layout_main_layout_resizer_preview").mouseleave(function(){
+          ace.edit("code_editor").resize();
     });
 
     window.ajaxutil.reload_projects();

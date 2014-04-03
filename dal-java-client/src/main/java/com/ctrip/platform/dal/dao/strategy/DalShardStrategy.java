@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.strategy;
 
 import java.util.Map;
-import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
@@ -20,15 +19,15 @@ public interface DalShardStrategy {
 	 * @param hints
 	 * @return
 	 */
-	boolean useMaster(DalConfigure configure, String logicDbName, DalHints hints);
+	boolean isMaster(DalConfigure configure, String logicDbName, DalHints hints);
 
 	/**
-	 * Select all shards that the operation covers. For most of the case, it will return only 1 shard id
-	 * If this operation requires cross shard execution, the method will return multiple shard id.
+	 * Locate target shard that the operation is performed. 
+	 * If this operation requires cross shard execution, using Cross Shard Manager.
 	 * @param configure
 	 * @param logicDbName
-	 * @param hint
+	 * @param hints
 	 * @return
 	 */
-	Set<String> locateShards(DalConfigure configure, String logicDbName, DalHints hints);
+	String locateShard(DalConfigure configure, String logicDbName, DalHints hints);
 }

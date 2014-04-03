@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.strategy;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -39,14 +38,14 @@ public class SmartReadRouteStrategy implements DalShardStrategy {
 
 
 	@Override
-	public boolean useMaster(DalConfigure configure, String logicDbName,
+	public boolean isMaster(DalConfigure configure, String logicDbName,
 			DalHints hints) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public Set<String> locateShards(DalConfigure configure, String logicDbName,
+	public String locateShard(DalConfigure configure, String logicDbName,
 			DalHints hints) {
 		String shard = null;
 		DalEventEnum operation = (DalEventEnum)hints.get(DalHintEnum.operation);

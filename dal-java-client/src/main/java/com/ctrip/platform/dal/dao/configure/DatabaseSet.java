@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -100,6 +101,12 @@ public class DatabaseSet {
 
 	public Map<String, DataBase> getDatabases() {
 		return databases;
+	}
+	
+	public boolean validate(String shard) throws SQLException {
+		if(masterDbByShard.containsKey(shard))
+			return true;
+		throw new SQLException("No shard defined for id: " + shard);
 	}
 	
 	public Set<String> getAllShards() {

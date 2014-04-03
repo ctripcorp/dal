@@ -43,7 +43,7 @@
             complete: function(jqXHR, textStatus){
                 if(this.progressStatus == "finish" || textStatus != "success"){
                     Progress.progressStatus = undefined;
-                    stop($("#generateCodeProcessDiv"));
+                    progress.stop($("#generateCodeProcessDiv"));
                     $("#viewCode").val($("#regen_language").val());
                     $("#refreshFiles").trigger("click");
                 }else{

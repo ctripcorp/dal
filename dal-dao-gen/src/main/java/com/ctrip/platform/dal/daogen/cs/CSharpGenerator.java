@@ -18,8 +18,10 @@ import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
+import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.resource.ProgressResource;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
@@ -44,7 +46,11 @@ public class CSharpGenerator extends AbstractGenerator {
 	/**
 	 * 生成C#的公共部分，如Dal.config，Program.cs以及DALFactory.cs
 	 */
-	private void generateCSharpCode() {
+	private void generateCSharpCode(Progress progress) {
+		progress.setOtherMessage("正在生成C#的公共部分");
+		ProgressResource.addTotalFiles(progress, freeSqlPojoHosts.size()+
+				freeSqlHosts.size()+tableHosts.size()+spHosts.size()+2);
+		
 		VelocityContext context = GenUtils.buildDefaultVelocityContext();
 
 		File csMavenLikeDir = new File(String.format("%s/%s/cs",generatePath ,projectId));
@@ -57,6 +63,7 @@ public class CSharpGenerator extends AbstractGenerator {
 							csMavenLikeDir.getAbsolutePath(),
 							CommonUtils.normalizeVariable(host.getClassName())), "templates/Pojo.cs.tpl");
 		}
+		ProgressResource.addDoneFiles(progress, freeSqlPojoHosts.size());
 
 		for (CSharpFreeSqlHost host : freeSqlHosts) {
 			context.put("host", host);
@@ -73,7 +80,8 @@ public class CSharpGenerator extends AbstractGenerator {
 							CommonUtils.normalizeVariable(host.getClassName())),
 					"templates/FreeSqlTest.cs.tpl");
 		}
-
+		ProgressResource.addDoneFiles(progress, freeSqlHosts.size());
+		
 		context.put("dbs", dbHosts.values());
 		context.put("namespace", namespace);
 		context.put("freeSqlHosts", freeDaos);
@@ -88,16 +96,25 @@ public class CSharpGenerator extends AbstractGenerator {
 				String.format("%s/DalFactory.cs",
 						csMavenLikeDir.getAbsolutePath()),
 				"templates/DalFactory.cs.tpl");
+		
+		ProgressResource.addDoneFiles(progress, 2);
 
+		progress.setOtherMessage("正在生成TableDao");
 		generateTableDao(tableHosts, context, csMavenLikeDir);
+		ProgressResource.addDoneFiles(progress, tableHosts.size());
+		
+		progress.setOtherMessage("正在生成SpDao");
 		generateSpDao(spHosts, context, csMavenLikeDir);
+		ProgressResource.addDoneFiles(progress, spHosts.size());
 	}
 
 	// -----------------------------------------------Free Sql generate
 	// begin---------------------------------------------------
 	@Override
-	public void generateByFreeSql(List<GenTaskByFreeSql> tasks) {
+	public void generateByFreeSql(List<GenTaskByFreeSql> tasks,Progress progress) {
 
+		progress.setOtherMessage("正在生成FreeSql的代码");
+		
 		// 首先按照ServerID, DbName以及ClassName做一次GroupBy，但是ClassName不区分大小写
 		Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(tasks);
 
@@ -135,7 +152,8 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		freeSqlPojoHosts.addAll(pojoHosts.values());
 
-		generateCSharpCode();
+		generateCSharpCode(progress);
+		
 	}
 
 	private Map<String, List<GenTaskByFreeSql>> freeSqlGroupBy(
@@ -220,7 +238,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	// end---------------------------------------------------
 
 	@Override
-	public void generateByTableView(List<GenTaskByTableViewSp> tasks)
+	public void generateByTableView(List<GenTaskByTableViewSp> tasks,Progress progress)
 			throws Exception {
 
 		prepareFolder(projectId, "cs");
@@ -228,6 +246,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		tableHosts = new ArrayList<CSharpTableHost>();
 		spHosts = new ArrayList<CSharpTableHost>();
 
+		progress.setOtherMessage("正在为所有表/存储过程生成DAO.");
 		// 首先为所有表/存储过程生成DAO
 		for (GenTaskByTableViewSp tableViewSp : tasks) {
 			String[] viewNames = StringUtils.split(tableViewSp.getView_names(),

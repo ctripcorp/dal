@@ -156,6 +156,7 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', "#refreshFiles", function (event) {
+        ace.edit("code_editor").setValue(null);
         $.jstree.reference("#jstree_files").refresh();
     });
 

@@ -20,8 +20,10 @@ import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
+import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.resource.ProgressResource;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 
@@ -36,17 +38,18 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public void generateByTableView(List<GenTaskByTableViewSp> tasks) throws Exception {
+
+	public void generateByTableView(List<GenTaskByTableViewSp> tasks,Progress progress) throws Exception {
 		
 		prepareFolder(projectId, "java");
 		
-		Map<String, String> dbs = buildCommonVelocity(tasks);
-		
+		Map<String, String> dbs = buildCommonVelocity(tasks);		
 		List<JavaTableHost> tableHosts = new ArrayList<JavaTableHost>();
 		HashMap<String, SpDbHost> spHostMaps = new HashMap<String, SpDbHost>();
 		List<SpHost> spHosts = new ArrayList<SpHost>();
 		List<ViewHost> viewHosts = new ArrayList<ViewHost>();
 
+		progress.setOtherMessage("正在为所有表/存储过程生成DAO.");
 		// 首先为所有表/存储过程生成DAO
 		for (GenTaskByTableViewSp tableViewSp : tasks) {
 			String[] tableNames = StringUtils.split(
@@ -115,10 +118,19 @@ public class JavaGenerator extends AbstractGenerator {
 		GenUtils.mergeVelocityContext(context, String.format("%s/Dal.config",
 				mavenLikeDir.getAbsolutePath()), "templates/java/Dal.config.tpl");
 
+		ProgressResource.addTotalFiles(progress, tableHosts.size()+spHostMaps.size()+viewHosts.size());
+		
+		progress.setOtherMessage("正在生成TableDao");
 		generateTableDao(tableHosts, context, mavenLikeDir);
+		ProgressResource.addDoneFiles(progress, tableHosts.size());
+		
+		progress.setOtherMessage("正在生成SpDao");
 		generateSpDao(spHostMaps, context, mavenLikeDir);
-		//generateSpDao(spHosts, context, mavenLikeDir);
+		ProgressResource.addDoneFiles(progress, spHostMaps.size());
+		
+		progress.setOtherMessage("正在生成VeiwDao");
 		generateVeiwDao(viewHosts, context, mavenLikeDir);
+		ProgressResource.addDoneFiles(progress, viewHosts.size());
 	}
 
 	private Map<String, String> buildCommonVelocity(List<GenTaskByTableViewSp> tasks) {
@@ -479,8 +491,9 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 	
 	@Override
-	public void generateByFreeSql(List<GenTaskByFreeSql> tasks) {
+	public void generateByFreeSql(List<GenTaskByFreeSql> tasks,Progress progress) {
 
+		progress.setOtherMessage("正在生成FreeSql的代码");
 		// 首先按照ServerID, DbName以及ClassName做一次GroupBy
 		Map<String, List<GenTaskByFreeSql>> groupBy =  freeSqlGroupBy(tasks);
 
@@ -564,13 +577,17 @@ public class JavaGenerator extends AbstractGenerator {
 				projectId));
 		
 //		for(FreeSqlPojoHost host : pojoHosts.values()){
+		ProgressResource.addTotalFiles(progress, pojoHosts.size()+hosts.size());
+		progress.setOtherMessage("正在生成FreeSql的POJO代码");
 		for(JavaMethodHost host : pojoHosts.values()){
 			context.put("host", host);
 
 			GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
 					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
 		}
+		ProgressResource.addDoneFiles(progress, pojoHosts.size());
 
+		progress.setOtherMessage("正在生成FreeSql的Dao和Test代码");
 		for (FreeSqlHost host : hosts) {
 			context.put("host", host);
 			
@@ -580,5 +597,6 @@ public class JavaGenerator extends AbstractGenerator {
 			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoTest.java",
 					mavenLikeDir.getAbsolutePath(), host.getClassName()), "templates/java/FreeSqlDAOTest.java.tpl");
 		}
+		ProgressResource.addDoneFiles(progress, hosts.size());
 	}
 }

@@ -19,7 +19,7 @@
                     resizable: true,
                     style: 'border-right: 1px solid silver;'
                 }, {
-                    type: 'main',
+                    type: 'main'
                     //style: 'background-color: white;'
                 },{ 
                     type: 'preview', 
@@ -264,7 +264,7 @@
                     field: 'method_name',
                     caption: '方法名',
                     type: 'text'
-                }, ],
+                }],
                 columns: [{
                     field: 'db_name',
                     caption: '数据库',
@@ -290,11 +290,11 @@
                     field: 'sql_content',
                     caption: '预览',
                     size: '50%'
-                }, ],
+                } ],
                 records: [],
                 onDblClick: function (target, data) {
                     window.render.editDAO(data.recid);
-                },
+                }
             }));
         },
         editDAO: function(recid){

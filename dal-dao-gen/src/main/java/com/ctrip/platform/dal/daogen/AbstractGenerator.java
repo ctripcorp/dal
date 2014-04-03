@@ -23,7 +23,9 @@ import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
+import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
+import com.ctrip.platform.dal.daogen.resource.ProgressResource;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
@@ -76,7 +78,7 @@ public abstract class AbstractGenerator implements Generator {
 	}
 
 	@Override
-	public boolean generateCode(int projectId, boolean regenerate)
+	public boolean generateCode(int projectId, boolean regenerate, Progress progress)
 			throws Exception {
 
 		this.regenerate = regenerate;
@@ -109,9 +111,9 @@ public abstract class AbstractGenerator implements Generator {
 					daoBySqlBuilder.getTasksByProjectId(projectId));
 		}
 
-		generateByTableView(tableViewSps);
+		generateByTableView(tableViewSps,progress);
 
-		generateByFreeSql(freeSqls);
+		generateByFreeSql(freeSqls,progress);
 
 		return true;
 	}
@@ -252,11 +254,11 @@ public abstract class AbstractGenerator implements Generator {
 	}
 
 	@Override
-	public abstract void generateByTableView(List<GenTaskByTableViewSp> tasks)
+	public abstract void generateByTableView(List<GenTaskByTableViewSp> tasks,Progress progress)
 			throws Exception;
 
 	@Override
-	public abstract void generateByFreeSql(List<GenTaskByFreeSql> tasks)
+	public abstract void generateByFreeSql(List<GenTaskByFreeSql> tasks,Progress progress)
 			throws Exception;
 
 }

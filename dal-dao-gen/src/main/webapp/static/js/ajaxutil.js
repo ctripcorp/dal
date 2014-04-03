@@ -227,7 +227,7 @@
             },function (data) {
 //                $("body").unblock();
                 if (data.code == "OK") {
-//                    progress.stop($("#generateCodeProcessDiv"));
+                    progress.stop($("#generateCodeProcessDiv"));
 //                    $("#viewCode").val($("#regen_language").val());
 //                    $("#refreshFiles").trigger("click");
 //                    $("#generateCode").modal('hide');

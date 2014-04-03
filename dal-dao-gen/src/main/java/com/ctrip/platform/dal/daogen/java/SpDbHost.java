@@ -55,7 +55,8 @@ public class SpDbHost {
 	public Set<String> getDaoImports()
 	{
 		Set<String> imports = new TreeSet<String>();
-		
+		imports.add("com.ctrip.platform.dal.dao.*");
+		imports.add("com.ctrip.platform.dal.dao.helper.*");
 		imports.add(java.sql.SQLException.class.getName());
 		imports.add(java.sql.Types.class.getName());
 		imports.add(java.util.Map.class.getName());

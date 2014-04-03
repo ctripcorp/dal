@@ -202,6 +202,10 @@ public class JavaTableHost {
 			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))
 				continue;
 			imports.add(clazz.getName());
+			
+			if(null != field.getDirection() && 
+					(field.getDirection().name() == "InputOutput" || field.getDirection().name() == "InputOutput"))
+				imports.add(com.ctrip.platform.dal.common.enums.ParameterDirection.class.getName());
 		}
 		
 		return imports;

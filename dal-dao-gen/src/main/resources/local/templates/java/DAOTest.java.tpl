@@ -15,8 +15,8 @@ public class ${host.getPojoClassName()}DaoTest {
 			* The Dal.config can be specified from class-path or local file path.
 			* One of follow three need to be enabled.
 			**/
-			DalClientFactory.initPrivateFactory(); //Load from class-path connections.properties
-			//DalClientFactory.initClientFactory(); // load from class-path Dal.config
+			//DalClientFactory.initPrivateFactory(); //Load from class-path connections.properties
+			DalClientFactory.initClientFactory(); // load from class-path Dal.config
 			//DalClientFactory.initClientFactory("E:/DalMult.config"); // load from the specified Dal.config file path
 			
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();

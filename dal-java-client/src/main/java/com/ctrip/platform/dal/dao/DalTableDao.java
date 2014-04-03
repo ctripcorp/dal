@@ -27,7 +27,7 @@ public final class DalTableDao<T> {
 	private static final String TMPL_SET_VALUE = "%s=?";
 	private static final String AND = " AND ";
 	private static final String OR = " OR ";
-	private static final String TMPL_CALL = "call %s(%s)";
+	private static final String TMPL_CALL = "{call %s(%s)}";
 	
 	private DalClient client;
 	private DalQueryDao queryDao;

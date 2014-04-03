@@ -59,6 +59,16 @@ public class SpHost {
 		this.fields = fields;
 	}
 	
+	public boolean isSpa()
+	{
+		return null != this.spName && this.spName.contains("spA_");
+	}
+	
+	public boolean isSp3()
+	{
+		return null != this.spName && this.spName.contains("sp3_");
+	}
+	
 	public void setCallParameters(String callParameters) {
 		this.callParameters = callParameters;
 	}

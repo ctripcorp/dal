@@ -413,7 +413,7 @@ public class DbUtils {
 						host.setDirection(ParameterDirection.Output);
 					}
 
-					host.setName(spParams.getString("COLUMN_NAME"));
+					host.setName(spParams.getString("COLUMN_NAME").replace("@",""));
 					host.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(host
 							.getSqlType()));
 

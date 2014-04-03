@@ -5,6 +5,9 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ctrip.freeway.config.LogConfig;
+import com.ctrip.freeway.logging.ILog;
+import com.ctrip.freeway.logging.LogManager;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -107,6 +110,9 @@ public class DirectClientDaoShardTest {
 	}
 
 	public static void main(String[] args) {
+		ILog logger = LogManager.getLogger("DAL Java Client");
+		logger.debug("test");
+		System.out.print(LogConfig.getAppID());
 		try {
 			DalClientFactory.initClientFactory("d:/DalMult.config");
 		} catch (Exception e) {

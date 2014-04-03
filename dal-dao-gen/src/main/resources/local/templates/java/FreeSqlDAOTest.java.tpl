@@ -26,7 +26,9 @@ public class ${host.getClassName()}DaoTest {
 			${p.getClassDisplayName()} ${p.getName()} = ${p.getValidationValue()};// Test value here
 #end
 			List<${method.getPojoClassName()}> ${method.getPojoClassName()}s = dao.${method.getName()}(${method.getParameterNames()});
-
+			
+			if(null != ${method.getPojoClassName()}s)
+				System.out.println(${method.getPojoClassName()}s.size());
 #end
 			System.exit(1);
 		} catch (Exception e) {

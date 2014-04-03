@@ -63,7 +63,7 @@ public class ${host.getPojoClassName()}Dao {
 		return result;
 	}
 	
-	public List<${host.getPojoClassName()}> getListByPage(${host.getPojoClassName()} obj, int pagesize, int pageNo) throws SQLException
+	public List<${host.getPojoClassName()}> getListByPage(int pagesize, int pageNo) throws SQLException
 	{
 		if(pageNo < 1 || pagesize < 1) 
 			throw new SQLException("Illigal pagesize or pageNo, pls check");

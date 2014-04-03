@@ -20,11 +20,17 @@ public class ${host.getPojoClassName()}DaoTest {
 			
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 			
+			//Get the count
 			System.out.println(dao.Count());
+			
+			//Get all records
 			List<${host.getPojoClassName()}> ls = dao.getAll();
 			if(null != ls)
 				System.out.println(ls.size());
-			
+				
+			List<${host.getPojoClassName()}> lsp = dao.getListByPage(100, 1);
+			if(null != lsp)
+				System.out.println(ls.size());
 			System.exit(1);
 		} catch (Exception e) {
 			e.printStackTrace();

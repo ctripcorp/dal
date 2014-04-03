@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Set;
 
 import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
@@ -14,6 +13,7 @@ import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.logging.DalEventEnum;
 import com.ctrip.platform.dal.dao.logging.Logger;
+import com.ctrip.platform.dal.dao.strategy.DalShardStrategy;
 
 public class DalTransactionManager {
 	public static final boolean SELECTE = true;
@@ -119,9 +119,13 @@ public class DalTransactionManager {
 		String realDbName;
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
 		if(dbSet.isShardingSupported()){
-			Set<String> shards = dbSet.getStrategy().locateShards(config, logicDbName, hints);
-			// For now, we only access one shard
-			String shard = shards.toArray(new String[1])[0];
+			DalShardStrategy strategy = dbSet.getStrategy();
+
+			// In case the sharding strategy indicate that master shall be used
+			isMaster |= strategy.isMaster(config, logicDbName, hints);
+			String shard = strategy.locateShard(config, logicDbName, hints);
+			dbSet.validate(shard);
+			
 			realDbName = dbSet.getRandomRealDbName(shard, isMaster, isSelect);
 		} else {
 			realDbName = dbSet.getRandomRealDbName(isMaster, isSelect);

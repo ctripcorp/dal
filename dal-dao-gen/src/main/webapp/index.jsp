@@ -191,7 +191,7 @@
 				  	<div class="progress-bar" role="progressbar" style="width:0%;"></div>
 				  </div>
 				  <div id="generateCodeProcessMess">
-				  		正在生成***文件...
+				  		正在初始化...
 				  </div>
                </div>
             </div>

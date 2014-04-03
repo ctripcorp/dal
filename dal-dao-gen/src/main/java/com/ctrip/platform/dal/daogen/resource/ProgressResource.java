@@ -17,9 +17,7 @@ import org.jasig.cas.client.util.AssertionHolder;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 
 /**
- * The schema of {daogen.project} { "name": "InternationalFightEntine",
- * "namespace": "com.ctrip.flight.intl.engine" }
- * 
+ *
  * @author gzxia
  * 
  */
@@ -39,6 +37,7 @@ public class ProgressResource {
 	public final static String ISDOING = "isDoing";
 	
 	public final static String INIT_MESSAGE = "正在初始化...";
+	public final static String SUCCESS_MESSAGE = "生成完毕";
 
 	@Path("/poll")
 	@GET
@@ -51,16 +50,13 @@ public class ProgressResource {
 		Progress progress = getProgress(userNo,project_id);
 		if(FINISH.equals(progress.getStatus())){
 			resumeInitStatus(progress);
-//			progresses.remove(key);
 			Progress success = new Progress();
 			success.setPercent(100);
 			success.setStatus(FINISH);
+			success.setOtherMessage(SUCCESS_MESSAGE);
 			return success;
 		}
 		updatePercent(progress);
-		/*Progress progress = new Progress();
-		progress.setOtherMessage("otherMessage");
-		progress.setPercent(new Random().nextInt(98));*/
 		return progress;
 	}
 	

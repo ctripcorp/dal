@@ -4,17 +4,6 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.DalTableDao;
-import com.ctrip.platform.dal.dao.KeyHolder;
-import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
-import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
-import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
-
 public class ${host.getPojoClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbName()}";
 	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getTableName()}";
@@ -78,11 +67,15 @@ public class ${host.getPojoClassName()}Dao {
 		return client.queryByPk(pk, hints);
 	}
 	
-	public long count()  throws SQLException
+	public int count()  throws SQLException
 	{
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		long result = (Long)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
+#if($host.getDatabaseCategory().name() == "MySql")
+		int result = (int)(long)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
+#else
+		int result = (int)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
+#end
 		return result;
 	}
 	
@@ -239,7 +232,7 @@ public class ${host.getPojoClassName()}Dao {
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
 #end
 #if($method.getCrud_type() == "select")
-		return queryDao.query(sql, parameters, hints, personRowMapper);
+		return baseClient.query(sql, parameters, hints, rowextractor);
 #else
 		return baseClient.update(sql, parameters, hint);
 #end

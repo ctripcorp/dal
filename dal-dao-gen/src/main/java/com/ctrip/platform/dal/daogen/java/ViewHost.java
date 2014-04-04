@@ -80,6 +80,43 @@ public class ViewHost {
 			return this.fields.get(0).getName();
 	}
 	
+	public Set<String> getDaoImports()
+	{
+		Set<String> imports = new TreeSet<String>();
+		imports.add("com.ctrip.platform.dal.dao.*");
+		imports.add("com.ctrip.platform.dal.dao.helper.*");
+		imports.add(java.sql.ResultSet.class.getName());
+		imports.add(java.sql.SQLException.class.getName());
+		imports.add(java.sql.Timestamp.class.getName());
+		imports.add(java.util.List.class.getName());
+		
+		return imports;
+	}
+	
+	public Set<String> getTestImports()
+	{
+		Set<String> imports = new TreeSet<String>();
+		imports.add(java.util.List.class.getName());
+		return imports;
+	}
+	
+	public Set<String> getPojoImports()
+	{
+Set<String> imports = new TreeSet<String>();
+		
+		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(fields);
+		for(JavaParameterHost field: allTypes) {
+			Class<?> clazz = field.getJavaClass();
+			if(byte[].class.equals(clazz))
+				continue;
+			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))
+				continue;
+			imports.add(clazz.getName());
+		}
+		return imports;
+	}
+	
+	
 	public String getColumns()
 	{
 		List<String> tokens = new ArrayList<String>();

@@ -4,27 +4,17 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.List;
-
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalRowMapper;
-import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
-import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
-
 public class ${host.getPojoClassName()}Dao {
 
 	private static final String DATA_BASE = "${host.getDbName()}";
 	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getViewName()}";
 	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getViewName()}";
+#if($host.getDatabaseCategory().name() == "MySql")
 	private static final String PAGE_MYSQL_PATTERN = "SELECT * FROM ${host.getViewName()} WHERE LIMIT %s, %s";
+#else
 	private static final String PAGE_SQL_PATTERN = "WITH CTE AS (select *, row_number() over(order by ${host.getOverColumns()} desc ) as rownum" 
 			+" from ${host.getViewName()} (nolock)) select * from CTE where rownum between %s and %s";
+#end
 			
 	private DalClient client;
 	private ${host.getPojoClassName()}RowMapper mapper;
@@ -61,15 +51,19 @@ public class ${host.getPojoClassName()}Dao {
 	  *@return 
 	  *     the ${host.getPojoClassName()} records count
 	**/
-	public long Count() throws SQLException
+	public int Count() throws SQLException
 	{
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		long result = (Long)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
+#if($host.getDatabaseCategory().name() == "MySql")
+		int result = (int)(long)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
+#else
+		int result = (int)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
+#end
 		return result;
 	}
 	
-	public List<${host.getPojoClassName()}> getListByPage(${host.getPojoClassName()} obj, int pagesize, int pageNo) throws SQLException
+	public List<${host.getPojoClassName()}> getListByPage(int pagesize, int pageNo) throws SQLException
 	{
 		if(pageNo < 1 || pagesize < 1) 
 			throw new SQLException("Illigal pagesize or pageNo, pls check");

@@ -4,11 +4,6 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
-import com.ctrip.platform.dal.dao.DalRowMapper;
-import com.ctrip.platform.dal.dao.StatementParameters;
-
 public class ${host.getClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbName()}";
 	private DalQueryDao queryDao;

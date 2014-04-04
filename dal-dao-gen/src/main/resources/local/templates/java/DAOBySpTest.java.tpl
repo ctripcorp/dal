@@ -1,10 +1,9 @@
 package ${host.getPackageName()};
 
-#foreach( $field in ${host.getDaoImports()} )
+#foreach( $field in ${host.getTestImports()} )
 import ${field};
 #end
 
-import java.util.Map;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 
 public class ${host.getDbName()}SpDaoTest {
@@ -15,24 +14,25 @@ public class ${host.getDbName()}SpDaoTest {
 			* The Dal.config can be specified from class-path or local file path.
 			* One of follow three need to be enabled.
 			**/
-			DalClientFactory.initPrivateFactory(); //Load from class-path connections.properties
-			//DalClientFactory.initClientFactory(); // load from class-path Dal.config
+			//DalClientFactory.initPrivateFactory(); //Load from class-path connections.properties
+			DalClientFactory.initClientFactory(); // load from class-path Dal.config
 			//DalClientFactory.initClientFactory("E:/DalMult.config"); // load from the specified Dal.config file path
 			
 			${host.getDbName()}SpDao dao = new ${host.getDbName()}SpDao();
-			
+
+#set($count = 0)
 #foreach($h in $host.getSpHosts())
+#set($count = $count+1)
 			//Test call${h.getPojoClassName()} method
-			${h.getPojoClassName()} param = new ${h.getPojoClassName()}();	
+			${h.getPojoClassName()} param${count} = new ${h.getPojoClassName()}();	
 			// Set test value here
 			//param.setXXX(value);
 			
-			Map<String, ?> result = dao.call${h.getPojoClassName()}(param);
-			for(String key: result.keySet()) {
+			Map<String, ?> result${count} = dao.call${h.getPojoClassName()}(param${count});
+			for(String key: result${count}.keySet()) {
 				System.out.print("Key: " + key);
-				System.out.println(" Value: " + result.get(key));
+				System.out.println(" Value: " + result${count}.get(key));
 			}
-#break
 #end
 			
 			System.exit(1);

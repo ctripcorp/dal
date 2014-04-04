@@ -1,4 +1,3 @@
-
 package com.ctrip.platform.dal.daogen.entity;
 
 import java.sql.ResultSet;
@@ -26,7 +25,7 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	
 	private boolean pagination;
 	
-private boolean generated;
+	private boolean generated;
 	
 	private int version;
 

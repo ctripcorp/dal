@@ -102,7 +102,7 @@ public class JavaMethodHost {
 		String[] paramsDeclaration = new String[parameters.size()];
 		int i = 0;
 		for(JavaParameterHost parameter: parameters) {
-			paramsDeclaration[i++] = String.format("%s %s", parameter.getClassDisplayName(), parameter.getName());
+			paramsDeclaration[i++] = String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias());
 		}
 		
 		return StringUtils.join(paramsDeclaration, ", ");

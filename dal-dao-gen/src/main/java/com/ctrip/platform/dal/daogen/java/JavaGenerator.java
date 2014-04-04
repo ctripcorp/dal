@@ -38,12 +38,12 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	@Override
+
 	public void generateByTableView(List<GenTaskByTableViewSp> tasks,Progress progress) throws Exception {
 		
 		prepareFolder(projectId, "java");
 		
-		Map<String, String> dbs = buildCommonVelocity(tasks);
-		
+		Map<String, String> dbs = buildCommonVelocity(tasks);		
 		List<JavaTableHost> tableHosts = new ArrayList<JavaTableHost>();
 		HashMap<String, SpDbHost> spHostMaps = new HashMap<String, SpDbHost>();
 		List<SpHost> spHosts = new ArrayList<SpHost>();
@@ -195,7 +195,7 @@ public class JavaGenerator extends AbstractGenerator {
 			GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sSpDao.java",
 					mavenLikeDir.getAbsolutePath(), host.getDbName()), "templates/java/DAOBySp.java.tpl");
 
-			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoTest.java",
+			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sSpDaoTest.java",
 					mavenLikeDir.getAbsolutePath(), host.getDbName()), "templates/java/DAOBySpTest.java.tpl");
 			
 			for(SpHost sp : host.getSpHosts())
@@ -395,9 +395,14 @@ public class JavaGenerator extends AbstractGenerator {
 				String[] conditions = StringUtils.split(
 						builder.getCondition(), ";");
 				for (String condition : conditions) {
-					String name = StringUtils.split(condition, ",")[0];
+					String[] tokens = StringUtils.split(condition, ",");
+					String name = tokens[0];
+					String alias = "";
+					if(tokens.length == 3) 
+						alias = tokens[2];
 					for (JavaParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
+							pHost.setAlias(alias);
 							parameters.add(pHost);
 							break;
 						}
@@ -426,9 +431,13 @@ public class JavaGenerator extends AbstractGenerator {
 							break;
 						}
 					}
-					for (String condition : conditions) {
-						String name = StringUtils.split(condition, ",")[0];
+					for (String condition : conditions) {	
+						String[] tokens = StringUtils.split(condition, ",");
+						String name = tokens[0];
+						String alias = "";
+						if(tokens.length == 3) alias = tokens[2];
 						if (pHost.getName().equals(name)) {
+							pHost.setAlias(alias);
 							parameters.add(pHost);
 							break;
 						}

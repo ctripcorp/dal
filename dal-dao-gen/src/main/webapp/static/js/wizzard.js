@@ -10,26 +10,26 @@
     };
 
     var variableHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">';
-    var variable_typesHtml = '<select %s class="span5">' 
-    + "<option value='_please_select'>--参数类型--</option>" 
-    + "<option value='-7'>Bit----Boolean</option>"  
-    + "<option value='-6'>TinyInt----Byte</option>" 
-    + "<option value='5'>SmallInt----Short</option>" 
-    + "<option value='4'>Integer----int</option>" 
-    + "<option value='-5'>BigInt----long</option>" 
-    +  "<option value='7'>Real----Float</option>" 
-    + "<option value='8'>Double</option>" 
-    + "<option value='3'>Decimal</option>" 
-    + "<option value='1'>Char</option>" 
-    + "<option value='12'>Varchar----String</option>" 
-    + "<option value='-1'>LongVarchar----String</option>" 
-    + "<option value='-15'>Nchar----String</option>" 
-    + "<option value='-9'>NVarchar----String</option>" 
-    + "<option value='-16'>LongNVarchar----String</option>" 
-    + "<option value='91'>Date</option>" 
-    + "<option value='92'>Time----TimeSpan</option>" 
-    + "<option value='93'>Timestamp----DateTime</option>"  
-    +   "</select></div><br>";
+    var variable_typesHtml = '<select %s class="span5">'
+        + "<option value='_please_select'>--参数类型--</option>"
+        + "<option value='-7'>Bit----Boolean</option>"
+        + "<option value='-6'>TinyInt----Byte</option>"
+        + "<option value='5'>SmallInt----Short</option>"
+        + "<option value='4'>Integer----int</option>"
+        + "<option value='-5'>BigInt----long</option>"
+        +  "<option value='7'>Real----Float</option>"
+        + "<option value='8'>Double</option>"
+        + "<option value='3'>Decimal</option>"
+        + "<option value='1'>Char</option>"
+        + "<option value='12'>Varchar----String</option>"
+        + "<option value='-1'>LongVarchar----String</option>"
+        + "<option value='-15'>Nchar----String</option>"
+        + "<option value='-9'>NVarchar----String</option>"
+        + "<option value='-16'>LongNVarchar----String</option>"
+        + "<option value='91'>Date</option>"
+        + "<option value='92'>Time----TimeSpan</option>"
+        + "<option value='93'>Timestamp----DateTime</option>"
+        +   "</select></div><br>";
 
     wizzard.prototype = {
 
@@ -71,209 +71,209 @@
                 //首先蒙板化整个body,在后续get成功或者失败时，取消蒙板化
                 var gen_style = $("#gen_style").val();
                 switch (gen_style) {
-                case "table_view_sp":
-                    cblock($("body"));
-                    $.get(sprintf("/rest/db/table_sps?db_name=%s&rand=%s",
-                        $("#databases").val(), Math.random())).done(function (data) {
-                        $("select[id$=table_list] > option").remove();
-                        $("select[id$=view_list] > option").remove();
-                        $("select[id$=sp_list] > option").remove();
-                        var tableList = [];
-                        var viewList = [];
-                        var spList = [];
-                        $.each(data.tables, function (index, value) {
-                            tableList.push($('<option>', {
-                                value: value,
-                                text: value
-                            }));
-                        });
-                        $.each(data.views, function (index, value) {
-                            viewList.push($('<option>', {
-                                value: value,
-                                text: value
-                            }));
-                        });
-                        $.each(data.sps, function (index, value) {
-                            spList.push($('<option>', {
-                                value: value.schema + "." + value.name,
-                                text: value.schema + "." + value.name
-                            }));
-                        });
-                        if(data.dbType == "MySQL"){
-                            $("#cud_by_sp").prop("checked", false);
-                            $(".mysql_hide").hide();
-                        }else{
-                            $("#cud_by_sp").prop("checked", true);
-                            $(".mysql_hide").show();
+                    case "table_view_sp":
+                        cblock($("body"));
+                        $.get(sprintf("/rest/db/table_sps?db_name=%s&rand=%s",
+                                $("#databases").val(), Math.random())).done(function (data) {
+                                $("select[id$=table_list] > option").remove();
+                                $("select[id$=view_list] > option").remove();
+                                $("select[id$=sp_list] > option").remove();
+                                var tableList = [];
+                                var viewList = [];
+                                var spList = [];
+                                $.each(data.tables, function (index, value) {
+                                    tableList.push($('<option>', {
+                                        value: value,
+                                        text: value
+                                    }));
+                                });
+                                $.each(data.views, function (index, value) {
+                                    viewList.push($('<option>', {
+                                        value: value,
+                                        text: value
+                                    }));
+                                });
+                                $.each(data.sps, function (index, value) {
+                                    spList.push($('<option>', {
+                                        value: value.schema + "." + value.name,
+                                        text: value.schema + "." + value.name
+                                    }));
+                                });
+                                if(data.dbType == "MySQL"){
+                                    $("#cud_by_sp").prop("checked", false);
+                                    $(".mysql_hide").hide();
+                                }else{
+                                    $("#cud_by_sp").prop("checked", true);
+                                    $(".mysql_hide").show();
+                                }
+
+                                $("#table_list").append(tableList).multipleSelect({
+                                    "refresh": true,
+                                    onOpen: function() {
+                                        $(".step2-1").height(330);
+                                    },
+                                    onClose: function() {
+                                        $(".step2-1").height(245);
+                                    }
+                                });
+                                $("#view_list").append(viewList).multipleSelect({
+                                    "refresh": true,
+                                    onOpen: function() {
+                                        $(".step2-1").height(330);
+                                    },
+                                    onClose: function() {
+                                        $(".step2-1").height(245);
+                                    }
+                                });
+                                $("#sp_list").append(spList).multipleSelect({
+                                    "refresh": true,
+                                    onOpen: function() {
+                                        $(".step2-1").height(330);
+                                    },
+                                    onClose: function() {
+                                        $(".step2-1").height(245);
+                                    }
+                                });
+
+                                if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "table_view_sp") {
+                                    if (record.table_names != undefined)
+                                        $('#table_list').multipleSelect('setSelects', record.table_names.split(","));
+                                    if (record.view_names != undefined)
+                                        $('#view_list').multipleSelect('setSelects', record.view_names.split(","));
+                                    if (record.sp_names != undefined)
+                                        $('#sp_list').multipleSelect('setSelects', record.sp_names.split(","));
+                                }
+                                current.hide();
+
+                                $(".step2-1").show();
+                                $("body").unblock();
+                            }).fail(function (data) {
+                                $("#error_msg").text("获取表/视图列表失败，是否有权限");
+                                $("body").unblock();
+                            });
+                        break;
+                    case "auto":
+                        //在显示下一页之前，清空下一页的信息
+                        if ($("#tables")[0] != undefined && $("#tables")[0].selectize != undefined) {
+                            $("#tables")[0].selectize.clearOptions();
+                        } else {
+                            $("#tables").selectize({
+                                //maxItems: null,
+                                valueField: 'id',
+                                labelField: 'title',
+                                searchField: 'title',
+                                sortField: 'title',
+                                options: [],
+                                create: false
+                            });
                         }
 
-                        $("#table_list").append(tableList).multipleSelect({
-                            "refresh": true,
-                            onOpen: function() {
-                                $(".step2-1").height(330);
-                            },
-                            onClose: function() {
-                                $(".step2-1").height(245);
-                            }
-                        });
-                        $("#view_list").append(viewList).multipleSelect({
-                            "refresh": true,
-                            onOpen: function() {
-                                $(".step2-1").height(330);
-                            },
-                            onClose: function() {
-                                $(".step2-1").height(245);
-                            }
-                        });
-                        $("#sp_list").append(spList).multipleSelect({
-                            "refresh": true,
-                            onOpen: function() {
-                                $(".step2-1").height(330);
-                            },
-                            onClose: function() {
-                                $(".step2-1").height(245);
-                            }
+                        $("#tables")[0].selectize.on('dropdown_open', function(dropdown){
+                            $(".step2-2").height(240);
                         });
 
-                        if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "table_view_sp") {
-                            if (record.table_names != undefined)
-                                $('#table_list').multipleSelect('setSelects', record.table_names.split(","));
-                            if (record.view_names != undefined)
-                                $('#view_list').multipleSelect('setSelects', record.view_names.split(","));
-                            if (record.sp_names != undefined)
-                                $('#sp_list').multipleSelect('setSelects', record.sp_names.split(","));
+                        $("#tables")[0].selectize.on('dropdown_close', function(dropdown){
+                            $(".step2-2").height(145);
+                        });
+
+                        cblock($("body"));
+                        $.get(
+                            sprintf("/rest/db/tables?db_name=%s&rand=%s",
+                                $("#databases").val(),
+                                Math.random()), function (data) {
+                                var results = [];
+                                $.each(data, function (index, value) {
+                                    results.push({
+                                        id: value,
+                                        title: value
+                                    });
+                                });
+                                $("#tables")[0].selectize.addOption(results);
+                                $("#tables")[0].selectize.refreshOptions(false);
+                                if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "auto") {
+                                    $("#tables")[0].selectize.setValue(record.table_name);
+                                    $("#method_name").val(record.method_name);
+                                    $("#crud_option").val(record.crud_type);
+                                }
+                                current.hide();
+                                $(".step2-2").show();
+                                $("body").unblock();
+                            }).fail(function(data){
+                                alert("获取所有表失败!");
+                            });
+
+                        break;
+                    case "sql":
+                        if ($("#sql_class_name")[0] != undefined && $("#sql_class_name")[0].selectize != undefined) {
+                            $("#sql_class_name")[0].selectize.clearOptions();
+                        } else {
+                            $("#sql_class_name").selectize({
+                                //maxItems: null,
+                                valueField: 'value',
+                                labelField: 'title',
+                                searchField: 'title',
+                                sortField: 'value',
+                                options: [],
+                                create: true
+                            });
                         }
-                        current.hide();
-                        
-                        $(".step2-1").show();
-                        $("body").unblock();
-                    }).fail(function (data) {
-                        $("#error_msg").text("获取表/视图列表失败，是否有权限");
-                        $("body").unblock();
-                    });
-                    break;
-                case "auto":
-                    //在显示下一页之前，清空下一页的信息
-                    if ($("#tables")[0] != undefined && $("#tables")[0].selectize != undefined) {
-                        $("#tables")[0].selectize.clearOptions();
-                    } else {
-                        $("#tables").selectize({
-                            //maxItems: null,
-                            valueField: 'id',
-                            labelField: 'title',
-                            searchField: 'title',
-                            sortField: 'title',
-                            options: [],
-                            create: false
-                        });
-                    }  
-
-                    $("#tables")[0].selectize.on('dropdown_open', function(dropdown){
-                        $(".step2-2").height(240);
-                    });
-
-                    $("#tables")[0].selectize.on('dropdown_close', function(dropdown){
-                        $(".step2-2").height(145);
-                    });
-
-                    cblock($("body"));
-                    $.get(
-                        sprintf("/rest/db/tables?db_name=%s&rand=%s",
-                            $("#databases").val(), 
-                            Math.random()), function (data) {
-                            var results = [];
-                            $.each(data, function (index, value) {
-                                results.push({
-                                    id: value,
+                        if ($("#sql_pojo_name")[0] != undefined && $("#sql_pojo_name")[0].selectize != undefined) {
+                            $("#sql_pojo_name")[0].selectize.clearOptions();
+                        } else {
+                            $("#sql_pojo_name").selectize({
+                                //maxItems: null,
+                                valueField: 'value',
+                                labelField: 'title',
+                                searchField: 'title',
+                                sortField: 'value',
+                                options: [],
+                                create: true
+                            });
+                        }
+                        //在显示下一页之前，清空下一页的信息
+                        $.get("/rest/task/sql_class?project_id="
+                            + w2ui['grid'].current_project
+                            + "&db_name=" + $("#databases").val()
+                            + "&rand=" + Math.random(), function (data) {
+                            var update = $("#page1").attr('is_update') == "1"
+                                && record != undefined
+                                && record.task_type == "sql";
+                            var clazz = [];
+                            var pojos = [];
+                            $.each(data.classes, function (index, value) {
+                                clazz.push({
+                                    value: value,
                                     title: value
                                 });
                             });
-                            $("#tables")[0].selectize.addOption(results);
-                            $("#tables")[0].selectize.refreshOptions(false);
-                            if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "auto") {
-                                $("#tables")[0].selectize.setValue(record.table_name);
-                                $("#method_name").val(record.method_name);
-                                $("#crud_option").val(record.crud_type);
-                            } 
-                            current.hide();
-                            $(".step2-2").show();
-                            $("body").unblock();
-                        }).fail(function(data){
-                             alert("获取所有表失败!");
-                        });
-
-                    break;
-                case "sql":
-                    if ($("#sql_class_name")[0] != undefined && $("#sql_class_name")[0].selectize != undefined) {
-                        $("#sql_class_name")[0].selectize.clearOptions();
-                    } else {
-                        $("#sql_class_name").selectize({
-                            //maxItems: null,
-                            valueField: 'value',
-                            labelField: 'title',
-                            searchField: 'title',
-                            sortField: 'value',
-                            options: [],
-                            create: true
-                        });
-                    }
-                    if ($("#sql_pojo_name")[0] != undefined && $("#sql_pojo_name")[0].selectize != undefined) {
-                        $("#sql_pojo_name")[0].selectize.clearOptions();
-                    } else {
-                        $("#sql_pojo_name").selectize({
-                            //maxItems: null,
-                            valueField: 'value',
-                            labelField: 'title',
-                            searchField: 'title',
-                            sortField: 'value',
-                            options: [],
-                            create: true
-                        });
-                    }
-                    //在显示下一页之前，清空下一页的信息
-                    $.get("/rest/task/sql_class?project_id=" 
-                        + w2ui['grid'].current_project 
-                        + "&db_name=" + $("#databases").val() 
-                        + "&rand=" + Math.random(), function (data) {
-                        var update = $("#page1").attr('is_update') == "1" 
-                            && record != undefined 
-                            && record.task_type == "sql";
-                        var clazz = [];
-                        var pojos = [];
-                        $.each(data.classes, function (index, value) {
-                            clazz.push({
-                                value: value,
-                                title: value
+                            $.each(data.pojos, function (index, value) {
+                                pojos.push({
+                                    value: value,
+                                    title: value
+                                });
                             });
-                        });
-                        $.each(data.pojos, function (index, value) {
-                            pojos.push({
-                                value: value,
-                                title: value
+                            $("#sql_class_name")[0].selectize.addOption(clazz);
+                            $("#sql_pojo_name")[0].selectize.addOption(pojos);
+
+                            $("#sql_class_name")[0].selectize.refreshOptions(false);
+                            $("#sql_pojo_name")[0].selectize.refreshOptions(false);
+
+                            if (update) {
+                                $("#sql_class_name")[0].selectize.setValue(record.class_name);
+                                $("#sql_pojo_name")[0].selectize.setValue(record.pojo_name);
+                                $("#sql_method_name").val(record.method_name);
+                                var editor = ace.edit("sql_editor");
+                                editor.setTheme("ace/theme/monokai");
+                                editor.getSession().setMode("ace/mode/sql");
+                                editor.setValue(record.sql_content);
+                            }
+                        }).fail(function (data) {
+                                $("#error_msg").text("获取历史记录失败");
                             });
-                        });
-                        $("#sql_class_name")[0].selectize.addOption(clazz);
-                        $("#sql_pojo_name")[0].selectize.addOption(pojos);
 
-                        $("#sql_class_name")[0].selectize.refreshOptions(false);
-                        $("#sql_pojo_name")[0].selectize.refreshOptions(false);
-
-                        if (update) {
-                            $("#sql_class_name")[0].selectize.setValue(record.class_name);
-                            $("#sql_pojo_name")[0].selectize.setValue(record.pojo_name);
-                            $("#sql_method_name").val(record.method_name);
-                            var editor = ace.edit("sql_editor");
-                            editor.setTheme("ace/theme/monokai");
-                            editor.getSession().setMode("ace/mode/sql");
-                            editor.setValue(record.sql_content);
-                        }
-                    }).fail(function (data) {
-                        $("#error_msg").text("获取历史记录失败");
-                    });
-                    
-                    current.hide();
-                    $(".step2-3").show();
-                    break;
+                        current.hide();
+                        $(".step2-3").show();
+                        break;
                 }
             }
             else if (current.hasClass("step2-2")) {
@@ -299,7 +299,9 @@
                 cblock($("body"));
                 $.get(url, function (data) {
                     var fieldList = [];
+                    var values = [];
                     $.each(data, function (index, value) {
+                        values.push(value.name);
                         fieldList.push($('<option>', {
                             value: value.name,
                             text: sprintf("%s%s%s",
@@ -311,7 +313,7 @@
                             text: value.name
                         }));
                     });
-                    
+
                     $("#fields").append(fieldList).multipleSelect({
                         "refresh": true,
                         onCheckAll: function() {
@@ -345,7 +347,7 @@
                     current.hide();
                     $(".step2-2-1").show();
 
-                    var op_type = $("#crud_option").val(); 
+                    var op_type = $("#crud_option").val();
                     if (op_type == "select") {
                         $(".step2-2-1-1").show();
                         $(".step2-2-1-2").show();
@@ -359,25 +361,31 @@
                         $(".step2-2-1-1").hide();
                         $(".step2-2-1-2").show();
                     }
+                    if("java"==$("#sql_style").val() && "select"==$("#crud_option").val()){
+                        $('#fields').multipleSelect('setSelects', values);
+                        $('#fields').multipleSelect('disable');
+                        window.sql_builder.build();
+                    }
                     $("body").unblock();
                 }).fail(function(data){
-                    $("#error_msg").text("获取表的信息失败，是否有权限");
-                    $("body").unblock();
-                });
+                        $("#error_msg").text("获取表的信息失败，是否有权限");
+                        $("body").unblock();
+                    });
 
-            } 
+            }
             else if (current.hasClass("step2-1")) {
                 window.ajaxutil.post_task();
             }
             else if (current.hasClass("step2-2-1")) {
-                if ($("#crud_option").val() != "delete" && $('#fields').multipleSelect('getSelects').length < 1) {
+                if ($("#crud_option").val() != "delete" &&  $('#fields').multipleSelect('getSelects').length < 1 ) {
                     $("#error_msg").text("请选择至少一个字段！");
                     return;
                 }
                 $("#error_msg").text("");
 
                 window.ajaxutil.post_task();
-            }else if (current.hasClass("step2-3")) {
+            }
+            else if (current.hasClass("step2-3")) {
                 //首先解析Sql语句，提取出参数
                 var regexIndex = /(\?{1})/igm;
                 var regexNames = /[@:](\w+)/igm;
@@ -389,7 +397,7 @@
 
                 if ($("#page1").attr('is_update') == "1") {
                     var splitedParams = record.parameters.split(";");
-                     
+
                     $.each(splitedParams, function (index, value) {
                         if (value != "") {
                             var resultParams = value.split(",");
@@ -401,28 +409,28 @@
                 while ((result = regexIndex.exec(sqlContent))) {
                     i++;
                     if(id_values[sprintf("param%s", i)] != undefined){
-                        htmls = htmls 
-                        + sprintf(variableHtml, sprintf("param%s", i)) 
-                        + sprintf(variable_typesHtml, 
-                            sprintf("id='db_type_%s'", sprintf("param%s", i)));    
+                        htmls = htmls
+                            + sprintf(variableHtml, sprintf("param%s", i))
+                            + sprintf(variable_typesHtml,
+                            sprintf("id='db_type_%s'", sprintf("param%s", i)));
                     }else{
-                        htmls = htmls 
-                        + sprintf(variableHtml, sprintf("param%s", i)) 
-                        + variable_typesHtml;
+                        htmls = htmls
+                            + sprintf(variableHtml, sprintf("param%s", i))
+                            + variable_typesHtml;
                     }
                 }
                 if (htmls.length == 0) {
                     while ((result = regexNames.exec(sqlContent))) {
                         var realName = result[1];
                         if(id_values[realName] != undefined){
-                            htmls = htmls 
-                            + sprintf(variableHtml, realName) 
-                            + sprintf(variable_typesHtml, 
-                                sprintf("id='db_type_%s'", realName));    
+                            htmls = htmls
+                                + sprintf(variableHtml, realName)
+                                + sprintf(variable_typesHtml,
+                                sprintf("id='db_type_%s'", realName));
                         }else{
-                            htmls = htmls 
-                            + sprintf(variableHtml, realName) 
-                            + variable_typesHtml;
+                            htmls = htmls
+                                + sprintf(variableHtml, realName)
+                                + variable_typesHtml;
                         }
                     }
                 }
@@ -439,7 +447,8 @@
 
                 current.hide();
                 $(".step2-3-1").show();
-            } else if (current.hasClass("step2-3-1")) {
+            }
+            else if (current.hasClass("step2-3-1")) {
                 window.ajaxutil.post_task();
             }
         },
@@ -450,8 +459,8 @@
             }
             current.hide();
 
-            if (current.hasClass("step2-1") 
-                || current.hasClass("step2-2") 
+            if (current.hasClass("step2-1")
+                || current.hasClass("step2-2")
                 || current.hasClass("step2-3")) {
                 $(".step1").show();
             } else if (current.hasClass("step2-2-1")) {

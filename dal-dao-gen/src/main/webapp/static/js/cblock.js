@@ -20,7 +20,7 @@
 	};
 
 	var cunblock = function(el){
-		
+		$(el).unblock();
 	};
 
 	/**
@@ -28,4 +28,4 @@
 	 */
 	ctx.cblock = cblock;
 	ctx.cunblock = cunblock;
-})(typeof exports != "undefined" ? exports : window);
+})(window);

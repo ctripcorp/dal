@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.tester.baseDao;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -364,6 +365,62 @@ public class DirectClientDaoTest {
 		}
 	}
 	
+	public void testIsolationLevel() {
+		try {
+			// Test for simple connection
+			DalClient client = DalClientFactory.getClient("dao_test");
+			final DalHints hints = new DalHints();
+			hints.setIsolationLevel(Connection.TRANSACTION_REPEATABLE_READ);
+
+			client.query("select * from Person", parameters, hints, new ColumnTypeExtractor());
+			
+			
+			//Test for transaction
+			// this will pass
+			List<DalCommand> cmds1 = new LinkedList<DalCommand>();
+			cmds1.add(new DalCommand() {
+				@Override
+				public boolean execute(DalClient client) throws SQLException {
+					selectPerson(client);
+					return true;
+				}
+			});
+			client.execute(cmds1, hints);
+
+			// This will fail
+			List<DalCommand> cmds = new LinkedList<DalCommand>();
+			cmds.add(new DalCommand() {
+				@Override
+				public boolean execute(DalClient client) throws SQLException {
+					selectPerson(client);
+
+					selectPerson(client);
+					List<DalCommand> cmds = new LinkedList<DalCommand>();
+					cmds.add(new DalCommand() {
+						@Override
+						public boolean execute(DalClient client) throws SQLException {
+							String update = "update Person set name='abcde' where id > 2000";
+							String[] sqls = new String[]{update, update};
+
+							System.out.println(client.batchUpdate(sqls, hints));
+
+							client.update(update, parameters, hints);
+							selectPerson(client);
+							return true;
+						}
+					});
+
+					client.execute(cmds, hints);
+					return true;
+				}
+			});
+
+			client.execute(cmds, hints);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void main(String[] args) {
         LogConfig.setAppID("9302011");
 //      LogConfig.setLoggingServerIP("localhost");
@@ -380,7 +437,8 @@ public class DirectClientDaoTest {
 		
 		DirectClientDaoTest test = new DirectClientDaoTest();
 		
-		test.testSelect();
+		test.testIsolationLevel();
+//		test.testSelect();
 		//test.testType("dao_test", "ManyTypes");
 		//test.test();
 //		test.test2();

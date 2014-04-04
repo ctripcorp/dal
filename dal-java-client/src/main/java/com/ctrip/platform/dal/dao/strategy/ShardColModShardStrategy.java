@@ -24,7 +24,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	}
 
 	@Override
-	public Set<String> locateShards(DalConfigure configure, String logicDbName,
+	public String locateShard(DalConfigure configure, String logicDbName,
 			DalHints hints) {
 		if(columns.length == 0)
 			return null;
@@ -38,9 +38,10 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		Set<String> shards = new HashSet<String>();
 		for(String column: columns) {
 			Integer id = shardColValues.get(column);
-			if(id != null)
-				shards.add(String.valueOf(id%mod));
+			if(id != null) {
+				return String.valueOf(id%mod);
+			}
 		}
-		return shards;
+		return null;
 	}
 }

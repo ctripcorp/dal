@@ -48,6 +48,14 @@
                 postData["condition"] = selectedConditions.join(";");
                 postData["sql_content"] = ace.edit("sql_builder").getValue();
 
+                var paramList = [];
+                $.each($("#param_list").children("div"), function (index, value) {
+                    var first = $(value).children("input").eq(0);
+                    var second = $(value).children("select").eq(0);
+                    paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
+                });
+                postData["params"] = paramList.join(";");
+
                 $.post("/rest/task/auto", postData,function (data) {
                     if (data.code == "OK") {
                         $("#page1").modal('hide');

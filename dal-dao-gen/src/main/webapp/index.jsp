@@ -385,6 +385,11 @@
                      </div>  
                      <div id="param_list_auto" class="row-fluid">      
                      </div>
+                     <br/>
+                      <div class="row-fluid">
+                        <div id="step2_2_2_sql_editor" class="span12" style="height:200px;">
+                        </div>
+                     </div>
                   </div>
                
                   <div class="steps step2-3 row-fluid" from="" style="height:348px;">

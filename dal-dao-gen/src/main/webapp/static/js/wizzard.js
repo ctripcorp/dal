@@ -346,8 +346,10 @@
             if("java"==$("#sql_style").val() && "select"==$("#crud_option").val()){
                 $('#fields').multipleSelect('setSelects', values);
                 $('#fields').multipleSelect('disable');
-                window.sql_builder.build();
+            }else{
+                $('#fields').multipleSelect('enable');
             }
+            window.sql_builder.build();
             $("body").unblock();
         }).fail(function(data){
                 $("#error_msg").text("获取表的信息失败，是否有权限");
@@ -371,16 +373,16 @@
         var i = 0;
         var id_values = {};
 
-        if ($("#page1").attr('is_update') == "1") {
-            var splitedParams = record.parameters.split(";");
-
-            $.each(splitedParams, function (index, value) {
-                if (value != "") {
-                    var resultParams = value.split(",");
-                    id_values["db_type_"+ resultParams[0]] = resultParams[1];
-                }
-            });
-        }
+//        if ($("#page1").attr('is_update') == "1") {
+//            var splitedParams = record.parameters.split(";");
+//
+//            $.each(splitedParams, function (index, value) {
+//                if (value != "") {
+//                    var resultParams = value.split(",");
+//                    id_values["db_type_"+ resultParams[0]] = resultParams[1];
+//                }
+//            });
+//        }
 
         while ((result = regexIndex.exec(sqlContent))) {
             i++;
@@ -416,13 +418,13 @@
             return;
         }
 
-        $("#param_list").html(htmls);
+        $("#param_list_auto").html(htmls);
         $.each(id_values, function(key, value){
             $("#"+key).val(value);
         });
 
         current.hide();
-        $(".step2-3-1").show();
+        $(".step2-2-2").show();
 
 //        window.ajaxutil.post_task();
     };
@@ -533,6 +535,9 @@
             else if (current.hasClass("step2-2-1")) {
                 step2_2_1(record, current);
             }
+            else if (current.hasClass("step2-2-2")) {
+                window.ajaxutil.post_task();
+            }
             else if (current.hasClass("step2-3")) {
                 step2_3(record, current);
             }
@@ -553,6 +558,8 @@
                 $(".step1").show();
             } else if (current.hasClass("step2-2-1")) {
                 $(".step2-2").show();
+            } else if (current.hasClass("step2-2-2")) {
+                $(".step2-2-1").show();
             }  else if (current.hasClass("step2-3-1")) {
                 $(".step2-3").show();
             }

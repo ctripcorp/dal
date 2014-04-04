@@ -15,7 +15,6 @@ public class SpHost {
 	private String spName;
 	private String callParameters;
 	private List<JavaParameterHost> fields = new ArrayList<JavaParameterHost>();
-	private Set<String> imports = new TreeSet<String>();
 	
 	public String getPojoClassName() {
 		return pojoClassName;
@@ -59,6 +58,16 @@ public class SpHost {
 		this.fields = fields;
 	}
 	
+	public boolean isSpa()
+	{
+		return null != this.spName && this.spName.contains("spA_");
+	}
+	
+	public boolean isSp3()
+	{
+		return null != this.spName && this.spName.contains("sp3_");
+	}
+	
 	public void setCallParameters(String callParameters) {
 		this.callParameters = callParameters;
 	}
@@ -76,17 +85,6 @@ public class SpHost {
 	public String getCallParameters()
 	{
 		return this.callParameters;
-		/*String params = "";
-		if(null != this.fields)
-		{
-			for (int i = 0; i < this.fields.size(); i++) {
-				if(0 != i)
-					params += ",?"; 
-				else
-					params = "?";
-			}
-		}
-		return params;*/
 	}
 	
 	public Set<String> getPojoImports() {

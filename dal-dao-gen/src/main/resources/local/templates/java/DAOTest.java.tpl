@@ -1,6 +1,6 @@
 package ${host.getPackageName()};
 
-#foreach( $field in ${host.getDaoImports()} )
+#foreach( $field in ${host.getTestImports()} )
 import ${field};
 #end
 
@@ -15,57 +15,57 @@ public class ${host.getPojoClassName()}DaoTest {
 			* The Dal.config can be specified from class-path or local file path.
 			* One of follow three need to be enabled.
 			**/
-			DalClientFactory.initPrivateFactory(); //Load from class-path connections.properties
-			//DalClientFactory.initClientFactory(); // load from class-path Dal.config
+			//DalClientFactory.initPrivateFactory(); //Load from class-path connections.properties
+			DalClientFactory.initClientFactory(); // load from class-path Dal.config
 			//DalClientFactory.initClientFactory("E:/DalMult.config"); // load from the specified Dal.config file path
 			
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 		
-			${host.getPojoClassName()} pk = dao.queryByPk(null);// you value here
+			//Query by perimary key
+			${host.getPojoClassName()} pk = dao.queryByPk(0);
 			
-			pk = dao.queryByPk(pk);
-			List<${host.getPojoClassName()}> pojos = dao.queryByPage(pk, 100, 0);
+			//Query by the Pojo which contains perimary key
+			pk = dao.queryByPk(pk); 
+			
+			//Invoke the paging function
+			//Note that both the pageSize and the pageNumber must be greater than 1
+			List<${host.getPojoClassName()}> pojos = dao.queryByPage(pk, 100, 1);
+			
+			//Get all records
+			List<${host.getPojoClassName()}> all = dao.getAll();
 
-#if($host.isSpa())
 #if($host.getSpInsert().isExist())
-			// Test SPA related CUD
-			// test insert
-			${host.getPojoClassName()} pojo = new ${host.getPojoClassName()}();
-			// Set pojo attribute value here
+			${host.getPojoClassName()} pojo = new ${host.getPojoClassName()}(); 
+			//Set fields here
+			
 			dao.insert(pojo);
-	
-#end
-#if($host.getSpUpdate().isExist())
-			// make some change to the pojo. set primary key
-			dao.update(pojo);
-#end
-
-#if($host.getSpDelete().isExist())
-			// remove the pojo
-			dao.delete(pojo);
-#end
-	
 #else
-#if($host.getSpInsert().isExist())
-			// Test normal CUD (non SPA) 
-			KeyHolder keyHolder = new KeyHolder();
-			${host.getPojoClassName()} pojo1 = new ${host.getPojoClassName()}();
+		    ${host.getPojoClassName()} pojo1 = new ${host.getPojoClassName()}();
 			${host.getPojoClassName()} pojo2 = new ${host.getPojoClassName()}();
-			${host.getPojoClassName()} pojo3 = new ${host.getPojoClassName()}();
-			dao.insert(keyHolder, pojo1, pojo2, pojo3);
-	
+			${host.getPojoClassName()} pojo3 = new ${host.getPojoClassName()}();			
+			//Set fields for pojos here
+			
+			//keyHolder will pull back the auto-increament keys
+			dao.insert(new KeyHolder(), pojo1, pojo2, pojo3);
 #end
 #if($host.getSpUpdate().isExist())
-			// make some change to the pojo. set primary key
-			dao.update(pojo1, pojo2, pojo3);
+			//Make some change to the pojo. set primary key
+			dao.update(pojo);
+#else
+		    //Make some change to the pojo1. set primary key
+			dao.update(pojo1);
 #end
-
 #if($host.getSpDelete().isExist())
-			// remove the pojo
-			dao.delete(pojo1, pojo2, pojo3);
-#end			
+			//Remove the pojo according to its primary keys
+			dao.delete(pojo);
+#else
+	        //Remove the pojos according to its primary keys
+		    dao.delete(pojo1, pojo2, pojo3);
 #end
 
+	        //Get the count
+			int count = dao.count();
+			
 #if($host.hasMethods())
 			// Test additional customized method
 			int affectedRows = 0;
@@ -73,14 +73,14 @@ public class ${host.getPojoClassName()}DaoTest {
 #foreach($method in $host.getMethods())
 			// Test ${method.getName()}
 #foreach($p in $method.getParameters())  
-			${p.getClassDisplayName()} ${p.getName()} = ${p.getValidationValue()};
+			${p.getClassDisplayName()} ${p.getName()} = null; //set you value here
 #end
 
 #if($method.getCrud_type() == "select")
-		    results = dao.${method.getName()}($method.getParameterNames()});
+		    results = dao.${method.getName()}(${method.getParameterNames()});
 
 #else
-    		affectedRows = dao.${method.getName()}($method.getParameterNames()});
+    		affectedRows = dao.${method.getName()}(${method.getParameterNames()});
 
 #end
 #end

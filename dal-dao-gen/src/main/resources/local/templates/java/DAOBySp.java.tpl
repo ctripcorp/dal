@@ -1,17 +1,8 @@
 package ${host.getPackageName()};
 
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Map;
-
 #foreach( $field in ${host.getDaoImports()} )
 import ${field};
 #end
-
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class ${host.getDbName()}SpDao {
 	private static final String DATA_BASE = "${host.getDbName()}";
@@ -23,7 +14,7 @@ public class ${host.getDbName()}SpDao {
 	
 #foreach($h in $host.getSpHosts())
 	public Map<String, ?> call${h.getPojoClassName()}(${h.getPojoClassName()} param) throws SQLException {
-		String callString = "${h.getSpName()}(${h.getCallParameters()})";
+		String callString = "{call ${h.getSpName()}(${h.getCallParameters()})}";
 		StatementParameters parameters = new StatementParameters();
 		
 #foreach($p in $h.getFields())
@@ -37,7 +28,7 @@ public class ${host.getDbName()}SpDao {
 		parameters.registerOut("${p.getName()}", ${p.getJavaTypeDisplay()});
 #end
 #end
-
+  
 		/* To specify returned result(not the output or inputoutput parameter)
 		DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
 		param = StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName("result").build();

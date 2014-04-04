@@ -8,6 +8,8 @@ public class CSharpParameterHost extends AbstractParameterHost {
 	
 	private String name;
 	
+	private String alias;
+	
 	private ParameterDirection direction;
 	
 	//C#的DbType
@@ -82,6 +84,14 @@ public class CSharpParameterHost extends AbstractParameterHost {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public String getAlias() {
+		return null != this.alias && ! this.alias.isEmpty() ? this.alias : this.name;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 
 	public ParameterDirection getDirection() {

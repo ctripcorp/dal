@@ -504,9 +504,13 @@ public class CSharpGenerator extends AbstractGenerator {
 				String[] conditions = StringUtils.split(builder.getCondition(),
 						";");
 				for (String condition : conditions) {
-					String name = StringUtils.split(condition, ",")[0];
+					String[] tokens = StringUtils.split(condition, ",");
+					String name = tokens[0];
+					String alias = "";
+					if(tokens.length == 3) alias = tokens[2];
 					for (CSharpParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
+							pHost.setAlias(alias);
 							parameters.add(pHost);
 							break;
 						}
@@ -534,8 +538,12 @@ public class CSharpGenerator extends AbstractGenerator {
 						}
 					}
 					for (String condition : conditions) {
-						String name = StringUtils.split(condition, ",")[0];
+						String[] tokens = StringUtils.split(condition, ",");
+						String name = tokens[0];
+						String alias = "";
+						if(tokens.length == 3) alias = tokens[2];
 						if (pHost.getName().equals(name)) {
+							pHost.setAlias(alias);
 							parameters.add(pHost);
 							break;
 						}

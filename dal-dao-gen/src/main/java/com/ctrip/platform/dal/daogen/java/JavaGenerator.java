@@ -28,8 +28,8 @@ import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 
 public class JavaGenerator extends AbstractGenerator {
-	
-	private JavaGenerator() { }
+	private JavaGenerator() {
+	}
 
 	private static JavaGenerator instance = new JavaGenerator();
 
@@ -38,12 +38,10 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	@Override
-
-	public void generateByTableView(List<GenTaskByTableViewSp> tasks,Progress progress) throws Exception {
-		
+	public void generateByTableView(List<GenTaskByTableViewSp> tasks,
+			Progress progress) throws Exception {
 		prepareFolder(projectId, "java");
-		
-		Map<String, String> dbs = buildCommonVelocity(tasks);		
+		Map<String, String> dbs = buildCommonVelocity(tasks);
 		List<JavaTableHost> tableHosts = new ArrayList<JavaTableHost>();
 		HashMap<String, SpDbHost> spHostMaps = new HashMap<String, SpDbHost>();
 		List<SpHost> spHosts = new ArrayList<SpHost>();
@@ -56,40 +54,33 @@ public class JavaGenerator extends AbstractGenerator {
 					tableViewSp.getTable_names(), ",");
 			String[] spNames = StringUtils
 					.split(tableViewSp.getSp_names(), ",");
-			String[] viewNames = StringUtils
-					.split(tableViewSp.getView_names(), ",");
+			String[] viewNames = StringUtils.split(tableViewSp.getView_names(),
+					",");
 
 			for (String table : tableNames) {
-				
-				JavaTableHost tableHost = this.buildTableHost(tableViewSp, table);
-				if(null != tableHost)
+				JavaTableHost tableHost = this.buildTableHost(tableViewSp,
+						table);
+				if (null != tableHost)
 					tableHosts.add(tableHost);
 			}
-		
 			for (String spName : spNames) {
-				
 				SpHost spHost = this.buildSpHost(tableViewSp, spName);
-				if(null != spHost)
-				{
-					if(!spHostMaps.containsKey(spHost.getDbName()))
-					{
-						SpDbHost spDbHost = new SpDbHost(spHost.getDbName(), spHost.getPackageName());
+				if (null != spHost) {
+					if (!spHostMaps.containsKey(spHost.getDbName())) {
+						SpDbHost spDbHost = new SpDbHost(spHost.getDbName(),
+								spHost.getPackageName());
 						spHostMaps.put(spHost.getDbName(), spDbHost);
 					}
 					spHostMaps.get(spHost.getDbName()).addSpHost(spHost);
 					spHosts.add(spHost);
 				}
 			}
-			
-			for (String viewName : viewNames)
-			{
+			for (String viewName : viewNames) {
 				ViewHost vhost = this.buildViewHost(tableViewSp, viewName);
-				if(null != vhost)
+				if (null != vhost)
 					viewHosts.add(vhost);
 			}
-			
 		}
-		
 		if (sqlBuilders.size() > 0) {
 			Map<String, GenTaskBySqlBuilder> _sqlBuildres = sqlBuilderBroupBy(sqlBuilders);
 			for (GenTaskBySqlBuilder _table : _sqlBuildres.values()) {
@@ -99,12 +90,10 @@ public class JavaGenerator extends AbstractGenerator {
 				}
 			}
 		}
-		
-		
 		VelocityContext context = new VelocityContext();
 		context.put("WordUtils", WordUtils.class);
 		context.put("StringUtils", StringUtils.class);
-		File mavenLikeDir = new File(String.format("%s/%s/java",generatePath ,
+		File mavenLikeDir = new File(String.format("%s/%s/java", generatePath,
 				projectId));
 
 		try {
@@ -115,25 +104,25 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 
 		context.put("dbs", dbs);
-		GenUtils.mergeVelocityContext(context, String.format("%s/Dal.config",
-				mavenLikeDir.getAbsolutePath()), "templates/java/Dal.config.tpl");
+		GenUtils.mergeVelocityContext(context,
+				String.format("%s/Dal.config", mavenLikeDir.getAbsolutePath()),
+				"templates/java/Dal.config.tpl");
 
-		ProgressResource.addTotalFiles(progress, tableHosts.size()+spHostMaps.size()+viewHosts.size());
-		
+		ProgressResource.addTotalFiles(progress,
+				tableHosts.size() + spHostMaps.size() + viewHosts.size());
 		progress.setOtherMessage("正在生成TableDao");
 		generateTableDao(tableHosts, context, mavenLikeDir);
 		ProgressResource.addDoneFiles(progress, tableHosts.size());
-		
 		progress.setOtherMessage("正在生成SpDao");
 		generateSpDao(spHostMaps, context, mavenLikeDir);
 		ProgressResource.addDoneFiles(progress, spHostMaps.size());
-		
 		progress.setOtherMessage("正在生成VeiwDao");
 		generateVeiwDao(viewHosts, context, mavenLikeDir);
 		ProgressResource.addDoneFiles(progress, viewHosts.size());
 	}
 
-	private Map<String, String> buildCommonVelocity(List<GenTaskByTableViewSp> tasks) {
+	private Map<String, String> buildCommonVelocity(
+			List<GenTaskByTableViewSp> tasks) {
 		Map<String, String> dbs = new HashMap<String, String>();
 		for (GenTaskByFreeSql task : freeSqls) {
 			if (!dbs.containsKey(task.getDb_name())) {
@@ -175,58 +164,81 @@ public class JavaGenerator extends AbstractGenerator {
 			VelocityContext context, File mavenLikeDir) {
 		for (JavaTableHost host : tableHosts) {
 			context.put("host", host);
-			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sDao.java",
-					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAO.java.tpl");
-			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
-					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
-			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoTest.java",
-					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAOTest.java.tpl");
+			GenUtils.mergeVelocityContext(
+					context,
+					String.format("%s/Dao/%sDao.java",
+							mavenLikeDir.getAbsolutePath(),
+							host.getPojoClassName()),
+					"templates/java/DAO.java.tpl");
+			GenUtils.mergeVelocityContext(
+					context,
+					String.format("%s/Entity/%s.java",
+							mavenLikeDir.getAbsolutePath(),
+							host.getPojoClassName()),
+					"templates/java/Pojo.java.tpl");
+			GenUtils.mergeVelocityContext(
+					context,
+					String.format("%s/Test/%sDaoTest.java",
+							mavenLikeDir.getAbsolutePath(),
+							host.getPojoClassName()),
+					"templates/java/DAOTest.java.tpl");
 		}
 	}
 
 	private void generateSpDao(HashMap<String, SpDbHost> spHostMaps,
 			VelocityContext context, File mavenLikeDir) {
-		for(SpDbHost host : spHostMaps.values())
-		{
+		for (SpDbHost host : spHostMaps.values()) {
 			context.put("host", host);
-			GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sSpDao.java",
-					mavenLikeDir.getAbsolutePath(), host.getDbName()), "templates/java/DAOBySp.java.tpl");
+			GenUtils.mergeVelocityContext(
+					context,
+					String.format("%s/Dao/%sSpDao.java",
+							mavenLikeDir.getAbsolutePath(), host.getDbName()),
+					"templates/java/DAOBySp.java.tpl");
 
-			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sSpDaoTest.java",
-					mavenLikeDir.getAbsolutePath(), host.getDbName()), "templates/java/DAOBySpTest.java.tpl");
-			
-			for(SpHost sp : host.getSpHosts())
-			{
+			GenUtils.mergeVelocityContext(
+					context,
+					String.format("%s/Test/%sSpDaoTest.java",
+							mavenLikeDir.getAbsolutePath(), host.getDbName()),
+					"templates/java/DAOBySpTest.java.tpl");
+			for (SpHost sp : host.getSpHosts()) {
 				context.put("host", sp);
-				GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
-						mavenLikeDir.getAbsolutePath(), sp.getPojoClassName()), "templates/java/Pojo.java.tpl");
+				GenUtils.mergeVelocityContext(
+						context,
+						String.format("%s/Entity/%s.java",
+								mavenLikeDir.getAbsolutePath(),
+								sp.getPojoClassName()),
+						"templates/java/Pojo.java.tpl");
 			}
 		}
-		
 	}
-	
-	private void generateVeiwDao(List<ViewHost> viewHosts, VelocityContext context,
-			File mavenLikeDir)
-	{
-		for(ViewHost host : viewHosts)
-		{
+
+	private void generateVeiwDao(List<ViewHost> viewHosts,
+			VelocityContext context, File mavenLikeDir) {
+		for (ViewHost host : viewHosts) {
 			context.put("host", host);
-			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sDao.java",
-					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/ViewDAO.java.tpl");
-			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
-					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
-			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoTest.java",
-					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/DAOByViewTest.java.tpl");
+			GenUtils.mergeVelocityContext(
+					context,
+					String.format("%s/Dao/%sDao.java",
+							mavenLikeDir.getAbsolutePath(),
+							host.getPojoClassName()),
+					"templates/java/ViewDAO.java.tpl");
+			GenUtils.mergeVelocityContext(
+					context,
+					String.format("%s/Entity/%s.java",
+							mavenLikeDir.getAbsolutePath(),
+							host.getPojoClassName()),
+					"templates/java/Pojo.java.tpl");
+			GenUtils.mergeVelocityContext(
+					context,
+					String.format("%s/Test/%sDaoTest.java",
+							mavenLikeDir.getAbsolutePath(),
+							host.getPojoClassName()),
+					"templates/java/DAOByViewTest.java.tpl");
 		}
 	}
-	
-	private JavaTableHost buildExtraSqlBuilderHost(GenTaskBySqlBuilder sqlBuilder) throws Exception {
+
+	private JavaTableHost buildExtraSqlBuilderHost(
+			GenTaskBySqlBuilder sqlBuilder) throws Exception {
 		GenTaskByTableViewSp tableViewSp = new GenTaskByTableViewSp();
 		tableViewSp.setCud_by_sp(false);
 		tableViewSp.setPagination(false);
@@ -236,33 +248,34 @@ public class JavaGenerator extends AbstractGenerator {
 
 		return buildTableHost(tableViewSp, sqlBuilder.getTable_name());
 	}
-	
-	private JavaTableHost buildTableHost(GenTaskByTableViewSp tableViewSp, String table) throws Exception {
+
+	private JavaTableHost buildTableHost(GenTaskByTableViewSp tableViewSp,
+			String table) throws Exception {
 		JavaTableHost tableHost = new JavaTableHost();
 		tableHost.setPackageName(super.namespace);
 		tableHost.setDatabaseCategory(this.getDatabaseCategory(tableViewSp));
 		tableHost.setDbName(tableViewSp.getDb_name());
 		tableHost.setTableName(table);
-		tableHost.setPojoClassName(getPojoClassName(tableViewSp.getPrefix(), 
+		tableHost.setPojoClassName(getPojoClassName(tableViewSp.getPrefix(),
 				tableViewSp.getSuffix(), table));
 		tableHost.setSp(tableViewSp.isCud_by_sp());
 
 		// 主键及所有列
-		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(tableViewSp.getDb_name(), table);
+		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
+				tableViewSp.getDb_name(), table);
 		List<AbstractParameterHost> allColumnsAbstract = DbUtils
-				.getAllColumnNames(tableViewSp.getDb_name(),
-						table, CurrentLanguage.Java);
-		
+				.getAllColumnNames(tableViewSp.getDb_name(), table,
+						CurrentLanguage.Java);
 		List<JavaParameterHost> allColumns = new ArrayList<JavaParameterHost>();
-		for(AbstractParameterHost h : allColumnsAbstract){
-			allColumns.add((JavaParameterHost)h);
+		for (AbstractParameterHost h : allColumnsAbstract) {
+			allColumns.add((JavaParameterHost) h);
 		}
 
 		List<JavaParameterHost> primaryKeys = new ArrayList<JavaParameterHost>();
 		boolean hasIdentity = false;
 		String identityColumnName = null;
 		for (JavaParameterHost h : allColumns) {
-			if(!hasIdentity && h.isIdentity()){
+			if (!hasIdentity && h.isIdentity()) {
 				hasIdentity = true;
 				identityColumnName = h.getName();
 			}
@@ -277,7 +290,6 @@ public class JavaGenerator extends AbstractGenerator {
 
 		List<JavaMethodHost> methods = buildMethodHosts(allColumns,
 				currentTableBuilders);
-		
 		tableHost.setFields(allColumns);
 		tableHost.setPrimaryKeys(primaryKeys);
 		tableHost.setHasIdentity(hasIdentity);
@@ -285,48 +297,49 @@ public class JavaGenerator extends AbstractGenerator {
 		tableHost.setMethods(methods);
 
 		if (tableHost.isSp()) {
-			tableHost.setSpInsert(this.getSpaOperation(tableViewSp.getDb_name(), table, "i"));
-			tableHost.setSpUpdate(this.getSpaOperation(tableViewSp.getDb_name(), table, "u"));
-			tableHost.setSpDelete(this.getSpaOperation(tableViewSp.getDb_name(), table, "d"));
+			tableHost.setSpInsert(this.getSpaOperation(
+					tableViewSp.getDb_name(), table, "i"));
+			tableHost.setSpUpdate(this.getSpaOperation(
+					tableViewSp.getDb_name(), table, "u"));
+			tableHost.setSpDelete(this.getSpaOperation(
+					tableViewSp.getDb_name(), table, "d"));
 		}
 		return tableHost;
 	}
-	
-	private ViewHost buildViewHost(GenTaskByTableViewSp tableViewSp, String viewName) throws Exception {
+
+	private ViewHost buildViewHost(GenTaskByTableViewSp tableViewSp,
+			String viewName) throws Exception {
 		if (!DbUtils.viewExists(tableViewSp.getDb_name(), viewName)) {
-			throw new Exception(String.format("The view[%s] doesn't exist, pls check", viewName));
-		}				
-		
+			throw new Exception(String.format(
+					"The view[%s] doesn't exist, pls check", viewName));
+		}
 		ViewHost vhost = new ViewHost();
 		String className = viewName.replace("_", "");
-		className = getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), className);
-		
+		className = getPojoClassName(tableViewSp.getPrefix(),
+				tableViewSp.getSuffix(), className);
 		vhost.setPackageName(super.namespace);
 		vhost.setDatabaseCategory(this.getDatabaseCategory(tableViewSp));
 		vhost.setDbName(tableViewSp.getDb_name());
 		vhost.setPojoClassName(className);
 		vhost.setViewName(viewName);
-		
-		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(tableViewSp.getDb_name(), viewName);
-		List<AbstractParameterHost> params = DbUtils
-				.getAllColumnNames(tableViewSp.getDb_name(), viewName,
-						CurrentLanguage.Java);
+		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
+				tableViewSp.getDb_name(), viewName);
+		List<AbstractParameterHost> params = DbUtils.getAllColumnNames(
+				tableViewSp.getDb_name(), viewName, CurrentLanguage.Java);
 		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
-		for(AbstractParameterHost p : params)
-		{
-			JavaParameterHost jHost = (JavaParameterHost)p;
-			if(primaryKeyNames.contains(jHost.getName()))
-			{
+		for (AbstractParameterHost p : params) {
+			JavaParameterHost jHost = (JavaParameterHost) p;
+			if (primaryKeyNames.contains(jHost.getName())) {
 				jHost.setPrimary(true);
 			}
 			realParams.add(jHost);
 		}
-		
 		vhost.setFields(realParams);
 		return vhost;
 	}
 
-	private SpHost buildSpHost(GenTaskByTableViewSp tableViewSp,  String spName) throws Exception {
+	private SpHost buildSpHost(GenTaskByTableViewSp tableViewSp, String spName)
+			throws Exception {
 		String schema = "dbo";
 		String realSpName = spName;
 		if (spName.contains(".")) {
@@ -341,15 +354,15 @@ public class JavaGenerator extends AbstractGenerator {
 
 		SpHost spHost = new SpHost();
 		String className = realSpName.replace("_", "");
-		className = getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), className);
-		
+		className = getPojoClassName(tableViewSp.getPrefix(),
+				tableViewSp.getSuffix(), className);
 		spHost.setPackageName(super.namespace);
 		spHost.setDatabaseCategory(this.getDatabaseCategory(tableViewSp));
 		spHost.setDbName(tableViewSp.getDb_name());
 		spHost.setPojoClassName(className);
 		spHost.setSpName(spName);
-		List<AbstractParameterHost> params = DbUtils.getSpParams(tableViewSp.getDb_name(), 
-				currentSp, CurrentLanguage.Java);
+		List<AbstractParameterHost> params = DbUtils.getSpParams(
+				tableViewSp.getDb_name(), currentSp, CurrentLanguage.Java);
 		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 		String callParams = "";
 		for (AbstractParameterHost p : params) {
@@ -358,27 +371,25 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 		spHost.setCallParameters(StringUtils.removeEnd(callParams, ","));
 		spHost.setFields(realParams);
-		
 		return spHost;
 	}
-	
+
 	private List<GenTaskBySqlBuilder> filterExtraMethods(
 			List<GenTaskBySqlBuilder> sqlBuilders, String dbName, String table) {
 		List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
 
 		Iterator<GenTaskBySqlBuilder> iter = sqlBuilders.iterator();
 		while (iter.hasNext()) {
-			GenTaskBySqlBuilder currentSqlBuilder =iter.next();
+			GenTaskBySqlBuilder currentSqlBuilder = iter.next();
 			if (currentSqlBuilder.getDb_name().equals(dbName)
 					&& currentSqlBuilder.getTable_name().equals(table)) {
 				currentTableBuilders.add(currentSqlBuilder);
 				iter.remove();
 			}
 		}
-		
 		return currentTableBuilders;
 	}
-	
+
 	private List<JavaMethodHost> buildMethodHosts(
 			List<JavaParameterHost> allColumns,
 			List<GenTaskBySqlBuilder> currentTableBuilders) {
@@ -392,20 +403,24 @@ public class JavaGenerator extends AbstractGenerator {
 			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
 			if (method.getCrud_type().equals("select")
 					|| method.getCrud_type().equals("delete")) {
-				String[] conditions = StringUtils.split(
-						builder.getCondition(), ";");
+				String[] conditions = StringUtils.split(builder.getCondition(),
+						";");
 				for (String condition : conditions) {
-					String name = StringUtils.split(condition, ",")[0];
+					String[] tokens = StringUtils.split(condition, ",");
+					String name = tokens[0];
+					String alias = "";
+					if (tokens.length == 3)
+						alias = tokens[2];
 					for (JavaParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
+							pHost.setAlias(alias);
 							parameters.add(pHost);
 							break;
 						}
 					}
 				}
 			} else if (method.getCrud_type().equals("insert")) {
-				String[] fields = StringUtils.split(
-						builder.getFields(), ",");
+				String[] fields = StringUtils.split(builder.getFields(), ",");
 				for (String field : fields) {
 					for (JavaParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(field)) {
@@ -415,10 +430,9 @@ public class JavaGenerator extends AbstractGenerator {
 					}
 				}
 			} else {
-				String[] fields = StringUtils.split(
-						builder.getFields(), ",");
-				String[] conditions = StringUtils.split(
-						builder.getCondition(), ";");
+				String[] fields = StringUtils.split(builder.getFields(), ",");
+				String[] conditions = StringUtils.split(builder.getCondition(),
+						";");
 				for (JavaParameterHost pHost : allColumns) {
 					for (String field : fields) {
 						if (pHost.getName().equals(field)) {
@@ -427,8 +441,13 @@ public class JavaGenerator extends AbstractGenerator {
 						}
 					}
 					for (String condition : conditions) {
-						String name = StringUtils.split(condition, ",")[0];
+						String[] tokens = StringUtils.split(condition, ",");
+						String name = tokens[0];
+						String alias = "";
+						if (tokens.length == 3)
+							alias = tokens[2];
 						if (pHost.getName().equals(name)) {
+							pHost.setAlias(alias);
 							parameters.add(pHost);
 							break;
 						}
@@ -441,8 +460,8 @@ public class JavaGenerator extends AbstractGenerator {
 		return methods;
 	}
 
-	private DatabaseCategory getDatabaseCategory(GenTaskByTableViewSp tableViewSp)
-	{
+	private DatabaseCategory getDatabaseCategory(
+			GenTaskByTableViewSp tableViewSp) {
 		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
 		if (!DbUtils.getDbType(tableViewSp.getDb_name()).equalsIgnoreCase(
 				"Microsoft SQL Server")) {
@@ -450,14 +469,14 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 		return dbCategory;
 	}
-	
+
 	private Map<String, List<GenTaskByFreeSql>> freeSqlGroupBy(
 			List<GenTaskByFreeSql> tasks) {
 		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();
 
 		for (GenTaskByFreeSql task : tasks) {
-			String key = String.format("%s_%s", 
-					task.getDb_name(), task.getClass_name().toLowerCase());
+			String key = String.format("%s_%s", task.getDb_name(), task
+					.getClass_name().toLowerCase());
 			if (groupBy.containsKey(key)) {
 				groupBy.get(key).add(task);
 			} else {
@@ -467,14 +486,14 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 		return groupBy;
 	}
-	
+
 	private Map<String, GenTaskBySqlBuilder> sqlBuilderBroupBy(
 			List<GenTaskBySqlBuilder> builders) {
 		Map<String, GenTaskBySqlBuilder> groupBy = new HashMap<String, GenTaskBySqlBuilder>();
 
 		for (GenTaskBySqlBuilder task : builders) {
-			String key = String.format("%s_%s", 
-					task.getDb_name(), task.getTable_name());
+			String key = String.format("%s_%s", task.getDb_name(),
+					task.getTable_name());
 
 			if (!groupBy.containsKey(key)) {
 				groupBy.put(key, task);
@@ -482,25 +501,26 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 		return groupBy;
 	}
-	
-	private SpOperationHost getSpaOperation(String dbName, String tableName, String operation) throws Exception
-	{
+
+	private SpOperationHost getSpaOperation(String dbName, String tableName,
+			String operation) throws Exception {
 		List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(dbName);
-		return SpOperationHost.getSpaOperation(dbName, 
-				tableName, allSpNames, operation);
+		return SpOperationHost.getSpaOperation(dbName, tableName, allSpNames,
+				operation);
 	}
-	
+
 	@Override
-	public void generateByFreeSql(List<GenTaskByFreeSql> tasks,Progress progress) {
+	public void generateByFreeSql(List<GenTaskByFreeSql> tasks,
+			Progress progress) {
 
 		progress.setOtherMessage("正在生成FreeSql的代码");
 		// 首先按照ServerID, DbName以及ClassName做一次GroupBy
-		Map<String, List<GenTaskByFreeSql>> groupBy =  freeSqlGroupBy(tasks);
+		Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(tasks);
 
 		List<FreeSqlHost> hosts = new ArrayList<FreeSqlHost>();
-//		Map<String, FreeSqlPojoHost> pojoHosts = new HashMap<String, FreeSqlPojoHost>();
+		// Map<String, FreeSqlPojoHost> pojoHosts = new HashMap<String,
+		// FreeSqlPojoHost>();
 		Map<String, JavaMethodHost> pojoHosts = new HashMap<String, JavaMethodHost>();
-		
 		// 随后，以ServerID, DbName以及ClassName为维度，为每个维度生成一个DAO类
 		for (Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy
 				.entrySet()) {
@@ -522,47 +542,47 @@ public class JavaGenerator extends AbstractGenerator {
 				method.setSql(task.getSql_content());
 				method.setName(task.getMethod_name());
 				method.setPackageName(namespace);
-				method.setPojoClassName(WordUtils.capitalize(task.getMethod_name() + "Pojo"));
+				method.setPojoClassName(WordUtils.capitalize(task
+						.getMethod_name() + "Pojo"));
 				List<JavaParameterHost> params = new ArrayList<JavaParameterHost>();
 				for (String param : StringUtils
 						.split(task.getParameters(), ";")) {
-					if(param.contains("HotelAddress"))
-					{
+					if (param.contains("HotelAddress")) {
 						System.out.println("");
 					}
 					String[] splitedParam = StringUtils.split(param, ",");
 					JavaParameterHost p = new JavaParameterHost();
 					p.setName(splitedParam[0]);
 					p.setSqlType(Integer.valueOf(splitedParam[1]));
-					p.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(p.getSqlType()));
-					//p.setValidationValue(splitedParam[2]);
+					p.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(p
+							.getSqlType()));
+					// p.setValidationValue(splitedParam[2]);
 					p.setValidationValue(DbUtils.mockATest(p.getSqlType()));
 					params.add(p);
 				}
 				method.setParameters(params);
 				methods.add(method);
 
-				// Need to specify Pojo class name for each method. or allow Map<Sting, Object> as row
-//				if (!pojoHosts.containsKey(task.getClass_name())) {
+				// Need to specify Pojo class name for each method. or allow
+				// Map<Sting, Object> as row
+				// if (!pojoHosts.containsKey(task.getClass_name())) {
 				if (!pojoHosts.containsKey(method.getPojoClassName())) {
 
-							List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
-							
-							for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(
-									task.getDb_name(), task.getSql_content(), task.getParameters(),
-									CurrentLanguage.Java, false)) {
-								paramHosts.add((JavaParameterHost) _ahost);
-							}
-							
-							method.setFields(paramHosts);
-							/*
-							FreeSqlPojoHost pojoHost = new FreeSqlPojoHost();
-							pojoHost.setColumns(paramHosts);
-							pojoHost.setTableName("");
-							pojoHost.setClassName(task.getClass_name());
-							pojoHost.setPackageName(host.getPackageName());
-							*/
-							pojoHosts.put(method.getPojoClassName(), method);
+					List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
+					for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(
+							task.getDb_name(), task.getSql_content(),
+							task.getParameters(), CurrentLanguage.Java, false)) {
+						paramHosts.add((JavaParameterHost) _ahost);
+					}
+					method.setFields(paramHosts);
+					/*
+					 * FreeSqlPojoHost pojoHost = new FreeSqlPojoHost();
+					 * pojoHost.setColumns(paramHosts);
+					 * pojoHost.setTableName("");
+					 * pojoHost.setClassName(task.getClass_name());
+					 * pojoHost.setPackageName(host.getPackageName());
+					 */
+					pojoHosts.put(method.getPojoClassName(), method);
 				}
 			}
 			host.setMethods(methods);
@@ -572,30 +592,34 @@ public class JavaGenerator extends AbstractGenerator {
 		VelocityContext context = new VelocityContext();
 		context.put("WordUtils", WordUtils.class);
 		context.put("StringUtils", StringUtils.class);
-		
-		File mavenLikeDir = new File(String.format("%s/%s/java",generatePath ,
+		File mavenLikeDir = new File(String.format("%s/%s/java", generatePath,
 				projectId));
-		
-//		for(FreeSqlPojoHost host : pojoHosts.values()){
-		ProgressResource.addTotalFiles(progress, pojoHosts.size()+hosts.size());
+		// for(FreeSqlPojoHost host : pojoHosts.values()){
+		ProgressResource.addTotalFiles(progress,
+				pojoHosts.size() + hosts.size());
 		progress.setOtherMessage("正在生成FreeSql的POJO代码");
-		for(JavaMethodHost host : pojoHosts.values()){
+		for (JavaMethodHost host : pojoHosts.values()) {
 			context.put("host", host);
 
-			GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
-					mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
+			GenUtils.mergeVelocityContext(
+					context,
+					String.format("%s/Entity/%s.java",
+							mavenLikeDir.getAbsolutePath(),
+							host.getPojoClassName()),
+					"templates/java/Pojo.java.tpl");
 		}
 		ProgressResource.addDoneFiles(progress, pojoHosts.size());
 
 		progress.setOtherMessage("正在生成FreeSql的Dao和Test代码");
 		for (FreeSqlHost host : hosts) {
 			context.put("host", host);
-			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sDao.java",
-						mavenLikeDir.getAbsolutePath(), host.getClassName()), "templates/java/FreeSqlDAO.java.tpl");
-			
-			GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoTest.java",
-					mavenLikeDir.getAbsolutePath(), host.getClassName()), "templates/java/FreeSqlDAOTest.java.tpl");
+			GenUtils.mergeVelocityContext(context, String.format(
+					"%s/Dao/%sDao.java", mavenLikeDir.getAbsolutePath(),
+					host.getClassName()), "templates/java/FreeSqlDAO.java.tpl");
+			GenUtils.mergeVelocityContext(context, String.format(
+					"%s/Test/%sDaoTest.java", mavenLikeDir.getAbsolutePath(),
+					host.getClassName()),
+					"templates/java/FreeSqlDAOTest.java.tpl");
 		}
 		ProgressResource.addDoneFiles(progress, hosts.size());
 	}

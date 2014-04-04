@@ -387,28 +387,27 @@
         while ((result = regexIndex.exec(sqlContent))) {
             i++;
             if(id_values[sprintf("param%s", i)] != undefined){
-                htmls = htmls
-                    + sprintf(variableHtml, sprintf("param%s", i))
-                    + sprintf(variable_typesHtml,
-                    sprintf("id='db_type_%s'", sprintf("param%s", i)));
+//                htmls = htmls
+//                    + sprintf(variableHtml, sprintf("param%s", i))
+//                    + sprintf(variable_typesHtml,sprintf("id='db_type_%s'", sprintf("param%s", i)));
+                htmls = htmls + sprintf(variableHtml, sprintf("param%s", i))+"</div><br/>";
+
             }else{
-                htmls = htmls
-                    + sprintf(variableHtml, sprintf("param%s", i))
-                    + variable_typesHtml;
+//                htmls = htmls
+//                    + sprintf(variableHtml, sprintf("param%s", i))
+//                    + variable_typesHtml;
+                htmls = htmls + sprintf(variableHtml, sprintf("param%s", i))+"</div><br/>";
             }
         }
         if (htmls.length == 0) {
             while ((result = regexNames.exec(sqlContent))) {
                 var realName = result[1];
                 if(id_values[realName] != undefined){
-                    htmls = htmls
-                        + sprintf(variableHtml, realName)
-                        + sprintf(variable_typesHtml,
-                        sprintf("id='db_type_%s'", realName));
+//                    htmls = htmls + sprintf(variableHtml, realName) + sprintf(variable_typesHtml, sprintf("id='db_type_%s'", realName));
+                    htmls = htmls + sprintf(variableHtml, realName) + "</div><br/>";
                 }else{
-                    htmls = htmls
-                        + sprintf(variableHtml, realName)
-                        + variable_typesHtml;
+//                    htmls = htmls + sprintf(variableHtml, realName) + variable_typesHtml;
+                    htmls = htmls + sprintf(variableHtml, realName) + "</div><br/>";
                 }
             }
         }
@@ -425,6 +424,11 @@
 
         current.hide();
         $(".step2-2-2").show();
+
+        var editor = ace.edit("step2_2_2_sql_editor");
+        editor.setTheme("ace/theme/monokai");
+        editor.getSession().setMode("ace/mode/sql");
+        editor.setValue(ace.edit("sql_builder").getValue());
 
 //        window.ajaxutil.post_task();
     };

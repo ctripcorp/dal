@@ -1,4 +1,3 @@
-
 package com.ctrip.platform.dal.daogen.entity;
 
 import java.sql.ResultSet;
@@ -28,7 +27,7 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 
 	private String sql_content;
 	
-private boolean generated;
+	private boolean generated;
 	
 	private int version;
 

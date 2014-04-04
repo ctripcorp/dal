@@ -381,9 +381,14 @@
 	               </div>
                	  <div class="steps step2-2-2 row-fluid" from="">
                      <div class="row-fluid">
-                           <label class="control-label popup_label">填写参数名/参数Index，并选择数据类型</label>
+                           <label class="control-label popup_label">填写参数名</label>
                      </div>  
                      <div id="param_list_auto" class="row-fluid">      
+                     </div>
+                     <br/>
+                      <div class="row-fluid">
+                        <div id="step2_2_2_sql_editor" class="span12" style="height:200px;">
+                        </div>
                      </div>
                   </div>
                

@@ -82,6 +82,9 @@ public enum DalHintEnum {
 	/*  Connection.TRANSACTION_READ_UNCOMMITTED, Connection.TRANSACTION_READ_COMMITTED, Connection.TRANSACTION_REPEATABLE_READ, Connection.TRANSACTION_SERIALIZABLE, or Connection.TRANSACTION_NONE.*/
 	isolationLevel,
 	
+	/* cache for store old isolationLevel of connection before we apply isolationLevel. It is for internal use. */
+	oldIsolationLevel,
+	
 	/* Allow customization */
 	userDefined0,
 	

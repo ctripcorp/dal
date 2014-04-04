@@ -69,6 +69,13 @@ public class DalClientFactory {
 		}
 	}
 	
+	/**
+	 * For advanced direct client initialization.
+	 * @deprecated
+	 * @param reader
+	 * @param logicDbNames
+	 * @throws Exception
+	 */
 	public static void initDirectClientFactory(DasConfigureReader reader, String...logicDbNames) throws Exception {
 		// TODO FIXIT should allow initialize logic Db for several times
 		if(connPool.get() != null)
@@ -80,6 +87,13 @@ public class DalClientFactory {
 		}
 	}
 	
+	/**
+	 * For advanced indirect client initialization.
+	 * @deprecated
+	 * @param reader
+	 * @param logicDbNames
+	 * @throws Exception
+	 */
 	public static void initDasClientFactory(DasConfigureReader reader, String...logicDbNames) throws Exception {
 		// TODO to support
 	}
@@ -95,8 +109,18 @@ public class DalClientFactory {
 	}
 	
 	public static DalClient getClient(String logicDbName) {
+		if(logicDbName == null)
+			throw new NullPointerException("Database Set name can not be null");
+		
 		if(configureRef.get() == null)
 			return new DalDirectClient(connPool.get(), logicDbName);
+		
+		DalConfigure config = configureRef.get();
+		if(config == null)
+			throw new IllegalStateException("DalClientFactory has not been not initialized or initilization fail");
+		
+		if(config.getDatabaseSet(logicDbName) == null)
+			throw new IllegalArgumentException("Can not find definition for Database Set " + logicDbName + ". Please check spelling or define it in Dal.config");
 		
 		return new DalDirectClient(configureRef.get(), logicDbName);
 	}

@@ -402,8 +402,9 @@ public class JavaGenerator extends AbstractGenerator {
 						alias = tokens[2];
 					for (JavaParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
-							pHost.setAlias(alias);
-							parameters.add(pHost);
+							JavaParameterHost host_ls = new JavaParameterHost(pHost);
+							host_ls.setAlias(alias);
+							parameters.add(host_ls);
 							break;
 						}
 					}
@@ -437,8 +438,9 @@ public class JavaGenerator extends AbstractGenerator {
 						String alias = "";
 						if(tokens.length == 3) alias = tokens[2];
 						if (pHost.getName().equals(name)) {
-							pHost.setAlias(alias);
-							parameters.add(pHost);
+							JavaParameterHost host_ls = new JavaParameterHost(pHost);
+							host_ls.setAlias(alias);
+							parameters.add(host_ls);
 							break;
 						}
 					}

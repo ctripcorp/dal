@@ -510,8 +510,9 @@ public class CSharpGenerator extends AbstractGenerator {
 					if(tokens.length == 3) alias = tokens[2];
 					for (CSharpParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
-							pHost.setAlias(alias);
-							parameters.add(pHost);
+							CSharpParameterHost host_al = new CSharpParameterHost(pHost);
+							host_al.setAlias(alias);
+							parameters.add(host_al);
 							break;
 						}
 					}
@@ -543,8 +544,9 @@ public class CSharpGenerator extends AbstractGenerator {
 						String alias = "";
 						if(tokens.length == 3) alias = tokens[2];
 						if (pHost.getName().equals(name)) {
-							pHost.setAlias(alias);
-							parameters.add(pHost);
+							CSharpParameterHost host_al = new CSharpParameterHost(pHost);
+							host_al.setAlias(alias);
+							parameters.add(host_al);
 							break;
 						}
 					}

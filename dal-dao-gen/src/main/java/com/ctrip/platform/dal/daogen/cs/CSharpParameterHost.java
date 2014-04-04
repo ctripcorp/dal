@@ -26,6 +26,21 @@ public class CSharpParameterHost extends AbstractParameterHost {
 	
 	private boolean valueType;
 	
+	public CSharpParameterHost(){ }
+	
+	public CSharpParameterHost(CSharpParameterHost host)
+	{
+		this.name = host.getName();
+		this.alias = host.getAlias();
+		this.direction = host.getDirection();
+		this.dbType = host.getDbType();
+		this.type = host.getType();
+		this.identity = host.isIdentity();
+		this.primary = host.isPrimary();
+		this.nullable = host.isNullable();
+		this.valueType = host.isValueType();
+	}
+	
 	public boolean isValueType() {
 		return valueType;
 	}

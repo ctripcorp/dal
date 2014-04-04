@@ -108,6 +108,14 @@ public class DirectClientDaoShardTest {
 			e.printStackTrace();
 		}
 	}
+	
+	private static Integer typeTest(Object objVal) {
+		if(objVal == null || objVal instanceof Integer)
+			return (Integer)objVal;
+		
+		return Integer.valueOf(((Number)objVal).intValue());
+
+	}
 
 	public static void main(String[] args) {
 		ILog logger = LogManager.getLogger("DAL Java Client");
@@ -120,9 +128,14 @@ public class DirectClientDaoShardTest {
 			System.exit(0);
 		}
 		
-		test();
-		test2();
+//		test();
+//		test2();
 
+		System.out.println(typeTest(null));
+		System.out.println(typeTest(Integer.valueOf(-1)));
+		System.out.println(typeTest(new Short((short)-1)));
+		System.out.println(typeTest(new Byte((byte)-1)));
+		
 		System.exit(0);
 	}
 }

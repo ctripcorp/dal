@@ -1,5 +1,8 @@
 package com.ctrip.platform.dal.dao.helper;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import com.ctrip.platform.dal.dao.DalParser;
 
 public abstract class AbstractDalParser<T> implements DalParser<T> {
@@ -45,5 +48,13 @@ public abstract class AbstractDalParser<T> implements DalParser<T> {
 	@Override
 	public int[] getColumnTypes() {
 		return columnTypes;
+	}
+	
+	public Integer getInteger(ResultSet rs, String colName) throws SQLException {
+		Object objVal = rs.getObject(colName);
+		if(objVal == null || objVal instanceof Integer)
+			return (Integer)objVal;
+		
+		return Integer.valueOf(((Number)objVal).intValue());
 	}
 }

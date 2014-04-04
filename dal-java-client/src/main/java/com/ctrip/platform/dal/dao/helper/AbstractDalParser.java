@@ -49,12 +49,4 @@ public abstract class AbstractDalParser<T> implements DalParser<T> {
 	public int[] getColumnTypes() {
 		return columnTypes;
 	}
-	
-	public Integer getInteger(ResultSet rs, String colName) throws SQLException {
-		Object objVal = rs.getObject(colName);
-		if(objVal == null || objVal instanceof Integer)
-			return (Integer)objVal;
-		
-		return Integer.valueOf(((Number)objVal).intValue());
-	}
 }

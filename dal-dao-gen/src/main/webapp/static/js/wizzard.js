@@ -390,7 +390,7 @@
 //                htmls = htmls
 //                    + sprintf(variableHtml, sprintf("param%s", i))
 //                    + sprintf(variable_typesHtml,sprintf("id='db_type_%s'", sprintf("param%s", i)));
-                htmls = htmls + sprintf(variableHtml, sprintf("param%s", i))+"<br/>";
+                htmls = htmls + sprintf(variableHtml, sprintf("param%s", i))+"</div><br/>";
 
             }else{
 //                htmls = htmls
@@ -403,14 +403,11 @@
             while ((result = regexNames.exec(sqlContent))) {
                 var realName = result[1];
                 if(id_values[realName] != undefined){
-                    htmls = htmls
-                        + sprintf(variableHtml, realName)
-                        + sprintf(variable_typesHtml,
-                        sprintf("id='db_type_%s'", realName));
+//                    htmls = htmls + sprintf(variableHtml, realName) + sprintf(variable_typesHtml, sprintf("id='db_type_%s'", realName));
+                    htmls = htmls + sprintf(variableHtml, realName) + "</div><br/>";
                 }else{
-                    htmls = htmls
-                        + sprintf(variableHtml, realName)
-                        + variable_typesHtml;
+//                    htmls = htmls + sprintf(variableHtml, realName) + variable_typesHtml;
+                    htmls = htmls + sprintf(variableHtml, realName) + "</div><br/>";
                 }
             }
         }

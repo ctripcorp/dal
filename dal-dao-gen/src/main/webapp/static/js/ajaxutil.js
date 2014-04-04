@@ -37,7 +37,7 @@
                 //C#风格或者Java风格，@Name or ?
                 postData["sql_style"] = $("#sql_style").val();
                 postData["crud_type"] = $("#crud_option").val();
-                ;
+
                 var selectedConditions = [];
 
                 $.each($("#selected_condition option"), function (index, value) {
@@ -45,8 +45,18 @@
                 });
 
                 postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
-                postData["condition"] = selectedConditions.join(";");
+//                postData["condition"] = selectedConditions.join(";");
                 postData["sql_content"] = ace.edit("sql_builder").getValue();
+
+                var paramList = [];
+                $.each($("#param_list_auto").children("div"), function (index, value) {
+                    var first = $(value).children("input").eq(0);
+                    var second = $(value).children("select").eq(0);
+                    paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
+                    selectedConditions[index]+=","+ $(first).val();
+                });
+                postData["condition"] = selectedConditions.join(";");
+                postData["params"] = paramList.join(";");
 
                 $.post("/rest/task/auto", postData,function (data) {
                     if (data.code == "OK") {

@@ -346,13 +346,87 @@
             if("java"==$("#sql_style").val() && "select"==$("#crud_option").val()){
                 $('#fields').multipleSelect('setSelects', values);
                 $('#fields').multipleSelect('disable');
-                window.sql_builder.build();
+            }else{
+                $('#fields').multipleSelect('enable');
             }
+            window.sql_builder.build();
             $("body").unblock();
         }).fail(function(data){
                 $("#error_msg").text("获取表的信息失败，是否有权限");
                 $("body").unblock();
             });
+    };
+
+    var step2_2_1 = function(record,current){
+        if ($("#crud_option").val() != "delete" &&  $('#fields').multipleSelect('getSelects').length < 1 ) {
+            $("#error_msg").text("请选择至少一个字段！");
+            return;
+        }
+        $("#error_msg").text("");
+
+        //解析Sql语句，提取出参数
+        var regexIndex = /(\?{1})/igm;
+        var regexNames = /[@:](\w+)/igm;
+        var sqlContent = ace.edit("sql_builder").getValue(),
+            result;
+        var htmls = "";
+        var i = 0;
+        var id_values = {};
+
+//        if ($("#page1").attr('is_update') == "1") {
+//            var splitedParams = record.parameters.split(";");
+//
+//            $.each(splitedParams, function (index, value) {
+//                if (value != "") {
+//                    var resultParams = value.split(",");
+//                    id_values["db_type_"+ resultParams[0]] = resultParams[1];
+//                }
+//            });
+//        }
+
+        while ((result = regexIndex.exec(sqlContent))) {
+            i++;
+            if(id_values[sprintf("param%s", i)] != undefined){
+                htmls = htmls
+                    + sprintf(variableHtml, sprintf("param%s", i))
+                    + sprintf(variable_typesHtml,
+                    sprintf("id='db_type_%s'", sprintf("param%s", i)));
+            }else{
+                htmls = htmls
+                    + sprintf(variableHtml, sprintf("param%s", i))
+                    + variable_typesHtml;
+            }
+        }
+        if (htmls.length == 0) {
+            while ((result = regexNames.exec(sqlContent))) {
+                var realName = result[1];
+                if(id_values[realName] != undefined){
+                    htmls = htmls
+                        + sprintf(variableHtml, realName)
+                        + sprintf(variable_typesHtml,
+                        sprintf("id='db_type_%s'", realName));
+                }else{
+                    htmls = htmls
+                        + sprintf(variableHtml, realName)
+                        + variable_typesHtml;
+                }
+            }
+        }
+
+        if (htmls.length == 0) {
+            window.ajaxutil.post_task();
+            return;
+        }
+
+        $("#param_list_auto").html(htmls);
+        $.each(id_values, function(key, value){
+            $("#"+key).val(value);
+        });
+
+        current.hide();
+        $(".step2-2-2").show();
+
+//        window.ajaxutil.post_task();
     };
 
     var step2_3 = function(record,current){
@@ -459,12 +533,9 @@
                 step2_2(record, current);
             }
             else if (current.hasClass("step2-2-1")) {
-                if ($("#crud_option").val() != "delete" &&  $('#fields').multipleSelect('getSelects').length < 1 ) {
-                    $("#error_msg").text("请选择至少一个字段！");
-                    return;
-                }
-                $("#error_msg").text("");
-
+                step2_2_1(record, current);
+            }
+            else if (current.hasClass("step2-2-2")) {
                 window.ajaxutil.post_task();
             }
             else if (current.hasClass("step2-3")) {
@@ -487,6 +558,8 @@
                 $(".step1").show();
             } else if (current.hasClass("step2-2-1")) {
                 $(".step2-2").show();
+            } else if (current.hasClass("step2-2-2")) {
+                $(".step2-2-1").show();
             }  else if (current.hasClass("step2-3-1")) {
                 $(".step2-3").show();
             }

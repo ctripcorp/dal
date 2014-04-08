@@ -33,6 +33,23 @@ public class JavaParameterHost extends AbstractParameterHost {
 	
 	private Object validationValue;
 
+	public JavaParameterHost(){ }
+	
+	public JavaParameterHost(JavaParameterHost host)
+	{
+		this.index = host.getIndex();
+		this.sqlType = host.getSqlType();
+		this.length = host.getLength();
+		this.javaClass = host.getJavaClass();
+		this.name = host.getName();
+		this.alias = host.getAlias();
+		this.identity = host.isIdentity();
+		this.primary = host.isPrimary();
+		this.nullable = host.isNullable();
+		this.direction = host.getDirection();
+		this.validationValue = host.getValidationValue();
+	}
+	
 	public boolean isNullable() {
 		return nullable;
 	}
@@ -104,7 +121,7 @@ public class JavaParameterHost extends AbstractParameterHost {
 	public void setIdentity(boolean identity) {
 		this.identity = identity;
 	}
-
+	
 	public boolean isPrimary() {
 		return primary;
 	}
@@ -112,7 +129,7 @@ public class JavaParameterHost extends AbstractParameterHost {
 	public void setPrimary(boolean primary) {
 		this.primary = primary;
 	}
-
+	
 	public String getCapitalizedName() {
 		String tempName = name.replace("@", "");
 		if(tempName.contains("_")) {

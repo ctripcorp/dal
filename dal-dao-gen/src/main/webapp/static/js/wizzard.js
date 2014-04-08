@@ -322,9 +322,9 @@
                     });
                 }
                 var sql_builder = ace.edit("sql_builder");
-                sql_builder.setValue(record.sql_content);
                 sql_builder.setTheme("ace/theme/monokai");
                 sql_builder.getSession().setMode("ace/mode/sql");
+                sql_builder.setValue(record["sql_content"]);
             }
             current.hide();
             $(".step2-2-1").show();
@@ -349,7 +349,9 @@
             }else{
                 $('#fields').multipleSelect('enable');
             }
-            window.sql_builder.build();
+            if ($("#page1").attr('is_update') != "1") {
+                window.sql_builder.build();
+            }
             $("body").unblock();
         }).fail(function(data){
                 $("#error_msg").text("获取表的信息失败，是否有权限");

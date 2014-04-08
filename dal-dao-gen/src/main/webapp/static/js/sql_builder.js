@@ -21,7 +21,7 @@
             var formatedConditions = [];
             $("#selected_condition > option").each(function () {
                 var splited = this.value.split(",");
-                if (splited.length == 2) {
+                if (splited.length >= 2) {
                     //between
                     if (splited[1] == "6") {
                         if ($("#sql_style").val() == "csharp") {

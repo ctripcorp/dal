@@ -360,7 +360,8 @@
     };
 
     var step2_2_1 = function(record,current){
-        if ($("#crud_option").val() != "delete" &&  $('#fields').multipleSelect('getSelects').length < 1 ) {
+        var crud_option = $("#crud_option").val();
+        if (crud_option != "delete" &&  $('#fields').multipleSelect('getSelects').length < 1 ) {
             $("#error_msg").text("请选择至少一个字段！");
             return;
         }
@@ -400,9 +401,14 @@
 //                    + variable_typesHtml;
                 htmls = htmls + sprintf(variableHtml, sprintf("param%s", i))+"</div><br/>";
             }
+            if($('#selected_condition>option').length == i
+                && "update"==crud_option){
+                break;
+            }
         }
         if (htmls.length == 0) {
             while ((result = regexNames.exec(sqlContent))) {
+                i++;
                 var realName = result[1];
                 if(id_values[realName] != undefined){
 //                    htmls = htmls + sprintf(variableHtml, realName) + sprintf(variable_typesHtml, sprintf("id='db_type_%s'", realName));
@@ -410,6 +416,10 @@
                 }else{
 //                    htmls = htmls + sprintf(variableHtml, realName) + variable_typesHtml;
                     htmls = htmls + sprintf(variableHtml, realName) + "</div><br/>";
+                }
+                if($('#selected_condition>option').length == i
+                    && "update"==crud_option){
+                    break;
                 }
             }
         }

@@ -82,7 +82,7 @@ public class DirectClientDaoTest {
 			DalClient client = DalClientFactory.getClient("dao_test");
 
 			String delete = "delete from Person where id = ?";
-			String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
+			String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00', NULL)";
 
 			System.out.println("Executing" + insert);
 			KeyHolder kh = new KeyHolder();
@@ -442,6 +442,7 @@ public class DirectClientDaoTest {
 		//test.testType("dao_test", "ManyTypes");
 		//test.test();
 //		test.test2();
+		test.testAutoIncrement();
 		/*test.testAutoIncrement();
 		test.testBatch();
 		test.testBatch2();

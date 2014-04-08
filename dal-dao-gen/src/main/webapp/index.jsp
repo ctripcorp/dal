@@ -381,7 +381,7 @@
 	               </div>
                	  <div class="steps step2-2-2 row-fluid" from="">
                      <div class="row-fluid">
-                           <label class="control-label popup_label">填写参数名</label>
+                           <label class="control-label popup_label">填写条件参数名</label>
                      </div>  
                      <div id="param_list_auto" class="row-fluid">      
                      </div>

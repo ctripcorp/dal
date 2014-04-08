@@ -55,8 +55,8 @@ public class ${host.getPojoClassName()}Dao {
 	{
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();		
-		Object result = this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
-		return Integer.valueOf(((Number)result).intValue());
+		Number result = (Number)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
+		return result.intValue();
 	}
 	
 	public List<${host.getPojoClassName()}> getListByPage(int pagesize, int pageNo) throws SQLException

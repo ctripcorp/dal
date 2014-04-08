@@ -41,7 +41,8 @@
                 var selectedConditions = [];
 
                 $.each($("#selected_condition option"), function (index, value) {
-                    selectedConditions.push($(value).val());
+                    var temp = $(value).val().split(",");
+                    selectedConditions.push(sprintf("%s,%s", temp[0], temp[1]));
                 });
 
                 postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");

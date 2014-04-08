@@ -71,12 +71,9 @@ public class ${host.getPojoClassName()}Dao {
 	{
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-#if($host.getDatabaseCategory().name() == "MySql")
-		int result = (int)(long)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
-#else
-		int result = (int)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
-#end
-		return result;
+		
+		Number result = (Number)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
+		return result.intValue();
 	}
 	
 	public List<${host.getPojoClassName()}> queryByPage(${host.getPojoClassName()} pk, int pageSize, int pageNo)  throws SQLException {
@@ -229,12 +226,12 @@ public class ${host.getPojoClassName()}Dao {
 		DalHints hints = new DalHints();
 		int i = 1;
 #foreach($p in $method.getParameters())  
-		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #end
 #if($method.getCrud_type() == "select")
 		return baseClient.query(sql, parameters, hints, rowextractor);
 #else
-		return baseClient.update(sql, parameters, hint);
+		return baseClient.update(sql, parameters, hints);
 #end
 	}
 #end

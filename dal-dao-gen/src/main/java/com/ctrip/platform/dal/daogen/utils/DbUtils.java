@@ -7,11 +7,15 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 
@@ -476,8 +480,10 @@ public class DbUtils {
 	 */
 	public static List<AbstractParameterHost> getAllColumnNames(String dbName,
 			String tableName, CurrentLanguage language) {
+		
+		Map<Integer, Class<?>> typeMapper = getSqlType2JavaTypeMaper(dbName, tableName);
+		
 		Connection connection = null;
-		// 获取所有列
 		ResultSet allColumnsRs = null;
 		List<AbstractParameterHost> allColumns = new ArrayList<AbstractParameterHost>();
 		try {
@@ -519,8 +525,9 @@ public class DbUtils {
 
 					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
-					host.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(host
-							.getSqlType()));
+					Class<?> javaClass = typeMapper.containsKey(host.getSqlType()) ? 
+							typeMapper.get(host.getSqlType()) : Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
+					host.setJavaClass(javaClass);
 					host.setIndex(allColumnsRs.getInt("ORDINAL_POSITION"));
 					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
 							.equalsIgnoreCase("YES"));
@@ -542,6 +549,63 @@ public class DbUtils {
 		return null;
 	}
 
+	private static Map<Integer, Class<?>> getSqlType2JavaTypeMaper(String dbName, String tableViewName)
+	{
+		Map<Integer, Class<?>> map = null;
+		Connection connection = null;
+		ResultSet rs = null;
+		try {
+			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(dbName);
+			connection = ds.getConnection();
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+			
+			String dbType = null;
+			if (Consts.databaseType.containsKey(dbName)) {
+				dbType = Consts.databaseType.get(dbName);
+			} else {
+				dbType = connection.getMetaData().getDatabaseProductName();
+				Consts.databaseType.put(dbName, dbType);
+			}
+	
+			String sql = dbType.equals("Microsoft SQL Server") ? "SELECT TOP(1) * FROM " + tableViewName :
+				"SELECT * FROM " + tableViewName + " limit 1";
+			
+			map = jdbcTemplate.query(sql, new ResultSetExtractor<Map<Integer, Class<?>>>(){
+				@Override
+				public Map<Integer, Class<?>> extractData(ResultSet rs)
+						throws SQLException, DataAccessException {
+					Map<Integer, Class<?>> result = new HashMap<Integer, Class<?>>();
+					ResultSetMetaData rsmd = rs.getMetaData();
+					
+					for(int i = 1; i <= rsmd.getColumnCount(); i++) {
+						Integer dbType = rsmd.getColumnType(i);
+						Class<?> javaType = null;
+						try {
+							javaType = Class.forName(rsmd.getColumnClassName(i));
+						} catch (ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if(!result.containsKey(dbType) && null != javaType)
+						{
+							result.put(dbType, javaType);
+						}
+					}
+					return result;
+				}	
+			});					
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch(Exception ex){
+			ex.printStackTrace();
+		}
+		finally {
+			JdbcUtils.closeResultSet(rs);
+			JdbcUtils.closeConnection(connection);
+		}
+		return map;
+	}
+	
 	/**
 	 * 测试查询SQL是否合法
 	 * 

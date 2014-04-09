@@ -441,8 +441,8 @@
       </div>
       <!-- /.modal-dialog -->
       
-      <div class="modal fade" id="view_code_fullscreen" style="width:100%;height:100%" tabindex="-1" role="dialog" aria-labelledby="view_code_fullscreen" aria-hidden="true">
-         <div class="modal-dialog" style="width:100%;height:90%">
+      <div class="modal fade" id="view_code_fullscreen" style="width:100%;height:100%;" tabindex="-1" role="dialog" aria-labelledby="view_code_fullscreen" aria-hidden="true">
+         <div class="modal-dialog" style="width:100%;height:100%;margin:0">
             <div class="modal-content" style="width:100%;height:100%">
                <div class="modal-header" style="width:100%;">
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>

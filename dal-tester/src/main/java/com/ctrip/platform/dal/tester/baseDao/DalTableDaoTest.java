@@ -12,6 +12,7 @@ import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
@@ -178,6 +179,35 @@ public class DalTableDaoTest {
 			e.printStackTrace();
 		}
 	}
+	
+	public void testBatchInsert() {
+		try {
+			DalTableDao<Person> dao = new DalTableDao<Person>(personParser);
+			
+			Person p = new Person();
+			p.setName("insert test 1");
+			dao.insert(hints, p);
+			p.setName("insert test 2");
+			dao.insert(hints, p);
+			p.setName("insert test 3");
+			dao.insert(hints, p);
+			
+			Person[] pList = new Person[3];
+			p = new Person();
+			p.setName("insert test 4");
+			pList[0] = p;
+			p = new Person();
+			p.setName("insert test 5");
+			pList[1] = p;
+			p = new Person();
+			p.setName("insert test 6");
+			pList[2] = p;
+			
+			dao.batchInsert(hints, pList);			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	public static void main(String[] args) {
         LogConfig.setAppID("9302011");
@@ -200,8 +230,9 @@ public class DalTableDaoTest {
 //		test.testQuery();
 //		test.testRange();
 //		test.testInsert();
-		test.testUpdate();
-		test.testDelete();
+//		test.testUpdate();
+//		test.testDelete();
+		test.testBatchInsert();
 		try {
 			Thread.sleep(30 * 1000);
 		} catch (InterruptedException e) {

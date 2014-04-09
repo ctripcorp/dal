@@ -5,22 +5,23 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 
 /**
- * 
+ * Base table DAO wraps common CRUD for particular table.
+ * The generated table DAO should use this DAO to perform CRUD.
  * @author jhhe
  */
 public final class DalTableDao<T> {
-	public static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
-	public static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
-	public static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
-	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
 	public static final String GENERATED_KEY = "GENERATED_KEY";
+
+	private static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
+	private static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
+	private static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
+	private static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
 	
 	private static final String COLUMN_SEPARATOR = ", ";
 	private static final String PLACE_HOLDER = "?";
@@ -103,21 +104,30 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * TODO add hints to set batch or non batch
-	 * The generated id if any will be set into the pojos
-	 * @param pojo
+	 * Insert pojos one by one.
+	 * If you want to inert them in the batch mode, user batchInsert instead.
+	 * @param hints additional parameters. DalHintEnum.continueOnError can be used to 
+	 * indicate that the inserting can be go on if there is any failure.
+	 * @param daoPojos list of pojos to be inserted
+	 * @return
 	 */
 	public int insert(DalHints hints, T...daoPojos) throws SQLException {
-		// Try to insert one by one
 		return insert(hints, null, daoPojos);
 	}
 
+	/**
+	 * Insert pojos and get the generated PK back in keyHolder.
+	 * Because certain JDBC driver may not support such feature, like MS JDBC driver, 
+	 * make sure the local test is performed before use this API.
+	 * @param hints additional parameters. DalHintEnum.continueOnError can be used to 
+	 * indicate that the inserting can be go on if there is any failure.
+	 * @param keyHolder holder for generated primary keys
+	 * @param daoPojos list of pojos to be inserted
+	 * @return
+	 * @throws SQLException
+	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, T...daoPojos) throws SQLException {
 		int count = 0;
-		if(hints.is(DalHintEnum.usingBatch)){
-			// TODO should revise for batch
-		}
-		
 		// Try to insert one by one
 		for(T pojo: daoPojos) {
 			Map<String, ?> fields = parser.getFields(pojo);
@@ -138,6 +148,28 @@ public final class DalTableDao<T> {
 			}
 		}
 		return count;
+	}
+	
+	/**
+	 * Insert pojos in batch mode.
+	 * @param hints
+	 * @param daoPojos
+	 * @return
+	 * @throws SQLException
+	 */
+	public int[] batchInsert(DalHints hints, T...daoPojos) throws SQLException {
+		String insertSql = buildBatchInsertSql();
+		
+		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
+		int i = 0;
+		for(T pojo: daoPojos) {
+			Map<String, ?> fields = parser.getFields(pojo);
+			StatementParameters parameters = new StatementParameters();
+			addParameters(parameters, fields);
+			parametersList[i++] = parameters;
+		}
+
+		return client.batchUpdate(insertSql, parametersList, hints);
 	}
 	
 	public int delete(DalHints hints, T...daoPojos) throws SQLException {
@@ -247,6 +279,14 @@ public final class DalTableDao<T> {
 		return String.format(TMPL_SQL_INSERT, parser.getTableName(), cloumns, values);
 	}
 	
+	private String buildBatchInsertSql() {
+		String[] allColumns = parser.getColumnNames();
+		String cloumns = combine(allColumns, COLUMN_SEPARATOR);
+		String values = combine(PLACE_HOLDER, allColumns.length, COLUMN_SEPARATOR);
+		
+		return String.format(TMPL_SQL_INSERT, parser.getTableName(), cloumns, values);
+	}
+	
 	private String buildDeleteSql(T pojo) {
 		return String.format(TMPL_SQL_DELETE, parser.getTableName(), pkSql);
 	}
@@ -284,7 +324,7 @@ public final class DalTableDao<T> {
 
 	private String combine(String value, int count, String separator) {
 		StringBuilder valuesSb = new StringBuilder();
-		;
+
 		for(int i = 1; i <= count; i++) {
 			valuesSb.append(value);
 			if(i < count)

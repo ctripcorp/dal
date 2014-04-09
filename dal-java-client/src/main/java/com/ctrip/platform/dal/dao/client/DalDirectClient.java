@@ -265,16 +265,15 @@ public class DalDirectClient implements DalClient {
 		long start = start();
 		long duration = 0;
 		try {
-			//conn.getSchema()
-			entry = Logger.create(action.getSqlLog(), action.parameters, logicDbName, "TBI", action.operation.getEventId(), action.operation.getOperation());
-			action.entry = entry;
+			entry = createLogEntry(action);
 			
 			T result = action.execute();
+			
 			duration = start() - start;
-			action.populateLogTag(hints, duration, true);
+			populateDbInfo(action);
 			entry.setResultCount(this.fetchQueryRows(result)); //TODO: fetch query rows
 			
-			Logger.log(entry);
+			Logger.log(entry, duration);
 			MetricsLogger.success(entry, duration);
 			return result;
 		} catch (Throwable e) {
@@ -307,15 +306,14 @@ public class DalDirectClient implements DalClient {
 		try {
 			//conn.getSchema()
 			level = startTransaction(hints);
-			entry = Logger.create(action.getSqlLog(), action.parameters, logicDbName, "TBI", action.operation.getEventId(), action.operation.getOperation());
-			action.entry = entry;
+			entry = createLogEntry(action);
+			populateDbInfo(action);
 			
 			T result = action.execute();	
 			endTransaction(level);			
 			duration = start() - start;
-			action.populateLogTag(hints, duration, true);
 			
-			Logger.log(entry);
+			Logger.log(entry, duration);
 			MetricsLogger.success(entry, duration);
 			return result;
 		} catch (Throwable e) {
@@ -327,6 +325,31 @@ public class DalDirectClient implements DalClient {
 		}
 	}
 	
+	private <T> LogEntry createLogEntry(ConnectionAction<T> action) {
+		LogEntry entry = Logger.create(action.getSqlLog(), action.parameters, logicDbName, "TBI", action.operation.getEventId(), action.operation.getOperation());
+		
+		entry.setCommandType(action.operation);
+		entry.setTransactional(transManager.isInTransaction());
+		action.entry = entry;
+		
+		return entry;
+	}
+	
+	private <T> void populateDbInfo(ConnectionAction<T> action) {
+		try {
+			action.entry.setDatabaseName(action.conn.getCatalog());
+			DatabaseMetaData meta = action.conn.getMetaData();
+			if(null != meta)
+			{
+				action.entry.setUserName(meta.getUserName());
+				action.entry.setServerAddress(CommonUtil.parseHostFromDBURL(meta.getURL()));
+			}
+		} catch (SQLException e) {
+			action.entry.setMessage(e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
 	private long start() {
 		return System.currentTimeMillis();
 	}
@@ -391,29 +414,6 @@ public class DalDirectClient implements DalClient {
 		}
 		
 		abstract T execute() throws Exception;
-		
-		private void populateLogTag(DalHints hints, long duration, boolean transactional)
-		{
-			this.entry.setDuration(duration);
-			this.entry.setCommandType(this.operation);
-			this.entry.setTransactional(transactional);
-			if(null != this.conn)
-			{
-				try {
-					this.entry.setDatabaseName(this.conn.getCatalog());
-					DatabaseMetaData meta = this.conn.getMetaData();
-					if(null != meta)
-					{
-						this.entry.setUserName(meta.getUserName());
-						this.entry.setServerAddress(CommonUtil.parseHostFromDBURL(meta.getURL()));
-					}
-				} catch (SQLException e) {
-					this.entry.setMessage(e.getMessage());
-					e.printStackTrace();
-				}
-			}
-		}
-		
 	}
 	
 	private void populateHints(DalHints hints, ConnectionAction<?> action) {

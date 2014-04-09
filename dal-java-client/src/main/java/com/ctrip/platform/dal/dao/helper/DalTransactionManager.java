@@ -57,6 +57,10 @@ public class DalTransactionManager {
 		connCache.endTransaction(startLevel);
 	}
 
+	public boolean isInTransaction() {
+		return connectionCacheHolder.get() != null;
+	}
+	
 	public void rollbackTransaction(int startLevel) throws SQLException {
 		ConnectionCache connCache = connectionCacheHolder.get();
 		

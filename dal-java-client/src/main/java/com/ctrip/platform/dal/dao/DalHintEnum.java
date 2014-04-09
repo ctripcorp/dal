@@ -74,9 +74,6 @@ public enum DalHintEnum {
 	callingUrl,
 	
 	/* For insert, delete, update multiple pojos */ 
-	usingBatch,
-	
-	/* For insert, delete, update multiple pojos */ 
 	continueOnError,
 	
 	/*  Connection.TRANSACTION_READ_UNCOMMITTED, Connection.TRANSACTION_READ_COMMITTED, Connection.TRANSACTION_REPEATABLE_READ, Connection.TRANSACTION_SERIALIZABLE, or Connection.TRANSACTION_NONE.*/

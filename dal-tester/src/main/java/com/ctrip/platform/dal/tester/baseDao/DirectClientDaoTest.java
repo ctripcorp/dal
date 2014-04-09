@@ -30,14 +30,14 @@ import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.tester.ColumnTypeExtractor;
 
 public class DirectClientDaoTest {
-	private StatementParameters parameters = new StatementParameters();
-	private DalHints hints = new DalHints();
 	private String sql = "select [HotelID],[LatestBookTime],[UID]  from HotelLatestBookInfo hl with(nolock)  Join resource r with(nolock) on r.resource = hl.HotelID join city c (nolock) on c.city = r.city and c.city in (select city from city (nolock) where Country = 1) ";
 	private String sql2 = "select * from Person";
 	
 	public void test() {
 		try {
 			DalClient client = DalClientFactory.getClient("HtlProductdb");
+			StatementParameters parameters = new StatementParameters();
+			DalHints hints = new DalHints();
 
 			client.query(sql, parameters, hints, new DalResultSetExtractor<Object>() {
 				@Override
@@ -57,6 +57,8 @@ public class DirectClientDaoTest {
 	public void test2() {
 		try {
 			DalClient client = DalClientFactory.getClient("dao_test");
+			StatementParameters parameters = new StatementParameters();
+			DalHints hints = new DalHints();
 
 			String delete = "delete from Person where id = 100";
 			String insert = "insert into Person values(100, 'aaa', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
@@ -80,6 +82,8 @@ public class DirectClientDaoTest {
 	public void testAutoIncrement() {
 		try {
 			DalClient client = DalClientFactory.getClient("dao_test");
+			StatementParameters parameters = new StatementParameters();
+			DalHints hints = new DalHints();
 
 			String delete = "delete from Person where id = ?";
 			String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00', NULL)";
@@ -90,7 +94,7 @@ public class DirectClientDaoTest {
 			
 			long id = kh.getKey().longValue();
 			
-			StatementParameters parameters = new StatementParameters();
+			parameters = new StatementParameters();
 			parameters.set(1, Types.INTEGER, id);
 
 			client.update(delete, parameters, hints);
@@ -104,6 +108,8 @@ public class DirectClientDaoTest {
 	public void testBatch() {
 		try {
 			DalClient client = DalClientFactory.getClient("dao_test");
+			StatementParameters parameters = new StatementParameters();
+			DalHints hints = new DalHints();
 
 			String delete = "delete from Person where id > 2000";
 			String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
@@ -123,13 +129,15 @@ public class DirectClientDaoTest {
 	public void testBatch2() {
 		try {
 			DalClient client = DalClientFactory.getClient("dao_test");
+			StatementParameters parameters = new StatementParameters();
+			DalHints hints = new DalHints();
 
 			String insert = "insert into Person values(NULL, ?, ?, 'aaaaa', 100, 1, '2012-05-01 10:10:00')";
 
 			StatementParameters[] parameterList = new StatementParameters[3];
 			
 			for (int i = 0; i < parameterList.length; i++) {
-				StatementParameters parameters = new StatementParameters();
+				parameters = new StatementParameters();
 				parameters.set(1, Types.VARCHAR, "abcde" + i);
 				parameters.set(2, Types.INTEGER, i);
 				parameterList[i] = parameters;	
@@ -145,10 +153,12 @@ public class DirectClientDaoTest {
 	
 	public void testSP() {
 		DalClient client = DalClientFactory.getClient("dao_test");
-		
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+
 		try {
 			int testId = 1000;
-			StatementParameters parameters = new StatementParameters();
+			parameters = new StatementParameters();
 			
 			parameters.set(1, Types.INTEGER, testId);
 			// clean up
@@ -183,10 +193,12 @@ public class DirectClientDaoTest {
 	
 	public void testSPInOut() {
 		DalClient client = DalClientFactory.getClient("dao_test");
-		
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+
 		try {
 			int testId = 100;
-			StatementParameters parameters = new StatementParameters();
+			parameters = new StatementParameters();
 			parameters.set("version", Types.VARCHAR, "version");
 			parameters.set("increment", Types.INTEGER, testId);
 
@@ -205,6 +217,9 @@ public class DirectClientDaoTest {
 	public void testCommand() {
 		try {
 			DalClient client = DalClientFactory.getClient("dao_test");
+			final StatementParameters parameters = new StatementParameters();
+			final DalHints hints = new DalHints();
+
 			List<DalCommand> cmds = new LinkedList<DalCommand>();
 			cmds.add(new DalCommand() {
 				@Override
@@ -247,7 +262,9 @@ public class DirectClientDaoTest {
 	
 	public void testConnectionException() {
 		DalClient client = DalClientFactory.getClient("dao_test");
-		
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+
 		try {
 			client.query(sql2, parameters, hints, new DalResultSetExtractor<Object>() {
 				@Override
@@ -264,6 +281,9 @@ public class DirectClientDaoTest {
 	public void testTransactionException() {
 		try {
 			DalClient client = DalClientFactory.getClient("dao_test");
+			final StatementParameters parameters = new StatementParameters();
+			final DalHints hints = new DalHints();
+
 			List<DalCommand> cmds = new LinkedList<DalCommand>();
 
 			cmds.add(new DalCommand() {
@@ -316,6 +336,9 @@ public class DirectClientDaoTest {
 	}
 
 	private void selectPerson(DalClient client) throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+
 		client.query(sql2, parameters, hints, new DalResultSetExtractor<List<Integer>>() {
 			private boolean headerDisplayed;
 			private int colCount;
@@ -358,6 +381,8 @@ public class DirectClientDaoTest {
 	public void testType(String db, String table) {
 		try {
 			DalClient client = DalClientFactory.getClient(db);
+			StatementParameters parameters = new StatementParameters();
+			DalHints hints = new DalHints();
 
 			client.query("select * from " + table, parameters, hints, new ColumnTypeExtractor());
 		} catch (Exception e) {
@@ -371,6 +396,7 @@ public class DirectClientDaoTest {
 			DalClient client = DalClientFactory.getClient("dao_test");
 			final DalHints hints = new DalHints();
 			hints.setIsolationLevel(Connection.TRANSACTION_REPEATABLE_READ);
+			final StatementParameters parameters = new StatementParameters();
 
 			client.query("select * from Person", parameters, hints, new ColumnTypeExtractor());
 			
@@ -437,15 +463,14 @@ public class DirectClientDaoTest {
 		
 		DirectClientDaoTest test = new DirectClientDaoTest();
 		
-		test.testIsolationLevel();
+//		test.testIsolationLevel();
 //		test.testSelect();
 		//test.testType("dao_test", "ManyTypes");
 		//test.test();
 //		test.test2();
-		test.testAutoIncrement();
-		/*test.testAutoIncrement();
+		/*test.testAutoIncrement();*/
 		test.testBatch();
-		test.testBatch2();
+		test.testBatch2();/*
 		test.testCommand();
 		test.testSP();
 		test.testSPInOut();

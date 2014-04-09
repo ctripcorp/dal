@@ -46,13 +46,15 @@ public class Logger {
 		return new LogEntry(sql, parameters, logicDbName, realDbName, eId, message);
 	}
 	
-	public static void log(LogEntry log) {
+	public static void log(LogEntry log, long duration) {
 
 		if(log == null) 
 			return;
 		// Don't log
 		if(!validate(log.getSql(), log.getInputParamStr()))
 			return;
+		
+		log.setDuration(duration);
 		
 		Map<String, String> tag = new LinkedHashMap<String, String>();
 		tag.put("InTransaction", log.isTransactional() ? "True" : "False");

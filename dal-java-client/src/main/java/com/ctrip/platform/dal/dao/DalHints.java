@@ -69,16 +69,6 @@ public class DalHints {
 		return this;
 	}
 	
-	public DalHints shardWith(String column) {
-		set(DalHintEnum.usingBatch, column);
-		return this;
-	}
-	
-	public DalHints usingBatch() {
-		set(DalHintEnum.usingBatch);
-		return this;
-	}
-	
 	public DalHints continueOnError() {
 		set(DalHintEnum.continueOnError);
 		return this;

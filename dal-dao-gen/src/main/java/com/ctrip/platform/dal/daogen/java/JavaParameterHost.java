@@ -19,8 +19,14 @@ public class JavaParameterHost extends AbstractParameterHost {
 
 	private Class<?> javaClass;
 	
+	/**
+	 * The default name
+	 */
 	private String name;
 	
+	/**
+	 * Used for re-name where condition parameters
+	 */
 	private String alias;
 	
 	private boolean identity;
@@ -50,8 +56,9 @@ public class JavaParameterHost extends AbstractParameterHost {
 		this.nullable = host.isNullable();
 		this.direction = host.getDirection();
 		this.validationValue = host.getValidationValue();
+		this.conditional = host.isConditional();
 	}
-	
+
 	public boolean isConditional() {
 		return conditional;
 	}

@@ -660,7 +660,7 @@ public class DbUtils {
 				List<AbstractParameterHost> pHosts = new ArrayList<AbstractParameterHost>();
 				for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
 					CSharpParameterHost pHost = new CSharpParameterHost();
-					pHost.setName(rsMeta.getColumnName(i));
+					pHost.setName(rsMeta.getColumnLabel(i));
 					pHost.setDbType(DbType.getDbTypeFromJdbcType(rsMeta
 							.getColumnType(i)));
 					pHost.setType(DbType.getCSharpType(pHost.getDbType()));
@@ -677,7 +677,7 @@ public class DbUtils {
 				List<AbstractParameterHost> paramHosts = new ArrayList<AbstractParameterHost>();
 				for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
 					JavaParameterHost paramHost = new JavaParameterHost();
-					paramHost.setName(rsMeta.getColumnName(i));
+					paramHost.setName(rsMeta.getColumnLabel(i));
 					paramHost.setSqlType(rsMeta.getColumnType(i));
 					paramHost.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType()));
 					paramHost.setIdentity(false);
@@ -705,7 +705,7 @@ public class DbUtils {
 		return null;
 
 	}
-
+	
 	public static Object mockATest(int javaSqlTypes) {
 		switch (javaSqlTypes) {
 		case java.sql.Types.BIT:

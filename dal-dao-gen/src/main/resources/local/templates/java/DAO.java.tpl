@@ -42,12 +42,19 @@ public class ${host.getPojoClassName()}Dao {
 	}
 
 #if($host.isIntegerPk())
+	/**
+	 * Query ${host.getPojoClassName()} by the specified ID
+	 * The ID must be a number
+	**/
 	public ${host.getPojoClassName()} queryByPk(Number id)
 			throws SQLException {
 		DalHints hints = new DalHints();
 		return client.queryByPk(id, hints);
 	}
 #else
+	/**
+	 * Query ${host.getPojoClassName()} by complex primary key
+	**/
 	public ${host.getPojoClassName()} queryByPk(${host.getPkParameterDeclaration()})
 			throws SQLException {
 		DalHints hints = new DalHints();
@@ -60,13 +67,18 @@ public class ${host.getPojoClassName()}Dao {
 		return client.queryByPk(pk, hints);
 	}
 #end
-
+    /**
+	 * Query ${host.getPojoClassName()} by ${host.getPojoClassName()} instance which the primary key is set
+	**/
 	public ${host.getPojoClassName()} queryByPk(${host.getPojoClassName()} pk)
 			throws SQLException {
 		DalHints hints = new DalHints();
 		return client.queryByPk(pk, hints);
 	}
 	
+	/**
+	 * Get the records count
+	**/
 	public int count()  throws SQLException
 	{
 		StatementParameters parameters = new StatementParameters();
@@ -76,6 +88,10 @@ public class ${host.getPojoClassName()}Dao {
 		return result.intValue();
 	}
 	
+	/**
+	 * Query ${host.getPojoClassName()} with paging function
+	 * The pageSize and pageNo must be greater than zero, the pk parameter can be null for the whole table
+	**/
 	public List<${host.getPojoClassName()}> queryByPage(${host.getPojoClassName()} pk, int pageSize, int pageNo)  throws SQLException {
 		if(pageNo < 1 || pageSize < 1) 
 			throw new SQLException("Illigal pagesize or pageNo, pls check");
@@ -94,6 +110,9 @@ public class ${host.getPojoClassName()}Dao {
 		return this.baseClient.query(sql, parameters, hints, rowextractor);
 	}
 	
+	/**
+	 * Get all records in the whole table
+	**/
 	public List<${host.getPojoClassName()}> getAll() throws SQLException
 	{
 		StatementParameters parameters = new StatementParameters();
@@ -104,6 +123,9 @@ public class ${host.getPojoClassName()}Dao {
 	}
 
 #if($host.getSpInsert().isExist())
+	/**
+	 * Operation type: insert by sp
+	**/
 	public int insert(${host.getPojoClassName()} daoPojo) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
@@ -133,18 +155,29 @@ public class ${host.getPojoClassName()}Dao {
 		return (Integer)results.get(RET_CODE);
 	}
 #{else}
+	/**
+	 * Operation type: insert by sql
+	 * Note: there must be one non-null field in daoPojo
+	**/
 	public void insert(${host.getPojoClassName()}...daoPojos) throws SQLException {
 		DalHints hints = new DalHints();
 		client.insert(hints, null, daoPojos);
 	}
 
+	/**
+	 * Operation type: insert by sql with keyHolder
+	 * Note: there must be one non-null field in daoPojo
+	**/
 	public void insert(KeyHolder keyHolder, ${host.getPojoClassName()}...daoPojos) throws SQLException {
 		DalHints hints = new DalHints();
 		client.insert(hints, keyHolder, daoPojos);
 	}
 #end
 
-#if($host.getSpDelete().isExist())	
+#if($host.getSpDelete().isExist())
+	/**
+	 * Operation type: delete by sp
+	**/
 	public int delete(${host.getPojoClassName()} daoPojo) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
@@ -173,13 +206,20 @@ public class ${host.getPojoClassName()}Dao {
 		return (Integer)results.get(RET_CODE);
 	}
 #{else}
+	/**
+	 * Operation type: delete by sql
+	 * Note: there must be one non-null field in daoPojo
+	**/
 	public void delete(${host.getPojoClassName()}...daoPojos) throws SQLException {
 		DalHints hints = new DalHints();
 		client.delete(hints, daoPojos);
 	}
 #end
 
-#if($host.getSpUpdate().isExist())	
+#if($host.getSpUpdate().isExist())
+	/**
+	 * Operation type: update by sp
+	**/
 	public int update(${host.getPojoClassName()} daoPojo) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
@@ -208,6 +248,10 @@ public class ${host.getPojoClassName()}Dao {
 		return (Integer)results.get(RET_CODE);
 	}
 #{else}
+	/**
+	 * Operation type: update by sql
+	 * Note: there must be one non-null field in daoPojo
+	**/
 	public void update(${host.getPojoClassName()}...daoPojos) throws SQLException {
 		DalHints hints = new DalHints();
 		client.update(hints, daoPojos);
@@ -216,9 +260,27 @@ public class ${host.getPojoClassName()}Dao {
 
 #foreach($method in $host.getMethods())
 #if($method.getCrud_type() == "select")
+	/**
+	 * Operation type: query
+#foreach($pama1 in $method.getParamComments())
+	 * @param ${pama1}
+#end
+#foreach($pama1 in $method.getConditionComments())
+	 * @param ${pama1}
+#end
+	**/
     public List<${host.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) 
 			throws SQLException {
 #else
+	/**
+	 * The operation type: ${method.getCrud_type()}
+#foreach($pama1 in $method.getParamComments())
+	 * @param ${pama1}
+#end
+#foreach($pama1 in $method.getConditionComments())
+	 * @param ${pama1}
+#end
+	**/
     public int ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 #end
 		String sql = "${method.getSql()}";

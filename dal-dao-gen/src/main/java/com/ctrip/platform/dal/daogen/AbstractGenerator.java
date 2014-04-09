@@ -136,9 +136,10 @@ public abstract class AbstractGenerator implements Generator {
 				DatabaseHost host = new DatabaseHost();
 				host.setAllInOneName(task.getDb_name());
 				host.setProviderType(provider);
-				int index = host.getAllInOneName().indexOf("_");
-				host.setDatasetName(host.getAllInOneName().substring(0,
-						index > -1 ? index : host.getAllInOneName().length()));
+//				int index = host.getAllInOneName().indexOf("_");
+//				host.setDatasetName(host.getAllInOneName().substring(0,
+//						index > -1 ? index : host.getAllInOneName().length()));
+				host.setDatasetName(host.getAllInOneName());
 				dbHosts.put(task.getDb_name(), host);
 			}
 		}
@@ -172,9 +173,10 @@ public abstract class AbstractGenerator implements Generator {
 				DatabaseHost host = new DatabaseHost();
 				host.setAllInOneName(task.getDb_name());
 				host.setProviderType(provider);
-				int index = host.getAllInOneName().indexOf("_");
-				host.setDatasetName(host.getAllInOneName().substring(0,
-						index > -1 ? index : host.getAllInOneName().length()));
+//				int index = host.getAllInOneName().indexOf("_");
+//				host.setDatasetName(host.getAllInOneName().substring(0,
+//						index > -1 ? index : host.getAllInOneName().length()));
+				host.setDatasetName(host.getAllInOneName());
 				dbHosts.put(task.getDb_name(), host);
 			}
 		}
@@ -195,9 +197,10 @@ public abstract class AbstractGenerator implements Generator {
 				DatabaseHost host = new DatabaseHost();
 				host.setAllInOneName(task.getDb_name());
 				host.setProviderType(provider);
-				int index = host.getAllInOneName().indexOf("_");
-				host.setDatasetName(host.getAllInOneName().substring(0,
-						index > -1 ? index : host.getAllInOneName().length()));
+//				int index = host.getAllInOneName().indexOf("_");
+//				host.setDatasetName(host.getAllInOneName().substring(0,
+//						index > -1 ? index : host.getAllInOneName().length()));
+				host.setDatasetName(host.getAllInOneName());
 				dbHosts.put(task.getDb_name(), host);
 			}
 		}

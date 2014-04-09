@@ -504,7 +504,8 @@ public class DbUtils {
 					DbType dbType = DbType.getDbTypeFromJdbcType(dataType);
 
 					host.setDbType(dbType);
-					host.setName(CommonUtils.normalizeVariable(allColumnsRs.getString("COLUMN_NAME")));
+					//host.setName(CommonUtils.normalizeVariable(allColumnsRs.getString("COLUMN_NAME")));
+					host.setName(allColumnsRs.getString("COLUMN_NAME"));;
 					host.setType(DbType.getCSharpType(host.getDbType()));
 					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
 							.equalsIgnoreCase("YES"));

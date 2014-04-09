@@ -32,6 +32,8 @@ public class JavaParameterHost extends AbstractParameterHost {
 	private ParameterDirection direction;
 	
 	private Object validationValue;
+	
+	private boolean conditional;
 
 	public JavaParameterHost(){ }
 	
@@ -50,6 +52,14 @@ public class JavaParameterHost extends AbstractParameterHost {
 		this.validationValue = host.getValidationValue();
 	}
 	
+	public boolean isConditional() {
+		return conditional;
+	}
+
+	public void setConditional(boolean conditional) {
+		this.conditional = conditional;
+	}
+
 	public boolean isNullable() {
 		return nullable;
 	}

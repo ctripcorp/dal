@@ -270,7 +270,7 @@ public class DalDirectClient implements DalClient {
 			T result = action.execute();
 			
 			duration = start() - start;
-			populateDbInfo(action, entry);
+			populateDbInfo(action.conn, entry);
 			entry.setResultCount(this.fetchQueryRows(result)); //TODO: fetch query rows
 			
 			Logger.log(entry, duration);
@@ -307,7 +307,7 @@ public class DalDirectClient implements DalClient {
 			//conn.getSchema()
 			level = startTransaction(hints);
 			entry = createLogEntry(action);
-			populateDbInfo(action, entry);
+			populateDbInfo(transManager.getConnection(hints), entry);
 			
 			T result = action.execute();	
 			endTransaction(level);			
@@ -334,10 +334,10 @@ public class DalDirectClient implements DalClient {
 		return entry;
 	}
 	
-	private <T> void populateDbInfo(ConnectionAction<T> action, LogEntry entry) {
+	private <T> void populateDbInfo(Connection conn, LogEntry entry) {
 		try {
-			entry.setDatabaseName(action.conn.getCatalog());
-			DatabaseMetaData meta = action.conn.getMetaData();
+			entry.setDatabaseName(conn.getCatalog());
+			DatabaseMetaData meta = conn.getMetaData();
 			if(null != meta)
 			{
 				entry.setUserName(meta.getUserName());
@@ -366,7 +366,6 @@ public class DalDirectClient implements DalClient {
 		PreparedStatement preparedStatement;
 		CallableStatement callableStatement;
 		ResultSet rs;
-		T result;
 		
 		void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
 			this.operation = operation;

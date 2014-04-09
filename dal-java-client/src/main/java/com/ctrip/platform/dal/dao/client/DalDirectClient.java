@@ -271,7 +271,7 @@ public class DalDirectClient implements DalClient {
 			
 			duration = start() - start;
 			populateDbInfo(action.conn, entry);
-			entry.setResultCount(this.fetchQueryRows(result)); //TODO: fetch query rows
+			entry.setResultCount(this.fetchQueryRows(result));
 			
 			Logger.log(entry, duration);
 			MetricsLogger.success(entry, duration);

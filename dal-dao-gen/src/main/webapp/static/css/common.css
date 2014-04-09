@@ -51,3 +51,13 @@ label.btn{
 .jstree-anchor{
     font-family: Verdana,Arial;
 }
+.code-fullscreen{
+    position:relative;
+    float:right;
+    top:15px;
+    right:25px;
+    z-index:999999;
+    height:30px;
+    width:30px;
+    cursor:pointer
+}

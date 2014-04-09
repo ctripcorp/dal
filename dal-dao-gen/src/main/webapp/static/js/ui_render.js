@@ -378,13 +378,34 @@
                     }
             }});
 
-            w2ui['sub_layout'].content('main',
-             '<div id="code_editor" class="code_edit" style="height:100%"></div>');
+            var code_editor_html = '<div id="code_editor" class="code_edit" style="height:100%"></div>';
+            w2ui['sub_layout'].content('main',code_editor_html);
             //End tree side bar
 
             var editor = ace.edit("code_editor");
             editor.setTheme("ace/theme/monokai");
             editor.getSession().setMode("ace/mode/csharp");
+
+            editor.getSession().on('change', function(e) {
+                if($("#code_fullscreen").length<=0){
+                    $("#code_editor:first-child").prepend('<img id="code_fullscreen" src="/static/images/fullscreen.jpg" alt="全屏" class="code-fullscreen" />');
+                    var code_editor_fullscreen = ace.edit("code_editor_fullscreen");
+                    code_editor_fullscreen.setTheme("ace/theme/monokai");
+                    code_editor_fullscreen.getSession().setMode("ace/mode/csharp");
+                    $(document.body).on('click', "#code_fullscreen", function(event){
+                        code_editor_fullscreen = ace.edit("code_editor_fullscreen");
+                        if("java"==$("#viewCode").val()){
+                            code_editor_fullscreen.getSession().setMode("ace/mode/java");
+                        }else{
+                            code_editor_fullscreen.getSession().setMode("ace/mode/csharp");
+                        }
+                        var value = ace.edit("code_editor").getValue();
+                        code_editor_fullscreen.setValue(value);
+                        $("#view_code_fullscreen").modal();
+                        code_editor_fullscreen.resize();
+                    });
+                }
+            });
         }
     };
 

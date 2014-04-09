@@ -26,10 +26,9 @@
                     if (splited[1] == "6") {
                         if ($("#sql_style").val() == "csharp") {
                             formatedConditions.push(sprintf(
-                                " BETWEEN @%s_start AND @%s_end ", splited[0],
-                                splited[0]));
+                                " %s BETWEEN @%s_start AND @%s_end ",splited[0], splited[0], splited[0]));
                         } else {
-                            formatedConditions.push(" BETWEEN ? AND ? ");
+                            formatedConditions.push(sprintf(" %s BETWEEN ? AND ? ",splited[0]));
                         }
                     } else {
                         if ($("#sql_style").val() == "csharp") {

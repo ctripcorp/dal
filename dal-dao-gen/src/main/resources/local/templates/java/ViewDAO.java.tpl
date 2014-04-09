@@ -10,7 +10,7 @@ public class ${host.getPojoClassName()}Dao {
 	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getViewName()}";
 	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getViewName()}";
 #if($host.getDatabaseCategory().name() == "MySql")
-	private static final String PAGE_MYSQL_PATTERN = "SELECT * FROM ${host.getViewName()} WHERE LIMIT %s, %s";
+	private static final String PAGE_MYSQL_PATTERN = "SELECT * FROM ${host.getViewName()} LIMIT %s, %s";
 #else
 	private static final String PAGE_SQL_PATTERN = "WITH CTE AS (select *, row_number() over(order by ${host.getOverColumns()} desc ) as rownum" 
 			+" from ${host.getViewName()} (nolock)) select * from CTE where rownum between %s and %s";

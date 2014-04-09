@@ -404,6 +404,7 @@ public class JavaGenerator extends AbstractGenerator {
 						if (pHost.getName().equals(name)) {
 							JavaParameterHost host_ls = new JavaParameterHost(pHost);
 							host_ls.setAlias(alias);
+							host_ls.setConditional(true);
 							parameters.add(host_ls);
 							break;
 						}
@@ -424,14 +425,20 @@ public class JavaGenerator extends AbstractGenerator {
 				String[] fields = StringUtils.split(
 						builder.getFields(), ",");
 				String[] conditions = StringUtils.split(
-						builder.getCondition(), ";");
+						builder.getCondition(), ";");				
+				
 				for (JavaParameterHost pHost : allColumns) {
 					for (String field : fields) {
 						if (pHost.getName().equals(field)) {
-							parameters.add(pHost);
+							JavaParameterHost host_ls = new JavaParameterHost(pHost);
+							parameters.add(host_ls);
 							break;
 						}
 					}
+				}
+				
+				for(JavaParameterHost pHost : allColumns)
+				{
 					for (String condition : conditions) {	
 						String[] tokens = StringUtils.split(condition, ",");
 						String name = tokens[0];
@@ -440,6 +447,7 @@ public class JavaGenerator extends AbstractGenerator {
 						if (pHost.getName().equals(name)) {
 							JavaParameterHost host_ls = new JavaParameterHost(pHost);
 							host_ls.setAlias(alias);
+							host_ls.setConditional(true);
 							parameters.add(host_ls);
 							break;
 						}

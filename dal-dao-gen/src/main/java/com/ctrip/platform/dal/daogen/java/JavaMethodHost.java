@@ -132,4 +132,24 @@ public class JavaMethodHost {
 		}
 		return imports;
 	}
+	
+	public List<String> getParamComments()
+	{
+		List<String> params = new ArrayList<String>();
+		for(JavaParameterHost parameter: parameters) {
+			if(!parameter.isConditional())
+				params.add(parameter.getAlias() + ": set clause");
+		}
+		return params;
+	}
+	
+	public List<String> getConditionComments()
+	{
+		List<String> params = new ArrayList<String>();
+		for(JavaParameterHost parameter: parameters) {
+			if(parameter.isConditional())
+				params.add(parameter.getAlias() + ": where clause");
+		}
+		return params;
+	}
 }

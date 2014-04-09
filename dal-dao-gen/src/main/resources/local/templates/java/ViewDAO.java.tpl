@@ -54,13 +54,9 @@ public class ${host.getPojoClassName()}Dao {
 	public int Count() throws SQLException
 	{
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
-#if($host.getDatabaseCategory().name() == "MySql")
-		int result = (int)(long)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
-#else
-		int result = (int)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
-#end
-		return result;
+		DalHints hints = new DalHints();		
+		Number result = (Number)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
+		return result.intValue();
 	}
 	
 	public List<${host.getPojoClassName()}> getListByPage(int pagesize, int pageNo) throws SQLException

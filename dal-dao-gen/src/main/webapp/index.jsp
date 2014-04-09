@@ -334,51 +334,63 @@
                      </div>
                   </div>
                   <div class="row-fluid steps step2-2-1" style="height:348px;">
-                  <div id="operation_fields" class="step2-2-1-1 row-fluid">
+	                  <div id="operation_fields" class="step2-2-1-1 row-fluid">
+	                     <div class="row-fluid">
+	                        <div class="control-group">
+	                           <label class="control-label popup_label">选择字段：</label>
+	                           <select id="fields" multiple="multiple" class="popup_text" style="width:440px;">
+	                           </select>
+	                        </div>
+	                     </div>
+	                  </div>
+	                  <br>
+	                  <div id="where_condition" class="step2-2-1-2">
+	                     <div class="row-fluid">
+	                        <div class="control-group">
+	                           <label class="control-label popup_label">Where条件：</label>
+	                           <select id="conditions" class="span4">
+	                              <option value='-1'>--请选择--</option>
+	                           </select>
+	                           <select id="condition_values" class='span3'>
+	                              <option value='-1'>--请选择--</option>
+	                              <option value='0'>=</option>
+	                              <option value='1'>!=</option>
+	                              <option value='2'>&gt;</option>
+	                              <option value='3'>&lt;</option>
+	                              <option value='4'>&ge;</option>
+	                              <option value='5'>&le;</option>
+	                              <option value='6'>Between</option>
+	                              <option value='7'>Like</option>
+	                              <option value='8'>In</option>
+	                           </select>
+	                           <input id="add_condition" type="button" class="span2 btn btn-primary popup_text" value="添加">
+	                        </div>
+	                     </div>
+	                     <br>
+	                     <div class="row-fluid">
+	                           <select class="span10" id="selected_condition" multiple="multiple" style="height:120px;">
+	                           </select>
+	                           <input id="del_condition" type="button" class="span2 btn btn-danger popup_text" value="删除">
+	                     </div>
+	                  </div>
+	                  <br>
+	                  <div class="row-fluid">
+	                        <div id="sql_builder" class="span12" style="height:100px;">
+	                        </div>
+	                  </div>
+	               </div>
+               	  <div class="steps step2-2-2 row-fluid" from="">
                      <div class="row-fluid">
-                        <div class="control-group">
-                           <label class="control-label popup_label">选择字段：</label>
-                           <select id="fields" multiple="multiple" class="popup_text" style="width:440px;">
-                           </select>
+                           <label class="control-label popup_label">填写条件参数名</label>
+                     </div>  
+                     <div id="param_list_auto" class="row-fluid">      
+                     </div>
+                     <br/>
+                      <div class="row-fluid">
+                        <div id="step2_2_2_sql_editor" class="span12" style="height:200px;">
                         </div>
                      </div>
                   </div>
-                  <br>
-                  <div id="where_condition" class="step2-2-1-2">
-                     <div class="row-fluid">
-                        <div class="control-group">
-                           <label class="control-label popup_label">Where条件：</label>
-                           <select id="conditions" class="span4">
-                              <option value='-1'>--请选择--</option>
-                           </select>
-                           <select id="condition_values" class='span3'>
-                              <option value='-1'>--请选择--</option>
-                              <option value='0'>=</option>
-                              <option value='1'>!=</option>
-                              <option value='2'>&gt;</option>
-                              <option value='3'>&lt;</option>
-                              <option value='4'>&ge;</option>
-                              <option value='5'>&le;</option>
-                              <option value='6'>Between</option>
-                              <option value='7'>Like</option>
-                              <option value='8'>In</option>
-                           </select>
-                           <input id="add_condition" type="button" class="span2 btn btn-primary popup_text" value="添加">
-                        </div>
-                     </div>
-                     <br>
-                     <div class="row-fluid">
-                           <select class="span10" id="selected_condition" multiple="multiple" style="height:120px;">
-                           </select>
-                           <input id="del_condition" type="button" class="span2 btn btn-danger popup_text" value="删除">
-                     </div>
-                  </div>
-                  <br>
-                  <div class="row-fluid">
-                        <div id="sql_builder" class="span12" style="height:100px;">
-                        </div>
-                  </div>
-               </div>
                
                   <div class="steps step2-3 row-fluid" from="" style="height:348px;">
                      <div class="row-fluid">

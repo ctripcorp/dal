@@ -98,11 +98,21 @@ public class JavaMethodHost {
 		return StringUtils.join(params, ", ");
 	}
 	
+	public String getParameterNames(String suffix) {
+		String[] params = new String[parameters.size()];
+		int i = 0;
+		for(JavaParameterHost parameter: parameters) {
+			params[i++] = parameter.getName() + (null != suffix ? suffix : "");
+		}
+		
+		return StringUtils.join(params, ", ");
+	}
+	
 	public String getParameterDeclaration() {
 		String[] paramsDeclaration = new String[parameters.size()];
 		int i = 0;
 		for(JavaParameterHost parameter: parameters) {
-			paramsDeclaration[i++] = String.format("%s %s", parameter.getClassDisplayName(), parameter.getName());
+			paramsDeclaration[i++] = String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias());
 		}
 		
 		return StringUtils.join(paramsDeclaration, ", ");

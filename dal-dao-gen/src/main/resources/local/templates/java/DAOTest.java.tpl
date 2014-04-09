@@ -65,22 +65,24 @@ public class ${host.getPojoClassName()}DaoTest {
 
 	        //Get the count
 			int count = dao.count();
-			
+#set($count = 0)
 #if($host.hasMethods())
 			// Test additional customized method
 			int affectedRows = 0;
 			List<${host.getPojoClassName()}> results = null;
 #foreach($method in $host.getMethods())
+#set($count = $count+1)
+#set($suffix = $count+'')
 			// Test ${method.getName()}
-#foreach($p in $method.getParameters())  
-			${p.getClassDisplayName()} ${p.getName()} = null; //set you value here
+#foreach($p in $method.getParameters())
+			${p.getClassDisplayName()} ${p.getName()}${suffix} = null; //set you value here
 #end
 
 #if($method.getCrud_type() == "select")
-		    results = dao.${method.getName()}(${method.getParameterNames()});
+		    results = dao.${method.getName()}(${method.getParameterNames($suffix)});
 
 #else
-    		affectedRows = dao.${method.getName()}(${method.getParameterNames()});
+    		affectedRows = dao.${method.getName()}(${method.getParameterNames($suffix)});
 
 #end
 #end

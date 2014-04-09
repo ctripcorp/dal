@@ -1,4 +1,3 @@
-
 package com.ctrip.platform.dal.daogen.dao;
 
 import java.sql.ResultSet;
@@ -12,7 +11,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 
 public class DaoBySqlBuilder {
@@ -107,7 +105,7 @@ public class DaoBySqlBuilder {
 						task.getFields(), task.getCondition(),
 						task.getSql_content(), task.isGenerated(),
 						task.getVersion(), task.getProject_id(),
-						task.getDb_name(), task.getTable_name(),
+						task.getDb_name(), task.getTable_name(), 
 						task.getMethod_name());
 
 	}

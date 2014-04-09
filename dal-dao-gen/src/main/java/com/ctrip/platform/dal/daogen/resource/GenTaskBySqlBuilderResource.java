@@ -39,7 +39,8 @@ public class GenTaskBySqlBuilderResource {
 			@FormParam("condition") String condition,
 			@FormParam("sql_content") String sql_content,
 			@FormParam("version") int version,
-			@FormParam("action") String action) {
+			@FormParam("action") String action,
+			@FormParam("params") String params) {
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 
 		if (action.equalsIgnoreCase("delete")) {

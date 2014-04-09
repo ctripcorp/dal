@@ -21,7 +21,7 @@
             var formatedConditions = [];
             $("#selected_condition > option").each(function () {
                 var splited = this.value.split(",");
-                if (splited.length == 2) {
+                if (splited.length >= 2) {
                     //between
                     if (splited[1] == "6") {
                         if ($("#sql_style").val() == "csharp") {
@@ -44,12 +44,21 @@
                 }
             });
             if ($("#crud_option").val() == "select") {
-                if (formatedConditions.length > 0) {
-                    ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
-                        $("#tables").val(), formatedConditions.join(" AND ")));
-                } else {
-                    ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
-                        $("#tables").val()));
+                if("java"==$("#sql_style").val() && "select"==$("#crud_option").val()){
+                    if (formatedConditions.length > 0) {
+                        ace.edit("sql_builder").setValue(sprintf("SELECT * FROM %s WHERE %s",
+                            $("#tables").val(), formatedConditions.join(" AND ")));
+                    } else {
+                        ace.edit("sql_builder").setValue(sprintf("SELECT * FROM %s", $("#tables").val()));
+                    }
+                }else{
+                    if (formatedConditions.length > 0) {
+                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
+                            $("#tables").val(), formatedConditions.join(" AND ")));
+                    } else {
+                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
+                            $("#tables").val()));
+                    }
                 }
             } else if ($("#crud_option").val() == "insert") {
 
@@ -96,7 +105,7 @@
                     ace.edit("sql_builder").setValue(sprintf("Delete FROM %s", $("#tables").val()));
                 }
             }
-        },
+        }
     };
 
     /**

@@ -8,6 +8,8 @@ public class CSharpParameterHost extends AbstractParameterHost {
 	
 	private String name;
 	
+	private String alias;
+	
 	private ParameterDirection direction;
 	
 	//C#的DbType
@@ -23,6 +25,21 @@ public class CSharpParameterHost extends AbstractParameterHost {
 	private boolean nullable;
 	
 	private boolean valueType;
+	
+	public CSharpParameterHost(){ }
+	
+	public CSharpParameterHost(CSharpParameterHost host)
+	{
+		this.name = host.getName();
+		this.alias = host.getAlias();
+		this.direction = host.getDirection();
+		this.dbType = host.getDbType();
+		this.type = host.getType();
+		this.identity = host.isIdentity();
+		this.primary = host.isPrimary();
+		this.nullable = host.isNullable();
+		this.valueType = host.isValueType();
+	}
 	
 	public boolean isValueType() {
 		return valueType;
@@ -82,6 +99,14 @@ public class CSharpParameterHost extends AbstractParameterHost {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public String getAlias() {
+		return null != this.alias && ! this.alias.isEmpty() ? this.alias : this.name;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 
 	public ParameterDirection getDirection() {

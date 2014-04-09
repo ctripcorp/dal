@@ -15,7 +15,6 @@ public class SpHost {
 	private String spName;
 	private String callParameters;
 	private List<JavaParameterHost> fields = new ArrayList<JavaParameterHost>();
-	private Set<String> imports = new TreeSet<String>();
 	
 	public String getPojoClassName() {
 		return pojoClassName;
@@ -86,17 +85,6 @@ public class SpHost {
 	public String getCallParameters()
 	{
 		return this.callParameters;
-		/*String params = "";
-		if(null != this.fields)
-		{
-			for (int i = 0; i < this.fields.size(); i++) {
-				if(0 != i)
-					params += ",?"; 
-				else
-					params = "?";
-			}
-		}
-		return params;*/
 	}
 	
 	public Set<String> getPojoImports() {

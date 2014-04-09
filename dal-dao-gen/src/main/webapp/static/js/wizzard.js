@@ -388,6 +388,9 @@
 //        }
 
         while ((result = regexIndex.exec(sqlContent))) {
+            if($('#selected_condition>option').length == i && "update"==crud_option){
+                break;
+            }
             i++;
             if(id_values[sprintf("param%s", i)] != undefined){
 //                htmls = htmls
@@ -401,13 +404,12 @@
 //                    + variable_typesHtml;
                 htmls = htmls + sprintf(variableHtml, sprintf("param%s", i))+"</div><br/>";
             }
-            if($('#selected_condition>option').length == i
-                && "update"==crud_option){
-                break;
-            }
         }
         if (htmls.length == 0) {
             while ((result = regexNames.exec(sqlContent))) {
+                if($('#selected_condition>option').length == i && "update"==crud_option){
+                    break;
+                }
                 i++;
                 var realName = result[1];
                 if(id_values[realName] != undefined){
@@ -416,10 +418,6 @@
                 }else{
 //                    htmls = htmls + sprintf(variableHtml, realName) + variable_typesHtml;
                     htmls = htmls + sprintf(variableHtml, realName) + "</div><br/>";
-                }
-                if($('#selected_condition>option').length == i
-                    && "update"==crud_option){
-                    break;
                 }
             }
         }
@@ -538,7 +536,7 @@
             if (records.length > 0)
                 record = w2ui['grid'].get(records[0]);
 
-            //向导首先显示所有数据库服务器，点击下一步后，获取此服务器所有的数据库列表 
+            //向导首先显示所有数据库服务器，点击下一步后，获取此服务器所有的数据库列表
             if (current.hasClass("step1")) {
                 step1(record, current);
             }

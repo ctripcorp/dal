@@ -185,6 +185,12 @@ public class DalTableDaoTest {
 			DalTableDao<Person> dao = new DalTableDao<Person>(personParser);
 			
 			Person p = new Person();
+			try {
+				dao.update(hints, p);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			p.setName("insert test 1");
 			dao.insert(hints, p);
 			p.setName("insert test 2");

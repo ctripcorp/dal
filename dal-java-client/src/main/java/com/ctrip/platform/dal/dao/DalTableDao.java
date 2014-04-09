@@ -197,6 +197,8 @@ public final class DalTableDao<T> {
 			Map<String, ?> pk = parser.getPrimaryKeys(pojo);
 			
 			String updateSql = buildUpdateSql(fields);
+			if(fields.size() == 0)
+				throw new SQLException("There is no column to be updated. Please check if needed fields have been set in pojo.");
 			
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);

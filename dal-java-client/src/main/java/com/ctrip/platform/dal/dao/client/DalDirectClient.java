@@ -59,7 +59,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<T> action = new ConnectionAction<T>() {
 			@Override
 			T execute() throws Exception {
-				conn = getConnection(hints, entry);
+				conn = getConnection(hints);
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
 				rs = preparedStatement.executeQuery();
@@ -77,7 +77,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
 			Integer execute() throws Exception {
-				conn = getConnection(hints, entry);
+				conn = getConnection(hints);
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
 				
@@ -95,7 +95,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
 			Integer execute() throws Exception {
-				conn = getConnection(hints, entry);
+				conn = getConnection(hints);
 
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints, generatedKeyHolder);
 				int rows = preparedStatement.executeUpdate();
@@ -122,7 +122,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			int[] execute() throws Exception {
-				conn = getConnection(hints, entry);
+				conn = getConnection(hints);
 				statement = createStatement(conn, hints);
 				for(String sql: sqls)
 					statement.addBatch(sql);
@@ -141,7 +141,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			int[] execute() throws Exception {
-				conn = getConnection(hints, entry);
+				conn = getConnection(hints);
 				
 				statement = createPreparedStatement(conn, sql, parametersList, hints);
 				
@@ -190,7 +190,7 @@ public class DalDirectClient implements DalClient {
 					}
 				}
 
-				conn = getConnection(hints, entry);
+				conn = getConnection(hints);
 				
 				callableStatement = createCallableStatement(conn, callString, parameters, hints);
 				boolean retVal = callableStatement.execute();
@@ -270,7 +270,7 @@ public class DalDirectClient implements DalClient {
 			T result = action.execute();
 			
 			duration = start() - start;
-			populateDbInfo(action);
+			populateDbInfo(action, entry);
 			entry.setResultCount(this.fetchQueryRows(result)); //TODO: fetch query rows
 			
 			Logger.log(entry, duration);
@@ -307,7 +307,7 @@ public class DalDirectClient implements DalClient {
 			//conn.getSchema()
 			level = startTransaction(hints);
 			entry = createLogEntry(action);
-			populateDbInfo(action);
+			populateDbInfo(action, entry);
 			
 			T result = action.execute();	
 			endTransaction(level);			
@@ -330,22 +330,21 @@ public class DalDirectClient implements DalClient {
 		
 		entry.setCommandType(action.operation);
 		entry.setTransactional(transManager.isInTransaction());
-		action.entry = entry;
 		
 		return entry;
 	}
 	
-	private <T> void populateDbInfo(ConnectionAction<T> action) {
+	private <T> void populateDbInfo(ConnectionAction<T> action, LogEntry entry) {
 		try {
-			action.entry.setDatabaseName(action.conn.getCatalog());
+			entry.setDatabaseName(action.conn.getCatalog());
 			DatabaseMetaData meta = action.conn.getMetaData();
 			if(null != meta)
 			{
-				action.entry.setUserName(meta.getUserName());
-				action.entry.setServerAddress(CommonUtil.parseHostFromDBURL(meta.getURL()));
+				entry.setUserName(meta.getUserName());
+				entry.setServerAddress(CommonUtil.parseHostFromDBURL(meta.getURL()));
 			}
 		} catch (SQLException e) {
-			action.entry.setMessage(e.getMessage());
+			entry.setMessage(e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -362,7 +361,6 @@ public class DalDirectClient implements DalClient {
 		StatementParameters parameters;
 		StatementParameters[] parametersList;
 		List<DalCommand> commands;
-		LogEntry entry;
 		Connection conn;
 		Statement statement;
 		PreparedStatement preparedStatement;
@@ -453,7 +451,7 @@ public class DalDirectClient implements DalClient {
 		transManager.endTransaction(startLevel);
 	}
 
-	private Connection getConnection(DalHints hints, LogEntry entry) throws SQLException {
+	private Connection getConnection(DalHints hints) throws SQLException {
 		return transManager.getConnection(hints);
 	}
 	

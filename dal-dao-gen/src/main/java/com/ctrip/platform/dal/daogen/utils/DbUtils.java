@@ -499,9 +499,11 @@ public class DbUtils {
 			if (language == CurrentLanguage.CSharp) {
 				while (allColumnsRs.next()) {
 					CSharpParameterHost host = new CSharpParameterHost();
+					String typeName = allColumnsRs.getString("TYPE_NAME");
 					int dataType = allColumnsRs.getInt("DATA_TYPE");
-
-					DbType dbType = DbType.getDbTypeFromJdbcType(dataType);
+					
+					//特殊处理
+					DbType dbType = (null != typeName && typeName.equalsIgnoreCase("year")) ? DbType.Int16 : DbType.getDbTypeFromJdbcType(dataType);
 
 					host.setDbType(dbType);
 					//host.setName(CommonUtils.normalizeVariable(allColumnsRs.getString("COLUMN_NAME")));

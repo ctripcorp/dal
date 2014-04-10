@@ -481,7 +481,7 @@ public class DbUtils {
 	public static List<AbstractParameterHost> getAllColumnNames(String dbName,
 			String tableName, CurrentLanguage language) {
 		
-		Map<Integer, Class<?>> typeMapper = getSqlType2JavaTypeMaper(dbName, tableName);
+		
 		
 		Connection connection = null;
 		ResultSet allColumnsRs = null;
@@ -523,6 +523,8 @@ public class DbUtils {
 					allColumns.add(host);
 				}
 			} else if (language == CurrentLanguage.Java) {
+				Map<Integer, Class<?>> typeMapper = getSqlType2JavaTypeMaper(dbName, tableName);
+				
 				while (allColumnsRs.next()) {
 					JavaParameterHost host = new JavaParameterHost();
 

@@ -247,11 +247,14 @@
 //                    $("#generateCode").modal('hide');
                 } else {
                     alert(data.info);
+                    progress.errorStatus = "exception";
+                    progress.stop($("#generateCodeProcessDiv"));
                 }
 
             }).fail(function (data) {
                     alert("生成异常！"+data);
 //                    $("body").unblock();
+                    progress.errorStatus = "exception";
                     progress.stop($("#generateCodeProcessDiv"));
                 });
         }

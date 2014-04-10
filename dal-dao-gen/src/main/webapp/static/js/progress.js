@@ -18,8 +18,6 @@
     };
 
     Progress.prototype.stop = function (el) {
-        Progress.errorStatus = undefined;
-        Progress.progressStatus = undefined;
         $(el).modal("hide");
         $('.progress-bar').css({'width': "0%"});
         $('#generateCodeProcessMess').html("正在初始化...");
@@ -46,6 +44,8 @@
             dataType: "json",
             complete: function(jqXHR, textStatus){
                 if(this.progressStatus == "finish" || textStatus != "success" || this.errorStatus=="exception" ){
+                    Progress.progressStatus = undefined;
+                    Progress.errorStatus = undefined;
                     progress.stop($("#generateCodeProcessDiv"));
                     $("#viewCode").val($("#regen_language").val());
                     $("#refreshFiles").trigger("click");

@@ -19,13 +19,16 @@ public class ${host.getClassName()}DaoTest {
 			//DalClientFactory.initClientFactory("E:/DalMult.config"); // load from the specified Dal.config file path
 			
 			${host.getClassName()}Dao dao = new ${host.getClassName()}Dao();
-		
+			
+#set($count = 0)
 #foreach( $method in ${host.getMethods()} )
+#set($count = $count+1)
+#set($suffix = $count+'')
 			// Test ${method.getName()}
 #foreach($p in $method.getParameters())
-			${p.getClassDisplayName()} ${p.getName()} = ${p.getValidationValue()};// Test value here
+			${p.getClassDisplayName()} ${p.getName()}${suffix} = ${p.getValidationValue()};// Test value here
 #end
-			List<${method.getPojoClassName()}> ${method.getPojoClassName()}s = dao.${method.getName()}(${method.getParameterNames()});
+			List<${method.getPojoClassName()}> ${method.getPojoClassName()}s = dao.${method.getName()}(${method.getParameterNames($suffix)});
 			
 			if(null != ${method.getPojoClassName()}s)
 				System.out.println(${method.getPojoClassName()}s.size());

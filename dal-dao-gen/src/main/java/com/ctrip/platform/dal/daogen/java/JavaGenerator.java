@@ -541,7 +541,7 @@ public class JavaGenerator extends AbstractGenerator {
 				method.setSql(task.getSql_content());
 				method.setName(task.getMethod_name());
 				method.setPackageName(namespace);
-				method.setPojoClassName(WordUtils.capitalize(task.getMethod_name() + "Pojo"));
+				method.setPojoClassName(WordUtils.capitalize(task.getPojo_name() + "Pojo"));
 				List<JavaParameterHost> params = new ArrayList<JavaParameterHost>();
 				for (String param : StringUtils
 						.split(task.getParameters(), ";")) {

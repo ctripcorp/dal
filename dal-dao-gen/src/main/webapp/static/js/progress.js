@@ -8,6 +8,8 @@
 
     };
 
+    Progress.errorStatus = undefined;
+
     Progress.progressStatus = undefined;
 
     Progress.prototype.start = function (el) {
@@ -31,7 +33,7 @@
                 "language": $("#regen_language").val()
             },
             success: function (data) {
-                if (data["status"] == "finish" || data["percent"] == "100") {
+                if (data["status"] == "finish" || data["percent"] == "100" || this.errorStatus=="exception") {
                     this.progressStatus = "finish";
                 }else{
                     this.progressStatus = "isDoing";
@@ -41,8 +43,9 @@
             },
             dataType: "json",
             complete: function(jqXHR, textStatus){
-                if(this.progressStatus == "finish" || textStatus != "success"){
+                if(this.progressStatus == "finish" || textStatus != "success" || this.errorStatus=="exception" ){
                     Progress.progressStatus = undefined;
+                    Progress.errorStatus = undefined;
                     progress.stop($("#generateCodeProcessDiv"));
                     $("#viewCode").val($("#regen_language").val());
                     $("#refreshFiles").trigger("click");

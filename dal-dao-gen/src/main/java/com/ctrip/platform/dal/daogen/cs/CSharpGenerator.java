@@ -47,7 +47,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	 * 生成C#的公共部分，如Dal.config，Program.cs以及DALFactory.cs
 	 */
 	private void generateCSharpCode(Progress progress) {
-		progress.setOtherMessage("正在生成C#的公共部分");
+		progress.setOtherMessage("正在为生成C#的公共部分准备数据.");
 		ProgressResource.addTotalFiles(progress, freeSqlPojoHosts.size()+
 				freeSqlHosts.size()+tableHosts.size()+spHosts.size()+2);
 		
@@ -56,6 +56,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		File csMavenLikeDir = new File(String.format("%s/%s/cs",generatePath ,projectId));
 
 		for (CSharpFreeSqlPojoHost host : freeSqlPojoHosts) {
+			progress.setOtherMessage("正在为生成pojoHost准备数据.<br/>pojoHost:"+CommonUtils.normalizeVariable(host.getClassName()));
 			context.put("host", host);
 			GenUtils.mergeVelocityContext(
 					context,
@@ -66,6 +67,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		ProgressResource.addDoneFiles(progress, freeSqlPojoHosts.size());
 
 		for (CSharpFreeSqlHost host : freeSqlHosts) {
+			progress.setOtherMessage("正在为生成freeSqlHost准备数据.<br/>freeSqlHost:"+CommonUtils.normalizeVariable(host.getClassName()));
 			context.put("host", host);
 			GenUtils.mergeVelocityContext(
 					context,
@@ -113,7 +115,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	@Override
 	public void generateByFreeSql(List<GenTaskByFreeSql> tasks,Progress progress) {
 
-		progress.setOtherMessage("正在生成FreeSql的代码");
+		progress.setOtherMessage("正在为生成FreeSql的准备数据.");
 		
 		// 首先按照ServerID, DbName以及ClassName做一次GroupBy，但是ClassName不区分大小写
 		Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(tasks);
@@ -138,6 +140,7 @@ public class CSharpGenerator extends AbstractGenerator {
 			List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
 			// 每个Method可能就有一个Pojo
 			for (GenTaskByFreeSql task : currentTasks) {
+				progress.setOtherMessage("正在为生成pojo准备数据.<br/>pojo:"+task.getPojo_name());
 				methods.add(buildFreeSqlMethodHost(task));
 				if (!pojoHosts.containsKey(task.getPojo_name())) {
 					CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(task);
@@ -246,7 +249,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		tableHosts = new ArrayList<CSharpTableHost>();
 		spHosts = new ArrayList<CSharpTableHost>();
 
-		progress.setOtherMessage("正在为所有表/存储过程生成DAO.");
+		progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.");
 		// 首先为所有表/存储过程生成DAO
 		for (GenTaskByTableViewSp tableViewSp : tasks) {
 			String[] viewNames = StringUtils.split(tableViewSp.getView_names(),
@@ -265,6 +268,7 @@ public class CSharpGenerator extends AbstractGenerator {
 			List<StoredProcedure> allSpNames = DbUtils
 					.getAllSpNames(tableViewSp.getDb_name());
 			for (String table : tableNames) {
+				progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildTable:"+table);
 				CSharpTableHost currentTableHost = buildTableHost(tableViewSp,
 						table, dbCategory, allSpNames);
 				if (null != currentTableHost) {
@@ -272,6 +276,7 @@ public class CSharpGenerator extends AbstractGenerator {
 				}
 			}
 			for (String view : viewNames) {
+				progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildView:"+view);
 				CSharpTableHost currentViewHost = buildViewHost(tableViewSp,
 						dbCategory, view);
 				if (null != currentViewHost) {
@@ -279,6 +284,7 @@ public class CSharpGenerator extends AbstractGenerator {
 				}
 			}
 			for (String spName : spNames) {
+				progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildSp:"+spName);
 				CSharpTableHost currentSpHost = buildSpHost(tableViewSp,
 						dbCategory, spName);
 				if (null != currentSpHost) {
@@ -287,11 +293,11 @@ public class CSharpGenerator extends AbstractGenerator {
 			}
 		}
 
+		progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>sqlBuilder初始化...");
 		if (sqlBuilders.size() > 0) {
 			Map<String, GenTaskBySqlBuilder> _sqlBuildres = sqlBuilderBroupBy(sqlBuilders);
 
-			for (Map.Entry<String, GenTaskBySqlBuilder> _table : _sqlBuildres
-					.entrySet()) {
+			for (Map.Entry<String, GenTaskBySqlBuilder> _table : _sqlBuildres.entrySet()) {
 				CSharpTableHost extraTableHost = buildExtraSqlBuilderHost(_table
 						.getValue());
 				if (null != extraTableHost) {

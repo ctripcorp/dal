@@ -366,6 +366,10 @@
             return;
         }
         $("#error_msg").text("");
+        if(crud_option=="insert"){
+            window.ajaxutil.post_task();
+            return;
+        }
 
         //解析Sql语句，提取出参数
         var regexIndex = /(\?{1})/igm;

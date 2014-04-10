@@ -63,8 +63,10 @@ public class FreeSqlHost {
 
 		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>();
 		for(JavaMethodHost method: methods) {
-			allTypes.addAll(method.getParameters());
-			allTypes.addAll(method.getFields());
+			if(null != method.getParameters())
+				allTypes.addAll(method.getParameters());
+			if(null != method.getFields())
+				allTypes.addAll(method.getFields());
 		}
 		
 		for(JavaParameterHost field: allTypes) {

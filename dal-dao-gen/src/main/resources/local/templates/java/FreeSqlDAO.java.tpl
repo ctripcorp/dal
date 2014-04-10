@@ -9,8 +9,9 @@ public class ${host.getClassName()}Dao {
 	private DalQueryDao queryDao;
 
 #foreach( $method in ${host.getMethods()} )
+#if(!$method.isEmptyFields())
 	private ${method.getPojoClassName()}RowMapper ${method.getVariableName()}RowMapper = new ${method.getPojoClassName()}RowMapper();
-
+#end
 #end
 	public ${host.getClassName()}Dao() {
 		queryDao = new DalQueryDao(DATA_BASE);
@@ -34,6 +35,7 @@ public class ${host.getClassName()}Dao {
 #end
 
 #foreach( $method in ${host.getMethods()} )
+#if(!$method.isEmptyFields())
 	private class ${method.getPojoClassName()}RowMapper implements DalRowMapper<${method.getPojoClassName()}> {
 
 		@Override
@@ -47,6 +49,6 @@ public class ${host.getClassName()}Dao {
 			return pojo;
 		}
 	}
-
+#end
 #end
 }

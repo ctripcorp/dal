@@ -12,8 +12,11 @@
 
     Progress.progressStatus = undefined;
 
-    Progress.prototype.start = function (el) {
+    Progress.random = undefined;
+
+    Progress.prototype.start = function (el,random) {
         $(el).modal();
+        Progress.random = random;
         poll();
     };
 
@@ -24,28 +27,30 @@
     };
 
     var poll = function () {
-        var newUrl = "/rest/progress/poll?random=" + Math.random();
+        var newUrl = "/rest/progress/poll?randomTag=" + Math.random();
         $.ajax({
             url: newUrl,
             data : {
                 "project_id": w2ui['grid'].current_project,
                 "regenerate": $("#regenerate").val() == "regenerate",
-                "language": $("#regen_language").val()
+                "language": $("#regen_language").val(),
+                "random":Progress.random
             },
             success: function (data) {
-                if (data["status"] == "finish" || data["percent"] == "100" || this.errorStatus=="exception") {
-                    this.progressStatus = "finish";
+                if (data["status"] == "finish" || data["percent"] == "100" || Progress.errorStatus=="exception") {
+                    Progress.progressStatus = "finish";
                 }else{
-                    this.progressStatus = "isDoing";
+                    Progress.progressStatus = "isDoing";
                 }
                 $('.progress-bar').css({'width': data["percent"]+"%"});
                 $('#generateCodeProcessMess').html(data["otherMessage"]);
             },
             dataType: "json",
             complete: function(jqXHR, textStatus){
-                if(this.progressStatus == "finish" || textStatus != "success" || this.errorStatus=="exception" ){
+                if(Progress.progressStatus == "finish" || textStatus != "success" || Progress.errorStatus=="exception" ){
                     Progress.progressStatus = undefined;
                     Progress.errorStatus = undefined;
+                    Progress.random = undefined;
                     progress.stop($("#generateCodeProcessDiv"));
                     $("#viewCode").val($("#regen_language").val());
                     $("#refreshFiles").trigger("click");

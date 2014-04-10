@@ -8,6 +8,8 @@ import java.util.TreeSet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 
+import com.ctrip.platform.dal.daogen.enums.ConditionType;
+
 public class JavaMethodHost {
 	private String crud_type;
 	private String name;
@@ -19,6 +21,8 @@ public class JavaMethodHost {
 	private List<JavaParameterHost> parameters;
 	// Only for free sql query dao
 	private List<JavaParameterHost> fields;
+	
+	private List<String> inClauses = new ArrayList<String>();
 
 	public String getPackageName() {
 		return packageName;
@@ -88,6 +92,11 @@ public class JavaMethodHost {
 		return WordUtils.uncapitalize(pojoClassName);
 	}
 	
+	public String getInClauses()
+	{
+		return StringUtils.join(this.inClauses, ",");
+	}
+	
 	public String getParameterNames() {
 		String[] params = new String[parameters.size()];
 		int i = 0;
@@ -112,7 +121,12 @@ public class JavaMethodHost {
 		String[] paramsDeclaration = new String[parameters.size()];
 		int i = 0;
 		for(JavaParameterHost parameter: parameters) {
-			paramsDeclaration[i++] = String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias());
+			if(ConditionType.In == parameter.getConditionType()){
+				paramsDeclaration[i++] = String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias());
+				this.inClauses.add(parameter.getAlias());
+			}
+			else
+				paramsDeclaration[i++] = String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias());
 		}
 		
 		return StringUtils.join(paramsDeclaration, ", ");

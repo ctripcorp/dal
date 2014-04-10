@@ -21,6 +21,7 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
+import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.resource.ProgressResource;
@@ -389,7 +390,8 @@ public class JavaGenerator extends AbstractGenerator {
 			method.setCrud_type(builder.getCrud_type());
 			method.setName(builder.getMethod_name());
 			method.setSql(builder.getSql_content());
-			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
+			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>(); 
+			//Only have condition clause
 			if (method.getCrud_type().equals("select")
 					|| method.getCrud_type().equals("delete")) {
 				String[] conditions = StringUtils.split(
@@ -397,20 +399,31 @@ public class JavaGenerator extends AbstractGenerator {
 				for (String condition : conditions) {
 					String[] tokens = StringUtils.split(condition, ",");
 					String name = tokens[0];
-					String alias = "";
-					if(tokens.length == 3) 
-						alias = tokens[2];
+					int type =  tokens.length >= 2 ? Integer.parseInt(tokens[1]) : -1;
+					String alias = tokens.length >= 3 ? tokens[2] : "";
 					for (JavaParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
 							JavaParameterHost host_ls = new JavaParameterHost(pHost);
 							host_ls.setAlias(alias);
 							host_ls.setConditional(true);
+							if(-1 != type)
+								host_ls.setConditionType(ConditionType.valueOf(type));
 							parameters.add(host_ls);
+							//Between need an extra parameter
+							if(ConditionType.Between == host_ls.getConditionType()){
+								JavaParameterHost host_bw = new JavaParameterHost(host_ls);
+								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
+								host_bw.setAlias(alias_bw);
+								parameters.add(host_bw);
+							}
 							break;
 						}
 					}
 				}
-			} else if (method.getCrud_type().equals("insert")) {
+			}
+			//Have no condition
+			else if (method.getCrud_type().equals("insert")) 
+			{
 				String[] fields = StringUtils.split(
 						builder.getFields(), ",");
 				for (String field : fields) {
@@ -421,15 +434,16 @@ public class JavaGenerator extends AbstractGenerator {
 						}
 					}
 				}
-			} else {
+			} 
+			//Have both set and condition clause
+			else 
+			{
 				String[] fields = StringUtils.split(
 						builder.getFields(), ",");
 				String[] conditions = StringUtils.split(
 						builder.getCondition(), ";");				
-				for(String field : fields)
-				{
-					for(JavaParameterHost pHost : allColumns)
-					{
+				for(String field : fields){
+					for(JavaParameterHost pHost : allColumns){
 						if (pHost.getName().equals(field)) {
 							JavaParameterHost host_ls = new JavaParameterHost(pHost);
 							parameters.add(host_ls);
@@ -438,19 +452,29 @@ public class JavaGenerator extends AbstractGenerator {
 					}
 				}
 				
-				for(String condition : conditions)
-				{
-					for(JavaParameterHost pHost : allColumns)
-					{
-						String[] tokens = StringUtils.split(condition, ",");
-						String name = tokens[0];
-						String alias = "";
-						if(tokens.length == 3) alias = tokens[2];
+				for(String condition : conditions){
+					String[] tokens = StringUtils.split(condition, ",");
+					String name = tokens[0];
+					int type =  tokens.length >= 2 ? Integer.parseInt(tokens[1]) : -1;
+					String alias = tokens.length >= 3 ? tokens[2] : "";
+					for (JavaParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
 							JavaParameterHost host_ls = new JavaParameterHost(pHost);
 							host_ls.setAlias(alias);
 							host_ls.setConditional(true);
+							if(-1 != type)
+								host_ls.setConditionType(ConditionType.valueOf(type));
+							if(ConditionType.In == host_ls.getConditionType()){
+								
+							}
 							parameters.add(host_ls);
+							//Between need an extra parameter
+							if(ConditionType.Between == host_ls.getConditionType()){
+								JavaParameterHost host_bw = new JavaParameterHost(host_ls);
+								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
+								host_bw.setAlias(alias_bw);
+								parameters.add(host_bw);
+							}
 							break;
 						}
 					}

@@ -447,7 +447,35 @@ public class DirectClientDaoTest {
 		}
 	}
 	
-	public static void main(String[] args) {
+	public void testDuplicateColumnName() throws SQLException
+	{
+		DalClient client = DalClientFactory.getClient("dao_test");
+		final DalHints hints = new DalHints();
+		final StatementParameters parameters = new StatementParameters();
+		client.query("SELECT Per.ID as pId, Per.Name as pName, Part.Name as paName FROM Person AS Per JOIN Partment AS Part ON Per.PartmentID = Part.ID", 
+				parameters, hints, new DalResultSetExtractor<Integer>(){
+
+			@Override
+			public Integer extract(ResultSet rs) throws SQLException {
+				// TODO Auto-generated method stub
+				while(rs.next())
+				{
+					ResultSetMetaData rsMeta = rs.getMetaData();
+					for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
+						System.out.println(rsMeta.getColumnLabel(i));
+					}
+					Object obj = rs.getObject("pId");
+					Object obj0 = rs.getObject("paName");
+					Object obj1 = rs.getObject(1);
+					Object obj2 = rs.getObject(2);
+					Object obj3 = rs.getObject(3);
+					System.out.println(obj);
+				}
+				return null;
+			}});
+	}
+	
+	public static void main(String[] args) throws SQLException {
         LogConfig.setAppID("9302011");
 //      LogConfig.setLoggingServerIP("localhost");
         LogConfig.setLoggingServerIP("192.168.82.58");
@@ -464,12 +492,13 @@ public class DirectClientDaoTest {
 		DirectClientDaoTest test = new DirectClientDaoTest();
 		
 //		test.testIsolationLevel();
-//		test.testSelect();
+		
+		test.testDuplicateColumnName();
 		//test.testType("dao_test", "ManyTypes");
 		//test.test();
 //		test.test2();
 		/*test.testAutoIncrement();*/
-		test.testBatch();
+		/*test.testBatch();
 		test.testBatch2();/*
 		test.testCommand();
 		test.testSP();

@@ -8,6 +8,7 @@ import org.apache.commons.lang.WordUtils;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
+import com.ctrip.platform.dal.daogen.enums.ConditionType;
 
 public class JavaParameterHost extends AbstractParameterHost {
 	
@@ -40,7 +41,9 @@ public class JavaParameterHost extends AbstractParameterHost {
 	private Object validationValue;
 	
 	private boolean conditional;
-
+	
+	private ConditionType conditionType;
+	
 	public JavaParameterHost(){ }
 	
 	public JavaParameterHost(JavaParameterHost host)
@@ -55,10 +58,15 @@ public class JavaParameterHost extends AbstractParameterHost {
 		this.primary = host.isPrimary();
 		this.nullable = host.isNullable();
 		this.direction = host.getDirection();
+		this.conditionType = host.getConditionType();
 		this.validationValue = host.getValidationValue();
 		this.conditional = host.isConditional();
 	}
 
+	public boolean isInParameter()
+	{
+		return ConditionType.In == this.conditionType;
+	}
 	public boolean isConditional() {
 		return conditional;
 	}
@@ -89,6 +97,14 @@ public class JavaParameterHost extends AbstractParameterHost {
 
 	public void setDirection(ParameterDirection direction) {
 		this.direction = direction;
+	}
+
+	public ConditionType getConditionType() {
+		return conditionType;
+	}
+
+	public void setConditionType(ConditionType conditionType) {
+		this.conditionType = conditionType;
 	}
 
 	public int getIndex() {

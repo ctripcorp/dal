@@ -283,13 +283,19 @@ public class ${host.getPojoClassName()}Dao {
 	**/
     public int ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 #end
-		String sql = "${method.getSql()}";
+		String sql = SQLParser.parse("${method.getSql()}",${method.getInClauses()});
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
+		
 		int i = 1;
-#foreach($p in $method.getParameters())  
+#foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #end
+#end
+
 #if($method.getCrud_type() == "select")
 		return baseClient.query(sql, parameters, hints, rowextractor);
 #else

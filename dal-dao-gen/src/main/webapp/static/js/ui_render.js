@@ -316,6 +316,7 @@
                 });
                 $("#page1").attr('is_update', '1');
                 $("#gen_style").val(record.task_type);
+                $("#sql_style").val(record.sql_style);
                 $("#page1").modal({
                     "backdrop": "static"
                 });

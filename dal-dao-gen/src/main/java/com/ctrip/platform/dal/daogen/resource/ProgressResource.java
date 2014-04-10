@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.daogen.resource;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -45,6 +46,11 @@ public class ProgressResource {
 	public Progress poll(@QueryParam("project_id") int project_id,
 			@QueryParam("regenerate") boolean regen,
 			@QueryParam("language") String language) {
+		try {
+			TimeUnit.SECONDS.sleep(1);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
 		Progress progress = getProgress(userNo,project_id);

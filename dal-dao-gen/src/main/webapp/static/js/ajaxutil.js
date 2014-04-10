@@ -38,24 +38,28 @@
                 postData["sql_style"] = $("#sql_style").val();
                 postData["crud_type"] = $("#crud_option").val();
 
-                var selectedConditions = [];
-
-                $.each($("#selected_condition option"), function (index, value) {
-                    var temp = $(value).val().split(",");
-                    selectedConditions.push(sprintf("%s,%s", temp[0], temp[1]));
-                });
-
                 postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
-//                postData["condition"] = selectedConditions.join(";");
                 postData["sql_content"] = ace.edit("sql_builder").getValue();
 
                 var paramList = [];
+                var paramValues = [];
                 $.each($("#param_list_auto").children("div"), function (index, value) {
                     var first = $(value).children("input").eq(0);
                     var second = $(value).children("select").eq(0);
                     paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
-                    selectedConditions[index]+=","+ $(first).val();
+                    paramValues.push($(first).val());
                 });
+
+                var selectedConditions = [];
+                $.each($("#selected_condition option"), function (index, value) {
+                    var temp = $(value).val().split(",");
+                    if(temp[1]=="6"){//between
+                        selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index], paramValues[index+1]));
+                    }else{
+                        selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index]));
+                    }
+                });
+
                 postData["condition"] = selectedConditions.join(";");
                 postData["params"] = paramList.join(";");
 

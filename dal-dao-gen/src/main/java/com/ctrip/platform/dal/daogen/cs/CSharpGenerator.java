@@ -531,14 +531,20 @@ public class CSharpGenerator extends AbstractGenerator {
 				String[] fields = StringUtils.split(builder.getFields(), ",");
 				String[] conditions = StringUtils.split(builder.getCondition(),
 						";");
-				for (CSharpParameterHost pHost : allColumns) {
-					for (String field : fields) {
+				for(String field : fields)
+				{
+					for(CSharpParameterHost pHost : allColumns)
+					{
 						if (pHost.getName().equals(field)) {
 							parameters.add(pHost);
 							break;
 						}
 					}
-					for (String condition : conditions) {
+				}
+				for(String condition : conditions)
+				{
+					for(CSharpParameterHost pHost : allColumns)
+					{
 						String[] tokens = StringUtils.split(condition, ",");
 						String name = tokens[0];
 						String alias = "";

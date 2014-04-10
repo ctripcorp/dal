@@ -18,5 +18,8 @@ public class DaoGenApplication extends ResourceConfig {
 		
 		Configuration.addResource("conf.properties");
 	}
+	
+	public static void main(String[] args) {
+	}
 
 }

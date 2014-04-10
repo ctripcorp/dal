@@ -152,4 +152,9 @@ public class JavaMethodHost {
 		}
 		return params;
 	}
+	
+	public boolean isEmptyFields()
+	{
+		return null == this.fields || this.fields.isEmpty();
+	}
 }

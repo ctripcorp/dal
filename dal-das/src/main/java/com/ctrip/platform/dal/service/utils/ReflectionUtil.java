@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.common.util;
+package com.ctrip.platform.dal.service.utils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;

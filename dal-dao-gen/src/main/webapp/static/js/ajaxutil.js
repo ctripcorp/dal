@@ -252,7 +252,7 @@
                 }
 
             }).fail(function (data) {
-                    alert("生成异常！"+data);
+                    //alert("生成异常！"+data);
 //                    $("body").unblock();
                     progress.errorStatus = "exception";
                     progress.stop($("#generateCodeProcessDiv"));

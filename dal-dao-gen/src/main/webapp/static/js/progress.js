@@ -26,6 +26,10 @@
         $('#generateCodeProcessMess').html("正在初始化...");
     };
 
+    Progress.prototype.reportException = function(exception){
+        Progress.errorStatus = exception;
+    };
+
     var poll = function () {
         var newUrl = "/rest/progress/poll?randomTag=" + Math.random();
         $.ajax({

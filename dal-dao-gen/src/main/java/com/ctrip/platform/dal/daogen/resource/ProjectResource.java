@@ -167,8 +167,7 @@ public class ProjectResource {
 		Status status = null;
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
-		Progress progress = ProgressResource.getProgress(userNo, id);
-		progress.setRandom(random);
+		Progress progress = ProgressResource.getProgress(userNo, id,random);
 		try {
 			if (language.equals("java"))
 			{

@@ -41,7 +41,7 @@ public class Progress {
 	
 	private long time = System.currentTimeMillis();
 	
-	private String random;
+	private String random="";
 	
 	public synchronized String getUserNo() {
 		return userNo;

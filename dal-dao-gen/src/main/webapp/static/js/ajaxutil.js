@@ -231,9 +231,8 @@
             $.jstree.reference("#jstree_projects").refresh();
         },
         generate_code: function () {
-//            cblock($("body"));
             $("#generateCode").modal("hide");
-            var random = new Date().getMilliseconds();
+            var random = new Date().valueOf();
             progress.start($("#generateCodeProcessDiv"),random);
             $.post("/rest/project/generate", {
                 "project_id": w2ui['grid'].current_project,
@@ -241,23 +240,13 @@
                 "language": $("#regen_language").val(),
                 "random":random
             },function (data) {
-//                $("body").unblock();
-                if (data.code == "OK") {
-                    progress.stop($("#generateCodeProcessDiv"));
-//                    $("#viewCode").val($("#regen_language").val());
-//                    $("#refreshFiles").trigger("click");
-//                    $("#generateCode").modal('hide');
-                } else {
+                if (data.code != "OK") {
                     alert(data.info);
-                    progress.errorStatus = "exception";
-                    progress.stop($("#generateCodeProcessDiv"));
+                    progress.reportException("exception");
                 }
-
             }).fail(function (data) {
-                    alert("生成异常！"+data);
-//                    $("body").unblock();
-                    progress.errorStatus = "exception";
-                    progress.stop($("#generateCodeProcessDiv"));
+                    alert("生成异常！");
+                    progress.reportException("exception");
                 });
         }
     };

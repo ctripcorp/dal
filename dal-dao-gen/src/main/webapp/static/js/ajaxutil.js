@@ -245,7 +245,7 @@
             },function (data) {
                 if (data.code != "OK") {
                     alert(data.info);
-                    progress.reportException("exception");
+                    progress.reportException("generate success return but not ok");
                 }
             }).fail(function (data) {
                     alert("生成异常！");

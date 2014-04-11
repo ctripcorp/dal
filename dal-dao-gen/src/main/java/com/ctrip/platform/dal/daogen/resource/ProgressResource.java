@@ -33,6 +33,10 @@ public class ProgressResource {
 	 */
 	public static Map<String,Progress> progresses = new ConcurrentHashMap<String,Progress>(); 
 	
+	private final static int MAX_PROGRESSES = 2000;
+	
+	private final static long MAX_ALIVE_TIME = 60*60*1000;//单个Progress最大生命时间，单位毫秒
+	
 	public final static String FINISH = "finish";
 	
 	public final static String ISDOING = "isDoing";
@@ -54,10 +58,9 @@ public class ProgressResource {
 		}
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
-		Progress progress = getProgress(userNo,project_id);
-		if(FINISH.equals(progress.getStatus()) && 
-				progress.getRandom().equalsIgnoreCase(random)){
-			resumeInitStatus(progress);
+		Progress progress = getProgress(userNo,project_id,random);
+		if(FINISH.equals(progress.getStatus())){
+			release(progress);
 			Progress success = new Progress();
 			success.setPercent(100);
 			success.setStatus(FINISH);
@@ -68,14 +71,15 @@ public class ProgressResource {
 		return progress;
 	}
 	
-	public static Progress getProgress(String userNo,int project_id){
-		String key = getKey(userNo,project_id);
+	public static synchronized Progress getProgress(String userNo,int project_id,String random){
+		String key = getKey(userNo,project_id,random);
 		Progress pro = progresses.get(key);
 		if(pro == null){
 			pro = new Progress();
 			pro.setUserNo(userNo);
 			pro.setProject_id(project_id);
 			pro.setOtherMessage(INIT_MESSAGE);
+			pro.setRandom(random);
 			progresses.put(key, pro);
 		}
 		return pro;
@@ -96,8 +100,8 @@ public class ProgressResource {
 		updatePercent(progress);
 	}
 	
-	private static String getKey(String userNo,int project_id){
-		return userNo+"#"+project_id;
+	private static String getKey(String userNo,int project_id,String random){
+		return userNo+"#"+project_id+"#"+random;
 	}
 	
 	private static void updatePercent(Progress progress){
@@ -115,14 +119,23 @@ public class ProgressResource {
 		}
 	}
 	
-	private static Progress resumeInitStatus(Progress progress){
-		progress.setDoneFiles(0);
-		progress.setOtherMessage(INIT_MESSAGE);
-		progress.setPercent(0);
-		progress.setStatus(ISDOING);
-		progress.setTotalFiles(0);
-		progress.setTime(System.currentTimeMillis());
-		return progress;
+	private static void release(Progress progress){
+		String key = getKey(progress.getUserNo(),progress.getProject_id(),progress.getRandom());
+		progress = null;
+		progresses.remove(key);
+		if(progresses.size()>MAX_PROGRESSES){
+			cleanProgresses();
+		}
+	}
+	
+	private static synchronized void cleanProgresses(){
+		for(Map.Entry<String,Progress> entry : progresses.entrySet()){
+			String key = entry.getKey();
+			Progress pro = entry.getValue();
+			if(System.currentTimeMillis() - pro.getTime() > MAX_ALIVE_TIME){
+				progresses.remove(key);
+			}
+		}
 	}
 	
 }

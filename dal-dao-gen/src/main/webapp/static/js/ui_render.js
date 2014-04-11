@@ -245,7 +245,7 @@
                             break;
                         case 'code':
                             //window.ajaxutil.generate_code("java");
-                            $("#generateCode").modal();
+                            $("#generateCode").modal({"backdrop": "static"});
                             break;
                         // case 'csharpCode':
                         //     window.ajaxutil.generate_code("csharp");

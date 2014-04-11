@@ -13,7 +13,7 @@
     Progress.progressStatus = undefined;
 
     Progress.prototype.start = function (el) {
-        $(el).modal();
+        $(el).modal({"backdrop": "static"});
         poll();
     };
 

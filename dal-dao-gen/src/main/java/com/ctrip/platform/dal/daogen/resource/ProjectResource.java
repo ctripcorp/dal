@@ -173,7 +173,7 @@ public class ProjectResource {
 				JavaGenerator.getInstance().generateCode(id, regen, progress);
 			}
 			else if (language.equals("cs")){
-				CSharpGenerator.getInstance().generateCode(id, regen, progress);
+				new CSharpGenerator().generateCode(id, regen, progress);
 			}
 			status = Status.OK;
 		} catch (Exception e) {

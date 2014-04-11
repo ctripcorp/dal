@@ -1,4 +1,3 @@
-
 package com.ctrip.platform.dal.daogen;
 
 import java.io.File;
@@ -77,9 +76,24 @@ public abstract class AbstractGenerator implements Generator {
 		Velocity.init(pr);
 	}
 
+//	public void generate(int projectId, boolean regenerate, Progress progress) {
+//		
+//		prepareData(projectId, regenerate, progress);
+//		
+//		generateCode(progress);
+//		
+//		clearResource();
+//	}
+//
+//	public abstract boolean prepareData(int projectId, boolean regenerate, Progress progress);
+//
+//	public abstract boolean generateCode(Progress progress);
+//
+//	public abstract boolean clearResource();
+
 	@Override
-	public boolean generateCode(int projectId, boolean regenerate, Progress progress)
-			throws Exception {
+	public boolean generateCode(int projectId, boolean regenerate,
+			Progress progress) throws Exception {
 
 		this.regenerate = regenerate;
 
@@ -111,9 +125,9 @@ public abstract class AbstractGenerator implements Generator {
 					daoBySqlBuilder.getTasksByProjectId(projectId));
 		}
 
-		generateByTableView(tableViewSps,progress);
+		generateByTableView(tableViewSps, progress);
 
-		generateByFreeSql(freeSqls,progress);
+		generateByFreeSql(freeSqls, progress);
 
 		return true;
 	}
@@ -121,7 +135,7 @@ public abstract class AbstractGenerator implements Generator {
 	private void buildDbs(List<GenTaskByFreeSql> _freeSqls,
 			List<GenTaskByTableViewSp> _tableViewSps,
 			List<GenTaskBySqlBuilder> _sqlBuilders) {
-		
+
 		Set<String> existsTable = new HashSet<String>();
 
 		for (GenTaskByFreeSql task : _freeSqls) {
@@ -136,9 +150,9 @@ public abstract class AbstractGenerator implements Generator {
 				DatabaseHost host = new DatabaseHost();
 				host.setAllInOneName(task.getDb_name());
 				host.setProviderType(provider);
-//				int index = host.getAllInOneName().indexOf("_");
-//				host.setDatasetName(host.getAllInOneName().substring(0,
-//						index > -1 ? index : host.getAllInOneName().length()));
+				// int index = host.getAllInOneName().indexOf("_");
+				// host.setDatasetName(host.getAllInOneName().substring(0,
+				// index > -1 ? index : host.getAllInOneName().length()));
 				host.setDatasetName(host.getAllInOneName());
 				dbHosts.put(task.getDb_name(), host);
 			}
@@ -159,10 +173,10 @@ public abstract class AbstractGenerator implements Generator {
 					String[] splitSp = StringUtils.split(table, '.');
 					realSpName = splitSp[1];
 				}
-				spDaos.add(getPojoClassName(task.getPrefix(),
-						task.getSuffix(), realSpName.replace("_", "")));
+				spDaos.add(getPojoClassName(task.getPrefix(), task.getSuffix(),
+						realSpName.replace("_", "")));
 			}
-			
+
 			if (!dbHosts.containsKey(task.getDb_name())) {
 
 				String provider = "sqlProvider";
@@ -173,21 +187,21 @@ public abstract class AbstractGenerator implements Generator {
 				DatabaseHost host = new DatabaseHost();
 				host.setAllInOneName(task.getDb_name());
 				host.setProviderType(provider);
-//				int index = host.getAllInOneName().indexOf("_");
-//				host.setDatasetName(host.getAllInOneName().substring(0,
-//						index > -1 ? index : host.getAllInOneName().length()));
+				// int index = host.getAllInOneName().indexOf("_");
+				// host.setDatasetName(host.getAllInOneName().substring(0,
+				// index > -1 ? index : host.getAllInOneName().length()));
 				host.setDatasetName(host.getAllInOneName());
 				dbHosts.put(task.getDb_name(), host);
 			}
 		}
 
 		for (GenTaskBySqlBuilder task : _sqlBuilders) {
-			
-			if(!existsTable.contains(task.getTable_name())){
-				tableDaos.add(getPojoClassName("",
-						"Gen", task.getTable_name()));
+
+			if (!existsTable.contains(task.getTable_name())) {
+				tableDaos
+						.add(getPojoClassName("", "Gen", task.getTable_name()));
 			}
-			
+
 			if (!dbHosts.containsKey(task.getDb_name())) {
 				String provider = "sqlProvider";
 				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
@@ -197,9 +211,9 @@ public abstract class AbstractGenerator implements Generator {
 				DatabaseHost host = new DatabaseHost();
 				host.setAllInOneName(task.getDb_name());
 				host.setProviderType(provider);
-//				int index = host.getAllInOneName().indexOf("_");
-//				host.setDatasetName(host.getAllInOneName().substring(0,
-//						index > -1 ? index : host.getAllInOneName().length()));
+				// int index = host.getAllInOneName().indexOf("_");
+				// host.setDatasetName(host.getAllInOneName().substring(0,
+				// index > -1 ? index : host.getAllInOneName().length()));
 				host.setDatasetName(host.getAllInOneName());
 				dbHosts.put(task.getDb_name(), host);
 			}
@@ -257,11 +271,11 @@ public abstract class AbstractGenerator implements Generator {
 	}
 
 	@Override
-	public abstract void generateByTableView(List<GenTaskByTableViewSp> tasks,Progress progress)
-			throws Exception;
+	public abstract void generateByTableView(List<GenTaskByTableViewSp> tasks,
+			Progress progress) throws Exception;
 
 	@Override
-	public abstract void generateByFreeSql(List<GenTaskByFreeSql> tasks,Progress progress)
-			throws Exception;
+	public abstract void generateByFreeSql(List<GenTaskByFreeSql> tasks,
+			Progress progress) throws Exception;
 
 }

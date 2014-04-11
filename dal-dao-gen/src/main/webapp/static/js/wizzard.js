@@ -391,8 +391,16 @@
 //            });
 //        }
 
+        var conditionParamCount = 0;
+        $('#selected_condition>option').each(function(index,value){
+            if(value["value"].split(",")[1]=="6"){
+                conditionParamCount++;
+            }
+            conditionParamCount++;
+        });
+
         while ((result = regexIndex.exec(sqlContent))) {
-            if($('#selected_condition>option').length == i && "update"==crud_option){
+            if(conditionParamCount == i && "update"==crud_option){
                 break;
             }
             i++;
@@ -411,7 +419,7 @@
         }
         if (htmls.length == 0) {
             while ((result = regexNames.exec(sqlContent))) {
-                if($('#selected_condition>option').length == i && "update"==crud_option){
+                if(conditionParamCount == i && "update"==crud_option){
                     break;
                 }
                 i++;

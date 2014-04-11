@@ -51,12 +51,15 @@
                 });
 
                 var selectedConditions = [];
+                var index2 = 0;
                 $.each($("#selected_condition option"), function (index, value) {
                     var temp = $(value).val().split(",");
                     if(temp[1]=="6"){//between
-                        selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index], paramValues[index+1]));
+                        selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1]));
+                        index2+=2;
                     }else{
-                        selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index]));
+                        selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index2]));
+                        index2++;
                     }
                 });
 

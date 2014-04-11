@@ -51,12 +51,15 @@
                 });
 
                 var selectedConditions = [];
+                var index2 = 0;
                 $.each($("#selected_condition option"), function (index, value) {
                     var temp = $(value).val().split(",");
                     if(temp[1]=="6"){//between
-                        selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index], paramValues[index+1]));
+                        selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1]));
+                        index2+=2;
                     }else{
-                        selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index]));
+                        selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index2]));
+                        index2++;
                     }
                 });
 
@@ -231,28 +234,22 @@
             $.jstree.reference("#jstree_projects").refresh();
         },
         generate_code: function () {
-//            cblock($("body"));
             $("#generateCode").modal("hide");
-            progress.start($("#generateCodeProcessDiv"));
+            var random = new Date().valueOf();
+            progress.start($("#generateCodeProcessDiv"),random);
             $.post("/rest/project/generate", {
                 "project_id": w2ui['grid'].current_project,
                 "regenerate": $("#regenerate").val() == "regenerate",
-                "language": $("#regen_language").val()
+                "language": $("#regen_language").val(),
+                "random":random
             },function (data) {
-//                $("body").unblock();
-                if (data.code == "OK") {
-                    progress.stop($("#generateCodeProcessDiv"));
-//                    $("#viewCode").val($("#regen_language").val());
-//                    $("#refreshFiles").trigger("click");
-//                    $("#generateCode").modal('hide');
-                } else {
+                if (data.code != "OK") {
                     alert(data.info);
+                    progress.reportException("generate success return but not ok");
                 }
-
             }).fail(function (data) {
-                    alert("生成异常！"+data);
-//                    $("body").unblock();
-                    progress.stop($("#generateCodeProcessDiv"));
+                    alert("生成异常！");
+                    progress.reportException("exception");
                 });
         }
     };

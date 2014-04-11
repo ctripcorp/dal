@@ -41,6 +41,8 @@ public class Progress {
 	
 	private long time = System.currentTimeMillis();
 	
+	private String random="";
+	
 	public synchronized String getUserNo() {
 		return userNo;
 	}
@@ -105,4 +107,12 @@ public class Progress {
 		this.time = time;
 	}
 
+	public synchronized String getRandom() {
+		return random;
+	}
+
+	public synchronized void setRandom(String random) {
+		this.random = random;
+	}
+	
 }

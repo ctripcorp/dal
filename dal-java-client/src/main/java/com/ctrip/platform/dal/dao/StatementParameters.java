@@ -53,6 +53,15 @@ public class StatementParameters {
 		return add(StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName(name).build());
 	}
 	
+	public int setInParameter(int index, int sqlType, List<?> values)
+	{
+		int i = index;
+		for(Object val : values){
+			this.set(i++, sqlType, val);
+		}
+		return i;
+	}
+	
 	public int size() {
 		return parameters.size();
 	}

@@ -45,10 +45,11 @@ public class CSharpGenerator extends AbstractGenerator {
 	/**
 	 * 生成C#的公共部分，如Dal.config，Program.cs以及DALFactory.cs
 	 */
+
 	private void generateCSharpCode(final Progress progress) {
-		progress.setOtherMessage("正在生成C#的公共部分");
-		ProgressResource.addTotalFiles(progress, freeSqlPojoHosts.size()
-				+ freeSqlHosts.size() + tableHosts.size() + spHosts.size() + 2);
+		progress.setOtherMessage("正在为生成C#的公共部分准备数据.");
+		ProgressResource.addTotalFiles(progress, freeSqlPojoHosts.size()+
+				freeSqlHosts.size()+tableHosts.size()+spHosts.size()+2);
 
 		final VelocityContext context = GenUtils.buildDefaultVelocityContext();
 
@@ -151,8 +152,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	@Override
 	public void generateByFreeSql(List<GenTaskByFreeSql> tasks,
 			Progress progress) {
-
-		progress.setOtherMessage("正在生成FreeSql的代码");
+		progress.setOtherMessage("正在为生成FreeSql的准备数据.");
 
 		// 首先按照ServerID, DbName以及ClassName做一次GroupBy，但是ClassName不区分大小写
 		final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(tasks);

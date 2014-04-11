@@ -162,11 +162,12 @@ public class ProjectResource {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Status generateProject(@FormParam("project_id") int id,
 			@FormParam("regenerate") boolean regen,
-			@FormParam("language") String language) {
+			@FormParam("language") String language,
+			@FormParam("random") String random) {
 		Status status = null;
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
-		Progress progress = ProgressResource.getProgress(userNo, id);
+		Progress progress = ProgressResource.getProgress(userNo, id,random);
 		try {
 			if (language.equals("java"))
 			{

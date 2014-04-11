@@ -49,7 +49,7 @@ public class JavaGenerator extends AbstractGenerator {
 		List<SpHost> spHosts = new ArrayList<SpHost>();
 		List<ViewHost> viewHosts = new ArrayList<ViewHost>();
 
-		progress.setOtherMessage("正在为所有表/存储过程生成DAO.");
+		progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.");
 		// 首先为所有表/存储过程生成DAO
 		for (GenTaskByTableViewSp tableViewSp : tasks) {
 			String[] tableNames = StringUtils.split(
@@ -60,14 +60,14 @@ public class JavaGenerator extends AbstractGenerator {
 					.split(tableViewSp.getView_names(), ",");
 
 			for (String table : tableNames) {
-				
+				progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildTable:"+table);
 				JavaTableHost tableHost = this.buildTableHost(tableViewSp, table);
 				if(null != tableHost)
 					tableHosts.add(tableHost);
 			}
 		
 			for (String spName : spNames) {
-				
+				progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildSp:"+spName);
 				SpHost spHost = this.buildSpHost(tableViewSp, spName);
 				if(null != spHost)
 				{
@@ -81,8 +81,8 @@ public class JavaGenerator extends AbstractGenerator {
 				}
 			}
 			
-			for (String viewName : viewNames)
-			{
+			for (String viewName : viewNames) {
+				progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildView:"+viewName);
 				ViewHost vhost = this.buildViewHost(tableViewSp, viewName);
 				if(null != vhost)
 					viewHosts.add(vhost);
@@ -90,6 +90,7 @@ public class JavaGenerator extends AbstractGenerator {
 			
 		}
 		
+		progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>sqlBuilder初始化...");
 		if (sqlBuilders.size() > 0) {
 			Map<String, GenTaskBySqlBuilder> _sqlBuildres = sqlBuilderBroupBy(sqlBuilders);
 			for (GenTaskBySqlBuilder _table : _sqlBuildres.values()) {

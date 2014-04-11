@@ -45,7 +45,8 @@ public class ProgressResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Progress poll(@QueryParam("project_id") int project_id,
 			@QueryParam("regenerate") boolean regen,
-			@QueryParam("language") String language) {
+			@QueryParam("language") String language,
+			@QueryParam("random") String random) {
 		try {
 			TimeUnit.SECONDS.sleep(1);
 		} catch (InterruptedException e) {
@@ -54,7 +55,8 @@ public class ProgressResource {
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
 		Progress progress = getProgress(userNo,project_id);
-		if(FINISH.equals(progress.getStatus())){
+		if(FINISH.equals(progress.getStatus()) && 
+				progress.getRandom().equalsIgnoreCase(random)){
 			resumeInitStatus(progress);
 			Progress success = new Progress();
 			success.setPercent(100);

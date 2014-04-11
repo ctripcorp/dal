@@ -233,11 +233,13 @@
         generate_code: function () {
 //            cblock($("body"));
             $("#generateCode").modal("hide");
-            progress.start($("#generateCodeProcessDiv"));
+            var random = new Date().getMilliseconds();
+            progress.start($("#generateCodeProcessDiv"),random);
             $.post("/rest/project/generate", {
                 "project_id": w2ui['grid'].current_project,
                 "regenerate": $("#regenerate").val() == "regenerate",
-                "language": $("#regen_language").val()
+                "language": $("#regen_language").val(),
+                "random":random
             },function (data) {
 //                $("body").unblock();
                 if (data.code == "OK") {
@@ -247,11 +249,14 @@
 //                    $("#generateCode").modal('hide');
                 } else {
                     alert(data.info);
+                    progress.errorStatus = "exception";
+                    progress.stop($("#generateCodeProcessDiv"));
                 }
 
             }).fail(function (data) {
                     alert("生成异常！"+data);
 //                    $("body").unblock();
+                    progress.errorStatus = "exception";
                     progress.stop($("#generateCodeProcessDiv"));
                 });
         }

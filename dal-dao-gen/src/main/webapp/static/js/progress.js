@@ -22,8 +22,11 @@
 
     Progress.prototype.stop = function (el) {
         $(el).modal("hide");
-        $('.progress-bar').css({'width': "0%"});
-        $('#generateCodeProcessMess').html("正在初始化...");
+        setTimeout(function(){
+            $('.progress-bar').css({'width': "0%"});
+            $('#generateCodeProcessMess').css({'font-weight': "normal"});
+            $('#generateCodeProcessMess').html("正在初始化...");
+        },500);
     };
 
     Progress.prototype.reportException = function(exception){
@@ -52,12 +55,12 @@
             dataType: "json",
             complete: function(jqXHR, textStatus){
                 if(Progress.progressStatus == "finish" || textStatus != "success" || Progress.errorStatus=="exception" ){
-                    Progress.progressStatus = undefined;
-                    Progress.errorStatus = undefined;
-                    Progress.random = undefined;
-                    progress.stop($("#generateCodeProcessDiv"));
-                    $("#viewCode").val($("#regen_language").val());
-                    $("#refreshFiles").trigger("click");
+                    if(Progress.progressStatus == "finish" && textStatus == "success" && Progress.errorStatus!="exception"){
+                        $('#generateCodeProcessMess').css({'font-weight': "bold"});
+                        setTimeout(refreshData,3000);
+                    }else{
+                        refreshData();
+                    }
                 }else{
                     poll();
                 }
@@ -66,6 +69,15 @@
             async:true,
             type: "GET"
         });
+    };
+
+    var refreshData = function(){
+        Progress.progressStatus = undefined;
+        Progress.errorStatus = undefined;
+        Progress.random = undefined;
+        progress.stop($("#generateCodeProcessDiv"));
+        $("#viewCode").val($("#regen_language").val());
+        $("#refreshFiles").trigger("click");
     };
 
     window.progress = new Progress();

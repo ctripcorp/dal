@@ -1,17 +1,25 @@
 package com.ctrip.platform.dal.daogen.cs;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
@@ -35,177 +43,15 @@ import com.ctrip.platform.dal.daogen.utils.GenUtils;
 
 public class CSharpGenerator extends AbstractGenerator {
 
-	private final List<CSharpTableHost> tableHosts = new CopyOnWriteArrayList<CSharpTableHost>();
-	private final List<CSharpTableHost> spHosts = new CopyOnWriteArrayList<CSharpTableHost>();
-	private final List<CSharpFreeSqlHost> freeSqlHosts = new CopyOnWriteArrayList<CSharpFreeSqlHost>();
-	private final List<CSharpFreeSqlPojoHost> freeSqlPojoHosts = new CopyOnWriteArrayList<CSharpFreeSqlPojoHost>();
 	private ExecutorService executor = Executors.newFixedThreadPool(100);
-	private List<Callable<Integer>> arrageTasks = new CopyOnWriteArrayList<Callable<Integer>>();
-	
-	/**
-	 * 生成C#的公共部分，如Dal.config，Program.cs以及DALFactory.cs
-	 */
 
-	private void generateCSharpCode(final Progress progress) {
-		progress.setOtherMessage("正在为生成C#的公共部分准备数据.");
-		ProgressResource.addTotalFiles(progress, freeSqlPojoHosts.size()+
-				freeSqlHosts.size()+tableHosts.size()+spHosts.size()+2);
-
-		final VelocityContext context = GenUtils.buildDefaultVelocityContext();
-
-		final File csMavenLikeDir = new File(String.format("%s/%s/cs",
-				generatePath, projectId));
-
-		for (final CSharpFreeSqlPojoHost host : freeSqlPojoHosts) {
-			context.put("host", host);
-			
-			Runnable worker = new CodeGeneratorRunnable(
-					new CodeGeneratorCallback() {
-						@Override
-						public void doWork() {
-							progress.setOtherMessage("正在生成 "+ host.getClassName());
-							GenUtils.mergeVelocityContext(
-									context,
-									String.format("%s/Entity/%s.cs",
-											csMavenLikeDir.getAbsolutePath(),
-											CommonUtils.normalizeVariable(host.getClassName())),
-									"templates/Pojo.cs.tpl");
-						}
-					});
-			executor.execute(worker);
-		}
-		ProgressResource.addDoneFiles(progress, freeSqlPojoHosts.size());
-
-		for (final CSharpFreeSqlHost host : freeSqlHosts) {
-			context.put("host", host);
-
-			Runnable worker = new CodeGeneratorRunnable(
-					new CodeGeneratorCallback() {
-						@Override
-						public void doWork() {
-							progress.setOtherMessage("正在生成 "+ host.getClassName());
-							
-							GenUtils.mergeVelocityContext(context, String
-									.format("%s/Dao/%sDao.cs", csMavenLikeDir
-											.getAbsolutePath(), CommonUtils
-											.normalizeVariable(host
-													.getClassName())),
-									"templates/FreeSqlDAO.cs.tpl");
-
-							GenUtils.mergeVelocityContext(context, String
-									.format("%s/Test/%sTest.cs", csMavenLikeDir
-											.getAbsolutePath(), CommonUtils
-											.normalizeVariable(host
-													.getClassName())),
-									"templates/FreeSqlTest.cs.tpl");
-						}
-					});
-			executor.execute(worker);
-
-		}
-		ProgressResource.addDoneFiles(progress, freeSqlHosts.size());
-
-		context.put("dbs", dbHosts.values());
-		context.put("namespace", namespace);
-		context.put("freeSqlHosts", freeDaos);
-		context.put("tableHosts", tableDaos);
-		context.put("spHosts", spDaos);
-
-		GenUtils.mergeVelocityContext(context, String.format("%s/Dal.config",
-				csMavenLikeDir.getAbsolutePath()), "templates/Dal.config.tpl");
-
-		GenUtils.mergeVelocityContext(
-				context,
-				String.format("%s/DalFactory.cs",
-						csMavenLikeDir.getAbsolutePath()),
-				"templates/DalFactory.cs.tpl");
-
-		ProgressResource.addDoneFiles(progress, 2);
-
-		//progress.setOtherMessage("正在生成TableDao");
-		generateTableDao(tableHosts, context, csMavenLikeDir,progress);
-		ProgressResource.addDoneFiles(progress, tableHosts.size());
-
-		//progress.setOtherMessage("正在生成SpDao");
-		generateSpDao(spHosts, context, csMavenLikeDir, progress);
-		ProgressResource.addDoneFiles(progress, spHosts.size());
-
-		// This will make the executor accept no new threads
-		// and finish all existing threads in the queue
-		executor.shutdown();
-		// Wait until all threads are finish
-		try {
-			executor.awaitTermination(60 * 60, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		tableHosts.clear();
-		spHosts.clear();
-		freeSqlHosts.clear();
-		freeSqlPojoHosts.clear();
-		System.gc();
-	}
-
-	// -----------------------------------------------Free Sql generate
-	// begin---------------------------------------------------
-	@Override
 	public void generateByFreeSql(List<GenTaskByFreeSql> tasks,
 			Progress progress) {
-		progress.setOtherMessage("正在为生成FreeSql的准备数据.");
+	}
 
-		// 首先按照ServerID, DbName以及ClassName做一次GroupBy，但是ClassName不区分大小写
-		final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(tasks);
-
-		final Map<String, CSharpFreeSqlPojoHost> pojoHosts = new HashMap<String, CSharpFreeSqlPojoHost>();
-
-		// 随后，以ServerID, DbName以及ClassName为维度，为每个维度生成一个DAO类
-		Callable<Integer> worker = new Callable<Integer>() {
-			@Override
-			public Integer call() throws Exception {
-				for (Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy
-						.entrySet()) {
-					List<GenTaskByFreeSql> currentTasks = entry
-							.getValue();
-					if (currentTasks.size() < 1)
-						continue;
-					CSharpFreeSqlHost host = new CSharpFreeSqlHost();
-					host.setDbSetName(currentTasks.get(0).getDb_name());
-					host.setClassName(CommonUtils
-							.normalizeVariable(WordUtils
-									.capitalize(currentTasks.get(0)
-											.getClass_name())));
-					host.setNameSpace(namespace);
-
-					List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
-					// 每个Method可能就有一个Pojo
-					for (GenTaskByFreeSql task : currentTasks) {
-						methods.add(buildFreeSqlMethodHost(task));
-						if (!pojoHosts.containsKey(task.getPojo_name())) {
-							CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(task);
-							if (null != freeSqlPojoHost) {
-								pojoHosts.put(task.getPojo_name(),
-										freeSqlPojoHost);
-							}
-						}
-					}
-					host.setMethods(methods);
-					freeSqlHosts.add(host);
-				}
-				freeSqlPojoHosts.addAll(pojoHosts.values());
-				
-				return 0;
-			}
-		};
-		arrageTasks.add(worker);
-
-		try {
-			executor.invokeAll(arrageTasks);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		generateCSharpCode(progress);
+	@Override
+	public void generateByTableView(List<GenTaskByTableViewSp> tasks,
+			final Progress progress) throws Exception {
 
 	}
 
@@ -227,7 +73,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	}
 
 	private Map<String, GenTaskBySqlBuilder> sqlBuilderBroupBy(
-			List<GenTaskBySqlBuilder> builders) {
+			Queue<GenTaskBySqlBuilder> builders) {
 		Map<String, GenTaskBySqlBuilder> groupBy = new HashMap<String, GenTaskBySqlBuilder>();
 
 		for (GenTaskBySqlBuilder task : builders) {
@@ -289,126 +135,6 @@ public class CSharpGenerator extends AbstractGenerator {
 		return freeSqlHost;
 	}
 
-	// -----------------------------------------------Free Sql generate
-	// end---------------------------------------------------
-
-	@Override
-	public void generateByTableView(List<GenTaskByTableViewSp> tasks,
-			final Progress progress) throws Exception {
-
-		prepareFolder(projectId, "cs");
-
-		progress.setOtherMessage("正在为所有表/存储过程生成DAO.");
-		// 首先为所有表/存储过程生成DAO
-		for (final GenTaskByTableViewSp tableViewSp : tasks) {
-			final String[] viewNames = StringUtils.split(
-					tableViewSp.getView_names(), ",");
-			final String[] tableNames = StringUtils.split(
-					tableViewSp.getTable_names(), ",");
-			final String[] spNames = StringUtils.split(
-					tableViewSp.getSp_names(), ",");
-
-			final DatabaseCategory dbCategory;
-			if (!DbUtils.getDbType(tableViewSp.getDb_name()).equalsIgnoreCase(
-					"Microsoft SQL Server")) {
-				dbCategory = DatabaseCategory.MySql;
-			} else {
-				dbCategory = DatabaseCategory.SqlServer;
-			}
-
-			final List<StoredProcedure> allSpNames = DbUtils
-					.getAllSpNames(tableViewSp.getDb_name());
-
-			Callable<Integer> worker = new Callable<Integer>() {
-				
-				@Override
-				public Integer call() throws Exception {
-					for (final String table : tableNames) {
-						progress.setOtherMessage("正在整理表 "+ table);
-						CSharpTableHost currentTableHost;
-						try {
-							currentTableHost = buildTableHost(
-									tableViewSp, table, dbCategory,
-									allSpNames);
-							if (null != currentTableHost) {
-								tableHosts.add(currentTableHost);
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-					if (sqlBuilders.size() > 0) {
-						Map<String, GenTaskBySqlBuilder> _sqlBuildres = sqlBuilderBroupBy(sqlBuilders);
-
-						for (Map.Entry<String, GenTaskBySqlBuilder> _table : _sqlBuildres
-								.entrySet()) {
-							CSharpTableHost extraTableHost;
-							try {
-								extraTableHost = buildExtraSqlBuilderHost(_table
-										.getValue());
-								if (null != extraTableHost) {
-									tableHosts.add(extraTableHost);
-								}
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-						
-					}
-					return 0;
-				}
-			};
-			//executor.execute(worker);
-			arrageTasks.add(worker);
-
-			Callable<Integer> viewWorker = new Callable<Integer>() {
-				
-				@Override
-				public Integer call() throws Exception {
-					for (final String view : viewNames) {
-						progress.setOtherMessage("正在整理视图 "+ view);
-						try {
-							CSharpTableHost currentViewHost = buildViewHost(
-									tableViewSp, dbCategory, view);
-							if (null != currentViewHost) {
-								tableHosts.add(currentViewHost);
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-					return 0;
-				}
-			}; 
-			//executor.execute(viewWorker);
-			arrageTasks.add(viewWorker);
-
-			Callable<Integer> spWorker = new Callable<Integer>() {
-				
-				@Override
-				public Integer call() throws Exception {
-					for (final String spName : spNames) {
-						progress.setOtherMessage("正在整理存储过程 " + spName);
-						try {
-							CSharpTableHost currentSpHost = buildSpHost(
-									tableViewSp, dbCategory, spName);
-							if (null != currentSpHost) {
-								spHosts.add(currentSpHost);
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-					return 0;
-				}
-			};
-			//executor.execute(spWorker);
-			arrageTasks.add(spWorker);
-
-		}
-
-	}
-
 	private CSharpTableHost buildTableHost(GenTaskByTableViewSp tableViewSp,
 			String table, DatabaseCategory dbCategory,
 			List<StoredProcedure> allSpNames) throws Exception {
@@ -439,7 +165,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		}
 
 		List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(
-				sqlBuilders, tableViewSp.getDb_name(), table);
+				_sqlBuilders, tableViewSp.getDb_name(), table);
 
 		List<CSharpMethodHost> methods = buildMethodHosts(allColumns,
 				currentTableBuilders);
@@ -580,7 +306,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	}
 
 	private List<GenTaskBySqlBuilder> filterExtraMethods(
-			List<GenTaskBySqlBuilder> sqlBuilders, String dbName, String table) {
+			Queue<GenTaskBySqlBuilder> sqlBuilders, String dbName, String table) {
 		List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
 
 		Iterator<GenTaskBySqlBuilder> iter = sqlBuilders.iterator();
@@ -672,8 +398,9 @@ public class CSharpGenerator extends AbstractGenerator {
 		return methods;
 	}
 
-	private void generateTableDao(final List<CSharpTableHost> tableHosts,
-			final VelocityContext context, final File mavenLikeDir, final Progress progress) {
+	private void generateTableDao(final Queue<CSharpTableHost> tableHosts,
+			final VelocityContext context, final File mavenLikeDir,
+			final Progress progress) {
 
 		Runnable worker = new CodeGeneratorRunnable(
 				new CodeGeneratorCallback() {
@@ -681,9 +408,10 @@ public class CSharpGenerator extends AbstractGenerator {
 					public void doWork() {
 						for (final CSharpTableHost host : tableHosts) {
 							context.put("host", host);
-							
-							progress.setOtherMessage("正在生成 "+ host.getClassName());
-							
+
+							progress.setOtherMessage("正在生成 "
+									+ host.getClassName());
+
 							GenUtils.mergeVelocityContext(context, String
 									.format("%s/Dao/%sDao.cs",
 											mavenLikeDir.getAbsolutePath(),
@@ -714,8 +442,9 @@ public class CSharpGenerator extends AbstractGenerator {
 
 	}
 
-	private void generateSpDao(final List<CSharpTableHost> spHosts,
-			final VelocityContext context, final File mavenLikeDir, final Progress progress) {
+	private void generateSpDao(final Queue<CSharpTableHost> spHosts,
+			final VelocityContext context, final File mavenLikeDir,
+			final Progress progress) {
 		for (final CSharpTableHost host : spHosts) {
 			context.put("host", host);
 
@@ -723,8 +452,9 @@ public class CSharpGenerator extends AbstractGenerator {
 					new CodeGeneratorCallback() {
 						@Override
 						public void doWork() {
-							progress.setOtherMessage("正在生成 "+ host.getClassName());
-							
+							progress.setOtherMessage("正在生成 "
+									+ host.getClassName());
+
 							GenUtils.mergeVelocityContext(context, String
 									.format("%s/Dao/%sDao.cs",
 											mavenLikeDir.getAbsolutePath(),
@@ -746,6 +476,482 @@ public class CSharpGenerator extends AbstractGenerator {
 					});
 			executor.execute(worker);
 		}
+	}
+
+	private void generateFreeSqlDao(final VelocityContext context,
+			final File mavenLikeDir, final Progress progress) {
+		for (final CSharpFreeSqlPojoHost host : _freeSqlPojoHosts.values()) {
+			context.put("host", host);
+
+			Runnable worker = new CodeGeneratorRunnable(
+					new CodeGeneratorCallback() {
+						@Override
+						public void doWork() {
+							progress.setOtherMessage("正在生成 "
+									+ host.getClassName());
+							GenUtils.mergeVelocityContext(context, String
+									.format("%s/Entity/%s.cs", mavenLikeDir
+											.getAbsolutePath(), CommonUtils
+											.normalizeVariable(host
+													.getClassName())),
+									"templates/Pojo.cs.tpl");
+						}
+					});
+			executor.execute(worker);
+		}
+		ProgressResource.addDoneFiles(progress, _freeSqlPojoHosts.size());
+
+		for (final CSharpFreeSqlHost host : _freeSqlHosts) {
+			context.put("host", host);
+
+			Runnable worker = new CodeGeneratorRunnable(
+					new CodeGeneratorCallback() {
+						@Override
+						public void doWork() {
+							progress.setOtherMessage("正在生成 "
+									+ host.getClassName());
+
+							GenUtils.mergeVelocityContext(context, String
+									.format("%s/Dao/%sDao.cs", mavenLikeDir
+											.getAbsolutePath(), CommonUtils
+											.normalizeVariable(host
+													.getClassName())),
+									"templates/FreeSqlDAO.cs.tpl");
+
+							GenUtils.mergeVelocityContext(context, String
+									.format("%s/Test/%sTest.cs", mavenLikeDir
+											.getAbsolutePath(), CommonUtils
+											.normalizeVariable(host
+													.getClassName())),
+									"templates/FreeSqlTest.cs.tpl");
+						}
+					});
+			executor.execute(worker);
+
+		}
+	}
+	
+	/**
+	 * 生成C#的公共部分，如Dal.config，Program.cs以及DALFactory.cs
+	 */
+	private void generateCommonCode(final int id, final Progress progress) {
+
+		final VelocityContext context = GenUtils.buildDefaultVelocityContext();
+
+		final File csMavenLikeDir = new File(String.format("%s/%s/cs",
+				generatePath, id));
+
+		context.put("dbs", _dbHosts.values());
+		context.put("namespace", namespace);
+		context.put("freeSqlHosts", _freeDaos);
+		context.put("tableHosts", _tableDaos);
+		context.put("spHosts", _spDaos);
+
+		GenUtils.mergeVelocityContext(context, String.format("%s/Dal.config",
+				csMavenLikeDir.getAbsolutePath()), "templates/Dal.config.tpl");
+
+		GenUtils.mergeVelocityContext(
+				context,
+				String.format("%s/DalFactory.cs",
+						csMavenLikeDir.getAbsolutePath()),
+				"templates/DalFactory.cs.tpl");
+	}
+
+	private Map<String, DatabaseHost> _dbHosts = new ConcurrentHashMap<String, DatabaseHost>();
+	private Queue<CSharpFreeSqlHost> _freeSqlHosts = new ConcurrentLinkedQueue<CSharpFreeSqlHost>();
+	private Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts = new ConcurrentHashMap<String, CSharpFreeSqlPojoHost>();
+	private Set<String> _freeDaos = Collections
+			.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+	private Set<String> _tableDaos = Collections
+			.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+	private Set<String> _spDaos = Collections
+			.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+
+	private Queue<CSharpTableHost> _tableViewHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
+	private Queue<CSharpTableHost> _spHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
+	private Queue<GenTaskBySqlBuilder> _sqlBuilders = new ConcurrentLinkedQueue<GenTaskBySqlBuilder>();
+
+	private void prepareDbFromFreeSql(List<GenTaskByFreeSql> freeSqls) {
+		for (GenTaskByFreeSql task : freeSqls) {
+			_freeDaos.add(WordUtils.capitalize(task.getClass_name()));
+			if (!_dbHosts.containsKey(task.getDb_name())) {
+
+				String provider = "sqlProvider";
+				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
+						"Microsoft SQL Server")) {
+					provider = "mySqlProvider";
+				}
+				DatabaseHost host = new DatabaseHost();
+				host.setAllInOneName(task.getDb_name());
+				host.setProviderType(provider);
+				// int index = host.getAllInOneName().indexOf("_");
+				// host.setDatasetName(host.getAllInOneName().substring(0,
+				// index > -1 ? index : host.getAllInOneName().length()));
+				host.setDatasetName(host.getAllInOneName());
+				_dbHosts.put(task.getDb_name(), host);
+			}
+		}
+	}
+
+	private List<Callable<Boolean>> prepareFreeSql(int projectId,
+			boolean regenerate, final Progress progress) {
+
+		List<GenTaskByFreeSql> _freeSqls;
+		if (regenerate) {
+			_freeSqls = daoByFreeSql.updateAndGetAllTasks(projectId);
+			prepareDbFromFreeSql(_freeSqls);
+		} else {
+			_freeSqls = daoByFreeSql.updateAndGetTasks(projectId);
+			prepareDbFromFreeSql(daoByFreeSql.getTasksByProjectId(projectId));
+		}
+
+		// 首先按照ServerID, DbName以及ClassName做一次GroupBy，但是ClassName不区分大小写
+		final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(_freeSqls);
+
+		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		// 随后，以ServerID, DbName以及ClassName为维度，为每个维度生成一个DAO类
+		for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy
+				.entrySet()) {
+			Callable<Boolean> worker = new Callable<Boolean>() {
+				@Override
+				public Boolean call() throws Exception {
+
+					List<GenTaskByFreeSql> currentTasks = entry.getValue();
+					if (currentTasks.size() < 1)
+						return false;
+
+					CSharpFreeSqlHost host = new CSharpFreeSqlHost();
+					host.setDbSetName(currentTasks.get(0).getDb_name());
+					host.setClassName(CommonUtils.normalizeVariable(WordUtils
+							.capitalize(currentTasks.get(0).getClass_name())));
+					host.setNameSpace(namespace);
+
+					progress.setOtherMessage("正在整理表 " + host.getClassName());
+
+					List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
+					// 每个Method可能就有一个Pojo
+					for (GenTaskByFreeSql task : currentTasks) {
+						methods.add(buildFreeSqlMethodHost(task));
+						if (!_freeSqlPojoHosts.containsKey(task.getPojo_name())) {
+							CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(task);
+							if (null != freeSqlPojoHost) {
+								_freeSqlPojoHosts.put(task.getPojo_name(),
+										freeSqlPojoHost);
+							}
+						}
+					}
+					host.setMethods(methods);
+					_freeSqlHosts.add(host);
+
+					return true;
+				}
+			};
+			results.add(worker);
+		}
+
+		return results;
+	}
+
+	private void prepareDbFromTableViewSp(
+			List<GenTaskByTableViewSp> tableViewSps,
+			List<GenTaskBySqlBuilder> sqlBuilders) {
+		Set<String> existsTable = new HashSet<String>();
+
+		for (GenTaskByTableViewSp task : tableViewSps) {
+			for (String table : StringUtils.split(task.getTable_names(), ",")) {
+				_tableDaos.add(getPojoClassName(task.getPrefix(),
+						task.getSuffix(), table));
+				existsTable.add(table);
+			}
+			for (String table : StringUtils.split(task.getView_names(), ",")) {
+				_tableDaos.add(getPojoClassName(task.getPrefix(),
+						task.getSuffix(), table));
+			}
+			for (String table : StringUtils.split(task.getSp_names(), ",")) {
+				String realSpName = table;
+				if (table.contains(".")) {
+					String[] splitSp = StringUtils.split(table, '.');
+					realSpName = splitSp[1];
+				}
+				_spDaos.add(getPojoClassName(task.getPrefix(),
+						task.getSuffix(), realSpName.replace("_", "")));
+			}
+
+			if (!_dbHosts.containsKey(task.getDb_name())) {
+
+				String provider = "sqlProvider";
+				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
+						"Microsoft SQL Server")) {
+					provider = "mySqlProvider";
+				}
+				DatabaseHost host = new DatabaseHost();
+				host.setAllInOneName(task.getDb_name());
+				host.setProviderType(provider);
+				// int index = host.getAllInOneName().indexOf("_");
+				// host.setDatasetName(host.getAllInOneName().substring(0,
+				// index > -1 ? index : host.getAllInOneName().length()));
+				host.setDatasetName(host.getAllInOneName());
+				_dbHosts.put(task.getDb_name(), host);
+			}
+		}
+
+		for (GenTaskBySqlBuilder task : sqlBuilders) {
+
+			if (!existsTable.contains(task.getTable_name())) {
+				_tableDaos
+						.add(getPojoClassName("", "Gen", task.getTable_name()));
+			}
+
+			if (!_dbHosts.containsKey(task.getDb_name())) {
+				String provider = "sqlProvider";
+				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
+						"Microsoft SQL Server")) {
+					provider = "mySqlProvider";
+				}
+				DatabaseHost host = new DatabaseHost();
+				host.setAllInOneName(task.getDb_name());
+				host.setProviderType(provider);
+				// int index = host.getAllInOneName().indexOf("_");
+				// host.setDatasetName(host.getAllInOneName().substring(0,
+				// index > -1 ? index : host.getAllInOneName().length()));
+				host.setDatasetName(host.getAllInOneName());
+				_dbHosts.put(task.getDb_name(), host);
+			}
+		}
+	}
+
+	private List<Callable<Boolean>> prepareTableViewSp(int projectId,
+			boolean regenerate, final Progress progress) throws Exception {
+		List<GenTaskByTableViewSp> _tableViewSps;
+		List<GenTaskBySqlBuilder> _tempSqlBuilders;
+		if (regenerate) {
+			_tableViewSps = daoByTableViewSp.updateAndGetAllTasks(projectId);
+			_tempSqlBuilders = daoBySqlBuilder.updateAndGetAllTasks(projectId);
+			prepareDbFromTableViewSp(_tableViewSps, _tempSqlBuilders);
+		} else {
+			_tableViewSps = daoByTableViewSp.updateAndGetTasks(projectId);
+			_tempSqlBuilders = daoBySqlBuilder.updateAndGetTasks(projectId);
+			prepareDbFromTableViewSp(
+					daoByTableViewSp.getTasksByProjectId(projectId),
+					daoBySqlBuilder.getTasksByProjectId(projectId));
+		}
+		for (GenTaskBySqlBuilder _t : _tempSqlBuilders) {
+			_sqlBuilders.add(_t);
+		}
+
+		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		for (final GenTaskByTableViewSp tableViewSp : _tableViewSps) {
+			final String[] viewNames = StringUtils.split(
+					tableViewSp.getView_names(), ",");
+			final String[] tableNames = StringUtils.split(
+					tableViewSp.getTable_names(), ",");
+			final String[] spNames = StringUtils.split(
+					tableViewSp.getSp_names(), ",");
+
+			final DatabaseCategory dbCategory;
+			if (!DbUtils.getDbType(tableViewSp.getDb_name()).equalsIgnoreCase(
+					"Microsoft SQL Server")) {
+				dbCategory = DatabaseCategory.MySql;
+			} else {
+				dbCategory = DatabaseCategory.SqlServer;
+			}
+
+			final List<StoredProcedure> allSpNames = DbUtils
+					.getAllSpNames(tableViewSp.getDb_name());
+
+			for (final String table : tableNames) {
+				Callable<Boolean> worker = new Callable<Boolean>() {
+					@Override
+					public Boolean call() throws Exception {
+						progress.setOtherMessage("正在整理表 " + table);
+						CSharpTableHost currentTableHost;
+						try {
+							currentTableHost = buildTableHost(tableViewSp,
+									table, dbCategory, allSpNames);
+							if (null != currentTableHost) {
+								_tableViewHosts.add(currentTableHost);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						return true;
+					}
+				};
+				results.add(worker);
+			}
+
+			for (final String view : viewNames) {
+				Callable<Boolean> viewWorker = new Callable<Boolean>() {
+					@Override
+					public Boolean call() throws Exception {
+						progress.setOtherMessage("正在整理视图 " + view);
+						try {
+							CSharpTableHost currentViewHost = buildViewHost(
+									tableViewSp, dbCategory, view);
+							if (null != currentViewHost) {
+								_tableViewHosts.add(currentViewHost);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						return true;
+					}
+				};
+				results.add(viewWorker);
+			}
+
+			for (final String spName : spNames) {
+				Callable<Boolean> spWorker = new Callable<Boolean>() {
+					@Override
+					public Boolean call() throws Exception {
+						progress.setOtherMessage("正在整理存储过程 " + spName);
+						try {
+							CSharpTableHost currentSpHost = buildSpHost(
+									tableViewSp, dbCategory, spName);
+							if (null != currentSpHost) {
+								_spHosts.add(currentSpHost);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						return true;
+					}
+				};
+				results.add(spWorker);
+			}
+		}
+
+		return results;
+	}
+
+	private List<Callable<Boolean>> prepareSqlBuilder(final Progress progress) {
+		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+
+		if (_sqlBuilders.size() > 0) {
+			Map<String, GenTaskBySqlBuilder> _TempSqlBuildres = sqlBuilderBroupBy(_sqlBuilders);
+
+			for (final Map.Entry<String, GenTaskBySqlBuilder> _table : _TempSqlBuildres
+					.entrySet()) {
+				Callable<Boolean> worker = new Callable<Boolean>() {
+
+					@Override
+					public Boolean call() throws Exception {
+						progress.setOtherMessage("正在整理表 "
+								+ _table.getValue().getClass_name());
+						CSharpTableHost extraTableHost;
+						try {
+							extraTableHost = buildExtraSqlBuilderHost(_table
+									.getValue());
+							if (null != extraTableHost) {
+								_tableViewHosts.add(extraTableHost);
+							}
+							return true;
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						return false;
+					}
+				};
+				results.add(worker);
+			}
+		}
+		return results;
+	}
+	
+	@Override
+	public boolean prepareDirectory(int projectId, boolean regenerate) {
+		File mavenLikeDir = new File(String.format("%s/%s/cs", generatePath,
+				projectId));
+
+		try {
+			if (mavenLikeDir.exists() && this.regenerate)
+				FileUtils.forceDelete(mavenLikeDir);
+
+			File idaoMavenLike = new File(mavenLikeDir, "IDao");
+			File daoMavenLike = new File(mavenLikeDir, "Dao");
+			File entityMavenLike = new File(mavenLikeDir, "Entity");
+			File testMavenLike = new File(mavenLikeDir, "Test");
+
+			if (!idaoMavenLike.exists()) {
+				FileUtils.forceMkdir(idaoMavenLike);
+			}
+			if (!daoMavenLike.exists()) {
+				FileUtils.forceMkdir(daoMavenLike);
+			}
+			if (!entityMavenLike.exists()) {
+				FileUtils.forceMkdir(entityMavenLike);
+			}
+			if (!testMavenLike.exists()) {
+				FileUtils.forceMkdir(testMavenLike);
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean prepareData(int projectId, boolean regenerate,
+			Progress progress) {
+
+		List<Callable<Boolean>> _freeSqlCallables = prepareFreeSql(projectId,
+				regenerate, progress);
+
+		try {
+			List<Callable<Boolean>> _tableViewSpCallables = prepareTableViewSp(
+					projectId, regenerate, progress);
+
+			List<Callable<Boolean>> allResults = ListUtils.union(
+					_freeSqlCallables, _tableViewSpCallables);
+
+			if (allResults.size() > 0) {
+				executor.invokeAll(allResults);
+			}
+
+			List<Callable<Boolean>> _sqlBuilderCallables = prepareSqlBuilder(progress);
+
+			if (_sqlBuilderCallables.size() > 0) {
+				executor.invokeAll(_sqlBuilderCallables);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean generateCode(int id, Progress progress) {
+		final VelocityContext context = GenUtils.buildDefaultVelocityContext();
+
+		final File csMavenLikeDir = new File(String.format("%s/%s/cs",
+				generatePath, id));
+
+		generateTableDao(_tableViewHosts, context, csMavenLikeDir, progress);
+		ProgressResource.addDoneFiles(progress, _tableViewHosts.size());
+
+		generateSpDao(_spHosts, context, csMavenLikeDir, progress);
+		ProgressResource.addDoneFiles(progress, _spHosts.size());
+		
+		generateFreeSqlDao(context, csMavenLikeDir, progress);
+		
+		generateCommonCode(id, progress);
+
+		executor.shutdown();
+		try {
+			executor.awaitTermination(60 * 60, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	@Override
+	public boolean clearResource() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

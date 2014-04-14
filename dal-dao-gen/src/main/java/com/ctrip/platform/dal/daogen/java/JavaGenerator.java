@@ -621,4 +621,30 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 		ProgressResource.addDoneFiles(progress, hosts.size());
 	}
+
+	@Override
+	public boolean prepareDirectory(int projectId, boolean regenerate) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean prepareData(int projectId, boolean regenerate,
+			Progress progress) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public boolean clearResource() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean generateCode(int projectId, Progress progress) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

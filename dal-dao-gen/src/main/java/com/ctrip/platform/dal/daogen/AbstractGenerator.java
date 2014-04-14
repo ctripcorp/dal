@@ -76,20 +76,34 @@ public abstract class AbstractGenerator implements Generator {
 		Velocity.init(pr);
 	}
 
-//	public void generate(int projectId, boolean regenerate, Progress progress) {
-//		
-//		prepareData(projectId, regenerate, progress);
-//		
-//		generateCode(progress);
-//		
-//		clearResource();
-//	}
-//
-//	public abstract boolean prepareData(int projectId, boolean regenerate, Progress progress);
-//
-//	public abstract boolean generateCode(Progress progress);
-//
-//	public abstract boolean clearResource();
+	public void generate(int projectId, boolean regenerate, Progress progress) {
+		
+		progress.setTotalFiles(4);
+		
+		prepareDirectory(projectId, regenerate);
+		
+		ProgressResource.addDoneFiles(progress, 1);
+		
+		prepareData(projectId, regenerate, progress);
+		
+		ProgressResource.addDoneFiles(progress, 2);
+		
+		generateCode(projectId, progress);
+		
+		ProgressResource.addDoneFiles(progress, 3);
+		
+		clearResource();
+		
+		ProgressResource.addDoneFiles(progress, 4);
+	}
+
+	public abstract boolean prepareDirectory(int projectId, boolean regenerate);
+	
+	public abstract boolean prepareData(int projectId, boolean regenerate, Progress progress);
+
+	public abstract boolean generateCode(int projectId, Progress progress);
+
+	public abstract boolean clearResource();
 
 	@Override
 	public boolean generateCode(int projectId, boolean regenerate,

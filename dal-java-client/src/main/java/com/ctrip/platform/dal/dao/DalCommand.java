@@ -2,6 +2,11 @@ package com.ctrip.platform.dal.dao;
 
 import java.sql.SQLException;
 
+/**
+ * Wrapper for all the transaction operation. All the actions executed in 
+ * the execute method will be treated as on transaction.
+ * @author jhhe
+ */
 public interface DalCommand {
 	/**
 	 * Execute in same local transaction

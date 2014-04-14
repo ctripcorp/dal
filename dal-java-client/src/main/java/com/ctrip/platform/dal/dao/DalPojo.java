@@ -1,10 +1,8 @@
 package com.ctrip.platform.dal.dao;
 
 /**
- * For nullable value, the attribute will be Object(Integer, Float, Double, BigDecimal, etc)
- * For not null value, it will be primary if possible
+ * Base Type for all generated entities. All attributes will be Object(Integer, Float, Double, BigDecimal, etc).
  * @author jhhe
- *
  */
 public interface DalPojo {
 

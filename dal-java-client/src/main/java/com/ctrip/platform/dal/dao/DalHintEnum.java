@@ -1,6 +1,10 @@
 package com.ctrip.platform.dal.dao;
 
-
+/**
+ * All valid entries for DalHints. Include parameters, config, and user defined entry.
+ * userDefined0 to userDefined10 can be used to pass customer parameters.
+ * @author jhhe
+ */
 public enum DalHintEnum {
 	/* All the parameters for each Dal client call. Used for locating shard, real database */
 	operation, //DalClient.operation

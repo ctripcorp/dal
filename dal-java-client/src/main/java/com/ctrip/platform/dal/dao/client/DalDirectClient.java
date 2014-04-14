@@ -35,7 +35,10 @@ import com.ctrip.platform.dal.dao.logging.LogEntry;
 import com.ctrip.platform.dal.dao.logging.Logger;
 import com.ctrip.platform.dal.dao.logging.MetricsLogger;
 
-// TODO minimize duplicate code
+/**
+ * The direct connection implementation for DalClient.
+ * @author jhhe
+ */
 public class DalDirectClient implements DalClient {
 	
 	

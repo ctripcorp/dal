@@ -46,6 +46,14 @@ public final class DalTableDao<T> {
 		pkSql = initSql();
 	}
 	
+	/**
+	 * Query by Primary key. The key column type should be Integer, Long, etc.
+	 * For table that the primary key is not of Integer type, this method will fail.
+	 * @param id
+	 * @param hints
+	 * @return
+	 * @throws SQLException
+	 */
 	public T queryByPk(Number id, DalHints hints)
 			throws SQLException {
 		if(parser.getPrimaryKeyNames().length != 1)
@@ -59,6 +67,13 @@ public final class DalTableDao<T> {
 		return queryDao.queryForObject(selectSql, parameters, hints, parser);
 	}
 
+	/**
+	 * Query by Primary key, the key columns are pass in the pojo.
+	 * @param pk
+	 * @param hints
+	 * @return
+	 * @throws SQLException
+	 */
 	public T queryByPk(T pk, DalHints hints)
 			throws SQLException {
 		StatementParameters parameters = new StatementParameters();
@@ -69,6 +84,13 @@ public final class DalTableDao<T> {
 		return queryDao.queryForObject(selectSql, parameters, hints, parser);
 	}
 	
+	/**
+	 * Query against sample pojo. All not null attributes of the passed in pojo will be used to build the where clause.  
+	 * @param sample
+	 * @param hints
+	 * @return
+	 * @throws SQLException
+	 */
 	public List<T> queryLike(T sample, DalHints hints)
 			throws SQLException {
 		StatementParameters parameters = new StatementParameters();
@@ -79,24 +101,63 @@ public final class DalTableDao<T> {
 		return query(whereClause, parameters, hints);
 	}
 	
+	/**
+	 * Query by the given where clause and parameters. 
+	 * The where clause can contain value placeholder "?". The parameter should match the index of the placeholder.
+	 * @param whereClause
+	 * @param parameters
+	 * @param hints
+	 * @return
+	 * @throws SQLException
+	 */
 	public List<T> query(String whereClause, StatementParameters parameters, DalHints hints)
 			throws SQLException {
 		String selectSql = String.format(TMPL_SQL_FIND_BY, parser.getTableName(), whereClause);
 		return queryDao.query(selectSql, parameters, hints, parser);
 	}
 	
+	/**
+	 * Query the first row of the given where clause and parameters.
+	 * The where clause can contain value placeholder "?". The parameter should match the index of the placeholder.
+	 * @param whereClause
+	 * @param parameters
+	 * @param hints
+	 * @return
+	 * @throws SQLException
+	 */
 	public T queryFirst(String whereClause, StatementParameters parameters, DalHints hints)
 			throws SQLException {
 		String selectSql = String.format(TMPL_SQL_FIND_BY, parser.getTableName(), whereClause);
 		return queryDao.queryFirst(selectSql, parameters, hints, parser);
 	}
 
+	/**
+	 * Query the top rows of the given where clause and parameters.
+	 * The where clause can contain value placeholder "?". The parameter should match the index of the placeholder.
+	 * @param whereClause
+	 * @param parameters
+	 * @param hints
+	 * @param count how may rows to return
+	 * @return The qualified list of pojo
+	 * @throws SQLException
+	 */
 	public List<T> queryTop(String whereClause, StatementParameters parameters, DalHints hints, int count)
 			throws SQLException {
 		String selectSql = String.format(TMPL_SQL_FIND_BY, parser.getTableName(), whereClause);
 		return queryDao.queryTop(selectSql, parameters, hints, parser, count);
 	}
 	
+	/**
+	 * Query range of result for the given where clause and parameters.
+	 * The where clause can contain value placeholder "?". The parameter should match the index of the placeholder.
+	 * @param whereClause
+	 * @param parameters
+	 * @param hints
+	 * @param start the start number
+	 * @param count how may rows to return
+	 * @return The qualified list of pojo
+	 * @throws SQLException
+	 */
 	public List<T> queryFrom(String whereClause, StatementParameters parameters, DalHints hints, int start, int count)
 			throws SQLException {
 		String selectSql = String.format(TMPL_SQL_FIND_BY, parser.getTableName(), whereClause);
@@ -109,7 +170,7 @@ public final class DalTableDao<T> {
 	 * @param hints additional parameters. DalHintEnum.continueOnError can be used to 
 	 * indicate that the inserting can be go on if there is any failure.
 	 * @param daoPojos list of pojos to be inserted
-	 * @return
+	 * @return how many rows been affected
 	 */
 	public int insert(DalHints hints, T...daoPojos) throws SQLException {
 		return insert(hints, null, daoPojos);
@@ -123,7 +184,7 @@ public final class DalTableDao<T> {
 	 * indicate that the inserting can be go on if there is any failure.
 	 * @param keyHolder holder for generated primary keys
 	 * @param daoPojos list of pojos to be inserted
-	 * @return
+	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, T...daoPojos) throws SQLException {
@@ -154,24 +215,30 @@ public final class DalTableDao<T> {
 	 * Insert pojos in batch mode.
 	 * @param hints
 	 * @param daoPojos
-	 * @return
+	 * @return how many rows been affected for deleting each of the pojo
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, T...daoPojos) throws SQLException {
 		String insertSql = buildBatchInsertSql();
-		
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		int i = 0;
 		for(T pojo: daoPojos) {
-			Map<String, ?> fields = parser.getFields(pojo);
-			StatementParameters parameters = new StatementParameters();
-			addParameters(parameters, fields);
-			parametersList[i++] = parameters;
+		Map<String, ?> fields = parser.getFields(pojo);
+		StatementParameters parameters = new StatementParameters();
+		addParameters(parameters, fields);
+		parametersList[i++] = parameters;
 		}
 
 		return client.batchUpdate(insertSql, parametersList, hints);
 	}
 	
+	/**
+	 * Delete the given pojo list. The PK in pojo will be extracted to locate 
+	 * @param hints
+	 * @param daoPojos
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
 	public int delete(DalHints hints, T...daoPojos) throws SQLException {
 		int count = 0;
 		for(T pojo: daoPojos) {
@@ -190,6 +257,13 @@ public final class DalTableDao<T> {
 		return count;
 	}
 	
+	/**
+	 * Update the given pojo list. 
+	 * @param hints
+	 * @param daoPojos
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
 	public int update(DalHints hints, T...daoPojos) throws SQLException {
 		int count = 0;
 		for(T pojo: daoPojos) {
@@ -215,31 +289,70 @@ public final class DalTableDao<T> {
 		return count;
 	}
 	
+	/**
+	 * Delete for the given where clause and parameters.
+	 * @param whereClause
+	 * @param parameters
+	 * @param hints
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
 	public int delete(String whereClause, StatementParameters parameters, DalHints hints) throws SQLException {
 		return client.update(String.format(TMPL_SQL_DELETE, parser.getTableName(), whereClause), parameters, hints);
 	}
 	
+	/**
+	 * Update for the given where clause and parameters.
+	 * @param sql
+	 * @param parameters
+	 * @param hints
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
 	public int update(String sql, StatementParameters parameters, DalHints hints) throws SQLException {
 		return client.update(sql, parameters, hints);
 	}
 	
+	/**
+	 * Add all the entries into the parameters by index. 
+	 * The parameter index will depends on the index of the entry in the entry set, value will be entry value. The value can be null.
+	 * @param parameters
+	 * @param entries
+	 */
 	public void addParameters(StatementParameters parameters, Map<String, ?> entries) {
 		int index = parameters.size() + 1;
 		for(Map.Entry<String, ?> entry: entries.entrySet()) {
 			parameters.set(index++, getColumnType(entry.getKey()), entry.getValue());
 		}
 	}
-	
+
+	/**
+	 * Add all the entries into the parameters by name.
+	 * The parameter name will be the entry key, value will be entry value. The value can be null.
+	 * This method will be used to set input parameters for stored procedure.
+	 * @param parameters
+	 * @param entries
+	 */
 	public void addParametersByName(StatementParameters parameters, Map<String, ?> entries) {
 		for(Map.Entry<String, ?> entry: entries.entrySet()) {
 			parameters.set(entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
 		}
 	}
 	
+	/**
+	 * Get the column type defined in java.sql.Types.
+	 * @param columnName
+	 * @return value defined in java.sql.Types
+	 */
 	public int getColumnType(String columnName) {
 		return columnTypes.get(columnName);
 	}
 	
+	/**
+	 * Remove all the null value in the given map.
+	 * @param fields
+	 * @return the original map reference
+	 */
 	public Map<String, ?> filterNullFileds(Map<String, ?> fields) {
 		for(String columnName: parser.getColumnNames()) {
 			if(fields.get(columnName) == null)

@@ -52,12 +52,17 @@
             dataType: "json",
             complete: function(jqXHR, textStatus){
                 if(Progress.progressStatus == "finish" || textStatus != "success" || Progress.errorStatus=="exception" ){
-                    Progress.progressStatus = undefined;
-                    Progress.errorStatus = undefined;
-                    Progress.random = undefined;
-                    progress.stop($("#generateCodeProcessDiv"));
-                    $("#viewCode").val($("#regen_language").val());
-                    $("#refreshFiles").trigger("click");
+                    if(Progress.progressStatus == "finish" && textStatus == "success" && Progress.errorStatus!="exception"){
+                        //alert("success finish generate code.");
+                        setTimeout(function(){
+                            Progress.progressStatus = undefined;
+                            Progress.errorStatus = undefined;
+                            Progress.random = undefined;
+                            progress.stop($("#generateCodeProcessDiv"));
+                            $("#viewCode").val($("#regen_language").val());
+                            $("#refreshFiles").trigger("click");
+                        },1000);
+                    }
                 }else{
                     poll();
                 }

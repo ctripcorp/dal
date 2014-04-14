@@ -54,14 +54,9 @@
                 if(Progress.progressStatus == "finish" || textStatus != "success" || Progress.errorStatus=="exception" ){
                     if(Progress.progressStatus == "finish" && textStatus == "success" && Progress.errorStatus!="exception"){
                         //alert("success finish generate code.");
-                        setTimeout(function(){
-                            Progress.progressStatus = undefined;
-                            Progress.errorStatus = undefined;
-                            Progress.random = undefined;
-                            progress.stop($("#generateCodeProcessDiv"));
-                            $("#viewCode").val($("#regen_language").val());
-                            $("#refreshFiles").trigger("click");
-                        },1000);
+                        setTimeout(refreshData,1000);
+                    }else{
+                        refreshData();
                     }
                 }else{
                     poll();
@@ -71,6 +66,15 @@
             async:true,
             type: "GET"
         });
+    };
+
+    var refreshData = function(){
+        Progress.progressStatus = undefined;
+        Progress.errorStatus = undefined;
+        Progress.random = undefined;
+        progress.stop($("#generateCodeProcessDiv"));
+        $("#viewCode").val($("#regen_language").val());
+        $("#refreshFiles").trigger("click");
     };
 
     window.progress = new Progress();

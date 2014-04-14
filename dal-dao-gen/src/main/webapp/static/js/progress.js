@@ -22,8 +22,11 @@
 
     Progress.prototype.stop = function (el) {
         $(el).modal("hide");
-        $('.progress-bar').css({'width': "0%"});
-        $('#generateCodeProcessMess').html("正在初始化...");
+        setTimeout(function(){
+            $('.progress-bar').css({'width': "0%"});
+            $('#generateCodeProcessMess').css({'font-weight': "normal"});
+            $('#generateCodeProcessMess').html("正在初始化...");
+        },500);
     };
 
     Progress.prototype.reportException = function(exception){
@@ -53,8 +56,8 @@
             complete: function(jqXHR, textStatus){
                 if(Progress.progressStatus == "finish" || textStatus != "success" || Progress.errorStatus=="exception" ){
                     if(Progress.progressStatus == "finish" && textStatus == "success" && Progress.errorStatus!="exception"){
-                        //alert("success finish generate code.");
-                        setTimeout(refreshData,1000);
+                        $('#generateCodeProcessMess').css({'font-weight': "bold"});
+                        setTimeout(refreshData,3000);
                     }else{
                         refreshData();
                     }

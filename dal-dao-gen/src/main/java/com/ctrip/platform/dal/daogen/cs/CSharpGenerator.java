@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
@@ -52,16 +51,6 @@ public class CSharpGenerator extends AbstractGenerator {
 	private Queue<CSharpTableHost> _tableViewHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
 	private Queue<CSharpTableHost> _spHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
 	private Queue<GenTaskBySqlBuilder> _sqlBuilders = new ConcurrentLinkedQueue<GenTaskBySqlBuilder>();
-
-	public void generateByFreeSql(List<GenTaskByFreeSql> tasks,
-			Progress progress) {
-	}
-
-	@Override
-	public void generateByTableView(List<GenTaskByTableViewSp> tasks,
-			final Progress progress) throws Exception {
-
-	}
 
 	private Map<String, List<GenTaskByFreeSql>> freeSqlGroupBy(
 			List<GenTaskByFreeSql> tasks) {

@@ -24,7 +24,6 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.java.JavaGenerator;
-import com.ctrip.platform.dal.daogen.java.NewJavaGenerator;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
@@ -173,7 +172,7 @@ public class ProjectResource {
 			if (language.equals("java"))
 			{
 				//JavaGenerator.getInstance().generateCode(id, regen, progress);
-				new NewJavaGenerator().generate(id, regen, progress);
+				new JavaGenerator().generate(id, regen, progress);
 			}
 			else if (language.equals("cs")){
 				new CSharpGenerator().generate(id, regen, progress);

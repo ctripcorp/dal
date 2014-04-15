@@ -10,6 +10,9 @@ public class CSharpParameterHost extends AbstractParameterHost {
 	
 	private String alias;
 	
+	//where条件是否是in,如 select * from Person where id in ?
+	private boolean inParameter;
+	
 	private ParameterDirection direction;
 	
 	//C#的DbType
@@ -32,6 +35,7 @@ public class CSharpParameterHost extends AbstractParameterHost {
 	{
 		this.name = host.getName();
 		this.alias = host.getAlias();
+		this.inParameter = host.isInParameter();
 		this.direction = host.getDirection();
 		this.dbType = host.getDbType();
 		this.type = host.getType();
@@ -40,7 +44,15 @@ public class CSharpParameterHost extends AbstractParameterHost {
 		this.nullable = host.isNullable();
 		this.valueType = host.isValueType();
 	}
-	
+
+	public boolean isInParameter() {
+		return inParameter;
+	}
+
+	public void setInParameter(boolean inParameter) {
+		this.inParameter = inParameter;
+	}
+
 	public boolean isValueType() {
 		return valueType;
 	}

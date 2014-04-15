@@ -482,27 +482,35 @@ namespace ${host.getNameSpace()}.Dao
 #end
 
 #foreach($method in $host.getExtraMethods())
-		/// <summary>
+        /// <summary>
         ///  ${method.getName()}
         /// </summary>
 #foreach($p in $method.getParameters())
         /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
 #end
         /// <returns></returns>
-        public #if($method.getCrud_type() == "select")IList<${host.getClassName()}>#{else}int#end ${method.getName()}(#foreach($p in $method.getParameters())${p.getType()} ${WordUtils.uncapitalize($p.getAlias())}#if($foreach.count != $method.getParameters().size()),#end#end)
+        public #if($method.getCrud_type() == "select")IList<${host.getClassName()}>#{else}int#end ${method.getName()}(#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getAlias())}#if($foreach.count != $method.getParameters().size()),#end#end)
         {
-        	try
+            try
             {
-            	string sql = "${method.getSql()}";
                 StatementParameterCollection parameters = new StatementParameterCollection();
+                string sql = "${method.getSql()}";
+#set($inParams = [])                
 #foreach($p in $method.getParameters())  
-                parameters.Add(new StatementParameter{ Name = "@${p.getName()}", Direction = ParameterDirection.Input, DbType = DbType.${p.getDbType()}, Value =${WordUtils.uncapitalize($p.getAlias())} });
+#if($p.isInParameter())
+#set($success = $inParams.add($p))
+#else
+                parameters.Add(new StatementParameter{ Name = "@${p.getAlias()}", Direction = ParameterDirection.Input, DbType = DbType.${p.getDbType()}, Value =${WordUtils.uncapitalize($p.getAlias())} });
+#end
+#end
+#if($inParams.size() > 0)
+                sql = string.format(sql, #foreach($p in $inParams)Arch.Data.Utility.ParameterUtility.NormalizeInParam(${WordUtils.uncapitalize($p.getAlias())}, parameters,"${WordUtils.uncapitalize($p.getAlias())}")#if($foreach.count != $inParams.size()),#end#end);
 #end
 
 #if($method.getCrud_type() == "select")
                 return baseDao.SelectList<${host.getClassName()}>(sql, parameters);
 #else
-				return baseDao.ExecNonQuery(sql, parameters);
+                return baseDao.ExecNonQuery(sql, parameters);
 #end
 
             }

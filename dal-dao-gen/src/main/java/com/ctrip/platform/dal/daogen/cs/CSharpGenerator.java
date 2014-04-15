@@ -29,8 +29,10 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
+import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.resource.ProgressResource;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
@@ -334,18 +336,33 @@ public class CSharpGenerator extends AbstractGenerator {
 					|| method.getCrud_type().equals("delete")) {
 				String[] conditions = StringUtils.split(builder.getCondition(),
 						";");
+				
 				for (String condition : conditions) {
 					String[] tokens = StringUtils.split(condition, ",");
 					String name = tokens[0];
+					int type = tokens.length >= 2 ? Integer.parseInt(tokens[1])
+							: -1;
 					String alias = "";
-					if (tokens.length == 3)
+					if (tokens.length >= 3)
 						alias = tokens[2];
 					for (CSharpParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
 							CSharpParameterHost host_al = new CSharpParameterHost(
 									pHost);
 							host_al.setAlias(alias);
+							host_al.setInParameter(ConditionType.In == ConditionType
+									.valueOf(type));
 							parameters.add(host_al);
+							// Between need an extra parameter
+							if (ConditionType.Between == ConditionType
+									.valueOf(type)) {
+								CSharpParameterHost host_bw = new CSharpParameterHost(
+										pHost);
+								String alias_bw = tokens.length >= 4 ? tokens[3]
+										: "";
+								host_bw.setAlias(alias_bw);
+								parameters.add(host_bw);
+							}
 							break;
 						}
 					}
@@ -376,14 +393,25 @@ public class CSharpGenerator extends AbstractGenerator {
 					for (CSharpParameterHost pHost : allColumns) {
 						String[] tokens = StringUtils.split(condition, ",");
 						String name = tokens[0];
+						int type = tokens.length >= 2 ? Integer.parseInt(tokens[1])
+								: -1;
 						String alias = "";
-						if (tokens.length == 3)
+						if (tokens.length >= 3)
 							alias = tokens[2];
 						if (pHost.getName().equals(name)) {
 							CSharpParameterHost host_al = new CSharpParameterHost(
 									pHost);
 							host_al.setAlias(alias);
 							parameters.add(host_al);
+							if (ConditionType.Between == ConditionType
+									.valueOf(type)) {
+								CSharpParameterHost host_bw = new CSharpParameterHost(
+										pHost);
+								String alias_bw = tokens.length >= 4 ? tokens[3]
+										: "";
+								host_bw.setAlias(alias_bw);
+								parameters.add(host_bw);
+							}
 							break;
 						}
 					}

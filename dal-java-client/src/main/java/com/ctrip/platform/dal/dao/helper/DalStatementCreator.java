@@ -6,11 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.Date;
 
-import com.ctrip.platform.dal.common.enums.DbType;
-import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
@@ -65,6 +61,19 @@ public class DalStatementCreator {
 		applyHints(statement, hints);
 		setParameter(statement, parameters);
 		registerOutParameters(statement, parameters);
+
+		return statement;
+	}
+	
+	public CallableStatement createCallableStatement(Connection conn,  String sql, StatementParameters[] parametersList, DalHints hints) throws Exception {
+		CallableStatement statement = conn.prepareCall(sql);
+		
+		applyHints(statement, hints);
+		
+		for(StatementParameters parameters: parametersList) {
+			setParameter(statement, parameters);
+			statement.addBatch();
+		}
 
 		return statement;
 	}

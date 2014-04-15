@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -212,6 +213,36 @@ public class DirectClientDaoTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public void testBatchSP() {
+		DalClient client = DalClientFactory.getClient("dao_test");
+		StatementParameters[] parametersList = new StatementParameters[3];
+		StatementParameters parameters;
+		DalHints hints = new DalHints();
+
+		try {
+			
+			for (int i = 0; i < parametersList.length; i++) {
+				parameters = new StatementParameters();
+				parameters.set("v_address", Types.VARCHAR, "my address test");
+				parameters.set("v_telephone", Types.VARCHAR, "12345678901");
+				parameters.set("v_name", Types.VARCHAR, "my name");
+				parameters.set("v_age", Types.INTEGER, 30);
+				parameters.set("v_gender", Types.INTEGER, 1);
+				parameters.set("v_birth", Types.TIMESTAMP, new Timestamp(System.currentTimeMillis()));
+				parameters.set("v_PartmentID", Types.INTEGER, 3);
+				parametersList[i] = parameters;	
+			}
+
+			int []result = client.batchCall("call insertPerson(?, ?,?, ?,?, ?,?)", parametersList, hints);
+
+			System.out.println(result.length);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void testCommand() {
@@ -491,9 +522,11 @@ public class DirectClientDaoTest {
 		
 		DirectClientDaoTest test = new DirectClientDaoTest();
 		
+		test.testBatchSP();
+		
 //		test.testIsolationLevel();
 		
-		test.testDuplicateColumnName();
+//		test.testDuplicateColumnName();
 		//test.testType("dao_test", "ManyTypes");
 		//test.test();
 //		test.test2();

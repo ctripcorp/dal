@@ -219,31 +219,15 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			int[] execute() throws Exception {
-				List<StatementParameter> resultParameters = new ArrayList<StatementParameter>();
-				List<StatementParameter> callParameters = new ArrayList<StatementParameter>();
-				for (StatementParameter parameter : parameters.values()) {
-					if (parameter.isResultsParameter()) {
-						resultParameters.add(parameter);
-					} else 
-					if(parameter.isOutParameter()){
-						callParameters.add(parameter);
-					}
-				}
 
 				conn = getConnection(hints);
 				
-				callableStatement = createCallableStatement(conn, callString, parameters, hints);
-//				boolean retVal = callableStatement.execute();
-//				int updateCount = callableStatement.getUpdateCount();
-//				Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
-//				if (retVal || updateCount != -1) {
-//					returnedResults.putAll(extractReturnedResults(callableStatement, resultParameters, updateCount, hints));
-//				}
-//				returnedResults.putAll(extractOutputParameters(callableStatement, callParameters));
+				callableStatement = createCallableStatement(conn, callString, parametersList, hints);
+
 				return callableStatement.executeBatch();
 			}
 		};
-//		action.populateSp(callString, parameters);
+		action.populateSp(callString, parametersList);
 		
 		return doInConnection(action, hints);
 	}
@@ -435,6 +419,12 @@ public class DalDirectClient implements DalClient {
 			this.parameters = parameters;
 		}
 		
+		void populateSp(String callString, StatementParameters []parametersList) {
+			this.operation = DalEventEnum.CALL;
+			this.callString = callString;
+			this.parametersList = parametersList;
+		}
+		
 		/**
 		 * TODO: How to display batch SQLs
 		 * @return
@@ -480,6 +470,10 @@ public class DalDirectClient implements DalClient {
 
 	private CallableStatement createCallableStatement(Connection conn,  String sql, StatementParameters parameters, DalHints hints) throws Exception {
 		return stmtCreator.createCallableStatement(conn, sql, parameters, hints);
+	}
+	
+	private CallableStatement createCallableStatement(Connection conn,  String sql, StatementParameters[] parametersList, DalHints hints) throws Exception {
+		return stmtCreator.createCallableStatement(conn, sql, parametersList, hints);
 	}
 	
 	private int startTransaction(DalHints hints) throws SQLException {

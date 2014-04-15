@@ -3,6 +3,10 @@ package com.ctrip.platform.dal.dao;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Additional parameters used to indicate how DAL behaves for each of the operation.
+ * @author jhhe
+ */
 public class DalHints {
 	private Map<DalHintEnum, Object> hints = new LinkedHashMap<DalHintEnum, Object>();
 	
@@ -82,5 +86,4 @@ public class DalHints {
 		set(DalHintEnum.isolationLevel, isolationLevel);
 		return this;
 	}
-
 }

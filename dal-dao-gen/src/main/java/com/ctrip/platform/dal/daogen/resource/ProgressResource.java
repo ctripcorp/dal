@@ -28,7 +28,7 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 public class ProgressResource {
 	
 	/**
-	 * key: userNo + # + project_id
+	 * key: userNo + # + project_id + # + random
 	 * value:Progress
 	 */
 	public static Map<String,Progress> progresses = new ConcurrentHashMap<String,Progress>(); 
@@ -42,7 +42,7 @@ public class ProgressResource {
 	public final static String ISDOING = "isDoing";
 	
 	public final static String INIT_MESSAGE = "正在初始化...";
-	public final static String SUCCESS_MESSAGE = "生成完毕";
+	public final static String SUCCESS_MESSAGE = "代码生成完毕。本窗口3秒后将自动关闭。";
 
 	@Path("/poll")
 	@GET

@@ -2,7 +2,7 @@ package com.ctrip.platform.dal.service;
 
 import java.util.Set;
 
-import com.ctrip.platform.dal.common.util.ReflectionUtil;
+import com.ctrip.platform.dal.service.utils.ReflectionUtil;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.google.inject.AbstractModule;

@@ -151,7 +151,7 @@ public class Configuration {
 		}
 		return classes;
 	}
-
+/*
 	@SuppressWarnings("unchecked")
 	public static <U> List<U> getInstances(String name, Class<U> xface)
 			throws ClassNotFoundException {
@@ -165,7 +165,7 @@ public class Configuration {
 		}
 		return ret;
 	}
-
+*/
 	public static void dumpDeprecatedKeys() {
 		for (String key : configMap.keySet()) {
 			System.out.println(key + "=" + configMap.get(key));

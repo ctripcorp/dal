@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
@@ -32,7 +34,6 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
-import com.ctrip.platform.dal.daogen.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.resource.ProgressResource;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
@@ -53,6 +54,13 @@ public class CSharpGenerator extends AbstractGenerator {
 	private Queue<CSharpTableHost> _tableViewHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
 	private Queue<CSharpTableHost> _spHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
 	private Queue<GenTaskBySqlBuilder> _sqlBuilders = new ConcurrentLinkedQueue<GenTaskBySqlBuilder>();
+	
+	private static String regEx = null;
+	private static Pattern inRegxPattern = null;
+	static{
+		 regEx="in\\s(@\\w+)";
+		 inRegxPattern = Pattern.compile(regEx, java.util.regex.Pattern.CASE_INSENSITIVE);
+	}
 
 	private Map<String, List<GenTaskByFreeSql>> freeSqlGroupBy(
 			List<GenTaskByFreeSql> tasks) {
@@ -88,7 +96,18 @@ public class CSharpGenerator extends AbstractGenerator {
 
 	private CSharpMethodHost buildFreeSqlMethodHost(GenTaskByFreeSql task) {
 		CSharpMethodHost method = new CSharpMethodHost();
-		method.setSql(task.getSql_content());
+		//method.setSql(task.getSql_content());
+		List<String> inParams = new ArrayList<String>();
+		Matcher m = inRegxPattern.matcher(task.getSql_content());
+		String temp=task.getSql_content();
+		int index = 0;
+		while(m.find())
+    	{
+			String paramName = m.group(1);
+			inParams.add(paramName.substring(1));
+			temp = temp.replace(paramName, String.format("({%d}) ", index++));
+    	}
+		method.setSql(temp);
 		method.setName(task.getMethod_name());
 		method.setPojoName(CommonUtils.normalizeVariable(WordUtils
 				.capitalize(task.getPojo_name())));
@@ -97,6 +116,7 @@ public class CSharpGenerator extends AbstractGenerator {
 			String[] splitedParam = StringUtils.split(param, ",");
 			CSharpParameterHost p = new CSharpParameterHost();
 			p.setName(splitedParam[0]);
+			p.setInParameter(inParams.contains(p.getName()));
 			p.setDbType(DbType.getDbTypeFromJdbcType(Integer
 					.valueOf(splitedParam[1])));
 			p.setType(DbType.getCSharpType(p.getDbType()));
@@ -330,7 +350,18 @@ public class CSharpGenerator extends AbstractGenerator {
 			CSharpMethodHost method = new CSharpMethodHost();
 			method.setCrud_type(builder.getCrud_type());
 			method.setName(builder.getMethod_name());
-			method.setSql(builder.getSql_content());
+			//method.setSql(builder.getSql_content());
+			
+			Matcher m = inRegxPattern.matcher(builder.getSql_content());
+			int index = 0;
+			String temp=builder.getSql_content();
+			while(m.find())
+	    	{
+				temp = temp.replace(m.group(1), String.format("({%d}) ", index));
+				index ++;
+	    	}
+			method.setSql(temp);
+			
 			List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
 			if (method.getCrud_type().equals("select")
 					|| method.getCrud_type().equals("delete")) {
@@ -423,16 +454,12 @@ public class CSharpGenerator extends AbstractGenerator {
 		return methods;
 	}
 
-	private List<Callable<Boolean>> generateTableDao(
-			final Queue<CSharpTableHost> tableHosts,
-			final VelocityContext context, final File mavenLikeDir,
+	private List<Callable<Boolean>> generateTableDao(final File mavenLikeDir,
 			final Progress progress) {
 
 		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
 
-		for (final CSharpTableHost host : tableHosts) {
-
-			context.put("host", host);
+		for (final CSharpTableHost host : _tableViewHosts) {
 
 			Callable<Boolean> worker = new Callable<Boolean>() {
 				@Override
@@ -440,6 +467,8 @@ public class CSharpGenerator extends AbstractGenerator {
 
 					progress.setOtherMessage("正在生成 " + host.getClassName());
 
+					VelocityContext context = GenUtils.buildDefaultVelocityContext();
+					context.put("host", host);
 					GenUtils.mergeVelocityContext(
 							context,
 							String.format("%s/Dao/%sDao.cs",
@@ -476,21 +505,20 @@ public class CSharpGenerator extends AbstractGenerator {
 		return results;
 	}
 
-	private List<Callable<Boolean>> generateSpDao(
-			final Queue<CSharpTableHost> spHosts,
-			final VelocityContext context, final File mavenLikeDir,
+	private List<Callable<Boolean>> generateSpDao(final File mavenLikeDir,
 			final Progress progress) {
 
 		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
 
-		for (final CSharpTableHost host : spHosts) {
-			context.put("host", host);
+		for (final CSharpTableHost host : _spHosts) {
 
 			Callable<Boolean> worker = new Callable<Boolean>() {
 				@Override
 				public Boolean call() {
 					progress.setOtherMessage("正在生成 " + host.getClassName());
 
+					VelocityContext context = GenUtils.buildDefaultVelocityContext();
+					context.put("host", host);
 					GenUtils.mergeVelocityContext(
 							context,
 							String.format("%s/Dao/%sDao.cs",
@@ -520,19 +548,19 @@ public class CSharpGenerator extends AbstractGenerator {
 		return results;
 	}
 
-	private List<Callable<Boolean>> generateFreeSqlDao(
-			final VelocityContext context, final File mavenLikeDir,
+	private List<Callable<Boolean>> generateFreeSqlDao(final File mavenLikeDir,
 			final Progress progress) {
 
 		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
 
 		for (final CSharpFreeSqlPojoHost host : _freeSqlPojoHosts.values()) {
-			context.put("host", host);
 
 			Callable<Boolean> worker = new Callable<Boolean>() {
 				@Override
 				public Boolean call() {
 					progress.setOtherMessage("正在生成 " + host.getClassName());
+					VelocityContext context = GenUtils.buildDefaultVelocityContext();
+					context.put("host", host);
 					GenUtils.mergeVelocityContext(context,
 							String.format("%s/Entity/%s.cs", mavenLikeDir
 									.getAbsolutePath(), CommonUtils
@@ -546,13 +574,13 @@ public class CSharpGenerator extends AbstractGenerator {
 		ProgressResource.addDoneFiles(progress, _freeSqlPojoHosts.size());
 
 		for (final CSharpFreeSqlHost host : _freeSqlHosts) {
-			context.put("host", host);
 
 			Callable<Boolean> worker = new Callable<Boolean>() {
 				@Override
 				public Boolean call() {
 					progress.setOtherMessage("正在生成 " + host.getClassName());
-
+					VelocityContext context = GenUtils.buildDefaultVelocityContext();
+					context.put("host", host);
 					GenUtils.mergeVelocityContext(context,
 							String.format("%s/Dao/%sDao.cs", mavenLikeDir
 									.getAbsolutePath(), CommonUtils
@@ -966,14 +994,14 @@ public class CSharpGenerator extends AbstractGenerator {
 				generatePath, id));
 
 		List<Callable<Boolean>> tableCallables = generateTableDao(
-				_tableViewHosts, context, csMavenLikeDir, progress);
+				 csMavenLikeDir, progress);
 		ProgressResource.addDoneFiles(progress, _tableViewHosts.size());
 
-		List<Callable<Boolean>> spCallables = generateSpDao(_spHosts, context,
+		List<Callable<Boolean>> spCallables = generateSpDao(
 				csMavenLikeDir, progress);
 		ProgressResource.addDoneFiles(progress, _spHosts.size());
 
-		List<Callable<Boolean>> freeCallables = generateFreeSqlDao(context,
+		List<Callable<Boolean>> freeCallables = generateFreeSqlDao(
 				csMavenLikeDir, progress);
 
 		List<Callable<Boolean>> allResults = ListUtils.union(

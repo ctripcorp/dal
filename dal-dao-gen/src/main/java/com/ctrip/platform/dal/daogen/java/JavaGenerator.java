@@ -44,19 +44,21 @@ public class JavaGenerator extends AbstractGenerator {
 	private Map<String, JavaMethodHost> _freeSqlPojoHosts = new ConcurrentHashMap<String, JavaMethodHost>();
 	private Queue<GenTaskBySqlBuilder> _sqlBuilders = new ConcurrentLinkedQueue<GenTaskBySqlBuilder>();
 
-	private List<Callable<Boolean>> generateTableDao(
-			final VelocityContext context, final File mavenLikeDir,
+	private List<Callable<Boolean>> generateTableDao( final File mavenLikeDir,
 			final Progress progress) {
 
 		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
 
 		for (final JavaTableHost host : _tableHosts) {
-			context.put("host", host);
 
 			Callable<Boolean> worker = new Callable<Boolean>() {
 
 				@Override
 				public Boolean call() throws Exception {
+					
+					VelocityContext context = GenUtils.buildDefaultVelocityContext();
+					context.put("host", host);
+					
 					GenUtils.mergeVelocityContext(
 							context,
 							String.format("%s/Dao/%sDao.java",
@@ -85,19 +87,20 @@ public class JavaGenerator extends AbstractGenerator {
 		return results;
 	}
 
-	private List<Callable<Boolean>> generateSpDao(
-			final VelocityContext context, final File mavenLikeDir,
+	private List<Callable<Boolean>> generateSpDao(final File mavenLikeDir,
 			final Progress progress) {
 
 		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
 
 		for (final SpDbHost host : _spHostMaps.values()) {
-			context.put("host", host);
 
 			Callable<Boolean> worker = new Callable<Boolean>() {
 
 				@Override
 				public Boolean call() throws Exception {
+					VelocityContext context = GenUtils.buildDefaultVelocityContext();
+					context.put("host", host);
+					
 					GenUtils.mergeVelocityContext(
 							context,
 							String.format("%s/Dao/%sSpDao.java",
@@ -128,18 +131,20 @@ public class JavaGenerator extends AbstractGenerator {
 
 	}
 
-	private List<Callable<Boolean>> generateViewDao( final VelocityContext context,
+	private List<Callable<Boolean>> generateViewDao( 
 			final File mavenLikeDir, final Progress progress) {
 
 		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
 
 		for (final ViewHost host : _viewHosts) {
-			context.put("host", host);
 
 			Callable<Boolean> worker = new Callable<Boolean>() {
 
 				@Override
 				public Boolean call() throws Exception {
+					VelocityContext context = GenUtils.buildDefaultVelocityContext();
+					context.put("host", host);
+					
 					GenUtils.mergeVelocityContext(
 							context,
 							String.format("%s/Dao/%sDao.java",
@@ -167,19 +172,20 @@ public class JavaGenerator extends AbstractGenerator {
 		return results;
 	}
 
-	private List<Callable<Boolean>> generateFreeSqlDao(
-			final VelocityContext context, final File mavenLikeDir,
+	private List<Callable<Boolean>> generateFreeSqlDao(final File mavenLikeDir,
 			final Progress progress) {
 
 		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
 
 		for (final JavaMethodHost host : _freeSqlPojoHosts.values()) {
-			context.put("host", host);
+		
 
 			Callable<Boolean> worker = new Callable<Boolean>() {
 
 				@Override
 				public Boolean call() throws Exception {
+					VelocityContext context = GenUtils.buildDefaultVelocityContext();
+					context.put("host", host);
 					GenUtils.mergeVelocityContext(
 							context,
 							String.format("%s/Entity/%s.java",
@@ -193,12 +199,13 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 
 		for (final FreeSqlHost host : _freeSqlHosts) {
-			context.put("host", host);
-
 			Callable<Boolean> worker = new Callable<Boolean>() {
 
 				@Override
 				public Boolean call() throws Exception {
+					VelocityContext context = GenUtils.buildDefaultVelocityContext();
+					context.put("host", host);
+					
 					GenUtils.mergeVelocityContext(
 							context,
 							String.format("%s/Dao/%sDao.java",
@@ -864,15 +871,15 @@ public class JavaGenerator extends AbstractGenerator {
 				id));
 
 		List<Callable<Boolean>> tableCallables = generateTableDao(
-				context, mavenLikeDir, progress);
+				 mavenLikeDir, progress);
 
 		List<Callable<Boolean>> viewCallables = generateViewDao(
-				context, mavenLikeDir, progress);
+				 mavenLikeDir, progress);
 
 		List<Callable<Boolean>> spCallables = generateSpDao(
-				context, mavenLikeDir, progress);
+				 mavenLikeDir, progress);
 
-		List<Callable<Boolean>> freeCallables = generateFreeSqlDao(context,
+		List<Callable<Boolean>> freeCallables = generateFreeSqlDao(
 				mavenLikeDir, progress);
 
 		List<Callable<Boolean>> allResults = ListUtils.union(ListUtils.union(

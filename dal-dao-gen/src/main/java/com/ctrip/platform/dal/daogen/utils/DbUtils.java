@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
@@ -33,6 +35,8 @@ import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 public class DbUtils {
 	private static Logger log;
 	private static List<Integer> validMode;
+	private static String regEx = null;
+	private static Pattern inRegxPattern = null;
 
 	static {
 		log = Logger.getLogger(DbUtils.class);
@@ -40,6 +44,8 @@ public class DbUtils {
 		validMode.add(DatabaseMetaData.procedureColumnIn);
 		validMode.add(DatabaseMetaData.procedureColumnInOut);
 		validMode.add(DatabaseMetaData.procedureColumnOut);
+		 regEx="in\\s(@\\w+)";
+		 inRegxPattern = Pattern.compile(regEx, java.util.regex.Pattern.CASE_INSENSITIVE);
 	}
 
 	public static boolean tableExists(String dbName, String tableName) {
@@ -653,7 +659,16 @@ public class DbUtils {
 			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
 					dbName);
 
-			String replacedSql = sql.replaceAll("[@:]\\w+", "?");
+			
+			
+			Matcher m = inRegxPattern.matcher(sql);
+			String temp=sql;
+			while(m.find())
+	    	{
+				temp = temp.replace(m.group(1), String.format("(?) "));
+	    	}
+			
+			String replacedSql = temp.replaceAll("[@:]\\w+", "?");
 
 			connection = ds.getConnection();
 

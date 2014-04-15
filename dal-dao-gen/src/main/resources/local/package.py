@@ -34,14 +34,17 @@ def build(args):
 
 	src_conf_properties = os.path.join(working_dir, "src/main/resources/local/conf.properties")
 	src_jdbc_properties = os.path.join(working_dir, "src/main/resources/local/jdbc.properties")
+	src_log4j = os.path.join(working_dir, "src/main/resources/local/log4j.xml")
 	src_web_xml = os.path.join(working_dir, "src/main/webapp/WEB-INF/web.xml")
 	try:
 		shutil.copy2(src_conf_properties, os.path.join(working_dir, "conf.properties"))
 		shutil.copy2(src_jdbc_properties, os.path.join(working_dir, "jdbc.properties"))
+		shutil.copy2(src_log4j, os.path.join(working_dir, "log4j.xml"))
 		shutil.copy2(src_web_xml, os.path.join(working_dir, "web.xml"))
 
 		shutil.copy2(os.path.join(os.path.dirname(src_conf_properties), "conf.properties.pub"), src_conf_properties)
 		shutil.copy2(os.path.join(os.path.dirname(src_jdbc_properties), "jdbc.properties.pub"), src_jdbc_properties)
+		shutil.copy2(os.path.join(os.path.dirname(src_log4j), "log4j.xml"), src_log4j)
 		shutil.copy2(os.path.join(os.path.dirname(src_web_xml), "web.xml.pub"), src_web_xml)
 		os.chdir(working_dir)
 		p = subprocess.Popen("mvn install",shell=True)
@@ -49,6 +52,7 @@ def build(args):
 
 		shutil.copy2(os.path.join(working_dir, "conf.properties"),src_conf_properties)
 		shutil.copy2(os.path.join(working_dir, "jdbc.properties"),src_jdbc_properties)
+		shutil.copy2(os.path.join(working_dir, "log4j.xml"),src_log4j)
 		shutil.copy2(os.path.join(working_dir, "web.xml"),src_web_xml)
 	except Exception,e:
 		print e

@@ -211,6 +211,43 @@ public class DalDirectClient implements DalClient {
 		return doInConnection(action, hints);
 	}
 	
+
+	@Override
+	public int[] batchCall(String callString,
+			StatementParameters[] parametersList, final DalHints hints)
+			throws SQLException {
+		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
+			@Override
+			int[] execute() throws Exception {
+				List<StatementParameter> resultParameters = new ArrayList<StatementParameter>();
+				List<StatementParameter> callParameters = new ArrayList<StatementParameter>();
+				for (StatementParameter parameter : parameters.values()) {
+					if (parameter.isResultsParameter()) {
+						resultParameters.add(parameter);
+					} else 
+					if(parameter.isOutParameter()){
+						callParameters.add(parameter);
+					}
+				}
+
+				conn = getConnection(hints);
+				
+				callableStatement = createCallableStatement(conn, callString, parameters, hints);
+//				boolean retVal = callableStatement.execute();
+//				int updateCount = callableStatement.getUpdateCount();
+//				Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
+//				if (retVal || updateCount != -1) {
+//					returnedResults.putAll(extractReturnedResults(callableStatement, resultParameters, updateCount, hints));
+//				}
+//				returnedResults.putAll(extractOutputParameters(callableStatement, callParameters));
+				return callableStatement.executeBatch();
+			}
+		};
+//		action.populateSp(callString, parameters);
+		
+		return doInConnection(action, hints);
+	}
+	
 	private Map<String, Object> extractReturnedResults(CallableStatement statement, List<StatementParameter> resultParameters, int updateCount, DalHints hints) throws SQLException {
 
 		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();

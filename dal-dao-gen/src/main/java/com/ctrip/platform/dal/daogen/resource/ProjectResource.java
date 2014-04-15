@@ -15,6 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
@@ -38,6 +39,8 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 @Path("project")
 public class ProjectResource {
 
+	private static Logger log = Logger.getLogger(ProjectResource.class);
+	
 	@GET
 	@Path("users")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -169,6 +172,8 @@ public class ProjectResource {
 				.getAttributes().get("employee").toString();
 		Progress progress = ProgressResource.getProgress(userNo, id,random);
 		try {
+			log.info(String.format("begain generate project: [id=%s; regen=%s; language=%s]",
+					id, regen, language));
 			if (language.equals("java"))
 			{
 				//JavaGenerator.getInstance().generateCode(id, regen, progress);
@@ -178,10 +183,11 @@ public class ProjectResource {
 				new CSharpGenerator().generate(id, regen, progress);
 			}
 			status = Status.OK;
+			log.info(String.format("generate project[%s] completed.", id));
 		} catch (Exception e) {
 			status = Status.ERROR;
 			status.setInfo(e.getMessage());
-			e.printStackTrace();
+			log.error(String.format("generate project[%s] failed.", id), e);
 		} finally{
 			progress.setStatus(ProgressResource.FINISH);
 		}

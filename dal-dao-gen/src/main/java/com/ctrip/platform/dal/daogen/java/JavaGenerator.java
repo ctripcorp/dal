@@ -29,6 +29,7 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 
@@ -397,8 +398,7 @@ public class JavaGenerator extends AbstractGenerator {
 				for (String condition : conditions) {
 					String[] tokens = StringUtils.split(condition, ",");
 					String name = tokens[0];
-					int type = tokens.length >= 2 ? Integer.parseInt(tokens[1])
-							: -1;
+					int type = tokens.length >= 2 ? CommonUtils.tryParse(tokens[1], -1) : -1;
 					String alias = tokens.length >= 3 ? tokens[2] : "";
 					for (JavaParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
@@ -456,8 +456,7 @@ public class JavaGenerator extends AbstractGenerator {
 				for (String condition : conditions) {
 					String[] tokens = StringUtils.split(condition, ",");
 					String name = tokens[0];
-					int type = tokens.length >= 2 ? Integer.parseInt(tokens[1])
-							: -1;
+					int type = tokens.length >= 2 ? CommonUtils.tryParse(tokens[1], -1) : -1;
 					String alias = tokens.length >= 3 ? tokens[2] : "";
 					for (JavaParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {

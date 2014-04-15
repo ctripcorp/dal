@@ -13,6 +13,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -30,9 +31,11 @@ import com.ctrip.platform.dal.daogen.java.JavaParameterHost;
 import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 
 public class DbUtils {
+	private static Logger log;
 	private static List<Integer> validMode;
 
 	static {
+		log = Logger.getLogger(DbUtils.class);
 		validMode = new ArrayList<Integer>();
 		validMode.add(DatabaseMetaData.procedureColumnIn);
 		validMode.add(DatabaseMetaData.procedureColumnInOut);
@@ -77,9 +80,11 @@ public class DbUtils {
 				result = rs.next();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.error(String.format("get table exists error: [dbName=%s;tableName=%s]", 
+					dbName, tableName), e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(String.format("get table exists error: [dbName=%s;tableName=%s]", 
+					dbName, tableName), e);
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
@@ -135,7 +140,8 @@ public class DbUtils {
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.error(String.format("get all table names error: [dbName=%s]", 
+					dbName), e);
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
@@ -180,9 +186,11 @@ public class DbUtils {
 				result = rs.next();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.error(String.format("get view exists error: [dbName=%s;viewName=%s]", 
+					dbName, viewName), e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(String.format("get view exists error: [dbName=%s;viewName=%s]", 
+					dbName, viewName), e);
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
@@ -238,7 +246,8 @@ public class DbUtils {
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.error(String.format("get all view names error: [dbName=%s]", 
+					dbName), e);
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
@@ -280,8 +289,9 @@ public class DbUtils {
 							}
 						}).size() > 0;
 			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
+		} catch (Exception e) {
+			log.error(String.format("get sp exists error: [dbName=%s;spName=%s]", 
+					dbName, sp.getName()), e);
 		} finally {
 			JdbcUtils.closeConnection(connection);
 		}
@@ -332,7 +342,8 @@ public class DbUtils {
 						});
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.error(String.format("get all sp names error: [dbName=%s]", 
+					dbName), e);
 		} finally {
 			JdbcUtils.closeConnection(connection);
 		}
@@ -425,10 +436,12 @@ public class DbUtils {
 				}
 			}
 			return parameters;
-		} catch (SQLException e1) {
-			e1.printStackTrace();
+		} catch (SQLException e) {
+			log.error(String.format("get sp params error: [dbName=%s;spName=%s;language=%s]", 
+					dbName,sp.getName(), language.name()), e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(String.format("get sp params error: [dbName=%s;spName=%s;language=%s]", 
+					dbName,sp.getName(), language.name()), e);
 		} finally {
 			JdbcUtils.closeConnection(connection);
 		}
@@ -461,9 +474,11 @@ public class DbUtils {
 				primaryKeys.add(primaryKeyRs.getString("COLUMN_NAME"));
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.error(String.format("get primary key names error: [dbName=%s;tableName=%s]", 
+					dbName, tableName), e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(String.format("get primary key names error: [dbName=%s;tableName=%s]", 
+					dbName, tableName), e);
 		} finally {
 			JdbcUtils.closeResultSet(primaryKeyRs);
 			JdbcUtils.closeConnection(connection);
@@ -547,9 +562,11 @@ public class DbUtils {
 
 			return allColumns;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.error(String.format("get all column names error: [dbName=%s;tableName=%s;language=%s]", 
+					dbName, tableName, language), e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(String.format("get all column names error: [dbName=%s;tableName=%s;language=%s]", 
+					dbName, tableName, language), e);
 		} finally {
 			JdbcUtils.closeResultSet(allColumnsRs);
 			JdbcUtils.closeConnection(connection);
@@ -604,9 +621,11 @@ public class DbUtils {
 				}	
 			});					
 		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch(Exception ex){
-			ex.printStackTrace();
+			log.error(String.format("get sql-type to java-type maper error: [dbName=%s;tableVeiwName=%s]",
+					dbName, tableViewName), e);
+		} catch(Exception e){
+			log.error(String.format("get sql-type to java-type maper error: [dbName=%s;tableVeiwName=%s]",
+					dbName, tableViewName), e);
 		}
 		finally {
 			JdbcUtils.closeResultSet(rs);
@@ -702,9 +721,11 @@ public class DbUtils {
 			//return rs.getMetaData();
 
 		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (Throwable e) {
-			e.printStackTrace();
+			log.error(String.format("test query sql error: [dbName=%s;sql=%s;language=%s]", 
+					dbName, sql, language), e);
+		} catch (Exception e) {
+			log.error(String.format("test query sql error: [dbName=%s;sql=%s;language=%s]", 
+					dbName, sql, language), e);
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
@@ -757,7 +778,7 @@ public class DbUtils {
 				Consts.databaseType.put(dbName, dbType);
 
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				log.error(String.format("get db type error: [dbName=%s]", dbName), ex);
 			} finally {
 				JdbcUtils.closeConnection(connection);
 			}

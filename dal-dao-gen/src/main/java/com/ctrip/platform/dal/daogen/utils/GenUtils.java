@@ -5,11 +5,18 @@ import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
+import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
 public final class GenUtils {
-
+	
+	private static Logger log;
+	
+	static{
+		log = Logger.getLogger(GenUtils.class);
+	}
+	
 	/**
 	 * 组建最基本的VelocityContext
 	 * @return
@@ -36,7 +43,8 @@ public final class GenUtils {
 			daoWriter = new FileWriter(resultFilePath);
 			Velocity.mergeTemplate(templateFile, "UTF-8", context, daoWriter);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(String.format("merge velocity context error: [context=%s;resultFilePath=%s;templateFile=%s]", 
+					CommonUtils.toJson(context.get("host")), resultFilePath, templateFile), e);
 			return false;
 		} finally {
 			JavaIOUtils.closeWriter(daoWriter);

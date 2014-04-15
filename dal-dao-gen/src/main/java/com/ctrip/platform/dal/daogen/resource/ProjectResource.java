@@ -171,10 +171,11 @@ public class ProjectResource {
 		try {
 			if (language.equals("java"))
 			{
-				JavaGenerator.getInstance().generateCode(id, regen, progress);
+				//JavaGenerator.getInstance().generateCode(id, regen, progress);
+				new JavaGenerator().generate(id, regen, progress);
 			}
 			else if (language.equals("cs")){
-				CSharpGenerator.getInstance().generateCode(id, regen, progress);
+				new CSharpGenerator().generate(id, regen, progress);
 			}
 			status = Status.OK;
 		} catch (Exception e) {

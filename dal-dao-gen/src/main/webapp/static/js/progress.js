@@ -12,10 +12,8 @@
 
     Progress.progressStatus = undefined;
 
-    Progress.random = undefined;
-
     Progress.prototype.start = function (el,random) {
-        $(el).modal();
+        $(el).modal({"backdrop": "static"});
         Progress.random = random;
         poll();
     };

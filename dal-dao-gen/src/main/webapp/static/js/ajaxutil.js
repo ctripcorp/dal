@@ -72,7 +72,7 @@
                         w2ui["grid_toolbar"].click('refreshDAO', null);
                         if ($("#gen_on_save").is(":checked")) {
                             //window.ajaxutil.generate_code($("#gen_language").val());
-                            $("#generateCode").modal();
+                            $("#generateCode").modal({"backdrop": "static"});
                         }
                     } else {
                         alert(data.info);
@@ -112,7 +112,7 @@
                                 w2ui["grid_toolbar"].click('refreshDAO', null);
                                 if ($("#gen_on_save").is(":checked")) {
                                     //window.ajaxutil.generate_code($("#gen_language").val());
-                                    $("#generateCode").modal();
+                                    $("#generateCode").modal({"backdrop": "static"});
                                 }
                             } else {
                                 alert(data.info);
@@ -139,7 +139,7 @@
                     w2ui["grid_toolbar"].click('refreshDAO', null);
                     if ($("#gen_on_save").is(":checked")) {
                         //window.ajaxutil.generate_code($("#gen_language").val());
-                        $("#generateCode").modal();
+                        $("#generateCode").modal({"backdrop": "static"});
                     }
                 }).fail(function (data) {
                         alert("保存出错！");
@@ -248,7 +248,7 @@
                     progress.reportException("generate success return but not ok");
                 }
             }).fail(function (data) {
-                    alert("生成异常！");
+                    //alert("生成异常！");
                     progress.reportException("exception");
                 });
         }

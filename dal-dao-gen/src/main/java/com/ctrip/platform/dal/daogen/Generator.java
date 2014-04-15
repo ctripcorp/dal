@@ -9,11 +9,13 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 
 public interface Generator {
 	
-	public boolean generateCode(int projectId, boolean regenerate,Progress progress) throws Exception;
+	public boolean prepareDirectory(int projectId, boolean regenerate);
 	
-	public void generateByTableView(List<GenTaskByTableViewSp> tasks,Progress progress) throws Exception;
-	
-	public void generateByFreeSql(List<GenTaskByFreeSql> tasks,Progress progress) throws Exception;
+	public boolean prepareData(int projectId, boolean regenerate, Progress progress);
+
+	public boolean generateCode(int projectId, Progress progress);
+
+	public boolean clearResource();
 
 }
 

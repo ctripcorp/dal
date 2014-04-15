@@ -87,4 +87,15 @@ public interface DalClient {
 	 */
 	Map<String, ?> call(String callString, StatementParameters parameters,
 			DalHints hints) throws SQLException;
+
+	/**
+	 * Call stored procedure.
+	 * @param callString
+	 * @param parametersList
+	 * @param hints
+	 * return how many rows been affected for each of parameters
+	 * @throws SQLException
+	 */
+	int[] batchCall(String callString, StatementParameters[] parametersList,
+			DalHints hints) throws SQLException;
 }

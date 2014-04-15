@@ -648,7 +648,30 @@ public class JavaGenerator extends AbstractGenerator {
 
 	@Override
 	public boolean prepareDirectory(int projectId, boolean regenerate) {
-		// TODO Auto-generated method stub
+		File mavenLikeDir = new File(String.format("%s/%s/java", generatePath,
+				projectId));
+
+		try {
+			if (mavenLikeDir.exists() && this.regenerate)
+				FileUtils.forceDelete(mavenLikeDir);
+
+			File daoMavenLike = new File(mavenLikeDir, "Dao");
+			File entityMavenLike = new File(mavenLikeDir, "Entity");
+			File testMavenLike = new File(mavenLikeDir, "Test");
+
+			if (!daoMavenLike.exists()) {
+				FileUtils.forceMkdir(daoMavenLike);
+			}
+			if (!entityMavenLike.exists()) {
+				FileUtils.forceMkdir(entityMavenLike);
+			}
+			if (!testMavenLike.exists()) {
+				FileUtils.forceMkdir(testMavenLike);
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
 		return false;
 	}
 

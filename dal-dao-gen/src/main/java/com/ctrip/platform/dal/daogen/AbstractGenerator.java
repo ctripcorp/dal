@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -39,6 +41,8 @@ public abstract class AbstractGenerator implements Generator {
 	protected static DaoByTableViewSp daoByTableViewSp;
 
 	protected static String generatePath;
+	
+	protected static ExecutorService executor = Executors.newFixedThreadPool(100);
 
 	protected String namespace;
 
@@ -77,6 +81,12 @@ public abstract class AbstractGenerator implements Generator {
 	}
 
 	public void generate(int projectId, boolean regenerate, Progress progress) {
+		
+		Project proj = daoOfProject.getProjectByID(projectId);
+
+		if (null != proj) {
+			namespace = proj.getNamespace();
+		}
 		
 		progress.setTotalFiles(4);
 		

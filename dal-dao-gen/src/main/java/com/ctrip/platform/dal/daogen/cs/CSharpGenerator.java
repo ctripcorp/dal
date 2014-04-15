@@ -14,8 +14,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.ListUtils;
@@ -35,15 +33,25 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.resource.ProgressResource;
-import com.ctrip.platform.dal.daogen.utils.CodeGeneratorCallback;
-import com.ctrip.platform.dal.daogen.utils.CodeGeneratorRunnable;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 
 public class CSharpGenerator extends AbstractGenerator {
 
-	private ExecutorService executor = Executors.newFixedThreadPool(100);
+	private Map<String, DatabaseHost> _dbHosts = new ConcurrentHashMap<String, DatabaseHost>();
+	private Queue<CSharpFreeSqlHost> _freeSqlHosts = new ConcurrentLinkedQueue<CSharpFreeSqlHost>();
+	private Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts = new ConcurrentHashMap<String, CSharpFreeSqlPojoHost>();
+	private Set<String> _freeDaos = Collections
+			.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+	private Set<String> _tableDaos = Collections
+			.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+	private Set<String> _spDaos = Collections
+			.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+
+	private Queue<CSharpTableHost> _tableViewHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
+	private Queue<CSharpTableHost> _spHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
+	private Queue<GenTaskBySqlBuilder> _sqlBuilders = new ConcurrentLinkedQueue<GenTaskBySqlBuilder>();
 
 	public void generateByFreeSql(List<GenTaskByFreeSql> tasks,
 			Progress progress) {
@@ -130,7 +138,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		freeSqlHost.setTableName("");
 		freeSqlHost.setClassName(CommonUtils.normalizeVariable(WordUtils
 				.capitalize(task.getPojo_name())));
-		freeSqlHost.setNameSpace(super.namespace);
+		freeSqlHost.setNameSpace(namespace);
 
 		return freeSqlHost;
 	}
@@ -172,7 +180,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		CSharpTableHost tableHost = new CSharpTableHost();
 		tableHost.setExtraMethods(methods);
-		tableHost.setNameSpace(super.namespace);
+		tableHost.setNameSpace(namespace);
 		tableHost.setDatabaseCategory(dbCategory);
 		tableHost.setDbSetName(tableViewSp.getDb_name());
 		tableHost.setTableName(table);
@@ -241,7 +249,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		}
 
 		CSharpTableHost tableHost = new CSharpTableHost();
-		tableHost.setNameSpace(super.namespace);
+		tableHost.setNameSpace(namespace);
 		tableHost.setDatabaseCategory(dbCategory);
 		tableHost.setDbSetName(tableViewSp.getDb_name());
 		tableHost.setClassName(getPojoClassName(tableViewSp.getPrefix(),
@@ -270,7 +278,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		}
 
 		CSharpTableHost tableHost = new CSharpTableHost();
-		tableHost.setNameSpace(super.namespace);
+		tableHost.setNameSpace(namespace);
 		tableHost.setDatabaseCategory(dbCategory);
 		tableHost.setDbSetName(tableViewSp.getDb_name());
 		tableHost.setTableName(view);
@@ -398,139 +406,157 @@ public class CSharpGenerator extends AbstractGenerator {
 		return methods;
 	}
 
-	private void generateTableDao(final Queue<CSharpTableHost> tableHosts,
+	private List<Callable<Boolean>> generateTableDao(
+			final Queue<CSharpTableHost> tableHosts,
 			final VelocityContext context, final File mavenLikeDir,
 			final Progress progress) {
 
-		Runnable worker = new CodeGeneratorRunnable(
-				new CodeGeneratorCallback() {
-					@Override
-					public void doWork() {
-						for (final CSharpTableHost host : tableHosts) {
-							context.put("host", host);
+		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
 
-							progress.setOtherMessage("正在生成 "
-									+ host.getClassName());
+		for (final CSharpTableHost host : tableHosts) {
 
-							GenUtils.mergeVelocityContext(context, String
-									.format("%s/Dao/%sDao.cs",
-											mavenLikeDir.getAbsolutePath(),
-											host.getClassName()),
-									"templates/DAO.cs.tpl");
+			context.put("host", host);
 
-							GenUtils.mergeVelocityContext(context, String
-									.format("%s/Entity/%s.cs",
-											mavenLikeDir.getAbsolutePath(),
-											host.getClassName()),
-									"templates/Pojo.cs.tpl");
+			Callable<Boolean> worker = new Callable<Boolean>() {
+				@Override
+				public Boolean call() {
 
-							GenUtils.mergeVelocityContext(context, String
-									.format("%s/IDao/I%sDao.cs",
-											mavenLikeDir.getAbsolutePath(),
-											host.getClassName()),
-									"templates/IDAO.cs.tpl");
+					progress.setOtherMessage("正在生成 " + host.getClassName());
 
-							GenUtils.mergeVelocityContext(context, String
-									.format("%s/Test/%sTest.cs",
-											mavenLikeDir.getAbsolutePath(),
-											host.getClassName()),
-									"templates/DAOTest.cs.tpl");
-						}
-					}
-				});
-		executor.execute(worker);
+					GenUtils.mergeVelocityContext(
+							context,
+							String.format("%s/Dao/%sDao.cs",
+									mavenLikeDir.getAbsolutePath(),
+									host.getClassName()),
+							"templates/DAO.cs.tpl");
 
+					GenUtils.mergeVelocityContext(
+							context,
+							String.format("%s/Entity/%s.cs",
+									mavenLikeDir.getAbsolutePath(),
+									host.getClassName()),
+							"templates/Pojo.cs.tpl");
+
+					GenUtils.mergeVelocityContext(
+							context,
+							String.format("%s/IDao/I%sDao.cs",
+									mavenLikeDir.getAbsolutePath(),
+									host.getClassName()),
+							"templates/IDAO.cs.tpl");
+
+					GenUtils.mergeVelocityContext(
+							context,
+							String.format("%s/Test/%sTest.cs",
+									mavenLikeDir.getAbsolutePath(),
+									host.getClassName()),
+							"templates/DAOTest.cs.tpl");
+					return true;
+				}
+			};
+			results.add(worker);
+		}
+
+		return results;
 	}
 
-	private void generateSpDao(final Queue<CSharpTableHost> spHosts,
+	private List<Callable<Boolean>> generateSpDao(
+			final Queue<CSharpTableHost> spHosts,
 			final VelocityContext context, final File mavenLikeDir,
 			final Progress progress) {
+
+		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+
 		for (final CSharpTableHost host : spHosts) {
 			context.put("host", host);
 
-			Runnable worker = new CodeGeneratorRunnable(
-					new CodeGeneratorCallback() {
-						@Override
-						public void doWork() {
-							progress.setOtherMessage("正在生成 "
-									+ host.getClassName());
+			Callable<Boolean> worker = new Callable<Boolean>() {
+				@Override
+				public Boolean call() {
+					progress.setOtherMessage("正在生成 " + host.getClassName());
 
-							GenUtils.mergeVelocityContext(context, String
-									.format("%s/Dao/%sDao.cs",
-											mavenLikeDir.getAbsolutePath(),
-											host.getClassName()),
-									"templates/DAOBySp.cs.tpl");
+					GenUtils.mergeVelocityContext(
+							context,
+							String.format("%s/Dao/%sDao.cs",
+									mavenLikeDir.getAbsolutePath(),
+									host.getClassName()),
+							"templates/DAOBySp.cs.tpl");
 
-							GenUtils.mergeVelocityContext(context, String
-									.format("%s/Entity/%s.cs",
-											mavenLikeDir.getAbsolutePath(),
-											host.getClassName()),
-									"templates/PojoBySp.cs.tpl");
+					GenUtils.mergeVelocityContext(
+							context,
+							String.format("%s/Entity/%s.cs",
+									mavenLikeDir.getAbsolutePath(),
+									host.getClassName()),
+							"templates/PojoBySp.cs.tpl");
 
-							GenUtils.mergeVelocityContext(context, String
-									.format("%s/Test/%sTest.cs",
-											mavenLikeDir.getAbsolutePath(),
-											host.getClassName()),
-									"templates/SpTest.cs.tpl");
-						}
-					});
-			executor.execute(worker);
+					GenUtils.mergeVelocityContext(
+							context,
+							String.format("%s/Test/%sTest.cs",
+									mavenLikeDir.getAbsolutePath(),
+									host.getClassName()),
+							"templates/SpTest.cs.tpl");
+					return true;
+				}
+			};
+			results.add(worker);
 		}
+
+		return results;
 	}
 
-	private void generateFreeSqlDao(final VelocityContext context,
-			final File mavenLikeDir, final Progress progress) {
+	private List<Callable<Boolean>> generateFreeSqlDao(
+			final VelocityContext context, final File mavenLikeDir,
+			final Progress progress) {
+
+		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+
 		for (final CSharpFreeSqlPojoHost host : _freeSqlPojoHosts.values()) {
 			context.put("host", host);
 
-			Runnable worker = new CodeGeneratorRunnable(
-					new CodeGeneratorCallback() {
-						@Override
-						public void doWork() {
-							progress.setOtherMessage("正在生成 "
-									+ host.getClassName());
-							GenUtils.mergeVelocityContext(context, String
-									.format("%s/Entity/%s.cs", mavenLikeDir
-											.getAbsolutePath(), CommonUtils
-											.normalizeVariable(host
-													.getClassName())),
-									"templates/Pojo.cs.tpl");
-						}
-					});
-			executor.execute(worker);
+			Callable<Boolean> worker = new Callable<Boolean>() {
+				@Override
+				public Boolean call() {
+					progress.setOtherMessage("正在生成 " + host.getClassName());
+					GenUtils.mergeVelocityContext(context,
+							String.format("%s/Entity/%s.cs", mavenLikeDir
+									.getAbsolutePath(), CommonUtils
+									.normalizeVariable(host.getClassName())),
+							"templates/Pojo.cs.tpl");
+					return true;
+				}
+			};
+			results.add(worker);
 		}
 		ProgressResource.addDoneFiles(progress, _freeSqlPojoHosts.size());
 
 		for (final CSharpFreeSqlHost host : _freeSqlHosts) {
 			context.put("host", host);
 
-			Runnable worker = new CodeGeneratorRunnable(
-					new CodeGeneratorCallback() {
-						@Override
-						public void doWork() {
-							progress.setOtherMessage("正在生成 "
-									+ host.getClassName());
+			Callable<Boolean> worker = new Callable<Boolean>() {
+				@Override
+				public Boolean call() {
+					progress.setOtherMessage("正在生成 " + host.getClassName());
 
-							GenUtils.mergeVelocityContext(context, String
-									.format("%s/Dao/%sDao.cs", mavenLikeDir
-											.getAbsolutePath(), CommonUtils
-											.normalizeVariable(host
-													.getClassName())),
-									"templates/FreeSqlDAO.cs.tpl");
+					GenUtils.mergeVelocityContext(context,
+							String.format("%s/Dao/%sDao.cs", mavenLikeDir
+									.getAbsolutePath(), CommonUtils
+									.normalizeVariable(host.getClassName())),
+							"templates/FreeSqlDAO.cs.tpl");
 
-							GenUtils.mergeVelocityContext(context, String
-									.format("%s/Test/%sTest.cs", mavenLikeDir
-											.getAbsolutePath(), CommonUtils
-											.normalizeVariable(host
-													.getClassName())),
-									"templates/FreeSqlTest.cs.tpl");
-						}
-					});
-			executor.execute(worker);
+					GenUtils.mergeVelocityContext(context,
+							String.format("%s/Test/%sTest.cs", mavenLikeDir
+									.getAbsolutePath(), CommonUtils
+									.normalizeVariable(host.getClassName())),
+							"templates/FreeSqlTest.cs.tpl");
+					return true;
+				}
+			};
+			results.add(worker);
 
 		}
+
+		return results;
 	}
-	
+
 	/**
 	 * 生成C#的公共部分，如Dal.config，Program.cs以及DALFactory.cs
 	 */
@@ -547,8 +573,11 @@ public class CSharpGenerator extends AbstractGenerator {
 		context.put("tableHosts", _tableDaos);
 		context.put("spHosts", _spDaos);
 
-		GenUtils.mergeVelocityContext(context, String.format("%s/Dal.config",
-				csMavenLikeDir.getAbsolutePath()), "templates/Dal.config.tpl");
+		GenUtils.mergeVelocityContext(
+				context,
+				String.format("%s/Config/Dal.config",
+						csMavenLikeDir.getAbsolutePath()),
+				"templates/Dal.config.tpl");
 
 		GenUtils.mergeVelocityContext(
 				context,
@@ -556,20 +585,6 @@ public class CSharpGenerator extends AbstractGenerator {
 						csMavenLikeDir.getAbsolutePath()),
 				"templates/DalFactory.cs.tpl");
 	}
-
-	private Map<String, DatabaseHost> _dbHosts = new ConcurrentHashMap<String, DatabaseHost>();
-	private Queue<CSharpFreeSqlHost> _freeSqlHosts = new ConcurrentLinkedQueue<CSharpFreeSqlHost>();
-	private Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts = new ConcurrentHashMap<String, CSharpFreeSqlPojoHost>();
-	private Set<String> _freeDaos = Collections
-			.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-	private Set<String> _tableDaos = Collections
-			.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-	private Set<String> _spDaos = Collections
-			.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-
-	private Queue<CSharpTableHost> _tableViewHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
-	private Queue<CSharpTableHost> _spHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
-	private Queue<GenTaskBySqlBuilder> _sqlBuilders = new ConcurrentLinkedQueue<GenTaskBySqlBuilder>();
 
 	private void prepareDbFromFreeSql(List<GenTaskByFreeSql> freeSqls) {
 		for (GenTaskByFreeSql task : freeSqls) {
@@ -857,20 +872,21 @@ public class CSharpGenerator extends AbstractGenerator {
 		}
 		return results;
 	}
-	
+
 	@Override
 	public boolean prepareDirectory(int projectId, boolean regenerate) {
 		File mavenLikeDir = new File(String.format("%s/%s/cs", generatePath,
 				projectId));
 
 		try {
-			if (mavenLikeDir.exists() && this.regenerate)
+			if (mavenLikeDir.exists() && regenerate)
 				FileUtils.forceDelete(mavenLikeDir);
 
 			File idaoMavenLike = new File(mavenLikeDir, "IDao");
 			File daoMavenLike = new File(mavenLikeDir, "Dao");
 			File entityMavenLike = new File(mavenLikeDir, "Entity");
 			File testMavenLike = new File(mavenLikeDir, "Test");
+			File configMavenLike = new File(mavenLikeDir, "Config");
 
 			if (!idaoMavenLike.exists()) {
 				FileUtils.forceMkdir(idaoMavenLike);
@@ -883,6 +899,9 @@ public class CSharpGenerator extends AbstractGenerator {
 			}
 			if (!testMavenLike.exists()) {
 				FileUtils.forceMkdir(testMavenLike);
+			}
+			if (!configMavenLike.exists()) {
+				FileUtils.forceMkdir(configMavenLike);
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -929,22 +948,30 @@ public class CSharpGenerator extends AbstractGenerator {
 		final File csMavenLikeDir = new File(String.format("%s/%s/cs",
 				generatePath, id));
 
-		generateTableDao(_tableViewHosts, context, csMavenLikeDir, progress);
+		List<Callable<Boolean>> tableCallables = generateTableDao(
+				_tableViewHosts, context, csMavenLikeDir, progress);
 		ProgressResource.addDoneFiles(progress, _tableViewHosts.size());
 
-		generateSpDao(_spHosts, context, csMavenLikeDir, progress);
+		List<Callable<Boolean>> spCallables = generateSpDao(_spHosts, context,
+				csMavenLikeDir, progress);
 		ProgressResource.addDoneFiles(progress, _spHosts.size());
-		
-		generateFreeSqlDao(context, csMavenLikeDir, progress);
-		
+
+		List<Callable<Boolean>> freeCallables = generateFreeSqlDao(context,
+				csMavenLikeDir, progress);
+
+		List<Callable<Boolean>> allResults = ListUtils.union(
+				ListUtils.union(tableCallables, spCallables), freeCallables);
+
+		if (allResults.size() > 0) {
+			try {
+				executor.invokeAll(allResults);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
 		generateCommonCode(id, progress);
 
-		executor.shutdown();
-		try {
-			executor.awaitTermination(60 * 60, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		return false;
 	}
 

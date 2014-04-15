@@ -480,9 +480,7 @@ public class DbUtils {
 	 */
 	public static List<AbstractParameterHost> getAllColumnNames(String dbName,
 			String tableName, CurrentLanguage language) {
-		
-		
-		
+
 		Connection connection = null;
 		ResultSet allColumnsRs = null;
 		List<AbstractParameterHost> allColumns = new ArrayList<AbstractParameterHost>();
@@ -503,7 +501,13 @@ public class DbUtils {
 					int dataType = allColumnsRs.getInt("DATA_TYPE");
 					
 					//特殊处理
-					DbType dbType = (null != typeName && typeName.equalsIgnoreCase("year")) ? DbType.Int16 : DbType.getDbTypeFromJdbcType(dataType);
+					DbType dbType;
+					if(null != typeName && typeName.equalsIgnoreCase("year"))
+						dbType = DbType.Int16;
+					else if(null != typeName && typeName.equalsIgnoreCase("sql_variant"))
+						dbType = DbType.Object;
+					else
+						dbType =DbType.getDbTypeFromJdbcType(dataType);
 
 					host.setDbType(dbType);
 					//host.setName(CommonUtils.normalizeVariable(allColumnsRs.getString("COLUMN_NAME")));
@@ -515,8 +519,8 @@ public class DbUtils {
 					host.setValueType(Consts.CSharpValueTypes.contains(host
 							.getType()));
 					// 仅获取String类型的长度
-					// if (host.getType().equalsIgnoreCase("string"))
-					host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
+					 if (host.getType().equalsIgnoreCase("string"))
+						 host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
 
 					// COLUMN_SIZE
 

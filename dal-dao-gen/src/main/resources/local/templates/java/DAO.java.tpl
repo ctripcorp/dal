@@ -89,7 +89,7 @@ public class ${host.getPojoClassName()}Dao {
 	 * Query ${host.getPojoClassName()} with paging function
 	 * The pageSize and pageNo must be greater than zero.
 	**/
-	public List<${host.getPojoClassName()}> queryByPage(${host.getPojoClassName()} pk, int pageSize, int pageNo)  throws SQLException {
+	public List<${host.getPojoClassName()}> queryByPage(int pageSize, int pageNo)  throws SQLException {
 		if(pageNo < 1 || pageSize < 1) 
 			throw new SQLException("Illigal pagesize or pageNo, pls check");	
         StatementParameters parameters = new StatementParameters();
@@ -177,6 +177,16 @@ public class ${host.getPojoClassName()}Dao {
 		DalHints hints = new DalHints();
 		client.insert(hints, null, daoPojos);
 	}
+	
+	/**
+	 * SQL insert with batch mode
+	**/
+	public int[] batchInsert(${host.getPojoClassName()}...daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.length == 0)
+			return new int[0];
+		DalHints hints = new DalHints();
+		return client.batchInsert(hints, daoPojos);
+	}
 
 	/**
 	 * SQL insert with keyHolder
@@ -247,6 +257,16 @@ public class ${host.getPojoClassName()}Dao {
 			return;
 		DalHints hints = new DalHints();
 		client.delete(hints, daoPojos);
+	}
+	
+	/**
+	 * SQL delete with batch mode
+	**/
+	public int[] batchDelete(${host.getPojoClassName()}...daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.length <= 0)
+			return new int[0];
+		DalHints hints = new DalHints();
+		return client.batchDelete(hints, daoPojos);
 	}
 #end
 

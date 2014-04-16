@@ -29,7 +29,7 @@ public class ${host.getPojoClassName()}DaoTest {
 			
 			//Invoke the paging function
 			//Note that both the pageSize and the pageNumber must be greater than 1
-			List<${host.getPojoClassName()}> pojos = dao.queryByPage(pk, 100, 1);
+			List<${host.getPojoClassName()}> pojos = dao.queryByPage(100, 1);
 			
 			//Get all records
 			List<${host.getPojoClassName()}> all = dao.getAll();

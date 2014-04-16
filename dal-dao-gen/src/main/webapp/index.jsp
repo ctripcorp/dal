@@ -59,6 +59,9 @@
                   <a href="javascript:;" onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">文档</a>
                </li>
                <li>
+                  <a href="javascript:;" onclick="window.open('http://conf.ctripcorp.com/display/SysDev/web+code+gen+guide', '_blank');">使用说明</a>
+               </li>
+               <li>
                   <a href="mailto:R%26Dsysdev_dal@Ctrip.com">咨询</a>
                </li>
                <li class="dropdown user">

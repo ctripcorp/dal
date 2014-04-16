@@ -58,12 +58,10 @@ public class ${host.getPojoClassName()}Dao {
 	public ${host.getPojoClassName()} queryByPk(${host.getPkParameterDeclaration()})
 			throws SQLException {
 		DalHints hints = new DalHints();
-		${host.getPojoClassName()} pk = new ${host.getPojoClassName()}();
-			
+		${host.getPojoClassName()} pk = new ${host.getPojoClassName()}();		
 #foreach( $field in ${host.getPrimaryKeys()} )
 		pojo.set${field.getCapitalizedName()}(${field.getUncapitalizedName()});
 #end
-
 		return client.queryByPk(pk, hints);
 	}
 #end
@@ -79,26 +77,23 @@ public class ${host.getPojoClassName()}Dao {
 	/**
 	 * Get the records count
 	**/
-	public int count()  throws SQLException
+	public int count() throws SQLException
 	{
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
-		
+		DalHints hints = new DalHints();	
 		Number result = (Number)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
 		return result.intValue();
 	}
 	
 	/**
 	 * Query ${host.getPojoClassName()} with paging function
-	 * The pageSize and pageNo must be greater than zero, the pk parameter can be null for the whole table
+	 * The pageSize and pageNo must be greater than zero.
 	**/
 	public List<${host.getPojoClassName()}> queryByPage(${host.getPojoClassName()} pk, int pageSize, int pageNo)  throws SQLException {
 		if(pageNo < 1 || pageSize < 1) 
-			throw new SQLException("Illigal pagesize or pageNo, pls check");
-		
+			throw new SQLException("Illigal pagesize or pageNo, pls check");	
         StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		
 		String sql = "";
 #if($host.getDatabaseCategory().name() == "MySql" )
 		sql = String.format(PAGE_MYSQL_PATTERN, (pageNo - 1) * pageSize, pageSize);
@@ -124,14 +119,14 @@ public class ${host.getPojoClassName()}Dao {
 
 #if($host.getSpInsert().isExist())
 	/**
-	 * Operation type: insert by sp
+	 * SP Insert
 	**/
 	public int insert(${host.getPojoClassName()} daoPojo) throws SQLException {
+		if(null != daoPojo)
+			return 0;
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		
 		String callSql = prepareSpCall(INSERT_SP_NAME, parameters, parser.getFields(daoPojo));
-
 #foreach($p in $host.getSpInsert().getParameters())
 #if($p.getDirection().name() == "InputOutput")
 		parameters.registerInOut("${p.getName()}", ${p.getJavaTypeDisplay()}, daoPojo.get${p.getCapitalizedName()}());
@@ -140,7 +135,6 @@ public class ${host.getPojoClassName()}Dao {
 		parameters.registerOut("${p.getName()}", ${p.getJavaTypeDisplay()});
 #end
 #end
-
 		Map<String, ?> results = baseClient.call(callSql, parameters, hints);
 
 #foreach($p in $host.getSpInsert().getParameters())
@@ -151,24 +145,46 @@ public class ${host.getPojoClassName()}Dao {
 		${p.getClassDisplayName()} ${p.getUncapitalizedName()} = (${p.getClassDisplayName()})parameters.get("${p.getName()}", ParameterDirection.Output).getValue();
 #end
 #end
-		
 		return (Integer)results.get(RET_CODE);
 	}
-#{else}
+	
 	/**
-	 * Operation type: insert by sql
+	 * Batch insert without out parameters
+	 * Return how many rows been affected for each of parameters
+	**/
+	public int[] insert(${host.getPojoClassName()}...daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.length == 0)
+			return new int[0];
+		DalHints hints = new DalHints();
+		String callSql = client.buildCallSql(INSERT_SP_NAME, parser.getFields(daoPojos[0]).size());
+		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
+		for(int i = 0; i< daoPojos.length; i++){
+			StatementParameters parameters = new StatementParameters();
+			client.addParametersByName(parameters, parser.getFields(daoPojos[i]));
+			parametersList[i] = parameters;
+		}
+		return baseClient.batchCall(callSql, parametersList, hints);
+	}
+	
+#else
+	/**
+	 * SQL insert
 	 * Note: there must be one non-null field in daoPojo
 	**/
 	public void insert(${host.getPojoClassName()}...daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.length <= 0)
+			return;
 		DalHints hints = new DalHints();
 		client.insert(hints, null, daoPojos);
 	}
 
 	/**
-	 * Operation type: insert by sql with keyHolder
+	 * SQL insert with keyHolder
 	 * Note: there must be one non-null field in daoPojo
 	**/
 	public void insert(KeyHolder keyHolder, ${host.getPojoClassName()}...daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.length <= 0)
+			return;
 		DalHints hints = new DalHints();
 		client.insert(hints, keyHolder, daoPojos);
 	}
@@ -176,14 +192,14 @@ public class ${host.getPojoClassName()}Dao {
 
 #if($host.getSpDelete().isExist())
 	/**
-	 * Operation type: delete by sp
+	 * SP delete
 	**/
 	public int delete(${host.getPojoClassName()} daoPojo) throws SQLException {
+		if(null == daoPojo)
+			return 0;
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
-		
+		DalHints hints = new DalHints();	
 		String callSql = prepareSpCall(DELETE_SP_NAME, parameters, parser.getPrimaryKeys(daoPojo));
-
 #foreach($p in $host.getSpDelete().getParameters())
 #if($p.getDirection().name() == "InputOutput")
 		parameters.registerInOut("${p.getName()}", ${p.getJavaTypeDisplay()}, daoPojo.get${p.getCapitalizedName()}());
@@ -192,7 +208,6 @@ public class ${host.getPojoClassName()}Dao {
 		parameters.registerOut("${p.getName()}", ${p.getJavaTypeDisplay()});
 #end
 #end
-
 		Map<String, ?> results = baseClient.call(callSql, parameters, hints);
 #foreach($p in $host.getSpDelete().getParameters())
 #if($p.getDirection().name() == "InputOutput")
@@ -202,15 +217,34 @@ public class ${host.getPojoClassName()}Dao {
 		${p.getClassDisplayName()} ${p.getUncapitalizedName()} = (${p.getClassDisplayName()})parameters.get("${p.getName()}", ParameterDirection.Output).getValue();
 #end
 #end
-		
 		return (Integer)results.get(RET_CODE);
 	}
-#{else}
+	
 	/**
-	 * Operation type: delete by sql
+	 * Batch SP delete without out parameters
+	 * Return how many rows been affected for each of parameters
+	 */
+	public int[] delete(${host.getPojoClassName()}...daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.length == 0)
+			return new int[0];
+		DalHints hints = new DalHints();
+		String callSql = client.buildCallSql(DELETE_SP_NAME, parser.getFields(daoPojos[0]).size());
+		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
+		for(int i = 0; i< daoPojos.length; i++){
+			StatementParameters parameters = new StatementParameters();
+			client.addParametersByName(parameters, parser.getFields(daoPojos[i]));
+			parametersList[i] = parameters;
+		}
+		return baseClient.batchCall(callSql, parametersList, hints);
+	}
+#else
+	/**
+	 * SQL delete
 	 * Note: there must be one non-null field in daoPojo
 	**/
 	public void delete(${host.getPojoClassName()}...daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.length <= 0)
+			return;
 		DalHints hints = new DalHints();
 		client.delete(hints, daoPojos);
 	}
@@ -218,14 +252,14 @@ public class ${host.getPojoClassName()}Dao {
 
 #if($host.getSpUpdate().isExist())
 	/**
-	 * Operation type: update by sp
+	 * SP update
 	**/
 	public int update(${host.getPojoClassName()} daoPojo) throws SQLException {
+		if(null == daoPojo)
+			return 0;
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		
 		String callSql = prepareSpCall(UPDATE_SP_NAME, parameters, parser.getFields(daoPojo));
-
 #foreach($p in $host.getSpUpdate().getParameters())
 #if($p.getDirection().name() == "InputOutput")
 		parameters.registerInOut("${p.getName()}", ${p.getJavaTypeDisplay()}, daoPojo.get${p.getCapitalizedName()}());
@@ -234,7 +268,6 @@ public class ${host.getPojoClassName()}Dao {
 		parameters.registerOut("${p.getName()}", ${p.getJavaTypeDisplay()});
 #end
 #end
-
 		Map<String, ?> results = baseClient.call(callSql, parameters, hints);
 #foreach($p in $host.getSpUpdate().getParameters())
 #if($p.getDirection().name() == "InputOutput")
@@ -243,16 +276,35 @@ public class ${host.getPojoClassName()}Dao {
 #if($p.getDirection().name() == "Output")
 		${p.getClassDisplayName()} ${p.getUncapitalizedName()} = (${p.getClassDisplayName()})parameters.get("${p.getName()}", ParameterDirection.Output).getValue();
 #end
-#end
-		
+#end	
 		return (Integer)results.get(RET_CODE);
 	}
-#{else}
+	
 	/**
-	 * Operation type: update by sql
+	 * Batch SP update without out parameters
+	 * Return how many rows been affected for each of parameters
+	 */
+	public int[] update(${host.getPojoClassName()}... daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.length == 0)
+			return new int[0];
+		DalHints hints = new DalHints();
+		String callSql = client.buildCallSql(UPDATE_SP_NAME, parser.getFields(daoPojos[0]).size());
+		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
+		for(int i = 0; i< daoPojos.length; i++){
+			StatementParameters parameters = new StatementParameters();
+			client.addParametersByName(parameters, parser.getFields(daoPojos[i]));
+			parametersList[i] = parameters;
+		}
+		return baseClient.batchCall(callSql, parametersList, hints);
+	}
+#else
+	/**
+	 * SQL update
 	 * Note: there must be one non-null field in daoPojo
 	**/
 	public void update(${host.getPojoClassName()}...daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.length <= 0)
+			return;
 		DalHints hints = new DalHints();
 		client.update(hints, daoPojos);
 	}

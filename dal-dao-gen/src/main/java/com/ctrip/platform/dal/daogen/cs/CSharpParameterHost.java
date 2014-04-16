@@ -4,7 +4,7 @@ import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 
-public class CSharpParameterHost extends AbstractParameterHost {
+public class CSharpParameterHost extends AbstractParameterHost  implements Comparable<CSharpParameterHost> {
 	
 	private String name;
 	
@@ -148,6 +148,11 @@ public class CSharpParameterHost extends AbstractParameterHost {
 	@Override
 	public String toString() {
 		return this.getName().toString();
+	}
+
+	@Override
+	public int compareTo(CSharpParameterHost o) {
+		return this.getName().compareTo(o.getName());
 	}
 
 }

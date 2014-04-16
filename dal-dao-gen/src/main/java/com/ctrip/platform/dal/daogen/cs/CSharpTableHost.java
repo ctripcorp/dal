@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.cs;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
@@ -152,6 +153,7 @@ public class CSharpTableHost {
 
 	public void setColumns(List<CSharpParameterHost> columns) {
 		this.columns = columns;
+		Collections.sort(this.columns);
 	}
 	
 	public boolean isHasPagination() {

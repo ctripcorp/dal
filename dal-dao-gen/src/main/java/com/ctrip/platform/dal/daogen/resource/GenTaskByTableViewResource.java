@@ -59,7 +59,7 @@ public class GenTaskByTableViewResource {
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);
-				task.setVersion(version);
+				task.setVersion(daoByTableViewSp.getVersionById(id));
 				if (0 >= daoByTableViewSp.updateTask(task)) {
 					return Status.ERROR;
 				}

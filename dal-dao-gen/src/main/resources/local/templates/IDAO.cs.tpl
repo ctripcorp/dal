@@ -8,7 +8,14 @@ namespace ${host.getNameSpace()}.Interface.IDao
         {
 
 #if($host.isTable())
-               /// <summary>
+
+        /// <summary>
+        /// 手工映射，建议使用1.2.0.5版本以上的VisitDataReader
+        /// </summary>
+        /// <returns>结果</returns>
+        //${host.getClassName()} OrmByHand(string sql);
+
+        /// <summary>
         ///  插入${host.getClassName()}
         /// </summary>
         /// <param name="${WordUtils.uncapitalize(${host.getClassName()})}">${host.getClassName()}实体对象</param>
@@ -133,7 +140,7 @@ namespace ${host.getNameSpace()}.Interface.IDao
         /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
 #end
         /// <returns></returns>
-        #if($method.getCrud_type() == "select")IList<${host.getClassName()}>#{else}int#end ${method.getName()}(#foreach($p in $method.getParameters())${p.getType()} ${WordUtils.uncapitalize($p.getName())}#if($foreach.count != $method.getParameters().size()),#end#end);
+        #if($method.getCrud_type() == "select")IList<${host.getClassName()}>#{else}int#end ${method.getName()}(#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getAlias())}#if($foreach.count != $method.getParameters().size()),#end#end);
 #end
         }
 }

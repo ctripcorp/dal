@@ -60,7 +60,7 @@ public class GenTaskBySqlBuilderResource {
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);
-				task.setVersion(version);
+				task.setVersion(daoBySqlBuilder.getVersionById(id));
 				task.setSql_content(sql_content);
 				if (0 >= daoBySqlBuilder.updateTask(task)) {
 					Status status = Status.ERROR;

@@ -21,17 +21,20 @@ namespace ${host.getNameSpace()}.Test
             I${host.getClassName()}Dao ${WordUtils.uncapitalize($host.getClassName())}Dao = DALFactory.${host.getClassName()}Dao;
 
 #if($host.isTable())
-            int insertResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Insert${host.getClassName()}(new ${host.getClassName()}());
+
+            //${host.getClassName()} orm = ${WordUtils.uncapitalize($host.getClassName())}Dao.OrmByHand("select * from table");
+
+            //int insertResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Insert${host.getClassName()}(new ${host.getClassName()}());
 
 #if($host.getPrimaryKeys().size() == 0)
         /*由于没有PK，不能生成Update和Delete方法
 #end
-            int updateResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Update${host.getClassName()}(new ${host.getClassName()}());
+            //int updateResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Update${host.getClassName()}(new ${host.getClassName()}());
 
-            int deleteResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Delete${host.getClassName()}(new ${host.getClassName()}());
+            //int deleteResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Delete${host.getClassName()}(new ${host.getClassName()}());
 
 #if($host.isSpa())
-            int deleteByFieldResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Delete${host.getClassName()}(#foreach($p in $host.getPrimaryKeys())#if($p.isValueType())0#{else}null#if($foreach.count != $host.getPrimaryKeys().size()),#end#end#end);
+            //int deleteByFieldResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.Delete${host.getClassName()}(#foreach($p in $host.getPrimaryKeys())#if($p.isValueType())0#{else}null#if($foreach.count != $host.getPrimaryKeys().size()),#end#end#end);
 #end
 
 #if($host.getPrimaryKeys().size() == 0)
@@ -39,31 +42,31 @@ namespace ${host.getNameSpace()}.Test
 #end
 
 #if($host.getPrimaryKeys().size() >= 1)
-            var resultsByPk = ${WordUtils.uncapitalize($host.getClassName())}Dao.FindByPk(#foreach($p in $host.getPrimaryKeys())#if($p.isValueType())0#{else}null#if($foreach.count != $host.getPrimaryKeys().size()),#end#end#end);
+            //var resultsByPk = ${WordUtils.uncapitalize($host.getClassName())}Dao.FindByPk(#foreach($p in $host.getPrimaryKeys())#if($p.isValueType())0#{else}null#if($foreach.count != $host.getPrimaryKeys().size()),#end#end#end);
 #end
 #end
-            var entities = ${WordUtils.uncapitalize($host.getClassName())}Dao.GetAll();
+            //var entities = ${WordUtils.uncapitalize($host.getClassName())}Dao.GetAll();
 
-            long count = ${WordUtils.uncapitalize($host.getClassName())}Dao.Count();
+            //long count = ${WordUtils.uncapitalize($host.getClassName())}Dao.Count();
 
 #if($host.isHasPagination())
-            var listByPage = ${WordUtils.uncapitalize($host.getClassName())}Dao.GetListByPage(null, 0, 0);
+            //var listByPage = ${WordUtils.uncapitalize($host.getClassName())}Dao.GetListByPage(null, 0, 0);
 
 #end
 #if($host.isHasSptI())
-            int bulkInsertResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.BulkInsert${host.getClassName()}(new List<${host.getClassName()}>());
+            //int bulkInsertResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.BulkInsert${host.getClassName()}(new List<${host.getClassName()}>());
 
 #end
 #if($host.isHasSptU())
-            int bulkUpdateResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.BulkUpdate${host.getClassName()}(new List<${host.getClassName()}>());
+            //int bulkUpdateResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.BulkUpdate${host.getClassName()}(new List<${host.getClassName()}>());
 
 #end
 #if($host.isHasSptD())
-            int bulkDeleteResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.BulkDelete${host.getClassName()}(new List<${host.getClassName()}>());
+            //int bulkDeleteResult = ${WordUtils.uncapitalize($host.getClassName())}Dao.BulkDelete${host.getClassName()}(new List<${host.getClassName()}>());
 
 #end
 #foreach($method in $host.getExtraMethods())
-            var ${method.getName()}Result =  ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach($p in $method.getParameters())#if($p.isValueType())0#{else}null#if($foreach.count != $host.getPrimaryKeys().size()),#end#end#end);
+            //var ${method.getName()}Result =  ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach($p in $method.getParameters())#if($p.isValueType())0#{else}null#if($foreach.count != $host.getPrimaryKeys().size()),#end#end#end);
 
 #end
         }

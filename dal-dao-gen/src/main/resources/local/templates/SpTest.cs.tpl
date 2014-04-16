@@ -7,6 +7,7 @@ using System.Text;
 using Arch.Data;
 using Arch.Data.DbEngine;
 using ${host.getNameSpace()}.Entity.DataModel;
+using ${host.getNameSpace()}.Dao;
 
 namespace ${host.getNameSpace()}.Test
 {
@@ -14,7 +15,7 @@ namespace ${host.getNameSpace()}.Test
     {
         public static void Test()
         {
-            int exec${host.getClassName()}Result = DALFactory.${host.getClassName()}Dao.Exec${host.getClassName()}(new ${host.getClassName()}());
+            //int exec${host.getClassName()}Result = DALFactory.${host.getClassName()}Dao.Exec${host.getClassName()}(new ${host.getClassName()}());
         }
         
     }

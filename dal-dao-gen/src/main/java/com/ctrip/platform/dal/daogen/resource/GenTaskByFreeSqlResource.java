@@ -57,7 +57,7 @@ public class GenTaskByFreeSqlResource {
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);
-				task.setVersion(version);
+				task.setVersion(daoByFreeSql.getVersionById(id));
 				if (0 >= daoByFreeSql.updateTask(task)) {
 					Status status = Status.ERROR;
 					status.setInfo("更新出错，数据是否合法？或者已经有同名方法？");

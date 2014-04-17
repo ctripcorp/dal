@@ -122,7 +122,7 @@ public class ${host.getPojoClassName()}Dao {
 	 * SP Insert
 	**/
 	public int insert(${host.getPojoClassName()} daoPojo) throws SQLException {
-		if(null != daoPojo)
+		if(null == daoPojo)
 			return 0;
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();

@@ -38,7 +38,7 @@ public class LogEntry {
 
 	private String message;
     private String level;
-    private String title;
+    private String title = "Dal Fx";
     public String getTitle() {
 		return title;
 	}

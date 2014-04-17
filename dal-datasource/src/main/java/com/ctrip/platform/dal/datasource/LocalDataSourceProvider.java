@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.datasource;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,8 +19,13 @@ public class LocalDataSourceProvider extends
 			.getLog(LocalDataSourceProvider.class);
 	private static Object _lockObj = new Object();
 
-	Map<String, String[]> props = AllInOneConfigParser.newInstance()
-			.getDBAllInOneConfig();
+	Map<String, String[]> props = new HashMap<String, String[]>();
+	
+	public void initialize(String configFile){
+		AllInOneConfigParser.newInstance().initialize(configFile);
+		props = AllInOneConfigParser.newInstance()
+		.getDBAllInOneConfig();
+	}
 
 	public Set<String> keySet() {
 		synchronized (_lockObj) {

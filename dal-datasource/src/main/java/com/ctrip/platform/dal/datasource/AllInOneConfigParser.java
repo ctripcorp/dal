@@ -1,14 +1,14 @@
 package com.ctrip.platform.dal.datasource;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.sql.DataSource;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
@@ -43,14 +43,18 @@ public class AllInOneConfigParser {
 	private ConcurrentHashMap<String, String[]> props = new ConcurrentHashMap();
 
 	private AllInOneConfigParser() {
-		initDBAllInOneConfig();
+		//initDBAllInOneConfig();
 	}
 
 	public static AllInOneConfigParser newInstance() {
 		return allInOneConfigParser;
 	}
-	
-	public String refresh(String line){
+
+	public void initialize(String configFile) {
+		initDBAllInOneConfig(configFile);
+	}
+
+	public String refresh(String line) {
 		Matcher matcher = dbLinePattern.matcher(line);
 		if (matcher.find()) {
 			String key = matcher.group(1);
@@ -59,19 +63,24 @@ public class AllInOneConfigParser {
 					parseDotNetDBConnString(connStr));
 			return previous == null ? key : null;
 		}
-		
+
 		return null;
 	}
-	
-	public boolean remove(String key){
+
+	public boolean remove(String key) {
 		return this.props.remove(key) != null;
 	}
 
-	private void initDBAllInOneConfig() {
+	private void initDBAllInOneConfig(String configFilePath) {
 		BufferedReader br = null;
 		try {
-			br = new BufferedReader(new InputStreamReader(getClass()
-					.getResourceAsStream("/Database.config")));
+			if (null != configFilePath && new File(configFilePath).exists()) {
+				br = new BufferedReader(new InputStreamReader(
+						new FileInputStream(configFilePath)));
+			} else {
+				br = new BufferedReader(new InputStreamReader(getClass()
+						.getResourceAsStream("/Database.config")));
+			}
 
 			String line = br.readLine();
 			while (line != null) {
@@ -102,9 +111,9 @@ public class AllInOneConfigParser {
 		return this.props;
 	}
 
-	public void reloadAllInOneConfig() {
+	public void reloadAllInOneConfig(String configFile) {
 		this.props.clear();
-		initDBAllInOneConfig();
+		initDBAllInOneConfig(configFile);
 	}
 
 	private static String[] parseDotNetDBConnString(String connStr) {

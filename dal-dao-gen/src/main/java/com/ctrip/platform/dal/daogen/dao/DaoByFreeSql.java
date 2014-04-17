@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
@@ -33,6 +34,22 @@ public class DaoByFreeSql {
 						return GenTaskByFreeSql.visitRow(rs);
 					}
 				});
+	}
+	
+	public int getVersionById(int id) {
+		try {
+			return this.jdbcTemplate.queryForObject(
+					"select version from task_sql where id =?",
+					new Object[] { id }, new RowMapper<Integer>() {
+						public Integer mapRow(ResultSet rs, int rowNum)
+								throws SQLException {
+							return rs.getInt(1);
+						}
+					});
+		} catch (DataAccessException ex) {
+			ex.printStackTrace();
+			return -1;
+		}
 	}
 
 	public List<GenTaskByFreeSql> getTasksByProjectId(int iD) {

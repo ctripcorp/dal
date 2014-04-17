@@ -21,7 +21,7 @@ public class Logger {
 	public static final String TAG_METHOD = "Method";
 	public static final String TAG_SIZE = "Size";
 	public static final String TAG_STATUS = "Status";
-	
+	public static final String TITLE = "Dal Fx";
 	public static boolean encryptIn = true;
 	public static boolean encryptOut = true;
 	
@@ -92,15 +92,15 @@ public class Logger {
 		
 		switch (level) {
 			case DEBUG:
-				logger.debug(sbuffer.toString());
+				logger.debug(TITLE, sbuffer.toString());
 			case INFO: 
-				logger.info(sbuffer.toString());
+				logger.info(TITLE, sbuffer.toString());
 				break;
 			case ERROR:
-				logger.error(sbuffer.toString());
+				logger.error(TITLE, sbuffer.toString());
 				break;
 			case FATAL:
-				logger.fatal(sbuffer.toString());
+				logger.fatal(TITLE, sbuffer.toString());
 				break;
 		default:
 			break;

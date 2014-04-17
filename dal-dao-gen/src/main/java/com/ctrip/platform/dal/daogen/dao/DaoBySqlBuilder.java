@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
@@ -19,6 +20,22 @@ public class DaoBySqlBuilder {
 
 	public void setDataSource(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+	
+	public int getVersionById(int id) {
+		try {
+			return this.jdbcTemplate.queryForObject(
+					"select version from task_auto where id =?",
+					new Object[] { id }, new RowMapper<Integer>() {
+						public Integer mapRow(ResultSet rs, int rowNum)
+								throws SQLException {
+							return rs.getInt(1);
+						}
+					});
+		} catch (DataAccessException ex) {
+			ex.printStackTrace();
+			return -1;
+		}
 	}
 
 	public List<GenTaskBySqlBuilder> getAllTasks() {

@@ -119,7 +119,6 @@ public class DalDirectClient implements DalClient {
 		return doInConnection(action, hints);
 	}
 
-	// TODO wrap into command
 	@Override
 	public int[] batchUpdate(String[] sqls, final DalHints hints) throws SQLException {
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
@@ -135,7 +134,7 @@ public class DalDirectClient implements DalClient {
 		};
 		action.populate(sqls);
 		
-		return doInTransaction(action, hints);
+		return executeBatch(action, hints);
 	}
 
 	@Override
@@ -153,7 +152,7 @@ public class DalDirectClient implements DalClient {
 		};
 		action.populate(sql, parametersList);
 		
-		return doInTransaction(action, hints);
+		return executeBatch(action, hints);
 	}
 
 	@Override
@@ -229,7 +228,7 @@ public class DalDirectClient implements DalClient {
 		};
 		action.populateSp(callString, parametersList);
 		
-		return doInConnection(action, hints);
+		return executeBatch(action, hints);
 	}
 	
 	private Map<String, Object> extractReturnedResults(CallableStatement statement, List<StatementParameter> resultParameters, int updateCount, DalHints hints) throws SQLException {
@@ -280,6 +279,15 @@ public class DalDirectClient implements DalClient {
 			returnedResults.put(parameter.getName(), value);
 		}
 		return returnedResults;
+	}
+	
+	private <T> T executeBatch(ConnectionAction<T> action, DalHints hints) 
+			throws SQLException  {
+		if(hints.is(DalHintEnum.forceAutoCommit)){
+			return doInConnection(action, hints);
+		}else{
+			return doInTransaction(action, hints);
+		}
 	}
 	
 	private <T> T doInConnection(ConnectionAction<T> action, DalHints hints)

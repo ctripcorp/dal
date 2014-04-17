@@ -79,6 +79,14 @@ public interface DalClient {
 	 * @param hints
 	 * @throws SQLException
 	 */
+	void execute(DalCommand command, DalHints hints) throws SQLException;
+	
+	/**
+	 * Execute list of commands in the same transaction.
+	 * @param commands
+	 * @param hints
+	 * @throws SQLException
+	 */
 	void execute(List<DalCommand> commands, DalHints hints) throws SQLException;
 
 	/**

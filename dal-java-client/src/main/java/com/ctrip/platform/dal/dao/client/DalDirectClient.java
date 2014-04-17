@@ -156,6 +156,21 @@ public class DalDirectClient implements DalClient {
 	}
 
 	@Override
+	public void execute(DalCommand command, DalHints hints) throws SQLException {
+		final DalClient client = this;
+		ConnectionAction<?> action = new ConnectionAction<Object>() {
+			@Override
+			Object execute() throws Exception {
+				command.execute(client);
+				return null;
+			}
+		};
+		action.populate(command);
+		
+		doInTransaction(action, hints);
+	}
+	
+	@Override
 	public void execute(final List<DalCommand> commands, final DalHints hints)
 			throws SQLException {
 		final DalClient client = this;
@@ -392,6 +407,7 @@ public class DalDirectClient implements DalClient {
 		String[] sqls;
 		StatementParameters parameters;
 		StatementParameters[] parametersList;
+		DalCommand command;
 		List<DalCommand> commands;
 		Connection conn;
 		Statement statement;
@@ -414,6 +430,11 @@ public class DalDirectClient implements DalClient {
 			this.operation = DalEventEnum.BATCH_UPDATE_PARAM;
 			this.sql = sql;
 			this.parametersList = parametersList;
+		}
+		
+		void populate(DalCommand command) {
+			this.operation = DalEventEnum.EXECUTE;
+			this.command = command;
 		}
 		
 		void populate(List<DalCommand> commands) {

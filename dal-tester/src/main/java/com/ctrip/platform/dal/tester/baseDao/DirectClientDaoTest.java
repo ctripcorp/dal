@@ -251,6 +251,35 @@ public class DirectClientDaoTest {
 			final StatementParameters parameters = new StatementParameters();
 			final DalHints hints = new DalHints();
 
+			DalCommand command = new DalCommand() {
+				@Override
+				public boolean execute(DalClient client) throws SQLException {
+					String delete = "delete from Person where id > 2000";
+					String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00',1)";
+					String update = "update Person set name='abcde' where id > 2000";
+					String[] sqls = new String[]{delete, insert, insert, insert, update};
+
+					System.out.println(client.batchUpdate(sqls, hints));
+
+					client.update(delete, parameters, hints);
+					selectPerson(client);
+					return true;
+				}
+			};
+			
+			client.execute(command, hints);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void testCommands() {
+		try {
+			DalClient client = DalClientFactory.getClient("dao_test");
+			final StatementParameters parameters = new StatementParameters();
+			final DalHints hints = new DalHints();
+
 			List<DalCommand> cmds = new LinkedList<DalCommand>();
 			cmds.add(new DalCommand() {
 				@Override
@@ -523,7 +552,7 @@ public class DirectClientDaoTest {
 		DirectClientDaoTest test = new DirectClientDaoTest();
 		
 		test.testBatchSP();
-		
+		test.testCommand();
 //		test.testIsolationLevel();
 		
 //		test.testDuplicateColumnName();

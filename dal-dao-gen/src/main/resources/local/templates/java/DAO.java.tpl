@@ -147,7 +147,8 @@ public class ${host.getPojoClassName()}Dao {
 #end
 		return (Integer)results.get(RET_CODE);
 	}
-	
+
+#if($host.getSpInsert().getType=="sp3")
 	/**
 	 * Batch insert without out parameters
 	 * Return how many rows been affected for each of parameters
@@ -165,7 +166,8 @@ public class ${host.getPojoClassName()}Dao {
 		}
 		return baseClient.batchCall(callSql, parametersList, hints);
 	}
-	
+#end
+
 #else
 	/**
 	 * SQL insert
@@ -230,6 +232,7 @@ public class ${host.getPojoClassName()}Dao {
 		return (Integer)results.get(RET_CODE);
 	}
 	
+#if($host.getSpDelete() == "sp3")
 	/**
 	 * Batch SP delete without out parameters
 	 * Return how many rows been affected for each of parameters
@@ -247,6 +250,8 @@ public class ${host.getPojoClassName()}Dao {
 		}
 		return baseClient.batchCall(callSql, parametersList, hints);
 	}
+#end
+
 #else
 	/**
 	 * SQL delete
@@ -299,7 +304,7 @@ public class ${host.getPojoClassName()}Dao {
 #end	
 		return (Integer)results.get(RET_CODE);
 	}
-	
+#* The batch sp update has issue 
 	/**
 	 * Batch SP update without out parameters
 	 * Return how many rows been affected for each of parameters
@@ -317,6 +322,8 @@ public class ${host.getPojoClassName()}Dao {
 		}
 		return baseClient.batchCall(callSql, parametersList, hints);
 	}
+*#
+
 #else
 	/**
 	 * SQL update

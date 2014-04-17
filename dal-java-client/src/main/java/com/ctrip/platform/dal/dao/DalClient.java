@@ -74,7 +74,7 @@ public interface DalClient {
 			DalHints hints) throws SQLException;
 
 	/**
-	 * Execute list of commands in the same transaction.
+	 * Execute customized command in the transaction.
 	 * @param commands
 	 * @param hints
 	 * @throws SQLException

@@ -28,6 +28,11 @@ public enum DalHintEnum {
 	shards, // Set<String>
 	/* End of parameters for each Dal client call */
 	
+	/**
+	 * used in batch sp, when set the connection auto commit will be true.
+	 */
+	forceAutoCommit,
+	
 	/* Settings for initialize statement */
 	timeout,
 	

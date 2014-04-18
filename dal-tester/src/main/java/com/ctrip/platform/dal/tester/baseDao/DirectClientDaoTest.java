@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.tester.baseDao;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -14,10 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.ctrip.freeway.config.LogConfig;
-import com.ctrip.platform.dal.common.cfg.DasConfigureService;
-import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
-import com.ctrip.platform.dal.common.db.DasConfigureReader;
-import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
@@ -28,15 +23,16 @@ import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 import com.ctrip.platform.dal.tester.ColumnTypeExtractor;
 
 public class DirectClientDaoTest {
-	private String sql = "select [HotelID],[LatestBookTime],[UID]  from HotelLatestBookInfo hl with(nolock)  Join resource r with(nolock) on r.resource = hl.HotelID join city c (nolock) on c.city = r.city and c.city in (select city from city (nolock) where Country = 1) ";
+	private String sql = "SELECT * FROM [AbacusDB].[dbo].[AbacusPara]";
 	private String sql2 = "select * from Person";
 	
 	public void test() {
 		try {
-			DalClient client = DalClientFactory.getClient("HtlProductdb");
+			DalClient client = DalClientFactory.getClient("AbacusDB");
 			StatementParameters parameters = new StatementParameters();
 			DalHints hints = new DalHints();
 
@@ -338,6 +334,41 @@ public class DirectClientDaoTest {
 		}
 	}
 	
+	public void testDetectDistibutedTransaction() {
+		try {
+			DalClient daoTestClient = DalClientFactory.getClient("dao_test");
+			
+			final StatementParameters parameters = new StatementParameters();
+			final DalHints hints = new DalHints();
+
+			DalCommand command = new DalCommand() {
+				@Override
+				public boolean execute(DalClient client) throws SQLException {
+					String delete = "delete from Person where id > 2000";
+					String insert = "insert into Person values(NULL, 'bbb', 100, 'aaaaa', 100, 1, '2012-05-01 10:10:00',1)";
+					String update = "update Person set name='abcde' where id > 2000";
+					String[] sqls = new String[]{delete, insert, insert, insert, update};
+
+					System.out.println(client.batchUpdate(sqls, hints));
+
+					client.update(delete, parameters, hints);
+					selectPerson(client);
+
+					StatementParameters parameters = new StatementParameters();
+					DalHints hints = new DalHints();
+					DalClient abacusDBClient = DalClientFactory.getClient("AbacusDB");
+					abacusDBClient.query(sql, parameters, hints, new DalScalarExtractor());
+					return true;
+				}
+			};
+			
+			daoTestClient.execute(command, hints);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void testTransactionException() {
 		try {
 			DalClient client = DalClientFactory.getClient("dao_test");
@@ -541,23 +572,25 @@ public class DirectClientDaoTest {
         LogConfig.setLoggingServerIP("192.168.82.58");
         LogConfig.setLoggingServerPort("63100");
 
-		Configuration.addResource("conf.properties");
-		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
+//		Configuration.addResource("conf.properties");
+//		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
 		try {
-			DalClientFactory.initDirectClientFactory(reader, "dao_test");
+//			DalClientFactory.initDirectClientFactory(reader, "dao_test");
+			DalClientFactory.initPrivateFactory();
 		} catch (Exception e) {
 			System.exit(0);
 		}
 		
 		DirectClientDaoTest test = new DirectClientDaoTest();
 		
-		test.testBatchSP();
-		test.testCommand();
+//		test.testBatchSP();
+//		test.testCommand();
 //		test.testIsolationLevel();
 		
 //		test.testDuplicateColumnName();
 		//test.testType("dao_test", "ManyTypes");
-		//test.test();
+//		test.testSP();
+		test.test();
 //		test.test2();
 		/*test.testAutoIncrement();*/
 		/*test.testBatch();
@@ -567,6 +600,7 @@ public class DirectClientDaoTest {
 		test.testSPInOut();
 		test.testConnectionException();
 		test.testTransactionException();*/
+		test.testDetectDistibutedTransaction();
 		try {
 			Thread.sleep(30 * 1000);
 		} catch (InterruptedException e) {

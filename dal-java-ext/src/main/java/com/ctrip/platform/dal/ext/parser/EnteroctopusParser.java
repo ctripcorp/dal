@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.ctrip.fx.enteroctopus.common.jpa.DBColumn;
 import com.ctrip.fx.enteroctopus.common.jpa.DBEntity;
 import com.ctrip.fx.enteroctopus.common.jpa.DBId;
+import com.ctrip.platform.dal.dao.DalParser;
 
 public class EnteroctopusParser<T> implements DalParser<T>{
 	

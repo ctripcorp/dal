@@ -109,7 +109,7 @@ public class DalDirectClient implements DalClient {
 					return rows;
 				
 				DalRowMapperExtractor<Map<String, Object>> rse =
-						new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper(), 1);
+						new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
 				generatedKeys.addAll(rse.extract(rs));
 				return rows;
 			}

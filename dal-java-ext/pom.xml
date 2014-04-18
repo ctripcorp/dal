@@ -14,5 +14,15 @@
       <artifactId>dal-common</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+    	<groupId>com.ctrip.fx</groupId>
+    	<artifactId>enteroctopus-common</artifactId>
+    	<version>1.0.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>com.ctrip.platform</groupId>
+    	<artifactId>dal-java-client</artifactId>
+    	<version>0.0.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>

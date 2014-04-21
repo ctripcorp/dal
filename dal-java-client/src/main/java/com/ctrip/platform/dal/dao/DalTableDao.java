@@ -315,8 +315,9 @@ public final class DalTableDao<T> {
 	}
 
 	/**
-	 * Update the given pojo list.
-	 * 
+	 * Update the given pojo list.Default,if the filed of pojo is null value,
+	 * the field will be ignor,means,the filed will not be update.
+	 * You can overwrite this by set updateNullField in hints.
 	 * @param hints
 	 * @param daoPojos
 	 * @return how many rows been affected
@@ -328,7 +329,7 @@ public final class DalTableDao<T> {
 			Map<String, ?> fields = parser.getFields(pojo);
 			Map<String, ?> pk = parser.getPrimaryKeys(pojo);
 
-			String updateSql = buildUpdateSql(fields);
+			String updateSql = buildUpdateSql(fields,hints);
 
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
@@ -484,10 +485,11 @@ public final class DalTableDao<T> {
 		return String.format(TMPL_SQL_DELETE, parser.getTableName(), pkSql);
 	}
 
-	private String buildUpdateSql(Map<String, ?> fields) {
-		// Remove null value or primary key
+	private String buildUpdateSql(Map<String, ?> fields,DalHints hints) {
+		// Remove null value when hints is not DalHintEnum.updateNullField or primary key
 		for (String column : parser.getColumnNames()) {
-			if (fields.get(column) == null || pkColumns.contains(column))
+			if ( (fields.get(column) == null && !hints.is(DalHintEnum.updateNullField) )
+					|| pkColumns.contains(column))
 				fields.remove(column);
 		}
 

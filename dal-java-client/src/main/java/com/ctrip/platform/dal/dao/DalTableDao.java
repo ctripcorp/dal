@@ -355,10 +355,12 @@ public final class DalTableDao<T> {
 
 	/**
 	 * Update the given pojo list.Default,if the filed of pojo is null value,
-	 * the field will be ignor,means,the filed will not be update. You can
+	 * the field will be ignored,means,the filed will not be update. You can
 	 * overwrite this by set updateNullField in hints.
 	 * 
 	 * @param hints
+	 * 			additional parameters. DalHintEnum.updateNullField can be used
+	 *          to indicate that the field of pojo is null value will be update.
 	 * @param daoPojos
 	 * @return how many rows been affected
 	 * @throws SQLException

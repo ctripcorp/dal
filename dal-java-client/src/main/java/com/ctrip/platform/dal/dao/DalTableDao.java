@@ -20,6 +20,7 @@ public final class DalTableDao<T> {
 
 	private static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
 	private static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
+	private static final String TMPL_SQL_MULTIPLE_INSERT = "INSERT INTO %s(%s) VALUES %s";
 	private static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
 	private static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
 
@@ -244,6 +245,42 @@ public final class DalTableDao<T> {
 		}
 		return count;
 	}
+	
+	/**
+	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder
+	 * If the nocount is on, the keyholder is not available
+	 * @param hints
+	 * @param keyHolder
+	 * @param daoPojos
+	 * @return
+	 * @throws SQLException
+	 */
+	public int insertMultiple(DalHints hints, KeyHolder keyHolder, T... daoPojos) 
+			throws SQLException {
+		if(null == daoPojos || daoPojos.length < 1)
+			return 0;	
+		Map<String, ?> fields = this.parser.getFields(daoPojos[1]);
+		Set<String> remainedColumns = fields.keySet();
+		String cloumns = combine(remainedColumns, COLUMN_SEPARATOR);
+		int count = daoPojos.length;
+		StatementParameters parameters = new StatementParameters();
+		StringBuilder values = new StringBuilder();
+		
+		int startIndex = 1;
+		for(int i = 0; i < count; i++){
+			Map<String, ?> vfields = parser.getFields(daoPojos[i]);
+			int paramCount = addParameters(startIndex, parameters, vfields);
+			startIndex += paramCount;
+			values.append(
+					String.format("(%s),", this.combine("?", paramCount, ",")));
+		}
+		
+		String sql = String.format(TMPL_SQL_MULTIPLE_INSERT, 
+				this.parser.getTableName(), cloumns, values.substring(0, values.length() - 2) + ")");
+
+		return null == keyHolder ? this.client.update(sql, parameters, hints) : 
+			this.client.update(sql, parameters, hints, keyHolder);
+	}
 
 	/**
 	 * Insert pojos in batch mode.
@@ -394,6 +431,25 @@ public final class DalTableDao<T> {
 		}
 	}
 
+	private int addParameters(int start, StatementParameters parameters,
+			Map<String, ?> entries) {
+		int count = 0;
+		for (Map.Entry<String, ?> entry : entries.entrySet()) {
+			boolean isKey = false;
+			if(this.parser.isAutoIncrement())
+				for(String key : this.parser.getPrimaryKeyNames()){
+					if(entry.getKey().equals(key)){
+						isKey = true;
+						break;
+					}
+				}
+			Object value =isKey ? null : entry.getValue();
+			parameters.set(count + start, this.parser.getColumnTypes()[count], value);
+			count++;
+		}
+		return count;
+	}
+	
 	/**
 	 * Add all the entries into the parameters by name. The parameter name will
 	 * be the entry key, value will be entry value. The value can be null. This
@@ -469,7 +525,7 @@ public final class DalTableDao<T> {
 		return String.format(TMPL_SQL_INSERT, parser.getTableName(), cloumns,
 				values);
 	}
-
+	
 	private String buildBatchInsertSql() {
 		String[] allColumns = parser.getColumnNames();
 		String cloumns = combine(allColumns, COLUMN_SEPARATOR);

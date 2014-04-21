@@ -29,10 +29,20 @@ public class Test {
 			entities.add(person);
 		}
 		KeyHolder hk = dao.batchInsert(entities, false);
+		
 		for(Map<String, Object> ent : hk.getKeyList()){
 			for(Map.Entry<String, Object> en : ent.entrySet())
 			System.out.println(String.format("key=%s;value=%s", en.getKey(), en.getValue()));
 		}
+		
+		List<Person> all = dao.queryAll();
+		System.out.println(all.size());
+		
+		String condition = "Address like ?";
+		
+		List<Person> like = dao.queryByCondition(condition, "%tsh%");
+		System.out.println(like.size());
+		
 	}
 
 }

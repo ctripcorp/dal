@@ -13,6 +13,10 @@ public class StatementParameters {
 		return this;
 	}
 	
+	public StatementParameters set(int index, Object value) {
+		return add(StatementParameter.Builder.set(index, value).build());
+	}
+	
 	public StatementParameters set(int index, int sqlType, Object value) {
 		return add(StatementParameter.Builder.set(index, sqlType, value).build());
 	}

@@ -81,17 +81,42 @@ public class DalStatementCreator {
 	private void setParameter(PreparedStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
 			if(parameter.isInputParameter())
-				statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+				setObject(statement, parameter);
 		}
 	}
 	
 	private void setParameter(CallableStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
 			if(parameter.isInputParameter()) {
-				if(parameter.getValue() == null)
-					statement.setNull(parameter.getName(), parameter.getSqlType());
-				else
-					statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
+				setObject(statement, parameter);
+			}
+		}
+	}
+
+	
+	private void setObject(PreparedStatement statement, StatementParameter parameter) throws SQLException{
+		if(parameter.isDefaultType()){
+			statement.setObject(parameter.getIndex(), parameter.getValue());
+		}
+		else{
+			statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+		}
+	}
+	
+	private void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException{
+		if(parameter.getValue() == null) {
+			if(parameter.isDefaultType()){
+				statement.setObject(parameter.getIndex(), null);
+			}
+			else{
+				statement.setNull(parameter.getName(), parameter.getSqlType());
+			}
+		} else {
+			if(parameter.isDefaultType()){
+				statement.setObject(parameter.getIndex(), parameter.getValue());
+			}
+			else{
+				statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
 			}
 		}
 	}

@@ -12,16 +12,17 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 
 public class EnteroctopusDao {
 
 	private static final String INSERT_TEMP = "INSERT INTO %s VALUES";
+	private static final String QUERY_PATTERN = "SELECT * FROM %s";
 	
 	private Loader loader = null;
 	
 	@SuppressWarnings("rawtypes")
 	private DalParser parser = null;
-
 	private DalClient client = null;
 	private Set<String> permaryKeys = null;
 	
@@ -84,5 +85,29 @@ public class EnteroctopusDao {
 		DalHints hints = new DalHints();
 		this.client.update(sql, parameters, hints, generatedKeyHolder);
 		return generatedKeyHolder;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> List<T> queryAll() throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+		DalRowMapperExtractor<T> rowextractor = new DalRowMapperExtractor<T>(this.parser);
+		List<T> result = this.client.query(String.format(QUERY_PATTERN, this.parser.getTableName()), 
+				parameters, hints, rowextractor);
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> List<T> queryByCondition(String condition, Object... params) throws SQLException{
+		String sql = String.format(QUERY_PATTERN, this.parser.getTableName()) + " WHERE " + condition;
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+		for(int i = 0 ; i < params.length ; i++){
+			parameters.set(i + 1, params[i]);
+		}
+
+		DalRowMapperExtractor<T> rowextractor = new DalRowMapperExtractor<T>(this.parser);
+		List<T> result = this.client.query(sql, parameters, hints, rowextractor);
+		return result;
 	}
 }

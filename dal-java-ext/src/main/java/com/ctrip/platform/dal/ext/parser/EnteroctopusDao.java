@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -19,12 +20,17 @@ public class EnteroctopusDao {
 	private static final String INSERT_TEMP = "INSERT INTO %s VALUES";
 	private static final String QUERY_PATTERN = "SELECT * FROM %s";
 	
+	private static ConcurrentHashMap<Class<?>, EnteroctopusDao> cache = null;
 	private Loader loader = null;
 	
 	@SuppressWarnings("rawtypes")
 	private DalParser parser = null;
 	private DalClient client = null;
 	private Set<String> permaryKeys = null;
+	
+	static{
+		cache = new ConcurrentHashMap<Class<?>, EnteroctopusDao>();
+	}
 	
 	private EnteroctopusDao(Class<?> clazz){ 
 		this.loader = new EnteroctopusLoader();
@@ -37,7 +43,10 @@ public class EnteroctopusDao {
 	} 
 	
 	public static EnteroctopusDao create(Class<?> clazz){
-		return new EnteroctopusDao(clazz);
+		if(!cache.contains(clazz)){
+			cache.put(clazz, new EnteroctopusDao(clazz));
+		}
+		return cache.get(clazz);
 	}
 	
 	private String combine(String value, int count, String separator) {

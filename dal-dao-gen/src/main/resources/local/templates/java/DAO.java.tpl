@@ -395,7 +395,7 @@ public class ${host.getPojoClassName()}Dao {
 	}
 	
 #end
-	private static class ${host.getPojoClassName()}Parser extends AbstractDalParser<${host.getPojoClassName()}> {
+	public static class ${host.getPojoClassName()}Parser extends AbstractDalParser<${host.getPojoClassName()}> {
 		public static final String DATABASE_NAME = "${host.getDbName()}";
 		public static final String TABLE_NAME = "${host.getTableName()}";
 		private static final String[] COLUMNS = new String[]{

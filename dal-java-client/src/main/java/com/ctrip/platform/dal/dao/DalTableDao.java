@@ -247,6 +247,44 @@ public final class DalTableDao<T> {
 	}
 
 	/**
+	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in
+	 * keyHolder If the nocount is on, the keyholder is not available
+	 * 
+	 * @param hints
+	 * @param keyHolder
+	 * @param daoPojos
+	 * @return
+	 * @throws SQLException
+	 */
+	public int insertMultiple(DalHints hints, KeyHolder keyHolder,
+			T... daoPojos) throws SQLException {
+		if (null == daoPojos || daoPojos.length < 1)
+			return 0;
+		Map<String, ?> fields = this.parser.getFields(daoPojos[1]);
+		Set<String> remainedColumns = fields.keySet();
+		String cloumns = combine(remainedColumns, COLUMN_SEPARATOR);
+		int count = daoPojos.length;
+		StatementParameters parameters = new StatementParameters();
+		StringBuilder values = new StringBuilder();
+
+		int startIndex = 1;
+		for (int i = 0; i < count; i++) {
+			Map<String, ?> vfields = parser.getFields(daoPojos[i]);
+			int paramCount = addParameters(startIndex, parameters, vfields);
+			startIndex += paramCount;
+			values.append(String.format("(%s),",
+					this.combine("?", paramCount, ",")));
+		}
+
+		String sql = String.format(TMPL_SQL_MULTIPLE_INSERT,
+				this.parser.getTableName(), cloumns,
+				values.substring(0, values.length() - 2) + ")");
+
+		return null == keyHolder ? this.client.update(sql, parameters, hints)
+				: this.client.update(sql, parameters, hints, keyHolder);
+	}
+
+	/**
 	 * Insert pojos in batch mode.
 	 * 
 	 * @param hints
@@ -317,8 +355,9 @@ public final class DalTableDao<T> {
 
 	/**
 	 * Update the given pojo list.Default,if the filed of pojo is null value,
-	 * the field will be ignor,means,the filed will not be update.
-	 * You can overwrite this by set updateNullField in hints.
+	 * the field will be ignor,means,the filed will not be update. You can
+	 * overwrite this by set updateNullField in hints.
+	 * 
 	 * @param hints
 	 * @param daoPojos
 	 * @return how many rows been affected
@@ -330,7 +369,7 @@ public final class DalTableDao<T> {
 			Map<String, ?> fields = parser.getFields(pojo);
 			Map<String, ?> pk = parser.getPrimaryKeys(pojo);
 
-			String updateSql = buildUpdateSql(fields,hints);
+			String updateSql = buildUpdateSql(fields, hints);
 
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
@@ -349,7 +388,7 @@ public final class DalTableDao<T> {
 		}
 		return count;
 	}
-	
+
 	/**
 	 * Delete for the given where clause and parameters.
 	 * 
@@ -394,6 +433,26 @@ public final class DalTableDao<T> {
 			parameters.set(index++, getColumnType(entry.getKey()),
 					entry.getValue());
 		}
+	}
+
+	private int addParameters(int start, StatementParameters parameters,
+			Map<String, ?> entries) {
+		int count = 0;
+		for (Map.Entry<String, ?> entry : entries.entrySet()) {
+			boolean isKey = false;
+			if (this.parser.isAutoIncrement())
+				for (String key : this.parser.getPrimaryKeyNames()) {
+					if (entry.getKey().equals(key)) {
+						isKey = true;
+						break;
+					}
+				}
+			Object value = isKey ? null : entry.getValue();
+			parameters.set(count + start, this.parser.getColumnTypes()[count],
+					value);
+			count++;
+		}
+		return count;
 	}
 
 	/**
@@ -486,10 +545,12 @@ public final class DalTableDao<T> {
 		return String.format(TMPL_SQL_DELETE, parser.getTableName(), pkSql);
 	}
 
-	private String buildUpdateSql(Map<String, ?> fields,DalHints hints) {
-		// Remove null value when hints is not DalHintEnum.updateNullField or primary key
+	private String buildUpdateSql(Map<String, ?> fields, DalHints hints) {
+		// Remove null value when hints is not DalHintEnum.updateNullField or
+		// primary key
 		for (String column : parser.getColumnNames()) {
-			if ( (fields.get(column) == null && !hints.is(DalHintEnum.updateNullField) )
+			if ((fields.get(column) == null && !hints
+					.is(DalHintEnum.updateNullField))
 					|| pkColumns.contains(column))
 				fields.remove(column);
 		}
@@ -501,7 +562,7 @@ public final class DalTableDao<T> {
 		return String.format(TMPL_SQL_UPDATE, parser.getTableName(), columns,
 				pkSql);
 	}
-	
+
 	private String buildWhereClause(Map<String, ?> fields) {
 		return String.format(combine(TMPL_SET_VALUE, fields.size(), AND),
 				fields.keySet().toArray());

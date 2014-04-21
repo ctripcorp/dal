@@ -1,6 +1,10 @@
 package intest;
 
+import java.sql.Timestamp;
+
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHintEnum;
+import com.ctrip.platform.dal.dao.DalHints;
 
 public class PersonDaoTest {
 	public static void main(String[] args) {
@@ -18,17 +22,14 @@ public class PersonDaoTest {
 			PersonDao dao = new PersonDao();
 		
 		    Person pojo1 = new Person();
-		    pojo1.setID(303);
-			Person pojo2 = new Person();
-			pojo2.setID(304);
-			Person pojo3 = new Person();	
-			pojo3.setID(305);
-
-			int[] vals = dao.batchInsert(pojo1, pojo2, pojo3);
-			System.out.println(dao.count());
+		    pojo1.setID(10004);
+		    pojo1.setName(null);
+		    pojo1.setBirth(new Timestamp(System.currentTimeMillis()));
+		    
+		    DalHints hints = new DalHints();
+			hints.set(DalHintEnum.updateNullField);
 			
-			int[] upds = dao.batchDelete(pojo1, pojo2, pojo3);
-			System.out.println(dao.count());
+		    dao.update(hints,pojo1);
 			
 			System.exit(1);
 		} catch (Exception e) {

@@ -20,6 +20,7 @@ public final class DalTableDao<T> {
 
 	private static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
 	private static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
+	private static final String TMPL_SQL_MULTIPLE_INSERT = "INSERT INTO %s(%s) VALUES %s";
 	private static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
 	private static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
 

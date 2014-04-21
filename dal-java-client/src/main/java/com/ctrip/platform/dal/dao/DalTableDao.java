@@ -359,6 +359,8 @@ public final class DalTableDao<T> {
 	 * overwrite this by set updateNullField in hints.
 	 * 
 	 * @param hints
+	 * 			additional parameters. DalHintEnum.updateNullField can be used
+	 *          to indicate that the field of pojo is null value will be update.
 	 * @param daoPojos
 	 * @return how many rows been affected
 	 * @throws SQLException

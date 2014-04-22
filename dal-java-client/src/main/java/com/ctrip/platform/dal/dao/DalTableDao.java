@@ -256,7 +256,7 @@ public final class DalTableDao<T> {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int insertMultiple(DalHints hints, KeyHolder keyHolder,
+	public int insertCombined(DalHints hints, KeyHolder keyHolder,
 			T... daoPojos) throws SQLException {
 		if (null == daoPojos || daoPojos.length < 1)
 			return 0;

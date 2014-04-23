@@ -9,7 +9,7 @@ public enum DalHintEnum {
 	/* All the parameters for each Dal client call. Used for locating shard, real database */
 	operation, //DalClient.operation
 	
-	sql,
+	/*sql,
 	
 	sqls,
 	
@@ -19,7 +19,7 @@ public enum DalHintEnum {
 	
 	parametersList,
 	
-	commands,
+	commands,*/
 
 	shardColValues,// Map<String, Integer> of column name value pair
 	

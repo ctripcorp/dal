@@ -149,7 +149,9 @@ public class CommonUtil {
     	return null != str ? str : "NA";
     }
     
-    
+    public static boolean isNullEmpty(String str){
+    	return null == str || str.isEmpty();
+    }
     public static String parseHostFromDBURL(String url)
     {
     	Matcher m = hostRegxPattern.matcher(url);

@@ -2,19 +2,19 @@ package com.ctrip.platform.dal.dao.logging;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import com.ctrip.freeway.gen.v2.LogLevel;
+import com.ctrip.freeway.gen.v2.LogType;
 import com.ctrip.freeway.logging.ILog;
 import com.ctrip.freeway.logging.LogManager;
-import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.freeway.tracing.ITrace;
+import com.ctrip.freeway.tracing.TraceManager;
 
 public class Logger {
 	public static final int DAL_APP_ID = 930201;
-	
 	public static final String TAG_APPID = "APPID";
 	public static final String TAG_HOST = "Host";
 	public static final String TAG_DAO = "DAO";
@@ -41,31 +41,17 @@ public class Logger {
 	}
 	
 	private static ILog logger = LogManager.getLogger("DAL Java Client");
-	
-	public static LogEntry create(String sql, StatementParameters parameters, String logicDbName, String realDbName, int eId, String message) {
-		return new LogEntry(sql, parameters, logicDbName, realDbName, eId, message);
-	}
-	
-	public static void log(LogEntry log, long duration) {
+	private static ITrace trace = TraceManager.getTracer("DAL Java Client");
+	public static void log(LogEntry log) {
 
 		if(log == null) 
 			return;
 		// Don't log
-		if(!validate(log.getSql(), log.getInputParamStr()))
-			return;
-		
-		log.setDuration(duration);
-		
-		Map<String, String> tag = new LinkedHashMap<String, String>();
-		tag.put("InTransaction", log.isTransactional() ? "True" : "False");
-		tag.put("DurationTime", Long.toString(log.getDuration()) + "ms");
-		tag.put("DatabaseName", CommonUtil.null2NA(log.getDatabaseName()));
-		tag.put("ServerAddress", CommonUtil.null2NA(log.getServerAddress()));
-		tag.put("CommandType", CommonUtil.null2NA(log.getCommandType()));
-		tag.put("UserName", CommonUtil.null2NA(log.getUserName()));
-		tag.put("RecordCount", Long.toString(log.getResultCount()));
-		
-		logger.info(CommonUtil.null2NA(log.getTitle()), log.toBrief(), tag);
+		if(validate(log.getSqlTpl(), log.getInputParamStr())){
+			logger.info(CommonUtil.null2NA(log.getTitle()), log.toBrief(), log.getTag());;
+		}
+		trace.log(LogType.SQL, LogLevel.INFO, 
+				CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
 	}
 	
 	public static void logGetConnectionSuccess(String realDbName)
@@ -105,10 +91,6 @@ public class Logger {
 		default:
 			break;
 		}
-	}
-	
-	public static void log(LogEntry log, Throwable e) {
-		logger.error(log.toBrief(), e);
 	}
 	
 	/**

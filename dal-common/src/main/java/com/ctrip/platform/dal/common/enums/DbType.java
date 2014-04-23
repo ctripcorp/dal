@@ -81,7 +81,7 @@ public enum DbType {
     	jdbcTypeToNetDbType.put(java.sql.Types.DOUBLE,Double);
     	jdbcTypeToNetDbType.put(java.sql.Types.NUMERIC,Decimal);
     	jdbcTypeToNetDbType.put(java.sql.Types.DECIMAL,Currency);
-    	jdbcTypeToNetDbType.put(java.sql.Types.CHAR,String);
+    	jdbcTypeToNetDbType.put(java.sql.Types.CHAR,AnsiStringFixedLength);
     	jdbcTypeToNetDbType.put(java.sql.Types.VARCHAR,AnsiString);
     	jdbcTypeToNetDbType.put(java.sql.Types.LONGVARCHAR,String);
     	jdbcTypeToNetDbType.put(java.sql.Types.DATE,Date);

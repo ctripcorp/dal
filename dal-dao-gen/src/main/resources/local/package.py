@@ -44,7 +44,7 @@ def build(args):
 
 		shutil.copy2(os.path.join(os.path.dirname(src_conf_properties), "conf.properties.pub"), src_conf_properties)
 		shutil.copy2(os.path.join(os.path.dirname(src_jdbc_properties), "jdbc.properties.pub"), src_jdbc_properties)
-		shutil.copy2(os.path.join(os.path.dirname(src_log4j), "log4j.xml"), src_log4j)
+		shutil.copy2(os.path.join(os.path.dirname(src_log4j), "log4j.xml.pub"), src_log4j)
 		shutil.copy2(os.path.join(os.path.dirname(src_web_xml), "web.xml.pub"), src_web_xml)
 		os.chdir(working_dir)
 		p = subprocess.Popen("mvn install",shell=True)

@@ -1,10 +1,10 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -78,11 +78,12 @@ public class DatabaseResource {
 			}
 			
 			//inStream = classLoader.getResourceAsStream("Database.config");
-			URL url = classLoader.getResource("Database.config");
-			if(url == null){
-				return Status.ERROR;
-			}
-			inStream = url.openStream();
+//			URL url = classLoader.getResource("Database.config");
+//			if(url == null){
+//				return Status.ERROR;
+//			}
+			//inStream = url.openStream();
+			inStream = new FileInputStream(Configuration.get("all_in_one"));
 			
 			document = saxReader.read(inStream);
 
@@ -90,7 +91,7 @@ public class DatabaseResource {
 
 			Document temp = DocumentHelper.parseText(data);
 			root.add(temp.getRootElement());
-			writer = new FileWriter(url.getPath());
+			writer = new FileWriter(Configuration.get("all_in_one"));
 			OutputFormat format = OutputFormat.createPrettyPrint();
 			XMLWriter output = new XMLWriter(writer, format);
 			output.write(document);

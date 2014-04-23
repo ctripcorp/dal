@@ -18,6 +18,8 @@ public class MetricsLogger {
 	public static final String COST = "arch.dal.sql.cost";
     public static String SUCCESS = "success";
     public static String FAIL = "fail";
+    
+    public static long ticksPerMillisecond = 10000;
 
 	private static final String DAO = "DAO";
 	private static final String METHOD = "Method";
@@ -65,7 +67,7 @@ public class MetricsLogger {
         MetricsData md = new MetricsData();
         md.method = method;
         md.dao = dao;
-        md.cost = cost;
+        md.cost = cost * ticksPerMillisecond;
         md.count = 1;
         md.size = size;
         md.status = status;

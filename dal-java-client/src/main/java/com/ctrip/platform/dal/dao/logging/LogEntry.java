@@ -364,14 +364,15 @@ public class LogEntry {
 	}
 
 	public String toJson(){
-		int hashCode = 0;
-		String sqlTpl = this.getSqlTpl();
+		String sqlTpl = this.getSqlTpl();	
+		String params = this.getParams(); //TODO: 加密
+		int hashCode = CommonUtil.GetHashCode(sqlTpl);
 		boolean existed = this.hasHashCode(sqlTpl, hashCode);
 		return String.format(JSON_PATTERN, 
 				existed ? 1 : 0, 
 				hashCode, 
 				existed ? "" : sqlTpl, 
-				this.getParams(), 
+				params, 
 				this.success ? 1 : 0, 
 				this.errorMsg);
 	}

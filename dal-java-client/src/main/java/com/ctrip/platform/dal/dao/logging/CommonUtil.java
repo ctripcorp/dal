@@ -164,6 +164,23 @@ public class CommonUtil {
     	return host;
     }
     
+    public static int GetHashCode(String str) 
+    { 
+    int hash, i;
+    char[] arr = str.toCharArray();
+    for (hash = i = 0; i < arr.length; ++i) 
+    { 
+    hash += arr[i]; 
+    hash += (hash << 12); 
+    hash ^= (hash >> 4); 
+    } 
+    hash += (hash << 3); 
+    hash ^= (hash >> 11); 
+    hash += (hash << 15); 
+    return hash; 
+    }
+
+    
     public static void main(String[] args) {
     	String sql = "select * from Person where Id = ?";
     	String hash = getHashCode4SQLString(sql);

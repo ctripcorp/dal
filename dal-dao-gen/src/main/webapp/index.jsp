@@ -94,6 +94,7 @@
             <div class="modal-content">
                <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <a href="http://conf.ctripcorp.com/display/SysDev/DAL+Code+Generator#DALCodeGenerator-addproject" target="_blank" type="button" class="close">?&nbsp;</a>
                   <h4 class="modal-title" id="myModalLabel">Add a project</h4>
                </div>
                <div class="modal-body">
@@ -236,6 +237,7 @@
             <div class="modal-content">
                <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <a href="http://conf.ctripcorp.com/display/SysDev/DAL+Code+Generator#DALCodeGenerator-addDao" target="_blank" type="button" class="close">?&nbsp;</a>
                   <h4 class="modal-title" id="page1_label">DAO生成向导</h4>
                </div>
                <div class="modal-body" style="position: relative;overflow: auto;width: auto;max-height:420px;">

@@ -52,7 +52,6 @@ public class EnteroctopusParser<T> implements DalParser<T>{
 	private String[] primaryKeys; //The default primary key has only one
 	private DBEntity entiryAntot;
 	private Class<T> clazz;
-	private Object[] defaultValues;
 	private Field identity;
 	private Field[] originFileds;
 	
@@ -68,7 +67,6 @@ public class EnteroctopusParser<T> implements DalParser<T>{
 		this.fieldNames = new String[fields.length];
 		this.columns = new String[fields.length];
 		this.columnTypes = new int[fields.length];
-		this.defaultValues = new Object[fields.length];
 		this.originFileds = new Field[fields.length];
 		
 		List<String> ids = new ArrayList<String>();
@@ -80,10 +78,6 @@ public class EnteroctopusParser<T> implements DalParser<T>{
 			DBColumn dbColumn = field.getAnnotation(DBColumn.class);
 			this.columns[i] = dbColumn.columnName().equals("") ? 
 					field.getName() : dbColumn.columnName();
-			//Note: Here the contains not check
-			System.out.println(dbColumn.wrapperType());
-			System.out.println(field.getType());
-			System.out.println(dbColumn.wrapperType().equals(Void.class));
 			this.columnTypes[i] = dbColumn.wrapperType().equals(Void.class) ?
 					java2SqlTypeMaper.get(field.getType()) : 
 						wrapperTypeMapper.get(dbColumn.wrapperType());
@@ -115,7 +109,7 @@ public class EnteroctopusParser<T> implements DalParser<T>{
 			for(int i = 0; i < fieldNames.length; i++){
 				Field field = this.originFileds[i];
 				field.set(instance, this.loader.load(field, 
-						rs.getObject(this.columns[i]), defaultValues[i]));
+						rs.getObject(this.columns[i])));
 			}
 			return instance;
 		} catch (Exception e) {
@@ -183,14 +177,10 @@ public class EnteroctopusParser<T> implements DalParser<T>{
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		for(int i = 0; i < this.originFileds.length; i++){
 			try {
-				Object val = this.originFileds[i].get(pojo);
+				Object val = this.loader.save(originFileds[i], pojo);
 				map.put(this.columns[i], val);
-			} catch (IllegalArgumentException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 		return map;

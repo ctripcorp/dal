@@ -10,6 +10,14 @@ import java.util.Map;
 public class DalHints {
 	private Map<DalHintEnum, Object> hints = new LinkedHashMap<DalHintEnum, Object>();
 	
+	public DalHints() {}
+	
+	public DalHints(DalHintEnum...hints) {
+		for(DalHintEnum hint: hints) {
+			set(hint);
+		}
+	}
+	
 	public boolean is(DalHintEnum hint) {
 		return hints.containsKey(hint);
 	}

@@ -11,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.ctrip.platform.dal.dao.DalHintEnum;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameter;
@@ -59,9 +61,11 @@ public class LogEntry {
 		execludedClasses.add(DalQueryDao.class.getName());
 	}
 
-	public LogEntry() {
+	public LogEntry(DalHints hints) {
 		this.timeStamp = new Date();
 		this.machine = CommonUtil.MACHINE;
+		if(hints.is(DalHintEnum.sensitive))
+			this.sensitive = (Boolean)hints.get(DalHintEnum.sensitive);
 		this.getSourceAndMessage();
 		if(null != this.parameters) {
 			this.inputParamStr = this.getInputParameterPrint(this.parameters);
@@ -210,10 +214,10 @@ public class LogEntry {
 	
 	private String getParams(StatementParameters params){
 		List<String> plantPrams = new ArrayList<String>();
-		for (StatementParameter param : parameters.values()) {
+		for (StatementParameter param : params.values()) {
 			plantPrams.add(String.format("%s=%s", 
 					param.getName() == null ? param.getIndex() : param.getName(), 
-					param.isSensitive() ? SQLHIDDENString : param.getValue()));
+					this.sensitive ? SQLHIDDENString : param.getValue()));
 		}
 		return StringUtils.join(plantPrams, ",");
 	}

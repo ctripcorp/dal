@@ -139,6 +139,30 @@ public class LogEntry {
 		this.message = message;
 	}
 
+	public String getTitle(){
+		return this.title;
+	}
+	
+	public String getDao(){
+		return this.dao;
+	}
+	
+	public String getMethod(){
+		return this.method;
+	}
+	
+	public void setSuccess(boolean success) {
+		this.success = success;
+	}
+
+	public void setErrorMsg(String errorMsg) {
+		this.errorMsg = errorMsg;
+	}
+
+	public String getInputParamStr(){
+		return this.inputParamStr;
+	}
+	
 	private void getSourceAndMessage() {
 		StackTraceElement[] callers = Thread.currentThread().getStackTrace();
 
@@ -154,14 +178,6 @@ public class LogEntry {
 		}
 	}
 	
-	public void setSuccess(boolean success) {
-		this.success = success;
-	}
-
-	public void setErrorMsg(String errorMsg) {
-		this.errorMsg = errorMsg;
-	}
-
 	private String getInputParameterPrint(StatementParameters parameters) {
 		if(null == parameters)
 			return "";
@@ -208,16 +224,12 @@ public class LogEntry {
 		return "";
 	}
 	
-	public String getInputParamStr(){
-		return this.inputParamStr;
-	}
-	
 	private String getParams(StatementParameters params){
 		List<String> plantPrams = new ArrayList<String>();
 		for (StatementParameter param : params.values()) {
 			plantPrams.add(String.format("%s=%s", 
 					param.getName() == null ? param.getIndex() : param.getName(), 
-					this.sensitive ? SQLHIDDENString : param.getValue()));
+					param.isSensitive() ? SQLHIDDENString : param.getValue()));
 		}
 		return StringUtils.join(plantPrams, ",");
 	}
@@ -248,19 +260,7 @@ public class LogEntry {
 			return true;
 		}
 	}
-	
-	public String getTitle(){
-		return this.title;
-	}
-	
-	public String getDao(){
-		return this.dao;
-	}
-	
-	public String getMethod(){
-		return this.method;
-	}
-	
+
 	public int getSqlSize(){
 		int size = 0;
 		if(this.event == DalEventEnum.QUERY || 
@@ -331,7 +331,7 @@ public class LogEntry {
 		sb.append(String.format("Message:%s\r\n", message));
 		if (sql != null) {
 			sb.append(String.format("Duration:%d\r\n", duration))
-				.append(String.format("SQL Text:%s\r\n", sensitive ? SQLHIDDENString : sql))
+				.append(String.format("SQL Text:%s\r\n", this.sensitive ? SQLHIDDENString : sql))
 				.append(String.format("SQL Hash:%s\r\n", sqlHash))
 				.append("Input Parameters:")
 				.append(CommonUtil.desEncrypt(this.inputParamStr)).append("\r\n")
@@ -352,7 +352,7 @@ public class LogEntry {
 			sb.append(String.format("Event:%d\r\n", event.getEventId()))
 				.append(String.format("Message:%s\r\n", message))
 				.append(String.format("SQL Text: %s\r\n", CommonUtil.tagSql(sql)))
-				.append(String.format("%s\r\n", sensitive ? SQLHIDDENString : sql))
+				.append(String.format("%s\r\n", this.sensitive ? SQLHIDDENString : sql))
 				.append("Input Parameters:").append(CommonUtil.desEncrypt(this.inputParamStr)).append("\r\n")
 				.append("Output Parameters:").append(outputParamStr)
 				.append("\r\n");
@@ -368,8 +368,8 @@ public class LogEntry {
 	}
 
 	public String toJson(){
-		String sqlTpl = this.getSqlTpl();	
-		String params = this.getParams(); //TODO: 加密
+		String sqlTpl = this.sensitive ?  SQLHIDDENString : this.getSqlTpl();	
+		String params = this.sensitive ?  SQLHIDDENString :this.getParams(); //TODO: 加密
 		int hashCode = CommonUtil.GetHashCode(sqlTpl);
 		boolean existed = this.hasHashCode(sqlTpl, hashCode);
 		return String.format(JSON_PATTERN, 

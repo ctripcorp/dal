@@ -369,7 +369,7 @@ public class LogEntry {
 
 	public String toJson(){
 		String sqlTpl = this.sensitive ?  SQLHIDDENString : this.getSqlTpl();	
-		String params = this.sensitive ?  SQLHIDDENString :this.getParams(); //TODO: 加密
+		String params = this.getParams(); //TODO: 加密
 		int hashCode = CommonUtil.GetHashCode(sqlTpl);
 		boolean existed = this.hasHashCode(sqlTpl, hashCode);
 		return String.format(JSON_PATTERN, 

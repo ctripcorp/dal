@@ -45,7 +45,7 @@ public class ShardConfigTest {
 			set.add("1");
 			set.add("2");
 			set.add("3");
-			hints.set(DalHintEnum.shards, set);
+//			hints.set(DalHintEnum.shards, set);
 			System.out.println(stra.locateShard(cfg, "shardingtestMaster", hints));
 			
 		} catch (Exception e) {

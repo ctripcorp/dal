@@ -6,34 +6,28 @@ package com.ctrip.platform.dal.dao;
  * @author jhhe
  */
 public enum DalHintEnum {
-	/* All the parameters for each Dal client call. Used for locating shard, real database */
-	operation, //DalClient.operation
-	
-	/*sql,
-	
-	sqls,
-	
-	callString,
-	
-	parameters,
-	
-	parametersList,
-	
-	commands,*/
+	operation, //DalEventEnum
 
-	shardColValues,// Map<String, Integer> of column name value pair
+	/*
+	 * Map<String, Integer> of column name value pair. To help sharding strategy locate
+	 * shard
+	 */
+	shardColValues,
 	
-	shard, // String
-	
-	shards, // Set<String>
-	/* End of parameters for each Dal client call */
+	/*
+	 * Explicitly indicate which shard the operation will be performed.
+	 * Value should be String
+	 */
+	shard,
 	
 	/*
 	 * used in batch sp, when set the connection auto commit will be true.
 	 */
 	forceAutoCommit,
 	
-	/* Settings for initialize statement */
+	/* 
+	 * Settings for initialize statement 
+	 */
 	timeout,
 	
 	/* 
@@ -51,71 +45,58 @@ public enum DalHintEnum {
 	 */
     resultSetConcurrency,
     
-	/*  */
+	/*
+	 *  Parameter for statement.setFetchSize(fetchSize); 
+	 */
 	fetchSize,
 	
+	/*
+	 * Indicate that processing of result set and update count can be skipped for 
+	 * stored procedure.
+	 */
 	skipResultsProcessing,
 	
 //	skipUndeclaredResults,
 	
-	/*  */
+	/* 
+	 * Parameter for statement.setMaxRows(maxRows); 
+	 */
 	maxRows,
 	
-	maxFieldSize,
 	/* End of settings for initialize connection and statement*/
 	
-	/* Is the SQL sensitive */
+	/* 
+	 * Is the SQL sensitive, if set, the sql will be replaced by * in the log. 
+	 */
 	sensitive,
 
-	/*  */
+	/* 
+	 * Indicate using master database even the operation can be routed to slave database 
+	 */
 	masterOnly, 
 
-	/*  */
-	startRow,
-	
-	/*  */
-	rowCount,
-	
-	/* SQL Server flag, for batch CUD operation. Using table as parameter */
-	// SPT,
-	
-	/* for logging */
-	callingUrl,
-	
-	/* For insert, delete, update multiple pojos */ 
+	/* 
+	 * For insert, delete, update multiple pojos 
+	 */ 
 	continueOnError,
 	
-	/*  Connection.TRANSACTION_READ_UNCOMMITTED, Connection.TRANSACTION_READ_COMMITTED, Connection.TRANSACTION_REPEATABLE_READ, Connection.TRANSACTION_SERIALIZABLE, or Connection.TRANSACTION_NONE.*/
+	/*  
+	 * Indicate which isolation level should be used to set on conection
+	 * Connection.TRANSACTION_READ_UNCOMMITTED, 
+	 * Connection.TRANSACTION_READ_COMMITTED, 
+	 * Connection.TRANSACTION_REPEATABLE_READ, 
+	 * Connection.TRANSACTION_SERIALIZABLE,
+	 * Connection.TRANSACTION_NONE.
+	 */
 	isolationLevel,
 	
-	/* cache for store old isolationLevel of connection before we apply isolationLevel. It is for internal use. */
+	/* 
+	 * cache for store old isolationLevel of connection before we apply isolationLevel. It is for internal use. 
+	 */
 	oldIsolationLevel,
 	
 	/*
 	 * used in DalTableDao, when set the update field can be null value.
 	 */
 	updateNullField,
-	
-	/* Allow customization */
-	userDefined0,
-	
-	userDefined1,
-	
-	userDefined2,
-	
-	userDefined3,
-	
-	userDefined4,
-	
-	userDefined5,
-	
-	userDefined6,
-	
-	userDefined7,
-	
-	userDefined8,
-	
-	userDefined9,
-	
-	userDefined10,
 }

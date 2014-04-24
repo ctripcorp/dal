@@ -47,22 +47,6 @@ public class DalHints {
 		return this;
 	}
 	
-	public DalHints selectFirst() {
-		set(DalHintEnum.rowCount, 1);
-		return this;
-	}
-
-	public DalHints selectTop(int count) {
-		set(DalHintEnum.rowCount, count);
-		return this;
-	}
-	
-	public DalHints selectFrom(int start, int count) {
-		set(DalHintEnum.startRow, start);
-		set(DalHintEnum.rowCount, count);
-		return this;
-	}
-	
 	public DalHints masterOnly() {
 		set(DalHintEnum.masterOnly, true);
 		return this;

@@ -4,8 +4,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.ctrip.fx.enteroctopus.common.jpa.DBColumn;
 
@@ -13,6 +16,8 @@ public class EnteroctopusLoader extends Loader {
 	private static HashMap<Class<?>, Class<?>> unboxingMap = null;
 	private static HashMap<Class<?>, Object> defaultMap = null;
 
+	private static Map<Class<?>, Integer> java2SqlTypeMaper = null;
+	
 	private static final Class<?>[] UNBOXED_CLASS = { boolean.class,
 			byte.class, char.class, short.class, int.class, long.class,
 			float.class, double.class, };
@@ -29,6 +34,20 @@ public class EnteroctopusLoader extends Loader {
 	private static final int CLASS_NUM = UNBOXED_CLASS.length;
 
 	static {
+		
+		java2SqlTypeMaper = new HashMap<Class<?>, Integer>();
+		java2SqlTypeMaper.put(Integer.class, Types.INTEGER);
+		java2SqlTypeMaper.put(int.class, Types.INTEGER);
+		java2SqlTypeMaper.put(String.class, Types.VARCHAR);
+		java2SqlTypeMaper.put(Timestamp.class, Types.TIMESTAMP);
+		java2SqlTypeMaper.put(byte[].class, Types.BINARY);
+		java2SqlTypeMaper.put(Float.class, Types.FLOAT);
+		java2SqlTypeMaper.put(float.class, Types.FLOAT);
+		java2SqlTypeMaper.put(Double.class, Types.DOUBLE);
+		java2SqlTypeMaper.put(double.class, Types.DOUBLE);
+		java2SqlTypeMaper.put(Long.class, Types.BIGINT);
+		java2SqlTypeMaper.put(long.class, Types.BIGINT);
+		
 		unboxingMap = new HashMap<Class<?>, Class<?>>();
 		defaultMap = new HashMap<Class<?>, Object>();
 		for (int i = 0; i < CLASS_NUM; i++) {
@@ -123,5 +142,10 @@ public class EnteroctopusLoader extends Loader {
 			throws ReflectiveOperationException {
 		return value.getClass().getMethod(type.getName() + "Value")
 				.invoke(value);
+	}
+
+	@Override
+	public int getSqlType(Class<?> javaType) {
+		return java2SqlTypeMaper.get(javaType);
 	}
 }

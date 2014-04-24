@@ -3,10 +3,7 @@ package com.ctrip.platform.dal.ext.parser;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,27 +17,9 @@ import com.ctrip.platform.dal.dao.DalParser;
 public class EnteroctopusParser<T> implements DalParser<T>{
 	
 	private static ConcurrentHashMap<String, DalParser<?>> cache = null;
-	private static Map<Class<?>, Integer> java2SqlTypeMaper = null;
-	private static Map<Class<?>, Integer> wrapperTypeMapper = null;
 	
 	static{
-		cache = new ConcurrentHashMap<String, DalParser<?>>();
-		java2SqlTypeMaper = new HashMap<Class<?>, Integer>();
-		java2SqlTypeMaper.put(Integer.class, Types.INTEGER);
-		java2SqlTypeMaper.put(int.class, Types.INTEGER);
-		java2SqlTypeMaper.put(String.class, Types.VARCHAR);
-		java2SqlTypeMaper.put(Timestamp.class, Types.TIMESTAMP);
-		java2SqlTypeMaper.put(byte[].class, Types.BINARY);
-		java2SqlTypeMaper.put(Float.class, Types.FLOAT);
-		java2SqlTypeMaper.put(float.class, Types.FLOAT);
-		java2SqlTypeMaper.put(Double.class, Types.DOUBLE);
-		java2SqlTypeMaper.put(double.class, Types.DOUBLE);
-		java2SqlTypeMaper.put(Long.class, Types.BIGINT);
-		java2SqlTypeMaper.put(long.class, Types.BIGINT);
-		
-		wrapperTypeMapper = new HashMap<Class<?>, Integer>();
-		wrapperTypeMapper.put(Timestamp.class, Types.TIMESTAMP);
-		
+		cache = new ConcurrentHashMap<String, DalParser<?>>();	
 	}
 	
 	private Loader loader;
@@ -79,8 +58,8 @@ public class EnteroctopusParser<T> implements DalParser<T>{
 			this.columns[i] = dbColumn.columnName().equals("") ? 
 					field.getName() : dbColumn.columnName();
 			this.columnTypes[i] = dbColumn.wrapperType().equals(Void.class) ?
-					java2SqlTypeMaper.get(field.getType()) : 
-						wrapperTypeMapper.get(dbColumn.wrapperType());
+					this.loader.getSqlType(field.getType()) : 
+						this.loader.getSqlType(dbColumn.wrapperType());
 			this.fieldNames[i] = field.getName();		
 			DBId id = field.getAnnotation(DBId.class);
 			if(null != id){

@@ -91,7 +91,7 @@ public class DefaultLoader extends Loader{
 	}
 
 	@Override
-	public Object save(Field field, Object entity)
+	public Object save(Field field, Object entity, boolean nullable)
 			throws ReflectiveOperationException {
 		
 		return this.load(field, entity);

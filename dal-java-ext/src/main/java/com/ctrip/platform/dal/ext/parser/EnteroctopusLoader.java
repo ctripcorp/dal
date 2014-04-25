@@ -101,9 +101,9 @@ public class EnteroctopusLoader extends Loader {
 		return null;
 	}
 
-	public Object save(Field field, Object entity)
+	public Object save(Field field, Object entity, boolean val)
 			throws ReflectiveOperationException {
-		Class<?> type = field.getType();		
+		Class<?> type = field.getType();
 		Object value = defaultMap.containsKey(type) ? defaultMap.get(type) : null;
 		DBColumn annot = field.getAnnotation(DBColumn.class);
 		Constructor<?> constr = annot.wrapperType().getConstructor(field.getType());

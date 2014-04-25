@@ -34,11 +34,13 @@ public abstract class Loader {
 	 * 		The specified Entity Field
 	 * @param entity
 	 * 		Entity from which the represented field's value is to be extracted
+	 * @param defaultVal
+	 * 		boolean indicate this column allow to be nullable or not
 	 * @return
 	 * 		the value of the field represented by this Field
 	 * @throws ReflectiveOperationException
 	 */
-	public abstract Object save(Field field, Object entity)
+	public abstract Object save(Field field, Object entity, boolean nullable)
 			throws ReflectiveOperationException;
 	
 	/**

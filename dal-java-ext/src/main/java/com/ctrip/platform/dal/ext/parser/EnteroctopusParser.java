@@ -156,7 +156,7 @@ public class EnteroctopusParser<T> implements DalParser<T>{
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		for(int i = 0; i < this.originFileds.length; i++){
 			try {
-				Object val = this.loader.save(originFileds[i], pojo);
+				Object val = this.loader.save(originFileds[i], pojo, true);
 				map.put(this.columns[i], val);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

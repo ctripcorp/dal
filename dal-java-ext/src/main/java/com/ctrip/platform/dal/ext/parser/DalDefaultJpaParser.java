@@ -37,7 +37,7 @@ public class DalDefaultJpaParser<T> implements DalParser<T> {
 	private boolean[] nullables;
 	private int[] columnTypes;
 	private String[] primaryKeys; 
-	
+	private Object[] defaultVals;
 	private Class<T> clazz;
 	private Field identity;
 	private Field[] originFileds;
@@ -62,6 +62,7 @@ public class DalDefaultJpaParser<T> implements DalParser<T> {
 			this.columns = new String[fields.length];
 			this.columnTypes = new int[fields.length];
 			this.originFileds = new Field[fields.length];
+			this.defaultVals = new Object[fields.length];
 			this.nullables = new boolean[fields.length];
 			
 			List<String> ids = new ArrayList<String>();
@@ -69,6 +70,7 @@ public class DalDefaultJpaParser<T> implements DalParser<T> {
 				Field field = fields[i];
 				field.setAccessible(true);
 				this.originFileds[i] = field;
+				this.defaultVals[i] = null;
 				
 				GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
 				if(null != generatedValue && 
@@ -195,7 +197,11 @@ public class DalDefaultJpaParser<T> implements DalParser<T> {
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		for(int i = 0; i < this.originFileds.length; i++){
 			try {
-				Object val = this.loader.save(originFileds[i], pojo);
+				if(this.autoIncrement && originFileds[i].equals(this.identity)){
+					map.put(this.columns[i], null);
+					continue;
+				}
+				Object val = this.loader.save(originFileds[i], pojo, nullables[i]);
 				map.put(this.columns[i], val);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -212,9 +218,9 @@ public class DalDefaultJpaParser<T> implements DalParser<T> {
 		person.setID(1);
 		person.setName("cc");
 		person.setAddress("ctrip");
-		person.setAge(100);
+		person.setAge(null);
 		person.setGender(-1);
-		person.setTelephone("120");
+		person.setTelephone(null);
 		person.setBirth(new Timestamp(System.currentTimeMillis()));
 		
 		System.out.println("databaseName: " + parser.getDatabaseName());
@@ -234,7 +240,6 @@ public class DalDefaultJpaParser<T> implements DalParser<T> {
 		for(Map.Entry<String, ?> en : parser.getFields(person).entrySet()){
 			System.out.print(String.format("[key=%s,value=%s],", en.getKey(), en.getValue()));
 		}
-		
 		System.out.print("\r\nprimaryKeys: ");
 		for(Map.Entry<String, ?> en : parser.getPrimaryKeys(person).entrySet()){
 			System.out.print(String.format("[key=%s,value=%s],", en.getKey(), en.getValue()));

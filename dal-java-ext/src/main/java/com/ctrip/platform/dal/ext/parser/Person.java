@@ -13,16 +13,16 @@ public class Person {
 	@Id
 	private Integer iD;
 	
-	@Column()
+	@Column
 	private String address;
 	
-	@Basic
+	@Column(nullable=false)
 	private String telephone;
 	
 	@Basic
 	private String name;
 	
-	@Basic
+	@Column(nullable=false)
 	private Integer age;
 	
 	@Basic

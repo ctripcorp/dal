@@ -210,7 +210,7 @@ public class LogEntry {
 	
 	private String getParams(StatementParameters params){
 		List<String> plantPrams = new ArrayList<String>();
-		for (StatementParameter param : parameters.values()) {
+		for (StatementParameter param : params.values()) {
 			plantPrams.add(String.format("%s=%s", 
 					param.getName() == null ? param.getIndex() : param.getName(), 
 					param.isSensitive() ? SQLHIDDENString : param.getValue()));

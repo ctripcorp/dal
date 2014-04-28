@@ -50,9 +50,9 @@ public class Logger {
 		if(validate(log.getSqlTpl(), log.getInputParamStr())){
 			logger.info(CommonUtil.null2NA(log.getTitle()), log.toBrief(), log.getTag());;
 		}
-		//trace.log(LogType.SQL, LogLevel.INFO, 
-				//CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
-		logger.info(CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
+		trace.log(LogType.SQL, LogLevel.INFO, 
+				CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
+		//logger.info(CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
 	}
 	
 	public static void logGetConnectionSuccess(String realDbName)

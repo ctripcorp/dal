@@ -309,7 +309,7 @@ public class DalDirectClient implements DalClient {
 		long start = start();
 		long duration = 0;
 		try {
-			entry = createLogEntry(action);
+			entry = createLogEntry(action, hints);
 			
 			T result = action.execute();
 			
@@ -351,9 +351,9 @@ public class DalDirectClient implements DalClient {
 		try {
 			//conn.getSchema()
 			level = startTransaction(hints);
-			entry = createLogEntry(action);
+			entry = createLogEntry(action, hints);
 			populateDbInfo(transManager.getConnection(hints), entry);
-			
+		
 			T result = action.execute();	
 			endTransaction(level);			
 			duration = start() - start;
@@ -372,8 +372,8 @@ public class DalDirectClient implements DalClient {
 		}
 	}
 	
-	private LogEntry createLogEntry(ConnectionAction<?> action) {
-		LogEntry entry = new LogEntry();
+	private LogEntry createLogEntry(ConnectionAction<?> action, DalHints hints) {
+		LogEntry entry = new LogEntry(hints);
 		entry.setEvent(action.operation);
 		entry.setDatabaseName(logicDbName);
 		entry.setCallString(action.callString);
@@ -382,6 +382,7 @@ public class DalDirectClient implements DalClient {
 		entry.setParameters(action.parameters);
 		entry.setParametersList(action.parametersList);
 		entry.setTransactional(transManager.isInTransaction());
+		
 		return entry;
 	}
 	

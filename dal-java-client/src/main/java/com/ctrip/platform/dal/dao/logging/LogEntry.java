@@ -11,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.ctrip.platform.dal.dao.DalHintEnum;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameter;
@@ -59,9 +61,11 @@ public class LogEntry {
 		execludedClasses.add(DalQueryDao.class.getName());
 	}
 
-	public LogEntry() {
+	public LogEntry(DalHints hints) {
 		this.timeStamp = new Date();
 		this.machine = CommonUtil.MACHINE;
+		if(hints.is(DalHintEnum.sensitive))
+			this.sensitive = (Boolean)hints.get(DalHintEnum.sensitive);
 		this.getSourceAndMessage();
 		if(null != this.parameters) {
 			this.inputParamStr = this.getInputParameterPrint(this.parameters);
@@ -135,6 +139,30 @@ public class LogEntry {
 		this.message = message;
 	}
 
+	public String getTitle(){
+		return this.title;
+	}
+	
+	public String getDao(){
+		return this.dao;
+	}
+	
+	public String getMethod(){
+		return this.method;
+	}
+	
+	public void setSuccess(boolean success) {
+		this.success = success;
+	}
+
+	public void setErrorMsg(String errorMsg) {
+		this.errorMsg = errorMsg;
+	}
+
+	public String getInputParamStr(){
+		return this.inputParamStr;
+	}
+	
 	private void getSourceAndMessage() {
 		StackTraceElement[] callers = Thread.currentThread().getStackTrace();
 
@@ -150,14 +178,6 @@ public class LogEntry {
 		}
 	}
 	
-	public void setSuccess(boolean success) {
-		this.success = success;
-	}
-
-	public void setErrorMsg(String errorMsg) {
-		this.errorMsg = errorMsg;
-	}
-
 	private String getInputParameterPrint(StatementParameters parameters) {
 		if(null == parameters)
 			return "";
@@ -204,10 +224,6 @@ public class LogEntry {
 		return "";
 	}
 	
-	public String getInputParamStr(){
-		return this.inputParamStr;
-	}
-	
 	private String getParams(StatementParameters params){
 		List<String> plantPrams = new ArrayList<String>();
 		for (StatementParameter param : params.values()) {
@@ -244,19 +260,7 @@ public class LogEntry {
 			return true;
 		}
 	}
-	
-	public String getTitle(){
-		return this.title;
-	}
-	
-	public String getDao(){
-		return this.dao;
-	}
-	
-	public String getMethod(){
-		return this.method;
-	}
-	
+
 	public int getSqlSize(){
 		int size = 0;
 		if(this.event == DalEventEnum.QUERY || 
@@ -327,7 +331,7 @@ public class LogEntry {
 		sb.append(String.format("Message:%s\r\n", message));
 		if (sql != null) {
 			sb.append(String.format("Duration:%d\r\n", duration))
-				.append(String.format("SQL Text:%s\r\n", sensitive ? SQLHIDDENString : sql))
+				.append(String.format("SQL Text:%s\r\n", this.sensitive ? SQLHIDDENString : sql))
 				.append(String.format("SQL Hash:%s\r\n", sqlHash))
 				.append("Input Parameters:")
 				.append(CommonUtil.desEncrypt(this.inputParamStr)).append("\r\n")
@@ -348,7 +352,7 @@ public class LogEntry {
 			sb.append(String.format("Event:%d\r\n", event.getEventId()))
 				.append(String.format("Message:%s\r\n", message))
 				.append(String.format("SQL Text: %s\r\n", CommonUtil.tagSql(sql)))
-				.append(String.format("%s\r\n", sensitive ? SQLHIDDENString : sql))
+				.append(String.format("%s\r\n", this.sensitive ? SQLHIDDENString : sql))
 				.append("Input Parameters:").append(CommonUtil.desEncrypt(this.inputParamStr)).append("\r\n")
 				.append("Output Parameters:").append(outputParamStr)
 				.append("\r\n");
@@ -364,7 +368,7 @@ public class LogEntry {
 	}
 
 	public String toJson(){
-		String sqlTpl = this.getSqlTpl();	
+		String sqlTpl = this.sensitive ?  SQLHIDDENString : this.getSqlTpl();	
 		String params = this.getParams(); //TODO: 加密
 		int hashCode = CommonUtil.GetHashCode(sqlTpl);
 		boolean existed = this.hasHashCode(sqlTpl, hashCode);

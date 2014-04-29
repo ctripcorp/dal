@@ -1,10 +1,7 @@
 package com.ctrip.platform.dal.tester.baseDao;
 
 import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.ctrip.freeway.config.LogConfig;
@@ -12,13 +9,10 @@ import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.util.Configuration;
-import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.DalQueryDao;
-import com.ctrip.platform.dal.dao.DalRowCallback;
-import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -235,36 +229,26 @@ public class DalTableDaoTest {
 		}
 	}
 	
-	public void testCUDHint() {
+	public void testContinueOnError() {
 		try {
 			DalTableDao<Person> dao = new DalTableDao<Person>(personParser);
 			
 			Person p = new Person();
-			try {
-				dao.update(hints, p);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			p.setName("insert test 1");
-			dao.insert(hints, p);
-			p.setName("insert test 2");
-			dao.insert(hints, p);
-			p.setName("insert test 3");
-			dao.insert(hints, p);
-			
 			Person[] pList = new Person[3];
 			p = new Person();
-			p.setName("insert test 4");
+			p.setName("ContinueOnError");
 			pList[0] = p;
 			p = new Person();
-			p.setName("insert test 5");
+			p.setName("ContinueOnErrorContinueOnErrorContinueOnErrorContinueOnErrorContinueOnError");
 			pList[1] = p;
 			p = new Person();
-			p.setName("insert test 6");
+			p.setName("ContinueOnError");
 			pList[2] = p;
 			
-			dao.batchInsert(hints, pList);			
+			hints = new DalHints(DalHintEnum.continueOnError);
+			int count = dao.insert(hints, pList);
+			System.out.println(count);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -331,7 +315,8 @@ public class DalTableDaoTest {
 //		test.testDelete();
 //		test.testInsertWithKeyHolder();
 //		test.testCombinedInsert();
-		test.testBatchInsert();
+//		test.testBatchInsert();
+		test.testContinueOnError();
 		try {
 			Thread.sleep(30 * 1000);
 		} catch (InterruptedException e) {

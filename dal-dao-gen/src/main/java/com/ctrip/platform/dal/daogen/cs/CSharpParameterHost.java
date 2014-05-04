@@ -8,6 +8,8 @@ public class CSharpParameterHost extends AbstractParameterHost  implements Compa
 	
 	private String name;
 	
+	private String comment;
+	
 	private String alias;
 	
 	//where条件是否是in,如 select * from Person where id in ?
@@ -43,6 +45,15 @@ public class CSharpParameterHost extends AbstractParameterHost  implements Compa
 		this.primary = host.isPrimary();
 		this.nullable = host.isNullable();
 		this.valueType = host.isValueType();
+		this.comment = host.getComment();
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 	public boolean isInParameter() {

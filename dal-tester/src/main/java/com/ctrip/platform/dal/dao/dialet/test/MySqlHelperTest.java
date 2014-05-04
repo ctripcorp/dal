@@ -30,8 +30,8 @@ public class MySqlHelperTest {
 		}
 		hints = new DalHints();
 		parser = new PersonParser();
-		client = new DalTableDao<>(parser);
-		helper = new DalMySqlHelper<>(parser);
+		client = new DalTableDao<Person>(parser);
+		helper = new DalMySqlHelper<Person>(parser);
 	}
 	
 	@Test

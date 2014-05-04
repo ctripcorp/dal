@@ -13,6 +13,8 @@ import com.ctrip.platform.dal.ext.parser.EnteroctopusDao;
 public class Test {
 
 	public static void main(String[] args) throws Exception {
+		
+		
 		DalClientFactory.initPrivateFactory();
 		EnteroctopusDao dao = EnteroctopusDao.create(Person.class);
 		

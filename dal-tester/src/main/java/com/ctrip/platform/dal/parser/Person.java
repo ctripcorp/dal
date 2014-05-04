@@ -5,10 +5,10 @@ import java.sql.Timestamp;
 import com.ctrip.fx.enteroctopus.common.jpa.DBColumn;
 import com.ctrip.fx.enteroctopus.common.jpa.DBEntity;
 import com.ctrip.fx.enteroctopus.common.jpa.DBId;
-import com.ctrip.fx.enteroctopus.common.jpa.DataBase;
 import com.ctrip.platform.dal.dao.DalPojo;
 
-@DBEntity(tableName="Person", db = DataBase.dao_test)
+
+@DBEntity(tableName="Person") //modify the com.ctrip.fx.enteroctopus.common.jpa.DataBase and add db = DataBase.dao_test here
 public class Person implements DalPojo {
 	
 	@DBId

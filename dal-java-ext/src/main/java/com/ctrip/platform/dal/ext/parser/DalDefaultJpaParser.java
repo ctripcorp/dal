@@ -204,7 +204,7 @@ public class DalDefaultJpaParser<T> implements DalParser<T> {
 				Object val = this.loader.save(originFileds[i], pojo, nullables[i]);
 				map.put(this.columns[i], val);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		return map;

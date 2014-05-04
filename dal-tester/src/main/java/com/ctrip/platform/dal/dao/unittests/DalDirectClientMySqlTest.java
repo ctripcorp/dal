@@ -156,6 +156,7 @@ public class DalDirectClientMySqlTest {
 	}
 
 	
+	
 	private static class ClientTestModel {
 		private int id;
 		private int quantity;

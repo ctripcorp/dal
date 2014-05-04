@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
+import com.ctrip.platform.dal.dao.logging.MetricsLogger;
 
 public class DalClientFactory {
 	private static AtomicReference<DruidDataSourceWrapper> connPool = new AtomicReference<DruidDataSourceWrapper>();
@@ -124,5 +125,12 @@ public class DalClientFactory {
 			throw new IllegalArgumentException("Can not find definition for Database Set " + logicDbName + ". Please check spelling or define it in Dal.config");
 		
 		return new DalDirectClient(configureRef.get(), logicDbName);
+	}
+	
+	/**
+	 * Release All resource the Dal client used.
+	 */
+	public static void shutdownFactory(){
+		MetricsLogger.shutdown();
 	}
 }

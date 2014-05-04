@@ -45,6 +45,10 @@ public class MetricsLogger {
 		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), FAIL, System.currentTimeMillis() - start);
 	}
 	
+	public static void shutdown(){
+		sender.shutdown();
+	}
+	
 	private static void report(String dao, String method, int size, String status, long duration) {
 		long cost = duration;
         if (size < 200)

@@ -156,7 +156,7 @@ public class DalClientFactory {
 	/**
 	 * Release All resource the Dal client used.
 	 */
-	private static void shutdownFactory() {
+	public static void shutdownFactory() {
 		MetricsLogger.shutdown();
 	}
 }

@@ -41,7 +41,7 @@ public class DalTransactionManager {
 		if(connCache == null) {
 			Connection conn = getConnection(hints, true);
 			conn.setAutoCommit(false);
-			connCache = new ConnectionCache(hints.getInt(DalHintEnum.oldIsolationLevel), conn);
+			connCache = new ConnectionCache(hints.getInt(DalHintEnum.oldIsolationLevel), conn, logicDbName);
 			connectionCacheHolder.set(connCache);
 		}
 		return connCache.startTransaction();
@@ -83,6 +83,7 @@ public class DalTransactionManager {
 		if(connCache == null) {
 			return getNewConnection(hints, useMaster);
 		} else {
+			connCache.validate(logicDbName);
 			return connCache.getConnection();
 		}
 	}
@@ -222,15 +223,25 @@ public class DalTransactionManager {
 	}
 	
 	private static final class ConnectionCache {
+		private String logicDbName;
 		private Connection conn;
 		private Integer oldLevel;
 		private int level = 0;
 		private boolean rolledBack;
 		
-		public ConnectionCache(Integer oldLevel, Connection conn) throws SQLException{
+		public ConnectionCache(Integer oldLevel, Connection conn, String logicDbName) throws SQLException{
+			this.logicDbName = logicDbName;
 			this.conn = conn;
 			this.oldLevel = oldLevel;
 			conn.setAutoCommit(false);
+		}
+		
+		public void validate(String logicDbName) throws SQLException {
+			if(logicDbName == null || logicDbName.length() == 0)
+				throw new SQLException("Logic Db Name is empty!");
+			
+			if(!logicDbName.equals(this.logicDbName))
+				throw new SQLException(String.format("DAL do not support distributed transaction. Current DB: %s, DB requested: %s", this.logicDbName, logicDbName));
 		}
 		
 		public Connection getConnection() {

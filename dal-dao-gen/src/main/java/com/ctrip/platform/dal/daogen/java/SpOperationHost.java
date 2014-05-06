@@ -12,8 +12,16 @@ public class SpOperationHost {
 	private boolean exist;
 	private List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
 	private String methodName;
-	private boolean spa = false;
-	
+	private String type;
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
 	public boolean isExist() {
 		return exist;
 	}
@@ -53,10 +61,12 @@ public class SpOperationHost {
 		if( (index = spNames.indexOf(expectSpa)) > 0){
 			host.exist = true;
 			host.methodName = expectSpa.getName();
+			host.setType("spA");
 			currentSp = spNames.get(index);
 		}else if((index = spNames.indexOf(expectSp3)) > 0){
 			host.exist = true;
 			host.methodName = expectSp3.getName();
+			host.setType("sp3");
 			currentSp = spNames.get(index);
 		}else{
 			host.exist = false;

@@ -50,16 +50,20 @@ public interface DalClient {
 			KeyHolder generatedKeyHolder) throws SQLException;
 
 	/**
-	 * Batch update for given sqls.
+	 * Batch update for given sqls.The default behavior is execute in transaction.
+	 * You can overwrite this by set forceAutoCommit in hints.
 	 * @param sqls
-	 * @param hints
+	 * @param hints 
+	 * 			when hints set forceAutoCommit the connection auto commit will be true.
 	 * @return how many rows been affected for each of the sql
 	 * @throws SQLException
 	 */
 	int[] batchUpdate(String[] sqls, DalHints hints) throws SQLException;
 
 	/**
-	 * Batch update for the given sql with all the given parameters in parametersList
+	 * Batch update for the given sql with all the given parameters in parametersList.
+	 * The default behavior is execute in transaction.
+	 * You can overwrite this by set forceAutoCommit in hints.
 	 * @param sql
 	 * @param parametersList
 	 * @param hints
@@ -69,6 +73,14 @@ public interface DalClient {
 	int[] batchUpdate(String sql, StatementParameters[] parametersList,
 			DalHints hints) throws SQLException;
 
+	/**
+	 * Execute customized command in the transaction.
+	 * @param commands
+	 * @param hints
+	 * @throws SQLException
+	 */
+	void execute(DalCommand command, DalHints hints) throws SQLException;
+	
 	/**
 	 * Execute list of commands in the same transaction.
 	 * @param commands
@@ -90,6 +102,8 @@ public interface DalClient {
 
 	/**
 	 * Call stored procedure.
+	 * The default behavior is execute in transaction.
+	 * You can overwrite this by set forceAutoCommit in hints.
 	 * @param callString
 	 * @param parametersList
 	 * @param hints

@@ -17,6 +17,7 @@
 		<module>dal-common</module>
 		<module>dal-tester</module>
 		<module>dal-server-common</module>
+		<module>dal-java-ext</module>
 	</modules>
 	<properties>
 		<package.environment>local</package.environment>

@@ -520,7 +520,6 @@ public class DbUtils {
 					CSharpParameterHost host = new CSharpParameterHost();
 					String typeName = allColumnsRs.getString("TYPE_NAME");
 					int dataType = allColumnsRs.getInt("DATA_TYPE");
-					int length = allColumnsRs.getInt("COLUMN_SIZE");
 					
 					//特殊处理
 					DbType dbType;
@@ -528,14 +527,13 @@ public class DbUtils {
 						dbType = DbType.Int16;
 					else if(null != typeName && typeName.equalsIgnoreCase("sql_variant"))
 						dbType = DbType.Object;
-					else if(dataType == 1 && length > 1)
-						dbType = DbType.AnsiString;
 					else
 						dbType =DbType.getDbTypeFromJdbcType(dataType);
 
 					host.setDbType(dbType);
 					//host.setName(CommonUtils.normalizeVariable(allColumnsRs.getString("COLUMN_NAME")));
-					host.setName(allColumnsRs.getString("COLUMN_NAME"));;
+					host.setName(allColumnsRs.getString("COLUMN_NAME"));
+					host.setComment(allColumnsRs.getString("REMARKS"));
 					host.setType(DbType.getCSharpType(host.getDbType()));
 					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
 							.equalsIgnoreCase("YES"));
@@ -544,7 +542,7 @@ public class DbUtils {
 							.getType()));
 					// 仅获取String类型的长度
 					 if (host.getType().equalsIgnoreCase("string"))
-						 host.setLength(length);
+						 host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
 
 					// COLUMN_SIZE
 

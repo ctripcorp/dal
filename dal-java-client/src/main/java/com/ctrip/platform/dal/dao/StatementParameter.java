@@ -23,6 +23,10 @@ public class StatementParameter {
 		return currentBuilder.build2SqlParameters();
 	}
 	
+	public boolean isDefaultType(){
+		return currentBuilder.defaultType_;
+	}
+	
 	// TODO use builder to build parameter can be optimized 
 	public DbType getDbType() {
 		return currentBuilder.dbType_;
@@ -101,6 +105,17 @@ public class StatementParameter {
 			return builder;
 		}
 		
+		public static Builder set(int index, Object value) {
+			Builder builder = new Builder();
+			
+			builder.index_ = index;
+			builder.defaultType_ = true;
+			builder.value_ = value;
+			builder.direction_ = ParameterDirection.Input;
+			
+			return builder;
+		}
+		
 		public static Builder set(String name, int sqlType, Object value) {
 			Builder builder = new Builder();
 			
@@ -135,6 +150,8 @@ public class StatementParameter {
 			
 			return builder;
 		}
+		
+		private boolean defaultType_;
 		
 		private DbType dbType_;
 		
@@ -201,6 +218,11 @@ public class StatementParameter {
 			return this;
 		}
 
+		public Builder setDefaultType(boolean defaultType){
+			defaultType_ = defaultType;
+			return this;
+		}
+		
 		public StatementParameter build() {
 			return new StatementParameter(this);
 		}

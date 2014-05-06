@@ -28,6 +28,11 @@ public enum DalHintEnum {
 	shards, // Set<String>
 	/* End of parameters for each Dal client call */
 	
+	/*
+	 * used in batch sp, when set the connection auto commit will be true.
+	 */
+	forceAutoCommit,
+	
 	/* Settings for initialize statement */
 	timeout,
 	
@@ -85,6 +90,11 @@ public enum DalHintEnum {
 	
 	/* cache for store old isolationLevel of connection before we apply isolationLevel. It is for internal use. */
 	oldIsolationLevel,
+	
+	/*
+	 * used in DalTableDao, when set the update field can be null value.
+	 */
+	updateNullField,
 	
 	/* Allow customization */
 	userDefined0,

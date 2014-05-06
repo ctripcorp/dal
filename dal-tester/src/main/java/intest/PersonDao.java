@@ -140,10 +140,9 @@ public class PersonDao {
 	 * SQL update
 	 * Note: there must be one non-null field in daoPojo
 	**/
-	public void update(Person...daoPojos) throws SQLException {
+	public void update(DalHints hints, Person...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
-		DalHints hints = new DalHints();
 		client.update(hints, daoPojos);
 	}
 

@@ -2,7 +2,9 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -166,6 +168,7 @@ public class ProjectResource {
 	public Status generateProject(@FormParam("project_id") int id,
 			@FormParam("regenerate") boolean regen,
 			@FormParam("language") String language,
+			@FormParam("newPojo") boolean newPojo,
 			@FormParam("random") String random) {
 		Status status = null;
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
@@ -177,10 +180,12 @@ public class ProjectResource {
 			if (language.equals("java"))
 			{
 				//JavaGenerator.getInstance().generateCode(id, regen, progress);
-				new JavaGenerator().generate(id, regen, progress);
+				new JavaGenerator().generate(id, regen, progress, null);
 			}
 			else if (language.equals("cs")){
-				new CSharpGenerator().generate(id, regen, progress);
+				Map hints = new HashMap<String, Boolean>();
+				hints.put("newPojo", newPojo);
+				new CSharpGenerator().generate(id, regen, progress, hints);
 			}
 			status = Status.OK;
 			log.info(String.format("generate project[%s] completed.", id));

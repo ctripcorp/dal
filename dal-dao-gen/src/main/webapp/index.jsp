@@ -173,6 +173,9 @@
                         </select>
                      </div>
                   </div>
+                  <div class="row-fluid useNewPojo">
+                     <label class="popup_label"><input id="newPojo" type="checkbox" checked="checked">生成代码时附带数据库中的类型（DAL Fx>V1.2.0.6）</label>
+                  </div>
                </div>
                <div class="modal-footer">
                   <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>

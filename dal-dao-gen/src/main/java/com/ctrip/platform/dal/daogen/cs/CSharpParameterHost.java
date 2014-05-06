@@ -163,7 +163,7 @@ public class CSharpParameterHost extends AbstractParameterHost  implements Compa
 
 	@Override
 	public int compareTo(CSharpParameterHost o) {
-		return this.getName().compareTo(o.getName());
+		return this.getName().toLowerCase().compareTo(o.getName().toLowerCase());
 	}
 
 }

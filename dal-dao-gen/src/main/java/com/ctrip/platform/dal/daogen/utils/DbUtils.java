@@ -533,7 +533,10 @@ public class DbUtils {
 					host.setDbType(dbType);
 					//host.setName(CommonUtils.normalizeVariable(allColumnsRs.getString("COLUMN_NAME")));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
-					host.setComment(allColumnsRs.getString("REMARKS"));
+					String remark = allColumnsRs.getString("REMARKS");
+					if(remark == null)
+						remark = "";
+					host.setComment(remark.replace("\n", " "));
 					host.setType(DbType.getCSharpType(host.getDbType()));
 					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
 							.equalsIgnoreCase("YES"));

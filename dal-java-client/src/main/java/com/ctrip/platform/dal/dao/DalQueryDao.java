@@ -50,7 +50,9 @@ public final class DalQueryDao {
 
 	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
-		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, 1)).get(0);
+		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, 1));
+		assertCount(1, result.size());
+		return result.get(0);
 	}
 
 	public <T> List<T> queryTop(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int count) 

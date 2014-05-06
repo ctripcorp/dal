@@ -44,7 +44,7 @@ public class DalTabelDaoMySqlTest {
 			DalClientFactory.initPrivateFactory();
 			client = DalClientFactory.getClient(DATABASE_NAME);
 			parser = new ClientTestDalParser();
-			dao = new DalTableDao<>(parser);
+			dao = new DalTableDao<ClientTestModel>(parser);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -118,8 +118,11 @@ public class DalTabelDaoMySqlTest {
 	@Test
 	public void testQueryByPkWithEntityNoId() throws SQLException{
 		ClientTestModel pk = new ClientTestModel();
-		ClientTestModel model = dao.queryByPk(pk, new DalHints());
-		Assert.assertTrue(null == model);
+		try {
+			ClientTestModel model = dao.queryByPk(pk, new DalHints());
+			Assert.fail();
+		} catch (SQLException e) {
+		}
 	}
 	
 	/**
@@ -176,9 +179,11 @@ public class DalTabelDaoMySqlTest {
 		String whereClause = "type=?";
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, Types.SMALLINT, 10);
-		
-		ClientTestModel model = dao.queryFirst(whereClause, parameters, new DalHints());
-		Assert.assertTrue(null != model);
+		try{
+			dao.queryFirst(whereClause, parameters, new DalHints());
+			Assert.fail();
+		}catch(Throwable e) {
+		}
 	}
 	
 	/**

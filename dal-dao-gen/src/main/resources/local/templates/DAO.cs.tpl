@@ -426,10 +426,17 @@ namespace ${host.getNameSpace()}.Dao
             {
                 DataRow row = dt.NewRow();
 #foreach($column in $host.getColumns())
+#if($column.isNullable() && $column.isValueType())
+                if(${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalize($column.getName())} != null && ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalize($column.getName())}.HasValue)
+                {
+#end
 #if($column.isIdentity())
-                row["${WordUtils.capitalize($column.getName())}"] = insert ? ++i : ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalize($column.getName())};
+                    row["${WordUtils.capitalize($column.getName())}"] = insert ? ++i : ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalize($column.getName())};
 #else
-                row["${WordUtils.capitalize($column.getName())}"] = ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalize($column.getName())};
+                    row["${WordUtils.capitalize($column.getName())}"] = ${WordUtils.uncapitalize($host.getClassName())}Info.${WordUtils.capitalize($column.getName())};
+#if($column.isNullable() && $column.isValueType())
+                }
+#end
 #end
 #end
                 dt.Rows.Add(row);

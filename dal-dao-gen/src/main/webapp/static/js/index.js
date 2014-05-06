@@ -128,6 +128,14 @@ jQuery(document).ready(function () {
         window.ajaxutil.generate_code();
     });
 
+    $(document.body).on('click', '#regen_language', function (event) {
+        if($("#regen_language").val() == "cs"){
+            $(".useNewPojo").show();
+        }else{
+            $(".useNewPojo").hide();
+        }
+    });
+
     $("#add_condition").click(function () {
         var selectedField = $("#conditions").val();
         var selectedCondition = $("#condition_values").val();

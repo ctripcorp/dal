@@ -55,6 +55,8 @@ public class CSharpGenerator extends AbstractGenerator {
 	private Queue<CSharpTableHost> _spHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
 	private Queue<GenTaskBySqlBuilder> _sqlBuilders = new ConcurrentLinkedQueue<GenTaskBySqlBuilder>();
 	
+	private boolean newPojo = false;
+	
 	private static String regEx = null;
 	private static Pattern inRegxPattern = null;
 	static{
@@ -481,7 +483,7 @@ public class CSharpGenerator extends AbstractGenerator {
 							String.format("%s/Entity/%s.cs",
 									mavenLikeDir.getAbsolutePath(),
 									host.getClassName()),
-							"templates/Pojo.cs.tpl");
+							newPojo ? "templates/PojoNew.cs.tpl" : "templates/Pojo.cs.tpl");
 
 					GenUtils.mergeVelocityContext(
 							context,
@@ -565,7 +567,7 @@ public class CSharpGenerator extends AbstractGenerator {
 							String.format("%s/Entity/%s.cs", mavenLikeDir
 									.getAbsolutePath(), CommonUtils
 									.normalizeVariable(host.getClassName())),
-							"templates/Pojo.cs.tpl");
+									newPojo ? "templates/PojoNew.cs.tpl" : "templates/Pojo.cs.tpl");
 					return true;
 				}
 			};
@@ -987,11 +989,16 @@ public class CSharpGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public boolean generateCode(int id, Progress progress) {
+	public boolean generateCode(int id, Progress progress, Map hints) {
 		final VelocityContext context = GenUtils.buildDefaultVelocityContext();
 
 		final File csMavenLikeDir = new File(String.format("%s/%s/cs",
 				generatePath, id));
+		
+		if(null != hints && hints.containsKey("newPojo")){
+			Object _newPojo = hints.get("newPojo");
+			newPojo = Boolean.parseBoolean(_newPojo.toString());
+		}
 
 		List<Callable<Boolean>> tableCallables = generateTableDao(
 				 csMavenLikeDir, progress);

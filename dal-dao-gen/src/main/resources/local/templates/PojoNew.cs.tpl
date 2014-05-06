@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using Arch.Data.Orm;
 
 namespace ${host.getNameSpace()}.Entity.DataModel
@@ -16,7 +17,7 @@ namespace ${host.getNameSpace()}.Entity.DataModel
 		/// $column.getComment()
 #end
         /// </summary>
-        [Column(Name = "${column.getName()}"#if($column.getLength() > 0),Length=${column.getLength()}#end)#if($column.isIdentity()),ID#end#if($column.isPrimary()),PK#end]
+        [Column(Name = "${column.getName()}",ColumnType=DbType.${column.getDbType()}#if($column.getLength() > 0),Length=${column.getLength()}#end)#if($column.isIdentity()),ID#end#if($column.isPrimary()),PK#end]
         public ${column.getType()}#if($column.isNullable() && $column.isValueType())?#end #if($WordUtils.capitalize($column.getName()) == $host.getClassName())${host.getClassName()}_Gen#{else}${WordUtils.capitalize($column.getName())}#end { get; set; }
 #end
     }

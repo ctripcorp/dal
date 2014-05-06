@@ -864,7 +864,7 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public boolean generateCode(int id, Progress progress) {
+	public boolean generateCode(int id, Progress progress, Map hints) {
 
 		VelocityContext context = GenUtils.buildDefaultVelocityContext();
 		File mavenLikeDir = new File(String.format("%s/%s/java", generatePath,

@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen;
 
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -49,7 +50,7 @@ public abstract class AbstractGenerator implements Generator {
 		Velocity.init(pr);
 	}
 
-	public void generate(int projectId, boolean regenerate, Progress progress) {
+	public void generate(int projectId, boolean regenerate, Progress progress, Map hints) {
 		
 		Project proj = daoOfProject.getProjectByID(projectId);
 
@@ -67,7 +68,7 @@ public abstract class AbstractGenerator implements Generator {
 		
 		ProgressResource.addDoneFiles(progress, 2);
 		
-		generateCode(projectId, progress);
+		generateCode(projectId, progress, hints);
 		
 		ProgressResource.addDoneFiles(progress, 3);
 		
@@ -80,7 +81,7 @@ public abstract class AbstractGenerator implements Generator {
 	
 	public abstract boolean prepareData(int projectId, boolean regenerate, Progress progress);
 
-	public abstract boolean generateCode(int projectId, Progress progress);
+	public abstract boolean generateCode(int projectId, Progress progress, Map hints);
 
 	public abstract boolean clearResource();
 

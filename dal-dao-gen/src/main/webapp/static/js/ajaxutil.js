@@ -241,6 +241,7 @@
                 "project_id": w2ui['grid'].current_project,
                 "regenerate": $("#regenerate").val() == "regenerate",
                 "language": $("#regen_language").val(),
+                "newPojo": $("#newPojo").attr("checked") == "checked",
                 "random":random
             },function (data) {
                 if (data.code != "OK") {

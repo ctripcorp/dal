@@ -23,9 +23,7 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.KeyHolder;
-import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
@@ -37,26 +35,56 @@ import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
  */
 public class DalDirectClientMySqlTest {
 	private final static String DATABASE_NAME = "dao_test";
+	
 	private final static String TABLE_NAME = "dal_client_test";
-	private final static String SP_NAME = "dal_client_test_i";
+	private final static String SP_I_NAME = "dal_client_test_i";
+	private final static String SP_D_NAME="dal_client_test_d";
+	private final static String SP_U_NAME = "dal_client_test_u";
+	
 	private final static String DROP_TABLE_SQL = "DROP TABLE IF EXISTS " + TABLE_NAME;
+	
+	//Create the the table
 	private final static String CREATE_TABLE_SQL = "CREATE TABLE dal_client_test("
-			+ "ID int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
+			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
 			+ "quantity int,"
 			+ "type smallint, "
 			+ "address VARCHAR(64) not null, "
 			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
-	private static final String CREATE_SP_SQL = "CREATE PROCEDURE dal_client_test_i("
-			+ "id int,"
+	
+	//Only has normal parameters
+	private static final String CREATE_I_SP_SQL = "CREATE PROCEDURE dal_client_test_i("
+			+ "dal_id int,"
 			+ "quantity int,"
 			+ "type smallint,"
 			+ "address VARCHAR(64)) "
 			+ "BEGIN INSERT INTO dal_client_test"
 			+ "(id, quantity, type, address) "
-			+ "VALUES(id, quantity, type, address);"
+			+ "VALUES(dal_id, quantity, type, address);"
 			+ "SELECT ROW_COUNT() AS result;"
 			+ "END";
-	private static final String DROP_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_i";
+	//Has out parameters store procedure
+	private static final String CREATE_D_SP_SQL = "CREATE PROCEDURE dal_client_test_d("
+			+ "dal_id int,"
+			+ "out count int)"
+			+ "BEGIN DELETE FROM dal_client_test WHERE id=dal_id;"
+			+ "SELECT ROW_COUNT() AS result;"
+			+ "SELECT COUNT(*) INTO count from dal_client_test;"
+			+ "END";
+	//Has in-out parameters store procedure
+	private static final String CREATE_U_SP_SQL = "CREATE PROCEDURE dal_client_test_u("
+			+ "dal_id int,"
+			+ "quantity int,"
+			+ "type smallint,"
+			+ "INOUT address VARCHAR(64))"
+			+ "BEGIN UPDATE dal_client_test "
+			+ "SET quantity = quantity, type=type, address=address "
+			+ "WHERE id=dal_id;"
+			+ "SELECT ROW_COUNT() AS result;"
+			+ "END";
+	
+	private static final String DROP_I_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_i";
+	private static final String DROP_D_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_d";
+	private static final String DROP_U_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_u";
 	
 	private static DalClient client = null;
 	private static ClientTestDalRowMapper mapper = null;
@@ -75,14 +103,17 @@ public class DalDirectClientMySqlTest {
 	public static void setUpBeforeClass() throws Exception {
 		DalHints hints = new DalHints();
 		String[] sqls = new String[] { DROP_TABLE_SQL, CREATE_TABLE_SQL, 
-				DROP_SP_SQL, CREATE_SP_SQL};
+				DROP_I_SP_SQL, CREATE_I_SP_SQL, 
+				DROP_D_SP_SQL, CREATE_D_SP_SQL,
+				DROP_U_SP_SQL, CREATE_U_SP_SQL};
 		client.batchUpdate(sqls, hints);
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		DalHints hints = new DalHints();
-		String[] sqls = new String[] { DROP_TABLE_SQL, DROP_SP_SQL};
+		String[] sqls = new String[] { DROP_TABLE_SQL, DROP_I_SP_SQL,
+				DROP_D_SP_SQL, DROP_U_SP_SQL};
 		client.batchUpdate(sqls, hints);
 	}
 
@@ -458,7 +489,7 @@ public class DalDirectClientMySqlTest {
 	 */
 	@Test
 	public void callTestWithoutParametersNoResultsParameter() throws SQLException{
-		String callSql = "call " + SP_NAME + "(4,12,1,'SZ INFO')";
+		String callSql = "call " + SP_I_NAME + "(4,12,1,'SZ INFO')";
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
 		Map<String, ?> res = client.call(callSql, parameters, hints);
@@ -471,12 +502,34 @@ public class DalDirectClientMySqlTest {
 	}
 	
 	/**
+	 * Test the call function with out parameters
+	 * @throws SQLException
+	 */
+	@Test
+	public void callTestWithoutParametersAndOutParameter() throws SQLException{
+		String callSql = "call " + SP_D_NAME + "(1,?)";
+		StatementParameters parameters = new StatementParameters();
+		parameters.registerOut("count", Types.INTEGER);
+		DalHints hints = new DalHints();
+		Map<String, ?> res = client.call(callSql, parameters, hints);
+		Assert.assertTrue(null != res);
+		Assert.assertEquals(1, res.size());
+		Assert.assertEquals(2, ((Number)res.get("count")).intValue());
+		
+		List<ClientTestModel> models = this.queryModelsByIds(1);
+		Assert.assertEquals(0, models.size());
+		
+		List<ClientTestModel> models_d = this.queryModelsByIds();
+		Assert.assertEquals(2, models_d.size());
+	}
+	
+	/**
 	 * Test call without parameters but has resultsParameter
 	 * @throws SQLException
 	 */
 	@Test
 	public void callTestWithoutParametersAndResultsParameter() throws SQLException{
-		String callSql = "call " + SP_NAME + "(4,12,1,'SZ INFO')";
+		String callSql = "call " + SP_I_NAME + "(4,12,1,'SZ INFO')";
 		StatementParameters parameters = new StatementParameters();
 		DalScalarExtractor extractor = new DalScalarExtractor();
 		parameters.setResultsParameter("result", extractor);
@@ -499,9 +552,9 @@ public class DalDirectClientMySqlTest {
 	 */
 	@Test
 	public void callTestWithParametersNoResultsParameter() throws SQLException {
-		String callSql = "call " + SP_NAME + "(?,?,?,?)";
+		String callSql = "call " + SP_I_NAME + "(?,?,?,?)";
 		StatementParameters parameters = new StatementParameters();
-		parameters.set("id", Types.INTEGER, 4);
+		parameters.set("dal_id", Types.INTEGER, 4);
 		parameters.set("quantity", Types.INTEGER, 10);
 		parameters.set("type", Types.SMALLINT, 3);
 		parameters.set("address", Types.VARCHAR, "SZ INFO");
@@ -517,14 +570,39 @@ public class DalDirectClientMySqlTest {
 	}
 	
 	/**
+	 * Test the call function with in-out parameters
+	 * @throws SQLException
+	 */
+	@Test
+	public void callTestWithParametersAndInOutParameters() throws SQLException{
+		String callSql = "call " + SP_U_NAME + "(?,?,?,?)";
+		StatementParameters parameters = new StatementParameters();
+		parameters.set("dal_id", Types.INTEGER, 1);
+		parameters.set("quantity", Types.INTEGER, 10);
+		parameters.set("type", Types.SMALLINT, 3);
+		//parameters.set("address", Types.VARCHAR, "SZ INFO");
+		parameters.registerInOut("address", Types.VARCHAR, "SZ INFO");
+		
+		DalHints hints = new DalHints();
+		Map<String, ?> res = client.call(callSql, parameters, hints);
+		Assert.assertTrue(null != res);
+		Assert.assertEquals(1, res.size());
+		Assert.assertTrue(res.containsKey("address"));
+		
+		List<ClientTestModel> models = this.queryModelsByIds(1);
+		Assert.assertEquals(1, models.size());
+		Assert.assertEquals("SZ INFO", models.get(0).getAddress());
+	}
+	
+	/**
 	 * Test call with parameters and has resultsParameter
 	 * @throws SQLException
 	 */
 	@Test
 	public void callTestWithParametersAndResultsParameter() throws SQLException {
-		String callSql = "call " + SP_NAME + "(?,?,?,?)";
+		String callSql = "call " + SP_I_NAME + "(?,?,?,?)";
 		StatementParameters parameters = new StatementParameters();
-		parameters.set("id", Types.INTEGER, 4);
+		parameters.set("dal_id", Types.INTEGER, 4);
 		parameters.set("quantity", Types.INTEGER, 10);
 		parameters.set("type", Types.SMALLINT, 3);
 		parameters.set("address", Types.VARCHAR, "SZ INFO");
@@ -545,43 +623,49 @@ public class DalDirectClientMySqlTest {
 	}
 	
 	/**
-	 * Test batch call without parameters and has no ResultParameters
-	 */
-	@Test
-	public void testBatchCallWithoutParametersNoResultParameters(){
-		
-	}
-	
-	/**
-	 * Test batch call without parameters but has ResultParameters
-	 */
-	@Test
-	public void testBatchCallWithoutParametersAndResultParameters(){
-		
-	}
-	
-	/**
 	 * Test batch call with parameters but has no ResultParameters
+	 * @throws SQLException 
 	 */
 	@Test
-	public void testBatchCallWithParametersNoResultParameters(){
+	public void testBatchCallWithParametersNoResultParameters() throws SQLException{
+		String callSql = "call " + SP_I_NAME + "(?,?,?,?)";
+		StatementParameters[] parametersList = new StatementParameters[7];
+		DalHints hints = new DalHints();
+		for(int i = 0; i < 7; i++){
+			StatementParameters param = new StatementParameters();
+			param.set("dal_id", Types.INTEGER, null);
+			param.set("quantity", Types.INTEGER, 10 + i);
+			param.set("type", Types.SMALLINT, 3);
+			param.set("address", Types.VARCHAR, "SZ INFO" + "_" + i);
+			parametersList[i] = param;
+		}
+		int[] res = client.batchCall(callSql, parametersList, hints);
+		Assert.assertEquals(7, res.length);
 		
+		List<ClientTestModel> models = this.queryModelsByIds();
+		Assert.assertEquals(10, models.size());
 	}
 	
 	/**
 	 * Test batch call with parameters and has ResultParameters
+	 * @throws SQLException 
 	 */
 	@Test
-	public void testBatchCallWithParametersAndResultParameters(){
+	public void testBatchCallWithParametersAndResultParameters() throws SQLException{
+		String callSql = "call " + SP_D_NAME + "(?,?)";
+		StatementParameters[] parametersList = new StatementParameters[3];
+		for(int i = 0; i < 3; i++){
+			StatementParameters parameters = new StatementParameters();
+			parameters.set("dal_id", Types.INTEGER, i + 1);
+			parameters.registerOut("count", Types.INTEGER);
+			parametersList[i] = parameters;
+		}
+		DalHints hints = new DalHints();
+		int[] res = client.batchCall(callSql, parametersList, hints);
+		Assert.assertEquals(3, res.length);
 		
-	}
-	
-	/**
-	 * Test batch call with parameters and no all has ResultParameters
-	 */
-	@Test
-	public void testBatchCallWithParametersNoAllResultParameters(){
-		
+		List<ClientTestModel> models = this.queryModelsByIds(1,2,3);
+		Assert.assertEquals(0, models.size());
 	}
 	
 	/**

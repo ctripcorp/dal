@@ -149,7 +149,9 @@ public class CommonUtil {
     	return null != str ? str : "NA";
     }
     
-    
+    public static boolean isNullEmpty(String str){
+    	return null == str || str.isEmpty();
+    }
     public static String parseHostFromDBURL(String url)
     {
     	Matcher m = hostRegxPattern.matcher(url);
@@ -161,6 +163,23 @@ public class CommonUtil {
     	}
     	return host;
     }
+    
+    public static int GetHashCode(String str) 
+    { 
+    int hash, i;
+    char[] arr = str.toCharArray();
+    for (hash = i = 0; i < arr.length; ++i) 
+    { 
+    hash += arr[i]; 
+    hash += (hash << 12); 
+    hash ^= (hash >> 4); 
+    } 
+    hash += (hash << 3); 
+    hash ^= (hash >> 11); 
+    hash += (hash << 15); 
+    return hash; 
+    }
+
     
     public static void main(String[] args) {
     	String sql = "select * from Person where Id = ?";

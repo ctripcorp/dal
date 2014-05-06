@@ -10,6 +10,14 @@ import java.util.Map;
 public class DalHints {
 	private Map<DalHintEnum, Object> hints = new LinkedHashMap<DalHintEnum, Object>();
 	
+	public DalHints() {}
+	
+	public DalHints(DalHintEnum...hints) {
+		for(DalHintEnum hint: hints) {
+			set(hint);
+		}
+	}
+	
 	public boolean is(DalHintEnum hint) {
 		return hints.containsKey(hint);
 	}
@@ -44,22 +52,6 @@ public class DalHints {
 	
 	public DalHints set(DalHintEnum hint, Object value) {
 		hints.put(hint, value);
-		return this;
-	}
-	
-	public DalHints selectFirst() {
-		set(DalHintEnum.rowCount, 1);
-		return this;
-	}
-
-	public DalHints selectTop(int count) {
-		set(DalHintEnum.rowCount, count);
-		return this;
-	}
-	
-	public DalHints selectFrom(int start, int count) {
-		set(DalHintEnum.startRow, start);
-		set(DalHintEnum.rowCount, count);
 		return this;
 	}
 	

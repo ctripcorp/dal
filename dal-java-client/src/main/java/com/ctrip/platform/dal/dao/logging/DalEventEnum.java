@@ -8,6 +8,7 @@ public enum DalEventEnum {
 	BATCH_UPDATE_PARAM("batchUpdate(params)", 2005),
 	EXECUTE("execute", 2006),
 	CALL("call", 2007),
+	BATCH_CALL("call(params)", 2008),
 	CONNECTION_SUCCESS("connection_success", 2010),
 	CONNECTION_FAILED("connection_failed", 2011);
 	

@@ -1,10 +1,7 @@
 package com.ctrip.platform.dal.tester.baseDao;
 
 import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.ctrip.freeway.config.LogConfig;
@@ -12,14 +9,12 @@ import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.util.Configuration;
-import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.DalQueryDao;
-import com.ctrip.platform.dal.dao.DalRowCallback;
-import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.tester.person.DalPersonParser;
 import com.ctrip.platform.dal.tester.person.Person;
@@ -180,6 +175,86 @@ public class DalTableDaoTest {
 		}
 	}
 	
+	public void testInsertWithKeyHolder() {
+		try {
+			DalTableDao<Person> dao = new DalTableDao<Person>(personParser);
+			
+			dao.delete("Name = 'testInsertKH'", parameters, hints);
+			
+			Person p = new Person();
+			
+			Person[] pList = new Person[3];
+			p = new Person();
+			p.setName("testInsertKH");
+			pList[0] = p;
+			p = new Person();
+			p.setName("testInsertKH");
+			pList[1] = p;
+			p = new Person();
+			p.setName("testInsertKH");
+			pList[2] = p;
+			
+			KeyHolder keyHolder = new KeyHolder();
+			dao.insert(hints, keyHolder, pList);
+			System.out.println(keyHolder.getKeyList());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void testCombinedInsert() {
+		try {
+			DalTableDao<Person> dao = new DalTableDao<Person>(personParser);
+			
+			dao.delete("Name LIKE 'testInsertCombined%'", parameters, hints);
+			
+			Person p = new Person();
+			
+			Person[] pList = new Person[3];
+			p = new Person();
+			p.setName("testInsertCombined1");
+			pList[0] = p;
+			p = new Person();
+			p.setName("testInsertCombined2");
+			pList[1] = p;
+			p = new Person();
+			p.setName("testInsertCombined3");
+			pList[2] = p;
+			
+			KeyHolder keyHolder = new KeyHolder();
+			dao.combinedInsert(hints, keyHolder, pList);
+			System.out.println(keyHolder.getKeyList());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void testContinueOnError() {
+		try {
+			DalTableDao<Person> dao = new DalTableDao<Person>(personParser);
+			
+			Person p = new Person();
+			Person[] pList = new Person[3];
+			p = new Person();
+			p.setName("ContinueOnError");
+			pList[0] = p;
+			p = new Person();
+			p.setName("ContinueOnErrorContinueOnErrorContinueOnErrorContinueOnErrorContinueOnError");
+			pList[1] = p;
+			p = new Person();
+			p.setName("ContinueOnError");
+			pList[2] = p;
+			
+			hints = new DalHints(DalHintEnum.continueOnError);
+			int count = dao.insert(hints, pList);
+			System.out.println(count);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
 	public void testBatchInsert() {
 		try {
 			DalTableDao<Person> dao = new DalTableDao<Person>(personParser);
@@ -238,7 +313,10 @@ public class DalTableDaoTest {
 //		test.testInsert();
 //		test.testUpdate();
 //		test.testDelete();
-		test.testBatchInsert();
+//		test.testInsertWithKeyHolder();
+//		test.testCombinedInsert();
+//		test.testBatchInsert();
+		test.testContinueOnError();
 		try {
 			Thread.sleep(30 * 1000);
 		} catch (InterruptedException e) {

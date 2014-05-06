@@ -13,8 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalCommand;
@@ -308,26 +306,27 @@ public class DalDirectClient implements DalClient {
 	private <T> T doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
 		LogEntry entry = null;
-		populateHints(hints,action);
 		long start = start();
 		long duration = 0;
 		try {
-			entry = createLogEntry(action);
+			entry = createLogEntry(action, hints);
 			
 			T result = action.execute();
 			
 			duration = start() - start;
+			entry.setDuration(duration);
 			populateDbInfo(action.conn, entry);
 			entry.setResultCount(this.fetchQueryRows(result));
-			
-			Logger.log(entry, duration);
+			entry.setSuccess(true);
 			MetricsLogger.success(entry, duration);
 			return result;
 		} catch (Throwable e) {
-			Logger.log(entry, e);
+			entry.setSuccess(false);
+			entry.setErrorMsg(e.getMessage());
 			MetricsLogger.fail(entry, start);
 			throw(handleException(e));
 		} finally {
+			Logger.log(entry);
 			cleanup(hints, action);
 		}
 	}
@@ -347,35 +346,41 @@ public class DalDirectClient implements DalClient {
 			throws SQLException {
 		LogEntry entry = null;
 		int level = 0;
-		populateHints(hints,action);
 		long start = start();
 		long duration = 0;
 		try {
 			//conn.getSchema()
 			level = startTransaction(hints);
-			entry = createLogEntry(action);
+			entry = createLogEntry(action, hints);
 			populateDbInfo(transManager.getConnection(hints), entry);
-			
+		
 			T result = action.execute();	
 			endTransaction(level);			
 			duration = start() - start;
-			
-			Logger.log(entry, duration);
-			MetricsLogger.success(entry, duration);
+			entry.setDuration(duration);
+			entry.setSuccess(true);
+			MetricsLogger.success(entry, duration);		
 			return result;
 		} catch (Throwable e) {
-			Logger.log(entry, e);
+			entry.setSuccess(false);
+			entry.setErrorMsg(e.getMessage());
 			MetricsLogger.fail(entry, start);
 			throw handleException(e, level);
 		} finally {
+			Logger.log(entry);
 			cleanup(hints, action);
 		}
 	}
 	
-	private <T> LogEntry createLogEntry(ConnectionAction<T> action) {
-		LogEntry entry = Logger.create(action.getSqlLog(), action.parameters, logicDbName, "TBI", action.operation.getEventId(), action.operation.getOperation());
-		
-		entry.setCommandType(action.operation);
+	private LogEntry createLogEntry(ConnectionAction<?> action, DalHints hints) {
+		LogEntry entry = new LogEntry(hints);
+		entry.setEvent(action.operation);
+		entry.setDatabaseName(logicDbName);
+		entry.setCallString(action.callString);
+		entry.setSql(action.sql);
+		entry.setSqls(action.sqls);
+		entry.setParameters(action.parameters);
+		entry.setParametersList(action.parametersList);
 		entry.setTransactional(transManager.isInTransaction());
 		
 		return entry;
@@ -449,36 +454,12 @@ public class DalDirectClient implements DalClient {
 		}
 		
 		void populateSp(String callString, StatementParameters []parametersList) {
-			this.operation = DalEventEnum.CALL;
+			this.operation = DalEventEnum.BATCH_CALL;
 			this.callString = callString;
 			this.parametersList = parametersList;
 		}
 		
-		/**
-		 * TODO: How to display batch SQLs
-		 * @return
-		 */
-		String getSqlLog() {
-			if(null != sql)
-				return sql;
-			else if(null != callString)
-				return callString;
-			else if(sqls != null)
-				return StringUtils.join(sqls, ";");
-			else
-				return "";
-		}
-		
 		abstract T execute() throws Exception;
-	}
-	
-	private void populateHints(DalHints hints, ConnectionAction<?> action) {
-		hints.set(DalHintEnum.operation, action.operation);
-		hints.set(DalHintEnum.sql, action.sql);
-		hints.set(DalHintEnum.callString, action.callString);
-		hints.set(DalHintEnum.parameters, action.parameters);
-		hints.set(DalHintEnum.parametersList, action.parametersList);
-		hints.set(DalHintEnum.commands, action.commands);
 	}
 	
 	private Statement createStatement(Connection conn, DalHints hints) throws Exception {

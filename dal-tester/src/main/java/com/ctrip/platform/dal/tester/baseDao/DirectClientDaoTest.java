@@ -566,6 +566,10 @@ public class DirectClientDaoTest {
 			}});
 	}
 	
+	public void testCombinedAllInsertIntoOneClause(){
+		
+	}
+	
 	public static void main(String[] args) throws SQLException {
         LogConfig.setAppID("9302011");
 //      LogConfig.setLoggingServerIP("localhost");

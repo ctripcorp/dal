@@ -11,8 +11,11 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-	DalDirectClientMySqlTest.class, 
+	DalDirectClientMySqlTest.class,
+	DalDirectClientSqlServerTest.class,
 	DalQueryDaoMySqlTest.class,
-	DalTabelDaoMySqlTest.class
+	DalQueryDaoSqlServerTest.class,
+	DalTabelDaoMySqlTest.class,
+	DalTableDaoSqlServerTest.class
 })
 public class AllTest {}

@@ -55,7 +55,7 @@ public class MySqlHelperTest {
 		assertTrue(generateKeys.size() == 3);
 		assertTrue(generateKeys.get(0).containsKey("GENERATED_KEY"));
 		
-		persons[1].setName("jack1");	
+		persons[1].setName("jack1");
 		helper.replace(holder, new DalHints(), persons);	
 		Person rep = client.queryByPk(2, hints);
 		assertTrue(rep.getName().equals("jack1"));

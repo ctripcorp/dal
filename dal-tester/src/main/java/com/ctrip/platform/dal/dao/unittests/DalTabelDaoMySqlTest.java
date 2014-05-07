@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.dao.unittests;
 
-import static org.junit.Assert.fail;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;

@@ -60,7 +60,7 @@
 					<div class="todo-search">
 						<span style="font-weight: bold;font-size: 18px">Video List</span>
 					</div>
-					<ul>
+					<ul id="welcome-ver-list">
 						<li class="todo-done">
 							<div class="todo-icon fui-user"></div>
 							<div class="todo-content">
@@ -140,5 +140,6 @@
     <script src="/static/Flat-UI-master/js/jquery.ui.touch-punch.min.js"></script>
     
     <script src="/static/js/header.js"></script>
+    <script src="/static/js/welcome.js"></script>
 </body>
 </html>

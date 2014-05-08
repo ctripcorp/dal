@@ -10,7 +10,7 @@
 		</a>
 	</div>
 	<div class="collapse navbar-collapse" id="navbar-collapse-01">
-		<ul class="nav navbar-nav ctrip-nav-action">
+		<ul class="nav navbar-nav">
 			<li id="indexjsp"><a href="index.jsp">数据访问层生成器</a></li>
 			<li id="codeviewjsp"><a href="codeview.jsp">DAL Code 一览</a></li>
 			<li id="membermanagejsp"><a href="membermanage.jsp">Member管理</a></li>

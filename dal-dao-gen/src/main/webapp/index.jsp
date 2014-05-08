@@ -38,6 +38,15 @@
       <![endif]-->
       <!-- Favicons -->
       <link rel="shortcut icon" href="/static/images/favicon.ico">
+      
+      	<!-- Loading Flat UI -->
+	    <link href="/static/Flat-UI-master/css/flat-ui.css" rel="stylesheet">
+	
+	    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+	    <!--[if lt IE 9]>
+	      <script src="/static/Flat-UI-master/js/html5shiv.js"></script>
+	      <script src="/static/Flat-UI-master/js/respond.min.js"></script>
+	    <![endif]-->
    </head>
    <body>
       <!-- Docs master nav -->
@@ -59,13 +68,13 @@
                      <div class="control-group">
                         <input id="project_id" type="hidden" value="">
                         <label class="control-label popup_label">项目名称</label>
-                        <input id="name" class="span9" type="text">
+                        <input id="name" class="span9 input-sm" type="text">
                      </div>
                   </div>
                   <div class="row-fluid">
                      <div class="control-group">
                         <label class="control-label popup_label">命名空间</label>
-                        <input id="namespace" class="span9" type="text">
+                        <input id="namespace" class="span9 input-sm" type="text">
                      </div>
                   </div>
                </div>
@@ -178,7 +187,7 @@
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">All-In-One：</label>
-                           <textarea id="all_in_one" class="span9" style="height:100px;">&lt;add name="xxx" connectionString="Server=xxx;port=xxx;UID=xxx;password=xxx;database=xxx;" providerName="System.Data.SqlClient" /&gt;</textarea>
+                           <textarea id="all_in_one" class="span9" style="height:120px;">&lt;add name="xxx" connectionString="Server=xxx;port=xxx;UID=xxx;password=xxx;database=xxx;" providerName="System.Data.SqlClient" /&gt;</textarea>
                         </div>
                      </div>
                </div>
@@ -246,13 +255,13 @@
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">生成时移除前缀：</label>
-                           <input type="text" id="prefix" class="span9 popup_text">
+                           <input type="text" id="prefix" class="span9 popup_text input-sm">
                         </div>
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">生成时加上后缀：</label>
-                           <input type="text" id="suffix" class="span9 popup_text">
+                           <input type="text" id="suffix" class="span9 popup_text input-sm">
                         </div>
                      </div>
                      <div class="row-fluid mysql_hide">
@@ -294,7 +303,7 @@
                      <div class="row-fluid method_name_class">
                         <div class="control-group">
                            <label class="control-label popup_label">生成的方法名：</label>
-                           <input id="method_name" class="span9 popup_text">
+                           <input id="method_name" class="span9  popup_text" style="height:32px;line-height:32px">
                         </div>
                      </div>
                   </div>
@@ -377,7 +386,7 @@
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label" style="width:80px;">方法名：</label>
-                           <input  id="sql_method_name" class="span9" type="text">
+                           <input  id="sql_method_name" class="span9 input-sm" type="text">
                         </div>
                      </div>
                      <label class="control-label popup_label">输入查询SQL，占位符：Java请使用?或者:Name形式，c#请使用@Name形式</label>
@@ -445,5 +454,7 @@
       <script src="/static/js/ui_render.js"></script>
       <script src="/static/js/index.js"></script>
       <script src="/static/js/progress.js"></script>
+      
+      <script src="/static/js/header.js"></script>
    </body>
 </html>

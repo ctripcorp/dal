@@ -38,19 +38,28 @@
       <![endif]-->
       <!-- Favicons -->
       <link rel="shortcut icon" href="/static/images/favicon.ico">
+      	<!-- Loading Flat UI -->
+	    <link href="/static/Flat-UI-master/css/flat-ui.css" rel="stylesheet">
+	    <link href="/static/Flat-UI-master/css/demo.css" rel="stylesheet">
+	
+	    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+	    <!--[if lt IE 9]>
+	      <script src="/static/Flat-UI-master/js/html5shiv.js"></script>
+	      <script src="/static/Flat-UI-master/js/respond.min.js"></script>
+	    <![endif]-->
    </head>
    <body>
       <!-- Docs master nav -->
       <%@ include file="header.jsp"%>
+      
       <div id="main_layout">
-      	group manage page.
+      group
       </div>
+
       
       <!-- JS and analytics only. -->
       <!-- Bootstrap core JavaScript================================================== -->
       <!-- Placed at the end of the document so the pages load faster -->
-      <script src="/static/jquery/jquery-1.10.2.min.js"></script>
-      <script src="/static/bootstrap/js/bootstrap.min.js"></script>
       <script src="/static/w2ui/w2ui-1.3.2.min.js"></script>
       <script src="/static/jstree/jstree.js"></script>
       <script src="/static/jquery/jquery.blockui.min.js"></script>
@@ -58,5 +67,24 @@
       <script src="/static/jquery/jquery.multiple.select.js"></script>
       <script src="/static/js/selectize.min.js"></script>
       <script src="/static/js/cblock.js"></script>
+      
+      <script src="/static/jquery/jquery-1.10.2.min.js"></script>
+	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+	<script src="/static/Flat-UI-master/js/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="/static/Flat-UI-master/js/jquery.ui.touch-punch.min.js"></script>
+    <script src="/static/Flat-UI-master/js/bootstrap-select.js"></script>
+    <script src="/static/Flat-UI-master/js/bootstrap-switch.js"></script>
+    <script src="/static/Flat-UI-master/js/flatui-checkbox.js"></script>
+    <script src="/static/Flat-UI-master/js/flatui-radio.js"></script>
+    <script src="/static/Flat-UI-master/js/jquery.tagsinput.js"></script>
+    <script src="/static/Flat-UI-master/js/jquery.placeholder.js"></script>
+    <script src="/static/Flat-UI-master/js/jquery.stacktable.js"></script>
+    <script src="http://vjs.zencdn.net/4.3/video.js"></script>
+    <script src="/static/Flat-UI-master/js/application.js"></script>
+    
+    <script src="/static/Flat-UI-master/js/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="/static/Flat-UI-master/js/jquery.ui.touch-punch.min.js"></script>
+    
+    <script src="/static/js/header.js"></script>
    </body>
 </html>

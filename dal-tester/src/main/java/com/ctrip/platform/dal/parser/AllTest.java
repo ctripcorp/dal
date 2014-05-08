@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.tester;
+package com.ctrip.platform.dal.parser;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	com.ctrip.platform.dal.dao.unittests.AllTest.class,
-	com.ctrip.platform.dal.parser.AllTest.class
+	DalDefaultJpaParserMySqlTest.class,
+	DalDefaultJpaParserSqlServerTest.class
 })
 public class AllTest {}

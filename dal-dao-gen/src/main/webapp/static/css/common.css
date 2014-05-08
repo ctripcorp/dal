@@ -66,3 +66,6 @@ label.btn{
 .modal-body div{
     margin-bottom: 3px;
 }
+ul.navbar-right li{
+    margin-right: 1px;
+}

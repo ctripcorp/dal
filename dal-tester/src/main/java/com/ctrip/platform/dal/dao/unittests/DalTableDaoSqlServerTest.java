@@ -363,8 +363,6 @@ public class DalTableDaoSqlServerTest {
 		DalHints hints = new DalHints();
 		int res = dao.combinedInsert(hints, holder, entities);
 		Assert.assertEquals(3, res);
-		Assert.assertEquals(3, holder.getKeyList().size());
-		Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEY"));		
 	}
 	
 	/**

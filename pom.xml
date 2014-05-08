@@ -18,7 +18,6 @@
 		<module>dal-tester</module>
 		<module>dal-server-common</module>
 		<module>dal-java-ext</module>
-		<module>dal-java-performance</module>
 	</modules>
 	<properties>
 		<package.environment>local</package.environment>

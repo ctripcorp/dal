@@ -19,13 +19,25 @@
 		</ul>
 		<ul class="nav navbar-nav navbar-right">
             <li id="welcomejsp"><a href="welcome.jsp">Tutorial</a></li>
-			<li><a href="javascript:;"
-				onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">文档</a>
+			<li class="dropdown">
+				<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
+					data-close-others="true"> 
+					<span class="username"> 
+					Help
+					</span> 
+					<i class="fa fa-angle-down"> </i>
+				</a>
+				<span class="dropdown-arrow dropdown-arrow-inverse" style="margin-top:1px"></span>
+				<ul class="dropdown-menu dropdown-inverse" style="margin-top:8px !important">
+					<li><a href="javascript:;"
+						onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">文档</a>
+					</li>
+					<li><a href="javascript:;"
+						onclick="window.open('http://conf.ctripcorp.com/display/SysDev/DAL+Code+Generator#DALCodeGenerator-codegenguide', '_blank');">使用说明</a>
+					</li>
+					<li><a href="mailto:R%26Dsysdev_dal@Ctrip.com">咨询</a></li>
+				</ul>
 			</li>
-			<li><a href="javascript:;"
-				onclick="window.open('http://conf.ctripcorp.com/display/SysDev/DAL+Code+Generator#DALCodeGenerator-codegenguide', '_blank');">使用说明</a>
-			</li>
-			<li><a href="mailto:R%26Dsysdev_dal@Ctrip.com">咨询</a></li>
 			<li class="dropdown user">
 				<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
 					data-close-others="true"> 

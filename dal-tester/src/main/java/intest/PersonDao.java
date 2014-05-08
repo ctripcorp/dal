@@ -28,6 +28,9 @@ public class PersonDao {
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}
 
+	public DalParser<Person> getParser(){
+		return this.parser;
+	}
 	/**
 	 * Query Person by the specified ID
 	 * The ID must be a number
@@ -147,7 +150,7 @@ public class PersonDao {
 	}
 
 
-	private static class PersonParser extends AbstractDalParser<Person> {
+	public static class PersonParser extends AbstractDalParser<Person> {
 		public static final String DATABASE_NAME = "dao_test";
 		public static final String TABLE_NAME = "Person";
 		private static final String[] COLUMNS = new String[]{

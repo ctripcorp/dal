@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -260,9 +261,12 @@ public final class DalTableDao<T> {
 			T... daoPojos) throws SQLException {
 		if (null == daoPojos || daoPojos.length < 1)
 			return 0;
-		Map<String, ?> fields = this.parser.getFields(daoPojos[1]);
-		Set<String> remainedColumns = fields.keySet();
-		String cloumns = combine(remainedColumns, COLUMN_SEPARATOR);
+		List<String> validColumns = new ArrayList<String>();
+		for(String s : parser.getColumnNames()){
+			if(!(parser.isAutoIncrement() && isPermaryKey(s)))
+				validColumns.add(s);
+		}
+		String cloumns = combine(validColumns, COLUMN_SEPARATOR);
 		int count = daoPojos.length;
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
@@ -270,7 +274,8 @@ public final class DalTableDao<T> {
 		int startIndex = 1;
 		for (int i = 0; i < count; i++) {
 			Map<String, ?> vfields = parser.getFields(daoPojos[i]);
-			int paramCount = addParameters(startIndex, parameters, vfields);
+			filterAutoIncrementPrimaryFields(vfields);
+			int paramCount = addParameters(startIndex, parameters, vfields, validColumns);
 			startIndex += paramCount;
 			values.append(String.format("(%s),",
 					this.combine("?", paramCount, ",")));
@@ -298,6 +303,7 @@ public final class DalTableDao<T> {
 		int i = 0;
 		for (T pojo : daoPojos) {
 			Map<String, ?> fields = parser.getFields(pojo);
+			filterAutoIncrementPrimaryFields(fields);
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
 			parametersList[i++] = parameters;
@@ -438,20 +444,11 @@ public final class DalTableDao<T> {
 	}
 
 	private int addParameters(int start, StatementParameters parameters,
-			Map<String, ?> entries) {
+			Map<String, ?> entries, List<String> validColumns) {	
 		int count = 0;
-		for (Map.Entry<String, ?> entry : entries.entrySet()) {
-			boolean isKey = false;
-			if (this.parser.isAutoIncrement())
-				for (String key : this.parser.getPrimaryKeyNames()) {
-					if (entry.getKey().equals(key)) {
-						isKey = true;
-						break;
-					}
-				}
-			Object value = isKey ? null : entry.getValue();
-			parameters.set(count + start, this.parser.getColumnTypes()[count],
-					value);
+		for(String column : validColumns){
+			if(entries.containsKey(column))
+				parameters.set(count + start, this.getColumnType(column), entries.get(column));
 			count++;
 		}
 		return count;
@@ -497,11 +494,32 @@ public final class DalTableDao<T> {
 		return fields;
 	}
 
+	public Map<String, ?> filterAutoIncrementPrimaryFields(Map<String, ?> fields){
+		for (String columnName : parser.getColumnNames()) {
+			if (parser.isAutoIncrement() && isPermaryKey(columnName))
+				fields.remove(columnName);
+		}
+		return fields;
+	}
+	
 	public String buildCallSql(String spName, int paramCount) {
 		return String.format(TMPL_CALL, spName,
 				combine(PLACE_HOLDER, paramCount, COLUMN_SEPARATOR));
 	}
 
+	private boolean isPermaryKey(String fieldName){
+		boolean isKey = false;
+		String[] primaryKeyNames = parser.getPrimaryKeyNames();
+		if(null != primaryKeyNames)
+			for (String string : primaryKeyNames) {
+				if(string.toLowerCase().equals(fieldName.toLowerCase())){
+					isKey = true;
+					break;
+				}
+			}
+		return isKey;
+	}
+	
 	private String initSql() {
 		pkColumns = new HashSet<String>();
 		Collections.addAll(pkColumns, parser.getPrimaryKeyNames());
@@ -532,16 +550,21 @@ public final class DalTableDao<T> {
 		return String.format(TMPL_SQL_INSERT, parser.getTableName(), cloumns,
 				values);
 	}
-
+	
 	private String buildBatchInsertSql() {
-		String[] allColumns = parser.getColumnNames();
-		String cloumns = combine(allColumns, COLUMN_SEPARATOR);
-		String values = combine(PLACE_HOLDER, allColumns.length,
+		List<String> validColumns = new ArrayList<String>();
+		for(String s : parser.getColumnNames()){
+			if(!(parser.isAutoIncrement() && isPermaryKey(s)))
+				validColumns.add(s);
+		}
+		String cloumns = combine(validColumns, COLUMN_SEPARATOR);
+		String values = combine(PLACE_HOLDER, validColumns.size(),
 				COLUMN_SEPARATOR);
 
 		return String.format(TMPL_SQL_INSERT, parser.getTableName(), cloumns,
 				values);
 	}
+
 
 	private String buildDeleteSql() {
 		return String.format(TMPL_SQL_DELETE, parser.getTableName(), pkSql);

@@ -87,14 +87,29 @@ public class DefaultLoader extends Loader{
 	@Override
 	public Object load(Field field, Object value)
 			throws ReflectiveOperationException {
-		return field.get(value);
+		if(field.getType().equals(Integer.class) || 
+				field.getType().equals(int.class))
+			return ((Number)value).intValue();
+		if(field.getType().equals(Long.class) || 
+				field.getType().equals(long.class))
+			return ((Number)value).longValue();
+		if(field.getType().equals(Short.class) || 
+				field.getType().equals(short.class))
+			return ((Number)value).shortValue();
+		if(field.getType().equals(Float.class) || 
+				field.getType().equals(float.class))
+			return ((Number)value).floatValue();
+		if(field.getType().equals(Double.class) || 
+				field.getType().equals(double.class))
+			return ((Number)value).doubleValue();
+		else return value;
 	}
 
 	@Override
 	public Object save(Field field, Object entity, boolean nullable)
 			throws ReflectiveOperationException {
 		
-		return this.load(field, entity);
+		return field.get(entity);
 	}
 
 	@Override

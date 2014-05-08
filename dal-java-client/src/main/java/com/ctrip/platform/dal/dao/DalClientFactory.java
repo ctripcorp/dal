@@ -2,6 +2,8 @@ package com.ctrip.platform.dal.dao;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.ctrip.freeway.logging.ILog;
+import com.ctrip.freeway.logging.LogManager;
 import com.ctrip.platform.dal.common.db.ConnectionPropertyReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
@@ -12,6 +14,7 @@ import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 import com.ctrip.platform.dal.dao.logging.MetricsLogger;
 
 public class DalClientFactory {
+	private static ILog logger = LogManager.getLogger("DAL Java Client Factory");
 	private static AtomicReference<DruidDataSourceWrapper> connPool = new AtomicReference<DruidDataSourceWrapper>();
 
 	private static final String DAL_CONFIG = "Dal.config";
@@ -31,12 +34,17 @@ public class DalClientFactory {
 	 * @throws Exception
 	 */
 	public static void initClientFactory() throws Exception {
-		if (configureRef.get() != null)
+		if (configureRef.get() != null) {
+			logReInitialized();
 			return;
+		}
 
 		synchronized (DalClientFactory.class) {
-			if (configureRef.get() != null)
+			if (configureRef.get() != null) {
+				logReInitialized();
 				return;
+			}
+			
 			ClassLoader classLoader = Thread.currentThread()
 					.getContextClassLoader();
 			if (classLoader == null) {
@@ -45,9 +53,10 @@ public class DalClientFactory {
 
 			configureRef.set(DalConfigureFactory.load(classLoader
 					.getResource(DAL_CONFIG)));
+			logInitialized();
 		}
 	}
-
+	
 	/**
 	 * Initialize for DB All In One client. Load Dal.config from give path
 	 * 
@@ -56,28 +65,34 @@ public class DalClientFactory {
 	 * @throws Exception
 	 */
 	public static void initClientFactory(String path) throws Exception {
-		if (configureRef.get() != null)
+		if (configureRef.get() != null) {
+			logReInitialized();
 			return;
+		}
 
 		synchronized (DalClientFactory.class) {
-			if (configureRef.get() != null)
+			if (configureRef.get() != null) {
+				logReInitialized();
 				return;
+			}
 			configureRef.set(DalConfigureFactory.load(path));
+			logInitialized(path);
 		}
 	}
 
 	/**
 	 * Initialize from local connections.properties in classpath. For local
 	 * testing.
-	 * 
+	 * @deprecated TODO will be replaced by local datasource mode
 	 * @throws Exception
 	 */
 	public static void initPrivateFactory() throws Exception {
 		// DasConfigureReader reader = new ConfigureServiceReader(new
 		// DasConfigureService("localhost:8080", new
 		// File(DEFAULT_SNAPSHOT_PATH)));
+		logger.warn("Initialize Dal Java Client Factory with private mode.");
 		ConnectionPropertyReader reader = new ConnectionPropertyReader();
-		Configuration.addResource(reader.DEFAULT_CONF_NAME);
+		Configuration.addResource(ConnectionPropertyReader.DEFAULT_CONF_NAME);
 		String[] logicDbNames = reader.getLogicDbNames();
 		try {
 			DalClientFactory.initDirectClientFactory(reader, logicDbNames);
@@ -157,6 +172,20 @@ public class DalClientFactory {
 	 * Release All resource the Dal client used.
 	 */
 	public static void shutdownFactory() {
+		logger.info("Start shutdown Dal Java Client Factory");
 		MetricsLogger.shutdown();
+		logger.info("Dal Java Client Factory is shutdown");
+	}
+	
+	private static void logInitialized() {
+		logger.info("Successfully initialized Dal Java Client Factory");
+	}
+
+	private static void logInitialized(String path) {
+		logger.info("Successfully initialized Dal Java Client Factory with " + path);
+	}
+	
+	private static void logReInitialized() {
+		logger.info("Dal Java Client Factory is already initialized.");
 	}
 }

@@ -35,11 +35,11 @@ public class DalTransactionManager {
 		this.logicDbName = logicDbName;
 	}
 	
-	public int startTransaction(DalHints hints) throws SQLException {
+	public int startTransaction(DalHints hints, DalEventEnum operation) throws SQLException {
 		ConnectionCache connCache = connectionCacheHolder.get();
 		
 		if(connCache == null) {
-			Connection conn = getConnection(hints, true);
+			Connection conn = getConnection(hints, true, operation);
 			conn.setAutoCommit(false);
 			connCache = new ConnectionCache(hints.getInt(DalHintEnum.oldIsolationLevel), conn, logicDbName);
 			connectionCacheHolder.set(connCache);
@@ -73,29 +73,29 @@ public class DalTransactionManager {
 		connCache.rollbackTransaction(startLevel);
 	}
 	
-	public Connection getConnection(DalHints hints) throws SQLException {
-		return getConnection(hints, false);
+	public Connection getConnection(DalHints hints, DalEventEnum operation) throws SQLException {
+		return getConnection(hints, false, operation);
 	}
 	
-	private Connection getConnection(DalHints hints, boolean useMaster) throws SQLException {
+	private Connection getConnection(DalHints hints, boolean useMaster, DalEventEnum operation) throws SQLException {
 		ConnectionCache connCache = connectionCacheHolder.get();
 		
 		if(connCache == null) {
-			return getNewConnection(hints, useMaster);
+			return getNewConnection(hints, useMaster, operation);
 		} else {
 			connCache.validate(logicDbName);
 			return connCache.getConnection();
 		}
 	}
 
-	private Connection getNewConnection(DalHints hints, boolean useMaster)
+	private Connection getNewConnection(DalHints hints, boolean useMaster, DalEventEnum operation)
 			throws SQLException {
 		Connection conn = null;
 		String realDbName = logicDbName;
 		try
 		{
 			boolean isMaster = hints.is(DalHintEnum.masterOnly) || useMaster;
-			boolean isSelect = hints.get(DalHintEnum.operation) == DalEventEnum.QUERY;
+			boolean isSelect = operation == DalEventEnum.QUERY;
 			
 			// The internal test path
 			if(config == null) {

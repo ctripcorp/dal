@@ -38,8 +38,6 @@ import com.ctrip.platform.dal.dao.logging.MetricsLogger;
  * @author jhhe
  */
 public class DalDirectClient implements DalClient {
-	
-	
 	private DalStatementCreator stmtCreator = new DalStatementCreator();
 	private DalTransactionManager transManager;
 	private String logicDbName;
@@ -350,9 +348,9 @@ public class DalDirectClient implements DalClient {
 		long duration = 0;
 		try {
 			//conn.getSchema()
-			level = startTransaction(hints);
+			level = startTransaction(hints, action.operation);
 			entry = createLogEntry(action, hints);
-			populateDbInfo(transManager.getConnection(hints), entry);
+			populateDbInfo(transManager.getConnection(hints, action.operation), entry);
 		
 			T result = action.execute();	
 			endTransaction(level);			
@@ -459,6 +457,10 @@ public class DalDirectClient implements DalClient {
 			this.parametersList = parametersList;
 		}
 		
+		public Connection getConnection(DalHints hints) throws SQLException {
+			return transManager.getConnection(hints, operation);
+		}
+		
 		abstract T execute() throws Exception;
 	}
 	
@@ -486,18 +488,14 @@ public class DalDirectClient implements DalClient {
 		return stmtCreator.createCallableStatement(conn, sql, parametersList, hints);
 	}
 	
-	private int startTransaction(DalHints hints) throws SQLException {
-		return transManager.startTransaction(hints);
+	private int startTransaction(DalHints hints, DalEventEnum operation) throws SQLException {
+		return transManager.startTransaction(hints, operation);
 	}
 
 	private void endTransaction(int startLevel) throws SQLException {
 		transManager.endTransaction(startLevel);
 	}
 
-	private Connection getConnection(DalHints hints) throws SQLException {
-		return transManager.getConnection(hints);
-	}
-	
 	private void cleanup(DalHints hints, ConnectionAction<?> action) {
 		Statement statement = action.statement != null? 
 				action.statement : action.preparedStatement != null?

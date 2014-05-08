@@ -1,8 +1,8 @@
 body {
-    padding-top: 30px;
+    padding-top: 53px;
 }
 
-.dal-navbar {
+/* .dal-navbar {
     background-color: #205081;
 }
 
@@ -13,11 +13,11 @@ body {
 .navbar-inverse .navbar-nav>.open>a:hover,
 .navbar-inverse .navbar-nav>.open>a:focus{
     background-color: #3b73af;
-}
+} */
 
 #main_layout {
     height: 100% ;
-    padding-top: 19px;
+    /* padding-top: 19px; */
 }
 
 .logo{
@@ -50,6 +50,8 @@ label.btn{
 
 .jstree-anchor{
     font-family: Verdana,Arial;
+    color: #34495E !important;
+    font-size: 14px;
 }
 .code-fullscreen{
     position:relative;
@@ -60,4 +62,10 @@ label.btn{
     height:30px;
     width:30px;
     cursor:pointer
+}
+.modal-body div{
+    margin-bottom: 3px;
+}
+ul.navbar-right li{
+    margin-right: 1px;
 }

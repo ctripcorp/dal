@@ -32,36 +32,16 @@
             });
         },
         render_sidebar: function () {
-            // w2ui['main_layout'].content('left', $().w2sidebar({
-            //     name: 'sidebar',
-            //     img: null,
-            //     topHTML: '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver">'
-            //     +'<a id="addProj" href="javascript:;">'
-            //     +'<i class="fa fa-plus"></i>添加</a>'
-            //     +'&nbsp;&nbsp;<a id="editProj" href="javascript:;">'
-            //     +'<i class="fa fa-edit"></i>修改</a>'
-            //     +'&nbsp;&nbsp;<a id="delProj" href="javascript:;">'
-            //     +'<i class="fa fa-times"></i>删除</a>'
-            //     +'&nbsp;&nbsp;<a id="shareProj" href="javascript:;">'
-            //     +'<i class="fa fa-twitter"></i>共享</a></div>',
-            //     nodes: [{
-            //         id: 'all_projects',
-            //         text: '所有项目',
-            //         icon: 'fa fa-folder-o',
-            //         // plus: true,
-            //         group: true,
-            //     }],
-            // }));
-
-            w2ui['main_layout'].content('left', '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver">'
+            w2ui['main_layout'].content('left', '<div style="color: #34495E !important;font-size: 15px;background-color: #eee; padding: 7px 5px 6px 20px; border-bottom: 1px solid silver">'
                 +'<a id="addProj" href="javascript:;">'
                 +'<i class="fa fa-plus"></i>添加</a>'
                 +'&nbsp;&nbsp;<a id="editProj" href="javascript:;">'
                 +'<i class="fa fa-edit"></i>修改</a>'
                 +'&nbsp;&nbsp;<a id="delProj" href="javascript:;">'
                 +'<i class="fa fa-times"></i>删除</a>'
-                +'&nbsp;&nbsp;<a id="shareProj" href="javascript:;">'
-                +'<i class="fa fa-twitter"></i>共享</a></div>'
+//                +'&nbsp;&nbsp;<a id="shareProj" href="javascript:;">'
+//                +'<i class="fa fa-twitter"></i>共享</a>'
+                +"</div>"
                 +'<div id="jstree_projects"></div>');
 
             $('#jstree_projects').on('select_node.jstree', function (e, obj) {

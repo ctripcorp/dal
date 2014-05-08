@@ -1,10 +1,4 @@
 (function(){
-    $("ul[class*='ctrip-nav-action']").click(function(event){
-//        $("li[class='active']").removeClass("active");
-//        $(event.target.parentNode).addClass("active");
-//        event.preventDefault();
-//        location.href = event.target.href;
-    });
 
     $(document).ready(function(){
         var href = location.href;

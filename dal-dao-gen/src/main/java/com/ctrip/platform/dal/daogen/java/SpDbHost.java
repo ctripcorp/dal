@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 
 public class SpDbHost {

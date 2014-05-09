@@ -33,7 +33,7 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
-import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.resource.ProgressResource;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;

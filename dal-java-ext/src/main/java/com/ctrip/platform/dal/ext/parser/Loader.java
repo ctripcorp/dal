@@ -10,37 +10,30 @@ import java.lang.reflect.Field;
 public abstract class Loader {
 	
 	/**
-	 * Returns the value of the field represented by this Field, on the specified entity. 
-	 * The value is automatically wrapped in an object if it has a primitive type.
-	 * The returned value will be filled into business objects,
+	 * Sets the specified value into The specified Entity Field.
 	 * If some re-map action needed, do it here. 
 	 * @param field
 	 * 		The specified Entity Field
 	 * @param entity
 	 * 		Entity from which the represented field's value is to be extracted
-	 * @return
-	 * 		the value of the field represented by this Field
+	 * @param value
+	 * 		The specified value
 	 * @throws ReflectiveOperationException
 	 */
-	public abstract Object load(Field field, Object entity) 
+	public abstract void setValue(Field field,  Object entity, Object value) 
 			throws ReflectiveOperationException;
 	
 	/**
-	 * Returns the value of the field represented by this Field, on the specified entity. 
-	 * The value is automatically wrapped in an object if it has a primitive type.
-	 * The returned value will be set into columns, inserted or updated.
-	 * If some re-map action needed, do it here
+	 * Returns the value of the field represented by the specified entity
 	 * @param field
 	 * 		The specified Entity Field
 	 * @param entity
 	 * 		Entity from which the represented field's value is to be extracted
-	 * @param defaultVal
-	 * 		boolean indicate this column allow to be nullable or not
 	 * @return
-	 * 		the value of the field represented by this Field
+	 * 		The represented field's value.
 	 * @throws ReflectiveOperationException
 	 */
-	public abstract Object save(Field field, Object entity, boolean nullable)
+	public abstract Object getValue(Field field, Object entity)
 			throws ReflectiveOperationException;
 	
 	/**
@@ -48,16 +41,7 @@ public abstract class Loader {
 	 * @param javaType
 	 * 		The specified java type
 	 * @return
-	 * 		Integer value indicats java.sql.TYPES
+	 * 		Integer value indicates java.sql.TYPES
 	 */
 	public abstract int getSqlType(Class<?> javaType);
-	
-	
-	/**
-	 * Database type
-	 */
-	public static enum DBType {
-		mysql,
-		sqlserver
-	}
 }

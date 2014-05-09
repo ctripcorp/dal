@@ -12,6 +12,7 @@ import java.util.Map;
 
 import com.ctrip.fx.enteroctopus.common.jpa.DBColumn;
 
+@Deprecated
 public class EnteroctopusLoader extends Loader {
 	private static HashMap<Class<?>, Class<?>> unboxingMap = null;
 	private static HashMap<Class<?>, Object> defaultMap = null;
@@ -59,49 +60,56 @@ public class EnteroctopusLoader extends Loader {
 	}
 
 	@Override
-	public Object load(Field field, Object value)
+	public void setValue(Field field, Object entity, Object value)
 			throws ReflectiveOperationException {
 		Class<?> type = field.getType();
 		Object defaultVal = defaultMap.containsKey(type) ? defaultMap.get(type) : null;
 		if (type.isPrimitive()) {
 			if (value == null) {
-				return defaultVal;
+				field.set(entity, defaultVal);
+				return;
 			}
 			if (type.equals(unboxingMap.get(value.getClass()))) {
-				return value;
+				field.set(entity, value);
+				return;
 			}
 			if (value instanceof Number) {
 				if (type.equals(boolean.class) || type.equals(char.class)) {
-					return defaultVal;
+					field.set(entity, defaultVal);
+					return;
 				}
-				return numberValue(type, value);
+				field.set(entity, numberValue(type, value));
 			}
 			if (value instanceof Date && type.equals(long.class)) {
-				return Long.valueOf(((Date) value).getTime());
+				field.set(entity, Long.valueOf(((Date) value).getTime()));
 			}
-			return defaultVal;
+			field.set(entity, defaultVal);
+			return;
 		}
 		if (value == null || value.getClass().equals(type)) {
-			return value;
+			field.set(entity, value);
+			return;
 		}
 		if (Number.class.isAssignableFrom(type) && value instanceof Number) {
 			if (type.equals(BigInteger.class)) {
-				return BigInteger.valueOf(((Number) value).longValue());
+				field.set(entity, BigInteger.valueOf(((Number) value).longValue()));
+				return;
 			}
 			if (type.equals(BigDecimal.class)) {
-				return BigDecimal.valueOf(((Number) value).doubleValue());
+				field.set(entity, BigDecimal.valueOf(((Number) value).doubleValue()));
+				return;
 			}
 			Class<?> primitiveType = unboxingMap.get(type);
 			if (primitiveType == null) {
-				return null;
+				field.set(entity, null);
+				return;
 			}
-			return type.getDeclaredMethod("valueOf", primitiveType).invoke(
-					null, numberValue(primitiveType, value));
+			field.set(entity, type.getDeclaredMethod("valueOf", primitiveType).invoke(
+					null, numberValue(primitiveType, value))); ;
 		}
-		return null;
 	}
 
-	public Object save(Field field, Object entity, boolean val)
+	public Object getValue(Field field, Object entity)
 			throws ReflectiveOperationException {
 		Class<?> type = field.getType();
 		Object value = defaultMap.containsKey(type) ? defaultMap.get(type) : null;

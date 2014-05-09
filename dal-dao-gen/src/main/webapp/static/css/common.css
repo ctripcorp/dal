@@ -69,3 +69,18 @@ label.btn{
 ul.navbar-right li{
     margin-right: 1px;
 }
+.ctip{
+    margin:0px 9px 0px 0px;
+}
+.helpicon{
+    border: 0px;
+    width: 30px;
+    height: 30px;
+}
+div[class*='tooltip']{
+    text-align: left;
+}
+div[class*='tooltip-inner']{
+    width: 95% !important;
+    min-width: 600px;
+}

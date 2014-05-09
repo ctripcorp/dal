@@ -198,6 +198,15 @@ jQuery(document).ready(function () {
 
     $("#layout_main_layout_resizer_preview").mouseleave(function(){
           ace.edit("code_editor").resize();
+    })
+
+    jQuery(window).load(function(){
+        var options={
+            animation:true,
+            trigger:'hover',
+            html:true
+        }
+        $('.ctip').tooltip(options);
     });
 
     window.ajaxutil.reload_projects();

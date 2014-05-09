@@ -58,33 +58,20 @@
 
       
       <!-- JS and analytics only. -->
-      <!-- Bootstrap core JavaScript================================================== -->
-      <!-- Placed at the end of the document so the pages load faster -->
-      <script src="/static/w2ui/w2ui-1.3.2.min.js"></script>
-      <script src="/static/jstree/jstree.js"></script>
-      <script src="/static/jquery/jquery.blockui.min.js"></script>
-      <script src="/static/js/sprintf.js"></script>
-      <script src="/static/jquery/jquery.multiple.select.js"></script>
-      <script src="/static/js/selectize.min.js"></script>
-      <script src="/static/js/cblock.js"></script>
-      
-      <script src="/static/jquery/jquery-1.10.2.min.js"></script>
+	<!-- Bootstrap core JavaScript================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="/static/w2ui/w2ui-1.3.2.min.js"></script>
+	<script src="/static/jstree/jstree.js"></script>
+	<script src="/static/jquery/jquery.blockui.min.js"></script>
+	<script src="/static/js/sprintf.js"></script>
+	<script src="/static/jquery/jquery.multiple.select.js"></script>
+	<script src="/static/js/selectize.min.js"></script>
+	<script src="/static/js/cblock.js"></script>
+
+	<script src="/static/jquery/jquery-1.10.2.min.js"></script>
 	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
-	<script src="/static/Flat-UI-master/js/jquery-ui-1.10.3.custom.min.js"></script>
-    <script src="/static/Flat-UI-master/js/jquery.ui.touch-punch.min.js"></script>
-    <script src="/static/Flat-UI-master/js/bootstrap-select.js"></script>
-    <script src="/static/Flat-UI-master/js/bootstrap-switch.js"></script>
-    <script src="/static/Flat-UI-master/js/flatui-checkbox.js"></script>
-    <script src="/static/Flat-UI-master/js/flatui-radio.js"></script>
-    <script src="/static/Flat-UI-master/js/jquery.tagsinput.js"></script>
-    <script src="/static/Flat-UI-master/js/jquery.placeholder.js"></script>
-    <script src="/static/Flat-UI-master/js/jquery.stacktable.js"></script>
-    <script src="http://vjs.zencdn.net/4.3/video.js"></script>
-    <script src="/static/Flat-UI-master/js/application.js"></script>
-    
-    <script src="/static/Flat-UI-master/js/jquery-ui-1.10.3.custom.min.js"></script>
-    <script src="/static/Flat-UI-master/js/jquery.ui.touch-punch.min.js"></script>
-    
-    <script src="/static/js/header.js"></script>
+
+	<script src="/static/js/header.js"></script>
+	
    </body>
 </html>

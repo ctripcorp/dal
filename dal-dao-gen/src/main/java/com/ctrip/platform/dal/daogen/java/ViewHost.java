@@ -7,7 +7,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 
 public class ViewHost {
 	private String packageName;

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 
 public class SpHost {
 	private DatabaseCategory databaseCategory;

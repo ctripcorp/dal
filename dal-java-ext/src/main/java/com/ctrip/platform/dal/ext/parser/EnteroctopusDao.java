@@ -15,6 +15,7 @@ import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 
+@Deprecated
 public class EnteroctopusDao {
 
 	private static final String INSERT_TEMP = "INSERT INTO %s VALUES";

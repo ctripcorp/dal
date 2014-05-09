@@ -16,6 +16,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -24,7 +25,6 @@ import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
 import com.ctrip.platform.dal.ext.parser.DefaultLoader;
-import com.ctrip.platform.dal.ext.parser.Loader.DBType;
 
 /**
  * Test the default Jpa Parser with mysql database
@@ -47,7 +47,7 @@ public class DalDefaultJpaParserMySqlTest {
 	static {
 		try {
 			parser = DalDefaultJpaParser.create(ClientTestModel.class, 
-					new DefaultLoader(DBType.mysql), "dao_test");
+					new DefaultLoader(DatabaseCategory.MySql), "dao_test");
 			
 			DalClientFactory.initPrivateFactory();
 			client = DalClientFactory.getClient(parser.getDatabaseName());	

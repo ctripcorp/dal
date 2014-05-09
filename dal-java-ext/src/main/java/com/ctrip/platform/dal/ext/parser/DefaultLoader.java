@@ -5,12 +5,14 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+
 public class DefaultLoader extends Loader{
 
 	private static Map<Class<?>, Integer> ms_sql_server = null;
 	private static Map<Class<?>, Integer> my_sql = null;
 	
-	private DBType dbtype = DBType.mysql;
+	private DatabaseCategory dbtype = DatabaseCategory.MySql;
 	
 	//ref:http://docs.oracle.com/cd/E19159-01/819-3672/gbxjk/index.html
 	static{
@@ -80,33 +82,43 @@ public class DefaultLoader extends Loader{
 	
 	public DefaultLoader(){ }
 	
-	public DefaultLoader(DBType type){ 
+	public DefaultLoader(DatabaseCategory type){ 
 		this.dbtype = type;
 	}
 	
 	@Override
-	public Object load(Field field, Object value)
+	public void setValue(Field field, Object entity, Object val)
 			throws ReflectiveOperationException {
 		if(field.getType().equals(Integer.class) || 
-				field.getType().equals(int.class))
-			return ((Number)value).intValue();
+				field.getType().equals(int.class)){
+			field.set(entity,((Number)val).intValue());
+			return;
+		}
 		if(field.getType().equals(Long.class) || 
-				field.getType().equals(long.class))
-			return ((Number)value).longValue();
+				field.getType().equals(long.class)){
+			field.set(entity,((Number)val).longValue());
+			return;
+		}
 		if(field.getType().equals(Short.class) || 
-				field.getType().equals(short.class))
-			return ((Number)value).shortValue();
+				field.getType().equals(short.class)){
+			field.set(entity,((Number)val).shortValue());
+			return;
+		}
 		if(field.getType().equals(Float.class) || 
-				field.getType().equals(float.class))
-			return ((Number)value).floatValue();
+				field.getType().equals(float.class)){
+			field.set(entity,((Number)val).floatValue());
+			return;
+		}
 		if(field.getType().equals(Double.class) || 
-				field.getType().equals(double.class))
-			return ((Number)value).doubleValue();
-		else return value;
+				field.getType().equals(double.class)){
+			field.set(entity,((Number)val).doubleValue());
+			return;
+		}
+		 field.set(entity, val);
 	}
 
 	@Override
-	public Object save(Field field, Object entity, boolean nullable)
+	public Object getValue(Field field, Object entity)
 			throws ReflectiveOperationException {
 		
 		return field.get(entity);
@@ -114,7 +126,7 @@ public class DefaultLoader extends Loader{
 
 	@Override
 	public int getSqlType(Class<?> javaType) {
-		if(this.dbtype == DBType.sqlserver){
+		if(this.dbtype == DatabaseCategory.SqlServer){
 			return ms_sql_server.get(javaType);
 		}
 		return my_sql.get(javaType);

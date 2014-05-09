@@ -12,7 +12,7 @@
       <meta name="author" content="">
       <title>Ctrip DAO Generator</title>
       <!-- Bootstrap core CSS -->
-      <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+      <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
       <link href="/static/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
       <link href="/static/w2ui/w2ui-1.3.2.min.css" rel="stylesheet"/>
       <link rel="stylesheet" href="/static/jstree/themes/default/style.min.css" />
@@ -58,12 +58,12 @@
       <div class="modal fade" id="projectModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
          <div class="modal-dialog">
             <div class="modal-content">
-               <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <a href="http://conf.ctripcorp.com/display/SysDev/DAL+Code+Generator#DALCodeGenerator-addproject" target="_blank" type="button" class="close">?&nbsp;</a>
-                  <h4 class="modal-title" id="myModalLabel">Add a project</h4>
-               </div>
-               <div class="modal-body">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">Add a project</h4>
+				</div>
+				<div class="modal-body">
                   <div class="row-fluid">
                      <div class="control-group">
                         <input id="project_id" type="hidden" value="">
@@ -79,6 +79,11 @@
                   </div>
                </div>
                <div class="modal-footer">
+               	   <a href="#" class="ctip" data-toggle="tooltip"
+						data-placement="top" title=""
+						data-original-title="代码生成器按照项目来组织代码，因此，同一个用户可以新建多个项目，每个项目生成的代码相互独立，互不干扰。"> <img class="helpicon"
+						src="/static/images/help.jpg">
+					</a>
                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                   <button id="save_proj" type="button" class="btn btn-primary">Save changes</button>
                </div>
@@ -206,7 +211,6 @@
             <div class="modal-content">
                <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <a href="http://conf.ctripcorp.com/display/SysDev/DAL+Code+Generator#DALCodeGenerator-addDao" target="_blank" type="button" class="close">?&nbsp;</a>
                   <h4 class="modal-title" id="page1_label">DAO生成向导</h4>
                </div>
                <div class="modal-body" style="position: relative;overflow: auto;width: auto;max-height:420px;">
@@ -405,6 +409,16 @@
                </div>
                <div class="modal-footer">
                   <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
+                  <a href="#" class="ctip" data-toggle="tooltip"
+						data-placement="top" title="" html="1"
+						data-original-title="1、如果在列表中没有找到你需要的数据库，可以点击列表后面的超链接追加All In One数据库。<br/>
+						2、目前，DAO代码生成方式有三种：<br/>
+						&nbsp;2.1、生成模板(包含基础的增删改查操作)：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
+						&nbsp;2.2、构建SQL（生成的代码绑定到模板）：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
+						&nbsp;2.3、复杂查询（额外生成实体类）：在这种模式下面，我们可以自定义复杂的查询SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
+						"> <img class="helpicon"
+						src="/static/images/help.jpg">
+					</a>
                   <button id="prev_step"  type="button" class="btn btn-default">上一步</button>
                   <button id="next_step"  type="button" class="btn btn-primary">下一步</button>
                   <label class="popup_label"><input id="gen_on_save" type="checkbox">保存时生成代码</label>

@@ -1,6 +1,6 @@
 (function(){
 
-    $(document).ready(function(){
+    $(window).load(function(){
         var href = location.href;
         $("li[class='active']").removeClass("active");
         if(href.indexOf("codeview")!=-1){

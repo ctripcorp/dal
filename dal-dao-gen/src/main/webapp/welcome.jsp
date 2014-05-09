@@ -124,8 +124,6 @@
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script src="/static/jquery/jquery-1.10.2.min.js"></script>
 	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
-	<script src="/static/Flat-UI-master/js/jquery-ui-1.10.3.custom.min.js"></script>
-    <script src="/static/Flat-UI-master/js/jquery.ui.touch-punch.min.js"></script>
     <script src="/static/Flat-UI-master/js/bootstrap-select.js"></script>
     <script src="/static/Flat-UI-master/js/bootstrap-switch.js"></script>
     <script src="/static/Flat-UI-master/js/flatui-checkbox.js"></script>
@@ -133,13 +131,11 @@
     <script src="/static/Flat-UI-master/js/jquery.tagsinput.js"></script>
     <script src="/static/Flat-UI-master/js/jquery.placeholder.js"></script>
     <script src="/static/Flat-UI-master/js/jquery.stacktable.js"></script>
-    <script src="http://vjs.zencdn.net/4.3/video.js"></script>
+    <script src="/static/Flat-UI-master/js/video.js"></script>
     <script src="/static/Flat-UI-master/js/application.js"></script>
-    
-    <script src="/static/Flat-UI-master/js/jquery-ui-1.10.3.custom.min.js"></script>
-    <script src="/static/Flat-UI-master/js/jquery.ui.touch-punch.min.js"></script>
     
     <script src="/static/js/header.js"></script>
     <script src="/static/js/welcome.js"></script>
+    
 </body>
 </html>

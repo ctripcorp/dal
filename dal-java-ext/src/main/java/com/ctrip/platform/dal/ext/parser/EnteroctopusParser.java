@@ -14,6 +14,7 @@ import com.ctrip.fx.enteroctopus.common.jpa.DBEntity;
 import com.ctrip.fx.enteroctopus.common.jpa.DBId;
 import com.ctrip.platform.dal.dao.DalParser;
 
+@Deprecated
 public class EnteroctopusParser<T> implements DalParser<T>{
 	
 	private static ConcurrentHashMap<String, DalParser<?>> cache = null;
@@ -87,8 +88,7 @@ public class EnteroctopusParser<T> implements DalParser<T>{
 			//Fill fields here
 			for(int i = 0; i < fieldNames.length; i++){
 				Field field = this.originFileds[i];
-				field.set(instance, this.loader.load(field, 
-						rs.getObject(this.columns[i])));
+				this.loader.setValue(field, instance, rs.getObject(this.columns[i]));
 			}
 			return instance;
 		} catch (Exception e) {
@@ -156,7 +156,7 @@ public class EnteroctopusParser<T> implements DalParser<T>{
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		for(int i = 0; i < this.originFileds.length; i++){
 			try {
-				Object val = this.loader.save(originFileds[i], pojo, true);
+				Object val = this.loader.getValue(originFileds[i], pojo);
 				map.put(this.columns[i], val);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

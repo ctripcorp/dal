@@ -16,7 +16,7 @@
                 }   
             });
         },
-        render_grid: function (project_id) {
+        render_grid: function () {
             var existsGrid = w2ui['grid'];
             if (existsGrid != undefined) {
                 return;
@@ -64,12 +64,7 @@
                         case 'refreshDAO':
 
                             w2ui['grid'].clear();
-                            var current_project = w2ui['grid'].current_project;
-                            if (current_project == undefined) {
-                                if (w2ui['sidebar'].nodes.length < 1 || w2ui['sidebar'].nodes[0].nodes.length < 1)
-                                    return;
-                                current_project = w2ui['sidebar'].nodes[0].nodes[0].id;
-                            }
+                            var current_project = 80;
                             cblock($("body"));
                             $.get("/rest/task?project_id=" + current_project + "&rand=" + Math.random(), function (data) {
                                 var allTasks = [];
@@ -152,7 +147,9 @@
 
     window.render.render_layout($('#main_layout'));
 
-    window.render.render_grid(80);
+    window.render.render_grid();
+
+    w2ui['grid_toolbar'].click('refreshDAO', null);
 
     $(window).resize(function () {
         $('#main_layout').height($(document).height() - 50);

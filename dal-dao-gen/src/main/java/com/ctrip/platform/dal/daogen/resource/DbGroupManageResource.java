@@ -21,16 +21,16 @@ import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
- * DAL Member Manage.
+ * DAL database of group manage.
  * @author gzxia
  *
  */
 @Resource
 @Singleton
-@Path("member")
-public class MemberResource {
+@Path("dbgroup")
+public class DbGroupManageResource {
 
-	private static Logger log = Logger.getLogger(MemberResource.class);
+	private static Logger log = Logger.getLogger(DbGroupManageResource.class);
 	
 	@GET
 	@Path("users")

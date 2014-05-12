@@ -71,6 +71,7 @@
 	<script src="/static/js/cblock.js"></script>
 
 	<script src="/static/js/header.js"></script>
+	<script src="/static/js/dbmanage.js"></script>
 	
    </body>
 </html>

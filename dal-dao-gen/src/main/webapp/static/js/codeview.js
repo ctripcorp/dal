@@ -41,7 +41,7 @@
                     'multiple': false,
                     'data' : {
                       'url' : function (node) {
-                        return node.id == "#" ? "/rest/project?root=true&rand=" + Math.random() : "/rest/project?rand=" + Math.random();
+                        return node.id == "#" ? "/rest/projectview?root=true&rand=" + Math.random() : "/rest/projectview?rand=" + Math.random();
                       }
                     }
             }});

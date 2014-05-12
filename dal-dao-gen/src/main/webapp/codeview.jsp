@@ -52,7 +52,6 @@
       <!-- Docs master nav -->
       <%@ include file="header.jsp"%>
 	<div id="main_layout">
-		code view page
 	</div>
 
 	<!-- JS and analytics only. -->

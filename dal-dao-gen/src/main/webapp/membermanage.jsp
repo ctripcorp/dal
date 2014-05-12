@@ -53,11 +53,9 @@
       <%@ include file="header.jsp"%>
       
       <div id="main_layout">
-      member.
       </div>
-
       
-      <!-- JS and analytics only. -->
+    <!-- JS and analytics only. -->
 	<!-- Bootstrap core JavaScript================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script src="/static/jquery/jquery-1.10.2.min.js"></script>
@@ -71,5 +69,6 @@
 	<script src="/static/js/cblock.js"></script>
 
 	<script src="/static/js/header.js"></script>
+	<script src="/static/js/membermanage.js"></script>
    </body>
 </html>

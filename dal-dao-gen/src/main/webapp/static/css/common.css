@@ -82,5 +82,5 @@ div[class*='tooltip']{
 }
 div[class*='tooltip-inner']{
     width: 95% !important;
-    min-width: 600px;
+    min-width: 200px;
 }

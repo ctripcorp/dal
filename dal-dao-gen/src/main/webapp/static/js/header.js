@@ -17,5 +17,13 @@
             $("#indexjsp").addClass("active");
         }
 
+        var options={
+            animation:true,
+            trigger:'hover',
+            html:true
+        }
+        $('.ctip').tooltip(options);
+
     });
+
 })();

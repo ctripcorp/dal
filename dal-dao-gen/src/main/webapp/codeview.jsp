@@ -61,6 +61,8 @@
 	<!-- JS and analytics only. -->
 	<!-- Bootstrap core JavaScript================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="/static/jquery/jquery-1.10.2.min.js"></script>
+	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
 	<script src="/static/w2ui/w2ui-1.3.2.min.js"></script>
 	<script src="/static/jstree/jstree.js"></script>
 	<script src="/static/jquery/jquery.blockui.min.js"></script>
@@ -68,9 +70,6 @@
 	<script src="/static/jquery/jquery.multiple.select.js"></script>
 	<script src="/static/js/selectize.min.js"></script>
 	<script src="/static/js/cblock.js"></script>
-
-	<script src="/static/jquery/jquery-1.10.2.min.js"></script>
-	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
 
 	<script src="/static/js/header.js"></script>
 

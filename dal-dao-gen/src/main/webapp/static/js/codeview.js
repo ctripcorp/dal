@@ -182,7 +182,6 @@
                 }   ],
                 records: [],
                 onDblClick: function (target, data) {
-                    window.render.editDAO(data.recid);
                 }
             }));
         }

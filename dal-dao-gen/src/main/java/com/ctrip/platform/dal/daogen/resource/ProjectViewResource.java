@@ -2,16 +2,11 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -20,21 +15,15 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
-import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
-import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
-import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserProject;
-import com.ctrip.platform.dal.daogen.java.JavaGenerator;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
- * The schema of {daogen.project} { "name": "InternationalFightEntine",
- * "namespace": "com.ctrip.flight.intl.engine" }
- * 
- * @author gawu
- * 
+ * DAL Project & Code 一览
+ * @author gzxia
+ *
  */
 @Resource
 @Singleton

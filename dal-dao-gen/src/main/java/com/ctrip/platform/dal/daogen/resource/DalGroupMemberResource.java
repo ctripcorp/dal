@@ -28,9 +28,9 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 @Resource
 @Singleton
 @Path("member")
-public class MemberResource {
+public class DalGroupMemberResource {
 
-	private static Logger log = Logger.getLogger(MemberResource.class);
+	private static Logger log = Logger.getLogger(DalGroupMemberResource.class);
 	
 	@GET
 	@Path("users")

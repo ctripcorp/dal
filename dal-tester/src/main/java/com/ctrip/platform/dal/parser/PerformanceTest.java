@@ -10,8 +10,8 @@ public class PerformanceTest {
 	public static void main(String[] args) throws Exception{
 		
 		DalClientFactory.initPrivateFactory();
-		int count = 5000;
-		String queryWhere = "id < 4000";
+		int count = 100;
+		String queryWhere = "id < 100";
 		jpa(count, queryWhere);
 		//normal(count, queryWhere);	
 		System.exit(1);

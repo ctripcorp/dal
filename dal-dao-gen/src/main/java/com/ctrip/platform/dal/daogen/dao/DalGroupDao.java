@@ -69,7 +69,7 @@ public class DalGroupDao{
 	public int updateDalGroup(DalGroup group){
 		return this.jdbcTemplate
 				.update("update dal_group set group_name=?, group_comment=?, create_user_no=?, create_time=?"
-						+ "where id=?",
+						+ " where id=?",
 						group.getGroup_name(),
 						group.getGroup_comment(),
 						group.getCreate_user_no(),

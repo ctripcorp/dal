@@ -21,6 +21,8 @@
     };
 
     var addGroup = function(){
+        $("#name").val('');
+        $("#comment").val('');
         $("#groupModal").modal({
             "backdrop": "static"
         });
@@ -49,8 +51,35 @@
     };
 
     var editGroup = function(){
-        $("#groupModal").modal({
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        $("#name2").val(record["group_name"]);
+        $("#comment2").val(record["group_comment"]);
+        $("#groupModal2").modal({
             "backdrop": "static"
+        });
+        $("#update_group").click(function(){
+            var records = w2ui['grid'].getSelection();
+            var record = w2ui['grid'].get(records[0]);
+            var postData = {
+                groupId:record['id'],
+                groupName:$("#name2").val(),
+                groupComment:$("#comment2").val()
+            };
+            if(record!=null){
+                $.post("/rest/group/update", postData,function (data) {
+                    if (data.code == "OK") {
+                        $("#groupModal2").modal('hide');
+                        refreshGroup();
+                    } else {
+                        alert(data.info);
+                    }
+                }).fail(function (data) {
+                        alert("执行异常:"+data);
+                    });
+            }else{
+                alert('请选择一个group！');
+            }
         });
     };
 
@@ -59,12 +88,20 @@
         var record = w2ui['grid'].get(records[0]);
         if(record!=null){
             if (confirm("Are you sure to delete?")) {
-
+                $.post("/rest/group/delete", {id:record["id"]},function (data) {
+                    if (data.code == "OK") {
+                        $("#groupModal").modal('hide');
+                        refreshGroup();
+                    } else {
+                        alert(data.info);
+                    }
+                }).fail(function (data) {
+                        alert("执行异常:"+data);
+                    });
             }
         }else{
             alert('请选择一个group！');
         }
-
     };
 
     Render.prototype = {

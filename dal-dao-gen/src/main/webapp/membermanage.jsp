@@ -52,8 +52,45 @@
       <!-- Docs master nav -->
       <%@ include file="header.jsp"%>
       
-      <div id="main_layout">
+      <div id="main_layout"></div>
+      <!--Begin modal-->
+      <div class="modal fade" id="memberModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+            <div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">Add a member</h4>
+				</div>
+				<div class="modal-body">
+                  <div class="row-fluid">
+                     <div class="control-group">
+                        <input id="group_id" type="hidden" value="">
+                        <label class="control-label popup_label" style="width:130px;">Member UserNo:</label>
+                        <input id="userNo" class="span7 input-sm" type="text">&nbsp;
+                        <a href="#" class="ctip" data-toggle="tooltip"
+							data-placement="bottom" title=""
+							data-original-title="请输入员工的编号，例如：S45678"> <img class="helpicon"
+							src="/static/images/help.jpg">
+						</a>
+                     </div>
+                  </div>
+                  <div class="row-fluid">
+                     <div class="control-group">
+                        <label class="control-label popup_label" style="width:130px;">备 注:</label>
+                        <input id="comment" class="span7 input-sm" type="text">
+                     </div>
+                  </div>
+               </div>
+               <div class="modal-footer">
+               	  <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button id="save_member" type="button" class="btn btn-primary">Save changes</button>
+               </div>
+            </div>
+         </div>
       </div>
+      <!--End modal-->
       
     <!-- JS and analytics only. -->
 	<!-- Bootstrap core JavaScript================================================== -->

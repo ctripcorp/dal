@@ -5,6 +5,92 @@
 
     };
 
+    var refreshMember = function () {
+        w2ui['grid'].clear();
+        var current_project = w2ui['grid'].current_project;
+        if (current_project == undefined) {
+            if (w2ui['sidebar'].nodes.length < 1 || w2ui['sidebar'].nodes[0].nodes.length < 1)
+                return;
+            current_project = w2ui['sidebar'].nodes[0].nodes[0].id;
+        }
+        cblock($("body"));
+        $.get("/rest/task?project_id=" + current_project + "&rand=" + Math.random(),function (data) {
+            var allTasks = [];
+            $.each(data.tableViewSpTasks, function (index, value) {
+                value.recid = allTasks.length + 1;
+                value.task_type = "table_view_sp";
+                value.task_desc = "表/视图/存储过程";
+                if (value.table_names != null && value.table_names != "") {
+                    value.sql_content = value.table_names;
+                }
+                if (value.sp_names != null && value.sp_names != "") {
+                    if (value.sql_content == null || value.sql_content == "")
+                        value.sql_content = value.sp_names;
+                    else
+                        value.sql_content = value.sql_content + "," + value.sp_names;
+                }
+                if (value.view_names != null && value.view_names != "") {
+                    if (value.sql_content == null || value.sql_content == "")
+                        value.sql_content = value.view_names;
+                    else
+                        value.sql_content = value.sql_content + "," + value.view_names;
+                }
+                value.class_name = "/";
+                value.method_name = "/";
+                allTasks.push(value);
+            });
+            $.each(data.autoTasks, function (index, value) {
+                value.recid = allTasks.length + 1;
+                value.task_type = "auto";
+                value.task_desc = "SQL构建";
+                value.class_name = value.table_name;
+                allTasks.push(value);
+            });
+            $.each(data.sqlTasks, function (index, value) {
+                value.recid = allTasks.length + 1;
+                value.task_type = "sql";
+                value.task_desc = "自定义查询";
+                allTasks.push(value);
+            });
+            w2ui['grid'].add(allTasks);
+            $("body").unblock();
+        }).fail(function (data) {
+                alert("获取所有Member失败!");
+            });
+    };
+
+    var addMember = function(){
+        $("#memberModal").modal({
+            "backdrop": "static"
+        });
+        $("#save_member").click(function(){
+            var userNo = $("userNo").val();
+            var comment = $("comment").val();
+            if(userNo==null){
+                $("#error_msg").html('请输入Group Name!');
+            }
+        });
+    };
+
+    var editMember = function(){
+        $("#memberModal").modal({
+            "backdrop": "static"
+        });
+    };
+
+    var delMember = function(){
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if(record!=null){
+            if (confirm("Are you sure to delete?")) {
+
+            }
+        }else{
+            alert('请选择一个member！');
+        }
+
+    };
+
     Render.prototype = {
         render_layout: function (render_obj) {
             $(render_obj).w2layout({
@@ -70,81 +156,39 @@
                         type: 'break'
                     }, {
                         type: 'button',
-                        id: 'refreshDAO',
+                        id: 'refreshMember',
                         caption: '刷新',
                         icon: 'fa fa-refresh'
                     }, {
                         type: 'button',
-                        id: 'addDAO',
+                        id: 'addMember',
                         caption: '添加Member',
                         icon: 'fa fa-plus'
                     }, {
                         type: 'button',
-                        id: 'editDAO',
+                        id: 'editMember',
                         caption: '修改Member',
                         icon: 'fa fa-edit'
                     }, {
                         type: 'button',
-                        id: 'delDAO',
+                        id: 'delMember',
                         caption: '删除Member',
                         icon: 'fa fa-times'
                     }],
                     onClick: function (target, data) {
                         switch (target) {
-                        case 'refreshDAO':
-
-                            w2ui['grid'].clear();
-                            var current_project = w2ui['grid'].current_project;
-                            if (current_project == undefined) {
-                                if (w2ui['sidebar'].nodes.length < 1 || w2ui['sidebar'].nodes[0].nodes.length < 1)
-                                    return;
-                                current_project = w2ui['sidebar'].nodes[0].nodes[0].id;
-                            }
-                            cblock($("body"));
-                            $.get("/rest/task?project_id=" + current_project + "&rand=" + Math.random(), function (data) {
-                                var allTasks = [];
-                                $.each(data.tableViewSpTasks, function (index, value) {
-                                    value.recid = allTasks.length + 1;
-                                    value.task_type = "table_view_sp";
-                                    value.task_desc = "表/视图/存储过程";
-                                    if (value.table_names != null && value.table_names != "") {
-                                        value.sql_content = value.table_names;
-                                    }
-                                    if (value.sp_names != null && value.sp_names != "") {
-                                        if (value.sql_content == null || value.sql_content == "")
-                                            value.sql_content = value.sp_names;
-                                        else
-                                            value.sql_content = value.sql_content + "," + value.sp_names;
-                                    }
-                                    if (value.view_names != null && value.view_names != "") {
-                                        if (value.sql_content == null || value.sql_content == "")
-                                            value.sql_content = value.view_names;
-                                        else
-                                            value.sql_content = value.sql_content + "," + value.view_names;
-                                    }
-                                    value.class_name = "/";
-                                    value.method_name = "/";
-                                    allTasks.push(value);
-                                });
-                                $.each(data.autoTasks, function (index, value) {
-                                    value.recid = allTasks.length + 1;
-                                    value.task_type = "auto";
-                                    value.task_desc = "SQL构建";
-                                    value.class_name= value.table_name;
-                                    allTasks.push(value);
-                                });
-                                $.each(data.sqlTasks, function (index, value) {
-                                    value.recid = allTasks.length + 1;
-                                    value.task_type = "sql";
-                                    value.task_desc = "自定义查询";
-                                    allTasks.push(value);
-                                });
-                                w2ui['grid'].add(allTasks);
-                                $("body").unblock();
-                            }).fail(function(data){
-                                 alert("获取所有DAO失败!");
-                            });
-                            break;
+                            case 'refreshMember':
+                                refreshMember();
+                                break;
+                            case 'addMember':
+                                addMember();
+                                break;
+                            case 'editMember':
+                                editMember();
+                                break;
+                            case 'delMember':
+                                delMember();
+                                break;
                         }
                     }
                 },

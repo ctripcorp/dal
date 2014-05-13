@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.jasig.cas.client.util.AssertionHolder;
 
 import ch.qos.logback.core.status.Status;
 
@@ -38,7 +39,6 @@ public class DalGroupResource {
 	}
 	
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
 	@Path("get")
 	public Response getAllGroup(){
 		List<DalGroup> groups =  dal_dao.getAllGroups();
@@ -49,12 +49,14 @@ public class DalGroupResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("add")
 	public Response add(@FormParam("groupName") String groupName,
-			@FormParam("groupComment") String groupComment,
-			@FormParam("userNo") String userNo){
-
+			@FormParam("groupComment") String groupComment){
+		
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+		
 		if(null == userNo || null == groupName || groupName.isEmpty()){
 			log.error(String.format("Add dal group failed, caused by illegal parameters: "
-					+ "[groupName=%s, groupComment=%s, userNo=%s]",groupName, groupComment, userNo));
+					+ "[groupName=%s, groupComment=%s]",groupName, groupComment));
 			return Response.status(Status.ERROR)
 					.entity("Illegal parameters.").build();
 		}
@@ -82,12 +84,14 @@ public class DalGroupResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("delete")
-	public Response delete(@FormParam("id") String id,
-			@FormParam("userNo") String userNo){
+	public Response delete(@FormParam("id") String id){
 
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+		
 		if(null == userNo || null == id || id.isEmpty()){
 			log.error(String.format("Delete dal group failed, caused by illegal parameters "
-					+ "[ids=%s, userNo=%s]", id, userNo));
+					+ "[ids=%s]", id));
 			return Response.status(Status.ERROR)
 					.entity("Illegal parameters.").build();
 		}
@@ -118,12 +122,14 @@ public class DalGroupResource {
 	@Path("update")
 	public Response update(@FormParam("groupId") String id,
 			@FormParam("groupName") String groupName,
-			@FormParam("groupComment") String groupComment,
-			@FormParam("userNo") String userNo){
+			@FormParam("groupComment") String groupComment){
+		
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
 		
 		if(null == userNo || null == id || id.isEmpty()){
 			log.error(String.format("Update dal group failed, caused by illegal parameters, "
-					+ "[id=%s, serNo=%s]", id, userNo));
+					+ "[id=%s, groupName=%s, groupComment=%s]", id, groupName, groupComment));
 			return Response.status(Status.ERROR)
 					.entity("Illegal parameters.").build();
 		}

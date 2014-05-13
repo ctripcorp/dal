@@ -53,7 +53,7 @@
       
       <div id="main_layout">
       </div>
-      <!--Begin project modal-->
+      <!--Begin modal-->
       <div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
          <div class="modal-dialog">
             <div class="modal-content">
@@ -90,7 +90,7 @@
             </div>
          </div>
       </div>
-      <!--End project modal-->
+      <!--End modal-->
       
     <!-- JS and analytics only. -->
 	<!-- Bootstrap core JavaScript================================================== -->

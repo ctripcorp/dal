@@ -52,9 +52,41 @@
       <!-- Docs master nav -->
       <%@ include file="header.jsp"%>
       
-      <div id="main_layout">
-      db.
+      <div id="main_layout"></div>
+      
+      <!--Begin modal-->
+      <div class="modal fade" id="dbModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+            <div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">Add a DataBase</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 140px;">All-In-One数据库：</label>
+							<select id="databases" class="span8">
+							</select>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 140px;">备
+								注:</label> <input id="comment" class="span8 input-sm" type="text">
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+               	  <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button id="save_db" type="button" class="btn btn-primary">Save changes</button>
+               </div>
+            </div>
+         </div>
       </div>
+      <!--End modal-->
 
       
       <!-- JS and analytics only. -->
@@ -69,6 +101,7 @@
 	<script src="/static/jquery/jquery.multiple.select.js"></script>
 	<script src="/static/js/selectize.min.js"></script>
 	<script src="/static/js/cblock.js"></script>
+	<script src="/static/js/ajaxutil.js"></script>
 
 	<script src="/static/js/header.js"></script>
 	<script src="/static/js/dbmanage.js"></script>

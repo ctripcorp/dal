@@ -4,6 +4,7 @@ package com.ctrip.platform.dal.daogen.utils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
@@ -28,6 +29,8 @@ public class SpringBeanGetter {
 
 	private static DaoOfUserProject daoOfUserProject;
 	
+	private static DalGroupDao daoOfDalGroup;
+	
 	static {
 		daoOfProject = (DaoOfProject) context.getBean("projectDao");
 		
@@ -36,6 +39,8 @@ public class SpringBeanGetter {
 		daoByTableViewSp =  (DaoByTableViewSp)context.getBean("daoByTableViewSp");
 		daoOfLoginUser =  (DaoOfLoginUser)context.getBean("loginUserDao");
 		daoOfUserProject = (DaoOfUserProject)context.getBean("userProjectDao");
+		
+		daoOfDalGroup = (DalGroupDao)context.getBean("dalGroup");
 	}
 
 	public static DaoOfProject getDaoOfProject() {
@@ -62,4 +67,7 @@ public class SpringBeanGetter {
 		return daoOfUserProject;
 	}
 
+	public static DalGroupDao getDaoOfDalGroup(){
+		return daoOfDalGroup;
+	}
 }

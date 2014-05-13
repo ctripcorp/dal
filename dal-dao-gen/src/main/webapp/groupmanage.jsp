@@ -40,7 +40,6 @@
       <link rel="shortcut icon" href="/static/images/favicon.ico">
       	<!-- Loading Flat UI -->
 	    <link href="/static/Flat-UI-master/css/flat-ui.css" rel="stylesheet">
-	    <link href="/static/Flat-UI-master/css/demo.css" rel="stylesheet">
 	
 	    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
 	    <!--[if lt IE 9]>
@@ -53,13 +52,51 @@
       <%@ include file="header.jsp"%>
       
       <div id="main_layout">
-      group
       </div>
-
+      <!--Begin modal-->
+      <div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+            <div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">Add a group</h4>
+				</div>
+				<div class="modal-body">
+                  <div class="row-fluid">
+                     <div class="control-group">
+                        <input id="group_id" type="hidden" value="">
+                        <label class="control-label popup_label" style="width:100px;">Group Name:</label>
+                        <input id="name" class="span7 input-sm" type="text">&nbsp;
+                        <a href="#" class="ctip" data-toggle="tooltip"
+							data-placement="right" title=""
+							data-original-title="一个业务线DAL Team对应一个Group Name。"> <img class="helpicon"
+							src="/static/images/help.jpg">
+						</a>
+                     </div>
+                  </div>
+                  <div class="row-fluid">
+                     <div class="control-group">
+                        <label class="control-label popup_label" style="width:100px;">备 注:</label>
+                        <input id="comment" class="span7 input-sm" type="text">
+                     </div>
+                  </div>
+               </div>
+               <div class="modal-footer">
+               	  <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button id="save_group" type="button" class="btn btn-primary">Save changes</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!--End modal-->
       
-      <!-- JS and analytics only. -->
+    <!-- JS and analytics only. -->
 	<!-- Bootstrap core JavaScript================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="/static/jquery/jquery-1.10.2.min.js"></script>
+	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
 	<script src="/static/w2ui/w2ui-1.3.2.min.js"></script>
 	<script src="/static/jstree/jstree.js"></script>
 	<script src="/static/jquery/jquery.blockui.min.js"></script>
@@ -68,9 +105,7 @@
 	<script src="/static/js/selectize.min.js"></script>
 	<script src="/static/js/cblock.js"></script>
 
-	<script src="/static/jquery/jquery-1.10.2.min.js"></script>
-	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
-
 	<script src="/static/js/header.js"></script>
+	<script src="/static/js/groupmanage.js"></script>
    </body>
 </html>

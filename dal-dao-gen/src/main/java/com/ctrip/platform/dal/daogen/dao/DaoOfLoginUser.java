@@ -56,6 +56,25 @@ public class DaoOfLoginUser {
 			return null;
 		}
 	}
+	
+	public List<LoginUser> getUserByGroupId(int groupId) {
+
+		try {
+			return this.jdbcTemplate
+					.query(
+							"select id, user_no, user_name, user_email,dal_group_id from login_users where dal_group_id = ?",
+							new Object[] { groupId },
+							new RowMapper<LoginUser>() {
+								public LoginUser mapRow(ResultSet rs, int rowNum)
+										throws SQLException {
+									return LoginUser.visitRow(rs);
+								}
+							});
+		} catch (DataAccessException ex) {
+			ex.printStackTrace();
+			return null;
+		}
+	}
 
 	public int insertUser(final LoginUser data) {
 

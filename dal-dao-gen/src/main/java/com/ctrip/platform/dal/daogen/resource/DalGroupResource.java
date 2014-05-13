@@ -11,15 +11,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
-import ch.qos.logback.core.status.Status;
-
 import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
 import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
+import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -40,15 +38,15 @@ public class DalGroupResource {
 	
 	@GET
 	@Path("get")
-	public Response getAllGroup(){
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<DalGroup> getAllGroup(){
 		List<DalGroup> groups =  dal_dao.getAllGroups();
-		return Response.ok(groups, MediaType.APPLICATION_JSON).build();
+		return groups;
 	}
 	
 	@POST
-	@Produces(MediaType.APPLICATION_JSON)
 	@Path("add")
-	public Response add(@FormParam("groupName") String groupName,
+	public Status add(@FormParam("groupName") String groupName,
 			@FormParam("groupComment") String groupComment){
 		
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
@@ -57,34 +55,37 @@ public class DalGroupResource {
 		if(null == userNo || null == groupName || groupName.isEmpty()){
 			log.error(String.format("Add dal group failed, caused by illegal parameters: "
 					+ "[groupName=%s, groupComment=%s]",groupName, groupComment));
-			return Response.status(Status.ERROR)
-					.entity("Illegal parameters.").build();
+			Status status = Status.ERROR;
+			status.setInfo("Illegal parameters.");
+			return status;
 		}
 		
 		//TODO: How to validate the userNo has the permission or not to operate the dal_group table
-		if(!this.validate(userNo))
-			return Response.status(Status.ERROR)
-					.entity("Permission deny.").build();
+		if(!this.validate(userNo)){
+			Status status = Status.ERROR;
+			status.setInfo("Permission deny.");
+			return status;
+		}
 		
 		DalGroup group = new DalGroup();
-		group.setGroupName(groupName);
-		group.setGroupComment(groupComment);
-		group.setCreateUserNo(userNo);
-		group.setCteateTime(new Timestamp(System.currentTimeMillis()));
+		group.setGroup_name(groupName);
+		group.setGroup_comment(groupComment);
+		group.setCreate_user_no(userNo);
+		group.setCreate_time(new Timestamp(System.currentTimeMillis()));
 		
 		int ret = dal_dao.insertDalGroup(group);
-		if(ret > 0){
+		if(ret <= 0){
 			log.error("Add dal group failed, caused by db operation failed, pls check the spring log");
-			return Response.status(Status.ERROR)
-					.entity("Add operation failed.").build();
+			Status status = Status.ERROR;
+			status.setInfo("Add operation failed.");
+			return status;
 		}
-		return Response.ok("Success").build();
+		return Status.OK;
 	}
 	
 	@POST
-	@Produces(MediaType.APPLICATION_JSON)
 	@Path("delete")
-	public Response delete(@FormParam("id") String id){
+	public Status delete(@FormParam("id") String id){
 
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
@@ -92,35 +93,39 @@ public class DalGroupResource {
 		if(null == userNo || null == id || id.isEmpty()){
 			log.error(String.format("Delete dal group failed, caused by illegal parameters "
 					+ "[ids=%s]", id));
-			return Response.status(Status.ERROR)
-					.entity("Illegal parameters.").build();
+			Status status = Status.ERROR;
+			status.setInfo("Illegal parameters.");
+			return status;
 		}
 		
-		if(!this.validate(userNo))
-			return Response.status(Status.ERROR)
-					.entity("Permission deny.").build();
+		if(!this.validate(userNo)){
+			Status status = Status.ERROR;
+			status.setInfo("Permission deny.");
+			return status;
+		}
 		int groupId = -1;
 		try{
 			groupId = Integer.parseInt(id);
 		}catch(NumberFormatException  ex){
 			log.error("Delete dal group failed", ex);
-			return Response.status(Status.ERROR)
-					.entity("Illegal group id").build();
+			Status status = Status.ERROR;
+			status.setInfo("Illegal group id");
+			return status;
 		}
 
 		int ret = dal_dao.deleteDalGroup(groupId);	
-		if(ret > 0){
+		if(ret <= 0){
 			log.error("Delete dal group failed, caused by db operation failed, pls check the spring log");
-			return Response.status(Status.ERROR)
-					.entity("Add operation failed.").build();
+			Status status = Status.ERROR;
+			status.setInfo("Delete operation failed.");
+			return status;
 		}
-		return Response.ok("Success").build();
+		return Status.OK;
 	}
 	
 	@POST
-	@Produces(MediaType.APPLICATION_JSON)
 	@Path("update")
-	public Response update(@FormParam("groupId") String id,
+	public Status update(@FormParam("groupId") String id,
 			@FormParam("groupName") String groupName,
 			@FormParam("groupComment") String groupComment){
 		
@@ -130,43 +135,52 @@ public class DalGroupResource {
 		if(null == userNo || null == id || id.isEmpty()){
 			log.error(String.format("Update dal group failed, caused by illegal parameters, "
 					+ "[id=%s, groupName=%s, groupComment=%s]", id, groupName, groupComment));
-			return Response.status(Status.ERROR)
-					.entity("Illegal parameters.").build();
+			Status status = Status.ERROR;
+			status.setInfo("Illegal parameters.");
+			return status;
 		}
 		
-		if(!this.validate(userNo))
-			return Response.status(Status.ERROR)
-					.entity("Permission deny.").build();
+		if(!this.validate(userNo)){
+			Status status = Status.ERROR;
+			status.setInfo("Permission deny.");
+			return status;
+		}
 		
 		int groupId = -1;
 		try{
 			groupId = Integer.parseInt(id);
 		}catch(NumberFormatException  ex){
 			log.error("Update dal group failed", ex);
-			return Response.status(Status.ERROR)
-					.entity("Illegal group id").build();
+			Status status = Status.ERROR;
+			status.setInfo("Illegal group id");
+			return status;
 		}
 		
 		DalGroup group = dal_dao.getDalGroupById(groupId);
 		if(null == group) {
 			log.error("Update dal group failed, caused by group_id specifed not existed.");
-			return Response.status(Status.ERROR)
-					.entity("Group id not existed").build();
+			Status status = Status.ERROR;
+			status.setInfo("Group id not existed");
+			return status;
 		}
-		if(null != groupName && !groupName.trim().isEmpty())
-			group.setGroupName(groupName);
-		if(null != groupComment && !groupComment.trim().isEmpty())
-			group.setGroupComment(groupComment);
-		group.setCteateTime(new Timestamp(System.currentTimeMillis()));
+		if(null != groupName && !groupName.trim().isEmpty()){
+			group.setGroup_name(groupName);
+		}
+		if(null != groupComment && !groupComment.trim().isEmpty()){
+			group.setGroup_comment(groupComment);
+		}
+			
+		group.setCreate_time(new Timestamp(System.currentTimeMillis()));
 		
 		int ret = dal_dao.updateDalGroup(group);
 
-		if(ret > 0){
+		if(ret <= 0){
 			log.error("Delete dal group failed, caused by db operation failed, pls check the spring log");
-			return Response.status(Status.ERROR)
-					.entity("Delete operation failed.").build();
+			Status status = Status.ERROR;
+			status.setInfo("update operation failed.");
+			return status;
 		}
-		return Response.ok("Success").build();
+		return Status.OK;
 	}
 	
 	private boolean validate(String userNo){

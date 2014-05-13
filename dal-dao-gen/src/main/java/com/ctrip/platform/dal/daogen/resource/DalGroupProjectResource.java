@@ -21,16 +21,16 @@ import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
- * DAL database of group manage.
+ * DAL Project & Code 一览
  * @author gzxia
  *
  */
 @Resource
 @Singleton
-@Path("dbgroup")
-public class DbGroupManageResource {
+@Path("projectview")
+public class DalGroupProjectResource {
 
-	private static Logger log = Logger.getLogger(DbGroupManageResource.class);
+	private static Logger log = Logger.getLogger(DalGroupProjectResource.class);
 	
 	@GET
 	@Path("users")
@@ -48,8 +48,8 @@ public class DbGroupManageResource {
 			List<Project> roots = new ArrayList<Project>();
 			Project p = new Project();
 			p.setId(-1);
-			p.setName("ALL DAL TEAM");
-			p.setText("ALL DAL TEAM");
+			p.setName("所有项目");
+			p.setText("所有项目");
 			p.setNamespace("com.ctrip.platform");
 			p.setIcon("fa fa-folder-o");
 			p.setChildren(true);

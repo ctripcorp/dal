@@ -41,6 +41,7 @@ public class DalDefaultJpaPerformance {
 	private DalParser<ClientTestModel> parser = null;
 	private DalTableDao<ClientTestModel> dao = null;
 	private static DalClient client = null;
+	
 	public DalDefaultJpaPerformance(DatabaseCategory dbCategory,String dbName){
 		try {
 			parser = DalDefaultJpaParser.create(ClientTestModel.class, 

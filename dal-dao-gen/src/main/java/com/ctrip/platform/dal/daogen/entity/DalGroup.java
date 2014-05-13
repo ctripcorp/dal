@@ -11,6 +11,12 @@ public class DalGroup implements Comparable<DalGroup>{
 	private String create_user_no;
 	private Timestamp create_time;
 	
+	private String text;
+	
+	private String icon;
+	
+	private boolean children;
+	
 	public int getId() {
 		return id;
 	}
@@ -40,6 +46,25 @@ public class DalGroup implements Comparable<DalGroup>{
 	}
 	public void setCreate_time(Timestamp create_time) {
 		this.create_time = create_time;
+	}
+	
+	public String getText() {
+		return text;
+	}
+	public void setText(String text) {
+		this.text = text;
+	}
+	public String getIcon() {
+		return icon;
+	}
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+	public boolean isChildren() {
+		return children;
+	}
+	public void setChildren(boolean children) {
+		this.children = children;
 	}
 	
 	public static DalGroup visitRow(ResultSet rs) throws SQLException {

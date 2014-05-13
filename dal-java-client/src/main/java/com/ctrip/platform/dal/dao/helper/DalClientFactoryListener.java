@@ -16,14 +16,15 @@ public class DalClientFactoryListener  implements ServletContextListener {
 				DalClientFactory.initClientFactory();
 			else
 				DalClientFactory.initClientFactory(DalConfigPath.trim());
+			System.out.println("Dal Java Client Factory initialized");
 		} catch (Exception e) {
+			System.out.println("Dal Java Client Factory initializing error!!!");
 			e.printStackTrace();
 		}
 	}
 
 	public void contextDestroyed(ServletContextEvent sce) {
-		System.out.println("Dal Factory Listener ended");
-		if(true) return;
 		DalClientFactory.shutdownFactory();
+		System.out.println("Dal Java Client Factory finalized");
 	}
 }

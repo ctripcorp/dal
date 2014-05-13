@@ -77,7 +77,7 @@
                   </div>
                   <div class="row-fluid">
                      <div class="control-group">
-                        <label class="control-label popup_label" style="width:130px;">备 注:</label>
+                        <label class="control-label popup_label" style="width:130px;">Member Email:</label>
                         <input id="comment" class="span7 input-sm" type="text">
                      </div>
                   </div>

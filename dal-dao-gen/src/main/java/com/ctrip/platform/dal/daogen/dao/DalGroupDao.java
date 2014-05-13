@@ -60,20 +60,20 @@ public class DalGroupDao{
 				.update("insert into dal_group(id, group_name, group_comment,create_user_no, create_time)"
 						+ "value(?,?,?,?,?)",
 						group.getId(), 
-						group.getGroupName(),
-						group.getGroupComment(),
-						group.getCreateUserNo(),
-						group.getCteateTime());
+						group.getGroup_name(),
+						group.getGroup_comment(),
+						group.getCreate_user_no(),
+						group.getCreate_time());
 	}
 	
 	public int updateDalGroup(DalGroup group){
 		return this.jdbcTemplate
 				.update("update dal_group set group_name=?, group_comment=?, create_user_no=?, create_time=?"
 						+ "where id=?",
-						group.getGroupName(),
-						group.getGroupComment(),
-						group.getCreateUserNo(),
-						group.getCteateTime(),
+						group.getGroup_name(),
+						group.getGroup_comment(),
+						group.getCreate_user_no(),
+						group.getCreate_time(),
 						group.getId());
 	}
 	

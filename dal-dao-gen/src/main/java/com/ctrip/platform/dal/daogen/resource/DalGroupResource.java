@@ -40,9 +40,10 @@ public class DalGroupResource {
 	
 	@GET
 	@Path("get")
-	public Response getAllGroup(){
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<DalGroup> getAllGroup(){
 		List<DalGroup> groups =  dal_dao.getAllGroups();
-		return Response.ok(groups, MediaType.APPLICATION_JSON).build();
+		return groups;
 	}
 	
 	@POST
@@ -67,10 +68,10 @@ public class DalGroupResource {
 					.entity("Permission deny.").build();
 		
 		DalGroup group = new DalGroup();
-		group.setGroupName(groupName);
-		group.setGroupComment(groupComment);
-		group.setCreateUserNo(userNo);
-		group.setCteateTime(new Timestamp(System.currentTimeMillis()));
+		group.setGroup_name(groupName);
+		group.setGroup_comment(groupComment);
+		group.setCreate_user_no(userNo);
+		group.setCreate_time(new Timestamp(System.currentTimeMillis()));
 		
 		int ret = dal_dao.insertDalGroup(group);
 		if(ret > 0){
@@ -153,11 +154,14 @@ public class DalGroupResource {
 			return Response.status(Status.ERROR)
 					.entity("Group id not existed").build();
 		}
-		if(null != groupName && !groupName.trim().isEmpty())
-			group.setGroupName(groupName);
-		if(null != groupComment && !groupComment.trim().isEmpty())
-			group.setGroupComment(groupComment);
-		group.setCteateTime(new Timestamp(System.currentTimeMillis()));
+		if(null != groupName && !groupName.trim().isEmpty()){
+			group.setGroup_name(groupName);
+		}
+		if(null != groupComment && !groupComment.trim().isEmpty()){
+			group.setGroup_comment(groupComment);
+		}
+			
+		group.setCreate_time(new Timestamp(System.currentTimeMillis()));
 		
 		int ret = dal_dao.updateDalGroup(group);
 

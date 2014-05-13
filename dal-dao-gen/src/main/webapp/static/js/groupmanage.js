@@ -16,7 +16,7 @@
             w2ui['grid'].add(allGroup);
             $("body").unblock();
         }).fail(function (data) {
-                alert("获取所有DAO失败!");
+                alert("获取所有Group失败!");
             });
     };
 
@@ -25,10 +25,25 @@
             "backdrop": "static"
         });
         $("#save_group").click(function(){
-            var group_name = $("name").val();
-            var comment = $("comment").val();
-            if(group_name==null){
+            var group_name = $("#name").val();
+            var comment = $("#comment").val();
+            var postData = {
+                groupName:group_name,
+                groupComment:comment
+            };
+            if(group_name==null || $.trim(group_name)==''){
                 $("#error_msg").html('请输入Group Name!');
+            }else{
+                $.post("/rest/group/add", postData,function (data) {
+                    if (data.code == "OK") {
+                        $("#groupModal").modal('hide');
+                        refreshGroup();
+                    } else {
+                        alert(data.info);
+                    }
+                }).fail(function (data) {
+                        alert("执行异常:"+data);
+                    });
             }
         });
     };

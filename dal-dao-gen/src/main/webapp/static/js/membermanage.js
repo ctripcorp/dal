@@ -64,8 +64,8 @@
             "backdrop": "static"
         });
         $("#save_member").click(function(){
-            var userNo = $("userNo").val();
-            var comment = $("comment").val();
+            var userNo = $("#userNo").val();
+            var comment = $("#comment").val();
             if(userNo==null){
                 $("#error_msg").html('请输入Group Name!');
             }

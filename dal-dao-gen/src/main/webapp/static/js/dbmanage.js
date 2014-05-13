@@ -66,7 +66,7 @@
         });
         $("#save_db").click(function(){
             var db_name = $("#databases").val();
-            var comment = $("comment").val();
+            var comment = $("#comment").val();
             if(db_name==null){
                 $("#error_msg").html('请选择DB!');
             }

@@ -105,7 +105,7 @@ public class DalGroupDbResource {
 		
 		if(!this.validatePermision(userNo,groupID)){
 			Status status = Status.ERROR;
-			status.setInfo("Permission deny.");
+			status.setInfo("你没有当前DAL Team的操作权限.");
 			return status;
 		}
 		
@@ -168,7 +168,7 @@ public class DalGroupDbResource {
 		
 		if(!this.validatePermision(userNo,groupID)){
 			Status status = Status.ERROR;
-			status.setInfo("Permission deny.");
+			status.setInfo("你没有当前DAL Team的操作权限.");
 			return status;
 		}
 		
@@ -214,7 +214,7 @@ public class DalGroupDbResource {
 		
 		if(!this.validatePermision(userNo,groupID)){
 			Status status = Status.ERROR;
-			status.setInfo("Permission deny.");
+			status.setInfo("你没有当前DAL Team的操作权限.");
 			return status;
 		}
 

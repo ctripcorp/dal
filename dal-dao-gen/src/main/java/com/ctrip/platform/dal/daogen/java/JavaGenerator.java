@@ -747,7 +747,7 @@ public class JavaGenerator extends AbstractGenerator {
 					public ExecuteResult call() throws Exception {
 						progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildView:"
 								+ view);
-						ExecuteResult result = new ExecuteResult("Buuild View[" + tableViewSp.getProject_id() + "." + view + "] Host");
+						ExecuteResult result = new ExecuteResult("Build View[" + tableViewSp.getProject_id() + "." + view + "] Host");
 						try{
 							ViewHost vhost = buildViewHost(tableViewSp, view);
 							if (null != vhost)

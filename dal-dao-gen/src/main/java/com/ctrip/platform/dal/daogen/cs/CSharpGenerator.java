@@ -858,7 +858,7 @@ public class CSharpGenerator extends AbstractGenerator {
 					@Override
 					public ExecuteResult call() throws Exception {
 						progress.setOtherMessage("正在整理视图 " + view);
-						ExecuteResult result = new ExecuteResult("Buuild View[" + tableViewSp.getProject_id() + "." + view + "] Host");
+						ExecuteResult result = new ExecuteResult("Build View[" + tableViewSp.getProject_id() + "." + view + "] Host");
 						try {
 							CSharpTableHost currentViewHost = buildViewHost(
 									tableViewSp, dbCategory, view);

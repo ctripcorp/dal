@@ -27,6 +27,7 @@ import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
+import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
@@ -38,6 +39,7 @@ import com.ctrip.platform.dal.daogen.resource.ProgressResource;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
+import com.ctrip.platform.dal.daogen.utils.LogUtils;
 
 public class CSharpGenerator extends AbstractGenerator {
 
@@ -456,19 +458,20 @@ public class CSharpGenerator extends AbstractGenerator {
 		return methods;
 	}
 
-	private List<Callable<Boolean>> generateTableDao(final File mavenLikeDir,
+	private List<Callable<ExecuteResult>> generateTableDao(final File mavenLikeDir,
 			final Progress progress) {
 
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
 		for (final CSharpTableHost host : _tableViewHosts) {
 
-			Callable<Boolean> worker = new Callable<Boolean>() {
+			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
-				public Boolean call() {
-
+				public ExecuteResult call() {
+					
 					progress.setOtherMessage("正在生成 " + host.getClassName());
-
+					ExecuteResult result = new ExecuteResult("Generate Table[" + host.getTableName() + "] Dao");
+					
 					VelocityContext context = GenUtils.buildDefaultVelocityContext();
 					context.put("host", host);
 					GenUtils.mergeVelocityContext(
@@ -498,7 +501,8 @@ public class CSharpGenerator extends AbstractGenerator {
 									mavenLikeDir.getAbsolutePath(),
 									host.getClassName()),
 							"templates/DAOTest.cs.tpl");
-					return true;
+					result.setSuccessal(true);
+					return result;
 				}
 			};
 			results.add(worker);
@@ -507,18 +511,19 @@ public class CSharpGenerator extends AbstractGenerator {
 		return results;
 	}
 
-	private List<Callable<Boolean>> generateSpDao(final File mavenLikeDir,
+	private List<Callable<ExecuteResult>> generateSpDao(final File mavenLikeDir,
 			final Progress progress) {
 
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
 		for (final CSharpTableHost host : _spHosts) {
 
-			Callable<Boolean> worker = new Callable<Boolean>() {
+			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
-				public Boolean call() {
+				public ExecuteResult call() {
 					progress.setOtherMessage("正在生成 " + host.getClassName());
-
+					ExecuteResult result = new ExecuteResult("Generate SP[" + host.getClassName() + "] Dao");
+					
 					VelocityContext context = GenUtils.buildDefaultVelocityContext();
 					context.put("host", host);
 					GenUtils.mergeVelocityContext(
@@ -541,7 +546,8 @@ public class CSharpGenerator extends AbstractGenerator {
 									mavenLikeDir.getAbsolutePath(),
 									host.getClassName()),
 							"templates/SpTest.cs.tpl");
-					return true;
+					result.setSuccessal(true);
+					return result;
 				}
 			};
 			results.add(worker);
@@ -550,17 +556,18 @@ public class CSharpGenerator extends AbstractGenerator {
 		return results;
 	}
 
-	private List<Callable<Boolean>> generateFreeSqlDao(final File mavenLikeDir,
+	private List<Callable<ExecuteResult>> generateFreeSqlDao(final File mavenLikeDir,
 			final Progress progress) {
 
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
 		for (final CSharpFreeSqlPojoHost host : _freeSqlPojoHosts.values()) {
 
-			Callable<Boolean> worker = new Callable<Boolean>() {
+			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
-				public Boolean call() {
+				public ExecuteResult call() {
 					progress.setOtherMessage("正在生成 " + host.getClassName());
+					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Pojo");
 					VelocityContext context = GenUtils.buildDefaultVelocityContext();
 					context.put("host", host);
 					GenUtils.mergeVelocityContext(context,
@@ -568,7 +575,8 @@ public class CSharpGenerator extends AbstractGenerator {
 									.getAbsolutePath(), CommonUtils
 									.normalizeVariable(host.getClassName())),
 									newPojo ? "templates/PojoNew.cs.tpl" : "templates/Pojo.cs.tpl");
-					return true;
+					result.setSuccessal(true);
+					return result;
 				}
 			};
 			results.add(worker);
@@ -577,10 +585,11 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		for (final CSharpFreeSqlHost host : _freeSqlHosts) {
 
-			Callable<Boolean> worker = new Callable<Boolean>() {
+			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
-				public Boolean call() {
+				public ExecuteResult call() {
 					progress.setOtherMessage("正在生成 " + host.getClassName());
+					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Dap, Test");
 					VelocityContext context = GenUtils.buildDefaultVelocityContext();
 					context.put("host", host);
 					GenUtils.mergeVelocityContext(context,
@@ -594,7 +603,8 @@ public class CSharpGenerator extends AbstractGenerator {
 									.getAbsolutePath(), CommonUtils
 									.normalizeVariable(host.getClassName())),
 							"templates/FreeSqlTest.cs.tpl");
-					return true;
+					result.setSuccessal(true);
+					return result;
 				}
 			};
 			results.add(worker);
@@ -613,7 +623,6 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		final File csMavenLikeDir = new File(String.format("%s/%s/cs",
 				generatePath, id));
-
 		context.put("dbs", _dbHosts.values());
 		context.put("namespace", namespace);
 		context.put("freeSqlHosts", _freeDaos);
@@ -655,7 +664,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		}
 	}
 
-	private List<Callable<Boolean>> prepareFreeSql(int projectId,
+	private List<Callable<ExecuteResult>> prepareFreeSql(int projectId,
 			boolean regenerate, final Progress progress) {
 
 		List<GenTaskByFreeSql> _freeSqls;
@@ -670,17 +679,17 @@ public class CSharpGenerator extends AbstractGenerator {
 		// 首先按照ServerID, DbName以及ClassName做一次GroupBy，但是ClassName不区分大小写
 		final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(_freeSqls);
 
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 		// 随后，以ServerID, DbName以及ClassName为维度，为每个维度生成一个DAO类
 		for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy
 				.entrySet()) {
-			Callable<Boolean> worker = new Callable<Boolean>() {
+			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
-				public Boolean call() throws Exception {
-
+				public ExecuteResult call() throws Exception {
+					ExecuteResult result  = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");				
 					List<GenTaskByFreeSql> currentTasks = entry.getValue();
 					if (currentTasks.size() < 1)
-						return false;
+						return result;
 
 					CSharpFreeSqlHost host = new CSharpFreeSqlHost();
 					host.setDbSetName(currentTasks.get(0).getDb_name());
@@ -704,8 +713,8 @@ public class CSharpGenerator extends AbstractGenerator {
 					}
 					host.setMethods(methods);
 					_freeSqlHosts.add(host);
-
-					return true;
+					result.setSuccessal(true);
+					return result;
 				}
 			};
 			results.add(worker);
@@ -782,7 +791,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		}
 	}
 
-	private List<Callable<Boolean>> prepareTableViewSp(int projectId,
+	private List<Callable<ExecuteResult>> prepareTableViewSp(int projectId,
 			boolean regenerate, final Progress progress) throws Exception {
 		List<GenTaskByTableViewSp> _tableViewSps;
 		List<GenTaskBySqlBuilder> _tempSqlBuilders;
@@ -801,7 +810,7 @@ public class CSharpGenerator extends AbstractGenerator {
 			_sqlBuilders.add(_t);
 		}
 
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 		for (final GenTaskByTableViewSp tableViewSp : _tableViewSps) {
 			final String[] viewNames = StringUtils.split(
 					tableViewSp.getView_names(), ",");
@@ -822,10 +831,11 @@ public class CSharpGenerator extends AbstractGenerator {
 					.getAllSpNames(tableViewSp.getDb_name());
 
 			for (final String table : tableNames) {
-				Callable<Boolean> worker = new Callable<Boolean>() {
+				Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 					@Override
-					public Boolean call() throws Exception {
+					public ExecuteResult call() throws Exception {
 						progress.setOtherMessage("正在整理表 " + table);
+						ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getProject_id() + "." + table + "] Host");
 						CSharpTableHost currentTableHost;
 						try {
 							currentTableHost = buildTableHost(tableViewSp,
@@ -833,39 +843,43 @@ public class CSharpGenerator extends AbstractGenerator {
 							if (null != currentTableHost) {
 								_tableViewHosts.add(currentTableHost);
 							}
+							result.setSuccessal(true);
 						} catch (Exception e) {
-							e.printStackTrace();
+							log.error(result.getTaskName() + " exception.", e);
 						}
-						return true;
+						return result;
 					}
 				};
 				results.add(worker);
 			}
 
 			for (final String view : viewNames) {
-				Callable<Boolean> viewWorker = new Callable<Boolean>() {
+				Callable<ExecuteResult> viewWorker = new Callable<ExecuteResult>() {
 					@Override
-					public Boolean call() throws Exception {
+					public ExecuteResult call() throws Exception {
 						progress.setOtherMessage("正在整理视图 " + view);
+						ExecuteResult result = new ExecuteResult("Build View[" + tableViewSp.getProject_id() + "." + view + "] Host");
 						try {
 							CSharpTableHost currentViewHost = buildViewHost(
 									tableViewSp, dbCategory, view);
 							if (null != currentViewHost) {
 								_tableViewHosts.add(currentViewHost);
 							}
+							result.setSuccessal(true);
 						} catch (Exception e) {
-							e.printStackTrace();
+							log.error(result.getTaskName() + " exception.", e);
 						}
-						return true;
+						return result;
 					}
 				};
 				results.add(viewWorker);
 			}
 
 			for (final String spName : spNames) {
-				Callable<Boolean> spWorker = new Callable<Boolean>() {
+				Callable<ExecuteResult> spWorker = new Callable<ExecuteResult>() {
 					@Override
-					public Boolean call() throws Exception {
+					public ExecuteResult call() throws Exception {
+						ExecuteResult result = new ExecuteResult("Build SP[" + tableViewSp.getProject_id() + "." + spName + "] Host");
 						progress.setOtherMessage("正在整理存储过程 " + spName);
 						try {
 							CSharpTableHost currentSpHost = buildSpHost(
@@ -873,10 +887,11 @@ public class CSharpGenerator extends AbstractGenerator {
 							if (null != currentSpHost) {
 								_spHosts.add(currentSpHost);
 							}
+							result.setSuccessal(true);
 						} catch (Exception e) {
-							e.printStackTrace();
+							log.error(result.getTaskName() + " exception.", e);
 						}
-						return true;
+						return result;
 					}
 				};
 				results.add(spWorker);
@@ -886,20 +901,21 @@ public class CSharpGenerator extends AbstractGenerator {
 		return results;
 	}
 
-	private List<Callable<Boolean>> prepareSqlBuilder(final Progress progress) {
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+	private List<Callable<ExecuteResult>> prepareSqlBuilder(final Progress progress) {
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
 		if (_sqlBuilders.size() > 0) {
 			Map<String, GenTaskBySqlBuilder> _TempSqlBuildres = sqlBuilderBroupBy(_sqlBuilders);
 
 			for (final Map.Entry<String, GenTaskBySqlBuilder> _table : _TempSqlBuildres
 					.entrySet()) {
-				Callable<Boolean> worker = new Callable<Boolean>() {
+				Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 
 					@Override
-					public Boolean call() throws Exception {
+					public ExecuteResult call() throws Exception {
 						progress.setOtherMessage("正在整理表 "
 								+ _table.getValue().getClass_name());
+						ExecuteResult result = new ExecuteResult("Build Extral SQL[" + _table.getValue().getProject_id() + "." + _table.getKey() + "] Host");
 						CSharpTableHost extraTableHost;
 						try {
 							extraTableHost = buildExtraSqlBuilderHost(_table
@@ -907,11 +923,11 @@ public class CSharpGenerator extends AbstractGenerator {
 							if (null != extraTableHost) {
 								_tableViewHosts.add(extraTableHost);
 							}
-							return true;
+							result.setSuccessal(true);
 						} catch (Exception e) {
-							e.printStackTrace();
+							log.error(result.getTaskName() + " exception.", e);
 						}
-						return false;
+						return result;
 					}
 				};
 				results.add(worker);
@@ -928,7 +944,9 @@ public class CSharpGenerator extends AbstractGenerator {
 		try {
 			if (mavenLikeDir.exists() && regenerate)
 				FileUtils.forceDelete(mavenLikeDir);
-
+			
+			log.info("The maven like directory: " + mavenLikeDir.getAbsolutePath());
+			
 			File idaoMavenLike = new File(mavenLikeDir, "IDao");
 			File daoMavenLike = new File(mavenLikeDir, "Dao");
 			File entityMavenLike = new File(mavenLikeDir, "Entity");
@@ -961,24 +979,25 @@ public class CSharpGenerator extends AbstractGenerator {
 	public boolean prepareData(int projectId, boolean regenerate,
 			Progress progress) {
 
-		List<Callable<Boolean>> _freeSqlCallables = prepareFreeSql(projectId,
+		List<Callable<ExecuteResult>> _freeSqlCallables = prepareFreeSql(projectId,
 				regenerate, progress);
 
 		try {
-			List<Callable<Boolean>> _tableViewSpCallables = prepareTableViewSp(
+			List<Callable<ExecuteResult>> _tableViewSpCallables = prepareTableViewSp(
 					projectId, regenerate, progress);
 
-			List<Callable<Boolean>> allResults = ListUtils.union(
+			@SuppressWarnings("unchecked")
+			List<Callable<ExecuteResult>> allResults = ListUtils.union(
 					_freeSqlCallables, _tableViewSpCallables);
 
 			if (allResults.size() > 0) {
-				executor.invokeAll(allResults);
+				LogUtils.log(log, executor.invokeAll(allResults));
 			}
 
-			List<Callable<Boolean>> _sqlBuilderCallables = prepareSqlBuilder(progress);
+			List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder(progress);
 
 			if (_sqlBuilderCallables.size() > 0) {
-				executor.invokeAll(_sqlBuilderCallables);
+				LogUtils.log(log, executor.invokeAll(_sqlBuilderCallables));
 			}
 
 		} catch (Exception e) {
@@ -1000,29 +1019,32 @@ public class CSharpGenerator extends AbstractGenerator {
 			newPojo = Boolean.parseBoolean(_newPojo.toString());
 		}
 
-		List<Callable<Boolean>> tableCallables = generateTableDao(
+		List<Callable<ExecuteResult>> tableCallables = generateTableDao(
 				 csMavenLikeDir, progress);
 		ProgressResource.addDoneFiles(progress, _tableViewHosts.size());
 
-		List<Callable<Boolean>> spCallables = generateSpDao(
+		List<Callable<ExecuteResult>> spCallables = generateSpDao(
 				csMavenLikeDir, progress);
 		ProgressResource.addDoneFiles(progress, _spHosts.size());
 
-		List<Callable<Boolean>> freeCallables = generateFreeSqlDao(
+		List<Callable<ExecuteResult>> freeCallables = generateFreeSqlDao(
 				csMavenLikeDir, progress);
 
-		List<Callable<Boolean>> allResults = ListUtils.union(
+		@SuppressWarnings("unchecked")
+		List<Callable<ExecuteResult>> allResults = ListUtils.union(
 				ListUtils.union(tableCallables, spCallables), freeCallables);
 
 		if (allResults.size() > 0) {
 			try {
-				executor.invokeAll(allResults);
+				LogUtils.log(log, executor.invokeAll(allResults));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 
+		log.info("Generate common code...");
 		generateCommonCode(id, progress);
+		log.info("Generate common code completed.");
 
 		return false;
 	}

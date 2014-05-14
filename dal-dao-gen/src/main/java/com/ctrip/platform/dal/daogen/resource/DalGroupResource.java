@@ -27,7 +27,7 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 @Path("group")
 public class DalGroupResource {
 	private static Logger log = Logger.getLogger(DalGroupResource.class);
-	private static final int SUPER_GROUP_ID = 1; //The default supper user group
+	public static final int SUPER_GROUP_ID = 1; //The default supper user group
 	private static DalGroupDao dal_dao = null;
 	private static DaoOfLoginUser user_dao = null;
 	

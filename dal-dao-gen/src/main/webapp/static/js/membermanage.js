@@ -28,21 +28,37 @@
     };
 
     var addMember = function(){
+        $("#error_msg").html('');
+        var current_group = w2ui['grid'].current_group;
+        if(current_group==null || current_group==''){
+            alert('请先选择Group');
+            return;
+        }
+        reload_all_members();
         $("#memberModal").modal({
             "backdrop": "static"
         });
-        $("#save_member").click(function(){
-            var userNo = $("#userNo").val();
-            var comment = $("#comment").val();
-            if(userNo==null){
-                $("#error_msg").html('请输入Group Name!');
-            }
-        });
-    };
 
-    var editMember = function(){
-        $("#memberModal").modal({
-            "backdrop": "static"
+        $("#save_member").click(function(){
+            var id = $("#members").val();
+            if(id==null){
+                $("#error_msg").html('请选择member!');
+            }else{
+                var current_group = w2ui['grid'].current_group;
+                $.post("/rest/member/add", {
+                    groupId : current_group,
+                    userId : id
+                },function (data) {
+                    if (data.code == "OK") {
+                        $("#memberModal").modal('hide');
+                        refreshMember();
+                    } else {
+                        $("#error_msg").html(data.info);
+                    }
+                }).fail(function (data) {
+                        $("#error_msg").html(data.info);
+                    });
+            }
         });
     };
 
@@ -51,12 +67,59 @@
         var record = w2ui['grid'].get(records[0]);
         if(record!=null){
             if (confirm("Are you sure to delete?")) {
-
+                $.post("/rest/member/delete", {
+                    userId:record["id"],
+                    groupId:record['groupId']
+                },function (data) {
+                    if (data.code == "OK") {
+                        $("#memberModal").modal('hide');
+                        refreshMember();
+                    } else {
+                        alert(data.info);
+                    }
+                }).fail(function (data) {
+                        alert("执行异常:"+data);
+                    });
             }
         }else{
             alert('请选择一个member！');
         }
 
+    };
+
+    var reload_all_members = function () {
+        cblock($("body"));
+
+        $.get("/rest/member/all?rand=" + Math.random()).done(function (data) {
+
+            if ($("#members")[0] != undefined && $("#members")[0].selectize != undefined) {
+                $("#members")[0].selectize.clearOptions();
+            } else {
+                $("#members").selectize({
+                    //maxItems: null,
+                    valueField: 'id',
+                    labelField: 'title',
+                    searchField: 'title',
+                    sortField: 'title',
+                    options: [],
+                    create: false
+                });
+            }
+
+            var allMembers = [];
+            $.each(data, function (index, value) {
+                allMembers.push({
+                    id: value['id'],
+                    title: value['userName']
+                });
+            });
+            $("#members")[0].selectize.addOption(allMembers);
+            $("#members")[0].selectize.refreshOptions(false);
+
+            $("body").unblock();
+        }).fail(function (data) {
+                $("body").unblock();
+            });
     };
 
     Render.prototype = {
@@ -131,11 +194,6 @@
                         icon: 'fa fa-plus'
                     }, {
                         type: 'button',
-                        id: 'editMember',
-                        caption: '修改Member',
-                        icon: 'fa fa-edit'
-                    }, {
-                        type: 'button',
                         id: 'delMember',
                         caption: '删除Member',
                         icon: 'fa fa-times'
@@ -147,9 +205,6 @@
                                 break;
                             case 'addMember':
                                 addMember();
-                                break;
-                            case 'editMember':
-                                editMember();
                                 break;
                             case 'delMember':
                                 delMember();

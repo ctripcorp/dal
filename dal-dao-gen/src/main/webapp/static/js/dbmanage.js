@@ -15,12 +15,12 @@
         }
         cblock($("body"));
         $.get("/rest/groupdb/groupdb?groupId=" + current_group + "&rand=" + Math.random(),function (data) {
-            var allMember = [];
+            var allGroupDBs = [];
             $.each(data, function (index, value) {
-                value.recid = allMember.length + 1;
-                allMember.push(value);
+                value.recid = allGroupDBs.length + 1;
+                allGroupDBs.push(value);
             });
-            w2ui['grid'].add(allMember);
+            w2ui['grid'].add(allGroupDBs);
             $("body").unblock();
         }).fail(function (data) {
                 alert("获取所有Member失败!");
@@ -28,22 +28,71 @@
     };
 
     var addDB = function(){
+        $("#error_msg").html('');
+        var current_group = w2ui['grid'].current_group;
+        if(current_group==null || current_group==''){
+            alert('请先选择Group');
+            return;
+        }
         ajaxutil.reload_dbservers();
+        $("#comment").val('');
         $("#dbModal").modal({
             "backdrop": "static"
         });
         $("#save_db").click(function(){
             var db_name = $("#databases").val();
             var comment = $("#comment").val();
-            if(db_name==null){
+            if(db_name==null || db_name==''){
                 $("#error_msg").html('请选择DB!');
+            }else{
+                $.post("/rest/groupdb/add", {
+                    groupId : w2ui['grid'].current_group,
+                    dbname : db_name,
+                    comment : comment
+                },function (data) {
+                    if (data.code == "OK") {
+                        $("#dbModal").modal('hide');
+                        refreshDB();
+                    } else {
+                        $("#error_msg").html(data.info);
+                    }
+                }).fail(function (data) {
+                        $("#error_msg").html(data.info);
+                    });
             }
         });
     };
 
     var editDB = function(){
-        $("#dbModal").modal({
+        $("#error_msg2").html('');
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if(record==null || record==''){
+            alert("请先选择一个db");
+            return;
+        }
+        $("#databases2").val(record["dbname"]);
+        $("#comment2").val(record["comment"]);
+        $("#dbModal2").modal({
             "backdrop": "static"
+        });
+        $("#update_db").click(function(){
+            var records = w2ui['grid'].getSelection();
+            var record = w2ui['grid'].get(records[0]);
+            $.post("/rest/groupdb/update", {
+                groupId : w2ui['grid'].current_group,
+                dbId : record['id'],
+                comment : $("#comment2").val()
+            },function (data) {
+                if (data.code == "OK") {
+                    $("#dbModal2").modal('hide');
+                    refreshDB();
+                } else {
+                    $("#error_msg2").html(data.info);
+                }
+            }).fail(function (data) {
+                    $("#error_msg2").html(data.info);
+                });
         });
     };
 
@@ -52,7 +101,18 @@
         var record = w2ui['grid'].get(records[0]);
         if(record!=null){
             if (confirm("Are you sure to delete?")) {
-
+                $.post("/rest/groupdb/delete", {
+                    groupId : w2ui['grid'].current_group,
+                    dbId : record['id']
+                },function (data) {
+                    if (data.code == "OK") {
+                        refreshDB();
+                    } else {
+                        alert(data.info);
+                    }
+                }).fail(function (data) {
+                        alert("执行异常");
+                    });
             }
         }else{
             alert('请选择一个db！');

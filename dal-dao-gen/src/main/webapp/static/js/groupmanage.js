@@ -55,6 +55,10 @@
         $("#error_msg2").html('');
         var records = w2ui['grid'].getSelection();
         var record = w2ui['grid'].get(records[0]);
+        if(record==null || record==''){
+            alert("请先选择一个member");
+            return;
+        }
         $("#name2").val(record["group_name"]);
         $("#comment2").val(record["group_comment"]);
         $("#groupModal2").modal({

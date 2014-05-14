@@ -35,6 +35,10 @@
     <bean id = "dalGroup" class = "com.ctrip.platform.dal.daogen.dao.DalGroupDao">
     	<property name="dataSource" ref="dataSource" />
     </bean>
+    
+    <bean id = "dalGroupDB" class = "com.ctrip.platform.dal.daogen.dao.DalGroupDBDao">
+    	<property name="dataSource" ref="dataSource" />
+    </bean>
 
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="${jdbc.driverClassName}"/>

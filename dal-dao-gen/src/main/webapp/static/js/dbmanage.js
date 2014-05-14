@@ -7,55 +7,23 @@
 
     var refreshDB = function () {
         w2ui['grid'].clear();
-        var current_project = w2ui['grid'].current_project;
-        if (current_project == undefined) {
+        var current_group = w2ui['grid'].current_group;
+        if (current_group == undefined) {
             if (w2ui['sidebar'].nodes.length < 1 || w2ui['sidebar'].nodes[0].nodes.length < 1)
                 return;
-            current_project = w2ui['sidebar'].nodes[0].nodes[0].id;
+            current_group = w2ui['sidebar'].nodes[0].nodes[0].id;
         }
         cblock($("body"));
-        $.get("/rest/task?project_id=" + current_project + "&rand=" + Math.random(),function (data) {
-            var allTasks = [];
-            $.each(data.tableViewSpTasks, function (index, value) {
-                value.recid = allTasks.length + 1;
-                value.task_type = "table_view_sp";
-                value.task_desc = "表/视图/存储过程";
-                if (value.table_names != null && value.table_names != "") {
-                    value.sql_content = value.table_names;
-                }
-                if (value.sp_names != null && value.sp_names != "") {
-                    if (value.sql_content == null || value.sql_content == "")
-                        value.sql_content = value.sp_names;
-                    else
-                        value.sql_content = value.sql_content + "," + value.sp_names;
-                }
-                if (value.view_names != null && value.view_names != "") {
-                    if (value.sql_content == null || value.sql_content == "")
-                        value.sql_content = value.view_names;
-                    else
-                        value.sql_content = value.sql_content + "," + value.view_names;
-                }
-                value.class_name = "/";
-                value.method_name = "/";
-                allTasks.push(value);
+        $.get("/rest/groupdb/groupdb?groupId=" + current_group + "&rand=" + Math.random(),function (data) {
+            var allMember = [];
+            $.each(data, function (index, value) {
+                value.recid = allMember.length + 1;
+                allMember.push(value);
             });
-            $.each(data.autoTasks, function (index, value) {
-                value.recid = allTasks.length + 1;
-                value.task_type = "auto";
-                value.task_desc = "SQL构建";
-                value.class_name = value.table_name;
-                allTasks.push(value);
-            });
-            $.each(data.sqlTasks, function (index, value) {
-                value.recid = allTasks.length + 1;
-                value.task_type = "sql";
-                value.task_desc = "自定义查询";
-                allTasks.push(value);
-            });
-            w2ui['grid'].add(allTasks);
+            w2ui['grid'].add(allMember);
             $("body").unblock();
         }).fail(function (data) {
-                alert("获取所有DAO失败!");
+                alert("获取所有Member失败!");
             });
     };
 
@@ -113,22 +81,19 @@
             w2ui['main_layout'].content('left', '<div style="color: #34495E !important;font-size: 15px;background-color: #eee; padding: 7px 5px 6px 20px; border-bottom: 1px solid silver">'
                 +'All DAL Team'
                 +"</div>"
-                +'<div id="jstree_projects"></div>');
+                +'<div id="jstree_groups"></div>');
 
-            $('#jstree_projects').on('select_node.jstree', function (e, obj) {
-                if(obj.node.id != -1){
-                    window.render.render_grid();
-
-                    w2ui['grid'].current_project = obj.node.id;
-                    w2ui['grid_toolbar'].click('refreshDAO', null);
-                }
+            $('#jstree_groups').on('select_node.jstree', function (e, obj) {
+                window.render.render_grid();
+                w2ui['grid'].current_group = obj.node.id;
+                w2ui['grid_toolbar'].click('refreshDB', null);
             }).jstree({ 
                 'core' : {
                     'check_callback' : true,
                     'multiple': false,
                     'data' : {
                       'url' : function (node) {
-                        return node.id == "#" ? "/rest/dbgroup?root=true&rand=" + Math.random() : "/rest/dbgroup?rand=" + Math.random();
+                        return node.id == "#" ? "/rest/groupdb?root=true&rand=" + Math.random() : "/rest/groupdb?rand=" + Math.random();
                       }
                     }
             }});
@@ -194,22 +159,22 @@
                     }
                 },
                 searches: [{
-                    field: 'db_name',
+                    field: 'dbname',
                     caption: 'DB Name',
                     type: 'text'
                 }, {
-                    field: 'table_name',
+                    field: 'comment',
                     caption: '备注',
                     type: 'text'
                 }],
                 columns: [{
-                    field: 'db_name',
+                    field: 'dbname',
                     caption: 'DB Name',
                     size: '50%',
                     sortable: true,
                     attr: 'align=center'
                 }, {
-                    field: 'class_name',
+                    field: 'comment',
                     caption: '备注',
                     size: '50%',
                     sortable: true

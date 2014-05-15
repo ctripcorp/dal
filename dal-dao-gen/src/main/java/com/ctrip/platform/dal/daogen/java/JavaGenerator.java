@@ -854,7 +854,8 @@ public class JavaGenerator extends AbstractGenerator {
 				FileUtils.forceMkdir(testMavenLike);
 			}
 		} catch (IOException e1) {
-			e1.printStackTrace();
+			log.error(String.format("PrepareDirectory(%s, %s) Exception", 
+					projectId, regenerate), e1);
 		}
 
 		return false;

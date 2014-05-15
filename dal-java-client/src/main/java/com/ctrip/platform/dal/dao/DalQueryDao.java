@@ -51,7 +51,8 @@ public final class DalQueryDao {
 	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
 		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, 1));
-		assertCount(1, result.size());
+		if(result.size() == 0)
+			throw new SQLException("There is no result found.");
 		return result.get(0);
 	}
 

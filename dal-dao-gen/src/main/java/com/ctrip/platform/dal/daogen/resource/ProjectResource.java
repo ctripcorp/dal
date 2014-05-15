@@ -135,20 +135,35 @@ public class ProjectResource {
 
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
+		
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		
+		if(user==null){
+			Status status = Status.ERROR;
+			status.setInfo("You have not login.");
+			return status;
+		}
+		
+		if(user.getGroupId()<=0){
+			Status status = Status.ERROR;
+			status.setInfo("请先加入某个DAL Team.");
+			return status;
+		}
 
 		if (action.equals("insert")) {
 			proj.setName(name);
 			proj.setNamespace(namespace);
+			proj.setDal_group_id(user.getGroupId());
 			int pk = SpringBeanGetter.getDaoOfProject().insertProject(proj);
 
-			shareProject(pk, userNo);
+//			shareProject(pk, userNo);
 		} else if (action.equals("update")) {
 			proj.setId(id);
 			proj.setName(name);
 			proj.setNamespace(namespace);
 			SpringBeanGetter.getDaoOfProject().updateProject(proj);
 
-			shareProject(id, userNo);
+//			shareProject(id, userNo);
 		} else if (action.equals("delete")) {
 			proj.setId(Integer.valueOf(id));
 			if (SpringBeanGetter.getDaoOfProject().deleteProject(proj) > 0) {

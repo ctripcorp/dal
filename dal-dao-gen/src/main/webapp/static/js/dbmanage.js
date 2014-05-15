@@ -260,4 +260,17 @@
         $('#main_layout').height($(document).height() - 50);
     });
 
+    $(document.body).on('click', "#add_db", function(event){
+        $.post("/rest/db/all_in_one", {"data": $("#all_in_one").val()}, function(data){
+            if(data.code == "OK"){
+                $("#manageDb").modal('hide');
+                window.ajaxutil.reload_dbservers();
+                $("#page1").modal();
+            }else{
+                alert(data.info);
+            }
+
+        });
+    });
+
 })(window);

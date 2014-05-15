@@ -66,15 +66,16 @@
 				<div class="modal-body">
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label" style="width: 140px;">All-In-One数据库：</label>
-							<select id="databases" class="span8">
+							<label class="control-label popup_label" style="width: 130px;">All-In-One数据库：</label>
+							<select id="databases" class="span7">
 							</select>
+							<a href="javascript:;" onclick="$('#manageDb').modal();">没有找到？</a>
 						</div>
 					</div>
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label" style="width: 140px;">备
-								注:</label> <input id="comment" class="span8 input-sm" type="text">
+							<label class="control-label popup_label" style="width: 130px;">备
+								注:</label> <input id="comment" class="span7 input-sm" type="text">
 						</div>
 					</div>
 				</div>
@@ -120,6 +121,33 @@
          </div>
       </div>
       <!--End modal-->
+      
+      <!--Begin modal-->
+	<div class="modal fade" id="manageDb" tabindex="-1" role="dialog"
+		aria-labelledby="generateCodeLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title">添加All-In-One配置</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label">All-In-One：</label>
+							<textarea id="all_in_one" class="span9" style="height: 120px;">&lt;add name="xxx" connectionString="Server=xxx;port=xxx;UID=xxx;password=xxx;database=xxx;" providerName="System.Data.SqlClient" /&gt;</textarea>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button id="add_db" type="button" class="btn btn-primary">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--End modal-->
 
       
       <!-- JS and analytics only. -->

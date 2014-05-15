@@ -98,8 +98,16 @@ public class ProjectResource {
 					.getAttributes().get("mail").toString());
 			SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
 		}
+		
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		
+		if(user==null){
+			log.error("user "+userNo+ " is not exist in table of login_users.");
+		}
+		
+		return SpringBeanGetter.getDaoOfProject().getProjectByGroupId(user.getGroupId());
 
-		List<UserProject> projects = SpringBeanGetter.getDaoOfUserProject()
+		/*List<UserProject> projects = SpringBeanGetter.getDaoOfUserProject()
 				.getUserProjectsByUser(userNo);
 
 		List<Integer> ids = new ArrayList<Integer>();
@@ -112,7 +120,7 @@ public class ProjectResource {
 			return SpringBeanGetter.getDaoOfProject().getProjectByIDS(
 					ids.toArray());
 		else
-			return new ArrayList<Project>();
+			return new ArrayList<Project>();*/
 
 	}
 

@@ -31,6 +31,7 @@ import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
+import org.jasig.cas.client.util.AssertionHolder;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.common.util.Configuration;
@@ -38,10 +39,13 @@ import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.domain.TableSpNames;
+import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
+import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.IgnoreCaseCampare;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -111,12 +115,30 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("dbs")
-	public String getDbNames() {
-		try {
-			return mapper.writeValueAsString(LocalDataSourceLocator.newInstance()
-					.getDBNames());
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+	public String getDbNames(@QueryParam("groupDBs") boolean groupDBs) {
+		if(groupDBs){
+			String userNo = AssertionHolder.getAssertion().getPrincipal()
+					.getAttributes().get("employee").toString();
+			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+			if(user!=null){
+				List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(user.getGroupId());
+				Set<String> sets = new HashSet<String>();
+				for(DalGroupDB db:dbs){
+					sets.add(db.getDbname());
+				}
+				try {
+					return mapper.writeValueAsString(sets);
+				} catch (JsonProcessingException e) {
+					e.printStackTrace();
+				}
+			}
+		}else{
+			try {
+				return mapper.writeValueAsString(LocalDataSourceLocator.newInstance()
+						.getDBNames());
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}

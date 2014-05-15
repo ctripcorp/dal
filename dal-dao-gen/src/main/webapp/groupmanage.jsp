@@ -117,7 +117,7 @@
                   </div>
                </div>
                <div class="modal-footer">
-               	  <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
+               	  <label id="error_msg2" class="control-label popup_label" style="color:red;"></label>
                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                   <button id="update_group" type="button" class="btn btn-primary">Save changes</button>
                </div>

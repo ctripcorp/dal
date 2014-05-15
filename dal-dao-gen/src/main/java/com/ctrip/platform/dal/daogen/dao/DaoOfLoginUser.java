@@ -37,6 +37,24 @@ public class DaoOfLoginUser {
 					}
 				});
 	}
+	
+	public LoginUser getUserById(int userId) {
+		try {
+			return this.jdbcTemplate
+					.queryForObject(
+							"select id, user_no, user_name, user_email,dal_group_id from login_users where id = ?",
+							new Object[] { userId },
+							new RowMapper<LoginUser>() {
+								public LoginUser mapRow(ResultSet rs, int rowNum)
+										throws SQLException {
+									return LoginUser.visitRow(rs);
+								}
+							});
+		} catch (DataAccessException ex) {
+			ex.printStackTrace();
+			return null;
+		}
+	}
 
 	public LoginUser getUserByNo(String userNo) {
 
@@ -75,7 +93,7 @@ public class DaoOfLoginUser {
 			return null;
 		}
 	}
-
+	
 	public int insertUser(final LoginUser data) {
 
 		KeyHolder holder = new GeneratedKeyHolder();
@@ -100,6 +118,14 @@ public class DaoOfLoginUser {
 
 		return holder.getKey().intValue();
 
+	}
+	
+	public int updateUserGroup(int userId,Integer groupId){
+		return this.jdbcTemplate
+				.update("update login_users set dal_group_id=?"
+						+ " where id=?",
+						groupId,
+						userId);
 	}
 
 }

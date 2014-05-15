@@ -22,6 +22,7 @@ import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
+import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
@@ -32,6 +33,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
+import com.ctrip.platform.dal.daogen.utils.LogUtils;
 
 public class JavaGenerator extends AbstractGenerator {
 	
@@ -44,18 +46,18 @@ public class JavaGenerator extends AbstractGenerator {
 	private Map<String, JavaMethodHost> _freeSqlPojoHosts = new ConcurrentHashMap<String, JavaMethodHost>();
 	private Queue<GenTaskBySqlBuilder> _sqlBuilders = new ConcurrentLinkedQueue<GenTaskBySqlBuilder>();
 
-	private List<Callable<Boolean>> generateTableDao( final File mavenLikeDir,
+	private List<Callable<ExecuteResult>> generateTableDao( final File mavenLikeDir,
 			final Progress progress) {
 
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
 		for (final JavaTableHost host : _tableHosts) {
 
-			Callable<Boolean> worker = new Callable<Boolean>() {
+			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 
 				@Override
-				public Boolean call() throws Exception {
-					
+				public ExecuteResult call() throws Exception {
+					ExecuteResult result = new ExecuteResult("Generate Table[" + host.getTableName() + "] Dao, Pojo, Test");
 					VelocityContext context = GenUtils.buildDefaultVelocityContext();
 					context.put("host", host);
 					
@@ -78,7 +80,9 @@ public class JavaGenerator extends AbstractGenerator {
 							mavenLikeDir.getAbsolutePath(),
 							host.getPojoClassName()),
 							"templates/java/DAOTest.java.tpl");
-					return false;
+					result.setSuccessal(true);
+					
+					return result;
 				}
 			};
 			results.add(worker);
@@ -87,17 +91,18 @@ public class JavaGenerator extends AbstractGenerator {
 		return results;
 	}
 
-	private List<Callable<Boolean>> generateSpDao(final File mavenLikeDir,
+	private List<Callable<ExecuteResult>> generateSpDao(final File mavenLikeDir,
 			final Progress progress) {
 
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
 		for (final SpDbHost host : _spHostMaps.values()) {
 
-			Callable<Boolean> worker = new Callable<Boolean>() {
+			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 
 				@Override
-				public Boolean call() throws Exception {
+				public ExecuteResult call() throws Exception {
+					ExecuteResult result = new ExecuteResult("Generate SP[" + host.getDbName() + "] Dao, Pojo, Test");
 					VelocityContext context = GenUtils.buildDefaultVelocityContext();
 					context.put("host", host);
 					
@@ -122,7 +127,9 @@ public class JavaGenerator extends AbstractGenerator {
 										sp.getPojoClassName()),
 								"templates/java/Pojo.java.tpl");
 					}
-					return false;
+					result.setSuccessal(true);
+					
+					return result;
 				}
 			};
 			results.add(worker);
@@ -131,17 +138,18 @@ public class JavaGenerator extends AbstractGenerator {
 
 	}
 
-	private List<Callable<Boolean>> generateViewDao( 
+	private List<Callable<ExecuteResult>> generateViewDao( 
 			final File mavenLikeDir, final Progress progress) {
 
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
 		for (final ViewHost host : _viewHosts) {
 
-			Callable<Boolean> worker = new Callable<Boolean>() {
+			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 
 				@Override
-				public Boolean call() throws Exception {
+				public ExecuteResult call() throws Exception {					
+					ExecuteResult result = new ExecuteResult("Generate View[" + host.getViewName() + "] Dao");
 					VelocityContext context = GenUtils.buildDefaultVelocityContext();
 					context.put("host", host);
 					
@@ -164,7 +172,9 @@ public class JavaGenerator extends AbstractGenerator {
 							mavenLikeDir.getAbsolutePath(),
 							host.getPojoClassName()),
 							"templates/java/DAOByViewTest.java.tpl");
-					return true;
+					
+					result.setSuccessal(true);
+					return result;
 				}
 			};
 			results.add(worker);
@@ -172,18 +182,16 @@ public class JavaGenerator extends AbstractGenerator {
 		return results;
 	}
 
-	private List<Callable<Boolean>> generateFreeSqlDao(final File mavenLikeDir,
+	private List<Callable<ExecuteResult>> generateFreeSqlDao(final File mavenLikeDir,
 			final Progress progress) {
 
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
 		for (final JavaMethodHost host : _freeSqlPojoHosts.values()) {
-		
-
-			Callable<Boolean> worker = new Callable<Boolean>() {
-
+			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
-				public Boolean call() throws Exception {
+				public ExecuteResult call() throws Exception {
+					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getPojoClassName() + "] Pojo");
 					VelocityContext context = GenUtils.buildDefaultVelocityContext();
 					context.put("host", host);
 					GenUtils.mergeVelocityContext(
@@ -192,17 +200,19 @@ public class JavaGenerator extends AbstractGenerator {
 									mavenLikeDir.getAbsolutePath(),
 									host.getPojoClassName()),
 							"templates/java/Pojo.java.tpl");
-					return true;
+					result.setSuccessal(true);
+					return result;
 				}
 			};
 			results.add(worker);
 		}
 
 		for (final FreeSqlHost host : _freeSqlHosts) {
-			Callable<Boolean> worker = new Callable<Boolean>() {
+			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 
 				@Override
-				public Boolean call() throws Exception {
+				public ExecuteResult call() throws Exception {
+					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Dap, Test");
 					VelocityContext context = GenUtils.buildDefaultVelocityContext();
 					context.put("host", host);
 					
@@ -218,7 +228,8 @@ public class JavaGenerator extends AbstractGenerator {
 									mavenLikeDir.getAbsolutePath(),
 									host.getClassName()),
 							"templates/java/FreeSqlDAOTest.java.tpl");
-					return true;
+					result.setSuccessal(true);			
+					return result;
 				}
 			};
 			results.add(worker);
@@ -589,7 +600,7 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 	}
 
-	private List<Callable<Boolean>> prepareFreeSql(int projectId,
+	private List<Callable<ExecuteResult>> prepareFreeSql(int projectId,
 			boolean regenerate, final Progress progress) {
 
 		List<GenTaskByFreeSql> _freeSqls;
@@ -604,16 +615,17 @@ public class JavaGenerator extends AbstractGenerator {
 		// 首先按照ServerID, DbName以及ClassName做一次GroupBy，但是ClassName不区分大小写
 		final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(_freeSqls);
 
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 		// 随后，以ServerID, DbName以及ClassName为维度，为每个维度生成一个DAO类
 		for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy
 				.entrySet()) {
-			Callable<Boolean> worker = new Callable<Boolean>() {
+			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
-				public Boolean call() throws Exception {
+				public ExecuteResult call() throws Exception {
+					ExecuteResult result  = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");				
 					List<GenTaskByFreeSql> currentTasks = entry.getValue();
 					if (currentTasks.size() < 1)
-						return false;
+						return result;
 
 					FreeSqlHost host = new FreeSqlHost();
 					host.setDbName(currentTasks.get(0).getDb_name());
@@ -669,7 +681,8 @@ public class JavaGenerator extends AbstractGenerator {
 					}
 					host.setMethods(methods);
 					_freeSqlHosts.add(host);
-					return true;
+					result.setSuccessal(true);
+					return result;
 				}
 			};
 			results.add(worker);
@@ -678,7 +691,7 @@ public class JavaGenerator extends AbstractGenerator {
 		return results;
 	}
 
-	private List<Callable<Boolean>> prepareTableViewSp(int projectId,
+	private List<Callable<ExecuteResult>> prepareTableViewSp(int projectId,
 			boolean regenerate, final Progress progress) throws Exception {
 		List<GenTaskByTableViewSp> _tableViewSps;
 		List<GenTaskBySqlBuilder> _tempSqlBuilders;
@@ -697,7 +710,7 @@ public class JavaGenerator extends AbstractGenerator {
 			_sqlBuilders.add(_t);
 		}
 
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 		for (final GenTaskByTableViewSp tableViewSp : _tableViewSps) {
 			final String[] viewNames = StringUtils.split(
 					tableViewSp.getView_names(), ",");
@@ -707,59 +720,73 @@ public class JavaGenerator extends AbstractGenerator {
 					tableViewSp.getSp_names(), ",");
 
 			for (final String table : tableNames) {
-				Callable<Boolean> worker = new Callable<Boolean>() {
+				Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 					@Override
-					public Boolean call() throws Exception {
+					public ExecuteResult call() throws Exception {
 						progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildTable:"
 								+ table);
+						ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getProject_id() + "." + table + "] Host");
 						try{
-						JavaTableHost tableHost = buildTableHost(tableViewSp,
-								table);
+							JavaTableHost tableHost = buildTableHost(tableViewSp, table);
+							result.setSuccessal(true);
 						if (null != tableHost)
 							_tableHosts.add(tableHost);
+						result.setSuccessal(true);
 						} catch (Exception e) {
-							e.printStackTrace();
+							log.error(result.getTaskName() + " exception.", e);
 						}
-						return true;
+						return result;
 					}
 				};
 				results.add(worker);
 			}
 
 			for (final String view : viewNames) {
-				Callable<Boolean> viewWorker = new Callable<Boolean>() {
+				Callable<ExecuteResult> viewWorker = new Callable<ExecuteResult>() {
 					@Override
-					public Boolean call() throws Exception {
+					public ExecuteResult call() throws Exception {
 						progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildView:"
 								+ view);
-						ViewHost vhost = buildViewHost(tableViewSp, view);
-						if (null != vhost)
-							_viewHosts.add(vhost);
-						return true;
+						ExecuteResult result = new ExecuteResult("Build View[" + tableViewSp.getProject_id() + "." + view + "] Host");
+						try{
+							ViewHost vhost = buildViewHost(tableViewSp, view);
+							if (null != vhost)
+								_viewHosts.add(vhost);
+							result.setSuccessal(true);
+						}catch(Exception e){
+							log.error(result.getTaskName() + " exception.", e);
+						}
+						return result;
 					}
 				};
 				results.add(viewWorker);
 			}
 
 			for (final String spName : spNames) {
-				Callable<Boolean> spWorker = new Callable<Boolean>() {
+				Callable<ExecuteResult> spWorker = new Callable<ExecuteResult>() {
 					@Override
-					public Boolean call() throws Exception {
+					public ExecuteResult call() throws Exception {
 						progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildSp:"
 								+ spName);
-						SpHost spHost = buildSpHost(tableViewSp, spName);
-						if (null != spHost) {
-							if (!_spHostMaps.containsKey(spHost.getDbName())) {
-								SpDbHost spDbHost = new SpDbHost(
-										spHost.getDbName(),
-										spHost.getPackageName());
-								_spHostMaps.put(spHost.getDbName(), spDbHost);
+						ExecuteResult result = new ExecuteResult("Build SP[" + tableViewSp.getProject_id() + "." + spName + "] Host");
+						try{
+							SpHost spHost = buildSpHost(tableViewSp, spName);
+							if (null != spHost) {
+								if (!_spHostMaps.containsKey(spHost.getDbName())) {
+									SpDbHost spDbHost = new SpDbHost(
+											spHost.getDbName(),
+											spHost.getPackageName());
+									_spHostMaps.put(spHost.getDbName(), spDbHost);
+								}
+								_spHostMaps.get(spHost.getDbName()).addSpHost(
+										spHost);
+								_spHosts.add(spHost);
 							}
-							_spHostMaps.get(spHost.getDbName()).addSpHost(
-									spHost);
-							_spHosts.add(spHost);
+							result.setSuccessal(true);
+						}catch(Exception e){
+							log.error(result.getTaskName() + " exception.", e);
 						}
-						return true;
+						return result;
 					}
 				};
 				results.add(spWorker);
@@ -769,27 +796,32 @@ public class JavaGenerator extends AbstractGenerator {
 		return results;
 	}
 
-	private List<Callable<Boolean>> prepareSqlBuilder(final Progress progress) {
-		List<Callable<Boolean>> results = new ArrayList<Callable<Boolean>>();
+	private List<Callable<ExecuteResult>> prepareSqlBuilder(final Progress progress) {
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
 		if (_sqlBuilders.size() > 0) {
 			Map<String, GenTaskBySqlBuilder> _TempSqlBuildres = sqlBuilderBroupBy(_sqlBuilders);
 
 			for (final Map.Entry<String, GenTaskBySqlBuilder> _table : _TempSqlBuildres
 					.entrySet()) {
-				Callable<Boolean> worker = new Callable<Boolean>() {
+				Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 
 					@Override
-					public Boolean call() throws Exception {
+					public ExecuteResult call() throws Exception {
 						progress.setOtherMessage("正在整理表 "
 								+ _table.getValue().getClass_name());
-
-						JavaTableHost extraTableHost = buildExtraSqlBuilderHost(_table
+						ExecuteResult result = new ExecuteResult("Build Extral SQL[" + _table.getValue().getProject_id() + "." + _table.getKey() + "] Host");
+						try{
+							JavaTableHost extraTableHost = buildExtraSqlBuilderHost(_table
 								.getValue());
-						if (null != extraTableHost) {
-							_tableHosts.add(extraTableHost);
+							if (null != extraTableHost) {
+								_tableHosts.add(extraTableHost);
+							}
+							result.setSuccessal(true);
+						}catch(Exception e){
+							log.error(result.getTaskName() + " exception.", e);
 						}
-						return false;
+						return result;
 					}
 				};
 				results.add(worker);
@@ -802,11 +834,12 @@ public class JavaGenerator extends AbstractGenerator {
 	public boolean prepareDirectory(int projectId, boolean regenerate) {
 		File mavenLikeDir = new File(String.format("%s/%s/java", generatePath,
 				projectId));
-
 		try {
 			if (mavenLikeDir.exists() && regenerate)
 				FileUtils.forceDelete(mavenLikeDir);
 
+			log.info("The maven like directory: " + mavenLikeDir.getAbsolutePath());
+			
 			File daoMavenLike = new File(mavenLikeDir, "Dao");
 			File entityMavenLike = new File(mavenLikeDir, "Entity");
 			File testMavenLike = new File(mavenLikeDir, "Test");
@@ -830,24 +863,25 @@ public class JavaGenerator extends AbstractGenerator {
 	@Override
 	public boolean prepareData(int projectId, boolean regenerate,
 			Progress progress) {
-		List<Callable<Boolean>> _freeSqlCallables = prepareFreeSql(projectId,
+		List<Callable<ExecuteResult>> _freeSqlCallables = prepareFreeSql(projectId,
 				regenerate, progress);
 
 		try {
-			List<Callable<Boolean>> _tableViewSpCallables = prepareTableViewSp(
+			List<Callable<ExecuteResult>> _tableViewSpCallables = prepareTableViewSp(
 					projectId, regenerate, progress);
 
-			List<Callable<Boolean>> allResults = ListUtils.union(
+			@SuppressWarnings("unchecked")
+			List<Callable<ExecuteResult>> allResults = ListUtils.union(
 					_freeSqlCallables, _tableViewSpCallables);
 
 			if (allResults.size() > 0) {
-				executor.invokeAll(allResults);
+				LogUtils.log(log, executor.invokeAll(allResults));
 			}
 
-			List<Callable<Boolean>> _sqlBuilderCallables = prepareSqlBuilder(progress);
+			List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder(progress);
 
 			if (_sqlBuilderCallables.size() > 0) {
-				executor.invokeAll(_sqlBuilderCallables);
+				LogUtils.log(log, executor.invokeAll(_sqlBuilderCallables));
 			}
 
 		} catch (Exception e) {
@@ -870,25 +904,26 @@ public class JavaGenerator extends AbstractGenerator {
 		File mavenLikeDir = new File(String.format("%s/%s/java", generatePath,
 				id));
 
-		List<Callable<Boolean>> tableCallables = generateTableDao(
+		List<Callable<ExecuteResult>> tableCallables = generateTableDao(
 				 mavenLikeDir, progress);
 
-		List<Callable<Boolean>> viewCallables = generateViewDao(
+		List<Callable<ExecuteResult>> viewCallables = generateViewDao(
 				 mavenLikeDir, progress);
 
-		List<Callable<Boolean>> spCallables = generateSpDao(
+		List<Callable<ExecuteResult>> spCallables = generateSpDao(
 				 mavenLikeDir, progress);
 
-		List<Callable<Boolean>> freeCallables = generateFreeSqlDao(
+		List<Callable<ExecuteResult>> freeCallables = generateFreeSqlDao(
 				mavenLikeDir, progress);
 
-		List<Callable<Boolean>> allResults = ListUtils.union(ListUtils.union(
+		@SuppressWarnings("unchecked")
+		List<Callable<ExecuteResult>> allResults = ListUtils.union(ListUtils.union(
 				ListUtils.union(tableCallables, viewCallables), spCallables),
 				freeCallables);
 
 		if (allResults.size() > 0) {
 			try {
-				executor.invokeAll(allResults);
+				LogUtils.log(log, executor.invokeAll(allResults));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

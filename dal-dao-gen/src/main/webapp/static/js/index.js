@@ -183,19 +183,6 @@ jQuery(document).ready(function () {
         $("#refreshFiles").trigger('click');
     });
 
-    $(document.body).on('click', "#add_db", function(event){
-        $.post("/rest/db/all_in_one", {"data": $("#all_in_one").val()}, function(data){
-            if(data.code == "OK"){
-                $("#manageDb").modal('hide');
-                window.ajaxutil.reload_dbservers();
-                $("#page1").modal();
-            }else{
-                alert(data.info);
-            }
-
-        });
-    });
-
     $("#layout_main_layout_resizer_preview").mouseleave(function(){
           ace.edit("code_editor").resize();
     });

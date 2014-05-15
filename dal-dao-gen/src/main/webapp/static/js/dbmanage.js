@@ -39,28 +39,6 @@
         $("#dbModal").modal({
             "backdrop": "static"
         });
-        $("#save_db").click(function(){
-            var db_name = $("#databases").val();
-            var comment = $("#comment").val();
-            if(db_name==null || db_name==''){
-                $("#error_msg").html('请选择DB!');
-            }else{
-                $.post("/rest/groupdb/add", {
-                    groupId : w2ui['grid'].current_group,
-                    dbname : db_name,
-                    comment : comment
-                },function (data) {
-                    if (data.code == "OK") {
-                        $("#dbModal").modal('hide');
-                        refreshDB();
-                    } else {
-                        $("#error_msg").html(data.info);
-                    }
-                }).fail(function (data) {
-                        $("#error_msg").html(data.info);
-                    });
-            }
-        });
     };
 
     var editDB = function(){
@@ -75,24 +53,6 @@
         $("#comment2").val(record["comment"]);
         $("#dbModal2").modal({
             "backdrop": "static"
-        });
-        $("#update_db").click(function(){
-            var records = w2ui['grid'].getSelection();
-            var record = w2ui['grid'].get(records[0]);
-            $.post("/rest/groupdb/update", {
-                groupId : w2ui['grid'].current_group,
-                dbId : record['id'],
-                comment : $("#comment2").val()
-            },function (data) {
-                if (data.code == "OK") {
-                    $("#dbModal2").modal('hide');
-                    refreshDB();
-                } else {
-                    $("#error_msg2").html(data.info);
-                }
-            }).fail(function (data) {
-                    $("#error_msg2").html(data.info);
-                });
         });
     };
 
@@ -260,16 +220,60 @@
         $('#main_layout').height($(document).height() - 50);
     });
 
-    $(document.body).on('click', "#add_db", function(event){
-        $.post("/rest/db/all_in_one", {"data": $("#all_in_one").val()}, function(data){
-            if(data.code == "OK"){
-                $("#manageDb").modal('hide');
-                window.ajaxutil.reload_dbservers();
-                $("#page1").modal();
-            }else{
-                alert(data.info);
-            }
+    jQuery(document).ready(function(){
+        $(document.body).on('click', "#add_db", function(event){
+            $.post("/rest/db/all_in_one", {"data": $("#all_in_one").val()}, function(data){
+                if(data.code == "OK"){
+                    $("#manageDb").modal('hide');
+                    window.ajaxutil.reload_dbservers();
+                    $("#page1").modal();
+                }else{
+                    alert(data.info);
+                }
 
+            });
+        });
+
+        $("#save_db").click(function(){
+            var db_name = $("#databases").val();
+            var comment = $("#comment").val();
+            if(db_name==null || db_name==''){
+                $("#error_msg").html('请选择DB!');
+            }else{
+                $.post("/rest/groupdb/add", {
+                    groupId : w2ui['grid'].current_group,
+                    dbname : db_name,
+                    comment : comment
+                },function (data) {
+                    if (data.code == "OK") {
+                        $("#dbModal").modal('hide');
+                        refreshDB();
+                    } else {
+                        $("#error_msg").html(data.info);
+                    }
+                }).fail(function (data) {
+                        $("#error_msg").html(data.info);
+                    });
+            }
+        });
+
+        $("#update_db").click(function(){
+            var records = w2ui['grid'].getSelection();
+            var record = w2ui['grid'].get(records[0]);
+            $.post("/rest/groupdb/update", {
+                groupId : w2ui['grid'].current_group,
+                dbId : record['id'],
+                comment : $("#comment2").val()
+            },function (data) {
+                if (data.code == "OK") {
+                    $("#dbModal2").modal('hide');
+                    refreshDB();
+                } else {
+                    $("#error_msg2").html(data.info);
+                }
+            }).fail(function (data) {
+                    $("#error_msg2").html(data.info);
+                });
         });
     });
 

@@ -79,6 +79,7 @@
                   </div>
                </div>
                <div class="modal-footer">
+               		<label id="proj_error_msg" class="control-label popup_label" style="color:red;"></label>
                	   <a href="#" class="ctip" data-toggle="tooltip"
 						data-placement="top" title=""
 						data-original-title="代码生成器按照项目来组织代码，因此，同一个用户可以新建多个项目，每个项目生成的代码相互独立，互不干扰。"> <img class="helpicon"

@@ -46,9 +46,8 @@ public class DalGroupDBDao {
 	
 	public int insertDalGroupDB(DalGroupDB groupDb){
 		return this.jdbcTemplate
-				.update("insert into alldbs(id, dbname, comment, dal_group_id)"
-						+ "value(?,?,?,?)",
-						groupDb.getId(), 
+				.update("insert into alldbs(dbname, comment, dal_group_id)"
+						+ "value(?,?,?)",
 						groupDb.getDbname(),
 						groupDb.getComment(),
 						groupDb.getDal_group_id());

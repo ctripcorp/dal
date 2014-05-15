@@ -44,12 +44,13 @@ public class Logger {
 	private static ITrace trace = TraceManager.getTracer("DAL Java Client");
 	public static void log(LogEntry log) {
 
-		if(log == null) 
+		//The old  logging 
+		/*if(log == null) 
 			return;
 		// Don't log
 		if(validate(log.getSqlTpl(), log.getInputParamStr())){
 			logger.info(CommonUtil.null2NA(log.getTitle()), log.toBrief(), log.getTag());;
-		}
+		}*/
 		trace.log(LogType.SQL, LogLevel.INFO, 
 				CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
 		//logger.info(CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());

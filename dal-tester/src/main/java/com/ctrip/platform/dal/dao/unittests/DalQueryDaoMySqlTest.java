@@ -139,13 +139,12 @@ public class DalQueryDaoMySqlTest {
 		String sql = "SELECT * FROM " + TABLE_NAME + " LIMIT 2";
 		StatementParameters param = new StatementParameters();
 		DalHints hints = new DalHints();
-		ClientTestModel model = null;
 		try {
-			model = client.queryForObject(sql, param, hints, mapper);
+			client.queryForObject(sql, param, hints, mapper);
+			Assert.fail();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		Assert.assertTrue(null == model);
 	}
 	
 	/**
@@ -169,13 +168,11 @@ public class DalQueryDaoMySqlTest {
 		String sql = "SELECT * FROM " + TABLE_NAME + " LIMIT 2";
 		StatementParameters param = new StatementParameters();
 		DalHints hints = new DalHints();
-		Long id = null;
 		try {
-			id = client.queryForObject(sql, param, hints, Long.class);
+			client.queryForObject(sql, param, hints, Long.class);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		Assert.assertEquals(null, id);
 	}
 	
 	/**
@@ -199,14 +196,13 @@ public class DalQueryDaoMySqlTest {
 		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE id = -1";
 		StatementParameters param = new StatementParameters();
 		DalHints hints = new DalHints();
-		ClientTestModel model = null;
 		try {
-			model = client.queryFirst(sql, param, hints, mapper);
+			client.queryFirst(sql, param, hints, mapper);
+			Assert.fail();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Assert.assertEquals(null, model);
 	}
 	
 	/**

@@ -60,6 +60,22 @@ public class DaoOfProject {
 			return null;
 		}
 	}
+	
+	public List<Project> getProjectByGroupId(int groupId) {
+		try {
+			return this.jdbcTemplate
+					.query("select id, name, namespace from project where dal_group_id=? ",
+							new Object[] { groupId }, new RowMapper<Project>() {
+								public Project mapRow(ResultSet rs, int rowNum)
+										throws SQLException {
+									return Project.visitRow(rs);
+								}
+							});
+		} catch (DataAccessException ex) {
+			ex.printStackTrace();
+			return null;
+		}
+	}
 
 	public Project getProjectByID(int iD) {
 		try {

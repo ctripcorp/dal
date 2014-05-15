@@ -1,7 +1,6 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -13,11 +12,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
-import org.jasig.cas.client.util.AssertionHolder;
 
-import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
+import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
+import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
@@ -32,67 +32,45 @@ public class DalGroupProjectResource {
 
 	private static Logger log = Logger.getLogger(DalGroupProjectResource.class);
 	
-	@GET
-	@Path("users")
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<LoginUser> getUsers() {
-		return SpringBeanGetter.getDaoOfLoginUser().getAllUsers();
+	private static DalGroupDao group_dao = null;
+	private static DaoOfProject project = null;	
+	
+	static{
+		group_dao = SpringBeanGetter.getDaoOfDalGroup();
+		project = SpringBeanGetter.getDaoOfProject();
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Project> getProjects(@QueryParam("root") boolean root) {
-		// return projectDao.getAllProjects();
+	public List<DalGroup> getGroups(@QueryParam("root") boolean root) {
+
+		List<DalGroup> groups =  group_dao.getAllGroups();
+		for(DalGroup group:groups){
+			group.setText(group.getGroup_name());
+			group.setIcon("fa fa-folder-o");
+			group.setChildren(true);
+		}
+		return groups;
 		
-		if(root){
-			List<Project> roots = new ArrayList<Project>();
-			Project p = new Project();
-			p.setId(-1);
-			p.setName("所有项目");
-			p.setText("所有项目");
-			p.setNamespace("com.ctrip.platform");
-			p.setIcon("fa fa-folder-o");
-			p.setChildren(true);
-			roots.add(p);
-			return roots;
-		}
-
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
-
-		if (SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo) == null) {
-			LoginUser user = new LoginUser();
-			user.setUserNo(userNo);
-			user.setUserName(AssertionHolder.getAssertion().getPrincipal()
-					.getAttributes().get("sn").toString());
-			user.setUserEmail(AssertionHolder.getAssertion().getPrincipal()
-					.getAttributes().get("mail").toString());
-			SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
-		}
-
-		List<UserProject> projects = SpringBeanGetter.getDaoOfUserProject()
-				.getUserProjectsByUser(userNo);
-
-		List<Integer> ids = new ArrayList<Integer>();
-
-		for (UserProject u : projects) {
-			ids.add(u.getProject_id());
-		}
-
-		if (ids.size() > 0)
-			return SpringBeanGetter.getDaoOfProject().getProjectByIDS(
-					ids.toArray());
-		else
-			return new ArrayList<Project>();
-
 	}
-
+	
 	@GET
-	@Path("project")
+	@Path("groupprojects")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Project getProject(@QueryParam("id") String id) {
-		return SpringBeanGetter.getDaoOfProject().getProjectByID(
-				Integer.valueOf(id));
+	public List<Project> getGroupProjects(@QueryParam("groupId") String groupId) {
+
+		int groupID = -1;
+		try{
+			groupID = Integer.parseInt(groupId);
+		}catch(NumberFormatException  ex){
+			log.error("Add member failed", ex);
+			Status status = Status.ERROR;
+			status.setInfo("Illegal group id");
+			return null;
+		}
+		
+		return project.getProjectByGroupId(groupID);
+
 	}
 
 

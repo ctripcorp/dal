@@ -83,8 +83,8 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', '#save_proj', function (event) {
+        $("#proj_error_msg").html('');
         var post_data = {};
-
         var currentid = $("#project_id").val();
         if ($("#projectModal").attr("is_update") == "1" &&
             currentid != undefined && currentid != "") {
@@ -96,10 +96,23 @@ jQuery(document).ready(function () {
         post_data["name"] = $("#name").val();
         post_data["namespace"] = $("#namespace").val();
 
+        if(post_data["name"]==null || post_data["name"]==''){
+            $("#proj_error_msg").html('请输入项目名称！');
+            return;
+        }
+
+        if(post_data["namespace"]==null || post_data["namespace"]==''){
+            $("#proj_error_msg").html('请输入命名空间！');
+            return;
+        }
 
         $.post("/rest/project", post_data, function (data) {
-            $("#projectModal").modal('hide');
-            window.ajaxutil.reload_projects();
+            if(data.code == "OK"){
+                $("#projectModal").modal('hide');
+                window.ajaxutil.reload_projects();
+            }else{
+                $("#proj_error_msg").html(data.info);
+            }
         }).fail(function(data){
                 alert("保存失败！");
             });
@@ -181,19 +194,6 @@ jQuery(document).ready(function () {
 
     $(document.body).on('change', "#viewCode", function (event) {
         $("#refreshFiles").trigger('click');
-    });
-
-    $(document.body).on('click', "#add_db", function(event){
-        $.post("/rest/db/all_in_one", {"data": $("#all_in_one").val()}, function(data){
-            if(data.code == "OK"){
-                $("#manageDb").modal('hide');
-                window.ajaxutil.reload_dbservers();
-                $("#page1").modal();
-            }else{
-                alert(data.info);
-            }
-
-        });
     });
 
     $("#layout_main_layout_resizer_preview").mouseleave(function(){

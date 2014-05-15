@@ -11,6 +11,8 @@ public class Project {
 	
 	private String namespace;
 	
+	private int dal_group_id; 
+	
 	private String text;
 	
 	private String icon;
@@ -50,6 +52,14 @@ public class Project {
 		this.namespace = namespace;
 	}
 	
+	public int getDal_group_id() {
+		return dal_group_id;
+	}
+
+	public void setDal_group_id(int dal_group_id) {
+		this.dal_group_id = dal_group_id;
+	}
+
 	public String getText() {
 		return text;
 	}
@@ -71,6 +81,7 @@ public class Project {
         project.setId(rs.getInt(1));
         project.setName(rs.getString(2));
         project.setNamespace(rs.getString(3));
+        project.setDal_group_id(rs.getInt(4));
         project.setText(project.getName());
         project.setChildren(false);
         project.setIcon("fa fa-tasks");

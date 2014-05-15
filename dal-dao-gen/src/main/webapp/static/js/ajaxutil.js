@@ -146,10 +146,14 @@
                     });
             }
         },
-        reload_dbservers: function (callback) {
+        reload_dbservers: function (callback,groupDBs) {
             cblock($("body"));
 
-            $.get("/rest/db/dbs?rand=" + Math.random()).done(function (data) {
+            var url = "/rest/db/dbs?rand=" + Math.random();
+            if(groupDBs!=null && groupDBs!=''){
+                url+="&groupDBs=true";
+            }
+            $.get(url).done(function (data) {
                 //$("select[id$=servers] > option:gt(0)").remove();
 
                 if ($("#databases")[0] != undefined && $("#databases")[0].selectize != undefined) {

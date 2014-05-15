@@ -79,6 +79,7 @@
                   </div>
                </div>
                <div class="modal-footer">
+               		<label id="proj_error_msg" class="control-label popup_label" style="color:red;"></label>
                	   <a href="#" class="ctip" data-toggle="tooltip"
 						data-placement="top" title=""
 						data-original-title="代码生成器按照项目来组织代码，因此，同一个用户可以新建多个项目，每个项目生成的代码相互独立，互不干扰。"> <img class="helpicon"
@@ -180,32 +181,6 @@
       <!-- /.modal -->
       <!--Begin wizard-->
 
-       <div class="modal fade" id="manageDb" tabindex="-1" role="dialog" aria-labelledby="generateCodeLabel" aria-hidden="true">
-         <div class="modal-dialog">
-            <div class="modal-content">
-               <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <h4 class="modal-title">添加All-In-One配置</h4>
-               </div>
-               <div class="modal-body">
-                                       
-                     <div class="row-fluid">
-                        <div class="control-group">
-                           <label class="control-label popup_label">All-In-One：</label>
-                           <textarea id="all_in_one" class="span9" style="height:120px;">&lt;add name="xxx" connectionString="Server=xxx;port=xxx;UID=xxx;password=xxx;database=xxx;" providerName="System.Data.SqlClient" /&gt;</textarea>
-                        </div>
-                     </div>
-               </div>
-               <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                  <button id="add_db" type="button" class="btn btn-primary">保存</button>
-               </div>
-            </div>
-            <!-- /.modal-content -->
-         </div>
-         <!-- /.modal-dialog -->
-      </div>
-
       <div class="modal fade" id="page1" tabindex="-1" role="dialog" aria-labelledby="page1_label" aria-hidden="true" is_update="0">
          <div class="modal-dialog">
             <div class="modal-content">
@@ -218,15 +193,14 @@
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label" style="width:130px;">All-In-One数据库：</label>
-                           <select id="databases" class="span7">
+                           <select id="databases" class="span8">
                            </select>
-                           <a href="javascript:;" onclick="$('#page1').modal('hide');$('#manageDb').modal();">没有找到？</a>
                         </div>
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label" style="width:130px;">DAO代码生成方式:</label>
-                           <select id="gen_style" class="span7">
+                           <select id="gen_style" class="span8">
                               <option value="table_view_sp">生成模板(包含基础的增删改查操作)</option>
                               <option value="auto">构建SQL（生成的代码绑定到模板）</option>
                               <option value="sql">复杂查询（额外生成实体类）</option>
@@ -411,7 +385,7 @@
                   <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
                   <a href="#" class="ctip" data-toggle="tooltip"
 						data-placement="top" title="" html="1"
-						data-original-title="1、如果在列表中没有找到你需要的数据库，可以点击列表后面的超链接追加All In One数据库。<br/>
+						data-original-title="1、如果在列表中没有找到你需要的数据库，请到DB管理界面追加All In One数据库。<br/>
 						2、目前，DAO代码生成方式有三种：<br/>
 						&nbsp;2.1、生成模板(包含基础的增删改查操作)：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
 						&nbsp;2.2、构建SQL（生成的代码绑定到模板）：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>

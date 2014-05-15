@@ -190,7 +190,7 @@
                             $("#page1").modal({
                                 "backdrop": "static"
                             });
-                            window.ajaxutil.reload_dbservers();
+                            window.ajaxutil.reload_dbservers(null,true);
                             break;
                         case 'editDAO':
                             window.wizzard.clear();
@@ -293,7 +293,7 @@
                 $(".step2-3-1").hide();
                 window.ajaxutil.reload_dbservers(function () {
                     $("#databases")[0].selectize.setValue(record.db_name);
-                });
+                },true);
                 $("#page1").attr('is_update', '1');
                 $("#gen_style").val(record.task_type);
                 $("#sql_style").val(record.sql_style);

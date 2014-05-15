@@ -21,6 +21,7 @@
     };
 
     var addGroup = function(){
+        $("#error_msg").html('');
         $("#name").val('');
         $("#comment").val('');
         $("#groupModal").modal({
@@ -41,18 +42,23 @@
                         $("#groupModal").modal('hide');
                         refreshGroup();
                     } else {
-                        alert(data.info);
+                        $("#error_msg").html(data.info);
                     }
                 }).fail(function (data) {
-                        alert("执行异常:"+data);
+                        $("#error_msg").html("执行异常:"+data);
                     });
             }
         });
     };
 
     var editGroup = function(){
+        $("#error_msg2").html('');
         var records = w2ui['grid'].getSelection();
         var record = w2ui['grid'].get(records[0]);
+        if(record==null || record==''){
+            alert("请先选择一个member");
+            return;
+        }
         $("#name2").val(record["group_name"]);
         $("#comment2").val(record["group_comment"]);
         $("#groupModal2").modal({
@@ -72,10 +78,10 @@
                         $("#groupModal2").modal('hide');
                         refreshGroup();
                     } else {
-                        alert(data.info);
+                        $("#error_msg2").html(data.info);
                     }
                 }).fail(function (data) {
-                        alert("执行异常:"+data);
+                        $("#error_msg2").html("执行异常:"+data);
                     });
             }else{
                 alert('请选择一个group！');

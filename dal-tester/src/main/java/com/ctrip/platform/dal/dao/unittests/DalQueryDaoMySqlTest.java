@@ -170,6 +170,7 @@ public class DalQueryDaoMySqlTest {
 		DalHints hints = new DalHints();
 		try {
 			client.queryForObject(sql, param, hints, Long.class);
+			Assert.fail();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -200,7 +201,6 @@ public class DalQueryDaoMySqlTest {
 			client.queryFirst(sql, param, hints, mapper);
 			Assert.fail();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

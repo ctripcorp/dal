@@ -129,6 +129,18 @@ public class DaoOfProject {
 			return -1;
 		}
 	}
+	
+	public int updateProjectGroupById(int groupId,int id) {
+		try {
+			return this.jdbcTemplate
+					.update("update project set dal_group_id=? where id=?",
+							groupId,
+							id);
+		} catch (DataAccessException ex) {
+			ex.printStackTrace();
+			return -1;
+		}
+	}
 
 	public int deleteProject(Project project) {
 		try {

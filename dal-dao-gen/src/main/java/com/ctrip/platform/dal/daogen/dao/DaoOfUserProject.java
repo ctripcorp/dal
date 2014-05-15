@@ -50,7 +50,7 @@ public class DaoOfUserProject {
 					}
 				});
 	}
-
+	
 	public UserProject getUserProject(int project_id, String userNo) {
 
 		try {
@@ -58,6 +58,25 @@ public class DaoOfUserProject {
 					.queryForObject(
 							"select id,project_id, user_no from user_project where project_id=? and user_no = ?",
 							new Object[] { project_id, userNo },
+							new RowMapper<UserProject>() {
+								public UserProject mapRow(ResultSet rs,
+										int rowNum) throws SQLException {
+									return UserProject.visitRow(rs);
+								}
+							});
+		} catch (DataAccessException ex) {
+			ex.printStackTrace();
+			return null;
+		}
+	}
+	
+	public UserProject getMinUserProjectByProjectId(int project_id) {
+
+		try {
+			return this.jdbcTemplate
+					.queryForObject(
+							"select id,project_id, user_no from user_project where id=(select min(id) from user_project where project_id=?)",
+							new Object[] { project_id},
 							new RowMapper<UserProject>() {
 								public UserProject mapRow(ResultSet rs,
 										int rowNum) throws SQLException {

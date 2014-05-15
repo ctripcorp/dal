@@ -21,6 +21,7 @@ import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
@@ -187,5 +188,35 @@ public class DalGroupMemberResource {
 		}
 		return false;
 	}
+	
+	
+	private void transferProjectToGroup(String userNo, int groupId){
+		//当前用户的所有Project
+		List<UserProject> userProjects = SpringBeanGetter.getDaoOfUserProject()
+				.getUserProjectsByUser(userNo);
+		for(UserProject proj : userProjects){
+			int project_id = proj.getProject_id();
+			//project_id符合当前迭代的Project，且在user_project中id最小
+			UserProject project = SpringBeanGetter.getDaoOfUserProject().getMinUserProjectByProjectId(project_id);
+			//验证当前project是否是由当前user创建
+			if(proj.getId() == project.getId()){
+				//更新Project表的groupId为当前用户的gourpId
+				SpringBeanGetter.getDaoOfProject().updateProjectGroupById(project_id, proj.getId());
+				//删除user_project表中所有project_id符合当前迭代的Project
+				SpringBeanGetter.getDaoOfUserProject().deleteUserProject(project_id);
+			}
+			
+		}
+	}
 
 }
+
+
+
+
+
+
+
+
+
+

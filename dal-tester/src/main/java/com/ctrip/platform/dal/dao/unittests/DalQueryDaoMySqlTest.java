@@ -142,6 +142,7 @@ public class DalQueryDaoMySqlTest {
 		ClientTestModel model = null;
 		try {
 			model = client.queryForObject(sql, param, hints, mapper);
+			Assert.fail();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -172,6 +173,7 @@ public class DalQueryDaoMySqlTest {
 		Long id = null;
 		try {
 			id = client.queryForObject(sql, param, hints, Long.class);
+			Assert.fail();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -202,8 +204,8 @@ public class DalQueryDaoMySqlTest {
 		ClientTestModel model = null;
 		try {
 			model = client.queryFirst(sql, param, hints, mapper);
+			Assert.fail();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		Assert.assertEquals(null, model);

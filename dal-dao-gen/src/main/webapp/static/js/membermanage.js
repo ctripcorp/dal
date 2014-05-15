@@ -38,28 +38,6 @@
         $("#memberModal").modal({
             "backdrop": "static"
         });
-
-        $("#save_member").click(function(){
-            var id = $("#members").val();
-            if(id==null){
-                $("#error_msg").html('请选择member!');
-            }else{
-                var current_group = w2ui['grid'].current_group;
-                $.post("/rest/member/add", {
-                    groupId : current_group,
-                    userId : id
-                },function (data) {
-                    if (data.code == "OK") {
-                        $("#memberModal").modal('hide');
-                        refreshMember();
-                    } else {
-                        $("#error_msg").html(data.info);
-                    }
-                }).fail(function (data) {
-                        $("#error_msg").html(data.info);
-                    });
-            }
-        });
     };
 
     var delMember = function(){
@@ -253,6 +231,30 @@
 
     $(window).resize(function () {
         $('#main_layout').height($(document).height() - 50);
+    });
+
+    jQuery(document).ready(function(){
+        $("#save_member").click(function(){
+            var id = $("#members").val();
+            if(id==null){
+                $("#error_msg").html('请选择member!');
+            }else{
+                var current_group = w2ui['grid'].current_group;
+                $.post("/rest/member/add", {
+                    groupId : current_group,
+                    userId : id
+                },function (data) {
+                    if (data.code == "OK") {
+                        $("#memberModal").modal('hide');
+                        refreshMember();
+                    } else {
+                        $("#error_msg").html(data.info);
+                    }
+                }).fail(function (data) {
+                        $("#error_msg").html(data.info);
+                    });
+            }
+        });
     });
 
 })(window);

@@ -27,28 +27,6 @@
         $("#groupModal").modal({
             "backdrop": "static"
         });
-        $("#save_group").click(function(){
-            var group_name = $("#name").val();
-            var comment = $("#comment").val();
-            var postData = {
-                groupName:group_name,
-                groupComment:comment
-            };
-            if(group_name==null || $.trim(group_name)==''){
-                $("#error_msg").html('请输入Group Name!');
-            }else{
-                $.post("/rest/group/add", postData,function (data) {
-                    if (data.code == "OK") {
-                        $("#groupModal").modal('hide');
-                        refreshGroup();
-                    } else {
-                        $("#error_msg").html(data.info);
-                    }
-                }).fail(function (data) {
-                        $("#error_msg").html("执行异常:"+data);
-                    });
-            }
-        });
     };
 
     var editGroup = function(){
@@ -63,29 +41,6 @@
         $("#comment2").val(record["group_comment"]);
         $("#groupModal2").modal({
             "backdrop": "static"
-        });
-        $("#update_group").click(function(){
-            var records = w2ui['grid'].getSelection();
-            var record = w2ui['grid'].get(records[0]);
-            var postData = {
-                groupId:record['id'],
-                groupName:$("#name2").val(),
-                groupComment:$("#comment2").val()
-            };
-            if(record!=null){
-                $.post("/rest/group/update", postData,function (data) {
-                    if (data.code == "OK") {
-                        $("#groupModal2").modal('hide');
-                        refreshGroup();
-                    } else {
-                        $("#error_msg2").html(data.info);
-                    }
-                }).fail(function (data) {
-                        $("#error_msg2").html("执行异常:"+data);
-                    });
-            }else{
-                alert('请选择一个group！');
-            }
         });
     };
 
@@ -232,6 +187,55 @@
     window.render.render_grid();
 
     w2ui['grid_toolbar'].click('refreshGroup', null);
+
+    jQuery(document).ready(function(){
+        $("#save_group").click(function(){
+            var group_name = $("#name").val();
+            var comment = $("#comment").val();
+            var postData = {
+                groupName:group_name,
+                groupComment:comment
+            };
+            if(group_name==null || $.trim(group_name)==''){
+                $("#error_msg").html('请输入Group Name!');
+            }else{
+                $.post("/rest/group/add", postData,function (data) {
+                    if (data.code == "OK") {
+                        $("#groupModal").modal('hide');
+                        refreshGroup();
+                    } else {
+                        $("#error_msg").html(data.info);
+                    }
+                }).fail(function (data) {
+                        $("#error_msg").html("执行异常:"+data);
+                    });
+            }
+        });
+
+        $("#update_group").click(function(){
+            var records = w2ui['grid'].getSelection();
+            var record = w2ui['grid'].get(records[0]);
+            var postData = {
+                groupId:record['id'],
+                groupName:$("#name2").val(),
+                groupComment:$("#comment2").val()
+            };
+            if(record!=null){
+                $.post("/rest/group/update", postData,function (data) {
+                    if (data.code == "OK") {
+                        $("#groupModal2").modal('hide');
+                        refreshGroup();
+                    } else {
+                        $("#error_msg2").html(data.info);
+                    }
+                }).fail(function (data) {
+                        $("#error_msg2").html("执行异常:"+data);
+                    });
+            }else{
+                alert('请选择一个group！');
+            }
+        });
+    });
 
     $(window).resize(function () {
         $('#main_layout').height($(document).height() - 50);

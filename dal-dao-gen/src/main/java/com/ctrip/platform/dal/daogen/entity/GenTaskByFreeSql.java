@@ -4,6 +4,7 @@ package com.ctrip.platform.dal.daogen.entity;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
@@ -28,6 +29,10 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	private boolean generated;
 	
 	private int version;
+	
+	private String update_user_no;
+	private Timestamp update_time;
+	private String comment;
 
 	public String getParameters() {
 		return parameters;
@@ -117,6 +122,30 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		this.version = version;
 	}
 
+	public String getUpdate_user_no() {
+		return update_user_no;
+	}
+
+	public void setUpdate_user_no(String update_user_no) {
+		this.update_user_no = update_user_no;
+	}
+
+	public Timestamp getUpdate_time() {
+		return update_time;
+	}
+
+	public void setUpdate_time(Timestamp update_time) {
+		this.update_time = update_time;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
 	public static GenTaskByFreeSql visitRow(ResultSet rs) throws SQLException {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 		task.setId(rs.getInt(1));
@@ -130,6 +159,9 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		task.setParameters(rs.getString(9));
 		task.setGenerated(rs.getBoolean(10));
 		task.setVersion(rs.getInt(11));
+		task.setUpdate_user_no(rs.getString(12));
+		task.setUpdate_time(rs.getTimestamp(13));
+		task.setComment(rs.getString(14));
 		return task;
 	}
 

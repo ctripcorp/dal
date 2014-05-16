@@ -1,6 +1,8 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.sql.Timestamp;
+
 import javax.annotation.Resource;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -9,9 +11,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
+import org.jasig.cas.client.util.AssertionHolder;
+
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
+import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
@@ -44,7 +49,8 @@ public class GenTaskBySqlBuilderResource {
 			@FormParam("sql_content") String sql_content,
 			@FormParam("version") int version,
 			@FormParam("action") String action,
-			@FormParam("params") String params) {
+			@FormParam("params") String params,
+			@FormParam("comment") String comment) {
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 
 		if (action.equalsIgnoreCase("delete")) {
@@ -53,6 +59,9 @@ public class GenTaskBySqlBuilderResource {
 				return Status.ERROR;
 			}	
 		}else{
+			String userNo = AssertionHolder.getAssertion().getPrincipal()
+					.getAttributes().get("employee").toString();
+			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 			task.setProject_id(project_id);
 			task.setDb_name(db_name);
 			task.setTable_name(table_name);
@@ -61,6 +70,9 @@ public class GenTaskBySqlBuilderResource {
 			task.setCrud_type(crud_type);
 			task.setFields(fields);
 			task.setCondition(condition);
+			task.setUpdate_user_no(user.getUserName()+"("+userNo+")");
+			task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+			task.setComment(comment);
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);

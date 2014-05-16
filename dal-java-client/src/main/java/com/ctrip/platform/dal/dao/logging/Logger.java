@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.logging;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -64,10 +66,19 @@ public class Logger {
 	
 	public static void logGetConnectionFailed(String realDbName, Throwable e)
 	{
+		String msg = e.getMessage();
+		try {  
+            StringWriter sw = new StringWriter();  
+            PrintWriter pw = new PrintWriter(sw);  
+            e.printStackTrace(pw);  
+            msg = "\r\n" + sw.toString() + "\r\n";  
+        } catch (Exception e2) {  
+        	msg = "bad getErrorInfoFromException";  
+        }
+		
 		String logMsg = "Connection " + realDbName + " database failed." +
 				System.lineSeparator() + System.lineSeparator() +
-				"********** Exception Info **********" + System.lineSeparator() +
-				e.getMessage();
+				"********** Exception Info **********" + System.lineSeparator() + msg;
 		Logger.log("Get connection", DalEventEnum.CONNECTION_FAILED, LogLevel.ERROR, logMsg);	
 	}
 	

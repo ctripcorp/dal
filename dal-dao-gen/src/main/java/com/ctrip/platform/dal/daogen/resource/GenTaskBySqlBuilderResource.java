@@ -13,8 +13,12 @@ import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 
+/**
+ * 构建SQL（生成的代码绑定到模板）
+ * @author gzxia
+ *
+ */
 @Resource
 @Singleton
 @Path("task/auto")

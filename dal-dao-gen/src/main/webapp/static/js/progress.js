@@ -55,7 +55,7 @@
                 if(Progress.progressStatus == "finish" || textStatus != "success" || Progress.errorStatus=="exception" ){
                     if(Progress.progressStatus == "finish" && textStatus == "success" && Progress.errorStatus!="exception"){
                         $('#generateCodeProcessMess').css({'font-weight': "bold"});
-                        setTimeout(refreshData,3000);
+                        setTimeout(refreshData,1000);
                     }else{
                         refreshData();
                     }

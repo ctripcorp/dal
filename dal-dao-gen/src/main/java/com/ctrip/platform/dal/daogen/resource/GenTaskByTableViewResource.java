@@ -14,6 +14,11 @@ import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
+/**
+ * 生成模板(包含基础的增删改查操作)
+ * @author gzxia
+ *
+ */
 @Resource
 @Singleton
 @Path("task/table")

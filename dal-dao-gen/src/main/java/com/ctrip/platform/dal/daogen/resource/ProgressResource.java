@@ -42,7 +42,7 @@ public class ProgressResource {
 	public final static String ISDOING = "isDoing";
 	
 	public final static String INIT_MESSAGE = "正在初始化...";
-	public final static String SUCCESS_MESSAGE = "代码生成完毕。本窗口3秒后将自动关闭。";
+	public final static String SUCCESS_MESSAGE = "代码生成完毕。本窗口1秒后将自动关闭。";
 
 	@Path("/poll")
 	@GET

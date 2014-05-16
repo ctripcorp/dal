@@ -14,6 +14,11 @@ import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
+/**
+ * 复杂查询（额外生成实体类）
+ * @author gzxia
+ *
+ */
 @Resource
 @Singleton
 @Path("task/sql")

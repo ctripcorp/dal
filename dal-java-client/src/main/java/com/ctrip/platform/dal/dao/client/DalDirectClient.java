@@ -320,7 +320,7 @@ public class DalDirectClient implements DalClient {
 			return result;
 		} catch (Throwable e) {
 			entry.setSuccess(false);
-			entry.setErrorMsg(e.getMessage());
+			entry.setErrorMsg(e);
 			MetricsLogger.fail(entry, start);
 			throw(handleException(e));
 		} finally {
@@ -361,7 +361,7 @@ public class DalDirectClient implements DalClient {
 			return result;
 		} catch (Throwable e) {
 			entry.setSuccess(false);
-			entry.setErrorMsg(e.getMessage());
+			entry.setErrorMsg(e);
 			MetricsLogger.fail(entry, start);
 			throw handleException(e, level);
 		} finally {

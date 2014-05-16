@@ -294,7 +294,7 @@ public class ProjectResource {
 			}
 			info += "</ul>";
 			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
-			info = "在DAL Team Group："+group.getGroup_name()+"中不存在以下数据库：</br>"+ info +"<br/>请先添加DB到所在Group!";
+			info = "在DAL Team Group："+group.getGroup_name()+"中不存在以下数据库：</br>"+ info +"请先添加DB到所在Group!";
 			status.setInfo(info);
 			return status;
 		}

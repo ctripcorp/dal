@@ -128,7 +128,7 @@ public class DaoByTableViewSp {
 	public int updateTask(GenTaskByTableViewSp task) {
 		try {
 			return this.jdbcTemplate
-					.update("update task_table set project_id=?,db_name=?,table_names=?,view_names=?,sp_names=?,prefix=?,suffix=?,cud_by_sp=?,pagination=?,generated=?,version=version+1,,update_user_no=?,update_time=?,comment=? where id=? and version=?",
+					.update("update task_table set project_id=?,db_name=?,table_names=?,view_names=?,sp_names=?,prefix=?,suffix=?,cud_by_sp=?,pagination=?,generated=?,version=version+1,update_user_no=?,update_time=?,comment=? where id=? and version=?",
 
 					task.getProject_id(), task.getDb_name(),
 							task.getTable_names(), task.getView_names(),

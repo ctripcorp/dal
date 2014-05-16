@@ -41,7 +41,7 @@ public class DaoBySqlBuilder {
 	public List<GenTaskBySqlBuilder> getAllTasks() {
 
 		return this.jdbcTemplate
-				.query("select id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version from task_auto",
+				.query("select id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment from task_auto",
 						new RowMapper<GenTaskBySqlBuilder>() {
 							public GenTaskBySqlBuilder mapRow(ResultSet rs,
 									int rowNum) throws SQLException {
@@ -54,7 +54,7 @@ public class DaoBySqlBuilder {
 	public List<GenTaskBySqlBuilder> getTasksByProjectId(int iD) {
 
 		return this.jdbcTemplate
-				.query("select id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version from task_auto where project_id=?",
+				.query("select id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment from task_auto where project_id=?",
 						new Object[] { iD },
 						new RowMapper<GenTaskBySqlBuilder>() {
 							public GenTaskBySqlBuilder mapRow(ResultSet rs,
@@ -69,7 +69,7 @@ public class DaoBySqlBuilder {
 		final List<GenTaskBySqlBuilder> tasks = new ArrayList<GenTaskBySqlBuilder>();
 
 		this.jdbcTemplate
-				.query("select  id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version from task_auto where project_id=?",
+				.query("select  id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment from task_auto where project_id=?",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -91,7 +91,7 @@ public class DaoBySqlBuilder {
 		final List<GenTaskBySqlBuilder> tasks = new ArrayList<GenTaskBySqlBuilder>();
 
 		this.jdbcTemplate
-				.query("select  id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version from task_auto  where project_id=? and generated=false",
+				.query("select  id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment from task_auto  where project_id=? and generated=false",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -112,8 +112,8 @@ public class DaoBySqlBuilder {
 
 		return this.jdbcTemplate
 				.update("insert into task_auto "
-						+ "( project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version)"
-						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12) tmp where not exists "
+						+ "( project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment)"
+						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,,? as p13,,? as p14,,? as p15) tmp where not exists "
 						+ "(select 1 from task_auto where project_id=? and db_name=? and table_name=? and method_name=? limit 1)",
 						task.getProject_id(),
 						task.getDb_name(), task.getTable_name(),
@@ -121,7 +121,11 @@ public class DaoBySqlBuilder {
 						task.getSql_style(), task.getCrud_type(),
 						task.getFields(), task.getCondition(),
 						task.getSql_content(), task.isGenerated(),
-						task.getVersion(), task.getProject_id(),
+						task.getVersion(), 
+						task.getUpdate_user_no(),
+						task.getUpdate_time(),
+						task.getComment(),
+						task.getProject_id(),
 						task.getDb_name(), task.getTable_name(), 
 						task.getMethod_name());
 
@@ -147,13 +151,16 @@ public class DaoBySqlBuilder {
 			return -1;
 
 		return this.jdbcTemplate
-				.update("update task_auto set  project_id=?,db_name=?, table_name=?,class_name=?,method_name=?,sql_style=?,crud_type=?,fields=?,where_condition=?,sql_content=?,generated=?,version=version+1 where id=? and version = ?",
+				.update("update task_auto set  project_id=?,db_name=?, table_name=?,class_name=?,method_name=?,sql_style=?,crud_type=?,fields=?,where_condition=?,sql_content=?,generated=?,version=version+1,update_user_no=?,update_time=?,comment=? where id=? and version = ?",
 						task.getProject_id(),
 						task.getDb_name(), task.getTable_name(),
 						task.getClass_name(), task.getMethod_name(),
 						task.getSql_style(), task.getCrud_type(),
 						task.getFields(), task.getCondition(),
 						task.getSql_content(), task.isGenerated(),
+						task.getUpdate_user_no(),
+						task.getUpdate_time(),
+						task.getComment(),
 						task.getId(), task.getVersion());
 
 	}

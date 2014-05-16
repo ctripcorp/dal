@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.entity;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	
@@ -28,6 +29,10 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	private boolean generated;
 	
 	private int version;
+	
+	private String update_user_no;
+	private Timestamp update_time;
+	private String comment;
 
 	public int getId() {
 		return id;
@@ -124,6 +129,31 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	public void setVersion(int version) {
 		this.version = version;
 	}
+	
+
+	public String getUpdate_user_no() {
+		return update_user_no;
+	}
+
+	public void setUpdate_user_no(String update_user_no) {
+		this.update_user_no = update_user_no;
+	}
+
+	public Timestamp getUpdate_time() {
+		return update_time;
+	}
+
+	public void setUpdate_time(Timestamp update_time) {
+		this.update_time = update_time;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
 
 	/**
 	 * 根据Resultset返回GenTaskByTableView实体对象
@@ -145,6 +175,9 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 		task.setPagination(rs.getBoolean(10));
 		task.setGenerated(rs.getBoolean(11));
 		task.setVersion(rs.getInt(12));
+		task.setUpdate_user_no(rs.getString(13));
+		task.setUpdate_time(rs.getTimestamp(14));
+		task.setComment(rs.getString(15));
 		return task;
 	}
 

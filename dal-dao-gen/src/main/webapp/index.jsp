@@ -226,6 +226,12 @@
                            </select>
                         </div>
                      </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label" style="width:130px;">方法功能描述：</label>
+                           <textarea id="comment" class="span12 popup_text input-sm" rows="4"></textarea>
+                        </div>
+                     </div>
                   </div>
                   <div class="steps step2-1 row-fluid">
                      <div class="row-fluid">

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.entity;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 
@@ -30,6 +31,10 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	private boolean generated;
 	
 	private int version;
+	
+	private String update_user_no;
+	private Timestamp update_time;
+	private String comment;
 
 	public String getFields() {
 		return fields;
@@ -135,6 +140,30 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		this.version = version;
 	}
 
+	public String getUpdate_user_no() {
+		return update_user_no;
+	}
+
+	public void setUpdate_user_no(String update_user_no) {
+		this.update_user_no = update_user_no;
+	}
+
+	public Timestamp getUpdate_time() {
+		return update_time;
+	}
+
+	public void setUpdate_time(Timestamp update_time) {
+		this.update_time = update_time;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
 	public static GenTaskBySqlBuilder visitRow(ResultSet rs) throws SQLException {
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 		task.setId(rs.getInt(1));
@@ -150,6 +179,9 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		task.setSql_content(rs.getString(11));
 		task.setGenerated(rs.getBoolean(12));
 		task.setVersion(rs.getInt(13));
+		task.setUpdate_user_no(rs.getString(14));
+		task.setUpdate_time(rs.getTimestamp(15));
+		task.setComment(rs.getString(16));
 		return task;
 	}
 

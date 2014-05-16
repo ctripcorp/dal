@@ -23,9 +23,6 @@ import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
-import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
-import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
-import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
@@ -172,8 +169,8 @@ public class ProjectResource {
 			proj.setName(name);
 			proj.setNamespace(namespace);
 			proj.setDal_group_id(user.getGroupId());
-			int pk = SpringBeanGetter.getDaoOfProject().insertProject(proj);
-
+			SpringBeanGetter.getDaoOfProject().insertProject(proj);
+//			int pk = SpringBeanGetter.getDaoOfProject().insertProject(proj);
 //			shareProject(pk, userNo);
 		} else if (action.equals("update")) {
 			proj.setId(id);
@@ -217,11 +214,10 @@ public class ProjectResource {
 					id, regen, language));
 			if (language.equals("java"))
 			{
-				//JavaGenerator.getInstance().generateCode(id, regen, progress);
 				new JavaGenerator().generate(id, regen, progress, null);
 			}
 			else if (language.equals("cs")){
-				Map hints = new HashMap<String, Boolean>();
+				Map<String, Boolean> hints = new HashMap<String, Boolean>();
 				hints.put("newPojo", newPojo);
 				new CSharpGenerator().generate(id, regen, progress, hints);
 			}

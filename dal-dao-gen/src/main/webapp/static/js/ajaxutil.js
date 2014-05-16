@@ -20,6 +20,7 @@
 
             postData["project_id"] = current_project;
             postData["db_name"] = $("#databases").val();
+            postData["comment"] = $("#comment").val();
             if ($("#page1").attr('is_update') == "1") {
                 postData["action"] = "update";
                 var records = w2ui['grid'].getSelection();

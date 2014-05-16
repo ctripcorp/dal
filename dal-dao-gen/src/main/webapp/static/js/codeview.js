@@ -178,14 +178,14 @@
                     caption: '预览',
                     size: '25%'
                 }, {
-                    field: '',
+                    field: 'comment',
                     caption: '方法描述',
                     size: '20%'
                 }, {
-                    field: '',
+                    field: 'update_user_no',
                     caption: '最后修改User',
                     size: '10%'
-                }   ],
+                }],
                 records: [],
                 onDblClick: function (target, data) {
                 }

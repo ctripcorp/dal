@@ -113,7 +113,7 @@ public class DaoBySqlBuilder {
 		return this.jdbcTemplate
 				.update("insert into task_auto "
 						+ "( project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment)"
-						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,,? as p13,,? as p14,,? as p15) tmp where not exists "
+						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,? as p13,? as p14,? as p15) tmp where not exists "
 						+ "(select 1 from task_auto where project_id=? and db_name=? and table_name=? and method_name=? limit 1)",
 						task.getProject_id(),
 						task.getDb_name(), task.getTable_name(),

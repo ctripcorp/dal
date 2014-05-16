@@ -402,7 +402,7 @@
                      <div class="row-fluid">
                            <label class="control-label popup_label">填写参数名/参数Index，并选择数据类型</label>
                      </div>  
-                     <div id="param_list" class="row-fluid">      
+                     <div id="param_list" class="row-fluid input-sm">      
                      </div>
                   </div>
                </div>

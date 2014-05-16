@@ -112,7 +112,7 @@ public class DaoByFreeSql {
 
 		return this.jdbcTemplate
 				.update("insert into task_sql (project_id,  db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment)"
-						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,,? as p12,,? as p13) tmp where not exists "
+						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,? as p13) tmp where not exists "
 						+ "(select 1 from task_sql where project_id=? and db_name=? and class_name=? and method_name=? limit 1)",
 						task.getProject_id(),
 						task.getDb_name(), task.getClass_name(),

@@ -151,6 +151,10 @@
                     field: 'method_name',
                     caption: '方法名',
                     type: 'text'
+                }, {
+                    field: 'comment',
+                    caption: '方法描述',
+                    type: 'text'
                 }],
                 columns: [{
                     field: 'db_name',

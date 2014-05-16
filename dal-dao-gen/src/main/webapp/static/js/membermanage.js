@@ -100,6 +100,25 @@
             });
     };
 
+    var applyAdd = function () {
+        var current_group = w2ui['grid'].current_group;
+        if (current_group == null || current_group == '') {
+            alert('请先选择Group');
+            return;
+        }
+        cblock($("body"));
+        var emailUrl = 'mailto:R%26Dsysdev_dal@Ctrip.com';
+        $.get("/rest/member/groupuser?groupId=" + current_group + "&rand=" + Math.random(),function (data) {
+            if(data!=null){
+                emailUrl='mailto:'+data[0]['userEmail'];
+                window.location.href = emailUrl;
+            }
+        }).fail(function (data) {
+
+            });
+        $("body").unblock();
+    };
+
     Render.prototype = {
         render_layout: function (render_obj) {
             $(render_obj).w2layout({
@@ -175,6 +194,11 @@
                         id: 'delMember',
                         caption: '删除Member',
                         icon: 'fa fa-times'
+                    }, {
+                        type: 'button',
+                        id: 'applyAdd',
+                        caption: '申请加入DAL Group',
+                        icon: 'fa fa-envelope'
                     }],
                     onClick: function (target, data) {
                         switch (target) {
@@ -186,6 +210,9 @@
                                 break;
                             case 'delMember':
                                 delMember();
+                                break;
+                            case 'applyAdd':
+                                applyAdd();
                                 break;
                         }
                     }

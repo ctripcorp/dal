@@ -3,8 +3,10 @@ package com.ctrip.platform.dal.daogen.resource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -22,6 +24,11 @@ import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.DalGroup;
+import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
+import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
@@ -162,8 +169,8 @@ public class ProjectResource {
 			proj.setName(name);
 			proj.setNamespace(namespace);
 			proj.setDal_group_id(user.getGroupId());
-			int pk = SpringBeanGetter.getDaoOfProject().insertProject(proj);
-
+			SpringBeanGetter.getDaoOfProject().insertProject(proj);
+//			int pk = SpringBeanGetter.getDaoOfProject().insertProject(proj);
 //			shareProject(pk, userNo);
 		} else if (action.equals("update")) {
 			proj.setId(id);
@@ -197,16 +204,20 @@ public class ProjectResource {
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
 		Progress progress = ProgressResource.getProgress(userNo, id,random);
+		status = validatePermision(userNo,id);
+		if(status.getCode().equals(Status.ERROR.getCode())){
+			progress.setStatus(ProgressResource.FINISH);
+			return status;
+		}
 		try {
 			log.info(String.format("begain generate project: [id=%s; regen=%s; language=%s]",
 					id, regen, language));
 			if (language.equals("java"))
 			{
-				//JavaGenerator.getInstance().generateCode(id, regen, progress);
 				new JavaGenerator().generate(id, regen, progress, null);
 			}
 			else if (language.equals("cs")){
-				Map hints = new HashMap<String, Boolean>();
+				Map<String, Boolean> hints = new HashMap<String, Boolean>();
 				hints.put("newPojo", newPojo);
 				new CSharpGenerator().generate(id, regen, progress, hints);
 			}
@@ -222,5 +233,86 @@ public class ProjectResource {
 		
 		return status;
 	}
+	
+	private Status validatePermision(String userNo,int project_id){
+		Status status = Status.ERROR;
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		int groupId = -1;
+		if(user!=null){
+			groupId = user.getGroupId();
+			if(groupId <=0){
+				status.setInfo("你没有权限生成代码.请先加入一个DAL Team.");
+				return status;
+			}
+		}else{
+			status.setInfo(userNo + "is not exist in system.");
+			return status;
+		}
+		
+		List<DalGroupDB> groupDBs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
+		Set<String> group_db_names = new HashSet<String>();
+		for(DalGroupDB groupDB : groupDBs){
+			group_db_names.add(groupDB.getDbname());
+		}
+
+		boolean flag = true;
+		status.setInfo("");
+		Set<String> notExistDB = new HashSet<String>();
+		List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
+		for(GenTaskBySqlBuilder task : autoTasks){
+			String db_name = task.getDb_name();
+			if(!group_db_names.contains(db_name)){
+				notExistDB.add(db_name);
+				flag = false;
+			}
+		}
+
+		List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
+		for(GenTaskByTableViewSp task : tableViewSpTasks){
+			String db_name = task.getDb_name();
+			if(!group_db_names.contains(db_name)){
+				notExistDB.add(db_name);
+				flag = false;
+			}
+		}
+		
+		List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(project_id);
+		for(GenTaskByFreeSql task : sqlTasks){
+			String db_name = task.getDb_name();
+			if(!group_db_names.contains(db_name)){
+				notExistDB.add(db_name);
+				flag = false;
+			}
+		}
+		
+		if(flag){
+			return Status.OK;
+		}else{
+			String info = "<ul>";
+			for(String temp:notExistDB){
+				info+="<li>"+temp+"</li>";
+			}
+			info += "</ul>";
+			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
+			info = "在DAL Team Group："+group.getGroup_name()+"中不存在以下数据库：</br>"+ info +"请先添加DB到所在Group!";
+			status.setInfo(info);
+			return status;
+		}
+	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

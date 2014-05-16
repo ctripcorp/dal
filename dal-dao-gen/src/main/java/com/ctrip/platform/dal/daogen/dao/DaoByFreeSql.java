@@ -26,7 +26,7 @@ public class DaoByFreeSql {
 	public List<GenTaskByFreeSql> getAllTasks() {
 
 		return this.jdbcTemplate
-				.query("select id, project_id, db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version from task_sql",
+				.query("select id, project_id, db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment from task_sql",
 
 				new RowMapper<GenTaskByFreeSql>() {
 					public GenTaskByFreeSql mapRow(ResultSet rs, int rowNum)
@@ -55,7 +55,7 @@ public class DaoByFreeSql {
 	public List<GenTaskByFreeSql> getTasksByProjectId(int iD) {
 
 		return this.jdbcTemplate
-				.query("select id, project_id, db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version from task_sql where project_id=?",
+				.query("select id, project_id, db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment from task_sql where project_id=?",
 						new Object[] { iD }, new RowMapper<GenTaskByFreeSql>() {
 							public GenTaskByFreeSql mapRow(ResultSet rs,
 									int rowNum) throws SQLException {
@@ -69,7 +69,7 @@ public class DaoByFreeSql {
 		final List<GenTaskByFreeSql> tasks = new ArrayList<GenTaskByFreeSql>();
 
 		this.jdbcTemplate
-				.query("select id, project_id, db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version from task_sql where project_id=?",
+				.query("select id, project_id, db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment from task_sql where project_id=?",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -91,7 +91,7 @@ public class DaoByFreeSql {
 		final List<GenTaskByFreeSql> tasks = new ArrayList<GenTaskByFreeSql>();
 
 		this.jdbcTemplate
-				.query("select id, project_id, db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version from task_sql where project_id=?  and generated=false",
+				.query("select id, project_id, db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment from task_sql where project_id=?  and generated=false",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -111,17 +111,22 @@ public class DaoByFreeSql {
 	public int insertTask(GenTaskByFreeSql task) {
 
 		return this.jdbcTemplate
-				.update("insert into task_sql (project_id,  db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version)"
-						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10) tmp where not exists "
+				.update("insert into task_sql (project_id,  db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment)"
+						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,? as p13) tmp where not exists "
 						+ "(select 1 from task_sql where project_id=? and db_name=? and class_name=? and method_name=? limit 1)",
 						task.getProject_id(),
 						task.getDb_name(), task.getClass_name(),
 						task.getPojo_name(), task.getMethod_name(),
 						task.getCrud_type(), task.getSql_content(),
 						task.getParameters(), task.isGenerated(),
-						task.getVersion(), task.getProject_id(),
+						task.getVersion(), 
+						task.getUpdate_user_no(),
+						task.getUpdate_time(),
+						task.getComment(),
+						task.getProject_id(),
 						task.getDb_name(), task.getClass_name(),
-						task.getMethod_name());
+						task.getMethod_name()
+						);
 
 	}
 
@@ -145,12 +150,16 @@ public class DaoByFreeSql {
 			return -1;
 
 		return this.jdbcTemplate
-				.update("update task_sql set project_id=?, db_name=?,class_name=?,pojo_name=?,method_name=?,crud_type=?,sql_content=?,parameters=?,generated=?,version=version+1 where id=? and version=?",
+				.update("update task_sql set project_id=?, db_name=?,class_name=?,pojo_name=?,method_name=?,crud_type=?,sql_content=?,parameters=?,generated=?,version=version+1,update_user_no=?,update_time=?,comment=? where id=? and version=?",
 						task.getProject_id(),
 						task.getDb_name(), task.getClass_name(),
 						task.getPojo_name(), task.getMethod_name(),
 						task.getCrud_type(), task.getSql_content(),
-						task.getParameters(), task.isGenerated(), task.getId(),
+						task.getParameters(), task.isGenerated(), 
+						task.getUpdate_user_no(),
+						task.getUpdate_time(),
+						task.getComment(),
+						task.getId(),
 						task.getVersion());
 
 	}

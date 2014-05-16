@@ -20,6 +20,7 @@
 
             postData["project_id"] = current_project;
             postData["db_name"] = $("#databases").val();
+            postData["comment"] = $("#comment").val();
             if ($("#page1").attr('is_update') == "1") {
                 postData["action"] = "update";
                 var records = w2ui['grid'].getSelection();
@@ -31,7 +32,7 @@
             }
             //postData["server"] = $("#servers").val();
 
-            if ($("#gen_style").val() == "auto") {
+            if ($("#gen_style").val() == "auto") { //构建SQL（生成的代码绑定到模板）
                 postData["table_name"] = $("#tables").val();
                 postData["method_name"] = $("#method_name").val();
                 //C#风格或者Java风格，@Name or ?
@@ -81,7 +82,7 @@
                         alert("保存出错！");
                     });
 
-            } else if ($("#gen_style").val() == "sql") {
+            } else if ($("#gen_style").val() == "sql") {//复杂查询（额外生成实体类）
                 postData["class_name"] = $("#sql_class_name").val();
                 postData["pojo_name"] = $("#sql_pojo_name").val();
                 postData["method_name"] = $("#sql_method_name").val();
@@ -126,7 +127,7 @@
                 }).fail(function (data) {
                         alert("执行异常，请检查sql及对应参数！");
                     });
-            } else if ($("#gen_style").val() == "table_view_sp") {
+            } else if ($("#gen_style").val() == "table_view_sp") { //生成模板(包含基础的增删改查操作)
                 postData["table_names"] = $('#table_list').multipleSelect('getSelects').join(",");
                 postData["view_names"] = $('#view_list').multipleSelect('getSelects').join(",");
                 postData["sp_names"] = $('#sp_list').multipleSelect('getSelects').join(",");
@@ -249,11 +250,13 @@
                 "random":random
             },function (data) {
                 if (data.code != "OK") {
-                    alert(data.info);
+                    $("#generateCodeProcessErrorMess").html(data.info);
+                    $("#generateCodeProcessErrorDiv").modal();
                     progress.reportException("generate success return but not ok");
                 }
             }).fail(function (data) {
-                    //alert("生成异常！");
+                    $("#generateCodeProcessErrorMess").html("生成异常！");
+                    $("#generateCodeProcessErrorDiv").modal();
                     progress.reportException("exception");
                 });
         }

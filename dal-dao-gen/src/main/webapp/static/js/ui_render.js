@@ -245,11 +245,15 @@
                     field: 'method_name',
                     caption: '方法名',
                     type: 'text'
+                }, {
+                    field: 'comment',
+                    caption: '方法描述',
+                    type: 'text'
                 }],
                 columns: [{
                     field: 'db_name',
                     caption: '数据库',
-                    size: '10%',
+                    size: '15%',
                     sortable: true,
                     attr: 'align=center'
                 }, {
@@ -270,8 +274,16 @@
                 }, {
                     field: 'sql_content',
                     caption: '预览',
-                    size: '50%'
-                } ],
+                    size: '25%'
+                }, {
+                    field: 'comment',
+                    caption: '方法描述',
+                    size: '20%'
+                }, {
+                    field: 'update_user_no',
+                    caption: '最后修改User',
+                    size: '10%'
+                }],
                 records: [],
                 onDblClick: function (target, data) {
                     window.render.editDAO(data.recid);
@@ -297,6 +309,7 @@
                 $("#page1").attr('is_update', '1');
                 $("#gen_style").val(record.task_type);
                 $("#sql_style").val(record.sql_style);
+                $("#comment").val(record.comment);
                 $("#page1").modal({
                     "backdrop": "static"
                 });

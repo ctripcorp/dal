@@ -174,13 +174,32 @@
 				  </div>
                </div>
             </div>
-            <!-- /.modal-content -->
          </div>
-         <!-- /.modal-dialog -->
       </div>
       <!-- /.modal -->
+      
+      <div class="modal fade" id="generateCodeProcessErrorDiv" tabindex="-1" role="dialog" aria-labelledby="generateCodeProcessLabel" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h4 class="modal-title">错误提示</h4>
+               </div>
+               <div class="modal-body">
+				  <div class="row-fluid">
+						<div class="control-group">
+							<label id="generateCodeProcessErrorMess" class="control-label popup_label" style="color:red;"></label>
+						</div>
+					</div>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      
       <!--Begin wizard-->
-
       <div class="modal fade" id="page1" tabindex="-1" role="dialog" aria-labelledby="page1_label" aria-hidden="true" is_update="0">
          <div class="modal-dialog">
             <div class="modal-content">
@@ -205,6 +224,12 @@
                               <option value="auto">构建SQL（生成的代码绑定到模板）</option>
                               <option value="sql">复杂查询（额外生成实体类）</option>
                            </select>
+                        </div>
+                     </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label" style="width:130px;">方法功能描述：</label>
+                           <textarea id="comment" class="span12 popup_text input-sm" rows="4"></textarea>
                         </div>
                      </div>
                   </div>
@@ -377,7 +402,7 @@
                      <div class="row-fluid">
                            <label class="control-label popup_label">填写参数名/参数Index，并选择数据类型</label>
                      </div>  
-                     <div id="param_list" class="row-fluid">      
+                     <div id="param_list" class="row-fluid input-sm">      
                      </div>
                   </div>
                </div>

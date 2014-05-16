@@ -2,8 +2,9 @@ package com.ctrip.platform.dal.dao;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.ctrip.freeway.logging.ILog;
-import com.ctrip.freeway.logging.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ctrip.platform.dal.common.db.ConnectionPropertyReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
@@ -14,7 +15,7 @@ import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 import com.ctrip.platform.dal.dao.logging.MetricsLogger;
 
 public class DalClientFactory {
-	private static ILog logger = LogManager.getLogger("DAL Java Client Factory");
+	private static Logger logger = LoggerFactory.getLogger(DalClientFactory.class);
 	private static AtomicReference<DruidDataSourceWrapper> connPool = new AtomicReference<DruidDataSourceWrapper>();
 
 	private static final String DAL_CONFIG = "Dal.config";

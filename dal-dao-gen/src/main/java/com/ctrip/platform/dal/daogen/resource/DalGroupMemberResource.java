@@ -130,6 +130,8 @@ public class DalGroupMemberResource {
 			Status status = Status.ERROR;
 			status.setInfo("Add operation failed.");
 			return status;
+		}else{
+			transferProjectToGroup(user.getUserNo(), groupID);
 		}
 		return Status.OK;
 	}
@@ -201,7 +203,7 @@ public class DalGroupMemberResource {
 			//验证当前project是否是由当前user创建
 			if(proj.getId() == project.getId()){
 				//更新Project表的groupId为当前用户的gourpId
-				SpringBeanGetter.getDaoOfProject().updateProjectGroupById(project_id, proj.getId());
+				SpringBeanGetter.getDaoOfProject().updateProjectGroupById(groupId, project_id);
 				//删除user_project表中所有project_id符合当前迭代的Project
 				SpringBeanGetter.getDaoOfUserProject().deleteUserProject(project_id);
 			}

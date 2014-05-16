@@ -38,28 +38,6 @@
         $("#memberModal").modal({
             "backdrop": "static"
         });
-
-        $("#save_member").click(function(){
-            var id = $("#members").val();
-            if(id==null){
-                $("#error_msg").html('请选择member!');
-            }else{
-                var current_group = w2ui['grid'].current_group;
-                $.post("/rest/member/add", {
-                    groupId : current_group,
-                    userId : id
-                },function (data) {
-                    if (data.code == "OK") {
-                        $("#memberModal").modal('hide');
-                        refreshMember();
-                    } else {
-                        $("#error_msg").html(data.info);
-                    }
-                }).fail(function (data) {
-                        $("#error_msg").html(data.info);
-                    });
-            }
-        });
     };
 
     var delMember = function(){
@@ -120,6 +98,25 @@
         }).fail(function (data) {
                 $("body").unblock();
             });
+    };
+
+    var applyAdd = function () {
+        var current_group = w2ui['grid'].current_group;
+        if (current_group == null || current_group == '') {
+            alert('请先选择Group');
+            return;
+        }
+        cblock($("body"));
+        var emailUrl = 'mailto:R%26Dsysdev_dal@Ctrip.com';
+        $.get("/rest/member/groupuser?groupId=" + current_group + "&rand=" + Math.random(),function (data) {
+            if(data!=null){
+                emailUrl='mailto:'+data[0]['userEmail'];
+            }
+            window.location.href = emailUrl;
+        }).fail(function (data) {
+
+            });
+        $("body").unblock();
     };
 
     Render.prototype = {
@@ -197,6 +194,11 @@
                         id: 'delMember',
                         caption: '删除Member',
                         icon: 'fa fa-times'
+                    }, {
+                        type: 'button',
+                        id: 'applyAdd',
+                        caption: '申请加入DAL Group',
+                        icon: 'fa fa-envelope'
                     }],
                     onClick: function (target, data) {
                         switch (target) {
@@ -208,6 +210,9 @@
                                 break;
                             case 'delMember':
                                 delMember();
+                                break;
+                            case 'applyAdd':
+                                applyAdd();
                                 break;
                         }
                     }
@@ -253,6 +258,30 @@
 
     $(window).resize(function () {
         $('#main_layout').height($(document).height() - 50);
+    });
+
+    jQuery(document).ready(function(){
+        $("#save_member").click(function(){
+            var id = $("#members").val();
+            if(id==null){
+                $("#error_msg").html('请选择member!');
+            }else{
+                var current_group = w2ui['grid'].current_group;
+                $.post("/rest/member/add", {
+                    groupId : current_group,
+                    userId : id
+                },function (data) {
+                    if (data.code == "OK") {
+                        $("#memberModal").modal('hide');
+                        refreshMember();
+                    } else {
+                        $("#error_msg").html(data.info);
+                    }
+                }).fail(function (data) {
+                        $("#error_msg").html(data.info);
+                    });
+            }
+        });
     });
 
 })(window);

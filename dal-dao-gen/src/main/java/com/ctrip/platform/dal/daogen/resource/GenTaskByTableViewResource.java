@@ -1,6 +1,8 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.sql.Timestamp;
+
 import javax.annotation.Resource;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -9,11 +11,19 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
+import org.jasig.cas.client.util.AssertionHolder;
+
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
+import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
+/**
+ * 生成模板(包含基础的增删改查操作)
+ * @author gzxia
+ *
+ */
 @Resource
 @Singleton
 @Path("task/table")
@@ -38,7 +48,8 @@ public class GenTaskByTableViewResource {
 			@FormParam("cud_by_sp") boolean cud_by_sp,
 			@FormParam("pagination") boolean pagination,
 			@FormParam("version") int version,
-			@FormParam("action") String action) {
+			@FormParam("action") String action,
+			@FormParam("comment") String comment) {
 		GenTaskByTableViewSp task = new GenTaskByTableViewSp();
 
 		if (action.equalsIgnoreCase("delete")) {
@@ -47,6 +58,9 @@ public class GenTaskByTableViewResource {
 				return Status.ERROR;
 			}	
 		}else{
+			String userNo = AssertionHolder.getAssertion().getPrincipal()
+					.getAttributes().get("employee").toString();
+			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 			task.setProject_id(project_id);
 			task.setDb_name(db_name);
 			task.setTable_names(table_names);
@@ -56,6 +70,9 @@ public class GenTaskByTableViewResource {
 			task.setSuffix(suffix);
 			task.setCud_by_sp(cud_by_sp);
 			task.setPagination(pagination);
+			task.setUpdate_user_no(user.getUserName()+"("+userNo+")");
+			task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+			task.setComment(comment);
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);

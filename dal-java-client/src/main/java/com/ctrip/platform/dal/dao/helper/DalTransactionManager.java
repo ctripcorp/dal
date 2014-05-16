@@ -139,7 +139,7 @@ public class DalTransactionManager {
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(realDbName).getConnection();
 		} catch (Throwable e) {
-			throw new SQLException(e);
+			throw new SQLException("Can not get connection from DB" + realDbName, e);
 		}
 		return conn;
 	}

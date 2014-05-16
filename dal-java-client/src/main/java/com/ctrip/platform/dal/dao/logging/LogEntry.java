@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.logging;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -157,6 +159,17 @@ public class LogEntry {
 
 	public void setErrorMsg(String errorMsg) {
 		this.errorMsg = errorMsg;
+	}
+	
+	public void setErrorMsg(Throwable e) {
+		try {  
+            StringWriter sw = new StringWriter();  
+            PrintWriter pw = new PrintWriter(sw);  
+            e.printStackTrace(pw);  
+            this.errorMsg = "\r\n" + sw.toString() + "\r\n";  
+        } catch (Exception e2) {  
+        	this.errorMsg = "bad getErrorInfoFromException";  
+        }
 	}
 
 	public String getInputParamStr(){
@@ -369,7 +382,7 @@ public class LogEntry {
 
 	public String toJson(){
 		String sqlTpl = this.sensitive ?  SQLHIDDENString : this.getSqlTpl();	
-		String params = this.getParams(); //TODO: 加密
+		String params = this.sensitive ? SQLHIDDENString : this.getParams(); //TODO: 加密
 		int hashCode = CommonUtil.GetHashCode(sqlTpl);
 		boolean existed = this.hasHashCode(sqlTpl, hashCode);
 		return String.format(JSON_PATTERN, 

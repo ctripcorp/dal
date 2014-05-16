@@ -111,8 +111,8 @@
         $.get("/rest/member/groupuser?groupId=" + current_group + "&rand=" + Math.random(),function (data) {
             if(data!=null){
                 emailUrl='mailto:'+data[0]['userEmail'];
-                window.location.href = emailUrl;
             }
+            window.location.href = emailUrl;
         }).fail(function (data) {
 
             });

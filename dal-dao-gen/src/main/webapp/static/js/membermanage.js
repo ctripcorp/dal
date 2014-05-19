@@ -109,7 +109,7 @@
         cblock($("body"));
         var emailUrl = 'mailto:R%26Dsysdev_dal@Ctrip.com';
         $.get("/rest/member/groupuser?groupId=" + current_group + "&rand=" + Math.random(),function (data) {
-            if(data!=null){
+            if(data!=null && data.length>0){
                 emailUrl='mailto:'+data[0]['userEmail'];
             }
             window.location.href = emailUrl;

@@ -33,7 +33,8 @@ public abstract class AbstractGenerator implements Generator {
 
 	protected static String generatePath;
 	
-	protected static ExecutorService executor = Executors.newFixedThreadPool(100);
+	//protected static ExecutorService executor = Executors.newFixedThreadPool(100);
+	protected static ExecutorService executor = Executors.newCachedThreadPool();
 
 	protected String namespace;
 

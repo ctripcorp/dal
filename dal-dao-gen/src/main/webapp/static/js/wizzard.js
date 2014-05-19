@@ -55,6 +55,9 @@
 
     var step1_table_view_sp = function(record, current){
         cblock($("body"));
+        $("#next_step").attr("disabled","true");
+        $("#next_step").text("正在加载...");
+        $("#next_step").removeClass("btn-primary");
         $.get(sprintf("/rest/db/table_sps?db_name=%s&rand=%s",
                 $("#databases").val(), Math.random())).done(function (data) {
                 $("select[id$=table_list] > option").remove();
@@ -118,19 +121,28 @@
                 });
 
                 if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "table_view_sp") {
-                    if (record.table_names != undefined)
+                    if (record.table_names != undefined){
                         $('#table_list').multipleSelect('setSelects', record.table_names.split(","));
-                    if (record.view_names != undefined)
+                    }
+                    if (record.view_names != undefined){
                         $('#view_list').multipleSelect('setSelects', record.view_names.split(","));
-                    if (record.sp_names != undefined)
+                    }
+                    if (record.sp_names != undefined){
                         $('#sp_list').multipleSelect('setSelects', record.sp_names.split(","));
+                    }
                 }
                 current.hide();
 
                 $(".step2-1").show();
+                $("#next_step").removeAttr("disabled");
+                $("#next_step").addClass("btn-primary");
+                $("#next_step").text("下一步");
                 $("body").unblock();
             }).fail(function (data) {
                 $("#error_msg").text("获取表/视图列表失败，是否有权限");
+                $("#next_step").removeAttr("disabled");
+                $("#next_step").addClass("btn-primary");
+                $("#next_step").text("下一步");
                 $("body").unblock();
             });
     };

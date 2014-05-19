@@ -201,7 +201,7 @@ public class JavaTableHost {
 			if(byte[].class.equals(clazz))
 				continue;
 			if(null == clazz)
-				System.out.println("hit");
+				continue;
 			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))
 				continue;
 			imports.add(clazz.getName());

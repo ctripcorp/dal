@@ -34,6 +34,7 @@ import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.LogUtils;
+import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 
 public class JavaGenerator extends AbstractGenerator {
 	
@@ -875,13 +876,13 @@ public class JavaGenerator extends AbstractGenerator {
 					_freeSqlCallables, _tableViewSpCallables);
 
 			if (allResults.size() > 0) {
-				LogUtils.log(log, executor.invokeAll(allResults));
+				LogUtils.log(log, TaskUtils.invokeBatch(executor, allResults));
 			}
 
 			List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder(progress);
 
 			if (_sqlBuilderCallables.size() > 0) {
-				LogUtils.log(log, executor.invokeAll(_sqlBuilderCallables));
+				LogUtils.log(log, TaskUtils.invokeBatch(executor, _sqlBuilderCallables));
 			}
 
 		} catch (Exception e) {
@@ -923,7 +924,7 @@ public class JavaGenerator extends AbstractGenerator {
 
 		if (allResults.size() > 0) {
 			try {
-				LogUtils.log(log, executor.invokeAll(allResults));
+				LogUtils.log(log, TaskUtils.invokeBatch(executor,allResults));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

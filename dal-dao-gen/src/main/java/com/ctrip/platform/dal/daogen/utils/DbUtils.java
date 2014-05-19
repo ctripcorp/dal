@@ -124,7 +124,7 @@ public class DbUtils {
 			}
 
 			// 如果是Sql Server，通过Sql语句获取所有视图的名称
-			if (dbType.equals("Microsoft SQL Server")) {
+			/*if (dbType.equals("Microsoft SQL Server")) {
 				JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
 				String sql = String
@@ -136,15 +136,20 @@ public class DbUtils {
 						return rs.getString(1);
 					}
 				});
-			} else {
+			} else {*/
 				String[] types = { "TABLE" };
 
-				rs = connection.getMetaData().getTables(null, null, "%",
+				rs = connection.getMetaData().getTables(null, "dbo", "%",
 						types);
+				String tableName = null;
 				while (rs.next()) {
+					tableName = rs.getString("TABLE_NAME");
+					if(tableName.toLowerCase().equals("sysdiagrams")){
+						continue;
+					}
 					results.add(rs.getString("TABLE_NAME"));
 				}
-			}
+			//}
 		} catch (SQLException e) {
 			log.error(String.format("get all table names error: [dbName=%s]", 
 					dbName), e);
@@ -230,7 +235,7 @@ public class DbUtils {
 			}
 
 			// 如果是Sql Server，通过Sql语句获取所有视图的名称
-			if (dbType.equals("Microsoft SQL Server")) {
+			/*if (dbType.equals("Microsoft SQL Server")) {
 				JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
 				String sql = String
@@ -242,15 +247,15 @@ public class DbUtils {
 						return rs.getString(1);
 					}
 				});
-			} else {
+			} else {*/
 				String[] types = { "VIEW" };
 
-				rs = connection.getMetaData().getTables(null, null, "%",
+				rs = connection.getMetaData().getTables(null, "dbo", "%",
 						types);
 				while (rs.next()) {
 					results.add(rs.getString("TABLE_NAME"));
 				}
-			}
+			//}
 		} catch (SQLException e) {
 			log.error(String.format("get all view names error: [dbName=%s]", 
 					dbName), e);
@@ -562,7 +567,7 @@ public class DbUtils {
 
 					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
-					Class<?> javaClass = typeMapper.containsKey(host.getSqlType()) ? 
+					Class<?> javaClass = null != typeMapper && typeMapper.containsKey(host.getSqlType()) ? 
 							typeMapper.get(host.getSqlType()) : Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
 					host.setJavaClass(javaClass);
 					host.setIndex(allColumnsRs.getInt("ORDINAL_POSITION"));

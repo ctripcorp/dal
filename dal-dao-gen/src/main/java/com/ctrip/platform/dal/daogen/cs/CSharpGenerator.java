@@ -253,7 +253,7 @@ public class CSharpGenerator extends AbstractGenerator {
 		currentSp.setName(realSpName);
 
 		if (!DbUtils.spExists(tableViewSp.getDb_name(), currentSp)) {
-			throw new Exception(String.format("视图 %s 不存在，请修改DAO后再试！"));
+			throw new Exception(String.format("存储过程 %s 不存在，请修改DAO后再试！", currentSp.getName()));
 		}
 
 		List<AbstractParameterHost> params = DbUtils.getSpParams(

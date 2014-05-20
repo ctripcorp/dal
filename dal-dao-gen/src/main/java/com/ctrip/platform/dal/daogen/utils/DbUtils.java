@@ -611,8 +611,8 @@ public class DbUtils {
 				Consts.databaseType.put(dbName, dbType);
 			}
 	
-			String sql = dbType.equals("Microsoft SQL Server") ? "SELECT TOP(1) * FROM " + tableViewName :
-				"SELECT * FROM " + tableViewName + " limit 1";
+			String sql = dbType.equals("Microsoft SQL Server") ? "SELECT TOP(1) * FROM [" + tableViewName + "]" :
+				"SELECT * FROM `" + tableViewName + "` limit 1";
 			
 			map = jdbcTemplate.query(sql, new ResultSetExtractor<Map<Integer, Class<?>>>(){
 				@Override

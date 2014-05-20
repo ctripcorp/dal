@@ -13,7 +13,7 @@ public class TaskUtils {
 			List<? extends Callable<T>> tasks) throws InterruptedException{
 		List<Future<T>> result = new ArrayList<Future<T>>();
 		int loop = tasks.size();
-		for(int i = 0; i < loop; i += loop){
+		for(int i = 0; i < loop; i += BATCH_SIZE){
 			result.addAll(service.invokeAll(
 					tasks.subList(i, Math.min(loop, i + BATCH_SIZE))));
 		}

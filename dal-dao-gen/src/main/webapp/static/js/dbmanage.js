@@ -81,6 +81,11 @@
     };
 
     var transferDB = function(){
+        var current_group = w2ui['grid'].current_group;
+        if(current_group==null || current_group==''){
+            alert('请先选择Group');
+            return;
+        }
         $("#transferdb_error_msg").html("");
         var records = w2ui['grid'].getSelection();
         var record = w2ui['grid'].get(records[0]);

@@ -44,7 +44,7 @@ public class Logger {
 	
 	private static ILog logger = LogManager.getLogger("DAL Java Client");
 	private static ITrace trace = TraceManager.getTracer("DAL Java Client");
-
+	
 	public static void success(LogEntry entry, long duration, int count) {
 		entry.setDuration(duration);
 		entry.setSuccess(true);
@@ -60,7 +60,7 @@ public class Logger {
 	}
 	
 	public static void log(LogEntry log) {
-		try{
+		try {
 			//The old  logging 
 			/*if(log == null) 
 				return;
@@ -71,7 +71,8 @@ public class Logger {
 			trace.log(LogType.SQL, LogLevel.INFO, 
 					CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
 			//logger.info(CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
-		}catch(Throwable e) {
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -140,8 +140,8 @@
                      <div class="control-group">
                            <label class="control-label popup_label">方式：</label>
                        <select id="regenerate" class="span9 pupup_text">
-                           <option value="increment_gen">增量生成，仅生成被修改的DAO</option>
-                            <option value="regenerate">重新生成</option>
+                       		<option value="regenerate">重新生成</option>
+                            <option value="increment_gen">增量生成，仅生成被修改的DAO</option>
                         </select>
                      </div>
                   </div>

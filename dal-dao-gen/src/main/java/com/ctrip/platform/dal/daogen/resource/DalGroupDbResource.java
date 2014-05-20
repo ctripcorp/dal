@@ -228,6 +228,50 @@ public class DalGroupDbResource {
 		return Status.OK;
 	}
 	
+	@POST
+	@Path("transferdb")
+	public Status transferdb(@FormParam("groupId") String groupId,
+			@FormParam("dbId") String dbId){
+
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+		
+		if(null == userNo || null == groupId || null == dbId){
+			log.error(String.format("transfer db failed, caused by illegal parameters: "
+					+ "[groupId=%s, dbId=%s]",groupId, dbId));
+			Status status = Status.ERROR;
+			status.setInfo("Illegal parameters.");
+			return status;
+		}
+		
+		int groupID = -1;
+		int dbID = -1;
+		try{
+			groupID = Integer.parseInt(groupId);
+			dbID =  Integer.parseInt(dbId);
+		}catch(NumberFormatException  ex){
+			log.error("transfer db failed", ex);
+			Status status = Status.ERROR;
+			status.setInfo("Illegal group id or db id");
+			return status;
+		}
+		
+		if(!this.validateTransferPermision(userNo,dbID)){
+			Status status = Status.ERROR;
+			status.setInfo("你没有当前DataBase的操作权限.");
+			return status;
+		}
+
+		int ret = group_db_dao.updateGroupDB(dbID, groupID);
+		if(ret <= 0){
+			log.error("transfer db failed, caused by db operation failed, pls check the spring log");
+			Status status = Status.ERROR;
+			status.setInfo("transfer operation failed.");
+			return status;
+		}
+		return Status.OK;
+	}
+	
 	private boolean validatePermision(String userNo,int groupId){
 		LoginUser user = user_dao.getUserByNo(userNo);
 		if(null != user && user.getGroupId() == DalGroupResource.SUPER_GROUP_ID){
@@ -235,6 +279,22 @@ public class DalGroupDbResource {
 		}
 		if(null != user && user.getGroupId() == groupId){
 			return true;
+		}
+		return false;
+	}
+	
+	private boolean validateTransferPermision(String userNo,int dbId){
+		LoginUser user = user_dao.getUserByNo(userNo);
+		if(user!=null && user.getGroupId()==DalGroupResource.SUPER_GROUP_ID){
+			return true;
+		}
+		List<DalGroupDB> groupDbs = group_db_dao.getGroupDBsByGroup(user.getGroupId());
+		if(groupDbs!=null && groupDbs.size()>0){
+			for(DalGroupDB db:groupDbs){
+				if(db.getId()==dbId){
+					return true;
+				}
+			}
 		}
 		return false;
 	}

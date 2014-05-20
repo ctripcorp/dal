@@ -80,6 +80,52 @@
 
     };
 
+    var transferDB = function(){
+        var current_group = w2ui['grid'].current_group;
+        if(current_group==null || current_group==''){
+            alert('请先选择Group');
+            return;
+        }
+        $("#transferdb_error_msg").html("");
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if(record!=null){
+            $.get("/rest/groupdb?root=true&rand=" + Math.random()).done(function (data) {
+
+                if ($("#transferGroup")[0] != undefined && $("#transferGroup")[0].selectize != undefined) {
+                    $("#transferGroup")[0].selectize.clearOptions();
+                } else {
+                    $("#transferGroup").selectize({
+                        valueField: 'id',
+                        labelField: 'title',
+                        searchField: 'title',
+                        sortField: 'title',
+                        options: [],
+                        create: false
+                    });
+                }
+
+                var allGroups = [];
+                $.each(data, function (index, value) {
+                    allGroups.push({
+                        id: value.id,
+                        title: value['group_name']
+                    });
+                });
+                $("#transferGroup")[0].selectize.addOption(allGroups);
+                $("#transferGroup")[0].selectize.refreshOptions(false);
+
+                $("body").unblock();
+                $("#transferDbModal").modal();
+            }).fail(function (data) {
+                    alert('获取所有DAL Group失败.');
+                    $("body").unblock();
+                });
+        }else{
+            alert('请选择一个db！');
+        }
+    };
+
     Render.prototype = {
         render_layout: function (render_obj) {
             $(render_obj).w2layout({
@@ -160,6 +206,11 @@
                         id: 'delDB',
                         caption: '删除DB',
                         icon: 'fa fa-times'
+                    }, {
+                        type: 'button',
+                        id: 'transferDB',
+                        caption: '转移DB',
+                        icon: 'fa fa-exchange'
                     }],
                     onClick: function (target, data) {
                         switch (target) {
@@ -174,6 +225,9 @@
                                 break;
                             case 'delDB':
                                 delDB();
+                                break;
+                            case 'transferDB':
+                                transferDB();
                                 break;
                         }
                     }
@@ -273,6 +327,35 @@
                 }
             }).fail(function (data) {
                     $("#error_msg2").html(data.info);
+                });
+        });
+
+        $("#transfer_db").click(function(){
+            var records = w2ui['grid'].getSelection();
+            var record = w2ui['grid'].get(records[0]);
+            var dbId = record['id'];
+            var groupId = $("#transferGroup").val();
+            $("#transferdb_error_msg").html("");
+            if(dbId==null||dbId==''){
+                $("#transferdb_error_msg").html("请选择需要转移的DataBase.");
+                return;
+            }
+            if(groupId==null||groupId==''){
+                $("#transferdb_error_msg").html("请选择需要转入的DAL Team.");
+                return;
+            }
+            $.post("/rest/groupdb/transferdb", {
+                groupId : groupId,
+                dbId : dbId
+            },function (data) {
+                if (data.code == "OK") {
+                    $("#transferDbModal").modal('hide');
+                    refreshDB();
+                } else {
+                    $("#transferdb_error_msg").html(data.info);
+                }
+            }).fail(function (data) {
+                    $("#transferdb_error_msg").html(data.info);
                 });
         });
     });

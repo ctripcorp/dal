@@ -124,7 +124,7 @@ public class DbUtils {
 			}
 
 			// 如果是Sql Server，通过Sql语句获取所有视图的名称
-			if (dbType.equals("Microsoft SQL Server")) {
+			/*if (dbType.equals("Microsoft SQL Server")) {
 				JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
 				String sql = String
@@ -136,15 +136,20 @@ public class DbUtils {
 						return rs.getString(1);
 					}
 				});
-			} else {
+			} else {*/
 				String[] types = { "TABLE" };
 
-				rs = connection.getMetaData().getTables(null, null, "%",
+				rs = connection.getMetaData().getTables(null, "dbo", "%",
 						types);
+				String tableName = null;
 				while (rs.next()) {
+					tableName = rs.getString("TABLE_NAME");
+					if(tableName.toLowerCase().equals("sysdiagrams")){
+						continue;
+					}
 					results.add(rs.getString("TABLE_NAME"));
 				}
-			}
+			//}
 		} catch (SQLException e) {
 			log.error(String.format("get all table names error: [dbName=%s]", 
 					dbName), e);
@@ -230,7 +235,7 @@ public class DbUtils {
 			}
 
 			// 如果是Sql Server，通过Sql语句获取所有视图的名称
-			if (dbType.equals("Microsoft SQL Server")) {
+			/*if (dbType.equals("Microsoft SQL Server")) {
 				JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
 				String sql = String
@@ -242,15 +247,15 @@ public class DbUtils {
 						return rs.getString(1);
 					}
 				});
-			} else {
+			} else {*/
 				String[] types = { "VIEW" };
 
-				rs = connection.getMetaData().getTables(null, null, "%",
+				rs = connection.getMetaData().getTables(null, "dbo", "%",
 						types);
 				while (rs.next()) {
 					results.add(rs.getString("TABLE_NAME"));
 				}
-			}
+			//}
 		} catch (SQLException e) {
 			log.error(String.format("get all view names error: [dbName=%s]", 
 					dbName), e);
@@ -520,6 +525,7 @@ public class DbUtils {
 					CSharpParameterHost host = new CSharpParameterHost();
 					String typeName = allColumnsRs.getString("TYPE_NAME");
 					int dataType = allColumnsRs.getInt("DATA_TYPE");
+					int length = allColumnsRs.getInt("COLUMN_SIZE");
 					
 					//特殊处理
 					DbType dbType;
@@ -527,6 +533,8 @@ public class DbUtils {
 						dbType = DbType.Int16;
 					else if(null != typeName && typeName.equalsIgnoreCase("sql_variant"))
 						dbType = DbType.Object;
+					else if (dataType == 1 && length > 1)
+						dbType = DbType.AnsiString;
 					else
 						dbType =DbType.getDbTypeFromJdbcType(dataType);
 
@@ -545,7 +553,7 @@ public class DbUtils {
 							.getType()));
 					// 仅获取String类型的长度
 					 if (host.getType().equalsIgnoreCase("string"))
-						 host.setLength(allColumnsRs.getInt("COLUMN_SIZE"));
+						 host.setLength(length);
 
 					// COLUMN_SIZE
 
@@ -559,7 +567,7 @@ public class DbUtils {
 
 					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
-					Class<?> javaClass = typeMapper.containsKey(host.getSqlType()) ? 
+					Class<?> javaClass = null != typeMapper && typeMapper.containsKey(host.getSqlType()) ? 
 							typeMapper.get(host.getSqlType()) : Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
 					host.setJavaClass(javaClass);
 					host.setIndex(allColumnsRs.getInt("ORDINAL_POSITION"));
@@ -603,8 +611,8 @@ public class DbUtils {
 				Consts.databaseType.put(dbName, dbType);
 			}
 	
-			String sql = dbType.equals("Microsoft SQL Server") ? "SELECT TOP(1) * FROM " + tableViewName :
-				"SELECT * FROM " + tableViewName + " limit 1";
+			String sql = dbType.equals("Microsoft SQL Server") ? "SELECT TOP(1) * FROM [" + tableViewName + "]" :
+				"SELECT * FROM `" + tableViewName + "` limit 1";
 			
 			map = jdbcTemplate.query(sql, new ResultSetExtractor<Map<Integer, Class<?>>>(){
 				@Override

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.helper;
+package com.ctrip.platform.dal.dao.client;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -9,9 +9,6 @@ import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.client.ConnectionCache;
-import com.ctrip.platform.dal.dao.client.ConnectionHolder;
-import com.ctrip.platform.dal.dao.client.DbMeta;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.logging.DalEventEnum;

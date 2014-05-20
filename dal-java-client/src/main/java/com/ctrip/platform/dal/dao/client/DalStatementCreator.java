@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.helper;
+package com.ctrip.platform.dal.dao.client;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;

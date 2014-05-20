@@ -23,7 +23,7 @@ public class DalTransactionManager {
 	private String logicDbName;
 	private DruidDataSourceWrapper connPool;
 
-	static final ThreadLocal<ConnectionCache> connectionCacheHolder = new ThreadLocal<ConnectionCache>();
+	private static final ThreadLocal<ConnectionCache> connectionCacheHolder = new ThreadLocal<ConnectionCache>();
 
 	public DalTransactionManager(DalConfigure config, String logicDbName) {
 		this.config = config;

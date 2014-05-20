@@ -8,10 +8,9 @@ import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 public class DalScalarExtractor implements DalResultSetExtractor<Object> {
 	@Override
 	public Object extract(ResultSet rs) throws SQLException {
-		Object result = null;
-		while (rs.next()) {
-			result = rs.getObject(1);
+		if(rs.next()) {
+			return rs.getObject(1);
 		}
-		return result;
+		throw new SQLException("No result found from result set");
 	}
 }

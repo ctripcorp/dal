@@ -44,18 +44,36 @@ public class Logger {
 	
 	private static ILog logger = LogManager.getLogger("DAL Java Client");
 	private static ITrace trace = TraceManager.getTracer("DAL Java Client");
-	public static void log(LogEntry log) {
 
-		//The old  logging 
-		/*if(log == null) 
-			return;
-		// Don't log
-		if(validate(log.getSqlTpl(), log.getInputParamStr())){
-			logger.info(CommonUtil.null2NA(log.getTitle()), log.toBrief(), log.getTag());;
-		}*/
-		trace.log(LogType.SQL, LogLevel.INFO, 
-				CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
-		//logger.info(CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
+	public static void success(LogEntry entry, long duration, int count) {
+		entry.setDuration(duration);
+		entry.setSuccess(true);
+		entry.setResultCount(count);
+		log(entry);
+	}
+	
+	public static void fail(LogEntry entry, long duration, Throwable e) {
+		entry.setDuration(duration);
+		entry.setSuccess(false);
+		entry.setErrorMsg(e);
+		log(entry);
+	}
+	
+	public static void log(LogEntry log) {
+		try{
+			//The old  logging 
+			/*if(log == null) 
+				return;
+			// Don't log
+			if(validate(log.getSqlTpl(), log.getInputParamStr())){
+				logger.info(CommonUtil.null2NA(log.getTitle()), log.toBrief(), log.getTag());;
+			}*/
+			trace.log(LogType.SQL, LogLevel.INFO, 
+					CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
+			//logger.info(CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
+		}catch(Throwable e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void logGetConnectionSuccess(String realDbName)

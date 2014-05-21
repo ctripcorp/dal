@@ -429,7 +429,7 @@ public class DalDirectClient implements DalClient {
 	}
 	
 	private void populate(LogEntry entry) throws SQLException {
-		transManager.getCurrentConnection().getMeta().populate(entry);
+		transManager.getCurrentDbMeta().populate(entry);
 	}
 
 	private void endTransaction(int startLevel) throws SQLException {

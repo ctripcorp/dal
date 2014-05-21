@@ -11,11 +11,11 @@
 	</div>
 	<div class="collapse navbar-collapse" id="navbar-collapse-01">
 		<ul class="nav navbar-nav">
-			<li id="indexjsp"><a href="index.jsp">DAL Code 生成器</a></li>
-			<li id="codeviewjsp"><a href="codeview.jsp">DAL Code 一览</a></li>
-			<li id="membermanagejsp"><a href="membermanage.jsp">Member管理</a></li>
-			<li id="dbmanagejsp"><a href="dbmanage.jsp">DB管理</a></li>
-			<li id="groupmanagejsp"><a href="groupmanage.jsp">DAL Group管理</a></li>
+			<li id="indexjsp"><a href="index.jsp">代码生成器</a></li>
+			<li id="codeviewjsp"><a href="codeview.jsp">项目一览</a></li>
+			<li id="membermanagejsp"><a href="membermanage.jsp">组员管理</a></li>
+			<li id="dbmanagejsp"><a href="dbmanage.jsp">数据库管理</a></li>
+			<li id="groupmanagejsp"><a href="groupmanage.jsp">组管理</a></li>
 		</ul>
 		<ul class="nav navbar-nav navbar-right">
             <li id="welcomejsp"><a href="welcome.jsp">Tutorial</a></li>

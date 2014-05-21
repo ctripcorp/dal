@@ -102,6 +102,8 @@ public class Consts {
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.VARBINARY, byte[].class);
 		// getBinaryStream 
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.LONGVARBINARY, byte[].class);
+		jdbcSqlTypeToJavaClass.put(java.sql.Types.NCHAR, String.class);
+		jdbcSqlTypeToJavaClass.put(java.sql.Types.LONGNVARCHAR, String.class);
 		
 		// Used as an argument to CallableStatement.registerOutParameter
 		//jdbcSqlTypeToJavaClass.put(java.sql.Types.OTHER, "Object");

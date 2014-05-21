@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
@@ -29,12 +30,11 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
-import com.ctrip.platform.dal.daogen.utils.LogUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
+import com.mysql.jdbc.log.LogUtils;
 
 public class JavaGenerator extends AbstractGenerator {
 	
@@ -59,30 +59,34 @@ public class JavaGenerator extends AbstractGenerator {
 				@Override
 				public ExecuteResult call() throws Exception {
 					ExecuteResult result = new ExecuteResult("Generate Table[" + host.getTableName() + "] Dao, Pojo, Test");
-					VelocityContext context = GenUtils.buildDefaultVelocityContext();
-					context.put("host", host);
-					
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Dao/%sDao.java",
-									mavenLikeDir.getAbsolutePath(),
-									host.getPojoClassName()),
-							"templates/java/DAO.java.tpl");
-
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Entity/%s.java",
-									mavenLikeDir.getAbsolutePath(),
-									host.getPojoClassName()),
-							"templates/java/Pojo.java.tpl");
-
-					GenUtils.mergeVelocityContext(context, String.format(
-							"%s/Test/%sDaoTest.java",
-							mavenLikeDir.getAbsolutePath(),
-							host.getPojoClassName()),
-							"templates/java/DAOTest.java.tpl");
-					result.setSuccessal(true);
-					
+					try
+					{
+						VelocityContext context = GenUtils.buildDefaultVelocityContext();
+						context.put("host", host);
+						
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Dao/%sDao.java",
+										mavenLikeDir.getAbsolutePath(),
+										host.getPojoClassName()),
+								"templates/java/DAO.java.tpl");
+	
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Entity/%s.java",
+										mavenLikeDir.getAbsolutePath(),
+										host.getPojoClassName()),
+								"templates/java/Pojo.java.tpl");
+	
+						GenUtils.mergeVelocityContext(context, String.format(
+								"%s/Test/%sDaoTest.java",
+								mavenLikeDir.getAbsolutePath(),
+								host.getPojoClassName()),
+								"templates/java/DAOTest.java.tpl");
+						result.setSuccessal(true);
+					}catch(Exception e){
+						log.error(result.getTaskName() + " exception", e);
+					}
 					return result;
 				}
 			};
@@ -104,32 +108,37 @@ public class JavaGenerator extends AbstractGenerator {
 				@Override
 				public ExecuteResult call() throws Exception {
 					ExecuteResult result = new ExecuteResult("Generate SP[" + host.getDbName() + "] Dao, Pojo, Test");
-					VelocityContext context = GenUtils.buildDefaultVelocityContext();
-					context.put("host", host);
 					
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Dao/%sSpDao.java",
-									mavenLikeDir.getAbsolutePath(),
-									host.getDbName()),
-							"templates/java/DAOBySp.java.tpl");
-
-					GenUtils.mergeVelocityContext(context, String.format(
-							"%s/Test/%sSpDaoTest.java",
-							mavenLikeDir.getAbsolutePath(), host.getDbName()),
-							"templates/java/DAOBySpTest.java.tpl");
-
-					for (SpHost sp : host.getSpHosts()) {
-						context.put("host", sp);
+					try
+					{
+						VelocityContext context = GenUtils.buildDefaultVelocityContext();
+						context.put("host", host);
+						
 						GenUtils.mergeVelocityContext(
 								context,
-								String.format("%s/Entity/%s.java",
+								String.format("%s/Dao/%sSpDao.java",
 										mavenLikeDir.getAbsolutePath(),
-										sp.getPojoClassName()),
-								"templates/java/Pojo.java.tpl");
+										host.getDbName()),
+								"templates/java/DAOBySp.java.tpl");
+	
+						GenUtils.mergeVelocityContext(context, String.format(
+								"%s/Test/%sSpDaoTest.java",
+								mavenLikeDir.getAbsolutePath(), host.getDbName()),
+								"templates/java/DAOBySpTest.java.tpl");
+	
+						for (SpHost sp : host.getSpHosts()) {
+							context.put("host", sp);
+							GenUtils.mergeVelocityContext(
+									context,
+									String.format("%s/Entity/%s.java",
+											mavenLikeDir.getAbsolutePath(),
+											sp.getPojoClassName()),
+									"templates/java/Pojo.java.tpl");
+						}
+						result.setSuccessal(true);
+					}catch(Exception e){
+						log.error(result.getTaskName() + " exception", e);
 					}
-					result.setSuccessal(true);
-					
 					return result;
 				}
 			};
@@ -151,30 +160,35 @@ public class JavaGenerator extends AbstractGenerator {
 				@Override
 				public ExecuteResult call() throws Exception {					
 					ExecuteResult result = new ExecuteResult("Generate View[" + host.getViewName() + "] Dao");
-					VelocityContext context = GenUtils.buildDefaultVelocityContext();
-					context.put("host", host);
-					
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Dao/%sDao.java",
-									mavenLikeDir.getAbsolutePath(),
-									host.getPojoClassName()),
-							"templates/java/ViewDAO.java.tpl");
-
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Entity/%s.java",
-									mavenLikeDir.getAbsolutePath(),
-									host.getPojoClassName()),
-							"templates/java/Pojo.java.tpl");
-
-					GenUtils.mergeVelocityContext(context, String.format(
-							"%s/Test/%sDaoTest.java",
-							mavenLikeDir.getAbsolutePath(),
-							host.getPojoClassName()),
-							"templates/java/DAOByViewTest.java.tpl");
-					
-					result.setSuccessal(true);
+					try
+					{
+						VelocityContext context = GenUtils.buildDefaultVelocityContext();
+						context.put("host", host);
+						
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Dao/%sDao.java",
+										mavenLikeDir.getAbsolutePath(),
+										host.getPojoClassName()),
+								"templates/java/ViewDAO.java.tpl");
+	
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Entity/%s.java",
+										mavenLikeDir.getAbsolutePath(),
+										host.getPojoClassName()),
+								"templates/java/Pojo.java.tpl");
+	
+						GenUtils.mergeVelocityContext(context, String.format(
+								"%s/Test/%sDaoTest.java",
+								mavenLikeDir.getAbsolutePath(),
+								host.getPojoClassName()),
+								"templates/java/DAOByViewTest.java.tpl");
+						
+						result.setSuccessal(true);
+					}catch(Exception e){
+						log.error(result.getTaskName() + " exception", e);
+					}
 					return result;
 				}
 			};
@@ -193,15 +207,20 @@ public class JavaGenerator extends AbstractGenerator {
 				@Override
 				public ExecuteResult call() throws Exception {
 					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getPojoClassName() + "] Pojo");
-					VelocityContext context = GenUtils.buildDefaultVelocityContext();
-					context.put("host", host);
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Entity/%s.java",
-									mavenLikeDir.getAbsolutePath(),
-									host.getPojoClassName()),
-							"templates/java/Pojo.java.tpl");
-					result.setSuccessal(true);
+					try
+					{
+						VelocityContext context = GenUtils.buildDefaultVelocityContext();
+						context.put("host", host);
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Entity/%s.java",
+										mavenLikeDir.getAbsolutePath(),
+										host.getPojoClassName()),
+								"templates/java/Pojo.java.tpl");
+						result.setSuccessal(true);
+					}catch(Exception e){
+						log.error(result.getTaskName() + " exception", e);
+					}
 					return result;
 				}
 			};
@@ -214,22 +233,27 @@ public class JavaGenerator extends AbstractGenerator {
 				@Override
 				public ExecuteResult call() throws Exception {
 					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Dap, Test");
-					VelocityContext context = GenUtils.buildDefaultVelocityContext();
-					context.put("host", host);
-					
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Dao/%sDao.java",
-									mavenLikeDir.getAbsolutePath(),
-									host.getClassName()),
-							"templates/java/FreeSqlDAO.java.tpl");
-
-					GenUtils.mergeVelocityContext(context,
-							String.format("%s/Test/%sDaoTest.java",
-									mavenLikeDir.getAbsolutePath(),
-									host.getClassName()),
-							"templates/java/FreeSqlDAOTest.java.tpl");
-					result.setSuccessal(true);			
+					try
+					{
+						VelocityContext context = GenUtils.buildDefaultVelocityContext();
+						context.put("host", host);
+						
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Dao/%sDao.java",
+										mavenLikeDir.getAbsolutePath(),
+										host.getClassName()),
+								"templates/java/FreeSqlDAO.java.tpl");
+	
+						GenUtils.mergeVelocityContext(context,
+								String.format("%s/Test/%sDaoTest.java",
+										mavenLikeDir.getAbsolutePath(),
+										host.getClassName()),
+								"templates/java/FreeSqlDAOTest.java.tpl");
+						result.setSuccessal(true);
+					}catch(Exception e){
+						log.error(result.getTaskName() + " exception", e);
+					}
 					return result;
 				}
 			};
@@ -267,7 +291,11 @@ public class JavaGenerator extends AbstractGenerator {
 		List<AbstractParameterHost> allColumnsAbstract = DbUtils
 				.getAllColumnNames(tableViewSp.getDb_name(), table,
 						CurrentLanguage.Java);
-
+		if(null == allColumnsAbstract){
+			log.error(String.format("The column names of tabel[%s, %s] is null", 
+					tableViewSp.getDb_name(), table));
+			return null;
+		}
 		List<JavaParameterHost> allColumns = new ArrayList<JavaParameterHost>();
 		for (AbstractParameterHost h : allColumnsAbstract) {
 			allColumns.add((JavaParameterHost) h);
@@ -332,6 +360,11 @@ public class JavaGenerator extends AbstractGenerator {
 		List<AbstractParameterHost> params = DbUtils.getAllColumnNames(
 				tableViewSp.getDb_name(), viewName, CurrentLanguage.Java);
 		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
+		if(null == params){
+			log.error(String.format("The column names of view[%s, %s] is null", 
+					tableViewSp.getDb_name(), viewName));
+			return null;
+		}
 		for (AbstractParameterHost p : params) {
 			JavaParameterHost jHost = (JavaParameterHost) p;
 			if (primaryKeyNames.contains(jHost.getName())) {
@@ -372,6 +405,11 @@ public class JavaGenerator extends AbstractGenerator {
 				tableViewSp.getDb_name(), currentSp, CurrentLanguage.Java);
 		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 		String callParams = "";
+		if(null == params){
+			log.error(String.format("The sp[%s, %s] parameters is null", 
+					tableViewSp.getDb_name(), currentSp.getName()));
+			return null;
+		}
 		for (AbstractParameterHost p : params) {
 			callParams += "?,";
 			realParams.add((JavaParameterHost) p);
@@ -876,13 +914,13 @@ public class JavaGenerator extends AbstractGenerator {
 					_freeSqlCallables, _tableViewSpCallables);
 
 			if (allResults.size() > 0) {
-				LogUtils.log(log, TaskUtils.invokeBatch(executor, allResults));
+				TaskUtils.invokeBatch(log, executor, allResults);
 			}
 
 			List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder(progress);
 
 			if (_sqlBuilderCallables.size() > 0) {
-				LogUtils.log(log, TaskUtils.invokeBatch(executor, _sqlBuilderCallables));
+				TaskUtils.invokeBatch(log, executor, _sqlBuilderCallables);
 			}
 
 		} catch (Exception e) {
@@ -924,7 +962,7 @@ public class JavaGenerator extends AbstractGenerator {
 
 		if (allResults.size() > 0) {
 			try {
-				LogUtils.log(log, TaskUtils.invokeBatch(executor,allResults));
+				TaskUtils.invokeBatch(log, executor,allResults);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

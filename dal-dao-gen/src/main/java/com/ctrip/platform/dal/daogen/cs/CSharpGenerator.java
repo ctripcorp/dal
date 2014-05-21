@@ -317,8 +317,8 @@ public class CSharpGenerator extends AbstractGenerator {
 		tableViewSp.setSuffix("Gen");
 
 		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
-		if (!DbUtils.getDbType(sqlBuilder.getDb_name()).equalsIgnoreCase(
-				"Microsoft SQL Server")) {
+		String dbType = DbUtils.getDbType(sqlBuilder.getDb_name());
+		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 			dbCategory = DatabaseCategory.MySql;
 		}
 
@@ -470,39 +470,43 @@ public class CSharpGenerator extends AbstractGenerator {
 				@Override
 				public ExecuteResult call() {
 					
-					progress.setOtherMessage("正在生成 " + host.getClassName());
+					//progress.setOtherMessage("正在生成 " + host.getClassName());
 					ExecuteResult result = new ExecuteResult("Generate Table[" + host.getTableName() + "] Dao");
-					
-					VelocityContext context = GenUtils.buildDefaultVelocityContext();
-					context.put("host", host);
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Dao/%sDao.cs",
-									mavenLikeDir.getAbsolutePath(),
-									host.getClassName()),
-							"templates/DAO.cs.tpl");
-
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Entity/%s.cs",
-									mavenLikeDir.getAbsolutePath(),
-									host.getClassName()),
-							newPojo ? "templates/PojoNew.cs.tpl" : "templates/Pojo.cs.tpl");
-
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/IDao/I%sDao.cs",
-									mavenLikeDir.getAbsolutePath(),
-									host.getClassName()),
-							"templates/IDAO.cs.tpl");
-
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Test/%sTest.cs",
-									mavenLikeDir.getAbsolutePath(),
-									host.getClassName()),
-							"templates/DAOTest.cs.tpl");
-					result.setSuccessal(true);
+					progress.setOtherMessage(result.getTaskName());
+					try{
+						VelocityContext context = GenUtils.buildDefaultVelocityContext();
+						context.put("host", host);
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Dao/%sDao.cs",
+										mavenLikeDir.getAbsolutePath(),
+										host.getClassName()),
+								"templates/DAO.cs.tpl");
+	
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Entity/%s.cs",
+										mavenLikeDir.getAbsolutePath(),
+										host.getClassName()),
+								newPojo ? "templates/PojoNew.cs.tpl" : "templates/Pojo.cs.tpl");
+	
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/IDao/I%sDao.cs",
+										mavenLikeDir.getAbsolutePath(),
+										host.getClassName()),
+								"templates/IDAO.cs.tpl");
+	
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Test/%sTest.cs",
+										mavenLikeDir.getAbsolutePath(),
+										host.getClassName()),
+								"templates/DAOTest.cs.tpl");
+						result.setSuccessal(true);
+					}catch(Exception e){
+						log.error(result.getTaskName() + "exception", e);
+					}
 					return result;
 				}
 			};
@@ -522,32 +526,36 @@ public class CSharpGenerator extends AbstractGenerator {
 			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
 				public ExecuteResult call() {
-					progress.setOtherMessage("正在生成 " + host.getClassName());
+					//progress.setOtherMessage("正在生成 " + host.getClassName());
 					ExecuteResult result = new ExecuteResult("Generate SP[" + host.getClassName() + "] Dao");
-					
-					VelocityContext context = GenUtils.buildDefaultVelocityContext();
-					context.put("host", host);
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Dao/%sDao.cs",
-									mavenLikeDir.getAbsolutePath(),
-									host.getClassName()),
-							"templates/DAOBySp.cs.tpl");
-
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Entity/%s.cs",
-									mavenLikeDir.getAbsolutePath(),
-									host.getClassName()),
-							"templates/PojoBySp.cs.tpl");
-
-					GenUtils.mergeVelocityContext(
-							context,
-							String.format("%s/Test/%sTest.cs",
-									mavenLikeDir.getAbsolutePath(),
-									host.getClassName()),
-							"templates/SpTest.cs.tpl");
-					result.setSuccessal(true);
+					progress.setOtherMessage(result.getTaskName());
+					try{
+						VelocityContext context = GenUtils.buildDefaultVelocityContext();
+						context.put("host", host);
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Dao/%sDao.cs",
+										mavenLikeDir.getAbsolutePath(),
+										host.getClassName()),
+								"templates/DAOBySp.cs.tpl");
+	
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Entity/%s.cs",
+										mavenLikeDir.getAbsolutePath(),
+										host.getClassName()),
+								"templates/PojoBySp.cs.tpl");
+	
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Test/%sTest.cs",
+										mavenLikeDir.getAbsolutePath(),
+										host.getClassName()),
+								"templates/SpTest.cs.tpl");
+						result.setSuccessal(true);
+					}catch(Exception e){
+						log.error(result.getTaskName() + "exception", e);
+					}
 					return result;
 				}
 			};
@@ -567,16 +575,21 @@ public class CSharpGenerator extends AbstractGenerator {
 			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
 				public ExecuteResult call() {
-					progress.setOtherMessage("正在生成 " + host.getClassName());
+					//progress.setOtherMessage("正在生成 " + host.getClassName());
 					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Pojo");
-					VelocityContext context = GenUtils.buildDefaultVelocityContext();
-					context.put("host", host);
-					GenUtils.mergeVelocityContext(context,
-							String.format("%s/Entity/%s.cs", mavenLikeDir
-									.getAbsolutePath(), CommonUtils
-									.normalizeVariable(host.getClassName())),
-									newPojo ? "templates/PojoNew.cs.tpl" : "templates/Pojo.cs.tpl");
-					result.setSuccessal(true);
+					progress.setOtherMessage(result.getTaskName());
+					try{
+						VelocityContext context = GenUtils.buildDefaultVelocityContext();
+						context.put("host", host);
+						GenUtils.mergeVelocityContext(context,
+								String.format("%s/Entity/%s.cs", mavenLikeDir
+										.getAbsolutePath(), CommonUtils
+										.normalizeVariable(host.getClassName())),
+										newPojo ? "templates/PojoNew.cs.tpl" : "templates/Pojo.cs.tpl");
+						result.setSuccessal(true);
+					}catch(Exception e){
+						log.error(result.getTaskName() + "exception", e);
+					}
 					return result;
 				}
 			};
@@ -589,22 +602,28 @@ public class CSharpGenerator extends AbstractGenerator {
 			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
 				public ExecuteResult call() {
-					progress.setOtherMessage("正在生成 " + host.getClassName());
+					//progress.setOtherMessage("正在生成 " + host.getClassName());
 					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Dap, Test");
-					VelocityContext context = GenUtils.buildDefaultVelocityContext();
-					context.put("host", host);
-					GenUtils.mergeVelocityContext(context,
-							String.format("%s/Dao/%sDao.cs", mavenLikeDir
-									.getAbsolutePath(), CommonUtils
-									.normalizeVariable(host.getClassName())),
-							"templates/FreeSqlDAO.cs.tpl");
-
-					GenUtils.mergeVelocityContext(context,
-							String.format("%s/Test/%sTest.cs", mavenLikeDir
-									.getAbsolutePath(), CommonUtils
-									.normalizeVariable(host.getClassName())),
-							"templates/FreeSqlTest.cs.tpl");
-					result.setSuccessal(true);
+					progress.setOtherMessage(result.getTaskName());
+					try
+					{
+						VelocityContext context = GenUtils.buildDefaultVelocityContext();
+						context.put("host", host);
+						GenUtils.mergeVelocityContext(context,
+								String.format("%s/Dao/%sDao.cs", mavenLikeDir
+										.getAbsolutePath(), CommonUtils
+										.normalizeVariable(host.getClassName())),
+								"templates/FreeSqlDAO.cs.tpl");
+	
+						GenUtils.mergeVelocityContext(context,
+								String.format("%s/Test/%sTest.cs", mavenLikeDir
+										.getAbsolutePath(), CommonUtils
+										.normalizeVariable(host.getClassName())),
+								"templates/FreeSqlTest.cs.tpl");
+						result.setSuccessal(true);
+					}catch(Exception e){
+						log.error(result.getTaskName() + "exception", e);
+					}
 					return result;
 				}
 			};
@@ -649,8 +668,8 @@ public class CSharpGenerator extends AbstractGenerator {
 			if (!_dbHosts.containsKey(task.getDb_name())) {
 
 				String provider = "sqlProvider";
-				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
-						"Microsoft SQL Server")) {
+				String dbType = DbUtils.getDbType(task.getDb_name());
+				if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				DatabaseHost host = new DatabaseHost();
@@ -688,33 +707,39 @@ public class CSharpGenerator extends AbstractGenerator {
 				@Override
 				public ExecuteResult call() throws Exception {
 					ExecuteResult result  = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");				
-					List<GenTaskByFreeSql> currentTasks = entry.getValue();
-					if (currentTasks.size() < 1)
-						return result;
-
-					CSharpFreeSqlHost host = new CSharpFreeSqlHost();
-					host.setDbSetName(currentTasks.get(0).getDb_name());
-					host.setClassName(CommonUtils.normalizeVariable(WordUtils
-							.capitalize(currentTasks.get(0).getClass_name())));
-					host.setNameSpace(namespace);
-
-					progress.setOtherMessage("正在整理表 " + host.getClassName());
-
-					List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
-					// 每个Method可能就有一个Pojo
-					for (GenTaskByFreeSql task : currentTasks) {
-						methods.add(buildFreeSqlMethodHost(task));
-						if (!_freeSqlPojoHosts.containsKey(task.getPojo_name())) {
-							CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(task);
-							if (null != freeSqlPojoHost) {
-								_freeSqlPojoHosts.put(task.getPojo_name(),
-										freeSqlPojoHost);
+					progress.setOtherMessage(result.getTaskName());
+					
+					try{
+						List<GenTaskByFreeSql> currentTasks = entry.getValue();
+						if (currentTasks.size() < 1)
+							return result;
+	
+						CSharpFreeSqlHost host = new CSharpFreeSqlHost();
+						host.setDbSetName(currentTasks.get(0).getDb_name());
+						host.setClassName(CommonUtils.normalizeVariable(WordUtils
+								.capitalize(currentTasks.get(0).getClass_name())));
+						host.setNameSpace(namespace);
+	
+						//progress.setOtherMessage("正在整理表 " + host.getClassName());
+	
+						List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
+						// 每个Method可能就有一个Pojo
+						for (GenTaskByFreeSql task : currentTasks) {
+							methods.add(buildFreeSqlMethodHost(task));
+							if (!_freeSqlPojoHosts.containsKey(task.getPojo_name())) {
+								CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(task);
+								if (null != freeSqlPojoHost) {
+									_freeSqlPojoHosts.put(task.getPojo_name(),
+											freeSqlPojoHost);
+								}
 							}
 						}
+						host.setMethods(methods);
+						_freeSqlHosts.add(host);
+						result.setSuccessal(true);
+					}catch(Exception e){
+						log.error(result.getTaskName() + "exception", e);
 					}
-					host.setMethods(methods);
-					_freeSqlHosts.add(host);
-					result.setSuccessal(true);
 					return result;
 				}
 			};
@@ -750,10 +775,9 @@ public class CSharpGenerator extends AbstractGenerator {
 			}
 
 			if (!_dbHosts.containsKey(task.getDb_name())) {
-
 				String provider = "sqlProvider";
-				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
-						"Microsoft SQL Server")) {
+				String dbType = DbUtils.getDbType(task.getDb_name());
+				if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				DatabaseHost host = new DatabaseHost();
@@ -776,8 +800,8 @@ public class CSharpGenerator extends AbstractGenerator {
 
 			if (!_dbHosts.containsKey(task.getDb_name())) {
 				String provider = "sqlProvider";
-				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
-						"Microsoft SQL Server")) {
+				String dbType = DbUtils.getDbType(task.getDb_name());
+				if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				DatabaseHost host = new DatabaseHost();
@@ -821,8 +845,8 @@ public class CSharpGenerator extends AbstractGenerator {
 					tableViewSp.getSp_names(), ",");
 
 			final DatabaseCategory dbCategory;
-			if (!DbUtils.getDbType(tableViewSp.getDb_name()).equalsIgnoreCase(
-					"Microsoft SQL Server")) {
+			String dbType = DbUtils.getDbType(tableViewSp.getDb_name());
+			if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 				dbCategory = DatabaseCategory.MySql;
 			} else {
 				dbCategory = DatabaseCategory.SqlServer;
@@ -835,8 +859,9 @@ public class CSharpGenerator extends AbstractGenerator {
 				Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 					@Override
 					public ExecuteResult call() throws Exception {
-						progress.setOtherMessage("正在整理表 " + table);
-						ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getProject_id() + "." + table + "] Host");
+						//progress.setOtherMessage("正在整理表 " + table);
+						ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getDb_name() + "." + table + "] Host");
+						progress.setOtherMessage(result.getTaskName());
 						CSharpTableHost currentTableHost;
 						try {
 							currentTableHost = buildTableHost(tableViewSp,
@@ -858,8 +883,9 @@ public class CSharpGenerator extends AbstractGenerator {
 				Callable<ExecuteResult> viewWorker = new Callable<ExecuteResult>() {
 					@Override
 					public ExecuteResult call() throws Exception {
-						progress.setOtherMessage("正在整理视图 " + view);
-						ExecuteResult result = new ExecuteResult("Build View[" + tableViewSp.getProject_id() + "." + view + "] Host");
+						//progress.setOtherMessage("正在整理视图 " + view);
+						ExecuteResult result = new ExecuteResult("Build View[" + tableViewSp.getDb_name() + "." + view + "] Host");
+						progress.setOtherMessage(result.getTaskName());
 						try {
 							CSharpTableHost currentViewHost = buildViewHost(
 									tableViewSp, dbCategory, view);
@@ -880,8 +906,9 @@ public class CSharpGenerator extends AbstractGenerator {
 				Callable<ExecuteResult> spWorker = new Callable<ExecuteResult>() {
 					@Override
 					public ExecuteResult call() throws Exception {
-						ExecuteResult result = new ExecuteResult("Build SP[" + tableViewSp.getProject_id() + "." + spName + "] Host");
-						progress.setOtherMessage("正在整理存储过程 " + spName);
+						ExecuteResult result = new ExecuteResult("Build SP[" + tableViewSp.getDb_name() + "." + spName + "] Host");
+						//progress.setOtherMessage("正在整理存储过程 " + spName);
+						progress.setOtherMessage(result.getTaskName());
 						try {
 							CSharpTableHost currentSpHost = buildSpHost(
 									tableViewSp, dbCategory, spName);
@@ -914,9 +941,10 @@ public class CSharpGenerator extends AbstractGenerator {
 
 					@Override
 					public ExecuteResult call() throws Exception {
-						progress.setOtherMessage("正在整理表 "
-								+ _table.getValue().getClass_name());
-						ExecuteResult result = new ExecuteResult("Build Extral SQL[" + _table.getValue().getProject_id() + "." + _table.getKey() + "] Host");
+						/*progress.setOtherMessage("正在整理表 "
+								+ _table.getValue().getClass_name());*/
+						ExecuteResult result = new ExecuteResult("Build Extral SQL[" + _table.getValue().getDb_name() + "." + _table.getKey() + "] Host");
+						progress.setOtherMessage(result.getTaskName());
 						CSharpTableHost extraTableHost;
 						try {
 							extraTableHost = buildExtraSqlBuilderHost(_table

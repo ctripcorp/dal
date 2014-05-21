@@ -47,8 +47,8 @@ public class LogEntry {
 	private String level;
 	private String title = "Dal Fx";
 	private long duration;
-	private String userName;
-	private String serverAddress;
+	private String userName = "N/A";
+	private String serverAddress = "N/A";
 	private String databaseName;
 	private boolean transactional;
 	private int resultCount;

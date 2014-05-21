@@ -35,16 +35,19 @@ import com.ctrip.platform.dal.dao.logging.MetricsLogger;
  */
 public class DalDirectClient implements DalClient {
 	private DalStatementCreator stmtCreator = new DalStatementCreator();
+	private DalConnectionManager connManager;
 	private DalTransactionManager transManager;
 	private String logicDbName;
 
 	public DalDirectClient(DruidDataSourceWrapper connPool, String logicDbName) {
-		transManager = new DalTransactionManager(logicDbName, connPool);
+		connManager = new DalConnectionManager(logicDbName, connPool);
+		transManager = new DalTransactionManager(connManager);
 		this.logicDbName = logicDbName;
 	}
 	
 	public DalDirectClient(DalConfigure config, String logicDbName) {
-		transManager = new DalTransactionManager(config, logicDbName);
+		connManager = new DalConnectionManager(logicDbName, config);
+		transManager = new DalTransactionManager(connManager);
 		this.logicDbName = logicDbName;
 	}
 
@@ -322,11 +325,11 @@ public class DalDirectClient implements DalClient {
 	private <T> T doInTransaction(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
 		LogEntry entry = null;
-		int level = 0;
 		long start = start();
 		Throwable ex = null;
 		T result = null;
 		
+		int level = 0;
 		try {
 			level = startTransaction(hints, action.operation);
 			
@@ -339,12 +342,13 @@ public class DalDirectClient implements DalClient {
 			return result;
 		} catch (Throwable e) {
 			ex = e;
+			rollbackTransaction(level);
 		} finally {
 			cleanup(hints, action);
 		}
 		
 		log(entry, start, result, ex);
-		handleException(ex, level);
+		handleException(ex);
 		
 		return result;
 	}
@@ -362,7 +366,7 @@ public class DalDirectClient implements DalClient {
 		entry.setSqls(action.sqls);
 		entry.setParameters(action.parameters);
 		entry.setParametersList(action.parametersList);
-		entry.setTransactional(transManager.isInTransaction());
+		entry.setTransactional(DalTransactionManager.isInTransaction());
 		
 		return entry;
 	}
@@ -372,13 +376,17 @@ public class DalDirectClient implements DalClient {
 	}
 	
 	private void log(LogEntry entry, long start, Object result, Throwable e) throws SQLException {
-		long duration = start() - start;
-		if(e == null) {
-			Logger.success(entry, duration, fetchQueryRows(result));
-			MetricsLogger.success(entry, duration);
-		}else{
-			Logger.fail(entry, duration, e);
-			MetricsLogger.fail(entry, duration);
+		try {
+			long duration = start() - start;
+			if(e == null) {
+				Logger.success(entry, duration, fetchQueryRows(result));
+				MetricsLogger.success(entry, duration);
+			}else{
+				Logger.fail(entry, duration, e);
+				MetricsLogger.fail(entry, duration);
+			}
+		} catch (Throwable e1) {
+			e1.printStackTrace();
 		}
 	}
 
@@ -490,12 +498,16 @@ public class DalDirectClient implements DalClient {
 		transManager.endTransaction(startLevel);
 	}
 
+	private void rollbackTransaction(int startLevel) throws SQLException {
+		transManager.rollbackTransaction(startLevel);
+	}
+	
 	private void cleanup(DalHints hints, ConnectionAction<?> action) {
 		Statement statement = action.statement != null? 
 				action.statement : action.preparedStatement != null?
 						action.preparedStatement : action.callableStatement;
 
-		transManager.cleanup(hints, action.rs, statement, action.conn);
+		connManager.cleanup(hints, action.rs, statement, action.conn);
 		
 		action.rs = null;
 		action.statement = null;
@@ -507,11 +519,6 @@ public class DalDirectClient implements DalClient {
 	
 	private void handleException(Throwable e) throws SQLException {
 		if(e != null)
-			throw transManager.handleException(e);
-	}
-
-	private void handleException(Throwable e, int startLevel) throws SQLException {
-		if(e != null)
-			throw transManager.handleException(e, startLevel);
+			throw e instanceof SQLException ? (SQLException)e : new SQLException(e);
 	}
 }

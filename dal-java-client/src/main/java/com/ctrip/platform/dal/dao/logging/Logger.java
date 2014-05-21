@@ -72,7 +72,6 @@ public class Logger {
 					CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
 			//logger.info(CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

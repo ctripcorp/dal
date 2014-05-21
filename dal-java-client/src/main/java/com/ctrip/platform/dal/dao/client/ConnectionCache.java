@@ -69,7 +69,7 @@ public class ConnectionCache  {
 			e.printStackTrace();
 		}
 		
-		DalTransactionManager.closeConnection(oldLevel, conn);
+		DalConnectionManager.closeConnection(oldLevel, conn);
 		DalTransactionManager.clearCache();
 	}
 }

@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.VelocityContext;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
@@ -34,13 +35,12 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.resource.ProgressResource;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
-import com.ctrip.platform.dal.daogen.utils.LogUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
+import com.mysql.jdbc.log.LogUtils;
 
 public class CSharpGenerator extends AbstractGenerator {
 
@@ -992,13 +992,13 @@ public class CSharpGenerator extends AbstractGenerator {
 					_freeSqlCallables, _tableViewSpCallables);
 
 			if (allResults.size() > 0) {
-				LogUtils.log(log, TaskUtils.invokeBatch(executor, allResults));
+				TaskUtils.invokeBatch(log, executor, allResults);
 			}
 
 			List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder(progress);
 
 			if (_sqlBuilderCallables.size() > 0) {
-				LogUtils.log(log, TaskUtils.invokeBatch(executor, _sqlBuilderCallables));
+				TaskUtils.invokeBatch(log, executor, _sqlBuilderCallables);
 			}
 
 		} catch (Exception e) {
@@ -1037,7 +1037,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		if (allResults.size() > 0) {
 			try {
-				LogUtils.log(log, TaskUtils.invokeBatch(executor, allResults));
+				TaskUtils.invokeBatch(log, executor, allResults);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

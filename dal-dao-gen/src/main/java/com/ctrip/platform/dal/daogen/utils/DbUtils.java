@@ -371,7 +371,6 @@ public class DbUtils {
 	 */
 	public static List<AbstractParameterHost> getSpParams(String dbName,
 			StoredProcedure sp, CurrentLanguage language) {
-
 		Connection connection = null;
 		List<AbstractParameterHost> parameters = new ArrayList<AbstractParameterHost>();
 		try {
@@ -381,7 +380,7 @@ public class DbUtils {
 
 			ResultSet spParams = connection.getMetaData().getProcedureColumns(
 					null, sp.getSchema(), sp.getName(), null);
-
+			boolean terminal = false;
 			if (language == CurrentLanguage.CSharp) {
 				while (spParams.next()) {
 					int paramMode = spParams.getShort("COLUMN_TYPE");
@@ -440,13 +439,26 @@ public class DbUtils {
 					}
 
 					host.setName(spParams.getString("COLUMN_NAME").replace("@",""));
-					host.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(host
-							.getSqlType()));
+					Class<?> javaClass = Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
+					if(null == javaClass){
+						if(-153 == host.getSqlType()){
+							log.error(String.format("The Table-Valued Parameters is not support for JDBC. [%s, %s]", 
+									dbName, sp.getName()));
+							terminal = true;
+							break;
+						}else{
+							log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", 
+									host.getName(), dbName, sp.getName(), host.getSqlType(), javaClass));
+							terminal = true;
+							break;
+						}
+					}
+					host.setJavaClass(javaClass);
 
 					parameters.add(host);
 				}
 			}
-			return parameters;
+			return terminal ? null : parameters;
 		} catch (SQLException e) {
 			log.error(String.format("get sp params error: [dbName=%s;spName=%s;language=%s]", 
 					dbName,sp.getName(), language.name()), e);
@@ -560,20 +572,27 @@ public class DbUtils {
 					allColumns.add(host);
 				}
 			} else if (language == CurrentLanguage.Java) {
-				Map<Integer, Class<?>> typeMapper = getSqlType2JavaTypeMaper(dbName, tableName);
+				//Map<Integer, Class<?>> typeMapper = getSqlType2JavaTypeMaper(dbName, tableName);
 				
 				while (allColumnsRs.next()) {
 					JavaParameterHost host = new JavaParameterHost();
-
+					String typeName = allColumnsRs.getString("TYPE_NAME");
 					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
-					Class<?> javaClass = null != typeMapper && typeMapper.containsKey(host.getSqlType()) ? 
-							typeMapper.get(host.getSqlType()) : Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
+					Class<?> javaClass = Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
+					if(null == javaClass){
+						if(null != typeName && typeName.equalsIgnoreCase("sql_variant")){
+							javaClass = String.class;
+						}
+						else{
+							log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", 
+									host.getName(), dbName, tableName, host.getSqlType(), javaClass));
+						}
+					}
 					host.setJavaClass(javaClass);
 					host.setIndex(allColumnsRs.getInt("ORDINAL_POSITION"));
 					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
 							.equalsIgnoreCase("YES"));
-
 					allColumns.add(host);
 				}
 			}

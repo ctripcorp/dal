@@ -57,7 +57,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<T> action = new ConnectionAction<T>() {
 			@Override
 			T execute() throws Exception {
-				conn = getConnection(hints);
+				conn = getConnection(hints, this);
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
 				rs = preparedStatement.executeQuery();
@@ -75,7 +75,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
 			Integer execute() throws Exception {
-				conn = getConnection(hints);
+				conn = getConnection(hints, this);
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
 				
@@ -93,7 +93,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
 			Integer execute() throws Exception {
-				conn = getConnection(hints);
+				conn = getConnection(hints, this);
 
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints, generatedKeyHolder);
 				int rows = preparedStatement.executeUpdate();
@@ -119,7 +119,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			int[] execute() throws Exception {
-				conn = getConnection(hints);
+				conn = getConnection(hints, this);
 				statement = createStatement(conn, hints);
 				for(String sql: sqls)
 					statement.addBatch(sql);
@@ -138,7 +138,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			int[] execute() throws Exception {
-				conn = getConnection(hints);
+				conn = getConnection(hints, this);
 				
 				statement = createPreparedStatement(conn, sql, parametersList, hints);
 				
@@ -202,7 +202,7 @@ public class DalDirectClient implements DalClient {
 					}
 				}
 
-				conn = getConnection(hints);
+				conn = getConnection(hints, this);
 				
 				callableStatement = createCallableStatement(conn, callString, parameters, hints);
 				boolean retVal = callableStatement.execute();
@@ -229,7 +229,7 @@ public class DalDirectClient implements DalClient {
 			@Override
 			int[] execute() throws Exception {
 
-				conn = getConnection(hints);
+				conn = getConnection(hints, this);
 				
 				callableStatement = createCallableStatement(conn, callString, parametersList, hints);
 
@@ -394,72 +394,10 @@ public class DalDirectClient implements DalClient {
 	{
 		return null != result && result instanceof Collection<?> ? ((Collection<?>)result).size() : 0;
 	}
-	
-	private abstract class ConnectionAction<T> {
-		DalEventEnum operation;
-		String sql;
-		String callString;
-		String[] sqls;
-		StatementParameters parameters;
-		StatementParameters[] parametersList;
-		DalCommand command;
-		List<DalCommand> commands;
-		ConnectionHolder connHolder;
-		Connection conn;
-		Statement statement;
-		PreparedStatement preparedStatement;
-		CallableStatement callableStatement;
-		ResultSet rs;
-		
-		void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
-			this.operation = operation;
-			this.sql = sql;
-			this.parameters = parameters;
-		}
 
-		void populate(String[] sqls) {
-			this.operation = DalEventEnum.BATCH_UPDATE;
-			this.sqls = sqls;
-		}
-		
-		void populate(String sql, StatementParameters[] parametersList) {
-			this.operation = DalEventEnum.BATCH_UPDATE_PARAM;
-			this.sql = sql;
-			this.parametersList = parametersList;
-		}
-		
-		void populate(DalCommand command) {
-			this.operation = DalEventEnum.EXECUTE;
-			this.command = command;
-		}
-		
-		void populate(List<DalCommand> commands) {
-			this.operation = DalEventEnum.EXECUTE;
-			this.commands = commands;
-		}
-		
-		void populateSp(String callString, StatementParameters parameters) {
-			this.operation = DalEventEnum.CALL;
-			this.callString = callString;
-			this.parameters = parameters;
-		}
-		
-		void populateSp(String callString, StatementParameters []parametersList) {
-			this.operation = DalEventEnum.BATCH_CALL;
-			this.callString = callString;
-			this.parametersList = parametersList;
-		}
-		
-		public Connection getConnection(DalHints hints) throws SQLException {
-			connHolder = transManager.getConnection(hints, operation);
-			return connHolder.getConn();
-		}
-		
-		public void populate(LogEntry entry) {
-			connHolder.getMeta().populate(entry);
-		}
-		
-		abstract T execute() throws Exception;
+	public Connection getConnection(DalHints hints, ConnectionAction<?> action) throws SQLException {
+		action.connHolder = transManager.getConnection(hints, action.operation);
+		return action.connHolder.getConn();
 	}
 	
 	private Statement createStatement(Connection conn, DalHints hints) throws Exception {

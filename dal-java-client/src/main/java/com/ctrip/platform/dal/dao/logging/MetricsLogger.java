@@ -41,8 +41,8 @@ public class MetricsLogger {
 		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), SUCCESS, duration);
 	}
 	
-	public static void fail(LogEntry entry, long start) {
-		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), FAIL, System.currentTimeMillis() - start);
+	public static void fail(LogEntry entry, long duration) {
+		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), FAIL, duration);
 	}
 	
 	public static void shutdown(){

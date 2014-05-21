@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.helper;
+package com.ctrip.platform.dal.dao.client;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -37,11 +37,13 @@ public class DalTransactionManager {
 	
 	public int startTransaction(DalHints hints, DalEventEnum operation) throws SQLException {
 		ConnectionCache connCache = connectionCacheHolder.get();
-		
+
 		if(connCache == null) {
-			Connection conn = getConnection(hints, true, operation);
-			conn.setAutoCommit(false);
-			connCache = new ConnectionCache(hints.getInt(DalHintEnum.oldIsolationLevel), conn, logicDbName);
+			connCache = new ConnectionCache(
+					hints.getInt(DalHintEnum.oldIsolationLevel), 
+					getConnection(hints, true, operation), 
+					logicDbName);
+			
 			connectionCacheHolder.set(connCache);
 		}
 		return connCache.startTransaction();
@@ -73,11 +75,15 @@ public class DalTransactionManager {
 		connCache.rollbackTransaction(startLevel);
 	}
 	
-	public Connection getConnection(DalHints hints, DalEventEnum operation) throws SQLException {
+	public ConnectionHolder getConnection(DalHints hints, DalEventEnum operation) throws SQLException {
 		return getConnection(hints, false, operation);
 	}
 	
-	private Connection getConnection(DalHints hints, boolean useMaster, DalEventEnum operation) throws SQLException {
+	public ConnectionHolder getCurrentConnection() throws SQLException {
+		return connectionCacheHolder.get().getConnection();
+	}
+	
+	private ConnectionHolder getConnection(DalHints hints, boolean useMaster, DalEventEnum operation) throws SQLException {
 		ConnectionCache connCache = connectionCacheHolder.get();
 		
 		if(connCache == null) {
@@ -88,9 +94,9 @@ public class DalTransactionManager {
 		}
 	}
 
-	private Connection getNewConnection(DalHints hints, boolean useMaster, DalEventEnum operation)
+	private ConnectionHolder getNewConnection(DalHints hints, boolean useMaster, DalEventEnum operation)
 			throws SQLException {
-		Connection conn = null;
+		ConnectionHolder connHolder = null;
 		String realDbName = logicDbName;
 		try
 		{
@@ -99,11 +105,14 @@ public class DalTransactionManager {
 			
 			// The internal test path
 			if(config == null) {
+				Connection conn = null;
 				conn = connPool.getConnection(logicDbName, isMaster, isSelect);
+				connHolder = new ConnectionHolder(conn, DbMeta.getDbMeta(conn.getCatalog(), conn));
 			}else {
-				conn = getConnectionFromDSLocator(hints, isMaster, isSelect);
+				connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect);
 			}
 			
+			Connection conn = connHolder.getConn();
 			conn.setAutoCommit(true);
 			applyHints(hints, conn);
 
@@ -115,10 +124,10 @@ public class DalTransactionManager {
 			Logger.logGetConnectionFailed(realDbName, ex);
 			throw ex;
 		}
-		return conn;
+		return connHolder;
 	}
 
-	private Connection getConnectionFromDSLocator(DalHints hints,
+	private ConnectionHolder getConnectionFromDSLocator(DalHints hints,
 			boolean isMaster, boolean isSelect) throws SQLException {
 		Connection conn;
 		String realDbName;
@@ -138,10 +147,11 @@ public class DalTransactionManager {
 		
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(realDbName).getConnection();
+			DbMeta meta = DbMeta.getDbMeta(realDbName, conn);
+			return new ConnectionHolder(conn, meta);
 		} catch (Throwable e) {
 			throw new SQLException("Can not get connection from DB " + realDbName, e);
 		}
-		return conn;
 	}
 	
 	private void applyHints(DalHints hints, Connection conn) throws SQLException {
@@ -165,7 +175,11 @@ public class DalTransactionManager {
 		conn.setTransactionIsolation(oldLevel);
 	}
 	
-	private static void closeConnection(Integer oldLevel, Connection conn) {
+	public static void clearCache() {
+		connectionCacheHolder.set(null);
+	}
+	
+	public static void closeConnection(Integer oldLevel, Connection conn) {
 		try {
 			if(!conn.isClosed()){
 				restoreIsolation(oldLevel, conn);
@@ -220,75 +234,5 @@ public class DalTransactionManager {
 	
 	public SQLException handleException(Throwable e) {
 		return e instanceof SQLException ? (SQLException)e : new SQLException(e);
-	}
-	
-	private static final class ConnectionCache {
-		private String logicDbName;
-		private Connection conn;
-		private Integer oldLevel;
-		private int level = 0;
-		private boolean rolledBack;
-		
-		public ConnectionCache(Integer oldLevel, Connection conn, String logicDbName) throws SQLException{
-			this.logicDbName = logicDbName;
-			this.conn = conn;
-			this.oldLevel = oldLevel;
-			conn.setAutoCommit(false);
-		}
-		
-		public void validate(String logicDbName) throws SQLException {
-			if(logicDbName == null || logicDbName.length() == 0)
-				throw new SQLException("Logic Db Name is empty!");
-			
-			if(!logicDbName.equals(this.logicDbName))
-				throw new SQLException(String.format("DAL do not support distributed transaction. Current DB: %s, DB requested: %s", this.logicDbName, logicDbName));
-		}
-		
-		public Connection getConnection() {
-			return conn;
-		}
-		
-		public int startTransaction() throws SQLException {
-			return level++;
-		}
-		
-		public void endTransaction(int startLevel) throws SQLException {
-			if(startLevel != (level - 1)) {
-				rollbackTransaction(startLevel);
-				throw new SQLException(String.format("Transaction level mismatch. Expected: %d Actual: %d", level, startLevel));
-			}
-			
-			if(--level == 0)
-				cleanup(true);
-		}
-		
-		public void rollbackTransaction(int startLevel) throws SQLException {
-			if(rolledBack)
-				return;
-
-			rolledBack = true;
-			// Even the rollback fails, we still set the flag to true;
-			cleanup(false);
-		}
-		
-		private void cleanup(boolean commit) {
-			try {
-				if(commit)
-					conn.commit();
-				else
-					conn.rollback();
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
-
-			try {
-				conn.setAutoCommit(false);
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
-			
-			closeConnection(oldLevel, conn);			
-			connectionCacheHolder.set(null);
-		}
 	}
 }

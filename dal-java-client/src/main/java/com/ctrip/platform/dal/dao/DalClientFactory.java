@@ -18,7 +18,6 @@ public class DalClientFactory {
 	private static Logger logger = LoggerFactory.getLogger(DalClientFactory.class);
 	private static AtomicReference<DruidDataSourceWrapper> connPool = new AtomicReference<DruidDataSourceWrapper>();
 
-	private static final String DAL_CONFIG = "Dal.config";
 	private static AtomicReference<DalConfigure> configureRef = new AtomicReference<DalConfigure>();
 
 	static {
@@ -46,14 +45,7 @@ public class DalClientFactory {
 				return;
 			}
 			
-			ClassLoader classLoader = Thread.currentThread()
-					.getContextClassLoader();
-			if (classLoader == null) {
-				classLoader = DalClientFactory.class.getClassLoader();
-			}
-
-			configureRef.set(DalConfigureFactory.load(classLoader
-					.getResource(DAL_CONFIG)));
+			configureRef.set(DalConfigureFactory.load());
 			logInitialized();
 		}
 	}

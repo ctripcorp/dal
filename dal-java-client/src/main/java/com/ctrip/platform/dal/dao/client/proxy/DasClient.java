@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.client;
+package com.ctrip.platform.dal.dao.client.proxy;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -8,8 +8,13 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.ctrip.platform.dal.dao.StatementParameter;
+import com.ctrip.platform.dal.dao.client.DasProto;
 import com.ctrip.platform.dal.dao.client.DasProto.CRUD;
+import com.ctrip.platform.dal.dao.client.DasProto.Request;
+import com.ctrip.platform.dal.dao.client.DasProto.RequestMessage;
+import com.ctrip.platform.dal.dao.client.DasProto.Response;
 import com.ctrip.platform.dal.dao.client.DasProto.StatementType;
+import com.ctrip.platform.dal.dao.client.DasProto.RequestMessage.Builder;
 
 /**
  * TODO support exception report

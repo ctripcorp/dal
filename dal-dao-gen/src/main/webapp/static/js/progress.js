@@ -48,7 +48,7 @@
                     Progress.progressStatus = "isDoing";
                 }
                 $('.progress-bar').css({'width': data["percent"]+"%"});
-                $('#generateCodeProcessMess').html(data["otherMessage"]);
+                $('#generateCodeProcessMess').html("<br/>"+data["otherMessage"]);
             },
             dataType: "json",
             complete: function(jqXHR, textStatus){

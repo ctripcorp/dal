@@ -5,11 +5,11 @@ import java.sql.SQLException;
 
 public class DalTransaction  {
 	private String logicDbName;
-	private ConnectionHolder connHolder;
+	private DalConnection connHolder;
 	private int level = 0;
 	private boolean rolledBack;
 	
-	public DalTransaction(ConnectionHolder connHolder, String logicDbName) throws SQLException{
+	public DalTransaction(DalConnection connHolder, String logicDbName) throws SQLException{
 		this.logicDbName = logicDbName;
 		this.connHolder = connHolder;
 		connHolder.getConn().setAutoCommit(false);
@@ -23,7 +23,7 @@ public class DalTransaction  {
 			throw new SQLException(String.format("DAL do not support distributed transaction. Current DB: %s, DB requested: %s", this.logicDbName, logicDbName));
 	}
 	
-	public ConnectionHolder getConnection() {
+	public DalConnection getConnection() {
 		return connHolder;
 	}
 	

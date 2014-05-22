@@ -51,7 +51,7 @@ public class DalTransactionManager {
 		connCache.rollbackTransaction(startLevel);
 	}
 	
-	public ConnectionHolder getConnection(DalHints hints, DalEventEnum operation) throws SQLException {
+	public DalConnection getConnection(DalHints hints, DalEventEnum operation) throws SQLException {
 		return getConnection(hints, false, operation);
 	}
 	
@@ -59,7 +59,7 @@ public class DalTransactionManager {
 		return connectionCacheHolder.get().getConnection().getMeta();
 	}
 	
-	private ConnectionHolder getConnection(DalHints hints, boolean useMaster, DalEventEnum operation) throws SQLException {
+	private DalConnection getConnection(DalHints hints, boolean useMaster, DalEventEnum operation) throws SQLException {
 		DalTransaction connCache = connectionCacheHolder.get();
 		
 		if(connCache == null) {

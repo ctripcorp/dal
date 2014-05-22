@@ -34,9 +34,9 @@ public class DalConnectionManager {
 		return logicDbName;
 	}
 
-	public ConnectionHolder getNewConnection(DalHints hints, boolean useMaster, DalEventEnum operation)
+	public DalConnection getNewConnection(DalHints hints, boolean useMaster, DalEventEnum operation)
 			throws SQLException {
-		ConnectionHolder connHolder = null;
+		DalConnection connHolder = null;
 		String realDbName = logicDbName;
 		try
 		{
@@ -47,7 +47,7 @@ public class DalConnectionManager {
 			if(config == null) {
 				Connection conn = null;
 				conn = connPool.getConnection(logicDbName, isMaster, isSelect);
-				connHolder = new ConnectionHolder(conn, DbMeta.getDbMeta(conn.getCatalog(), conn));
+				connHolder = new DalConnection(conn, DbMeta.getDbMeta(conn.getCatalog(), conn));
 			}else {
 				connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect);
 			}
@@ -66,7 +66,7 @@ public class DalConnectionManager {
 		return connHolder;
 	}
 
-	private ConnectionHolder getConnectionFromDSLocator(DalHints hints,
+	private DalConnection getConnectionFromDSLocator(DalHints hints,
 			boolean isMaster, boolean isSelect) throws SQLException {
 		Connection conn;
 		String allInOneKey;
@@ -87,13 +87,13 @@ public class DalConnectionManager {
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
 			DbMeta meta = DbMeta.getDbMeta(allInOneKey, conn);
-			return new ConnectionHolder(conn, meta);
+			return new DalConnection(conn, meta);
 		} catch (Throwable e) {
 			throw new SQLException("Can not get connection from DB " + allInOneKey, e);
 		}
 	}
 	
-	public void cleanup(DalHints hints, ResultSet rs, Statement statement, ConnectionHolder connHolder) {
+	public void cleanup(DalHints hints, ResultSet rs, Statement statement, DalConnection connHolder) {
 		if(rs != null) {
 			try {
 				rs.close();
@@ -113,7 +113,7 @@ public class DalConnectionManager {
 		closeConnection(connHolder);
 	}
 
-	private void closeConnection(ConnectionHolder connHolder) {
+	private void closeConnection(DalConnection connHolder) {
 		//do nothing for connection in transaction
 		if(DalTransactionManager.isInTransaction())
 			return;

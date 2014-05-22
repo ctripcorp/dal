@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.client.ConnectionHolder;
+import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
@@ -27,7 +27,7 @@ public class DalConnectionManagerTest {
 			config = DalConfigureFactory.load();
 			
 			DalConnectionManager test = new DalConnectionManager(logicDbName, config);
-			ConnectionHolder conn = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
+			DalConnection conn = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
 			Assert.assertNotNull(conn);
 			Assert.assertNotNull(conn.getConn());
 			conn.getConn().close();
@@ -47,7 +47,7 @@ public class DalConnectionManagerTest {
 			config = DalConfigureFactory.load();
 			
 			DalConnectionManager test = new DalConnectionManager(logicDbName, config);
-			ConnectionHolder conn = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
+			DalConnection conn = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
 			
 			Statement statement = conn.getConn().createStatement();
 			ResultSet rs = statement.executeQuery("select * from City");

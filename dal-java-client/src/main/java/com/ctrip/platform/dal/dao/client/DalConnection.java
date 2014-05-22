@@ -7,13 +7,13 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.logging.Logger;
 
-public class ConnectionHolder {
+public class DalConnection {
 	private Integer oldIsolationLevel;
 	private Integer newIsolationLevel;
 	private Connection conn;
 	private DbMeta meta;
 	
-	public ConnectionHolder(Connection conn, DbMeta meta) throws SQLException {
+	public DalConnection(Connection conn, DbMeta meta) throws SQLException {
 		this.oldIsolationLevel = conn.getTransactionIsolation();
 		this.conn = conn;
 		this.meta = meta;

@@ -572,14 +572,14 @@ public class DbUtils {
 					allColumns.add(host);
 				}
 			} else if (language == CurrentLanguage.Java) {
-				//Map<Integer, Class<?>> typeMapper = getSqlType2JavaTypeMaper(dbName, tableName);
-				
+				Map<Integer, Class<?>> typeMapper = getSqlType2JavaTypeMaper(dbName, tableName);
 				while (allColumnsRs.next()) {
 					JavaParameterHost host = new JavaParameterHost();
 					String typeName = allColumnsRs.getString("TYPE_NAME");
 					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
-					Class<?> javaClass = Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
+					Class<?> javaClass = null != typeMapper && typeMapper.containsKey(host.getSqlType()) ? 
+							typeMapper.get(host.getSqlType()) :Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
 					if(null == javaClass){
 						if(null != typeName && typeName.equalsIgnoreCase("sql_variant")){
 							javaClass = String.class;
@@ -619,9 +619,8 @@ public class DbUtils {
 		ResultSet rs = null;
 		try {
 			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(dbName);
-			connection = ds.getConnection();
-			JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 			
+			connection = ds.getConnection();
 			String dbType = null;
 			if (Consts.databaseType.containsKey(dbName)) {
 				dbType = Consts.databaseType.get(dbName);
@@ -629,34 +628,26 @@ public class DbUtils {
 				dbType = connection.getMetaData().getDatabaseProductName();
 				Consts.databaseType.put(dbName, dbType);
 			}
-	
-			String sql = dbType.equals("Microsoft SQL Server") ? "SELECT TOP(1) * FROM [" + tableViewName + "]" :
-				"SELECT * FROM `" + tableViewName + "` limit 1";
 			
-			map = jdbcTemplate.query(sql, new ResultSetExtractor<Map<Integer, Class<?>>>(){
-				@Override
-				public Map<Integer, Class<?>> extractData(ResultSet rs)
-						throws SQLException, DataAccessException {
-					Map<Integer, Class<?>> result = new HashMap<Integer, Class<?>>();
-					ResultSetMetaData rsmd = rs.getMetaData();
-					
-					for(int i = 1; i <= rsmd.getColumnCount(); i++) {
-						Integer dbType = rsmd.getColumnType(i);
-						Class<?> javaType = null;
-						try {
-							javaType = Class.forName(rsmd.getColumnClassName(i));
-						} catch (ClassNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						if(!result.containsKey(dbType) && null != javaType)
-						{
-							result.put(dbType, javaType);
-						}
-					}
-					return result;
-				}	
-			});					
+			rs = connection.getMetaData().getColumns(null, null,
+					tableViewName, null);
+			
+			Map<Integer, Class<?>> result = new HashMap<Integer, Class<?>>();
+			
+			ResultSetMetaData rsmd = rs.getMetaData();
+			for(int i = 1; i <= rsmd.getColumnCount(); i++) {
+				Integer sqlType = rsmd.getColumnType(i);
+				Class<?> javaType = null;
+				try {
+					javaType = Class.forName(rsmd.getColumnClassName(i));
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+				if(!result.containsKey(sqlType) && null != javaType)
+				{
+					result.put(sqlType, javaType);
+				}
+			}
 		} catch (SQLException e) {
 			log.error(String.format("get sql-type to java-type maper error: [dbName=%s;tableVeiwName=%s]",
 					dbName, tableViewName), e);
@@ -667,6 +658,7 @@ public class DbUtils {
 		finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
+			
 		}
 		return map;
 	}

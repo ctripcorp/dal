@@ -281,8 +281,7 @@ public class JavaGenerator extends AbstractGenerator {
 	private JavaTableHost buildTableHost(GenTaskByTableViewSp tableViewSp,
 			String table) throws Exception {
 		if(!DbUtils.tableExists(tableViewSp.getDb_name(), table)){
-			log.error(String.format("The table doesn't exist, pls check", tableViewSp.getDb_name(), table));
-			return null;
+			throw new Exception(String.format("The table doesn't exist, pls check", tableViewSp.getDb_name(), table));
 		}
 		JavaTableHost tableHost = new JavaTableHost();
 		tableHost.setPackageName(super.namespace);
@@ -300,9 +299,8 @@ public class JavaGenerator extends AbstractGenerator {
 				.getAllColumnNames(tableViewSp.getDb_name(), table,
 						CurrentLanguage.Java);
 		if(null == allColumnsAbstract){
-			log.error(String.format("The column names of tabel[%s, %s] is null", 
+			throw new Exception(String.format("The column names of tabel[%s, %s] is null", 
 					tableViewSp.getDb_name(), table));
-			return null;
 		}
 		List<JavaParameterHost> allColumns = new ArrayList<JavaParameterHost>();
 		for (AbstractParameterHost h : allColumnsAbstract) {
@@ -370,9 +368,8 @@ public class JavaGenerator extends AbstractGenerator {
 				tableViewSp.getDb_name(), viewName, CurrentLanguage.Java);
 		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 		if(null == params){
-			log.error(String.format("The column names of view[%s, %s] is null", 
+			throw new Exception(String.format("The column names of view[%s, %s] is null", 
 					tableViewSp.getDb_name(), viewName));
-			return null;
 		}
 		for (AbstractParameterHost p : params) {
 			JavaParameterHost jHost = (JavaParameterHost) p;
@@ -401,9 +398,8 @@ public class JavaGenerator extends AbstractGenerator {
 		currentSp.setName(realSpName);
 
 		if (!DbUtils.spExists(tableViewSp.getDb_name(), currentSp)) {
-			log.error(String.format("The store procedure[%s, %s] doesn't exist, pls check", 
+			throw new Exception(String.format("The store procedure[%s, %s] doesn't exist, pls check", 
 					tableViewSp.getDb_name(),  currentSp.getName()));
-			return null;
 		}
 		
 		SpHost spHost = new SpHost();
@@ -421,9 +417,8 @@ public class JavaGenerator extends AbstractGenerator {
 		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 		String callParams = "";
 		if(null == params){
-			log.error(String.format("The sp[%s, %s] parameters is null", 
+			throw new Exception(String.format("The sp[%s, %s] parameters is null", 
 					tableViewSp.getDb_name(), currentSp.getName()));
-			return null;
 		}
 		for (AbstractParameterHost p : params) {
 			callParams += "?,";
@@ -573,7 +568,7 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 		return dbCategory;
 	}
-
+	
 	private Map<String, List<GenTaskByFreeSql>> freeSqlGroupBy(
 			List<GenTaskByFreeSql> tasks) {
 		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();

@@ -169,7 +169,7 @@
                   <div class="progress progress-info progress-striped active">
 				  	<div class="progress-bar" role="progressbar" style="width:0%;"></div>
 				  </div>
-				  <div id="generateCodeProcessMess">
+				  <div id="generateCodeProcessMess" style="font-size:16px;padding-top:10px">
 				  		正在初始化...
 				  </div>
                </div>
@@ -442,10 +442,8 @@
 	               </div>
                </div>
             </div>
-            <!-- /.modal-content -->
          </div>
-         <!-- /.modal-dialog -->
-      </div>
+      </div> 
       
       <!--End wizard-->
       <!-- JS and analytics only. -->

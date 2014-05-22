@@ -58,7 +58,8 @@ public class JavaGenerator extends AbstractGenerator {
 
 				@Override
 				public ExecuteResult call() throws Exception {
-					ExecuteResult result = new ExecuteResult("Generate Table[" + host.getTableName() + "] Dao, Pojo, Test");
+					ExecuteResult result = new ExecuteResult("Generate Table[" + host.getDbName() + "." + host.getTableName() + "] Dao, Pojo, Test");
+					progress.setOtherMessage(result.getTaskName());
 					try
 					{
 						VelocityContext context = GenUtils.buildDefaultVelocityContext();
@@ -108,7 +109,7 @@ public class JavaGenerator extends AbstractGenerator {
 				@Override
 				public ExecuteResult call() throws Exception {
 					ExecuteResult result = new ExecuteResult("Generate SP[" + host.getDbName() + "] Dao, Pojo, Test");
-					
+					progress.setOtherMessage(result.getTaskName());
 					try
 					{
 						VelocityContext context = GenUtils.buildDefaultVelocityContext();
@@ -159,7 +160,8 @@ public class JavaGenerator extends AbstractGenerator {
 
 				@Override
 				public ExecuteResult call() throws Exception {					
-					ExecuteResult result = new ExecuteResult("Generate View[" + host.getViewName() + "] Dao");
+					ExecuteResult result = new ExecuteResult("Generate View[" + host.getDbName() + "." + host.getViewName() + "] Dao");
+					progress.setOtherMessage(result.getTaskName());
 					try
 					{
 						VelocityContext context = GenUtils.buildDefaultVelocityContext();
@@ -207,6 +209,7 @@ public class JavaGenerator extends AbstractGenerator {
 				@Override
 				public ExecuteResult call() throws Exception {
 					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getPojoClassName() + "] Pojo");
+					progress.setOtherMessage(result.getTaskName());
 					try
 					{
 						VelocityContext context = GenUtils.buildDefaultVelocityContext();
@@ -233,6 +236,7 @@ public class JavaGenerator extends AbstractGenerator {
 				@Override
 				public ExecuteResult call() throws Exception {
 					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Dap, Test");
+					progress.setOtherMessage(result.getTaskName());
 					try
 					{
 						VelocityContext context = GenUtils.buildDefaultVelocityContext();
@@ -276,6 +280,9 @@ public class JavaGenerator extends AbstractGenerator {
 
 	private JavaTableHost buildTableHost(GenTaskByTableViewSp tableViewSp,
 			String table) throws Exception {
+		if(!DbUtils.tableExists(tableViewSp.getDb_name(), table)){
+			throw new Exception(String.format("The table doesn't exist, pls check", tableViewSp.getDb_name(), table));
+		}
 		JavaTableHost tableHost = new JavaTableHost();
 		tableHost.setPackageName(super.namespace);
 		tableHost.setDatabaseCategory(this.getDatabaseCategory(tableViewSp));
@@ -292,9 +299,8 @@ public class JavaGenerator extends AbstractGenerator {
 				.getAllColumnNames(tableViewSp.getDb_name(), table,
 						CurrentLanguage.Java);
 		if(null == allColumnsAbstract){
-			log.error(String.format("The column names of tabel[%s, %s] is null", 
+			throw new Exception(String.format("The column names of tabel[%s, %s] is null", 
 					tableViewSp.getDb_name(), table));
-			return null;
 		}
 		List<JavaParameterHost> allColumns = new ArrayList<JavaParameterHost>();
 		for (AbstractParameterHost h : allColumnsAbstract) {
@@ -340,8 +346,9 @@ public class JavaGenerator extends AbstractGenerator {
 	private ViewHost buildViewHost(GenTaskByTableViewSp tableViewSp,
 			String viewName) throws Exception {
 		if (!DbUtils.viewExists(tableViewSp.getDb_name(), viewName)) {
-			throw new Exception(String.format(
+			log.error(String.format(
 					"The view[%s] doesn't exist, pls check", viewName));
+			return null;
 		}
 
 		ViewHost vhost = new ViewHost();
@@ -361,9 +368,8 @@ public class JavaGenerator extends AbstractGenerator {
 				tableViewSp.getDb_name(), viewName, CurrentLanguage.Java);
 		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 		if(null == params){
-			log.error(String.format("The column names of view[%s, %s] is null", 
+			throw new Exception(String.format("The column names of view[%s, %s] is null", 
 					tableViewSp.getDb_name(), viewName));
-			return null;
 		}
 		for (AbstractParameterHost p : params) {
 			JavaParameterHost jHost = (JavaParameterHost) p;
@@ -391,6 +397,11 @@ public class JavaGenerator extends AbstractGenerator {
 		currentSp.setSchema(schema);
 		currentSp.setName(realSpName);
 
+		if (!DbUtils.spExists(tableViewSp.getDb_name(), currentSp)) {
+			throw new Exception(String.format("The store procedure[%s, %s] doesn't exist, pls check", 
+					tableViewSp.getDb_name(),  currentSp.getName()));
+		}
+		
 		SpHost spHost = new SpHost();
 		String className = realSpName.replace("_", "");
 		className = getPojoClassName(tableViewSp.getPrefix(),
@@ -406,9 +417,8 @@ public class JavaGenerator extends AbstractGenerator {
 		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 		String callParams = "";
 		if(null == params){
-			log.error(String.format("The sp[%s, %s] parameters is null", 
+			throw new Exception(String.format("The sp[%s, %s] parameters is null", 
 					tableViewSp.getDb_name(), currentSp.getName()));
-			return null;
 		}
 		for (AbstractParameterHost p : params) {
 			callParams += "?,";
@@ -552,13 +562,13 @@ public class JavaGenerator extends AbstractGenerator {
 	private DatabaseCategory getDatabaseCategory(
 			GenTaskByTableViewSp tableViewSp) {
 		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
-		if (!DbUtils.getDbType(tableViewSp.getDb_name()).equalsIgnoreCase(
-				"Microsoft SQL Server")) {
+		String dbType = DbUtils.getDbType(tableViewSp.getDb_name());
+		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 			dbCategory = DatabaseCategory.MySql;
 		}
 		return dbCategory;
 	}
-
+	
 	private Map<String, List<GenTaskByFreeSql>> freeSqlGroupBy(
 			List<GenTaskByFreeSql> tasks) {
 		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();
@@ -603,8 +613,8 @@ public class JavaGenerator extends AbstractGenerator {
 			if (!dbs.containsKey(task.getDb_name())) {
 
 				String provider = "sqlProvider";
-				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
-						"Microsoft SQL Server")) {
+				String dbType = DbUtils.getDbType(task.getDb_name());
+				if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				dbs.put(task.getDb_name(), provider);
@@ -617,10 +627,9 @@ public class JavaGenerator extends AbstractGenerator {
 			List<GenTaskBySqlBuilder> sqlBuilders) {
 		for (GenTaskByTableViewSp task : tableViewSps) {
 			if (!dbs.containsKey(task.getDb_name())) {
-
 				String provider = "sqlProvider";
-				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
-						"Microsoft SQL Server")) {
+				String dbType = DbUtils.getDbType(task.getDb_name());
+				if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				dbs.put(task.getDb_name(), provider);
@@ -630,8 +639,8 @@ public class JavaGenerator extends AbstractGenerator {
 		for (GenTaskBySqlBuilder task : sqlBuilders) {
 			if (!dbs.containsKey(task.getDb_name())) {
 				String provider = "sqlProvider";
-				if (!DbUtils.getDbType(task.getDb_name()).equalsIgnoreCase(
-						"Microsoft SQL Server")) {
+				String dbType = DbUtils.getDbType(task.getDb_name());
+				if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				dbs.put(task.getDb_name(), provider);
@@ -660,8 +669,9 @@ public class JavaGenerator extends AbstractGenerator {
 				.entrySet()) {
 			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
-				public ExecuteResult call() throws Exception {
+				public ExecuteResult call() throws Exception {				
 					ExecuteResult result  = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");				
+					progress.setOtherMessage(result.getTaskName());
 					List<GenTaskByFreeSql> currentTasks = entry.getValue();
 					if (currentTasks.size() < 1)
 						return result;
@@ -762,9 +772,10 @@ public class JavaGenerator extends AbstractGenerator {
 				Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 					@Override
 					public ExecuteResult call() throws Exception {
-						progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildTable:"
-								+ table);
-						ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getProject_id() + "." + table + "] Host");
+						/*progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildTable:"
+								+ table);*/
+						ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getDb_name() + "." + table + "] Host");
+						progress.setOtherMessage(result.getTaskName());
 						try{
 							JavaTableHost tableHost = buildTableHost(tableViewSp, table);
 							result.setSuccessal(true);
@@ -784,9 +795,10 @@ public class JavaGenerator extends AbstractGenerator {
 				Callable<ExecuteResult> viewWorker = new Callable<ExecuteResult>() {
 					@Override
 					public ExecuteResult call() throws Exception {
-						progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildView:"
-								+ view);
-						ExecuteResult result = new ExecuteResult("Build View[" + tableViewSp.getProject_id() + "." + view + "] Host");
+						/*progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildView:"
+								+ view);*/
+						ExecuteResult result = new ExecuteResult("Build View[" + tableViewSp.getDb_name() + "." + view + "] Host");
+						progress.setOtherMessage(result.getTaskName());
 						try{
 							ViewHost vhost = buildViewHost(tableViewSp, view);
 							if (null != vhost)
@@ -805,9 +817,10 @@ public class JavaGenerator extends AbstractGenerator {
 				Callable<ExecuteResult> spWorker = new Callable<ExecuteResult>() {
 					@Override
 					public ExecuteResult call() throws Exception {
-						progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildSp:"
-								+ spName);
-						ExecuteResult result = new ExecuteResult("Build SP[" + tableViewSp.getProject_id() + "." + spName + "] Host");
+					/*	progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildSp:"
+								+ spName);*/
+						ExecuteResult result = new ExecuteResult("Build SP[" + tableViewSp.getDb_name() + "." + spName + "] Host");
+						progress.setOtherMessage(result.getTaskName());
 						try{
 							SpHost spHost = buildSpHost(tableViewSp, spName);
 							if (null != spHost) {
@@ -847,9 +860,10 @@ public class JavaGenerator extends AbstractGenerator {
 
 					@Override
 					public ExecuteResult call() throws Exception {
-						progress.setOtherMessage("正在整理表 "
-								+ _table.getValue().getClass_name());
-						ExecuteResult result = new ExecuteResult("Build Extral SQL[" + _table.getValue().getProject_id() + "." + _table.getKey() + "] Host");
+						/*progress.setOtherMessage("正在整理表 "
+								+ _table.getValue().getClass_name());*/
+						ExecuteResult result = new ExecuteResult("Build Extral SQL[" + _table.getValue().getDb_name() + "." + _table.getKey() + "] Host");
+						progress.setOtherMessage(result.getTaskName());
 						try{
 							JavaTableHost extraTableHost = buildExtraSqlBuilderHost(_table
 								.getValue());

@@ -16,6 +16,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.ctrip.platform.dal.dao.DalClientFactory;
+
 /*
 <dal name="dal.prize.test">
   <databaseSets>
@@ -44,9 +46,8 @@ import org.w3c.dom.NodeList;
 
 public class DalConfigureFactory {
 	private static DalConfigureFactory factory = new DalConfigureFactory();
-	
-	private static String CONFIGURE_NT_LOCATION = "";
-	private static String CONFIGURE_LINUX_LOCATION = "";
+	private static final String DAL_CONFIG = "Dal.config";
+
 	private static String NAME = "name";
 	private static String DATABASE_SETS = "databaseSets";
 	private static String DATABASE_SET = "databaseSet";
@@ -58,11 +59,19 @@ public class DalConfigureFactory {
 	private static String CONNECTION_STRING = "connectionString";
 	private static String MASTER = "Master";
 
+	/**
+	 * Load frmo classpath
+	 * @return
+	 * @throws Exception
+	 */
 	public static DalConfigure load() throws Exception {
-		if(System.getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1&& System.getProperty("opath.separator").equals("\\"))
-			return load(CONFIGURE_NT_LOCATION);
-		else
-			return load(CONFIGURE_LINUX_LOCATION);
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+		if (classLoader == null) {
+			classLoader = DalClientFactory.class.getClassLoader();
+		}
+
+		return load(classLoader.getResource(DAL_CONFIG));
 	}
 		
 	public static DalConfigure load(URL url) throws Exception {

@@ -21,7 +21,7 @@ public abstract class ConnectionAction<T> {
 	StatementParameters[] parametersList;
 	DalCommand command;
 	List<DalCommand> commands;
-	ConnectionHolder connHolder;
+	DalConnection connHolder;
 	Connection conn;
 	Statement statement;
 	PreparedStatement preparedStatement;

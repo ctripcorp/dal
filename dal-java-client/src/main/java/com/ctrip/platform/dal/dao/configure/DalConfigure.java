@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 

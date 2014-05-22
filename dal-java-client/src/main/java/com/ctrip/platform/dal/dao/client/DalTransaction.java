@@ -3,17 +3,15 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class ConnectionCache  {
+public class DalTransaction  {
 	private String logicDbName;
-	private ConnectionHolder connHolder;
-	private Integer oldLevel;
+	private DalConnection connHolder;
 	private int level = 0;
 	private boolean rolledBack;
 	
-	public ConnectionCache(Integer oldLevel, ConnectionHolder connHolder, String logicDbName) throws SQLException{
+	public DalTransaction(DalConnection connHolder, String logicDbName) throws SQLException{
 		this.logicDbName = logicDbName;
 		this.connHolder = connHolder;
-		this.oldLevel = oldLevel;
 		connHolder.getConn().setAutoCommit(false);
 	}
 	
@@ -25,7 +23,7 @@ public class ConnectionCache  {
 			throw new SQLException(String.format("DAL do not support distributed transaction. Current DB: %s, DB requested: %s", this.logicDbName, logicDbName));
 	}
 	
-	public ConnectionHolder getConnection() {
+	public DalConnection getConnection() {
 		return connHolder;
 	}
 	
@@ -69,7 +67,7 @@ public class ConnectionCache  {
 			e.printStackTrace();
 		}
 		
-		DalConnectionManager.closeConnection(oldLevel, conn);
+		connHolder.closeConnection();
 		DalTransactionManager.clearCache();
 	}
 }

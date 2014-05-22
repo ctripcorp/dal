@@ -19,8 +19,8 @@ public class SpDbHost {
 		this.dbName = dbName;
 		this.packageName = packageName;
 		this.databaseCategory = DatabaseCategory.SqlServer;
-		if (!DbUtils.getDbType(this.dbName).equalsIgnoreCase(
-				"Microsoft SQL Server")) {
+		String dbType = DbUtils.getDbType(this.dbName);
+		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 			this.databaseCategory = DatabaseCategory.MySql;
 		}
 		this.spHosts = new HashMap<String, SpHost>();

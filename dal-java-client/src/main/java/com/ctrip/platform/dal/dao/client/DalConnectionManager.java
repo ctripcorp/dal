@@ -52,11 +52,10 @@ public class DalConnectionManager {
 				connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect);
 			}
 			
-			Connection conn = connHolder.getConn();
-			conn.setAutoCommit(true);
-			applyHints(hints, conn);
+			connHolder.setAutoCommit(true);
+			connHolder.applyHints(hints);
 
-			realDbName = conn.getCatalog();
+			realDbName = connHolder.getCatalog();
 			Logger.logGetConnectionSuccess(realDbName);
 		}
 		catch(SQLException ex)
@@ -70,7 +69,7 @@ public class DalConnectionManager {
 	private ConnectionHolder getConnectionFromDSLocator(DalHints hints,
 			boolean isMaster, boolean isSelect) throws SQLException {
 		Connection conn;
-		String realDbName;
+		String allInOneKey;
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
 		if(dbSet.isShardingSupported()){
 			DalShardStrategy strategy = dbSet.getStrategy();
@@ -80,34 +79,21 @@ public class DalConnectionManager {
 			String shard = strategy.locateShard(config, logicDbName, hints);
 			dbSet.validate(shard);
 			
-			realDbName = dbSet.getRandomRealDbName(shard, isMaster, isSelect);
+			allInOneKey = dbSet.getRandomRealDbName(shard, isMaster, isSelect);
 		} else {
-			realDbName = dbSet.getRandomRealDbName(isMaster, isSelect);
+			allInOneKey = dbSet.getRandomRealDbName(isMaster, isSelect);
 		}
 		
 		try {
-			conn = DataSourceLocator.newInstance().getDataSource(realDbName).getConnection();
-			DbMeta meta = DbMeta.getDbMeta(realDbName, conn);
+			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
+			DbMeta meta = DbMeta.getDbMeta(allInOneKey, conn);
 			return new ConnectionHolder(conn, meta);
 		} catch (Throwable e) {
-			throw new SQLException("Can not get connection from DB " + realDbName, e);
+			throw new SQLException("Can not get connection from DB " + allInOneKey, e);
 		}
 	}
 	
-	private void applyHints(DalHints hints, Connection conn) throws SQLException {
-		Integer level = hints.getInt(DalHintEnum.isolationLevel);
-		
-		if(level == null || conn.getTransactionIsolation() == level) {
-			// Make sure this hints
-			hints.set(DalHintEnum.oldIsolationLevel, null);
-			return;
-		}
-
-		hints.set(DalHintEnum.oldIsolationLevel, conn.getTransactionIsolation());
-		conn.setTransactionIsolation(level);
-	}
-	
-	public void cleanup(DalHints hints, ResultSet rs, Statement statement, Connection conn) {
+	public void cleanup(DalHints hints, ResultSet rs, Statement statement, ConnectionHolder connHolder) {
 		if(rs != null) {
 			try {
 				rs.close();
@@ -124,36 +110,18 @@ public class DalConnectionManager {
 			}
 		}
 		
-		closeConnection(hints, conn);
+		closeConnection(connHolder);
 	}
 
-	private void closeConnection(DalHints hints, Connection conn) {
-		if(conn == null) 
-			return;
-
+	private void closeConnection(ConnectionHolder connHolder) {
 		//do nothing for connection in transaction
 		if(DalTransactionManager.isInTransaction())
 			return;
 		
-		closeConnection(hints.getInt(DalHintEnum.oldIsolationLevel), conn);
-	}	
-
-	public static void closeConnection(Integer oldLevel, Connection conn) {
-		try {
-			if(!conn.isClosed()){
-				restoreIsolation(oldLevel, conn);
-				conn.close();
-			}
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static void restoreIsolation(Integer oldLevel, Connection conn) throws SQLException {
-		if(oldLevel == null) {
+		// For list of nested commands, the top level action will not hold any connHolder
+		if(connHolder == null)
 			return;
-		}
 		
-		conn.setTransactionIsolation(oldLevel);
+		connHolder.closeConnection();
 	}
 }

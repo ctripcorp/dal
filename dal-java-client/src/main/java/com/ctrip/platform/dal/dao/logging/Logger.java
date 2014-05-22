@@ -79,25 +79,25 @@ public class Logger {
 	public static void logGetConnectionSuccess(String realDbName)
 	{
 		Logger.log("Get connection", DalEventEnum.CONNECTION_SUCCESS, LogLevel.INFO, 
-				String.format("Connection %s database successfully", realDbName));
+				String.format("Connect %s database successfully", realDbName));
 	}
 	
 	public static void logGetConnectionFailed(String realDbName, Throwable e)
 	{
-		String msg = e.getMessage();
-		try {  
-            StringWriter sw = new StringWriter();  
-            PrintWriter pw = new PrintWriter(sw);  
-            e.printStackTrace(pw);  
-            msg = "\r\n" + sw.toString() + "\r\n";  
-        } catch (Exception e2) {  
-        	msg = "bad getErrorInfoFromException";  
-        }
+		String msg = getExceptionStack(e);
 		
-		String logMsg = "Connection " + realDbName + " database failed." +
+		String logMsg = "Connectiing to " + realDbName + " database failed." +
 				System.lineSeparator() + System.lineSeparator() +
 				"********** Exception Info **********" + System.lineSeparator() + msg;
 		Logger.log("Get connection", DalEventEnum.CONNECTION_FAILED, LogLevel.ERROR, logMsg);	
+	}
+	
+	public static void error(String desc, Throwable e) {
+		String msg = getExceptionStack(e);
+		
+		String logMsg = desc + System.lineSeparator() + System.lineSeparator() +
+		"********** Exception Info **********" + System.lineSeparator() + msg;
+		logger.error(TITLE, logMsg);
 	}
 	
 	public static void log(String name, DalEventEnum event, LogLevel level, String msg)
@@ -122,6 +122,21 @@ public class Logger {
 		default:
 			break;
 		}
+	}
+	
+	private static String getExceptionStack(Throwable e)
+	{
+		String msg = e.getMessage();
+		try {  
+            StringWriter sw = new StringWriter();  
+            PrintWriter pw = new PrintWriter(sw);  
+            e.printStackTrace(pw);  
+            msg = "\r\n" + sw.toString() + "\r\n";  
+        } catch (Exception e2) {  
+        	msg = "bad getErrorInfoFromException";  
+        }
+		
+		return msg;
 	}
 	
 	/**

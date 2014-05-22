@@ -445,7 +445,7 @@ public class DalDirectClient implements DalClient {
 				action.statement : action.preparedStatement != null?
 						action.preparedStatement : action.callableStatement;
 
-		connManager.cleanup(hints, action.rs, statement, action.conn);
+		connManager.cleanup(hints, action.rs, statement, action.connHolder);
 		
 		action.rs = null;
 		action.statement = null;

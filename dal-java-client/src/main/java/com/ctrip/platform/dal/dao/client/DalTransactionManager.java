@@ -19,8 +19,7 @@ public class DalTransactionManager {
 		ConnectionCache connCache = connectionCacheHolder.get();
 
 		if(connCache == null) {
-			connCache = new ConnectionCache(
-					hints.getInt(DalHintEnum.oldIsolationLevel), 
+			connCache = new ConnectionCache( 
 					getConnection(hints, true, operation), 
 					connManager.getLogicDbName());
 			

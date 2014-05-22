@@ -90,11 +90,6 @@ public enum DalHintEnum {
 	 */
 	isolationLevel,
 	
-	/* 
-	 * cache for store old isolationLevel of connection before we apply isolationLevel. It is for internal use. 
-	 */
-	oldIsolationLevel,
-	
 	/*
 	 * used in DalTableDao, when set the update field can be null value.
 	 */

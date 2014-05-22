@@ -6,14 +6,12 @@ import java.sql.SQLException;
 public class ConnectionCache  {
 	private String logicDbName;
 	private ConnectionHolder connHolder;
-	private Integer oldLevel;
 	private int level = 0;
 	private boolean rolledBack;
 	
-	public ConnectionCache(Integer oldLevel, ConnectionHolder connHolder, String logicDbName) throws SQLException{
+	public ConnectionCache(ConnectionHolder connHolder, String logicDbName) throws SQLException{
 		this.logicDbName = logicDbName;
 		this.connHolder = connHolder;
-		this.oldLevel = oldLevel;
 		connHolder.getConn().setAutoCommit(false);
 	}
 	
@@ -69,7 +67,7 @@ public class ConnectionCache  {
 			e.printStackTrace();
 		}
 		
-		DalConnectionManager.closeConnection(oldLevel, conn);
+		connHolder.closeConnection();
 		DalTransactionManager.clearCache();
 	}
 }

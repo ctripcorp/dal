@@ -132,7 +132,7 @@ public class Logger {
             PrintWriter pw = new PrintWriter(sw);  
             e.printStackTrace(pw);  
             msg = "\r\n" + sw.toString() + "\r\n";  
-        } catch (Exception e2) {  
+        } catch (Throwable e2) {  
         	msg = "bad getErrorInfoFromException";  
         }
 		

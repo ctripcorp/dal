@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.dao.client;
 
 import java.sql.SQLException;
 
-import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.logging.DalEventEnum;
 
@@ -72,5 +71,35 @@ public class DalTransactionManager {
 	
 	public static void clearCache() {
 		connectionCacheHolder.set(null);
-	}	
+	}
+	
+	public <T> T doInTransaction(ConnectionAction<T> action, DalHints hints)
+			throws SQLException {
+		action.start();
+		
+		Throwable ex = null;
+		T result = null;
+		
+		int level = 0;
+		try {
+			level = startTransaction(hints, action.operation);
+			
+			action.initLogEntry(connManager.getLogicDbName(), hints);
+			action.populateDbMeta();
+			
+			result = action.execute();	
+			
+			action.cleanup();
+			endTransaction(level);
+			return result;
+		} catch (Throwable e) {
+			ex = e;
+			action.cleanup();
+			rollbackTransaction(level);
+		}
+		
+		action.end(result, ex);
+		
+		return result;
+	}
 }

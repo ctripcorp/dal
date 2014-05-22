@@ -9,17 +9,17 @@ import com.ctrip.platform.dal.dao.logging.DalEventEnum;
 public class DalTransactionManager {
 	private DalConnectionManager connManager;
 
-	private static final ThreadLocal<ConnectionCache> connectionCacheHolder = new ThreadLocal<ConnectionCache>();
+	private static final ThreadLocal<DalTransaction> connectionCacheHolder = new ThreadLocal<DalTransaction>();
 
 	public DalTransactionManager(DalConnectionManager connManager) {
 		this.connManager = connManager;
 	}
 	
 	public int startTransaction(DalHints hints, DalEventEnum operation) throws SQLException {
-		ConnectionCache connCache = connectionCacheHolder.get();
+		DalTransaction connCache = connectionCacheHolder.get();
 
 		if(connCache == null) {
-			connCache = new ConnectionCache( 
+			connCache = new DalTransaction( 
 					getConnection(hints, true, operation), 
 					connManager.getLogicDbName());
 			
@@ -29,7 +29,7 @@ public class DalTransactionManager {
 	}
 
 	public void endTransaction(int startLevel) throws SQLException {
-		ConnectionCache connCache = connectionCacheHolder.get();
+		DalTransaction connCache = connectionCacheHolder.get();
 		
 		if(connCache == null)
 			throw new SQLException("calling endTransaction with empty ConnectionCache");
@@ -42,7 +42,7 @@ public class DalTransactionManager {
 	}
 	
 	public void rollbackTransaction(int startLevel) throws SQLException {
-		ConnectionCache connCache = connectionCacheHolder.get();
+		DalTransaction connCache = connectionCacheHolder.get();
 		
 		// Already handled in deeper level
 		if(connCache == null)
@@ -60,7 +60,7 @@ public class DalTransactionManager {
 	}
 	
 	private ConnectionHolder getConnection(DalHints hints, boolean useMaster, DalEventEnum operation) throws SQLException {
-		ConnectionCache connCache = connectionCacheHolder.get();
+		DalTransaction connCache = connectionCacheHolder.get();
 		
 		if(connCache == null) {
 			return connManager.getNewConnection(hints, useMaster, operation);

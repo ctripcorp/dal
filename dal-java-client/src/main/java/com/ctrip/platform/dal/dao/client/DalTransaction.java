@@ -3,13 +3,13 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class ConnectionCache  {
+public class DalTransaction  {
 	private String logicDbName;
 	private ConnectionHolder connHolder;
 	private int level = 0;
 	private boolean rolledBack;
 	
-	public ConnectionCache(ConnectionHolder connHolder, String logicDbName) throws SQLException{
+	public DalTransaction(ConnectionHolder connHolder, String logicDbName) throws SQLException{
 		this.logicDbName = logicDbName;
 		this.connHolder = connHolder;
 		connHolder.getConn().setAutoCommit(false);

@@ -303,6 +303,38 @@ public class DalDirectClientMySqlTest {
 		Assert.assertArrayEquals(new int[] { 1, 1, 1 }, counts);
 	}
 
+	@Test
+	public void batchUpdateTestWithRollback() throws SQLException{
+		String[] sqls = new String[] {
+				"DELETE FROM " + TABLE_NAME + " WHERE ID = 1",
+				"DELETE FROM " + TABLE_NAME + " WHERE _ID = 2",
+				"DELETE FROM " + TABLE_NAME + " WHERE ID = 3" };
+		DalHints hints = new DalHints();
+		//hints.set(DalHintEnum.forceAutoCommit);
+		try{
+			client.batchUpdate(sqls, hints);
+			Assert.fail();
+		}catch(Exception e){ }
+		List<ClientTestModel> models = this.queryModelsByIds();
+		Assert.assertEquals(3, models.size());
+	}
+	
+	@Test
+	public void batchUpdateTestWithoutRollback() throws SQLException{
+		String[] sqls = new String[] {
+				"DELETE FROM " + TABLE_NAME + " WHERE ID = 1",
+				"DELETE FROM " + TABLE_NAME + " WHERE _ID = 2",
+				"DELETE FROM " + TABLE_NAME + " WHERE ID = 3" };
+		DalHints hints = new DalHints();
+		hints.set(DalHintEnum.forceAutoCommit);
+		try{
+			client.batchUpdate(sqls, hints);
+			Assert.fail();
+		}catch(Exception e){ }
+		List<ClientTestModel> models = this.queryModelsByIds();
+		Assert.assertEquals(1, models.size());
+	}
+	
 	/**
 	 * Test the batch update function without parameters not all success.
 	 * 

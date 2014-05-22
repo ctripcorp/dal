@@ -189,6 +189,7 @@
                     $("#tables")[0].selectize.setValue(record.table_name);
                     $("#method_name").val(record.method_name);
                     $("#crud_option").val(record.crud_type);
+                    $("#crud_option").attr("disabled","disabled");
                 }
                 current.hide();
                 $(".step2-2").show();

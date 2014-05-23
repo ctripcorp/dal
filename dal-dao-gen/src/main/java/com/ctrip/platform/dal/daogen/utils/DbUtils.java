@@ -532,7 +532,7 @@ public class DbUtils {
 
 			allColumnsRs = connection.getMetaData().getColumns(null, null,
 					tableName, null);
-
+			boolean terminal = false;
 			if (language == CurrentLanguage.CSharp) {
 				while (allColumnsRs.next()) {
 					CSharpParameterHost host = new CSharpParameterHost();
@@ -583,7 +583,10 @@ public class DbUtils {
 							typeMapper.get(host.getSqlType()) :Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
 					if(null == javaClass){
 						if(null != typeName && typeName.equalsIgnoreCase("sql_variant")){
-							javaClass = Object.class;
+							log.fatal(String.format("The sql_variant is not support by java.[%s, %s, %s, %s, %s]", 
+									host.getName(), dbName, tableName, host.getSqlType(), javaClass));
+							terminal = true;
+							break;
 						}
 						else if(null != typeName && typeName.equalsIgnoreCase("datetimeoffset")){
 							javaClass = Timestamp.class;
@@ -591,6 +594,8 @@ public class DbUtils {
 						else{
 							log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", 
 									host.getName(), dbName, tableName, host.getSqlType(), javaClass));
+							terminal = true;
+							break;
 						}
 					}
 					host.setJavaClass(javaClass);
@@ -601,7 +606,7 @@ public class DbUtils {
 				}
 			}
 
-			return allColumns;
+			return terminal ? null : allColumns;
 		} catch (SQLException e) {
 			log.error(String.format("get all column names error: [dbName=%s;tableName=%s;language=%s]", 
 					dbName, tableName, language), e);

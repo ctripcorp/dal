@@ -29,7 +29,7 @@ jQuery(document).ready(function () {
             text: '所有项目',
             icon: 'fa fa-folder-o',
             // plus: true,
-            group: true,
+            group: true
         }],
         menu: [{
             id: "download",
@@ -55,7 +55,7 @@ jQuery(document).ready(function () {
                 });
                 break;
             }
-        },
+        }
     }));
 
     w2ui['main_layout'].content('main', '<div id="code_editor" class="code_edit" style="height:100%"></div>');
@@ -100,7 +100,7 @@ var reloadProjects = function () {
                     //console.log(this == w2ui["sidebar"]);
                     event.object.icon = "fa fa-folder-o";
                     w2ui['sidebar'].refresh();
-                },
+                }
             });
         });
         currentElement.add('all_projects', new_nodes);

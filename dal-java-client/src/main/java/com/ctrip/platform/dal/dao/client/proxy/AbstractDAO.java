@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.client;
+package com.ctrip.platform.dal.dao.client.proxy;
 
 import java.sql.ResultSet;
 import java.util.List;

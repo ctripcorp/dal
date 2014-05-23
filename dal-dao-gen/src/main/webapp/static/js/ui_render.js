@@ -23,7 +23,7 @@
                     //style: 'background-color: white;'
                 },{ 
                     type: 'preview', 
-                    size: '50%', 
+                    size: '50%',
                     resizable: true
                 }],
                 onResizing: function(event) {
@@ -345,7 +345,8 @@
                     } else if (fileName.match(/java$/)) {
                         ace.edit("code_editor").getSession().setMode("ace/mode/java");
                     }
-                    $.get("/rest/file/content?id=" 
+                    $.get("/rest/file/content?random="+Math.random()
+                        +"&id="
                         + w2ui['grid'].current_project
                         +"&language="+$("#viewCode").val() 
                         + "&name=" + fileName, function (data) {
@@ -374,7 +375,6 @@
 
             var code_editor_html = '<div id="code_editor" class="code_edit" style="height:100%"></div>';
             w2ui['sub_layout'].content('main',code_editor_html);
-            //End tree side bar
 
             var editor = ace.edit("code_editor");
             editor.setTheme("ace/theme/monokai");
@@ -383,10 +383,25 @@
             editor.getSession().on('change', function(e) {
                 if($("#code_fullscreen").length<=0){
                     $("#code_editor:first-child").prepend('<img id="code_fullscreen" src="/static/images/fullscreen.jpg" alt="全屏" class="code-fullscreen" />');
+
+                    $('#main_layout2').height($(document).height() - 60);
+                    $("#main_layout2").w2layout({
+                        name: 'main_layout2',
+                        panels: [{
+                            type: 'main'
+                        }]
+                    });
+                    var code_editor_html = '<div id="code_editor_fullscreen" class="code_edit" style="height:100%"></div>';
+                    w2ui['main_layout2'].content('main',code_editor_html);
+
                     var code_editor_fullscreen = ace.edit("code_editor_fullscreen");
                     code_editor_fullscreen.setTheme("ace/theme/monokai");
                     code_editor_fullscreen.getSession().setMode("ace/mode/csharp");
+
                     $(document.body).on('click', "#code_fullscreen", function(event){
+                        if($("#code_fullscreen_back").length<=0){
+                            $("#code_editor_fullscreen:first-child").prepend('<img id="code_fullscreen_back" src="/static/images/back.jpg" alt="全屏" class="code-fullscreen" />');
+                        }
                         code_editor_fullscreen = ace.edit("code_editor_fullscreen");
                         if("java"==$("#viewCode").val()){
                             code_editor_fullscreen.getSession().setMode("ace/mode/java");
@@ -394,9 +409,24 @@
                             code_editor_fullscreen.getSession().setMode("ace/mode/csharp");
                         }
                         var value = ace.edit("code_editor").getValue();
+
+                        $("#main_layout").hide();
+                        $("#main_layout2").show();
+
                         code_editor_fullscreen.setValue(value);
-                        $("#view_code_fullscreen").modal();
+
+//                        $("#view_code_fullscreen").modal();
                         code_editor_fullscreen.resize();
+                        $('#main_layout2').resize();
+                        code_editor_fullscreen.resize();
+                    });
+
+                    $(document.body).on('click', "#code_fullscreen_back", function(event){
+                        code_editor_fullscreen = ace.edit("code_editor_fullscreen");
+                        code_editor_fullscreen.setValue(null);
+                        $("#main_layout").show();
+                        $("#main_layout2").hide();
+                        $('#main_layout').resize();
                     });
                 }
             });

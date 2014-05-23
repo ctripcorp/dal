@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.client;
 
+import java.awt.color.CMMException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,6 +13,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.logging.DalEventEnum;
+import com.ctrip.platform.dal.dao.logging.LogEntry;
 import com.ctrip.platform.dal.dao.logging.Logger;
 import com.ctrip.platform.dal.dao.strategy.DalShardStrategy;
 
@@ -93,7 +95,29 @@ public class DalConnectionManager {
 		}
 	}
 	
-	public void cleanup(DalHints hints, ResultSet rs, Statement statement, DalConnection connHolder) {
+	public <T> T doInConnection(ConnectionAction<T> action, DalHints hints)
+			throws SQLException {
+		action.initLogEntry(logicDbName, hints);
+		action.start();
+		
+		Throwable ex = null;
+		T result = null;
+		
+		try {
+			result = action.execute();
+		} catch (Throwable e) {
+			ex = e;
+		} finally {
+			action.populateDbMeta();
+			action.cleanup();
+		}
+		
+		action.end(result, ex);
+
+		return result;
+	}
+	
+	public static void cleanup(ResultSet rs, Statement statement, DalConnection connHolder) {
 		if(rs != null) {
 			try {
 				rs.close();
@@ -113,7 +137,7 @@ public class DalConnectionManager {
 		closeConnection(connHolder);
 	}
 
-	private void closeConnection(DalConnection connHolder) {
+	private static void closeConnection(DalConnection connHolder) {
 		//do nothing for connection in transaction
 		if(DalTransactionManager.isInTransaction())
 			return;

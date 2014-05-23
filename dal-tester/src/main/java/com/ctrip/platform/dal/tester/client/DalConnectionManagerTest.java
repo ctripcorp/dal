@@ -53,7 +53,7 @@ public class DalConnectionManagerTest {
 			ResultSet rs = statement.executeQuery("select * from City");
 			rs.next();
 			
-			test.cleanup(hints, rs, statement, conn);
+//			test.cleanup(hints, rs, statement, conn);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();

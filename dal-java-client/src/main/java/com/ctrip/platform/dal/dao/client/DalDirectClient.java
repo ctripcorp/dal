@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +24,6 @@ import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.logging.DalEventEnum;
-import com.ctrip.platform.dal.dao.logging.LogEntry;
-import com.ctrip.platform.dal.dao.logging.Logger;
-import com.ctrip.platform.dal.dao.logging.MetricsLogger;
 
 /**
  * The direct connection implementation for DalClient.
@@ -37,18 +33,15 @@ public class DalDirectClient implements DalClient {
 	private DalStatementCreator stmtCreator = new DalStatementCreator();
 	private DalConnectionManager connManager;
 	private DalTransactionManager transManager;
-	private String logicDbName;
 
 	public DalDirectClient(DruidDataSourceWrapper connPool, String logicDbName) {
 		connManager = new DalConnectionManager(logicDbName, connPool);
 		transManager = new DalTransactionManager(connManager);
-		this.logicDbName = logicDbName;
 	}
 	
 	public DalDirectClient(DalConfigure config, String logicDbName) {
 		connManager = new DalConnectionManager(logicDbName, config);
 		transManager = new DalTransactionManager(connManager);
-		this.logicDbName = logicDbName;
 	}
 
 	@Override
@@ -302,99 +295,14 @@ public class DalDirectClient implements DalClient {
 	
 	private <T> T doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
-		LogEntry entry = createLogEntry(action, hints);
-		long start = start();
-		Throwable ex = null;
-		T result = null;
-		
-		try {
-			result = action.execute();
-		} catch (Throwable e) {
-			ex = e;
-		} finally {
-			action.populate(entry);
-			cleanup(hints, action);
-		}
-		
-		log(entry, start, result, ex);
-		handleException(ex);
-		
-		return result;
+		return connManager.doInConnection(action, hints);
 	}
 	
 	private <T> T doInTransaction(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
-		LogEntry entry = null;
-		long start = start();
-		Throwable ex = null;
-		T result = null;
-		
-		int level = 0;
-		try {
-			level = startTransaction(hints, action.operation);
-			
-			entry = createLogEntry(action, hints);
-			populate(entry);
-			
-			result = action.execute();	
-			
-			endTransaction(level);
-			return result;
-		} catch (Throwable e) {
-			ex = e;
-			rollbackTransaction(level);
-		} finally {
-			cleanup(hints, action);
-		}
-		
-		log(entry, start, result, ex);
-		handleException(ex);
-		
-		return result;
+		return transManager.doInTransaction(action, hints);
 	}
 	
-	/*
-	 * createLogEntry will check whether current operation is in transaction. 
-	 * so it must be put after startTransaction. It is not require so for doInConnection
-	 */
-	private LogEntry createLogEntry(ConnectionAction<?> action, DalHints hints) {
-		LogEntry entry = new LogEntry(hints);
-		entry.setEvent(action.operation);
-		entry.setDatabaseName(logicDbName);
-		entry.setCallString(action.callString);
-		entry.setSql(action.sql);
-		entry.setSqls(action.sqls);
-		entry.setParameters(action.parameters);
-		entry.setParametersList(action.parametersList);
-		entry.setTransactional(DalTransactionManager.isInTransaction());
-		
-		return entry;
-	}
-	
-	private long start() {
-		return System.currentTimeMillis();
-	}
-	
-	private void log(LogEntry entry, long start, Object result, Throwable e) throws SQLException {
-		try {
-			long duration = start() - start;
-			if(e == null) {
-				Logger.success(entry, duration, fetchQueryRows(result));
-				MetricsLogger.success(entry, duration);
-			}else{
-				Logger.fail(entry, duration, e);
-				MetricsLogger.fail(entry, duration);
-			}
-		} catch (Throwable e1) {
-			e1.printStackTrace();
-		}
-	}
-
-	private int fetchQueryRows(Object result)
-	{
-		return null != result && result instanceof Collection<?> ? ((Collection<?>)result).size() : 0;
-	}
-
 	public Connection getConnection(DalHints hints, ConnectionAction<?> action) throws SQLException {
 		action.connHolder = transManager.getConnection(hints, action.operation);
 		return action.connHolder.getConn();
@@ -422,41 +330,5 @@ public class DalDirectClient implements DalClient {
 	
 	private CallableStatement createCallableStatement(Connection conn,  String sql, StatementParameters[] parametersList, DalHints hints) throws Exception {
 		return stmtCreator.createCallableStatement(conn, sql, parametersList, hints);
-	}
-	
-	private int startTransaction(DalHints hints, DalEventEnum operation) throws SQLException {
-		return transManager.startTransaction(hints, operation);
-	}
-	
-	private void populate(LogEntry entry) throws SQLException {
-		transManager.getCurrentDbMeta().populate(entry);
-	}
-
-	private void endTransaction(int startLevel) throws SQLException {
-		transManager.endTransaction(startLevel);
-	}
-
-	private void rollbackTransaction(int startLevel) throws SQLException {
-		transManager.rollbackTransaction(startLevel);
-	}
-	
-	private void cleanup(DalHints hints, ConnectionAction<?> action) {
-		Statement statement = action.statement != null? 
-				action.statement : action.preparedStatement != null?
-						action.preparedStatement : action.callableStatement;
-
-		connManager.cleanup(hints, action.rs, statement, action.connHolder);
-		
-		action.rs = null;
-		action.statement = null;
-		action.preparedStatement = null;
-		action.callableStatement = null;
-		action.connHolder = null;
-		action.conn = null;
-	}
-	
-	private void handleException(Throwable e) throws SQLException {
-		if(e != null)
-			throw e instanceof SQLException ? (SQLException)e : new SQLException(e);
-	}
+	}	
 }

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.client;
+package com.ctrip.platform.dal.dao.client.proxy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +24,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+
+import com.ctrip.platform.dal.dao.client.DasProto;
+import com.ctrip.platform.dal.dao.client.DasProto.AvailableType;
+import com.ctrip.platform.dal.dao.client.DasProto.InnerResultSet;
+import com.ctrip.platform.dal.dao.client.DasProto.ResponseHeader;
+import com.ctrip.platform.dal.dao.client.DasProto.Row;
 
 public class DasResultSet implements ResultSet {
 

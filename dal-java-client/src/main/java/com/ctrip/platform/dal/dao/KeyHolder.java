@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.dao;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,7 @@ public class KeyHolder {
 	
 	/**
 	 * Get the generated Id. The type is of Number.
-	 * @return null if no key found, or the id in number
+	 * @return id in number
 	 * @throws SQLException if there is more than one generated key or the conversion is failed.
 	 */
 	public Number getKey() throws SQLException {

@@ -34,15 +34,7 @@ public class DalConnection {
 	public String getCatalog() throws SQLException {
 		return conn.getCatalog();
 	}
-	
-	public boolean isClosed() throws SQLException {
-		return conn.isClosed();
-	}
-	
-	public void close() throws SQLException {
-		conn.close();
-	}
-	
+
 	public void setAutoCommit(boolean autoCommit) throws SQLException {
 		conn.setAutoCommit(autoCommit);
 	}
@@ -57,7 +49,7 @@ public class DalConnection {
 		conn.setTransactionIsolation(level);
 	}
 	
-	public void closeConnection() {
+	public void close() {
 		try {
 			if(conn == null || conn.isClosed())
 				return;

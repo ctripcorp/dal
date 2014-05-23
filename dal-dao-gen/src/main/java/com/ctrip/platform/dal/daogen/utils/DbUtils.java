@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -582,7 +583,10 @@ public class DbUtils {
 							typeMapper.get(host.getSqlType()) :Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
 					if(null == javaClass){
 						if(null != typeName && typeName.equalsIgnoreCase("sql_variant")){
-							javaClass = String.class;
+							javaClass = Object.class;
+						}
+						else if(null != typeName && typeName.equalsIgnoreCase("datetimeoffset")){
+							javaClass = Timestamp.class;
 						}
 						else{
 							log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", 
@@ -614,7 +618,7 @@ public class DbUtils {
 
 	private static Map<Integer, Class<?>> getSqlType2JavaTypeMaper(String dbName, String tableViewName)
 	{
-		Map<Integer, Class<?>> map = null;
+		Map<Integer, Class<?>> map = new HashMap<Integer, Class<?>>();;
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
@@ -632,8 +636,6 @@ public class DbUtils {
 			rs = connection.getMetaData().getColumns(null, null,
 					tableViewName, null);
 			
-			Map<Integer, Class<?>> result = new HashMap<Integer, Class<?>>();
-			
 			ResultSetMetaData rsmd = rs.getMetaData();
 			for(int i = 1; i <= rsmd.getColumnCount(); i++) {
 				Integer sqlType = rsmd.getColumnType(i);
@@ -643,9 +645,9 @@ public class DbUtils {
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}
-				if(!result.containsKey(sqlType) && null != javaType)
+				if(!map.containsKey(sqlType) && null != javaType)
 				{
-					result.put(sqlType, javaType);
+					map.put(sqlType, javaType);
 				}
 			}
 		} catch (SQLException e) {

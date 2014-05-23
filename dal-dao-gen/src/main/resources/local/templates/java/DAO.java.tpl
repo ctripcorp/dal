@@ -362,7 +362,11 @@ public class ${host.getPojoClassName()}Dao {
 	**/
     public int ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 #end
+#if(${method.getInClauses()} != "")
 		String sql = SQLParser.parse("${method.getSql()}",${method.getInClauses()});
+#else
+		String sql = SQLParser.parse("${method.getSql()}");
+#end
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
 		

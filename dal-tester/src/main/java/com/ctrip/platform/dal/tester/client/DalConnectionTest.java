@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import org.junit.Test;
 
 import com.ctrip.datasource.locator.DataSourceLocator;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DbMeta;
 
@@ -40,22 +41,6 @@ public class DalConnectionTest {
 			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
 			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
 			assertNotNull(test.getConn());
-		} catch (Throwable e){
-			fail();
-			e.printStackTrace();
-		}finally{
-			if(conn != null)
-				conn.close();
-		}
-	}
-
-	@Test
-	public void testGetOldIsolationLevel() throws SQLException {
-		Connection conn = null;
-		try {
-			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
-			test.getOldIsolationLevel();
 		} catch (Throwable e){
 			fail();
 			e.printStackTrace();
@@ -117,8 +102,26 @@ public class DalConnectionTest {
 	}
 
 	@Test
-	public void testApplyHints() {
-//		fail("Not yet implemented");
+	public void testApplyHints() throws SQLException {
+		Connection conn = null;
+		try {
+			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
+			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
+			DalHints hints = new DalHints();
+			hints.setIsolationLevel(Connection.TRANSACTION_SERIALIZABLE);
+			test.applyHints(hints);
+			assertTrue(conn.getTransactionIsolation() == Connection.TRANSACTION_SERIALIZABLE);
+			
+			hints.setIsolationLevel(Connection.TRANSACTION_NONE);
+			test.applyHints(hints);
+			assertTrue(conn.getTransactionIsolation() == Connection.TRANSACTION_NONE);
+		} catch (Throwable e){
+			fail();
+			e.printStackTrace();
+		}finally{
+			if(conn != null)
+				conn.close();
+		}
 	}
 
 	@Test

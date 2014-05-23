@@ -23,10 +23,6 @@ public class DalConnection {
 		return conn;
 	}
 
-	public int getOldIsolationLevel() {
-		return oldIsolationLevel;
-	}
-
 	public DbMeta getMeta() {
 		return meta;
 	}

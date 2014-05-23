@@ -18,6 +18,7 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
@@ -93,11 +94,11 @@ public class TestTableDao {
 	 * SQL insert
 	 * Note: there must be one non-null field in daoPojo
 	**/
-	public void insert(TestTable...daoPojos) throws SQLException {
+	public void insert(KeyHolder keyHolder, TestTable...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
 		DalHints hints = new DalHints();
-		client.insert(hints, null, daoPojos);
+		client.insert(hints, keyHolder, daoPojos);
 	}
 	
 	public static class TestTableParser extends AbstractDalParser<TestTable> {

@@ -186,7 +186,7 @@ public class JavaParameterHost extends AbstractParameterHost {
 	}
 	
 	public String getJavaTypeDisplay() {
-		return Integer.toString(this.sqlType);
+		return Consts.jdbcSqlTypeDisplay.get(this.sqlType);
 	}
 
 	private static Set<Integer> stringTypes = new HashSet<Integer>();

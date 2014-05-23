@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.KeyHolder;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,7 +56,10 @@ public class TestTableDaoTest {
 			pojo.setDecimal(new BigDecimal(124.0));
 			pojo.setNchar("T");
 			
-			dao.insert(pojo);
+			KeyHolder kh  = new KeyHolder();
+			dao.insert(kh, pojo);
+			Number generatedKey = kh.getKey(0);
+			System.out.println(generatedKey);
 			
 			List<TestTable> tables = dao.queryWhereClause("id < 100");
 			System.out.println(tables.size());

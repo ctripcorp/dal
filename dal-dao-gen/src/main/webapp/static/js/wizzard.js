@@ -36,6 +36,10 @@
             $("#error_msg").text("请选择All-In-One数据库！");
             return;
         }
+        if($("#comment").val() == ""){
+            $("#error_msg").text("请输入方法功能描述！");
+            return;
+        }
         $("#error_msg").text("");
 
         //首先蒙板化整个body,在后续get成功或者失败时，取消蒙板化

@@ -76,10 +76,10 @@ public abstract class ConnectionAction<T> {
 	}
 	
 	public void populateDbMeta() {
-		if(connHolder == null || connHolder.getMeta() == null)
-			return;
-		
-		connHolder.getMeta().populate(entry);
+		DbMeta meta = DalTransactionManager.isInTransaction() ?
+				DalTransactionManager.getCurrentDbMeta() : connHolder.getMeta();
+			
+		meta.populate(entry);
 	}
 	
 	/*
@@ -128,20 +128,55 @@ public abstract class ConnectionAction<T> {
 	}
 	
 	public void cleanup() {
+		closeResultSet();
+		closeStatement();
+		closeConnection();
+	}
+	
+	private void closeResultSet() {
+		if(rs != null) {
+			try {
+				rs.close();
+			} catch (SQLException e) {
+				Logger.error("Close result set failed.", e);
+			}
+		}
+		rs = null;
+	}
+	
+	private void closeStatement() {
 		Statement _statement = statement != null? 
 				statement : preparedStatement != null?
 						preparedStatement : callableStatement;
 
-		DalConnectionManager.cleanup(rs, _statement, connHolder);
-		
-		rs = null;
 		statement = null;
 		preparedStatement = null;
 		callableStatement = null;
+		
+		if(_statement != null) {
+			try {
+				_statement.close();
+			} catch (SQLException e) {
+				Logger.error("Close statement failed.", e);
+			}
+		}		
+	}
+
+	private void closeConnection() {
+		//do nothing for connection in transaction
+		if(DalTransactionManager.isInTransaction())
+			return;
+		
+		// For list of nested commands, the top level action will not hold any connHolder
+		if(connHolder == null)
+			return;
+		
+		connHolder.close();
+		
 		connHolder = null;
 		conn = null;
 	}
-	
+
 	private void handleException(Throwable e) throws SQLException {
 		if(e != null)
 			throw e instanceof SQLException ? (SQLException)e : new SQLException(e);

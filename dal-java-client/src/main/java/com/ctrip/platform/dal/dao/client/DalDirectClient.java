@@ -49,7 +49,7 @@ public class DalDirectClient implements DalClient {
 			throws SQLException {
 		ConnectionAction<T> action = new ConnectionAction<T>() {
 			@Override
-			T execute() throws Exception {
+			public T execute() throws Exception {
 				conn = getConnection(hints, this);
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
@@ -67,7 +67,7 @@ public class DalDirectClient implements DalClient {
 			throws SQLException {
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
-			Integer execute() throws Exception {
+			public Integer execute() throws Exception {
 				conn = getConnection(hints, this);
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
@@ -85,7 +85,7 @@ public class DalDirectClient implements DalClient {
 			final DalHints hints, final KeyHolder generatedKeyHolder) throws SQLException {
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
-			Integer execute() throws Exception {
+			public Integer execute() throws Exception {
 				conn = getConnection(hints, this);
 
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints, generatedKeyHolder);
@@ -111,7 +111,7 @@ public class DalDirectClient implements DalClient {
 	public int[] batchUpdate(String[] sqls, final DalHints hints) throws SQLException {
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
-			int[] execute() throws Exception {
+			public int[] execute() throws Exception {
 				conn = getConnection(hints, this);
 				statement = createStatement(conn, hints);
 				for(String sql: sqls)
@@ -130,7 +130,7 @@ public class DalDirectClient implements DalClient {
 			final DalHints hints) throws SQLException {
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
-			int[] execute() throws Exception {
+			public int[] execute() throws Exception {
 				conn = getConnection(hints, this);
 				
 				statement = createPreparedStatement(conn, sql, parametersList, hints);
@@ -148,7 +148,7 @@ public class DalDirectClient implements DalClient {
 		final DalClient client = this;
 		ConnectionAction<?> action = new ConnectionAction<Object>() {
 			@Override
-			Object execute() throws Exception {
+			public Object execute() throws Exception {
 				command.execute(client);
 				return null;
 			}
@@ -164,7 +164,7 @@ public class DalDirectClient implements DalClient {
 		final DalClient client = this;
 		ConnectionAction<?> action = new ConnectionAction<Object>() {
 			@Override
-			Object execute() throws Exception {
+			public Object execute() throws Exception {
 				for(DalCommand cmd: commands) {
 					if(!cmd.execute(client))
 						break;
@@ -183,7 +183,7 @@ public class DalDirectClient implements DalClient {
 			StatementParameters parameters, final DalHints hints) throws SQLException {
 		ConnectionAction<Map<String, ?>> action = new ConnectionAction<Map<String, ?>>() {
 			@Override
-			Map<String, ?> execute() throws Exception {
+			public Map<String, ?> execute() throws Exception {
 				List<StatementParameter> resultParameters = new ArrayList<StatementParameter>();
 				List<StatementParameter> callParameters = new ArrayList<StatementParameter>();
 				for (StatementParameter parameter : parameters.values()) {
@@ -220,7 +220,7 @@ public class DalDirectClient implements DalClient {
 			throws SQLException {
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
-			int[] execute() throws Exception {
+			public int[] execute() throws Exception {
 
 				conn = getConnection(hints, this);
 				

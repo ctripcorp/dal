@@ -1,13 +1,14 @@
 package com.ctrip.platform.dal.tester.client;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.client.ConnectionAction;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
@@ -38,51 +39,61 @@ public class DalConnectionManagerTest {
 	}
 
 	@Test
-	public void testCleanup() {
+	public void testDoInConnection() {
 		DalConfigure config = null;
-		boolean useMaster = true;
-		DalHints hints = new DalHints();
+		final boolean useMaster = true;
+		final DalHints hints = new DalHints();
 		
 		try {
 			config = DalConfigureFactory.load();
 			
-			DalConnectionManager test = new DalConnectionManager(logicDbName, config);
-			DalConnection conn = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
-			
-			Statement statement = conn.getConn().createStatement();
-			ResultSet rs = statement.executeQuery("select * from City");
-			rs.next();
-			
-//			test.cleanup(hints, rs, statement, conn);
+			final DalConnectionManager test = new DalConnectionManager(logicDbName, config);
+			ConnectionAction<Object> action = new ConnectionAction<Object>() {
+				public Object execute() throws Exception {
+					DalConnection conn = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
+					
+					Statement statement = conn.getConn().createStatement();
+					ResultSet rs = statement.executeQuery("select * from City");
+					rs.next();
+					return null;
+				}
+			};
+			test.doInConnection(action, hints);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
 		}
 	}
-	
-//	@Test
-//	public void testCloseConnection() {
-//		DalConfigure config = null;
-//		boolean useMaster = true;
-//		DalHints hints = new DalHints();
-//		
-//		try {
-//			config = DalConfigureFactory.load();
-//			
-//			DalConnectionManager test = new DalConnectionManager(logicDbName, config);
-//			ConnectionHolder conn = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
-//			
-//			Statement statement = conn.getConn().createStatement();
-//			ResultSet rs = statement.executeQuery("select * from City");
-//			rs.next();
-//			
-//			test.cleanup(hints, rs, statement, conn.getConn());
-//			Integer oldLevel = hints.getInt(DalHintEnum.oldIsolationLevel);
-//			Assert.assertNotNull(oldLevel);
-//			DalConnectionManager.closeConnection(oldLevel, conn.getConn());
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			Assert.fail();
-//		}
-//	}
+
+	@Test
+	public void testDoInConnectionException() {
+		DalConfigure config = null;
+		final boolean useMaster = true;
+		final DalHints hints = new DalHints();
+		final String message  = "testDoInConnectionException";
+		final Connection connTest;
+		
+		try {
+			config = DalConfigureFactory.load();
+			
+			final DalConnectionManager test = new DalConnectionManager(logicDbName, config);
+			ConnectionAction<Object> action = new ConnectionAction<Object>() {
+				public Connection connTest;
+				public Object execute() throws Exception {
+					DalConnection conn = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
+					connTest = conn.getConn();
+					
+					Statement statement = conn.getConn().createStatement();
+					ResultSet rs = statement.executeQuery("select * from City");
+					rs.next();
+					throw new RuntimeException(message);
+				}
+			};
+			
+			test.doInConnection(action, hints);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
 }

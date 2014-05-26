@@ -1,10 +1,7 @@
 package com.ctrip.platform.dal.dao.client;
 
-import java.awt.color.CMMException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
@@ -13,7 +10,6 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.logging.DalEventEnum;
-import com.ctrip.platform.dal.dao.logging.LogEntry;
 import com.ctrip.platform.dal.dao.logging.Logger;
 import com.ctrip.platform.dal.dao.strategy.DalShardStrategy;
 
@@ -47,9 +43,7 @@ public class DalConnectionManager {
 			
 			// The internal test path
 			if(config == null) {
-				Connection conn = null;
-				conn = connPool.getConnection(logicDbName, isMaster, isSelect);
-				connHolder = new DalConnection(conn, DbMeta.getDbMeta(conn.getCatalog(), conn));
+				connHolder = getConnectionFromDruidDS(isMaster, isSelect);
 			}else {
 				connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect);
 			}
@@ -65,6 +59,15 @@ public class DalConnectionManager {
 			Logger.logGetConnectionFailed(realDbName, ex);
 			throw ex;
 		}
+		return connHolder;
+	}
+
+	private DalConnection getConnectionFromDruidDS(boolean isMaster,
+			boolean isSelect) throws SQLException {
+		DalConnection connHolder;
+		Connection conn = null;
+		conn = connPool.getConnection(logicDbName, isMaster, isSelect);
+		connHolder = new DalConnection(conn, DbMeta.getDbMeta(conn.getCatalog(), conn));
 		return connHolder;
 	}
 
@@ -115,37 +118,5 @@ public class DalConnectionManager {
 		action.end(result, ex);
 
 		return result;
-	}
-	
-	public static void cleanup(ResultSet rs, Statement statement, DalConnection connHolder) {
-		if(rs != null) {
-			try {
-				rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		if(statement != null) {
-			try {
-				statement.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		closeConnection(connHolder);
-	}
-
-	private static void closeConnection(DalConnection connHolder) {
-		//do nothing for connection in transaction
-		if(DalTransactionManager.isInTransaction())
-			return;
-		
-		// For list of nested commands, the top level action will not hold any connHolder
-		if(connHolder == null)
-			return;
-		
-		connHolder.close();
 	}
 }

@@ -14,7 +14,7 @@ public class DalTransactionManager {
 		this.connManager = connManager;
 	}
 	
-	public int startTransaction(DalHints hints, DalEventEnum operation) throws SQLException {
+	private int startTransaction(DalHints hints, DalEventEnum operation) throws SQLException {
 		DalTransaction connCache = connectionCacheHolder.get();
 
 		if(connCache == null) {
@@ -27,7 +27,7 @@ public class DalTransactionManager {
 		return connCache.startTransaction();
 	}
 
-	public void endTransaction(int startLevel) throws SQLException {
+	private void endTransaction(int startLevel) throws SQLException {
 		DalTransaction connCache = connectionCacheHolder.get();
 		
 		if(connCache == null)
@@ -40,7 +40,7 @@ public class DalTransactionManager {
 		return connectionCacheHolder.get() != null;
 	}
 	
-	public void rollbackTransaction(int startLevel) throws SQLException {
+	private void rollbackTransaction(int startLevel) throws SQLException {
 		DalTransaction connCache = connectionCacheHolder.get();
 		
 		// Already handled in deeper level
@@ -54,7 +54,7 @@ public class DalTransactionManager {
 		return getConnection(hints, false, operation);
 	}
 	
-	public DbMeta getCurrentDbMeta() throws SQLException {
+	public static DbMeta getCurrentDbMeta() {
 		return connectionCacheHolder.get().getConnection().getMeta();
 	}
 	

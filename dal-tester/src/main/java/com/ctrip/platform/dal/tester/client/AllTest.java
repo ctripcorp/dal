@@ -6,8 +6,11 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	ConnectionActionTest.class,
 	DalConnectionManagerTest.class,
-	DalTransactionManagerTest.class
+	DalConnectionTest.class,
+	DalTransactionManagerTest.class,
+	DalTransactionTest.class,
 })
 public class AllTest {
 

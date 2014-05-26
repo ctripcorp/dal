@@ -43,9 +43,7 @@ public class DalConnectionManager {
 			
 			// The internal test path
 			if(config == null) {
-				Connection conn = null;
-				conn = connPool.getConnection(logicDbName, isMaster, isSelect);
-				connHolder = new DalConnection(conn, DbMeta.getDbMeta(conn.getCatalog(), conn));
+				connHolder = getConnectionFromDruidDS(isMaster, isSelect);
 			}else {
 				connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect);
 			}
@@ -61,6 +59,15 @@ public class DalConnectionManager {
 			Logger.logGetConnectionFailed(realDbName, ex);
 			throw ex;
 		}
+		return connHolder;
+	}
+
+	private DalConnection getConnectionFromDruidDS(boolean isMaster,
+			boolean isSelect) throws SQLException {
+		DalConnection connHolder;
+		Connection conn = null;
+		conn = connPool.getConnection(logicDbName, isMaster, isSelect);
+		connHolder = new DalConnection(conn, DbMeta.getDbMeta(conn.getCatalog(), conn));
 		return connHolder;
 	}
 

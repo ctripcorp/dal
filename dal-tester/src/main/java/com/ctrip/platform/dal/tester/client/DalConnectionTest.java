@@ -6,14 +6,22 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.DalConnection;
+import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.client.DbMeta;
+import com.ctrip.platform.dal.dao.configure.DalConfigure;
+import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
+import com.ctrip.platform.dal.dao.logging.DalEventEnum;
+import com.ctrip.platform.dal.dao.logging.LogEntry;
 
 public class DalConnectionTest {
 	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";
@@ -56,6 +64,11 @@ public class DalConnectionTest {
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
 			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
+			assertNotNull(test.getMeta());
+			LogEntry entry = new LogEntry(new DalHints());
+			
+			assertNotNull(test.getMeta());
+			test.getMeta().populate(entry); 
 			assertNotNull(test.getMeta());
 		} catch (Throwable e){
 			fail();
@@ -130,6 +143,11 @@ public class DalConnectionTest {
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
 			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
+
+			Statement statement = test.getConn().createStatement();
+			ResultSet rs = statement.executeQuery("select * from City");
+			rs.next();
+
 			test.close();
 			assertTrue(conn.isClosed());
 		} catch (Throwable e){
@@ -140,5 +158,4 @@ public class DalConnectionTest {
 				conn.close();
 		}
 	}
-
 }

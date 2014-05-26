@@ -49,7 +49,11 @@ public class DalConnection {
 		try {
 			if(conn == null || conn.isClosed())
 				return;
+		} catch (Throwable e) {
+			Logger.error("Restore connection isolation level failed!", e);
+		}
 
+		try {
 			if(newIsolationLevel != null)
 				conn.setTransactionIsolation(oldIsolationLevel);
 		} catch (Throwable e) {

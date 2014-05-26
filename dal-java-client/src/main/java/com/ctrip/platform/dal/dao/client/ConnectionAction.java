@@ -18,23 +18,23 @@ import com.ctrip.platform.dal.dao.logging.Logger;
 import com.ctrip.platform.dal.dao.logging.MetricsLogger;
 
 public abstract class ConnectionAction<T> {
-	DalEventEnum operation;
-	String sql;
-	String callString;
-	String[] sqls;
-	StatementParameters parameters;
-	StatementParameters[] parametersList;
-	DalCommand command;
-	List<DalCommand> commands;
-	DalConnection connHolder;
-	Connection conn;
-	Statement statement;
-	PreparedStatement preparedStatement;
-	CallableStatement callableStatement;
-	ResultSet rs;
+	public DalEventEnum operation;
+	public String sql;
+	public String callString;
+	public String[] sqls;
+	public StatementParameters parameters;
+	public StatementParameters[] parametersList;
+	public DalCommand command;
+	public List<DalCommand> commands;
+	public DalConnection connHolder;
+	public Connection conn;
+	public Statement statement;
+	public PreparedStatement preparedStatement;
+	public CallableStatement callableStatement;
+	public ResultSet rs;
 	
-	long start;
-	LogEntry entry;
+	public long start;
+	public LogEntry entry;
 	
 	void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
 		this.operation = operation;
@@ -182,5 +182,5 @@ public abstract class ConnectionAction<T> {
 			throw e instanceof SQLException ? (SQLException)e : new SQLException(e);
 	}
 
-	abstract T execute() throws Exception;
+	public abstract T execute() throws Exception;
 }

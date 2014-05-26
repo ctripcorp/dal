@@ -44,9 +44,12 @@ public class ${host.getPojoClassName()}DaoTest {
 			${host.getPojoClassName()} pojo2 = new ${host.getPojoClassName()}();
 			${host.getPojoClassName()} pojo3 = new ${host.getPojoClassName()}();			
 			//Set fields for pojos here
-			
+			KeyHolder kh = new KeyHolder();
 			//keyHolder will pull back the auto-increament keys
-			dao.insert(new KeyHolder(), pojo1, pojo2, pojo3);
+			dao.insert(kh, pojo1, pojo2, pojo3);
+			
+			Number generatedKey = kh.getKey(0);
+			System.out.println(generatedKey);
 #end
 #if($host.getSpUpdate().isExist())
 			//Make some change to the pojo. set primary key

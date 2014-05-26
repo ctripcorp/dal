@@ -146,6 +146,6 @@ public class DalConnectionManager {
 		if(connHolder == null)
 			return;
 		
-		connHolder.closeConnection();
+		connHolder.close();
 	}
 }

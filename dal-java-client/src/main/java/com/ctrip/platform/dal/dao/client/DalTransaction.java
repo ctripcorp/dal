@@ -67,7 +67,7 @@ public class DalTransaction  {
 			e.printStackTrace();
 		}
 		
-		connHolder.closeConnection();
+		connHolder.close();
 		DalTransactionManager.clearCache();
 	}
 }

@@ -30,12 +30,12 @@
 				<span class="dropdown-arrow dropdown-arrow-inverse" style="margin-top:1px"></span>
 				<ul class="dropdown-menu dropdown-inverse" style="margin-top:8px !important">
 					<li><a href="javascript:;"
-						onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">文档</a>
+						onclick="window.open('http://conf.ctripcorp.com/display/SysDev/DAL+Code+Generator#DALCodeGenerator-codegenguide', '_blank');">Code Gen使用说明</a>
 					</li>
 					<li><a href="javascript:;"
-						onclick="window.open('http://conf.ctripcorp.com/display/SysDev/DAL+Code+Generator#DALCodeGenerator-codegenguide', '_blank');">使用说明</a>
+						onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">DAL框架使用说明</a>
 					</li>
-					<li><a href="mailto:R%26Dsysdev_dal@Ctrip.com">咨询</a></li>
+					<li><a href="mailto:R%26Dsysdev_dal@Ctrip.com">联系我们</a></li>
 				</ul>
 			</li>
 			<li class="dropdown user">

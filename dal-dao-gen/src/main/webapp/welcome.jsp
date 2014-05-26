@@ -65,9 +65,9 @@
 							<div class="todo-icon fui-user"></div>
 							<div class="todo-content">
 								<h4 class="todo-name">
-									Meet <strong>Adrian</strong> at <strong>6pm</strong>
+									 <strong>组员管理</strong>
 								</h4>
-								Times Square
+								Member management
 							</div>
 						</li>
 						<li>
@@ -83,9 +83,9 @@
 							<div class="todo-icon fui-eye"></div>
 							<div class="todo-content">
 								<h4 class="todo-name">
-									Watch <strong>Iron Man</strong>
+									<strong>项目一览</strong>
 								</h4>
-								1998 Broadway
+								Project view
 							</div>
 						</li>
 						<li>

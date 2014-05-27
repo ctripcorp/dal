@@ -3,11 +3,14 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.ctrip.platform.dal.dao.logging.Logger;
+
 public class DalTransaction  {
 	private String logicDbName;
 	private DalConnection connHolder;
 	private int level = 0;
-	private boolean rolledBack;
+	private boolean rolledBack = false;
+	private boolean completed = false;
 	
 	public DalTransaction(DalConnection connHolder, String logicDbName) throws SQLException{
 		this.logicDbName = logicDbName;
@@ -27,13 +30,27 @@ public class DalTransaction  {
 		return connHolder;
 	}
 	
+	public int getLevel() {
+		return level;
+	}
+	
+	public boolean isRolledBack() {
+		return rolledBack;
+	}
+
 	public int startTransaction() throws SQLException {
+		if(rolledBack || completed)
+			throw new SQLException("The current transaction is already rolled back or completed");
+		
 		return level++;
 	}
 	
 	public void endTransaction(int startLevel) throws SQLException {
+		if(rolledBack || completed)
+			throw new SQLException("The current transaction is already rolled back or completed");
+
 		if(startLevel != (level - 1)) {
-			rollbackTransaction(startLevel);
+			rollbackTransaction();
 			throw new SQLException(String.format("Transaction level mismatch. Expected: %d Actual: %d", level, startLevel));
 		}
 		
@@ -41,7 +58,7 @@ public class DalTransaction  {
 			cleanup(true);
 	}
 	
-	public void rollbackTransaction(int startLevel) throws SQLException {
+	public void rollbackTransaction() throws SQLException {
 		if(rolledBack)
 			return;
 
@@ -58,7 +75,7 @@ public class DalTransaction  {
 			else
 				conn.rollback();
 		} catch (Throwable e) {
-			e.printStackTrace();
+			Logger.error("Can not commit or rollback on current connection", e);
 		}
 
 		try {
@@ -68,6 +85,6 @@ public class DalTransaction  {
 		}
 		
 		connHolder.close();
-		DalTransactionManager.clearCache();
+		DalTransactionManager.clearCurrentTransaction();
 	}
 }

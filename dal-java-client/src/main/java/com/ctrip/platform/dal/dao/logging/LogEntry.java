@@ -22,6 +22,14 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
 
 public class LogEntry {
+	public static final String TAG_IN_TRANSACTION = "InTransaction";
+	public static final String TAG_DURATION_TIME = "DurationTime";
+	public static final String TAG_DATABASE_NAME = "DatabaseName";
+	public static final String TAG_SERVER_ADDRESS = "ServerAddress";
+	public static final String TAG_COMMAND_TYPE = "CommandType";
+	public static final String TAG_USER_NAME = "UserName";
+	public static final String TAG_RECORD_COUNT = "RecordCount";
+	
 	private static final String SQLHIDDENString = "*";
 	private static final String JSON_PATTERN = "{'HasSql':'%s','Hash':'%s','SqlTpl':'%s','Param':'%s','IsSuccess':'%s','ErrorMsg':'%s'}";
 	private static ConcurrentHashMap<String, Integer> hashes = null;
@@ -152,7 +160,7 @@ public class LogEntry {
 	public String getMethod(){
 		return this.method;
 	}
-	
+
 	public void setSuccess(boolean success) {
 		this.success = success;
 	}
@@ -297,13 +305,13 @@ public class LogEntry {
 	
 	public Map<String, String> getTag() {
 		Map<String, String> tag = new LinkedHashMap<String, String>();
-		tag.put("InTransaction", this.transactional ? "True" : "False");
-		tag.put("DurationTime", Long.toString(this.duration) + "ms");
-		tag.put("DatabaseName", CommonUtil.null2NA(this.databaseName));
-		tag.put("ServerAddress", CommonUtil.null2NA(this.getServerAddress()));
-		tag.put("CommandType", CommonUtil.null2NA(this.commandType));
-		tag.put("UserName", CommonUtil.null2NA(this.userName));
-		tag.put("RecordCount", Long.toString(this.resultCount));
+		tag.put(TAG_IN_TRANSACTION, this.transactional ? "True" : "False");
+		tag.put(TAG_DURATION_TIME, Long.toString(this.duration) + "ms");
+		tag.put(TAG_DATABASE_NAME, CommonUtil.null2NA(this.databaseName));
+		tag.put(TAG_SERVER_ADDRESS, CommonUtil.null2NA(this.getServerAddress()));
+		tag.put(TAG_COMMAND_TYPE, CommonUtil.null2NA(this.commandType));
+		tag.put(TAG_USER_NAME, CommonUtil.null2NA(this.userName));
+		tag.put(TAG_RECORD_COUNT, Long.toString(this.resultCount));
 
 		return tag;
 	}

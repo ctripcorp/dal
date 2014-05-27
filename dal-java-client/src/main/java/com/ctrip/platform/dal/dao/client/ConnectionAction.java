@@ -137,7 +137,7 @@ public abstract class ConnectionAction<T> {
 		if(rs != null) {
 			try {
 				rs.close();
-			} catch (SQLException e) {
+			} catch (Throwable e) {
 				Logger.error("Close result set failed.", e);
 			}
 		}
@@ -156,7 +156,7 @@ public abstract class ConnectionAction<T> {
 		if(_statement != null) {
 			try {
 				_statement.close();
-			} catch (SQLException e) {
+			} catch (Throwable e) {
 				Logger.error("Close statement failed.", e);
 			}
 		}		

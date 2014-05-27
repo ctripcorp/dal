@@ -8,6 +8,6 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	com.ctrip.platform.dal.dao.unittests.AllTest.class,
 	com.ctrip.platform.dal.parser.AllTest.class,
-	//com.ctrip.platform.dal.tester.client.AllTest.class
+	com.ctrip.platform.dal.tester.client.AllTest.class
 })
 public class AllTest {}

@@ -338,7 +338,8 @@ public class DalDirectClientSqlServerTest {
 			Assert.fail();
 		}catch(Exception e){ }
 		List<ClientTestModel> models = this.queryModelsByIds();
-		Assert.assertEquals(1, models.size());
+		// The SQL server does not support auto commit for batch update
+		Assert.assertEquals(3, models.size());
 	}
 
 	/**

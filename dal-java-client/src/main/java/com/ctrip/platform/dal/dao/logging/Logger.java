@@ -78,26 +78,38 @@ public class Logger {
 	
 	public static void logGetConnectionSuccess(String realDbName)
 	{
-		Logger.log("Get connection", DalEventEnum.CONNECTION_SUCCESS, LogLevel.INFO, 
-				String.format("Connect %s database successfully", realDbName));
+		try {
+			Logger.log("Get connection", DalEventEnum.CONNECTION_SUCCESS, LogLevel.INFO, 
+					String.format("Connect %s database successfully", realDbName));
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void logGetConnectionFailed(String realDbName, Throwable e)
 	{
-		String msg = getExceptionStack(e);
-		
-		String logMsg = "Connectiing to " + realDbName + " database failed." +
-				System.lineSeparator() + System.lineSeparator() +
-				"********** Exception Info **********" + System.lineSeparator() + msg;
-		Logger.log("Get connection", DalEventEnum.CONNECTION_FAILED, LogLevel.ERROR, logMsg);	
+		try {
+			String msg = getExceptionStack(e);
+			
+			String logMsg = "Connectiing to " + realDbName + " database failed." +
+					System.lineSeparator() + System.lineSeparator() +
+					"********** Exception Info **********" + System.lineSeparator() + msg;
+			Logger.log("Get connection", DalEventEnum.CONNECTION_FAILED, LogLevel.ERROR, logMsg);
+		} catch (Throwable e1) {
+			e1.printStackTrace();
+		}	
 	}
 	
 	public static void error(String desc, Throwable e) {
-		String msg = getExceptionStack(e);
-		
-		String logMsg = desc + System.lineSeparator() + System.lineSeparator() +
-		"********** Exception Info **********" + System.lineSeparator() + msg;
-		logger.error(TITLE, logMsg);
+		try {
+			String msg = getExceptionStack(e);
+			
+			String logMsg = desc + System.lineSeparator() + System.lineSeparator() +
+			"********** Exception Info **********" + System.lineSeparator() + msg;
+			logger.error(TITLE, logMsg);
+		} catch (Throwable e1) {
+			e1.printStackTrace();
+		}
 	}
 	
 	public static void log(String name, DalEventEnum event, LogLevel level, String msg)

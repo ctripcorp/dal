@@ -54,6 +54,30 @@
       
       <div id="main_layout"></div>
       
+      <!--Begin modal-->
+      <div class="modal fade" id="dalConfigDemoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">Dal.config Demo</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row-fluid">
+						<div class="control-group">
+							<img alt="" src="/static/images/dal_config.jpg">
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+      </div>
+      <!--End modal-->
+      
       <!-- JS and analytics only. -->
 	<!-- Bootstrap core JavaScript================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
@@ -69,6 +93,7 @@
 	<script src="/static/js/ajaxutil.js"></script>
 
 	<script src="/static/js/header.js"></script>
+	<script src="/static/js/dbsetsmanage.js"></script>
 	
    </body>
 </html>

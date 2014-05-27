@@ -14,7 +14,18 @@
 			<li id="indexjsp"><a href="index.jsp">代码生成器</a></li>
 			<li id="codeviewjsp"><a href="codeview.jsp">项目一览</a></li>
 			<li id="membermanagejsp"><a href="membermanage.jsp">组员管理</a></li>
-			<li id="dbmanagejsp"><a href="dbmanage.jsp">数据库管理</a></li>
+			<li id="dbmanagejsp" class="dropdown">
+				<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
+					data-close-others="true"> 
+					<span class="username">数据库管理</span> 
+					<i class="fa fa-angle-down"> </i>
+				</a>
+				<span class="dropdown-arrow dropdown-arrow-inverse" style="margin-top:1px"></span>
+				<ul class="dropdown-menu dropdown-inverse" style="margin-top:8px !important">
+					<li><a href="dbmanage.jsp">组内All In One数据库管理</a></li>
+					<li><a href="dbsetsmanage.jsp">组内databaseSet管理</a></li>
+				</ul>
+			</li>
 			<li id="groupmanagejsp"><a href="groupmanage.jsp">组管理</a></li>
 		</ul>
 		<ul class="nav navbar-nav navbar-right">

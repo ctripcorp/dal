@@ -51,11 +51,13 @@ public class DalTransaction  {
 
 		if(startLevel != (level - 1)) {
 			rollbackTransaction();
-			throw new SQLException(String.format("Transaction level mismatch. Expected: %d Actual: %d", level, startLevel));
+			throw new SQLException(String.format("Transaction level mismatch. Expected: %d Actual: %d", (level - 1), startLevel));
 		}
 		
-		if(--level == 0)
+		if(--level == 0) {
+			completed = true;
 			cleanup(true);
+		}
 	}
 	
 	public void rollbackTransaction() throws SQLException {

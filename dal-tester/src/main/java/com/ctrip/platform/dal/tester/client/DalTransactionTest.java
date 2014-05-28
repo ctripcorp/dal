@@ -97,6 +97,31 @@ public class DalTransactionTest {
 	}
 
 	@Test
+	public void testStartOnCompletedTransaction() {
+		DalTransaction test = null;
+		try {
+			test = new DalTransaction(getDalConnection(), logicDbName);
+			assertEquals(0, test.getLevel());
+			int level  = test.startTransaction();
+			level  = test.startTransaction();
+			test.endTransaction(level--);
+			test.endTransaction(level--);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		try {
+			test.startTransaction();
+			fail();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			if(test != null && test.getConnection() != null)
+				test.getConnection().close();
+		}
+	}
+
+	@Test
 	public void testEndTransaction() {
 		DalTransaction test = null;
 		try {

@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
+import com.ctrip.platform.dal.daogen.dao.DaoOfDatabaseSet;
 import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
 import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
 import com.ctrip.platform.dal.daogen.dao.DaoOfUserProject;
@@ -34,6 +35,8 @@ public class SpringBeanGetter {
 	
 	private static DalGroupDBDao daoOfDalGroupDB;
 	
+	private static DaoOfDatabaseSet daoOfDatabaseSet;
+	
 	static {
 		daoOfProject = (DaoOfProject) context.getBean("projectDao");
 		
@@ -45,6 +48,8 @@ public class SpringBeanGetter {
 		
 		daoOfDalGroup = (DalGroupDao)context.getBean("dalGroup");
 		daoOfDalGroupDB = (DalGroupDBDao)context.getBean("dalGroupDB");
+		
+		daoOfDatabaseSet = (DaoOfDatabaseSet) context.getBean("dalDatabaseSet");
 	}
 
 	public static DaoOfProject getDaoOfProject() {
@@ -77,5 +82,9 @@ public class SpringBeanGetter {
 	
 	public static DalGroupDBDao getDaoOfDalGroupDB(){
 		return daoOfDalGroupDB;
+	}
+	
+	public static DaoOfDatabaseSet getDaoOfDatabaseSet(){
+		return daoOfDatabaseSet;
 	}
 }

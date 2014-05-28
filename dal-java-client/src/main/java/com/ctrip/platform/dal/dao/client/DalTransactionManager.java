@@ -55,7 +55,9 @@ public class DalTransactionManager {
 	}
 	
 	public static DbMeta getCurrentDbMeta() {
-		return transactionHolder.get().getConnection().getMeta();
+		return isInTransaction() ?
+				transactionHolder.get().getConnection().getMeta() :
+					null;
 	}
 	
 	private DalConnection getConnection(DalHints hints, boolean useMaster, DalEventEnum operation) throws SQLException {

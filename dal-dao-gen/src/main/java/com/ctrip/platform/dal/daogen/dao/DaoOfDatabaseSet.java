@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 
@@ -81,4 +82,41 @@ public class DaoOfDatabaseSet {
 						dbsetEntry.getConnectionString(),
 						dbsetEntry.getDatabaseSet_Id());
 	}
+	
+	public int updateDatabaseSet(DatabaseSet dbset){
+		return this.jdbcTemplate
+				.update("update databaseSet set name=?, provider=?, shardingStrategy=?, groupId=? "
+						+ " where id=?",
+						dbset.getName(),
+						dbset.getProvider(),
+						dbset.getShardingStrategy(),
+						dbset.getGroupId(),
+						dbset.getId());
+	}
+	
+	public int deleteDatabaseSetEntry(Integer dbsetId){
+		return this.jdbcTemplate
+				.update("delete from databaseSetEntry where databaseSet_Id=?",
+						dbsetId);
+	}
+	
+	public int deleteDatabaseSet(Integer dbsetId){
+		return this.jdbcTemplate
+				.update("delete from databaseSet where id=?",
+						dbsetId);
+	}
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

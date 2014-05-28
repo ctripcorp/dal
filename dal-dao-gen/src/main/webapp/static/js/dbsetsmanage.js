@@ -68,10 +68,63 @@
             return;
         }
         $("#dbsetname").val('');
-        $("#shardingStrategy").val('');
+        $("#shardingStrategy").val('class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=XXX;mod=XXX');
         $("#addDbsetModal").modal({
             "backdrop": "static"
         });
+    };
+
+    var editDbSet = function(){
+        $("#updatedbset_error_msg").html('');
+        var current_group = w2ui['grid'].current_group;
+        if (current_group == null || current_group == '') {
+            alert('请先选择Group');
+            return;
+        }
+
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if(record==null || record==''){
+            alert("请先选择一个databaseSet");
+            return;
+        }
+
+        $("#dbsetname2").val(record['name']);
+        $("#provider2").val(record['provider']);
+        $("#shardingStrategy2").val(record['shardingStrategy']);
+        $("#updateDbsetModal").modal({
+            "backdrop": "static"
+        });
+    };
+
+    var delDbSet = function(){
+        var current_group = w2ui['grid'].current_group;
+        if (current_group == null || current_group == '') {
+            alert('请先选择Group');
+            return;
+        }
+
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if(record==null || record==''){
+            alert("请先选择一个databaseSet");
+            return;
+        }
+
+        if (confirm("Are you sure to delete?")) {
+            $.post("/rest/groupdbset/deletedbset", {
+                groupId : w2ui['grid'].current_group,
+                dbsetId : record['id']
+            },function (data) {
+                if (data.code == "OK") {
+                    refreshDbSet();
+                } else {
+                    alert(data.info);
+                }
+            }).fail(function (data) {
+                    alert("执行异常");
+                });
+        }
     };
 
     var addDbSetEntry = function(){
@@ -233,14 +286,15 @@
                 }, {
                     field: 'provider',
                     caption: 'provider',
-                    size: '25%',
+                    size: '15%',
                     sortable: true,
                     resizable:true
                 }, {
                     field: 'shardingStrategy',
                     caption: 'shardStrategy',
-                    size: '50%',
-                    sortable: true
+                    size: '60%',
+                    sortable: true,
+                    resizable:true
                 }],
                 records: [],
                 onClick: function (event) {
@@ -331,25 +385,25 @@
                 columns: [{
                     field: 'name',
                     caption: 'Name',
-                    size: '30%',
+                    size: '25%',
                     sortable: true,
                     resizable:true
                 }, {
                     field: 'databaseType',
                     caption: 'databaseType',
-                    size: '20%',
+                    size: '15%',
                     sortable: true,
                     resizable:true
                 }, {
                     field: 'sharding',
                     caption: 'sharding',
-                    size: '20%',
+                    size: '15%',
                     sortable: true,
                     resizable:true
                 }, {
                     field: 'connectionString',
                     caption: 'connectionString',
-                    size: '30%',
+                    size: '45%',
                     sortable: true,
                     resizable:true
                 }],
@@ -420,6 +474,36 @@
                     refreshDbSetEntry();
                 } else {
                     $("#adddbsetentry_error_msg").html(data.info);
+                }
+            });
+        });
+
+        $(document.body).on('click', '#save_updatedbset', function (event) {
+            var dbsetname = $("#dbsetname2").val();
+            var provider = $("#provider2").val();
+            var shardingStrategy = $("#shardingStrategy2").val();
+            if (dbsetname == null || dbsetname == "") {
+                $("#updatedbset_error_msg").html('databaseSet name 不能为空!');
+                return;
+            }
+            if (shardingStrategy == null || shardingStrategy == "") {
+                $("#updatedbset_error_msg").html('shardingStrategy 不能为空!');
+                return;
+            }
+            var records = w2ui['grid'].getSelection();
+            var record = w2ui['grid'].get(records[0]);
+            $.post("/rest/groupdbset/updateDbset", {
+                "id":record['id'],
+                "name": dbsetname,
+                "provider":provider,
+                "shardingStrategy":shardingStrategy,
+                "groupId":w2ui['grid'].current_group
+            }, function (data) {
+                if (data.code == "OK") {
+                    $("#updateDbsetModal").modal('hide');
+                    refreshDbSet();
+                } else {
+                    $("#updatedbset_error_msg").html(data.info);
                 }
             });
         });

@@ -155,6 +155,117 @@ public class DalGroupDbSetResource {
 	}
 	
 	@POST
+	@Path("updateDbset")
+	public Status updateDbset(@FormParam("id") String id,
+			@FormParam("name") String name,
+			@FormParam("provider") String provider,
+			@FormParam("shardingStrategy") String shardingStrategy,
+			@FormParam("groupId") String groupId){
+		
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+		
+		if(null == userNo || null == groupId){
+			log.error(String.format("Update Dbset failed, caused by illegal parameters: "
+					+ "[userNo=%s, groupId=%s]",userNo, groupId));
+			Status status = Status.ERROR;
+			status.setInfo("Illegal parameters.");
+			return status;
+		}
+		
+		int iD = -1;
+		int groupID = -1;
+		try{
+			iD = Integer.parseInt(id);
+			groupID = Integer.parseInt(groupId);
+		}catch(NumberFormatException  ex){
+			log.error("Update Dbset failed", ex);
+			Status status = Status.ERROR;
+			status.setInfo("Illegal group id");
+			return status;
+		}
+		
+		if(!this.validatePermision(userNo,groupID)){
+			Status status = Status.ERROR;
+			status.setInfo("你没有当前DAL Team的操作权限.");
+			return status;
+		}
+		
+		List<DatabaseSet> dbsets = dbset_dao.getAllDatabaseSetByName(name);
+		if(null != dbsets && dbsets.size() > 0){
+			for(DatabaseSet dbset:dbsets){
+				if(dbset.getId()!=iD){
+					Status status = Status.ERROR;
+					status.setInfo("name:"+name+"已经存在，请重新命名!");
+					return status;
+				}
+			}
+		}
+		
+		int ret = -1;
+		DatabaseSet dbset = new DatabaseSet();
+		dbset.setId(iD);
+		dbset.setName(name);
+		dbset.setProvider(provider);
+		dbset.setShardingStrategy(shardingStrategy);
+		dbset.setGroupId(groupID);
+		ret = dbset_dao.updateDatabaseSet(dbset);
+		if(ret <= 0){
+			log.error("Update database set failed, caused by db operation failed, pls check the spring log");
+			Status status = Status.ERROR;
+			status.setInfo("Update operation failed.");
+			return status;
+		}
+		
+		return Status.OK;
+	}
+	
+	@POST
+	@Path("deletedbset")
+	public Status deleteDbset(@FormParam("groupId") String groupId,
+			@FormParam("dbsetId") String dbset_Id){
+
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+		
+		if(null == userNo || null == groupId || null == dbset_Id){
+			log.error(String.format("Delete databaseSet failed, caused by illegal parameters: "
+					+ "[groupId=%s, dbsetId=%s]",groupId, dbset_Id));
+			Status status = Status.ERROR;
+			status.setInfo("Illegal parameters.");
+			return status;
+		}
+		
+		int groupID = -1;
+		int dbsetID = -1;
+		try{
+			groupID = Integer.parseInt(groupId);
+			dbsetID =  Integer.parseInt(dbset_Id);
+		}catch(NumberFormatException  ex){
+			log.error("Delete databaseSet failed", ex);
+			Status status = Status.ERROR;
+			status.setInfo("Illegal group id");
+			return status;
+		}
+		
+		if(!this.validatePermision(userNo,groupID)){
+			Status status = Status.ERROR;
+			status.setInfo("你没有当前DAL Team的操作权限.");
+			return status;
+		}
+
+		int ret1 = dbset_dao.deleteDatabaseSetEntry(dbsetID);
+		int ret2 = dbset_dao.deleteDatabaseSet(dbsetID);
+		if(ret1<0 || ret2<0){
+			log.error("Delete databaseSet failed, caused by db operation failed, pls check the spring log");
+			Status status = Status.ERROR;
+			status.setInfo("Delete operation failed.");
+			return status;
+		}
+		return Status.OK;
+	}
+	
+	@POST
 	@Path("addDbsetEntry")
 	public Status addDbsetEntry(@FormParam("name") String name,
 			@FormParam("databaseType") String databaseType,

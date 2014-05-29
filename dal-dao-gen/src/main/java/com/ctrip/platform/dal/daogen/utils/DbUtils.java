@@ -548,6 +548,9 @@ public class DbUtils {
 						dbType = DbType.Object;
 					else if (dataType == 1 && length > 1)
 						dbType = DbType.AnsiString;
+					else if(-155 == dataType){
+						dbType = DbType.DateTimeOffset;
+					}
 					else
 						dbType =DbType.getDbTypeFromJdbcType(dataType);
 

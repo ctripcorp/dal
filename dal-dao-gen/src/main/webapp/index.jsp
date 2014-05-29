@@ -217,7 +217,7 @@
                   <div class="steps step1 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
-                           <label class="control-label popup_label" style="width:130px;">All-In-One数据库：</label>
+                           <label class="control-label popup_label" style="width:130px;">databaseSet：</label>
                            <select id="databases" class="span8">
                            </select>
                         </div>

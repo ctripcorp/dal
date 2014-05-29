@@ -26,7 +26,6 @@ import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
-import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;

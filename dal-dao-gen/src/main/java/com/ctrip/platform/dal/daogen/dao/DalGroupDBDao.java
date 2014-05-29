@@ -18,6 +18,17 @@ public class DalGroupDBDao {
 	public void setDataSource(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
+	
+	public List<DalGroupDB> getAllGroupDbs() {
+		return this.jdbcTemplate.query(
+				"select t1.id as id, t1.dbname as dbname,t2.group_name as comment,t1.dal_group_id as dal_group_id from alldbs t1 left join dal_group t2 on t1.dal_group_id=t2.id ",
+				new RowMapper<DalGroupDB>() {
+					public DalGroupDB mapRow(ResultSet rs, int rowNum)
+							throws SQLException {
+						return DalGroupDB.visitRow(rs);
+					}
+				});
+	}
 
 	public List<DalGroupDB> getGroupDBsByGroup(int groupId) {
 		return this.jdbcTemplate.query(

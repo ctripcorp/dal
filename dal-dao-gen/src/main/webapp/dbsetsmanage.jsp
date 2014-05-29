@@ -72,7 +72,7 @@
 					<div class="row-fluid">
 						<div class="control-group">
 							<label class="control-label popup_label" style="width: 130px;">Entry Name:</label> 
-							<input id="dbsetentryname2" class="span8 input-sm" type="text">
+							<input id="dbsetentryname2" class="span8 input-sm" type="text"  style="height:30px">
 						</div>
 					</div>
 					<div class="row-fluid">
@@ -120,7 +120,7 @@
 					<div class="row-fluid">
 						<div class="control-group">
 							<label class="control-label popup_label" style="width: 130px;">Entry Name:</label> 
-							<input id="dbsetentryname" class="span8 input-sm" type="text">
+							<input id="dbsetentryname" class="span8 input-sm" type="text"  style="height:30px">
 						</div>
 					</div>
 					<div class="row-fluid">
@@ -162,7 +162,7 @@
 					<div class="row-fluid">
 						<div class="control-group">
 							<label class="control-label popup_label" style="width: 130px;">databaseSet Name:</label> 
-							<input id="dbsetname" class="span8 input-sm" type="text">
+							<input id="dbsetname" class="span8 input-sm" type="text"  style="height:30px">
 						</div>
 					</div>
 					<div class="row-fluid">
@@ -204,7 +204,7 @@
 					<div class="row-fluid">
 						<div class="control-group">
 							<label class="control-label popup_label" style="width: 130px;">databaseSet Name:</label> 
-							<input id="dbsetname2" class="span8 input-sm" type="text">
+							<input id="dbsetname2" class="span8 input-sm" type="text"  style="height:30px">
 						</div>
 					</div>
 					<div class="row-fluid">

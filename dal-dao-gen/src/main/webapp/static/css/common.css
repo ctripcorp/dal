@@ -69,6 +69,9 @@ label.btn{
 ul.navbar-nav li{
     margin-right: 1px;
 }
+ul.navbar-nav li:last-child{
+    margin-bottom: 1px;
+}
 .ctip{
     margin:0px 9px 0px 0px;
 }

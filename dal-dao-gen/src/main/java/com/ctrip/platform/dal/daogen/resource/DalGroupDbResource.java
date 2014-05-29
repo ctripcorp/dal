@@ -1,7 +1,11 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -24,6 +28,7 @@ import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 
 /**
  * DAL database of group manage.
@@ -75,6 +80,33 @@ public class DalGroupDbResource {
 		List<DalGroupDB> dbs = group_db_dao.getGroupDBsByGroup(groupId);
 		return dbs;
 	}
+	
+	@GET
+	@Path("allgroupdbs")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<DalGroupDB> getAllGroupDbs() {
+		
+		Set<String> allDbNames = LocalDataSourceLocator.newInstance().getDBNames();
+		List<DalGroupDB> dbs = group_db_dao.getAllGroupDbs();
+		List<DalGroupDB> result = new ArrayList<DalGroupDB>(dbs); 
+		for(DalGroupDB db:dbs){
+			allDbNames.remove(db.getDbname());
+		}
+		for(String name:allDbNames){
+			DalGroupDB db = new DalGroupDB();
+			db.setDbname(name);
+			result.add(db);
+		}
+		Collections.sort(result, new Comparator<DalGroupDB>() {
+			@Override
+			public int compare(DalGroupDB o1, DalGroupDB o2) {
+				return o1.getDbname().compareTo(o2.getDbname());
+			}
+		});
+		return result;
+	}
+	
+	
 	
 	@POST
 	@Path("add")

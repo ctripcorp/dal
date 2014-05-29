@@ -5,7 +5,8 @@
         $("li[class='active']").removeClass("active");
         if(href.indexOf("codeview")!=-1){
             $("#codeviewjsp").addClass("active");
-        }else if(href.indexOf("dbmanage")!=-1 || href.indexOf("dbsetsmanage")!=-1){
+        }else if(href.indexOf("dbmanage")!=-1 || href.indexOf("dbsetsmanage")!=-1
+            ||href.indexOf("dbview")!=-1){
             $("#dbmanagejsp").addClass("active");
         }else if(href.indexOf("groupmanage")!=-1){
             $("#groupmanagejsp").addClass("active");

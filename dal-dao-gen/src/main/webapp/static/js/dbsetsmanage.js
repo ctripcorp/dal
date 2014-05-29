@@ -68,7 +68,6 @@
             return;
         }
         $("#dbsetname").val('');
-        $("#shardingStrategy").val('class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=XXX;mod=XXX');
         $("#addDbsetModal").modal({
             "backdrop": "static"
         });
@@ -514,10 +513,6 @@
                 $("#adddbset_error_msg").html('databaseSet name 不能为空!');
                 return;
             }
-            if (shardingStrategy == null || shardingStrategy == "") {
-                $("#adddbset_error_msg").html('shardingStrategy 不能为空!');
-                return;
-            }
             $.post("/rest/groupdbset/addDbset", {
                 "name": dbsetname,
                 "provider":provider,
@@ -571,10 +566,6 @@
             var shardingStrategy = $("#shardingStrategy2").val();
             if (dbsetname == null || dbsetname == "") {
                 $("#updatedbset_error_msg").html('databaseSet name 不能为空!');
-                return;
-            }
-            if (shardingStrategy == null || shardingStrategy == "") {
-                $("#updatedbset_error_msg").html('shardingStrategy 不能为空!');
                 return;
             }
             var records = w2ui['grid'].getSelection();

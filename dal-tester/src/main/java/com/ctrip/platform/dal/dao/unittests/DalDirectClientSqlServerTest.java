@@ -284,8 +284,9 @@ public class DalDirectClientSqlServerTest {
 		int count = client.update(insertSql, parameters, hints, holder);
 		Assert.assertEquals(1, count);
 		Assert.assertEquals(1, holder.getKeyList().size());
+		Assert.assertTrue(holder.getKey(0).longValue() > 0);
 		Map<String, ?> map= holder.getKeyList().get(0);
-		Assert.assertTrue(map.containsKey("ID"));
+		Assert.assertTrue(map.containsKey("GENERATED_KEYS"));
 	}
 
 	/**

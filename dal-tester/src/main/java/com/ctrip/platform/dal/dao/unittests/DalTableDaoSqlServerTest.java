@@ -341,8 +341,9 @@ public class DalTableDaoSqlServerTest {
 		KeyHolder holder = new KeyHolder();
 		int res = dao.insert(new DalHints(),holder, entities);
 		Assert.assertEquals(3, res);
-		Assert.assertEquals(3, holder.getKeyList().size());
-		Assert.assertTrue(holder.getKeyList().get(0).containsKey("ID"));
+		Assert.assertEquals(3, holder.getKeyList().size());		 
+		Assert.assertTrue(holder.getKey(0).longValue() > 0);
+		Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEYS"));
 	}
 	
 	/**

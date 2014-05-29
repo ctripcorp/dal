@@ -235,8 +235,12 @@
                     }
                 },
                 searches: [{
+                    field: 'databaseSet_name',
+                    caption: '逻辑数据库',
+                    type: 'text'
+                }, {
                     field: 'db_name',
-                    caption: '数据库',
+                    caption: 'Master数据库',
                     type: 'text'
                 }, {
                     field: 'table_name',
@@ -252,38 +256,52 @@
                     type: 'text'
                 }],
                 columns: [{
-                    field: 'db_name',
-                    caption: '数据库',
+                    field: 'databaseSet_name',
+                    caption: '逻辑数据库',
                     size: '15%',
                     sortable: true,
-                    attr: 'align=center'
+                    attr: 'align=center',
+                    resizable:true
+                }, {
+                    field: 'db_name',
+                    caption: 'Master数据库',
+                    size: '15%',
+                    sortable: true,
+                    attr: 'align=center',
+                    resizable:true
                 }, {
                     field: 'class_name',
                     caption: '类名',
                     size: '10%',
-                    sortable: true
+                    sortable: true,
+                    resizable:true
                 }, {
                     field: 'method_name',
                     caption: '方法名',
                     size: '10%',
-                    sortable: true
+                    sortable: true,
+                    resizable:true
                 }, {
                     field: 'task_desc',
                     caption: '类型',
                     size: '10%',
-                    sortable: true
+                    sortable: true,
+                    resizable:true
                 }, {
                     field: 'sql_content',
                     caption: '预览',
-                    size: '25%'
+                    size: '15%',
+                    resizable:true
                 }, {
                     field: 'comment',
                     caption: '方法描述',
-                    size: '20%'
+                    size: '25%',
+                    resizable:true
                 }, {
                     field: 'update_user_no',
                     caption: '最后修改User',
-                    size: '10%'
+                    size: '10%',
+                    resizable:true
                 }],
                 records: [],
                 onDblClick: function (target, data) {

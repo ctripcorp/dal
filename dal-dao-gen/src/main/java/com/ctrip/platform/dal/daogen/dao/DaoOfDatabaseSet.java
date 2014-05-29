@@ -59,6 +59,21 @@ public class DaoOfDatabaseSet {
 		return dbset;
 	}
 	
+	public DatabaseSetEntry getMasterDatabaseSetEntryByDatabaseSetName(String dbName){
+		return this.jdbcTemplate
+				.query("select en.id, en.name, en.databaseType, en.sharding, en.connectionString, en.databaseSet_Id "
+						+ "from databaseSetEntry as en "
+						+ "join databaseSet as se on en.databaseSet_Id = se.id "
+						+ "where se.name = '" + dbName + "' and en.databaseType = 'Master' limit 1;", new RowMapper<DatabaseSetEntry>(){
+					@Override
+					public DatabaseSetEntry mapRow(ResultSet rs, int rowNum)
+							throws SQLException {
+						return DatabaseSetEntry.visitRow(rs);
+					}
+					
+				}).get(0);
+	}
+	
 	public int insertDatabaseSet(DatabaseSet dbset){
 		return this.jdbcTemplate
 				.update("insert into databaseSet(id, name, provider, shardingStrategy, groupId)"

@@ -15,6 +15,7 @@ import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -39,7 +40,7 @@ public class GenTaskBySqlBuilderResource {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Status addTask(@FormParam("id") int id,
 			@FormParam("project_id") int project_id,
-			@FormParam("db_name") String db_name,
+			@FormParam("db_name") String set_name,
 			@FormParam("table_name") String table_name,
 			@FormParam("method_name") String method_name,
 			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
@@ -62,8 +63,13 @@ public class GenTaskBySqlBuilderResource {
 			String userNo = AssertionHolder.getAssertion().getPrincipal()
 					.getAttributes().get("employee").toString();
 			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+			
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
+			String dbName = databaseSetEntry.getConnectionString();
+			
 			task.setProject_id(project_id);
-			task.setDb_name(db_name);
+			task.setDb_name(dbName);
+			task.setDatabaseSet_name(set_name);
 			task.setTable_name(table_name);
 			task.setMethod_name(method_name);
 			task.setSql_style(sql_style);

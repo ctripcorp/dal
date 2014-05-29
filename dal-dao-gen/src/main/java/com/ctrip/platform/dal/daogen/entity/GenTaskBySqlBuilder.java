@@ -12,6 +12,8 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	
 	private String db_name;
 	
+	private String databaseSet_name;
+	
 	private String table_name;
 
 	private String class_name;
@@ -35,6 +37,14 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	private String update_user_no;
 	private Timestamp update_time;
 	private String comment;
+
+	public String getDatabaseSet_name() {
+		return databaseSet_name;
+	}
+
+	public void setDatabaseSet_name(String databaseSet_name) {
+		this.databaseSet_name = databaseSet_name;
+	}
 
 	public String getFields() {
 		return fields;
@@ -182,6 +192,7 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		task.setUpdate_user_no(rs.getString(14));
 		task.setUpdate_time(rs.getTimestamp(15));
 		task.setComment(rs.getString(16));
+		task.setDatabaseSet_name(rs.getString(17));
 		return task;
 	}
 

@@ -279,27 +279,27 @@ public class ProjectResource {
 		Set<String> notExistDbset = new HashSet<String>();
 		List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
 		for(GenTaskBySqlBuilder task : autoTasks){
-			String db_name = task.getDb_name();
-			if(!group_dbset_names.contains(db_name)){
-				notExistDbset.add(db_name);
+			String databaseSet_name = task.getDatabaseSet_name();
+			if(!group_dbset_names.contains(databaseSet_name)){
+				notExistDbset.add(databaseSet_name);
 				flag = false;
 			}
 		}
 
 		List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
 		for(GenTaskByTableViewSp task : tableViewSpTasks){
-			String db_name = task.getDb_name();
-			if(!group_dbset_names.contains(db_name)){
-				notExistDbset.add(db_name);
+			String databaseSet_name = task.getDatabaseSet_name();
+			if(!group_dbset_names.contains(databaseSet_name)){
+				notExistDbset.add(databaseSet_name);
 				flag = false;
 			}
 		}
 		
 		List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(project_id);
 		for(GenTaskByFreeSql task : sqlTasks){
-			String db_name = task.getDb_name();
-			if(!group_dbset_names.contains(db_name)){
-				notExistDbset.add(db_name);
+			String databaseSet_name = task.getDatabaseSet_name();
+			if(!group_dbset_names.contains(databaseSet_name)){
+				notExistDbset.add(databaseSet_name);
 				flag = false;
 			}
 		}

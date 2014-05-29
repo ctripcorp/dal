@@ -40,6 +40,7 @@ import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.domain.TableSpNames;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
@@ -146,9 +147,10 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("tables")
-	public String getTableNames(@QueryParam("db_name") String dbName) {
+	public String getTableNames(@QueryParam("db_name") String db_set) {
 		try {
-
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set);
+			String dbName = databaseSetEntry.getConnectionString();
 			List<String> results = DbUtils.getAllTableNames(dbName);
 			java.util.Collections.sort(results);
 			return mapper.writeValueAsString(results);
@@ -171,8 +173,11 @@ public class DatabaseResource {
 
 		Connection connection = null;
 		try {
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(dbName);
+			String db_Name = databaseSetEntry.getConnectionString();
+			
 			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
-					dbName);
+					db_Name);
 			connection = ds.getConnection();
 			Set<String> indexedColumns = new HashSet<String>();
 			Set<String> primaryKeys = new HashSet<String>();
@@ -248,12 +253,15 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("table_sps")
-	public TableSpNames getTableSPNames(@QueryParam("db_name") String dbName) {
+	public TableSpNames getTableSPNames(@QueryParam("db_name") String setName) {
 		TableSpNames tableSpNames = new TableSpNames();
 		List<String> views;
 		List<String> tables;
 		List<StoredProcedure> sps;
 		try {
+			
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(setName);
+			String dbName = databaseSetEntry.getConnectionString();
 			views = DbUtils.getAllViewNames(dbName);
 			tables = DbUtils.getAllTableNames(dbName);
 			sps = DbUtils.getAllSpNames(dbName);
@@ -275,10 +283,13 @@ public class DatabaseResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("test_sql")
-	public Status verifyQuery(@FormParam("db_name") String dbName,
+	public Status verifyQuery(@FormParam("db_name") String set_name,
 			@FormParam("sql_content") String sql,
 			@FormParam("params") String params) {
 
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
+		String dbName = databaseSetEntry.getConnectionString();
+		
 		return DbUtils.testAQuerySql(dbName, sql, params,
 				CurrentLanguage.CSharp, true) == null ? Status.ERROR
 				: Status.OK;

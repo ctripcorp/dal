@@ -56,6 +56,7 @@
 		<jetty-glassfish-version>2.2.2.v201112011158</jetty-glassfish-version>
 		<jetty-javax-el-version>2.2.0.v201108011116</jetty-javax-el-version>
 		<javax-persistence-version>1.0.2</javax-persistence-version>
+		<ctrip-security-version>1.0.0.2</ctrip-security-version>
 	</properties>
 	<profiles>
 		<profile>

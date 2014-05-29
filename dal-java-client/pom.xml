@@ -41,5 +41,10 @@
       <artifactId>central-logging-agent</artifactId>
       <version>${central-logging-version}</version>
     </dependency>
+    <dependency>
+		<groupId>com.ctrip.security</groupId>
+		<artifactId>encryption</artifactId>
+		<version>${ctrip-security-version}</version>
+	</dependency>
   </dependencies>
 </project>

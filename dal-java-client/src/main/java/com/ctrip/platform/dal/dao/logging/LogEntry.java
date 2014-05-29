@@ -20,6 +20,7 @@ import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
+import com.ctrip.security.encryption.AESCrypto;
 
 public class LogEntry {
 	public static final String TAG_IN_TRANSACTION = "InTransaction";
@@ -44,7 +45,7 @@ public class LogEntry {
 	private StatementParameters parameters;
 	private StatementParameters[] parametersList;
 	private boolean success;
-	private String errorMsg;
+	private String errorMsg = "";
 	private String inputParamStr;
 	private String outputParamStr = "";
 	private String dao;
@@ -74,15 +75,7 @@ public class LogEntry {
 	public LogEntry(DalHints hints) {
 		this.timeStamp = new Date();
 		this.machine = CommonUtil.MACHINE;
-		if(hints.is(DalHintEnum.sensitive))
-			this.sensitive = (Boolean)hints.get(DalHintEnum.sensitive);
-		this.getSourceAndMessage();
-		if(null != this.parameters) {
-			this.inputParamStr = this.getInputParameterPrint(this.parameters);
-		}
-		else if(null != this.parametersList && this.parametersList.length > 0){
-			this.inputParamStr = this.getInputParameterPrint(this.parametersList);
-		}
+		this.sensitive = hints.is(DalHintEnum.sensitive);
 	}
 
 	public void setCallString(String callString) {
@@ -181,6 +174,12 @@ public class LogEntry {
 	}
 
 	public String getInputParamStr(){
+		if(null != this.parameters) {
+			this.inputParamStr = this.getInputParameterPrint(this.parameters);
+		}
+		else if(null != this.parametersList && this.parametersList.length > 0){
+			this.inputParamStr = this.getInputParameterPrint(this.parametersList);
+		}
 		return this.inputParamStr;
 	}
 	
@@ -355,7 +354,7 @@ public class LogEntry {
 				.append(String.format("SQL Text:%s\r\n", this.sensitive ? SQLHIDDENString : sql))
 				.append(String.format("SQL Hash:%s\r\n", sqlHash))
 				.append("Input Parameters:")
-				.append(CommonUtil.desEncrypt(this.inputParamStr)).append("\r\n")
+				.append(CommonUtil.desEncrypt(this.getInputParamStr())).append("\r\n")
 				.append("Output Parameters:").append(outputParamStr)
 				.append("\r\n");
 		}
@@ -374,7 +373,7 @@ public class LogEntry {
 				.append(String.format("Message:%s\r\n", message))
 				.append(String.format("SQL Text: %s\r\n", CommonUtil.tagSql(sql)))
 				.append(String.format("%s\r\n", this.sensitive ? SQLHIDDENString : sql))
-				.append("Input Parameters:").append(CommonUtil.desEncrypt(this.inputParamStr)).append("\r\n")
+				.append("Input Parameters:").append(CommonUtil.desEncrypt(this.getInputParamStr())).append("\r\n")
 				.append("Output Parameters:").append(outputParamStr)
 				.append("\r\n");
 		} else {
@@ -389,8 +388,17 @@ public class LogEntry {
 	}
 
 	public String toJson(){
-		String sqlTpl = this.sensitive ?  SQLHIDDENString : this.getSqlTpl();	
-		String params = this.sensitive ? SQLHIDDENString : this.getParams(); //TODO: 加密
+		String sqlTpl = this.sensitive ?  SQLHIDDENString : this.getSqlTpl();
+		String params = "";
+		if(this.sensitive){
+			try {
+				params = AESCrypto.getInstance().crypt(this.getParams());
+			} catch (Exception e) {
+				this.errorMsg = e.getMessage();
+			}
+		} else {
+			params = this.getParams();
+		}
 		int hashCode = CommonUtil.GetHashCode(sqlTpl);
 		boolean existed = this.hasHashCode(sqlTpl, hashCode);
 		return String.format(JSON_PATTERN, 

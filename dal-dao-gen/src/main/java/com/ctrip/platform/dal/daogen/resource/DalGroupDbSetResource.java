@@ -16,13 +16,11 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
-import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDatabaseSet;
 import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
-import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
@@ -42,13 +40,11 @@ public class DalGroupDbSetResource {
 	
 	private static DalGroupDao group_dao = null;
 	private static DaoOfLoginUser user_dao = null;
-	private static DalGroupDBDao group_db_dao = null;
 	private static DaoOfDatabaseSet dbset_dao = null;
 	
 	static{
 		group_dao = SpringBeanGetter.getDaoOfDalGroup();
 		user_dao = SpringBeanGetter.getDaoOfLoginUser();
-		group_db_dao = SpringBeanGetter.getDaoOfDalGroupDB();
 		dbset_dao = SpringBeanGetter.getDaoOfDatabaseSet();
 	}
 
@@ -254,8 +250,8 @@ public class DalGroupDbSetResource {
 			return status;
 		}
 
-		int ret1 = dbset_dao.deleteDatabaseSetEntry(dbsetID);
-		int ret2 = dbset_dao.deleteDatabaseSet(dbsetID);
+		int ret1 = dbset_dao.deleteDatabaseSetEntryByDbsetId(dbsetID);
+		int ret2 = dbset_dao.deleteDatabaseSetById(dbsetID);
 		if(ret1<0 || ret2<0){
 			log.error("Delete databaseSet failed, caused by db operation failed, pls check the spring log");
 			Status status = Status.ERROR;
@@ -322,29 +318,35 @@ public class DalGroupDbSetResource {
 	}
 	
 	@POST
-	@Path("update")
-	public Status update(@FormParam("groupId") String groupId,
-			@FormParam("dbId") String dbId,
-			@FormParam("comment") String comment){
+	@Path("updateDbsetEntry")
+	public Status updateDbsetEntry(@FormParam("id") String id,
+			@FormParam("name") String name,
+			@FormParam("databaseType") String databaseType,
+			@FormParam("sharding") String sharding,
+			@FormParam("connectionString") String connectionString,
+			@FormParam("dbsetId") String dbsetId,
+			@FormParam("groupId") String groupId){
 		
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
 		
-		if(null == userNo || null == groupId || null == dbId){
-			log.error(String.format("Add member failed, caused by illegal parameters: "
-					+ "[groupId=%s, dbId=%s]",groupId, dbId));
+		if(null == userNo || null == dbsetId){
+			log.error(String.format("Update Dbset Entry failed, caused by illegal parameters: "
+					+ "[userNo=%s, dbsetId=%s]",userNo, dbsetId));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
 		}
 		
+		int dbsetEntyID = -1;
+		int dbsetID = -1;
 		int groupID = -1;
-		int dbID = -1;
 		try{
-			dbID = Integer.parseInt(dbId); 
+			dbsetEntyID = Integer.parseInt(id);
+			dbsetID = Integer.parseInt(dbsetId);
 			groupID = Integer.parseInt(groupId);
 		}catch(NumberFormatException  ex){
-			log.error("Update failed", ex);
+			log.error("Update Dbset Entry failed", ex);
 			Status status = Status.ERROR;
 			status.setInfo("Illegal group id");
 			return status;
@@ -356,10 +358,17 @@ public class DalGroupDbSetResource {
 			return status;
 		}
 		
-		
-		int ret = group_db_dao.updateGroupDB(dbID, comment);
+		int ret = -1;
+		DatabaseSetEntry dbsetEntry = new DatabaseSetEntry();
+		dbsetEntry.setId(dbsetEntyID);
+		dbsetEntry.setName(name);
+		dbsetEntry.setDatabaseType(databaseType);
+		dbsetEntry.setSharding(sharding);
+		dbsetEntry.setConnectionString(connectionString);
+		dbsetEntry.setDatabaseSet_Id(dbsetID);
+		ret = dbset_dao.updateDatabaseSetEntry(dbsetEntry);
 		if(ret <= 0){
-			log.error("Update dal group db failed, caused by db operation failed, pls check the spring log");
+			log.error("Update databaseSet Entry failed, caused by db operation failed, pls check the spring log");
 			Status status = Status.ERROR;
 			status.setInfo("Update operation failed.");
 			return status;
@@ -369,28 +378,28 @@ public class DalGroupDbSetResource {
 	}
 	
 	@POST
-	@Path("delete")
-	public Status delete(@FormParam("groupId") String groupId,
-			@FormParam("dbId") String dbId){
+	@Path("deletedbsetEntry")
+	public Status deleteDbsetEntry(@FormParam("groupId") String groupId,
+			@FormParam("dbsetEntryId") String dbsetEntryId){
 
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
 		
-		if(null == userNo || null == groupId || null == dbId){
-			log.error(String.format("Delete db failed, caused by illegal parameters: "
-					+ "[groupId=%s, dbId=%s]",groupId, dbId));
+		if(null == userNo || null == groupId || null == dbsetEntryId){
+			log.error(String.format("Delete databaseSet Entry failed, caused by illegal parameters: "
+					+ "[groupId=%s, dbsetId=%s]",groupId, dbsetEntryId));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
 		}
 		
 		int groupID = -1;
-		int dbID = -1;
+		int dbsetEntryID = -1;
 		try{
 			groupID = Integer.parseInt(groupId);
-			dbID =  Integer.parseInt(dbId);
+			dbsetEntryID =  Integer.parseInt(dbsetEntryId);
 		}catch(NumberFormatException  ex){
-			log.error("Delete db failed", ex);
+			log.error("Delete databaseSet Entry failed", ex);
 			Status status = Status.ERROR;
 			status.setInfo("Illegal group id");
 			return status;
@@ -402,9 +411,9 @@ public class DalGroupDbSetResource {
 			return status;
 		}
 
-		int ret = group_db_dao.deleteDalGroupDB(dbID);
-		if(ret <= 0){
-			log.error("Delete db failed, caused by db operation failed, pls check the spring log");
+		int ret = dbset_dao.deleteDatabaseSetEntryById(dbsetEntryID);
+		if(ret<0){
+			log.error("Delete databaseSet Entry failed, caused by db operation failed, pls check the spring log");
 			Status status = Status.ERROR;
 			status.setInfo("Delete operation failed.");
 			return status;
@@ -412,49 +421,6 @@ public class DalGroupDbSetResource {
 		return Status.OK;
 	}
 	
-	@POST
-	@Path("transferdb")
-	public Status transferdb(@FormParam("groupId") String groupId,
-			@FormParam("dbId") String dbId){
-
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
-		
-		if(null == userNo || null == groupId || null == dbId){
-			log.error(String.format("transfer db failed, caused by illegal parameters: "
-					+ "[groupId=%s, dbId=%s]",groupId, dbId));
-			Status status = Status.ERROR;
-			status.setInfo("Illegal parameters.");
-			return status;
-		}
-		
-		int groupID = -1;
-		int dbID = -1;
-		try{
-			groupID = Integer.parseInt(groupId);
-			dbID =  Integer.parseInt(dbId);
-		}catch(NumberFormatException  ex){
-			log.error("transfer db failed", ex);
-			Status status = Status.ERROR;
-			status.setInfo("Illegal group id or db id");
-			return status;
-		}
-		
-		if(!this.validateTransferPermision(userNo,dbID)){
-			Status status = Status.ERROR;
-			status.setInfo("你没有当前DataBase的操作权限.");
-			return status;
-		}
-
-		int ret = group_db_dao.updateGroupDB(dbID, groupID);
-		if(ret <= 0){
-			log.error("transfer db failed, caused by db operation failed, pls check the spring log");
-			Status status = Status.ERROR;
-			status.setInfo("transfer operation failed.");
-			return status;
-		}
-		return Status.OK;
-	}
 	
 	private boolean validatePermision(String userNo,int groupId){
 		LoginUser user = user_dao.getUserByNo(userNo);
@@ -467,21 +433,4 @@ public class DalGroupDbSetResource {
 		return false;
 	}
 	
-	private boolean validateTransferPermision(String userNo,int dbId){
-		LoginUser user = user_dao.getUserByNo(userNo);
-		if(user!=null && user.getGroupId()==DalGroupResource.SUPER_GROUP_ID){
-			return true;
-		}
-		List<DalGroupDB> groupDbs = group_db_dao.getGroupDBsByGroup(user.getGroupId());
-		if(groupDbs!=null && groupDbs.size()>0){
-			for(DalGroupDB db:groupDbs){
-				if(db.getId()==dbId){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-
 }

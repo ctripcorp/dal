@@ -141,6 +141,93 @@
         });
     };
 
+    var editDbSetEntry = function(){
+        var records = w2ui['previewgrid'].getSelection();
+        var record = w2ui['previewgrid'].get(records[0]);
+        if(record==null || record==''){
+            alert("请先选择一个databaseSet Entry");
+            return;
+        }
+        $("#dbsetentryname2").val(record['name']);
+        $("#databaseType2").val(record['databaseType']);
+        $("#sharding2").val(record['sharding']);
+        cblock($("body"));
+
+        $.get("/rest/db/dbs?rand=" + Math.random()+"&groupDBs=true").done(function (data) {
+
+            if ($("#databases2")[0] != undefined && $("#databases2")[0].selectize != undefined) {
+                $("#databases2")[0].selectize.clearOptions();
+            } else {
+                $("#databases2").selectize({
+                    valueField: 'id',
+                    labelField: 'title',
+                    searchField: 'title',
+                    sortField: 'title',
+                    options: [],
+                    create: false
+                });
+            }
+
+            var allServers = [];
+            $.each(data, function (index, value) {
+                allServers.push({
+                    id: value,
+                    title: value
+                });
+            });
+            $("#databases2")[0].selectize.addOption(allServers);
+            $("#databases2")[0].selectize.refreshOptions(false);
+
+            $("#databases2")[0].selectize.setValue(record['connectionString']);
+
+            $("body").unblock();
+        }).fail(function (data) {
+                $("body").unblock();
+                alert(data);
+            });
+        $("#updateDbsetEntryModal").modal({
+            "backdrop": "static"
+        });
+    };
+
+    var delDbSetEntry = function(){
+        var current_group = w2ui['grid'].current_group;
+        if (current_group == null || current_group == '') {
+            alert('请先选择Group');
+            return;
+        }
+
+        var records1 = w2ui['grid'].getSelection();
+        var record1 = w2ui['grid'].get(records1[0]);
+        if(record1==null || record1==''){
+            alert("请先选择一个databaseSet");
+            return;
+        }
+
+        var records2 = w2ui['previewgrid'].getSelection();
+        var record2 = w2ui['previewgrid'].get(records2[0]);
+        if(record2==null || record2==''){
+            alert("请先选择一个databaseSet Entry");
+            return;
+        }
+
+        if (confirm("Are you sure to delete?")) {
+            $.post("/rest/groupdbset/deletedbsetEntry", {
+                groupId : w2ui['grid'].current_group,
+                dbsetEntryId : record2['id']
+            },function (data) {
+                if (data.code == "OK") {
+                    refreshDbSetEntry();
+                } else {
+                    alert(data.info);
+                }
+            }).fail(function (data) {
+                    alert("执行异常");
+                });
+        }
+
+    };
+
     Render.prototype = {
         renderAll: function(){
             $('#main_layout').height($(document).height() - 55);
@@ -504,6 +591,40 @@
                     refreshDbSet();
                 } else {
                     $("#updatedbset_error_msg").html(data.info);
+                }
+            });
+        });
+
+        $(document.body).on('click', '#save_updatedbsetentry', function (event) {
+            $("#updatedbsetentry_error_msg").html('');
+            var dbsetentryname = $("#dbsetentryname2").val();
+            var databaseType = $("#databaseType2").val();
+            var sharding = $("#sharding2").val();
+            var connectionString = $("#databases2").val();
+            if (dbsetentryname == null || dbsetentryname == "") {
+                $("#updatedbsetentry_error_msg").html('databaseSet entry name 不能为空!');
+                return;
+            }
+            if (connectionString == null || connectionString == "") {
+                $("#updatedbsetentry_error_msg").html('请选择connectionString');
+                return;
+            }
+            var records = w2ui['previewgrid'].getSelection();
+            var record = w2ui['previewgrid'].get(records[0]);
+            $.post("/rest/groupdbset/updateDbsetEntry", {
+                "id":record['id'],
+                "name": dbsetentryname,
+                "databaseType":databaseType,
+                "sharding":sharding,
+                "connectionString":connectionString,
+                "dbsetId":record['databaseSet_Id'],
+                "groupId":w2ui['grid'].current_group
+            }, function (data) {
+                if (data.code == "OK") {
+                    $("#updateDbsetEntryModal").modal('hide');
+                    refreshDbSetEntry();
+                } else {
+                    $("#updatedbsetentry_error_msg").html(data.info);
                 }
             });
         });

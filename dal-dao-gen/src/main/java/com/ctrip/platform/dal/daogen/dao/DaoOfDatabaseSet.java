@@ -9,7 +9,6 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 
@@ -94,13 +93,41 @@ public class DaoOfDatabaseSet {
 						dbset.getId());
 	}
 	
-	public int deleteDatabaseSetEntry(Integer dbsetId){
+	public int updateDatabaseSetEntry(DatabaseSetEntry dbsetEntry){
+		return this.jdbcTemplate
+				.update("update databaseSetEntry set name=?, databaseType=?, sharding=?, connectionString=?, databaseSet_Id=? "
+						+ " where id=?",
+						dbsetEntry.getName(),
+						dbsetEntry.getDatabaseType(),
+						dbsetEntry.getSharding(),
+						dbsetEntry.getConnectionString(),
+						dbsetEntry.getDatabaseSet_Id(),
+						dbsetEntry.getId());
+	}
+	
+	/**
+	 * 依据外键databaseSet_Id删除entry
+	 * @param dbsetId
+	 * @return
+	 */
+	public int deleteDatabaseSetEntryByDbsetId(Integer dbsetId){
 		return this.jdbcTemplate
 				.update("delete from databaseSetEntry where databaseSet_Id=?",
 						dbsetId);
 	}
 	
-	public int deleteDatabaseSet(Integer dbsetId){
+	/**
+	 * 根据主键id删除entry
+	 * @param id
+	 * @return
+	 */
+	public int deleteDatabaseSetEntryById(Integer id){
+		return this.jdbcTemplate
+				.update("delete from databaseSetEntry where id=?",
+						id);
+	}
+	
+	public int deleteDatabaseSetById(Integer dbsetId){
 		return this.jdbcTemplate
 				.update("delete from databaseSet where id=?",
 						dbsetId);

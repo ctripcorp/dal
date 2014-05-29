@@ -31,7 +31,7 @@ public class DaoOfProject {
 	public List<Project> getAllProjects() {
 		try {
 			return this.jdbcTemplate.query(
-					"select id, name, namespace,dal_group_id from project",
+					"select id, name, namespace,dal_group_id,dal_config_name from project",
 					new RowMapper<Project>() {
 						public Project mapRow(ResultSet rs, int rowNum)
 								throws SQLException {
@@ -48,7 +48,7 @@ public class DaoOfProject {
 		try {
 			return this.jdbcTemplate
 					.query(
-							String.format("select id, name, namespace,dal_group_id from project where id in (%s) ", StringUtils.join(iD, ","))
+							String.format("select id, name, namespace,dal_group_id,dal_config_name from project where id in (%s) ", StringUtils.join(iD, ","))
 							, new RowMapper<Project>() {
 								public Project mapRow(ResultSet rs, int rowNum)
 										throws SQLException {
@@ -64,7 +64,7 @@ public class DaoOfProject {
 	public List<Project> getProjectByGroupId(int groupId) {
 		try {
 			return this.jdbcTemplate
-					.query("select id, name, namespace,dal_group_id from project where dal_group_id=? ",
+					.query("select id, name, namespace,dal_group_id,dal_config_name from project where dal_group_id=? ",
 							new Object[] { groupId }, new RowMapper<Project>() {
 								public Project mapRow(ResultSet rs, int rowNum)
 										throws SQLException {
@@ -81,7 +81,7 @@ public class DaoOfProject {
 		try {
 			return this.jdbcTemplate
 					.queryForObject(
-							"select id, name, namespace,dal_group_id from project where id=?",
+							"select id, name, namespace,dal_group_id,dal_config_name from project where id=?",
 							new Object[] { iD }, new RowMapper<Project>() {
 								public Project mapRow(ResultSet rs, int rowNum)
 										throws SQLException {
@@ -92,6 +92,18 @@ public class DaoOfProject {
 			ex.printStackTrace();
 			return null;
 		}
+	}
+	
+	public List<Project> getProjectByConfigname(String dal_config_name) {
+		return this.jdbcTemplate
+				.query(
+						"select id, name, namespace,dal_group_id,dal_config_name from project where dal_config_name=?",
+						new Object[] { dal_config_name }, new RowMapper<Project>() {
+							public Project mapRow(ResultSet rs, int rowNum)
+									throws SQLException {
+								return Project.visitRow(rs);
+							}
+						});
 	}
 
 	public int insertProject(final Project project) {
@@ -105,11 +117,12 @@ public class DaoOfProject {
 					Connection connection) throws SQLException {
 				PreparedStatement ps = connection
 						.prepareStatement(
-								"insert into project ( name, namespace, dal_group_id) values (?,?,?)",
+								"insert into project ( name, namespace, dal_group_id,dal_config_name) values (?,?,?,?)",
 								Statement.RETURN_GENERATED_KEYS);
 				ps.setString(1, project.getName());
 				ps.setString(2, project.getNamespace());
 				ps.setInt(3, project.getDal_group_id());
+				ps.setString(4, project.getDal_config_name());
 				return ps;
 			}
 		}, holder);
@@ -121,9 +134,11 @@ public class DaoOfProject {
 	public int updateProject(Project project) {
 		try {
 			return this.jdbcTemplate
-					.update("update project set name=?, namespace=? where id=?",
+					.update("update project set name=?, namespace=?, dal_config_name=? where id=?",
 							project.getName(),
-							project.getNamespace(), project.getId());
+							project.getNamespace(), 
+							project.getDal_config_name(),
+							project.getId());
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
 			return -1;

@@ -167,9 +167,9 @@
                                 });
                                 w2ui['grid'].add(allTasks);
                                 $("body").unblock();
-                                if(allTasks.length == 0){
-                                    w2ui['grid_toolbar'].click('addDAO', null);
-                                }
+//                                if(allTasks.length == 0){
+//                                    w2ui['grid_toolbar'].click('addDAO', null);
+//                                }
                             }).fail(function(data){
                                  alert("获取所有DAO失败!");
                             });
@@ -190,7 +190,8 @@
                             $("#page1").modal({
                                 "backdrop": "static"
                             });
-                            window.ajaxutil.reload_dbservers(null,true);
+//                            window.ajaxutil.reload_dbservers(null,true);
+                            window.ajaxutil.reload_dbsets();
                             break;
                         case 'editDAO':
                             window.wizzard.clear();
@@ -303,9 +304,12 @@
                 $(".step2-2-2").hide();
                 $(".step2-3").hide();
                 $(".step2-3-1").hide();
-                window.ajaxutil.reload_dbservers(function () {
+                window.ajaxutil.reload_dbsets(function () {
                     $("#databases")[0].selectize.setValue(record.db_name);
-                },true);
+                });
+//                window.ajaxutil.reload_dbservers(function () {
+//                    $("#databases")[0].selectize.setValue(record.db_name);
+//                },true);
                 $("#page1").attr('is_update', '1');
                 $("#gen_style").val(record.task_type);
                 $("#sql_style").val(record.sql_style);

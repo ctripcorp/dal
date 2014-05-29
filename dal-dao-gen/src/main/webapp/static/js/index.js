@@ -15,6 +15,7 @@ jQuery(document).ready(function () {
         $("#projectModal").attr("is_update", "0");
         $("#name").val("");
         $("#namespace").val("");
+        $("#dalconfigname").val("");
         $("#projectModal").modal();
     });
 
@@ -30,6 +31,7 @@ jQuery(document).ready(function () {
         if (project != undefined) {
             $("#name").val(project.text);
             $("#namespace").val(project.namespace);
+            $("#dalconfigname").val(project['dal_config_name']);
         }
         $("#projectModal").attr("is_update", "1");
         $("#projectModal").modal();
@@ -95,6 +97,8 @@ jQuery(document).ready(function () {
         }
         post_data["name"] = $("#name").val();
         post_data["namespace"] = $("#namespace").val();
+        post_data["dalconfigname"] = $("#dalconfigname").val();
+
 
         if(post_data["name"]==null || post_data["name"]==''){
             $("#proj_error_msg").html('请输入项目名称！');
@@ -103,6 +107,11 @@ jQuery(document).ready(function () {
 
         if(post_data["namespace"]==null || post_data["namespace"]==''){
             $("#proj_error_msg").html('请输入命名空间！');
+            return;
+        }
+
+        if(post_data["dalconfigname"]==null || post_data["dalconfigname"]==''){
+            $("#proj_error_msg").html('请输入Dal.config配置文件根节点name！');
             return;
         }
 

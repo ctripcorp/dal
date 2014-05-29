@@ -238,6 +238,58 @@
             // });
             $.jstree.reference("#jstree_projects").refresh();
         },
+        reload_dbsets: function (callback) {
+            var selectedProject = $.jstree.reference("#jstree_projects").get_selected();
+            if(selectedProject == undefined || selectedProject.length < 1 ||
+                selectedProject[0] == -1){
+                alert("请单击一个项目，再操作！");
+                return;
+            }
+            var project = $.jstree.reference("#jstree_projects").get_node(selectedProject[0]).original;
+            cblock($("body"));
+            $.get("/rest/groupdbset/getDbset?rand=" + Math.random()+"&groupId="+project['dal_group_id']).done(function (data) {
+
+                if ($("#databases")[0] != undefined && $("#databases")[0].selectize != undefined) {
+                    $("#databases")[0].selectize.clearOptions();
+                } else {
+                    $("#databases").selectize({
+                        //maxItems: null,
+                        valueField: 'id',
+                        labelField: 'title',
+                        searchField: 'title',
+                        sortField: 'title',
+                        options: [],
+                        create: false
+                    });
+                }
+
+                $("#databases")[0].selectize.on('dropdown_open', function (dropdown) {
+                    $(".step1").height(240);
+                });
+
+                $("#databases")[0].selectize.on('dropdown_close', function (dropdown) {
+                    $(".step1").height(74);
+                });
+
+                var allServers = [];
+                $.each(data, function (index, value) {
+                    allServers.push({
+                        id: value['name'],
+                        title: value['name']
+                    });
+                });
+                $("#databases")[0].selectize.addOption(allServers);
+                $("#databases")[0].selectize.refreshOptions(false);
+
+                if (callback != undefined) {
+                    callback();
+                }
+
+                $("body").unblock();
+            }).fail(function (data) {
+                    $("body").unblock();
+                });
+        },
         generate_code: function () {
             $("#generateCode").modal("hide");
             var random = new Date().valueOf();

@@ -55,6 +55,185 @@
       <div id="main_layout"></div>
       
       <!--Begin modal-->
+      <div class="modal fade" id="updateDbsetEntryModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+            <div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">Update databaseSet Entry</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 130px;">Entry Name:</label> 
+							<input id="dbsetentryname2" class="span8 input-sm" type="text">
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 130px;">databaseType</label> 
+							<select id="databaseType2" class="span8">
+	                           <option value="Master">Master</option>
+	                           <option value="Slave">Slave</option>
+	                        </select>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 130px;">sharding:</label> 
+							<textarea  id="sharding2" class="span8" cols="4"></textarea>
+						</div>
+					</div>
+					<div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label" style="width:130px;">connectionString</label>
+                           <select id="databases2" class="span8"></select>
+                        </div>
+                     </div>
+				</div>
+				<div class="modal-footer">
+               	  <label id="updatedbsetentry_error_msg" class="control-label popup_label" style="color:red;"></label>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button id="save_updatedbsetentry" type="button" class="btn btn-primary">Save changes</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!--End modal-->
+      
+      <!--Begin modal-->
+      <div class="modal fade" id="addDbsetEntryModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+            <div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">Add databaseSet Entry</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 130px;">Entry Name:</label> 
+							<input id="dbsetentryname" class="span8 input-sm" type="text">
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 130px;">databaseType</label> 
+							<select id="databaseType" class="span8">
+	                           <option value="Master">Master</option>
+	                           <option value="Slave">Slave</option>
+	                        </select>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 130px;">sharding:</label> 
+							<textarea  id="sharding" class="span8" cols="4"></textarea>
+						</div>
+					</div>
+					<div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label" style="width:130px;">connectionString</label>
+                           <select id="databases" class="span8">
+                           </select>
+                        </div>
+                     </div>
+				</div>
+				<div class="modal-footer">
+               	  <label id="adddbsetentry_error_msg" class="control-label popup_label" style="color:red;"></label>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button id="save_adddbsetentry" type="button" class="btn btn-primary">Save changes</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!--End modal-->
+      
+      <!--Begin modal-->
+      <div class="modal fade" id="addDbsetModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+            <div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">Add databaseSet</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 130px;">databaseSet Name:</label> 
+							<input id="dbsetname" class="span8 input-sm" type="text">
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 130px;">provider:</label> 
+							<select id="provider" class="span8">
+	                           <option value="SQLServer">SQLServer</option>
+	                           <option value="MySQL">MySQL</option>
+	                        </select>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 130px;">shardingStrategy:</label> 
+							<textarea  id="shardingStrategy" class="span12 popup_text" cols="4"></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+               	  <label id="adddbset_error_msg" class="control-label popup_label" style="color:red;"></label>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button id="save_adddbset" type="button" class="btn btn-primary">Save changes</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!--End modal-->
+      
+      <!--Begin modal-->
+      <div class="modal fade" id="updateDbsetModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+            <div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">Update databaseSet</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 130px;">databaseSet Name:</label> 
+							<input id="dbsetname2" class="span8 input-sm" type="text">
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 130px;">provider:</label> 
+							<select id="provider2" class="span8">
+	                           <option value="SQLServer">SQLServer</option>
+	                           <option value="MySQL">MySQL</option>
+	                        </select>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width: 130px;">shardingStrategy:</label> 
+							<textarea  id="shardingStrategy2" class="span12 popup_text" cols="4"></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+               	  <label id="updatedbset_error_msg" class="control-label popup_label" style="color:red;"></label>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button id="save_updatedbset" type="button" class="btn btn-primary">Save changes</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!--End modal-->
+      
+      <!--Begin modal-->
       <div class="modal fade" id="dalConfigDemoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
          <div class="modal-dialog">
 			<div class="modal-content">

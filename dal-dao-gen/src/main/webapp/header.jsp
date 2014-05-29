@@ -23,7 +23,7 @@
 				<span class="dropdown-arrow dropdown-arrow-inverse" style="margin-top:1px"></span>
 				<ul class="dropdown-menu dropdown-inverse" style="margin-top:8px !important">
 					<li><a href="dbmanage.jsp">组内All In One数据库管理</a></li>
-					<li><a href="dbsetsmanage.jsp">组内databaseSet管理</a></li>
+					<li><a href="dbsetsmanage.jsp">组内逻辑数据库管理</a></li>
 				</ul>
 			</li>
 			<li id="groupmanagejsp"><a href="groupmanage.jsp">组管理</a></li>

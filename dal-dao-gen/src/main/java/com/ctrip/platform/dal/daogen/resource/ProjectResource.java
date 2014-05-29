@@ -25,7 +25,7 @@ import org.jasig.cas.client.util.AssertionHolder;
 import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
-import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
@@ -78,7 +78,6 @@ public class ProjectResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Project> getProjects(@QueryParam("root") boolean root) {
-		// return projectDao.getAllProjects();
 		
 		if(root){
 			List<Project> roots = new ArrayList<Project>();
@@ -144,6 +143,7 @@ public class ProjectResource {
 	public Status addProject(@FormParam("id") int id,
 			@FormParam("name") String name,
 			@FormParam("namespace") String namespace,
+			@FormParam("dalconfigname") String dalconfigname,
 			@FormParam("action") String action) {
 
 		Project proj = new Project();
@@ -166,16 +166,35 @@ public class ProjectResource {
 		}
 
 		if (action.equals("insert")) {
+			List<Project>  pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
+			if(null != pjs && pjs.size() > 0){
+				Status status = Status.ERROR;
+				status.setInfo("Dal.config Name --> "+name+" 已经存在，请重新命名!");
+				return status;
+			}
 			proj.setName(name);
 			proj.setNamespace(namespace);
+			proj.setDal_config_name(dalconfigname);
 			proj.setDal_group_id(user.getGroupId());
 			SpringBeanGetter.getDaoOfProject().insertProject(proj);
 //			int pk = SpringBeanGetter.getDaoOfProject().insertProject(proj);
 //			shareProject(pk, userNo);
 		} else if (action.equals("update")) {
+			List<Project>  pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
+			if(null != pjs && pjs.size() > 0){
+				for(Project temp:pjs){
+					if(temp.getId()!=id){
+						Status status = Status.ERROR;
+						status.setInfo("Dal.config Name --> "+name+" 已经存在，请重新命名!");
+						return status;
+					}
+				}
+			}
+			
 			proj.setId(id);
 			proj.setName(name);
 			proj.setNamespace(namespace);
+			proj.setDal_config_name(dalconfigname);
 			SpringBeanGetter.getDaoOfProject().updateProject(proj);
 
 //			shareProject(id, userNo);
@@ -249,20 +268,20 @@ public class ProjectResource {
 			return status;
 		}
 		
-		List<DalGroupDB> groupDBs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
-		Set<String> group_db_names = new HashSet<String>();
-		for(DalGroupDB groupDB : groupDBs){
-			group_db_names.add(groupDB.getDbname());
+		List<DatabaseSet> groupDbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
+		Set<String> group_dbset_names = new HashSet<String>();
+		for(DatabaseSet dbset : groupDbsets){
+			group_dbset_names.add(dbset.getName());
 		}
 
 		boolean flag = true;
 		status.setInfo("");
-		Set<String> notExistDB = new HashSet<String>();
+		Set<String> notExistDbset = new HashSet<String>();
 		List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
 		for(GenTaskBySqlBuilder task : autoTasks){
 			String db_name = task.getDb_name();
-			if(!group_db_names.contains(db_name)){
-				notExistDB.add(db_name);
+			if(!group_dbset_names.contains(db_name)){
+				notExistDbset.add(db_name);
 				flag = false;
 			}
 		}
@@ -270,8 +289,8 @@ public class ProjectResource {
 		List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
 		for(GenTaskByTableViewSp task : tableViewSpTasks){
 			String db_name = task.getDb_name();
-			if(!group_db_names.contains(db_name)){
-				notExistDB.add(db_name);
+			if(!group_dbset_names.contains(db_name)){
+				notExistDbset.add(db_name);
 				flag = false;
 			}
 		}
@@ -279,8 +298,8 @@ public class ProjectResource {
 		List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(project_id);
 		for(GenTaskByFreeSql task : sqlTasks){
 			String db_name = task.getDb_name();
-			if(!group_db_names.contains(db_name)){
-				notExistDB.add(db_name);
+			if(!group_dbset_names.contains(db_name)){
+				notExistDbset.add(db_name);
 				flag = false;
 			}
 		}
@@ -289,12 +308,14 @@ public class ProjectResource {
 			return Status.OK;
 		}else{
 			String info = "<ul>";
-			for(String temp:notExistDB){
+			for(String temp:notExistDbset){
 				info+="<li>"+temp+"</li>";
 			}
 			info += "</ul>";
 			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
-			info = "在DAL Team Group："+group.getGroup_name()+"中不存在以下数据库：</br>"+ info +"请先添加DB到所在Group!";
+			info = "你所在DAL Team-->"+group.getGroup_name()+"中不存在以下databaseSet：</br>"+ info 
+					+"请先添加databaseSet到所在Group!</br>"
+					+"点击此处添加databaseSet ： <a href='dbsetsmanage.jsp'>组内databaseSet管理</a>";
 			status.setInfo(info);
 			return status;
 		}

@@ -49,7 +49,7 @@ public class DalDefaultJpaParserMySqlTest {
 			parser = DalDefaultJpaParser.create(ClientTestModel.class, 
 					new DefaultLoader(DatabaseCategory.MySql), "dao_test");
 			
-			DalClientFactory.initPrivateFactory();
+			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(parser.getDatabaseName());	
 			dao = new DalTableDao<ClientTestModel>(parser);
 		} catch (Exception e) {

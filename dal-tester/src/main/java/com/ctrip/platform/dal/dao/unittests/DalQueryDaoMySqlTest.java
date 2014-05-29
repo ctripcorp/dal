@@ -37,7 +37,7 @@ public class DalQueryDaoMySqlTest {
 	private static DalRowMapper<ClientTestModel> mapper = null;
 	static{
 		try {
-			DalClientFactory.initPrivateFactory();
+			DalClientFactory.initClientFactory();
 			baseClient = DalClientFactory.getClient(DATABASE_NAME);
 			client = new DalQueryDao(DATABASE_NAME);
 			mapper = new ClientTestDalRowMapper();

@@ -92,7 +92,7 @@ public class DalDirectClientSqlServerTest {
 
 	static {
 		try {
-			DalClientFactory.initPrivateFactory();
+			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(DATABASE_NAME);
 			mapper = new ClientTestDalRowMapper();
 		} catch (Exception e) {

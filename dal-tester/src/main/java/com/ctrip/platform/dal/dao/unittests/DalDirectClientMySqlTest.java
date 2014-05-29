@@ -91,7 +91,7 @@ public class DalDirectClientMySqlTest {
 
 	static {
 		try {
-			DalClientFactory.initPrivateFactory();
+			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(DATABASE_NAME);
 			mapper = new ClientTestDalRowMapper();
 		} catch (Exception e) {

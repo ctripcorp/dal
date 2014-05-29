@@ -40,7 +40,7 @@ public class DalTabelDaoMySqlTest {
 	private static DalParser<ClientTestModel> parser = null;
 	static {
 		try {
-			DalClientFactory.initPrivateFactory();
+			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(DATABASE_NAME);
 			parser = new ClientTestDalParser();
 			dao = new DalTableDao<ClientTestModel>(parser);

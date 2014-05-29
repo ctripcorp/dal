@@ -26,6 +26,7 @@ import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
@@ -78,7 +79,6 @@ public class ProjectResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Project> getProjects(@QueryParam("root") boolean root) {
-		// return projectDao.getAllProjects();
 		
 		if(root){
 			List<Project> roots = new ArrayList<Project>();
@@ -144,6 +144,7 @@ public class ProjectResource {
 	public Status addProject(@FormParam("id") int id,
 			@FormParam("name") String name,
 			@FormParam("namespace") String namespace,
+			@FormParam("dalconfigname") String dalconfigname,
 			@FormParam("action") String action) {
 
 		Project proj = new Project();
@@ -165,17 +166,39 @@ public class ProjectResource {
 			return status;
 		}
 
+		
+		
+		
 		if (action.equals("insert")) {
+			List<Project>  pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
+			if(null != pjs && pjs.size() > 0){
+				Status status = Status.ERROR;
+				status.setInfo("Dal.config Name --> "+name+" 已经存在，请重新命名!");
+				return status;
+			}
 			proj.setName(name);
 			proj.setNamespace(namespace);
+			proj.setDal_config_name(dalconfigname);
 			proj.setDal_group_id(user.getGroupId());
 			SpringBeanGetter.getDaoOfProject().insertProject(proj);
 //			int pk = SpringBeanGetter.getDaoOfProject().insertProject(proj);
 //			shareProject(pk, userNo);
 		} else if (action.equals("update")) {
+			List<Project>  pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
+			if(null != pjs && pjs.size() > 0){
+				for(Project temp:pjs){
+					if(temp.getId()!=id){
+						Status status = Status.ERROR;
+						status.setInfo("Dal.config Name --> "+name+" 已经存在，请重新命名!");
+						return status;
+					}
+				}
+			}
+			
 			proj.setId(id);
 			proj.setName(name);
 			proj.setNamespace(namespace);
+			proj.setDal_config_name(dalconfigname);
 			SpringBeanGetter.getDaoOfProject().updateProject(proj);
 
 //			shareProject(id, userNo);

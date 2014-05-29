@@ -67,14 +67,20 @@
                   <div class="row-fluid">
                      <div class="control-group">
                         <input id="project_id" type="hidden" value="">
-                        <label class="control-label popup_label">项目名称</label>
+                        <label class="control-label popup_label" style="width: 110px;">项目名称</label>
                         <input id="name" class="span9 input-sm" type="text">
                      </div>
                   </div>
                   <div class="row-fluid">
                      <div class="control-group">
-                        <label class="control-label popup_label">命名空间</label>
+                        <label class="control-label popup_label" style="width: 110px;">命名空间</label>
                         <input id="namespace" class="span9 input-sm" type="text">
+                     </div>
+                  </div>
+                  <div class="row-fluid">
+                     <div class="control-group">
+                        <label class="control-label popup_label" style="width: 110px;">Dal.config Name</label>
+                        <input id="dalconfigname" class="span9 input-sm" type="text">
                      </div>
                   </div>
                </div>

@@ -167,9 +167,9 @@
                                 });
                                 w2ui['grid'].add(allTasks);
                                 $("body").unblock();
-                                if(allTasks.length == 0){
-                                    w2ui['grid_toolbar'].click('addDAO', null);
-                                }
+//                                if(allTasks.length == 0){
+//                                    w2ui['grid_toolbar'].click('addDAO', null);
+//                                }
                             }).fail(function(data){
                                  alert("获取所有DAO失败!");
                             });

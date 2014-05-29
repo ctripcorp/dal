@@ -129,7 +129,7 @@ public class DalGroupDbSetResource {
 		List<DatabaseSet> dbsets = dbset_dao.getAllDatabaseSetByName(name);
 		if(null != dbsets && dbsets.size() > 0){
 			Status status = Status.ERROR;
-			status.setInfo("name:"+name+"已经存在，请重新命名!");
+			status.setInfo("databaseSet Name --> "+name+" 已经存在，请重新命名!");
 			return status;
 		}
 		
@@ -192,7 +192,7 @@ public class DalGroupDbSetResource {
 			for(DatabaseSet dbset:dbsets){
 				if(dbset.getId()!=iD){
 					Status status = Status.ERROR;
-					status.setInfo("name:"+name+"已经存在，请重新命名!");
+					status.setInfo("databaseSet Name --> "+name+"已经存在，请重新命名!");
 					return status;
 				}
 			}

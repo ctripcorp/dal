@@ -64,6 +64,12 @@
 				</div>
 				<div class="modal-body">
 					<div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label" style="width:130px;">connectionString</label>
+                           <select id="databases2" class="span8"></select>
+                        </div>
+                     </div>
+					<div class="row-fluid">
 						<div class="control-group">
 							<label class="control-label popup_label" style="width: 130px;">Entry Name:</label> 
 							<input id="dbsetentryname2" class="span8 input-sm" type="text">
@@ -84,12 +90,6 @@
 							<textarea  id="sharding2" class="span8" cols="4"></textarea>
 						</div>
 					</div>
-					<div class="row-fluid">
-                        <div class="control-group">
-                           <label class="control-label popup_label" style="width:130px;">connectionString</label>
-                           <select id="databases2" class="span8"></select>
-                        </div>
-                     </div>
 				</div>
 				<div class="modal-footer">
                	  <label id="updatedbsetentry_error_msg" class="control-label popup_label" style="color:red;"></label>
@@ -111,6 +111,13 @@
 				</div>
 				<div class="modal-body">
 					<div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label" style="width:130px;">connectionString</label>
+                           <select id="databases" class="span8">
+                           </select>
+                        </div>
+                    </div>
+					<div class="row-fluid">
 						<div class="control-group">
 							<label class="control-label popup_label" style="width: 130px;">Entry Name:</label> 
 							<input id="dbsetentryname" class="span8 input-sm" type="text">
@@ -131,13 +138,6 @@
 							<textarea  id="sharding" class="span8" cols="4"></textarea>
 						</div>
 					</div>
-					<div class="row-fluid">
-                        <div class="control-group">
-                           <label class="control-label popup_label" style="width:130px;">connectionString</label>
-                           <select id="databases" class="span8">
-                           </select>
-                        </div>
-                     </div>
 				</div>
 				<div class="modal-footer">
                	  <label id="adddbsetentry_error_msg" class="control-label popup_label" style="color:red;"></label>

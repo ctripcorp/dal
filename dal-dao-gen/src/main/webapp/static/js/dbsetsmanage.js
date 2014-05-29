@@ -365,7 +365,7 @@
                 }],
                 columns: [{
                     field: 'name',
-                    caption: 'Name',
+                    caption: 'databaseSet Name',
                     size: '25%',
                     sortable: true,
                     resizable:true
@@ -470,7 +470,7 @@
                 }],
                 columns: [{
                     field: 'name',
-                    caption: 'Name',
+                    caption: 'databaseSet Entry Name',
                     size: '25%',
                     sortable: true,
                     resizable:true
@@ -618,6 +618,14 @@
                     $("#updatedbsetentry_error_msg").html(data.info);
                 }
             });
+        });
+
+        $(document.body).on('change', '#databases', function (event) {
+            $("#dbsetentryname").val($("#databases").val());
+        });
+
+        $(document.body).on('change', '#databases2', function (event) {
+            $("#dbsetentryname2").val($("#databases2").val());
         });
 
     });

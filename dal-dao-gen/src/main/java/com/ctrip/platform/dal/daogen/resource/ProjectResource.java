@@ -25,6 +25,7 @@ import org.jasig.cas.client.util.AssertionHolder;
 import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
+import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
@@ -223,11 +224,17 @@ public class ProjectResource {
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
 		Progress progress = ProgressResource.getProgress(userNo, id,random);
-		status = validatePermision(userNo,id);
+		status = validateDBPermision(userNo,id);
 		if(status.getCode().equals(Status.ERROR.getCode())){
 			progress.setStatus(ProgressResource.FINISH);
 			return status;
 		}
+		status = validateDbsetPermision(userNo,id);
+		if(status.getCode().equals(Status.ERROR.getCode())){
+			progress.setStatus(ProgressResource.FINISH);
+			return status;
+		}
+		
 		try {
 			log.info(String.format("begain generate project: [id=%s; regen=%s; language=%s]",
 					id, regen, language));
@@ -253,7 +260,74 @@ public class ProjectResource {
 		return status;
 	}
 	
-	private Status validatePermision(String userNo,int project_id){
+	private Status validateDBPermision(String userNo,int project_id){
+		Status status = Status.ERROR;
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		int groupId = -1;
+		if(user!=null){
+			groupId = user.getGroupId();
+			if(groupId <=0){
+				status.setInfo("你没有权限生成代码.请先加入一个DAL Team.");
+				return status;
+			}
+		}else{
+			status.setInfo(userNo + "is not exist in system.");
+			return status;
+		}
+		
+		List<DalGroupDB> groupDBs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
+		Set<String> group_db_names = new HashSet<String>();
+		for(DalGroupDB groupDB : groupDBs){
+			group_db_names.add(groupDB.getDbname());
+		}
+
+		boolean flag = true;
+		status.setInfo("");
+		Set<String> notExistDB = new HashSet<String>();
+		List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
+		for(GenTaskBySqlBuilder task : autoTasks){
+			String db_name = task.getDb_name();
+			if(!group_db_names.contains(db_name)){
+				notExistDB.add(db_name);
+				flag = false;
+			}
+		}
+
+		List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
+		for(GenTaskByTableViewSp task : tableViewSpTasks){
+			String db_name = task.getDb_name();
+			if(!group_db_names.contains(db_name)){
+				notExistDB.add(db_name);
+				flag = false;
+			}
+		}
+		
+		List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(project_id);
+		for(GenTaskByFreeSql task : sqlTasks){
+			String db_name = task.getDb_name();
+			if(!group_db_names.contains(db_name)){
+				notExistDB.add(db_name);
+				flag = false;
+			}
+		}
+		
+		if(flag){
+			return Status.OK;
+		}else{
+			String info = "<ul>";
+			for(String temp:notExistDB){
+				info+="<li>"+temp+"</li>";
+			}
+			info += "</ul>";
+			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
+			info = "在DAL Team Group："+group.getGroup_name()+"中不存在以下数据库：</br>"+ info +"<br/>请先添加DB到所在Group!</br>"
+					+"点击此处添加组内数据库 ： <a href='dbmanage.jsp'>组内All In One数据库管理</a>";
+			status.setInfo(info);
+			return status;
+		}
+	}
+	
+	private Status validateDbsetPermision(String userNo,int project_id){
 		Status status = Status.ERROR;
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		int groupId = -1;

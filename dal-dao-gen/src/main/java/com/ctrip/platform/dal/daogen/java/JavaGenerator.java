@@ -23,11 +23,14 @@ import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
+import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
@@ -42,6 +45,7 @@ public class JavaGenerator extends AbstractGenerator {
 	private Queue<ViewHost> _viewHosts = new ConcurrentLinkedQueue<ViewHost>();
 	private Map<String, SpDbHost> _spHostMaps = new ConcurrentHashMap<String, SpDbHost>();
 	private Queue<SpHost> _spHosts = new ConcurrentLinkedQueue<SpHost>();
+	private DalConfigHost dalConfigHost = null;
 	private Map<String, String> dbs = new ConcurrentHashMap<String, String>();
 	private Queue<FreeSqlHost> _freeSqlHosts = new ConcurrentLinkedQueue<FreeSqlHost>();
 	private Map<String, JavaMethodHost> _freeSqlPojoHosts = new ConcurrentHashMap<String, JavaMethodHost>();
@@ -609,7 +613,8 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	private void prepareDbFromFreeSql(List<GenTaskByFreeSql> freeSqls) {
-		for (GenTaskByFreeSql task : freeSqls) {
+		for (GenTaskByFreeSql task : freeSqls) {		
+			this.addDatabaseSet(task.getDatabaseSet_name());
 			if (!dbs.containsKey(task.getDb_name())) {
 
 				String provider = "sqlProvider";
@@ -622,10 +627,29 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 	}
 
+	private void addDatabaseSet(String databaseSetName){
+		List<DatabaseSet> sets = daoOfDatabaseSet.getAllDatabaseSetByName(databaseSetName);
+		if(null == sets || sets.isEmpty()){
+			log.error(String.format("The databaseSet name[%s] does not exist", databaseSetName));
+			return;
+		}
+		dalConfigHost.addDatabaseSet(sets);
+		for (DatabaseSet databaseSet : sets) {
+			List<DatabaseSetEntry> entries = daoOfDatabaseSet.getAllDatabaseSetEntryByDbsetid(databaseSet.getId());
+			if(null == entries || entries.isEmpty()){
+				log.error(String.format("The databaseSet[%s] does't contain any entries", databaseSet.getId()));
+				continue;
+			}
+			dalConfigHost.addDatabaseSetEntry(entries);
+		}
+	}
+	
 	private void prepareDbFromTableViewSp(
 			List<GenTaskByTableViewSp> tableViewSps,
 			List<GenTaskBySqlBuilder> sqlBuilders) {
 		for (GenTaskByTableViewSp task : tableViewSps) {
+			
+			this.addDatabaseSet(task.getDatabaseSet_name());
 			if (!dbs.containsKey(task.getDb_name())) {
 				String provider = "sqlProvider";
 				String dbType = DbUtils.getDbType(task.getDb_name());
@@ -637,6 +661,8 @@ public class JavaGenerator extends AbstractGenerator {
 		}
 
 		for (GenTaskBySqlBuilder task : sqlBuilders) {
+			
+			this.addDatabaseSet(task.getDatabaseSet_name());
 			if (!dbs.containsKey(task.getDb_name())) {
 				String provider = "sqlProvider";
 				String dbType = DbUtils.getDbType(task.getDb_name());
@@ -916,6 +942,10 @@ public class JavaGenerator extends AbstractGenerator {
 	@Override
 	public boolean prepareData(int projectId, boolean regenerate,
 			Progress progress) {
+		
+		Project project = daoOfProject.getProjectByID(projectId);
+		dalConfigHost = new DalConfigHost(project.getDal_config_name());
+		
 		List<Callable<ExecuteResult>> _freeSqlCallables = prepareFreeSql(projectId,
 				regenerate, progress);
 
@@ -982,10 +1012,15 @@ public class JavaGenerator extends AbstractGenerator {
 			}
 		}
 
-		context.put("dbs", dbs);
+		/*context.put("dbs", dbs);
 		GenUtils.mergeVelocityContext(context,
 				String.format("%s/Dal.config", mavenLikeDir.getAbsolutePath()),
-				"templates/java/Dal.config.tpl");
+				"templates/java/Dal.config.tpl");*/
+		
+		context.put("host", dalConfigHost);
+		GenUtils.mergeVelocityContext(context,
+				String.format("%s/Dal.config", mavenLikeDir.getAbsolutePath()),
+				"templates/java/DalConfig.java.tpl");
 		return false;
 	}
 }

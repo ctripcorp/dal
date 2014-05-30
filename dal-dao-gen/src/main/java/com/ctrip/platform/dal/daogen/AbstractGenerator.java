@@ -13,6 +13,7 @@ import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
+import com.ctrip.platform.dal.daogen.dao.DaoOfDatabaseSet;
 import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
@@ -30,6 +31,8 @@ public abstract class AbstractGenerator implements Generator {
 	protected static DaoByFreeSql daoByFreeSql;
 
 	protected static DaoByTableViewSp daoByTableViewSp;
+	
+	protected static DaoOfDatabaseSet daoOfDatabaseSet;
 
 	protected static String generatePath;
 	
@@ -44,7 +47,7 @@ public abstract class AbstractGenerator implements Generator {
 		daoBySqlBuilder = SpringBeanGetter.getDaoBySqlBuilder();
 		daoByFreeSql = SpringBeanGetter.getDaoByFreeSql();
 		daoByTableViewSp = SpringBeanGetter.getDaoByTableViewSp();
-
+		daoOfDatabaseSet = SpringBeanGetter.getDaoOfDatabaseSet();
 		generatePath = Configuration.get("gen_code_path");
 
 		java.util.Properties pr = new java.util.Properties();

@@ -27,12 +27,16 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.DalConfigHost;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
+import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.resource.ProgressResource;
@@ -40,11 +44,11 @@ import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import com.mysql.jdbc.log.LogUtils;
 
 public class CSharpGenerator extends AbstractGenerator {
 
 	private Map<String, DatabaseHost> _dbHosts = new ConcurrentHashMap<String, DatabaseHost>();
+	private DalConfigHost dalConfigHost;
 	private Queue<CSharpFreeSqlHost> _freeSqlHosts = new ConcurrentLinkedQueue<CSharpFreeSqlHost>();
 	private Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts = new ConcurrentHashMap<String, CSharpFreeSqlPojoHost>();
 	private Set<String> _freeDaos = Collections
@@ -643,6 +647,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 		final File csMavenLikeDir = new File(String.format("%s/%s/cs",
 				generatePath, id));
+		context.put("host", dalConfigHost);
 		context.put("dbs", _dbHosts.values());
 		context.put("namespace", namespace);
 		context.put("freeSqlHosts", _freeDaos);
@@ -653,7 +658,13 @@ public class CSharpGenerator extends AbstractGenerator {
 				context,
 				String.format("%s/Config/Dal.config",
 						csMavenLikeDir.getAbsolutePath()),
-				"templates/Dal.config.tpl");
+				"templates/DalConfig.cs.tpl");
+		
+		/*GenUtils.mergeVelocityContext(
+				context,
+				String.format("%s/Config/Dal.config",
+						csMavenLikeDir.getAbsolutePath()),
+				"templates/Dal.config.tpl");*/
 
 		GenUtils.mergeVelocityContext(
 				context,
@@ -664,6 +675,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 	private void prepareDbFromFreeSql(List<GenTaskByFreeSql> freeSqls) {
 		for (GenTaskByFreeSql task : freeSqls) {
+			this.addDatabaseSet(task.getDatabaseSet_name());
 			_freeDaos.add(WordUtils.capitalize(task.getClass_name()));
 			if (!_dbHosts.containsKey(task.getDb_name())) {
 
@@ -683,6 +695,23 @@ public class CSharpGenerator extends AbstractGenerator {
 			}
 		}
 	}
+	
+	private void addDatabaseSet(String databaseSetName){
+		List<DatabaseSet> sets = daoOfDatabaseSet.getAllDatabaseSetByName(databaseSetName);
+		if(null == sets || sets.isEmpty()){
+			log.error(String.format("The databaseSet name[%s] does not exist", databaseSetName));
+			return;
+		}
+		dalConfigHost.addDatabaseSet(sets);
+		for (DatabaseSet databaseSet : sets) {
+			List<DatabaseSetEntry> entries = daoOfDatabaseSet.getAllDatabaseSetEntryByDbsetid(databaseSet.getId());
+			if(null == entries || entries.isEmpty()){
+				log.error(String.format("The databaseSet[%s] does't contain any entries", databaseSet.getId()));
+				continue;
+			}
+			dalConfigHost.addDatabaseSetEntry(entries);
+		}
+	} 
 
 	private List<Callable<ExecuteResult>> prepareFreeSql(int projectId,
 			boolean regenerate, final Progress progress) {
@@ -773,7 +802,9 @@ public class CSharpGenerator extends AbstractGenerator {
 				_spDaos.add(getPojoClassName(task.getPrefix(),
 						task.getSuffix(), realSpName.replace("_", "")));
 			}
-
+			
+			this.addDatabaseSet(task.getDatabaseSet_name());
+			
 			if (!_dbHosts.containsKey(task.getDb_name())) {
 				String provider = "sqlProvider";
 				String dbType = DbUtils.getDbType(task.getDb_name());
@@ -797,7 +828,9 @@ public class CSharpGenerator extends AbstractGenerator {
 				_tableDaos
 						.add(getPojoClassName("", "Gen", task.getTable_name()));
 			}
-
+			
+			this.addDatabaseSet(task.getDatabaseSet_name());
+			
 			if (!_dbHosts.containsKey(task.getDb_name())) {
 				String provider = "sqlProvider";
 				String dbType = DbUtils.getDbType(task.getDb_name());
@@ -1008,6 +1041,9 @@ public class CSharpGenerator extends AbstractGenerator {
 	public boolean prepareData(int projectId, boolean regenerate,
 			Progress progress) {
 
+		Project project = daoOfProject.getProjectByID(projectId);
+		dalConfigHost = new DalConfigHost(project.getDal_config_name());
+		
 		List<Callable<ExecuteResult>> _freeSqlCallables = prepareFreeSql(projectId,
 				regenerate, progress);
 

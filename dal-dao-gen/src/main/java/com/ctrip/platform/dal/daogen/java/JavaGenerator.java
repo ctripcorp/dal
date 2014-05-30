@@ -22,6 +22,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.AbstractGenerator;
 import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
+import com.ctrip.platform.dal.daogen.DalConfigHost;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;

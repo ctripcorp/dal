@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.daogen.java;
+package com.ctrip.platform.dal.daogen;
 
 import java.util.ArrayList;
 import java.util.Collection;

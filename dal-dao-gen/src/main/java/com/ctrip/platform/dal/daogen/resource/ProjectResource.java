@@ -25,7 +25,6 @@ import org.jasig.cas.client.util.AssertionHolder;
 import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
-import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
@@ -35,7 +34,6 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.java.JavaGenerator;
-import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
@@ -81,21 +79,29 @@ public class ProjectResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Project> getProjects(@QueryParam("root") boolean root) {
 		
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+		LoginUser user1 = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		String rootName = "组内所有项目";
+		if(user1!=null){
+			DalGroup dalGroup = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(user1.getGroupId());
+			if(dalGroup!=null){
+				rootName = dalGroup.getGroup_name() + rootName;
+			}
+		}
+		
 		if(root){
 			List<Project> roots = new ArrayList<Project>();
 			Project p = new Project();
 			p.setId(-1);
-			p.setName("所有项目");
-			p.setText("所有项目");
+			p.setName(rootName);
+			p.setText(rootName);
 			p.setNamespace("com.ctrip.platform");
 			p.setIcon("fa fa-folder-o");
 			p.setChildren(true);
 			roots.add(p);
 			return roots;
 		}
-
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
 
 		if (SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo) == null) {
 			LoginUser user = new LoginUser();

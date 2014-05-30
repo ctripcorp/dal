@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+
 public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	
 	private int id;
@@ -175,20 +177,26 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 		GenTaskByTableViewSp task = new GenTaskByTableViewSp();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		task.setDb_name(rs.getString(3));
-		task.setTable_names(rs.getString(4));
-		task.setView_names(rs.getString(5));
-		task.setSp_names(rs.getString(6));
-		task.setPrefix(rs.getString(7));
-		task.setSuffix(rs.getString(8));
-		task.setCud_by_sp(rs.getBoolean(9));
-		task.setPagination(rs.getBoolean(10));
-		task.setGenerated(rs.getBoolean(11));
-		task.setVersion(rs.getInt(12));
-		task.setUpdate_user_no(rs.getString(13));
-		task.setUpdate_time(rs.getTimestamp(14));
-		task.setComment(rs.getString(15));
-		task.setDatabaseSet_name(rs.getString(16));
+		//task.setDb_name(rs.getString(3));
+		task.setTable_names(rs.getString(3));
+		task.setView_names(rs.getString(4));
+		task.setSp_names(rs.getString(5));
+		task.setPrefix(rs.getString(6));
+		task.setSuffix(rs.getString(7));
+		task.setCud_by_sp(rs.getBoolean(8));
+		task.setPagination(rs.getBoolean(9));
+		task.setGenerated(rs.getBoolean(10));
+		task.setVersion(rs.getInt(11));
+		task.setUpdate_user_no(rs.getString(12));
+		task.setUpdate_time(rs.getTimestamp(13));
+		task.setComment(rs.getString(14));
+		task.setDatabaseSet_name(rs.getString(15));
+		
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet()
+				.getMasterDatabaseSetEntryByDatabaseSetName(task.getDatabaseSet_name());
+		String dbName = databaseSetEntry.getConnectionString();
+		
+		task.setDb_name(dbName);
 		return task;
 	}
 

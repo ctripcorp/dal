@@ -41,7 +41,7 @@ public class DaoBySqlBuilder {
 	public List<GenTaskBySqlBuilder> getAllTasks() {
 
 		return this.jdbcTemplate
-				.query("select id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment,databaseSet_name from task_auto",
+				.query("select id, project_id, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment,databaseSet_name from task_auto",
 						new RowMapper<GenTaskBySqlBuilder>() {
 							public GenTaskBySqlBuilder mapRow(ResultSet rs,
 									int rowNum) throws SQLException {
@@ -54,7 +54,7 @@ public class DaoBySqlBuilder {
 	public List<GenTaskBySqlBuilder> getTasksByProjectId(int iD) {
 
 		return this.jdbcTemplate
-				.query("select id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment,databaseSet_name from task_auto where project_id=?",
+				.query("select id, project_id, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment,databaseSet_name from task_auto where project_id=?",
 						new Object[] { iD },
 						new RowMapper<GenTaskBySqlBuilder>() {
 							public GenTaskBySqlBuilder mapRow(ResultSet rs,
@@ -69,7 +69,7 @@ public class DaoBySqlBuilder {
 		final List<GenTaskBySqlBuilder> tasks = new ArrayList<GenTaskBySqlBuilder>();
 
 		this.jdbcTemplate
-				.query("select  id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment,databaseSet_name from task_auto where project_id=?",
+				.query("select  id, project_id, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment,databaseSet_name from task_auto where project_id=?",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -91,7 +91,7 @@ public class DaoBySqlBuilder {
 		final List<GenTaskBySqlBuilder> tasks = new ArrayList<GenTaskBySqlBuilder>();
 
 		this.jdbcTemplate
-				.query("select  id, project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment,databaseSet_name from task_auto  where project_id=? and generated=false",
+				.query("select  id, project_id, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment,databaseSet_name from task_auto  where project_id=? and generated=false",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)

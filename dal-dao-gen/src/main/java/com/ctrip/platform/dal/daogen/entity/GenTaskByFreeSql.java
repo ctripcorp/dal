@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+
 public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
 	private int id;
@@ -71,9 +73,9 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	public String getDb_name() {
 		return db_name;
 	}
-
-	public void setDb_name(String db_name) {
-		this.db_name = db_name;
+	
+	public void setDb_name(String dbName){
+		this.db_name = dbName;
 	}
 
 	public String getClass_name() {
@@ -160,19 +162,26 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		task.setDb_name(rs.getString(3));
-		task.setClass_name(rs.getString(4));
-		task.setPojo_name(rs.getString(5));
-		task.setMethod_name(rs.getString(6));
-		task.setCrud_type(rs.getString(7));
-		task.setSql_content(rs.getString(8));
-		task.setParameters(rs.getString(9));
-		task.setGenerated(rs.getBoolean(10));
-		task.setVersion(rs.getInt(11));
-		task.setUpdate_user_no(rs.getString(12));
-		task.setUpdate_time(rs.getTimestamp(13));
-		task.setComment(rs.getString(14));
-		task.setDatabaseSet_name(rs.getString(15));
+		//task.setDb_name(rs.getString(3));
+		task.setClass_name(rs.getString(3));
+		task.setPojo_name(rs.getString(4));
+		task.setMethod_name(rs.getString(5));
+		task.setCrud_type(rs.getString(6));
+		task.setSql_content(rs.getString(7));
+		task.setParameters(rs.getString(8));
+		task.setGenerated(rs.getBoolean(9));
+		task.setVersion(rs.getInt(10));
+		task.setUpdate_user_no(rs.getString(11));
+		task.setUpdate_time(rs.getTimestamp(12));
+		task.setComment(rs.getString(13));
+		task.setDatabaseSet_name(rs.getString(14));
+		
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet()
+				.getMasterDatabaseSetEntryByDatabaseSetName(task.getDatabaseSet_name());
+		String dbName = databaseSetEntry.getConnectionString();
+		
+		task.setDb_name(dbName);
+		
 		return task;
 	}
 

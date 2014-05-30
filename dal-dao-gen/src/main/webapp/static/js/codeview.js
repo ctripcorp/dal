@@ -140,7 +140,7 @@
                     }
                 },
                 searches: [{
-                    field: 'db_name',
+                    field: 'databaseSetName',
                     caption: '逻辑数据库',
                     type: 'text'
                 }, {
@@ -157,7 +157,7 @@
                     type: 'text'
                 }],
                 columns: [{
-                    field: 'db_name',
+                    field: 'databaseSetName',
                     caption: '逻辑数据库',
                     size: '15%',
                     sortable: true,

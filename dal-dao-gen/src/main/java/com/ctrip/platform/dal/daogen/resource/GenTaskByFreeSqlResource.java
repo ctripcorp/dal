@@ -63,7 +63,7 @@ public class GenTaskByFreeSqlResource {
 			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		
 			task.setProject_id(project_id);
-			task.setDb_name(set_name);
+			task.setDatabaseSetName(set_name);
 			task.setClass_name(class_name);
 			task.setPojo_name(pojo_name);
 			task.setMethod_name(method_name);

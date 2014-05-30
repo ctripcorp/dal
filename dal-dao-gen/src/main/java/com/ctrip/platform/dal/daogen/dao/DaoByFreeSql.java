@@ -115,7 +115,7 @@ public class DaoByFreeSql {
 						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,? as p13) tmp where not exists "
 						+ "(select 1 from task_sql where project_id=? and db_name=? and class_name=? and method_name=? limit 1)",
 						task.getProject_id(),
-						task.getDb_name(), task.getClass_name(),
+						task.getDatabaseSetName(), task.getClass_name(),
 						task.getPojo_name(), task.getMethod_name(),
 						task.getCrud_type(), task.getSql_content(),
 						task.getParameters(), task.isGenerated(),
@@ -124,7 +124,7 @@ public class DaoByFreeSql {
 						task.getUpdate_time(),
 						task.getComment(),
 						task.getProject_id(),
-						task.getDb_name(), task.getClass_name(),
+						task.getDatabaseSetName(), task.getClass_name(),
 						task.getMethod_name()
 						);
 
@@ -136,7 +136,7 @@ public class DaoByFreeSql {
 		this.jdbcTemplate
 				.query("select 1 from task_sql where id != ? and project_id=? and db_name=? and class_name=? and method_name=? limit 1",
 						new Object[] { task.getId(), task.getProject_id(),
-								task.getDb_name(), 
+								task.getDatabaseSetName(), 
 								task.getClass_name(),
 								task.getMethod_name() },
 						new RowCallbackHandler() {
@@ -153,7 +153,7 @@ public class DaoByFreeSql {
 		return this.jdbcTemplate
 				.update("update task_sql set project_id=?, db_name=?,class_name=?,pojo_name=?,method_name=?,crud_type=?,sql_content=?,parameters=?,generated=?,version=version+1,update_user_no=?,update_time=?,comment=? where id=? and version=?",
 						task.getProject_id(),
-						task.getDb_name(), task.getClass_name(),
+						task.getDatabaseSetName(), task.getClass_name(),
 						task.getPojo_name(), task.getMethod_name(),
 						task.getCrud_type(), task.getSql_content(),
 						task.getParameters(), task.isGenerated(), 

@@ -94,7 +94,7 @@ public class DaoByTableViewSp {
 		try {
 			return this.jdbcTemplate
 					.update("insert into task_table ( project_id,  db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version,update_user_no,update_time,comment) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-							task.getProject_id(), task.getDb_name(),
+							task.getProject_id(), task.getDatabaseSetName(),
 							task.getTable_names(), task.getView_names(),
 							task.getSp_names(), task.getPrefix(),
 							task.getSuffix(), task.isCud_by_sp(),
@@ -130,7 +130,7 @@ public class DaoByTableViewSp {
 			return this.jdbcTemplate
 					.update("update task_table set project_id=?,db_name=?,table_names=?,view_names=?,sp_names=?,prefix=?,suffix=?,cud_by_sp=?,pagination=?,generated=?,version=version+1,update_user_no=?,update_time=?,comment=? where id=? and version=?",
 
-					task.getProject_id(), task.getDb_name(),
+					task.getProject_id(), task.getDatabaseSetName(),
 							task.getTable_names(), task.getView_names(),
 							task.getSp_names(), task.getPrefix(),
 							task.getSuffix(), task.isCud_by_sp(),

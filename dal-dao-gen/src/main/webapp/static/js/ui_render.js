@@ -81,8 +81,7 @@
                     toolbarAdd: false,
                     toolbarDelete: false,
                     //toolbarSave: true,
-                    toolbarEdit: false,
-                    selectColumn: true
+                    toolbarEdit: false
                 },
                 multiSelect: false,
                 toolbar: {
@@ -174,6 +173,7 @@
 //                                }
                             }).fail(function(data){
                                  alert("获取所有DAO失败!");
+                                 $("body").unblock();
                             });
                             break;
                         case 'addDAO':
@@ -237,12 +237,8 @@
                     }
                 },
                 searches: [{
-                    field: 'databaseSet_name',
-                    caption: '逻辑数据库',
-                    type: 'text'
-                }, {
                     field: 'db_name',
-                    caption: 'Master数据库',
+                    caption: '逻辑数据库',
                     type: 'text'
                 }, {
                     field: 'table_name',
@@ -258,16 +254,9 @@
                     type: 'text'
                 }],
                 columns: [{
-                    field: 'databaseSet_name',
-                    caption: '逻辑数据库',
-                    size: '15%',
-                    sortable: true,
-                    attr: 'align=center',
-                    resizable:true
-                }, {
                     field: 'db_name',
-                    caption: 'Master数据库',
-                    size: '15%',
+                    caption: '逻辑数据库',
+                    size: '20%',
                     sortable: true,
                     attr: 'align=center',
                     resizable:true
@@ -292,12 +281,12 @@
                 }, {
                     field: 'sql_content',
                     caption: '预览',
-                    size: '10%',
+                    size: '15%',
                     resizable:true
                 }, {
                     field: 'comment',
                     caption: '方法描述',
-                    size: '20%',
+                    size: '25%',
                     resizable:true
                 }, {
                     field: 'update_user_no',
@@ -325,7 +314,7 @@
                 $(".step2-3").hide();
                 $(".step2-3-1").hide();
                 window.ajaxutil.reload_dbsets(function () {
-                    $("#databases")[0].selectize.setValue(record['databaseSet_name']);
+                    $("#databases")[0].selectize.setValue(record['db_name']);
                 });
                 $("#page1").attr('is_update', '1');
                 $("#gen_style").val(record.task_type);

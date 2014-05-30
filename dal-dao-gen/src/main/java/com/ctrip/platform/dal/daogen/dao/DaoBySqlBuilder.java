@@ -116,7 +116,7 @@ public class DaoBySqlBuilder {
 						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,? as p13,? as p14,? as p15) tmp where not exists "
 						+ "(select 1 from task_auto where project_id=? and db_name=? and table_name=? and method_name=? limit 1)",
 						task.getProject_id(),
-						task.getDb_name(), task.getTable_name(),
+						task.getDatabaseSetName(), task.getTable_name(),
 						task.getClass_name(), task.getMethod_name(),
 						task.getSql_style(), task.getCrud_type(),
 						task.getFields(), task.getCondition(),
@@ -126,7 +126,7 @@ public class DaoBySqlBuilder {
 						task.getUpdate_time(),
 						task.getComment(),
 						task.getProject_id(),
-						task.getDb_name(), task.getTable_name(), 
+						task.getDatabaseSetName(), task.getTable_name(), 
 						task.getMethod_name());
 
 	}
@@ -137,7 +137,7 @@ public class DaoBySqlBuilder {
 		this.jdbcTemplate
 				.query("select 1 from task_auto where id != ? and project_id=? and db_name=? and table_name=? and method_name=? limit 1",
 						new Object[] { task.getId(), task.getProject_id(),
-								task.getDb_name(), 
+								task.getDatabaseSetName(), 
 								task.getTable_name(),
 								task.getMethod_name() },
 						new RowCallbackHandler() {
@@ -154,7 +154,7 @@ public class DaoBySqlBuilder {
 		return this.jdbcTemplate
 				.update("update task_auto set  project_id=?,db_name=?, table_name=?, class_name=?,method_name=?,sql_style=?,crud_type=?,fields=?,where_condition=?,sql_content=?,generated=?,version=version+1,update_user_no=?,update_time=?,comment=? where id=? and version = ?",
 						task.getProject_id(),
-						task.getDb_name(),
+						task.getDatabaseSetName(),
 						task.getTable_name(),
 						task.getClass_name(), task.getMethod_name(),
 						task.getSql_style(), task.getCrud_type(),

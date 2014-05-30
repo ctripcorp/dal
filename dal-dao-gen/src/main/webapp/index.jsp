@@ -416,7 +416,7 @@
                   <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
                   <a href="#" class="ctip" data-toggle="tooltip"
 						data-placement="top" title="" html="1"
-						data-original-title="1、如果在列表中没有找到你需要的数据库，请到DB管理界面追加All In One数据库。<br/>
+						data-original-title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>
 						2、目前，DAO代码生成方式有三种：<br/>
 						&nbsp;2.1、生成模板(包含基础的增删改查操作)：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
 						&nbsp;2.2、构建SQL（生成的代码绑定到模板）：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>

@@ -538,6 +538,7 @@
     wizzard.prototype = {
 
         clear: function(){
+            $("#error_msg").html("");
             //默认后缀
             $("#suffix").val("Gen");
 

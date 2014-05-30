@@ -81,8 +81,10 @@
                     toolbarAdd: false,
                     toolbarDelete: false,
                     //toolbarSave: true,
-                    toolbarEdit: false
+                    toolbarEdit: false,
+                    selectColumn: true
                 },
+                multiSelect: false,
                 toolbar: {
                     items: [{
                         type: 'break'
@@ -290,12 +292,12 @@
                 }, {
                     field: 'sql_content',
                     caption: '预览',
-                    size: '15%',
+                    size: '10%',
                     resizable:true
                 }, {
                     field: 'comment',
                     caption: '方法描述',
-                    size: '25%',
+                    size: '20%',
                     resizable:true
                 }, {
                     field: 'update_user_no',
@@ -323,11 +325,8 @@
                 $(".step2-3").hide();
                 $(".step2-3-1").hide();
                 window.ajaxutil.reload_dbsets(function () {
-                    $("#databases")[0].selectize.setValue(record.db_name);
+                    $("#databases")[0].selectize.setValue(record['databaseSet_name']);
                 });
-//                window.ajaxutil.reload_dbservers(function () {
-//                    $("#databases")[0].selectize.setValue(record.db_name);
-//                },true);
                 $("#page1").attr('is_update', '1');
                 $("#gen_style").val(record.task_type);
                 $("#sql_style").val(record.sql_style);

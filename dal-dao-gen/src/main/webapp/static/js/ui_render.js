@@ -81,8 +81,7 @@
                     toolbarAdd: false,
                     toolbarDelete: false,
                     //toolbarSave: true,
-                    toolbarEdit: false,
-                    selectColumn: true
+                    toolbarEdit: false
                 },
                 multiSelect: false,
                 toolbar: {

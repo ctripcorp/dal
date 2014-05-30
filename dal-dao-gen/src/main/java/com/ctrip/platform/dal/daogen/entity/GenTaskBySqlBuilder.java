@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+
 public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 
 	private int id;
@@ -178,21 +180,28 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		task.setDb_name(rs.getString(3));
-		task.setTable_name(rs.getString(4));
-		task.setClass_name(rs.getString(5));
-		task.setMethod_name(rs.getString(6));
-		task.setSql_style(rs.getString(7));
-		task.setCrud_type(rs.getString(8));
-		task.setFields(rs.getString(9));
-		task.setCondition(rs.getString(10));
-		task.setSql_content(rs.getString(11));
-		task.setGenerated(rs.getBoolean(12));
-		task.setVersion(rs.getInt(13));
-		task.setUpdate_user_no(rs.getString(14));
-		task.setUpdate_time(rs.getTimestamp(15));
-		task.setComment(rs.getString(16));
-		task.setDatabaseSet_name(rs.getString(17));
+		//task.setDb_name(rs.getString(3));
+		task.setTable_name(rs.getString(3));
+		task.setClass_name(rs.getString(4));
+		task.setMethod_name(rs.getString(5));
+		task.setSql_style(rs.getString(6));
+		task.setCrud_type(rs.getString(7));
+		task.setFields(rs.getString(8));
+		task.setCondition(rs.getString(9));
+		task.setSql_content(rs.getString(10));
+		task.setGenerated(rs.getBoolean(11));
+		task.setVersion(rs.getInt(12));
+		task.setUpdate_user_no(rs.getString(13));
+		task.setUpdate_time(rs.getTimestamp(14));
+		task.setComment(rs.getString(15));
+		task.setDatabaseSet_name(rs.getString(16));
+		
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet()
+				.getMasterDatabaseSetEntryByDatabaseSetName(task.getDatabaseSet_name());
+		String dbName = databaseSetEntry.getConnectionString();
+		
+		task.setDb_name(dbName);
+		
 		return task;
 	}
 

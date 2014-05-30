@@ -299,8 +299,10 @@
                     toolbarAdd: false,
                     toolbarDelete: false,
                     //toolbarSave: true,
-                    toolbarEdit: false
+                    toolbarEdit: false,
+                    selectColumn: true
                 },
+                multiSelect: false,
                 toolbar: {
                     items: [{
                         type: 'break'
@@ -408,8 +410,10 @@
                     toolbarColumns: false,
                     toolbarAdd: false,
                     toolbarDelete: false,
-                    toolbarEdit: false
+                    toolbarEdit: false,
+                    selectColumn: true
                 },
+                multiSelect: false,
                 toolbar: {
                     items: [{
                         type: 'break'

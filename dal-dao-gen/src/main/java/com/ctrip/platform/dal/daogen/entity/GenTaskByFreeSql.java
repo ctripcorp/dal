@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
 
 public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
@@ -16,7 +16,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	
 	private String db_name;
 	
-	private String databaseSet_name;
+	private String databaseSetName;
 	
 	private String class_name;
 	
@@ -38,12 +38,12 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	private Timestamp update_time;
 	private String comment;
 
-	public String getDatabaseSet_name() {
-		return databaseSet_name;
+	public String getDatabaseSetName() {
+		return databaseSetName;
 	}
 
-	public void setDatabaseSet_name(String databaseSet_name) {
-		this.databaseSet_name = databaseSet_name;
+	public void setDatabaseSetName(String databaseSetName) {
+		this.databaseSetName = databaseSetName;
 	}
 
 	public String getParameters() {
@@ -162,26 +162,23 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		//task.setDb_name(rs.getString(3));
-		task.setClass_name(rs.getString(3));
-		task.setPojo_name(rs.getString(4));
-		task.setMethod_name(rs.getString(5));
-		task.setCrud_type(rs.getString(6));
-		task.setSql_content(rs.getString(7));
-		task.setParameters(rs.getString(8));
-		task.setGenerated(rs.getBoolean(9));
-		task.setVersion(rs.getInt(10));
-		task.setUpdate_user_no(rs.getString(11));
-		task.setUpdate_time(rs.getTimestamp(12));
-		task.setComment(rs.getString(13));
-		task.setDatabaseSet_name(rs.getString(14));
 		
-		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet()
-				.getMasterDatabaseSetEntryByDatabaseSetName(task.getDatabaseSet_name());
-		String dbName = databaseSetEntry.getConnectionString();
+		String databaseSet = rs.getString(3);
 		
-		task.setDb_name(dbName);
-		
+		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
+		task.setDatabaseSetName(databaseSet);
+		task.setClass_name(rs.getString(4));
+		task.setPojo_name(rs.getString(5));
+		task.setMethod_name(rs.getString(6));
+		task.setCrud_type(rs.getString(7));
+		task.setSql_content(rs.getString(8));
+		task.setParameters(rs.getString(9));
+		task.setGenerated(rs.getBoolean(10));
+		task.setVersion(rs.getInt(11));
+		task.setUpdate_user_no(rs.getString(12));
+		task.setUpdate_time(rs.getTimestamp(13));
+		task.setComment(rs.getString(14));
+
 		return task;
 	}
 

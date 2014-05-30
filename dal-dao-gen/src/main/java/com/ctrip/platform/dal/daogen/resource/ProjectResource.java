@@ -35,6 +35,7 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.java.JavaGenerator;
+import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
@@ -286,7 +287,7 @@ public class ProjectResource {
 		Set<String> notExistDB = new HashSet<String>();
 		List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
 		for(GenTaskBySqlBuilder task : autoTasks){
-			String db_name = task.getDb_name();
+			String db_name = task.getDatabaseSetName();
 			if(!group_db_names.contains(db_name)){
 				notExistDB.add(db_name);
 				flag = false;
@@ -295,7 +296,7 @@ public class ProjectResource {
 
 		List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
 		for(GenTaskByTableViewSp task : tableViewSpTasks){
-			String db_name = task.getDb_name();
+			String db_name = task.getDatabaseSetName();
 			if(!group_db_names.contains(db_name)){
 				notExistDB.add(db_name);
 				flag = false;
@@ -304,7 +305,7 @@ public class ProjectResource {
 		
 		List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(project_id);
 		for(GenTaskByFreeSql task : sqlTasks){
-			String db_name = task.getDb_name();
+			String db_name = task.getDatabaseSetName();
 			if(!group_db_names.contains(db_name)){
 				notExistDB.add(db_name);
 				flag = false;
@@ -353,7 +354,7 @@ public class ProjectResource {
 		Set<String> notExistDbset = new HashSet<String>();
 		List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
 		for(GenTaskBySqlBuilder task : autoTasks){
-			String databaseSet_name = task.getDatabaseSet_name();
+			String databaseSet_name = task.getDb_name();
 			if(!group_dbset_names.contains(databaseSet_name)){
 				notExistDbset.add(databaseSet_name);
 				flag = false;
@@ -362,7 +363,7 @@ public class ProjectResource {
 
 		List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
 		for(GenTaskByTableViewSp task : tableViewSpTasks){
-			String databaseSet_name = task.getDatabaseSet_name();
+			String databaseSet_name = task.getDb_name();
 			if(!group_dbset_names.contains(databaseSet_name)){
 				notExistDbset.add(databaseSet_name);
 				flag = false;
@@ -371,7 +372,7 @@ public class ProjectResource {
 		
 		List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(project_id);
 		for(GenTaskByFreeSql task : sqlTasks){
-			String databaseSet_name = task.getDatabaseSet_name();
+			String databaseSet_name = task.getDb_name();
 			if(!group_dbset_names.contains(databaseSet_name)){
 				notExistDbset.add(databaseSet_name);
 				flag = false;

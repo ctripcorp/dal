@@ -26,7 +26,7 @@ public class DaoByFreeSql {
 	public List<GenTaskByFreeSql> getAllTasks() {
 
 		return this.jdbcTemplate
-				.query("select id, project_id,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment,databaseSet_name from task_sql",
+				.query("select id, project_id, db_name, class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment from task_sql",
 
 				new RowMapper<GenTaskByFreeSql>() {
 					public GenTaskByFreeSql mapRow(ResultSet rs, int rowNum)
@@ -55,7 +55,7 @@ public class DaoByFreeSql {
 	public List<GenTaskByFreeSql> getTasksByProjectId(int iD) {
 
 		return this.jdbcTemplate
-				.query("select id, project_id,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment,databaseSet_name from task_sql where project_id=?",
+				.query("select id, project_id, db_name, class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment from task_sql where project_id=?",
 						new Object[] { iD }, new RowMapper<GenTaskByFreeSql>() {
 							public GenTaskByFreeSql mapRow(ResultSet rs,
 									int rowNum) throws SQLException {
@@ -69,7 +69,7 @@ public class DaoByFreeSql {
 		final List<GenTaskByFreeSql> tasks = new ArrayList<GenTaskByFreeSql>();
 
 		this.jdbcTemplate
-				.query("select id, project_id,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment,databaseSet_name from task_sql where project_id=?",
+				.query("select id, project_id,db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment from task_sql where project_id=?",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -91,7 +91,7 @@ public class DaoByFreeSql {
 		final List<GenTaskByFreeSql> tasks = new ArrayList<GenTaskByFreeSql>();
 
 		this.jdbcTemplate
-				.query("select id, project_id,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment,databaseSet_name from task_sql where project_id=?  and generated=false",
+				.query("select id, project_id,db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment from task_sql where project_id=? and generated=false",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -111,8 +111,8 @@ public class DaoByFreeSql {
 	public int insertTask(GenTaskByFreeSql task) {
 
 		return this.jdbcTemplate
-				.update("insert into task_sql (project_id,  db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment, databaseSet_name)"
-						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,? as p13, ? as p14) tmp where not exists "
+				.update("insert into task_sql (project_id,  db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment)"
+						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,? as p13) tmp where not exists "
 						+ "(select 1 from task_sql where project_id=? and db_name=? and class_name=? and method_name=? limit 1)",
 						task.getProject_id(),
 						task.getDb_name(), task.getClass_name(),
@@ -123,7 +123,6 @@ public class DaoByFreeSql {
 						task.getUpdate_user_no(),
 						task.getUpdate_time(),
 						task.getComment(),
-						task.getDatabaseSet_name(),
 						task.getProject_id(),
 						task.getDb_name(), task.getClass_name(),
 						task.getMethod_name()
@@ -135,9 +134,9 @@ public class DaoByFreeSql {
 
 		final List<Integer> counts = new ArrayList<Integer>();
 		this.jdbcTemplate
-				.query("select 1 from task_sql where id != ? and project_id=? and db_name=? and databaseSet_name=? and class_name=? and method_name=? limit 1",
+				.query("select 1 from task_sql where id != ? and project_id=? and db_name=? and class_name=? and method_name=? limit 1",
 						new Object[] { task.getId(), task.getProject_id(),
-								task.getDb_name(), task.getDatabaseSet_name(), 
+								task.getDb_name(), 
 								task.getClass_name(),
 								task.getMethod_name() },
 						new RowCallbackHandler() {
@@ -152,7 +151,7 @@ public class DaoByFreeSql {
 			return -1;
 
 		return this.jdbcTemplate
-				.update("update task_sql set project_id=?, db_name=?,class_name=?,pojo_name=?,method_name=?,crud_type=?,sql_content=?,parameters=?,generated=?,version=version+1,update_user_no=?,update_time=?,comment=? ,databaseSet_name =? where id=? and version=?",
+				.update("update task_sql set project_id=?, db_name=?,class_name=?,pojo_name=?,method_name=?,crud_type=?,sql_content=?,parameters=?,generated=?,version=version+1,update_user_no=?,update_time=?,comment=? where id=? and version=?",
 						task.getProject_id(),
 						task.getDb_name(), task.getClass_name(),
 						task.getPojo_name(), task.getMethod_name(),
@@ -161,7 +160,6 @@ public class DaoByFreeSql {
 						task.getUpdate_user_no(),
 						task.getUpdate_time(),
 						task.getComment(),
-						task.getDatabaseSet_name(),
 						task.getId(),
 						task.getVersion());
 

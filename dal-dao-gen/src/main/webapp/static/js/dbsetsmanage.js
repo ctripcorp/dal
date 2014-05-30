@@ -385,9 +385,8 @@
                     resizable:true
                 }],
                 records: [],
-                onClick: function (event) {
+                onSelect: function (event) {
                     var grid = this;
-                    // need timer for nicer visual effect that record was selected
                     setTimeout(function () {
                         refreshDbSetEntry();
                     }, 200);

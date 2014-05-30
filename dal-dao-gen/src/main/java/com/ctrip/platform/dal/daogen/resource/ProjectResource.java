@@ -223,11 +223,6 @@ public class ProjectResource {
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
 		Progress progress = ProgressResource.getProgress(userNo, id,random);
-//		status = validateDBPermision(userNo,id);
-//		if(status.getCode().equals(Status.ERROR.getCode())){
-//			progress.setStatus(ProgressResource.FINISH);
-//			return status;
-//		}
 		status = validateDbsetPermision(userNo,id);
 		if(status.getCode().equals(Status.ERROR.getCode())){
 			progress.setStatus(ProgressResource.FINISH);

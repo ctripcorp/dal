@@ -140,12 +140,8 @@
                     }
                 },
                 searches: [{
-                    field: 'databaseSet_name',
-                    caption: '逻辑数据库',
-                    type: 'text'
-                }, {
                     field: 'db_name',
-                    caption: 'Master数据库',
+                    caption: '逻辑数据库',
                     type: 'text'
                 }, {
                     field: 'table_name',
@@ -161,16 +157,8 @@
                     type: 'text'
                 }],
                 columns: [{
-                    field: 'databaseSet_name',
-                    caption: '逻辑数据库',
-                    size: '15%',
-                    sortable: true,
-                    attr: 'align=center',
-                    resizable:true,
-                    resizable:true
-                }, {
                     field: 'db_name',
-                    caption: 'Master数据库',
+                    caption: '逻辑数据库',
                     size: '15%',
                     sortable: true,
                     attr: 'align=center',
@@ -196,12 +184,12 @@
                 }, {
                     field: 'sql_content',
                     caption: '预览',
-                    size: '10%',
+                    size: '20%',
                     resizable:true
                 }, {
                     field: 'comment',
                     caption: '方法描述',
-                    size: '20%',
+                    size: '25%',
                     resizable:true
                 }, {
                     field: 'update_user_no',

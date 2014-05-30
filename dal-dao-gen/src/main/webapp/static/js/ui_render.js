@@ -370,7 +370,7 @@
                 }],
                 records: [],
                 onDblClick: function (target, data) {
-                    editDAO();
+                    setTimeout(editDAO,300);
                 }
             }));
         },

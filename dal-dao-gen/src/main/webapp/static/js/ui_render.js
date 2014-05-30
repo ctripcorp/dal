@@ -173,6 +173,7 @@
 //                                }
                             }).fail(function(data){
                                  alert("获取所有DAO失败!");
+                                 $("body").unblock();
                             });
                             break;
                         case 'addDAO':

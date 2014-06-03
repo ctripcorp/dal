@@ -25,7 +25,7 @@ namespace ${host.getNameSpace()}.Dao
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
 #foreach($p in $host.getSpParams())
-                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalizeFully($p.getName().replace("@",""))}});
+                parameters.Add(new StatementParameter{ Name = "${p.getName()}", Direction = ParameterDirection.${p.getDirection()}, DbType = DbType.${p.getDbType()}, Value = ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalize($p.getName().replace("@",""))}});
 #end
                 parameters.Add(new StatementParameter{ Name = "@return",  Direction = ParameterDirection.ReturnValue});
 

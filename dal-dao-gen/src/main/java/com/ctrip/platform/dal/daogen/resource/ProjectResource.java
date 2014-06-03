@@ -350,7 +350,7 @@ public class ProjectResource {
 			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
 			info = "你所在DAL Team-->"+group.getGroup_name()+"中不存在以下databaseSet：</br>"+ info 
 					+"请先添加databaseSet到所在Group!</br>"
-					+"点击此处添加databaseSet ： <a href='dbsetsmanage.jsp'>组内databaseSet管理</a>";
+					+"点击此处添加databaseSet ： <a href='dbsetsmanage.jsp' target='_blank'>组内databaseSet管理</a>";
 			status.setInfo(info);
 			return status;
 		}
@@ -388,7 +388,7 @@ public class ProjectResource {
 			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
 			info = "你所在DAL Team-->"+group.getGroup_name()+"中不存在以下database：</br>"+ info 
 					+"请先添加database到所在Group!</br>"
-					+"点击此处添加组内database ： <a href='dbmanage.jsp'>组内All In One数据库管理</a>";
+					+"点击此处添加组内database ： <a href='dbmanage.jsp' target='_blank'>组内All In One数据库管理</a>";
 			status.setInfo(info);
 			return status;
 		}

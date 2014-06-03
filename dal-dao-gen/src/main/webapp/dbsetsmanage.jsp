@@ -169,8 +169,8 @@
 						<div class="control-group">
 							<label class="control-label popup_label" style="width: 130px;">provider:</label> 
 							<select id="provider" class="span8">
-	                           <option value="SQLServer">SQLServer</option>
-	                           <option value="MySQL">MySQL</option>
+	                           <option value="sqlProvider">sqlProvider</option>
+	                           <option value="mySqlProvider">mySqlProvider</option>
 	                        </select>
 						</div>
 					</div>
@@ -211,8 +211,8 @@
 						<div class="control-group">
 							<label class="control-label popup_label" style="width: 130px;">provider:</label> 
 							<select id="provider2" class="span8">
-	                           <option value="SQLServer">SQLServer</option>
-	                           <option value="MySQL">MySQL</option>
+	                           <option value="sqlProvider">sqlProvider</option>
+	                           <option value="mySqlProvider">mySqlProvider</option>
 	                        </select>
 						</div>
 					</div>

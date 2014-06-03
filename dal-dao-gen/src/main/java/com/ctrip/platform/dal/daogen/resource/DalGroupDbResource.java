@@ -345,7 +345,7 @@ public class DalGroupDbResource {
 	private void genDefaultDbset(int groupId,String dbname){
 		DatabaseSet dbset = new DatabaseSet();
 		dbset.setName(dbname);
-		dbset.setProvider("SQLServer");
+		dbset.setProvider("sqlProvider");
 		dbset.setGroupId(groupId);
 		int ret = SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
 		if(ret>0){

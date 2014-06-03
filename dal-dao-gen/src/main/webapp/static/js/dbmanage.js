@@ -299,7 +299,8 @@
                 $.post("/rest/groupdb/add", {
                     groupId : w2ui['grid'].current_group,
                     dbname : db_name,
-                    comment : comment
+                    comment : comment,
+                    gen_default_dbset:$("#gen_default_dbset").is(":checked")
                 },function (data) {
                     if (data.code == "OK") {
                         $("#dbModal").modal('hide');

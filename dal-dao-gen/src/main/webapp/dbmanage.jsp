@@ -78,6 +78,14 @@
 								注:</label> <input id="comment" class="span7 input-sm" type="text">
 						</div>
 					</div>
+					<div class="row-fluid" style="margin-top:12px">
+						<div class="control-group">
+							<label class="popup_label">
+								<input id="gen_default_dbset" type="checkbox" checked="checked">
+								保存时生成默认的databaseSet和databaseSet Entry
+							</label>
+						</div>
+					</div>
 				</div>
 				<div class="modal-footer">
                	  <label id="error_msg" class="control-label popup_label" style="color:red;"></label>

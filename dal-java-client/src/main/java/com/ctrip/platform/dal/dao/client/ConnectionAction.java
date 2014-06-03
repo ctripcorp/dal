@@ -89,6 +89,7 @@ public abstract class ConnectionAction<T> {
 	public void initLogEntry(String logicDbName, DalHints hints) {
 		entry = new LogEntry(hints);
 		entry.setEvent(operation);
+		entry.setCommandType();
 		entry.setDatabaseName(logicDbName);
 		entry.setCallString(callString);
 		entry.setSql(sql);

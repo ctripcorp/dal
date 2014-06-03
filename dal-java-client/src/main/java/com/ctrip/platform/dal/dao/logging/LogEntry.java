@@ -76,6 +76,7 @@ public class LogEntry {
 		this.timeStamp = new Date();
 		this.machine = CommonUtil.MACHINE;
 		this.sensitive = hints.is(DalHintEnum.sensitive);
+		this.getSourceAndMessage();
 	}
 
 	public void setCallString(String callString) {
@@ -244,6 +245,18 @@ public class LogEntry {
 		return "";
 	}
 	
+	public void setCommandType(){
+		if(this.event == DalEventEnum.CALL || 
+				this.event == DalEventEnum.BATCH_CALL)
+			this.commandType = "StoreProcedure";
+		else
+			this.commandType = "Text";
+	}
+	
+	public String getCommandType(){
+		return this.commandType;
+	}
+	
 	private String getParams(StatementParameters params){
 		List<String> plantPrams = new ArrayList<String>();
 		for (StatementParameter param : params.values()) {
@@ -308,7 +321,7 @@ public class LogEntry {
 		tag.put(TAG_DURATION_TIME, Long.toString(this.duration) + "ms");
 		tag.put(TAG_DATABASE_NAME, CommonUtil.null2NA(this.databaseName));
 		tag.put(TAG_SERVER_ADDRESS, CommonUtil.null2NA(this.getServerAddress()));
-		tag.put(TAG_COMMAND_TYPE, CommonUtil.null2NA(this.commandType));
+		tag.put(TAG_COMMAND_TYPE, CommonUtil.null2NA(this.getCommandType()));
 		tag.put(TAG_USER_NAME, CommonUtil.null2NA(this.userName));
 		tag.put(TAG_RECORD_COUNT, Long.toString(this.resultCount));
 

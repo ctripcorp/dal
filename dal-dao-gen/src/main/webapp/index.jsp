@@ -194,13 +194,12 @@
                <div class="modal-body">
 				  <div class="row-fluid">
 						<div class="control-group">
-							<label id="generateCodeProcessErrorMess" class="control-label popup_label" style="color:red;"></label>
+							<label id="generateCodeProcessErrorMess" class="control-label popup_label"></label>
 						</div>
 					</div>
                </div>
                <div class="modal-footer">
-               	  <button id="add_lack_dbset" type="button" class="btn btn-primary">一键添加缺失dbset</button>
-               	  <button id="add_lack_db" type="button" class="btn btn-primary">一键添加缺失db</button>
+               	  <button id="add_lack_dbset" type="button" class="btn btn-primary">一键补全</button>
                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                </div>
             </div>

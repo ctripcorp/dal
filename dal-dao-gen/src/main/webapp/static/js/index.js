@@ -181,5 +181,17 @@ jQuery(document).ready(function () {
         ace.edit("code_editor").resize();
     });
 
+    //一键添加缺失dbset和db
+    $(document.body).on('click', "#add_lack_dbset", function (event) {
+        var current_project = w2ui['grid'].current_project;
+        $.post("/rest/project/addLackDbset", {
+            "project_id": current_project
+        }, function (data) {
+            $("#generateCodeProcessErrorMess").html(data.info);
+        }).fail(function(data){
+                $("#generateCodeProcessErrorMess").html("一键补全失败!");
+            });
+    });
+
     window.ajaxutil.reload_projects();
 });

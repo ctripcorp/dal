@@ -50,7 +50,7 @@ public class DalConfigHost {
 			this.databaseSetEntries.put(entry.getDatabaseSet_Id(), 
 					new HashMap<String, DatabaseSetEntry>());
 		}
-		if(!this.databaseSetEntries.get(entry.getDatabaseSet_Id()).containsKey(entry.getId())){
+		if(!this.databaseSetEntries.get(entry.getDatabaseSet_Id()).containsKey(entry.getName())){
 			this.databaseSetEntries.get(entry.getDatabaseSet_Id()).put(entry.getName(), entry);
 		}
 	}

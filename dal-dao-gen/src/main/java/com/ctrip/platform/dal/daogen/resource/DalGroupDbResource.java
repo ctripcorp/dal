@@ -148,7 +148,7 @@ public class DalGroupDbResource {
 		if(null != groupdb && groupdb.getDal_group_id() > 0){
 			DalGroup group = group_dao.getDalGroupById(groupdb.getDal_group_id());
 			Status status = Status.ERROR;
-			status.setInfo(groupdb.getDbname()+" is already added in "+group.getGroup_comment());
+			status.setInfo(groupdb.getDbname()+" is already added in "+group.getGroup_name());
 			return status;
 		}
 		

@@ -60,13 +60,13 @@
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal"
 						aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="myModalLabel">Add a group</h4>
+					<h4 class="modal-title" id="myModalLabel">Add DAL Team</h4>
 				</div>
 				<div class="modal-body">
                   <div class="row-fluid">
                      <div class="control-group">
                         <input id="group_id" type="hidden" value="">
-                        <label class="control-label popup_label" style="width:100px;">Group Name:</label>
+                        <label class="control-label popup_label" style="width:100px;">Team Name:</label>
                         <input id="name" class="span7 input-sm" type="text">&nbsp;
                         <a href="#" class="ctip" data-toggle="tooltip"
 							data-placement="right" title=""
@@ -99,13 +99,13 @@
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal"
 						aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="myModalLabel">Updata a group</h4>
+					<h4 class="modal-title" id="myModalLabel">Updata DAL Team</h4>
 				</div>
 				<div class="modal-body">
                   <div class="row-fluid">
                      <div class="control-group">
                         <input id="group_id" type="hidden" value="">
-                        <label class="control-label popup_label" style="width:100px;">Group Name:</label>
+                        <label class="control-label popup_label" style="width:100px;">Team Name:</label>
                         <input id="name2" class="span7 input-sm" type="text">&nbsp;
                      </div>
                   </div>

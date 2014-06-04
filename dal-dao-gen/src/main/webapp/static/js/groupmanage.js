@@ -113,19 +113,19 @@
                         {
                             type: 'button',
                             id: 'addGroup',
-                            caption: '添加Group',
+                            caption: '添加DAL Team',
                             icon: 'fa fa-plus'
                         },
                         {
                             type: 'button',
                             id: 'editGroup',
-                            caption: '修改Group',
+                            caption: '修改DAL Team',
                             icon: 'fa fa-edit'
                         },
                         {
                             type: 'button',
                             id: 'delGroup',
-                            caption: '删除Group',
+                            caption: '删除DAL Team',
                             icon: 'fa fa-times'
                         }
                     ],

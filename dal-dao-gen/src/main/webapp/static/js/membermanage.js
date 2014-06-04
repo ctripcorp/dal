@@ -189,17 +189,17 @@
                     }, {
                         type: 'button',
                         id: 'addMember',
-                        caption: '添加Member',
+                        caption: '添加组员',
                         icon: 'fa fa-plus'
                     }, {
                         type: 'button',
                         id: 'delMember',
-                        caption: '删除Member',
+                        caption: '删除组员',
                         icon: 'fa fa-times'
                     }, {
                         type: 'button',
                         id: 'applyAdd',
-                        caption: '申请加入DAL Group',
+                        caption: '申请加入DAL Team',
                         icon: 'fa fa-envelope'
                     }],
                     onClick: function (target, data) {

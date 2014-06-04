@@ -57,4 +57,7 @@ public class DatabaseSet implements Comparable<DatabaseSet> {
 		this.groupId = groupId;
 	}
 	
+	public boolean hasShardingStrategy(){
+		return this.shardingStrategy != null && !this.shardingStrategy.isEmpty();
+	}
 }

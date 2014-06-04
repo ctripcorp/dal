@@ -48,7 +48,7 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
 		this.databaseType = databaseType;
 	}
 	public String getSharding() {
-		return sharding;
+		return sharding == null ? "" : sharding;
 	}
 	public void setSharding(String sharding) {
 		this.sharding = sharding;

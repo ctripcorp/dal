@@ -246,13 +246,13 @@ public class ProjectResource {
 				if(allInOneDbnames.contains(dbsetName)){
 					info+=genDefaultDbset(groupId,dbsetName);
 				}else{
-					info+="<span style='color:red;'>databaseSet Name --> "+dbsetName+"在All In One中不存在，请手动添加!"+"</span><br/>";
+					info+="<span style='color:red;'>databaseSet Name --> "+dbsetName+"在数据库中不存在，请手动添加!"+"</span><br/>";
 				}
 			}
 		}
 		if(!"".equals(info)){
-			info+="点击此处添加databaseSet ： <a href='dbsetsmanage.jsp' target='_blank'>组内databaseSet管理</a><br/>";
-			info+="点击此处添加组内database ： <a href='dbmanage.jsp' target='_blank'>组内All In One数据库管理</a><br/>";
+			info+="点击此处添加databaseSet ： <a href='dbsetsmanage.jsp' target='_blank'>逻辑数据库管理</a><br/>";
+			info+="点击此处添加组内database ： <a href='dbmanage.jsp' target='_blank'>数据库管理</a><br/>";
 			Status status = Status.ERROR;
 			status.setInfo(info);
 			return status;
@@ -410,9 +410,9 @@ public class ProjectResource {
 			}
 			info += "</ul>";
 			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
-			info = "你所在DAL Team-->"+group.getGroup_name()+"中不存在以下databaseSet：</br>"+ info 
-					+"请先添加databaseSet到所在Group!</br>"
-					+"点击此处添加databaseSet ： <a href='dbsetsmanage.jsp' target='_blank'>组内databaseSet管理</a>";
+			info = "你所在"+group.getGroup_name()+"中不存在以下逻辑数据库(databaseSet)：</br>"+ info 
+					+"请先添加逻辑数据库(databaseSet)到你所在DAL Team!</br>"
+					+"点击此处添加逻辑数据库(databaseSet) ： <a href='dbsetsmanage.jsp' target='_blank'>逻辑数据库管理</a>";
 			status.setInfo(info);
 			return status;
 		}
@@ -467,9 +467,9 @@ public class ProjectResource {
 			}
 			info += "</ul>";
 			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
-			info = "你所在DAL Team-->"+group.getGroup_name()+"中不存在以下database：</br>"+ info 
-					+"请先添加database到所在Group!</br>"
-					+"点击此处添加组内database ： <a href='dbmanage.jsp' target='_blank'>组内All In One数据库管理</a>";
+			info = "你所在"+group.getGroup_name()+"中不存在以下数据库(database)：</br>"+ info 
+					+"请先添加数据库(database)到你所在DAL Team!</br>"
+					+"点击此处添加组内数据库(database) ： <a href='dbmanage.jsp' target='_blank'>数据库管理</a>";
 			status.setInfo(info);
 			return status;
 		}

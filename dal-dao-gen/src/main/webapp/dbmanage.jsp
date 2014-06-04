@@ -66,7 +66,7 @@
 				<div class="modal-body">
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label" style="width: 130px;">All-In-One数据库：</label>
+							<label class="control-label popup_label" style="width: 130px;">数据库：</label>
 							<select id="databases" class="span7">
 							</select>
 							<a href="javascript:;" onclick="$('#manageDb').modal();">没有找到？</a>
@@ -82,7 +82,7 @@
 						<div class="control-group">
 							<label class="popup_label">
 								<input id="gen_default_dbset" type="checkbox" checked="checked">
-								保存时生成默认的databaseSet和databaseSet Entry
+								保存时生成默认的逻辑数据库（databaseSet和databaseSet Entry)
 							</label>
 						</div>
 					</div>
@@ -138,12 +138,12 @@
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal"
 						aria-hidden="true">&times;</button>
-					<h4 class="modal-title">添加All-In-One配置</h4>
+					<h4 class="modal-title">添加数据库配置</h4>
 				</div>
 				<div class="modal-body">
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label">All-In-One：</label>
+							<label class="control-label popup_label">数据库：</label>
 							<textarea id="all_in_one" class="span9" style="height: 120px;">&lt;add name="xxx" connectionString="Server=xxx;port=xxx;UID=xxx;password=xxx;database=xxx;" providerName="System.Data.SqlClient" /&gt;</textarea>
 						</div>
 					</div>

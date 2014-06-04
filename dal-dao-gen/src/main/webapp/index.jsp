@@ -199,6 +199,14 @@
 					</div>
                </div>
                <div class="modal-footer">
+               	  <a href="#" class="ctip" data-toggle="tooltip"
+						data-placement="top" title="" html="1"
+						data-original-title="一键补全，功能描述：<br/>
+						1、将当前Project缺少的数据库自动添加到所属DAL Team。<br/>
+						2、将当前Project缺少的逻辑数据库自动新增并添加到所属DAL Team。<br/>
+						"> <img class="helpicon"
+						src="/static/images/help.jpg">
+					</a>
                	  <button id="add_lack_dbset" type="button" class="btn btn-primary">一键补全</button>
                   <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                </div>

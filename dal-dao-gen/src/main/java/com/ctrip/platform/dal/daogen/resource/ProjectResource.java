@@ -519,6 +519,11 @@ public class ProjectResource {
 				for(DatabaseSetEntry entry : dbentrys){
 					result.add(entry.getConnectionString());
 				}
+			}else{
+				Set<String> allInOneDbnames = LocalDataSourceLocator.newInstance().getDBNames();
+				if(allInOneDbnames.contains(dbsetName)){
+					result.add(dbsetName);
+				}
 			}
 		}
 		return result;

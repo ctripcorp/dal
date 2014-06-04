@@ -138,7 +138,7 @@
         },
         render_sidebar: function () {
             w2ui['main_layout'].content('left', '<div style="color: #34495E !important;font-size: 15px;background-color: #eee; padding: 7px 5px 6px 20px; border-bottom: 1px solid silver">'
-                +'All DAL Team'
+                +'ALL DAL Team'
                 +"</div>"
                 +'<div id="jstree_groups"></div>');
 
@@ -230,13 +230,13 @@
                 }],
                 columns: [{
                     field: 'userName',
-                    caption: 'Member Name',
+                    caption: '组员名字',
                     size: '50%',
                     sortable: true,
                     attr: 'align=center'
                 }, {
                     field: 'userEmail',
-                    caption: 'Member Email',
+                    caption: '组员邮件地址',
                     size: '50%',
                     sortable: true,
                     attr: 'align=center'

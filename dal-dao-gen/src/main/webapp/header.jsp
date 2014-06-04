@@ -22,7 +22,7 @@
 				</a>
 				<span class="dropdown-arrow dropdown-arrow-inverse" style="margin-top:1px"></span>
 				<ul class="dropdown-menu dropdown-inverse" style="margin-top:8px !important">
-					<li><a href="dbview.jsp">所有数据库一览</a></li>
+					<li><a href="dbview.jsp">数据库一览</a></li>
 					<li><a href="dbmanage.jsp">数据库管理</a></li>
 					<li><a href="dbsetsmanage.jsp">逻辑数据库管理</a></li>
 				</ul>

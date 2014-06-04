@@ -60,12 +60,12 @@
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal"
 						aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="myModalLabel">Add a member</h4>
+					<h4 class="modal-title" id="myModalLabel">添加组员</h4>
 				</div>
 				<div class="modal-body">
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label">Member List：</label>
+							<label class="control-label popup_label">用户列表：</label>
 							<select id="members" class="span8">
 							</select>&nbsp;
 							<a href="#" class="ctip" data-toggle="tooltip"
@@ -79,9 +79,8 @@
 				<div class="modal-footer">
 					<label id="error_msg" class="control-label popup_label"
 						style="color: red;"></label>
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					<button id="save_member" type="button" class="btn btn-primary">Save
-						changes</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button id="save_member" type="button" class="btn btn-primary">保存</button>
 				</div>
 			</div>
 		</div>

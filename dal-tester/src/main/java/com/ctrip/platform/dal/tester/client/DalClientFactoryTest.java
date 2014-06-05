@@ -15,7 +15,7 @@ import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 public class DalClientFactoryTest {
 	private void testInitPrivateFactory(){
 		try {
-			DalClientFactory.initPrivateFactory();
+			DalClientFactory.initClientFactory();
 			DalClient client = DalClientFactory.getClient("dao_test");
 			DalHints hints = new DalHints();
 			//SimpleShardHintStrategy test
@@ -96,7 +96,7 @@ public class DalClientFactoryTest {
 	
 	private void testSqlServer() {
 		try {
-			DalClientFactory.initPrivateFactory();
+			DalClientFactory.initClientFactory();
 			DalClient client = DalClientFactory.getClient("SysDalTest");
 			
 			DalHints hints = new DalHints();

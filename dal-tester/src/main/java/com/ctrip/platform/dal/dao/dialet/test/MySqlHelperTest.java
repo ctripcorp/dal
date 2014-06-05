@@ -24,7 +24,7 @@ public class MySqlHelperTest {
 	
 	static{
 		try {
-			DalClientFactory.initPrivateFactory();
+			DalClientFactory.initClientFactory();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

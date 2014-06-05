@@ -30,7 +30,7 @@
 			<li id="groupmanagejsp"><a href="groupmanage.jsp">组管理</a></li>
 		</ul>
 		<ul class="nav navbar-nav navbar-right">
-            <li id="welcomejsp"><a href="welcome.jsp">Tutorial</a></li>
+            <li id="welcomejsp" style="display:none"><a href="welcome.jsp">Tutorial</a></li>
 			<li class="dropdown">
 				<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
 					data-close-others="true"> 

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.logging;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ public class LogEntry {
 	public static final String TAG_COMMAND_TYPE = "CommandType";
 	public static final String TAG_USER_NAME = "UserName";
 	public static final String TAG_RECORD_COUNT = "RecordCount";
+	public static final int LOG_LIMIT = 32*1024;
 	
 	private static final String SQLHIDDENString = "*";
 	private static final String JSON_PATTERN = "{'HasSql':'%s','Hash':'%s','SqlTpl':'%s','Param':'%s','IsSuccess':'%s','ErrorMsg':'%s'}";
@@ -406,6 +408,12 @@ public class LogEntry {
 		if(this.sensitive){
 			try {
 				params = AESCrypto.getInstance().crypt(this.getParams());
+				int tplLength = sqlTpl.length();
+				int paramsLength = params.length();
+				if(tplLength + paramsLength > LOG_LIMIT){
+					sqlTpl = sqlTpl.substring(0, tplLength > LOG_LIMIT ? LOG_LIMIT : tplLength);
+					params = "over long with param, can not be recorded";
+				}
 			} catch (Exception e) {
 				this.errorMsg = e.getMessage();
 			}

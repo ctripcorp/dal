@@ -15,7 +15,7 @@ public class Test {
 	public static void main(String[] args) throws Exception {
 		
 		
-		DalClientFactory.initPrivateFactory();
+		DalClientFactory.initClientFactory();
 		EnteroctopusDao dao = EnteroctopusDao.create(Person.class);
 		
 		List<Person> entities = new ArrayList<Person>();

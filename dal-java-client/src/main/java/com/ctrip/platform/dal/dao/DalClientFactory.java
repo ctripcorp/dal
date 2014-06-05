@@ -74,62 +74,6 @@ public class DalClientFactory {
 	}
 
 	/**
-	 * Initialize from local connections.properties in classpath. For local
-	 * testing.
-	 * @deprecated TODO will be replaced by local datasource mode
-	 * @throws Exception
-	 */
-	public static void initPrivateFactory() throws Exception {
-		// DasConfigureReader reader = new ConfigureServiceReader(new
-		// DasConfigureService("localhost:8080", new
-		// File(DEFAULT_SNAPSHOT_PATH)));
-		logger.warn("Initialize Dal Java Client Factory with private mode.");
-		ConnectionPropertyReader reader = new ConnectionPropertyReader();
-		Configuration.addResource(ConnectionPropertyReader.DEFAULT_CONF_NAME);
-		String[] logicDbNames = reader.getLogicDbNames();
-		try {
-			DalClientFactory.initDirectClientFactory(reader, logicDbNames);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("Cannot initilize DB");
-			System.exit(0);
-		}
-	}
-
-	/**
-	 * For advanced direct client initialization.
-	 * 
-	 * @deprecated
-	 * @param reader
-	 * @param logicDbNames
-	 * @throws Exception
-	 */
-	public static void initDirectClientFactory(DasConfigureReader reader,
-			String... logicDbNames) throws Exception {
-		// TODO FIXIT should allow initialize logic Db for several times
-		if (connPool.get() != null)
-			return;
-		synchronized (DalClientFactory.class) {
-			if (connPool.get() != null)
-				return;
-			connPool.set(new DruidDataSourceWrapper(reader, logicDbNames));
-		}
-	}
-
-	/**
-	 * For advanced indirect client initialization.
-	 * 
-	 * @deprecated
-	 * @param reader
-	 * @param logicDbNames
-	 * @throws Exception
-	 */
-	public static void initDasClientFactory(DasConfigureReader reader,
-			String... logicDbNames) throws Exception {
-		// TODO to support
-	}
-
-	/**
 	 * Actively initialize connection pools for all the logic db in the
 	 * Dal.config
 	 */

@@ -21,7 +21,7 @@ public class PersonTest {
 		Configuration.addResource("conf.properties");
 		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
 		try {
-			DalClientFactory.initDirectClientFactory(reader, "HtlProductdb", "dao_test");
+			DalClientFactory.initClientFactory();
 		} catch (Exception e) {
 			System.exit(0);
 		}

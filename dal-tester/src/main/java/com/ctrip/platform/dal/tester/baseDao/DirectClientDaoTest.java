@@ -580,7 +580,7 @@ public class DirectClientDaoTest {
 //		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
 		try {
 //			DalClientFactory.initDirectClientFactory(reader, "dao_test");
-			DalClientFactory.initPrivateFactory();
+			DalClientFactory.initClientFactory();
 		} catch (Exception e) {
 			System.exit(0);
 		}

@@ -9,7 +9,7 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 public class PerformanceTest {
 	public static void main(String[] args) throws Exception{
 		
-		DalClientFactory.initPrivateFactory();
+		DalClientFactory.initClientFactory();
 		int count = 100;
 		String queryWhere = "id < 100";
 		jpa(count, queryWhere);

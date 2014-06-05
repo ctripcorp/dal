@@ -33,7 +33,7 @@
 
     var step1 = function(record, current){
         if ($("#databases").val() == "") {
-            $("#error_msg").text("请选择All-In-One数据库！");
+            $("#error_msg").text("请选择逻辑数据库！");
             return;
         }
         if($("#comment").val() == ""){

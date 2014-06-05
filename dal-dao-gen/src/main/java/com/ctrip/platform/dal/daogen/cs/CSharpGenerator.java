@@ -675,7 +675,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 	private void prepareDbFromFreeSql(List<GenTaskByFreeSql> freeSqls) {
 		for (GenTaskByFreeSql task : freeSqls) {
-			this.addDatabaseSet(task.getDatabaseSet_name());
+			this.addDatabaseSet(task.getDatabaseSetName());
 			_freeDaos.add(WordUtils.capitalize(task.getClass_name()));
 			if (!_dbHosts.containsKey(task.getDb_name())) {
 
@@ -803,7 +803,7 @@ public class CSharpGenerator extends AbstractGenerator {
 						task.getSuffix(), realSpName.replace("_", "")));
 			}
 			
-			this.addDatabaseSet(task.getDatabaseSet_name());
+			this.addDatabaseSet(task.getDatabaseSetName());
 			
 			if (!_dbHosts.containsKey(task.getDb_name())) {
 				String provider = "sqlProvider";
@@ -829,7 +829,7 @@ public class CSharpGenerator extends AbstractGenerator {
 						.add(getPojoClassName("", "Gen", task.getTable_name()));
 			}
 			
-			this.addDatabaseSet(task.getDatabaseSet_name());
+			this.addDatabaseSet(task.getDatabaseSetName());
 			
 			if (!_dbHosts.containsKey(task.getDb_name())) {
 				String provider = "sqlProvider";
@@ -1042,7 +1042,12 @@ public class CSharpGenerator extends AbstractGenerator {
 			Progress progress) {
 
 		Project project = daoOfProject.getProjectByID(projectId);
-		dalConfigHost = new DalConfigHost(project.getDal_config_name());
+		if(project.getDal_config_name() != null && !project.getDal_config_name().isEmpty())
+			dalConfigHost = new DalConfigHost(project.getDal_config_name());
+		else if(project.getNamespace() != null && !project.getNamespace().isEmpty())
+			dalConfigHost = new DalConfigHost(project.getNamespace());
+		else 
+			dalConfigHost = new DalConfigHost("");
 		
 		List<Callable<ExecuteResult>> _freeSqlCallables = prepareFreeSql(projectId,
 				regenerate, progress);

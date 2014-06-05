@@ -22,9 +22,9 @@
 				</a>
 				<span class="dropdown-arrow dropdown-arrow-inverse" style="margin-top:1px"></span>
 				<ul class="dropdown-menu dropdown-inverse" style="margin-top:8px !important">
-					<li><a href="dbview.jsp">所有All In One数据库一览</a></li>
-					<li><a href="dbmanage.jsp">组内All In One数据库管理</a></li>
-					<li><a href="dbsetsmanage.jsp">组内逻辑数据库管理</a></li>
+					<li><a href="dbview.jsp">数据库一览</a></li>
+					<li><a href="dbmanage.jsp">数据库管理</a></li>
+					<li><a href="dbsetsmanage.jsp">逻辑数据库管理</a></li>
 				</ul>
 			</li>
 			<li id="groupmanagejsp"><a href="groupmanage.jsp">组管理</a></li>
@@ -35,7 +35,7 @@
 				<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
 					data-close-others="true"> 
 					<span class="username"> 
-					Help
+					帮助
 					</span> 
 					<i class="fa fa-angle-down"> </i>
 				</a>

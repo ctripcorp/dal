@@ -12,7 +12,7 @@
       <meta name="author" content="">
       <title>Ctrip DAO Generator</title>
       <!-- Bootstrap core CSS -->
-      <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+      <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
       <link href="/static/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
       <link href="/static/w2ui/w2ui-1.3.2.min.css" rel="stylesheet"/>
       <link rel="stylesheet" href="/static/jstree/themes/default/style.min.css" />
@@ -66,16 +66,31 @@
 				<div class="modal-body">
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label" style="width: 130px;">All-In-One数据库：</label>
-							<select id="databases" class="span7">
-							</select>
+							<label class="control-label popup_label" style="width: 80px;">数据库：</label>
+							<select id="databases" class="span8"></select>
 							<a href="javascript:;" onclick="$('#manageDb').modal();">没有找到？</a>
 						</div>
 					</div>
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label" style="width: 130px;">备
-								注:</label> <input id="comment" class="span7 input-sm" type="text">
+							<label class="control-label popup_label" style="width: 80px;">备
+								注:</label> <input id="comment" class="span8 input-sm" type="text">
+						</div>
+					</div>
+					<div class="row-fluid" style="margin-top:12px">
+						<div class="control-group">
+							<label class="popup_label">
+								<input id="gen_default_dbset" type="checkbox" checked="checked">
+								保存时生成默认的逻辑数据库（databaseSet和databaseSet Entry)
+								<a href="#" class="ctip" data-toggle="tooltip"
+									data-placement="bottom" title="" html="1"
+									data-original-title="
+									&lt; databaseSet name='XXX' provider='sqlProvider' shardStrategy=' ' &gt; </br>
+							            &lt; add  name='XXX' databaseType='Master' sharding=' ' connectionString='XXX'/ &gt; </br>
+							        &lt; /databaseSet &gt;</br>其中XXX即为所选择的数据库名"> 
+							        <img class="helpicon" src="/static/images/help.jpg">
+								</a>
+							</label>
 						</div>
 					</div>
 				</div>
@@ -101,14 +116,14 @@
 				<div class="modal-body">
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label" style="width: 140px;">All-In-One数据库：</label>
-							<input id="databases2" class="span8 input-sm" type="text" disabled="disabled">
+							<label class="control-label popup_label" style="width: 80px;">数据库：</label>
+							<input id="databases2" class="span9 input-sm" type="text" disabled="disabled">
 						</div>
 					</div>
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label" style="width: 140px;">备
-								注:</label> <input id="comment2" class="span8 input-sm" type="text">
+							<label class="control-label popup_label" style="width: 80px;">备
+								注:</label> <input id="comment2" class="span9 input-sm" type="text">
 						</div>
 					</div>
 				</div>
@@ -130,12 +145,12 @@
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal"
 						aria-hidden="true">&times;</button>
-					<h4 class="modal-title">添加All-In-One配置</h4>
+					<h4 class="modal-title">添加数据库配置</h4>
 				</div>
 				<div class="modal-body">
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label">All-In-One：</label>
+							<label class="control-label popup_label">数据库：</label>
 							<textarea id="all_in_one" class="span9" style="height: 120px;">&lt;add name="xxx" connectionString="Server=xxx;port=xxx;UID=xxx;password=xxx;database=xxx;" providerName="System.Data.SqlClient" /&gt;</textarea>
 						</div>
 					</div>

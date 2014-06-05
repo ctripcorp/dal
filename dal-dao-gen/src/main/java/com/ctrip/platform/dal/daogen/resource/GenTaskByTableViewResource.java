@@ -63,12 +63,8 @@ public class GenTaskByTableViewResource {
 					.getAttributes().get("employee").toString();
 			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 			
-			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
-			String dbName = databaseSetEntry.getConnectionString();
-			
 			task.setProject_id(project_id);
-			task.setDb_name(dbName);
-			task.setDatabaseSet_name(set_name);
+			task.setDatabaseSetName(set_name);
 			task.setTable_names(table_names);
 			task.setView_names(view_names);
 			task.setSp_names(sp_names);

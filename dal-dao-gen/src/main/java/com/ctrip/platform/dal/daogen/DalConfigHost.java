@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.daogen;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -12,12 +11,12 @@ import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 public class DalConfigHost {
 	private String name;
 	private Map<Integer, DatabaseSet> databaseSet;
-	private Map<Integer, List<DatabaseSetEntry>> databaseSetEntries;
+	private Map<Integer, HashMap<String, DatabaseSetEntry>> databaseSetEntries;
 	
 	public DalConfigHost(String name){
 		this.name = name;
 		this.databaseSet = new HashMap<Integer, DatabaseSet>();
-		this.databaseSetEntries = new HashMap<Integer, List<DatabaseSetEntry>>();
+		this.databaseSetEntries = new HashMap<Integer, HashMap<String, DatabaseSetEntry>>();
 	}
 	
 	public String getName(){
@@ -28,10 +27,10 @@ public class DalConfigHost {
 		return this.databaseSet.values();
 	}
 	
-	public List<DatabaseSetEntry> getDatabaseSetEntry(int setId){
+	public Collection<DatabaseSetEntry> getDatabaseSetEntry(int setId){
 		
 		return this.databaseSetEntries.containsKey(setId) ? 
-				this.databaseSetEntries.get(setId) : null;
+				this.databaseSetEntries.get(setId).values() : null;
 	}
 	
 	public void addDatabaseSet(DatabaseSet set){
@@ -49,9 +48,11 @@ public class DalConfigHost {
 	public void addDatabaseSetEntry(DatabaseSetEntry entry){
 		if(!this.databaseSetEntries.containsKey(entry.getDatabaseSet_Id())){
 			this.databaseSetEntries.put(entry.getDatabaseSet_Id(), 
-					new ArrayList<DatabaseSetEntry>());
+					new HashMap<String, DatabaseSetEntry>());
 		}
-		this.databaseSetEntries.get(entry.getDatabaseSet_Id()).add(entry);
+		if(!this.databaseSetEntries.get(entry.getDatabaseSet_Id()).containsKey(entry.getName())){
+			this.databaseSetEntries.get(entry.getDatabaseSet_Id()).put(entry.getName(), entry);
+		}
 	}
 	
 	public void addDatabaseSetEntry(List<DatabaseSetEntry> entries){

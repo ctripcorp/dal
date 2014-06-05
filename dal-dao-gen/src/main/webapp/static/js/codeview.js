@@ -78,7 +78,7 @@
         },
         render_sidebar: function () {
             w2ui['main_layout'].content('left', '<div style="color: #34495E !important;font-size: 15px;background-color: #eee; padding: 7px 5px 6px 20px; border-bottom: 1px solid silver">'
-                + 'All DAL Project View'
+                + 'ALL DAL Project View'
                 + "</div>"
                 + '<div id="jstree_groups"></div>');
 
@@ -140,12 +140,8 @@
                     }
                 },
                 searches: [{
-                    field: 'databaseSet_name',
+                    field: 'databaseSetName',
                     caption: '逻辑数据库',
-                    type: 'text'
-                }, {
-                    field: 'db_name',
-                    caption: 'Master数据库',
                     type: 'text'
                 }, {
                     field: 'table_name',
@@ -161,16 +157,8 @@
                     type: 'text'
                 }],
                 columns: [{
-                    field: 'databaseSet_name',
+                    field: 'databaseSetName',
                     caption: '逻辑数据库',
-                    size: '15%',
-                    sortable: true,
-                    attr: 'align=center',
-                    resizable:true,
-                    resizable:true
-                }, {
-                    field: 'db_name',
-                    caption: 'Master数据库',
                     size: '15%',
                     sortable: true,
                     attr: 'align=center',
@@ -196,12 +184,12 @@
                 }, {
                     field: 'sql_content',
                     caption: '预览',
-                    size: '10%',
+                    size: '20%',
                     resizable:true
                 }, {
                     field: 'comment',
                     caption: '方法描述',
-                    size: '20%',
+                    size: '25%',
                     resizable:true
                 }, {
                     field: 'update_user_no',

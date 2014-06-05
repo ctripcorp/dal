@@ -61,7 +61,7 @@
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal"
 						aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="myModalLabel">Add a project</h4>
+					<h4 class="modal-title" id="myModalLabel">项目管理</h4>
 				</div>
 				<div class="modal-body">
                   <div class="row-fluid">
@@ -91,8 +91,8 @@
 						data-original-title="代码生成器按照项目来组织代码，因此，同一个用户可以新建多个项目，每个项目生成的代码相互独立，互不干扰。"> <img class="helpicon"
 						src="/static/images/help.jpg">
 					</a>
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                  <button id="save_proj" type="button" class="btn btn-primary">Save changes</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                  <button id="save_proj" type="button" class="btn btn-primary">保存</button>
                </div>
             </div>
          </div>
@@ -194,12 +194,21 @@
                <div class="modal-body">
 				  <div class="row-fluid">
 						<div class="control-group">
-							<label id="generateCodeProcessErrorMess" class="control-label popup_label" style="color:red;"></label>
+							<label id="generateCodeProcessErrorMess" class="control-label popup_label"></label>
 						</div>
 					</div>
                </div>
                <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+               	  <a href="#" class="ctip" data-toggle="tooltip"
+						data-placement="top" title="" html="1"
+						data-original-title="一键补全，功能描述：<br/>
+						1、将当前Project缺少的数据库自动添加到所属DAL Team。<br/>
+						2、将当前Project缺少的逻辑数据库自动新增并添加到所属DAL Team。<br/>
+						"> <img class="helpicon"
+						src="/static/images/help.jpg">
+					</a>
+               	  <button id="add_lack_dbset" type="button" class="btn btn-primary">一键补全</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                </div>
             </div>
          </div>

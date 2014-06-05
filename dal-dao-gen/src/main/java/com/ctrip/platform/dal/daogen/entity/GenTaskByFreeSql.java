@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
+
 public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
 	private int id;
@@ -14,7 +16,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	
 	private String db_name;
 	
-	private String databaseSet_name;
+	private String databaseSetName;
 	
 	private String class_name;
 	
@@ -36,12 +38,12 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	private Timestamp update_time;
 	private String comment;
 
-	public String getDatabaseSet_name() {
-		return databaseSet_name;
+	public String getDatabaseSetName() {
+		return databaseSetName;
 	}
 
-	public void setDatabaseSet_name(String databaseSet_name) {
-		this.databaseSet_name = databaseSet_name;
+	public void setDatabaseSetName(String databaseSetName) {
+		this.databaseSetName = databaseSetName;
 	}
 
 	public String getParameters() {
@@ -71,9 +73,9 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	public String getDb_name() {
 		return db_name;
 	}
-
-	public void setDb_name(String db_name) {
-		this.db_name = db_name;
+	
+	public void setDb_name(String dbName){
+		this.db_name = dbName;
 	}
 
 	public String getClass_name() {
@@ -160,7 +162,11 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		task.setDb_name(rs.getString(3));
+		
+		String databaseSet = rs.getString(3);
+		
+		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
+		task.setDatabaseSetName(databaseSet);
 		task.setClass_name(rs.getString(4));
 		task.setPojo_name(rs.getString(5));
 		task.setMethod_name(rs.getString(6));
@@ -172,7 +178,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		task.setUpdate_user_no(rs.getString(12));
 		task.setUpdate_time(rs.getTimestamp(13));
 		task.setComment(rs.getString(14));
-		task.setDatabaseSet_name(rs.getString(15));
+
 		return task;
 	}
 

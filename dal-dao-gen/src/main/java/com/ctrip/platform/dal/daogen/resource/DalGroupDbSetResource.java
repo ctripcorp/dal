@@ -1,6 +1,7 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -65,7 +66,8 @@ public class DalGroupDbSetResource {
 	@GET
 	@Path("getDbset")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DatabaseSet> getDatabaseSetByGroupId(@QueryParam("groupId") String id) {
+	public List<DatabaseSet> getDatabaseSetByGroupId(@QueryParam("groupId") String id,
+			@QueryParam("daoFlag") boolean daoFlag) {
 		int groupId = -1;
 		try{
 			groupId = Integer.parseInt(id);
@@ -73,8 +75,18 @@ public class DalGroupDbSetResource {
 			log.error("get DatabaseSet failed", ex);
 			return null;
 		}
-		List<DatabaseSet> dbset = dbset_dao.getAllDatabaseSetByGroupId(groupId);
-		return dbset;
+		List<DatabaseSet> dbsets = dbset_dao.getAllDatabaseSetByGroupId(groupId);
+		if(!daoFlag){
+			return dbsets;
+		}
+		List<DatabaseSet> result = new ArrayList<DatabaseSet>();
+		for(DatabaseSet dbset:dbsets){ //排除没有entry的dbset
+			List<DatabaseSetEntry> entrys = dbset_dao.getAllDatabaseSetEntryByDbsetid(dbset.getId());
+			if(entrys!=null && entrys.size()>0){
+				result.add(dbset);
+			}
+		}
+		return result;
 	}
 	
 	@GET

@@ -27,6 +27,7 @@ import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
@@ -36,6 +37,7 @@ import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.java.JavaGenerator;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 
 /**
  * The schema of {daogen.project} { "name": "InternationalFightEntine",
@@ -80,21 +82,29 @@ public class ProjectResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Project> getProjects(@QueryParam("root") boolean root) {
 		
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+		LoginUser user1 = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		String rootName = "组内所有项目";
+		if(user1!=null){
+			DalGroup dalGroup = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(user1.getGroupId());
+			if(dalGroup!=null){
+				rootName = dalGroup.getGroup_name() + rootName;
+			}
+		}
+		
 		if(root){
 			List<Project> roots = new ArrayList<Project>();
 			Project p = new Project();
 			p.setId(-1);
-			p.setName("所有项目");
-			p.setText("所有项目");
+			p.setName(rootName);
+			p.setText(rootName);
 			p.setNamespace("com.ctrip.platform");
 			p.setIcon("fa fa-folder-o");
 			p.setChildren(true);
 			roots.add(p);
 			return roots;
 		}
-
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
 
 		if (SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo) == null) {
 			LoginUser user = new LoginUser();
@@ -212,6 +222,101 @@ public class ProjectResource {
 
 	}
 
+	/**
+	 * 一键添加project缺失的databaseSet
+	 * @param projId
+	 * @return
+	 */
+	@POST
+	@Path("addLackDbset")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Status addLackDbset(@FormParam("project_id") int project_id) {
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		int groupId = user.getGroupId();
+		String info = addLackDb(project_id);
+		
+		Set<String> notExistDbset = getLackDbset(groupId,project_id);
+		for(String dbsetName:notExistDbset){
+			List<DatabaseSet> dbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbsetName);
+			if(null != dbsets && dbsets.size() > 0){
+				info += "<span style='color:red;'>databaseSet Name --> "+dbsetName+" 已经存在，请重新命名，再手动添加!"+"</span><br/>";
+			}else{
+				Set<String> allInOneDbnames = LocalDataSourceLocator.newInstance().getDBNames();
+				if(allInOneDbnames.contains(dbsetName)){
+					info+=genDefaultDbset(groupId,dbsetName);
+				}else{
+					info+="<span style='color:red;'>databaseSet Name --> "+dbsetName+"在数据库中不存在，请手动添加!"+"</span><br/>";
+				}
+			}
+		}
+		if(!"".equals(info)){
+			info+="点击此处添加databaseSet ： <a href='dbsetsmanage.jsp' target='_blank'>逻辑数据库管理</a><br/>";
+			info+="点击此处添加组内database ： <a href='dbmanage.jsp' target='_blank'>数据库管理</a><br/>";
+			Status status = Status.ERROR;
+			status.setInfo(info);
+			return status;
+		}else{
+			Status status = Status.OK;
+			status.setInfo("一键补全成功！");
+			return status;
+		}
+	}
+	
+	/**
+	 * 生成默认的databaseSet和databaseSet Entry
+	 * @param dbname
+	 */
+	private String genDefaultDbset(int groupId,String dbname){
+		DatabaseSet dbset = new DatabaseSet();
+		dbset.setName(dbname);
+		dbset.setProvider("sqlProvider");
+		dbset.setGroupId(groupId);
+		String info="";
+		int ret = SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
+		if(ret>0){
+			info+="databaseSet-->"+dbname+"一键补全成功!<br/>";
+			dbset = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname).get(0);
+			
+			DatabaseSetEntry entry = new DatabaseSetEntry();
+			entry.setDatabaseSet_Id(dbset.getId());
+			entry.setDatabaseType("Master");
+			entry.setName(dbname);
+			entry.setConnectionString(dbname);
+			
+			SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSetEntry(entry);
+		}
+		return info;
+	}
+	
+	private String addLackDb(int project_id){
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		int groupId = user.getGroupId();
+		Set<String> notExistDb = getLackDatabase(groupId, project_id);
+		Set<String> allInOneDbnames = LocalDataSourceLocator.newInstance().getDBNames();
+		
+		String info="";
+		for(String dbname:notExistDb){
+			DalGroupDB groupdb = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
+			if(null != groupdb && groupdb.getDal_group_id() > 0){
+				DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDal_group_id());
+				info += "<span style='color:red;'>数据库"+groupdb.getDbname()+" 已经加入 "+group.getGroup_comment()+"，一键补全失败</span><br/>";
+			}else if(allInOneDbnames.contains(dbname)){
+				DalGroupDB groupDb = new DalGroupDB();
+				groupDb.setDbname(dbname);
+				groupDb.setDal_group_id(groupId);
+				int ret = SpringBeanGetter.getDaoOfDalGroupDB().insertDalGroupDB(groupDb);
+				if(ret <= 0){
+					info+="<span style='color:red;'>数据库"+dbname+"一键补全失败，请手动添加。"+"</span><br/>";
+				}else{
+					info+="数据库"+dbname+"一键补全成功。"+"<br/>";
+				}
+			}
+		}
+		return info;
+	}
+	
 	@POST
 	@Path("generate")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -224,12 +329,8 @@ public class ProjectResource {
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
 		Progress progress = ProgressResource.getProgress(userNo, id,random);
-		status = validateDBPermision(userNo,id);
-		if(status.getCode().equals(Status.ERROR.getCode())){
-			progress.setStatus(ProgressResource.FINISH);
-			return status;
-		}
-		status = validateDbsetPermision(userNo,id);
+		
+		status = validatePermision(userNo,id);
 		if(status.getCode().equals(Status.ERROR.getCode())){
 			progress.setStatus(ProgressResource.FINISH);
 			return status;
@@ -260,7 +361,7 @@ public class ProjectResource {
 		return status;
 	}
 	
-	private Status validateDBPermision(String userNo,int project_id){
+	private Status validatePermision(String userNo,int project_id){
 		Status status = Status.ERROR;
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		int groupId = -1;
@@ -275,110 +376,32 @@ public class ProjectResource {
 			return status;
 		}
 		
-		List<DalGroupDB> groupDBs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
-		Set<String> group_db_names = new HashSet<String>();
-		for(DalGroupDB groupDB : groupDBs){
-			group_db_names.add(groupDB.getDbname());
+		String info = "";
+		//验证project的task所需要的databaseSet在组内是否存在
+		status = validateDbsetPermision(groupId,project_id);
+		if(status.getCode().equals(Status.ERROR.getCode())){
+			info = status.getInfo();
 		}
-
-		boolean flag = true;
-		status.setInfo("");
-		Set<String> notExistDB = new HashSet<String>();
-		List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
-		for(GenTaskBySqlBuilder task : autoTasks){
-			String db_name = task.getDb_name();
-			if(!group_db_names.contains(db_name)){
-				notExistDB.add(db_name);
-				flag = false;
-			}
+		//验证project的task所需要的database在组内是否存在
+		status = validateDbPermision(groupId,project_id);
+		if(status.getCode().equals(Status.ERROR.getCode())){
+			info += "</br>" + status.getInfo();
 		}
-
-		List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
-		for(GenTaskByTableViewSp task : tableViewSpTasks){
-			String db_name = task.getDb_name();
-			if(!group_db_names.contains(db_name)){
-				notExistDB.add(db_name);
-				flag = false;
-			}
-		}
-		
-		List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(project_id);
-		for(GenTaskByFreeSql task : sqlTasks){
-			String db_name = task.getDb_name();
-			if(!group_db_names.contains(db_name)){
-				notExistDB.add(db_name);
-				flag = false;
-			}
-		}
-		
-		if(flag){
-			return Status.OK;
-		}else{
-			String info = "<ul>";
-			for(String temp:notExistDB){
-				info+="<li>"+temp+"</li>";
-			}
-			info += "</ul>";
-			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
-			info = "在DAL Team Group："+group.getGroup_name()+"中不存在以下数据库：</br>"+ info +"<br/>请先添加DB到所在Group!</br>"
-					+"点击此处添加组内数据库 ： <a href='dbmanage.jsp'>组内All In One数据库管理</a>";
+		if(!"".equals(info)){
+			status = Status.ERROR;
 			status.setInfo(info);
 			return status;
 		}
+		
+		return Status.OK;
 	}
 	
-	private Status validateDbsetPermision(String userNo,int project_id){
+	private Status validateDbsetPermision(int groupId,int project_id){
 		Status status = Status.ERROR;
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-		int groupId = -1;
-		if(user!=null){
-			groupId = user.getGroupId();
-			if(groupId <=0){
-				status.setInfo("你没有权限生成代码.请先加入一个DAL Team.");
-				return status;
-			}
-		}else{
-			status.setInfo(userNo + "is not exist in system.");
-			return status;
-		}
 		
-		List<DatabaseSet> groupDbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
-		Set<String> group_dbset_names = new HashSet<String>();
-		for(DatabaseSet dbset : groupDbsets){
-			group_dbset_names.add(dbset.getName());
-		}
-
-		boolean flag = true;
-		status.setInfo("");
-		Set<String> notExistDbset = new HashSet<String>();
-		List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
-		for(GenTaskBySqlBuilder task : autoTasks){
-			String databaseSet_name = task.getDatabaseSet_name();
-			if(!group_dbset_names.contains(databaseSet_name)){
-				notExistDbset.add(databaseSet_name);
-				flag = false;
-			}
-		}
-
-		List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
-		for(GenTaskByTableViewSp task : tableViewSpTasks){
-			String databaseSet_name = task.getDatabaseSet_name();
-			if(!group_dbset_names.contains(databaseSet_name)){
-				notExistDbset.add(databaseSet_name);
-				flag = false;
-			}
-		}
+		Set<String> notExistDbset = getLackDbset(groupId,project_id);
 		
-		List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(project_id);
-		for(GenTaskByFreeSql task : sqlTasks){
-			String databaseSet_name = task.getDatabaseSet_name();
-			if(!group_dbset_names.contains(databaseSet_name)){
-				notExistDbset.add(databaseSet_name);
-				flag = false;
-			}
-		}
-		
-		if(flag){
+		if(notExistDbset==null || notExistDbset.size()<=0){
 			return Status.OK;
 		}else{
 			String info = "<ul>";
@@ -387,14 +410,125 @@ public class ProjectResource {
 			}
 			info += "</ul>";
 			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
-			info = "你所在DAL Team-->"+group.getGroup_name()+"中不存在以下databaseSet：</br>"+ info 
-					+"请先添加databaseSet到所在Group!</br>"
-					+"点击此处添加databaseSet ： <a href='dbsetsmanage.jsp'>组内databaseSet管理</a>";
+			info = "你所在"+group.getGroup_name()+"中不存在以下逻辑数据库(databaseSet)：</br>"+ info 
+					+"请先添加逻辑数据库(databaseSet)到你所在DAL Team!</br>"
+					+"点击此处添加逻辑数据库(databaseSet) ： <a href='dbsetsmanage.jsp' target='_blank'>逻辑数据库管理</a>";
 			status.setInfo(info);
 			return status;
 		}
 	}
+	
+	private Set<String> getLackDbset(int groupId,int project_id){
+		List<DatabaseSet> groupDbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
+		Set<String> group_dbset_names = new HashSet<String>();
+		for(DatabaseSet dbset : groupDbsets){
+			group_dbset_names.add(dbset.getName());
+		}
 
+		Set<String> notExistDbset = new HashSet<String>();
+		List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
+		for(GenTaskBySqlBuilder task : autoTasks){
+			String databaseSet_name = task.getDatabaseSetName();
+			if(!group_dbset_names.contains(databaseSet_name)){
+				notExistDbset.add(databaseSet_name);
+			}
+		}
+
+		List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
+		for(GenTaskByTableViewSp task : tableViewSpTasks){
+			String databaseSet_name = task.getDatabaseSetName();
+			if(!group_dbset_names.contains(databaseSet_name)){
+				notExistDbset.add(databaseSet_name);
+			}
+		}
+		
+		List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(project_id);
+		for(GenTaskByFreeSql task : sqlTasks){
+			String databaseSet_name = task.getDatabaseSetName();
+			if(!group_dbset_names.contains(databaseSet_name)){
+				notExistDbset.add(databaseSet_name);
+			}
+		}
+		
+		return notExistDbset;
+	}
+	
+	private Status validateDbPermision(int groupId,int project_id){
+		Status status = Status.ERROR;
+		
+		Set<String> notExistDb = getLackDatabase(groupId, project_id);
+		
+		if(notExistDb==null || notExistDb.size()<=0){
+			return Status.OK;
+		}else{
+			String info = "<ul>";
+			for(String temp:notExistDb){
+				info+="<li>"+temp+"</li>";
+			}
+			info += "</ul>";
+			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
+			info = "你所在"+group.getGroup_name()+"中不存在以下数据库(database)：</br>"+ info 
+					+"请先添加数据库(database)到你所在DAL Team!</br>"
+					+"点击此处添加组内数据库(database) ： <a href='dbmanage.jsp' target='_blank'>数据库管理</a>";
+			status.setInfo(info);
+			return status;
+		}
+		
+	}
+	
+	private Set<String> getLackDatabase(int groupId,int project_id){
+		List<DalGroupDB> groupDbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
+		Set<String> group_db_names = new HashSet<String>();
+		for(DalGroupDB db : groupDbs){
+			group_db_names.add(db.getDbname());
+		}
+		
+		Set<String> allRequiredDb = getProjectAllRequireDbname(project_id);
+		
+		Set<String> notExistDb = new HashSet<String>();
+		for(String db : allRequiredDb){
+			if(!group_db_names.contains(db)){
+				notExistDb.add(db);
+			}
+		}
+		return notExistDb;
+	}
+	
+	private Set<String> getProjectAllRequireDbname(int project_id){
+		List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
+
+		List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
+
+		List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(project_id);
+		
+		List<String> allRequireDbset = new ArrayList<String>();
+		for(GenTaskBySqlBuilder temp:autoTasks){
+			allRequireDbset.add(temp.getDatabaseSetName());
+		}
+		for(GenTaskByTableViewSp temp:tableViewSpTasks){
+			allRequireDbset.add(temp.getDatabaseSetName());
+		}
+		for(GenTaskByFreeSql temp:sqlTasks){
+			allRequireDbset.add(temp.getDatabaseSetName());
+		}
+		Set<String> result = new HashSet<String>();
+		for(String dbsetName:allRequireDbset){
+			List<DatabaseSet> dbset = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbsetName);
+			if(dbset!=null && dbset.size()>0){
+				List<DatabaseSetEntry> dbentrys = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetEntryByDbsetid(dbset.get(0).getId());
+				for(DatabaseSetEntry entry : dbentrys){
+					result.add(entry.getConnectionString());
+				}
+			}else{
+				Set<String> allInOneDbnames = LocalDataSourceLocator.newInstance().getDBNames();
+				if(allInOneDbnames.contains(dbsetName)){
+					result.add(dbsetName);
+				}
+			}
+		}
+		return result;
+	}
+	
 }
 
 

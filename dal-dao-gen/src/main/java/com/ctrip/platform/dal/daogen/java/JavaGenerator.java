@@ -38,7 +38,6 @@ import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import com.mysql.jdbc.log.LogUtils;
 
 public class JavaGenerator extends AbstractGenerator {
 	
@@ -615,8 +614,8 @@ public class JavaGenerator extends AbstractGenerator {
 
 	private void prepareDbFromFreeSql(List<GenTaskByFreeSql> freeSqls) {
 		for (GenTaskByFreeSql task : freeSqls) {		
-			this.addDatabaseSet(task.getDatabaseSet_name());
-			if (!dbs.containsKey(task.getDb_name())) {
+			this.addDatabaseSet(task.getDatabaseSetName());
+			/*if (!dbs.containsKey(task.getDb_name())) {
 
 				String provider = "sqlProvider";
 				String dbType = DbUtils.getDbType(task.getDb_name());
@@ -624,7 +623,7 @@ public class JavaGenerator extends AbstractGenerator {
 					provider = "mySqlProvider";
 				}
 				dbs.put(task.getDb_name(), provider);
-			}
+			}*/
 		}
 	}
 
@@ -650,28 +649,28 @@ public class JavaGenerator extends AbstractGenerator {
 			List<GenTaskBySqlBuilder> sqlBuilders) {
 		for (GenTaskByTableViewSp task : tableViewSps) {
 			
-			this.addDatabaseSet(task.getDatabaseSet_name());
-			if (!dbs.containsKey(task.getDb_name())) {
+			this.addDatabaseSet(task.getDatabaseSetName());
+			/*if (!dbs.containsKey(task.getDb_name())) {
 				String provider = "sqlProvider";
 				String dbType = DbUtils.getDbType(task.getDb_name());
 				if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				dbs.put(task.getDb_name(), provider);
-			}
+			}*/
 		}
 
 		for (GenTaskBySqlBuilder task : sqlBuilders) {
 			
-			this.addDatabaseSet(task.getDatabaseSet_name());
-			if (!dbs.containsKey(task.getDb_name())) {
+			this.addDatabaseSet(task.getDatabaseSetName());
+			/*if (!dbs.containsKey(task.getDb_name())) {
 				String provider = "sqlProvider";
 				String dbType = DbUtils.getDbType(task.getDb_name());
 				if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				dbs.put(task.getDb_name(), provider);
-			}
+			}*/
 		}
 	}
 
@@ -945,7 +944,12 @@ public class JavaGenerator extends AbstractGenerator {
 			Progress progress) {
 		
 		Project project = daoOfProject.getProjectByID(projectId);
-		dalConfigHost = new DalConfigHost(project.getDal_config_name());
+		if(project.getDal_config_name() != null && !project.getDal_config_name().isEmpty())
+			dalConfigHost = new DalConfigHost(project.getDal_config_name());
+		else if(project.getNamespace() != null && !project.getNamespace().isEmpty())
+			dalConfigHost = new DalConfigHost(project.getNamespace());
+		else 
+			dalConfigHost = new DalConfigHost("");
 		
 		List<Callable<ExecuteResult>> _freeSqlCallables = prepareFreeSql(projectId,
 				regenerate, progress);

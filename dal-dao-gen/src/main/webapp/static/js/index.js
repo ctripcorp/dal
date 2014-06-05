@@ -1,11 +1,7 @@
 
 jQuery(document).ready(function () {
 
-    $('#main_layout').height($(document).height() - 50);
-
-    window.render.render_layout($('#main_layout'));
-
-    window.render.render_sidebar();
+    window.render.renderAll();
 
     $(window).resize(function () {
         $('#main_layout').height($(document).height() - 50);
@@ -146,10 +142,6 @@ jQuery(document).ready(function () {
         }
     });
 
-    $(document.body).on('click', '#generate_code', function (event) {
-        window.ajaxutil.generate_code();
-    });
-
     $(document.body).on('click', '#regen_language', function (event) {
         if($("#regen_language").val() == "cs"){
             $(".useNewPojo").show();
@@ -185,28 +177,20 @@ jQuery(document).ready(function () {
         window.wizzard.previous(current_step);
     });
 
-    $(document.body).on('click', "#refreshFiles", function (event) {
-        ace.edit("code_editor").setValue(null);
-        $.jstree.reference("#jstree_files").refresh();
-    });
-
-    $(document.body).on('click', "#downloadFiles", function (event) {
-        cblock($("body"));
-        $.get("/rest/file/download?id=" + w2ui['grid'].current_project+
-            "&language=" + $("#viewCode").val(), function (data) {
-            $("body").unblock();
-            window.location.href = data;
-        }).fail(function(data){
-                alert("下载失败!");
-            });
-    });
-
-    $(document.body).on('change', "#viewCode", function (event) {
-        $("#refreshFiles").trigger('click');
-    });
-
     $("#layout_main_layout_resizer_preview").mouseleave(function(){
-          ace.edit("code_editor").resize();
+        ace.edit("code_editor").resize();
+    });
+
+    //一键添加缺失dbset和db
+    $(document.body).on('click', "#add_lack_dbset", function (event) {
+        var current_project = w2ui['grid'].current_project;
+        $.post("/rest/project/addLackDbset", {
+            "project_id": current_project
+        }, function (data) {
+            $("#generateCodeProcessErrorMess").html(data.info);
+        }).fail(function(data){
+                $("#generateCodeProcessErrorMess").html("一键补全失败!");
+            });
     });
 
     window.ajaxutil.reload_projects();

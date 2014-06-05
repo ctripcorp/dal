@@ -145,7 +145,7 @@
         },
         render_sidebar: function () {
             w2ui['main_layout'].content('left', '<div style="color: #34495E !important;font-size: 15px;background-color: #eee; padding: 7px 5px 6px 20px; border-bottom: 1px solid silver">'
-                +'All DAL Team'
+                +'ALL DAL Team'
                 +"</div>"
                 +'<div id="jstree_groups"></div>');
 
@@ -299,7 +299,8 @@
                 $.post("/rest/groupdb/add", {
                     groupId : w2ui['grid'].current_group,
                     dbname : db_name,
-                    comment : comment
+                    comment : comment,
+                    gen_default_dbset:$("#gen_default_dbset").is(":checked")
                 },function (data) {
                     if (data.code == "OK") {
                         $("#dbModal").modal('hide');

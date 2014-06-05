@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
+
 public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 
 	private int id;
@@ -12,7 +14,7 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	
 	private String db_name;
 	
-	private String databaseSet_name;
+	private String databaseSetName;
 	
 	private String table_name;
 
@@ -38,12 +40,12 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	private Timestamp update_time;
 	private String comment;
 
-	public String getDatabaseSet_name() {
-		return databaseSet_name;
+	public String getDatabaseSetName() {
+		return databaseSetName;
 	}
 
-	public void setDatabaseSet_name(String databaseSet_name) {
-		this.databaseSet_name = databaseSet_name;
+	public void setDatabaseSetName(String databaseSetName) {
+		this.databaseSetName = databaseSetName;
 	}
 
 	public String getFields() {
@@ -178,7 +180,11 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		task.setDb_name(rs.getString(3));
+		
+		String databaseSet = rs.getString(3);
+		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
+		task.setDatabaseSetName(databaseSet);
+		
 		task.setTable_name(rs.getString(4));
 		task.setClass_name(rs.getString(5));
 		task.setMethod_name(rs.getString(6));
@@ -192,7 +198,7 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		task.setUpdate_user_no(rs.getString(14));
 		task.setUpdate_time(rs.getTimestamp(15));
 		task.setComment(rs.getString(16));
-		task.setDatabaseSet_name(rs.getString(17));
+
 		return task;
 	}
 

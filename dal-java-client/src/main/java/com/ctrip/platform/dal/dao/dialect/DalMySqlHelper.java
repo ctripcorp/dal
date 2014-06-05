@@ -26,6 +26,7 @@ public class DalMySqlHelper<T> {
 		this.client = DalClientFactory.getClient(this.parser.getDatabaseName());
 	}
 
+	@SuppressWarnings("unchecked")
 	public int replace(KeyHolder holder, DalHints hints, T... entities) throws SQLException{
 		if(null == entities || entities.length == 0)
 			return 0;

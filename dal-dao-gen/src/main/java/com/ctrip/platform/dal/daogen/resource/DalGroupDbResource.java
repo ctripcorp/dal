@@ -26,6 +26,8 @@ import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
@@ -112,7 +114,8 @@ public class DalGroupDbResource {
 	@Path("add")
 	public Status add(@FormParam("groupId") String groupId,
 			@FormParam("dbname") String dbname,
-			@FormParam("comment") String comment){
+			@FormParam("comment") String comment,
+			@FormParam("gen_default_dbset") boolean gen_default_dbset){
 		
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
@@ -145,7 +148,7 @@ public class DalGroupDbResource {
 		if(null != groupdb && groupdb.getDal_group_id() > 0){
 			DalGroup group = group_dao.getDalGroupById(groupdb.getDal_group_id());
 			Status status = Status.ERROR;
-			status.setInfo(groupdb.getDbname()+" is already added in "+group.getGroup_comment());
+			status.setInfo(groupdb.getDbname()+" is already added in "+group.getGroup_name());
 			return status;
 		}
 		
@@ -164,6 +167,10 @@ public class DalGroupDbResource {
 			Status status = Status.ERROR;
 			status.setInfo("Add operation failed.");
 			return status;
+		}
+
+		if(gen_default_dbset){
+			genDefaultDbset(groupID,dbname);
 		}
 		
 		return Status.OK;
@@ -331,5 +338,43 @@ public class DalGroupDbResource {
 		return false;
 	}
 
+	/**
+	 * 生成默认的databaseSet和databaseSet Entry
+	 * @param dbname
+	 */
+	private void genDefaultDbset(int groupId,String dbname){
+		DatabaseSet dbset = new DatabaseSet();
+		dbset.setName(dbname);
+		dbset.setProvider("sqlProvider");
+		dbset.setGroupId(groupId);
+		int ret = SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
+		if(ret>0){
+			dbset = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname).get(0);
+			
+			DatabaseSetEntry entry = new DatabaseSetEntry();
+			entry.setDatabaseSet_Id(dbset.getId());
+			entry.setDatabaseType("Master");
+			entry.setName(dbname);
+			entry.setConnectionString(dbname);
+			
+			SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSetEntry(entry);
+		}
+	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

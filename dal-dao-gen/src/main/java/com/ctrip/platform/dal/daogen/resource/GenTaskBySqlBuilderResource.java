@@ -64,12 +64,8 @@ public class GenTaskBySqlBuilderResource {
 					.getAttributes().get("employee").toString();
 			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 			
-			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
-			String dbName = databaseSetEntry.getConnectionString();
-			
 			task.setProject_id(project_id);
-			task.setDb_name(dbName);
-			task.setDatabaseSet_name(set_name);
+			task.setDatabaseSetName(set_name);
 			task.setTable_name(table_name);
 			task.setMethod_name(method_name);
 			task.setSql_style(sql_style);

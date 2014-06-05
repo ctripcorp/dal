@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
+
 public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	
 	private int id;
@@ -12,7 +14,7 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	
 	private String db_name;
 	
-	private String databaseSet_name;
+	private String databaseSetName;
 	
 	private String table_names;
 	
@@ -36,16 +38,16 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	private Timestamp update_time;
 	private String comment;
 
+	public String getDatabaseSetName() {
+		return databaseSetName;
+	}
+
+	public void setDatabaseSetName(String databaseSetName) {
+		this.databaseSetName = databaseSetName;
+	}
+
 	public int getId() {
 		return id;
-	}
-
-	public String getDatabaseSet_name() {
-		return databaseSet_name;
-	}
-
-	public void setDatabaseSet_name(String databaseSet_name) {
-		this.databaseSet_name = databaseSet_name;
 	}
 
 	public void setId(int id) {
@@ -175,7 +177,11 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 		GenTaskByTableViewSp task = new GenTaskByTableViewSp();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		task.setDb_name(rs.getString(3));
+		
+		String databaseSet = rs.getString(3);
+		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
+		task.setDatabaseSetName(databaseSet);
+		
 		task.setTable_names(rs.getString(4));
 		task.setView_names(rs.getString(5));
 		task.setSp_names(rs.getString(6));
@@ -188,7 +194,7 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 		task.setUpdate_user_no(rs.getString(13));
 		task.setUpdate_time(rs.getTimestamp(14));
 		task.setComment(rs.getString(15));
-		task.setDatabaseSet_name(rs.getString(16));
+
 		return task;
 	}
 

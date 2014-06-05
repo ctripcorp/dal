@@ -9,7 +9,182 @@
 
     };
 
+    var refreshDAO = function(){
+        w2ui['grid'].clear();
+        var current_project = w2ui['grid'].current_project;
+        if(current_project==null || current_project==''){
+            return;
+        }
+//        if (current_project == undefined) {
+//            if (w2ui['sidebar'].nodes.length < 1 || w2ui['sidebar'].nodes[0].nodes.length < 1)
+//                return;
+//            current_project = w2ui['sidebar'].nodes[0].nodes[0].id;
+//        }
+        cblock($("body"));
+        $.get("/rest/task?project_id=" + current_project + "&rand=" + Math.random(), function (data) {
+            var allTasks = [];
+            $.each(data.tableViewSpTasks, function (index, value) {
+                value.recid = allTasks.length + 1;
+                value.task_type = "table_view_sp";
+                value.task_desc = "表/视图/存储过程";
+                if (value.table_names != null && value.table_names != "") {
+                    value.sql_content = value.table_names;
+                }
+                if (value.sp_names != null && value.sp_names != "") {
+                    if (value.sql_content == null || value.sql_content == "")
+                        value.sql_content = value.sp_names;
+                    else
+                        value.sql_content = value.sql_content + "," + value.sp_names;
+                }
+                if (value.view_names != null && value.view_names != "") {
+                    if (value.sql_content == null || value.sql_content == "")
+                        value.sql_content = value.view_names;
+                    else
+                        value.sql_content = value.sql_content + "," + value.view_names;
+                }
+                value.class_name = "/";
+                value.method_name = "/";
+                allTasks.push(value);
+            });
+            $.each(data.autoTasks, function (index, value) {
+                value.recid = allTasks.length + 1;
+                value.task_type = "auto";
+                value.task_desc = "SQL构建";
+                value.class_name= value.table_name;
+                allTasks.push(value);
+            });
+            $.each(data.sqlTasks, function (index, value) {
+                value.recid = allTasks.length + 1;
+                value.task_type = "sql";
+                value.task_desc = "自定义查询";
+                allTasks.push(value);
+            });
+            w2ui['grid'].add(allTasks);
+            $("body").unblock();
+        }).fail(function(data){
+                alert("获取所有DAO失败!");
+                $("body").unblock();
+            });
+    };
+
+    var addDAO = function(){
+        var current_project = w2ui['grid'].current_project;
+        if(current_project==null || current_project==''){
+            alert('请先选择Project');
+            return;
+        }
+        window.wizzard.clear();
+        $(".step1").show();
+        $(".step2-1").hide();
+        $(".step2-2").hide();
+        $(".step2-3").hide();
+        $(".step2-2-1").hide();
+        $(".step2-2-1-1").hide();
+        $(".step2-2-1-2").hide();
+        $(".step2-2-2").hide();
+        $(".step2-3").hide();
+        $(".step2-3-1").hide();
+        $("#page1").attr('is_update', '0');
+        $("#page1").modal({
+            "backdrop": "static"
+        });
+        window.ajaxutil.reload_dbsets();
+    };
+
+    var editDAO = function(){
+        var current_project = w2ui['grid'].current_project;
+        if(current_project==null || current_project==''){
+            alert('请先选择Project');
+            return;
+        }
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if(record==null || record==''){
+            alert("请先选择一个DAO");
+            return;
+        }
+        window.wizzard.clear();
+        $(".step1").show();
+        $(".step2-1").hide();
+        $(".step2-2").hide();
+        $(".step2-3").hide();
+        $(".step2-2-1").hide();
+        $(".step2-2-1-1").hide();
+        $(".step2-2-1-2").hide();
+        $(".step2-2-2").hide();
+        $(".step2-3").hide();
+        $(".step2-3-1").hide();
+        window.ajaxutil.reload_dbsets(function () {
+            $("#databases")[0].selectize.setValue(record['databaseSetName']);
+        });
+        $("#page1").attr('is_update', '1');
+        $("#gen_style").val(record.task_type);
+        $("#sql_style").val(record.sql_style);
+        $("#comment").val(record.comment);
+        $("#page1").modal({
+            "backdrop": "static"
+        });
+    };
+
+    var delDAO = function () {
+        var current_project = w2ui['grid'].current_project;
+        if(current_project==null || current_project==''){
+            alert('请先选择Project');
+            return;
+        }
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if (record == null || record == '') {
+            alert("请先选择一个DAO");
+            return;
+        }
+        if (confirm("Are you sure to delete?")) {
+            var records = w2ui['grid'].getSelection();
+            var record = w2ui['grid'].get(records[0]);
+            var url = "";
+            if (record.task_type == "table_view_sp") {
+                url = "rest/task/table";
+            } else if (record.task_type == "auto") {
+                url = "rest/task/auto";
+            } else if (record.task_type == "sql") {
+                url = "rest/task/sql";
+            }
+            $.post(url, {
+                    "action": "delete",
+                    "id": record.id
+                },
+                function (data) {
+                    w2ui["grid_toolbar"].click('refreshDAO', null);
+                }).fail(function (data) {
+                    alert("删除失败!");
+                });
+        }
+    };
+
+    var generateCode = function(){
+        var current_project = w2ui['grid'].current_project;
+        if(current_project==null || current_project==''){
+            alert('请先选择Project');
+            return;
+        }
+        $("#generateCode").modal({"backdrop": "static"});
+    };
+
     Render.prototype = {
+        renderAll : function(){
+            $('#main_layout').height($(document).height() - 50);
+
+            window.render.render_layout($('#main_layout'));
+
+            window.render.render_sidebar();
+
+            window.render.render_grid();
+
+            window.render.render_preview();
+
+            w2ui['grid_toolbar'].click('refreshDAO', null);
+            $("#refreshFiles").trigger('click');
+        },
         render_layout: function (render_obj) {
             $(render_obj).w2layout({
                 name: 'main_layout',
@@ -46,10 +221,10 @@
 
             $('#jstree_projects').on('select_node.jstree', function (e, obj) {
                 if(obj.node.id != -1){
-                    window.render.render_grid();
+//                    window.render.render_grid();
 
                     w2ui['grid'].current_project = obj.node.id;
-                    window.render.render_preview();
+//                    window.render.render_preview();
                     w2ui['grid_toolbar'].click('refreshDAO', null);
                     $("#refreshFiles").trigger('click');
                 }
@@ -81,8 +256,7 @@
                     toolbarAdd: false,
                     toolbarDelete: false,
                     //toolbarSave: true,
-                    toolbarEdit: false,
-                    selectColumn: true
+                    toolbarEdit: false
                 },
                 multiSelect: false,
                 toolbar: {
@@ -112,137 +286,33 @@
                         type: 'break'
                     }, {
                         type: 'button',
-                        id: 'code',
+                        id: 'generateCode',
                         caption: '生成代码',
                         icon: 'fa fa-play'
                     }],
-                    
                     onClick: function (target, data) {
                         switch (target) {
-                        case 'refreshDAO':
-
-                            w2ui['grid'].clear();
-                            var current_project = w2ui['grid'].current_project;
-                            if (current_project == undefined) {
-                                if (w2ui['sidebar'].nodes.length < 1 || w2ui['sidebar'].nodes[0].nodes.length < 1)
-                                    return;
-                                current_project = w2ui['sidebar'].nodes[0].nodes[0].id;
-                            }
-                            cblock($("body"));
-                            $.get("/rest/task?project_id=" + current_project + "&rand=" + Math.random(), function (data) {
-                                var allTasks = [];
-                                $.each(data.tableViewSpTasks, function (index, value) {
-                                    value.recid = allTasks.length + 1;
-                                    value.task_type = "table_view_sp";
-                                    value.task_desc = "表/视图/存储过程";
-                                    if (value.table_names != null && value.table_names != "") {
-                                        value.sql_content = value.table_names;
-                                    }
-                                    if (value.sp_names != null && value.sp_names != "") {
-                                        if (value.sql_content == null || value.sql_content == "")
-                                            value.sql_content = value.sp_names;
-                                        else
-                                            value.sql_content = value.sql_content + "," + value.sp_names;
-                                    }
-                                    if (value.view_names != null && value.view_names != "") {
-                                        if (value.sql_content == null || value.sql_content == "")
-                                            value.sql_content = value.view_names;
-                                        else
-                                            value.sql_content = value.sql_content + "," + value.view_names;
-                                    }
-                                    value.class_name = "/";
-                                    value.method_name = "/";
-                                    allTasks.push(value);
-                                });
-                                $.each(data.autoTasks, function (index, value) {
-                                    value.recid = allTasks.length + 1;
-                                    value.task_type = "auto";
-                                    value.task_desc = "SQL构建";
-                                    value.class_name= value.table_name;
-                                    allTasks.push(value);
-                                });
-                                $.each(data.sqlTasks, function (index, value) {
-                                    value.recid = allTasks.length + 1;
-                                    value.task_type = "sql";
-                                    value.task_desc = "自定义查询";
-                                    allTasks.push(value);
-                                });
-                                w2ui['grid'].add(allTasks);
-                                $("body").unblock();
-//                                if(allTasks.length == 0){
-//                                    w2ui['grid_toolbar'].click('addDAO', null);
-//                                }
-                            }).fail(function(data){
-                                 alert("获取所有DAO失败!");
-                            });
-                            break;
-                        case 'addDAO':
-                            window.wizzard.clear();
-                            $(".step1").show();
-                            $(".step2-1").hide();
-                            $(".step2-2").hide();
-                            $(".step2-3").hide();
-                            $(".step2-2-1").hide();
-                            $(".step2-2-1-1").hide();
-                            $(".step2-2-1-2").hide();
-                            $(".step2-2-2").hide();
-                            $(".step2-3").hide();
-                            $(".step2-3-1").hide();
-                            $("#page1").attr('is_update', '0');
-                            $("#page1").modal({
-                                "backdrop": "static"
-                            });
-//                            window.ajaxutil.reload_dbservers(null,true);
-                            window.ajaxutil.reload_dbsets();
-                            break;
-                        case 'editDAO':
-                            window.wizzard.clear();
-                            var records = w2ui['grid'].getSelection();
-                            if(records.length > 0){
-                                window.render.editDAO(records[0]);    
-                            }
-                            break;
-                        case 'delDAO':
-                            if (confirm("Are you sure to delete?")) {
-                                var records = w2ui['grid'].getSelection();
-                                var record = w2ui['grid'].get(records[0]);
-                                var url = "";
-                                if (record.task_type == "table_view_sp") {
-                                    url = "rest/task/table";
-                                } else if (record.task_type == "auto") {
-                                    url = "rest/task/auto";
-                                } else if (record.task_type == "sql") {
-                                    url = "rest/task/sql";
-                                }
-                                $.post(url, {
-                                        "action": "delete",
-                                        "id": record.id
-                                    },
-                                    function (data) {
-                                        //$("#page1").modal('hide');
-                                        w2ui["grid_toolbar"].click('refreshDAO', null);
-                                    }).fail(function(data){
-                                         alert("删除失败!");
-                                    });
-                            }
-                            break;
-                        case 'code':
-                            //window.ajaxutil.generate_code("java");
-                            $("#generateCode").modal({"backdrop": "static"});
-                            break;
-                        // case 'csharpCode':
-                        //     window.ajaxutil.generate_code("csharp");
-                        //     break;
+                            case 'refreshDAO':
+                                refreshDAO();
+                                break;
+                            case 'addDAO':
+                                addDAO();
+                                break;
+                            case 'editDAO':
+                                editDAO();
+                                break;
+                            case 'delDAO':
+                                delDAO();
+                                break;
+                            case 'generateCode':
+                                generateCode();
+                                break;
                         }
                     }
                 },
                 searches: [{
-                    field: 'databaseSet_name',
+                    field: 'databaseSetName',
                     caption: '逻辑数据库',
-                    type: 'text'
-                }, {
-                    field: 'db_name',
-                    caption: 'Master数据库',
                     type: 'text'
                 }, {
                     field: 'table_name',
@@ -258,16 +328,9 @@
                     type: 'text'
                 }],
                 columns: [{
-                    field: 'databaseSet_name',
+                    field: 'databaseSetName',
                     caption: '逻辑数据库',
-                    size: '15%',
-                    sortable: true,
-                    attr: 'align=center',
-                    resizable:true
-                }, {
-                    field: 'db_name',
-                    caption: 'Master数据库',
-                    size: '15%',
+                    size: '20%',
                     sortable: true,
                     attr: 'align=center',
                     resizable:true
@@ -292,12 +355,12 @@
                 }, {
                     field: 'sql_content',
                     caption: '预览',
-                    size: '10%',
+                    size: '15%',
                     resizable:true
                 }, {
                     field: 'comment',
                     caption: '方法描述',
-                    size: '20%',
+                    size: '25%',
                     resizable:true
                 }, {
                     field: 'update_user_no',
@@ -307,35 +370,9 @@
                 }],
                 records: [],
                 onDblClick: function (target, data) {
-                    window.render.editDAO(data.recid);
+                    setTimeout(editDAO,300);
                 }
             }));
-        },
-        editDAO: function(recid){
-            var record = w2ui['grid'].get(recid);
-            if (record != undefined) {
-                $(".step1").show();
-                $(".step2-1").hide();
-                $(".step2-2").hide();
-                $(".step2-3").hide();
-                $(".step2-2-1").hide();
-                $(".step2-2-1-1").hide();
-                $(".step2-2-1-2").hide();
-                $(".step2-2-2").hide();
-                $(".step2-3").hide();
-                $(".step2-3-1").hide();
-                window.ajaxutil.reload_dbsets(function () {
-                    $("#databases")[0].selectize.setValue(record['databaseSet_name']);
-                });
-                $("#page1").attr('is_update', '1');
-                $("#gen_style").val(record.task_type);
-                $("#sql_style").val(record.sql_style);
-                $("#comment").val(record.comment);
-                $("#page1").modal({
-                    "backdrop": "static"
-                });
-            }
-            
         },
         render_preview:function(){
             var existsGrid = w2ui['sub_layout'];
@@ -356,7 +393,7 @@
 
             w2ui['main_layout'].content('preview', w2ui['sub_layout']);
 
-            w2ui['sub_layout'].content('left', '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a id="refreshFiles" href="javascript:;"><i class="fa fa-refresh"></i>刷新</a>&nbsp;&nbsp;<a id="downloadFiles" href="javascript:;"><i class="fa fa-download"></i>下载Zip包</a>&nbsp;&nbsp;<select id="viewCode"><option value="cs">C#</option><option value="java">Java</option></select></div>'+'<div id="jstree_files"></div>');
+            w2ui['sub_layout'].content('left', '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a id="refreshFiles" href="javascript:void(0);"><i class="fa fa-refresh"></i>刷新</a>&nbsp;&nbsp;<a id="downloadFiles" href="javascript:;"><i class="fa fa-download"></i>下载Zip包</a>&nbsp;&nbsp;<select id="viewCode"><option value="cs">C#</option><option value="java">Java</option></select></div>'+'<div id="jstree_files"></div>');
 
             $('#jstree_files').on('select_node.jstree', function (e, obj) {
                 if(obj.node.original.type == "file"){
@@ -436,7 +473,6 @@
 
                         code_editor_fullscreen.setValue(value);
 
-//                        $("#view_code_fullscreen").modal();
                         code_editor_fullscreen.resize();
                         $('#main_layout2').resize();
                         code_editor_fullscreen.resize();
@@ -456,5 +492,32 @@
 
     window.render = new Render();
 
+    $(function(){
+
+        $(document.body).on('click', '#generate_code', function (event) {
+            window.ajaxutil.generate_code();
+        });
+
+        $(document.body).on('click', "#refreshFiles", function (event) {
+            ace.edit("code_editor").setValue(null);
+            $.jstree.reference("#jstree_files").refresh();
+        });
+
+        $(document.body).on('click', "#downloadFiles", function (event) {
+            cblock($("body"));
+            $.get("/rest/file/download?id=" + w2ui['grid'].current_project+
+                "&language=" + $("#viewCode").val(), function (data) {
+                $("body").unblock();
+                window.location.href = data;
+            }).fail(function(data){
+                    alert("下载失败!");
+                });
+        });
+
+        $(document.body).on('change', "#viewCode", function (event) {
+            $("#refreshFiles").trigger('click');
+        });
+
+    });
 
 })(window);

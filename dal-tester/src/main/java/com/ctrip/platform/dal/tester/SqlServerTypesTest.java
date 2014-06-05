@@ -63,7 +63,7 @@ public class SqlServerTypesTest {
 	private static DalClient client = null;
 	static {
 		try {
-			DalClientFactory.initPrivateFactory();
+			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(DATABASE_NAME);
 		} catch (Exception e) {
 			e.printStackTrace();

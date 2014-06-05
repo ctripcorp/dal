@@ -174,7 +174,7 @@ public final class DalTableDao<T> {
 	 * @param parameters
 	 * @param hints
 	 * @param start
-	 *            the start number
+	 *            the start number. It is zero(0) based, means the index is from 0. 1 will be the 2nd row.
 	 * @param count
 	 *            how may rows to return
 	 * @return The qualified list of pojo

@@ -1,16 +1,21 @@
 package com.ctrip.platform.dal.tester.baseDao;
 
-import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
 
-import com.ctrip.freeway.config.LogConfig;
-import com.ctrip.platform.dal.common.cfg.DasConfigureService;
-import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
-import com.ctrip.platform.dal.common.db.DasConfigureReader;
-import com.ctrip.platform.dal.common.util.Configuration;
+import org.junit.After;
+
+import static org.junit.Assert.*;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalQueryDao;
@@ -19,43 +24,124 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class DalQueryDaoTest {
+	private final static String DATABASE_NAME = "HotelPubDB";
+
+	private final static String TABLE_NAME = "dal_client_test";
+	
+	private final static String DROP_TABLE_SQL = "IF EXISTS ("
+			+ "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
+			+ "WHERE TABLE_NAME = '"+ TABLE_NAME + "') "
+			+ "DROP TABLE  "+ TABLE_NAME;
+	
+	//Create the the table
+	private final static String CREATE_TABLE_SQL = "CREATE TABLE " + TABLE_NAME +"("
+			+ "Id int NOT NULL IDENTITY(1,1) PRIMARY KEY, "
+			+ "quantity int,type smallint, "
+			+ "address varchar(64) not null,"
+			+ "last_changed datetime default getdate())";
+	
+	private static DalClient client = null;
+
+	static {
+		try {
+			DalClientFactory.initClientFactory();
+			client = DalClientFactory.getClient(DATABASE_NAME);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		DalHints hints = new DalHints();
+		StatementParameters parameters = new StatementParameters();
+		String[] sqls = new String[] { DROP_TABLE_SQL, CREATE_TABLE_SQL};
+		for (int i = 0; i < sqls.length; i++) {
+			client.update(sqls[i], parameters, hints);
+		}
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+		DalHints hints = new DalHints();
+		StatementParameters parameters = new StatementParameters();
+		String[] sqls = new String[] { DROP_TABLE_SQL};
+		for (int i = 0; i < sqls.length; i++) {
+			client.update(sqls[i], parameters, hints);
+		}
+	}
+	
+	@Before
+	public void setUp() throws Exception {
+		DalHints hints = new DalHints();
+		String[] insertSqls = new String[] {
+				"SET IDENTITY_INSERT "+ TABLE_NAME +" ON",
+				"INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
+						+ " VALUES(1, 10, 1, 'SH INFO')",
+				"INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
+						+ " VALUES(2, 11, 1, 'BJ INFO')",
+				"INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
+						+ " VALUES(3, 12, 2, 'SZ INFO')",
+				"SET IDENTITY_INSERT "+ TABLE_NAME +" OFF"};
+		client.batchUpdate(insertSqls, hints);
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		String sql = "DELETE FROM " + TABLE_NAME;
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+		try {
+			client.update(sql, parameters, hints);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private StatementParameters parameters = new StatementParameters();
 	private DalHints hints = new DalHints();
-	private String sqlList = "select [HotelID],[LatestBookTime],[UID]  from HotelLatestBookInfo hl with(nolock)  Join resource r with(nolock) on r.resource = hl.HotelID join city c (nolock) on c.city = r.city and c.city in (select city from city (nolock) where Country = 1) ";
-	private String sqlObject = "select [HotelID],[LatestBookTime],[UID]  from HotelLatestBookInfo hl with(nolock)  where hl.HotelID = ?";
-	private String sql2 = "select * from Person";
+	private String sqlList = "select * from " + TABLE_NAME;
+	private String sqlObject = "select * from " + TABLE_NAME + " where id = ?";
 	
+	@Test
 	public void testQueryMapperForList() {
 		try {
-			DalQueryDao dao = new DalQueryDao("HtlProductdb");
-			List<Integer> result = dao.query(sqlList, parameters, hints, new DalRowMapper<Integer>() {
+			DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
+			List<Short> result = dao.query(sqlList, parameters, hints, new DalRowMapper<Short>() {
 				@Override
-				public Integer map(ResultSet rs, int rowNum) throws SQLException {
-					return rs.getInt("HotelID");
+				public Short map(ResultSet rs, int rowNum) throws SQLException {
+					return rs.getShort("quantity");
 				}
 			});
-			System.out.println(result);
+			assertEquals(3, result.size());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
+	private static class DalRowCallbackTest implements DalRowCallback {
+		int result = 0;
+		public void process(ResultSet rs) throws SQLException {
+			result+=rs.getShort("quantity");
+		}
+	}
+	
+	@Test
 	public void testQueryCallbackForList() {
 		try {
-			DalQueryDao dao = new DalQueryDao("HtlProductdb");
-			dao.query(sqlList, parameters, hints, new DalRowCallback() {
-				@Override
-				public void process(ResultSet rs) throws SQLException {
-					System.out.println(rs.getObject(1));
-				}
-			});
+			DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
+			int a = 0;
+			DalRowCallbackTest test = new DalRowCallbackTest();
+			dao.query(sqlList, parameters, hints, test);
+			assertEquals(33, test.result);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private void testQueryForObject() {
-		DalQueryDao dao = new DalQueryDao("HtlProductdb");
+	@Test
+	public void testQueryForObject() {
+		DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
 		
 		Integer id;
 		// This will fail
@@ -63,108 +149,134 @@ public class DalQueryDaoTest {
 			id = dao.queryForObject(sqlList, parameters, hints, new DalRowMapper<Integer>() {
 				@Override
 				public Integer map(ResultSet rs, int rowNum) throws SQLException {
-					return rs.getInt("HotelID");
+					return null;
 				}
 			});
-			System.out.println(id);
+			fail();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 		
 		// This will pass
 		try {
 			StatementParameters parameters = new StatementParameters();
-			parameters.set(1, Types.INTEGER, 73657);
+			parameters.set(1, Types.INTEGER, 1);
 
 			id = dao.queryForObject(sqlObject, parameters, hints, new DalRowMapper<Integer>() {
 				@Override
 				public Integer map(ResultSet rs, int rowNum) throws SQLException {
-					return rs.getInt("HotelID");
+					return 1;
 				}
 			});
-			System.out.println(id);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			fail();
 		}
 		
 		// This will fail
 		try {
 			dao.queryForObject(sqlList, parameters, hints, Integer.class);
+			fail();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		
 		// This will pass
 		try {
 			StatementParameters parameters = new StatementParameters();
-			parameters.set(1, Types.INTEGER, 73657);
+			parameters.set(1, Types.INTEGER, 1);
 
 			dao.queryForObject(sqlObject, parameters, hints, Integer.class);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			fail();
 		}
 	}
 
+	@Test
 	public void testRange() {
 		try {
-			DalQueryDao dao = new DalQueryDao("HtlProductdb");
-			Integer id = dao.queryFirst(sqlList, parameters, hints, new DalRowMapper<Integer>() {
+			DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
+			DalRowMapper<Integer> mapper = new DalRowMapper<Integer>() {
 				@Override
 				public Integer map(ResultSet rs, int rowNum) throws SQLException {
-					return rs.getInt("HotelID");
+					return rs.getInt("Id");
 				}
-			});
-			System.out.println(id);
+			};
 			
-			List<Integer> result = dao.queryTop(sqlList, parameters, hints, new DalRowMapper<Integer>() {
-				@Override
-				public Integer map(ResultSet rs, int rowNum) throws SQLException {
-					return rs.getInt("HotelID");
-				}
-			}, 5);
-			System.out.println(result);
+			Integer id = dao.queryFirst(sqlList, parameters, hints, mapper);
+			assertNotNull(id);
 			
-			result = dao.queryFrom(sqlList, parameters, hints, new DalRowMapper<Integer>() {
-				@Override
-				public Integer map(ResultSet rs, int rowNum) throws SQLException {
-					return rs.getInt("HotelID");
-				}
-			}, 3, 5);
-			System.out.println(result);
+			List<Integer> result = dao.queryTop(sqlList, parameters, hints, mapper, 5);
+			assertEquals(3, result.size());
+			
+			result = dao.queryFrom(sqlList, parameters, hints, mapper, 3, 5);
+			assertEquals(0, result.size());
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
+	private static class ClientTestModel {
+		private int id;
+		private int quantity;
+		private short type;
+		private String address;
+		private Timestamp lastChanged;
 
-	public static void main(String[] args) {
-        LogConfig.setAppID("9302011");
-        LogConfig.setLoggingServerIP("192.168.82.58");
-        LogConfig.setLoggingServerPort("63100");
+		public int getId() {
+			return id;
+		}
 
-		Configuration.addResource("conf.properties");
-		DasConfigureReader reader = new ConfigureServiceReader(new DasConfigureService("localhost:8080", new File("e:/snapshot.json")));
-		try {
-			DalClientFactory.initClientFactory();
-		} catch (Exception e) {
-			System.exit(0);
+		public void setId(int id) {
+			this.id = id;
 		}
-		
-		DalQueryDaoTest test = new DalQueryDaoTest();
-		
-		
-		test.testQueryMapperForList();
-		test.testQueryCallbackForList();
-		test.testQueryForObject();
-		test.testRange();
-		try {
-			Thread.sleep(30 * 1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+		public int getQuantity() {
+			return quantity;
 		}
-		System.exit(0);
+
+		public void setQuantity(int quantity) {
+			this.quantity = quantity;
+		}
+
+		public short getType() {
+			return type;
+		}
+
+		public void setType(short type) {
+			this.type = type;
+		}
+
+		public String getAddress() {
+			return address;
+		}
+
+		public void setAddress(String address) {
+			this.address = address;
+		}
+
+		public Timestamp getLastChanged() {
+			return lastChanged;
+		}
+
+		public void setLastChanged(Timestamp lastChanged) {
+			this.lastChanged = lastChanged;
+		}
+	}
+
+	private static class ClientTestDalRowMapper implements
+			DalRowMapper<ClientTestModel> {
+
+		@Override
+		public ClientTestModel map(ResultSet rs, int rowNum)
+				throws SQLException {
+			ClientTestModel model = new ClientTestModel();
+			model.setId(rs.getInt(1));
+			model.setQuantity(rs.getInt(2));
+			model.setType(rs.getShort(3));
+			model.setAddress(rs.getString(4));
+			model.setLastChanged(rs.getTimestamp(5));
+			return model;
+		}
 	}
 }

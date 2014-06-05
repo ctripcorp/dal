@@ -38,7 +38,7 @@ public class DalRowMapperExtractor <T> implements DalResultSetExtractor<List<T>>
 		int i = 0;
 		int rowNum = 0;
 		while ((i++ < count || count == 0) && rs.next()) {
-			result.add(mapper.map(rs, rowNum));
+			result.add(mapper.map(rs, rowNum++));
 		}
 		return result;
 	}

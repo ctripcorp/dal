@@ -408,17 +408,17 @@ public class LogEntry {
 		if(this.sensitive){
 			try {
 				params = AESCrypto.getInstance().crypt(this.getParams());
-				int tplLength = sqlTpl.length();
-				int paramsLength = params.length();
-				if(tplLength + paramsLength > LOG_LIMIT){
-					sqlTpl = sqlTpl.substring(0, tplLength > LOG_LIMIT ? LOG_LIMIT : tplLength);
-					params = "over long with param, can not be recorded";
-				}
 			} catch (Exception e) {
 				this.errorMsg = e.getMessage();
 			}
 		} else {
 			params = this.getParams();
+		}
+		int tplLength = sqlTpl.length();
+		int paramsLength = params.length();
+		if(tplLength + paramsLength > LOG_LIMIT){
+			sqlTpl = sqlTpl.substring(0, tplLength > LOG_LIMIT ? LOG_LIMIT : tplLength);
+			params = "over long with param, can not be recorded";
 		}
 		int hashCode = CommonUtil.GetHashCode(sqlTpl);
 		boolean existed = this.hasHashCode(sqlTpl, hashCode);

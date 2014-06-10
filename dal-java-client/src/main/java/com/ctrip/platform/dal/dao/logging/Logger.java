@@ -78,12 +78,13 @@ public class Logger {
 	
 	public static void logGetConnectionSuccess(String realDbName)
 	{
-		try {
-			Logger.log("Get connection", DalEventEnum.CONNECTION_SUCCESS, LogLevel.INFO, 
-					String.format("Connect %s database successfully", realDbName));
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+		// We do not need to log for getting connection
+//		try {
+//			Logger.log("Get connection", DalEventEnum.CONNECTION_SUCCESS, LogLevel.INFO, 
+//					String.format("Connect %s database successfully", realDbName));
+//		} catch (Throwable e) {
+//			e.printStackTrace();
+//		}
 	}
 	
 	public static void logGetConnectionFailed(String realDbName, Throwable e)

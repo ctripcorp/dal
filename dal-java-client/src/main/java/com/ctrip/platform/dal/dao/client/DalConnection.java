@@ -27,8 +27,8 @@ public class DalConnection {
 		return meta;
 	}
 	
-	public String getCatalog() throws SQLException {
-		return conn.getCatalog();
+	public String getDatabaseName() throws SQLException {
+		return meta.getDatabaseName();
 	}
 
 	public void setAutoCommit(boolean autoCommit) throws SQLException {

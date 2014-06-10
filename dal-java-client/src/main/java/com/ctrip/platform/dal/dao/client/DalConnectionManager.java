@@ -51,7 +51,7 @@ public class DalConnectionManager {
 			connHolder.setAutoCommit(true);
 			connHolder.applyHints(hints);
 
-			realDbName = connHolder.getCatalog();
+			realDbName = connHolder.getDatabaseName();
 			Logger.logGetConnectionSuccess(realDbName);
 		}
 		catch(SQLException ex)

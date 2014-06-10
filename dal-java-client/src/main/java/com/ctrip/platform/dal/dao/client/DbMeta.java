@@ -39,4 +39,8 @@ public class DbMeta {
 
 		return meta;
 	}
+
+	public String getDatabaseName() {
+		return databaseName;
+	}
 }

@@ -80,7 +80,7 @@ public class DalConnectionTest {
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
 			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
-			assertNotNull(test.getCatalog());
+			assertNotNull(test.getDatabaseName());
 		} catch (Throwable e){
 			fail();
 			e.printStackTrace();

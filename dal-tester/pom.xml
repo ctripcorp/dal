@@ -8,13 +8,13 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>dal-tester</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<name>com.ctrip.platform.dal.tester</name>
 	<dependencies>
 		<dependency>
 			<groupId>com.ctrip.platform</groupId>
 			<artifactId>dal-java-client</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ctrip.datasource</groupId>

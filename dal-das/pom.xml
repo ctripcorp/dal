@@ -4,10 +4,11 @@
   <parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-all</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>dal-das</artifactId>
+  <version>1.0.0</version>
   <dependencies>
     <dependency>
       <groupId>io.netty</groupId>
@@ -107,12 +108,12 @@
     <dependency>
       <groupId>com.ctrip.platform</groupId>
       <artifactId>dal-ctrl</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.ctrip.platform</groupId>
       <artifactId>dal-server-common</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
   </dependencies>
 </project>

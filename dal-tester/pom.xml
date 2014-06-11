@@ -4,16 +4,17 @@
 	<parent>
 		<groupId>com.ctrip.platform</groupId>
 		<artifactId>dal-all</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>dal-tester</artifactId>
+	<version>1.0.0</version>
 	<name>com.ctrip.platform.dal.tester</name>
 	<dependencies>
 		<dependency>
 			<groupId>com.ctrip.platform</groupId>
 			<artifactId>dal-java-client</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ctrip.datasource</groupId>
@@ -23,7 +24,7 @@
 		<dependency>
 			<groupId>com.ctrip.platform</groupId>
 			<artifactId>dal-java-ext</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

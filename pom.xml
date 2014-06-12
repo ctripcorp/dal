@@ -21,6 +21,7 @@
 	</modules>
 	<properties>
 		<package.environment>local</package.environment>
+		<file_encoding>UTF-8</file_encoding>
 		<spring-version>4.0.0.RELEASE</spring-version>
 		<commons-net-version>3.3</commons-net-version>
 		<commons-dbcp-version>1.4</commons-dbcp-version>

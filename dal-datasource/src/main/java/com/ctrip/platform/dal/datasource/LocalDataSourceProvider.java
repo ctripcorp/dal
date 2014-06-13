@@ -10,14 +10,15 @@ import javax.sql.DataSource;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
 public class LocalDataSourceProvider extends
 		ConcurrentHashMap<String, DataSource> {
 	private static final long serialVersionUID = -5752249323568785554L;
-	private static final Log log = LogFactory
-			.getLog(LocalDataSourceProvider.class);
+	private static final Logger log = Logger.getLogger(LocalDataSourceProvider.class);
 	private static Object _lockObj = new Object();
+	private static volatile boolean initialized = false;
 
 	Map<String, String[]> props = new HashMap<String, String[]>();
 	
@@ -25,6 +26,11 @@ public class LocalDataSourceProvider extends
 		AllInOneConfigParser.newInstance().initialize(configFile);
 		props = AllInOneConfigParser.newInstance()
 		.getDBAllInOneConfig();
+		StringBuilder sb = new StringBuilder();
+		for(Map.Entry<String, String[]> entry : props.entrySet()){
+			sb.append(entry.getKey()).append(",");
+		}
+		log.info(sb.toString());
 	}
 
 	public Set<String> keySet() {
@@ -75,7 +81,16 @@ public class LocalDataSourceProvider extends
 			throws SQLException {
 		PoolProperties p = new PoolProperties();
 
+		
 		String[] prop = (String[]) this.props.get(name);
+		if(prop == null){
+			StringBuilder sb = new StringBuilder();
+			for(Map.Entry<String, String[]> entry : props.entrySet()){
+				sb.append(entry.getKey()).append(",");
+			}
+			log.error(sb.toString());
+			
+		}
 		p.setUrl(prop[0]);
 		p.setUsername(prop[1]);
 		p.setPassword(prop[2]);

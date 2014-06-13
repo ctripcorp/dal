@@ -95,8 +95,8 @@
                     toolbarAdd: false,
                     toolbarDelete: false,
                     //toolbarSave: true,
-                    toolbarEdit: false,
-                    selectColumn: true
+                    toolbarEdit: false
+//                    selectColumn: true
                 },
                 multiSelect: false,
                 toolbar: {
@@ -149,7 +149,7 @@
                 searches: [
                     {
                         field: 'group_name',
-                        caption: 'Group Name',
+                        caption: 'Team Name',
                         type: 'text'
                     },
                     {
@@ -161,7 +161,7 @@
                 columns: [
                     {
                         field: 'group_name',
-                        caption: 'Group Name',
+                        caption: 'Team Name',
                         size: '50%',
                         sortable: true,
                         attr: 'align=center'

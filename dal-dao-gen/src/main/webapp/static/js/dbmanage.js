@@ -181,8 +181,8 @@
                     toolbarAdd: false,
                     toolbarDelete: false,
                     //toolbarSave: true,
-                    toolbarEdit: false,
-                    selectColumn: true
+                    toolbarEdit: false
+//                    selectColumn: true
                 },
                 multiSelect: false,
                 toolbar: {

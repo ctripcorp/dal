@@ -10,13 +10,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
+import org.apache.log4j.Logger;
+
 
 public class AllInOneConfigParser {
 
-	private static final Log log = LogFactory
-			.getLog(AllInOneConfigParser.class);
+//	private static final Log log = LogFactory
+//			.getLog(AllInOneConfigParser.class);
+	private static final Logger log = Logger.getLogger(AllInOneConfigParser.class);
 	private static final String DB_CONFIG_FILE = "/Database.config";
 	private static final Pattern dbLinePattern = Pattern
 			.compile(" name=\"([^\"]+)\" connectionString=\"([^\"]+)\"");
@@ -84,12 +85,16 @@ public class AllInOneConfigParser {
 
 			String line = br.readLine();
 			while (line != null) {
-				Matcher matcher = dbLinePattern.matcher(line);
-				if (matcher.find()) {
-					this.props.put(matcher.group(1),
-							parseDotNetDBConnString(matcher.group(2)));
+				try{
+					Matcher matcher = dbLinePattern.matcher(line);
+					if (matcher.find()) {
+						this.props.put(matcher.group(1),
+								parseDotNetDBConnString(matcher.group(2)));
+					}
+					line = br.readLine();
+				}catch(Exception ex){
+					log.error("parse all in one error: " + line, ex);
 				}
-				line = br.readLine();
 			}
 			return;
 		} catch (IOException e) {

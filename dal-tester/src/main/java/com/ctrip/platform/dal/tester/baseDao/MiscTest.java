@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.tester.baseDao;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -7,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -83,6 +85,8 @@ public class MiscTest {
 	public static void main(String[] args) {
 		try {
 			DalClientFactory.initClientFactory();
+			Connection conn = DataSourceLocator.newInstance().getDataSource("local-test-mzang").getConnection();
+			
 			testSqlServer("AccDB_INSERT_1");
 			
 //			DalClientFactory.initPrivateFactory();

@@ -134,6 +134,9 @@
                     if (record.sp_names != undefined){
                         $('#sp_list').multipleSelect('setSelects', record.sp_names.split(","));
                     }
+                    if(record.suffix != undefined){
+                        $('#suffix').val(record.suffix);
+                    }
                 }
                 current.hide();
 

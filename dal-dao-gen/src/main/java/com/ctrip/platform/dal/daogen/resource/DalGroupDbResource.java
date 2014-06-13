@@ -4,7 +4,9 @@ package com.ctrip.platform.dal.daogen.resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -89,14 +91,23 @@ public class DalGroupDbResource {
 	public List<DalGroupDB> getAllGroupDbs() {
 		
 		Set<String> allDbNames = LocalDataSourceLocator.newInstance().getDBNames();
+	
 		List<DalGroupDB> dbs = group_db_dao.getAllGroupDbs();
-		List<DalGroupDB> result = new ArrayList<DalGroupDB>(dbs); 
-		for(DalGroupDB db:dbs){
-			allDbNames.remove(db.getDbname());
+		Map<String, DalGroupDB> map = new HashMap<String,DalGroupDB>();
+		for(DalGroupDB db : dbs){
+			if(!map.containsKey(db.getDbname()))
+				map.put(db.getDbname(), db);
 		}
+		//List<DalGroupDB> result = new ArrayList<DalGroupDB>(dbs); 
+		List<DalGroupDB> result = new ArrayList<DalGroupDB>();
+//		for(DalGroupDB db:dbs){
+//			allDbNames.remove(db.getDbname());
+//		}
 		for(String name:allDbNames){
 			DalGroupDB db = new DalGroupDB();
 			db.setDbname(name);
+			if(map.containsKey(name))
+				db.setComment( map.get(name).getComment());
 			result.add(db);
 		}
 		Collections.sort(result, new Comparator<DalGroupDB>() {

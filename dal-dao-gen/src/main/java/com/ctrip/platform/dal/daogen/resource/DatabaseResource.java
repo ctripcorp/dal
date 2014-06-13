@@ -253,7 +253,7 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("table_sps")
-	public TableSpNames getTableSPNames(@QueryParam("db_name") String setName) {
+	public TableSpNames getTableSPNames(@QueryParam("db_name") String setName) throws Exception {
 		TableSpNames tableSpNames = new TableSpNames();
 		List<String> views;
 		List<String> tables;
@@ -276,6 +276,8 @@ public class DatabaseResource {
 			tableSpNames.setDbType(DbUtils.getDbType(dbName));
 		} catch (Exception e1) {
 			e1.printStackTrace();
+			
+			throw new Exception("Error occured when process: " + setName);
 		}
 		return tableSpNames;
 	}

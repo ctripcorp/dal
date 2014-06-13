@@ -146,7 +146,7 @@
                 $("#next_step").text("下一步");
                 $("body").unblock();
             }).fail(function (data) {
-                $("#error_msg").text("获取表/视图列表失败，是否有权限");
+                $("#error_msg").text("获取表/视图列表失败, 请检查是否有权限, 或者数据库已被删除!");
                 $("#next_step").removeAttr("disabled");
                 $("#next_step").addClass("btn-primary");
                 $("#next_step").text("下一步");

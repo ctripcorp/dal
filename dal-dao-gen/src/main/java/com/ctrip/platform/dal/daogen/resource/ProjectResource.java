@@ -84,12 +84,29 @@ public class ProjectResource {
 		
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
-		LoginUser user1 = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		LoginUser user1 = null;
+		try {
+			user1 = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		} catch (Exception e) {
+			log.warn("",e);
+		}
 		String rootName = "组内所有项目";
 		if(user1!=null){
 			DalGroup dalGroup = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(user1.getGroupId());
 			if(dalGroup!=null){
 				rootName = dalGroup.getGroup_name() + rootName;
+			}
+		}else{
+			LoginUser user = new LoginUser();
+			user.setUserNo(userNo);
+			user.setUserName(AssertionHolder.getAssertion().getPrincipal()
+					.getAttributes().get("sn").toString());
+			user.setUserEmail(AssertionHolder.getAssertion().getPrincipal()
+					.getAttributes().get("mail").toString());
+			try {
+				SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
+			} catch (Exception e) {
+				log.warn("",e);
 			}
 		}
 		
@@ -106,16 +123,6 @@ public class ProjectResource {
 			return roots;
 		}
 
-		if (SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo) == null) {
-			LoginUser user = new LoginUser();
-			user.setUserNo(userNo);
-			user.setUserName(AssertionHolder.getAssertion().getPrincipal()
-					.getAttributes().get("sn").toString());
-			user.setUserEmail(AssertionHolder.getAssertion().getPrincipal()
-					.getAttributes().get("mail").toString());
-			SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
-		}
-		
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		
 		if(user==null){

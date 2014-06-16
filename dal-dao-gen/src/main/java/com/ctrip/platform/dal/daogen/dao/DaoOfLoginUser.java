@@ -70,7 +70,6 @@ public class DaoOfLoginUser {
 								}
 							});
 		} catch (DataAccessException ex) {
-			ex.printStackTrace();
 			return null;
 		}
 	}

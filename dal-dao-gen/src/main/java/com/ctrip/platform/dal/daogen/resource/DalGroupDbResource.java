@@ -1,6 +1,7 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,6 +12,7 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.sql.DataSource;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -22,6 +24,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
+import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
 import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
@@ -361,6 +364,17 @@ public class DalGroupDbResource {
 		DatabaseSet dbset = new DatabaseSet();
 		dbset.setName(dbname);
 		dbset.setProvider("sqlProvider");
+		try {
+			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(dbname);
+			Connection connection = ds.getConnection();
+			String dbType = connection.getMetaData().getDatabaseProductName();
+			if (dbType !=null && (!dbType.equals("Microsoft SQL Server"))){
+				dbset.setProvider("mySqlProvider");
+			}
+		} catch (Exception e) {
+			log.warn("", e);
+		}
+		
 		dbset.setGroupId(groupId);
 		int ret = SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
 		if(ret>0){

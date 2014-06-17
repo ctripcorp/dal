@@ -201,7 +201,8 @@
                 $(".step2-2").show();
                 $("body").unblock();
             }).fail(function(data){
-                alert("获取所有表失败!");
+                 $("#error_msg").text("获取所有表失败!");
+                $("body").unblock();
             });
     };
 

@@ -168,7 +168,29 @@
 
 	</dependencies>
 	<build>
+	
 		<plugins>
+		<plugin>
+            <artifactId>exec-maven-plugin</artifactId>
+            <groupId>org.codehaus.mojo</groupId>
+            <executions>
+                <execution>
+                    <!-- Run our version calculation script -->
+                    <id>Version Calculation</id>
+                    <phase>generate-resources</phase>
+                    <goals>
+                        <goal>exec</goal>
+                    </goals>
+                    <configuration>
+                        <executable>copy</executable>
+                        <arguments>
+                            <argument>${project.basedir}\src\main\resources\${package.environment}\web.xml</argument>
+                            <argument>${project.basedir}\src\main\webapp\WEB-INF\web.xml</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>

@@ -1,4 +1,0 @@
-jdbc.driverClassName=com.mysql.jdbc.Driver
-jdbc.url=jdbc:mysql://10.3.6.188:3306/daogen
-jdbc.username=dal
-jdbc.password=dalforctrip

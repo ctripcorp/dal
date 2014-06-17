@@ -61,16 +61,28 @@
 	</properties>
 	<profiles>
 		<profile>
-			<id>test</id>
+			<id>release</id>
 			<properties>
-				<package.environment>test</package.environment>
+				<package.environment>release</package.environment>
 			</properties>
+			<activation>
+		      <property>
+		        <name>environment</name>
+		        <value>release</value>
+		      </property>
+    		</activation>
 		</profile>
 		<profile>
 			<id>local</id>
 			<properties>
 				<package.environment>local</package.environment>
 			</properties>
+			<activation>
+		      <property>
+		        <name>environment</name>
+		        <value>local</value>
+		      </property>
+    		</activation>
 		</profile>
 	</profiles>
 	<build>

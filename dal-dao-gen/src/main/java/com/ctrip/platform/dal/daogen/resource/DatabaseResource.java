@@ -147,7 +147,7 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("tables")
-	public String getTableNames(@QueryParam("db_name") String db_set) {
+	public String getTableNames(@QueryParam("db_name") String db_set) throws Exception {
 		try {
 			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set);
 			String dbName = databaseSetEntry.getConnectionString();
@@ -156,10 +156,12 @@ public class DatabaseResource {
 			return mapper.writeValueAsString(results);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
+			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw e;
 		}
-		return null;
+		//return null;
 	}
 
 	@GET
@@ -167,7 +169,7 @@ public class DatabaseResource {
 	@Path("fields")
 	public List<ColumnMetaData> getFieldNames(
 			@QueryParam("db_name") String dbName,
-			@QueryParam("table_name") String tableName) {
+			@QueryParam("table_name") String tableName) throws Exception {
 
 		List<ColumnMetaData> fields = new ArrayList<ColumnMetaData>();
 
@@ -240,8 +242,10 @@ public class DatabaseResource {
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
+			throw e1;
 		} catch (Exception e1) {
 			e1.printStackTrace();
+			throw e1;
 		} finally {
 			JdbcUtils.closeConnection(connection);
 		}

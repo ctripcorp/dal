@@ -168,7 +168,7 @@
 
 	</dependencies>
 	<build>
-	
+	<pluginManagement>
 		<plugins>
 		<plugin>
             <artifactId>exec-maven-plugin</artifactId>
@@ -304,5 +304,6 @@
 				</configuration>
 			</plugin>
 		</plugins>
+	</pluginManagement>
 	</build>
 </project>

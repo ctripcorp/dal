@@ -214,8 +214,6 @@
                 +'<i class="fa fa-edit"></i>修改</a>'
                 +'&nbsp;&nbsp;<a id="delProj" href="javascript:;">'
                 +'<i class="fa fa-times"></i>删除</a>'
-//                +'&nbsp;&nbsp;<a id="shareProj" href="javascript:;">'
-//                +'<i class="fa fa-twitter"></i>共享</a>'
                 +"</div>"
                 +'<div id="jstree_projects"></div>');
 

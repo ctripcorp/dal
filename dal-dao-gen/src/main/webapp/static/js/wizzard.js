@@ -397,18 +397,6 @@
             result;
         var htmls = "";
         var i = 0;
-        var id_values = {};
-
-//        if ($("#page1").attr('is_update') == "1") {
-//            var splitedParams = record.parameters.split(";");
-//
-//            $.each(splitedParams, function (index, value) {
-//                if (value != "") {
-//                    var resultParams = value.split(",");
-//                    id_values["db_type_"+ resultParams[0]] = resultParams[1];
-//                }
-//            });
-//        }
 
         var conditionParamCount = 0;
         $('#selected_condition>option').each(function(index,value){
@@ -418,38 +406,52 @@
             conditionParamCount++;
         });
 
-        while ((result = regexIndex.exec(sqlContent))) {
+        var condition;
+        var conditions;
+        var conVal = new Array();
+        if ($("#page1").attr('is_update') == "1") {
+            condition = record['condition'];
+            // 模式： Age,6,aa,bb;Name,1,param2;
+            conditions = condition.split(";");
+            for(i=0;i<conditions.length;i++){
+                var con = conditions[i];
+                var keyValue = con.split(",");
+                // Between类型的操作符需要特殊处理
+                if (keyValue[1]=="6"){
+                    conVal.push(keyValue[2]);
+                    conVal.push(keyValue[3]);
+                }else{
+                    conVal.push(keyValue[2]);
+                }
+            }
+        }
+
+        while ((result = regexIndex.exec(sqlContent))) { //按照java风格解析
             if(conditionParamCount == i && "update"==crud_option){
                 break;
             }
             i++;
-            if(id_values[sprintf("param%s", i)] != undefined){
-//                htmls = htmls
-//                    + sprintf(variableHtml, sprintf("param%s", i))
-//                    + sprintf(variable_typesHtml,sprintf("id='db_type_%s'", sprintf("param%s", i)));
-                htmls = htmls + sprintf(variableHtml, sprintf("param%s", i))+"</div><br/>";
-
+            var temp = conVal.shift();
+            if(temp!=null && temp!=""){
+                htmls = htmls + sprintf(variableHtml, temp)+"</div><br/>";
             }else{
-//                htmls = htmls
-//                    + sprintf(variableHtml, sprintf("param%s", i))
-//                    + variable_typesHtml;
                 htmls = htmls + sprintf(variableHtml, sprintf("param%s", i))+"</div><br/>";
             }
         }
         if (htmls.length == 0) {
-            while ((result = regexNames.exec(sqlContent))) {
+            while ((result = regexNames.exec(sqlContent))) {//按照c#风格解析
                 if(conditionParamCount == i && "update"==crud_option){
                     break;
                 }
                 i++;
-                var realName = result[1];
-                if(id_values[realName] != undefined){
-//                    htmls = htmls + sprintf(variableHtml, realName) + sprintf(variable_typesHtml, sprintf("id='db_type_%s'", realName));
-                    htmls = htmls + sprintf(variableHtml, realName) + "</div><br/>";
+                var temp = conVal.shift();
+                if(temp!=null && temp!=""){
+                    htmls = htmls + sprintf(variableHtml, temp)+"</div><br/>";
                 }else{
-//                    htmls = htmls + sprintf(variableHtml, realName) + variable_typesHtml;
+                    var realName = result[1];
                     htmls = htmls + sprintf(variableHtml, realName) + "</div><br/>";
                 }
+
             }
         }
 
@@ -459,9 +461,6 @@
         }
 
         $("#param_list_auto").html(htmls);
-        $.each(id_values, function(key, value){
-            $("#"+key).val(value);
-        });
 
         current.hide();
         $(".step2-2-2").show();
@@ -482,44 +481,47 @@
             result;
         var htmls = "";
         var i = 0;
-        var id_values = {};
 
+        var conVal = new Array();
         if ($("#page1").attr('is_update') == "1") {
             var splitedParams = record.parameters.split(";");
 
             $.each(splitedParams, function (index, value) {
-                if (value != "") {
-                    var resultParams = value.split(",");
-                    id_values["db_type_"+ resultParams[0]] = resultParams[1];
-                }
+                var resultParams = value.split(",");
+                conVal.push(resultParams[0]);
             });
         }
 
         while ((result = regexIndex.exec(sqlContent))) {
             i++;
-            if(id_values[sprintf("param%s", i)] != undefined){
+            var temp = conVal.shift();
+            if(temp!=null && temp!=""){
                 htmls = htmls
-                    + sprintf(variableHtml, sprintf("param%s", i))
+                    + sprintf(variableHtml, temp)
                     + sprintf(variable_typesHtml,
                     sprintf("id='db_type_%s'", sprintf("param%s", i)));
             }else{
                 htmls = htmls
                     + sprintf(variableHtml, sprintf("param%s", i))
-                    + variable_typesHtml;
+                    + sprintf(variable_typesHtml,
+                    sprintf("id='db_type_%s'", sprintf("param%s", i)));
             }
         }
         if (htmls.length == 0) {
             while ((result = regexNames.exec(sqlContent))) {
-                var realName = result[1];
-                if(id_values[realName] != undefined){
+                i++;
+                var temp = conVal.shift();
+                if(temp!=null && temp!=""){
+                    htmls = htmls
+                        + sprintf(variableHtml, temp)
+                        + sprintf(variable_typesHtml,
+                        sprintf("id='db_type_%s'", sprintf("param%s", i)));
+                }else{
+                    var realName = result[1];
                     htmls = htmls
                         + sprintf(variableHtml, realName)
                         + sprintf(variable_typesHtml,
                         sprintf("id='db_type_%s'", realName));
-                }else{
-                    htmls = htmls
-                        + sprintf(variableHtml, realName)
-                        + variable_typesHtml;
                 }
             }
         }
@@ -530,10 +532,16 @@
         }
 
         $("#param_list").html(htmls);
-        $.each(id_values, function(key, value){
-            $("#"+key).val(value);
-        });
-
+        if ($("#page1").attr('is_update') == "1") {
+            splitedParams = record.parameters.split(";");
+            $.each(splitedParams, function (index, value) {
+                if(index<=i){
+                    var resultParams = value.split(",");
+                    var paramIndex = index+1;
+                    $("#db_type_param"+paramIndex).val(resultParams[1]);
+                }
+            });
+        }
         current.hide();
         $(".step2-3-1").show();
     };

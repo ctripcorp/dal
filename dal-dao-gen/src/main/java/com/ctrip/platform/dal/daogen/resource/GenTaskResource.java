@@ -89,7 +89,7 @@ public class GenTaskResource {
 		Set<String> pojos = new HashSet<String>();
 
 		for (GenTaskByFreeSql freesql : sqlTasks) {
-			if (freesql.getDb_name().equals(db_name)) {
+			if (freesql.getDb_name().trim().equals(db_name.trim())) {
 				clazz.add(freesql.getClass_name());
 				pojos.add(freesql.getPojo_name());
 			}

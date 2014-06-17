@@ -261,8 +261,25 @@
             $("#sql_pojo_name")[0].selectize.refreshOptions(false);
 
             if (update) {
-                $("#sql_class_name")[0].selectize.setValue(record.class_name);
-                $("#sql_pojo_name")[0].selectize.setValue(record.pojo_name);
+                if(data.classes.length!=0){
+                    $("#sql_class_name")[0].selectize.setValue(record['class_name']);
+                }else{
+                    $("#sql_class_name")[0].selectize.addOption({
+                        value: record['class_name'],
+                        title: record['class_name']
+                    });
+                    $("#sql_class_name")[0].selectize.setValue(record['sql_class_name']);
+                }
+                if(data.pojos.length!=0){
+                    $("#sql_pojo_name")[0].selectize.setValue(record['pojo_name']);
+                }else{
+                    $("#sql_pojo_name")[0].selectize.addOption({
+                        value: record['pojo_name'],
+                        title: record['pojo_name']
+                    });
+                    $("#sql_pojo_name")[0].selectize.setValue(record['sql_pojo_name']);
+                }
+
                 $("#sql_method_name").val(record.method_name);
                 var editor = ace.edit("sql_editor");
                 editor.setTheme("ace/theme/monokai");

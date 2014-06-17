@@ -268,7 +268,7 @@
                         value: record['class_name'],
                         title: record['class_name']
                     });
-                    $("#sql_class_name")[0].selectize.setValue(record['sql_class_name']);
+                    $("#sql_class_name")[0].selectize.setValue(record['class_name']);
                 }
                 if(data.pojos.length!=0){
                     $("#sql_pojo_name")[0].selectize.setValue(record['pojo_name']);
@@ -277,7 +277,7 @@
                         value: record['pojo_name'],
                         title: record['pojo_name']
                     });
-                    $("#sql_pojo_name")[0].selectize.setValue(record['sql_pojo_name']);
+                    $("#sql_pojo_name")[0].selectize.setValue(record['pojo_name']);
                 }
 
                 $("#sql_method_name").val(record.method_name);

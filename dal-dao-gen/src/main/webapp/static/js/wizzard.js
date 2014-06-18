@@ -431,8 +431,8 @@
             condition = record['condition'];
             // 模式： Age,6,aa,bb;Name,1,param2;
             conditions = condition.split(";");
-            for(i=0;i<conditions.length;i++){
-                var con = conditions[i];
+            for(var j=0;j<conditions.length;j++){
+                var con = conditions[j];
                 var keyValue = con.split(",");
                 // Between类型的操作符需要特殊处理
                 if (keyValue[1]=="6"){

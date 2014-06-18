@@ -60,9 +60,9 @@
   </properties>
   <profiles>
     <profile>
-      <id>release</id>
+      <id>pub</id>
       <properties>
-        <environment>release</environment>
+        <environment>pub</environment>
       </properties>
       <activation>
         <property>

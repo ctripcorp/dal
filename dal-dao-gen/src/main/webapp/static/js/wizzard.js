@@ -431,8 +431,8 @@
             condition = record['condition'];
             // 模式： Age,6,aa,bb;Name,1,param2;
             conditions = condition.split(";");
-            for(i=0;i<conditions.length;i++){
-                var con = conditions[i];
+            for(var j=0;j<conditions.length;j++){
+                var con = conditions[j];
                 var keyValue = con.split(",");
                 // Between类型的操作符需要特殊处理
                 if (keyValue[1]=="6"){
@@ -457,6 +457,17 @@
             }
         }
         if (htmls.length == 0) {
+            var sqlTemp = sqlContent;
+            var namesStack = new Array();
+            while ((result = regexNames.exec(sqlTemp))){
+                if("update"==crud_option){
+                    namesStack.push(result[1]);
+                }
+            }
+            var delCount = namesStack.length-conditionParamCount;
+            for(var si=0;si<delCount;si++){
+                namesStack.shift();
+            }
             while ((result = regexNames.exec(sqlContent))) {//按照c#风格解析
                 if(conditionParamCount == i && "update"==crud_option){
                     break;
@@ -466,7 +477,7 @@
                 if(temp!=null && temp!=""){
                     htmls = htmls + sprintf(variableHtml, temp)+"</div><br/>";
                 }else{
-                    var realName = result[1];
+                    var realName = "update"==crud_option? namesStack.shift():result[1];
                     htmls = htmls + sprintf(variableHtml, realName) + "</div><br/>";
                 }
 

@@ -32,6 +32,7 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
+import com.ctrip.platform.dal.daogen.entity.Resource;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
@@ -46,7 +47,7 @@ public class JavaGenerator extends AbstractGenerator {
 	private Map<String, SpDbHost> _spHostMaps = new ConcurrentHashMap<String, SpDbHost>();
 	private Queue<SpHost> _spHosts = new ConcurrentLinkedQueue<SpHost>();
 	private DalConfigHost dalConfigHost = null;
-	private Map<String, String> dbs = new ConcurrentHashMap<String, String>();
+	private ContextHost contextHost = new ContextHost();
 	private Queue<FreeSqlHost> _freeSqlHosts = new ConcurrentLinkedQueue<FreeSqlHost>();
 	private Map<String, JavaMethodHost> _freeSqlPojoHosts = new ConcurrentHashMap<String, JavaMethodHost>();
 	private Queue<GenTaskBySqlBuilder> _sqlBuilders = new ConcurrentLinkedQueue<GenTaskBySqlBuilder>();
@@ -290,7 +291,7 @@ public class JavaGenerator extends AbstractGenerator {
 		JavaTableHost tableHost = new JavaTableHost();
 		tableHost.setPackageName(super.namespace);
 		tableHost.setDatabaseCategory(this.getDatabaseCategory(tableViewSp));
-		tableHost.setDbName(tableViewSp.getDb_name());
+		tableHost.setDbName(tableViewSp.getDatabaseSetName());
 		tableHost.setTableName(table);
 		tableHost.setPojoClassName(getPojoClassName(tableViewSp.getPrefix(),
 				tableViewSp.getSuffix(), table));
@@ -362,7 +363,7 @@ public class JavaGenerator extends AbstractGenerator {
 
 		vhost.setPackageName(super.namespace);
 		vhost.setDatabaseCategory(this.getDatabaseCategory(tableViewSp));
-		vhost.setDbName(tableViewSp.getDb_name());
+		vhost.setDbName(tableViewSp.getDatabaseSetName());
 		vhost.setPojoClassName(className);
 		vhost.setViewName(viewName);
 
@@ -413,7 +414,7 @@ public class JavaGenerator extends AbstractGenerator {
 
 		spHost.setPackageName(super.namespace);
 		spHost.setDatabaseCategory(this.getDatabaseCategory(tableViewSp));
-		spHost.setDbName(tableViewSp.getDb_name());
+		spHost.setDbName(tableViewSp.getDatabaseSetName());
 		spHost.setPojoClassName(className);
 		spHost.setSpName(spName);
 		List<AbstractParameterHost> params = DbUtils.getSpParams(
@@ -641,6 +642,10 @@ public class JavaGenerator extends AbstractGenerator {
 				continue;
 			}
 			dalConfigHost.addDatabaseSetEntry(entries);
+			
+			for (DatabaseSetEntry entry : entries) {
+				contextHost.addResource(new Resource(entry.getConnectionString()));
+			}
 		}
 	}
 	
@@ -703,7 +708,7 @@ public class JavaGenerator extends AbstractGenerator {
 						return result;
 
 					FreeSqlHost host = new FreeSqlHost();
-					host.setDbName(currentTasks.get(0).getDb_name());
+					host.setDbName(currentTasks.get(0).getDatabaseSetName());
 					host.setClassName(currentTasks.get(0).getClass_name());
 					host.setPackageName(namespace);
 
@@ -1026,6 +1031,12 @@ public class JavaGenerator extends AbstractGenerator {
 		GenUtils.mergeVelocityContext(context,
 				String.format("%s/Dal.config", mavenLikeDir.getAbsolutePath()),
 				"templates/java/DalConfig.java.tpl");
+		
+		context.put("host", contextHost);
+		GenUtils.mergeVelocityContext(context,
+				String.format("%s/Context.xml", mavenLikeDir.getAbsolutePath()),
+				"templates/java/DalContext.java.tpl");
+		
 		return false;
 	}
 }

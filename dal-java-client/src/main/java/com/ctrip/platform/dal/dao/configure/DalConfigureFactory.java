@@ -54,6 +54,7 @@ public class DalConfigureFactory {
 	private static String ADD = "add";
 	private static String PROVIDER = "provider";
 	private static String SHARD_STRATEGY = "shardStrategy";
+	private static String SHARDING_STRATEGY = "shardingStrategy";
 	private static String DATABASE_TYPE = "databaseType";
 	private static String SHARDING = "sharding";
 	private static String CONNECTION_STRING = "connectionString";
@@ -135,6 +136,12 @@ public class DalConfigureFactory {
 					getAttribute(databaseSetNode, NAME),
 					getAttribute(databaseSetNode, PROVIDER),
 					getAttribute(databaseSetNode, SHARD_STRATEGY),
+					databases );
+		else if(hasAttribute(databaseSetNode, SHARDING_STRATEGY))
+			return new DatabaseSet(
+					getAttribute(databaseSetNode, NAME),
+					getAttribute(databaseSetNode, PROVIDER),
+					getAttribute(databaseSetNode, SHARDING_STRATEGY),
 					databases );
 		else
 			return new DatabaseSet(

@@ -25,7 +25,8 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
 public class DirectClientDaoShardTest {
-	private final static String DATABASE_NAME = "dao_test";
+	private final static String DATABASE_NAME_MOD = "dao_test_mod";
+	private final static String DATABASE_NAME_SIMPLE = "dao_test_simple";
 	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr";
 	private final static String DATABASE_NAME_MYSQL = "dao_test_mysql";
 	
@@ -59,7 +60,8 @@ public class DirectClientDaoShardTest {
 	
 	static {
 		try {
-			DalClientFactory.initClientFactory("/DalMult.config");
+//			DalClientFactory.initClientFactory("/DalMult.config");
+			DalClientFactory.initClientFactory();
 			clientSqlSvr = DalClientFactory.getClient(DATABASE_NAME_SQLSVR);
 			clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
 		} catch (Exception e) {
@@ -146,10 +148,10 @@ public class DirectClientDaoShardTest {
 		}
 	}
 
-	@Test
-	public void test() {
+//	@Test
+	public void testMod() {
 		try {
-			DalClient client = DalClientFactory.getClient(DATABASE_NAME);
+			DalClient client = DalClientFactory.getClient(DATABASE_NAME_MOD);
 			
 			String sql = "select id from " + TABLE_NAME;
 			
@@ -177,6 +179,35 @@ public class DirectClientDaoShardTest {
 	}
 
 	@Test
+	public void testSimple() {
+		try {
+			DalClient client = DalClientFactory.getClient(DATABASE_NAME_SIMPLE);
+			
+			String sql = "select id from " + TABLE_NAME;
+			
+			StatementParameters parameters = new StatementParameters();
+			DalHints hints = new DalHints();
+			hints.set(DalHintEnum.shard, "0");
+			hints.masterOnly();
+			
+			Integer o = (Integer)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertNotNull(o);
+			assertEquals(4, o.longValue());
+			
+			hints = new DalHints();
+			hints.set(DalHintEnum.shard, "1");
+			hints.masterOnly();
+
+			Long l = (Long)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertNotNull(l);
+			assertEquals(1, l.longValue());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+//	@Test
 	public void test2() {
 //		try {
 //			DalClient client = DalClientFactory.getClient("AbacusDB_INSERT_1");

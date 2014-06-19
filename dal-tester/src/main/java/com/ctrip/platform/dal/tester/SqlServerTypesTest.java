@@ -6,6 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
+
+import microsoft.sql.DateTimeOffset;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -119,6 +122,109 @@ public class SqlServerTypesTest {
 		}catch(SQLException e){}
 	}
 	
+	@Test
+	public void insertTest() throws SQLException{
+		String sql = "INSERT INTO " + TABLE_NAME + "("
+				//+ "_ID, "
+				+ "_datetime, "
+				+ "_datetime2, "
+				+ "_smalldatetime,"
+				+ "_date,"
+				+ "_datetimeoffset, "
+				+ "_time,"
+				+ "_smallint,"
+				+ "_tinyint,"
+				+ "_bigint,"
+				+ "_money,"
+				+ "_smallmoney,"
+				+ "_float,"
+				+ "_text,"
+				+ "_ntext,"
+				+ "_xml,"
+				+ "_char,"
+				+ "_varchar,"
+				+ "_nchar,"
+				+ "_nvarchar,"
+				+ "_real,"
+				+ "_decimal,"
+				+ "_bit, "
+				+ "_numeric,"
+				+ "_binary,"
+				+ "_guid,"
+				+ "_image,"
+				//+ "_timestamp,"
+				+ "_charone,"
+				+ "_varbinary) "
+				+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		ClientTestModel model = new ClientTestModel();
+		
+		model.set_datetime(new Timestamp(System.currentTimeMillis()));
+		model.set_datetime2(new Timestamp(System.currentTimeMillis()));
+		model.set_smalldatetime(new Timestamp(System.currentTimeMillis()));
+		model.set_date(new Date(System.currentTimeMillis()));
+		model.set_datetimeoffset(DateTimeOffset.valueOf(new Timestamp(System.currentTimeMillis()), 1));
+		model.set_time(new Time(System.currentTimeMillis()));
+		model.set_smallint(Short.MAX_VALUE);
+		model.set_tinyint(Short.valueOf("0"));
+		model.set_bigint(Long.MAX_VALUE);
+		model.set_money(BigDecimal.ONE);
+		model.set_smallmoney(BigDecimal.TEN);
+		model.set_float(Double.MIN_VALUE);
+		model.set_text("This is a text");
+		model.set_ntext("This is a ntext");
+		model.set_xml("<xml>hello</xml>");
+		model.set_char("C");
+		model.set_varchar("This is a varchar");
+		model.set_nchar("T");
+		model.set_nvarchar("TT");
+		model.set_real(Float.MAX_VALUE);
+		model.set_decimal(BigDecimal.ZERO);
+		model.set_bit(true);
+		model.set_numeric(BigDecimal.TEN);
+		model.set_binary("This is binary".getBytes());
+		model.set_guid("2A66057D-F4E5-4E2B-B2F1-38C51A96D385");
+		model.set_image("This is image".getBytes());
+		model.set_timestamp("This is timestamp".getBytes());
+		model.set_charone("C");
+		model.set_varbinary("This is varbinary".getBytes());
+		
+		StatementParameters parameters = new StatementParameters();
+		//parameters.set(1, Types.INTEGER, model.get_ID());
+		parameters.set(1, Types.TIMESTAMP, model.get_datetime());
+		parameters.set(2, Types.TIMESTAMP, model.get_datetime2());
+		parameters.set(3, Types.TIMESTAMP, model.get_smalldatetime());
+		parameters.set(4, Types.DATE, model.get_date());
+		parameters.set(5, microsoft.sql.Types.DATETIMEOFFSET, model.get_datetimeoffset());
+		parameters.set(6, Types.TIME, model.get_time());
+		parameters.set(7, Types.SMALLINT, model.get_smallint());
+		parameters.set(8, Types.SMALLINT, model.get_tinyint());
+		parameters.set(9, Types.BIGINT, model.get_bigint());
+		parameters.set(10, Types.DECIMAL, model.get_money());
+		parameters.set(11, Types.DECIMAL, model.get_smallmoney());
+		parameters.set(12, Types.DOUBLE, model.get_float());
+		parameters.set(13, Types.LONGVARCHAR, model.get_text());
+		parameters.set(14, Types.LONGNVARCHAR, model.get_ntext());
+		parameters.set(15, Types.LONGVARCHAR, model.get_xml());
+		parameters.set(16, Types.CHAR, model.get_char());
+		parameters.set(17, Types.VARCHAR, model.get_varchar());
+		parameters.set(18, Types.CHAR, model.get_nchar());
+		parameters.set(19, Types.VARCHAR, model.get_nvarchar());
+		parameters.set(20, Types.REAL, model.get_real());
+		parameters.set(21, Types.DECIMAL, model.get_decimal());
+		parameters.set(22, Types.BIT, model.get_bit());
+		parameters.set(23, Types.NUMERIC, model.get_numeric());
+		parameters.set(24, Types.BINARY, model.get_binary());
+		parameters.set(25, Types.NVARCHAR, model.get_guid());
+		parameters.set(26, Types.LONGVARBINARY, model.get_image());
+		//parameters.set(28, Types.BINARY,model.get_timestamp());
+		parameters.set(27, Types.CHAR,model.get_charone());
+		parameters.set(28, Types.VARBINARY, model.get_varbinary());
+		
+		int count = client.update(sql, parameters, new DalHints());
+		
+		System.out.println(count);
+	}
+	
 	public static class ClientTestModel
 	{
 		private Integer _ID;
@@ -126,7 +232,7 @@ public class SqlServerTypesTest {
 		private Timestamp _datetime2;
 		private Timestamp _smalldatetime;
 		private Date _date;
-		private Date _datetimeoffset;
+		private DateTimeOffset _datetimeoffset;
 		private Time _time;
 		private Short _smallint;
 		private Short _tinyint;
@@ -137,7 +243,7 @@ public class SqlServerTypesTest {
 		private String _text;
 		private String _ntext;
 		private String _xml;
-		private Character _char;
+		private String _char;
 		private String _varchar;
 		private String _nchar;
 		private String _nvarchar;
@@ -182,10 +288,10 @@ public class SqlServerTypesTest {
 		public void set_date(Date _date) {
 			this._date = _date;
 		}
-		public Date get_datetimeoffset() {
+		public DateTimeOffset get_datetimeoffset() {
 			return _datetimeoffset;
 		}
-		public void set_datetimeoffset(Date _datetimeoffset) {
+		public void set_datetimeoffset(DateTimeOffset _datetimeoffset) {
 			this._datetimeoffset = _datetimeoffset;
 		}
 		public Time get_time() {
@@ -248,10 +354,10 @@ public class SqlServerTypesTest {
 		public void set_xml(String _xml) {
 			this._xml = _xml;
 		}
-		public Character get_char() {
+		public String get_char() {
 			return _char;
 		}
-		public void set_char(Character _char) {
+		public void set_char(String _char) {
 			this._char = _char;
 		}
 		public String get_varchar() {
@@ -345,12 +451,12 @@ public class SqlServerTypesTest {
 			model.set_bigint(rs.getLong("_bigint"));
 			model.set_binary(rs.getBytes("_binary"));
 			model.set_bit(rs.getBoolean("_bit"));
-			model.set_char((Character)rs.getObject("_char"));
+			model.set_char(rs.getString("_char"));
 			model.set_charone(rs.getString("_charone"));
 			model.set_date(rs.getDate("_date"));
 			model.set_datetime(rs.getTimestamp("_datetime"));
 			model.set_datetime2(rs.getTimestamp("_datetime2"));
-			model.set_datetimeoffset(rs.getDate("_datetimeoffset"));
+			model.set_datetimeoffset((DateTimeOffset)rs.getObject("_datetimeoffset"));
 			model.set_decimal(rs.getBigDecimal("_decimal"));
 			model.set_float(rs.getDouble("_float"));
 			model.set_guid(rs.getString("_guid"));

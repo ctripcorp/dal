@@ -150,12 +150,36 @@
 				<div class="modal-body">
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label">数据库：</label>
-							<textarea id="all_in_one" class="span9" style="height: 120px;">&lt;add name="xxx" connectionString="Server=xxx;port=xxx;UID=xxx;password=xxx;database=xxx;" providerName="System.Data.SqlClient" /&gt;</textarea>
+							<label class="control-label popup_label" style="width:130px">All-In-One Name：</label>
+							<input id="all_In_One_Name" class="span8 input-sm" type="text">
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width:130px">数据库类型：</label>
+							<select id="dbtype" class="span8">
+								<option value="no">请选择</option>
+								<option value="MySQL">MySQL</option>
+								<option value="SQLServer">SQLServer</option>
+							</select>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width:130px">数据库：</label>
+							<!-- <select id="origianlDB" class="span8"></select> -->
+							<input id="origianlDB" class="span8 input-sm" type="text">
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width:190px">最后生成的数据库配置：</label>
+							<textarea id="all_in_one" class="span12 popup_text" style="height: 130px;"></textarea>
 						</div>
 					</div>
 				</div>
 				<div class="modal-footer">
+					<label id="error_msg3" class="control-label popup_label" style="color:red;"></label>
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
 					<button id="add_db" type="button" class="btn btn-primary">保存</button>
 				</div>

@@ -277,17 +277,106 @@
     });
 
     jQuery(document).ready(function(){
+
+        var buildAddDbStr = function(){
+            $("#error_msg3").html(" ");
+            var mysqlConnStr = "Server=pub.mysql.db.dev.sh.ctripcorp.com;port=28747;UID=uws_allinone_1;password=ljwxg2yArv5uusoKpm9b;database=%s;";
+            var sqlServerConnStr = "Data Source=devdb.dev.sh.ctriptravel.com,28747;UID=uws_AllInOneKey_dev;password=!QAZ@WSX1qaz2wsx;database=%s;";
+            var addDdStr = "<add name=\"%s\" connectionString=\"%s\" providerName=\"System.Data.SqlClient\" />";
+
+            var all_In_One_Name = $.trim($("#all_In_One_Name").val());
+            var dbType = $.trim($("#dbtype").val());
+            var realDB = $.trim($("#origianlDB").val());
+
+            var result="";
+            var connStr="";
+            if("MySQL"==dbType){
+                connStr = sprintf(mysqlConnStr,realDB);
+                result = sprintf(addDdStr, all_In_One_Name, connStr);
+            }else if("SQLServer"==dbType){
+                connStr = sprintf(sqlServerConnStr,realDB);
+                result = sprintf(addDdStr, all_In_One_Name, connStr);
+            }else{
+                result = sprintf(addDdStr, all_In_One_Name, "XXX");
+            }
+            $("#all_in_one").text(result);
+        };
+
+        $(document.body).on('change', "#dbtype", function(event){
+//            if ($("#origianlDB")[0] != undefined && $("#origianlDB")[0].selectize != undefined) {
+//                $("#origianlDB")[0].selectize.clearOptions();
+//            } else {
+//                $("#origianlDB").selectize({
+//                    valueField: 'value',
+//                    labelField: 'title',
+//                    searchField: 'title',
+//                    sortField: 'value',
+//                    options: [],
+//                    create: true
+//                });
+//            }
+//            var dbType = $("#dbtype").val();
+//            if("MySQL"==dbType){
+//                $("#origianlDB")[0].selectize.addOption({
+//                    value: "mysql",
+//                    title: "mysql"
+//                });
+//            }else if("SQLServer"==dbType){
+//                $("#origianlDB")[0].selectize.addOption({
+//                    value: "sqlserver",
+//                    title: "sqlserver"
+//                });
+//            }else{
+//                $("#origianlDB")[0].selectize.clearOptions();
+//            }
+            buildAddDbStr();
+        });
+
+        $(document.body).on('keyup', "#origianlDB", function(event){
+            var dbType = $.trim($("#dbtype").val());
+            if("no"==dbType){
+                $("#error_msg3").html("请先选择数据库类型");
+                $("#origianlDB").val("");
+            }else{
+                buildAddDbStr();
+            }
+        });
+
+        $(document.body).on('keyup', "#all_In_One_Name", function(event){
+            buildAddDbStr();
+        });
+
         $(document.body).on('click', "#add_db", function(event){
+            var all_In_One_Name = $("#all_In_One_Name").val();
+            var dbType = $("#dbtype").val();
+            var realDB = $("#origianlDB").val();
+            if(""==all_In_One_Name || null==all_In_One_Name){
+                $("#error_msg3").html("请输入数据库的All In One的名称");
+                return;
+            }
+            if("no"==dbType){
+                $("#error_msg3").html("请选择数据库类型");
+                return;
+            }
+            if(realDB==null || realDB==""){
+                $("#error_msg3").html("请选择数据库");
+                return;
+            }
+
+            cblock($("body"));
             $.post("/rest/db/all_in_one", {"data": $("#all_in_one").val()}, function(data){
                 if(data.code == "OK"){
                     $("#manageDb").modal('hide');
                     window.ajaxutil.reload_dbservers();
                     $("#page1").modal();
                 }else{
-                    alert(data.info);
+                    $("#error_msg3").html(data.info);
                 }
-
-            });
+                $("body").unblock();
+            }).fail(function(data){
+                    $("#error_msg3").text(data);
+                    $("body").unblock();
+                });;
         });
 
         $("#save_db").click(function(){

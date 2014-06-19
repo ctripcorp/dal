@@ -16,6 +16,8 @@ import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
+import microsoft.sql.DateTimeOffset;
+
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -592,7 +594,7 @@ public class DbUtils {
 							break;
 						}
 						else if(null != typeName && typeName.equalsIgnoreCase("datetimeoffset")){
-							javaClass = Timestamp.class;
+							javaClass = DateTimeOffset.class;
 						}
 						else{
 							log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", 

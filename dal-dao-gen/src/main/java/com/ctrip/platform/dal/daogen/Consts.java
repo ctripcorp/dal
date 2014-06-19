@@ -161,6 +161,7 @@ public class Consts {
 		jdbcSqlTypeDisplay.put(java.sql.Types.LONGVARBINARY, "Types.LONGVARBINARY");
 		jdbcSqlTypeDisplay.put(java.sql.Types.NCHAR, "Types.NCHAR");
 		jdbcSqlTypeDisplay.put(java.sql.Types.LONGNVARCHAR, "Types.LONGNVARCHAR");
+		jdbcSqlTypeDisplay.put(microsoft.sql.Types.DATETIMEOFFSET, "microsoft.sql.Types.DATETIMEOFFSET");
 	}
 	
 

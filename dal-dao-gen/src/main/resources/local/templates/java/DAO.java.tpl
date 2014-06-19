@@ -25,8 +25,10 @@ public class ${host.getPojoClassName()}Dao {
 #if($host.getSpUpdate().isExist())
 	private static final String UPDATE_SP_NAME = "${host.getSpUpdate().getMethodName()}";
 #end
+#if($host.getSpInsert().isExist() || $host.getSpDelete().isExist() ||$host.getSpUpdate().isExist())
 	private static final String RET_CODE = "retcode";
 	private static final String UPDATE_COUNT = "update_count";
+#end
 #end
 	
 	private DalParser<${host.getPojoClassName()}> parser = new ${host.getPojoClassName()}Parser();
@@ -387,7 +389,7 @@ public class ${host.getPojoClassName()}Dao {
 	}
 #end
 
-#if($host.isSp())
+#if($host.isSp() && ($host.getSpInsert().isExist() || $host.getSpDelete().isExist() ||$host.getSpUpdate().isExist()))
 	private String prepareSpCall(String SpName, StatementParameters parameters, Map<String, ?> fields) {
 		client.addParametersByName(parameters, fields);
 		String callSql = client.buildCallSql(SpName, fields.size());

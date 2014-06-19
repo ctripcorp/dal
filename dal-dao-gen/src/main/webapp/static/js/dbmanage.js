@@ -280,7 +280,8 @@
 
         var buildAddDbStr = function(){
             $("#error_msg3").html(" ");
-            var mysqlConnStr = "Server=pub.mysql.db.dev.sh.ctripcorp.com;port=28747;UID=uws_allinone_1;password=ljwxg2yArv5uusoKpm9b;database=%s;";
+            $("#all_in_one").val('');
+            var mysqlConnStr = "Server=pub.mysql.db.dev.sh.ctripcorp.com;port=28747;UID=uws_dbticket;password=kgd8v5CenyoMjtg1uwzj;database=%s;";
             var sqlServerConnStr = "Data Source=devdb.dev.sh.ctriptravel.com,28747;UID=uws_AllInOneKey_dev;password=!QAZ@WSX1qaz2wsx;database=%s;";
             var addDdStr = "<add name=\"%s\" connectionString=\"%s\" providerName=\"System.Data.SqlClient\" />";
 
@@ -299,7 +300,8 @@
             }else{
                 result = sprintf(addDdStr, all_In_One_Name, "XXX");
             }
-            $("#all_in_one").text(result);
+
+            $("#all_in_one").val(result);
         };
 
         $(document.body).on('change', "#dbtype", function(event){

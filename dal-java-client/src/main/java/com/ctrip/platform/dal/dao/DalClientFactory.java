@@ -88,9 +88,6 @@ public class DalClientFactory {
 		if (logicDbName == null)
 			throw new NullPointerException("Database Set name can not be null");
 
-		if (configureRef.get() == null)
-			return new DalDirectClient(connPool.get(), logicDbName);
-
 		DalConfigure config = configureRef.get();
 		if (config == null)
 			throw new IllegalStateException(

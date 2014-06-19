@@ -475,6 +475,7 @@
                 i++;
                 var temp = conVal.shift();
                 if(temp!=null && temp!=""){
+                    namesStack.shift();
                     htmls = htmls + sprintf(variableHtml, temp)+"</div><br/>";
                 }else{
                     var realName = "update"==crud_option? namesStack.shift():result[1];

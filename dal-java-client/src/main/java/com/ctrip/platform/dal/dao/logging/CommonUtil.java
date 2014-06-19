@@ -47,6 +47,10 @@ public class CommonUtil {
 		return new String(Base64.encodeBase64(md5Byte));
     }
 
+    public static String lineSeparator(){
+    	return System.getProperty("line.separator");
+    }
+    
 	public static int getSqlHashCodeForCache(String sql) { 
 		String[] sqlSections = sql.split("where");
 		// Probably use WHERE instead of where

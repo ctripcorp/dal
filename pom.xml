@@ -116,13 +116,25 @@
         <artifactId>maven-source-plugin</artifactId>
         <executions>
           <execution>
-            <phase>package</phase>
+            <phase>deploy</phase>
 			  <goals>
                 <goal>jar</goal>
               </goals>
           </execution>
         </executions>
       </plugin>
+      <plugin>  
+        <artifactId>maven-javadoc-plugin</artifactId>  
+        <executions>  
+          <execution>  
+            <id>attach-javadocs</id>  
+            <phase>deploy</phase>  
+			  <goals>
+                <goal>jar</goal>
+              </goals>
+          </execution>  
+        </executions>  
+      </plugin> 
       <!-- <plugin> mvn compile assembly:single will produce a single jar <artifactId>maven-assembly-plugin</artifactId> 
 				<configuration> <archive> <manifest> <mainClass>com.ctrip.sysdev.das.DalServer</mainClass> 
 				</manifest> </archive> <descriptorRefs> <descriptorRef>jar-with-dependencies</descriptorRef> 

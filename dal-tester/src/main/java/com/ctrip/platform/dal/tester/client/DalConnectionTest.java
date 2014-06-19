@@ -60,7 +60,7 @@ public class DalConnectionTest {
 			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
 			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
 			assertNotNull(test.getMeta());
-			LogEntry entry = new LogEntry(new DalHints());
+			LogEntry entry = new LogEntry();
 			
 			assertNotNull(test.getMeta());
 			test.getMeta().populate(entry); 

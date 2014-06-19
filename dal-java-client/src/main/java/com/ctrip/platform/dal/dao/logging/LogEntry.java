@@ -74,11 +74,14 @@ public class LogEntry {
 		execludedClasses.add(DalQueryDao.class.getName());
 	}
 
-	public LogEntry(DalHints hints) {
+	public LogEntry() {
 		this.timeStamp = new Date();
 		this.machine = CommonUtil.MACHINE;
-		this.sensitive = hints.is(DalHintEnum.sensitive);
 		this.getSourceAndMessage();
+	}
+
+	public void setSensitive(boolean sensitive) {
+		this.sensitive = sensitive;
 	}
 
 	public void setCallString(String callString) {

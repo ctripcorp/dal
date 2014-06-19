@@ -11,7 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -34,11 +33,6 @@ public class DalDirectClient implements DalClient {
 	private DalConnectionManager connManager;
 	private DalTransactionManager transManager;
 
-	public DalDirectClient(DruidDataSourceWrapper connPool, String logicDbName) {
-		connManager = new DalConnectionManager(logicDbName, connPool);
-		transManager = new DalTransactionManager(connManager);
-	}
-	
 	public DalDirectClient(DalConfigure config, String logicDbName) {
 		connManager = new DalConnectionManager(logicDbName, config);
 		transManager = new DalTransactionManager(connManager);

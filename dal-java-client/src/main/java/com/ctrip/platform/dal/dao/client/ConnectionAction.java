@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.ctrip.platform.dal.dao.DalCommand;
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.logging.DalEventEnum;
@@ -34,7 +35,7 @@ public abstract class ConnectionAction<T> {
 	public ResultSet rs;
 	
 	public long start;
-	public LogEntry entry;
+	public LogEntry entry = new LogEntry();
 	
 	void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
 		this.operation = operation;
@@ -76,10 +77,17 @@ public abstract class ConnectionAction<T> {
 	}
 	
 	public void populateDbMeta() {
-		DbMeta meta = DalTransactionManager.isInTransaction() ?
-				DalTransactionManager.getCurrentDbMeta() : connHolder.getMeta();
-			
-		meta.populate(entry);
+		DbMeta meta = null;
+		
+		if(DalTransactionManager.isInTransaction()) {
+			meta = DalTransactionManager.getCurrentDbMeta();
+		} else {
+			if(connHolder != null)
+				meta = connHolder.getMeta();
+		}
+		
+		if(meta != null)
+			meta.populate(entry);
 	}
 	
 	/*
@@ -87,10 +95,10 @@ public abstract class ConnectionAction<T> {
 	 * so it must be put after startTransaction. It is not require so for doInConnection
 	 */
 	public void initLogEntry(String logicDbName, DalHints hints) {
-		entry = new LogEntry(hints);
+		entry.setSensitive(hints.is(DalHintEnum.sensitive));
 		entry.setEvent(operation);
 		entry.setCommandType();
-		entry.setDatabaseName(logicDbName);
+		entry.setDatabaseName("Logic Name: " + logicDbName);
 		entry.setCallString(callString);
 		entry.setSql(sql);
 		entry.setSqls(sqls);

@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.ctrip.datasource.locator.DataSourceLocator;
-import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
@@ -16,16 +15,10 @@ import com.ctrip.platform.dal.dao.strategy.DalShardStrategy;
 public class DalConnectionManager {
 	private DalConfigure config;
 	private String logicDbName;
-	private DruidDataSourceWrapper connPool;
 
 	public DalConnectionManager(String logicDbName, DalConfigure config) {
 		this.logicDbName = logicDbName;
 		this.config = config;
-	}
-	
-	public DalConnectionManager(String logicDbName, DruidDataSourceWrapper connPool) {
-		this.logicDbName = logicDbName;
-		this.connPool = connPool;
 	}
 	
 	public String getLogicDbName() {
@@ -41,13 +34,8 @@ public class DalConnectionManager {
 			boolean isMaster = hints.is(DalHintEnum.masterOnly) || useMaster;
 			boolean isSelect = operation == DalEventEnum.QUERY;
 			
-			// The internal test path
-			if(config == null) {
-				connHolder = getConnectionFromDruidDS(isMaster, isSelect);
-			}else {
-				connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect);
-			}
-			
+			connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect);
+
 			connHolder.setAutoCommit(true);
 			connHolder.applyHints(hints);
 
@@ -59,15 +47,6 @@ public class DalConnectionManager {
 			Logger.logGetConnectionFailed(realDbName, ex);
 			throw ex;
 		}
-		return connHolder;
-	}
-
-	private DalConnection getConnectionFromDruidDS(boolean isMaster,
-			boolean isSelect) throws SQLException {
-		DalConnection connHolder;
-		Connection conn = null;
-		conn = connPool.getConnection(logicDbName, isMaster, isSelect);
-		connHolder = new DalConnection(conn, DbMeta.getDbMeta(conn.getCatalog(), conn));
 		return connHolder;
 	}
 

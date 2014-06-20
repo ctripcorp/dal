@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.domain;
 
-public class W2uiElement {
+public class W2uiElement  implements Comparable<W2uiElement>{
 	
 	private String id;
 	
@@ -60,6 +60,11 @@ public class W2uiElement {
 
 	public void setData(String data) {
 		this.data = data;
+	}
+
+	@Override
+	public int compareTo(W2uiElement o) {
+		return this.data.compareTo(o.getData());
 	}
 
 }

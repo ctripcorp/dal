@@ -82,7 +82,7 @@ public class FileResource {
 				files.add(element);
 			}
 		}
-
+		java.util.Collections.sort(files);
 		return files;
 	}
 

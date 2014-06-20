@@ -174,6 +174,11 @@
 					<div class="row-fluid">
 						<div class="control-group">
 							<label class="control-label popup_label" style="width:190px">最后生成的数据库配置：</label>
+							<a href="#" class="ctip" data-toggle="tooltip"
+									data-placement="right" title="" html="1"
+									data-original-title="如果生成的配置不符合你的要求，请直接修改下面的数据库配置再保存!"> 
+							        <img class="helpicon" src="/static/images/help.jpg">
+							</a>
 							<textarea id="all_in_one" class="span12 popup_text" style="height: 130px;"></textarea>
 						</div>
 					</div>

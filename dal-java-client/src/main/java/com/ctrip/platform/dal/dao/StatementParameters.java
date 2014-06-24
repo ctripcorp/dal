@@ -1,11 +1,16 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 
 public class StatementParameters {
+	private static final String SQLHIDDENString = "*";
+	
 	private List<StatementParameter> parameters = new LinkedList<StatementParameter>();
 	
 	public StatementParameters add(StatementParameter parameter) {
@@ -88,5 +93,14 @@ public class StatementParameters {
 	public List<StatementParameter> values() {
 		return parameters;
 	}
-	// Other overload helper methods
+	
+	public String toLogString() {
+		List<String> plantPrams = new ArrayList<String>();
+		for (StatementParameter param : this.values()) {
+			plantPrams.add(String.format("%s=%s", 
+					param.getName() == null ? param.getIndex() : param.getName(), 
+					param.isSensitive() ? SQLHIDDENString : param.getValue()));
+		}
+		return StringUtils.join(plantPrams, ",");
+	}
 }

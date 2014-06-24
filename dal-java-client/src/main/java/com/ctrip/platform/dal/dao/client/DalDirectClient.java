@@ -22,7 +22,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
-import com.ctrip.platform.dal.dao.logging.DalEventEnum;
+import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 
 /**
  * The direct connection implementation for DalClient.

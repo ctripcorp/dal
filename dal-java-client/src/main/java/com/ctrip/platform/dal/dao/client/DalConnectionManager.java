@@ -8,9 +8,9 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
-import com.ctrip.platform.dal.dao.logging.DalEventEnum;
-import com.ctrip.platform.dal.dao.logging.Logger;
 import com.ctrip.platform.dal.dao.strategy.DalShardStrategy;
+import com.ctrip.platform.dal.sql.logging.DalEventEnum;
+import com.ctrip.platform.dal.sql.logging.Logger;
 
 public class DalConnectionManager {
 	private DalConfigure config;
@@ -40,7 +40,6 @@ public class DalConnectionManager {
 			connHolder.applyHints(hints);
 
 			realDbName = connHolder.getDatabaseName();
-			Logger.logGetConnectionSuccess(realDbName);
 		}
 		catch(SQLException ex)
 		{
@@ -70,7 +69,7 @@ public class DalConnectionManager {
 		
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
-			DbMeta meta = DbMeta.getDbMeta(allInOneKey, conn);
+			DbMeta meta = DbMeta.getDbMeta(allInOneKey,isMaster,isSelect, conn);
 			return new DalConnection(conn, meta);
 		} catch (Throwable e) {
 			throw new SQLException("Can not get connection from DB " + allInOneKey, e);

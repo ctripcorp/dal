@@ -13,10 +13,10 @@ import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.logging.DalEventEnum;
-import com.ctrip.platform.dal.dao.logging.LogEntry;
-import com.ctrip.platform.dal.dao.logging.Logger;
-import com.ctrip.platform.dal.dao.logging.MetricsLogger;
+import com.ctrip.platform.dal.sql.logging.DalEventEnum;
+import com.ctrip.platform.dal.sql.logging.LogEntry;
+import com.ctrip.platform.dal.sql.logging.Logger;
+import com.ctrip.platform.dal.sql.logging.MetricsLogger;
 
 public abstract class ConnectionAction<T> {
 	public DalEventEnum operation;
@@ -98,12 +98,24 @@ public abstract class ConnectionAction<T> {
 		entry.setSensitive(hints.is(DalHintEnum.sensitive));
 		entry.setEvent(operation);
 		entry.setCommandType();
-		entry.setDatabaseName("Logic Name: " + logicDbName);
 		entry.setCallString(callString);
-		entry.setSql(sql);
-		entry.setSqls(sqls);
-		entry.setParameters(parameters);
-		entry.setParametersList(parametersList);
+		if(sqls != null)	
+			entry.setSqls(sqls);
+		else
+			entry.setSqls(sql);
+
+		if(null != parametersList)
+		{
+			String[] params = new String[parametersList.length];
+			for (int i = 0; i < parametersList.length; i++) {
+				params[i] = parametersList[i].toLogString();
+			}
+			entry.setPramemters(params);
+		}
+		else if(parameters != null){
+			entry.setPramemters(parameters.toLogString());
+		}
+		
 		entry.setTransactional(DalTransactionManager.isInTransaction());
 	}
 	

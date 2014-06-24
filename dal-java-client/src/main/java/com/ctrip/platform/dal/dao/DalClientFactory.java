@@ -5,14 +5,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.platform.dal.common.db.ConnectionPropertyReader;
-import com.ctrip.platform.dal.common.db.DasConfigureReader;
 import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
-import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
-import com.ctrip.platform.dal.dao.logging.MetricsLogger;
+import com.ctrip.platform.dal.sql.logging.MetricsLogger;
 
 public class DalClientFactory {
 	private static Logger logger = LoggerFactory.getLogger(DalClientFactory.class);

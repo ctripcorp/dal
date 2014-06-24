@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import com.ctrip.platform.dal.dao.logging.Logger;
+import com.ctrip.platform.dal.sql.logging.Logger;
 
 public class DalTransaction  {
 	private String logicDbName;

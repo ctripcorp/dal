@@ -16,7 +16,7 @@ import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DbMeta;
-import com.ctrip.platform.dal.dao.logging.LogEntry;
+import com.ctrip.platform.dal.sql.logging.LogEntry;
 
 public class DalConnectionTest {
 	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.logging;
+/*package com.ctrip.platform.dal.dao.logging;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -62,12 +62,12 @@ public class Logger {
 	public static void log(LogEntry log) {
 		try {
 			//The old  logging 
-			/*if(log == null) 
+			if(log == null) 
 				return;
 			// Don't log
 			if(validate(log.getSqlTpl(), log.getInputParamStr())){
 				logger.info(CommonUtil.null2NA(log.getTitle()), log.toBrief(), log.getTag());;
-			}*/
+			}
 			trace.log(LogType.SQL, LogLevel.INFO, 
 					CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
 			//logger.info(CommonUtil.null2NA(log.getTitle()), log.toJson(), log.getTag());
@@ -152,11 +152,11 @@ public class Logger {
 		return msg;
 	}
 	
-	/**
+	*//**
 	 * Check if this entry need to be logged. For level abve information, we always log
 	 * @param entry
 	 * @return
-	 */
+	 *//*
 	private static boolean validate(String sql, String inputParamStr) {
 		Date now  = new Date();
 		clearCache(now, low);
@@ -184,10 +184,10 @@ public class Logger {
         return true;
     }
 	
-	/**
+	*//**
 	 * @param now
 	 * @param interval in minutes
-	 */
+	 *//*
 	private static void clearCache(Date now, int interval) {
 		//no clear if the number in control
         if (CACHE_SIZE_LIMIT > sqlLogCache.size()) return;
@@ -198,4 +198,4 @@ public class Logger {
         		sqlLogCache.remove(key);
         }
     }
-}
+}*/

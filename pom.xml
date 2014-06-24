@@ -17,6 +17,7 @@
     <module>dal-tester</module>
     <module>dal-server-common</module>
     <module>dal-java-ext</module>
+    <module>dal-sql-log</module>
   </modules>
   <properties>
   	 <environment>local</environment>
@@ -24,7 +25,7 @@
     <spring-version>4.0.0.RELEASE</spring-version>
     <commons-net-version>3.3</commons-net-version>
     <commons-dbcp-version>1.4</commons-dbcp-version>
-    <commons-lang-version>3.1</commons-lang-version>
+    <commons-lang-version>3.3.2</commons-lang-version>
     <commons-log-version>1.1</commons-log-version>
     <apache-http-version>4.0.1</apache-http-version>
     <apache-zk-version>3.4.5-cdh4.2.0</apache-zk-version>

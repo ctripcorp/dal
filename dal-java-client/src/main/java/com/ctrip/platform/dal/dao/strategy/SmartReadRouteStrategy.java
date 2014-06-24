@@ -7,7 +7,7 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
-import com.ctrip.platform.dal.dao.logging.DalEventEnum;
+import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 
 /**
  * New strategy that support same function that current hotel DAL team provided.

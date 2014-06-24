@@ -18,7 +18,7 @@ public class DalTransactionTest {
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
 		conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-		return new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
+		return new DalConnection(conn, DbMeta.getDbMeta(logicDbName, true, conn));
 	}
 
 	@Test

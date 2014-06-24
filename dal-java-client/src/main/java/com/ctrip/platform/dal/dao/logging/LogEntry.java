@@ -1,8 +1,7 @@
-package com.ctrip.platform.dal.dao.logging;
+/*package com.ctrip.platform.dal.dao.logging;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -14,8 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.ctrip.platform.dal.dao.DalHintEnum;
-import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameter;
@@ -333,11 +330,11 @@ public class LogEntry {
 		return tag;
 	}
 	
-	/**
+	*//**
 	 * To be called after execute Sp
 	 * 
 	 * @param parameters
-	 */
+	 *//*
 	public void setOutputParameters(StatementParameters parameters) {
 		StringBuilder sbout = new StringBuilder();
 		for (StatementParameter param : parameters.values()) {
@@ -380,10 +377,10 @@ public class LogEntry {
 		return sb.toString();
 	}
 
-	/**
+	*//**
 	 * 获取LogEntry字符串概要表示，用于Central Logging等本身已生成date, appid, machine,
 	 * level等字段的日志工具
-	 */
+	 *//*
 	public String toBrief() {
 		StringBuilder sb = new StringBuilder();
 		if (sql != null) {
@@ -433,4 +430,4 @@ public class LogEntry {
 				this.success ? 1 : 0, 
 				this.errorMsg);
 	}
-}
+}*/

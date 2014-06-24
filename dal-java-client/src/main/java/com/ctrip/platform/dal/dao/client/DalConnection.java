@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.logging.Logger;
+import com.ctrip.platform.dal.sql.logging.Logger;
 
 public class DalConnection {
 	private Integer oldIsolationLevel;

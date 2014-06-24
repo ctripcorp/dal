@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.SQLException;
 
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.logging.DalEventEnum;
+import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 
 public class DalTransactionManager {
 	private DalConnectionManager connManager;

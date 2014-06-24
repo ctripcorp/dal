@@ -1,4 +1,4 @@
-/*package com.ctrip.platform.dal.dao.logging;
+package com.ctrip.platform.dal.sql.logging;
 
 public enum DalEventEnum {
 	QUERY("query", 2001),
@@ -25,4 +25,3 @@ public enum DalEventEnum {
 		return operation;
 	}
 }
-*/

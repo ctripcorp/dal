@@ -1,4 +1,4 @@
-/*package com.ctrip.platform.dal.dao.logging;
+package com.ctrip.platform.dal.sql.logging;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,9 +11,7 @@ import java.util.concurrent.TimeUnit;
 import com.ctrip.freeway.metrics.IMetric;
 import com.ctrip.freeway.metrics.MetricManager;
 
-
 public class MetricsLogger {
-	
 	public static final String COUNT = "arch.dal.sql.count";
 	public static final String COST = "arch.dal.sql.cost";
     public static String SUCCESS = "success";
@@ -141,4 +139,3 @@ public class MetricsLogger {
 		}
     }
 }
-*/

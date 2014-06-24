@@ -17,7 +17,7 @@ import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.client.DbMeta;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
-import com.ctrip.platform.dal.dao.logging.LogEntry;
+import com.ctrip.platform.dal.sql.logging.LogEntry;
 
 public class ConnectionActionTest {
 	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";
@@ -25,7 +25,7 @@ public class ConnectionActionTest {
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
 		conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-		return new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
+		return new DalConnection(conn, DbMeta.getDbMeta(logicDbName,true, false, conn));
 	}
 	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
@@ -47,7 +47,7 @@ public class ConnectionActionTest {
 			test.connHolder = getDalConnection();
 			test.populateDbMeta();
 			assertNotNull(test.entry.getTag().get(LogEntry.TAG_DATABASE_NAME));
-			assertNotNull(test.entry.getTag().get(LogEntry.TAG_USER_NAME));
+			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_USER_NAME)); be removed
 			assertNotNull(test.entry.getTag().get(LogEntry.TAG_SERVER_ADDRESS));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -62,7 +62,7 @@ public class ConnectionActionTest {
 			DalTransactionManager tranManager = new DalTransactionManager(getDalConnectionManager());
 			tranManager.doInTransaction(test, new DalHints());
 			assertNotNull(test.entry.getTag().get(LogEntry.TAG_DATABASE_NAME));
-			assertNotNull(test.entry.getTag().get(LogEntry.TAG_USER_NAME));
+			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_USER_NAME)); be removed
 			assertNotNull(test.entry.getTag().get(LogEntry.TAG_SERVER_ADDRESS));
 		} catch (Exception e) {
 			e.printStackTrace();

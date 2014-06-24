@@ -5,17 +5,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
-import com.ctrip.platform.dal.dao.logging.DalEventEnum;
 import com.ctrip.platform.dal.dao.strategy.DalShardStrategy;
 import com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;
 import com.ctrip.platform.dal.dao.strategy.SimpleShardHintStrategy;
-import com.ctrip.platform.dal.tester.baseDao.DirectClientDaoTest;
+import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 
 public class ShardConfigTest {
 	private void testRead() {

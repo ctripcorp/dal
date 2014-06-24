@@ -47,5 +47,10 @@
 		<artifactId>encryption</artifactId>
 		<version>${ctrip-security-version}</version>
 	</dependency>
+    <dependency>
+    	<groupId>com.ctrip.platform</groupId>
+    	<artifactId>dal-sql-log</artifactId>
+    	<version>1.0.0</version>
+    </dependency>
   </dependencies>
 </project>

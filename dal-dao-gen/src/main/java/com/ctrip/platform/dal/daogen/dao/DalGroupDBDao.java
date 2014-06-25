@@ -21,7 +21,13 @@ public class DalGroupDBDao {
 	
 	public List<DalGroupDB> getAllGroupDbs() {
 		return this.jdbcTemplate.query(
-				"select t1.id as id, t1.dbname as dbname,t2.group_name as comment,t1.dal_group_id as dal_group_id from alldbs t1 left join dal_group t2 on t1.dal_group_id=t2.id ",
+				"select t1.id as id, t1.dbname as dbname,t2.group_name as comment,t1.dal_group_id as dal_group_id,"
+				+ "t1.db_address as db_address,"
+				+ "t1.db_port as db_port,"
+				+ "t1.db_user as db_user,"
+				+ "t1.db_password as db_password,"
+				+ "t1.db_catalog as db_catalog,"
+				+ "t1.db_providerName as db_providerName from alldbs t1 left join dal_group t2 on t1.dal_group_id=t2.id ",
 				new RowMapper<DalGroupDB>() {
 					public DalGroupDB mapRow(ResultSet rs, int rowNum)
 							throws SQLException {
@@ -32,7 +38,8 @@ public class DalGroupDBDao {
 
 	public List<DalGroupDB> getGroupDBsByGroup(int groupId) {
 		return this.jdbcTemplate.query(
-				"select id, dbname, comment,dal_group_id from alldbs"
+				"select id, dbname, comment,dal_group_id,"
+				+ "db_address, db_port, db_user, db_password, db_catalog, db_providerName from alldbs"
 						+ " where dal_group_id=?", new Object[] { groupId },
 				new RowMapper<DalGroupDB>() {
 					public DalGroupDB mapRow(ResultSet rs, int rowNum)
@@ -44,7 +51,8 @@ public class DalGroupDBDao {
 	
 	public DalGroupDB getGroupDBByDbName(String dbname) {
 		List<DalGroupDB> dbs = this.jdbcTemplate.query(
-				"select id, dbname, comment,dal_group_id from alldbs"
+				"select id, dbname, comment,dal_group_id,"
+				+ "db_address, db_port, db_user, db_password, db_catalog, db_providerName from alldbs"
 						+ " where dbname=?", new Object[] { dbname },
 				new RowMapper<DalGroupDB>() {
 					public DalGroupDB mapRow(ResultSet rs, int rowNum)
@@ -57,11 +65,17 @@ public class DalGroupDBDao {
 	
 	public int insertDalGroupDB(DalGroupDB groupDb){
 		return this.jdbcTemplate
-				.update("insert into alldbs(dbname, comment, dal_group_id)"
-						+ "value(?,?,?)",
+				.update("insert into alldbs(dbname, comment, dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName)"
+						+ "value(?,?,?,?,?,?,?,?,?)",
 						groupDb.getDbname(),
 						groupDb.getComment(),
-						groupDb.getDal_group_id());
+						groupDb.getDal_group_id(),
+						groupDb.getDb_address(),
+						groupDb.getDb_port(),
+						groupDb.getDb_user(),
+						groupDb.getDb_password(),
+						groupDb.getDb_catalog(),
+						groupDb.getDb_providerName());
 	}
 	
 	public int updateGroupDB(int id,Integer groupId){

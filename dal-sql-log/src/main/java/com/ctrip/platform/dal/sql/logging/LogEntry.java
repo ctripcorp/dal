@@ -22,7 +22,7 @@ public class LogEntry {
 	public static final String TAG_RECORD_COUNT = "RecordCount";
 	public static final int LOG_LIMIT = 32*1024;	
 	public static final String SQLHIDDENString = "*";
-	private static final String JSON_PATTERN = "{'HasSql':'%s','Hash':'%s','SqlTpl':'%s','Param':'%s','IsSuccess':'%s','ErrorMsg':'%s'}";
+	private static final String JSON_PATTERN = "{'HasSql':'%s','Hash':'%s','SqlTpl':'%s','Param':'%s','IsSuccess':'%s','ErrorMsg':'%s', CostDetail:%s}";
 	
 	private static Set<String> execludedClasses = null;
 	private static ConcurrentHashMap<String, Integer> hashes = null;
@@ -237,6 +237,7 @@ public class LogEntry {
 		this.isSlave = isSlave;
 	}
 
+
 	public int getSqlSize(){
 		int size = 0;
 		if(this.event == DalEventEnum.QUERY || 
@@ -351,13 +352,18 @@ public class LogEntry {
 		}
 		int hashCode = CommonUtil.GetHashCode(sqlTpl);
 		boolean existed = this.hasHashCode(sqlTpl, hashCode);
+		
+		Logger.watcherEnd();
+		Watcher wac = Logger.getAndRemoveWatcher();
+		
 		return String.format(JSON_PATTERN, 
 				existed ? 1 : 0, 
 				hashCode, 
 				existed ? "" : sqlTpl, 
 				params, 
 				this.success ? 1 : 0, 
-				this.errorMsg);
+				this.errorMsg,
+				wac != null ? wac.toJson() : "{}");
 	}
 
 }

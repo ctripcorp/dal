@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.platform.dal.sql.logging.Logger;
+
 /**
  * Base table DAO wraps common CRUD for particular table. The generated table
  * DAO should use this DAO to perform CRUD.
@@ -59,6 +61,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public T queryByPk(Number id, DalHints hints) throws SQLException {
+		Logger.watcherBegin();
 		if (parser.getPrimaryKeyNames().length != 1)
 			throw new SQLException(
 					"The primary key of this table is consists of more than one column");
@@ -81,6 +84,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public T queryByPk(T pk, DalHints hints) throws SQLException {
+		Logger.watcherBegin();
 		StatementParameters parameters = new StatementParameters();
 		addParameters(parameters, parser.getPrimaryKeys(pk));
 
@@ -100,6 +104,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public List<T> queryLike(T sample, DalHints hints) throws SQLException {
+		Logger.watcherBegin();
 		StatementParameters parameters = new StatementParameters();
 		Map<String, ?> queryCriteria = filterNullFileds(parser
 				.getFields(sample));
@@ -122,6 +127,7 @@ public final class DalTableDao<T> {
 	 */
 	public List<T> query(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
+		Logger.watcherBegin();
 		String selectSql = String.format(TMPL_SQL_FIND_BY,
 				parser.getTableName(), whereClause);
 		return queryDao.query(selectSql, parameters, hints, parser);
@@ -140,6 +146,7 @@ public final class DalTableDao<T> {
 	 */
 	public T queryFirst(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
+		Logger.watcherBegin();
 		String selectSql = String.format(TMPL_SQL_FIND_BY,
 				parser.getTableName(), whereClause);
 		return queryDao.queryFirst(selectSql, parameters, hints, parser);
@@ -160,6 +167,7 @@ public final class DalTableDao<T> {
 	 */
 	public List<T> queryTop(String whereClause, StatementParameters parameters,
 			DalHints hints, int count) throws SQLException {
+		Logger.watcherBegin();
 		String selectSql = String.format(TMPL_SQL_FIND_BY,
 				parser.getTableName(), whereClause);
 		return queryDao.queryTop(selectSql, parameters, hints, parser, count);
@@ -183,6 +191,7 @@ public final class DalTableDao<T> {
 	public List<T> queryFrom(String whereClause,
 			StatementParameters parameters, DalHints hints, int start, int count)
 			throws SQLException {
+		Logger.watcherBegin();
 		String selectSql = String.format(TMPL_SQL_FIND_BY,
 				parser.getTableName(), whereClause);
 		return queryDao.queryFrom(selectSql, parameters, hints, parser, start,
@@ -202,6 +211,7 @@ public final class DalTableDao<T> {
 	 * @return how many rows been affected
 	 */
 	public int insert(DalHints hints, T... daoPojos) throws SQLException {
+		Logger.watcherBegin();
 		return insert(hints, null, daoPojos);
 	}
 
@@ -223,6 +233,7 @@ public final class DalTableDao<T> {
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, T... daoPojos)
 			throws SQLException {
+		Logger.watcherBegin();
 		int count = 0;
 		// Try to insert one by one
 		for (T pojo : daoPojos) {
@@ -259,6 +270,7 @@ public final class DalTableDao<T> {
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
 			T... daoPojos) throws SQLException {
+		Logger.watcherBegin();
 		if (null == daoPojos || daoPojos.length < 1)
 			return 0;
 		List<String> validColumns = new ArrayList<String>();
@@ -298,6 +310,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
+		Logger.watcherBegin();
 		String insertSql = buildBatchInsertSql();
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		int i = 0;
@@ -321,6 +334,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int delete(DalHints hints, T... daoPojos) throws SQLException {
+		Logger.watcherBegin();
 		int count = 0;
 		for (T pojo : daoPojos) {
 			String deleteSql = buildDeleteSql();
@@ -347,6 +361,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
+		Logger.watcherBegin();
 		String deleteSql = buildDeleteSql();
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		int i = 0;
@@ -372,6 +387,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int update(DalHints hints, T... daoPojos) throws SQLException {
+		Logger.watcherBegin();
 		int count = 0;
 		for (T pojo : daoPojos) {
 			Map<String, ?> fields = parser.getFields(pojo);
@@ -408,6 +424,7 @@ public final class DalTableDao<T> {
 	 */
 	public int delete(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
+		Logger.watcherBegin();
 		return client.update(String.format(TMPL_SQL_DELETE,
 				parser.getTableName(), whereClause), parameters, hints);
 	}
@@ -423,6 +440,7 @@ public final class DalTableDao<T> {
 	 */
 	public int update(String sql, StatementParameters parameters, DalHints hints)
 			throws SQLException {
+		Logger.watcherBegin();
 		return client.update(sql, parameters, hints);
 	}
 

@@ -99,6 +99,7 @@ public abstract class ConnectionAction<T> {
 		entry.setEvent(operation);
 		entry.setCommandType();
 		entry.setCallString(callString);
+		
 		if(sqls != null)	
 			entry.setSqls(sqls);
 		else

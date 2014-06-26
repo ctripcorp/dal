@@ -74,7 +74,7 @@ public enum DalHintEnum {
 	 * Indicate using master database even the operation can be routed to slave database 
 	 */
 	masterOnly, 
-
+	
 	/* 
 	 * For insert, delete, update multiple pojos 
 	 */ 

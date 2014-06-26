@@ -14,6 +14,8 @@ import com.ctrip.freeway.tracing.TraceManager;
 public class Logger {
 	public static final String TITLE = "Dal Fx";
 	
+	public static ThreadLocal<Watcher> watcher = new ThreadLocal<Watcher>();
+	
 	private static ILog logger = LogManager.getLogger("DAL Java Client");
 	private static ITrace trace = TraceManager.getTracer("DAL Java Client");
 
@@ -32,7 +34,8 @@ public class Logger {
 	}
 	
 	public static void log(LogEntry entry) {
-		trace.log(LogType.SQL, LogLevel.INFO, TITLE, entry.toJson(), entry.getTag());
+		logger.info(TITLE, entry.toJson(), entry.getTag());
+		//trace.log(LogType.SQL, LogLevel.INFO, TITLE, entry.toJson(), entry.getTag());
 	}
 	
 	public static void logGetConnectionFailed(String realDbName, Throwable e)
@@ -98,5 +101,45 @@ public class Logger {
         }
 		
 		return msg;
+	}
+
+	public static void watcherBegin(){
+		Watcher wac = watcher.get();
+		if(null == wac){
+			wac = new Watcher();
+			wac.begin();
+			watcher.set(wac);		
+		}		
+	}
+	
+	public static void watcherBeginConnect(){
+		if(watcher.get() != null)
+			watcher.get().beginConnect();
+	}
+	
+	public static void watcherEndConnect(){
+		if(watcher.get() != null)
+			watcher.get().endConnect();
+	}
+	
+	public static void watcherBeginExecute(){
+		if(watcher.get() != null)
+			watcher.get().beginExecute();
+	}
+	
+	public static void watcherEndExecute(){
+		if(watcher.get() != null)
+			watcher.get().endExectue();
+	}
+	
+	public static void watcherEnd(){
+		if(watcher.get() != null)
+			watcher.get().end();
+	}
+	
+	public static Watcher getAndRemoveWatcher(){
+		Watcher wac = watcher.get();
+		watcher.remove();
+		return wac;  
 	}
 }

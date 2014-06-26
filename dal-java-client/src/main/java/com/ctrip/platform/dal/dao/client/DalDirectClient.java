@@ -23,6 +23,7 @@ import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
+import com.ctrip.platform.dal.sql.logging.Logger;
 
 /**
  * The direct connection implementation for DalClient.
@@ -41,13 +42,20 @@ public class DalDirectClient implements DalClient {
 	@Override
 	public <T> T query(String sql, StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor)
 			throws SQLException {
+		Logger.watcherBegin();
 		ConnectionAction<T> action = new ConnectionAction<T>() {
 			@Override
 			public T execute() throws Exception {
+				Logger.watcherBeginConnect();
 				conn = getConnection(hints, this);
+				Logger.watcherEndConnect();
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
+				
+				Logger.watcherBeginExecute();
 				rs = preparedStatement.executeQuery();
+				Logger.watcherEndExecute();
+				
 				return extractor.extract(rs);
 			}
 		};
@@ -59,14 +67,21 @@ public class DalDirectClient implements DalClient {
 	@Override
 	public int update(String sql, StatementParameters parameters, final DalHints hints)
 			throws SQLException {
+		Logger.watcherBegin();
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
 			public Integer execute() throws Exception {
+				Logger.watcherBeginConnect();
 				conn = getConnection(hints, this);
+				Logger.watcherEndConnect();
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
 				
-				return preparedStatement.executeUpdate();
+				Logger.watcherBeginExecute();
+				int ret = preparedStatement.executeUpdate();
+				Logger.watcherEndExecute();
+				
+				return ret;
 			}
 		};
 		action.populate(DalEventEnum.UPDATE_SIMPLE, sql, parameters);
@@ -77,13 +92,19 @@ public class DalDirectClient implements DalClient {
 	@Override
 	public int update(String sql, StatementParameters parameters,
 			final DalHints hints, final KeyHolder generatedKeyHolder) throws SQLException {
+		Logger.watcherBegin();
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
 			public Integer execute() throws Exception {
+				Logger.watcherBeginConnect();
 				conn = getConnection(hints, this);
+				Logger.watcherEndConnect();
 
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints, generatedKeyHolder);
+				
+				Logger.watcherBeginExecute();
 				int rows = preparedStatement.executeUpdate();
+				Logger.watcherEndExecute();
 				
 				List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
 				rs = preparedStatement.getGeneratedKeys();
@@ -103,15 +124,23 @@ public class DalDirectClient implements DalClient {
 
 	@Override
 	public int[] batchUpdate(String[] sqls, final DalHints hints) throws SQLException {
+		Logger.watcherBegin();
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			public int[] execute() throws Exception {
+				Logger.watcherBeginConnect();
 				conn = getConnection(hints, this);
+				Logger.watcherEndConnect();
+				
 				statement = createStatement(conn, hints);
 				for(String sql: sqls)
 					statement.addBatch(sql);
 				
-				return statement.executeBatch();
+				Logger.watcherBeginExecute();
+				int[] ret = statement.executeBatch();
+				Logger.watcherEndExecute();
+				
+				return ret;
 			}
 		};
 		action.populate(sqls);
@@ -122,14 +151,21 @@ public class DalDirectClient implements DalClient {
 	@Override
 	public int[] batchUpdate(String sql, StatementParameters[] parametersList,
 			final DalHints hints) throws SQLException {
+		Logger.watcherBegin();
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			public int[] execute() throws Exception {
+				Logger.watcherBeginConnect();
 				conn = getConnection(hints, this);
+				Logger.watcherEndConnect();
 				
 				statement = createPreparedStatement(conn, sql, parametersList, hints);
 				
-				return statement.executeBatch();
+				Logger.watcherBeginExecute();
+				int[] ret =  statement.executeBatch();
+				Logger.watcherEndExecute();
+				
+				return ret;
 			}
 		};
 		action.populate(sql, parametersList);
@@ -175,6 +211,7 @@ public class DalDirectClient implements DalClient {
 	@Override
 	public Map<String, ?> call(String callString,
 			StatementParameters parameters, final DalHints hints) throws SQLException {
+		Logger.watcherBegin();
 		ConnectionAction<Map<String, ?>> action = new ConnectionAction<Map<String, ?>>() {
 			@Override
 			public Map<String, ?> execute() throws Exception {
@@ -188,12 +225,19 @@ public class DalDirectClient implements DalClient {
 						callParameters.add(parameter);
 					}
 				}
-
+                
+				Logger.watcherBeginConnect();
 				conn = getConnection(hints, this);
+				Logger.watcherEndConnect();
 				
 				callableStatement = createCallableStatement(conn, callString, parameters, hints);
+				
+				Logger.watcherBeginExecute();
 				boolean retVal = callableStatement.execute();
 				int updateCount = callableStatement.getUpdateCount();
+				
+				Logger.watcherEndExecute();
+				
 				Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
 				if (retVal || updateCount != -1) {
 					returnedResults.putAll(extractReturnedResults(callableStatement, resultParameters, updateCount, hints));
@@ -207,20 +251,26 @@ public class DalDirectClient implements DalClient {
 		return doInConnection(action, hints);
 	}
 	
-
 	@Override
 	public int[] batchCall(String callString,
 			StatementParameters[] parametersList, final DalHints hints)
 			throws SQLException {
+		Logger.watcherBegin();
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			public int[] execute() throws Exception {
-
+				
+				Logger.watcherBeginConnect();
 				conn = getConnection(hints, this);
+				Logger.watcherEndConnect();
 				
 				callableStatement = createCallableStatement(conn, callString, parametersList, hints);
 
-				return callableStatement.executeBatch();
+				Logger.watcherBeginExecute();
+				int[] ret =  callableStatement.executeBatch();
+				Logger.watcherEndExecute();
+				
+				return ret;
 			}
 		};
 		action.populateSp(callString, parametersList);

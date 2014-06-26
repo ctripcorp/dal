@@ -77,6 +77,7 @@ public class DalTransactionManager {
 	
 	public <T> T doInTransaction(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
+		action.initLogEntry(connManager.getLogicDbName(), hints);
 		action.start();
 		
 		Throwable ex = null;
@@ -85,19 +86,16 @@ public class DalTransactionManager {
 		int level = 0;
 		try {
 			level = startTransaction(hints, action.operation);
-			
-			action.initLogEntry(connManager.getLogicDbName(), hints);
-			action.populateDbMeta();
-			
+					
 			result = action.execute();	
-			
-			action.cleanup();
+
 			endTransaction(level);
-			return result;
 		} catch (Throwable e) {
-			ex = e;
-			action.cleanup();
+			ex = e;	
 			rollbackTransaction();
+		}finally{
+			action.populateDbMeta();
+			action.cleanup();
 		}
 		
 		action.end(result, ex);

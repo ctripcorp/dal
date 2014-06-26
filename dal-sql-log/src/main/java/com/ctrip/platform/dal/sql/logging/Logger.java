@@ -34,8 +34,8 @@ public class Logger {
 	}
 	
 	public static void log(LogEntry entry) {
-		logger.info(TITLE, entry.toJson(), entry.getTag());
-		//trace.log(LogType.SQL, LogLevel.INFO, TITLE, entry.toJson(), entry.getTag());
+		//logger.info(TITLE, entry.toJson(), entry.getTag());
+		trace.log(LogType.SQL, LogLevel.INFO, TITLE, entry.toJson(), entry.getTag());
 	}
 	
 	public static void logGetConnectionFailed(String realDbName, Throwable e)

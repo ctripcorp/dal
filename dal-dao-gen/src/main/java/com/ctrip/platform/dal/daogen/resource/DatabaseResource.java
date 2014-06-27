@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import org.jasig.cas.client.util.AssertionHolder;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
@@ -43,6 +45,8 @@ import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
+import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.IgnoreCaseCampare;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
@@ -65,6 +69,74 @@ public class DatabaseResource {
 			classLoader = Configuration.class.getClassLoader();
 		}
 	}
+	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("connectionTest")
+	public Status addAllInOneDB(@FormParam("dbtype") String dbtype,
+			@FormParam("dbaddress") String dbaddress,
+			@FormParam("dbport") String dbport,
+			@FormParam("dbuser") String dbuser,
+			@FormParam("dbpassword") String dbpassword) {
+		Status status = Status.OK;
+		Connection conn = null;
+		ResultSet rs = null;
+		try {
+			conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword,
+							DatabaseType.valueOf(dbtype).getValue());
+			rs = conn.getMetaData().getCatalogs();
+			Set<String> allCatalog = new HashSet<String>();
+			while(rs.next()){
+				allCatalog.add(rs.getString("TABLE_CAT"));
+			}
+			status.setInfo(mapper.writeValueAsString(allCatalog));
+		} catch (SQLException e) {
+			status = Status.ERROR;
+			status.setInfo(e.getMessage());
+			return status;
+		} catch (JsonProcessingException e) {
+			status = Status.ERROR;
+			status.setInfo(e.getMessage());
+			return status;
+		} finally {
+			JdbcUtils.closeResultSet(rs);
+			JdbcUtils.closeConnection(conn);
+		}
+
+		return status;
+	}
+	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("addNewAllInOneDB")
+	public Status addAllInOneDB(@FormParam("dbtype") String dbtype,
+			@FormParam("allinonename") String allinonename,@FormParam("dbaddress") String dbaddress,
+			@FormParam("dbport") String dbport,@FormParam("dbuser") String dbuser,
+			@FormParam("dbpassword") String dbpassword,@FormParam("dbcatalog") String dbcatalog) {
+
+		Status status = Status.OK;
+		
+		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
+		
+		if(allDbDao.getGroupDBByDbName(allinonename)!=null){
+			status = Status.ERROR;
+			status.setInfo(allinonename+"已经存在!");
+			return status;
+		}else{
+			DalGroupDB groupDb = new DalGroupDB();
+			groupDb.setDbname(allinonename);
+			groupDb.setDb_address(dbaddress);
+			groupDb.setDb_port(dbport);
+			groupDb.setDb_user(dbuser);
+			groupDb.setDb_password(dbpassword);
+			groupDb.setDb_catalog(dbcatalog);
+			groupDb.setDb_providerName(DatabaseType.valueOf(dbtype).getValue());
+			allDbDao.insertDalGroupDB(groupDb);
+		}
+		
+		return Status.OK;
+	}
+	
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)

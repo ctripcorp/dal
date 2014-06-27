@@ -96,7 +96,7 @@ public class DalGroupDbResource {
 			
 			if(DatabaseType.SQLServer.getValue().equals(db.getDb_providerName())){
 				db.setDb_providerName("SQLServer");
-			}else if(DatabaseType.SQLServer.getValue().equals(db.getDb_providerName())){
+			}else if(DatabaseType.MySQL.getValue().equals(db.getDb_providerName())){
 				db.setDb_providerName("MySQL");
 			}else{
 				db.setDb_providerName("unknown");

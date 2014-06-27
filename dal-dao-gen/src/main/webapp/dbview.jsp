@@ -64,57 +64,67 @@
 					<h4 class="modal-title" id="myModalLabel">Add New DataBase</h4>
 				</div>
 				<div class="modal-body">
-					<div class="row-fluid">
-						<div class="control-group">
-							<label class="control-label popup_label" style="width: 130px;">数据库类型:</label> 
-							<select id="dbtype" class="span8">
-								<option value="no">请选择</option>
-								<option value="MySQL">MySQL</option>
-								<option value="SQLServer">SQLServer</option>
-							</select>
+				    <div id="add_new_db_step1" class="row-fluid">
+				    	<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">数据库类型:</label> 
+								<select id="dbtype" class="span8">
+									<option value="no">请选择</option>
+									<option value="MySQL">MySQL</option>
+									<option value="SQLServer">SQLServer</option>
+								</select>
+							</div>
+						</div>
+						<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">DB Address:</label> 
+								<input id="dbaddress" class="span8 input-sm" type="text">
+							</div>
+						</div>
+						<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">DB Port:</label> 
+								<input id="dbport" class="span8 input-sm" type="text" value="28747">
+							</div>
+						</div>
+						<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">DB User:</label> 
+								<input id="dbuser" class="span8 input-sm" type="text">
+							</div>
+						</div>
+						<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">DB Password:</label> 
+								<input id="dbpassword" class="span8 input-sm" type="text">
+							</div>
+						</div>
+				    </div>
+					<div id="add_new_db_step2" class="row-fluid">
+						<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">DB Catalog:</label> 
+								<select id="dbcatalog" class="span8"></select>
+							</div>
+						</div>
+						<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">All-In-One Name:</label> 
+								<input id="allinonename" class="span8 input-sm" type="text">
+							</div>
 						</div>
 					</div>
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label" style="width: 130px;">All-In-One Name:</label> 
-							<input id="allinonename" class="span8 input-sm" type="text">
-						</div>
-					</div>
-					<div class="row-fluid">
-						<div class="control-group">
-							<label class="control-label popup_label" style="width: 130px;">DB Address:</label> 
-							<input id="address" class="span8 input-sm" type="text">
-						</div>
-					</div>
-					<div class="row-fluid">
-						<div class="control-group">
-							<label class="control-label popup_label" style="width: 130px;">DB Port:</label> 
-							<input id="dbport" class="span8 input-sm" type="text" value="28747">
-						</div>
-					</div>
-					<div class="row-fluid">
-						<div class="control-group">
-							<label class="control-label popup_label" style="width: 130px;">DB User:</label> 
-							<input id="dbuser" class="span8 input-sm" type="text">
-						</div>
-					</div>
-					<div class="row-fluid">
-						<div class="control-group">
-							<label class="control-label popup_label" style="width: 130px;">DB Password:</label> 
-							<input id="dbpassword" class="span8 input-sm" type="text">
-						</div>
-					</div>
-					<div class="row-fluid">
-						<div class="control-group">
-							<label class="control-label popup_label" style="width: 130px;">DB Catalog:</label> 
-							<input id="dbcatalog" class="span8 input-sm" type="text">
+							<label id="error_msg" class="control-label popup_label" style="color:red;"></label>
 						</div>
 					</div>
 				</div>
 				<div class="modal-footer">
-               	  <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                  <button id="save_db" type="button" class="btn btn-primary">Save changes</button>
+               	  <button id="conn_test"  type="button" class="btn btn-success">连接测试</button>
+                  <button id="add_new_db_next" type="button" class="btn btn-primary">下一步</button>
+                  <button id="add_new_db_prev" type="button" class="btn btn-info">上一步</button>
+                  <button id="add_new_db_save" type="button" class="btn btn-primary">保存</button>
                </div>
             </div>
          </div>

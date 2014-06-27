@@ -2,13 +2,9 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -24,7 +20,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
-import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
 import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
@@ -34,6 +29,7 @@ import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 
@@ -93,33 +89,26 @@ public class DalGroupDbResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<DalGroupDB> getAllGroupDbs() {
 		
-		Set<String> allDbNames = LocalDataSourceLocator.newInstance().getDBNames();
-	
 		List<DalGroupDB> dbs = group_db_dao.getAllGroupDbs();
-		Map<String, DalGroupDB> map = new HashMap<String,DalGroupDB>();
 		for(DalGroupDB db : dbs){
-			if(!map.containsKey(db.getDbname()))
-				map.put(db.getDbname(), db);
+			db.setDb_user("******");
+			db.setDb_password("******");
+			
+			if(DatabaseType.SQLServer.getValue().equals(db.getDb_providerName())){
+				db.setDb_providerName("SQLServer");
+			}else if(DatabaseType.SQLServer.getValue().equals(db.getDb_providerName())){
+				db.setDb_providerName("MySQL");
+			}else{
+				db.setDb_providerName("unknown");
+			}
 		}
-		//List<DalGroupDB> result = new ArrayList<DalGroupDB>(dbs); 
-		List<DalGroupDB> result = new ArrayList<DalGroupDB>();
-//		for(DalGroupDB db:dbs){
-//			allDbNames.remove(db.getDbname());
-//		}
-		for(String name:allDbNames){
-			DalGroupDB db = new DalGroupDB();
-			db.setDbname(name);
-			if(map.containsKey(name))
-				db.setComment( map.get(name).getComment());
-			result.add(db);
-		}
-		Collections.sort(result, new Comparator<DalGroupDB>() {
+		Collections.sort(dbs, new Comparator<DalGroupDB>() {
 			@Override
 			public int compare(DalGroupDB o1, DalGroupDB o2) {
 				return o1.getDbname().compareTo(o2.getDbname());
 			}
 		});
-		return result;
+		return dbs;
 	}
 	
 	

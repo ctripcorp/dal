@@ -24,4 +24,4 @@ to the root directory of the application. -->
                    jmxEnabled="$resource.isJmxEnabled()"
                    jdbcInterceptors="$resource.getJdbcInterceptors()"/>
 #end
-<Context>
+</Context>

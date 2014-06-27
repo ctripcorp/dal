@@ -137,6 +137,31 @@ public class DatabaseResource {
 		return Status.OK;
 	}
 	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("deleteAllInOneDB")
+	public Status addAllInOneDB(@FormParam("allinonename") String allinonename) {
+		
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+
+		Status status = Status.OK;
+		
+		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
+		DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		
+		if(user.getGroupId()!=groupDb.getDal_group_id()){
+			status = Status.ERROR;
+			status.setInfo("你没有当前DataBase的操作权限.");
+			return status;
+		}
+		
+		allDbDao.deleteDalGroupDB(groupDb.getId());		
+		
+		return Status.OK;
+	}
+	
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)

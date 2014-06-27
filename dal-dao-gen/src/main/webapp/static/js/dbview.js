@@ -52,7 +52,28 @@
     };
 
     var delDB = function(){
-
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if(record!=null){
+            if (confirm("Are you sure to delete?")) {
+                $.post("/rest/db/deleteAllInOneDB", {
+                    allinonename : record['dbname']
+                },function (data) {
+                    if (data.code == "OK") {
+                        refreshAllDB();
+                    } else {
+                        $("#errorMess").html(data.info);
+                        $("#errorNoticeDiv").modal({
+                            "backdrop": "static"
+                        });
+                    }
+                }).fail(function (data) {
+                        alert("执行异常");
+                    });
+            }
+        }else{
+            alert('请选择一个database！');
+        }
     };
 
     Render.prototype = {

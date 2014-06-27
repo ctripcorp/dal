@@ -19,11 +19,15 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="D:/Users/wcyuan/Documents/Projects/Dal_Java/dal-tester/libs/p-unit-0.15.319.jar"/>
-	<classpathentry kind="lib" path="D:/Users/wcyuan/Documents/Projects/Dal_Java/dal-tester/libs/p-unit-0.15.319-extension.jar"/>
-	<classpathentry kind="lib" path="D:/Users/wcyuan/Documents/Projects/Dal_Java/dal-tester/libs/itext-2.0.2.jar"/>
-	<classpathentry kind="lib" path="D:/Users/wcyuan/Documents/Projects/Dal_Java/dal-tester/libs/jcommon-1.0.9.jar"/>
-	<classpathentry kind="lib" path="D:/Users/wcyuan/Documents/Projects/Dal_Java/dal-tester/libs/jfreechart-1.0.5.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libs/itext-2.0.2.jar"/>
+	<classpathentry kind="lib" path="libs/jcommon-1.0.9.jar"/>
+	<classpathentry kind="lib" path="libs/jfreechart-1.0.5.jar"/>
+	<classpathentry kind="lib" path="libs/p-unit-0.15.319-extension.jar"/>
+	<classpathentry kind="lib" path="libs/p-unit-0.15.319.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

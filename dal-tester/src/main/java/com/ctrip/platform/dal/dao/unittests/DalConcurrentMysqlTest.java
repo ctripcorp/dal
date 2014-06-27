@@ -34,7 +34,7 @@ public class DalConcurrentMysqlTest {
 	
 	private static List<Number> generateIds;
 	private static Random random = new Random();
-	private final static int INSERT_COUNT = 1000;
+	private final static int INSERT_COUNT = 100;
 	
 	private final static String DROP_TABLE_SQL = "DROP TABLE IF EXISTS " + TABLE_NAME;
 	private final static String CREATE_TABLE_SQL = "CREATE TABLE dal_client_test("

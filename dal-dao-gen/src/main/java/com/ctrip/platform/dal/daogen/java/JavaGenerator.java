@@ -868,6 +868,7 @@ public class JavaGenerator extends AbstractGenerator {
 							result.setSuccessal(true);
 						}catch(Exception e){
 							log.error(result.getTaskName() + " exception.", e);
+							progress.setOtherMessage(e.getMessage());
 						}
 						return result;
 					}
@@ -904,6 +905,7 @@ public class JavaGenerator extends AbstractGenerator {
 							result.setSuccessal(true);
 						}catch(Exception e){
 							log.error(result.getTaskName() + " exception.", e);
+							progress.setOtherMessage(e.getMessage());
 						}
 						return result;
 					}
@@ -915,7 +917,7 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public boolean prepareDirectory(int projectId, boolean regenerate) {
+	public boolean prepareDirectory(int projectId, boolean regenerate) throws Exception {
 		File mavenLikeDir = new File(String.format("%s/%s/java", generatePath,
 				projectId));
 		try {
@@ -938,7 +940,7 @@ public class JavaGenerator extends AbstractGenerator {
 				FileUtils.forceMkdir(testMavenLike);
 			}
 		} catch (IOException e1) {
-			e1.printStackTrace();
+			throw e1;
 		}
 
 		return false;
@@ -946,7 +948,7 @@ public class JavaGenerator extends AbstractGenerator {
 
 	@Override
 	public boolean prepareData(int projectId, boolean regenerate,
-			Progress progress) {
+			Progress progress) throws Exception {
 		
 		Project project = daoOfProject.getProjectByID(projectId);
 		if(project.getDal_config_name() != null && !project.getDal_config_name().isEmpty())
@@ -978,7 +980,7 @@ public class JavaGenerator extends AbstractGenerator {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw e;
 		}
 
 		return true;
@@ -986,7 +988,6 @@ public class JavaGenerator extends AbstractGenerator {
 
 	@Override
 	public boolean clearResource() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

@@ -281,6 +281,7 @@ public class DbUtils {
 		} catch (Exception e) {
 			log.error(String.format("get sp exists error: [dbName=%s;spName=%s]", 
 					dbName, sp.getName()), e);
+//			throw e;
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);

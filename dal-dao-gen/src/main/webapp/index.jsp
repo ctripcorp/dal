@@ -420,9 +420,13 @@
                      <div id="param_list" class="row-fluid input-sm">      
                      </div>
                   </div>
+                  <div class="row-fluid">
+                     <div class="row-fluid">
+                           <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
+                     </div>  
+                  </div>
                </div>
                <div class="modal-footer">
-                  <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
                   <a href="#" class="ctip" data-toggle="tooltip"
 						data-placement="top" title="" html="1"
 						data-original-title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>

@@ -8,7 +8,6 @@ import java.util.List;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
-import javax.sql.DataSource;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -30,8 +29,8 @@ import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 
 /**
  * DAL database of group manage.
@@ -158,12 +157,11 @@ public class DalGroupDbResource {
 		int ret = -1;
 		if(null != groupdb){
 			ret = group_db_dao.updateGroupDB(groupdb.getId(), groupID);
+			group_db_dao.updateGroupDB(groupdb.getId(), comment);
 		}else{
-			DalGroupDB groupDb = new DalGroupDB();
-			groupDb.setDbname(dbname);
-			groupDb.setComment(comment);
-			groupDb.setDal_group_id(groupID);
-			ret = group_db_dao.insertDalGroupDB(groupDb);
+			Status status = Status.ERROR;
+			status.setInfo(dbname + " 不存在，请先到数据库一览界面添加DB.");
+			return status;
 		}
 		if(ret <= 0){
 			log.error("Add dal group db failed, caused by db operation failed, pls check the spring log");
@@ -260,7 +258,7 @@ public class DalGroupDbResource {
 			return status;
 		}
 
-		int ret = group_db_dao.deleteDalGroupDB(dbID);
+		int ret = group_db_dao.updateGroupDB(dbID, -1);
 		if(ret <= 0){
 			log.error("Delete db failed, caused by db operation failed, pls check the spring log");
 			Status status = Status.ERROR;
@@ -354,8 +352,7 @@ public class DalGroupDbResource {
 		dbset.setName(dbname);
 		dbset.setProvider("sqlProvider");
 		try {
-			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(dbname);
-			Connection connection = ds.getConnection();
+			Connection connection = DataSourceUtil.getConnection(dbname);
 			String dbType = connection.getMetaData().getDatabaseProductName();
 			if (dbType !=null && (!dbType.equals("Microsoft SQL Server"))){
 				dbset.setProvider("mySqlProvider");

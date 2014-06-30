@@ -63,7 +63,16 @@
         $("#next_step").text("正在加载...");
         $("#next_step").removeClass("btn-primary");
         $.get(sprintf("/rest/db/table_sps?db_name=%s&rand=%s",
-                $("#databases").val(), Math.random())).done(function (data) {
+                $("#databases").val(), Math.random())).done(function (retValue) {
+                if(retValue.code!='OK'){
+                    $("#error_msg").text(retValue.info);
+                    $("#next_step").removeAttr("disabled");
+                    $("#next_step").addClass("btn-primary");
+                    $("#next_step").text("下一步");
+                    $("body").unblock();
+                    return;
+                }
+                var data = $.parseJSON(retValue.info);
                 $("select[id$=table_list] > option").remove();
                 $("select[id$=view_list] > option").remove();
                 $("select[id$=sp_list] > option").remove();

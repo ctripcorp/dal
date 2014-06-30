@@ -673,7 +673,7 @@ public class CSharpGenerator extends AbstractGenerator {
 				"templates/DalFactory.cs.tpl");
 	}
 
-	private void prepareDbFromFreeSql(List<GenTaskByFreeSql> freeSqls) {
+	private void prepareDbFromFreeSql(List<GenTaskByFreeSql> freeSqls) throws Exception {
 		for (GenTaskByFreeSql task : freeSqls) {
 			this.addDatabaseSet(task.getDatabaseSetName());
 			_freeDaos.add(WordUtils.capitalize(task.getClass_name()));
@@ -714,7 +714,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	} 
 
 	private List<Callable<ExecuteResult>> prepareFreeSql(int projectId,
-			boolean regenerate, final Progress progress) {
+			boolean regenerate, final Progress progress) throws Exception {
 
 		List<GenTaskByFreeSql> _freeSqls;
 		if (regenerate) {
@@ -780,7 +780,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 	private void prepareDbFromTableViewSp(
 			List<GenTaskByTableViewSp> tableViewSps,
-			List<GenTaskBySqlBuilder> sqlBuilders) {
+			List<GenTaskBySqlBuilder> sqlBuilders) throws Exception {
 		Set<String> existsTable = new HashSet<String>();
 
 		for (GenTaskByTableViewSp task : tableViewSps) {
@@ -1039,7 +1039,7 @@ public class CSharpGenerator extends AbstractGenerator {
 
 	@Override
 	public boolean prepareData(int projectId, boolean regenerate,
-			Progress progress) {
+			Progress progress) throws Exception {
 
 		Project project = daoOfProject.getProjectByID(projectId);
 		if(project.getDal_config_name() != null && !project.getDal_config_name().isEmpty())

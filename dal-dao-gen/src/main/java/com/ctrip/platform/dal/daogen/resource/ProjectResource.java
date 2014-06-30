@@ -37,15 +37,7 @@ import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.java.JavaGenerator;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 
-/**
- * The schema of {daogen.project} { "name": "InternationalFightEntine",
- * "namespace": "com.ctrip.flight.intl.engine" }
- * 
- * @author gawu
- * 
- */
 @Resource
 @Singleton
 @Path("project")
@@ -131,21 +123,6 @@ public class ProjectResource {
 		
 		return SpringBeanGetter.getDaoOfProject().getProjectByGroupId(user.getGroupId());
 
-		/*List<UserProject> projects = SpringBeanGetter.getDaoOfUserProject()
-				.getUserProjectsByUser(userNo);
-
-		List<Integer> ids = new ArrayList<Integer>();
-
-		for (UserProject u : projects) {
-			ids.add(u.getProject_id());
-		}
-
-		if (ids.size() > 0)
-			return SpringBeanGetter.getDaoOfProject().getProjectByIDS(
-					ids.toArray());
-		else
-			return new ArrayList<Project>();*/
-
 	}
 
 	@GET
@@ -195,8 +172,6 @@ public class ProjectResource {
 			proj.setDal_config_name(dalconfigname);
 			proj.setDal_group_id(user.getGroupId());
 			SpringBeanGetter.getDaoOfProject().insertProject(proj);
-//			int pk = SpringBeanGetter.getDaoOfProject().insertProject(proj);
-//			shareProject(pk, userNo);
 		} else if (action.equals("update")) {
 			List<Project>  pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
 			if(null != pjs && pjs.size() > 0){
@@ -215,7 +190,6 @@ public class ProjectResource {
 			proj.setDal_config_name(dalconfigname);
 			SpringBeanGetter.getDaoOfProject().updateProject(proj);
 
-//			shareProject(id, userNo);
 		} else if (action.equals("delete")) {
 			proj.setId(Integer.valueOf(id));
 			if (SpringBeanGetter.getDaoOfProject().deleteProject(proj) > 0) {
@@ -249,7 +223,8 @@ public class ProjectResource {
 			if(null != dbsets && dbsets.size() > 0){
 				info += "<span style='color:red;'>databaseSet Name --> "+dbsetName+" 已经存在，请重新命名，再手动添加!"+"</span><br/>";
 			}else{
-				Set<String> allInOneDbnames = LocalDataSourceLocator.newInstance().getDBNames();
+				List<String> dbAllinOneNames = SpringBeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
+				Set<String> allInOneDbnames = new HashSet<String>(dbAllinOneNames);
 				if(allInOneDbnames.contains(dbsetName)){
 					info+=genDefaultDbset(groupId,dbsetName);
 				}else{
@@ -301,7 +276,8 @@ public class ProjectResource {
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		int groupId = user.getGroupId();
 		Set<String> notExistDb = getLackDatabase(groupId, project_id);
-		Set<String> allInOneDbnames = LocalDataSourceLocator.newInstance().getDBNames();
+		List<String> dbAllinOneNames = SpringBeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
+		Set<String> allInOneDbnames = new HashSet<String>(dbAllinOneNames);
 		
 		String info="";
 		for(String dbname:notExistDb){
@@ -310,15 +286,15 @@ public class ProjectResource {
 				DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDal_group_id());
 				info += "<span style='color:red;'>数据库"+groupdb.getDbname()+" 已经加入 "+group.getGroup_comment()+"，一键补全失败</span><br/>";
 			}else if(allInOneDbnames.contains(dbname)){
-				DalGroupDB groupDb = new DalGroupDB();
-				groupDb.setDbname(dbname);
-				groupDb.setDal_group_id(groupId);
-				int ret = SpringBeanGetter.getDaoOfDalGroupDB().insertDalGroupDB(groupDb);
+				DalGroupDB groupDb = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
+				int ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupDb.getId(), groupId);
 				if(ret <= 0){
 					info+="<span style='color:red;'>数据库"+dbname+"一键补全失败，请手动添加。"+"</span><br/>";
 				}else{
 					info+="数据库"+dbname+"一键补全成功。"+"<br/>";
 				}
+			}else{
+				info+="<span style='color:red;'>数据库"+dbname+"一键补全失败，请手动添加。"+"</span><br/>";
 			}
 		}
 		return info;
@@ -346,8 +322,7 @@ public class ProjectResource {
 		try {
 			log.info(String.format("begain generate project: [id=%s; regen=%s; language=%s]",
 					id, regen, language));
-			if (language.equals("java"))
-			{
+			if (language.equals("java")) {
 				new JavaGenerator().generate(id, regen, progress, null);
 			}
 			else if (language.equals("cs")){
@@ -527,7 +502,8 @@ public class ProjectResource {
 					result.add(entry.getConnectionString());
 				}
 			}else{
-				Set<String> allInOneDbnames = LocalDataSourceLocator.newInstance().getDBNames();
+				List<String> dbAllinOneNames = SpringBeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
+				Set<String> allInOneDbnames = new HashSet<String>(dbAllinOneNames);
 				if(allInOneDbnames.contains(dbsetName)){
 					result.add(dbsetName);
 				}

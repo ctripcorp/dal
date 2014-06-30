@@ -63,7 +63,7 @@ public abstract class AbstractGenerator implements Generator {
 		this.log = log;
 	}
 	
-	public void generate(int projectId, boolean regenerate, Progress progress, Map hints) {
+	public void generate(int projectId, boolean regenerate, Progress progress, Map hints) throws Exception {
 		
 		Project proj = daoOfProject.getProjectByID(projectId);
 
@@ -100,7 +100,7 @@ public abstract class AbstractGenerator implements Generator {
 
 	public abstract boolean prepareDirectory(int projectId, boolean regenerate);
 	
-	public abstract boolean prepareData(int projectId, boolean regenerate, Progress progress);
+	public abstract boolean prepareData(int projectId, boolean regenerate, Progress progress) throws Exception;
 
 	public abstract boolean generateCode(int projectId, Progress progress, Map hints);
 

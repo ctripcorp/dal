@@ -13,13 +13,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.sql.DataSource;
-
 import microsoft.sql.DateTimeOffset;
 
 import org.apache.log4j.Logger;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.common.enums.DbType;
@@ -30,7 +26,6 @@ import com.ctrip.platform.dal.daogen.cs.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.java.JavaParameterHost;
-import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 
 public class DbUtils {
 	private static Logger log;
@@ -54,9 +49,7 @@ public class DbUtils {
 		ResultSet rs = null;
 		Connection connection = null;
 		try {
-			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
-					dbName);
-			connection = ds.getConnection();
+			connection = DataSourceUtil.getConnection(dbName);
 
 			String dbType = null;
 			if (Consts.databaseType.containsKey(dbName)) {
@@ -67,18 +60,15 @@ public class DbUtils {
 			}
 
 			if (dbType.equals("Microsoft SQL Server")) {
-				JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
 				String sql = String
 						.format("select Name from sysobjects where xtype  = 'u' and status>=0 and Name=?",
 								dbName);
-				result = jdbcTemplate.query(sql, new Object[] { tableName },
-						new RowMapper<String>() {
-							public String mapRow(ResultSet rs, int rowNum)
-									throws SQLException {
-								return rs.getString(1);
-							}
-						}).size() > 0;
+				PreparedStatement statement = connection.prepareStatement(sql,
+						ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+				statement.setString(1, tableName);
+				rs = statement.executeQuery();
+				result = rs.next();
 			} else {
 				String[] types = { "TABLE" };
 				rs = connection.getMetaData().getTables(null, null,
@@ -108,13 +98,11 @@ public class DbUtils {
 	 * @throws Exception
 	 */
 	public static List<String> getAllTableNames(String dbName) throws Exception {
-		DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(dbName);
-
 		List<String> results = new ArrayList<String>();
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
-			connection = ds.getConnection();
+			connection = DataSourceUtil.getConnection(dbName);
 			String dbType = null;
 			if (Consts.databaseType.containsKey(dbName)) {
 				dbType = Consts.databaseType.get(dbName);
@@ -151,8 +139,9 @@ public class DbUtils {
 				}
 			//}
 		} catch (SQLException e) {
-			log.error(String.format("get all table names error: [dbName=%s]", 
-					dbName), e);
+//			log.error(String.format("get all table names error: [dbName=%s]", 
+//					dbName), e);
+			throw e;
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
@@ -166,9 +155,7 @@ public class DbUtils {
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
-			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
-					dbName);
-			connection = ds.getConnection();
+			connection = DataSourceUtil.getConnection(dbName);
 			String dbType = null;
 			if (Consts.databaseType.containsKey(dbName)) {
 				dbType = Consts.databaseType.get(dbName);
@@ -178,18 +165,16 @@ public class DbUtils {
 			}
 
 			if (dbType.equals("Microsoft SQL Server")) {
-				JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
 				String sql = String
 						.format(" select Name from sysobjects where xtype ='v' and status>=0 and Name = ?",
 								dbName);
-				result = jdbcTemplate.query(sql, new Object[] { viewName },
-						new RowMapper<String>() {
-							public String mapRow(ResultSet rs, int rowNum)
-									throws SQLException {
-								return rs.getString(1);
-							}
-						}).size() > 0;
+				PreparedStatement statement = connection.prepareStatement(sql,
+						ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+				statement.setString(1, viewName);
+				rs = statement.executeQuery();
+				result = rs.next();
+				
 			} else {
 				String[] types = { "VIEW" };
 				rs = connection.getMetaData().getTables(null, null, viewName,
@@ -219,13 +204,12 @@ public class DbUtils {
 	 * @throws Exception
 	 */
 	public static List<String> getAllViewNames(String dbName) throws Exception {
-		DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(dbName);
 
 		List<String> results = new ArrayList<String>();
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
-			connection = ds.getConnection();
+			connection = DataSourceUtil.getConnection(dbName);
 			String dbType = null;
 			if (Consts.databaseType.containsKey(dbName)) {
 				dbType = Consts.databaseType.get(dbName);
@@ -257,8 +241,9 @@ public class DbUtils {
 				}
 			//}
 		} catch (SQLException e) {
-			log.error(String.format("get all view names error: [dbName=%s]", 
-					dbName), e);
+//			log.error(String.format("get all view names error: [dbName=%s]", 
+//					dbName), e);
+			throw e;
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
@@ -271,11 +256,9 @@ public class DbUtils {
 
 		boolean result = false;
 		Connection connection = null;
+		ResultSet rs = null;
 		try {
-			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
-					dbName);
-
-			connection = ds.getConnection();
+			connection = DataSourceUtil.getConnection(dbName);
 			String dbType = null;
 			if (Consts.databaseType.containsKey(dbName)) {
 				dbType = Consts.databaseType.get(dbName);
@@ -285,25 +268,21 @@ public class DbUtils {
 			}
 			// 如果是Sql Server，通过Sql语句获取所有表和视图的名称
 			if (dbType.equals("Microsoft SQL Server")) {
-				JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
 				String sql = "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE' and SPECIFIC_SCHEMA=? and SPECIFIC_NAME=?";
-				result = jdbcTemplate.query(sql,
-						new Object[] { sp.getSchema(), sp.getName() },
-						new RowMapper<StoredProcedure>() {
-							public StoredProcedure mapRow(ResultSet rs,
-									int rowNum) throws SQLException {
-								StoredProcedure sp = new StoredProcedure();
-								sp.setSchema(rs.getString(1));
-								sp.setName(rs.getString(2));
-								return sp;
-							}
-						}).size() > 0;
+				PreparedStatement statement = connection.prepareStatement(sql,
+						ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+				statement.setString(1, sp.getSchema());
+				statement.setString(2, sp.getName());
+				rs = statement.executeQuery();
+				result = rs.next();
+				
 			}
 		} catch (Exception e) {
 			log.error(String.format("get sp exists error: [dbName=%s;spName=%s]", 
 					dbName, sp.getName()), e);
 		} finally {
+			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
 		}
 
@@ -320,12 +299,11 @@ public class DbUtils {
 	public static List<StoredProcedure> getAllSpNames(String dbName)
 			throws Exception {
 
-		DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(dbName);
-
 		List<StoredProcedure> results = new ArrayList<StoredProcedure>();
 		Connection connection = null;
+		ResultSet rs = null;
 		try {
-			connection = ds.getConnection();
+			connection = DataSourceUtil.getConnection(dbName);
 			String dbType = null;
 			if (Consts.databaseType.containsKey(dbName)) {
 				dbType = Consts.databaseType.get(dbName);
@@ -336,26 +314,27 @@ public class DbUtils {
 
 			// 如果是Sql Server，通过Sql语句获取所有视图的名称
 			if (dbType.equals("Microsoft SQL Server")) {
-				JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
 				String sql = String
 						.format("select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE'",
 								dbName);
-				results = jdbcTemplate.query(sql,
-						new RowMapper<StoredProcedure>() {
-							public StoredProcedure mapRow(ResultSet rs,
-									int rowNum) throws SQLException {
-								StoredProcedure sp = new StoredProcedure();
-								sp.setSchema(rs.getString(1));
-								sp.setName(rs.getString(2));
-								return sp;
-							}
-						});
+				PreparedStatement statement = connection.prepareStatement(sql,
+						ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+				rs = statement.executeQuery();
+				while(rs.next()){
+					StoredProcedure sp = new StoredProcedure();
+					sp.setSchema(rs.getString(1));
+					sp.setName(rs.getString(2));
+					results.add(sp);
+				}
+				
 			}
 		} catch (SQLException e) {
-			log.error(String.format("get all sp names error: [dbName=%s]", 
-					dbName), e);
+//			log.error(String.format("get all sp names error: [dbName=%s]", 
+//					dbName), e);
+			throw e;
 		} finally {
+			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
 		}
 		return results;
@@ -374,9 +353,7 @@ public class DbUtils {
 		Connection connection = null;
 		List<AbstractParameterHost> parameters = new ArrayList<AbstractParameterHost>();
 		try {
-			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
-					dbName);
-			connection = ds.getConnection();
+			connection = DataSourceUtil.getConnection(dbName);
 
 			ResultSet spParams = connection.getMetaData().getProcedureColumns(
 					null, sp.getSchema(), sp.getName(), null);
@@ -412,8 +389,7 @@ public class DbUtils {
 
 					parameters.add(host);
 				}
-			} else // TODO replace with CurrentLanguage
-			if (language == CurrentLanguage.Java) {
+			} else if (language == CurrentLanguage.Java) {
 				while (spParams.next()) {
 					int paramMode = spParams.getShort("COLUMN_TYPE");
 					// for (int i = 1; i<=
@@ -487,9 +463,7 @@ public class DbUtils {
 		ResultSet primaryKeyRs = null;
 		List<String> primaryKeys = new ArrayList<String>();
 		try {
-			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
-					dbName);
-			connection = ds.getConnection();
+			connection = DataSourceUtil.getConnection(dbName);
 			primaryKeyRs = connection.getMetaData().getPrimaryKeys(null,
 					null, tableName);
 
@@ -523,9 +497,7 @@ public class DbUtils {
 		ResultSet allColumnsRs = null;
 		List<AbstractParameterHost> allColumns = new ArrayList<AbstractParameterHost>();
 		try {
-			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
-					dbName);
-			connection = ds.getConnection();
+			connection = DataSourceUtil.getConnection(dbName);
 
 			// 首先检查表是否存在
 
@@ -629,9 +601,7 @@ public class DbUtils {
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
-			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(dbName);
-			
-			connection = ds.getConnection();
+			connection = DataSourceUtil.getConnection(dbName);
 			String dbType = null;
 			if (Consts.databaseType.containsKey(dbName)) {
 				dbType = Consts.databaseType.get(dbName);
@@ -688,23 +658,16 @@ public class DbUtils {
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
-			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
-					dbName);
-
-			
 			
 			Matcher m = inRegxPattern.matcher(sql);
 			String temp=sql;
-			while(m.find())
-	    	{
+			while(m.find()) {
 				temp = temp.replace(m.group(1), String.format("(?) "));
 	    	}
 			
 			String replacedSql = temp.replaceAll("[@:]\\w+", "?");
 
-			connection = ds.getConnection();
-
-			// connection.setCatalog(dbName);
+			connection = DataSourceUtil.getConnection(dbName);
 
 			PreparedStatement ps = connection.prepareStatement(replacedSql);
 
@@ -765,8 +728,6 @@ public class DbUtils {
 			}
 			
 			
-			//return rs.getMetaData();
-
 		} catch (SQLException e) {
 			log.error(String.format("test query sql error: [dbName=%s;sql=%s;language=%s]", 
 					dbName, sql, language), e);
@@ -808,7 +769,7 @@ public class DbUtils {
 		}
 	}
 
-	public static String getDbType(String dbName) {
+	public static String getDbType(String dbName) throws Exception {
 
 		String dbType = null;
 		if (Consts.databaseType.containsKey(dbName)) {
@@ -816,16 +777,14 @@ public class DbUtils {
 		} else {
 			Connection connection = null;
 			try {
-				DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
-						dbName);
-
-				connection = ds.getConnection();
+				connection = DataSourceUtil.getConnection(dbName);
 
 				dbType = connection.getMetaData().getDatabaseProductName();
 				Consts.databaseType.put(dbName, dbType);
 
 			} catch (Exception ex) {
-				log.error(String.format("get db type error: [dbName=%s]", dbName), ex);
+//				log.error(String.format("get db type error: [dbName=%s]", dbName), ex);
+				throw ex;
 			} finally {
 				JdbcUtils.closeConnection(connection);
 			}

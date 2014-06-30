@@ -68,7 +68,11 @@
 						<div class="control-group">
 							<label class="control-label popup_label" style="width: 80px;">数据库：</label>
 							<select id="databases" class="span8"></select>
-							<a href="javascript:;" onclick="$('#manageDb').modal();">没有找到？</a>
+							<a href="dbview.jsp" target="_blank" class="ctip" data-toggle="tooltip"
+									data-placement="right" title="" html="1"
+									data-original-title="如果没有找到，请到数据库一览界面添加Database!"> 
+							        没有找到？
+							</a>
 						</div>
 					</div>
 					<div class="row-fluid">
@@ -137,62 +141,6 @@
       </div>
       <!--End modal-->
       
-      <!--Begin modal-->
-	<div class="modal fade" id="manageDb" tabindex="-1" role="dialog"
-		aria-labelledby="generateCodeLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"
-						aria-hidden="true">&times;</button>
-					<h4 class="modal-title">添加数据库配置</h4>
-				</div>
-				<div class="modal-body">
-					<div class="row-fluid">
-						<div class="control-group">
-							<label class="control-label popup_label" style="width:130px">All-In-One Name：</label>
-							<input id="all_In_One_Name" class="span8 input-sm" type="text">
-						</div>
-					</div>
-					<div class="row-fluid">
-						<div class="control-group">
-							<label class="control-label popup_label" style="width:130px">数据库类型：</label>
-							<select id="dbtype" class="span8">
-								<option value="no">请选择</option>
-								<option value="MySQL">MySQL</option>
-								<option value="SQLServer">SQLServer</option>
-							</select>
-						</div>
-					</div>
-					<div class="row-fluid">
-						<div class="control-group">
-							<label class="control-label popup_label" style="width:130px">数据库：</label>
-							<!-- <select id="origianlDB" class="span8"></select> -->
-							<input id="origianlDB" class="span8 input-sm" type="text">
-						</div>
-					</div>
-					<div class="row-fluid">
-						<div class="control-group">
-							<label class="control-label popup_label" style="width:190px">最后生成的数据库配置：</label>
-							<a href="#" class="ctip" data-toggle="tooltip"
-									data-placement="right" title="" html="1"
-									data-original-title="如果生成的配置不符合你的要求，请直接修改下面的数据库配置再保存!"> 
-							        <img class="helpicon" src="/static/images/help.jpg">
-							</a>
-							<textarea id="all_in_one" class="span12 popup_text" style="height: 130px;"></textarea>
-						</div>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<label id="error_msg3" class="control-label popup_label" style="color:red;"></label>
-					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button id="add_db" type="button" class="btn btn-primary">保存</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!--End modal-->
-	
 	<!--Begin modal-->
       <div class="modal fade" id="transferDbModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
          <div class="modal-dialog">

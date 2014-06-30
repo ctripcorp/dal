@@ -7,7 +7,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.resource.ProjectResource;
-import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 
 @ApplicationPath("/rest")
 public class DaoGenApplication extends ResourceConfig {
@@ -19,7 +18,6 @@ public class DaoGenApplication extends ResourceConfig {
 		
 		Configuration.addResource("conf.properties");
 		
-		LocalDataSourceLocator.newInstance().initialize(Configuration.get("all_in_one"));
 	}
 	
 	public static void main(String[] args) {

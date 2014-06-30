@@ -11,7 +11,6 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
-import javax.sql.DataSource;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -38,7 +37,6 @@ import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.IgnoreCaseCampare;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -275,9 +273,7 @@ public class DatabaseResource {
 			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(dbName);
 			String db_Name = databaseSetEntry.getConnectionString();
 			
-			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
-					db_Name);
-			connection = ds.getConnection();
+			connection = DataSourceUtil.getConnection(db_Name);
 			Set<String> indexedColumns = new HashSet<String>();
 			Set<String> primaryKeys = new HashSet<String>();
 			Set<String> allColumns = new HashSet<String>();

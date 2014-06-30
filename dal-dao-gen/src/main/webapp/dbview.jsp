@@ -131,6 +131,83 @@
       </div>
       <!--End modal-->
       
+      <!--Begin modal-->
+      <div class="modal fade" id="updateDbModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+            <div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">Update DataBase</h4>
+				</div>
+				<div class="modal-body">
+				    <div id="update_db_step1" class="row-fluid">
+				    	<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">数据库类型:</label> 
+								<select id="dbtype_up" class="span8">
+									<option value="no">请选择</option>
+									<option value="MySQL">MySQL</option>
+									<option value="SQLServer">SQLServer</option>
+								</select>
+							</div>
+						</div>
+						<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">DB Address:</label> 
+								<input id="dbaddress_up" class="span8 input-sm" type="text">
+							</div>
+						</div>
+						<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">DB Port:</label> 
+								<input id="dbport_up" class="span8 input-sm" type="text" value="28747">
+							</div>
+						</div>
+						<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">DB User:</label> 
+								<input id="dbuser_up" class="span8 input-sm" type="text">
+							</div>
+						</div>
+						<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">DB Password:</label> 
+								<input id="dbpassword_up" class="span8 input-sm" type="text">
+							</div>
+						</div>
+				    </div>
+					<div id="update_db_step2" class="row-fluid">
+						<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">DB Catalog:</label> 
+								<select id="dbcatalog_up" class="span8"></select>
+							</div>
+						</div>
+						<div class="row-fluid">
+							<div class="control-group">
+								<label class="control-label popup_label" style="width: 130px;">All-In-One Name:</label> 
+								<input id="allinonename_up" class="span8 input-sm" type="text">
+							</div>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label id="update_error_msg" class="control-label popup_label" style="color:red;"></label>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+               	  <button id="update_conn_test"  type="button" class="btn btn-success">连接测试</button>
+                  <button id="update_db_next" type="button" class="btn btn-primary">下一步</button>
+                  <button id="update_db_prev" type="button" class="btn btn-info">上一步</button>
+                  <button id="update_db_save" type="button" class="btn btn-primary">保存</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!--End modal-->
+      
       <div class="modal fade" id="errorNoticeDiv" tabindex="-1" role="dialog" aria-labelledby="generateCodeProcessLabel" aria-hidden="true">
          <div class="modal-dialog">
             <div class="modal-content">

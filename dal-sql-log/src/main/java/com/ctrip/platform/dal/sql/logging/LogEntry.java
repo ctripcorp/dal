@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.sql.logging;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -356,7 +356,7 @@ public class LogEntry {
 		boolean existed = this.hasHashCode(sqlTpl, hashCode);
 		
 		try {
-			params = URLDecoder.decode(params, "UTF-8");
+			params = URLEncoder.encode(params, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			this.errorMsg += Logger.getExceptionStack(e);
 			params = "";

@@ -350,7 +350,8 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("table_sps")
-	public TableSpNames getTableSPNames(@QueryParam("db_name") String setName) throws Exception {
+	public Status getTableSPNames(@QueryParam("db_name") String setName) {
+		Status status = Status.OK;
 		TableSpNames tableSpNames = new TableSpNames();
 		List<String> views;
 		List<String> tables;
@@ -371,12 +372,14 @@ public class DatabaseResource {
 			tableSpNames.setViews(views);
 			tableSpNames.setTables(tables);
 			tableSpNames.setDbType(DbUtils.getDbType(dbName));
-		} catch (Exception e1) {
-			e1.printStackTrace();
 			
-			throw new Exception("Error occured when process: " + setName);
+			status.setInfo(mapper.writeValueAsString(tableSpNames));
+		} catch (Exception e1) {
+			status = Status.ERROR;
+			status.setInfo(e1.getMessage());
+			return status;
 		}
-		return tableSpNames;
+		return status;
 	}
 
 	@POST

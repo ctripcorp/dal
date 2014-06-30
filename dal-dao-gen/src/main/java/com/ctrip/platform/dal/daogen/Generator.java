@@ -9,7 +9,7 @@ public interface Generator {
 	
 	public boolean prepareDirectory(int projectId, boolean regenerate);
 	
-	public boolean prepareData(int projectId, boolean regenerate, Progress progress);
+	public boolean prepareData(int projectId, boolean regenerate, Progress progress) throws Exception;
 
 	public boolean generateCode(int projectId, Progress progress, Map hints);
 

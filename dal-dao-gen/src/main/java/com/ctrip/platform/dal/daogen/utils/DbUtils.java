@@ -139,8 +139,9 @@ public class DbUtils {
 				}
 			//}
 		} catch (SQLException e) {
-			log.error(String.format("get all table names error: [dbName=%s]", 
-					dbName), e);
+//			log.error(String.format("get all table names error: [dbName=%s]", 
+//					dbName), e);
+			throw e;
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
@@ -240,8 +241,9 @@ public class DbUtils {
 				}
 			//}
 		} catch (SQLException e) {
-			log.error(String.format("get all view names error: [dbName=%s]", 
-					dbName), e);
+//			log.error(String.format("get all view names error: [dbName=%s]", 
+//					dbName), e);
+			throw e;
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
@@ -328,8 +330,9 @@ public class DbUtils {
 				
 			}
 		} catch (SQLException e) {
-			log.error(String.format("get all sp names error: [dbName=%s]", 
-					dbName), e);
+//			log.error(String.format("get all sp names error: [dbName=%s]", 
+//					dbName), e);
+			throw e;
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
@@ -766,7 +769,7 @@ public class DbUtils {
 		}
 	}
 
-	public static String getDbType(String dbName) {
+	public static String getDbType(String dbName) throws Exception {
 
 		String dbType = null;
 		if (Consts.databaseType.containsKey(dbName)) {
@@ -780,7 +783,8 @@ public class DbUtils {
 				Consts.databaseType.put(dbName, dbType);
 
 			} catch (Exception ex) {
-				log.error(String.format("get db type error: [dbName=%s]", dbName), ex);
+//				log.error(String.format("get db type error: [dbName=%s]", dbName), ex);
+				throw ex;
 			} finally {
 				JdbcUtils.closeConnection(connection);
 			}

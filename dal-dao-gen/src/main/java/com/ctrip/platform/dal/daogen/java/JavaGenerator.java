@@ -565,7 +565,7 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	private DatabaseCategory getDatabaseCategory(
-			GenTaskByTableViewSp tableViewSp) {
+			GenTaskByTableViewSp tableViewSp) throws Exception {
 		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
 		String dbType = DbUtils.getDbType(tableViewSp.getDb_name());
 		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {

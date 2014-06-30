@@ -1,8 +1,5 @@
 package com.ctrip.platform.dal.dao.helper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import com.ctrip.platform.dal.dao.DalParser;
 
 public abstract class AbstractDalParser<T> implements DalParser<T> {

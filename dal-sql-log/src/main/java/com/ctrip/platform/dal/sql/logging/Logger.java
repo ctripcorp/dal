@@ -88,7 +88,7 @@ public class Logger {
 		}
 	}
 	
-	private static String getExceptionStack(Throwable e)
+	public static String getExceptionStack(Throwable e)
 	{
 		String msg = e.getMessage();
 		try {  

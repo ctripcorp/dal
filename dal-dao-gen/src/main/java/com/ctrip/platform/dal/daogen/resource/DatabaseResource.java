@@ -1,10 +1,6 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,7 +11,6 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
-import javax.sql.DataSource;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -24,17 +19,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
 import org.jasig.cas.client.util.AssertionHolder;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
@@ -43,11 +32,11 @@ import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
+import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.IgnoreCaseCampare;
-import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import com.ctrip.platform.dal.datasource.LocalDataSourceLocator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -65,54 +54,161 @@ public class DatabaseResource {
 			classLoader = Configuration.class.getClassLoader();
 		}
 	}
-
+	
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("all_in_one")
-	public Status saveAllInOne(@FormParam("data") String data) {
-		SAXReader saxReader = new SAXReader();
-		InputStream inStream= null;
-		FileWriter writer = null;
-		Document document;
+	@Path("connectionTest")
+	public Status addAllInOneDB(@FormParam("dbtype") String dbtype,
+			@FormParam("dbaddress") String dbaddress,
+			@FormParam("dbport") String dbport,
+			@FormParam("dbuser") String dbuser,
+			@FormParam("dbpassword") String dbpassword) {
+		Status status = Status.OK;
+		Connection conn = null;
+		ResultSet rs = null;
 		try {
-			
-			if(!LocalDataSourceLocator.newInstance().refresh(data)){
-				Status status = Status.ERROR;
-				status.setInfo("此数据库已存在，或者连接字符串非法，请修改后再保存");
-				return status;
+			conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword,
+							DatabaseType.valueOf(dbtype).getValue());
+			rs = conn.getMetaData().getCatalogs();
+			Set<String> allCatalog = new HashSet<String>();
+			while(rs.next()){
+				allCatalog.add(rs.getString("TABLE_CAT"));
 			}
-			
-			//inStream = classLoader.getResourceAsStream("Database.config");
-//			URL url = classLoader.getResource("Database.config");
-//			if(url == null){
-//				return Status.ERROR;
-//			}
-			//inStream = url.openStream();
-			inStream = new FileInputStream(Configuration.get("all_in_one"));
-			
-			document = saxReader.read(inStream);
-
-			Element root = document.getRootElement();
-
-			Document temp = DocumentHelper.parseText(data);
-			root.add(temp.getRootElement());
-			writer = new FileWriter(Configuration.get("all_in_one"));
-			OutputFormat format = OutputFormat.createPrettyPrint();
-			XMLWriter output = new XMLWriter(writer, format);
-			output.write(document);
-			//output.close();
-		} catch (DocumentException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}finally{
-			JavaIOUtils.closeInputStream(inStream);
-			JavaIOUtils.closeWriter(writer);
+			status.setInfo(mapper.writeValueAsString(allCatalog));
+		} catch (SQLException e) {
+			status = Status.ERROR;
+			status.setInfo(e.getMessage());
+			return status;
+		} catch (JsonProcessingException e) {
+			status = Status.ERROR;
+			status.setInfo(e.getMessage());
+			return status;
+		} finally {
+			JdbcUtils.closeResultSet(rs);
+			JdbcUtils.closeConnection(conn);
 		}
 
+		return status;
+	}
+	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("addNewAllInOneDB")
+	public Status addAllInOneDB(@FormParam("dbtype") String dbtype,
+			@FormParam("allinonename") String allinonename,@FormParam("dbaddress") String dbaddress,
+			@FormParam("dbport") String dbport,@FormParam("dbuser") String dbuser,
+			@FormParam("dbpassword") String dbpassword,@FormParam("dbcatalog") String dbcatalog) {
+
+		Status status = Status.OK;
+		
+		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
+		
+		if(allDbDao.getGroupDBByDbName(allinonename)!=null){
+			status = Status.ERROR;
+			status.setInfo(allinonename+"已经存在!");
+			return status;
+		}else{
+			DalGroupDB groupDb = new DalGroupDB();
+			groupDb.setDbname(allinonename);
+			groupDb.setDb_address(dbaddress);
+			groupDb.setDb_port(dbport);
+			groupDb.setDb_user(dbuser);
+			groupDb.setDb_password(dbpassword);
+			groupDb.setDb_catalog(dbcatalog);
+			groupDb.setDb_providerName(DatabaseType.valueOf(dbtype).getValue());
+			allDbDao.insertDalGroupDB(groupDb);
+		}
+		
 		return Status.OK;
 	}
+	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("deleteAllInOneDB")
+	public Status addAllInOneDB(@FormParam("allinonename") String allinonename) {
+		
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
 
+		Status status = Status.OK;
+		
+		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
+		DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		
+		if(!(user.getGroupId()==groupDb.getDal_group_id() || user.getGroupId()==DalGroupResource.SUPER_GROUP_ID)){
+			status = Status.ERROR;
+			status.setInfo("你没有当前DataBase的操作权限.");
+			return status;
+		}
+		
+		allDbDao.deleteDalGroupDB(groupDb.getId());		
+		
+		return Status.OK;
+	}
+	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("getOneDB")
+	public Status getOneDB(@FormParam("allinonename") String allinonename) {
+		
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+
+		Status status = Status.OK;
+		
+		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
+		DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		
+		if(!(user.getGroupId()==groupDb.getDal_group_id() || user.getGroupId()==DalGroupResource.SUPER_GROUP_ID)){
+			status = Status.ERROR;
+			status.setInfo("你没有当前DataBase的操作权限.");
+			return status;
+		}
+		
+		try {
+			if(DatabaseType.MySQL.getValue().equals(groupDb.getDb_providerName())){
+				groupDb.setDb_providerName(DatabaseType.MySQL.toString());
+			}else if(DatabaseType.SQLServer.getValue().equals(groupDb.getDb_providerName())){
+				groupDb.setDb_providerName(DatabaseType.SQLServer.toString());
+			}else{
+				groupDb.setDb_providerName("no");
+			}
+			status.setInfo(mapper.writeValueAsString(groupDb));
+		} catch (JsonProcessingException e) {
+			status = Status.ERROR;
+			status.setInfo(e.getMessage());
+			return status;
+		}		
+		
+		return Status.OK;
+	}
+	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("updateDB")
+	public Status updateDB(@FormParam("id") int id,@FormParam("dbtype") String dbtype,
+			@FormParam("allinonename") String allinonename,@FormParam("dbaddress") String dbaddress,
+			@FormParam("dbport") String dbport,@FormParam("dbuser") String dbuser,
+			@FormParam("dbpassword") String dbpassword,@FormParam("dbcatalog") String dbcatalog) {
+
+		Status status = Status.OK;
+		
+		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
+		DalGroupDB db = allDbDao.getGroupDBByDbName(allinonename);
+		
+		if(db!=null && db.getId()!=id){
+			status = Status.ERROR;
+			status.setInfo(allinonename+"已经存在!");
+			return status;
+		}else{
+			allDbDao.updateGroupDB(id, allinonename, dbaddress, dbport, dbuser, dbpassword, dbcatalog, DatabaseType.valueOf(dbtype).getValue());
+		}
+		
+		return Status.OK;
+	}
+	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("dbs")
@@ -135,8 +231,8 @@ public class DatabaseResource {
 			}
 		}else{
 			try {
-				return mapper.writeValueAsString(LocalDataSourceLocator.newInstance()
-						.getDBNames());
+				List<String> dbAllinOneNames = SpringBeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
+				return mapper.writeValueAsString(dbAllinOneNames);
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
 			}
@@ -161,7 +257,6 @@ public class DatabaseResource {
 			e.printStackTrace();
 			throw e;
 		}
-		//return null;
 	}
 
 	@GET
@@ -178,9 +273,7 @@ public class DatabaseResource {
 			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(dbName);
 			String db_Name = databaseSetEntry.getConnectionString();
 			
-			DataSource ds = LocalDataSourceLocator.newInstance().getDataSource(
-					db_Name);
-			connection = ds.getConnection();
+			connection = DataSourceUtil.getConnection(db_Name);
 			Set<String> indexedColumns = new HashSet<String>();
 			Set<String> primaryKeys = new HashSet<String>();
 			Set<String> allColumns = new HashSet<String>();
@@ -301,5 +394,5 @@ public class DatabaseResource {
 				: Status.OK;
 
 	}
-
+	
 }

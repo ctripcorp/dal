@@ -19,6 +19,17 @@ public class DalGroupDBDao {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 	
+	public List<String> getAllDbAllinOneNames() {
+		return this.jdbcTemplate.query(
+				"select dbname from alldbs ",
+				new RowMapper<String>() {
+					public String mapRow(ResultSet rs, int rowNum)
+							throws SQLException {
+						return rs.getString("dbname");
+					}
+				});
+	}
+	
 	public List<DalGroupDB> getAllGroupDbs() {
 		return this.jdbcTemplate.query(
 				"select t1.id as id, t1.dbname as dbname,t2.group_name as comment,t1.dal_group_id as dal_group_id,"
@@ -78,11 +89,11 @@ public class DalGroupDBDao {
 						groupDb.getDb_providerName());
 	}
 	
-	public int updateGroupDB(int id,Integer groupId){
+	public int updateGroupDB(int id,String dbname,String db_address,String db_port,String db_user,String db_password,String db_catalog,String db_providerName){
 		return this.jdbcTemplate
-				.update("update alldbs set dal_group_id=?"
+				.update("update alldbs set dbname=?, db_address=?, db_port=?, db_user=?, db_password=?, db_catalog=?, db_providerName=?"
 						+ " where id=?",
-						groupId,
+						dbname, db_address, db_port, db_user, db_password, db_catalog, db_providerName,
 						id);
 	}
 	
@@ -91,6 +102,14 @@ public class DalGroupDBDao {
 				.update("update alldbs set comment=?"
 						+ " where id=?",
 						comment,
+						id);
+	}
+	
+	public int updateGroupDB(int id,Integer groupId){
+		return this.jdbcTemplate
+				.update("update alldbs set dal_group_id=?"
+						+ " where id=?",
+						groupId,
 						id);
 	}
 	

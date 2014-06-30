@@ -16,9 +16,11 @@ import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 
 public class DataSourceUtil {
 
+	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(DataSourceUtil.class);
-
+	@SuppressWarnings("unused")
 	private static final String DBURL_MYSQL = "jdbc:mysql://%s:%s/%s?useUnicode=true&characterEncoding=utf8";
+	@SuppressWarnings("unused")
 	private static final String DBURL_SQLSERVER = "jdbc:sqlserver://%s:%s;DatabaseName=%s";
 	
 	private static final String DBURL_MYSQL_CACHE = "jdbc:mysql://%s:%s/?useUnicode=true&characterEncoding=utf8";
@@ -27,8 +29,32 @@ public class DataSourceUtil {
 	private static final String DRIVER_MYSQL = "com.mysql.jdbc.Driver";
 	private static final String DRIVER_SQLSERVRE = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 	
-	// dbAddress+port,DataSource
+	// dbAddress+port+user+password,DataSource
 	private static Map<String,DataSource> cache = new ConcurrentHashMap<String,DataSource>();
+	
+	public static Connection getConnection(String address, String port,
+			String userName, String password, String driverClass) throws SQLException{
+		validSqlParam(address, port, userName, password, driverClass);
+		String key = address.trim() + port.trim() + userName.trim() + password.trim();
+		DataSource ds = cache.get(key);
+		if(ds!=null){
+			Connection conn = ds.getConnection();
+			return conn;
+		}
+		synchronized(DataSourceUtil.class){
+			ds = cache.get(key);
+			if(ds!=null){
+				Connection conn = ds.getConnection();
+				return conn;
+			}else{
+				DataSource newDS = createCacheDataSource("", address.trim(), port.trim(),
+						userName.trim(), password.trim(), driverClass.trim());
+				cache.put(key, newDS);
+				Connection conn = newDS.getConnection();
+				return conn;
+			}
+		}
+	}
 	
 	public static Connection getConnection(String allInOneName) throws SQLException{
 		if (isEmpty(allInOneName)) {
@@ -37,7 +63,6 @@ public class DataSourceUtil {
 		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
 		DalGroupDB db = allDbDao.getGroupDBByDbName(allInOneName);
 		if (db == null) {
-			log.error(allInOneName + " is not exist in the table of alldbs.");
 			throw new SQLException(allInOneName + " is not exist in the table of alldbs.");
 		}
 		String address = db.getDb_address();
@@ -47,9 +72,15 @@ public class DataSourceUtil {
 		String driverClass = db.getDb_providerName();
 		String catalog = db.getDb_catalog();
 		validSqlParam(allInOneName, address, port, catalog, userName, password, driverClass);
-		String key = address.trim() + port.trim();
+		String key = address.trim() + port.trim() + userName.trim() + password.trim();
+		DataSource ds = cache.get(key);
+		if(ds!=null){
+			Connection conn = ds.getConnection();
+			conn.setCatalog(catalog);
+			return conn;
+		}
 		synchronized(DataSourceUtil.class){
-			DataSource ds = cache.get(key);
+			ds = cache.get(key);
 			if(ds!=null){
 				Connection conn = ds.getConnection();
 				conn.setCatalog(catalog);
@@ -77,7 +108,6 @@ public class DataSourceUtil {
 			driverClass = DRIVER_SQLSERVRE;
 			url = String.format(DBURL_SQLSERVER_CACHE, address, port);
 		}else{
-			log.error(allInOneName + " have't define it's database type, it can be MySQL or SQLServer.");
 			throw new SQLException(allInOneName + " have't define it's database type, it can be MySQL or SQLServer.");
 		}
 		
@@ -109,6 +139,25 @@ public class DataSourceUtil {
 
 		ds.createPool();
 		return ds;
+	}
+	
+	private static void validSqlParam(String address, String port, 
+			String userName, String password, String driverClass) throws SQLException {
+		if (isEmpty(address)) {
+			throw new SQLException("the address of is null.");
+		}
+		if (isEmpty(port)) {
+			throw new SQLException("the port of is null.");
+		}
+		if (isEmpty(userName)) {
+			throw new SQLException("the userName of is null.");
+		}
+		if (isEmpty(password)) {
+			throw new SQLException("the password of is null.");
+		}
+		if (isEmpty(driverClass)) {
+			throw new SQLException("the driverClass of is null.");
+		}
 	}
 
 	private static void validSqlParam(String allInOneName, String address,

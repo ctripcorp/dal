@@ -455,7 +455,7 @@
                 "dbcatalog": dbCatalog
             }, function(data){
                 if(data.code == "OK"){
-                    $("#error_msg").html("保存成功.");
+                    $("#error_msg").html("保存成功.<br/>如果需要将此数据库加你的DAL Team，请到<a href='dbmanage.jsp' target='_blank'>数据库管理</a>界面进行添加");
                     refreshAllDB();
                 }else{
                     $("#error_msg").html(data.info);

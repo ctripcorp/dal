@@ -335,6 +335,7 @@ public class ProjectResource {
 		} catch (Exception e) {
 			status = Status.ERROR;
 			status.setInfo(e.getMessage());
+			progress.setOtherMessage(e.getMessage());
 			log.error(String.format("generate project[%s] failed.", id), e);
 		} finally{
 			progress.setStatus(ProgressResource.FINISH);

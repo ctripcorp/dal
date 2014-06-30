@@ -98,7 +98,7 @@ public abstract class AbstractGenerator implements Generator {
 		ProgressResource.addDoneFiles(progress, 4);
 	}
 
-	public abstract boolean prepareDirectory(int projectId, boolean regenerate);
+	public abstract boolean prepareDirectory(int projectId, boolean regenerate) throws Exception;
 	
 	public abstract boolean prepareData(int projectId, boolean regenerate, Progress progress) throws Exception;
 

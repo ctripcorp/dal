@@ -999,7 +999,7 @@ public class CSharpGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public boolean prepareDirectory(int projectId, boolean regenerate) {
+	public boolean prepareDirectory(int projectId, boolean regenerate) throws Exception {
 		File mavenLikeDir = new File(String.format("%s/%s/cs", generatePath,
 				projectId));
 
@@ -1031,7 +1031,7 @@ public class CSharpGenerator extends AbstractGenerator {
 				FileUtils.forceMkdir(configMavenLike);
 			}
 		} catch (IOException e1) {
-			e1.printStackTrace();
+			throw e1;
 		}
 
 		return false;
@@ -1071,7 +1071,7 @@ public class CSharpGenerator extends AbstractGenerator {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw e;
 		}
 
 		return true;

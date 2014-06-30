@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.sql.logging;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,7 +24,7 @@ public class LogEntry {
 	public static final String TAG_RECORD_COUNT = "RecordCount";
 	public static final int LOG_LIMIT = 32*1024;	
 	public static final String SQLHIDDENString = "*";
-	private static final String JSON_PATTERN = "{'HasSql':'%s','Hash':'%s','SqlTpl':'%s','Param':'%s','IsSuccess':'%s','ErrorMsg':'%s', CostDetail:%s}";
+	private static final String JSON_PATTERN = "{\"HasSql\":\"%s\",\"Hash\":\"%s\",\"SqlTpl\":\"%s\",\"Param\":\"%s\",\"IsSuccess\":\"%s\",\"ErrorMsg\":\"%s\", \"CostDetail\":\"%s\"}";
 	
 	private static Set<String> execludedClasses = null;
 	private static ConcurrentHashMap<String, Integer> hashes = null;
@@ -353,14 +355,21 @@ public class LogEntry {
 		int hashCode = CommonUtil.GetHashCode(sqlTpl);
 		boolean existed = this.hasHashCode(sqlTpl, hashCode);
 		
+		try {
+			params = URLEncoder.encode(params, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			this.errorMsg += Logger.getExceptionStack(e);
+			params = "";
+		}
+		
 		Logger.watcherEnd();
 		Watcher wac = Logger.getAndRemoveWatcher();
 		
 		return String.format(JSON_PATTERN, 
-				existed ? 1 : 0, 
+				existed ? 0 : 1, 
 				hashCode, 
 				existed ? "" : sqlTpl, 
-				params, 
+				params,
 				this.success ? 1 : 0, 
 				this.errorMsg,
 				wac != null ? wac.toJson() : "{}");

@@ -14,7 +14,7 @@ public class SpDbHost {
 	private String dbName;
 	private HashMap<String, SpHost> spHosts;
 	
-	public SpDbHost(String dbName, String packageName)
+	public SpDbHost(String dbName, String packageName) throws Exception
 	{
 		this.dbName = dbName;
 		this.packageName = packageName;

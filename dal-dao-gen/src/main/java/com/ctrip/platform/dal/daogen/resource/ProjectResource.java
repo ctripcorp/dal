@@ -322,8 +322,7 @@ public class ProjectResource {
 		try {
 			log.info(String.format("begain generate project: [id=%s; regen=%s; language=%s]",
 					id, regen, language));
-			if (language.equals("java"))
-			{
+			if (language.equals("java")) {
 				new JavaGenerator().generate(id, regen, progress, null);
 			}
 			else if (language.equals("cs")){
@@ -336,6 +335,7 @@ public class ProjectResource {
 		} catch (Exception e) {
 			status = Status.ERROR;
 			status.setInfo(e.getMessage());
+			progress.setOtherMessage(e.getMessage());
 			log.error(String.format("generate project[%s] failed.", id), e);
 		} finally{
 			progress.setStatus(ProgressResource.FINISH);

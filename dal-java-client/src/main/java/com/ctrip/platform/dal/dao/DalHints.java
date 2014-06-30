@@ -55,6 +55,11 @@ public class DalHints {
 		return this;
 	}
 	
+	public DalHints inShard(String shardId) {
+		hints.put(DalHintEnum.shard, shardId);
+		return this;
+	}
+	
 	public DalHints masterOnly() {
 		set(DalHintEnum.masterOnly, true);
 		return this;

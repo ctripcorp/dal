@@ -186,17 +186,13 @@ public class DirectClientDaoShardTest {
 			String sql = "select id from " + TABLE_NAME;
 			
 			StatementParameters parameters = new StatementParameters();
-			DalHints hints = new DalHints();
-			hints.set(DalHintEnum.shard, "0");
-			hints.masterOnly();
+			DalHints hints = new DalHints().inShard("0").masterOnly();
 			
 			Integer o = (Integer)client.query(sql, parameters, hints, new DalScalarExtractor());
 			assertNotNull(o);
 			assertEquals(4, o.longValue());
 			
-			hints = new DalHints();
-			hints.set(DalHintEnum.shard, "1");
-			hints.masterOnly();
+			hints = new DalHints().inShard("1").masterOnly();
 
 			Long l = (Long)client.query(sql, parameters, hints, new DalScalarExtractor());
 			assertNotNull(l);

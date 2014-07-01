@@ -34,7 +34,7 @@
         var records = w2ui['grid'].getSelection();
         var record = w2ui['grid'].get(records[0]);
         if(record==null || record==''){
-            alert("请先选择一个member");
+            alert("请先选择一个DAL Team");
             return;
         }
         $("#name2").val(record["group_name"]);

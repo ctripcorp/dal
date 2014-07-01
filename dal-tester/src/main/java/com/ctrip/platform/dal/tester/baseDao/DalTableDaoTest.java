@@ -40,11 +40,15 @@ public class DalTableDaoTest {
 			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
 	
 	private static DalClient client = null;
+	private static DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser();
+	private static DalTableDao<ClientTestModel> dao;
 
 	static {
 		try {
 			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(DATABASE_NAME);
+			dao = new DalTableDao<ClientTestModel>(clientTestParser);
+			dao.setDelimiter('`');
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -93,12 +97,10 @@ public class DalTableDaoTest {
 
 	private StatementParameters parameters = new StatementParameters();
 	private DalHints hints = new DalHints();
-	DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser();
-	
+
 	@Test
 	public void testQueryByPkNumber() {
 		try {
-			DalTableDao<ClientTestModel> dao = new DalTableDao<ClientTestModel>(clientTestParser);
 			ClientTestModel p = dao.queryByPk(1, hints);
 			assertEquals("SH INFO", p.getAddress());
 		} catch (Exception e) {
@@ -110,7 +112,6 @@ public class DalTableDaoTest {
 	@Test
 	public void testQueryByPk() {
 		try {
-			DalTableDao<ClientTestModel> dao = new DalTableDao<ClientTestModel>(clientTestParser);
 			ClientTestModel p = new ClientTestModel();
 			p.setId(1);
 			p = dao.queryByPk(p, hints);
@@ -124,7 +125,6 @@ public class DalTableDaoTest {
 	@Test
 	public void testQueryLike() {
 		try {
-			DalTableDao<ClientTestModel> dao = new DalTableDao<ClientTestModel>(clientTestParser);
 			ClientTestModel p = new ClientTestModel();
 			p.setAddress("SH INFO");
 
@@ -141,7 +141,6 @@ public class DalTableDaoTest {
 	@Test
 	public void testQuery() {
 		try {
-			DalTableDao<ClientTestModel> dao = new DalTableDao<ClientTestModel>(clientTestParser);
 			StatementParameters parameters = new StatementParameters();
 			parameters.set(1, Types.INTEGER, 1);
 
@@ -156,7 +155,6 @@ public class DalTableDaoTest {
 	@Test
 	public void testRange() {
 		try {
-			DalTableDao<ClientTestModel> dao = new DalTableDao<ClientTestModel>(clientTestParser);
 			StatementParameters parameters = new StatementParameters();
 			parameters.set(1, Types.INTEGER, 1);
 			
@@ -180,8 +178,6 @@ public class DalTableDaoTest {
 	@Test
 	public void testInsert() {
 		try {
-			DalTableDao<ClientTestModel> dao = new DalTableDao<ClientTestModel>(clientTestParser);
-			
 			ClientTestModel p = new ClientTestModel();
 			p.setAddress("insert test 1");
 			assertEquals(1, dao.insert(hints, p));
@@ -211,7 +207,6 @@ public class DalTableDaoTest {
 	@Test
 	public void testUpdate() {
 		try {
-			DalTableDao<ClientTestModel> dao = new DalTableDao<ClientTestModel>(clientTestParser);
 			
 			ClientTestModel p = new ClientTestModel();
 			try {
@@ -246,7 +241,6 @@ public class DalTableDaoTest {
 	@Test
 	public void testDelete() {
 		try {
-			DalTableDao<ClientTestModel> dao = new DalTableDao<ClientTestModel>(clientTestParser);
 			StatementParameters parameters = new StatementParameters();
 			parameters.set(1, Types.VARCHAR, "SH INFO");
 			
@@ -274,8 +268,6 @@ public class DalTableDaoTest {
 	@Test
 	public void testInsertWithKeyHolder() {
 		try {
-			DalTableDao<ClientTestModel> dao = new DalTableDao<ClientTestModel>(clientTestParser);
-			
 			dao.delete("Address = 'testInsertKH'", parameters, hints);
 			
 			ClientTestModel p = new ClientTestModel();
@@ -303,8 +295,6 @@ public class DalTableDaoTest {
 	@Test
 	public void testCombinedInsert() {
 		try {
-			DalTableDao<ClientTestModel> dao = new DalTableDao<ClientTestModel>(clientTestParser);
-			
 			dao.delete("Address LIKE 'testInsertCombined%'", parameters, hints);
 			
 			ClientTestModel p = new ClientTestModel();
@@ -332,8 +322,6 @@ public class DalTableDaoTest {
 	@Test
 	public void testContinueOnError() {
 		try {
-			DalTableDao<ClientTestModel> dao = new DalTableDao<ClientTestModel>(clientTestParser);
-			
 			ClientTestModel p = new ClientTestModel();
 			ClientTestModel[] pList = new ClientTestModel[3];
 			p = new ClientTestModel();
@@ -359,7 +347,6 @@ public class DalTableDaoTest {
 	@Test
 	public void testBatchInsert() {
 		try {
-			DalTableDao<ClientTestModel> dao = new DalTableDao<ClientTestModel>(clientTestParser);
 			ClientTestModel p;
 			ClientTestModel[] pList = new ClientTestModel[3];
 			p = new ClientTestModel();

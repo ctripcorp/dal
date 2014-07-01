@@ -40,7 +40,9 @@ public final class DalTableDao<T> {
 
 	private final String pkSql;
 	private Set<String> pkColumns;
+	private String batchInsertSql;
 	private Map<String, Integer> columnTypes = new HashMap<String, Integer>();
+	private Character delimiter;
 
 	public DalTableDao(DalParser<T> parser) {
 		this.client = DalClientFactory.getClient(parser.getDatabaseName());
@@ -48,6 +50,16 @@ public final class DalTableDao<T> {
 		queryDao = new DalQueryDao(parser.getDatabaseName());
 		initColumnTypes();
 		pkSql = initSql();
+		batchInsertSql = buildBatchInsertSql();
+	}
+	
+	/**
+	 * Specify the delimiter used to quote column name. This is useful when column name happens 
+	 * to be keyword of target database.
+	 * @param delimiter the char used to quote column name.
+	 */
+	public void setDelimiter(Character delimiter) {
+		this.delimiter=  delimiter;
 	}
 
 	/**
@@ -275,10 +287,10 @@ public final class DalTableDao<T> {
 			return 0;
 		List<String> validColumns = new ArrayList<String>();
 		for(String s : parser.getColumnNames()){
-			if(!(parser.isAutoIncrement() && isPermaryKey(s)))
+			if(!(parser.isAutoIncrement() && isPrimaryKey(s)))
 				validColumns.add(s);
 		}
-		String cloumns = combine(validColumns, COLUMN_SEPARATOR);
+		String cloumns = combineColumns(validColumns, COLUMN_SEPARATOR);
 		int count = daoPojos.length;
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
@@ -311,7 +323,6 @@ public final class DalTableDao<T> {
 	 */
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
 		Logger.watcherBegin();
-		String insertSql = buildBatchInsertSql();
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		int i = 0;
 		for (T pojo : daoPojos) {
@@ -322,7 +333,7 @@ public final class DalTableDao<T> {
 			parametersList[i++] = parameters;
 		}
 
-		return client.batchUpdate(insertSql, parametersList, hints);
+		return client.batchUpdate(batchInsertSql, parametersList, hints);
 	}
 
 	/**
@@ -512,11 +523,15 @@ public final class DalTableDao<T> {
 		return fields;
 	}
 
+	
 	public Map<String, ?> filterAutoIncrementPrimaryFields(Map<String, ?> fields){
-		for (String columnName : parser.getColumnNames()) {
-			if (parser.isAutoIncrement() && isPermaryKey(columnName))
-				fields.remove(columnName);
-		}
+		if(parser.isAutoIncrement())
+			fields.remove(parser.getPrimaryKeyNames()[0]);
+		
+//		for (String columnName : parser.getColumnNames()) {
+//			if (parser.isAutoIncrement() && isPrimaryKey(columnName))
+//				fields.remove(columnName);
+//		}
 		return fields;
 	}
 	
@@ -525,17 +540,8 @@ public final class DalTableDao<T> {
 				combine(PLACE_HOLDER, paramCount, COLUMN_SEPARATOR));
 	}
 
-	private boolean isPermaryKey(String fieldName){
-		boolean isKey = false;
-		String[] primaryKeyNames = parser.getPrimaryKeyNames();
-		if(null != primaryKeyNames)
-			for (String string : primaryKeyNames) {
-				if(string.toLowerCase().equals(fieldName.toLowerCase())){
-					isKey = true;
-					break;
-				}
-			}
-		return isKey;
+	private boolean isPrimaryKey(String fieldName){
+		return pkColumns.contains(fieldName);
 	}
 	
 	private String initSql() {
@@ -546,7 +552,7 @@ public final class DalTableDao<T> {
 		String template = parser.isAutoIncrement() ? TMPL_SET_VALUE : combine(
 				TMPL_SET_VALUE, parser.getPrimaryKeyNames().length, AND);
 
-		return String.format(template, (Object[]) parser.getPrimaryKeyNames());
+		return String.format(template, (Object[]) quote(parser.getPrimaryKeyNames()));
 	}
 
 	// Build a lookup table
@@ -561,7 +567,7 @@ public final class DalTableDao<T> {
 	private String buildInsertSql(Map<String, ?> fields) {
 		filterNullFileds(fields);
 		Set<String> remainedColumns = fields.keySet();
-		String cloumns = combine(remainedColumns, COLUMN_SEPARATOR);
+		String cloumns = combineColumns(remainedColumns, COLUMN_SEPARATOR);
 		String values = combine(PLACE_HOLDER, remainedColumns.size(),
 				COLUMN_SEPARATOR);
 
@@ -572,10 +578,10 @@ public final class DalTableDao<T> {
 	private String buildBatchInsertSql() {
 		List<String> validColumns = new ArrayList<String>();
 		for(String s : parser.getColumnNames()){
-			if(!(parser.isAutoIncrement() && isPermaryKey(s)))
+			if(!(parser.isAutoIncrement() && isPrimaryKey(s)))
 				validColumns.add(s);
 		}
-		String cloumns = combine(validColumns, COLUMN_SEPARATOR);
+		String cloumns = combineColumns(validColumns, COLUMN_SEPARATOR);
 		String values = combine(PLACE_HOLDER, validColumns.size(),
 				COLUMN_SEPARATOR);
 
@@ -594,13 +600,13 @@ public final class DalTableDao<T> {
 		for (String column : parser.getColumnNames()) {
 			if ((fields.get(column) == null && !hints
 					.is(DalHintEnum.updateNullField))
-					|| pkColumns.contains(column))
+					|| isPrimaryKey(column))
 				fields.remove(column);
 		}
 
 		String columns = String.format(
 				combine(TMPL_SET_VALUE, fields.size(), COLUMN_SEPARATOR),
-				fields.keySet().toArray());
+				quote(fields.keySet()));
 
 		return String.format(TMPL_SQL_UPDATE, parser.getTableName(), columns,
 				pkSql);
@@ -608,22 +614,18 @@ public final class DalTableDao<T> {
 
 	private String buildWhereClause(Map<String, ?> fields) {
 		return String.format(combine(TMPL_SET_VALUE, fields.size(), AND),
-				fields.keySet().toArray());
+				quote(fields.keySet()));
 	}
 
-	private String combine(String[] values, String separator) {
+	private String combineColumns(Collection<String> values, String separator) {
 		StringBuilder valuesSb = new StringBuilder();
 		int i = 0;
 		for (String value : values) {
-			valuesSb.append(value);
-			if (++i < values.length)
+			quote(valuesSb, value);
+			if (++i < values.size())
 				valuesSb.append(separator);
 		}
 		return valuesSb.toString();
-	}
-
-	private String combine(Collection<String> values, String separator) {
-		return combine(values.toArray(new String[values.size()]), separator);
 	}
 
 	private String combine(String value, int count, String separator) {
@@ -635,5 +637,35 @@ public final class DalTableDao<T> {
 				valuesSb.append(separator);
 		}
 		return valuesSb.toString();
+	}
+	
+	private String quote(String column) {
+		if(delimiter == null)
+			return column;
+		return new StringBuilder().append(delimiter).append(column).append(delimiter).toString();
+	}
+
+	private StringBuilder quote(StringBuilder sb, String column) {
+		if(delimiter == null)
+			return sb.append(column);
+		return sb.append(delimiter).append(column).append(delimiter);
+	}
+	
+	private Object[] quote(Set<String> columns) {
+		if(delimiter == null)
+			return columns.toArray();
+		
+		Object[] rawColumns = columns.toArray();
+		for(int i = 0; i < rawColumns.length; i++)
+			rawColumns[i] = quote((String)rawColumns[i]);
+		return rawColumns;
+	}
+	
+	private String[] quote(String[] columns) {
+		if(delimiter == null)
+			return columns;
+		for(int i = 0; i < columns.length; i++)
+			columns[i] = quote(columns[i]);
+		return columns;
 	}
 }

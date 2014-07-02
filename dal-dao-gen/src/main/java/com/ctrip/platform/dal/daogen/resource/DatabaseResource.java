@@ -116,6 +116,7 @@ public class DatabaseResource {
 			groupDb.setDb_password(dbpassword);
 			groupDb.setDb_catalog(dbcatalog);
 			groupDb.setDb_providerName(DatabaseType.valueOf(dbtype).getValue());
+			groupDb.setDal_group_id(-1);
 			allDbDao.insertDalGroupDB(groupDb);
 		}
 		

@@ -138,7 +138,7 @@ public class DatabaseResource {
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		
 		if (user.getGroupId() != DalGroupResource.SUPER_GROUP_ID){
-			if (user.getGroupId() != groupDb.getDal_group_id()) {
+			if (user.getGroupId()!=0 && user.getGroupId() != -1 && user.getGroupId() != groupDb.getDal_group_id()) {
 				status = Status.ERROR;
 				status.setInfo("你没有当前DataBase的操作权限.");
 				return status;
@@ -165,7 +165,7 @@ public class DatabaseResource {
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		
 		if (user.getGroupId() != DalGroupResource.SUPER_GROUP_ID){
-			if (user.getGroupId() != groupDb.getDal_group_id()) {
+			if (user.getGroupId()!=0 && user.getGroupId() != -1 && user.getGroupId() != groupDb.getDal_group_id()) {
 				status = Status.ERROR;
 				status.setInfo("你没有当前DataBase的操作权限.");
 				return status;

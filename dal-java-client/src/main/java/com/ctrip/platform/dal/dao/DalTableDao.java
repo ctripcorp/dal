@@ -42,7 +42,8 @@ public final class DalTableDao<T> {
 	private Set<String> pkColumns;
 	private String batchInsertSql;
 	private Map<String, Integer> columnTypes = new HashMap<String, Integer>();
-	private Character delimiter;
+	private Character startDelimiter;
+	private Character endDelimiter;
 
 	public DalTableDao(DalParser<T> parser) {
 		this.client = DalClientFactory.getClient(parser.getDatabaseName());
@@ -54,12 +55,25 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * Specify the delimiter used to quote column name. This is useful when column name happens 
-	 * to be keyword of target database.
+	 * Specify the delimiter used to quote column name. The delimiter will be used as
+	 * both start and end delimiter. This is useful when column name happens 
+	 * to be keyword of target database and the start and end delimiter are the same.
 	 * @param delimiter the char used to quote column name.
 	 */
 	public void setDelimiter(Character delimiter) {
-		this.delimiter=  delimiter;
+		startDelimiter = delimiter;
+		endDelimiter = delimiter;
+	}
+
+	/**
+	 * Specify the start and end delimiter used to quote column name.  
+	 * This is useful when column name happens  to be keyword of target database.
+	 * @param startDelimiter the start char used quote column name on .
+	 * @param endDelimiter the end char used to quote column name.
+	 */
+	public void setDelimiter(Character startDelimiter, Character endDelimiter) {
+		this.startDelimiter = startDelimiter;
+		this.endDelimiter = endDelimiter;
 	}
 
 	/**
@@ -640,19 +654,19 @@ public final class DalTableDao<T> {
 	}
 	
 	private String quote(String column) {
-		if(delimiter == null)
+		if(startDelimiter == null)
 			return column;
-		return new StringBuilder().append(delimiter).append(column).append(delimiter).toString();
+		return new StringBuilder().append(startDelimiter).append(column).append(endDelimiter).toString();
 	}
 
 	private StringBuilder quote(StringBuilder sb, String column) {
-		if(delimiter == null)
+		if(startDelimiter == null)
 			return sb.append(column);
-		return sb.append(delimiter).append(column).append(delimiter);
+		return sb.append(startDelimiter).append(column).append(endDelimiter);
 	}
 	
 	private Object[] quote(Set<String> columns) {
-		if(delimiter == null)
+		if(startDelimiter == null)
 			return columns.toArray();
 		
 		Object[] rawColumns = columns.toArray();
@@ -662,7 +676,7 @@ public final class DalTableDao<T> {
 	}
 	
 	private String[] quote(String[] columns) {
-		if(delimiter == null)
+		if(startDelimiter == null)
 			return columns;
 		for(int i = 0; i < columns.length; i++)
 			columns[i] = quote(columns[i]);

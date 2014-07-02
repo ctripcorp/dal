@@ -48,6 +48,7 @@ public class DalTableDaoSqlServerTest {
 			client = DalClientFactory.getClient(DATABASE_NAME);
 			parser = new ClientTestDalParser();
 			dao = new DalTableDao<ClientTestModel>(parser);
+			dao.setDelimiter('[', ']');
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

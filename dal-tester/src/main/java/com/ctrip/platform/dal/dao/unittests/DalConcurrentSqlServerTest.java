@@ -54,6 +54,7 @@ public class DalConcurrentSqlServerTest {
 			client = DalClientFactory.getClient(DATABASE_NAME);
 			parser = new ClientTestDalParser();
 			dao = new DalTableDao<ClientTestModel>(parser);
+			dao.setDelimiter('[', ']');
 			generateIds = new ArrayList<Number>();
 		} catch (Exception e) {
 			e.printStackTrace();

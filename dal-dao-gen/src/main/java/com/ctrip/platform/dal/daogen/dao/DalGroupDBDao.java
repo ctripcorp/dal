@@ -74,6 +74,20 @@ public class DalGroupDBDao {
 		return dbs!=null && dbs.size()>0? dbs.get(0):null;
 	}
 	
+	public DalGroupDB getGroupDBByDbId(int id) {
+		List<DalGroupDB> dbs = this.jdbcTemplate.query(
+				"select id, dbname, comment,dal_group_id,"
+				+ "db_address, db_port, db_user, db_password, db_catalog, db_providerName from alldbs"
+						+ " where id=?", new Object[] { id },
+				new RowMapper<DalGroupDB>() {
+					public DalGroupDB mapRow(ResultSet rs, int rowNum)
+							throws SQLException {
+						return DalGroupDB.visitRow(rs);
+					}
+				});
+		return dbs!=null && dbs.size()>0? dbs.get(0):null;
+	}
+	
 	public int insertDalGroupDB(DalGroupDB groupDb){
 		return this.jdbcTemplate
 				.update("insert into alldbs(dbname, comment, dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName)"

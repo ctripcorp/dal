@@ -136,10 +136,12 @@ public class DatabaseResource {
 		DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		
-		if(!(user.getGroupId()==groupDb.getDal_group_id() || user.getGroupId()==DalGroupResource.SUPER_GROUP_ID)){
-			status = Status.ERROR;
-			status.setInfo("你没有当前DataBase的操作权限.");
-			return status;
+		if (user.getGroupId() != DalGroupResource.SUPER_GROUP_ID){
+			if (user.getGroupId() != groupDb.getDal_group_id()) {
+				status = Status.ERROR;
+				status.setInfo("你没有当前DataBase的操作权限.");
+				return status;
+			}
 		}
 		
 		allDbDao.deleteDalGroupDB(groupDb.getId());		
@@ -161,10 +163,12 @@ public class DatabaseResource {
 		DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		
-		if(!(user.getGroupId()==groupDb.getDal_group_id() || user.getGroupId()==DalGroupResource.SUPER_GROUP_ID)){
-			status = Status.ERROR;
-			status.setInfo("你没有当前DataBase的操作权限.");
-			return status;
+		if (user.getGroupId() != DalGroupResource.SUPER_GROUP_ID){
+			if (user.getGroupId() != groupDb.getDal_group_id()) {
+				status = Status.ERROR;
+				status.setInfo("你没有当前DataBase的操作权限.");
+				return status;
+			}
 		}
 		
 		try {

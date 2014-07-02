@@ -10,6 +10,7 @@ import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.sql.logging.Logger;
 
 public final class DalQueryDao {
+	private static final String COUNT_MISMATCH_MSG = "It is expected to return only %d result. But the actually count is %d.";
 	private static final String NO_RESULT_MSG = "There is no result found!";
 	private DalClient client;
 
@@ -39,7 +40,7 @@ public final class DalQueryDao {
 			throws SQLException {
 		Logger.watcherBegin();
 		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper));
-		assertEquals(1, result.size(), NO_RESULT_MSG);
+		assertEquals(1, result.size());
 		return result.get(0);
 	}
 
@@ -47,17 +48,16 @@ public final class DalQueryDao {
 	 * Query for the only object in the result. It is expected that there is only one result should be found.
 	 * If there is no result or more than 1 result found, it will throws exception to indicate the exceptional case.
 	 * If you want to get the first object, please use queryFirst instead.  
-	 * ExecuteScalar
 	 * @throws SQLException If there is no result or more than 1 result found.
 	 */
 	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
 		Logger.watcherBegin();
 		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()));
-		assertEquals(1, result.size(), NO_RESULT_MSG);
+		assertEquals(1, result.size());
 		return result.get(0);
 	}
-	
+
 	/**
 	 * Query for the first object in the result. It is expected that there is at least one result should be found.
 	 * If there is no result found, it will throws exception to indicate the exceptional case.
@@ -84,9 +84,9 @@ public final class DalQueryDao {
 		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, start, count));
 	}
 
-	private void assertEquals(int expected, int actual, String message) throws SQLException{
+	private void assertEquals(int expected, int actual) throws SQLException{
 		if(expected != actual)
-			throw new SQLException(message);
+			throw new SQLException(String.format(COUNT_MISMATCH_MSG, expected, actual));
 	}
 
 	private void assertGreatThan(int expected, int actual, String message) throws SQLException{

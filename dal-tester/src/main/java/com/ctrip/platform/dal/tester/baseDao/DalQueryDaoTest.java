@@ -118,6 +118,17 @@ public class DalQueryDaoTest {
 		}
 	}
 	
+	@Test
+	public void testQueryClassForList() {
+		try {
+			DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
+			List<Integer> result = dao.query(sqlList, parameters, hints, Integer.class);
+			assertEquals(3, result.size());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private static class DalRowCallbackTest implements DalRowCallback {
 		int result = 0;
 		public void process(ResultSet rs) throws SQLException {
@@ -203,6 +214,9 @@ public class DalQueryDaoTest {
 			};
 			
 			Integer id = dao.queryFirst(sqlList, parameters, hints, mapper);
+			assertNotNull(id);
+			
+			id = dao.queryFirst(sqlList, parameters, hints, Integer.class);
 			assertNotNull(id);
 			
 			List<Integer> result = dao.queryTop(sqlList, parameters, hints, mapper, 5);

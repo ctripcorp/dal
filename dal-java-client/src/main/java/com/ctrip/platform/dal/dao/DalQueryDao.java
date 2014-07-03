@@ -132,6 +132,26 @@ public final class DalQueryDao {
 	}
 
 	/**
+	 * Query for the first object in the result. It is expected that there is at least one result should be found.
+	 * If there is no result found, it will throws exception to indicate the exceptional case.
+	 * If you want to get the only one result, please use queryObject instead.
+	 *   
+	 * @param sql The sql statement to be executed
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param clazz The return type 
+	 * @return instance of clazz that represent the query result.
+	 * @throws SQLException If there is no result found.
+	 */
+	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
+			throws SQLException {
+		Logger.watcherBegin();
+		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), 1));
+		assertGreatThan(0, result.size(), NO_RESULT_MSG);
+		return result.get(0);
+	}
+
+	/**
 	 * Query the first count of object in the result. If the query return more result than 
 	 * count. It will return top count of result. If there is not enough result, it will 
 	 * return all the results.

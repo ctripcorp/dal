@@ -69,6 +69,11 @@ public class DatabaseResource {
 			DalGroupDB db = allDbDao.getGroupDBByDbName(key);
 			if(db==null){
 				allDbDao.insertDalGroupDB(allDbs.get(key));
+			}else{
+				DalGroupDB fileDB = allDbs.get(key);
+				allDbDao.updateGroupDB(db.getId(), key, fileDB.getDb_address(), 
+						fileDB.getDb_port(),fileDB.getDb_user(), fileDB.getDb_password(),
+						fileDB.getDb_catalog(), fileDB.getDb_providerName());
 			}
 		}
 

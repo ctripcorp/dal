@@ -126,6 +126,27 @@
       </div>
       <!--End modal-->
       
+      <div class="modal fade" id="errorNoticeDiv" tabindex="-1" role="dialog" aria-labelledby="generateCodeProcessLabel" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h4 class="modal-title">错误提示</h4>
+               </div>
+               <div class="modal-body">
+				  <div class="row-fluid">
+						<div class="control-group">
+							<label id="errorNoticeDivMsg" class="control-label popup_label"></label>
+						</div>
+					</div>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      
     <!-- JS and analytics only. -->
 	<!-- Bootstrap core JavaScript================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->

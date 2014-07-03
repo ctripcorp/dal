@@ -95,4 +95,15 @@ public class DalGroupDB implements Comparable<DalGroupDB>{
 	public int compareTo(DalGroupDB o) {
 		return this.dbname.compareTo(o.getDbname());
 	}
+
+	@Override
+	public String toString() {
+		return "DalGroupDB [id=" + id + ", dbname=" + dbname + ", comment="
+				+ comment + ", dal_group_id=" + dal_group_id + ", db_address="
+				+ db_address + ", db_port=" + db_port + ", db_user=" + db_user
+				+ ", db_password=" + db_password + ", db_catalog=" + db_catalog
+				+ ", db_providerName=" + db_providerName + "]";
+	}
+	
+	
 }

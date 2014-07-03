@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -33,6 +34,7 @@ import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import com.ctrip.platform.dal.daogen.utils.AllInOneConfigParser;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.IgnoreCaseCampare;
@@ -53,6 +55,24 @@ public class DatabaseResource {
 		if (classLoader == null) {
 			classLoader = Configuration.class.getClassLoader();
 		}
+	}
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("merge")
+	public Status mergeDB() {
+		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
+		
+		Map<String, DalGroupDB> allDbs = new AllInOneConfigParser(Configuration.get("all_in_one")).getDBAllInOneConfig();
+		Set<String> keys = allDbs.keySet();
+		for(String key:keys){
+			DalGroupDB db = allDbDao.getGroupDBByDbName(key);
+			if(db==null){
+				allDbDao.insertDalGroupDB(allDbs.get(key));
+			}
+		}
+
+		return Status.OK;
 	}
 	
 	@POST
@@ -415,5 +435,7 @@ public class DatabaseResource {
 				: Status.OK;
 
 	}
+	
+	
 	
 }

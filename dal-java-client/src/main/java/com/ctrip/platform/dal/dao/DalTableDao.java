@@ -81,9 +81,9 @@ public final class DalTableDao<T> {
 	 * For table that the primary key is not of Integer type, this method will
 	 * fail.
 	 * 
-	 * @param id
-	 * @param hints
-	 * @return
+	 * @param id The primary key in number format
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @return entity of this table
 	 * @throws SQLException
 	 */
 	public T queryByPk(Number id, DalHints hints) throws SQLException {
@@ -104,9 +104,9 @@ public final class DalTableDao<T> {
 	/**
 	 * Query by Primary key, the key columns are pass in the pojo.
 	 * 
-	 * @param pk
-	 * @param hints
-	 * @return
+	 * @param pk The pojo used to represent primary key(s)
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @return entity of this table
 	 * @throws SQLException
 	 */
 	public T queryByPk(T pk, DalHints hints) throws SQLException {
@@ -124,9 +124,9 @@ public final class DalTableDao<T> {
 	 * Query against sample pojo. All not null attributes of the passed in pojo
 	 * will be used to build the where clause.
 	 * 
-	 * @param sample
-	 * @param hints
-	 * @return
+	 * @param sample The pojo used for sampling
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @return List of pojos that have the same attributes like in the sample
 	 * @throws SQLException
 	 */
 	public List<T> queryLike(T sample, DalHints hints) throws SQLException {
@@ -146,8 +146,8 @@ public final class DalTableDao<T> {
 	 * the placeholder.
 	 * 
 	 * @param whereClause
-	 * @param parameters
-	 * @param hints
+	 * @param parameters A container that holds all the necessary parameters 
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return
 	 * @throws SQLException
 	 */
@@ -165,8 +165,8 @@ public final class DalTableDao<T> {
 	 * index of the placeholder.
 	 * 
 	 * @param whereClause
-	 * @param parameters
-	 * @param hints
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return
 	 * @throws SQLException
 	 */
@@ -184,8 +184,8 @@ public final class DalTableDao<T> {
 	 * index of the placeholder.
 	 * 
 	 * @param whereClause
-	 * @param parameters
-	 * @param hints
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param count
 	 *            how may rows to return
 	 * @return The qualified list of pojo
@@ -205,8 +205,8 @@ public final class DalTableDao<T> {
 	 * match the index of the placeholder.
 	 * 
 	 * @param whereClause
-	 * @param parameters
-	 * @param hints
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param start
 	 *            the start number. It is zero(0) based, means the index is from 0. 1 will be the 2nd row.
 	 * @param count
@@ -228,8 +228,9 @@ public final class DalTableDao<T> {
 	 * Insert pojos one by one. If you want to inert them in the batch mode,
 	 * user batchInsert instead.
 	 * 
-	 * @param hints
-	 *            additional parameters. DalHintEnum.continueOnError can be used
+	 * @param hints 
+	 *            Additional parameters that instruct how DAL Client perform database operation.
+	 *            DalHintEnum.continueOnError can be used
 	 *            to indicate that the inserting can be go on if there is any
 	 *            failure.
 	 * @param daoPojos
@@ -247,7 +248,8 @@ public final class DalTableDao<T> {
 	 * the local test is performed before use this API.
 	 * 
 	 * @param hints
-	 *            additional parameters. DalHintEnum.continueOnError can be used
+	 *            Additional parameters that instruct how DAL Client perform database operation.
+	 *            DalHintEnum.continueOnError can be used
 	 *            to indicate that the inserting can be go on if there is any
 	 *            failure.
 	 * @param keyHolder
@@ -288,7 +290,7 @@ public final class DalTableDao<T> {
 	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in
 	 * keyHolder If the nocount is on, the keyholder is not available
 	 * 
-	 * @param hints
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param keyHolder
 	 * @param daoPojos
 	 * @return
@@ -330,7 +332,7 @@ public final class DalTableDao<T> {
 	/**
 	 * Insert pojos in batch mode.
 	 * 
-	 * @param hints
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojos
 	 * @return how many rows been affected for deleting each of the pojo
 	 * @throws SQLException
@@ -353,7 +355,7 @@ public final class DalTableDao<T> {
 	/**
 	 * Delete the given pojos list in batch mode
 	 * 
-	 * @param hints
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojos
 	 * @return how many rows been affected
 	 * @throws SQLException
@@ -380,7 +382,7 @@ public final class DalTableDao<T> {
 	/**
 	 * Delete the given pojo list.
 	 * 
-	 * @param hints
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojos
 	 * @return how many rows been affected for deleting each of the pojo
 	 * @throws SQLException
@@ -405,7 +407,8 @@ public final class DalTableDao<T> {
 	 * overwrite this by set updateNullField in hints.
 	 * 
 	 * @param hints
-	 * 			additional parameters. DalHintEnum.updateNullField can be used
+	 * 			Additional parameters that instruct how DAL Client perform database operation.
+	 *          DalHintEnum.updateNullField can be used
 	 *          to indicate that the field of pojo is null value will be update.
 	 * @param daoPojos
 	 * @return how many rows been affected
@@ -442,8 +445,8 @@ public final class DalTableDao<T> {
 	 * Delete for the given where clause and parameters.
 	 * 
 	 * @param whereClause
-	 * @param parameters
-	 * @param hints
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
@@ -458,8 +461,8 @@ public final class DalTableDao<T> {
 	 * Update for the given where clause and parameters.
 	 * 
 	 * @param sql
-	 * @param parameters
-	 * @param hints
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
@@ -474,8 +477,8 @@ public final class DalTableDao<T> {
 	 * will depends on the index of the entry in the entry set, value will be
 	 * entry value. The value can be null.
 	 * 
-	 * @param parameters
-	 * @param entries
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param entries Key value pairs to be added into parameters
 	 */
 	public void addParameters(StatementParameters parameters,
 			Map<String, ?> entries) {
@@ -502,8 +505,8 @@ public final class DalTableDao<T> {
 	 * be the entry key, value will be entry value. The value can be null. This
 	 * method will be used to set input parameters for stored procedure.
 	 * 
-	 * @param parameters
-	 * @param entries
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param entries Key value pairs to be added into parameters
 	 */
 	public void addParametersByName(StatementParameters parameters,
 			Map<String, ?> entries) {
@@ -516,7 +519,7 @@ public final class DalTableDao<T> {
 	/**
 	 * Get the column type defined in java.sql.Types.
 	 * 
-	 * @param columnName
+	 * @param columnName The column name of the table
 	 * @return value defined in java.sql.Types
 	 */
 	public int getColumnType(String columnName) {

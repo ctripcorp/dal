@@ -106,6 +106,16 @@ public class DalQueryDaoSqlServerTest {
 		Assert.assertEquals(ROW_COUNT, models.size());
 	}
 
+	@Test
+	public void testQueryWithClazz() throws SQLException {
+		String sql = "SELECT quantity FROM " + TABLE_NAME;
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+
+		List<Integer> models = client.query(sql, param, hints, Integer.class);
+		Assert.assertEquals(ROW_COUNT, models.size());
+	}
+	
 	/**
 	 * Test the query function with callback
 	 * 
@@ -225,6 +235,35 @@ public class DalQueryDaoSqlServerTest {
 		}
 	}
 
+	/**
+	 * Test query for first success
+	 * @throws SQLException
+	 */
+	@Test
+	public void testTypedQueryFirstSuccess() throws SQLException{
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE id = 1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		Integer result = client.queryFirst(sql, param, hints, Integer.class);
+		Assert.assertNotNull(result);
+	}
+	
+	/**
+	 *  Test query for first failed
+	 */
+	@Test
+	public void testTypedQueryFirstFaield(){
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE id = -1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		try {
+			Integer result = client.queryFirst(sql, param, hints, Integer.class);
+			Assert.fail();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Test query for Top success
 	 * 

@@ -59,6 +59,7 @@
         var record = w2ui['grid'].get(records[0]);
         if(record==null){
             alert('请先选择一个database');
+            return;
         }
         cblock($("body"));
         $.post("/rest/db/getOneDB", {

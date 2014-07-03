@@ -54,7 +54,10 @@
                         $("#groupModal").modal('hide');
                         refreshGroup();
                     } else {
-                        alert(data.info);
+                        $("#errorNoticeDivMsg").html(data.info);
+                        $("#errorNoticeDiv").modal({
+                            "backdrop": "static"
+                        });
                     }
                 }).fail(function (data) {
                         alert("执行异常:"+data);

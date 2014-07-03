@@ -20,6 +20,7 @@ import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -118,19 +119,25 @@ public class DalGroupResource {
 		List<Project> prjs = SpringBeanGetter.getDaoOfProject().getProjectByGroupId(groupId);
 		if(prjs!=null && prjs.size()>0){
 			Status status = Status.ERROR;
-			status.setInfo("当前Group中还有Project，请清空Project后再操作！");
+			status.setInfo("当前DAL Team中还有Project，请清空Project后再操作！");
 			return status;
 		}
 		List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
 		if(dbs!=null && dbs.size()>0){
 			Status status = Status.ERROR;
-			status.setInfo("当前Group中还有DataBase，请清空DataBase后再操作！");
+			status.setInfo("当前DAL Team中还有DataBase，请清空DataBase后再操作！");
+			return status;
+		}
+		List<DatabaseSet> dbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
+		if(dbsets!=null && dbsets.size()>0){
+			Status status = Status.ERROR;
+			status.setInfo("当前DAL Team中还有DataBaseSet，请清空DataBaseSet后再操作！");
 			return status;
 		}
 		List<LoginUser> us = user_dao.getUserByGroupId(groupId);
 		if(us!=null && us.size()>0){
 			Status status = Status.ERROR;
-			status.setInfo("当前Group中还有Member，请清空Member后再操作！");
+			status.setInfo("当前DAL Team中还有Member，请清空Member后再操作！");
 			return status;
 		}
 

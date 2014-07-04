@@ -61,6 +61,19 @@ public class DatabaseResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("merge")
 	public Status mergeDB() {
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+
+		Status status = Status.OK;
+		
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		
+		if (user.getGroupId() != DalGroupResource.SUPER_GROUP_ID){
+			status = Status.ERROR;
+			status.setInfo("You have no permision, only DAL Admin Team can do this.");
+			return status;
+		}
+		
 		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
 		
 		Map<String, DalGroupDB> allDbs = new AllInOneConfigParser(Configuration.get("all_in_one")).getDBAllInOneConfig();

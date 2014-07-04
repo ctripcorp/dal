@@ -80,7 +80,6 @@
 	    <filter-name>UserLoginFilter</filter-name>  
 	    <filter-class>com.ctrip.platform.dal.daogen.utils.UserFilter</filter-class>  
 	</filter>  
-	  
 	<filter-mapping>  
 	    <filter-name>UserLoginFilter</filter-name>  
 	    <url-pattern>/*</url-pattern>  

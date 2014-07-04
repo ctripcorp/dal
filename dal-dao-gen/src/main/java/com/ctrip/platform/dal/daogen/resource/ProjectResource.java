@@ -34,7 +34,6 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.java.JavaGenerator;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
@@ -50,24 +49,6 @@ public class ProjectResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<LoginUser> getUsers() {
 		return SpringBeanGetter.getDaoOfLoginUser().getAllUsers();
-	}
-
-	@POST
-	@Path("share_proj")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Status shareProject(@FormParam("id") int id,
-			@FormParam("userNo") String userNo) {
-		UserProject userProject = SpringBeanGetter.getDaoOfUserProject()
-				.getUserProject(id, userNo);
-		if (null == userProject) {
-			UserProject project = new UserProject();
-			project.setProject_id(id);
-			project.setUserNo(userNo);
-			SpringBeanGetter.getDaoOfUserProject().insertUserProject(project);
-			return Status.OK;
-		} else {
-			return Status.ERROR;
-		}
 	}
 
 	@GET
@@ -512,6 +493,24 @@ public class ProjectResource {
 		}
 		return result;
 	}
+	
+//	@POST
+//	@Path("share_proj")
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public Status shareProject(@FormParam("id") int id,
+//			@FormParam("userNo") String userNo) {
+//		UserProject userProject = SpringBeanGetter.getDaoOfUserProject()
+//				.getUserProject(id, userNo);
+//		if (null == userProject) {
+//			UserProject project = new UserProject();
+//			project.setProject_id(id);
+//			project.setUserNo(userNo);
+//			SpringBeanGetter.getDaoOfUserProject().insertUserProject(project);
+//			return Status.OK;
+//		} else {
+//			return Status.ERROR;
+//		}
+//	}
 	
 }
 

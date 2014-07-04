@@ -75,6 +75,16 @@
         <filter-name>CAS Assertion Thread Local Filter</filter-name>  
         <url-pattern>/*</url-pattern>  
     </filter-mapping>  
+    
+    <filter>  
+	    <filter-name>UserLoginFilter</filter-name>  
+	    <filter-class>com.ctrip.platform.dal.daogen.utils.UserFilter</filter-class>  
+	</filter>  
+	  
+	<filter-mapping>  
+	    <filter-name>UserLoginFilter</filter-name>  
+	    <url-pattern>/*</url-pattern>  
+	</filter-mapping>  
 	
 	<servlet>
 		<servlet-name>DaoGenApplication</servlet-name>

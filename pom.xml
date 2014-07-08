@@ -12,7 +12,6 @@
 		<module>dal-console</module>
 		<module>dal-ctrl</module>
 		<module>dal-dao-gen</module>
-		<module>dal-datasource</module>
 		<module>dal-name-srv</module>
 		<module>dal-common</module>
 		<module>dal-tester</module>

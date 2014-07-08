@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,6 @@ import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.utils.AllInOneConfigParser;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.IgnoreCaseCampare;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -420,8 +420,18 @@ public class DatabaseResource {
 			tables = DbUtils.getAllTableNames(dbName);
 			sps = DbUtils.getAllSpNames(dbName);
 			
-			java.util.Collections.sort(views, new IgnoreCaseCampare());
-			java.util.Collections.sort(tables, new IgnoreCaseCampare());
+			java.util.Collections.sort(views, new Comparator<String>(){
+				@Override
+				public int compare(String o1, String o2) {
+					return o1.toLowerCase().compareTo(o2.toLowerCase());
+				}
+			});
+			java.util.Collections.sort(tables,  new Comparator<String>(){
+				@Override
+				public int compare(String o1, String o2) {
+					return o1.toLowerCase().compareTo(o2.toLowerCase());
+				}
+			});
 			java.util.Collections.sort(sps);
 
 			tableSpNames.setSps(sps);

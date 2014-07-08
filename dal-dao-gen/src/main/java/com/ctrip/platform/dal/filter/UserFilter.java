@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.daogen.utils;
+package com.ctrip.platform.dal.filter;
 
 import java.io.IOException;
 
@@ -12,6 +12,7 @@ import javax.servlet.ServletResponse;
 import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 public class UserFilter implements Filter {
 

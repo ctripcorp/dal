@@ -485,28 +485,28 @@ public class CSharpGenerator extends AbstractGenerator {
 								String.format("%s/Dao/%sDao.cs",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/DAO.cs.tpl");
+								"templates/csharp/DAO.cs.tpl");
 	
 						GenUtils.mergeVelocityContext(
 								context,
 								String.format("%s/Entity/%s.cs",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								newPojo ? "templates/PojoNew.cs.tpl" : "templates/Pojo.cs.tpl");
+								newPojo ? "templates/csharp/PojoNew.cs.tpl" : "templates/csharp/Pojo.cs.tpl");
 	
 						GenUtils.mergeVelocityContext(
 								context,
 								String.format("%s/IDao/I%sDao.cs",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/IDAO.cs.tpl");
+								"templates/csharp/IDAO.cs.tpl");
 	
 						GenUtils.mergeVelocityContext(
 								context,
 								String.format("%s/Test/%sTest.cs",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/DAOTest.cs.tpl");
+								"templates/csharp/DAOTest.cs.tpl");
 						result.setSuccessal(true);
 					}catch(Exception e){
 						log.error(result.getTaskName() + "exception", e);
@@ -541,21 +541,21 @@ public class CSharpGenerator extends AbstractGenerator {
 								String.format("%s/Dao/%sDao.cs",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/DAOBySp.cs.tpl");
+								"templates/csharp/DAOBySp.cs.tpl");
 	
 						GenUtils.mergeVelocityContext(
 								context,
 								String.format("%s/Entity/%s.cs",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/PojoBySp.cs.tpl");
+								"templates/csharp/PojoBySp.cs.tpl");
 	
 						GenUtils.mergeVelocityContext(
 								context,
 								String.format("%s/Test/%sTest.cs",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/SpTest.cs.tpl");
+								"templates/csharp/SpTest.cs.tpl");
 						result.setSuccessal(true);
 					}catch(Exception e){
 						log.error(result.getTaskName() + "exception", e);
@@ -589,7 +589,7 @@ public class CSharpGenerator extends AbstractGenerator {
 								String.format("%s/Entity/%s.cs", mavenLikeDir
 										.getAbsolutePath(), CommonUtils
 										.normalizeVariable(host.getClassName())),
-										newPojo ? "templates/PojoNew.cs.tpl" : "templates/Pojo.cs.tpl");
+										newPojo ? "templates/csharp/PojoNew.cs.tpl" : "templates/csharp/Pojo.cs.tpl");
 						result.setSuccessal(true);
 					}catch(Exception e){
 						log.error(result.getTaskName() + "exception", e);
@@ -617,13 +617,13 @@ public class CSharpGenerator extends AbstractGenerator {
 								String.format("%s/Dao/%sDao.cs", mavenLikeDir
 										.getAbsolutePath(), CommonUtils
 										.normalizeVariable(host.getClassName())),
-								"templates/FreeSqlDAO.cs.tpl");
+								"templates/csharp/FreeSqlDAO.cs.tpl");
 	
 						GenUtils.mergeVelocityContext(context,
 								String.format("%s/Test/%sTest.cs", mavenLikeDir
 										.getAbsolutePath(), CommonUtils
 										.normalizeVariable(host.getClassName())),
-								"templates/FreeSqlTest.cs.tpl");
+								"templates/csharp/FreeSqlTest.cs.tpl");
 						result.setSuccessal(true);
 					}catch(Exception e){
 						log.error(result.getTaskName() + "exception", e);
@@ -658,7 +658,7 @@ public class CSharpGenerator extends AbstractGenerator {
 				context,
 				String.format("%s/Config/Dal.config",
 						csMavenLikeDir.getAbsolutePath()),
-				"templates/DalConfig.cs.tpl");
+				"templates/csharp/DalConfig.cs.tpl");
 		
 		/*GenUtils.mergeVelocityContext(
 				context,
@@ -670,7 +670,7 @@ public class CSharpGenerator extends AbstractGenerator {
 				context,
 				String.format("%s/DalFactory.cs",
 						csMavenLikeDir.getAbsolutePath()),
-				"templates/DalFactory.cs.tpl");
+				"templates/csharp/DalFactory.cs.tpl");
 	}
 
 	private void prepareDbFromFreeSql(List<GenTaskByFreeSql> freeSqls) throws Exception {

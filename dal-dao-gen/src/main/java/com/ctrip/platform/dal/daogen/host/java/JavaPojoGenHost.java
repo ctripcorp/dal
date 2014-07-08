@@ -66,7 +66,7 @@ public class JavaPojoGenHost {
 	private void buildImports() {
 		
 		for(ColumnMetaData field: fields) {
-			Class clazz = field.getJavaClass();
+			Class<?> clazz = field.getJavaClass();
 			if(byte[].class.equals(clazz))
 				continue;
 			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))
@@ -102,7 +102,7 @@ public class JavaPojoGenHost {
 		return WordUtils.uncapitalize(getFieldName(fieldName));
 	}
 	
-	public String getClassDisplayName(Class clazz) {
+	public String getClassDisplayName(Class<?> clazz) {
 		if(byte[].class.equals(clazz))
 			return "byte[]";
 		return clazz.getSimpleName();

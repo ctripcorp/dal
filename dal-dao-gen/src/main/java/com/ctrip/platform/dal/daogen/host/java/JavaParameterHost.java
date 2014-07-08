@@ -6,9 +6,9 @@ import java.util.Set;
 import org.apache.commons.lang.WordUtils;
 
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
-import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
+import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 
 public class JavaParameterHost extends AbstractParameterHost {
 	

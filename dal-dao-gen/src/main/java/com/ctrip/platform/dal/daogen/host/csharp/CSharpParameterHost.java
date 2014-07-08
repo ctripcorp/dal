@@ -2,7 +2,7 @@ package com.ctrip.platform.dal.daogen.host.csharp;
 
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
-import com.ctrip.platform.dal.daogen.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 
 public class CSharpParameterHost extends AbstractParameterHost  implements Comparable<CSharpParameterHost> {
 	

@@ -22,7 +22,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
-import com.ctrip.platform.dal.daogen.cs.CSharpGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
@@ -34,7 +33,8 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.java.JavaGenerator;
+import com.ctrip.platform.dal.daogen.generator.CSharpGenerator;
+import com.ctrip.platform.dal.daogen.generator.JavaGenerator;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 @Resource

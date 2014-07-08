@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.daogen.cs;
+package com.ctrip.platform.dal.daogen.generator;
 
 import java.io.File;
 import java.io.IOException;
@@ -1085,8 +1085,8 @@ public class CSharpGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public boolean generateCode(int id, Progress progress, Map hints) {
-		final VelocityContext context = GenUtils.buildDefaultVelocityContext();
+	public boolean generateCode(int id, Progress progress, Map<String,?> hints) {
+//		final VelocityContext context = GenUtils.buildDefaultVelocityContext();
 
 		final File csMavenLikeDir = new File(String.format("%s/%s/cs",
 				generatePath, id));

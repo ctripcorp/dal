@@ -11,7 +11,7 @@ public interface Generator {
 	
 	public boolean prepareData(int projectId, boolean regenerate, Progress progress) throws Exception;
 
-	public boolean generateCode(int projectId, Progress progress, Map hints);
+	public boolean generateCode(int projectId, Progress progress, Map<String,?> hints);
 
 	public boolean clearResource();
 

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.daogen.java;
+package com.ctrip.platform.dal.daogen.generator;
 
 import java.io.File;
 import java.io.IOException;
@@ -1001,7 +1001,7 @@ public class JavaGenerator extends AbstractGenerator {
 	}
 
 	@Override
-	public boolean generateCode(int id, Progress progress, Map hints) {
+	public boolean generateCode(int id, Progress progress, Map<String,?> hints) {
 
 		VelocityContext context = GenUtils.buildDefaultVelocityContext();
 		File mavenLikeDir = new File(String.format("%s/%s/java", generatePath,

@@ -79,7 +79,7 @@ public class JavaParserGenHost {
 		imports.add(java.util.LinkedHashMap.class.getName());
 		
 		for(ColumnMetaData field: fields) {
-			Class clazz = field.getJavaClass();
+			Class<?> clazz = field.getJavaClass();
 			if(byte[].class.equals(clazz))
 				continue;
 			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))

@@ -3,9 +3,9 @@ package com.ctrip.platform.dal.daogen.host.java;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
+import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 
 public class SpOperationHost {

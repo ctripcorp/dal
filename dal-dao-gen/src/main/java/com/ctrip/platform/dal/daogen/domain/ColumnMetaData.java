@@ -7,7 +7,7 @@ public class ColumnMetaData implements Comparable<ColumnMetaData> {
 	//指Java或者CSharp的数据类型
 	private String type;
 	
-	private Class javaClass;
+	private Class<?> javaClass;
 
 	//指对应的数据库类型，如varchar
 	private String dbType;
@@ -107,11 +107,11 @@ public class ColumnMetaData implements Comparable<ColumnMetaData> {
 	}
 	
 	
-	public Class getJavaClass() {
+	public Class<?> getJavaClass() {
 		return javaClass;
 	}
 
-	public void setJavaClass(Class javaClass) {
+	public void setJavaClass(Class<?> javaClass) {
 		this.javaClass = javaClass;
 	}
 

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.filter;
+package com.ctrip.platform.dal.daogen.filter;
 
 import java.io.IOException;
 

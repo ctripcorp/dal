@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.daogen.cs;
+package com.ctrip.platform.dal.daogen.host.csharp;
 
 import java.util.Collections;
 import java.util.List;

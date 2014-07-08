@@ -1,5 +1,4 @@
-
-package com.ctrip.platform.dal.daogen.cs;
+package com.ctrip.platform.dal.daogen.host.java;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,11 +8,20 @@ import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 
-public class CSharpSpaOperationHost {
+public class SpOperationHost {
 	private boolean exist;
-	private List<CSharpParameterHost> parameters;
+	private List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
 	private String methodName;
-	
+	private String type;
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
 	public boolean isExist() {
 		return exist;
 	}
@@ -22,11 +30,11 @@ public class CSharpSpaOperationHost {
 		this.exist = exist;
 	}
 
-	public List<CSharpParameterHost> getParameters() {
+	public List<JavaParameterHost> getParameters() {
 		return parameters;
 	}
 
-	public void setParameters(List<CSharpParameterHost> parameters) {
+	public void setParameters(List<JavaParameterHost> parameters) {
 		this.parameters = parameters;
 	}
 
@@ -38,10 +46,10 @@ public class CSharpSpaOperationHost {
 		this.methodName = methodName;
 	}
 
-	public static CSharpSpaOperationHost getSpaOperation(String dbName,
+	public static SpOperationHost getSpaOperation(String dbName,
 			String tableName, List<StoredProcedure> spNames, String operation) {
 
-		CSharpSpaOperationHost host = new CSharpSpaOperationHost();
+		SpOperationHost host = new SpOperationHost();
 		
 		StoredProcedure expectSpa = new StoredProcedure();
 		expectSpa.setName(String.format("spA_%s_%s", tableName, operation));
@@ -53,26 +61,26 @@ public class CSharpSpaOperationHost {
 		if( (index = spNames.indexOf(expectSpa)) > 0){
 			host.exist = true;
 			host.methodName = expectSpa.getName();
+			host.setType("spA");
 			currentSp = spNames.get(index);
 		}else if((index = spNames.indexOf(expectSp3)) > 0){
 			host.exist = true;
 			host.methodName = expectSp3.getName();
+			host.setType("sp3");
 			currentSp = spNames.get(index);
 		}else{
 			host.exist = false;
 		}
 		
 		if(host.exist){
-			List<AbstractParameterHost> parameters =  DbUtils.getSpParams(dbName, currentSp, CurrentLanguage.CSharp);
-			List<CSharpParameterHost> realParams = new ArrayList<CSharpParameterHost>();
-			for(AbstractParameterHost _host: parameters){
-				realParams.add((CSharpParameterHost)_host);
+			List<AbstractParameterHost> params =  DbUtils.getSpParams(dbName, currentSp, CurrentLanguage.Java);
+			List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
+			for(AbstractParameterHost p : params){
+				realParams.add((JavaParameterHost) p);
 			}
-			
-			host.setParameters(realParams);
+			host.parameters = realParams;
 		}
 		
 		return host;
 	}
 }
-

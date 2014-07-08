@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.daogen.java;
+package com.ctrip.platform.dal.daogen.host.java;
 
 import java.util.List;
 import java.util.Set;

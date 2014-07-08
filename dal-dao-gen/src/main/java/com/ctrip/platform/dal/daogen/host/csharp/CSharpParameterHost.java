@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.daogen.cs;
+package com.ctrip.platform.dal.daogen.host.csharp;
 
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;

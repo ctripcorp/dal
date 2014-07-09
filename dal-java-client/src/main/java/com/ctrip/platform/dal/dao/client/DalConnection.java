@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.sql.logging.Logger;
+import com.ctrip.platform.dal.sql.logging.DalLogger;
 
 public class DalConnection {
 	private Integer oldIsolationLevel;
@@ -50,20 +50,20 @@ public class DalConnection {
 			if(conn == null || conn.isClosed())
 				return;
 		} catch (Throwable e) {
-			Logger.error("Restore connection isolation level failed!", e);
+			DalLogger.error("Restore connection isolation level failed!", e);
 		}
 
 		try {
 			if(newIsolationLevel != null)
 				conn.setTransactionIsolation(oldIsolationLevel);
 		} catch (Throwable e) {
-			Logger.error("Restore connection isolation level failed!", e);
+			DalLogger.error("Restore connection isolation level failed!", e);
 		}
 
 		try {
 			conn.close();
 		} catch (Throwable e) {
-			Logger.error("Close connection failed!", e);
+			DalLogger.error("Close connection failed!", e);
 		}
 		conn = null;
 	}

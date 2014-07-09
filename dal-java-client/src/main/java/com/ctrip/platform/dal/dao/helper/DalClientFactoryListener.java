@@ -17,8 +17,11 @@ public class DalClientFactoryListener implements ServletContextListener {
 		ServletContext context = sce.getServletContext();
 		String DalConfigPath = context.getInitParameter("com.ctrip.platform.dal.dao.DalConfigPath");
 		String warmUp = context.getInitParameter("com.ctrip.platform.dal.dao.DalWarmUp");
+		String enableLoggingStr = context.getInitParameter("com.ctrip.platform.dal.dao.EnableLogging");
 		
 		boolean isWarmUp = null != warmUp && warmUp.equalsIgnoreCase("true") ? true : false;
+		boolean enableLogging = null != enableLoggingStr && enableLoggingStr.equalsIgnoreCase("true") ? true : false;
+		
 		try {
 			if(DalConfigPath == null || DalConfigPath.trim().length() == 0)
 				DalClientFactory.initClientFactory();
@@ -26,6 +29,7 @@ public class DalClientFactoryListener implements ServletContextListener {
 				DalClientFactory.initClientFactory(DalConfigPath.trim());
 			if(isWarmUp)
 				DalClientFactory.warmUpConnections();
+			
 		} catch (Exception e) {
 			logger.error("Error when init client factory", e);
 		}

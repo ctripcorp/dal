@@ -100,6 +100,7 @@ public class DalQueryDaoTest {
 	private StatementParameters parameters = new StatementParameters();
 	private DalHints hints = new DalHints();
 	private String sqlList = "select * from " + TABLE_NAME;
+	private String sqlListQuantity = "select quantity from " + TABLE_NAME;
 	private String sqlObject = "select * from " + TABLE_NAME + " where id = ?";
 	
 	@Test
@@ -222,7 +223,13 @@ public class DalQueryDaoTest {
 			List<Integer> result = dao.queryTop(sqlList, parameters, hints, mapper, 5);
 			assertEquals(3, result.size());
 			
+			result = dao.queryTop(sqlListQuantity, parameters, hints, Integer.class, 5);
+			assertEquals(3, result.size());
+
 			result = dao.queryFrom(sqlList, parameters, hints, mapper, 3, 5);
+			assertEquals(0, result.size());
+			
+			result = dao.queryFrom(sqlListQuantity, parameters, hints, mapper, 3, 5);
 			assertEquals(0, result.size());
 			
 		} catch (Exception e) {

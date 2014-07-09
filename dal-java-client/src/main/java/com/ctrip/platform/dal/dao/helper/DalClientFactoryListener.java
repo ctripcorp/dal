@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.sql.logging.DalLogger;
 
 public class DalClientFactoryListener implements ServletContextListener {
 	private Logger logger = LoggerFactory.getLogger(DalClientFactoryListener.class);
@@ -30,6 +31,7 @@ public class DalClientFactoryListener implements ServletContextListener {
 			if(isWarmUp)
 				DalClientFactory.warmUpConnections();
 			
+			DalLogger.setEnableLogging(enableLogging);
 		} catch (Exception e) {
 			logger.error("Error when init client factory", e);
 		}

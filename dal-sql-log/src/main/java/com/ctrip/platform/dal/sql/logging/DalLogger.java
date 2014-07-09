@@ -44,7 +44,11 @@ public class DalLogger {
 	}
 	
 	public static void log(LogEntry entry) {
+		if(!isEnableLogging())
+			return;
+		
 		//logger.info(TITLE, entry.toJson(), entry.getTag());
+		
 		trace.log(LogType.SQL, LogLevel.INFO, TITLE, entry.toJson(), entry.getTag());
 	}
 	
@@ -56,7 +60,7 @@ public class DalLogger {
 			String logMsg = "Connectiing to " + realDbName + " database failed." +
 					System.lineSeparator() + System.lineSeparator()  +
 					"********** Exception Info **********" + System.lineSeparator()  + msg;
-			DalLogger.log("Get connection", DalEventEnum.CONNECTION_FAILED, LogLevel.ERROR, logMsg);
+			log("Get connection", DalEventEnum.CONNECTION_FAILED, LogLevel.ERROR, logMsg);
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 		}	

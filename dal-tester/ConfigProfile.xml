@@ -1,130 +1,41 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <profile>
-    <environments>
-    <!--所有属性及XML节点名称均需要区分大小写-->
-    <!--name属性的命名可以随意进行，只要符合Windows的文件夹名规范即可，下文中的类似prd_iis7_net4的节点名称就是依据此属性而得来的，很多
-      同事会以target来命名，这是不太理想的-->
-    <!--target属性可以是dev,test等属性，是用来区分当前环境的-->
-    <!--iis属性可以是IIS6,IIS7或者ALL-->
-    <!--net属性可以是NET2，NET4或者ALL-->
-    <!--dataCenter属性，可以是如下值: sh,nt,sh2或者ALL，也可以是sh,nt,sh2中任意多个值的并集，以逗号分隔-->
-    <!--以上5个属性共同组成了一个元数据，可以唯一的标识一个环境-->
-    <add name="dev" dataCenter="sh" target="dev" iis="ALL" net="ALL" />
-    <add name="test" target="test" iis="ALL" net="ALL" dataCenter="ALL" />
-    <add name="fws" target="fws" iis="ALL" net="ALL" dataCenter="ALL" />
-    <add name="fat" target="fat" iis="ALL" net="ALL" dataCenter="ALL" />
-    <add name="lpt" target="lpt" iis="ALL" net="ALL" dataCenter="ALL" />
-    <add name="prd_iis7_net4" target="prd" iis="IIS7" net="NET4" dataCenter="sh" />
-        <add name="prd_iis7_net2" target="prd" iis="IIS7" net="NET2" dataCenter="sh" />
-        <add name="prd_iis6_nt" target="prd" iis="IIS6" net="ALL" dataCenter="nt" />
-    </environments>
-  <!--可选节点，1.3.9版本加入的功能，支持自定义验证-->
-  <validates files="Validate.xml;"></validates>
-  <!--environments节点有多少个子节点，则下文中必须出现同样数量的节点，且名称必须与上文中的name属性一致-->
-  <fat>
-    <user>dd.qa.nt.ctripcorp.com</user>
-    <Env>dev</Env>
-    <Encoding>gb2312</Encoding>
-    <UDPTracePort>8009</UDPTracePort>
-    <StateServer1>localhost:42424</StateServer1>
-    <StateServer2>localhost:42424</StateServer2>
-    <ESBUrl>http://soa.fws.qa.nt.ctripcorp.com/SOA.ESB/Ctrip.SOA.ESB.asmx</ESBUrl>
-    <hello>http://soa.{g.EnvType}.com</hello>
-    <UDPTraceIP>192.168.100.145</UDPTraceIP>
-    <FaxServer>192.168.100.235</FaxServer>
-    <loggingserver.v2.ip>collector.logging.fws.qa.nt.ctripcorp.com</loggingserver.v2.ip>
-  </fat>
-  <lpt>
-    <Env>dev</Env>
-    <Encoding>gb2312</Encoding>
-    <UDPTracePort>8009</UDPTracePort>
-    <StateServer1>localhost:42424</StateServer1>
-    <StateServer2>localhost:42424</StateServer2>
-    <ESBUrl>http://soa.lpt.qa.nt.ctripcorp.com/SOA.ESB/Ctrip.SOA.ESB.asmx</ESBUrl>
-    <UDPTraceIP>192.168.100.145</UDPTraceIP>
-    <FaxServer>192.168.100.235</FaxServer>
-  </lpt>
-   
-    <dev>
-        <Env>{$g.EnvType}</Env>
-        <Encoding>gb2312</Encoding>
-        <UDPTracePort>8009</UDPTracePort>
-        <StateServer1>localhost:42424</StateServer1>
-        <StateServer2>localhost:42424</StateServer2>
-        <ESBUrl>http://soa.dev.sh.ctriptravel.com/SOA.ESB/Ctrip.SOA.ESB.asmx</ESBUrl>
-        <UDPTraceIP>192.168.100.145</UDPTraceIP>
-        <FaxServer>192.168.100.235</FaxServer>
-    </dev>
-  <test>
-    <Env>test</Env>
-    <Encoding>gb2312</Encoding>
-    <UDPTracePort>8009</UDPTracePort>
-    <StateServer1>localhost:42424</StateServer1>
-    <StateServer2>localhost:42424</StateServer2>
-    <ESBUrl>http://soa.dev.sh.ctriptravel.com/SOA.ESB/Ctrip.SOA.ESB.asmx</ESBUrl>
-    <UDPTraceIP>192.168.100.145</UDPTraceIP>
-    <FaxServer>192.168.100.235</FaxServer>
-  </test>
-    <fws>
-        <Env>fws</Env>
-        <Encoding>gb2312</Encoding>
-        <UDPTracePort>8009</UDPTracePort>
-        <StateServer1>localhost:42424</StateServer1>
-        <StateServer2>localhost:42424</StateServer2>
-        <ESBUrl>http://soa.fws.qa.nt.ctripcorp.com/SOA.ESB/Ctrip.SOA.ESB.asmx</ESBUrl>
-    <hello>http://www.fws10.com</hello>
-        <UDPTraceIP>193.168.100.145</UDPTraceIP>
-        <FaxServer>193.168.100.235</FaxServer>
-    </fws>
-    <uat>
-        <Env>uat</Env>
-        <Encoding>gb2312</Encoding>
-        <UDPTracePort>8009</UDPTracePort>
-        <StateServer1>localhost:42424</StateServer1>
-        <StateServer2>localhost:42424</StateServer2>
-        <ESBUrl>http://soa.uat.sh.ctriptravel.com/SOA.ESB/Ctrip.SOA.ESB.asmx</ESBUrl>
-        <UDPTraceIP>194.168.100.145</UDPTraceIP>
-        <FaxServer>194.168.100.235</FaxServer>
-    </uat>
-    <prd_iis7>
-        <Env>{$g.EnvType}</Env>
-        <Encoding>gb2312</Encoding>
-        <UDPTracePort>8009</UDPTracePort>
-        <StateServer1>localhost:42424</StateServer1>
-        <StateServer2>localhost:42424</StateServer2>
-        <ESBUrl>http://soa.sh.ctriptravel.com/SOA.ESB/Ctrip.SOA.ESB.asmx</ESBUrl>
-        <UDPTraceIP>10.168.100.145</UDPTraceIP>
-        <FaxServer>10.168.100.235</FaxServer>
-    </prd_iis7>
-     
-    <prd_iis7_net2>
-        <Env>prd_iis7_net2</Env>
-        <ESBUrl>http://soa2.sh.ctriptravel.com/SOA.ESB/Ctrip.SOA.ESB.asmx</ESBUrl>
-        <Encoding>gb2312</Encoding>
-        <UDPTracePort>8009</UDPTracePort>
-        <StateServer1>localhost:42424</StateServer1>
-        <StateServer2>localhost:42424</StateServer2>
-        <UDPTraceIP>12.168.100.145</UDPTraceIP>
-        <FaxServer>12.168.100.235</FaxServer>
-    </prd_iis7_net2>
-    <prd_iis7_net4>
-        <Env>prd_iis7_net4</Env>
-        <ESBUrl>http://soa4.sh.ctriptravel.com/SOA.ESB/Ctrip.SOA.ESB.asmx</ESBUrl>
-        <Encoding>gb2312</Encoding>
-        <UDPTracePort>8009</UDPTracePort>
-        <StateServer1>localhost:42424</StateServer1>
-        <StateServer2>localhost:42424</StateServer2>
-        <UDPTraceIP>14.168.100.145</UDPTraceIP>
-        <FaxServer>14.168.100.235</FaxServer>
-    </prd_iis7_net4>
-    <prd_iis6_nt>
-        <Env>prd_iis6_nt</Env>
-        <Encoding>utf-8</Encoding>
-        <UDPTracePort>2001</UDPTracePort>
-        <StateServer1>localhost:42424</StateServer1>
-        <StateServer2>localhost:42424</StateServer2>
-        <ESBUrl>http://soa5.sh.ctriptravel.com/SOA.ESB/Ctrip.SOA.ESB.asmx</ESBUrl>
-        <UDPTraceIP>15.168.100.145</UDPTraceIP>
-        <FaxServer>15.168.100.235</FaxServer>
-    </prd_iis6_nt>
+	<environments>
+		<!--所有属性及XML节点名称均需要区分大小写 -->
+		<!--name属性的命名可以随意进行，只要符合Windows的文件夹名规范即可，下文中的类似prd_iis7_net4的节点名称就是依据此属性而得来的，很多 
+			同事会以target来命名，这是不太理想的 -->
+		<!--target属性可以是dev,test等属性，是用来区分当前环境的 -->
+		<!--iis属性可以是IIS6,IIS7或者ALL -->
+		<!--net属性可以是NET2，NET4或者ALL -->
+		<!--dataCenter属性，可以是如下值: sh,nt,sh2或者ALL，也可以是sh,nt,sh2中任意多个值的并集，以逗号分隔 -->
+		<!--以上5个属性共同组成了一个元数据，可以唯一的标识一个环境 -->
+		<add name="dev" target="dev" iis="ALL" net="ALL" dataCenter="sh" />
+		<add name="test" target="test" iis="ALL" net="ALL" dataCenter="ALL" />
+		<add name="fws" target="fws" iis="ALL" net="ALL" dataCenter="ALL" />
+		<add name="fat" target="fat" iis="ALL" net="ALL" dataCenter="ALL" />
+		<add name="lpt" target="lpt" iis="ALL" net="ALL" dataCenter="ALL" />
+		<add name="prd" target="prd" iis="ALL" net="ALL" dataCenter="sh" />
+	</environments>
+	<!--environments节点有多少个子节点，则下文中必须出现同样数量的节点，且名称必须与上文中的name属性一致 -->
+	<fat>
+		<DBDataCenter></DBDataCenter>
+	</fat>
+	<lpt>
+		<DBDataCenter></DBDataCenter>
+	</lpt>
+	<dev>
+		<DBDataCenter></DBDataCenter>
+	</dev>
+	<test>
+		<DBDataCenter></DBDataCenter>
+	</test>
+	<fws>
+		<DBDataCenter></DBDataCenter>
+	</fws>
+	<uat>
+		<DBDataCenter></DBDataCenter>
+	</uat>
+	<prd>
+		<DBDataCenter>_SH</DBDataCenter>
+	</prd>
 </profile>

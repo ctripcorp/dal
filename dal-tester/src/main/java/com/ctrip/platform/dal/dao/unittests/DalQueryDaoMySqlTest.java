@@ -264,12 +264,48 @@ public class DalQueryDaoMySqlTest {
 	 */
 	@Test
 	public void testQueryTopFailed() throws SQLException{
-		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE quantity = 10";
+		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE iid = -1";
 		StatementParameters param = new StatementParameters();
 		DalHints hints = new DalHints();
-		List<ClientTestModel> models = client.queryTop(sql, param, hints, mapper, 1000);
-		Assert.assertTrue(1000 > models.size());
-		Assert.assertEquals(10, models.get(0).getQuantity());
+		
+		try {
+			List<ClientTestModel> models = client.queryTop(sql, param, hints, mapper, 1000);
+			Assert.fail();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Test query for Top success
+	 * @throws SQLException
+	 */
+	@Test
+	public void testQueryObjectTopSuccess() throws SQLException{
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE quantity = 10";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		List<Integer> models = client.queryTop(sql, param, hints, Integer.class, 10);
+		Assert.assertEquals(10, models.size());
+		Assert.assertEquals(10, models.get(0).intValue());
+	}
+	
+	/**
+	 * Test query for Top failed
+	 * @throws SQLException
+	 */
+	@Test
+	public void testQueryObjectTopFailed() throws SQLException{
+		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE iid = -1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+
+		try {
+			client.queryTop(sql, param, hints, Integer.class, 1000);
+			Assert.fail();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -296,13 +332,52 @@ public class DalQueryDaoMySqlTest {
 	 */
 	@Test
 	public void testQueryFromFailed() throws SQLException{
-		String sql = "SELECT * FROM " + TABLE_NAME + " LIMIT 5";
+		String sql = "SELECT * FROM " + TABLE_NAME + " LIMIT x 5";
 		StatementParameters param = new StatementParameters();
 		DalHints hints = new DalHints();
-		List<ClientTestModel> models = client.queryFrom(sql, param, hints, mapper, 0, 10);
-		Assert.assertEquals(5, models.size());
-		Assert.assertEquals(1, models.get(0).getId());
+		List<ClientTestModel> models;
+		try {
+			models = client.queryFrom(sql, param, hints, mapper, 0, 10);
+			Assert.fail();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
+	
+	/**
+	 * Test query for From success
+	 * @throws SQLException
+	 */
+	@Test
+	public void testQueryObjectFromSuccess() throws SQLException{
+		String sql = "SELECT quantity FROM " + TABLE_NAME;
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		List<Integer> models = client.queryFrom(sql, param, hints, Integer.class, 0, 10);
+		Assert.assertEquals(10, models.size());
+		
+		List<Integer> models_2 = client.queryFrom(sql, param, hints, Integer.class, 100, 10);
+		Assert.assertEquals(10, models_2.size());
+	}
+	
+	/**
+	 * Test query for From Failed
+	 * @throws SQLException
+	 */
+	@Test
+	public void testQueryObjectFromFailed() throws SQLException{
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " LIMIT x 5";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+
+		try {
+			client.queryFrom(sql, param, hints, Integer.class, 0, 10);
+			Assert.fail();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	private static class ClientTestModel {
 		private int id;
 		private int quantity;

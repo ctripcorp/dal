@@ -5,8 +5,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -33,9 +35,9 @@ import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import com.ctrip.platform.dal.daogen.utils.AllInOneConfigParser;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.IgnoreCaseCampare;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,6 +55,42 @@ public class DatabaseResource {
 		if (classLoader == null) {
 			classLoader = Configuration.class.getClassLoader();
 		}
+	}
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("merge")
+	public Status mergeDB() {
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+
+		Status status = Status.OK;
+		
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		
+		if (user.getGroupId() != DalGroupResource.SUPER_GROUP_ID){
+			status = Status.ERROR;
+			status.setInfo("You have no permision, only DAL Admin Team can do this.");
+			return status;
+		}
+		
+		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
+		
+		Map<String, DalGroupDB> allDbs = new AllInOneConfigParser(Configuration.get("all_in_one")).getDBAllInOneConfig();
+		Set<String> keys = allDbs.keySet();
+		for(String key:keys){
+			DalGroupDB db = allDbDao.getGroupDBByDbName(key);
+			if(db==null){
+				allDbDao.insertDalGroupDB(allDbs.get(key));
+			}else{
+				DalGroupDB fileDB = allDbs.get(key);
+				allDbDao.updateGroupDB(db.getId(), key, fileDB.getDb_address(), 
+						fileDB.getDb_port(),fileDB.getDb_user(), fileDB.getDb_password(),
+						fileDB.getDb_catalog(), fileDB.getDb_providerName());
+			}
+		}
+
+		return Status.OK;
 	}
 	
 	@POST
@@ -382,8 +420,18 @@ public class DatabaseResource {
 			tables = DbUtils.getAllTableNames(dbName);
 			sps = DbUtils.getAllSpNames(dbName);
 			
-			java.util.Collections.sort(views, new IgnoreCaseCampare());
-			java.util.Collections.sort(tables, new IgnoreCaseCampare());
+			java.util.Collections.sort(views, new Comparator<String>(){
+				@Override
+				public int compare(String o1, String o2) {
+					return o1.toLowerCase().compareTo(o2.toLowerCase());
+				}
+			});
+			java.util.Collections.sort(tables,  new Comparator<String>(){
+				@Override
+				public int compare(String o1, String o2) {
+					return o1.toLowerCase().compareTo(o2.toLowerCase());
+				}
+			});
 			java.util.Collections.sort(sps);
 
 			tableSpNames.setSps(sps);
@@ -415,5 +463,7 @@ public class DatabaseResource {
 				: Status.OK;
 
 	}
+	
+	
 	
 }

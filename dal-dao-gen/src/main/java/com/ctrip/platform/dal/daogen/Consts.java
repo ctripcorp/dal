@@ -22,7 +22,7 @@ public class Consts {
 	
 	public static Map<String, String> databaseType;
 	
-	public static Map<Integer, Class> jdbcSqlTypeToJavaClass;
+	public static Map<Integer, Class<?>> jdbcSqlTypeToJavaClass;
 	public static Map<Integer, String> jdbcSqlTypeDisplay;
 	
 	public static List<String> CSharpValueTypes;
@@ -30,7 +30,7 @@ public class Consts {
 	static{
 		CSharpValueTypes = new ArrayList<String>();
 		WhereConditionMap = new HashMap<String, String>();
-		jdbcSqlTypeToJavaClass= new HashMap<Integer, Class>();
+		jdbcSqlTypeToJavaClass= new HashMap<Integer, Class<?>>();
 		SystemDatabases = new ArrayList<String>();
 		databaseType = new ConcurrentHashMap<String, String>();
 		

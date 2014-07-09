@@ -10,7 +10,6 @@ import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 
 public class DataSourceUtilTest {
 	
-	@Test
 	public void getConn1() throws SQLException{
 		long start = System.currentTimeMillis();
 		
@@ -23,7 +22,6 @@ public class DataSourceUtilTest {
 		System.out.println("cost time is " + (System.currentTimeMillis() - start) + "ms");
 	}
 	
-	@Test
 	public void getConn2() throws SQLException{
 		long start = System.currentTimeMillis();
 		
@@ -42,7 +40,6 @@ public class DataSourceUtilTest {
 		System.out.println("mysql cost time is " + (System.currentTimeMillis() - start) + "ms");
 	}
 	
-	@Test
 	public void getConn3() throws SQLException{
 		long start = System.currentTimeMillis();
 		

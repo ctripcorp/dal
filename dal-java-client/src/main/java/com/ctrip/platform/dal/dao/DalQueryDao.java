@@ -235,5 +235,5 @@ public final class DalQueryDao {
 			return;
 		
 		throw new SQLException(message);
-	}	
+	}
 }

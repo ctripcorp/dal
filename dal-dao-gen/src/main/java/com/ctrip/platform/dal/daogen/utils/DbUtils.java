@@ -20,12 +20,12 @@ import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
-import com.ctrip.platform.dal.daogen.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.Consts;
-import com.ctrip.platform.dal.daogen.cs.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
-import com.ctrip.platform.dal.daogen.java.JavaParameterHost;
+import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.host.csharp.CSharpParameterHost;
+import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 
 public class DbUtils {
 	private static Logger log;

@@ -106,16 +106,6 @@ public class DalQueryDaoSqlServerTest {
 		Assert.assertEquals(ROW_COUNT, models.size());
 	}
 
-	@Test
-	public void testQueryWithClazz() throws SQLException {
-		String sql = "SELECT quantity FROM " + TABLE_NAME;
-		StatementParameters param = new StatementParameters();
-		DalHints hints = new DalHints();
-
-		List<Integer> models = client.query(sql, param, hints, Integer.class);
-		Assert.assertEquals(ROW_COUNT, models.size());
-	}
-	
 	/**
 	 * Test the query function with callback
 	 * 
@@ -236,35 +226,6 @@ public class DalQueryDaoSqlServerTest {
 	}
 
 	/**
-	 * Test query for first success
-	 * @throws SQLException
-	 */
-	@Test
-	public void testTypedQueryFirstSuccess() throws SQLException{
-		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE id = 1";
-		StatementParameters param = new StatementParameters();
-		DalHints hints = new DalHints();
-		Integer result = client.queryFirst(sql, param, hints, Integer.class);
-		Assert.assertNotNull(result);
-	}
-	
-	/**
-	 *  Test query for first failed
-	 */
-	@Test
-	public void testTypedQueryFirstFaield(){
-		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE id = -1";
-		StatementParameters param = new StatementParameters();
-		DalHints hints = new DalHints();
-		try {
-			Integer result = client.queryFirst(sql, param, hints, Integer.class);
-			Assert.fail();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
 	 * Test query for Top success
 	 * 
 	 * @throws SQLException
@@ -287,15 +248,52 @@ public class DalQueryDaoSqlServerTest {
 	 */
 	@Test
 	public void testQueryTopFailed() throws SQLException {
-		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE quantity = 10";
+		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE quantity = 10 x";
 		StatementParameters param = new StatementParameters();
 		DalHints hints = new DalHints();
-		List<ClientTestModel> models = client.queryTop(sql, param, hints,
-				mapper, 1000);
-		Assert.assertTrue(1000 > models.size());
-		Assert.assertEquals(10, models.get(0).getQuantity());
+		try {
+			client.queryTop(sql, param, hints,
+					mapper, 1000);
+			Assert.fail();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
+	/**
+	 * Test query for Top success
+	 * 
+	 * @throws SQLException
+	 */
+	@Test
+	public void testQueryObjectTopSuccess() throws SQLException {
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE quantity = 10";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		List<Integer> models = client.queryTop(sql, param, hints,
+				Integer.class, 10);
+		Assert.assertEquals(10, models.size());
+	}
+
+	/**
+	 * Test query for Top failed
+	 * 
+	 * @throws SQLException
+	 */
+	@Test
+	public void testQueryObjectTopFailed() throws SQLException {
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE quantity = 10 x";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		try {
+			client.queryTop(sql, param, hints,
+					Integer.class, 1000);
+			Assert.fail();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Test query for From success
 	 * 
@@ -324,15 +322,59 @@ public class DalQueryDaoSqlServerTest {
 	 */
 	@Test
 	public void testQueryFromFailed() throws SQLException {
-		String sql = "SELECT TOP(5) * FROM " + TABLE_NAME;
+		String sql = "SELECT TOP(x) * FROM " + TABLE_NAME;
 		StatementParameters param = new StatementParameters();
 		DalHints hints = new DalHints();
-		List<ClientTestModel> models = client.queryFrom(sql, param, hints,
-				mapper, 0, 10);
-		Assert.assertEquals(5, models.size());
-		Assert.assertEquals(1, models.get(0).getId());
+		List<ClientTestModel> models;
+		try {
+			models = client.queryFrom(sql, param, hints,
+					mapper, 0, 10);
+			Assert.fail();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
+	/**
+	 * Test query for From success
+	 * 
+	 * @throws SQLException
+	 */
+	@Test
+	public void testQueryObjectFromSuccess() throws SQLException {
+		String sql = "SELECT id FROM " + TABLE_NAME;
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		List<Integer> models = client.queryFrom(sql, param, hints,
+				Integer.class, 0, 10);
+		Assert.assertEquals(10, models.size());
+		Assert.assertEquals(1, models.get(0).intValue());
+
+		List<Integer> models_2 = client.queryFrom(sql, param, hints,
+				Integer.class, 100, 10);
+		Assert.assertEquals(10, models_2.size());
+		Assert.assertEquals(101, models_2.get(0).intValue());
+	}
+
+	/**
+	 * Test query for From Failed
+	 * 
+	 * @throws SQLException
+	 */
+	@Test
+	public void testQueryObjectFromFailed() throws SQLException {
+		String sql = "SELECT TOP(x) quantity FROM " + TABLE_NAME;
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		try {
+			client.queryFrom(sql, param, hints,
+					Integer.class, 0, 10);
+			Assert.fail();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private static class ClientTestModel {
 		private int id;
 		private int quantity;

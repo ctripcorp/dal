@@ -171,6 +171,25 @@ public final class DalQueryDao {
 	}
 
 	/**
+	 * Query the first count of object in the result. If the query return more result than 
+	 * count. It will return top count of result. If there is not enough result, it will 
+	 * return all the results.
+	 *   
+	 * @param sql The sql statement to be executed
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param clazz The return type .
+	 * @param count number of result 
+	 * @return list of instance of clazz that represent the query result.
+	 * @throws SQLException If there is no result found.
+	 */
+	public <T> List<T> queryTop(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int count) 
+			throws SQLException {
+		Logger.watcherBegin();
+		return client.query(sql, parameters, hints,  new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), count));
+	}
+
+	/**
 	 * Execute query and return partial result against the given start and count.
 	 *   
 	 * @param sql The sql statement to be executed
@@ -188,6 +207,24 @@ public final class DalQueryDao {
 		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, start, count));
 	}
 
+	/**
+	 * Execute query and return partial result against the given start and count.
+	 *   
+	 * @param sql The sql statement to be executed
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param clazz The return type .
+	 * @param start the row number to be started counting
+	 * @param count number of result 
+	 * @return list of instance of clazz that represent the query result.
+	 * @throws SQLException If there is no result found.
+	 */
+	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int start, int count) throws SQLException {
+		Logger.watcherBegin();
+		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
+		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), start, count));
+	}
+
 	private void assertEquals(int expected, int actual) throws SQLException{
 		if(expected != actual)
 			throw new SQLException(String.format(COUNT_MISMATCH_MSG, expected, actual));
@@ -198,5 +235,5 @@ public final class DalQueryDao {
 			return;
 		
 		throw new SQLException(message);
-	}	
+	}
 }

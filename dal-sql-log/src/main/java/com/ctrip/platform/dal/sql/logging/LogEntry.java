@@ -358,12 +358,12 @@ public class LogEntry {
 		try {
 			params = URLEncoder.encode(params, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			this.errorMsg += Logger.getExceptionStack(e);
+			this.errorMsg += DalLogger.getExceptionStack(e);
 			params = "";
 		}
 		
-		Logger.watcherEnd();
-		Watcher wac = Logger.getAndRemoveWatcher();
+		DalLogger.watcherEnd();
+		Watcher wac = DalLogger.getAndRemoveWatcher();
 		
 		return String.format(JSON_PATTERN, 
 				existed ? 0 : 1, 

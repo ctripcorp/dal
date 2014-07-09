@@ -15,7 +15,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 import com.ctrip.platform.dal.sql.logging.LogEntry;
-import com.ctrip.platform.dal.sql.logging.Logger;
+import com.ctrip.platform.dal.sql.logging.DalLogger;
 import com.ctrip.platform.dal.sql.logging.MetricsLogger;
 
 public abstract class ConnectionAction<T> {
@@ -133,14 +133,14 @@ public abstract class ConnectionAction<T> {
 		try {
 			long duration = System.currentTimeMillis() - start;
 			if(e == null) {
-				Logger.success(entry, duration, fetchQueryRows(result));
+				DalLogger.success(entry, duration, fetchQueryRows(result));
 				MetricsLogger.success(entry, duration);
 			}else{
-				Logger.fail(entry, duration, e);
+				DalLogger.fail(entry, duration, e);
 				MetricsLogger.fail(entry, duration);
 			}
 		} catch (Throwable e1) {
-			Logger.error("Can not log", e1);
+			DalLogger.error("Can not log", e1);
 		}
 	}
 
@@ -160,7 +160,7 @@ public abstract class ConnectionAction<T> {
 			try {
 				rs.close();
 			} catch (Throwable e) {
-				Logger.error("Close result set failed.", e);
+				DalLogger.error("Close result set failed.", e);
 			}
 		}
 		rs = null;
@@ -179,7 +179,7 @@ public abstract class ConnectionAction<T> {
 			try {
 				_statement.close();
 			} catch (Throwable e) {
-				Logger.error("Close statement failed.", e);
+				DalLogger.error("Close statement failed.", e);
 			}
 		}		
 	}

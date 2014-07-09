@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import com.ctrip.platform.dal.sql.logging.Logger;
+import com.ctrip.platform.dal.sql.logging.DalLogger;
 
 public class DalTransaction  {
 	private String logicDbName;
@@ -77,7 +77,7 @@ public class DalTransaction  {
 			else
 				conn.rollback();
 		} catch (Throwable e) {
-			Logger.error("Can not commit or rollback on current connection", e);
+			DalLogger.error("Can not commit or rollback on current connection", e);
 		}
 
 		try {

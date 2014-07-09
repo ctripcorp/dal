@@ -10,7 +10,7 @@ import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.strategy.DalShardStrategy;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
-import com.ctrip.platform.dal.sql.logging.Logger;
+import com.ctrip.platform.dal.sql.logging.DalLogger;
 
 public class DalConnectionManager {
 	private DalConfigure config;
@@ -43,7 +43,7 @@ public class DalConnectionManager {
 		}
 		catch(SQLException ex)
 		{
-			Logger.logGetConnectionFailed(realDbName, ex);
+			DalLogger.logGetConnectionFailed(realDbName, ex);
 			throw ex;
 		}
 		return connHolder;

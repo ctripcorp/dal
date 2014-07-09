@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.sql.logging;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.ctrip.freeway.gen.v2.LogLevel;
 import com.ctrip.freeway.gen.v2.LogType;
@@ -11,14 +12,23 @@ import com.ctrip.freeway.tracing.ITrace;
 import com.ctrip.freeway.tracing.TraceManager;
 
 
-public class Logger {
+public class DalLogger {
 	public static final String TITLE = "Dal Fx";
+	public static AtomicBoolean enableLogging = new AtomicBoolean(true);
 	
 	public static ThreadLocal<Watcher> watcher = new ThreadLocal<Watcher>();
 	
 	private static ILog logger = LogManager.getLogger("DAL Java Client");
 	private static ITrace trace = TraceManager.getTracer("DAL Java Client");
 
+	public static boolean isEnableLogging() {
+		return enableLogging.get();
+	}
+	
+	public static void setEnableLogging(boolean enable) {
+		enableLogging.set(enable);
+	}
+	
 	public static void success(LogEntry entry, long duration, int count) {
 		entry.setDuration(duration);
 		entry.setSuccess(true);
@@ -34,7 +44,11 @@ public class Logger {
 	}
 	
 	public static void log(LogEntry entry) {
+		if(!isEnableLogging())
+			return;
+		
 		//logger.info(TITLE, entry.toJson(), entry.getTag());
+		
 		trace.log(LogType.SQL, LogLevel.INFO, TITLE, entry.toJson(), entry.getTag());
 	}
 	
@@ -46,7 +60,7 @@ public class Logger {
 			String logMsg = "Connectiing to " + realDbName + " database failed." +
 					System.lineSeparator() + System.lineSeparator()  +
 					"********** Exception Info **********" + System.lineSeparator()  + msg;
-			Logger.log("Get connection", DalEventEnum.CONNECTION_FAILED, LogLevel.ERROR, logMsg);
+			log("Get connection", DalEventEnum.CONNECTION_FAILED, LogLevel.ERROR, logMsg);
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 		}	

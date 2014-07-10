@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.sql.logging;
 
 public class DalWatcher {
-	private static ThreadLocal<CostRecorder> curRecorder = new ThreadLocal<CostRecorder>();
+	private static ThreadLocal<CostRecorder> costRecorder = new ThreadLocal<CostRecorder>();
 	
 	private static final String JSON_PATTERN = "{'Decode':'%s','Connect':'%s','Prepare':'%s','Excute':'%s','ClearUp':'%s'}";
 	
@@ -24,13 +24,13 @@ public class DalWatcher {
 	}
 	
 	private static CostRecorder recorder() {
-		CostRecorder value = curRecorder.get();
-		if(value == null) {
-			value = new CostRecorder();
-			curRecorder.set(value);
+		CostRecorder curRecorder = costRecorder.get();
+		if(curRecorder == null) {
+			curRecorder = new CostRecorder();
+			costRecorder.set(curRecorder);
 		}
 		
-		return value;
+		return curRecorder;
 	}
 	
 	public static void reset() {
@@ -43,7 +43,13 @@ public class DalWatcher {
 	}
 	
 	public static void beginConnect(){
-		recorder().beginConnect = System.currentTimeMillis();
+		CostRecorder curRecorder = recorder();
+		
+		// Check abnormal case. We only need to check it here
+		if(curRecorder.beginConnect != 0)
+			curRecorder.reset();
+		
+		curRecorder.beginConnect = System.currentTimeMillis();
 	}
 	
 	public static void endConnect(){
@@ -58,22 +64,15 @@ public class DalWatcher {
 		recorder().endExecute = System.currentTimeMillis();
 	}
 	
-	public static void end(){
-		recorder().end = System.currentTimeMillis();
-	}	
-	
 	public static String toJson(){
 		CostRecorder cur = recorder();
-		String json = "";
-		if(cur.begin != 0 && cur.beginConnect >= cur.begin && 
-				cur.endConnect >= cur.beginConnect && 
-				cur.beginExecute >= cur.endConnect && 
-				cur.endExecute >= cur.beginExecute && 
-				cur.end >= cur.endExecute){
-			json = String.format(JSON_PATTERN, cur.beginConnect - cur.begin,
-					cur.endConnect - cur.beginConnect, cur.beginExecute - cur.endConnect,
-					cur.endExecute - cur.beginExecute, cur.end - cur.endExecute);
-		} 
+		
+		// Final end
+		cur.end = System.currentTimeMillis();
+		
+		String json = String.format(JSON_PATTERN, cur.begin == 0 ? 0 : cur.beginConnect - cur.begin,
+				cur.endConnect - cur.beginConnect, cur.beginExecute - cur.endConnect,
+				cur.endExecute - cur.beginExecute, cur.end - cur.endExecute);
 		
 		reset();
 		return json;

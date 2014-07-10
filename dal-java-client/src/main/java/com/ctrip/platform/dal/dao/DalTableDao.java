@@ -41,6 +41,7 @@ public final class DalTableDao<T> {
 	private final String pkSql;
 	private Set<String> pkColumns;
 	private String batchInsertSql;
+	private String deleteSql;
 	private Map<String, Integer> columnTypes = new HashMap<String, Integer>();
 	private Character startDelimiter;
 	private Character endDelimiter;
@@ -52,6 +53,7 @@ public final class DalTableDao<T> {
 		initColumnTypes();
 		pkSql = initSql();
 		batchInsertSql = buildBatchInsertSql();
+		deleteSql = buildDeleteSql();
 	}
 	
 	/**
@@ -261,10 +263,10 @@ public final class DalTableDao<T> {
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, T... daoPojos)
 			throws SQLException {
-		DalWatcher.begin();
 		int count = 0;
 		// Try to insert one by one
 		for (T pojo : daoPojos) {
+			DalWatcher.begin();
 			Map<String, ?> fields = parser.getFields(pojo);
 			// TODO revise and improve performance
 			String insertSql = buildInsertSql(fields);
@@ -361,11 +363,9 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int delete(DalHints hints, T... daoPojos) throws SQLException {
-		DalWatcher.begin();
 		int count = 0;
 		for (T pojo : daoPojos) {
-			String deleteSql = buildDeleteSql();
-
+			DalWatcher.begin();
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, parser.getPrimaryKeys(pojo));
 
@@ -389,7 +389,6 @@ public final class DalTableDao<T> {
 	 */
 	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
 		DalWatcher.begin();
-		String deleteSql = buildDeleteSql();
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		int i = 0;
 		for (T pojo : daoPojos) {
@@ -415,9 +414,9 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int update(DalHints hints, T... daoPojos) throws SQLException {
-		DalWatcher.begin();
 		int count = 0;
 		for (T pojo : daoPojos) {
+			DalWatcher.begin();
 			Map<String, ?> fields = parser.getFields(pojo);
 			Map<String, ?> pk = parser.getPrimaryKeys(pojo);
 

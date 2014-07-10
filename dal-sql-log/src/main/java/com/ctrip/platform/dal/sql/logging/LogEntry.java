@@ -362,8 +362,6 @@ public class LogEntry {
 			params = "";
 		}
 		
-		DalWatcher.end();
-		
 		return String.format(JSON_PATTERN, 
 				existed ? 0 : 1, 
 				hashCode, 

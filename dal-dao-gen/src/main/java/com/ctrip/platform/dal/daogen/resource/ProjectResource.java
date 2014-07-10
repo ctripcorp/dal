@@ -22,6 +22,8 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
+import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
@@ -33,8 +35,8 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.generator.CSharpGenerator;
-import com.ctrip.platform.dal.daogen.generator.JavaGenerator;
+import com.ctrip.platform.dal.daogen.generator.csharp.CSharpDalGenerator;
+import com.ctrip.platform.dal.daogen.generator.java.JavaDalGenerator;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 @Resource
@@ -303,14 +305,20 @@ public class ProjectResource {
 		try {
 			log.info(String.format("begain generate project: [id=%s; regen=%s; language=%s]",
 					id, regen, language));
+			DalGenerator generator = null;
+			CodeGenContext context = null;
 			if (language.equals("java")) {
-				new JavaGenerator().generate(id, regen, progress, null);
-			}
-			else if (language.equals("cs")){
+				generator = new JavaDalGenerator();
+				context = generator.createContext(id, regen, progress, null);
+			} else if (language.equals("cs")){
 				Map<String, Boolean> hints = new HashMap<String, Boolean>();
 				hints.put("newPojo", newPojo);
-				new CSharpGenerator().generate(id, regen, progress, hints);
+				generator = new CSharpDalGenerator();
+				context = generator.createContext(id, regen, progress, hints);
 			}
+			generator.prepareDirectory(context);
+			generator.prepareData(context);
+			generator.generateCode(context);
 			status = Status.OK;
 			log.info(String.format("generate project[%s] completed.", id));
 		} catch (Exception e) {

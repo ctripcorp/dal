@@ -16,27 +16,29 @@ public class DalClientFactoryListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent sce) {
 		logger.info("Dal Factory Listener is about to start");
 		ServletContext context = sce.getServletContext();
+		
 		String DalConfigPath = context.getInitParameter("com.ctrip.platform.dal.dao.DalConfigPath");
 		String warmUp = context.getInitParameter("com.ctrip.platform.dal.dao.DalWarmUp");
-		String enableLoggingStr = context.getInitParameter("com.ctrip.platform.dal.dao.EnableLogging");
-		
-		boolean isWarmUp = null != warmUp && warmUp.equalsIgnoreCase("true") ? true : false;
-		boolean enableLogging = null != enableLoggingStr && enableLoggingStr.equalsIgnoreCase("true") ? true : false;
-		
+		String diableLogging = context.getInitParameter("com.ctrip.platform.dal.dao.EnableLogging");
+		String simplifyLogging = context.getInitParameter("com.ctrip.platform.dal.dao.SimplifyLogging");
+
 		try {
 			if(DalConfigPath == null || DalConfigPath.trim().length() == 0)
 				DalClientFactory.initClientFactory();
 			else
 				DalClientFactory.initClientFactory(DalConfigPath.trim());
-			if(isWarmUp)
+			
+			if(Boolean.parseBoolean(warmUp))
 				DalClientFactory.warmUpConnections();
 			
-			DalLogger.setEnableLogging(enableLogging);
+			DalLogger.setDisableLogging(Boolean.parseBoolean(diableLogging));
+			DalLogger.setSimplifyLogging(Boolean.parseBoolean(simplifyLogging));
+			
 		} catch (Exception e) {
 			logger.error("Error when init client factory", e);
 		}
 	}
-
+	
 	public void contextDestroyed(ServletContextEvent sce) {
 		DalClientFactory.shutdownFactory();
 	}

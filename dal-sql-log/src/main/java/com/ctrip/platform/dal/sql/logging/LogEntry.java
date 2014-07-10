@@ -363,7 +363,7 @@ public class LogEntry {
 		}
 		
 		DalLogger.watcherEnd();
-		Watcher wac = DalLogger.getAndRemoveWatcher();
+		DalWatcher wac = DalLogger.getAndRemoveWatcher();
 		
 		return String.format(JSON_PATTERN, 
 				existed ? 0 : 1, 

@@ -14,19 +14,28 @@ import com.ctrip.freeway.tracing.TraceManager;
 
 public class DalLogger {
 	public static final String TITLE = "Dal Fx";
-	public static AtomicBoolean enableLogging = new AtomicBoolean(true);
+	public static AtomicBoolean disableLogging = new AtomicBoolean(false);
+	public static AtomicBoolean simplifyLogging = new AtomicBoolean(false);
 	
-	public static ThreadLocal<Watcher> watcher = new ThreadLocal<Watcher>();
+	public static ThreadLocal<DalWatcher> watcher = new ThreadLocal<DalWatcher>();
 	
 	private static ILog logger = LogManager.getLogger("DAL Java Client");
 	private static ITrace trace = TraceManager.getTracer("DAL Java Client");
 
-	public static boolean isEnableLogging() {
-		return enableLogging.get();
+	public static boolean isDisableLogging() {
+		return disableLogging.get();
 	}
 	
-	public static void setEnableLogging(boolean enable) {
-		enableLogging.set(enable);
+	public static void setDisableLogging(boolean value) {
+		disableLogging.set(value);
+	}
+	
+	public static boolean isSimplifyLogging() {
+		return simplifyLogging.get();
+	}
+	
+	public static void setSimplifyLogging(boolean simplify) {
+		simplifyLogging.set(simplify);
 	}
 	
 	public static void success(LogEntry entry, long duration, int count) {
@@ -44,12 +53,15 @@ public class DalLogger {
 	}
 	
 	public static void log(LogEntry entry) {
-		if(!isEnableLogging())
+		if(isDisableLogging())
 			return;
 		
-		//logger.info(TITLE, entry.toJson(), entry.getTag());
-		
-		trace.log(LogType.SQL, LogLevel.INFO, TITLE, entry.toJson(), entry.getTag());
+		if(isSimplifyLogging()) {
+			logger.info(TITLE, DalWatcher.toJson(), entry.getTag());
+		} else {
+			//logger.info(TITLE, entry.toJson(), entry.getTag());
+			trace.log(LogType.SQL, LogLevel.INFO, TITLE, entry.toJson(), entry.getTag());
+		}
 	}
 	
 	public static void logGetConnectionFailed(String realDbName, Throwable e)
@@ -118,9 +130,9 @@ public class DalLogger {
 	}
 
 	public static void watcherBegin(){
-		Watcher wac = watcher.get();
+		DalWatcher wac = watcher.get();
 		if(null == wac){
-			wac = new Watcher();
+			wac = new DalWatcher();
 			wac.begin();
 			watcher.set(wac);		
 		}		
@@ -151,8 +163,8 @@ public class DalLogger {
 			watcher.get().end();
 	}
 	
-	public static Watcher getAndRemoveWatcher(){
-		Watcher wac = watcher.get();
+	public static DalWatcher getAndRemoveWatcher(){
+		DalWatcher wac = watcher.get();
 		watcher.remove();
 		return wac;  
 	}

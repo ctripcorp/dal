@@ -28,8 +28,8 @@ public class CSharpCodeGenContext extends CodeGenContext {
 	
 	protected boolean newPojo = false;
 	
-	protected static String regEx = null;
-	protected static Pattern inRegxPattern = null;
+	public static String regEx = null;
+	public static Pattern inRegxPattern = null;
 	
 	static{
 		 regEx="in\\s(@\\w+)";

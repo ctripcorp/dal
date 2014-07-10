@@ -6,12 +6,13 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 
 public interface DalGenerator {
 
-	CodeGenContext createContext(int projectId, boolean regenerate, Progress progress, Map<String,?> hints) throws Exception;
+	public CodeGenContext createContext(int projectId, boolean regenerate,
+			Progress progress, Map<String, ?> hints) throws Exception;
 
-	boolean prepareDirectory(CodeGenContext codeGenCtx) throws Exception;
-	
-	boolean prepareData(CodeGenContext codeGenCtx) throws Exception;
-	
-	boolean generateCode(CodeGenContext codeGenCtx) throws Exception;
-	
+	public void prepareDirectory(CodeGenContext codeGenCtx) throws Exception;
+
+	public void prepareData(CodeGenContext codeGenCtx) throws Exception;
+
+	public void generateCode(CodeGenContext codeGenCtx) throws Exception;
+
 }

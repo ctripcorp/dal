@@ -14,6 +14,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.dialect.DalMySqlHelper;
+import com.ctrip.platform.dal.sql.logging.DalLogger;
 
 public class MySqlHelperTest {
 
@@ -25,6 +26,8 @@ public class MySqlHelperTest {
 	static{
 		try {
 			DalClientFactory.initClientFactory();
+			DalLogger.setDisableLogging(false);
+			DalLogger.setSimplifyLogging(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

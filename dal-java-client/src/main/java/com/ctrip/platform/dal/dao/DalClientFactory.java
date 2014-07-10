@@ -117,6 +117,6 @@ public class DalClientFactory {
 	}
 	
 	private static void logReInitialized() {
-		logger.info("Dal Java Client Factory is already initialized.");
+		logger.warn("Dal Java Client Factory is already initialized.");
 	}
 }

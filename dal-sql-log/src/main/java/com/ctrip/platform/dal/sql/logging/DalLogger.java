@@ -128,44 +128,4 @@ public class DalLogger {
 		
 		return msg;
 	}
-
-	public static void watcherBegin(){
-		DalWatcher wac = watcher.get();
-		if(null == wac){
-			wac = new DalWatcher();
-			wac.begin();
-			watcher.set(wac);		
-		}		
-	}
-	
-	public static void watcherBeginConnect(){
-		if(watcher.get() != null)
-			watcher.get().beginConnect();
-	}
-	
-	public static void watcherEndConnect(){
-		if(watcher.get() != null)
-			watcher.get().endConnect();
-	}
-	
-	public static void watcherBeginExecute(){
-		if(watcher.get() != null)
-			watcher.get().beginExecute();
-	}
-	
-	public static void watcherEndExecute(){
-		if(watcher.get() != null)
-			watcher.get().endExectue();
-	}
-	
-	public static void watcherEnd(){
-		if(watcher.get() != null)
-			watcher.get().end();
-	}
-	
-	public static DalWatcher getAndRemoveWatcher(){
-		DalWatcher wac = watcher.get();
-		watcher.remove();
-		return wac;  
-	}
 }

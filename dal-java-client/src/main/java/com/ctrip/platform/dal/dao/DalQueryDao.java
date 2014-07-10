@@ -7,7 +7,6 @@ import java.util.List;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
-import com.ctrip.platform.dal.sql.logging.DalLogger;
 
 /**
  * DAO class that provides common query based functions.
@@ -36,7 +35,6 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> query(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
-		DalLogger.watcherBegin();
 		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper));
 	}
 
@@ -52,7 +50,6 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> query(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		DalLogger.watcherBegin();
 		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()));
 	}
 
@@ -67,7 +64,6 @@ public final class DalQueryDao {
 	 */
 	public void query(String sql, StatementParameters parameters, DalHints hints, DalRowCallback callback) 
 			throws SQLException {
-		DalLogger.watcherBegin();
 		client.query(sql, parameters, hints, new DalRowCallbackExtractor(callback));
 	}
 
@@ -85,7 +81,6 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
-		DalLogger.watcherBegin();
 		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper));
 		assertEquals(1, result.size());
 		return result.get(0);
@@ -105,7 +100,6 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		DalLogger.watcherBegin();
 		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()));
 		assertEquals(1, result.size());
 		return result.get(0);
@@ -125,7 +119,6 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
-		DalLogger.watcherBegin();
 		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, 1));
 		assertGreatThan(0, result.size(), NO_RESULT_MSG);
 		return result.get(0);
@@ -145,7 +138,6 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		DalLogger.watcherBegin();
 		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), 1));
 		assertGreatThan(0, result.size(), NO_RESULT_MSG);
 		return result.get(0);
@@ -166,7 +158,6 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> queryTop(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int count) 
 			throws SQLException {
-		DalLogger.watcherBegin();
 		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, count));
 	}
 
@@ -185,7 +176,6 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> queryTop(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int count) 
 			throws SQLException {
-		DalLogger.watcherBegin();
 		return client.query(sql, parameters, hints,  new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), count));
 	}
 
@@ -202,7 +192,6 @@ public final class DalQueryDao {
 	 * @throws SQLException If there is no result found.
 	 */
 	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count) throws SQLException {
-		DalLogger.watcherBegin();
 		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
 		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, start, count));
 	}
@@ -220,7 +209,6 @@ public final class DalQueryDao {
 	 * @throws SQLException If there is no result found.
 	 */
 	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int start, int count) throws SQLException {
-		DalLogger.watcherBegin();
 		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
 		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), start, count));
 	}

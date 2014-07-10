@@ -24,6 +24,7 @@ import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
+import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 /**
  * The direct connection implementation for DalClient.
@@ -42,19 +43,18 @@ public class DalDirectClient implements DalClient {
 	@Override
 	public <T> T query(String sql, StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor)
 			throws SQLException {
-		DalLogger.watcherBegin();
 		ConnectionAction<T> action = new ConnectionAction<T>() {
 			@Override
 			public T execute() throws Exception {
-				DalLogger.watcherBeginConnect();
+				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalLogger.watcherEndConnect();
+				DalWatcher.endConnect();
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
 				
-				DalLogger.watcherBeginExecute();
+				DalWatcher.beginExecute();
 				rs = preparedStatement.executeQuery();
-				DalLogger.watcherEndExecute();
+				DalWatcher.endExectue();
 				
 				return extractor.extract(rs);
 			}
@@ -67,19 +67,18 @@ public class DalDirectClient implements DalClient {
 	@Override
 	public int update(String sql, StatementParameters parameters, final DalHints hints)
 			throws SQLException {
-		DalLogger.watcherBegin();
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
 			public Integer execute() throws Exception {
-				DalLogger.watcherBeginConnect();
+				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalLogger.watcherEndConnect();
+				DalWatcher.endConnect();
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
 				
-				DalLogger.watcherBeginExecute();
+				DalWatcher.beginExecute();
 				int ret = preparedStatement.executeUpdate();
-				DalLogger.watcherEndExecute();
+				DalWatcher.endExectue();
 				
 				return ret;
 			}
@@ -92,19 +91,18 @@ public class DalDirectClient implements DalClient {
 	@Override
 	public int update(String sql, StatementParameters parameters,
 			final DalHints hints, final KeyHolder generatedKeyHolder) throws SQLException {
-		DalLogger.watcherBegin();
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
 			public Integer execute() throws Exception {
-				DalLogger.watcherBeginConnect();
+				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalLogger.watcherEndConnect();
+				DalWatcher.endConnect();
 
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints, generatedKeyHolder);
 				
-				DalLogger.watcherBeginExecute();
+				DalWatcher.beginExecute();
 				int rows = preparedStatement.executeUpdate();
-				DalLogger.watcherEndExecute();
+				DalWatcher.endExectue();
 				
 				List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
 				rs = preparedStatement.getGeneratedKeys();
@@ -124,21 +122,20 @@ public class DalDirectClient implements DalClient {
 
 	@Override
 	public int[] batchUpdate(String[] sqls, final DalHints hints) throws SQLException {
-		DalLogger.watcherBegin();
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			public int[] execute() throws Exception {
-				DalLogger.watcherBeginConnect();
+				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalLogger.watcherEndConnect();
+				DalWatcher.endConnect();
 				
 				statement = createStatement(conn, hints);
 				for(String sql: sqls)
 					statement.addBatch(sql);
 				
-				DalLogger.watcherBeginExecute();
+				DalWatcher.beginExecute();
 				int[] ret = statement.executeBatch();
-				DalLogger.watcherEndExecute();
+				DalWatcher.endExectue();
 				
 				return ret;
 			}
@@ -151,19 +148,18 @@ public class DalDirectClient implements DalClient {
 	@Override
 	public int[] batchUpdate(String sql, StatementParameters[] parametersList,
 			final DalHints hints) throws SQLException {
-		DalLogger.watcherBegin();
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			public int[] execute() throws Exception {
-				DalLogger.watcherBeginConnect();
+				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalLogger.watcherEndConnect();
+				DalWatcher.endConnect();
 				
 				statement = createPreparedStatement(conn, sql, parametersList, hints);
 				
-				DalLogger.watcherBeginExecute();
+				DalWatcher.beginExecute();
 				int[] ret =  statement.executeBatch();
-				DalLogger.watcherEndExecute();
+				DalWatcher.endExectue();
 				
 				return ret;
 			}
@@ -211,7 +207,6 @@ public class DalDirectClient implements DalClient {
 	@Override
 	public Map<String, ?> call(String callString,
 			StatementParameters parameters, final DalHints hints) throws SQLException {
-		DalLogger.watcherBegin();
 		ConnectionAction<Map<String, ?>> action = new ConnectionAction<Map<String, ?>>() {
 			@Override
 			public Map<String, ?> execute() throws Exception {
@@ -226,17 +221,17 @@ public class DalDirectClient implements DalClient {
 					}
 				}
                 
-				DalLogger.watcherBeginConnect();
+				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalLogger.watcherEndConnect();
+				DalWatcher.endConnect();
 				
 				callableStatement = createCallableStatement(conn, callString, parameters, hints);
 				
-				DalLogger.watcherBeginExecute();
+				DalWatcher.beginExecute();
 				boolean retVal = callableStatement.execute();
 				int updateCount = callableStatement.getUpdateCount();
 				
-				DalLogger.watcherEndExecute();
+				DalWatcher.endExectue();
 				
 				Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
 				if (retVal || updateCount != -1) {
@@ -255,20 +250,19 @@ public class DalDirectClient implements DalClient {
 	public int[] batchCall(String callString,
 			StatementParameters[] parametersList, final DalHints hints)
 			throws SQLException {
-		DalLogger.watcherBegin();
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			public int[] execute() throws Exception {
 				
-				DalLogger.watcherBeginConnect();
+				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalLogger.watcherEndConnect();
+				DalWatcher.endConnect();
 				
 				callableStatement = createCallableStatement(conn, callString, parametersList, hints);
 
-				DalLogger.watcherBeginExecute();
+				DalWatcher.beginExecute();
 				int[] ret =  callableStatement.executeBatch();
-				DalLogger.watcherEndExecute();
+				DalWatcher.endExectue();
 				
 				return ret;
 			}

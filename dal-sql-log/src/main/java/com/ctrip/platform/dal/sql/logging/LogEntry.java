@@ -362,8 +362,7 @@ public class LogEntry {
 			params = "";
 		}
 		
-		DalLogger.watcherEnd();
-		DalWatcher wac = DalLogger.getAndRemoveWatcher();
+		DalWatcher.end();
 		
 		return String.format(JSON_PATTERN, 
 				existed ? 0 : 1, 
@@ -372,7 +371,7 @@ public class LogEntry {
 				params,
 				this.success ? 1 : 0, 
 				this.errorMsg,
-				wac != null ? wac.toJson() : "{}");
+				DalWatcher.toJson());
 	}
 
 }

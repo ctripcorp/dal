@@ -12,6 +12,15 @@ public class DalWatcher {
 		long beginExecute;
 		long endExecute;
 		long end;
+		
+		void reset() {
+			begin = 0;
+			beginConnect = 0;
+			endConnect = 0;
+			beginExecute = 0;
+			endExecute = 0;
+			end = 0;
+		}
 	}
 	
 	private static CostRecorder recorder() {
@@ -24,7 +33,12 @@ public class DalWatcher {
 		return value;
 	}
 	
+	public static void reset() {
+		recorder().reset();
+	}
+	
 	public static void begin(){
+		reset();
 		recorder().begin = System.currentTimeMillis();
 	}
 	
@@ -60,6 +74,8 @@ public class DalWatcher {
 					cur.endConnect - cur.beginConnect, cur.beginExecute - cur.endConnect,
 					cur.endExecute - cur.beginExecute, cur.end - cur.endExecute);
 		} 
+		
+		reset();
 		return json;
 	}
 }

@@ -19,7 +19,6 @@ public class DalClientFactoryListener implements ServletContextListener {
 		
 		String DalConfigPath = context.getInitParameter("com.ctrip.platform.dal.dao.DalConfigPath");
 		String warmUp = context.getInitParameter("com.ctrip.platform.dal.dao.DalWarmUp");
-		String diableLogging = context.getInitParameter("com.ctrip.platform.dal.dao.EnableLogging");
 		String simplifyLogging = context.getInitParameter("com.ctrip.platform.dal.dao.SimplifyLogging");
 
 		try {
@@ -31,7 +30,6 @@ public class DalClientFactoryListener implements ServletContextListener {
 			if(Boolean.parseBoolean(warmUp))
 				DalClientFactory.warmUpConnections();
 			
-			DalLogger.setDisableLogging(Boolean.parseBoolean(diableLogging));
 			DalLogger.setSimplifyLogging(Boolean.parseBoolean(simplifyLogging));
 			
 		} catch (Exception e) {

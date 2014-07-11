@@ -338,6 +338,35 @@ public class DalQueryDaoMySqlTest {
 	}
 	
 	/**
+	 * Test query for first success
+	 * @throws SQLException
+	 */
+	@Test
+	public void testTypedQueryFirstNullableSuccess() throws SQLException{
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE id = 1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		Integer result = client.queryFirstNullable(sql, param, hints, Integer.class);
+		Assert.assertNotNull(result);
+	}
+	
+	/**
+	 *  Test query for first failed
+	 */
+	@Test
+	public void testTypedQueryFirstNullableFaield(){
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE id = -1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		try {
+			Assert.assertNull(client.queryFirstNullable(sql, param, hints, Integer.class));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
+	/**
 	 * Test query for Top success
 	 * @throws SQLException
 	 */

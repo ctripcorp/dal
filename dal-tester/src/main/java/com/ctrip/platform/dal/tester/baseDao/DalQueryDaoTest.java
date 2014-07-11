@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.tester.baseDao;
 
+import static org.junit.Assert.*;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -7,9 +9,6 @@ import java.sql.Types;
 import java.util.List;
 
 import org.junit.After;
-
-import static org.junit.Assert.*;
-
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,6 +21,7 @@ import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowCallback;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.FixedValueRowMapper;
 
 public class DalQueryDaoTest {
 	private final static String DATABASE_NAME = "HotelPubDB";
@@ -102,6 +102,7 @@ public class DalQueryDaoTest {
 	private String sqlList = "select * from " + TABLE_NAME;
 	private String sqlListQuantity = "select quantity from " + TABLE_NAME;
 	private String sqlObject = "select * from " + TABLE_NAME + " where id = ?";
+	private String sqlNoResult = "select * from " + TABLE_NAME + " where id = -1";
 	
 	@Test
 	public void testQueryMapperForList() {
@@ -151,6 +152,8 @@ public class DalQueryDaoTest {
 		}
 	}
 	
+	
+	
 	@Test
 	public void testQueryForObject() {
 		DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
@@ -158,12 +161,7 @@ public class DalQueryDaoTest {
 		Integer id;
 		// This will fail
 		try {
-			id = dao.queryForObject(sqlList, parameters, hints, new DalRowMapper<Integer>() {
-				@Override
-				public Integer map(ResultSet rs, int rowNum) throws SQLException {
-					return null;
-				}
-			});
+			id = dao.queryForObject(sqlList, parameters, hints, new FixedValueRowMapper<Integer>());
 			fail();
 		} catch (SQLException e) {
 		}
@@ -173,12 +171,7 @@ public class DalQueryDaoTest {
 			StatementParameters parameters = new StatementParameters();
 			parameters.set(1, Types.INTEGER, 1);
 
-			id = dao.queryForObject(sqlObject, parameters, hints, new DalRowMapper<Integer>() {
-				@Override
-				public Integer map(ResultSet rs, int rowNum) throws SQLException {
-					return 1;
-				}
-			});
+			id = dao.queryForObject(sqlObject, parameters, hints, new FixedValueRowMapper<Integer>(1));
 		} catch (SQLException e) {
 			e.printStackTrace();
 			fail();
@@ -202,7 +195,59 @@ public class DalQueryDaoTest {
 			fail();
 		}
 	}
+	
+	@Test
+	public void testQueryForObjectNullable() {
+		DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
+		
+		Integer id;
+		try {
+			id = dao.queryForObjectNullable(sqlList, parameters, hints, new FixedValueRowMapper<Integer>());
+			fail();
+		} catch (SQLException e) {
+		}
+		
+		// This will pass
+		try {
+			StatementParameters parameters = new StatementParameters();
+			parameters.set(1, Types.INTEGER, 1);
 
+			id = dao.queryForObjectNullable(sqlObject, parameters, hints, new FixedValueRowMapper<Integer>(1));
+			
+			parameters = new StatementParameters();
+			parameters.set(1, Types.INTEGER, -1);
+
+			assertNull(dao.queryForObjectNullable(sqlObject, parameters, hints, new FixedValueRowMapper<Integer>(1)));
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+		
+		// This will fail
+		try {
+			dao.queryForObjectNullable(sqlList, parameters, hints, Integer.class);
+			fail();
+		} catch (SQLException e) {
+		}
+		
+		// This will pass
+		try {
+			StatementParameters parameters = new StatementParameters();
+			parameters.set(1, Types.INTEGER, 1);
+
+			dao.queryForObjectNullable(sqlObject, parameters, hints, Integer.class);
+			
+			parameters = new StatementParameters();
+			parameters.set(1, Types.INTEGER, -1);
+			
+			assertNull(dao.queryForObjectNullable(sqlObject, parameters, hints, Integer.class));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
 	@Test
 	public void testRange() {
 		try {
@@ -220,6 +265,18 @@ public class DalQueryDaoTest {
 			id = dao.queryFirst(sqlList, parameters, hints, Integer.class);
 			assertNotNull(id);
 			
+			id = dao.queryFirstNullable(sqlList, parameters, hints, mapper);
+			assertNotNull(id);
+			
+			id = dao.queryFirstNullable(sqlList, parameters, hints, Integer.class);
+			assertNotNull(id);
+			
+			id = dao.queryFirstNullable(sqlNoResult, parameters, hints, mapper);
+			assertNull(id);
+			
+			id = dao.queryFirstNullable(sqlNoResult, parameters, hints, Integer.class);
+			assertNull(id);
+
 			List<Integer> result = dao.queryTop(sqlList, parameters, hints, mapper, 5);
 			assertEquals(3, result.size());
 			

@@ -25,8 +25,8 @@ public class JavaCodeGenContext extends CodeGenContext{
 	protected Map<String, JavaMethodHost> _freeSqlPojoHosts = new ConcurrentHashMap<String, JavaMethodHost>();
 	
 	public JavaCodeGenContext(int projectId, boolean regenerate,
-			Progress progress, Map<String, ?> hints) {
-		super(projectId, regenerate, progress, hints);
+			Progress progress) {
+		super(projectId, regenerate, progress, null);
 	}
 
 	public Queue<JavaTableHost> get_tableHosts() {

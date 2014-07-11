@@ -1,7 +1,10 @@
 package com.ctrip.platform.dal.daogen.generator.csharp;
 
+import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
+
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalGenerator;
 import com.ctrip.platform.dal.daogen.entity.Progress;
@@ -23,11 +26,13 @@ public class CSharpDalGenerator implements DalGenerator {
 	
 	@Override
 	public CodeGenContext createContext(int projectId, boolean regenerate,
-			Progress progress, Map<String, ?> hints) throws Exception {
+			Progress progress, boolean newPojo) throws Exception {
 		CSharpCodeGenContext ctx = null;
 		try {
-			ctx = new CSharpCodeGenContext(projectId, regenerate, progress,
-					hints);
+			Map<String, Boolean> hints = new HashMap<String, Boolean>();
+			hints.put("newPojo", newPojo);
+			ctx = new CSharpCodeGenContext(projectId, regenerate, progress, hints);
+			ctx.setNewPojo(newPojo);
 			Project project = SpringBeanGetter.getDaoOfProject().getProjectByID(ctx.getProjectId());
 			DalConfigHost dalConfigHost = null;
 			if (project.getDal_config_name() != null
@@ -40,11 +45,6 @@ public class CSharpDalGenerator implements DalGenerator {
 				dalConfigHost = new DalConfigHost("");
 			}
 			ctx.setDalConfigHost(dalConfigHost);
-			if (null != hints && hints.containsKey("newPojo")) {
-				Object _newPojo = hints.get("newPojo");
-				boolean newPojo = Boolean.parseBoolean(_newPojo.toString());
-				ctx.setNewPojo(newPojo);
-			}
 		} catch (Exception e) {
 			log.warn("exception occur when createContext", e);
 			throw e;

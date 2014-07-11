@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.daogen.generator.java;
 
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
@@ -26,10 +24,10 @@ public class JavaDalGenerator implements DalGenerator {
 	
 	@Override
 	public CodeGenContext createContext(int projectId, boolean regenerate,
-			Progress progress, Map<String, ?> hints) throws Exception {
+			Progress progress, boolean newPojo) throws Exception {
 		JavaCodeGenContext ctx = null;
 		try {
-			ctx = new JavaCodeGenContext(projectId, regenerate, progress, hints);
+			ctx = new JavaCodeGenContext(projectId, regenerate, progress);
 			Project project = SpringBeanGetter.getDaoOfProject()
 					.getProjectByID(projectId);
 			DalConfigHost dalConfigHost = null;

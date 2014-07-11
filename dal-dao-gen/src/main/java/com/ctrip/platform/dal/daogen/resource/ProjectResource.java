@@ -309,12 +309,14 @@ public class ProjectResource {
 			CodeGenContext context = null;
 			if (language.equals("java")) {
 				generator = new JavaDalGenerator();
-				context = generator.createContext(id, regen, progress, null);
+				context = generator.createContext(id, regen, progress, newPojo);
+//				context= new JavaCodeGenContext(id, regen, progress, null);
+//				XrossFactory.createFromXML("code_gen.xunit").getProcessor("Java Code Generator").process(context);
 			} else if (language.equals("cs")){
 				Map<String, Boolean> hints = new HashMap<String, Boolean>();
 				hints.put("newPojo", newPojo);
 				generator = new CSharpDalGenerator();
-				context = generator.createContext(id, regen, progress, hints);
+				context = generator.createContext(id, regen, progress, newPojo);
 			}
 			generator.prepareDirectory(context);
 			generator.prepareData(context);

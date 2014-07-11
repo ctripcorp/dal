@@ -139,9 +139,10 @@ public class DalTableDaoSqlServerTest {
 	public void testQueryByPkWithEntityNoId() throws SQLException{
 		ClientTestModel pk = new ClientTestModel();
 		try {
-			dao.queryByPk(pk, new DalHints());
+			Assert.assertNull(dao.queryByPk(pk, new DalHints()));
+		} catch (SQLException e) { 
 			Assert.fail();
-		} catch (SQLException e) { }
+		}
 	}
 	
 	/**

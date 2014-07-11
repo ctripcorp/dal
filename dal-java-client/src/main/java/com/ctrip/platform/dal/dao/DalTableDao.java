@@ -85,7 +85,7 @@ public final class DalTableDao<T> {
 	 * 
 	 * @param id The primary key in number format
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @return entity of this table
+	 * @return entity of this table. Null if no result found.
 	 * @throws SQLException
 	 */
 	public T queryByPk(Number id, DalHints hints) throws SQLException {
@@ -100,7 +100,7 @@ public final class DalTableDao<T> {
 		String selectSql = String.format(TMPL_SQL_FIND_BY,
 				parser.getTableName(), pkSql);
 
-		return queryDao.queryForObject(selectSql, parameters, hints, parser);
+		return queryDao.queryForObjectNullable(selectSql, parameters, hints, parser);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public final class DalTableDao<T> {
 	 * 
 	 * @param pk The pojo used to represent primary key(s)
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @return entity of this table
+	 * @return entity of this table. Null if no result found.
 	 * @throws SQLException
 	 */
 	public T queryByPk(T pk, DalHints hints) throws SQLException {
@@ -119,7 +119,7 @@ public final class DalTableDao<T> {
 		String selectSql = String.format(TMPL_SQL_FIND_BY,
 				parser.getTableName(), pkSql);
 
-		return queryDao.queryForObject(selectSql, parameters, hints, parser);
+		return queryDao.queryForObjectNullable(selectSql, parameters, hints, parser);
 	}
 
 	/**
@@ -169,7 +169,7 @@ public final class DalTableDao<T> {
 	 * @param whereClause
 	 * @param parameters A container that holds all the necessary parameters
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @return
+	 * @return Null if no result found.
 	 * @throws SQLException
 	 */
 	public T queryFirst(String whereClause, StatementParameters parameters,
@@ -177,7 +177,7 @@ public final class DalTableDao<T> {
 		DalWatcher.begin();
 		String selectSql = String.format(TMPL_SQL_FIND_BY,
 				parser.getTableName(), whereClause);
-		return queryDao.queryFirst(selectSql, parameters, hints, parser);
+		return queryDao.queryFirstNullable(selectSql, parameters, hints, parser);
 	}
 
 	/**

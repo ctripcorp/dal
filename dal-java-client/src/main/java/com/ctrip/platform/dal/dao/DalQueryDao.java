@@ -82,8 +82,25 @@ public final class DalQueryDao {
 	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
 		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper));
-		assertEquals(1, result.size());
-		return result.get(0);
+		return requireSingle(result);
+	}
+
+	/**
+	 * Query for the only object in the result. It is expected that there is only one result should be found.
+	 * If there is no result, it will return null. If there is more than 1 result found, it will throws exception to indicate the exceptional case.
+	 * If you want to get the first object, please use queryFirst instead.  
+	 * 
+	 * @param sql The sql statement to be executed
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param mapper Helper that converters each row to entity. 
+	 * @return entity that represent the query result. Or null if no result found.
+	 * @throws SQLException If there is than 1 result found.
+	 */
+	public <T> T queryForObjectNullable(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
+			throws SQLException {
+		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper));
+		return requireSingleNullable(result);
 	}
 
 	/**
@@ -101,8 +118,25 @@ public final class DalQueryDao {
 	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
 		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()));
-		assertEquals(1, result.size());
-		return result.get(0);
+		return requireSingle(result);
+	}
+
+	/**
+	 * Query for the only object in the result. It is expected that there is only one result should be found.
+	 * If there is no result, it will return null. If there is more than 1 result found, it will throws exception to indicate the exceptional case.
+	 * If you want to get the first object, please use queryFirst instead.
+	 *   
+	 * @param sql The sql statement to be executed
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param clazz The return type  
+	 * @return instance of clazz that represent the query result. Or null if no result found.
+	 * @throws SQLException If there is more than 1 result found.
+	 */
+	public <T> T queryForObjectNullable(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
+			throws SQLException {
+		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()));
+		return requireSingleNullable(result);
 	}
 
 	/**
@@ -120,10 +154,27 @@ public final class DalQueryDao {
 	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
 		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, 1));
-		assertGreatThan(0, result.size(), NO_RESULT_MSG);
-		return result.get(0);
+		return requireFirst(result);
 	}
 
+	/**
+	 * Query for the first object in the result. It is expected that there is at least one result should be found.
+	 * If there is no result found, it will return null.
+	 * If you want to get the only one result, please use queryObject instead.
+	 *   
+	 * @param sql The sql statement to be executed
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param mapper Helper that converters each row to entity. 
+	 * @return entity that represent the query result. Null if no result found.
+	 * @throws SQLException when things going wrong during the execution
+	 */
+	public <T> T queryFirstNullable(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
+			throws SQLException {
+		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, 1));
+		return requireFirstNullable(result);
+	}
+	
 	/**
 	 * Query for the first object in the result. It is expected that there is at least one result should be found.
 	 * If there is no result found, it will throws exception to indicate the exceptional case.
@@ -139,8 +190,25 @@ public final class DalQueryDao {
 	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
 		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), 1));
-		assertGreatThan(0, result.size(), NO_RESULT_MSG);
-		return result.get(0);
+		return requireFirst(result);
+	}
+
+	/**
+	 * Query for the first object in the result. It is expected that there is at least one result should be found.
+	 * If there is no result found, it will return null.
+	 * If you want to get the only one result, please use queryObject instead.
+	 *   
+	 * @param sql The sql statement to be executed
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param clazz The return type 
+	 * @return instance of clazz that represent the query result. Null if no result found.
+	 * @throws SQLException when things going wrong during the execution
+	 */
+	public <T> T queryFirstNullable(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
+			throws SQLException {
+		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), 1));
+		return requireFirstNullable(result);
 	}
 
 	/**
@@ -154,7 +222,7 @@ public final class DalQueryDao {
 	 * @param mapper Helper that converters each row to entity.
 	 * @param count number of result 
 	 * @return list of entity that represent the query result.
-	 * @throws SQLException If there is no result found.
+	 * @throws SQLException when things going wrong during the execution
 	 */
 	public <T> List<T> queryTop(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int count) 
 			throws SQLException {
@@ -172,7 +240,7 @@ public final class DalQueryDao {
 	 * @param clazz The return type .
 	 * @param count number of result 
 	 * @return list of instance of clazz that represent the query result.
-	 * @throws SQLException If there is no result found.
+	 * @throws SQLException when things going wrong during the execution
 	 */
 	public <T> List<T> queryTop(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int count) 
 			throws SQLException {
@@ -189,7 +257,7 @@ public final class DalQueryDao {
 	 * @param start the row number to be started counting
 	 * @param count number of result 
 	 * @return list of entity that represent the query result.
-	 * @throws SQLException If there is no result found.
+	 * @throws SQLException when things going wrong during the execution
 	 */
 	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count) throws SQLException {
 		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
@@ -206,11 +274,66 @@ public final class DalQueryDao {
 	 * @param start the row number to be started counting
 	 * @param count number of result 
 	 * @return list of instance of clazz that represent the query result.
-	 * @throws SQLException If there is no result found.
+	 * @throws SQLException when things going wrong during the execution
 	 */
 	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int start, int count) throws SQLException {
 		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
 		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), start, count));
+	}
+	
+	/**
+	 * Get result from given list of T. If there is 0 or more than 1 element found, throws exception. 
+	 * Else return the first element.
+	 * 
+	 * @param result The container that hold 0 or more than 1 element.
+	 * @return Null if no result found or first element in the results.
+	 * @throws SQLException if there is 0 or more than 1 element in the result
+	 */
+	private <T> T requireSingle(List<T> result) throws SQLException {
+		assertEquals(1, result.size());
+		return result.get(0);
+	}
+
+	/**
+	 * Get result from given list of T. If there is no result found, return null. 
+	 * If there is more than 1 element found, throws exception.
+	 * Else return the first element.
+	 * 
+	 * @param result The container that hold 0 or more than 1 element.
+	 * @return Null if no result found or first element in the results.
+	 * @throws SQLException if there is more than 1 element in the result
+	 */
+	private <T> T requireSingleNullable(List<T> result) throws SQLException {
+		if(result.size() == 0)
+			return null;
+		
+		assertEquals(1, result.size());
+		return result.get(0);
+	}
+
+	/**
+	 * Get result from given list of T. If there is no element found, throws exception. 
+	 * Else return the first element.
+	 * 
+	 * @param result The container that hold 0 or more than 1 element.
+	 * @return Null if no result found or first element in the results.
+	 * @throws SQLException if there is 0 or more than 1 element in the result
+	 */
+	private <T> T requireFirst(List<T> result) throws SQLException {
+		assertGreatThan(0, result.size(), NO_RESULT_MSG);
+		return result.get(0);
+	}
+
+	/**
+	 * Get result from given list of T. If there is no element found, return null. 
+	 * Else return the first element.
+	 * 
+	 * @param result The container that hold 0 or more than 1 element.
+	 * @return Null if no result found or first element in the results.
+	 * @throws SQLException if there is more than 1 element in the result
+	 */
+	private <T> T requireFirstNullable(List<T> result) throws SQLException {
+		return result.size() == 0 ? null : result.get(0);
 	}
 
 	private void assertEquals(int expected, int actual) throws SQLException{

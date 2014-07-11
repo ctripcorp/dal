@@ -248,9 +248,10 @@ public class DalTableDaoTest {
 			assertNotNull(p);
 			dao.delete(hints, p);
 			try{
-				p = dao.queryByPk(p.getId(), hints);
-				fail();
+				assertNull(dao.queryByPk(p.getId(), hints));
+				
 			} catch (Exception e) {
+				fail();
 			}
 			
 			parameters = new StatementParameters();

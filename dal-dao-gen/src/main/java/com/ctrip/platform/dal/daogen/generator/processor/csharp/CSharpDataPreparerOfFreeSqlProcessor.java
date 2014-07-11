@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
-import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
@@ -32,8 +31,10 @@ import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
+import com.xross.tools.xunit.Context;
+import com.xross.tools.xunit.Processor;
 
-public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
+public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPreparer implements Processor {
 
 	private static Logger log = Logger.getLogger(CSharpDataPreparerOfFreeSqlProcessor.class);
 	
@@ -44,9 +45,14 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 	}
 	
 	@Override
-	public void process(CodeGenContext context) throws Exception {
+	public void process(Context context) {
 		
-		List<Callable<ExecuteResult>> _freeSqlCallables = prepareFreeSql(context);
+		List<Callable<ExecuteResult>> _freeSqlCallables;
+		try {
+			_freeSqlCallables = prepareFreeSql((CodeGenContext)context);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 		
 		TaskUtils.invokeBatch(log, _freeSqlCallables);
 		

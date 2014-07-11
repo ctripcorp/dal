@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
-import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
@@ -29,8 +28,10 @@ import com.ctrip.platform.dal.daogen.host.java.ViewHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
+import com.xross.tools.xunit.Context;
+import com.xross.tools.xunit.Processor;
 
-public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPreparer implements DalProcessor {
+public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPreparer implements Processor {
 
 	private static Logger log = Logger.getLogger(JavaDataPreparerOfTableViewSpProcessor.class);
 	
@@ -43,8 +44,15 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 	}
 	
 	@Override
-	public void process(CodeGenContext context) throws Exception {
-		List<Callable<ExecuteResult>> _tableViewSpCallables = prepareTableViewSp(context);
+	public void process(Context context) {
+		List<Callable<ExecuteResult>> _tableViewSpCallables;
+		
+		try {
+			_tableViewSpCallables = prepareTableViewSp((CodeGenContext)context);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
 		TaskUtils.invokeBatch(log, _tableViewSpCallables);
 	}
 

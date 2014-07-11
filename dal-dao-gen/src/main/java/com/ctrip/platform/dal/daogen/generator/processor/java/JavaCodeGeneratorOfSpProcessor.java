@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
-import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
@@ -18,13 +17,15 @@ import com.ctrip.platform.dal.daogen.host.java.SpDbHost;
 import com.ctrip.platform.dal.daogen.host.java.SpHost;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
+import com.xross.tools.xunit.Context;
+import com.xross.tools.xunit.Processor;
 
-public class JavaCodeGeneratorOfSpProcessor implements DalProcessor {
+public class JavaCodeGeneratorOfSpProcessor implements Processor {
 
 	private static Logger log = Logger.getLogger(JavaCodeGeneratorOfSpProcessor.class);
 	
 	@Override
-	public void process(CodeGenContext context) throws Exception {
+	public void process(Context context) {
 		JavaCodeGenContext ctx = (JavaCodeGenContext)context;
 		String generatePath = CodeGenContext.generatePath;
 		int projectId = ctx.getProjectId();

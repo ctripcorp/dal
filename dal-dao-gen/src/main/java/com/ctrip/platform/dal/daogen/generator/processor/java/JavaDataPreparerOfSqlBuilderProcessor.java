@@ -10,7 +10,6 @@ import java.util.concurrent.Callable;
 import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
-import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
@@ -18,15 +17,17 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
+import com.xross.tools.xunit.Context;
+import com.xross.tools.xunit.Processor;
 
-public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPreparer implements DalProcessor {
+public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPreparer implements Processor {
 
 	private static Logger log = Logger.getLogger(JavaDataPreparerOfSqlBuilderProcessor.class);
 	
 	@Override
-	public void process(CodeGenContext context) throws Exception {
+	public void process(Context context) {
 		
-		List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder(context);
+		List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder((CodeGenContext )context);
 		
 		TaskUtils.invokeBatch(log, _sqlBuilderCallables);
 	}

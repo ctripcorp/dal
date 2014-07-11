@@ -10,20 +10,21 @@ import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
-import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.java.ViewHost;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
+import com.xross.tools.xunit.Context;
+import com.xross.tools.xunit.Processor;
 
-public class JavaCodeGeneratorOfViewProcessor implements DalProcessor {
+public class JavaCodeGeneratorOfViewProcessor implements Processor {
 	
 	private static Logger log = Logger.getLogger(JavaCodeGeneratorOfViewProcessor.class);
 
 	@Override
-	public void process(CodeGenContext context) throws Exception {
+	public void process(Context context) {
 		JavaCodeGenContext ctx = (JavaCodeGenContext)context;
 		String generatePath = CodeGenContext.generatePath;
 		int projectId = ctx.getProjectId();

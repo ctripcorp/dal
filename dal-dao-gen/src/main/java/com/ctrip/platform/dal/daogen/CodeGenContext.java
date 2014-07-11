@@ -8,8 +8,9 @@ import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
+import com.xross.tools.xunit.Context;
 
-public class CodeGenContext {
+public class CodeGenContext implements Context {
 	
 	protected int projectId;
 	protected boolean regenerate;

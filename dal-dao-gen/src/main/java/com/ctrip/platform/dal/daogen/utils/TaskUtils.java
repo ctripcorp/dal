@@ -17,14 +17,18 @@ public class TaskUtils {
 	
 	private static ExecutorService executor = Executors.newCachedThreadPool();
 	
-	public static void invokeBatch(Logger log, List<Callable<ExecuteResult>> tasks) throws InterruptedException{
+	public static void invokeBatch(Logger log, List<Callable<ExecuteResult>> tasks) {
 		int loop = tasks.size();
-		for(int i = 0; i < loop; i += BATCH_SIZE){
-			TaskUtils.log(log,
-					executor.invokeAll(
-							tasks.subList(i, Math.min(loop, i + BATCH_SIZE))
-						)
-					);
+		try {
+			for(int i = 0; i < loop; i += BATCH_SIZE){
+				TaskUtils.log(log,
+						executor.invokeAll(
+								tasks.subList(i, Math.min(loop, i + BATCH_SIZE))
+							)
+						);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 	

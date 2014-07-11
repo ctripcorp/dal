@@ -163,6 +163,11 @@
 			<version>${jetty-javax-el-version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.xross.tools</groupId>
+			<artifactId>xunit</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>ROOT</finalName>

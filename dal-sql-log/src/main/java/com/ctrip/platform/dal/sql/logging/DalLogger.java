@@ -14,7 +14,6 @@ import com.ctrip.freeway.tracing.TraceManager;
 
 public class DalLogger {
 	public static final String TITLE = "Dal Fx";
-	public static AtomicBoolean disableLogging = new AtomicBoolean(false);
 	public static AtomicBoolean simplifyLogging = new AtomicBoolean(false);
 	
 	public static ThreadLocal<DalWatcher> watcher = new ThreadLocal<DalWatcher>();
@@ -22,14 +21,6 @@ public class DalLogger {
 	private static ILog logger = LogManager.getLogger("DAL Java Client");
 	private static ITrace trace = TraceManager.getTracer("DAL Java Client");
 
-	public static boolean isDisableLogging() {
-		return disableLogging.get();
-	}
-	
-	public static void setDisableLogging(boolean value) {
-		disableLogging.set(value);
-	}
-	
 	public static boolean isSimplifyLogging() {
 		return simplifyLogging.get();
 	}
@@ -53,9 +44,6 @@ public class DalLogger {
 	}
 	
 	public static void log(LogEntry entry) {
-		if(isDisableLogging())
-			return;
-		
 		if(isSimplifyLogging()) {
 			logger.info(TITLE, DalWatcher.toJson(), entry.getTag());
 		} else {

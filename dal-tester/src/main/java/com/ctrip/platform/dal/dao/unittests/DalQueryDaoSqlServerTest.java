@@ -165,6 +165,40 @@ public class DalQueryDaoSqlServerTest {
 	}
 
 	/**
+	 * Test query for object success
+	 * 
+	 * @throws SQLException
+	 */
+	@Test
+	public void testQueryForObjectNullableSuccess() throws SQLException {
+		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE id = 1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		ClientTestModel model = client
+				.queryForObjectNullable(sql, param, hints, mapper);
+		Assert.assertEquals(1, model.getId());
+		
+		sql = "SELECT * FROM " + TABLE_NAME + " WHERE id = -1";
+		Assert.assertNull(client.queryForObjectNullable(sql, param, hints, mapper));
+	}
+
+	/**
+	 * Test query for object failed
+	 */
+	@Test
+	public void testQueryForObjectNullableFailed() {
+		String sql = "SELECT * FROM " + TABLE_NAME + " LIMIT 2";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		try {
+			client.queryForObjectNullable(sql, param, hints, mapper);
+			Assert.fail();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
 	 * Test query for object success with scalar
 	 * 
 	 * @throws SQLException
@@ -188,6 +222,39 @@ public class DalQueryDaoSqlServerTest {
 		DalHints hints = new DalHints();
 		try {
 			client.queryForObject(sql, param, hints, Long.class);
+			Assert.fail();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Test query for object success with scalar
+	 * 
+	 * @throws SQLException
+	 */
+	@Test
+	public void testQueryForObjectScalarNullableSuccess() throws SQLException {
+		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE id = 1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		Integer id = client.queryForObjectNullable(sql, param, hints, Integer.class);
+		Assert.assertEquals(1, id.intValue());
+		
+		sql = "SELECT * FROM " + TABLE_NAME + " WHERE id = -1";
+		Assert.assertNull(client.queryForObjectNullable(sql, param, hints, Integer.class));
+	}
+
+	/**
+	 * Test query for object failed with scalar
+	 */
+	@Test
+	public void testQueryForObjectScalarNullableFailed() {
+		String sql = "SELECT * FROM " + TABLE_NAME + " LIMIT 2";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		try {
+			client.queryForObjectNullable(sql, param, hints, Long.class);
 			Assert.fail();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -225,6 +292,95 @@ public class DalQueryDaoSqlServerTest {
 		}
 	}
 
+	/**
+	 * Test query for first success
+	 * 
+	 * @throws SQLException
+	 */
+	@Test
+	public void testQueryFirstNullableSuccess() throws SQLException {
+		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE id = 1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		ClientTestModel model = client.queryFirstNullable(sql, param, hints, mapper);
+		Assert.assertEquals(1, model.getId());
+	}
+
+	/**
+	 * Test query for first failed
+	 */
+	@Test
+	public void testQueryFirstNullableFaield() {
+		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE id = -1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		try {
+			Assert.assertNull(client.queryFirstNullable(sql, param, hints, mapper));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+
+
+	/**
+	 * Test query for first success
+	 * @throws SQLException
+	 */
+	@Test
+	public void testTypedQueryFirstSuccess() throws SQLException{
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE id = 1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		Integer result = client.queryFirst(sql, param, hints, Integer.class);
+		Assert.assertNotNull(result);
+	}
+	
+	/**
+	 *  Test query for first failed
+	 */
+	@Test
+	public void testTypedQueryFirstFaield(){
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE id = -1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		try {
+			Integer result = client.queryFirst(sql, param, hints, Integer.class);
+			Assert.fail();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Test query for first success
+	 * @throws SQLException
+	 */
+	@Test
+	public void testTypedQueryFirstNullableSuccess() throws SQLException{
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE id = 1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		Integer result = client.queryFirstNullable(sql, param, hints, Integer.class);
+		Assert.assertNotNull(result);
+	}
+	
+	/**
+	 *  Test query for first failed
+	 */
+	@Test
+	public void testTypedQueryFirstNullableFaield(){
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE id = -1";
+		StatementParameters param = new StatementParameters();
+		DalHints hints = new DalHints();
+		try {
+			Assert.assertNull(client.queryFirstNullable(sql, param, hints, Integer.class));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
 	/**
 	 * Test query for Top success
 	 * 

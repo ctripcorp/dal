@@ -26,7 +26,6 @@ public class MySqlHelperTest {
 	static{
 		try {
 			DalClientFactory.initClientFactory();
-			DalLogger.setDisableLogging(false);
 			DalLogger.setSimplifyLogging(true);
 		} catch (Exception e) {
 			e.printStackTrace();

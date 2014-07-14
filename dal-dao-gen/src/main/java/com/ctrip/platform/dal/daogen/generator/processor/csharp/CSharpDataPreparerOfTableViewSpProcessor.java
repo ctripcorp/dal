@@ -82,12 +82,9 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 		final Queue<CSharpTableHost> _spHosts = ctx.get_spHosts();
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 		for (final GenTaskByTableViewSp tableViewSp : _tableViewSps) {
-			final String[] viewNames = StringUtils.split(
-					tableViewSp.getView_names(), ",");
-			final String[] tableNames = StringUtils.split(
-					tableViewSp.getTable_names(), ",");
-			final String[] spNames = StringUtils.split(
-					tableViewSp.getSp_names(), ",");
+			final String[] viewNames = StringUtils.split(tableViewSp.getView_names(), ",");
+			final String[] tableNames = StringUtils.split(tableViewSp.getTable_names(), ",");
+			final String[] spNames = StringUtils.split(tableViewSp.getSp_names(), ",");
 
 			final DatabaseCategory dbCategory;
 			String dbType = DbUtils.getDbType(tableViewSp.getDb_name());
@@ -97,80 +94,110 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 				dbCategory = DatabaseCategory.SqlServer;
 			}
 
-			final List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(tableViewSp.getDb_name());
-
 			final Queue<CSharpTableHost> _tableViewHosts = ctx.get_tableViewHosts();
-			for (final String table : tableNames) {
-				Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
-					@Override
-					public ExecuteResult call() throws Exception {
-						//progress.setOtherMessage("正在整理表 " + table);
-						ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getDb_name() + "." + table + "] Host");
-						progress.setOtherMessage(result.getTaskName());
-						CSharpTableHost currentTableHost;
-						try {
-							currentTableHost = buildTableHost(ctx, tableViewSp,
-									table, dbCategory, allSpNames);
-							if (null != currentTableHost) {
-								_tableViewHosts.add(currentTableHost);
-							}
-							result.setSuccessal(true);
-						} catch (Exception e) {
-							log.error(result.getTaskName() + " exception.", e);
-						}
-						return result;
-					}
-				};
-				results.add(worker);
-			}
+			
+			results.addAll(prepareTable(ctx, progress, tableViewSp, tableNames,
+					dbCategory, _tableViewHosts));
 
-			for (final String view : viewNames) {
-				Callable<ExecuteResult> viewWorker = new Callable<ExecuteResult>() {
-					@Override
-					public ExecuteResult call() throws Exception {
-						//progress.setOtherMessage("正在整理视图 " + view);
-						ExecuteResult result = new ExecuteResult("Build View[" + tableViewSp.getDb_name() + "." + view + "] Host");
-						progress.setOtherMessage(result.getTaskName());
-						try {
-							CSharpTableHost currentViewHost = buildViewHost(ctx,
-									tableViewSp, dbCategory, view);
-							if (null != currentViewHost) {
-								_tableViewHosts.add(currentViewHost);
-							}
-							result.setSuccessal(true);
-						} catch (Exception e) {
-							log.error(result.getTaskName() + " exception.", e);
-						}
-						return result;
-					}
-				};
-				results.add(viewWorker);
-			}
+			results.addAll(prepareView(ctx, progress, tableViewSp, viewNames,
+					dbCategory, _tableViewHosts));
 
-			for (final String spName : spNames) {
-				Callable<ExecuteResult> spWorker = new Callable<ExecuteResult>() {
-					@Override
-					public ExecuteResult call() throws Exception {
-						ExecuteResult result = new ExecuteResult("Build SP[" + tableViewSp.getDb_name() + "." + spName + "] Host");
-						//progress.setOtherMessage("正在整理存储过程 " + spName);
-						progress.setOtherMessage(result.getTaskName());
-						try {
-							CSharpTableHost currentSpHost = buildSpHost(ctx,
-									tableViewSp, dbCategory, spName);
-							if (null != currentSpHost) {
-								_spHosts.add(currentSpHost);
-							}
-							result.setSuccessal(true);
-						} catch (Exception e) {
-							log.error(result.getTaskName() + " exception.", e);
-						}
-						return result;
-					}
-				};
-				results.add(spWorker);
-			}
+			results.addAll(prepareSp(ctx, progress, _spHosts, tableViewSp, spNames, dbCategory));
 		}
 
+		return results;
+	}
+
+	private List<Callable<ExecuteResult>> prepareSp(final CSharpCodeGenContext ctx,
+			final Progress progress, final Queue<CSharpTableHost> _spHosts,
+			final GenTaskByTableViewSp tableViewSp, final String[] spNames,
+			final DatabaseCategory dbCategory) {
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
+		for (final String spName : spNames) {
+			Callable<ExecuteResult> spWorker = new Callable<ExecuteResult>() {
+				@Override
+				public ExecuteResult call() throws Exception {
+					ExecuteResult result = new ExecuteResult("Build SP[" + tableViewSp.getDb_name() + "." + spName + "] Host");
+					//progress.setOtherMessage("正在整理存储过程 " + spName);
+					progress.setOtherMessage(result.getTaskName());
+					try {
+						CSharpTableHost currentSpHost = buildSpHost(ctx,
+								tableViewSp, dbCategory, spName);
+						if (null != currentSpHost) {
+							_spHosts.add(currentSpHost);
+						}
+						result.setSuccessal(true);
+					} catch (Exception e) {
+						log.error(result.getTaskName() + " exception.", e);
+					}
+					return result;
+				}
+			};
+			results.add(spWorker);
+		}
+		return results;
+	}
+
+	private List<Callable<ExecuteResult>> prepareView(final CSharpCodeGenContext ctx,
+			final Progress progress, final GenTaskByTableViewSp tableViewSp,
+			final String[] viewNames, final DatabaseCategory dbCategory,
+			final Queue<CSharpTableHost> _tableViewHosts) {
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
+		for (final String view : viewNames) {
+			Callable<ExecuteResult> viewWorker = new Callable<ExecuteResult>() {
+				@Override
+				public ExecuteResult call() throws Exception {
+					// progress.setOtherMessage("正在整理视图 " + view);
+					ExecuteResult result = new ExecuteResult("Build View["
+							+ tableViewSp.getDb_name() + "." + view + "] Host");
+					progress.setOtherMessage(result.getTaskName());
+					try {
+						CSharpTableHost currentViewHost = buildViewHost(ctx,
+								tableViewSp, dbCategory, view);
+						if (null != currentViewHost) {
+							_tableViewHosts.add(currentViewHost);
+						}
+						result.setSuccessal(true);
+					} catch (Exception e) {
+						log.error(result.getTaskName() + " exception.", e);
+					}
+					return result;
+				}
+			};
+			results.add(viewWorker);
+		}
+		return results;
+	}
+
+	private List<Callable<ExecuteResult>> prepareTable(final CSharpCodeGenContext ctx,
+			final Progress progress, final GenTaskByTableViewSp tableViewSp, 
+			final String[] tableNames, final DatabaseCategory dbCategory,
+			final Queue<CSharpTableHost> _tableViewHosts) throws Exception {
+		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
+		final List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(tableViewSp.getDb_name());
+		for (final String table : tableNames) {
+			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
+				@Override
+				public ExecuteResult call() throws Exception {
+					//progress.setOtherMessage("正在整理表 " + table);
+					ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getDb_name() + "." + table + "] Host");
+					progress.setOtherMessage(result.getTaskName());
+					CSharpTableHost currentTableHost;
+					try {
+						currentTableHost = buildTableHost(ctx, tableViewSp,
+								table, dbCategory, allSpNames);
+						if (null != currentTableHost) {
+							_tableViewHosts.add(currentTableHost);
+						}
+						result.setSuccessal(true);
+					} catch (Exception e) {
+						log.error(result.getTaskName() + " exception.", e);
+					}
+					return result;
+				}
+			};
+			results.add(worker);
+		}
 		return results;
 	}
 	

@@ -7,6 +7,7 @@ import javax.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ctrip.freeway.agent.MessageManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
 
@@ -39,5 +40,13 @@ public class DalClientFactoryListener implements ServletContextListener {
 	
 	public void contextDestroyed(ServletContextEvent sce) {
 		DalClientFactory.shutdownFactory();
+		ServletContext context = sce.getServletContext();
+		
+		String closeClogWhenExit = context.getInitParameter("com.ctrip.platform.dal.dao.closeClogWhenExit");
+
+		if(Boolean.parseBoolean(closeClogWhenExit)) {
+			logger.info("shutdown clogging");
+			MessageManager.getInstance().shutdown();
+		}
 	}
 }

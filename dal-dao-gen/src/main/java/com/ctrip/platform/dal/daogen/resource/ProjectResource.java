@@ -2,10 +2,8 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -313,8 +311,6 @@ public class ProjectResource {
 //				context= new JavaCodeGenContext(id, regen, progress, null);
 //				XrossFactory.createFromXML("code_gen.xunit").getProcessor("Java Code Generator").process(context);
 			} else if (language.equals("cs")){
-				Map<String, Boolean> hints = new HashMap<String, Boolean>();
-				hints.put("newPojo", newPojo);
 				generator = new CSharpDalGenerator();
 				context = generator.createContext(id, regen, progress, newPojo);
 			}

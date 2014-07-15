@@ -168,6 +168,10 @@ public class JavaTableHost {
 		
 		return StringUtils.join(paramsDeclaration, ", ");
 	}
+	
+	public boolean hasPk(){
+		return null != primaryKeys && !primaryKeys.isEmpty();
+	}
 
 	public Set<String> getDaoImports() {
 		Set<String> imports = new TreeSet<String>();

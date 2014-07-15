@@ -42,7 +42,7 @@ public class ${host.getPojoClassName()}Dao {
 		this.rowextractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(parser); 
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}
-
+#if($host.hasPk())
 #if($host.isIntegerPk())
 	/**
 	 * Query ${host.getPojoClassName()} by the specified ID
@@ -75,7 +75,7 @@ public class ${host.getPojoClassName()}Dao {
 		DalHints hints = new DalHints();
 		return client.queryByPk(pk, hints);
 	}
-	
+#end
 	/**
 	 * Get the records count
 	**/

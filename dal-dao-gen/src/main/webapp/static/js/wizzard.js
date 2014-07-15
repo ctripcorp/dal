@@ -389,12 +389,12 @@
                 $(".step2-2-1-1").hide();
                 $(".step2-2-1-2").show();
             }
-            if("java"==$("#sql_style").val() && "select"==$("#crud_option").val()){
-                $('#fields').multipleSelect('setSelects', values);
-                $('#fields').multipleSelect('disable');
-            }else{
-                $('#fields').multipleSelect('enable');
-            }
+//            if("java"==$("#sql_style").val() && "select"==$("#crud_option").val()){
+//                $('#fields').multipleSelect('setSelects', values);
+//                $('#fields').multipleSelect('disable');
+//            }else{
+//                $('#fields').multipleSelect('enable');
+//            }
             if ($("#page1").attr('is_update') != "1") {
                 window.sql_builder.build();
             }

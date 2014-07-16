@@ -196,7 +196,7 @@
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                   <h4 class="modal-title" id="page1_label">DAO生成向导</h4>
                </div>
-               <div class="modal-body" style="position: relative;overflow: auto;width: auto;max-height:420px;">
+               <div class="modal-body" style="position: relative;overflow: auto;width: auto;">
                   <div class="steps step1 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
@@ -299,7 +299,7 @@
                         </div>
                      </div>
                   </div>
-                  <div class="row-fluid steps step2-2-1" style="height:348px;">
+                  <div class="row-fluid steps step2-2-1" style="height:368px;">
 	                  <div id="operation_fields" class="step2-2-1-1 row-fluid">
 	                     <div class="row-fluid">
 	                        <div class="control-group">
@@ -340,6 +340,17 @@
 	                     </div>
 	                  </div>
 	                  <br>
+	                  <div class="row-fluid" id="auto_sql_scalarTypeDiv">
+	                  		<div class="control-group">
+	                           <label class="control-label popup_label">返回形式：</label>
+	                           <select id="auto_sql_scalarType" class='span7'>
+	                              <option value='List'>列表(List)</option>
+	                              <option value='Single'>唯一的(Single)</option>
+	                              <option value='First'>第一个(First)</option>
+	                           </select>	                           
+	                        </div>
+	                  </div>
+	                  <br>
 	                  <div class="row-fluid">
 	                        <div id="sql_builder" class="span12" style="height:100px;">
 	                        </div>
@@ -361,26 +372,32 @@
                   <div class="steps step2-3 row-fluid" from="" style="height:348px;">
                      <div class="row-fluid">
                         <div class="control-group">
-                           <label class="control-label popup_label" style="width:80px;">DAO类名：</label>
-
+                           <label class="control-label popup_label" style="width:90px;">DAO类名：</label>
                             <select id="sql_class_name" class="span9"></select>
-                          
                         </div>
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
-                           <label class="control-label popup_label" style="width:80px;">实体类名：</label>
-                          
+                           <label class="control-label popup_label" style="width:90px;">实体类名：</label>
                             <select id="sql_pojo_name" class="span9"></select>
-                           
                         </div>
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
-                           <label class="control-label popup_label" style="width:80px;">方法名：</label>
+                           <label class="control-label popup_label" style="width:90px;">方法名：</label>
                            <input  id="sql_method_name" class="span9 input-sm" type="text">
                         </div>
                      </div>
+                      <div class="row-fluid" id="free_sql_scalarTypeDiv" style="margin-top:12px">
+	                  		<div class="control-group">
+	                           <label class="control-label popup_label" style="width:90px;">返回形式：</label>
+	                           <select id="free_sql_scalarType" class='span9'>
+	                              <option value='List'>列表(List)</option>
+	                              <option value='Single'>唯一的(Single)</option>
+	                              <option value='First'>第一个(First)</option>
+	                           </select>	                           
+	                        </div>
+	                  </div>
                      <label class="control-label popup_label">输入查询SQL，占位符：Java请使用?或者:Name形式，c#请使用@Name形式</label>
                      <div class="row-fluid">
                         <div id="sql_editor" class="span12" style="height:200px;">
@@ -396,7 +413,8 @@
                   </div>
                   <div class="row-fluid">
                      <div class="row-fluid">
-                           <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
+                     	 <br>
+                         <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
                      </div>  
                   </div>
                </div>

@@ -37,6 +37,49 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	private String update_user_no;
 	private Timestamp update_time;
 	private String comment;
+	
+	//可取值：Single、First、List，表示select返回的结果类型
+	private String scalarType;
+	
+	public static GenTaskByFreeSql visitRow(ResultSet rs) throws SQLException {
+		GenTaskByFreeSql task = new GenTaskByFreeSql();
+		task.setId(rs.getInt(1));
+		task.setProject_id(rs.getInt(2));
+		
+		String databaseSet = rs.getString(3);
+		
+		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
+		task.setDatabaseSetName(databaseSet);
+		task.setClass_name(rs.getString(4));
+		task.setPojo_name(rs.getString(5));
+		task.setMethod_name(rs.getString(6));
+		task.setCrud_type(rs.getString(7));
+		task.setSql_content(rs.getString(8));
+		task.setParameters(rs.getString(9));
+		task.setGenerated(rs.getBoolean(10));
+		task.setVersion(rs.getInt(11));
+		task.setUpdate_user_no(rs.getString(12));
+		task.setUpdate_time(rs.getTimestamp(13));
+		task.setComment(rs.getString(14));
+		task.setScalarType(rs.getString("scalarType"));
+
+		return task;
+	}
+
+	@Override
+	public int compareTo(GenTaskByFreeSql o) {
+		int result =  this.getDb_name().compareTo(o.getDb_name());
+		if(result != 0){
+			return result;
+		}
+		
+		result = this.getClass_name().compareTo(o.getClass_name());
+		if(result != 0){
+			return result;
+		}
+		
+		return this.getMethod_name().compareTo(o.getMethod_name());
+	}
 
 	public String getDatabaseSetName() {
 		return databaseSetName;
@@ -157,44 +200,13 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-
-	public static GenTaskByFreeSql visitRow(ResultSet rs) throws SQLException {
-		GenTaskByFreeSql task = new GenTaskByFreeSql();
-		task.setId(rs.getInt(1));
-		task.setProject_id(rs.getInt(2));
-		
-		String databaseSet = rs.getString(3);
-		
-		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
-		task.setDatabaseSetName(databaseSet);
-		task.setClass_name(rs.getString(4));
-		task.setPojo_name(rs.getString(5));
-		task.setMethod_name(rs.getString(6));
-		task.setCrud_type(rs.getString(7));
-		task.setSql_content(rs.getString(8));
-		task.setParameters(rs.getString(9));
-		task.setGenerated(rs.getBoolean(10));
-		task.setVersion(rs.getInt(11));
-		task.setUpdate_user_no(rs.getString(12));
-		task.setUpdate_time(rs.getTimestamp(13));
-		task.setComment(rs.getString(14));
-
-		return task;
-	}
-
-	@Override
-	public int compareTo(GenTaskByFreeSql o) {
-		int result =  this.getDb_name().compareTo(o.getDb_name());
-		if(result != 0){
-			return result;
-		}
-		
-		result = this.getClass_name().compareTo(o.getClass_name());
-		if(result != 0){
-			return result;
-		}
-		
-		return this.getMethod_name().compareTo(o.getMethod_name());
-	}
 	
+	public String getScalarType() {
+		return scalarType;
+	}
+
+	public void setScalarType(String scalarType) {
+		this.scalarType = scalarType;
+	}
+
 }

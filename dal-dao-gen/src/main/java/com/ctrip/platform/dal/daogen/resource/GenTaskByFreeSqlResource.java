@@ -48,7 +48,8 @@ public class GenTaskByFreeSqlResource {
 			@FormParam("params") String params,
 			@FormParam("version") int version,
 			@FormParam("action") String action,
-			@FormParam("comment") String comment) {
+			@FormParam("comment") String comment,
+			@FormParam("scalarType") String scalarType) {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 
 		if (action.equalsIgnoreCase("delete")) {
@@ -72,6 +73,7 @@ public class GenTaskByFreeSqlResource {
 			task.setUpdate_user_no(user.getUserName()+"("+userNo+")");
 			task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
 			task.setComment(comment);
+			task.setScalarType(scalarType);
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);

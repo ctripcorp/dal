@@ -38,6 +38,7 @@
                 //C#风格或者Java风格，@Name or ?
                 postData["sql_style"] = $("#sql_style").val();
                 postData["crud_type"] = $("#crud_option").val();
+                postData["scalarType"] = $("#auto_sql_scalarType").val();
 
                 postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
                 postData["sql_content"] = ace.edit("sql_builder").getValue();
@@ -86,6 +87,7 @@
                 postData["class_name"] = $("#sql_class_name").val();
                 postData["pojo_name"] = $("#sql_pojo_name").val();
                 postData["method_name"] = $("#sql_method_name").val();
+                postData["scalarType"] = $("#free_sql_scalarType").val();
 
                 if (postData["class_name"] == ""
                     || postData["pojo_name"] == ""

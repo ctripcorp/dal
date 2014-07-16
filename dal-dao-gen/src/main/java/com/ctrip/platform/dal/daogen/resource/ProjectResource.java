@@ -311,7 +311,7 @@ public class ProjectResource {
 //				generator = new JavaDalGenerator();
 //				context = generator.createContext(id, regen, progress, newPojo);
 				context= new JavaCodeGenContext(id, regen, progress);
-				XrossFactory.createFromXML("code_gen.xunit").getProcessor("Java Code Generator").process(context);
+				XrossFactory.createFromXML("code_gen_java.xunit").getProcessor("Java Code Generator").process(context);
 			} else if (language.equals("cs")){
 //				generator = new CSharpDalGenerator();
 //				context = generator.createContext(id, regen, progress, newPojo);
@@ -319,7 +319,7 @@ public class ProjectResource {
 				hints.put("newPojo", newPojo);
 				context = new CSharpCodeGenContext(id, regen, progress, hints);
 				((CSharpCodeGenContext)context).setNewPojo(newPojo);
-				XrossFactory.createFromXML("code_gen.xunit").getProcessor("C# Code Generator").process(context);
+				XrossFactory.createFromXML("code_gen_csharp.xunit").getProcessor("C# Code Generator").process(context);
 			}
 //			generator.prepareDirectory(context);
 //			generator.prepareData(context);

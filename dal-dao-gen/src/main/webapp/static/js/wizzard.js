@@ -251,7 +251,10 @@
                 && record != undefined
                 && record.task_type == "sql";
             var clazz = [];
-            var pojos = [];
+            var pojos = [{
+                value: '简单类型',
+                title: '简单类型'
+            }];
             $.each(data.classes, function (index, value) {
                 clazz.push({
                     value: value,
@@ -295,6 +298,7 @@
                 editor.setTheme("ace/theme/monokai");
                 editor.getSession().setMode("ace/mode/sql");
                 editor.setValue(record.sql_content);
+                $("#free_sql_scalarType").val(record['scalarType']);
             }
         }).fail(function (data) {
                 $("#error_msg").text("获取历史记录失败");

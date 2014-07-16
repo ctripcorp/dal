@@ -87,6 +87,7 @@
                 postData["class_name"] = $("#sql_class_name").val();
                 postData["pojo_name"] = $("#sql_pojo_name").val();
                 postData["method_name"] = $("#sql_method_name").val();
+                postData["scalarType"] = $("#free_sql_scalarType").val();
 
                 if (postData["class_name"] == ""
                     || postData["pojo_name"] == ""

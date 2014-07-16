@@ -38,6 +38,7 @@
                 //C#风格或者Java风格，@Name or ?
                 postData["sql_style"] = $("#sql_style").val();
                 postData["crud_type"] = $("#crud_option").val();
+                postData["scalarType"] = $("#auto_sql_scalarType").val();
 
                 postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
                 postData["sql_content"] = ace.edit("sql_builder").getValue();

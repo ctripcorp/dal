@@ -50,7 +50,8 @@ public class GenTaskBySqlBuilderResource {
 			@FormParam("version") int version,
 			@FormParam("action") String action,
 			@FormParam("params") String params,
-			@FormParam("comment") String comment) {
+			@FormParam("comment") String comment,
+			@FormParam("scalarType") String scalarType) {
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 
 		if (action.equalsIgnoreCase("delete")) {
@@ -74,6 +75,7 @@ public class GenTaskBySqlBuilderResource {
 			task.setUpdate_user_no(user.getUserName()+"("+userNo+")");
 			task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
 			task.setComment(comment);
+			task.setScalarType(scalarType);
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);
@@ -83,7 +85,6 @@ public class GenTaskBySqlBuilderResource {
 					Status status = Status.ERROR;
 					status.setInfo("更新出错，数据是否合法？或者已经有同名方法？");
 					return status;
-
 				}
 			}else{
 				task.setGenerated(false);

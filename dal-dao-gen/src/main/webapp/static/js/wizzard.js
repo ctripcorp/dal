@@ -355,6 +355,7 @@
                 }
             });
             if ($("#page1").attr('is_update') == "1") {
+                $("#auto_sql_scalarType").val(record["scalarType"]);
                 $('#fields').multipleSelect('setSelects', record.fields.split(","));
                 if (record.condition != undefined && record.condition != "") {
                     var selectedConditions = record.condition.split(";");
@@ -376,9 +377,11 @@
             $(".step2-2-1").show();
 
             var op_type = $("#crud_option").val();
+            $("#auto_sql_scalarTypeDiv").hide();
             if (op_type == "select") {
                 $(".step2-2-1-1").show();
                 $(".step2-2-1-2").show();
+                $("#auto_sql_scalarTypeDiv").show();
             } else if (op_type == "update") {
                 $(".step2-2-1-1").show();
                 $(".step2-2-1-2").show();

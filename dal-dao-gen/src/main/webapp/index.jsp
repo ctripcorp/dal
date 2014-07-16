@@ -196,7 +196,7 @@
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                   <h4 class="modal-title" id="page1_label">DAO生成向导</h4>
                </div>
-               <div class="modal-body" style="position: relative;overflow: auto;width: auto;max-height:420px;">
+               <div class="modal-body" style="position: relative;overflow: auto;width: auto;">
                   <div class="steps step1 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
@@ -299,7 +299,7 @@
                         </div>
                      </div>
                   </div>
-                  <div class="row-fluid steps step2-2-1" style="height:348px;">
+                  <div class="row-fluid steps step2-2-1" style="height:368px;">
 	                  <div id="operation_fields" class="step2-2-1-1 row-fluid">
 	                     <div class="row-fluid">
 	                        <div class="control-group">
@@ -338,6 +338,17 @@
 	                           </select>
 	                           <input id="del_condition" type="button" class="span2 btn btn-danger popup_text" value="删除">
 	                     </div>
+	                  </div>
+	                  <br>
+	                  <div class="row-fluid" id="auto_sql_scalarTypeDiv">
+	                  		<div class="control-group">
+	                           <label class="control-label popup_label">返回形式：</label>
+	                           <select id="auto_sql_scalarType" class='span7'>
+	                              <option value='List'>列表(List)</option>
+	                              <option value='Single'>唯一的(Single)</option>
+	                              <option value='First'>第一个(First)</option>
+	                           </select>	                           
+	                        </div>
 	                  </div>
 	                  <br>
 	                  <div class="row-fluid">
@@ -396,7 +407,8 @@
                   </div>
                   <div class="row-fluid">
                      <div class="row-fluid">
-                           <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
+                     	 <br>
+                         <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
                      </div>  
                   </div>
                </div>

@@ -12,10 +12,11 @@ import com.ctrip.freeway.metrics.IMetric;
 import com.ctrip.freeway.metrics.MetricManager;
 
 public class MetricsLogger {
-	public static final String COUNT = "arch.dal.sql.count";
-	public static final String COST = "arch.dal.sql.cost";
-    public static String SUCCESS = "success";
-    public static String FAIL = "fail";
+	private static final String COUNT = "arch.dal.sql.count";
+	private static final String COST = "arch.dal.sql.cost";
+	private static final String MASTER_SLAVE_COUNT = "arch.dal.rw.count";
+	private static String SUCCESS = "success";
+	private static String FAIL = "fail";
     
     public static long ticksPerMillisecond = 10000;
 
@@ -23,8 +24,17 @@ public class MetricsLogger {
 	private static final String METHOD = "Method";
 	private static final String SIZE = "Size";
 	private static final String STATUS = "Status";
+	
 	private static Queue<MetricsData> statusQueue = new ConcurrentLinkedQueue<MetricsData>();
 	private static Map<String, MetricsData> metrixCache = new HashMap<String, MetricsData>();
+	
+	
+	private static final String DBTYPE = "DBType";
+    private static final String OPTTYPE = "OperationType";
+    private static final String DB = "DB";
+    
+	private static Queue<MasterSlaveMetrics> msQueue = new ConcurrentLinkedQueue<MasterSlaveMetrics>();
+	private static Map<String, MasterSlaveMetrics> msCache = new HashMap<String, MasterSlaveMetrics>();
 	
 	private static ScheduledExecutorService sender;
 
@@ -37,6 +47,7 @@ public class MetricsLogger {
 	
 	public static void success(LogEntry entry, long duration) {
 		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), SUCCESS, duration);
+		report(entry.getDatabaseName(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name());
 	}
 	
 	public static void fail(LogEntry entry, long duration) {
@@ -47,7 +58,15 @@ public class MetricsLogger {
 		sender.shutdown();
 	}
 	
-	private static void report(String dao, String method, int size, String status, long duration) {
+	public static void report(String databaseSet, String databaseType,String operationType){
+		MasterSlaveMetrics data = new MasterSlaveMetrics();
+		data.count = 1;
+		data.databaseSet = databaseSet;
+		data.databaseType = databaseType;
+		data.operationType = operationType;
+		msQueue.offer(data);
+	}
+	public static void report(String dao, String method, int size, String status, long duration) {
 		long cost = duration;
         if (size < 200)
         {
@@ -120,6 +139,40 @@ public class MetricsLogger {
 				cachedMd.cost = 0;
 			}
 		}
+		
+		metrixCache.clear(); //If not clear, the cost is zero
+		
+    }
+    
+    private static void sendMasterSlaveMetrics(){
+    	if(msQueue.isEmpty())
+    		return;
+    	MasterSlaveMetrics mm = null;
+    	while((mm = msQueue.poll()) != null){
+    		String key = new StringBuilder().append(mm.databaseSet)
+    				.append(mm.databaseType)
+    				.append(mm.operationType).toString();
+    		MasterSlaveMetrics cacheMm = msCache.get(key);
+    		if(cacheMm == null){
+    			cacheMm = mm;
+    			cacheMm.tags = new HashMap<String, String>();
+    			cacheMm.tags.put(DB, cacheMm.databaseSet);
+    			cacheMm.tags.put(DBTYPE, cacheMm.databaseType);
+    			cacheMm.tags.put(OPTTYPE, cacheMm.operationType);
+    			
+    			msCache.put(key, cacheMm);
+    		} else {
+    			cacheMm.count ++;
+    		}
+    	}
+    	
+    	for(MasterSlaveMetrics mmc : msCache.values()){
+    		if(mmc.count > 0){
+    			metricLogger.log(MASTER_SLAVE_COUNT, mmc.count, mmc.tags);
+    		}
+    	}
+    	
+    	msCache.clear();
     }
     
 	private static class MetricsData {
@@ -131,11 +184,21 @@ public class MetricsLogger {
         long count;
         Map<String, String> tags;
     }
+	
+	 private static class MasterSlaveMetrics
+     {
+         String databaseSet;
+         String databaseType;
+         String operationType;
+         long count;
+         Map<String, String> tags;
+     }
     
     private static class MetrixReporter implements Runnable {
 		@Override
 		public void run() {
 			sendLog();
+			sendMasterSlaveMetrics();
 		}
     }
 }

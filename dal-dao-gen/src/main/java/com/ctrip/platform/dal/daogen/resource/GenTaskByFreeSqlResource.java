@@ -74,6 +74,11 @@ public class GenTaskByFreeSqlResource {
 			task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
 			task.setComment(comment);
 			task.setScalarType(scalarType);
+			if("简单类型".equals(pojo_name)){
+				task.setPojoType("SimpleType");
+			}else{
+				task.setPojoType("EntityType");
+			}
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);

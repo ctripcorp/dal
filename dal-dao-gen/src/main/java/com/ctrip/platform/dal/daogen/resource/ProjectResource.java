@@ -23,7 +23,6 @@ import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
-import com.ctrip.platform.dal.daogen.DalGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
@@ -306,13 +305,13 @@ public class ProjectResource {
 		try {
 			log.info(String.format("begain generate project: [id=%s; regen=%s; language=%s]",
 					id, regen, language));
-			DalGenerator generator = null;
+//			DalGenerator generator = null;
 			CodeGenContext context = null;
 			if (language.equals("java")) {
 //				generator = new JavaDalGenerator();
 //				context = generator.createContext(id, regen, progress, newPojo);
 				context= new JavaCodeGenContext(id, regen, progress);
-				XrossFactory.createFromXML("code_gen.xunit").getProcessor("Java Code Generator").process(context);
+				XrossFactory.createFromXML("code_gen_java.xunit").getProcessor("Java Code Generator").process(context);
 			} else if (language.equals("cs")){
 //				generator = new CSharpDalGenerator();
 //				context = generator.createContext(id, regen, progress, newPojo);
@@ -320,7 +319,7 @@ public class ProjectResource {
 				hints.put("newPojo", newPojo);
 				context = new CSharpCodeGenContext(id, regen, progress, hints);
 				((CSharpCodeGenContext)context).setNewPojo(newPojo);
-				XrossFactory.createFromXML("code_gen.xunit").getProcessor("C# Code Generator").process(context);
+				XrossFactory.createFromXML("code_gen_csharp.xunit").getProcessor("C# Code Generator").process(context);
 			}
 //			generator.prepareDirectory(context);
 //			generator.prepareData(context);

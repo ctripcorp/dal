@@ -40,6 +40,9 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	
 	//可取值：Single、First、List，表示select返回的结果类型
 	private String scalarType;
+	//实体类型，取值：EntityType、SimpleType，分别表示实体类型、简单类型
+	//若取值为SimpleType，则pojo_name的值为：简单类型
+	private String pojoType;
 	
 	public static GenTaskByFreeSql visitRow(ResultSet rs) throws SQLException {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
@@ -62,6 +65,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		task.setUpdate_time(rs.getTimestamp(13));
 		task.setComment(rs.getString(14));
 		task.setScalarType(rs.getString("scalarType"));
+		task.setPojoType(rs.getString("pojoType"));
 
 		return task;
 	}
@@ -208,5 +212,14 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	public void setScalarType(String scalarType) {
 		this.scalarType = scalarType;
 	}
+
+	public String getPojoType() {
+		return pojoType;
+	}
+
+	public void setPojoType(String pojoType) {
+		this.pojoType = pojoType;
+	}
+	
 
 }

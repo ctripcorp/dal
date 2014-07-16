@@ -251,7 +251,10 @@
                 && record != undefined
                 && record.task_type == "sql";
             var clazz = [];
-            var pojos = [];
+            var pojos = [{
+                value: '简单类型',
+                title: '简单类型'
+            }];
             $.each(data.classes, function (index, value) {
                 clazz.push({
                     value: value,
@@ -295,6 +298,7 @@
                 editor.setTheme("ace/theme/monokai");
                 editor.getSession().setMode("ace/mode/sql");
                 editor.setValue(record.sql_content);
+                $("#free_sql_scalarType").val(record['scalarType']);
             }
         }).fail(function (data) {
                 $("#error_msg").text("获取历史记录失败");
@@ -355,6 +359,7 @@
                 }
             });
             if ($("#page1").attr('is_update') == "1") {
+                $("#auto_sql_scalarType").val(record["scalarType"]);
                 $('#fields').multipleSelect('setSelects', record.fields.split(","));
                 if (record.condition != undefined && record.condition != "") {
                     var selectedConditions = record.condition.split(";");
@@ -376,9 +381,11 @@
             $(".step2-2-1").show();
 
             var op_type = $("#crud_option").val();
+            $("#auto_sql_scalarTypeDiv").hide();
             if (op_type == "select") {
                 $(".step2-2-1-1").show();
                 $(".step2-2-1-2").show();
+                $("#auto_sql_scalarTypeDiv").show();
             } else if (op_type == "update") {
                 $(".step2-2-1-1").show();
                 $(".step2-2-1-2").show();
@@ -389,12 +396,12 @@
                 $(".step2-2-1-1").hide();
                 $(".step2-2-1-2").show();
             }
-            if("java"==$("#sql_style").val() && "select"==$("#crud_option").val()){
-                $('#fields').multipleSelect('setSelects', values);
-                $('#fields').multipleSelect('disable');
-            }else{
-                $('#fields').multipleSelect('enable');
-            }
+//            if("java"==$("#sql_style").val() && "select"==$("#crud_option").val()){
+//                $('#fields').multipleSelect('setSelects', values);
+//                $('#fields').multipleSelect('disable');
+//            }else{
+//                $('#fields').multipleSelect('enable');
+//            }
             if ($("#page1").attr('is_update') != "1") {
                 window.sql_builder.build();
             }

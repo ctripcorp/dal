@@ -39,6 +39,52 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	private String update_user_no;
 	private Timestamp update_time;
 	private String comment;
+	
+	//当crud_type取值为select时，此字段才有意义，可取值：Single、First、List，表示select返回的结果类型
+	private String scalarType;
+	
+	public static GenTaskBySqlBuilder visitRow(ResultSet rs) throws SQLException {
+		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
+		task.setId(rs.getInt(1));
+		task.setProject_id(rs.getInt(2));
+		
+		String databaseSet = rs.getString(3);
+		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
+		task.setDatabaseSetName(databaseSet);
+		
+		task.setTable_name(rs.getString(4));
+		task.setClass_name(rs.getString(5));
+		task.setMethod_name(rs.getString(6));
+		task.setSql_style(rs.getString(7));
+		task.setCrud_type(rs.getString(8));
+		task.setFields(rs.getString(9));
+		task.setCondition(rs.getString(10));
+		task.setSql_content(rs.getString(11));
+		task.setGenerated(rs.getBoolean(12));
+		task.setVersion(rs.getInt(13));
+		task.setUpdate_user_no(rs.getString(14));
+		task.setUpdate_time(rs.getTimestamp(15));
+		task.setComment(rs.getString(16));
+		task.setScalarType(rs.getString("scalarType"));
+
+		return task;
+	}
+
+	@Override
+	public int compareTo(GenTaskBySqlBuilder o) {
+		int result =  this.getDb_name().compareTo(o.getDb_name());
+		if(result != 0){
+			return result;
+		}
+		
+		result = this.getTable_name().compareTo(o.getTable_name());
+		if(result != 0){
+			return result;
+		}
+		
+		return this.getMethod_name().compareTo(o.getMethod_name());
+		
+	}
 
 	public String getDatabaseSetName() {
 		return databaseSetName;
@@ -175,47 +221,13 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-
-	public static GenTaskBySqlBuilder visitRow(ResultSet rs) throws SQLException {
-		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
-		task.setId(rs.getInt(1));
-		task.setProject_id(rs.getInt(2));
-		
-		String databaseSet = rs.getString(3);
-		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
-		task.setDatabaseSetName(databaseSet);
-		
-		task.setTable_name(rs.getString(4));
-		task.setClass_name(rs.getString(5));
-		task.setMethod_name(rs.getString(6));
-		task.setSql_style(rs.getString(7));
-		task.setCrud_type(rs.getString(8));
-		task.setFields(rs.getString(9));
-		task.setCondition(rs.getString(10));
-		task.setSql_content(rs.getString(11));
-		task.setGenerated(rs.getBoolean(12));
-		task.setVersion(rs.getInt(13));
-		task.setUpdate_user_no(rs.getString(14));
-		task.setUpdate_time(rs.getTimestamp(15));
-		task.setComment(rs.getString(16));
-
-		return task;
+	
+	public String getScalarType() {
+		return scalarType;
 	}
 
-	@Override
-	public int compareTo(GenTaskBySqlBuilder o) {
-		int result =  this.getDb_name().compareTo(o.getDb_name());
-		if(result != 0){
-			return result;
-		}
-		
-		result = this.getTable_name().compareTo(o.getTable_name());
-		if(result != 0){
-			return result;
-		}
-		
-		return this.getMethod_name().compareTo(o.getMethod_name());
-		
+	public void setScalarType(String scalarType) {
+		this.scalarType = scalarType;
 	}
 
 }

@@ -11,7 +11,7 @@ public class CSharpCodeGenContextCreator  implements Processor {
 
 	@Override
 	public void process(Context context) {
-		CSharpCodeGenContext ctx = null;
+		CSharpCodeGenContext ctx = (CSharpCodeGenContext)context;
 
 		Project project = SpringBeanGetter.getDaoOfProject().getProjectByID(ctx.getProjectId());
 		DalConfigHost dalConfigHost = null;

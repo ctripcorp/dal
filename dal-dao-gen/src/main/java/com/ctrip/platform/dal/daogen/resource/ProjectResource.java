@@ -23,7 +23,6 @@ import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
-import com.ctrip.platform.dal.daogen.DalGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
@@ -306,7 +305,7 @@ public class ProjectResource {
 		try {
 			log.info(String.format("begain generate project: [id=%s; regen=%s; language=%s]",
 					id, regen, language));
-			DalGenerator generator = null;
+//			DalGenerator generator = null;
 			CodeGenContext context = null;
 			if (language.equals("java")) {
 //				generator = new JavaDalGenerator();

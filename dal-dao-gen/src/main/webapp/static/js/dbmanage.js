@@ -23,7 +23,7 @@
             w2ui['grid'].add(allGroupDBs);
             $("body").unblock();
         }).fail(function (data) {
-                alert("获取所有Member失败!");
+                alert("获取Group失败!");
             });
     };
 

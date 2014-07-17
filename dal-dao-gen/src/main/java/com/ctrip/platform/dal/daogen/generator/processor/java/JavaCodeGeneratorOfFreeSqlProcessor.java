@@ -44,6 +44,8 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements Processor {
 
 		Map<String, JavaMethodHost> _freeSqlPojoHosts = ctx.get_freeSqlPojoHosts();
 		for (final JavaMethodHost host : _freeSqlPojoHosts.values()) {
+			if(host.isSampleType())
+				continue;
 			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
 				public ExecuteResult call() throws Exception {

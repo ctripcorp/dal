@@ -9,7 +9,7 @@ public class ${host.getClassName()}Dao {
 	private DalQueryDao queryDao;
 
 #foreach( $method in ${host.getMethods()} )
-#if(!$method.isEmptyFields())
+#if(!$method.isEmptyFields() && !$method.isSampleType())
 	private ${method.getPojoClassName()}RowMapper ${method.getVariableName()}RowMapper = new ${method.getPojoClassName()}RowMapper();
 #end
 #end
@@ -18,24 +18,101 @@ public class ${host.getClassName()}Dao {
 	}
     
 #foreach($method in $host.getMethods())
+##简单类型并且返回值是List
+#if($method.isSampleType() && $method.isReturnList())
 	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-
+#if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
 #end
-
-		//如果只需要一条记录，建议使用limit 1或者top 1，并使用SelectFirst提高性能
+#end
+		return queryDao.query(sql, parameters, hints, ${method.getPojoClassName()}.class);
+	}
+#end
+##简单类型并且返回值为Single
+#if($method.isSampleType() && $method.isReturnSingle())
+	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+#if($method.hasParameters())
+		int i = 1;
+#foreach($p in $method.getParameters())
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
+#end
+		return queryDao.queryForObjectNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
+	}
+#end
+##简单类型且返回值为First
+#if($method.isSampleType() && $method.isReturnFirst())
+	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+#if($method.hasParameters())
+		int i = 1;
+#foreach($p in $method.getParameters())
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
+#end
+		return queryDao.queryFirstNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
+	}
+#end
+##实体类型并且返回值为List
+#if($method.isReturnList() && !$method.isSampleType())
+	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+#if($method.hasParameters())
+		int i = 1;
+#foreach($p in $method.getParameters())
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
+#end
 		return queryDao.query(sql, parameters, hints, ${method.getVariableName()}RowMapper);
 	}
+#end
+##实体类型且返回Signle
+#if($method.isReturnSingle() && !$method.isSampleType())
+	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+#if($method.hasParameters())
+		int i = 1;
+#foreach($p in $method.getParameters())
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
+#end
+		return queryDao.queryForObjectNullable(sql, parameters, hints, ${method.getVariableName()}RowMapper);
+	}
+#end
+##实体类型且返回First
+#if($method.isReturnFirst() && !$method.isSampleType())
+	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+#if($method.hasParameters())
+		int i = 1;
+#foreach($p in $method.getParameters())
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
+#end
+		return queryDao.queryFirstNullable(sql, parameters, hints, ${method.getVariableName()}RowMapper);
+	}
+#end
 
 #end
 
 #foreach( $method in ${host.getMethods()} )
-#if(!$method.isEmptyFields())
+#if(!$method.isEmptyFields()&& !$method.isSampleType())
 	private class ${method.getPojoClassName()}RowMapper implements DalRowMapper<${method.getPojoClassName()}> {
 
 		@Override

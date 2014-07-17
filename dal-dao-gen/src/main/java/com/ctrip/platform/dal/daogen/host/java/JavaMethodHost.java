@@ -22,6 +22,9 @@ public class JavaMethodHost {
 	// Only for free sql query dao
 	private List<JavaParameterHost> fields;
 	
+	private String scalarType;
+	private String pojoType;
+	
 	private List<String> inClauses = new ArrayList<String>();
 
 	public String getPackageName() {
@@ -33,6 +36,8 @@ public class JavaMethodHost {
 	}
 
 	public String getPojoClassName() {
+		if(this.isSampleType() && null != this.fields && !this.fields.isEmpty())
+			return this.fields.get(0).getClassDisplayName();
 		return pojoClassName;
 	}
 
@@ -62,6 +67,22 @@ public class JavaMethodHost {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getScalarType() {
+		return scalarType;
+	}
+
+	public void setScalarType(String scalarType) {
+		this.scalarType = scalarType;
+	}
+
+	public String getPojoType() {
+		return pojoType;
+	}
+
+	public void setPojoType(String pojoType) {
+		this.pojoType = pojoType;
 	}
 
 	public String getSql() {
@@ -168,8 +189,29 @@ public class JavaMethodHost {
 		return params;
 	}
 	
+	public boolean hasParameters(){
+		return null != this.parameters && !this.parameters.isEmpty();
+	}
+	
 	public boolean isEmptyFields()
 	{
 		return null == this.fields || this.fields.isEmpty();
 	}
+	
+	public boolean isSampleType(){
+		return this.pojoType.equalsIgnoreCase("SimpleType");
+	}
+	
+	public boolean isReturnList(){
+		return this.scalarType.equalsIgnoreCase("List");
+	}
+	
+	public boolean isReturnSingle(){
+		return this.scalarType.equalsIgnoreCase("Single");
+	}
+	
+	public boolean isReturnFirst(){
+		return this.scalarType.equalsIgnoreCase("First");
+	}
+	
 }

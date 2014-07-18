@@ -354,7 +354,16 @@
                 onUncheckAll: function() {
                     ace.edit("sql_builder").setValue("");
                 },
-                onClick: function(view) {
+                onClick: function(option) {
+                    var tempValue = $('#fields').multipleSelect('getSelects');
+                    if(tempValue.length>1 && $("#crud_option").val() == "select"){
+                        alert('只能选择一个字段，或者选择全部字段');
+                        $.each(tempValue,function(index,value){
+                            if(option['value']!=value){
+                                $('#fields').multipleSelect('setSelects', [value]);
+                            }
+                        });
+                    }
                     window.sql_builder.build();
                 }
             });

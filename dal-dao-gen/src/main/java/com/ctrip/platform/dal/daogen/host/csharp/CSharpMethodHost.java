@@ -11,8 +11,12 @@ public class CSharpMethodHost {
 	private String sql;
 	
 	private List<CSharpParameterHost> parameters;
+	private CSharpFreeSqlPojoHost pojohost;
 	
 	private String pojoName;
+	
+	private String scalarType;
+	private String pojoType;
 
 	public String getCrud_type() {
 		return crud_type;
@@ -54,4 +58,38 @@ public class CSharpMethodHost {
 		this.pojoName = pojoName;
 	}
 
+	public String getScalarType() {
+		return scalarType;
+	}
+
+	public void setScalarType(String scalarType) {
+		this.scalarType = scalarType;
+	}
+
+	public String getPojoType() {
+		return pojoType;
+	}
+
+	public void setPojoType(String pojoType) {
+		this.pojoType = pojoType;
+	}
+
+	public CSharpFreeSqlPojoHost getPojohost() {
+		return pojohost;
+	}
+
+	public void setPojohost(CSharpFreeSqlPojoHost pojohost) {
+		this.pojohost = pojohost;
+	}
+
+	public boolean isScalar(){
+		return this.pojoType.equalsIgnoreCase("SimpleType") && 
+				(this.scalarType.equalsIgnoreCase("First") ||
+						this.scalarType.equalsIgnoreCase("Single"));
+	}
+	
+	public CSharpParameterHost  getSinglePojoFieldHost(){
+		return this.pojohost.getColumns().get(0);
+	}
+	
 }

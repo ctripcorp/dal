@@ -18,6 +18,7 @@ import microsoft.sql.DateTimeOffset;
 import org.apache.log4j.Logger;
 import org.springframework.jdbc.support.JdbcUtils;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.Consts;
@@ -643,6 +644,75 @@ public class DbUtils {
 		return map;
 	}
 	
+	
+	public static List<AbstractParameterHost> getSelectFieldHosts(String dbName, String sql, CurrentLanguage language){
+		List<AbstractParameterHost> hosts = new ArrayList<AbstractParameterHost>();
+		String testSql = sql.toLowerCase();
+		int whereIndex = testSql.indexOf("where");
+		if(whereIndex > 0)
+			testSql = sql.substring(0, whereIndex);
+
+		Connection connection = null;
+		ResultSet rs = null;
+		try {
+			connection = DataSourceUtil.getConnection(dbName);
+			DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
+			String dbType = DbUtils.getDbType(dbName);
+			if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
+				dbCategory = DatabaseCategory.MySql;
+			}
+			
+			if(dbCategory.equals(DatabaseCategory.MySql)){
+				testSql = testSql + " limit 1";
+			}
+			else{
+				testSql = testSql.replace("select", "select top(1)");
+			}
+			PreparedStatement ps = connection.prepareStatement(testSql);
+			rs = ps.executeQuery();
+			ResultSetMetaData rsMeta = rs.getMetaData();
+			
+			if(language == CurrentLanguage.CSharp){
+				for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
+					CSharpParameterHost pHost = new CSharpParameterHost();
+					pHost.setName(rsMeta.getColumnLabel(i));
+					pHost.setDbType(DbType.getDbTypeFromJdbcType(rsMeta
+							.getColumnType(i)));
+					pHost.setType(DbType.getCSharpType(pHost.getDbType()));
+					pHost.setIdentity(false);
+					pHost.setNullable(false);
+					pHost.setPrimary(false);
+					pHost.setLength(rsMeta.getColumnDisplaySize(i));
+					hosts.add(pHost);
+				}
+
+			}else{
+				for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
+					JavaParameterHost paramHost = new JavaParameterHost();
+					paramHost.setName(rsMeta.getColumnLabel(i));
+					paramHost.setSqlType(rsMeta.getColumnType(i));
+					paramHost.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType()));
+					paramHost.setIdentity(false);
+					paramHost.setNullable(false);
+					paramHost.setPrimary(false);
+					paramHost.setLength(rsMeta.getColumnDisplaySize(i));
+					hosts.add(paramHost);
+				}
+			}
+		}catch (SQLException e) {
+			log.error(String.format("get select field error: [dbName=%s;sql=%s;language=%s]", 
+					dbName, sql, language), e);
+		} catch (Exception e) {
+			log.error(String.format("get select field error: [dbName=%s;sql=%s;language=%s]", 
+					dbName, sql, language), e);
+		} finally {
+			JdbcUtils.closeResultSet(rs);
+			JdbcUtils.closeConnection(connection);
+		}
+	
+		return hosts;
+	}
+	
 	/**
 	 * 测试查询SQL是否合法
 	 * 
@@ -791,5 +861,10 @@ public class DbUtils {
 			}
 		}
 		return dbType;
+	}
+	
+	public static void main(String[] args){
+		List<AbstractParameterHost> hosts = getSelectFieldHosts("dao_test", "select name from person where  age = ?", CurrentLanguage.Java);
+		System.out.println(hosts.size());
 	}
 }

@@ -189,10 +189,22 @@ public class AbstractJavaDataPreparer{
 			method.setCrud_type(builder.getCrud_type());
 			method.setName(builder.getMethod_name());
 			method.setSql(builder.getSql_content());
+			method.setScalarType(builder.getScalarType());
 			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
 			// Only have condition clause
 			if (method.getCrud_type().equals("select")
 					|| method.getCrud_type().equals("delete")) {
+				
+				if(method.getCrud_type().equals("select")){
+					List<AbstractParameterHost> paramAbstractHosts = 
+							DbUtils.getSelectFieldHosts(builder.getDb_name(), builder.getSql_content(), CurrentLanguage.Java);
+					List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
+					for (AbstractParameterHost phost : paramAbstractHosts) {
+						paramHosts.add((JavaParameterHost)phost);
+					}
+					method.setFields(paramHosts);
+				}
+				
 				String[] conditions = StringUtils.split(builder.getCondition(),
 						";");
 				for (String condition : conditions) {

@@ -253,5 +253,12 @@ public class JavaTableHost {
 		else
 			return this.fields.get(0).getName();
 	}
+	
+	public String getScalarColumn(){
+		return (null != this.fields && !this.fields.isEmpty()) ? this.fields.get(0).getClassDisplayName() : "";
+	}
 
+	public boolean isSampleType(){
+		return null != this.fields && this.fields.size() == 1;
+	}
 }

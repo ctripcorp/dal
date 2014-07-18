@@ -341,29 +341,98 @@ public class ${host.getPojoClassName()}Dao {
 
 #foreach($method in $host.getMethods())
 #if($method.getCrud_type() == "select")
-	/**
-	 * Operation type: query
-#foreach($pama1 in $method.getParamComments())
-	 * @param ${pama1}
+##简单类型并且返回值是List
+#if($method.isSampleType() && $method.isReturnList())
+	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+#if($method.hasParameters())
+		int i = 1;
+#foreach($p in $method.getParameters())
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
 #end
-#foreach($pama1 in $method.getConditionComments())
-	 * @param ${pama1}
 #end
-	**/
-    public List<${host.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) 
-			throws SQLException {
+		return queryDao.query(sql, parameters, hints, ${method.getPojoClassName()}.class);
+	}
+#end
+##简单类型并且返回值为Single
+#if($method.isSampleType() && $method.isReturnSingle())
+	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+#if($method.hasParameters())
+		int i = 1;
+#foreach($p in $method.getParameters())
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
+#end
+		return queryDao.queryForObjectNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
+	}
+#end
+##简单类型且返回值为First
+#if($method.isSampleType() && $method.isReturnFirst())
+	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+#if($method.hasParameters())
+		int i = 1;
+#foreach($p in $method.getParameters())
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
+#end
+		return queryDao.queryFirstNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
+	}
+#end
+##实体类型并且返回值为List
+#if($method.isReturnList() && !$method.isSampleType())
+	public List<${host.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+#if($method.hasParameters())
+		int i = 1;
+#foreach($p in $method.getParameters())
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
+#end
+		return queryDao.query(sql, parameters, hints, rowextractor);
+	}
+#end
+##实体类型且返回Signle
+#if($method.isReturnSingle() && !$method.isSampleType())
+	public ${host.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+#if($method.hasParameters())
+		int i = 1;
+#foreach($p in $method.getParameters())
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
+#end
+		return queryDao.queryForObjectNullable(sql, parameters, hints, rowextractor);
+	}
+#end
+##实体类型且返回First
+#if($method.isReturnFirst() && !$method.isSampleType())
+	public ${host.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+#if($method.hasParameters())
+		int i = 1;
+#foreach($p in $method.getParameters())
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
+#end
+		return queryDao.queryFirstNullable(sql, parameters, hints, rowextractor);
+	}
+#end
 #else
-	/**
-	 * The operation type: ${method.getCrud_type()}
-#foreach($pama1 in $method.getParamComments())
-	 * @param ${pama1}
-#end
-#foreach($pama1 in $method.getConditionComments())
-	 * @param ${pama1}
-#end
-	**/
-    public int ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
-#end
+	public int ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 #if(${method.getInClauses()} != "")
 		String sql = SQLParser.parse("${method.getSql()}",${method.getInClauses()});
 #else
@@ -380,14 +449,11 @@ public class ${host.getPojoClassName()}Dao {
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #end
 #end
-
-#if($method.getCrud_type() == "select")
-		return baseClient.query(sql, parameters, hints, rowextractor);
-#else
 		return baseClient.update(sql, parameters, hints);
-#end
 	}
 #end
+#end
+
 
 #if($host.isSp() && ($host.getSpInsert().isExist() || $host.getSpDelete().isExist() ||$host.getSpUpdate().isExist()))
 	private String prepareSpCall(String SpName, StatementParameters parameters, Map<String, ?> fields) {

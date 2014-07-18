@@ -134,7 +134,7 @@ public class DalGroupDbResource {
 		try{
 			groupID = Integer.parseInt(groupId);
 		}catch(NumberFormatException  ex){
-			log.error("Add member failed", ex);
+			log.error("Add dal team database failed", ex);
 			Status status = Status.ERROR;
 			status.setInfo("Illegal group id");
 			return status;

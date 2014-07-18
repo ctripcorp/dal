@@ -146,6 +146,8 @@ public class DatabaseResource {
 			status.setInfo(allinonename+"已经存在!");
 			return status;
 		}else{
+			String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
+			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 			DalGroupDB groupDb = new DalGroupDB();
 			groupDb.setDbname(allinonename);
 			groupDb.setDb_address(dbaddress);
@@ -154,7 +156,7 @@ public class DatabaseResource {
 			groupDb.setDb_password(dbpassword);
 			groupDb.setDb_catalog(dbcatalog);
 			groupDb.setDb_providerName(DatabaseType.valueOf(dbtype).getValue());
-			groupDb.setDal_group_id(-1);
+			groupDb.setDal_group_id(user.getGroupId()==0?-1:user.getGroupId());
 			allDbDao.insertDalGroupDB(groupDb);
 		}
 		

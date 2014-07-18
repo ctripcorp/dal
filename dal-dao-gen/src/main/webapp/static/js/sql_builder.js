@@ -45,10 +45,14 @@
             if ($("#crud_option").val() == "select") {
                 if("java"==$("#sql_style").val() && "select"==$("#crud_option").val()){
                     if (formatedConditions.length > 0) {
-                        ace.edit("sql_builder").setValue(sprintf("SELECT * FROM %s WHERE %s",
+//                        ace.edit("sql_builder").setValue(sprintf("SELECT * FROM %s WHERE %s",
+//                            $("#tables").val(), formatedConditions.join(" AND ")));
+                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
                             $("#tables").val(), formatedConditions.join(" AND ")));
                     } else {
-                        ace.edit("sql_builder").setValue(sprintf("SELECT * FROM %s", $("#tables").val()));
+//                        ace.edit("sql_builder").setValue(sprintf("SELECT * FROM %s", $("#tables").val()));
+                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
+                            $("#tables").val()));
                     }
                 }else{
                     if (formatedConditions.length > 0) {

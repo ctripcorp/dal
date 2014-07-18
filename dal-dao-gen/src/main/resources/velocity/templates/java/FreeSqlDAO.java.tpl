@@ -80,7 +80,7 @@ public class ${host.getClassName()}Dao {
 #end
 ##实体类型且返回Signle
 #if($method.isReturnSingle() && !$method.isSampleType())
-	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
@@ -95,7 +95,7 @@ public class ${host.getClassName()}Dao {
 #end
 ##实体类型且返回First
 #if($method.isReturnFirst() && !$method.isSampleType())
-	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();

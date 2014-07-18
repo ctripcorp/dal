@@ -36,8 +36,11 @@ public class JavaMethodHost {
 	}
 
 	public String getPojoClassName() {
-		if(this.isSampleType() && null != this.fields && !this.fields.isEmpty())
-			return this.fields.get(0).getClassDisplayName();
+		if(this.isSampleType()){
+			if(null != this.fields && !this.fields.isEmpty()){
+				return this.fields.get(0).getClassDisplayName();
+			}
+		}
 		return pojoClassName;
 	}
 
@@ -78,7 +81,13 @@ public class JavaMethodHost {
 	}
 
 	public String getPojoType() {
-		return pojoType;
+		if(null != this.pojoType)
+			return this.pojoType;
+		if(null != this.fields && this.fields.size() == 1){
+			return "SimpleType";
+		}else{
+			return "";
+		}
 	}
 
 	public void setPojoType(String pojoType) {
@@ -199,7 +208,7 @@ public class JavaMethodHost {
 	}
 	
 	public boolean isSampleType(){
-		return this.pojoType.equalsIgnoreCase("SimpleType");
+		return this.getPojoType().equalsIgnoreCase("SimpleType");
 	}
 	
 	public boolean isReturnList(){

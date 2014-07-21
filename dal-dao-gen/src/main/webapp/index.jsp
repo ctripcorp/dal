@@ -211,7 +211,7 @@
                            <select id="gen_style" class="span8">
                               <option value="table_view_sp">生成模板(包含基础的增删改查操作)</option>
                               <option value="auto">构建SQL（生成的代码绑定到模板）</option>
-                              <option value="sql">复杂查询（额外生成实体类）</option>
+                              <option value="sql">自定义查询（额外生成实体类）</option>
                            </select>
                         </div>
                      </div>

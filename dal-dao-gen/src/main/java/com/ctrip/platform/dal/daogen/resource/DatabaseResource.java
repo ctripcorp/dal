@@ -260,9 +260,9 @@ public class DatabaseResource {
 				status.setInfo("你没有当前DataBase的操作权限.");
 				return status;
 			}
-		}else{
-			allDbDao.updateGroupDB(id, allinonename, dbaddress, dbport, dbuser, dbpassword, dbcatalog, DatabaseType.valueOf(dbtype).getValue());
 		}
+		
+		allDbDao.updateGroupDB(id, allinonename, dbaddress, dbport, dbuser, dbpassword, dbcatalog, DatabaseType.valueOf(dbtype).getValue());
 		
 		return Status.OK;
 	}

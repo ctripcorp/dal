@@ -343,11 +343,15 @@
 	                  <div class="row-fluid" id="auto_sql_scalarTypeDiv">
 	                  		<div class="control-group">
 	                           <label class="control-label popup_label">返回形式：</label>
-	                           <select id="auto_sql_scalarType" class='span7'>
+	                           <select id="auto_sql_scalarType" class='span5'>
 	                              <option value='List'>列表(List)</option>
 	                              <option value='Single'>唯一的(Single)</option>
 	                              <option value='First'>第一个(First)</option>
-	                           </select>	                           
+	                           </select>	
+	                           <label class="popup_label" style="padding-left:20px">
+	                           	   <input id="auto_sql_pagination" type="checkbox" checked="true">
+	                           	     增加分页方法
+	                           </label>                           
 	                        </div>
 	                  </div>
 	                  <br>
@@ -360,10 +364,12 @@
                      <div class="row-fluid">
                            <label class="control-label popup_label">填写条件参数名</label>
                      </div>  
-                     <div id="param_list_auto" class="row-fluid">      
+                     <div id="param_list_auto" class="row-fluid input-sm">      
                      </div>
-                     <br/>
-                      <div class="row-fluid">
+                     <div class="row-fluid"><br/><br/>
+                     	以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。
+                     </div>
+                     <div class="row-fluid">
                         <div id="step2_2_2_sql_editor" class="span12" style="height:200px;">
                         </div>
                      </div>
@@ -391,11 +397,15 @@
                       <div class="row-fluid" id="free_sql_scalarTypeDiv" style="margin-top:12px">
 	                  		<div class="control-group">
 	                           <label class="control-label popup_label" style="width:90px;">返回形式：</label>
-	                           <select id="free_sql_scalarType" class='span9'>
+	                           <select id="free_sql_scalarType" class='span5'>
 	                              <option value='List'>列表(List)</option>
 	                              <option value='Single'>唯一的(Single)</option>
 	                              <option value='First'>第一个(First)</option>
-	                           </select>	                           
+	                           </select>	 
+	                           <label class="popup_label" style="padding-left:20px">
+	                           	   <input id="free_sql_pagination" type="checkbox" checked="true">
+	                           	     增加分页方法
+	                           </label>                           
 	                        </div>
 	                  </div>
                      <label class="control-label popup_label">输入查询SQL，占位符：Java请使用?或者:Name形式，c#请使用@Name形式</label>
@@ -410,28 +420,34 @@
                      </div>  
                      <div id="param_list" class="row-fluid input-sm">      
                      </div>
-                  </div>
-                  <div class="row-fluid">
+                     <div class="row-fluid"><br/><br/>
+                     	以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。
+                     </div>
                      <div class="row-fluid">
-                     	 <br>
-                         <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
-                     </div>  
+                        <div id="step2_3_1_sql_editor" class="span12" style="height:200px;">
+                        </div>
+                     </div>
                   </div>
                </div>
                <div class="modal-footer">
-                  <a href="#" class="ctip" data-toggle="tooltip"
-						data-placement="top" title="" html="1"
-						data-original-title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>
-						2、目前，DAO代码生成方式有三种：<br/>
-						&nbsp;2.1、生成模板(包含基础的增删改查操作)：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
-						&nbsp;2.2、构建SQL（生成的代码绑定到模板）：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
-						&nbsp;2.3、复杂查询（额外生成实体类）：在这种模式下面，我们可以自定义复杂的查询SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
-						"> <img class="helpicon"
-						src="/static/images/help.jpg">
-					</a>
-                  <button id="prev_step"  type="button" class="btn btn-default">上一步</button>
-                  <button id="next_step"  type="button" class="btn btn-primary">下一步</button>
-                  <label class="popup_label"><input id="gen_on_save" type="checkbox">保存时生成代码</label>
+               		<div class="row-fluid">
+                      <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
+                  	</div>
+                   	<div class="row-fluid">
+              			<a href="#" class="ctip" data-toggle="tooltip"
+							data-placement="top" title="" html="1"
+							data-original-title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>
+							2、目前，DAO代码生成方式有三种：<br/>
+							&nbsp;2.1、生成模板(包含基础的增删改查操作)：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
+							&nbsp;2.2、构建SQL（生成的代码绑定到模板）：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
+							&nbsp;2.3、复杂查询（额外生成实体类）：在这种模式下面，我们可以自定义复杂的查询SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
+							"> <img class="helpicon"
+							src="/static/images/help.jpg">
+						</a>
+	                  	<button id="prev_step"  type="button" class="btn btn-default">上一步</button>
+	                  	<button id="next_step"  type="button" class="btn btn-primary">下一步</button>
+	                  	<label class="popup_label"><input id="gen_on_save" type="checkbox">保存时生成代码</label>
+	                 </div>
                </div>
             </div>
          </div>

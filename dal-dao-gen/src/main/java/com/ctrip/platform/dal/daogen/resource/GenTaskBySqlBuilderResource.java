@@ -51,7 +51,9 @@ public class GenTaskBySqlBuilderResource {
 			@FormParam("action") String action,
 			@FormParam("params") String params,
 			@FormParam("comment") String comment,
-			@FormParam("scalarType") String scalarType) {
+			@FormParam("scalarType") String scalarType,
+			@FormParam("pagination") boolean pagination) {
+		
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 
 		if (action.equalsIgnoreCase("delete")) {
@@ -76,6 +78,7 @@ public class GenTaskBySqlBuilderResource {
 			task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
 			task.setComment(comment);
 			task.setScalarType(scalarType);
+			task.setPagination(pagination);
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);

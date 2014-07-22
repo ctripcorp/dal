@@ -41,6 +41,7 @@ public class JavaDalGenerator implements DalGenerator {
 				dalConfigHost = new DalConfigHost("");
 			}
 			ctx.setDalConfigHost(dalConfigHost);
+			ctx.setNamespace(project.getNamespace());
 		} catch (Exception e) {
 			log.warn("exception occur when createContext", e);
 			throw e;

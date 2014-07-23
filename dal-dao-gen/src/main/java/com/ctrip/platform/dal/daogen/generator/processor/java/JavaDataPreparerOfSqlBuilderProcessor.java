@@ -92,6 +92,7 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
 		tableViewSp.setCud_by_sp(false);
 		tableViewSp.setPagination(false);
 		tableViewSp.setDb_name(sqlBuilder.getDb_name());
+		tableViewSp.setDatabaseSetName(sqlBuilder.getDatabaseSetName());
 		tableViewSp.setPrefix("");
 		tableViewSp.setSuffix("Gen");
 

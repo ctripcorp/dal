@@ -299,6 +299,7 @@
                 editor.getSession().setMode("ace/mode/sql");
                 editor.setValue(record.sql_content);
                 $("#free_sql_scalarType").val(record['scalarType']);
+                $("#free_sql_pagination").attr('checked',record['pagination']);
             }
         }).fail(function (data) {
                 $("#error_msg").text("获取历史记录失败");
@@ -369,6 +370,7 @@
             });
             if ($("#page1").attr('is_update') == "1") {
                 $("#auto_sql_scalarType").val(record["scalarType"]);
+                $("#auto_sql_pagination").attr('checked',record['pagination']);
                 $('#fields').multipleSelect('setSelects', record.fields.split(","));
                 if (record.condition != undefined && record.condition != "") {
                     var selectedConditions = record.condition.split(";");
@@ -517,14 +519,14 @@
 
         $("#param_list_auto").html(htmls);
 
-        current.hide();
-        $(".step2-2-2").show();
-
         var editor = ace.edit("step2_2_2_sql_editor");
         editor.setTheme("ace/theme/monokai");
         editor.getSession().setMode("ace/mode/sql");
         editor.setValue(ace.edit("sql_builder").getValue());
+        editor.setReadOnly(true);
 
+        current.hide();
+        $(".step2-2-2").show();
 //        window.ajaxutil.post_task();
     };
 
@@ -597,6 +599,13 @@
                 }
             });
         }
+
+        var editor = ace.edit("step2_3_1_sql_editor");
+        editor.setTheme("ace/theme/monokai");
+        editor.getSession().setMode("ace/mode/sql");
+        editor.setValue(ace.edit("sql_editor").getValue());
+        editor.setReadOnly(true);
+
         current.hide();
         $(".step2-3-1").show();
     };

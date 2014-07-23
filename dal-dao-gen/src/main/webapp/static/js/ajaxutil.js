@@ -39,6 +39,7 @@
                 postData["sql_style"] = $("#sql_style").val();
                 postData["crud_type"] = $("#crud_option").val();
                 postData["scalarType"] = $("#auto_sql_scalarType").val();
+                postData["pagination"] = $("#auto_sql_pagination").is(":checked");
 
                 postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
                 postData["sql_content"] = ace.edit("sql_builder").getValue();
@@ -88,6 +89,7 @@
                 postData["pojo_name"] = $("#sql_pojo_name").val();
                 postData["method_name"] = $("#sql_method_name").val();
                 postData["scalarType"] = $("#free_sql_scalarType").val();
+                postData["pagination"] = $("#free_sql_pagination").is(":checked");
 
                 if (postData["class_name"] == ""
                     || postData["pojo_name"] == ""

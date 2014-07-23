@@ -49,7 +49,9 @@ public class GenTaskByFreeSqlResource {
 			@FormParam("version") int version,
 			@FormParam("action") String action,
 			@FormParam("comment") String comment,
-			@FormParam("scalarType") String scalarType) {
+			@FormParam("scalarType") String scalarType,
+			@FormParam("pagination") boolean pagination) {
+		
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 
 		if (action.equalsIgnoreCase("delete")) {
@@ -74,6 +76,8 @@ public class GenTaskByFreeSqlResource {
 			task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
 			task.setComment(comment);
 			task.setScalarType(scalarType);
+			task.setPagination(pagination);
+			
 			if("简单类型".equals(pojo_name)){
 				task.setPojoType("SimpleType");
 			}else{

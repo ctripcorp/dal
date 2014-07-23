@@ -35,10 +35,12 @@ public class ${host.getPojoClassName()}Dao {
 	private DalScalarExtractor extractor = new DalScalarExtractor();
 	private DalRowMapperExtractor<${host.getPojoClassName()}> rowextractor = null;
 	private DalTableDao<${host.getPojoClassName()}> client;
+	private DalQueryDao queryDao = null;
 	private DalClient baseClient;
 
 	public ${host.getPojoClassName()}Dao() {
 		this.client = new DalTableDao<${host.getPojoClassName()}>(parser);
+		thhis.queryDao = new DalQueryDao(DATA_BASE);
 		this.rowextractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(parser); 
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}

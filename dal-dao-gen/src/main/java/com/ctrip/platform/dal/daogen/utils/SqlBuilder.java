@@ -156,7 +156,7 @@ public class SqlBuilder {
 			String cetWrap = "WITH CET AS (" + plain.toString() + ")";
 			
 			selectitems.remove(newItem);
-			result = cetWrap + " SELECT " + StringUtils.join(selectitems, " ") + " FROM CET WHERE " + sqlserverPageClausePattern;
+			result = cetWrap + " SELECT " + StringUtils.join(selectitems, ", ") + " FROM CET WHERE " + sqlserverPageClausePattern;
 		}else{
 			throw new Exception("Unknow database category.");
 		}

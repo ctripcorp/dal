@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.daogen.host.csharp;
 import java.util.List;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 
 public class CSharpMethodHost {
@@ -110,6 +111,6 @@ public class CSharpMethodHost {
 	
 	public String getPagingSql(DatabaseCategory dbType) 
 			throws Exception{
-        return SqlBuilder.pagingQuerySql(sql, dbType);
+        return SqlBuilder.pagingQuerySql(sql, dbType, CurrentLanguage.CSharp);
 	}
 }

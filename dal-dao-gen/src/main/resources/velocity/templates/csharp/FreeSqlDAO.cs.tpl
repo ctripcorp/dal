@@ -55,13 +55,13 @@ namespace ${host.getNameSpace()}.Dao
         /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
 #end
         /// <returns></returns>
-        public IList<${method.getPojoName()}> ${method.getName()}(#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getName())}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()), int pageNo, int pageSize#end)
+        public IList<${method.getPojoName()}> ${method.getName()}(#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getName())}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging())#if($method.getParameters().size()!=0),#end int pageNo, int pageSize#end)
         {
         	try
             {
 #if($method.isPaging())
 		        String sqlPattern = "${method.getPagingSql($host.getDatabaseCategory())}";
-				String sql = String.format(sqlPattern, (pageNo - 1) * pageSize + 1, pageSize * pageNo);
+				String sql = String.Format(sqlPattern, (pageNo - 1) * pageSize + 1, pageSize * pageNo);
 #else
 		        String sql = "${method.getSql()}";
 #end

@@ -223,7 +223,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 				tableViewSp.getSuffix(), className);
 
 		vhost.setPackageName(ctx.getNamespace());
-		vhost.setDatabaseCategory(getDatabaseCategory(tableViewSp));
+		vhost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getDb_name()));
 		vhost.setDbName(tableViewSp.getDatabaseSetName());
 		vhost.setPojoClassName(className);
 		vhost.setViewName(viewName);
@@ -275,7 +275,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 				tableViewSp.getSuffix(), className);
 
 		spHost.setPackageName(ctx.getNamespace());
-		spHost.setDatabaseCategory(getDatabaseCategory(tableViewSp));
+		spHost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getDb_name()));
 		spHost.setDbName(tableViewSp.getDatabaseSetName());
 		spHost.setPojoClassName(className);
 		spHost.setSpName(spName);

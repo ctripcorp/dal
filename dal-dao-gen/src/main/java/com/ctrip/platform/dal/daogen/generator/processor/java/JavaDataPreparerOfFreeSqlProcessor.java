@@ -80,6 +80,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 					host.setDbName(currentTasks.get(0).getDatabaseSetName());
 					host.setClassName(currentTasks.get(0).getClass_name());
 					host.setPackageName(namespace);
+					host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getDb_name()));
 
 					List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 					// 每个Method可能就有一个Pojo
@@ -90,6 +91,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 						method.setPackageName(namespace);
 						method.setScalarType(task.getScalarType());
 						method.setPojoType(task.getPojoType());
+						method.setPaging(task.isPagination());
 						method.setPojoClassName(WordUtils.capitalize(task
 								.getPojo_name() + "Pojo"));
 						List<JavaParameterHost> params = new ArrayList<JavaParameterHost>();

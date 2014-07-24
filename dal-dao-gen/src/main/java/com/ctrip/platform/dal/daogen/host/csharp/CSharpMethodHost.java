@@ -2,6 +2,9 @@ package com.ctrip.platform.dal.daogen.host.csharp;
 
 import java.util.List;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
+
 public class CSharpMethodHost {
 	
 	private String crud_type;
@@ -17,6 +20,8 @@ public class CSharpMethodHost {
 	
 	private String scalarType;
 	private String pojoType;
+	
+	private boolean paging;
 
 	public String getCrud_type() {
 		return crud_type;
@@ -78,6 +83,14 @@ public class CSharpMethodHost {
 		return pojohost;
 	}
 
+	public boolean isPaging() {
+		return paging;
+	}
+
+	public void setPaging(boolean paging) {
+		this.paging = paging;
+	}
+
 	public void setPojohost(CSharpFreeSqlPojoHost pojohost) {
 		this.pojohost = pojohost;
 	}
@@ -95,4 +108,8 @@ public class CSharpMethodHost {
 		return this.pojohost.getColumns().get(0);
 	}
 	
+	public String getPagingSql(DatabaseCategory dbType) 
+			throws Exception{
+        return SqlBuilder.pagingQuerySql(sql, dbType);
+	}
 }

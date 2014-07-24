@@ -36,10 +36,11 @@ public class SqlBuilder {
 	 * @throws Exception
 	 */
 	public static String pagingQuerySql(String sql, DatabaseCategory dbType) throws Exception{
-		Select select = (Select) parserManager.parse(new StringReader(sql));
+		Select select = (Select) parserManager.parse(new StringReader(sql.replace("@", ":")));
 		PlainSelect plain = (PlainSelect)select.getSelectBody();
+		String result = "";
 		if(dbType == DatabaseCategory.MySql){	
-			return plain.toString() + mysqlPageClausePattern;
+			result = plain.toString() + mysqlPageClausePattern;
 		}else if(dbType == DatabaseCategory.SqlServer){		
 			List<OrderByElement> orderbys = plain.getOrderByElements();
 			List<SelectItem> selectitems = plain.getSelectItems();
@@ -54,16 +55,17 @@ public class SqlBuilder {
 			String cetWrap = "WITH CET AS (" + plain.toString() + ")";
 			
 			selectitems.remove(newItem);
-			return cetWrap + " SELECT " + StringUtils.join(selectitems, " ") + " FROM CET WHERE " + sqlserverPageClausePattern;
-			
+			result = cetWrap + " SELECT " + StringUtils.join(selectitems, " ") + " FROM CET WHERE " + sqlserverPageClausePattern;
 		}else{
 			throw new Exception("Unknow database category.");
 		}
+		
+		return result.replace(":", "@");
 	}
 	
 	
 	public static void main(String[] args) throws Exception{
-		String sql = "SELECT CityName, COUNT(CityName) AS count FROM [HHProductDB].[dbo].[City] Group by CityName Order by count";
+		String sql = "SELECT Birth,Name,Age,Telephone,PartmentID,Gender,Address,ID,space FROM Person WHERE  Age > @Age order by Name";
 		String cet = pagingQuerySql(sql, DatabaseCategory.SqlServer);
 		
 		System.out.println(cet);

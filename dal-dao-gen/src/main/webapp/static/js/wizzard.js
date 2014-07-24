@@ -309,6 +309,10 @@
         $(".step2-3").show();
     };
 
+    var step2_1 = function(){
+        window.ajaxutil.post_task();
+    };
+
     var step2_2 = function(record,current){
         if ($("#tables").val() == "") {
             $("#error_msg").text("请选择一个表！");
@@ -512,7 +516,7 @@
             }
         }
 
-        if (htmls.length == 0) {
+        if (htmls.length==0 && $("#auto_sql_pagination").is(":checked")==false) {
             window.ajaxutil.post_task();
             return;
         }
@@ -528,6 +532,10 @@
         current.hide();
         $(".step2-2-2").show();
 //        window.ajaxutil.post_task();
+    };
+
+    var step2_2_2 = function(){
+        window.ajaxutil.post_task();
     };
 
     var step2_3 = function(record,current){
@@ -583,7 +591,7 @@
             }
         }
 
-        if (htmls.length == 0) {
+        if (htmls.length==0 && $("#free_sql_pagination").is(":checked")==false) {
             window.ajaxutil.post_task();
             return;
         }
@@ -608,6 +616,10 @@
 
         current.hide();
         $(".step2-3-1").show();
+    };
+
+    var step2_3_1 = function(){
+        window.ajaxutil.post_task();
     };
 
     wizzard.prototype = {
@@ -643,24 +655,18 @@
             //向导首先显示所有数据库服务器，点击下一步后，获取此服务器所有的数据库列表
             if (current.hasClass("step1")) {
                 step1(record, current);
-            }
-            else if (current.hasClass("step2-1")) {
-                window.ajaxutil.post_task();
-            }
-            else if (current.hasClass("step2-2")) {
+            } else if (current.hasClass("step2-1")) {
+                step2_1();
+            } else if (current.hasClass("step2-2")) {
                 step2_2(record, current);
-            }
-            else if (current.hasClass("step2-2-1")) {
+            } else if (current.hasClass("step2-2-1")) {
                 step2_2_1(record, current);
-            }
-            else if (current.hasClass("step2-2-2")) {
-                window.ajaxutil.post_task();
-            }
-            else if (current.hasClass("step2-3")) {
+            } else if (current.hasClass("step2-2-2")) {
+                step2_2_2();
+            } else if (current.hasClass("step2-3")) {
                 step2_3(record, current);
-            }
-            else if (current.hasClass("step2-3-1")) {
-                window.ajaxutil.post_task();
+            } else if (current.hasClass("step2-3-1")) {
+                step2_3_1();
             }
         },
         previous: function (current) {

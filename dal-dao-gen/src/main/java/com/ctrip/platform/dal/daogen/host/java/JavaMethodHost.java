@@ -10,6 +10,7 @@ import org.apache.commons.lang.WordUtils;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
+import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 
 public class JavaMethodHost {
@@ -214,7 +215,7 @@ public class JavaMethodHost {
 	
 	public String getPagingSql(DatabaseCategory dbType) 
 			throws Exception{
-        return SqlBuilder.pagingQuerySql(sql, dbType);
+        return SqlBuilder.pagingQuerySql(sql, dbType, CurrentLanguage.Java);
 	}
 	
 	public boolean hasParameters(){

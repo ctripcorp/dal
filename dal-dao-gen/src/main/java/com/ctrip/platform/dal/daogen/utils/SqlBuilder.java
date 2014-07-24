@@ -14,11 +14,14 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.lang.StringUtils;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 
 public class SqlBuilder {
 	
 	private static final String mysqlPageClausePattern = " limit %s, %s";
+	private static final String mysqlCSPageClausePattern = " limit {0}, {1}";
 	private static final String sqlserverPageClausePattern = " rownum BETWEEN %s AND %s";
+	private static final String sqlserverCSPageClausePattern = " rownum BETWEEN {0} AND {1}";
 	
 	private static CCJSqlParserManager parserManager = new CCJSqlParserManager();
 	
@@ -35,12 +38,13 @@ public class SqlBuilder {
 	 * 		Re-build SQL which contains limit if the database type is MYSQL, CET wrapped if database type is SQL Server.
 	 * @throws Exception
 	 */
-	public static String pagingQuerySql(String sql, DatabaseCategory dbType) throws Exception{
+	public static String pagingQuerySql(String sql, DatabaseCategory dbType, CurrentLanguage lang) throws Exception{
 		Select select = (Select) parserManager.parse(new StringReader(sql.replace("@", ":")));
 		PlainSelect plain = (PlainSelect)select.getSelectBody();
 		String result = "";
 		if(dbType == DatabaseCategory.MySql){	
-			result = plain.toString() + mysqlPageClausePattern;
+			result = plain.toString() + 
+					(lang == CurrentLanguage.Java ? mysqlPageClausePattern : mysqlCSPageClausePattern);
 		}else if(dbType == DatabaseCategory.SqlServer){		
 			List<OrderByElement> orderbys = plain.getOrderByElements();
 			List<SelectItem> selectitems = plain.getSelectItems();
@@ -55,7 +59,8 @@ public class SqlBuilder {
 			String cetWrap = "WITH CET AS (" + plain.toString() + ")";
 			
 			selectitems.remove(newItem);
-			result = cetWrap + " SELECT " + StringUtils.join(selectitems, ", ") + " FROM CET WHERE " + sqlserverPageClausePattern;
+			result = cetWrap + " SELECT " + StringUtils.join(selectitems, ", ") + " FROM CET WHERE " + 
+			(lang == CurrentLanguage.Java ? sqlserverPageClausePattern : sqlserverCSPageClausePattern);
 		}else{
 			throw new Exception("Unknow database category.");
 		}
@@ -66,7 +71,7 @@ public class SqlBuilder {
 	
 	public static void main(String[] args) throws Exception{
 		String sql = "SELECT Birth,Name,Age,Telephone,PartmentID,Gender,Address,ID,space FROM Person WHERE  Age > @Age order by Name";
-		String cet = pagingQuerySql(sql, DatabaseCategory.SqlServer);
+		String cet = pagingQuerySql(sql, DatabaseCategory.SqlServer, CurrentLanguage.Java);
 		
 		System.out.println(cet);
 	}

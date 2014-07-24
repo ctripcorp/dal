@@ -304,7 +304,7 @@
 	                     <div class="row-fluid">
 	                        <div class="control-group">
 	                           <label class="control-label popup_label">选择字段：</label>
-	                           <select id="fields" multiple="multiple" class="popup_text" style="width:440px;">
+	                           <select id="fields" multiple="multiple" class="popup_text" style="width:434px;">
 	                           </select>
 	                        </div>
 	                     </div>
@@ -329,17 +329,31 @@
 	                              <option value='7'>Like</option>
 	                              <option value='8'>In</option>
 	                           </select>
-	                           <input id="add_condition" type="button" class="span2 btn btn-primary popup_text" value="添加">
+	                           <input id="add_condition" type="button" class="span2 btn btn-primary popup_text input-sm" value="添加">
 	                        </div>
 	                     </div>
 	                     <br>
 	                     <div class="row-fluid">
 	                           <select class="span10" id="selected_condition" multiple="multiple" style="height:120px;">
 	                           </select>
-	                           <input id="del_condition" type="button" class="span2 btn btn-danger popup_text" value="删除">
+	                           <input id="del_condition" type="button" class="span2 btn btn-danger popup_text input-sm" value="删除">
 	                     </div>
 	                  </div>
 	                  <br>
+	                  <div id="orderby" class="step2-2-1-2">
+	                     <div class="row-fluid">
+	                        <div class="control-group">
+	                           <label class="control-label popup_label">Order by：</label>
+	                           <select id="orderby_field" class="span5">
+	                              <option value='-1'>--请选择--</option>
+	                           </select>
+	                           <select id="orderby_sort" class='span3'>
+	                              <option value='asc'>ASC</option>
+	                              <option value='desc'>DESC</option>
+	                           </select>
+	                        </div>
+	                     </div>
+	                  </div>
 	                  <div class="row-fluid" id="auto_sql_scalarTypeDiv">
 	                  		<div class="control-group">
 	                           <label class="control-label popup_label">返回形式：</label>
@@ -348,7 +362,7 @@
 	                              <option value='Single'>唯一的(Single)</option>
 	                              <option value='First'>第一个(First)</option>
 	                           </select>	
-	                           <label class="popup_label" style="padding-left:20px">
+	                           <label class="popup_label" style="padding-left:15px">
 	                           	   <input id="auto_sql_pagination" type="checkbox" checked="true">
 	                           	     增加分页方法
 	                           </label>                           
@@ -361,7 +375,7 @@
 	                  </div>
 	               </div>
                	  <div class="steps step2-2-2 row-fluid" from="">
-                     <div class="row-fluid">
+                     <div class="row-fluid" id="param_list_auto_div">
                            <label class="control-label popup_label">填写条件参数名</label>
                      </div>  
                      <div id="param_list_auto" class="row-fluid input-sm">      
@@ -415,7 +429,7 @@
                      </div>
                   </div>
                   <div class="steps step2-3-1 row-fluid" from="">
-                     <div class="row-fluid">
+                     <div class="row-fluid" id="param_list_free_div">
                            <label class="control-label popup_label">填写参数名/参数Index，并选择数据类型</label>
                      </div>  
                      <div id="param_list" class="row-fluid input-sm">      

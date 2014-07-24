@@ -43,26 +43,36 @@
                 }
             });
             if ($("#crud_option").val() == "select") {
-                if("java"==$("#sql_style").val() && "select"==$("#crud_option").val()){
+                var select_sql_builder = '';
+                if("java"==$("#sql_style").val()){
                     if (formatedConditions.length > 0) {
-//                        ace.edit("sql_builder").setValue(sprintf("SELECT * FROM %s WHERE %s",
+                        select_sql_builder = sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
+                            $("#tables").val(), formatedConditions.join(" AND "));
+//                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
 //                            $("#tables").val(), formatedConditions.join(" AND ")));
-                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
-                            $("#tables").val(), formatedConditions.join(" AND ")));
                     } else {
-//                        ace.edit("sql_builder").setValue(sprintf("SELECT * FROM %s", $("#tables").val()));
-                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
-                            $("#tables").val()));
+                        select_sql_builder = sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
+                            $("#tables").val());
+//                            ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
+//                            $("#tables").val()));
                     }
                 }else{
                     if (formatedConditions.length > 0) {
-                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
-                            $("#tables").val(), formatedConditions.join(" AND ")));
+                        select_sql_builder = sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
+                            $("#tables").val(), formatedConditions.join(" AND "));
+//                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
+//                            $("#tables").val(), formatedConditions.join(" AND ")));
                     } else {
-                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
-                            $("#tables").val()));
+                        select_sql_builder = sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
+                            $("#tables").val());
+//                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
+//                            $("#tables").val()));
                     }
                 }
+                if($("#orderby_field").val() != '-1'){
+                    select_sql_builder = sprintf("%s ORDER BY %s %s",select_sql_builder,$("#orderby_field").val(),$("#orderby_sort").val());
+                }
+                ace.edit("sql_builder").setValue(select_sql_builder);
             } else if ($("#crud_option").val() == "insert") {
 
                 var placeHodler = [];
@@ -76,8 +86,6 @@
                 ace.edit("sql_builder").setValue(sprintf("INSERT INTO %s (%s) VALUES (%s)",
                     $("#tables").val(), $('#fields').multipleSelect('getSelects').join(","),
                     placeHodler.join(",")));
-
-
             } else if ($("#crud_option").val() == "update") {
                 var placeHodler = [];
                 $.each($('#fields').multipleSelect('getSelects'), function (index, value) {

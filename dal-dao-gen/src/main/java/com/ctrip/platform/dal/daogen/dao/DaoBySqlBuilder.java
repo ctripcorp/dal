@@ -43,7 +43,7 @@ public class DaoBySqlBuilder {
 		return this.jdbcTemplate
 				.query("select id, project_id, db_name,table_name,class_name,method_name,sql_style,"
 						+ "crud_type,fields,where_condition,sql_content,generated,version,update_user_no,"
-						+ "update_time,comment,scalarType,pagination from task_auto",
+						+ "update_time,comment,scalarType,pagination,orderby from task_auto",
 						new RowMapper<GenTaskBySqlBuilder>() {
 							public GenTaskBySqlBuilder mapRow(ResultSet rs,
 									int rowNum) throws SQLException {
@@ -58,7 +58,8 @@ public class DaoBySqlBuilder {
 		return this.jdbcTemplate
 				.query("select id, project_id,db_name, table_name,class_name,method_name,sql_style,"
 						+ "crud_type,fields,where_condition,sql_content,generated,version,update_user_no,"
-						+ "update_time,comment,scalarType,pagination from task_auto where project_id=?",
+						+ "update_time,comment,scalarType,pagination,orderby "
+						+ " from task_auto where project_id=?",
 						new Object[] { iD },
 						new RowMapper<GenTaskBySqlBuilder>() {
 							public GenTaskBySqlBuilder mapRow(ResultSet rs,
@@ -75,7 +76,8 @@ public class DaoBySqlBuilder {
 		this.jdbcTemplate
 				.query("select  id, project_id, db_name,table_name,class_name,method_name,sql_style,"
 						+ "crud_type,fields,where_condition,sql_content,generated,version,update_user_no,"
-						+ "update_time,comment,scalarType,pagination from task_auto where project_id=?",
+						+ "update_time,comment,scalarType,pagination,orderby "
+						+ " from task_auto where project_id=?",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -99,7 +101,7 @@ public class DaoBySqlBuilder {
 		this.jdbcTemplate
 				.query("select  id, project_id, db_name,table_name,class_name,method_name,sql_style,"
 						+ "crud_type,fields,where_condition,sql_content,generated,version,update_user_no,"
-						+ "update_time,comment,scalarType,pagination from task_auto  "
+						+ "update_time,comment,scalarType,pagination,orderby from task_auto  "
 						+ " where project_id=? and generated=false",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
@@ -120,8 +122,8 @@ public class DaoBySqlBuilder {
 
 		return this.jdbcTemplate
 				.update("insert into task_auto "
-						+ "( project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment,scalarType,pagination)"
-						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,? as p13,? as p14,? as p15,? as p16,? as p17) tmp where not exists "
+						+ "( project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,generated,version,update_user_no,update_time,comment,scalarType,pagination,orderby)"
+						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,? as p13,? as p14,? as p15,? as p16,? as p17,? as p18) tmp where not exists "
 						+ "(select 1 from task_auto where project_id=? and db_name=? and table_name=? and method_name=? limit 1)",
 						task.getProject_id(),
 						task.getDatabaseSetName(), task.getTable_name(),
@@ -135,6 +137,7 @@ public class DaoBySqlBuilder {
 						task.getComment(),
 						task.getScalarType(),
 						task.isPagination(),
+						task.getOrderby(),
 						task.getProject_id(),
 						task.getDatabaseSetName(), 
 						task.getTable_name(), 
@@ -166,7 +169,7 @@ public class DaoBySqlBuilder {
 				.update("update task_auto set  project_id=?,db_name=?, table_name=?, class_name=?,method_name=?,"
 						+ "sql_style=?,crud_type=?,fields=?,where_condition=?,sql_content=?,generated=?,"
 						+ "version=version+1,update_user_no=?,update_time=?,comment=?,scalarType=?,"
-						+ "pagination=? where id=? and version = ?",
+						+ "pagination=?,orderby=? where id=? and version = ?",
 						task.getProject_id(),
 						task.getDatabaseSetName(),
 						task.getTable_name(),
@@ -179,6 +182,7 @@ public class DaoBySqlBuilder {
 						task.getComment(),
 						task.getScalarType(),
 						task.isPagination(),
+						task.getOrderby(),
 						task.getId(), 
 						task.getVersion());
 

@@ -2,6 +2,8 @@ package com.ctrip.platform.dal.daogen.host.csharp;
 
 import java.util.List;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+
 public class CSharpFreeSqlHost {
 
 	private String nameSpace;
@@ -11,6 +13,8 @@ public class CSharpFreeSqlHost {
 	private String className;
 	
 	private List<CSharpMethodHost> methods;
+	
+	private DatabaseCategory databaseCategory;
 
 	public String getNameSpace() {
 		return nameSpace;
@@ -42,6 +46,14 @@ public class CSharpFreeSqlHost {
 
 	public void setMethods(List<CSharpMethodHost> methods) {
 		this.methods = methods;
+	}
+
+	public DatabaseCategory getDatabaseCategory() {
+		return databaseCategory;
+	}
+
+	public void setDatabaseCategory(DatabaseCategory databaseCategory) {
+		this.databaseCategory = databaseCategory;
 	}
 	
 }

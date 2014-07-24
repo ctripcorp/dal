@@ -175,6 +175,7 @@ public class AbstractCSharpDataPreparer{
 				index ++;
 	    	}
 			method.setSql(temp);
+			method.setPaging(builder.isPagination());
 			
 			List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
 			if (method.getCrud_type().equals("select")
@@ -285,4 +286,12 @@ public class AbstractCSharpDataPreparer{
 		return WordUtils.capitalize(result.toString());
 	}
 
+	protected DatabaseCategory getDatabaseCategory(String dbName) throws Exception {
+		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
+		String dbType = DbUtils.getDbType(dbName);
+		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
+			dbCategory = DatabaseCategory.MySql;
+		}
+		return dbCategory;
+	}
 }

@@ -301,7 +301,7 @@ public final class DalTableDao<T> {
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
 			T... daoPojos) throws SQLException {
-		DalShardingHelper.reqirePredefinedSharding(parser.getTableName(), hints, "combinedInsert requires predefined shard! Use crossShardCombinedInsert instead.");
+		DalShardingHelper.reqirePredefinedSharding(getLogicDbName(), hints, "combinedInsert requires predefined shard! Use crossShardCombinedInsert instead.");
 		DalWatcher.begin();
 		if (null == daoPojos || daoPojos.length < 1)
 			return 0;
@@ -356,7 +356,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
-		DalShardingHelper.reqirePredefinedSharding(parser.getTableName(), hints, "batchInsert requires predefined shard! Use crossShardBatchInsert instead.");
+		DalShardingHelper.reqirePredefinedSharding(getLogicDbName(), hints, "batchInsert requires predefined shard! Use crossShardBatchInsert instead.");
 		DalWatcher.begin();
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		int i = 0;
@@ -409,7 +409,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
-		DalShardingHelper.reqirePredefinedSharding(parser.getTableName(), hints, "batchDelete requires predefined shard! Use crossShardBatchDelete instead.");
+		DalShardingHelper.reqirePredefinedSharding(getLogicDbName(), hints, "batchDelete requires predefined shard! Use crossShardBatchDelete instead.");
 		DalWatcher.begin();
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		int i = 0;
@@ -565,7 +565,6 @@ public final class DalTableDao<T> {
 		return fields;
 	}
 
-	
 	public Map<String, ?> filterAutoIncrementPrimaryFields(Map<String, ?> fields){
 		if(parser.isAutoIncrement())
 			fields.remove(parser.getPrimaryKeyNames()[0]);
@@ -580,6 +579,10 @@ public final class DalTableDao<T> {
 	public String buildCallSql(String spName, int paramCount) {
 		return String.format(TMPL_CALL, spName,
 				combine(PLACE_HOLDER, paramCount, COLUMN_SEPARATOR));
+	}
+	
+	private String getLogicDbName() {
+		return parser.getDatabaseName();
 	}
 
 	private boolean isPrimaryKey(String fieldName){

@@ -721,9 +721,10 @@ public class DbUtils {
 	 * @param sql
 	 * @param params
 	 * @return
+	 * @throws Exception 
 	 */
 	public static List<AbstractParameterHost> testAQuerySql(String dbName, String sql,
-			String params,CurrentLanguage language , boolean justTest) {
+			String params,CurrentLanguage language , boolean justTest) throws Exception {
 		String[] parameters = params.split(";");
 
 		Connection connection = null;
@@ -800,43 +801,39 @@ public class DbUtils {
 			
 			
 		} catch (SQLException e) {
-			log.error(String.format("test query sql error: [dbName=%s;sql=%s;language=%s]", 
-					dbName, sql, language), e);
+			throw e;
 		} catch (Exception e) {
-			log.error(String.format("test query sql error: [dbName=%s;sql=%s;language=%s]", 
-					dbName, sql, language), e);
+			throw e;
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
 		}
 		
-		return null;
-
 	}
 	
 	public static Object mockATest(int javaSqlTypes) {
 		switch (javaSqlTypes) {
-		case java.sql.Types.BIT:
-			return true;
-		case java.sql.Types.TINYINT:
-		case java.sql.Types.SMALLINT:
-		case java.sql.Types.INTEGER:
-		case java.sql.Types.BIGINT:
-			return 1;
-		case java.sql.Types.REAL:
-		case java.sql.Types.DOUBLE:
-		case java.sql.Types.DECIMAL:
-			return 1.0;
-		case java.sql.Types.CHAR:
-			return 't';
-		case java.sql.Types.DATE:
-			return "2012-01-01";
-		case java.sql.Types.TIME:
-			return "10:00:00";
-		case java.sql.Types.TIMESTAMP:
-			return "2012-01-01 10:00:00";
-		default:
-			return "test";
+			case java.sql.Types.BIT:
+				return true;
+			case java.sql.Types.TINYINT:
+			case java.sql.Types.SMALLINT:
+			case java.sql.Types.INTEGER:
+			case java.sql.Types.BIGINT:
+				return 1;
+			case java.sql.Types.REAL:
+			case java.sql.Types.DOUBLE:
+			case java.sql.Types.DECIMAL:
+				return 1.0;
+			case java.sql.Types.CHAR:
+				return 't';
+			case java.sql.Types.DATE:
+				return "2012-01-01";
+			case java.sql.Types.TIME:
+				return "10:00:00";
+			case java.sql.Types.TIMESTAMP:
+				return "2012-01-01 10:00:00";
+			default:
+				return "test";
 		}
 	}
 

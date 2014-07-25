@@ -33,6 +33,9 @@
     $.extend({
         isEmpty:function(str){
             return str==null || str=='';
+        },
+        showMsg:function(id,msg){
+            $(id).html(msg);
         }
     });
 })(jQuery);

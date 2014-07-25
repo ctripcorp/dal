@@ -9,6 +9,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.jasig.cas.client.util.AssertionHolder;
@@ -123,11 +124,35 @@ public class GenTaskByFreeSqlResource {
 			status.setInfo(pagingSQL);
 		} catch (Exception e) {
 			status = Status.ERROR;
+			status.setInfo(e.getMessage()==null?e.getCause().getMessage():e.getMessage());
+			return status;
+		}
+		
+		return status;
+	}
+	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("test_sql")
+	public Status verifyQuery(@FormParam("db_name") String set_name,
+			@FormParam("sql_content") String sql,
+			@FormParam("params") String params) {
+
+		Status status = Status.OK;
+		
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
+		String dbName = databaseSetEntry.getConnectionString();
+		
+		try {
+			DbUtils.testAQuerySql(dbName, sql, params, CurrentLanguage.CSharp, true);
+		} catch (Exception e) {
+			status = Status.ERROR;
 			status.setInfo(e.getMessage());
 			return status;
 		}
 		
 		return status;
+
 	}
 
 }

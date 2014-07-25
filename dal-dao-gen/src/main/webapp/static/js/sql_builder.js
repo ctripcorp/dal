@@ -110,12 +110,17 @@
             }
         },
         buildPagingSQL : function(callable){
-            cblock($("body"));
             var postData = {};
             postData["db_name"] = $("#databases").val();
             if ($("#gen_style").val() == "auto") { //构建SQL（生成的代码绑定到模板）
                 postData["sql_style"] = $("#sql_style").val();
                 postData["sql_content"] = ace.edit("sql_builder").getValue();
+                if($("#auto_sql_pagination").is(":checked")==false){
+                    showSQL("step2_2_2_sql_editor",postData["sql_content"]);
+                    callable();
+                    return;
+                }
+                cblock($("body"));
                 $.post("/rest/task/auto/buildPagingSQL", postData, function (data) {
                     if (data.code == "OK") {
                         showSQL("step2_2_2_sql_editor",data.info);
@@ -130,6 +135,12 @@
                     });
             } else if ($("#gen_style").val() == "sql") {//复杂查询（额外生成实体类）
                 postData["sql_content"] = ace.edit("sql_editor").getValue();
+                if($("#free_sql_pagination").is(":checked")==false){
+                    showSQL("step2_3_1_sql_editor",postData["sql_content"]);
+                    callable();
+                    return;
+                }
+                cblock($("body"));
                 $.post("/rest/task/sql/buildPagingSQL", postData, function (data) {
                     if (data.code == "OK") {
                         showSQL("step2_3_1_sql_editor",data.info);

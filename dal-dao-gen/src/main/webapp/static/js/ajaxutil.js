@@ -110,24 +110,23 @@
                 });
                 postData["params"] = paramList.join(";");
 
-                $.post("/rest/db/test_sql", postData).done(function (data) {
+                $.post("/rest/task/sql/test_sql", postData).done(function (data) {
                     if (data.code == "OK") {
                         $.post("/rest/task/sql", postData,function (data) {
                             if (data.code == "OK") {
                                 $("#page1").modal('hide');
                                 w2ui["grid_toolbar"].click('refreshDAO', null);
                                 if ($("#gen_on_save").is(":checked")) {
-                                    //window.ajaxutil.generate_code($("#gen_language").val());
                                     $("#generateCode").modal({"backdrop": "static"});
                                 }
                             } else {
-                                alert(data.info);
+                                $.showMsg("error_msg","SQL测试执行异常，请检查sql及对应参数！"+data.info);
                             }
                         }).fail(function (data) {
                                 alert("执行异常，请检查sql及对应参数！");
                             });
                     } else {
-                        $("#error_msg").text("执行异常，请检查sql及对应参数！");
+                        $.showMsg("error_msg","SQL测试执行异常，请检查sql及对应参数！"+data.info);
                     }
                 }).fail(function (data) {
                         alert("执行异常，请检查sql及对应参数！");

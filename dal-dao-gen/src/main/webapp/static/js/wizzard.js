@@ -526,11 +526,6 @@
             }
         }
 
-        if (htmls.length==0 && $("#auto_sql_pagination").is(":checked")==false) {
-            window.ajaxutil.post_task();
-            return;
-        }
-
         if(htmls.length==0){
             $("#param_list_auto_div").hide();
         }else{
@@ -543,6 +538,7 @@
         }
 
         window.sql_builder.buildPagingSQL(function(){
+            $("#error_msg").html(" ");
             current.hide();
             $(".step2-2-2").show();
         });
@@ -606,11 +602,6 @@
             }
         }
 
-        if (htmls.length==0 && $("#free_sql_pagination").is(":checked")==false) {
-            window.ajaxutil.post_task();
-            return;
-        }
-
         if(htmls.length==0){
             $("#param_list_free_div").hide();
         }else{
@@ -629,6 +620,7 @@
         }
 
         window.sql_builder.buildPagingSQL(function(){
+            $("#error_msg").html(" ");
             current.hide();
             $(".step2-3-1").show();
         });

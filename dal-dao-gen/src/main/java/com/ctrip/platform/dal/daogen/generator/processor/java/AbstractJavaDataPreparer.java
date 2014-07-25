@@ -66,7 +66,7 @@ public class AbstractJavaDataPreparer{
 		}
 		JavaTableHost tableHost = new JavaTableHost();
 		tableHost.setPackageName(ctx.getNamespace());
-		tableHost.setDatabaseCategory(getDatabaseCategory(tableViewSp));
+		tableHost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getDb_name()));
 		tableHost.setDbName(tableViewSp.getDatabaseSetName());
 		tableHost.setTableName(table);
 		tableHost.setPojoClassName(getPojoClassName(tableViewSp.getPrefix(),
@@ -124,10 +124,9 @@ public class AbstractJavaDataPreparer{
 		return tableHost;
 	}
 	
-	protected DatabaseCategory getDatabaseCategory(
-			GenTaskByTableViewSp tableViewSp) throws Exception {
+	protected DatabaseCategory getDatabaseCategory(String dbName) throws Exception {
 		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
-		String dbType = DbUtils.getDbType(tableViewSp.getDb_name());
+		String dbType = DbUtils.getDbType(dbName);
 		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 			dbCategory = DatabaseCategory.MySql;
 		}
@@ -190,6 +189,7 @@ public class AbstractJavaDataPreparer{
 			method.setName(builder.getMethod_name());
 			method.setSql(builder.getSql_content());
 			method.setScalarType(builder.getScalarType());
+			method.setPaging(builder.isPagination());
 			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
 			// Only have condition clause
 			if (method.getCrud_type().equals("select")

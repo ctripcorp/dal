@@ -11,38 +11,27 @@ import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
 public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
 	private int id;
-	
 	private int project_id;
-	
 	private String db_name;
-	
 	private String databaseSetName;
-	
 	private String class_name;
-	
 	private String pojo_name;
-	
 	private String method_name;
-	
 	private String crud_type;
-	
 	private String sql_content;
-	
 	private String parameters;
-	
 	private boolean generated;
-	
 	private int version;
-	
 	private String update_user_no;
 	private Timestamp update_time;
 	private String comment;
-	
 	//可取值：Single、First、List，表示select返回的结果类型
 	private String scalarType;
 	//实体类型，取值：EntityType、SimpleType，分别表示实体类型、简单类型
 	//若取值为SimpleType，则pojo_name的值为：简单类型
 	private String pojoType;
+	//是否增加分页方法，true：增加
+	private boolean pagination;
 	
 	public static GenTaskByFreeSql visitRow(ResultSet rs) throws SQLException {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
@@ -66,6 +55,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		task.setComment(rs.getString(14));
 		task.setScalarType(rs.getString("scalarType"));
 		task.setPojoType(rs.getString("pojoType"));
+		task.setPagination(rs.getBoolean("pagination"));
 
 		return task;
 	}
@@ -220,6 +210,13 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	public void setPojoType(String pojoType) {
 		this.pojoType = pojoType;
 	}
-	
+
+	public boolean isPagination() {
+		return pagination;
+	}
+
+	public void setPagination(boolean pagination) {
+		this.pagination = pagination;
+	}
 
 }

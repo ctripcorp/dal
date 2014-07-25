@@ -8,7 +8,10 @@ import java.util.TreeSet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
+import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
+import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 
 public class JavaMethodHost {
 	private String crud_type;
@@ -24,6 +27,8 @@ public class JavaMethodHost {
 	
 	private String scalarType;
 	private String pojoType;
+	
+	private boolean paging;
 	
 	private List<String> inClauses = new ArrayList<String>();
 
@@ -128,6 +133,14 @@ public class JavaMethodHost {
 		return StringUtils.join(this.inClauses, ",");
 	}
 	
+	public boolean isPaging() {
+		return paging;
+	}
+
+	public void setPaging(boolean paging) {
+		this.paging = paging;
+	}
+
 	public String getParameterNames() {
 		String[] params = new String[parameters.size()];
 		int i = 0;
@@ -149,17 +162,19 @@ public class JavaMethodHost {
 	}
 	
 	public String getParameterDeclaration() {
-		String[] paramsDeclaration = new String[parameters.size()];
-		int i = 0;
+		List<String> paramsDeclaration = new ArrayList<String>();
 		for(JavaParameterHost parameter: parameters) {
 			if(ConditionType.In == parameter.getConditionType()){
-				paramsDeclaration[i++] = String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias());
+				paramsDeclaration.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
 				this.inClauses.add(parameter.getAlias());
 			}
 			else
-				paramsDeclaration[i++] = String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias());
+				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
 		}
-		
+		if(this.paging){
+			paramsDeclaration.add("int pageNo");
+			paramsDeclaration.add("int pageSize");
+		}
 		return StringUtils.join(paramsDeclaration, ", ");
 	}
 
@@ -196,6 +211,11 @@ public class JavaMethodHost {
 				params.add(parameter.getAlias() + ": where clause");
 		}
 		return params;
+	}
+	
+	public String getPagingSql(DatabaseCategory dbType) 
+			throws Exception{
+        return SqlBuilder.pagingQuerySql(sql, dbType, CurrentLanguage.Java);
 	}
 	
 	public boolean hasParameters(){

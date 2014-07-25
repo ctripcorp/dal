@@ -42,7 +42,7 @@ public class CSharpCodeGeneratorOfOthersProcessor implements Processor {
 				context,
 				String.format("%s/Config/Dal.config.tpl",
 						csMavenLikeDir.getAbsolutePath()),
-				"templates/csharp/DalConfig.cs.tpl");
+				"templates/csharp/Dal.config.cs.tpl");
 		
 		GenUtils.mergeVelocityContext(
 				context,

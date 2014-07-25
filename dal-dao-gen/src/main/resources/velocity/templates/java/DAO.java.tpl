@@ -35,10 +35,12 @@ public class ${host.getPojoClassName()}Dao {
 	private DalScalarExtractor extractor = new DalScalarExtractor();
 	private DalRowMapperExtractor<${host.getPojoClassName()}> rowextractor = null;
 	private DalTableDao<${host.getPojoClassName()}> client;
+	private DalQueryDao queryDao = null;
 	private DalClient baseClient;
 
 	public ${host.getPojoClassName()}Dao() {
 		this.client = new DalTableDao<${host.getPojoClassName()}>(parser);
+		thhis.queryDao = new DalQueryDao(DATA_BASE);
 		this.rowextractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(parser); 
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}
@@ -344,7 +346,12 @@ public class ${host.getPojoClassName()}Dao {
 ##简单类型并且返回值是List
 #if($method.isSampleType() && $method.isReturnList())
 	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+#if($method.isPaging())
+		String sqlPattern = "${method.getPagingSql($host.getDatabaseCategory())}";
+		String sql = String.format(sqlPattern, (pageNo - 1) * pageSize + 1, pageSize * pageNo);
+#else
 		String sql = "${method.getSql()}";
+#end
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
 #if($method.hasParameters())
@@ -389,7 +396,12 @@ public class ${host.getPojoClassName()}Dao {
 ##实体类型并且返回值为List
 #if($method.isReturnList() && !$method.isSampleType())
 	public List<${host.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
+#if($method.isPaging())
+		String sqlPattern = "${method.getPagingSql($host.getDatabaseCategory())}";
+		String sql = String.format(sqlPattern, (pageNo - 1) * pageSize + 1, pageSize * pageNo);
+#else
 		String sql = "${method.getSql()}";
+#end
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
 #if($method.hasParameters())

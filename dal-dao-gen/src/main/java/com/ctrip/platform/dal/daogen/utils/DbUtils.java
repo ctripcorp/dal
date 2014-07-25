@@ -721,9 +721,10 @@ public class DbUtils {
 	 * @param sql
 	 * @param params
 	 * @return
+	 * @throws Exception 
 	 */
 	public static List<AbstractParameterHost> testAQuerySql(String dbName, String sql,
-			String params,CurrentLanguage language , boolean justTest) {
+			String params,CurrentLanguage language , boolean justTest) throws Exception {
 		String[] parameters = params.split(";");
 
 		Connection connection = null;
@@ -800,58 +801,54 @@ public class DbUtils {
 			
 			
 		} catch (SQLException e) {
-			log.error(String.format("test query sql error: [dbName=%s;sql=%s;language=%s]", 
-					dbName, sql, language), e);
+			throw e;
 		} catch (Exception e) {
-			log.error(String.format("test query sql error: [dbName=%s;sql=%s;language=%s]", 
-					dbName, sql, language), e);
+			throw e;
 		} finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeConnection(connection);
 		}
 		
-		return null;
-
 	}
 	
 	public static Object mockATest(int javaSqlTypes) {
 		switch (javaSqlTypes) {
-		case java.sql.Types.BIT:
-			return true;
-		case java.sql.Types.TINYINT:
-		case java.sql.Types.SMALLINT:
-		case java.sql.Types.INTEGER:
-		case java.sql.Types.BIGINT:
-			return 1;
-		case java.sql.Types.REAL:
-		case java.sql.Types.DOUBLE:
-		case java.sql.Types.DECIMAL:
-			return 1.0;
-		case java.sql.Types.CHAR:
-			return 't';
-		case java.sql.Types.DATE:
-			return "2012-01-01";
-		case java.sql.Types.TIME:
-			return "10:00:00";
-		case java.sql.Types.TIMESTAMP:
-			return "2012-01-01 10:00:00";
-		default:
-			return "test";
+			case java.sql.Types.BIT:
+				return true;
+			case java.sql.Types.TINYINT:
+			case java.sql.Types.SMALLINT:
+			case java.sql.Types.INTEGER:
+			case java.sql.Types.BIGINT:
+				return 1;
+			case java.sql.Types.REAL:
+			case java.sql.Types.DOUBLE:
+			case java.sql.Types.DECIMAL:
+				return 1.0;
+			case java.sql.Types.CHAR:
+				return 't';
+			case java.sql.Types.DATE:
+				return "2012-01-01";
+			case java.sql.Types.TIME:
+				return "10:00:00";
+			case java.sql.Types.TIMESTAMP:
+				return "2012-01-01 10:00:00";
+			default:
+				return "test";
 		}
 	}
 
-	public static String getDbType(String dbName) throws Exception {
+	public static String getDbType(String allInOneName) throws Exception {
 
 		String dbType = null;
-		if (Consts.databaseType.containsKey(dbName)) {
-			dbType = Consts.databaseType.get(dbName);
+		if (Consts.databaseType.containsKey(allInOneName)) {
+			dbType = Consts.databaseType.get(allInOneName);
 		} else {
 			Connection connection = null;
 			try {
-				connection = DataSourceUtil.getConnection(dbName);
+				connection = DataSourceUtil.getConnection(allInOneName);
 
 				dbType = connection.getMetaData().getDatabaseProductName();
-				Consts.databaseType.put(dbName, dbType);
+				Consts.databaseType.put(allInOneName, dbType);
 
 			} catch (Exception ex) {
 //				log.error(String.format("get db type error: [dbName=%s]", dbName), ex);
@@ -861,6 +858,23 @@ public class DbUtils {
 			}
 		}
 		return dbType;
+	}
+	
+	public static DatabaseCategory getDatabaseCategory(String allInOneName)
+			throws Exception {
+
+		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
+
+		String dbType = DbUtils.getDbType(allInOneName);
+
+		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
+
+			dbCategory = DatabaseCategory.MySql;
+
+		}
+
+		return dbCategory;
+
 	}
 	
 	public static void main(String[] args){

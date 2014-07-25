@@ -9,15 +9,20 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
+import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 
 /**
  * 复杂查询（额外生成实体类）
@@ -49,7 +54,9 @@ public class GenTaskByFreeSqlResource {
 			@FormParam("version") int version,
 			@FormParam("action") String action,
 			@FormParam("comment") String comment,
-			@FormParam("scalarType") String scalarType) {
+			@FormParam("scalarType") String scalarType,
+			@FormParam("pagination") boolean pagination) {
+		
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 
 		if (action.equalsIgnoreCase("delete")) {
@@ -74,6 +81,8 @@ public class GenTaskByFreeSqlResource {
 			task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
 			task.setComment(comment);
 			task.setScalarType(scalarType);
+			task.setPagination(pagination);
+			
 			if("简单类型".equals(pojo_name)){
 				task.setPojoType("SimpleType");
 			}else{
@@ -100,6 +109,50 @@ public class GenTaskByFreeSqlResource {
 		}
 
 		return Status.OK;
+	}
+	
+	@POST
+	@Path("buildPagingSQL")
+	public Status buildPagingSQL(@FormParam("db_name") String db_set_name,//dbset name
+			@FormParam("sql_content") String sql_content){
+		Status status = Status.OK;
+		try {
+				
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
+			CurrentLanguage lang = sql_content.contains("@")?CurrentLanguage.Java:CurrentLanguage.CSharp;
+			String pagingSQL = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), lang);
+			status.setInfo(pagingSQL);
+		} catch (Exception e) {
+			status = Status.ERROR;
+			status.setInfo(e.getMessage()==null?e.getCause().getMessage():e.getMessage());
+			return status;
+		}
+		
+		return status;
+	}
+	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("test_sql")
+	public Status verifyQuery(@FormParam("db_name") String set_name,
+			@FormParam("sql_content") String sql,
+			@FormParam("params") String params) {
+
+		Status status = Status.OK;
+		
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
+		String dbName = databaseSetEntry.getConnectionString();
+		
+		try {
+			DbUtils.testAQuerySql(dbName, sql, params, CurrentLanguage.CSharp, true);
+		} catch (Exception e) {
+			status = Status.ERROR;
+			status.setInfo(e.getMessage());
+			return status;
+		}
+		
+		return status;
+
 	}
 
 }

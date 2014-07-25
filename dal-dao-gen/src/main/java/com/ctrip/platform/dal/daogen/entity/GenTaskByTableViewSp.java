@@ -9,34 +9,55 @@ import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
 public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	
 	private int id;
-	
 	private int project_id;
-	
 	private String db_name;
-	
 	private String databaseSetName;
-	
 	private String table_names;
-	
 	private String view_names;
-	
 	private String sp_names;
-
 	private String prefix;
-	
 	private String suffix;
-	
 	private boolean cud_by_sp;
-	
 	private boolean pagination;
-	
 	private boolean generated;
-	
 	private int version;
-	
 	private String update_user_no;
 	private Timestamp update_time;
 	private String comment;
+	
+	/**
+	 * 根据Resultset返回GenTaskByTableView实体对象
+	 * @param rs
+	 * @return
+	 * @throws SQLException
+	 */
+	public static GenTaskByTableViewSp visitRow(ResultSet rs) throws SQLException {
+		GenTaskByTableViewSp task = new GenTaskByTableViewSp();
+		task.setId(rs.getInt(1));
+		task.setProject_id(rs.getInt(2));
+		String databaseSet = rs.getString(3);
+		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
+		task.setDatabaseSetName(databaseSet);
+		task.setTable_names(rs.getString(4));
+		task.setView_names(rs.getString(5));
+		task.setSp_names(rs.getString(6));
+		task.setPrefix(rs.getString(7));
+		task.setSuffix(rs.getString(8));
+		task.setCud_by_sp(rs.getBoolean(9));
+		task.setPagination(rs.getBoolean(10));
+		task.setGenerated(rs.getBoolean(11));
+		task.setVersion(rs.getInt(12));
+		task.setUpdate_user_no(rs.getString(13));
+		task.setUpdate_time(rs.getTimestamp(14));
+		task.setComment(rs.getString(15));
+
+		return task;
+	}
+
+	@Override
+	public int compareTo(GenTaskByTableViewSp o) {
+		return this.getDb_name().compareTo(o.getDb_name());
+	}
 
 	public String getDatabaseSetName() {
 		return databaseSetName;
@@ -165,42 +186,6 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 
 	public void setComment(String comment) {
 		this.comment = comment;
-	}
-
-	/**
-	 * 根据Resultset返回GenTaskByTableView实体对象
-	 * @param rs
-	 * @return
-	 * @throws SQLException
-	 */
-	public static GenTaskByTableViewSp visitRow(ResultSet rs) throws SQLException {
-		GenTaskByTableViewSp task = new GenTaskByTableViewSp();
-		task.setId(rs.getInt(1));
-		task.setProject_id(rs.getInt(2));
-		
-		String databaseSet = rs.getString(3);
-		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
-		task.setDatabaseSetName(databaseSet);
-		
-		task.setTable_names(rs.getString(4));
-		task.setView_names(rs.getString(5));
-		task.setSp_names(rs.getString(6));
-		task.setPrefix(rs.getString(7));
-		task.setSuffix(rs.getString(8));
-		task.setCud_by_sp(rs.getBoolean(9));
-		task.setPagination(rs.getBoolean(10));
-		task.setGenerated(rs.getBoolean(11));
-		task.setVersion(rs.getInt(12));
-		task.setUpdate_user_no(rs.getString(13));
-		task.setUpdate_time(rs.getTimestamp(14));
-		task.setComment(rs.getString(15));
-
-		return task;
-	}
-
-	@Override
-	public int compareTo(GenTaskByTableViewSp o) {
-		return this.getDb_name().compareTo(o.getDb_name());
 	}
 
 }

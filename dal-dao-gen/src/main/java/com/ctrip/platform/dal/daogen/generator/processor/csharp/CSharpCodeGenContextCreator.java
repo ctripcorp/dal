@@ -25,6 +25,7 @@ public class CSharpCodeGenContextCreator  implements Processor {
 			dalConfigHost = new DalConfigHost("");
 		}
 		ctx.setDalConfigHost(dalConfigHost);
+		ctx.setNamespace(project.getNamespace());
 	} 
 
 }

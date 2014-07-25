@@ -840,18 +840,18 @@ public class DbUtils {
 		}
 	}
 
-	public static String getDbType(String dbName) throws Exception {
+	public static String getDbType(String allInOneName) throws Exception {
 
 		String dbType = null;
-		if (Consts.databaseType.containsKey(dbName)) {
-			dbType = Consts.databaseType.get(dbName);
+		if (Consts.databaseType.containsKey(allInOneName)) {
+			dbType = Consts.databaseType.get(allInOneName);
 		} else {
 			Connection connection = null;
 			try {
-				connection = DataSourceUtil.getConnection(dbName);
+				connection = DataSourceUtil.getConnection(allInOneName);
 
 				dbType = connection.getMetaData().getDatabaseProductName();
-				Consts.databaseType.put(dbName, dbType);
+				Consts.databaseType.put(allInOneName, dbType);
 
 			} catch (Exception ex) {
 //				log.error(String.format("get db type error: [dbName=%s]", dbName), ex);
@@ -861,6 +861,23 @@ public class DbUtils {
 			}
 		}
 		return dbType;
+	}
+	
+	public static DatabaseCategory getDatabaseCategory(String allInOneName)
+			throws Exception {
+
+		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
+
+		String dbType = DbUtils.getDbType(allInOneName);
+
+		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
+
+			dbCategory = DatabaseCategory.MySql;
+
+		}
+
+		return dbCategory;
+
 	}
 	
 	public static void main(String[] args){

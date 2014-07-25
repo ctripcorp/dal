@@ -48,25 +48,17 @@
                     if (formatedConditions.length > 0) {
                         select_sql_builder = sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
                             $("#tables").val(), formatedConditions.join(" AND "));
-//                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
-//                            $("#tables").val(), formatedConditions.join(" AND ")));
                     } else {
                         select_sql_builder = sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
                             $("#tables").val());
-//                            ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
-//                            $("#tables").val()));
                     }
                 }else{
                     if (formatedConditions.length > 0) {
                         select_sql_builder = sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
                             $("#tables").val(), formatedConditions.join(" AND "));
-//                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
-//                            $("#tables").val(), formatedConditions.join(" AND ")));
                     } else {
                         select_sql_builder = sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
                             $("#tables").val());
-//                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
-//                            $("#tables").val()));
                     }
                 }
                 if($("#orderby_field").val() != '-1'){
@@ -116,7 +108,50 @@
                     ace.edit("sql_builder").setValue(sprintf("Delete FROM %s", $("#tables").val()));
                 }
             }
+        },
+        buildPagingSQL : function(callable){
+            cblock($("body"));
+            var postData = {};
+            postData["db_name"] = $("#databases").val();
+            if ($("#gen_style").val() == "auto") { //构建SQL（生成的代码绑定到模板）
+                postData["sql_style"] = $("#sql_style").val();
+                postData["sql_content"] = ace.edit("sql_builder").getValue();
+                $.post("/rest/task/auto/buildPagingSQL", postData, function (data) {
+                    if (data.code == "OK") {
+                        showSQL("step2_2_2_sql_editor",data.info);
+                        callable();
+                    }else{
+                        $("#error_msg").html(data.info);
+                    }
+                    $("body").unblock();
+                }).fail(function (data) {
+                        alert("构建分页SQL语句出错,请刷新页面重试!");
+                        $("body").unblock();
+                    });
+            } else if ($("#gen_style").val() == "sql") {//复杂查询（额外生成实体类）
+                postData["sql_content"] = ace.edit("sql_editor").getValue();
+                $.post("/rest/task/sql/buildPagingSQL", postData, function (data) {
+                    if (data.code == "OK") {
+                        showSQL("step2_3_1_sql_editor",data.info);
+                        callable();
+                    }else{
+                        $("#error_msg").html(data.info);
+                    }
+                    $("body").unblock();
+                }).fail(function (data) {
+                        alert("构建分页SQL语句出错,请刷新页面重试!");
+                        $("body").unblock();
+                    });
+            }
         }
+    };
+
+    var showSQL = function(id,sql){
+        var editor = ace.edit(id);
+        editor.setTheme("ace/theme/monokai");
+        editor.getSession().setMode("ace/mode/sql");
+        editor.setValue(sql);
+        editor.setReadOnly(true);
     };
 
     /**

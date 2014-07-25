@@ -15,9 +15,13 @@ import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
+import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 
 /**
  * 复杂查询（额外生成实体类）
@@ -104,6 +108,26 @@ public class GenTaskByFreeSqlResource {
 		}
 
 		return Status.OK;
+	}
+	
+	@POST
+	@Path("buildPagingSQL")
+	public Status buildPagingSQL(@FormParam("db_name") String db_set_name,//dbset name
+			@FormParam("sql_content") String sql_content){
+		Status status = Status.OK;
+		try {
+				
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
+			CurrentLanguage lang = sql_content.contains("@")?CurrentLanguage.Java:CurrentLanguage.CSharp;
+			String pagingSQL = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), lang);
+			status.setInfo(pagingSQL);
+		} catch (Exception e) {
+			status = Status.ERROR;
+			status.setInfo(e.getMessage());
+			return status;
+		}
+		
+		return status;
 	}
 
 }

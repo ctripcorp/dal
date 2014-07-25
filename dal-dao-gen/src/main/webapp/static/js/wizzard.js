@@ -537,19 +537,15 @@
             $("#param_list_auto").html(htmls);
         }
 
-        var editor = ace.edit("step2_2_2_sql_editor");
-        editor.setTheme("ace/theme/monokai");
-        editor.getSession().setMode("ace/mode/sql");
-        editor.setValue(ace.edit("sql_builder").getValue());
-        editor.setReadOnly(true);
-
         if($("#auto_sql_pagination").is(":checked")==true && $("#orderby_field").val()=='-1'){
             $("#error_msg").html("请选择排序(Order by)的字段");
             return;
         }
 
-        current.hide();
-        $(".step2-2-2").show();
+        window.sql_builder.buildPagingSQL(function(){
+            current.hide();
+            $(".step2-2-2").show();
+        });
 
     };
 
@@ -632,14 +628,11 @@
             });
         }
 
-        var editor = ace.edit("step2_3_1_sql_editor");
-        editor.setTheme("ace/theme/monokai");
-        editor.getSession().setMode("ace/mode/sql");
-        editor.setValue(ace.edit("sql_editor").getValue());
-        editor.setReadOnly(true);
+        window.sql_builder.buildPagingSQL(function(){
+            current.hide();
+            $(".step2-3-1").show();
+        });
 
-        current.hide();
-        $(".step2-3-1").show();
     };
 
     var step2_3_1 = function(){

@@ -339,7 +339,7 @@ public class LogEntry {
 		String params = "";
 		if(this.sensitive){
 			try {
-				params = AESCrypto.getInstance().crypt(this.getParams());
+				params = AESCrypto.getInstance().encrypt(this.getParams());
 			} catch (Exception e) {
 				this.errorMsg = e.getMessage();
 			}
@@ -368,7 +368,7 @@ public class LogEntry {
 				existed ? "" : sqlTpl, 
 				params,
 				this.success ? 1 : 0, 
-				this.errorMsg,
+				CommonUtil.string2Json(this.errorMsg),
 				DalWatcher.toJson());
 	}
 

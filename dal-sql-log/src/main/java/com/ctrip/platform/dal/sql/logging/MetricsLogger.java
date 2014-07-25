@@ -2,14 +2,9 @@ package com.ctrip.platform.dal.sql.logging;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import com.ctrip.freeway.metrics.IMetric;
-import com.ctrip.freeway.metrics.MetricManager;
+import com.ctrip.framework.clogging.agent.metrics.IMetric;
+import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 
 public class MetricsLogger {
 	private static final String COUNT = "arch.dal.sql.count";
@@ -25,24 +20,24 @@ public class MetricsLogger {
 	private static final String SIZE = "Size";
 	private static final String STATUS = "Status";
 	
-	private static Queue<MetricsData> statusQueue = new ConcurrentLinkedQueue<MetricsData>();
-	private static Map<String, MetricsData> metrixCache = new HashMap<String, MetricsData>();
+	//private static Queue<MetricsData> statusQueue = new ConcurrentLinkedQueue<MetricsData>();
+	//private static Map<String, MetricsData> metrixCache = new HashMap<String, MetricsData>();
 	
 	
 	private static final String DBTYPE = "DBType";
     private static final String OPTTYPE = "OperationType";
     private static final String DB = "DB";
     
-	private static Queue<MasterSlaveMetrics> msQueue = new ConcurrentLinkedQueue<MasterSlaveMetrics>();
-	private static Map<String, MasterSlaveMetrics> msCache = new HashMap<String, MasterSlaveMetrics>();
+	//private static Queue<MasterSlaveMetrics> msQueue = new ConcurrentLinkedQueue<MasterSlaveMetrics>();
+	//private static Map<String, MasterSlaveMetrics> msCache = new HashMap<String, MasterSlaveMetrics>();
 	
-	private static ScheduledExecutorService sender;
+	//private static ScheduledExecutorService sender;
 
 	private static IMetric metricLogger = MetricManager.getMetricer();
 
 	static {
-		sender = Executors.newSingleThreadScheduledExecutor();
-		sender.scheduleAtFixedRate(new MetrixReporter(), 1, 1, TimeUnit.MINUTES);
+		//sender = Executors.newSingleThreadScheduledExecutor();
+		//sender.scheduleAtFixedRate(new MetrixReporter(), 1, 1, TimeUnit.MINUTES);
 	}
 	
 	public static void success(LogEntry entry, long duration) {
@@ -55,7 +50,7 @@ public class MetricsLogger {
 	}
 	
 	public static void shutdown(){
-		sender.shutdown();
+		//sender.shutdown();
 	}
 	
 	public static void report(String databaseSet, String databaseType,String operationType){
@@ -64,7 +59,13 @@ public class MetricsLogger {
 		data.databaseSet = databaseSet;
 		data.databaseType = databaseType;
 		data.operationType = operationType;
-		msQueue.offer(data);
+		
+		data.tags = new HashMap<String, String>();
+		data.tags.put(DB, data.databaseSet);
+		data.tags.put(DBTYPE, data.databaseType);
+		data.tags.put(OPTTYPE, data.operationType);
+		
+		metricLogger.log(MASTER_SLAVE_COUNT, data.count, data.tags);
 	}
 	public static void report(String dao, String method, int size, String status, long duration) {
 		long cost = duration;
@@ -92,9 +93,19 @@ public class MetricsLogger {
         md.count = 1;
         md.size = size;
         md.status = status;
-        statusQueue.offer(md);
+        
+        Map<String, String> tags = new HashMap<String, String>();
+        tags.put(DAO, md.dao);
+        tags.put(METHOD, md.method);
+        tags.put(STATUS, md.status);
+        tags.put(SIZE, String.valueOf(md.size));
+        md.tags = tags;
+        
+        metricLogger.log(COUNT, md.count, md.tags);    
+        metricLogger.log(COST, md.cost, md.tags);
     }
     
+	/*
     private static void sendLog() {
 		if (statusQueue.isEmpty())
 			return;
@@ -174,6 +185,7 @@ public class MetricsLogger {
     	
     	msCache.clear();
     }
+    */
     
 	private static class MetricsData {
         String dao;
@@ -194,11 +206,11 @@ public class MetricsLogger {
          Map<String, String> tags;
      }
     
-    private static class MetrixReporter implements Runnable {
+    /*private static class MetrixReporter implements Runnable {
 		@Override
 		public void run() {
 			sendLog();
 			sendMasterSlaveMetrics();
 		}
-    }
+    }*/
 }

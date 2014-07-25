@@ -42,6 +42,9 @@ public class DalShardingHelper {
 	 * @throws SQLException
 	 */
 	public static String locateShardId(String logicDbName, DalHints hints) throws SQLException {
+		if(isShardDecided(hints))
+			return hints.getShardId();
+		
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
@@ -58,8 +61,8 @@ public class DalShardingHelper {
 	 * @return Grouped pojos
 	 * @throws SQLException In case locate shard id faild 
 	 */
-	public static <T> Map<String, List<Map<String, ?>>> shaffle(String logicDbName, DalParser<T> parser, T[] pojos) throws SQLException {
-		Map<String, List<Map<String, ?>>> shaffled = new HashMap<String, List<Map<String, ?>>>();
+	public static <T> Map<String, List<Map<String, ?>>> shuffle(String logicDbName, DalParser<T> parser, T[] pojos) throws SQLException {
+		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
@@ -70,15 +73,16 @@ public class DalShardingHelper {
 			Map<String, ?> fields = parser.getFields(pojo);
 			tmpHints.set(DalHintEnum.shardColValues, fields);
 			String shardId = strategy.locateShard(config, logicDbName, tmpHints);
-			List<Map<String, ?>> pojosInShard = shaffled.get(shardId);
+			dbSet.validate(shardId);
+			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
 			if(pojosInShard == null) {
 				pojosInShard = new LinkedList<Map<String, ?>>();
-				shaffled.put(shardId, pojosInShard);
+				shuffled.put(shardId, pojosInShard);
 			}
 			pojosInShard.add(fields);
 		}
 		
-		return shaffled;
+		return shuffled;
 	}
 	
 	/**
@@ -99,11 +103,13 @@ public class DalShardingHelper {
 		if(DalTransactionManager.isInTransaction())
 			return;
 		
-		throw new SQLException(message);
+		String shard = locateShardId(logicDbName, hints);
+		if(shard == null)
+			throw new SQLException(message);
 	}
 	
 	public static <T> void executeByShard(String logicDbName, DalParser<T> parser, T[] pojos, DalHints hints, BulkTask task) throws SQLException {
-		Map<String, List<Map<String, ?>>> shaffled = shaffle(logicDbName, parser, pojos);
+		Map<String, List<Map<String, ?>>> shaffled = shuffle(logicDbName, parser, pojos);
 		
 		for(;;){}
 	}

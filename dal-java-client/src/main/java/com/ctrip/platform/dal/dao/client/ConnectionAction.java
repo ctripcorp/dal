@@ -115,6 +115,7 @@ public abstract class ConnectionAction<T> {
 		}
 		else if(parameters != null){
 			entry.setPramemters(parameters.toLogString());
+			hints.setParameters(parameters);
 		}
 		
 		entry.setTransactional(DalTransactionManager.isInTransaction());

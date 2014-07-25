@@ -1,16 +1,19 @@
 package com.ctrip.platform.dal.dao;
 
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.reqirePredefinedSharding;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffle;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 /**
@@ -39,8 +42,11 @@ public final class DalTableDao<T> {
 	private DalQueryDao queryDao;
 	private DalParser<T> parser;
 
+	private final String logicDbName;
 	private final String pkSql;
 	private Set<String> pkColumns;
+	private String columnsForInsert;
+	private List<String> validColumnsForInsert;
 	private String batchInsertSql;
 	private String deleteSql;
 	private Map<String, Integer> columnTypes = new HashMap<String, Integer>();
@@ -50,9 +56,12 @@ public final class DalTableDao<T> {
 	public DalTableDao(DalParser<T> parser) {
 		this.client = DalClientFactory.getClient(parser.getDatabaseName());
 		this.parser = parser;
+		this.logicDbName = parser.getDatabaseName();
 		queryDao = new DalQueryDao(parser.getDatabaseName());
 		initColumnTypes();
 		pkSql = initSql();
+		validColumnsForInsert = buildValidColumnsForInsert();
+		columnsForInsert = combineColumns(validColumnsForInsert, COLUMN_SEPARATOR);
 		batchInsertSql = buildBatchInsertSql();
 		deleteSql = buildDeleteSql();
 	}
@@ -301,32 +310,42 @@ public final class DalTableDao<T> {
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
 			T... daoPojos) throws SQLException {
-		DalShardingHelper.reqirePredefinedSharding(getLogicDbName(), hints, "combinedInsert requires predefined shard! Use crossShardCombinedInsert instead.");
+		reqirePredefinedSharding(logicDbName, hints, "combinedInsert requires predefined shard! Use crossShardCombinedInsert instead.");
 		DalWatcher.begin();
+		return combinedInsert(hints, keyHolder, getPojosFields(daoPojos)); 
+	}
+	
+	private List<Map<String, ?>> getPojosFields(T... daoPojos) {
+		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
 		if (null == daoPojos || daoPojos.length < 1)
-			return 0;
-		List<String> validColumns = new ArrayList<String>();
-		for(String s : parser.getColumnNames()){
-			if(!(parser.isAutoIncrement() && isPrimaryKey(s)))
-				validColumns.add(s);
+			return pojoFields;
+		
+		for (T pojo: daoPojos){
+			pojoFields.add(parser.getFields(pojo));
 		}
-		String cloumns = combineColumns(validColumns, COLUMN_SEPARATOR);
-		int count = daoPojos.length;
+		
+		return pojoFields;
+	}
+	
+	private int combinedInsert(DalHints hints, KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
+		if (null == daoPojos || daoPojos.size() < 1)
+			return 0;
+		
+		int count = daoPojos.size();
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
 
 		int startIndex = 1;
-		for (int i = 0; i < count; i++) {
-			Map<String, ?> vfields = parser.getFields(daoPojos[i]);
+		for (Map<String, ?> vfields: daoPojos) {
 			filterAutoIncrementPrimaryFields(vfields);
-			int paramCount = addParameters(startIndex, parameters, vfields, validColumns);
+			int paramCount = addParameters(startIndex, parameters, vfields, validColumnsForInsert);
 			startIndex += paramCount;
 			values.append(String.format("(%s),",
 					this.combine("?", paramCount, ",")));
 		}
 
 		String sql = String.format(TMPL_SQL_MULTIPLE_INSERT,
-				this.parser.getTableName(), cloumns,
+				this.parser.getTableName(), columnsForInsert,
 				values.substring(0, values.length() - 2) + ")");
 
 		return null == keyHolder ? this.client.update(sql, parameters, hints)
@@ -341,9 +360,21 @@ public final class DalTableDao<T> {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int crossShardCombinedInsert(DalHints hints, KeyHolder keyHolder,
+	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
 			T... daoPojos) throws SQLException {
-		return 0;
+		int total = 0;
+		// TODO add check for shard related info
+		if (null == daoPojos || daoPojos.length < 1)
+			return 0;
+		
+		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
+		for(String shard: shuffled.keySet()) {
+			KeyHolder keyHolder = keyHolders == null? null : keyHolders.get(shard);
+			hints.inShard(shard);
+			total += combinedInsert(hints, keyHolder, shuffled.get(shard));
+		}
+
+		return total;
 	}
 
 
@@ -356,7 +387,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
-		DalShardingHelper.reqirePredefinedSharding(getLogicDbName(), hints, "batchInsert requires predefined shard! Use crossShardBatchInsert instead.");
+		reqirePredefinedSharding(getLogicDbName(), hints, "batchInsert requires predefined shard! Use crossShardBatchInsert instead.");
 		DalWatcher.begin();
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		int i = 0;
@@ -409,7 +440,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
-		DalShardingHelper.reqirePredefinedSharding(getLogicDbName(), hints, "batchDelete requires predefined shard! Use crossShardBatchDelete instead.");
+		reqirePredefinedSharding(getLogicDbName(), hints, "batchDelete requires predefined shard! Use crossShardBatchDelete instead.");
 		DalWatcher.begin();
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		int i = 0;
@@ -620,17 +651,26 @@ public final class DalTableDao<T> {
 				values);
 	}
 	
-	private String buildBatchInsertSql() {
+	private List<String> buildValidColumnsForInsert() {
 		List<String> validColumns = new ArrayList<String>();
 		for(String s : parser.getColumnNames()){
 			if(!(parser.isAutoIncrement() && isPrimaryKey(s)))
 				validColumns.add(s);
 		}
-		String cloumns = combineColumns(validColumns, COLUMN_SEPARATOR);
-		String values = combine(PLACE_HOLDER, validColumns.size(),
+		
+		return validColumns;
+
+	}
+	
+	private String buildBatchInsertSql() {
+		int validColumnsSize = parser.getColumnNames().length;
+		if(parser.isAutoIncrement())
+			validColumnsSize--;
+		
+		String values = combine(PLACE_HOLDER, validColumnsSize,
 				COLUMN_SEPARATOR);
 
-		return String.format(TMPL_SQL_INSERT, parser.getTableName(), cloumns,
+		return String.format(TMPL_SQL_INSERT, parser.getTableName(), columnsForInsert,
 				values);
 	}
 

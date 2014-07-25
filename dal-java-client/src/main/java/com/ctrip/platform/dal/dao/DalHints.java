@@ -69,6 +69,18 @@ public class DalHints {
 		return getString(DalHintEnum.shard);
 	}
 	
+	public DalHints setShardValue(Object shardValue) {
+		return set(DalHintEnum.shardValue, shardValue);
+	}
+	
+	public DalHints setShardColValues(Map<String, ?> shardColValues) {
+		return set(DalHintEnum.shardColValues, shardColValues);
+	}
+
+	public DalHints setParameters(StatementParameters parameters) {
+		return set(DalHintEnum.parameters, parameters);
+	}
+	
 	public DalHints masterOnly() {
 		set(DalHintEnum.masterOnly, true);
 		return this;

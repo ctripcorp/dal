@@ -4,13 +4,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.ctrip.freeway.gen.v2.LogLevel;
-import com.ctrip.freeway.gen.v2.LogType;
-import com.ctrip.freeway.logging.ILog;
-import com.ctrip.freeway.logging.LogManager;
-import com.ctrip.freeway.tracing.ITrace;
-import com.ctrip.freeway.tracing.TraceManager;
-
+import com.ctrip.framework.clogging.agent.log.ILog;
+import com.ctrip.framework.clogging.agent.log.LogManager;
+import com.ctrip.framework.clogging.agent.trace.ITrace;
+import com.ctrip.framework.clogging.agent.trace.TraceManager;
+import com.ctrip.framework.clogging.domain.thrift.LogLevel;
+import com.ctrip.framework.clogging.domain.thrift.LogType;
 
 public class DalLogger {
 	public static final String TITLE = "Dal Fx";
@@ -39,7 +38,7 @@ public class DalLogger {
 	public static void fail(LogEntry entry, long duration, Throwable e) {
 		entry.setDuration(duration);
 		entry.setSuccess(false);
-		entry.setErrorMsg(getExceptionStack(e));
+		entry.setErrorMsg(e.getMessage());
 		log(entry);
 	}
 	
@@ -109,7 +108,7 @@ public class DalLogger {
             StringWriter sw = new StringWriter();  
             PrintWriter pw = new PrintWriter(sw);  
             e.printStackTrace(pw);  
-            msg = "\r\n" + sw.toString() + "\r\n";  
+            msg = sw.toString();  
         } catch (Throwable e2) {  
         	msg = "bad getErrorInfoFromException";  
         }

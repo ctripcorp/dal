@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 /**
@@ -300,6 +301,7 @@ public final class DalTableDao<T> {
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
 			T... daoPojos) throws SQLException {
+		DalShardingHelper.reqirePredefinedSharding(parser.getTableName(), hints, "combinedInsert requires predefined shard! Use crossShardCombinedInsert instead.");
 		DalWatcher.begin();
 		if (null == daoPojos || daoPojos.length < 1)
 			return 0;
@@ -330,6 +332,20 @@ public final class DalTableDao<T> {
 		return null == keyHolder ? this.client.update(sql, parameters, hints)
 				: this.client.update(sql, parameters, hints, keyHolder);
 	}
+	
+	/**
+	 * Cross shard version of combined insert
+	 * @param hints
+	 * @param keyHolder
+	 * @param daoPojos
+	 * @return
+	 * @throws SQLException
+	 */
+	public int crossShardCombinedInsert(DalHints hints, KeyHolder keyHolder,
+			T... daoPojos) throws SQLException {
+		return 0;
+	}
+
 
 	/**
 	 * Insert pojos in batch mode.
@@ -340,6 +356,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
+		DalShardingHelper.reqirePredefinedSharding(parser.getTableName(), hints, "batchInsert requires predefined shard! Use crossShardBatchInsert instead.");
 		DalWatcher.begin();
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		int i = 0;
@@ -352,6 +369,10 @@ public final class DalTableDao<T> {
 		}
 
 		return client.batchUpdate(batchInsertSql, parametersList, hints);
+	}
+	
+	public int[] crossShardBatchInsert(DalHints hints, T... daoPojos) throws SQLException {
+		return null;
 	}
 
 	/**
@@ -388,6 +409,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
+		DalShardingHelper.reqirePredefinedSharding(parser.getTableName(), hints, "batchDelete requires predefined shard! Use crossShardBatchDelete instead.");
 		DalWatcher.begin();
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		int i = 0;
@@ -398,6 +420,10 @@ public final class DalTableDao<T> {
 		}
 
 		return client.batchUpdate(deleteSql, parametersList, hints);
+	}
+	
+	public int[] crossShardBatchDelete(DalHints hints, T... daoPojos) throws SQLException {
+		return null;
 	}
 
 	/**

@@ -103,17 +103,18 @@ public class DatabaseSet {
 		return databases;
 	}
 	
-	public boolean validate(String shard) throws SQLException {
-		if(masterDbByShard.containsKey(shard))
-			return true;
-		throw new SQLException("No shard defined for id: " + shard);
+	public void validate(String shard) throws SQLException {
+		if(!masterDbByShard.containsKey(shard))
+			throw new SQLException("No shard defined for id: " + shard);
 	}
 	
 	public Set<String> getAllShards() {
 		return masterDbByShard.keySet();
 	}
 
-	public DalShardStrategy getStrategy() {
+	public DalShardStrategy getStrategy() throws SQLException {
+		if(strategy == null)
+			throw new SQLException("No sharding stradegy defined");
 		return strategy;
 	}
 	

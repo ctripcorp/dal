@@ -15,9 +15,13 @@ import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
+import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 
 /**
  * 构建SQL（生成的代码绑定到模板）
@@ -52,7 +56,8 @@ public class GenTaskBySqlBuilderResource {
 			@FormParam("params") String params,
 			@FormParam("comment") String comment,
 			@FormParam("scalarType") String scalarType,
-			@FormParam("pagination") boolean pagination) {
+			@FormParam("pagination") boolean pagination,
+			@FormParam("orderby") String orderby) {
 		
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 
@@ -79,6 +84,7 @@ public class GenTaskBySqlBuilderResource {
 			task.setComment(comment);
 			task.setScalarType(scalarType);
 			task.setPagination(pagination);
+			task.setOrderby(orderby);
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);
@@ -102,6 +108,27 @@ public class GenTaskBySqlBuilderResource {
 		}
 
 		return Status.OK;
+	}
+	
+	@POST
+	@Path("buildPagingSQL")
+	public Status buildPagingSQL(@FormParam("db_name") String db_set_name,//dbset name
+			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
+			@FormParam("sql_content") String sql_content){
+		Status status = Status.OK;
+		
+		try {
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
+			CurrentLanguage lang = "java".equals(sql_style)?CurrentLanguage.Java:CurrentLanguage.CSharp;
+			String pagingSQL = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), lang);
+			status.setInfo(pagingSQL);
+		} catch (Exception e) {
+			status = Status.ERROR;
+			status.setInfo(e.getMessage());
+			return status;
+		}
+		
+		return status;
 	}
 
 

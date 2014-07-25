@@ -43,26 +43,28 @@
                 }
             });
             if ($("#crud_option").val() == "select") {
-                if("java"==$("#sql_style").val() && "select"==$("#crud_option").val()){
+                var select_sql_builder = '';
+                if("java"==$("#sql_style").val()){
                     if (formatedConditions.length > 0) {
-//                        ace.edit("sql_builder").setValue(sprintf("SELECT * FROM %s WHERE %s",
-//                            $("#tables").val(), formatedConditions.join(" AND ")));
-                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
-                            $("#tables").val(), formatedConditions.join(" AND ")));
+                        select_sql_builder = sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
+                            $("#tables").val(), formatedConditions.join(" AND "));
                     } else {
-//                        ace.edit("sql_builder").setValue(sprintf("SELECT * FROM %s", $("#tables").val()));
-                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
-                            $("#tables").val()));
+                        select_sql_builder = sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
+                            $("#tables").val());
                     }
                 }else{
                     if (formatedConditions.length > 0) {
-                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
-                            $("#tables").val(), formatedConditions.join(" AND ")));
+                        select_sql_builder = sprintf("SELECT %s FROM %s WHERE %s", $('#fields').multipleSelect('getSelects').join(","),
+                            $("#tables").val(), formatedConditions.join(" AND "));
                     } else {
-                        ace.edit("sql_builder").setValue(sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
-                            $("#tables").val()));
+                        select_sql_builder = sprintf("SELECT %s FROM %s", $('#fields').multipleSelect('getSelects').join(","),
+                            $("#tables").val());
                     }
                 }
+                if($("#orderby_field").val() != '-1'){
+                    select_sql_builder = sprintf("%s ORDER BY %s %s",select_sql_builder,$("#orderby_field").val(),$("#orderby_sort").val());
+                }
+                ace.edit("sql_builder").setValue(select_sql_builder);
             } else if ($("#crud_option").val() == "insert") {
 
                 var placeHodler = [];
@@ -76,8 +78,6 @@
                 ace.edit("sql_builder").setValue(sprintf("INSERT INTO %s (%s) VALUES (%s)",
                     $("#tables").val(), $('#fields').multipleSelect('getSelects').join(","),
                     placeHodler.join(",")));
-
-
             } else if ($("#crud_option").val() == "update") {
                 var placeHodler = [];
                 $.each($('#fields').multipleSelect('getSelects'), function (index, value) {
@@ -108,7 +108,61 @@
                     ace.edit("sql_builder").setValue(sprintf("Delete FROM %s", $("#tables").val()));
                 }
             }
+        },
+        buildPagingSQL : function(callable){
+            var postData = {};
+            postData["db_name"] = $("#databases").val();
+            if ($("#gen_style").val() == "auto") { //构建SQL（生成的代码绑定到模板）
+                postData["sql_style"] = $("#sql_style").val();
+                postData["sql_content"] = ace.edit("sql_builder").getValue();
+                if($("#auto_sql_pagination").is(":checked")==false){
+                    showSQL("step2_2_2_sql_editor",postData["sql_content"]);
+                    callable();
+                    return;
+                }
+                cblock($("body"));
+                $.post("/rest/task/auto/buildPagingSQL", postData, function (data) {
+                    if (data.code == "OK") {
+                        showSQL("step2_2_2_sql_editor",data.info);
+                        callable();
+                    }else{
+                        $("#error_msg").html(data.info);
+                    }
+                    $("body").unblock();
+                }).fail(function (data) {
+                        alert("构建分页SQL语句出错,请刷新页面重试!");
+                        $("body").unblock();
+                    });
+            } else if ($("#gen_style").val() == "sql") {//复杂查询（额外生成实体类）
+                postData["sql_content"] = ace.edit("sql_editor").getValue();
+                if($("#free_sql_pagination").is(":checked")==false){
+                    showSQL("step2_3_1_sql_editor",postData["sql_content"]);
+                    callable();
+                    return;
+                }
+                cblock($("body"));
+                $.post("/rest/task/sql/buildPagingSQL", postData, function (data) {
+                    if (data.code == "OK") {
+                        showSQL("step2_3_1_sql_editor",data.info);
+                        callable();
+                    }else{
+                        $("#error_msg").html(data.info);
+                    }
+                    $("body").unblock();
+                }).fail(function (data) {
+                        alert("构建分页SQL语句出错,请刷新页面重试!");
+                        $("body").unblock();
+                    });
+            }
         }
+    };
+
+    var showSQL = function(id,sql){
+        var editor = ace.edit(id);
+        editor.setTheme("ace/theme/monokai");
+        editor.getSession().setMode("ace/mode/sql");
+        editor.setValue(sql);
+        editor.setReadOnly(true);
     };
 
     /**

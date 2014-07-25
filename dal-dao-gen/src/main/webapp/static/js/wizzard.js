@@ -327,6 +327,7 @@
         $("select[id$=fields] > option").remove();
         $("select[id$=selected_condition] > option").remove();
         $("select[id$=conditions] > option:gt(0)").remove();
+        $("select[id$=orderby_field] > option:gt(0)").remove();
 
         var url = sprintf(
             "/rest/db/fields?table_name=%s&db_name=%s&rand=%s",
@@ -341,13 +342,15 @@
                 values.push(value.name);
                 fieldList.push($('<option>', {
                     value: value.name,
-                    text: sprintf("%s%s%s",
-                        value.name, value.indexed ? "(索引)" : "",
-                        value.primary ? "(主键)" : "")
+                    text: sprintf("%s%s%s", value.name, value.indexed ? "(索引)" : "", value.primary ? "(主键)" : "")
                 }));
                 $("#conditions").append($('<option>', {
                     value: value.name,
                     text: value.name
+                }));
+                $("#orderby_field").append($('<option>', {
+                    value: value.name,
+                    text: sprintf("%s%s%s", value.name, value.indexed ? "(索引)" : "", value.primary ? "(主键)" : "")
                 }));
             });
 
@@ -373,6 +376,10 @@
                 }
             });
             if ($("#page1").attr('is_update') == "1") {
+                if(!$.isEmpty(record["orderby"])){
+                    $("#orderby_field").val(record["orderby"].split(',')[0]);
+                    $("#orderby_sort").val(record["orderby"].split(',')[1]);
+                }
                 $("#auto_sql_scalarType").val(record["scalarType"]);
                 $("#auto_sql_pagination").attr('checked',record['pagination']);
                 $('#fields').multipleSelect('setSelects', record.fields.split(","));
@@ -391,7 +398,10 @@
                 sql_builder.setTheme("ace/theme/monokai");
                 sql_builder.getSession().setMode("ace/mode/sql");
                 sql_builder.setValue(record["sql_content"]);
+            }else{
+                window.sql_builder.build();
             }
+
             current.hide();
             $(".step2-2-1").show();
 
@@ -417,9 +427,9 @@
 //            }else{
 //                $('#fields').multipleSelect('enable');
 //            }
-            if ($("#page1").attr('is_update') != "1") {
-                window.sql_builder.build();
-            }
+//            if ($("#page1").attr('is_update') != "1") {
+//                window.sql_builder.build();
+//            }
             $("body").unblock();
         }).fail(function(data){
                 $("#error_msg").text("获取表的信息失败，是否有权限");
@@ -516,22 +526,23 @@
             }
         }
 
-        if (htmls.length==0 && $("#auto_sql_pagination").is(":checked")==false) {
-            window.ajaxutil.post_task();
+        if(htmls.length==0){
+            $("#param_list_auto_div").hide();
+        }else{
+            $("#param_list_auto").html(htmls);
+        }
+
+        if($("#auto_sql_pagination").is(":checked")==true && $("#orderby_field").val()=='-1'){
+            $("#error_msg").html("请选择排序(Order by)的字段");
             return;
         }
 
-        $("#param_list_auto").html(htmls);
+        window.sql_builder.buildPagingSQL(function(){
+            $("#error_msg").html(" ");
+            current.hide();
+            $(".step2-2-2").show();
+        });
 
-        var editor = ace.edit("step2_2_2_sql_editor");
-        editor.setTheme("ace/theme/monokai");
-        editor.getSession().setMode("ace/mode/sql");
-        editor.setValue(ace.edit("sql_builder").getValue());
-        editor.setReadOnly(true);
-
-        current.hide();
-        $(".step2-2-2").show();
-//        window.ajaxutil.post_task();
     };
 
     var step2_2_2 = function(){
@@ -591,12 +602,12 @@
             }
         }
 
-        if (htmls.length==0 && $("#free_sql_pagination").is(":checked")==false) {
-            window.ajaxutil.post_task();
-            return;
+        if(htmls.length==0){
+            $("#param_list_free_div").hide();
+        }else{
+            $("#param_list").html(htmls);
         }
 
-        $("#param_list").html(htmls);
         if ($("#page1").attr('is_update') == "1") {
             splitedParams = record.parameters.split(";");
             $.each(splitedParams, function (index, value) {
@@ -608,14 +619,12 @@
             });
         }
 
-        var editor = ace.edit("step2_3_1_sql_editor");
-        editor.setTheme("ace/theme/monokai");
-        editor.getSession().setMode("ace/mode/sql");
-        editor.setValue(ace.edit("sql_editor").getValue());
-        editor.setReadOnly(true);
+        window.sql_builder.buildPagingSQL(function(){
+            $("#error_msg").html(" ");
+            current.hide();
+            $(".step2-3-1").show();
+        });
 
-        current.hide();
-        $(".step2-3-1").show();
     };
 
     var step2_3_1 = function(){

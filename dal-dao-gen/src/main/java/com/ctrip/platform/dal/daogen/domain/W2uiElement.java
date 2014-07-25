@@ -64,7 +64,7 @@ public class W2uiElement  implements Comparable<W2uiElement>{
 
 	@Override
 	public int compareTo(W2uiElement o) {
-		return this.data.compareTo(o.getData());
+		return this.data.compareToIgnoreCase(o.getData());
 	}
 
 }

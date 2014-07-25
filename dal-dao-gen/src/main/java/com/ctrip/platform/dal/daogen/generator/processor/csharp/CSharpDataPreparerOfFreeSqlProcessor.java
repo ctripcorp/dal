@@ -219,7 +219,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		return groupBy;
 	}
 	
-	private CSharpFreeSqlPojoHost buildFreeSqlPojoHost(CodeGenContext codeGenCtx, GenTaskByFreeSql task) {
+	private CSharpFreeSqlPojoHost buildFreeSqlPojoHost(CodeGenContext codeGenCtx, GenTaskByFreeSql task) throws Exception {
 
 		CSharpFreeSqlPojoHost freeSqlHost = new CSharpFreeSqlPojoHost();
 

@@ -10,6 +10,11 @@ import java.util.Map;
 public class DalHints {
 	private Map<DalHintEnum, Object> hints = new LinkedHashMap<DalHintEnum, Object>();
 	
+	// TODO find a better name
+	public static DalHints createIfAbsent(DalHints hints) {
+		return hints == null ? new DalHints() : hints;
+	}
+	
 	public DalHints() {}
 	
 	public DalHints(DalHintEnum...hints) {
@@ -58,6 +63,10 @@ public class DalHints {
 	public DalHints inShard(String shardId) {
 		hints.put(DalHintEnum.shard, shardId);
 		return this;
+	}
+	
+	public String getShardId() {
+		return getString(DalHintEnum.shard);
 	}
 	
 	public DalHints masterOnly() {

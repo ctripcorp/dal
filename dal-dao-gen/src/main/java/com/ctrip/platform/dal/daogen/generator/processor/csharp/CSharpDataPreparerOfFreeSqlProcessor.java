@@ -98,6 +98,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 						host.setClassName(CommonUtils.normalizeVariable(WordUtils
 								.capitalize(currentTasks.get(0).getClass_name())));
 						host.setNameSpace(namespace);
+						host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getDb_name()));
 	
 						List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
 						// 每个Method可能就有一个Pojo
@@ -141,6 +142,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
     	}
 		method.setSql(temp);
 		method.setName(task.getMethod_name());
+		method.setPaging(task.isPagination());
 		String pojoName = task.getPojo_name();
 		if(pojoName.equalsIgnoreCase("简单类型")){
 			method.setPojoName(method.getName().substring(0,1).toUpperCase() + method.getName().substring(1));
@@ -217,7 +219,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		return groupBy;
 	}
 	
-	private CSharpFreeSqlPojoHost buildFreeSqlPojoHost(CodeGenContext codeGenCtx, GenTaskByFreeSql task) {
+	private CSharpFreeSqlPojoHost buildFreeSqlPojoHost(CodeGenContext codeGenCtx, GenTaskByFreeSql task) throws Exception {
 
 		CSharpFreeSqlPojoHost freeSqlHost = new CSharpFreeSqlPojoHost();
 

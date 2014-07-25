@@ -22,12 +22,12 @@ public class JavaCodeGeneratorOfOthersProcessor implements Processor {
 		VelocityContext vltCcontext = GenUtils.buildDefaultVelocityContext();
 		vltCcontext.put("host", ctx.getDalConfigHost());
 		GenUtils.mergeVelocityContext(vltCcontext,
-				String.format("%s/Dal.config", dir.getAbsolutePath()),
-				"templates/java/DalConfig.java.tpl");
+				String.format("%s/Dal.config.tpl", dir.getAbsolutePath()),
+				"templates/java/Dal.config.java.tpl");
 		
 		vltCcontext.put("host", ctx.getContextHost());
 		GenUtils.mergeVelocityContext(vltCcontext,
-				String.format("%s/Context.xml", dir.getAbsolutePath()),
+				String.format("%s/context.xml", dir.getAbsolutePath()),
 				"templates/java/DalContext.java.tpl");
 		
 	}

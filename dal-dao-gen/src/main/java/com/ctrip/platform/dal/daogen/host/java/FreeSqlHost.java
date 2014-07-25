@@ -5,12 +5,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+
 public class FreeSqlHost {
 	private String packageName;
 	private String dbName;
 	private String className;
 	private List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 	private List<JavaParameterHost> fields;
+	private DatabaseCategory databaseCategory;
 	
 	public List<JavaParameterHost> getFields() {
 		return fields;
@@ -52,6 +55,14 @@ public class FreeSqlHost {
 		this.methods = methods;
 	}
 	
+	public DatabaseCategory getDatabaseCategory() {
+		return databaseCategory;
+	}
+
+	public void setDatabaseCategory(DatabaseCategory databaseCategory) {
+		this.databaseCategory = databaseCategory;
+	}
+
 	public Set<String> getDaoImports() {
 		Set<String> imports = new TreeSet<String>();
 		imports.add("com.ctrip.platform.dal.dao.*");

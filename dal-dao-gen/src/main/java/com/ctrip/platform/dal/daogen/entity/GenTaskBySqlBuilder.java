@@ -42,6 +42,10 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	
 	//当crud_type取值为select时，此字段才有意义，可取值：Single、First、List，表示select返回的结果类型
 	private String scalarType;
+	//是否增加分页方法，true：增加
+	private boolean pagination;
+	//存放order by 信息，值demo：id，asc 或者 id，desc
+	private String orderby;
 	
 	public static GenTaskBySqlBuilder visitRow(ResultSet rs) throws SQLException {
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
@@ -66,6 +70,8 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		task.setUpdate_time(rs.getTimestamp(15));
 		task.setComment(rs.getString(16));
 		task.setScalarType(rs.getString("scalarType"));
+		task.setPagination(rs.getBoolean("pagination"));
+		task.setOrderby(rs.getString("orderby"));
 
 		return task;
 	}
@@ -228,6 +234,22 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 
 	public void setScalarType(String scalarType) {
 		this.scalarType = scalarType;
+	}
+
+	public boolean isPagination() {
+		return pagination;
+	}
+
+	public void setPagination(boolean pagination) {
+		this.pagination = pagination;
+	}
+
+	public String getOrderby() {
+		return orderby;
+	}
+
+	public void setOrderby(String orderby) {
+		this.orderby = orderby;
 	}
 
 }

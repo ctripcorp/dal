@@ -27,8 +27,8 @@ public class DaoByFreeSql {
 
 		return this.jdbcTemplate
 				.query("select id, project_id, db_name, class_name,pojo_name,method_name,crud_type,sql_content,"
-						+ "parameters,generated,version,update_user_no,update_time,comment,scalarType,pojoType"
-						+ " from task_sql",
+						+ "parameters,generated,version,update_user_no,update_time,comment,scalarType,pojoType,"
+						+ "pagination from task_sql",
 
 				new RowMapper<GenTaskByFreeSql>() {
 					public GenTaskByFreeSql mapRow(ResultSet rs, int rowNum)
@@ -59,7 +59,7 @@ public class DaoByFreeSql {
 		return this.jdbcTemplate
 				.query("select id, project_id, db_name, class_name,pojo_name,method_name,crud_type,"
 						+ "sql_content,parameters,generated,version,update_user_no,update_time,comment,"
-						+ "scalarType,pojoType from task_sql where project_id=?",
+						+ "scalarType,pojoType,pagination from task_sql where project_id=?",
 						new Object[] { iD }, new RowMapper<GenTaskByFreeSql>() {
 							public GenTaskByFreeSql mapRow(ResultSet rs,
 									int rowNum) throws SQLException {
@@ -75,13 +75,12 @@ public class DaoByFreeSql {
 		this.jdbcTemplate
 				.query("select id, project_id,db_name,class_name,pojo_name,method_name,crud_type,"
 						+ "sql_content,parameters,generated,version,update_user_no,update_time,comment,"
-						+ "scalarType,pojoType from task_sql where project_id=?",
+						+ "scalarType,pojoType,pagination from task_sql where project_id=?",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
 									throws SQLException {
-								GenTaskByFreeSql task = GenTaskByFreeSql
-										.visitRow(rs);
+								GenTaskByFreeSql task = GenTaskByFreeSql.visitRow(rs);
 
 								task.setGenerated(true);
 								if (updateTask(task) > 0) {
@@ -98,14 +97,14 @@ public class DaoByFreeSql {
 
 		this.jdbcTemplate
 				.query("select id, project_id,db_name,class_name,pojo_name,method_name,crud_type,"
-						+ "sql_content,parameters,generated,version,update_user_no,update_time,"
-						+ "comment,scalarType,pojoType from task_sql where project_id=? and generated=false",
+						+ " sql_content,parameters,generated,version,update_user_no,update_time,"
+						+ " comment,scalarType,pojoType,pagination from task_sql "
+						+ " where project_id=? and generated=false",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
 									throws SQLException {
-								GenTaskByFreeSql task = GenTaskByFreeSql
-										.visitRow(rs);
+								GenTaskByFreeSql task = GenTaskByFreeSql.visitRow(rs);
 
 								task.setGenerated(true);
 								if (updateTask(task) > 0) {
@@ -119,8 +118,8 @@ public class DaoByFreeSql {
 	public int insertTask(GenTaskByFreeSql task) {
 
 		return this.jdbcTemplate
-				.update("insert into task_sql (project_id,db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment,scalarType,pojoType)"
-						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,? as p13,? as p14,? as p15) tmp where not exists "
+				.update("insert into task_sql (project_id,db_name,class_name,pojo_name,method_name,crud_type,sql_content,parameters,generated,version,update_user_no,update_time,comment,scalarType,pojoType,pagination)"
+						+ " select * from (select ? as p1,? as p2,? as p3,? as p4,? as p5,? as p6,? as p7,? as p8,? as p9,? as p10,? as p11,? as p12,? as p13,? as p14,? as p15,? as p16) tmp where not exists "
 						+ "(select 1 from task_sql where project_id=? and db_name=? and class_name=? and method_name=? limit 1)",
 						task.getProject_id(),
 						task.getDatabaseSetName(), task.getClass_name(),
@@ -133,6 +132,7 @@ public class DaoByFreeSql {
 						task.getComment(),
 						task.getScalarType(),
 						task.getPojoType(),
+						task.isPagination(),
 						task.getProject_id(),
 						task.getDatabaseSetName(), 
 						task.getClass_name(),
@@ -165,7 +165,7 @@ public class DaoByFreeSql {
 				.update("update task_sql set project_id=?, db_name=?,class_name=?,pojo_name=?,"
 						+ "method_name=?,crud_type=?,sql_content=?,parameters=?,generated=?,"
 						+ "version=version+1,update_user_no=?,update_time=?,comment=?,"
-						+ "scalarType=?,pojoType=? where id=? and version=?",
+						+ "scalarType=?,pojoType=?,pagination=? where id=? and version=?",
 						task.getProject_id(),
 						task.getDatabaseSetName(), task.getClass_name(),
 						task.getPojo_name(), task.getMethod_name(),
@@ -176,6 +176,7 @@ public class DaoByFreeSql {
 						task.getComment(),
 						task.getScalarType(),
 						task.getPojoType(),
+						task.isPagination(),
 						task.getId(),
 						task.getVersion());
 

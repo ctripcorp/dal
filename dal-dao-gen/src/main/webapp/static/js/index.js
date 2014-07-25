@@ -167,6 +167,14 @@ jQuery(document).ready(function () {
         window.sql_builder.build();
     });
 
+    $("#orderby_field").change(function(){
+        window.sql_builder.build();
+    });
+
+    $("#orderby_sort").change(function(){
+        window.sql_builder.build();
+    });
+
     $(document.body).on('click', "#next_step", function (event) {
         var current_step = $("div.steps:visible");
         window.wizzard.next(current_step);

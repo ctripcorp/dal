@@ -299,6 +299,7 @@
                 editor.getSession().setMode("ace/mode/sql");
                 editor.setValue(record.sql_content);
                 $("#free_sql_scalarType").val(record['scalarType']);
+                $("#free_sql_pagination").attr('checked',record['pagination']);
             }
         }).fail(function (data) {
                 $("#error_msg").text("获取历史记录失败");
@@ -306,6 +307,10 @@
 
         current.hide();
         $(".step2-3").show();
+    };
+
+    var step2_1 = function(){
+        window.ajaxutil.post_task();
     };
 
     var step2_2 = function(record,current){
@@ -322,6 +327,7 @@
         $("select[id$=fields] > option").remove();
         $("select[id$=selected_condition] > option").remove();
         $("select[id$=conditions] > option:gt(0)").remove();
+        $("select[id$=orderby_field] > option:gt(0)").remove();
 
         var url = sprintf(
             "/rest/db/fields?table_name=%s&db_name=%s&rand=%s",
@@ -336,13 +342,15 @@
                 values.push(value.name);
                 fieldList.push($('<option>', {
                     value: value.name,
-                    text: sprintf("%s%s%s",
-                        value.name, value.indexed ? "(索引)" : "",
-                        value.primary ? "(主键)" : "")
+                    text: sprintf("%s%s%s", value.name, value.indexed ? "(索引)" : "", value.primary ? "(主键)" : "")
                 }));
                 $("#conditions").append($('<option>', {
                     value: value.name,
                     text: value.name
+                }));
+                $("#orderby_field").append($('<option>', {
+                    value: value.name,
+                    text: sprintf("%s%s%s", value.name, value.indexed ? "(索引)" : "", value.primary ? "(主键)" : "")
                 }));
             });
 
@@ -368,7 +376,12 @@
                 }
             });
             if ($("#page1").attr('is_update') == "1") {
+                if(!$.isEmpty(record["orderby"])){
+                    $("#orderby_field").val(record["orderby"].split(',')[0]);
+                    $("#orderby_sort").val(record["orderby"].split(',')[1]);
+                }
                 $("#auto_sql_scalarType").val(record["scalarType"]);
+                $("#auto_sql_pagination").attr('checked',record['pagination']);
                 $('#fields').multipleSelect('setSelects', record.fields.split(","));
                 if (record.condition != undefined && record.condition != "") {
                     var selectedConditions = record.condition.split(";");
@@ -385,7 +398,10 @@
                 sql_builder.setTheme("ace/theme/monokai");
                 sql_builder.getSession().setMode("ace/mode/sql");
                 sql_builder.setValue(record["sql_content"]);
+            }else{
+                window.sql_builder.build();
             }
+
             current.hide();
             $(".step2-2-1").show();
 
@@ -411,9 +427,9 @@
 //            }else{
 //                $('#fields').multipleSelect('enable');
 //            }
-            if ($("#page1").attr('is_update') != "1") {
-                window.sql_builder.build();
-            }
+//            if ($("#page1").attr('is_update') != "1") {
+//                window.sql_builder.build();
+//            }
             $("body").unblock();
         }).fail(function(data){
                 $("#error_msg").text("获取表的信息失败，是否有权限");
@@ -510,22 +526,27 @@
             }
         }
 
-        if (htmls.length == 0) {
-            window.ajaxutil.post_task();
+        if(htmls.length==0){
+            $("#param_list_auto_div").hide();
+        }else{
+            $("#param_list_auto").html(htmls);
+        }
+
+        if($("#auto_sql_pagination").is(":checked")==true && $("#orderby_field").val()=='-1'){
+            $("#error_msg").html("请选择排序(Order by)的字段");
             return;
         }
 
-        $("#param_list_auto").html(htmls);
+        window.sql_builder.buildPagingSQL(function(){
+            $("#error_msg").html(" ");
+            current.hide();
+            $(".step2-2-2").show();
+        });
 
-        current.hide();
-        $(".step2-2-2").show();
+    };
 
-        var editor = ace.edit("step2_2_2_sql_editor");
-        editor.setTheme("ace/theme/monokai");
-        editor.getSession().setMode("ace/mode/sql");
-        editor.setValue(ace.edit("sql_builder").getValue());
-
-//        window.ajaxutil.post_task();
+    var step2_2_2 = function(){
+        window.ajaxutil.post_task();
     };
 
     var step2_3 = function(record,current){
@@ -581,12 +602,12 @@
             }
         }
 
-        if (htmls.length == 0) {
-            window.ajaxutil.post_task();
-            return;
+        if(htmls.length==0){
+            $("#param_list_free_div").hide();
+        }else{
+            $("#param_list").html(htmls);
         }
 
-        $("#param_list").html(htmls);
         if ($("#page1").attr('is_update') == "1") {
             splitedParams = record.parameters.split(";");
             $.each(splitedParams, function (index, value) {
@@ -597,8 +618,17 @@
                 }
             });
         }
-        current.hide();
-        $(".step2-3-1").show();
+
+        window.sql_builder.buildPagingSQL(function(){
+            $("#error_msg").html(" ");
+            current.hide();
+            $(".step2-3-1").show();
+        });
+
+    };
+
+    var step2_3_1 = function(){
+        window.ajaxutil.post_task();
     };
 
     wizzard.prototype = {
@@ -634,24 +664,18 @@
             //向导首先显示所有数据库服务器，点击下一步后，获取此服务器所有的数据库列表
             if (current.hasClass("step1")) {
                 step1(record, current);
-            }
-            else if (current.hasClass("step2-1")) {
-                window.ajaxutil.post_task();
-            }
-            else if (current.hasClass("step2-2")) {
+            } else if (current.hasClass("step2-1")) {
+                step2_1();
+            } else if (current.hasClass("step2-2")) {
                 step2_2(record, current);
-            }
-            else if (current.hasClass("step2-2-1")) {
+            } else if (current.hasClass("step2-2-1")) {
                 step2_2_1(record, current);
-            }
-            else if (current.hasClass("step2-2-2")) {
-                window.ajaxutil.post_task();
-            }
-            else if (current.hasClass("step2-3")) {
+            } else if (current.hasClass("step2-2-2")) {
+                step2_2_2();
+            } else if (current.hasClass("step2-3")) {
                 step2_3(record, current);
-            }
-            else if (current.hasClass("step2-3-1")) {
-                window.ajaxutil.post_task();
+            } else if (current.hasClass("step2-3-1")) {
+                step2_3_1();
             }
         },
         previous: function (current) {

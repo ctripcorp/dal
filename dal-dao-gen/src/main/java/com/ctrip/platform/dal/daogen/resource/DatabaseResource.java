@@ -33,7 +33,6 @@ import com.ctrip.platform.dal.daogen.domain.TableSpNames;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
-import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.utils.AllInOneConfigParser;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
@@ -450,22 +449,4 @@ public class DatabaseResource {
 		return status;
 	}
 
-	@POST
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("test_sql")
-	public Status verifyQuery(@FormParam("db_name") String set_name,
-			@FormParam("sql_content") String sql,
-			@FormParam("params") String params) {
-
-		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
-		String dbName = databaseSetEntry.getConnectionString();
-		
-		return DbUtils.testAQuerySql(dbName, sql, params,
-				CurrentLanguage.CSharp, true) == null ? Status.ERROR
-				: Status.OK;
-
-	}
-	
-	
-	
 }

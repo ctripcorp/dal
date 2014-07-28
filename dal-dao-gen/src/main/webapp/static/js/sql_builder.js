@@ -27,6 +27,14 @@
         return value;
     };
 
+    var wrapTable = function(value){
+        if($(".step2-2-1").attr("dbCatalog")=="MySql"){
+            return value;
+        }else{
+            return value+" WITH (NOLOCK)";
+        }
+    };
+
     var buildFormatedConditionsSQL = function(){
         var formatedConditions = [];
         $("#selected_condition > option").each(function () {
@@ -60,18 +68,18 @@
         if("java"==$("#sql_style").val()){
             if (formatedConditions.length > 0) {
                 select_sql_builder = sprintf("SELECT %s FROM %s WHERE %s", wrapedFields.join(","),
-                    $("#tables").val(), formatedConditions.join(" AND "));
+                    wrapTable($("#tables").val()), formatedConditions.join(" AND "));
             } else {
                 select_sql_builder = sprintf("SELECT %s FROM %s", wrapedFields.join(","),
-                    $("#tables").val());
+                    wrapTable($("#tables").val()));
             }
         }else{
             if (formatedConditions.length > 0) {
                 select_sql_builder = sprintf("SELECT %s FROM %s WHERE %s", wrapedFields.join(","),
-                    $("#tables").val(), formatedConditions.join(" AND "));
+                    wrapTable($("#tables").val()), formatedConditions.join(" AND "));
             } else {
                 select_sql_builder = sprintf("SELECT %s FROM %s", wrapedFields.join(","),
-                    $("#tables").val());
+                    wrapTable($("#tables").val()));
             }
         }
         if($("#orderby_field").val() != '-1'){

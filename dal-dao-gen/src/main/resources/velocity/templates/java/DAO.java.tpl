@@ -40,6 +40,11 @@ public class ${host.getPojoClassName()}Dao {
 
 	public ${host.getPojoClassName()}Dao() {
 		this.client = new DalTableDao<${host.getPojoClassName()}>(parser);
+#if($host.getDatabaseCategory().name() == "MySql")
+		this.client.setDelimiter('`','`');
+#else
+		this.client.setDelimiter('[',']');
+#end
 		thhis.queryDao = new DalQueryDao(DATA_BASE);
 		this.rowextractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(parser); 
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);

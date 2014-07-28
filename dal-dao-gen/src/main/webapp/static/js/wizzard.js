@@ -213,6 +213,7 @@
                  $("#error_msg").text("获取所有表失败!");
                 $("body").unblock();
             });
+        window.sql_builder.getDatabaseCategory();
     };
 
     var step1_sql = function(record, current){

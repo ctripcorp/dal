@@ -299,7 +299,7 @@
                         </div>
                      </div>
                   </div>
-                  <div class="row-fluid steps step2-2-1" style="height:368px;">
+                  <div class="row-fluid steps step2-2-1" style="height:368px;" dbCatalog="SqlServer">
 	                  <div id="operation_fields" class="step2-2-1-1 row-fluid">
 	                     <div class="row-fluid">
 	                        <div class="control-group">

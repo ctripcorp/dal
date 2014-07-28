@@ -1,10 +1,12 @@
 package com.ctrip.platform.dal.dao;
 
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.crossShardOperationAllowed;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.reqirePredefinedSharding;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffle;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -315,6 +317,33 @@ public final class DalTableDao<T> {
 		return combinedInsert(hints, keyHolder, getPojosFields(daoPojos)); 
 	}
 	
+	/**
+	 * Cross shard version of combined insert
+	 * @param hints
+	 * @param keyHolder
+	 * @param daoPojos
+	 * @return
+	 * @throws SQLException
+	 */
+	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
+			T... daoPojos) throws SQLException {
+		crossShardOperationAllowed(logicDbName, hints, "crossShardCombinedInsert");
+		DalWatcher.begin();
+		int total = 0;
+		// TODO add check for shard related info
+		if (null == daoPojos || daoPojos.length < 1)
+			return 0;
+		
+		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
+		for(String shard: shuffled.keySet()) {
+			KeyHolder keyHolder = keyHolders == null? null : keyHolders.get(shard);
+			hints.inShard(shard);
+			total += combinedInsert(hints, keyHolder, shuffled.get(shard));
+		}
+
+		return total;
+	}
+
 	private List<Map<String, ?>> getPojosFields(T... daoPojos) {
 		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
 		if (null == daoPojos || daoPojos.length < 1)
@@ -331,7 +360,6 @@ public final class DalTableDao<T> {
 		if (null == daoPojos || daoPojos.size() < 1)
 			return 0;
 		
-		int count = daoPojos.size();
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
 
@@ -353,32 +381,6 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * Cross shard version of combined insert
-	 * @param hints
-	 * @param keyHolder
-	 * @param daoPojos
-	 * @return
-	 * @throws SQLException
-	 */
-	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
-			T... daoPojos) throws SQLException {
-		int total = 0;
-		// TODO add check for shard related info
-		if (null == daoPojos || daoPojos.length < 1)
-			return 0;
-		
-		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
-		for(String shard: shuffled.keySet()) {
-			KeyHolder keyHolder = keyHolders == null? null : keyHolders.get(shard);
-			hints.inShard(shard);
-			total += combinedInsert(hints, keyHolder, shuffled.get(shard));
-		}
-
-		return total;
-	}
-
-
-	/**
 	 * Insert pojos in batch mode.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
@@ -389,10 +391,33 @@ public final class DalTableDao<T> {
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
 		reqirePredefinedSharding(getLogicDbName(), hints, "batchInsert requires predefined shard! Use crossShardBatchInsert instead.");
 		DalWatcher.begin();
-		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
+		return batchInsert(hints, getPojosFields(daoPojos));
+	}
+	
+	/**
+	 * The cross shard version of batch insert
+	 * @param hints
+	 * @param daoPojos
+	 * @return
+	 * @throws SQLException
+	 */
+	public Map<String, int[]> crossShardBatchInsert(DalHints hints, T... daoPojos) throws SQLException {
+		crossShardOperationAllowed(logicDbName, hints, "crossShardBatchInsert");
+		DalWatcher.begin();
+		Map<String, int[]> result = new HashMap<String, int[]>();
+		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
+		for(String shard: shuffled.keySet()) {
+			hints.inShard(shard);
+			result.put(shard, batchInsert(hints, shuffled.get(shard)));
+		}
+
+		return result;
+	}
+
+	private int[] batchInsert(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
-		for (T pojo : daoPojos) {
-			Map<String, ?> fields = parser.getFields(pojo);
+		for (Map<String, ?> fields : daoPojos) {
 			filterAutoIncrementPrimaryFields(fields);
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
@@ -402,10 +427,6 @@ public final class DalTableDao<T> {
 		return client.batchUpdate(batchInsertSql, parametersList, hints);
 	}
 	
-	public int[] crossShardBatchInsert(DalHints hints, T... daoPojos) throws SQLException {
-		return null;
-	}
-
 	/**
 	 * Delete the given pojos list in batch mode
 	 * 
@@ -442,19 +463,40 @@ public final class DalTableDao<T> {
 	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
 		reqirePredefinedSharding(getLogicDbName(), hints, "batchDelete requires predefined shard! Use crossShardBatchDelete instead.");
 		DalWatcher.begin();
-		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
+		return batchDelete(hints, getPojosFields(daoPojos));
+	}
+	
+	/**
+	 * Cross shard version of batch delete
+	 * @param hints
+	 * @param daoPojos
+	 * @return
+	 * @throws SQLException
+	 */
+	public Map<String, int[]> crossShardBatchDelete(DalHints hints, T... daoPojos) throws SQLException {
+		crossShardOperationAllowed(logicDbName, hints, "crossShardBatchDelete");
+		DalWatcher.begin();
+		Map<String, int[]> result = new HashMap<String, int[]>();
+		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
+		for(String shard: shuffled.keySet()) {
+			hints.inShard(shard);
+			result.put(shard, batchDelete(hints, shuffled.get(shard)));
+		}
+
+		return result;
+	}
+	
+	private int[] batchDelete(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
-		for (T pojo : daoPojos) {
+		List<String> pkNames = Arrays.asList(parser.getPrimaryKeyNames());
+		for (Map<String, ?> pojo : daoPojos) {
 			StatementParameters parameters = new StatementParameters();
-			addParameters(parameters, parser.getPrimaryKeys(pojo));
+			addParameters(1, parameters, pojo, pkNames);
 			parametersList[i++] = parameters;
 		}
 
 		return client.batchUpdate(deleteSql, parametersList, hints);
-	}
-	
-	public int[] crossShardBatchDelete(DalHints hints, T... daoPojos) throws SQLException {
-		return null;
 	}
 
 	/**

@@ -108,6 +108,12 @@ public class DalShardingHelper {
 			throw new SQLException(message);
 	}
 	
+	public static void crossShardOperationAllowed(String logicDbName, DalHints hints, String operation) throws SQLException {
+		// Assume the out transaction already handle sharding logic
+		if(DalTransactionManager.isInTransaction())
+			throw new SQLException(operation + " is not allowed within transaction");
+	}
+	
 	public static <T> void executeByShard(String logicDbName, DalParser<T> parser, T[] pojos, DalHints hints, BulkTask task) throws SQLException {
 		Map<String, List<Map<String, ?>>> shaffled = shuffle(logicDbName, parser, pojos);
 		

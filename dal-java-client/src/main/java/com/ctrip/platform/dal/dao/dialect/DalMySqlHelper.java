@@ -30,7 +30,7 @@ public class DalMySqlHelper<T> {
 	public int replace(KeyHolder holder, DalHints hints, T... entities) throws SQLException{
 		if(null == entities || entities.length == 0)
 			return 0;
-		Map<String, ?> fields = this.parser.getFields(entities[1]);
+		Map<String, ?> fields = this.parser.getFields(entities[0]);
 		Set<String> remainedColumns = fields.keySet();
 		String cloumns = combine(remainedColumns, COLUMN_SEPARATOR);
 		int count = entities.length;

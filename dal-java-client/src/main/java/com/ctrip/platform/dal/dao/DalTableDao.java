@@ -27,7 +27,7 @@ import com.ctrip.platform.dal.sql.logging.DalWatcher;
 public final class DalTableDao<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
 
-	private static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
+	//private static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
 	private static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
 	private static final String TMPL_SQL_MULTIPLE_INSERT = "INSERT INTO %s(%s) VALUES %s";
 	private static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
@@ -40,6 +40,8 @@ public final class DalTableDao<T> {
 	private static final String OR = " OR ";
 	private static final String TMPL_CALL = "{call %s(%s)}";
 
+	private String findtmp = "SELECT * FROM %s WHERE %s";
+	
 	private DalClient client;
 	private DalQueryDao queryDao;
 	private DalParser<T> parser;
@@ -79,6 +81,10 @@ public final class DalTableDao<T> {
 		endDelimiter = delimiter;
 	}
 
+	public void setFindTemplate(String tmp){
+		this.findtmp = tmp;
+	}
+	
 	/**
 	 * Specify the start and end delimiter used to quote column name.  
 	 * This is useful when column name happens  to be keyword of target database.
@@ -109,7 +115,7 @@ public final class DalTableDao<T> {
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, getColumnType(parser.getPrimaryKeyNames()[0]), id);
 
-		String selectSql = String.format(TMPL_SQL_FIND_BY,
+		String selectSql = String.format(findtmp,
 				parser.getTableName(), pkSql);
 
 		return queryDao.queryForObjectNullable(selectSql, parameters, hints, parser);
@@ -128,7 +134,7 @@ public final class DalTableDao<T> {
 		StatementParameters parameters = new StatementParameters();
 		addParameters(parameters, parser.getPrimaryKeys(pk));
 
-		String selectSql = String.format(TMPL_SQL_FIND_BY,
+		String selectSql = String.format(findtmp,
 				parser.getTableName(), pkSql);
 
 		return queryDao.queryForObjectNullable(selectSql, parameters, hints, parser);
@@ -168,7 +174,7 @@ public final class DalTableDao<T> {
 	public List<T> query(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
 		DalWatcher.begin();
-		String selectSql = String.format(TMPL_SQL_FIND_BY,
+		String selectSql = String.format(findtmp,
 				parser.getTableName(), whereClause);
 		return queryDao.query(selectSql, parameters, hints, parser);
 	}
@@ -187,7 +193,7 @@ public final class DalTableDao<T> {
 	public T queryFirst(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
 		DalWatcher.begin();
-		String selectSql = String.format(TMPL_SQL_FIND_BY,
+		String selectSql = String.format(findtmp,
 				parser.getTableName(), whereClause);
 		return queryDao.queryFirstNullable(selectSql, parameters, hints, parser);
 	}
@@ -208,7 +214,7 @@ public final class DalTableDao<T> {
 	public List<T> queryTop(String whereClause, StatementParameters parameters,
 			DalHints hints, int count) throws SQLException {
 		DalWatcher.begin();
-		String selectSql = String.format(TMPL_SQL_FIND_BY,
+		String selectSql = String.format(findtmp,
 				parser.getTableName(), whereClause);
 		return queryDao.queryTop(selectSql, parameters, hints, parser, count);
 	}
@@ -232,7 +238,7 @@ public final class DalTableDao<T> {
 			StatementParameters parameters, DalHints hints, int start, int count)
 			throws SQLException {
 		DalWatcher.begin();
-		String selectSql = String.format(TMPL_SQL_FIND_BY,
+		String selectSql = String.format(findtmp,
 				parser.getTableName(), whereClause);
 		return queryDao.queryFrom(selectSql, parameters, hints, parser, start,
 				count);

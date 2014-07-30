@@ -1,7 +1,9 @@
 package com.ctrip.platform.dal.daogen.utils;
 
 import java.io.StringReader;
+import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
@@ -10,6 +12,7 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.Join;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -39,7 +42,12 @@ public class SqlBuilder {
 	 * @throws Exception
 	 */
 	public static String pagingQuerySql(String sql, DatabaseCategory dbType, CurrentLanguage lang) throws Exception{
-		Select select = (Select) parserManager.parse(new StringReader(sql.replace("@", ":")));
+		String sql_content = sql.replace("@", ":");
+		boolean withNolock = StringUtils.containsIgnoreCase(sql_content, "WITH (NOLOCK)");
+		if(withNolock)
+			sql_content = sql_content.replaceAll("(?i)WITH \\(NOLOCK\\)","");
+		
+		Select select = (Select) parserManager.parse(new StringReader(sql_content));
 		PlainSelect plain = (PlainSelect)select.getSelectBody();
 		String result = "";
 		if(dbType == DatabaseCategory.MySql){	
@@ -56,7 +64,12 @@ public class SqlBuilder {
 			selectitems.add(newItem);
 			plain.getOrderByElements().clear();
 			
-			String cetWrap = "WITH CET AS (" + plain.toString() + ")";
+			String sqlWithRowNum = plain.toString();
+			if(withNolock){
+				sqlWithRowNum = plainSelectToStringAppendWithNoLock(plain);
+			}
+			
+			String cetWrap = "WITH CET AS (" + sqlWithRowNum + ")";
 			
 			selectitems.remove(newItem);
 			result = cetWrap + " SELECT " + StringUtils.join(selectitems, ", ") + " FROM CET WHERE " + 
@@ -68,9 +81,52 @@ public class SqlBuilder {
 		return result.replace(":", "@");
 	}
 	
+	private static String plainSelectToStringAppendWithNoLock(PlainSelect plain){
+		StringBuilder sql = new StringBuilder("SELECT ");
+		if (plain.getDistinct() != null) {
+			sql.append(plain.getDistinct()).append(" ");
+		}
+		if (plain.getTop() != null) {
+			sql.append(plain.getTop()).append(" ");
+		}
+		sql.append(PlainSelect.getStringList(plain.getSelectItems()));
+		if (plain.getFromItem() != null) {
+			sql.append(" FROM ").append(plain.getFromItem());
+			if (plain.getJoins() != null) {
+				Iterator<Join> it = plain.getJoins().iterator();
+				while (it.hasNext()) {
+					Join join = it.next();
+					if (join.isSimple()) {
+						sql.append(", ").append(join);
+					} else {
+						sql.append(" ").append(join);
+					}
+				}
+			}
+			// sql += getFormatedList(joins, "", false, false);
+			if (plain.getWhere() != null) {
+				sql.append(" WITH (NOLOCK) WHERE ").append(plain.getWhere());
+			}
+			else{
+				sql.append(" WITH (NOLOCK)");
+			}
+			if (plain.getOracleHierarchical() != null) {
+				sql.append(plain.getOracleHierarchical().toString());
+			}
+			sql.append(PlainSelect.getFormatedList(plain.getGroupByColumnReferences(), "GROUP BY"));
+			if (plain.getHaving() != null) {
+				sql.append(" HAVING ").append(plain.getHaving());
+			}
+			sql.append(PlainSelect.orderByToString(plain.isOracleSiblings(), plain.getOrderByElements()));
+			if (plain.getLimit() != null) {
+				sql.append(plain.getLimit());
+			}
+		}
+		return sql.toString();
+	}
 	
 	public static void main(String[] args) throws Exception{
-		String sql = "SELECT Birth,Name,Age,Telephone,PartmentID,Gender,Address,ID,space FROM Person WHERE  Age > @Age order by Name";
+		String sql = "SELECT [Birth],[Name],[Age],[ID] FROM [PerformanceTest].[dbo].[Person] WITH (NOLOCK) ORDER BY Age asc";
 		String cet = pagingQuerySql(sql, DatabaseCategory.SqlServer, CurrentLanguage.Java);
 		
 		System.out.println(cet);

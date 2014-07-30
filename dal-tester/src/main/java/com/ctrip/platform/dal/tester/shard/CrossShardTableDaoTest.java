@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.tester.shard;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.sql.ResultSet;
@@ -21,17 +20,14 @@ import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
 public class CrossShardTableDaoTest {
 	private final static String DATABASE_NAME_MOD = "dao_test_mod";
-	private final static String DATABASE_NAME_SIMPLE = "dao_test_simple";
 	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr";
 	private final static String DATABASE_NAME_MYSQL = "dao_test_mysql";
 	

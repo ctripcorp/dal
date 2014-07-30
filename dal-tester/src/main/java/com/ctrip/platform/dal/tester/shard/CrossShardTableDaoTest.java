@@ -3,15 +3,14 @@ package com.ctrip.platform.dal.tester.shard;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
@@ -28,32 +27,51 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
 public class CrossShardTableDaoTest {
-	private final static String DATABASE_NAME = "dao_test";
+	private final static String DATABASE_NAME_MOD = "dao_test_mod";
+	private final static String DATABASE_NAME_SIMPLE = "dao_test_simple";
+	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr";
+	private final static String DATABASE_NAME_MYSQL = "dao_test_mysql";
 	
 	private final static String TABLE_NAME = "dal_client_test";
 	
-	private final static String DROP_TABLE_SQL = "DROP TABLE IF EXISTS " + TABLE_NAME;
+	private final static String DROP_TABLE_SQL_MYSQL = "DROP TABLE IF EXISTS " + TABLE_NAME;
 	
 	//Create the the table
-	private final static String CREATE_TABLE_SQL = "CREATE TABLE " + TABLE_NAME +"("
+	private final static String CREATE_TABLE_SQL_MYSQL = "CREATE TABLE " + TABLE_NAME +"("
 			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
 			+ "quantity int,"
 			+ "type smallint, "
 			+ "address VARCHAR(64) not null, "
 			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
 	
-	private static DalClient client = null;
+	
+	private final static String DROP_TABLE_SQL_SQLSVR = "IF EXISTS ("
+			+ "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
+			+ "WHERE TABLE_NAME = '"+ TABLE_NAME + "') "
+			+ "DROP TABLE  "+ TABLE_NAME;
+	
+	//Create the the table
+	private final static String CREATE_TABLE_SQL_SQLSVR = "CREATE TABLE " + TABLE_NAME +"("
+			+ "Id int NOT NULL IDENTITY(1,1) PRIMARY KEY, "
+			+ "quantity int,type smallint, "
+			+ "address varchar(64) not null,"
+			+ "last_changed datetime default getdate())";
+	
+	private static DalClient clientSqlSvr;
+	private static DalClient clientMySql;
 	private static DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser();
 	private static DalTableDao<ClientTestModel> dao;
-
+	
 	static {
 		try {
+//			DalClientFactory.initClientFactory("/DalMult.config");
 			DalClientFactory.initClientFactory();
-			client = DalClientFactory.getClient(DATABASE_NAME);
+			clientSqlSvr = DalClientFactory.getClient(DATABASE_NAME_SQLSVR);
+			clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
 			dao = new DalTableDao<ClientTestModel>(clientTestParser);
-			dao.setDelimiter('`');
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -62,15 +80,31 @@ public class CrossShardTableDaoTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		DalHints hints = new DalHints();
-		String[] sqls = new String[] { DROP_TABLE_SQL, CREATE_TABLE_SQL};
-		client.batchUpdate(sqls, hints);
+		String[] sqls = new String[] { DROP_TABLE_SQL_MYSQL, CREATE_TABLE_SQL_MYSQL};
+		clientMySql.batchUpdate(sqls, hints);
+		
+		// For SQL server
+		hints = new DalHints();
+		StatementParameters parameters = new StatementParameters();
+		sqls = new String[] { DROP_TABLE_SQL_SQLSVR, CREATE_TABLE_SQL_SQLSVR};
+		for (int i = 0; i < sqls.length; i++) {
+			clientSqlSvr.update(sqls[i], parameters, hints);
+		}	
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		DalHints hints = new DalHints();
-		String[] sqls = new String[] { DROP_TABLE_SQL};
-		client.batchUpdate(sqls, hints);
+		String[] sqls = new String[] { DROP_TABLE_SQL_MYSQL};
+		clientMySql.batchUpdate(sqls, hints);
+		
+		//For Sql Server
+		hints = new DalHints();
+		StatementParameters parameters = new StatementParameters();
+		sqls = new String[] { DROP_TABLE_SQL_SQLSVR};
+		for (int i = 0; i < sqls.length; i++) {
+			clientSqlSvr.update(sqls[i], parameters, hints);
+		}
 	}
 
 	@Before
@@ -83,8 +117,21 @@ public class CrossShardTableDaoTest {
 						+ " VALUES(2, 11, 1, 'BJ INFO', NULL)",
 				"INSERT INTO " + TABLE_NAME
 						+ " VALUES(3, 12, 2, 'SZ INFO', NULL)" };
-		int[] counts = client.batchUpdate(insertSqls, hints);
+		int[] counts = clientMySql.batchUpdate(insertSqls, hints);
 		assertArrayEquals(new int[] { 1, 1, 1 }, counts);
+		
+		//For Sql Server
+		hints = new DalHints();
+		insertSqls = new String[] {
+				"SET IDENTITY_INSERT "+ TABLE_NAME +" ON",
+				"INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
+						+ " VALUES(4, 10, 1, 'SH INFO')",
+				"INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
+						+ " VALUES(5, 11, 1, 'BJ INFO')",
+				"INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
+						+ " VALUES(6, 12, 2, 'SZ INFO')",
+				"SET IDENTITY_INSERT "+ TABLE_NAME +" OFF"};
+		clientSqlSvr.batchUpdate(insertSqls, hints);
 	}
 
 	@After
@@ -93,178 +140,93 @@ public class CrossShardTableDaoTest {
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
 		try {
-			client.update(sql, parameters, hints);
+			clientMySql.update(sql, parameters, hints);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			fail();
 		}
-	}
 
-	private StatementParameters parameters = new StatementParameters();
-	private DalHints hints = new DalHints();
-
-	@Test
-	public void testQueryByPkNumber() {
+		sql = "DELETE FROM " + TABLE_NAME;
+		parameters = new StatementParameters();
+		hints = new DalHints();
 		try {
-			ClientTestModel p = dao.queryByPk(1, hints);
-			assertEquals("SH INFO", p.getAddress());
-		} catch (Exception e) {
+			clientSqlSvr.update(sql, parameters, hints);
+		} catch (SQLException e) {
 			e.printStackTrace();
-			fail();
 		}
 	}
-
+	
 	@Test
-	public void testQueryByPk() {
+	public void testCrossShardCombinedInsert() {
 		try {
+			StatementParameters parameters = new StatementParameters();
+			DalHints hints = new DalHints();
+			
+			hints.inShard("0");
+			dao.delete("id > 0", parameters, hints);
+			hints.inShard("1");
+			dao.delete("id > 0", parameters, hints);
+			
 			ClientTestModel p = new ClientTestModel();
+			
+			ClientTestModel[] pList = new ClientTestModel[3];
+			p = new ClientTestModel();
 			p.setId(1);
-			p = dao.queryByPk(p, hints);
-			assertEquals("SH INFO", p.getAddress());
+			p.setAddress("aaa");
+			pList[0] = p;
+			p = new ClientTestModel();
+			p.setId(2);
+			p.setAddress("aaa");
+			pList[1] = p;
+			p = new ClientTestModel();
+			p.setId(3);
+			p.setAddress("aaa");
+			pList[2] = p;
+			
+			Map<String, KeyHolder> keyHolders =  new HashMap<String, KeyHolder>();
+			dao.crossShardCombinedInsert(hints, keyHolders, pList);
+			
+			assertEquals(2, keyHolders.size());
+			assertEquals(1, keyHolders.get("0").size());
+			assertEquals(2, keyHolders.get("1").size());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
 		}
 	}
-	
-	@Test
-	public void testQueryLike() {
-		try {
-			ClientTestModel p = new ClientTestModel();
-			p.setAddress("SH INFO");
 
-			List<ClientTestModel> pList = dao.queryLike(p, hints);
-			assertEquals(1, pList.size());
-			assertEquals("SH INFO", pList.get(0).getAddress());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
-
-	
 	@Test
-	public void testQuery() {
+	public void testCrossShardBatchInsert() {
 		try {
 			StatementParameters parameters = new StatementParameters();
-			parameters.set(1, Types.INTEGER, 1);
-
-			List<ClientTestModel> pList = dao.query("ID = ?", parameters, hints);
-			assertEquals(1, pList.size());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
-
-	@Test
-	public void testRange() {
-		try {
-			StatementParameters parameters = new StatementParameters();
-			parameters.set(1, Types.INTEGER, 1);
+			DalHints hints = new DalHints();
 			
-			ClientTestModel p = dao.queryFirst("ID > ?", parameters, hints);
-			assertEquals(2, p.getId().intValue());
+			hints.inShard("0");
+			dao.delete("id > 0", parameters, hints);
+			hints.inShard("1");
+			dao.delete("id > 0", parameters, hints);
 			
-			List<ClientTestModel> result = dao.queryTop("ID > ?", parameters, hints, 5);
-			assertEquals(2, result.size());
-			
-			result = dao.queryFrom("ID > ?", parameters, hints, 0, 3);
-			assertEquals(2, result.size());
-			
-			result = dao.queryFrom("ID > ?", parameters, hints, 1, 3);
-			assertEquals(1, result.size());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
-
-	@Test
-	public void testInsert() {
-		try {
 			ClientTestModel p = new ClientTestModel();
-			p.setAddress("insert test 1");
-			assertEquals(1, dao.insert(hints, p));
-			p.setAddress("insert test 2");
-			assertEquals(1, dao.insert(hints, p));
-			p.setAddress("insert test 3");
-			assertEquals(1, dao.insert(hints, p));
 			
 			ClientTestModel[] pList = new ClientTestModel[3];
 			p = new ClientTestModel();
-			p.setAddress("insert test 4");
+			p.setId(1);
+			p.setAddress("aaa");
 			pList[0] = p;
 			p = new ClientTestModel();
-			p.setAddress("insert test 5");
+			p.setId(2);
+			p.setAddress("aaa");
 			pList[1] = p;
 			p = new ClientTestModel();
-			p.setAddress("insert test 6");
+			p.setId(3);
+			p.setAddress("aaa");
 			pList[2] = p;
 			
-			assertEquals(3, dao.insert(hints, pList));			
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
-
-	@Test
-	public void testUpdate() {
-		try {
+			Map<String, int[]> counts = dao.crossShardBatchInsert(hints, pList);
 			
-			ClientTestModel p = new ClientTestModel();
-			try {
-				dao.update(hints, p);
-				fail();
-			} catch (Exception e) {
-			}
-
-			StatementParameters parameters = new StatementParameters();
-			parameters.set(1, Types.VARCHAR, "SH%");
-			
-			p = dao.queryFirst("Address Like ?", parameters, hints);
-			System.out.println(p.getId());
-			p.setAddress("Never mind it");
-			dao.update(hints, p);
-			p = dao.queryByPk(p.getId(), hints);
-			assertEquals("Never mind it", p.getAddress());
-			
-			parameters = new StatementParameters();
-			parameters.set(1, Types.VARCHAR, "update test");
-			parameters.set(2, Types.INTEGER, p.getId());
-			dao.update("update " + TABLE_NAME + " set Address = ? where ID >= ?", parameters, hints);
-			p = dao.queryByPk(p.getId(), hints);
-			assertEquals("update test", p.getAddress());
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
-
-	@Test
-	public void testDelete() {
-		try {
-			StatementParameters parameters = new StatementParameters();
-			parameters.set(1, Types.VARCHAR, "SH INFO");
-			
-			ClientTestModel p = dao.queryFirst("Address Like ?", parameters, hints);
-			assertNotNull(p);
-			dao.delete(hints, p);
-			try{
-				assertNull(dao.queryByPk(p.getId(), hints));
-				
-			} catch (Exception e) {
-				fail();
-			}
-			
-			parameters = new StatementParameters();
-			parameters.set(1, Types.VARCHAR, "SH INFO");
-			dao.delete("Address LIKE ?", parameters, hints);
-			List<ClientTestModel> result = dao.query("Address LIKE ?", parameters, hints);
-			assertEquals(0, result.size());
-			
+			assertEquals(2, counts.size());
+			assertEquals(1, counts.get("0").length);
+			assertEquals(2, counts.get("1").length);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -272,105 +234,28 @@ public class CrossShardTableDaoTest {
 	}
 	
 	@Test
-	public void testInsertWithKeyHolder() {
+	public void testCrossShardBatchDelete() {
 		try {
-			dao.delete("Address = 'testInsertKH'", parameters, hints);
+			DalHints hints = new DalHints();
 			
 			ClientTestModel p = new ClientTestModel();
 			
 			ClientTestModel[] pList = new ClientTestModel[3];
 			p = new ClientTestModel();
-			p.setAddress("testInsertKH");
+			p.setId(1);
 			pList[0] = p;
 			p = new ClientTestModel();
-			p.setAddress("testInsertKH");
+			p.setId(2);
 			pList[1] = p;
 			p = new ClientTestModel();
-			p.setAddress("testInsertKH");
+			p.setId(3);
 			pList[2] = p;
 			
-			KeyHolder keyHolder = new KeyHolder();
-			dao.insert(hints, keyHolder, pList);
-			assertEquals(3, keyHolder.size());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
-	
-	@Test
-	public void testCombinedInsert() {
-		try {
-			dao.delete("Address LIKE 'testInsertCombined%'", parameters, hints);
+			Map<String, int[]> counts = dao.crossShardBatchDelete(hints, pList);
 			
-			ClientTestModel p = new ClientTestModel();
-			
-			ClientTestModel[] pList = new ClientTestModel[3];
-			p = new ClientTestModel();
-			p.setAddress("testInsertCombined1");
-			pList[0] = p;
-			p = new ClientTestModel();
-			p.setAddress("testInsertCombined2");
-			pList[1] = p;
-			p = new ClientTestModel();
-			p.setAddress("testInsertCombined3");
-			pList[2] = p;
-			
-			KeyHolder keyHolder = new KeyHolder();
-			dao.combinedInsert(hints, keyHolder, pList);
-			assertEquals(3, keyHolder.size());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
-	
-	@Test
-	public void testContinueOnError() {
-		try {
-			ClientTestModel p = new ClientTestModel();
-			ClientTestModel[] pList = new ClientTestModel[3];
-			p = new ClientTestModel();
-			p.setAddress("ContinueOnError");
-			pList[0] = p;
-			p = new ClientTestModel();
-			p.setAddress("ContinueOnErrorContinueOnErrorContinueOnErrorContinueOnErrorContinueOnError");
-			pList[1] = p;
-			p = new ClientTestModel();
-			p.setAddress("ContinueOnError");
-			pList[2] = p;
-			
-			hints = new DalHints(DalHintEnum.continueOnError);
-			int count = dao.insert(hints, pList);
-			assertEquals(2, count);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
-
-	@Test
-	public void testBatchInsert() {
-		try {
-			ClientTestModel p;
-			ClientTestModel[] pList = new ClientTestModel[3];
-			p = new ClientTestModel();
-			p.setAddress("insert test 4");
-			pList[0] = p;
-			p = new ClientTestModel();
-			p.setAddress("insert test 5");
-			pList[1] = p;
-			p = new ClientTestModel();
-			p.setAddress("insert test 6");
-			pList[2] = p;
-			
-			int[] counts = dao.batchInsert(hints, pList);
-			int count = 0;
-			for(int t: counts)
-				count+=t;
-			
-			assertEquals(3, count);
+			assertEquals(2, counts.size());
+			assertEquals(1, counts.get("0").length);
+			assertEquals(2, counts.get("1").length);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -378,7 +263,7 @@ public class CrossShardTableDaoTest {
 	}
 
 	private static class ClientTestDalParser implements DalParser<ClientTestModel>{
-		private static final String databaseName="dao_test";
+		private static final String databaseName=DATABASE_NAME_MOD;
 		private static final String tableName= "dal_client_test";
 		private static final String[] columnNames = new String[]{
 			"id","quantity","type","address","last_changed"
@@ -501,4 +386,52 @@ public class CrossShardTableDaoTest {
 			this.lastChanged = lastChanged;
 		}
 	}
+
+//	@Test
+	public void test2() {
+//		try {
+//			DalClient client = DalClientFactory.getClient("AbacusDB_INSERT_1");
+//			StatementParameters parameters = new StatementParameters();
+//			DalHints hints = new DalHints();
+//			//String delete = "update AbacusAddInfoLog set PNR='dafas' where id = 100";
+//			String select = "select PNR from AbacusAddInfoLog where LOGID = 100";
+//			String update = "update AbacusAddInfoLog set PNR='dafas11' where LOGID = 100";
+//			String restore = "update AbacusAddInfoLog set PNR='dafas' where LOGID = 100";
+//			
+//			hints = new DalHints();
+//			Map<String, Integer> colValues = new HashMap<String, Integer>();
+//			colValues.put("user_id", 0);
+//			hints.set(DalHintEnum.shardColValues, colValues);
+//
+//			client.update(update, parameters, hints);
+//			
+//			client.query(select, parameters, hints, new DalResultSetExtractor<Object>() {
+//				@Override
+//				public Object extract(ResultSet rs) throws SQLException {
+//					while(rs.next()){
+//						System.out.println(rs.getObject(1));
+//					}
+//					return null;
+//				}
+//				
+//			});
+//			
+//
+//			client.update(restore, parameters, hints);
+//			
+//			client.query(select, parameters, hints, new DalResultSetExtractor<Object>() {
+//				@Override
+//				public Object extract(ResultSet rs) throws SQLException {
+//					while(rs.next()){
+//						System.out.println(rs.getObject(1));
+//					}
+//					return null;
+//				}
+//				
+//			});
+//						
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+	}	
 }

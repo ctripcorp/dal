@@ -184,6 +184,18 @@
      </repository>
 	</repositories>
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources/${environment}</directory>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources/velocity</directory>
+			</resource>
+			<resource>
+				<directory>src/main/resources/xunit</directory>
+			</resource>
+		</resources>
 		<finalName>ROOT</finalName>
 		<pluginManagement>
 			<plugins>

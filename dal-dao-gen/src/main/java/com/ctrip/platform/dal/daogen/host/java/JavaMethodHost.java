@@ -175,6 +175,9 @@ public class JavaMethodHost {
 			paramsDeclaration.add("int pageNo");
 			paramsDeclaration.add("int pageSize");
 		}
+		
+		paramsDeclaration.add("DalHints hints");
+		
 		return StringUtils.join(paramsDeclaration, ", ");
 	}
 

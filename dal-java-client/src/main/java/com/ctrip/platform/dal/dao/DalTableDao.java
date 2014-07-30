@@ -326,7 +326,7 @@ public final class DalTableDao<T> {
 	/**
 	 * Cross shard version of combined insert
 	 * @param hints
-	 * @param keyHolder
+	 * @param keyHolder if you want to get generated keys, just create an empty map.
 	 * @param daoPojos
 	 * @return
 	 * @throws SQLException
@@ -342,7 +342,11 @@ public final class DalTableDao<T> {
 		
 		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
 		for(String shard: shuffled.keySet()) {
-			KeyHolder keyHolder = keyHolders == null? null : keyHolders.get(shard);
+			KeyHolder keyHolder = null;
+			if(keyHolders != null) {
+				keyHolder = new KeyHolder();
+				keyHolders.put(shard, keyHolder);
+			}
 			hints.inShard(shard);
 			total += combinedInsert(hints, keyHolder, shuffled.get(shard));
 		}

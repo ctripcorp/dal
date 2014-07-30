@@ -32,6 +32,12 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		if(columns.length == 0)
 			return null;
 		
+		// Shard value take the highest priority
+		if(hints.is(DalHintEnum.shardValue)) {
+			Integer id = (Integer)hints.get(DalHintEnum.shardValue);
+			return String.valueOf(id%mod);
+		}
+		
 		String shard = locateByParameters(hints);
 		if(shard != null)
 			return shard;
@@ -39,11 +45,6 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		shard = locateByShardCol(hints);
 		if(shard != null)
 			return shard;
-		
-		if(hints.is(DalHintEnum.shardValue)) {
-			Integer id = (Integer)hints.get(DalHintEnum.shardValue);
-			return String.valueOf(id%mod);
-		}
 		
 		throw new RuntimeException("Can not locate shard for " + logicDbName);
 	}

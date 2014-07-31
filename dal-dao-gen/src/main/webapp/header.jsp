@@ -54,7 +54,8 @@
 				<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
 					data-close-others="true"> 
 					<span class="username"> 
-					<%=AssertionHolder.getAssertion().getPrincipal().getAttributes().get("sn")%>
+					<%=request.getSession().getAttribute("loginUserName")%>
+					<%-- AssertionHolder.getAssertion().getPrincipal().getAttributes().get("sn") --%>
 					</span> 
 					<i class="fa fa-angle-down"> </i>
 				</a>

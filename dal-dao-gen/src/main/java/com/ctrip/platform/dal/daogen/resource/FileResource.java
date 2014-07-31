@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -14,11 +16,17 @@ import java.util.zip.ZipOutputStream;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.StreamingOutput;
 
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
@@ -105,17 +113,14 @@ public class FileResource {
 					sb.append(System.getProperty("line.separator"));
 				}
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
 				if (null != reader) {
 					try {
 						reader.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -129,7 +134,9 @@ public class FileResource {
 	@Path("download")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String download(@QueryParam("id") String id,
-			@QueryParam("language") String name) {
+			@QueryParam("language") String name,
+			@Context HttpServletRequest request,@Context HttpServletResponse response) throws Exception {
+
 		File f = null;
 		if (null != name && !name.isEmpty()) {
 			f = new File(new File(generatePath, id), name);
@@ -139,16 +146,64 @@ public class FileResource {
 
 		Project proj = daoOfProject.getProjectByID(Integer.valueOf(id));
 
-		String zipFileName = proj.getName() + "-" + System.currentTimeMillis()
-				+ ".zip";
+		final String zipFileName = proj.getName() + "-" + System.currentTimeMillis() + ".zip";
 
 		if (f.isFile()) {
 			zipFile(f, zipFileName);
 		} else {
 			new ZipFolder(f.getAbsolutePath()).zipIt(zipFileName);
 		}
+		
+		response.setContentType("text/html; charset=UTF-8");
+//		((ServletRequest) response).setCharacterEncoding("UTF-8");
+		FileInputStream fis = null;
+		BufferedInputStream buff = null;
+		OutputStream myout = null;
+		
+		String path = generatePath+"/"+zipFileName;
+		
+		File file = new File(path);
 
-		return String.format("%s/files/%s", Configuration.get("codegen_url"), zipFileName);
+		try {
+			if (!file.exists()) {
+				response.sendError(404, "File not found!");
+				return "";
+			} else {
+				response.setContentType("application/x-msdownload");
+				response.setContentLength((int) file.length());
+				response.setHeader("Content-Disposition","attachment;filename="+ new String(file.getName().getBytes("gbk"),"iso-8859-1"));
+			}
+			response.reset();
+			fis = new FileInputStream(file);
+			buff = new BufferedInputStream(fis);
+			byte[] b = new byte[1024];
+			long k = 0;
+			myout = response.getOutputStream();
+
+			while (k < file.length()) {
+				int j = buff.read(b, 0, 1024);
+				k += j;
+				myout.write(b, 0, j);
+			}
+			myout.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (fis != null) {
+					fis.close();
+				}
+				if (buff != null)
+					buff.close();
+				if (myout != null)
+					myout.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return "";
+		
 	}
 
 	private void zipFile(File fileToZip, String zipFileName) {
@@ -178,5 +233,30 @@ public class FileResource {
 			JavaIOUtils.closeOutputStream(zos);
 		}
 	}
+	
+//	@GET
+//	@Path("download")
+//	@Produces(MediaType.TEXT_PLAIN)
+//	public String download(@QueryParam("id") String id,
+//			@QueryParam("language") String name) {
+//		File f = null;
+//		if (null != name && !name.isEmpty()) {
+//			f = new File(new File(generatePath, id), name);
+//		} else {
+//			f = new File(generatePath, id);
+//		}
+//
+//		Project proj = daoOfProject.getProjectByID(Integer.valueOf(id));
+//
+//		String zipFileName = proj.getName() + "-" + System.currentTimeMillis() + ".zip";
+//
+//		if (f.isFile()) {
+//			zipFile(f, zipFileName);
+//		} else {
+//			new ZipFolder(f.getAbsolutePath()).zipIt(zipFileName);
+//		}
+//
+//		return String.format("%s/files/%s", Configuration.get("codegen_url"), zipFileName);
+//	}
 
 }

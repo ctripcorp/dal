@@ -502,14 +502,35 @@
         });
 
         $(document.body).on('click', "#downloadFiles", function (event) {
-            cblock($("body"));
-            $.get("/rest/file/download?id=" + w2ui['grid'].current_project+
-                "&language=" + $("#viewCode").val(), function (data) {
-                $("body").unblock();
-                window.location.href = data;
-            }).fail(function(data){
-                    alert("下载失败!");
-                });
+            var form=$("<form>");//定义一个form表单
+            form.attr("style","display:none");
+            form.attr("target","");
+            form.attr("method","get");
+            form.attr("action","/rest/file/download");
+            var input1=$("<input>");
+            input1.attr("type","hidden");
+            input1.attr("name","id");
+            input1.attr("value",w2ui['grid'].current_project);
+            var input2=$("<input>");
+            input2.attr("type","hidden");
+            input2.attr("name","language");
+            input2.attr("value",$("#viewCode").val());
+
+            $("body").append(form);//将表单放置在web中
+            form.append(input1);
+            form.append(input2);
+
+            form.submit();//表单提交
+
+//            cblock($("body"));
+//            $.get("/rest/file/download?id=" + w2ui['grid'].current_project+
+//                "&language=" + $("#viewCode").val(), function (data) {
+//                $("body").unblock();
+////                window.location.href = data;
+//            }).fail(function(data){
+//                    alert("下载失败!");
+//                    $("body").unblock();
+//                });
         });
 
         $(document.body).on('change', "#viewCode", function (event) {

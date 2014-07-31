@@ -21,7 +21,7 @@
     <dependency>
   		<groupId>com.ctrip.framework.clogging</groupId>
   		<artifactId>clogging-agent</artifactId>
-  		<version>3.2.5</version>
+  		<version>${central-logging-version}</version>
 	</dependency>
   </dependencies>
   

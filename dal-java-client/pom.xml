@@ -37,11 +37,6 @@
       <artifactId>protobuf-java</artifactId>
       <version>${google-pb-version}</version>
     </dependency>
-    <dependency>  
-      <groupId>com.ctrip.freeway</groupId>
-      <artifactId>central-logging-agent</artifactId>
-      <version>${central-logging-version}</version>
-    </dependency>
     <dependency>
 		<groupId>com.ctrip.security</groupId>
 		<artifactId>encryption</artifactId>

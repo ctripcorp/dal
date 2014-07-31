@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -82,6 +83,16 @@ public class DalHints {
 		return set(DalHintEnum.shardColValues, shardColValues);
 	}
 
+	public DalHints setShardColValue(String column, Object value) {
+		if(is(DalHintEnum.shardColValues) == false) {
+			setShardColValues(new HashMap<String, Object>());
+		}
+		
+		Map<String, Object> shardColValues = (Map<String, Object>)get(DalHintEnum.shardColValues);
+		shardColValues.put(column, value);
+		return this;
+	}
+	
 	public DalHints setParameters(StatementParameters parameters) {
 		return set(DalHintEnum.parameters, parameters);
 	}

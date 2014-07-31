@@ -227,32 +227,27 @@ public class DirectClientDaoShardTest {
 			
 			parameters = new StatementParameters();
 			shardColValues = new HashMap<String, Integer>();
-			hints = new DalHints().setShardColValues(shardColValues);
-			shardColValues.put("id", 1);
+			hints = new DalHints().setShardColValue("id", 1);
 			parameters.set(1, Types.INTEGER, 1);
 			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
 			assertEquals(1, o.longValue());
 			
 			parameters = new StatementParameters();
 			shardColValues = new HashMap<String, Integer>();
-			hints = new DalHints().setShardColValues(shardColValues);
-			shardColValues.put("id", 3);
+			hints = new DalHints().setShardColValue("id", 3);
 			parameters.set(1, Types.INTEGER, 3);
 			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
 			assertEquals(3, o.longValue());
 			
 			parameters = new StatementParameters();
 			shardColValues = new HashMap<String, Integer>();
-			hints = new DalHints().setShardColValues(shardColValues);
-			shardColValues.put("id", 4);
+			hints = new DalHints().setShardColValue("id", 4);
 			parameters.set(1, Types.INTEGER, 4);
 			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
 			assertEquals(4, o.longValue());
 			
 			parameters = new StatementParameters();
-			shardColValues = new HashMap<String, Integer>();
-			hints = new DalHints().setShardColValues(shardColValues);
-			shardColValues.put("id", 6);
+			hints = new DalHints().setShardColValue("id", 6);
 			parameters.set(1, Types.INTEGER, 6);
 			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
 			assertEquals(6, o.longValue());

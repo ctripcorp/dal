@@ -5,6 +5,11 @@ import java.util.Map;
 
 /**
  * Additional parameters used to indicate how DAL behaves for each of the operation.
+ * 
+ * IMPORTANT NOTE!!!
+ * Because entry may be changed by by DAL internal logic, DalHints is not intended to be reused. 
+ * You should never create a class level DalHints reference and reuse it in the following calls.
+ * 
  * @author jhhe
  */
 public class DalHints {

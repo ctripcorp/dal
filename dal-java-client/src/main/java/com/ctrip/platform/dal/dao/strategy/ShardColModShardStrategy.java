@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.dao.strategy;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -26,7 +24,10 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		mod = Integer.parseInt(settings.get(MOD));
 	}
 
-	@Override
+	/**
+	 * This method will locate shard id by first referring shardValue, then parameter and finally shardCol defined in hints.
+	 * If shard can be decided by any of these values, it will return immediately with the found id.
+	 */
 	public String locateShard(DalConfigure configure, String logicDbName,
 			DalHints hints) {
 		if(columns.length == 0)

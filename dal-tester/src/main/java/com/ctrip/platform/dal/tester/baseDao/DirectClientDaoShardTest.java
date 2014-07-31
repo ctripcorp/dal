@@ -1,9 +1,12 @@
 package com.ctrip.platform.dal.tester.baseDao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,14 +16,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.ctrip.freeway.config.LogConfig;
-import com.ctrip.freeway.logging.ILog;
-import com.ctrip.freeway.logging.LogManager;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
@@ -148,36 +146,118 @@ public class DirectClientDaoShardTest {
 		}
 	}
 
-//	@Test
-	public void testMod() {
+	@Test
+	public void testModByShardValue() {
 		try {
 			DalClient client = DalClientFactory.getClient(DATABASE_NAME_MOD);
 			
 			String sql = "select id from " + TABLE_NAME;
 			
 			StatementParameters parameters = new StatementParameters();
-			DalHints hints = new DalHints();
-			Map<String, Integer> colValues = new HashMap<String, Integer>();
-			colValues.put("id", 0);
-			hints.set(DalHintEnum.shardColValues, colValues);
-
-			Integer o = (Integer)client.query(sql, parameters, hints, new DalScalarExtractor());
-			assertNotNull(o);
+			DalHints hints = new DalHints().setShardValue(1);
+			Number o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertEquals(1, o.longValue());
 			
-			hints = new DalHints();
-			colValues = new HashMap<String, Integer>();
-			colValues.put("id", 1);
-			hints.masterOnly();
-			hints.set(DalHintEnum.shardColValues, colValues);
+			hints.setShardValue(2);
+			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertEquals(4, o.longValue());
 
-			o = (Integer)client.query(sql, parameters, hints, new DalScalarExtractor());
-			assertNotNull(o);
+			hints.setShardValue(3);
+			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertEquals(1, o.longValue());
+
+			hints.setShardValue(4);
+			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertEquals(4, o.longValue());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
 		}
 	}
 
+	@Test
+	public void testModByParameters() {
+		try {
+			DalClient client = DalClientFactory.getClient(DATABASE_NAME_MOD);
+			
+			String sql = "select id from " + TABLE_NAME + " where id = ?";
+			StatementParameters parameters;
+			DalHints hints;
+			Number o;
+			
+			parameters = new StatementParameters();
+			hints = new DalHints();
+			parameters.set(1, "id", Types.INTEGER, 1);
+			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertEquals(1, o.longValue());
+			
+			parameters = new StatementParameters();
+			hints = new DalHints();
+			parameters.set(1, "id", Types.INTEGER, 3);
+			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertEquals(3, o.longValue());
+
+			parameters = new StatementParameters();
+			hints = new DalHints();
+			parameters.set(1, "id", Types.INTEGER, 4);
+			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertEquals(4, o.longValue());
+
+			parameters = new StatementParameters();
+			hints = new DalHints();
+			parameters.set(1, "id", Types.INTEGER, 6);
+			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertEquals(6, o.longValue());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testModByShardCol() {
+		try {
+			DalClient client = DalClientFactory.getClient(DATABASE_NAME_MOD);
+			
+			String sql = "select id from " + TABLE_NAME + " where id = ?";
+			StatementParameters parameters;
+			DalHints hints;
+			Number o;
+			Map<String, Integer> shardColValues;
+			
+			parameters = new StatementParameters();
+			shardColValues = new HashMap<String, Integer>();
+			hints = new DalHints().setShardColValue("id", 1);
+			parameters.set(1, Types.INTEGER, 1);
+			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertEquals(1, o.longValue());
+			
+			parameters = new StatementParameters();
+			shardColValues = new HashMap<String, Integer>();
+			hints = new DalHints().setShardColValue("id", 3);
+			parameters.set(1, Types.INTEGER, 3);
+			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertEquals(3, o.longValue());
+			
+			parameters = new StatementParameters();
+			shardColValues = new HashMap<String, Integer>();
+			hints = new DalHints().setShardColValue("id", 4);
+			parameters.set(1, Types.INTEGER, 4);
+			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertEquals(4, o.longValue());
+			
+			parameters = new StatementParameters();
+			hints = new DalHints().setShardColValue("id", 6);
+			parameters.set(1, Types.INTEGER, 6);
+			o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
+			assertEquals(6, o.longValue());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
 	@Test
 	public void testSimple() {
 		try {
@@ -202,52 +282,4 @@ public class DirectClientDaoShardTest {
 			fail();
 		}
 	}
-
-//	@Test
-	public void test2() {
-//		try {
-//			DalClient client = DalClientFactory.getClient("AbacusDB_INSERT_1");
-//			StatementParameters parameters = new StatementParameters();
-//			DalHints hints = new DalHints();
-//			//String delete = "update AbacusAddInfoLog set PNR='dafas' where id = 100";
-//			String select = "select PNR from AbacusAddInfoLog where LOGID = 100";
-//			String update = "update AbacusAddInfoLog set PNR='dafas11' where LOGID = 100";
-//			String restore = "update AbacusAddInfoLog set PNR='dafas' where LOGID = 100";
-//			
-//			hints = new DalHints();
-//			Map<String, Integer> colValues = new HashMap<String, Integer>();
-//			colValues.put("user_id", 0);
-//			hints.set(DalHintEnum.shardColValues, colValues);
-//
-//			client.update(update, parameters, hints);
-//			
-//			client.query(select, parameters, hints, new DalResultSetExtractor<Object>() {
-//				@Override
-//				public Object extract(ResultSet rs) throws SQLException {
-//					while(rs.next()){
-//						System.out.println(rs.getObject(1));
-//					}
-//					return null;
-//				}
-//				
-//			});
-//			
-//
-//			client.update(restore, parameters, hints);
-//			
-//			client.query(select, parameters, hints, new DalResultSetExtractor<Object>() {
-//				@Override
-//				public Object extract(ResultSet rs) throws SQLException {
-//					while(rs.next()){
-//						System.out.println(rs.getObject(1));
-//					}
-//					return null;
-//				}
-//				
-//			});
-//						
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-	}	
 }

@@ -1,6 +1,7 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -311,7 +312,8 @@ public class ProjectResource {
 //				generator = new JavaDalGenerator();
 //				context = generator.createContext(id, regen, progress, newPojo);
 				context= new JavaCodeGenContext(id, regen, progress);
-				XrossFactory.createFromXML("code_gen_java.xunit").getProcessor("Java Code Generator").process(context);
+				URL url = ProjectResource.class.getResource("/code_gen_java.xunit");
+				XrossFactory.createFromXML(url.getFile()).getProcessor("Java Code Generator").process(context);
 			} else if (language.equals("cs")){
 //				generator = new CSharpDalGenerator();
 //				context = generator.createContext(id, regen, progress, newPojo);
@@ -319,7 +321,8 @@ public class ProjectResource {
 				hints.put("newPojo", newPojo);
 				context = new CSharpCodeGenContext(id, regen, progress, hints);
 				((CSharpCodeGenContext)context).setNewPojo(newPojo);
-				XrossFactory.createFromXML("code_gen_csharp.xunit").getProcessor("C# Code Generator").process(context);
+				URL url = ProjectResource.class.getResource("/code_gen_csharp.xunit");
+				XrossFactory.createFromXML(url.getFile()).getProcessor("C# Code Generator").process(context);
 			}
 //			generator.prepareDirectory(context);
 //			generator.prepareData(context);

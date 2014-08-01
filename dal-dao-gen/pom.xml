@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.ctrip.platform</groupId>
 		<artifactId>dal-all</artifactId>
-		<version>1.0.0</version>
+		<version>1.1.1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>dal-dao-gen</artifactId>
@@ -184,6 +184,18 @@
      </repository>
 	</repositories>
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources/${environment}</directory>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources/velocity</directory>
+			</resource>
+			<resource>
+				<directory>src/main/resources/xunit</directory>
+			</resource>
+		</resources>
 		<finalName>ROOT</finalName>
 		<pluginManagement>
 			<plugins>

@@ -24,10 +24,5 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libs/itext-2.0.2.jar"/>
-	<classpathentry kind="lib" path="libs/jcommon-1.0.9.jar"/>
-	<classpathentry kind="lib" path="libs/jfreechart-1.0.5.jar"/>
-	<classpathentry kind="lib" path="libs/p-unit-0.15.319-extension.jar"/>
-	<classpathentry kind="lib" path="libs/p-unit-0.15.319.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -20,6 +20,12 @@ public class DalConfigure {
 	}
 	
 	public DatabaseSet getDatabaseSet(String logicDbName) {
+		if (!databaseSets.containsKey(logicDbName))
+			throw new IllegalArgumentException(
+					"Can not find definition for Database Set "
+							+ logicDbName
+							+ ". Please check spelling or define it in Dal.config");
+
 		return databaseSets.get(logicDbName);
 	}
 	

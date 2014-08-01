@@ -7,7 +7,7 @@ import javax.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.freeway.agent.MessageManager;
+import com.ctrip.framework.clogging.agent.MessageManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
 

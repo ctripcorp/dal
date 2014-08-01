@@ -10,7 +10,7 @@ import javax.crypto.Cipher;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import com.ctrip.freeway.config.LogConfig;
+import com.ctrip.framework.clogging.agent.config.LogConfig;
 
 public class CommonUtil {
     private static final String APPID_COMMENT;

@@ -1,11 +1,17 @@
 package com.ctrip.platform.dal.dao;
 
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.crossShardOperationAllowed;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.reqirePredefinedSharding;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffle;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +27,7 @@ import com.ctrip.platform.dal.sql.logging.DalWatcher;
 public final class DalTableDao<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
 
-	private static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
+	//private static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
 	private static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
 	private static final String TMPL_SQL_MULTIPLE_INSERT = "INSERT INTO %s(%s) VALUES %s";
 	private static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
@@ -34,12 +40,17 @@ public final class DalTableDao<T> {
 	private static final String OR = " OR ";
 	private static final String TMPL_CALL = "{call %s(%s)}";
 
+	private String findtmp = "SELECT * FROM %s WHERE %s";
+	
 	private DalClient client;
 	private DalQueryDao queryDao;
 	private DalParser<T> parser;
 
+	private final String logicDbName;
 	private final String pkSql;
 	private Set<String> pkColumns;
+	private String columnsForInsert;
+	private List<String> validColumnsForInsert;
 	private String batchInsertSql;
 	private String deleteSql;
 	private Map<String, Integer> columnTypes = new HashMap<String, Integer>();
@@ -49,9 +60,12 @@ public final class DalTableDao<T> {
 	public DalTableDao(DalParser<T> parser) {
 		this.client = DalClientFactory.getClient(parser.getDatabaseName());
 		this.parser = parser;
+		this.logicDbName = parser.getDatabaseName();
 		queryDao = new DalQueryDao(parser.getDatabaseName());
 		initColumnTypes();
 		pkSql = initSql();
+		validColumnsForInsert = buildValidColumnsForInsert();
+		columnsForInsert = combineColumns(validColumnsForInsert, COLUMN_SEPARATOR);
 		batchInsertSql = buildBatchInsertSql();
 		deleteSql = buildDeleteSql();
 	}
@@ -67,6 +81,10 @@ public final class DalTableDao<T> {
 		endDelimiter = delimiter;
 	}
 
+	public void setFindTemplate(String tmp){
+		this.findtmp = tmp;
+	}
+	
 	/**
 	 * Specify the start and end delimiter used to quote column name.  
 	 * This is useful when column name happens  to be keyword of target database.
@@ -97,7 +115,7 @@ public final class DalTableDao<T> {
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, getColumnType(parser.getPrimaryKeyNames()[0]), id);
 
-		String selectSql = String.format(TMPL_SQL_FIND_BY,
+		String selectSql = String.format(findtmp,
 				parser.getTableName(), pkSql);
 
 		return queryDao.queryForObjectNullable(selectSql, parameters, hints, parser);
@@ -116,7 +134,7 @@ public final class DalTableDao<T> {
 		StatementParameters parameters = new StatementParameters();
 		addParameters(parameters, parser.getPrimaryKeys(pk));
 
-		String selectSql = String.format(TMPL_SQL_FIND_BY,
+		String selectSql = String.format(findtmp,
 				parser.getTableName(), pkSql);
 
 		return queryDao.queryForObjectNullable(selectSql, parameters, hints, parser);
@@ -156,7 +174,7 @@ public final class DalTableDao<T> {
 	public List<T> query(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
 		DalWatcher.begin();
-		String selectSql = String.format(TMPL_SQL_FIND_BY,
+		String selectSql = String.format(findtmp,
 				parser.getTableName(), whereClause);
 		return queryDao.query(selectSql, parameters, hints, parser);
 	}
@@ -175,7 +193,7 @@ public final class DalTableDao<T> {
 	public T queryFirst(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
 		DalWatcher.begin();
-		String selectSql = String.format(TMPL_SQL_FIND_BY,
+		String selectSql = String.format(findtmp,
 				parser.getTableName(), whereClause);
 		return queryDao.queryFirstNullable(selectSql, parameters, hints, parser);
 	}
@@ -196,7 +214,7 @@ public final class DalTableDao<T> {
 	public List<T> queryTop(String whereClause, StatementParameters parameters,
 			DalHints hints, int count) throws SQLException {
 		DalWatcher.begin();
-		String selectSql = String.format(TMPL_SQL_FIND_BY,
+		String selectSql = String.format(findtmp,
 				parser.getTableName(), whereClause);
 		return queryDao.queryTop(selectSql, parameters, hints, parser, count);
 	}
@@ -220,7 +238,7 @@ public final class DalTableDao<T> {
 			StatementParameters parameters, DalHints hints, int start, int count)
 			throws SQLException {
 		DalWatcher.begin();
-		String selectSql = String.format(TMPL_SQL_FIND_BY,
+		String selectSql = String.format(findtmp,
 				parser.getTableName(), whereClause);
 		return queryDao.queryFrom(selectSql, parameters, hints, parser, start,
 				count);
@@ -300,37 +318,78 @@ public final class DalTableDao<T> {
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
 			T... daoPojos) throws SQLException {
+		reqirePredefinedSharding(logicDbName, hints, "combinedInsert requires predefined shard! Use crossShardCombinedInsert instead.");
 		DalWatcher.begin();
+		return combinedInsert(hints, keyHolder, getPojosFields(daoPojos)); 
+	}
+	
+	/**
+	 * Cross shard version of combined insert
+	 * @param hints
+	 * @param keyHolder if you want to get generated keys, just create an empty map.
+	 * @param daoPojos
+	 * @return
+	 * @throws SQLException
+	 */
+	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
+			T... daoPojos) throws SQLException {
+		crossShardOperationAllowed(logicDbName, hints, "crossShardCombinedInsert");
+		DalWatcher.begin();
+		int total = 0;
+		// TODO add check for shard related info
 		if (null == daoPojos || daoPojos.length < 1)
 			return 0;
-		List<String> validColumns = new ArrayList<String>();
-		for(String s : parser.getColumnNames()){
-			if(!(parser.isAutoIncrement() && isPrimaryKey(s)))
-				validColumns.add(s);
+		
+		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
+		for(String shard: shuffled.keySet()) {
+			KeyHolder keyHolder = null;
+			if(keyHolders != null) {
+				keyHolder = new KeyHolder();
+				keyHolders.put(shard, keyHolder);
+			}
+			hints.inShard(shard);
+			total += combinedInsert(hints, keyHolder, shuffled.get(shard));
 		}
-		String cloumns = combineColumns(validColumns, COLUMN_SEPARATOR);
-		int count = daoPojos.length;
+
+		return total;
+	}
+
+	private List<Map<String, ?>> getPojosFields(T... daoPojos) {
+		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
+		if (null == daoPojos || daoPojos.length < 1)
+			return pojoFields;
+		
+		for (T pojo: daoPojos){
+			pojoFields.add(parser.getFields(pojo));
+		}
+		
+		return pojoFields;
+	}
+	
+	private int combinedInsert(DalHints hints, KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
+		if (null == daoPojos || daoPojos.size() < 1)
+			return 0;
+		
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
 
 		int startIndex = 1;
-		for (int i = 0; i < count; i++) {
-			Map<String, ?> vfields = parser.getFields(daoPojos[i]);
+		for (Map<String, ?> vfields: daoPojos) {
 			filterAutoIncrementPrimaryFields(vfields);
-			int paramCount = addParameters(startIndex, parameters, vfields, validColumns);
+			int paramCount = addParameters(startIndex, parameters, vfields, validColumnsForInsert);
 			startIndex += paramCount;
 			values.append(String.format("(%s),",
 					this.combine("?", paramCount, ",")));
 		}
 
 		String sql = String.format(TMPL_SQL_MULTIPLE_INSERT,
-				this.parser.getTableName(), cloumns,
+				this.parser.getTableName(), columnsForInsert,
 				values.substring(0, values.length() - 2) + ")");
 
 		return null == keyHolder ? this.client.update(sql, parameters, hints)
 				: this.client.update(sql, parameters, hints, keyHolder);
 	}
-
+	
 	/**
 	 * Insert pojos in batch mode.
 	 * 
@@ -340,11 +399,35 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
+		reqirePredefinedSharding(getLogicDbName(), hints, "batchInsert requires predefined shard! Use crossShardBatchInsert instead.");
 		DalWatcher.begin();
-		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
+		return batchInsert(hints, getPojosFields(daoPojos));
+	}
+	
+	/**
+	 * The cross shard version of batch insert
+	 * @param hints
+	 * @param daoPojos
+	 * @return
+	 * @throws SQLException
+	 */
+	public Map<String, int[]> crossShardBatchInsert(DalHints hints, T... daoPojos) throws SQLException {
+		crossShardOperationAllowed(logicDbName, hints, "crossShardBatchInsert");
+		DalWatcher.begin();
+		Map<String, int[]> result = new HashMap<String, int[]>();
+		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
+		for(String shard: shuffled.keySet()) {
+			hints.inShard(shard);
+			result.put(shard, batchInsert(hints, shuffled.get(shard)));
+		}
+
+		return result;
+	}
+
+	private int[] batchInsert(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
-		for (T pojo : daoPojos) {
-			Map<String, ?> fields = parser.getFields(pojo);
+		for (Map<String, ?> fields : daoPojos) {
 			filterAutoIncrementPrimaryFields(fields);
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
@@ -353,7 +436,7 @@ public final class DalTableDao<T> {
 
 		return client.batchUpdate(batchInsertSql, parametersList, hints);
 	}
-
+	
 	/**
 	 * Delete the given pojos list in batch mode
 	 * 
@@ -388,12 +471,38 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
+		reqirePredefinedSharding(getLogicDbName(), hints, "batchDelete requires predefined shard! Use crossShardBatchDelete instead.");
 		DalWatcher.begin();
-		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
+		return batchDelete(hints, getPojosFields(daoPojos));
+	}
+	
+	/**
+	 * Cross shard version of batch delete
+	 * @param hints
+	 * @param daoPojos
+	 * @return
+	 * @throws SQLException
+	 */
+	public Map<String, int[]> crossShardBatchDelete(DalHints hints, T... daoPojos) throws SQLException {
+		crossShardOperationAllowed(logicDbName, hints, "crossShardBatchDelete");
+		DalWatcher.begin();
+		Map<String, int[]> result = new HashMap<String, int[]>();
+		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
+		for(String shard: shuffled.keySet()) {
+			hints.inShard(shard);
+			result.put(shard, batchDelete(hints, shuffled.get(shard)));
+		}
+
+		return result;
+	}
+	
+	private int[] batchDelete(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
-		for (T pojo : daoPojos) {
+		List<String> pkNames = Arrays.asList(parser.getPrimaryKeyNames());
+		for (Map<String, ?> pojo : daoPojos) {
 			StatementParameters parameters = new StatementParameters();
-			addParameters(parameters, parser.getPrimaryKeys(pojo));
+			addParameters(1, parameters, pojo, pkNames);
 			parametersList[i++] = parameters;
 		}
 
@@ -539,7 +648,6 @@ public final class DalTableDao<T> {
 		return fields;
 	}
 
-	
 	public Map<String, ?> filterAutoIncrementPrimaryFields(Map<String, ?> fields){
 		if(parser.isAutoIncrement())
 			fields.remove(parser.getPrimaryKeyNames()[0]);
@@ -554,6 +662,10 @@ public final class DalTableDao<T> {
 	public String buildCallSql(String spName, int paramCount) {
 		return String.format(TMPL_CALL, spName,
 				combine(PLACE_HOLDER, paramCount, COLUMN_SEPARATOR));
+	}
+	
+	private String getLogicDbName() {
+		return parser.getDatabaseName();
 	}
 
 	private boolean isPrimaryKey(String fieldName){
@@ -591,17 +703,26 @@ public final class DalTableDao<T> {
 				values);
 	}
 	
-	private String buildBatchInsertSql() {
+	private List<String> buildValidColumnsForInsert() {
 		List<String> validColumns = new ArrayList<String>();
 		for(String s : parser.getColumnNames()){
 			if(!(parser.isAutoIncrement() && isPrimaryKey(s)))
 				validColumns.add(s);
 		}
-		String cloumns = combineColumns(validColumns, COLUMN_SEPARATOR);
-		String values = combine(PLACE_HOLDER, validColumns.size(),
+		
+		return validColumns;
+
+	}
+	
+	private String buildBatchInsertSql() {
+		int validColumnsSize = parser.getColumnNames().length;
+		if(parser.isAutoIncrement())
+			validColumnsSize--;
+		
+		String values = combine(PLACE_HOLDER, validColumnsSize,
 				COLUMN_SEPARATOR);
 
-		return String.format(TMPL_SQL_INSERT, parser.getTableName(), cloumns,
+		return String.format(TMPL_SQL_INSERT, parser.getTableName(), columnsForInsert,
 				values);
 	}
 

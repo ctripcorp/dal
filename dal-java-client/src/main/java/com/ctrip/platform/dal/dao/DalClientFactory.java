@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.platform.dal.common.db.DruidDataSourceWrapper;
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
@@ -13,7 +12,7 @@ import com.ctrip.platform.dal.sql.logging.MetricsLogger;
 
 public class DalClientFactory {
 	private static Logger logger = LoggerFactory.getLogger(DalClientFactory.class);
-	private static AtomicReference<DruidDataSourceWrapper> connPool = new AtomicReference<DruidDataSourceWrapper>();
+//	private static AtomicReference<DruidDataSourceWrapper> connPool = new AtomicReference<DruidDataSourceWrapper>();
 
 	private static AtomicReference<DalConfigure> configureRef = new AtomicReference<DalConfigure>();
 
@@ -31,20 +30,7 @@ public class DalClientFactory {
 	 * @throws Exception
 	 */
 	public static void initClientFactory() throws Exception {
-		if (configureRef.get() != null) {
-			logReInitialized();
-			return;
-		}
-
-		synchronized (DalClientFactory.class) {
-			if (configureRef.get() != null) {
-				logReInitialized();
-				return;
-			}
-			
-			configureRef.set(DalConfigureFactory.load());
-			logInitialized();
-		}
+		internalInitClientFactory(null);
 	}
 	
 	/**
@@ -55,18 +41,30 @@ public class DalClientFactory {
 	 * @throws Exception
 	 */
 	public static void initClientFactory(String path) throws Exception {
+		if(path == null)
+			throw new NullPointerException("Path is empty");
+		
+		internalInitClientFactory(path);
+	}
+	
+	private static void internalInitClientFactory(String path) throws Exception {
 		if (configureRef.get() != null) {
-			logReInitialized();
+			logger.warn("Dal Java Client Factory is already initialized.");
 			return;
 		}
 
 		synchronized (DalClientFactory.class) {
 			if (configureRef.get() != null) {
-				logReInitialized();
 				return;
 			}
-			configureRef.set(DalConfigureFactory.load(path));
-			logInitialized(path);
+			
+			if(path == null) {
+				configureRef.set(DalConfigureFactory.load());
+				logger.info("Successfully initialized Dal Java Client Factory");
+			} else {
+				configureRef.set(DalConfigureFactory.load(path));
+				logger.info("Successfully initialized Dal Java Client Factory with " + path);
+			}
 		}
 	}
 
@@ -75,28 +73,27 @@ public class DalClientFactory {
 	 * Dal.config
 	 */
 	public static void warmUpConnections() {
-		DalConfigure config = configureRef.get();
-		if (config == null)
-			return;
-		config.warmUpConnections();
+		getDalConfigure().warmUpConnections();
 	}
 
 	public static DalClient getClient(String logicDbName) {
 		if (logicDbName == null)
 			throw new NullPointerException("Database Set name can not be null");
 
+		DalConfigure config = getDalConfigure();
+
+		// Verify if it is existed
+		config.getDatabaseSet(logicDbName);
+
+		return new DalDirectClient(getDalConfigure(), logicDbName);
+	}
+	
+	public static DalConfigure getDalConfigure() {
 		DalConfigure config = configureRef.get();
 		if (config == null)
 			throw new IllegalStateException(
 					"DalClientFactory has not been not initialized or initilization fail");
-
-		if (config.getDatabaseSet(logicDbName) == null)
-			throw new IllegalArgumentException(
-					"Can not find definition for Database Set "
-							+ logicDbName
-							+ ". Please check spelling or define it in Dal.config");
-
-		return new DalDirectClient(configureRef.get(), logicDbName);
+		return config;
 	}
 
 	/**
@@ -106,17 +103,5 @@ public class DalClientFactory {
 		logger.info("Start shutdown Dal Java Client Factory");
 		MetricsLogger.shutdown();
 		logger.info("Dal Java Client Factory is shutdown");
-	}
-	
-	private static void logInitialized() {
-		logger.info("Successfully initialized Dal Java Client Factory");
-	}
-
-	private static void logInitialized(String path) {
-		logger.info("Successfully initialized Dal Java Client Factory with " + path);
-	}
-	
-	private static void logReInitialized() {
-		logger.warn("Dal Java Client Factory is already initialized.");
 	}
 }

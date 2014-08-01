@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-all</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.1</version>
     <relativePath>../pom.xml</relativePath> 
   </parent>
   <artifactId>dal-java-client</artifactId>
@@ -36,11 +36,6 @@
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
       <version>${google-pb-version}</version>
-    </dependency>
-    <dependency>  
-      <groupId>com.ctrip.freeway</groupId>
-      <artifactId>central-logging-agent</artifactId>
-      <version>${central-logging-version}</version>
     </dependency>
     <dependency>
 		<groupId>com.ctrip.security</groupId>

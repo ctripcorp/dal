@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.jasig.cas.client.util.AssertionHolder;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
@@ -128,6 +129,26 @@ public class GenTaskBySqlBuilderResource {
 			return status;
 		}
 		
+		return status;
+	}
+	
+	@POST
+	@Path("getDatabaseCategory")
+	public Status getDatabaseCategory(@FormParam("db_set_name") String db_set_name){
+		Status status = Status.OK;
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
+		try {
+			DatabaseCategory category = DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString());
+			if(DatabaseCategory.MySql==category){
+				status.setInfo("MySql");
+			}else{
+				status.setInfo("SqlServer");
+			}
+		} catch (Exception e) {
+			status = Status.ERROR;
+			status.setInfo(e.getMessage());
+			return status;
+		}
 		return status;
 	}
 

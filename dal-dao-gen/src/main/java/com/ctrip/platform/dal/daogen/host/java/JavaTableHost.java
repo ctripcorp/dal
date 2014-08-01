@@ -160,12 +160,11 @@ public class JavaTableHost {
 	}
 
 	public String getPkParameterDeclaration() {
-		String[] paramsDeclaration = new String[primaryKeys.size()];
-		int i = 0;
+		List<String> paramsDeclaration = new ArrayList<String>();
 		for(JavaParameterHost parameter: primaryKeys) {
-			paramsDeclaration[i++] = String.format("%s %s", parameter.getClassDisplayName(), parameter.getUncapitalizedName());
+			paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getUncapitalizedName()));
 		}
-		
+		paramsDeclaration.add(String.format("%s %s", "DalHints", "hints"));
 		return StringUtils.join(paramsDeclaration, ", ");
 	}
 	

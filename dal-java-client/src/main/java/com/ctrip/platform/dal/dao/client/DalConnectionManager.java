@@ -59,7 +59,9 @@ public class DalConnectionManager {
 
 			// In case the sharding strategy indicate that master shall be used
 			isMaster |= strategy.isMaster(config, logicDbName, hints);
-			String shard = strategy.locateShard(config, logicDbName, hints);
+			String shard = hints.getShardId();
+			if(shard == null)
+				shard = strategy.locateShard(config, logicDbName, hints);
 			dbSet.validate(shard);
 			
 			allInOneKey = dbSet.getRandomRealDbName(shard, isMaster, isSelect);

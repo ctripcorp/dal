@@ -7,11 +7,14 @@ import ${field};
 public class ${host.getPojoClassName()}Dao {
 
 	private static final String DATA_BASE = "${host.getDbName()}";
+	
+#if($host.getDatabaseCategory().name() == "MySql")
 	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getViewName()}";
 	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getViewName()}";
-#if($host.getDatabaseCategory().name() == "MySql")
 	private static final String PAGE_MYSQL_PATTERN = "SELECT * FROM ${host.getViewName()} LIMIT %s, %s";
 #else
+	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getViewName()} WITH (NOLOCK)";
+	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getViewName()} WITH (NOLOCK)";
 	private static final String PAGE_SQL_PATTERN = "WITH CTE AS (select *, row_number() over(order by ${host.getOverColumns()} desc ) as rownum" 
 			+" from ${host.getViewName()} (nolock)) select * from CTE where rownum between %s and %s";
 #end
@@ -37,10 +40,10 @@ public class ${host.getPojoClassName()}Dao {
 	  *@return 
 	  *     ${host.getPojoClassName()} collection
 	**/
-	public List<${host.getPojoClassName()}> getAll() throws SQLException
+	public List<${host.getPojoClassName()}> getAll(DalHints hints) throws SQLException
 	{
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		List<${host.getPojoClassName()}> result = null;
 		result = this.client.query(ALL_SQL_PATTERN, parameters, hints, extractor);
 		return result;
@@ -51,21 +54,21 @@ public class ${host.getPojoClassName()}Dao {
 	  *@return 
 	  *     the ${host.getPojoClassName()} records count
 	**/
-	public int Count() throws SQLException
+	public int Count(DalHints hints) throws SQLException
 	{
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();		
+		hints = DalHints.createIfAbsent(hints);	
 		Number result = (Number)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
 		return result.intValue();
 	}
 	
-	public List<${host.getPojoClassName()}> getListByPage(int pagesize, int pageNo) throws SQLException
+	public List<${host.getPojoClassName()}> getListByPage(int pagesize, int pageNo,DalHints hints) throws SQLException
 	{
 		if(pageNo < 1 || pagesize < 1) 
 			throw new SQLException("Illigal pagesize or pageNo, pls check");
 		
         StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);	
 		
 		String sql = "";
 #if($host.getDatabaseCategory().name() == "MySql" )

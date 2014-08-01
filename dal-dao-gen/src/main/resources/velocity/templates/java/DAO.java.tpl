@@ -6,11 +6,13 @@ import ${field};
 
 public class ${host.getPojoClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbName()}";
+#if($host.getDatabaseCategory().name() == "MySql")
 	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getTableName()}";
 	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getTableName()}";
-#if($host.getDatabaseCategory().name() == "MySql")
 	private static final String PAGE_MYSQL_PATTERN = "SELECT * FROM ${host.getTableName()} LIMIT %s, %s";
 #else
+	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getTableName()} WITH (NOLOCK)";
+	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getTableName()} WITH (NOLOCK)";
 	private static final String PAGE_SQL_PATTERN = "WITH CTE AS (select *, row_number() over(order by ${host.getOverColumns()} desc ) as rownum" 
 			+" from ${host.getTableName()} (nolock)) select * from CTE where rownum between %s and %s";
 #end
@@ -40,7 +42,13 @@ public class ${host.getPojoClassName()}Dao {
 
 	public ${host.getPojoClassName()}Dao() {
 		this.client = new DalTableDao<${host.getPojoClassName()}>(parser);
-		thhis.queryDao = new DalQueryDao(DATA_BASE);
+#if($host.getDatabaseCategory().name() == "MySql")
+		this.client.setDelimiter('`','`');
+#else
+		this.client.setDelimiter('[',']');
+		this.client.setFindTemplate("SELECT * FROM %s WHERE %s WITH (NOLOCK)");
+#end
+		this.queryDao = new DalQueryDao(DATA_BASE);
 		this.rowextractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(parser); 
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}
@@ -50,9 +58,9 @@ public class ${host.getPojoClassName()}Dao {
 	 * Query ${host.getPojoClassName()} by the specified ID
 	 * The ID must be a number
 	**/
-	public ${host.getPojoClassName()} queryByPk(Number id)
+	public ${host.getPojoClassName()} queryByPk(Number id, DalHints hints)
 			throws SQLException {
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		return client.queryByPk(id, hints);
 	}
 #else
@@ -61,7 +69,7 @@ public class ${host.getPojoClassName()}Dao {
 	**/
 	public ${host.getPojoClassName()} queryByPk(${host.getPkParameterDeclaration()})
 			throws SQLException {
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		${host.getPojoClassName()} pk = new ${host.getPojoClassName()}();		
 #foreach( $field in ${host.getPrimaryKeys()} )
 		pojo.set${field.getCapitalizedName()}(${field.getUncapitalizedName()});
@@ -72,19 +80,19 @@ public class ${host.getPojoClassName()}Dao {
     /**
 	 * Query ${host.getPojoClassName()} by ${host.getPojoClassName()} instance which the primary key is set
 	**/
-	public ${host.getPojoClassName()} queryByPk(${host.getPojoClassName()} pk)
+	public ${host.getPojoClassName()} queryByPk(${host.getPojoClassName()} pk, DalHints hints)
 			throws SQLException {
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		return client.queryByPk(pk, hints);
 	}
 #end
 	/**
 	 * Get the records count
 	**/
-	public int count() throws SQLException
+	public int count(DalHints hints) throws SQLException
 	{
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();	
+		hints = DalHints.createIfAbsent(hints);
 		Number result = (Number)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
 		return result.intValue();
 	}
@@ -93,11 +101,11 @@ public class ${host.getPojoClassName()}Dao {
 	 * Query ${host.getPojoClassName()} with paging function
 	 * The pageSize and pageNo must be greater than zero.
 	**/
-	public List<${host.getPojoClassName()}> queryByPage(int pageSize, int pageNo)  throws SQLException {
+	public List<${host.getPojoClassName()}> queryByPage(int pageSize, int pageNo, DalHints hints)  throws SQLException {
 		if(pageNo < 1 || pageSize < 1) 
 			throw new SQLException("Illigal pagesize or pageNo, pls check");	
         StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		String sql = "";
 #if($host.getDatabaseCategory().name() == "MySql" )
 		sql = String.format(PAGE_MYSQL_PATTERN, (pageNo - 1) * pageSize, pageSize);
@@ -112,10 +120,10 @@ public class ${host.getPojoClassName()}Dao {
 	/**
 	 * Get all records in the whole table
 	**/
-	public List<${host.getPojoClassName()}> getAll() throws SQLException
+	public List<${host.getPojoClassName()}> getAll(DalHints hints) throws SQLException
 	{
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		List<${host.getPojoClassName()}> result = null;
 		result = this.baseClient.query(ALL_SQL_PATTERN, parameters, hints, rowextractor);
 		return result;
@@ -125,11 +133,11 @@ public class ${host.getPojoClassName()}Dao {
 	/**
 	 * SP Insert
 	**/
-	public int insert(${host.getPojoClassName()} daoPojo) throws SQLException {
+	public int insert(${host.getPojoClassName()} daoPojo, DalHints hints) throws SQLException {
 		if(null == daoPojo)
 			return 0;
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		String callSql = prepareSpCall(INSERT_SP_NAME, parameters, parser.getFields(daoPojo));
 #foreach($p in $host.getSpInsert().getParameters())
 #if($p.getDirection().name() == "InputOutput")
@@ -157,10 +165,10 @@ public class ${host.getPojoClassName()}Dao {
 	 * Batch insert without out parameters
 	 * Return how many rows been affected for each of parameters
 	**/
-	public int[] insert(${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public int[] insert(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length == 0)
 			return new int[0];
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		String callSql = client.buildCallSql(INSERT_SP_NAME, parser.getFields(daoPojos[0]).size());
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		for(int i = 0; i< daoPojos.length; i++){
@@ -177,20 +185,20 @@ public class ${host.getPojoClassName()}Dao {
 	 * SQL insert
 	 * Note: there must be one non-null field in daoPojo
 	**/
-	public void insert(${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public void insert(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		client.insert(hints, null, daoPojos);
 	}
 	
 	/**
 	 * SQL insert with batch mode
 	**/
-	public int[] batchInsert(${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public int[] batchInsert(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length == 0)
 			return new int[0];
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		return client.batchInsert(hints, daoPojos);
 	}
 
@@ -198,10 +206,10 @@ public class ${host.getPojoClassName()}Dao {
 	 * SQL insert with keyHolder
 	 * Note: there must be one non-null field in daoPojo
 	**/
-	public void insert(KeyHolder keyHolder, ${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public void insert(DalHints hints, KeyHolder keyHolder, ${host.getPojoClassName()}...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		client.insert(hints, keyHolder, daoPojos);
 	}
 #end
@@ -210,11 +218,11 @@ public class ${host.getPojoClassName()}Dao {
 	/**
 	 * SP delete
 	**/
-	public int delete(${host.getPojoClassName()} daoPojo) throws SQLException {
+	public int delete(DalHints hints, ${host.getPojoClassName()} daoPojo) throws SQLException {
 		if(null == daoPojo)
 			return 0;
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();	
+		hints = DalHints.createIfAbsent(hints);
 		String callSql = prepareSpCall(DELETE_SP_NAME, parameters, parser.getPrimaryKeys(daoPojo));
 #foreach($p in $host.getSpDelete().getParameters())
 #if($p.getDirection().name() == "InputOutput")
@@ -241,10 +249,10 @@ public class ${host.getPojoClassName()}Dao {
 	 * Batch SP delete without out parameters
 	 * Return how many rows been affected for each of parameters
 	 */
-	public int[] delete(${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public int[] delete(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length == 0)
 			return new int[0];
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		String callSql = client.buildCallSql(DELETE_SP_NAME, parser.getFields(daoPojos[0]).size());
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		for(int i = 0; i< daoPojos.length; i++){
@@ -261,20 +269,20 @@ public class ${host.getPojoClassName()}Dao {
 	 * SQL delete
 	 * Note: there must be one non-null field in daoPojo
 	**/
-	public void delete(${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public void delete(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		client.delete(hints, daoPojos);
 	}
 	
 	/**
 	 * SQL delete with batch mode
 	**/
-	public int[] batchDelete(${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public int[] batchDelete(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return new int[0];
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		return client.batchDelete(hints, daoPojos);
 	}
 #end
@@ -283,11 +291,11 @@ public class ${host.getPojoClassName()}Dao {
 	/**
 	 * SP update
 	**/
-	public int update(${host.getPojoClassName()} daoPojo) throws SQLException {
+	public int update(DalHints hints, ${host.getPojoClassName()} daoPojo) throws SQLException {
 		if(null == daoPojo)
 			return 0;
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		String callSql = prepareSpCall(UPDATE_SP_NAME, parameters, parser.getFields(daoPojo));
 #foreach($p in $host.getSpUpdate().getParameters())
 #if($p.getDirection().name() == "InputOutput")
@@ -313,10 +321,10 @@ public class ${host.getPojoClassName()}Dao {
 	 * Batch SP update without out parameters
 	 * Return how many rows been affected for each of parameters
 	 */
-	public int[] update(${host.getPojoClassName()}... daoPojos) throws SQLException {
+	public int[] update(DalHints hints, ${host.getPojoClassName()}... daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length == 0)
 			return new int[0];
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		String callSql = client.buildCallSql(UPDATE_SP_NAME, parser.getFields(daoPojos[0]).size());
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		for(int i = 0; i< daoPojos.length; i++){
@@ -333,10 +341,10 @@ public class ${host.getPojoClassName()}Dao {
 	 * SQL update
 	 * Note: there must be one non-null field in daoPojo
 	**/
-	public void update(${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public void update(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		client.update(hints, daoPojos);
 	}
 #end
@@ -353,11 +361,11 @@ public class ${host.getPojoClassName()}Dao {
 		String sql = "${method.getSql()}";
 #end
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
-		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #end
 #end
 		return queryDao.query(sql, parameters, hints, ${method.getPojoClassName()}.class);
@@ -368,11 +376,11 @@ public class ${host.getPojoClassName()}Dao {
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
-		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #end
 #end
 		return queryDao.queryForObjectNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
@@ -383,11 +391,11 @@ public class ${host.getPojoClassName()}Dao {
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
-		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #end
 #end
 		return queryDao.queryFirstNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
@@ -403,14 +411,14 @@ public class ${host.getPojoClassName()}Dao {
 		String sql = "${method.getSql()}";
 #end
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
-		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #end
 #end
-		return queryDao.query(sql, parameters, hints, rowextractor);
+		return queryDao.query(sql, parameters, hints, parser);
 	}
 #end
 ##实体类型且返回Signle
@@ -418,14 +426,14 @@ public class ${host.getPojoClassName()}Dao {
 	public ${host.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
-		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #end
 #end
-		return queryDao.queryForObjectNullable(sql, parameters, hints, rowextractor);
+		return queryDao.queryForObjectNullable(sql, parameters, hints, parser);
 	}
 #end
 ##实体类型且返回First
@@ -433,14 +441,14 @@ public class ${host.getPojoClassName()}Dao {
 	public ${host.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
-		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #end
 #end
-		return queryDao.queryFirstNullable(sql, parameters, hints, rowextractor);
+		return queryDao.queryFirstNullable(sql, parameters, hints, parser);
 	}
 #end
 #else
@@ -451,7 +459,7 @@ public class ${host.getPojoClassName()}Dao {
 		String sql = SQLParser.parse("${method.getSql()}");
 #end
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		
 		int i = 1;
 #foreach($p in $method.getParameters())

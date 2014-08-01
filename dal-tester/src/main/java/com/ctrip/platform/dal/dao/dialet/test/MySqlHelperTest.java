@@ -66,6 +66,30 @@ public class MySqlHelperTest {
 	}
 	
 	@Test
+	public void replaceOneTest() throws SQLException {
+		Person pojo1 = new Person();
+	    pojo1.setID(1);
+	    pojo1.setName("forest" + 1);
+	    pojo1.setBirth(new Timestamp(System.currentTimeMillis()));
+		
+		client.delete(hints, pojo1);
+		KeyHolder holder = new KeyHolder();
+		
+		helper.replace(holder, hints, pojo1);
+		
+		List<Map<String, Object>> generateKeys = holder.getKeyList();
+		assertTrue(generateKeys.size() == 1);
+		assertTrue(generateKeys.get(0).containsKey("GENERATED_KEY"));
+		
+		pojo1.setName("jack1");
+		helper.replace(holder, new DalHints(), pojo1);	
+		Person rep = client.queryByPk(1, hints);
+		assertTrue(rep.getName().equals("jack1"));
+		
+		client.delete(hints, pojo1);
+	}
+	
+	@Test
 	public void multipleInsert() throws SQLException {
 		int count = 3;
 		Person[] persons = new Person[count];

@@ -28,7 +28,7 @@ public class ${host.getClassName()}Dao {
 		String sql = "${method.getSql()}";
 #end
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
@@ -43,7 +43,7 @@ public class ${host.getClassName()}Dao {
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
@@ -58,7 +58,7 @@ public class ${host.getClassName()}Dao {
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
@@ -78,7 +78,7 @@ public class ${host.getClassName()}Dao {
 		String sql = "${method.getSql()}";
 #end
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
@@ -93,7 +93,7 @@ public class ${host.getClassName()}Dao {
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
@@ -108,7 +108,7 @@ public class ${host.getClassName()}Dao {
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
 		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())

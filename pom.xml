@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ctrip.platform</groupId>
 	<artifactId>dal-all</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.1</version>
 	<packaging>pom</packaging>
 	<modules>
 		<module>dal-java-client</module>
@@ -39,7 +39,7 @@
 		<mysql-version>5.1.25</mysql-version>
 		<sqlserver-version>4.0</sqlserver-version>
 		<jtds-version>1.2.8</jtds-version>
-		<central-logging-version>2.1.7</central-logging-version>
+		<central-logging-version>3.2.5</central-logging-version>
 		<google-pb-version>2.5.0</google-pb-version>
 		<google-guice-version>4.0-beta</google-guice-version>
 		<google-guava-version>14.0.1</google-guava-version>

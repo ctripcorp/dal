@@ -1,12 +1,12 @@
 package com.ctrip.platform.dal.tester;
 
-import com.ctrip.freeway.config.LogConfig;
-import com.ctrip.freeway.metrics.IMetric;
-import com.ctrip.freeway.metrics.MetricManager;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+
+import com.ctrip.framework.clogging.agent.config.LogConfig;
+import com.ctrip.framework.clogging.agent.metrics.IMetric;
+import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 
 /**
  * @author: huang_jie

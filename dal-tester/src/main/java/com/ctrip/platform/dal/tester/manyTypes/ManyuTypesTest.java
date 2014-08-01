@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.freeway.config.LogConfig;
+import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.platform.dal.common.cfg.DasConfigureService;
 import com.ctrip.platform.dal.common.db.ConfigureServiceReader;
 import com.ctrip.platform.dal.common.db.DasConfigureReader;

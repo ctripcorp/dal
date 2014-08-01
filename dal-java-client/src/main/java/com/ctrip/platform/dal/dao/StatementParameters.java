@@ -26,6 +26,10 @@ public class StatementParameters {
 		return add(StatementParameter.Builder.set(index, sqlType, value).build());
 	}
 
+	public StatementParameters set(int index, String name, int sqlType, Object value) {
+		return add(StatementParameter.Builder.set(index, sqlType, value).setName(name).build());
+	}
+
 	public StatementParameters set(String name, int sqlType, Object value) {
 		return add(StatementParameter.Builder.set(name, sqlType, value).build());
 	}
@@ -42,6 +46,10 @@ public class StatementParameters {
 		return add(StatementParameter.Builder.set(index, sqlType, value).setSensitive(true).build());
 	}
 
+	public StatementParameters setSensitive(int index, String name, int sqlType, Object value) {
+		return add(StatementParameter.Builder.set(index, sqlType, value).setSensitive(true).setName(name).build());
+	}
+	
 	public StatementParameters setSensitive(String name, int sqlType, Object value) {
 		return add(StatementParameter.Builder.set(name, sqlType, value).setSensitive(true).build());
 	}

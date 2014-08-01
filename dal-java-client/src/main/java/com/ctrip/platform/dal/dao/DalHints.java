@@ -1,14 +1,25 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Additional parameters used to indicate how DAL behaves for each of the operation.
+ * 
+ * IMPORTANT NOTE!!!
+ * Because entry may be changed by by DAL internal logic, DalHints is not intended to be reused. 
+ * You should never create a class level DalHints reference and reuse it in the following calls.
+ * 
  * @author jhhe
  */
 public class DalHints {
 	private Map<DalHintEnum, Object> hints = new LinkedHashMap<DalHintEnum, Object>();
+	
+	// TODO find a better name
+	public static DalHints createIfAbsent(DalHints hints) {
+		return hints == null ? new DalHints() : hints;
+	}
 	
 	public DalHints() {}
 	
@@ -58,6 +69,32 @@ public class DalHints {
 	public DalHints inShard(String shardId) {
 		hints.put(DalHintEnum.shard, shardId);
 		return this;
+	}
+	
+	public String getShardId() {
+		return getString(DalHintEnum.shard);
+	}
+	
+	public DalHints setShardValue(Object shardValue) {
+		return set(DalHintEnum.shardValue, shardValue);
+	}
+	
+	public DalHints setShardColValues(Map<String, ?> shardColValues) {
+		return set(DalHintEnum.shardColValues, shardColValues);
+	}
+
+	public DalHints setShardColValue(String column, Object value) {
+		if(is(DalHintEnum.shardColValues) == false) {
+			setShardColValues(new HashMap<String, Object>());
+		}
+		
+		Map<String, Object> shardColValues = (Map<String, Object>)get(DalHintEnum.shardColValues);
+		shardColValues.put(column, value);
+		return this;
+	}
+	
+	public DalHints setParameters(StatementParameters parameters) {
+		return set(DalHintEnum.parameters, parameters);
 	}
 	
 	public DalHints masterOnly() {

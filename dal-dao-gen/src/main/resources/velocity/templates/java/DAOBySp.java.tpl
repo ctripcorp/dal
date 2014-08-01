@@ -13,7 +13,7 @@ public class ${host.getDbName()}SpDao {
 	}
 	
 #foreach($h in $host.getSpHosts())
-	public Map<String, ?> call${h.getPojoClassName()}(${h.getPojoClassName()} param) throws SQLException {
+	public Map<String, ?> call${h.getPojoClassName()}(${h.getPojoClassName()} param, DalHints hints) throws SQLException {
 		String callString = "{call ${h.getSpName()}(${h.getCallParameters()})}";
 		StatementParameters parameters = new StatementParameters();
 		
@@ -38,7 +38,7 @@ public class ${host.getDbName()}SpDao {
 		parameters.add(param);
 		*/
 		
-		DalHints hints = new DalHints();
+		hints = DalHints.createIfAbsent(hints);
 		
 		return client.call(callString, parameters, hints);
 	

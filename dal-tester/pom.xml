@@ -39,7 +39,7 @@
 	</dependencies>
 	<build>
         <plugins>
-        <plugin>
+        <!-- <plugin>
         	<groupId>com.googlecode.addjars-maven-plugin</groupId>
         	<artifactId>addjars-maven-plugin</artifactId>
         	<version>1.0.5</version>
@@ -57,7 +57,7 @@
             		</configuration>
         		</execution>
     		</executions>
-        </plugin>
+        </plugin> -->
         </plugins>
     </build>
 </project>

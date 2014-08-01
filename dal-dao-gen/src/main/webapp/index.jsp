@@ -48,7 +48,9 @@
 	      <script src="/static/Flat-UI-master/js/respond.min.js"></script>
 	    <![endif]-->
    </head>
+  
    <body>
+   
       <!-- Docs master nav -->
       <%@ include file="header.jsp"%>
       <div id="main_layout">
@@ -189,12 +191,22 @@
       </div>
       
       <!--Begin wizard-->
+      
       <div class="modal fade" id="page1" tabindex="-1" role="dialog" aria-labelledby="page1_label" aria-hidden="true" is_update="0">
          <div class="modal-dialog">
             <div class="modal-content">
                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <h4 class="modal-title" id="page1_label">DAO生成向导</h4>
+                  <label class="modal-title" id="page1_label" style = "font-size: 25px;font-weight: bold" >DAO生成向导</label>
+                 <a style="margin-left:359px !important;margin-right:0px !important" href="#" class="ctip" data-toggle="tooltip" data-placement = "bottom"
+							data-original-title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>
+							2、目前，DAO代码生成方式有三种：<br/>
+							&nbsp;2.1、生成模板(包含基础的增删改查操作)：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
+							&nbsp;2.2、构建SQL（生成的代码绑定到模板）：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
+							&nbsp;2.3、复杂查询（额外生成实体类）：在这种模式下面，我们可以自定义复杂的查询SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
+							"> <img style="margin-bottom:15px;height:25px;width:25px" class="helpicon" id="help"
+							src="/static/images/help.jpg">
+					</a>
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="margin-top:3px">&times;</button>
                </div>
                <div class="modal-body" style="position: relative;overflow: auto;width: auto;">
                   <div class="steps step1 row-fluid">
@@ -205,23 +217,34 @@
                            </select>
                         </div>
                      </div>
+                     
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label" style="width:130px;">DAO代码生成方式:</label>
-                           <select id="gen_style" class="span8">
-                              <option value="table_view_sp">生成模板(包含基础的增删改查操作)</option>
-                              <option value="auto">构建SQL（生成的代码绑定到模板）</option>
-                              <option value="sql">自定义查询（额外生成实体类）</option>
+						   <select id="gen_style" class="span8">
+                              <option value="table_view_sp">标准DAO</option>
+                              <option value="auto">构建SQL</option>
+                              <option value="sql"> 自定义SQL</option>
                            </select>
                         </div>
-                     </div>
-                     <div class="row-fluid">
-                        <div class="control-group">
+							<div id="table_view_sp" style="display:none">
+							<a style = "color: #000000; font-size: 12px; line-height:1.0;">在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br></a>
+							</div>
+							<div id="auto" style="display:none">
+    						<a style = "color: #000000; font-size: 12px; line-height:1.0;">在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br></a>
+							</div>
+							<div id="sql" style="display:none">
+    						<a style = "color: #000000; font-size: 12px; line-height:1.0;">在这种模式下面，我们可以自定义复杂的查询SQL语句，指定生成的DAO类名、实体类名、方法名。<br></a>
+							</div>
+					 </div>
+                  <div class="row-fluid">
+                     	<div class="control-group">
                            <label class="control-label popup_label" style="width:130px;">方法功能描述：</label>
                            <textarea id="comment" class="span12 popup_text input-sm" rows="4"></textarea>
                         </div>
                      </div>
                   </div>
+                  
                   <div class="steps step2-1 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
@@ -446,18 +469,9 @@
                <div class="modal-footer">
                		<div class="row-fluid">
                       <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
+                      <label id="explanation" class = "control-label popup_label" style = "color:#009999; font-size: 8px; word-break:normal; text-align:left;"></label>
                   	</div>
                    	<div class="row-fluid">
-              			<a href="#" class="ctip" data-toggle="tooltip"
-							data-placement="top" title="" html="1"
-							data-original-title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>
-							2、目前，DAO代码生成方式有三种：<br/>
-							&nbsp;2.1、生成模板(包含基础的增删改查操作)：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
-							&nbsp;2.2、构建SQL（生成的代码绑定到模板）：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
-							&nbsp;2.3、复杂查询（额外生成实体类）：在这种模式下面，我们可以自定义复杂的查询SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
-							"> <img class="helpicon"
-							src="/static/images/help.jpg">
-						</a>
 	                  	<button id="prev_step"  type="button" class="btn btn-default">上一步</button>
 	                  	<button id="next_step"  type="button" class="btn btn-primary">下一步</button>
 	                  	<label class="popup_label"><input id="gen_on_save" type="checkbox">保存时生成代码</label>
@@ -512,5 +526,27 @@
       <script src="/static/js/progress.js"></script>
       
       <script src="/static/js/header.js"></script>
+      <script>
+      	$("#gen_style").click(function(event){
+      	    if($("#gen_style").val()=="table_view_sp"){
+      	    	$("#explanation").html("在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。");
+      	    }
+      	    if($("#gen_style").val()=="auto"){
+      	    	$("#explanation").html("在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。");
+      	    }
+      	    if($("#gen_style").val()=="sql"){
+      	    	$("#explanation").html("在这种模式下面，我们可以自定义复杂的查询SQL语句，指定生成的DAO类名、实体类名、方法名。");
+      	    }
+      	});
+      	
+      	$("#page1 img").tooltip({
+      		position:['bottom','center'], 
+			offset:[10,400], 
+      	});
+      	
+
+</script> 
+
+
    </body>
 </html>

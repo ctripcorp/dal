@@ -3,23 +3,29 @@ package com.ctrip.platform.dal.daogen.utils;
 import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.Join;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 
+/**
+ * The SQL Re-build Utils
+ * @author wcyuan
+ */
 public class SqlBuilder {
+	
+	private static Logger log = Logger.getLogger(SqlBuilder.class);
 	
 	private static final String mysqlPageClausePattern = " limit %s, %s";
 	private static final String mysqlCSPageClausePattern = " limit {0}, {1}";
@@ -46,38 +52,40 @@ public class SqlBuilder {
 		boolean withNolock = StringUtils.containsIgnoreCase(sql_content, "WITH (NOLOCK)");
 		if(withNolock)
 			sql_content = sql_content.replaceAll("(?i)WITH \\(NOLOCK\\)","");
-		
-		Select select = (Select) parserManager.parse(new StringReader(sql_content));
-		PlainSelect plain = (PlainSelect)select.getSelectBody();
 		String result = "";
-		if(dbType == DatabaseCategory.MySql){	
-			result = plain.toString() + 
-					(lang == CurrentLanguage.Java ? mysqlPageClausePattern : mysqlCSPageClausePattern);
-		}else if(dbType == DatabaseCategory.SqlServer){		
-			List<OrderByElement> orderbys = plain.getOrderByElements();
-			List<SelectItem> selectitems = plain.getSelectItems();
-			if(null == orderbys || orderbys.size() != 1){
-				throw new Exception("The sql server CET paging must contain one order clause.");
+		try{
+			Select select = (Select) parserManager.parse(new StringReader(sql_content));
+			PlainSelect plain = (PlainSelect)select.getSelectBody();
+			if(dbType == DatabaseCategory.MySql){	
+				result = plain.toString() + 
+						(lang == CurrentLanguage.Java ? mysqlPageClausePattern : mysqlCSPageClausePattern);
+			}else if(dbType == DatabaseCategory.SqlServer){		
+				List<OrderByElement> orderbys = plain.getOrderByElements();
+				List<SelectItem> selectitems = plain.getSelectItems();
+				if(null == orderbys || orderbys.size() != 1){
+					throw new Exception("The sql server CET paging must contain one order clause.");
+				}
+				String rowColumn = "ROW_NUMBER() OVER (ORDER BY " + orderbys.get(0).toString() + ") AS rownum";
+				SelectExpressionItem newItem = new SelectExpressionItem(new Column(rowColumn));
+				selectitems.add(newItem);
+				plain.getOrderByElements().clear();
+				
+				String sqlWithRowNum = plain.toString();
+				if(withNolock){
+					sqlWithRowNum = plainSelectToStringAppendWithNoLock(plain);
+				}
+				
+				String cetWrap = "WITH CET AS (" + sqlWithRowNum + ")";
+				
+				selectitems.remove(newItem);
+				result = cetWrap + " SELECT " + StringUtils.join(selectitems, ", ") + " FROM CET WHERE " + 
+				(lang == CurrentLanguage.Java ? sqlserverPageClausePattern : sqlserverCSPageClausePattern);
+			}else{
+				throw new Exception("Unknow database category.");
 			}
-			String rowColumn = "ROW_NUMBER() OVER (ORDER BY " + orderbys.get(0).toString() + ") AS rownum";
-			SelectExpressionItem newItem = new SelectExpressionItem(new Column(rowColumn));
-			selectitems.add(newItem);
-			plain.getOrderByElements().clear();
-			
-			String sqlWithRowNum = plain.toString();
-			if(withNolock){
-				sqlWithRowNum = plainSelectToStringAppendWithNoLock(plain);
-			}
-			
-			String cetWrap = "WITH CET AS (" + sqlWithRowNum + ")";
-			
-			selectitems.remove(newItem);
-			result = cetWrap + " SELECT " + StringUtils.join(selectitems, ", ") + " FROM CET WHERE " + 
-			(lang == CurrentLanguage.Java ? sqlserverPageClausePattern : sqlserverCSPageClausePattern);
-		}else{
-			throw new Exception("Unknow database category.");
+		}catch(Exception e){
+			log.error("Paging the SQL Failed.", e);
 		}
-		
 		return result.replace(":", "@");
 	}
 	

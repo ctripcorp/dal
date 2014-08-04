@@ -48,7 +48,9 @@
 	      <script src="/static/Flat-UI-master/js/respond.min.js"></script>
 	    <![endif]-->
    </head>
+  
    <body>
+   
       <!-- Docs master nav -->
       <%@ include file="header.jsp"%>
       <div id="main_layout">
@@ -189,12 +191,22 @@
       </div>
       
       <!--Begin wizard-->
+      
       <div class="modal fade" id="page1" tabindex="-1" role="dialog" aria-labelledby="page1_label" aria-hidden="true" is_update="0">
          <div class="modal-dialog">
             <div class="modal-content">
                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <h4 class="modal-title" id="page1_label">DAO生成向导</h4>
+                  <label class="modal-title" id="page1_label" style = "font-size: 25px;font-weight: bold" >DAO生成向导</label>
+                 <a style="margin-left:359px !important;margin-right:0px !important" href="#" class="ctip" data-toggle="tooltip" data-placement = "bottom"
+							data-original-title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>
+							2、目前，DAO代码生成方式有三种：<br/>
+							&nbsp;2.1、标准DAO：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
+							&nbsp;2.2、构建SQL（生成的代码绑定到模板）：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
+							&nbsp;2.3、自定义SQL：在这种模式下面，我们可以自定义查询SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
+							"> <img style="margin-bottom:15px;height:25px;width:25px" class="helpicon" id="help"
+							src="/static/images/help.jpg">
+					</a>
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="margin-top:3px">&times;</button>
                </div>
                <div class="modal-body" style="position: relative;overflow: auto;width: auto;">
                   <div class="steps step1 row-fluid">
@@ -205,23 +217,25 @@
                            </select>
                         </div>
                      </div>
+                     
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label" style="width:130px;">DAO代码生成方式:</label>
-                           <select id="gen_style" class="span8">
-                              <option value="table_view_sp">生成模板(包含基础的增删改查操作)</option>
-                              <option value="auto">构建SQL（生成的代码绑定到模板）</option>
-                              <option value="sql">自定义查询（额外生成实体类）</option>
+						   <select id="gen_style" class="span8">
+                              <option value="table_view_sp">标准DAO</option>
+                              <option value="auto">构建SQL</option>
+                              <option value="sql"> 自定义SQL</option>
                            </select>
                         </div>
-                     </div>
-                     <div class="row-fluid">
-                        <div class="control-group">
+					 </div>
+                  <div class="row-fluid">
+                     	<div class="control-group">
                            <label class="control-label popup_label" style="width:130px;">方法功能描述：</label>
                            <textarea id="comment" class="span12 popup_text input-sm" rows="4"></textarea>
                         </div>
                      </div>
                   </div>
+                  
                   <div class="steps step2-1 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
@@ -285,12 +299,12 @@
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
-                        <label class="control-label popup_label">选择SQL风格：</label>
-                        <select id="sql_style" class="span9 popup_text">
-                           <option value="csharp">C#风格(参数形式为@Name)</option>
-                           <option value="java">JAVA风格(参数形式为?)</option>
-                        </select>
-                     </div>
+	                        <label class="control-label popup_label">选择SQL风格：</label>
+	                        <select id="sql_style" class="span9 popup_text">
+	                           <option value="csharp">C#风格(参数形式为@Name)</option>
+	                           <option value="java">JAVA风格(参数形式为?)</option>
+	                        </select>
+	                     </div>
                      </div>
                      <div class="row-fluid method_name_class">
                         <div class="control-group">
@@ -381,7 +395,7 @@
                      <div id="param_list_auto" class="row-fluid input-sm">      
                      </div>
                      <div class="row-fluid"><br/><br/>
-                     	以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。
+                     	<div style="clear:both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
                      </div>
                      <div class="row-fluid">
                         <div id="step2_2_2_sql_editor" class="span12" style="height:200px;">
@@ -435,7 +449,7 @@
                      <div id="param_list" class="row-fluid input-sm">      
                      </div>
                      <div class="row-fluid"><br/><br/>
-                     	以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。
+                     	 <div style="clear:both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
                      </div>
                      <div class="row-fluid">
                         <div id="step2_3_1_sql_editor" class="span12" style="height:200px;">
@@ -445,19 +459,9 @@
                </div>
                <div class="modal-footer">
                		<div class="row-fluid">
-                      <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
+                      <label id="error_msg" class="control-label popup_label" style="color:red; word-break:normal; text-align:left;"></label>
                   	</div>
                    	<div class="row-fluid">
-              			<a href="#" class="ctip" data-toggle="tooltip"
-							data-placement="top" title="" html="1"
-							data-original-title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>
-							2、目前，DAO代码生成方式有三种：<br/>
-							&nbsp;2.1、生成模板(包含基础的增删改查操作)：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
-							&nbsp;2.2、构建SQL（生成的代码绑定到模板）：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
-							&nbsp;2.3、复杂查询（额外生成实体类）：在这种模式下面，我们可以自定义复杂的查询SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
-							"> <img class="helpicon"
-							src="/static/images/help.jpg">
-						</a>
 	                  	<button id="prev_step"  type="button" class="btn btn-default">上一步</button>
 	                  	<button id="next_step"  type="button" class="btn btn-primary">下一步</button>
 	                  	<label class="popup_label"><input id="gen_on_save" type="checkbox">保存时生成代码</label>
@@ -512,5 +516,6 @@
       <script src="/static/js/progress.js"></script>
       
       <script src="/static/js/header.js"></script>
+
    </body>
 </html>

@@ -1,9 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- If deploying this as an exploded war (a directory) please make sure to specify a docBase attribute to the context, pointing
-to the root directory of the application. -->
-<Context docBase="$host.getDocBase()" path="$host.getPath()">
+<Context docBase="$host.getDocBase()" path="$host.getPath()" crossContext="true" reloadable="true">
 #foreach($resource in $host.getResources())
-	<Resource name="$resource.getName()"
+	<Resource name="${resource.getName()}{$DBDataCenter}"
                    auth="$resource.getAuth()"
                    type="$resource.getType()"
                    factory="$resource.getFactory()"

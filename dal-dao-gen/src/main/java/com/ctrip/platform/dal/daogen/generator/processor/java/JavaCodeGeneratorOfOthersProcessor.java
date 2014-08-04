@@ -27,8 +27,13 @@ public class JavaCodeGeneratorOfOthersProcessor implements Processor {
 		
 		vltCcontext.put("host", ctx.getContextHost());
 		GenUtils.mergeVelocityContext(vltCcontext,
-				String.format("%s/context.xml", dir.getAbsolutePath()),
+				String.format("%s/context.xml.tpl", dir.getAbsolutePath()),
 				"templates/java/DalContext.java.tpl");
+		
+		vltCcontext.put("host", "");
+		GenUtils.mergeVelocityContext(vltCcontext,
+				String.format("%s/ConfigProfile.xml", dir.getAbsolutePath()),
+				"templates/java/ConfigProfile.java.tpl");
 		
 	}
 

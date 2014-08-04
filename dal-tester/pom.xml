@@ -36,28 +36,30 @@
 			<artifactId>log4j</artifactId>
 			<version>1.2.17</version>
 		</dependency>
+		<dependency>
+  			<groupId>dal3rdParty</groupId>
+  			<artifactId>itext</artifactId>
+  			<version>2.0.2</version>
+		</dependency>
+		<dependency>
+  			<groupId>jfree</groupId>
+  			<artifactId>jfreechart</artifactId>
+  			<version>1.0.5</version>
+		</dependency>
+		<dependency>
+  			<groupId>dal3rdParty</groupId>
+  			<artifactId>jcommon</artifactId>
+  			<version>1.0.9</version>
+		</dependency>
+		<dependency>
+  			<groupId>dal3rdParty</groupId>
+  			<artifactId>p-unit</artifactId>
+  			<version>0.15.319</version>
+		</dependency>
+		<dependency>
+  			<groupId>dal3rdParty</groupId>
+  			<artifactId>p-unit-extension</artifactId>
+  			<version>0.15.319</version>
+		</dependency>
 	</dependencies>
-	<build>
-        <plugins>
-        <!-- <plugin>
-        	<groupId>com.googlecode.addjars-maven-plugin</groupId>
-        	<artifactId>addjars-maven-plugin</artifactId>
-        	<version>1.0.5</version>
-    		<executions>
-        		<execution>
-            		<goals>
-                		<goal>add-jars</goal>
-            		</goals>
-            		<configuration>
-                		<resources>
-                    		<resource>
-                        		<directory>${basedir}/libs</directory>
-                    		</resource>
-                		</resources>
-            		</configuration>
-        		</execution>
-    		</executions>
-        </plugin> -->
-        </plugins>
-    </build>
 </project>

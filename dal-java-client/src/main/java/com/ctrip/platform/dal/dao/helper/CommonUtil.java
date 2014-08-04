@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.logging;
+package com.ctrip.platform.dal.dao.helper;
 
 import java.net.InetAddress;
 import java.security.Key;

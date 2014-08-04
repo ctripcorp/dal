@@ -27,6 +27,41 @@
 
     });
 
+    $(function(){
+        var Sys = {};
+        var ua = navigator.userAgent.toLowerCase();
+        var s;
+        var scan;
+        (s = ua.match(/msie ([\d.]+)/)) ? Sys.ie = s[1] :
+            (s = ua.match(/firefox\/([\d.]+)/)) ? Sys.firefox = s[1] :
+                (s = ua.match(/chrome\/([\d.]+)/)) ? Sys.chrome = s[1] :
+                    (s = ua.match(/opera.([\d.]+)/)) ? Sys.opera = s[1] :
+                        (s = ua.match(/version\/([\d.]+).*safari/)) ? Sys.safari = s[1] : 0;
+
+        //以下进行测试
+
+        if (Sys.ie) {
+            scan = "您使用的ie内核" + Sys.ie + "浏览器，建议您使用chrome浏览器";
+            alert(scan);
+        }
+        if (Sys.firefox) {
+            scan = "您使用的是firefox内核" + Sys.firefox + "浏览器，建议您使用chrome浏览器";
+            alert(scan);
+        }
+        if (Sys.chrome) {
+            scan = "您使用的是chrome内核" + Sys.chrome + "浏览器，建议您使用chrome浏览器";
+        }
+        if (Sys.opera) {
+            scan = "您使用的是opera内核" + Sys.opera + "浏览器，建议您使用chrome浏览器";
+            alert(scan);
+        }
+        if (Sys.safari) {
+            scan = "您使用的是safari内核" + Sys.safari + "浏览器，建议您使用chrome浏览器";
+            alert(scan);
+        }
+
+    });
+
 })();
 
 (function($){

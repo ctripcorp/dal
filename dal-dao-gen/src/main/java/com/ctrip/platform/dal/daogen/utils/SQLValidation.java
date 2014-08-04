@@ -8,11 +8,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.daogen.Consts;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The SQL Validate Utils
@@ -26,10 +29,7 @@ public class SQLValidation {
 	 */
 	private static Logger log = Logger.getLogger(SQLValidation.class);
 	
-	/**
-	 * The MYSQL explain output format pattern.
-	 */
-	private static final String MYSQLPLAINPATTER = "|%1$-5s|%2$-10s|%3$-15s|%4$-10s|%5$-5s|%6$-32s\n";
+	private static ObjectMapper objectMapper =  new ObjectMapper();
 	
 	public static void main(String[] args) throws Exception{
 		String sql = "INSERT INTO Person(Address, Telephone, Name, Age, Gender, PartmentID, space) VALUES(?, ?, ?, ?, ?, ?, ?)";
@@ -38,6 +38,23 @@ public class SQLValidation {
 		
 		Validation v = validate(dbName, sql, params);
 		System.out.println(v.toString());
+		
+		sql = "select * from Person as p join Partment as pp on p.PartmentID = pp.Id where p.space=?";
+		v = validate(dbName, sql, Types.NVARCHAR);
+		
+		System.out.println(v.toString());
+		
+		dbName = "HotelPubDB_test1";
+		sql = "Select * from TestPerson where id = ?";
+		v = validate(dbName, sql, Types.VARCHAR);
+		
+		System.out.println(v.toString());
+		
+		sql = "insert into TestPerson(name,age,address) values(?,?,?)";
+		v = validate(dbName, sql, Types.VARCHAR, Types.INTEGER, Types.VARCHAR);
+		
+		System.out.println(v.toString());
+		
 	}
 	
 	/**
@@ -104,21 +121,20 @@ public class SQLValidation {
 				sql = sql.replaceFirst("\\?", replacement);
 			}				
 			rs = profile.executeQuery(sql);
-		
-			while(rs.next()){
-				for (int i = 0; i < rs.getRow(); i++) {
-					status.append(rs.getObject(i+1).toString())
-						.append(System.lineSeparator());
-				}
+			List<SqlServerExplain> explains = new ArrayList<SqlServerExplain>();
+			while(rs.next()){	
+				explains.add(ORMUtils.map(rs, SqlServerExplain.class));
 			}
+			status.append(objectMapper.writeValueAsString(explains));
 			profile.execute("SET SHOWPLAN_ALL OFF");
+			conn.setAutoCommit(true);	
 		}catch(Exception e){
 			status.append(getExceptionStack(e));
+			conn.rollback();
 			log.error("Validate sql server query failed", e);
 		}finally{
-			conn.setAutoCommit(true);
 			rs.close();
-			profile.close();
+			profile.close();		
 		}
 	}
 	
@@ -134,17 +150,11 @@ public class SQLValidation {
 				}
 			}
 			rs = stat.executeQuery();
-			
-			status.appendLineFormat(MYSQLPLAINPATTER, "id", "type", "possible_keys","key", "rows","Extra");
+			List<MySQLExplain> explains = new ArrayList<MySQLExplain>();
 			while(rs.next()){
-				status.appendLineFormat(MYSQLPLAINPATTER, 
-						rs.getObject("id"),
-						rs.getObject("select_type"),
-						rs.getObject("possible_keys"),
-						rs.getObject("key"),
-						rs.getObject("rows"),
-						rs.getObject("Extra"));
+				explains.add(ORMUtils.map(rs, MySQLExplain.class));
 			}
+			status.append(objectMapper.writeValueAsString(explains));
 			status.setPassed(true);
 		}catch(Exception e){
 			status.append(getExceptionStack(e));
@@ -241,6 +251,186 @@ public class SQLValidation {
 				return "2012-01-01 10:00:00";
 			default:
 				return "test";
+		}
+	}
+	
+	public static class MySQLExplain{
+		private Integer id;
+		private String select_type;
+		private String possible_keys;
+		private String key;
+		private Integer rows;
+		private String extra;
+
+		public Integer getId() {
+			return id;
+		}
+
+		public void setId(Integer id) {
+			this.id = id;
+		}
+		
+		public String getSelect_type() {
+			return select_type;
+		}
+		
+		public void setSelect_type(String select_type) {
+			this.select_type = select_type;
+		}
+
+		public String getPossible_keys() {
+			return possible_keys;
+		}
+
+		public void setPossible_keys(String possible_keys) {
+			this.possible_keys = possible_keys;
+		}
+
+
+		public String getKey() {
+			return key;
+		}
+
+		public void setKey(String key) {
+			this.key = key;
+		}
+
+		public Integer getRows() {
+			return rows;
+		}
+
+		public void setRows(Integer rows) {
+			this.rows = rows;
+		}
+
+		public String getExtra() {
+			return extra;
+		}
+
+		public void setExtra(String extra) {
+			this.extra = extra;
+		}
+	}
+	
+	public static class SqlServerExplain{
+		private String StmtText; 
+		private Integer StmtId;
+		private Integer NodeId;
+		private Integer Parent;
+		private String PhysicalOp;
+		private String LogicalOp;
+		private String Argument;
+		private String DefinedValues;
+		private Integer EstimateRows;
+		private Double EstimateIO;
+		private Double EstimateCPU;
+		private Integer AvgRowSize;
+		private Double TotalSubtreeCost;
+		private String OutputList;
+		private String Type;
+		private Boolean Parallel;
+		private Integer EstimateExecutions;
+		public String getStmtText() {
+			return StmtText;
+		}
+		public void setStmtText(String stmtText) {
+			StmtText = stmtText;
+		}
+		public Integer getStmtId() {
+			return StmtId;
+		}
+		public void setStmtId(Integer stmtId) {
+			StmtId = stmtId;
+		}
+		public Integer getNodeId() {
+			return NodeId;
+		}
+		public void setNodeId(Integer nodeId) {
+			NodeId = nodeId;
+		}
+		public Integer getParent() {
+			return Parent;
+		}
+		public void setParent(Integer parent) {
+			Parent = parent;
+		}
+		public String getPhysicalOp() {
+			return PhysicalOp;
+		}
+		public void setPhysicalOp(String physicalOp) {
+			PhysicalOp = physicalOp;
+		}
+		public String getLogicalOp() {
+			return LogicalOp;
+		}
+		public void setLogicalOp(String logicalOp) {
+			LogicalOp = logicalOp;
+		}
+		public String getArgument() {
+			return Argument;
+		}
+		public void setArgument(String argument) {
+			Argument = argument;
+		}
+		public String getDefinedValues() {
+			return DefinedValues;
+		}
+		public void setDefinedValues(String definedValues) {
+			DefinedValues = definedValues;
+		}
+		public Integer getEstimateRows() {
+			return EstimateRows;
+		}
+		public void setEstimateRows(Integer estimateRows) {
+			EstimateRows = estimateRows;
+		}
+		public Double getEstimateIO() {
+			return EstimateIO;
+		}
+		public void setEstimateIO(Double estimateIO) {
+			EstimateIO = estimateIO;
+		}
+		public Double getEstimateCPU() {
+			return EstimateCPU;
+		}
+		public void setEstimateCPU(Double estimateCPU) {
+			EstimateCPU = estimateCPU;
+		}
+		public Integer getAvgRowSize() {
+			return AvgRowSize;
+		}
+		public void setAvgRowSize(Integer avgRowSize) {
+			AvgRowSize = avgRowSize;
+		}
+		public Double getTotalSubtreeCost() {
+			return TotalSubtreeCost;
+		}
+		public void setTotalSubtreeCost(Double totalSubtreeCost) {
+			TotalSubtreeCost = totalSubtreeCost;
+		}
+		public String getOutputList() {
+			return OutputList;
+		}
+		public void setOutputList(String outputList) {
+			OutputList = outputList;
+		}
+		public String getType() {
+			return Type;
+		}
+		public void setType(String type) {
+			Type = type;
+		}
+		public Boolean getParallel() {
+			return Parallel;
+		}
+		public void setParallel(Boolean parallel) {
+			Parallel = parallel;
+		}
+		public Integer getEstimateExecutions() {
+			return EstimateExecutions;
+		}
+		public void setEstimateExecutions(Integer estimateExecutions) {
+			EstimateExecutions = estimateExecutions;
 		}
 	}
 	

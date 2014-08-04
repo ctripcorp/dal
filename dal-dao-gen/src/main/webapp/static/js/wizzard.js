@@ -308,6 +308,7 @@
 
         current.hide();
         $(".step2-3").show();
+        window.sql_builder.getDatabaseCategory();
     };
 
     var step2_1 = function(){

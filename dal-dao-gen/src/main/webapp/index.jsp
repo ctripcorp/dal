@@ -436,6 +436,17 @@
 	                           </label>                           
 	                        </div>
 	                  </div>
+	                  <div class="row-fluid" id="free_sql_scalarTypeDiv" style="margin-top:12px">
+	                  		<div class="control-group">
+	                           <label class="control-label popup_label" style="width:90px;">操作类型：</label>
+	                           <select id="free_sql_crud_option" class="span5">
+	                              <option value="select">查询</option>
+	                              <option value="insert">新增</option>
+	                              <option value="update">更新</option>
+	                              <option value="delete">删除</option>
+	                           </select>
+	                        </div>
+	                  </div>
                      <label class="control-label popup_label">输入查询SQL，占位符：Java请使用?或者:Name形式，c#请使用@Name形式</label>
                      <div class="row-fluid">
                         <div id="sql_editor" class="span12" style="height:200px;">

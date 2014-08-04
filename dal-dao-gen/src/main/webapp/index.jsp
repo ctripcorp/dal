@@ -200,9 +200,9 @@
                  <a style="margin-left:359px !important;margin-right:0px !important" href="#" class="ctip" data-toggle="tooltip" data-placement = "bottom"
 							data-original-title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>
 							2、目前，DAO代码生成方式有三种：<br/>
-							&nbsp;2.1、生成模板(包含基础的增删改查操作)：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
+							&nbsp;2.1、标准DAO：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
 							&nbsp;2.2、构建SQL（生成的代码绑定到模板）：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
-							&nbsp;2.3、复杂查询（额外生成实体类）：在这种模式下面，我们可以自定义复杂的查询SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
+							&nbsp;2.3、自定义SQL：在这种模式下面，我们可以自定义查询SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
 							"> <img style="margin-bottom:15px;height:25px;width:25px" class="helpicon" id="help"
 							src="/static/images/help.jpg">
 					</a>
@@ -227,15 +227,6 @@
                               <option value="sql"> 自定义SQL</option>
                            </select>
                         </div>
-							<div id="table_view_sp" style="display:none">
-							<a style = "color: #000000; font-size: 12px; line-height:1.0;">在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br></a>
-							</div>
-							<div id="auto" style="display:none">
-    						<a style = "color: #000000; font-size: 12px; line-height:1.0;">在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br></a>
-							</div>
-							<div id="sql" style="display:none">
-    						<a style = "color: #000000; font-size: 12px; line-height:1.0;">在这种模式下面，我们可以自定义复杂的查询SQL语句，指定生成的DAO类名、实体类名、方法名。<br></a>
-							</div>
 					 </div>
                   <div class="row-fluid">
                      	<div class="control-group">
@@ -468,8 +459,7 @@
                </div>
                <div class="modal-footer">
                		<div class="row-fluid">
-                      <label id="error_msg" class="control-label popup_label" style="color:red;"></label>
-                      <label id="explanation" class = "control-label popup_label" style = "color:#009999; font-size: 8px; word-break:normal; text-align:left;"></label>
+                      <label id="error_msg" class="control-label popup_label" style="color:red; word-break:normal; text-align:left;"></label>
                   	</div>
                    	<div class="row-fluid">
 	                  	<button id="prev_step"  type="button" class="btn btn-default">上一步</button>
@@ -526,27 +516,6 @@
       <script src="/static/js/progress.js"></script>
       
       <script src="/static/js/header.js"></script>
-      <script>
-      	$("#gen_style").click(function(event){
-      	    if($("#gen_style").val()=="table_view_sp"){
-      	    	$("#explanation").html("在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。");
-      	    }
-      	    if($("#gen_style").val()=="auto"){
-      	    	$("#explanation").html("在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。");
-      	    }
-      	    if($("#gen_style").val()=="sql"){
-      	    	$("#explanation").html("在这种模式下面，我们可以自定义复杂的查询SQL语句，指定生成的DAO类名、实体类名、方法名。");
-      	    }
-      	});
-      	
-      	$("#page1 img").tooltip({
-      		position:['bottom','center'], 
-			offset:[10,400], 
-      	});
-      	
-
-</script> 
-
 
    </body>
 </html>

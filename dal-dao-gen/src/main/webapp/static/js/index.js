@@ -201,5 +201,18 @@ jQuery(document).ready(function () {
             });
     });
 
+    $("#gen_style").click(function(event){
+        $("#error_msg").css("color","black");
+        if($("#gen_style").val()=="table_view_sp"){
+            $("#error_msg").html("在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。");
+        }
+        if($("#gen_style").val()=="auto"){
+            $("#error_msg").html("在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。");
+        }
+        if($("#gen_style").val()=="sql"){
+            $("#error_msg").html("在这种模式下面，我们可以自定义查询SQL语句，指定生成的DAO类名、实体类名、方法名。");
+        }
+    });
+
     window.ajaxutil.reload_projects();
 });

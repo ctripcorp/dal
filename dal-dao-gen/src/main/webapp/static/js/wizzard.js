@@ -412,6 +412,11 @@
                 $(".step2-2-1-1").show();
                 $(".step2-2-1-2").show();
                 $("#auto_sql_scalarTypeDiv").show();
+                if($("#sql_style").val()=="csharp"){
+                    $("#auto_sql_scalarType option[value='Single']").hide();
+                }else{
+                    $("#auto_sql_scalarType option[value='Single']").show();
+                }
             } else if (op_type == "update") {
                 $(".step2-2-1-1").show();
                 $(".step2-2-1-2").show();
@@ -661,6 +666,8 @@
             var record = null;
             if (records.length > 0)
                 record = w2ui['grid'].get(records[0]);
+
+            $("#error_msg").css("color","red");
 
             //向导首先显示所有数据库服务器，点击下一步后，获取此服务器所有的数据库列表
             if (current.hasClass("step1")) {

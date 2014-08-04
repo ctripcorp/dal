@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -29,6 +30,15 @@ public class SQLValidation {
 	 * The MYSQL explain output format pattern.
 	 */
 	private static final String MYSQLPLAINPATTER = "|%1$-5s|%2$-10s|%3$-15s|%4$-10s|%5$-5s|%6$-32s\n";
+	
+	public static void main(String[] args) throws Exception{
+		String sql = "INSERT INTO Person(Address, Telephone, Name, Age, Gender, PartmentID, space) VALUES(?, ?, ?, ?, ?, ?, ?)";
+		int[] params = new int[]{Types.NVARCHAR, Types.NVARCHAR, Types.NVARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.NVARCHAR};
+		String dbName = "dao_test";
+		
+		Validation v = validate(dbName, sql, params);
+		System.out.println(v.toString());
+	}
 	
 	/**
 	 * Validate the SQL is correct or not

@@ -70,7 +70,7 @@
             return str==null || str=='';
         },
         showMsg:function(id,msg){
-            $(id).html(msg);
+            $("#"+id).html(msg);
         }
     });
 })(jQuery);

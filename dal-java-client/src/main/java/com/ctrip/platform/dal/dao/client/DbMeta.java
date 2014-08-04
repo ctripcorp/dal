@@ -5,7 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ctrip.platform.dal.dao.logging.CommonUtil;
+import com.ctrip.platform.dal.dao.helper.CommonUtil;
 import com.ctrip.platform.dal.sql.logging.LogEntry;
 
 public class DbMeta {

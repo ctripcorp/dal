@@ -26,6 +26,7 @@ import com.ctrip.platform.dal.daogen.host.csharp.CSharpMethodHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpSpaOperationHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
+import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -175,11 +176,21 @@ public class AbstractCSharpDataPreparer{
 				index ++;
 	    	}
 			method.setSql(temp);
+			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			
 			List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
 			if (method.getCrud_type().equals("select")
 					|| method.getCrud_type().equals("delete")) {
+				if(method.getCrud_type().equals("select")){
+					List<AbstractParameterHost> paramAbstractHosts = 
+					DbUtils.getSelectFieldHosts(builder.getDb_name(), builder.getSql_content(), CurrentLanguage.Java);
+					List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
+					for (AbstractParameterHost phost : paramAbstractHosts) {
+						paramHosts.add((JavaParameterHost)phost);
+					}
+					method.setFields(paramHosts);
+				}
 				String[] conditions = StringUtils.split(builder.getCondition(),
 						";");
 				

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
+import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 
 public class CSharpMethodHost {
@@ -16,6 +17,8 @@ public class CSharpMethodHost {
 	
 	private List<CSharpParameterHost> parameters;
 	private CSharpFreeSqlPojoHost pojohost;
+	
+	private List<JavaParameterHost> fields;
 	
 	private String pojoName;
 	
@@ -56,6 +59,14 @@ public class CSharpMethodHost {
 		this.parameters = parameters;
 	}
 
+	public List<JavaParameterHost> getFields() {
+		return fields;
+	}
+
+	public void setFields(List<JavaParameterHost> fields) {
+		this.fields = fields;
+	}
+
 	public String getPojoName() {
 		return pojoName;
 	}
@@ -73,13 +84,20 @@ public class CSharpMethodHost {
 	}
 
 	public String getPojoType() {
-		return pojoType;
+		if(null != this.pojoType)
+			return this.pojoType;
+		if(null != this.fields && this.fields.size() == 1){
+			return "SimpleType";
+		}else{
+			return "";
+		}
 	}
 
 	public void setPojoType(String pojoType) {
 		this.pojoType = pojoType;
 	}
 
+	
 	public CSharpFreeSqlPojoHost getPojohost() {
 		return pojohost;
 	}
@@ -97,12 +115,13 @@ public class CSharpMethodHost {
 	}
 
 	public boolean isFirstOrSingle(){
-		return this.scalarType.equalsIgnoreCase("First") ||
-						this.scalarType.equalsIgnoreCase("Single");
+		return (this.scalarType!= null) && 
+				(this.scalarType.equalsIgnoreCase("First") ||
+						this.scalarType.equalsIgnoreCase("Single"));
 	}
 	
-	public boolean isScalar(){
-		return this.pojoType.equalsIgnoreCase("SimpleType");
+	public boolean isSampleType(){
+		return this.getPojoType().equalsIgnoreCase("SimpleType");
 	}
 	
 	public CSharpParameterHost  getSinglePojoFieldHost(){

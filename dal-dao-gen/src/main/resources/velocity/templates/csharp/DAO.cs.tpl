@@ -535,7 +535,11 @@ namespace ${host.getNameSpace()}.Dao
         /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
 #end
         /// <returns></returns>
-        public #if($method.getCrud_type() == "select")IList<${host.getClassName()}>#{else}int#end ${method.getName()}(#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getAlias())}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging())#if($method.getParameters().size()!=0),#end int pageNo, int pageSize#end)
+#if($method.isFirstOrSingle())
+		public object ${method.getName()} (#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getAlias())}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging())#if($method.getParameters().size()!=0),#end int pageNo, int pageSize#end)
+#else
+		public #if($method.getCrud_type() == "select")IList<${host.getClassName()}>#{else}int#end ${method.getName()}(#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getAlias())}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging())#if($method.getParameters().size()!=0),#end int pageNo, int pageSize#end)
+#end
         {
             try
             {
@@ -558,10 +562,12 @@ namespace ${host.getNameSpace()}.Dao
                 sql = string.Format(sql, #foreach($p in $inParams)Arch.Data.Utility.ParameterUtility.NormalizeInParam(${WordUtils.uncapitalize($p.getAlias())}, parameters,"${WordUtils.uncapitalize($p.getAlias())}")#if($foreach.count != $inParams.size()),#end#end);
 #end
 
-#if($method.getCrud_type() == "select")
-                return baseDao.SelectList<${host.getClassName()}>(sql, parameters);
+#if($method.isFirstOrSingle())
+	            return baseDao.ExecScalar(sql, parameters);
+#elseif($method.getCrud_type() == "select")
+		        return baseDao.SelectList<${host.getClassName()}>(sql, parameters);
 #else
-                return baseDao.ExecNonQuery(sql, parameters);
+		        return baseDao.ExecNonQuery(sql, parameters);
 #end
 
             }

@@ -97,12 +97,13 @@ public class CSharpMethodHost {
 	}
 
 	public boolean isFirstOrSingle(){
-		return this.scalarType.equalsIgnoreCase("First") ||
-						this.scalarType.equalsIgnoreCase("Single");
+		return (this.scalarType!= null) && 
+				(this.scalarType.equalsIgnoreCase("First") ||
+						this.scalarType.equalsIgnoreCase("Single"));
 	}
 	
 	public boolean isScalar(){
-		return this.pojoType.equalsIgnoreCase("SimpleType");
+		return this.pojoType != null && this.pojoType.equalsIgnoreCase("SimpleType");
 	}
 	
 	public CSharpParameterHost  getSinglePojoFieldHost(){

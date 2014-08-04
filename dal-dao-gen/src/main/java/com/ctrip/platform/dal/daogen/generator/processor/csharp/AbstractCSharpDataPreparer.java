@@ -175,6 +175,7 @@ public class AbstractCSharpDataPreparer{
 				index ++;
 	    	}
 			method.setSql(temp);
+			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			
 			List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();

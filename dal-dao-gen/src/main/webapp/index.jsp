@@ -484,23 +484,6 @@
       </div>
       <!-- /.modal-dialog -->
       
-      <!-- <div class="modal fade" id="view_code_fullscreen" style="width:100%;height:100%;" tabindex="-1" role="dialog" aria-labelledby="view_code_fullscreen" aria-hidden="true">
-         <div class="modal-dialog" style="width:100%;height:100%;margin:0">
-            <div class="modal-content" style="width:100%;height:100%">
-               <div class="modal-header" style="width:100%;">
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <h4 class="modal-title"></h4>
-               </div>
-               <div class="modal-body" style="width:100%;height:95%">
-                  <div class="row-fluid" style="width:100%;height:100%">
-	                  <div id="code_editor_fullscreen" class="span12" style="height:100%;">
-	                  </div>
-	               </div>
-               </div>
-            </div>
-         </div>
-      </div>  -->
-      
       <div id="main_layout2" style="display: none; padding-top: 1px;">
 	      	
       </div>

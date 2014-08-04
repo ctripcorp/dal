@@ -395,7 +395,7 @@
                      <div id="param_list_auto" class="row-fluid input-sm">      
                      </div>
                      <div class="row-fluid"><br/><br/>
-                     	以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。
+                     	<div style="clear:both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
                      </div>
                      <div class="row-fluid">
                         <div id="step2_2_2_sql_editor" class="span12" style="height:200px;">
@@ -449,7 +449,7 @@
                      <div id="param_list" class="row-fluid input-sm">      
                      </div>
                      <div class="row-fluid"><br/><br/>
-                     	以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。
+                     	 <div style="clear:both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
                      </div>
                      <div class="row-fluid">
                         <div id="step2_3_1_sql_editor" class="span12" style="height:200px;">

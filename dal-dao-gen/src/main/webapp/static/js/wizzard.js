@@ -611,6 +611,7 @@
 
         if(htmls.length==0){
             $("#param_list_free_div").hide();
+            $("#param_list").empty();
         }else{
             $("#param_list").html(htmls);
         }

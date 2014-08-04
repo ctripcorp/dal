@@ -399,6 +399,7 @@
                 sql_builder.setTheme("ace/theme/monokai");
                 sql_builder.getSession().setMode("ace/mode/sql");
                 sql_builder.setValue(record["sql_content"]);
+                sql_builder.setReadOnly(true);
             }else{
                 window.sql_builder.build();
             }

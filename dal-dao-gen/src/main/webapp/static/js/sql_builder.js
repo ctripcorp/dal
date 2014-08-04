@@ -86,6 +86,7 @@
             select_sql_builder = sprintf("%s ORDER BY %s %s",select_sql_builder,$("#orderby_field").val(),$("#orderby_sort").val());
         }
         ace.edit("sql_builder").setValue(select_sql_builder);
+        ace.edit("sql_builder").setReadOnly(true);
     };
 
     var buildInsertSQL = function(){
@@ -103,6 +104,7 @@
         });
         ace.edit("sql_builder").setValue(sprintf("INSERT INTO %s (%s) VALUES (%s)",
             $("#tables").val(), wrapedFields.join(","), placeHodler.join(",")));
+        ace.edit("sql_builder").setReadOnly(true);
     };
 
     var buildUpdateSQL = function(formatedConditions){
@@ -125,6 +127,7 @@
                 $("#tables").val(),
                 placeHodler.join(",")));
         }
+        ace.edit("sql_builder").setReadOnly(true);
     };
 
     var buildDeleteSQL = function(formatedConditions){
@@ -135,6 +138,7 @@
         } else {
             ace.edit("sql_builder").setValue(sprintf("Delete FROM %s", $("#tables").val()));
         }
+        ace.edit("sql_builder").setReadOnly(true);
     };
 
     sql_builder.prototype = {

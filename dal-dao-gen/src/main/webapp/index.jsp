@@ -299,12 +299,12 @@
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
-                        <label class="control-label popup_label">选择SQL风格：</label>
-                        <select id="sql_style" class="span9 popup_text">
-                           <option value="csharp">C#风格(参数形式为@Name)</option>
-                           <option value="java">JAVA风格(参数形式为?)</option>
-                        </select>
-                     </div>
+	                        <label class="control-label popup_label">选择SQL风格：</label>
+	                        <select id="sql_style" class="span9 popup_text">
+	                           <option value="csharp">C#风格(参数形式为@Name)</option>
+	                           <option value="java">JAVA风格(参数形式为?)</option>
+	                        </select>
+	                     </div>
                      </div>
                      <div class="row-fluid method_name_class">
                         <div class="control-group">

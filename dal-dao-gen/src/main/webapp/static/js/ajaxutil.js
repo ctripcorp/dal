@@ -110,6 +110,13 @@
                 });
                 postData["params"] = paramList.join(";");
 
+                if($("#free_sql_crud_option").val()=="select" &&
+                    postData["sql_content"].toLowerCase().indexOf("nolock")==-1 &&
+                    $(".step2-2-1").attr("dbCatalog")!="MySql"){
+                    $.showMsg("error_msg","select语句中必须含有with (nolock)");
+                    return;
+                }
+
                 $.post("/rest/task/sql/test_sql", postData).done(function (data) {
                     if (data.code == "OK") {
                         $.post("/rest/task/sql", postData,function (data) {

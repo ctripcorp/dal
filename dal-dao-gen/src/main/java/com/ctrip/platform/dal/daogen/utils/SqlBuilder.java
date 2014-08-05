@@ -85,6 +85,7 @@ public class SqlBuilder {
 			}
 		}catch(Exception e){
 			log.error("Paging the SQL Failed.", e);
+			throw e;
 		}
 		return result.replace(":", "@");
 	}

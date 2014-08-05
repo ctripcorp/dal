@@ -436,6 +436,17 @@
 	                           </label>                           
 	                        </div>
 	                  </div>
+	                  <div class="row-fluid" id="free_sql_scalarTypeDiv" style="margin-top:12px">
+	                  		<div class="control-group">
+	                           <label class="control-label popup_label" style="width:90px;">操作类型：</label>
+	                           <select id="free_sql_crud_option" class="span5">
+	                              <option value="select">查询</option>
+	                              <option value="insert">新增</option>
+	                              <option value="update">更新</option>
+	                              <option value="delete">删除</option>
+	                           </select>
+	                        </div>
+	                  </div>
                      <label class="control-label popup_label">输入查询SQL，占位符：Java请使用?或者:Name形式，c#请使用@Name形式</label>
                      <div class="row-fluid">
                         <div id="sql_editor" class="span12" style="height:200px;">
@@ -472,23 +483,6 @@
          <!-- /.modal-content -->
       </div>
       <!-- /.modal-dialog -->
-      
-      <!-- <div class="modal fade" id="view_code_fullscreen" style="width:100%;height:100%;" tabindex="-1" role="dialog" aria-labelledby="view_code_fullscreen" aria-hidden="true">
-         <div class="modal-dialog" style="width:100%;height:100%;margin:0">
-            <div class="modal-content" style="width:100%;height:100%">
-               <div class="modal-header" style="width:100%;">
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <h4 class="modal-title"></h4>
-               </div>
-               <div class="modal-body" style="width:100%;height:95%">
-                  <div class="row-fluid" style="width:100%;height:100%">
-	                  <div id="code_editor_fullscreen" class="span12" style="height:100%;">
-	                  </div>
-	               </div>
-               </div>
-            </div>
-         </div>
-      </div>  -->
       
       <div id="main_layout2" style="display: none; padding-top: 1px;">
 	      	

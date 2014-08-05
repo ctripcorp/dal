@@ -81,6 +81,10 @@ public final class DalTableDao<T> {
 		endDelimiter = delimiter;
 	}
 
+	/**
+	 * Specify the sql template for find by primary key
+	 * @param tmp the sql template for find by primary key
+	 */
 	public void setFindTemplate(String tmp){
 		this.findtmp = tmp;
 	}
@@ -142,7 +146,7 @@ public final class DalTableDao<T> {
 
 	/**
 	 * Query against sample pojo. All not null attributes of the passed in pojo
-	 * will be used to build the where clause.
+	 * will be used as search criteria.
 	 * 
 	 * @param sample The pojo used for sampling
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
@@ -165,10 +169,10 @@ public final class DalTableDao<T> {
 	 * contain value placeholder "?". The parameter should match the index of
 	 * the placeholder.
 	 * 
-	 * @param whereClause
+	 * @param whereClause the where section for the search statement.
 	 * @param parameters A container that holds all the necessary parameters 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @return
+	 * @return List of pojos that meet the search criteria
 	 * @throws SQLException
 	 */
 	public List<T> query(String whereClause, StatementParameters parameters,
@@ -184,7 +188,7 @@ public final class DalTableDao<T> {
 	 * clause can contain value placeholder "?". The parameter should match the
 	 * index of the placeholder.
 	 * 
-	 * @param whereClause
+	 * @param whereClause the where section for the search statement.
 	 * @param parameters A container that holds all the necessary parameters
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return Null if no result found.
@@ -203,7 +207,7 @@ public final class DalTableDao<T> {
 	 * clause can contain value placeholder "?". The parameter should match the
 	 * index of the placeholder.
 	 * 
-	 * @param whereClause
+	 * @param whereClause the where section for the search statement.
 	 * @param parameters A container that holds all the necessary parameters
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param count
@@ -224,7 +228,7 @@ public final class DalTableDao<T> {
 	 * where clause can contain value placeholder "?". The parameter should
 	 * match the index of the placeholder.
 	 * 
-	 * @param whereClause
+	 * @param whereClause the where section for the search statement.
 	 * @param parameters A container that holds all the necessary parameters
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param start
@@ -246,7 +250,7 @@ public final class DalTableDao<T> {
 
 	/**
 	 * Insert pojos one by one. If you want to inert them in the batch mode,
-	 * user batchInsert instead.
+	 * user batchInsert instead. You can also use the combinedInsert.
 	 * 
 	 * @param hints 
 	 *            Additional parameters that instruct how DAL Client perform database operation.
@@ -308,12 +312,14 @@ public final class DalTableDao<T> {
 
 	/**
 	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in
-	 * keyHolder If the nocount is on, the keyholder is not available
+	 * keyHolder If the nocount is on, the keyholder is not available. If the logic db has 
+	 * sharding policy, all pojos are supposed to be in same shard. If the pojos are not belongs to 
+	 * same shard, you can use crossShardCombinedInsert instead.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param keyHolder
-	 * @param daoPojos
-	 * @return
+	 * @param keyHolder holder for generated primary keys
+	 * @param daoPojos list of pojos to be inserted
+	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
@@ -324,11 +330,15 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * Cross shard version of combined insert
-	 * @param hints
-	 * @param keyHolder if you want to get generated keys, just create an empty map.
-	 * @param daoPojos
-	 * @return
+	 * Cross shard version of combined insert. If you want to get the generated primary keys
+	 * for each shards being inserted, just pass in an empty map of keyholder. If you don't want to 
+	 * get that info, just pass in a null.
+	 * If you are sure that all the pojos are of the same shard, you can use combinedInsert instead with hints properly initialized.
+	 * 
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param keyHolder if you want to get generated keys, just create an empty map. The key will be shard id if that shard is used for insert.
+	 * @param daoPojos list of pojos to be inserted
+	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
 	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
@@ -336,7 +346,6 @@ public final class DalTableDao<T> {
 		crossShardOperationAllowed(logicDbName, hints, "crossShardCombinedInsert");
 		DalWatcher.begin();
 		int total = 0;
-		// TODO add check for shard related info
 		if (null == daoPojos || daoPojos.length < 1)
 			return 0;
 		
@@ -391,11 +400,12 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * Insert pojos in batch mode.
+	 * Insert pojos in batch mode. If the logic db has sharding policy, all pojos are supposed to be in same shard.
+	 * If the pojos are not belongs to same shard, you can use crossShardBatchInsert instead.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param daoPojos
-	 * @return how many rows been affected for deleting each of the pojo
+	 * @param daoPojos list of pojos to be inserted
+	 * @return how many rows been affected for inserting each of the pojo
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
@@ -405,10 +415,12 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * The cross shard version of batch insert
-	 * @param hints
-	 * @param daoPojos
-	 * @return
+	 * The cross shard version of batch insert. Each pojo can be in different shard.
+	 * If you are sure that all the pojos are of the same shard, you can use batchInsert instead with hints properly initialized.
+	 * 
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param daoPojos list of pojos to be inserted
+	 * @return how many rows been affected for inserting each of the pojo organized by shard id.
 	 * @throws SQLException
 	 */
 	public Map<String, int[]> crossShardBatchInsert(DalHints hints, T... daoPojos) throws SQLException {
@@ -438,10 +450,10 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * Delete the given pojos list in batch mode
+	 * Delete the given pojos list one by one.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param daoPojos
+	 * @param daoPojos list of pojos to be deleted
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
@@ -463,10 +475,11 @@ public final class DalTableDao<T> {
 	}
 
 	/**
-	 * Delete the given pojo list.
+	 * Delete the given pojo list. If the logic db has sharding policy, all pojos are supposed to be in same shard.
+	 * If the pojos are not belongs to same shard, you can use crossShardBatchDelete instead.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param daoPojos
+	 * @param daoPojos list of pojos to be deleted
 	 * @return how many rows been affected for deleting each of the pojo
 	 * @throws SQLException
 	 */
@@ -477,10 +490,12 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * Cross shard version of batch delete
-	 * @param hints
-	 * @param daoPojos
-	 * @return
+	 * Cross shard version of batch delete. Each pojo can be in different shard if logic db is shard enabled.
+	 * If you are sure that all the pojos are of the same shard, you can use batchDelete instead with hints properly initialized.
+	 * 
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param daoPojos list of pojos to be deleted
+	 * @return how many rows been affected for deleting each of the pojo organized by shard id.
 	 * @throws SQLException
 	 */
 	public Map<String, int[]> crossShardBatchDelete(DalHints hints, T... daoPojos) throws SQLException {
@@ -510,15 +525,15 @@ public final class DalTableDao<T> {
 	}
 
 	/**
-	 * Update the given pojo list.Default,if the filed of pojo is null value,
-	 * the field will be ignored,means,the filed will not be update. You can
+	 * Update the given pojo list one by one. By default, if a field of pojo is null value,
+	 * that field will be ignored, so that it will not be updated. You can
 	 * overwrite this by set updateNullField in hints.
 	 * 
 	 * @param hints
 	 * 			Additional parameters that instruct how DAL Client perform database operation.
 	 *          DalHintEnum.updateNullField can be used
 	 *          to indicate that the field of pojo is null value will be update.
-	 * @param daoPojos
+	 * @param daoPojos list of pojos to be updated
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
@@ -552,7 +567,7 @@ public final class DalTableDao<T> {
 	/**
 	 * Delete for the given where clause and parameters.
 	 * 
-	 * @param whereClause
+	 * @param whereClause the condition specified for delete operation
 	 * @param parameters A container that holds all the necessary parameters
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return how many rows been affected
@@ -568,7 +583,7 @@ public final class DalTableDao<T> {
 	/**
 	 * Update for the given where clause and parameters.
 	 * 
-	 * @param sql
+	 * @param sql the statement that used to update the db.
 	 * @param parameters A container that holds all the necessary parameters
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return how many rows been affected

@@ -170,6 +170,12 @@ public class GenTaskByFreeSqlResource {
 			}else{
 				validResult = SQLValidation.updateValidate(dbName, sql, paramsTypes);
 			}
+			if(validResult.isPassed()){
+				status.setInfo(validResult.getMessage());
+			}else{
+				status = Status.ERROR;
+				status.setInfo(validResult.getMessage());
+			}
 			
 		} catch (Exception e) {
 			status = Status.ERROR;

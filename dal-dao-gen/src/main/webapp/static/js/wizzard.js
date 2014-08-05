@@ -536,7 +536,9 @@
 
         if(htmls.length==0){
             $("#param_list_auto_div").hide();
+            $("#param_list_auto").empty();
         }else{
+            $("#param_list_auto_div").show();
             $("#param_list_auto").html(htmls);
         }
 
@@ -614,6 +616,7 @@
             $("#param_list_free_div").hide();
             $("#param_list").empty();
         }else{
+            $("#param_list_free_div").show();
             $("#param_list").html(htmls);
         }
 

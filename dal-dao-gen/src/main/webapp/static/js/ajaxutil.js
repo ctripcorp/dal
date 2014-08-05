@@ -92,12 +92,21 @@
                 postData["scalarType"] = $("#free_sql_scalarType").val();
                 postData["pagination"] = $("#free_sql_pagination").is(":checked");
 
-                if (postData["class_name"] == ""
-                    || postData["pojo_name"] == ""
-                    || postData["method_name"] == "") {
-                    $("#error_msg").text("DAO类名，实体类名以及方法名需要填写！");
-                    return;
+                if($("#free_sql_crud_option").val()=="select"){
+                    if (postData["class_name"] == ""
+                        || postData["pojo_name"] == ""
+                        || postData["method_name"] == "") {
+                        $("#error_msg").text("DAO类名，实体类名以及方法名需要填写！");
+                        return;
+                    }
+                }else{
+                    if (postData["class_name"] == ""
+                        || postData["method_name"] == "") {
+                        $("#error_msg").text("DAO类名以及方法名需要填写！");
+                        return;
+                    }
                 }
+
                 $("#error_msg").text("");
 
                 postData["crud_type"] = "select";

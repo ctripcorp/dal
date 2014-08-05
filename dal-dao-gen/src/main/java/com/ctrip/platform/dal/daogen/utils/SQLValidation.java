@@ -130,8 +130,9 @@ public class SQLValidation {
 				explains.add(ORMUtils.map(rs, SqlServerExplain.class));
 			}
 			status.append(objectMapper.writeValueAsString(explains));
+			status.setPassed(true);
 			profile.execute("SET SHOWPLAN_ALL OFF");
-			conn.setAutoCommit(true);	
+			conn.setAutoCommit(true);
 		}catch(Exception e){
 			status.append(getExceptionStack(e));
 			conn.rollback();

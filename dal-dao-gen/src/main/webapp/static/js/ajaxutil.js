@@ -109,7 +109,7 @@
 
                 $("#error_msg").text("");
 
-                postData["crud_type"] = "select";
+                postData["crud_type"] = $("#free_sql_crud_option").val();
                 postData["sql_content"] = ace.edit("sql_editor").getValue();
                 var paramList = [];
                 $.each($("#param_list").children("div"), function (index, value) {

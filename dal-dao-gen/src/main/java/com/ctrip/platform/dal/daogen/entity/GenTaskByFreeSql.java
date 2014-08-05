@@ -17,6 +17,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	private String class_name;
 	private String pojo_name;
 	private String method_name;
+	//操作类型，可取值:select、update
 	private String crud_type;
 	private String sql_content;
 	private String parameters;

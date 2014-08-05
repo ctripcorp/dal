@@ -88,7 +88,7 @@ public class SQLValidation {
 	 * @return
 	 * 		The SQL is correct, return true, otherwise return false.
 	 */
-	private static Validation queryValidate(String dbName, String sql, int... paramsTypes){
+	public static Validation queryValidate(String dbName, String sql, int... paramsTypes){
 		Validation status = new Validation(sql);
 		Connection connection = null;
 		try{
@@ -176,7 +176,7 @@ public class SQLValidation {
 	 * @return
 	 * 		The SQL is correct, return true, otherwise return false.
 	 */
-	private static Validation updateValidate(String dbName, String sql, int... paramsTypes) throws Exception{
+	public static Validation updateValidate(String dbName, String sql, int... paramsTypes) throws Exception{
 		Validation status = new Validation(sql);
 		Connection connection = null;
 		try{

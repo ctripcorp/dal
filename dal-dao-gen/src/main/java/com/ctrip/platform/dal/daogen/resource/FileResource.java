@@ -9,7 +9,10 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -129,7 +132,7 @@ public class FileResource {
 
 	@GET
 	@Path("download")
-	@Produces(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public String download(@QueryParam("id") String id,
 			@QueryParam("language") String name,
 			@Context HttpServletRequest request,@Context HttpServletResponse response) throws Exception {
@@ -142,8 +145,9 @@ public class FileResource {
 		}
 
 		Project proj = daoOfProject.getProjectByID(Integer.valueOf(id));
-
-		final String zipFileName = proj.getName() + "-" + System.currentTimeMillis() + ".zip";
+		DateFormat format1 = new SimpleDateFormat("yyyyMMddHHmmss");
+	    String date = format1.format(new Date());
+		final String zipFileName = proj.getName() + "-" + date + ".zip";
 
 		if (f.isFile()) {
 			zipFile(f, zipFileName);
@@ -151,8 +155,6 @@ public class FileResource {
 			new ZipFolder(f.getAbsolutePath()).zipIt(zipFileName);
 		}
 		
-		response.setContentType("text/html; charset=UTF-8");
-//		((ServletRequest) response).setCharacterEncoding("UTF-8");
 		FileInputStream fis = null;
 		BufferedInputStream buff = null;
 		OutputStream myout = null;
@@ -166,11 +168,11 @@ public class FileResource {
 				response.sendError(404, "File not found!");
 				return "";
 			} else {
-				response.setContentType("application/x-msdownload");
+				response.setContentType("application/zip;charset=utf-8");
 				response.setContentLength((int) file.length());
 				response.setHeader("Content-Disposition","attachment;filename="+ new String(file.getName().getBytes("gbk"),"iso-8859-1"));
 			}
-			response.reset();
+//			response.reset();
 			fis = new FileInputStream(file);
 			buff = new BufferedInputStream(fis);
 			byte[] b = new byte[1024];

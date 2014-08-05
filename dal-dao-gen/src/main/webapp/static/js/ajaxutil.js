@@ -8,6 +8,156 @@
 
     };
 
+    /**
+     * 标准DAO(包含基础的增删改查操作)
+     * @param postData
+     */
+    var post_task_table_view_sp = function(postData){
+        postData["table_names"] = $('#table_list').multipleSelect('getSelects').join(",");
+        postData["view_names"] = $('#view_list').multipleSelect('getSelects').join(",");
+        postData["sp_names"] = $('#sp_list').multipleSelect('getSelects').join(",");
+        postData["prefix"] = $("#prefix").val();
+        postData["suffix"] = $("#suffix").val();
+        postData["cud_by_sp"] = $("#cud_by_sp").is(":checked");
+        postData["pagination"] = $("#pagination").is(":checked");
+        $.post("/rest/task/table", postData,function (data) {
+            $("#page1").modal('hide');
+            w2ui["grid_toolbar"].click('refreshDAO', null);
+            if ($("#gen_on_save").is(":checked")) {
+                //window.ajaxutil.generate_code($("#gen_language").val());
+                $("#generateCode").modal({"backdrop": "static"});
+            }
+        }).fail(function (data) {
+                alert("保存出错！");
+            });
+    };
+
+    /**
+     * 构建SQL（生成的代码绑定到模板）
+     * @param postData
+     */
+    var post_task_auto = function(postData){
+        postData["table_name"] = $("#tables").val();
+        postData["method_name"] = $("#method_name").val();
+        //C#风格或者Java风格，@Name or ?
+        postData["sql_style"] = $("#sql_style").val();
+        postData["crud_type"] = $("#crud_option").val();
+        postData["scalarType"] = $("#auto_sql_scalarType").val();
+        postData["pagination"] = $("#auto_sql_pagination").is(":checked");
+        postData["orderby"] = sprintf("%s,%s",$("#orderby_field").val(),$("#orderby_sort").val());
+
+        postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
+        postData["sql_content"] = ace.edit("sql_builder").getValue();
+
+        var paramList = [];
+        var paramValues = [];
+        $.each($("#param_list_auto").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            var second = $(value).children("select").eq(0);
+            paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
+            paramValues.push($(first).val());
+        });
+
+        var selectedConditions = [];
+        var index2 = 0;
+        $.each($("#selected_condition option"), function (index, value) {
+            var temp = $(value).val().split(",");
+            if(temp[1]=="6"){//between
+                selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1]));
+                index2+=2;
+            }else{
+                selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index2]));
+                index2++;
+            }
+        });
+
+        postData["condition"] = selectedConditions.join(";");
+        postData["params"] = paramList.join(";");
+
+        $.post("/rest/task/auto", postData,function (data) {
+            if (data.code == "OK") {
+                $("#page1").modal('hide');
+                w2ui["grid_toolbar"].click('refreshDAO', null);
+                if ($("#gen_on_save").is(":checked")) {
+                    //window.ajaxutil.generate_code($("#gen_language").val());
+                    $("#generateCode").modal({"backdrop": "static"});
+                }
+            } else {
+                alert(data.info);
+            }
+        }).fail(function (data) {
+                alert("保存出错！");
+            });
+    };
+
+    /**
+     * 自定义SQL（额外生成实体类）
+     * @param postData
+     */
+    var post_task_free_sql = function(postData){
+        postData["class_name"] = $("#sql_class_name").val();
+        postData["pojo_name"] = $("#sql_pojo_name").val();
+        postData["method_name"] = $("#sql_method_name").val();
+        postData["scalarType"] = $("#free_sql_scalarType").val();
+        postData["pagination"] = $("#free_sql_pagination").is(":checked");
+
+        if($("#free_sql_crud_option").val()=="select"){
+            if (postData["class_name"] == ""
+                || postData["pojo_name"] == ""
+                || postData["method_name"] == "") {
+                $("#error_msg").text("DAO类名，实体类名以及方法名需要填写！");
+                return;
+            }
+        }else{
+            if (postData["class_name"] == ""
+                || postData["method_name"] == "") {
+                $("#error_msg").text("DAO类名以及方法名需要填写！");
+                return;
+            }
+        }
+
+        $("#error_msg").text("");
+
+        postData["crud_type"] = $("#free_sql_crud_option").val();
+        postData["sql_content"] = ace.edit("sql_editor").getValue();
+        var paramList = [];
+        $.each($("#param_list").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            var second = $(value).children("select").eq(0);
+            paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
+        });
+        postData["params"] = paramList.join(";");
+
+        if($("#free_sql_crud_option").val()=="select" &&
+            postData["sql_content"].toLowerCase().indexOf("nolock")==-1 &&
+            $(".step2-2-1").attr("dbCatalog")!="MySql"){
+            $.showMsg("error_msg","select语句中必须含有with (nolock)");
+            return;
+        }
+
+        $.post("/rest/task/sql/test_sql", postData).done(function (data) {
+            if (data.code == "OK") {
+                $.post("/rest/task/sql", postData, function (data) {
+                    if (data.code == "OK") {
+                        $("#page1").modal('hide');
+                        w2ui["grid_toolbar"].click('refreshDAO', null);
+                        if ($("#gen_on_save").is(":checked")) {
+                            $("#generateCode").modal({"backdrop": "static"});
+                        }
+                    } else {
+                        $.showMsg("error_msg","SQL测试执行异常，请检查sql及对应参数！"+data.info);
+                    }
+                }).fail(function (data) {
+                        alert("执行异常，请检查sql及对应参数！");
+                    });
+            } else {
+                $.showMsg("error_msg","SQL测试执行异常，请检查sql及对应参数！"+data.info);
+            }
+        }).fail(function (data) {
+                alert("执行异常，请检查sql及对应参数！");
+            });
+    };
+
     AjaxUtil.prototype = {
         post_task: function () {
             var postData = {};
@@ -30,141 +180,13 @@
             } else {
                 postData["action"] = "insert";
             }
-            //postData["server"] = $("#servers").val();
 
             if ($("#gen_style").val() == "auto") { //构建SQL（生成的代码绑定到模板）
-                postData["table_name"] = $("#tables").val();
-                postData["method_name"] = $("#method_name").val();
-                //C#风格或者Java风格，@Name or ?
-                postData["sql_style"] = $("#sql_style").val();
-                postData["crud_type"] = $("#crud_option").val();
-                postData["scalarType"] = $("#auto_sql_scalarType").val();
-                postData["pagination"] = $("#auto_sql_pagination").is(":checked");
-                postData["orderby"] = sprintf("%s,%s",$("#orderby_field").val(),$("#orderby_sort").val());
-
-                postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
-                postData["sql_content"] = ace.edit("sql_builder").getValue();
-
-                var paramList = [];
-                var paramValues = [];
-                $.each($("#param_list_auto").children("div"), function (index, value) {
-                    var first = $(value).children("input").eq(0);
-                    var second = $(value).children("select").eq(0);
-                    paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
-                    paramValues.push($(first).val());
-                });
-
-                var selectedConditions = [];
-                var index2 = 0;
-                $.each($("#selected_condition option"), function (index, value) {
-                    var temp = $(value).val().split(",");
-                    if(temp[1]=="6"){//between
-                        selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1]));
-                        index2+=2;
-                    }else{
-                        selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index2]));
-                        index2++;
-                    }
-                });
-
-                postData["condition"] = selectedConditions.join(";");
-                postData["params"] = paramList.join(";");
-
-                $.post("/rest/task/auto", postData,function (data) {
-                    if (data.code == "OK") {
-                        $("#page1").modal('hide');
-                        w2ui["grid_toolbar"].click('refreshDAO', null);
-                        if ($("#gen_on_save").is(":checked")) {
-                            //window.ajaxutil.generate_code($("#gen_language").val());
-                            $("#generateCode").modal({"backdrop": "static"});
-                        }
-                    } else {
-                        alert(data.info);
-                    }
-                }).fail(function (data) {
-                        alert("保存出错！");
-                    });
-
-            } else if ($("#gen_style").val() == "sql") {//复杂查询（额外生成实体类）
-                postData["class_name"] = $("#sql_class_name").val();
-                postData["pojo_name"] = $("#sql_pojo_name").val();
-                postData["method_name"] = $("#sql_method_name").val();
-                postData["scalarType"] = $("#free_sql_scalarType").val();
-                postData["pagination"] = $("#free_sql_pagination").is(":checked");
-
-                if($("#free_sql_crud_option").val()=="select"){
-                    if (postData["class_name"] == ""
-                        || postData["pojo_name"] == ""
-                        || postData["method_name"] == "") {
-                        $("#error_msg").text("DAO类名，实体类名以及方法名需要填写！");
-                        return;
-                    }
-                }else{
-                    if (postData["class_name"] == ""
-                        || postData["method_name"] == "") {
-                        $("#error_msg").text("DAO类名以及方法名需要填写！");
-                        return;
-                    }
-                }
-
-                $("#error_msg").text("");
-
-                postData["crud_type"] = $("#free_sql_crud_option").val();
-                postData["sql_content"] = ace.edit("sql_editor").getValue();
-                var paramList = [];
-                $.each($("#param_list").children("div"), function (index, value) {
-                    var first = $(value).children("input").eq(0);
-                    var second = $(value).children("select").eq(0);
-                    paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
-                });
-                postData["params"] = paramList.join(";");
-
-                if($("#free_sql_crud_option").val()=="select" &&
-                    postData["sql_content"].toLowerCase().indexOf("nolock")==-1 &&
-                    $(".step2-2-1").attr("dbCatalog")!="MySql"){
-                    $.showMsg("error_msg","select语句中必须含有with (nolock)");
-                    return;
-                }
-
-                $.post("/rest/task/sql/test_sql", postData).done(function (data) {
-                    if (data.code == "OK") {
-                        $.post("/rest/task/sql", postData,function (data) {
-                            if (data.code == "OK") {
-                                $("#page1").modal('hide');
-                                w2ui["grid_toolbar"].click('refreshDAO', null);
-                                if ($("#gen_on_save").is(":checked")) {
-                                    $("#generateCode").modal({"backdrop": "static"});
-                                }
-                            } else {
-                                $.showMsg("error_msg","SQL测试执行异常，请检查sql及对应参数！"+data.info);
-                            }
-                        }).fail(function (data) {
-                                alert("执行异常，请检查sql及对应参数！");
-                            });
-                    } else {
-                        $.showMsg("error_msg","SQL测试执行异常，请检查sql及对应参数！"+data.info);
-                    }
-                }).fail(function (data) {
-                        alert("执行异常，请检查sql及对应参数！");
-                    });
-            } else if ($("#gen_style").val() == "table_view_sp") { //生成模板(包含基础的增删改查操作)
-                postData["table_names"] = $('#table_list').multipleSelect('getSelects').join(",");
-                postData["view_names"] = $('#view_list').multipleSelect('getSelects').join(",");
-                postData["sp_names"] = $('#sp_list').multipleSelect('getSelects').join(",");
-                postData["prefix"] = $("#prefix").val();
-                postData["suffix"] = $("#suffix").val();
-                postData["cud_by_sp"] = $("#cud_by_sp").is(":checked");
-                postData["pagination"] = $("#pagination").is(":checked");
-                $.post("/rest/task/table", postData,function (data) {
-                    $("#page1").modal('hide');
-                    w2ui["grid_toolbar"].click('refreshDAO', null);
-                    if ($("#gen_on_save").is(":checked")) {
-                        //window.ajaxutil.generate_code($("#gen_language").val());
-                        $("#generateCode").modal({"backdrop": "static"});
-                    }
-                }).fail(function (data) {
-                        alert("保存出错！");
-                    });
+                post_task_auto(postData);
+            } else if ($("#gen_style").val() == "sql") {//自定义SQL（额外生成实体类）
+                post_task_free_sql(postData);
+            } else if ($("#gen_style").val() == "table_view_sp") { //标准DAO(包含基础的增删改查操作)
+                post_task_table_view_sp(postData);
             }
         },
         reload_dbservers: function (callback,groupDBs) {

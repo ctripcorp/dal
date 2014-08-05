@@ -21,6 +21,8 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
+import com.ctrip.platform.dal.daogen.utils.SQLValidation;
+import com.ctrip.platform.dal.daogen.utils.SQLValidation.Validation;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 
@@ -134,17 +136,41 @@ public class GenTaskByFreeSqlResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("test_sql")
-	public Status verifyQuery(@FormParam("db_name") String set_name,
+	public Status verifyQuery(@FormParam("id") int id,
+			@FormParam("project_id") int project_id,
+			@FormParam("db_name") String set_name,
+			@FormParam("class_name") String class_name,
+			@FormParam("pojo_name") String pojo_name,
+			@FormParam("method_name") String method_name,
+			@FormParam("crud_type") String crud_type,
 			@FormParam("sql_content") String sql,
-			@FormParam("params") String params) {
+			@FormParam("params") String params,
+			@FormParam("version") int version,
+			@FormParam("action") String action,
+			@FormParam("comment") String comment,
+			@FormParam("scalarType") String scalarType,
+			@FormParam("pagination") boolean pagination) {
 
 		Status status = Status.OK;
 		
-		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
-		String dbName = databaseSetEntry.getConnectionString();
-		
 		try {
-			DbUtils.testAQuerySql(dbName, sql, params, CurrentLanguage.CSharp, true);
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
+			String dbName = databaseSetEntry.getConnectionString();
+			String []parameters = params.split(";");
+			int []paramsTypes = new int[parameters.length];
+			int i=0;
+			for(String param : parameters){
+				if (param != null && !param.isEmpty()){
+					paramsTypes[i++] = Integer.valueOf(param.split(",")[1]);
+				}
+			}
+			Validation validResult=null;
+			if("select".equalsIgnoreCase(crud_type)){
+				validResult = SQLValidation.queryValidate(dbName, sql, paramsTypes);
+			}else{
+				validResult = SQLValidation.updateValidate(dbName, sql, paramsTypes);
+			}
+			
 		} catch (Exception e) {
 			status = Status.ERROR;
 			status.setInfo(e.getMessage());
@@ -154,5 +180,29 @@ public class GenTaskByFreeSqlResource {
 		return status;
 
 	}
+	
+//	@POST
+//	@Produces(MediaType.APPLICATION_JSON)
+//	@Path("test_sql")
+//	public Status verifyQuery(@FormParam("db_name") String set_name,
+//			@FormParam("sql_content") String sql,
+//			@FormParam("params") String params) {
+//
+//		Status status = Status.OK;
+//		
+//		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
+//		String dbName = databaseSetEntry.getConnectionString();
+//		
+//		try {
+//			DbUtils.testAQuerySql(dbName, sql, params, CurrentLanguage.CSharp, true);
+//		} catch (Exception e) {
+//			status = Status.ERROR;
+//			status.setInfo(e.getMessage());
+//			return status;
+//		}
+//		
+//		return status;
+//
+//	}
 
 }

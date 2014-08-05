@@ -631,11 +631,18 @@
             });
         }
 
-        window.sql_builder.buildPagingSQL(function(){
+        if($("#free_sql_crud_option").val()=="select"){
+            window.sql_builder.buildPagingSQL(function(){
+                $("#error_msg").html(" ");
+                current.hide();
+                $(".step2-3-1").show();
+            });
+        }else{
             $("#error_msg").html(" ");
             current.hide();
             $(".step2-3-1").show();
-        });
+        }
+
 
     };
 

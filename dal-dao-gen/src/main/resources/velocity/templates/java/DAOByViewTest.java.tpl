@@ -4,7 +4,7 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
-import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 
 public class ${host.getPojoClassName()}DaoTest {
 	public static void main(String[] args) {

@@ -21,14 +21,14 @@ public class ${host.getPojoClassName()}DaoTest {
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 			
 			//Get the count
-			System.out.println(dao.Count());
+			System.out.println(dao.Count(null));
 			
 			//Get all records
-			List<${host.getPojoClassName()}> ls = dao.getAll();
+			List<${host.getPojoClassName()}> ls = dao.getAll(null);
 			if(null != ls)
 				System.out.println(ls.size());
 				
-			List<${host.getPojoClassName()}> lsp = dao.getListByPage(100, 1);
+			List<${host.getPojoClassName()}> lsp = dao.getListByPage(100, 1, null);
 			if(null != lsp)
 				System.out.println(ls.size());
 			System.exit(1);

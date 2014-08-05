@@ -217,6 +217,7 @@ public class JavaTableHost {
 	{
 		Set<String> imports = new TreeSet<String>();
 		imports.add(java.util.List.class.getName());
+		imports.addAll(this.getPojoImports());
 		return imports;
 	}
 	

@@ -214,5 +214,15 @@ jQuery(document).ready(function () {
         }
     });
 
+    $("#free_sql_crud_option").change(function(){
+        if($("#free_sql_crud_option").val()=='select'){
+            $("#sql_pojo_name_div").show();
+            $("#free_sql_scalarTypeDiv").show();
+        }else{
+            $("#sql_pojo_name_div").hide();
+            $("#free_sql_scalarTypeDiv").hide();
+        }
+    });
+
     window.ajaxutil.reload_projects();
 });

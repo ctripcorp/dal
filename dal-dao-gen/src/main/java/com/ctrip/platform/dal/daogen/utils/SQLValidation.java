@@ -39,6 +39,10 @@ public class SQLValidation {
 		Validation v = validate(dbName, sql, params);
 		System.out.println(v.toString());
 		
+		sql = "insert into Person(Address, Telephone, Name, Age, Gender, PartmentID, space) select Address, Telephone, Name, Age, Gender, PartmentID, space from Person where id = 2141839676";
+		v = validate(dbName, sql);
+		System.out.println(v.toString());
+		
 		sql = "select * from Person as p join Partment as pp on p.PartmentID = pp.Id where p.space=?";
 		v = validate(dbName, sql, Types.NVARCHAR);
 		
@@ -88,7 +92,7 @@ public class SQLValidation {
 	 * @return
 	 * 		The SQL is correct, return true, otherwise return false.
 	 */
-	private static Validation queryValidate(String dbName, String sql, int... paramsTypes){
+	public static Validation queryValidate(String dbName, String sql, int... paramsTypes){
 		Validation status = new Validation(sql);
 		Connection connection = null;
 		try{
@@ -176,7 +180,7 @@ public class SQLValidation {
 	 * @return
 	 * 		The SQL is correct, return true, otherwise return false.
 	 */
-	private static Validation updateValidate(String dbName, String sql, int... paramsTypes) throws Exception{
+	public static Validation updateValidate(String dbName, String sql, int... paramsTypes) throws Exception{
 		Validation status = new Validation(sql);
 		Connection connection = null;
 		try{

@@ -28,7 +28,7 @@ public class ${host.getDbName()}SpDaoTest {
 			// Set test value here
 			//param.setXXX(value);
 			
-			Map<String, ?> result${count} = dao.call${h.getPojoClassName()}(param${count});
+			Map<String, ?> result${count} = dao.call${h.getPojoClassName()}(param${count}, null);
 			for(String key: result${count}.keySet()) {
 				System.out.print("Key: " + key);
 				System.out.println(" Value: " + result${count}.get(key));

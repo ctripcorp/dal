@@ -152,12 +152,15 @@ public class JavaMethodHost {
 	}
 	
 	public String getParameterNames(String suffix) {
-		String[] params = new String[parameters.size()];
-		int i = 0;
+		List<String> params = new ArrayList<String>();
 		for(JavaParameterHost parameter: parameters) {
-			params[i++] = parameter.getName() + (null != suffix ? suffix : "");
+			params.add(parameter.getName() + (null != suffix ? suffix : ""));
 		}
-		
+		if(this.isPaging()){
+			params.add("1");
+			params.add("10");
+		}
+		params.add("new DalHints()");
 		return StringUtils.join(params, ", ");
 	}
 	

@@ -301,6 +301,8 @@
                 editor.setValue(record.sql_content);
                 $("#free_sql_scalarType").val(record['scalarType']);
                 $("#free_sql_pagination").attr('checked',record['pagination']);
+                $("#free_sql_crud_option").val(record['crud_type']);
+                $("#free_sql_crud_option").trigger("change");
             }
         }).fail(function (data) {
                 $("#error_msg").text("获取历史记录失败");
@@ -638,6 +640,12 @@
                 $(".step2-3-1").show();
             });
         }else{
+            var editor = ace.edit("step2_3_1_sql_editor");
+            editor.setTheme("ace/theme/monokai");
+            editor.getSession().setMode("ace/mode/sql");
+            editor.setValue(ace.edit("sql_editor").getValue());
+            editor.setReadOnly(true);
+
             $("#error_msg").html(" ");
             current.hide();
             $(".step2-3-1").show();

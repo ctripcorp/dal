@@ -12,14 +12,14 @@
       <meta name="author" content="">
       <title>Ctrip DAO Generator</title>
       <!-- Bootstrap core CSS -->
-      <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
-      <link href="/static/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
-      <link href="/static/w2ui/w2ui-1.3.2.min.css" rel="stylesheet"/>
-      <link rel="stylesheet" href="/static/jstree/themes/default/style.min.css" />
-      <link href="/static/font-awesome/css/font-awesome.css" rel="stylesheet">
-      <link href="/static/css/multiple-select.css" rel="stylesheet">
-      <link href="/static/css/selectize.bootstrap3.css" rel="stylesheet">
-      <link href="/static/css/common.css" rel="stylesheet">
+      <link href="/static/bootstrap/css/bootstrap.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
+      <link href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
+      <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet"/>
+      <link rel="stylesheet" href="/static/jstree/themes/default/style.min.css?codegen=<%=System.currentTimeMillis() %>" />
+      <link href="/static/font-awesome/css/font-awesome.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
+      <link href="/static/css/multiple-select.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
+      <link href="/static/css/selectize.bootstrap3.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
+      <link href="/static/css/common.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
      
       <!-- Documentation extras -->
       <!-- 
@@ -40,7 +40,7 @@
       <link rel="shortcut icon" href="/static/images/favicon.ico">
       
       	<!-- Loading Flat UI -->
-	    <link href="/static/Flat-UI-master/css/flat-ui.css" rel="stylesheet">
+	    <link href="/static/Flat-UI-master/css/flat-ui.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
 	
 	    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
 	    <!--[if lt IE 9]>
@@ -482,24 +482,24 @@
       <!-- JS and analytics only. -->
       <!-- Bootstrap core JavaScript================================================== -->
       <!-- Placed at the end of the document so the pages load faster -->
-      <script src="/static/jquery/jquery-1.10.2.min.js"></script>
-      <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-      <script src="/static/w2ui/w2ui-1.3.2.min.js"></script>
-      <script src="/static/jstree/jstree.js"></script>
-      <script src="/static/jquery/jquery.blockui.min.js"></script>
-      <script src="/static/js/sprintf.js"></script>
-      <script src="/static/ace/ace.js"></script>
-      <script src="/static/jquery/jquery.multiple.select.js"></script>
-      <script src="/static/js/selectize.min.js"></script>
-      <script src="/static/js/cblock.js"></script>
-      <script src="/static/js/ajaxutil.js"></script>
-      <script src="/static/js/sql_builder.js"></script>
-      <script src="/static/js/wizzard.js"></script>
-      <script src="/static/js/ui_render.js"></script>
-      <script src="/static/js/index.js"></script>
-      <script src="/static/js/progress.js"></script>
+      <script src="/static/jquery/jquery-1.10.2.min.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/bootstrap/js/bootstrap.min.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/jstree/jstree.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/jquery/jquery.blockui.min.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/js/sprintf.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/ace/ace.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/jquery/jquery.multiple.select.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/js/selectize.min.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/js/cblock.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/js/ajaxutil.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/js/sql_builder.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/js/wizzard.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/js/ui_render.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/js/index.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/js/progress.js?codegen=<%=System.currentTimeMillis() %>"></script>
       
-      <script src="/static/js/header.js"></script>
+      <script src="/static/js/header.js?codegen=<%=System.currentTimeMillis() %>"></script>
 
    </body>
 </html>

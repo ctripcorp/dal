@@ -262,7 +262,23 @@ public final class DalTableDao<T> {
 	 * @return how many rows been affected
 	 */
 	public int insert(DalHints hints, T... daoPojos) throws SQLException {
-		DalWatcher.begin();
+		return insert(hints, null, daoPojos);
+	}
+
+	/**
+	 * Insert pojos one by one. If you want to inert them in the batch mode,
+	 * user batchInsert instead. You can also use the combinedInsert.
+	 * 
+	 * @param hints 
+	 *            Additional parameters that instruct how DAL Client perform database operation.
+	 *            DalHintEnum.continueOnError can be used
+	 *            to indicate that the inserting can be go on if there is any
+	 *            failure.
+	 * @param daoPojos
+	 *            list of pojos to be inserted
+	 * @return how many rows been affected
+	 */
+	public int insert(DalHints hints, List<T> daoPojos) throws SQLException {
 		return insert(hints, null, daoPojos);
 	}
 
@@ -285,6 +301,29 @@ public final class DalTableDao<T> {
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, T... daoPojos)
 			throws SQLException {
+		return insert(hints, keyHolder, Arrays.asList(daoPojos));
+	}
+	
+	/**
+	 * Insert pojos and get the generated PK back in keyHolder. Because certain
+	 * JDBC driver may not support such feature, like MS JDBC driver, make sure
+	 * the local test is performed before use this API.
+	 * 
+	 * @param hints
+	 *            Additional parameters that instruct how DAL Client perform database operation.
+	 *            DalHintEnum.continueOnError can be used
+	 *            to indicate that the inserting can be go on if there is any
+	 *            failure.
+	 * @param keyHolder
+	 *            holder for generated primary keys
+	 * @param daoPojos
+	 *            list of pojos to be inserted
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
+	public int insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos)
+			throws SQLException {
+		DalWatcher.begin();
 		int count = 0;
 		// Try to insert one by one
 		for (T pojo : daoPojos) {

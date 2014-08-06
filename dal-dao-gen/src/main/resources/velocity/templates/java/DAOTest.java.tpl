@@ -22,7 +22,12 @@ public class ${host.getPojoClassName()}DaoTest {
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 		
 			//Query by perimary key
-			${host.getPojoClassName()} pk = dao.queryByPk(0, new DalHints());
+#if($host.hasPk())
+#foreach($p in $host.getPrimaryKeys())
+		    ${p.getClassDisplayName()} ${p.getUncapitalizedName()} = null;
+#end
+#end
+			${host.getPojoClassName()} pk = dao.queryByPk(${host.getPkParametersList()});
 			
 			//Query by the Pojo which contains perimary key
 			pk = dao.queryByPk(pk, new DalHints()); 
@@ -69,29 +74,43 @@ public class ${host.getPojoClassName()}DaoTest {
 	        //Get the count
 			int count = dao.count(new DalHints());
 			System.out.println(count);
+			
 #set($count = 0)
 #if($host.hasMethods())
 			// Test additional customized method
 #foreach($method in $host.getMethods())
 #set($count = $count+1)
 #set($suffix = $count+'')
-			// Test ${method.getName()}
-#if($method.isSampleType())
-		    List<${method.getPojoClassName()}> results${suffix} = null;
-#else
-			List<${host.getPojoClassName()}> results${suffix} = null;
-#end
+			// Test ${method.getName()}	
+#if($method.getCrud_type() == "select")	
 #foreach($p in $method.getParameters())
 			${p.getClassDisplayName()} ${p.getName()}${suffix} = null; //set you value here
 #end
-
-#if($method.getCrud_type() == "select")
-		    results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+#if($method.isSampleType())
+#if($method.isReturnList())
+			List<${method.getPojoClassName()}> results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
 			System.out.println(results${suffix}.size());
 #else
-    		int affectedRows${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			${method.getPojoClassName()} results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(results${suffix});
+#end
+#else
+#if($method.isReturnList())
+			List<${host.getPojoClassName()}> results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(results${suffix}.size());
+#else
+			${host.getPojoClassName()} results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(results${suffix});
+#end
+#end
+#else
+#foreach($p in $method.getParameters())
+		    ${p.getClassDisplayName()} ${p.getName()}${suffix} = null; //set you value here
+#end
+			int affectedRows${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
 			System.out.println(affectedRows${suffix});
 #end
+
 #end
 #end
 			System.exit(1);

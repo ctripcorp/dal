@@ -93,8 +93,9 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 						method.setPojoType(task.getPojoType());
 						method.setPaging(task.isPagination());
 						method.setCrud_type(task.getCrud_type());
-						method.setPojoClassName(WordUtils.capitalize(task
-								.getPojo_name() + "Pojo"));
+						if(task.getPojo_name() != null && !task.getPojo_name().isEmpty())
+							method.setPojoClassName(WordUtils.capitalize(task
+									.getPojo_name() + "Pojo"));
 						List<JavaParameterHost> params = new ArrayList<JavaParameterHost>();
 						for (String param : StringUtils.split(
 								task.getParameters(), ";")) {
@@ -115,8 +116,9 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 						method.setParameters(params);
 						methods.add(method);
 
-						if (!_freeSqlPojoHosts.containsKey(method
-								.getPojoClassName())) {
+						if (method.getPojoClassName() != null && 
+								!method.getPojoClassName().isEmpty() &&
+								!_freeSqlPojoHosts.containsKey(method.getPojoClassName())) {
 
 							List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
 

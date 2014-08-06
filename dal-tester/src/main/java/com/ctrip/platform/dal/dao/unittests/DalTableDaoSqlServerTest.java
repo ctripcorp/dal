@@ -380,6 +380,33 @@ public class DalTableDaoSqlServerTest {
 	}
 
 	/**
+	 * Test Test Insert multiple entities one by one with continueOnError hints
+	 * @throws SQLException
+	 */
+	@Test
+	public void testInsertMultipleAsListWithContinueOnErrorHints() throws SQLException{
+		List<ClientTestModel> entities = new ArrayList<ClientTestModel>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setQuantity(10 + 1%3);
+			model.setType(((Number)(1%3)).shortValue());
+			if(i==1){
+				model.setAddress("CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+						+ "CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+						+ "CTRIPCTRIPCTRIPCTRIP");
+			}
+			else{
+				model.setAddress("CTRIP");
+			}
+			entities.add(model);
+		}
+		
+		DalHints hints = new DalHints(DalHintEnum.continueOnError);
+		int res = dao.insert(hints, entities);
+		Assert.assertEquals(2, res);
+	}
+	
+	/**
 	 * Test Insert multiple entities with key-holder
 	 * @throws SQLException
 	 */
@@ -398,6 +425,27 @@ public class DalTableDaoSqlServerTest {
 		Assert.assertEquals(3, res);
 		Assert.assertEquals(3, holder.getKeyList().size());		 
 		Assert.assertTrue(holder.getKey(0).longValue() > 0);
+		Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEYS"));
+	}
+	
+	/**
+	 * Test Insert multiple entities with key-holder
+	 * @throws SQLException
+	 */
+	@Test
+	public void testInsertMultipleAsListWithKeyHolder() throws SQLException{
+		List<ClientTestModel> entities = new ArrayList<ClientTestModel>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setQuantity(10 + 1%3);
+			model.setType(((Number)(1%3)).shortValue());
+			model.setAddress("CTRIP");
+			entities.add(model);
+		}
+		KeyHolder holder = new KeyHolder();
+		int res = dao.insert(new DalHints(),holder, entities);
+		Assert.assertEquals(3, res);
+		Assert.assertEquals(3, holder.getKeyList().size());
 		Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEYS"));
 	}
 	

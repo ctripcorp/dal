@@ -155,15 +155,7 @@ public class GenTaskByFreeSqlResource {
 		
 		try {
 			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
-			
-			if(pagination && "select".equals(crud_type)){
-				sql = SqlBuilder.pagingQuerySql(sql, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), CurrentLanguage.Java);
-				sql = String.format(sql, 1, 2);
-			}
-			
 			String dbName = databaseSetEntry.getConnectionString();
-			
-			
 			String []parameters = null == params || params.isEmpty() ? new String[0] : params.split(";");
 			int []paramsTypes = new int[parameters.length];
 			int i=0;
@@ -172,12 +164,20 @@ public class GenTaskByFreeSqlResource {
 					paramsTypes[i++] = Integer.valueOf(param.split(",")[1]);
 				}
 			}
+			
 			Validation validResult=null;
-			if("select".equalsIgnoreCase(crud_type)){
+			
+			if( "select".equalsIgnoreCase(crud_type)){
+				if(pagination){
+					sql = SqlBuilder.pagingQuerySql(sql, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), CurrentLanguage.Java);
+					sql = String.format(sql, 1, 2);
+				}
 				validResult = SQLValidation.queryValidate(dbName, sql, paramsTypes);
 			}else{
 				validResult = SQLValidation.updateValidate(dbName, sql, paramsTypes);
 			}
+			
+
 			if(validResult.isPassed()){
 				status.setInfo(validResult.getMessage());
 			}else{

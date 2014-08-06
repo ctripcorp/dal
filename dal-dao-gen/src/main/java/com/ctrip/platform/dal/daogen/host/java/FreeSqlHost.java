@@ -113,4 +113,26 @@ public class FreeSqlHost {
 		}
 		return imports;
 	}
+	
+	public boolean hasQuery(){
+		boolean hasQuery = false;
+		for (JavaMethodHost mtd : this.methods) {
+			if(mtd.isQuery()){
+				hasQuery = true;
+				break;
+			}
+		}
+		return hasQuery;
+	}
+	
+	public boolean hasUpdate(){
+		boolean hasUpdate = false;
+		for (JavaMethodHost mtd : this.methods) {
+			if(mtd.isUpdate()){
+				hasUpdate = true;
+				break;
+			}
+		}
+		return hasUpdate;
+	}
 }

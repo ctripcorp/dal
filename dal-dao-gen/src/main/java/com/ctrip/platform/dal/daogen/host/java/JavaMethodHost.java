@@ -165,7 +165,7 @@ public class JavaMethodHost {
 		for(JavaParameterHost parameter: parameters) {
 			params.add(parameter.getAlias() + (null != suffix ? suffix : ""));
 		}
-		if(this.isPaging()){
+		if(this.isPaging() && this.isQuery()){
 			params.add("1");
 			params.add("10");
 		}
@@ -183,7 +183,7 @@ public class JavaMethodHost {
 			else
 				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
 		}
-		if(this.paging){
+		if(this.paging && this.crud_type == "select"){
 			paramsDeclaration.add("int pageNo");
 			paramsDeclaration.add("int pageSize");
 		}
@@ -256,5 +256,13 @@ public class JavaMethodHost {
 	
 	public boolean isReturnFirst(){
 		return this.scalarType.equalsIgnoreCase("First");
+	}
+	
+	public boolean isQuery(){
+		return this.crud_type == null || this.crud_type.isEmpty() || this.crud_type.equalsIgnoreCase("select");
+	}
+	
+	public boolean isUpdate(){
+		return this.crud_type != null && this.crud_type.equalsIgnoreCase("update");
 	}
 }

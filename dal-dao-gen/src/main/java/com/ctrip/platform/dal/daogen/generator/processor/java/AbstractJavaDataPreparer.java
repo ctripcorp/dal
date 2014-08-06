@@ -190,6 +190,7 @@ public class AbstractJavaDataPreparer{
 			method.setSql(builder.getSql_content());
 			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
+			method.setComments(builder.getComment());
 			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
 			// Only have condition clause
 			if (method.getCrud_type().equals("select")

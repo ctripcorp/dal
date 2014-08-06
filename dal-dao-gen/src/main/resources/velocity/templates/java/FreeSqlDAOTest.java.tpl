@@ -24,14 +24,28 @@ public class ${host.getClassName()}DaoTest {
 #foreach( $method in ${host.getMethods()} )
 #set($count = $count+1)
 #set($suffix = $count+'')
-			// Test ${method.getName()}
+
+			// Test ${method.getName()}: ${method.getComments()}
 #foreach($p in $method.getParameters())
-			${p.getClassDisplayName()} ${p.getName()}${suffix} = ${p.getValidationValue()};// Test value here
+			${p.getClassDisplayName()} ${p.getAlias()}${suffix} = ${p.getValidationValue()};// Test value here
 #end
-			List<${method.getPojoClassName()}> ${method.getPojoClassName()}s = dao.${method.getName()}(${method.getParameterNames($suffix)});
-			
-			if(null != ${method.getPojoClassName()}s)
-				System.out.println(${method.getPojoClassName()}s.size());
+#if($method.isSampleType())
+#if($method.isReturnList())
+		    List<${method.getPojoClassName()}> results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(results${suffix}.size());
+#else
+		    ${method.getPojoClassName()} results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(results${suffix});
+#end
+#else
+#if($method.isReturnList())
+		    List<${method.getPojoClassName()}> results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(results${suffix}.size());
+#else
+		    ${method.getPojoClassName()} results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(results${suffix});
+#end
+#end
 #end
 			System.exit(1);
 		} catch (Exception e) {

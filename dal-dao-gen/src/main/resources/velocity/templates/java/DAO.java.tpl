@@ -350,6 +350,9 @@ public class ${host.getPojoClassName()}Dao {
 #end
 
 #foreach($method in $host.getMethods())
+		/**
+		 * ${method.getComments()}
+		**/
 #if($method.getCrud_type() == "select")
 ##简单类型并且返回值是List
 #if($method.isSampleType() && $method.isReturnList())

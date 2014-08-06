@@ -93,6 +93,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 						method.setPojoType(task.getPojoType());
 						method.setPaging(task.isPagination());
 						method.setCrud_type(task.getCrud_type());
+						method.setComments(task.getComment());
 						if(task.getPojo_name() != null && !task.getPojo_name().isEmpty())
 							method.setPojoClassName(WordUtils.capitalize(task
 									.getPojo_name() + "Pojo"));

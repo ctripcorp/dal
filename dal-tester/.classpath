@@ -24,5 +24,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/dal-java-client"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -24,6 +24,7 @@ import com.ctrip.platform.dal.sql.logging.DalWatcher;
  * 
  * @author jhhe
  */
+@SuppressWarnings("unchecked")
 public final class DalTableDao<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
 
@@ -295,13 +296,36 @@ public final class DalTableDao<T> {
 	 * @param keyHolder
 	 *            holder for generated primary keys
 	 * @param daoPojos
-	 *            list of pojos to be inserted
+	 *            Array of pojos to be inserted
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, T... daoPojos)
 			throws SQLException {
-		return insert(hints, keyHolder, Arrays.asList(daoPojos));
+		DalWatcher.begin();
+		int count = 0;
+		// Try to insert one by one
+		for (T pojo : daoPojos) {
+			DalWatcher.begin();
+			Map<String, ?> fields = parser.getFields(pojo);
+			// TODO revise and improve performance
+			String insertSql = buildInsertSql(fields);
+
+			StatementParameters parameters = new StatementParameters();
+			addParameters(parameters, fields);
+
+			try {
+				if (keyHolder == null)
+					count += client.update(insertSql, parameters, hints);
+				else
+					count += client.update(insertSql, parameters, hints,
+							keyHolder);
+			} catch (SQLException e) {
+				if (hints.isStopOnError())
+					throw e;
+			}
+		}
+		return count;
 	}
 	
 	/**
@@ -357,7 +381,7 @@ public final class DalTableDao<T> {
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param keyHolder holder for generated primary keys
-	 * @param daoPojos list of pojos to be inserted
+	 * @param daoPojos array of pojos to be inserted
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
@@ -365,7 +389,60 @@ public final class DalTableDao<T> {
 			T... daoPojos) throws SQLException {
 		reqirePredefinedSharding(logicDbName, hints, "combinedInsert requires predefined shard! Use crossShardCombinedInsert instead.");
 		DalWatcher.begin();
-		return combinedInsert(hints, keyHolder, getPojosFields(daoPojos)); 
+		return  combinedAndInsert(hints, keyHolder, getPojosFields(daoPojos));
+	}
+	
+	/**
+	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in
+	 * keyHolder If the nocount is on, the keyholder is not available. If the logic db has 
+	 * sharding policy, all pojos are supposed to be in same shard. If the pojos are not belongs to 
+	 * same shard, you can use crossShardCombinedInsert instead.
+	 * 
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param keyHolder holder for generated primary keys
+	 * @param daoPojos list of pojos to be inserted
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
+	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
+			List<T> daoPojos) throws SQLException {
+		reqirePredefinedSharding(logicDbName, hints, "combinedInsert requires predefined shard! Use crossShardCombinedInsert instead.");
+		DalWatcher.begin();
+		return combinedAndInsert(hints, keyHolder, getPojosFields(daoPojos)); 
+	}
+	
+	/**
+	 * Cross shard version of combined insert. If you want to get the generated primary keys
+	 * for each shards being inserted, just pass in an empty map of keyholder. If you don't want to 
+	 * get that info, just pass in a null.
+	 * If you are sure that all the pojos are of the same shard, you can use combinedInsert instead with hints properly initialized.
+	 * 
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param keyHolder if you want to get generated keys, just create an empty map. The key will be shard id if that shard is used for insert.
+	 * @param daoPojos array of pojos to be inserted
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
+	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
+			List<T> daoPojos) throws SQLException {
+		crossShardOperationAllowed(logicDbName, hints, "crossShardCombinedInsert");
+		DalWatcher.begin();
+		int total = 0;
+		if (null == daoPojos || daoPojos.size() < 1)
+			return 0;
+		
+		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
+		for(String shard: shuffled.keySet()) {
+			KeyHolder keyHolder = null;
+			if(keyHolders != null) {
+				keyHolder = new KeyHolder();
+				keyHolders.put(shard, keyHolder);
+			}
+			hints.inShard(shard);
+			total += combinedAndInsert(hints, keyHolder, shuffled.get(shard));
+		}
+
+		return total;
 	}
 	
 	/**
@@ -396,12 +473,25 @@ public final class DalTableDao<T> {
 				keyHolders.put(shard, keyHolder);
 			}
 			hints.inShard(shard);
-			total += combinedInsert(hints, keyHolder, shuffled.get(shard));
+			total += combinedAndInsert(hints, keyHolder, shuffled.get(shard));
 		}
 
 		return total;
 	}
-
+	
+	
+	private List<Map<String, ?>> getPojosFields(List<T> daoPojos) {
+		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
+		if (null == daoPojos || daoPojos.size() < 1)
+			return pojoFields;
+		
+		for (T pojo: daoPojos){
+			pojoFields.add(parser.getFields(pojo));
+		}
+		
+		return pojoFields;
+	}
+	
 	private List<Map<String, ?>> getPojosFields(T... daoPojos) {
 		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
 		if (null == daoPojos || daoPojos.length < 1)
@@ -414,7 +504,8 @@ public final class DalTableDao<T> {
 		return pojoFields;
 	}
 	
-	private int combinedInsert(DalHints hints, KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
+	
+	private int combinedAndInsert(DalHints hints, KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
 		if (null == daoPojos || daoPojos.size() < 1)
 			return 0;
 		
@@ -438,6 +529,7 @@ public final class DalTableDao<T> {
 				: this.client.update(sql, parameters, hints, keyHolder);
 	}
 	
+	
 	/**
 	 * Insert pojos in batch mode. If the logic db has sharding policy, all pojos are supposed to be in same shard.
 	 * If the pojos are not belongs to same shard, you can use crossShardBatchInsert instead.
@@ -447,18 +539,56 @@ public final class DalTableDao<T> {
 	 * @return how many rows been affected for inserting each of the pojo
 	 * @throws SQLException
 	 */
+	public int[] batchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
+		reqirePredefinedSharding(getLogicDbName(), hints, "batchInsert requires predefined shard! Use crossShardBatchInsert instead.");
+		DalWatcher.begin();
+		return batchAndInsert(hints, getPojosFields(daoPojos));
+	}
+	
+
+	/**
+	 * Insert pojos in batch mode. If the logic db has sharding policy, all pojos are supposed to be in same shard.
+	 * If the pojos are not belongs to same shard, you can use crossShardBatchInsert instead.
+	 * 
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param daoPojos array of pojos to be inserted
+	 * @return how many rows been affected for inserting each of the pojo
+	 * @throws SQLException
+	 */
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
 		reqirePredefinedSharding(getLogicDbName(), hints, "batchInsert requires predefined shard! Use crossShardBatchInsert instead.");
 		DalWatcher.begin();
-		return batchInsert(hints, getPojosFields(daoPojos));
+		return batchAndInsert(hints, getPojosFields(daoPojos));
 	}
-	
+		
 	/**
 	 * The cross shard version of batch insert. Each pojo can be in different shard.
 	 * If you are sure that all the pojos are of the same shard, you can use batchInsert instead with hints properly initialized.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojos list of pojos to be inserted
+	 * @return how many rows been affected for inserting each of the pojo organized by shard id.
+	 * @throws SQLException
+	 */
+	public Map<String, int[]> crossShardBatchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
+		crossShardOperationAllowed(logicDbName, hints, "crossShardBatchInsert");
+		DalWatcher.begin();
+		Map<String, int[]> result = new HashMap<String, int[]>();
+		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
+		for(String shard: shuffled.keySet()) {
+			hints.inShard(shard);
+			result.put(shard, batchAndInsert(hints, shuffled.get(shard)));
+		}
+
+		return result;
+	}
+
+	/**
+	 * The cross shard version of batch insert. Each pojo can be in different shard.
+	 * If you are sure that all the pojos are of the same shard, you can use batchInsert instead with hints properly initialized.
+	 * 
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param daoPojos array of pojos to be inserted
 	 * @return how many rows been affected for inserting each of the pojo organized by shard id.
 	 * @throws SQLException
 	 */
@@ -469,13 +599,13 @@ public final class DalTableDao<T> {
 		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
 		for(String shard: shuffled.keySet()) {
 			hints.inShard(shard);
-			result.put(shard, batchInsert(hints, shuffled.get(shard)));
+			result.put(shard, batchAndInsert(hints, shuffled.get(shard)));
 		}
 
 		return result;
 	}
-
-	private int[] batchInsert(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+	
+	private int[] batchAndInsert(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
 		for (Map<String, ?> fields : daoPojos) {
@@ -496,6 +626,31 @@ public final class DalTableDao<T> {
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
+	public int delete(DalHints hints, List<T> daoPojos) throws SQLException {
+		int count = 0;
+		for (T pojo : daoPojos) {
+			DalWatcher.begin();
+			StatementParameters parameters = new StatementParameters();
+			addParameters(parameters, parser.getPrimaryKeys(pojo));
+
+			try {
+				count += client.update(deleteSql, parameters, hints);
+			} catch (SQLException e) {
+				if (hints.isStopOnError())
+					throw e;
+			}
+		}
+		return count;
+	}
+	
+	/**
+	 * Delete the given pojos list one by one.
+	 * 
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param daoPojos array of pojos to be deleted
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
 	public int delete(DalHints hints, T... daoPojos) throws SQLException {
 		int count = 0;
 		for (T pojo : daoPojos) {
@@ -512,7 +667,23 @@ public final class DalTableDao<T> {
 		}
 		return count;
 	}
+	
 
+	/**
+	 * Delete the given pojo list. If the logic db has sharding policy, all pojos are supposed to be in same shard.
+	 * If the pojos are not belongs to same shard, you can use crossShardBatchDelete instead.
+	 * 
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param daoPojos array of pojos to be deleted
+	 * @return how many rows been affected for deleting each of the pojo
+	 * @throws SQLException
+	 */
+	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
+		reqirePredefinedSharding(getLogicDbName(), hints, "batchDelete requires predefined shard! Use crossShardBatchDelete instead.");
+		DalWatcher.begin();
+		return batchAndDelete(hints, getPojosFields(daoPojos));
+	}
+	
 	/**
 	 * Delete the given pojo list. If the logic db has sharding policy, all pojos are supposed to be in same shard.
 	 * If the pojos are not belongs to same shard, you can use crossShardBatchDelete instead.
@@ -522,10 +693,10 @@ public final class DalTableDao<T> {
 	 * @return how many rows been affected for deleting each of the pojo
 	 * @throws SQLException
 	 */
-	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
+	public int[] batchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
 		reqirePredefinedSharding(getLogicDbName(), hints, "batchDelete requires predefined shard! Use crossShardBatchDelete instead.");
 		DalWatcher.begin();
-		return batchDelete(hints, getPojosFields(daoPojos));
+		return batchAndDelete(hints, getPojosFields(daoPojos));
 	}
 	
 	/**
@@ -544,13 +715,13 @@ public final class DalTableDao<T> {
 		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
 		for(String shard: shuffled.keySet()) {
 			hints.inShard(shard);
-			result.put(shard, batchDelete(hints, shuffled.get(shard)));
+			result.put(shard, batchAndDelete(hints, shuffled.get(shard)));
 		}
 
 		return result;
 	}
 	
-	private int[] batchDelete(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+	private int[] batchAndDelete(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
 		List<String> pkNames = Arrays.asList(parser.getPrimaryKeyNames());
@@ -572,11 +743,51 @@ public final class DalTableDao<T> {
 	 * 			Additional parameters that instruct how DAL Client perform database operation.
 	 *          DalHintEnum.updateNullField can be used
 	 *          to indicate that the field of pojo is null value will be update.
-	 * @param daoPojos list of pojos to be updated
+	 * @param daoPojos array of pojos to be updated
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
 	public int update(DalHints hints, T... daoPojos) throws SQLException {
+		int count = 0;
+		for (T pojo : daoPojos) {
+			DalWatcher.begin();
+			Map<String, ?> fields = parser.getFields(pojo);
+			Map<String, ?> pk = parser.getPrimaryKeys(pojo);
+
+			String updateSql = buildUpdateSql(fields, hints);
+
+			StatementParameters parameters = new StatementParameters();
+			addParameters(parameters, fields);
+			addParameters(parameters, pk);
+
+			try {
+				if (fields.size() == 0)
+					throw new SQLException(
+							"There is no column to be updated. Please check if needed fields have been set in pojo.");
+
+				count += client.update(updateSql, parameters, hints);
+			} catch (SQLException e) {
+				if (hints.isStopOnError())
+					throw e;
+			}
+		}
+		return count;
+	}
+	
+	/**
+	 * Update the given pojo list one by one. By default, if a field of pojo is null value,
+	 * that field will be ignored, so that it will not be updated. You can
+	 * overwrite this by set updateNullField in hints.
+	 * 
+	 * @param hints
+	 * 			Additional parameters that instruct how DAL Client perform database operation.
+	 *          DalHintEnum.updateNullField can be used
+	 *          to indicate that the field of pojo is null value will be update.
+	 * @param daoPojos list of pojos to be updated
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
+	public int update(DalHints hints, List<T> daoPojos) throws SQLException {
 		int count = 0;
 		for (T pojo : daoPojos) {
 			DalWatcher.begin();

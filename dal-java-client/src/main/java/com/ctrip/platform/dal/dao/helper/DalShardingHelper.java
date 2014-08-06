@@ -61,7 +61,38 @@ public class DalShardingHelper {
 	 * @return Grouped pojos
 	 * @throws SQLException In case locate shard id faild 
 	 */
-	public static <T> Map<String, List<Map<String, ?>>> shuffle(String logicDbName, DalParser<T> parser, T[] pojos) throws SQLException {
+	public static <T> Map<String, List<Map<String, ?>>> shuffle(String logicDbName, DalParser<T> parser, List<T> pojos) throws SQLException {
+		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
+		DalConfigure config = DalClientFactory.getDalConfigure();
+		
+		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
+		DalShardStrategy strategy = dbSet.getStrategy();
+		
+		DalHints tmpHints = new DalHints();
+		for(T pojo:pojos) {
+			Map<String, ?> fields = parser.getFields(pojo);
+			tmpHints.set(DalHintEnum.shardColValues, fields);
+			String shardId = strategy.locateShard(config, logicDbName, tmpHints);
+			dbSet.validate(shardId);
+			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
+			if(pojosInShard == null) {
+				pojosInShard = new LinkedList<Map<String, ?>>();
+				shuffled.put(shardId, pojosInShard);
+			}
+			pojosInShard.add(fields);
+		}
+		
+		return shuffled;
+	}
+	
+	/**
+	 * Group pojos by shard id. Should be only used for DB that support sharding.
+	 * @param logicDbName
+	 * @param pojos
+	 * @return Grouped pojos
+	 * @throws SQLException In case locate shard id faild 
+	 */
+	public static <T> Map<String, List<Map<String, ?>>> shuffle(String logicDbName, DalParser<T> parser, T... pojos) throws SQLException {
 		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		

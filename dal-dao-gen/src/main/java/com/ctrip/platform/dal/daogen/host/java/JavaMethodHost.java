@@ -21,6 +21,7 @@ public class JavaMethodHost {
 	// DAO class name
 	private String className;
 	private String pojoClassName;
+	private String comments;
 	private List<JavaParameterHost> parameters;
 	// Only for free sql query dao
 	private List<JavaParameterHost> fields;
@@ -67,6 +68,14 @@ public class JavaMethodHost {
 
 	public void setCrud_type(String crud_type) {
 		this.crud_type = crud_type;
+	}
+
+	public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
 	}
 
 	public String getName() {
@@ -145,7 +154,7 @@ public class JavaMethodHost {
 		String[] params = new String[parameters.size()];
 		int i = 0;
 		for(JavaParameterHost parameter: parameters) {
-			params[i++] = parameter.getName();
+			params[i++] = parameter.getAlias();
 		}
 		
 		return StringUtils.join(params, ", ");
@@ -154,7 +163,7 @@ public class JavaMethodHost {
 	public String getParameterNames(String suffix) {
 		List<String> params = new ArrayList<String>();
 		for(JavaParameterHost parameter: parameters) {
-			params.add(parameter.getName() + (null != suffix ? suffix : ""));
+			params.add(parameter.getAlias() + (null != suffix ? suffix : ""));
 		}
 		if(this.isPaging()){
 			params.add("1");
@@ -248,5 +257,4 @@ public class JavaMethodHost {
 	public boolean isReturnFirst(){
 		return this.scalarType.equalsIgnoreCase("First");
 	}
-	
 }

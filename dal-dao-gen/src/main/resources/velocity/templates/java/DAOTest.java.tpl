@@ -81,10 +81,10 @@ public class ${host.getPojoClassName()}DaoTest {
 #foreach($method in $host.getMethods())
 #set($count = $count+1)
 #set($suffix = $count+'')
-			// Test ${method.getName()}	
+			// Test ${method.getName()}: ${method.getComments()}
 #if($method.getCrud_type() == "select")	
 #foreach($p in $method.getParameters())
-			${p.getClassDisplayName()} ${p.getName()}${suffix} = null; //set you value here
+			${p.getClassDisplayName()} ${p.getAlias()}${suffix} = null; //set you value here
 #end
 #if($method.isSampleType())
 #if($method.isReturnList())

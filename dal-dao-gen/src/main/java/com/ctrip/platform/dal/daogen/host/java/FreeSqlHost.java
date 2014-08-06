@@ -95,13 +95,14 @@ public class FreeSqlHost {
 	{
 		Set<String> imports = new TreeSet<String>();
 		imports.add(java.util.List.class.getName());
+		imports.addAll(this.getPojoImports());
 		return imports;
 	}
 	
 	public Set<String> getPojoImports() {
 		Set<String> imports = new TreeSet<String>();
 
-		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(fields);
+		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>();
 		for(JavaParameterHost field: allTypes) {
 			Class<?> clazz = field.getJavaClass();
 			if(byte[].class.equals(clazz))

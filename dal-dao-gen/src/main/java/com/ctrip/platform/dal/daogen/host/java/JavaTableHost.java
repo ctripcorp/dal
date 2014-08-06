@@ -168,6 +168,16 @@ public class JavaTableHost {
 		return StringUtils.join(paramsDeclaration, ", ");
 	}
 	
+	public String getPkParametersList(){
+		List<String> paramsList = new ArrayList<String>();
+		for(JavaParameterHost parameter: primaryKeys) {
+			paramsList.add(parameter.getUncapitalizedName());
+		}
+		paramsList.add("new DalHints()");
+		
+		return StringUtils.join(paramsList, ",");
+	}
+	
 	public boolean hasPk(){
 		return null != primaryKeys && !primaryKeys.isEmpty();
 	}
@@ -217,6 +227,7 @@ public class JavaTableHost {
 	{
 		Set<String> imports = new TreeSet<String>();
 		imports.add(java.util.List.class.getName());
+		imports.addAll(this.getPojoImports());
 		return imports;
 	}
 	

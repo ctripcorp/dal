@@ -22,23 +22,28 @@ public class ${host.getPojoClassName()}DaoTest {
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 		
 			//Query by perimary key
-			${host.getPojoClassName()} pk = dao.queryByPk(0);
+#if($host.hasPk())
+#foreach($p in $host.getPrimaryKeys())
+		    ${p.getClassDisplayName()} ${p.getUncapitalizedName()} = null;
+#end
+#end
+			${host.getPojoClassName()} pk = dao.queryByPk(${host.getPkParametersList()});
 			
 			//Query by the Pojo which contains perimary key
-			pk = dao.queryByPk(pk); 
+			pk = dao.queryByPk(pk, new DalHints()); 
 			
 			//Invoke the paging function
 			//Note that both the pageSize and the pageNumber must be greater than 1
-			List<${host.getPojoClassName()}> pojos = dao.queryByPage(100, 1);
+			List<${host.getPojoClassName()}> pojos = dao.queryByPage(100, 1, new DalHints());
 			
 			//Get all records
-			List<${host.getPojoClassName()}> all = dao.getAll();
+			List<${host.getPojoClassName()}> all = dao.getAll(new DalHints());
 
 #if($host.getSpInsert().isExist())
 			${host.getPojoClassName()} pojo = new ${host.getPojoClassName()}(); 
 			//Set fields here
 			
-			dao.insert(pojo);
+			dao.insert(null,pojo);
 #else
 		    ${host.getPojoClassName()} pojo1 = new ${host.getPojoClassName()}();
 			${host.getPojoClassName()} pojo2 = new ${host.getPojoClassName()}();
@@ -46,48 +51,66 @@ public class ${host.getPojoClassName()}DaoTest {
 			//Set fields for pojos here
 			KeyHolder kh = new KeyHolder();
 			//keyHolder will pull back the auto-increament keys
-			dao.insert(kh, pojo1, pojo2, pojo3);
+			dao.insert(new DalHints(), kh, pojo1, pojo2, pojo3);
 			
 			Number generatedKey = kh.getKey(0);
 			System.out.println(generatedKey);
 #end
 #if($host.getSpUpdate().isExist())
 			//Make some change to the pojo. set primary key
-			dao.update(pojo);
+			dao.update(new DalHints(), pojo);
 #else
 		    //Make some change to the pojo1. set primary key
-			dao.update(pojo1);
+			dao.update(new DalHints(), pojo1);
 #end
 #if($host.getSpDelete().isExist())
 			//Remove the pojo according to its primary keys
-			dao.delete(pojo);
+			dao.delete(new DalHints(), pojo);
 #else
 	        //Remove the pojos according to its primary keys
-		    dao.delete(pojo1, pojo2, pojo3);
+		    dao.delete(new DalHints(), pojo1, pojo2, pojo3);
 #end
 
 	        //Get the count
-			int count = dao.count();
+			int count = dao.count(new DalHints());
+			System.out.println(count);
+			
 #set($count = 0)
 #if($host.hasMethods())
 			// Test additional customized method
-			int affectedRows = 0;
-			List<${host.getPojoClassName()}> results = null;
 #foreach($method in $host.getMethods())
 #set($count = $count+1)
 #set($suffix = $count+'')
-			// Test ${method.getName()}
+			// Test ${method.getName()}	
+#if($method.getCrud_type() == "select")	
 #foreach($p in $method.getParameters())
 			${p.getClassDisplayName()} ${p.getName()}${suffix} = null; //set you value here
 #end
-
-#if($method.getCrud_type() == "select")
-		    results = dao.${method.getName()}(${method.getParameterNames($suffix)});
-
+#if($method.isSampleType())
+#if($method.isReturnList())
+			List<${method.getPojoClassName()}> results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(results${suffix}.size());
 #else
-    		affectedRows = dao.${method.getName()}(${method.getParameterNames($suffix)});
-
+			${method.getPojoClassName()} results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(results${suffix});
 #end
+#else
+#if($method.isReturnList())
+			List<${host.getPojoClassName()}> results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(results${suffix}.size());
+#else
+			${host.getPojoClassName()} results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(results${suffix});
+#end
+#end
+#else
+#foreach($p in $method.getParameters())
+		    ${p.getClassDisplayName()} ${p.getName()}${suffix} = null; //set you value here
+#end
+			int affectedRows${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(affectedRows${suffix});
+#end
+
 #end
 #end
 			System.exit(1);

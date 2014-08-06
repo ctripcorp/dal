@@ -72,7 +72,7 @@ public class ${host.getPojoClassName()}Dao {
 		hints = DalHints.createIfAbsent(hints);
 		${host.getPojoClassName()} pk = new ${host.getPojoClassName()}();		
 #foreach( $field in ${host.getPrimaryKeys()} )
-		pojo.set${field.getCapitalizedName()}(${field.getUncapitalizedName()});
+		pk.set${field.getCapitalizedName()}(${field.getUncapitalizedName()});
 #end
 		return client.queryByPk(pk, hints);
 	}
@@ -133,7 +133,7 @@ public class ${host.getPojoClassName()}Dao {
 	/**
 	 * SP Insert
 	**/
-	public int insert(${host.getPojoClassName()} daoPojo, DalHints hints) throws SQLException {
+	public int insert(DalHints hints, ${host.getPojoClassName()} daoPojo) throws SQLException {
 		if(null == daoPojo)
 			return 0;
 		StatementParameters parameters = new StatementParameters();

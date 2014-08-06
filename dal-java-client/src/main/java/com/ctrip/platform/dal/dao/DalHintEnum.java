@@ -31,6 +31,12 @@ public enum DalHintEnum {
 	shard,
 	
 	/*
+	 * Explicitly indicate which table shard the operation will be performed.
+	 * Value should be String
+	 */
+	tableShard,
+	
+	/*
 	 * used in batch sp, when set the connection auto commit will be true.
 	 */
 	forceAutoCommit,

@@ -155,8 +155,16 @@ public class GenTaskByFreeSqlResource {
 		
 		try {
 			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
+			
+			if(pagination){
+				sql = SqlBuilder.pagingQuerySql(sql, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), CurrentLanguage.Java);
+				sql = String.format(sql, 1, 2);
+			}
+			
 			String dbName = databaseSetEntry.getConnectionString();
-			String []parameters = params.split(";");
+			
+			
+			String []parameters = null == params || params.isEmpty() ? new String[0] : params.split(";");
 			int []paramsTypes = new int[parameters.length];
 			int i=0;
 			for(String param : parameters){

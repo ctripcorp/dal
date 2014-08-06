@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -286,6 +287,40 @@ public class DalTableDaoSqlServerTest {
 	 * @throws SQLException
 	 */
 	@Test
+	public void testInsertSingle() throws SQLException{
+		ClientTestModel model = new ClientTestModel();
+		model.setQuantity(10 + 1%3);
+		model.setType(((Number)(1%3)).shortValue());
+		model.setAddress("CTRIP");
+		int res = dao.insert(new DalHints(), model);
+		Assert.assertEquals(1, res);
+	}
+	
+	/**
+	 * Test Insert multiple entities one by one
+	 * @throws SQLException
+	 */
+	@Test
+	public void testInsertDouble() throws SQLException{
+		ClientTestModel model = new ClientTestModel();
+		model.setQuantity(10 + 1%3);
+		model.setType(((Number)(1%3)).shortValue());
+		model.setAddress("CTRIP");
+
+		ClientTestModel model2 = new ClientTestModel();
+		model2.setQuantity(10 + 1%3);
+		model2.setType(((Number)(1%3)).shortValue());
+		model2.setAddress("CTRIP");
+		
+		int res = dao.insert(new DalHints(), model, model2);
+		Assert.assertEquals(2, res);
+	}
+
+	/**
+	 * Test Insert multiple entities one by one
+	 * @throws SQLException
+	 */
+	@Test
 	public void testInsertMultiple() throws SQLException{
 		ClientTestModel[] entities = new ClientTestModel[3];
 		for (int i = 0; i < 3; i++) {
@@ -294,6 +329,24 @@ public class DalTableDaoSqlServerTest {
 			model.setType(((Number)(1%3)).shortValue());
 			model.setAddress("CTRIP");
 			entities[i] = model;
+		}
+		int res = dao.insert(new DalHints(), entities);
+		Assert.assertEquals(3, res);
+	}
+	
+	/**
+	 * Test Insert multiple entities one by one
+	 * @throws SQLException
+	 */
+	@Test
+	public void testInsertMultipleAsList() throws SQLException{
+		List<ClientTestModel> entities = new ArrayList<ClientTestModel>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setQuantity(10 + 1%3);
+			model.setType(((Number)(1%3)).shortValue());
+			model.setAddress("CTRIP");
+			entities.add(model);
 		}
 		int res = dao.insert(new DalHints(), entities);
 		Assert.assertEquals(3, res);

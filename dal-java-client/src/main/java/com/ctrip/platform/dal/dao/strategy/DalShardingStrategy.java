@@ -5,7 +5,7 @@ import java.util.Map;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 
-public interface DalShardStrategy {
+public interface DalShardingStrategy {
 	/**
 	 * Initialize strategy
 	 * @param settings

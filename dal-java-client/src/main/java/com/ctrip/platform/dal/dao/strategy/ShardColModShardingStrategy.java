@@ -9,7 +9,7 @@ import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 
-public class ShardColModShardStrategy extends AbstractRWSeparationStrategy implements DalShardStrategy {
+public class ShardColModShardingStrategy extends AbstractRWSeparationStrategy implements DalShardingStrategy {
 	public static final String COLUMNS = "columns";
 	public static final String MOD = "mod";
 	

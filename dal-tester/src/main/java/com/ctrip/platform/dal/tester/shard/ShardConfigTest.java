@@ -9,8 +9,8 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
-import com.ctrip.platform.dal.dao.strategy.DalShardStrategy;
-import com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;
+import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
+import com.ctrip.platform.dal.dao.strategy.ShardColModShardingStrategy;
 import com.ctrip.platform.dal.dao.strategy.SimpleShardHintStrategy;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 
@@ -28,7 +28,7 @@ public class ShardConfigTest {
 
 	private void testSimpleStrategey() {
 		try {
-			DalShardStrategy stra = new SimpleShardHintStrategy();
+			DalShardingStrategy stra = new SimpleShardHintStrategy();
 			Map<String, String> settings = new HashMap<String, String>();
 			stra.initialize(settings);
 			DalConfigure cfg;
@@ -53,10 +53,10 @@ public class ShardConfigTest {
 
 	private void testModStrategey() {
 		try {
-			DalShardStrategy stra = new ShardColModShardStrategy();
+			DalShardingStrategy stra = new ShardColModShardingStrategy();
 			Map<String, String> settings = new HashMap<String, String>();
-			settings.put(ShardColModShardStrategy.COLUMNS, "user_id,order_id");
-			settings.put(ShardColModShardStrategy.MOD, "3");
+			settings.put(ShardColModShardingStrategy.COLUMNS, "user_id,order_id");
+			settings.put(ShardColModShardingStrategy.MOD, "3");
 			
 			stra.initialize(settings);
 			DalConfigure cfg;

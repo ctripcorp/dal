@@ -16,7 +16,7 @@ import com.ctrip.platform.dal.sql.logging.DalEventEnum;
  * @author jhhe
  *
  */
-public class SmartReadRouteStrategy implements DalShardStrategy {
+public class SmartReadRouteStrategy implements DalShardingStrategy {
 	public static final String REPL_SLA = "replSla";
 	public static final int DEEFAULT_THRESHOLD = 5;
 	private final ConcurrentHashMap<String, Integer> dbTimeoutMap = new ConcurrentHashMap<String, Integer>();

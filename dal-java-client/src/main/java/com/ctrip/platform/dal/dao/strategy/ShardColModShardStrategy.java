@@ -27,8 +27,13 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	 * @Override
 	 */
 	public void initialize(Map<String, String> settings) {
-		columns = settings.get(COLUMNS).split(",");
-		mod = Integer.parseInt(settings.get(MOD));
+		if(settings.containsKey(COLUMNS)) {
+			columns = settings.get(COLUMNS).split(",");
+		}
+		
+		if(settings.containsKey(MOD)) {
+			mod = Integer.parseInt(settings.get(MOD));
+		}
 		
 		if(settings.containsKey(TABLE_COLUMNS)) {
 			tableColumns = settings.get(TABLE_COLUMNS).split(",");
@@ -37,6 +42,11 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		if(settings.containsKey(TABLE_MOD)) {
 			tableMod = Integer.parseInt(settings.get(TABLE_MOD));
 		}
+	}
+
+	@Override
+	public boolean isShardingByDb() {
+		return columns != null;
 	}
 
 	/**
@@ -64,7 +74,12 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		throw new RuntimeException("Can not locate shard for " + logicDbName);
 	}
-	
+
+	@Override
+	public boolean isShardingByTable() {
+		return tableColumns != null;
+	}
+
 	@Override
 	public String locateTableShard(DalConfigure configure, String logicDbName,
 			DalHints hints) {

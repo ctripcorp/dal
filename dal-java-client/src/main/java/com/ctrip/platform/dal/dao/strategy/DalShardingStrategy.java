@@ -20,6 +20,12 @@ public interface DalShardingStrategy {
 	 * @return
 	 */
 	boolean isMaster(DalConfigure configure, String logicDbName, DalHints hints);
+	
+	/**
+	 * Check if the shard is by DB
+	 * @return
+	 */
+	boolean isShardingByDb();
 
 	/**
 	 * Locate target shard that the operation is performed. 
@@ -30,6 +36,12 @@ public interface DalShardingStrategy {
 	 * @return
 	 */
 	String locateDbShard(DalConfigure configure, String logicDbName, DalHints hints);
+	
+	/**
+	 * Check if the shard is by table
+	 * @return
+	 */
+	boolean isShardingByTable();
 	
 	/**
 	 * Locate table shard suffix. The table name + suffix will be used as real table name 

@@ -24,7 +24,6 @@ import com.ctrip.platform.dal.sql.logging.DalWatcher;
  * 
  * @author jhhe
  */
-@SuppressWarnings("unchecked")
 public final class DalTableDao<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
 

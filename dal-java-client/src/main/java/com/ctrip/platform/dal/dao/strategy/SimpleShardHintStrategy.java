@@ -23,4 +23,14 @@ public class SimpleShardHintStrategy extends AbstractRWSeparationStrategy implem
 			DalHints hints) {
 		return hints.getString(DalHintEnum.tableShard);
 	}
+
+	@Override
+	public boolean isShardingByDb() {
+		return true;
+	}
+
+	@Override
+	public boolean isShardingByTable() {
+		return true;
+	}
 }

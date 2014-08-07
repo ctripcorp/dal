@@ -14,7 +14,7 @@ import com.ctrip.platform.dal.sql.logging.DalEventEnum;
  * Add cache for DB timeout. Key is DB name, value is timeout. timeout is provided by app user. when DB get updated, timeout will be reset.
  * For new read request, it will check timeout first. if not timeout, read master, if timeout read slave.
  * @author jhhe
- *
+ * @deprecated not used for now
  */
 public class SmartReadRouteStrategy implements DalShardingStrategy {
 	public static final String REPL_SLA = "replSla";
@@ -77,5 +77,19 @@ public class SmartReadRouteStrategy implements DalShardingStrategy {
 	public String locateTableShard(DalConfigure configure, String logicDbName,
 			DalHints hints) {
 		return hints.getString(DalHintEnum.tableShard);
+	}
+
+
+	@Override
+	public boolean isShardingByDb() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public boolean isShardingByTable() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

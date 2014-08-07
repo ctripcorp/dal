@@ -9,7 +9,7 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
-import com.ctrip.platform.dal.dao.strategy.DalShardStrategy;
+import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;
 import com.ctrip.platform.dal.dao.strategy.SimpleShardHintStrategy;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
@@ -28,14 +28,14 @@ public class ShardConfigTest {
 
 	private void testSimpleStrategey() {
 		try {
-			DalShardStrategy stra = new SimpleShardHintStrategy();
+			DalShardingStrategy stra = new SimpleShardHintStrategy();
 			Map<String, String> settings = new HashMap<String, String>();
 			stra.initialize(settings);
 			DalConfigure cfg;
 			cfg = DalConfigureFactory.load("e:/Dal.config");
 			DalHints hints = new DalHints();
 			hints.set(DalHintEnum.shard, "1");
-			System.out.println(stra.locateShard(cfg, "shardingtestMaster", hints));
+			System.out.println(stra.locateDbShard(cfg, "shardingtestMaster", hints));
 			
 			hints = new DalHints();
 			Set<String> set = new HashSet<String>();
@@ -43,7 +43,7 @@ public class ShardConfigTest {
 			set.add("2");
 			set.add("3");
 //			hints.set(DalHintEnum.shards, set);
-			System.out.println(stra.locateShard(cfg, "shardingtestMaster", hints));
+			System.out.println(stra.locateDbShard(cfg, "shardingtestMaster", hints));
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -53,7 +53,7 @@ public class ShardConfigTest {
 
 	private void testModStrategey() {
 		try {
-			DalShardStrategy stra = new ShardColModShardStrategy();
+			DalShardingStrategy stra = new ShardColModShardStrategy();
 			Map<String, String> settings = new HashMap<String, String>();
 			settings.put(ShardColModShardStrategy.COLUMNS, "user_id,order_id");
 			settings.put(ShardColModShardStrategy.MOD, "3");
@@ -67,7 +67,7 @@ public class ShardConfigTest {
 			DalHints hints = new DalHints();
 			hints.set(DalHintEnum.shardColValues, colValues);
 			
-			System.out.println(stra.locateShard(cfg, "shardingtestMaster", hints));
+			System.out.println(stra.locateDbShard(cfg, "shardingtestMaster", hints));
 			
 			hints = new DalHints();
 			colValues.clear();
@@ -75,7 +75,7 @@ public class ShardConfigTest {
 			hints.set(DalHintEnum.shardColValues, colValues);
 			hints.set(DalHintEnum.masterOnly);
 			hints.set(DalHintEnum.operation, DalEventEnum.BATCH_UPDATE);
-			System.out.println(stra.locateShard(cfg, "shardingtestMaster", hints));
+			System.out.println(stra.locateDbShard(cfg, "shardingtestMaster", hints));
 			System.out.println(stra.isMaster(cfg, "shardingtestMaster", hints));
 			
 			hints = new DalHints();
@@ -83,7 +83,7 @@ public class ShardConfigTest {
 			colValues.put("user_id", 2);
 			hints.set(DalHintEnum.shardColValues, colValues);
 			hints.set(DalHintEnum.operation, DalEventEnum.QUERY);
-			System.out.println(stra.locateShard(cfg, "shardingtestMaster", hints));
+			System.out.println(stra.locateDbShard(cfg, "shardingtestMaster", hints));
 			System.out.println(stra.isMaster(cfg, "shardingtestMaster", hints));
 			
 			hints = new DalHints();
@@ -91,7 +91,7 @@ public class ShardConfigTest {
 			colValues.put("user_id", 3);
 			hints.set(DalHintEnum.shardColValues, colValues);
 			hints.set(DalHintEnum.operation, DalEventEnum.EXECUTE);
-			System.out.println(stra.locateShard(cfg, "shardingtestMaster", hints));
+			System.out.println(stra.locateDbShard(cfg, "shardingtestMaster", hints));
 			System.out.println(stra.isMaster(cfg, "shardingtestMaster", hints));
 
 		} catch (Exception e) {

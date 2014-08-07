@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.ctrip.platform.dal.dao.strategy.DalShardStrategy;
+import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 
 public class DatabaseSet {
 	private static final String CLASS = "class";
@@ -17,7 +17,7 @@ public class DatabaseSet {
 	private String name;
 	private String provider;
 
-	private DalShardStrategy strategy;
+	private DalShardingStrategy strategy;
 	private Map<String, DataBase> databases;
 	// Key is shard id, value is all database under in this shard
 	private Map<String, List<DataBase>> masterDbByShard = new HashMap<String, List<DataBase>>();
@@ -53,7 +53,7 @@ public class DatabaseSet {
 		String[] strategyDef = values[0].split(KEY_VALUE_SEPARATOR);
 		
 		if(strategyDef[0].equals(CLASS))
-			strategy = (DalShardStrategy)Class.forName(strategyDef[1]).newInstance();
+			strategy = (DalShardingStrategy)Class.forName(strategyDef[1]).newInstance();
 		Map<String, String> settings = new HashMap<String, String>();
 		for(int i = 1; i < values.length; i++) {
 			String[] entry = values[i].split(KEY_VALUE_SEPARATOR);
@@ -112,7 +112,7 @@ public class DatabaseSet {
 		return masterDbByShard.keySet();
 	}
 
-	public DalShardStrategy getStrategy() throws SQLException {
+	public DalShardingStrategy getStrategy() throws SQLException {
 		if(strategy == null)
 			throw new SQLException("No sharding stradegy defined");
 		return strategy;

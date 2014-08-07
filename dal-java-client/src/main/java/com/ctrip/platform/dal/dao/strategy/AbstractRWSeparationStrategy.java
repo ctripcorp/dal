@@ -5,7 +5,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 
-public abstract class AbstractRWSeparationStrategy implements DalShardStrategy {
+public abstract class AbstractRWSeparationStrategy implements DalShardingStrategy {
 	@Override
 	public boolean isMaster(DalConfigure configure, String logicDbName,
 			DalHints hints) {

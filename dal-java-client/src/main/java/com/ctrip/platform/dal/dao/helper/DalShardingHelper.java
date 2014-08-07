@@ -15,7 +15,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
-import com.ctrip.platform.dal.dao.strategy.DalShardStrategy;
+import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 
 public class DalShardingHelper {
 	
@@ -49,7 +49,7 @@ public class DalShardingHelper {
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
-		String shard = dbSet.getStrategy().locateShard(config, logicDbName, hints);
+		String shard = dbSet.getStrategy().locateDbShard(config, logicDbName, hints);
 		dbSet.validate(shard);
 		
 		return shard;
@@ -67,13 +67,13 @@ public class DalShardingHelper {
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
-		DalShardStrategy strategy = dbSet.getStrategy();
+		DalShardingStrategy strategy = dbSet.getStrategy();
 		
 		DalHints tmpHints = new DalHints();
 		for(T pojo:pojos) {
 			Map<String, ?> fields = parser.getFields(pojo);
 			tmpHints.set(DalHintEnum.shardColValues, fields);
-			String shardId = strategy.locateShard(config, logicDbName, tmpHints);
+			String shardId = strategy.locateDbShard(config, logicDbName, tmpHints);
 			dbSet.validate(shardId);
 			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
 			if(pojosInShard == null) {

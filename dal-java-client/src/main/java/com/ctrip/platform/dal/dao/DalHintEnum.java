@@ -9,9 +9,14 @@ public enum DalHintEnum {
 	operation, //DalEventEnum
 
 	/*
-	 * Value used to help sharding strategy locate shard. Can be any type
+	 * Value used to help sharding strategy locate DB shard. Can be any type
 	 */
 	shardValue,
+	
+	/*
+	 * Value used to help sharding strategy locate table shard. Can be any type
+	 */
+	tableShardValue,
 	
 	/*
 	 * Map<String, Object> of column name value pair. To help sharding strategy locate

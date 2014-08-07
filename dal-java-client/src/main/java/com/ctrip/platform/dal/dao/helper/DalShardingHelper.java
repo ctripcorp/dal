@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.helper;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -93,27 +94,7 @@ public class DalShardingHelper {
 	 * @throws SQLException In case locate shard id faild 
 	 */
 	public static <T> Map<String, List<Map<String, ?>>> shuffle(String logicDbName, DalParser<T> parser, T... pojos) throws SQLException {
-		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
-		DalConfigure config = DalClientFactory.getDalConfigure();
-		
-		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
-		DalShardStrategy strategy = dbSet.getStrategy();
-		
-		DalHints tmpHints = new DalHints();
-		for(T pojo:pojos) {
-			Map<String, ?> fields = parser.getFields(pojo);
-			tmpHints.set(DalHintEnum.shardColValues, fields);
-			String shardId = strategy.locateShard(config, logicDbName, tmpHints);
-			dbSet.validate(shardId);
-			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
-			if(pojosInShard == null) {
-				pojosInShard = new LinkedList<Map<String, ?>>();
-				shuffled.put(shardId, pojosInShard);
-			}
-			pojosInShard.add(fields);
-		}
-		
-		return shuffled;
+		return shuffle(logicDbName, parser, Arrays.asList(pojos));
 	}
 	
 	/**

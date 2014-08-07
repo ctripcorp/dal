@@ -83,7 +83,7 @@
                     $("#generateCode").modal({"backdrop": "static"});
                 }
             } else {
-                alert(data.info);
+                $.showMsg("error_msg",data.info);
             }
         }).fail(function (data) {
                 alert("保存出错！");

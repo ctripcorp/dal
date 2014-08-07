@@ -680,7 +680,9 @@ public class DbUtils {
 							.getColumnType(i)));
 					pHost.setType(DbType.getCSharpType(pHost.getDbType()));
 					pHost.setIdentity(false);
-					pHost.setNullable(false);
+					pHost.setNullable(true);
+					pHost.setValueType(Consts.CSharpValueTypes.contains(pHost
+							.getType()));
 					pHost.setPrimary(false);
 					pHost.setLength(rsMeta.getColumnDisplaySize(i));
 					hosts.add(pHost);

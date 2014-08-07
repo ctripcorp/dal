@@ -774,7 +774,9 @@ public class DbUtils {
 							.getColumnType(i)));
 					pHost.setType(DbType.getCSharpType(pHost.getDbType()));
 					pHost.setIdentity(false);
-					pHost.setNullable(false);
+					pHost.setNullable(true);
+					pHost.setValueType(Consts.CSharpValueTypes.contains(pHost
+							.getType()));
 					pHost.setPrimary(false);
 					pHost.setLength(rsMeta.getColumnDisplaySize(i));
 					pHosts.add(pHost);
@@ -790,7 +792,7 @@ public class DbUtils {
 					paramHost.setSqlType(rsMeta.getColumnType(i));
 					paramHost.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType()));
 					paramHost.setIdentity(false);
-					paramHost.setNullable(false);
+					paramHost.setNullable(true);
 					paramHost.setPrimary(false);
 					paramHost.setLength(rsMeta.getColumnDisplaySize(i));
 					paramHosts.add(paramHost);

@@ -636,24 +636,11 @@
             });
         }
 
-        if($("#free_sql_crud_option").val()=="select"){
-            window.sql_builder.buildPagingSQL(function(){
-                $("#error_msg").html(" ");
-                current.hide();
-                $(".step2-3-1").show();
-            });
-        }else{
-            var editor = ace.edit("step2_3_1_sql_editor");
-            editor.setTheme("ace/theme/monokai");
-            editor.getSession().setMode("ace/mode/sql");
-            editor.setValue(ace.edit("sql_editor").getValue());
-            editor.setReadOnly(true);
-
+        window.sql_builder.buildPagingSQL(function(){
             $("#error_msg").html(" ");
             current.hide();
             $(".step2-3-1").show();
-        }
-
+        });
 
     };
 

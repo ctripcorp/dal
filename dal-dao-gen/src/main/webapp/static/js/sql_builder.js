@@ -160,7 +160,8 @@
             if ($("#gen_style").val() == "auto") { //构建SQL（生成的代码绑定到模板）
                 postData["sql_style"] = $("#sql_style").val();
                 postData["sql_content"] = ace.edit("sql_builder").getValue();
-                if($("#auto_sql_pagination").is(":checked")==false){
+                if($("#auto_sql_pagination").is(":checked")==false ||
+                    $("#crud_option").val()!="select"){
                     showSQL("step2_2_2_sql_editor",postData["sql_content"]);
                     callable();
                     return;

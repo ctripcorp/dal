@@ -265,4 +265,5 @@ public class JavaMethodHost {
 	public boolean isUpdate(){
 		return this.crud_type != null && this.crud_type.equalsIgnoreCase("update");
 	}
+	
 }

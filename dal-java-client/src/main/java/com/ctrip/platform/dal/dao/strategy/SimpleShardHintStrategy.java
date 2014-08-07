@@ -15,8 +15,7 @@ public class SimpleShardHintStrategy extends AbstractRWSeparationStrategy implem
 	@Override
 	public String locateDbShard(DalConfigure configure, String logicDbName,
 			DalHints hints) {
-		// TODO Auto-generated method stub
-		return null;
+		return hints.getString(DalHintEnum.shard);
 	}
 	
 	@Override

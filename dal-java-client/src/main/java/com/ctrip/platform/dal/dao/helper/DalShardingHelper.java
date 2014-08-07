@@ -49,7 +49,7 @@ public class DalShardingHelper {
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
-		String shard = dbSet.getStrategy().locateShard(config, logicDbName, hints);
+		String shard = dbSet.getStrategy().locateDbShard(config, logicDbName, hints);
 		dbSet.validate(shard);
 		
 		return shard;
@@ -73,7 +73,7 @@ public class DalShardingHelper {
 		for(T pojo:pojos) {
 			Map<String, ?> fields = parser.getFields(pojo);
 			tmpHints.set(DalHintEnum.shardColValues, fields);
-			String shardId = strategy.locateShard(config, logicDbName, tmpHints);
+			String shardId = strategy.locateDbShard(config, logicDbName, tmpHints);
 			dbSet.validate(shardId);
 			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
 			if(pojosInShard == null) {
@@ -126,6 +126,7 @@ public class DalShardingHelper {
 			throw new SQLException(operation + " is not allowed within transaction");
 	}
 	
+	/*
 	public static <T> void executeByShard(String logicDbName, DalParser<T> parser, T[] pojos, DalHints hints, BulkTask task) throws SQLException {
 		Map<String, List<Map<String, ?>>> shaffled = shuffle(logicDbName, parser, pojos);
 		
@@ -134,5 +135,5 @@ public class DalShardingHelper {
 	
 	public static interface BulkTask {
 		void execute(Map<String, List<Map<String, ?>>> shaffled);
-	}
+	}*/
 }

@@ -28,7 +28,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	 * This method will locate shard id by first referring shardValue, then parameter and finally shardCol defined in hints.
 	 * If shard can be decided by any of these values, it will return immediately with the found id.
 	 */
-	public String locateShard(DalConfigure configure, String logicDbName,
+	public String locateDbShard(DalConfigure configure, String logicDbName,
 			DalHints hints) {
 		if(columns.length == 0)
 			return null;
@@ -76,5 +76,11 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public String locateTableShard(DalConfigure configure, String logicDbName,
+			DalHints hints) {
+		return hints.getString(DalHintEnum.tableShard);
 	}
 }

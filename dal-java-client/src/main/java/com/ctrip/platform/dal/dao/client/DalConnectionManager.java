@@ -61,7 +61,7 @@ public class DalConnectionManager {
 			isMaster |= strategy.isMaster(config, logicDbName, hints);
 			String shard = hints.getShardId();
 			if(shard == null)
-				shard = strategy.locateShard(config, logicDbName, hints);
+				shard = strategy.locateDbShard(config, logicDbName, hints);
 			dbSet.validate(shard);
 			
 			allInOneKey = dbSet.getRandomRealDbName(shard, isMaster, isSelect);

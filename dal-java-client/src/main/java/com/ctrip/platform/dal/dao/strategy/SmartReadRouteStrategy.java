@@ -45,7 +45,7 @@ public class SmartReadRouteStrategy implements DalShardStrategy {
 	}
 
 	@Override
-	public String locateShard(DalConfigure configure, String logicDbName,
+	public String locateDbShard(DalConfigure configure, String logicDbName,
 			DalHints hints) {
 		String shard = null;
 		DalEventEnum operation = (DalEventEnum)hints.get(DalHintEnum.operation);
@@ -71,5 +71,11 @@ public class SmartReadRouteStrategy implements DalShardStrategy {
 //		
 //		return (Set<String>)hints.get(DalHintEnum.shards);
 		return null;
+	}
+
+	@Override
+	public String locateTableShard(DalConfigure configure, String logicDbName,
+			DalHints hints) {
+		return hints.getString(DalHintEnum.tableShard);
 	}
 }

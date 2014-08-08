@@ -38,11 +38,13 @@
                 //C#风格或者Java风格，@Name or ?
                 postData["sql_style"] = $("#sql_style").val();
                 postData["crud_type"] = $("#crud_option").val();
-                postData["scalarType"] = $("#auto_sql_scalarType").val();
+
                 if("select" == postData["crud_type"]){
+                    postData["scalarType"] = $("#auto_sql_scalarType").val();
                     postData["pagination"] = $("#auto_sql_pagination").is(":checked");
                     postData["orderby"] = sprintf("%s,%s",$("#orderby_field").val(),$("#orderby_sort").val());
                 }else{
+                    postData["scalarType"] = "";
                     postData["pagination"] = false;
                     postData["orderby"] = "";
                 }

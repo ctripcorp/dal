@@ -180,7 +180,7 @@ public class CrossShardTableDaoTest {
 			pList[2] = p;
 			
 			Map<String, KeyHolder> keyHolders =  new HashMap<String, KeyHolder>();
-			dao.crossShardCombinedInsert(hints, keyHolders, pList);
+			dao.crossShardCombinedInsert(new DalHints(), keyHolders, pList);
 			
 			assertEquals(2, keyHolders.size());
 			assertEquals(1, keyHolders.get("0").size());
@@ -218,7 +218,7 @@ public class CrossShardTableDaoTest {
 			p.setAddress("aaa");
 			pList[2] = p;
 			
-			Map<String, int[]> counts = dao.crossShardBatchInsert(hints, pList);
+			Map<String, int[]> counts = dao.crossShardBatchInsert(new DalHints(), pList);
 			
 			assertEquals(2, counts.size());
 			assertEquals(1, counts.get("0").length);

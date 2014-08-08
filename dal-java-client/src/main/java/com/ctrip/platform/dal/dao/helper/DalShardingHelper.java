@@ -191,9 +191,21 @@ public class DalShardingHelper {
 	}
 	
 	public static void crossShardOperationAllowed(String logicDbName, DalHints hints, String operation) throws SQLException {
+		if(!isShardingEnabled(logicDbName))
+			throw new SQLException(logicDbName + " is not configured with sharding strategy");
+
 		// Assume the out transaction already handle sharding logic
 		if(DalTransactionManager.isInTransaction())
 			throw new SQLException(operation + " is not allowed within transaction");
+		
+		String shard;
+		try {
+			shard = locateShardId(logicDbName, hints);
+		} catch (Exception e) {
+			return;
+		}
+		if(shard != null)
+			throw new SQLException(operation + " requires to be executed only when shard id can not be located in hints. sharid:" + shard);
 	}
 	
 //	public static int[] executeByDbShard(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask task) throws SQLException {
@@ -202,7 +214,7 @@ public class DalShardingHelper {
 	
 	public static <T> T executeByTableShard(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask<T> task) throws SQLException {
 		if(isTableShardingEnabled(logicDbName)) {
-			DalHints tmpHints = new DalHints();
+			DalHints tmpHints = DalHints.copyOf(hints);
 			Map<String, List<Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, daoPojos);
 			List<T> results = new ArrayList<T>(pojosInTable.size());
 			for(String tableShardId: pojosInTable.keySet()) {

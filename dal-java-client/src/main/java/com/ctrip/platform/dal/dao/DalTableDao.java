@@ -50,7 +50,6 @@ public final class DalTableDao<T> {
 	private Set<String> pkColumns;
 	private String columnsForInsert;
 	private List<String> validColumnsForInsert;
-	private String batchInsertSql;
 	private Map<String, Integer> columnTypes = new HashMap<String, Integer>();
 	private Character startDelimiter;
 	private Character endDelimiter;
@@ -63,10 +62,9 @@ public final class DalTableDao<T> {
 		this.logicDbName = parser.getDatabaseName();
 		queryDao = new DalQueryDao(parser.getDatabaseName());
 		initColumnTypes();
-		pkSql = initSql();
+		pkSql = initPkSql();
 		validColumnsForInsert = buildValidColumnsForInsert();
 		columnsForInsert = combineColumns(validColumnsForInsert, COLUMN_SEPARATOR);
-		batchInsertSql = buildBatchInsertSql();
 		
 		tableShardingEnabled = isTableShardingEnabled(logicDbName);
 	}
@@ -321,7 +319,7 @@ public final class DalTableDao<T> {
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, T... daoPojos)
 			throws SQLException {
-		return this.insert(hints, keyHolder, Arrays.asList(daoPojos));
+		return insert(hints, keyHolder, Arrays.asList(daoPojos));
 	}
 	
 	/**
@@ -343,10 +341,7 @@ public final class DalTableDao<T> {
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos)
 			throws SQLException {
-		DalWatcher.begin();
 		int count = 0;
-		
-		// Try to insert one by one
 		for (T pojo : daoPojos) {
 			DalWatcher.begin();
 			Map<String, ?> fields = parser.getFields(pojo);
@@ -384,7 +379,7 @@ public final class DalTableDao<T> {
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
 			T... daoPojos) throws SQLException {
-		return this.combinedInsert(hints, keyHolder, Arrays.asList(daoPojos));
+		return combinedInsert(hints, keyHolder, Arrays.asList(daoPojos));
 	}
 	
 	/**
@@ -420,7 +415,6 @@ public final class DalTableDao<T> {
 	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
 			List<T> daoPojos) throws SQLException {
 		crossShardOperationAllowed(logicDbName, hints, "crossShardCombinedInsert");
-		
 		DalWatcher.crossShardBegin();
 		
 		int total = 0;
@@ -456,7 +450,7 @@ public final class DalTableDao<T> {
 	 */
 	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
 			T... daoPojos) throws SQLException {
-		return this.crossShardCombinedInsert(hints, keyHolders, Arrays.asList(daoPojos));
+		return crossShardCombinedInsert(hints, keyHolders, Arrays.asList(daoPojos));
 	}
 	
 	private int combinedInsertByDb(DalHints hints, final KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
@@ -524,7 +518,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
-		return this.batchInsert(hints, Arrays.asList(daoPojos));
+		return batchInsert(hints, Arrays.asList(daoPojos));
 	}
 		
 	/**
@@ -590,6 +584,7 @@ public final class DalTableDao<T> {
 			parametersList[i++] = parameters;
 		}
 
+		String batchInsertSql = buildBatchInsertSql(getTableName(hints));
 		return client.batchUpdate(batchInsertSql, parametersList, hints);
 	}
 	
@@ -629,7 +624,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int delete(DalHints hints, T... daoPojos) throws SQLException {
-		return this.delete(hints, Arrays.asList(daoPojos));
+		return delete(hints, Arrays.asList(daoPojos));
 	}
 	
 
@@ -643,7 +638,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
-		return this.batchDelete(hints, Arrays.asList(daoPojos));
+		return batchDelete(hints, Arrays.asList(daoPojos));
 	}
 	
 	/**
@@ -670,7 +665,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public Map<String, int[]> crossShardBatchDelete(DalHints hints, T... daoPojos) throws SQLException {
-		return this.crossShardBatchDelete(hints, Arrays.asList(daoPojos));
+		return crossShardBatchDelete(hints, Arrays.asList(daoPojos));
 	}
 	
 	/**
@@ -776,7 +771,7 @@ public final class DalTableDao<T> {
 			Map<String, ?> fields = parser.getFields(pojo);
 			Map<String, ?> pk = parser.getPrimaryKeys(pojo);
 
-			String updateSql = buildUpdateSql(fields, hints);
+			String updateSql = buildUpdateSql(getTableName(hints, fields), fields, hints);
 
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
@@ -809,7 +804,7 @@ public final class DalTableDao<T> {
 			DalHints hints) throws SQLException {
 		DalWatcher.begin();
 		return client.update(String.format(TMPL_SQL_DELETE,
-				parser.getTableName(), whereClause), parameters, hints);
+				getTableName(hints, parameters), whereClause), parameters, hints);
 	}
 
 	/**
@@ -896,13 +891,10 @@ public final class DalTableDao<T> {
 	}
 
 	public Map<String, ?> filterAutoIncrementPrimaryFields(Map<String, ?> fields){
+		// This is bug here, for My Sql, auto incremental id and be part of the joint primary key.
+		// But for Ctrip, a table must have a pk defined by sigle column as mandatory, so we don't have problem here
 		if(parser.isAutoIncrement())
 			fields.remove(parser.getPrimaryKeyNames()[0]);
-		
-//		for (String columnName : parser.getColumnNames()) {
-//			if (parser.isAutoIncrement() && isPrimaryKey(columnName))
-//				fields.remove(columnName);
-//		}
 		return fields;
 	}
 	
@@ -919,7 +911,7 @@ public final class DalTableDao<T> {
 		return pkColumns.contains(fieldName);
 	}
 	
-	private String initSql() {
+	private String initPkSql() {
 		pkColumns = new HashSet<String>();
 		Collections.addAll(pkColumns, parser.getPrimaryKeyNames());
 
@@ -960,7 +952,7 @@ public final class DalTableDao<T> {
 
 	}
 	
-	private String buildBatchInsertSql() {
+	private String buildBatchInsertSql(String tableName) {
 		int validColumnsSize = parser.getColumnNames().length;
 		if(parser.isAutoIncrement())
 			validColumnsSize--;
@@ -968,7 +960,7 @@ public final class DalTableDao<T> {
 		String values = combine(PLACE_HOLDER, validColumnsSize,
 				COLUMN_SEPARATOR);
 
-		return String.format(TMPL_SQL_INSERT, parser.getTableName(), columnsForInsert,
+		return String.format(TMPL_SQL_INSERT, tableName, columnsForInsert,
 				values);
 	}
 
@@ -977,7 +969,7 @@ public final class DalTableDao<T> {
 		return String.format(TMPL_SQL_DELETE, tableName, pkSql);
 	}
 
-	private String buildUpdateSql(Map<String, ?> fields, DalHints hints) {
+	private String buildUpdateSql(String tableName, Map<String, ?> fields, DalHints hints) {
 		// Remove null value when hints is not DalHintEnum.updateNullField or
 		// primary key
 		for (String column : parser.getColumnNames()) {
@@ -991,7 +983,7 @@ public final class DalTableDao<T> {
 				combine(TMPL_SET_VALUE, fields.size(), COLUMN_SEPARATOR),
 				quote(fields.keySet()));
 
-		return String.format(TMPL_SQL_UPDATE, parser.getTableName(), columns,
+		return String.format(TMPL_SQL_UPDATE, tableName, columns,
 				pkSql);
 	}
 

@@ -247,15 +247,15 @@ public class JavaMethodHost {
 	}
 	
 	public boolean isReturnList(){
-		return this.scalarType.equalsIgnoreCase("List");
+		return this.scalarType == null || this.scalarType.equalsIgnoreCase("List");
 	}
 	
 	public boolean isReturnSingle(){
-		return this.scalarType.equalsIgnoreCase("Single");
+		return scalarType != null && this.scalarType.equalsIgnoreCase("Single");
 	}
 	
 	public boolean isReturnFirst(){
-		return this.scalarType.equalsIgnoreCase("First");
+		return this.scalarType != null && this.scalarType.equalsIgnoreCase("First");
 	}
 	
 	public boolean isQuery(){

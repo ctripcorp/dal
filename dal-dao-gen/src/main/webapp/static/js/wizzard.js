@@ -303,6 +303,9 @@
                 $("#free_sql_pagination").attr('checked',record['pagination']);
                 $("#free_sql_crud_option").val(record['crud_type']);
                 $("#free_sql_crud_option").trigger("change");
+                if('select'==record['crud_type']){
+                    $("#free_sql_scalarType").trigger("change");
+                }
             }
         }).fail(function (data) {
                 $("#error_msg").text("获取历史记录失败");
@@ -412,10 +415,13 @@
 
             var op_type = $("#crud_option").val();
             $("#auto_sql_scalarTypeDiv").hide();
+            $("#orderby").hide();
             if (op_type == "select") {
                 $(".step2-2-1-1").show();
                 $(".step2-2-1-2").show();
                 $("#auto_sql_scalarTypeDiv").show();
+                $("#auto_sql_scalarType").trigger("change");
+                $("#orderby").show();
                 if($("#sql_style").val()=="csharp"){
                     $("#auto_sql_scalarType option[value='Single']").hide();
                 }else{
@@ -544,7 +550,8 @@
             $("#param_list_auto").html(htmls);
         }
 
-        if($("#auto_sql_pagination").is(":checked")==true && $("#orderby_field").val()=='-1'){
+        if($("#auto_sql_pagination").is(":checked")==true && $("#orderby_field").val()=='-1'
+            && $("#crud_option").val()=="select"){
             $("#error_msg").html("请选择排序(Order by)的字段");
             return;
         }
@@ -633,24 +640,11 @@
             });
         }
 
-        if($("#free_sql_crud_option").val()=="select"){
-            window.sql_builder.buildPagingSQL(function(){
-                $("#error_msg").html(" ");
-                current.hide();
-                $(".step2-3-1").show();
-            });
-        }else{
-            var editor = ace.edit("step2_3_1_sql_editor");
-            editor.setTheme("ace/theme/monokai");
-            editor.getSession().setMode("ace/mode/sql");
-            editor.setValue(ace.edit("sql_editor").getValue());
-            editor.setReadOnly(true);
-
+        window.sql_builder.buildPagingSQL(function(){
             $("#error_msg").html(" ");
             current.hide();
             $(".step2-3-1").show();
-        }
-
+        });
 
     };
 

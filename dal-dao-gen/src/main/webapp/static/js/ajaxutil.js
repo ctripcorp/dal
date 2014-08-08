@@ -42,9 +42,16 @@
         //C#风格或者Java风格，@Name or ?
         postData["sql_style"] = $("#sql_style").val();
         postData["crud_type"] = $("#crud_option").val();
-        postData["scalarType"] = $("#auto_sql_scalarType").val();
-        postData["pagination"] = $("#auto_sql_pagination").is(":checked");
-        postData["orderby"] = sprintf("%s,%s",$("#orderby_field").val(),$("#orderby_sort").val());
+
+        if("select" == postData["crud_type"]){
+            postData["scalarType"] = $("#auto_sql_scalarType").val();
+            postData["pagination"] = $("#auto_sql_pagination").is(":checked");
+            postData["orderby"] = sprintf("%s,%s",$("#orderby_field").val(),$("#orderby_sort").val());
+        }else{
+            postData["scalarType"] = "";
+            postData["pagination"] = false;
+            postData["orderby"] = "";
+        }
 
         postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
         postData["sql_content"] = ace.edit("sql_builder").getValue();
@@ -74,7 +81,7 @@
         postData["condition"] = selectedConditions.join(";");
         postData["params"] = paramList.join(";");
 
-        $.post("/rest/task/auto", postData,function (data) {
+        $.post("/rest/task/auto", postData, function (data) {
             if (data.code == "OK") {
                 $("#page1").modal('hide');
                 w2ui["grid_toolbar"].click('refreshDAO', null);
@@ -83,7 +90,7 @@
                     $("#generateCode").modal({"backdrop": "static"});
                 }
             } else {
-                alert(data.info);
+                $.showMsg("error_msg",data.info);
             }
         }).fail(function (data) {
                 alert("保存出错！");
@@ -98,10 +105,10 @@
         postData["class_name"] = $("#sql_class_name").val();
         postData["pojo_name"] = $("#sql_pojo_name").val();
         postData["method_name"] = $("#sql_method_name").val();
-        postData["scalarType"] = $("#free_sql_scalarType").val();
-        postData["pagination"] = $("#free_sql_pagination").is(":checked");
 
         if($("#free_sql_crud_option").val()=="select"){
+            postData["scalarType"] = $("#free_sql_scalarType").val();
+            postData["pagination"] = $("#free_sql_pagination").is(":checked");
             if (postData["class_name"] == ""
                 || postData["pojo_name"] == ""
                 || postData["method_name"] == "") {
@@ -109,6 +116,8 @@
                 return;
             }
         }else{
+            postData["scalarType"] = "";
+            postData["pagination"] = false;
             if (postData["class_name"] == ""
                 || postData["method_name"] == "") {
                 $("#error_msg").text("DAO类名以及方法名需要填写！");

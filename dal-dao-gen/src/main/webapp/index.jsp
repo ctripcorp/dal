@@ -1,6 +1,8 @@
-
-
 <%@page pageEncoding="UTF-8"%>
+<%
+	String codegenpageflag = Long.toString(System.currentTimeMillis());
+	request.setAttribute("codegenpageflag", codegenpageflag);
+%>
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -12,14 +14,14 @@
       <meta name="author" content="">
       <title>Ctrip DAO Generator</title>
       <!-- Bootstrap core CSS -->
-      <link href="/static/bootstrap/css/bootstrap.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
-      <link href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
-      <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet"/>
-      <link rel="stylesheet" href="/static/jstree/themes/default/style.min.css?codegen=<%=System.currentTimeMillis() %>" />
-      <link href="/static/font-awesome/css/font-awesome.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
-      <link href="/static/css/multiple-select.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
-      <link href="/static/css/selectize.bootstrap3.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
-      <link href="/static/css/common.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
+      <link href="/static/bootstrap/css/bootstrap.css?codegen=${codegenpageflag}" rel="stylesheet">
+      <link href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${codegenpageflag}" rel="stylesheet">
+      <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=${codegenpageflag}" rel="stylesheet"/>
+      <link rel="stylesheet" href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}" />
+      <link href="/static/font-awesome/css/font-awesome.css?codegen=${codegenpageflag}" rel="stylesheet">
+      <link href="/static/css/multiple-select.css?codegen=${codegenpageflag}" rel="stylesheet">
+      <link href="/static/css/selectize.bootstrap3.css?codegen=${codegenpageflag}" rel="stylesheet">
+      <link href="/static/css/common.css?codegen=${codegenpageflag}" rel="stylesheet">
      
       <!-- Documentation extras -->
       <!-- 
@@ -40,7 +42,7 @@
       <link rel="shortcut icon" href="/static/images/favicon.ico">
       
       	<!-- Loading Flat UI -->
-	    <link href="/static/Flat-UI-master/css/flat-ui.css?codegen=<%=System.currentTimeMillis() %>" rel="stylesheet">
+	    <link href="/static/Flat-UI-master/css/flat-ui.css?codegen=${codegenpageflag}" rel="stylesheet">
 	
 	    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
 	    <!--[if lt IE 9]>
@@ -354,7 +356,21 @@
 	                     </div>
 	                  </div>
 	                  <br>
-	                  <div id="orderby" class="step2-2-1-2">
+	                  <div class="row-fluid" id="auto_sql_scalarTypeDiv">
+	                  		<div class="control-group">
+	                           <label class="control-label popup_label">返回形式：</label>
+	                           <select id="auto_sql_scalarType" class='span5'>
+	                              <option value='List'>列表(List)</option>
+	                              <option value='Single'>唯一的(Single)</option>
+	                              <option value='First'>第一个(First)</option>
+	                           </select>	
+	                           <label class="popup_label" style="padding-left:15px">
+	                           	   <input id="auto_sql_pagination" type="checkbox">
+	                           	     增加分页方法
+	                           </label>                           
+	                        </div>
+	                  </div>
+	                  <div id="orderby">
 	                     <div class="row-fluid">
 	                        <div class="control-group">
 	                           <label class="control-label popup_label">Order by：</label>
@@ -367,20 +383,6 @@
 	                           </select>
 	                        </div>
 	                     </div>
-	                  </div>
-	                  <div class="row-fluid" id="auto_sql_scalarTypeDiv">
-	                  		<div class="control-group">
-	                           <label class="control-label popup_label">返回形式：</label>
-	                           <select id="auto_sql_scalarType" class='span5'>
-	                              <option value='List'>列表(List)</option>
-	                              <option value='Single'>唯一的(Single)</option>
-	                              <option value='First'>第一个(First)</option>
-	                           </select>	
-	                           <label class="popup_label" style="padding-left:15px">
-	                           	   <input id="auto_sql_pagination" type="checkbox" checked="true">
-	                           	     增加分页方法
-	                           </label>                           
-	                        </div>
 	                  </div>
 	                  <br>
 	                  <div class="row-fluid">
@@ -440,7 +442,7 @@
 	                              <option value='First'>第一个(First)</option>
 	                           </select>	 
 	                           <label class="popup_label" style="padding-left:20px">
-	                           	   <input id="free_sql_pagination" type="checkbox" checked="true">
+	                           	   <input id="free_sql_pagination" type="checkbox">
 	                           	     增加分页方法
 	                           </label>                           
 	                        </div>
@@ -491,24 +493,24 @@
       <!-- JS and analytics only. -->
       <!-- Bootstrap core JavaScript================================================== -->
       <!-- Placed at the end of the document so the pages load faster -->
-      <script src="/static/jquery/jquery-1.10.2.min.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/bootstrap/js/bootstrap.min.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/jstree/jstree.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/jquery/jquery.blockui.min.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/js/sprintf.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/ace/ace.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/jquery/jquery.multiple.select.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/js/selectize.min.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/js/cblock.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/js/ajaxutil.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/js/sql_builder.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/js/wizzard.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/js/ui_render.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/js/index.js?codegen=<%=System.currentTimeMillis() %>"></script>
-      <script src="/static/js/progress.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/jquery/jquery-1.10.2.min.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/bootstrap/js/bootstrap.min.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/jstree/jstree.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/jquery/jquery.blockui.min.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/js/sprintf.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/ace/ace.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/jquery/jquery.multiple.select.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/js/selectize.min.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/js/cblock.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/js/ajaxutil.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/js/sql_builder.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/js/wizzard.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/js/ui_render.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/js/index.js?codegen=${codegenpageflag}"></script>
+      <script src="/static/js/progress.js?codegen=${codegenpageflag}"></script>
       
-      <script src="/static/js/header.js?codegen=<%=System.currentTimeMillis() %>"></script>
+      <script src="/static/js/header.js?codegen=${codegenpageflag}"></script>
 
    </body>
 </html>

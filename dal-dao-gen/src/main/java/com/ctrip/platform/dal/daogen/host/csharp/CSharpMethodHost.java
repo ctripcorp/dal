@@ -116,6 +116,7 @@ public class CSharpMethodHost {
 
 	public boolean isFirstOrSingle(){
 		return (this.scalarType!= null) && 
+				(!this.scalarType.isEmpty()) &&
 				(this.scalarType.equalsIgnoreCase("First") ||
 						this.scalarType.equalsIgnoreCase("Single"));
 	}

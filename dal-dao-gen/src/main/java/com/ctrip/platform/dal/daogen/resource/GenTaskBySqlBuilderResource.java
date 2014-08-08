@@ -77,7 +77,7 @@ public class GenTaskBySqlBuilderResource {
 				return Status.ERROR;
 			}	
 		}else{
-			Status temp = validateSQL(set_name, table_name, crud_type, condition, sql_content, pagination);
+			Status temp = validateSQL(set_name, table_name, crud_type, fields, condition, sql_content, pagination);
 			if(!Status.OK.getCode().equals(temp.getCode())){
 				return temp;
 			}
@@ -166,7 +166,7 @@ public class GenTaskBySqlBuilderResource {
 	}
 	
 	private Status validateSQL(String set_name, String table_name,
-			String crud_type, String condition, String sql_content,
+			String crud_type, String fields, String condition, String sql_content,
 			boolean pagination) {
 		Status status = Status.OK;
 		if(condition!=null && !condition.isEmpty()){
@@ -179,6 +179,10 @@ public class GenTaskBySqlBuilderResource {
 					paramCount++;
 				}
 			}
+			
+			if("update".equalsIgnoreCase(crud_type) && !fields.isEmpty()){
+				paramCount += fields.split(",").length;
+ 			}
 			
 			int []paramsTypes = new int[paramCount];
 			
@@ -201,6 +205,12 @@ public class GenTaskBySqlBuilderResource {
 					paramsTypes[index++] = map.get(columnName);
 				}
 			}
+			
+			if("update".equalsIgnoreCase(crud_type) && !fields.isEmpty()){
+				for(String field : fields.split(",") ){
+					paramsTypes[index++] = map.get(field.toLowerCase());
+				}
+ 			}
 			
 			String tempSQL = sql_content;
 			Validation validResult;

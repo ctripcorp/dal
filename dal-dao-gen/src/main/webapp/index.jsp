@@ -357,20 +357,6 @@
 	                     </div>
 	                  </div>
 	                  <br>
-	                  <div id="orderby">
-	                     <div class="row-fluid">
-	                        <div class="control-group">
-	                           <label class="control-label popup_label">Order by：</label>
-	                           <select id="orderby_field" class="span5">
-	                              <option value='-1'>--请选择--</option>
-	                           </select>
-	                           <select id="orderby_sort" class='span3'>
-	                              <option value='asc'>ASC</option>
-	                              <option value='desc'>DESC</option>
-	                           </select>
-	                        </div>
-	                     </div>
-	                  </div>
 	                  <div class="row-fluid" id="auto_sql_scalarTypeDiv">
 	                  		<div class="control-group">
 	                           <label class="control-label popup_label">返回形式：</label>
@@ -384,6 +370,20 @@
 	                           	     增加分页方法
 	                           </label>                           
 	                        </div>
+	                  </div>
+	                  <div id="orderby">
+	                     <div class="row-fluid">
+	                        <div class="control-group">
+	                           <label class="control-label popup_label">Order by：</label>
+	                           <select id="orderby_field" class="span5">
+	                              <option value='-1'>--请选择--</option>
+	                           </select>
+	                           <select id="orderby_sort" class='span3'>
+	                              <option value='asc'>ASC</option>
+	                              <option value='desc'>DESC</option>
+	                           </select>
+	                        </div>
+	                     </div>
 	                  </div>
 	                  <br>
 	                  <div class="row-fluid">

@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.daogen.utils;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -134,7 +132,7 @@ public class SQLValidation {
 			profile.execute("SET SHOWPLAN_ALL OFF");
 			conn.setAutoCommit(true);
 		}catch(Exception e){
-			status.append(getExceptionStack(e));
+			status.append(e.getMessage());
 			conn.rollback();
 			log.error("Validate sql server query failed", e);
 		}finally{
@@ -162,7 +160,7 @@ public class SQLValidation {
 			status.append(objectMapper.writeValueAsString(explains));
 			status.setPassed(true);
 		}catch(Exception e){
-			status.append(getExceptionStack(e));
+			status.append(e.getMessage());
 			log.error("Validate mysql query failed", e);
 		}finally{
 			rs.close();
@@ -196,7 +194,7 @@ public class SQLValidation {
 			stat.execute();
 			status.setPassed(true).append("Validate Successfully");
 		}catch(Exception e){
-			status.append(getExceptionStack(e));
+			status.append(e.getMessage());
 			log.error("Validate update failed", e);
 		}
 		finally{
@@ -205,21 +203,6 @@ public class SQLValidation {
 		}
 		
 		return status;		
-	}
-	
-	private static String getExceptionStack(Throwable e)
-	{
-		String msg = e.getMessage();
-		try {  
-            StringWriter sw = new StringWriter();  
-            PrintWriter pw = new PrintWriter(sw);  
-            e.printStackTrace(pw);  
-            msg = sw.toString();  
-        } catch (Throwable e2) {  
-        	msg = "bad getErrorInfoFromException";  
-        }
-		
-		return msg;
 	}
 	
 	private static String getDBType(Connection conn, String dbName) throws SQLException{

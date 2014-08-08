@@ -39,8 +39,13 @@
                 postData["sql_style"] = $("#sql_style").val();
                 postData["crud_type"] = $("#crud_option").val();
                 postData["scalarType"] = $("#auto_sql_scalarType").val();
-                postData["pagination"] = $("#auto_sql_pagination").is(":checked");
-                postData["orderby"] = sprintf("%s,%s",$("#orderby_field").val(),$("#orderby_sort").val());
+                if("select" == postData["crud_type"]){
+                    postData["pagination"] = $("#auto_sql_pagination").is(":checked");
+                    postData["orderby"] = sprintf("%s,%s",$("#orderby_field").val(),$("#orderby_sort").val());
+                }else{
+                    postData["pagination"] = false;
+                    postData["orderby"] = "";
+                }
 
                 postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
                 postData["sql_content"] = ace.edit("sql_builder").getValue();

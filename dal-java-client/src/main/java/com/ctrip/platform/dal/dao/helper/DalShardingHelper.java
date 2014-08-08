@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.helper;
 
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffleByTable;
+
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,13 +20,10 @@ import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 
 public class DalShardingHelper {
+	private static final String EMPTY = "";
 	
 	public static boolean isShardingEnabled(String logicDbName) {
-		return DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).isShardingSupported();
-	}
-	
-	public static boolean isShardDecided(DalHints hints) {
-		return hints.getShardId() != null;
+		return getDatabaseSet(logicDbName).isShardingSupported();
 	}
 	
 	public static <T> String locateShardId(String logicDbName, DalParser<T> parser, T pojo) throws SQLException {
@@ -35,17 +34,31 @@ public class DalShardingHelper {
 		return locateShardId(logicDbName, new DalHints().set(DalHintEnum.parameters, parameters));
 	}
 	
+	public static boolean isTableShardingEnabled(String logicDbName) {
+		DatabaseSet dbSet = getDatabaseSet(logicDbName);
+		if(dbSet.isShardingSupported()) {
+			try {
+				return dbSet.getStrategy().isShardingByTable();
+			} catch (SQLException e) {
+				// Should never be here
+				return false;
+			}
+		}
+		return false;
+	}
+	
+	private static DatabaseSet getDatabaseSet(String logicDbName) {
+		return DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName);
+	}
+	
 	/**
-	 * Locate by hints
+	 * Locate DB shard id by hints
 	 * @param logicDbName
 	 * @param hints
 	 * @return
 	 * @throws SQLException
 	 */
 	public static String locateShardId(String logicDbName, DalHints hints) throws SQLException {
-		if(isShardDecided(hints))
-			return hints.getShardId();
-		
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
@@ -56,7 +69,38 @@ public class DalShardingHelper {
 	}
 
 	/**
+	 * Locate table shard id by hints.
+	 * @param logicDbName
+	 * @param hints
+	 * @return
+	 * @throws SQLException
+	 */
+	public static String locateTableShardId(String logicDbName, DalHints hints, StatementParameters parameters, Map<String, ?> fields) throws SQLException {
+		DalConfigure config = DalClientFactory.getDalConfigure();
+		DalShardingStrategy strategy = config.getDatabaseSet(logicDbName).getStrategy();
+		
+		// First check if we can locate the table shard id with the original hints
+		String shard = strategy.locateTableShard(config, logicDbName, hints);
+		if(shard != null)
+			return shard;
+		
+		DalHints tmpHints = null;
+		if(parameters != null) {
+			shard = strategy.locateTableShard(config, logicDbName, tmpHints = new DalHints().setParameters(parameters));
+			if(shard != null)
+				return shard;
+		}
+		
+		if(fields == null)
+			return null;
+		// dbSet.validate(shard);
+		// We cannot validate the id, since it is inside the db
+		return strategy.locateTableShard(config, logicDbName, DalHints.createIfAbsent(tmpHints).setShardColValues(fields));
+	}
+	
+	/**
 	 * Group pojos by shard id. Should be only used for DB that support sharding.
+	 * 
 	 * @param logicDbName
 	 * @param pojos
 	 * @return Grouped pojos
@@ -72,6 +116,36 @@ public class DalShardingHelper {
 		DalHints tmpHints = new DalHints();
 		for(T pojo:pojos) {
 			Map<String, ?> fields = parser.getFields(pojo);
+			tmpHints.set(DalHintEnum.shardColValues, fields);
+			String shardId = strategy.locateDbShard(config, logicDbName, tmpHints);
+			dbSet.validate(shardId);
+			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
+			if(pojosInShard == null) {
+				pojosInShard = new LinkedList<Map<String, ?>>();
+				shuffled.put(shardId, pojosInShard);
+			}
+			pojosInShard.add(fields);
+		}
+		
+		return shuffled;
+	}
+	
+	/**
+	 * Shuffle by table shard id.
+	 * @param logicDbName
+	 * @param pojos
+	 * @return
+	 * @throws SQLException
+	 */
+	public static Map<String, List<Map<String, ?>>> shuffleByTable(String logicDbName, List<Map<String, ?>> pojos) throws SQLException {
+		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
+		DalConfigure config = DalClientFactory.getDalConfigure();
+		
+		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
+		DalShardingStrategy strategy = dbSet.getStrategy();
+		
+		DalHints tmpHints = new DalHints();
+		for(Map<String, ?> fields: pojos) {
 			tmpHints.set(DalHintEnum.shardColValues, fields);
 			String shardId = strategy.locateDbShard(config, logicDbName, tmpHints);
 			dbSet.validate(shardId);
@@ -108,9 +182,6 @@ public class DalShardingHelper {
 		if(!isShardingEnabled(logicDbName))
 			return;
 		
-		if(isShardDecided(hints))
-			return;
-		
 		// Assume the out transaction already handle sharding logic
 		if(DalTransactionManager.isInTransaction())
 			return;
@@ -126,13 +197,43 @@ public class DalShardingHelper {
 			throw new SQLException(operation + " is not allowed within transaction");
 	}
 	
-	public static <T> void executeByShard(String logicDbName, DalParser<T> parser, T[] pojos, DalHints hints, BulkTask task) throws SQLException {
-		Map<String, List<Map<String, ?>>> shaffled = shuffle(logicDbName, parser, pojos);
-		
-		for(;;){}
+//	public static int[] executeByDbShard(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask task) throws SQLException {
+//		
+//	}
+	
+	public static int[] executeByTableShard(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask task) throws SQLException {
+		if(isTableShardingEnabled(logicDbName)) {
+			DalHints tmpHints = new DalHints();
+			Map<String, List<Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, daoPojos);
+			int[][] counts = new int[pojosInTable.size()][];
+			int i =0;
+			for(String tableShardId: pojosInTable.keySet()) {
+				tmpHints.inTableShard(tableShardId);
+				counts[i++] = task.execute(tmpHints, pojosInTable.get(tableShardId));
+			}
+			return combine(counts);
+		}else{
+			return task.execute(hints, daoPojos);
+		}
 	}
 	
+	private static int[] combine(int[]... counts) {
+		int total = 0;
+		for(int[] countsInTable: counts)
+			total += countsInTable.length;
+		
+		int[] totalCounts = new int[total];
+		int cur = 0;
+		for(int[] countsInTable: counts) {
+			System.arraycopy(countsInTable, 0, totalCounts, cur, countsInTable.length);
+			cur += countsInTable.length;
+		}
+		
+		return totalCounts;
+	}
+
+	
 	public static interface BulkTask {
-		void execute(Map<String, List<Map<String, ?>>> shaffled);
+		int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException;
 	}
 }

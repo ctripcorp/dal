@@ -6,12 +6,14 @@ public class DalWatcher {
 	private static final String JSON_PATTERN = "{'Decode':'%s','Connect':'%s','Prepare':'%s','Excute':'%s','ClearUp':'%s'}";
 	
 	private static class CostRecorder {
+		long corssShardBegin;
 		long begin;
 		long beginConnect;
 		long endConnect;
 		long beginExecute;
 		long endExecute;
 		long end;
+		long corssShardEnd;
 		
 		void reset() {
 			begin = 0;
@@ -35,6 +37,14 @@ public class DalWatcher {
 	
 	public static void reset() {
 		recorder().reset();
+	}
+	
+	public static void crossShardBegin(){
+		recorder().corssShardBegin = System.currentTimeMillis();
+	}
+	
+	public static void crossShardEnd(){
+		recorder().corssShardEnd = System.currentTimeMillis();
 	}
 	
 	public static void begin(){

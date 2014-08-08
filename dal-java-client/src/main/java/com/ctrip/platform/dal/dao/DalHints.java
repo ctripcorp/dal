@@ -71,12 +71,25 @@ public class DalHints {
 		return this;
 	}
 	
+	public DalHints inTableShard(String tableShardId) {
+		hints.put(DalHintEnum.tableShard, tableShardId);
+		return this;
+	}
+	
 	public String getShardId() {
 		return getString(DalHintEnum.shard);
 	}
 	
+	public String getTableShardId() {
+		return getString(DalHintEnum.tableShard);
+	}
+	
 	public DalHints setShardValue(Object shardValue) {
 		return set(DalHintEnum.shardValue, shardValue);
+	}
+	
+	public DalHints setTableShardValue(Object tableShardValue) {
+		return set(DalHintEnum.tableShardValue, tableShardValue);
 	}
 	
 	public DalHints setShardColValues(Map<String, ?> shardColValues) {

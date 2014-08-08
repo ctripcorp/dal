@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.dao;
 
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.crossShardOperationAllowed;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.reqirePredefinedSharding;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffle;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.*;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -52,10 +50,11 @@ public final class DalTableDao<T> {
 	private String columnsForInsert;
 	private List<String> validColumnsForInsert;
 	private String batchInsertSql;
-	private String deleteSql;
 	private Map<String, Integer> columnTypes = new HashMap<String, Integer>();
 	private Character startDelimiter;
 	private Character endDelimiter;
+	
+	private boolean tableShardingEnabled;
 
 	public DalTableDao(DalParser<T> parser) {
 		this.client = DalClientFactory.getClient(parser.getDatabaseName());
@@ -67,7 +66,8 @@ public final class DalTableDao<T> {
 		validColumnsForInsert = buildValidColumnsForInsert();
 		columnsForInsert = combineColumns(validColumnsForInsert, COLUMN_SEPARATOR);
 		batchInsertSql = buildBatchInsertSql();
-		deleteSql = buildDeleteSql();
+		
+		tableShardingEnabled = isTableShardingEnabled(logicDbName);
 	}
 	
 	/**
@@ -99,6 +99,25 @@ public final class DalTableDao<T> {
 		this.startDelimiter = startDelimiter;
 		this.endDelimiter = endDelimiter;
 	}
+	
+	public String getTableName(DalHints hints) throws SQLException {
+		return getTableName(hints, null, null);
+	}
+	
+	public String getTableName(DalHints hints, StatementParameters parameters) throws SQLException {
+		return getTableName(hints, parameters, null);
+	}
+	
+	public String getTableName(DalHints hints, Map<String, ?> fields) throws SQLException {
+		return getTableName(hints, null, fields);
+	}
+	
+	public String getTableName(DalHints hints, StatementParameters parameters, Map<String, ?> fields) throws SQLException {
+		if(tableShardingEnabled == false)
+			return parser.getTableName();
+		
+		return parser.getTableName() + locateTableShardId(logicDbName, hints, parameters, fields);
+	}
 
 	/**
 	 * Query by Primary key. The key column type should be Integer, Long, etc.
@@ -120,11 +139,11 @@ public final class DalTableDao<T> {
 		parameters.set(1, getColumnType(parser.getPrimaryKeyNames()[0]), id);
 
 		String selectSql = String.format(findtmp,
-				parser.getTableName(), pkSql);
+				getTableName(hints, parameters), pkSql);
 
 		return queryDao.queryForObjectNullable(selectSql, parameters, hints, parser);
 	}
-
+	
 	/**
 	 * Query by Primary key, the key columns are pass in the pojo.
 	 * 
@@ -139,7 +158,7 @@ public final class DalTableDao<T> {
 		addParameters(parameters, parser.getPrimaryKeys(pk));
 
 		String selectSql = String.format(findtmp,
-				parser.getTableName(), pkSql);
+				getTableName(hints, parameters, parser.getFields(pk)), pkSql);
 
 		return queryDao.queryForObjectNullable(selectSql, parameters, hints, parser);
 	}
@@ -179,7 +198,7 @@ public final class DalTableDao<T> {
 			DalHints hints) throws SQLException {
 		DalWatcher.begin();
 		String selectSql = String.format(findtmp,
-				parser.getTableName(), whereClause);
+				getTableName(hints, parameters), whereClause);
 		return queryDao.query(selectSql, parameters, hints, parser);
 	}
 
@@ -198,7 +217,7 @@ public final class DalTableDao<T> {
 			DalHints hints) throws SQLException {
 		DalWatcher.begin();
 		String selectSql = String.format(findtmp,
-				parser.getTableName(), whereClause);
+				getTableName(hints, parameters), whereClause);
 		return queryDao.queryFirstNullable(selectSql, parameters, hints, parser);
 	}
 
@@ -219,7 +238,7 @@ public final class DalTableDao<T> {
 			DalHints hints, int count) throws SQLException {
 		DalWatcher.begin();
 		String selectSql = String.format(findtmp,
-				parser.getTableName(), whereClause);
+				getTableName(hints, parameters), whereClause);
 		return queryDao.queryTop(selectSql, parameters, hints, parser, count);
 	}
 
@@ -243,7 +262,7 @@ public final class DalTableDao<T> {
 			throws SQLException {
 		DalWatcher.begin();
 		String selectSql = String.format(findtmp,
-				parser.getTableName(), whereClause);
+				getTableName(hints, parameters), whereClause);
 		return queryDao.queryFrom(selectSql, parameters, hints, parser, start,
 				count);
 	}
@@ -325,12 +344,13 @@ public final class DalTableDao<T> {
 			throws SQLException {
 		DalWatcher.begin();
 		int count = 0;
+		
 		// Try to insert one by one
 		for (T pojo : daoPojos) {
 			DalWatcher.begin();
 			Map<String, ?> fields = parser.getFields(pojo);
 			// TODO revise and improve performance
-			String insertSql = buildInsertSql(fields);
+			String insertSql = buildInsertSql(hints, fields);
 
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
@@ -381,7 +401,6 @@ public final class DalTableDao<T> {
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
 			List<T> daoPojos) throws SQLException {
 		reqirePredefinedSharding(logicDbName, hints, "combinedInsert requires predefined shard! Use crossShardCombinedInsert instead.");
-		DalWatcher.begin();
 		return combinedAndInsert(hints, keyHolder, getPojosFields(daoPojos)); 
 	}
 	
@@ -400,7 +419,9 @@ public final class DalTableDao<T> {
 	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
 			List<T> daoPojos) throws SQLException {
 		crossShardOperationAllowed(logicDbName, hints, "crossShardCombinedInsert");
-		DalWatcher.begin();
+		
+		// TODO add cross watch
+		//DalWatcher.begin();
 		int total = 0;
 		if (null == daoPojos || daoPojos.size() < 1)
 			return 0;
@@ -436,21 +457,8 @@ public final class DalTableDao<T> {
 		return this.crossShardCombinedInsert(hints, keyHolders, Arrays.asList(daoPojos));
 	}
 	
-	
-	private List<Map<String, ?>> getPojosFields(List<T> daoPojos) {
-		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
-		if (null == daoPojos || daoPojos.size() < 1)
-			return pojoFields;
-		
-		for (T pojo: daoPojos){
-			pojoFields.add(parser.getFields(pojo));
-		}
-		
-		return pojoFields;
-	}
-	
-	
 	private int combinedAndInsert(DalHints hints, KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
+		DalWatcher.begin();
 		if (null == daoPojos || daoPojos.size() < 1)
 			return 0;
 		
@@ -568,6 +576,8 @@ public final class DalTableDao<T> {
 			addParameters(parameters, parser.getPrimaryKeys(pojo));
 
 			try {
+				String deleteSql = buildDeleteSql(getTableName(hints, parameters, parser.getFields(pojo)));
+
 				count += client.update(deleteSql, parameters, hints);
 			} catch (SQLException e) {
 				if (hints.isStopOnError())
@@ -615,7 +625,7 @@ public final class DalTableDao<T> {
 	public int[] batchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
 		reqirePredefinedSharding(getLogicDbName(), hints, "batchDelete requires predefined shard! Use crossShardBatchDelete instead.");
 		DalWatcher.begin();
-		return batchAndDelete(hints, getPojosFields(daoPojos));
+		return batchDeleteByDb(hints, getPojosFields(daoPojos));
 	}
 	
 	/**
@@ -642,17 +652,30 @@ public final class DalTableDao<T> {
 	 */
 	public Map<String, int[]> crossShardBatchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
 		crossShardOperationAllowed(logicDbName, hints, "crossShardBatchDelete");
-		DalWatcher.begin();
+		DalWatcher.crossShardBegin();
+		
 		Map<String, int[]> result = new HashMap<String, int[]>();
 		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
 		for(String shard: shuffled.keySet()) {
 			hints.inShard(shard);
-			result.put(shard, batchAndDelete(hints, shuffled.get(shard)));
+			result.put(shard, batchDeleteByDb(hints, shuffled.get(shard)));
 		}
+		
+		DalWatcher.crossShardEnd();
 		return result;
 	}
 	
-	private int[] batchAndDelete(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+	private int[] batchDeleteByDb(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+		return executeByTableShard(logicDbName, hints, daoPojos, new BulkTask(){
+			@Override
+			public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
+				return batchDeleteByTable(hints, shaffled);
+			}
+		});
+	}
+	
+	private int[] batchDeleteByTable(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+		DalWatcher.begin();
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
 		List<String> pkNames = Arrays.asList(parser.getPrimaryKeyNames());
@@ -661,8 +684,21 @@ public final class DalTableDao<T> {
 			addParameters(1, parameters, pojo, pkNames);
 			parametersList[i++] = parameters;
 		}
-
+		
+		String deleteSql = buildDeleteSql(getTableName(hints));
 		return client.batchUpdate(deleteSql, parametersList, hints);
+	}
+	
+	private List<Map<String, ?>> getPojosFields(List<T> daoPojos) {
+		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
+		if (null == daoPojos || daoPojos.size() < 1)
+			return pojoFields;
+		
+		for (T pojo: daoPojos){
+			pojoFields.add(parser.getFields(pojo));
+		}
+		
+		return pojoFields;
 	}
 
 	/**
@@ -864,14 +900,14 @@ public final class DalTableDao<T> {
 		}
 	}
 
-	private String buildInsertSql(Map<String, ?> fields) {
+	private String buildInsertSql(DalHints hints, Map<String, ?> fields) throws SQLException {
 		filterNullFileds(fields);
 		Set<String> remainedColumns = fields.keySet();
 		String cloumns = combineColumns(remainedColumns, COLUMN_SEPARATOR);
 		String values = combine(PLACE_HOLDER, remainedColumns.size(),
 				COLUMN_SEPARATOR);
 
-		return String.format(TMPL_SQL_INSERT, parser.getTableName(), cloumns,
+		return String.format(TMPL_SQL_INSERT, getTableName(hints, fields), cloumns,
 				values);
 	}
 	
@@ -899,8 +935,8 @@ public final class DalTableDao<T> {
 	}
 
 
-	private String buildDeleteSql() {
-		return String.format(TMPL_SQL_DELETE, parser.getTableName(), pkSql);
+	private String buildDeleteSql(String tableName) {
+		return String.format(TMPL_SQL_DELETE, tableName, pkSql);
 	}
 
 	private String buildUpdateSql(Map<String, ?> fields, DalHints hints) {

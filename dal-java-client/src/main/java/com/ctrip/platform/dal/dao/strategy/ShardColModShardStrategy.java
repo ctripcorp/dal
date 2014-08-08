@@ -58,13 +58,17 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		if(columns.length == 0)
 			return null;
 		
+		String shard = hints.getString(DalHintEnum.shard);
+		if(shard != null)
+			return shard;
+		
 		// Shard value take the highest priority
 		if(hints.is(DalHintEnum.shardValue)) {
 			Integer id = (Integer)hints.get(DalHintEnum.shardValue);
 			return String.valueOf(id%mod);
 		}
 		
-		String shard = locateByParameters(hints, columns, mod);
+		shard = locateByParameters(hints, columns, mod);
 		if(shard != null)
 			return shard;
 		
@@ -86,13 +90,17 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		if(tableColumns.length == 0)
 			return null;
 		
+		String shard = hints.getString(DalHintEnum.tableShard);
+		if(shard != null)
+			return shard;
+		
 		// Shard value take the highest priority
 		if(hints.is(DalHintEnum.tableShardValue)) {
 			Integer id = (Integer)hints.get(DalHintEnum.shardValue);
 			return String.valueOf(id%mod);
 		}
 		
-		String shard = locateByParameters(hints, tableColumns, tableMod);
+		shard = locateByParameters(hints, tableColumns, tableMod);
 		if(shard != null)
 			return shard;
 		

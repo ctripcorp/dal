@@ -175,6 +175,33 @@ jQuery(document).ready(function () {
         window.sql_builder.build();
     });
 
+    $("#auto_sql_scalarType").change(function(){
+        var scalar = $("#auto_sql_scalarType").val();
+        if(scalar=='List'){
+            $("#auto_sql_pagination").removeAttr("disabled");
+            $("#orderby_field").removeAttr("disabled");
+            $("#orderby_sort").removeAttr("disabled");
+        }else if(scalar=='Single'){
+            $("#auto_sql_pagination").attr({"checked":false,"disabled":"disabled"});
+            $("#orderby_field").val('-1').trigger("change").attr({"disabled":"disabled"});
+            $("#orderby_sort").attr({"disabled":"disabled"});
+        }else{//First
+            $("#auto_sql_pagination").attr({"checked":false,"disabled":"disabled"});
+            $("#orderby_field").removeAttr("disabled");
+            $("#orderby_sort").removeAttr("disabled");
+        }
+
+    });
+
+    $("#free_sql_scalarType").change(function(){
+        var scalar = $("#free_sql_scalarType").val();
+        if(scalar != 'List'){
+            $("#free_sql_pagination").attr({"checked":false,"disabled":"disabled"});
+        }else{
+            $("#free_sql_pagination").removeAttr("disabled");
+        }
+    });
+
     $(document.body).on('click', "#next_step", function (event) {
         var current_step = $("div.steps:visible");
         window.wizzard.next(current_step);

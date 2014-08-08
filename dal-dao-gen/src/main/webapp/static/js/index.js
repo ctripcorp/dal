@@ -181,12 +181,15 @@ jQuery(document).ready(function () {
             $("#auto_sql_pagination").removeAttr("disabled");
             $("#orderby_field").removeAttr("disabled");
             $("#orderby_sort").removeAttr("disabled");
+            $("#auto_sql_pagination").parent().css({"color":"#34495E"});
         }else if(scalar=='Single'){
             $("#auto_sql_pagination").attr({"checked":false,"disabled":"disabled"});
+            $("#auto_sql_pagination").parent().css({"color":"rgb(156, 154, 154)"});
             $("#orderby_field").val('-1').trigger("change").attr({"disabled":"disabled"});
             $("#orderby_sort").attr({"disabled":"disabled"});
         }else{//First
             $("#auto_sql_pagination").attr({"checked":false,"disabled":"disabled"});
+            $("#auto_sql_pagination").parent().css({"color":"rgb(156, 154, 154)"});
             $("#orderby_field").removeAttr("disabled");
             $("#orderby_sort").removeAttr("disabled");
         }
@@ -197,8 +200,10 @@ jQuery(document).ready(function () {
         var scalar = $("#free_sql_scalarType").val();
         if(scalar != 'List'){
             $("#free_sql_pagination").attr({"checked":false,"disabled":"disabled"});
+            $("#free_sql_pagination").parent().css({"color":"rgb(156, 154, 154)"});
         }else{
             $("#free_sql_pagination").removeAttr("disabled");
+            $("#free_sql_pagination").parent().css({"color":"#34495E"});
         }
     });
 

@@ -365,7 +365,7 @@
 	                              <option value='First'>第一个(First)</option>
 	                           </select>	
 	                           <label class="popup_label" style="padding-left:15px">
-	                           	   <input id="auto_sql_pagination" type="checkbox" checked="true">
+	                           	   <input id="auto_sql_pagination" type="checkbox">
 	                           	     增加分页方法
 	                           </label>                           
 	                        </div>
@@ -442,7 +442,7 @@
 	                              <option value='First'>第一个(First)</option>
 	                           </select>	 
 	                           <label class="popup_label" style="padding-left:20px">
-	                           	   <input id="free_sql_pagination" type="checkbox" checked="true">
+	                           	   <input id="free_sql_pagination" type="checkbox">
 	                           	     增加分页方法
 	                           </label>                           
 	                        </div>

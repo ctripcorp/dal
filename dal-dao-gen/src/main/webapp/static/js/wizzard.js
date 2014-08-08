@@ -303,6 +303,9 @@
                 $("#free_sql_pagination").attr('checked',record['pagination']);
                 $("#free_sql_crud_option").val(record['crud_type']);
                 $("#free_sql_crud_option").trigger("change");
+                if('select'==record['crud_type']){
+                    $("#free_sql_scalarType").trigger("change");
+                }
             }
         }).fail(function (data) {
                 $("#error_msg").text("获取历史记录失败");
@@ -417,6 +420,7 @@
                 $(".step2-2-1-1").show();
                 $(".step2-2-1-2").show();
                 $("#auto_sql_scalarTypeDiv").show();
+                $("#auto_sql_scalarType").trigger("change");
                 $("#orderby").show();
                 if($("#sql_style").val()=="csharp"){
                     $("#auto_sql_scalarType option[value='Single']").hide();

@@ -74,7 +74,7 @@
         postData["condition"] = selectedConditions.join(";");
         postData["params"] = paramList.join(";");
 
-        $.post("/rest/task/auto", postData,function (data) {
+        $.post("/rest/task/auto", postData, function (data) {
             if (data.code == "OK") {
                 $("#page1").modal('hide');
                 w2ui["grid_toolbar"].click('refreshDAO', null);
@@ -83,7 +83,7 @@
                     $("#generateCode").modal({"backdrop": "static"});
                 }
             } else {
-                alert(data.info);
+                $.showMsg("error_msg",data.info);
             }
         }).fail(function (data) {
                 alert("保存出错！");

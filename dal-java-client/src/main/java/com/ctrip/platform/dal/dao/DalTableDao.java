@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 /**
@@ -401,7 +402,7 @@ public final class DalTableDao<T> {
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
 			List<T> daoPojos) throws SQLException {
 		reqirePredefinedSharding(logicDbName, hints, "combinedInsert requires predefined shard! Use crossShardCombinedInsert instead.");
-		return combinedAndInsert(hints, keyHolder, getPojosFields(daoPojos)); 
+		return combinedInsertByDb(hints, keyHolder, getPojosFields(daoPojos)); 
 	}
 	
 	/**
@@ -420,8 +421,8 @@ public final class DalTableDao<T> {
 			List<T> daoPojos) throws SQLException {
 		crossShardOperationAllowed(logicDbName, hints, "crossShardCombinedInsert");
 		
-		// TODO add cross watch
-		//DalWatcher.begin();
+		DalWatcher.crossShardBegin();
+		
 		int total = 0;
 		if (null == daoPojos || daoPojos.size() < 1)
 			return 0;
@@ -434,9 +435,10 @@ public final class DalTableDao<T> {
 				keyHolders.put(shard, keyHolder);
 			}
 			hints.inShard(shard);
-			total += combinedAndInsert(hints, keyHolder, shuffled.get(shard));
+			total += combinedInsertByDb(hints, keyHolder, shuffled.get(shard));
 		}
 
+		DalWatcher.crossShardEnd();
 		return total;
 	}
 	
@@ -457,10 +459,24 @@ public final class DalTableDao<T> {
 		return this.crossShardCombinedInsert(hints, keyHolders, Arrays.asList(daoPojos));
 	}
 	
-	private int combinedAndInsert(DalHints hints, KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
+	private int combinedInsertByDb(DalHints hints, final KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
+		return executeByTableShard(logicDbName, hints, daoPojos, new BulkTask<Integer>(){
+			@Override
+			public Integer execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
+				return combinedInsertByTable(hints, keyHolder, shaffled);
+			}
+
+			@Override
+			public Integer merge(List<Integer> results) {
+				int value = 0;
+				for(Integer i: results) value += i;
+				return value;
+			}
+		});
+	}
+	
+	private int combinedInsertByTable(DalHints hints, KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
 		DalWatcher.begin();
-		if (null == daoPojos || daoPojos.size() < 1)
-			return 0;
 		
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
@@ -494,8 +510,7 @@ public final class DalTableDao<T> {
 	 */
 	public int[] batchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
 		reqirePredefinedSharding(getLogicDbName(), hints, "batchInsert requires predefined shard! Use crossShardBatchInsert instead.");
-		DalWatcher.begin();
-		return batchAndInsert(hints, getPojosFields(daoPojos));
+		return batchInsertByDb(hints, getPojosFields(daoPojos));
 	}
 	
 
@@ -523,14 +538,16 @@ public final class DalTableDao<T> {
 	 */
 	public Map<String, int[]> crossShardBatchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
 		crossShardOperationAllowed(logicDbName, hints, "crossShardBatchInsert");
-		DalWatcher.begin();
+		
+		DalWatcher.crossShardBegin();
 		Map<String, int[]> result = new HashMap<String, int[]>();
 		Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
 		for(String shard: shuffled.keySet()) {
 			hints.inShard(shard);
-			result.put(shard, batchAndInsert(hints, shuffled.get(shard)));
+			result.put(shard, batchInsertByDb(hints, shuffled.get(shard)));
 		}
 
+		DalWatcher.crossShardEnd();
 		return result;
 	}
 
@@ -547,7 +564,23 @@ public final class DalTableDao<T> {
 		return this.crossShardBatchInsert(hints, Arrays.asList(daoPojos));
 	}
 	
-	private int[] batchAndInsert(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+	private int[] batchInsertByDb(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+		return executeByTableShard(logicDbName, hints, daoPojos, new BulkTask<int[]>(){
+			@Override
+			public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
+				return batchInsertByTable(hints, shaffled);
+			}
+
+			@Override
+			public int[] merge(List<int[]> results) {
+				return DalShardingHelper.combine(results.toArray(new int[results.size()][]));
+			}
+		});
+	}
+	
+	private int[] batchInsertByTable(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+		DalWatcher.begin();
+		
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
 		for (Map<String, ?> fields : daoPojos) {
@@ -624,7 +657,6 @@ public final class DalTableDao<T> {
 	 */
 	public int[] batchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
 		reqirePredefinedSharding(getLogicDbName(), hints, "batchDelete requires predefined shard! Use crossShardBatchDelete instead.");
-		DalWatcher.begin();
 		return batchDeleteByDb(hints, getPojosFields(daoPojos));
 	}
 	
@@ -666,16 +698,22 @@ public final class DalTableDao<T> {
 	}
 	
 	private int[] batchDeleteByDb(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
-		return executeByTableShard(logicDbName, hints, daoPojos, new BulkTask(){
+		return executeByTableShard(logicDbName, hints, daoPojos, new BulkTask<int[]>(){
 			@Override
 			public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
 				return batchDeleteByTable(hints, shaffled);
+			}
+
+			@Override
+			public int[] merge(List<int[]> results) {
+				return DalShardingHelper.combine(results.toArray(new int[results.size()][]));
 			}
 		});
 	}
 	
 	private int[] batchDeleteByTable(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
 		DalWatcher.begin();
+		
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
 		List<String> pkNames = Arrays.asList(parser.getPrimaryKeyNames());

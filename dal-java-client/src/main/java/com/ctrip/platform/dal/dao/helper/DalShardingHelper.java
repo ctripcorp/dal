@@ -1,8 +1,7 @@
 package com.ctrip.platform.dal.dao.helper;
 
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffleByTable;
-
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -201,23 +200,23 @@ public class DalShardingHelper {
 //		
 //	}
 	
-	public static int[] executeByTableShard(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask task) throws SQLException {
+	public static <T> T executeByTableShard(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask<T> task) throws SQLException {
 		if(isTableShardingEnabled(logicDbName)) {
 			DalHints tmpHints = new DalHints();
 			Map<String, List<Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, daoPojos);
-			int[][] counts = new int[pojosInTable.size()][];
-			int i =0;
+			List<T> results = new ArrayList<T>(pojosInTable.size());
 			for(String tableShardId: pojosInTable.keySet()) {
 				tmpHints.inTableShard(tableShardId);
-				counts[i++] = task.execute(tmpHints, pojosInTable.get(tableShardId));
+				T result = task.execute(tmpHints, pojosInTable.get(tableShardId));
+				results.add(result);
 			}
-			return combine(counts);
+			return task.merge(results);
 		}else{
 			return task.execute(hints, daoPojos);
 		}
 	}
 	
-	private static int[] combine(int[]... counts) {
+	public static int[] combine(int[]... counts) {
 		int total = 0;
 		for(int[] countsInTable: counts)
 			total += countsInTable.length;
@@ -231,9 +230,9 @@ public class DalShardingHelper {
 		
 		return totalCounts;
 	}
-
 	
-	public static interface BulkTask {
-		int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException;
+	public static interface BulkTask<T> {
+		T execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException;
+		T merge(List<T> results);
 	}
 }

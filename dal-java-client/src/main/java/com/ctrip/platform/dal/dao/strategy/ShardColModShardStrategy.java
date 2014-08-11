@@ -15,12 +15,14 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	
 	public static final String TABLE_COLUMNS = "tableColumns";
 	public static final String TABLE_MOD = "tableMod";
+	public static final String SEPARATOR = "separator";
 
 	private String[] columns;
 	private Integer mod;
 
 	private String[] tableColumns;
 	private Integer tableMod;
+	private String separator;
 	
 	/**
 	 * columns are separated by ','
@@ -41,6 +43,10 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		if(settings.containsKey(TABLE_MOD)) {
 			tableMod = Integer.parseInt(settings.get(TABLE_MOD));
+		}
+		
+		if(settings.containsKey(SEPARATOR)) {
+			separator = settings.get(TABLE_MOD);
 		}
 	}
 
@@ -137,5 +143,9 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 			}
 		}
 		return null;
+	}
+	
+	private String buildShardStr(String shardId) {
+		return separator == null? shardId: separator + separator;
 	}
 }

@@ -46,7 +46,7 @@ public class ${host.getPojoClassName()}Dao {
 		this.client.setDelimiter('`','`');
 #else
 		this.client.setDelimiter('[',']');
-		this.client.setFindTemplate("SELECT * FROM %s WHERE WITH (NOLOCK) %s");
+		this.client.setFindTemplate("SELECT * FROM %s WITH (NOLOCK) WHERE %s");
 #end
 		this.queryDao = new DalQueryDao(DATA_BASE);
 		this.rowextractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(parser); 

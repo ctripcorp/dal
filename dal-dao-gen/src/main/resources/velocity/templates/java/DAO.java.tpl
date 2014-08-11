@@ -485,7 +485,7 @@ public class ${host.getPojoClassName()}Dao {
 #if($host.isSpa())
 		parameters.setResultsParameter(RET_CODE, extractor);
 #end
-		parameters.setResultsParameter(UPDATE_COUNT);
+		parameters.setResultsParameter(UPDATE_COUNT, extractor);
 		return callSql;
 	}
 	

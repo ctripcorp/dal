@@ -12,7 +12,7 @@ import com.ctrip.platform.dal.dao.*;
 public class ${host.getPojoClassName()}DaoUnitTest {
 
 	private static ${host.getPojoClassName()}Dao dao = null;
-	
+	private static ${host.getPojoClassName()}[] testdata = null; 
 	static{
 		try{
 		/**
@@ -33,12 +33,20 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		//Initialize the database.
+		//Setup the data
+		if(null == testdata || testdata.length <= 0)
+			throw new Exception("Test data must be prepared.");
+		for(int i = 0; i < testdata.length; i++)
+			dao.insert(new DalHints(), testdata[i]);
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		//Cleanup the database
+		//Setup the data
+		if(null == testdata || testdata.length <= 0)
+			throw new Exception("Test data must be prepared.");
+		for(int i = 0; i < testdata.length; i++)
+			dao.delete(new DalHints(), testdata[i]);
 	}
 	
 #if($host.hasPk())

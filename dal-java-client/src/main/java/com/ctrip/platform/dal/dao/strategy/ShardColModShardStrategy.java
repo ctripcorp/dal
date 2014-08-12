@@ -46,7 +46,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		}
 		
 		if(settings.containsKey(SEPARATOR)) {
-			separator = settings.get(TABLE_MOD);
+			separator = settings.get(SEPARATOR);
 		}
 	}
 
@@ -98,21 +98,21 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		String shard = hints.getString(DalHintEnum.tableShard);
 		if(shard != null)
-			return shard;
+			return buildShardStr(shard);
 		
 		// Shard value take the highest priority
 		if(hints.is(DalHintEnum.tableShardValue)) {
 			Integer id = (Integer)hints.get(DalHintEnum.shardValue);
-			return String.valueOf(id%mod);
+			return buildShardStr(String.valueOf(id%mod));
 		}
 		
 		shard = locateByParameters(hints, tableColumns, tableMod);
 		if(shard != null)
-			return shard;
+			return buildShardStr(shard);
 		
 		shard = locateByShardCol(hints, tableColumns, tableMod);
 		if(shard != null)
-			return shard;
+			return buildShardStr(shard);
 		
 		throw new RuntimeException("Can not locate table shard for " + logicDbName);
 	}
@@ -146,6 +146,6 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	}
 	
 	private String buildShardStr(String shardId) {
-		return separator == null? shardId: separator + separator;
+		return separator == null? shardId: separator + shardId;
 	}
 }

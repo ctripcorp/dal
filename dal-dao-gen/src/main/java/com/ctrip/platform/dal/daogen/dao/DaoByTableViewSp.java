@@ -31,7 +31,9 @@ public class DaoByTableViewSp {
 	public List<GenTaskByTableViewSp> getTasksByProjectId(int iD) {
 		try {
 			return this.jdbcTemplate
-					.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version,update_user_no,update_time,comment from task_table where project_id=?",
+					.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
+							+ "cud_by_sp,pagination,generated,version,update_user_no,update_time,"
+							+ "comment,sql_style from task_table where project_id=?",
 							new Object[] { iD },
 							new RowMapper<GenTaskByTableViewSp>() {
 								public GenTaskByTableViewSp mapRow(
@@ -51,7 +53,8 @@ public class DaoByTableViewSp {
 		final List<GenTaskByTableViewSp> tasks = new ArrayList<GenTaskByTableViewSp>();
 
 		this.jdbcTemplate
-				.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version,update_user_no,update_time,comment from task_table where project_id=?",
+				.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,"
+						+ "pagination,generated,version,update_user_no,update_time,comment,sql_style from task_table where project_id=?",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -73,7 +76,9 @@ public class DaoByTableViewSp {
 		final List<GenTaskByTableViewSp> tasks = new ArrayList<GenTaskByTableViewSp>();
 
 		this.jdbcTemplate
-				.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version,update_user_no,update_time,comment from task_table where project_id=? and generated=false",
+				.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
+						+ "cud_by_sp,pagination,generated,version,update_user_no,update_time,"
+						+ "comment,sql_style from task_table where project_id=? and generated=false",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -93,7 +98,9 @@ public class DaoByTableViewSp {
 	public int insertTask(GenTaskByTableViewSp task) {
 		try {
 			return this.jdbcTemplate
-					.update("insert into task_table ( project_id,  db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,generated,version,update_user_no,update_time,comment) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+					.update("insert into task_table ( project_id,  db_name,table_names,view_names,sp_names,"
+							+ "prefix,suffix,cud_by_sp,pagination,generated,version,update_user_no,update_time,"
+							+ "comment,sql_style) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 							task.getProject_id(), task.getDatabaseSetName(),
 							task.getTable_names(), task.getView_names(),
 							task.getSp_names(), task.getPrefix(),
@@ -102,7 +109,8 @@ public class DaoByTableViewSp {
 							task.getVersion(),
 							task.getUpdate_user_no(),
 							task.getUpdate_time(),
-							task.getComment());
+							task.getComment(),
+							task.getSql_style());
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
 			return -1;
@@ -128,9 +136,11 @@ public class DaoByTableViewSp {
 	public int updateTask(GenTaskByTableViewSp task) {
 		try {
 			return this.jdbcTemplate
-					.update("update task_table set project_id=?,db_name=?,table_names=?,view_names=?,sp_names=?,prefix=?,suffix=?,cud_by_sp=?,pagination=?,generated=?,version=version+1,update_user_no=?,update_time=?,comment=? where id=? and version=?",
+					.update("update task_table set project_id=?,db_name=?,table_names=?,view_names=?,sp_names=?,"
+							+ "prefix=?,suffix=?,cud_by_sp=?,pagination=?,generated=?,version=version+1,"
+							+ "update_user_no=?,update_time=?,comment=?,sql_style=? where id=? and version=?",
 
-					task.getProject_id(), task.getDatabaseSetName(),
+							task.getProject_id(), task.getDatabaseSetName(),
 							task.getTable_names(), task.getView_names(),
 							task.getSp_names(), task.getPrefix(),
 							task.getSuffix(), task.isCud_by_sp(),
@@ -138,6 +148,7 @@ public class DaoByTableViewSp {
 							task.getUpdate_user_no(),
 							task.getUpdate_time(),
 							task.getComment(),
+							task.getSql_style(),
 							task.getId(), task.getVersion());
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();

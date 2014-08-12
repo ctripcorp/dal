@@ -24,6 +24,8 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	private String update_user_no;
 	private Timestamp update_time;
 	private String comment;
+	//csharp 或者 java，表示C#风格或者Java风格，@Name or ?
+	private String sql_style;
 	
 	/**
 	 * 根据Resultset返回GenTaskByTableView实体对象
@@ -50,6 +52,7 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 		task.setUpdate_user_no(rs.getString(13));
 		task.setUpdate_time(rs.getTimestamp(14));
 		task.setComment(rs.getString(15));
+		task.setSql_style(rs.getString("sql_style"));
 
 		return task;
 	}
@@ -186,6 +189,14 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+
+	public String getSql_style() {
+		return sql_style;
+	}
+
+	public void setSql_style(String sql_style) {
+		this.sql_style = sql_style;
 	}
 
 }

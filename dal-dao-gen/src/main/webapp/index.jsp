@@ -204,7 +204,7 @@
 							2、目前，DAO代码生成方式有三种：<br/>
 							&nbsp;2.1、标准DAO：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
 							&nbsp;2.2、构建SQL（生成的代码绑定到模板）：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
-							&nbsp;2.3、自定义SQL：在这种模式下面，我们可以自定义查询SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
+							&nbsp;2.3、自定义SQL：在这种模式下面，我们可以自定义SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
 							"> <img style="margin-bottom:15px;height:25px;width:25px" class="helpicon" id="help"
 							src="/static/images/help.jpg">
 					</a>
@@ -219,7 +219,6 @@
                            </select>
                         </div>
                      </div>
-                     
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label" style="width:130px;">DAO代码生成方式:</label>
@@ -230,6 +229,15 @@
                            </select>
                         </div>
 					 </div>
+					 <div class="row-fluid">
+                        <div class="control-group">
+	                        <label class="control-label popup_label" style="width:130px;">选择SQL风格：</label>
+	                        <select id="sql_style" class="span8">
+	                           <option value="csharp" selected="selected">C#风格(参数形式为@Name)</option>
+	                           <option value="java">JAVA风格(参数形式为?)</option>
+	                        </select>
+	                     </div>
+                     </div>
                   <div class="row-fluid">
                      	<div class="control-group">
                            <label class="control-label popup_label" style="width:130px;">方法功能描述：</label>
@@ -299,15 +307,7 @@
                            </select>
                         </div>
                      </div>
-                     <div class="row-fluid">
-                        <div class="control-group">
-	                        <label class="control-label popup_label">选择SQL风格：</label>
-	                        <select id="sql_style" class="span9 popup_text">
-	                           <option value="csharp">C#风格(参数形式为@Name)</option>
-	                           <option value="java">JAVA风格(参数形式为?)</option>
-	                        </select>
-	                     </div>
-                     </div>
+                     
                      <div class="row-fluid method_name_class">
                         <div class="control-group">
                            <label class="control-label popup_label">生成的方法名：</label>

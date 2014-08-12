@@ -57,7 +57,9 @@ public class GenTaskByFreeSqlResource {
 			@FormParam("action") String action,
 			@FormParam("comment") String comment,
 			@FormParam("scalarType") String scalarType,
-			@FormParam("pagination") boolean pagination) {
+			@FormParam("pagination") boolean pagination,
+			@FormParam("sql_style") String sql_style// C#风格或者Java风格
+			) {
 		
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 
@@ -84,6 +86,7 @@ public class GenTaskByFreeSqlResource {
 			task.setComment(comment);
 			task.setScalarType(scalarType);
 			task.setPagination(pagination);
+			task.setSql_style(sql_style);
 			
 			if("简单类型".equals(pojo_name)){
 				task.setPojoType("SimpleType");

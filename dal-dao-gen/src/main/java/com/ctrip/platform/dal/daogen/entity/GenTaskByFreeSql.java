@@ -33,6 +33,8 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	private String pojoType;
 	//是否增加分页方法，true：增加
 	private boolean pagination;
+	//csharp 或者 java，表示C#风格或者Java风格，@Name or ?
+	private String sql_style;
 	
 	public static GenTaskByFreeSql visitRow(ResultSet rs) throws SQLException {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
@@ -57,6 +59,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		task.setScalarType(rs.getString("scalarType"));
 		task.setPojoType(rs.getString("pojoType"));
 		task.setPagination(rs.getBoolean("pagination"));
+		task.setSql_style(rs.getString("sql_style"));
 
 		return task;
 	}
@@ -218,6 +221,14 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
 	public void setPagination(boolean pagination) {
 		this.pagination = pagination;
+	}
+
+	public String getSql_style() {
+		return sql_style;
+	}
+
+	public void setSql_style(String sql_style) {
+		this.sql_style = sql_style;
 	}
 
 }

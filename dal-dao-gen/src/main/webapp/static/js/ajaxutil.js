@@ -39,8 +39,6 @@
     var post_task_auto = function(postData){
         postData["table_name"] = $("#tables").val();
         postData["method_name"] = $("#method_name").val();
-        //C#风格或者Java风格，@Name or ?
-        postData["sql_style"] = $("#sql_style").val();
         postData["crud_type"] = $("#crud_option").val();
 
         if("select" == postData["crud_type"]){
@@ -179,6 +177,8 @@
 
             postData["project_id"] = current_project;
             postData["db_name"] = $("#databases").val();
+            //C#风格或者Java风格，@Name or ?
+            postData["sql_style"] = $("#sql_style").val();
             postData["comment"] = $("#comment").val();
             if ($("#page1").attr('is_update') == "1") {
                 postData["action"] = "update";

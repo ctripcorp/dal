@@ -49,7 +49,9 @@ public class GenTaskByTableViewResource {
 			@FormParam("pagination") boolean pagination,
 			@FormParam("version") int version,
 			@FormParam("action") String action,
-			@FormParam("comment") String comment) {
+			@FormParam("comment") String comment,
+			@FormParam("sql_style") String sql_style// C#风格或者Java风格
+			) {
 		GenTaskByTableViewSp task = new GenTaskByTableViewSp();
 
 		if (action.equalsIgnoreCase("delete")) {
@@ -74,6 +76,7 @@ public class GenTaskByTableViewResource {
 			task.setUpdate_user_no(user.getUserName()+"("+userNo+")");
 			task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
 			task.setComment(comment);
+			task.setSql_style(sql_style);
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);

@@ -246,7 +246,7 @@ jQuery(document).ready(function () {
         }
     });
 
-    $("#databases,#gen_style,#sql_style").click(function(){
+    $("#databases,#gen_style").click(function(){
         var records = w2ui['grid'].getSelection();
         var record = null;
         if (records.length > 0){
@@ -259,10 +259,6 @@ jQuery(document).ready(function () {
             $("#page1").attr('is_update', '0');
         }else{
             $("#page1").attr('is_update', '1');
-        }
-
-        if($("#sql_style").val()!=record['sql_style'] && "auto"==$("#gen_style").val()){
-            window.sql_builder.build();
         }
 
     });

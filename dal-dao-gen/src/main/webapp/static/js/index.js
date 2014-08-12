@@ -256,7 +256,7 @@ jQuery(document).ready(function () {
         }
     });
 
-    $("#databases,#gen_style").click(function(){
+    $("#databases,#gen_style,#sql_style").click(function(){
         var records = w2ui['grid'].getSelection();
         var record = null;
         if (records.length > 0){

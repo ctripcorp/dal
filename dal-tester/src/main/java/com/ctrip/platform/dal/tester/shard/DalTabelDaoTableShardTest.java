@@ -184,7 +184,11 @@ public class DalTabelDaoTableShardTest {
 	public void testQueryByPk() throws SQLException {
 		ClientTestModel model = dao.queryByPk(1, new DalHints().setShardColValue("index", 1).setShardColValue("id", 1));
 		Assert.assertTrue(null != model);
-		Assert.assertEquals(10, model.getQuantity().intValue());
+		Assert.assertEquals(1, model.getId().intValue());
+		
+		model = dao.queryByPk(1, new DalHints().setShardColValue("index", 2).setShardColValue("id", 1));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(1, model.getId().intValue());
 	}
 //
 //	/**

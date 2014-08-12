@@ -61,8 +61,8 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	 */
 	public String locateDbShard(DalConfigure configure, String logicDbName,
 			DalHints hints) {
-		if(columns.length == 0)
-			return null;
+		if(!isShardingByDb())
+			throw new RuntimeException(String.format("Logic Db %s is not configured to be shard by database", logicDbName));
 		
 		String shard = hints.getString(DalHintEnum.shard);
 		if(shard != null)
@@ -70,7 +70,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		// Shard value take the highest priority
 		if(hints.is(DalHintEnum.shardValue)) {
-			Integer id = (Integer)hints.get(DalHintEnum.shardValue);
+			Integer id = getIntValue(hints.get(DalHintEnum.shardValue));
 			return String.valueOf(id%mod);
 		}
 		
@@ -93,8 +93,8 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	@Override
 	public String locateTableShard(DalConfigure configure, String logicDbName,
 			DalHints hints) {
-		if(tableColumns.length == 0)
-			return null;
+		if(!isShardingByTable())
+			throw new RuntimeException(String.format("Logic Db %s is not configured to be shard by table", logicDbName));
 		
 		String shard = hints.getString(DalHintEnum.tableShard);
 		if(shard != null)
@@ -102,8 +102,8 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		// Shard value take the highest priority
 		if(hints.is(DalHintEnum.tableShardValue)) {
-			Integer id = (Integer)hints.get(DalHintEnum.shardValue);
-			return buildShardStr(String.valueOf(id%mod));
+			Integer id = getIntValue(hints.get(DalHintEnum.tableShardValue));
+			return buildShardStr(String.valueOf(id%tableMod));
 		}
 		
 		shard = locateByParameters(hints, tableColumns, tableMod);
@@ -147,5 +147,18 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	
 	private String buildShardStr(String shardId) {
 		return separator == null? shardId: separator + shardId;
+	}
+	
+	private Integer getIntValue(Object value) {
+		if(value instanceof Integer)
+			return (Integer)value;
+		
+		if(value instanceof Number)
+			return ((Number)value).intValue();
+		
+		if(value instanceof String)
+			return new Integer((String)value);
+		
+		throw new RuntimeException(String.format("Shard value: %s can not be recoganized as int value", value.toString()));
 	}
 }

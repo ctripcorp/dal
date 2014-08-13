@@ -1,12 +1,12 @@
 package com.ctrip.platform.dal.tester.shard;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.fail;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -22,22 +22,29 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
-import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-/**
- * Only test shard by table case
- * @author jhhe
- *
- */
-public class DalTabelDaoTableShardTest {
-	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr_tableShard";
-	private final static String DATABASE_NAME_MOD = DATABASE_NAME_SQLSVR;
+public class DalTableDaoShardByDbTableTest {
+
+	private final static String DATABASE_NAME_MOD = "DB_TABLE_SHARD";
+	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr";
+	private final static String DATABASE_NAME_MYSQL = "dao_test_mysql";
 	
 	private final static String TABLE_NAME = "dal_client_test";
 	private final static int mod = 4;
 	
+	private final static String DROP_TABLE_SQL_MYSQL_TPL = "DROP TABLE IF EXISTS " + TABLE_NAME + "_%d";
+	
 	//Create the the table
+	private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"_%d("
+			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
+			+ "quantity int,"
+			+ "tableIndex int,"
+			+ "type smallint, "
+			+ "address VARCHAR(64) not null, "
+			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
+	
+	
 	private final static String DROP_TABLE_SQL_SQLSVR_TPL = "IF EXISTS ("
 			+ "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
 			+ "WHERE TABLE_NAME = '"+ TABLE_NAME + "_%d') "
@@ -51,6 +58,7 @@ public class DalTabelDaoTableShardTest {
 			+ "last_changed datetime default getdate())";
 	
 	private static DalClient clientSqlSvr;
+	private static DalClient clientMySql;
 	private static DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser();
 	private static DalTableDao<ClientTestModel> dao;
 	
@@ -59,6 +67,7 @@ public class DalTabelDaoTableShardTest {
 //			DalClientFactory.initClientFactory("/DalMult.config");
 			DalClientFactory.initClientFactory();
 			clientSqlSvr = DalClientFactory.getClient(DATABASE_NAME_SQLSVR);
+			clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
 			dao = new DalTableDao<ClientTestModel>(clientTestParser);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -69,6 +78,13 @@ public class DalTabelDaoTableShardTest {
 	public static void setUpBeforeClass() throws Exception {
 		DalHints hints = new DalHints();
 		String[] sqls = null;
+		for(int i = 0; i < mod; i++) {
+			sqls = new String[] { 
+					String.format(DROP_TABLE_SQL_MYSQL_TPL,i), 
+					String.format(CREATE_TABLE_SQL_MYSQL_TPL, i)};
+			clientMySql.batchUpdate(sqls, hints);
+		}
+		
 		// For SQL server
 		hints = new DalHints();
 		StatementParameters parameters = new StatementParameters();
@@ -86,6 +102,11 @@ public class DalTabelDaoTableShardTest {
 	public static void tearDownAfterClass() throws Exception {
 		DalHints hints = new DalHints();
 		String[] sqls = null;
+		for(int i = 0; i < mod; i++) {
+			sqls = new String[] { String.format(DROP_TABLE_SQL_MYSQL_TPL, i)};
+			clientMySql.batchUpdate(sqls, hints);
+		}
+		
 		//For Sql Server
 		hints = new DalHints();
 		StatementParameters parameters = new StatementParameters();
@@ -101,17 +122,31 @@ public class DalTabelDaoTableShardTest {
 	public void setUp() throws Exception {
 		DalHints hints = new DalHints();
 		String[] insertSqls = null;
+		// shard 1
+		for(int i = 0; i < mod; i++) {
+			insertSqls = new String[] {
+					"INSERT INTO " + TABLE_NAME + "_"+ i
+							+ " VALUES(1, 10, " + i + " ,1, 'SH INFO', NULL)",
+					"INSERT INTO " + TABLE_NAME + "_"+ i
+							+ " VALUES(3, 11, " + i + " ,1, 'BJ INFO', NULL)",
+					"INSERT INTO " + TABLE_NAME + "_"+ i
+							+ " VALUES(5, 12, " + i + " ,2, 'SZ INFO', NULL)" };
+			int[] counts = clientMySql.batchUpdate(insertSqls, hints);
+			assertArrayEquals(new int[] { 1, 1, 1 }, counts);
+		}
+		
+		// shard 0
 		//For Sql Server
 		hints = new DalHints();
 		for(int i = 0; i < mod; i++) {
 			insertSqls = new String[] {
 					"SET IDENTITY_INSERT "+ TABLE_NAME + "_" + i + " ON",
 					"INSERT INTO " + TABLE_NAME + "_" + i + "(Id, quantity,tableIndex,type,address)"
-							+ " VALUES(1, 10, " + i + ",1, 'SH INFO')",
+							+ " VALUES(2, 10, " + i + ",1, 'SH INFO')",
 					"INSERT INTO " + TABLE_NAME + "_" + i + "(Id, quantity,tableIndex,type,address)"
-							+ " VALUES(2, 11, " + i + ",1, 'BJ INFO')",
+							+ " VALUES(4, 11, " + i + ",1, 'BJ INFO')",
 					"INSERT INTO " + TABLE_NAME + "_" + i + "(Id, quantity,tableIndex,type,address)"
-							+ " VALUES(3, 12, " + i + ",2, 'SZ INFO')",
+							+ " VALUES(6, 12, " + i + ",2, 'SZ INFO')",
 					"SET IDENTITY_INSERT "+ TABLE_NAME + "_" + i +" OFF"};
 			clientSqlSvr.batchUpdate(insertSqls, hints);
 		}
@@ -122,6 +157,15 @@ public class DalTabelDaoTableShardTest {
 		String sql = "DELETE FROM " + TABLE_NAME;
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
+		try {
+			for(int i = 0; i < mod; i++) {
+				clientMySql.update(sql + "_" + i, parameters, hints);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+
 		sql = "DELETE FROM " + TABLE_NAME;
 		parameters = new StatementParameters();
 		hints = new DalHints();
@@ -140,113 +184,99 @@ public class DalTabelDaoTableShardTest {
 	 */
 	@Test
 	public void testQueryByPk() throws SQLException {
-		ClientTestModel model = null;
+		ClientTestModel model = dao.queryByPk(1, new DalHints().setShardColValue("index", 1).setShardColValue("id", 1));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(1, model.getId().intValue());
 		
-		// By tabelShard
-		for(int i = 0; i < mod; i++) {
-			if(i%2 == 0)
-				model = dao.queryByPk(1, new DalHints().inTableShard(String.valueOf(i)));
-			else
-				model = dao.queryByPk(1, new DalHints().inTableShard(i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
-		}
-		
-		// By tableShardValue
-		for(int i = 0; i < mod; i++) {
-			if(i%2 == 0)
-				model = dao.queryByPk(1, new DalHints().setTableShardValue(String.valueOf(i)));
-			else
-				model = dao.queryByPk(1, new DalHints().setTableShardValue(i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
-		}
+		model = dao.queryByPk(1, new DalHints().setShardColValue("index", 2).setShardColValue("id", 1));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(1, model.getId().intValue());
 	}
 
-//	/**
-//	 * Query by Entity with Primary key
-//	 * @throws SQLException
-//	 */
-//	@Test
-//	public void testQueryByPkWithEntity() throws SQLException{
-//		ClientTestModel pk = null;
-//		ClientTestModel model = null;
-//		
-//		// Using tableShard
-//		pk = new ClientTestModel();
-//		pk.setId(2);
-//		model = dao.queryByPk(pk, new DalHints().inTableShard("0"));
-//		Assert.assertTrue(null != model);
-//		Assert.assertEquals(0, model.getTableIndex().intValue());
-//		
-//		pk = new ClientTestModel();
-//		pk.setId(1);
-//		model = dao.queryByPk(pk, new DalHints().inTableShard("1"));
-//		Assert.assertTrue(null != model);
-//		Assert.assertEquals(1, model.getTableIndex().intValue());
-//
-//		pk = new ClientTestModel();
-//		pk.setId(4);
-//		model = dao.queryByPk(pk, new DalHints().inTableShard("2"));
-//		Assert.assertTrue(null != model);
-//		Assert.assertEquals(2, model.getTableIndex().intValue());
-//
-//		pk = new ClientTestModel();
-//		pk.setId(3);
-//		model = dao.queryByPk(pk, new DalHints().inTableShard("3"));
-//		Assert.assertTrue(null != model);
-//		Assert.assertEquals(3, model.getTableIndex().intValue());
-//
-//		// Using shardValue and tableShardValue
-//		pk = new ClientTestModel();
-//		pk.setId(2);
-//		model = dao.queryByPk(pk, new DalHints().setTableShardValue("0"));
-//		Assert.assertTrue(null != model);
-//		Assert.assertEquals(0, model.getTableIndex().intValue());
-//		
-//		pk = new ClientTestModel();
-//		pk.setId(1);
-//		model = dao.queryByPk(pk, new DalHints().setTableShardValue("1"));
-//		Assert.assertTrue(null != model);
-//		Assert.assertEquals(1, model.getTableIndex().intValue());
-//
-//		pk = new ClientTestModel();
-//		pk.setId(4);
-//		model = dao.queryByPk(pk, new DalHints().setTableShardValue("2"));
-//		Assert.assertTrue(null != model);
-//		Assert.assertEquals(2, model.getTableIndex().intValue());
-//
-//		pk = new ClientTestModel();
-//		pk.setId(3);
-//		model = dao.queryByPk(pk, new DalHints().setTableShardValue("3"));
-//		Assert.assertTrue(null != model);
-//		Assert.assertEquals(3, model.getTableIndex().intValue());
-//
-//		// Using shardCol
-//		pk = new ClientTestModel();
-//		pk.setId(2);
-//		model = dao.queryByPk(pk, new DalHints().setShardColValue("index", 0));
-//		Assert.assertTrue(null != model);
-//		Assert.assertEquals(0, model.getTableIndex().intValue());
-//		
-//		pk = new ClientTestModel();
-//		pk.setId(1);
-//		model = dao.queryByPk(pk, new DalHints().setShardColValue("index", "1"));
-//		Assert.assertTrue(null != model);
-//		Assert.assertEquals(1, model.getTableIndex().intValue());
-//
-//		pk = new ClientTestModel();
-//		pk.setId(4);
-//		model = dao.queryByPk(pk, new DalHints().setShardColValue("index", "2"));
-//		Assert.assertTrue(null != model);
-//		Assert.assertEquals(2, model.getTableIndex().intValue());
-//
-//		pk = new ClientTestModel();
-//		pk.setId(3);
-//		model = dao.queryByPk(pk, new DalHints().setShardColValue("index", "3"));
-//		Assert.assertTrue(null != model);
-//		Assert.assertEquals(3, model.getTableIndex().intValue());
-//	}
+	/**
+	 * Query by Entity with Primary key
+	 * @throws SQLException
+	 */
+	@Test
+	public void testQueryByPkWithEntity() throws SQLException{
+		ClientTestModel pk = null;
+		ClientTestModel model = null;
+		
+		// Using shard and tableShard
+		pk = new ClientTestModel();
+		pk.setId(2);
+		model = dao.queryByPk(pk, new DalHints().inShard("0").inTableShard("0"));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(0, model.getTableIndex().intValue());
+		
+		pk = new ClientTestModel();
+		pk.setId(1);
+		model = dao.queryByPk(pk, new DalHints().inShard("1").inTableShard("1"));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(1, model.getTableIndex().intValue());
+
+		pk = new ClientTestModel();
+		pk.setId(4);
+		model = dao.queryByPk(pk, new DalHints().inShard("0").inTableShard("2"));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(2, model.getTableIndex().intValue());
+
+		pk = new ClientTestModel();
+		pk.setId(3);
+		model = dao.queryByPk(pk, new DalHints().inShard("1").inTableShard("3"));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(3, model.getTableIndex().intValue());
+
+		// Using shardValue and tableShardValue
+		pk = new ClientTestModel();
+		pk.setId(2);
+		model = dao.queryByPk(pk, new DalHints().setShardValue("0").setTableShardValue("0"));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(0, model.getTableIndex().intValue());
+		
+		pk = new ClientTestModel();
+		pk.setId(1);
+		model = dao.queryByPk(pk, new DalHints().setShardValue("1").setTableShardValue("1"));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(1, model.getTableIndex().intValue());
+
+		pk = new ClientTestModel();
+		pk.setId(4);
+		model = dao.queryByPk(pk, new DalHints().setShardValue("0").setTableShardValue("2"));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(2, model.getTableIndex().intValue());
+
+		pk = new ClientTestModel();
+		pk.setId(3);
+		model = dao.queryByPk(pk, new DalHints().setShardValue("1").setTableShardValue("3"));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(3, model.getTableIndex().intValue());
+
+		// Using shardCol
+		pk = new ClientTestModel();
+		pk.setId(2);
+		model = dao.queryByPk(pk, new DalHints().setShardColValue("id", 0).setShardColValue("index", 0));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(0, model.getTableIndex().intValue());
+		
+		pk = new ClientTestModel();
+		pk.setId(1);
+		model = dao.queryByPk(pk, new DalHints().setShardColValue("id", "1").setShardColValue("index", "1"));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(1, model.getTableIndex().intValue());
+
+		pk = new ClientTestModel();
+		pk.setId(4);
+		model = dao.queryByPk(pk, new DalHints().setShardColValue("id", "0").setShardColValue("index", "2"));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(2, model.getTableIndex().intValue());
+
+		pk = new ClientTestModel();
+		pk.setId(3);
+		model = dao.queryByPk(pk, new DalHints().setShardColValue("id", "1").setShardColValue("index", "3"));
+		Assert.assertTrue(null != model);
+		Assert.assertEquals(3, model.getTableIndex().intValue());
+	}
 	
 //	/**
 //	 * Query by Entity without Primary key

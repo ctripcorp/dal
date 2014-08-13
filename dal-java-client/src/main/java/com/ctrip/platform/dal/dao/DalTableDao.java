@@ -55,6 +55,7 @@ public final class DalTableDao<T> {
 	private Character endDelimiter;
 	
 	private boolean tableShardingEnabled;
+	private String rawTableName;
 
 	public DalTableDao(DalParser<T> parser) {
 		this.client = DalClientFactory.getClient(parser.getDatabaseName());
@@ -66,7 +67,8 @@ public final class DalTableDao<T> {
 		validColumnsForInsert = buildValidColumnsForInsert();
 		columnsForInsert = combineColumns(validColumnsForInsert, COLUMN_SEPARATOR);
 		
-		tableShardingEnabled = isTableShardingEnabled(logicDbName);
+		rawTableName = parser.getTableName();
+		tableShardingEnabled = isTableShardingEnabled(logicDbName, rawTableName);
 	}
 	
 	/**
@@ -115,7 +117,7 @@ public final class DalTableDao<T> {
 		if(tableShardingEnabled == false)
 			return parser.getTableName();
 		
-		return parser.getTableName() + locateTableShardId(logicDbName, hints, parameters, fields);
+		return rawTableName + locateTableShardId(logicDbName, hints, parameters, fields);
 	}
 
 	/**
@@ -454,7 +456,7 @@ public final class DalTableDao<T> {
 	}
 	
 	private int combinedInsertByDb(DalHints hints, final KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
-		return executeByTableShard(logicDbName, hints, daoPojos, new BulkTask<Integer>(){
+		return executeByTableShard(logicDbName, rawTableName, hints, daoPojos, new BulkTask<Integer>(){
 			@Override
 			public Integer execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
 				return combinedInsertByTable(hints, keyHolder, shaffled);
@@ -559,7 +561,7 @@ public final class DalTableDao<T> {
 	}
 	
 	private int[] batchInsertByDb(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
-		return executeByTableShard(logicDbName, hints, daoPojos, new BulkTask<int[]>(){
+		return executeByTableShard(logicDbName, rawTableName, hints, daoPojos, new BulkTask<int[]>(){
 			@Override
 			public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
 				return batchInsertByTable(hints, shaffled);
@@ -693,7 +695,7 @@ public final class DalTableDao<T> {
 	}
 	
 	private int[] batchDeleteByDb(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
-		return executeByTableShard(logicDbName, hints, daoPojos, new BulkTask<int[]>(){
+		return executeByTableShard(logicDbName, rawTableName, hints, daoPojos, new BulkTask<int[]>(){
 			@Override
 			public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
 				return batchDeleteByTable(hints, shaffled);

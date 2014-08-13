@@ -92,4 +92,11 @@ public class SmartReadRouteStrategy implements DalShardingStrategy {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+
+	@Override
+	public boolean isShardingEnable(String tableName) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

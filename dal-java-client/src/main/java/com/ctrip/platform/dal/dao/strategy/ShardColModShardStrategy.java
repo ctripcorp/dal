@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.dao.strategy;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -13,6 +15,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	public static final String COLUMNS = "columns";
 	public static final String MOD = "mod";
 	
+	public static final String SHARDED_TABLES = "shardedTables";
 	public static final String TABLE_COLUMNS = "tableColumns";
 	public static final String TABLE_MOD = "tableMod";
 	public static final String SEPARATOR = "separator";
@@ -20,6 +23,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	private String[] columns;
 	private Integer mod;
 
+	private Set<String> shardedTables = new HashSet<String>();
 	private String[] tableColumns;
 	private Integer tableMod;
 	private String separator;
@@ -35,6 +39,12 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		if(settings.containsKey(MOD)) {
 			mod = Integer.parseInt(settings.get(MOD));
+		}
+		
+		if(settings.containsKey(SHARDED_TABLES)) {
+			String[] tables = settings.get(SHARDED_TABLES).split(",");
+			for(String table: tables)
+				shardedTables.add(table);
 		}
 		
 		if(settings.containsKey(TABLE_COLUMNS)) {
@@ -64,7 +74,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		if(!isShardingByDb())
 			throw new RuntimeException(String.format("Logic Db %s is not configured to be shard by database", logicDbName));
 		
-		String shard = hints.getString(DalHintEnum.shard);
+		String shard = hints.getShardId();
 		if(shard != null)
 			return shard;
 		
@@ -96,7 +106,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		if(!isShardingByTable())
 			throw new RuntimeException(String.format("Logic Db %s is not configured to be shard by table", logicDbName));
 		
-		String shard = hints.getString(DalHintEnum.tableShard);
+		String shard = hints.getTableShardId();
 		if(shard != null)
 			return buildShardStr(shard);
 		
@@ -123,7 +133,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 			for(String column: columns) {
 				StatementParameter param = parameters.get(column, ParameterDirection.Input);
 				if(param != null && param.getValue() != null) {
-					Integer id = (Integer)param.getValue();
+					Integer id = getIntValue(param.getValue());
 					return String.valueOf(id%mod);
 				}
 			}
@@ -136,7 +146,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		if(shardColValues != null) {
 			for(String column: columns) {
-				Integer id = shardColValues.get(column);
+				Integer id = getIntValue(shardColValues.get(column));
 				if(id != null) {
 					return String.valueOf(id%mod);
 				}
@@ -160,5 +170,10 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 			return new Integer((String)value);
 		
 		throw new RuntimeException(String.format("Shard value: %s can not be recoganized as int value", value.toString()));
+	}
+
+	@Override
+	public boolean isShardingEnable(String tableName) {
+		return shardedTables.contains(tableName);
 	}
 }

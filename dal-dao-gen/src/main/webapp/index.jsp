@@ -238,7 +238,7 @@
 	                        </select>
 	                     </div>
                      </div>
-                  <div class="row-fluid">
+                     <div class="row-fluid">
                      	<div class="control-group">
                            <label class="control-label popup_label" style="width:130px;">方法功能描述：</label>
                            <textarea id="comment" class="span12 popup_text input-sm" rows="4"></textarea>
@@ -287,6 +287,68 @@
                         <label class="popup_label"><input id="pagination" type="checkbox" checked="true">增加分页方法</label>
                      </div>
                   </div>
+                  
+                  <div class="steps step2-1-2 row-fluid">
+                  	  <div class="panel-group" id="accordion">
+						  <div class="panel panel-default">
+						    <div class="panel-heading">
+						      <h4 class="panel-title">
+						        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" style="font-size:15px">
+						            Create Method
+						        </a>
+						      </h4>
+						    </div>
+						    <div id="collapseOne" class="panel-collapse collapse in">
+						      <div class="panel-body" id="CreateMethodListDiv">
+						           Create Method list here.
+						      </div>
+						    </div>
+						  </div>
+						  <div class="panel panel-default">
+						    <div class="panel-heading">
+						      <h4 class="panel-title">
+						        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" style="font-size:15px">
+						          Retrieve Method
+						        </a>
+						      </h4>
+						    </div>
+						    <div id="collapseTwo" class="panel-collapse collapse">
+						      <div class="panel-body" id="RetrieveMethodListDiv">
+						        Retrieve Method list here.
+						      </div>
+						    </div>
+						  </div>
+						  <div class="panel panel-default">
+						    <div class="panel-heading">
+						      <h4 class="panel-title">
+						        <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" style="font-size:15px">
+						          Update Method
+						        </a>
+						      </h4>
+						    </div>
+						    <div id="collapseThree" class="panel-collapse collapse">
+						      <div class="panel-body" id="UpdateMethodListDiv">
+						        Update Method list here.
+						      </div>
+						    </div>
+						  </div>
+						  <div class="panel panel-default">
+						    <div class="panel-heading">
+						      <h4 class="panel-title">
+						        <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour" style="font-size:15px">
+						          Delete Method
+						        </a>
+						      </h4>
+						    </div>
+						    <div id="collapseFour" class="panel-collapse collapse">
+						      <div class="panel-body" id="DeleteMethodListDiv">
+						        Delete Method list here.
+						      </div>
+						    </div>
+						  </div>
+					  </div>
+                  </div>
+                  
                   <div class="steps step2-2 row-fluid">
                      <div class="row-fluid">
                         <div class="control-group">
@@ -295,7 +357,6 @@
                            </select>
                         </div>
                      </div>
-                     
                      <div class="row-fluid">
                         <div class="control-group">
                            <label class="control-label popup_label">操作类型：</label>

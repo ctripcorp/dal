@@ -316,7 +316,65 @@
         window.sql_builder.getDatabaseCategory();
     };
 
-    var step2_1 = function(){
+    var step2_1 = function(record,current){
+        cblock($("body"));
+        $("#next_step").attr("disabled","true");
+        $("#next_step").text("正在加载...");
+        $("#next_step").removeClass("btn-primary");
+        $.get(sprintf("/rest/task/table/apiList?db_name=%s&rand=%s",
+            $("#databases").val(), Math.random())).done(function (retValue) {
+            if(retValue.code!='OK'){
+                $("#error_msg").text(retValue.info);
+                $("#next_step").removeAttr("disabled");
+                $("#next_step").addClass("btn-primary");
+                $("#next_step").text("下一步");
+                $("body").unblock();
+                return;
+            }
+            var data = $.parseJSON(retValue.info);
+            var selectList = [];
+            var insertList = [];
+            var updateList = [];
+            var deleteList = [];
+            $("#RetrieveMethodListDiv").empty();
+            $.each(data, function (index, value) {
+                if(value['crud_type']=='select'){
+                    $("#RetrieveMethodListDiv").append($('<input>', {
+                        type:"checkbox",
+                        id: value['id']
+                    }));
+                    var temp = "<a href='#' class='ctip' data-toggle='tooltip' data-placement='top'"+
+                        " title='' html='1' data-original-title='"+ value['method_description']+"'>"+
+                        value['method_declaration']+"</a>";
+                    $("#"+value['id']).wrap("<label class='popup_label'></label>").after($(temp));
+                    $("#RetrieveMethodListDiv>label[class='popup_label']").wrapAll("<div class='row-fluid'></div>");
+                    $("#RetrieveMethodListDiv a[data-toggle='tooltip']").tooltip('hide');
+                }
+            });
+
+            $(".step2-1-2").append(selectList);
+
+            if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "table_view_sp") {
+
+            }
+
+            current.hide();
+
+            $(".step2-1-2").show();
+            $("#next_step").removeAttr("disabled");
+            $("#next_step").addClass("btn-primary");
+            $("#next_step").text("下一步");
+            $("body").unblock();
+        }).fail(function (data) {
+            $("#error_msg").text("获取表/视图列表失败, 请检查是否有权限, 或者数据库已被删除!");
+            $("#next_step").removeAttr("disabled");
+            $("#next_step").addClass("btn-primary");
+            $("#next_step").text("下一步");
+            $("body").unblock();
+        });
+    };
+
+    var step2_1_2 = function(){
         window.ajaxutil.post_task();
     };
 
@@ -688,8 +746,10 @@
             if (current.hasClass("step1")) {
                 step1(record, current);
             } else if (current.hasClass("step2-1")) {
-                step2_1();
-            } else if (current.hasClass("step2-2")) {
+                step2_1(record,current);
+            }else if(current.hasClass("step2-1-2")){
+                step2_1_2();
+            }else if (current.hasClass("step2-2")) {
                 step2_2(record, current);
             } else if (current.hasClass("step2-2-1")) {
                 step2_2_1(record, current);
@@ -712,7 +772,9 @@
                 || current.hasClass("step2-2")
                 || current.hasClass("step2-3")) {
                 $(".step1").show();
-            } else if (current.hasClass("step2-2-1")) {
+            }else if(current.hasClass("step2-1-2")){
+                $(".step2-1").show();
+            }else if (current.hasClass("step2-2-1")) {
                 $(".step2-2").show();
             } else if (current.hasClass("step2-2-2")) {
                 $(".step2-2-1").show();

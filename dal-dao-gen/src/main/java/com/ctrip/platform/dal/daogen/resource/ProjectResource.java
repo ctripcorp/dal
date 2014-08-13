@@ -148,7 +148,7 @@ public class ProjectResource {
 			List<Project>  pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
 			if(null != pjs && pjs.size() > 0){
 				Status status = Status.ERROR;
-				status.setInfo("Dal.config Name --> "+name+" 已经存在，请重新命名!");
+				status.setInfo("Dal.config Name --> "+dalconfigname+" 已经存在，请重新命名!");
 				return status;
 			}
 			proj.setName(name);
@@ -162,7 +162,7 @@ public class ProjectResource {
 				for(Project temp:pjs){
 					if(temp.getId()!=id){
 						Status status = Status.ERROR;
-						status.setInfo("Dal.config Name --> "+name+" 已经存在，请重新命名!");
+						status.setInfo("Dal.config Name --> "+dalconfigname+" 已经存在，请重新命名!");
 						return status;
 					}
 				}

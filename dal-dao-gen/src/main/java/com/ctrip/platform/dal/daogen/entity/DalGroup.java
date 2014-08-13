@@ -17,6 +17,21 @@ public class DalGroup implements Comparable<DalGroup>{
 	
 	private boolean children;
 	
+	public static DalGroup visitRow(ResultSet rs) throws SQLException {
+		DalGroup group = new DalGroup();
+		group.setId(rs.getInt(1));
+		group.setGroup_name(rs.getString(2));
+		group.setGroup_comment(rs.getString(3));
+		group.setCreate_user_no(rs.getString(4));
+		group.setCreate_time(rs.getTimestamp(5));
+		return group;
+	}
+	
+	@Override
+	public int compareTo(DalGroup o) {
+		return this.group_name.compareTo(o.getGroup_name());
+	}
+	
 	public int getId() {
 		return id;
 	}
@@ -67,17 +82,4 @@ public class DalGroup implements Comparable<DalGroup>{
 		this.children = children;
 	}
 	
-	public static DalGroup visitRow(ResultSet rs) throws SQLException {
-		DalGroup group = new DalGroup();
-		group.setId(rs.getInt(1));
-		group.setGroup_name(rs.getString(2));
-		group.setGroup_comment(rs.getString(3));
-		group.setCreate_user_no(rs.getString(4));
-		group.setCreate_time(rs.getTimestamp(5));
-		return group;
-	}
-	@Override
-	public int compareTo(DalGroup o) {
-		return this.group_name.compareTo(o.getGroup_name());
-	}
 }

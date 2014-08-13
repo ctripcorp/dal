@@ -76,6 +76,7 @@
         window.wizzard.clear();
         $(".step1").show();
         $(".step2-1").hide();
+        $(".step2-1-2").hide();
         $(".step2-2").hide();
         $(".step2-3").hide();
         $(".step2-2-1").hide();
@@ -106,6 +107,7 @@
         window.wizzard.clear();
         $(".step1").show();
         $(".step2-1").hide();
+        $(".step2-1-2").hide();
         $(".step2-2").hide();
         $(".step2-3").hide();
         $(".step2-2-1").hide();

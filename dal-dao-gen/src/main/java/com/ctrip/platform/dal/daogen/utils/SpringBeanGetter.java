@@ -4,6 +4,7 @@ package com.ctrip.platform.dal.daogen.utils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.ctrip.platform.dal.daogen.dao.DalApiDao;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
@@ -16,8 +17,7 @@ import com.ctrip.platform.dal.daogen.dao.DaoOfUserProject;
 
 public class SpringBeanGetter {
 
-	private static ApplicationContext context = new ClassPathXmlApplicationContext(
-			"spring.xml");
+	private static ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
 	
 	private static DaoOfProject daoOfProject;
 
@@ -37,6 +37,8 @@ public class SpringBeanGetter {
 	
 	private static DaoOfDatabaseSet daoOfDatabaseSet;
 	
+	private static DalApiDao dalApiDao;
+	
 	static {
 		daoOfProject = (DaoOfProject) context.getBean("projectDao");
 		
@@ -50,6 +52,8 @@ public class SpringBeanGetter {
 		daoOfDalGroupDB = (DalGroupDBDao)context.getBean("dalGroupDB");
 		
 		daoOfDatabaseSet = (DaoOfDatabaseSet) context.getBean("dalDatabaseSet");
+		
+		dalApiDao = (DalApiDao) context.getBean("dalApiDao");
 	}
 
 	public static DaoOfProject getDaoOfProject() {
@@ -87,4 +91,9 @@ public class SpringBeanGetter {
 	public static DaoOfDatabaseSet getDaoOfDatabaseSet(){
 		return daoOfDatabaseSet;
 	}
+
+	public static DalApiDao getDalApiDao() {
+		return dalApiDao;
+	}
+
 }

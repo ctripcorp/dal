@@ -2,22 +2,31 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.sql.Timestamp;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.jasig.cas.client.util.AssertionHolder;
 
+import com.ctrip.platform.dal.daogen.dao.DalApiDao;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
 import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.DalApi;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 生成模板(包含基础的增删改查操作)
@@ -30,9 +39,14 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 public class GenTaskByTableViewResource {
 
 	private static DaoByTableViewSp daoByTableViewSp;
+	
+	private static DalApiDao dalApiDao;
+	
+	private static ObjectMapper mapper = new ObjectMapper();
 
 	static {
 		daoByTableViewSp = SpringBeanGetter.getDaoByTableViewSp();
+		dalApiDao = SpringBeanGetter.getDalApiDao();
 	}
 
 	@POST
@@ -94,6 +108,31 @@ public class GenTaskByTableViewResource {
 		}
 
 		return Status.OK;
+	}
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("apiList")
+	public Status getTableSPNames(@QueryParam("db_name") String setName) {
+		Status status = Status.OK;
+		
+		List<DalApi> apis = dalApiDao.getAllDalApi();
+		
+		java.util.Collections.sort(apis, new Comparator<DalApi>(){
+			@Override
+			public int compare(DalApi o1, DalApi o2) {
+				return o1.getMethod_declaration().compareToIgnoreCase(o2.getMethod_declaration());
+			}
+		});
+		
+		try {
+			status.setInfo(mapper.writeValueAsString(apis));
+		} catch (JsonProcessingException e) {
+			status = Status.ERROR;
+			status.setInfo(e.getMessage());
+			return status;
+		}
+		return status;
 	}
 
 }

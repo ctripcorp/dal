@@ -4,6 +4,8 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
+import com.ctrip.platform.dal.dao.helper.*;
+
 public class ${host.getClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbName()}";
 	

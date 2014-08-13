@@ -76,6 +76,12 @@ public class JavaCodeGeneratorOfViewProcessor implements Processor {
 								host.getPojoClassName()),
 								"templates/java/DAOByViewTest.java.tpl");
 						
+						GenUtils.mergeVelocityContext(context, String.format(
+								"%s/Test/%sDaoUnitTest.java",
+								mavenLikeDir.getAbsolutePath(),
+								host.getPojoClassName()),
+								"templates/java/DAOByViewUnitTest.java.tpl");
+						
 						result.setSuccessal(true);
 					}catch(Exception e){
 						log.error(result.getTaskName() + " exception", e);

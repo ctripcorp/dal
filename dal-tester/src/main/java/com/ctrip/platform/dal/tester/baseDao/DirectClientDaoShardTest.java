@@ -268,7 +268,7 @@ public class DirectClientDaoShardTest {
 			StatementParameters parameters = new StatementParameters();
 			DalHints hints = new DalHints().inShard("0").masterOnly();
 			
-			Integer o = (Integer)client.query(sql, parameters, hints, new DalScalarExtractor());
+			Number o = (Number)client.query(sql, parameters, hints, new DalScalarExtractor());
 			assertNotNull(o);
 			assertEquals(4, o.longValue());
 			

@@ -134,7 +134,9 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 				StatementParameter param = parameters.get(column, ParameterDirection.Input);
 				if(param != null && param.getValue() != null) {
 					Integer id = getIntValue(param.getValue());
-					return String.valueOf(id%mod);
+					if(id != null) {
+						return String.valueOf(id%mod);
+					}
 				}
 			}
 		}
@@ -160,6 +162,9 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	}
 	
 	private Integer getIntValue(Object value) {
+		if(value == null)
+			return null;
+		
 		if(value instanceof Integer)
 			return (Integer)value;
 		

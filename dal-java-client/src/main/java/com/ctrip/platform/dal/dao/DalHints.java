@@ -55,7 +55,14 @@ public class DalHints {
 	}
 	
 	public String getString(DalHintEnum hint) {
-		return (String)hints.get(hint);
+		Object value = hints.get(hint);
+		if(value == null)
+			return null;
+		
+		if(value instanceof String)
+			return (String)value;
+		
+		return value.toString();
 	}
 
 	public String[] getStrings(DalHintEnum hint) {
@@ -77,7 +84,17 @@ public class DalHints {
 		return this;
 	}
 	
+	public DalHints inShard(Integer shardId) {
+		hints.put(DalHintEnum.shard, shardId);
+		return this;
+	}
+	
 	public DalHints inTableShard(String tableShardId) {
+		hints.put(DalHintEnum.tableShard, tableShardId);
+		return this;
+	}
+	
+	public DalHints inTableShard(Integer tableShardId) {
 		hints.put(DalHintEnum.tableShard, tableShardId);
 		return this;
 	}

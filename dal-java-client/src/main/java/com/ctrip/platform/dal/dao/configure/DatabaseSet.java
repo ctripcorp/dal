@@ -63,7 +63,7 @@ public class DatabaseSet {
 	}
 
 	private void initShards() throws Exception {
-		if(strategy == null){
+		if(strategy == null || strategy.isShardingByDb() == false){
 			// Init with no shard support
 			for(DataBase db: databases.values()) {
 				if(db.isMaster())
@@ -96,7 +96,11 @@ public class DatabaseSet {
 	}
 
 	public boolean isShardingSupported() {
-		return strategy != null;
+		return strategy != null && strategy.isShardingByDb();
+	}
+
+	public boolean isTableShardingSupported() {
+		return strategy != null && strategy.isShardingByTable();
 	}
 
 	public Map<String, DataBase> getDatabases() {

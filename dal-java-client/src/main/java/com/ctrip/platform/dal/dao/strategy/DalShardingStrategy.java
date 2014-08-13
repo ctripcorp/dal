@@ -44,6 +44,13 @@ public interface DalShardingStrategy {
 	boolean isShardingByTable();
 	
 	/**
+	 * Check if sharding is enabled for this table. The assumption is not every table in DB is sharded by table
+	 * @param tableName
+	 * @return
+	 */
+	boolean isShardingEnable(String tableName);
+	
+	/**
 	 * Locate table shard suffix. The table name + suffix will be used as real table name 
 	 * If this operation requires cross shard execution, using Cross Shard Manager.
 	 * @param configure

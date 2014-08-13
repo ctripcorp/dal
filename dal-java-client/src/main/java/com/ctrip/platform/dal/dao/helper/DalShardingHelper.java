@@ -33,17 +33,8 @@ public class DalShardingHelper {
 		return locateShardId(logicDbName, new DalHints().set(DalHintEnum.parameters, parameters));
 	}
 	
-	public static boolean isTableShardingEnabled(String logicDbName) {
-		DatabaseSet dbSet = getDatabaseSet(logicDbName);
-		if(dbSet.isShardingSupported()) {
-			try {
-				return dbSet.getStrategy().isShardingByTable();
-			} catch (SQLException e) {
-				// Should never be here
-				return false;
-			}
-		}
-		return false;
+	public static boolean isTableShardingEnabled(String logicDbName, String tableName) {
+		return getDatabaseSet(logicDbName).isTableShardingSupported();
 	}
 	
 	private static DatabaseSet getDatabaseSet(String logicDbName) {
@@ -212,8 +203,8 @@ public class DalShardingHelper {
 //		
 //	}
 	
-	public static <T> T executeByTableShard(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask<T> task) throws SQLException {
-		if(isTableShardingEnabled(logicDbName)) {
+	public static <T> T executeByTableShard(String logicDbName, String tabelName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask<T> task) throws SQLException {
+		if(isTableShardingEnabled(logicDbName, tabelName)) {
 			DalHints tmpHints = DalHints.copyOf(hints);
 			Map<String, List<Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, daoPojos);
 			List<T> results = new ArrayList<T>(pojosInTable.size());

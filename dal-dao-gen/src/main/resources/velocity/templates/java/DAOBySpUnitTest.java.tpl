@@ -11,10 +11,10 @@ import static org.junit.Assert.*;
 
 import com.ctrip.platform.dal.dao.*;
 
-public class ${host.getPojoClassName()}DaoUnitTest {
+public class ${host.getDbName()}SpDaoUnitTest {
 	private static final String DATA_BASE = "${host.getDbName()}";
 
-	private static ${host.getPojoClassName()}Dao dao = null;
+	private static ${host.getDbName()}SpDao dao = null;
 	private static DalClient client = null;
 		
 	//The optional setup SQL, which will be executed on test begin.
@@ -34,7 +34,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
     		//DalClientFactory.initClientFactory("E:/DalMult.config"); // load from the specified Dal.config file path
     		
     		client = DalClientFactory.getClient(DATA_BASE);
-    		dao = new ${host.getPojoClassName()}Dao();
+    		dao = new ${host.getDbName()}SpDao();
 		
 		}catch(Exception e){
 			e.printStackTrace();
@@ -54,41 +54,19 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			client.batchUpdate(cleanupsqls, new DalHints());
 		}
 	}
-	
+#foreach($h in $host.getSpHosts())
+	//Test call${h.getPojoClassName()} method
 	@Test
-	public void testGetAll(){
+	public void testCall${h.getPojoClassName()}(){
+		${h.getPojoClassName()} param = new ${h.getPojoClassName()}();	
+		// Set test value here
+		//param.setXXX(value);
 		try{
-			List<${host.getPojoClassName()}> pojos = dao.getAll(new DalHints());
-			int count = dao.Count(new DalHints());
-			//TODO: Verify the result.
-			assertTrue(null != pojos && pojos.size() == count);
+			Map<String, ?> result = dao.call${h.getPojoClassName()}(param, new DalHints());
+			assertTrue(result != null && result.size() >= 0);
 		}catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	@Test
-	public void testCount(){
-		int count = -1;
-		try{
-			count = dao.Count(new DalHints());
-			List<${host.getPojoClassName()}> pojos = dao.getAll(new DalHints());
-			//TODO: Verify the result.
-			assertTrue(count >= pojos.size());
-		}catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	@Test
-	public void testQueryByPage(){
-		int pageNo = 1;
-		int pageSize = 10;
-		try{
-			List<${host.getPojoClassName()}> pojos = dao.getListByPage(pageSize, pageNo, new DalHints());
-			assertTrue(pojos.size() >= 10);
-		}catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
+#end
 }

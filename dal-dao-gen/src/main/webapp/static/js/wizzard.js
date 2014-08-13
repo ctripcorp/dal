@@ -343,10 +343,11 @@
                         type:"checkbox",
                         id: value['id']
                     }));
-                    var temp = "<a href='#' class='ctip' data-toggle='tooltip' data-placement='top'"+
+                    var temp = "<a href='#' class='ctip' data-toggle='tooltip' data-placement='top' style='float:right'"+
                         " title='' html='1' data-original-title='"+ value['method_description']+"'>"+
-                        value['method_declaration']+"</a>";
-                    $("#"+value['id']).wrap("<label class='popup_label'></label>").after($(temp));
+                        "<img style='height:20px;width:20px' class='helpicon' id='help' src='/static/images/help.jpg'></a>";
+                    $("#"+value['id']).wrap("<label class='popup_label'></label>").after(value['method_declaration']);
+                    $("#"+value['id']).parent().append($(temp));
                     $("#RetrieveMethodListDiv>label[class='popup_label']").wrapAll("<div class='row-fluid'></div>");
                     $("#RetrieveMethodListDiv a[data-toggle='tooltip']").tooltip('hide');
                 }

@@ -16,9 +16,14 @@ import java.util.Map;
 public class DalHints {
 	private Map<DalHintEnum, Object> hints = new LinkedHashMap<DalHintEnum, Object>();
 	
-	// TODO find a better name
 	public static DalHints createIfAbsent(DalHints hints) {
 		return hints == null ? new DalHints() : hints;
+	}
+	
+	public DalHints clone() {
+		DalHints newHints = new DalHints ();
+		newHints.hints.putAll(hints);
+		return newHints;
 	}
 	
 	public static DalHints copyOf(DalHints otherHints) {
@@ -127,6 +132,10 @@ public class DalHints {
 		Map<String, Object> shardColValues = (Map<String, Object>)get(DalHintEnum.shardColValues);
 		shardColValues.put(column, value);
 		return this;
+	}
+	
+	public DalHints setFields(Map<String, ?> fields) {
+		return set(DalHintEnum.fields, fields);
 	}
 	
 	public DalHints setParameters(StatementParameters parameters) {

@@ -11,13 +11,47 @@ import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 
+/**
+ * This strategy locate both db and table shard by mod shard value.
+ * The checking sequency is same for both DB and table shard:
+ * Shard id
+ * Shard value
+ * Shard column values
+ * Parameters
+ * Entity fields
+ * 
+ * @author jhhe
+ *
+ */
 public class ShardColModShardStrategy extends AbstractRWSeparationStrategy implements DalShardingStrategy {
+	/**
+	 * Key used to declared columns for locating DB shard.
+	 */
 	public static final String COLUMNS = "columns";
+
+	/**
+	 * Key used to declared mod for locating DB shard.
+	 */
 	public static final String MOD = "mod";
 	
+	/**
+	 * Key used to declared tables that qualified for table shard. That's not every table is sharded
+	 */
 	public static final String SHARDED_TABLES = "shardedTables";
+	
+	/**
+	 * Key used to declared columns for locating table shard.
+	 */
 	public static final String TABLE_COLUMNS = "tableColumns";
+	
+	/**
+	 * Key used to declared mod for locating table shard.
+	 */
 	public static final String TABLE_MOD = "tableMod";
+
+	/**
+	 * Key used to declared separater between raw tabel name and shard id
+	 */
 	public static final String SEPARATOR = "separator";
 
 	private String[] columns;
@@ -65,10 +99,6 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		return columns != null;
 	}
 
-	/**
-	 * This method will locate shard id by first referring shardValue, then parameter and finally shardCol defined in hints.
-	 * If shard can be decided by any of these values, it will return immediately with the found id.
-	 */
 	public String locateDbShard(DalConfigure configure, String logicDbName,
 			DalHints hints) {
 		if(!isShardingByDb())
@@ -84,15 +114,19 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 			return String.valueOf(id%mod);
 		}
 		
-		shard = locateByParameters(hints, columns, mod);
-		if(shard != null)
-			return shard;
-		
 		shard = locateByShardCol(hints, columns, mod);
 		if(shard != null)
 			return shard;
 		
-		throw new RuntimeException("Can not locate shard for " + logicDbName);
+		shard = locateByParameters(hints, columns, mod);
+		if(shard != null)
+			return shard;
+		
+		shard = locateByEntityFields(hints, columns, mod);
+		if(shard != null)
+			return buildShardStr(shard);
+		
+		return null;
 	}
 
 	@Override
@@ -116,15 +150,20 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 			return buildShardStr(String.valueOf(id%tableMod));
 		}
 		
-		shard = locateByParameters(hints, tableColumns, tableMod);
-		if(shard != null)
-			return buildShardStr(shard);
-		
 		shard = locateByShardCol(hints, tableColumns, tableMod);
 		if(shard != null)
 			return buildShardStr(shard);
 		
-		throw new RuntimeException("Can not locate table shard for " + logicDbName);
+		shard = locateByParameters(hints, tableColumns, tableMod);
+		if(shard != null)
+			return buildShardStr(shard);
+		
+		shard = locateByEntityFields(hints, tableColumns, tableMod);
+		if(shard != null)
+			return buildShardStr(shard);
+		
+		return null;
+//		throw new RuntimeException("Can not locate table shard for " + logicDbName);
 	}
 	
 	private String locateByParameters(DalHints hints, String[] columns, int mod) {
@@ -144,7 +183,21 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	}
 	
 	private String locateByShardCol(DalHints hints, String[] columns, int mod) {
-		Map<String, Integer> shardColValues = (Map<String, Integer>)hints.get(DalHintEnum.shardColValues);
+		Map<String, ?> shardColValues = (Map<String, ?>)hints.get(DalHintEnum.shardColValues);
+		
+		if(shardColValues != null) {
+			for(String column: columns) {
+				Integer id = getIntValue(shardColValues.get(column));
+				if(id != null) {
+					return String.valueOf(id%mod);
+				}
+			}
+		}
+		return null;
+	}
+	
+	private String locateByEntityFields(DalHints hints, String[] columns, int mod) {
+		Map<String, ?> shardColValues = (Map<String, ?>)hints.get(DalHintEnum.fields);
 		
 		if(shardColValues != null) {
 			for(String column: columns) {

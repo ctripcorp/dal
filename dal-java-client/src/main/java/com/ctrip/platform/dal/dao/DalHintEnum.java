@@ -25,6 +25,11 @@ public enum DalHintEnum {
 	shardColValues,
 	
 	/*
+	 * Entity columns to help sharding strategy locate shard
+	 */
+	fields,
+	
+	/*
 	 * StatementParameters to help sharding strategy locate shard
 	 */
 	parameters,

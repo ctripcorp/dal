@@ -773,8 +773,21 @@ public class DbUtils {
 				for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
 					CSharpParameterHost pHost = new CSharpParameterHost();
 					pHost.setName(rsMeta.getColumnLabel(i));
-					pHost.setDbType(DbType.getDbTypeFromJdbcType(rsMeta
-							.getColumnType(i)));
+					String typename = rsMeta.getColumnTypeName(i);
+					int dataType = rsMeta.getColumnType(i);
+					
+					DbType dbType;
+					if(null != typename && typename.equalsIgnoreCase("year"))
+						dbType = DbType.Int16;
+					else if(null != typename && typename.equalsIgnoreCase("sql_variant"))
+						dbType = DbType.Object;
+					else if(-155 == dataType){
+						dbType = DbType.DateTimeOffset;
+					}
+					else
+						dbType =DbType.getDbTypeFromJdbcType(dataType);
+					
+					pHost.setDbType(dbType);
 					pHost.setType(DbType.getCSharpType(pHost.getDbType()));
 					pHost.setIdentity(false);
 					pHost.setNullable(true);

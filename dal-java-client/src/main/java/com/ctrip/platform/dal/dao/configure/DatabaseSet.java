@@ -99,8 +99,8 @@ public class DatabaseSet {
 		return strategy != null && strategy.isShardingByDb();
 	}
 
-	public boolean isTableShardingSupported() {
-		return strategy != null && strategy.isShardingByTable();
+	public boolean isTableShardingSupported(String tableName) {
+		return strategy != null && strategy.isShardingByTable() && strategy.isShardingEnable(tableName);
 	}
 
 	public Map<String, DataBase> getDatabases() {

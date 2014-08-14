@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.helper;
+package com.ctrip.platform.dal.dao.helpers;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,6 +15,8 @@ import org.junit.Test;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalCustomRowMapper;
+import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.unitbase.Database;
 
 public class DalCustomRowMapperTest{

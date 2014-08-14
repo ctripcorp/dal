@@ -316,13 +316,33 @@
         window.sql_builder.getDatabaseCategory();
     };
 
+    var append_api = function(id,value){
+        $("#"+id).append($('<input>', {
+            type:"checkbox",
+            id: 'dal_api_'+value['id'],
+            checked:'checked'
+        }));
+        var temp = "<a href='#' class='ctip' data-toggle='tooltip' data-placement='top' style='float:right'"+
+            " title='' html='1' data-original-title='"+ value['method_description']+"'>"+
+            "<img style='height:20px;width:20px' class='helpicon' id='help' src='/static/images/help.jpg'></a>";
+        $("#dal_api_"+value['id']).wrap("<label class='popup_label'></label>").after(value['method_declaration']);
+        $("#dal_api_"+value['id']).parent().append($(temp));
+        $("#"+id+" > label[class='popup_label']").wrapAll("<div class='row-fluid'></div>");
+        $("#"+id+" a[data-toggle='tooltip']").tooltip('hide');
+    };
+
     var step2_1 = function(record,current){
+        if($('#table_list').multipleSelect('getSelects').length<1){
+            $.showMsg("error_msg","请选择表!");
+            return;
+        }
         cblock($("body"));
         $("#next_step").attr("disabled","true");
         $("#next_step").text("正在加载...");
         $("#next_step").removeClass("btn-primary");
-        $.get(sprintf("/rest/task/table/apiList?db_name=%s&rand=%s",
-            $("#databases").val(), Math.random())).done(function (retValue) {
+        var data = undefined;
+        $.get(sprintf("/rest/task/table/apiList?db_name=%s&sql_style=%s&rand=%s",
+            $("#databases").val(), $("#sql_style").val(), Math.random())).done(function (retValue) {
             if(retValue.code!='OK'){
                 $("#error_msg").text(retValue.info);
                 $("#next_step").removeAttr("disabled");
@@ -331,36 +351,38 @@
                 $("body").unblock();
                 return;
             }
-            var data = $.parseJSON(retValue.info);
-            var selectList = [];
-            var insertList = [];
-            var updateList = [];
-            var deleteList = [];
+            data = $.parseJSON(retValue.info);
             $("#RetrieveMethodListDiv").empty();
+            $("#UpdateMethodListDiv").empty();
+            $("#DeleteMethodListDiv").empty();
+            $("#CreateMethodListDiv").empty();
             $.each(data, function (index, value) {
                 if(value['crud_type']=='select'){
-                    $("#RetrieveMethodListDiv").append($('<input>', {
-                        type:"checkbox",
-                        id: value['id']
-                    }));
-                    var temp = "<a href='#' class='ctip' data-toggle='tooltip' data-placement='top' style='float:right'"+
-                        " title='' html='1' data-original-title='"+ value['method_description']+"'>"+
-                        "<img style='height:20px;width:20px' class='helpicon' id='help' src='/static/images/help.jpg'></a>";
-                    $("#"+value['id']).wrap("<label class='popup_label'></label>").after(value['method_declaration']);
-                    $("#"+value['id']).parent().append($(temp));
-                    $("#RetrieveMethodListDiv>label[class='popup_label']").wrapAll("<div class='row-fluid'></div>");
-                    $("#RetrieveMethodListDiv a[data-toggle='tooltip']").tooltip('hide');
+                    append_api("RetrieveMethodListDiv",value);
+                }else if(value['crud_type']=='update'){
+                    append_api("UpdateMethodListDiv",value);
+                }else if(value['crud_type']=='delete'){
+                    append_api("DeleteMethodListDiv",value);
+                }else if(value['crud_type']=='insert'){
+                    append_api("CreateMethodListDiv",value);
                 }
             });
 
-            $(".step2-1-2").append(selectList);
+            if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "table_view_sp"
+                && record['api_list']!='all' && record['api_list']!='' && record['api_list']!=undefined
+                && data!=undefined) {
 
-            if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "table_view_sp") {
-
+                var tempArr = record['api_list'].split(',');
+                $.each(data, function (index, value) {
+                    if($.inArray('dal_api_'+value['id'],tempArr)==-1){
+                        $("#dal_api_"+value['id']).prop("checked", false);
+                    }
+                });
             }
 
             current.hide();
 
+            $.showMsg("error_msg","");
             $(".step2-1-2").show();
             $("#next_step").removeAttr("disabled");
             $("#next_step").addClass("btn-primary");

@@ -33,7 +33,7 @@ public class DaoByTableViewSp {
 			return this.jdbcTemplate
 					.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
 							+ "cud_by_sp,pagination,generated,version,update_user_no,update_time,"
-							+ "comment,sql_style from task_table where project_id=?",
+							+ "comment,sql_style,api_list from task_table where project_id=?",
 							new Object[] { iD },
 							new RowMapper<GenTaskByTableViewSp>() {
 								public GenTaskByTableViewSp mapRow(
@@ -54,7 +54,8 @@ public class DaoByTableViewSp {
 
 		this.jdbcTemplate
 				.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,"
-						+ "pagination,generated,version,update_user_no,update_time,comment,sql_style from task_table where project_id=?",
+						+ "pagination,generated,version,update_user_no,update_time,comment,"
+						+ "sql_style,api_list from task_table where project_id=?",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -78,7 +79,7 @@ public class DaoByTableViewSp {
 		this.jdbcTemplate
 				.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
 						+ "cud_by_sp,pagination,generated,version,update_user_no,update_time,"
-						+ "comment,sql_style from task_table where project_id=? and generated=false",
+						+ "comment,sql_style,api_list from task_table where project_id=? and generated=false",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
@@ -100,7 +101,7 @@ public class DaoByTableViewSp {
 			return this.jdbcTemplate
 					.update("insert into task_table ( project_id,  db_name,table_names,view_names,sp_names,"
 							+ "prefix,suffix,cud_by_sp,pagination,generated,version,update_user_no,update_time,"
-							+ "comment,sql_style) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+							+ "comment,sql_style,api_list) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 							task.getProject_id(), task.getDatabaseSetName(),
 							task.getTable_names(), task.getView_names(),
 							task.getSp_names(), task.getPrefix(),
@@ -110,7 +111,8 @@ public class DaoByTableViewSp {
 							task.getUpdate_user_no(),
 							task.getUpdate_time(),
 							task.getComment(),
-							task.getSql_style());
+							task.getSql_style(),
+							task.getApi_list());
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
 			return -1;
@@ -138,7 +140,8 @@ public class DaoByTableViewSp {
 			return this.jdbcTemplate
 					.update("update task_table set project_id=?,db_name=?,table_names=?,view_names=?,sp_names=?,"
 							+ "prefix=?,suffix=?,cud_by_sp=?,pagination=?,generated=?,version=version+1,"
-							+ "update_user_no=?,update_time=?,comment=?,sql_style=? where id=? and version=?",
+							+ "update_user_no=?,update_time=?,comment=?,sql_style=?,"
+							+ "api_list=? where id=? and version=?",
 
 							task.getProject_id(), task.getDatabaseSetName(),
 							task.getTable_names(), task.getView_names(),
@@ -149,7 +152,9 @@ public class DaoByTableViewSp {
 							task.getUpdate_time(),
 							task.getComment(),
 							task.getSql_style(),
-							task.getId(), task.getVersion());
+							task.getApi_list(),
+							task.getId(), 
+							task.getVersion());
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
 			return -1;
@@ -158,8 +163,7 @@ public class DaoByTableViewSp {
 
 	public int deleteTask(GenTaskByTableViewSp task) {
 		try {
-			return this.jdbcTemplate.update(
-					"delete from task_table where id=?", task.getId());
+			return this.jdbcTemplate.update("delete from task_table where id=?", task.getId());
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
 			return -1;
@@ -167,13 +171,11 @@ public class DaoByTableViewSp {
 	}
 
 	public int deleteByProjectId(int id) {
-		return this.jdbcTemplate.update(
-				"delete from task_table where project_id=?", id);
+		return this.jdbcTemplate.update("delete from task_table where project_id=?", id);
 	}
 
 	public int deleteByServerId(int id) {
-		return this.jdbcTemplate.update(
-				"delete from task_table where server_id=?", id);
+		return this.jdbcTemplate.update("delete from task_table where server_id=?", id);
 	}
 
 }

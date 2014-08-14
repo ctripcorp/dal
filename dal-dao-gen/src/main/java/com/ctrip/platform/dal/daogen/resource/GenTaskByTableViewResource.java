@@ -18,14 +18,16 @@ import javax.ws.rs.core.MediaType;
 
 import org.jasig.cas.client.util.AssertionHolder;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.dao.DalApiDao;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalApi;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -64,7 +66,8 @@ public class GenTaskByTableViewResource {
 			@FormParam("version") int version,
 			@FormParam("action") String action,
 			@FormParam("comment") String comment,
-			@FormParam("sql_style") String sql_style// C#风格或者Java风格
+			@FormParam("sql_style") String sql_style,// C#风格或者Java风格
+			@FormParam("api_list") String api_list
 			) {
 		GenTaskByTableViewSp task = new GenTaskByTableViewSp();
 
@@ -91,6 +94,7 @@ public class GenTaskByTableViewResource {
 			task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
 			task.setComment(comment);
 			task.setSql_style(sql_style);
+			task.setApi_list(api_list);
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);
@@ -113,21 +117,38 @@ public class GenTaskByTableViewResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("apiList")
-	public Status getTableSPNames(@QueryParam("db_name") String setName) {
+	public Status getTableSPNames(@QueryParam("db_name") String db_set_name,
+			@QueryParam("table_names") String table_names,
+			@QueryParam("sql_style") String sql_style// C#风格或者Java风格
+			) {
 		Status status = Status.OK;
 		
-		List<DalApi> apis = dalApiDao.getAllDalApi();
-		
-		java.util.Collections.sort(apis, new Comparator<DalApi>(){
-			@Override
-			public int compare(DalApi o1, DalApi o2) {
-				return o1.getMethod_declaration().compareToIgnoreCase(o2.getMethod_declaration());
-			}
-		});
-		
 		try {
+			List<DalApi> apis = null;
+			if("csharp".equalsIgnoreCase(sql_style)){
+				apis = dalApiDao.getDalApiByLanguage("csharp");
+			}else{
+				DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
+
+				DatabaseCategory dbCategory = DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString());
+				
+				if(dbCategory == DatabaseCategory.MySql){
+					apis = dalApiDao.getDalApiByLanguageAndDbtype("java", "MySQL");
+				}else{
+					apis = dalApiDao.getDalApiByLanguageAndDbtype("java", "SQLServer");
+				}
+				
+			}
+			
+			java.util.Collections.sort(apis, new Comparator<DalApi>(){
+				@Override
+				public int compare(DalApi o1, DalApi o2) {
+					return o1.getMethod_declaration().compareToIgnoreCase(o2.getMethod_declaration());
+				}
+			});
+			
 			status.setInfo(mapper.writeValueAsString(apis));
-		} catch (JsonProcessingException e) {
+		} catch (Exception e) {
 			status = Status.ERROR;
 			status.setInfo(e.getMessage());
 			return status;

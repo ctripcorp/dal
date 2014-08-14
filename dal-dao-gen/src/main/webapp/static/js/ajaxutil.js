@@ -20,7 +20,12 @@
         postData["suffix"] = $("#suffix").val();
         postData["cud_by_sp"] = $("#cud_by_sp").is(":checked");
         postData["pagination"] = $("#pagination").is(":checked");
-        $.post("/rest/task/table", postData,function (data) {
+        var api_list = new Array();
+        $.each($(".step2-1-2 input:checked"), function(index,value){
+            api_list.push($(value).attr("id"));
+        });
+        postData["api_list"] = api_list.join(",");
+        $.post("/rest/task/table", postData, function (data) {
             $("#page1").modal('hide');
             w2ui["grid_toolbar"].click('refreshDAO', null);
             if ($("#gen_on_save").is(":checked")) {

@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
 
+import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -39,18 +40,21 @@ public abstract class ConnectionAction<T> {
 	
 	void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
 		this.operation = operation;
-		this.sql = sql;
+		this.sql = this.wrapAPPID(sql);
 		this.parameters = parameters;
 	}
 
 	void populate(String[] sqls) {
 		this.operation = DalEventEnum.BATCH_UPDATE;
 		this.sqls = sqls;
+		for(int i = 0; i < this.sqls.length; i++){
+			this.sqls[i] = this.wrapAPPID(this.sqls[i]);
+		}
 	}
 	
 	void populate(String sql, StatementParameters[] parametersList) {
 		this.operation = DalEventEnum.BATCH_UPDATE_PARAM;
-		this.sql = sql;
+		this.sql = this.wrapAPPID(sql);
 		this.parametersList = parametersList;
 	}
 	
@@ -205,5 +209,9 @@ public abstract class ConnectionAction<T> {
 			throw e instanceof SQLException ? (SQLException)e : new SQLException(e);
 	}
 
+	private String wrapAPPID(String sql){
+		return "/*" + LogConfig.getAppID() + "*/" + sql;
+	}
+	
 	public abstract T execute() throws Exception;
 }

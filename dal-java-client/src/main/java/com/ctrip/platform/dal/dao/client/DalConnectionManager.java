@@ -62,6 +62,8 @@ public class DalConnectionManager {
 			String shard = hints.getShardId();
 			if(shard == null)
 				shard = strategy.locateDbShard(config, logicDbName, hints);
+			if(shard == null)
+				throw new SQLException("Can not locate shard for " + logicDbName);
 			dbSet.validate(shard);
 			
 			allInOneKey = dbSet.getRandomRealDbName(shard, isMaster, isSelect);

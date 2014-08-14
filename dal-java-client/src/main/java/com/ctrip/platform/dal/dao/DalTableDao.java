@@ -176,12 +176,12 @@ public final class DalTableDao<T> {
 	public List<T> queryLike(T sample, DalHints hints) throws SQLException {
 		DalWatcher.begin();
 		StatementParameters parameters = new StatementParameters();
-		Map<String, ?> queryCriteria = filterNullFileds(parser
-				.getFields(sample));
+		Map<String, ?> fields = parser.getFields(sample);
+		Map<String, ?> queryCriteria = filterNullFileds(fields);
 		addParameters(parameters, queryCriteria);
 		String whereClause = buildWhereClause(queryCriteria);
 
-		return query(whereClause, parameters, hints);
+		return query(whereClause, parameters, hints.clone().setFields(fields));
 	}
 
 	/**

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -25,16 +24,8 @@ public class DalShardingHelper {
 		return getDatabaseSet(logicDbName).isShardingSupported();
 	}
 	
-	public static <T> String locateShardId(String logicDbName, DalParser<T> parser, T pojo) throws SQLException {
-		return locateShardId(logicDbName, new DalHints().set(DalHintEnum.shardColValues, parser.getFields(pojo)));
-	}
-	
-	public static <T> String locateShardId(String logicDbName, DalParser<T> parser, StatementParameters parameters) throws SQLException {
-		return locateShardId(logicDbName, new DalHints().set(DalHintEnum.parameters, parameters));
-	}
-	
 	public static boolean isTableShardingEnabled(String logicDbName, String tableName) {
-		return getDatabaseSet(logicDbName).isTableShardingSupported();
+		return getDatabaseSet(logicDbName).isTableShardingSupported(tableName);
 	}
 	
 	private static DatabaseSet getDatabaseSet(String logicDbName) {
@@ -74,18 +65,7 @@ public class DalShardingHelper {
 		if(shard != null)
 			return shard;
 		
-		DalHints tmpHints = null;
-		if(parameters != null) {
-			shard = strategy.locateTableShard(config, logicDbName, tmpHints = new DalHints().setParameters(parameters));
-			if(shard != null)
-				return shard;
-		}
-		
-		if(fields == null)
-			return null;
-		// dbSet.validate(shard);
-		// We cannot validate the id, since it is inside the db
-		return strategy.locateTableShard(config, logicDbName, DalHints.createIfAbsent(tmpHints).setShardColValues(fields));
+		return strategy.locateTableShard(config, logicDbName, new DalHints().setParameters(parameters).setFields(fields));
 	}
 	
 	/**
@@ -106,8 +86,7 @@ public class DalShardingHelper {
 		DalHints tmpHints = new DalHints();
 		for(T pojo:pojos) {
 			Map<String, ?> fields = parser.getFields(pojo);
-			tmpHints.set(DalHintEnum.shardColValues, fields);
-			String shardId = strategy.locateDbShard(config, logicDbName, tmpHints);
+			String shardId = strategy.locateDbShard(config, logicDbName, tmpHints.setFields(fields));
 			dbSet.validate(shardId);
 			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
 			if(pojosInShard == null) {
@@ -136,8 +115,7 @@ public class DalShardingHelper {
 		
 		DalHints tmpHints = new DalHints();
 		for(Map<String, ?> fields: pojos) {
-			tmpHints.set(DalHintEnum.shardColValues, fields);
-			String shardId = strategy.locateDbShard(config, logicDbName, tmpHints);
+			String shardId = strategy.locateDbShard(config, logicDbName, tmpHints.setFields(fields));
 			dbSet.validate(shardId);
 			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
 			if(pojosInShard == null) {
@@ -176,9 +154,7 @@ public class DalShardingHelper {
 		if(DalTransactionManager.isInTransaction())
 			return;
 		
-		String shard = locateShardId(logicDbName, hints);
-		if(shard == null)
-			throw new SQLException(message);
+		locateShardId(logicDbName, hints);
 	}
 	
 	public static void crossShardOperationAllowed(String logicDbName, DalHints hints, String operation) throws SQLException {
@@ -193,10 +169,11 @@ public class DalShardingHelper {
 		try {
 			shard = locateShardId(logicDbName, hints);
 		} catch (Exception e) {
+			// No shard can be located, so meet the criteria
 			return;
 		}
-		if(shard != null)
-			throw new SQLException(operation + " requires to be executed only when shard id can not be located in hints. sharid:" + shard);
+
+		throw new SQLException(operation + " requires to be executed only when shard id can not be located in hints. sharid:" + shard);
 	}
 	
 //	public static int[] executeByDbShard(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask task) throws SQLException {

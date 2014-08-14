@@ -163,7 +163,6 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 			return buildShardStr(shard);
 		
 		return null;
-//		throw new RuntimeException("Can not locate table shard for " + logicDbName);
 	}
 	
 	private String locateByParameters(DalHints hints, String[] columns, int mod) {

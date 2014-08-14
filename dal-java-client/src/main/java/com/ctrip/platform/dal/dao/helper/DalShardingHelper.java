@@ -65,7 +65,12 @@ public class DalShardingHelper {
 		if(shard != null)
 			return shard;
 		
-		return strategy.locateTableShard(config, logicDbName, new DalHints().setParameters(parameters).setFields(fields));
+		shard = strategy.locateTableShard(config, logicDbName, new DalHints().setParameters(parameters).setFields(fields));
+		if(shard != null)
+			return shard;
+
+		throw new SQLException("Can not locate table shard for " + logicDbName);
+
 	}
 	
 	/**

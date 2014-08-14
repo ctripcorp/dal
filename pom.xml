@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ctrip.platform</groupId>
 	<artifactId>dal-all</artifactId>
-	<version>1.1.1</version>
+	<version>1.1.2</version>
 	<packaging>pom</packaging>
 	<modules>
 		<module>dal-java-client</module>
@@ -120,6 +120,7 @@
 				<artifactId>maven-source-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>attach-sources</id>
 						<phase>deploy</phase>
 						<goals>
 							<goal>jar</goal>
@@ -139,6 +140,18 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>  
+                <artifactId>maven-deploy-plugin</artifactId>  
+                <executions>  
+                    <execution>  
+                        <id>deploy</id>  
+                        <phase>deploy</phase>  
+                        <goals>  
+                            <goal>deploy</goal>  
+                        </goals>  
+                    </execution>  
+                </executions>  
+            </plugin>
 			<!-- <plugin> mvn compile assembly:single will produce a single jar <artifactId>maven-assembly-plugin</artifactId> 
 				<configuration> <archive> <manifest> <mainClass>com.ctrip.sysdev.das.DalServer</mainClass> 
 				</manifest> </archive> <descriptorRefs> <descriptorRef>jar-with-dependencies</descriptorRef> 

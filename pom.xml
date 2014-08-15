@@ -103,7 +103,7 @@
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
-					<encoding>UTF-8</encoding>
+					<encoding>${file_encoding}</encoding>
 					<showDeprecation>true</showDeprecation>
 					<showWarnings>true</showWarnings>
 				</configuration>
@@ -118,10 +118,13 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
+				<configuration>
+					<encoding>${file_encoding}</encoding>
+				</configuration>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
-						<phase>deploy</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>jar</goal>
 						</goals>
@@ -129,29 +132,21 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<encoding>${file_encoding}</encoding>
+				</configuration>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
-						<phase>deploy</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>jar</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>  
-                <artifactId>maven-deploy-plugin</artifactId>  
-                <executions>  
-                    <execution>  
-                        <id>deploy</id>  
-                        <phase>deploy</phase>  
-                        <goals>  
-                            <goal>deploy</goal>  
-                        </goals>  
-                    </execution>  
-                </executions>  
-            </plugin>
 			<!-- <plugin> mvn compile assembly:single will produce a single jar <artifactId>maven-assembly-plugin</artifactId> 
 				<configuration> <archive> <manifest> <mainClass>com.ctrip.sysdev.das.DalServer</mainClass> 
 				</manifest> </archive> <descriptorRefs> <descriptorRef>jar-with-dependencies</descriptorRef> 
@@ -161,12 +156,12 @@
 	<distributionManagement>
 		<repository>
 			<uniqueVersion>false</uniqueVersion>
-			<id>nexus</id>
+			<id>nexus-releases</id>
 			<url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/sysdevrelease/</url>
 		</repository>
 		<snapshotRepository>
 			<uniqueVersion>false</uniqueVersion>
-			<id>nexus</id>
+			<id>nexus-snapshots</id>
 			<url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/sysdevsnapshot/</url>
 		</snapshotRepository>
 	</distributionManagement>

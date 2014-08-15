@@ -33,7 +33,7 @@ namespace ${host.getNameSpace()}.Dao
 
 #foreach ($p in $host.getSpParams())
 #if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
-                ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalizeFully($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
+                ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalize($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
 #end
 #end
                 return (int)parameters["@return"].Value;

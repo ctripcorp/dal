@@ -373,6 +373,7 @@ public class DbUtils {
 					DbType dbType = DbType.getDbTypeFromJdbcType(spParams
 							.getInt("DATA_TYPE"));
 					host.setDbType(dbType);
+					host.setNullable(spParams.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
 
 					if (paramMode == DatabaseMetaData.procedureColumnIn) {
 						host.setDirection(ParameterDirection.Input);

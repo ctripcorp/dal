@@ -27,8 +27,7 @@ public class ${host.getPojoClassName()}Dao {
 	/**
 	 * Initialize the instance of Hotel2GenDao
 	 */
-	public ${host.getPojoClassName()}Dao()
-	{
+	public ${host.getPojoClassName()}Dao() {
 		this.client = DalClientFactory.getClient(DATA_BASE);
 		this.mapper = new ${host.getPojoClassName()}RowMapper();
 		this.extractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(this.mapper);
@@ -40,8 +39,7 @@ public class ${host.getPojoClassName()}Dao {
 	  *@return 
 	  *     ${host.getPojoClassName()} collection
 	**/
-	public List<${host.getPojoClassName()}> getAll(DalHints hints) throws SQLException
-	{
+	public List<${host.getPojoClassName()}> getAll(DalHints hints) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 		List<${host.getPojoClassName()}> result = null;
@@ -54,16 +52,14 @@ public class ${host.getPojoClassName()}Dao {
 	  *@return 
 	  *     the ${host.getPojoClassName()} records count
 	**/
-	public int Count(DalHints hints) throws SQLException
-	{
+	public int count(DalHints hints) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);	
 		Number result = (Number)this.client.query(COUNT_SQL_PATTERN, parameters, hints, scalarExtractor);
 		return result.intValue();
 	}
 	
-	public List<${host.getPojoClassName()}> getListByPage(int pagesize, int pageNo,DalHints hints) throws SQLException
-	{
+	public List<${host.getPojoClassName()}> getListByPage(int pagesize, int pageNo,DalHints hints) throws SQLException {
 		if(pageNo < 1 || pagesize < 1) 
 			throw new SQLException("Illigal pagesize or pageNo, pls check");
 		

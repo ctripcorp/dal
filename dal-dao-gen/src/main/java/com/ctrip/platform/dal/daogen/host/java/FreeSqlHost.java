@@ -15,54 +15,6 @@ public class FreeSqlHost {
 	private List<JavaParameterHost> fields;
 	private DatabaseCategory databaseCategory;
 	
-	public List<JavaParameterHost> getFields() {
-		return fields;
-	}
-
-	public void setFields(List<JavaParameterHost> fields) {
-		this.fields = fields;
-	}
-
-	public String getPackageName() {
-		return packageName;
-	}
-
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
-	}
-
-	public String getDbName() {
-		return dbName;
-	}
-
-	public void setDbName(String dbName) {
-		this.dbName = dbName;
-	}
-
-	public String getClassName() {
-		return className;
-	}
-
-	public void setClassName(String className) {
-		this.className = className;
-	}
-
-	public List<JavaMethodHost> getMethods() {
-		return methods;
-	}
-
-	public void setMethods(List<JavaMethodHost> methods) {
-		this.methods = methods;
-	}
-	
-	public DatabaseCategory getDatabaseCategory() {
-		return databaseCategory;
-	}
-
-	public void setDatabaseCategory(DatabaseCategory databaseCategory) {
-		this.databaseCategory = databaseCategory;
-	}
-
 	public Set<String> getDaoImports() {
 		Set<String> imports = new TreeSet<String>();
 		imports.add("com.ctrip.platform.dal.dao.*");
@@ -135,4 +87,53 @@ public class FreeSqlHost {
 		}
 		return hasUpdate;
 	}
+	
+	public List<JavaParameterHost> getFields() {
+		return fields;
+	}
+
+	public void setFields(List<JavaParameterHost> fields) {
+		this.fields = fields;
+	}
+
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+
+	public String getDbName() {
+		return dbName;
+	}
+
+	public void setDbName(String dbName) {
+		this.dbName = dbName;
+	}
+
+	public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
+	}
+
+	public List<JavaMethodHost> getMethods() {
+		return methods;
+	}
+
+	public void setMethods(List<JavaMethodHost> methods) {
+		this.methods = methods;
+	}
+	
+	public DatabaseCategory getDatabaseCategory() {
+		return databaseCategory;
+	}
+
+	public void setDatabaseCategory(DatabaseCategory databaseCategory) {
+		this.databaseCategory = databaseCategory;
+	}
+
 }

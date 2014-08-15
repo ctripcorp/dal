@@ -13,9 +13,8 @@ public class SpDbHost {
 	private String packageName;
 	private String dbName;
 	private HashMap<String, SpHost> spHosts;
-	
-	public SpDbHost(String dbName, String packageName) throws Exception
-	{
+
+	public SpDbHost(String dbName, String packageName) throws Exception {
 		this.dbName = dbName;
 		this.packageName = packageName;
 		this.databaseCategory = DatabaseCategory.SqlServer;
@@ -25,60 +24,52 @@ public class SpDbHost {
 		}
 		this.spHosts = new HashMap<String, SpHost>();
 	}
-	
-	public void addSpHost(SpHost host)
-	{
-		if(!this.spHosts.containsKey(host.getSpName()))
+
+	public void addSpHost(SpHost host) {
+		if (!this.spHosts.containsKey(host.getSpName()))
 			this.spHosts.put(host.getSpName(), host);
 	}
-	
-	public DatabaseCategory getDatabaseCategory()
-	{
+
+	public DatabaseCategory getDatabaseCategory() {
 		return this.databaseCategory;
 	}
-	
-	public String getPackageName()
-	{
+
+	public String getPackageName() {
 		return this.packageName;
 	}
-	
-	public String getDbName()
-	{
+
+	public String getDbName() {
 		return this.dbName;
 	}
-	
-	public Collection<SpHost> getSpHosts()
-	{
+
+	public Collection<SpHost> getSpHosts() {
 		return this.spHosts.values();
 	}
-	
-	public Set<String> getDaoImports()
-	{
+
+	public Set<String> getDaoImports() {
 		Set<String> imports = new TreeSet<String>();
 		imports.add("com.ctrip.platform.dal.dao.*");
 		imports.add("com.ctrip.platform.dal.dao.helper.*");
 		imports.add(java.sql.SQLException.class.getName());
 		imports.add(java.sql.Types.class.getName());
 		imports.add(java.util.Map.class.getName());
-		
+
 		return imports;
 	}
-	
-	public Set<String> getTestImports()
-	{
-		Set<String> imports = new TreeSet<String>();		
+
+	public Set<String> getTestImports() {
+		Set<String> imports = new TreeSet<String>();
 		imports.add(java.util.Map.class.getName());
-		
+
 		return imports;
 	}
-	
-	public Set<String> getPojoImports()
-	{
+
+	public Set<String> getPojoImports() {
 		Set<String> imports = new TreeSet<String>();
 		for (SpHost host : this.spHosts.values()) {
 			imports.addAll(host.getPojoImports());
 		}
-		
+
 		return imports;
 	}
 }

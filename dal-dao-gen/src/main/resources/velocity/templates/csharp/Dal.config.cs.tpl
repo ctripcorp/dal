@@ -1,7 +1,6 @@
 <dal name="$host.getName()">
 	<databaseSets>
 #foreach($databaseSet in $host.getDatabaseSet())
-		
 #if($databaseSet.hasShardingStrategy())
 		<databaseSet name="$databaseSet.getName()" provider="$databaseSet.getProvider()"
              shardingStrategy="$databaseSet.getShardingStrategy()">

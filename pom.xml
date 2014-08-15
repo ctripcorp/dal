@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ctrip.platform</groupId>
 	<artifactId>dal-all</artifactId>
-	<version>1.1.1</version>
+	<version>1.1.2</version>
 	<packaging>pom</packaging>
 	<modules>
 		<module>dal-java-client</module>
@@ -103,7 +103,7 @@
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
-					<encoding>UTF-8</encoding>
+					<encoding>${file_encoding}</encoding>
 					<showDeprecation>true</showDeprecation>
 					<showWarnings>true</showWarnings>
 				</configuration>
@@ -118,9 +118,13 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
+				<configuration>
+					<encoding>${file_encoding}</encoding>
+				</configuration>
 				<executions>
 					<execution>
-						<phase>deploy</phase>
+						<id>attach-sources</id>
+						<phase>install</phase>
 						<goals>
 							<goal>jar</goal>
 						</goals>
@@ -128,11 +132,15 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<encoding>${file_encoding}</encoding>
+				</configuration>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
-						<phase>deploy</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>jar</goal>
 						</goals>
@@ -148,12 +156,12 @@
 	<distributionManagement>
 		<repository>
 			<uniqueVersion>false</uniqueVersion>
-			<id>nexus</id>
+			<id>nexus-releases</id>
 			<url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/sysdevrelease/</url>
 		</repository>
 		<snapshotRepository>
 			<uniqueVersion>false</uniqueVersion>
-			<id>nexus</id>
+			<id>nexus-snapshots</id>
 			<url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/sysdevsnapshot/</url>
 		</snapshotRepository>
 	</distributionManagement>

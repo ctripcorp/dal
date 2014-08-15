@@ -12,7 +12,7 @@ namespace ${host.getNameSpace()}.Dao
 {
     public partial class ${host.getClassName()}Dao
     {
-        readonly BaseDao baseDao = BaseDaoFactory.CreateBaseDao("");
+        readonly BaseDao baseDao = BaseDaoFactory.CreateBaseDao("${host.getDbSetName()}");
 
         /// <summary>
         ///  执行SP${host.getClassName()}

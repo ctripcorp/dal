@@ -384,6 +384,7 @@ public class DbUtils {
 
 					host.setName(spParams.getString("COLUMN_NAME"));
 					host.setType(DbType.getCSharpType(host.getDbType()));
+					host.setNullable(spParams.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
 
 					if (host.getType() == null) {
 						host.setType("string");

@@ -29,7 +29,6 @@ public class ${host.getPojoClassName()}Dao {
 #end
 #if($host.getSpInsert().isExist() || $host.getSpDelete().isExist() ||$host.getSpUpdate().isExist())
 	private static final String RET_CODE = "retcode";
-	private static final String UPDATE_COUNT = "update_count";
 #end
 #end
 	
@@ -482,10 +481,7 @@ public class ${host.getPojoClassName()}Dao {
 	private String prepareSpCall(String SpName, StatementParameters parameters, Map<String, ?> fields) {
 		client.addParametersByName(parameters, fields);
 		String callSql = client.buildCallSql(SpName, fields.size());
-#if($host.isSpa())
 		parameters.setResultsParameter(RET_CODE, extractor);
-#end
-		parameters.setResultsParameter(UPDATE_COUNT);
 		return callSql;
 	}
 	

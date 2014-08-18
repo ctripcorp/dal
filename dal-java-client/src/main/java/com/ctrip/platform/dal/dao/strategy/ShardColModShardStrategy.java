@@ -49,9 +49,6 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	 */
 	public static final String TABLE_MOD = "tableMod";
 
-	/**
-	 * Key used to declared separater between raw tabel name and shard id
-	 */
 	public static final String SEPARATOR = "separator";
 
 	private String[] columns;
@@ -124,7 +121,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		shard = locateByEntityFields(hints, columns, mod);
 		if(shard != null)
-			return buildShardStr(shard);
+			return shard;
 		
 		return null;
 	}
@@ -142,25 +139,25 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		String shard = hints.getTableShardId();
 		if(shard != null)
-			return buildShardStr(shard);
+			return shard;
 		
 		// Shard value take the highest priority
 		if(hints.is(DalHintEnum.tableShardValue)) {
 			Integer id = getIntValue(hints.get(DalHintEnum.tableShardValue));
-			return buildShardStr(String.valueOf(id%tableMod));
+			return String.valueOf(id%tableMod);
 		}
 		
 		shard = locateByShardCol(hints, tableColumns, tableMod);
 		if(shard != null)
-			return buildShardStr(shard);
+			return shard;
 		
 		shard = locateByParameters(hints, tableColumns, tableMod);
 		if(shard != null)
-			return buildShardStr(shard);
+			return shard;
 		
 		shard = locateByEntityFields(hints, tableColumns, tableMod);
 		if(shard != null)
-			return buildShardStr(shard);
+			return shard;
 		
 		return null;
 	}
@@ -209,10 +206,6 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		return null;
 	}
 	
-	private String buildShardStr(String shardId) {
-		return separator == null? shardId: separator + shardId;
-	}
-	
 	private Integer getIntValue(Object value) {
 		if(value == null)
 			return null;
@@ -232,5 +225,10 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	@Override
 	public boolean isShardingEnable(String tableName) {
 		return shardedTables.contains(tableName);
+	}
+
+	@Override
+	public String getTableShardSeparator() {
+		return separator;
 	}
 }

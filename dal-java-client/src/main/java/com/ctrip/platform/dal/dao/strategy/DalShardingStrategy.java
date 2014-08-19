@@ -7,6 +7,11 @@ import com.ctrip.platform.dal.dao.configure.DalConfigure;
 
 public interface DalShardingStrategy {
 	/**
+	 * Key name of table shard separator in sharding strategy config
+	 */
+	public static final String SEPARATOR = "separator";
+	
+	/**
 	 * Initialize strategy
 	 * @param settings
 	 */
@@ -59,5 +64,11 @@ public interface DalShardingStrategy {
 	 * @return
 	 */
 	String locateTableShard(DalConfigure configure, String logicDbName, DalHints hints);
+	
+	/**
+	 * Get the separator between raw table name and table shard id
+	 * @return
+	 */
+	String getTableShardSeparator();
 
 }

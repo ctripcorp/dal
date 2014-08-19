@@ -15,6 +15,7 @@ public class SimpleShardHintStrategy extends AbstractRWSeparationStrategy implem
 
 	private boolean shardByDb;
 	private boolean shardByTable;
+	private String separator;
 	private Set<String> shardedTables = new HashSet<String>();
 	
 	@Override
@@ -31,6 +32,10 @@ public class SimpleShardHintStrategy extends AbstractRWSeparationStrategy implem
 			String[] tables = settings.get(SHARDED_TABLES).split(",");
 			for(String table: tables)
 				shardedTables.add(table);
+		}
+		
+		if(settings.containsKey(SEPARATOR)) {
+			separator = settings.get(SEPARATOR);
 		}
 	}
 
@@ -59,5 +64,10 @@ public class SimpleShardHintStrategy extends AbstractRWSeparationStrategy implem
 	@Override
 	public boolean isShardingEnable(String tableName) {
 		return shardedTables.contains(tableName);
+	}
+
+	@Override
+	public String getTableShardSeparator() {
+		return separator;
 	}
 }

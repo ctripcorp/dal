@@ -99,4 +99,11 @@ public class SmartReadRouteStrategy implements DalShardingStrategy {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+
+	@Override
+	public String getTableShardSeparator() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

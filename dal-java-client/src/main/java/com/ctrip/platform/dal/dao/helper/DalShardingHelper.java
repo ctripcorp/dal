@@ -18,14 +18,17 @@ import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 
 public class DalShardingHelper {
-	private static final String EMPTY = "";
-	
 	public static boolean isShardingEnabled(String logicDbName) {
 		return getDatabaseSet(logicDbName).isShardingSupported();
 	}
 	
 	public static boolean isTableShardingEnabled(String logicDbName, String tableName) {
 		return getDatabaseSet(logicDbName).isTableShardingSupported(tableName);
+	}
+	
+	public static String buildShardStr(String logicDbName, String shardId) throws SQLException {
+		String separator = getDatabaseSet(logicDbName).getStrategy().getTableShardSeparator();
+		return separator == null? shardId: separator + shardId;
 	}
 	
 	private static DatabaseSet getDatabaseSet(String logicDbName) {
@@ -120,8 +123,7 @@ public class DalShardingHelper {
 		
 		DalHints tmpHints = new DalHints();
 		for(Map<String, ?> fields: pojos) {
-			String shardId = strategy.locateDbShard(config, logicDbName, tmpHints.setFields(fields));
-			dbSet.validate(shardId);
+			String shardId = strategy.locateTableShard(config, logicDbName, tmpHints.setFields(fields));
 			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
 			if(pojosInShard == null) {
 				pojosInShard = new LinkedList<Map<String, ?>>();
@@ -144,6 +146,14 @@ public class DalShardingHelper {
 		return shuffle(logicDbName, parser, Arrays.asList(pojos));
 	}
 	
+	public static <T> Map<String, List<Map<String, ?>>> shuffleByTable(String logicDbName, DalParser<T> parser, List<T> daoPojos) throws SQLException {
+		List<Map<String, ?>> pojos = new ArrayList<Map<String, ?>>();
+		for(T pojo: daoPojos) {
+			pojos.add(parser.getFields(pojo));
+		}
+		return shuffleByTable(logicDbName, pojos);
+	}
+	
 	/**
 	 * Verify if shard id is already set for combined insert or batch update. 
 	 * @param logicDbName
@@ -151,23 +161,30 @@ public class DalShardingHelper {
 	 * @param message
 	 * @throws SQLException
 	 */
-	public static void reqirePredefinedSharding(String logicDbName, DalHints hints, String message) throws SQLException {
-		if(!isShardingEnabled(logicDbName))
+	public static void reqirePredefinedSharding(String logicDbName, String tableName, DalHints hints, String message) throws SQLException {
+		// For normal case, both DB and table sharding are not enabled
+		if(!(isShardingEnabled(logicDbName) || isTableShardingEnabled(logicDbName, tableName)))
 			return;
 		
 		// Assume the out transaction already handle sharding logic
 		if(DalTransactionManager.isInTransaction())
 			return;
 		
-		locateShardId(logicDbName, hints);
+		// Verify if DB shard is defined
+		if(isShardingEnabled(logicDbName))
+			locateShardId(logicDbName, hints);
+		
+		// Verify if table shard is defined
+		if(isTableShardingEnabled(logicDbName, tableName))
+			locateTableShardId(logicDbName, hints, null, null);
 	}
 	
-	public static void crossShardOperationAllowed(String logicDbName, DalHints hints, String operation) throws SQLException {
-		if(!isShardingEnabled(logicDbName))
+	public static void crossShardOperationAllowed(String logicDbName, String tableName, DalHints hints, String operation) throws SQLException {
+		if(!(isShardingEnabled(logicDbName) || isTableShardingEnabled(logicDbName, tableName)))
 			throw new SQLException(logicDbName + " is not configured with sharding strategy");
 
-		// Assume the out transaction already handle sharding logic
-		if(DalTransactionManager.isInTransaction())
+		// Not allowed for distributed transaction
+		if(isShardingEnabled(logicDbName) && DalTransactionManager.isInTransaction())
 			throw new SQLException(operation + " is not allowed within transaction");
 		
 		String shard;
@@ -178,6 +195,13 @@ public class DalShardingHelper {
 			return;
 		}
 
+		try {
+			shard = locateTableShardId(logicDbName, hints, null, null);
+		} catch (Exception e) {
+			// No shard can be located, so meet the criteria
+			return;
+		}
+		
 		throw new SQLException(operation + " requires to be executed only when shard id can not be located in hints. sharid:" + shard);
 	}
 	

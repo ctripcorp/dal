@@ -182,9 +182,43 @@ public class CrossShardTableDaoTest {
 			Map<String, KeyHolder> keyHolders =  new HashMap<String, KeyHolder>();
 			dao.crossShardCombinedInsert(new DalHints(), keyHolders, pList);
 			
-			assertEquals(2, keyHolders.size());
+			assertEquals(1, keyHolders.size());
 			assertEquals(1, keyHolders.get("0").size());
 			assertEquals(2, keyHolders.get("1").size());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testCrossShardCombinedInsertWithNoKH() {
+		try {
+			StatementParameters parameters = new StatementParameters();
+			DalHints hints = new DalHints();
+			
+			hints.inShard("0");
+			dao.delete("id > 0", parameters, hints);
+			hints.inShard("1");
+			dao.delete("id > 0", parameters, hints);
+			
+			ClientTestModel p = new ClientTestModel();
+			
+			ClientTestModel[] pList = new ClientTestModel[3];
+			p = new ClientTestModel();
+			p.setId(1);
+			p.setAddress("aaa");
+			pList[0] = p;
+			p = new ClientTestModel();
+			p.setId(2);
+			p.setAddress("aaa");
+			pList[1] = p;
+			p = new ClientTestModel();
+			p.setId(3);
+			p.setAddress("aaa");
+			pList[2] = p;
+			
+			dao.crossShardCombinedInsert(new DalHints(), null, pList);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();

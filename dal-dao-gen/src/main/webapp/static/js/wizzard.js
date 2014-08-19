@@ -809,4 +809,5 @@
     };
 
     window.wizzard = new wizzard();
+
 })(window);

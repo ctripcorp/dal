@@ -8,33 +8,21 @@ import com.ctrip.platform.dal.dao.helper.*;
 
 public class ${host.getClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbName()}";
-	
-#if($host.hasQuery())
 	private DalQueryDao queryDao;
-#end
-#if($host.hasUpdate())
-	private DalClient baseClient;
-#end
 
 #foreach( $method in ${host.getMethods()} )
-#if(!$method.isEmptyFields() && !$method.isSampleType() && $method.isQuery())
+#if(!$method.isEmptyFields() && !$method.isSampleType())
 	private ${method.getPojoClassName()}RowMapper ${method.getVariableName()}RowMapper = new ${method.getPojoClassName()}RowMapper();
 #end
 #end
 	public ${host.getClassName()}Dao() {
-#if($host.hasQuery())
-		this.queryDao = new DalQueryDao(DATA_BASE);
-#end
-#if($host.hasUpdate())
-		this.baseClient = DalClientFactory.getClient(DATA_BASE);
-#end
+		queryDao = new DalQueryDao(DATA_BASE);
 	}
     
 #foreach($method in $host.getMethods())
 		/**
 		 * ${method.getComments()}
 		**/
-#if($method.getCrud_type()=="select")
 ##简单类型并且返回值是List
 #if($method.isSampleType() && $method.isReturnList())
 	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {	
@@ -133,27 +121,6 @@ public class ${host.getClassName()}Dao {
 #end
 #end
 		return queryDao.queryFirstNullable(sql, parameters, hints, ${method.getVariableName()}RowMapper);
-	}
-#end
-#else
-	public int ${method.getName()} (${method.getParameterDeclaration()}) throws SQLException {
-#if(${method.getInClauses()} != "")
-		String sql = SQLParser.parse("${method.getSql()}",${method.getInClauses()});
-#else
-		String sql = SQLParser.parse("${method.getSql()}");
-#end
-		StatementParameters parameters = new StatementParameters();
-		hints = DalHints.createIfAbsent(hints);
-		
-		int i = 1;
-#foreach($p in $method.getParameters())
-#if($p.isInParameter())
-		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
-#else
-		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
-#end
-#end
-		return baseClient.update(sql, parameters, hints);
 	}
 #end
 

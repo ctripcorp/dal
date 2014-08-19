@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.tester.shard;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
 import java.sql.ResultSet;
@@ -28,9 +27,14 @@ import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
+/** 
+ * Only test for my sql table based shard
+ * @author jhhe
+ *
+ */
 public class DalTabelDaoTableShardMySqlTest {
-	private final static String DATABASE_NAME_MOD = "DB_TABLE_SHARD";
 	private final static String DATABASE_NAME_MYSQL = "dao_test_mysql_tableShard";
+	private final static String DATABASE_NAME_MOD = DATABASE_NAME_MYSQL;
 	
 	private final static String TABLE_NAME = "dal_client_test";
 	private final static int mod = 4;
@@ -87,17 +91,15 @@ public class DalTabelDaoTableShardMySqlTest {
 	public void setUp() throws Exception {
 		DalHints hints = new DalHints();
 		String[] insertSqls = null;
-		// shard 1
 		for(int i = 0; i < mod; i++) {
-			insertSqls = new String[] {
-					"INSERT INTO " + TABLE_NAME + "_"+ i
-							+ " VALUES(1, 10, " + i + " ,1, 'SH INFO', NULL)",
-					"INSERT INTO " + TABLE_NAME + "_"+ i
-							+ " VALUES(3, 11, " + i + " ,1, 'BJ INFO', NULL)",
-					"INSERT INTO " + TABLE_NAME + "_"+ i
-							+ " VALUES(5, 12, " + i + " ,2, 'SZ INFO', NULL)" };
-			int[] counts = clientMySql.batchUpdate(insertSqls, hints);
-			assertArrayEquals(new int[] { 1, 1, 1 }, counts);
+			insertSqls = new String[i + 1];
+			for(int j = 0; j < i + 1; j ++) {
+				int id = j + 1;
+				int quantity = 10 + j;
+				insertSqls[j] = "INSERT INTO " + TABLE_NAME + "_"+ i
+						+ " VALUES(" + id + ", " + quantity + ", " + i + ",1, 'SH INFO', NULL)";
+			}
+			clientMySql.batchUpdate(insertSqls, hints);
 		}
 	}
 

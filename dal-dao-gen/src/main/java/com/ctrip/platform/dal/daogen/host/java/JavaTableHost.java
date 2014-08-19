@@ -24,6 +24,20 @@ public class JavaTableHost {
 	private SpOperationHost SpDelete;
 	private SpOperationHost SpUpdate;
 	private List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
+	
+	private String api_list;
+	
+	public boolean generateAPI(Integer ...apiID){
+		if(api_list==null || api_list.isEmpty() || api_list==""){
+			return true;
+		}
+		for(int i=0;i<apiID.length;i++){
+			if(api_list.indexOf("dal_api_"+apiID[i])>0){
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public String getPackageName() {
 		return packageName;
@@ -151,6 +165,14 @@ public class JavaTableHost {
 
 	public void setDatabaseCategory(DatabaseCategory databaseCategory) {
 		this.databaseCategory = databaseCategory;
+	}
+	
+	public String getApi_list() {
+		return api_list;
+	}
+
+	public void setApi_list(String api_list) {
+		this.api_list = api_list;
 	}
 
 	public boolean isIntegerPk() {

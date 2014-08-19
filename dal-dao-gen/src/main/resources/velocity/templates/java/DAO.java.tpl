@@ -51,7 +51,7 @@ public class ${host.getPojoClassName()}Dao {
 		this.rowextractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(parser); 
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}
-#if($host.hasPk())
+#if($host.hasPk() && $host.generateAPI(1,2,3,13,14,15,22,23,24,34,35,36))
 #if($host.isIntegerPk())
 	/**
 	 * Query ${host.getPojoClassName()} by the specified ID
@@ -85,6 +85,8 @@ public class ${host.getPojoClassName()}Dao {
 		return client.queryByPk(pk, hints);
 	}
 #end
+
+#if($host.generateAPI(4,16,25,37))
 	/**
 	 * Get the records count
 	**/
@@ -95,7 +97,9 @@ public class ${host.getPojoClassName()}Dao {
 		Number result = (Number)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
 		return result.intValue();
 	}
-	
+#end	
+
+#if($host.generateAPI(5,17,26,38))
 	/**
 	 * Query ${host.getPojoClassName()} with paging function
 	 * The pageSize and pageNo must be greater than zero.
@@ -115,20 +119,23 @@ public class ${host.getPojoClassName()}Dao {
 #end
 		return this.baseClient.query(sql, parameters, hints, rowextractor);
 	}
-	
+#end
+
+#if($host.generateAPI(6,18,27))
 	/**
 	 * Get all records in the whole table
 	**/
-	public List<${host.getPojoClassName()}> getAll(DalHints hints) throws SQLException
-	{
+	public List<${host.getPojoClassName()}> getAll(DalHints hints) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 		List<${host.getPojoClassName()}> result = null;
 		result = this.baseClient.query(ALL_SQL_PATTERN, parameters, hints, rowextractor);
 		return result;
 	}
+#end
 
 #if($host.getSpInsert().isExist())
+#if($host.generateAPI(19))
 	/**
 	 * SP Insert
 	**/
@@ -158,8 +165,9 @@ public class ${host.getPojoClassName()}Dao {
 #end
 		return (Integer)results.get(RET_CODE);
 	}
+#end
 
-#if($host.getSpInsert().getType=="sp3")
+#if($host.getSpInsert().getType=="sp3" && $host.generateAPI(8,29,39))
 	/**
 	 * Batch insert without out parameters
 	 * Return how many rows been affected for each of parameters
@@ -180,6 +188,7 @@ public class ${host.getPojoClassName()}Dao {
 #end
 
 #else
+#if($host.generateAPI(7,28))
 	/**
 	 * SQL insert
 	 * Note: there must be one non-null field in daoPojo
@@ -190,7 +199,9 @@ public class ${host.getPojoClassName()}Dao {
 		hints = DalHints.createIfAbsent(hints);
 		client.insert(hints, null, daoPojos);
 	}
-	
+#end
+
+#if($host.generateAPI(8,29))
 	/**
 	 * SQL insert with batch mode
 	**/
@@ -200,7 +211,9 @@ public class ${host.getPojoClassName()}Dao {
 		hints = DalHints.createIfAbsent(hints);
 		return client.batchInsert(hints, daoPojos);
 	}
-
+#end
+	
+#if($host.generateAPI(9,30))
 	/**
 	 * SQL insert with keyHolder
 	 * Note: there must be one non-null field in daoPojo
@@ -212,8 +225,10 @@ public class ${host.getPojoClassName()}Dao {
 		client.insert(hints, keyHolder, daoPojos);
 	}
 #end
+#end
 
 #if($host.getSpDelete().isExist())
+#if($host.generateAPI(20))
 	/**
 	 * SP delete
 	**/
@@ -242,8 +257,9 @@ public class ${host.getPojoClassName()}Dao {
 #end
 		return (Integer)results.get(RET_CODE);
 	}
+#end
 	
-#if($host.getSpDelete() == "sp3")
+#if($host.getSpDelete()=="sp3" && $host.generateAPI(40))
 	/**
 	 * Batch SP delete without out parameters
 	 * Return how many rows been affected for each of parameters
@@ -264,6 +280,7 @@ public class ${host.getPojoClassName()}Dao {
 #end
 
 #else
+#if($host.generateAPI(10,31))
 	/**
 	 * SQL delete
 	 * Note: there must be one non-null field in daoPojo
@@ -274,7 +291,9 @@ public class ${host.getPojoClassName()}Dao {
 		hints = DalHints.createIfAbsent(hints);
 		client.delete(hints, daoPojos);
 	}
-	
+#end
+
+#if($host.generateAPI(11,32))
 	/**
 	 * SQL delete with batch mode
 	**/
@@ -285,8 +304,10 @@ public class ${host.getPojoClassName()}Dao {
 		return client.batchDelete(hints, daoPojos);
 	}
 #end
+#end
 
 #if($host.getSpUpdate().isExist())
+#if($host.generateAPI(21))
 	/**
 	 * SP update
 	**/
@@ -315,6 +336,7 @@ public class ${host.getPojoClassName()}Dao {
 #end	
 		return (Integer)results.get(RET_CODE);
 	}
+#end
 #* The batch sp update has issue 
 	/**
 	 * Batch SP update without out parameters
@@ -336,6 +358,7 @@ public class ${host.getPojoClassName()}Dao {
 *#
 
 #else
+#if($host.generateAPI(12,33,41))
 	/**
 	 * SQL update
 	 * Note: there must be one non-null field in daoPojo
@@ -346,6 +369,7 @@ public class ${host.getPojoClassName()}Dao {
 		hints = DalHints.createIfAbsent(hints);
 		client.update(hints, daoPojos);
 	}
+#end
 #end
 
 #foreach($method in $host.getMethods())

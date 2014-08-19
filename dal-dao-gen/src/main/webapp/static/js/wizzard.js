@@ -341,8 +341,9 @@
         $("#next_step").text("正在加载...");
         $("#next_step").removeClass("btn-primary");
         var data = undefined;
-        $.get(sprintf("/rest/task/table/apiList?db_name=%s&sql_style=%s&rand=%s",
-            $("#databases").val(), $("#sql_style").val(), Math.random())).done(function (retValue) {
+        $.get(sprintf("/rest/task/table/apiList?db_name=%s&table_names=%s&sql_style=%s&rand=%s",
+            $("#databases").val(), $('#table_list').multipleSelect('getSelects').join(","),
+            $("#sql_style").val(), Math.random())).done(function (retValue) {
             if(retValue.code!='OK'){
                 $("#error_msg").text(retValue.info);
                 $("#next_step").removeAttr("disabled");

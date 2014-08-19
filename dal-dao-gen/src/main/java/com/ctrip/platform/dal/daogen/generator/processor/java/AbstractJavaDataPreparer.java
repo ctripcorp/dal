@@ -72,6 +72,7 @@ public class AbstractJavaDataPreparer{
 		tableHost.setPojoClassName(getPojoClassName(tableViewSp.getPrefix(),
 				tableViewSp.getSuffix(), table));
 		tableHost.setSp(tableViewSp.isCud_by_sp());
+		tableHost.setApi_list(tableViewSp.getApi_list());
 
 		// 主键及所有列
 		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(

@@ -93,7 +93,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 		}
 	} 
 	
-#if($host.hasPk())
+#if($host.hasPk() && $host.generateAPI(1,2,3,13,14,15,22,23,24,34,35,36))
 #if($host.isIntegerPk())
 	@Test
 	public void testQueryByPk() {
@@ -129,6 +129,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 #end
 #end
 
+#if($host.generateAPI(3,15,24,36))
 	@Test
 	public void testQueryByPkWithEnitity(){
 		${host.getPojoClassName()} pk = testdata[0];
@@ -140,7 +141,9 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			e.printStackTrace();
 		}
 	}
-	
+#end
+
+#if($host.generateAPI(4,16,25,37))
 	@Test
 	public void testCount(){
 		int count = -1;
@@ -152,7 +155,9 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			e.printStackTrace();
 		}
 	}
-	
+#end
+
+#if($host.generateAPI(5,17,26,38))
 	@Test
 	public void testQueryByPage(){
 		int pageNo = 1;
@@ -169,7 +174,9 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			e.printStackTrace();
 		}
 	}
-	
+#end
+
+#if($host.generateAPI(6,18,27))
 	@Test
 	public void testGetAll(){
 		try{
@@ -181,7 +188,9 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			e.printStackTrace();
 		}
 	}
+#end
 #if($host.getSpInsert().isExist())
+#if($host.generateAPI(19))
 	@Test
 	public void testInsert(){
 		 ${host.getPojoClassName()} daoPojo = testdata2[0];
@@ -196,7 +205,8 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			e.printStackTrace();
 		}
 	}
-#if($host.getSpInsert().getType=="sp3")
+#end
+#if($host.getSpInsert().getType=="sp3" && $host.generateAPI(8,29,39))
 	@Test
 	public void testMultipleInsert(){
 		${host.getPojoClassName()}[] pojos = testdata2;
@@ -217,6 +227,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	}
 #end
 #else
+#if($host.generateAPI(7,28))
 	@Test
 	public void testMultipleInsert(){
 		${host.getPojoClassName()}[] pojos = testdata2;
@@ -233,7 +244,9 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			e.printStackTrace();
 		}
 	}
-	
+#end
+
+#if($host.generateAPI(8,29))
 	@Test
 	public void testBatchInsert(){
 		${host.getPojoClassName()}[] pojos = testdata2;
@@ -246,7 +259,9 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			e.printStackTrace();
 		}
 	}
-	
+#end
+
+#if($host.generateAPI(9,30))
 	@Test
 	public void testMultipleInsertWithKeyHolder(){
 		KeyHolder holder = new KeyHolder();
@@ -267,8 +282,10 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 		}
 	}
 #end
+#end
 
 #if($host.getSpDelete().isExist())
+#if($host.generateAPI(20))
 	@Test
 	public void testDelete(){
 		 ${host.getPojoClassName()} daoPojo = testdata2[0];
@@ -286,8 +303,9 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			e.printStackTrace();
 		}
 	}
+#end
 	
-#if($host.getSpInsert().getType=="sp3")
+#if($host.getSpInsert().getType=="sp3" && $host.generateAPI(40))
 	@Test
 	public void testMultipleDelete(){
 		${host.getPojoClassName()}[] pojos = testdata2;
@@ -315,6 +333,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	}
 #end
 #else
+#if($host.generateAPI(10,31))
 	@Test
 	public void testMultipleDelete(){
 		${host.getPojoClassName()}[] pojos = testdata2;
@@ -340,7 +359,9 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			fail(e.getMessage());
 		}
 	}
-	
+#end
+
+#if($host.generateAPI(11,32))
 	@Test
 	public void testBatchDelete(){
 		${host.getPojoClassName()}[] pojos = testdata2;
@@ -368,8 +389,10 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 		}
 	}
 #end
+#end
 
 #if($host.getSpUpdate().isExist())
+#if($host.generateAPI(21))
 	@Test
 	public void testUpdate(){
 		 ${host.getPojoClassName()} pojos = testdata2[0];
@@ -392,7 +415,9 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			e.printStackTrace();
 		}
 	}
+#end
 #else
+#if($host.generateAPI(12,33,41))
 	@Test
 	public void testMultipleUpdate(){
 		${host.getPojoClassName()}[] pojos = testdata2;
@@ -420,6 +445,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			e.printStackTrace();
 		}
 	}
+#end
 #end
 
 #if($host.hasMethods())

@@ -85,7 +85,6 @@ public class ${host.getPojoClassName()}Dao {
 		return client.queryByPk(pk, hints);
 	}
 #end
-
 #if($host.generateAPI(4,16,25,37))
 	/**
 	 * Get the records count
@@ -97,8 +96,7 @@ public class ${host.getPojoClassName()}Dao {
 		Number result = (Number)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
 		return result.intValue();
 	}
-#end	
-
+#end
 #if($host.generateAPI(5,17,26,38))
 	/**
 	 * Query ${host.getPojoClassName()} with paging function
@@ -120,7 +118,6 @@ public class ${host.getPojoClassName()}Dao {
 		return this.baseClient.query(sql, parameters, hints, rowextractor);
 	}
 #end
-
 #if($host.generateAPI(6,18,27))
 	/**
 	 * Get all records in the whole table
@@ -133,7 +130,6 @@ public class ${host.getPojoClassName()}Dao {
 		return result;
 	}
 #end
-
 #if($host.getSpInsert().isExist())
 #if($host.generateAPI(19))
 	/**
@@ -166,7 +162,6 @@ public class ${host.getPojoClassName()}Dao {
 		return (Integer)results.get(RET_CODE);
 	}
 #end
-
 #if($host.getSpInsert().getType=="sp3" && $host.generateAPI(8,29,39))
 	/**
 	 * Batch insert without out parameters
@@ -186,7 +181,6 @@ public class ${host.getPojoClassName()}Dao {
 		return baseClient.batchCall(callSql, parametersList, hints);
 	}
 #end
-
 #else
 #if($host.generateAPI(7,28))
 	/**
@@ -200,7 +194,6 @@ public class ${host.getPojoClassName()}Dao {
 		client.insert(hints, null, daoPojos);
 	}
 #end
-
 #if($host.generateAPI(8,29))
 	/**
 	 * SQL insert with batch mode
@@ -212,7 +205,6 @@ public class ${host.getPojoClassName()}Dao {
 		return client.batchInsert(hints, daoPojos);
 	}
 #end
-	
 #if($host.generateAPI(9,30))
 	/**
 	 * SQL insert with keyHolder
@@ -226,7 +218,6 @@ public class ${host.getPojoClassName()}Dao {
 	}
 #end
 #end
-
 #if($host.getSpDelete().isExist())
 #if($host.generateAPI(20))
 	/**
@@ -258,7 +249,6 @@ public class ${host.getPojoClassName()}Dao {
 		return (Integer)results.get(RET_CODE);
 	}
 #end
-	
 #if($host.getSpDelete()=="sp3" && $host.generateAPI(40))
 	/**
 	 * Batch SP delete without out parameters
@@ -278,7 +268,6 @@ public class ${host.getPojoClassName()}Dao {
 		return baseClient.batchCall(callSql, parametersList, hints);
 	}
 #end
-
 #else
 #if($host.generateAPI(10,31))
 	/**
@@ -292,7 +281,6 @@ public class ${host.getPojoClassName()}Dao {
 		client.delete(hints, daoPojos);
 	}
 #end
-
 #if($host.generateAPI(11,32))
 	/**
 	 * SQL delete with batch mode
@@ -305,7 +293,6 @@ public class ${host.getPojoClassName()}Dao {
 	}
 #end
 #end
-
 #if($host.getSpUpdate().isExist())
 #if($host.generateAPI(21))
 	/**
@@ -337,26 +324,6 @@ public class ${host.getPojoClassName()}Dao {
 		return (Integer)results.get(RET_CODE);
 	}
 #end
-#* The batch sp update has issue 
-	/**
-	 * Batch SP update without out parameters
-	 * Return how many rows been affected for each of parameters
-	 */
-	public int[] update(DalHints hints, ${host.getPojoClassName()}... daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.length == 0)
-			return new int[0];
-		hints = DalHints.createIfAbsent(hints);
-		String callSql = client.buildCallSql(UPDATE_SP_NAME, parser.getFields(daoPojos[0]).size());
-		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
-		for(int i = 0; i< daoPojos.length; i++){
-			StatementParameters parameters = new StatementParameters();
-			client.addParametersByName(parameters, parser.getFields(daoPojos[i]));
-			parametersList[i] = parameters;
-		}
-		return baseClient.batchCall(callSql, parametersList, hints);
-	}
-*#
-
 #else
 #if($host.generateAPI(12,33,41))
 	/**
@@ -499,7 +466,6 @@ public class ${host.getPojoClassName()}Dao {
 	}
 #end
 #end
-
 
 #if($host.isSp() && ($host.getSpInsert().isExist() || $host.getSpDelete().isExist() ||$host.getSpUpdate().isExist()))
 	private String prepareSpCall(String SpName, StatementParameters parameters, Map<String, ?> fields) {

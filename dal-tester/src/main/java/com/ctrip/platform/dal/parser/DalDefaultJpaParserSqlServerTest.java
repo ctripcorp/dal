@@ -23,6 +23,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.unittests.DalTestHelper;
 import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
 import com.ctrip.platform.dal.ext.parser.DefaultLoader;
 
@@ -89,14 +90,14 @@ public class DalDefaultJpaParserSqlServerTest {
 		}
 		DalHints hints = new DalHints();
 		int res = dao.insert(hints, models);
-		Assert.assertEquals(ROW_COUNT, res);
+		Assert.assertEquals(ROW_COUNT, DalTestHelper.getCount(dao));
 		
 		StatementParameters parameters = new StatementParameters();
 		List<ClientTestModel> db_models = dao.query("1=1", parameters, hints);
 		Assert.assertEquals(ROW_COUNT, db_models.size());
 		db_models.toArray(models);
 		res = dao.delete(hints, models);
-		Assert.assertEquals(ROW_COUNT, res);
+		Assert.assertEquals(0, DalTestHelper.getCount(dao));
 	}
 	
 	@Test
@@ -119,7 +120,7 @@ public class DalDefaultJpaParserSqlServerTest {
 		
 		db_models.toArray(models);
 		int ress = dao.delete(hints, models);
-		Assert.assertEquals(ROW_COUNT, ress);
+		Assert.assertEquals(0, DalTestHelper.getCount(dao));
 	}
 
 	

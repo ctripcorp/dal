@@ -256,5 +256,22 @@ jQuery(document).ready(function () {
         }
     });
 
+    $("#databases,#gen_style").click(function(){
+        var records = w2ui['grid'].getSelection();
+        var record = null;
+        if (records.length > 0){
+            record = w2ui['grid'].get(records[0]);
+        }else{
+            return;
+        }
+        if($("#databases").val()!=record['databaseSetName']
+            || $("#gen_style").val()!=record['task_type']){
+            $("#page1").attr('is_update', '0');
+        }else{
+            $("#page1").attr('is_update', '1');
+        }
+
+    });
+
     window.ajaxutil.reload_projects();
 });

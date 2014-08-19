@@ -191,11 +191,11 @@
             }
 
             if ($("#gen_style").val() == "auto") { //构建SQL（生成的代码绑定到模板）
-                post_task_auto(postData);
+            	post_task_auto(postData);
             } else if ($("#gen_style").val() == "sql") {//自定义SQL（额外生成实体类）
-                post_task_free_sql(postData);
+            	post_task_free_sql(postData);
             } else if ($("#gen_style").val() == "table_view_sp") { //标准DAO(包含基础的增删改查操作)
-                post_task_table_view_sp(postData);
+            	post_task_table_view_sp(postData);
             }
         },
         reload_dbservers: function (callback,groupDBs) {

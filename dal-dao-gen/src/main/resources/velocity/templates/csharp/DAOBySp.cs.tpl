@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -12,7 +11,7 @@ namespace ${host.getNameSpace()}.Dao
 {
     public partial class ${host.getClassName()}Dao
     {
-        readonly BaseDao baseDao = BaseDaoFactory.CreateBaseDao("");
+        readonly BaseDao baseDao = BaseDaoFactory.CreateBaseDao("${host.getDbSetName()}");
 
         /// <summary>
         ///  执行SP${host.getClassName()}
@@ -33,7 +32,7 @@ namespace ${host.getNameSpace()}.Dao
 
 #foreach ($p in $host.getSpParams())
 #if($p.getDirection().name() == "Output" || $p.getDirection().name() == "InputOutput")
-                ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalizeFully($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
+                ${WordUtils.uncapitalize(${host.getClassName()})}.${WordUtils.capitalize($p.getName().replace("@",""))} = (${p.getType()})parameters["${p.getName()}"].Value;
 #end
 #end
                 return (int)parameters["@return"].Value;

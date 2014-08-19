@@ -102,8 +102,10 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 	
 						List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
 						// 每个Method可能就有一个Pojo
-						for (GenTaskByFreeSql task : currentTasks) {							
-							if (!_freeSqlPojoHosts.containsKey(task.getPojo_name())) {
+						for (GenTaskByFreeSql task : currentTasks) {
+							CSharpMethodHost method = buildFreeSqlMethodHost(ctx, task);
+							if (!_freeSqlPojoHosts.containsKey(task.getPojo_name()) && 
+									(!method.isFirstOrSingle() || !method.isSampleType())) {
 								CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(ctx, task);
 								if (null != freeSqlPojoHost) {
 									
@@ -111,7 +113,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 											freeSqlPojoHost);
 								}
 							}
-							methods.add(buildFreeSqlMethodHost(ctx, task));							
+							methods.add(method);						
 						}
 						host.setMethods(methods);
 						_freeSqlHosts.add(host);

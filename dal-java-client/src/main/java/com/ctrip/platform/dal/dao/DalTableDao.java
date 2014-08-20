@@ -1,14 +1,6 @@
 package com.ctrip.platform.dal.dao;
 
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.buildShardStr;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.crossShardOperationAllowed;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.executeByTableShard;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isShardingEnabled;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardingEnabled;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.locateTableShardId;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.reqirePredefinedSharding;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffle;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffleByTable;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.*;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -23,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
-import com.ctrip.platform.dal.dao.helper.DalShardingHelper.BulkTask;
 import com.ctrip.platform.dal.sql.exceptions.DalException;
 import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
 import com.ctrip.platform.dal.sql.logging.DalWatcher;
@@ -168,10 +159,11 @@ public final class DalTableDao<T> {
 		StatementParameters parameters = new StatementParameters();
 		addParameters(parameters, parser.getPrimaryKeys(pk));
 
+		Map<String, ?> fields = parser.getFields(pk);
 		String selectSql = String.format(findtmp,
-				getTableName(hints, parameters, parser.getFields(pk)), pkSql);
+				getTableName(hints, parameters, fields), pkSql);
 
-		return queryDao.queryForObjectNullable(selectSql, parameters, hints, parser);
+		return queryDao.queryForObjectNullable(selectSql, parameters, hints.clone().setFields(fields), parser);
 	}
 
 	/**

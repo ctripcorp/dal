@@ -211,7 +211,7 @@ public class DalShardingHelper {
 	
 	public static <T> T executeByTableShard(String logicDbName, String tabelName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask<T> task) throws SQLException {
 		if(isTableShardingEnabled(logicDbName, tabelName)) {
-			DalHints tmpHints = DalHints.copyOf(hints);
+			DalHints tmpHints = hints.clone();
 			Map<String, List<Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, daoPojos);
 			List<T> results = new ArrayList<T>(pojosInTable.size());
 			for(String tableShardId: pojosInTable.keySet()) {

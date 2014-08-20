@@ -18,8 +18,7 @@ namespace ${host.getNameSpace()}.Dao
     {
         readonly BaseDao baseDao = BaseDaoFactory.CreateBaseDao("${host.getDbSetName()}");
         
-#if($host.isTable())
-        
+#if($host.isTable())      
         //特别注意，如果是可空类型，建议以如下方式使用：
         // var data = reader["field"];
         // entity.stringData = data ?? data.ToString();
@@ -58,6 +57,7 @@ namespace ${host.getNameSpace()}.Dao
         }
         */
 
+#if($host.generateAPI(46,53))
         /// <summary>
         ///  插入${host.getClassName()}
         /// </summary>
@@ -110,10 +110,12 @@ namespace ${host.getNameSpace()}.Dao
             }
 #end
         }
+#end
         
 #if($host.getPrimaryKeys().size() == 0)
         /*由于没有PK，不能生成Update和Delete方法
 #end
+#if($host.generateAPI(47,55))
         /// <summary>
         /// 修改${host.getClassName()}
         /// </summary>
@@ -162,7 +164,9 @@ namespace ${host.getNameSpace()}.Dao
             }
 #end
         }
-        
+#end
+
+#if($host.generateAPI(48,57,58,59))        
         /// <summary>
         /// 删除${host.getClassName()}
         /// </summary>
@@ -206,9 +210,11 @@ namespace ${host.getNameSpace()}.Dao
             }
 #end
         }
+#end
         
 #if($host.isSpa())
 #if($host.getSpaDelete().isExist())
+#if($host.generateAPI(48,57,58))
         /// <summary>
         /// 删除${host.getClassName()}
         /// </summary>
@@ -237,11 +243,13 @@ namespace ${host.getNameSpace()}.Dao
         }
 #end
 #end
+#end
         
 #if($host.getPrimaryKeys().size() == 0)
         */
 #end
 
+#if($host.generateAPI(42,49))
 #if($host.getPrimaryKeys().size() == 1)
         /// <summary>
         /// 根据主键获取${host.getClassName()}信息
@@ -292,7 +300,8 @@ namespace ${host.getNameSpace()}.Dao
         }
 #end
 #end
-
+#end
+#if($host.generateAPI(43,50))
         /// <summary>
         /// 获取所有${host.getClassName()}信息
         /// </summary>
@@ -308,7 +317,8 @@ namespace ${host.getNameSpace()}.Dao
                 throw new DalException("调用${host.getClassName()}Dao时，访问GetAll时出错", ex);
             }
         }
-        
+#end
+#if($host.generateAPI(44,51))
         /// <summary>
         /// 取得总记录数
         /// </summary>
@@ -328,7 +338,9 @@ namespace ${host.getNameSpace()}.Dao
                 throw new DalException("调用${host.getClassName()}Dao时，访问Count时出错", ex);
             }
         }
-        
+#end
+
+#if($host.generateAPI(45,52))
 #if($host.isHasPagination())
         /// <summary>
         ///  检索${host.getClassName()}，带翻页
@@ -406,6 +418,7 @@ namespace ${host.getNameSpace()}.Dao
             }
         }
 #end
+#end
 
 #if($host.isHasSpt())
         /// <summary>
@@ -445,7 +458,7 @@ namespace ${host.getNameSpace()}.Dao
         }
 #end
 
-
+#if($host.generateAPI(54))
 #if($host.isHasSptI())
         /// <summary>
         ///  批量插入${host.getClassName()}
@@ -472,7 +485,9 @@ namespace ${host.getNameSpace()}.Dao
             }
         }
 #end
+#end
 
+#if($host.generateAPI(56))
 #if($host.isHasSptU())
         /// <summary>
         ///  批量修改${host.getClassName()}
@@ -499,7 +514,9 @@ namespace ${host.getNameSpace()}.Dao
             }
         }
 #end
+#end
 
+#if($host.generateAPI(59))
 #if($host.isHasSptD())
         /// <summary>
         ///  批量删除${host.getClassName()}
@@ -525,6 +542,7 @@ namespace ${host.getNameSpace()}.Dao
                 throw new DalException("调用${host.getClassName()}Dao时，访问BulkDelete时出错", ex);
             }
         }
+#end
 #end
 
 #foreach($method in $host.getExtraMethods())

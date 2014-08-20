@@ -136,6 +136,8 @@ public class AbstractCSharpDataPreparer{
 		tableHost.setHasSptD(allSpNames.contains(expectSptD));
 		tableHost.setHasSpt(tableHost.isHasSptI() || tableHost.isHasSptU()
 				|| tableHost.isHasSptD());
+		
+		tableHost.setApi_list(tableViewSp.getApi_list());
 
 		return tableHost;
 	}

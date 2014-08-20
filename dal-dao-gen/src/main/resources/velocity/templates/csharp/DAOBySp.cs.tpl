@@ -13,6 +13,7 @@ namespace ${host.getNameSpace()}.Dao
     {
         readonly BaseDao baseDao = BaseDaoFactory.CreateBaseDao("${host.getDbSetName()}");
 
+#if($host.generateAPI(60,61))
         /// <summary>
         ///  执行SP${host.getClassName()}
         /// </summary>
@@ -43,6 +44,6 @@ namespace ${host.getNameSpace()}.Dao
             }
 
        }
-
+#end
     }
 }

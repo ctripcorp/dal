@@ -33,6 +33,20 @@ public class CSharpTableHost {
 	
 	private String spName;
 	
+	private String api_list;
+	
+	public boolean generateAPI(Integer ...apiID){
+		if(api_list==null || api_list.isEmpty() || api_list==""){
+			return true;
+		}
+		for(int i=0;i<apiID.length;i++){
+			if(api_list.indexOf("dal_api_"+apiID[i])>0){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public List<CSharpMethodHost> getExtraMethods() {
 		return extraMethods;
 	}
@@ -195,10 +209,17 @@ public class CSharpTableHost {
 	public void setHasSptU(boolean hasSptU) {
 		this.hasSptU = hasSptU;
 	}
+	
+	public String getApi_list() {
+		return api_list;
+	}
+
+	public void setApi_list(String api_list) {
+		this.api_list = api_list;
+	}
 
 	@Override
 	public int hashCode() {
-		// TODO Auto-generated method stub
 		return super.hashCode();
 	}
 

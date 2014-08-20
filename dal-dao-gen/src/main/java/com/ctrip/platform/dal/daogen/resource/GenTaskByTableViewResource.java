@@ -126,12 +126,18 @@ public class GenTaskByTableViewResource {
 		
 		try {
 			List<DalApi> apis = null;
-			if("csharp".equalsIgnoreCase(sql_style)){
-				apis = dalApiDao.getDalApiByLanguage("csharp");
-			}else{
-				DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
+			
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
 
-				DatabaseCategory dbCategory = DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString());
+			DatabaseCategory dbCategory = DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString());
+			
+			if("csharp".equalsIgnoreCase(sql_style)){
+				if(dbCategory == DatabaseCategory.MySql){
+					apis = dalApiDao.getDalApiByLanguageAndDbtype("csharp", "MySQL");
+				}else{
+					apis = dalApiDao.getDalApiByLanguageAndDbtype("csharp", "SQLServer");
+				}
+			}else{
 				
 				if(dbCategory == DatabaseCategory.MySql){
 					apis = dalApiDao.getDalApiByLanguageAndDbtype("java", "MySQL");

@@ -344,6 +344,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 		tableHost.setTable(false);
 		tableHost.setSpName(spName);
 		tableHost.setSpParams(realParams);
+		tableHost.setApi_list(tableViewSp.getApi_list());
 
 		return tableHost;
 	}

@@ -39,15 +39,22 @@ public class DalLogger {
 		entry.setDuration(duration);
 		entry.setSuccess(false);
 		entry.setErrorMsg(e.getMessage());
+		entry.setException(e);
 		log(entry);
 	}
 	
 	public static void log(LogEntry entry) {
 		if(isSimplifyLogging()) {
-			logger.info(TITLE, DalWatcher.toJson(), entry.getTag());
+			if(entry.getException() == null){
+				logger.info(TITLE, entry.toJson(), entry.getTag());
+			}else{
+				logger.error(TITLE, entry.toJson(), entry.getTag());
+			}
 		} else {
-			//logger.info(TITLE, entry.toJson(), entry.getTag());
-			trace.log(LogType.SQL, LogLevel.INFO, TITLE, entry.toJson(), entry.getTag());
+			if(entry.getException() == null)
+				trace.log(LogType.SQL, LogLevel.ERROR, TITLE, entry.toJson(), entry.getTag());
+			else
+				trace.log(LogType.SQL, LogLevel.ERROR, TITLE, entry.toJson(), entry.getTag());
 		}
 	}
 	

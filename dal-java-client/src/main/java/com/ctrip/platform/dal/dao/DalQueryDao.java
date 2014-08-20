@@ -7,6 +7,8 @@ import java.util.List;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.sql.exceptions.DalException;
+import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
 
 /**
  * DAO class that provides common query based functions.
@@ -338,13 +340,13 @@ public final class DalQueryDao {
 
 	private void assertEquals(int expected, int actual) throws SQLException{
 		if(expected != actual)
-			throw new SQLException(String.format(COUNT_MISMATCH_MSG, expected, actual));
+			throw new DalException(ErrorCode.AssertEqual, expected, actual);
 	}
 
 	private void assertGreatThan(int expected, int actual, String message) throws SQLException{
 		if(actual > expected)
 			return;
 		
-		throw new SQLException(message);
+		throw new DalException(ErrorCode.AssertGreatThan);
 	}
 }

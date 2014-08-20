@@ -3,6 +3,8 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.ctrip.platform.dal.sql.exceptions.DalException;
+import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
 
 public class DalTransaction  {
@@ -20,10 +22,10 @@ public class DalTransaction  {
 	
 	public void validate(String logicDbName) throws SQLException {
 		if(logicDbName == null || logicDbName.length() == 0)
-			throw new SQLException("Logic Db Name is empty!");
+			throw new DalException(ErrorCode.LogicDbEmpty);
 		
 		if(!logicDbName.equals(this.logicDbName))
-			throw new SQLException(String.format("DAL do not support distributed transaction. Current DB: %s, DB requested: %s", this.logicDbName, logicDbName));
+			throw new DalException(ErrorCode.TransactionDistributed, this.logicDbName, logicDbName);
 	}
 	
 	public DalConnection getConnection() {
@@ -40,18 +42,18 @@ public class DalTransaction  {
 
 	public int startTransaction() throws SQLException {
 		if(rolledBack || completed)
-			throw new SQLException("The current transaction is already rolled back or completed");
+			throw new DalException(ErrorCode.TransactionState);
 		
 		return level++;
 	}
 	
 	public void endTransaction(int startLevel) throws SQLException {
 		if(rolledBack || completed)
-			throw new SQLException("The current transaction is already rolled back or completed");
+			throw new DalException(ErrorCode.TransactionState);
 
 		if(startLevel != (level - 1)) {
 			rollbackTransaction();
-			throw new SQLException(String.format("Transaction level mismatch. Expected: %d Actual: %d", (level - 1), startLevel));
+			throw new DalException(ErrorCode.TransactionLevelMatch, (level - 1), startLevel);
 		}
 		
 		if(--level == 0) {

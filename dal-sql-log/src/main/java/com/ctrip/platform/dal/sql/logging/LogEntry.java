@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.sql.logging;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.ctrip.platform.dal.sql.exceptions.DalException;
+import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
 import com.ctrip.security.encryption.AESCrypto;
 
 public class LogEntry {
@@ -18,6 +21,7 @@ public class LogEntry {
 	public static final String TAG_DATABASE_NAME = "DatabaseName";
 	public static final String TAG_ALLINONEKEY = "AllInOne";
 	public static final String TAG_SERVER_ADDRESS = "ServerAddress";
+	public static final String TAG_ERROR_CODE = "ErrorCode";
 	public static final String TAG_COMMAND_TYPE = "CommandType";
 	public static final String TAG_USER_NAME = "UserName";
 	public static final String TAG_DAO = "dao";
@@ -25,6 +29,7 @@ public class LogEntry {
 	public static final int LOG_LIMIT = 32*1024;	
 	public static final String SQLHIDDENString = "*";
 	private static final String JSON_PATTERN = "{\"HasSql\":\"%s\",\"Hash\":\"%s\",\"SqlTpl\":\"%s\",\"Param\":\"%s\",\"IsSuccess\":\"%s\",\"ErrorMsg\":\"%s\", \"CostDetail\":\"%s\"}";
+	private static final String ERRORCDE_PATTERN = "SYS%sL%s";
 	
 	private static Set<String> execludedClasses = null;
 	private static ConcurrentHashMap<String, Integer> hashes = null;
@@ -49,6 +54,7 @@ public class LogEntry {
 	private String dao;
 	private String method;
 	private String source;
+	private Throwable exception;
 	
 	static {
 		execludedClasses = new HashSet<String>();
@@ -110,6 +116,14 @@ public class LogEntry {
 
 	public void setErrorMsg(String errorMsg) {
 		this.errorMsg = errorMsg;
+	}
+
+	public Throwable getException() {
+		return exception;
+	}
+
+	public void setException(Throwable exception) {
+		this.exception = exception;
 	}
 
 	public boolean isSuccess() {
@@ -325,13 +339,28 @@ public class LogEntry {
 		tag.put(TAG_IN_TRANSACTION, this.isTransactional() ? "True" : "False");
 		tag.put(TAG_DURATION_TIME, Long.toString(this.getDuration()) + "ms");
 		tag.put(TAG_DATABASE_NAME, CommonUtil.null2NA(dbName));
-		tag.put(TAG_ALLINONEKEY, CommonUtil.null2NA(this.getAllInOneKey()));
-		tag.put(TAG_SERVER_ADDRESS, CommonUtil.null2NA(this.getServerAddress()));
+		tag.put(TAG_ALLINONEKEY, CommonUtil.null2NA(this.getAllInOneKey()));	
+		tag.put(TAG_ERROR_CODE, this.getErrorCode());
 		tag.put(TAG_COMMAND_TYPE, CommonUtil.null2NA(this.getCommandType()));
 		tag.put(TAG_DAO, this.getDao() + "." + this.getMethod());
 		tag.put(TAG_RECORD_COUNT, Long.toString(this.getResultCount()));
 
 		return tag;
+	}
+	
+	private String getErrorCode(){
+		if(this.exception == null)
+			return "NA";
+		else{
+			if(this.exception instanceof DalException){
+				DalException dalEx = (DalException)this.exception;
+				return String.format(ERRORCDE_PATTERN, 5, dalEx.getErrorCode());
+			}else if(this.exception instanceof SQLException){
+				return String.format(ERRORCDE_PATTERN, 1, "0000");
+			}else{
+				return String.format(ERRORCDE_PATTERN, 5, ErrorCode.Unknown.getCode());
+			}
+		}
 	}
 	
 	public String toJson(){

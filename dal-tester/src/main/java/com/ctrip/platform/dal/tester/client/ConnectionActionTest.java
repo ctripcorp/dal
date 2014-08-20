@@ -48,7 +48,7 @@ public class ConnectionActionTest {
 			test.populateDbMeta();
 			assertNotNull(test.entry.getTag().get(LogEntry.TAG_DATABASE_NAME));
 			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_USER_NAME)); be removed
-			assertNotNull(test.entry.getTag().get(LogEntry.TAG_SERVER_ADDRESS));
+			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_SERVER_ADDRESS)); be removed
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -63,7 +63,7 @@ public class ConnectionActionTest {
 			tranManager.doInTransaction(test, new DalHints());
 			assertNotNull(test.entry.getTag().get(LogEntry.TAG_DATABASE_NAME));
 			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_USER_NAME)); be removed
-			assertNotNull(test.entry.getTag().get(LogEntry.TAG_SERVER_ADDRESS));
+			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_SERVER_ADDRESS)); be removed
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();

@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.ctrip.platform.dal.sql.exceptions.DalException;
+import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
+
 public class KeyHolder {
 	private final List<Map<String, Object>> keyList = new LinkedList<Map<String, Object>>();;
 
@@ -20,8 +23,7 @@ public class KeyHolder {
 	 */
 	public Number getKey() throws SQLException {
 		if (this.keyList.size() != 1) {
-			throw new SQLException(
-					"Non or More than one generated keys are returned: " + keyList);
+			throw new DalException(ErrorCode.ValidateKeyHolderSize, keyList);
 		}
 		return getKey(0);
 	}
@@ -34,11 +36,11 @@ public class KeyHolder {
 	public Number getKey(int index) throws SQLException {
 		try {
 			if(keyList.get(index).size() != 1)
-				throw new SQLException("Non or More than one entries found for the generated key: " + keyList.get(index));
+				throw new DalException(ErrorCode.ValidateKeyHolderFetchSize, keyList.get(index));
 			
 			return (Number)keyList.get(index).values().iterator().next();
 		} catch (Throwable e) {
-			throw new SQLException("Can not convert generated key to number.", e);
+			throw new DalException(ErrorCode.ValidateKeyHolderConvert, e);
 		}
 	}
 
@@ -49,8 +51,7 @@ public class KeyHolder {
 	 */
 	public Map<String, Object> getKeys() throws SQLException {
 		if (this.keyList.size() != 1) {
-			throw new SQLException(
-					"Non or More than one generated keys are returned: " + keyList);
+			throw new DalException(ErrorCode.ValidateKeyHolderSize, keyList);
 		}
 		return this.keyList.get(0);
 	}
@@ -77,7 +78,7 @@ public class KeyHolder {
 			}
 			return idList;
 		} catch (Throwable e) {
-			throw new SQLException("Can not convert generated keys to list of number.", e);
+			throw new DalException(ErrorCode.ValidateKeyHolderConvert, e);
 		}
 	}
 }

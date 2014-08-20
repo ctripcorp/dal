@@ -10,5 +10,6 @@ import org.junit.runners.Suite.SuiteClasses;
 	ShardColModShardStrategyTest.class,
 	DalTabelDaoTableShardTest.class,
 	DalTabelDaoTableShardMySqlTest.class,
+	DalTableDaoShardByDbTest.class,
 })
 public class AllTest {}

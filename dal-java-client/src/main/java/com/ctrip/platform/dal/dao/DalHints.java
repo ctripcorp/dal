@@ -26,12 +26,6 @@ public class DalHints {
 		return newHints;
 	}
 	
-	public static DalHints copyOf(DalHints otherHints) {
-		DalHints hints = new DalHints();
-		hints.hints.putAll(otherHints.hints);
-		return hints;
-	}
-	
 	public DalHints() {}
 	
 	public DalHints(DalHintEnum...hints) {

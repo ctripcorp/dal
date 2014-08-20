@@ -158,10 +158,11 @@ public final class DalTableDao<T> {
 		StatementParameters parameters = new StatementParameters();
 		addParameters(parameters, parser.getPrimaryKeys(pk));
 
+		Map<String, ?> fields = parser.getFields(pk);
 		String selectSql = String.format(findtmp,
-				getTableName(hints, parameters, parser.getFields(pk)), pkSql);
+				getTableName(hints, parameters, fields), pkSql);
 
-		return queryDao.queryForObjectNullable(selectSql, parameters, hints, parser);
+		return queryDao.queryForObjectNullable(selectSql, parameters, hints.clone().setFields(fields), parser);
 	}
 
 	/**

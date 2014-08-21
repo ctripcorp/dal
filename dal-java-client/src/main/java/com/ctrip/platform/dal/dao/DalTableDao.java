@@ -346,11 +346,13 @@ public final class DalTableDao<T> {
 	public int insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos)
 			throws SQLException {
 		int count = 0;
+		hints = hints.clone();
 		for (T pojo : daoPojos) {
 			DalWatcher.begin();
 			Map<String, ?> fields = parser.getFields(pojo);
 			filterAutoIncrementPrimaryFields(fields);
-			// TODO revise and improve performance
+			// clean up hints
+			hints.setParameters(null).setFields(null);
 			String insertSql = buildInsertSql(hints, fields);
 
 			StatementParameters parameters = new StatementParameters();
@@ -631,15 +633,17 @@ public final class DalTableDao<T> {
 	 */
 	public int delete(DalHints hints, List<T> daoPojos) throws SQLException {
 		int count = 0;
+		hints = hints.clone();
 		for (T pojo : daoPojos) {
 			DalWatcher.begin();
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, parser.getPrimaryKeys(pojo));
-
+			hints.setParameters(null).setFields(null);
 			try {
-				String deleteSql = buildDeleteSql(getTableName(hints, parameters, parser.getFields(pojo)));
+				Map<String, ?> fields = parser.getFields(pojo);
+				String deleteSql = buildDeleteSql(getTableName(hints, parameters, fields));
 
-				count += client.update(deleteSql, parameters, hints);
+				count += client.update(deleteSql, parameters, hints.setFields(fields));
 			} catch (SQLException e) {
 				if (hints.isStopOnError())
 					throw e;
@@ -877,7 +881,7 @@ public final class DalTableDao<T> {
 			Map<String, ?> entries) {
 		int index = parameters.size() + 1;
 		for (Map.Entry<String, ?> entry : entries.entrySet()) {
-			parameters.set(index++, getColumnType(entry.getKey()),
+			parameters.set(index++, entry.getKey(), getColumnType(entry.getKey()),
 					entry.getValue());
 		}
 	}
@@ -887,7 +891,7 @@ public final class DalTableDao<T> {
 		int count = 0;
 		for(String column : validColumns){
 			if(entries.containsKey(column))
-				parameters.set(count + start, this.getColumnType(column), entries.get(column));
+				parameters.set(count + start, column, this.getColumnType(column), entries.get(column));
 			count++;
 		}
 		return count;

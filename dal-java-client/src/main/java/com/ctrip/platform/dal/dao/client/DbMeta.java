@@ -60,4 +60,8 @@ public class DbMeta {
 	public String getDatabaseName() {
 		return databaseName;
 	}
+
+	public String getAllInOneKey() {
+		return allInOneKey;
+	}
 }

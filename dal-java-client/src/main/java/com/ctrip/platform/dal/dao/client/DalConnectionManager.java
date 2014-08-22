@@ -84,16 +84,23 @@ public class DalConnectionManager {
 	
 	public <T> T doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
+		// If HA disabled, we just directly call _doInConnnection
+		if(!DalHAManager.isHaEnabled())
+			return _doInConnection(action, hints);;
+			
 		T result = null;
 		SQLException ex = null;
 		
+		int retryCount = 0;
+		int maxRetry = 2;
 		do {
+			ex = null;
 			try {
 				result = _doInConnection(action, hints);
 			} catch (SQLException e) {
 				ex = e;
 			}
-		} while(result == null && DalHAManager.isFailOverable(ex));
+		} while(ex != null && retryCount++ < maxRetry && DalHAManager.isFailOverable(ex));
 		
 		return result;
 	}

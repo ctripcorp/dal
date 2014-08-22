@@ -7,7 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.platform.dal.dao.DalCommand;
@@ -15,8 +17,8 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
-import com.ctrip.platform.dal.sql.logging.LogEntry;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
+import com.ctrip.platform.dal.sql.logging.LogEntry;
 import com.ctrip.platform.dal.sql.logging.MetricsLogger;
 
 public abstract class ConnectionAction<T> {
@@ -29,6 +31,7 @@ public abstract class ConnectionAction<T> {
 	public DalCommand command;
 	public List<DalCommand> commands;
 	public DalConnection connHolder;
+	public Set<String> usedDbs = new HashSet<>();
 	public Connection conn;
 	public Statement statement;
 	public PreparedStatement preparedStatement;

@@ -20,6 +20,10 @@ public class DalHAManager {
 		haEnabled.set(enabled);
 	}
 	
+	public static boolean isHaEnabled() {
+		return haEnabled.get();
+	}
+	
 	public static boolean isRetriable(SQLException e) {
 		return haEnabled.get() && retriableCodes.contains(e.getErrorCode());
 	}

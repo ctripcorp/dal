@@ -187,11 +187,11 @@ public class ${host.getPojoClassName()}Dao {
 	 * SQL insert
 	 * Note: there must be one non-null field in daoPojo
 	**/
-	public void insert(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public int insert(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length <= 0)
-			return;
+			return 0;
 		hints = DalHints.createIfAbsent(hints);
-		client.insert(hints, null, daoPojos);
+		return client.insert(hints, null, daoPojos);
 	}
 #end
 #if($host.generateAPI(8,29))
@@ -210,11 +210,11 @@ public class ${host.getPojoClassName()}Dao {
 	 * SQL insert with keyHolder
 	 * Note: there must be one non-null field in daoPojo
 	**/
-	public void insert(DalHints hints, KeyHolder keyHolder, ${host.getPojoClassName()}...daoPojos) throws SQLException {
+	public int insert(DalHints hints, KeyHolder keyHolder, ${host.getPojoClassName()}...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length <= 0)
-			return;
+			return 0;
 		hints = DalHints.createIfAbsent(hints);
-		client.insert(hints, keyHolder, daoPojos);
+		return client.insert(hints, keyHolder, daoPojos);
 	}
 #end
 #end

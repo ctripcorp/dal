@@ -289,6 +289,12 @@ public class JavaTableHost {
 			return this.fields.get(0).getName();
 	}
 
+	public String getPrimaryKeyName() throws Exception{
+		if(this.getPrimaryKeys() == null && this.getPrimaryKeys().size() != 1)
+			throw new Exception("The multiple primary key is not allowed here!");
+		return this.getPrimaryKeys().get(0).getCapitalizedName();
+	}
+	
 	public String getScalarColumn() {
 		return (null != this.fields && !this.fields.isEmpty()) ? this.fields
 				.get(0).getClassDisplayName() : "";

@@ -36,7 +36,9 @@ public class ${host.getPojoClassName()}Dao {
 	private DalScalarExtractor extractor = new DalScalarExtractor();
 	private DalRowMapperExtractor<${host.getPojoClassName()}> rowextractor = null;
 	private DalTableDao<${host.getPojoClassName()}> client;
+#if($host.hasMethods())
 	private DalQueryDao queryDao = null;
+#end
 	private DalClient baseClient;
 
 	public ${host.getPojoClassName()}Dao() {
@@ -47,7 +49,9 @@ public class ${host.getPojoClassName()}Dao {
 		this.client.setDelimiter('[',']');
 		this.client.setFindTemplate("SELECT * FROM %s WITH (NOLOCK) WHERE %s");
 #end
+#if($host.hasMethods())
 		this.queryDao = new DalQueryDao(DATA_BASE);
+#end
 		this.rowextractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(parser); 
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}
@@ -141,6 +145,16 @@ public class ${host.getPojoClassName()}Dao {
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 		String callSql = prepareSpCall(INSERT_SP_NAME, parameters, parser.getFields(daoPojo));
+		Map<String, ?> results = baseClient.call(callSql, parameters, hints);
+		return (Integer)results.get(RET_CODE);
+	}
+	
+	public int insert(DalHints hints, KeyHolder holder, ${host.getPojoClassName()} daoPojo) throws SQLException {
+		if(null == daoPojo)
+			return 0;
+		StatementParameters parameters = new StatementParameters();
+		hints = DalHints.createIfAbsent(hints);
+		String callSql = prepareSpCall(INSERT_SP_NAME, parameters, parser.getFields(daoPojo));
 #foreach($p in $host.getSpInsert().getParameters())
 #if($p.getDirection().name() == "InputOutput")
 		parameters.registerInOut("${p.getName()}", ${p.getJavaTypeDisplay()}, daoPojo.get${p.getCapitalizedName()}());
@@ -150,15 +164,19 @@ public class ${host.getPojoClassName()}Dao {
 #end
 #end
 		Map<String, ?> results = baseClient.call(callSql, parameters, hints);
-
+		
+		if(holder != null){
+			Map<String, Object> map = new LinkedHashMap<String, Object>();
 #foreach($p in $host.getSpInsert().getParameters())
 #if($p.getDirection().name() == "InputOutput")
-		${p.getClassDisplayName()} ${p.getUncapitalizedName()} = (${p.getClassDisplayName()})parameters.get("${p.getName()}", ParameterDirection.InputOutput).getValue();
+		    map.put("${p.getName()}", parameters.get("${p.getName()}", ParameterDirection.InputOutput).getValue());
 #end
 #if($p.getDirection().name() == "Output")
-		${p.getClassDisplayName()} ${p.getUncapitalizedName()} = (${p.getClassDisplayName()})parameters.get("${p.getName()}", ParameterDirection.Output).getValue();
+		    map.put("${p.getName()}", parameters.get("${p.getName()}", ParameterDirection.InputOutput).getValue())
 #end
 #end
+	        holder.getKeyList().add(map);
+		}
 		return (Integer)results.get(RET_CODE);
 	}
 #end

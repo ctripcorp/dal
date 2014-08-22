@@ -44,25 +44,25 @@ public class ${host.getPojoClassName()}DaoUnitTest {
     		client = DalClientFactory.getClient(DATA_BASE);
     		dao = new ${host.getPojoClassName()}Dao();
 			
-    		 /* testdata = new ${host.getPojoClassName()}[3];
-    		  testdata2 = new ${host.getPojoClassName()}[3];
+    		testdata = new ${host.getPojoClassName()}[3];
+    		testdata2 = new ${host.getPojoClassName()}[3];
     		 
-    		  for(int i = 0; i < 3; i++){
-    		 	 ${host.getPojoClassName()} p1 = new ${host.getPojoClassName()}();
+    		for(int i = 0; i < 3; i++){
+				${host.getPojoClassName()} p1 = new ${host.getPojoClassName()}();
 #foreach($field in ${host.getFields()})
-    		 	 p1.set${field.getCapitalizedName()}(${helper.getMockValForUnitTest($field,"i")});
+    		 	p1.set${field.getCapitalizedName()}(${helper.getMockValForUnitTest($field,"i")});
 #end
-    		 	 testdata[i] = p1;
+    		 	testdata[i] = p1;
     		 	
-    		 	 ${host.getPojoClassName()} p2 = new ${host.getPojoClassName()}();
+    		 	${host.getPojoClassName()} p2 = new ${host.getPojoClassName()}();
 #foreach($field in ${host.getFields()})	
-    		 	 p2.set${field.getCapitalizedName()}(${helper.getMockValForUnitTest($field,"i+3")});
+    		 	p2.set${field.getCapitalizedName()}(${helper.getMockValForUnitTest($field,"i+3")});
 #end	
-    		 	 testdata2[i] = p2;
+    		 	testdata2[i] = p2;
     		 	
-    		   }
+    		 }
     		 
-    		   cleanupsqls = new String[]{"delete from ${host.getTableName()} where 1=0"};*/
+    		 //cleanupsqls = new String[]{"delete from ${host.getTableName()} where 1=0"};
 		
 		}catch(Exception e){
 			e.printStackTrace();
@@ -96,7 +96,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			dao.delete(new DalHints(), testdata[i]);
 #if($host.isHasIdentity())
 		    dao.insert(new DalHints(), keyHolder, testdata[i]);
-			testdata[i].set${host.getPrimaryKeyName()}(keyHolder.getKey(i).intValue());
+			testdata[i].set${host.getPrimaryKeyName()}((${host.getPrimaryKeyType()})keyHolder.getKey(i));
 #else
 		    dao.insert(new DalHints(), testdata[i]);
 #end	    
@@ -125,7 +125,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 #if($host.isIntegerPk())
 	@Test
 	public void testQueryByPk() {
-		Integer id = testdata[0].get${host.getPrimaryKeyName()}();
+		${host.getPrimaryKeyType()} id = testdata[0].get${host.getPrimaryKeyName()}();
 		try {
 			${host.getPojoClassName()} ret = dao.queryByPk(id, new DalHints());
 			//TODO: Verify the result.
@@ -226,7 +226,11 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 		 ${host.getPojoClassName()} daoPojo = testdata2[0];
 		 try{
 			int rows = dao.insert(new DalHints(), daoPojo);
-			assertEquals(1, rows);
+#if($host.getSpInsert().isExist())
+		    assertTrue(rows == 0);
+#else
+		    assertEquals(1, rows);
+#end
 		 }catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -315,7 +319,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 		 try{
 #if($host.isHasIdentity())
 		    dao.insert(new DalHints(), holder, daoPojo);
-			daoPojo.set${host.getPrimaryKeys().get(0).getCapitalizedName()}(holder.getKey().intValue())
+			daoPojo.set${host.getPrimaryKeys().get(0).getCapitalizedName()}((${host.getPrimaryKeyType()})holder.getKey());
 #else
 		    dao.insert(new DalHints(), daoPojo);
 #end
@@ -450,11 +454,18 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 		 ${host.getPojoClassName()} pojos = testdata2[0];
 		 ${host.getPojoClassName()} ret = null;
 		 try{
+#if($host.isHasIdentity())
+		    KeyHolder keyHolder = new KeyHolder();
+			dao.insert(new DalHints(), keyHolder, pojos);
+			pojos.set${host.getPrimaryKeyName()}((${host.getPrimaryKeyType()})keyHolder.getKey(0));
+			
+			ret = dao.queryByPk(pojos, new DalHints());
+			assertNotNull(ret);
+#else
 			dao.insert(new DalHints(), pojos);
-
 			ret = dao.queryByPk(pojos, new DalHints());
 			assertTrue(null != ret);
-			
+#end
 			//Change the values of pojos
 			int row = dao.update(new DalHints(), pojos);
 			assertTrue(row >= 0);

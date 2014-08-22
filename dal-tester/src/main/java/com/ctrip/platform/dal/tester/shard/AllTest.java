@@ -11,5 +11,6 @@ import org.junit.runners.Suite.SuiteClasses;
 	DalTabelDaoTableShardTest.class,
 	DalTabelDaoTableShardMySqlTest.class,
 	DalTableDaoShardByDbTest.class,
+	DalTableDaoShardByDbMySqlTest.class,
 })
 public class AllTest {}

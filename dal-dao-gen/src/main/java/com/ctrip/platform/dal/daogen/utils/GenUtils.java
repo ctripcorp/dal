@@ -29,6 +29,7 @@ public final class GenUtils {
 		VelocityContext context = new VelocityContext();
 		context.put("WordUtils", WordUtils.class);
 		context.put("StringUtils", StringUtils.class);
+		context.put("helper", VelocityHelper.class);
 
 		return context;
 	}

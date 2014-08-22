@@ -32,7 +32,7 @@ public class JavaTableHost {
 			return true;
 		}
 		for(int i=0;i<apiID.length;i++){
-			if(api_list.indexOf("dal_api_"+apiID[i])>0){
+			if(api_list.indexOf("dal_api_"+apiID[i])>=0){
 				return true;
 			}
 		}
@@ -293,6 +293,12 @@ public class JavaTableHost {
 		if(this.getPrimaryKeys() == null && this.getPrimaryKeys().size() != 1)
 			throw new Exception("The multiple primary key is not allowed here!");
 		return this.getPrimaryKeys().get(0).getCapitalizedName();
+	}
+	
+	public String getPrimaryKeyType() throws Exception{
+		if(this.getPrimaryKeys() == null && this.getPrimaryKeys().size() != 1)
+			throw new Exception("The multiple primary key is not allowed here!");
+		return this.getPrimaryKeys().get(0).getClassDisplayName();
 	}
 	
 	public String getScalarColumn() {

@@ -84,6 +84,22 @@ public class DalConnectionManager {
 	
 	public <T> T doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
+		T result = null;
+		SQLException ex = null;
+		
+		do {
+			try {
+				result = _doInConnection(action, hints);
+			} catch (SQLException e) {
+				ex = e;
+			}
+		} while(result == null && DalHAManager.isFailOverable(ex));
+		
+		return result;
+	}
+	
+	private <T> T _doInConnection(ConnectionAction<T> action, DalHints hints)
+			throws SQLException {
 		action.initLogEntry(logicDbName, hints);
 		action.start();
 		

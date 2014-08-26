@@ -47,7 +47,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
     		testdata = new ${host.getPojoClassName()}[3];
     		testdata2 = new ${host.getPojoClassName()}[3];
     		 
-    		for(int i = 0; i < 3; i++){
+    		/*for(int i = 0; i < 3; i++){
 				${host.getPojoClassName()} p1 = new ${host.getPojoClassName()}();
 #foreach($field in ${host.getFields()})
     		 	p1.set${field.getCapitalizedName()}(${helper.getMockValForUnitTest($field,"i")});
@@ -62,7 +62,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
     		 	
     		 }
     		 
-    		 //cleanupsqls = new String[]{"delete from ${host.getTableName()} where 1=0"};
+    		 cleanupsqls = new String[]{"delete from ${host.getTableName()} where 1=0"};*/
 		
 		}catch(Exception e){
 			e.printStackTrace();

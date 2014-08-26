@@ -55,7 +55,19 @@ public class ${host.getDbName()}SpDaoUnitTest {
 		}
 	}
 #foreach($h in $host.getSpHosts())
-	//Test call${h.getPojoClassName()} method
+	//Test batch call ${h.getSpName()} method
+	@Test
+	public void testCall${h.getPojoClassName()}(){
+		${h.getPojoClassName()} params = null;// TODO: Test data
+		try{
+			int[] ret = dao.batchCall${h.getPojoClassName()}(params, new DalHints()));
+			assertTrue(ret != null);
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//Test call ${h.getSpName()} method
 	@Test
 	public void testCall${h.getPojoClassName()}(){
 		${h.getPojoClassName()} param = new ${h.getPojoClassName()}();	

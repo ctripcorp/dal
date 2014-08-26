@@ -13,6 +13,22 @@ public class ${host.getDbName()}SpDao {
 	}
 	
 #foreach($h in $host.getSpHosts())
+	public int[] batchCall${h.getPojoClassName()}(${h.getPojoClassName()}[] params, DalHints hints) throws SQLException{
+		if(null == params || params.length == 0)
+			return new int[]{};
+		String callString = "{call ${h.getSpName()}(${h.getCallParameters()})}";
+		StatementParameters[] parametersList= new StatementParameters[params.length];
+		for(int i = 0; i< params.length; i++){
+			StatementParameters parameters = new StatementParameters();
+#foreach($p in $h.getFields())
+		    parameters.set("${p.getName()}", ${p.getJavaTypeDisplay()}, params[i].get${p.getCapitalizedName()}());		
+#end
+	       parametersList[i] = parameters;
+		}
+		
+		return this.client.batchCall(callString, parametersList, hints);
+	}
+	
 	public Map<String, ?> call${h.getPojoClassName()}(${h.getPojoClassName()} param, DalHints hints) throws SQLException {
 		String callString = "{call ${h.getSpName()}(${h.getCallParameters()})}";
 		StatementParameters parameters = new StatementParameters();

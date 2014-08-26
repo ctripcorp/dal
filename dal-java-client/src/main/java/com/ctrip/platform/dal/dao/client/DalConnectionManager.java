@@ -68,9 +68,9 @@ public class DalConnectionManager {
 				throw new DalException(ErrorCode.ShardLocated, logicDbName);
 			dbSet.validate(shard);
 			
-			allInOneKey = dbSet.getRandomRealDbName(shard, isMaster, isSelect);
+			allInOneKey = dbSet.getRandomRealDbName(hints.get(), shard, isMaster, isSelect);
 		} else {
-			allInOneKey = dbSet.getRandomRealDbName(isMaster, isSelect);
+			allInOneKey = dbSet.getRandomRealDbName(hints.get(), isMaster, isSelect);
 		}
 		
 		try {
@@ -89,18 +89,15 @@ public class DalConnectionManager {
 			return _doInConnection(action, hints);;
 			
 		T result = null;
-		SQLException ex = null;
-		
-		int retryCount = 0;
-		int maxRetry = 2;
-		do {
-			ex = null;
+		DalHA highAvalible = new DalHA();
+		hints.set(highAvalible);
+		do{
 			try {
 				result = _doInConnection(action, hints);
 			} catch (SQLException e) {
-				ex = e;
+				highAvalible.update(e);
 			}
-		} while(ex != null && retryCount++ < maxRetry && DalHAManager.isFailOverable(ex));
+		}while(highAvalible.isAvalible());
 		
 		return result;
 	}
@@ -120,10 +117,11 @@ public class DalConnectionManager {
 		} finally {
 			action.populateDbMeta();
 			action.cleanup();
+			if(hints.get() != null)
+				hints.get().clear();
 		}
 		
 		action.end(result, ex);
-
 		return result;
 	}
 }

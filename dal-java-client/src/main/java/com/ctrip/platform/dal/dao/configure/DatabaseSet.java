@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 
 public class DatabaseSet {
@@ -130,27 +131,70 @@ public class DatabaseSet {
 		return slaveDbByShard.get(shard);
 	}
 	
-	public String getRandomRealDbName(String shard, boolean isMaster, boolean isSelect) {
-		return getRandomRealDbName(isMaster, isSelect, getMasterDbs(shard), getSlaveDbs(shard));
+	public String getRandomRealDbName(DalHA ha, String shard, boolean isMaster, boolean isSelect) {
+		return getRandomRealDbName(ha, isMaster, isSelect, getMasterDbs(shard), getSlaveDbs(shard));
 	}
 	
-	public String getRandomRealDbName(boolean isMaster, boolean isSelect) {
-		return getRandomRealDbName(isMaster, isSelect, masterDbs, slaveDbs);
+	public String getRandomRealDbName(DalHA ha, boolean isMaster, boolean isSelect) {
+		return getRandomRealDbName(ha, isMaster, isSelect, masterDbs, slaveDbs);
 	}
 	
-	private String getRandomRealDbName(boolean isMaster, boolean isSelect, List<DataBase> masterCandidates, List<DataBase> slaveCandidates) {
+	private String getRandomRealDbName(DalHA ha, boolean isMaster, boolean isSelect, List<DataBase> masterCandidates, List<DataBase> slaveCandidates) {
 		if (isMaster)
-			return getRandomRealDbName(masterCandidates);
+			return getRandomRealDbName(ha, masterCandidates);
 		
 		if (isSelect && slaveCandidates.size() > 0)
-			getRandomRealDbName(slaveCandidates);
+			return getRandomRealDbName(ha, slaveCandidates);
 
-		return getRandomRealDbName(masterCandidates);
+		return getRandomRealDbName(ha, masterCandidates);
 	}
 	
-	private String getRandomRealDbName(List<DataBase> dbs) {
-		int index = (int)(Math.random() * dbs.size());
-		return dbs.get(index).getConnectionString();
+	private String getRandomRealDbName(DalHA ha, List<DataBase> dbs) {
+		if(null != ha){
+			if(ha.isRetry() && ha.getDB() != null){
+				return ha.getDB();
+			}else if(ha.isFailOver()){
+				List<String> dbNames = new ArrayList<String>();
+				for (DataBase database : dbs) {
+					if(!ha.contains(database.getConnectionString()))
+						dbNames.add(database.getConnectionString());
+				}
+				if(dbNames.isEmpty()){
+					ha.setOver(true);
+					return null;
+				}else{
+					int index = (int)(Math.random() * dbNames.size());
+					ha.addDB(dbNames.get(index));
+					return dbNames.get(index);
+				}
+			}else{
+				int index = (int)(Math.random() * dbs.size());	
+				ha.addDB(dbs.get(index).getConnectionString());
+				return dbs.get(index).getConnectionString();
+			}
+		}else{
+			int index = (int)(Math.random() * dbs.size());	
+			return dbs.get(index).getConnectionString();
+		}
+		/*if(ha != null && ha.isRetry()){
+			if(ha.getDB() == null){
+				int index = (int)(Math.random() * dbs.size());	
+				ha.addDB(dbs.get(index).getConnectionString());
+			}
+			return ha.getDB();
+		}else if(ha != null && ha.isFailOver())
+		{
+			List<String> dbNames = new ArrayList<String>();
+			for (DataBase database : dbs) {
+				if(!ha.contains(database.getConnectionString()))
+					dbNames.add(database.getConnectionString());
+			}
+			int index = (int)(Math.random() * dbNames.size());
+			ha.addDB(dbNames.get(index));
+			return dbNames.get(index);
+		}else{
+			int index = (int)(Math.random() * dbs.size());	
+			return dbs.get(index).getConnectionString();
+		}*/
 	}
-
 }

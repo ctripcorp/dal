@@ -61,5 +61,11 @@
   			<artifactId>p-unit-extension</artifactId>
   			<version>0.15.319</version>
 		</dependency>
+		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymockclassextension</artifactId>
+			<version>2.3</version>
+		</dependency>
+		
 	</dependencies>
 </project>

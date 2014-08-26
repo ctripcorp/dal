@@ -342,7 +342,6 @@ public class DalDirectClient implements DalClient {
 	
 	public Connection getConnection(DalHints hints, ConnectionAction<?> action) throws SQLException {
 		action.connHolder = transManager.getConnection(hints, action.operation);
-		action.usedDbs.add(action.connHolder.getMeta().getAllInOneKey());
 		return action.connHolder.getConn();
 	}
 	

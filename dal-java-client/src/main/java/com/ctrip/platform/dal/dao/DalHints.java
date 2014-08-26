@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.ctrip.platform.dal.dao.client.DalHA;
+
 /**
  * Additional parameters used to indicate how DAL behaves for each of the operation.
  * 
@@ -40,6 +42,14 @@ public class DalHints {
 	
 	public Object get(DalHintEnum hint) {
 		return hints.get(hint);
+	}
+	
+	public DalHA get(){
+		return (DalHA)hints.get(DalHintEnum.heighAvaliable);
+	}
+	
+	public void set(DalHA ha){
+		hints.put(DalHintEnum.heighAvaliable, ha);
 	}
 	
 	public Integer getInt(DalHintEnum hint, int defaultValue) {

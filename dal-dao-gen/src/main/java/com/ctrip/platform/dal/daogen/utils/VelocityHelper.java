@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.daogen.utils;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
 
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;

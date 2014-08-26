@@ -5,8 +5,11 @@ import java.sql.SQLException;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalRowMapper;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 
 public class Database {
 	
@@ -46,7 +49,7 @@ public class Database {
 	}
 	
 	public void mock() throws SQLException{
-		this.batchUpdate(this.initScript.mockData());
+		this.client.batchUpdate(this.initScript.mockData(), new DalHints());
 	}
 	
 	public void clear() throws SQLException{
@@ -74,6 +77,11 @@ public class Database {
 	}
 
 	private void batchUpdate(String... sqls) throws SQLException{
-		this.client.batchUpdate(sqls, new DalHints());
+		DalHints hints = new DalHints();
+		hints.set(DalHintEnum.operation, DalEventEnum.UPDATE_SIMPLE);
+		StatementParameters parameters = new StatementParameters();
+		for (String sql : sqls) {
+			this.client.update(sql, parameters, hints);
+		}
 	}
 }

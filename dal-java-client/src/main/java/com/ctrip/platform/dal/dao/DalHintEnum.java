@@ -101,6 +101,8 @@ public enum DalHintEnum {
 	 */
 	masterOnly, 
 	
+	heighAvaliable,
+	
 	/* 
 	 * For insert, delete, update multiple pojos 
 	 */ 

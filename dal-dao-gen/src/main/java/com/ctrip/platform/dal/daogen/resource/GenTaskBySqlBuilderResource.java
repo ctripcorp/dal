@@ -196,6 +196,13 @@ public class GenTaskBySqlBuilderResource {
 			}
 			
 			int index = 0;
+			
+			if("update".equalsIgnoreCase(crud_type) && !fields.isEmpty()){
+				for(String field : fields.split(",") ){
+					paramsTypes[index++] = map.get(field.toLowerCase());
+				}
+ 			}
+			
 			for(String param : parameters){
 				String columnName = param.split(",")[0].toLowerCase();
 				if("6".equals(param.split(",")[1])){
@@ -205,12 +212,6 @@ public class GenTaskBySqlBuilderResource {
 					paramsTypes[index++] = map.get(columnName);
 				}
 			}
-			
-			if("update".equalsIgnoreCase(crud_type) && !fields.isEmpty()){
-				for(String field : fields.split(",") ){
-					paramsTypes[index++] = map.get(field.toLowerCase());
-				}
- 			}
 			
 			String tempSQL = sql_content;
 			Validation validResult;
@@ -223,6 +224,7 @@ public class GenTaskBySqlBuilderResource {
 				}
 				
 				validResult = null;
+				tempSQL = tempSQL.replaceAll("[@:]\\w+", "?");
 				if ("select".equalsIgnoreCase(crud_type)) {
 					validResult = SQLValidation.queryValidate(dbName,
 							tempSQL, paramsTypes);

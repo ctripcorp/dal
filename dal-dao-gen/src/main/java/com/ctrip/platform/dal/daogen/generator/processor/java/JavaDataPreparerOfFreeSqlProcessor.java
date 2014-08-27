@@ -60,13 +60,12 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 			prepareDbFromFreeSql(ctx, daoByFreeSql.getTasksByProjectId(projectId));
 		}
 
-		// 首先按照ServerID, DbName以及ClassName做一次GroupBy，但是ClassName不区分大小写
+		// 按照DbName以及ClassName做一次GroupBy(相同DbName的GenTaskByFreeSql作为一组)，且ClassName不区分大小写
 		final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(_freeSqls);
 
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
-		// 随后，以ServerID, DbName以及ClassName为维度，为每个维度生成一个DAO类
-		for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy
-				.entrySet()) {
+		// 以DbName以及ClassName为维度，为每个维度生成一个DAO类
+		for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy.entrySet()) {
 			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
 				public ExecuteResult call() throws Exception {				
@@ -95,23 +94,15 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 						method.setCrud_type(task.getCrud_type());
 						method.setComments(task.getComment());
 						if(task.getPojo_name() != null && !task.getPojo_name().isEmpty())
-							method.setPojoClassName(WordUtils.capitalize(task
-									.getPojo_name() + "Pojo"));
+							method.setPojoClassName(WordUtils.capitalize(task.getPojo_name() + "Pojo"));
 						List<JavaParameterHost> params = new ArrayList<JavaParameterHost>();
-						for (String param : StringUtils.split(
-								task.getParameters(), ";")) {
-							if (param.contains("HotelAddress")) {
-								System.out.println("");
-							}
-							String[] splitedParam = StringUtils.split(param,
-									",");
+						for (String param : StringUtils.split(task.getParameters(), ";")) {
+							String[] splitedParam = StringUtils.split(param, ",");
 							JavaParameterHost p = new JavaParameterHost();
 							p.setName(splitedParam[0]);
 							p.setSqlType(Integer.valueOf(splitedParam[1]));
-							p.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(p
-									.getSqlType()));
-							p.setValidationValue(DbUtils.mockATest(p
-									.getSqlType()));
+							p.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(p.getSqlType()));
+							p.setValidationValue(DbUtils.mockATest(p.getSqlType()));
 							params.add(p);
 						}
 						method.setParameters(params);
@@ -123,17 +114,14 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 
 							List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
 
-							for (AbstractParameterHost _ahost : DbUtils
-									.testAQuerySql(task.getDb_name(),
-											task.getSql_content(),
-											task.getParameters(),
+							for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(task.getDb_name(),
+											task.getSql_content(), task.getParameters(),
 											CurrentLanguage.Java, false)) {
 								paramHosts.add((JavaParameterHost) _ahost);
 							}
 
 							method.setFields(paramHosts);
-							_freeSqlPojoHosts.put(method.getPojoClassName(),
-									method);
+							_freeSqlPojoHosts.put(method.getPojoClassName(), method);
 						}
 					}
 					host.setMethods(methods);
@@ -154,6 +142,12 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 		}
 	}
 	
+	/**
+	 * 按照DbName以及ClassName做一次GroupBy(相同DbName的GenTaskByFreeSql作为一组)，
+	 * 且ClassName不区分大小写
+	 * @param tasks
+	 * @return
+	 */
 	private Map<String, List<GenTaskByFreeSql>> freeSqlGroupBy(
 			List<GenTaskByFreeSql> tasks) {
 		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();

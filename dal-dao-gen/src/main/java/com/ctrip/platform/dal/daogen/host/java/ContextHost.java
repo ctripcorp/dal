@@ -7,6 +7,7 @@ import java.util.Map;
 import com.ctrip.platform.dal.daogen.entity.Resource;
 
 public class ContextHost {
+	//<Resource name, Resource>
 	private Map<String, Resource> resources = new HashMap<String, Resource>();
 	
 	private String docBase = "";

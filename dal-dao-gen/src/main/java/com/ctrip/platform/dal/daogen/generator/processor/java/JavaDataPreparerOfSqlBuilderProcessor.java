@@ -39,10 +39,10 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
 		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.get_sqlBuilders();
 		final Queue<JavaTableHost> _tableHosts = ctx.get_tableHosts();
 		if (_sqlBuilders.size() > 0) {
+			//按照DbName和TableName进行分组
 			Map<String, GenTaskBySqlBuilder> _TempSqlBuildres = sqlBuilderBroupBy(_sqlBuilders);
 
-			for (final Map.Entry<String, GenTaskBySqlBuilder> _table : _TempSqlBuildres
-					.entrySet()) {
+			for (final Map.Entry<String, GenTaskBySqlBuilder> _table : _TempSqlBuildres.entrySet()) {
 				Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 
 					@Override

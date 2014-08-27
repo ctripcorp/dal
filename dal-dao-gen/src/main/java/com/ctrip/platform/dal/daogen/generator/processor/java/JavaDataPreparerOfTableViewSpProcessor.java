@@ -85,12 +85,9 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 		final Map<String, SpDbHost> _spHostMaps = ctx.get_spHostMaps();
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 		for (final GenTaskByTableViewSp tableViewSp : _tableViewSps) {
-			final String[] viewNames = StringUtils.split(
-					tableViewSp.getView_names(), ",");
-			final String[] tableNames = StringUtils.split(
-					tableViewSp.getTable_names(), ",");
-			final String[] spNames = StringUtils.split(
-					tableViewSp.getSp_names(), ",");
+			final String[] viewNames = StringUtils.split(tableViewSp.getView_names(), ",");
+			final String[] tableNames = StringUtils.split(tableViewSp.getTable_names(), ",");
+			final String[] spNames = StringUtils.split(tableViewSp.getSp_names(), ",");
 
 			results.addAll(prepareTable(ctx, progress, _tableHosts, tableViewSp, tableNames));
 			
@@ -119,13 +116,11 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 						SpHost spHost = buildSpHost(ctx, tableViewSp, spName);
 						if (null != spHost) {
 							if (!_spHostMaps.containsKey(spHost.getDbName())) {
-								SpDbHost spDbHost = new SpDbHost(
-										spHost.getDbName(),
+								SpDbHost spDbHost = new SpDbHost(spHost.getDbName(),
 										spHost.getPackageName());
 								_spHostMaps.put(spHost.getDbName(), spDbHost);
 							}
-							_spHostMaps.get(spHost.getDbName()).addSpHost(
-									spHost);
+							_spHostMaps.get(spHost.getDbName()).addSpHost(spHost);
 							_spHosts.add(spHost);
 						}
 						result.setSuccessal(true);
@@ -173,16 +168,16 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 			final Progress progress, final Queue<JavaTableHost> _tableHosts,
 			final GenTaskByTableViewSp tableViewSp, final String[] tableNames) {
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
-		for (final String table : tableNames) {
+		for (final String tableName : tableNames) {
 			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
 				public ExecuteResult call() throws Exception {
 					/*progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildTable:"
 							+ table);*/
-					ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getDb_name() + "." + table + "] Host");
+					ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getDb_name() + "." + tableName + "] Host");
 					progress.setOtherMessage(result.getTaskName());
 					try{
-						JavaTableHost tableHost = buildTableHost(ctx, tableViewSp, table);
+						JavaTableHost tableHost = buildTableHost(ctx, tableViewSp, tableName);
 						result.setSuccessal(true);
 					if (null != tableHost)
 						_tableHosts.add(tableHost);

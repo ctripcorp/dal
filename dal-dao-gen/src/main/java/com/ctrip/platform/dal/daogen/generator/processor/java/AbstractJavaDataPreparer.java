@@ -59,30 +59,30 @@ public class AbstractJavaDataPreparer{
 	}
 	
 	protected JavaTableHost buildTableHost(CodeGenContext codeGenCtx, GenTaskByTableViewSp tableViewSp,
-			String table) throws Exception {
+			String tableName) throws Exception {
 		JavaCodeGenContext ctx = (JavaCodeGenContext)codeGenCtx;
-		if(!DbUtils.tableExists(tableViewSp.getDb_name(), table)){
-			throw new Exception(String.format("The table doesn't exist, pls check", tableViewSp.getDb_name(), table));
+		if(!DbUtils.tableExists(tableViewSp.getDb_name(), tableName)){
+			throw new Exception(String.format("The table doesn't exist, pls check", tableViewSp.getDb_name(), tableName));
 		}
 		JavaTableHost tableHost = new JavaTableHost();
 		tableHost.setPackageName(ctx.getNamespace());
 		tableHost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getDb_name()));
 		tableHost.setDbName(tableViewSp.getDatabaseSetName());
-		tableHost.setTableName(table);
+		tableHost.setTableName(tableName);
 		tableHost.setPojoClassName(getPojoClassName(tableViewSp.getPrefix(),
-				tableViewSp.getSuffix(), table));
+				tableViewSp.getSuffix(), tableName));
 		tableHost.setSp(tableViewSp.isCud_by_sp());
 		tableHost.setApi_list(tableViewSp.getApi_list());
 
 		// 主键及所有列
 		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
-				tableViewSp.getDb_name(), table);
+				tableViewSp.getDb_name(), tableName);
 		List<AbstractParameterHost> allColumnsAbstract = DbUtils
-				.getAllColumnNames(tableViewSp.getDb_name(), table,
+				.getAllColumnNames(tableViewSp.getDb_name(), tableName,
 						CurrentLanguage.Java);
 		if(null == allColumnsAbstract){
 			throw new Exception(String.format("The column names of tabel[%s, %s] is null", 
-					tableViewSp.getDb_name(), table));
+					tableViewSp.getDb_name(), tableName));
 		}
 		List<JavaParameterHost> allColumns = new ArrayList<JavaParameterHost>();
 		for (AbstractParameterHost h : allColumnsAbstract) {
@@ -103,10 +103,9 @@ public class AbstractJavaDataPreparer{
 			}
 		}
 
-		List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(ctx, tableViewSp.getDb_name(), table);
+		List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(ctx, tableViewSp.getDb_name(), tableName);
 
-		List<JavaMethodHost> methods = buildMethodHosts(allColumns,
-				currentTableBuilders);
+		List<JavaMethodHost> methods = buildMethodHosts(allColumns, currentTableBuilders);
 
 		tableHost.setFields(allColumns);
 		tableHost.setPrimaryKeys(primaryKeys);
@@ -115,12 +114,9 @@ public class AbstractJavaDataPreparer{
 		tableHost.setMethods(methods);
 
 		if (tableHost.isSp()) {
-			tableHost.setSpInsert(getSpaOperation(
-					tableViewSp.getDb_name(), table, "i"));
-			tableHost.setSpUpdate(getSpaOperation(
-					tableViewSp.getDb_name(), table, "u"));
-			tableHost.setSpDelete(getSpaOperation(
-					tableViewSp.getDb_name(), table, "d"));
+			tableHost.setSpInsert(getSpaOperation(tableViewSp.getDb_name(), tableName, "i"));
+			tableHost.setSpUpdate(getSpaOperation(tableViewSp.getDb_name(), tableName, "u"));
+			tableHost.setSpDelete(getSpaOperation(tableViewSp.getDb_name(), tableName, "d"));
 		}
 		return tableHost;
 	}
@@ -134,8 +130,8 @@ public class AbstractJavaDataPreparer{
 		return dbCategory;
 	}
 	
-	protected String getPojoClassName(String prefix, String suffix, String table) {
-		String className = table;
+	protected String getPojoClassName(String prefix, String suffix, String tableName) {
+		String className = tableName;
 		if (null != prefix && !prefix.isEmpty()) {
 			className = className.substring(prefix.length());
 		}
@@ -151,7 +147,7 @@ public class AbstractJavaDataPreparer{
 		return WordUtils.capitalize(result.toString());
 	}
 	
-	private List<GenTaskBySqlBuilder> filterExtraMethods(CodeGenContext codeGenCtx, String dbName, String table) {
+	private List<GenTaskBySqlBuilder> filterExtraMethods(CodeGenContext codeGenCtx, String dbName, String tableName) {
 		
 		JavaCodeGenContext ctx = (JavaCodeGenContext)codeGenCtx;
 		
@@ -163,7 +159,7 @@ public class AbstractJavaDataPreparer{
 		while (iter.hasNext()) {
 			GenTaskBySqlBuilder currentSqlBuilder = iter.next();
 			if (currentSqlBuilder.getDb_name().equals(dbName)
-					&& currentSqlBuilder.getTable_name().equals(table)) {
+					&& currentSqlBuilder.getTable_name().equals(tableName)) {
 				currentTableBuilders.add(currentSqlBuilder);
 				iter.remove();
 			}
@@ -175,8 +171,7 @@ public class AbstractJavaDataPreparer{
 	private SpOperationHost getSpaOperation(String dbName, String tableName,
 			String operation) throws Exception {
 		List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(dbName);
-		return SpOperationHost.getSpaOperation(dbName, tableName, allSpNames,
-				operation);
+		return SpOperationHost.getSpaOperation(dbName, tableName, allSpNames, operation);
 	}
 	
 	private List<JavaMethodHost> buildMethodHosts(
@@ -207,8 +202,7 @@ public class AbstractJavaDataPreparer{
 					method.setFields(paramHosts);
 				}
 				
-				String[] conditions = StringUtils.split(builder.getCondition(),
-						";");
+				String[] conditions = StringUtils.split(builder.getCondition(), ";");
 				for (String condition : conditions) {
 					String[] tokens = StringUtils.split(condition, ",");
 					String name = tokens[0];
@@ -216,21 +210,16 @@ public class AbstractJavaDataPreparer{
 					String alias = tokens.length >= 3 ? tokens[2] : "";
 					for (JavaParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
-							JavaParameterHost host_ls = new JavaParameterHost(
-									pHost);
+							JavaParameterHost host_ls = new JavaParameterHost(pHost);
 							host_ls.setAlias(alias);
 							host_ls.setConditional(true);
 							if (-1 != type)
-								host_ls.setConditionType(ConditionType
-										.valueOf(type));
+								host_ls.setConditionType(ConditionType.valueOf(type));
 							parameters.add(host_ls);
 							// Between need an extra parameter
-							if (ConditionType.Between == host_ls
-									.getConditionType()) {
-								JavaParameterHost host_bw = new JavaParameterHost(
-										host_ls);
-								String alias_bw = tokens.length >= 4 ? tokens[3]
-										: "";
+							if (ConditionType.Between == host_ls.getConditionType()) {
+								JavaParameterHost host_bw = new JavaParameterHost(host_ls);
+								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
 								host_bw.setAlias(alias_bw);
 								parameters.add(host_bw);
 							}
@@ -254,13 +243,11 @@ public class AbstractJavaDataPreparer{
 			// Have both set and condition clause
 			else {
 				String[] fields = StringUtils.split(builder.getFields(), ",");
-				String[] conditions = StringUtils.split(builder.getCondition(),
-						";");
+				String[] conditions = StringUtils.split(builder.getCondition(), ";");
 				for (String field : fields) {
 					for (JavaParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(field)) {
-							JavaParameterHost host_ls = new JavaParameterHost(
-									pHost);
+							JavaParameterHost host_ls = new JavaParameterHost(pHost);
 							parameters.add(host_ls);
 							break;
 						}
@@ -274,24 +261,19 @@ public class AbstractJavaDataPreparer{
 					String alias = tokens.length >= 3 ? tokens[2] : "";
 					for (JavaParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
-							JavaParameterHost host_ls = new JavaParameterHost(
-									pHost);
+							JavaParameterHost host_ls = new JavaParameterHost(pHost);
 							host_ls.setAlias(alias);
 							host_ls.setConditional(true);
 							if (-1 != type)
-								host_ls.setConditionType(ConditionType
-										.valueOf(type));
+								host_ls.setConditionType(ConditionType.valueOf(type));
 							if (ConditionType.In == host_ls.getConditionType()) {
 
 							}
 							parameters.add(host_ls);
 							// Between need an extra parameter
-							if (ConditionType.Between == host_ls
-									.getConditionType()) {
-								JavaParameterHost host_bw = new JavaParameterHost(
-										host_ls);
-								String alias_bw = tokens.length >= 4 ? tokens[3]
-										: "";
+							if (ConditionType.Between == host_ls.getConditionType()) {
+								JavaParameterHost host_bw = new JavaParameterHost(host_ls);
+								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
 								host_bw.setAlias(alias_bw);
 								parameters.add(host_bw);
 							}

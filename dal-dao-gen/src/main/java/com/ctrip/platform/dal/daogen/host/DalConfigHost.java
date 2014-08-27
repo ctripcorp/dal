@@ -10,7 +10,9 @@ import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 
 public class DalConfigHost {
 	private String name;
+	//<DatabaseSet ID, DatabaseSet>
 	private Map<Integer, DatabaseSet> databaseSet;
+	//<DatabaseSet ID,<DatabaseSetEntry ID, DatabaseSetEntry>>
 	private Map<Integer, HashMap<Integer, DatabaseSetEntry>> databaseSetEntries;
 	
 	public DalConfigHost(String name){

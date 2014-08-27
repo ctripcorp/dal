@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
-import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 

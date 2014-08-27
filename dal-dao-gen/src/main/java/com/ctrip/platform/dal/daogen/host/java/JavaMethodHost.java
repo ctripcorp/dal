@@ -183,7 +183,7 @@ public class JavaMethodHost {
 			else
 				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
 		}
-		if(this.paging && this.crud_type == "select"){
+		if(this.paging && this.crud_type.equalsIgnoreCase("select")){
 			paramsDeclaration.add("int pageNo");
 			paramsDeclaration.add("int pageSize");
 		}

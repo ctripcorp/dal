@@ -223,6 +223,7 @@ public class GenTaskBySqlBuilderResource {
 				}
 				
 				validResult = null;
+				tempSQL = tempSQL.replaceAll("[@:]\\w+", "?");
 				if ("select".equalsIgnoreCase(crud_type)) {
 					validResult = SQLValidation.queryValidate(dbName,
 							tempSQL, paramsTypes);

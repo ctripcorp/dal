@@ -224,11 +224,11 @@ public class SQLValidation {
 			case java.sql.Types.SMALLINT:
 			case java.sql.Types.INTEGER:
 			case java.sql.Types.BIGINT:
-				return 1;
+				return 101;
 			case java.sql.Types.REAL:
 			case java.sql.Types.DOUBLE:
 			case java.sql.Types.DECIMAL:
-				return 1.0;
+				return 101.0;
 			case java.sql.Types.CHAR:
 				return 't';
 			case java.sql.Types.DATE:

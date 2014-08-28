@@ -203,7 +203,7 @@
 							data-original-title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>
 							2、目前，DAO代码生成方式有三种：<br/>
 							&nbsp;2.1、标准DAO：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
-							&nbsp;2.2、构建SQL（生成的代码绑定到模板）：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
+							&nbsp;2.2、构建SQL：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
 							&nbsp;2.3、自定义SQL：在这种模式下面，我们可以自定义SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
 							"> <img style="margin-bottom:15px;height:25px;width:25px" class="helpicon" id="help"
 							src="/static/images/help.jpg">
@@ -465,17 +465,25 @@
                         </div>
                      </div>
                   </div>
-               
-                  <div class="steps step2-3 row-fluid" from="" style="height:348px;">
+                  
+                  <div class="steps step2-3-1 row-fluid" from="" style="height:auto;">
                   	 <div class="row-fluid" style="margin-bottom:12px">
 	                  		<div class="control-group">
 	                           <label class="control-label popup_label" style="width:90px;">操作类型：</label>
 	                           <select id="free_sql_crud_option" class="span5">
 	                              <option value="select">查询</option>
-	                              <option value="update">更新</option>
+	                              <option value="update">增删改</option>
 	                           </select>
 	                        </div>
 	                  </div>
+                     <div class="row-fluid">
+                        <div class="control-group">
+                           <label class="control-label popup_label" style="width:90px;">方法名：</label>
+                           <input  id="sql_method_name" class="span9 input-sm" type="text">
+                        </div>
+                     </div>
+                  </div>
+                  <div class="steps step2-3-2 row-fluid" from="" style="height:348px;">
                      <div class="row-fluid">
                         <div class="control-group">
                             <label class="control-label popup_label" style="width:90px;">DAO类名：</label>
@@ -486,12 +494,6 @@
                         <div class="control-group">
                            <label class="control-label popup_label" style="width:90px;">实体类名：</label>
                             <select id="sql_pojo_name" class="span9"></select>
-                        </div>
-                     </div>
-                     <div class="row-fluid">
-                        <div class="control-group">
-                           <label class="control-label popup_label" style="width:90px;">方法名：</label>
-                           <input  id="sql_method_name" class="span9 input-sm" type="text">
                         </div>
                      </div>
                       <div class="row-fluid" id="free_sql_scalarTypeDiv" style="margin-top:12px">
@@ -508,13 +510,13 @@
 	                           </label>                           
 	                        </div>
 	                  </div>
-                      <label class="control-label popup_label">输入查询SQL，占位符：Java请使用?或者:Name形式，c#请使用@Name形式</label>
+                      <label class="control-label popup_label">输入SQL，占位符：Java请使用?或者:Name形式，c#请使用@Name形式</label>
                       <div class="row-fluid">
                          <div id="sql_editor" class="span12" style="height:200px;">
                          </div>
                       </div>
                   </div>
-                  <div class="steps step2-3-1 row-fluid" from="">
+                  <div class="steps step2-3-3 row-fluid" from="">
                      <div class="row-fluid" id="param_list_free_div">
                            <label class="control-label popup_label">填写参数名/参数Index，并选择数据类型</label>
                      </div>  

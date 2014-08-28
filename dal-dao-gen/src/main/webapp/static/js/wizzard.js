@@ -312,7 +312,7 @@
             });
 
         current.hide();
-        $(".step2-3").show();
+        $(".step2-3-1").show();
         window.sql_builder.getDatabaseCategory();
     };
 
@@ -650,7 +650,17 @@
         window.ajaxutil.post_task();
     };
 
-    var step2_3 = function(record,current){
+    var step2_3_1 = function(record, current){
+        var sql_method_name = $.trim($("#sql_method_name").val());
+        if(sql_method_name==null || sql_method_name==""){
+            $("#error_msg").html("请输入方法名");
+            return;
+        }
+        current.hide();
+        $(".step2-3-2").show();
+    };
+
+    var step2_3_2 = function(record,current){
         //首先解析Sql语句，提取出参数
         var regexIndex = /(\?{1})/igm;
         var regexNames = /[@:](\w+)/igm;
@@ -725,12 +735,12 @@
         window.sql_builder.buildPagingSQL(function(){
             $("#error_msg").html(" ");
             current.hide();
-            $(".step2-3-1").show();
+            $(".step2-3-3").show();
         });
 
     };
 
-    var step2_3_1 = function(){
+    var step2_3_3 = function(){
         window.ajaxutil.post_task();
     };
 
@@ -775,14 +785,16 @@
                 step2_1_2();
             }else if (current.hasClass("step2-2")) {
                 step2_2(record, current);
-            } else if (current.hasClass("step2-2-1")) {
+            }else if (current.hasClass("step2-2-1")) {
                 step2_2_1(record, current);
-            } else if (current.hasClass("step2-2-2")) {
+            }else if (current.hasClass("step2-2-2")) {
                 step2_2_2();
-            } else if (current.hasClass("step2-3")) {
-                step2_3(record, current);
-            } else if (current.hasClass("step2-3-1")) {
-                step2_3_1();
+            }else if (current.hasClass("step2-3-1")) {
+                step2_3_1(record, current);
+            }else if (current.hasClass("step2-3-2")) {
+                step2_3_2(record, current);
+            }else if (current.hasClass("step2-3-3")) {
+                step2_3_3();
             }
         },
         previous: function (current) {
@@ -794,16 +806,18 @@
 
             if (current.hasClass("step2-1")
                 || current.hasClass("step2-2")
-                || current.hasClass("step2-3")) {
+                || current.hasClass("step2-3-1")) {
                 $(".step1").show();
             }else if(current.hasClass("step2-1-2")){
                 $(".step2-1").show();
-            }else if (current.hasClass("step2-2-1")) {
+            }else if(current.hasClass("step2-2-1")) {
                 $(".step2-2").show();
-            } else if (current.hasClass("step2-2-2")) {
+            }else if(current.hasClass("step2-2-2")) {
                 $(".step2-2-1").show();
-            }  else if (current.hasClass("step2-3-1")) {
-                $(".step2-3").show();
+            }else if(current.hasClass("step2-3-2")) {
+                $(".step2-3-1").show();
+            }else if(current.hasClass("step2-3-3")) {
+                $(".step2-3-2").show();
             }
         }
     };

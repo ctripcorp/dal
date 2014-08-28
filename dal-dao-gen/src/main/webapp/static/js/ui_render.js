@@ -83,8 +83,9 @@
         $(".step2-2-1-1").hide();
         $(".step2-2-1-2").hide();
         $(".step2-2-2").hide();
-        $(".step2-3").hide();
         $(".step2-3-1").hide();
+        $(".step2-3-2").hide();
+        $(".step2-3-3").hide();
         $("#page1").attr('is_update', '0');
         $("#page1").modal({
             "backdrop": "static"
@@ -114,8 +115,9 @@
         $(".step2-2-1-1").hide();
         $(".step2-2-1-2").hide();
         $(".step2-2-2").hide();
-        $(".step2-3").hide();
         $(".step2-3-1").hide();
+        $(".step2-3-2").hide();
+        $(".step2-3-3").hide();
         window.ajaxutil.reload_dbsets(function () {
             $("#databases")[0].selectize.setValue(record['databaseSetName']);
         });

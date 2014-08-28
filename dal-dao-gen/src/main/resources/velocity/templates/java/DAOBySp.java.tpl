@@ -13,6 +13,7 @@ public class ${host.getDbName()}SpDao {
 	}
 	
 #foreach($h in $host.getSpHosts())
+#if($h.isSp3())
 	/**
 	 * Batch call ${h.getSpName()} Store Procedure
 	**/
@@ -31,6 +32,7 @@ public class ${host.getDbName()}SpDao {
 		
 		return this.client.batchCall(callString, parametersList, hints);
 	}
+#end
 	
 	/**
 	 * Call ${h.getSpName()} Store Procedure

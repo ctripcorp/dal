@@ -13,6 +13,10 @@ public class ${host.getDbName()}SpDao {
 	}
 	
 #foreach($h in $host.getSpHosts())
+#if($h.isSp3())
+	/**
+	 * Batch call ${h.getSpName()} Store Procedure
+	**/
 	public int[] batchCall${h.getPojoClassName()}(${h.getPojoClassName()}[] params, DalHints hints) throws SQLException{
 		if(null == params || params.length == 0)
 			return new int[]{};
@@ -28,7 +32,11 @@ public class ${host.getDbName()}SpDao {
 		
 		return this.client.batchCall(callString, parametersList, hints);
 	}
+#end
 	
+	/**
+	 * Call ${h.getSpName()} Store Procedure
+	**/
 	public Map<String, ?> call${h.getPojoClassName()}(${h.getPojoClassName()} param, DalHints hints) throws SQLException {
 		String callString = "{call ${h.getSpName()}(${h.getCallParameters()})}";
 		StatementParameters parameters = new StatementParameters();

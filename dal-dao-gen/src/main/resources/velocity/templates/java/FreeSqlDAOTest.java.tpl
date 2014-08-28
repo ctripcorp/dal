@@ -29,6 +29,7 @@ public class ${host.getClassName()}DaoTest {
 #foreach($p in $method.getParameters())
 			${p.getClassDisplayName()} ${p.getAlias()}${suffix} = ${p.getValidationValue()};// Test value here
 #end
+#if($method.isQuery())
 #if($method.isSampleType())
 #if($method.isReturnList())
 		    List<${method.getPojoClassName()}> results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
@@ -46,6 +47,11 @@ public class ${host.getClassName()}DaoTest {
 			System.out.println(results${suffix});
 #end
 #end
+#else
+		    int results${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
+			System.out.println(results${suffix});
+#end
+
 #end
 			System.exit(1);
 		} catch (Exception e) {

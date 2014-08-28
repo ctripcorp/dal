@@ -101,7 +101,7 @@ public class AbstractCSharpDataPreparer{
 		tableHost.setExtraMethods(methods);
 		tableHost.setNameSpace(ctx.getNamespace());
 		tableHost.setDatabaseCategory(dbCategory);
-		tableHost.setDbSetName(tableViewSp.getDb_name());
+		tableHost.setDbSetName(tableViewSp.getDatabaseSetName());
 		tableHost.setTableName(table);
 		tableHost.setClassName(CommonUtils.normalizeVariable(getPojoClassName(
 				tableViewSp.getPrefix(), tableViewSp.getSuffix(), table)));

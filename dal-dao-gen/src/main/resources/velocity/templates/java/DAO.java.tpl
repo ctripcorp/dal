@@ -180,7 +180,7 @@ public class ${host.getPojoClassName()}Dao {
 		return (Integer)results.get(RET_CODE);
 	}
 #end
-#if($host.getSpInsert().getType=="sp3" && $host.generateAPI(8,29,39))
+#if($host.getSpInsert().getType()=="sp3" && $host.generateAPI(8,29,39))
 	/**
 	 * Batch insert without out parameters
 	 * Return how many rows been affected for each of parameters
@@ -267,7 +267,7 @@ public class ${host.getPojoClassName()}Dao {
 		return (Integer)results.get(RET_CODE);
 	}
 #end
-#if($host.getSpDelete()=="sp3" && $host.generateAPI(40))
+#if($host.getSpDelete().getType()=="sp3" && $host.generateAPI(40))
 	/**
 	 * Batch SP delete without out parameters
 	 * Return how many rows been affected for each of parameters
@@ -341,6 +341,28 @@ public class ${host.getPojoClassName()}Dao {
 #end	
 		return (Integer)results.get(RET_CODE);
 	}
+#*
+#if($host.getSpUpdate().getType()=="sp3") 
+	/**
+	 * Batch SP update without out parameters
+	 * Return how many rows been affected for each of parameters
+	 */
+	public int[] update(DalHints hints, ${host.getPojoClassName()}... daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.length == 0)
+			return new int[0];
+		hints = DalHints.createIfAbsent(hints);
+		String callSql = client.buildCallSql(UPDATE_SP_NAME, parser.getFields(daoPojos[0]).size());
+		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
+		for(int i = 0; i< daoPojos.length; i++){
+			StatementParameters parameters = new StatementParameters();
+			client.addParametersByName(parameters, parser.getFields(daoPojos[i]));
+			parametersList[i] = parameters;
+		}
+		return baseClient.batchCall(callSql, parametersList, hints);
+	}
+
+#end
+*#
 #end
 #else
 #if($host.generateAPI(12,33,41))
@@ -362,7 +384,7 @@ public class ${host.getPojoClassName()}Dao {
 		 * ${method.getComments()}
 		**/
 #if($method.getCrud_type() == "select")
-##简单类型并且返回值是List
+##绠€鍗曠被鍨嬪苟涓旇繑鍥炲€兼槸List
 #if($method.isSampleType() && $method.isReturnList())
 	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 #if($method.isPaging())
@@ -382,7 +404,7 @@ public class ${host.getPojoClassName()}Dao {
 		return queryDao.query(sql, parameters, hints, ${method.getPojoClassName()}.class);
 	}
 #end
-##简单类型并且返回值为Single
+##绠€鍗曠被鍨嬪苟涓旇繑鍥炲€间负Single
 #if($method.isSampleType() && $method.isReturnSingle())
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
@@ -397,7 +419,7 @@ public class ${host.getPojoClassName()}Dao {
 		return queryDao.queryForObjectNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
 	}
 #end
-##简单类型且返回值为First
+##绠€鍗曠被鍨嬩笖杩斿洖鍊间负First
 #if($method.isSampleType() && $method.isReturnFirst())
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
@@ -412,7 +434,7 @@ public class ${host.getPojoClassName()}Dao {
 		return queryDao.queryFirstNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
 	}
 #end
-##实体类型并且返回值为List
+##瀹炰綋绫诲瀷骞朵笖杩斿洖鍊间负List
 #if($method.isReturnList() && !$method.isSampleType())
 	public List<${host.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 #if($method.isPaging())
@@ -432,7 +454,7 @@ public class ${host.getPojoClassName()}Dao {
 		return queryDao.query(sql, parameters, hints, parser);
 	}
 #end
-##实体类型且返回Signle
+##瀹炰綋绫诲瀷涓旇繑鍥濻ignle
 #if($method.isReturnSingle() && !$method.isSampleType())
 	public ${host.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
@@ -447,7 +469,7 @@ public class ${host.getPojoClassName()}Dao {
 		return queryDao.queryForObjectNullable(sql, parameters, hints, parser);
 	}
 #end
-##实体类型且返回First
+##瀹炰綋绫诲瀷涓旇繑鍥濬irst
 #if($method.isReturnFirst() && !$method.isSampleType())
 	public ${host.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";

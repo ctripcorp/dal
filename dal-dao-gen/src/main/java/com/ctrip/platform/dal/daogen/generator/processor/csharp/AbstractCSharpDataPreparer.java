@@ -172,10 +172,9 @@ public class AbstractCSharpDataPreparer{
 			Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(builder.getSql_content());
 			int index = 0;
 			String temp=builder.getSql_content();
-			while(m.find())
-	    	{
+			while(m.find()){
 				temp = temp.replace(m.group(1), String.format("({%d}) ", index));
-				index ++;
+				index++;
 	    	}
 			method.setSql(temp);
 			method.setScalarType(builder.getScalarType());
@@ -186,39 +185,33 @@ public class AbstractCSharpDataPreparer{
 					|| method.getCrud_type().equals("delete")) {
 				if(method.getCrud_type().equals("select")){
 					List<AbstractParameterHost> paramAbstractHosts = 
-					DbUtils.getSelectFieldHosts(builder.getDb_name(), builder.getSql_content(), CurrentLanguage.Java);
+							DbUtils.getSelectFieldHosts(builder.getDb_name(), builder.getSql_content(), 
+									CurrentLanguage.Java);
 					List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
 					for (AbstractParameterHost phost : paramAbstractHosts) {
 						paramHosts.add((JavaParameterHost)phost);
 					}
 					method.setFields(paramHosts);
 				}
-				String[] conditions = StringUtils.split(builder.getCondition(),
-						";");
+				String[] conditions = StringUtils.split(builder.getCondition(), ";");
 				
 				for (String condition : conditions) {
 					String[] tokens = StringUtils.split(condition, ",");
 					String name = tokens[0];
-					int type = tokens.length >= 2 ? Integer.parseInt(tokens[1])
-							: -1;
+					int type = tokens.length >= 2 ? Integer.parseInt(tokens[1]) : -1;
 					String alias = "";
 					if (tokens.length >= 3)
 						alias = tokens[2];
 					for (CSharpParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(name)) {
-							CSharpParameterHost host_al = new CSharpParameterHost(
-									pHost);
+							CSharpParameterHost host_al = new CSharpParameterHost(pHost);
 							host_al.setAlias(alias);
-							host_al.setInParameter(ConditionType.In == ConditionType
-									.valueOf(type));
+							host_al.setInParameter(ConditionType.In == ConditionType.valueOf(type));
 							parameters.add(host_al);
 							// Between need an extra parameter
-							if (ConditionType.Between == ConditionType
-									.valueOf(type)) {
-								CSharpParameterHost host_bw = new CSharpParameterHost(
-										pHost);
-								String alias_bw = tokens.length >= 4 ? tokens[3]
-										: "";
+							if (ConditionType.Between == ConditionType.valueOf(type)) {
+								CSharpParameterHost host_bw = new CSharpParameterHost(pHost);
+								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
 								host_bw.setAlias(alias_bw);
 								parameters.add(host_bw);
 							}
@@ -238,8 +231,7 @@ public class AbstractCSharpDataPreparer{
 				}
 			} else {
 				String[] fields = StringUtils.split(builder.getFields(), ",");
-				String[] conditions = StringUtils.split(builder.getCondition(),
-						";");
+				String[] conditions = StringUtils.split(builder.getCondition(), ";");
 				for (String field : fields) {
 					for (CSharpParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(field)) {
@@ -252,22 +244,17 @@ public class AbstractCSharpDataPreparer{
 					for (CSharpParameterHost pHost : allColumns) {
 						String[] tokens = StringUtils.split(condition, ",");
 						String name = tokens[0];
-						int type = tokens.length >= 2 ? Integer.parseInt(tokens[1])
-								: -1;
+						int type = tokens.length >= 2 ? Integer.parseInt(tokens[1]) : -1;
 						String alias = "";
 						if (tokens.length >= 3)
 							alias = tokens[2];
 						if (pHost.getName().equals(name)) {
-							CSharpParameterHost host_al = new CSharpParameterHost(
-									pHost);
+							CSharpParameterHost host_al = new CSharpParameterHost(pHost);
 							host_al.setAlias(alias);
 							parameters.add(host_al);
-							if (ConditionType.Between == ConditionType
-									.valueOf(type)) {
-								CSharpParameterHost host_bw = new CSharpParameterHost(
-										pHost);
-								String alias_bw = tokens.length >= 4 ? tokens[3]
-										: "";
+							if (ConditionType.Between == ConditionType.valueOf(type)) {
+								CSharpParameterHost host_bw = new CSharpParameterHost(pHost);
+								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
 								host_bw.setAlias(alias_bw);
 								parameters.add(host_bw);
 							}

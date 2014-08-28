@@ -48,8 +48,7 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
 		if (_sqlBuilders.size() > 0) {
 			Map<String, GenTaskBySqlBuilder> _TempSqlBuildres = sqlBuilderBroupBy(_sqlBuilders);
 
-			for (final Map.Entry<String, GenTaskBySqlBuilder> _table : _TempSqlBuildres
-					.entrySet()) {
+			for (final Map.Entry<String, GenTaskBySqlBuilder> _table : _TempSqlBuildres.entrySet()) {
 				Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 
 					@Override
@@ -60,8 +59,7 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
 						progress.setOtherMessage(result.getTaskName());
 						CSharpTableHost extraTableHost;
 						try {
-							extraTableHost = buildExtraSqlBuilderHost(ctx, _table
-									.getValue());
+							extraTableHost = buildExtraSqlBuilderHost(ctx, _table.getValue());
 							if (null != extraTableHost) {
 								_tableViewHosts.add(extraTableHost);
 							}

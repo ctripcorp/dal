@@ -73,15 +73,14 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 			prepareDbFromFreeSql(ctx, daoByFreeSql.getTasksByProjectId(projectId));
 		}
 
-		// 首先按照ServerID, DbName以及ClassName做一次GroupBy，但是ClassName不区分大小写
+		// 首先按照DbName以及ClassName做一次GroupBy，且ClassName不区分大小写
 		final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(_freeSqls);
 
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 		final Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts = ctx.get_freeSqlPojoHosts();
 		final Queue<CSharpFreeSqlHost> _freeSqlHosts = ctx.get_freeSqlHosts();
-		// 随后，以ServerID, DbName以及ClassName为维度，为每个维度生成一个DAO类
-		for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy
-				.entrySet()) {
+		// 随后，以DbName以及ClassName为维度，为每个维度生成一个DAO类
+		for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy.entrySet()) {
 			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
 				public ExecuteResult call() throws Exception {
@@ -108,9 +107,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 									(!method.isFirstOrSingle() || !method.isSampleType())) {
 								CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(ctx, task);
 								if (null != freeSqlPojoHost) {
-									
-									_freeSqlPojoHosts.put(task.getPojo_name(),
-											freeSqlPojoHost);
+									_freeSqlPojoHosts.put(task.getPojo_name(), freeSqlPojoHost);
 								}
 							}
 							methods.add(method);						
@@ -136,8 +133,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(task.getSql_content());
 		String temp=task.getSql_content();
 		int index = 0;
-		while(m.find())
-    	{
+		while(m.find()){
 			String paramName = m.group(1);
 			inParams.add(paramName.substring(1));
 			temp = temp.replace(paramName, String.format("({%d}) ", index++));
@@ -160,11 +156,9 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 			CSharpParameterHost p = new CSharpParameterHost();
 			p.setName(splitedParam[0]);
 			p.setInParameter(inParams.contains(p.getName()));
-			p.setDbType(DbType.getDbTypeFromJdbcType(Integer
-					.valueOf(splitedParam[1])));
+			p.setDbType(DbType.getDbTypeFromJdbcType(Integer.valueOf(splitedParam[1])));
 			p.setType(DbType.getCSharpType(p.getDbType()));
-			Object mockValue = DbUtils.mockATest(Integer
-					.valueOf(splitedParam[1]));
+			Object mockValue = DbUtils.mockATest(Integer.valueOf(splitedParam[1]));
 			if (p.getType().equals("string") || p.getType().equals("DateTime")) {
 				p.setValue("\"" + mockValue + "\"");
 			} else {
@@ -204,13 +198,11 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		}
 	}
 	
-	private Map<String, List<GenTaskByFreeSql>> freeSqlGroupBy(
-			List<GenTaskByFreeSql> tasks) {
+	private Map<String, List<GenTaskByFreeSql>> freeSqlGroupBy(List<GenTaskByFreeSql> tasks) {
 		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();
 
 		for (GenTaskByFreeSql task : tasks) {
-			String key = String.format("%s_%s", task.getDb_name(), task
-					.getClass_name().toLowerCase());
+			String key = String.format("%s_%s", task.getDb_name(), task.getClass_name().toLowerCase());
 			if (groupBy.containsKey(key)) {
 				groupBy.get(key).add(task);
 			} else {

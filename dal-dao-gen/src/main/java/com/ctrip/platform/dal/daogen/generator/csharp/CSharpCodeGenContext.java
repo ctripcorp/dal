@@ -16,12 +16,16 @@ import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.host.csharp.DatabaseHost;
 
 public class CSharpCodeGenContext extends CodeGenContext {
-	
+	//<DatabaseHost db_name, DatabaseHost>
 	protected Map<String, DatabaseHost> _dbHosts = new ConcurrentHashMap<String, DatabaseHost>();
 	protected Queue<CSharpFreeSqlHost> _freeSqlHosts = new ConcurrentLinkedQueue<CSharpFreeSqlHost>();
+	//<CSharpFreeSqlPojoHost pojo_name, CSharpFreeSqlPojoHost>
 	protected Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts = new ConcurrentHashMap<String, CSharpFreeSqlPojoHost>();
+	//GenTaskByFreeSql class_name
 	protected Set<String> _freeDaos = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+	//PojoClassName of Table and View
 	protected Set<String> _tableDaos = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+	//PojoClassName of SP
 	protected Set<String> _spDaos = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 	protected Queue<CSharpTableHost> _tableViewHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
 	protected Queue<CSharpTableHost> _spHosts = new ConcurrentLinkedQueue<CSharpTableHost>();

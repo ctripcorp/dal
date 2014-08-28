@@ -86,8 +86,7 @@ public class CSharpCodeGeneratorOfFreeSqlProcessor implements Processor {
 					//progress.setOtherMessage("正在生成 " + host.getClassName());
 					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Dap, Test");
 					progress.setOtherMessage(result.getTaskName());
-					try
-					{
+					try{
 						VelocityContext context = GenUtils.buildDefaultVelocityContext();
 						context.put("host", host);
 						GenUtils.mergeVelocityContext(context,

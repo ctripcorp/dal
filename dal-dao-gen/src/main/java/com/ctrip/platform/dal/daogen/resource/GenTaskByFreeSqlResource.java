@@ -119,12 +119,12 @@ public class GenTaskByFreeSqlResource {
 	@POST
 	@Path("buildPagingSQL")
 	public Status buildPagingSQL(@FormParam("db_name") String db_set_name,//dbset name
+			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
 			@FormParam("sql_content") String sql_content){
 		Status status = Status.OK;
 		try {
-				
 			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
-			CurrentLanguage lang = sql_content.contains("@")?CurrentLanguage.Java:CurrentLanguage.CSharp;
+			CurrentLanguage lang = "java".equals(sql_style)?CurrentLanguage.Java:CurrentLanguage.CSharp;
 			String pagingSQL = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), lang);
 			status.setInfo(pagingSQL);
 		} catch (Exception e) {
@@ -138,20 +138,11 @@ public class GenTaskByFreeSqlResource {
 	
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("test_sql")
-	public Status verifyQuery(@FormParam("id") int id,
-			@FormParam("project_id") int project_id,
-			@FormParam("db_name") String set_name,
-			@FormParam("class_name") String class_name,
-			@FormParam("pojo_name") String pojo_name,
-			@FormParam("method_name") String method_name,
+	@Path("sqlValidate")
+	public Status sqlValidate(@FormParam("db_name") String set_name,
 			@FormParam("crud_type") String crud_type,
 			@FormParam("sql_content") String sql,
 			@FormParam("params") String params,
-			@FormParam("version") int version,
-			@FormParam("action") String action,
-			@FormParam("comment") String comment,
-			@FormParam("scalarType") String scalarType,
 			@FormParam("pagination") boolean pagination) {
 
 		Status status = Status.OK;
@@ -168,19 +159,13 @@ public class GenTaskByFreeSqlResource {
 				}
 			}
 			
-			Validation validResult=null;
-			
-			if( "select".equalsIgnoreCase(crud_type)){
-				if(pagination){
-					sql = SqlBuilder.pagingQuerySql(sql, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), CurrentLanguage.Java);
-					sql = String.format(sql, 1, 2);
-				}
-				validResult = SQLValidation.queryValidate(dbName, sql, paramsTypes);
-			}else{
-				validResult = SQLValidation.updateValidate(dbName, sql, paramsTypes);
+			if("select".equalsIgnoreCase(crud_type) && pagination){
+				sql = SqlBuilder.pagingQuerySql(sql, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), CurrentLanguage.Java);
+				sql = String.format(sql, 1, 2);
 			}
 			
-
+			Validation validResult = SQLValidation.updateValidate(dbName, sql, paramsTypes);
+			
 			if(validResult.isPassed()){
 				status.setInfo(validResult.getMessage());
 			}else{

@@ -130,7 +130,6 @@ public class GenTaskBySqlBuilderResource {
 			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
 			@FormParam("sql_content") String sql_content){
 		Status status = Status.OK;
-		
 		try {
 			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
 			CurrentLanguage lang = "java".equals(sql_style)?CurrentLanguage.Java:CurrentLanguage.CSharp;
@@ -216,14 +215,11 @@ public class GenTaskBySqlBuilderResource {
 			String tempSQL = sql_content;
 			Validation validResult;
 			try {
-				if (pagination && "select".equals(crud_type)) {
-					tempSQL = SqlBuilder.pagingQuerySql(tempSQL, DbUtils
-							.getDatabaseCategory(databaseSetEntry.getConnectionString()),
-							CurrentLanguage.Java);
+				if (pagination && "select".equalsIgnoreCase(crud_type)) {
+					tempSQL = SqlBuilder.pagingQuerySql(tempSQL, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()),CurrentLanguage.Java);
 					tempSQL = String.format(tempSQL, 1, 2);
 				}
 				
-				validResult = null;
 				tempSQL = tempSQL.replaceAll("[@:]\\w+", "?");
 				if ("select".equalsIgnoreCase(crud_type)) {
 					validResult = SQLValidation.queryValidate(dbName,
@@ -237,7 +233,7 @@ public class GenTaskBySqlBuilderResource {
 				status.setInfo("验证SQL出错!"+e.getMessage());
 				return status;
 			}
-			if(validResult.isPassed()){
+			if(validResult!=null && validResult.isPassed()){
 				status.setInfo(validResult.getMessage());
 			}else{
 				status = Status.ERROR;

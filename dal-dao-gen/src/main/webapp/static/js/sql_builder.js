@@ -157,8 +157,8 @@
         buildPagingSQL : function(callable){
             var postData = {};
             postData["db_name"] = $("#databases").val();
+            postData["sql_style"] = $("#sql_style").val();
             if ($("#gen_style").val() == "auto") { //构建SQL（生成的代码绑定到模板）
-                postData["sql_style"] = $("#sql_style").val();
                 postData["sql_content"] = ace.edit("sql_builder").getValue();
                 if($("#auto_sql_pagination").is(":checked")==false ||
                     $("#crud_option").val()!="select"){

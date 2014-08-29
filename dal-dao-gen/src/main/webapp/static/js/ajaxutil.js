@@ -147,7 +147,7 @@
             return;
         }
 
-        $.post("/rest/task/sql/test_sql", postData).done(function (data) {
+        $.post("/rest/task/sql/sqlValidate", postData).done(function (data) {
             if (data.code == "OK") {
                 $.post("/rest/task/sql", postData, function (data) {
                     if (data.code == "OK") {

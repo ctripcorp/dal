@@ -299,6 +299,7 @@
                 editor.setTheme("ace/theme/monokai");
                 editor.getSession().setMode("ace/mode/sql");
                 editor.setValue(record.sql_content);
+                $("#sql_editor").find("div[class='ace_content']").trigger("click");
                 $("#free_sql_scalarType").val(record['scalarType']);
                 $("#free_sql_pagination").attr('checked',record['pagination']);
                 $("#free_sql_crud_option").val(record['crud_type']);

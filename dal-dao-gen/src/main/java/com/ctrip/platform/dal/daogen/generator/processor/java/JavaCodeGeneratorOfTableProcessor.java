@@ -60,7 +60,7 @@ public class JavaCodeGeneratorOfTableProcessor implements Processor {
 								String.format("%s/Dao/%sDao.java",
 										mavenLikeDir.getAbsolutePath(),
 										host.getPojoClassName()),
-								"templates/java/DAO.java.tpl");
+								"templates/java/dao/standard/DAO.java.tpl");
 	
 						GenUtils.mergeVelocityContext(
 								context,

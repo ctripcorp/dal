@@ -53,15 +53,7 @@ public class ${host.getPojoClassName()}Dao {
 #parse("templates/java/dao/standard/method.Update.sp.tpl")
 #parse("templates/java/dao/standard/method.Update.notSp.tpl")
 #parse("templates/java/dao/standard/method.scalar.tpl")
-
-#if($host.isSp() && ($host.getSpInsert().isExist() || $host.getSpDelete().isExist() ||$host.getSpUpdate().isExist()))
-	private String prepareSpCall(String SpName, StatementParameters parameters, Map<String, ?> fields) {
-		client.addParametersByName(parameters, fields);
-		String callSql = client.buildCallSql(SpName, fields.size());
-		parameters.setResultsParameter(RET_CODE, extractor);
-		return callSql;
-	}
-#end
+#parse("templates/java/dao/standard/method.sp.tpl")
 
 	public static class ${host.getPojoClassName()}Parser extends AbstractDalParser<${host.getPojoClassName()}> {
 		public static final String DATABASE_NAME = "${host.getDbName()}";

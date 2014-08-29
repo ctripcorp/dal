@@ -230,7 +230,7 @@ public class SQLValidation {
 			case java.sql.Types.DECIMAL:
 				return 101.0;
 			case java.sql.Types.CHAR:
-				return 't';
+				return "t";
 			case java.sql.Types.DATE:
 				return "2012-01-01";
 			case java.sql.Types.TIME:

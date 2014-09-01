@@ -93,8 +93,8 @@ namespace ${host.getNameSpace()}.Interface.IDao
         long Count();
 #end
 
-#if($host.generateAPI(1))
-#if($host.isHasSptI(54))
+#if($host.generateAPI(54))
+#if($host.isHasSptI())
         /// <summary>
         ///  批量插入${host.getClassName()}
         /// </summary>

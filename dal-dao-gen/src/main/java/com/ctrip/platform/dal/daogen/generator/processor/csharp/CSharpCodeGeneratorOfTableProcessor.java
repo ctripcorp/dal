@@ -69,7 +69,7 @@ public class CSharpCodeGeneratorOfTableProcessor implements Processor {
 								String.format("%s/Dao/%sDao.cs",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/csharp/DAO.cs.tpl");
+								"templates/csharp/dao/standard/DAO.cs.tpl");
 	
 						GenUtils.mergeVelocityContext(
 								context,
@@ -83,7 +83,7 @@ public class CSharpCodeGeneratorOfTableProcessor implements Processor {
 								String.format("%s/IDao/I%sDao.cs",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/csharp/IDAO.cs.tpl");
+								"templates/csharp/dao/standard/IDAO.cs.tpl");
 	
 						GenUtils.mergeVelocityContext(
 								context,

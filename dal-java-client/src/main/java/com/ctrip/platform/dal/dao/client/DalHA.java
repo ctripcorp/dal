@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+
 public class DalHA {
 	private int retryCount = 0;
 	private boolean over = false;
@@ -11,6 +13,7 @@ public class DalHA {
 	private boolean retry = false;
 	private boolean failOver = false;
 	private SQLException exception = null;
+	private String productName = null;
 	
 	public DalHA(){
 		this.usedKeys = new HashSet<String>();
@@ -35,12 +38,20 @@ public class DalHA {
 	public void setOver(boolean over) {
 		this.over = over;
 	}
+	
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
 
 	public void update(SQLException ex){
 		this.exception = ex;
 		this.increment();
-		this.retry = DalHAManager.isRetriable(this.exception);
-		this.failOver = DalHAManager.isFailOverable(this.exception);
+		this.retry = DalHAManager.isRetriable(this.getDBType(), this.exception);
+		this.failOver = DalHAManager.isFailOverable(this.getDBType(), this.exception);
 	}
 	
 	public void clear(){
@@ -69,6 +80,14 @@ public class DalHA {
 	
 	public boolean contains(String db){
 		return this.usedKeys.contains(db);
+	}
+	
+	private DatabaseCategory getDBType(){
+		if(this.productName.equalsIgnoreCase("Microsoft SQL Server"))
+			return DatabaseCategory.SqlServer;
+		else{
+			return DatabaseCategory.MySql;
+		}
 	}
 	
 	public String getDB(){

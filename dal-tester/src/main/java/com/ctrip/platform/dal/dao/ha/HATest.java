@@ -21,6 +21,7 @@ import com.ctrip.platform.dal.dao.unitbase.Database;
 public class HATest {
 	private static Database database = null;
 	private static Database database2 = null;
+	private static DalHints hints = new DalHints();
 	private static int markCount = 0;
 	static {
 		database = new Database("dao_test", "dal_client_test",
@@ -57,8 +58,7 @@ public class HATest {
 	@Test
 	public void testNotRetryNotFailOver() throws SQLException {
 		DalHAManager.setHaEnabled(true);
-		DalHints hints = new DalHints();	
-		
+		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database.getTableName();
 		Integer count = database.getClient().query(sql, new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
@@ -74,7 +74,7 @@ public class HATest {
 	@Test
 	public void testAllRetryFailed() throws SQLException {
 		DalHAManager.setHaEnabled(true);
-		DalHints hints = new DalHints();
+		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database.getTableName();
 		Integer count = database.getClient().query(sql, new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
@@ -92,7 +92,7 @@ public class HATest {
 	@Test
 	public void testTheSecondRetrySuccess() throws SQLException {
 		DalHAManager.setHaEnabled(true);
-		DalHints hints = new DalHints();
+		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database.getTableName();
 		Integer count = database.getClient().query(sql, new StatementParameters(),
 				hints, new DalResultSetExtractor<Integer>() {
@@ -113,7 +113,7 @@ public class HATest {
 	@Test
 	public void testTheSecondFailOverSuccess() throws SQLException {
 		DalHAManager.setHaEnabled(true);
-		DalHints hints = new DalHints();
+		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database2.getTableName();
 		Integer count = database2.getClient().query(sql,
 				new StatementParameters(), hints,
@@ -127,7 +127,12 @@ public class HATest {
 							}				
 						}else{
 							markCount++;
-							throw createException(1021);
+							if(hints.get().getProductName().equalsIgnoreCase("mysql")){
+								throw createException(1021);
+								}
+								else{
+									throw createException(1222);
+								}
 						}
 						return 0;
 					}
@@ -139,14 +144,19 @@ public class HATest {
 	@Test
 	public void testAllFailOverFailed() throws SQLException {
 		DalHAManager.setHaEnabled(true);
-		DalHints hints = new DalHints();
+		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database2.getTableName();
 		Integer count = database2.getClient().query(sql,
 				new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
 					public Integer extract(ResultSet rs) throws SQLException {
+						if(hints.get().getProductName().equalsIgnoreCase("mysql")){
 						throw createException(1021);
+						}
+						else{
+							throw createException(1222);
+						}
 					}
 				});
 		

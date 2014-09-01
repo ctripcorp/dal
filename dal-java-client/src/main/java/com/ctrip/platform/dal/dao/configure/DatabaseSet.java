@@ -176,25 +176,5 @@ public class DatabaseSet {
 			int index = (int)(Math.random() * dbs.size());	
 			return dbs.get(index).getConnectionString();
 		}
-		/*if(ha != null && ha.isRetry()){
-			if(ha.getDB() == null){
-				int index = (int)(Math.random() * dbs.size());	
-				ha.addDB(dbs.get(index).getConnectionString());
-			}
-			return ha.getDB();
-		}else if(ha != null && ha.isFailOver())
-		{
-			List<String> dbNames = new ArrayList<String>();
-			for (DataBase database : dbs) {
-				if(!ha.contains(database.getConnectionString()))
-					dbNames.add(database.getConnectionString());
-			}
-			int index = (int)(Math.random() * dbNames.size());
-			ha.addDB(dbNames.get(index));
-			return dbNames.get(index);
-		}else{
-			int index = (int)(Math.random() * dbs.size());	
-			return dbs.get(index).getConnectionString();
-		}*/
 	}
 }

@@ -95,12 +95,14 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements Processor {
 								String.format("%s/Test/%sDaoTest.java",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/java/FreeSqlDAOTest.java.tpl");
+								"templates/java/test/FreeSqlDAOTest.java.tpl");
+						
 						GenUtils.mergeVelocityContext(context,
 								String.format("%s/Test/%sDaoUnitTest.java",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/java/FreeSqlDaoUnitTest.java.tpl");
+								"templates/java/test/FreeSqlDaoUnitTest.java.tpl");
+						
 						result.setSuccessal(true);
 					}catch(Exception e){
 						log.error(result.getTaskName() + " exception", e);

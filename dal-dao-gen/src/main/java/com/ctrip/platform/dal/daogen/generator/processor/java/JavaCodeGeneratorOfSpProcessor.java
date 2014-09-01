@@ -66,12 +66,12 @@ public class JavaCodeGeneratorOfSpProcessor implements Processor {
 						GenUtils.mergeVelocityContext(context, String.format(
 								"%s/Test/%sSpDaoTest.java",
 								mavenLikeDir.getAbsolutePath(), host.getDbName()),
-								"templates/java/DAOBySpTest.java.tpl");
+								"templates/java/test/DAOBySpTest.java.tpl");
 						
 						GenUtils.mergeVelocityContext(context, String.format(
 								"%s/Test/%sSpDaoUnitTest.java",
 								mavenLikeDir.getAbsolutePath(), host.getDbName()),
-								"templates/java/DAOBySpUnitTest.java.tpl");
+								"templates/java/test/DAOBySpUnitTest.java.tpl");
 	
 						for (SpHost sp : host.getSpHosts()) {
 							context.put("host", sp);

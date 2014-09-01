@@ -73,12 +73,13 @@ public class JavaCodeGeneratorOfTableProcessor implements Processor {
 								"%s/Test/%sDaoTest.java",
 								mavenLikeDir.getAbsolutePath(),
 								host.getPojoClassName()),
-								"templates/java/DAOTest.java.tpl");
+								"templates/java/test/DAOTest.java.tpl");
+						
 						GenUtils.mergeVelocityContext(context, String.format(
 								"%s/Test/%sDaoUnitTest.java",
 								mavenLikeDir.getAbsolutePath(),
 								host.getPojoClassName()),
-								"templates/java/DaoUnitTests.java.tpl");
+								"templates/java/test/DaoUnitTests.java.tpl");
 						
 						result.setSuccessal(true);
 					}catch(Exception e){

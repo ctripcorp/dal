@@ -99,7 +99,8 @@ public class CSharpCodeGeneratorOfFreeSqlProcessor implements Processor {
 								String.format("%s/Test/%sTest.cs", mavenLikeDir
 										.getAbsolutePath(), CommonUtils
 										.normalizeVariable(host.getClassName())),
-								"templates/csharp/FreeSqlTest.cs.tpl");
+								"templates/csharp/test/FreeSqlTest.cs.tpl");
+						
 						result.setSuccessal(true);
 					}catch(Exception e){
 						log.error(result.getTaskName() + "exception", e);

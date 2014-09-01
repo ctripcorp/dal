@@ -90,7 +90,8 @@ public class CSharpCodeGeneratorOfTableProcessor implements Processor {
 								String.format("%s/Test/%sTest.cs",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/csharp/DAOTest.cs.tpl");
+								"templates/csharp/test/DAOTest.cs.tpl");
+						
 						result.setSuccessal(true);
 					}catch(Exception e){
 						log.error(result.getTaskName() + "exception", e);

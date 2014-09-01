@@ -80,7 +80,8 @@ public class CSharpCodeGeneratorOfSpProcessor implements Processor {
 								String.format("%s/Test/%sTest.cs",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/csharp/SpTest.cs.tpl");
+								"templates/csharp/test/SpTest.cs.tpl");
+						
 						result.setSuccessal(true);
 					}catch(Exception e){
 						log.error(result.getTaskName() + "exception", e);

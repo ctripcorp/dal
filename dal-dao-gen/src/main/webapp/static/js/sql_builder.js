@@ -47,6 +47,12 @@
                     } else {
                         formatedConditions.push(sprintf(" %s BETWEEN ? AND ? ",wrapColumn(splited[0])));
                     }
+                }else if(splited[1] == "8"){ //in
+                    if ($("#sql_style").val() == "csharp") {
+                        formatedConditions.push(sprintf(" %s in (@%s) ",wrapColumn(splited[0]),splited[0]));
+                    } else {
+                        formatedConditions.push(sprintf(" %s in (?) ",wrapColumn(splited[0])));
+                    }
                 } else {
                     if ($("#sql_style").val() == "csharp") {
                         formatedConditions.push(sprintf(" %s %s @%s ", wrapColumn(splited[0]), whereCondition[splited[1]], splited[0]));

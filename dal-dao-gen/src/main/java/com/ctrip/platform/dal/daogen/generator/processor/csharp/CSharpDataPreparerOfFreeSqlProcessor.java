@@ -93,7 +93,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 							return result;
 	
 						CSharpFreeSqlHost host = new CSharpFreeSqlHost();
-						host.setDbSetName(currentTasks.get(0).getDb_name());
+						host.setDbSetName(currentTasks.get(0).getDatabaseSetName());
 						host.setClassName(CommonUtils.normalizeVariable(WordUtils
 								.capitalize(currentTasks.get(0).getClass_name())));
 						host.setNameSpace(namespace);
@@ -104,6 +104,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 						for (GenTaskByFreeSql task : currentTasks) {
 							CSharpMethodHost method = buildFreeSqlMethodHost(ctx, task);
 							if (!_freeSqlPojoHosts.containsKey(task.getPojo_name()) && 
+									method.getPojoName()!=null && !method.getPojoName().isEmpty() &&
 									(!method.isFirstOrSingle() || !method.isSampleType())) {
 								CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(ctx, task);
 								if (null != freeSqlPojoHost) {
@@ -129,6 +130,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 	
 	private CSharpMethodHost buildFreeSqlMethodHost(CSharpCodeGenContext ctx, GenTaskByFreeSql task) {
 		CSharpMethodHost method = new CSharpMethodHost();
+		method.setCrud_type(task.getCrud_type());
 		List<String> inParams = new ArrayList<String>();
 		Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(task.getSql_content());
 		String temp=task.getSql_content();

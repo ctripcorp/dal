@@ -93,7 +93,7 @@ public class CSharpCodeGeneratorOfFreeSqlProcessor implements Processor {
 								String.format("%s/Dao/%sDao.cs", mavenLikeDir
 										.getAbsolutePath(), CommonUtils
 										.normalizeVariable(host.getClassName())),
-								"templates/csharp/FreeSqlDAO.cs.tpl");
+								"templates/csharp/dao/freesql/FreeSqlDAO.cs.tpl");
 	
 						GenUtils.mergeVelocityContext(context,
 								String.format("%s/Test/%sTest.cs", mavenLikeDir

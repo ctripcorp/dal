@@ -139,7 +139,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		while(m.find())
     	{
 			String paramName = m.group(1);
-			inParams.add(paramName.substring(1));
+			inParams.add(paramName.replaceAll("[\\(|\\)|@]", ""));
 			temp = temp.replace(paramName, String.format("({%d}) ", index++));
     	}
 		method.setSql(temp);

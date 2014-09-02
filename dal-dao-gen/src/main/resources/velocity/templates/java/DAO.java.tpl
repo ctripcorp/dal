@@ -365,12 +365,19 @@ public class ${host.getPojoClassName()}Dao {
 #else
 		String sql = "${method.getSql()}";
 #end
+#if($method.isInClauses())
+		sql = SQLParser.parse(sql, ${method.getInClauses()});
+#end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#end
 #end
 #end
 		return queryDao.query(sql, parameters, hints, ${method.getPojoClassName()}.class);
@@ -380,12 +387,19 @@ public class ${host.getPojoClassName()}Dao {
 #if($method.isSampleType() && $method.isReturnSingle())
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
+#if($method.isInClauses())
+		sql = SQLParser.parse(sql, ${method.getInClauses()});
+#end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#end
 #end
 #end
 		return queryDao.queryForObjectNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
@@ -395,12 +409,19 @@ public class ${host.getPojoClassName()}Dao {
 #if($method.isSampleType() && $method.isReturnFirst())
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
+#if($method.isInClauses())
+		sql = SQLParser.parse(sql, ${method.getInClauses()});
+#end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#end
 #end
 #end
 		return queryDao.queryFirstNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
@@ -415,12 +436,19 @@ public class ${host.getPojoClassName()}Dao {
 #else
 		String sql = "${method.getSql()}";
 #end
+#if($method.isInClauses())
+		sql = SQLParser.parse(sql, ${method.getInClauses()});
+#end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#end
 #end
 #end
 		return queryDao.query(sql, parameters, hints, parser);
@@ -430,12 +458,19 @@ public class ${host.getPojoClassName()}Dao {
 #if($method.isReturnSingle() && !$method.isSampleType())
 	public ${host.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
+#if($method.isInClauses())
+		sql = SQLParser.parse(sql, ${method.getInClauses()});
+#end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#end
 #end
 #end
 		return queryDao.queryForObjectNullable(sql, parameters, hints, parser);
@@ -445,12 +480,19 @@ public class ${host.getPojoClassName()}Dao {
 #if($method.isReturnFirst() && !$method.isSampleType())
 	public ${host.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
+#if($method.isInClauses())
+		sql = SQLParser.parse(sql, ${method.getInClauses()});
+#end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#end
 #end
 #end
 		return queryDao.queryFirstNullable(sql, parameters, hints, parser);
@@ -458,7 +500,7 @@ public class ${host.getPojoClassName()}Dao {
 #end
 #else
 	public int ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
-#if(${method.getInClauses()} != "")
+#if($method.isInClauses())
 		String sql = SQLParser.parse("${method.getSql()}",${method.getInClauses()});
 #else
 		String sql = SQLParser.parse("${method.getSql()}");

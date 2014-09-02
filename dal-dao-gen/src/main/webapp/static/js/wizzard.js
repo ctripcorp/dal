@@ -654,9 +654,11 @@
         var paramName = [];
         var msg=[];
         $.each($("#param_list input"),function(index,value){
-            if(paramName.join(",").indexOf($(value).val())>-1){
-                msg.push($(value).val());
-            }
+            $.each(paramName,function(index,name){
+                if($(value).val()==name){
+                    msg.push($(value).val());
+                }
+            });
             paramName.push($(value).val());
         });
         if(msg.length>0){

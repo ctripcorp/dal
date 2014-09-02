@@ -293,6 +293,7 @@
 						  <div class="panel panel-default">
 						    <div class="panel-heading">
 						      <h4 class="panel-title">
+						        <input id="SelectAllCreateMethodAPIChk" type="checkbox" checked="true">
 						        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" style="font-size:15px">
 						            Create Method
 						        </a>
@@ -307,6 +308,7 @@
 						  <div class="panel panel-default">
 						    <div class="panel-heading">
 						      <h4 class="panel-title">
+						        <input id="SelectAllRetrieveMethodAPIChk" type="checkbox" checked="true">
 						        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" style="font-size:15px">
 						          Retrieve Method
 						        </a>
@@ -321,6 +323,7 @@
 						  <div class="panel panel-default">
 						    <div class="panel-heading">
 						      <h4 class="panel-title">
+						        <input id="SelectAllUpdateMethodAPIChk" type="checkbox" checked="true">
 						        <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" style="font-size:15px">
 						          Update Method
 						        </a>
@@ -335,6 +338,7 @@
 						  <div class="panel panel-default">
 						    <div class="panel-heading">
 						      <h4 class="panel-title">
+						        <input id="SelectAllDeleteMethodAPIChk" type="checkbox" checked="true">
 						        <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour" style="font-size:15px">
 						          Delete Method
 						        </a>

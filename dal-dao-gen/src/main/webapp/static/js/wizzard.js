@@ -383,6 +383,8 @@
                 });
             }
 
+            methodApiClickHandler();
+
             current.hide();
 
             $.showMsg("error_msg","");
@@ -397,6 +399,54 @@
             $("#next_step").addClass("btn-primary");
             $("#next_step").text("下一步");
             $("body").unblock();
+        });
+    };
+
+    var methodApiClickHandler = function(){
+        bindSelectAllCheck("CreateMethodListDiv","SelectAllCreateMethodAPIChk");
+        bindSelectAllCheck("RetrieveMethodListDiv","SelectAllRetrieveMethodAPIChk");
+        bindSelectAllCheck("UpdateMethodListDiv","SelectAllUpdateMethodAPIChk");
+        bindSelectAllCheck("DeleteMethodListDiv","SelectAllDeleteMethodAPIChk");
+    };
+
+    var apiMethodChkValidate = function(methodListDiv,selectAllMethodCheckbox){
+        var totalCkbx = $("#"+methodListDiv+" :checkbox").length;
+        var checkedCkbx = 0;
+        $.each($("#"+methodListDiv+" :checkbox"),function(index,value){
+            if($(value).is(":checked")==true){
+                checkedCkbx++;
+            }
+        });
+        if(totalCkbx==checkedCkbx){
+            $("#"+selectAllMethodCheckbox).prop("checked", true);
+        }else{
+            $("#"+selectAllMethodCheckbox).attr("checked", false);
+        }
+    };
+
+    var bindSelectAllCheck = function(methodListDiv,selectAllMethodCheckbox){
+        apiMethodChkValidate(methodListDiv,selectAllMethodCheckbox);
+        $("#"+methodListDiv+" :checkbox").bind("click",function(){
+            var totalCkbx = $("#"+methodListDiv+" :checkbox").length;
+            var checkedCkbx = 0;
+            $.each($("#"+methodListDiv+" :checkbox"),function(index,value){
+                if($(value).is(":checked")==true){
+                    checkedCkbx++;
+                }
+            });
+            if(totalCkbx==checkedCkbx){
+                $("#"+selectAllMethodCheckbox).prop("checked", true);
+            }else{
+                $("#"+selectAllMethodCheckbox).prop("checked", false);
+            }
+        });
+
+        $("#"+selectAllMethodCheckbox).bind("click",function(){
+            if ($("#"+selectAllMethodCheckbox).is(":checked")==true) {
+                $("#"+methodListDiv+" :checkbox").prop("checked", true);
+            } else {
+                $("#"+methodListDiv+" :checkbox").prop("checked", false);
+            }
         });
     };
 

@@ -1,5 +1,5 @@
-#if($host.hasPk() && $host.generateAPI(1,2,3,13,14,15,22,23,24,34,35,36))
-#if($host.isIntegerPk())
+#if($host.hasPk())
+#if($host.isIntegerPk() && $host.generateAPI(1,13))
 	/**
 	 * Query ${host.getPojoClassName()} by the specified ID
 	 * The ID must be a number
@@ -9,7 +9,8 @@
 		hints = DalHints.createIfAbsent(hints);
 		return client.queryByPk(id, hints);
 	}
-#else
+#end
+#if(!$host.isIntegerPk() && $host.generateAPI(2,14))	
 	/**
 	 * Query ${host.getPojoClassName()} by complex primary key
 	**/
@@ -23,6 +24,7 @@
 		return client.queryByPk(pk, hints);
 	}
 #end
+#if($host.generateAPI(3,15))
     /**
 	 * Query ${host.getPojoClassName()} by ${host.getPojoClassName()} instance which the primary key is set
 	**/
@@ -31,4 +33,5 @@
 		hints = DalHints.createIfAbsent(hints);
 		return client.queryByPk(pk, hints);
 	}
+#end
 #end

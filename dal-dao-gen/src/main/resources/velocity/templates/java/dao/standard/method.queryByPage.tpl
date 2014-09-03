@@ -1,4 +1,4 @@
-#if($host.generateAPI(5,17,26,38))
+#if($host.generateAPI(5,17))
 	/**
 	 * Query ${host.getPojoClassName()} with paging function
 	 * The pageSize and pageNo must be greater than zero.

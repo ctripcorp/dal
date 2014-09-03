@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -31,8 +32,10 @@ public class JavaTableHost {
 		if(api_list==null || api_list.isEmpty() || api_list==""){
 			return true;
 		}
+		String []list = api_list.split(",");
+		Arrays.sort(list);
 		for(int i=0;i<apiID.length;i++){
-			if(api_list.indexOf("dal_api_"+apiID[i])>=0){
+			if(Arrays.binarySearch(list, "dal_api_"+apiID[i])>=0){
 				return true;
 			}
 		}

@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.host.csharp;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,8 +40,10 @@ public class CSharpTableHost {
 		if(api_list==null || api_list.isEmpty() || api_list==""){
 			return true;
 		}
+		String []list = api_list.split(",");
+		Arrays.sort(list);
 		for(int i=0;i<apiID.length;i++){
-			if(api_list.indexOf("dal_api_"+apiID[i])>0){
+			if(Arrays.binarySearch(list, "dal_api_"+apiID[i])>=0){
 				return true;
 			}
 		}

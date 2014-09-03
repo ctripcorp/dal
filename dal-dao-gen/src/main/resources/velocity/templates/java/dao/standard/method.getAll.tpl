@@ -1,4 +1,4 @@
-#if($host.generateAPI(6,18,27))
+#if($host.generateAPI(6,18))
 	/**
 	 * Get all records in the whole table
 	**/

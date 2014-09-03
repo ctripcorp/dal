@@ -22,7 +22,6 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.dao.DalApiDao;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
 import com.ctrip.platform.dal.daogen.domain.Status;
-import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.entity.DalApi;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
@@ -142,8 +141,9 @@ public class GenTaskByTableViewResource {
 				if(dbCategory == DatabaseCategory.MySql){
 					apis = dalApiDao.getDalApiByLanguageAndDbtype("java", "MySQL");
 				}else{
-					SpType spType = spType(databaseSetEntry.getConnectionString(), table_names);
-					apis = dalApiDao.getDalApiByLanguageAndDbtypeAndSptype("java", "SQLServer", spType.getValue());
+//					SpType spType = spType(databaseSetEntry.getConnectionString(), table_names);
+//					apis = dalApiDao.getDalApiByLanguageAndDbtypeAndSptype("java", "SQLServer", spType.getValue());
+					apis = dalApiDao.getDalApiByLanguageAndDbtype("java", "SQLServer");
 				}
 				
 			}
@@ -164,47 +164,47 @@ public class GenTaskByTableViewResource {
 		return status;
 	}
 	
-	private SpType spType(String db_set_name,String table_names){
-		try {
-			List<StoredProcedure> sps = DbUtils.getAllSpNames(db_set_name);
-			if(sps!=null && sps.size()>0){
-				StringBuilder spNames = new StringBuilder();
-				for(StoredProcedure sp:sps){
-					spNames.append(sp.getName()+",");
-				}
-				for(String tableName : table_names.split(",")){
-					if(spNames.indexOf(String.format("spA_%s", tableName))>0){
-						return SpType.SPA;
-					}else if(spNames.indexOf(String.format("sp3_%s", tableName))>0){
-						return SpType.SP3;
-					}else{
-						return SpType.NotSP;
-					}
-				}
-			}else{
-				return SpType.NotSP;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return SpType.NotSP;
-	}
-	
-	enum SpType{
-		
-		SPA("spa"),
-		SP3("sp3"),
-		NotSP("not sp");
-		
-		private String value;
-		
-		SpType(String val){
-			this.value = val;
-		}
-		
-		public String getValue(){
-			return this.value;
-		}
-	}
+//	private SpType spType(String db_set_name,String table_names){
+//		try {
+//			List<StoredProcedure> sps = DbUtils.getAllSpNames(db_set_name);
+//			if(sps!=null && sps.size()>0){
+//				StringBuilder spNames = new StringBuilder();
+//				for(StoredProcedure sp:sps){
+//					spNames.append(sp.getName()+",");
+//				}
+//				for(String tableName : table_names.split(",")){
+//					if(spNames.indexOf(String.format("spA_%s", tableName))>0){
+//						return SpType.SPA;
+//					}else if(spNames.indexOf(String.format("sp3_%s", tableName))>0){
+//						return SpType.SP3;
+//					}else{
+//						return SpType.NotSP;
+//					}
+//				}
+//			}else{
+//				return SpType.NotSP;
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return SpType.NotSP;
+//	}
+//	
+//	enum SpType{
+//		
+//		SPA("spa"),
+//		SP3("sp3"),
+//		NotSP("not sp");
+//		
+//		private String value;
+//		
+//		SpType(String val){
+//			this.value = val;
+//		}
+//		
+//		public String getValue(){
+//			return this.value;
+//		}
+//	}
 
 }

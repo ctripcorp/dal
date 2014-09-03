@@ -1,5 +1,5 @@
 #if(!$host.getSpUpdate().isExist())
-#if($host.generateAPI(12,33,41))
+#if($host.generateAPI(12,33))
 	/**
 	 * SQL update
 	 * Note: there must be one non-null field in daoPojo

@@ -420,6 +420,7 @@ public class DatabaseResource {
 			views = DbUtils.getAllViewNames(dbName);
 			tables = DbUtils.getAllTableNames(dbName);
 			sps = DbUtils.getAllSpNames(dbName);
+			sps = filterSP(tables, sps);
 			
 			java.util.Collections.sort(views, new Comparator<String>(){
 				@Override
@@ -434,7 +435,7 @@ public class DatabaseResource {
 				}
 			});
 			java.util.Collections.sort(sps);
-
+			
 			tableSpNames.setSps(sps);
 			tableSpNames.setViews(views);
 			tableSpNames.setTables(tables);
@@ -448,5 +449,47 @@ public class DatabaseResource {
 		}
 		return status;
 	}
-
+	
+	private List<StoredProcedure> filterSP(List<String> tables, List<StoredProcedure> sps){
+		List<StoredProcedure> result = new ArrayList<StoredProcedure>();
+		if(tables!=null && sps!=null && tables.size()>0 && sps.size()>0){
+			for(StoredProcedure sp:sps){
+				String spName = sp.getName()!=null?sp.getName().toLowerCase():null;
+				boolean isSpAOrSp3orSpT = false;
+				for(String tableName:tables){
+					tableName = tableName.toLowerCase();
+					if(spName==null || "".equals(spName)){
+						isSpAOrSp3orSpT = true;
+						break;
+					}
+					if(spName.indexOf(String.format("spa_%s", tableName))>-1
+							|| spName.indexOf(String.format("sp3_%s", tableName))>-1
+							|| spName.indexOf(String.format("spt_%s", tableName))>-1){
+						isSpAOrSp3orSpT = true;
+						break;
+					}
+				}
+				if(!isSpAOrSp3orSpT){
+					result.add(sp);
+				}
+			}
+		}
+		return result;
+	}
+	
+	public static void main(String[] args) {
+		System.out.println("123".indexOf("12"));
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+

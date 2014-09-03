@@ -1,18 +1,25 @@
 package com.ctrip.platform.dal.daogen.utils;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+
+import microsoft.sql.DateTimeOffset;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.daogen.Consts;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -59,6 +66,21 @@ public class SQLValidation {
 		
 	}
 	
+	public static String[] mockValues(int[] sqlTypes){
+		if(null == sqlTypes)
+			return new String[]{};
+		String[] values = new String[sqlTypes.length];
+		Object obj = null;
+		for (int i = 0; i < values.length; i++) {
+			obj = mockSQLValue(sqlTypes[i]);
+			if(null == obj)
+				values[i] = "null";
+			else
+				values[i] = obj.toString();
+		}
+		return values;
+	}
+	
 	/**
 	 * Validate the SQL is correct or not
 	 * @param dbName
@@ -71,7 +93,7 @@ public class SQLValidation {
 	 * 		The SQL is correct, return true, otherwise return false.
 	 * @throws Exception 
 	 */
-	public static Validation validate(String dbName, String sql, int... paramsTypes) throws Exception{
+ 	public static Validation validate(String dbName, String sql, int... paramsTypes) throws Exception{
 		if(StringUtils.startsWithIgnoreCase(sql, "SELECT"))
 			return queryValidate(dbName, sql, paramsTypes);
 		else{
@@ -107,10 +129,20 @@ public class SQLValidation {
 			status.clearAppend(e.getMessage());
 			log.error("Validate query failed", e);
 		}
+		finally{
+			if(connection != null){
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 		return status;
 	}
 	
-	private static void sqlserverQuery(Connection conn, String sql, Validation status, int... paramsTypes) throws Exception{
+	private static void sqlserverQuery(Connection conn, String sql, Validation status, int... paramsTypes){
 		ResultSet rs = null;
 		Statement profile = null;
 		try{
@@ -131,17 +163,37 @@ public class SQLValidation {
 			status.setPassed(true);
 			profile.execute("SET SHOWPLAN_ALL OFF");
 			conn.setAutoCommit(true);
+		}catch(SQLException e){	
+			try {
+				if(conn != null)
+					conn.rollback();
+			} catch (SQLException e1) {
+				status.append(e1.getMessage());
+				log.error("Validate sql server query rollback failed");
+			}
+			status.append(e.getMessage());
+			log.error("Validate sql server query sql execute failed", e);
+		}catch(JsonProcessingException e){
+			status.append(e.getMessage());
+			log.error("Validate sql server query json parse failed");
 		}catch(Exception e){
 			status.append(e.getMessage());
-			conn.rollback();
 			log.error("Validate sql server query failed", e);
-		}finally{
-			rs.close();
-			profile.close();		
+		}
+		finally{
+			try {
+				if(rs != null)
+					rs.close();
+				if(profile != null)
+				profile.close();
+			} catch (SQLException e) {
+				status.append(e.getMessage());
+				log.error("Validate sql server query close resouce failed");
+			}		
 		}
 	}
 	
-	private static void mysqlQuery(Connection conn, String sql, Validation status, int... paramsTypes) throws Exception {
+	private static void mysqlQuery(Connection conn, String sql, Validation status, int... paramsTypes){
 		ResultSet rs = null;
 		PreparedStatement stat = null;
 		try{
@@ -163,8 +215,15 @@ public class SQLValidation {
 			status.append(e.getMessage());
 			log.error("Validate mysql query failed", e);
 		}finally{
-			rs.close();
-			stat.close();
+			try {
+				if(rs != null)
+					rs.close();
+				if(stat != null)
+					stat.close();
+			} catch (SQLException ex) {
+				status.append(ex.getMessage());
+				log.error("Validate mysql query cleanup failed", ex);
+			}	
 		}
 	}
 	
@@ -179,7 +238,7 @@ public class SQLValidation {
 	 * @return
 	 * 		The SQL is correct, return true, otherwise return false.
 	 */
-	public static Validation updateValidate(String dbName, String sql, int... paramsTypes) throws Exception{
+	public static Validation updateValidate(String dbName, String sql, int... paramsTypes){
 		Validation status = new Validation(sql);
 		Connection connection = null;
 		try{
@@ -198,8 +257,15 @@ public class SQLValidation {
 			log.error("Validate update failed", e);
 		}
 		finally{
-			connection.rollback();
-			connection.setAutoCommit(true);
+			try {
+				if(null != connection){
+					connection.rollback();
+					connection.setAutoCommit(true);
+				}
+			} catch (SQLException ex) {
+				status.append(ex.getMessage());
+				log.error("Validate update rollback failed", ex);
+			}	
 		}
 		
 		return status;		
@@ -216,29 +282,95 @@ public class SQLValidation {
 		return dbType;
 	}
 
-	private static Object mockSQLValue(int javaSqlTypes) {
+	private static Object mockSQLValue(int javaSqlTypes) {	
 		switch (javaSqlTypes) {
 			case java.sql.Types.BIT:
-				return true;
+				return false;
 			case java.sql.Types.TINYINT:
 			case java.sql.Types.SMALLINT:
 			case java.sql.Types.INTEGER:
 			case java.sql.Types.BIGINT:
-				return 101;
+				return 0;
 			case java.sql.Types.REAL:
+			case java.sql.Types.FLOAT:
 			case java.sql.Types.DOUBLE:
 			case java.sql.Types.DECIMAL:
-				return 101.0;
+				return 0.0;
+			case java.sql.Types.NUMERIC:
+				return BigDecimal.ZERO;
+			case java.sql.Types.BINARY:
+			case java.sql.Types.VARBINARY:
+			case java.sql.Types.LONGVARBINARY:
+			case java.sql.Types.NULL:
+			case java.sql.Types.OTHER:
+				return null;
 			case java.sql.Types.CHAR:
-				return "t";
+				return "X";
 			case java.sql.Types.DATE:
 				return "2012-01-01";
 			case java.sql.Types.TIME:
 				return "10:00:00";
 			case java.sql.Types.TIMESTAMP:
+			case microsoft.sql.Types.DATETIMEOFFSET:
 				return "2012-01-01 10:00:00";
+			case java.sql.Types.VARCHAR:
+			case java.sql.Types.NVARCHAR:
+			case java.sql.Types.LONGNVARCHAR:
+			case java.sql.Types.LONGVARCHAR:
+				return "TT";
 			default:
-				return "test";
+				return null;
+			
+		}
+	}
+	
+	private static Object parseSQLValue(int javaSqlTypes, String val){
+		if(null == val)
+			return null;
+		switch (javaSqlTypes) {
+			case java.sql.Types.BIT:
+				return Boolean.parseBoolean(val);
+			case java.sql.Types.TINYINT:
+				return Byte.parseByte(val);
+			case java.sql.Types.SMALLINT:
+				return Short.parseShort(val);
+			case java.sql.Types.INTEGER:
+				return Integer.parseInt(val);
+			case java.sql.Types.BIGINT:
+				return Long.parseLong(val);
+			case java.sql.Types.REAL:
+				return Float.parseFloat(val);
+			case java.sql.Types.FLOAT:
+			case java.sql.Types.DOUBLE:
+				return Double.parseDouble(val);
+			case java.sql.Types.DECIMAL:
+			case java.sql.Types.NUMERIC:
+				return BigDecimal.valueOf(Double.parseDouble(val));
+			case java.sql.Types.BINARY:
+			case java.sql.Types.VARBINARY:
+			case java.sql.Types.LONGVARBINARY:
+				return val.getBytes();
+			case java.sql.Types.NULL:
+			case java.sql.Types.OTHER:
+				return null;
+			case java.sql.Types.CHAR:
+				return val.charAt(0);
+			case java.sql.Types.DATE:
+				return Date.valueOf("2012-01-01");
+			case java.sql.Types.TIME:
+				return Time.valueOf("10:00:00");
+			case java.sql.Types.TIMESTAMP:
+				return Timestamp.valueOf("2012-01-01 10:00:00");
+			case microsoft.sql.Types.DATETIMEOFFSET:
+				return DateTimeOffset.valueOf(Timestamp.valueOf(val), 0);
+			case java.sql.Types.VARCHAR:
+			case java.sql.Types.NVARCHAR:
+			case java.sql.Types.LONGNVARCHAR:
+			case java.sql.Types.LONGVARCHAR:
+				return val;
+			default:
+				return null;
+		
 		}
 	}
 	

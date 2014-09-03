@@ -11,7 +11,7 @@ public class SQLParser {
 	private static String regEx = null;
 	private static Pattern inRegxPattern = null;
 	static{
-		 regEx="In \\?";
+		 regEx="(?i)In *\\(?\\?\\)?";
 		 inRegxPattern = Pattern.compile(regEx);
 	}
 	

@@ -44,11 +44,11 @@ public class DalHints {
 		return hints.get(hint);
 	}
 	
-	public DalHA get(){
+	public DalHA getHA(){
 		return (DalHA)hints.get(DalHintEnum.heighAvaliable);
 	}
 	
-	public void set(DalHA ha){
+	public void setHA(DalHA ha){
 		hints.put(DalHintEnum.heighAvaliable, ha);
 	}
 	

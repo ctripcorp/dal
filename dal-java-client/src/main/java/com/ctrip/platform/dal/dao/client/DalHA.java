@@ -48,6 +48,10 @@ public class DalHA {
 	}
 
 	public void update(SQLException ex){
+		this.retry = false;
+		this.failOver = false;
+		if(this.isOver()) //There is no more connections to fail over.
+			return;
 		this.exception = ex;
 		this.increment();
 		this.retry = DalHAManager.isRetriable(this.getDBType(), this.exception);
@@ -55,12 +59,13 @@ public class DalHA {
 	}
 	
 	public void clear(){
-		this.exception = null;
+		if(!this.isOver())
+			this.exception = null;
 		this.retry = false;
 		this.failOver = false;
 	}
 
-	public boolean isAvalible(){
+	public boolean needTryAgain(){
 		return !this.isOver() && null != this.exception && 
 				this.retryCount < DalHAManager.getRetryCount() &&
 				(this.isRetry() || this.isFailOver());

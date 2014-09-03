@@ -76,6 +76,8 @@ public enum ErrorCode {
 	 */
 	CantGetConnection(ErrorClassify.Connection, 5300, "Can not get connection from DB %s"),
 	
+	NoMoreConnectionToFailOver(ErrorClassify.Connection, 5300, "There is no more fail over connections to try"),
+	
 	/**
 	 * Logic Db Name is empty!
 	 */

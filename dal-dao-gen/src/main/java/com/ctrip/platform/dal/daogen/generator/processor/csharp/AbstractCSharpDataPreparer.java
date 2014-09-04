@@ -181,9 +181,8 @@ public class AbstractCSharpDataPreparer{
 			method.setPaging(builder.isPagination());
 			
 			List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
-			if (method.getCrud_type().equals("select")
-					|| method.getCrud_type().equals("delete")) {
-				if(method.getCrud_type().equals("select")){
+			if (method.getCrud_type().equals("select") || method.getCrud_type().equals("delete")) {
+				if(method.getCrud_type().equals("select")) {
 					List<AbstractParameterHost> paramAbstractHosts = 
 							DbUtils.getSelectFieldHosts(builder.getDb_name(), builder.getSql_content(), 
 									CurrentLanguage.Java);

@@ -17,20 +17,23 @@
         + "<option value='5'>SmallInt----Short</option>"
         + "<option value='4'>Integer----int</option>"
         + "<option value='-5'>BigInt----long</option>"
-        + "<option value='-4'>Blog----byte[]</option>"
         + "<option value='7'>Real----Float</option>"
         + "<option value='8'>Double</option>"
         + "<option value='3'>Decimal</option>"
-        + "<option value='1'>Char</option>"
+        + "<option value='2'>Numeric</option>"
+        + "<option value='1'>Char----String</option>"
         + "<option value='12'>Varchar----String</option>"
         + "<option value='-1'>LongVarchar----String</option>"
         + "<option value='-15'>Nchar----String</option>"
         + "<option value='-9'>NVarchar----String</option>"
         + "<option value='-16'>LongNVarchar----String</option>"
         + "<option value='91'>Date</option>"
-        + "<option value='92'>Time----TimeSpan</option>"
-        + "<option value='93'>Timestamp----DateTime</option>"
-        +   "</select></div><br>";
+        + "<option value='92'>Time</option>"
+        + "<option value='93'>Timestamp</option>"
+        + "<option value='-2'>binary----byte[]</option>"
+        + "<option value='-3'>VarBinary----byte[]</option>"
+        + "<option value='-4'>LongVarBinary----byte[]</option>"
+        + "</select></div><br>";
 
     var step1 = function(record, current){
         if ($("#databases").val() == "") {

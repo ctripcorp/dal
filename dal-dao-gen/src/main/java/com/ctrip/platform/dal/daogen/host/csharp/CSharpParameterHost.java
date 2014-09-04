@@ -33,8 +33,7 @@ public class CSharpParameterHost extends AbstractParameterHost  implements Compa
 	
 	public CSharpParameterHost(){ }
 	
-	public CSharpParameterHost(CSharpParameterHost host)
-	{
+	public CSharpParameterHost(CSharpParameterHost host) {
 		this.name = host.getName();
 		this.alias = host.getAlias();
 		this.inParameter = host.isInParameter();

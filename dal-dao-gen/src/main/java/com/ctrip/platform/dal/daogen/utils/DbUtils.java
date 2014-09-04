@@ -506,8 +506,7 @@ public class DbUtils {
 
 			// 首先检查表是否存在
 
-			allColumnsRs = connection.getMetaData().getColumns(null, null,
-					tableName, null);
+			allColumnsRs = connection.getMetaData().getColumns(null, null, tableName, null);
 			boolean terminal = false;
 			if (language == CurrentLanguage.CSharp) {
 				while (allColumnsRs.next()) {
@@ -526,9 +525,9 @@ public class DbUtils {
 						dbType = DbType.AnsiString;
 					else if(-155 == dataType){
 						dbType = DbType.DateTimeOffset;
-					}
-					else
+					} else {
 						dbType =DbType.getDbTypeFromJdbcType(dataType);
+					}
 
 					host.setDbType(dbType);
 					//host.setName(CommonUtils.normalizeVariable(allColumnsRs.getString("COLUMN_NAME")));
@@ -538,17 +537,14 @@ public class DbUtils {
 						remark = "";
 					host.setComment(remark.replace("\n", " "));
 					host.setType(DbType.getCSharpType(host.getDbType()));
-					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
-							.equalsIgnoreCase("YES"));
+					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
 					host.setNullable(allColumnsRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
-					host.setValueType(Consts.CSharpValueTypes.contains(host
-							.getType()));
+					host.setValueType(Consts.CSharpValueTypes.contains(host.getType()));
 					// 仅获取String类型的长度
 					 if (host.getType().equalsIgnoreCase("string"))
 						 host.setLength(length);
 
 					// COLUMN_SIZE
-
 					allColumns.add(host);
 				}
 			} else if (language == CurrentLanguage.Java) {

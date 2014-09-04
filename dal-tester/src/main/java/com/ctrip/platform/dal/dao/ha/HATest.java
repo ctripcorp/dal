@@ -15,6 +15,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.client.DalHAManager;
 import com.ctrip.platform.dal.dao.unitbase.Database;
 
@@ -56,57 +57,67 @@ public class HATest {
 	}
 
 	@Test
-	public void testNotRetryNotFailOver() throws SQLException {
+	public void testNotRetryNotFailOver(){
 		DalHAManager.setHaEnabled(true);
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database.getTableName();
-		Integer count = database.getClient().query(sql, new StatementParameters(), hints,
+		Integer count = 0;
+		try{
+			count = database.getClient().query(sql, new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
 					public Integer extract(ResultSet rs) throws SQLException {
 						throw createException(-100);
 					}
 				});
+		}catch(SQLException e){}
 		Assert.assertEquals(0, count ==null ? 0 : count.intValue());
-		Assert.assertEquals(1, hints.get().getRetryCount());
+		Assert.assertEquals(1, hints.getHA().getRetryCount());
 	}
 
 	@Test
-	public void testAllRetryFailed() throws SQLException {
+	public void testAllRetryFailed() {
 		DalHAManager.setHaEnabled(true);
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database.getTableName();
-		Integer count = database.getClient().query(sql, new StatementParameters(), hints,
+		Integer count = 0;
+		try {
+			count = database.getClient().query(sql, new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
 					public Integer extract(ResultSet rs) throws SQLException {
-						throw createException(1043);
+						mockRetryThrows(hints.getHA());
+						return 0;
 					}
 				});
+		}catch(SQLException e){}
 
 		Assert.assertEquals(0, count ==null ? 0 : count.intValue());
-		Assert.assertEquals(DalHAManager.getRetryCount(), hints.get()
+		Assert.assertEquals(DalHAManager.getRetryCount(), hints.getHA()
 				.getRetryCount());
 	}
 
 	@Test
-	public void testTheSecondRetrySuccess() throws SQLException {
+	public void testTheSecondRetrySuccess() {
 		DalHAManager.setHaEnabled(true);
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database.getTableName();
-		Integer count = database.getClient().query(sql, new StatementParameters(),
+		Integer count = 0;
+		try{
+			count = database.getClient().query(sql, new StatementParameters(),
 				hints, new DalResultSetExtractor<Integer>() {
 					@Override
-					public Integer extract(ResultSet rs) throws SQLException {
+					public Integer extract(ResultSet rs) throws SQLException {						
 						if (1 == markCount++){
 							while(rs.next()){
 								return rs.getInt(1);
 							}
 						}
-						throw createException(1043);
+						mockRetryThrows(hints.getHA());
+						return 0;
 					}
 				});
-
+		}catch(SQLException e){}
 		Assert.assertEquals(3, count ==null ? 0 : count.intValue());
 	}
 
@@ -115,7 +126,9 @@ public class HATest {
 		DalHAManager.setHaEnabled(true);
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database2.getTableName();
-		Integer count = database2.getClient().query(sql,
+		Integer count = 0;
+		try{ 
+			count = database2.getClient().query(sql,
 				new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
@@ -127,46 +140,40 @@ public class HATest {
 							}				
 						}else{
 							markCount++;
-							if(hints.get().getProductName().equalsIgnoreCase("mysql")){
-								throw createException(1021);
-								}
-								else{
-									throw createException(1222);
-								}
+							mockFailOverThrow(hints.getHA());
 						}
 						return 0;
 					}
 				});
+		}catch(SQLException e){}
 		Assert.assertEquals(3, count ==null ? 0 : count.intValue());
-		Assert.assertEquals(1, hints.get().getRetryCount());
+		Assert.assertEquals(1, hints.getHA().getRetryCount());
 	}
 	
 	@Test
-	public void testAllFailOverFailed() throws SQLException {
+	public void testAllFailOverFailed(){
 		DalHAManager.setHaEnabled(true);
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database2.getTableName();
-		Integer count = database2.getClient().query(sql,
+		Integer count = 0;
+		try{
+			count = database2.getClient().query(sql,
 				new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
 					public Integer extract(ResultSet rs) throws SQLException {
-						if(hints.get().getProductName().equalsIgnoreCase("mysql")){
-						throw createException(1021);
-						}
-						else{
-							throw createException(1222);
-						}
+						mockFailOverThrow(hints.getHA());
+						return 0;
 					}
 				});
-		
+		}catch(SQLException e){ }
 		Assert.assertEquals(0, count ==null ? 0 : count.intValue());
-		Assert.assertEquals(DalHAManager.getRetryCount(), hints.get().getRetryCount());
+		Assert.assertEquals(2, hints.getHA().getRetryCount()); //There is no more connection to fail over
 	}
 	
 	@Test
 	public void testRetryFailOverDisabled(){
-		DalHints hints = new DalHints();
+		hints = new DalHints();
 		String sql = "SELECT * from " + database2.getTableName();
 		try {
 			database2.getClient().query(sql,
@@ -174,7 +181,8 @@ public class HATest {
 					new DalResultSetExtractor<String>() {
 						@Override
 						public String extract(ResultSet rs) throws SQLException {
-							throw createException(1021);
+							mockFailOverThrow(hints.getHA());
+							return "";
 						}
 					});
 		} catch (SQLException e) {
@@ -183,22 +191,24 @@ public class HATest {
 	}
 	
 	@Test
-	public void testFirstRetrySecondeFailOver() throws SQLException{
+	public void testFirstRetrySecondeFailOver() {
 		DalHAManager.setHaEnabled(true);
-		DalHints hints = new DalHints();
+		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database2.getTableName();
-		Integer count = database2.getClient().query(sql,
+		Integer count = 0;
+		try{ 
+			count = database2.getClient().query(sql,
 				new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
 					public Integer extract(ResultSet rs) throws SQLException {		
 						if(0 == markCount){
 							markCount ++;
-							throw createException(1043);
+							mockRetryThrows(hints.getHA());
 						}
 						if(1== markCount){
 							markCount ++;
-							throw createException(1021);
+							mockFailOverThrow(hints.getHA());
 						}
 						else{
 							while(rs.next()){
@@ -208,6 +218,7 @@ public class HATest {
 						return 0;	
 					}
 				});
+		}catch(SQLException e){ }
 		Assert.assertEquals(3, count ==null ? 0 : count.intValue());
 	}
 
@@ -219,4 +230,19 @@ public class HATest {
 		return mockex;
 	}
 
+	private void mockRetryThrows(DalHA ha)throws SQLException{
+		if(ha.getProductName().equalsIgnoreCase("mysql")){
+			throw createException(1043);
+		}else{
+			throw createException(1043);
+		}
+	}
+	
+	private void mockFailOverThrow(DalHA ha) throws SQLException{
+		if(ha.getProductName().equalsIgnoreCase("mysql")){
+			throw createException(1021);
+		}else{
+			throw createException(2);
+		}
+	}
 }

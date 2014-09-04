@@ -41,8 +41,8 @@ public class DalConnectionManager {
 			connHolder.setAutoCommit(true);
 			connHolder.applyHints(hints);
 			
-			if(hints.get() != null){
-				hints.get().setProductName(connHolder.getDatabaseProductName());
+			if(hints.getHA() != null){
+				hints.getHA().setProductName(connHolder.getDatabaseProductName());
 			}
 
 			realDbName = connHolder.getDatabaseName();
@@ -72,9 +72,13 @@ public class DalConnectionManager {
 				throw new DalException(ErrorCode.ShardLocated, logicDbName);
 			dbSet.validate(shard);
 			
-			allInOneKey = dbSet.getRandomRealDbName(hints.get(), shard, isMaster, isSelect);
+			allInOneKey = dbSet.getRandomRealDbName(hints.getHA(), shard, isMaster, isSelect);
 		} else {
-			allInOneKey = dbSet.getRandomRealDbName(hints.get(), isMaster, isSelect);
+			allInOneKey = dbSet.getRandomRealDbName(hints.getHA(), isMaster, isSelect);
+		}
+		
+		if(allInOneKey == null && hints.getHA().isOver()){
+			throw new DalException(ErrorCode.NoMoreConnectionToFailOver);
 		}
 		
 		try {
@@ -91,23 +95,22 @@ public class DalConnectionManager {
 		// If HA disabled or not query, we just directly call _doInConnnection
 
 		if(!DalHAManager.isHaEnabled() || action.operation != DalEventEnum.QUERY)
-			return _doInConnection(null, action, hints);;
+			return _doInConnection(action, hints);;
 
-		T result = null;
 		DalHA highAvalible = new DalHA();
-		hints.set(highAvalible);
+		hints.setHA(highAvalible);
 		do{
 			try {
-				result = _doInConnection(highAvalible, action, hints);
+				return _doInConnection(action, hints);			
 			} catch (SQLException e) {
-				highAvalible.update(e);			
+				highAvalible.update(e);	
 			}
-		}while(highAvalible.isAvalible());
+		}while(highAvalible.needTryAgain());
 		
-		return result;
+		throw highAvalible.getException();
 	}
 	
-	private <T> T _doInConnection(DalHA ha, ConnectionAction<T> action, DalHints hints)
+	private <T> T _doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
 		action.initLogEntry(logicDbName, hints);
 		action.start();
@@ -120,9 +123,6 @@ public class DalConnectionManager {
 		} catch (Throwable e) {
 			ex = e;
 		} finally {
-			if(ha != null){
-				ha.clear();
-			}
 			action.populateDbMeta();
 			action.cleanup();		
 		}

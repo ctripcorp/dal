@@ -64,7 +64,7 @@ public class DalHAManager {
 	}
 	
 	public static boolean isHaEnabled() {
-		return haEnabled.get();
+		return haEnabled.get() && !DalTransactionManager.isInTransaction();
 	}
 	
 	public static void setRetryCount(int count){

@@ -123,7 +123,9 @@
         });
         $("#page1").attr('is_update', '1');
         $("#gen_style").val(record.task_type);
-        $("#sql_style").val(record.sql_style);
+        if(record['sql_style']){
+            $("#sql_style").val(record.sql_style);
+        }
         $("#comment").val(record.comment);
         $("#page1").modal({
             "backdrop": "static"

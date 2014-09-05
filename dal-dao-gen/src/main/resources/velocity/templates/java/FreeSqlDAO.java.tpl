@@ -3,6 +3,7 @@ package ${host.getPackageName()};
 #foreach( $field in ${host.getDaoImports()} )
 import ${field};
 #end
+import com.ctrip.platform.dal.dao.helper.*;
 
 public class ${host.getClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbName()}";

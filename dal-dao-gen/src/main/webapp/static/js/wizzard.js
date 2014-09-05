@@ -304,8 +304,12 @@
                 editor.getSession().setMode("ace/mode/sql");
                 editor.setValue(record.sql_content);
                 $("#sql_editor").find("div[class='ace_content']").trigger("click");
-                $("#free_sql_scalarType").val(record['scalarType']);
-                $("#free_sql_pagination").attr('checked',record['pagination']);
+                if(record['scalarType']){
+                    $("#free_sql_scalarType").val(record['scalarType']);
+                }else{
+                    $("#free_sql_scalarType").val("List");
+                }
+                $("#free_sql_pagination").prop('checked',record['pagination']);
                 $("#free_sql_crud_option").val(record['crud_type']);
                 $("#free_sql_crud_option").trigger("change");
                 if('select'==record['crud_type']){
@@ -524,8 +528,12 @@
                     $("#orderby_field").val(record["orderby"].split(',')[0]);
                     $("#orderby_sort").val(record["orderby"].split(',')[1]);
                 }
-                $("#auto_sql_scalarType").val(record["scalarType"]);
-                $("#auto_sql_pagination").attr('checked',record['pagination']);
+                if(record["scalarType"]){
+                    $("#auto_sql_scalarType").val(record["scalarType"]);
+                }else{
+                    $("#auto_sql_scalarType").val("List");
+                }
+                $("#auto_sql_pagination").prop('checked',record['pagination']);
                 $('#fields').multipleSelect('setSelects', record.fields.split(","));
                 if (record.condition != undefined && record.condition != "") {
                     var selectedConditions = record.condition.split(";");
@@ -821,6 +829,10 @@
             editor.setTheme("ace/theme/monokai");
             editor.getSession().setMode("ace/mode/sql");
             editor.setValue(null);
+
+            $("#free_sql_pagination").prop('checked',false);
+            $("#auto_sql_pagination").prop('checked',false);
+            $("#comment").val("");
         },
         next: function (current) {
             //首先获取当前Grid选中的行,records是id数组

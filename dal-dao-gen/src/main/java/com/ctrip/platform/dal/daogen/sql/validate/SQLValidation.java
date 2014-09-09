@@ -300,7 +300,7 @@ public class SQLValidation {
 		try{
 			stat = connection.prepareStatement(SqlBuilder.net2Java(sql));
 			for (int i = 1; i <= paramsTypes.length; i++) {
-				stat.setObject(i, vals[i], paramsTypes[i]);
+				stat.setObject(i, vals[i-1], paramsTypes[i-1]);
 			}
 			rs = stat.executeQuery();
 			status.append("The SQL Server explain is not supported!");
@@ -378,7 +378,11 @@ public class SQLValidation {
 			stat = connection.prepareStatement(sql_content);
 
 			for (int i = 1; i <= paramsTypes.length; i++) {
-				stat.setObject(i, vals[i], paramsTypes[i-1]);
+				try{
+				stat.setObject(i, vals[i-1], paramsTypes[i-1]);
+				}catch(SQLException e){
+					System.out.println(i + ": " + e.getMessage());
+				}
 			}
 
 			rs = stat.executeQuery();
@@ -458,9 +462,9 @@ public class SQLValidation {
 			case java.sql.Types.CHAR:
 				return "X";
 			case java.sql.Types.DATE:
-				return "2012-01-01";
+				return Date.valueOf("2012-01-01");
 			case java.sql.Types.TIME:
-				return "10:00:00";
+				return Time.valueOf("10:00:00");
 			case java.sql.Types.TIMESTAMP:
 				return Timestamp.valueOf("2012-01-01 10:00:00");
 			case microsoft.sql.Types.DATETIMEOFFSET:

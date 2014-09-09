@@ -259,6 +259,8 @@ public class AbstractCSharpDataPreparer{
 							CSharpParameterHost host_al = new CSharpParameterHost(
 									pHost);
 							host_al.setAlias(alias);
+							host_al.setInParameter(ConditionType.In == ConditionType
+									.valueOf(type));
 							parameters.add(host_al);
 							if (ConditionType.Between == ConditionType
 									.valueOf(type)) {

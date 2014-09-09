@@ -606,8 +606,8 @@
         }
         $("#error_msg").text("");
         if(crud_option=="insert"){
-            window.ajaxutil.post_task();
-            return;
+            $("#param_list_auto_div").hide();
+            $("#param_list_auto").hide();
         }
 
         //解析Sql语句，提取出参数

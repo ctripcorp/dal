@@ -303,19 +303,21 @@ public class GenTaskBySqlBuilderResource {
 		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
 		String dbName = databaseSetEntry.getConnectionString();
 		
+		ValidateResult validResult = null;
 		try {
 			if (pagination && "select".equalsIgnoreCase(crud_type)) {
 				sql_content = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), CurrentLanguage.Java);
 				sql_content = String.format(sql_content, 1, 2);
 			}
+			if("select".equalsIgnoreCase(crud_type)){
+				validResult = SQLValidation.queryValidate(dbName, sql_content, sqlTypes, vals);
+			}else{
+				validResult = SQLValidation.updateValidate(dbName, sql_content, sqlTypes, vals);
+			}
 		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		ValidateResult validResult;
-		if("select".equalsIgnoreCase(crud_type)){
-			validResult = SQLValidation.queryValidate(dbName, sql_content, sqlTypes, vals);
-		}else{
-			validResult = SQLValidation.updateValidate(dbName, sql_content, sqlTypes, vals);
+			status = Status.ERROR;
+			status.setInfo(e.getMessage());
+			return status;
 		}
 		
 		if(validResult!=null && validResult.isPassed()){

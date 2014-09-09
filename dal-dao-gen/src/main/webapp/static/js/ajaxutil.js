@@ -84,6 +84,13 @@
         postData["condition"] = selectedConditions.join(";");
         postData["params"] = paramList.join(";");
 
+        var mockValues = [];
+        $.each($("#auto_sql_mock_value").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            mockValues.push($(first).val());
+        });
+        postData["mockValues"] = mockValues.join(";");
+
         $.post("/rest/task/auto", postData, function (data) {
             if (data.code == "OK") {
                 $("#page1").modal('hide');

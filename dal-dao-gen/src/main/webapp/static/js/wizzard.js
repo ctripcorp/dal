@@ -709,7 +709,58 @@
 
     };
 
-    var step2_2_2 = function(){
+    var step2_2_2 = function(record, current){
+        var postData = {};
+        postData["db_name"] = $("#databases").val();
+        postData["table_name"] = $("#tables").val();
+        postData["crud_type"] = $("#crud_option").val();
+        postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
+        postData["pagination"] = $("#auto_sql_pagination").is(":checked");
+
+        var paramValues = [];
+        $.each($("#param_list_auto").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            paramValues.push($(first).val());
+        });
+        var selectedConditions = [];
+        var index2 = 0;
+        $.each($("#selected_condition option"), function (index, value) {
+            var temp = $(value).val().split(",");
+            if(temp[1]=="6"){//between
+                selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1]));
+                index2+=2;
+            }else{
+                selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index2]));
+                index2++;
+            }
+        });
+
+        postData["condition"] = selectedConditions.join(";");
+        var mockValueHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">'+
+            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label></div><br>';
+        $("#auto_sql_mock_value").html(" ");
+        $.post("/rest/task/auto/getMockValue", postData, function (data) {
+            if (data.code == "OK") {
+                var mockValue = $.parseJSON(data.info);
+                $.each(mockValue,function(index,value){
+                    $("#auto_sql_mock_value").append(sprintf(mockValueHtml, value, value));
+                });
+                var editor = ace.edit("step2_2_3_sql_editor");
+                editor.setTheme("ace/theme/monokai");
+                editor.getSession().setMode("ace/mode/sql");
+                editor.setValue(ace.edit("step2_2_2_sql_editor").getValue());
+                editor.setReadOnly(true);
+                current.hide();
+                $(".step2-2-3").show();
+            } else {
+                $.showMsg("error_msg",data.info);
+            }
+        }).fail(function (data) {
+            alert("获取Mock Value出错！");
+        });
+    };
+
+    var step2_2_3 = function(){
         window.ajaxutil.post_task();
     };
 
@@ -855,7 +906,9 @@
             }else if (current.hasClass("step2-2-1")) {
                 step2_2_1(record, current);
             }else if (current.hasClass("step2-2-2")) {
-                step2_2_2();
+                step2_2_2(record, current);
+            }else if (current.hasClass("step2-2-3")) {
+                step2_2_3();
             }else if (current.hasClass("step2-3-1")) {
                 step2_3_1(record, current);
             }else if (current.hasClass("step2-3-2")) {
@@ -881,6 +934,8 @@
                 $(".step2-2").show();
             }else if(current.hasClass("step2-2-2")) {
                 $(".step2-2-1").show();
+            }else if(current.hasClass("step2-2-3")) {
+                $(".step2-2-2").show();
             }else if(current.hasClass("step2-3-2")) {
                 $(".step2-3-1").show();
             }else if(current.hasClass("step2-3-3")) {

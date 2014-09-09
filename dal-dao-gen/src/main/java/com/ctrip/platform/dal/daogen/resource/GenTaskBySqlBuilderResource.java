@@ -25,11 +25,13 @@ import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
+import com.ctrip.platform.dal.daogen.sql.validate.SQLValidation;
+import com.ctrip.platform.dal.daogen.sql.validate.ValidateResult;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.SQLValidation;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
-import com.ctrip.platform.dal.daogen.utils.SQLValidation.Validation;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 构建SQL（生成的代码绑定到模板）
@@ -42,6 +44,8 @@ import com.ctrip.platform.dal.daogen.utils.SQLValidation.Validation;
 public class GenTaskBySqlBuilderResource {
 	
 	private static DaoBySqlBuilder daoBySqlBuilder;
+	
+	private static ObjectMapper mapper = new ObjectMapper();
 
 	static {
 		daoBySqlBuilder = SpringBeanGetter.getDaoBySqlBuilder();
@@ -65,7 +69,8 @@ public class GenTaskBySqlBuilderResource {
 			@FormParam("comment") String comment,
 			@FormParam("scalarType") String scalarType,
 			@FormParam("pagination") boolean pagination,
-			@FormParam("orderby") String orderby) {
+			@FormParam("orderby") String orderby,
+			@FormParam("mockValues") String mockValues) {
 		
 		Status status = Status.OK;
 		
@@ -77,7 +82,7 @@ public class GenTaskBySqlBuilderResource {
 				return Status.ERROR;
 			}	
 		}else{
-			Status temp = validateSQL(set_name, table_name, crud_type, fields, condition, sql_content, pagination);
+			Status temp = validateSQL(set_name, table_name, crud_type, fields, condition, sql_content, pagination, mockValues);
 			if(!Status.OK.getCode().equals(temp.getCode())){
 				return temp;
 			}
@@ -164,83 +169,161 @@ public class GenTaskBySqlBuilderResource {
 		return status;
 	}
 	
+	@POST
+	@Path("getMockValue")
+	public Status getMockValue(@FormParam("db_name") String set_name,
+			@FormParam("table_name") String table_name,
+			@FormParam("crud_type") String crud_type,
+			@FormParam("fields") String fields,
+			@FormParam("condition") String condition,
+			@FormParam("pagination") boolean pagination){
+		Status status = Status.OK;
+		int []sqlTypes = getSqlTypes(set_name, table_name, crud_type, fields, condition);
+		Object []values = com.ctrip.platform.dal.daogen.sql.validate.SQLValidation.mockObjectValues(sqlTypes);
+		try {
+			status.setInfo(mapper.writeValueAsString(values));
+		} catch (JsonProcessingException e) {
+			status = Status.ERROR;
+			status.setInfo("获取mock value异常.");
+		}
+		return status;
+	}
+	
+	private int[] getSqlTypes(String set_name, String table_name,
+			String crud_type, String fields, String condition){
+		if("select".equalsIgnoreCase(crud_type)){
+			return getSelectSqlTypes(set_name, table_name, condition);
+		}else if("insert".equalsIgnoreCase(crud_type)){
+			return getInsertSqlTypes(set_name, table_name, fields);
+		}else if("update".equalsIgnoreCase(crud_type)){
+			getUpdateSqlTypes(set_name, table_name, fields, condition);
+		}else if("delete".equalsIgnoreCase(crud_type)){
+			getDeleteSqlTypes(set_name, table_name, condition);
+		}
+		return new int[0];
+	}
+	
+	private int[] getDeleteSqlTypes(String set_name, String table_name, String condition){
+		return getWhereConditionSqlTypes(set_name, table_name, condition);
+	}
+	
+	private int[] getUpdateSqlTypes(String set_name, String table_name, String fields, String condition){
+		int []fieldSqlTypes = getFieldSqlTypes(set_name, table_name, fields);
+		int []whereConditionSqlTypes = getWhereConditionSqlTypes(set_name, table_name, condition);
+		int []mergeSqlTypes = new int[fieldSqlTypes.length+whereConditionSqlTypes.length];
+		for(int i=0;i<fieldSqlTypes.length;i++){
+			mergeSqlTypes[i] = fieldSqlTypes[i];
+		}
+		for(int i=fieldSqlTypes.length;i<fieldSqlTypes.length+whereConditionSqlTypes.length;i++){
+			mergeSqlTypes[i] = whereConditionSqlTypes[i];
+		}
+		return mergeSqlTypes;
+	}
+	
+	private int[] getInsertSqlTypes(String set_name, String table_name, String fields){
+		return getFieldSqlTypes(set_name, table_name, fields);
+	}
+	
+	private int[] getSelectSqlTypes(String set_name, String table_name, String condition){
+		return getWhereConditionSqlTypes(set_name, table_name, condition);
+	}
+	
+	private int[] getFieldSqlTypes(String set_name, String table_name, String fields){
+		if(fields==null || "".equals(fields)){
+			return new int[0];
+		}
+		Map<String,Integer> tableColumnSqlType = getTableColumnSqlType(set_name,table_name);
+		String []insertFields = fields.split(",");
+		int []insertFieldSqlTypes = new int[insertFields.length];
+		int index = 0;
+		for(String field : insertFields){
+			insertFieldSqlTypes[index++] = tableColumnSqlType.get(field.toLowerCase());
+		}
+		return insertFieldSqlTypes;
+	}
+	
+	private int[] getWhereConditionSqlTypes(String set_name, String table_name, String condition){
+		int whereConditionCount = 0;
+		if(condition!=null && !condition.isEmpty()){
+			String []whereConditions = condition.split(";");
+			for(String whereCondition : whereConditions){
+				if("6".equals(whereCondition.split(",")[1])){
+					whereConditionCount = whereConditionCount + 2;
+				}else{
+					whereConditionCount++;
+				}
+			}
+		}
+		if(whereConditionCount<1){
+			return new int[0];
+		}
+		int []whereConditionSqlTypes = new int[whereConditionCount];
+		Map<String,Integer> tableColumnSqlType = getTableColumnSqlType(set_name,table_name);
+		String []whereConditions = condition.split(";");
+		int index = 0;
+		for(String whereCondition : whereConditions) {
+			String columnName = whereCondition.split(",")[0].toLowerCase();
+			if("6".equals(whereCondition.split(",")[1])){
+				whereConditionSqlTypes[index++] = tableColumnSqlType.get(columnName);
+				whereConditionSqlTypes[index++] = tableColumnSqlType.get(columnName);
+			}else{
+				whereConditionSqlTypes[index++] = tableColumnSqlType.get(columnName);
+			}
+		}
+		return whereConditionSqlTypes;
+	}
+	
+	/**
+	 * 
+	 * @param set_name
+	 * @param table_name
+	 * @return <column alias, sqltype>
+	 */
+	private Map<String,Integer> getTableColumnSqlType(String set_name, String table_name){
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
+		String dbName = databaseSetEntry.getConnectionString();
+		List<AbstractParameterHost> paramsHost = DbUtils.getAllColumnNames(dbName, table_name, CurrentLanguage.Java);
+		Map<String,Integer> map = new HashMap<String,Integer>();
+		for(int i=0;i<paramsHost.size();i++){
+			JavaParameterHost paramHost = (JavaParameterHost) paramsHost.get(i);
+			map.put(paramHost.getAlias().toLowerCase(), paramHost.getSqlType());
+		}
+		return map;
+	}
+	
 	private Status validateSQL(String set_name, String table_name,
 			String crud_type, String fields, String condition, String sql_content,
-			boolean pagination) {
+			boolean pagination,String mockValues) {
+		
 		Status status = Status.OK;
-		if(condition!=null && !condition.isEmpty()){
-			String []parameters = condition.split(";");
-			int paramCount = 0;
-			for(String param : parameters){
-				if("6".equals(param.split(",")[1])){
-					paramCount = paramCount + 2;
-				}else{
-					paramCount++;
-				}
+		sql_content = sql_content.replaceAll("[@:]\\w+", "?");
+		int []sqlTypes = getSqlTypes(set_name, table_name, crud_type, fields, condition);
+		String []vals = mockValues.split(";");
+		
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
+		String dbName = databaseSetEntry.getConnectionString();
+		
+		try {
+			if (pagination && "select".equalsIgnoreCase(crud_type)) {
+				sql_content = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), CurrentLanguage.Java);
+				sql_content = String.format(sql_content, 1, 2);
 			}
-			
-			if("update".equalsIgnoreCase(crud_type) && !fields.isEmpty()){
-				paramCount += fields.split(",").length;
- 			}
-			
-			int []paramsTypes = new int[paramCount];
-			
-			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
-			String dbName = databaseSetEntry.getConnectionString();
-			List<AbstractParameterHost> paramsHost = DbUtils.getAllColumnNames(dbName, table_name, CurrentLanguage.Java);
-			Map<String,Integer> map = new HashMap<String,Integer>();
-			for(int i=0;i<paramsHost.size();i++){
-				JavaParameterHost paramHost = (JavaParameterHost) paramsHost.get(i);
-				map.put(paramHost.getAlias().toLowerCase(), paramHost.getSqlType());
-			}
-			
-			int index = 0;
-			
-			if("update".equalsIgnoreCase(crud_type) && !fields.isEmpty()){
-				for(String field : fields.split(",") ){
-					paramsTypes[index++] = map.get(field.toLowerCase());
-				}
- 			}
-			
-			for(String param : parameters){
-				String columnName = param.split(",")[0].toLowerCase();
-				if("6".equals(param.split(",")[1])){
-					paramsTypes[index++] = map.get(columnName);
-					paramsTypes[index++] = map.get(columnName);
-				}else{
-					paramsTypes[index++] = map.get(columnName);
-				}
-			}
-			
-			String tempSQL = sql_content;
-			Validation validResult;
-			try {
-				if (pagination && "select".equalsIgnoreCase(crud_type)) {
-					tempSQL = SqlBuilder.pagingQuerySql(tempSQL, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()),CurrentLanguage.Java);
-					tempSQL = String.format(tempSQL, 1, 2);
-				}
-				
-				tempSQL = tempSQL.replaceAll("[@:]\\w+", "?");
-				if ("select".equalsIgnoreCase(crud_type)) {
-					validResult = SQLValidation.queryValidate(dbName,
-							tempSQL, paramsTypes);
-				} else {
-					validResult = SQLValidation.updateValidate(dbName,
-							tempSQL, paramsTypes);
-				}
-			} catch (Exception e) {
-				status = Status.ERROR;
-				status.setInfo("验证SQL出错!"+e.getMessage());
-				return status;
-			}
-			if(validResult!=null && validResult.isPassed()){
-				status.setInfo(validResult.getMessage());
-			}else{
-				status = Status.ERROR;
-				status.setInfo(validResult.getMessage());
-				return status;
-			}
-			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		ValidateResult validResult;
+		if("select".equalsIgnoreCase(crud_type)){
+			validResult = SQLValidation.queryValidate(dbName, sql_content, sqlTypes, vals);
+		}else{
+			validResult = SQLValidation.updateValidate(dbName, sql_content, sqlTypes, vals);
+		}
+		
+		if(validResult!=null && validResult.isPassed()){
+			status.setInfo(validResult.getMessage());
+		}else{
+			status = Status.ERROR;
+			status.setInfo(validResult.getMessage());
+			return status;
 		}
 		return status;
 	}

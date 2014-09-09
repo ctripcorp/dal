@@ -83,6 +83,7 @@
         $(".step2-2-1-1").hide();
         $(".step2-2-1-2").hide();
         $(".step2-2-2").hide();
+        $(".step2-2-3").hide();
         $(".step2-3-1").hide();
         $(".step2-3-2").hide();
         $(".step2-3-3").hide();
@@ -115,6 +116,7 @@
         $(".step2-2-1-1").hide();
         $(".step2-2-1-2").hide();
         $(".step2-2-2").hide();
+        $(".step2-2-3").hide();
         $(".step2-3-1").hide();
         $(".step2-3-2").hide();
         $(".step2-3-3").hide();

@@ -30,6 +30,7 @@ import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 
 public class AbstractCSharpDataPreparer{
 	
@@ -159,23 +160,26 @@ public class AbstractCSharpDataPreparer{
 	
 	private List<CSharpMethodHost> buildMethodHosts(
 			List<CSharpParameterHost> allColumns,
-			List<GenTaskBySqlBuilder> currentTableBuilders) {
+			List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
 		List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
 
 		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
 			CSharpMethodHost method = new CSharpMethodHost();
 			method.setCrud_type(builder.getCrud_type());
 			method.setName(builder.getMethod_name());
-			
-			Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(builder.getSql_content());
+			String sql = builder.getSql_content();
 			int index = 0;
-			String temp=builder.getSql_content();
+			if(builder.isPagination()){
+				sql = SqlBuilder.pagingQuerySql(sql, getDatabaseCategory(builder.getDb_name()), CurrentLanguage.CSharp);
+				index += 2;
+			}
+			Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(builder.getSql_content());
 			while(m.find())
 	    	{
-				temp = temp.replace(m.group(1), String.format("({%d}) ", index));
+				sql = sql.replace(m.group(1), String.format("({%d}) ", index));
 				index ++;
 	    	}
-			method.setSql(temp);
+			method.setSql(sql);
 			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			

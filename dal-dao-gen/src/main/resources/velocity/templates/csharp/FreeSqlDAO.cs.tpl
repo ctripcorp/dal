@@ -59,12 +59,15 @@ namespace ${host.getNameSpace()}.Dao
         {
         	try
             {
+			String sql = "${method.getSql()}";
+#*
 #if($method.isPaging())
 		        String sqlPattern = "${method.getPagingSql($host.getDatabaseCategory())}";
 				String sql = String.Format(sqlPattern, (pageNo - 1) * pageSize + 1, pageSize * pageNo);
 #else
 		        String sql = "${method.getSql()}";
 #end
+*#
                 StatementParameterCollection parameters = new StatementParameterCollection();
 #set($inParams = [])                
 #foreach($p in $method.getParameters())  

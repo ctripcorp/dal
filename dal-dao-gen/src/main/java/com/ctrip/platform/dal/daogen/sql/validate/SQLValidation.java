@@ -17,10 +17,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.daogen.Consts;
-import com.ctrip.platform.dal.daogen.sql.builder.SQLBuilder;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.ORMUtils;
 import com.ctrip.platform.dal.daogen.utils.ResourceUtils;
+import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -185,7 +185,7 @@ public class SQLValidation {
 		try{
 			connection = DataSourceUtil.getConnection(dbName);
 			connection.setAutoCommit(false);
-			PreparedStatement stat = connection.prepareStatement(SQLBuilder.net2Java(sql));
+			PreparedStatement stat = connection.prepareStatement(SqlBuilder.net2Java(sql));
 			for (int i = 1; i <= paramsTypes.length; i++) {
 				stat.setObject(i, mockedVals[i-1], paramsTypes[i-1]);
 			}
@@ -298,7 +298,7 @@ public class SQLValidation {
 		ResultSet rs = null;
 		PreparedStatement stat = null;
 		try{
-			stat = connection.prepareStatement(SQLBuilder.net2Java(sql));
+			stat = connection.prepareStatement(SqlBuilder.net2Java(sql));
 			for (int i = 1; i <= paramsTypes.length; i++) {
 				stat.setObject(i, vals[i], paramsTypes[i]);
 			}
@@ -374,7 +374,7 @@ public class SQLValidation {
 		ResultSet rs = null;
 		PreparedStatement stat = null;
 		try{
-			String sql_content = "EXPLAIN " + SQLBuilder.net2Java(sql);
+			String sql_content = "EXPLAIN " + SqlBuilder.net2Java(sql);
 			stat = connection.prepareStatement(sql_content);
 
 			for (int i = 1; i <= paramsTypes.length; i++) {

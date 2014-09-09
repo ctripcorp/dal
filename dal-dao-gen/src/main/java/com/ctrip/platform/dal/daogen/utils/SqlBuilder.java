@@ -34,6 +34,10 @@ public class SqlBuilder {
 	
 	private static CCJSqlParserManager parserManager = new CCJSqlParserManager();
 	
+	public static String net2Java(String sql){
+		return sql.replaceAll("@\\w+", "?");
+	}
+	
 	/**
 	 * Re-build the query SQL to implement paging function.
 	 * The new SQL Statement will contains limit if the database type is MYSQL, 

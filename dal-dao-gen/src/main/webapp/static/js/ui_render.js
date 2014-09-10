@@ -87,6 +87,7 @@
         $(".step2-3-1").hide();
         $(".step2-3-2").hide();
         $(".step2-3-3").hide();
+        $(".step2-3-4").hide();
         $("#page1").attr('is_update', '0');
         $("#page1").modal({
             "backdrop": "static"
@@ -120,6 +121,7 @@
         $(".step2-3-1").hide();
         $(".step2-3-2").hide();
         $(".step2-3-3").hide();
+        $(".step2-3-4").hide();
         window.ajaxutil.reload_dbsets(function () {
             $("#databases")[0].selectize.setValue(record['databaseSetName']);
         });

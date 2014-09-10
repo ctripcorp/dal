@@ -302,8 +302,8 @@
                 var editor = ace.edit("sql_editor");
                 editor.setTheme("ace/theme/monokai");
                 editor.getSession().setMode("ace/mode/sql");
-                editor.setValue(record.sql_content);
-                $("#sql_editor").find("div[class='ace_content']").trigger("click");
+                editor.setValue(record["sql_content"]);
+
                 if(record['scalarType']){
                     $("#free_sql_scalarType").val(record['scalarType']);
                 }else{
@@ -687,11 +687,12 @@
             }
         }
 
-        if(htmls.length==0){
+        if(htmls.length==0 || crud_option=="insert"){
             $("#param_list_auto_div").hide();
             $("#param_list_auto").empty();
         }else{
             $("#param_list_auto_div").show();
+            $("#param_list_auto").show();
             $("#param_list_auto").html(htmls);
         }
 
@@ -774,7 +775,20 @@
         $(".step2-3-2").show();
     };
 
+    var existKeyword_Nolock = function(){
+        if($("#free_sql_crud_option").val()=="select" &&
+            ace.edit("sql_editor").getValue().toLowerCase().indexOf("nolock")==-1 &&
+            $(".step2-2-1").attr("dbCatalog")!="MySql"){
+            $.showMsg("error_msg","select语句中必须含有with (nolock)");
+            return false;
+        }
+        return true;
+    };
+
     var step2_3_2 = function(record,current){
+        if(!existKeyword_Nolock()){
+            return;
+        }
         //首先解析Sql语句，提取出参数
         var regexIndex = /(\?{1})/igm;
         var regexNames = /[@:](\w+)/igm;
@@ -854,7 +868,44 @@
 
     };
 
-    var step2_3_3 = function(){
+    var step2_3_3 = function(record, current){
+        if(checkDuplicateParamName()){
+            return;
+        }
+        var postData = {};
+        var paramList = [];
+        $.each($("#param_list").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            var second = $(value).children("select").eq(0);
+            paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
+        });
+        postData["params"] = paramList.join(";");
+
+        var mockValueHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">'+
+            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label></div><br>';
+        $("#free_sql_mock_value").html(" ");
+        $.post("/rest/task/sql/getMockValue", postData, function (data) {
+            if (data.code == "OK") {
+                var mockValue = $.parseJSON(data.info);
+                $.each(mockValue,function(index,value){
+                    $("#free_sql_mock_value").append(sprintf(mockValueHtml, value, value));
+                });
+                var editor = ace.edit("step2_3_4_sql_editor");
+                editor.setTheme("ace/theme/monokai");
+                editor.getSession().setMode("ace/mode/sql");
+                editor.setValue(ace.edit("step2_3_1_sql_editor").getValue());
+                editor.setReadOnly(true);
+                current.hide();
+                $(".step2-3-4").show();
+            } else {
+                $.showMsg("error_msg",data.info);
+            }
+        }).fail(function (data) {
+            alert("获取Mock Value出错！");
+        });
+    };
+
+    var checkDuplicateParamName = function(){
         $("#error_msg").html(" ");
         var paramName = [];
         var msg=[];
@@ -868,8 +919,12 @@
         });
         if(msg.length>0){
             $("#error_msg").html("以下参数名重复,请重新命名.<br/>"+msg.join(",")+" ");
-            return;
+            return true;
         }
+        return false;
+    };
+
+    var step2_3_4 = function(){
         window.ajaxutil.post_task();
     };
 
@@ -887,7 +942,7 @@
             var sql_builder = ace.edit("sql_builder");
             sql_builder.setTheme("ace/theme/monokai");
             sql_builder.getSession().setMode("ace/mode/sql");
-            sql_builder.setValue("");
+            sql_builder.setValue(null);
 
             $("#method_name").val("");
 
@@ -929,7 +984,9 @@
             }else if (current.hasClass("step2-3-2")) {
                 step2_3_2(record, current);
             }else if (current.hasClass("step2-3-3")) {
-                step2_3_3();
+                step2_3_3(record,current);
+            }else if (current.hasClass("step2-3-4")) {
+                step2_3_4();
             }
         },
         previous: function (current) {
@@ -955,6 +1012,8 @@
                 $(".step2-3-1").show();
             }else if(current.hasClass("step2-3-3")) {
                 $(".step2-3-2").show();
+            }else if(current.hasClass("step2-3-4")) {
+                $(".step2-3-3").show();
             }
         }
     };

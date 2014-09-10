@@ -147,12 +147,12 @@
         });
         postData["params"] = paramList.join(";");
 
-        if($("#free_sql_crud_option").val()=="select" &&
-            postData["sql_content"].toLowerCase().indexOf("nolock")==-1 &&
-            $(".step2-2-1").attr("dbCatalog")!="MySql"){
-            $.showMsg("error_msg","select语句中必须含有with (nolock)");
-            return;
-        }
+        var mockValues = [];
+        $.each($("#free_sql_mock_value").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            mockValues.push($(first).val());
+        });
+        postData["mockValues"] = mockValues.join(";");
 
         $.post("/rest/task/sql/sqlValidate", postData).done(function (data) {
             if (data.code == "OK") {

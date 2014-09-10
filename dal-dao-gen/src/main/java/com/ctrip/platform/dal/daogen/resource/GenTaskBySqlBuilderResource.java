@@ -179,7 +179,7 @@ public class GenTaskBySqlBuilderResource {
 			@FormParam("pagination") boolean pagination){
 		Status status = Status.OK;
 		int []sqlTypes = getSqlTypes(set_name, table_name, crud_type, fields, condition);
-		Object []values = com.ctrip.platform.dal.daogen.sql.validate.SQLValidation.mockObjectValues(sqlTypes);
+		Object []values = SQLValidation.mockStringValues(sqlTypes);
 		try {
 			status.setInfo(mapper.writeValueAsString(values));
 		} catch (JsonProcessingException e) {
@@ -306,7 +306,7 @@ public class GenTaskBySqlBuilderResource {
 		ValidateResult validResult = null;
 		try {
 			if (pagination && "select".equalsIgnoreCase(crud_type)) {
-				sql_content = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), CurrentLanguage.Java);
+				sql_content = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(dbName), CurrentLanguage.Java);
 				sql_content = String.format(sql_content, 1, 2);
 			}
 			if("select".equalsIgnoreCase(crud_type)){

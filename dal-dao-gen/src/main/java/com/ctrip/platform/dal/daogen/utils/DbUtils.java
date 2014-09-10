@@ -509,6 +509,7 @@ public class DbUtils {
 			allColumnsRs = connection.getMetaData().getColumns(null, null, tableName, null);
 			boolean terminal = false;
 			if (language == CurrentLanguage.CSharp) {
+				Map<String,String> columnComment = getSqlserverColumnComment(dbName, tableName);
 				while (allColumnsRs.next()) {
 					CSharpParameterHost host = new CSharpParameterHost();
 					String typeName = allColumnsRs.getString("TYPE_NAME");
@@ -533,8 +534,10 @@ public class DbUtils {
 					//host.setName(CommonUtils.normalizeVariable(allColumnsRs.getString("COLUMN_NAME")));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
 					String remark = allColumnsRs.getString("REMARKS");
-					if(remark == null)
-						remark = "";
+					if(remark == null){
+						String description = columnComment.get(allColumnsRs.getString("COLUMN_NAME").toLowerCase());
+						remark = description==null?"":description;
+					}
 					host.setComment(remark.replace("\n", " "));
 					host.setType(DbType.getCSharpType(host.getDbType()));
 					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
@@ -575,8 +578,7 @@ public class DbUtils {
 					}
 					host.setJavaClass(javaClass);
 					host.setIndex(allColumnsRs.getInt("ORDINAL_POSITION"));
-					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT")
-							.equalsIgnoreCase("YES"));
+					host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
 					allColumns.add(host);
 				}
 			}
@@ -596,8 +598,7 @@ public class DbUtils {
 		return null;
 	}
 
-	private static Map<Integer, Class<?>> getSqlType2JavaTypeMaper(String dbName, String tableViewName)
-	{
+	private static Map<Integer, Class<?>> getSqlType2JavaTypeMaper(String dbName, String tableViewName) {
 		Map<Integer, Class<?>> map = new HashMap<Integer, Class<?>>();;
 		Connection connection = null;
 		ResultSet rs = null;
@@ -611,8 +612,7 @@ public class DbUtils {
 				Consts.databaseType.put(dbName, dbType);
 			}
 			
-			rs = connection.getMetaData().getColumns(null, null,
-					tableViewName, null);
+			rs = connection.getMetaData().getColumns(null, null, tableViewName, null);
 			
 			ResultSetMetaData rsmd = rs.getMetaData();
 			for(int i = 1; i <= rsmd.getColumnCount(); i++) {
@@ -623,8 +623,7 @@ public class DbUtils {
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}
-				if(!map.containsKey(sqlType) && null != javaType)
-				{
+				if(!map.containsKey(sqlType) && null != javaType) {
 					map.put(sqlType, javaType);
 				}
 			}
@@ -675,13 +674,11 @@ public class DbUtils {
 				for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
 					CSharpParameterHost pHost = new CSharpParameterHost();
 					pHost.setName(rsMeta.getColumnLabel(i));
-					pHost.setDbType(DbType.getDbTypeFromJdbcType(rsMeta
-							.getColumnType(i)));
+					pHost.setDbType(DbType.getDbTypeFromJdbcType(rsMeta.getColumnType(i)));
 					pHost.setType(DbType.getCSharpType(pHost.getDbType()));
 					pHost.setIdentity(false);
 					pHost.setNullable(true);
-					pHost.setValueType(Consts.CSharpValueTypes.contains(pHost
-							.getType()));
+					pHost.setValueType(Consts.CSharpValueTypes.contains(pHost.getType()));
 					pHost.setPrimary(false);
 					pHost.setLength(rsMeta.getColumnDisplaySize(i));
 					hosts.add(pHost);
@@ -889,6 +886,34 @@ public class DbUtils {
 
 		return dbCategory;
 
+	}
+	
+	private static Map<String,String> getSqlserverColumnComment(String allInOneName, String tableName) throws Exception{
+		Map<String,String> map = new HashMap<String,String>();
+		if(getDatabaseCategory(allInOneName)==DatabaseCategory.MySql){
+			return map;
+		}
+		String sql = ""
+				+ "SELECT sys.columns.name as name, "
+				+ "       CONVERT(VARCHAR(1000), (SELECT VALUE "
+				+ "                              FROM   sys.extended_properties "
+				+ "                              WHERE  sys.extended_properties.major_id = sys.columns.object_id "
+				+ "                                     AND sys.extended_properties.minor_id = sys.columns.column_id)) AS description "
+				+ "FROM   sys.columns, "
+				+ "       sys.tables "
+				+ "WHERE  sys.columns.object_id = sys.tables.object_id "
+				+ "       AND sys.tables.name = ? "
+				+ "ORDER  BY sys.columns.column_id ";
+		Connection connection = DataSourceUtil.getConnection(allInOneName);
+		PreparedStatement stmt = connection.prepareStatement(sql);
+		stmt.setObject(1, tableName);
+		ResultSet rs = stmt.executeQuery();
+		while(rs.next()){
+			map.put(rs.getString("name").toLowerCase(), rs.getString("description"));
+		}
+		JdbcUtils.closeResultSet(rs);
+		JdbcUtils.closeConnection(connection);
+		return map;
 	}
 	
 	public static void main(String[] args){

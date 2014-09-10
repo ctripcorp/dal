@@ -154,6 +154,13 @@
             return;
         }
 
+        var mockValues = [];
+        $.each($("#free_sql_mock_value").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            mockValues.push($(first).val());
+        });
+        postData["mockValues"] = mockValues.join(";");
+
         $.post("/rest/task/sql/sqlValidate", postData).done(function (data) {
             if (data.code == "OK") {
                 $.post("/rest/task/sql", postData, function (data) {

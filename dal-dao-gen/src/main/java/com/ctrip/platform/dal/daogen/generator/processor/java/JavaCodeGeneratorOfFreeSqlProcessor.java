@@ -89,7 +89,7 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements Processor {
 								String.format("%s/Dao/%sDao.java",
 										mavenLikeDir.getAbsolutePath(),
 										host.getClassName()),
-								"templates/java/FreeSqlDAO.java.tpl");
+								"templates/java/dao/freesql/FreeSqlDAO.java.tpl");
 	
 						GenUtils.mergeVelocityContext(context,
 								String.format("%s/Test/%sDaoTest.java",

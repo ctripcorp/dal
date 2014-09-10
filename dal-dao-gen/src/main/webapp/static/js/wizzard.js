@@ -856,6 +856,9 @@
     };
 
     var step2_3_3 = function(record, current){
+        if(checkDuplicateParamName()){
+            return;
+        }
         var postData = {};
         var paramList = [];
         $.each($("#param_list").children("div"), function (index, value) {
@@ -889,7 +892,7 @@
         });
     };
 
-    var step2_3_4 = function(){
+    var checkDuplicateParamName = function(){
         $("#error_msg").html(" ");
         var paramName = [];
         var msg=[];
@@ -903,8 +906,12 @@
         });
         if(msg.length>0){
             $("#error_msg").html("以下参数名重复,请重新命名.<br/>"+msg.join(",")+" ");
-            return;
+            return true;
         }
+        return false;
+    };
+
+    var step2_3_4 = function(){
         window.ajaxutil.post_task();
     };
 

@@ -14,7 +14,7 @@ namespace ${host.getNameSpace()}.Entity.DataModel
 #foreach($column in $host.getColumns())
         /// <summary>
 #if($column.getComment()!="")
-		/// $column.getComment()
+		/// $!column.getComment()
 #end
         /// </summary>
         [Column(Name = "${column.getName()}",ColumnType=DbType.${column.getDbType()}#if($column.getLength() > 0),Length=${column.getLength()}#end)#if($column.isIdentity()),ID#end#if($column.isPrimary()),PK#end]

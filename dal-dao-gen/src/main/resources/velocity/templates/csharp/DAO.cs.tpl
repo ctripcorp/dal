@@ -554,7 +554,7 @@ namespace ${host.getNameSpace()}.Dao
 #if($p.isInParameter())
 #set($success = $inParams.add($p))
 #else
-                parameters.Add(new StatementParameter{ Name = "@${p.getName()}", Direction = ParameterDirection.Input, DbType = DbType.${p.getDbType()}, Value =${WordUtils.uncapitalize($p.getAlias())} });
+                parameters.Add(new StatementParameter{ Name = "@${p.getAlias()}", Direction = ParameterDirection.Input, DbType = DbType.${p.getDbType()}, Value =${WordUtils.uncapitalize($p.getAlias())} });
 #end
 #end
 

@@ -418,6 +418,7 @@ public final class DalTableDao<T> {
 	 * @param daoPojos array of pojos to be inserted
 	 * @return how many rows been affected
 	 * @throws SQLException
+	 * @deprecated this api may merge with the non cross shard version in next release. Do not use it.
 	 */
 	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
 			List<T> daoPojos) throws SQLException {
@@ -469,6 +470,7 @@ public final class DalTableDao<T> {
 	 * @param daoPojos list of pojos to be inserted
 	 * @return how many rows been affected
 	 * @throws SQLException
+	 * @deprecated this api may merge with the non cross shard version in next release. Do not use it.
 	 */
 	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
 			T... daoPojos) throws SQLException {
@@ -553,6 +555,7 @@ public final class DalTableDao<T> {
 	 * @param daoPojos list of pojos to be inserted
 	 * @return how many rows been affected for inserting each of the pojo organized by shard id.
 	 * @throws SQLException
+	 * @deprecated this api may merge with the non cross shard version in next release. Do not use it.
 	 */
 	public Map<String, int[]> crossShardBatchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
 		crossShardOperationAllowed(logicDbName, rawTableName, hints, "crossShardBatchInsert");
@@ -587,6 +590,7 @@ public final class DalTableDao<T> {
 	 * @param daoPojos array of pojos to be inserted
 	 * @return how many rows been affected for inserting each of the pojo organized by shard id.
 	 * @throws SQLException
+	 * @deprecated this api may merge with the non cross shard version in next release. Do not use it.
 	 */
 	public Map<String, int[]> crossShardBatchInsert(DalHints hints, T... daoPojos) throws SQLException {
 		return this.crossShardBatchInsert(hints, Arrays.asList(daoPojos));
@@ -701,6 +705,7 @@ public final class DalTableDao<T> {
 	 * @param daoPojos list of pojos to be deleted
 	 * @return how many rows been affected for deleting each of the pojo organized by shard id.
 	 * @throws SQLException
+	 * @deprecated this api may merge with the non cross shard version in next release. Do not use it.
 	 */
 	public Map<String, int[]> crossShardBatchDelete(DalHints hints, T... daoPojos) throws SQLException {
 		return crossShardBatchDelete(hints, Arrays.asList(daoPojos));
@@ -716,6 +721,7 @@ public final class DalTableDao<T> {
 	 * @param daoPojos list of pojos to be deleted
 	 * @return how many rows been affected for deleting each of the pojo organized by shard id.
 	 * @throws SQLException
+	 * @deprecated this api may merge with the non cross shard version in next release. Do not use it.
 	 */
 	public Map<String, int[]> crossShardBatchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
 		crossShardOperationAllowed(logicDbName, rawTableName, hints, "crossShardBatchDelete");

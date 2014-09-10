@@ -890,6 +890,21 @@
     };
 
     var step2_3_4 = function(){
+        $("#error_msg").html(" ");
+        var paramName = [];
+        var msg=[];
+        $.each($("#param_list input"),function(index,value){
+            $.each(paramName,function(index,name){
+                if($(value).val()==name){
+                    msg.push($(value).val());
+                }
+            });
+            paramName.push($(value).val());
+        });
+        if(msg.length>0){
+            $("#error_msg").html("以下参数名重复,请重新命名.<br/>"+msg.join(",")+" ");
+            return;
+        }
         window.ajaxutil.post_task();
     };
 

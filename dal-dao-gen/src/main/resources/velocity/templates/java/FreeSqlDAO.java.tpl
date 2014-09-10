@@ -35,6 +35,7 @@ public class ${host.getClassName()}Dao {
 	 * ${method.getComments()}
 	**/
 #if($method.getCrud_type()=="select")
+#if($method.getCrud_type()=="select")
 ##简单类型并且返回值是List
 #if($method.isSampleType() && $method.isReturnList())
 	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {	
@@ -141,6 +142,12 @@ public class ${host.getClassName()}Dao {
 		String sql = SQLParser.parse("${method.getSql()}",${method.getInClauses()});
 #else
 		String sql = SQLParser.parse("${method.getSql()}");
+#else
+	public int ${method.getName()} (${method.getParameterDeclaration()}) throws SQLException {
+#if(${method.getInClauses()} != "")
+		String sql = SQLParser.parse("${method.getSql()}",${method.getInClauses()});
+#else
+		String sql = SQLParser.parse("${method.getSql()}");
 #end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
@@ -156,6 +163,8 @@ public class ${host.getClassName()}Dao {
 		return baseClient.update(sql, parameters, hints);
 	}
 #end
+#end
+
 #end
 
 #foreach( $method in ${host.getMethods()} )

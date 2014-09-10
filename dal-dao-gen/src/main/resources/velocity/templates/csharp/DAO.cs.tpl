@@ -560,13 +560,13 @@ namespace ${host.getNameSpace()}.Dao
 
 #if($inParams.size() > 0)
 #if($method.isPaging())
-                sql = string.Format(sql, (pageNo - 1) * pageSize + 1, pageSize * pageNo, 
+                sql = string.Format(sql, ${host.pageBegain()}, ${host.pageEnd()}, 
 					#foreach($p in $inParams)Arch.Data.Utility.ParameterUtility.NormalizeInParam(${WordUtils.uncapitalize($p.getAlias())}, parameters,"${WordUtils.uncapitalize($p.getAlias())}")#if($foreach.count != $inParams.size()),#end#end);
 #else
 		        sql = string.Format(sql, #foreach($p in $inParams)Arch.Data.Utility.ParameterUtility.NormalizeInParam(${WordUtils.uncapitalize($p.getAlias())}, parameters,"${WordUtils.uncapitalize($p.getAlias())}")#if($foreach.count != $inParams.size()),#end#end);
 #end
 #elseif($method.isPaging())
-		        sql = string.Format(sql, (pageNo - 1) * pageSize + 1, pageSize * pageNo);
+		        sql = string.Format(sql, ${host.pageBegain()}, ${host.pageEnd()});
 #end
 
 #if($method.isFirstOrSingle())

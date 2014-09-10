@@ -361,7 +361,7 @@ public class ${host.getPojoClassName()}Dao {
 	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 #if($method.isPaging())
 		String sqlPattern = "${method.getPagingSql($host.getDatabaseCategory())}";
-		String sql = String.format(sqlPattern, (pageNo - 1) * pageSize + 1, pageSize * pageNo);
+		String sql = String.format(sqlPattern, ${host.pageBegain()}, ${host.pageEnd()});
 #else
 		String sql = "${method.getSql()}";
 #end
@@ -432,7 +432,7 @@ public class ${host.getPojoClassName()}Dao {
 	public List<${host.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 #if($method.isPaging())
 		String sqlPattern = "${method.getPagingSql($host.getDatabaseCategory())}";
-		String sql = String.format(sqlPattern, (pageNo - 1) * pageSize + 1, pageSize * pageNo);
+		String sql = String.format(sqlPattern, ${host.pageBegain()}, ${host.pageEnd()});
 #else
 		String sql = "${method.getSql()}";
 #end

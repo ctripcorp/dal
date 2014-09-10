@@ -1,13 +1,10 @@
 package com.ctrip.platform.dal.daogen.sql.validate;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
@@ -29,7 +26,9 @@ public class SQLValidationTests {
 	
 	@Test
 	public void testMSQueryValidate() {
-		String sql = "SELECT * FROM TestTable WHERE ID=?";
+		Items item = Items.create()
+				.add("ID", "=", Types.INTEGER);
+		String sql = "SELECT * FROM TestTable WHERE " + item.toWhere();
 		int[] sqlTypes = new int[]{Types.INTEGER};
 		ValidateResult vret = SQLValidation.validate(MSDB, sql, sqlTypes);
 		assertTrue(vret.isPassed());
@@ -37,57 +36,151 @@ public class SQLValidationTests {
 	
 	@Test
 	public void testMySQLQueryTypesValidate() {
+		Items item = Items.create()
+				.add("Id", "=", Types.INTEGER)
+				.add("TinyIntCol", "=", Types.TINYINT)
+				.add("SmallIntCol", "=", Types.SMALLINT)
+				.add("IntCol", "=", Types.INTEGER)
+				.add("BigIntCol", "=", Types.BIGINT)
+				.add("DecimalCol", "=", Types.DECIMAL)
+				.add("DoubleCol", "=", Types.DOUBLE)
+				.add("FloatCol", "=", Types.REAL)
+				.add("BitCol", "=", Types.BIT)
+				.add("CharCol", "=", Types.CHAR)
+				.add("VarCharCol", "=", Types.VARCHAR)
+				.add("DateCol", "=", Types.DATE)
+				.add("DateTimeCol", "=", Types.TIMESTAMP)
+				.add("TimeCol", "=", Types.TIME)
+				.add("TimestampCol", "=", Types.TIMESTAMP)
+				.add("YearCol", "=", Types.DATE)
+				.add("BinaryCol", "=", Types.BINARY)
+				.add("BlobCol", "=", Types.BLOB)
+				.add("LongBlobCol", "=", Types.LONGVARBINARY)
+				.add("MediumBlobCol", "=", Types.LONGVARBINARY)
+				.add("TinyBlobCol", "=", Types.LONGVARBINARY)
+				.add("VarBinaryCol", "=", Types.VARBINARY)
+				.add("LongTextCol", "=", Types.LONGVARCHAR)
+				.add("MediumTextCol", "=", Types.LONGVARCHAR)
+				.add("TextCol", "=", Types.LONGVARCHAR)
+				.add("TinyTextCol", "=", Types.VARCHAR)
+				.add("TinyIntOne", "=", Types.BIT)
+				.add("CharTow", "=", Types.CHAR)
+				.add("Year", "=", Types.DATE);
 		
-		String sql = "SELECT * FROM ManyTypes WHERE Id = ? AND TinyIntCol = ? AND SmallIntCol = ? AND "
-				+ "IntCol = ? AND BigIntCol = ? AND DecimalCol = ? AND DoubleCol = ? AND FloatCol = ? AND "
-				+ "BitCol = ? AND CharCol = ? AND VarCharCol = ? AND DateCol = ? AND DateTimeCol = ? AND "
-				+ "TimeCol = ? AND TimestampCol = ? AND YearCol = ? AND BinaryCol = ? AND BlobCol = ? AND "
-				+ "LongBlobCol = ? AND MediumBlobCol = ? AND TinyBlobCol = ? AND VarBinaryCol = ? AND "
-				+ "LongTextCol = ? AND MediumTextCol = ? AND TextCol = ? AND TinyTextCol = ? AND TinyIntOne = ? AND "
-				+ "CharTow = ? AND Year = ?";
-		int[] sqlTypes = new int[]{Types.INTEGER,Types.TINYINT,Types.SMALLINT,Types.INTEGER,Types.BIGINT,Types.DECIMAL,
-				Types.DOUBLE,Types.REAL,Types.BIT,Types.CHAR,Types.VARCHAR,Types.DATE,Types.TIMESTAMP,Types.TIME,Types.TIMESTAMP,
-				Types.DATE,Types.BINARY,Types.LONGVARBINARY,Types.LONGVARBINARY,Types.LONGVARBINARY,Types.BINARY,Types.VARBINARY,
-				Types.LONGVARCHAR,Types.LONGVARCHAR,Types.LONGVARCHAR,Types.VARCHAR,Types.BIT,Types.CHAR,Types.DATE};
-		ValidateResult vret = SQLValidation.validate(MYSQLDB, sql, sqlTypes);
+		String sql = "SELECT * FROM ManyTypes WHERE " + item.toWhere();
+		ValidateResult vret = SQLValidation.validate(MYSQLDB, sql, item.toTypes());
 		assertTrue(vret.isPassed());
 	}
 	
 	@Test
 	public void testMSQueryTypesValidate() {
-		String sql = "SELECT * FROM TestTable WHERE [ID]=? AND [datetime] =? AND datetime2] =? AND [smalldatetime] =? AND [date] =? AND [datetimeoffset] =? AND [time] =? AND [smallint] =? AND [tinyint] =? AND [bigint] =? AND [money] =? AND [smallmoney] =? AND [float] =? AND [text] =? AND [ntext] =? AND [xml] =? AND [char] =? AND [varchar] =? AND [nchar] =? AND [nvarchar] =? AND [real] =? AND ,[decimal] =? AND [bit] =? AND [numeric] =? AND [binary] =? AND [guid] =? AND [image] = ? AND[timestamp] = ? AND[charone] = ?";
-		int[] sqlTypes = new int[]{Types.INTEGER,Types.TIMESTAMP,Types.TIMESTAMP,Types.TIMESTAMP,Types.DATE,microsoft.sql.Types.DATETIMEOFFSET,Types.TIME,Types.SMALLINT,Types.TINYINT,Types.BIGINT,Types.DECIMAL,Types.DECIMAL,Types.DOUBLE,Types.LONGVARCHAR,Types.LONGNVARCHAR,Types.CHAR,Types.VARCHAR,Types.NCHAR,Types.NVARCHAR,Types.REAL,Types.DECIMAL,Types.BIT,Types.NUMERIC,Types.BINARY,Types.CHAR,Types.BINARY,Types.CHAR};
-		ValidateResult vret = SQLValidation.validate(MSDB, sql, sqlTypes);
+		Items item = Items.create()
+				.add("[ID]", "=", Types.INTEGER)
+				.add("[datetime]", "=", Types.TIMESTAMP)
+				.add("[datetime2]", "=", Types.TIMESTAMP)
+				.add("[smalldatetime]", "=", Types.TIMESTAMP)
+				.add("[date]", "=", Types.DATE)
+				.add("[datetimeoffset]", "=", microsoft.sql.Types.DATETIMEOFFSET)
+				.add("[time]","=", Types.TIME)
+				.add("[tinyint]", "=", Types.TINYINT)
+				.add("[bigint]", "=", Types.BIGINT)
+				.add("[money]", "=", Types.DECIMAL)
+				.add("[smallmoney]", "=", Types.DECIMAL)
+				.add("[float]", "=", Types.DOUBLE)
+				.add("[text]", "like", Types.LONGVARCHAR)
+				.add("[ntext]", "like", Types.LONGVARCHAR)
+				.add("[char]", "=", Types.CHAR)
+				.add("[varchar]", "like", Types.VARCHAR)
+				.add("[nchar]", "=", Types.NCHAR)
+				.add("[nvarchar]", "like", Types.NVARCHAR)
+				.add("[real]", "=", Types.REAL)
+				.add("[decimal]", "=", Types.DECIMAL)		
+				.add("[bit]", "=", Types.BIT)
+				.add("[numeric]", "=", Types.NUMERIC)
+				.add("[binary]", "=", Types.BINARY)
+				.add("[guid]", "=", Types.NVARCHAR)
+				//.add("[timestamp]","=", Types.TIMESTAMP)
+				.add("[charone]", "=", Types.CHAR);
+		String sql = "SELECT * FROM TestTable WHERE " + item.toWhere();
+		ValidateResult vret = SQLValidation.validate(MSDB, sql, item.toTypes());
 		assertTrue(vret.isPassed());
 	}
 	
 	@Test
 	public void testMySQLUpdateValidate(){
-		String sql = "INSERT INTO ManyTypes(TinyIntCol,SmallIntCol,"
-				+ "IntCol,BigIntCol,DecimalCol,DoubleCol,FloatCol,"
-				+ "BitCol,CharCol,VarCharCol,DateCol,DateTimeCol,"
-				+ "TimeCol,TimestampCol,BinaryCol,BlobCol,"
-				+ "LongBlobCol,MediumBlobCol,TinyBlobCol,VarBinaryCol,"
-				+ "LongTextCol,MediumTextCol,TextCol,TinyTextCol,TinyIntOne,"
-				+ "CharTow) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-		int[] sqlTypes = new int[]{Types.TINYINT,Types.SMALLINT,Types.INTEGER,Types.BIGINT,Types.DECIMAL,
-				Types.DOUBLE,Types.REAL,Types.BIT,Types.CHAR,Types.VARCHAR,Types.DATE,Types.TIMESTAMP,Types.TIME,Types.TIMESTAMP,
-				Types.BINARY,Types.LONGVARBINARY,Types.LONGVARBINARY,Types.LONGVARBINARY,Types.BINARY,Types.VARBINARY,
-				Types.LONGVARCHAR,Types.LONGVARCHAR,Types.LONGVARCHAR,Types.VARCHAR,Types.TINYINT,Types.CHAR};
-		ValidateResult vret = SQLValidation.validate(MYSQLDB, sql, sqlTypes);
+		Items item = Items.create()
+				.add("TinyIntCol", Types.TINYINT)
+				.add("SmallIntCol", Types.SMALLINT)
+				.add("IntCol", Types.INTEGER)
+				.add("BigIntCol", Types.BIGINT)
+				.add("DecimalCol", Types.DECIMAL)
+				.add("DoubleCol", Types.DOUBLE)
+				.add("FloatCol", Types.REAL)
+				.add("BitCol", Types.BIT)
+				.add("CharCol", Types.CHAR)
+				.add("VarCharCol", Types.VARCHAR)
+				.add("DateCol", Types.DATE)
+				.add("DateTimeCol", Types.TIMESTAMP)
+				.add("TimeCol", Types.TIME)
+				.add("TimestampCol", Types.TIMESTAMP)
+				.add("BinaryCol", Types.BINARY)
+				.add("BlobCol", Types.BLOB)
+				.add("LongBlobCol", Types.LONGVARBINARY)
+				.add("MediumBlobCol", Types.LONGVARBINARY)
+				.add("TinyBlobCol", Types.BINARY)
+				.add("VarBinaryCol", Types.VARBINARY)
+				.add("LongTextCol", Types.LONGVARCHAR)
+				.add("MediumTextCol", Types.LONGVARCHAR)
+				.add("TextCol", Types.LONGVARCHAR)
+				.add("TinyTextCol", Types.VARCHAR)
+				.add("TinyIntOne", Types.TINYINT)
+				.add("CharTow", Types.CHAR);
+				
+		String sql = "INSERT INTO ManyTypes(" + item.toInsert() + ") VALUES(" + item.toValues() + ")";
+		ValidateResult vret = SQLValidation.validate(MYSQLDB, sql, item.toTypes());
 		assertTrue(vret.isPassed());
 	}
 	
 	@Test
 	public void testMSUpdateValidate(){
-		fail("Not yet implemented");
+		Items item = Items.create()
+				.add("[datetime]", Types.TIMESTAMP)
+				.add("[datetime2]", Types.TIMESTAMP)
+				.add("[smalldatetime]", Types.TIMESTAMP)
+				.add("[date]", Types.DATE)
+				.add("[datetimeoffset]", microsoft.sql.Types.DATETIMEOFFSET)
+				.add("[time]", Types.TIME)
+				.add("[tinyint]",Types.TINYINT)
+				.add("[bigint]",  Types.BIGINT)
+				.add("[money]",  Types.DECIMAL)
+				.add("[smallmoney]", Types.DECIMAL)
+				.add("[float]", Types.DOUBLE)
+				.add("[text]", Types.LONGVARCHAR)
+				.add("[ntext]", Types.LONGVARCHAR)
+				.add("[char]",  Types.CHAR)
+				.add("[varchar]", Types.VARCHAR)
+				.add("[nchar]",  Types.NCHAR)
+				.add("[nvarchar]",  Types.NVARCHAR)
+				.add("[real]",  Types.REAL)
+				.add("[decimal]",  Types.DECIMAL)		
+				.add("[bit]",  Types.BIT)
+				.add("[numeric]", Types.NUMERIC)
+				.add("[binary]", Types.BINARY)
+				//.add("[guid]", Types.NVARCHAR)
+				//.add("[timestamp]", Types.TIMESTAMP)
+				.add("[charone]", Types.CHAR);
+		String sql = "INSERT INTO TestTable(" + item.toInsert() + ")" + "VALUES(" + item.toValues() + ")";
+		ValidateResult vret = SQLValidation.validate(MSDB, sql, item.toTypes());
+		assertTrue(vret.isPassed());
 	}
 	
 	private static class Items{
+		List<String> fields;
 		List<String> operations;
 		List<Integer> types;
 		private Items(){
 			operations = new ArrayList<String>();
+			fields = new ArrayList<String>();
 			types = new ArrayList<Integer>();
 		}
 		public static Items create(){
@@ -95,6 +188,7 @@ public class SQLValidationTests {
 		}
 		
 		public Items add(String name, String opt, int val){
+			this.fields.add(name);
 			if(opt.equals("=")){
 				this.operations.add(name + " = ?");
 				this.types.add(val);
@@ -122,16 +216,34 @@ public class SQLValidationTests {
 			return this;
 		}
 		
+		public Items add(String name, int val){
+			this.fields.add(name);
+			this.types.add(val);
+			return this;
+		}
+		
 		public String toWhere(){
 			return StringUtils.join(this.operations, " AND ");
 		}
 		
 		public String toInsert(){
-			return null;
+			return StringUtils.join(this.fields, ",");
+		}
+		
+		public String toValues(){
+			List<String> qs = new ArrayList<String>();
+			for (int i = 0; i < this.fields.size(); i++) {
+				qs.add("?");
+			}
+			return StringUtils.join(qs, ",");
 		}
 		
 		public int[] toTypes(){
-			return this.toTypes().clone();
+			int[] ts = new int[this.types.size()];
+			for (int i = 0; i < ts.length; i++) {
+				ts[i] = this.types.get(i);
+			}
+			return ts;
 		}
 	}
 }

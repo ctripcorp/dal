@@ -123,9 +123,9 @@ public class SQLValidation {
 	 */
 	private static ValidateResult validate(String dbName, String sql, int[] paramsTypes, Object[] vals){
 		if(StringUtils.startsWithIgnoreCase(sql, "SELECT")){
-			return queryValidate(dbName, sql, paramsTypes);
+			return queryValidate(dbName, sql, paramsTypes, vals);
 		}else{
-			return updateValidate(dbName, sql, paramsTypes);
+			return updateValidate(dbName, sql, paramsTypes, vals);
 		}
 	}
 

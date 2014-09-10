@@ -775,7 +775,20 @@
         $(".step2-3-2").show();
     };
 
+    var existKeyword_Nolock = function(){
+        if($("#free_sql_crud_option").val()=="select" &&
+            ace.edit("sql_editor").getValue().toLowerCase().indexOf("nolock")==-1 &&
+            $(".step2-2-1").attr("dbCatalog")!="MySql"){
+            $.showMsg("error_msg","select语句中必须含有with (nolock)");
+            return false;
+        }
+        return true;
+    };
+
     var step2_3_2 = function(record,current){
+        if(!existKeyword_Nolock()){
+            return;
+        }
         //首先解析Sql语句，提取出参数
         var regexIndex = /(\?{1})/igm;
         var regexNames = /[@:](\w+)/igm;

@@ -63,7 +63,7 @@
         var paramValues = [];
         $.each($("#param_list_auto").children("div"), function (index, value) {
             var first = $(value).children("input").eq(0);
-            var second = $(value).children("select").eq(0);
+//            var second = $(value).children("select").eq(0);
 //            paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
             paramList.push( $(first).val());
             paramValues.push($(first).val());

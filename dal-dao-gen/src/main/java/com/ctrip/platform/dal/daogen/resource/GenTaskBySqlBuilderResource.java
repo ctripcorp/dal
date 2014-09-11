@@ -192,9 +192,9 @@ public class GenTaskBySqlBuilderResource {
 		}else if("insert".equalsIgnoreCase(crud_type)){
 			return getInsertSqlTypes(set_name, table_name, fields);
 		}else if("update".equalsIgnoreCase(crud_type)){
-			getUpdateSqlTypes(set_name, table_name, fields, condition);
+			return getUpdateSqlTypes(set_name, table_name, fields, condition);
 		}else if("delete".equalsIgnoreCase(crud_type)){
-			getDeleteSqlTypes(set_name, table_name, condition);
+			return getDeleteSqlTypes(set_name, table_name, condition);
 		}
 		return new int[0];
 	}
@@ -211,7 +211,7 @@ public class GenTaskBySqlBuilderResource {
 			mergeSqlTypes[i] = fieldSqlTypes[i];
 		}
 		for(int i=fieldSqlTypes.length;i<fieldSqlTypes.length+whereConditionSqlTypes.length;i++){
-			mergeSqlTypes[i] = whereConditionSqlTypes[i];
+			mergeSqlTypes[i] = whereConditionSqlTypes[i-fieldSqlTypes.length];
 		}
 		return mergeSqlTypes;
 	}
@@ -308,6 +308,7 @@ public class GenTaskBySqlBuilderResource {
 		String dbName = databaseSetEntry.getConnectionString();
 		
 		ValidateResult validResult = null;
+		String resultPrefix = "The affected rows is ";
 		try {
 			if (pagination && "select".equalsIgnoreCase(crud_type)) {
 				sql_content = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(dbName), CurrentLanguage.Java);
@@ -315,6 +316,7 @@ public class GenTaskBySqlBuilderResource {
 			}
 			if("select".equalsIgnoreCase(crud_type)){
 				validResult = SQLValidation.queryValidate(dbName, sql_content, sqlTypes, vals);
+				resultPrefix = "The result count is ";
 			}else{
 				validResult = SQLValidation.updateValidate(dbName, sql_content, sqlTypes, vals);
 			}
@@ -325,11 +327,10 @@ public class GenTaskBySqlBuilderResource {
 		}
 		
 		if(validResult!=null && validResult.isPassed()){
-			status.setInfo(validResult.getMessage());
+			status.setInfo(resultPrefix+validResult.getAffectRows());
 		}else{
 			status = Status.ERROR;
 			status.setInfo(validResult.getMessage());
-			return status;
 		}
 		return status;
 	}

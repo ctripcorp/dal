@@ -736,14 +736,18 @@
         });
 
         postData["condition"] = selectedConditions.join(";");
-        var mockValueHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">'+
-            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label></div><br>';
+        var mockValueHtml = '<div class="row-fluid">' +
+            '<label class="control-label popup_label" style="width:60px;overflow:auto">&nbsp;%s&nbsp;</label>' +
+            '<input type="text" class="span4" value="%s">'+
+            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label>' +
+            '</div><br>';
         $("#auto_sql_mock_value").html(" ");
         $.post("/rest/task/auto/getMockValue", postData, function (data) {
             if (data.code == "OK") {
                 var mockValue = $.parseJSON(data.info);
+                var paramNameList = getAutoSqlParamName();
                 $.each(mockValue,function(index,value){
-                    $("#auto_sql_mock_value").append(sprintf(mockValueHtml, value, value));
+                    $("#auto_sql_mock_value").append(sprintf(mockValueHtml, paramNameList[index], value, value));
                 });
                 var editor = ace.edit("step2_2_3_sql_editor");
                 editor.setTheme("ace/theme/monokai");
@@ -758,6 +762,25 @@
         }).fail(function (data) {
             alert("获取Mock Value出错！");
         });
+    };
+
+    var getAutoSqlParamName = function(){
+        var paramList = [];
+        if($("#crud_option").val()=='select' || $("#crud_option").val()=='delete'){
+            $.each($("#param_list_auto").children("div"), function (index, value) {
+                var first = $(value).children("input").eq(0);
+                paramList.push( $(first).val());
+            });
+        }else if($("#crud_option").val()=='insert'){
+            paramList = $('#fields').multipleSelect('getSelects');
+        }else if($("#crud_option").val()=='update'){
+            paramList = $('#fields').multipleSelect('getSelects');
+            $.each($("#param_list_auto").children("div"), function (index, value) {
+                var first = $(value).children("input").eq(0);
+                paramList.push( $(first).val());
+            });
+        }
+        return paramList;
     };
 
     var step2_2_3 = function(record, current){
@@ -942,14 +965,18 @@
         });
         postData["params"] = paramList.join(";");
 
-        var mockValueHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">'+
-            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label></div><br>';
+        var mockValueHtml = '<div class="row-fluid">' +
+            '<label class="control-label popup_label" style="width:60px;overflow:auto">&nbsp;%s&nbsp;</label>' +
+            '<input type="text" class="span4" value="%s">'+
+            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label>' +
+            '</div><br>';
         $("#free_sql_mock_value").html(" ");
         $.post("/rest/task/sql/getMockValue", postData, function (data) {
             if (data.code == "OK") {
                 var mockValue = $.parseJSON(data.info);
-                $.each(mockValue,function(index,value){
-                    $("#free_sql_mock_value").append(sprintf(mockValueHtml, value, value));
+                var paramNameList = getFreeSqlParamName();
+                 $.each(mockValue,function(index,value){
+                    $("#free_sql_mock_value").append(sprintf(mockValueHtml, paramNameList[index], value, value));
                 });
                 var editor = ace.edit("step2_3_4_sql_editor");
                 editor.setTheme("ace/theme/monokai");
@@ -962,8 +989,17 @@
                 $.showMsg("error_msg",data.info);
             }
         }).fail(function (data) {
-            alert("获取Mock Value出错！");
+            $.showMsg("error_msg","获取Mock Value出错！请检查参数类型选择是否正确!");
         });
+    };
+
+    var getFreeSqlParamName = function(){
+        var paramList = [];
+        $.each($("#param_list").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            paramList.push($(first).val());
+        });
+        return paramList;
     };
 
     var checkDuplicateParamName = function(){

@@ -189,7 +189,8 @@ public class SQLValidation {
 			for (int i = 1; i <= paramsTypes.length; i++) {
 				stat.setObject(i, mockedVals[i-1], paramsTypes[i-1]);
 			}
-			stat.execute();
+			int rows = stat.executeUpdate();
+			status.setAffectRows(rows);
 			status.setPassed(true).append("Validate Successfully");
 		}catch(Exception e){
 			status.append(e.getMessage());

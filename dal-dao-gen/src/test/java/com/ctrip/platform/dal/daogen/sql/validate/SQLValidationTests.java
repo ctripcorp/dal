@@ -138,6 +138,7 @@ public class SQLValidationTests {
 				
 		String sql = "INSERT INTO ManyTypes(" + item.toInsert() + ") VALUES(" + item.toValues() + ")";
 		ValidateResult vret = SQLValidation.validate(MYSQLDB, sql, item.toTypes());
+		System.out.println(vret.getAffectRows());
 		assertTrue(vret.isPassed());
 	}
 	

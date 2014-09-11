@@ -52,8 +52,7 @@
                         formatedConditions.push(sprintf(" %s in (@%s) ",wrapColumn(splited[0]),splited[0]));
                     } else {
                         formatedConditions.push(sprintf(" %s in (?) ",wrapColumn(splited[0])));
-                    }
-                }else{
+                    }                } else {
                     if ($("#sql_style").val() == "csharp") {
                         formatedConditions.push(sprintf(" %s %s @%s ", wrapColumn(splited[0]), whereCondition[splited[1]], splited[0]));
                     } else {

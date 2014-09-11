@@ -30,6 +30,7 @@ import com.ctrip.platform.dal.daogen.host.csharp.DatabaseHost;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import com.xross.tools.xunit.Context;
 import com.xross.tools.xunit.Processor;
@@ -128,16 +129,20 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		return results;
 	}
 	
-	private CSharpMethodHost buildFreeSqlMethodHost(CSharpCodeGenContext ctx, GenTaskByFreeSql task) {
+	private CSharpMethodHost buildFreeSqlMethodHost(CSharpCodeGenContext ctx, GenTaskByFreeSql task) throws Exception {
 		CSharpMethodHost method = new CSharpMethodHost();
-		method.setCrud_type(task.getCrud_type());
 		List<String> inParams = new ArrayList<String>();
 		Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(task.getSql_content());
-		String temp=task.getSql_content();
+		String temp= task.getSql_content();
 		int index = 0;
-		while(m.find()){
+		if(task.isPagination()){
+			temp = SqlBuilder.pagingQuerySql(temp, getDatabaseCategory(task.getDb_name()), CurrentLanguage.CSharp);
+			index += 2;
+		}
+		while(m.find())
+    	{
 			String paramName = m.group(1);
-			inParams.add(paramName.substring(1));
+			inParams.add(paramName.replaceAll("[\\(|\\)|@]", ""));
 			temp = temp.replace(paramName, String.format("({%d}) ", index++));
     	}
 		method.setSql(temp);

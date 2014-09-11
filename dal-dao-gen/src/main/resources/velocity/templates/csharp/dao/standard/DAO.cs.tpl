@@ -52,12 +52,7 @@ namespace ${host.getNameSpace()}.Dao
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
-#if($method.isPaging())
-		        String sqlPattern = "${method.getPagingSql($host.getDatabaseCategory())}";
-		        String sql = String.Format(sqlPattern, (pageNo - 1) * pageSize + 1, pageSize * pageNo);
-#else
-		        String sql = "${method.getSql()}";
-#end
+				String sql = "${method.getSql()}";
 #set($inParams = [])                
 #foreach($p in $method.getParameters())  
 #if($p.isInParameter())
@@ -67,7 +62,14 @@ namespace ${host.getNameSpace()}.Dao
 #end
 #end
 #if($inParams.size() > 0)
-                sql = string.Format(sql, #foreach($p in $inParams)Arch.Data.Utility.ParameterUtility.NormalizeInParam(${WordUtils.uncapitalize($p.getAlias())}, parameters,"${WordUtils.uncapitalize($p.getAlias())}")#if($foreach.count != $inParams.size()),#end#end);
+#if($method.isPaging())
+                sql = string.Format(sql, ${host.pageBegain()}, ${host.pageEnd()}, 
+					#foreach($p in $inParams)Arch.Data.Utility.ParameterUtility.NormalizeInParam(${WordUtils.uncapitalize($p.getAlias())}, parameters,"${WordUtils.uncapitalize($p.getAlias())}")#if($foreach.count != $inParams.size()),#end#end);
+#else
+		        sql = string.Format(sql, #foreach($p in $inParams)Arch.Data.Utility.ParameterUtility.NormalizeInParam(${WordUtils.uncapitalize($p.getAlias())}, parameters,"${WordUtils.uncapitalize($p.getAlias())}")#if($foreach.count != $inParams.size()),#end#end);
+#end
+#elseif($method.isPaging())
+		        sql = string.Format(sql, ${host.pageBegain()}, ${host.pageEnd()});
 #end
 
 #if($method.isFirstOrSingle())

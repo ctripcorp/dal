@@ -15,6 +15,22 @@ public class SQLValidationTests {
 	private static final String MSDB = "HotelPubDB_test1";
 
 	@Test
+	public void testMySQLQueryAffectRows(){
+		String sql = "SELECT * FROM Person";
+		ValidateResult vret = SQLValidation.validate(MYSQLDB, sql, new int[]{});
+		assertTrue(vret.isPassed());
+		assertTrue(vret.getAffectRows() > 0);
+	}
+	
+	@Test
+	public void testSqlServerQueryAffectRows(){
+		String sql = "SELECT * FROM TestTable";
+		ValidateResult vret = SQLValidation.validate(MSDB, sql, new int[]{});
+		assertTrue(vret.isPassed());
+		assertTrue(vret.getAffectRows() > 0);
+	}
+	
+	@Test
 	public void testMySQLQueryValidate() {
 		Items item = Items.create()
 				.add("ID", "=", Types.INTEGER)

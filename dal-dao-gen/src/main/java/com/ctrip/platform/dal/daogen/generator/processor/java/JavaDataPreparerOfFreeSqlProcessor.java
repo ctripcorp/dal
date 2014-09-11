@@ -25,6 +25,7 @@ import com.ctrip.platform.dal.daogen.host.java.JavaMethodHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import com.xross.tools.xunit.Context;
 import com.xross.tools.xunit.Processor;
@@ -105,6 +106,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 							p.setValidationValue(DbUtils.mockATest(p.getSqlType()));
 							params.add(p);
 						}
+						SqlBuilder.rebuildJavaInClauseSQL(task.getSql_content(), params);
 						method.setParameters(params);
 						methods.add(method);
 

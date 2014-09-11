@@ -302,8 +302,7 @@
                 var editor = ace.edit("sql_editor");
                 editor.setTheme("ace/theme/monokai");
                 editor.getSession().setMode("ace/mode/sql");
-                editor.setValue(record["sql_content"]);
-
+                editor.setValue(record.sql_content);
                 if(record['scalarType']){
                     $("#free_sql_scalarType").val(record['scalarType']);
                 }else{
@@ -1062,7 +1061,6 @@
 
             $("#free_sql_pagination").prop('checked',false);
             $("#auto_sql_pagination").prop('checked',false);
-            $("#comment").val("");
         },
         next: function (current) {
             //首先获取当前Grid选中的行,records是id数组

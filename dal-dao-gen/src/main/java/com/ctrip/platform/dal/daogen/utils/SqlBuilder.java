@@ -1,9 +1,13 @@
 package com.ctrip.platform.dal.daogen.utils;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.Join;
@@ -17,7 +21,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
+import com.ctrip.platform.dal.daogen.host.csharp.CSharpParameterHost;
+import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 
 /**
  * The SQL Re-build Utils
@@ -26,6 +33,16 @@ import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 public class SqlBuilder {
 	
 	private static Logger log = Logger.getLogger(SqlBuilder.class);
+	
+	private static final String regInEx = "(?i)In *\\(?\\?\\)?";
+	private static final String regEx = "\\?";
+	private static Pattern inRegxPattern = null;
+	private static Pattern regxPattern = null;
+	
+	static{
+		 inRegxPattern = Pattern.compile(regInEx);
+		 regxPattern = Pattern.compile(regEx);
+	}
 	
 	private static final String mysqlPageClausePattern = " limit %s, %s";
 	private static final String mysqlCSPageClausePattern = " limit {0}, {1}";
@@ -134,10 +151,48 @@ public class SqlBuilder {
 		return sql.toString();
 	}
 	
+	public static void rebuildJavaInClauseSQL(String sql, List<JavaParameterHost> parameters) throws Exception{
+		List<Integer> inStartIndex = new ArrayList<Integer>();
+		List<Integer> inEndIndex = new ArrayList<Integer>();
+		Matcher m = inRegxPattern.matcher(sql);
+		while(m.find()){
+			inStartIndex.add(m.start());
+			inEndIndex.add(m.end());
+		}
+		if(inStartIndex.size() == 0)
+			return;
+		
+		List<Integer> paramStartIndex = new ArrayList<Integer>();
+		List<Integer> paramEndIndex = new ArrayList<Integer>();
+		m = regxPattern.matcher(sql);
+		while(m.find()){
+			paramStartIndex.add(m.start());
+			paramEndIndex.add(m.end());
+		}
+		
+		if(paramStartIndex.size() != parameters.size())
+			throw new Exception("The count of parameters is not correct");
+		
+		for (int i = 0; i < parameters.size(); i++) {
+			for (int j = 0; j < inStartIndex.size(); j++) {
+				if(paramStartIndex.get(i) >= inStartIndex.get(j) &&
+						paramEndIndex.get(i) <= inEndIndex.get(j)){
+					parameters.get(i).setConditionType(ConditionType.In);
+					break;
+				}
+			}
+		}
+	}
+	
+	public static void rebuildCSharpInClauseSQL(String sql, List<CSharpParameterHost> params){
+		
+	}
+	
 	public static void main(String[] args) throws Exception{
 		String sql = "SELECT [Birth],[Name],[Age],[ID] FROM [PerformanceTest].[dbo].[Person] WITH (NOLOCK) ORDER BY Age asc";
 		String cet = pagingQuerySql(sql, DatabaseCategory.SqlServer, CurrentLanguage.Java);
-		
+		sql = "SELECT `Birth` FROM Person WHERE  `ID` In (?) and id = ? and name like ? and id in(?)";
+		rebuildJavaInClauseSQL(sql, null);
 		System.out.println(cet);
 	}
 	

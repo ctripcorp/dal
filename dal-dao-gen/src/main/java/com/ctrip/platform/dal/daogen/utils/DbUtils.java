@@ -27,6 +27,7 @@ import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
+import com.google.common.primitives.UnsignedLong;
 import com.mysql.jdbc.StringUtils;
 
 public class DbUtils {
@@ -525,6 +526,8 @@ public class DbUtils {
 						dbType = DbType.AnsiString;
 					else if(-155 == dataType){
 						dbType = DbType.DateTimeOffset;
+					}else if(-7 == dataType && length > 1){
+						dbType = DbType.UInt64;
 					}
 					else
 						dbType =DbType.getDbTypeFromJdbcType(dataType);

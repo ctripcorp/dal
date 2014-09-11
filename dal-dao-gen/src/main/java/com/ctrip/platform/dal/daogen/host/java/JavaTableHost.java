@@ -158,6 +158,22 @@ public class JavaTableHost {
 	public boolean isIntegerPk() {
 		return primaryKeys.size() == 1 && (primaryKeys.get(0).getJavaClass().equals(Integer.class) || primaryKeys.get(0).getJavaClass().equals(Long.class));
 	}
+	
+	public String pageBegain(){
+		if(this.databaseCategory == DatabaseCategory.MySql){
+			return "(pageNo - 1) * pageSize";
+		}else{
+			return "(pageNo - 1) * pageSize + 1";
+		}
+	}
+	
+	public String pageEnd(){
+		if(this.databaseCategory == DatabaseCategory.MySql){
+			return "pageSize";
+		}else{
+			return "pageSize * pageNo";
+		}
+	}
 
 	public String getPkParameterDeclaration() {
 		List<String> paramsDeclaration = new ArrayList<String>();

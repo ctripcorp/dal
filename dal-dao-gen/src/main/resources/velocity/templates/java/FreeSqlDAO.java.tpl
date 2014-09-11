@@ -3,6 +3,7 @@ package ${host.getPackageName()};
 #foreach( $field in ${host.getDaoImports()} )
 import ${field};
 #end
+import com.ctrip.platform.dal.dao.helper.*;
 
 public class ${host.getClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbName()}";
@@ -38,16 +39,23 @@ public class ${host.getClassName()}Dao {
 	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {	
 #if($method.isPaging())
 		String sqlPattern = "${method.getPagingSql($host.getDatabaseCategory())}";
-		String sql = String.format(sqlPattern, (pageNo - 1) * pageSize + 1, pageSize * pageNo);
+		String sql = String.format(sqlPattern, ${host.pageBegain()}, ${host.pageEnd()});
 #else
 		String sql = "${method.getSql()}";
+#end
+#if($method.isInClauses())
+		sql = SQLParser.parse(sql, ${method.getInClauses()});
 #end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
 #end
 #end
 		return queryDao.query(sql, parameters, hints, ${method.getPojoClassName()}.class);
@@ -57,12 +65,19 @@ public class ${host.getClassName()}Dao {
 #if($method.isSampleType() && $method.isReturnSingle())
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
+#if($method.isInClauses())
+		sql = SQLParser.parse(sql, ${method.getInClauses()});
+#end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
 #end
 #end
 		return queryDao.queryForObjectNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
@@ -72,12 +87,19 @@ public class ${host.getClassName()}Dao {
 #if($method.isSampleType() && $method.isReturnFirst())
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
+#if($method.isInClauses())
+		sql = SQLParser.parse(sql, ${method.getInClauses()});
+#end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
 #end
 #end
 		return queryDao.queryFirstNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
@@ -88,16 +110,23 @@ public class ${host.getClassName()}Dao {
 	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 #if($method.isPaging())
 		String sqlPattern = "${method.getPagingSql($host.getDatabaseCategory())}";
-		String sql = String.format(sqlPattern, (pageNo - 1) * pageSize + 1, pageSize * pageNo);
+		String sql = String.format(sqlPattern, ${host.pageBegain()}, ${host.pageEnd()});
 #else
 		String sql = "${method.getSql()}";
+#end
+#if($method.isInClauses())
+		sql = SQLParser.parse(sql, ${method.getInClauses()});
 #end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
 #end
 #end
 		return queryDao.query(sql, parameters, hints, ${method.getVariableName()}RowMapper);
@@ -107,12 +136,19 @@ public class ${host.getClassName()}Dao {
 #if($method.isReturnSingle() && !$method.isSampleType())
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
+#if($method.isInClauses())
+		sql = SQLParser.parse(sql, ${method.getInClauses()});
+#end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
 #end
 #end
 		return queryDao.queryForObjectNullable(sql, parameters, hints, ${method.getVariableName()}RowMapper);
@@ -122,12 +158,19 @@ public class ${host.getClassName()}Dao {
 #if($method.isReturnFirst() && !$method.isSampleType())
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		String sql = "${method.getSql()}";
+#if($method.isInClauses())
+		sql = SQLParser.parse(sql, ${method.getInClauses()});
+#end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#if($p.isInParameter())
+		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+#else
 		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+#end
 #end
 #end
 		return queryDao.queryFirstNullable(sql, parameters, hints, ${method.getVariableName()}RowMapper);

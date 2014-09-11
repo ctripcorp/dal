@@ -121,7 +121,7 @@ public class GenTaskByFreeSqlResource {
 		try {
 				
 			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
-			CurrentLanguage lang = sql_content.contains("@")?CurrentLanguage.Java:CurrentLanguage.CSharp;
+			CurrentLanguage lang = sql_content.contains("@")?CurrentLanguage.CSharp:CurrentLanguage.Java;
 			String pagingSQL = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), lang);
 			status.setInfo(pagingSQL);
 		} catch (Exception e) {

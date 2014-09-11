@@ -24,7 +24,7 @@ public class DataSourceUtil {
 	private static final String DBURL_SQLSERVER = "jdbc:sqlserver://%s:%s;DatabaseName=%s";
 	
 	private static final String DBURL_MYSQL_CACHE = "jdbc:mysql://%s:%s/?useUnicode=true&characterEncoding=utf8";
-	private static final String DBURL_SQLSERVER_CACHE = "jdbc:sqlserver://%s:%s;;sendTimeAsDateTime=false";
+	private static final String DBURL_SQLSERVER_CACHE = "jdbc:sqlserver://%s:%s;sendTimeAsDateTime=false";
 
 	private static final String DRIVER_MYSQL = "com.mysql.jdbc.Driver";
 	private static final String DRIVER_SQLSERVRE = "com.microsoft.sqlserver.jdbc.SQLServerDriver";

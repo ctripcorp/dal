@@ -63,8 +63,9 @@
         var paramValues = [];
         $.each($("#param_list_auto").children("div"), function (index, value) {
             var first = $(value).children("input").eq(0);
-            var second = $(value).children("select").eq(0);
-            paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
+//            var second = $(value).children("select").eq(0);
+//            paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
+            paramList.push( $(first).val());
             paramValues.push($(first).val());
         });
 
@@ -83,13 +84,6 @@
 
         postData["condition"] = selectedConditions.join(";");
         postData["params"] = paramList.join(";");
-
-        var mockValues = [];
-        $.each($("#auto_sql_mock_value").children("div"), function (index, value) {
-            var first = $(value).children("input").eq(0);
-            mockValues.push($(first).val());
-        });
-        postData["mockValues"] = mockValues.join(";");
 
         $.post("/rest/task/auto", postData, function (data) {
             if (data.code == "OK") {
@@ -147,34 +141,19 @@
         });
         postData["params"] = paramList.join(";");
 
-        var mockValues = [];
-        $.each($("#free_sql_mock_value").children("div"), function (index, value) {
-            var first = $(value).children("input").eq(0);
-            mockValues.push($(first).val());
-        });
-        postData["mockValues"] = mockValues.join(";");
-
-        $.post("/rest/task/sql/sqlValidate", postData).done(function (data) {
+        $.post("/rest/task/sql", postData, function (data) {
             if (data.code == "OK") {
-                $.post("/rest/task/sql", postData, function (data) {
-                    if (data.code == "OK") {
-                        $("#page1").modal('hide');
-                        w2ui["grid_toolbar"].click('refreshDAO', null);
-                        if ($("#gen_on_save").is(":checked")) {
-                            $("#generateCode").modal({"backdrop": "static"});
-                        }
-                    } else {
-                        $.showMsg("error_msg","SQL测试执行异常，请检查sql及对应参数！"+data.info);
-                    }
-                }).fail(function (data) {
-                        alert("执行异常，请检查sql及对应参数！");
-                    });
+                $("#page1").modal('hide');
+                w2ui["grid_toolbar"].click('refreshDAO', null);
+                if ($("#gen_on_save").is(":checked")) {
+                    $("#generateCode").modal({"backdrop": "static"});
+                }
             } else {
                 $.showMsg("error_msg","SQL测试执行异常，请检查sql及对应参数！"+data.info);
             }
         }).fail(function (data) {
-                alert("执行异常，请检查sql及对应参数！");
-            });
+            alert("执行异常，请检查sql及对应参数！");
+        });
     };
 
     AjaxUtil.prototype = {

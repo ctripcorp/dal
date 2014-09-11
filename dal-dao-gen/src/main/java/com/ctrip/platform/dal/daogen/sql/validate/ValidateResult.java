@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.daogen.sql.validate;
 public class ValidateResult {
 	private boolean passed;
 	private String sql;
+	private int affectRows;
 	private StringBuffer msg = new StringBuffer();
 	
 	public ValidateResult(String sql){
@@ -24,6 +25,14 @@ public class ValidateResult {
 		return this.sql;
 	}
 	
+	public int getAffectRows() {
+		return affectRows;
+	}
+
+	public void setAffectRows(int affectRows) {
+		this.affectRows = affectRows;
+	}
+
 	public ValidateResult append(String msg) {
 		this.msg.append(msg);
 		return this;

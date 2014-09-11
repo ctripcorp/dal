@@ -12,6 +12,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.jasig.cas.client.util.AssertionHolder;
@@ -69,8 +70,7 @@ public class GenTaskBySqlBuilderResource {
 			@FormParam("comment") String comment,
 			@FormParam("scalarType") String scalarType,
 			@FormParam("pagination") boolean pagination,
-			@FormParam("orderby") String orderby,
-			@FormParam("mockValues") String mockValues) {
+			@FormParam("orderby") String orderby) {
 		
 		Status status = Status.OK;
 		
@@ -82,10 +82,6 @@ public class GenTaskBySqlBuilderResource {
 				return Status.ERROR;
 			}	
 		}else{
-			Status temp = validateSQL(set_name, table_name, crud_type, fields, condition, sql_content, pagination, mockValues);
-			if(!Status.OK.getCode().equals(temp.getCode())){
-				return temp;
-			}
 			String userNo = AssertionHolder.getAssertion().getPrincipal()
 					.getAttributes().get("employee").toString();
 			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
@@ -196,9 +192,9 @@ public class GenTaskBySqlBuilderResource {
 		}else if("insert".equalsIgnoreCase(crud_type)){
 			return getInsertSqlTypes(set_name, table_name, fields);
 		}else if("update".equalsIgnoreCase(crud_type)){
-			getUpdateSqlTypes(set_name, table_name, fields, condition);
+			return getUpdateSqlTypes(set_name, table_name, fields, condition);
 		}else if("delete".equalsIgnoreCase(crud_type)){
-			getDeleteSqlTypes(set_name, table_name, condition);
+			return getDeleteSqlTypes(set_name, table_name, condition);
 		}
 		return new int[0];
 	}
@@ -215,7 +211,7 @@ public class GenTaskBySqlBuilderResource {
 			mergeSqlTypes[i] = fieldSqlTypes[i];
 		}
 		for(int i=fieldSqlTypes.length;i<fieldSqlTypes.length+whereConditionSqlTypes.length;i++){
-			mergeSqlTypes[i] = whereConditionSqlTypes[i];
+			mergeSqlTypes[i] = whereConditionSqlTypes[i-fieldSqlTypes.length];
 		}
 		return mergeSqlTypes;
 	}
@@ -291,9 +287,17 @@ public class GenTaskBySqlBuilderResource {
 		return map;
 	}
 	
-	private Status validateSQL(String set_name, String table_name,
-			String crud_type, String fields, String condition, String sql_content,
-			boolean pagination,String mockValues) {
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("sqlValidate")
+	public Status validateSQL(@FormParam("db_name") String set_name, 
+			@FormParam("table_name") String table_name,
+			@FormParam("crud_type") String crud_type, 
+			@FormParam("fields") String fields, 
+			@FormParam("condition") String condition, 
+			@FormParam("sql_content") String sql_content,
+			@FormParam("pagination") boolean pagination,
+			@FormParam("mockValues") String mockValues) {
 		
 		Status status = Status.OK;
 		sql_content = sql_content.replaceAll("[@:]\\w+", "?");
@@ -304,6 +308,7 @@ public class GenTaskBySqlBuilderResource {
 		String dbName = databaseSetEntry.getConnectionString();
 		
 		ValidateResult validResult = null;
+		String resultPrefix = "The affected rows is ";
 		try {
 			if (pagination && "select".equalsIgnoreCase(crud_type)) {
 				sql_content = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(dbName), CurrentLanguage.Java);
@@ -311,6 +316,7 @@ public class GenTaskBySqlBuilderResource {
 			}
 			if("select".equalsIgnoreCase(crud_type)){
 				validResult = SQLValidation.queryValidate(dbName, sql_content, sqlTypes, vals);
+				resultPrefix = "The result count is ";
 			}else{
 				validResult = SQLValidation.updateValidate(dbName, sql_content, sqlTypes, vals);
 			}
@@ -321,11 +327,10 @@ public class GenTaskBySqlBuilderResource {
 		}
 		
 		if(validResult!=null && validResult.isPassed()){
-			status.setInfo(validResult.getMessage());
+			status.setInfo(resultPrefix+validResult.getAffectRows());
 		}else{
 			status = Status.ERROR;
 			status.setInfo(validResult.getMessage());
-			return status;
 		}
 		return status;
 	}

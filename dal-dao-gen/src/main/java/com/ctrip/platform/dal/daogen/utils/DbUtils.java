@@ -41,8 +41,8 @@ public class DbUtils {
 		validMode.add(DatabaseMetaData.procedureColumnIn);
 		validMode.add(DatabaseMetaData.procedureColumnInOut);
 		validMode.add(DatabaseMetaData.procedureColumnOut);
-		 regEx="in\\s(@\\w+)";
-		 inRegxPattern = Pattern.compile(regEx, java.util.regex.Pattern.CASE_INSENSITIVE);
+		regEx="in\\s(@\\w+)";
+		inRegxPattern = Pattern.compile(regEx, java.util.regex.Pattern.CASE_INSENSITIVE);
 	}
 
 	public static boolean tableExists(String dbName, String tableName) {
@@ -526,7 +526,9 @@ public class DbUtils {
 						dbType = DbType.AnsiString;
 					else if(-155 == dataType){
 						dbType = DbType.DateTimeOffset;
-					} else {
+					}else if(-7 == dataType && length > 1){
+						dbType = DbType.UInt64;
+					}else {
 						dbType =DbType.getDbTypeFromJdbcType(dataType);
 					}
 

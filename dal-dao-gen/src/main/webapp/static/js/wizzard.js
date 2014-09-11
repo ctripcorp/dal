@@ -302,8 +302,7 @@
                 var editor = ace.edit("sql_editor");
                 editor.setTheme("ace/theme/monokai");
                 editor.getSession().setMode("ace/mode/sql");
-                editor.setValue(record["sql_content"]);
-
+                editor.setValue(record.sql_content);
                 if(record['scalarType']){
                     $("#free_sql_scalarType").val(record['scalarType']);
                 }else{
@@ -737,14 +736,18 @@
         });
 
         postData["condition"] = selectedConditions.join(";");
-        var mockValueHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">'+
-            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label></div><br>';
+        var mockValueHtml = '<div class="row-fluid">' +
+            '<label class="control-label popup_label" style="width:60px;overflow:auto">&nbsp;%s&nbsp;</label>' +
+            '<input type="text" class="span4" value="%s">'+
+            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label>' +
+            '</div><br>';
         $("#auto_sql_mock_value").html(" ");
         $.post("/rest/task/auto/getMockValue", postData, function (data) {
             if (data.code == "OK") {
                 var mockValue = $.parseJSON(data.info);
+                var paramNameList = getAutoSqlParamName();
                 $.each(mockValue,function(index,value){
-                    $("#auto_sql_mock_value").append(sprintf(mockValueHtml, value, value));
+                    $("#auto_sql_mock_value").append(sprintf(mockValueHtml, paramNameList[index], value, value));
                 });
                 var editor = ace.edit("step2_2_3_sql_editor");
                 editor.setTheme("ace/theme/monokai");
@@ -761,7 +764,88 @@
         });
     };
 
-    var step2_2_3 = function(){
+    var getAutoSqlParamName = function(){
+        var paramList = [];
+        if($("#crud_option").val()=='select' || $("#crud_option").val()=='delete'){
+            $.each($("#param_list_auto").children("div"), function (index, value) {
+                var first = $(value).children("input").eq(0);
+                paramList.push( $(first).val());
+            });
+        }else if($("#crud_option").val()=='insert'){
+            paramList = $('#fields').multipleSelect('getSelects');
+        }else if($("#crud_option").val()=='update'){
+            paramList = $('#fields').multipleSelect('getSelects');
+            $.each($("#param_list_auto").children("div"), function (index, value) {
+                var first = $(value).children("input").eq(0);
+                paramList.push( $(first).val());
+            });
+        }
+        return paramList;
+    };
+
+    var step2_2_3 = function(record, current){
+        var postData = {};
+        postData["db_name"] = $("#databases").val();
+        postData["table_name"] = $("#tables").val();
+        postData["crud_type"] = $("#crud_option").val();
+        postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
+
+        var paramValues = [];
+        $.each($("#param_list_auto").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            paramValues.push($(first).val());
+        });
+
+        var selectedConditions = [];
+        var index2 = 0;
+        $.each($("#selected_condition option"), function (index, value) {
+            var temp = $(value).val().split(",");
+            if(temp[1]=="6"){//between
+                selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1]));
+                index2+=2;
+            }else{
+                selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index2]));
+                index2++;
+            }
+        });
+        postData["condition"] = selectedConditions.join(";");
+        postData["sql_content"] = ace.edit("sql_builder").getValue();
+
+        if("select" == postData["crud_type"]){
+            postData["pagination"] = $("#auto_sql_pagination").is(":checked");
+        }else{
+            postData["pagination"] = false;
+        }
+
+        var mockValues = [];
+        $.each($("#auto_sql_mock_value").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            mockValues.push($(first).val());
+        });
+        postData["mockValues"] = mockValues.join(";");
+
+        $("#auto_sql_validate_result").empty();
+        $.post("/rest/task/auto/sqlValidate", postData, function (data) {
+            if (data.code == "OK") {
+                $("#error_msg").empty();
+                $("#auto_sql_validate_result").html(data.info);
+                var editor = ace.edit("step2_2_4_sql_editor");
+                editor.setTheme("ace/theme/monokai");
+                editor.getSession().setMode("ace/mode/sql");
+                editor.setValue(ace.edit("step2_2_2_sql_editor").getValue());
+                editor.setReadOnly(true);
+                current.hide();
+                $(".step2-2-4").show();
+            } else {
+                $.showMsg("error_msg","SQL测试执行异常，请检查sql及对应参数！"+data.info);
+            }
+        }).fail(function (data) {
+            alert("保存出错！");
+        });
+
+    };
+
+    var step2_2_4 = function(){
         window.ajaxutil.post_task();
     };
 
@@ -881,14 +965,18 @@
         });
         postData["params"] = paramList.join(";");
 
-        var mockValueHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">'+
-            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label></div><br>';
+        var mockValueHtml = '<div class="row-fluid">' +
+            '<label class="control-label popup_label" style="width:60px;overflow:auto">&nbsp;%s&nbsp;</label>' +
+            '<input type="text" class="span4" value="%s">'+
+            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label>' +
+            '</div><br>';
         $("#free_sql_mock_value").html(" ");
         $.post("/rest/task/sql/getMockValue", postData, function (data) {
             if (data.code == "OK") {
                 var mockValue = $.parseJSON(data.info);
-                $.each(mockValue,function(index,value){
-                    $("#free_sql_mock_value").append(sprintf(mockValueHtml, value, value));
+                var paramNameList = getFreeSqlParamName();
+                 $.each(mockValue,function(index,value){
+                    $("#free_sql_mock_value").append(sprintf(mockValueHtml, paramNameList[index], value, value));
                 });
                 var editor = ace.edit("step2_3_4_sql_editor");
                 editor.setTheme("ace/theme/monokai");
@@ -901,8 +989,17 @@
                 $.showMsg("error_msg",data.info);
             }
         }).fail(function (data) {
-            alert("获取Mock Value出错！");
+            $.showMsg("error_msg","获取Mock Value出错！请检查参数类型选择是否正确!");
         });
+    };
+
+    var getFreeSqlParamName = function(){
+        var paramList = [];
+        $.each($("#param_list").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            paramList.push($(first).val());
+        });
+        return paramList;
     };
 
     var checkDuplicateParamName = function(){
@@ -924,7 +1021,54 @@
         return false;
     };
 
-    var step2_3_4 = function(){
+    var step2_3_4 = function(record, current){
+        var postData = {};
+        postData["db_name"] = $("#databases").val();
+        postData["crud_type"] = $("#free_sql_crud_option").val();
+        postData["sql_content"] = ace.edit("sql_editor").getValue();
+
+        var paramList = [];
+        $.each($("#param_list").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            var second = $(value).children("select").eq(0);
+            paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
+        });
+        postData["params"] = paramList.join(";");
+
+        if($("#free_sql_crud_option").val()=="select"){
+            postData["pagination"] = $("#free_sql_pagination").is(":checked");
+        }else{
+            postData["pagination"] = false;
+        }
+
+        var mockValues = [];
+        $.each($("#free_sql_mock_value").children("div"), function (index, value) {
+            var first = $(value).children("input").eq(0);
+            mockValues.push($(first).val());
+        });
+        postData["mockValues"] = mockValues.join(";");
+
+        $("#free_sql_validate_result").empty();
+        $.post("/rest/task/sql/sqlValidate", postData).done(function (data) {
+            if (data.code == "OK") {
+                $("#error_msg").empty();
+                $("#free_sql_validate_result").html(data['info']);
+                var editor = ace.edit("step2_3_5_sql_editor");
+                editor.setTheme("ace/theme/monokai");
+                editor.getSession().setMode("ace/mode/sql");
+                editor.setValue(ace.edit("step2_3_1_sql_editor").getValue());
+                editor.setReadOnly(true);
+                current.hide();
+                $(".step2-3-5").show();
+            } else {
+                $.showMsg("error_msg","SQL测试执行异常，请检查sql及对应参数！"+data.info);
+            }
+        }).fail(function (data) {
+            alert("执行异常，请检查sql及对应参数！");
+        });
+    };
+
+    var step2_3_5 = function(){
         window.ajaxutil.post_task();
     };
 
@@ -953,7 +1097,6 @@
 
             $("#free_sql_pagination").prop('checked',false);
             $("#auto_sql_pagination").prop('checked',false);
-            $("#comment").val("");
         },
         next: function (current) {
             //首先获取当前Grid选中的行,records是id数组
@@ -978,7 +1121,9 @@
             }else if (current.hasClass("step2-2-2")) {
                 step2_2_2(record, current);
             }else if (current.hasClass("step2-2-3")) {
-                step2_2_3();
+                step2_2_3(record, current);
+            }else if (current.hasClass("step2-2-4")) {
+                step2_2_4();
             }else if (current.hasClass("step2-3-1")) {
                 step2_3_1(record, current);
             }else if (current.hasClass("step2-3-2")) {
@@ -986,7 +1131,9 @@
             }else if (current.hasClass("step2-3-3")) {
                 step2_3_3(record,current);
             }else if (current.hasClass("step2-3-4")) {
-                step2_3_4();
+                step2_3_4(record, current);
+            }else if (current.hasClass("step2-3-5")) {
+                step2_3_5();
             }
         },
         previous: function (current) {
@@ -1008,12 +1155,16 @@
                 $(".step2-2-1").show();
             }else if(current.hasClass("step2-2-3")) {
                 $(".step2-2-2").show();
+            }else if(current.hasClass("step2-2-4")) {
+                $(".step2-2-3").show();
             }else if(current.hasClass("step2-3-2")) {
                 $(".step2-3-1").show();
             }else if(current.hasClass("step2-3-3")) {
                 $(".step2-3-2").show();
             }else if(current.hasClass("step2-3-4")) {
                 $(".step2-3-3").show();
+            }else if(current.hasClass("step2-3-5")) {
+                $(".step2-3-4").show();
             }
         }
     };

@@ -128,7 +128,7 @@ public class GenTaskByFreeSqlResource {
 		Status status = Status.OK;
 		try {
 			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
-			CurrentLanguage lang = "java".equals(sql_style)?CurrentLanguage.Java:CurrentLanguage.CSharp;
+			CurrentLanguage lang = sql_content.contains("@")?CurrentLanguage.CSharp:CurrentLanguage.Java;
 			String pagingSQL = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), lang);
 			status.setInfo(pagingSQL);
 		} catch (Exception e) {
@@ -191,6 +191,7 @@ public class GenTaskByFreeSqlResource {
 			String dbName = databaseSetEntry.getConnectionString();
 			
 			ValidateResult validResult = null;
+			String resultPrefix = "The affected rows is ";
 			if (pagination && "select".equalsIgnoreCase(crud_type)) {
 				sql_content = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(dbName), CurrentLanguage.Java);
 				sql_content = String.format(sql_content, 1, 2);
@@ -198,12 +199,13 @@ public class GenTaskByFreeSqlResource {
 			
 			if("select".equalsIgnoreCase(crud_type)){
 				validResult = SQLValidation.queryValidate(dbName, sql_content, sqlTypes, vals);
+				resultPrefix = "The result count is ";
 			}else{
 				validResult = SQLValidation.updateValidate(dbName, sql_content, sqlTypes, vals);
 			}
 			
 			if(validResult!=null && validResult.isPassed()){
-				status.setInfo(validResult.getMessage());
+				status.setInfo(resultPrefix+validResult.getAffectRows());
 			}else{
 				status = Status.ERROR;
 				status.setInfo(validResult.getMessage());

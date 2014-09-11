@@ -483,6 +483,20 @@
                         </div>
                      </div>
                   </div>
+                  <div class="steps step2-2-4 row-fluid">
+                     <div class="row-fluid">
+                        <label class="control-label popup_label">SQL验证通过，结果如下</label>
+                     </div>  
+                     <div id="auto_sql_validate_result" class="row-fluid input-sm">      
+                     </div>
+                     <div class="row-fluid"><br/><br/>
+                     	<div style="clear:both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
+                     </div>
+                     <div class="row-fluid">
+                        <div id="step2_2_4_sql_editor" class="span12" style="height:200px;">
+                        </div>
+                     </div>
+                  </div>
                   
                   <div class="steps step2-3-1 row-fluid" from="" style="height:auto;">
                   	 <div class="row-fluid" style="margin-bottom:12px">
@@ -559,6 +573,20 @@
                      </div>
                      <div class="row-fluid">
                         <div id="step2_3_4_sql_editor" class="span12" style="height:200px;">
+                        </div>
+                     </div>
+                  </div>
+                  <div class="steps step2-3-5 row-fluid" from="">
+                     <div class="row-fluid">
+                           <label class="control-label popup_label">SQL验证通过，结果如下</label>
+                     </div>  
+                     <div id="free_sql_validate_result" class="row-fluid input-sm">      
+                     </div>
+                     <div class="row-fluid"><br/><br/>
+                     	 <div style="clear:both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
+                     </div>
+                     <div class="row-fluid">
+                        <div id="step2_3_5_sql_editor" class="span12" style="height:200px;">
                         </div>
                      </div>
                   </div>

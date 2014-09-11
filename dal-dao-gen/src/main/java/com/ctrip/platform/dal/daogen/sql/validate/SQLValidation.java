@@ -123,9 +123,9 @@ public class SQLValidation {
 	 */
 	private static ValidateResult validate(String dbName, String sql, int[] paramsTypes, Object[] vals){
 		if(StringUtils.startsWithIgnoreCase(sql, "SELECT")){
-			return queryValidate(dbName, sql, paramsTypes);
+			return queryValidate(dbName, sql, paramsTypes, vals);
 		}else{
-			return updateValidate(dbName, sql, paramsTypes);
+			return updateValidate(dbName, sql, paramsTypes, vals);
 		}
 	}
 
@@ -189,7 +189,8 @@ public class SQLValidation {
 			for (int i = 1; i <= paramsTypes.length; i++) {
 				stat.setObject(i, mockedVals[i-1], paramsTypes[i-1]);
 			}
-			stat.execute();
+			int rows = stat.executeUpdate();
+			status.setAffectRows(rows);
 			status.setPassed(true).append("Validate Successfully");
 		}catch(Exception e){
 			status.append(e.getMessage());
@@ -295,26 +296,41 @@ public class SQLValidation {
 	
 	private static void sqlserverQueryWithoutExplain(Connection connection, String sql,
 			ValidateResult status, int[] paramsTypes, Object[] vals) {
-		ResultSet rs = null;
-		PreparedStatement stat = null;
-		try{
-			stat = connection.prepareStatement(SqlBuilder.net2Java(sql));
-			for (int i = 1; i <= paramsTypes.length; i++) {
-				stat.setObject(i, vals[i-1], paramsTypes[i-1]);
+		
+		sqlserverExplain(connection, sql, status, paramsTypes, vals);
+		if(status.isPassed()){
+			ResultSet rs = null;
+			PreparedStatement stat = null;
+			try{
+				stat = connection.prepareStatement(SqlBuilder.net2Java(sql));
+				for (int i = 1; i <= paramsTypes.length; i++) {
+					stat.setObject(i, vals[i-1], paramsTypes[i-1]);
+				}
+				rs = stat.executeQuery();
+				int affectRows = 0;
+				while (rs.next()) {
+					affectRows ++;
+				}
+				status.setAffectRows(affectRows);
+			}catch(SQLException e){
+				status.setPassed(false);
+				status.append(e.getMessage());
+				log.error("Validate SQL Server query execute failed", e);
+			}catch(Exception e){
+				status.setPassed(false);
+				status.append(e.getMessage());
+				log.error("Validate SQL Server query failed", e);
+			}finally{
+				ResourceUtils.close(rs);
+				ResourceUtils.close(stat);
 			}
-			rs = stat.executeQuery();
-			status.append("The SQL Server explain is not supported!");
-			status.setPassed(true);
-		}catch(SQLException e){
-			status.append(e.getMessage());
-			log.error("Validate SQL Server query execute failed", e);
-		}catch(Exception e){
-			status.append(e.getMessage());
-			log.error("Validate SQL Server query failed", e);
-		}finally{
-			ResourceUtils.close(rs);
-			ResourceUtils.close(stat);
 		}
+	}
+	
+	private static void sqlserverExplain(Connection connection, String sql,
+			ValidateResult status, int[] paramsTypes, Object[] vals){
+		status.append("The SQL Server explain is not supported!");
+		status.setPassed(true);
 	}
 
 	/*
@@ -371,6 +387,45 @@ public class SQLValidation {
 
 	private static void mysqlQuery(Connection connection, String sql,
 			ValidateResult status, int[] paramsTypes, Object[] vals) {
+		
+		mysqlExplain(connection, sql, status, paramsTypes, vals);
+		
+		if(status.isPassed()){
+			ResultSet rs = null;
+			PreparedStatement stat = null;
+			try{
+				String sql_content = SqlBuilder.net2Java(sql);
+				stat = connection.prepareStatement(sql_content);
+	
+				for (int i = 1; i <= paramsTypes.length; i++) {
+					stat.setObject(i, vals[i-1], paramsTypes[i-1]);
+				}
+	
+				rs = stat.executeQuery();
+				int affectRows = 0;
+				while(rs.next()){
+					affectRows ++;
+				}
+				status.setAffectRows(affectRows);
+			}catch(SQLException e){
+				status.setPassed(false);
+				status.append(e.getMessage());
+				log.error("Validate mysql query execute failed", e);
+			}catch(Exception e){
+				status.setPassed(false);
+				status.append(e.getMessage());
+				log.error("Validate mysql query failed");
+			}
+			finally{
+				ResourceUtils.close(rs);
+				ResourceUtils.close(stat);
+			}
+		}
+	}
+	
+	
+	private static void mysqlExplain(Connection connection, String sql,
+			ValidateResult status, int[] paramsTypes, Object[] vals){
 		ResultSet rs = null;
 		PreparedStatement stat = null;
 		try{
@@ -378,11 +433,7 @@ public class SQLValidation {
 			stat = connection.prepareStatement(sql_content);
 
 			for (int i = 1; i <= paramsTypes.length; i++) {
-				try{
 				stat.setObject(i, vals[i-1], paramsTypes[i-1]);
-				}catch(SQLException e){
-					System.out.println(i + ": " + e.getMessage());
-				}
 			}
 
 			rs = stat.executeQuery();
@@ -394,10 +445,10 @@ public class SQLValidation {
 			status.setPassed(true);
 		}catch(SQLException e){
 			status.append(e.getMessage());
-			log.error("Validate mysql query execute failed", e);
+			log.error("Validate mysql query explain failed", e);
 		}catch(JsonProcessingException e){
 			status.append(e.getMessage());
-			log.error("Validate mysql query JSON Parse failed", e);
+			log.error("Validate mysql query JSON Explain failed", e);
 		}catch(Exception e){
 			status.append(e.getMessage());
 			log.error("Validate mysql query failed");

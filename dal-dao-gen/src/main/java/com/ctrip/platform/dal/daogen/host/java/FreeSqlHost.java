@@ -66,7 +66,21 @@ public class FreeSqlHost {
 		}
 		return imports;
 	}
+	public String pageBegain(){
+		if(this.databaseCategory == DatabaseCategory.MySql){
+			return "(pageNo - 1) * pageSize";
+		}else{
+			return "(pageNo - 1) * pageSize + 1";
+		}
+	}
 	
+	public String pageEnd(){
+		if(this.databaseCategory == DatabaseCategory.MySql){
+			return "pageSize";
+		}else{
+			return "pageSize * pageNo";
+		}
+	}
 	public boolean hasQuery(){
 		boolean hasQuery = false;
 		for (JavaMethodHost mtd : this.methods) {

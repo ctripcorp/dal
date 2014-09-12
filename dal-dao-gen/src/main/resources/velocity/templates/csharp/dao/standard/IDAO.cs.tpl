@@ -94,13 +94,24 @@ namespace ${host.getNameSpace()}.Interface.IDao
 #end
 
 #if($host.generateAPI(54))
-#if($host.isHasSptI())
+#if($host.isHasSptI() && $host.getDatabaseCategory().name()!="MySql" )
         /// <summary>
         ///  批量插入${host.getClassName()}
         /// </summary>
         /// <param name="${WordUtils.uncapitalize(${host.getClassName()})}">${host.getClassName()}实体对象列表</param>
         /// <returns>状态代码</returns>
         int BulkInsert${host.getClassName()}(IList<${host.getClassName()}> ${WordUtils.uncapitalize(${host.getClassName()})}List);
+#end
+#end
+
+#if($host.generateAPI(74))
+#if($host.getDatabaseCategory().name() == "MySql")
+		/// <summary>
+        ///  批量插入${host.getClassName()}
+        /// </summary>
+        /// <param name="${WordUtils.uncapitalize(${host.getClassName()})}">${host.getClassName()}实体对象列表</param>
+        /// <returns>状态代码</returns>
+        bool BulkInsert${host.getClassName()}(IList<${host.getClassName()}> ${WordUtils.uncapitalize(${host.getClassName()})}List);
 #end
 #end
 

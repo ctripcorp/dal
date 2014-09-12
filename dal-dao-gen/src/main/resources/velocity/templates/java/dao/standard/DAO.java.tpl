@@ -16,8 +16,8 @@ public class ${host.getPojoClassName()}Dao {
 	private static final String PAGE_SQL_PATTERN = "WITH CTE AS (select *, row_number() over(order by ${host.getOverColumns()} desc ) as rownum" 
 			+" from ${host.getTableName()} (nolock)) select * from CTE where rownum between %s and %s";
 #end
-#if($host.isSp())
 
+#if($host.isSp())
 #if($host.getSpInsert().isExist())
 	private static final String INSERT_SP_NAME = "${host.getSpInsert().getMethodName()}";
 #end

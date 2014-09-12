@@ -19,7 +19,7 @@ public class SpDbHost {
 		this.dbName = dbName;
 		this.packageName = packageName;
 		this.databaseCategory = DatabaseCategory.SqlServer;
-		String dbType = DbUtils.getDbType(this.dbName);
+		String dbType = DbUtils.getDbType(DbUtils.getAllInOneName(this.dbName));
 		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 			this.databaseCategory = DatabaseCategory.MySql;
 		}

@@ -33,6 +33,10 @@ public class DalTestHelper {
 		return dao.query("1=1", new StatementParameters(), new DalHints().inTableShard(shardId)).size();
 	}
 	
+	public static int getCountByDbTable(DalTableDao<?> dao, int shardId, int tableShardId) throws SQLException {
+		return dao.query("1=1", new StatementParameters(), new DalHints().inShard(shardId).inTableShard(tableShardId)).size();
+	}
+	
 	public static Object query(DalTableDao<?> dao, String where, Object... params) throws SQLException {
 		return dao.query("1=1", new StatementParameters(), new DalHints()).size();
 	}
@@ -41,6 +45,13 @@ public class DalTestHelper {
 		for(int i = 0; i < mod; i++) {
 			int j = 1;
 			dao.delete("1=1", new StatementParameters(), new DalHints().inShard(i));
+		}
+	}
+	
+	public static void deleteAllShardsByDbTable(DalTableDao<?> dao, int mod, int tableMod) throws SQLException {
+		for(int i = 0; i < mod; i++) {
+			for(int j = 0; j < tableMod; j++) 
+				dao.delete("1=1", new StatementParameters(), new DalHints().inShard(i).inTableShard(j));
 		}
 	}
 	

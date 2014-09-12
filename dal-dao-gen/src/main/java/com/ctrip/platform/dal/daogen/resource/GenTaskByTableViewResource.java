@@ -117,7 +117,7 @@ public class GenTaskByTableViewResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("apiList")
-	public Status getTableSPNames(@QueryParam("db_name") String db_set_name,
+	public Status getApiList(@QueryParam("db_name") String db_set_name,
 			@QueryParam("table_names") String table_names,
 			@QueryParam("sql_style") String sql_style// C#风格或者Java风格
 			) {

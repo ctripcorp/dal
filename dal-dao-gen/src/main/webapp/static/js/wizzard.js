@@ -737,9 +737,9 @@
 
         postData["condition"] = selectedConditions.join(";");
         var mockValueHtml = '<div class="row-fluid">' +
-            '<label class="control-label popup_label" style="width:60px;overflow:auto">&nbsp;%s&nbsp;</label>' +
+            '<label class="control-label popup_label span3 text-right">&nbsp;%s&nbsp;</label>' +
             '<input type="text" class="span4" value="%s">'+
-            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label>' +
+//            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label>' +
             '</div><br>';
         $("#auto_sql_mock_value").html(" ");
         $.post("/rest/task/auto/getMockValue", postData, function (data) {
@@ -747,7 +747,7 @@
                 var mockValue = $.parseJSON(data.info);
                 var paramNameList = getAutoSqlParamName();
                 $.each(mockValue,function(index,value){
-                    $("#auto_sql_mock_value").append(sprintf(mockValueHtml, paramNameList[index], value, value));
+                    $("#auto_sql_mock_value").append(sprintf(mockValueHtml, paramNameList[index], value));
                 });
                 var editor = ace.edit("step2_2_3_sql_editor");
                 editor.setTheme("ace/theme/monokai");
@@ -966,9 +966,9 @@
         postData["params"] = paramList.join(";");
 
         var mockValueHtml = '<div class="row-fluid">' +
-            '<label class="control-label popup_label" style="width:60px;overflow:auto">&nbsp;%s&nbsp;</label>' +
+            '<label class="control-label popup_label span3 text-right">&nbsp;%s&nbsp;</label>' +
             '<input type="text" class="span4" value="%s">'+
-            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label>' +
+//            '<label class="control-label popup_label">&nbsp;&nbsp;Example Value:%s</label>' +
             '</div><br>';
         $("#free_sql_mock_value").html(" ");
         $.post("/rest/task/sql/getMockValue", postData, function (data) {
@@ -976,7 +976,7 @@
                 var mockValue = $.parseJSON(data.info);
                 var paramNameList = getFreeSqlParamName();
                  $.each(mockValue,function(index,value){
-                    $("#free_sql_mock_value").append(sprintf(mockValueHtml, paramNameList[index], value, value));
+                    $("#free_sql_mock_value").append(sprintf(mockValueHtml, paramNameList[index], value));
                 });
                 var editor = ace.edit("step2_3_4_sql_editor");
                 editor.setTheme("ace/theme/monokai");

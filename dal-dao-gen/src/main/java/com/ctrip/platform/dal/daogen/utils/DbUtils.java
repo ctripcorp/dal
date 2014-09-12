@@ -23,6 +23,7 @@ import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpParameterHost;
@@ -370,8 +371,10 @@ public class DbUtils {
 					}
 
 					CSharpParameterHost host = new CSharpParameterHost();
-					DbType dbType = DbType.getDbTypeFromJdbcType(spParams
-							.getInt("DATA_TYPE"));
+					DbType dbType =getDotNetDbType(spParams.getString("TYPE_NAME"), spParams
+							.getInt("DATA_TYPE"), spParams.getInt("LENGTH"));
+//					DbType dbType = DbType.getDbTypeFromJdbcType(spParams
+//							.getInt("DATA_TYPE"));
 					host.setDbType(dbType);
 					host.setNullable(spParams.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
 
@@ -469,8 +472,7 @@ public class DbUtils {
 		List<String> primaryKeys = new ArrayList<String>();
 		try {
 			connection = DataSourceUtil.getConnection(dbName);
-			primaryKeyRs = connection.getMetaData().getPrimaryKeys(null,
-					null, tableName);
+			primaryKeyRs = connection.getMetaData().getPrimaryKeys(null, null, tableName);
 
 			while (primaryKeyRs.next()) {
 				primaryKeys.add(primaryKeyRs.getString("COLUMN_NAME"));
@@ -487,6 +489,26 @@ public class DbUtils {
 		}
 
 		return primaryKeys;
+	}
+	
+	private static DbType getDotNetDbType(String typeName,int dataType, int length){
+		DbType dbType;
+		if(null != typeName && typeName.equalsIgnoreCase("year")){
+			dbType = DbType.Int16;
+		}else if(typeName.equalsIgnoreCase("uniqueidentifier")){
+			dbType = DbType.Guid;
+		}else if(null != typeName && typeName.equalsIgnoreCase("sql_variant")){
+			dbType = DbType.Object;
+		}else if (dataType == 1 && length > 1){
+			dbType = DbType.AnsiString;
+		}else if(-155 == dataType){
+			dbType = DbType.DateTimeOffset;
+		}else if(-7 == dataType && length > 1){
+			dbType = DbType.UInt64;
+		}else {
+			dbType =DbType.getDbTypeFromJdbcType(dataType);
+		}
+		return dbType;
 	}
 
 	/**
@@ -517,22 +539,7 @@ public class DbUtils {
 					int length = allColumnsRs.getInt("COLUMN_SIZE");
 					
 					//特殊处理
-					DbType dbType;
-					if(null != typeName && typeName.equalsIgnoreCase("year"))
-						dbType = DbType.Int16;
-					else if(null != typeName && typeName.equalsIgnoreCase("sql_variant"))
-						dbType = DbType.Object;
-					else if (dataType == 1 && length > 1)
-						dbType = DbType.AnsiString;
-					else if(-155 == dataType){
-						dbType = DbType.DateTimeOffset;
-					}else if(-7 == dataType && length > 1){
-						dbType = DbType.UInt64;
-					}else {
-						dbType =DbType.getDbTypeFromJdbcType(dataType);
-					}
-
-					host.setDbType(dbType);
+					host.setDbType(getDotNetDbType(typeName, dataType, length));
 					//host.setName(CommonUtils.normalizeVariable(allColumnsRs.getString("COLUMN_NAME")));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
 					String remark = allColumnsRs.getString("REMARKS");
@@ -774,8 +781,13 @@ public class DbUtils {
 					int dataType = rsMeta.getColumnType(i);
 					
 					DbType dbType;
+
 					if(null != typename && typename.equalsIgnoreCase("year"))
 						dbType = DbType.Int16;
+					else if(typename.equalsIgnoreCase("uniqueidentifier"))
+					{
+						dbType = DbType.Guid;
+					}
 					else if(null != typename && typename.equalsIgnoreCase("sql_variant"))
 						dbType = DbType.Object;
 					else if(-155 == dataType){
@@ -888,6 +900,11 @@ public class DbUtils {
 
 		return dbCategory;
 
+	}
+	
+	public static String getAllInOneName(String db_set_name){
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
+		return databaseSetEntry.getConnectionString();
 	}
 	
 	private static Map<String,String> getSqlserverColumnComment(String allInOneName, String tableName) throws Exception{

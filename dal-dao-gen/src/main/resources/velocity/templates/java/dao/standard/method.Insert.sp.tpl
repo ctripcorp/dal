@@ -1,5 +1,4 @@
-#if($host.getSpInsert().isExist())
-#if($host.generateAPI(19))
+#if($host.getSpInsert().isExist() && $host.generateAPI(19))
 	/**
 	 * SP Insert
 	**/
@@ -13,7 +12,10 @@
 		return (Integer)results.get(RET_CODE);
 	}
 #end
-#if($host.generateAPI(73))	
+#if($host.getSpInsert().isExist() && $host.generateAPI(73))	
+	/**
+	 * SP Insert
+	**/
 	public int insert(DalHints hints, KeyHolder holder, ${host.getPojoClassName()} daoPojo) throws SQLException {
 		if(null == daoPojo)
 			return 0;
@@ -45,8 +47,7 @@
 		return (Integer)results.get(RET_CODE);
 	}
 #end
-
-#if($host.getSpInsert().getType()=="sp3" && $host.generateAPI(39))
+#if($host.getSpInsert().isExist() && $host.getSpInsert().getType()=="sp3" && $host.generateAPI(39))
 	/**
 	 * Batch insert without out parameters
 	 * Return how many rows been affected for each of parameters
@@ -64,5 +65,4 @@
 		}
 		return baseClient.batchCall(callSql, parametersList, hints);
 	}
-#end
 #end

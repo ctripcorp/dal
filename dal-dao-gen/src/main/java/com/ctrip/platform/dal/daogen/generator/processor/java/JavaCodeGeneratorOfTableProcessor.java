@@ -48,7 +48,7 @@ public class JavaCodeGeneratorOfTableProcessor implements Processor {
 
 				@Override
 				public ExecuteResult call() throws Exception {
-					ExecuteResult result = new ExecuteResult("Generate Table[" + host.getDbName() + "." + host.getTableName() + "] Dao, Pojo, Test");
+					ExecuteResult result = new ExecuteResult("Generate Table[" + host.getDbSetName() + "." + host.getTableName() + "] Dao, Pojo, Test");
 					progress.setOtherMessage(result.getTaskName());
 					try
 					{

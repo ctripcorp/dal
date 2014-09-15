@@ -16,6 +16,7 @@ public class CSharpMethodHost {
 	private String sql;
 	
 	private List<CSharpParameterHost> parameters;
+	
 	private CSharpFreeSqlPojoHost pojohost;
 	
 	private List<JavaParameterHost> fields;
@@ -23,6 +24,7 @@ public class CSharpMethodHost {
 	private String pojoName;
 	
 	private String scalarType;
+	
 	private String pojoType;
 	
 	private boolean paging;

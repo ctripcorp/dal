@@ -66,17 +66,17 @@ public class AbstractCSharpDataPreparer{
 
 		CSharpCodeGenContext ctx = (CSharpCodeGenContext)codeGenCtx;
 		
-		if (!DbUtils.tableExists(tableViewSp.getDb_name(), table)) {
+		if (!DbUtils.tableExists(tableViewSp.getAllInOneName(), table)) {
 			throw new Exception(String.format("表 %s 不存在，请编辑DAO再生成", table));
 		}
 
 		// 主键及所有列
 		List<AbstractParameterHost> allColumnsAbstract = DbUtils
-				.getAllColumnNames(tableViewSp.getDb_name(), table,
+				.getAllColumnNames(tableViewSp.getAllInOneName(), table,
 						CurrentLanguage.CSharp);
 
 		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
-				tableViewSp.getDb_name(), table);
+				tableViewSp.getAllInOneName(), table);
 
 		List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
 		for (AbstractParameterHost h : allColumnsAbstract) {
@@ -93,7 +93,7 @@ public class AbstractCSharpDataPreparer{
 
 		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.get_sqlBuilders();
 		List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(
-				_sqlBuilders, tableViewSp.getDb_name(), table);
+				_sqlBuilders, tableViewSp.getAllInOneName(), table);
 
 		List<CSharpMethodHost> methods = buildMethodHosts(allColumns,
 				currentTableBuilders);
@@ -111,11 +111,11 @@ public class AbstractCSharpDataPreparer{
 		// SP方式增删改
 		if (tableHost.isSpa()) {
 			tableHost.setSpaInsert(CSharpSpaOperationHost.getSpaOperation(
-					tableViewSp.getDb_name(), table, allSpNames, "i"));
+					tableViewSp.getAllInOneName(), table, allSpNames, "i"));
 			tableHost.setSpaUpdate(CSharpSpaOperationHost.getSpaOperation(
-					tableViewSp.getDb_name(), table, allSpNames, "u"));
+					tableViewSp.getAllInOneName(), table, allSpNames, "u"));
 			tableHost.setSpaDelete(CSharpSpaOperationHost.getSpaOperation(
-					tableViewSp.getDb_name(), table, allSpNames, "d"));
+					tableViewSp.getAllInOneName(), table, allSpNames, "d"));
 		}
 
 		tableHost.setPrimaryKeys(primaryKeys);
@@ -150,7 +150,7 @@ public class AbstractCSharpDataPreparer{
 		Iterator<GenTaskBySqlBuilder> iter = sqlBuilders.iterator();
 		while (iter.hasNext()) {
 			GenTaskBySqlBuilder currentSqlBuilder = iter.next();
-			if (currentSqlBuilder.getDb_name().equals(dbName)
+			if (currentSqlBuilder.getAllInOneName().equals(dbName)
 					&& currentSqlBuilder.getTable_name().equals(table)) {
 				currentTableBuilders.add(currentSqlBuilder);
 				iter.remove();
@@ -172,7 +172,7 @@ public class AbstractCSharpDataPreparer{
 			String sql = builder.getSql_content();
 			int index = 0;
 			if(builder.isPagination()){
-				sql = SqlBuilder.pagingQuerySql(sql, getDatabaseCategory(builder.getDb_name()), CurrentLanguage.CSharp);
+				sql = SqlBuilder.pagingQuerySql(sql, getDatabaseCategory(builder.getAllInOneName()), CurrentLanguage.CSharp);
 				index += 2;
 			}
 			Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(builder.getSql_content());
@@ -188,7 +188,7 @@ public class AbstractCSharpDataPreparer{
 			if (method.getCrud_type().equals("select") || method.getCrud_type().equals("delete")) {
 				if(method.getCrud_type().equals("select")) {
 					List<AbstractParameterHost> paramAbstractHosts = 
-							DbUtils.getSelectFieldHosts(builder.getDb_name(), builder.getSql_content(), 
+							DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), 
 									CurrentLanguage.Java);
 					List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
 					for (AbstractParameterHost phost : paramAbstractHosts) {

@@ -7,7 +7,7 @@ import ${field};
 import com.ctrip.platform.dal.dao.helper.*;
 
 public class ${host.getClassName()}Dao {
-	private static final String DATA_BASE = "${host.getDbName()}";
+	private static final String DATA_BASE = "${host.getDbSetName()}";
 	
 #if($host.hasQuery())
 	private DalQueryDao queryDao;

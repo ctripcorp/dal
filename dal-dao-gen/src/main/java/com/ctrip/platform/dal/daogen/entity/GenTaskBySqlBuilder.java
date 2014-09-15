@@ -12,7 +12,7 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 
 	private int project_id;
 	
-	private String db_name;
+	private String allInOneName;
 	
 	private String databaseSetName;
 	
@@ -53,7 +53,7 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		task.setProject_id(rs.getInt(2));
 		
 		String databaseSet = rs.getString(3);
-		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
+		task.setAllInOneName(DatabaseSetUtils.getAllInOneName(databaseSet));
 		task.setDatabaseSetName(databaseSet);
 		
 		task.setTable_name(rs.getString(4));
@@ -78,7 +78,7 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 
 	@Override
 	public int compareTo(GenTaskBySqlBuilder o) {
-		int result =  this.getDb_name().compareTo(o.getDb_name());
+		int result =  this.getAllInOneName().compareTo(o.getAllInOneName());
 		if(result != 0){
 			return result;
 		}
@@ -140,12 +140,12 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		this.project_id = project_id;
 	}
 
-	public String getDb_name() {
-		return db_name;
+	public String getAllInOneName() {
+		return allInOneName;
 	}
 
-	public void setDb_name(String db_name) {
-		this.db_name = db_name;
+	public void setAllInOneName(String allInOneName) {
+		this.allInOneName = allInOneName;
 	}
 
 	public String getTable_name() {

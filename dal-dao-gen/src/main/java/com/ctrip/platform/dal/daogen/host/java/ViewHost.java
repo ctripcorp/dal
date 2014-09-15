@@ -11,7 +11,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 
 public class ViewHost {
 	private String packageName;
-	private String dbName;
+	private String dbSetName;
 	private String pojoClassName;
 	private String ViewName;
 	private List<JavaParameterHost> fields = new ArrayList<JavaParameterHost>();
@@ -26,12 +26,12 @@ public class ViewHost {
 		this.packageName = packageName;
 	}
 
-	public String getDbName() {
-		return dbName;
+	public String getDbSetName() {
+		return dbSetName;
 	}
 
-	public void setDbName(String dbName) {
-		this.dbName = dbName;
+	public void setDbSetName(String dbSetName) {
+		this.dbSetName = dbSetName;
 	}
 
 	public String getPojoClassName() {

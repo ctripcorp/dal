@@ -10,7 +10,7 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	
 	private int id;
 	private int project_id;
-	private String db_name;
+	private String allInOneName;
 	private String databaseSetName;
 	private String table_names;
 	private String view_names;
@@ -39,7 +39,7 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
 		String databaseSet = rs.getString(3);
-		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
+		task.setAllInOneName(DatabaseSetUtils.getAllInOneName(databaseSet));
 		task.setDatabaseSetName(databaseSet);
 		task.setTable_names(rs.getString(4));
 		task.setView_names(rs.getString(5));
@@ -61,7 +61,7 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 
 	@Override
 	public int compareTo(GenTaskByTableViewSp o) {
-		return this.getDb_name().compareTo(o.getDb_name());
+		return this.getAllInOneName().compareTo(o.getAllInOneName());
 	}
 
 	public String getDatabaseSetName() {
@@ -88,12 +88,12 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 		this.project_id = project_id;
 	}
 
-	public String getDb_name() {
-		return db_name;
+	public String getAllInOneName() {
+		return allInOneName;
 	}
 
-	public void setDb_name(String db_name) {
-		this.db_name = db_name;
+	public void setAllInOneName(String allInOneName) {
+		this.allInOneName = allInOneName;
 	}
 
 	public String getTable_names() {

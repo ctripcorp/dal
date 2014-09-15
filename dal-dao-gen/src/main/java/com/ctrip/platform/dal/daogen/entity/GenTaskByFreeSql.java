@@ -12,7 +12,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
 	private int id;
 	private int project_id;
-	private String db_name;
+	private String allInOneName;
 	private String databaseSetName;
 	private String class_name;
 	private String pojo_name;
@@ -43,7 +43,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		
 		String databaseSet = rs.getString(3);
 		
-		task.setDb_name(DatabaseSetUtils.getDBName(databaseSet));
+		task.setAllInOneName(DatabaseSetUtils.getAllInOneName(databaseSet));
 		task.setDatabaseSetName(databaseSet);
 		task.setClass_name(rs.getString(4));
 		task.setPojo_name(rs.getString(5));
@@ -66,7 +66,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
 	@Override
 	public int compareTo(GenTaskByFreeSql o) {
-		int result =  this.getDb_name().compareTo(o.getDb_name());
+		int result =  this.getAllInOneName().compareTo(o.getAllInOneName());
 		if(result != 0){
 			return result;
 		}
@@ -111,12 +111,12 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		this.project_id = project_id;
 	}
 
-	public String getDb_name() {
-		return db_name;
+	public String getAllInOneName() {
+		return allInOneName;
 	}
 	
-	public void setDb_name(String dbName){
-		this.db_name = dbName;
+	public void setAllInOneName(String allInOneName){
+		this.allInOneName = allInOneName;
 	}
 
 	public String getClass_name() {

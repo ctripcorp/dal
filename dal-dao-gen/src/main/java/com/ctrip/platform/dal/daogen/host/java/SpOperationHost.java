@@ -7,15 +7,13 @@ import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-//http://conf.ctripcorp.com/pages/viewpage.action?pageId=54479645
+//rules is according to http://conf.ctripcorp.com/pages/viewpage.action?pageId=54479645
 public class SpOperationHost {
 	private boolean exist;
 	private List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
-	//Sp Name
-	private String methodName;
-	//Sp Name
-	private String spName="";
-	//Sp Name
+	//apA Name
+	private String basicSpName="";
+	//sp3 Name
 	private String batchSpName="";
 	
 	private String type;
@@ -24,6 +22,7 @@ public class SpOperationHost {
 			String tableName, List<StoredProcedure> spNames, String operation) {
 
 		SpOperationHost host = new SpOperationHost();
+		host.exist = true;
 		
 		StoredProcedure expectSpa = new StoredProcedure();
 		expectSpa.setName(String.format("spA_%s_%s", tableName, operation));
@@ -32,14 +31,18 @@ public class SpOperationHost {
 		StoredProcedure currentSp = null;
 		int index = -1;
 		
-		if( (index = spNames.indexOf(expectSpa)) > 0){
-			host.exist = true;
-			host.methodName = expectSpa.getName();
+		if((index = spNames.indexOf(expectSpa))>-1 && spNames.indexOf(expectSp3)>-1){//spA、sp3都存在
+			host.setBasicSpName(expectSpa.getName());
+			host.setBatchSpName(expectSp3.getName());
+			host.setType("sp3");
+			currentSp = spNames.get(index);
+		}else if((index = spNames.indexOf(expectSpa))>-1 && spNames.indexOf(expectSp3)<0){//只存在spA
+			host.setBasicSpName(expectSpa.getName());
 			host.setType("spA");
 			currentSp = spNames.get(index);
-		}else if((index = spNames.indexOf(expectSp3)) > 0){
-			host.exist = true;
-			host.methodName = expectSp3.getName();
+		}else if(spNames.indexOf(expectSpa)<0 && (index = spNames.indexOf(expectSp3))>-1){//只存在sp3
+			host.setBasicSpName(expectSp3.getName());
+			host.setBatchSpName(expectSp3.getName());
 			host.setType("sp3");
 			currentSp = spNames.get(index);
 		}else{
@@ -82,20 +85,12 @@ public class SpOperationHost {
 		this.parameters = parameters;
 	}
 
-	public String getMethodName() {
-		return methodName;
+	public String getBasicSpName() {
+		return basicSpName;
 	}
 
-	public void setMethodName(String methodName) {
-		this.methodName = methodName;
-	}
-
-	public String getSpName() {
-		return spName;
-	}
-
-	public void setSpName(String spName) {
-		this.spName = spName;
+	public void setBasicSpName(String basicSpName) {
+		this.basicSpName = basicSpName;
 	}
 
 	public String getBatchSpName() {

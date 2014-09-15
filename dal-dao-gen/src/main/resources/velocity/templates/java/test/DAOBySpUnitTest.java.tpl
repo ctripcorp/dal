@@ -11,10 +11,10 @@ import static org.junit.Assert.*;
 
 import com.ctrip.platform.dal.dao.*;
 
-public class ${host.getDbName()}SpDaoUnitTest {
-	private static final String DATA_BASE = "${host.getDbName()}";
+public class ${host.getDbSetName()}SpDaoUnitTest {
+	private static final String DATA_BASE = "${host.getDbSetName()}";
 
-	private static ${host.getDbName()}SpDao dao = null;
+	private static ${host.getDbSetName()}SpDao dao = null;
 	private static DalClient client = null;
 		
 	//The optional setup SQL, which will be executed on test begin.
@@ -34,7 +34,7 @@ public class ${host.getDbName()}SpDaoUnitTest {
     		//DalClientFactory.initClientFactory("E:/DalMult.config"); // load from the specified Dal.config file path
     		
     		client = DalClientFactory.getClient(DATA_BASE);
-    		dao = new ${host.getDbName()}SpDao();
+    		dao = new ${host.getDbSetName()}SpDao();
 		
 		}catch(Exception e){
 			e.printStackTrace();

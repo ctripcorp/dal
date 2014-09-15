@@ -10,8 +10,11 @@ import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 
 public class CSharpSpaOperationHost {
+	
 	private boolean exist;
+	
 	private List<CSharpParameterHost> parameters;
+	
 	private String methodName;
 	
 	public boolean isExist() {

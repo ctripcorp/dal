@@ -9,7 +9,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 
 public class FreeSqlHost {
 	private String packageName;
-	private String dbName;
+	private String dbSetName;
 	private String className;
 	private List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 	private List<JavaParameterHost> fields;
@@ -119,12 +119,12 @@ public class FreeSqlHost {
 		this.packageName = packageName;
 	}
 
-	public String getDbName() {
-		return dbName;
+	public String getDbSetName() {
+		return dbSetName;
 	}
 
-	public void setDbName(String dbName) {
-		this.dbName = dbName;
+	public void setDbSetName(String dbSetName) {
+		this.dbSetName = dbSetName;
 	}
 
 	public String getClassName() {

@@ -6,20 +6,21 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 
 public class SpDbHost {
 	private DatabaseCategory databaseCategory;
 	private String packageName;
-	private String dbName;
+	private String dbSetName;
 	//<SpHost spName, SpHost>
 	private HashMap<String, SpHost> spHosts;
 
-	public SpDbHost(String dbName, String packageName) throws Exception {
-		this.dbName = dbName;
+	public SpDbHost(String dbSetName, String packageName) throws Exception {
+		this.dbSetName = dbSetName;
 		this.packageName = packageName;
 		this.databaseCategory = DatabaseCategory.SqlServer;
-		String dbType = DbUtils.getDbType(DbUtils.getAllInOneName(this.dbName));
+		String dbType = DbUtils.getDbType(DatabaseSetUtils.getAllInOneName(dbSetName));
 		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 			this.databaseCategory = DatabaseCategory.MySql;
 		}
@@ -39,8 +40,8 @@ public class SpDbHost {
 		return this.packageName;
 	}
 
-	public String getDbName() {
-		return this.dbName;
+	public String getDbSetName() {
+		return this.dbSetName;
 	}
 
 	public Collection<SpHost> getSpHosts() {

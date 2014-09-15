@@ -4,11 +4,11 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
-public class ${host.getDbName()}SpDao {
-	private static final String DATA_BASE = "${host.getDbName()}";
+public class ${host.getDbSetName()}SpDao {
+	private static final String DATA_BASE = "${host.getDbSetName()}";
 	private DalClient client;
 
-	public ${host.getDbName()}SpDao() {
+	public ${host.getDbSetName()}SpDao() {
 		this.client = DalClientFactory.getClient(DATA_BASE);
 	}
 	

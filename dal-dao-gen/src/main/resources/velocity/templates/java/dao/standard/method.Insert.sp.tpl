@@ -7,7 +7,7 @@
 			return 0;
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
-		String callSql = prepareSpCall(INSERT_SP_NAME, parameters, parser.getFields(daoPojo));
+		String callSql = prepareSpCall(BASIC_INSERT_SP_NAME, parameters, parser.getFields(daoPojo));
 		Map<String, ?> results = baseClient.call(callSql, parameters, hints);
 		return (Integer)results.get(RET_CODE);
 	}
@@ -21,7 +21,7 @@
 			return 0;
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
-		String callSql = prepareSpCall(INSERT_SP_NAME, parameters, parser.getFields(daoPojo));
+		String callSql = prepareSpCall(BASIC_INSERT_SP_NAME, parameters, parser.getFields(daoPojo));
 #foreach($p in $host.getSpInsert().getParameters())
 #if($p.getDirection().name() == "InputOutput")
 		parameters.registerInOut("${p.getName()}", ${p.getJavaTypeDisplay()}, daoPojo.get${p.getCapitalizedName()}());
@@ -56,7 +56,7 @@
 		if(null == daoPojos || daoPojos.length == 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
-		String callSql = client.buildCallSql(INSERT_SP_NAME, parser.getFields(daoPojos[0]).size());
+		String callSql = client.buildCallSql(BATCH_INSERT_SP_NAME, parser.getFields(daoPojos[0]).size());
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		for(int i = 0; i< daoPojos.length; i++){
 			StatementParameters parameters = new StatementParameters();

@@ -3,6 +3,8 @@ package com.ctrip.platform.dal.daogen.utils;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
+
 public class DatabaseSetUtils {
 	private static Map<String, String> databaseSetDBNameCache = null;
 	
@@ -25,5 +27,10 @@ public class DatabaseSetUtils {
 				return databaseSetName;
 			}
 		}
+	}
+	
+	public static String getAllInOneName(String db_set_name){
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
+		return databaseSetEntry.getConnectionString();
 	}
 }

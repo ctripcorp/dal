@@ -49,7 +49,7 @@ public class JavaCodeGeneratorOfViewProcessor implements Processor {
 
 				@Override
 				public ExecuteResult call() throws Exception {					
-					ExecuteResult result = new ExecuteResult("Generate View[" + host.getDbName() + "." + host.getViewName() + "] Dao");
+					ExecuteResult result = new ExecuteResult("Generate View[" + host.getDbSetName() + "." + host.getViewName() + "] Dao");
 					progress.setOtherMessage(result.getTaskName());
 					try
 					{

@@ -36,7 +36,7 @@ public class ${host.getClassName()}Dao {
 #parse("templates/java/dao/freesql/method.scalar.Entity.List.tpl")
 #parse("templates/java/dao/freesql/method.scalar.Entity.Single.tpl")
 #parse("templates/java/dao/freesql/method.scalar.Entity.First.tpl")
-#parse("templates/java/dao/freesql/method.update.tpl")
+#parse("templates/java/dao/freesql/method.cud.tpl")
 
 #foreach( $method in ${host.getMethods()} )
 #if(!$method.isEmptyFields()&& !$method.isSampleType())

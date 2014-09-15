@@ -55,8 +55,8 @@ public class ${host.getPojoClassName()}Dao {
 #parse("templates/java/dao/standard/method.Delete.notSp.tpl")
 #parse("templates/java/dao/standard/method.Update.sp.tpl")
 #parse("templates/java/dao/standard/method.Update.notSp.tpl")
-#parse("templates/java/dao/standard/method.scalar.tpl")
-#parse("templates/java/dao/standard/method.sp.tpl")
+#parse("templates/java/dao/autosql/DAO.java.tpl")
+#parse("templates/java/dao/standard/method.sp.prepareSpCall.tpl")
 
 	public static class ${host.getPojoClassName()}Parser extends AbstractDalParser<${host.getPojoClassName()}> {
 		public static final String DATABASE_NAME = "${host.getDbSetName()}";

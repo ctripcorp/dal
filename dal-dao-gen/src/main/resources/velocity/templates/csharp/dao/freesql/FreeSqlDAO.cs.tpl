@@ -15,7 +15,7 @@ namespace ${host.getNameSpace()}.Dao
 
 #parse("templates/csharp/dao/freesql/method.scalar.FirstOrSingle.tpl")
 #parse("templates/csharp/dao/freesql/method.scalar.List.tpl")
-#parse("templates/csharp/dao/freesql/method.update.tpl")
+#parse("templates/csharp/dao/freesql/method.cud.tpl")
 
     }
 }

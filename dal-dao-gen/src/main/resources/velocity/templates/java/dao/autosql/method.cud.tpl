@@ -1,5 +1,5 @@
 #foreach($method in $host.getMethods())
-#if($method.getCrud_type()!="select")
+#if($method.getCrud_type() != "select")
 	/**
 	 * ${method.getComments()}
 	**/

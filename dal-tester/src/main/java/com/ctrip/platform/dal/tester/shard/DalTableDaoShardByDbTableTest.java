@@ -1454,7 +1454,7 @@ public class DalTableDaoShardByDbTableTest {
 			testInsertMultipleAsListWithContinueOnErrorHints(i, new DalHints().continueOnError().setShardColValue("index", i));
 			
 			// By shardColValue
-			testInsertMultipleAsListWithContinueOnErrorHints(i, new DalHints().continueOnError().setShardColValue("dbndex", i));
+			testInsertMultipleAsListWithContinueOnErrorHints(i, new DalHints().continueOnError().setShardColValue("dbIndex", i));
 		}
 		
 		deleteAllShardsByDbTable(dao, mod, tableMod);
@@ -1540,7 +1540,7 @@ public class DalTableDaoShardByDbTableTest {
 		
 		entities.get(2).setTableIndex(2);
 		entities.get(2).setDbIndex(2);
-		dao.insert(new DalHints().continueOnError(), entities);
+		dao.insert(hints.clone().continueOnError(), entities);
 		Assert.assertEquals(1, getCount(shardId, 0));
 		Assert.assertEquals(0, getCount(shardId, 1));
 		Assert.assertEquals(1, getCount(shardId, 2));

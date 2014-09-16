@@ -110,7 +110,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 				public ExecuteResult call() throws Exception {
 				/*	progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildSp:"
 							+ spName);*/
-					ExecuteResult result = new ExecuteResult("Build SP[" + tableViewSp.getDb_name() + "." + spName + "] Host");
+					ExecuteResult result = new ExecuteResult("Build SP[" + tableViewSp.getAllInOneName() + "." + spName + "] Host");
 					progress.setOtherMessage(result.getTaskName());
 					try{
 						SpHost spHost = buildSpHost(ctx, tableViewSp, spName);
@@ -146,7 +146,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 				public ExecuteResult call() throws Exception {
 					/*progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildView:"
 							+ view);*/
-					ExecuteResult result = new ExecuteResult("Build View[" + tableViewSp.getDb_name() + "." + view + "] Host");
+					ExecuteResult result = new ExecuteResult("Build View[" + tableViewSp.getAllInOneName() + "." + view + "] Host");
 					progress.setOtherMessage(result.getTaskName());
 					try{
 						ViewHost vhost = buildViewHost(ctx, tableViewSp, view);
@@ -174,7 +174,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 				public ExecuteResult call() throws Exception {
 					/*progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildTable:"
 							+ table);*/
-					ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getDb_name() + "." + tableName + "] Host");
+					ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getAllInOneName() + "." + tableName + "] Host");
 					progress.setOtherMessage(result.getTaskName());
 					try{
 						JavaTableHost tableHost = buildTableHost(ctx, tableViewSp, tableName);
@@ -206,7 +206,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 	private ViewHost buildViewHost(CodeGenContext codeGenCtx, GenTaskByTableViewSp tableViewSp,
 			String viewName) throws Exception {
 		JavaCodeGenContext ctx = (JavaCodeGenContext)codeGenCtx;
-		if (!DbUtils.viewExists(tableViewSp.getDb_name(), viewName)) {
+		if (!DbUtils.viewExists(tableViewSp.getAllInOneName(), viewName)) {
 			log.error(String.format(
 					"The view[%s] doesn't exist, pls check", viewName));
 			return null;
@@ -218,19 +218,19 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 				tableViewSp.getSuffix(), className);
 
 		vhost.setPackageName(ctx.getNamespace());
-		vhost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getDb_name()));
-		vhost.setDbName(tableViewSp.getDatabaseSetName());
+		vhost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getAllInOneName()));
+		vhost.setDbSetName(tableViewSp.getDatabaseSetName());
 		vhost.setPojoClassName(className);
 		vhost.setViewName(viewName);
 
 		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
-				tableViewSp.getDb_name(), viewName);
+				tableViewSp.getAllInOneName(), viewName);
 		List<AbstractParameterHost> params = DbUtils.getAllColumnNames(
-				tableViewSp.getDb_name(), viewName, CurrentLanguage.Java);
+				tableViewSp.getAllInOneName(), viewName, CurrentLanguage.Java);
 		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 		if(null == params){
 			throw new Exception(String.format("The column names of view[%s, %s] is null", 
-					tableViewSp.getDb_name(), viewName));
+					tableViewSp.getAllInOneName(), viewName));
 		}
 		for (AbstractParameterHost p : params) {
 			JavaParameterHost jHost = (JavaParameterHost) p;
@@ -259,9 +259,9 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 		currentSp.setSchema(schema);
 		currentSp.setName(realSpName);
 
-		if (!DbUtils.spExists(tableViewSp.getDb_name(), currentSp)) {
+		if (!DbUtils.spExists(tableViewSp.getAllInOneName(), currentSp)) {
 			throw new Exception(String.format("The store procedure[%s, %s] doesn't exist, pls check", 
-					tableViewSp.getDb_name(),  currentSp.getName()));
+					tableViewSp.getAllInOneName(),  currentSp.getName()));
 		}
 		
 		SpHost spHost = new SpHost();
@@ -270,17 +270,17 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 				tableViewSp.getSuffix(), className);
 
 		spHost.setPackageName(ctx.getNamespace());
-		spHost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getDb_name()));
+		spHost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getAllInOneName()));
 		spHost.setDbName(tableViewSp.getDatabaseSetName());
 		spHost.setPojoClassName(className);
 		spHost.setSpName(spName);
 		List<AbstractParameterHost> params = DbUtils.getSpParams(
-				tableViewSp.getDb_name(), currentSp, CurrentLanguage.Java);
+				tableViewSp.getAllInOneName(), currentSp, CurrentLanguage.Java);
 		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 		String callParams = "";
 		if(null == params){
 			throw new Exception(String.format("The sp[%s, %s] parameters is null", 
-					tableViewSp.getDb_name(), currentSp.getName()));
+					tableViewSp.getAllInOneName(), currentSp.getName()));
 		}
 		for (AbstractParameterHost p : params) {
 			callParams += "?,";

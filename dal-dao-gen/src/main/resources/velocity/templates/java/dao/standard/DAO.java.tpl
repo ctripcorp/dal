@@ -5,7 +5,7 @@ import ${field};
 #end
 
 public class ${host.getPojoClassName()}Dao {
-	private static final String DATA_BASE = "${host.getDbName()}";
+	private static final String DATA_BASE = "${host.getDbSetName()}";
 #if($host.getDatabaseCategory().name() == "MySql")
 	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getTableName()}";
 	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getTableName()}";
@@ -19,13 +19,16 @@ public class ${host.getPojoClassName()}Dao {
 
 #if($host.isSp())
 #if($host.getSpInsert().isExist())
-	private static final String INSERT_SP_NAME = "${host.getSpInsert().getMethodName()}";
+	private static final String BASIC_INSERT_SP_NAME = "${host.getSpInsert().getBasicSpName()}";
+	private static final String BATCH_INSERT_SP_NAME = "${host.getSpInsert().getBatchSpName()}";
 #end
 #if($host.getSpDelete().isExist())
-	private static final String DELETE_SP_NAME = "${host.getSpDelete().getMethodName()}";
+	private static final String BASIC_DELETE_SP_NAME = "${host.getSpDelete().getBasicSpName()}";
+	private static final String BATCH_DELETE_SP_NAME = "${host.getSpDelete().getBatchSpName()}";
 #end
 #if($host.getSpUpdate().isExist())
-	private static final String UPDATE_SP_NAME = "${host.getSpUpdate().getMethodName()}";
+	private static final String BASIC_UPDATE_SP_NAME = "${host.getSpUpdate().getBasicSpName()}";
+	private static final String BATCH_UPDATE_SP_NAME = "${host.getSpUpdate().getBatchSpName()}";
 #end
 #if($host.getSpInsert().isExist() || $host.getSpDelete().isExist() ||$host.getSpUpdate().isExist())
 	private static final String RET_CODE = "retcode";
@@ -52,11 +55,11 @@ public class ${host.getPojoClassName()}Dao {
 #parse("templates/java/dao/standard/method.Delete.notSp.tpl")
 #parse("templates/java/dao/standard/method.Update.sp.tpl")
 #parse("templates/java/dao/standard/method.Update.notSp.tpl")
-#parse("templates/java/dao/standard/method.scalar.tpl")
-#parse("templates/java/dao/standard/method.sp.tpl")
+#parse("templates/java/dao/autosql/DAO.java.tpl")
+#parse("templates/java/dao/standard/method.sp.prepareSpCall.tpl")
 
 	public static class ${host.getPojoClassName()}Parser extends AbstractDalParser<${host.getPojoClassName()}> {
-		public static final String DATABASE_NAME = "${host.getDbName()}";
+		public static final String DATABASE_NAME = "${host.getDbSetName()}";
 		public static final String TABLE_NAME = "${host.getTableName()}";
 		private static final String[] COLUMNS = new String[]{
 #foreach( $field in ${host.getFields()} )

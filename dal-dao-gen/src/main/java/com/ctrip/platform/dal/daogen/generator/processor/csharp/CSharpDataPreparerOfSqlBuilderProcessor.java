@@ -55,7 +55,7 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
 					public ExecuteResult call() throws Exception {
 						/*progress.setOtherMessage("正在整理表 "
 								+ _table.getValue().getClass_name());*/
-						ExecuteResult result = new ExecuteResult("Build Extral SQL[" + _table.getValue().getDb_name() + "." + _table.getKey() + "] Host");
+						ExecuteResult result = new ExecuteResult("Build Extral SQL[" + _table.getValue().getAllInOneName() + "." + _table.getKey() + "] Host");
 						progress.setOtherMessage(result.getTaskName());
 						CSharpTableHost extraTableHost;
 						try {
@@ -81,7 +81,7 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
 		Map<String, GenTaskBySqlBuilder> groupBy = new HashMap<String, GenTaskBySqlBuilder>();
 
 		for (GenTaskBySqlBuilder task : builders) {
-			String key = String.format("%s_%s", task.getDb_name(),
+			String key = String.format("%s_%s", task.getAllInOneName(),
 					task.getTable_name());
 
 			if (!groupBy.containsKey(key)) {
@@ -96,19 +96,19 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
 		GenTaskByTableViewSp tableViewSp = new GenTaskByTableViewSp();
 		tableViewSp.setCud_by_sp(false);
 		tableViewSp.setPagination(false);
-		tableViewSp.setDb_name(sqlBuilder.getDb_name());
+		tableViewSp.setAllInOneName(sqlBuilder.getAllInOneName());
 		tableViewSp.setDatabaseSetName(sqlBuilder.getDatabaseSetName());
 		tableViewSp.setPrefix("");
 		tableViewSp.setSuffix("Gen");
 
 		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
-		String dbType = DbUtils.getDbType(sqlBuilder.getDb_name());
+		String dbType = DbUtils.getDbType(sqlBuilder.getAllInOneName());
 		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 			dbCategory = DatabaseCategory.MySql;
 		}
 
 		List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(sqlBuilder
-				.getDb_name());
+				.getAllInOneName());
 
 		return buildTableHost(codeGenCtx, tableViewSp, sqlBuilder.getTable_name(),
 				dbCategory, allSpNames);

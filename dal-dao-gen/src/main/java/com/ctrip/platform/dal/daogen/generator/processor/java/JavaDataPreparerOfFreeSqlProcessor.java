@@ -77,10 +77,10 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 						return result;
 
 					FreeSqlHost host = new FreeSqlHost();
-					host.setDbName(currentTasks.get(0).getDatabaseSetName());
+					host.setDbSetName(currentTasks.get(0).getDatabaseSetName());
 					host.setClassName(currentTasks.get(0).getClass_name());
 					host.setPackageName(namespace);
-					host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getDb_name()));
+					host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
 
 					List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 					// 每个Method可能就有一个Pojo
@@ -116,7 +116,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 
 							List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
 
-							for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(task.getDb_name(),
+							for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(task.getAllInOneName(),
 											task.getSql_content(), task.getParameters(),
 											CurrentLanguage.Java, false)) {
 								paramHosts.add((JavaParameterHost) _ahost);
@@ -155,7 +155,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();
 
 		for (GenTaskByFreeSql task : tasks) {
-			String key = String.format("%s_%s", task.getDb_name(), task
+			String key = String.format("%s_%s", task.getAllInOneName(), task
 					.getClass_name().toLowerCase());
 			if (groupBy.containsKey(key)) {
 				groupBy.get(key).add(task);

@@ -14,7 +14,7 @@ import com.ctrip.platform.dal.dao.*;
 **/
 public class ${host.getClassName()}DaoUnitTest {
 
-	private static final String DATA_BASE = "${host.getDbName()}";
+	private static final String DATA_BASE = "${host.getDbSetName()}";
 	private static ${host.getClassName()}Dao dao = null;
 	private static DalClient client = null;
 	

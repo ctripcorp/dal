@@ -13,7 +13,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 public class JavaTableHost {
 	private DatabaseCategory databaseCategory;
 	private String packageName;
-	private String dbName;
+	private String dbSetName;
 	private String tableName;
 	private String pojoClassName;
 	private List<JavaParameterHost> fields;
@@ -62,12 +62,12 @@ public class JavaTableHost {
 		return null != this.SpInsert && this.SpInsert.isExist();
 	}
 
-	public String getDbName() {
-		return dbName;
+	public String getDbSetName() {
+		return dbSetName;
 	}
 
-	public void setDbName(String dbName) {
-		this.dbName = dbName;
+	public void setDbSetName(String dbSetName) {
+		this.dbSetName = dbSetName;
 	}
 
 	public String getTableName() {

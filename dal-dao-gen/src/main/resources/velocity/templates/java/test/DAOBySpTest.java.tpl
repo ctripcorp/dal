@@ -6,7 +6,7 @@ import ${field};
 
 import com.ctrip.platform.dal.dao.*;
 
-public class ${host.getDbName()}SpDaoTest {
+public class ${host.getDbSetName()}SpDaoTest {
 	public static void main(String[] args) {
 		try {
 			/**
@@ -18,7 +18,7 @@ public class ${host.getDbName()}SpDaoTest {
 			DalClientFactory.initClientFactory(); // load from class-path Dal.config
 			//DalClientFactory.initClientFactory("E:/DalMult.config"); // load from the specified Dal.config file path
 			
-			${host.getDbName()}SpDao dao = new ${host.getDbName()}SpDao();
+			${host.getDbSetName()}SpDao dao = new ${host.getDbSetName()}SpDao();
 
 #set($count = 0)
 #foreach($h in $host.getSpHosts())

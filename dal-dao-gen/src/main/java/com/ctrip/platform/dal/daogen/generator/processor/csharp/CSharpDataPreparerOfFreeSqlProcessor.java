@@ -98,7 +98,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 						host.setClassName(CommonUtils.normalizeVariable(WordUtils
 								.capitalize(currentTasks.get(0).getClass_name())));
 						host.setNameSpace(namespace);
-						host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getDb_name()));
+						host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
 	
 						List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
 						// 每个Method可能就有一个Pojo
@@ -136,7 +136,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		String temp= task.getSql_content();
 		int index = 0;
 		if(task.isPagination()){
-			temp = SqlBuilder.pagingQuerySql(temp, getDatabaseCategory(task.getDb_name()), CurrentLanguage.CSharp);
+			temp = SqlBuilder.pagingQuerySql(temp, getDatabaseCategory(task.getAllInOneName()), CurrentLanguage.CSharp);
 			index += 2;
 		}
 		while(m.find())
@@ -189,18 +189,18 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		for (GenTaskByFreeSql task : freeSqls) {
 			addDatabaseSet(ctx, task.getDatabaseSetName());
 			_freeDaos.add(WordUtils.capitalize(task.getClass_name()));
-			if (!_dbHosts.containsKey(task.getDb_name())) {
+			if (!_dbHosts.containsKey(task.getAllInOneName())) {
 
 				String provider = "sqlProvider";
-				String dbType = DbUtils.getDbType(task.getDb_name());
+				String dbType = DbUtils.getDbType(task.getAllInOneName());
 				if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				DatabaseHost host = new DatabaseHost();
-				host.setAllInOneName(task.getDb_name());
+				host.setAllInOneName(task.getAllInOneName());
 				host.setProviderType(provider);
-				host.setDatasetName(host.getAllInOneName());
-				_dbHosts.put(task.getDb_name(), host);
+				host.setDatasetName(task.getDatabaseSetName());
+				_dbHosts.put(task.getAllInOneName(), host);
 			}
 		}
 	}
@@ -209,7 +209,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<String, List<GenTaskByFreeSql>>();
 
 		for (GenTaskByFreeSql task : tasks) {
-			String key = String.format("%s_%s", task.getDb_name(), task.getClass_name().toLowerCase());
+			String key = String.format("%s_%s", task.getAllInOneName(), task.getClass_name().toLowerCase());
 			if (groupBy.containsKey(key)) {
 				groupBy.get(key).add(task);
 			} else {
@@ -227,7 +227,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		List<CSharpParameterHost> pHosts = new ArrayList<CSharpParameterHost>();
 
 		for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(
-				task.getDb_name(), task.getSql_content(), task.getParameters(),
+				task.getAllInOneName(), task.getSql_content(), task.getParameters(),
 				CurrentLanguage.CSharp, false)) {
 			pHosts.add((CSharpParameterHost) _ahost);
 		}

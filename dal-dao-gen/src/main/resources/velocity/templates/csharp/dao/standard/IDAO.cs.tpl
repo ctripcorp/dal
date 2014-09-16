@@ -27,7 +27,6 @@ namespace ${host.getNameSpace()}.Interface.IDao
 #end
         int Insert${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize(${host.getClassName()})});
 #end
-
 #if($host.getPrimaryKeys().size() == 0)
         /*由于没有PK，不能生成Update和Delete方法
 #end
@@ -84,7 +83,6 @@ namespace ${host.getNameSpace()}.Interface.IDao
         /// <returns>${host.getClassName()}列表</returns>
         IList<${host.getClassName()}> GetAll();
 #end
-
 #if($host.generateAPI(44,51))
         /// <summary>
         /// 取得总记录数
@@ -92,7 +90,6 @@ namespace ${host.getNameSpace()}.Interface.IDao
         /// <returns>记录数</returns>
         long Count();
 #end
-
 #if($host.generateAPI(54))
 #if($host.isHasSptI() && $host.getDatabaseCategory().name()!="MySql" )
         /// <summary>
@@ -103,7 +100,6 @@ namespace ${host.getNameSpace()}.Interface.IDao
         int BulkInsert${host.getClassName()}(IList<${host.getClassName()}> ${WordUtils.uncapitalize(${host.getClassName()})}List);
 #end
 #end
-
 #if($host.generateAPI(74))
 #if($host.getDatabaseCategory().name() == "MySql")
 		/// <summary>
@@ -114,7 +110,6 @@ namespace ${host.getNameSpace()}.Interface.IDao
         bool BulkInsert${host.getClassName()}(IList<${host.getClassName()}> ${WordUtils.uncapitalize(${host.getClassName()})}List);
 #end
 #end
-
 #if($host.generateAPI(56))
 #if($host.isHasSptU())
         /// <summary>
@@ -125,7 +120,6 @@ namespace ${host.getNameSpace()}.Interface.IDao
         int BulkUpdate${host.getClassName()}(IList<${host.getClassName()}> ${WordUtils.uncapitalize(${host.getClassName()})}List);
 #end
 #end
-
 #if($host.generateAPI(59))
 #if($host.isHasSptD())
         /// <summary>
@@ -136,7 +130,6 @@ namespace ${host.getNameSpace()}.Interface.IDao
         int BulkDelete${host.getClassName()}(IList<${host.getClassName()}> ${WordUtils.uncapitalize(${host.getClassName()})}List);
 #end
 #end
-
 #if($host.generateAPI(45,52))
 #if($host.isHasPagination())
 #if($host.getDatabaseCategory().name() == "MySql" )
@@ -160,24 +153,7 @@ namespace ${host.getNameSpace()}.Interface.IDao
 #end
 #end
 #end
+#parse("templates/csharp/dao/autosql/IDAO.cs.tpl")
 
-#foreach($method in $host.getExtraMethods())
-        /// <summary>
-        ///  ${method.getName()}
-        /// </summary>
-#foreach($p in $method.getParameters())
-        /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
-#end
-        /// <returns></returns>
-#if($method.isFirstOrSingle())
-#if($method.isSampleType())
-		object ${method.getName()} (#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getAlias())}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging())#if($method.getParameters().size()!=0),#end int pageNo, int pageSize#end);
-#else
-		${host.getClassName()} ${method.getName()} (#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getAlias())}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging())#if($method.getParameters().size()!=0),#end int pageNo, int pageSize#end);
-#end
-#else
-		#if($method.getCrud_type() == "select")IList<${host.getClassName()}>#{else}int#end ${method.getName()}(#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getAlias())}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging())#if($method.getParameters().size()!=0),#end int pageNo, int pageSize#end);
-#end
-#end
         }
 }

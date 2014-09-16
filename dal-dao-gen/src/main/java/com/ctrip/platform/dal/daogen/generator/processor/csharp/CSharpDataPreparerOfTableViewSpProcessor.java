@@ -87,7 +87,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 			final String[] spNames = StringUtils.split(tableViewSp.getSp_names(), ",");
 
 			final DatabaseCategory dbCategory;
-			String dbType = DbUtils.getDbType(tableViewSp.getDb_name());
+			String dbType = DbUtils.getDbType(tableViewSp.getAllInOneName());
 			if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 				dbCategory = DatabaseCategory.MySql;
 			} else {
@@ -117,7 +117,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 			Callable<ExecuteResult> spWorker = new Callable<ExecuteResult>() {
 				@Override
 				public ExecuteResult call() throws Exception {
-					ExecuteResult result = new ExecuteResult("Build SP[" + tableViewSp.getDb_name() + "." + spName + "] Host");
+					ExecuteResult result = new ExecuteResult("Build SP[" + tableViewSp.getAllInOneName() + "." + spName + "] Host");
 					//progress.setOtherMessage("正在整理存储过程 " + spName);
 					progress.setOtherMessage(result.getTaskName());
 					try {
@@ -149,7 +149,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 				public ExecuteResult call() throws Exception {
 					// progress.setOtherMessage("正在整理视图 " + view);
 					ExecuteResult result = new ExecuteResult("Build View["
-							+ tableViewSp.getDb_name() + "." + view + "] Host");
+							+ tableViewSp.getAllInOneName() + "." + view + "] Host");
 					progress.setOtherMessage(result.getTaskName());
 					try {
 						CSharpTableHost currentViewHost = buildViewHost(ctx,
@@ -174,13 +174,13 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 			final String[] tableNames, final DatabaseCategory dbCategory,
 			final Queue<CSharpTableHost> _tableViewHosts) throws Exception {
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
-		final List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(tableViewSp.getDb_name());
+		final List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(tableViewSp.getAllInOneName());
 		for (final String table : tableNames) {
 			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
 				public ExecuteResult call() throws Exception {
 					//progress.setOtherMessage("正在整理表 " + table);
-					ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getDb_name() + "." + table + "] Host");
+					ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getAllInOneName() + "." + table + "] Host");
 					progress.setOtherMessage(result.getTaskName());
 					CSharpTableHost currentTableHost;
 					try {
@@ -234,17 +234,17 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 			
 			addDatabaseSet(ctx,task.getDatabaseSetName());
 			
-			if (!_dbHosts.containsKey(task.getDb_name())) {
+			if (!_dbHosts.containsKey(task.getAllInOneName())) {
 				String provider = "sqlProvider";
-				String dbType = DbUtils.getDbType(task.getDb_name());
+				String dbType = DbUtils.getDbType(task.getAllInOneName());
 				if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				DatabaseHost host = new DatabaseHost();
-				host.setAllInOneName(task.getDb_name());
+				host.setAllInOneName(task.getAllInOneName());
 				host.setProviderType(provider);
 				host.setDatasetName(host.getAllInOneName());
-				_dbHosts.put(task.getDb_name(), host);
+				_dbHosts.put(task.getAllInOneName(), host);
 			}
 		}
 
@@ -256,17 +256,17 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 			
 			addDatabaseSet(ctx, task.getDatabaseSetName());
 			
-			if (!_dbHosts.containsKey(task.getDb_name())) {
+			if (!_dbHosts.containsKey(task.getAllInOneName())) {
 				String provider = "sqlProvider";
-				String dbType = DbUtils.getDbType(task.getDb_name());
+				String dbType = DbUtils.getDbType(task.getAllInOneName());
 				if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 					provider = "mySqlProvider";
 				}
 				DatabaseHost host = new DatabaseHost();
-				host.setAllInOneName(task.getDb_name());
+				host.setAllInOneName(task.getAllInOneName());
 				host.setProviderType(provider);
 				host.setDatasetName(host.getAllInOneName());
-				_dbHosts.put(task.getDb_name(), host);
+				_dbHosts.put(task.getAllInOneName(), host);
 			}
 		}
 	}
@@ -278,12 +278,12 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 
 		CSharpCodeGenContext ctx = (CSharpCodeGenContext)codeGenCtx;
 		
-		if (!DbUtils.viewExists(tableViewSp.getDb_name(), view)) {
+		if (!DbUtils.viewExists(tableViewSp.getAllInOneName(), view)) {
 			throw new Exception(String.format("视图 %s 不存在，请编辑DAO再生成", view));
 		}
 
 		List<AbstractParameterHost> allColumnsAbstract = DbUtils
-				.getAllColumnNames(tableViewSp.getDb_name(), view,
+				.getAllColumnNames(tableViewSp.getAllInOneName(), view,
 						CurrentLanguage.CSharp);
 
 		List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
@@ -294,7 +294,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 		CSharpTableHost tableHost = new CSharpTableHost();
 		tableHost.setNameSpace(ctx.getNamespace());
 		tableHost.setDatabaseCategory(dbCategory);
-		tableHost.setDbSetName(tableViewSp.getDb_name());
+		tableHost.setDbSetName(tableViewSp.getDatabaseSetName());
 		tableHost.setTableName(view);
 		tableHost.setClassName(CommonUtils.normalizeVariable(getPojoClassName(
 				tableViewSp.getPrefix(), tableViewSp.getSuffix(), view)));
@@ -323,12 +323,12 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 		currentSp.setSchema(schema);
 		currentSp.setName(realSpName);
 
-		if (!DbUtils.spExists(tableViewSp.getDb_name(), currentSp)) {
+		if (!DbUtils.spExists(tableViewSp.getAllInOneName(), currentSp)) {
 			throw new Exception(String.format("存储过程 %s 不存在，请修改DAO后再试！", currentSp.getName()));
 		}
 
 		List<AbstractParameterHost> params = DbUtils.getSpParams(
-				tableViewSp.getDb_name(), currentSp, CurrentLanguage.CSharp);
+				tableViewSp.getAllInOneName(), currentSp, CurrentLanguage.CSharp);
 
 		List<CSharpParameterHost> realParams = new ArrayList<CSharpParameterHost>();
 		for (AbstractParameterHost p : params) {
@@ -338,7 +338,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 		CSharpTableHost tableHost = new CSharpTableHost();
 		tableHost.setNameSpace(ctx.getNamespace());
 		tableHost.setDatabaseCategory(dbCategory);
-		tableHost.setDbSetName(tableViewSp.getDb_name());
+		tableHost.setDbSetName(tableViewSp.getDatabaseSetName());
 		tableHost.setClassName(getPojoClassName(tableViewSp.getPrefix(),
 				tableViewSp.getSuffix(), realSpName.replace("_", "")));
 		tableHost.setTable(false);

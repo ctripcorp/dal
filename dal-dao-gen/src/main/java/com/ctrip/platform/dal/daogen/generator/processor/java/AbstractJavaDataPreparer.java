@@ -61,13 +61,13 @@ public class AbstractJavaDataPreparer{
 	protected JavaTableHost buildTableHost(CodeGenContext codeGenCtx, GenTaskByTableViewSp tableViewSp,
 			String tableName) throws Exception {
 		JavaCodeGenContext ctx = (JavaCodeGenContext)codeGenCtx;
-		if(!DbUtils.tableExists(tableViewSp.getDb_name(), tableName)){
-			throw new Exception(String.format("The table doesn't exist, pls check", tableViewSp.getDb_name(), tableName));
+		if(!DbUtils.tableExists(tableViewSp.getAllInOneName(), tableName)){
+			throw new Exception(String.format("The table doesn't exist, pls check", tableViewSp.getAllInOneName(), tableName));
 		}
 		JavaTableHost tableHost = new JavaTableHost();
 		tableHost.setPackageName(ctx.getNamespace());
-		tableHost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getDb_name()));
-		tableHost.setDbName(tableViewSp.getDatabaseSetName());
+		tableHost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getAllInOneName()));
+		tableHost.setDbSetName(tableViewSp.getDatabaseSetName());
 		tableHost.setTableName(tableName);
 		tableHost.setPojoClassName(getPojoClassName(tableViewSp.getPrefix(),
 				tableViewSp.getSuffix(), tableName));
@@ -76,13 +76,13 @@ public class AbstractJavaDataPreparer{
 
 		// 主键及所有列
 		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
-				tableViewSp.getDb_name(), tableName);
+				tableViewSp.getAllInOneName(), tableName);
 		List<AbstractParameterHost> allColumnsAbstract = DbUtils
-				.getAllColumnNames(tableViewSp.getDb_name(), tableName,
+				.getAllColumnNames(tableViewSp.getAllInOneName(), tableName,
 						CurrentLanguage.Java);
 		if(null == allColumnsAbstract){
 			throw new Exception(String.format("The column names of tabel[%s, %s] is null", 
-					tableViewSp.getDb_name(), tableName));
+					tableViewSp.getAllInOneName(), tableName));
 		}
 		List<JavaParameterHost> allColumns = new ArrayList<JavaParameterHost>();
 		for (AbstractParameterHost h : allColumnsAbstract) {
@@ -103,7 +103,7 @@ public class AbstractJavaDataPreparer{
 			}
 		}
 
-		List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(ctx, tableViewSp.getDb_name(), tableName);
+		List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(ctx, tableViewSp.getAllInOneName(), tableName);
 
 		List<JavaMethodHost> methods = buildMethodHosts(allColumns, currentTableBuilders);
 
@@ -114,9 +114,9 @@ public class AbstractJavaDataPreparer{
 		tableHost.setMethods(methods);
 
 		if (tableHost.isSp()) {
-			tableHost.setSpInsert(getSpaOperation(tableViewSp.getDb_name(), tableName, "i"));
-			tableHost.setSpUpdate(getSpaOperation(tableViewSp.getDb_name(), tableName, "u"));
-			tableHost.setSpDelete(getSpaOperation(tableViewSp.getDb_name(), tableName, "d"));
+			tableHost.setSpInsert(getSpaOperation(tableViewSp.getAllInOneName(), tableName, "i"));
+			tableHost.setSpUpdate(getSpaOperation(tableViewSp.getAllInOneName(), tableName, "u"));
+			tableHost.setSpDelete(getSpaOperation(tableViewSp.getAllInOneName(), tableName, "d"));
 		}
 		return tableHost;
 	}
@@ -158,7 +158,7 @@ public class AbstractJavaDataPreparer{
 		Iterator<GenTaskBySqlBuilder> iter = _sqlBuilders.iterator();
 		while (iter.hasNext()) {
 			GenTaskBySqlBuilder currentSqlBuilder = iter.next();
-			if (currentSqlBuilder.getDb_name().equals(dbName)
+			if (currentSqlBuilder.getAllInOneName().equals(dbName)
 					&& currentSqlBuilder.getTable_name().equals(tableName)) {
 				currentTableBuilders.add(currentSqlBuilder);
 				iter.remove();
@@ -194,7 +194,7 @@ public class AbstractJavaDataPreparer{
 				
 				if(method.getCrud_type().equals("select")){
 					List<AbstractParameterHost> paramAbstractHosts = 
-							DbUtils.getSelectFieldHosts(builder.getDb_name(), builder.getSql_content(), CurrentLanguage.Java);
+							DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), CurrentLanguage.Java);
 					List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
 					for (AbstractParameterHost phost : paramAbstractHosts) {
 						paramHosts.add((JavaParameterHost)phost);

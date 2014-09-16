@@ -49,7 +49,7 @@ public class JavaCodeGeneratorOfSpProcessor implements Processor {
 
 				@Override
 				public ExecuteResult call() throws Exception {
-					ExecuteResult result = new ExecuteResult("Generate SP[" + host.getDbName() + "] Dao, Pojo, Test");
+					ExecuteResult result = new ExecuteResult("Generate SP[" + host.getDbSetName() + "] Dao, Pojo, Test");
 					progress.setOtherMessage(result.getTaskName());
 					try
 					{
@@ -60,17 +60,17 @@ public class JavaCodeGeneratorOfSpProcessor implements Processor {
 								context,
 								String.format("%s/Dao/%sSpDao.java",
 										mavenLikeDir.getAbsolutePath(),
-										host.getDbName()),
+										host.getDbSetName()),
 								"templates/java/DAOBySp.java.tpl");
 	
 						GenUtils.mergeVelocityContext(context, String.format(
 								"%s/Test/%sSpDaoTest.java",
-								mavenLikeDir.getAbsolutePath(), host.getDbName()),
+								mavenLikeDir.getAbsolutePath(), host.getDbSetName()),
 								"templates/java/test/DAOBySpTest.java.tpl");
 						
 						GenUtils.mergeVelocityContext(context, String.format(
 								"%s/Test/%sSpDaoUnitTest.java",
-								mavenLikeDir.getAbsolutePath(), host.getDbName()),
+								mavenLikeDir.getAbsolutePath(), host.getDbSetName()),
 								"templates/java/test/DAOBySpUnitTest.java.tpl");
 	
 						for (SpHost sp : host.getSpHosts()) {

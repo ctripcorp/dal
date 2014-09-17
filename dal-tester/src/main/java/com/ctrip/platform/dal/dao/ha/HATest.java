@@ -25,35 +25,35 @@ public class HATest {
 	private static DalHints hints = new DalHints();
 	private static int markCount = 0;
 	static {
-		database = new Database("dao_test", "dal_client_test",
+		database = new Database("HA_Test_0", "dal_client_test",
 				DatabaseCategory.MySql);
 		database2 = new Database("HA_Test", "dal_client_test",
-				DatabaseCategory.SqlServer);
+				DatabaseCategory.MySql);
 	}
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		database.init();
-		database2.init();
+		//database2.init();
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		database.drop();
-		database2.drop();
+		//database2.drop();
 	}
 	
 	@Before
 	public void setUp() throws Exception {
 		markCount = 0;
 		database.mock();
-		database2.mock();
+		//database2.mock();
 	}
 	
 	@After
 	public void tearDown() throws Exception {
 		database.clear();
-		database2.clear();
+		//database2.clear();
 	}
 
 	@Test

@@ -16,8 +16,24 @@ public class AppInternalsServlet extends HttpServlet{
 	
 	private static final String URL_TEMPLATE = "请输入正确的RUL格式， 格式如下：<br /> http://{host}/[{virtualDir}]/AppInternals/?(.*)";
 	private static final String NOPERMISSION = "Sorry,Your IP Address %s Doesn't Have Read/Write Permission.";
+	private static final String APPINTERNALS = "appinternals";
+	private static final String CONFIGURATION = "configurations";
 	
 	private static final long serialVersionUID = 1L;
+	
+	@Override
+	public void init() throws ServletException {
+		String reads = this.getInitParameter("permissions.read1");
+		String[] tokens = reads.split(",");
+		for (String token : tokens) {
+			Permission.getInstance().addUser(token, 0);
+		}
+		String writes = this.getInitParameter("permissions.write");
+		tokens = writes.split(",");
+		for (String token : tokens) {
+			Permission.getInstance().addUser(token, 1);
+		}
+	}
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -31,7 +47,7 @@ public class AppInternalsServlet extends HttpServlet{
 		
 		if(Permission.getInstance().hasRead(ctx.getRemoteip()) || 
 				Permission.getInstance().hasWrite(ctx.getRemoteip())){
-			if(ctx.getCategory(AppConst.APPINTERNALS).equals(AppConst.CONFIGURATION)){
+			if(ctx.getCategory(APPINTERNALS).equals(CONFIGURATION)){
 				try {
 					this.doConfiguration(ctx);
 				} catch (Exception e) {
@@ -53,7 +69,7 @@ public class AppInternalsServlet extends HttpServlet{
 	}
 	
 	private void doConfiguration(AppInternalsContext ctx) throws Exception{
-		String configs = ctx.getCategory(AppConst.CONFIGURATION);
+		String configs = ctx.getCategory(CONFIGURATION);
 		String action = ctx.getParameters().containsKey("action") ? 
 				ctx.getParameters().get("action") : "view";
 		if(configs.isEmpty() && action.equalsIgnoreCase("view")){

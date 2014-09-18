@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.appinternals;
+package com.ctrip.platform.appinternals;
 
 public class AppConst {
 	public static final String PERMISSIONKEY = "com.ctrip.platform.dal.appinternals.permissions";

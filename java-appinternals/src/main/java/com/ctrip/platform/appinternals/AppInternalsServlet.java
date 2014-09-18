@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.appinternals;
+package com.ctrip.platform.appinternals;
 
 import java.io.IOException;
 
@@ -7,10 +7,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.ctrip.platform.dal.appinternals.configuration.ConfigBeanBase;
-import com.ctrip.platform.dal.appinternals.configuration.ConfigBeanManager;
-import com.ctrip.platform.dal.appinternals.helpers.Helper;
-import com.ctrip.platform.dal.appinternals.permission.Permission;
+import com.ctrip.platform.appinternals.configuration.ConfigBeanBase;
+import com.ctrip.platform.appinternals.configuration.ConfigBeanManager;
+import com.ctrip.platform.appinternals.helpers.Helper;
+import com.ctrip.platform.appinternals.permission.Permission;
 
 public class AppInternalsServlet extends HttpServlet{
 	

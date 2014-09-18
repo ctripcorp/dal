@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.appinternals.helpers;
+package com.ctrip.platform.appinternals.helpers;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

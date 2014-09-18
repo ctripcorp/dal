@@ -1,8 +1,8 @@
-package com.ctrip.platform.dal.appinternals.serialization;
+package com.ctrip.platform.appinternals.serialization;
 
 import java.util.Collection;
 
-import com.ctrip.platform.dal.appinternals.configuration.ConfigBeanBase;
+import com.ctrip.platform.appinternals.configuration.ConfigBeanBase;
 
 public class HTMLSerializer extends Serializer{
 

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.appinternals;
+package com.ctrip.platform.appinternals;
 
 import java.util.Set;
 
@@ -9,8 +9,8 @@ import javax.servlet.ServletRegistration;
 
 import com.ctrip.framework.clogging.agent.log.ILog;
 import com.ctrip.framework.clogging.agent.log.LogManager;
-import com.ctrip.platform.dal.appinternals.helpers.Helper;
-import com.ctrip.platform.dal.appinternals.permission.Permission;
+import com.ctrip.platform.appinternals.helpers.Helper;
+import com.ctrip.platform.appinternals.permission.Permission;
 
 public class AppInternalsServletContainerInitializer implements
 		ServletContainerInitializer {

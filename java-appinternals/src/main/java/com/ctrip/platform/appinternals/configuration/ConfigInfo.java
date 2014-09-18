@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.appinternals.configuration;
+package com.ctrip.platform.appinternals.configuration;
 
 import java.util.Date;
 

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.appinternals;
+package com.ctrip.platform.appinternals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,10 +9,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.ctrip.platform.dal.appinternals.serialization.HTMLSerializer;
-import com.ctrip.platform.dal.appinternals.serialization.JSONSerializer;
-import com.ctrip.platform.dal.appinternals.serialization.Serializer;
-import com.ctrip.platform.dal.appinternals.serialization.XMLSerializer;
+import com.ctrip.platform.appinternals.serialization.HTMLSerializer;
+import com.ctrip.platform.appinternals.serialization.JSONSerializer;
+import com.ctrip.platform.appinternals.serialization.Serializer;
+import com.ctrip.platform.appinternals.serialization.XMLSerializer;
 
 public class AppInternalsContext {
 	private String applicationPath;

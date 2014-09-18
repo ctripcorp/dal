@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.appinternals.permission;
+package com.ctrip.platform.appinternals.permission;
 
 import java.util.HashMap;
 import java.util.Map;

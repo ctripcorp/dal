@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.appinternals.permission;
+package com.ctrip.platform.appinternals.permission;
 
 public class IPVisitor {
 	private String ip;

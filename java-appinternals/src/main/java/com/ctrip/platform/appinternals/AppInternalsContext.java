@@ -7,8 +7,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.ctrip.platform.appinternals.serialization.HTMLSerializer;
 import com.ctrip.platform.appinternals.serialization.JSONSerializer;
 import com.ctrip.platform.appinternals.serialization.Serializer;
@@ -28,12 +26,12 @@ public class AppInternalsContext {
 		this.remoteip = request.getRemoteAddr();
 		this.localPath = request.getRequestURI();
 		this.requestUrl = request.getRequestURL().toString();
-		applicationPath = StringUtils.substring(requestUrl, 0, requestUrl.indexOf("appinternals"));
+		applicationPath = requestUrl.substring(0, requestUrl.indexOf("appinternals"));
 		String[] pices = this.localPath.replaceFirst("/", "")
 				.replace('\\', '/').split("/");
 		boolean bg = false;
 		for (int i = 0; i < pices.length; i++) {
-			if(StringUtils.equalsIgnoreCase("appinternals", pices[i])){
+			if("appinternals".equalsIgnoreCase(pices[i])){
 				bg = true;
 			}
 			if(bg){
@@ -77,7 +75,7 @@ public class AppInternalsContext {
         for (String segement : this.segments) {
 			if(flag)
 				return segement;
-			if(StringUtils.equalsIgnoreCase(segement, parent))
+			if(segement.equalsIgnoreCase(parent))
 				flag = true;
 		}
 		return "";

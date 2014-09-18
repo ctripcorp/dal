@@ -89,6 +89,7 @@ public class AppInternalsServlet extends HttpServlet{
 				}else{
 					result.setMessage(String.format(NOPERMISSION, ctx.getRemoteip()));
 				}
+				ctx.getContent().append(result.toString());
 			}
 		}
 	}

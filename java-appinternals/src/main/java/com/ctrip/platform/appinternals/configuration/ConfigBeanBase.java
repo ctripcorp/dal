@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.lang.StringUtils;
+import com.ctrip.platform.appinternals.helpers.Helper;
 
 public abstract class ConfigBeanBase{
 
@@ -17,9 +17,9 @@ public abstract class ConfigBeanBase{
 	public void init() throws Exception {
 		Field[] fields = this.getClass().getDeclaredFields();
 		for (Field field : fields) {
-			Method getMethod = this.getClass().getMethod("get" + StringUtils.capitalize(field.getName()));
+			Method getMethod = this.getClass().getMethod("get" + Helper.capitalize(field.getName()));
 			Method setMethod = this.getClass().getMethod(
-						"set" + StringUtils.capitalize(field.getName()), field.getType());
+						"set" + Helper.capitalize(field.getName()), field.getType());
 			ConfigName pname = new ConfigName();
 			pname.setName(field.getName());
 			pname.setClazz(field.getType());

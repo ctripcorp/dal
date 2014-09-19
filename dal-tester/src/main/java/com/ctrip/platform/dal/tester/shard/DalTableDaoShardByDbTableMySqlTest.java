@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.tester.shard;
 
-import static com.ctrip.platform.dal.dao.unittests.DalTestHelper.assertKeyHolder;
-import static com.ctrip.platform.dal.dao.unittests.DalTestHelper.createKeyHolder;
 import static com.ctrip.platform.dal.dao.unittests.DalTestHelper.deleteAllShardsByDbTable;
 import static com.ctrip.platform.dal.dao.unittests.DalTestHelper.getCountByDbTable;
 
@@ -235,10 +233,10 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	}
 	
 	// Only for sql server
-	public void assertResEquals(int[] expected, int[] real) {
-		Assert.assertEquals(expected.length, real.length);
+	public void assertResEquals(int[] expected, int[] res) {
+		Assert.assertEquals(expected.length, res.length);
 		if(ASSERT_ALLOWED)
-			Assert.assertArrayEquals(expected, real);
+			Assert.assertArrayEquals(expected, res);
 	}
 	
 	/**
@@ -895,7 +893,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	@Test
-	public void testInsertSingle() throws SQLException{
+	public void testInsertSingleFail() throws SQLException{
 		ClientTestModel model = new ClientTestModel();
 		model.setQuantity(10 + 1%3);
 		model.setType(((Number)(1%3)).shortValue());
@@ -906,23 +904,48 @@ public class DalTableDaoShardByDbTableMySqlTest {
 			Assert.fail();
 		} catch (Exception e) {
 		}
+	}
 		
+	@Test
+	public void testInsertSingleByShard() throws SQLException{
 		for(int i = 0; i < mod; i++) {
 			// By shard
 			testInsertSingle(i, new DalHints().inShard(i));
-
+		}
+	}
+	
+	@Test
+	public void testInsertSingleByShardValue() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardValue
 			testInsertSingle(i, new DalHints().setShardValue(i));
-
-			// By shardColValue
+		}
+	}
+	
+	@Test
+	public void testInsertSingleByShardCol() throws SQLException{
+		for(int i = 0; i < mod; i++) {
+		// By shardColValue
 			testInsertSingle(i, new DalHints().setShardColValue("index", i));
-			
+		}
+	}
+
+	@Test
+	public void testInsertSingleByShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testInsertSingle(i, new DalHints().setShardColValue("dbIndex", i));
 		}
-		
+	}
+	
+	@Test
+	public void testInsertSingleByFields() throws SQLException{
+		int res;
 		deleteAllShardsByDbTable(dao, mod, tableMod);
-		
+		ClientTestModel model = new ClientTestModel();
+		model.setQuantity(10 + 1%3);
+		model.setType(((Number)(1%3)).shortValue());
+		model.setAddress("CTRIP");
 		model.setTableIndex(0);
 		model.setDbIndex(3);
 		
@@ -936,7 +959,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testInsertSingle(int shardId, DalHints hints) throws SQLException{
-		reset();
 		ClientTestModel model = new ClientTestModel();
 		model.setQuantity(10 + 1%3);
 		model.setType(((Number)(1%3)).shortValue());
@@ -1023,7 +1045,12 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testInsertDouble(i, new DalHints().setShardColValue("index", i));
-			
+		}
+	}
+	
+	@Test
+	public void testInsertDoubleByShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testInsertDouble(i, new DalHints().setShardColValue("dbIndex", i));
 		}
@@ -1062,7 +1089,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testInsertDouble(int shardId, DalHints hints) throws SQLException{
-		reset();
 		ClientTestModel model = new ClientTestModel();
 		model.setQuantity(10 + 1%3);
 		model.setType(((Number)(1%3)).shortValue());
@@ -1196,7 +1222,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testInsertMultiple(int shardId, DalHints hints) throws SQLException{
-		reset();
 		ClientTestModel[] entities = create(3);
 		
 		int res;
@@ -1287,8 +1312,13 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testInsertMultipleAsList(i, new DalHints().setShardColValue("index", i));
-
-			// By shardColValue
+		}
+	}
+	
+	@Test
+	public void testInsertMultipleAsListByShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
+		// By shardColValue
 			testInsertMultipleAsList(i, new DalHints().setShardColValue("dbIndex", i));
 		}
 	}	
@@ -1321,7 +1351,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testInsertMultipleAsList(int shardId, DalHints hints) throws SQLException{
-		reset();
 		List<ClientTestModel> entities = createListNoId(3);
 
 		int res = 0;
@@ -1414,7 +1443,12 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testInsertMultipleWithContinueOnErrorHints(i, new DalHints().continueOnError().setShardColValue("index", i));
-			
+		}
+	}
+	
+	@Test
+	public void testInsertMultipleWithContinueOnErrorHintsByShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testInsertMultipleWithContinueOnErrorHints(i, new DalHints().continueOnError().setShardColValue("dbIndex", i));
 		}
@@ -1450,7 +1484,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testInsertMultipleWithContinueOnErrorHints(int shardId, DalHints hints) throws SQLException{
-		reset();
 		ClientTestModel[] entities = create(3);
 		entities[1].setAddress("CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
 						+ "CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
@@ -1551,7 +1584,12 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testInsertMultipleAsListWithContinueOnErrorHints(i, new DalHints().continueOnError().setShardColValue("index", i));
-			
+		}
+	}
+	
+	@Test
+	public void testInsertMultipleAsListWithContinueOnErrorHintsShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testInsertMultipleAsListWithContinueOnErrorHints(i, new DalHints().continueOnError().setShardColValue("dbIndex", i));
 		}
@@ -1588,7 +1626,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testInsertMultipleAsListWithContinueOnErrorHints(int shardId, DalHints hints) throws SQLException{
-		reset();
 		List<ClientTestModel> entities = createListNoId(3);
 		entities.get(1).setAddress("CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
 				+ "CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
@@ -1688,7 +1725,12 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testInsertMultipleWithKeyHolder(i, new DalHints().setShardColValue("index", i));
-			
+		}
+	}
+	
+	@Test
+	public void testInsertMultipleWithKeyHolderByShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testInsertMultipleWithKeyHolder(i, new DalHints().setShardColValue("dbIndex", i));
 		}
@@ -1725,7 +1767,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testInsertMultipleWithKeyHolder(int shardId, DalHints hints) throws SQLException{
-		reset();
 		ClientTestModel[] entities = create(3);
 
 		KeyHolder holder = createKeyHolder();
@@ -1831,7 +1872,12 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testInsertMultipleAsListWithKeyHolder(i, new DalHints().setShardColValue("index", i));
-			
+		}
+	}
+	
+	@Test
+	public void testInsertMultipleAsListWithKeyHolderByShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testInsertMultipleAsListWithKeyHolder(i, new DalHints().setShardColValue("dbIndex", i));
 		}
@@ -1869,7 +1915,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testInsertMultipleAsListWithKeyHolder(int shardId, DalHints hints) throws SQLException{
-		reset();
 		List<ClientTestModel> entities = createListNoId(3);
 
 		KeyHolder holder = new KeyHolder();
@@ -1976,7 +2021,12 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testCombinedInsert(i, new DalHints().setShardColValue("index", i));
-
+		}
+	}
+	
+	@Test
+	public void testCombinedInsertByShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testCombinedInsert(i, new DalHints().setShardColValue("dbIndex", i));
 		}
@@ -1988,7 +2038,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testCombinedInsert(int shardId, DalHints hints) throws SQLException{
-		reset();
 		ClientTestModel[] entities = create(3);
 		
 		KeyHolder holder = createKeyHolder();
@@ -2072,7 +2121,12 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testBatchInsert(i, new DalHints().setShardColValue("index", i));
-			
+		}
+	}
+
+	@Test
+	public void testBatchInsertByShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testBatchInsert(i, new DalHints().setShardColValue("dbIndex", i));
 		}
@@ -2084,7 +2138,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testBatchInsert(int shardId, DalHints hints) throws SQLException{
-		reset();
 		ClientTestModel[] entities = create(3);
 
 		int[] res;
@@ -2159,7 +2212,12 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testDeleteMultiple(i, new DalHints().setShardColValue("index", i));
-			
+		}
+	}
+	
+	@Test
+	public void testDeleteMultipleByShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testDeleteMultiple(i, new DalHints().setShardColValue("dbIndex", i));
 		}
@@ -2167,7 +2225,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	
 	@Test
 	public void testDeleteMultipleByFields() throws SQLException{
-		reset();
 		int res;
 		
 		// By fields not same shard
@@ -2190,7 +2247,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testDeleteMultiple(int shardId, DalHints hints) throws SQLException{
-		reset();
 		ClientTestModel[] entities = create(3);
 
 		int res;
@@ -2255,7 +2311,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	@Test
-	public void testBatchDelete() throws SQLException{
+	public void testBatchDeleteFail() throws SQLException{
 		ClientTestModel[] entities = create(3);
 		
 		int[] res;
@@ -2265,18 +2321,35 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
+	}
+	
+	@Test
+	public void testBatchDeleteByShard() throws SQLException{
 		for(int i = 0; i < mod; i++) {
 			// By shard
 			testBatchDelete(i, new DalHints().inShard(i));
-	
+		}
+	}
+
+	@Test
+	public void testBatchDeleteByShardValue() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardValue
 			testBatchDelete(i, new DalHints().setShardValue(i));
-	
+		}
+	}
+
+	@Test
+	public void testBatchDeleteByShardCol() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testBatchDelete(i, new DalHints().setShardColValue("index", i));
-			
+		}
+	}
+	
+	@Test
+	public void testBatchDeleteByShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testBatchDelete(i, new DalHints().setShardColValue("dbIndex", i));
 		}
@@ -2288,15 +2361,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testBatchDelete(int shardId, DalHints hints) throws SQLException{
-		ClientTestModel[] entities = new ClientTestModel[3];
-		for (int i = 0; i < 3; i++) {
-			ClientTestModel model = new ClientTestModel();
-			model.setId(i+1);
-			model.setQuantity(10 + 1%3);
-			model.setType(((Number)(1%3)).shortValue());
-			model.setAddress("CTRIP");
-			entities[i] = model;
-		}
+		ClientTestModel[] entities = create(3);
 		
 		int[] res;
 		try {
@@ -2327,6 +2392,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 
 				Assert.assertEquals(1 + i, getCount(shardId, i));
 				res = dao.batchDelete(hints.clone(), entities);
+				assertResEquals(new int[]{1,1,1}, res);
 				Assert.assertEquals(0, getCount(shardId, i));
 				Assert.fail();
 			} catch (Exception e) {
@@ -2339,6 +2405,9 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		int count = 1 + tableShardId;
 		Assert.assertEquals(count, getCount(shardId, tableShardId));
 		int[] res = dao.batchDelete(hints, getModels(shardId, tableShardId));
+		int[] exp = new int[count];
+		for(int i = 0;i < count; i++) exp[i] = 1;
+		assertResEquals(exp, res);
 		Assert.assertEquals(0, getCount(shardId, tableShardId));
 		dao.insert(hints, create(count));
 	}
@@ -2349,40 +2418,50 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	@Test
-	public void testUpdateMultiple() throws SQLException{
-		DalHints hints = new DalHints();
-		ClientTestModel[] entities = new ClientTestModel[3];
-		for (int i = 0; i < 3; i++) {
-			ClientTestModel model = new ClientTestModel();
-			model.setId(i+1);
-			model.setAddress("CTRIP");
-			entities[i] = model;
-		}
+	public void testUpdateMultipleFail() throws SQLException{
+		ClientTestModel[] entities = create(3);
 		
 		int res;
 		try {
-			res = dao.update(hints, entities);
+			res = dao.update(new DalHints(), entities);
 			Assert.fail();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+	}		
+
+	@Test
+	public void testUpdateMultipleByShard() throws SQLException{
 		for(int i = 0; i < mod; i++) {
 			// By shard
 			testUpdateMultiple(i, new DalHints().inShard(i));
+		}
+	}
 	
+	@Test
+	public void testUpdateMultipleByShardValue() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardValue
 			testUpdateMultiple(i, new DalHints().setShardValue(i));
+		}
+	}
 	
+	@Test
+	public void testUpdateMultipleByShardCol() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testUpdateMultiple(i, new DalHints().setShardColValue("index", i));
 			
 			// By shardColValue
 			testUpdateMultiple(i, new DalHints().setShardColValue("dbIndex", i));
 		}
-
+	}
+	
+	@Test
+	public void testUpdateMultipleByFields() throws SQLException{
 		// By fields not same shard
-		entities = create(4);
+		ClientTestModel[] entities = create(4);
+		int res;
 		int i = 0;
 		for(ClientTestModel model: entities) {
 			model.setTableIndex(i);
@@ -2391,8 +2470,9 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		}
 		
 		res = dao.update(new DalHints(), entities);
+		assertResEquals(4, res);
 		for(ClientTestModel model: entities)
-			Assert.assertEquals("1234", dao.queryByPk(model, hints).getAddress());
+			Assert.assertEquals("1234", dao.queryByPk(model, new DalHints()).getAddress());
 	}
 	
 	/**
@@ -2400,14 +2480,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testUpdateMultiple(int shardId, DalHints hints) throws SQLException{
-		reset();
-		ClientTestModel[] entities = new ClientTestModel[4];
-		for (int i = 0; i < 4; i++) {
-			ClientTestModel model = new ClientTestModel();
-			model.setId(i+1);
-			model.setAddress("CTRIP");
-			entities[i] = model;
-		}
+		ClientTestModel[] entities = create(4);
 		
 		int res;
 		try {
@@ -2422,6 +2495,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 			entities = create(i + 1);
 			for(ClientTestModel model: entities) model.setAddress("test1");
 			res = dao.update(hints.clone().inTableShard(i), entities);
+			assertResEquals(i + 1, res);
 			for(ClientTestModel model: getModels(shardId, i))
 				Assert.assertEquals("test1", model.getAddress());
 	
@@ -2429,12 +2503,14 @@ public class DalTableDaoShardByDbTableMySqlTest {
 			entities = create(i + 1);
 			for(ClientTestModel model: entities) model.setQuantity(-11);
 			res = dao.update(hints.clone().inTableShard(i), entities);
+			assertResEquals(i + 1, res);
 			for(ClientTestModel model: getModels(shardId, i))
 				Assert.assertEquals(-11, model.getQuantity().intValue());
 			
 			// By shardColValue
 			entities = create(i + 1);
 			for(ClientTestModel model: entities) model.setType((short)3);
+			assertResEquals(i + 1, res);
 			res = dao.update(hints.clone().inTableShard(i), entities);
 			for(ClientTestModel model: getModels(shardId, i))
 				Assert.assertEquals((short)3, model.getType().intValue());
@@ -2443,6 +2519,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 			entities = create(i + 1);
 			for(ClientTestModel model: entities) model.setAddress("testa");
 			res = dao.update(hints.clone().inTableShard(i), entities);
+			assertResEquals(i + 1, res);
 			for(ClientTestModel model: getModels(shardId, i))
 				Assert.assertEquals("testa", model.getAddress());
 			
@@ -2455,6 +2532,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 				model.setDbIndex(shardId);
 			}
 			res = dao.update(hints.clone(), entities);
+			assertResEquals(i + 1, res);
 			for(ClientTestModel model: getModels(shardId, i))
 				Assert.assertEquals("testx", model.getAddress());
 		}
@@ -2468,6 +2546,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 			model.setDbIndex(shardId);
 		}
 		res = dao.update(hints, entities);
+		assertResEquals(4, res);
 		for(ClientTestModel model: entities)
 			Assert.assertEquals("testy", dao.queryByPk(model, hints).getAddress());
 	}
@@ -2477,7 +2556,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	@Test
-	public void testDeleteWithWhereClause() throws SQLException{
+	public void testDeleteWithWhereClauseFail() throws SQLException{
 		String whereClause = "type=?";
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, Types.SMALLINT, 1);
@@ -2490,17 +2569,35 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+	}
+	
+	@Test
+	public void testDeleteWithWhereClauseByShard() throws SQLException{
 		for(int i = 0; i < mod; i++) {
 			// By shard
 			testDeleteWithWhereClause(i, new DalHints().inShard(i));
+		}
+	}
 	
+	@Test
+	public void testDeleteWithWhereClauseByShardValue() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardValue
 			testDeleteWithWhereClause(i, new DalHints().setShardValue(i));
+		}
+	}
 	
+	@Test
+	public void testDeleteWithWhereClauseByShardCol() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testDeleteWithWhereClause(i, new DalHints().setShardColValue("index", i));
-			
+		}
+	}
+	
+	@Test
+	public void testDeleteWithWhereClauseByShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testDeleteWithWhereClause(i, new DalHints().setShardColValue("dbIndex", i));
 		}
@@ -2511,7 +2608,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testDeleteWithWhereClause(int shardId, DalHints hints) throws SQLException{
-		reset();
 		String whereClause = "type=?";
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, Types.SMALLINT, 1);
@@ -2527,21 +2623,25 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		// By tabelShard
 		Assert.assertEquals(1, getCount(shardId, 0));
 		res = dao.delete(whereClause, parameters, hints.clone().inTableShard(0));
+		assertResEquals(1, res);
 		Assert.assertEquals(0, dao.query(whereClause, parameters, hints.clone().inTableShard(0)).size());
 
 		// By tableShardValue
 		Assert.assertEquals(2, getCount(shardId, 1));
 		res = dao.delete(whereClause, parameters, hints.clone().setTableShardValue(1));
+		assertResEquals(2, res);
 		Assert.assertEquals(0, dao.query(whereClause, parameters, hints.clone().setTableShardValue(1)).size());
 		
 		// By shardColValue
 		Assert.assertEquals(3, getCount(shardId, 2));
 		res = dao.delete(whereClause, parameters, hints.clone().setShardColValue("table", 2));
+		assertResEquals(3, res);
 		Assert.assertEquals(0, dao.query(whereClause, parameters, hints.clone().setShardColValue("table", 2)).size());
 		
 		// By shardColValue
 		Assert.assertEquals(4, getCount(shardId, 3));
 		res = dao.delete(whereClause, parameters, hints.clone().setShardColValue("tableIndex", 3));
+		assertResEquals(4, res);
 		Assert.assertEquals(0, dao.query(whereClause, parameters, hints.clone().setShardColValue("tableIndex", 3)).size());
 	}
 	
@@ -2551,7 +2651,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	@Test
-	public void testUpdatePlain() throws SQLException{
+	public void testUpdatePlainFail() throws SQLException{
 		String sql = "UPDATE " + TABLE_NAME
 				+ " SET address = 'CTRIP' WHERE id = 1";
 		StatementParameters parameters = new StatementParameters();
@@ -2563,17 +2663,35 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+	}
+	
+	@Test
+	public void testUpdatePlainByShard() throws SQLException{
 		for(int i = 0; i < mod; i++) {
 			// By shard
 			testUpdatePlain(i, new DalHints().inShard(i));
+		}
+	}
 	
+	@Test
+	public void testUpdatePlainByShardValue() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardValue
 			testUpdatePlain(i, new DalHints().setShardValue(i));
-	
-			// By shardColValue
+		}
+	}
+
+	@Test
+	public void testUpdatePlainByShardCol() throws SQLException{
+		for(int i = 0; i < mod; i++) {
+		// By shardColValue
 			testUpdatePlain(i, new DalHints().setShardColValue("index", i));
-			
+		}
+	}
+
+	@Test
+	public void testUpdatePlainByShardCol2() throws SQLException{
+		for(int i = 0; i < mod; i++) {
 			// By shardColValue
 			testUpdatePlain(i, new DalHints().setShardColValue("dbIndex", i));
 		}
@@ -2584,7 +2702,6 @@ public class DalTableDaoShardByDbTableMySqlTest {
 	 * @throws SQLException
 	 */
 	public void testUpdatePlain(int shardId, DalHints hints) throws SQLException{
-		reset();
 		String sql = "UPDATE " + TABLE_NAME
 				+ " SET address = 'CTRIP' WHERE id = 1";
 		StatementParameters parameters = new StatementParameters();
@@ -2601,6 +2718,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 		sql = "UPDATE " + TABLE_NAME
 				+ "_0 SET address = 'CTRIP' WHERE id = 1";
 		res = dao.update(sql, parameters, hints.clone().inTableShard(0));
+		assertResEquals(1, res);
 		Assert.assertEquals("CTRIP", dao.queryByPk(1, hints.clone().inTableShard(0)).getAddress());
 
 		// By tableShardValue
@@ -2608,6 +2726,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 				+ "_1 SET address = 'CTRIP' WHERE id = 1";
 		Assert.assertEquals(2, getCount(shardId, 1));
 		res = dao.update(sql, parameters, hints.clone().setTableShardValue(1));
+		assertResEquals(1, res);
 		Assert.assertEquals("CTRIP", dao.queryByPk(1, hints.clone().setTableShardValue(1)).getAddress());
 		
 		// By shardColValue
@@ -2615,6 +2734,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 				+ "_2 SET address = 'CTRIP' WHERE id = 1";
 		Assert.assertEquals(3, getCount(shardId, 2));
 		res = dao.update(sql, parameters, hints.clone().setShardColValue("table", 2));
+		assertResEquals(1, res);
 		Assert.assertEquals("CTRIP", dao.queryByPk(1, hints.clone().setShardColValue("table", 2)).getAddress());
 		
 		// By shardColValue
@@ -2622,6 +2742,7 @@ public class DalTableDaoShardByDbTableMySqlTest {
 				+ "_3 SET address = 'CTRIP' WHERE id = 1";
 		Assert.assertEquals(4, getCount(shardId, 3));
 		res = dao.update(sql, parameters, hints.clone().setShardColValue("tableIndex", 3));
+		assertResEquals(1, res);
 		Assert.assertEquals("CTRIP", dao.queryByPk(1, hints.clone().setShardColValue("tableIndex", 3)).getAddress());
 
 	}

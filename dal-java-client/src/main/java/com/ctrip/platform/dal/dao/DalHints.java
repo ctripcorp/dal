@@ -41,6 +41,10 @@ public class DalHints {
 	
 	public DalHints() {}
 	
+	public DalHints cleanUp() {
+		return setFields(null).setParameters(null);
+	}
+	
 	public DalHints(DalHintEnum...hints) {
 		for(DalHintEnum hint: hints) {
 			set(hint);

@@ -119,6 +119,7 @@ public final class DalTableDao<T> {
 		if(tableShardingEnabled == false)
 			return parser.getTableName();
 		
+		hints.cleanUp();
 		return rawTableName + buildShardStr(logicDbName, locateTableShardId(logicDbName, hints, parameters, fields));
 	}
 
@@ -351,8 +352,7 @@ public final class DalTableDao<T> {
 			DalWatcher.begin();
 			Map<String, ?> fields = parser.getFields(pojo);
 			filterAutoIncrementPrimaryFields(fields);
-			// clean up hints
-			hints.setParameters(null).setFields(null);
+			
 			String insertSql = buildInsertSql(hints, fields);
 
 			StatementParameters parameters = new StatementParameters();
@@ -642,9 +642,9 @@ public final class DalTableDao<T> {
 			DalWatcher.begin();
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, parser.getPrimaryKeys(pojo));
-			hints.setParameters(null).setFields(null);
 			try {
 				Map<String, ?> fields = parser.getFields(pojo);
+				
 				String deleteSql = buildDeleteSql(getTableName(hints, parameters, fields));
 
 				count += client.update(deleteSql, parameters, hints.setFields(fields));

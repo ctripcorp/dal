@@ -603,35 +603,69 @@
             $("#error_msg").text("请选择至少一个字段！");
             return;
         }
-        $("#error_msg").text("");
+        if($("#auto_sql_pagination").is(":checked")==true && $("#orderby_field").val()=='-1'
+            && $("#crud_option").val()=="select"){
+            $("#error_msg").html("请选择排序(Order by)的字段");
+            return;
+        }
+        $("#error_msg").empty();
         if(crud_option=="insert"){
             $("#param_list_auto_div").hide();
             $("#param_list_auto").hide();
         }
 
-        //解析Sql语句，提取出参数
-        var regexIndex = /(\?{1})/igm;
-        var regexNames = /[@:](\w+)/igm;
-        var sqlContent = ace.edit("sql_builder").getValue(),
-            result;
-        var htmls = "";
-        var i = 0;
+        var paramHtml = "";
+        if ($("#sql_style").val() == "csharp") {
+            paramHtml = step2_2_1_csharp(record,current,crud_option);
+        }else{
+            paramHtml = step2_2_1_java(record,current,crud_option);
+        }
 
-        var conditionParamCount = 0;
-        $('#selected_condition>option').each(function(index,value){
-            if(value["value"].split(",")[1]=="6"){
-                conditionParamCount++;
-            }
-            conditionParamCount++;
+        if(paramHtml.length==0 || crud_option=="insert"){
+            $("#param_list_auto_div").hide();
+            $("#param_list_auto").empty();
+        }else{
+            $("#param_list_auto_div").show();
+            $("#param_list_auto").show();
+            $("#param_list_auto").html(paramHtml);
+        }
+
+        window.sql_builder.buildPagingSQL(function(){
+            $("#error_msg").empty();
+            current.hide();
+            $(".step2-2-2").show();
         });
 
-        var condition;
-        var conditions;
+    };
+
+    var step2_2_1_getSelectedConditionParamCount = function(){
+        var conditionParamCount = 0;
+        $('#selected_condition>option').each(function(index,value){
+            conditionParamCount++;
+            if(value["value"].split(",")[1]=="6"){
+                conditionParamCount++;
+            }else if(value["value"].split(",")[1]=="9" || value["value"].split(",")[1]=="10"){
+                // is null、is not null don't need param
+                conditionParamCount--;
+            }
+        });
+        return conditionParamCount;
+    };
+
+    var step2_2_1_java = function(record,current,crud_option){
+
+        //解析Sql语句，提取出参数
+        var regexIndex = /(\?{1})/igm;
+        var sqlContent = ace.edit("sql_builder").getValue(),
+            result;
+        var paramHtml = "";
+
+        var conditionParamCount = step2_2_1_getSelectedConditionParamCount();
+
         var conVal = new Array();
         if ($("#page1").attr('is_update') == "1") {
-            condition = record['condition'];
             // 模式： Age,6,aa,bb;Name,1,param2;
-            conditions = condition.split(";");
+            var conditions = record['condition'].split(";");
             for(var j=0;j<conditions.length;j++){
                 var con = conditions[j];
                 var keyValue = con.split(",");
@@ -639,12 +673,15 @@
                 if (keyValue[1]=="6"){
                     conVal.push(keyValue[2]);
                     conVal.push(keyValue[3]);
+                }else if(keyValue[1]=="9" || keyValue[1]=="10"){
+                    continue;// is null、is not null don't need param
                 }else{
                     conVal.push(keyValue[2]);
                 }
             }
         }
 
+        var i = 0;
         while ((result = regexIndex.exec(sqlContent))) { //按照java风格解析
             if(conditionParamCount == i && "update"==crud_option){
                 break;
@@ -652,61 +689,71 @@
             i++;
             var temp = conVal.shift();
             if(temp!=null && temp!=""){
-                htmls = htmls + sprintf(variableHtml, temp)+"</div><br/>";
+                paramHtml = paramHtml + sprintf(variableHtml, temp)+"</div><br/>";
             }else{
-                htmls = htmls + sprintf(variableHtml, sprintf("param%s", i))+"</div><br/>";
+                paramHtml = paramHtml + sprintf(variableHtml, sprintf("param%s", i))+"</div><br/>";
             }
         }
-        if (htmls.length == 0) {
-            var sqlTemp = sqlContent;
-            var namesStack = new Array();
-            while ((result = regexNames.exec(sqlTemp))){
-                if("update"==crud_option){
-                    namesStack.push(result[1]);
-                }
-            }
-            var delCount = namesStack.length-conditionParamCount;
-            for(var si=0;si<delCount;si++){
-                namesStack.shift();
-            }
-            while ((result = regexNames.exec(sqlContent))) {//按照c#风格解析
-                if(conditionParamCount == i && "update"==crud_option){
-                    break;
-                }
-                i++;
-                var temp = conVal.shift();
-                if(temp!=null && temp!=""){
-                    namesStack.shift();
-                    htmls = htmls + sprintf(variableHtml, temp)+"</div><br/>";
+        return paramHtml;
+    };
+
+    var step2_2_1_csharp = function(record,current,crud_option){
+
+        //解析Sql语句，提取出参数
+        var regexNames = /[@:](\w+)/igm;
+        var sqlContent = ace.edit("sql_builder").getValue(),
+            result;
+        var paramHtml = "";
+
+        var conditionParamCount = step2_2_1_getSelectedConditionParamCount();
+
+        var conVal = new Array();
+        if ($("#page1").attr('is_update') == "1") {
+            // 模式： Age,6,aa,bb;Name,1,param2;
+            var conditions = record['condition'].split(";");
+            for(var j=0;j<conditions.length;j++){
+                var con = conditions[j];
+                var keyValue = con.split(",");
+                // Between类型的操作符需要特殊处理
+                if (keyValue[1]=="6"){
+                    conVal.push(keyValue[2]);
+                    conVal.push(keyValue[3]);
+                }else if(keyValue[1]=="9" || keyValue[1]=="10"){
+                    continue;// is null、is not null don't need param
                 }else{
-                    var realName = "update"==crud_option? namesStack.shift():result[1];
-                    htmls = htmls + sprintf(variableHtml, realName) + "</div><br/>";
+                    conVal.push(keyValue[2]);
                 }
-
             }
         }
 
-        if(htmls.length==0 || crud_option=="insert"){
-            $("#param_list_auto_div").hide();
-            $("#param_list_auto").empty();
-        }else{
-            $("#param_list_auto_div").show();
-            $("#param_list_auto").show();
-            $("#param_list_auto").html(htmls);
+        var sqlTemp = sqlContent;
+        var namesStack = new Array();
+        while ((result = regexNames.exec(sqlTemp))){
+            if("update"==crud_option){
+                namesStack.push(result[1]);
+            }
         }
-
-        if($("#auto_sql_pagination").is(":checked")==true && $("#orderby_field").val()=='-1'
-            && $("#crud_option").val()=="select"){
-            $("#error_msg").html("请选择排序(Order by)的字段");
-            return;
+        var delCount = namesStack.length-conditionParamCount;
+        for(var si=0;si<delCount;si++){
+            namesStack.shift();
         }
+        var i = 0;
+        while ((result = regexNames.exec(sqlContent))) {//按照c#风格解析
+            if(conditionParamCount == i && "update"==crud_option){
+                break;
+            }
+            i++;
+            var temp = conVal.shift();
+            if(temp!=null && temp!=""){
+                namesStack.shift();
+                paramHtml = paramHtml + sprintf(variableHtml, temp)+"</div><br/>";
+            }else{
+                var realName = "update"==crud_option? namesStack.shift():result[1];
+                paramHtml = paramHtml + sprintf(variableHtml, realName) + "</div><br/>";
+            }
 
-        window.sql_builder.buildPagingSQL(function(){
-            $("#error_msg").html(" ");
-            current.hide();
-            $(".step2-2-2").show();
-        });
-
+        }
+        return paramHtml;
     };
 
     var step2_2_2 = function(record, current){
@@ -729,6 +776,8 @@
             if(temp[1]=="6"){//between
                 selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1]));
                 index2+=2;
+            }else if(temp[1]=="9" || temp[1]=="10"){
+                //is null 、is not null do not get mock value
             }else{
                 selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index2]));
                 index2++;
@@ -803,6 +852,8 @@
             if(temp[1]=="6"){//between
                 selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1]));
                 index2+=2;
+            }else if(temp[1]=="9" || temp[1]=="10"){
+                //is null 、is not null do not have mock value
             }else{
                 selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index2]));
                 index2++;

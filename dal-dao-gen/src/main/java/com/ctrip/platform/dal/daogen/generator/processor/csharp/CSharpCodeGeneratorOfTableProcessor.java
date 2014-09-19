@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
@@ -17,27 +18,25 @@ import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.resource.ProgressResource;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class CSharpCodeGeneratorOfTableProcessor implements Processor {
+public class CSharpCodeGeneratorOfTableProcessor implements DalProcessor {
 
 	private static Logger log = Logger.getLogger(CSharpCodeGeneratorOfTableProcessor.class);
 	
 	@Override
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		
 		CSharpCodeGenContext ctx = (CSharpCodeGenContext)context;
 		int projectId = ctx.getProjectId();
 		Progress progress = ctx.getProgress();
 		
-		final File dir = new File(String.format("%s/%s/cs", CodeGenContext.generatePath, projectId));
+		final File dir = new File(String.format("%s/%s/cs", ctx.getGeneratePath(), projectId));
 		
 		List<Callable<ExecuteResult>> tableCallables = generateTableDao(ctx, dir);
 		
 		TaskUtils.invokeBatch(log, tableCallables);
 		
-		ProgressResource.addDoneFiles(progress, ctx.get_tableViewHosts().size());
+		ProgressResource.addDoneFiles(progress, ctx.getTableViewHosts().size());
 	}
 	
 
@@ -50,7 +49,7 @@ public class CSharpCodeGeneratorOfTableProcessor implements Processor {
 		
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
-		Queue<CSharpTableHost> _tableViewHosts = ctx.get_tableViewHosts();
+		Queue<CSharpTableHost> _tableViewHosts = ctx.getTableViewHosts();
 		
 		for (final CSharpTableHost host : _tableViewHosts) {
 

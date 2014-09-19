@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
@@ -17,26 +18,24 @@ import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.resource.ProgressResource;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class CSharpCodeGeneratorOfSpProcessor implements Processor {
+public class CSharpCodeGeneratorOfSpProcessor implements DalProcessor {
 
 	private static Logger log = Logger.getLogger(CSharpCodeGeneratorOfSpProcessor.class);
 	
 	@Override
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		CSharpCodeGenContext ctx = (CSharpCodeGenContext)context;
 		int projectId = ctx.getProjectId();
 		Progress progress = ctx.getProgress();
 		
-		final File dir = new File(String.format("%s/%s/cs", CodeGenContext.generatePath, projectId));
+		final File dir = new File(String.format("%s/%s/cs", ctx.getGeneratePath(), projectId));
 		
 		List<Callable<ExecuteResult>> spCallables = generateSpDao(ctx, dir);
 		
 		TaskUtils.invokeBatch(log, spCallables);
 		
-		ProgressResource.addDoneFiles(progress, ctx.get_spHosts().size());
+		ProgressResource.addDoneFiles(progress, ctx.getSpHosts().size());
 	}
 	
 	private List<Callable<ExecuteResult>> generateSpDao(CodeGenContext codeGenCtx,
@@ -48,7 +47,7 @@ public class CSharpCodeGeneratorOfSpProcessor implements Processor {
 		
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
-		Queue<CSharpTableHost> _spHosts = ctx.get_spHosts();
+		Queue<CSharpTableHost> _spHosts = ctx.getSpHosts();
 		
 		for (final CSharpTableHost host : _spHosts) {
 

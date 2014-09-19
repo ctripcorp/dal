@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.Consts;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
@@ -27,15 +28,13 @@ import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer implements Processor {
+public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer implements DalProcessor {
 
 	private static Logger log = Logger.getLogger(JavaDataPreparerOfFreeSqlProcessor.class);
 	
 	@Override
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		
 		List<Callable<ExecuteResult>> _freeSqlCallables = prepareFreeSql((CodeGenContext)context);
 		
@@ -46,14 +45,13 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 	private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext codeGenCtx) {
 		JavaCodeGenContext ctx = (JavaCodeGenContext)codeGenCtx;
 		int projectId = ctx.getProjectId();
-		boolean regenerate = ctx.isRegenerate();
 		final Progress progress = ctx.getProgress();
 		final String namespace = ctx.getNamespace();
 		final Map<String, JavaMethodHost> _freeSqlPojoHosts = ctx.get_freeSqlPojoHosts();
-		final Queue<FreeSqlHost> _freeSqlHosts = ctx.get_freeSqlHosts();
+		final Queue<FreeSqlHost> _freeSqlHosts = ctx.getFreeSqlHosts();
 		DaoByFreeSql daoByFreeSql = SpringBeanGetter.getDaoByFreeSql();
 		List<GenTaskByFreeSql> _freeSqls;
-		if (regenerate) {
+		if (ctx.isRegenerate()) {
 			_freeSqls = daoByFreeSql.updateAndGetAllTasks(projectId);
 			prepareDbFromFreeSql(ctx, _freeSqls);
 		} else {

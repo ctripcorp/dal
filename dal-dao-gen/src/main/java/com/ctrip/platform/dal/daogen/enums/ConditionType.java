@@ -1,26 +1,26 @@
 package com.ctrip.platform.dal.daogen.enums;
 
 public enum ConditionType {
-	Unknow(-1),
-	Equal(0),
-	NotEqual(1),
-	Great(2),
-	Less(3),
-	GreatAndEqual(4),
-	LessAndEqual(5),
-	Between(6),
-	Like(7),
-	In(8);
-	
+	Unknow(-1), 
+	Equal(0), 
+	NotEqual(1), 
+	Great(2), 
+	Less(3), 
+	GreatAndEqual(4), 
+	LessAndEqual(5), 
+	Between(6), 
+	Like(7), 
+	In(8), 
+	IsNull(9), 
+	IsNotNull(10);
+
 	private int intVal;
-	
-	ConditionType(int intVal)
-	{
+
+	ConditionType(int intVal) {
 		this.intVal = intVal;
 	}
-	
-	public static ConditionType valueOf(int intVal)
-	{
+
+	public static ConditionType valueOf(int intVal) {
 		switch (intVal) {
 		case 0:
 			return Equal;
@@ -40,13 +40,16 @@ public enum ConditionType {
 			return Like;
 		case 8:
 			return In;
+		case 9:
+			return IsNull;
+		case 10:
+			return IsNotNull;
 		default:
 			return Unknow;
 		}
 	}
-	
-	public int getIntVal()
-	{
+
+	public int getIntVal() {
 		return intVal;
 	}
 }

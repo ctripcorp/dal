@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
@@ -18,18 +19,15 @@ import com.ctrip.platform.dal.daogen.host.java.FreeSqlHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaMethodHost;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class JavaCodeGeneratorOfFreeSqlProcessor implements Processor {
+public class JavaCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
 
 	private static Logger log = Logger.getLogger(JavaCodeGeneratorOfFreeSqlProcessor.class);
 	
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		JavaCodeGenContext ctx = (JavaCodeGenContext)context;
-		String generatePath = CodeGenContext.generatePath;
 		int projectId = ctx.getProjectId();
-		File dir = new File(String.format("%s/%s/java", generatePath, projectId));
+		File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
 		
 		List<Callable<ExecuteResult>> freeCallables = generateFreeSqlDao(ctx, dir);
 			
@@ -71,7 +69,7 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements Processor {
 			results.add(worker);
 		}
 
-		Queue<FreeSqlHost> _freeSqlHosts = ctx.get_freeSqlHosts();
+		Queue<FreeSqlHost> _freeSqlHosts = ctx.getFreeSqlHosts();
 		for (final FreeSqlHost host : _freeSqlHosts) {
 			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 

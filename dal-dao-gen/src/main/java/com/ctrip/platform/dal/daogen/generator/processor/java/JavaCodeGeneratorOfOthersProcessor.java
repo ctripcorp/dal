@@ -5,19 +5,17 @@ import java.io.File;
 import org.apache.velocity.VelocityContext;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class JavaCodeGeneratorOfOthersProcessor implements Processor {
+public class JavaCodeGeneratorOfOthersProcessor implements DalProcessor {
 	
 	@Override
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		JavaCodeGenContext ctx = (JavaCodeGenContext)context;
-		String generatePath = CodeGenContext.generatePath;
 		int projectId = ctx.getProjectId();
-		File dir = new File(String.format("%s/%s/java", generatePath, projectId));
+		File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
 		
 		VelocityContext vltCcontext = GenUtils.buildDefaultVelocityContext();
 		vltCcontext.put("host", ctx.getDalConfigHost());

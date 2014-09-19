@@ -5,15 +5,17 @@
     };
 
     var whereCondition = {
-        "0": "=",
-        "1": "!=",
-        "2": ">",
-        "3": "<",
-        "4": ">=",
-        "5": "<=",
-        "6": "Between",
-        "7": "Like",
-        "8": "In"
+        "0" : "=",
+        "1" : "!=",
+        "2" : ">",
+        "3" : "<",
+        "4" : ">=",
+        "5" : "<=",
+        "6" : "Between",
+        "7" : "Like",
+        "8" : "In",
+        "9" : "IS NULL",
+        "10": "IS NOT NULL"
     };
 
     var wrapColumn = function(value){
@@ -41,7 +43,7 @@
             var splited = this.value.split(",");
             if (splited.length >= 2) {
                 //between
-                if(splited[1] == "6") {
+                if(splited[1] == "6") {//between
                     if ($("#sql_style").val() == "csharp") {
                         formatedConditions.push(sprintf(" %s BETWEEN @%s_start AND @%s_end ",wrapColumn(splited[0]), splited[0], splited[0]));
                     } else {
@@ -52,7 +54,10 @@
                         formatedConditions.push(sprintf(" %s in (@%s) ",wrapColumn(splited[0]),splited[0]));
                     } else {
                         formatedConditions.push(sprintf(" %s in (?) ",wrapColumn(splited[0])));
-                    }                } else {
+                    }
+                } else if(splited[1] == "9" || splited[1] == "10"){// is null、is not null
+                    formatedConditions.push(sprintf(" %s %s ", wrapColumn(splited[0]), whereCondition[splited[1]]));
+                } else {
                     if ($("#sql_style").val() == "csharp") {
                         formatedConditions.push(sprintf(" %s %s @%s ", wrapColumn(splited[0]), whereCondition[splited[1]], splited[0]));
                     } else {

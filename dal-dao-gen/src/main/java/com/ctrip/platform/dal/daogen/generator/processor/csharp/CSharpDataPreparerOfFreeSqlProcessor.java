@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
@@ -32,10 +33,8 @@ import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPreparer implements Processor {
+public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
 
 	private static Logger log = Logger.getLogger(CSharpDataPreparerOfFreeSqlProcessor.class);
 	
@@ -46,7 +45,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 	}
 	
 	@Override
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		
 		List<Callable<ExecuteResult>> _freeSqlCallables;
 		try {
@@ -78,8 +77,8 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(_freeSqls);
 
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
-		final Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts = ctx.get_freeSqlPojoHosts();
-		final Queue<CSharpFreeSqlHost> _freeSqlHosts = ctx.get_freeSqlHosts();
+		final Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts = ctx.getFreeSqlPojoHosts();
+		final Queue<CSharpFreeSqlHost> _freeSqlHosts = ctx.getFreeSqlHosts();
 		// 随后，以DbName以及ClassName为维度，为每个维度生成一个DAO类
 		for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy.entrySet()) {
 			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
@@ -175,8 +174,8 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		}
 		method.setParameters(params);
 		
-		if(ctx.get_freeSqlPojoHosts().containsKey(method.getPojoName())){
-			method.setPojohost(ctx.get_freeSqlPojoHosts().get(method.getPojoName()));
+		if(ctx.getFreeSqlPojoHosts().containsKey(method.getPojoName())){
+			method.setPojohost(ctx.getFreeSqlPojoHosts().get(method.getPojoName()));
 		}
 		
 		return method;
@@ -184,8 +183,8 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 	
 	private void prepareDbFromFreeSql(CodeGenContext codeGenCtx, List<GenTaskByFreeSql> freeSqls) throws Exception {
 		CSharpCodeGenContext ctx = (CSharpCodeGenContext)codeGenCtx;
-		Map<String, DatabaseHost> _dbHosts = ctx.get_dbHosts();
-		Set<String> _freeDaos = ctx.get_freeDaos();
+		Map<String, DatabaseHost> _dbHosts = ctx.getDbHosts();
+		Set<String> _freeDaos = ctx.getFreeDaos();
 		for (GenTaskByFreeSql task : freeSqls) {
 			addDatabaseSet(ctx, task.getDatabaseSetName());
 			_freeDaos.add(WordUtils.capitalize(task.getClass_name()));
@@ -220,7 +219,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		return groupBy;
 	}
 	
-	private CSharpFreeSqlPojoHost buildFreeSqlPojoHost(CodeGenContext codeGenCtx, GenTaskByFreeSql task) throws Exception {
+	private CSharpFreeSqlPojoHost buildFreeSqlPojoHost(CSharpCodeGenContext codeGenCtx, GenTaskByFreeSql task) throws Exception {
 
 		CSharpFreeSqlPojoHost freeSqlHost = new CSharpFreeSqlPojoHost();
 

@@ -1,12 +1,9 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -24,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
@@ -35,10 +33,9 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
-import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
+import com.ctrip.platform.dal.daogen.generator.csharp.CSharpDalGenerator;
+import com.ctrip.platform.dal.daogen.generator.java.JavaDalGenerator;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import com.xross.tools.xunit.XrossFactory;
 
 @Resource
 @Singleton
@@ -306,27 +303,18 @@ public class ProjectResource {
 		try {
 			log.info(String.format("begain generate project: [id=%s; regen=%s; language=%s]",
 					id, regen, language));
-//			DalGenerator generator = null;
+			DalGenerator generator = null;
 			CodeGenContext context = null;
 			if (language.equals("java")) {
-//				generator = new JavaDalGenerator();
-//				context = generator.createContext(id, regen, progress, newPojo);
-				context= new JavaCodeGenContext(id, regen, progress);
-				URL url = ProjectResource.class.getResource("/code_gen_java.xunit");
-				XrossFactory.createFromXML(url.getFile()).getProcessor("Java Code Generator").process(context);
+				generator = new JavaDalGenerator();
+				context = generator.createContext(id, regen, progress, newPojo);
 			} else if (language.equals("cs")){
-//				generator = new CSharpDalGenerator();
-//				context = generator.createContext(id, regen, progress, newPojo);
-				Map<String, Boolean> hints = new HashMap<String, Boolean>();
-				hints.put("newPojo", newPojo);
-				context = new CSharpCodeGenContext(id, regen, progress, hints);
-				((CSharpCodeGenContext)context).setNewPojo(newPojo);
-				URL url = ProjectResource.class.getResource("/code_gen_csharp.xunit");
-				XrossFactory.createFromXML(url.getFile()).getProcessor("C# Code Generator").process(context);
+				generator = new CSharpDalGenerator();
+				context = generator.createContext(id, regen, progress, newPojo);
 			}
-//			generator.prepareDirectory(context);
-//			generator.prepareData(context);
-//			generator.generateCode(context);
+			generator.prepareDirectory(context);
+			generator.prepareData(context);
+			generator.generateCode(context);
 			status = Status.OK;
 			log.info(String.format("generate project[%s] completed.", id));
 		} catch (Exception e) {

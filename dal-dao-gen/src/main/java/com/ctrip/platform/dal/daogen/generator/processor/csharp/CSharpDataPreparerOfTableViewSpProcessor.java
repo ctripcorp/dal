@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
@@ -30,10 +31,8 @@ import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpDataPreparer implements Processor {
+public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
 
 	private static Logger log = Logger.getLogger(CSharpDataPreparerOfTableViewSpProcessor.class);
 	
@@ -46,7 +45,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 	}
 	
 	@Override
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		List<Callable<ExecuteResult>> _tableViewSpCallables;
 		try {
 			_tableViewSpCallables = prepareTableViewSp((CodeGenContext )context);
@@ -74,12 +73,12 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 					daoByTableViewSp.getTasksByProjectId(projectId),
 					daoBySqlBuilder.getTasksByProjectId(projectId));
 		}
-		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.get_sqlBuilders();
+		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.getSqlBuilders();
 		for (GenTaskBySqlBuilder _t : _tempSqlBuilders) {
 			_sqlBuilders.add(_t);
 		}
 
-		final Queue<CSharpTableHost> _spHosts = ctx.get_spHosts();
+		final Queue<CSharpTableHost> _spHosts = ctx.getSpHosts();
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 		for (final GenTaskByTableViewSp tableViewSp : _tableViewSps) {
 			final String[] viewNames = StringUtils.split(tableViewSp.getView_names(), ",");
@@ -94,7 +93,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 				dbCategory = DatabaseCategory.SqlServer;
 			}
 
-			final Queue<CSharpTableHost> _tableViewHosts = ctx.get_tableViewHosts();
+			final Queue<CSharpTableHost> _tableViewHosts = ctx.getTableViewHosts();
 			
 			results.addAll(prepareTable(ctx, progress, tableViewSp, tableNames,
 					dbCategory, _tableViewHosts));
@@ -209,9 +208,9 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 		
 		Set<String> existsTable = new HashSet<String>();
 
-		Set<String> _tableDaos = ctx.get_tableDaos();
-		Set<String> _spDaos = ctx.get_spDaos();
-		Map<String, DatabaseHost> _dbHosts = ctx.get_dbHosts();
+		Set<String> _tableDaos = ctx.getTableDaos();
+		Set<String> _spDaos = ctx.getSpDaos();
+		Map<String, DatabaseHost> _dbHosts = ctx.getDbHosts();
 		for (GenTaskByTableViewSp task : tableViewSps) {
 			for (String table : StringUtils.split(task.getTable_names(), ",")) {
 				_tableDaos.add(getPojoClassName(task.getPrefix(),

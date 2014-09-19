@@ -183,9 +183,9 @@ public class JavaMethodHost {
 			if(ConditionType.In == parameter.getConditionType()){
 				paramsDeclaration.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
 				this.inClauses.add(parameter.getAlias());
-			}
-			else
+			}else{
 				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
+			}
 		}
 		if(this.paging && this.crud_type.equalsIgnoreCase("select")){
 			paramsDeclaration.add("int pageNo");

@@ -60,8 +60,7 @@ public class AbstractCSharpDataPreparer{
 	} 
 	
 	protected CSharpTableHost buildTableHost(CodeGenContext codeGenCtx, 
-			GenTaskByTableViewSp tableViewSp,
-			String table, DatabaseCategory dbCategory,
+			GenTaskByTableViewSp tableViewSp, String table, DatabaseCategory dbCategory,
 			List<StoredProcedure> allSpNames) throws Exception {
 
 		CSharpCodeGenContext ctx = (CSharpCodeGenContext)codeGenCtx;
@@ -91,12 +90,11 @@ public class AbstractCSharpDataPreparer{
 			}
 		}
 
-		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.get_sqlBuilders();
+		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.getSqlBuilders();
 		List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(
 				_sqlBuilders, tableViewSp.getAllInOneName(), table);
 
-		List<CSharpMethodHost> methods = buildMethodHosts(allColumns,
-				currentTableBuilders);
+		List<CSharpMethodHost> methods = buildSqlBuilderMethodHost(allColumns, currentTableBuilders);
 
 		CSharpTableHost tableHost = new CSharpTableHost();
 		tableHost.setExtraMethods(methods);
@@ -135,16 +133,15 @@ public class AbstractCSharpDataPreparer{
 		tableHost.setHasSptI(allSpNames.contains(expectSptI));
 		tableHost.setHasSptU(allSpNames.contains(expectSptU));
 		tableHost.setHasSptD(allSpNames.contains(expectSptD));
-		tableHost.setHasSpt(tableHost.isHasSptI() || tableHost.isHasSptU()
-				|| tableHost.isHasSptD());
+		tableHost.setHasSpt(tableHost.isHasSptI() || tableHost.isHasSptU() || tableHost.isHasSptD());
 		
 		tableHost.setApi_list(tableViewSp.getApi_list());
 
 		return tableHost;
 	}
 	
-	private List<GenTaskBySqlBuilder> filterExtraMethods(
-			Queue<GenTaskBySqlBuilder> sqlBuilders, String dbName, String table) {
+	private List<GenTaskBySqlBuilder> filterExtraMethods(Queue<GenTaskBySqlBuilder> sqlBuilders, 
+			String dbName, String table) {
 		List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
 
 		Iterator<GenTaskBySqlBuilder> iter = sqlBuilders.iterator();
@@ -160,12 +157,24 @@ public class AbstractCSharpDataPreparer{
 		return currentTableBuilders;
 	}
 	
-	private List<CSharpMethodHost> buildMethodHosts(
-			List<CSharpParameterHost> allColumns,
+	private List<CSharpMethodHost> buildSqlBuilderMethodHost(List<CSharpParameterHost> allColumns,
+			List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
+		List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
+		methods.addAll(buildSelectMethodHosts(allColumns,currentTableBuilders));
+		methods.addAll(buildDeleteMethodHosts(allColumns,currentTableBuilders));
+		methods.addAll(buildInsertMethodHosts(allColumns,currentTableBuilders));
+		methods.addAll(buildUpdateMethodHosts(allColumns,currentTableBuilders));
+		return methods;
+	}
+	
+	private List<CSharpMethodHost> buildSelectMethodHosts(List<CSharpParameterHost> allColumns,
 			List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
 		List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
 
 		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
+			if (!builder.getCrud_type().equals("select")) {
+				continue;
+			}
 			CSharpMethodHost method = new CSharpMethodHost();
 			method.setCrud_type(builder.getCrud_type());
 			method.setName(builder.getMethod_name());
@@ -184,85 +193,64 @@ public class AbstractCSharpDataPreparer{
 			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			
+			List<AbstractParameterHost> paramAbstractHosts = 
+					DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), 
+							CurrentLanguage.Java);
+			List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
+			for (AbstractParameterHost phost : paramAbstractHosts) {
+				paramHosts.add((JavaParameterHost)phost);
+			}
+			method.setFields(paramHosts);
+			
+			method.setParameters(buildMethodParameterHost4SqlConditin(builder, allColumns));
+			methods.add(method);
+		}
+		return methods;
+	}
+	
+	private List<CSharpMethodHost> buildDeleteMethodHosts(List<CSharpParameterHost> allColumns,
+			List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
+		List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
+
+		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
+			if (!builder.getCrud_type().equals("delete")) {
+				continue;
+			}
+			CSharpMethodHost method = new CSharpMethodHost();
+			method.setCrud_type(builder.getCrud_type());
+			method.setName(builder.getMethod_name());
+			method.setSql(builder.getSql_content());
+			method.setScalarType(builder.getScalarType());
+			method.setPaging(builder.isPagination());
+			
+			method.setParameters(buildMethodParameterHost4SqlConditin(builder, allColumns));
+			methods.add(method);
+		}
+		return methods;
+	}
+	
+	private List<CSharpMethodHost> buildInsertMethodHosts(List<CSharpParameterHost> allColumns,
+			List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
+		List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
+
+		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
+			if (!builder.getCrud_type().equals("insert")) {
+				continue;
+			}
+			CSharpMethodHost method = new CSharpMethodHost();
+			method.setCrud_type(builder.getCrud_type());
+			method.setName(builder.getMethod_name());
+			method.setSql(builder.getSql_content());
+			method.setScalarType(builder.getScalarType());
+			method.setPaging(builder.isPagination());
+			
 			List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
-			if (method.getCrud_type().equals("select") || method.getCrud_type().equals("delete")) {
-				if(method.getCrud_type().equals("select")) {
-					List<AbstractParameterHost> paramAbstractHosts = 
-							DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), 
-									CurrentLanguage.Java);
-					List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
-					for (AbstractParameterHost phost : paramAbstractHosts) {
-						paramHosts.add((JavaParameterHost)phost);
-					}
-					method.setFields(paramHosts);
-				}
-				String[] conditions = StringUtils.split(builder.getCondition(), ";");
-				
-				for (String condition : conditions) {
-					String[] tokens = StringUtils.split(condition, ",");
-					String name = tokens[0];
-					int type = tokens.length >= 2 ? Integer.parseInt(tokens[1]) : -1;
-					String alias = "";
-					if (tokens.length >= 3)
-						alias = tokens[2];
-					for (CSharpParameterHost pHost : allColumns) {
-						if (pHost.getName().equals(name)) {
-							CSharpParameterHost host_al = new CSharpParameterHost(pHost);
-							host_al.setAlias(alias);
-							host_al.setInParameter(ConditionType.In == ConditionType.valueOf(type));
-							parameters.add(host_al);
-							// Between need an extra parameter
-							if (ConditionType.Between == ConditionType.valueOf(type)) {
-								CSharpParameterHost host_bw = new CSharpParameterHost(pHost);
-								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
-								host_bw.setAlias(alias_bw);
-								parameters.add(host_bw);
-							}
-							break;
-						}
-					}
-				}
-			} else if (method.getCrud_type().equals("insert")) {
+			if (method.getCrud_type().equals("insert")) {
 				String[] fields = StringUtils.split(builder.getFields(), ",");
 				for (String field : fields) {
 					for (CSharpParameterHost pHost : allColumns) {
 						if (pHost.getName().equals(field)) {
 							parameters.add(pHost);
-							break;
-						}
-					}
-				}
-			} else {
-				String[] fields = StringUtils.split(builder.getFields(), ",");
-				String[] conditions = StringUtils.split(builder.getCondition(), ";");
-				for (String field : fields) {
-					for (CSharpParameterHost pHost : allColumns) {
-						if (pHost.getName().equals(field)) {
-							parameters.add(pHost);
-							break;
-						}
-					}
-				}
-				for (String condition : conditions) {
-					for (CSharpParameterHost pHost : allColumns) {
-						String[] tokens = StringUtils.split(condition, ",");
-						String name = tokens[0];
-						int type = tokens.length >= 2 ? Integer.parseInt(tokens[1]) : -1;
-						String alias = "";
-						if (tokens.length >= 3)
-							alias = tokens[2];
-						if (pHost.getName().equals(name)) {
-							CSharpParameterHost host_al = new CSharpParameterHost(pHost);
-							host_al.setAlias(alias);
-							host_al.setInParameter(ConditionType.In == ConditionType
-									.valueOf(type));
-							parameters.add(host_al);
-							if (ConditionType.Between == ConditionType.valueOf(type)) {
-								CSharpParameterHost host_bw = new CSharpParameterHost(pHost);
-								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
-								host_bw.setAlias(alias_bw);
-								parameters.add(host_bw);
-							}
 							break;
 						}
 					}
@@ -273,7 +261,73 @@ public class AbstractCSharpDataPreparer{
 		}
 		return methods;
 	}
+	
+	private List<CSharpMethodHost> buildUpdateMethodHosts(List<CSharpParameterHost> allColumns,
+			List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
+		List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
 
+		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
+			if (!builder.getCrud_type().equals("update")) {
+				continue;
+			}
+			CSharpMethodHost method = new CSharpMethodHost();
+			method.setCrud_type(builder.getCrud_type());
+			method.setName(builder.getMethod_name());
+			method.setSql(builder.getSql_content());
+			method.setScalarType(builder.getScalarType());
+			method.setPaging(builder.isPagination());
+			
+			List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
+			
+			String[] fields = StringUtils.split(builder.getFields(), ",");
+			for (String field : fields) {
+				for (CSharpParameterHost pHost : allColumns) {
+					if (pHost.getName().equals(field)) {
+						parameters.add(pHost);
+						break;
+					}
+				}
+			}
+			parameters.addAll(buildMethodParameterHost4SqlConditin(builder, allColumns));
+			
+			method.setParameters(parameters);
+			methods.add(method);
+		}
+		return methods;
+	}
+	
+	private List<CSharpParameterHost> buildMethodParameterHost4SqlConditin(GenTaskBySqlBuilder builder,
+			List<CSharpParameterHost> allColumns){
+		List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
+		String[] conditions = StringUtils.split(builder.getCondition(), ";");
+		for (String condition : conditions) {
+			String[] tokens = StringUtils.split(condition, ",");
+			String name = tokens[0];
+			int type = tokens.length >= 2 ? Integer.parseInt(tokens[1]) : -1;
+			if(type == 9 || type == 10){ //is null、is not null don't hava param
+				continue;
+			}
+			String alias = tokens.length >= 3 ? tokens[2] : "";
+			for (CSharpParameterHost pHost : allColumns) {
+				if (pHost.getName().equals(name)) {
+					CSharpParameterHost host_al = new CSharpParameterHost(pHost);
+					host_al.setAlias(alias);
+					host_al.setInParameter(ConditionType.In == ConditionType.valueOf(type));
+					parameters.add(host_al);
+					// Between need an extra parameter
+					if (ConditionType.Between == ConditionType.valueOf(type)) {
+						CSharpParameterHost host_bw = new CSharpParameterHost(pHost);
+						String alias_bw = tokens.length >= 4 ? tokens[3] : "";
+						host_bw.setAlias(alias_bw);
+						parameters.add(host_bw);
+					}
+					break;
+				}
+			}
+		}		
+		return parameters;
+	}
+	
 	protected String getPojoClassName(String prefix, String suffix, String table) {
 		String className = table;
 		if (null != prefix && !prefix.isEmpty()) {
@@ -299,4 +353,117 @@ public class AbstractCSharpDataPreparer{
 		}
 		return dbCategory;
 	}
+	
+//	private List<CSharpMethodHost> buildMethodHosts(List<CSharpParameterHost> allColumns,
+//			List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
+//		List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
+//
+//		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
+//			CSharpMethodHost method = new CSharpMethodHost();
+//			method.setCrud_type(builder.getCrud_type());
+//			method.setName(builder.getMethod_name());
+//			String sql = builder.getSql_content();
+//			int index = 0;
+//			if(builder.isPagination()){
+//				sql = SqlBuilder.pagingQuerySql(sql, getDatabaseCategory(builder.getAllInOneName()), CurrentLanguage.CSharp);
+//				index += 2;
+//			}
+//			Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(builder.getSql_content());
+//			while(m.find()){
+//				sql = sql.replace(m.group(1), String.format("({%d}) ", index));
+//				index++;
+//	    	}
+//			method.setSql(sql);
+//			method.setScalarType(builder.getScalarType());
+//			method.setPaging(builder.isPagination());
+//			
+//			List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
+//			if (method.getCrud_type().equals("select") || method.getCrud_type().equals("delete")) {
+//				if(method.getCrud_type().equals("select")) {
+//					List<AbstractParameterHost> paramAbstractHosts = 
+//							DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), 
+//									CurrentLanguage.Java);
+//					List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
+//					for (AbstractParameterHost phost : paramAbstractHosts) {
+//						paramHosts.add((JavaParameterHost)phost);
+//					}
+//					method.setFields(paramHosts);
+//				}
+//				String[] conditions = StringUtils.split(builder.getCondition(), ";");
+//				
+//				for (String condition : conditions) {
+//					String[] tokens = StringUtils.split(condition, ",");
+//					String name = tokens[0];
+//					int type = tokens.length >= 2 ? Integer.parseInt(tokens[1]) : -1;
+//					String alias = "";
+//					if (tokens.length >= 3)
+//						alias = tokens[2];
+//					for (CSharpParameterHost pHost : allColumns) {
+//						if (pHost.getName().equals(name)) {
+//							CSharpParameterHost host_al = new CSharpParameterHost(pHost);
+//							host_al.setAlias(alias);
+//							host_al.setInParameter(ConditionType.In == ConditionType.valueOf(type));
+//							parameters.add(host_al);
+//							// Between need an extra parameter
+//							if (ConditionType.Between == ConditionType.valueOf(type)) {
+//								CSharpParameterHost host_bw = new CSharpParameterHost(pHost);
+//								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
+//								host_bw.setAlias(alias_bw);
+//								parameters.add(host_bw);
+//							}
+//							break;
+//						}
+//					}
+//				}
+//			} else if (method.getCrud_type().equals("insert")) {
+//				String[] fields = StringUtils.split(builder.getFields(), ",");
+//				for (String field : fields) {
+//					for (CSharpParameterHost pHost : allColumns) {
+//						if (pHost.getName().equals(field)) {
+//							parameters.add(pHost);
+//							break;
+//						}
+//					}
+//				}
+//			} else {
+//				String[] fields = StringUtils.split(builder.getFields(), ",");
+//				String[] conditions = StringUtils.split(builder.getCondition(), ";");
+//				for (String field : fields) {
+//					for (CSharpParameterHost pHost : allColumns) {
+//						if (pHost.getName().equals(field)) {
+//							parameters.add(pHost);
+//							break;
+//						}
+//					}
+//				}
+//				for (String condition : conditions) {
+//					for (CSharpParameterHost pHost : allColumns) {
+//						String[] tokens = StringUtils.split(condition, ",");
+//						String name = tokens[0];
+//						int type = tokens.length >= 2 ? Integer.parseInt(tokens[1]) : -1;
+//						String alias = "";
+//						if (tokens.length >= 3)
+//							alias = tokens[2];
+//						if (pHost.getName().equals(name)) {
+//							CSharpParameterHost host_al = new CSharpParameterHost(pHost);
+//							host_al.setAlias(alias);
+//							host_al.setInParameter(ConditionType.In == ConditionType
+//									.valueOf(type));
+//							parameters.add(host_al);
+//							if (ConditionType.Between == ConditionType.valueOf(type)) {
+//								CSharpParameterHost host_bw = new CSharpParameterHost(pHost);
+//								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
+//								host_bw.setAlias(alias_bw);
+//								parameters.add(host_bw);
+//							}
+//							break;
+//						}
+//					}
+//				}
+//			}
+//			method.setParameters(parameters);
+//			methods.add(method);
+//		}
+//		return methods;
+//	}
 }

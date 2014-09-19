@@ -5,15 +5,14 @@ import java.io.File;
 import org.apache.velocity.VelocityContext;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class CSharpCodeGeneratorOfOthersProcessor implements Processor {
+public class CSharpCodeGeneratorOfOthersProcessor implements DalProcessor {
 	
 	@Override
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		
 		generateCommonCode((CodeGenContext )context);
 	}
@@ -29,14 +28,13 @@ public class CSharpCodeGeneratorOfOthersProcessor implements Processor {
 
 		final VelocityContext context = GenUtils.buildDefaultVelocityContext();
 
-		final File csMavenLikeDir = new File(String.format("%s/%s/cs",
-				CodeGenContext.generatePath, id));
+		final File csMavenLikeDir = new File(String.format("%s/%s/cs", ctx.getGeneratePath(), id));
 		context.put("host", ctx.getDalConfigHost());
-		context.put("dbs", ctx.get_dbHosts().values());
+		context.put("dbs", ctx.getDbHosts().values());
 		context.put("namespace", ctx.getNamespace());
-		context.put("freeSqlHosts", ctx.get_freeDaos());
-		context.put("tableHosts", ctx.get_tableDaos());
-		context.put("spHosts", ctx.get_spDaos());
+		context.put("freeSqlHosts", ctx.getFreeDaos());
+		context.put("tableHosts", ctx.getTableDaos());
+		context.put("spHosts", ctx.getSpDaos());
 
 		GenUtils.mergeVelocityContext(
 				context,

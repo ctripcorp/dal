@@ -409,6 +409,8 @@
 	                              <option value='6'>Between</option>
 	                              <option value='7'>Like</option>
 	                              <option value='8'>In</option>
+	                              <option value='9'>Is null</option>
+	                              <option value='10'>Is not null</option>
 	                           </select>
 	                           <input id="add_condition" type="button" class="span2 btn btn-primary popup_text input-sm" value="添加">
 	                        </div>

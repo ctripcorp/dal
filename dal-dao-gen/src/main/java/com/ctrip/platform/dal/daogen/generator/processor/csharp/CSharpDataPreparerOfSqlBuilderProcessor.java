@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
@@ -20,15 +21,13 @@ import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataPreparer implements Processor {
+public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
 
 	private static Logger log = Logger.getLogger(CSharpDataPreparerOfSqlBuilderProcessor.class);
 	
 	@Override
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		
 		List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder((CodeGenContext)context);
 		
@@ -43,8 +42,8 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
 		
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
-		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.get_sqlBuilders();
-		final Queue<CSharpTableHost> _tableViewHosts = ctx.get_tableViewHosts();
+		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.getSqlBuilders();
+		final Queue<CSharpTableHost> _tableViewHosts = ctx.getTableViewHosts();
 		if (_sqlBuilders.size() > 0) {
 			Map<String, GenTaskBySqlBuilder> _TempSqlBuildres = sqlBuilderBroupBy(_sqlBuilders);
 

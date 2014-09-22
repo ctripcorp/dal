@@ -1,16 +1,16 @@
 package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 
+import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class CSharpCodeGenContextCreator  implements Processor {
+public class CSharpCodeGenContextCreator  implements DalProcessor {
 
 	@Override
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		CSharpCodeGenContext ctx = (CSharpCodeGenContext)context;
 
 		Project project = SpringBeanGetter.getDaoOfProject().getProjectByID(ctx.getProjectId());

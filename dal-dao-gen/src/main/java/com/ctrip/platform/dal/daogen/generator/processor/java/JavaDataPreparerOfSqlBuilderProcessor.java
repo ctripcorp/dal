@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
 import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
@@ -17,15 +18,13 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPreparer implements Processor {
+public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPreparer implements DalProcessor {
 
 	private static Logger log = Logger.getLogger(JavaDataPreparerOfSqlBuilderProcessor.class);
 	
 	@Override
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		
 		List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder((CodeGenContext )context);
 		
@@ -36,8 +35,8 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
 		final JavaCodeGenContext ctx = (JavaCodeGenContext)codeGenCtx;
 		final Progress progress = ctx.getProgress();
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
-		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.get_sqlBuilders();
-		final Queue<JavaTableHost> _tableHosts = ctx.get_tableHosts();
+		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.getSqlBuilders();
+		final Queue<JavaTableHost> _tableHosts = ctx.getTableHosts();
 		if (_sqlBuilders.size() > 0) {
 			//按照DbName和TableName进行分组
 			Map<String, GenTaskBySqlBuilder> _TempSqlBuildres = sqlBuilderBroupBy(_sqlBuilders);

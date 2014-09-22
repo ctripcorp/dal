@@ -105,7 +105,7 @@ public class AbstractJavaDataPreparer{
 
 		List<GenTaskBySqlBuilder> currentTableBuilders = filterExtraMethods(ctx, tableViewSp.getAllInOneName(), tableName);
 
-		List<JavaMethodHost> methods = buildMethodHosts(allColumns, currentTableBuilders);
+		List<JavaMethodHost> methods = buildSqlBuilderMethodHost(allColumns, currentTableBuilders);
 
 		tableHost.setFields(allColumns);
 		tableHost.setPrimaryKeys(primaryKeys);
@@ -147,13 +147,14 @@ public class AbstractJavaDataPreparer{
 		return WordUtils.capitalize(result.toString());
 	}
 	
-	private List<GenTaskBySqlBuilder> filterExtraMethods(CodeGenContext codeGenCtx, String dbName, String tableName) {
+	private List<GenTaskBySqlBuilder> filterExtraMethods(CodeGenContext codeGenCtx, String dbName, 
+			String tableName) {
 		
 		JavaCodeGenContext ctx = (JavaCodeGenContext)codeGenCtx;
 		
 		List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
 
-		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.get_sqlBuilders();
+		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.getSqlBuilders();
 		
 		Iterator<GenTaskBySqlBuilder> iter = _sqlBuilders.iterator();
 		while (iter.hasNext()) {
@@ -174,12 +175,76 @@ public class AbstractJavaDataPreparer{
 		return SpOperationHost.getSpaOperation(dbName, tableName, allSpNames, operation);
 	}
 	
-	private List<JavaMethodHost> buildMethodHosts(
-			List<JavaParameterHost> allColumns,
+	private List<JavaMethodHost> buildSqlBuilderMethodHost(List<JavaParameterHost> allColumns,
+			List<GenTaskBySqlBuilder> currentTableBuilders) {
+		List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
+		methods.addAll(buildSelectMethodHosts(allColumns,currentTableBuilders));
+		methods.addAll(buildDeleteMethodHosts(allColumns,currentTableBuilders));
+		methods.addAll(buildInsertMethodHosts(allColumns,currentTableBuilders));
+		methods.addAll(buildUpdateMethodHosts(allColumns,currentTableBuilders));
+		return methods;
+	}
+	
+	private List<JavaMethodHost> buildSelectMethodHosts(List<JavaParameterHost> allColumns,
 			List<GenTaskBySqlBuilder> currentTableBuilders) {
 		List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 
 		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
+			if (!builder.getCrud_type().equals("select")) {
+				continue;
+			}
+			JavaMethodHost method = new JavaMethodHost();
+			method.setCrud_type(builder.getCrud_type());
+			method.setName(builder.getMethod_name());
+			method.setSql(builder.getSql_content());
+			method.setScalarType(builder.getScalarType());
+			method.setPaging(builder.isPagination());
+			method.setComments(builder.getComment());
+			// select sql have select field and where condition clause
+			List<AbstractParameterHost> paramAbstractHosts = 
+					DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), CurrentLanguage.Java);
+			List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
+			for (AbstractParameterHost phost : paramAbstractHosts) {
+				paramHosts.add((JavaParameterHost)phost);
+			}
+			method.setFields(paramHosts);
+			
+			method.setParameters(buildMethodParameterHost4SqlConditin(builder, allColumns));
+			methods.add(method);
+		}
+		return methods;
+	}
+	
+	private List<JavaMethodHost> buildDeleteMethodHosts(List<JavaParameterHost> allColumns,
+			List<GenTaskBySqlBuilder> currentTableBuilders) {
+		List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
+
+		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
+			if (!builder.getCrud_type().equals("delete")) {
+				continue;
+			}
+			JavaMethodHost method = new JavaMethodHost();
+			method.setCrud_type(builder.getCrud_type());
+			method.setName(builder.getMethod_name());
+			method.setSql(builder.getSql_content());
+			method.setScalarType(builder.getScalarType());
+			method.setPaging(builder.isPagination());
+			method.setComments(builder.getComment());
+			// Only have condition clause
+			method.setParameters(buildMethodParameterHost4SqlConditin(builder, allColumns));
+			methods.add(method);
+		}
+		return methods;
+	}
+
+	private List<JavaMethodHost> buildInsertMethodHosts(List<JavaParameterHost> allColumns,
+			List<GenTaskBySqlBuilder> currentTableBuilders) {
+		List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
+
+		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
+			if (!builder.getCrud_type().equals("insert")) {
+				continue;
+			}
 			JavaMethodHost method = new JavaMethodHost();
 			method.setCrud_type(builder.getCrud_type());
 			method.setName(builder.getMethod_name());
@@ -188,105 +253,203 @@ public class AbstractJavaDataPreparer{
 			method.setPaging(builder.isPagination());
 			method.setComments(builder.getComment());
 			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
-			// Only have condition clause
-			if (method.getCrud_type().equals("select")
-					|| method.getCrud_type().equals("delete")) {
-				
-				if(method.getCrud_type().equals("select")){
-					List<AbstractParameterHost> paramAbstractHosts = 
-							DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), CurrentLanguage.Java);
-					List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
-					for (AbstractParameterHost phost : paramAbstractHosts) {
-						paramHosts.add((JavaParameterHost)phost);
-					}
-					method.setFields(paramHosts);
-				}
-				
-				String[] conditions = StringUtils.split(builder.getCondition(), ";");
-				for (String condition : conditions) {
-					String[] tokens = StringUtils.split(condition, ",");
-					String name = tokens[0];
-					int type = tokens.length >= 2 ? CommonUtils.tryParse(tokens[1], -1) : -1;
-					String alias = tokens.length >= 3 ? tokens[2] : "";
-					for (JavaParameterHost pHost : allColumns) {
-						if (pHost.getName().equals(name)) {
-							JavaParameterHost host_ls = new JavaParameterHost(pHost);
-							host_ls.setAlias(alias);
-							host_ls.setConditional(true);
-							if (-1 != type)
-								host_ls.setConditionType(ConditionType.valueOf(type));
-							parameters.add(host_ls);
-							// Between need an extra parameter
-							if (ConditionType.Between == host_ls.getConditionType()) {
-								JavaParameterHost host_bw = new JavaParameterHost(host_ls);
-								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
-								host_bw.setAlias(alias_bw);
-								parameters.add(host_bw);
-							}
-							break;
-						}
+			
+			// Have no where condition
+			String[] fields = StringUtils.split(builder.getFields(), ",");
+			for (String field : fields) {
+				for (JavaParameterHost pHost : allColumns) {
+					if (pHost.getName().equals(field)) {
+						parameters.add(pHost);
+						break;
 					}
 				}
 			}
-			// Have no condition
-			else if (method.getCrud_type().equals("insert")) {
-				String[] fields = StringUtils.split(builder.getFields(), ",");
-				for (String field : fields) {
-					for (JavaParameterHost pHost : allColumns) {
-						if (pHost.getName().equals(field)) {
-							parameters.add(pHost);
-							break;
-						}
-					}
-				}
-			}
-			// Have both set and condition clause
-			else {
-				String[] fields = StringUtils.split(builder.getFields(), ",");
-				String[] conditions = StringUtils.split(builder.getCondition(), ";");
-				for (String field : fields) {
-					for (JavaParameterHost pHost : allColumns) {
-						if (pHost.getName().equals(field)) {
-							JavaParameterHost host_ls = new JavaParameterHost(pHost);
-							parameters.add(host_ls);
-							break;
-						}
-					}
-				}
-
-				for (String condition : conditions) {
-					String[] tokens = StringUtils.split(condition, ",");
-					String name = tokens[0];
-					int type = tokens.length >= 2 ? CommonUtils.tryParse(tokens[1], -1) : -1;
-					String alias = tokens.length >= 3 ? tokens[2] : "";
-					for (JavaParameterHost pHost : allColumns) {
-						if (pHost.getName().equals(name)) {
-							JavaParameterHost host_ls = new JavaParameterHost(pHost);
-							host_ls.setAlias(alias);
-							host_ls.setConditional(true);
-							if (-1 != type)
-								host_ls.setConditionType(ConditionType.valueOf(type));
-							if (ConditionType.In == host_ls.getConditionType()) {
-
-							}
-							parameters.add(host_ls);
-							// Between need an extra parameter
-							if (ConditionType.Between == host_ls.getConditionType()) {
-								JavaParameterHost host_bw = new JavaParameterHost(host_ls);
-								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
-								host_bw.setAlias(alias_bw);
-								parameters.add(host_bw);
-							}
-							break;
-						}
-					}
-				}
-			}
+			
 			method.setParameters(parameters);
 			methods.add(method);
 		}
 		return methods;
 	}
+	
+	private List<JavaMethodHost> buildUpdateMethodHosts(List<JavaParameterHost> allColumns,
+			List<GenTaskBySqlBuilder> currentTableBuilders) {
+		List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 
-
+		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
+			if (!builder.getCrud_type().equals("update")) {
+				continue;
+			}
+			JavaMethodHost method = new JavaMethodHost();
+			method.setCrud_type(builder.getCrud_type());
+			method.setName(builder.getMethod_name());
+			method.setSql(builder.getSql_content());
+			method.setScalarType(builder.getScalarType());
+			method.setPaging(builder.isPagination());
+			method.setComments(builder.getComment());
+			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
+			// Have both set and condition clause
+			String[] fields = StringUtils.split(builder.getFields(), ",");
+			for (String field : fields) {
+				for (JavaParameterHost pHost : allColumns) {
+					if (pHost.getName().equals(field)) {
+						JavaParameterHost host_ls = new JavaParameterHost(pHost);
+						parameters.add(host_ls);
+						break;
+					}
+				}
+			}
+			parameters.addAll(buildMethodParameterHost4SqlConditin(builder, allColumns));
+			method.setParameters(parameters);
+			methods.add(method);
+		}
+		return methods;
+	}
+	
+	private List<JavaParameterHost> buildMethodParameterHost4SqlConditin(GenTaskBySqlBuilder builder, 
+			List<JavaParameterHost> allColumns){
+		List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
+		String[] conditions = StringUtils.split(builder.getCondition(), ";");
+		for (String condition : conditions) {
+			String[] tokens = StringUtils.split(condition, ",");
+			String name = tokens[0];
+			int type = tokens.length >= 2 ? CommonUtils.tryParse(tokens[1], -1) : -1;
+			if(type == 9 || type == 10){ //is null、is not null don't hava param
+				continue;
+			}
+			String alias = tokens.length >= 3 ? tokens[2] : "";
+			for (JavaParameterHost pHost : allColumns) {
+				if (pHost.getName().equals(name)) {
+					JavaParameterHost host_ls = new JavaParameterHost(pHost);
+					host_ls.setAlias(alias);
+					host_ls.setConditional(true);
+					if (-1 != type)
+						host_ls.setConditionType(ConditionType.valueOf(type));
+					parameters.add(host_ls);
+					// Between need an extra parameter
+					if (ConditionType.Between == host_ls.getConditionType()) {
+						JavaParameterHost host_bw = new JavaParameterHost(host_ls);
+						String alias_bw = tokens.length >= 4 ? tokens[3] : "";
+						host_bw.setAlias(alias_bw);
+						parameters.add(host_bw);
+					}
+					break;
+				}
+			}
+		}
+		return parameters;
+	}
+	
+//	private List<JavaMethodHost> buildMethodHosts(
+//			List<JavaParameterHost> allColumns,
+//			List<GenTaskBySqlBuilder> currentTableBuilders) {
+//		List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
+//
+//		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
+//			JavaMethodHost method = new JavaMethodHost();
+//			method.setCrud_type(builder.getCrud_type());
+//			method.setName(builder.getMethod_name());
+//			method.setSql(builder.getSql_content());
+//			method.setScalarType(builder.getScalarType());
+//			method.setPaging(builder.isPagination());
+//			method.setComments(builder.getComment());
+//			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
+//			// Only have condition clause
+//			if (method.getCrud_type().equals("select")
+//					|| method.getCrud_type().equals("delete")) {
+//				
+//				if(method.getCrud_type().equals("select")){
+//					List<AbstractParameterHost> paramAbstractHosts = 
+//							DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), CurrentLanguage.Java);
+//					List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
+//					for (AbstractParameterHost phost : paramAbstractHosts) {
+//						paramHosts.add((JavaParameterHost)phost);
+//					}
+//					method.setFields(paramHosts);
+//				}
+//				
+//				String[] conditions = StringUtils.split(builder.getCondition(), ";");
+//				for (String condition : conditions) {
+//					String[] tokens = StringUtils.split(condition, ",");
+//					String name = tokens[0];
+//					int type = tokens.length >= 2 ? CommonUtils.tryParse(tokens[1], -1) : -1;
+//					String alias = tokens.length >= 3 ? tokens[2] : "";
+//					for (JavaParameterHost pHost : allColumns) {
+//						if (pHost.getName().equals(name)) {
+//							JavaParameterHost host_ls = new JavaParameterHost(pHost);
+//							host_ls.setAlias(alias);
+//							host_ls.setConditional(true);
+//							if (-1 != type)
+//								host_ls.setConditionType(ConditionType.valueOf(type));
+//							parameters.add(host_ls);
+//							// Between need an extra parameter
+//							if (ConditionType.Between == host_ls.getConditionType()) {
+//								JavaParameterHost host_bw = new JavaParameterHost(host_ls);
+//								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
+//								host_bw.setAlias(alias_bw);
+//								parameters.add(host_bw);
+//							}
+//							break;
+//						}
+//					}
+//				}
+//			}
+//			// Have no condition
+//			else if (method.getCrud_type().equals("insert")) {
+//				String[] fields = StringUtils.split(builder.getFields(), ",");
+//				for (String field : fields) {
+//					for (JavaParameterHost pHost : allColumns) {
+//						if (pHost.getName().equals(field)) {
+//							parameters.add(pHost);
+//							break;
+//						}
+//					}
+//				}
+//			}
+//			// Have both set and condition clause
+//			else {
+//				String[] fields = StringUtils.split(builder.getFields(), ",");
+//				String[] conditions = StringUtils.split(builder.getCondition(), ";");
+//				for (String field : fields) {
+//					for (JavaParameterHost pHost : allColumns) {
+//						if (pHost.getName().equals(field)) {
+//							JavaParameterHost host_ls = new JavaParameterHost(pHost);
+//							parameters.add(host_ls);
+//							break;
+//						}
+//					}
+//				}
+//
+//				for (String condition : conditions) {
+//					String[] tokens = StringUtils.split(condition, ",");
+//					String name = tokens[0];
+//					int type = tokens.length >= 2 ? CommonUtils.tryParse(tokens[1], -1) : -1;
+//					String alias = tokens.length >= 3 ? tokens[2] : "";
+//					for (JavaParameterHost pHost : allColumns) {
+//						if (pHost.getName().equals(name)) {
+//							JavaParameterHost host_ls = new JavaParameterHost(pHost);
+//							host_ls.setAlias(alias);
+//							host_ls.setConditional(true);
+//							if (-1 != type)
+//								host_ls.setConditionType(ConditionType.valueOf(type));
+//							if (ConditionType.In == host_ls.getConditionType()) {
+//
+//							}
+//							parameters.add(host_ls);
+//							// Between need an extra parameter
+//							if (ConditionType.Between == host_ls.getConditionType()) {
+//								JavaParameterHost host_bw = new JavaParameterHost(host_ls);
+//								String alias_bw = tokens.length >= 4 ? tokens[3] : "";
+//								host_bw.setAlias(alias_bw);
+//								parameters.add(host_bw);
+//							}
+//							break;
+//						}
+//					}
+//				}
+//			}
+//			method.setParameters(parameters);
+//			methods.add(method);
+//		}
+//		return methods;
+//	}
 }

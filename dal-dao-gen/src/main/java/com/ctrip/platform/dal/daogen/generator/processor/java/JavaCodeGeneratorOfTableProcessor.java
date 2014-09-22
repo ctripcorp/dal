@@ -10,26 +10,24 @@ import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class JavaCodeGeneratorOfTableProcessor implements Processor {
+public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
 
 	private static Logger log = Logger.getLogger(JavaCodeGeneratorOfTableProcessor.class);
 	
 	@Override
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		
 		JavaCodeGenContext ctx = (JavaCodeGenContext)context;
-		String generatePath = CodeGenContext.generatePath;
 		int projectId = ctx.getProjectId();
-		File dir = new File(String.format("%s/%s/java", generatePath, projectId));
+		File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
 		
 		List<Callable<ExecuteResult>> tableCallables = generateTableDao(ctx, dir);
 		
@@ -39,7 +37,7 @@ public class JavaCodeGeneratorOfTableProcessor implements Processor {
 	private List<Callable<ExecuteResult>> generateTableDao(CodeGenContext codeGenCtx, final File mavenLikeDir) {
 		JavaCodeGenContext ctx = (JavaCodeGenContext)codeGenCtx;
 		final Progress progress = ctx.getProgress();
-		Queue<JavaTableHost> _tableHosts = ctx.get_tableHosts();
+		Queue<JavaTableHost> _tableHosts = ctx.getTableHosts();
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
 		for (final JavaTableHost host : _tableHosts) {

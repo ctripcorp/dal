@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
@@ -28,10 +29,8 @@ import com.ctrip.platform.dal.daogen.host.java.ViewHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPreparer implements Processor {
+public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPreparer implements DalProcessor {
 
 	private static Logger log = Logger.getLogger(JavaDataPreparerOfTableViewSpProcessor.class);
 	
@@ -44,7 +43,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 	}
 	
 	@Override
-	public void process(Context context) {
+	public void process(CodeGenContext context) throws Exception {
 		List<Callable<ExecuteResult>> _tableViewSpCallables;
 		
 		try {
@@ -74,15 +73,15 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 					daoByTableViewSp.getTasksByProjectId(projectId),
 					daoBySqlBuilder.getTasksByProjectId(projectId));
 		}
-		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.get_sqlBuilders();
+		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.getSqlBuilders();
 		for (GenTaskBySqlBuilder _t : _tempSqlBuilders) {
 			_sqlBuilders.add(_t);
 		}
 
-		final Queue<JavaTableHost> _tableHosts = ctx.get_tableHosts();
-		final Queue<ViewHost> _viewHosts = ctx.get_viewHosts();
-		final Queue<SpHost> _spHosts = ctx.get_spHosts();
-		final Map<String, SpDbHost> _spHostMaps = ctx.get_spHostMaps();
+		final Queue<JavaTableHost> _tableHosts = ctx.getTableHosts();
+		final Queue<ViewHost> _viewHosts = ctx.getViewHosts();
+		final Queue<SpHost> _spHosts = ctx.getSpHosts();
+		final Map<String, SpDbHost> _spHostMaps = ctx.getSpHostMaps();
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 		for (final GenTaskByTableViewSp tableViewSp : _tableViewSps) {
 			final String[] viewNames = StringUtils.split(tableViewSp.getView_names(), ",");

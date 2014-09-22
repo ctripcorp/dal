@@ -8,107 +8,124 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Pattern;
 
+import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.Progress;
+import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpFreeSqlHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpFreeSqlPojoHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.host.csharp.DatabaseHost;
 
-public class CSharpCodeGenContext extends CodeGenContext {
-	//<DatabaseHost db_name, DatabaseHost>
-	protected Map<String, DatabaseHost> _dbHosts = new ConcurrentHashMap<String, DatabaseHost>();
-	protected Queue<CSharpFreeSqlHost> _freeSqlHosts = new ConcurrentLinkedQueue<CSharpFreeSqlHost>();
-	//<CSharpFreeSqlPojoHost pojo_name, CSharpFreeSqlPojoHost>
-	protected Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts = new ConcurrentHashMap<String, CSharpFreeSqlPojoHost>();
-	//GenTaskByFreeSql class_name
-	protected Set<String> _freeDaos = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-	//PojoClassName of Table and View
-	protected Set<String> _tableDaos = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-	//PojoClassName of SP
-	protected Set<String> _spDaos = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-	protected Queue<CSharpTableHost> _tableViewHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
-	protected Queue<CSharpTableHost> _spHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
+public class CSharpCodeGenContext implements CodeGenContext {
 	
-	protected boolean newPojo = false;
+	private int projectId;
+	private boolean regenerate;
+	private Progress progress;
+	private Map<String,?> hints;
+	private String namespace;
+	public String generatePath;
+	
+	private Queue<GenTaskBySqlBuilder> sqlBuilders = new ConcurrentLinkedQueue<GenTaskBySqlBuilder>();
+	private DalConfigHost dalConfigHost;
+	
+	//<DatabaseHost db_name, DatabaseHost>
+	private Map<String, DatabaseHost> dbHosts = new ConcurrentHashMap<String, DatabaseHost>();
+	private Queue<CSharpFreeSqlHost> freeSqlHosts = new ConcurrentLinkedQueue<CSharpFreeSqlHost>();
+	//<CSharpFreeSqlPojoHost pojo_name, CSharpFreeSqlPojoHost>
+	private Map<String, CSharpFreeSqlPojoHost> freeSqlPojoHosts = new ConcurrentHashMap<String, CSharpFreeSqlPojoHost>();
+	//GenTaskByFreeSql class_name
+	private Set<String> freeDaos = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+	//PojoClassName of Table and View
+	private Set<String> tableDaos = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+	//PojoClassName of SP
+	private Set<String> spDaos = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+	private Queue<CSharpTableHost> tableViewHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
+	private Queue<CSharpTableHost> spHosts = new ConcurrentLinkedQueue<CSharpTableHost>();
+	
+	private boolean newPojo = false;
 	
 	public static String regEx = null;
 	public static Pattern inRegxPattern = null;
 	
-	static{
-		 //regEx="in\\s(@\\w+)";
-		 regEx = "(?i)In *(\\(?@\\w+\\)?)";
-		 inRegxPattern = Pattern.compile(regEx);
+	static {
+		// regEx="in\\s(@\\w+)";
+		regEx = "(?i)In *(\\(?@\\w+\\)?)";
+		inRegxPattern = Pattern.compile(regEx);
 	}
 	
 	public CSharpCodeGenContext(int projectId, boolean regenerate,
 			Progress progress, Map<String, ?> hints) {
-		super(projectId, regenerate, progress, hints);
+		this.projectId = projectId;
+		this.regenerate = regenerate;
+		this.progress = progress;
+		this.hints = hints;
+		this.generatePath = Configuration.get("gen_code_path");
 	}
 
-	public Map<String, DatabaseHost> get_dbHosts() {
-		return _dbHosts;
+	public Map<String, DatabaseHost> getDbHosts() {
+		return dbHosts;
 	}
 
-	public void set_dbHosts(Map<String, DatabaseHost> _dbHosts) {
-		this._dbHosts = _dbHosts;
+	public void setDbHosts(Map<String, DatabaseHost> dbHosts) {
+		this.dbHosts = dbHosts;
 	}
 
-	public Queue<CSharpFreeSqlHost> get_freeSqlHosts() {
-		return _freeSqlHosts;
+	public Queue<CSharpFreeSqlHost> getFreeSqlHosts() {
+		return freeSqlHosts;
 	}
 
-	public void set_freeSqlHosts(Queue<CSharpFreeSqlHost> _freeSqlHosts) {
-		this._freeSqlHosts = _freeSqlHosts;
+	public void setFreeSqlHosts(Queue<CSharpFreeSqlHost> freeSqlHosts) {
+		this.freeSqlHosts = freeSqlHosts;
 	}
 
-	public Map<String, CSharpFreeSqlPojoHost> get_freeSqlPojoHosts() {
-		return _freeSqlPojoHosts;
+	public Map<String, CSharpFreeSqlPojoHost> getFreeSqlPojoHosts() {
+		return freeSqlPojoHosts;
 	}
 
-	public void set_freeSqlPojoHosts(
-			Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts) {
-		this._freeSqlPojoHosts = _freeSqlPojoHosts;
+	public void set_freeSqlPojoHosts(Map<String, CSharpFreeSqlPojoHost> freeSqlPojoHosts) {
+		this.freeSqlPojoHosts = freeSqlPojoHosts;
 	}
 
-	public Set<String> get_freeDaos() {
-		return _freeDaos;
+	public Set<String> getFreeDaos() {
+		return freeDaos;
 	}
 
-	public void set_freeDaos(Set<String> _freeDaos) {
-		this._freeDaos = _freeDaos;
+	public void setFreeDaos(Set<String> freeDaos) {
+		this.freeDaos = freeDaos;
 	}
 
-	public Set<String> get_tableDaos() {
-		return _tableDaos;
+	public Set<String> getTableDaos() {
+		return tableDaos;
 	}
 
-	public void set_tableDaos(Set<String> _tableDaos) {
-		this._tableDaos = _tableDaos;
+	public void setTableDaos(Set<String> tableDaos) {
+		this.tableDaos = tableDaos;
 	}
 
-	public Set<String> get_spDaos() {
-		return _spDaos;
+	public Set<String> getSpDaos() {
+		return spDaos;
 	}
 
-	public void set_spDaos(Set<String> _spDaos) {
-		this._spDaos = _spDaos;
+	public void setSpDaos(Set<String> spDaos) {
+		this.spDaos = spDaos;
 	}
 
-	public Queue<CSharpTableHost> get_tableViewHosts() {
-		return _tableViewHosts;
+	public Queue<CSharpTableHost> getTableViewHosts() {
+		return tableViewHosts;
 	}
 
-	public void set_tableViewHosts(Queue<CSharpTableHost> _tableViewHosts) {
-		this._tableViewHosts = _tableViewHosts;
+	public void setTableViewHosts(Queue<CSharpTableHost> tableViewHosts) {
+		this.tableViewHosts = tableViewHosts;
 	}
 
-	public Queue<CSharpTableHost> get_spHosts() {
-		return _spHosts;
+	public Queue<CSharpTableHost> getSpHosts() {
+		return spHosts;
 	}
 
-	public void set_spHosts(Queue<CSharpTableHost> _spHosts) {
-		this._spHosts = _spHosts;
+	public void setSpHosts(Queue<CSharpTableHost> spHosts) {
+		this.spHosts = spHosts;
 	}
 
 	public boolean isNewPojo() {
@@ -119,33 +136,68 @@ public class CSharpCodeGenContext extends CodeGenContext {
 		this.newPojo = newPojo;
 	}
 
-	public static String getRegEx() {
-		return regEx;
+	public int getProjectId() {
+		return projectId;
 	}
 
-	public static void setRegEx(String regEx) {
-		CSharpCodeGenContext.regEx = regEx;
+	public void setProjectId(int projectId) {
+		this.projectId = projectId;
 	}
 
-	public static Pattern getInRegxPattern() {
-		return inRegxPattern;
+	public boolean isRegenerate() {
+		return regenerate;
 	}
 
-	public static void setInRegxPattern(Pattern inRegxPattern) {
-		CSharpCodeGenContext.inRegxPattern = inRegxPattern;
+	public void setRegenerate(boolean regenerate) {
+		this.regenerate = regenerate;
+	}
+
+	public Progress getProgress() {
+		return progress;
+	}
+
+	public void setProgress(Progress progress) {
+		this.progress = progress;
+	}
+
+	public Map<String, ?> getHints() {
+		return hints;
+	}
+
+	public void setHints(Map<String, ?> hints) {
+		this.hints = hints;
+	}
+
+	public String getNamespace() {
+		return namespace;
+	}
+
+	public void setNamespace(String namespace) {
+		this.namespace = namespace;
+	}
+
+	public String getGeneratePath() {
+		return generatePath;
+	}
+
+	public void setGeneratePath(String generatePath) {
+		this.generatePath = generatePath;
+	}
+
+	public Queue<GenTaskBySqlBuilder> getSqlBuilders() {
+		return sqlBuilders;
+	}
+
+	public void setSqlBuilders(Queue<GenTaskBySqlBuilder> sqlBuilders) {
+		this.sqlBuilders = sqlBuilders;
+	}
+
+	public DalConfigHost getDalConfigHost() {
+		return dalConfigHost;
+	}
+
+	public void setDalConfigHost(DalConfigHost dalConfigHost) {
+		this.dalConfigHost = dalConfigHost;
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

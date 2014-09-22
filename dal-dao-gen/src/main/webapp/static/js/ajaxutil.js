@@ -76,6 +76,8 @@
             if(temp[1]=="6"){//between
                 selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1]));
                 index2+=2;
+            }else if(temp[1]=="9" || temp[1]=="10"){// is null or is not null
+                selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], temp[0]));
             }else{
                 selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index2]));
                 index2++;

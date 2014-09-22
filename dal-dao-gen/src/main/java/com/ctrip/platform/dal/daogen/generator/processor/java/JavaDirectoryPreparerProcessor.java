@@ -7,36 +7,33 @@ import org.apache.commons.io.FileUtils;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
 
-public class JavaDirectoryPreparerProcessor implements Processor{
+public class JavaDirectoryPreparerProcessor {
 
-	@Override
-	public void process(Context context) {
-		JavaCodeGenContext ctx = (JavaCodeGenContext)context;
-		int projectId = ctx.getProjectId();
-		boolean regenerate = ctx.isRegenerate();
-		File dir = new File(String.format("%s/%s/java", CodeGenContext.generatePath, projectId));
+	public void process(CodeGenContext codeGenCtx) throws Exception {
+		JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
+		
+		File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), ctx.getProjectId()));
+		
 		try {
-			if (dir.exists() && regenerate)
+			if (dir.exists() && ctx.isRegenerate())
 				FileUtils.forceDelete(dir);
 
-			File daoMavenLike = new File(dir, "Dao");
-			File entityMavenLike = new File(dir, "Entity");
-			File testMavenLike = new File(dir, "Test");
+			File daoDir = new File(dir, "Dao");
+			File entityDir = new File(dir, "Entity");
+			File testDir = new File(dir, "Test");
 
-			if (!daoMavenLike.exists()) {
-				FileUtils.forceMkdir(daoMavenLike);
+			if (!daoDir.exists()) {
+				FileUtils.forceMkdir(daoDir);
 			}
-			if (!entityMavenLike.exists()) {
-				FileUtils.forceMkdir(entityMavenLike);
+			if (!entityDir.exists()) {
+				FileUtils.forceMkdir(entityDir);
 			}
-			if (!testMavenLike.exists()) {
-				FileUtils.forceMkdir(testMavenLike);
+			if (!testDir.exists()) {
+				FileUtils.forceMkdir(testDir);
 			}
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw e;
 		}
 	}
 

@@ -23,7 +23,7 @@ public class AppInternalsServlet extends HttpServlet{
 	
 	@Override
 	public void init() throws ServletException {
-		String reads = this.getInitParameter("permissions.read1");
+		String reads = this.getInitParameter("permissions.read");
 		String[] tokens = reads.split(",");
 		for (String token : tokens) {
 			Permission.getInstance().addUser(token, 0);
@@ -91,7 +91,7 @@ public class AppInternalsServlet extends HttpServlet{
 				return;
 			}
 			if(action.equalsIgnoreCase("change")){
-				AppMessage result = new AppMessage();
+				Result result = new Result();
 				if(Permission.getInstance().hasWrite(ctx.getRemoteip())){
 					try{
 						for (String key : ctx.getParameters().keySet()) {
@@ -105,7 +105,7 @@ public class AppInternalsServlet extends HttpServlet{
 				}else{
 					result.setMessage(String.format(NOPERMISSION, ctx.getRemoteip()));
 				}
-				ctx.getContent().append(result.toString());
+				ctx.getContent().append(Helper.toJSON(Result.class, "Result", result));
 			}
 		}
 	}

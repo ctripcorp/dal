@@ -12,7 +12,7 @@ public class HTMLSerializer extends Serializer{
 	}
 
 	@Override
-	public String serializer(Collection<ConfigBeanBase> beans) throws Exception{
+	public String serializer(Collection<ConfigBeanBase> beans) throws Exception {
 		throw new Exception("Not implement!");
 	}
 

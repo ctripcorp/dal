@@ -394,7 +394,7 @@ public class LogEntry {
 		return String.format(JSON_PATTERN, 
 				existed ? 0 : 1, 
 				hashCode, 
-				existed ? "" : sqlTpl, 
+				sqlTpl, 
 				params,
 				this.success ? 1 : 0, 
 				CommonUtil.string2Json(this.errorMsg),

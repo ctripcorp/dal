@@ -6,6 +6,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
@@ -32,8 +33,9 @@ public class CSharpCodeGenContext extends CodeGenContext {
 	public static Pattern inRegxPattern = null;
 	
 	static{
-		 regEx="in\\s(@\\w+)";
-		 inRegxPattern = Pattern.compile(regEx, java.util.regex.Pattern.CASE_INSENSITIVE);
+		 //regEx="in\\s(@\\w+)";
+		 regEx = "(?i)In *(\\(?@\\w+\\)?)";
+		 inRegxPattern = Pattern.compile(regEx);
 	}
 	
 	public CSharpCodeGenContext(int projectId, boolean regenerate,

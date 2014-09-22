@@ -142,6 +142,10 @@ public class JavaMethodHost {
 		return StringUtils.join(this.inClauses, ",");
 	}
 	
+	public boolean isInClauses(){
+		return this.inClauses != null && !this.inClauses.isEmpty();
+	}
+	
 	public boolean isPaging() {
 		return paging;
 	}

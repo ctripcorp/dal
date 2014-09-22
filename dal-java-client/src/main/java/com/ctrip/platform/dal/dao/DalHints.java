@@ -21,12 +21,27 @@ public class DalHints {
 	}
 	
 	public DalHints clone() {
-		DalHints newHints = new DalHints ();
+		DalHints newHints = new DalHints();
 		newHints.hints.putAll(hints);
+		
+		// Make sure we do deep copy for Map
+		Map shardColValues = (Map)newHints.get(DalHintEnum.shardColValues);
+		if(shardColValues != null)
+			newHints.setShardColValues(new HashMap<String, Object>(shardColValues));
+
+		// Make sure we do deep copy for Map
+		Map fields = (Map)newHints.get(DalHintEnum.fields);
+		if(fields != null)
+			newHints.setFields(new LinkedHashMap<String, Object>(fields));
+		
 		return newHints;
 	}
 	
 	public DalHints() {}
+	
+	public DalHints cleanUp() {
+		return setFields(null).setParameters(null);
+	}
 	
 	public DalHints(DalHintEnum...hints) {
 		for(DalHintEnum hint: hints) {

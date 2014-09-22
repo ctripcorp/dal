@@ -26,7 +26,7 @@ public class AppInternalsContext {
 		this.remoteip = request.getRemoteAddr();
 		this.localPath = request.getRequestURI();
 		this.requestUrl = request.getRequestURL().toString();
-		applicationPath = requestUrl.substring(0, requestUrl.indexOf("appinternals"));
+		applicationPath = requestUrl.substring(0, requestUrl.indexOf("appinternals") -1);
 		String[] pices = this.localPath.replaceFirst("/", "")
 				.replace('\\', '/').split("/");
 		boolean bg = false;
@@ -108,11 +108,12 @@ public class AppInternalsContext {
 				}else{
 					this.serializer = new JSONSerializer();
 				}
-				this.serializer.setAppPath(this.applicationPath);
 			}else{
 				this.serializer = new JSONSerializer();
-				this.serializer.setAppPath(this.applicationPath);
 			}
+		}else{
+			this.serializer = new JSONSerializer();
 		}
+		this.serializer.setAppPath(this.applicationPath);
 	}
 }

@@ -1,6 +1,6 @@
 package com.ctrip.platform.appinternals;
 
-public class AppMessage {
+public class Result {
 	private boolean sueccess;
 	private String message;
 	
@@ -10,17 +10,10 @@ public class AppMessage {
 	public void setSueccess(boolean sueccess) {
 		this.sueccess = sueccess;
 	}
-
 	public String getMessage() {
 		return message;
 	}
-
 	public void setMessage(String message) {
 		this.message = message;
-	}
-
-	public String toString(){
-		return String.format("{\"Message\":\"%s\",\"IsSuccess\":\"%s\"}",
-				this.message, this.sueccess ? "True" : "False");
 	}
 }

@@ -8,10 +8,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.platform.appinternals.helpers.Helper;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 public abstract class ConfigBeanBase{
-
+	
+	@XStreamOmitField
 	private Map<String, ConfigName> fields= new ConcurrentHashMap<String, ConfigName>();
+	
+	@XStreamOmitField
 	private ConfigInfo info = new ConfigInfo();
 	
 	public void init() throws Exception {

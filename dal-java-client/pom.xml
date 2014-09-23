@@ -47,5 +47,10 @@
     	<artifactId>dal-sql-log</artifactId>
     	<version>1.3.0</version>
     </dependency>
+    <dependency>
+    	<groupId>com.ctrip.platform</groupId>
+    	<artifactId>java-appinternals</artifactId>
+    	<version>1.0.0</version>
+    </dependency>
   </dependencies>
 </project>

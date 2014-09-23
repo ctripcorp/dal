@@ -5,13 +5,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 
 public class DalHA {
 	private int retryCount = 0;
 	private boolean over = false;
 	private Set<String> usedKeys = null;
 	private boolean retry = false;
-	private boolean failOver = false;
 	private SQLException exception = null;
 	private String productName = null;
 	
@@ -21,10 +21,6 @@ public class DalHA {
 	
 	public boolean isRetry() {
 		return retry;
-	}
-
-	public boolean isFailOver() {
-		return failOver;
 	}
 	
 	public SQLException getException() {
@@ -49,26 +45,29 @@ public class DalHA {
 
 	public void update(SQLException ex){
 		this.retry = false;
-		this.failOver = false;
 		if(this.isOver()) //There is no more connections to fail over.
 			return;
 		this.exception = ex;
 		this.increment();
-		this.retry = DalHAManager.isRetriable(this.getDBType(), this.exception);
-		this.failOver = DalHAManager.isFailOverable(this.getDBType(), this.exception);
+		if(this.getDBType().equals(DatabaseCategory.SqlServer))
+			this.retry = ConfigBeanFactory.getHAConfigBean()
+				.getSqlservercodes().contains(this.exception.getErrorCode());
+		else{
+			this.retry = ConfigBeanFactory.getHAConfigBean()
+					.getMysqlcodes().contains(this.exception.getErrorCode());
+		}
 	}
 	
 	public void clear(){
 		if(!this.isOver())
 			this.exception = null;
 		this.retry = false;
-		this.failOver = false;
 	}
 
 	public boolean needTryAgain(){
 		return !this.isOver() && null != this.exception && 
-				this.retryCount < DalHAManager.getRetryCount() &&
-				(this.isRetry() || this.isFailOver());
+				this.retryCount < ConfigBeanFactory.getHAConfigBean().getRetryCount() && 
+				this.isRetry();
 	}
 	
 	public void increment(){

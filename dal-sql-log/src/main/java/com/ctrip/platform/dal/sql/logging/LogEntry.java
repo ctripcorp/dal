@@ -125,7 +125,7 @@ public class LogEntry {
 	public void setException(Throwable exception) {
 		this.exception = exception;
 	}
-
+	
 	public boolean isSuccess() {
 		return success;
 	}
@@ -339,7 +339,7 @@ public class LogEntry {
 		tag.put(TAG_IN_TRANSACTION, this.isTransactional() ? "True" : "False");
 		tag.put(TAG_DURATION_TIME, Long.toString(this.getDuration()) + "ms");
 		tag.put(TAG_DATABASE_NAME, CommonUtil.null2NA(dbName));
-		tag.put(TAG_ALLINONEKEY, CommonUtil.null2NA(this.getAllInOneKey()));	
+		tag.put(TAG_ALLINONEKEY, CommonUtil.null2NA(this.getAllInOneKey()));
 		tag.put(TAG_ERROR_CODE, this.getErrorCode());
 		tag.put(TAG_COMMAND_TYPE, CommonUtil.null2NA(this.getCommandType()));
 		tag.put(TAG_DAO, this.getDao() + "." + this.getMethod());

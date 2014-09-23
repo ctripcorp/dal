@@ -3,9 +3,9 @@ package com.ctrip.platform.appinternals.configuration;
 import java.util.Date;
 
 public class ConfigInfo{
-	
 	private String name;
 	private String fullName;
+	private String alias;
 	private Date lastModifyTime;
      
 	public String getName() {
@@ -30,5 +30,11 @@ public class ConfigInfo{
 	}
 	public void setLastModifyTime(Date lastModifyTime) {
 		this.lastModifyTime = lastModifyTime;
+	}
+	public String getAlias() {
+		return alias;
+	}
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 }

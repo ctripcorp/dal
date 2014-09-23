@@ -5,6 +5,7 @@ import java.lang.reflect.Modifier;
 
 public class ConfigName {
 	private String name;
+	private String alias;
 	private Class<?> clazz;
 	private Method getMethod;
 	private Method setMethod;
@@ -46,5 +47,13 @@ public class ConfigName {
 
 	public void setSetMethod(Method setMethod) {
 		this.setMethod = setMethod;
+	}
+
+	public String getAlias() {
+		return alias;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 }

@@ -39,6 +39,7 @@ public class DalLogger {
 		entry.setDuration(duration);
 		entry.setSuccess(false);
 		entry.setErrorMsg(e.getMessage());
+		entry.setException(e);
 		log(entry);
 	}
 	

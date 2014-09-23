@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
+import com.ctrip.platform.dal.sql.exceptions.DalException;
+import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
 import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 /**
@@ -133,8 +135,7 @@ public final class DalTableDao<T> {
 	 */
 	public T queryByPk(Number id, DalHints hints) throws SQLException {
 		if (parser.getPrimaryKeyNames().length != 1)
-			throw new SQLException(
-					"The primary key of this table is consists of more than one column");
+			throw new DalException(ErrorCode.ValidatePrimaryKeyCount);
 
 		DalWatcher.begin();
 		StatementParameters parameters = new StatementParameters();
@@ -830,8 +831,7 @@ public final class DalTableDao<T> {
 
 			try {
 				if (fields.size() == 0)
-					throw new SQLException(
-							"There is no column to be updated. Please check if needed fields have been set in pojo.");
+					throw new DalException(ErrorCode.ValidateFieldCount);
 
 				count += client.update(updateSql, parameters, hints);
 			} catch (SQLException e) {

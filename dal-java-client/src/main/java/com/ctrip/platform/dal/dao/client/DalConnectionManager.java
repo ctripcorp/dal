@@ -9,6 +9,8 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
+import com.ctrip.platform.dal.sql.exceptions.DalException;
+import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
 
@@ -63,7 +65,7 @@ public class DalConnectionManager {
 			if(shard == null)
 				shard = strategy.locateDbShard(config, logicDbName, hints);
 			if(shard == null)
-				throw new SQLException("Can not locate shard for " + logicDbName);
+				throw new DalException(ErrorCode.ShardLocated, logicDbName);
 			dbSet.validate(shard);
 			
 			allInOneKey = dbSet.getRandomRealDbName(shard, isMaster, isSelect);

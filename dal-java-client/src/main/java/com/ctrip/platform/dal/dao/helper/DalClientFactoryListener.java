@@ -33,9 +33,8 @@ public class DalClientFactoryListener implements ServletContextListener {
 				DalClientFactory.warmUpConnections();
 			
 			DalLogger.setSimplifyLogging(Boolean.parseBoolean(simplifyLogging));
-			
 			ConfigBeanFactory.init();
-			
+
 		} catch (Exception e) {
 			logger.error("Error when init client factory", e);
 		}

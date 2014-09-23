@@ -30,7 +30,11 @@ public abstract class ConfigBeanBase{
 			BeanMeta falias = field.getAnnotation(BeanMeta.class);
 			if(falias != null && falias.omit())
 				continue;
-			Method getMethod = this.getClass().getMethod("get" + Helper.capitalize(field.getName()));
+			Method getMethod = null;
+			if(field.getType().equals(boolean.class) || field.getType().equals(Boolean.class))
+				getMethod = this.getClass().getMethod("is" + Helper.capitalize(field.getName()));
+			else
+				getMethod = this.getClass().getMethod("get" + Helper.capitalize(field.getName()));
 			Method setMethod = this.getClass().getMethod(
 						"set" + Helper.capitalize(field.getName()), field.getType());
 			ConfigName pname = new ConfigName();

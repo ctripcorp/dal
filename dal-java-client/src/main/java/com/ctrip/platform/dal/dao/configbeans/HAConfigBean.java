@@ -29,15 +29,27 @@ public class HAConfigBean extends ConfigBeanBase{
 		mysqlcodes = parseErrorCodes(this.mysqlErrorCodes);
 		
 		this.addChangeEvent("sqlserverErrorCodes", new ChangeEvent() {		
+
 			@Override
-			public void callback(String oldVal, String newVal) {
+			public void before(Object oldVal, String newVal) throws Exception {
+				// TODO Auto-generated method stub	
+			}
+
+			@Override
+			public void end(Object oldVal, String newVal) throws Exception {
 				sqlservercodes = parseErrorCodes(newVal);
 			}
 		});
 		
 		this.addChangeEvent("mysqlErrorCodes", new ChangeEvent() {
 			@Override
-			public void callback(String oldVal, String newVal) {
+			public void before(Object oldVal, String newVal) throws Exception {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void end(Object oldVal, String newVal) throws Exception {
 				mysqlcodes = parseErrorCodes(newVal);
 			}
 		});

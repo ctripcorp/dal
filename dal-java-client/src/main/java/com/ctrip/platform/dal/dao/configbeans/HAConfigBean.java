@@ -27,24 +27,14 @@ public class HAConfigBean extends ConfigBeanBase{
 		this.addChangeEvent("sqlserverErrorCodes", new ChangeEvent() {		
 			@Override
 			public void callback(String oldVal, String newVal) {
-				Set<Integer> temp = new HashSet<Integer>();
-				String[] tokens = newVal.split(",");
-				for (String code : tokens) {
-					temp.add(Integer.valueOf(code));
-				}
-				sqlservercodes = temp;
+				sqlservercodes = parseErrorCodes(newVal);
 			}
 		});
 		
 		this.addChangeEvent("mysqlErrorCodes", new ChangeEvent() {
 			@Override
 			public void callback(String oldVal, String newVal) {
-				Set<Integer> temp = new HashSet<Integer>();
-				String[] tokens = newVal.split(",");
-				for (String code : tokens) {
-					temp.add(Integer.valueOf(code));
-				}
-				mysqlcodes = temp;
+				mysqlcodes = parseErrorCodes(newVal);
 			}
 		});
 	}

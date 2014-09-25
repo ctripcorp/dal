@@ -61,12 +61,15 @@
 
         var paramList = [];
         var paramValues = [];
+        var paramNullable = [];
         $.each($("#param_list_auto").children("div"), function (index, value) {
             var first = $(value).children("input").eq(0);
+            var second = $(value).children("input").eq(1);
 //            var second = $(value).children("select").eq(0);
 //            paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
             paramList.push( $(first).val());
             paramValues.push($(first).val());
+            paramNullable.push($(second).is(":checked"));
         });
 
         var selectedConditions = [];
@@ -74,12 +77,13 @@
         $.each($("#selected_condition option"), function (index, value) {
             var temp = $(value).val().split(",");
             if(temp[1]=="6"){//between
-                selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1]));
+                selectedConditions.push(sprintf("%s,%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1],
+                    paramNullable[index2]));
                 index2+=2;
             }else if(temp[1]=="9" || temp[1]=="10"){// is null or is not null
                 selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], temp[0]));
             }else{
-                selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], paramValues[index2]));
+                selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2],paramNullable[index2]));
                 index2++;
             }
         });

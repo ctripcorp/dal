@@ -32,6 +32,45 @@ public class JavaMethodHost {
 	private boolean paging;
 	
 	private List<String> inClauses = new ArrayList<String>();
+	
+	// below is only for auto sql dao
+	private String field;
+	private String tableName;
+	private String orderByExp="";
+	
+	private List<JavaParameterHost> updateSetParameters;
+	
+	public String getOrderByExp() {
+		return orderByExp;
+	}
+
+	public void setOrderByExp(String orderByExp) {
+		this.orderByExp = orderByExp;
+	}
+
+	public List<JavaParameterHost> getUpdateSetParameters() {
+		return updateSetParameters;
+	}
+
+	public void setUpdateSetParameters(List<JavaParameterHost> updateSetParameters) {
+		this.updateSetParameters = updateSetParameters;
+	}
+
+	public String getField() {
+		return field;
+	}
+
+	public void setField(String field) {
+		this.field = field;
+	}
+
+	public String getTableName() {
+		return tableName;
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
 
 	public String getPackageName() {
 		return packageName;
@@ -190,6 +229,30 @@ public class JavaMethodHost {
 		if(this.paging && this.crud_type.equalsIgnoreCase("select")){
 			paramsDeclaration.add("int pageNo");
 			paramsDeclaration.add("int pageSize");
+		}
+		
+		paramsDeclaration.add("DalHints hints");
+		
+		return StringUtils.join(paramsDeclaration, ", ");
+	}
+	
+	public String getUpdateParameterDeclaration() {
+		List<String> paramsDeclaration = new ArrayList<String>();
+		for(JavaParameterHost parameter : updateSetParameters){
+			if(ConditionType.In == parameter.getConditionType()){
+				paramsDeclaration.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
+				this.inClauses.add(parameter.getAlias());
+			}else{
+				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
+			}
+		}
+		for(JavaParameterHost parameter : parameters) {
+			if(ConditionType.In == parameter.getConditionType()){
+				paramsDeclaration.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
+				this.inClauses.add(parameter.getAlias());
+			}else{
+				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
+			}
 		}
 		
 		paramsDeclaration.add("DalHints hints");

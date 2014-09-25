@@ -38,7 +38,7 @@ public interface DalShardingStrategy {
 	 * @param configure
 	 * @param logicDbName
 	 * @param hints
-	 * @return
+	 * @return shard Id for DB, null if not located
 	 */
 	String locateDbShard(DalConfigure configure, String logicDbName, DalHints hints);
 	
@@ -67,7 +67,7 @@ public interface DalShardingStrategy {
 	
 	/**
 	 * Get the separator between raw table name and table shard id
-	 * @return
+	 * @return shard Id for table, null if not located
 	 */
 	String getTableShardSeparator();
 

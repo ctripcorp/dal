@@ -10,7 +10,7 @@ import com.ctrip.platform.dal.sql.exceptions.DalException;
 import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
 
 public class KeyHolder {
-	private final List<Map<String, Object>> keyList = new LinkedList<Map<String, Object>>();;
+	private final List<Map<String, Object>> keyList = new LinkedList<Map<String, Object>>();
 
 	public int size() {
 		return keyList.size();
@@ -80,5 +80,9 @@ public class KeyHolder {
 		} catch (Throwable e) {
 			throw new DalException(ErrorCode.ValidateKeyHolderConvert, e);
 		}
+	}
+	
+	public void merge(KeyHolder tmpHolder) {
+		keyList.addAll(tmpHolder.keyList);
 	}
 }

@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.dao.helper;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,22 +35,47 @@ public class DalShardingHelper {
 	}
 	
 	/**
-	 * Locate DB shard id by hints
+	 * Try to locate DB shard id by hints. If can not be located, return false.
+	 * @param logicDbName
+	 * @param hints
+	 * @return true if shard id can be located
+	 * @throws SQLException
+	 */
+	private static boolean locateShardId(String logicDbName, DalHints hints) throws SQLException {
+		DalConfigure config = DalClientFactory.getDalConfigure();
+		
+		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
+		String shardId = dbSet.getStrategy().locateDbShard(config, logicDbName, hints);
+		if(shardId == null)
+			return false;
+		
+		// Fail fast asap
+		dbSet.validate(shardId);
+		hints.inShard(shardId);
+		
+		return true;
+	}
+
+	/**
+	 * Locate table shard id by hints.
 	 * @param logicDbName
 	 * @param hints
 	 * @return
 	 * @throws SQLException
 	 */
-	public static String locateShardId(String logicDbName, DalHints hints) throws SQLException {
+	private static boolean locateTableShardId(String logicDbName, DalHints hints) throws SQLException {
 		DalConfigure config = DalClientFactory.getDalConfigure();
+		DalShardingStrategy strategy = config.getDatabaseSet(logicDbName).getStrategy();
 		
-		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
-		String shard = dbSet.getStrategy().locateDbShard(config, logicDbName, hints);
-		dbSet.validate(shard);
+		// First check if we can locate the table shard id with the original hints
+		String tableShardId = strategy.locateTableShard(config, logicDbName, hints);
+		if(tableShardId == null)
+			return false;
 		
-		return shard;
+		hints.inTableShard(tableShardId);
+		return true;
 	}
-
+	
 	/**
 	 * Locate table shard id by hints.
 	 * @param logicDbName
@@ -84,8 +108,9 @@ public class DalShardingHelper {
 	 * @return Grouped pojos
 	 * @throws SQLException In case locate shard id faild 
 	 */
-	public static <T> Map<String, List<Map<String, ?>>> shuffle(String logicDbName, DalParser<T> parser, List<T> pojos) throws SQLException {
+	public static <T> Map<String, List<Map<String, ?>>> shuffle(String logicDbName, String shardId, DalParser<T> parser, List<T> pojos) throws SQLException {
 		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
+		
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
@@ -94,15 +119,23 @@ public class DalShardingHelper {
 		DalHints tmpHints = new DalHints();
 		for(T pojo:pojos) {
 			Map<String, ?> fields = parser.getFields(pojo);
-			String shardId = strategy.locateDbShard(config, logicDbName, tmpHints.setFields(fields));
-			dbSet.validate(shardId);
-			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
+			
+			String tmpShardId = shardId == null ? 
+					strategy.locateDbShard(config, logicDbName, tmpHints.setFields(fields)) :
+					shardId;
+			
+			dbSet.validate(tmpShardId);
+
+			List<Map<String, ?>> pojosInShard = shuffled.get(tmpShardId);
 			if(pojosInShard == null) {
 				pojosInShard = new LinkedList<Map<String, ?>>();
-				shuffled.put(shardId, pojosInShard);
+				shuffled.put(tmpShardId, pojosInShard);
 			}
+			
 			pojosInShard.add(fields);
 		}
+		
+		detectDistributedTransaction(logicDbName, shuffled.size(), "crossShardBatchDelete");
 		
 		return shuffled;
 	}
@@ -114,7 +147,7 @@ public class DalShardingHelper {
 	 * @return
 	 * @throws SQLException
 	 */
-	public static Map<String, List<Map<String, ?>>> shuffleByTable(String logicDbName, List<Map<String, ?>> pojos) throws SQLException {
+	private static Map<String, List<Map<String, ?>>> shuffleByTable(String logicDbName, String tableShardId, List<Map<String, ?>> pojos) throws SQLException {
 		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		
@@ -123,100 +156,81 @@ public class DalShardingHelper {
 		
 		DalHints tmpHints = new DalHints();
 		for(Map<String, ?> fields: pojos) {
-			String shardId = strategy.locateTableShard(config, logicDbName, tmpHints.setFields(fields));
+			String shardId = tableShardId == null ?
+					strategy.locateTableShard(config, logicDbName, tmpHints.setFields(fields)) :
+					tableShardId;
+
 			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
 			if(pojosInShard == null) {
 				pojosInShard = new LinkedList<Map<String, ?>>();
 				shuffled.put(shardId, pojosInShard);
 			}
+			
 			pojosInShard.add(fields);
 		}
 		
 		return shuffled;
 	}
 	
-	/**
-	 * Group pojos by shard id. Should be only used for DB that support sharding.
-	 * @param logicDbName
-	 * @param pojos
-	 * @return Grouped pojos
-	 * @throws SQLException In case locate shard id faild 
-	 */
-	public static <T> Map<String, List<Map<String, ?>>> shuffle(String logicDbName, DalParser<T> parser, T... pojos) throws SQLException {
-		return shuffle(logicDbName, parser, Arrays.asList(pojos));
-	}
-	
-	public static <T> Map<String, List<Map<String, ?>>> shuffleByTable(String logicDbName, DalParser<T> parser, List<T> daoPojos) throws SQLException {
+	public static <T> Map<String, List<Map<String, ?>>> shuffleByTable(String logicDbName, String tableShardId, DalParser<T> parser, List<T> daoPojos) throws SQLException {
 		List<Map<String, ?>> pojos = new ArrayList<Map<String, ?>>();
 		for(T pojo: daoPojos) {
 			pojos.add(parser.getFields(pojo));
 		}
-		return shuffleByTable(logicDbName, pojos);
+		return shuffleByTable(logicDbName, tableShardId, pojos);
 	}
 	
 	/**
-	 * Verify if shard id is already set for combined insert or batch update. 
+	 * Verify if shard id is already set for potential corss shard batch operation.
+	 * This includes combined insert, batch insert and batch delete.
+	 * It will first check if sharding is enabled. Then detect if necessary sharding id can be located.
+	 * If all meet, then allow the operation 
+	 * TODO do more analyze of the logic here
 	 * @param logicDbName
 	 * @param hints
 	 * @param message
 	 * @throws SQLException
+	 * @return if all sharding id can be located.
 	 */
-	public static void reqirePredefinedSharding(String logicDbName, String tableName, DalHints hints, String message) throws SQLException {
+	public static boolean isAlreadySharded(String logicDbName, String tableName, DalHints hints) throws SQLException {
 		// For normal case, both DB and table sharding are not enabled
 		if(!(isShardingEnabled(logicDbName) || isTableShardingEnabled(logicDbName, tableName)))
-			return;
+			return true;
 		
 		// Assume the out transaction already handle sharding logic
+		// This may have potential issue if PD think they can do cross DB operation
+		// TOD check here
 		if(DalTransactionManager.isInTransaction())
-			return;
-		
+			return true;
+
+		hints.cleanUp();
+
 		// Verify if DB shard is defined
-		if(isShardingEnabled(logicDbName))
-			locateShardId(logicDbName, hints);
+		if(isShardingEnabled(logicDbName) && !locateShardId(logicDbName, hints))
+			return false;
 		
 		// Verify if table shard is defined
-		if(isTableShardingEnabled(logicDbName, tableName))
-			locateTableShardId(logicDbName, hints, null, null);
+		if(isTableShardingEnabled(logicDbName, tableName) && !locateTableShardId(logicDbName, hints))
+			return false;
+		
+		return true;
 	}
 	
-	public static void crossShardOperationAllowed(String logicDbName, String tableName, DalHints hints, String operation) throws SQLException {
-		if(!(isShardingEnabled(logicDbName) || isTableShardingEnabled(logicDbName, tableName)))
-			throw new SQLException(logicDbName + " is not configured with sharding strategy");
-
+	private static void detectDistributedTransaction(String logicDbName, int dbShardSize, String operation) throws SQLException {
 		// Not allowed for distributed transaction
-		if(isShardingEnabled(logicDbName) && DalTransactionManager.isInTransaction())
-			throw new SQLException(operation + " is not allowed within transaction");
-		
-		String shard;
-		try {
-			shard = locateShardId(logicDbName, hints);
-		} catch (Exception e) {
-			// No shard can be located, so meet the criteria
-			return;
-		}
-
-		try {
-			shard = locateTableShardId(logicDbName, hints, null, null);
-		} catch (Exception e) {
-			// No shard can be located, so meet the criteria
-			return;
-		}
-		
-		throw new SQLException(operation + " requires to be executed only when shard id can not be located in hints. sharid:" + shard);
+		if(dbShardSize > 1 && DalTransactionManager.isInTransaction())
+			throw new SQLException(operation + " is not allowed in mutiple database shard within transaction");
 	}
-	
-//	public static int[] executeByDbShard(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask task) throws SQLException {
-//		
-//	}
 	
 	public static <T> T executeByTableShard(String logicDbName, String tabelName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask<T> task) throws SQLException {
 		if(isTableShardingEnabled(logicDbName, tabelName)) {
 			DalHints tmpHints = hints.clone();
-			Map<String, List<Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, daoPojos);
+			Map<String, List<Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, hints.getTableShardId(), daoPojos);
+			
 			List<T> results = new ArrayList<T>(pojosInTable.size());
-			for(String tableShardId: pojosInTable.keySet()) {
-				tmpHints.inTableShard(tableShardId);
-				T result = task.execute(tmpHints, pojosInTable.get(tableShardId));
+			for(String curTableShardId: pojosInTable.keySet()) {
+				tmpHints.inTableShard(curTableShardId);
+				T result = task.execute(tmpHints, pojosInTable.get(curTableShardId));
 				results.add(result);
 			}
 			return task.merge(results);

@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.sql.exceptions.DalException;
 import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
@@ -83,8 +84,7 @@ public class DalConnectionManager {
 		}
 		
 		try {
-			if(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown() || 
-					ConfigBeanFactory.getMarkdownConfigBean().getMarks().contains(allInOneKey))
+			if(MarkdownManager.isMarkdown(allInOneKey))
 				throw new DalException(ErrorCode.MarkdownConnection, allInOneKey);
 			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
 			DbMeta meta = DbMeta.getDbMeta(allInOneKey,isMaster,isSelect, conn);

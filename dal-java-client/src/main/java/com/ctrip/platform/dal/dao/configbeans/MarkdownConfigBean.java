@@ -9,11 +9,12 @@ import com.ctrip.platform.appinternals.annotations.BeanMeta;
 import com.ctrip.platform.appinternals.configuration.ChangeEvent;
 import com.ctrip.platform.appinternals.configuration.ConfigBeanBase;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 
 @BeanMeta(alias = "markdown")
 public class MarkdownConfigBean extends ConfigBeanBase{
 	@BeanMeta(alias = "Markdown")
-	private boolean markdown = false;
+	private volatile boolean markdown = false;
 	
 	@BeanMeta(alias = "MarkDownDB")
 	private String dbMarkdown = "";
@@ -44,8 +45,13 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 					marks = temp;
 				String[] tokens = newVal.split(",");
 				for (String token : tokens) {
+					//If the current mark down database doesn't contain the new value
+					//The new value need to be marked up on auto mark down
+					if(!marks.contains(token))
+						MarkdownManager.markup(token);
 					temp.add(token);
 				}
+				
 				marks = temp;
 			}
 		});
@@ -75,5 +81,17 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	
 	public Set<String> getMarks(){
 		return this.marks;
+	}
+	
+	public boolean isMarkdown(String dbname){
+		return this.isMarkdown() && this.marks.contains(dbname);
+	}
+	
+	public boolean markdown(String dbname){
+		if(!this.marks.contains(dbname)){
+			this.marks.add(dbname);
+			this.dbMarkdown = StringUtils.join(this.marks, ",");
+		}			
+		return this.marks.contains(dbname);
 	}
 }

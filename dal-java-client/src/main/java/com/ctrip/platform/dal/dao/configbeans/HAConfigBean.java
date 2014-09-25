@@ -10,9 +10,9 @@ import com.ctrip.platform.appinternals.configuration.ConfigBeanBase;
 @BeanMeta(alias = "haconf")
 public class HAConfigBean extends ConfigBeanBase{
 	@BeanMeta(alias = "HAEnabled")
-	private boolean enable = false;
+	private volatile boolean enable = false;
 	@BeanMeta(alias = "RetryTimes")
-	private int retryCount = 1;
+	private volatile int retryCount = 1;
 	@BeanMeta(alias = "SqlServerHAErrorCodes")
 	private String sqlserverErrorCodes = "-2,233,845,846,847,1421,2,53,701,802,945,1204,1222";
 	@BeanMeta(alias = "MySqlHAErrorCodes")

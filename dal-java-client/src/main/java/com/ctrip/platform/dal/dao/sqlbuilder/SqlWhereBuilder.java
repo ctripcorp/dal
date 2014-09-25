@@ -266,11 +266,17 @@ public class SqlWhereBuilder {
 			StatementParameters parameters, int index, int sqlType) throws SQLException {
 		if(null == paramValues){
 			and = or = false;
-			throw new SQLException(field + " is not support null value.");
+			throw new SQLException(field + " must have more than one value.");
 		}
 		if(paramValues.size() == 0){
 			and = or = false;
 			throw new SQLException(field + " must have more than one value.");
+		}
+		for(Object obj:paramValues){
+			if(obj==null){
+				and = or = false;
+				throw new SQLException(field + " is not support null value.");
+			}
 		}
 		return addInParam(field, paramValues, parameters, index, sqlType);
 	}

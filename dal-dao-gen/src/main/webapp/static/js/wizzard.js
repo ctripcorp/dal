@@ -9,7 +9,9 @@
 
     };
 
-    var variableHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">';
+    var variableHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">'+
+        ' &nbsp;&nbsp;支持NULL值：<input type="checkbox" %s >';
+
     var variable_typesHtml = '<select %s class="span5">'
         + "<option value='_please_select'>--参数类型--</option>"
         + "<option value='-7'>Bit----Boolean</option>"
@@ -663,6 +665,7 @@
         var conditionParamCount = step2_2_1_getSelectedConditionParamCount();
 
         var conVal = new Array();
+        var conNullable = new Array();
         if ($("#page1").attr('is_update') == "1") {
             // 模式： Age,6,aa,bb;Name,1,param2;
             var conditions = record['condition'].split(";");
@@ -673,10 +676,13 @@
                 if (keyValue[1]=="6"){
                     conVal.push(keyValue[2]);
                     conVal.push(keyValue[3]);
+                    conNullable.push(keyValue[4]);
+                    conNullable.push(keyValue[4]);
                 }else if(keyValue[1]=="9" || keyValue[1]=="10"){
                     continue;// is null、is not null don't need param
                 }else{
                     conVal.push(keyValue[2]);
+                    conNullable.push(keyValue[3]);
                 }
             }
         }
@@ -687,11 +693,14 @@
                 break;
             }
             i++;
-            var temp = conVal.shift();
-            if(temp!=null && temp!=""){
-                paramHtml = paramHtml + sprintf(variableHtml, temp)+"</div><br/>";
+            var conName = conVal.shift();
+            var nullable = conNullable.shift();
+            nullable = nullable!=undefined?nullable:'true';
+            nullable = nullable!='false'?'checked="checked"':"";
+            if(conName!=null && conName!=""){
+                paramHtml = paramHtml + sprintf(variableHtml, conName, nullable)+"</div><br/>";
             }else{
-                paramHtml = paramHtml + sprintf(variableHtml, sprintf("param%s", i))+"</div><br/>";
+                paramHtml = paramHtml + sprintf(variableHtml, sprintf("param%s", i), nullable)+"</div><br/>";
             }
         }
         return paramHtml;
@@ -708,6 +717,7 @@
         var conditionParamCount = step2_2_1_getSelectedConditionParamCount();
 
         var conVal = new Array();
+        var conNullable = new Array();
         if ($("#page1").attr('is_update') == "1") {
             // 模式： Age,6,aa,bb;Name,1,param2;
             var conditions = record['condition'].split(";");
@@ -718,10 +728,13 @@
                 if (keyValue[1]=="6"){
                     conVal.push(keyValue[2]);
                     conVal.push(keyValue[3]);
+                    conNullable.push(keyValue[4]);
+                    conNullable.push(keyValue[4]);
                 }else if(keyValue[1]=="9" || keyValue[1]=="10"){
                     continue;// is null、is not null don't need param
                 }else{
                     conVal.push(keyValue[2]);
+                    conNullable.push(keyValue[3]);
                 }
             }
         }
@@ -744,12 +757,15 @@
             }
             i++;
             var temp = conVal.shift();
+            var nullable = conNullable.shift();
+            nullable = nullable!=undefined?nullable:'true';
+            nullable = nullable!='false'?'checked="checked"':"";
             if(temp!=null && temp!=""){
                 namesStack.shift();
-                paramHtml = paramHtml + sprintf(variableHtml, temp)+"</div><br/>";
+                paramHtml = paramHtml + sprintf(variableHtml, temp, nullable)+"</div><br/>";
             }else{
                 var realName = "update"==crud_option? namesStack.shift():result[1];
-                paramHtml = paramHtml + sprintf(variableHtml, realName) + "</div><br/>";
+                paramHtml = paramHtml + sprintf(variableHtml, realName, nullable) + "</div><br/>";
             }
 
         }

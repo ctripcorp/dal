@@ -8,7 +8,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public class SConverter implements Converter{
+public class JSONConverter implements Converter{
 
 	@SuppressWarnings("rawtypes")
 	public boolean canConvert(Class type) {
@@ -18,12 +18,8 @@ public class SConverter implements Converter{
 	public void marshal(Object source, HierarchicalStreamWriter writer,
 			MarshallingContext context) {
 		ConfigBeanBase bean = (ConfigBeanBase)source;
-		if(bean.getBeanInfo().getAlias() != null)
-			writer.addAttribute("alias", bean.getBeanInfo().getAlias());
 		for (ConfigName cname : bean.getFieldNames()) {
 			writer.startNode(cname.getName());
-			if(cname.getAlias()!=null)
-				writer.addAttribute("alias", cname.getAlias());
 			try {
 				writer.setValue(bean.get(cname.getName()));
 			} catch (Exception e) {

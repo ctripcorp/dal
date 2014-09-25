@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
@@ -66,6 +67,10 @@ public class DalClientFactory {
 				logger.info("Successfully initialized Dal Java Client Factory with " + path);
 			}
 		}
+	}
+	
+	public static Set<String> getAllDB(){
+		return configureRef.get().getAllDB();
 	}
 
 	/**

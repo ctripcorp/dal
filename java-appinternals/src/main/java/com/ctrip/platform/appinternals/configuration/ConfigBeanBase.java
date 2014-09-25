@@ -31,12 +31,15 @@ public abstract class ConfigBeanBase{
 			if(falias != null && falias.omit())
 				continue;
 			Method getMethod = null;
-			if(field.getType().equals(boolean.class) || field.getType().equals(Boolean.class))
-				getMethod = this.getClass().getMethod("is" + Helper.capitalize(field.getName()));
-			else
-				getMethod = this.getClass().getMethod("get" + Helper.capitalize(field.getName()));
-			Method setMethod = this.getClass().getMethod(
-						"set" + Helper.capitalize(field.getName()), field.getType());
+			Method setMethod = null;
+			try{
+				if(field.getType().equals(boolean.class) || field.getType().equals(Boolean.class))
+					getMethod = this.getClass().getMethod("is" + Helper.capitalize(field.getName()));
+				else
+					getMethod = this.getClass().getMethod("get" + Helper.capitalize(field.getName()));
+				setMethod = this.getClass().getMethod(
+							"set" + Helper.capitalize(field.getName()), field.getType());
+			}catch(NoSuchMethodException ex){ }
 			ConfigName pname = new ConfigName();
 			pname.setName(field.getName());
 			pname.setClazz(field.getType());
@@ -69,6 +72,7 @@ public abstract class ConfigBeanBase{
 	}
 	
 	public void set(String fieldName, String val) throws Exception{
+		val = null == val ? "" : val; //Default
 		String key = this.aliases.get(fieldName);
 		ConfigName fname = key != null ? this.fields.get(key) : this.fields.get(fieldName);
 		if(fname != null){
@@ -77,10 +81,18 @@ public abstract class ConfigBeanBase{
 			}
 			Object oldVal = fname.getGetMethod().invoke(this, new Object[]{});
 			Object newVal = Converter.convert(val, fname.getClazz());
-			fname.getSetMethod().invoke(this, newVal);
-			if(this.events.containsKey(fieldName)){
-				this.events.get(fieldName).callback(oldVal.toString(), val);
+			ChangeEvent event = this.events.containsKey(fname.getName()) ? 
+					this.events.get(fname.getName()) : null;
+			if(null != event){
+				event.before(oldVal, val);
 			}
+			
+			fname.getSetMethod().invoke(this, newVal);
+			
+			if(null != event){
+				event.end(oldVal, val);
+			}
+
 			this.info.setLastModifyTime(new Date());
 		}else{
 			throw new Exception("The update field[" + fieldName+ "] name or alias doesn't exist.");

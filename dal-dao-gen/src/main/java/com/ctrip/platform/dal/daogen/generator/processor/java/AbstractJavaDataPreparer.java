@@ -121,9 +121,9 @@ public class AbstractJavaDataPreparer{
 		return tableHost;
 	}
 	
-	protected DatabaseCategory getDatabaseCategory(String dbName) throws Exception {
+	protected DatabaseCategory getDatabaseCategory(String allInOneName) throws Exception {
 		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
-		String dbType = DbUtils.getDbType(dbName);
+		String dbType = DbUtils.getDbType(allInOneName);
 		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 			dbCategory = DatabaseCategory.MySql;
 		}
@@ -147,19 +147,19 @@ public class AbstractJavaDataPreparer{
 		return WordUtils.capitalize(result.toString());
 	}
 	
-	private List<GenTaskBySqlBuilder> filterExtraMethods(CodeGenContext codeGenCtx, String dbName, 
+	private List<GenTaskBySqlBuilder> filterExtraMethods(CodeGenContext codeGenCtx, String allInOneName, 
 			String tableName) {
 		
 		JavaCodeGenContext ctx = (JavaCodeGenContext)codeGenCtx;
 		
 		List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
 
-		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.getSqlBuilders();
+		Queue<GenTaskBySqlBuilder> sqlBuilders = ctx.getSqlBuilders();
 		
-		Iterator<GenTaskBySqlBuilder> iter = _sqlBuilders.iterator();
+		Iterator<GenTaskBySqlBuilder> iter = sqlBuilders.iterator();
 		while (iter.hasNext()) {
 			GenTaskBySqlBuilder currentSqlBuilder = iter.next();
-			if (currentSqlBuilder.getAllInOneName().equals(dbName)
+			if (currentSqlBuilder.getAllInOneName().equals(allInOneName)
 					&& currentSqlBuilder.getTable_name().equals(tableName)) {
 				currentTableBuilders.add(currentSqlBuilder);
 				iter.remove();
@@ -176,17 +176,57 @@ public class AbstractJavaDataPreparer{
 	}
 	
 	private List<JavaMethodHost> buildSqlBuilderMethodHost(List<JavaParameterHost> allColumns,
-			List<GenTaskBySqlBuilder> currentTableBuilders) {
+			List<GenTaskBySqlBuilder> currentTableSqlBuilders) throws Exception {
 		List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
-		methods.addAll(buildSelectMethodHosts(allColumns,currentTableBuilders));
-		methods.addAll(buildDeleteMethodHosts(allColumns,currentTableBuilders));
-		methods.addAll(buildInsertMethodHosts(allColumns,currentTableBuilders));
-		methods.addAll(buildUpdateMethodHosts(allColumns,currentTableBuilders));
+		methods.addAll(buildSelectMethodHosts(allColumns,currentTableSqlBuilders));
+		methods.addAll(buildDeleteMethodHosts(allColumns,currentTableSqlBuilders));
+		methods.addAll(buildInsertMethodHosts(allColumns,currentTableSqlBuilders));
+		methods.addAll(buildUpdateMethodHosts(allColumns,currentTableSqlBuilders));
 		return methods;
 	}
 	
+	private String wrapField(GenTaskBySqlBuilder sqlBuilder) throws Exception{
+		String fieldStr = sqlBuilder.getFields();
+		
+		if("*".equalsIgnoreCase(fieldStr)){
+			return fieldStr;
+		}
+		DatabaseCategory dbCategory = getDatabaseCategory(sqlBuilder.getAllInOneName());
+		String []fields = fieldStr.split(",");
+		
+		String []result = new String[fields.length];
+		for(int i=0;i<fields.length;i++){
+			String field = fields[i];
+			if(DatabaseCategory.SqlServer==dbCategory){
+				field = "\"[" + field + "]\"";
+			}else{
+				field = "\"`" + field + "`\"";
+			}
+			result[i] = field;			
+		}
+		return StringUtils.join(result, ",");
+	}
+	
+	private String wrapSingleField(String field, String allInOneName) throws Exception{
+		DatabaseCategory dbCategory = getDatabaseCategory(allInOneName);
+		if(DatabaseCategory.SqlServer==dbCategory){
+			return field = "[" + field + "]";
+		}else{
+			return field = "`" + field + "`";
+		}
+	}
+	
+	private String wrapTableName(GenTaskBySqlBuilder sqlBuilder) throws Exception{
+		DatabaseCategory dbCategory = getDatabaseCategory(sqlBuilder.getAllInOneName());
+		String tableName = sqlBuilder.getTable_name();
+		if(DatabaseCategory.SqlServer==dbCategory && "select".equalsIgnoreCase(sqlBuilder.getCrud_type())){
+			tableName = tableName + " WITH (NOLOCK)";
+		}
+		return tableName;		
+	}
+	
 	private List<JavaMethodHost> buildSelectMethodHosts(List<JavaParameterHost> allColumns,
-			List<GenTaskBySqlBuilder> currentTableBuilders) {
+			List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
 		List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 
 		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
@@ -200,6 +240,15 @@ public class AbstractJavaDataPreparer{
 			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			method.setComments(builder.getComment());
+			method.setField(wrapField(builder));
+			method.setTableName(wrapTableName(builder));
+			String orderBy = builder.getOrderby();
+			if(orderBy!=null && !orderBy.trim().isEmpty() && orderBy.indexOf("-1,")!=0){
+				String []str = orderBy.split(",");
+				String wpf = wrapSingleField(str[0], builder.getAllInOneName());
+				String orderExp = "ORDER BY "+wpf+" "+StringUtils.upperCase(str[1]);
+				method.setOrderByExp(orderExp);
+			}
 			// select sql have select field and where condition clause
 			List<AbstractParameterHost> paramAbstractHosts = 
 					DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), CurrentLanguage.Java);
@@ -216,7 +265,7 @@ public class AbstractJavaDataPreparer{
 	}
 	
 	private List<JavaMethodHost> buildDeleteMethodHosts(List<JavaParameterHost> allColumns,
-			List<GenTaskBySqlBuilder> currentTableBuilders) {
+			List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
 		List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 
 		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
@@ -230,6 +279,7 @@ public class AbstractJavaDataPreparer{
 			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			method.setComments(builder.getComment());
+			method.setTableName(wrapTableName(builder));
 			// Only have condition clause
 			method.setParameters(buildMethodParameterHost4SqlConditin(builder, allColumns));
 			methods.add(method);
@@ -238,7 +288,7 @@ public class AbstractJavaDataPreparer{
 	}
 
 	private List<JavaMethodHost> buildInsertMethodHosts(List<JavaParameterHost> allColumns,
-			List<GenTaskBySqlBuilder> currentTableBuilders) {
+			List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
 		List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 
 		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
@@ -252,6 +302,7 @@ public class AbstractJavaDataPreparer{
 			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			method.setComments(builder.getComment());
+			method.setTableName(wrapTableName(builder));
 			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
 			
 			// Have no where condition
@@ -272,7 +323,7 @@ public class AbstractJavaDataPreparer{
 	}
 	
 	private List<JavaMethodHost> buildUpdateMethodHosts(List<JavaParameterHost> allColumns,
-			List<GenTaskBySqlBuilder> currentTableBuilders) {
+			List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
 		List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 
 		for (GenTaskBySqlBuilder builder : currentTableBuilders) {
@@ -286,20 +337,24 @@ public class AbstractJavaDataPreparer{
 			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			method.setComments(builder.getComment());
-			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
+			method.setField(wrapField(builder));
+			method.setTableName(wrapTableName(builder));
+			List<JavaParameterHost> updateSetParameters = new ArrayList<JavaParameterHost>();
 			// Have both set and condition clause
 			String[] fields = StringUtils.split(builder.getFields(), ",");
 			for (String field : fields) {
 				for (JavaParameterHost pHost : allColumns) {
 					if (pHost.getName().equals(field)) {
 						JavaParameterHost host_ls = new JavaParameterHost(pHost);
-						parameters.add(host_ls);
+						updateSetParameters.add(host_ls);
 						break;
 					}
 				}
 			}
-			parameters.addAll(buildMethodParameterHost4SqlConditin(builder, allColumns));
-			method.setParameters(parameters);
+			method.setUpdateSetParameters(updateSetParameters);
+			method.setParameters(buildMethodParameterHost4SqlConditin(builder, allColumns));
+//			parameters.addAll(buildMethodParameterHost4SqlConditin(builder, allColumns));
+//			method.setParameters(parameters);
 			methods.add(method);
 		}
 		return methods;
@@ -324,6 +379,7 @@ public class AbstractJavaDataPreparer{
 					host_ls.setConditional(true);
 					if (-1 != type)
 						host_ls.setConditionType(ConditionType.valueOf(type));
+					
 					parameters.add(host_ls);
 					// Between need an extra parameter
 					if (ConditionType.Between == host_ls.getConditionType()) {
@@ -331,6 +387,12 @@ public class AbstractJavaDataPreparer{
 						String alias_bw = tokens.length >= 4 ? tokens[3] : "";
 						host_bw.setAlias(alias_bw);
 						parameters.add(host_bw);
+						boolean nullable = tokens.length >= 5?Boolean.valueOf(tokens[4]):false;
+						host_ls.setNullable(nullable);
+						host_bw.setNullable(nullable);
+					}else{
+						boolean nullable = tokens.length >= 4?Boolean.valueOf(tokens[3]):false;
+						host_ls.setNullable(nullable);
 					}
 					break;
 				}

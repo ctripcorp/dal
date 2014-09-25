@@ -83,6 +83,9 @@ public class DalConnectionManager {
 		}
 		
 		try {
+			if(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown() || 
+					ConfigBeanFactory.getMarkdownConfigBean().getMarks().contains(allInOneKey))
+				throw new DalException(ErrorCode.MarkdownConnection, allInOneKey);
 			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
 			DbMeta meta = DbMeta.getDbMeta(allInOneKey,isMaster,isSelect, conn);
 			return new DalConnection(conn, meta);

@@ -9,9 +9,13 @@ import com.ctrip.platform.appinternals.configuration.ConfigBeanBase;
 
 @BeanMeta(alias = "haconf")
 public class HAConfigBean extends ConfigBeanBase{
+	@BeanMeta(alias = "HAEnabled")
 	private boolean enable = false;
+	@BeanMeta(alias = "RetryTimes")
 	private int retryCount = 1;
+	@BeanMeta(alias = "SqlServerHAErrorCodes")
 	private String sqlserverErrorCodes = "-2,233,845,846,847,1421,2,53,701,802,945,1204,1222";
+	@BeanMeta(alias = "MySqlHAErrorCodes")
 	private String mysqlErrorCodes = "1043,1159,1161,1021,1037,1038,1039,1040,1041,1154,1158,1160,1189,1190,1205,1218,1219,1220";
 	
 	@BeanMeta(omit = true)
@@ -25,15 +29,27 @@ public class HAConfigBean extends ConfigBeanBase{
 		mysqlcodes = parseErrorCodes(this.mysqlErrorCodes);
 		
 		this.addChangeEvent("sqlserverErrorCodes", new ChangeEvent() {		
+
 			@Override
-			public void callback(String oldVal, String newVal) {
+			public void before(Object oldVal, String newVal) throws Exception {
+				// TODO Auto-generated method stub	
+			}
+
+			@Override
+			public void end(Object oldVal, String newVal) throws Exception {
 				sqlservercodes = parseErrorCodes(newVal);
 			}
 		});
 		
 		this.addChangeEvent("mysqlErrorCodes", new ChangeEvent() {
 			@Override
-			public void callback(String oldVal, String newVal) {
+			public void before(Object oldVal, String newVal) throws Exception {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void end(Object oldVal, String newVal) throws Exception {
 				mysqlcodes = parseErrorCodes(newVal);
 			}
 		});

@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -20,6 +19,7 @@ import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
@@ -188,15 +188,14 @@ public class CrossShardTableDaoTest {
 			p.setAddress("aaa");
 			pList[2] = p;
 			
-			Map<String, KeyHolder> keyHolders =  new HashMap<String, KeyHolder>();
+			KeyHolder keyHolder = new KeyHolder();
 			/**
 			 * For sql server, the set no count on is selected for ctrip db. this will cause keholder not working 
 			 * correctly for most of the time.
 			 * com.microsoft.sqlserver.jdbc.SQLServerException: 已生成用于更新的结果集。
 			 * 	at com.microsoft.sqlserver.jdbc.SQLServerException.makeFromDriverError(SQLServerException.java:171)
 			 */
-			keyHolders =  null;
-			dao.crossShardCombinedInsert(new DalHints(), keyHolders, pList);
+			dao.combinedInsert(new DalHints(), null, pList);
 			
 			assertEquals(1, getCount(0));
 			assertEquals(2, getCount(1));
@@ -237,7 +236,7 @@ public class CrossShardTableDaoTest {
 			p.setAddress("aaa");
 			pList[2] = p;
 			
-			dao.crossShardCombinedInsert(new DalHints(), null, pList);
+			dao.combinedInsert(new DalHints(), null, pList);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -271,11 +270,13 @@ public class CrossShardTableDaoTest {
 			p.setAddress("aaa");
 			pList[2] = p;
 			
-			Map<String, int[]> counts = dao.crossShardBatchInsert(new DalHints(), pList);
+			hints = new DalHints();
+			int[] counts = dao.batchInsert(hints, pList);
 			
-			assertEquals(2, counts.size());
-			assertEquals(1, counts.get("0").length);
-			assertEquals(2, counts.get("1").length);
+			assertEquals(3, counts.length);
+			
+			assertEquals(1, ((int[])hints.getDetailResults().getResultByDb("0")).length);
+			assertEquals(2, ((int[])hints.getDetailResults().getResultByDb("1")).length);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -300,11 +301,12 @@ public class CrossShardTableDaoTest {
 			p.setId(3);
 			pList[2] = p;
 			
-			Map<String, int[]> counts = dao.crossShardBatchDelete(hints, pList);
+			int[] counts = dao.batchDelete(hints, pList);
 			
-			assertEquals(2, counts.size());
-			assertEquals(1, counts.get("0").length);
-			assertEquals(2, counts.get("1").length);
+			assertEquals(3, counts.length);
+			
+			assertEquals(1, ((int[])hints.getDetailResults().getResultByDb("0")).length);
+			assertEquals(2, ((int[])hints.getDetailResults().getResultByDb("1")).length);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();

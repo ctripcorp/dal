@@ -282,7 +282,7 @@ public class SqlWhereBuilder {
 	}
 	
 	/**
-	 *  In操作，若字段值为NULL，则此条件不会加入SQL中.
+	 *  In操作，允许字段值为NULL.
 	 *  若传入的字段值数量为0，则抛出异常。
 	 * @param field 字段
 	 * @param paramValues 字段值

@@ -41,6 +41,9 @@ public class DalHints {
 	
 	public DalHints() {}
 	
+	/**
+	 * Make sure only shardId, tableShardId, shardValue, shardColValue will be used to locate shard Id.
+	 */
 	public DalHints cleanUp() {
 		return setFields(null).setParameters(null);
 	}
@@ -182,6 +185,21 @@ public class DalHints {
 
 	public DalHints setIsolationLevel(int isolationLevel) {
 		set(DalHintEnum.isolationLevel, isolationLevel);
+		return this;
+	}
+	
+	public <T> DalHints setDetailResults(DalDetailResults<T> detailResults) {
+		set(DalHintEnum.detailResults, detailResults);
+		return this;
+	}
+
+	public DalDetailResults getDetailResults() {
+		return (DalDetailResults)get(DalHintEnum.detailResults);
+	}	
+
+	public <T> DalHints addDetailResults(T result) {
+		DalDetailResults<T> detailResults = (DalDetailResults<T>)get(DalHintEnum.detailResults);
+		detailResults.addResult(getShardId(), getTableShardId(), result);
 		return this;
 	}
 }

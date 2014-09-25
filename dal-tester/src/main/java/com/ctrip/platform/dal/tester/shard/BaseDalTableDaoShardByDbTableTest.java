@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalDetailResults;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
@@ -2272,18 +2273,18 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 			batchDeleteTest(shardId, i, hints.clone().setShardColValue("tableIndex", i));
 
 			// By fields same shard
-			try {
-				entities = getModels(shardId, i);
-				for(ClientTestModel model: entities)
-					model.setTableIndex(i);
+			entities = getModels(shardId, i);
+			int[] exp = new int[i + 1];
+			for(int k = 0; k < exp.length; k++)
+				exp[k] = 1;
+			
+			for(ClientTestModel model: entities)
+				model.setTableIndex(i);
 
-				Assert.assertEquals(1 + i, getCount(shardId, i));
-				res = dao.batchDelete(hints.clone(), entities);
-				assertResEquals(new int[]{1,1,1}, res);
-				Assert.assertEquals(0, getCount(shardId, i));
-				Assert.fail();
-			} catch (Exception e) {
-			}
+			Assert.assertEquals(1 + i, getCount(shardId, i));
+			res = dao.batchDelete(hints.clone(), entities);
+			assertResEquals(exp, res);
+			Assert.assertEquals(0, getCount(shardId, i));
 		}		
 		// Currently does not support not same shard 
 	}
@@ -2657,10 +2658,10 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 				}
 			}
 			
-			Map<String, KeyHolder> keyHolders =  new HashMap<String, KeyHolder>();
-			keyHolders = null;
-			dao.crossShardCombinedInsert(new DalHints(), keyHolders, pList);
-
+			KeyHolder keyHolder = createKeyHolder();
+			DalHints hints = new DalHints();
+			dao.combinedInsert(hints, keyHolder, pList);
+			assertKeyHolderCrossShard(keyHolder, hints.getDetailResults());
 			for(int i = 0; i < mod; i++) {
 				for(int j = 0; j < tableMod; j++) {
 					Assert.assertEquals(j + 1, getCount(i, j));
@@ -2672,6 +2673,17 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		}
 	}
 
+	public void assertKeyHolderCrossShard(KeyHolder holder, DalDetailResults<KeyHolder> detailResults) throws SQLException {
+		if(!ASSERT_ALLOWED)
+			return;
+
+		for(int i = 0; i < mod; i++) {
+			for(int j = 0; j < tableMod; j++) {
+				Assert.assertEquals(j + 1, detailResults.getResult(String.valueOf(i), String.valueOf(j)).size());
+			}
+		}
+	}
+	
 	@Test
 	public void testCrossShardBatchInsert() {
 		try {
@@ -2695,9 +2707,7 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 				}
 			}
 			
-			Map<String, KeyHolder> keyHolders =  new HashMap<String, KeyHolder>();
-			keyHolders = null;
-			dao.crossShardBatchInsert(new DalHints(), pList);
+			dao.batchInsert(new DalHints(), pList);
 
 			for(int i = 0; i < mod; i++) {
 				for(int j = 0; j < tableMod; j++) {
@@ -2737,9 +2747,7 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 				}
 			}
 			
-			Map<String, KeyHolder> keyHolders =  new HashMap<String, KeyHolder>();
-			keyHolders = null;
-			dao.crossShardBatchDelete(new DalHints(), pList);
+			dao.batchDelete(new DalHints(), pList);
 
 			for(int i = 0; i < mod; i++) {
 				for(int j = 0; j < tableMod; j++) {

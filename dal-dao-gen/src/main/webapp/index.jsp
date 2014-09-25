@@ -459,7 +459,7 @@
 	               </div>
                	  <div class="steps step2-2-2 row-fluid" from="">
                      <div class="row-fluid" id="param_list_auto_div">
-                           <label class="control-label popup_label">填写条件参数名</label>
+                           <label class="control-label popup_label">填写条件参数名,并选择参数是否支持NULL值</label>
                      </div>  
                      <div id="param_list_auto" class="row-fluid input-sm">      
                      </div>
@@ -544,7 +544,7 @@
 	                           </label>                           
 	                        </div>
 	                  </div>
-                      <label class="control-label popup_label">输入SQL，占位符：Java请使用?或者:Name形式，c#请使用@Name形式</label>
+                      <label class="control-label popup_label">输入SQL，占位符：Java请使用?，c#请使用@Name形式</label>
                       <div class="row-fluid">
                          <div id="sql_editor" class="span12" style="height:200px;">
                          </div>

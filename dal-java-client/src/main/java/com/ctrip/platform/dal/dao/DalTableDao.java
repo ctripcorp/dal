@@ -403,8 +403,12 @@ public final class DalTableDao<T> {
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
 			List<T> daoPojos) throws SQLException {
-		reqirePredefinedSharding(logicDbName, rawTableName, hints, "combinedInsert requires predefined shard! Use crossShardCombinedInsert instead.");
-		return combinedInsertByTable(hints, keyHolder, getPojosFields(daoPojos)); 
+		hints.setDetailResults(new DalDetailResults<KeyHolder>());
+		
+		if(isAlreadySharded(logicDbName, rawTableName, hints))
+			return combinedInsertByTable(hints, keyHolder, getPojosFields(daoPojos));
+		else
+			return crossShardCombinedInsert(hints, keyHolder, daoPojos);
 	}
 	
 	/**
@@ -419,38 +423,24 @@ public final class DalTableDao<T> {
 	 * @param daoPojos array of pojos to be inserted
 	 * @return how many rows been affected
 	 * @throws SQLException
-	 * @deprecated this api may merge with the non cross shard version in next release. Do not use it.
 	 */
-	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
+	private int crossShardCombinedInsert(DalHints hints, KeyHolder keyHolder,
 			List<T> daoPojos) throws SQLException {
-		crossShardOperationAllowed(logicDbName, rawTableName, hints, "crossShardCombinedInsert");
+		if (null == daoPojos || daoPojos.size() < 1)
+			return 0;
+
 		DalWatcher.crossShardBegin();
 		
 		int total = 0;
-		if (null == daoPojos || daoPojos.size() < 1)
-			return 0;
-		
 		if(isShardingEnabled(logicDbName)) {
-			// First shuffle by DB
-			Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
+			Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, hints.getShardId(), parser, daoPojos);
 			for(String shard: shuffled.keySet()) {
-				KeyHolder keyHolder = null;
-				if(keyHolders != null) {
-					keyHolder = new KeyHolder();
-					keyHolders.put(shard, keyHolder);
-				}
 				hints.inShard(shard);
 				total += combinedInsertByDb(hints, keyHolder, shuffled.get(shard));
 			}
 		} else {
-			// Only shuffle by table
-			Map<String, List<Map<String, ?>>> shuffled = shuffleByTable(logicDbName, parser, daoPojos);
+			Map<String, List<Map<String, ?>>> shuffled = shuffleByTable(logicDbName, hints.getTableShardId(), parser, daoPojos);
 			for(String shard: shuffled.keySet()) {
-				KeyHolder keyHolder = null;
-				if(keyHolders != null) {
-					keyHolder = new KeyHolder();
-					keyHolders.put(shard, keyHolder);
-				}
 				hints.inTableShard(shard);
 				total += combinedInsertByTable(hints, keyHolder, shuffled.get(shard));
 			}
@@ -471,11 +461,10 @@ public final class DalTableDao<T> {
 	 * @param daoPojos list of pojos to be inserted
 	 * @return how many rows been affected
 	 * @throws SQLException
-	 * @deprecated this api may merge with the non cross shard version in next release. Do not use it.
 	 */
-	public int crossShardCombinedInsert(DalHints hints, Map<String, KeyHolder> keyHolders,
+	private int crossShardCombinedInsert(DalHints hints, KeyHolder keyHolder,
 			T... daoPojos) throws SQLException {
-		return crossShardCombinedInsert(hints, keyHolders, Arrays.asList(daoPojos));
+		return crossShardCombinedInsert(hints, keyHolder, Arrays.asList(daoPojos));
 	}
 	
 	private int combinedInsertByDb(DalHints hints, final KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
@@ -513,8 +502,15 @@ public final class DalTableDao<T> {
 				getTableName(hints), columnsForInsert,
 				values.substring(0, values.length() - 2) + ")");
 
-		return null == keyHolder ? this.client.update(sql, parameters, hints)
-				: this.client.update(sql, parameters, hints, keyHolder);
+		if(keyHolder == null) {
+			return client.update(sql, parameters, hints);
+		} else{
+			KeyHolder tmpHolder = new KeyHolder();
+			int count = client.update(sql, parameters, hints, tmpHolder);
+			keyHolder.merge(tmpHolder);
+			hints.addDetailResults(tmpHolder);
+			return count;
+		}
 	}
 	
 	
@@ -528,8 +524,12 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
-		reqirePredefinedSharding(getLogicDbName(), rawTableName, hints, "batchInsert requires predefined shard! Use crossShardBatchInsert instead.");
-		return batchInsertByTable(hints, getPojosFields(daoPojos));
+		hints.setDetailResults(new DalDetailResults<int[]>());
+		
+		if(isAlreadySharded(getLogicDbName(), rawTableName, hints))
+			return batchInsertByTable(hints, getPojosFields(daoPojos));
+		else
+			return crossShardBatchInsert(hints, daoPojos);
 	}
 	
 
@@ -556,29 +556,32 @@ public final class DalTableDao<T> {
 	 * @param daoPojos list of pojos to be inserted
 	 * @return how many rows been affected for inserting each of the pojo organized by shard id.
 	 * @throws SQLException
-	 * @deprecated this api may merge with the non cross shard version in next release. Do not use it.
 	 */
-	public Map<String, int[]> crossShardBatchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
-		crossShardOperationAllowed(logicDbName, rawTableName, hints, "crossShardBatchInsert");
+	private int[] crossShardBatchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
+		if (null == daoPojos || daoPojos.size() < 1)
+			return new int[0];
 		
 		DalWatcher.crossShardBegin();
-		Map<String, int[]> result = new HashMap<String, int[]>();
+		
+		List<int[]> resultList = new LinkedList<>();
 		if(isShardingEnabled(logicDbName)) {
-			Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
+			Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, hints.getShardId(), parser, daoPojos);
 			for(String shard: shuffled.keySet()) {
 				hints.inShard(shard);
-				result.put(shard, batchInsertByDb(hints, shuffled.get(shard)));
+				int[] tmpResult = batchInsertByDb(hints, shuffled.get(shard));
+				resultList.add(tmpResult);
 			}
 		} else {
-			Map<String, List<Map<String, ?>>> shuffled = shuffleByTable(logicDbName, parser, daoPojos);
+			Map<String, List<Map<String, ?>>> shuffled = shuffleByTable(logicDbName, hints.getTableShardId(), parser, daoPojos);
 			for(String shard: shuffled.keySet()) {
 				hints.inTableShard(shard);
-				result.put(shard, batchInsertByTable(hints, shuffled.get(shard)));
+				int[] tmpResult = batchInsertByTable(hints, shuffled.get(shard));
+				resultList.add(tmpResult);
 			}
 		}
 
 		DalWatcher.crossShardEnd();
-		return result;
+		return DalShardingHelper.combine(resultList.toArray(new int[resultList.size()][]));
 	}
 
 	/**
@@ -591,9 +594,8 @@ public final class DalTableDao<T> {
 	 * @param daoPojos array of pojos to be inserted
 	 * @return how many rows been affected for inserting each of the pojo organized by shard id.
 	 * @throws SQLException
-	 * @deprecated this api may merge with the non cross shard version in next release. Do not use it.
 	 */
-	public Map<String, int[]> crossShardBatchInsert(DalHints hints, T... daoPojos) throws SQLException {
+	private int[] crossShardBatchInsert(DalHints hints, T... daoPojos) throws SQLException {
 		return this.crossShardBatchInsert(hints, Arrays.asList(daoPojos));
 	}
 	
@@ -624,7 +626,9 @@ public final class DalTableDao<T> {
 		}
 
 		String batchInsertSql = buildBatchInsertSql(getTableName(hints));
-		return client.batchUpdate(batchInsertSql, parametersList, hints);
+		int[] result = client.batchUpdate(batchInsertSql, parametersList, hints);
+		hints.addDetailResults(result);
+		return result;
 	}
 	
 	/**
@@ -692,8 +696,12 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
-		reqirePredefinedSharding(getLogicDbName(), rawTableName, hints, "batchDelete requires predefined shard! Use crossShardBatchDelete instead.");
-		return batchDeleteByTable(hints, getPojosFields(daoPojos));
+		hints.setDetailResults(new DalDetailResults<int[]>());
+		
+		if(isAlreadySharded(getLogicDbName(), rawTableName, hints))
+			return batchDeleteByTable(hints, getPojosFields(daoPojos));
+		else
+			return crossShardBatchDelete(hints, daoPojos);
 	}
 	
 	/**
@@ -706,9 +714,8 @@ public final class DalTableDao<T> {
 	 * @param daoPojos list of pojos to be deleted
 	 * @return how many rows been affected for deleting each of the pojo organized by shard id.
 	 * @throws SQLException
-	 * @deprecated this api may merge with the non cross shard version in next release. Do not use it.
 	 */
-	public Map<String, int[]> crossShardBatchDelete(DalHints hints, T... daoPojos) throws SQLException {
+	private int[] crossShardBatchDelete(DalHints hints, T... daoPojos) throws SQLException {
 		return crossShardBatchDelete(hints, Arrays.asList(daoPojos));
 	}
 	
@@ -722,28 +729,32 @@ public final class DalTableDao<T> {
 	 * @param daoPojos list of pojos to be deleted
 	 * @return how many rows been affected for deleting each of the pojo organized by shard id.
 	 * @throws SQLException
-	 * @deprecated this api may merge with the non cross shard version in next release. Do not use it.
 	 */
-	public Map<String, int[]> crossShardBatchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
-		crossShardOperationAllowed(logicDbName, rawTableName, hints, "crossShardBatchDelete");
+	private int[] crossShardBatchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
+		if (null == daoPojos || daoPojos.size() < 1)
+			return new int[0];
+
 		DalWatcher.crossShardBegin();
 		
-		Map<String, int[]> result = new HashMap<String, int[]>();
+		List<int[]> resultList = new LinkedList<>();
 		if(isShardingEnabled(logicDbName)) {
-			Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, parser, daoPojos);
+			Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, hints.getShardId(), parser, daoPojos);
 			for(String shard: shuffled.keySet()) {
 				hints.inShard(shard);
-				result.put(shard, batchDeleteByDb(hints, shuffled.get(shard)));
+				int[] tmpResult = batchDeleteByDb(hints, shuffled.get(shard));
+				resultList.add(tmpResult);
 			}
 		} else {
-			Map<String, List<Map<String, ?>>> shuffled = shuffleByTable(logicDbName, parser, daoPojos);
+			Map<String, List<Map<String, ?>>> shuffled = shuffleByTable(logicDbName, hints.getTableShardId(), parser, daoPojos);
 			for(String shard: shuffled.keySet()) {
 				hints.inTableShard(shard);
-				result.put(shard, batchDeleteByTable(hints, shuffled.get(shard)));
+				int[] tmpResult = batchDeleteByTable(hints, shuffled.get(shard));
+				resultList.add(tmpResult);
 			}
 		}
+		
 		DalWatcher.crossShardEnd();
-		return result;
+		return DalShardingHelper.combine(resultList.toArray(new int[resultList.size()][]));
 	}
 	
 	private int[] batchDeleteByDb(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
@@ -773,7 +784,9 @@ public final class DalTableDao<T> {
 		}
 		
 		String deleteSql = buildDeleteSql(getTableName(hints));
-		return client.batchUpdate(deleteSql, parametersList, hints);
+		int[] result = client.batchUpdate(deleteSql, parametersList, hints);
+		hints.addDetailResults(result);
+		return result;
 	}
 	
 	private List<Map<String, ?>> getPojosFields(List<T> daoPojos) {

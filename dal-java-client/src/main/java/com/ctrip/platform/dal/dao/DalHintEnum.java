@@ -122,4 +122,9 @@ public enum DalHintEnum {
 	 * used in DalTableDao, when set the update field can be null value.
 	 */
 	updateNullField,
+	
+	/**
+	 * The detail affected rows by DB and Table shard Id
+	 */
+	detailResults;
 }

@@ -2,7 +2,9 @@ package com.ctrip.platform.dal.dao.configure;
 
 import java.sql.Connection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.ctrip.datasource.locator.DataSourceLocator;
 
@@ -48,5 +50,15 @@ public class DalConfigure {
 				}
 			}
 		}
+	}
+	
+	public Set<String> getAllDB(){
+		Set<String> alldbs = new HashSet<String>();
+		for (DatabaseSet set : this.databaseSets.values()) {
+			for (DataBase db : set.getDatabases().values()) {
+				alldbs.add(db.getConnectionString());
+			}
+		}
+		return alldbs;
 	}
 }

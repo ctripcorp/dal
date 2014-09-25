@@ -150,31 +150,23 @@ public class DatabaseSet {
 	}
 	
 	private String getRandomRealDbName(DalHA ha, List<DataBase> dbs) {
-		if(null != ha){
-			if(ha.isRetry() && ha.getDB() != null){
-				return ha.getDB();
-			}else if(ha.isFailOver()){
-				List<String> dbNames = new ArrayList<String>();
-				for (DataBase database : dbs) {
-					if(!ha.contains(database.getConnectionString()))
-						dbNames.add(database.getConnectionString());
-				}
-				if(dbNames.isEmpty()){
-					ha.setOver(true);
-					return null;
-				}else{
-					int index = (int)(Math.random() * dbNames.size());
-					ha.addDB(dbNames.get(index));
-					return dbNames.get(index);
-				}
-			}else{
-				int index = (int)(Math.random() * dbs.size());	
-				ha.addDB(dbs.get(index).getConnectionString());
-				return dbs.get(index).getConnectionString();
-			}
-		}else{
+		if(ha == null || dbs.size() == 1){
 			int index = (int)(Math.random() * dbs.size());	
 			return dbs.get(index).getConnectionString();
+		}else{
+			List<String> dbNames = new ArrayList<String>();
+			for (DataBase database : dbs) {
+				if(!ha.contains(database.getConnectionString()))
+					dbNames.add(database.getConnectionString());
+			}
+			if(dbNames.isEmpty()){
+				ha.setOver(true);
+				return null;
+			}else{
+				int index = (int)(Math.random() * dbNames.size());
+				ha.addDB(dbNames.get(index));
+				return dbNames.get(index);
+			}
 		}
 	}
 }

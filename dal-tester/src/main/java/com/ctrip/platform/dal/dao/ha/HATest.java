@@ -17,11 +17,13 @@ import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.client.DalHAManager;
+import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.dao.unitbase.Database;
 
 public class HATest {
 	private static Database database = null;
 	private static Database database2 = null;
+	private static Database database3 = null;
 	private static DalHints hints = new DalHints();
 	private static int markCount = 0;
 	static {
@@ -29,6 +31,10 @@ public class HATest {
 				DatabaseCategory.MySql);
 		database2 = new Database("HA_Test", "dal_client_test",
 				DatabaseCategory.MySql);
+		database3 = new Database("HA_Test_1", "dal_client_test", 
+				DatabaseCategory.MySql);
+		ConfigBeanFactory.getHAConfigBean().setEnable(true);
+		ConfigBeanFactory.getHAConfigBean().setRetryCount(3);
 	}
 
 	@BeforeClass
@@ -58,7 +64,6 @@ public class HATest {
 
 	@Test
 	public void testNotRetryNotFailOver(){
-		DalHAManager.setHaEnabled(true);
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database.getTableName();
 		Integer count = 0;
@@ -77,7 +82,6 @@ public class HATest {
 
 	@Test
 	public void testAllRetryFailed() {
-		DalHAManager.setHaEnabled(true);
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database.getTableName();
 		Integer count = 0;
@@ -99,7 +103,6 @@ public class HATest {
 
 	@Test
 	public void testTheSecondRetrySuccess() {
-		DalHAManager.setHaEnabled(true);
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database.getTableName();
 		Integer count = 0;
@@ -123,7 +126,6 @@ public class HATest {
 
 	@Test
 	public void testTheSecondFailOverSuccess() throws SQLException {
-		DalHAManager.setHaEnabled(true);
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database2.getTableName();
 		Integer count = 0;
@@ -152,12 +154,11 @@ public class HATest {
 	
 	@Test
 	public void testAllFailOverFailed(){
-		DalHAManager.setHaEnabled(true);
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database2.getTableName();
 		Integer count = 0;
 		try{
-			count = database2.getClient().query(sql,
+			count = database3.getClient().query(sql,
 				new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
@@ -192,7 +193,6 @@ public class HATest {
 	
 	@Test
 	public void testFirstRetrySecondeFailOver() {
-		DalHAManager.setHaEnabled(true);
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database2.getTableName();
 		Integer count = 0;

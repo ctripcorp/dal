@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
@@ -82,6 +83,9 @@ public class DalConnectionManager {
 		}
 		
 		try {
+			if(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown() || 
+					ConfigBeanFactory.getMarkdownConfigBean().getMarks().contains(allInOneKey))
+				throw new DalException(ErrorCode.MarkdownConnection, allInOneKey);
 			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
 			DbMeta meta = DbMeta.getDbMeta(allInOneKey,isMaster,isSelect, conn);
 			return new DalConnection(conn, meta);
@@ -94,7 +98,8 @@ public class DalConnectionManager {
 			throws SQLException {
 		// If HA disabled or not query, we just directly call _doInConnnection
 
-		if(!DalHAManager.isHaEnabled() || action.operation != DalEventEnum.QUERY)
+		if(!ConfigBeanFactory.getHAConfigBean().isEnable() 
+				|| action.operation != DalEventEnum.QUERY)
 			return _doInConnection(action, hints);;
 
 		DalHA highAvalible = new DalHA();

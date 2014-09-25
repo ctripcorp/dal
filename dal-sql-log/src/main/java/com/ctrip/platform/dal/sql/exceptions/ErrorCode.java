@@ -76,6 +76,8 @@ public enum ErrorCode {
 	 */
 	CantGetConnection(ErrorClassify.Connection, 5300, "Can not get connection from DB %s"),
 	
+	MarkdownConnection(ErrorClassify.Connection, 5301, "The DB or allinonekey %s has bean marked down"),
+	
 	NoMoreConnectionToFailOver(ErrorClassify.Connection, 5300, "There is no more fail over connections to try"),
 	
 	/**

@@ -95,6 +95,8 @@ public class AppInternalsServlet extends HttpServlet{
 				if(Permission.getInstance().hasWrite(ctx.getRemoteip())){
 					try{
 						for (String key : ctx.getParameters().keySet()) {
+							if(key.equalsIgnoreCase("action") || key.equalsIgnoreCase("format"))
+								continue;
 							bean.set(key, ctx.getParameters().get(key));
 						}
 						result.setSueccess(true);

@@ -4,6 +4,8 @@ import java.io.Writer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.ctrip.platform.appinternals.serialization.JSONConverter;
+import com.ctrip.platform.appinternals.serialization.XMLConverter;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
@@ -26,11 +28,14 @@ public class Helper {
 		urlpattern = Pattern.compile(URLPATTERN);
 		
 		xmlStream = new XStream();
+		xmlStream.autodetectAnnotations(true);
+		
 		jsonStream = new XStream(new JsonHierarchicalStreamDriver() {
 		    public HierarchicalStreamWriter createWriter(Writer writer) {
 		        return new JsonWriter(writer, JsonWriter.DROP_ROOT_MODE);
 		    }
-		});;
+		});
+		jsonStream.autodetectAnnotations(true);
 	}
 	
 	public static boolean validateIPV4(String ipaddr) {  
@@ -56,15 +61,15 @@ public class Helper {
 	
 	public static <T> String toXML(Class<?> type, String alias, T model){
 		xmlStream.setMode(XStream.NO_REFERENCES);
-		xmlStream.autodetectAnnotations(true);
 		xmlStream.alias(alias, type);
+		xmlStream.registerConverter(new XMLConverter());
 		return xmlStream.toXML(model);
 	}
 	
 	public static <T> String toJSON(Class<?> type, String alias, T model){
+		jsonStream.setMode(XStream.NO_REFERENCES);
 		jsonStream.alias(alias, type);
-		jsonStream.autodetectAnnotations(true);
-		jsonStream.alias(alias, type);
+		jsonStream.registerConverter(new JSONConverter());
 		return jsonStream.toXML(model);
 	}
 }

@@ -368,9 +368,6 @@ public class AbstractJavaDataPreparer{
 			String[] tokens = StringUtils.split(condition, ",");
 			String name = tokens[0];
 			int type = tokens.length >= 2 ? CommonUtils.tryParse(tokens[1], -1) : -1;
-			if(type == 9 || type == 10){ //is null、is not null don't hava param
-				continue;
-			}
 			String alias = tokens.length >= 3 ? tokens[2] : "";
 			for (JavaParameterHost pHost : allColumns) {
 				if (pHost.getName().equals(name)) {
@@ -386,6 +383,7 @@ public class AbstractJavaDataPreparer{
 						JavaParameterHost host_bw = new JavaParameterHost(host_ls);
 						String alias_bw = tokens.length >= 4 ? tokens[3] : "";
 						host_bw.setAlias(alias_bw);
+						host_bw.setConditionType(ConditionType.Between);
 						parameters.add(host_bw);
 						boolean nullable = tokens.length >= 5?Boolean.valueOf(tokens[4]):false;
 						host_ls.setNullable(nullable);

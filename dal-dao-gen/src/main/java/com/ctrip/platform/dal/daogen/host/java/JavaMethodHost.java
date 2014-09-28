@@ -222,6 +222,9 @@ public class JavaMethodHost {
 			if(ConditionType.In == parameter.getConditionType()){
 				paramsDeclaration.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
 				this.inClauses.add(parameter.getAlias());
+			}else if(parameter.getConditionType() == ConditionType.IsNull
+					|| parameter.getConditionType() == ConditionType.IsNotNull){ 
+				continue;//is null、is not null don't hava param
 			}else{
 				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
 			}

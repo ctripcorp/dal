@@ -7,7 +7,7 @@
         /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
 #end
         /// <returns></returns>
-		public int ${method.getName()}(#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getAlias())}#if($foreach.count != $method.getParameters().size()),#end#end)
+		public int ${method.getName()}(${method.getParameterDeclaration()})
         {
             try
             {
@@ -17,7 +17,7 @@
 #foreach($p in $method.getParameters())  
 #if($p.isInParameter())
 #set($success = $inParams.add($p))
-#else
+#elseif(${p.getConditionType()}!="IsNull" && ${p.getConditionType()}!="IsNotNull")
                 parameters.Add(new StatementParameter{ Name = "@${p.getAlias()}", Direction = ParameterDirection.Input, DbType = DbType.${p.getDbType()}, Value =${WordUtils.uncapitalize($p.getAlias())} });
 #end
 #end

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.host.csharp;
 
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
+import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 
 public class CSharpParameterHost extends AbstractParameterHost  implements Comparable<CSharpParameterHost> {
@@ -31,6 +32,8 @@ public class CSharpParameterHost extends AbstractParameterHost  implements Compa
 	
 	private boolean valueType;
 	
+	private ConditionType conditionType;
+	
 	public CSharpParameterHost(){ }
 	
 	public CSharpParameterHost(CSharpParameterHost host) {
@@ -45,6 +48,14 @@ public class CSharpParameterHost extends AbstractParameterHost  implements Compa
 		this.nullable = host.isNullable();
 		this.valueType = host.isValueType();
 		this.comment = host.getComment();
+	}
+
+	public ConditionType getConditionType() {
+		return conditionType;
+	}
+
+	public void setConditionType(ConditionType conditionType) {
+		this.conditionType = conditionType;
 	}
 
 	public String getComment() {

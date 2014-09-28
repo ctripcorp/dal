@@ -7,6 +7,6 @@
         /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
 #end
         /// <returns></returns>
-		int ${method.getName()}(#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getAlias())}#if($foreach.count != $method.getParameters().size()),#end#end);
+		int ${method.getName()}(${method.getParameterDeclaration()});
 #end
 #end

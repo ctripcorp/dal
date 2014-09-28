@@ -306,9 +306,9 @@ public final class DalTableDao<T> {
 	}
 
 	/**
-	 * Insert pojos and get the generated PK back in keyHolder. Because certain
-	 * JDBC driver may not support such feature, like MS JDBC driver, make sure
-	 * the local test is performed before use this API.
+	 * Insert pojos and get the generated PK back in keyHolder. 
+	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
+	 * Please don't pass keyholder for MS SqlServer to avoid the failure.
 	 * 
 	 * @param hints
 	 *            Additional parameters that instruct how DAL Client perform database operation.
@@ -328,9 +328,9 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * Insert pojos and get the generated PK back in keyHolder. Because certain
-	 * JDBC driver may not support such feature, like MS JDBC driver, make sure
-	 * the local test is performed before use this API.
+	 * Insert pojos and get the generated PK back in keyHolder. 
+	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
+	 * Please don't pass keyholder for MS SqlServer to avoid the failure.
 	 * 
 	 * @param hints
 	 *            Additional parameters that instruct how DAL Client perform database operation.
@@ -373,13 +373,14 @@ public final class DalTableDao<T> {
 	}
 
 	/**
-	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in
-	 * keyHolder If the nocount is on, the keyholder is not available. If the logic db has 
-	 * sharding policy, all pojos are supposed to be in same shard. If the pojos are not belongs to 
-	 * same shard, you can use crossShardCombinedInsert instead.
+	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
+	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
+	 * Please don't pass keyholder for MS SqlServer to avoid the failure.
+	 * This operation support corss-sharding case. Include DB, table or DB + table sharding combination.
+	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param keyHolder holder for generated primary keys
+	 * @param keyHolder holder for generated primary keys. Don not use it(set to null) for MS SqlServer
 	 * @param daoPojos array of pojos to be inserted
 	 * @return how many rows been affected
 	 * @throws SQLException
@@ -390,10 +391,11 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in
-	 * keyHolder If the nocount is on, the keyholder is not available. If the logic db has 
-	 * sharding policy, all pojos are supposed to be in same shard. If the pojos are not belongs to 
-	 * same shard, you can use crossShardCombinedInsert instead.
+	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
+	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
+	 * Please don't pass keyholder for MS SqlServer to avoid the failure.
+	 * This operation support corss-sharding case. Include DB, table or DB + table sharding combination.
+	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param keyHolder holder for generated primary keys
@@ -411,19 +413,6 @@ public final class DalTableDao<T> {
 			return crossShardCombinedInsert(hints, keyHolder, daoPojos);
 	}
 	
-	/**
-	 * Cross shard version of combined insert. If you want to get the generated primary keys
-	 * for each shards being inserted, just pass in an empty map of keyholder. If you don't want to 
-	 * get that info, just pass in a null. If sharding bases on DB, the key will be db shard id, otherwise, it will be table shard id.
-	 * if bothe db and table sharding enabled, it will be db shard id. 
-	 * If you are sure that all the pojos are of the same shard, you can use combinedInsert instead with hints properly initialized.
-	 * 
-	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param keyHolder if you want to get generated keys, just create an empty map. The key will be shard id if that shard is used for insert.
-	 * @param daoPojos array of pojos to be inserted
-	 * @return how many rows been affected
-	 * @throws SQLException
-	 */
 	private int crossShardCombinedInsert(DalHints hints, KeyHolder keyHolder,
 			List<T> daoPojos) throws SQLException {
 		if (null == daoPojos || daoPojos.size() < 1)
@@ -439,32 +428,11 @@ public final class DalTableDao<T> {
 				total += combinedInsertByDb(hints, keyHolder, shuffled.get(shard));
 			}
 		} else {
-			Map<String, List<Map<String, ?>>> shuffled = shuffleByTable(logicDbName, hints.getTableShardId(), parser, daoPojos);
-			for(String shard: shuffled.keySet()) {
-				hints.inTableShard(shard);
-				total += combinedInsertByTable(hints, keyHolder, shuffled.get(shard));
-			}
+			total = combinedInsertByDb(hints, keyHolder, getPojosFields(daoPojos));
 		}
 
 		DalWatcher.crossShardEnd();
 		return total;
-	}
-	
-	/**
-	 * Cross shard version of combined insert. If you want to get the generated primary keys
-	 * for each shards being inserted, just pass in an empty map of keyholder. If you don't want to 
-	 * get that info, just pass in a null.
-	 * If you are sure that all the pojos are of the same shard, you can use combinedInsert instead with hints properly initialized.
-	 * 
-	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param keyHolder if you want to get generated keys, just create an empty map. The key will be shard id if that shard is used for insert.
-	 * @param daoPojos list of pojos to be inserted
-	 * @return how many rows been affected
-	 * @throws SQLException
-	 */
-	private int crossShardCombinedInsert(DalHints hints, KeyHolder keyHolder,
-			T... daoPojos) throws SQLException {
-		return crossShardCombinedInsert(hints, keyHolder, Arrays.asList(daoPojos));
 	}
 	
 	private int combinedInsertByDb(DalHints hints, final KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
@@ -515,8 +483,9 @@ public final class DalTableDao<T> {
 	
 	
 	/**
-	 * Insert pojos in batch mode. If the logic db has sharding policy, all pojos are supposed to be in same shard.
-	 * If the pojos are not belongs to same shard, you can use crossShardBatchInsert instead.
+	 * Insert pojos in batch mode. 
+	 * This operation support corss-sharding case. Include DB, table or DB + table sharding combination.
+	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojos list of pojos to be inserted
@@ -534,8 +503,9 @@ public final class DalTableDao<T> {
 	
 
 	/**
-	 * Insert pojos in batch mode. If the logic db has sharding policy, all pojos are supposed to be in same shard.
-	 * If the pojos are not belongs to same shard, you can use crossShardBatchInsert instead.
+	 * Insert pojos in batch mode. 
+	 * This operation support corss-sharding case. Include DB, table or DB + table sharding combination.
+	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojos array of pojos to be inserted
@@ -546,59 +516,30 @@ public final class DalTableDao<T> {
 		return batchInsert(hints, Arrays.asList(daoPojos));
 	}
 		
-	/**
-	 * The cross shard version of batch insert. Each pojo can be in different shard.
-	 * If you are sure that all the pojos are of the same shard, you can use batchInsert instead with hints properly initialized.
-	 * If sharding bases on DB, the key will be db shard id, otherwise, it will be table shard id.
-	 * if bothe db and table sharding enabled, it will be db shard id.
-	 * 
-	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param daoPojos list of pojos to be inserted
-	 * @return how many rows been affected for inserting each of the pojo organized by shard id.
-	 * @throws SQLException
-	 */
 	private int[] crossShardBatchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
 		if (null == daoPojos || daoPojos.size() < 1)
 			return new int[0];
 		
 		DalWatcher.crossShardBegin();
 		
-		List<int[]> resultList = new LinkedList<>();
+		int[] result;
 		if(isShardingEnabled(logicDbName)) {
+			List<int[]> resultList = new LinkedList<>();
 			Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, hints.getShardId(), parser, daoPojos);
 			for(String shard: shuffled.keySet()) {
 				hints.inShard(shard);
 				int[] tmpResult = batchInsertByDb(hints, shuffled.get(shard));
 				resultList.add(tmpResult);
 			}
+			result = DalShardingHelper.combine(resultList.toArray(new int[resultList.size()][]));
 		} else {
-			Map<String, List<Map<String, ?>>> shuffled = shuffleByTable(logicDbName, hints.getTableShardId(), parser, daoPojos);
-			for(String shard: shuffled.keySet()) {
-				hints.inTableShard(shard);
-				int[] tmpResult = batchInsertByTable(hints, shuffled.get(shard));
-				resultList.add(tmpResult);
-			}
+			result = batchInsertByDb(hints, getPojosFields(daoPojos));
 		}
 
 		DalWatcher.crossShardEnd();
-		return DalShardingHelper.combine(resultList.toArray(new int[resultList.size()][]));
+		return result;
 	}
 
-	/**
-	 * The cross shard version of batch insert. Each pojo can be in different shard.
-	 * If you are sure that all the pojos are of the same shard, you can use batchInsert instead with hints properly initialized.
-	 * If sharding bases on DB, the key will be db shard id, otherwise, it will be table shard id.
-	 * if bothe db and table sharding enabled, it will be db shard id.
-	 * 
-	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param daoPojos array of pojos to be inserted
-	 * @return how many rows been affected for inserting each of the pojo organized by shard id.
-	 * @throws SQLException
-	 */
-	private int[] crossShardBatchInsert(DalHints hints, T... daoPojos) throws SQLException {
-		return this.crossShardBatchInsert(hints, Arrays.asList(daoPojos));
-	}
-	
 	private int[] batchInsertByDb(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
 		return executeByTableShard(logicDbName, rawTableName, hints, daoPojos, new BulkTask<int[]>(){
 			@Override
@@ -674,8 +615,9 @@ public final class DalTableDao<T> {
 	
 
 	/**
-	 * Delete the given pojo list. If the logic db has sharding policy, all pojos are supposed to be in same shard.
-	 * If the pojos are not belongs to same shard, you can use crossShardBatchDelete instead.
+	 * Delete the given pojo list in batch. 
+	 * This operation support corss-sharding case. Include DB, table or DB + table sharding combination.
+	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojos array of pojos to be deleted
@@ -687,8 +629,9 @@ public final class DalTableDao<T> {
 	}
 	
 	/**
-	 * Delete the given pojo list. If the logic db has sharding policy, all pojos are supposed to be in same shard.
-	 * If the pojos are not belongs to same shard, you can use crossShardBatchDelete instead.
+	 * Delete the given pojo list in batch. 
+	 * This operation support corss-sharding case. Include DB, table or DB + table sharding combination.
+	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojos list of pojos to be deleted
@@ -703,58 +646,29 @@ public final class DalTableDao<T> {
 		else
 			return crossShardBatchDelete(hints, daoPojos);
 	}
-	
-	/**
-	 * Cross shard version of batch delete. Each pojo can be in different shard if logic db is shard enabled.
-	 * If you are sure that all the pojos are of the same shard, you can use batchDelete instead with hints properly initialized.
-	 * If sharding bases on DB, the key will be db shard id, otherwise, it will be table shard id.
-	 * if bothe db and table sharding enabled, it will be db shard id.
-	 * 
-	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param daoPojos list of pojos to be deleted
-	 * @return how many rows been affected for deleting each of the pojo organized by shard id.
-	 * @throws SQLException
-	 */
-	private int[] crossShardBatchDelete(DalHints hints, T... daoPojos) throws SQLException {
-		return crossShardBatchDelete(hints, Arrays.asList(daoPojos));
-	}
-	
-	/**
-	 * Cross shard version of batch delete. Each pojo can be in different shard if logic db is shard enabled.
-	 * If you are sure that all the pojos are of the same shard, you can use batchDelete instead with hints properly initialized.
-	 * If sharding bases on DB, the key will be db shard id, otherwise, it will be table shard id.
-	 * if bothe db and table sharding enabled, it will be db shard id.
-	 * 
-	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param daoPojos list of pojos to be deleted
-	 * @return how many rows been affected for deleting each of the pojo organized by shard id.
-	 * @throws SQLException
-	 */
+
 	private int[] crossShardBatchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
 		if (null == daoPojos || daoPojos.size() < 1)
 			return new int[0];
 
 		DalWatcher.crossShardBegin();
 		
-		List<int[]> resultList = new LinkedList<>();
+		int[] result;
 		if(isShardingEnabled(logicDbName)) {
+			List<int[]> resultList = new LinkedList<>();
 			Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, hints.getShardId(), parser, daoPojos);
 			for(String shard: shuffled.keySet()) {
 				hints.inShard(shard);
 				int[] tmpResult = batchDeleteByDb(hints, shuffled.get(shard));
 				resultList.add(tmpResult);
 			}
+			result = DalShardingHelper.combine(resultList.toArray(new int[resultList.size()][]));
 		} else {
-			Map<String, List<Map<String, ?>>> shuffled = shuffleByTable(logicDbName, hints.getTableShardId(), parser, daoPojos);
-			for(String shard: shuffled.keySet()) {
-				hints.inTableShard(shard);
-				int[] tmpResult = batchDeleteByTable(hints, shuffled.get(shard));
-				resultList.add(tmpResult);
-			}
+			result = batchDeleteByDb(hints, getPojosFields(daoPojos));
 		}
 		
 		DalWatcher.crossShardEnd();
-		return DalShardingHelper.combine(resultList.toArray(new int[resultList.size()][]));
+		return result;
 	}
 	
 	private int[] batchDeleteByDb(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {

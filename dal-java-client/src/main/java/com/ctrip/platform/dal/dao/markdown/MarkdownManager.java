@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.ctrip.platform.dal.dao.client.DalConnection;
+import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 
 public class MarkdownManager {
 	
@@ -14,9 +15,6 @@ public class MarkdownManager {
 	private static List<AutoMarkdown> mkds = new ArrayList<AutoMarkdown>();
 	private static ConcurrentLinkedQueue<Mark> exqueue = new ConcurrentLinkedQueue<Mark>();
 	
-	//Synchronized the final mark down status
-	private static ManualMarkdown maunal = new ManualMarkdown(); 
-	
 	static{
 		mkds.add(new TimeoutAutoMarkdown());
 		mkds.add(new LoginAutoMarkdown());
@@ -25,19 +23,8 @@ public class MarkdownManager {
 		manager.start();
 	}
 	
-	public static void markup(String key){
-		for (AutoMarkdown mk : mkds) {
-			mk.markup(key);
-		}
-	}
-	
 	public static boolean isMarkdown(String key){
-		for (AutoMarkdown mk : mkds) {
-			if(mk.isMarkdown(key)){
-				maunal.markown(key);
-			}			
-		}
-		return maunal.isMarkdown(key);
+		return ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(key);
 	}
 	
 	public static void shutdown(){
@@ -45,7 +32,8 @@ public class MarkdownManager {
 	}
 	
 	public static void collectException(DalConnection conn, Throwable e){
-		exqueue.add(new Mark(conn.getMeta().getAllInOneKey(), conn.getDatabaseProductName(), e));
+		if(conn != null && conn.getMeta() != null)
+			exqueue.add(new Mark(conn.getMeta().getAllInOneKey(), conn.getDatabaseProductName(), e));
 	}
 	
 	private static class CollectExceptionTask implements Runnable{

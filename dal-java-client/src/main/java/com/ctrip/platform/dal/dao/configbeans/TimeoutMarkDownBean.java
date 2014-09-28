@@ -10,15 +10,15 @@ import com.ctrip.platform.appinternals.configuration.ConfigBeanBase;
 @BeanMeta(alias="TimeoutMarkDownBean")
 public class TimeoutMarkDownBean extends ConfigBeanBase{
 	@BeanMeta(alias = "EnableTimeoutMarkDown")
-	private volatile boolean enableTimeoutMarkDown = false;
+	private volatile boolean enableTimeoutMarkDown = true;
 	@BeanMeta(alias = "SamplingDuration")
     private volatile int samplingDuration = 60;
 	@BeanMeta(alias = "ErrorCountBaseLine")
-    private volatile int errorCountBaseLine = 10000;
+    private volatile int errorCountBaseLine = 100;
 	@BeanMeta(alias = "ErrorPercent")
     private volatile float errorPercent = 0.5f;
 	@BeanMeta(alias = "ErrorPercentBaseLine")
-	private volatile int errorPercentBaseLine = 1000;
+	private volatile int errorPercentBaseLine = 20;
 	@BeanMeta(alias = "MySqlErrorCodes")
     private String mySqlErrorCodes = "0";
 	@BeanMeta(alias = "SqlServerErrorCodes")
@@ -75,7 +75,7 @@ public class TimeoutMarkDownBean extends ConfigBeanBase{
 		this.errorCountBaseLine = errorCountBaseLine;
 	}
 	public float getErrorPercent() {
-		return errorPercentBaseLine;
+		return errorPercent;
 	}
 	public void setErrorPercent(float errorPercent) {
 		this.errorPercent = errorPercent;

@@ -6,19 +6,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class TimeoutAutoMarkdown implements AutoMarkdown{
 	
 	private Map<String, Tuple<AtomicInteger, AtomicInteger>> data = 
 			new ConcurrentHashMap<String, Tuple<AtomicInteger, AtomicInteger>>();
-	private Map<String, Boolean> marks = new ConcurrentHashMap<String, Boolean>();
 	
 	/**
 	 * This method will be invoked by one thread.
 	 */
 	@Override
 	public void collectException(Mark mark) {
-		if(!ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown())
+		if(!ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown() ||
+				ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(mark.getName()))
 			return;
 		if(!data.containsKey(mark.getName()))
 			data.put(mark.getName(), new Tuple<AtomicInteger, AtomicInteger>(
@@ -32,28 +33,18 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 		requests = dt.getItem2().incrementAndGet();
 		
 		if(hints >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorCountBaseLine()){
-			marks.put(mark.getName(), true);
+			ConfigBeanFactory.getMarkdownConfigBean().markdown(mark.getName());
+			data.clear();
 			return;
 		}
 		if(requests >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercentBaseLine()){
 			float percent = (hints + 0.0f) /requests;
 			if(percent >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercent()){
-				marks.put(mark.getName(), true);
+				ConfigBeanFactory.getMarkdownConfigBean().markdown(mark.getName());
+				data.clear();
 				return;
 			}
 		}
-	}
-
-	@Override
-	public boolean isMarkdown(String key) {
-		return marks.containsKey(key) && marks.get(key);
-	}
-
-	@Override
-	public void markup(String key) {
-		data.put(key, new Tuple<AtomicInteger, AtomicInteger>(
-				new AtomicInteger(0), new AtomicInteger(0)));
-		marks.put(key, false);
 	}
 	
 	private boolean isHint(String dbType, Throwable e){
@@ -62,7 +53,9 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 		if(dbType.equalsIgnoreCase("Microsoft SQL Server"))
 			return e instanceof SQLException && ((SQLException)e).getErrorCode() == -2;
 		else{
-			
+			if(e.getClass().toString().equalsIgnoreCase(MySQLTimeoutException.class.toString())){
+				return true;
+			}
 		}
 		return false;
 	}

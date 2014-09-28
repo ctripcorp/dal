@@ -19,6 +19,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	@BeanMeta(alias = "MarkDownDB")
 	private String dbMarkdown = "";
 	
+	@BeanMeta(alias = "AllDB")
 	private String alldbs = "";
 	
 	@BeanMeta(omit = true)

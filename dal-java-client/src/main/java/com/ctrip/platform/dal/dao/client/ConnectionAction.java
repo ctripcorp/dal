@@ -16,6 +16,7 @@ import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
 import com.ctrip.platform.dal.sql.logging.LogEntry;
@@ -133,7 +134,7 @@ public abstract class ConnectionAction<T> {
 	}
 	
 	public void end(Object result, Throwable e) throws SQLException {
-		log(result, e);
+		log(result, e);	
 		handleException(e);
 	}
 

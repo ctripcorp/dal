@@ -126,6 +126,8 @@ public class DalConnectionManager {
 		try {
 			result = action.execute();
 		} catch (Throwable e) {
+			MarkdownManager.collectException(action.connHolder, e);
+			e.printStackTrace();
 			ex = e;
 		} finally {
 			action.populateDbMeta();

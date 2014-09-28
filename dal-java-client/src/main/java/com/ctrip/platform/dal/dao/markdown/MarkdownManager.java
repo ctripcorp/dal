@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.ctrip.platform.dal.dao.client.DalConnection;
+
 public class MarkdownManager {
 	
 	private static final int durations = 1000;
 	private static Thread manager = null;
 	
 	private static List<AutoMarkdown> mkds = new ArrayList<AutoMarkdown>();
-	private static ConcurrentLinkedQueue<Tuple<String, Throwable>> exqueue = 
-			new ConcurrentLinkedQueue<Tuple<String, Throwable>>();
+	private static ConcurrentLinkedQueue<Mark> exqueue = new ConcurrentLinkedQueue<Mark>();
 	
 	//Synchronized the final mark down status
 	private static ManualMarkdown maunal = new ManualMarkdown(); 
@@ -43,19 +44,20 @@ public class MarkdownManager {
 		manager.interrupt();
 	}
 	
-	public static void collectException(String key, Throwable e){
-		exqueue.add(new Tuple<String, Throwable>(key, e));
+	public static void collectException(DalConnection conn, Throwable e){
+		exqueue.add(new Mark(conn.getMeta().getAllInOneKey(), conn.getDatabaseProductName(), e));
 	}
 	
 	private static class CollectExceptionTask implements Runnable{
 		@Override
 		public void run() {
 			do{
-				Tuple<String, Throwable> kv = exqueue.poll();
-				if(kv != null){
+				Mark kv = exqueue.poll();
+				while(kv != null){
 					for (AutoMarkdown mk : mkds) {
-						mk.collectException(kv.getItem1(), kv.getItem2());
+						mk.collectException(kv);
 					}
+					kv = exqueue.poll();
 				}
 				try {
 					Thread.sleep(durations);
@@ -65,6 +67,5 @@ public class MarkdownManager {
 				}
 			}while(true);
 		}
-		
 	}
 }

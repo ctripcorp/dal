@@ -5,14 +5,10 @@ public interface AutoMarkdown {
 	 * Collect the exception. 
 	 * If the specified exception has been collected successfully
 	 * return true, else return false.
-	 * @param dbname
-	 * 		All in one key.
-	 * @param e
-	 * 		DAL Exception.
-	 * @return
-	 * 		The specified exception been collected or not.
-	 */		
-	boolean collectException(String key, Throwable e);
+	 * @param mark
+	 * 		mark information
+	 */
+	void collectException(Mark mark);
 	
 	/**
 	 * Judge the database name is marked down or not

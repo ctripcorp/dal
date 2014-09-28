@@ -8,20 +8,5 @@ public interface AutoMarkdown {
 	 * @param mark
 	 * 		mark information
 	 */
-	void collectException(Mark mark);
-	
-	/**
-	 * Judge the database name is marked down or not
-	 * @param dbname
-	 * 		All in one key
-	 * @return
-	 */
-	boolean isMarkdown(String key);
-	
-	/**
-	 * Mark the specified database up 
-	 * @param name
-	 * 		All in one key
-	 */
-	void markup(String key);
+	void collectException(MarkKey mark);
 }

@@ -83,9 +83,9 @@ public class DalConnectionManager {
 			throw new DalException(ErrorCode.NoMoreConnectionToFailOver);
 		}
 		
-		try {
-			if(MarkdownManager.isMarkdown(allInOneKey))
-				throw new DalException(ErrorCode.MarkdownConnection, allInOneKey);
+		if(MarkdownManager.isMarkdown(allInOneKey))
+			throw new DalException(ErrorCode.MarkdownConnection, allInOneKey);
+		try {	
 			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
 			DbMeta meta = DbMeta.getDbMeta(allInOneKey,isMaster,isSelect, conn);
 			return new DalConnection(conn, meta);
@@ -127,7 +127,6 @@ public class DalConnectionManager {
 			result = action.execute();
 		} catch (Throwable e) {
 			MarkdownManager.collectException(action.connHolder, e);
-			e.printStackTrace();
 			ex = e;
 		} finally {
 			action.populateDbMeta();

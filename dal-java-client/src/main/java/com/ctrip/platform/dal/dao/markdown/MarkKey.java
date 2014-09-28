@@ -1,11 +1,11 @@
 package com.ctrip.platform.dal.dao.markdown;
 
-public class Mark {
+public class MarkKey {
 	private String name;
 	private String dbtype;
 	private Throwable exception;
 	
-	public Mark(String name, String type, Throwable e){
+	public MarkKey(String name, String type, Throwable e){
 		this.name = name;
 		this.dbtype = type;
 		this.exception = e;

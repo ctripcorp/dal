@@ -10,7 +10,7 @@ import com.ctrip.platform.appinternals.configuration.ConfigBeanBase;
 @BeanMeta(alias="TimeoutMarkDownBean")
 public class TimeoutMarkDownBean extends ConfigBeanBase{
 	@BeanMeta(alias = "EnableTimeoutMarkDown")
-	private volatile boolean enableTimeoutMarkDown = false;
+	private volatile boolean enableTimeoutMarkDown = true;
 	@BeanMeta(alias = "SamplingDuration")
     private volatile int samplingDuration = 60;
 	@BeanMeta(alias = "ErrorCountBaseLine")
@@ -75,7 +75,7 @@ public class TimeoutMarkDownBean extends ConfigBeanBase{
 		this.errorCountBaseLine = errorCountBaseLine;
 	}
 	public float getErrorPercent() {
-		return errorPercentBaseLine;
+		return errorPercent;
 	}
 	public void setErrorPercent(float errorPercent) {
 		this.errorPercent = errorPercent;

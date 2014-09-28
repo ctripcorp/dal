@@ -11,51 +11,59 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 	
 	private Map<String, Tuple<AtomicInteger, AtomicInteger>> data = 
 			new ConcurrentHashMap<String, Tuple<AtomicInteger, AtomicInteger>>();
+	private Map<String, Boolean> marks = new ConcurrentHashMap<String, Boolean>();
 	
+	/**
+	 * This method will be invoked by one thread.
+	 */
 	@Override
-	public boolean collectException(String key, Throwable e) {
-		if(!data.containsKey(key))
-			data.put(key, new Tuple<AtomicInteger, AtomicInteger>(
+	public void collectException(Mark mark) {
+		if(!ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown())
+			return;
+		if(!data.containsKey(mark.getName()))
+			data.put(mark.getName(), new Tuple<AtomicInteger, AtomicInteger>(
 					new AtomicInteger(0), new AtomicInteger(0)));
-		Tuple<AtomicInteger, AtomicInteger> dt = data.get(key);
-		boolean isHinted = false;
-		if(this.isHint(e)){
-			dt.getItem1().incrementAndGet();
-			isHinted = true;
+		Tuple<AtomicInteger, AtomicInteger> dt = data.get(mark.getName());
+		int hints = 0;
+		int requests = 0;
+		if(this.isHint(mark.getDbtype(), mark.getException())){
+			hints = dt.getItem1().incrementAndGet();
 		}
-		dt.getItem2().incrementAndGet();
-		return isHinted;
+		requests = dt.getItem2().incrementAndGet();
+		
+		if(hints >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorCountBaseLine()){
+			marks.put(mark.getName(), true);
+			return;
+		}
+		if(requests >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercentBaseLine()){
+			float percent = (hints + 0.0f) /requests;
+			if(percent >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercent()){
+				marks.put(mark.getName(), true);
+				return;
+			}
+		}
 	}
 
 	@Override
 	public boolean isMarkdown(String key) {
-		Tuple<AtomicInteger, AtomicInteger> dt = data.get(key);
-		boolean ret = false;
-		if(null != dt){		
-			float hints = dt.getItem1().get();
-			float requestTimes = dt.getItem2().get();
-			float percent = requestTimes >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorCountBaseLine() ?
-					hints/requestTimes : 0;
-			ret = hints >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorCountBaseLine() || 
-					percent >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercent();
-		}
-		return ret;
+		return marks.containsKey(key) && marks.get(key);
 	}
 
 	@Override
 	public void markup(String key) {
-		Tuple<AtomicInteger, AtomicInteger> dt = data.get(key);
-		if(null != dt){
-			dt.getItem1().set(0);
-			dt.getItem2().set(0);
-		}
+		data.put(key, new Tuple<AtomicInteger, AtomicInteger>(
+				new AtomicInteger(0), new AtomicInteger(0)));
+		marks.put(key, false);
 	}
 	
-	private boolean isHint(Throwable e){
+	private boolean isHint(String dbType, Throwable e){
 		if(null == e)
 			return false;
-		if(e instanceof SQLException && ((SQLException)e).getErrorCode() == -2)
-			return true;
+		if(dbType.equalsIgnoreCase("Microsoft SQL Server"))
+			return e instanceof SQLException && ((SQLException)e).getErrorCode() == -2;
+		else{
+			
+		}
 		return false;
 	}
 }

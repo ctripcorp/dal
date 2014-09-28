@@ -3,9 +3,8 @@ package com.ctrip.platform.dal.dao.markdown;
 public class NullObjectAutoMarkdown implements AutoMarkdown{
 
 	@Override
-	public boolean collectException(String key, Throwable e) {
+	public void collectException(Mark mark) {
 		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override

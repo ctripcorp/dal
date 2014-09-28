@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.SQLException;
 
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 
 public class DalTransactionManager {
@@ -91,6 +92,8 @@ public class DalTransactionManager {
 
 			endTransaction(level);
 		} catch (Throwable e) {
+			MarkdownManager.collectException(action.connHolder, e);
+			e.printStackTrace();
 			ex = e;	
 			rollbackTransaction();
 		}finally{

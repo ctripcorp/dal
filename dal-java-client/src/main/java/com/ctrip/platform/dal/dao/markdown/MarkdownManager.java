@@ -13,7 +13,7 @@ public class MarkdownManager {
 	private static Thread manager = null;
 	
 	private static List<AutoMarkdown> mkds = new ArrayList<AutoMarkdown>();
-	private static ConcurrentLinkedQueue<Mark> exqueue = new ConcurrentLinkedQueue<Mark>();
+	private static ConcurrentLinkedQueue<MarkKey> exqueue = new ConcurrentLinkedQueue<MarkKey>();
 	
 	static{
 		mkds.add(new TimeoutAutoMarkdown());
@@ -32,15 +32,17 @@ public class MarkdownManager {
 	}
 	
 	public static void collectException(DalConnection conn, Throwable e){
+		if(!ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown())
+			return;
 		if(conn != null && conn.getMeta() != null)
-			exqueue.add(new Mark(conn.getMeta().getAllInOneKey(), conn.getDatabaseProductName(), e));
+			exqueue.add(new MarkKey(conn.getMeta().getAllInOneKey(), conn.getDatabaseProductName(), e));
 	}
 	
 	private static class CollectExceptionTask implements Runnable{
 		@Override
 		public void run() {
 			do{
-				Mark kv = exqueue.poll();
+				MarkKey kv = exqueue.poll();
 				while(kv != null){
 					for (AutoMarkdown mk : mkds) {
 						mk.collectException(kv);
@@ -50,7 +52,6 @@ public class MarkdownManager {
 				try {
 					Thread.sleep(durations);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}while(true);

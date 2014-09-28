@@ -8,5 +8,5 @@ public interface AutoMarkdown {
 	 * @param mark
 	 * 		mark information
 	 */
-	void collectException(Mark mark);
+	void collectException(MarkKey mark);
 }

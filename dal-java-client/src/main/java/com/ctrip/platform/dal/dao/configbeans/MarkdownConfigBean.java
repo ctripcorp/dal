@@ -11,7 +11,6 @@ import com.ctrip.platform.appinternals.annotations.BeanMeta;
 import com.ctrip.platform.appinternals.configuration.ChangeEvent;
 import com.ctrip.platform.appinternals.configuration.ConfigBeanBase;
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 
 @BeanMeta(alias = "markdown")
 public class MarkdownConfigBean extends ConfigBeanBase{
@@ -29,7 +28,6 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	@BeanMeta(omit = true)
 	private Lock lock = new ReentrantLock();
 	
-	//TODO: How to get all db names
 	public MarkdownConfigBean(){
 		this.addChangeEvent("dbMarkdown", new ChangeEvent() {			
 	

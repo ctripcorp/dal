@@ -302,15 +302,15 @@ public class ProjectResource {
 		
 		try {
 			log.info(String.format("begain generate project: [id=%s; regen=%s; language=%s]",
-					id, regen, language));
+					id, true, language));
 			DalGenerator generator = null;
 			CodeGenContext context = null;
 			if (language.equals("java")) {
 				generator = new JavaDalGenerator();
-				context = generator.createContext(id, regen, progress, newPojo);
+				context = generator.createContext(id, true, progress, newPojo);
 			} else if (language.equals("cs")){
 				generator = new CSharpDalGenerator();
-				context = generator.createContext(id, regen, progress, newPojo);
+				context = generator.createContext(id, true, progress, newPojo);
 			}
 			generator.prepareDirectory(context);
 			generator.prepareData(context);

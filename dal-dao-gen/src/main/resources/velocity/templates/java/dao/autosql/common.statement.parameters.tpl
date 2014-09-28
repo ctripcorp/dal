@@ -18,6 +18,9 @@
 #if(${p.getConditionType()} == "Great" && ${p.isNullable()} )
 		index = builder.addConstrant().$!{first}greaterThanNullable($wrapFielName, ${p.getAlias()}, parameters, index, ${p.getJavaTypeDisplay()});
 #end
+#if(${p.getConditionType()} == "Great" && !${p.isNullable()} )
+		index = builder.addConstrant().$!{first}greaterThan($wrapFielName, ${p.getAlias()}, parameters, index, ${p.getJavaTypeDisplay()});
+#end
 #if(${p.getConditionType()} == "lessThan" && ${p.isNullable()} ) 
 		index = builder.addConstrant().$!{first}lessThanNullable($wrapFielName, ${p.getAlias()}, parameters, index, ${p.getJavaTypeDisplay()});
 #end
@@ -48,10 +51,10 @@
 #if(${p.getConditionType()} == "In" && !${p.isNullable()} ) 
 		index = builder.addConstrant().$!{first}in($wrapFielName, ${p.getAlias()}, parameters, index, ${p.getJavaTypeDisplay()});
 #end
-#if(${p.getConditionType()} == "IsNull" && ${p.isNullable()} ) 
+#if(${p.getConditionType()} == "IsNull") 
 		builder.addConstrant().$!{first}isNull($wrapFielName);
 #end
-#if(${p.getConditionType()} == "IsNotNull" && ${p.isNullable()} ) 
+#if(${p.getConditionType()} == "IsNotNull") 
 		builder.addConstrant().$!{first}isNotNull($wrapFielName);
 #end
 #if(${p.getConditionType()} == "Between")

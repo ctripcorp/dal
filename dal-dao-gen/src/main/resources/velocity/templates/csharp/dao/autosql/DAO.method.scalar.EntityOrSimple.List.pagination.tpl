@@ -1,6 +1,6 @@
-##简单类型并且返回值是First
+##实体类型或简单类型且返回List
 #foreach($method in $host.getExtraMethods())
-#if($method.isFirstOrSingle() && $method.isSampleType())
+#if(!$method.isFirstOrSingle() && $method.getCrud_type() == "select" && $method.isPaging())
 		/// <summary>
         ///  ${method.getName()}
         /// </summary>
@@ -8,7 +8,7 @@
         /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
 #end
         /// <returns></returns>
-		public object ${method.getName()} (${method.getParameterDeclaration()})
+		public IList<${host.getClassName()}> ${method.getName()}(${method.getParameterDeclaration()})
         {
             try
             {
@@ -23,10 +23,17 @@
 #end
 #end
 #if($inParams.size() > 0)
+#if($method.isPaging())
+                sql = string.Format(sql, ${host.pageBegain()}, ${host.pageEnd()}, 
+					#foreach($p in $inParams)Arch.Data.Utility.ParameterUtility.NormalizeInParam(${WordUtils.uncapitalize($p.getAlias())}, parameters,"${WordUtils.uncapitalize($p.getAlias())}")#if($foreach.count != $inParams.size()),#end#end);
+#else
 		        sql = string.Format(sql, #foreach($p in $inParams)Arch.Data.Utility.ParameterUtility.NormalizeInParam(${WordUtils.uncapitalize($p.getAlias())}, parameters,"${WordUtils.uncapitalize($p.getAlias())}")#if($foreach.count != $inParams.size()),#end#end);
 #end
+#elseif($method.isPaging())
+		        sql = string.Format(sql, ${host.pageBegain()}, ${host.pageEnd()});
+#end
 
-	            return baseDao.ExecScalar(sql, parameters);
+	            return baseDao.SelectList<${host.getClassName()}>(sql, parameters);
 
             }
             catch (Exception ex)

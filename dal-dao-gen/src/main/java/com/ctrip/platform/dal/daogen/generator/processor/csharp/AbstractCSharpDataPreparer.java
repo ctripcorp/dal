@@ -203,6 +203,13 @@ public class AbstractCSharpDataPreparer{
 			method.setFields(paramHosts);
 			
 			method.setParameters(buildMethodParameterHost4SqlConditin(builder, allColumns));
+			String orderBy = builder.getOrderby();
+			if(orderBy!=null && !orderBy.trim().isEmpty() && orderBy.indexOf("-1,")!=0){
+				String []str = orderBy.split(",");
+				String odyExp = "p => p."+str[0]+", ";
+				odyExp = "asc".equalsIgnoreCase(str[1])?odyExp+"true":odyExp+"false";
+				method.setOrderByExp(odyExp);
+			}
 			methods.add(method);
 		}
 		return methods;
@@ -304,22 +311,28 @@ public class AbstractCSharpDataPreparer{
 			String[] tokens = StringUtils.split(condition, ",");
 			String name = tokens[0];
 			int type = tokens.length >= 2 ? Integer.parseInt(tokens[1]) : -1;
-			if(type == 9 || type == 10){ //is null、is not null don't hava param
-				continue;
-			}
 			String alias = tokens.length >= 3 ? tokens[2] : "";
 			for (CSharpParameterHost pHost : allColumns) {
 				if (pHost.getName().equals(name)) {
 					CSharpParameterHost host_al = new CSharpParameterHost(pHost);
 					host_al.setAlias(alias);
 					host_al.setInParameter(ConditionType.In == ConditionType.valueOf(type));
+					if (-1 != type)
+						host_al.setConditionType(ConditionType.valueOf(type));
 					parameters.add(host_al);
 					// Between need an extra parameter
 					if (ConditionType.Between == ConditionType.valueOf(type)) {
 						CSharpParameterHost host_bw = new CSharpParameterHost(pHost);
 						String alias_bw = tokens.length >= 4 ? tokens[3] : "";
 						host_bw.setAlias(alias_bw);
+						host_bw.setConditionType(ConditionType.Between);
 						parameters.add(host_bw);
+						boolean nullable = tokens.length >= 5?Boolean.valueOf(tokens[4]):false;
+						host_al.setNullable(nullable);
+						host_bw.setNullable(nullable);
+					}else{
+						boolean nullable = tokens.length >= 4?Boolean.valueOf(tokens[3]):false;
+						host_al.setNullable(nullable);
 					}
 					break;
 				}

@@ -15,6 +15,7 @@ import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
+import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 public class DalShardingHelper {
 	public static boolean isShardingEnabled(String logicDbName) {
@@ -223,6 +224,7 @@ public class DalShardingHelper {
 	}
 	
 	public static <T> T executeByDbShard(String logicDbName, String rawTableName, DalHints hints, List<Map<String, ?>>  daoPojos, BulkTask<T> task) throws SQLException {
+		DalWatcher.crossShardBegin();
 		T result;
 		
 		if(isShardingEnabled(logicDbName)) {
@@ -238,6 +240,7 @@ public class DalShardingHelper {
 			result = executeByTableShard(logicDbName, rawTableName, hints, daoPojos, task);
 		}
 		
+		DalWatcher.crossShardEnd();
 		return result; 
 	}
 	

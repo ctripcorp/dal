@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.sqlbuilder;
 
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -135,36 +134,6 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 		return orderbyExp.toString();
 	}
 	
-	
-	public static void main(String[] args) throws SQLException {
-		List<String> in = new ArrayList<String>();
-		in.add("12");
-		in.add("12");
-		SelectSqlBuilder builder = new SelectSqlBuilder("People", DatabaseCategory.MySql, false);
-		builder.addSelectField("PeopleID","Name","CityID");
-		builder.equal("a", "paramValue", Types.INTEGER);
-		
-		builder.and().in("b", in, Types.INTEGER);
-		
-		builder.and().like("b", "in", Types.INTEGER);
-		
-		builder.and().betweenNullable("c", "paramValue1", "paramValue2", Types.INTEGER);
-		
-		builder.and().betweenNullable("d", null, "paramValue2", Types.INTEGER);
-		
-		builder.and().isNull("sss");
-		
-		builder.addOrderbyField("PeopleID", false);
-		String sql = builder.build();
-		System.out.println(sql);
-		System.out.println(builder.getStatementParameterIndex());
-		
-		System.out.println(builder.buildPaginationSql4MySQL());
-		System.out.println(builder.buildPaginationSql4SqlServer());
-		System.out.println(builder.buildPaginationSql4MySQL());
-		
-	}
-
 }
 
 

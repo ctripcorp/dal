@@ -15,6 +15,7 @@ import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
+import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 public class DalShardingHelper {
 	public static boolean isShardingEnabled(String logicDbName) {
@@ -106,9 +107,10 @@ public class DalShardingHelper {
 	 * @param logicDbName
 	 * @param pojos
 	 * @return Grouped pojos
-	 * @throws SQLException In case locate shard id faild 
+	 * @throws SQLException In case locate shard id faild
+	 * @deprecated 
 	 */
-	public static <T> Map<String, List<Map<String, ?>>> shuffle(String logicDbName, String shardId, DalParser<T> parser, List<T> pojos) throws SQLException {
+	private static Map<String, List<Map<String, ?>>> shuffle(String logicDbName, String shardId, List<Map<String, ?>> daoPojos) throws SQLException {
 		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
 		
 		DalConfigure config = DalClientFactory.getDalConfigure();
@@ -117,11 +119,10 @@ public class DalShardingHelper {
 		DalShardingStrategy strategy = dbSet.getStrategy();
 		
 		DalHints tmpHints = new DalHints();
-		for(T pojo:pojos) {
-			Map<String, ?> fields = parser.getFields(pojo);
+		for(Map<String, ?> pojo:daoPojos) {
 			
 			String tmpShardId = shardId == null ? 
-					strategy.locateDbShard(config, logicDbName, tmpHints.setFields(fields)) :
+					strategy.locateDbShard(config, logicDbName, tmpHints.setFields(pojo)) :
 					shardId;
 			
 			dbSet.validate(tmpShardId);
@@ -132,7 +133,7 @@ public class DalShardingHelper {
 				shuffled.put(tmpShardId, pojosInShard);
 			}
 			
-			pojosInShard.add(fields);
+			pojosInShard.add(pojo);
 		}
 		
 		detectDistributedTransaction(logicDbName, shuffled.size(), "crossShardBatchDelete");
@@ -220,6 +221,27 @@ public class DalShardingHelper {
 		// Not allowed for distributed transaction
 		if(dbShardSize > 1 && DalTransactionManager.isInTransaction())
 			throw new SQLException(operation + " is not allowed in mutiple database shard within transaction");
+	}
+	
+	public static <T> T executeByDbShard(String logicDbName, String rawTableName, DalHints hints, List<Map<String, ?>>  daoPojos, BulkTask<T> task) throws SQLException {
+		DalWatcher.crossShardBegin();
+		T result;
+		
+		if(isShardingEnabled(logicDbName)) {
+			List<T> results = new LinkedList<>();
+			Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, hints.getShardId(), daoPojos);
+			for(String shard: shuffled.keySet()) {
+				hints.inShard(shard);
+				T tmpResult = executeByTableShard(logicDbName, rawTableName, hints, shuffled.get(shard), task);
+				results.add(tmpResult);
+			}
+			result = task.merge(results);
+		} else {
+			result = executeByTableShard(logicDbName, rawTableName, hints, daoPojos, task);
+		}
+		
+		DalWatcher.crossShardEnd();
+		return result; 
 	}
 	
 	public static <T> T executeByTableShard(String logicDbName, String tabelName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask<T> task) throws SQLException {

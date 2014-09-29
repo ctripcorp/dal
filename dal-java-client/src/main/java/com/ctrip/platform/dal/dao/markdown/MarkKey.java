@@ -1,16 +1,22 @@
 package com.ctrip.platform.dal.dao.markdown;
 
+import java.sql.SQLException;
+
 public class MarkKey {
 	private String name;
 	private String dbtype;
-	private Throwable exception;
+	private int errorCode;
+	private Class<?> exType;
+	private long time;
 	
-	public MarkKey(String name, String type, Throwable e){
+	public MarkKey(String name, String type, SQLException e){
 		this.name = name;
 		this.dbtype = type;
-		this.exception = e;
+		this.errorCode = e.getErrorCode();
+		this.exType = e.getClass();
+		this.time = System.currentTimeMillis();
 	}
-	
+
 	public String getName() {
 		return name;
 	}
@@ -19,7 +25,15 @@ public class MarkKey {
 		return dbtype;
 	}
 
-	public Throwable getException() {
-		return exception;
+	public int getErrorCode() {
+		return errorCode;
+	}
+
+	public Class<?> getExType() {
+		return exType;
+	}
+
+	public long getTime() {
+		return time;
 	}
 }

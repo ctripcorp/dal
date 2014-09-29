@@ -1,15 +1,18 @@
 package com.ctrip.platform.dal.dao.markdown;
 
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class TimeoutAutoMarkdown implements AutoMarkdown{
-	
+	private static Logger logger = LoggerFactory.getLogger(TimeoutAutoMarkdown.class);
 	private Map<String, Data> data = new ConcurrentHashMap<String, Data>();
+	private long latest = 0;
 	
 	/**
 	 * This method will be invoked by one thread.
@@ -17,17 +20,20 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 	@Override
 	public void collectException(MarkKey mark) {
 		if(!ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown() ||
-				ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(mark.getName()))
+				ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(mark.getName())){
 			return;
+		}
 		if(!data.containsKey(mark.getName()))
 			data.put(mark.getName(), new Data());
 		Data dt = data.get(mark.getName());
 		int hints = 0;
 		int requests = 0;
-		if(this.isHint(mark.getDbtype(), mark.getException())){
+		if(this.isHint(mark.getDbtype(), mark.getExType(), mark.getErrorCode())){
 			hints = dt.incrementAndGetHints();
 		}
 		requests = dt.incrementAndGetRequestTimes();
+		
+		logger.debug("request: " + requests + ", hints: " + hints);
 		
 		if(hints >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorCountBaseLine()){
 			ConfigBeanFactory.getMarkdownConfigBean().markdown(mark.getName());
@@ -42,15 +48,25 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 				return;
 			}
 		}
+		
+		this.removeOverdueData(mark.getName(), mark.getTime());
 	}
 	
-	private boolean isHint(String dbType, Throwable e){
-		if(null == e)
-			return false;
-		if(dbType.equalsIgnoreCase("Microsoft SQL Server") && e instanceof SQLException)
-			return ConfigBeanFactory.getTimeoutMarkDownBean().getSqlServerTimeoutMarkdownCodes().contains(((SQLException)e).getErrorCode());
+	private void removeOverdueData(String key, long time){
+		if(time > this.latest)
+			this.latest = time;
+		logger.debug("duration: " + (this.latest - System.currentTimeMillis()) + "ms");
+		if(this.latest - System.currentTimeMillis() > 
+			ConfigBeanFactory.getTimeoutMarkDownBean().getSamplingDuration() * 1000){
+			this.data.get(key).clear();
+		}
+	}
+	
+	private boolean isHint(String dbType, Class<?> exType, int errorCode){
+		if(dbType.equalsIgnoreCase("Microsoft SQL Server"))
+			return ConfigBeanFactory.getTimeoutMarkDownBean().getSqlServerTimeoutMarkdownCodes().contains(errorCode);
 		else{
-			if(e.getClass().toString().equalsIgnoreCase(MySQLTimeoutException.class.toString())){
+			if(exType.toString().equalsIgnoreCase(MySQLTimeoutException.class.toString())){
 				return true;
 			}
 		}

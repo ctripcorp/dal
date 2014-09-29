@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.markdown;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -34,8 +35,8 @@ public class MarkdownManager {
 	public static void collectException(DalConnection conn, Throwable e){
 		if(!ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown())
 			return;
-		if(conn != null && conn.getMeta() != null)
-			exqueue.add(new MarkKey(conn.getMeta().getAllInOneKey(), conn.getDatabaseProductName(), e));
+		if(conn != null && conn.getMeta() != null && e instanceof SQLException)
+			exqueue.add(new MarkKey(conn.getMeta().getAllInOneKey(), conn.getDatabaseProductName(), (SQLException)e));
 	}
 	
 	private static class CollectExceptionTask implements Runnable{

@@ -54,9 +54,10 @@
             });
             w2ui['grid'].add(allTasks);
             $("body").unblock();
-        }).fail(function(data){
-                alert("获取所有DAO失败!");
-            });
+        }).fail(function (data) {
+            alert("获取所有DAO失败!");
+            $("body").unblock();
+        });
     };
 
     Render.prototype = {
@@ -89,19 +90,21 @@
                     w2ui['grid_toolbar'].click('refreshDAO', null);
                 }
             }).jstree({
-                    'core': {
-                        'check_callback': true,
-                        'multiple': false,
-                        'data': {
-                            'url': function (node) {
-                                var url = "/rest/projectview?root=true&rand=" + Math.random();
-                                if (node.id != "#") {
-                                    url = "/rest/projectview/groupprojects?groupId="+node.id+"&rand=" + Math.random();
-                                }
-                                return url;
+                'core': {
+                    'check_callback': true,
+                    'multiple': false,
+                    'data': {
+                        'url': function (node) {
+                            var url = "/rest/projectview?root=true&rand=" + Math.random();
+                            if (node.id != "#") {
+                                url = "/rest/projectview/groupprojects?groupId=" + node.id + "&rand=" + Math.random();
                             }
+                            return url;
                         }
-                    }});
+                    }
+                },
+                "plugins": [ "state" ]
+            });
         },
         render_grid: function (project_id) {
             var existsGrid = w2ui['grid'];

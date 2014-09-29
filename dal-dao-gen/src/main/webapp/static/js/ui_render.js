@@ -240,16 +240,18 @@
                     w2ui['grid_toolbar'].click('refreshDAO', null);
                     $("#refreshFiles").trigger('click');
                 }
-            }).jstree({ 
-                'core' : {
-                    'check_callback' : true,
+            }).jstree({
+                'core': {
+                    'check_callback': true,
                     'multiple': false,
-                    'data' : {
-                      'url' : function (node) {
-                        return node.id == "#" ? "/rest/project?root=true&rand=" + Math.random() : "/rest/project?rand=" + Math.random();
-                      }
+                    'data': {
+                        'url': function (node) {
+                            return node.id == "#" ? "/rest/project?root=true&rand=" + Math.random() : "/rest/project?rand=" + Math.random();
+                        }
                     }
-            }});
+                },
+                "plugins": [ "state" ]
+            });
         },
         render_grid: function (project_id) {
             var existsGrid = w2ui['grid'];
@@ -426,22 +428,23 @@
                          alert("获取文件内容失败!");
                     });
                 }
-            }).jstree({ 
-                'core' : {
-                    'check_callback' : true,
+            }).jstree({
+                'core': {
+                    'check_callback': true,
                     'multiple': false,
-                    'data' : {
-                      'url' : function (node) {
-                        return node.id === '#' ?
-                          sprintf("/rest/file?id=%s&language=%s",
-                            w2ui['grid'].current_project,
-                            $("#viewCode").val()) : 
-                          sprintf("/rest/file?id=%s&language=%s&name=%s",
-                            w2ui['grid'].current_project,
-                            $("#viewCode").val(), node.data);
-                      }
+                    'data': {
+                        'url': function (node) {
+                            return node.id === '#' ?
+                                sprintf("/rest/file?id=%s&language=%s",
+                                    w2ui['grid'].current_project,
+                                    $("#viewCode").val()) :
+                                sprintf("/rest/file?id=%s&language=%s&name=%s",
+                                    w2ui['grid'].current_project,
+                                    $("#viewCode").val(), node.data);
+                        }
                     }
-            }});
+                }
+            });
 
             var code_editor_html = '<div id="code_editor" class="code_edit" style="height:100%"></div>';
             w2ui['sub_layout'].content('main',code_editor_html);

@@ -1,5 +1,6 @@
 #parse("templates/csharp/dao/autosql/DAO.method.scalar.Entity.First.tpl")
 #parse("templates/csharp/dao/autosql/DAO.method.scalar.EntityOrSimple.List.tpl")
+#parse("templates/csharp/dao/autosql/DAO.method.scalar.EntityOrSimple.List.pagination.tpl")
 #parse("templates/csharp/dao/autosql/DAO.method.scalar.Simple.First.tpl")
 #parse("templates/csharp/dao/autosql/DAO.method.cud.tpl")
 #*

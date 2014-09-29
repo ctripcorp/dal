@@ -1,8 +1,13 @@
 package com.ctrip.platform.dal.daogen.host.csharp;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
+
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
@@ -28,6 +33,36 @@ public class CSharpMethodHost {
 	private String pojoType;
 	
 	private boolean paging;
+	
+	private String orderByExp="";
+	
+	public String getOrderByExp() {
+		return orderByExp;
+	}
+
+	public void setOrderByExp(String orderByExp) {
+		this.orderByExp = orderByExp;
+	}
+
+	public String getParameterDeclaration() {
+		List<String> paramsDeclaration = new ArrayList<String>();
+		for(CSharpParameterHost parameter: parameters) {
+			if(ConditionType.In == parameter.getConditionType()){
+				paramsDeclaration.add(String.format("List<%s> %s", parameter.getType(), WordUtils.uncapitalize(parameter.getAlias())));
+			}else if(parameter.getConditionType() == ConditionType.IsNull
+					|| parameter.getConditionType() == ConditionType.IsNotNull){ 
+				continue;//is null、is not null don't hava param
+			}else{
+				paramsDeclaration.add(String.format("%s %s", parameter.getType(), WordUtils.uncapitalize(parameter.getAlias())));
+			}
+		}
+		if(this.paging && this.crud_type.equalsIgnoreCase("select")){
+			paramsDeclaration.add("int pageNo");
+			paramsDeclaration.add("int pageSize");
+		}
+		
+		return StringUtils.join(paramsDeclaration, ", ");
+	}
 
 	public String getCrud_type() {
 		return crud_type;
@@ -134,5 +169,9 @@ public class CSharpMethodHost {
 	public String getPagingSql(DatabaseCategory dbType) 
 			throws Exception{
         return SqlBuilder.pagingQuerySql(sql, dbType, CurrentLanguage.CSharp);
+	}
+	
+	public boolean hasParameters(){
+		return null != this.parameters && !this.parameters.isEmpty();
 	}
 }

@@ -8,25 +8,16 @@
         /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
 #end
         /// <returns></returns>
-		public ${host.getClassName()} ${method.getName()} (#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getAlias())}#if($foreach.count != $method.getParameters().size()),#end#end)
+		public ${host.getClassName()} ${method.getName()} (${method.getParameterDeclaration()})
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
-				String sql = "${method.getSql()}";
-#set($inParams = [])                
-#foreach($p in $method.getParameters())  
-#if($p.isInParameter())
-#set($success = $inParams.add($p))
-#else
-                parameters.Add(new StatementParameter{ Name = "@${p.getAlias()}", Direction = ParameterDirection.Input, DbType = DbType.${p.getDbType()}, Value =${WordUtils.uncapitalize($p.getAlias())} });
+				var query = baseDao.GetQuery<Entity.DataModel.${host.getClassName()}>();
+#parse("templates/csharp/dao/autosql/common.constrain.parameters.tpl")		
+#if($method.getOrderByExp()!="")
+			    query.Order(${method.getOrderByExp()});
 #end
-#end
-#if($inParams.size() > 0)
-		        sql = string.Format(sql, #foreach($p in $inParams)Arch.Data.Utility.ParameterUtility.NormalizeInParam(${WordUtils.uncapitalize($p.getAlias())}, parameters,"${WordUtils.uncapitalize($p.getAlias())}")#if($foreach.count != $inParams.size()),#end#end);
-#end
-
-	            return baseDao.SelectFirst<${host.getClassName()}>(sql, parameters);
+	            return baseDao.SelectFirst<Entity.DataModel.${host.getClassName()}>(query);
 
             }
             catch (Exception ex)

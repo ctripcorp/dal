@@ -60,7 +60,7 @@ public class DaoOfDatabaseSet {
 	}
 	
 	public DatabaseSetEntry getMasterDatabaseSetEntryByDatabaseSetName(String dbName){
-		return this.jdbcTemplate
+		List<DatabaseSetEntry> list = this.jdbcTemplate
 				.query("select en.id, en.name, en.databaseType, en.sharding, en.connectionString, en.databaseSet_Id "
 						+ "from databaseSetEntry as en "
 						+ "join databaseSet as se on en.databaseSet_Id = se.id "
@@ -71,7 +71,8 @@ public class DaoOfDatabaseSet {
 						return DatabaseSetEntry.visitRow(rs);
 					}
 					
-				}).get(0);
+				});
+		return null != list && list.size() > 0 ? list.get(0) : null;
 	}
 	
 	public int insertDatabaseSet(DatabaseSet dbset){

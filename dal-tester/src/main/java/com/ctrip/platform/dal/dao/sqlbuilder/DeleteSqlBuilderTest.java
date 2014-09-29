@@ -10,7 +10,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 
 public class DeleteSqlBuilderTest {
 	
@@ -20,27 +20,24 @@ public class DeleteSqlBuilderTest {
 		List<String> in = new ArrayList<String>();
 		in.add("12");
 		in.add("12");
-		DeleteSqlBuilder builder = new DeleteSqlBuilder("Person");
 		
-		StatementParameters parameters = new StatementParameters();
-		int index = 1;
+		DeleteSqlBuilder builder = new DeleteSqlBuilder("Person", DatabaseCategory.MySql);
 		
-		index = builder.addConstrant().equal("a", "paramValue", parameters, index, Types.INTEGER);
+		builder.equal("a", "paramValue", Types.INTEGER);
+		builder.and().in("b", in, Types.INTEGER);
+		builder.and().like("b", "in", Types.INTEGER);
+		builder.and().isNotNull("c");
+		builder.and().betweenNullable("d", null, "paramValue2", Types.INTEGER);
+		builder.and().isNull("e");
 		
-		index = builder.addConstrant().and().in("b", in, parameters, index, Types.INTEGER);
+		String build_sql = builder.build();
 		
-		index = builder.addConstrant().and().like("b", "in", parameters, index, Types.INTEGER);
+		String expected_sql = "DELETE FROM Person WHERE a = ? AND  b in ( ?, ? ) "
+				+ "AND  b LIKE ? AND  c IS NOT NULL AND  e IS NULL";
 		
-		builder.addConstrant().and().isNotNull("c");
-		
-		index = builder.addConstrant().and().betweenNullable("d", null, "paramValue2",
-				parameters, index, Types.INTEGER);
-		
-		builder.addConstrant().and().isNull("e");
-		
-		String build_sql = builder.buildDelectSql();
-		
-		String expected_sql = "DELETE FROM Person WHERE a = ? AND  b in ( ?, ? ) AND  b LIKE ? AND  c IS NOT NULL AND  e IS NULL";
 		Assert.assertEquals(expected_sql, build_sql);
+		
+		builder.buildParameters();
+		Assert.assertEquals(5, builder.getStatementParameterIndex());
 	}
 }

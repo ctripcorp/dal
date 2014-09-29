@@ -2,15 +2,16 @@ package com.ctrip.platform.dal.dao.sqlbuilder;
 
 import java.sql.SQLException;
 
-public class DeleteSqlBuilder {
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+
+public class DeleteSqlBuilder extends AbstractSqlBuilder {
 	
-	private StringBuilder sql = new StringBuilder("DELETE FROM");
+	private StringBuilder sql = new StringBuilder();
 	
 	private String tableName = "";
 	
-	private SqlWhereBuilder whereBuilder = new SqlWhereBuilder();
-	
-	public DeleteSqlBuilder(String tableName) throws SQLException{
+	public DeleteSqlBuilder(String tableName, DatabaseCategory dBCategory) throws SQLException{
+		super(dBCategory);
 		if(tableName!=null && !tableName.isEmpty()){
 			this.tableName = tableName;
 		}else{
@@ -18,13 +19,10 @@ public class DeleteSqlBuilder {
 		}
 	}
 	
-	public SqlWhereBuilder addConstrant(){
-		return whereBuilder;
-	}
-	
-	public String buildDelectSql(){
+	public String build(){
+		sql = new StringBuilder("DELETE FROM");
 		sql.append(" ").append(tableName);
-		sql.append(" ").append(whereBuilder.getWhereExp());
+		sql.append(" ").append(this.getWhereExp());
 		return sql.toString();
 	}
 	

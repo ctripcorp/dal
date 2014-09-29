@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.sqlbuilder;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -10,14 +11,29 @@ public class SqlWhereBuilder {
 	private StringBuilder whereExp = new StringBuilder();
 	
 	private boolean and = false;
+	
 	private boolean or  = false;
 	
+	private List<FieldEntry> whereFieldEntrys = new ArrayList<FieldEntry>();
+	
+	public int buildWhereStatementParameters(StatementParameters parameters,
+			int index){
+		int paramIndex = index;
+		for(FieldEntry entry : whereFieldEntrys){
+			parameters.set(paramIndex++, entry.getSqlType(), entry.getParamValue());
+		}
+		return paramIndex;
+	}
+	
+	public List<FieldEntry> getFieldEntry(){
+		return whereFieldEntrys;
+	}
 	
 	/**
-	 * build wehre expression
+	 * build where expression
 	 * @return
 	 */
-	protected String getWhereExp(){
+	public String getWhereExp(){
 		if(whereExp.toString().length()>0){
 			return "WHERE"+ whereExp.toString();
 		}else{
@@ -50,9 +66,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int equal(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) throws SQLException {
-		return addParam(field, "=", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder equal(String field, Object paramValue, int sqlType) throws SQLException {
+		return addParam(field, "=", paramValue, sqlType);
 	}
 	
 	/**
@@ -62,9 +77,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int equalNullable(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) {
-		return addParamNullable(field, "=", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder equalNullable(String field, Object paramValue, int sqlType) {
+		return addParamNullable(field, "=", paramValue, sqlType);
 	}
 
 	/**
@@ -74,9 +88,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int notEqual(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) throws SQLException {
-		return addParam(field, "!=", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder notEqual(String field, Object paramValue, int sqlType) throws SQLException {
+		return addParam(field, "!=", paramValue, sqlType);
 	}
 	
 	/**
@@ -86,9 +99,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int notEqualNullable(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) {
-		return addParamNullable(field, "!=", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder notEqualNullable(String field, Object paramValue, int sqlType) {
+		return addParamNullable(field, "!=", paramValue, sqlType);
 	}
 
 	/**
@@ -98,9 +110,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int greaterThan(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) throws SQLException {
-		return addParam(field, ">", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder greaterThan(String field, Object paramValue, int sqlType) throws SQLException {
+		return addParam(field, ">", paramValue, sqlType);
 	}
 	
 	/**
@@ -110,9 +121,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int greaterThanNullable(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) {
-		return addParamNullable(field, ">", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder greaterThanNullable(String field, Object paramValue, int sqlType) {
+		return addParamNullable(field, ">", paramValue, sqlType);
 	}
 
 	/**
@@ -122,9 +132,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int greaterThanEquals(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) throws SQLException {
-		return addParam(field, ">=", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder greaterThanEquals(String field, Object paramValue, int sqlType) throws SQLException {
+		return addParam(field, ">=", paramValue, sqlType);
 	}
 	
 	/**
@@ -134,9 +143,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int greaterThanEqualsNullable(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) {
-		return addParamNullable(field, ">=", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder greaterThanEqualsNullable(String field, Object paramValue, int sqlType) {
+		return addParamNullable(field, ">=", paramValue, sqlType);
 	}
 
 	/**
@@ -146,9 +154,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int lessThan(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) throws SQLException {
-		return addParam(field, "<", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder lessThan(String field, Object paramValue, int sqlType) throws SQLException {
+		return addParam(field, "<", paramValue, sqlType);
 	}
 	
 	/**
@@ -158,9 +165,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int lessThanNullable(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) {
-		return addParamNullable(field, "<", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder lessThanNullable(String field, Object paramValue, int sqlType) {
+		return addParamNullable(field, "<", paramValue, sqlType);
 	}
 
 	/**
@@ -170,9 +176,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int lessThanEquals(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) throws SQLException {
-		return addParam(field, "<=", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder lessThanEquals(String field, Object paramValue, int sqlType) throws SQLException {
+		return addParam(field, "<=", paramValue, sqlType);
 	}
 	
 	/**
@@ -182,9 +187,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int lessThanEqualsNullable(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) {
-		return addParamNullable(field, "<=", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder lessThanEqualsNullable(String field, Object paramValue, int sqlType) {
+		return addParamNullable(field, "<=", paramValue, sqlType);
 	}
 
 	/**
@@ -195,18 +199,19 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int between(String field, String paramValue1, String paramValue2,
-			StatementParameters parameters, int index, int sqlType) throws SQLException {
+	public SqlWhereBuilder between(String field, Object paramValue1, Object paramValue2, int sqlType) throws SQLException {
 		if (paramValue1 == null || paramValue2 == null) {
 			and = or = false;
 			throw new SQLException(field + " is not support null value.");
 		} else {
 			appendConcate();
 			whereExp.append(" ").append(field).append(" BETWEEN ? AND ?");
-			parameters.set(index++, sqlType, paramValue1);
-			parameters.set(index++, sqlType, paramValue2);
+			FieldEntry entry1 = new FieldEntry(field, paramValue1, sqlType);
+			whereFieldEntrys.add(entry1);
+			FieldEntry entry2 = new FieldEntry(field, paramValue2, sqlType);
+			whereFieldEntrys.add(entry2);
 		}
-		return index;
+		return this;
 	}
 	
 	/**
@@ -217,18 +222,19 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int betweenNullable( String field, String paramValue1, String paramValue2,
-			StatementParameters parameters, int index, int sqlType) {
+	public SqlWhereBuilder betweenNullable( String field, Object paramValue1, Object paramValue2, int sqlType) {
 		if(paramValue1 == null || paramValue2 == null){
 			//如果paramValue==null，则field不会作为条件加入到最终的SQL中。
 			and = or = false;
 		}else{
 			appendConcate();
 			whereExp.append(" ").append(field).append(" BETWEEN ? AND ?");
-			parameters.set(index++, sqlType, paramValue1);
-			parameters.set(index++, sqlType, paramValue2);
+			FieldEntry entry1 = new FieldEntry(field, paramValue1, sqlType);
+			whereFieldEntrys.add(entry1);
+			FieldEntry entry2 = new FieldEntry(field, paramValue2, sqlType);
+			whereFieldEntrys.add(entry2);
 		}
-		return index;
+		return this;
 	}
 
 	/**
@@ -238,9 +244,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int like(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) throws SQLException {
-		return addParam(field, "LIKE", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder like(String field, Object paramValue, int sqlType) throws SQLException {
+		return addParam(field, "LIKE", paramValue, sqlType);
 	}
 	
 	/**
@@ -250,9 +255,8 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int likeNullable(String field, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) {
-		return addParamNullable(field, "LIKE", paramValue, parameters, index, sqlType);
+	public SqlWhereBuilder likeNullable(String field, Object paramValue, int sqlType) {
+		return addParamNullable(field, "LIKE", paramValue, sqlType);
 	}
 
 	/**
@@ -262,8 +266,7 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int in(String field, List<?> paramValues, 
-			StatementParameters parameters, int index, int sqlType) throws SQLException {
+	public SqlWhereBuilder in(String field, List<?> paramValues, int sqlType) throws SQLException {
 		if(null == paramValues){
 			and = or = false;
 			throw new SQLException(field + " must have more than one value.");
@@ -278,7 +281,7 @@ public class SqlWhereBuilder {
 				throw new SQLException(field + " is not support null value.");
 			}
 		}
-		return addInParam(field, paramValues, parameters, index, sqlType);
+		return addInParam(field, paramValues, sqlType);
 	}
 	
 	/**
@@ -289,17 +292,16 @@ public class SqlWhereBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int inNullable(String field, List<Object> paramValues, 
-			StatementParameters parameters, int index, int sqlType) throws SQLException {
+	public SqlWhereBuilder inNullable(String field, List<?> paramValues, int sqlType) throws SQLException {
 		if(null == paramValues){
 			and = or = false;
-			return index;
+			return this;
 		}
 		if(paramValues.size() == 0){
 			and = or = false;
 			throw new SQLException(field + " must have more than one value.");
 		}
-		return addInParam(field, paramValues, parameters, index, sqlType);
+		return addInParam(field, paramValues, sqlType);
 	}
 	
 	/**
@@ -324,8 +326,7 @@ public class SqlWhereBuilder {
 		return this;
 	}
 	
-	private int addInParam(String field, List<?> paramValues,
-			StatementParameters parameters, int index, int sqlType){
+	private SqlWhereBuilder addInParam(String field, List<?> paramValues, int sqlType){
 		StringBuilder temp = new StringBuilder();
 		temp.append(" in ( ");
 		for(int i=0,size=paramValues.size();i<size;i++){
@@ -333,37 +334,39 @@ public class SqlWhereBuilder {
 			if(i!=size-1){
 				temp.append(", ");
 			}
+			FieldEntry entry = new FieldEntry(field, paramValues.get(i), sqlType);
+			whereFieldEntrys.add(entry);
 		}
 		temp.append(" )");
 		appendConcate();
 		whereExp.append(" ").append(field).append(temp);
-		return parameters.setInParameter(index, sqlType, paramValues);
+		return this;
 	}
 	
-	private int addParam(String field, String condition, String paramValue, 
-			StatementParameters parameters, int index, int sqlType) throws SQLException{
+	private SqlWhereBuilder addParam(String field, String condition, Object paramValue, int sqlType) throws SQLException{
 		if(paramValue != null){
 			appendConcate();
 			whereExp.append(" ").append(field).append(" ").append(condition).append(" ?");
-			parameters.set(index++, sqlType, paramValue);
+			FieldEntry entry = new FieldEntry(field, paramValue, sqlType);
+			whereFieldEntrys.add(entry);
 		}else{
 			and = or = false;
 			throw new SQLException(field + " is not support null value.");
 		}
-		return index;
+		return this;
 	}
 	
-	private int addParamNullable(String field, String condition, String paramValue,
-			StatementParameters parameters, int index, int sqlType){
+	private SqlWhereBuilder addParamNullable(String field, String condition, Object paramValue, int sqlType){
 		if(paramValue != null){
 			appendConcate();
 			whereExp.append(" ").append(field).append(" ").append(condition).append(" ?");
-			parameters.set(index++, sqlType, paramValue);
+			FieldEntry entry = new FieldEntry(field, paramValue, sqlType);
+			whereFieldEntrys.add(entry);
 		}else{
 			//如果paramValue==null，则field不会作为条件加入到最终的SQL中。
 			and = or = false;
 		}
-		return index;
+		return this;
 	}
 	
 	private void appendConcate(){
@@ -375,5 +378,5 @@ public class SqlWhereBuilder {
 		}
 		and = or = false;
 	}
-
+	
 }

@@ -45,7 +45,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	 * @param fieldName
 	 * @return
 	 */
-	public SelectSqlBuilder addSelectField(String ...fieldName){
+	public SelectSqlBuilder select(String ...fieldName){
 		for(String field:fieldName){
 			selectField.add(field);
 		}
@@ -58,7 +58,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	 * @param ascending 是否升序
 	 * @return
 	 */
-	public SelectSqlBuilder addOrderbyField(String fieldName, boolean ascending){
+	public SelectSqlBuilder orderBy(String fieldName, boolean ascending){
 		this.orderByField = fieldName;
 		this.ascending = ascending;
 		return this;
@@ -132,6 +132,20 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 			orderbyExp.append(wrap);
 		}
 		return orderbyExp.toString();
+	}
+	
+	/**
+	 * 对表名进行处理，如果数据库是SqlServer，则在表名称后追加关键字 WITH (NOLOCK)，其余均不作处理
+	 * @param tableName
+	 * @return
+	 */
+	private String wrapTableName(String tableName){
+		if(dBCategory == DatabaseCategory.MySql){
+			return tableName;
+		}else if(dBCategory == DatabaseCategory.SqlServer){
+			return tableName+" WITH (NOLOCK)";
+		}
+		return tableName;
 	}
 	
 }

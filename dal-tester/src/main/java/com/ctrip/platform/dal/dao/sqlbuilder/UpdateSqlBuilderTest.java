@@ -21,9 +21,9 @@ public class UpdateSqlBuilderTest {
 		
 		UpdateSqlBuilder builder = new UpdateSqlBuilder("Person", DatabaseCategory.MySql);
 		
-		builder.addUpdateField("name", "value", Types.VARCHAR);
-		builder.addUpdateField("age", 52, Types.INTEGER);
-		builder.addUpdateField("addr", "china", Types.VARCHAR);
+		builder.update("name", "value", Types.VARCHAR);
+		builder.update("age", 52, Types.INTEGER);
+		builder.update("addr", "china", Types.VARCHAR);
 		
 		builder.equal("age", 123, Types.INTEGER);
 		builder.and().in("b", in, Types.INTEGER);

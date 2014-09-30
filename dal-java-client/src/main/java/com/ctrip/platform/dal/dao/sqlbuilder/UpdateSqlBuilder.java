@@ -23,9 +23,9 @@ public class UpdateSqlBuilder extends AbstractSqlBuilder {
 		}
 	}
 
-	public UpdateSqlBuilder addUpdateField(String fieldName, Object paramValue, int sqlType){
+	public UpdateSqlBuilder update(String fieldName, Object paramValue, int sqlType){
 		FieldEntry field = new FieldEntry(fieldName,paramValue,sqlType);
-		fieldEntrys.add(field);
+		selectOrUpdataFieldEntrys.add(field);
 		updateFieldNames.add(fieldName);
 		return this;
 	}

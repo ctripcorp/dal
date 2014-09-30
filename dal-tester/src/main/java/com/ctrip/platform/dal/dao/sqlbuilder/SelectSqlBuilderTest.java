@@ -21,7 +21,7 @@ public class SelectSqlBuilderTest {
 		
 		SelectSqlBuilder builder = new SelectSqlBuilder("People", DatabaseCategory.MySql, false);
 		
-		builder.addSelectField("PeopleID","Name","CityID");
+		builder.select("PeopleID","Name","CityID");
 		
 		builder.equal("a", "paramValue", Types.INTEGER);
 		builder.and().in("b", in, Types.INTEGER);
@@ -29,7 +29,7 @@ public class SelectSqlBuilderTest {
 		builder.and().betweenNullable("c", "paramValue1", "paramValue2", Types.INTEGER);
 		builder.and().betweenNullable("d", null, "paramValue2", Types.INTEGER);
 		builder.and().isNull("sss");
-		builder.addOrderbyField("PeopleID", false);
+		builder.orderBy("PeopleID", false);
 		
 		String sql = builder.build();
 		
@@ -49,7 +49,7 @@ public class SelectSqlBuilderTest {
 		
 		SelectSqlBuilder builder = new SelectSqlBuilder("People", DatabaseCategory.MySql, true);
 		
-		builder.addSelectField("PeopleID","Name","CityID");
+		builder.select("PeopleID","Name","CityID");
 		
 		builder.equal("a", "paramValue", Types.INTEGER);
 		builder.and().in("b", in, Types.INTEGER);
@@ -58,7 +58,7 @@ public class SelectSqlBuilderTest {
 		builder.and().betweenNullable("d", null, "paramValue2", Types.INTEGER);
 		builder.and().isNull("sss");
 		
-		builder.addOrderbyField("PeopleID", false);
+		builder.orderBy("PeopleID", false);
 		
 		String sql = builder.build();
 		
@@ -78,7 +78,7 @@ public class SelectSqlBuilderTest {
 		
 		SelectSqlBuilder builder = new SelectSqlBuilder("People", DatabaseCategory.SqlServer, false);
 		
-		builder.addSelectField("PeopleID","Name","CityID");
+		builder.select("PeopleID","Name","CityID");
 		
 		builder.equal("a", "paramValue", Types.INTEGER);
 		builder.and().in("b", in, Types.INTEGER);
@@ -87,7 +87,7 @@ public class SelectSqlBuilderTest {
 		builder.and().betweenNullable("d", null, "paramValue2", Types.INTEGER);
 		builder.and().isNull("sss");
 		
-		builder.addOrderbyField("PeopleID", true);
+		builder.orderBy("PeopleID", true);
 		
 		String sql = builder.build();
 		
@@ -107,7 +107,7 @@ public class SelectSqlBuilderTest {
 		
 		SelectSqlBuilder builder = new SelectSqlBuilder("People", DatabaseCategory.SqlServer, true);
 		
-		builder.addSelectField("PeopleID","Name","CityID");
+		builder.select("PeopleID","Name","CityID");
 		
 		builder.equal("a", "paramValue", Types.INTEGER);
 		builder.and().in("b", in, Types.INTEGER);
@@ -116,7 +116,7 @@ public class SelectSqlBuilderTest {
 		builder.and().betweenNullable("d", null, "paramValue2", Types.INTEGER);
 		builder.and().isNull("sss");
 		
-		builder.addOrderbyField("PeopleID", true);
+		builder.orderBy("PeopleID", true);
 		
 		String sql = builder.build();
 		

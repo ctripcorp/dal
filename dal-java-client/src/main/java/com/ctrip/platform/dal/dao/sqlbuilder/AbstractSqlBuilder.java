@@ -7,17 +7,23 @@ import java.util.List;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class AbstractSqlBuilder {
-	
-	private SqlWhereBuilder whereBuilder = new SqlWhereBuilder();
+public abstract class AbstractSqlBuilder {
 	
 	protected DatabaseCategory dBCategory = DatabaseCategory.MySql;
 	
 	protected StatementParameters parameters = new StatementParameters();
 	
-	protected List<FieldEntry> fieldEntrys =  new ArrayList<FieldEntry>();
-	
 	protected int index = 1;
+	
+	protected List<FieldEntry> selectOrUpdataFieldEntrys =  new ArrayList<FieldEntry>();
+	
+	private StringBuilder whereExp = new StringBuilder();
+	
+	private boolean and = false;
+	
+	private boolean or  = false;
+	
+	private List<FieldEntry> whereFieldEntrys = new ArrayList<FieldEntry>();
 	
 	public AbstractSqlBuilder(DatabaseCategory dBCategory) throws SQLException{
 		if(dBCategory==null){
@@ -33,10 +39,9 @@ public class AbstractSqlBuilder {
 	public StatementParameters buildParameters(){
 		parameters = new StatementParameters();
 		index = 1;
-		for(FieldEntry entry : fieldEntrys){
+		for(FieldEntry entry : selectOrUpdataFieldEntrys){
 			parameters.set(index++, entry.getSqlType(), entry.getParamValue());
 		}
-		List<FieldEntry> whereFieldEntrys = whereBuilder.getFieldEntry();
 		for(FieldEntry entry : whereFieldEntrys){
 			parameters.set(index++, entry.getSqlType(), entry.getParamValue());
 		}
@@ -49,20 +54,6 @@ public class AbstractSqlBuilder {
 	 */
 	public int getStatementParameterIndex(){
 		return this.index;
-	}
-	
-	/**
-	 * 对表名进行处理，如果数据库是SqlServer，则在表名称后追加关键字 WITH (NOLOCK)，其余均不作处理
-	 * @param tableName
-	 * @return
-	 */
-	public String wrapTableName(String tableName){
-		if(dBCategory == DatabaseCategory.MySql){
-			return tableName;
-		}else if(dBCategory == DatabaseCategory.SqlServer){
-			return tableName+" WITH (NOLOCK)";
-		}
-		return tableName;
 	}
 	
 	/**
@@ -82,11 +73,21 @@ public class AbstractSqlBuilder {
 	}
 	
 	/**
-	 * build wehre expression
+	 * build sql.
+	 * @return
+	 */
+	public abstract String build();
+	
+	/**
+	 * build where expression
 	 * @return
 	 */
 	public String getWhereExp(){
-		return whereBuilder.getWhereExp();
+		if(whereExp.toString().length()>0){
+			return "WHERE"+ whereExp.toString();
+		}else{
+			return "";
+		}
 	}
 	
 	/**
@@ -94,7 +95,7 @@ public class AbstractSqlBuilder {
 	 * @return
 	 */
 	public AbstractSqlBuilder and(){
-		whereBuilder.and();
+		and = true;
 		return this;
 	}
 	
@@ -103,7 +104,7 @@ public class AbstractSqlBuilder {
 	 * @return
 	 */
 	public AbstractSqlBuilder or(){
-		whereBuilder.or();
+		or = true;
 		return this;
 	}
 	
@@ -115,8 +116,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder equal(String field, Object paramValue, int sqlType) throws SQLException {
-		whereBuilder.equal(field, paramValue, sqlType);
-		return this;
+		return addParam(field, "=", paramValue, sqlType);
 	}
 	
 	/**
@@ -127,8 +127,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder equalNullable(String field, Object paramValue, int sqlType) {
-		whereBuilder.equalNullable(field, paramValue, sqlType);
-		return this;
+		return addParamNullable(field, "=", paramValue, sqlType);
 	}
 
 	/**
@@ -139,8 +138,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder notEqual(String field, Object paramValue, int sqlType) throws SQLException {
-		whereBuilder.notEqual(field, paramValue, sqlType);
-		return this;
+		return addParam(field, "!=", paramValue, sqlType);
 	}
 	
 	/**
@@ -151,8 +149,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder notEqualNullable(String field, Object paramValue, int sqlType) {
-		whereBuilder.notEqualNullable(field, paramValue, sqlType);
-		return this;
+		return addParamNullable(field, "!=", paramValue, sqlType);
 	}
 
 	/**
@@ -163,8 +160,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder greaterThan(String field, Object paramValue, int sqlType) throws SQLException {
-		 whereBuilder.greaterThan(field, paramValue, sqlType);
-		return this;
+		return addParam(field, ">", paramValue, sqlType);
 	}
 	
 	/**
@@ -175,8 +171,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder greaterThanNullable(String field, Object paramValue, int sqlType) {
-		whereBuilder.greaterThanNullable(field, paramValue, sqlType);
-		return this;
+		return addParamNullable(field, ">", paramValue, sqlType);
 	}
 
 	/**
@@ -187,8 +182,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder greaterThanEquals(String field, Object paramValue, int sqlType) throws SQLException {
-		whereBuilder.greaterThanEquals(field, paramValue, sqlType);
-		return this;
+		return addParam(field, ">=", paramValue, sqlType);
 	}
 	
 	/**
@@ -199,8 +193,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder greaterThanEqualsNullable(String field, Object paramValue, int sqlType) {
-		whereBuilder.greaterThanEqualsNullable(field, paramValue, sqlType);
-		return this;
+		return addParamNullable(field, ">=", paramValue, sqlType);
 	}
 
 	/**
@@ -211,8 +204,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder lessThan(String field, Object paramValue, int sqlType) throws SQLException {
-		whereBuilder.lessThan(field, paramValue, sqlType);
-		return this;
+		return addParam(field, "<", paramValue, sqlType);
 	}
 	
 	/**
@@ -223,8 +215,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder lessThanNullable(String field, Object paramValue, int sqlType) {
-		whereBuilder.lessThanNullable(field, paramValue, sqlType);
-		return this;
+		return addParamNullable(field, "<", paramValue, sqlType);
 	}
 
 	/**
@@ -235,8 +226,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder lessThanEquals(String field, Object paramValue, int sqlType) throws SQLException {
-		whereBuilder.lessThanEquals(field, paramValue, sqlType);
-		return this;
+		return addParam(field, "<=", paramValue, sqlType);
 	}
 	
 	/**
@@ -247,8 +237,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder lessThanEqualsNullable(String field, Object paramValue, int sqlType) {
-		whereBuilder.lessThanEqualsNullable(field, paramValue, sqlType);
-		return this;
+		return addParamNullable(field, "<=", paramValue, sqlType);
 	}
 
 	/**
@@ -260,7 +249,17 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder between(String field, Object paramValue1, Object paramValue2, int sqlType) throws SQLException {
-		whereBuilder.between(field, paramValue1, paramValue2, sqlType);
+		if (paramValue1 == null || paramValue2 == null) {
+			and = or = false;
+			throw new SQLException(field + " is not support null value.");
+		} else {
+			appendConcate();
+			whereExp.append(" ").append(field).append(" BETWEEN ? AND ?");
+			FieldEntry entry1 = new FieldEntry(field, paramValue1, sqlType);
+			whereFieldEntrys.add(entry1);
+			FieldEntry entry2 = new FieldEntry(field, paramValue2, sqlType);
+			whereFieldEntrys.add(entry2);
+		}
 		return this;
 	}
 	
@@ -273,7 +272,17 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder betweenNullable( String field, Object paramValue1, Object paramValue2, int sqlType) {
-		whereBuilder.betweenNullable(field, paramValue1, paramValue2, sqlType);
+		if(paramValue1 == null || paramValue2 == null){
+			//如果paramValue==null，则field不会作为条件加入到最终的SQL中。
+			and = or = false;
+		}else{
+			appendConcate();
+			whereExp.append(" ").append(field).append(" BETWEEN ? AND ?");
+			FieldEntry entry1 = new FieldEntry(field, paramValue1, sqlType);
+			whereFieldEntrys.add(entry1);
+			FieldEntry entry2 = new FieldEntry(field, paramValue2, sqlType);
+			whereFieldEntrys.add(entry2);
+		}
 		return this;
 	}
 
@@ -285,8 +294,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder like(String field, Object paramValue, int sqlType) throws SQLException {
-		whereBuilder.like(field, paramValue, sqlType);
-		return this;
+		return addParam(field, "LIKE", paramValue, sqlType);
 	}
 	
 	/**
@@ -297,8 +305,7 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder likeNullable(String field, Object paramValue, int sqlType) {
-		whereBuilder.likeNullable(field, paramValue, sqlType);
-		return this;
+		return addParamNullable(field, "LIKE", paramValue, sqlType);
 	}
 
 	/**
@@ -309,8 +316,21 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder in(String field, List<?> paramValues, int sqlType) throws SQLException {
-		whereBuilder.in(field, paramValues, sqlType);
-		return this;
+		if(null == paramValues){
+			and = or = false;
+			throw new SQLException(field + " must have more than one value.");
+		}
+		if(paramValues.size() == 0){
+			and = or = false;
+			throw new SQLException(field + " must have more than one value.");
+		}
+		for(Object obj:paramValues){
+			if(obj==null){
+				and = or = false;
+				throw new SQLException(field + " is not support null value.");
+			}
+		}
+		return addInParam(field, paramValues, sqlType);
 	}
 	
 	/**
@@ -322,8 +342,15 @@ public class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder inNullable(String field, List<?> paramValues, int sqlType) throws SQLException {
-		whereBuilder.inNullable(field, paramValues, sqlType);
-		return this;
+		if(null == paramValues){
+			and = or = false;
+			return this;
+		}
+		if(paramValues.size() == 0){
+			and = or = false;
+			throw new SQLException(field + " must have more than one value.");
+		}
+		return addInParam(field, paramValues, sqlType);
 	}
 	
 	/**
@@ -332,7 +359,8 @@ public class AbstractSqlBuilder {
 	 * @return
 	 */
 	public AbstractSqlBuilder isNull(String field){
-		whereBuilder.isNull(field);
+		appendConcate();
+		whereExp.append(" ").append(field).append(" IS NULL");
 		return this;
 	}
 	
@@ -342,8 +370,62 @@ public class AbstractSqlBuilder {
 	 * @return
 	 */
 	public AbstractSqlBuilder isNotNull(String field){
-		whereBuilder.isNotNull(field);
+		appendConcate();
+		whereExp.append(" ").append(field).append(" IS NOT NULL");
 		return this;
+	}
+	
+	private AbstractSqlBuilder addInParam(String field, List<?> paramValues, int sqlType){
+		StringBuilder temp = new StringBuilder();
+		temp.append(" in ( ");
+		for(int i=0,size=paramValues.size();i<size;i++){
+			temp.append("?");
+			if(i!=size-1){
+				temp.append(", ");
+			}
+			FieldEntry entry = new FieldEntry(field, paramValues.get(i), sqlType);
+			whereFieldEntrys.add(entry);
+		}
+		temp.append(" )");
+		appendConcate();
+		whereExp.append(" ").append(field).append(temp);
+		return this;
+	}
+	
+	private AbstractSqlBuilder addParam(String field, String condition, Object paramValue, int sqlType) throws SQLException{
+		if(paramValue != null){
+			appendConcate();
+			whereExp.append(" ").append(field).append(" ").append(condition).append(" ?");
+			FieldEntry entry = new FieldEntry(field, paramValue, sqlType);
+			whereFieldEntrys.add(entry);
+		}else{
+			and = or = false;
+			throw new SQLException(field + " is not support null value.");
+		}
+		return this;
+	}
+	
+	private AbstractSqlBuilder addParamNullable(String field, String condition, Object paramValue, int sqlType){
+		if(paramValue != null){
+			appendConcate();
+			whereExp.append(" ").append(field).append(" ").append(condition).append(" ?");
+			FieldEntry entry = new FieldEntry(field, paramValue, sqlType);
+			whereFieldEntrys.add(entry);
+		}else{
+			//如果paramValue==null，则field不会作为条件加入到最终的SQL中。
+			and = or = false;
+		}
+		return this;
+	}
+	
+	private void appendConcate(){
+		if(and){
+			whereExp.append(" AND ");
+		}
+		if(or){
+			whereExp.append(" OR ");
+		}
+		and = or = false;
 	}
 
 }

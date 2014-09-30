@@ -185,44 +185,21 @@ public class AbstractJavaDataPreparer{
 		return methods;
 	}
 	
-	private String wrapField(GenTaskBySqlBuilder sqlBuilder) throws Exception{
+	private String buildSelectFieldExp(GenTaskBySqlBuilder sqlBuilder) throws Exception{
 		String fieldStr = sqlBuilder.getFields();
 		
 		if("*".equalsIgnoreCase(fieldStr)){
 			return fieldStr;
 		}
-		DatabaseCategory dbCategory = getDatabaseCategory(sqlBuilder.getAllInOneName());
+		
 		String []fields = fieldStr.split(",");
 		
 		String []result = new String[fields.length];
 		for(int i=0;i<fields.length;i++){
-			String field = fields[i];
-			if(DatabaseCategory.SqlServer==dbCategory){
-				field = "\"[" + field + "]\"";
-			}else{
-				field = "\"`" + field + "`\"";
-			}
+			String field = "\"" + fields[i] + "\"";
 			result[i] = field;			
 		}
 		return StringUtils.join(result, ",");
-	}
-	
-	private String wrapSingleField(String field, String allInOneName) throws Exception{
-		DatabaseCategory dbCategory = getDatabaseCategory(allInOneName);
-		if(DatabaseCategory.SqlServer==dbCategory){
-			return field = "[" + field + "]";
-		}else{
-			return field = "`" + field + "`";
-		}
-	}
-	
-	private String wrapTableName(GenTaskBySqlBuilder sqlBuilder) throws Exception{
-		DatabaseCategory dbCategory = getDatabaseCategory(sqlBuilder.getAllInOneName());
-		String tableName = sqlBuilder.getTable_name();
-		if(DatabaseCategory.SqlServer==dbCategory && "select".equalsIgnoreCase(sqlBuilder.getCrud_type())){
-			tableName = tableName + " WITH (NOLOCK)";
-		}
-		return tableName;		
 	}
 	
 	private List<JavaMethodHost> buildSelectMethodHosts(List<JavaParameterHost> allColumns,
@@ -240,14 +217,14 @@ public class AbstractJavaDataPreparer{
 			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			method.setComments(builder.getComment());
-			method.setField(wrapField(builder));
-			method.setTableName(wrapTableName(builder));
+			method.setField(buildSelectFieldExp(builder));
+			method.setTableName(builder.getTable_name());
 			String orderBy = builder.getOrderby();
 			if(orderBy!=null && !orderBy.trim().isEmpty() && orderBy.indexOf("-1,")!=0){
 				String []str = orderBy.split(",");
-				String wpf = wrapSingleField(str[0], builder.getAllInOneName());
-				String orderExp = "ORDER BY "+wpf+" "+StringUtils.upperCase(str[1]);
-				method.setOrderByExp(orderExp);
+				String odyExp = "\""+str[0]+"\", ";
+				odyExp = "asc".equalsIgnoreCase(str[1])?odyExp+"true":odyExp+"false";
+				method.setOrderByExp(odyExp);
 			}
 			// select sql have select field and where condition clause
 			List<AbstractParameterHost> paramAbstractHosts = 
@@ -279,7 +256,7 @@ public class AbstractJavaDataPreparer{
 			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			method.setComments(builder.getComment());
-			method.setTableName(wrapTableName(builder));
+			method.setTableName(builder.getTable_name());
 			// Only have condition clause
 			method.setParameters(buildMethodParameterHost4SqlConditin(builder, allColumns));
 			methods.add(method);
@@ -302,7 +279,7 @@ public class AbstractJavaDataPreparer{
 			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			method.setComments(builder.getComment());
-			method.setTableName(wrapTableName(builder));
+			method.setTableName(builder.getTable_name());
 			List<JavaParameterHost> parameters = new ArrayList<JavaParameterHost>();
 			
 			// Have no where condition
@@ -337,8 +314,8 @@ public class AbstractJavaDataPreparer{
 			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			method.setComments(builder.getComment());
-			method.setField(wrapField(builder));
-			method.setTableName(wrapTableName(builder));
+			method.setField(buildSelectFieldExp(builder));
+			method.setTableName(builder.getTable_name());
 			List<JavaParameterHost> updateSetParameters = new ArrayList<JavaParameterHost>();
 			// Have both set and condition clause
 			String[] fields = StringUtils.split(builder.getFields(), ",");

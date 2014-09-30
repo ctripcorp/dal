@@ -25,7 +25,7 @@ public class ConnectionActionTest {
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
 		conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-		return new DalConnection(conn, DbMeta.getDbMeta(logicDbName,true, false, conn));
+		return new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, true, conn));
 	}
 	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {

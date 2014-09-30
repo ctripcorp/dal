@@ -46,7 +46,7 @@ public class LogEntry {
 	private String databaseName;
 	private String allInOneKey;
 	private boolean isMaster;
-	private boolean isSlave;
+	private String shardId;
 	private String serverAddress;
 	private String commandType;
 	private String userName;
@@ -245,14 +245,9 @@ public class LogEntry {
 		this.isMaster = isMaster;
 	}
 	
-	public boolean isSlave() {
-		return isSlave;
+	public void setShardId(String shardId) {
+		this.shardId = shardId;
 	}
-
-	public void setSlave(boolean isSlave) {
-		this.isSlave = isSlave;
-	}
-
 
 	public int getSqlSize(){
 		int size = 0;
@@ -329,10 +324,7 @@ public class LogEntry {
 			dbName += tokens != null && tokens.length > 0 ? tokens[0] : "";
 		}
 		dbName += this.isMaster ? ".Master" : ".Slave";
-		if(this.isMaster)
-			dbName += ".Master";
-		if(this.isSlave)
-			dbName += ".Slave";
+
 		dbName += this.getDatabaseName() != null ? "." + this.getDatabaseName() : "";
 		
 		Map<String, String> tag = new LinkedHashMap<String, String>();

@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao;
 
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.buildShardStr;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.detectDistributedTransaction;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.executeByDbShard;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isAlreadySharded;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardingEnabled;
@@ -355,12 +356,14 @@ public final class DalTableDao<T> {
 	public int insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos)
 			throws SQLException {
 		if(isEmpty(daoPojos)) return 0;
+
+		List<Map<String, ?>>  pojos = getPojosFields(daoPojos);
+		detectDistributedTransaction(logicDbName, hints, pojos);
 		
 		int count = 0;
 		hints = hints.clone();
-		for (T pojo : daoPojos) {
+		for (Map<String, ?> fields : pojos) {
 			DalWatcher.begin();
-			Map<String, ?> fields = parser.getFields(pojo);
 			filterAutoIncrementPrimaryFields(fields);
 			
 			String insertSql = buildInsertSql(hints, fields);
@@ -552,16 +555,17 @@ public final class DalTableDao<T> {
 	 */
 	public int delete(DalHints hints, List<T> daoPojos) throws SQLException {
 		if(isEmpty(daoPojos)) return 0;
+
+		List<Map<String, ?>>  pojos = getPojosFields(daoPojos);
+		detectDistributedTransaction(logicDbName, hints, pojos);
 		
 		int count = 0;
 		hints = hints.clone();
-		for (T pojo : daoPojos) {
+		for (Map<String, ?>  fields: pojos) {
 			DalWatcher.begin();
 			StatementParameters parameters = new StatementParameters();
-			addParameters(parameters, parser.getPrimaryKeys(pojo));
+			addParameters(parameters, fields, parser.getPrimaryKeyNames());
 			try {
-				Map<String, ?> fields = parser.getFields(pojo);
-				
 				String deleteSql = buildDeleteSql(getTableName(hints, parameters, fields));
 
 				count += client.update(deleteSql, parameters, hints.setFields(fields));
@@ -687,18 +691,19 @@ public final class DalTableDao<T> {
 	 */
 	public int update(DalHints hints, List<T> daoPojos) throws SQLException {
 		if(isEmpty(daoPojos)) return 0;
+
+		List<Map<String, ?>>  pojos = getPojosFields(daoPojos);
+		detectDistributedTransaction(logicDbName, hints, pojos);
 		
 		int count = 0;
-		for (T pojo : daoPojos) {
+		for (int i = 0; i < daoPojos.size(); i++) {
 			DalWatcher.begin();
-			Map<String, ?> fields = parser.getFields(pojo);
-			Map<String, ?> pk = parser.getPrimaryKeys(pojo);
-
+			Map<String, ?> fields = pojos.get(i);
 			String updateSql = buildUpdateSql(getTableName(hints, fields), fields, hints);
 
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
-			addParameters(parameters, pk);
+			addParameters(parameters, parser.getPrimaryKeys(daoPojos.get(i)));
 
 			try {
 				if (fields.size() == 0)
@@ -761,8 +766,16 @@ public final class DalTableDao<T> {
 		}
 	}
 
+	private void addParameters(StatementParameters parameters,
+			Map<String, ?> entries, String[] validColumns) {
+		int index = parameters.size() + 1;
+		for(String column : validColumns){
+			parameters.set(index++, column, this.getColumnType(column), entries.get(column));
+		}
+	}
+	
 	private int addParameters(int start, StatementParameters parameters,
-			Map<String, ?> entries, List<String> validColumns) {	
+			Map<String, ?> entries, List<String> validColumns) {
 		int count = 0;
 		for(String column : validColumns){
 			if(entries.containsKey(column))

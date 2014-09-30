@@ -136,7 +136,7 @@ public class DalShardingHelper {
 			pojosInShard.add(pojo);
 		}
 		
-		detectDistributedTransaction(logicDbName, shuffled.keySet(), "crossShardBatchDelete");
+		detectDistributedTransaction(shuffled.keySet());
 		
 		return shuffled;
 	}
@@ -209,18 +209,38 @@ public class DalShardingHelper {
 		return true;
 	}
 	
-	private static void detectDistributedTransaction(String logicDbName, Set<String> shardIds, String operation) throws SQLException {
+	public static void detectDistributedTransaction(String logicDbName, DalHints hints, List<Map<String, ?>>  daoPojos) throws SQLException {
+		if(!isShardingEnabled(logicDbName))
+			return;
+		
+		if(!DalTransactionManager.isInTransaction())
+			return;
+		
+		String shardId = null;
+		if(locateShardId(logicDbName, hints)) {
+			shardId = hints.getShardId();
+			isSameShard(shardId);
+		} else {
+			detectDistributedTransaction(shuffle(logicDbName, shardId, daoPojos).keySet());
+		}
+	}
+	
+	private static void detectDistributedTransaction(Set<String> shardIds) throws SQLException {
 		if(!DalTransactionManager.isInTransaction())
 			return;
 		
 		// Not allowed for distributed transaction
 		if(shardIds.size() > 1)
-			throw new SQLException(operation + " is not allowed in mutiple database shards within transaction" + shardIds);
+			throw new SQLException("Potential distributed operation detected in shards: " + shardIds);
 		
 		String shardId = shardIds.iterator().next();
 		
+		isSameShard(shardId);
+	}
+
+	private static void isSameShard(String shardId) throws SQLException {
 		if(shardId.equals(DalTransactionManager.getCurrentDbMeta().getShardId()))
-			throw new SQLException(operation + " is not allowed in mutiple database shards within transaction. Current shardId: " + DalTransactionManager.getCurrentDbMeta().getShardId() + " Desired shardId: " + shardId);
+			throw new SQLException("Operation is not allowed in different database shard within current transaction. Current shardId: " + DalTransactionManager.getCurrentDbMeta().getShardId() + ". Requeted shardId: " + shardId);
 	}
 	
 	public static <T> T executeByDbShard(String logicDbName, String rawTableName, DalHints hints, List<Map<String, ?>>  daoPojos, BulkTask<T> task) throws SQLException {

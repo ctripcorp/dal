@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -45,7 +46,7 @@ public class DalTabelDaoMySqlTest {
 			client = DalClientFactory.getClient(DATABASE_NAME);
 			parser = new ClientTestDalParser();
 			dao = new DalTableDao<ClientTestModel>(parser);
-			dao.setDelimiter('`');
+			dao.setDatabaseCategory(DatabaseCategory.MySql);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

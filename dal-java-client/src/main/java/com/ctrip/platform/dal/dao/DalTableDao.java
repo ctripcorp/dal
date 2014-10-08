@@ -7,6 +7,7 @@ import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isAlreadyShard
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardingEnabled;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.locateTableShardId;
 
+import java.beans.FeatureDescriptor;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper.BulkTask;
 import com.ctrip.platform.dal.sql.exceptions.DalException;
@@ -85,6 +87,7 @@ public final class DalTableDao<T> {
 	 * both start and end delimiter. This is useful when column name happens 
 	 * to be keyword of target database and the start and end delimiter are the same.
 	 * @param delimiter the char used to quote column name.
+	 * @deprecated Use setDatabaseCategory instead of calling individule setXxx
 	 */
 	public void setDelimiter(Character delimiter) {
 		startDelimiter = delimiter;
@@ -94,6 +97,7 @@ public final class DalTableDao<T> {
 	/**
 	 * Specify the sql template for find by primary key
 	 * @param tmp the sql template for find by primary key
+	 * @deprecated Use setDatabaseCategory instead of calling individule setXxx
 	 */
 	public void setFindTemplate(String tmp){
 		this.findtmp = tmp;
@@ -104,10 +108,28 @@ public final class DalTableDao<T> {
 	 * This is useful when column name happens  to be keyword of target database.
 	 * @param startDelimiter the start char used quote column name on .
 	 * @param endDelimiter the end char used to quote column name.
+	 * @deprecated Use setDatabaseCategory instead of calling individule setXxx
 	 */
 	public void setDelimiter(Character startDelimiter, Character endDelimiter) {
 		this.startDelimiter = startDelimiter;
 		this.endDelimiter = endDelimiter;
+	}
+	
+	/**
+	 * This is to set DatabaseCategory to initialize startDelimiter/endDelimiter and findtmp.
+	 * This will apply db specific settings. So the dao is no longer reusable across different dbs.
+	 * @param dBCategory The target Db category
+	 */
+	public void setDatabaseCategory(DatabaseCategory dbCategory) {
+		if(DatabaseCategory.MySql == dbCategory) {
+			startDelimiter = '`';
+			endDelimiter = startDelimiter;
+		} else if(DatabaseCategory.SqlServer == dbCategory ) {
+			startDelimiter = '[';
+			endDelimiter = ']';
+			findtmp = "SELECT * FROM %s WITH (NOLOCK) WHERE %s";
+		} else
+			throw new RuntimeException("Such Db category not suported yet");
 	}
 	
 	public String getTableName(DalHints hints) throws SQLException {

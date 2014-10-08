@@ -7,6 +7,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -19,7 +20,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
  */
 public class DalTableDaoShardByDbTest extends BaseDalTableDaoShardByDbTest {
 	public DalTableDaoShardByDbTest() {
-		super(DATABASE_NAME_SQLSVR, false, null);
+		super(DATABASE_NAME_SQLSVR, false, null, DatabaseCategory.SqlServer);
 	}
 	
 	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr_dbShard";

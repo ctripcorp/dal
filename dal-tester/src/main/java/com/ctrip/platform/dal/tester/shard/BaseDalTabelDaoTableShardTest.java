@@ -12,6 +12,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
@@ -22,11 +23,12 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 public abstract class BaseDalTabelDaoTableShardTest {
 	private boolean ASSERT_ALLOWED = true;
 
-	public BaseDalTabelDaoTableShardTest(String databaseName, boolean assertAllowed) {
+	public BaseDalTabelDaoTableShardTest(String databaseName, boolean assertAllowed, DatabaseCategory dbCategory) {
 		try {
 			DalClientFactory.initClientFactory();
 			DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser(databaseName);
 			dao = new DalTableDao<ClientTestModel>(clientTestParser);
+			dao.setDatabaseCategory(dbCategory);
 			ASSERT_ALLOWED = assertAllowed;
 		} catch (Exception e) {
 			e.printStackTrace();

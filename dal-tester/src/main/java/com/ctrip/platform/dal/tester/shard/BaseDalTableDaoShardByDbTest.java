@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalDetailResults;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -28,11 +28,12 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 public abstract class BaseDalTableDaoShardByDbTest {
 	private boolean ASSERT_ALLOWED = true;
 
-	public BaseDalTableDaoShardByDbTest(String databaseName, boolean assertAllowed, String generatedKey) {
+	public BaseDalTableDaoShardByDbTest(String databaseName, boolean assertAllowed, String generatedKey, DatabaseCategory dbCategory) {
 		try {
 			DalClientFactory.initClientFactory();
 			DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser(databaseName);
 			dao = new DalTableDao<ClientTestModel>(clientTestParser);
+			dao.setDatabaseCategory(dbCategory);
 			ASSERT_ALLOWED = assertAllowed;
 			GENERATED_KEY = generatedKey;
 		} catch (Exception e) {

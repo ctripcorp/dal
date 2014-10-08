@@ -26,7 +26,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, true, conn));
 			assertNotNull(test);
 		} catch (Throwable e){
 			fail();
@@ -42,7 +42,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, true, conn));
 			assertNotNull(test.getConn());
 		} catch (Throwable e){
 			fail();
@@ -58,7 +58,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, true, conn));
 			assertNotNull(test.getMeta());
 			LogEntry entry = new LogEntry();
 			
@@ -79,7 +79,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, true, conn));
 			assertNotNull(test.getDatabaseName());
 		} catch (Throwable e){
 			fail();
@@ -95,7 +95,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, true, conn));
 			test.setAutoCommit(false);
 			assertFalse(conn.getAutoCommit());
 			test.setAutoCommit(true);
@@ -114,7 +114,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, true, conn));
 			DalHints hints = new DalHints();
 			hints.setIsolationLevel(Connection.TRANSACTION_SERIALIZABLE);
 			test.applyHints(hints);
@@ -137,7 +137,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.getDbMeta(logicDbName, conn));
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, true, conn));
 
 			Statement statement = test.getConn().createStatement();
 			ResultSet rs = statement.executeQuery("select * from City");

@@ -14,11 +14,11 @@ public class DbMeta {
 	private String databaseName;
 	private String allInOneKey;
 	private String userName;
+	private String shardId;
 	private boolean isMaster;
-	private boolean isSlave;
 	private String url;
 
-	private DbMeta(Connection conn, String realDbName, boolean master, boolean isSelect) throws SQLException {
+	private DbMeta(Connection conn, String realDbName, String shardId, boolean master) throws SQLException {
 		DatabaseMetaData meta = conn.getMetaData();
 
 		databaseName = conn.getCatalog();
@@ -27,7 +27,7 @@ public class DbMeta {
 		
 		allInOneKey = realDbName;
 		isMaster = master;
-		isSlave = isSelect;
+		this.shardId = shardId;
 	}
 	
 	public void populate(LogEntry entry) {
@@ -35,26 +35,23 @@ public class DbMeta {
 		entry.setServerAddress(url);
 		entry.setUserName(userName);
 		entry.setMaster(isMaster);
-		entry.setSlave(isSlave);
+		entry.setShardId(shardId);
 		entry.setAllInOneKey(allInOneKey);
 	}
 	
 
-	public static DbMeta getDbMeta(String realDbName, boolean isMaster, boolean isSelect, Connection conn) throws SQLException {
+	public static DbMeta createIfAbsent(String realDbName, String shardId, boolean isMaster, Connection conn) throws SQLException {
 		DbMeta meta = metaMap.get(realDbName);
 		if(meta == null) {
-			meta = new DbMeta(conn, realDbName, isMaster, isSelect);
-			metaMap.putIfAbsent(realDbName, meta);
+			meta = new DbMeta(conn, realDbName, shardId, isMaster);
+			DbMeta oldMeta = metaMap.putIfAbsent(realDbName, meta);
+			meta = oldMeta == null ? meta : oldMeta;
 		}
 		return meta;
 	}
 	
-	public static DbMeta getDbMeta(String realDbName, Connection conn) throws SQLException {
-		return getDbMeta(realDbName, false, false, conn);
-	}
-	
-	public static DbMeta getDbMeta(String realDbName, boolean isMaster, Connection conn) throws SQLException {
-		return getDbMeta(realDbName, isMaster, false, conn);
+	public static DbMeta getDbMeta(String realDbName) throws SQLException {
+		return metaMap.get(realDbName);
 	}
 
 	public String getDatabaseName() {
@@ -63,5 +60,9 @@ public class DbMeta {
 
 	public String getAllInOneKey() {
 		return allInOneKey;
+	}
+
+	public String getShardId() {
+		return shardId;
 	}
 }

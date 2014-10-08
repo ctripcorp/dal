@@ -1,9 +1,11 @@
 package com.ctrip.platform.dal.tester.client;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import org.junit.Test;
 
@@ -18,7 +20,7 @@ public class DalTransactionTest {
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
 		conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-		return new DalConnection(conn, DbMeta.getDbMeta(logicDbName, true, conn));
+		return new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, true, conn));
 	}
 
 	@Test

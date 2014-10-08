@@ -38,7 +38,7 @@
 		<DBDataCenter></DBDataCenter>
 	</uat>
 	<uat_nt>
-		<DBDataCenter>_NT</DBDataCenter>
+		<DBDataCenter></DBDataCenter>
 	</uat_nt>
 	<prd>
 		<DBDataCenter>_SH</DBDataCenter>

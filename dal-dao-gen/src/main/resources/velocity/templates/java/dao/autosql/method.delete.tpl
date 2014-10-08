@@ -5,7 +5,7 @@
 	**/
 	public int ${method.getName()} (${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		DeleteSqlBuilder builder = new DeleteSqlBuilder("${method.getTableName()}", dBCategory);
+		DeleteSqlBuilder builder = new DeleteSqlBuilder("${method.getTableName()}", dbCategory);
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 	    String sql = builder.build();
 		return baseClient.update(sql, builder.buildParameters, hints);

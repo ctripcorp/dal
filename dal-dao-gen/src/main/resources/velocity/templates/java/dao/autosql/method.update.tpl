@@ -5,7 +5,7 @@
 	**/
 	public int ${method.getName()} (${method.getUpdateParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		UpdateSqlBuilder builder = new UpdateSqlBuilder("${method.getTableName()}", dBCategory);
+		UpdateSqlBuilder builder = new UpdateSqlBuilder("${method.getTableName()}", dbCategory);
 #foreach($p in $method.getUpdateSetParameters())
 		builder.update("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
 #end	

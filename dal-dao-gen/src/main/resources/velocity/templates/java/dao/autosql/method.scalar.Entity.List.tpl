@@ -11,7 +11,7 @@
 	**/
 	public List<${host.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dBCategory, $isPagination);
+		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory, $isPagination);
 		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 #if($method.getOrderByExp()!="")

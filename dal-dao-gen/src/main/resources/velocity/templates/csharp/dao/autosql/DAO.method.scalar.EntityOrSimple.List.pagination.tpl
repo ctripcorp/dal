@@ -1,4 +1,4 @@
-##实体类型或简单类型且返回List
+##实体类型或简单类型且返回分页List
 #foreach($method in $host.getExtraMethods())
 #if(!$method.isFirstOrSingle() && $method.getCrud_type() == "select" && $method.isPaging())
 		/// <summary>
@@ -12,29 +12,10 @@
         {
             try
             {
-                StatementParameterCollection parameters = new StatementParameterCollection();
-				String sql = "${method.getSql()}";
-#set($inParams = [])                
-#foreach($p in $method.getParameters())  
-#if($p.isInParameter())
-#set($success = $inParams.add($p))
-#else
-                parameters.Add(new StatementParameter{ Name = "@${p.getAlias()}", Direction = ParameterDirection.Input, DbType = DbType.${p.getDbType()}, Value =${WordUtils.uncapitalize($p.getAlias())} });
-#end
-#end
-#if($inParams.size() > 0)
-#if($method.isPaging())
-                sql = string.Format(sql, ${host.pageBegain()}, ${host.pageEnd()}, 
-					#foreach($p in $inParams)Arch.Data.Utility.ParameterUtility.NormalizeInParam(${WordUtils.uncapitalize($p.getAlias())}, parameters,"${WordUtils.uncapitalize($p.getAlias())}")#if($foreach.count != $inParams.size()),#end#end);
-#else
-		        sql = string.Format(sql, #foreach($p in $inParams)Arch.Data.Utility.ParameterUtility.NormalizeInParam(${WordUtils.uncapitalize($p.getAlias())}, parameters,"${WordUtils.uncapitalize($p.getAlias())}")#if($foreach.count != $inParams.size()),#end#end);
-#end
-#elseif($method.isPaging())
-		        sql = string.Format(sql, ${host.pageBegain()}, ${host.pageEnd()});
-#end
-
-	            return baseDao.SelectList<${host.getClassName()}>(sql, parameters);
-
+                var query = baseDao.GetQuery<Entity.DataModel.${host.getClassName()}>();
+#parse("templates/csharp/dao/autosql/common.constrain.parameters.tpl")		
+				query.Paging(pageNo, pageSize, ${method.getOrderByExp()});
+	            return baseDao.SelectList<Entity.DataModel.${host.getClassName()}>(query);
             }
             catch (Exception ex)
             {

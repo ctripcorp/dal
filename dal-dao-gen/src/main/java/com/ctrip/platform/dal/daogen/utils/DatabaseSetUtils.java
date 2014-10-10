@@ -31,6 +31,10 @@ public class DatabaseSetUtils {
 	
 	public static String getAllInOneName(String db_set_name){
 		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
-		return databaseSetEntry.getConnectionString();
+		if(null != databaseSetEntry){
+			return databaseSetEntry.getConnectionString();
+		}else{
+			return "";
+		}
 	}
 }

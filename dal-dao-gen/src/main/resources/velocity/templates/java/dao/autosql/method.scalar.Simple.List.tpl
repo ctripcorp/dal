@@ -2,31 +2,26 @@
 #if($method.getCrud_type() == "select")
 ##简单类型并且返回值是List
 #if($method.isSampleType() && $method.isReturnList())
+#set($isPagination = "false")		
+#if($method.isPaging())
+#set($isPagination = "true")	
+#end
 	/**
 	 * ${method.getComments()}
 	**/
 	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}");
-		builder.addSelectField(${method.getField()});
-		StatementParameters parameters = new StatementParameters();
-		int index = 1;
+		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory, $isPagination);
+		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 #if($method.getOrderByExp()!="")
-		builder.addOrderByExp("${method.getOrderByExp()}");
+		builder.orderBy(${method.getOrderByExp()});
 #end
-#if($method.isPaging() && ${host.getDatabaseCategory()}=="MySql")
-		String sqlPattern = builder.buildPaginationSql4MySQL();
-		String sql = String.format(sqlPattern, ${host.pageBegain()}, ${host.pageEnd()});
+        String sql = builder.build();
+#if($method.isPaging())
+		sql = String.format(sql, ${host.pageBegain()}, ${host.pageEnd()});
 #end
-#if($method.isPaging() && ${host.getDatabaseCategory()}!="MySql")
-		String sqlPattern = builder.buildPaginationSql4SqlServer();
-		String sql = String.format(sqlPattern, ${host.pageBegain()}, ${host.pageEnd()});
-#end
-#if(!$method.isPaging())
-		String sql = builder.buildSelectSql();
-#end
-		return queryDao.query(sql, parameters, hints, ${method.getPojoClassName()}.class);
+		return queryDao.query(sql, builder.buildParameters, hints, ${method.getPojoClassName()}.class);
 	}
 #end
 #end

@@ -19,7 +19,6 @@
 #set($current = $cpk.getName() + " desc")
 #set($success = $array.add($current))
 #end
-                
 #if($host.getDatabaseCategory().name() == "MySql" )
                 sbSql.Append(@"select ${StringUtils.join($host.getColumns(), ", ")} from ${host.getTableName()} ");
                 //包含查询条件

@@ -8,7 +8,6 @@
             try
             {
                 String sql = "SELECT count(1) from ${host.getTableName()} #if($host.getDatabaseCategory().name() == "MySql" ) #{else} with (nolock)#end  ";
-
                 object obj = baseDao.ExecScalar(sql);
                 long ret = Convert.ToInt64(obj);
                 return ret;

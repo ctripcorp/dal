@@ -5,9 +5,11 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 
-import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 
 public class UpdateSqlBuilderTest {
 	
@@ -17,27 +19,28 @@ public class UpdateSqlBuilderTest {
 		in.add("12");
 		in.add("12");
 		
-		UpdateSqlBuilder builder = new UpdateSqlBuilder("Person");
-		builder.addUpdateField("`a`","[b]","c");
+		UpdateSqlBuilder builder = new UpdateSqlBuilder("Person", DatabaseCategory.MySql);
 		
-		StatementParameters parameters = new StatementParameters();
-		int index = 1;
+		builder.update("name", "value", Types.VARCHAR);
+		builder.update("age", 52, Types.INTEGER);
+		builder.update("addr", "china", Types.VARCHAR);
 		
-		index = builder.addConstrant().equal("a", "paramValue", parameters, index, Types.INTEGER);
+		builder.equal("age", 123, Types.INTEGER);
+		builder.and().in("b", in, Types.INTEGER);
+		builder.and().like("b", "in", Types.INTEGER);
+		builder.and().betweenNullable("c", 20, 100, Types.INTEGER);
+		builder.and().betweenNullable("d", null, "paramValue2", Types.VARCHAR);
+		builder.and().isNull("e");
 		
-		index = builder.addConstrant().and().in("b", in, parameters, index, Types.INTEGER);
+		String sql = builder.build();
 		
-		index = builder.addConstrant().and().like("b", "in", parameters, index, Types.INTEGER);
-		
-		index = builder.addConstrant().and().betweenNullable("c", "paramValue1", "paramValue2", 
-				parameters, index, Types.INTEGER);
-		
-		index = builder.addConstrant().and().betweenNullable("d", null, "paramValue2", 
-				parameters, index, Types.INTEGER);
-		
-		builder.addConstrant().and().isNull("e");
-		String sql = builder.buildUpdateSql();
-		System.out.println(sql);
+		String expect_sql = "UPDATE Person SET `name` = ?, `age` = ?, `addr` = ? "
+				+ "WHERE age = ? AND  b in ( ?, ? ) AND  b LIKE ? "
+				+ "AND  c BETWEEN ? AND ? AND  e IS NULL";
+
+		Assert.assertEquals(expect_sql, sql);
+		builder.buildParameters();
+		Assert.assertEquals(10, builder.getStatementParameterIndex());
 	}
 
 }

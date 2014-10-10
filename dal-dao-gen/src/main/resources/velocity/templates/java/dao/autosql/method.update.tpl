@@ -5,16 +5,13 @@
 	**/
 	public int ${method.getName()} (${method.getUpdateParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		UpdateSqlBuilder builder = new UpdateSqlBuilder("${method.getTableName()}");
-		builder.addUpdateField(${method.getField()});
-		StatementParameters parameters = new StatementParameters();
-		int index = 1;
+		UpdateSqlBuilder builder = new UpdateSqlBuilder("${method.getTableName()}", dbCategory);
 #foreach($p in $method.getUpdateSetParameters())
-		parameters.set(index++, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+		builder.update("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
 #end	
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
-		String sql = builder.buildUpdateSql();
-		return baseClient.update(sql, parameters, hints);
+		String sql = builder.build();
+		return baseClient.update(sql, builder.buildParameters, hints);
 	}
 #end
 #end

@@ -5,15 +5,10 @@
 	**/
 	public int ${method.getName()} (${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		
-		DeleteSqlBuilder builder = new DeleteSqlBuilder("${method.getTableName()}");
-		
-		StatementParameters parameters = new StatementParameters();
-		int index = 1;
+		DeleteSqlBuilder builder = new DeleteSqlBuilder("${method.getTableName()}", dbCategory);
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
-	    String sql = builder.buildDelectSql();
-		
-		return baseClient.update(sql, parameters, hints);
+	    String sql = builder.build();
+		return baseClient.update(sql, builder.buildParameters, hints);
 	}
 #end
 #end

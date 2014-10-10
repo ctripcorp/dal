@@ -1,20 +1,20 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import java.sql.Connection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.datasource.locator.DataSourceLocator;
 
 public class DalConfigure {
 	private String name;
-	private Map<String, DatabaseSet> databaseSets = new HashMap<String, DatabaseSet>();
+	private Map<String, DatabaseSet> databaseSets = new ConcurrentHashMap<String, DatabaseSet>();
 	
 	public DalConfigure(String name, Map<String, DatabaseSet> databaseSets) {
 		this.name = name;
-		this.databaseSets = databaseSets;
+		this.databaseSets.putAll(databaseSets);
 	}
 	
 	public String getName() {

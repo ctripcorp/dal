@@ -63,19 +63,21 @@ public class DalConnectionManager {
 		Connection conn;
 		String allInOneKey;
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
+		String shardId = null;
+		
 		if(dbSet.isShardingSupported()){
 			DalShardingStrategy strategy = dbSet.getStrategy();
 
 			// In case the sharding strategy indicate that master shall be used
 			isMaster |= strategy.isMaster(config, logicDbName, hints);
-			String shard = hints.getShardId();
-			if(shard == null)
-				shard = strategy.locateDbShard(config, logicDbName, hints);
-			if(shard == null)
+			shardId = hints.getShardId();
+			if(shardId == null)
+				shardId = strategy.locateDbShard(config, logicDbName, hints);
+			if(shardId == null)
 				throw new DalException(ErrorCode.ShardLocated, logicDbName);
-			dbSet.validate(shard);
+			dbSet.validate(shardId);
 			
-			allInOneKey = dbSet.getRandomRealDbName(hints.getHA(), shard, isMaster, isSelect);
+			allInOneKey = dbSet.getRandomRealDbName(hints.getHA(), shardId, isMaster, isSelect);
 		} else {
 			allInOneKey = dbSet.getRandomRealDbName(hints.getHA(), isMaster, isSelect);
 		}
@@ -88,7 +90,7 @@ public class DalConnectionManager {
 			throw new DalException(ErrorCode.MarkdownConnection, allInOneKey);
 		try {	
 			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
-			DbMeta meta = DbMeta.getDbMeta(allInOneKey,isMaster,isSelect, conn);
+			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, shardId, isMaster, conn);
 			return new DalConnection(conn, meta);
 		} catch (Throwable e) {
 			throw new DalException(ErrorCode.CantGetConnection, e, allInOneKey);

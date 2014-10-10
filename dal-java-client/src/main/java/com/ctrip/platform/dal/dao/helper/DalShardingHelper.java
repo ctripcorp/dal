@@ -6,12 +6,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
+import com.ctrip.platform.dal.dao.client.DbMeta;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
@@ -108,7 +109,6 @@ public class DalShardingHelper {
 	 * @param pojos
 	 * @return Grouped pojos
 	 * @throws SQLException In case locate shard id faild
-	 * @deprecated 
 	 */
 	private static Map<String, List<Map<String, ?>>> shuffle(String logicDbName, String shardId, List<Map<String, ?>> daoPojos) throws SQLException {
 		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
@@ -136,7 +136,7 @@ public class DalShardingHelper {
 			pojosInShard.add(pojo);
 		}
 		
-		detectDistributedTransaction(logicDbName, shuffled.size(), "crossShardBatchDelete");
+		detectDistributedTransaction(shuffled.keySet());
 		
 		return shuffled;
 	}
@@ -171,14 +171,6 @@ public class DalShardingHelper {
 		}
 		
 		return shuffled;
-	}
-	
-	public static <T> Map<String, List<Map<String, ?>>> shuffleByTable(String logicDbName, String tableShardId, DalParser<T> parser, List<T> daoPojos) throws SQLException {
-		List<Map<String, ?>> pojos = new ArrayList<Map<String, ?>>();
-		for(T pojo: daoPojos) {
-			pojos.add(parser.getFields(pojo));
-		}
-		return shuffleByTable(logicDbName, tableShardId, pojos);
 	}
 	
 	/**
@@ -217,10 +209,38 @@ public class DalShardingHelper {
 		return true;
 	}
 	
-	private static void detectDistributedTransaction(String logicDbName, int dbShardSize, String operation) throws SQLException {
+	public static void detectDistributedTransaction(String logicDbName, DalHints hints, List<Map<String, ?>>  daoPojos) throws SQLException {
+		if(!isShardingEnabled(logicDbName))
+			return;
+		
+		if(!DalTransactionManager.isInTransaction())
+			return;
+		
+		String shardId = null;
+		if(locateShardId(logicDbName, hints)) {
+			shardId = hints.getShardId();
+			isSameShard(shardId);
+		} else {
+			detectDistributedTransaction(shuffle(logicDbName, shardId, daoPojos).keySet());
+		}
+	}
+	
+	private static void detectDistributedTransaction(Set<String> shardIds) throws SQLException {
+		if(!DalTransactionManager.isInTransaction())
+			return;
+		
 		// Not allowed for distributed transaction
-		if(dbShardSize > 1 && DalTransactionManager.isInTransaction())
-			throw new SQLException(operation + " is not allowed in mutiple database shard within transaction");
+		if(shardIds.size() > 1)
+			throw new SQLException("Potential distributed operation detected in shards: " + shardIds);
+		
+		String shardId = shardIds.iterator().next();
+		
+		isSameShard(shardId);
+	}
+
+	private static void isSameShard(String shardId) throws SQLException {
+		if(shardId.equals(DalTransactionManager.getCurrentDbMeta().getShardId()))
+			throw new SQLException("Operation is not allowed in different database shard within current transaction. Current shardId: " + DalTransactionManager.getCurrentDbMeta().getShardId() + ". Requeted shardId: " + shardId);
 	}
 	
 	public static <T> T executeByDbShard(String logicDbName, String rawTableName, DalHints hints, List<Map<String, ?>>  daoPojos, BulkTask<T> task) throws SQLException {

@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.daogen.domain;
 public class Status {
 	private String code;
 	private String info;
+	private String explanJson;
 
 	public String getInfo() {
 		return info;
@@ -29,4 +30,13 @@ public class Status {
 	public void setCode(String code) {
 		this.code = code;
 	}
+
+	public String getExplanJson() {
+		return explanJson;
+	}
+
+	public void setExplanJson(String explanJson) {
+		this.explanJson = explanJson;
+	}
+	
 }

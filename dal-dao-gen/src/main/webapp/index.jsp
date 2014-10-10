@@ -489,7 +489,30 @@
                      <div class="row-fluid">
                         <label class="control-label popup_label">SQL验证通过，结果如下</label>
                      </div>  
-                     <div id="auto_sql_validate_result" class="row-fluid input-sm">      
+                     <div id="auto_sql_validate_result_div" class="row-fluid input-sm">
+                        <div id="auto_sql_validate_result"></div>
+                     	<table class="table table-bordered table-condensed">
+						    <thead>
+						    	<tr>
+						    		<th>Select_type</th>
+						    		<th>Type</th>
+						    		<th>Possible_keys</th>
+						    		<th>Key</th>
+						    		<th>Rows</th>
+						    		<th>Extra</th>
+						    	</tr>
+						    </thead>
+						    <tbody>
+						    	<tr>
+						    		<td id="auto_select_type">select_type</td>
+						    		<th id="auto_type">type</th>
+						    		<td id="auto_possible_keys">possible_keys</td>
+						    		<td id="auto_key">key</td>
+						    		<td id="auto_rows">rows</td>
+						    		<td id="auto_extra">extra</td>
+						    	</tr>
+						    </tbody>
+						</table>      
                      </div>
                      <div class="row-fluid"><br/><br/>
                      	<div style="clear:both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
@@ -582,7 +605,30 @@
                      <div class="row-fluid">
                            <label class="control-label popup_label">SQL验证通过，结果如下</label>
                      </div>  
-                     <div id="free_sql_validate_result" class="row-fluid input-sm">      
+                     <div id="free_sql_validate_result_div" class="row-fluid input-sm">
+                     	<div id="free_sql_validate_result"></div>
+                     	<table class="table table-bordered table-condensed">
+						    <thead>
+						    	<tr>
+						    		<th>Select_type</th>
+						    		<th>Type</th>
+						    		<th>Possible_keys</th>
+						    		<th>Key</th>
+						    		<th>Rows</th>
+						    		<th>Extra</th>
+						    	</tr>
+						    </thead>
+						    <tbody>
+						    	<tr>
+						    		<td id="free_select_type">select_type</td>
+						    		<th id="free_type">type</th>
+						    		<td id="free_possible_keys">possible_keys</td>
+						    		<td id="free_key">key</td>
+						    		<td id="free_rows">rows</td>
+						    		<td id="free_extra">extra</td>
+						    	</tr>
+						    </tbody>
+						</table>      
                      </div>
                      <div class="row-fluid"><br/><br/>
                      	 <div style="clear:both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>

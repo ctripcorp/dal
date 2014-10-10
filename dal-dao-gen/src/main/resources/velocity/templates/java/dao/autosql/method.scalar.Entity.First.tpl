@@ -7,16 +7,14 @@
 	**/
 	public ${host.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}");
-		builder.addSelectField(${method.getField()});
-		StatementParameters parameters = new StatementParameters();
-		int index = 1;
+		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory, false);
+		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 #if($method.getOrderByExp()!="")
-		builder.addOrderByExp("${method.getOrderByExp()}");
+		builder.orderBy(${method.getOrderByExp()});
 #end
-	    String sql = builder.buildSelectSql();
-		return queryDao.queryFirstNullable(sql, parameters, hints, parser);
+	    String sql = builder.build();
+		return queryDao.queryFirstNullable(sql, builder.buildParameters, hints, parser);
 	}
 #end
 #end

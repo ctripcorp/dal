@@ -209,12 +209,4 @@ public class JavaParameterHost extends AbstractParameterHost {
 		this.validationValue = validationValue;
 	}
 	
-	public String wrapField(String dbCategory, String fieldName) throws Exception{
-		if("MySql".equalsIgnoreCase(dbCategory)){
-			fieldName = "\"`" + fieldName + "`\"";
-		}else{
-			fieldName = "\"[" + fieldName + "]\"";
-		}
-		return fieldName;
-	}
 }

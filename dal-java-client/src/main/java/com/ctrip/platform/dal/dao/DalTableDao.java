@@ -1,11 +1,13 @@
 package com.ctrip.platform.dal.dao;
 
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.buildShardStr;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.detectDistributedTransaction;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.executeByDbShard;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isAlreadySharded;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardingEnabled;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.locateTableShardId;
 
+import java.beans.FeatureDescriptor;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper.BulkTask;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -84,6 +87,7 @@ public final class DalTableDao<T> {
 	 * both start and end delimiter. This is useful when column name happens 
 	 * to be keyword of target database and the start and end delimiter are the same.
 	 * @param delimiter the char used to quote column name.
+	 * @deprecated Use setDatabaseCategory instead of calling individule setXxx
 	 */
 	public void setDelimiter(Character delimiter) {
 		startDelimiter = delimiter;
@@ -93,6 +97,7 @@ public final class DalTableDao<T> {
 	/**
 	 * Specify the sql template for find by primary key
 	 * @param tmp the sql template for find by primary key
+	 * @deprecated Use setDatabaseCategory instead of calling individule setXxx
 	 */
 	public void setFindTemplate(String tmp){
 		this.findtmp = tmp;
@@ -103,10 +108,28 @@ public final class DalTableDao<T> {
 	 * This is useful when column name happens  to be keyword of target database.
 	 * @param startDelimiter the start char used quote column name on .
 	 * @param endDelimiter the end char used to quote column name.
+	 * @deprecated Use setDatabaseCategory instead of calling individule setXxx
 	 */
 	public void setDelimiter(Character startDelimiter, Character endDelimiter) {
 		this.startDelimiter = startDelimiter;
 		this.endDelimiter = endDelimiter;
+	}
+	
+	/**
+	 * This is to set DatabaseCategory to initialize startDelimiter/endDelimiter and findtmp.
+	 * This will apply db specific settings. So the dao is no longer reusable across different dbs.
+	 * @param dBCategory The target Db category
+	 */
+	public void setDatabaseCategory(DatabaseCategory dbCategory) {
+		if(DatabaseCategory.MySql == dbCategory) {
+			startDelimiter = '`';
+			endDelimiter = startDelimiter;
+		} else if(DatabaseCategory.SqlServer == dbCategory ) {
+			startDelimiter = '[';
+			endDelimiter = ']';
+			findtmp = "SELECT * FROM %s WITH (NOLOCK) WHERE %s";
+		} else
+			throw new RuntimeException("Such Db category not suported yet");
 	}
 	
 	public String getTableName(DalHints hints) throws SQLException {
@@ -355,12 +378,14 @@ public final class DalTableDao<T> {
 	public int insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos)
 			throws SQLException {
 		if(isEmpty(daoPojos)) return 0;
+
+		List<Map<String, ?>>  pojos = getPojosFields(daoPojos);
+		detectDistributedTransaction(logicDbName, hints, pojos);
 		
 		int count = 0;
 		hints = hints.clone();
-		for (T pojo : daoPojos) {
+		for (Map<String, ?> fields : pojos) {
 			DalWatcher.begin();
-			Map<String, ?> fields = parser.getFields(pojo);
 			filterAutoIncrementPrimaryFields(fields);
 			
 			String insertSql = buildInsertSql(hints, fields);
@@ -552,16 +577,17 @@ public final class DalTableDao<T> {
 	 */
 	public int delete(DalHints hints, List<T> daoPojos) throws SQLException {
 		if(isEmpty(daoPojos)) return 0;
+
+		List<Map<String, ?>>  pojos = getPojosFields(daoPojos);
+		detectDistributedTransaction(logicDbName, hints, pojos);
 		
 		int count = 0;
 		hints = hints.clone();
-		for (T pojo : daoPojos) {
+		for (Map<String, ?>  fields: pojos) {
 			DalWatcher.begin();
 			StatementParameters parameters = new StatementParameters();
-			addParameters(parameters, parser.getPrimaryKeys(pojo));
+			addParameters(parameters, fields, parser.getPrimaryKeyNames());
 			try {
-				Map<String, ?> fields = parser.getFields(pojo);
-				
 				String deleteSql = buildDeleteSql(getTableName(hints, parameters, fields));
 
 				count += client.update(deleteSql, parameters, hints.setFields(fields));
@@ -687,18 +713,19 @@ public final class DalTableDao<T> {
 	 */
 	public int update(DalHints hints, List<T> daoPojos) throws SQLException {
 		if(isEmpty(daoPojos)) return 0;
+
+		List<Map<String, ?>>  pojos = getPojosFields(daoPojos);
+		detectDistributedTransaction(logicDbName, hints, pojos);
 		
 		int count = 0;
-		for (T pojo : daoPojos) {
+		for (int i = 0; i < daoPojos.size(); i++) {
 			DalWatcher.begin();
-			Map<String, ?> fields = parser.getFields(pojo);
-			Map<String, ?> pk = parser.getPrimaryKeys(pojo);
-
+			Map<String, ?> fields = pojos.get(i);
 			String updateSql = buildUpdateSql(getTableName(hints, fields), fields, hints);
 
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
-			addParameters(parameters, pk);
+			addParameters(parameters, parser.getPrimaryKeys(daoPojos.get(i)));
 
 			try {
 				if (fields.size() == 0)
@@ -761,8 +788,16 @@ public final class DalTableDao<T> {
 		}
 	}
 
+	private void addParameters(StatementParameters parameters,
+			Map<String, ?> entries, String[] validColumns) {
+		int index = parameters.size() + 1;
+		for(String column : validColumns){
+			parameters.set(index++, column, this.getColumnType(column), entries.get(column));
+		}
+	}
+	
 	private int addParameters(int start, StatementParameters parameters,
-			Map<String, ?> entries, List<String> validColumns) {	
+			Map<String, ?> entries, List<String> validColumns) {
 		int count = 0;
 		for(String column : validColumns){
 			if(entries.containsKey(column))

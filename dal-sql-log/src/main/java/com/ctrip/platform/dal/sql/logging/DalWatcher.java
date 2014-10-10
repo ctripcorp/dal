@@ -25,6 +25,10 @@ public class DalWatcher {
 		}
 	}
 	
+	public static void destroy(){
+		costRecorder = null;
+	}
+	
 	private static CostRecorder recorder() {
 		CostRecorder curRecorder = costRecorder.get();
 		if(curRecorder == null) {
@@ -34,6 +38,7 @@ public class DalWatcher {
 		
 		return curRecorder;
 	}
+	
 	
 	public static void reset() {
 		recorder().reset();

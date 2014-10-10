@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.sql.exceptions;
+package com.ctrip.platform.dal.exceptions;
 
 public enum ErrorClassify {
 	Assert(5000, 5100),

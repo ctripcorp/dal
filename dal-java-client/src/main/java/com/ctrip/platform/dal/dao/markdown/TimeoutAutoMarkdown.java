@@ -2,11 +2,16 @@ package com.ctrip.platform.dal.dao.markdown;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.ctrip.platform.dal.logging.markdown.MarkDownInfo;
+import com.ctrip.platform.dal.logging.markdown.MarkDownPolicy;
+import com.ctrip.platform.dal.logging.markdown.MarkDownReason;
+import com.ctrip.platform.dal.sql.logging.Metrics;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class TimeoutAutoMarkdown implements AutoMarkdown{
@@ -18,59 +23,72 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 	 * This method will be invoked by one thread.
 	 */
 	@Override
-	public void collectException(MarkKey mark) {
-		if(!ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown() ||
-				ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(mark.getName())){
+	public void collectException(MarkContext mark) {
+		if(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(mark.getName())){
 			return;
 		}
+		MarkDownInfo info = new MarkDownInfo(mark.getName(), MarkDownPolicy.TIMEOUT,
+				ConfigBeanFactory.getTimeoutMarkDownBean().getSamplingDuration());
 		if(!data.containsKey(mark.getName()))
 			data.put(mark.getName(), new Data());
 		Data dt = data.get(mark.getName());
-		int hints = 0;
-		int requests = 0;
-		if(this.isHint(mark.getDbtype(), mark.getExType(), mark.getErrorCode())){
-			hints = dt.incrementAndGetHints();
+		if(isTimeOutHint(mark)){
+			dt.incrementAndGetHints();
+			info.setStatus("fail");
+		}else{
+			info.setStatus("total");
 		}
-		requests = dt.incrementAndGetRequestTimes();
-		
-		logger.debug("request: " + requests + ", hints: " + hints);
-		
-		if(hints >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorCountBaseLine()){
-			ConfigBeanFactory.getMarkdownConfigBean().markdown(mark.getName());
-			dt.clear();
+		dt.incrementAndGetRequestTimes();
+
+		if(dt.getHints() >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorCountBaseLine()){
+			info.setReason(MarkDownReason.ERRORCOUNT);
+			Metrics.report(info, dt.getRequestTimes());
+			this.markdown(mark.getName(), dt);	
 			return;
 		}
-		if(requests >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercentBaseLine()){
-			float percent = (hints + 0.0f) /requests;
+		if(dt.getRequestTimes() >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercentBaseLine()){
+			float percent = (dt.getHints() + 0.0f) /dt.getRequestTimes();
 			if(percent >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercent()){
-				ConfigBeanFactory.getMarkdownConfigBean().markdown(mark.getName());
-				dt.clear();
+				info.setReason(MarkDownReason.ERRORPERCENT);
+				Metrics.report(info, dt.getHints());
+				this.markdown(mark.getName(), dt);
 				return;
 			}
 		}
-		
 		this.removeOverdueData(mark.getName(), mark.getTime());
+	}
+	
+	private void markdown(String key,Data dt){
+		if(ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown()){
+			logger.info("########################Mark-Donw########################");
+			ConfigBeanFactory.getMarkdownConfigBean().markdown(key);
+		}
+		dt.clear();
+	}
+
+	public static boolean isTimeOutHint(MarkContext mark){
+		if(mark.getCost() >= ConfigBeanFactory.getTimeoutMarkDownBean().getMinTimeOut()){
+			if(mark.getDbtype().equalsIgnoreCase("Microsoft SQL Server")){
+				if(mark.getMsg().startsWith("The query has timed out") || mark.getMsg().startsWith("查询超时")){
+					return true;
+				}
+			} else{
+				if(mark.getExType().toString().equalsIgnoreCase(MySQLTimeoutException.class.toString())){
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	private void removeOverdueData(String key, long time){
 		if(time > this.latest)
 			this.latest = time;
-		logger.debug("duration: " + (this.latest - System.currentTimeMillis()) + "ms");
-		if(this.latest - System.currentTimeMillis() > 
-			ConfigBeanFactory.getTimeoutMarkDownBean().getSamplingDuration() * 1000){
+		if((System.currentTimeMillis() - this.latest) > 
+			(ConfigBeanFactory.getTimeoutMarkDownBean().getSamplingDuration() * 1000)){
+			logger.debug("data overdur, cleared.");
 			this.data.get(key).clear();
 		}
-	}
-	
-	private boolean isHint(String dbType, Class<?> exType, int errorCode){
-		if(dbType.equalsIgnoreCase("Microsoft SQL Server"))
-			return ConfigBeanFactory.getTimeoutMarkDownBean().getSqlServerTimeoutMarkdownCodes().contains(errorCode);
-		else{
-			if(exType.toString().equalsIgnoreCase(MySQLTimeoutException.class.toString())){
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private static class Data{
@@ -78,11 +96,19 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 		private int hints = 0;
 		
 		public int incrementAndGetRequestTimes(){
-			return ++ this.requestTimes;
+			return this.requestTimes ++;
 		}
 		
 		public int incrementAndGetHints(){
-			return ++ this.hints;
+			return this.hints ++;
+		}
+		
+		public int getRequestTimes(){
+			return this.requestTimes;
+		}
+		
+		public int getHints(){
+			return this.hints;
 		}
 		
 		public void clear(){

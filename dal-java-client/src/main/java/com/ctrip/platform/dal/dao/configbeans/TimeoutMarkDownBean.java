@@ -14,11 +14,13 @@ public class TimeoutMarkDownBean extends ConfigBeanBase{
 	@BeanMeta(alias = "SamplingDuration")
     private volatile int samplingDuration = 60;
 	@BeanMeta(alias = "ErrorCountBaseLine")
-    private volatile int errorCountBaseLine = 10000;
+    private volatile int errorCountBaseLine = 100;
 	@BeanMeta(alias = "ErrorPercent")
     private volatile float errorPercent = 0.5f;
 	@BeanMeta(alias = "ErrorPercentBaseLine")
-	private volatile int errorPercentBaseLine = 1000;
+	private volatile int errorPercentBaseLine = 200;
+	@BeanMeta(alias = "MinTimeOut")
+	private volatile int minTimeOut = 100;
 	@BeanMeta(alias = "MySqlErrorCodes")
     private String mySqlErrorCodes = "0";
 	@BeanMeta(alias = "SqlServerErrorCodes")
@@ -103,6 +105,14 @@ public class TimeoutMarkDownBean extends ConfigBeanBase{
 	}
 	public Set<Integer> getSqlServerTimeoutMarkdownCodes() {
 		return sqlServerTimeoutMarkdownCodes;
+	}
+
+	public int getMinTimeOut() {
+		return minTimeOut;
+	}
+
+	public void setMinTimeOut(int minTimeOut) {
+		this.minTimeOut = minTimeOut;
 	}
 
 	private Set<Integer> parseErrorCodes(String codes){

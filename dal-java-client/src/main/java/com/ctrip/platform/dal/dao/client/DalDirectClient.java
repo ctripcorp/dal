@@ -47,7 +47,7 @@ public class DalDirectClient implements DalClient {
 			public T execute() throws Exception {
 				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-		
+
 				DalWatcher.endConnect();
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);

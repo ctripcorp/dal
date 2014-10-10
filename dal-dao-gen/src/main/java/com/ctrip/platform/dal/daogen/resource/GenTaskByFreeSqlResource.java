@@ -206,6 +206,7 @@ public class GenTaskByFreeSqlResource {
 			
 			if(validResult!=null && validResult.isPassed()){
 				status.setInfo(resultPrefix+validResult.getAffectRows());
+				status.setExplanJson(validResult.getMessage());
 			}else{
 				status = Status.ERROR;
 				status.setInfo(validResult.getMessage());

@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.daogen.sql.validate;
 public class MySQLExplain {
 	private Integer id;
 	private String select_type;
+	private String type;
 	private String possible_keys;
 	private String key;
 	private Integer rows;
@@ -22,6 +23,14 @@ public class MySQLExplain {
 	
 	public void setSelect_type(String select_type) {
 		this.select_type = select_type;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	public String getPossible_keys() {

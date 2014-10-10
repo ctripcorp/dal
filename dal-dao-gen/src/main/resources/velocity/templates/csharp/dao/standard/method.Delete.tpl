@@ -2,7 +2,6 @@
 #if($host.getPrimaryKeys().size() == 0)
         /*由于没有PK，不能生成Delete方法
 #end
-
 #if($host.generateAPI(48,57,58,59))        
         /// <summary>
         /// 删除${host.getClassName()}
@@ -48,7 +47,6 @@
 #end
         }
 #end
-        
 #if($host.isSpa())
 #if($host.getSpaDelete().isExist())
 #if($host.generateAPI(48,57,58))
@@ -81,7 +79,6 @@
 #end
 #end
 #end
-        
 #if($host.getPrimaryKeys().size() == 0)
         */
 #end

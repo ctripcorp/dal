@@ -2,10 +2,6 @@ package com.ctrip.platform.dal.dao.markdown;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.logging.markdown.MarkDownInfo;
@@ -15,7 +11,7 @@ import com.ctrip.platform.dal.sql.logging.Metrics;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class TimeoutAutoMarkdown implements AutoMarkdown{
-	private static Logger logger = LoggerFactory.getLogger(TimeoutAutoMarkdown.class);
+	//private static Logger logger = LoggerFactory.getLogger(TimeoutAutoMarkdown.class);
 	private Map<String, Data> data = new ConcurrentHashMap<String, Data>();
 	private long latest = 0;
 	
@@ -60,7 +56,7 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 	
 	private void markdown(String key,Data dt){
 		if(ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown()){
-			logger.info("########################Mark-Donw########################");
+			//logger.info("########################Mark-Donw########################");
 			ConfigBeanFactory.getMarkdownConfigBean().markdown(key);
 		}
 		dt.clear();
@@ -86,7 +82,7 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 			this.latest = time;
 		if((System.currentTimeMillis() - this.latest) > 
 			(ConfigBeanFactory.getTimeoutMarkDownBean().getSamplingDuration() * 1000)){
-			logger.debug("data overdur, cleared.");
+			//logger.info("data overdur, cleared.");
 			this.data.get(key).clear();
 		}
 	}

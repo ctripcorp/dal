@@ -3,18 +3,13 @@ package com.ctrip.platform.dal.dao.markdown;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 
 public class MarkdownManager {
-	private static Logger logger = LoggerFactory.getLogger(MarkdownManager.class);
+	//private static Logger logger = LoggerFactory.getLogger(MarkdownManager.class);
 	private static final int durations = 1000;
 	private static Thread manager = null;
 	
@@ -41,12 +36,12 @@ public class MarkdownManager {
 			
 			if(MarkupManager.isMarkup(key)){
 				ConfigBeanFactory.getMarkdownConfigBean().markup(key);
-				logger.info("########################Mark-Up########################");
+				//logger.info("########################Mark-Up########################");
 				return false;
 			}
 			
-			if(!MarkupManager.isPass(key)){
-				logger.info("########################Passed########################");
+			if(MarkupManager.isPass(key)){
+				//logger.info("########################Passed########################");
 				return false;
 			}
 		}			

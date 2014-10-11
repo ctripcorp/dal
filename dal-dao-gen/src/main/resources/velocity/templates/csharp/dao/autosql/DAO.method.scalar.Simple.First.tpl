@@ -13,7 +13,7 @@
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
-				String sql = "${method.getSql()}";
+				String sql = "${method.getSql($host.getDatabaseCategory())}";
 #set($inParams = [])                
 #foreach($p in $method.getParameters())  
 #if($p.isInParameter())

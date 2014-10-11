@@ -83,6 +83,16 @@ public class CSharpMethodHost {
 	public String getSql() {
 		return sql;
 	}
+	
+	public String getSql(DatabaseCategory databaseCategory) {
+		if(databaseCategory == DatabaseCategory.MySql){
+			return sql + "limit 0,1";
+		}
+		if(databaseCategory == DatabaseCategory.SqlServer){
+			return sql.replaceFirst("(?i)select", "SELECT TOP 1 ");
+		}
+		return sql;
+	}
 
 	public void setSql(String sql) {
 		this.sql = sql;

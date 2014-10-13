@@ -24,7 +24,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	private volatile boolean automarkup = true;
 	
 	@BeanMeta(alias = "AutoMarkupCount")
-	private volatile int autoMarkupCount = 100;
+	private volatile int autoMarkupCount = 10;
 	
 	@BeanMeta(alias = "MarkDownDB")
 	private volatile String dbMarkdown = "";
@@ -38,8 +38,17 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	@BeanMeta(alias = "AutoMarkuplv2")
 	private volatile int markuplv2 = 3;
 	
+	@BeanMeta(alias = "AutoMarkUpSchedule")
+	private volatile String markUpSchedule = "2,3";
+	
+	@BeanMeta(alias = "AutoMarkupFailureThreshold")
+	private volatile float autoMarkupFailureThreshold = 0.05f;
+	
 	@BeanMeta(alias = "AutoMarkupDelay")
 	private volatile int autoMarkupDelay = 1;
+	
+	@BeanMeta(omit = true)
+	private int[] autoMarkUpSchedule = new int[]{2, 3};
 	
 	@BeanMeta(omit = true)
 	private Map<String, Markdown> marks = new HashMap<String, Markdown>();
@@ -64,6 +73,31 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 			@Override
 			public void end(Object oldVal, String newVal) throws Exception {
 				updateMarks(newVal);
+			}
+		});
+		
+		this.addChangeEvent("markUpSchedule", new ChangeEvent() {			
+			@Override
+			public void end(Object oldVal, String newVal) throws Exception {
+				if(newVal == null || newVal.isEmpty())
+					throw new Exception();
+				String[] tokens = newVal.split(",");
+				int[] temp = new int[tokens.length];
+				for (int i = 0; i < tokens.length; i++) {
+					temp[i] = Integer.parseInt(tokens[i]);
+					if(temp[i] < 1 && temp[i] > 9){
+						throw new Exception("The auto mark up schedule must be greater than 0 and lesser than 9");
+					}
+					if(i > 0 && temp[i] <= temp[i-1]){
+						throw new Exception("The auto mark up schedule must be ascending order");
+					}
+				}
+				autoMarkUpSchedule = temp;
+			}
+			
+			@Override
+			public void before(Object oldVal, String newVal) throws Exception {
+				// TODO Auto-generated method stub		
 			}
 		});
 	}
@@ -185,5 +219,25 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 
 	public void setAutoMarkupDelay(int autoMarkupDelay) {
 		this.autoMarkupDelay = autoMarkupDelay;
+	}
+
+	public String getMarkUpSchedule() {
+		return markUpSchedule;
+	}
+
+	public void setMarkUpSchedule(String markUpSchedule) {
+		this.markUpSchedule = markUpSchedule;
+	}
+
+	public int[] getAutoMarkUpSchedule() {
+		return autoMarkUpSchedule;
+	}
+
+	public float getAutoMarkupFailureThreshold() {
+		return autoMarkupFailureThreshold;
+	}
+
+	public void setAutoMarkupFailureThreshold(float autoMarkupFailureThreshold) {
+		this.autoMarkupFailureThreshold = autoMarkupFailureThreshold;
 	}
 }

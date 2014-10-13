@@ -5,24 +5,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MarkupManager {
 	
-	private static Map<String, Markup> markups = new ConcurrentHashMap<String, Markup>();
-	
-	/**
-	 * Judge the specified all-in-one key is marked down or not.
-	 * @param key
-	 * @return
-	 */
-	public static boolean isMarkup(String key){
-		 return getMarkup(key).isMarkup(key);
-	}
-	
+	private static Map<String, Markup2> markups = new ConcurrentHashMap<String, Markup2>();
+		
 	/**
 	 * Try to pass request which is marked down.
 	 * @param key
 	 * @return
 	 */
 	public static boolean isPass(String key){
-		return getMarkup(key).isPassed(key);
+		return getMarkup(key).isPass();
 	}
 	
 	/**
@@ -41,9 +32,9 @@ public class MarkupManager {
 			markups.remove(key);
 	}
 	
-	private static Markup getMarkup(String key){
+	private static Markup2 getMarkup(String key){
 		if(!markups.containsKey(key))
-			markups.put(key, new Markup(key));
+			markups.put(key, new Markup2(key));
 		return markups.get(key);
 	}
 	

@@ -3,11 +3,11 @@ package com.ctrip.platform.dal.dao;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.buildShardStr;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.detectDistributedTransaction;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.executeByDbShard;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.getDatabaseSet;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isAlreadySharded;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardingEnabled;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.locateTableShardId;
 
-import java.beans.FeatureDescriptor;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,7 +57,8 @@ public final class DalTableDao<T> {
 	private DalParser<T> parser;
 
 	private final String logicDbName;
-	private final String pkSql;
+	private DatabaseCategory dbCategory;
+	private String pkSql;
 	private Set<String> pkColumns;
 	private String columnsForInsert;
 	private List<String> validColumnsForInsert;
@@ -73,13 +74,19 @@ public final class DalTableDao<T> {
 		this.parser = parser;
 		this.logicDbName = parser.getDatabaseName();
 		queryDao = new DalQueryDao(parser.getDatabaseName());
+
+		rawTableName = parser.getTableName();
+		tableShardingEnabled = isTableShardingEnabled(logicDbName, rawTableName);
 		initColumnTypes();
+		
+		dbCategory = getDatabaseSet(logicDbName).getDatabaseCategory();
+		setDatabaseCategory(dbCategory);
+	}
+	
+	private void initDbSpecific() {
 		pkSql = initPkSql();
 		validColumnsForInsert = buildValidColumnsForInsert();
 		columnsForInsert = combineColumns(validColumnsForInsert, COLUMN_SEPARATOR);
-		
-		rawTableName = parser.getTableName();
-		tableShardingEnabled = isTableShardingEnabled(logicDbName, rawTableName);
 	}
 	
 	/**
@@ -92,6 +99,7 @@ public final class DalTableDao<T> {
 	public void setDelimiter(Character delimiter) {
 		startDelimiter = delimiter;
 		endDelimiter = delimiter;
+		initDbSpecific();
 	}
 
 	/**
@@ -101,6 +109,7 @@ public final class DalTableDao<T> {
 	 */
 	public void setFindTemplate(String tmp){
 		this.findtmp = tmp;
+		initDbSpecific();
 	}
 	
 	/**
@@ -113,6 +122,7 @@ public final class DalTableDao<T> {
 	public void setDelimiter(Character startDelimiter, Character endDelimiter) {
 		this.startDelimiter = startDelimiter;
 		this.endDelimiter = endDelimiter;
+		initDbSpecific();
 	}
 	
 	/**
@@ -120,7 +130,7 @@ public final class DalTableDao<T> {
 	 * This will apply db specific settings. So the dao is no longer reusable across different dbs.
 	 * @param dBCategory The target Db category
 	 */
-	public void setDatabaseCategory(DatabaseCategory dbCategory) {
+	private void setDatabaseCategory(DatabaseCategory dbCategory) {
 		if(DatabaseCategory.MySql == dbCategory) {
 			startDelimiter = '`';
 			endDelimiter = startDelimiter;
@@ -130,6 +140,11 @@ public final class DalTableDao<T> {
 			findtmp = "SELECT * FROM %s WITH (NOLOCK) WHERE %s";
 		} else
 			throw new RuntimeException("Such Db category not suported yet");
+		initDbSpecific();
+	}
+	
+	public DatabaseCategory getDatabaseCategory() {
+		return dbCategory;
 	}
 	
 	public String getTableName(DalHints hints) throws SQLException {
@@ -379,7 +394,7 @@ public final class DalTableDao<T> {
 			throws SQLException {
 		if(isEmpty(daoPojos)) return 0;
 
-		List<Map<String, ?>>  pojos = getPojosFields(daoPojos);
+		List<Map<String, ?>> pojos = getPojosFields(daoPojos);
 		detectDistributedTransaction(logicDbName, hints, pojos);
 		
 		int count = 0;
@@ -578,7 +593,7 @@ public final class DalTableDao<T> {
 	public int delete(DalHints hints, List<T> daoPojos) throws SQLException {
 		if(isEmpty(daoPojos)) return 0;
 
-		List<Map<String, ?>>  pojos = getPojosFields(daoPojos);
+		List<Map<String, ?>> pojos = getPojosFields(daoPojos);
 		detectDistributedTransaction(logicDbName, hints, pojos);
 		
 		int count = 0;
@@ -714,7 +729,7 @@ public final class DalTableDao<T> {
 	public int update(DalHints hints, List<T> daoPojos) throws SQLException {
 		if(isEmpty(daoPojos)) return 0;
 
-		List<Map<String, ?>>  pojos = getPojosFields(daoPojos);
+		List<Map<String, ?>> pojos = getPojosFields(daoPojos);
 		detectDistributedTransaction(logicDbName, hints, pojos);
 		
 		int count = 0;
@@ -1007,17 +1022,18 @@ public final class DalTableDao<T> {
 		if(startDelimiter == null)
 			return columns.toArray();
 		
-		Object[] rawColumns = columns.toArray();
-		for(int i = 0; i < rawColumns.length; i++)
-			rawColumns[i] = quote((String)rawColumns[i]);
-		return rawColumns;
+		Object[] quatedColumns = columns.toArray();
+		for(int i = 0; i < quatedColumns.length; i++)
+			quatedColumns[i] = quote((String)quatedColumns[i]);
+		return quatedColumns;
 	}
 	
 	private String[] quote(String[] columns) {
 		if(startDelimiter == null)
 			return columns;
+		String[] quatedColumns = new String[columns.length];
 		for(int i = 0; i < columns.length; i++)
-			columns[i] = quote(columns[i]);
-		return columns;
+			quatedColumns[i] = quote(columns[i]);
+		return quatedColumns;
 	}
 }

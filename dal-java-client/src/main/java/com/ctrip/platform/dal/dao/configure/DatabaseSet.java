@@ -7,16 +7,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bouncycastle.jce.provider.JDKDSASigner.dsa224;
+
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 
 public class DatabaseSet {
+	public static final String SQL_PROVIDER = "sqlProvider";
+	public static final String MYSQL_PROVIDER = "mySqlProvider";
+
 	private static final String CLASS = "class";
 	private static final String ENTRY_SEPARATOR = ";";
 	private static final String KEY_VALUE_SEPARATOR = "=";
 	
 	private String name;
 	private String provider;
+	private DatabaseCategory dbCategory;
 
 	private DalShardingStrategy strategy;
 	private Map<String, DataBase> databases;
@@ -40,10 +47,28 @@ public class DatabaseSet {
 	public DatabaseSet(String name, String provider, String shardStrategy, Map<String, DataBase> databases) throws Exception {
 		this.name = name;
 		this.provider = provider;
+		initDbCategory();
 		this.databases = databases;
 
 		initStrategy(shardStrategy);
 		initShards();
+	}
+	
+	private void initDbCategory() {
+		if(provider == null)
+			throw new RuntimeException("The provider is NULL in Dal.config for databaseSet:" + name);
+		
+		if(provider.equals(SQL_PROVIDER)) {
+			dbCategory = DatabaseCategory.SqlServer;
+			return;
+		}
+		
+		if(provider.equals(MYSQL_PROVIDER)) {
+			dbCategory = DatabaseCategory.MySql;
+			return;
+		}
+		
+		throw new RuntimeException("The provider: " + provider + " is not recoganized in Dal.config for databaseSet:" + name);
 	}
 	
 	private void initStrategy(String shardStrategy) throws Exception {
@@ -96,6 +121,10 @@ public class DatabaseSet {
 		return provider;
 	}
 
+	public DatabaseCategory getDatabaseCategory() {
+		return dbCategory;
+	}
+	
 	public boolean isShardingSupported() {
 		return strategy != null && strategy.isShardingByDb();
 	}

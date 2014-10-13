@@ -31,13 +31,12 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 	
 	private static DalTableDao<ClientTestModel> dao;
 	
-	public BaseDalTableDaoShardByDbTableTest(String databaseName, boolean assertAllowed, DatabaseCategory dbCategory) {
+	public BaseDalTableDaoShardByDbTableTest(String databaseName) {
 		try {
 			DalClientFactory.initClientFactory();
 			DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser(databaseName);
 			dao = new DalTableDao<ClientTestModel>(clientTestParser);
-			dao.setDatabaseCategory(dbCategory);
-			ASSERT_ALLOWED = assertAllowed;
+			ASSERT_ALLOWED = dao.getDatabaseCategory() == DatabaseCategory.MySql;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

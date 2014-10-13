@@ -32,7 +32,7 @@ public class DalShardingHelper {
 		return separator == null? shardId: separator + shardId;
 	}
 	
-	private static DatabaseSet getDatabaseSet(String logicDbName) {
+	public static DatabaseSet getDatabaseSet(String logicDbName) {
 		return DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName);
 	}
 	

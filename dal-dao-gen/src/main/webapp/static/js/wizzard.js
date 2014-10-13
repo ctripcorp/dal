@@ -343,9 +343,41 @@
         $("#"+id+" a[data-toggle='tooltip']").tooltip('hide');
     };
 
+    /**
+     *
+     * @param daoName
+     */
+    var checkDaoNameConflict = function(daoName){
+        var checkDaoNameConflictResult = false;
+        cblock($("body"));
+        var current_project = w2ui['grid'].current_project;
+        var postData = {};
+        postData["project_id"] = current_project;
+        postData["db_set_name"] = $("#databases").val();
+        postData["daoName"] = daoName;
+        $.ajax({
+            type: "POST",
+            async: false,
+            url: "/rest/task/checkDaoNameConflict",
+            data: postData,
+            dataType: "json",
+            success: function (data) {
+                if (data.code != "OK") {
+                    $.showMsg("error_msg",data['info']);
+                    checkDaoNameConflictResult = true;
+                }
+                $("body").unblock();
+            }
+        });
+        return checkDaoNameConflictResult;
+    };
+
     var step2_1 = function(record,current){
         if($('#table_list').multipleSelect('getSelects').length<1){
             $.showMsg("error_msg","请选择表!");
+            return;
+        }
+        if(checkDaoNameConflict($('#table_list').multipleSelect('getSelects').join(","))){
             return;
         }
         cblock($("body"));
@@ -467,6 +499,9 @@
     var step2_2 = function(record,current){
         if ($("#tables").val() == "") {
             $("#error_msg").text("请选择一个表！");
+            return;
+        }
+        if(checkDaoNameConflict($("#tables").val())){
             return;
         }
         if ($("#method_name").val() == "") {
@@ -697,7 +732,7 @@
             i++;
             var conName = conVal.shift();
             var nullable = conNullable.shift();
-            nullable = nullable!=undefined?nullable:'true';
+            nullable = nullable!=undefined?nullable:'false';
             nullable = nullable!='false'?'checked="checked"':"";
             if(conName!=null && conName!=""){
                 paramHtml = paramHtml + sprintf(variableHtml, conName, nullable)+"</div><br/>";
@@ -760,7 +795,7 @@
             i++;
             var temp = conVal.shift();
             var nullable = conNullable.shift();
-            nullable = nullable!=undefined?nullable:'true';
+            nullable = nullable!=undefined?nullable:'false';
             nullable = nullable!='false'?'checked="checked"':"";
             if(temp!=null && temp!=""){
                 namesStack.shift();
@@ -953,6 +988,13 @@
 
     var step2_3_2 = function(record,current){
         if(!existKeyword_Nolock()){
+            return;
+        }
+        if($("#sql_class_name").val()==""){
+            $("#error_msg").html("请输入DAO类名.");
+            return;
+        }
+        if(checkDaoNameConflict($("#sql_class_name").val())){
             return;
         }
         //首先解析Sql语句，提取出参数

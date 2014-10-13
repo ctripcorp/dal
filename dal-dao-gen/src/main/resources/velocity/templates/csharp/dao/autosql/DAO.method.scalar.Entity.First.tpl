@@ -17,6 +17,11 @@
 #if($method.getOrderByExp()!="")
 			    query.Order(${method.getOrderByExp()});
 #end
+#if($host.getDatabaseCategory().name() == "MySql")
+	            query.Limit(0,1);
+#else
+	            query.Limit(1);
+#end	
 	            return baseDao.SelectFirst<Entity.DataModel.${host.getClassName()}>(query);
 
             }

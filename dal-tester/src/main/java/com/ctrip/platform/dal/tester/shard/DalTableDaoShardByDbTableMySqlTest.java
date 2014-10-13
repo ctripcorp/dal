@@ -15,7 +15,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class DalTableDaoShardByDbTableMySqlTest extends BaseDalTableDaoShardByDbTableTest{
 	public DalTableDaoShardByDbTableMySqlTest() {
-		super(DATABASE_NAME_MYSQL, true, DatabaseCategory.MySql);
+		super(DATABASE_NAME_MYSQL);
 	}
 	
 	private final static String DATABASE_NAME_MYSQL = "dao_test_mysql_dbTableShard";

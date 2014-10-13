@@ -177,6 +177,7 @@ jQuery(document).ready(function () {
 
     $("#auto_sql_scalarType").change(function(){
         var scalar = $("#auto_sql_scalarType").val();
+        $("#error_msg").empty();
         if(scalar=='List'){
             $("#auto_sql_pagination").removeAttr("disabled");
             $("#orderby_field").removeAttr("disabled");
@@ -192,8 +193,10 @@ jQuery(document).ready(function () {
             $("#auto_sql_pagination").parent().css({"color":"rgb(156, 154, 154)"});
             $("#orderby_field").removeAttr("disabled");
             $("#orderby_sort").removeAttr("disabled");
+            $("#error_msg").css("color","black");
+            $("#error_msg").html("a)该方法的执行是用原始SQL去调用数据库。原始SQL需要保证无全表扫描，保证没有性能瓶颈。" +
+                "b)对于select first，在Runtime时，在SQL中会追加limit 0,1(MySQL)或者top 1(SQL Server)来提高性能。");
         }
-
     });
 
     $("#free_sql_scalarType").change(function(){
@@ -201,6 +204,11 @@ jQuery(document).ready(function () {
         if(scalar != 'List'){
             $("#free_sql_pagination").attr({"checked":false,"disabled":"disabled"});
             $("#free_sql_pagination").parent().css({"color":"rgb(156, 154, 154)"});
+            if(scalar == 'First'){
+                $("#error_msg").css("color","black");
+                $("#error_msg").html("a)该方法的执行是用原始SQL去调用数据库。原始SQL需要保证无全表扫描，保证没有性能瓶颈。" +
+                    "b)对于select first，建议在SQL中会追加limit 0,1(MySQL)或者top 1(SQL Server)来提高性能。");
+            }
         }else{
             $("#free_sql_pagination").removeAttr("disabled");
             $("#free_sql_pagination").parent().css({"color":"#34495E"});

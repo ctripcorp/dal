@@ -46,7 +46,7 @@ public class DalTabelDaoMySqlTest {
 			client = DalClientFactory.getClient(DATABASE_NAME);
 			parser = new ClientTestDalParser();
 			dao = new DalTableDao<ClientTestModel>(parser);
-			dao.setDatabaseCategory(DatabaseCategory.MySql);
+//			dao.setDatabaseCategory(DatabaseCategory.MySql);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

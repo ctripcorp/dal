@@ -28,13 +28,12 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 public abstract class BaseDalTableDaoShardByDbTest {
 	private boolean ASSERT_ALLOWED = true;
 
-	public BaseDalTableDaoShardByDbTest(String databaseName, boolean assertAllowed, String generatedKey, DatabaseCategory dbCategory) {
+	public BaseDalTableDaoShardByDbTest(String databaseName, String generatedKey) {
 		try {
 			DalClientFactory.initClientFactory();
 			DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser(databaseName);
 			dao = new DalTableDao<ClientTestModel>(clientTestParser);
-			dao.setDatabaseCategory(dbCategory);
-			ASSERT_ALLOWED = assertAllowed;
+			ASSERT_ALLOWED = dao.getDatabaseCategory() == DatabaseCategory.MySql;
 			GENERATED_KEY = generatedKey;
 		} catch (Exception e) {
 			e.printStackTrace();

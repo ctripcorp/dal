@@ -13,7 +13,7 @@
 #if($method.getOrderByExp()!="")
 		builder.orderBy(${method.getOrderByExp()});
 #end
-	    String sql = builder.build();
+	    String sql = builder.buildFirst();
 		return queryDao.queryFirstNullable(sql, builder.buildParameters, hints, ${method.getPojoClassName()}.class);
 	}
 #end

@@ -23,9 +23,9 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
 public class DirectClientDaoShardTest {
-	private final static String DATABASE_NAME_MOD = "dao_test_mod";
+	private final static String DATABASE_NAME_MOD = "dao_test_mod_mysql";
 	private final static String DATABASE_NAME_SIMPLE = "dao_test_simple";
-	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr";
+	private final static String DATABASE_NAME_SQLSVR = "dao_test_mysql1";//"dao_test_sqlsvr";
 	private final static String DATABASE_NAME_MYSQL = "dao_test_mysql";
 	
 	private final static String TABLE_NAME = "dal_client_test";
@@ -76,7 +76,7 @@ public class DirectClientDaoShardTest {
 		// For SQL server
 		hints = new DalHints();
 		StatementParameters parameters = new StatementParameters();
-		sqls = new String[] { DROP_TABLE_SQL_SQLSVR, CREATE_TABLE_SQL_SQLSVR};
+		sqls = new String[] { DROP_TABLE_SQL_MYSQL, CREATE_TABLE_SQL_MYSQL};//DROP_TABLE_SQL_SQLSVR, CREATE_TABLE_SQL_SQLSVR};
 		for (int i = 0; i < sqls.length; i++) {
 			clientSqlSvr.update(sqls[i], parameters, hints);
 		}	
@@ -91,7 +91,7 @@ public class DirectClientDaoShardTest {
 		//For Sql Server
 		hints = new DalHints();
 		StatementParameters parameters = new StatementParameters();
-		sqls = new String[] { DROP_TABLE_SQL_SQLSVR};
+		sqls = new String[] { DROP_TABLE_SQL_MYSQL};//DROP_TABLE_SQL_SQLSVR};
 		for (int i = 0; i < sqls.length; i++) {
 			clientSqlSvr.update(sqls[i], parameters, hints);
 		}
@@ -102,25 +102,31 @@ public class DirectClientDaoShardTest {
 		DalHints hints = new DalHints();
 		String[] insertSqls = new String[] {
 				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(1, 10, 1, 'SH INFO', NULL)",
+						+ " VALUES(4, 10, 1, 'SH INFO', NULL)",
 				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(2, 11, 1, 'BJ INFO', NULL)",
+						+ " VALUES(5, 11, 1, 'BJ INFO', NULL)",
 				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(3, 12, 2, 'SZ INFO', NULL)" };
+						+ " VALUES(6, 12, 2, 'SZ INFO', NULL)" };
 		int[] counts = clientMySql.batchUpdate(insertSqls, hints);
 		assertArrayEquals(new int[] { 1, 1, 1 }, counts);
 		
 		//For Sql Server
 		hints = new DalHints();
 		insertSqls = new String[] {
-				"SET IDENTITY_INSERT "+ TABLE_NAME +" ON",
-				"INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
-						+ " VALUES(4, 10, 1, 'SH INFO')",
-				"INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
-						+ " VALUES(5, 11, 1, 'BJ INFO')",
-				"INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
-						+ " VALUES(6, 12, 2, 'SZ INFO')",
-				"SET IDENTITY_INSERT "+ TABLE_NAME +" OFF"};
+				"INSERT INTO " + TABLE_NAME
+						+ " VALUES(1, 10, 1, 'SH INFO', NULL)",
+				"INSERT INTO " + TABLE_NAME
+						+ " VALUES(2, 11, 1, 'BJ INFO', NULL)",
+				"INSERT INTO " + TABLE_NAME
+						+ " VALUES(3, 12, 2, 'SZ INFO', NULL)" };
+//				"SET IDENTITY_INSERT "+ TABLE_NAME +" ON",
+//				"INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
+//						+ " VALUES(4, 10, 1, 'SH INFO')",
+//				"INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
+//						+ " VALUES(5, 11, 1, 'BJ INFO')",
+//				"INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
+//						+ " VALUES(6, 12, 2, 'SZ INFO')",
+//				"SET IDENTITY_INSERT "+ TABLE_NAME +" OFF"};
 		clientSqlSvr.batchUpdate(insertSqls, hints);
 	}
 

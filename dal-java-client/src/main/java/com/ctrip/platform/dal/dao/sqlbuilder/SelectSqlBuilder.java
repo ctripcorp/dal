@@ -78,6 +78,24 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 		return this.buildSelectSql();
 	}
 	
+	/**
+	 * 对于select first，会在语句中追加limit 0,1(MySQL)或者top 1(SQL Server)：
+	 * @return
+	 */
+	public String buildFirst(){
+		if(DatabaseCategory.SqlServer == this.dBCategory){
+			sql = new StringBuilder("SELECT TOP 1 ");
+		}
+		sql.append(buildSelectField());
+		sql.append(" FROM ").append(this.wrapTableName(tableName));
+		sql.append(" ").append(this.getWhereExp());
+		sql.append(" ").append(buildOrderbyExp());
+		if(DatabaseCategory.MySql == this.dBCategory){
+			sql.append(" ").append("limit 0,1");
+		}
+		return sql.toString();
+	}
+	
 	private String buildSelectSql(){
 		sql = new StringBuilder("SELECT ");
 		sql.append(buildSelectField());

@@ -21,7 +21,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
  */
 public class DalTabelDaoTableShardTest extends BaseDalTabelDaoTableShardTest {
 	public DalTabelDaoTableShardTest() {
-		super(DATABASE_NAME_SQLSVR, false, DatabaseCategory.SqlServer);
+		super(DATABASE_NAME_SQLSVR);
 	}
 	
 	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr_tableShard";

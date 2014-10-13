@@ -11,10 +11,11 @@ import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
-import com.ctrip.platform.dal.sql.exceptions.DalException;
-import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
+import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 public class DalConnectionManager {
 	private DalConfigure config;
@@ -128,9 +129,11 @@ public class DalConnectionManager {
 		try {
 			result = action.execute();
 		} catch (Throwable e) {
-			MarkdownManager.collectException(action.connHolder, e);
+			MarkdownManager.collectException(action.connHolder, 
+					System.currentTimeMillis() - action.start, e);
 			ex = e;
 		} finally {
+			DalWatcher.endExectue();
 			action.populateDbMeta();
 			action.cleanup();		
 		}

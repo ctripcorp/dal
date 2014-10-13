@@ -23,8 +23,8 @@ import java.util.Set;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper.BulkTask;
-import com.ctrip.platform.dal.sql.exceptions.DalException;
-import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 /**

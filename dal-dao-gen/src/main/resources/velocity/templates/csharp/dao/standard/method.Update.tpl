@@ -1,5 +1,4 @@
 #if($host.isTable())      
-        
 #if($host.getPrimaryKeys().size() == 0)
         /*由于没有PK，不能生成Update方法
 #end
@@ -53,8 +52,6 @@
 #end
         }
 #end
-
-        
 #if($host.getPrimaryKeys().size() == 0)
         */
 #end

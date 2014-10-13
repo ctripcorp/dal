@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.configbeans;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -11,11 +12,19 @@ import com.ctrip.platform.appinternals.annotations.BeanMeta;
 import com.ctrip.platform.appinternals.configuration.ChangeEvent;
 import com.ctrip.platform.appinternals.configuration.ConfigBeanBase;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.markdown.Markdown;
+import com.ctrip.platform.dal.dao.markdown.MarkupManager;
 
 @BeanMeta(alias = "markdown")
 public class MarkdownConfigBean extends ConfigBeanBase{
 	@BeanMeta(alias = "Markdown")
 	private volatile boolean markdown = false;
+	
+	@BeanMeta(alias = "AutoMarkup")
+	private volatile boolean automarkup = true;
+	
+	@BeanMeta(alias = "AutoMarkupCount")
+	private volatile int autoMarkupCount = 100;
 	
 	@BeanMeta(alias = "MarkDownDB")
 	private volatile String dbMarkdown = "";
@@ -23,8 +32,17 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	@BeanMeta(alias = "AllDB")
 	private volatile String alldbs = "";
 	
+	@BeanMeta(alias = "AutoMarkuplv1")
+	private volatile int markuplv1 = 10;
+	
+	@BeanMeta(alias = "AutoMarkuplv2")
+	private volatile int markuplv2 = 3;
+	
+	@BeanMeta(alias = "AutoMarkupDelay")
+	private volatile int autoMarkupDelay = 1;
+	
 	@BeanMeta(omit = true)
-	private Set<String> marks = new HashSet<String>();
+	private Map<String, Markdown> marks = new HashMap<String, Markdown>();
 	@BeanMeta(omit = true)
 	private Lock lock = new ReentrantLock();
 	
@@ -72,28 +90,40 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 		return this.alldbs;
 	}
 	
+	public Markdown getMarkItem(String key){
+		return this.marks.get(key);
+	}
+	
 	public Set<String> getMarks(){
-		return this.marks;
+		return this.marks.keySet();
 	}
 	
 	public boolean isMarkdown(String dbname){
-		return this.isMarkdown() || this.marks.contains(dbname);
+		return this.isMarkdown() || this.marks.containsKey(dbname);
 	}
 	
-	public boolean markdown(String dbname){
-		if(!this.marks.contains(dbname)){
-			this.marks.add(dbname);
-			this.dbMarkdown = StringUtils.join(this.marks, ",");
+	public synchronized boolean markdown(String dbname){
+		if(!this.marks.containsKey(dbname)){
+			this.marks.put(dbname, new Markdown(true, dbname));
+			this.dbMarkdown = StringUtils.join(this.getMarks(), ",");
 		}			
-		return this.marks.contains(dbname);
+		return this.marks.containsKey(dbname);
+	}
+	
+	public synchronized void markup(String dbname){
+		if(this.marks.containsKey(dbname)){
+			this.marks.remove(dbname);
+			this.dbMarkdown = StringUtils.join(this.getMarks(), ",");
+			MarkupManager.reset(dbname);
+		}
 	}
 	
 	private void updateMarks(String newVal) throws Exception{
 		lock.lock();
 		try{
-		Set<String> temp = new HashSet<String>();
+		Map<String, Markdown> temp = new HashMap<String, Markdown>();
 		if(newVal == null || newVal.isEmpty()){
-			for (String mark : marks) {
+			for (String mark : this.getMarks()) {
 				this.marks.remove(mark);
 			}
 			this.marks = temp;
@@ -103,9 +133,9 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 		for (String token : tokens) {
 			//If the current mark down database doesn't contain the new value
 			//The new value need to be marked up on auto mark down
-			if(!this.marks.contains(token))
+			if(!this.marks.containsKey(token))
 				this.marks.remove(token);
-			temp.add(token);
+			temp.put(token, new Markdown(false, token));
 		}
 		marks = temp;
 		}catch(Exception e){
@@ -115,5 +145,45 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 		finally{
 			lock.unlock();
 		}
+	}
+
+	public int getMarkuplv1() {
+		return markuplv1;
+	}
+
+	public void setMarkuplv1(int markuplv1) {
+		this.markuplv1 = markuplv1;
+	}
+
+	public int getMarkuplv2() {
+		return markuplv2;
+	}
+
+	public void setMarkuplv2(int markuplv2) {
+		this.markuplv2 = markuplv2;
+	}
+
+	public boolean isAutomarkup() {
+		return automarkup;
+	}
+
+	public void setAutomarkup(boolean automarkup) {
+		this.automarkup = automarkup;
+	}
+
+	public int getAutoMarkupCount() {
+		return autoMarkupCount;
+	}
+
+	public void setAutoMarkupCount(int autoMarkupCount) {
+		this.autoMarkupCount = autoMarkupCount;
+	}
+
+	public int getAutoMarkupDelay() {
+		return autoMarkupDelay;
+	}
+
+	public void setAutoMarkupDelay(int autoMarkupDelay) {
+		this.autoMarkupDelay = autoMarkupDelay;
 	}
 }

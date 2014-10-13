@@ -7,8 +7,8 @@ import java.util.List;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
-import com.ctrip.platform.dal.sql.exceptions.DalException;
-import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 /**
  * DAO class that provides common query based functions.

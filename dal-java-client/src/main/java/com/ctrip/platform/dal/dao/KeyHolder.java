@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.platform.dal.sql.exceptions.DalException;
-import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class KeyHolder {
 	private final List<Map<String, Object>> keyList = new LinkedList<Map<String, Object>>();

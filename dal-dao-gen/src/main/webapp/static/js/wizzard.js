@@ -9,8 +9,10 @@
 
     };
 
+    var variableHtmlOrigin = '<div class="row-fluid"><input type="text" class="span3" value="%s">';
+
     var variableHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">'+
-        ' &nbsp;&nbsp;支持NULL值：<input type="checkbox" %s >';
+        ' &nbsp;&nbsp;允许NULL值：<input type="checkbox" %s >';
 
     var variable_typesHtml = '<select %s class="span5">'
         + "<option value='_please_select'>--参数类型--</option>"
@@ -341,9 +343,41 @@
         $("#"+id+" a[data-toggle='tooltip']").tooltip('hide');
     };
 
+    /**
+     *
+     * @param daoName
+     */
+    var checkDaoNameConflict = function(daoName){
+        var checkDaoNameConflictResult = false;
+        cblock($("body"));
+        var current_project = w2ui['grid'].current_project;
+        var postData = {};
+        postData["project_id"] = current_project;
+        postData["db_set_name"] = $("#databases").val();
+        postData["daoName"] = daoName;
+        $.ajax({
+            type: "POST",
+            async: false,
+            url: "/rest/task/checkDaoNameConflict",
+            data: postData,
+            dataType: "json",
+            success: function (data) {
+                if (data.code != "OK") {
+                    $.showMsg("error_msg",data['info']);
+                    checkDaoNameConflictResult = true;
+                }
+                $("body").unblock();
+            }
+        });
+        return checkDaoNameConflictResult;
+    };
+
     var step2_1 = function(record,current){
         if($('#table_list').multipleSelect('getSelects').length<1){
             $.showMsg("error_msg","请选择表!");
+            return;
+        }
+        if(checkDaoNameConflict($('#table_list').multipleSelect('getSelects').join(","))){
             return;
         }
         cblock($("body"));
@@ -465,6 +499,9 @@
     var step2_2 = function(record,current){
         if ($("#tables").val() == "") {
             $("#error_msg").text("请选择一个表！");
+            return;
+        }
+        if(checkDaoNameConflict($("#tables").val())){
             return;
         }
         if ($("#method_name").val() == "") {
@@ -695,7 +732,7 @@
             i++;
             var conName = conVal.shift();
             var nullable = conNullable.shift();
-            nullable = nullable!=undefined?nullable:'true';
+            nullable = nullable!=undefined?nullable:'false';
             nullable = nullable!='false'?'checked="checked"':"";
             if(conName!=null && conName!=""){
                 paramHtml = paramHtml + sprintf(variableHtml, conName, nullable)+"</div><br/>";
@@ -758,7 +795,7 @@
             i++;
             var temp = conVal.shift();
             var nullable = conNullable.shift();
-            nullable = nullable!=undefined?nullable:'true';
+            nullable = nullable!=undefined?nullable:'false';
             nullable = nullable!='false'?'checked="checked"':"";
             if(temp!=null && temp!=""){
                 namesStack.shift();
@@ -895,7 +932,20 @@
         $.post("/rest/task/auto/sqlValidate", postData, function (data) {
             if (data.code == "OK") {
                 $("#error_msg").empty();
-                $("#auto_sql_validate_result").html(data.info);
+                if($("#crud_option").val()=="select" && $(".step2-2-1").attr("dbCatalog")=="MySql"){
+                    $("#auto_sql_validate_result").html(data.info+". And below is the sql execution plan.");
+                    var explanJson = $.parseJSON(data['explanJson']);
+                    $("#auto_select_type").html(explanJson[0]['select_type']);
+                    $("#auto_type").html(explanJson[0]['type']);
+                    $("#auto_possible_keys").html(explanJson[0]['possible_keys']);
+                    $("#auto_key").html(explanJson[0]['key']);
+                    $("#auto_rows").html(explanJson[0]['rows']);
+                    $("#auto_extra").html(explanJson[0]['extra']);
+                    $("#auto_sql_validate_result_div > table").show();
+                }else{
+                    $("#auto_sql_validate_result").html(data.info);
+                    $("#auto_sql_validate_result_div > table").hide();
+                }
                 var editor = ace.edit("step2_2_4_sql_editor");
                 editor.setTheme("ace/theme/monokai");
                 editor.getSession().setMode("ace/mode/sql");
@@ -940,6 +990,13 @@
         if(!existKeyword_Nolock()){
             return;
         }
+        if($("#sql_class_name").val()==""){
+            $("#error_msg").html("请输入DAO类名.");
+            return;
+        }
+        if(checkDaoNameConflict($("#sql_class_name").val())){
+            return;
+        }
         //首先解析Sql语句，提取出参数
         var regexIndex = /(\?{1})/igm;
         var regexNames = /[@:](\w+)/igm;
@@ -963,12 +1020,12 @@
             var temp = conVal.shift();
             if(temp!=null && temp!=""){
                 htmls = htmls
-                    + sprintf(variableHtml, temp)
+                    + sprintf(variableHtmlOrigin, temp)
                     + sprintf(variable_typesHtml,
                     sprintf("id='db_type_%s'", sprintf("param%s", i)));
             }else{
                 htmls = htmls
-                    + sprintf(variableHtml, sprintf("param%s", i))
+                    + sprintf(variableHtmlOrigin, sprintf("param%s", i))
                     + sprintf(variable_typesHtml,
                     sprintf("id='db_type_%s'", sprintf("param%s", i)));
             }
@@ -979,13 +1036,13 @@
                 var temp = conVal.shift();
                 if(temp!=null && temp!=""){
                     htmls = htmls
-                        + sprintf(variableHtml, temp)
+                        + sprintf(variableHtmlOrigin, temp)
                         + sprintf(variable_typesHtml,
                         sprintf("id='db_type_%s'", sprintf("param%s", i)));
                 }else{
                     var realName = result[1];
                     htmls = htmls
-                        + sprintf(variableHtml, realName)
+                        + sprintf(variableHtmlOrigin, realName)
                         + sprintf(variable_typesHtml,
                         sprintf("id='db_type_%s'", realName));
                 }
@@ -1073,7 +1130,7 @@
         $("#error_msg").html(" ");
         var paramName = [];
         var msg=[];
-        $.each($("#param_list input"),function(index,value){
+        $.each($("#param_list input[type='text']"),function(index,value){
             $.each(paramName,function(index,name){
                 if($(value).val()==name){
                     msg.push($(value).val());
@@ -1119,7 +1176,20 @@
         $.post("/rest/task/sql/sqlValidate", postData).done(function (data) {
             if (data.code == "OK") {
                 $("#error_msg").empty();
-                $("#free_sql_validate_result").html(data['info']);
+                if($("#free_sql_crud_option").val()=="select" && $(".step2-2-1").attr("dbCatalog")=="MySql"){
+                    $("#free_sql_validate_result").html(data.info+". And below is the sql execution plan.");
+                    var explanJson = $.parseJSON(data['explanJson']);
+                    $("#free_select_type").html(explanJson[0]['select_type']);
+                    $("#free_type").html(explanJson[0]['type']);
+                    $("#free_possible_keys").html(explanJson[0]['possible_keys']);
+                    $("#free_key").html(explanJson[0]['key']);
+                    $("#free_rows").html(explanJson[0]['rows']);
+                    $("#free_extra").html(explanJson[0]['extra']);
+                    $("#free_sql_validate_result_div > table").show();
+                }else{
+                    $("#free_sql_validate_result").html(data.info);
+                    $("#free_sql_validate_result_div > table").hide();
+                }
                 var editor = ace.edit("step2_3_5_sql_editor");
                 editor.setTheme("ace/theme/monokai");
                 editor.getSession().setMode("ace/mode/sql");

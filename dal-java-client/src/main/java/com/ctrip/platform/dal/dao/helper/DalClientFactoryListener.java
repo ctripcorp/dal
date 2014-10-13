@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory;
 import com.ctrip.framework.clogging.agent.MessageManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
-import com.ctrip.platform.dal.sql.logging.DalLogger;;
+import com.ctrip.platform.dal.sql.logging.DalLogger;
+import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 public class DalClientFactoryListener implements ServletContextListener {
 	private Logger logger = LoggerFactory.getLogger(DalClientFactoryListener.class);
@@ -50,5 +51,7 @@ public class DalClientFactoryListener implements ServletContextListener {
 			logger.info("shutdown clogging");
 			MessageManager.getInstance().shutdown();
 		}
+		
+		DalWatcher.destroy();
 	}
 }

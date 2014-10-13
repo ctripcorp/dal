@@ -3,8 +3,8 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import com.ctrip.platform.dal.sql.exceptions.DalException;
-import com.ctrip.platform.dal.sql.exceptions.ErrorCode;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
 
 public class DalTransaction  {

@@ -224,6 +224,7 @@ public class HATest {
 
 	private SQLException createException(int errorCode) {
 		SQLException mockex = EasyMock.createMock(SQLException.class);
+		EasyMock.expect(mockex.getMessage()).andReturn("test").times(Integer.MAX_VALUE);
 		EasyMock.expect(mockex.getErrorCode()).andReturn(errorCode)
 				.times(Integer.MAX_VALUE);
 		EasyMock.replay(mockex);

@@ -11,7 +11,7 @@
 		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 	    String sql = builder.build();
-		return queryDao.queryForObjectNullable(sql, builder.buildParameters, hints, ${method.getPojoClassName()}.class);
+		return queryDao.queryForObjectNullable(sql, builder.buildParameters(), hints, ${method.getPojoClassName()}.class);
 	}
 #end
 #end

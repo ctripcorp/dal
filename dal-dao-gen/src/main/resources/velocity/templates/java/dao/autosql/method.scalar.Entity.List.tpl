@@ -21,7 +21,7 @@
 #if($method.isPaging() && ${host.getDatabaseCategory()}=="MySql")
 		sql = String.format(sql, ${host.pageBegain()}, ${host.pageEnd()});
 #end
-		return queryDao.query(sql, builder.buildParameters, hints, parser);
+		return queryDao.query(sql, builder.buildParameters(), hints, parser);
 	}
 #end
 #end

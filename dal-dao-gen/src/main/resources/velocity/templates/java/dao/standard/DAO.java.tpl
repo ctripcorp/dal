@@ -6,13 +6,12 @@ import ${field};
 
 public class ${host.getPojoClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbSetName()}";
+	private static final DatabaseCategory dbCategory = null;
 #if($host.getDatabaseCategory().name() == "MySql")
-	private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
 	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getTableName()}";
 	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getTableName()}";
 	private static final String PAGE_MYSQL_PATTERN = "SELECT * FROM ${host.getTableName()} LIMIT %s, %s";
 #else
-	private static final DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
 	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getTableName()} WITH (NOLOCK)";
 	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getTableName()} WITH (NOLOCK)";
 	private static final String PAGE_SQL_PATTERN = "WITH CTE AS (select *, row_number() over(order by ${host.getOverColumns()} desc ) as rownum" 

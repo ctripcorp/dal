@@ -1,8 +1,9 @@
 ##构造函数
 	public ${host.getPojoClassName()}Dao() {
 		this.client = new DalTableDao<${host.getPojoClassName()}>(parser);
-		this.client.setDatabaseCategory(dbCategory);
+		dbCategory = this.client.getDatabaseCategory();
 #*
+		this.client.setDatabaseCategory(dbCategory);
 #if($host.getDatabaseCategory().name() == "MySql")
 		this.client.setDelimiter('`','`');
 #else

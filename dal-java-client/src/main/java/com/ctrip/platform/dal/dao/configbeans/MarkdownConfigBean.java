@@ -21,22 +21,16 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	private volatile boolean markdown = false;
 	
 	@BeanMeta(alias = "AutoMarkup")
-	private volatile boolean automarkup = true;
+	private volatile boolean automarkup = false;
 	
 	@BeanMeta(alias = "AutoMarkupCount")
-	private volatile int autoMarkupCount = 10;
+	private volatile int autoMarkupCount = 1000;
 	
 	@BeanMeta(alias = "MarkDownDB")
 	private volatile String dbMarkdown = "";
 	
 	@BeanMeta(alias = "AllDB")
 	private volatile String alldbs = "";
-	
-	@BeanMeta(alias = "AutoMarkuplv1")
-	private volatile int markuplv1 = 10;
-	
-	@BeanMeta(alias = "AutoMarkuplv2")
-	private volatile int markuplv2 = 3;
 	
 	@BeanMeta(alias = "AutoMarkUpSchedule")
 	private volatile String markUpSchedule = "2,3";
@@ -45,7 +39,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	private volatile float autoMarkupFailureThreshold = 0.05f;
 	
 	@BeanMeta(alias = "AutoMarkupDelay")
-	private volatile int autoMarkupDelay = 1;
+	private volatile int autoMarkupDelay = 60;
 	
 	@BeanMeta(omit = true)
 	private int[] autoMarkUpSchedule = new int[]{2, 3};
@@ -179,22 +173,6 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 		finally{
 			lock.unlock();
 		}
-	}
-
-	public int getMarkuplv1() {
-		return markuplv1;
-	}
-
-	public void setMarkuplv1(int markuplv1) {
-		this.markuplv1 = markuplv1;
-	}
-
-	public int getMarkuplv2() {
-		return markuplv2;
-	}
-
-	public void setMarkuplv2(int markuplv2) {
-		this.markuplv2 = markuplv2;
 	}
 
 	public boolean isAutomarkup() {

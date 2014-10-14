@@ -30,7 +30,7 @@ public class MarkdownManager {
 		Markdown item = ConfigBeanFactory.getMarkdownConfigBean().getMarkItem(key);
 		if(item != null){
 			if(!item.isAuto() || (System.currentTimeMillis() - item.getMarkdownTime()) <=
-					ConfigBeanFactory.getMarkdownConfigBean().getAutoMarkupDelay() * 60 * 1000) //mark-down manually
+					ConfigBeanFactory.getMarkdownConfigBean().getAutoMarkupDelay() * 1000) //mark-down manually
 				return true;
 			
 			if(!MarkupManager.isPass(key)){

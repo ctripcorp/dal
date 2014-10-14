@@ -66,7 +66,7 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 	}
 
 	public static boolean isTimeOutHint(MarkContext mark){
-		if(mark.getCost() >= ConfigBeanFactory.getTimeoutMarkDownBean().getMinTimeOut()){
+		if(mark.getCost() >= ConfigBeanFactory.getTimeoutMarkDownBean().getMinTimeOut() * 1000){
 			if(mark.getDbtype().equalsIgnoreCase("Microsoft SQL Server")){
 				if(mark.getMsg().startsWith("The query has timed out") || mark.getMsg().startsWith("查询超时")){
 					return true;

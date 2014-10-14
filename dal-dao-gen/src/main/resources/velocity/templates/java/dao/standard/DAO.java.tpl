@@ -6,7 +6,7 @@ import ${field};
 
 public class ${host.getPojoClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbSetName()}";
-	private static final DatabaseCategory dbCategory = null;
+	private static DatabaseCategory dbCategory = null;
 #if($host.getDatabaseCategory().name() == "MySql")
 	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getTableName()}";
 	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getTableName()}";

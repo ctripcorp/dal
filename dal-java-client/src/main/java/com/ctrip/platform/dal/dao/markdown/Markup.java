@@ -1,87 +1,69 @@
 package com.ctrip.platform.dal.dao.markdown;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
-
 
 public class Markup {
 	private String name;
-	private MarkupLevel level;
-	private AtomicInteger retryTimes = new AtomicInteger(0);
-	private AtomicInteger markupTimes = new AtomicInteger(0);
-	
+	private int passCount = 0;
+	private int failCount = 0;
+	private int totalCount = 0;
+	private int loop = 0;
+	private Indexer indexer = null;
+
 	public Markup(String name){
 		this.name = name;
-		this.level = MarkupLevel.LV1;
 	}
 	
-	public boolean isMarkup(String key){
-		 int markupTimes = this.markupTimes.get();
-		 return this.level == MarkupLevel.LV2 && 
-				 markupTimes >= ConfigBeanFactory.getMarkdownConfigBean().getAutoMarkupCount();
-	}
-	
-	public boolean isPassed(String key){
-		int markuplv1 = ConfigBeanFactory.getMarkdownConfigBean().getMarkuplv1();
-		int markuplv2 = ConfigBeanFactory.getMarkdownConfigBean().getMarkuplv2();
-		
-		int retryTimes = this.retryTimes.incrementAndGet();
-		
-		if(this.level == MarkupLevel.LV1){
-			if(retryTimes == markuplv1){
-				return this.moveToLevel2(markuplv1);
+	public synchronized boolean isPass() {
+		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
+				.getAutoMarkUpSchedule();
+		if (this.moveToNext()) {
+			if (this.loop == schedules.length) {
+				ConfigBeanFactory.getMarkdownConfigBean().markup(this.name);
+				this.reset();
+				return true;
 			}
+			this.indexer = new Indexer(schedules[this.loop]);
+			this.loop ++;	
 		}
-		if(this.level == MarkupLevel.LV2){
-			if(retryTimes == markuplv2){
-				return this.resetLevel2(markuplv2);
+		boolean pass = this.indexer.isSchedule();
+		passCount = pass ? passCount + 1 : passCount;
+		this.totalCount++;
+		return pass;
+	}
+
+	private boolean moveToNext() {
+		if (this.totalCount == 0)
+			return true;
+		
+		if(this.totalCount
+				% ConfigBeanFactory.getMarkdownConfigBean()
+				.getAutoMarkupCount() == 0){
+			if(this.passCount
+					* ConfigBeanFactory.getMarkdownConfigBean()
+					.getAutoMarkupFailureThreshold() >= this.failCount){
+			}else{
+				this.reset();
 			}
+			return true;
 		}
 		return false;
 	}
 	
-	public void rollback(){
-		int markuplv1 = ConfigBeanFactory.getMarkdownConfigBean().getMarkuplv1();
-		int markuplv2 = ConfigBeanFactory.getMarkdownConfigBean().getMarkuplv2();
-		
-		 if(this.level == MarkupLevel.LV1){
-			 this.reduce(1, markuplv1);
-		 }
-		 if(this.level == MarkupLevel.LV2){
-			 this.reduce(1, markuplv2);
-		 }
+	private void reset(){
+		this.failCount = 0;
+		this.passCount= 0;
+		this.totalCount = 0;
+		this.loop = 0;
+		this.indexer = null;
 	}
-	
-	public synchronized boolean moveToLevel2(int m){
-		this.retryTimes.set(0);
-		this.markupTimes.addAndGet(m);
-		if(this.markupTimes.get() >= ConfigBeanFactory.getMarkdownConfigBean().getAutoMarkupCount()){
-			this.level = MarkupLevel.LV2;
-			this.markupTimes.set(0);
-		}
-		return true;
+
+	public synchronized void rollback() {
+		this.failCount++;
 	}
-	
-	public synchronized boolean resetLevel2(int m){
-		this.retryTimes.set(0);
-		this.markupTimes.addAndGet(m);
-		return true;
-	}
-	
-	public synchronized void reduce(int retry, int mks){
-		if(this.retryTimes.get() >= retry)
-			this.retryTimes.addAndGet(0 - retry);
-		if(this.markupTimes.get() >= mks)
-			this.markupTimes.addAndGet(0 - mks);
-	}
-	
-	public String getName(){
-		return this.name;
-	}
-	
-	public String toString(){
-		return String.format("Key:%s--Retry:%s--Markups:%s--level:%s", 
-				this.name, this.retryTimes.get(), this.markupTimes.get(), this.level.toString());
+
+	public String toString() {
+		return String.format("total:%s--pass:%s--fail:%s--loop:%s",
+				this.totalCount, this.passCount, this.failCount, this.loop);
 	}
 }

@@ -2,9 +2,6 @@ package com.ctrip.platform.dal.dao.markdown;
 
 import java.sql.SQLException;
 
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
-import com.mysql.jdbc.exceptions.MySQLTimeoutException;
-
 public class MarkContext {
 	private String name;
 	private String dbtype;

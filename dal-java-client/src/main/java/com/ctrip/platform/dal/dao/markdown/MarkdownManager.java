@@ -5,14 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 
 public class MarkdownManager {
-	private static Logger logger = LoggerFactory.getLogger(MarkdownManager.class);
 	private static final int durations = 1000;
 	private static Thread manager = null;
 	

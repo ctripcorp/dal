@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MarkupManager {
 	
-	private static Map<String, Markup2> markups = new ConcurrentHashMap<String, Markup2>();
+	private static Map<String, Markup> markups = new ConcurrentHashMap<String, Markup>();
 		
 	/**
 	 * Try to pass request which is marked down.
@@ -32,9 +32,9 @@ public class MarkupManager {
 			markups.remove(key);
 	}
 	
-	private static Markup2 getMarkup(String key){
+	private static Markup getMarkup(String key){
 		if(!markups.containsKey(key))
-			markups.put(key, new Markup2(key));
+			markups.put(key, new Markup(key));
 		return markups.get(key);
 	}
 	

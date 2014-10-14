@@ -76,7 +76,7 @@ public class Consts {
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.BIT, Boolean.class);
 		
 		// Recommended using Short for Byte
-		jdbcSqlTypeToJavaClass.put(java.sql.Types.TINYINT, Short.class);
+		jdbcSqlTypeToJavaClass.put(java.sql.Types.TINYINT, Integer.class);
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.SMALLINT, Short.class);
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.INTEGER, Integer.class);
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.BIGINT, Long.class);

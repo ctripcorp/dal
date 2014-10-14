@@ -16,7 +16,7 @@
 	 * Note: there must be one non-null field in daoPojo
 	**/
 	public int insert(DalHints hints, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.length <= 0)
+		if(null == daoPojos || daoPojos.size() <= 0)
 			return 0;
 		hints = DalHints.createIfAbsent(hints);
 		return client.insert(hints, daoPojos);
@@ -40,7 +40,7 @@
 	 * Note: there must be one non-null field in daoPojos
 	**/
 	public int insert(DalHints hints, KeyHolder keyHolder, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.length <= 0)
+		if(null == daoPojos || daoPojos.size() <= 0)
 			return 0;
 		hints = DalHints.createIfAbsent(hints);
 		return client.insert(hints, keyHolder, daoPojos);
@@ -62,7 +62,7 @@
 	 * SQL insert with batch mode
 	**/
 	public int[] batchInsert(DalHints hints, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.length == 0)
+		if(null == daoPojos || daoPojos.size() <= 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
 		return client.batchInsert(hints, daoPojos);
@@ -84,7 +84,7 @@
 	 * SQL insert with batch mode
 	 **/
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.length <= 0)
+		if(null == daoPojos || daoPojos.size() <= 0)
 			return 0;
 		hints = DalHints.createIfAbsent(hints);
 		return client.combinedInsert(hints, keyHolder, daoPojos);

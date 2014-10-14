@@ -14,7 +14,7 @@
 		builder.orderBy(${method.getOrderByExp()});
 #end
 	    String sql = builder.buildFirst();
-		return queryDao.queryFirstNullable(sql, builder.buildParameters, hints, ${method.getPojoClassName()}.class);
+		return queryDao.queryFirstNullable(sql, builder.buildParameters(), hints, ${method.getPojoClassName()}.class);
 	}
 #end
 #end

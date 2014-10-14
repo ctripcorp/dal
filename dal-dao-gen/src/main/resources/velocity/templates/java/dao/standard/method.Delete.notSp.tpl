@@ -5,7 +5,7 @@
 	**/
 	public int delete(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length <= 0)
-			return;
+			return 0;
 		hints = DalHints.createIfAbsent(hints);
 		return client.delete(hints, daoPojos);
 	}
@@ -16,8 +16,8 @@
 	 * Note: there must be one non-null field in daoPojo
 	**/
 	public int delete(DalHints hints, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.length <= 0)
-			return;
+		if(null == daoPojos || daoPojos.size() <= 0)
+			return 0;
 		hints = DalHints.createIfAbsent(hints);
 		return client.delete(hints, daoPojos);
 	}
@@ -38,7 +38,7 @@
 	 * SQL delete with batch mode
 	**/
 	public int[] batchDelete(DalHints hints, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.length <= 0)
+		if(null == daoPojos || daoPojos.size() <= 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
 		return client.batchDelete(hints, daoPojos);

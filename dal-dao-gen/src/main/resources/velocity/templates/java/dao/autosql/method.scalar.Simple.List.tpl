@@ -21,7 +21,7 @@
 #if($method.isPaging())
 		sql = String.format(sql, ${host.pageBegain()}, ${host.pageEnd()});
 #end
-		return queryDao.query(sql, builder.buildParameters, hints, ${method.getPojoClassName()}.class);
+		return queryDao.query(sql, builder.buildParameters(), hints, ${method.getPojoClassName()}.class);
 	}
 #end
 #end

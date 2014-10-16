@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.markdown;
 
 public class MarkupLooper {
-	private static final int length = 10;
+	public static final int length = 10;
 	
 	private int[] schedules = null;
 	private int index = 0;

@@ -5,7 +5,7 @@ import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 public class Markup {
 	private String name;
 	private int loop = 0;
-	private MarkupLooper indexer = null;
+	private MarkupLooper looper = null;
 
 	public Markup(String name){
 		this.name = name;
@@ -16,17 +16,17 @@ public class Markup {
 		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
 				.getAutoMarkUpSchedule();
 		int autoMarkupCount = ConfigBeanFactory.getMarkdownConfigBean()
-				.getAutoMarkupBatches() * 10;
-		if (this.indexer.getTotal() == autoMarkupCount) {
+				.getAutoMarkupBatches() * MarkupLooper.length;
+		if (this.looper.getTotal() == autoMarkupCount) {
 			if (this.loop == schedules.length) {
 				ConfigBeanFactory.getMarkdownConfigBean().markup(this.name);
 				this.init();
 				return true;
 			}
-			this.indexer = new MarkupLooper(schedules[this.loop]);
+			this.looper = new MarkupLooper(schedules[this.loop]);
 			this.loop ++;
 		}
-		boolean pass = this.indexer.isSchedule();
+		boolean pass = this.looper.isSchedule();
 		return pass;
 	}
 	
@@ -34,7 +34,7 @@ public class Markup {
 		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
 				.getAutoMarkUpSchedule();
 		this.loop = 1;
-		this.indexer = new MarkupLooper(schedules[0]);
+		this.looper = new MarkupLooper(schedules[0]);
 	}
 
 	public synchronized void rollback() {
@@ -43,11 +43,11 @@ public class Markup {
 		if(this.loop > 1){
 			this.loop = this.loop - 1;
 		}
-		this.indexer = new MarkupLooper(schedules[this.loop]);
+		this.looper = new MarkupLooper(schedules[this.loop]);
 	}
 	
 
 	public String toString() {
-		return String.format("total:%s--loop:%s", this.indexer.getTotal(), this.loop);
+		return String.format("total:%s--loop:%s", this.looper.getTotal(), this.loop);
 	}
 }

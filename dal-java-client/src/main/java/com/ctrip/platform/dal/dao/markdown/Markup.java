@@ -4,66 +4,50 @@ import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 
 public class Markup {
 	private String name;
-	private int passCount = 0;
-	private int failCount = 0;
-	private int totalCount = 0;
 	private int loop = 0;
-	private Indexer indexer = null;
+	private MarkupLooper indexer = null;
 
 	public Markup(String name){
 		this.name = name;
+		this.init();
 	}
 	
 	public synchronized boolean isPass() {
 		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
 				.getAutoMarkUpSchedule();
-		if (this.moveToNext()) {
+		int autoMarkupCount = ConfigBeanFactory.getMarkdownConfigBean()
+				.getAutoMarkupBatches() * 10;
+		if (this.indexer.getTotal() == autoMarkupCount) {
 			if (this.loop == schedules.length) {
 				ConfigBeanFactory.getMarkdownConfigBean().markup(this.name);
-				this.reset();
+				this.init();
 				return true;
 			}
-			this.indexer = new Indexer(schedules[this.loop]);
-			this.loop ++;	
+			this.indexer = new MarkupLooper(schedules[this.loop]);
+			this.loop ++;
 		}
 		boolean pass = this.indexer.isSchedule();
-		passCount = pass ? passCount + 1 : passCount;
-		this.totalCount++;
 		return pass;
 	}
-
-	private boolean moveToNext() {
-		if (this.totalCount == 0)
-			return true;
-		
-		if(this.totalCount
-				% ConfigBeanFactory.getMarkdownConfigBean()
-				.getAutoMarkupCount() == 0){
-			if(this.passCount
-					* ConfigBeanFactory.getMarkdownConfigBean()
-					.getAutoMarkupFailureThreshold() >= this.failCount){
-			}else{
-				this.reset();
-			}
-			return true;
-		}
-		return false;
-	}
 	
-	private void reset(){
-		this.failCount = 0;
-		this.passCount= 0;
-		this.totalCount = 0;
-		this.loop = 0;
-		this.indexer = null;
+	private void init(){
+		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
+				.getAutoMarkUpSchedule();
+		this.loop = 1;
+		this.indexer = new MarkupLooper(schedules[0]);
 	}
 
 	public synchronized void rollback() {
-		this.failCount++;
+		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
+				.getAutoMarkUpSchedule();
+		if(this.loop > 1){
+			this.loop = this.loop - 1;
+		}
+		this.indexer = new MarkupLooper(schedules[this.loop]);
 	}
+	
 
 	public String toString() {
-		return String.format("total:%s--pass:%s--fail:%s--loop:%s",
-				this.totalCount, this.passCount, this.failCount, this.loop);
+		return String.format("total:%s--loop:%s", this.indexer.getTotal(), this.loop);
 	}
 }

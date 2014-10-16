@@ -19,6 +19,7 @@ namespace ${host.getNameSpace()}.Dao
         readonly BaseDao baseDao = BaseDaoFactory.CreateBaseDao("${host.getDbSetName()}");
         
 #parse("templates/csharp/dao/standard/method.OrmByHand.tpl")
+#parse("templates/csharp/dao/standard/method.Insert.sp.tpl")
 #parse("templates/csharp/dao/standard/method.Insert.tpl")
 #parse("templates/csharp/dao/standard/method.Update.tpl")
 #parse("templates/csharp/dao/standard/method.Delete.tpl")

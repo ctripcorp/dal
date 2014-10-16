@@ -23,8 +23,8 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	@BeanMeta(alias = "AutoMarkup")
 	private volatile boolean automarkup = false;
 	
-	@BeanMeta(alias = "AutoMarkupCount")
-	private volatile int autoMarkupCount = 1000;
+	@BeanMeta(alias = "AutoMarkupBatches")
+	private volatile int autoMarkupBatches = 1;
 	
 	@BeanMeta(alias = "MarkDownDB")
 	private volatile String dbMarkdown = "";
@@ -33,7 +33,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	private volatile String alldbs = "";
 	
 	@BeanMeta(alias = "AutoMarkUpSchedule")
-	private volatile String markUpSchedule = "2,3";
+	private volatile String markUpSchedule = "1, 3, 5";
 	
 	@BeanMeta(alias = "AutoMarkupFailureThreshold")
 	private volatile float autoMarkupFailureThreshold = 0.05f;
@@ -42,7 +42,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	private volatile int autoMarkupDelay = 60;
 	
 	@BeanMeta(omit = true)
-	private int[] autoMarkUpSchedule = new int[]{2, 3};
+	private int[] autoMarkUpSchedule = new int[]{1, 3, 5};
 	
 	@BeanMeta(omit = true)
 	private Map<String, Markdown> marks = new HashMap<String, Markdown>();
@@ -183,12 +183,12 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 		this.automarkup = automarkup;
 	}
 
-	public int getAutoMarkupCount() {
-		return autoMarkupCount;
+	public int getAutoMarkupBatches() {
+		return autoMarkupBatches;
 	}
 
-	public void setAutoMarkupCount(int autoMarkupCount) {
-		this.autoMarkupCount = autoMarkupCount;
+	public void setAutoMarkupBatches(int autoMarkupBatches) {
+		this.autoMarkupBatches = autoMarkupBatches;
 	}
 
 	public int getAutoMarkupDelay() {

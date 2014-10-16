@@ -16,11 +16,11 @@ public class TimeoutMarkDownBean extends ConfigBeanBase{
 	@BeanMeta(alias = "TimeoutThreshold")
 	private volatile int minTimeOut = 1;
 	@BeanMeta(alias = "ErrorCountThreshold")
-    private volatile int errorCountBaseLine = 1000;
+    private volatile int errorCountBaseLine = 1;
 	@BeanMeta(alias = "ErrorPercentThreshold")
     private volatile float errorPercent = 0.5f;
 	@BeanMeta(alias = "ErrorPercentReferCount")
-	private volatile int errorPercentBaseLine = 2000;
+	private volatile int errorPercentBaseLine = 2;
 	
 	@BeanMeta(alias = "MySqlErrorCodes")
     private String mySqlErrorCodes = "0";

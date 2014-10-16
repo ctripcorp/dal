@@ -23,9 +23,9 @@
 #foreach($s in $returnType)
 #set($index = $velocityCount - 1 )
 #if($index==0)
-		        iReturn = ($returnType.get($index))result;
+		        $returnType.get($index) iReturn = ($returnType.get($index))result;
 #else	
-			    //iReturn = ($returnType.get($index))result;
+			    //$returnType.get($index) iReturn = ($returnType.get($index))result;
 #end	
 #end
                 return iReturn;

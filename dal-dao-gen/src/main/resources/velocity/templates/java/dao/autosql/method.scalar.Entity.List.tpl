@@ -18,7 +18,7 @@
 		builder.orderBy(${method.getOrderByExp()});
 #end
 	    String sql = builder.build();
-#if($method.isPaging() && ${host.getDatabaseCategory()}=="MySql")
+#if($method.isPaging())
 		sql = String.format(sql, ${host.pageBegain()}, ${host.pageEnd()});
 #end
 		return queryDao.query(sql, builder.buildParameters(), hints, parser);

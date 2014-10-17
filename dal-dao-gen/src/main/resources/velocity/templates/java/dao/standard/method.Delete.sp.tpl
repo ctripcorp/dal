@@ -37,11 +37,15 @@
 		if(null == daoPojos || daoPojos.length == 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
-		String callSql = client.buildCallSql(BATCH_DELETE_SP_NAME, parser.getFields(daoPojos[0]).size());
+##String callSql = client.buildCallSql(BATCH_DELETE_SP_NAME, parser.getFields(daoPojos[0]).size());
+		String callSql = client.buildCallSql(BATCH_DELETE_SP_NAME, $host.getSpDelete().getParameters().size());
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.length];
 		for(int i = 0; i< daoPojos.length; i++){
 			StatementParameters parameters = new StatementParameters();
-			client.addParametersByName(parameters, parser.getFields(daoPojos[i]));
+#foreach($p in $host.getSpDelete().getParameters())
+		    parameters.set("${p.getName()}", ${p.getJavaTypeDisplay()}, daoPojos[i].get${p.getName()}());
+#end
+##client.addParametersByName(parameters, parser.getFields(daoPojos[i]));
 			parametersList[i] = parameters;
 		}
 		return baseClient.batchCall(callSql, parametersList, hints);

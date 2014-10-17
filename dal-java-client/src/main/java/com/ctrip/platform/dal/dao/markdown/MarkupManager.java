@@ -20,8 +20,8 @@ public class MarkupManager {
 	 * Mark up passed, but execute failed
 	 * @param key
 	 */
-	public static void rollback(MarkContext ctx){
-		if(TimeoutAutoMarkdown.isTimeOutHint(ctx) && 
+	public static void rollback(ErrorContext ctx){
+		if(TimeoutDetector.isTimeOutHint(ctx) && 
 				markups.containsKey(ctx.getName())){
 			getMarkup(ctx.getName()).rollback();
 		}

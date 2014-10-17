@@ -4,7 +4,7 @@ import java.sql.SQLException;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 
-public class MarkContext {
+public class ErrorContext {
 	private String name;
 	private DatabaseCategory dbCategory;
 	private int errorCode;
@@ -13,7 +13,7 @@ public class MarkContext {
 	private Class<?> exType;
 	private long time;
 	
-	public MarkContext(String name, DatabaseCategory dbCategory, long cost, SQLException e){
+	public ErrorContext(String name, DatabaseCategory dbCategory, long cost, SQLException e){
 		this.name = name;
 		this.dbCategory = dbCategory;
 		this.cost = cost;

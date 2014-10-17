@@ -14,8 +14,8 @@ import com.ctrip.platform.dal.logging.markdown.MarkDownReason;
 import com.ctrip.platform.dal.sql.logging.Metrics;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
-public class TimeoutAutoMarkdown implements AutoMarkdown{
-	private static Logger logger = LoggerFactory.getLogger(TimeoutAutoMarkdown.class);
+public class TimeoutDetector implements ErrorDetector{
+	private static Logger logger = LoggerFactory.getLogger(TimeoutDetector.class);
 	private Map<String, Data> data = new ConcurrentHashMap<String, Data>();
 	private long latest = 0;
 	
@@ -23,16 +23,13 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 	 * This method will be invoked by one thread.
 	 */
 	@Override
-	public void collectException(MarkContext mark) {
-		if(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(mark.getName())){
-			return;
-		}
-		MarkDownInfo info = new MarkDownInfo(mark.getName(), MarkDownPolicy.TIMEOUT,
+	public void detect(ErrorContext ctx) {
+		MarkDownInfo info = new MarkDownInfo(ctx.getName(), MarkDownPolicy.TIMEOUT,
 				ConfigBeanFactory.getTimeoutMarkDownBean().getSamplingDuration());
-		if(!data.containsKey(mark.getName()))
-			data.put(mark.getName(), new Data());
-		Data dt = data.get(mark.getName());
-		if(isTimeOutHint(mark)){
+		if(!data.containsKey(ctx.getName()))
+			data.put(ctx.getName(), new Data());
+		Data dt = data.get(ctx.getName());
+		if(isTimeOutHint(ctx)){
 			dt.incrementAndGetHints();
 			info.setStatus("fail");
 		}else{
@@ -43,7 +40,7 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 		if(dt.getHints() >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorCountBaseLine()){
 			info.setReason(MarkDownReason.ERRORCOUNT);
 			Metrics.report(info, dt.getRequestTimes());
-			this.markdown(mark.getName(), dt);	
+			this.markdown(ctx.getName(), dt);	
 			return;
 		}
 		if(dt.getRequestTimes() >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercentBaseLine()){
@@ -51,11 +48,11 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 			if(percent >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercent()){
 				info.setReason(MarkDownReason.ERRORPERCENT);
 				Metrics.report(info, dt.getHints());
-				this.markdown(mark.getName(), dt);
+				this.markdown(ctx.getName(), dt);
 				return;
 			}
 		}
-		this.removeOverdueData(mark.getName(), mark.getTime());
+		this.removeOverdueData(ctx.getName(), ctx.getTime());
 	}
 	
 	private void markdown(String key,Data dt){
@@ -66,14 +63,14 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 		dt.clear();
 	}
 
-	public static boolean isTimeOutHint(MarkContext mark){
-		if(mark.getCost() >= ConfigBeanFactory.getTimeoutMarkDownBean().getMinTimeOut() * 1000){
-			if(mark.getDbCategory() == DatabaseCategory.SqlServer){
-				if(mark.getMsg().startsWith("The query has timed out") || mark.getMsg().startsWith("查询超时")){
+	public static boolean isTimeOutHint(ErrorContext ctx){
+		if(ctx.getCost() >= ConfigBeanFactory.getTimeoutMarkDownBean().getMinTimeOut() * 1000){
+			if(ctx.getDbCategory() == DatabaseCategory.SqlServer){
+				if(ctx.getMsg().startsWith("The query has timed out") || ctx.getMsg().startsWith("查询超时")){
 					return true;
 				}
 			} else{
-				if(mark.getExType().toString().equalsIgnoreCase(MySQLTimeoutException.class.toString())){
+				if(ctx.getExType().toString().equalsIgnoreCase(MySQLTimeoutException.class.toString())){
 					return true;
 				}
 			}

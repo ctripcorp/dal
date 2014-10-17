@@ -92,8 +92,7 @@ public class DalTransactionManager {
 
 			endTransaction(level);
 		} catch (Throwable e) {
-			MarkdownManager.collectException(action.connHolder, 
-					System.currentTimeMillis() - action.start, e);
+			MarkdownManager.detect(action.connHolder, action.start, e);
 			e.printStackTrace();
 			ex = e;	
 			rollbackTransaction();

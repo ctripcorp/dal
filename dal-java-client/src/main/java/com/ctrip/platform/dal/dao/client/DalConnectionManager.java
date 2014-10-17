@@ -129,8 +129,7 @@ public class DalConnectionManager {
 		try {
 			result = action.execute();
 		} catch (Throwable e) {
-			MarkdownManager.collectException(action.connHolder, 
-					System.currentTimeMillis() - action.start, e);
+			MarkdownManager.detect(action.connHolder, action.start, e);
 			ex = e;
 		} finally {
 			DalWatcher.endExectue();

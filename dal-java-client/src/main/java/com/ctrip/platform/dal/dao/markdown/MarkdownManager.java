@@ -12,13 +12,13 @@ public class MarkdownManager {
 	private static final int durations = 1000;
 	private static Thread manager = null;
 	
-	private static List<AutoMarkdown> mkds = new ArrayList<AutoMarkdown>();
-	private static ConcurrentLinkedQueue<MarkContext> exqueue = new ConcurrentLinkedQueue<MarkContext>();
+	private static List<ErrorDetector> detectors = new ArrayList<ErrorDetector>();
+	private static ConcurrentLinkedQueue<ErrorContext> exqueue = new ConcurrentLinkedQueue<ErrorContext>();
 	
 	static{
-		mkds.add(new TimeoutAutoMarkdown());
-		mkds.add(new LoginAutoMarkdown());
-		mkds.add(new NullObjectAutoMarkdown());
+		detectors.add(new TimeoutDetector());
+		detectors.add(new LoginFailDetector());
+		detectors.add(new NullObjectDetector());
 		manager = new Thread(new CollectExceptionTask());
 		manager.start();
 	}
@@ -44,9 +44,10 @@ public class MarkdownManager {
 		manager.interrupt();
 	}
 	
-	public static void collectException(DalConnection conn, long cost, Throwable e){
+	public static void detect(DalConnection conn, long start, Throwable e){
+		long cost = System.currentTimeMillis() - start;
 		if(conn != null && conn.getMeta() != null && e instanceof SQLException){
-			MarkContext ctx = new MarkContext(conn.getMeta().getAllInOneKey(), 
+			ErrorContext ctx = new ErrorContext(conn.getMeta().getAllInOneKey(), 
 					conn.getMeta().getDatabaseCategory(), cost, (SQLException)e);
 			exqueue.add(ctx);
 			MarkupManager.rollback(ctx);
@@ -57,12 +58,14 @@ public class MarkdownManager {
 		@Override
 		public void run() {
 			do{
-				MarkContext kv = exqueue.poll();
-				while(kv != null){
-					for (AutoMarkdown mk : mkds) {
-						mk.collectException(kv);
+				ErrorContext ctx = exqueue.poll();
+				while(ctx != null){
+					if(!ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(ctx.getName())){
+						for (ErrorDetector mk : detectors) {
+							mk.detect(ctx);
+						}
 					}
-					kv = exqueue.poll();
+					ctx = exqueue.poll();
 				}
 				try {
 					Thread.sleep(durations);

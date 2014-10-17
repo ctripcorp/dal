@@ -29,7 +29,7 @@ public class TimeoutDetector implements ErrorDetector{
 		if(!data.containsKey(ctx.getName()))
 			data.put(ctx.getName(), new Data());
 		Data dt = data.get(ctx.getName());
-		if(isTimeOutHint(ctx)){
+		if(isTimeOutException(ctx)){
 			dt.incrementAndGetHints();
 			info.setStatus("fail");
 		}else{
@@ -63,7 +63,7 @@ public class TimeoutDetector implements ErrorDetector{
 		dt.clear();
 	}
 
-	public static boolean isTimeOutHint(ErrorContext ctx){
+	public static boolean isTimeOutException(ErrorContext ctx){
 		if(ctx.getCost() >= ConfigBeanFactory.getTimeoutMarkDownBean().getMinTimeOut() * 1000){
 			if(ctx.getDbCategory() == DatabaseCategory.SqlServer){
 				if(ctx.getMsg().startsWith("The query has timed out") || ctx.getMsg().startsWith("查询超时")){

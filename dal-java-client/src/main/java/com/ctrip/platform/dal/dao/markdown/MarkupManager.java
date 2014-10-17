@@ -21,7 +21,7 @@ public class MarkupManager {
 	 * @param key
 	 */
 	public static void rollback(ErrorContext ctx){
-		if(TimeoutDetector.isTimeOutHint(ctx) && 
+		if(TimeoutDetector.isTimeOutException(ctx) && 
 				markups.containsKey(ctx.getName())){
 			getMarkup(ctx.getName()).rollback();
 		}

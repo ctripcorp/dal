@@ -11,12 +11,10 @@ public class DalConnection {
 	private Integer oldIsolationLevel;
 	private Integer newIsolationLevel;
 	private Connection conn;
-	private String productionName;
 	private DbMeta meta;
 	
 	public DalConnection(Connection conn, DbMeta meta) throws SQLException {
 		this.oldIsolationLevel = conn.getTransactionIsolation();
-		this.productionName = conn.getMetaData().getDatabaseProductName();
 		this.conn = conn;
 		this.meta = meta;
 	}
@@ -25,10 +23,6 @@ public class DalConnection {
 		return conn;
 	}
 
-	public String getDatabaseProductName(){
-		return this.productionName;
-	}
-	
 	public DbMeta getMeta() {
 		return meta;
 	}

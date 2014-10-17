@@ -47,7 +47,7 @@ public class MarkdownManager {
 	public static void collectException(DalConnection conn, long cost, Throwable e){
 		if(conn != null && conn.getMeta() != null && e instanceof SQLException){
 			MarkContext ctx = new MarkContext(conn.getMeta().getAllInOneKey(), 
-					conn.getDatabaseProductName(), cost, (SQLException)e);
+					conn.getMeta().getDatabaseCategory(), cost, (SQLException)e);
 			exqueue.add(ctx);
 			MarkupManager.rollback(ctx);
 		}	

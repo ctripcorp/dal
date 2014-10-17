@@ -5,6 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.CommonUtil;
 import com.ctrip.platform.dal.sql.logging.LogEntry;
 
@@ -12,13 +13,14 @@ public class DbMeta {
 	private static ConcurrentHashMap<String, DbMeta> metaMap = new ConcurrentHashMap<String, DbMeta>();
 	
 	private String databaseName;
+	private DatabaseCategory dbCategory;
 	private String allInOneKey;
 	private String userName;
 	private String shardId;
 	private boolean isMaster;
 	private String url;
 
-	private DbMeta(Connection conn, String realDbName, String shardId, boolean master) throws SQLException {
+	private DbMeta(Connection conn, String realDbName, DatabaseCategory dbCategory, String shardId, boolean master) throws SQLException {
 		DatabaseMetaData meta = conn.getMetaData();
 
 		databaseName = conn.getCatalog();
@@ -26,6 +28,7 @@ public class DbMeta {
 		userName = meta.getUserName();
 		
 		allInOneKey = realDbName;
+		this.dbCategory = dbCategory;
 		isMaster = master;
 		this.shardId = shardId;
 	}
@@ -40,10 +43,10 @@ public class DbMeta {
 	}
 	
 
-	public static DbMeta createIfAbsent(String realDbName, String shardId, boolean isMaster, Connection conn) throws SQLException {
+	public static DbMeta createIfAbsent(String realDbName, DatabaseCategory dbCategory, String shardId, boolean isMaster, Connection conn) throws SQLException {
 		DbMeta meta = metaMap.get(realDbName);
 		if(meta == null) {
-			meta = new DbMeta(conn, realDbName, shardId, isMaster);
+			meta = new DbMeta(conn, realDbName, dbCategory, shardId, isMaster);
 			DbMeta oldMeta = metaMap.putIfAbsent(realDbName, meta);
 			meta = oldMeta == null ? meta : oldMeta;
 		}
@@ -60,6 +63,10 @@ public class DbMeta {
 
 	public String getAllInOneKey() {
 		return allInOneKey;
+	}
+	
+	public DatabaseCategory getDatabaseCategory() {
+		return dbCategory;
 	}
 
 	public String getShardId() {

@@ -13,7 +13,7 @@ public class DalHA {
 	private Set<String> usedKeys = null;
 	private boolean retry = false;
 	private SQLException exception = null;
-	private String productName = null;
+	private DatabaseCategory dbCategory = null;
 	
 	public DalHA(){
 		this.usedKeys = new HashSet<String>();
@@ -35,12 +35,12 @@ public class DalHA {
 		this.over = over;
 	}
 	
-	public String getProductName() {
-		return productName;
+	public DatabaseCategory getDatabaseCategory() {
+		return dbCategory;
 	}
 
-	public void setProductName(String productName) {
-		this.productName = productName;
+	public void setDatabaseCategory(DatabaseCategory dbCategory) {
+		this.dbCategory = dbCategory;
 	}
 
 	public void update(SQLException ex){
@@ -49,7 +49,7 @@ public class DalHA {
 			return;
 		this.exception = ex;
 		this.increment();
-		if(this.getDBType().equals(DatabaseCategory.SqlServer))
+		if(dbCategory == DatabaseCategory.SqlServer)
 			this.retry = ConfigBeanFactory.getHAConfigBean()
 				.getSqlservercodes().contains(this.exception.getErrorCode());
 		else{
@@ -84,14 +84,6 @@ public class DalHA {
 	
 	public boolean contains(String db){
 		return this.usedKeys.contains(db);
-	}
-	
-	private DatabaseCategory getDBType(){
-		if(this.productName.equalsIgnoreCase("Microsoft SQL Server"))
-			return DatabaseCategory.SqlServer;
-		else{
-			return DatabaseCategory.MySql;
-		}
 	}
 	
 	public String getDB(){

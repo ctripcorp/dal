@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.logging.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.logging.markdown.MarkDownPolicy;
@@ -67,7 +68,7 @@ public class TimeoutAutoMarkdown implements AutoMarkdown{
 
 	public static boolean isTimeOutHint(MarkContext mark){
 		if(mark.getCost() >= ConfigBeanFactory.getTimeoutMarkDownBean().getMinTimeOut() * 1000){
-			if(mark.getDbtype().equalsIgnoreCase("Microsoft SQL Server")){
+			if(mark.getDbCategory() == DatabaseCategory.SqlServer){
 				if(mark.getMsg().startsWith("The query has timed out") || mark.getMsg().startsWith("查询超时")){
 					return true;
 				}

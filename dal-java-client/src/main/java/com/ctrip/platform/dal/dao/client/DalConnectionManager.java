@@ -45,7 +45,7 @@ public class DalConnectionManager {
 			connHolder.applyHints(hints);
 			
 			if(hints.getHA() != null){
-				hints.getHA().setProductName(connHolder.getDatabaseProductName());
+				hints.getHA().setDatabaseCategory(connHolder.getMeta().getDatabaseCategory());
 			}
 
 			realDbName = connHolder.getDatabaseName();
@@ -90,7 +90,7 @@ public class DalConnectionManager {
 			throw new DalException(ErrorCode.MarkdownConnection, allInOneKey);
 		try {	
 			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
-			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, shardId, isMaster, conn);
+			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), shardId, isMaster, conn);
 			return new DalConnection(conn, meta);
 		} catch (Throwable e) {
 			throw new DalException(ErrorCode.CantGetConnection, e, allInOneKey);

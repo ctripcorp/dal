@@ -232,7 +232,7 @@ public class HATest {
 	}
 
 	private void mockRetryThrows(DalHA ha)throws SQLException{
-		if(ha.getProductName().equalsIgnoreCase("mysql")){
+		if(ha.getDatabaseCategory() == DatabaseCategory.MySql){
 			throw createException(1043);
 		}else{
 			throw createException(1043);
@@ -240,7 +240,7 @@ public class HATest {
 	}
 	
 	private void mockFailOverThrow(DalHA ha) throws SQLException{
-		if(ha.getProductName().equalsIgnoreCase("mysql")){
+		if(ha.getDatabaseCategory() == DatabaseCategory.MySql){
 			throw createException(1021);
 		}else{
 			throw createException(2);

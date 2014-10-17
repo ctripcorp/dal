@@ -2,18 +2,20 @@ package com.ctrip.platform.dal.dao.markdown;
 
 import java.sql.SQLException;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+
 public class MarkContext {
 	private String name;
-	private String dbtype;
+	private DatabaseCategory dbCategory;
 	private int errorCode;
 	private String msg;
 	private long cost;
 	private Class<?> exType;
 	private long time;
 	
-	public MarkContext(String name, String type, long cost, SQLException e){
+	public MarkContext(String name, DatabaseCategory dbCategory, long cost, SQLException e){
 		this.name = name;
-		this.dbtype = type;
+		this.dbCategory = dbCategory;
 		this.cost = cost;
 		this.errorCode = e.getErrorCode();
 		this.exType = e.getClass();
@@ -25,8 +27,8 @@ public class MarkContext {
 		return name;
 	}
 
-	public String getDbtype() {
-		return dbtype;
+	public DatabaseCategory getDbCategory() {
+		return dbCategory;
 	}
 
 	public int getErrorCode() {

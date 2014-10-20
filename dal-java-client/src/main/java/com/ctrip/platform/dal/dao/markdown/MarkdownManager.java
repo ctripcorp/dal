@@ -29,8 +29,13 @@ public class MarkdownManager {
 		}
 		Markdown item = ConfigBeanFactory.getMarkdownConfigBean().getMarkItem(key);
 		if(item != null){
-			if(!item.isAuto() || (System.currentTimeMillis() - item.getMarkdownTime()) <=
-					ConfigBeanFactory.getMarkdownConfigBean().getAutoMarkupDelay() * 1000) //mark-down manually
+			// Manual markdeddown can only be markup manually.
+			if(!item.isAuto())
+				return true;
+			
+			// Timeout is not reached
+			if((System.currentTimeMillis() - item.getMarkdownTime()) <=
+					ConfigBeanFactory.getMarkdownConfigBean().getAutoMarkupDelay() * 1000)
 				return true;
 			
 			if(!MarkupManager.isPass(key)){

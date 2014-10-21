@@ -2,37 +2,64 @@ package com.ctrip.platform.appinternals;
 
 import java.io.IOException;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ctrip.platform.appinternals.appinfo.AppInfo;
+import com.ctrip.platform.appinternals.appinfo.AppInfoBuilder;
 import com.ctrip.platform.appinternals.configuration.ConfigBeanBase;
 import com.ctrip.platform.appinternals.configuration.ConfigBeanManager;
 import com.ctrip.platform.appinternals.helpers.Helper;
 import com.ctrip.platform.appinternals.permission.Permission;
 
 public class AppInternalsServlet extends HttpServlet{
-	
+	private Logger logger = LoggerFactory.getLogger(AppInternalsServlet.class);
 	private static final String URL_TEMPLATE = "请输入正确的RUL格式， 格式如下：<br /> http://{host}/[{virtualDir}]/AppInternals/?(.*)";
 	private static final String NOPERMISSION = "Sorry,Your IP Address %s Doesn't Have Read/Write Permission.";
 	private static final String APPINTERNALS = "appinternals";
 	private static final String CONFIGURATION = "configurations";
+	private static final String APPINFOURL = "http://ws.fx.fws.qa.nt.ctripcorp.com/appinfo/appinfo/Send";
 	
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public void init() throws ServletException {
-		String reads = this.getInitParameter("permissions.read");
+	public void init(ServletConfig config) throws ServletException {
+		ServletContext sct = config.getServletContext();
+		AppInfo info = new AppInfo();
+		AppInfoBuilder infoBuilder = new AppInfoBuilder(info);
+		infoBuilder.setVirtualDirectory(sct.getContextPath());
+		infoBuilder.setPhyDirectory(sct.getRealPath("/"));
+		infoBuilder.setStartTime();
+		infoBuilder.setAssemblyInfos(sct.getRealPath("/WEB-INF/lib"));
+		infoBuilder.setAppId();
+		infoBuilder.setDomain(config.getInitParameter("domain"));
+		infoBuilder.setPost(config.getInitParameter("port"));
+		infoBuilder.setIPV4();
+		infoBuilder.setHostName();
+		infoBuilder.setOS();
+		infoBuilder.setIs64BitOS();
+		infoBuilder.setProcessorCount();
+		
+		String reads = config.getInitParameter("permissions.read");
 		String[] tokens = reads.split(",");
 		for (String token : tokens) {
 			Permission.getInstance().addUser(token, 0);
 		}
-		String writes = this.getInitParameter("permissions.write");
+		String writes = config.getInitParameter("permissions.write");
 		tokens = writes.split(",");
 		for (String token : tokens) {
 			Permission.getInstance().addUser(token, 1);
 		}
+	
+        logger.info(infoBuilder.getJsonAppInfo());
+        logger.info(Helper.sendPost(APPINFOURL, infoBuilder.getJsonAppInfo()));
 	}
 	
 	@Override

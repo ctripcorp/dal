@@ -33,14 +33,15 @@
 		        $returnType.get($index) iReturn = Convert.ToString(result);
 #end
 #else	
-if($returnType.get($index).equalsIgnoreCase("int"))
+#if($returnType.get($index).equalsIgnoreCase("int"))
 			    //$returnType.get($index) iReturn = Convert.ToInt32(result);
-if($returnType.get($index).equalsIgnoreCase("long"))
+#elseif($returnType.get($index).equalsIgnoreCase("long"))
 		        //$returnType.get($index) iReturn = Convert.ToInt64(result);
-if($returnType.get($index).equalsIgnoreCase("ulong"))
+#elseif($returnType.get($index).equalsIgnoreCase("ulong"))
 		        //$returnType.get($index) iReturn = Convert.ToUInt64(result);
-if($returnType.get($index).equalsIgnoreCase("string"))
-		        //$returnType.get($index) iReturn = Convert.ToString(result);			    
+#elseif($returnType.get($index).equalsIgnoreCase("string"))
+		        //$returnType.get($index) iReturn = Convert.ToString(result);	
+#end
 #end	
 #end
                 return iReturn;

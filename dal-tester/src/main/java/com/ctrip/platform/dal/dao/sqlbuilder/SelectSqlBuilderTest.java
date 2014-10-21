@@ -27,103 +27,137 @@ public class SelectSqlBuilderTest {
 		
 		int sqlType = Types.INTEGER;
 		Integer paramValue = 1;
-		builder.between("bw", paramValue, paramValue, sqlType);
-		builder.and().betweenNullable("bwNullable", paramValue, 2, sqlType);
-		builder.and().equal("eq", paramValue, sqlType);
-		builder.and().equalNullable("eqNullable", paramValue, sqlType);
-		builder.and().greaterThan("gt", paramValue, sqlType);
-		builder.and().greaterThanNullable("gtNullable", paramValue, sqlType);
-		builder.and().greaterThanEquals("gteq", paramValue, sqlType);
-		builder.and().greaterThanEqualsNullable("gteqNullable", paramValue, sqlType);
-		builder.and().in("inparam", inParam, sqlType);
-		builder.and().inNullable("inNullable", inParam, sqlType);
-		builder.and().isNotNull("notnull");
-		builder.and().isNull("isnull");
-		builder.and().lessThan("less", paramValue, sqlType);
-		builder.and().lessThanNullable("lessNullable", paramValue, sqlType);
-		builder.and().lessThanEquals("lessthan", paramValue, sqlType);
-		builder.and().lessThanEqualsNullable("lessthannullable", paramValue, sqlType);
-		builder.and().like("lik", paramValue, sqlType);
-		builder.and().likeNullable("likNullable", paramValue, sqlType);
-		builder.and().notEqual("notEqual", paramValue, sqlType);
-		builder.and().notEqualNullable("notEqualNullable", paramValue, sqlType);
+		builder.between("bw1", paramValue, paramValue, sqlType);
+		builder.and().betweenNullable("bwNullable1", paramValue, 2, sqlType);
+		builder.and().equal("eq1", paramValue, sqlType);
+		builder.and().equalNullable("eqNullable1", paramValue, sqlType);
+		builder.and().greaterThan("gt1", paramValue, sqlType);
+		builder.and().greaterThanNullable("gtNullable1", paramValue, sqlType);
+		builder.and().greaterThanEquals("gteq1", paramValue, sqlType);
+		builder.and().greaterThanEqualsNullable("gteqNullable1", paramValue, sqlType);
+		builder.and().in("inparam1", inParam, sqlType);
+		builder.and().inNullable("inNullable1", inParam, sqlType);
+		builder.and().isNotNull("notnull1");
+		builder.and().isNull("isnull1");
+		builder.and().lessThan("less1", paramValue, sqlType);
+		builder.and().lessThanNullable("lessNullable1", paramValue, sqlType);
+		builder.and().lessThanEquals("lessThan1", paramValue, sqlType);
+		builder.and().lessThanEqualsNullable("lessThanNullable1", paramValue, sqlType);
+		builder.and().like("like1", paramValue, sqlType);
+		builder.and().likeNullable("likeNullable1", paramValue, sqlType);
+		builder.and().notEqual("notEqual1", paramValue, sqlType);
+		builder.and().notEqualNullable("notEqualNullable1", paramValue, sqlType);
 		
+		paramValue = null;
 		try {
-			paramValue = null;
-			builder.between("bw", paramValue, paramValue, sqlType);
-			builder.and().betweenNullable("bwNullable", paramValue, 2, sqlType);
-			builder.and().equal("eq", paramValue, sqlType);
-			builder.and().equalNullable("eqNullable", paramValue, sqlType);
-			builder.and().greaterThan("gt", paramValue, sqlType);
-			builder.and().greaterThanNullable("gtNullable", paramValue, sqlType);
-			builder.and().greaterThanEquals("gteq", paramValue, sqlType);
-			builder.and().greaterThanEqualsNullable("gteqNullable", paramValue, sqlType);
-			builder.and().in("inparam", inParam, sqlType);
-			builder.and().inNullable("inNullable", inParam, sqlType);
-			builder.and().isNotNull("notnull");
-			builder.and().isNull("isnull");
-			builder.and().lessThan("less", paramValue, sqlType);
-			builder.and().lessThanNullable("lessNullable", paramValue, sqlType);
-			builder.and().lessThanEquals("lessthan", paramValue, sqlType);
-			builder.and().lessThanEqualsNullable("lessthannullable", paramValue, sqlType);
-			builder.and().like("lik", paramValue, sqlType);
-			builder.and().likeNullable("likNullable", paramValue, sqlType);
-			builder.and().notEqual("notEqual", paramValue, sqlType);
-			builder.and().notEqualNullable("notEqualNullable", paramValue, sqlType);
+			builder.between("bw2", paramValue, paramValue, sqlType);
 		} catch (Exception e) {
 			Assert.assertNotNull(e);
 		}
-		
-		inParam = new ArrayList<String>();
-		inParam.add("12");
-		inParam.add(null);
-		inParam.add("12");
-		inParam.add(null);
+		builder.and().betweenNullable("bwNullable2", paramValue, 2, sqlType);
 		try {
-			builder.and().in("inparam", inParam, sqlType);
+			builder.and().equal("eq2", paramValue, sqlType);
 		} catch (Exception e) {
-			Assert.assertEquals("inparam is not support null value.", e.getMessage());
+			Assert.assertNotNull(e);
 		}
-		builder.and().inNullable("inNullable2", inParam, Types.VARCHAR);
+		builder.and().equalNullable("eqNullable2", paramValue, sqlType);
+		try {
+			builder.and().greaterThan("gt2", paramValue, sqlType);
+		} catch (Exception e) {
+			Assert.assertNotNull(e);
+		}
+		builder.and().greaterThanNullable("gtNullable2", paramValue, sqlType);
+		try {
+			builder.and().greaterThanEquals("gteq2", paramValue, sqlType);
+		} catch (Exception e) {
+			Assert.assertNotNull(e);
+		}
+		builder.and().greaterThanEqualsNullable("gteqNullable2", paramValue, sqlType);
+		List<String> inParam2 = new ArrayList<String>();
+		inParam2.add("12");
+		inParam2.add(null);
+		try {
+			builder.and().in("inparam2", inParam2, sqlType);
+		} catch (Exception e) {
+			Assert.assertNotNull(e);
+		}
+		builder.and().inNullable("inNullable2", inParam2, sqlType);
+		try {
+			builder.and().lessThan("less2", paramValue, sqlType);
+		} catch (Exception e) {
+			Assert.assertNotNull(e);
+		}
+		builder.and().lessThanNullable("lessNullable2", paramValue, sqlType);
+		try {
+			builder.and().lessThanEquals("lessthan2", paramValue, sqlType);
+		} catch (Exception e) {
+			Assert.assertNotNull(e);
+		}
+		builder.and().lessThanEqualsNullable("lessThanNullable2", paramValue, sqlType);
+		try {
+			builder.and().like("like2", paramValue, sqlType);
+		} catch (Exception e) {
+			Assert.assertNotNull(e);
+		}
+		builder.and().likeNullable("likeNullable2", paramValue, sqlType);
+		try {
+			builder.and().notEqual("notEqual2", paramValue, sqlType);
+		} catch (Exception e) {
+			Assert.assertNotNull(e);
+		}
+		builder.and().notEqualNullable("notEqualNullable2", paramValue, sqlType);
 		
-		List<Integer> inParam2 = new ArrayList<Integer>();
-		inParam2.add(12);
-		inParam2.add(null);
-		inParam2.add(12);
-		inParam2.add(null);
-		builder.and().inNullable("inNullable3", inParam2, Types.INTEGER);
+		List<String> inParam3 = new ArrayList<String>();
+		inParam3.add("12");
+		inParam3.add(null);
+		inParam3.add("12");
+		inParam3.add(null);
+		try {
+			builder.and().in("inparam3", inParam3, sqlType);
+		} catch (Exception e) {
+			Assert.assertEquals("inparam3 is not support null value.", e.getMessage());
+		}
+		builder.and().inNullable("inNullable3", inParam3, Types.VARCHAR);
 		
-		inParam2 = new ArrayList<Integer>();
-		inParam2.add(null);
-		inParam2.add(null);
-		builder.and().inNullable("inNullable4", inParam2, Types.INTEGER);
+		List<Integer> inParam4 = new ArrayList<Integer>();
+		inParam4.add(12);
+		inParam4.add(null);
+		inParam4.add(12);
+		inParam4.add(null);
+		builder.and().inNullable("inNullable4", inParam4, Types.INTEGER);
 		
+		List<Integer> inParam5 = new ArrayList<Integer>();
+		inParam5.add(null);
+		inParam5.add(null);
+		builder.and().inNullable("inNullable5", inParam5, Types.INTEGER);
 		String expected = "SELECT *, `id` FROM People WHERE "
-				+ "bw BETWEEN ? AND ? "
-				+ "AND  bwNullable BETWEEN ? AND ? "
-				+ "AND  eq = ? "
-				+ "AND  eqNullable = ? "
-				+ "AND  gt > ? "
-				+ "AND  gtNullable > ? "
-				+ "AND  gteq >= ? "
-				+ "AND  gteqNullable >= ? "
-				+ "AND  inparam in ( ?, ? ) "
-				+ "AND  inNullable in ( ?, ? ) "
-				+ "AND  notnull IS NOT NULL "
-				+ "AND  isnull IS NULL "
-				+ "AND  less < ? "
-				+ "AND  lessNullable < ? "
-				+ "AND  lessthan <= ? "
-				+ "AND  lessthannullable <= ? "
-				+ "AND  lik LIKE ? "
-				+ "AND  likNullable LIKE ? "
-				+ "AND  notEqual != ? "
-				+ "AND  notEqualNullable != ? "
-				+ "AND  inNullable2 in ( ?, ? ) "
-				+ "AND  inNullable3 in ( ?, ? )";
-		 Assert.assertEquals(expected, builder.build().trim());
-		 Assert.assertEquals(26, builder.buildParameters().size());
-		 Assert.assertEquals(27, builder.getStatementParameterIndex());
+				+ "bw1 BETWEEN ? AND ? "
+				+ "AND  bwNullable1 BETWEEN ? AND ? "
+				+ "AND  eq1 = ? "
+				+ "AND  eqNullable1 = ? "
+				+ "AND  gt1 > ? "
+				+ "AND  gtNullable1 > ? "
+				+ "AND  gteq1 >= ? "
+				+ "AND  gteqNullable1 >= ? "
+				+ "AND  inparam1 in ( ?, ? ) "
+				+ "AND  inNullable1 in ( ?, ? ) "
+				+ "AND  notnull1 IS NOT NULL "
+				+ "AND  isnull1 IS NULL "
+				+ "AND  less1 < ? "
+				+ "AND  lessNullable1 < ? "
+				+ "AND  lessThan1 <= ? "
+				+ "AND  lessThanNullable1 <= ? "
+				+ "AND  like1 LIKE ? "
+				+ "AND  likeNullable1 LIKE ? "
+				+ "AND  notEqual1 != ? "
+				+ "AND  notEqualNullable1 != ? "
+				+ "AND  inNullable2 in ( ? ) "
+				+ "AND  inNullable3 in ( ?, ? ) "
+				+ "AND  inNullable4 in ( ?, ? )";
+		Assert.assertEquals(expected, builder.build().trim());
+		Assert.assertEquals(27, builder.buildParameters().size());
+		Assert.assertEquals(28, builder.getStatementParameterIndex());
+		 
 	}
 	
 	@Test

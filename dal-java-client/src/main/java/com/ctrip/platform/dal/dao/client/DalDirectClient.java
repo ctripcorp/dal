@@ -51,7 +51,6 @@ public class DalDirectClient implements DalClient {
 				DalWatcher.endConnect();
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
-				preparedStatement.setQueryTimeout(1);
 				DalWatcher.beginExecute();
 				rs = preparedStatement.executeQuery();
 				DalWatcher.endExectue();

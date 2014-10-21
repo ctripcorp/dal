@@ -7,11 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bouncycastle.jce.provider.JDKDSASigner.dsa224;
+import org.apache.commons.lang.StringUtils;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalHA;
+import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DatabaseSet {
 	public static final String SQL_PROVIDER = "sqlProvider";
@@ -160,15 +163,15 @@ public class DatabaseSet {
 		return slaveDbByShard.get(shard);
 	}
 	
-	public String getRandomRealDbName(DalHA ha, String shard, boolean isMaster, boolean isSelect) {
+	public String getRandomRealDbName(DalHA ha, String shard, boolean isMaster, boolean isSelect) throws DalException {
 		return getRandomRealDbName(ha, isMaster, isSelect, getMasterDbs(shard), getSlaveDbs(shard));
 	}
 	
-	public String getRandomRealDbName(DalHA ha, boolean isMaster, boolean isSelect) {
+	public String getRandomRealDbName(DalHA ha, boolean isMaster, boolean isSelect) throws DalException {
 		return getRandomRealDbName(ha, isMaster, isSelect, masterDbs, slaveDbs);
 	}
 	
-	private String getRandomRealDbName(DalHA ha, boolean isMaster, boolean isSelect, List<DataBase> masterCandidates, List<DataBase> slaveCandidates) {
+	private String getRandomRealDbName(DalHA ha, boolean isMaster, boolean isSelect, List<DataBase> masterCandidates, List<DataBase> slaveCandidates) throws DalException {
 		if (isMaster)
 			return getRandomRealDbName(ha, masterCandidates);
 		
@@ -178,15 +181,16 @@ public class DatabaseSet {
 		return getRandomRealDbName(ha, masterCandidates);
 	}
 	
-	private String getRandomRealDbName(DalHA ha, List<DataBase> dbs) {
-		if(ha == null || dbs.size() == 1){
-			int index = (int)(Math.random() * dbs.size());	
-			return dbs.get(index).getConnectionString();
+	private String getRandomRealDbName(DalHA ha, List<DataBase> dbs) throws DalException {
+		List<String> availableDbNames = this.getNotMarkdownDbNames(dbs);
+		if(ha == null || availableDbNames.size() == 1){
+			int index = (int)(Math.random() * availableDbNames.size());	
+			return availableDbNames.get(index);
 		}else{
 			List<String> dbNames = new ArrayList<String>();
-			for (DataBase database : dbs) {
-				if(!ha.contains(database.getConnectionString()))
-					dbNames.add(database.getConnectionString());
+			for (String database : availableDbNames) {
+				if(!ha.contains(database))
+					dbNames.add(database);
 			}
 			if(dbNames.isEmpty()){
 				ha.setOver(true);
@@ -197,5 +201,23 @@ public class DatabaseSet {
 				return dbNames.get(index);
 			}
 		}
+	}
+	
+	private List<String> getNotMarkdownDbNames(List<DataBase> dbs) throws DalException{
+		List<String> dbNames = new ArrayList<String>();
+		List<String> markdownDbNames = new ArrayList<String>();
+		for (DataBase database : dbs) {
+			if(MarkdownManager.isMarkdown(database.getConnectionString())){
+				markdownDbNames.add(database.getConnectionString());
+			}else{
+				dbNames.add(database.getConnectionString());
+			}
+		}
+		if(dbNames.isEmpty()){
+			if(!markdownDbNames.isEmpty())
+				throw new DalException(ErrorCode.MarkdownConnection, StringUtils.join(markdownDbNames, ","));
+		}
+		
+		return dbNames;
 	}
 }

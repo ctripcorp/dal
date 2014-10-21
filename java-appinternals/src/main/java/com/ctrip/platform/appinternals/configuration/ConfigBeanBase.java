@@ -71,7 +71,7 @@ public abstract class ConfigBeanBase{
 		return this.info;
 	}
 	
-	public void set(String fieldName, String val) throws Exception{
+	public synchronized void set(String fieldName, String val) throws Exception{
 		val = null == val ? "" : val; //Default
 		String key = this.aliases.get(fieldName);
 		ConfigName fname = key != null ? this.fields.get(key) : this.fields.get(fieldName);

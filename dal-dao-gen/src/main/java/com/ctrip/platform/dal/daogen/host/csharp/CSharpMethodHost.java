@@ -2,6 +2,8 @@ package com.ctrip.platform.dal.daogen.host.csharp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -82,6 +84,18 @@ public class CSharpMethodHost {
 
 	public String getSql() {
 		return sql;
+	}
+	
+	public String getBuildCudSql() {
+		String temp = sql;
+		String regex = "(?i)In *\\(@\\w+\\)";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher m = pattern.matcher(sql);
+		int index = 0;
+		while(m.find()){
+			temp = temp.replaceFirst(regex, String.format("IN ({%s})", index++));
+		}
+		return temp;
 	}
 	
 	public String getSql(DatabaseCategory databaseCategory) {

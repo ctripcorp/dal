@@ -105,7 +105,8 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 							CSharpMethodHost method = buildFreeSqlMethodHost(ctx, task);
 							if (!_freeSqlPojoHosts.containsKey(task.getPojo_name()) && 
 									method.getPojoName()!=null && !method.getPojoName().isEmpty() &&
-									(!method.isFirstOrSingle() || !method.isSampleType())) {
+									(!method.isFirstOrSingle() || !method.isSampleType()) && 
+									!"update".equalsIgnoreCase(task.getCrud_type())) {
 								CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(ctx, task);
 								if (null != freeSqlPojoHost) {
 									_freeSqlPojoHosts.put(task.getPojo_name(), freeSqlPojoHost);

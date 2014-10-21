@@ -110,7 +110,8 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 
 						if (method.getPojoClassName() != null && 
 								!method.getPojoClassName().isEmpty() &&
-								!_freeSqlPojoHosts.containsKey(method.getPojoClassName())) {
+								!_freeSqlPojoHosts.containsKey(method.getPojoClassName()) && 
+								!"update".equalsIgnoreCase(method.getCrud_type())) {
 
 							List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
 

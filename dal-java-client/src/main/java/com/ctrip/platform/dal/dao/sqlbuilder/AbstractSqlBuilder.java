@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.sqlbuilder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
@@ -350,7 +351,17 @@ public abstract class AbstractSqlBuilder {
 			and = or = false;
 			throw new SQLException(field + " must have more than one value.");
 		}
-		return addInParam(field, paramValues, sqlType);
+		List paramList = new ArrayList();
+		for(int i=0,size=paramValues.size();i<size;i++){
+			if(paramValues.get(i)!=null){
+				paramList.add(paramValues.get(i));
+			}
+		}
+		if(paramList.size()<1){
+			and = or = false;
+			return this;
+		}
+		return addInParam(field, paramList, sqlType);
 	}
 	
 	/**

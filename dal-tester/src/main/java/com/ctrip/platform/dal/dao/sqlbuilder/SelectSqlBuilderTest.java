@@ -14,6 +14,119 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 public class SelectSqlBuilderTest {
 	
 	@Test
+	public void testMySQLWhere() throws SQLException{
+		
+		
+		List<String> inParam = new ArrayList<String>();
+		inParam.add("12");
+		inParam.add("12");
+		
+		SelectSqlBuilder builder = new SelectSqlBuilder("People", DatabaseCategory.MySql, false);
+		
+		builder.select("*","id");
+		
+		int sqlType = Types.INTEGER;
+		Integer paramValue = 1;
+		builder.between("bw", paramValue, paramValue, sqlType);
+		builder.and().betweenNullable("bwNullable", paramValue, 2, sqlType);
+		builder.and().equal("eq", paramValue, sqlType);
+		builder.and().equalNullable("eqNullable", paramValue, sqlType);
+		builder.and().greaterThan("gt", paramValue, sqlType);
+		builder.and().greaterThanNullable("gtNullable", paramValue, sqlType);
+		builder.and().greaterThanEquals("gteq", paramValue, sqlType);
+		builder.and().greaterThanEqualsNullable("gteqNullable", paramValue, sqlType);
+		builder.and().in("inparam", inParam, sqlType);
+		builder.and().inNullable("inNullable", inParam, sqlType);
+		builder.and().isNotNull("notnull");
+		builder.and().isNull("isnull");
+		builder.and().lessThan("less", paramValue, sqlType);
+		builder.and().lessThanNullable("lessNullable", paramValue, sqlType);
+		builder.and().lessThanEquals("lessthan", paramValue, sqlType);
+		builder.and().lessThanEqualsNullable("lessthannullable", paramValue, sqlType);
+		builder.and().like("lik", paramValue, sqlType);
+		builder.and().likeNullable("likNullable", paramValue, sqlType);
+		builder.and().notEqual("notEqual", paramValue, sqlType);
+		builder.and().notEqualNullable("notEqualNullable", paramValue, sqlType);
+		
+		try {
+			paramValue = null;
+			builder.between("bw", paramValue, paramValue, sqlType);
+			builder.and().betweenNullable("bwNullable", paramValue, 2, sqlType);
+			builder.and().equal("eq", paramValue, sqlType);
+			builder.and().equalNullable("eqNullable", paramValue, sqlType);
+			builder.and().greaterThan("gt", paramValue, sqlType);
+			builder.and().greaterThanNullable("gtNullable", paramValue, sqlType);
+			builder.and().greaterThanEquals("gteq", paramValue, sqlType);
+			builder.and().greaterThanEqualsNullable("gteqNullable", paramValue, sqlType);
+			builder.and().in("inparam", inParam, sqlType);
+			builder.and().inNullable("inNullable", inParam, sqlType);
+			builder.and().isNotNull("notnull");
+			builder.and().isNull("isnull");
+			builder.and().lessThan("less", paramValue, sqlType);
+			builder.and().lessThanNullable("lessNullable", paramValue, sqlType);
+			builder.and().lessThanEquals("lessthan", paramValue, sqlType);
+			builder.and().lessThanEqualsNullable("lessthannullable", paramValue, sqlType);
+			builder.and().like("lik", paramValue, sqlType);
+			builder.and().likeNullable("likNullable", paramValue, sqlType);
+			builder.and().notEqual("notEqual", paramValue, sqlType);
+			builder.and().notEqualNullable("notEqualNullable", paramValue, sqlType);
+		} catch (Exception e) {
+			Assert.assertNotNull(e);
+		}
+		
+		inParam = new ArrayList<String>();
+		inParam.add("12");
+		inParam.add(null);
+		inParam.add("12");
+		inParam.add(null);
+		try {
+			builder.and().in("inparam", inParam, sqlType);
+		} catch (Exception e) {
+			Assert.assertEquals("inparam is not support null value.", e.getMessage());
+		}
+		builder.and().inNullable("inNullable2", inParam, Types.VARCHAR);
+		
+		List<Integer> inParam2 = new ArrayList<Integer>();
+		inParam2.add(12);
+		inParam2.add(null);
+		inParam2.add(12);
+		inParam2.add(null);
+		builder.and().inNullable("inNullable3", inParam2, Types.INTEGER);
+		
+		inParam2 = new ArrayList<Integer>();
+		inParam2.add(null);
+		inParam2.add(null);
+		builder.and().inNullable("inNullable4", inParam2, Types.INTEGER);
+		
+		String expected = "SELECT *, `id` FROM People WHERE "
+				+ "bw BETWEEN ? AND ? "
+				+ "AND  bwNullable BETWEEN ? AND ? "
+				+ "AND  eq = ? "
+				+ "AND  eqNullable = ? "
+				+ "AND  gt > ? "
+				+ "AND  gtNullable > ? "
+				+ "AND  gteq >= ? "
+				+ "AND  gteqNullable >= ? "
+				+ "AND  inparam in ( ?, ? ) "
+				+ "AND  inNullable in ( ?, ? ) "
+				+ "AND  notnull IS NOT NULL "
+				+ "AND  isnull IS NULL "
+				+ "AND  less < ? "
+				+ "AND  lessNullable < ? "
+				+ "AND  lessthan <= ? "
+				+ "AND  lessthannullable <= ? "
+				+ "AND  lik LIKE ? "
+				+ "AND  likNullable LIKE ? "
+				+ "AND  notEqual != ? "
+				+ "AND  notEqualNullable != ? "
+				+ "AND  inNullable2 in ( ?, ? ) "
+				+ "AND  inNullable3 in ( ?, ? )";
+		 Assert.assertEquals(expected, builder.build().trim());
+		 Assert.assertEquals(26, builder.buildParameters().size());
+		 Assert.assertEquals(27, builder.getStatementParameterIndex());
+	}
+	
+	@Test
 	public void testMySQL() throws SQLException {
 		List<String> in = new ArrayList<String>();
 		in.add("12");

@@ -23,9 +23,25 @@
 #foreach($s in $returnType)
 #set($index = $velocityCount - 1 )
 #if($index==0)
-		        $returnType.get($index) iReturn = ($returnType.get($index))result;
+#if($returnType.get($index).equalsIgnoreCase("int"))
+			    $returnType.get($index) iReturn = Convert.ToInt32(result);
+#elseif($returnType.get($index).equalsIgnoreCase("long"))
+		        $returnType.get($index) iReturn = Convert.ToInt64(result);
+#elseif($returnType.get($index).equalsIgnoreCase("ulong"))
+		        $returnType.get($index) iReturn = Convert.ToUInt64(result);
+#elseif($returnType.get($index).equalsIgnoreCase("string"))
+		        $returnType.get($index) iReturn = Convert.ToString(result);
+#end
 #else	
-			    //$returnType.get($index) iReturn = ($returnType.get($index))result;
+#if($returnType.get($index).equalsIgnoreCase("int"))
+			    //$returnType.get($index) iReturn = Convert.ToInt32(result);
+#elseif($returnType.get($index).equalsIgnoreCase("long"))
+		        //$returnType.get($index) iReturn = Convert.ToInt64(result);
+#elseif($returnType.get($index).equalsIgnoreCase("ulong"))
+		        //$returnType.get($index) iReturn = Convert.ToUInt64(result);
+#elseif($returnType.get($index).equalsIgnoreCase("string"))
+		        //$returnType.get($index) iReturn = Convert.ToString(result);	
+#end
 #end	
 #end
                 return iReturn;

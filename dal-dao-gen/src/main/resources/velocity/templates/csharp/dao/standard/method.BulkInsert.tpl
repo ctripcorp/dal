@@ -37,7 +37,7 @@
 		{
             try
             {
-                return baseDao.BulkInsert<Person>(personList);
+                return baseDao.BulkInsert<${host.getClassName()}>(${WordUtils.uncapitalize(${host.getClassName()})}List);
             }
             catch (Exception ex)
             {

@@ -134,6 +134,16 @@ public class CSharpParameterHost extends AbstractParameterHost  implements Compa
 		this.name = name;
 	}
 	
+	/**
+	 * 将首字母小写
+	 */
+	public String getNameToFirstLetterLower(){
+		String name = getAlias();
+		char ch = name.charAt(0);
+		ch = Character.toLowerCase(ch);
+		return name.replaceFirst(name.charAt(0)+"", ch+"");
+	}
+	
 	public String getAlias() {
 		return null != this.alias && ! this.alias.isEmpty() ? this.alias : this.name;
 	}

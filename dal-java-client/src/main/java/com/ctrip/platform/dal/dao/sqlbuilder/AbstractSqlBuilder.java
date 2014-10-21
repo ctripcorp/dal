@@ -351,17 +351,17 @@ public abstract class AbstractSqlBuilder {
 			and = or = false;
 			throw new SQLException(field + " must have more than one value.");
 		}
-		List paramList = new ArrayList();
-		for(int i=0,size=paramValues.size();i<size;i++){
-			if(paramValues.get(i)!=null){
-				paramList.add(paramValues.get(i));
+		Iterator<?> ite = paramValues.iterator();
+		while(ite.hasNext()){
+			if(ite.next()==null){
+				ite.remove();
 			}
 		}
-		if(paramList.size()<1){
+		if(paramValues.size()<1){
 			and = or = false;
 			return this;
 		}
-		return addInParam(field, paramList, sqlType);
+		return addInParam(field, paramValues, sqlType);
 	}
 	
 	/**

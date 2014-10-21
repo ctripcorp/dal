@@ -16,7 +16,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -283,6 +282,34 @@ public class DalTableDaoSqlServerTest {
 	}
 	
 	/**
+	 * Test Insert with null or empty parameters
+	 * @throws SQLException
+	 */
+	@Test
+	public void testInsertCheckForData() throws SQLException{
+		int res;
+		ClientTestModel model = null;
+		res = dao.insert(new DalHints(), model);
+		Assert.assertEquals(0, res);
+		
+		ClientTestModel[] models = null;
+		res = dao.insert(new DalHints(), models);
+		Assert.assertEquals(0, res);
+
+		models = new ClientTestModel[0];
+		res = dao.insert(new DalHints(), models);
+		Assert.assertEquals(0, res);
+		
+		List<ClientTestModel> modelList = null;
+		res = dao.insert(new DalHints(), modelList);
+		Assert.assertEquals(0, res);
+		
+		modelList = new ArrayList<>();
+		res = dao.insert(new DalHints(), modelList);
+		Assert.assertEquals(0, res);
+	}
+		
+	/**
 	 * Test Insert multiple entities one by one
 	 * @throws SQLException
 	 */
@@ -451,6 +478,30 @@ public class DalTableDaoSqlServerTest {
 		Assert.assertEquals(4+3, DalTestHelper.getCount(dao));
 	}
 	
+	@Test
+	public void testCombinedInsertCheckForData() throws SQLException{
+		int res;
+		ClientTestModel model = null;
+		res = dao.combinedInsert(new DalHints(), null, model);
+		Assert.assertEquals(0, res);
+		
+		ClientTestModel[] models = null;
+		res = dao.combinedInsert(new DalHints(), null, models);
+		Assert.assertEquals(0, res);
+
+		models = new ClientTestModel[0];
+		res = dao.combinedInsert(new DalHints(), null, models);
+		Assert.assertEquals(0, res);
+		
+		List<ClientTestModel> modelList = null;
+		res = dao.combinedInsert(new DalHints(), null, modelList);
+		Assert.assertEquals(0, res);
+		
+		modelList = new ArrayList<>();
+		res = dao.combinedInsert(new DalHints(), null, modelList);
+		Assert.assertEquals(0, res);
+	}
+
 	/**
 	 * Test Insert multiple entities with one SQL Statement
 	 * @throws SQLException
@@ -472,6 +523,30 @@ public class DalTableDaoSqlServerTest {
 		Assert.assertEquals(4+3, DalTestHelper.getCount(dao));
 	}
 	
+	@Test
+	public void testBatchInsertCheckForData() throws SQLException{
+		int[] res;
+		ClientTestModel model = null;
+		res = dao.batchInsert(new DalHints(), model);
+		Assert.assertArrayEquals(new int[0], res);
+		
+		ClientTestModel[] models = null;
+		res = dao.batchInsert(new DalHints(), models);
+		Assert.assertArrayEquals(new int[0], res);
+
+		models = new ClientTestModel[0];
+		res = dao.batchInsert(new DalHints(), models);
+		Assert.assertArrayEquals(new int[0], res);
+		
+		List<ClientTestModel> modelList = null;
+		res = dao.batchInsert(new DalHints(), modelList);
+		Assert.assertArrayEquals(new int[0], res);
+		
+		modelList = new ArrayList<>();
+		res = dao.batchInsert(new DalHints(), modelList);
+		Assert.assertArrayEquals(new int[0], res);
+	}
+		
 	/**
 	 * Test Batch Insert multiple entities
 	 * @throws SQLException
@@ -507,6 +582,30 @@ public class DalTableDaoSqlServerTest {
 		Assert.assertEquals(4-3, DalTestHelper.getCount(dao));
 	}
 	
+	@Test
+	public void testBatchDeleteCheckForData() throws SQLException{
+		int[] res;
+		ClientTestModel model = null;
+		res = dao.batchDelete(new DalHints(), model);
+		Assert.assertArrayEquals(new int[0], res);
+		
+		ClientTestModel[] models = null;
+		res = dao.batchDelete(new DalHints(), models);
+		Assert.assertArrayEquals(new int[0], res);
+
+		models = new ClientTestModel[0];
+		res = dao.batchDelete(new DalHints(), models);
+		Assert.assertArrayEquals(new int[0], res);
+		
+		List<ClientTestModel> modelList = null;
+		res = dao.batchDelete(new DalHints(), modelList);
+		Assert.assertArrayEquals(new int[0], res);
+		
+		modelList = new ArrayList<>();
+		res = dao.batchDelete(new DalHints(), modelList);
+		Assert.assertArrayEquals(new int[0], res);
+	}
+	
 	/**
 	 * Test batch delete multiple entities
 	 * @throws SQLException
@@ -522,6 +621,30 @@ public class DalTableDaoSqlServerTest {
 		int[] res = dao.batchDelete(new DalHints(), entities);
 //		Assert.assertArrayEquals(new int[]{1,1,1}, res);
 		Assert.assertEquals(1, DalTestHelper.getCount(dao));
+	}
+	
+	@Test
+	public void testUpdateCheckForData() throws SQLException{
+		int res;
+		ClientTestModel model = null;
+		res = dao.update(new DalHints(), model);
+		Assert.assertEquals(0, res);
+		
+		ClientTestModel[] models = null;
+		res = dao.update(new DalHints(), models);
+		Assert.assertEquals(0, res);
+
+		models = new ClientTestModel[0];
+		res = dao.update(new DalHints(), models);
+		Assert.assertEquals(0, res);
+		
+		List<ClientTestModel> modelList = null;
+		res = dao.update(new DalHints(), modelList);
+		Assert.assertEquals(0, res);
+		
+		modelList = new ArrayList<>();
+		res = dao.update(new DalHints(), modelList);
+		Assert.assertEquals(0, res);
 	}
 	
 	/**

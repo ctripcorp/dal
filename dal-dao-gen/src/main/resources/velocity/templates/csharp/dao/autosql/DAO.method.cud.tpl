@@ -12,7 +12,7 @@
             try
             {
                 StatementParameterCollection parameters = new StatementParameterCollection();
-				String sql = "${method.getSql()}";
+				String sql = "${method.getBuildCudSql()}";
 #set($inParams = [])                
 #foreach($p in $method.getParameters())  
 #if($p.isInParameter())

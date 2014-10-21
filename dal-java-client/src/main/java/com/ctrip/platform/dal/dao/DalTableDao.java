@@ -880,7 +880,10 @@ public final class DalTableDao<T> {
 	}
 	
 	private boolean isEmpty(T... daoPojos) {
-		return null == daoPojos || daoPojos.length == 0;
+		if(null == daoPojos)
+			return true;
+		
+		return daoPojos.length == 1 && daoPojos[0] == null;
 	}
 	
 	private List<Map<String, ?>> getPojosFields(List<T> daoPojos) {

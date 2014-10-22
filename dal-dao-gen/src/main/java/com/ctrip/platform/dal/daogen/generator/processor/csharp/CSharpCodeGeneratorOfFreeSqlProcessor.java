@@ -90,8 +90,7 @@ public class CSharpCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
 						context.put("host", host);
 						GenUtils.mergeVelocityContext(context,
 								String.format("%s/Dao/%sDao.cs", mavenLikeDir
-										.getAbsolutePath(), CommonUtils
-										.normalizeVariable(host.getClassName())),
+										.getAbsolutePath(), CommonUtils.normalizeVariable(host.getClassName())),
 								"templates/csharp/dao/freesql/FreeSqlDAO.cs.tpl");
 	
 						GenUtils.mergeVelocityContext(context,

@@ -139,8 +139,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 			temp = SqlBuilder.pagingQuerySql(temp, getDatabaseCategory(task.getAllInOneName()), CurrentLanguage.CSharp);
 			index += 2;
 		}
-		while(m.find())
-    	{
+		while(m.find()){
 			String paramName = m.group(1);
 			inParams.add(paramName.replaceAll("[\\(|\\)|@]", ""));
 			temp = temp.replace(paramName, String.format("({%d}) ", index++));
@@ -152,8 +151,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		if(pojoName.equalsIgnoreCase("简单类型")){
 			method.setPojoName(method.getName().substring(0,1).toUpperCase() + method.getName().substring(1));
 		}else{
-			method.setPojoName(CommonUtils.normalizeVariable(WordUtils
-				.capitalize(task.getPojo_name())));
+			method.setPojoName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getPojo_name())));
 		}
 		method.setScalarType(task.getScalarType());
 		method.setPojoType(task.getPojoType());
@@ -178,7 +176,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		if(ctx.getFreeSqlPojoHosts().containsKey(method.getPojoName())){
 			method.setPojohost(ctx.getFreeSqlPojoHosts().get(method.getPojoName()));
 		}
-		
+		method.setCrud_type(task.getCrud_type());
 		return method;
 	}
 	

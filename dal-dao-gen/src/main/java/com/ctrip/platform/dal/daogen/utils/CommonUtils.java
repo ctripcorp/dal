@@ -14,7 +14,7 @@ public class CommonUtils {
 		log = Logger.getLogger(CommonUtils.class);
 	}
 	public static String normalizeVariable(String variable){
-		return variable.replaceAll("[^A-Za-z0-9()\\[\\]]", "");
+		return variable.replaceAll("[^A-Za-z0-9()\\[\\]_]", "");
 	}
 
 	public static int tryParse(String val, int defaultValue)

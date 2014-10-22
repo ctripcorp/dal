@@ -1,16 +1,11 @@
 package com.ctrip.platform.dal.dao.markdown;
 
-import java.sql.SQLException;
-import java.util.Random;
-
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
-import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class MarkupProcedureTest {
 

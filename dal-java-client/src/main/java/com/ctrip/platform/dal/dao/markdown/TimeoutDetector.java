@@ -16,8 +16,7 @@ import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class TimeoutDetector implements ErrorDetector{
 	private static Logger logger = LoggerFactory.getLogger(TimeoutDetector.class);
-	private Map<String, Data> data = new ConcurrentHashMap<String, Data>();
-	private long latest = 0;
+	private Map<String, DetectorCounter> data = new ConcurrentHashMap<String, DetectorCounter>();
 	
 	/**
 	 * This method will be invoked by one thread.
@@ -26,16 +25,17 @@ public class TimeoutDetector implements ErrorDetector{
 	public void detect(ErrorContext ctx) {
 		MarkDownInfo info = new MarkDownInfo(ctx.getName(), MarkDownPolicy.TIMEOUT,
 				ConfigBeanFactory.getTimeoutMarkDownBean().getSamplingDuration());
+		long duration = ConfigBeanFactory.getTimeoutMarkDownBean().getSamplingDuration() * 1000;
 		if(!data.containsKey(ctx.getName()))
-			data.put(ctx.getName(), new Data());
-		Data dt = data.get(ctx.getName());
+			data.put(ctx.getName(), new DetectorCounter(duration));
+		DetectorCounter dt = data.get(ctx.getName());
 		if(isTimeOutException(ctx)){
-			dt.incrementAndGetHints();
+			dt.incrementHints();
 			info.setStatus("fail");
 		}else{
 			info.setStatus("total");
 		}
-		dt.incrementAndGetRequestTimes();
+		dt.incrementRequest();
 
 		if(dt.getHints() >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorCountBaseLine()){
 			info.setReason(MarkDownReason.ERRORCOUNT);
@@ -52,15 +52,14 @@ public class TimeoutDetector implements ErrorDetector{
 				return;
 			}
 		}
-		this.removeOverdueData(ctx.getName(), ctx.getTime());
 	}
 	
-	private void markdown(String key,Data dt){
+	private void markdown(String key, DetectorCounter dt){
 		if(ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown()){
 			logger.info("Mark-Donw: " + MarkupManager.getMarkupInfo(key));
 			ConfigBeanFactory.getMarkdownConfigBean().markdown(key);
 		}
-		dt.clear();
+		dt.reset();
 	}
 
 	public static boolean isTimeOutException(ErrorContext ctx){
@@ -76,40 +75,5 @@ public class TimeoutDetector implements ErrorDetector{
 			}
 		}
 		return false;
-	}
-	
-	private void removeOverdueData(String key, long time){
-		if(time > this.latest)
-			this.latest = time;
-		if((System.currentTimeMillis() - this.latest) > 
-			(ConfigBeanFactory.getTimeoutMarkDownBean().getSamplingDuration() * 1000)){
-			this.data.get(key).clear();
-		}
-	}
-
-	private static class Data{
-		private int requestTimes = 0;
-		private int hints = 0;
-		
-		public int incrementAndGetRequestTimes(){
-			return this.requestTimes ++;
-		}
-		
-		public int incrementAndGetHints(){
-			return this.hints ++;
-		}
-		
-		public int getRequestTimes(){
-			return this.requestTimes;
-		}
-		
-		public int getHints(){
-			return this.hints;
-		}
-		
-		public void clear(){
-			this.requestTimes = 0;
-			this.hints = 0;
-		}
 	}
 }

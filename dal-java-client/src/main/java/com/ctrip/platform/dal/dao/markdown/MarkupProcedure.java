@@ -41,13 +41,22 @@ public class MarkupProcedure {
 	public synchronized void rollback() {
 		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
 				.getAutoMarkUpSchedule();
+		if(this.nextPhaseIndex >= 1){
+			this.phase = new MarkupPhase(schedules[this.nextPhaseIndex - 1]);
+		}
 		if(this.nextPhaseIndex > 1){
 			this.nextPhaseIndex = this.nextPhaseIndex - 1;
 		}
-		this.phase = new MarkupPhase(schedules[this.nextPhaseIndex]);
 	}
 	
-
+	public int getNextPhaseIndex(){
+		return this.nextPhaseIndex;
+	}
+	
+	public MarkupPhase getCurrentPhase(){
+		return this.phase;
+	}
+	
 	public String toString() {
 		return String.format("total:%s--loop:%s", this.phase.getTotal(), this.nextPhaseIndex);
 	}

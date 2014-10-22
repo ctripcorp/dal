@@ -32,7 +32,7 @@ public class MarkupManager {
 			markups.remove(key);
 	}
 	
-	private static MarkupProcedure getMarkup(String key){
+	public static MarkupProcedure getMarkup(String key){
 		if(!markups.containsKey(key))
 			markups.put(key, new MarkupProcedure(key));
 		return markups.get(key);

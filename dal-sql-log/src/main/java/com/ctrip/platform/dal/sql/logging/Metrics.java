@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.sql.logging;
 import com.ctrip.framework.clogging.agent.metrics.IMetric;
 import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 import com.ctrip.platform.dal.logging.markdown.MarkDownInfo;
+import com.ctrip.platform.dal.logging.markdup.MarkupInfo;
 import com.ctrip.platform.dal.logging.sql.OptInfo;
 import com.ctrip.platform.dal.logging.sql.SQLInfo;
 
@@ -14,6 +15,10 @@ public class Metrics {
 	
 	public static void report(MarkDownInfo info, long value){
 		metric.log(MarkDownInfo.KEY, value, info.toTag());
+	}
+	
+	public static void report(MarkupInfo info, int value){
+		metric.log(MarkupInfo.KEY, value, info.toTag());
 	}
 	
 	public static void success(LogEntry entry, long duration) {

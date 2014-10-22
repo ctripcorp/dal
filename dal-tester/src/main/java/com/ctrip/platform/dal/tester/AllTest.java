@@ -14,6 +14,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	com.ctrip.platform.dal.tester.shard.AllTest.class,
 	com.ctrip.platform.dal.dao.helpers.DalColumnMapRowMapperTest.class,
 	com.ctrip.platform.dal.dao.helpers.DalCustomRowMapperTest.class,
-	com.ctrip.platform.dal.dao.ha.HATest.class
+	com.ctrip.platform.dal.dao.ha.HATest.class,
+	com.ctrip.platform.dal.dao.markdown.AllTests.class
 })
 public class AllTest {}

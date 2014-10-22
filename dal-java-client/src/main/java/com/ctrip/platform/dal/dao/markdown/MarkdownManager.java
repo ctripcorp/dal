@@ -51,10 +51,6 @@ public class MarkdownManager {
 		return false;
 	}
 
-	public static void shutdown() {
-		manager.shutdown();
-	}
-
 	public static void detect(DalConnection conn, long start, Throwable e) {
 		long cost = System.currentTimeMillis() - start;
 		if (conn != null && conn.getMeta() != null && e instanceof SQLException) {

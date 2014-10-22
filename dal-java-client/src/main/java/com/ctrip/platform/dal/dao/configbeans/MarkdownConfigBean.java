@@ -75,7 +75,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 			public void end(Object oldVal, String newVal) throws Exception {
 				if(newVal == null || newVal.isEmpty())
 					throw new Exception();
-				String[] tokens = newVal.split(",");
+				String[] tokens = newVal.trim().split(",");
 				int[] temp = new int[tokens.length];
 				for (int i = 0; i < tokens.length; i++) {
 					temp[i] = Integer.parseInt(tokens[i]);
@@ -132,7 +132,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	
 	public synchronized boolean markdown(String dbname){
 		if(!this.marks.containsKey(dbname)){
-			this.marks.put(dbname, new Markdown(true, dbname));
+			this.marks.put(dbname, new Markdown(true));
 			this.dbMarkdown = StringUtils.join(this.getMarks(), ",");
 		}			
 		return this.marks.containsKey(dbname);
@@ -163,7 +163,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 			//The new value need to be marked up on auto mark down
 			if(!this.marks.containsKey(token))
 				this.marks.remove(token);
-			temp.put(token, new Markdown(false, token));
+			temp.put(token, new Markdown(false));
 		}
 		marks = temp;
 		}catch(Exception e){

@@ -26,7 +26,7 @@
             $.each(data.tableViewSpTasks, function (index, value) {
                 value.recid = allTasks.length + 1;
                 value.task_type = "table_view_sp";
-                value.task_desc = "表/视图/存储过程";
+                value.task_desc = "标准DAO";
                 if (value.table_names != null && value.table_names != "") {
                     value.sql_content = value.table_names;
                 }

@@ -974,6 +974,11 @@
         }
         current.hide();
         $(".step2-3-2").show();
+        if($("#sql_style").val()=="csharp"){
+            $("#free_sql_scalarType option[value='Single']").hide();
+        }else{
+            $("#free_sql_scalarType option[value='Single']").show();
+        }
     };
 
     var existKeyword_Nolock = function(){

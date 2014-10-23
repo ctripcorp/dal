@@ -18,6 +18,10 @@ public class TimeoutDetector implements ErrorDetector{
 	private static Logger logger = LoggerFactory.getLogger(TimeoutDetector.class);
 	private Map<String, DetectorCounter> data = new ConcurrentHashMap<String, DetectorCounter>();
 	
+	static{
+		ConfigBeanFactory.getTimeoutMarkDownBean().setMinTimeOut(1);
+	}
+	
 	/**
 	 * This method will be invoked by one thread.
 	 */

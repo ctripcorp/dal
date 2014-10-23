@@ -33,10 +33,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	private volatile String alldbs = "";
 	
 	@BeanMeta(alias = "AutoMarkUpSchedule")
-	private volatile String markUpSchedule = "1, 3, 5";
-	
-	@BeanMeta(alias = "AutoMarkupFailureThreshold")
-	private volatile float autoMarkupFailureThreshold = 0.05f;
+	private volatile String markUpSchedule = "1,3,5";
 	
 	@BeanMeta(alias = "AutoMarkupDelay")
 	private volatile int autoMarkupDelay = 60;
@@ -209,13 +206,5 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 
 	public int[] getAutoMarkUpSchedule() {
 		return autoMarkUpSchedule;
-	}
-
-	public float getAutoMarkupFailureThreshold() {
-		return autoMarkupFailureThreshold;
-	}
-
-	public void setAutoMarkupFailureThreshold(float autoMarkupFailureThreshold) {
-		this.autoMarkupFailureThreshold = autoMarkupFailureThreshold;
 	}
 }

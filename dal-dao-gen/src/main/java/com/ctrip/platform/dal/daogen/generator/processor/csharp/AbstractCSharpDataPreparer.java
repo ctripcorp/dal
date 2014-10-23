@@ -317,7 +317,7 @@ public class AbstractCSharpDataPreparer{
 				}
 			}
 			List<CSharpParameterHost> whereParams = buildMethodParameterHost4SqlConditin(builder, allColumns);
-			method.setParameters(buildSqlParamName(whereParams, method.getSql()));
+			parameters.addAll(buildSqlParamName(whereParams, method.getSql()));
 			
 			method.setParameters(parameters);
 			methods.add(method);

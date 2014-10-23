@@ -34,6 +34,9 @@ public class CSharpParameterHost extends AbstractParameterHost  implements Compa
 	
 	private ConditionType conditionType;
 	
+	//sql语句中以@开头的参数名称
+	private String sqlParamName;
+	
 	public CSharpParameterHost(){ }
 	
 	public CSharpParameterHost(CSharpParameterHost host) {
@@ -176,6 +179,14 @@ public class CSharpParameterHost extends AbstractParameterHost  implements Compa
 		this.type = type;
 	}
 	
+	public String getSqlParamName() {
+		return sqlParamName;
+	}
+
+	public void setSqlParamName(String sqlParamName) {
+		this.sqlParamName = sqlParamName;
+	}
+
 	@Override
 	public String toString() {
 		return this.getName().toString();

@@ -2,9 +2,11 @@ package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -95,7 +97,7 @@ public class AbstractCSharpDataPreparer{
 				_sqlBuilders, tableViewSp.getAllInOneName(), table);
 
 		List<CSharpMethodHost> methods = buildSqlBuilderMethodHost(allColumns, currentTableBuilders);
-
+		
 		CSharpTableHost tableHost = new CSharpTableHost();
 		tableHost.setExtraMethods(methods);
 		tableHost.setNameSpace(ctx.getNamespace());
@@ -202,7 +204,9 @@ public class AbstractCSharpDataPreparer{
 			}
 			method.setFields(paramHosts);
 			
-			method.setParameters(buildMethodParameterHost4SqlConditin(builder, allColumns));
+			List<CSharpParameterHost> whereParams = buildMethodParameterHost4SqlConditin(builder, allColumns);
+			method.setParameters(buildSqlParamName(whereParams, method.getSql()));
+			
 			String orderBy = builder.getOrderby();
 			if(orderBy!=null && !orderBy.trim().isEmpty() && orderBy.indexOf("-1,")!=0){
 				String []str = orderBy.split(",");
@@ -213,6 +217,22 @@ public class AbstractCSharpDataPreparer{
 			methods.add(method);
 		}
 		return methods;
+	}
+	
+	private List<CSharpParameterHost> buildSqlParamName(List<CSharpParameterHost> whereParams, String sql){
+		Pattern ptn = Pattern.compile("@([^\\s]+)", Pattern.CASE_INSENSITIVE);
+		Matcher mt = ptn.matcher(sql);
+		Queue<String> sqlParamQueue = new LinkedList<String>();
+		while(mt.find()){
+			sqlParamQueue.add(mt.group(1));
+		}
+		for(CSharpParameterHost param : whereParams){
+			String sqlParamName = sqlParamQueue.poll();
+			if(sqlParamName==null)
+				sqlParamName = param.getAlias();
+			param.setSqlParamName(sqlParamName);
+		}
+		return whereParams;
 	}
 	
 	private List<CSharpMethodHost> buildDeleteMethodHosts(List<CSharpParameterHost> allColumns,
@@ -230,7 +250,8 @@ public class AbstractCSharpDataPreparer{
 			method.setScalarType(builder.getScalarType());
 			method.setPaging(builder.isPagination());
 			
-			method.setParameters(buildMethodParameterHost4SqlConditin(builder, allColumns));
+			List<CSharpParameterHost> whereParams = buildMethodParameterHost4SqlConditin(builder, allColumns);
+			method.setParameters(buildSqlParamName(whereParams, method.getSql()));
 			methods.add(method);
 		}
 		return methods;
@@ -295,7 +316,8 @@ public class AbstractCSharpDataPreparer{
 					}
 				}
 			}
-			parameters.addAll(buildMethodParameterHost4SqlConditin(builder, allColumns));
+			List<CSharpParameterHost> whereParams = buildMethodParameterHost4SqlConditin(builder, allColumns);
+			method.setParameters(buildSqlParamName(whereParams, method.getSql()));
 			
 			method.setParameters(parameters);
 			methods.add(method);

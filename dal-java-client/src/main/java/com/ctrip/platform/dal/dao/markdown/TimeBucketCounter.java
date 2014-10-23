@@ -32,20 +32,48 @@ public class TimeBucketCounter {
 		}
 		long timePassed = now - bucketStart;
 		
-		//[0][1][2][@3] Restart counting
-		if(timePassed > duration + bucketInterval) {
+		//[0][*1][2][@3] Restart counting
+		if(timePassed > duration) {
 			counters[0] = 0;
 			counters[1] = 0;
 			bucketStart = now;
-		}else //[0][1][@2][3] Moving bucket forward
-		if(timePassed > duration) {
-			counters[1] = counters[0];
-			counters[0] = 0;
-			bucketStart += bucketInterval;
-		}else //[0][@1][2][3] Moving bucket forward
+			return;
+		}
+		
+		//[0][*1][@2][3] Moving bucket forward
 		if(timePassed > bucketInterval) {
 			counters[1] = counters[0];
 			counters[0] = 0;
-		}// Otherwise, remain here
+			bucketStart += bucketInterval;
+			return;
+		}
+		// Otherwise, remain here
+	}
+	
+	public static void main(String[] args) {
+		final TimeBucketCounter c = new TimeBucketCounter(1000 * 10);
+		try{
+			new Thread(){
+				public void run() {
+					while(true) {
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						System.out.println(String.format("%d [%d][%d]", c.getCount(), c.counters[0], c.counters[1]));
+					}
+				}
+			}.start();
+			
+			while(true) {
+				Thread.sleep(1000);
+				c.increase();
+			}
+		}catch(Throwable e)
+		{
+			
+		}
 	}
 }

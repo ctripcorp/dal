@@ -32,16 +32,20 @@ public class TimeBucketCounter {
 		}
 		long timePassed = now - bucketStart;
 		
-		// Restart counting
-		if(timePassed > duration) {
+		//[0][1][2][@3] Restart counting
+		if(timePassed > duration + bucketInterval) {
 			counters[0] = 0;
 			counters[1] = 0;
 			bucketStart = now;
-		}else //Moving bucket forward
-		if(timePassed > bucketInterval) {
+		}else //[0][1][@2][3] Moving bucket forward
+		if(timePassed > duration) {
 			counters[1] = counters[0];
 			counters[0] = 0;
 			bucketStart += bucketInterval;
+		}else //[0][@1][2][3] Moving bucket forward
+		if(timePassed > bucketInterval) {
+			counters[1] = counters[0];
+			counters[0] = 0;
 		}// Otherwise, remain here
 	}
 }

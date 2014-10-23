@@ -180,7 +180,10 @@ public class CSharpParameterHost extends AbstractParameterHost  implements Compa
 	}
 	
 	public String getSqlParamName() {
-		return sqlParamName;
+		if(sqlParamName!=null && !"".equals(sqlParamName))
+			return sqlParamName;
+		else
+			return getAlias();
 	}
 
 	public void setSqlParamName(String sqlParamName) {

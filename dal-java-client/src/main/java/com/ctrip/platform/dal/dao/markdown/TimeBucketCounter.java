@@ -4,7 +4,6 @@ public class TimeBucketCounter {
 	private long duration;
 	private long bucketInterval;
 	private long bucketStart;
-	private long count;
 	private long[] counters = new long[2];
 	
 	public TimeBucketCounter(long duration) {
@@ -16,12 +15,11 @@ public class TimeBucketCounter {
 	public void increase() {
 		checkBucket();
 		counters[0]++;
-		this.count = counters[0] + counters[1];
 	}
 	
 	public long getCount() {
 		checkBucket();
-		return this.count;
+		return counters[0] + counters[1];
 	}
 	
 	private void checkBucket() {
@@ -55,6 +53,7 @@ public class TimeBucketCounter {
 		try{
 			new Thread(){
 				public void run() {
+					int timer = 0;
 					while(true) {
 						try {
 							Thread.sleep(1000);
@@ -62,14 +61,19 @@ public class TimeBucketCounter {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						System.out.println(String.format("%d [%d][%d]", c.getCount(), c.counters[0], c.counters[1]));
+						System.out.println(String.format("%d -- %d [%d][%d]", timer++, c.getCount(), c.counters[0], c.counters[1]));
 					}
 				}
 			}.start();
 			
+			int count = 0;
+			boolean start = true;
 			while(true) {
 				Thread.sleep(1000);
-				c.increase();
+				if(start)
+					c.increase();
+				if(count++%12 == 0)
+					start=!start;
 			}
 		}catch(Throwable e)
 		{

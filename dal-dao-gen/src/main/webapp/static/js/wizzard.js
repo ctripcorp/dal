@@ -493,6 +493,15 @@
     };
 
     var step2_1_2 = function(){
+        $("#error_msg").empty();
+        var api_list = new Array();
+        $.each($(".step2-1-2 input:checked"), function(index,value){
+            api_list.push($(value).attr("id"));
+        });
+        if(api_list.length<1){
+            $("#error_msg").text("请选择至少一个API！");
+            return;
+        }
         window.ajaxutil.post_task();
     };
 

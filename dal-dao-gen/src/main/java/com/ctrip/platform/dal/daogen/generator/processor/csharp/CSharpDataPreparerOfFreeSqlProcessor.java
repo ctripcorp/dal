@@ -2,12 +2,14 @@ package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -155,11 +157,23 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		}
 		method.setScalarType(task.getScalarType());
 		method.setPojoType(task.getPojoType());
+		
+		Pattern ptn = Pattern.compile("@([^\\s]+)", Pattern.CASE_INSENSITIVE);
+		Matcher mt = ptn.matcher(method.getSql());
+		Queue<String> sqlParamQueue = new LinkedList<String>();
+		while(mt.find()){
+			sqlParamQueue.add(mt.group(1));
+		}
+		
 		List<CSharpParameterHost> params = new ArrayList<CSharpParameterHost>();
 		for (String param : StringUtils.split(task.getParameters(), ";")) {
 			String[] splitedParam = StringUtils.split(param, ",");
 			CSharpParameterHost p = new CSharpParameterHost();
 			p.setName(splitedParam[0]);
+			String sqlParamName = sqlParamQueue.poll();
+			if(sqlParamName==null)
+				sqlParamName = splitedParam[0];
+			p.setSqlParamName(sqlParamName);
 			p.setInParameter(inParams.contains(p.getName()));
 			p.setDbType(DbType.getDbTypeFromJdbcType(Integer.valueOf(splitedParam[1])));
 			p.setType(DbType.getCSharpType(p.getDbType()));

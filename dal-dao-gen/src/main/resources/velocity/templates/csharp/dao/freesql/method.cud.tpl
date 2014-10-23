@@ -7,7 +7,7 @@
         /// <param name="${WordUtils.uncapitalize($p.getName())}"></param>
 #end
         /// <returns>影响的行数</returns> 
-		public int ${method.getName()} (#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getName())}#if($foreach.count != $method.getParameters().size()),#end#end)
+		public int ${method.getName()} (${method.getParameterDeclaration()})
 		{
 			try
 			{
@@ -18,7 +18,7 @@
 #if($p.isInParameter())
 #set($success = $inParams.add($p))
 #else
-                parameters.Add(new StatementParameter{ Name = "@${p.getName()}", Direction = ParameterDirection.Input, DbType = DbType.${p.getDbType()}, Value =${WordUtils.uncapitalize($p.getName())} });
+                parameters.Add(new StatementParameter{ Name = "@${p.getSqlParamName()}", Direction = ParameterDirection.Input, DbType = DbType.${p.getDbType()}, Value =${WordUtils.uncapitalize($p.getName())} });
 #end
 #end
 #if($inParams.size() > 0)

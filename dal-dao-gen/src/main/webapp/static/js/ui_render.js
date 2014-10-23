@@ -377,9 +377,14 @@
                 }, {
                     field: 'comment',
                     caption: '方法描述',
-                    size: '25%',
+                    size: '20%',
                     resizable:true
                 }, {
+                    field: 'sql_style',
+                    caption: 'SQL风格',
+                    size: '5%',
+                    resizable:true
+                },{
                     field: 'update_user_no',
                     caption: '最后修改User',
                     size: '10%',

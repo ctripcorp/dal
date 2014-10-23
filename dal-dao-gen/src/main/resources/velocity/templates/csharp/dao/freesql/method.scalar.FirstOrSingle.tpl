@@ -1,9 +1,9 @@
 #foreach($method in $host.getMethods())
 #if($method.isFirstOrSingle() && $method.getCrud_type()!="update")
 #if($method.isSampleType())
-		public object ${method.getName()} (#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getName())}#if($foreach.count != $method.getParameters().size()),#end#end)
+		public object ${method.getName()} (${method.getParameterDeclaration()})
 #else
-		public ${method.getPojoName()} ${method.getName()} (#foreach($p in $method.getParameters())#if($p.isInParameter())List<${p.getType()}>#{else}${p.getType()}#end ${WordUtils.uncapitalize($p.getName())}#if($foreach.count != $method.getParameters().size()),#end#end)
+		public ${method.getPojoName()} ${method.getName()} (${method.getParameterDeclaration()})
 #end
 		{
 			try

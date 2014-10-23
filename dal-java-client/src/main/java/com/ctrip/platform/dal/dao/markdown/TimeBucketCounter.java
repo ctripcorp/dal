@@ -4,7 +4,8 @@ public class TimeBucketCounter {
 	private long duration;
 	private long bucketInterval;
 	private long bucketStart;
-	private long[] counters = new long[2]; 
+	private long count;
+	private long[] counters = new long[2];
 	
 	public TimeBucketCounter(long duration) {
 		this.duration = duration;
@@ -15,17 +16,12 @@ public class TimeBucketCounter {
 	public void increase() {
 		checkBucket();
 		counters[0]++;
+		this.count = counters[0] + counters[1];
 	}
 	
 	public long getCount() {
 		checkBucket();
-		return counters[0] + counters[1];
-	}
-	
-	public void reset(){
-		bucketStart = System.currentTimeMillis();
-		counters[0] = 0;
-		counters[1] = 0;
+		return this.count;
 	}
 	
 	private void checkBucket() {
@@ -40,13 +36,12 @@ public class TimeBucketCounter {
 		if(timePassed > duration) {
 			counters[0] = 0;
 			counters[1] = 0;
-			//bucketStart = now;
+			bucketStart = now;
 		}else //Moving bucket forward
 		if(timePassed > bucketInterval) {
 			counters[1] = counters[0];
 			counters[0] = 0;
-			//bucketStart += bucketInterval;
+			bucketStart += bucketInterval;
 		}// Otherwise, remain here
-		bucketStart = now;
 	}
 }

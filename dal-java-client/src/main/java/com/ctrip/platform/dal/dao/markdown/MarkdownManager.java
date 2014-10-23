@@ -81,4 +81,8 @@ public class MarkdownManager {
 			}
 		}
 	}
+	
+	public static String getDebugInfo(String key){
+		return ((TimeoutDetector)detectors.get(0)).toDebugInfo(key);
+	}
 }

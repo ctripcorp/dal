@@ -26,44 +26,43 @@ public class TimeoutDetector implements ErrorDetector{
 	 * This method will be invoked by one thread.
 	 */
 	@Override
-	public void detect(ErrorContext ctx) {
-		MarkDownInfo info = new MarkDownInfo(ctx.getName(), MarkDownPolicy.TIMEOUT,
-				ConfigBeanFactory.getTimeoutMarkDownBean().getSamplingDuration());
+	public void detect(ErrorContext ctx) {	
 		long duration = ConfigBeanFactory.getTimeoutMarkDownBean().getSamplingDuration() * 1000;
 		if(!data.containsKey(ctx.getName()))
 			data.put(ctx.getName(), new DetectorCounter(duration));
 		DetectorCounter dt = data.get(ctx.getName());
 		if(isTimeOutException(ctx)){
 			dt.incrementHints();
-			info.setStatus("fail");
-		}else{
-			info.setStatus("total");
 		}
 		dt.incrementRequest();
-
+		
 		if(dt.getHints() >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorCountBaseLine()){
-			info.setReason(MarkDownReason.ERRORCOUNT);
-			Metrics.report(info, dt.getRequestTimes());
-			this.markdown(ctx.getName(), dt);	
-			return;
-		}
-		if(dt.getRequestTimes() >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercentBaseLine()){
+			this.markdown(ctx.getName(), dt, MarkDownReason.ERRORCOUNT);
+		}else if(dt.getRequestTimes() >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercentBaseLine()){
 			float percent = (dt.getHints() + 0.0f) /dt.getRequestTimes();
 			if(percent >= ConfigBeanFactory.getTimeoutMarkDownBean().getErrorPercent()){
-				info.setReason(MarkDownReason.ERRORPERCENT);
-				Metrics.report(info, dt.getHints());
-				this.markdown(ctx.getName(), dt);
-				return;
+				this.markdown(ctx.getName(), dt, MarkDownReason.ERRORPERCENT);
 			}
 		}
 	}
 	
-	private void markdown(String key, DetectorCounter dt){
+	private void markdown(String key, DetectorCounter dc, MarkDownReason reason){
 		if(ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown()){
 			logger.info("Mark-Donw: " + MarkupManager.getMarkupInfo(key));
 			ConfigBeanFactory.getMarkdownConfigBean().markdown(key);
 		}
-		dt.reset();
+		MarkDownInfo info = new MarkDownInfo(key, MarkDownPolicy.TIMEOUT, dc.getDuration());
+		
+		info.setReason(reason);	
+		info.setStatus("Total");
+		Metrics.report(info, dc.getRequestTimes());
+		info.setStatus("Fail");
+		Metrics.report(info, dc.getHints());
+	}
+	
+	public String toDebugInfo(String key) {
+		return String.format("request:%s--hints:%s", 
+				data.get(key).getRequestTimes(), data.get(key).getHints());
 	}
 
 	public static boolean isTimeOutException(ErrorContext ctx){

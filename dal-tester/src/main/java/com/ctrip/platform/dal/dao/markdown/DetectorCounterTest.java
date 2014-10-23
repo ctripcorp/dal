@@ -10,8 +10,9 @@ public class DetectorCounterTest {
 	public void countCorrectTest() {
 		DetectorCounter counter = new DetectorCounter(1000);
 		for (int i = 0; i < 10; i++) {
-			if(i % 2 == 0)
+			if(i % 2 == 0){
 				counter.incrementHints();
+			}
 			counter.incrementRequest();
 		}
 		
@@ -26,7 +27,7 @@ public class DetectorCounterTest {
 			if(i == 5){
 				Thread.sleep(510);
 			}
-			if(i == 9){
+			if(i == 8){
 				Thread.sleep(510);
 			}
 			if(i % 2 == 0)
@@ -34,8 +35,8 @@ public class DetectorCounterTest {
 			counter.incrementRequest();
 		}
 		
-		Assert.assertEquals(2, counter.getHints());
-		Assert.assertEquals(5, counter.getRequestTimes());
+		Assert.assertEquals(2, counter.getHints()); //([8],[6])
+		Assert.assertEquals(5, counter.getRequestTimes());//([8,9],[5,6,7])
 	}
 	
 	@Test
@@ -49,7 +50,14 @@ public class DetectorCounterTest {
 		
 		Thread.sleep(1001);
 		
-		Assert.assertEquals(0, counter.getHints());
-		Assert.assertEquals(0, counter.getRequestTimes());
+		Assert.assertEquals(5, counter.getHints());
+		Assert.assertEquals(10, counter.getRequestTimes());
+		
+		counter.incrementHints();
+		counter.incrementRequest();
+		
+		Assert.assertEquals(1, counter.getHints());
+		Assert.assertEquals(1, counter.getRequestTimes());
+		
 	}
 }

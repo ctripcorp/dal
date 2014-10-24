@@ -14,13 +14,13 @@ public class TimeoutMarkDownBean extends ConfigBeanBase{
 	@BeanMeta(alias = "SamplingDuration")
     private volatile int samplingDuration = 60;
 	@BeanMeta(alias = "TimeoutThreshold")
-	private volatile int minTimeOut = 1;
+	private volatile int timeoutThreshold = 1;
 	@BeanMeta(alias = "ErrorCountThreshold")
-    private volatile int errorCountBaseLine = 1000;
+    private volatile int errorCountThreshold = 1000;
 	@BeanMeta(alias = "ErrorPercentThreshold")
-    private volatile float errorPercent = 0.8f;
+    private volatile float errorPercentThreshold = 0.8f;
 	@BeanMeta(alias = "ErrorPercentReferCount")
-	private volatile int errorPercentBaseLine = 200;
+	private volatile int errorPercentReferCount = 200;
 	
 	@BeanMeta(alias = "MySqlErrorCodes")
     private String mySqlErrorCodes = "0";
@@ -71,17 +71,17 @@ public class TimeoutMarkDownBean extends ConfigBeanBase{
 	public void setSamplingDuration(int samplingDuration) {
 		this.samplingDuration = samplingDuration;
 	}
-	public int getErrorCountBaseLine() {
-		return errorCountBaseLine;
+	public int getErrorCountThreshold() {
+		return errorCountThreshold;
 	}
-	public void setErrorCountBaseLine(int errorCountBaseLine) {
-		this.errorCountBaseLine = errorCountBaseLine;
+	public void setErrorCountThreshold(int errorCountBaseLine) {
+		this.errorCountThreshold = errorCountBaseLine;
 	}
-	public float getErrorPercent() {
-		return errorPercent;
+	public float getErrorPercentThreshold() {
+		return errorPercentThreshold;
 	}
-	public void setErrorPercent(float errorPercent) {
-		this.errorPercent = errorPercent;
+	public void setErrorPercentThreshold(float errorPercent) {
+		this.errorPercentThreshold = errorPercent;
 	}
 	public String getMySqlErrorCodes() {
 		return mySqlErrorCodes;
@@ -89,11 +89,11 @@ public class TimeoutMarkDownBean extends ConfigBeanBase{
 	public void setMySqlErrorCodes(String mySqlErrorCodes) {
 		this.mySqlErrorCodes = mySqlErrorCodes;
 	}
-	public int getErrorPercentBaseLine() {
-		return errorPercentBaseLine;
+	public int getErrorPercentReferCount() {
+		return errorPercentReferCount;
 	}
-	public void setErrorPercentBaseLine(int errorPercentBaseLine) {
-		this.errorPercentBaseLine = errorPercentBaseLine;
+	public void setErrorPercentReferCount(int errorPercentBaseLine) {
+		this.errorPercentReferCount = errorPercentBaseLine;
 	}
 	public String getSqlServerErrorCodes() {
 		return sqlServerErrorCodes;
@@ -108,12 +108,12 @@ public class TimeoutMarkDownBean extends ConfigBeanBase{
 		return sqlServerTimeoutMarkdownCodes;
 	}
 
-	public int getMinTimeOut() {
-		return minTimeOut;
+	public int getTimeoutThreshold() {
+		return timeoutThreshold;
 	}
 
-	public void setMinTimeOut(int minTimeOut) {
-		this.minTimeOut = minTimeOut;
+	public void setTimeoutThreshold(int minTimeOut) {
+		this.timeoutThreshold = minTimeOut;
 	}
 
 	private Set<Integer> parseErrorCodes(String codes){

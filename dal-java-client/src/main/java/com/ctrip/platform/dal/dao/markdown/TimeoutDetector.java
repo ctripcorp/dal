@@ -37,11 +37,11 @@ public class TimeoutDetector implements ErrorDetector{
 		}
 		dt.incrementRequest();
 		
-		if(dt.getErrors() >= tmb.getErrorCountBaseLine()){
+		if(dt.getErrors() >= tmb.getErrorCountThreshold()){
 			this.markdown(ctx.getName(), dt, MarkDownReason.ERRORCOUNT);
-		}else if(dt.getRequestTimes() >= tmb.getErrorPercentBaseLine()){
+		}else if(dt.getRequestTimes() >= tmb.getErrorPercentReferCount()){
 			float percent = (dt.getErrors() + 0.0f) /dt.getRequestTimes();
-			if(percent >= tmb.getErrorPercent()){
+			if(percent >= tmb.getErrorPercentThreshold()){
 				this.markdown(ctx.getName(), dt, MarkDownReason.ERRORPERCENT);
 			}
 		}
@@ -69,7 +69,7 @@ public class TimeoutDetector implements ErrorDetector{
 	}
 
 	public static boolean isTimeOutException(ErrorContext ctx){
-		if(ctx.getCost() >= ConfigBeanFactory.getTimeoutMarkDownBean().getMinTimeOut() * 1000){
+		if(ctx.getCost() >= ConfigBeanFactory.getTimeoutMarkDownBean().getTimeoutThreshold() * 1000){
 			if(ctx.getDbCategory() == DatabaseCategory.SqlServer){
 				if(ctx.getMsg().startsWith("The query has timed out") || ctx.getMsg().startsWith("查询超时")){
 					return true;

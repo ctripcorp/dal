@@ -31,7 +31,7 @@ public class MarkdownManager {
 
 	public static boolean isMarkdown(String key) {
 		MarkdownConfigBean mcb = ConfigBeanFactory.getMarkdownConfigBean();
-		if (mcb.isMarkdown()) {
+		if (mcb.isAppMarkDown()) {
 			return true;
 		}
 		Markdown item = mcb.getMarkItem(key);
@@ -41,7 +41,7 @@ public class MarkdownManager {
 				return true;
 
 			// Timeout is not reached
-			if ((System.currentTimeMillis() - item.getMarkdownTime()) <= mcb.getAutoMarkupDelay() * 1000)
+			if ((System.currentTimeMillis() - item.getMarkdownTime()) <= mcb.getAutoMarkUpDelay() * 1000)
 				return true;
 
 			if (!MarkupManager.isPass(key)) {
@@ -52,7 +52,7 @@ public class MarkdownManager {
 	}
 
 	public static void detect(DalConnection conn, long start, Throwable e) {
-		if(!ConfigBeanFactory.getMarkdownConfigBean().isEnnableAutoMarkDown())
+		if(!ConfigBeanFactory.getMarkdownConfigBean().isEnableAutoMarkDown())
 			return;
 		long cost = System.currentTimeMillis() - start;
 		if (conn != null && conn.getMeta() != null && e instanceof SQLException) {

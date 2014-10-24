@@ -18,17 +18,17 @@ public class MarkupProcedure {
 	
 	public synchronized boolean isPass() {
 		MarkdownConfigBean mcb = ConfigBeanFactory.getMarkdownConfigBean();
-		int autoMarkupCount = mcb.getAutoMarkupBatches() * MarkupPhase.length;
+		int autoMarkupCount = mcb.getAutoMarkUpVolume() * MarkupPhase.length;
 		
-		if(mcb.getAutoMarkupBatches() <= 0){
+		if(mcb.getAutoMarkUpVolume() <= 0){
 			return this.autoMarkup();
 		}
 		
 		if (this.phase.getTotal() >= autoMarkupCount) {
-			if (this.nextPhaseIndex == mcb.getAutoMarkUpSchedule().length) {
+			if (this.nextPhaseIndex == mcb.getMarkUpSchedule().length) {
 				return this.autoMarkup();
 			}
-			this.phase = new MarkupPhase(mcb.getAutoMarkUpSchedule()[this.nextPhaseIndex]);
+			this.phase = new MarkupPhase(mcb.getMarkUpSchedule()[this.nextPhaseIndex]);
 			this.nextPhaseIndex ++;
 		}
 		boolean pass = phase.isQualified();
@@ -46,7 +46,7 @@ public class MarkupProcedure {
 	
 	private void init(){
 		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
-				.getAutoMarkUpSchedule();
+				.getMarkUpSchedule();
 		this.nextPhaseIndex = 1;
 		this.phase = new MarkupPhase(schedules[0]);
 	}
@@ -56,7 +56,7 @@ public class MarkupProcedure {
 			this.qualifies --;
 		}
 		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
-				.getAutoMarkUpSchedule();
+				.getMarkUpSchedule();
 		if(this.nextPhaseIndex >= 1){
 			this.phase = new MarkupPhase(schedules[this.nextPhaseIndex - 1]);
 		}

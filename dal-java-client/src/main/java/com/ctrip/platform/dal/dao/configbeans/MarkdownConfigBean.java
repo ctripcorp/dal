@@ -18,28 +18,28 @@ import com.ctrip.platform.dal.dao.markdown.MarkupManager;
 @BeanMeta(alias = "arch-data-common-bean-markdownmarkupbean")
 public class MarkdownConfigBean extends ConfigBeanBase{
 	@BeanMeta(alias = "AppMarkDown")
-	private volatile boolean markdown = false;
+	private volatile boolean appMarkDown = false;
 	
 	@BeanMeta(alias = "EnableAutoMarkDown")
-	private volatile boolean ennableAutoMarkDown = true;
+	private volatile boolean enableAutoMarkDown = true;
 	
 	@BeanMeta(alias = "AutoMarkUpVolume")
-	private volatile int autoMarkupBatches = -1;
+	private volatile int autoMarkUpVolume = -1;
 	
 	@BeanMeta(alias = "MarkDownKeys")
-	private volatile String dbMarkdown = "";
+	private volatile String markDownKeys = "";
 	
 	@BeanMeta(alias = "AllInOneKeys")
-	private volatile String alldbs = "";
+	private volatile String allInOneKeys = "";
 	
 	@BeanMeta(alias = "AutoMarkUpSchedule")
-	private volatile String markUpSchedule = "1,3,5";
+	private volatile String autoMarkUpSchedule = "1,3,5";
 	
 	@BeanMeta(alias = "AutoMarkUpDelay")
-	private volatile int autoMarkupDelay = 60;
+	private volatile int autoMarkUpDelay = 60;
 	
 	@BeanMeta(omit = true)
-	private int[] autoMarkUpSchedule = new int[]{1, 3, 5};
+	private int[] markUpSchedule = new int[]{1, 3, 5};
 	
 	@BeanMeta(omit = true)
 	private Map<String, Markdown> marks = new HashMap<String, Markdown>();
@@ -47,7 +47,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	private Lock lock = new ReentrantLock();
 	
 	public MarkdownConfigBean(){
-		this.addChangeEvent("dbMarkdown", new ChangeEvent() {			
+		this.addChangeEvent("markDownKeys", new ChangeEvent() {			
 	
 			@Override
 			public void before(Object oldVal, String newVal) throws Exception {
@@ -67,7 +67,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 			}
 		});
 		
-		this.addChangeEvent("markUpSchedule", new ChangeEvent() {			
+		this.addChangeEvent("autoMarkUpSchedule", new ChangeEvent() {			
 			@Override
 			public void end(Object oldVal, String newVal) throws Exception {
 				if(newVal == null || newVal.isEmpty())
@@ -83,7 +83,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 						throw new Exception("The auto mark up schedule must be ascending order");
 					}
 				}
-				autoMarkUpSchedule = temp;
+				markUpSchedule = temp;
 			}
 			
 			@Override
@@ -93,26 +93,26 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 		});
 	}
 	
-	public boolean isMarkdown() {
-		return this.markdown;
+	public boolean isAppMarkDown() {
+		return this.appMarkDown;
 	}
 
-	public void setMarkdown(boolean markdown) {
-		this.markdown = markdown;
+	public void setAppMarkDown(boolean markdown) {
+		this.appMarkDown = markdown;
 	}
 
-	public String getDbMarkdown() {
-		return this.dbMarkdown;
+	public String getMarkDownKeys() {
+		return this.markDownKeys;
 	}
 
-	public void setDbMarkdown(String dbMarkdown) {
-		this.dbMarkdown = dbMarkdown;
+	public void setMarkDownKeys(String dbMarkdown) {
+		this.markDownKeys = dbMarkdown;
 	}
 
 	public String getAlldbs() {
-		if(this.alldbs.isEmpty())
-			this.alldbs = StringUtils.join(DalClientFactory.getAllDB(), ",");
-		return this.alldbs;
+		if(this.allInOneKeys.isEmpty())
+			this.allInOneKeys = StringUtils.join(DalClientFactory.getAllDB(), ",");
+		return this.allInOneKeys;
 	}
 	
 	public Markdown getMarkItem(String key){
@@ -124,13 +124,13 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	}
 	
 	public boolean isMarkdown(String dbname){
-		return this.isMarkdown() || this.marks.containsKey(dbname);
+		return this.isAppMarkDown() || this.marks.containsKey(dbname);
 	}
 	
 	public synchronized boolean markdown(String dbname){
 		if(!this.marks.containsKey(dbname)){
 			this.marks.put(dbname, new Markdown(true));
-			this.dbMarkdown = StringUtils.join(this.getMarks(), ",");
+			this.markDownKeys = StringUtils.join(this.getMarks(), ",");
 		}			
 		return this.marks.containsKey(dbname);
 	}
@@ -138,7 +138,7 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 	public synchronized void markup(String dbname){
 		if(this.marks.containsKey(dbname)){
 			this.marks.remove(dbname);
-			this.dbMarkdown = StringUtils.join(this.getMarks(), ",");
+			this.markDownKeys = StringUtils.join(this.getMarks(), ",");
 			MarkupManager.reset(dbname);
 		}
 	}
@@ -172,39 +172,39 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 		}
 	}
 
-	public boolean isEnnableAutoMarkDown() {
-		return ennableAutoMarkDown;
+	public boolean isEnableAutoMarkDown() {
+		return enableAutoMarkDown;
 	}
 
-	public void setEnnableAutoMarkDown(boolean ennableAutoMarkDown) {
-		this.ennableAutoMarkDown = ennableAutoMarkDown;
+	public void setEnableAutoMarkDown(boolean enableAutoMarkDown) {
+		this.enableAutoMarkDown = enableAutoMarkDown;
 	}
 
-	public int getAutoMarkupBatches() {
-		return autoMarkupBatches;
+	public int getAutoMarkUpVolume() {
+		return autoMarkUpVolume;
 	}
 
-	public void setAutoMarkupBatches(int autoMarkupBatches) {
-		this.autoMarkupBatches = autoMarkupBatches;
+	public void setAutoMarkUpVolume(int autoMarkupBatches) {
+		this.autoMarkUpVolume = autoMarkupBatches;
 	}
 
-	public int getAutoMarkupDelay() {
-		return autoMarkupDelay;
+	public int getAutoMarkUpDelay() {
+		return autoMarkUpDelay;
 	}
 
-	public void setAutoMarkupDelay(int autoMarkupDelay) {
-		this.autoMarkupDelay = autoMarkupDelay;
+	public void setAutoMarkUpDelay(int autoMarkUpDelay) {
+		this.autoMarkUpDelay = autoMarkUpDelay;
 	}
 
-	public String getMarkUpSchedule() {
-		return markUpSchedule;
-	}
-
-	public void setMarkUpSchedule(String markUpSchedule) {
-		this.markUpSchedule = markUpSchedule;
-	}
-
-	public int[] getAutoMarkUpSchedule() {
+	public String getAutoMarkUpSchedule() {
 		return autoMarkUpSchedule;
+	}
+
+	public void setAutoMarkUpSchedule(String autoMarkUpSchedule) {
+		this.autoMarkUpSchedule = autoMarkUpSchedule;
+	}
+
+	public int[] getMarkUpSchedule() {
+		return markUpSchedule;
 	}
 }

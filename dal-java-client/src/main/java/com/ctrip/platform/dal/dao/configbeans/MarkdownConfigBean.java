@@ -15,27 +15,27 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.markdown.Markdown;
 import com.ctrip.platform.dal.dao.markdown.MarkupManager;
 
-@BeanMeta(alias = "markdown")
+@BeanMeta(alias = "arch-data-common-bean-markdownmarkupbean")
 public class MarkdownConfigBean extends ConfigBeanBase{
-	@BeanMeta(alias = "Markdown")
+	@BeanMeta(alias = "AppMarkDown")
 	private volatile boolean markdown = false;
 	
-	@BeanMeta(alias = "AutoMarkup")
-	private volatile boolean automarkup = false;
+	@BeanMeta(alias = "EnableAutoMarkDown")
+	private volatile boolean ennableAutoMarkDown = true;
 	
-	@BeanMeta(alias = "AutoMarkupBatches")
-	private volatile int autoMarkupBatches = 1;
+	@BeanMeta(alias = "AutoMarkUpVolume")
+	private volatile int autoMarkupBatches = -1;
 	
-	@BeanMeta(alias = "MarkDownDB")
+	@BeanMeta(alias = "MarkDownKeys")
 	private volatile String dbMarkdown = "";
 	
-	@BeanMeta(alias = "AllDB")
+	@BeanMeta(alias = "AllInOneKeys")
 	private volatile String alldbs = "";
 	
 	@BeanMeta(alias = "AutoMarkUpSchedule")
 	private volatile String markUpSchedule = "1,3,5";
 	
-	@BeanMeta(alias = "AutoMarkupDelay")
+	@BeanMeta(alias = "AutoMarkUpDelay")
 	private volatile int autoMarkupDelay = 60;
 	
 	@BeanMeta(omit = true)
@@ -172,12 +172,12 @@ public class MarkdownConfigBean extends ConfigBeanBase{
 		}
 	}
 
-	public boolean isAutomarkup() {
-		return automarkup;
+	public boolean isEnnableAutoMarkDown() {
+		return ennableAutoMarkDown;
 	}
 
-	public void setAutomarkup(boolean automarkup) {
-		this.automarkup = automarkup;
+	public void setEnnableAutoMarkDown(boolean ennableAutoMarkDown) {
+		this.ennableAutoMarkDown = ennableAutoMarkDown;
 	}
 
 	public int getAutoMarkupBatches() {

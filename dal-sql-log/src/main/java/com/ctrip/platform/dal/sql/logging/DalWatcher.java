@@ -26,7 +26,7 @@ public class DalWatcher {
 	}
 	
 	public static void destroy(){
-		costRecorder = null;
+		costRecorder.remove();
 	}
 	
 	private static CostRecorder recorder() {

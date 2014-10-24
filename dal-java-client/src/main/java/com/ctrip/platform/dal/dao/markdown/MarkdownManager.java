@@ -52,6 +52,8 @@ public class MarkdownManager {
 	}
 
 	public static void detect(DalConnection conn, long start, Throwable e) {
+		if(!ConfigBeanFactory.getMarkdownConfigBean().isEnnableAutoMarkDown())
+			return;
 		long cost = System.currentTimeMillis() - start;
 		if (conn != null && conn.getMeta() != null && e instanceof SQLException) {
 			ErrorContext ctx = new ErrorContext(
@@ -60,6 +62,10 @@ public class MarkdownManager {
 			exqueue.add(ctx);
 			MarkupManager.rollback(ctx);
 		}
+	}
+	
+	public static void shutdown(){
+		manager.shutdownNow();
 	}
 
 	private static class CollectExceptionTask implements Runnable {

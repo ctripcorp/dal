@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.ctrip.framework.clogging.agent.MessageManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
 import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
@@ -52,6 +53,10 @@ public class DalClientFactoryListener implements ServletContextListener {
 			MessageManager.getInstance().shutdown();
 		}
 		
+		logger.info("DalWatcher has been destoryed");
 		DalWatcher.destroy();
+		
+		logger.info("Markdown Manager has been destoryed");
+		MarkdownManager.shutdown();
 	}
 }

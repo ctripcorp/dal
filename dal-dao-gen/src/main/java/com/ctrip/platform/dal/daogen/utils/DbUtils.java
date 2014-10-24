@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -541,8 +542,14 @@ public class DbUtils {
 					String typeName = allColumnsRs.getString("TYPE_NAME");
 					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
-					Class<?> javaClass = null != typeMapper && typeMapper.containsKey(host.getSqlType()) ? 
-							typeMapper.get(host.getSqlType()) :Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
+					Class<?> javaClass = null;
+					if(Types.TINYINT == host.getSqlType() || 
+							Types.SMALLINT == host.getSqlType()){
+						javaClass = Integer.class;
+					}else{
+						javaClass = null != typeMapper && typeMapper.containsKey(host.getSqlType()) ? 
+								typeMapper.get(host.getSqlType()) :Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
+					}
 					if(null == javaClass){
 						if(null != typeName && typeName.equalsIgnoreCase("sql_variant")){
 							log.fatal(String.format("The sql_variant is not support by java.[%s, %s, %s, %s, %s]", 

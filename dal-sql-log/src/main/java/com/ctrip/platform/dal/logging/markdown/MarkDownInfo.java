@@ -17,12 +17,15 @@ public class MarkDownInfo {
 	private String status;
 
 	private static String MarkDown_SamplingDuration = "SamplingDuration";
-	private Integer duration;
+	private Long duration;
 	
 	private static String MarkDown_MarkDownReason = "Reason";
 	private MarkDownReason reason;
+	
+	private int total = 0;
+	private int fail = 0;
 
-	public MarkDownInfo(String allinoneKey, MarkDownPolicy policy, int duration){
+	public MarkDownInfo(String allinoneKey, MarkDownPolicy policy, long duration){
 		this.allInOneKey = allinoneKey;
 		this.policy = policy;
 		this.duration = duration;
@@ -40,10 +43,10 @@ public class MarkDownInfo {
 	public void setPolicy(MarkDownPolicy policy) {
 		this.policy = policy;
 	}
-	public Integer getDuration() {
+	public Long getDuration() {
 		return duration;
 	}
-	public void setDuration(Integer duration) {
+	public void setDuration(long duration) {
 		this.duration = duration;
 	}
 	public MarkDownReason getReason() {
@@ -51,6 +54,22 @@ public class MarkDownInfo {
 	}
 	public void setReason(MarkDownReason reason) {
 		this.reason = reason;
+	}
+	
+	public void incrementTotal(){
+		this.total ++;
+	}
+	
+	public int getTotal(){
+		return this.total;
+	}
+	
+	public void incrementFail(){
+		this.fail ++;
+	}
+	
+	public int getFail(){
+		return this.fail;
 	}
 	
 	public String getStatus() {

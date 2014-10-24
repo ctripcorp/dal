@@ -3,8 +3,10 @@ package com.ctrip.platform.dal.dao.markdown;
 public class DetectorCounter {
 	private TimeBucketCounter request;
 	private TimeBucketCounter hints;
+	private long duration;
 	
 	public DetectorCounter(long duration){
+		this.duration = duration;
 		this.request = new TimeBucketCounter(duration);
 		this.hints = new TimeBucketCounter(duration);
 	}
@@ -25,8 +27,7 @@ public class DetectorCounter {
 		return this.hints.getCount();
 	}
 	
-	public void reset(){
-		this.request.reset();
-		this.hints.reset();
+	public long getDuration(){
+		return this.duration;
 	}
 }

@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.ctrip.platform.dal.dao.configbeans.MarkdownConfigBean;
 
 public class MarkdownManager {
 	private static final int durations = 1000;
@@ -29,19 +30,18 @@ public class MarkdownManager {
 	}
 
 	public static boolean isMarkdown(String key) {
-		if (ConfigBeanFactory.getMarkdownConfigBean().isMarkdown()) {
+		MarkdownConfigBean mcb = ConfigBeanFactory.getMarkdownConfigBean();
+		if (mcb.isMarkdown()) {
 			return true;
 		}
-		Markdown item = ConfigBeanFactory.getMarkdownConfigBean().getMarkItem(
-				key);
+		Markdown item = mcb.getMarkItem(key);
 		if (item != null) {
 			// Manual markdeddown can only be markup manually.
 			if (!item.isAuto())
 				return true;
 
 			// Timeout is not reached
-			if ((System.currentTimeMillis() - item.getMarkdownTime()) <= ConfigBeanFactory
-					.getMarkdownConfigBean().getAutoMarkupDelay() * 1000)
+			if ((System.currentTimeMillis() - item.getMarkdownTime()) <= mcb.getAutoMarkupDelay() * 1000)
 				return true;
 
 			if (!MarkupManager.isPass(key)) {
@@ -80,5 +80,9 @@ public class MarkdownManager {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static String getDebugInfo(String key){
+		return ((TimeoutDetector)detectors.get(0)).toDebugInfo(key);
 	}
 }

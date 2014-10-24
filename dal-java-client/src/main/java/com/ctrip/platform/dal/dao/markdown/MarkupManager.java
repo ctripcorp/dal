@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MarkupManager {
 	
 	private static Map<String, MarkupProcedure> markups = new ConcurrentHashMap<String, MarkupProcedure>();
-		
 	/**
 	 * Try to pass request which is marked down.
 	 * @param key

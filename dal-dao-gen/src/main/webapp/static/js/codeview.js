@@ -19,7 +19,7 @@
             $.each(data.tableViewSpTasks, function (index, value) {
                 value.recid = allTasks.length + 1;
                 value.task_type = "table_view_sp";
-                value.task_desc = "表/视图/存储过程";
+                value.task_desc = "标准DAO";
                 if (value.table_names != null && value.table_names != "") {
                     value.sql_content = value.table_names;
                 }
@@ -49,7 +49,10 @@
             $.each(data.sqlTasks, function (index, value) {
                 value.recid = allTasks.length + 1;
                 value.task_type = "sql";
-                value.task_desc = "自定义查询";
+                if("update" == value['crud_type'])
+                    value.task_desc = "自定义SQL(增删改)";
+                else
+                    value.task_desc = "自定义SQL(查询)";
                 allTasks.push(value);
             });
             w2ui['grid'].add(allTasks);
@@ -192,7 +195,12 @@
                 }, {
                     field: 'comment',
                     caption: '方法描述',
-                    size: '25%',
+                    size: '20%',
+                    resizable:true
+                }, {
+                    field: 'sql_style',
+                    caption: 'SQL风格',
+                    size: '5%',
                     resizable:true
                 }, {
                     field: 'update_user_no',

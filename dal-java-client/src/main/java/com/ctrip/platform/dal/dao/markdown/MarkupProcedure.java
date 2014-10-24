@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.markdown;
 
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.ctrip.platform.dal.dao.configbeans.MarkdownConfigBean;
 import com.ctrip.platform.dal.logging.markdup.MarkupInfo;
 import com.ctrip.platform.dal.sql.logging.Metrics;
 
@@ -16,22 +17,18 @@ public class MarkupProcedure {
 	}
 	
 	public synchronized boolean isPass() {
-		int[] scheduleTemplate = ConfigBeanFactory.getMarkdownConfigBean()
-				.getAutoMarkUpSchedule();
+		MarkdownConfigBean mcb = ConfigBeanFactory.getMarkdownConfigBean();
+		int autoMarkupCount = mcb.getAutoMarkUpVolume() * MarkupPhase.length;
 		
-		int autoMarkupCount = ConfigBeanFactory.getMarkdownConfigBean()
-				.getAutoMarkupBatches() * MarkupPhase.length;
-		
-		if(ConfigBeanFactory.getMarkdownConfigBean()
-				.getAutoMarkupBatches() <= 0){
+		if(mcb.getAutoMarkUpVolume() <= 0){
 			return this.autoMarkup();
 		}
 		
 		if (this.phase.getTotal() >= autoMarkupCount) {
-			if (this.nextPhaseIndex == scheduleTemplate.length) {
+			if (this.nextPhaseIndex == mcb.getMarkUpSchedule().length) {
 				return this.autoMarkup();
 			}
-			this.phase = new MarkupPhase(scheduleTemplate[this.nextPhaseIndex]);
+			this.phase = new MarkupPhase(mcb.getMarkUpSchedule()[this.nextPhaseIndex]);
 			this.nextPhaseIndex ++;
 		}
 		boolean pass = phase.isQualified();
@@ -49,7 +46,7 @@ public class MarkupProcedure {
 	
 	private void init(){
 		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
-				.getAutoMarkUpSchedule();
+				.getMarkUpSchedule();
 		this.nextPhaseIndex = 1;
 		this.phase = new MarkupPhase(schedules[0]);
 	}
@@ -59,7 +56,7 @@ public class MarkupProcedure {
 			this.qualifies --;
 		}
 		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
-				.getAutoMarkUpSchedule();
+				.getMarkUpSchedule();
 		if(this.nextPhaseIndex >= 1){
 			this.phase = new MarkupPhase(schedules[this.nextPhaseIndex - 1]);
 		}

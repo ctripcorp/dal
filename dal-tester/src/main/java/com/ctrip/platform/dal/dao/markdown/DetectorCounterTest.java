@@ -11,12 +11,12 @@ public class DetectorCounterTest {
 		DetectorCounter counter = new DetectorCounter(1000);
 		for (int i = 0; i < 10; i++) {
 			if(i % 2 == 0){
-				counter.incrementHints();
+				counter.incrementErrors();
 			}
 			counter.incrementRequest();
 		}
 		
-		Assert.assertEquals(5, counter.getHints());
+		Assert.assertEquals(5, counter.getErrors());
 		Assert.assertEquals(10, counter.getRequestTimes());
 	}
 	
@@ -31,11 +31,11 @@ public class DetectorCounterTest {
 				Thread.sleep(510);
 			}
 			if(i % 2 == 0)
-				counter.incrementHints();
+				counter.incrementErrors();
 			counter.incrementRequest();
 		}
 		
-		Assert.assertEquals(2, counter.getHints()); //([8],[6])
+		Assert.assertEquals(2, counter.getErrors()); //([8],[6])
 		Assert.assertEquals(5, counter.getRequestTimes());//([8,9],[5,6,7])
 	}
 	
@@ -44,20 +44,14 @@ public class DetectorCounterTest {
 		DetectorCounter counter = new DetectorCounter(1000);
 		for (int i = 0; i < 10; i++) {
 			if(i % 2 == 0)
-				counter.incrementHints();
+				counter.incrementErrors();
 			counter.incrementRequest();
 		}
 		
 		Thread.sleep(1001);
 		
-		Assert.assertEquals(5, counter.getHints());
-		Assert.assertEquals(10, counter.getRequestTimes());
-		
-		counter.incrementHints();
-		counter.incrementRequest();
-		
-		Assert.assertEquals(1, counter.getHints());
-		Assert.assertEquals(1, counter.getRequestTimes());
+		Assert.assertEquals(0, counter.getErrors());
+		Assert.assertEquals(0, counter.getRequestTimes());
 		
 	}
 }

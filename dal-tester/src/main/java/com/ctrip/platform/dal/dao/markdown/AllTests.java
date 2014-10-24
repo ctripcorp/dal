@@ -12,7 +12,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	AutoMarkdownTest.class,
 	AutoMarkupTest.class,
 	MarkupProcedureTest.class,
-	ManualMarkDownTest.class})
+	ManualMarkDownTest.class,
+	TimeBucketCounterTest.class})
 public class AllTests {
 
 }

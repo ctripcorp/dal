@@ -12,23 +12,23 @@ public class TimeBucketCounterTest {
 			TimeBucketCounter test = new TimeBucketCounter(1000);
 			assertEquals(0, test.getCount());
 			Thread.sleep(200);
-			// 200:[3][0]
+			// 200 [3][0]
 			test.increase();
 			test.increase();
 			test.increase();
 			assertEquals(3, test.getCount());
 			Thread.sleep(400);
-			// 600:[0][3]
+			// 600 [0][3]
 			assertEquals(3, test.getCount());
 			test.increase();
 			test.increase();
 			test.increase();
-			// 600:[3][3]
+			// 600 [3][3]
 			assertEquals(6, test.getCount());
-			Thread.sleep(400);
+			Thread.sleep(401);
 			// 1000 [0][3]
 			assertEquals(3, test.getCount());
-			Thread.sleep(500);
+			Thread.sleep(501);
 			// 1500 [0][0]
 			assertEquals(0, test.getCount());
 		} catch (InterruptedException e) {

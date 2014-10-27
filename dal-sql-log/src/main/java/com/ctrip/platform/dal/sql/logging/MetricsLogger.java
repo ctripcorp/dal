@@ -18,6 +18,7 @@ public class MetricsLogger {
 	private static final String DAO = "DAO";
 	private static final String METHOD = "Method";
 	private static final String SIZE = "Size";
+	private static final String LANGUAGE = "Language";
 	private static final String STATUS = "Status";
 	
 	//private static Queue<MetricsData> statusQueue = new ConcurrentLinkedQueue<MetricsData>();
@@ -64,6 +65,7 @@ public class MetricsLogger {
 		data.tags.put(DB, data.databaseSet);
 		data.tags.put(DBTYPE, data.databaseType);
 		data.tags.put(OPTTYPE, data.operationType);
+		data.tags.put(LANGUAGE, "Java");
 		
 		metricLogger.log(MASTER_SLAVE_COUNT, data.count, data.tags);
 	}
@@ -99,6 +101,7 @@ public class MetricsLogger {
         tags.put(METHOD, md.method);
         tags.put(STATUS, md.status);
         tags.put(SIZE, String.valueOf(md.size));
+        tags.put(LANGUAGE, "Java");
         md.tags = tags;
         
         metricLogger.log(COUNT, md.count, md.tags);    

@@ -6,6 +6,8 @@ import java.util.Map;
 public class OptInfo {
 	public static final String KEY = "arch.dal.rw.count";
 	
+	public static final String LANGUAGE = "Language";
+	
     private static final String DB = "DB";
 	private String databaseSet;
 	
@@ -45,7 +47,7 @@ public class OptInfo {
 		tag.put(DB, this.databaseSet);
 		tag.put(DBTYPE, this.databaseType);
 		tag.put(OPTTYPE, this.operationType);
-		
+		tag.put(LANGUAGE, "Java");
 		return tag;
 	}
 }

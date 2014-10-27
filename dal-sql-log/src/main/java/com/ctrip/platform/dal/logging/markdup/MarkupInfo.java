@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MarkupInfo {
-	public static final String KEY = "arch.java.dal.markup.info";
+	public static final String KEY = "arch.dal.markup.info";
 	
 	private static final String AllInOneKey = "AllInOneKey";
 	private String allinoneKey;
@@ -16,6 +16,7 @@ public class MarkupInfo {
 	public Map<String, String> toTag(){
 		Map<String, String> tag = new HashMap<String, String>();
 		tag.put(AllInOneKey, this.allinoneKey);
+		tag.put("Language", "Java");
 		return tag;
 	}
 }

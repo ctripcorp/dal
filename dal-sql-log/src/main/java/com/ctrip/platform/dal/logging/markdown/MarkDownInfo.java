@@ -5,7 +5,7 @@ import java.util.Map;
 
 
 public class MarkDownInfo {	
-	public static final String KEY = "arch.java.dal.markdown.info";
+	public static final String KEY = "arch.dal.markdown.info";
 	
 	private static String MarkDown_AllInOneKey = "AllInOneKey";
 	private String allInOneKey;
@@ -87,7 +87,7 @@ public class MarkDownInfo {
 		tag.put(MarkDown_Status, this.status);
 		tag.put(MarkDown_SamplingDuration, this.duration.toString());
 		tag.put(MarkDown_MarkDownReason, this.reason.toString().toLowerCase());
-		
+		tag.put("Language", "Java");
 		return tag;
 	}
 }

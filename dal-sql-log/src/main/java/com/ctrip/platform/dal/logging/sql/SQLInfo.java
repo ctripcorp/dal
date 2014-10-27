@@ -7,6 +7,8 @@ public class SQLInfo {
 	public static final String COUNT = "arch.dal.sql.count";
 	public static final String COST = "arch.dal.sql.cost";
 	
+	public static final String LANGUAGE = "Language";
+	
 	private static final String DAO = "DAO";
 	private String dao;
 	
@@ -72,6 +74,7 @@ public class SQLInfo {
 		tag.put(METHOD, this.method);
 		tag.put(SIZE, this.size.toString());
 		tag.put(STATUS, this.status);
+		tag.put(LANGUAGE, "Java");
 		
 		return tag;
 	}

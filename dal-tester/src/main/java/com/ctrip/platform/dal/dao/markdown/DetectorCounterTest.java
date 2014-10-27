@@ -48,7 +48,7 @@ public class DetectorCounterTest {
 			counter.incrementRequest();
 		}
 		
-		Thread.sleep(1001);
+		Thread.sleep(1100);
 		
 		Assert.assertEquals(0, counter.getErrors());
 		Assert.assertEquals(0, counter.getRequestTimes());

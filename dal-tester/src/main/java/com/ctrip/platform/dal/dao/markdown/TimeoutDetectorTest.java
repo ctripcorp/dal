@@ -20,9 +20,9 @@ public class TimeoutDetectorTest {
 	@Before
 	public void setUp() throws Exception {
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountBaseLine(10000);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercentBaseLine(10000);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercent(1f);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(10000);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercentReferCount(10000);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercentThreshold(1f);
 		ConfigBeanFactory.getTimeoutMarkDownBean().setSamplingDuration(10000);
 		ConfigBeanFactory.getMarkdownConfigBean().markup(dbName);
 	}
@@ -31,7 +31,7 @@ public class TimeoutDetectorTest {
 	public void countBaseLineMatchTest() {
 		TimeoutDetector detector = new TimeoutDetector();
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountBaseLine(5);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
 		for (int i = 0; i < 10; i++) {
 			SQLException e = this.mockNotTimeoutException();
 			DatabaseCategory ct = DatabaseCategory.MySql;
@@ -50,7 +50,7 @@ public class TimeoutDetectorTest {
 	public void countBaseLineMatchButOverdueTest() {
 		TimeoutDetector detector = new TimeoutDetector();
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountBaseLine(5);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
 		ConfigBeanFactory.getTimeoutMarkDownBean().setSamplingDuration(1);
 		for (int i = 0; i < 10; i++) {
 			SQLException e = this.mockNotTimeoutException();
@@ -77,8 +77,8 @@ public class TimeoutDetectorTest {
 	public void errorPercentMatchTest(){
 		TimeoutDetector detector = new TimeoutDetector();
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercentBaseLine(10);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercent(0.5f);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercentReferCount(10);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercentThreshold(0.5f);
 		for (int i = 0; i < 10; i++) {
 			SQLException e = this.mockNotTimeoutException();
 			DatabaseCategory ct = DatabaseCategory.MySql;

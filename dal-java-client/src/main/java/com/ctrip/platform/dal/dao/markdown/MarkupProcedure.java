@@ -1,11 +1,17 @@
 package com.ctrip.platform.dal.dao.markdown;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.dao.configbeans.MarkdownConfigBean;
 import com.ctrip.platform.dal.logging.markdup.MarkupInfo;
 import com.ctrip.platform.dal.sql.logging.Metrics;
 
 public class MarkupProcedure {
+	
+	private static Logger logger = LoggerFactory.getLogger(MarkupProcedure.class);
+	
 	private String name;
 	private int nextPhaseIndex = 0;
 	private int qualifies = 0;
@@ -39,6 +45,7 @@ public class MarkupProcedure {
 	private boolean autoMarkup(){
 		ConfigBeanFactory.getMarkdownConfigBean().markup(this.name);
 		MarkupInfo marticsInfo = new MarkupInfo(this.name);
+		logger.info(String.format("Database %s has been marked up automatically", this.name));
 		Metrics.report(marticsInfo, this.qualifies);
 		this.init();
 		return true;

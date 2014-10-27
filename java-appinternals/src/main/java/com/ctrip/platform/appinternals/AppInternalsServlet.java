@@ -68,10 +68,9 @@ public class AppInternalsServlet extends HttpServlet {
 			for (String token : tokens) {
 				Permission.getInstance().addUser(token, 1);
 			}
-			logger.info("Initialize appinternals permissions: " + reads + ", "
-					+ writes);
+			logger.info(String.format("Initialize appinternals read[%s], write[%s] permissions: ", reads, writes));
 		} catch (Exception e) {
-			logger.error("Initialize appinternals permissions failed", e);
+			logger.error("Initialize appinternals write permissions failed", e);
 		}
 	}
 

@@ -20,18 +20,18 @@ public class MarkupProcedureTest {
 	
 	@Before
 	public void setUp() throws Exception{
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupBatches(1000);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(1000);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutomarkup(false);
-		ConfigBeanFactory.getMarkdownConfigBean().set("markUpSchedule", "1,3,5");
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpVolume(1000);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1000);
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(false);
+		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "1,3,5");
 	}
 	
 	@Test
 	public void onlyOnePhaseTest() throws Exception {
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupBatches(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutomarkup(true);
-		ConfigBeanFactory.getMarkdownConfigBean().set("markUpSchedule", "3");
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpVolume(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
+		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3");
 		
 		MarkupProcedure procedure = new MarkupProcedure("dao_test");
 		for (int i = 0; i < MarkupPhase.length; i++) {
@@ -47,10 +47,10 @@ public class MarkupProcedureTest {
 	
 	@Test
 	public void twoPhasesTest() throws Exception{
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupBatches(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutomarkup(true);
-		ConfigBeanFactory.getMarkdownConfigBean().set("markUpSchedule", "3,5");
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpVolume(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
+		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3,5");
 		
 		MarkupProcedure procedure = new MarkupProcedure("dao_test");
 		for (int i = 0; i < MarkupPhase.length * 2; i++) {
@@ -66,10 +66,10 @@ public class MarkupProcedureTest {
 	
 	@Test
 	public void secondPhaseRollback() throws Exception{
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupBatches(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutomarkup(true);
-		ConfigBeanFactory.getMarkdownConfigBean().set("markUpSchedule", "3,5");
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpVolume(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
+		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3,5");
 		MarkupProcedure procedure = new MarkupProcedure("dao_test");
 		for (int i = 0; i < MarkupPhase.length * 2; i++) {
 			procedure.isPass();

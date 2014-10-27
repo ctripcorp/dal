@@ -2,6 +2,7 @@ package com.ctrip.platform.appinternals.configuration;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ public abstract class ConfigBeanBase{
 		Field[] fields = this.getClass().getDeclaredFields();
 		for (Field field : fields) {
 			BeanMeta falias = field.getAnnotation(BeanMeta.class);
-			if(falias != null && falias.omit())
+			if((falias != null && falias.omit()) || Modifier.isStatic(field.getModifiers()))
 				continue;
 			Method getMethod = null;
 			Method setMethod = null;

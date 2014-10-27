@@ -9,7 +9,7 @@ public class TimeBucketCounterTest {
 	public void testIncrease() {
 		try {
 			// 0
-			TimeBucketCounter test = new TimeBucketCounter(1000);
+			TimeBucketCounter test = new TimeBucketCounter(1000, System.currentTimeMillis());
 			assertEquals(0, test.getCount());
 			Thread.sleep(200);
 			// 200 [3][0]
@@ -25,7 +25,7 @@ public class TimeBucketCounterTest {
 			test.increase();
 			// 600 [3][3]
 			assertEquals(6, test.getCount());
-			Thread.sleep(401);
+			Thread.sleep(410);
 			// 1000 [0][3]
 			assertEquals(3, test.getCount());
 			Thread.sleep(501);

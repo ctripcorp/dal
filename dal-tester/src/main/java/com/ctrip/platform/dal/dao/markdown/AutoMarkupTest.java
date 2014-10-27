@@ -34,7 +34,7 @@ public class AutoMarkupTest {
 	public void autoMarkupTest() throws Exception{	
 		TimeoutDetector detector = new TimeoutDetector();
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountBaseLine(5);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
 		Random random = new Random();
 		for (int i = 0; i < 10; i++) {
 			SQLException e = this.mockNotTimeoutException();
@@ -49,10 +49,10 @@ public class AutoMarkupTest {
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().getMarkItem(dbName).isAuto());
 		
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupBatches(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutomarkup(true);
-		ConfigBeanFactory.getMarkdownConfigBean().set("markUpSchedule", "3,5");
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpVolume(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
+		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3,5");
 		
 		for (int i = 0; i < MarkupPhase.length * 2 + 1; i++) {
 			MarkupManager.isPass(dbName);
@@ -67,7 +67,7 @@ public class AutoMarkupTest {
 	public void autoMarkupFailTest() throws Exception{	
 		TimeoutDetector detector = new TimeoutDetector();
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountBaseLine(5);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
 		Random random = new Random();
 		for (int i = 0; i < 10; i++) {
 			SQLException e = this.mockNotTimeoutException();
@@ -82,10 +82,10 @@ public class AutoMarkupTest {
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().getMarkItem(dbName).isAuto());
 		
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupBatches(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutomarkup(true);
-		ConfigBeanFactory.getMarkdownConfigBean().set("markUpSchedule", "3");
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpVolume(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
+		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3");
 		
 		for (int i = 0; i < MarkupPhase.length + 1; i++) {
 			MarkupManager.isPass(dbName);

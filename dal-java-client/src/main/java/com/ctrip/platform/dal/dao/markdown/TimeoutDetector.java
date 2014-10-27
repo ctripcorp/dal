@@ -49,8 +49,8 @@ public class TimeoutDetector implements ErrorDetector{
 	
 	private void markdown(String key, DetectorCounter dc, MarkDownReason reason){
 		if(ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown()){
-			logger.info("Mark-Donw: " + MarkupManager.getMarkupInfo(key));
 			ConfigBeanFactory.getMarkdownConfigBean().markdown(key);
+			logger.info(String.format("Database %s has been marked down automatically", key));
 		}
 		MarkDownInfo info = new MarkDownInfo(key, MarkDownPolicy.TIMEOUT, dc.getDuration());
 		

@@ -30,18 +30,17 @@ public class AutoMarkdownTest {
 	@Before
 	public void setUp(){
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(false);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountBaseLine(10000);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(10000);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutomarkup(true);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(10000);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(10000);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(10000);
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
 		ConfigBeanFactory.getMarkdownConfigBean().markup(dbName);
 	}
 	
 	@Test
 	public void markdownSuccessTest() throws InterruptedException{
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountBaseLine(5);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(1);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
 		
 		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
 		for (int i = 0; i < 10; i++) {
@@ -54,8 +53,8 @@ public class AutoMarkdownTest {
 	@Test
 	public void markdownCanbeMarkupTest() throws Exception{
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountBaseLine(5);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(1);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
 		
 		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
 		for (int i = 0; i < 10; i++) {
@@ -64,10 +63,10 @@ public class AutoMarkdownTest {
 		Thread.sleep(1000);
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
 		
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupBatches(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutomarkup(true);
-		ConfigBeanFactory.getMarkdownConfigBean().set("markUpSchedule", "3");
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpVolume(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
+		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3");
 		
 		Thread.sleep(2000); //Wait auto mark up delay
 		for (int i = 0; i < MarkupPhase.length; i++) {
@@ -84,8 +83,8 @@ public class AutoMarkdownTest {
 	@Test
 	public void markdownDalayCantBeMarkupTest() throws Exception{
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountBaseLine(5);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(1);
+		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
 		
 		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
 		for (int i = 0; i < 10; i++) {
@@ -94,10 +93,10 @@ public class AutoMarkdownTest {
 		Thread.sleep(1000);
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
 		
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupBatches(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkupDelay(10);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutomarkup(true);
-		ConfigBeanFactory.getMarkdownConfigBean().set("markUpSchedule", "3");
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpVolume(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(10);
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
+		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3");
 		
 		for (int i = 0; i < MarkupPhase.length; i++) {
 			Assert.assertTrue(MarkdownManager.isMarkdown(dbName));

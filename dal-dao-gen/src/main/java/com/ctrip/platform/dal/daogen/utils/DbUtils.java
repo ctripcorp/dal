@@ -541,8 +541,12 @@ public class DbUtils {
 					String typeName = allColumnsRs.getString("TYPE_NAME");
 					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
-					Class<?> javaClass = null != typeMapper && typeMapper.containsKey(host.getSqlType()) ? 
-							typeMapper.get(host.getSqlType()) :Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
+					Class<?> javaClass = null;
+					if(null != typeMapper && typeMapper.containsKey(host.getSqlType()) ){
+						javaClass = typeMapper.get(host.getSqlType());
+					}else{
+						javaClass = Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
+					}
 					if(null == javaClass){
 						if(null != typeName && typeName.equalsIgnoreCase("sql_variant")){
 							log.fatal(String.format("The sql_variant is not support by java.[%s, %s, %s, %s, %s]", 
@@ -788,7 +792,8 @@ public class DbUtils {
 					JavaParameterHost paramHost = new JavaParameterHost();
 					paramHost.setName(rsMeta.getColumnLabel(i));
 					paramHost.setSqlType(rsMeta.getColumnType(i));
-					paramHost.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType()));
+					//paramHost.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType()));
+					paramHost.setJavaClass(Class.forName(rsMeta.getColumnClassName(i)));
 					paramHost.setIdentity(false);
 					paramHost.setNullable(false);
 					paramHost.setPrimary(false);

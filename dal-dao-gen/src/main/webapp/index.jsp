@@ -631,7 +631,7 @@
 						</table>      
                      </div>
                      <div class="row-fluid"><br/><br/>
-                     	 <div style="clear:both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
+                     	 <div style="clear:both;padding-top:8px">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
                      </div>
                      <div class="row-fluid">
                         <div id="step2_3_5_sql_editor" class="span12" style="height:200px;">

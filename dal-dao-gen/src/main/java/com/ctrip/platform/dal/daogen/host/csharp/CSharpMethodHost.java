@@ -83,7 +83,7 @@ public class CSharpMethodHost {
 	}
 
 	public String getSql() {
-		return sql;
+		return sql.replaceAll("[\r\n\t]", " ").replaceAll(" {2,}", " ");
 	}
 	
 	public String getBuildCudSql() {

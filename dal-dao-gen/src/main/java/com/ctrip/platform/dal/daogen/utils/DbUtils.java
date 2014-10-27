@@ -600,21 +600,43 @@ public class DbUtils {
 				Consts.databaseType.put(allInOneName, dbType);
 			}
 			
-			rs = connection.getMetaData().getColumns(null, null, tableViewName, null);
-			
-			ResultSetMetaData rsmd = rs.getMetaData();
-			for(int i = 1; i <= rsmd.getColumnCount(); i++) {
-				Integer sqlType = rsmd.getColumnType(i);
+			String sql = "select * from %s %s";
+			if(dbType.equalsIgnoreCase("Microsoft SQL Server")){
+				sql = "select top 1 * from " + tableViewName;
+			} else {
+				sql = "select * from " + tableViewName + "limit 1";
+			}
+			PreparedStatement ps = connection.prepareStatement(sql);
+			rs = ps.executeQuery();
+			ResultSetMetaData rsMeta = rs.getMetaData();
+			for(int i=1;i<=rsMeta.getColumnCount();i++){
+				Integer sqlType = rsMeta.getColumnType(i);
 				Class<?> javaType = null;
 				try {
-					javaType = Class.forName(rsmd.getColumnClassName(i));
-				} catch (ClassNotFoundException e) {
+					javaType = Class.forName(rsMeta.getColumnClassName(i));
+				} catch (Exception e) {
 					e.printStackTrace();
+					javaType = Consts.jdbcSqlTypeToJavaClass.get(sqlType);
 				}
 				if(!map.containsKey(sqlType) && null != javaType) {
 					map.put(sqlType, javaType);
 				}
 			}
+			
+//			rs = connection.getMetaData().getColumns(null, null, tableViewName, null);
+//			ResultSetMetaData rsmd = rs.getMetaData();
+//			for(int i = 1; i <= rsmd.getColumnCount(); i++) {
+//				Integer sqlType = rsmd.getColumnType(i);
+//				Class<?> javaType = null;
+//				try {
+//					javaType = Class.forName(rsmd.getColumnClassName(i));
+//				} catch (ClassNotFoundException e) {
+//					e.printStackTrace();
+//				}
+//				if(!map.containsKey(sqlType) && null != javaType) {
+//					map.put(sqlType, javaType);
+//				}
+//			}
 		} catch (SQLException e) {
 			log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]",
 					allInOneName, tableViewName), e);
@@ -671,13 +693,19 @@ public class DbUtils {
 					pHost.setLength(rsMeta.getColumnDisplaySize(i));
 					hosts.add(pHost);
 				}
-
 			}else{
 				for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
 					JavaParameterHost paramHost = new JavaParameterHost();
 					paramHost.setName(rsMeta.getColumnLabel(i));
 					paramHost.setSqlType(rsMeta.getColumnType(i));
-					paramHost.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType()));
+					Class<?> javaClass = null;
+					try {
+						javaClass = Class.forName(rsMeta.getColumnClassName(i));
+					} catch (Exception e) {
+						e.printStackTrace();
+						javaClass = Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType());
+					}
+					paramHost.setJavaClass(javaClass);
 					paramHost.setIdentity(false);
 					paramHost.setNullable(false);
 					paramHost.setPrimary(false);
@@ -763,11 +791,9 @@ public class DbUtils {
 
 					if(null != typename && typename.equalsIgnoreCase("year"))
 						dbType = DbType.Int16;
-					else if(typename.equalsIgnoreCase("uniqueidentifier"))
-					{
+					else if(typename.equalsIgnoreCase("uniqueidentifier")){
 						dbType = DbType.Guid;
-					}
-					else if(null != typename && typename.equalsIgnoreCase("sql_variant"))
+					}else if(null != typename && typename.equalsIgnoreCase("sql_variant"))
 						dbType = DbType.Object;
 					else if(-155 == dataType){
 						dbType = DbType.DateTimeOffset;
@@ -783,9 +809,7 @@ public class DbUtils {
 					pHost.setLength(rsMeta.getColumnDisplaySize(i));
 					pHosts.add(pHost);
 				}
-				
 				return pHosts;
-
 			}else{
 				List<AbstractParameterHost> paramHosts = new ArrayList<AbstractParameterHost>();
 				for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
@@ -793,7 +817,14 @@ public class DbUtils {
 					paramHost.setName(rsMeta.getColumnLabel(i));
 					paramHost.setSqlType(rsMeta.getColumnType(i));
 					//paramHost.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType()));
-					paramHost.setJavaClass(Class.forName(rsMeta.getColumnClassName(i)));
+					Class<?> javaClass = null;
+					try {
+						javaClass = Class.forName(rsMeta.getColumnClassName(i));
+					} catch (Exception e) {
+						e.printStackTrace();
+						javaClass = Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType());
+					}
+					paramHost.setJavaClass(javaClass);
 					paramHost.setIdentity(false);
 					paramHost.setNullable(false);
 					paramHost.setPrimary(false);

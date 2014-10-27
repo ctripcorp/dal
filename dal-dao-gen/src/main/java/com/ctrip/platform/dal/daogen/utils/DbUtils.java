@@ -604,7 +604,7 @@ public class DbUtils {
 			if(dbType.equalsIgnoreCase("Microsoft SQL Server")){
 				sql = "select top 1 * from " + tableViewName;
 			} else {
-				sql = "select * from " + tableViewName + "limit 1";
+				sql = "select * from " + tableViewName + " limit 1";
 			}
 			PreparedStatement ps = connection.prepareStatement(sql);
 			rs = ps.executeQuery();

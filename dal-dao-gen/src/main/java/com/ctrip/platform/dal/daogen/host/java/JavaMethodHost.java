@@ -148,8 +148,7 @@ public class JavaMethodHost {
 	}
 
 	public String getSql() {
-		String newSql = sql.replaceAll("[\\n\\r]", " ");
-		return newSql;
+		return sql.replaceAll("[\r\n\t]", " ").replaceAll(" {2,}", " ");
 	}
 
 	public void setSql(String sql) {

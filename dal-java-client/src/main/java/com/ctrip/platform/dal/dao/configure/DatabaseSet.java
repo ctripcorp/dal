@@ -7,14 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalHA;
-import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.exceptions.DalException;
-import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DatabaseSet {
 	public static final String SQL_PROVIDER = "sqlProvider";
@@ -172,16 +168,18 @@ public class DatabaseSet {
 	}
 	
 	private String getRandomRealDbName(DalHA ha, boolean isMaster, boolean isSelect, List<DataBase> masterCandidates, List<DataBase> slaveCandidates) throws DalException {
-		if (isMaster)
+		/*if (isMaster)
 			return getRandomRealDbName(ha, masterCandidates);
 		
 		if (isSelect && slaveCandidates.size() > 0)
 			return getRandomRealDbName(ha, slaveCandidates);
 
-		return getRandomRealDbName(ha, masterCandidates);
+		return getRandomRealDbName(ha, masterCandidates);*/
+		DatabaseSelector selector = new DatabaseSelector(ha, masterCandidates, slaveCandidates, isSelect);
+		return selector.select();
 	}
 	
-	private String getRandomRealDbName(DalHA ha, List<DataBase> dbs) throws DalException {
+/*	private String getRandomRealDbName(DalHA ha, List<DataBase> dbs) throws DalException {
 		List<String> availableDbNames = this.getNotMarkdownDbNames(dbs);
 		if(ha == null || availableDbNames.size() == 1){
 			int index = (int)(Math.random() * availableDbNames.size());	
@@ -219,5 +217,5 @@ public class DatabaseSet {
 		}
 		
 		return dbNames;
-	}
+	}*/
 }

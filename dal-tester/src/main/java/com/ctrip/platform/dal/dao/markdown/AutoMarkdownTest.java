@@ -40,7 +40,7 @@ public class AutoMarkdownTest {
 	public void markdownSuccessTest() throws InterruptedException{
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
 		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
+		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(10);
 		
 		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
 		for (int i = 0; i < 10; i++) {

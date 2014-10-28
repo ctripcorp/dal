@@ -78,6 +78,8 @@ public enum ErrorCode {
 	
 	MarkdownConnection(ErrorClassify.Connection, 5301, "The DB or allinonekey [%s] has bean marked down"),
 	
+	NullLogicDbName(ErrorClassify.Connection, 5302, "The master/slave database set is empty"),
+	
 	NoMoreConnectionToFailOver(ErrorClassify.Connection, 5300, "There is no more fail over connections to try"),
 	
 	/**

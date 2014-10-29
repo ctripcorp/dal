@@ -3,11 +3,14 @@ package com.ctrip.platform.dal.logging.sql;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ctrip.platform.dal.sql.logging.DalClientVersion;
+
 public class SQLInfo {
 	public static final String COUNT = "arch.dal.sql.count";
 	public static final String COST = "arch.dal.sql.cost";
 	
-	public static final String LANGUAGE = "Language";
+	public static final String CLIENT = "Client";
+	private static final String CLIENT_NAME = "Java " + DalClientVersion.version;
 	
 	private static final String DAO = "DAO";
 	private String dao;
@@ -74,7 +77,7 @@ public class SQLInfo {
 		tag.put(METHOD, this.method);
 		tag.put(SIZE, this.size.toString());
 		tag.put(STATUS, this.status);
-		tag.put(LANGUAGE, "Java");
+		tag.put(CLIENT, CLIENT_NAME);
 		
 		return tag;
 	}

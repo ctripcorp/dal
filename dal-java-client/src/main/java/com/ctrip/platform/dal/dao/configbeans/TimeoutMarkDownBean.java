@@ -26,8 +26,10 @@ public class TimeoutMarkDownBean extends ConfigBeanBase{
     private String mySqlErrorCodes = "0";
 	@BeanMeta(alias = "SqlServerErrorCodes")
     private String sqlServerErrorCodes = "-2";
-    
+	
+	@BeanMeta(omit = true)
     private Set<Integer> mysqlTimeoutMarkdownCodes = new HashSet<Integer>();
+	@BeanMeta(omit = true)
     private Set<Integer> sqlServerTimeoutMarkdownCodes = new HashSet<Integer>();
     
     public TimeoutMarkDownBean(){

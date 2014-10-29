@@ -28,8 +28,8 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 	@BeanMeta(alias = "EnableAutoMarkDown")
 	private volatile boolean enableAutoMarkDown = true;
 
-	@BeanMeta(alias = "AutoMarkUpVolume")
-	private volatile int autoMarkUpVolume = -1;
+	@BeanMeta(alias = "AutoMarkUpBatches")
+	private volatile int autoMarkUpVolume = 100;
 
 	@BeanMeta(alias = "MarkDownKeys")
 	private volatile String markDownKeys = "";

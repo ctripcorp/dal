@@ -146,23 +146,24 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 		return this.isAppMarkDown() || this.marks.containsKey(dbname);
 	}
 
-	public synchronized boolean markdown(String dbname) {
+	public synchronized void markdown(String dbname) {
+		this.autoDowns.add(dbname);
 		if(this.isEnableAutoMarkDown()){
 			if (!this.marks.containsKey(dbname)) {
 				this.marks.put(dbname, new Markdown(true));
 				this.markDownKeys = StringUtils.join(this.getMarks(), ",");
 			}
-			return this.marks.containsKey(dbname);
-		}else{
-			return this.autoDowns.add(dbname);
 		}
 	}
 
 	public synchronized void markup(String dbname) {
-		if (this.marks.containsKey(dbname)) {
-			this.marks.remove(dbname);
-			this.markDownKeys = StringUtils.join(this.getMarks(), ",");
-			MarkupManager.reset(dbname);
+		this.autoDowns.remove(dbname);
+		if(this.isEnableAutoMarkDown()){
+			if (this.marks.containsKey(dbname)) {
+				this.marks.remove(dbname);
+				this.markDownKeys = StringUtils.join(this.getMarks(), ",");
+				MarkupManager.reset(dbname);
+			}	
 		}
 	}
 

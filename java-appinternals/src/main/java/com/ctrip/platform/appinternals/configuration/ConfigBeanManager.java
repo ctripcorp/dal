@@ -1,5 +1,7 @@
 package com.ctrip.platform.appinternals.configuration;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,7 +33,12 @@ public class ConfigBeanManager {
 				alais.put(bean.getBeanInfo().getAlias(), bean.getBeanInfo().getFullName());
 			}
 		}
-		load(beans);
+		load(Arrays.asList(beans));
+	}
+	
+	public static void setPropertiesPath(String path){
+		storage = new Storage(path);
+		storage.load();
 	}
 	
 	public static Map<String, ConfigBeanBase> getBeans(){
@@ -43,7 +50,7 @@ public class ConfigBeanManager {
 		return key != null && !key.isEmpty() ? cache.get(key) :cache.get(name);
 	}
 	
-	public static void load(ConfigBeanBase... beans){
+	public static void load(Collection<ConfigBeanBase> beans){
 		for (ConfigBeanBase bean : beans) {
 			String className = bean.getBeanInfo().getFullName();
 			String propName = "";

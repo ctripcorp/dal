@@ -30,6 +30,7 @@ public class TimeoutDetectorTest {
 	@Test
 	public void countBaseLineMatchTest() {
 		TimeoutDetector detector = new TimeoutDetector();
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
 		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
 		for (int i = 0; i < 10; i++) {
@@ -77,6 +78,7 @@ public class TimeoutDetectorTest {
 	public void errorPercentMatchTest(){
 		TimeoutDetector detector = new TimeoutDetector();
 		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
 		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercentReferCount(10);
 		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercentThreshold(0.5f);
 		for (int i = 0; i < 10; i++) {

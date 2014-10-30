@@ -10,17 +10,17 @@ import com.ctrip.platform.appinternals.configuration.ConfigBeanBase;
 @BeanMeta(alias="arch-data-common-bean-timeoutmarkdownbean")
 public class TimeoutMarkDownBean extends ConfigBeanBase{
 	@BeanMeta(alias = "EnableTimeoutMarkDown")
-	private volatile boolean enableTimeoutMarkDown = true;
+	private volatile boolean enableTimeoutMarkDown = false;
 	@BeanMeta(alias = "SamplingDuration")
-    private volatile int samplingDuration = 60;
+    private volatile int samplingDuration = 120;
 	@BeanMeta(alias = "TimeoutThreshold")
 	private volatile int timeoutThreshold = 1;
 	@BeanMeta(alias = "ErrorCountThreshold")
-    private volatile int errorCountThreshold = 1000;
+    private volatile int errorCountThreshold = 300;
 	@BeanMeta(alias = "ErrorPercentThreshold")
-    private volatile float errorPercentThreshold = 0.8f;
+    private volatile float errorPercentThreshold = 0.5f;
 	@BeanMeta(alias = "ErrorPercentReferCount")
-	private volatile int errorPercentReferCount = 200;
+	private volatile int errorPercentReferCount = 400;
 	
 	@BeanMeta(alias = "MySqlErrorCodes")
     private String mySqlErrorCodes = "0";

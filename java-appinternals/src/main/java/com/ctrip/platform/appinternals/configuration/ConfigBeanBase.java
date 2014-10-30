@@ -95,6 +95,8 @@ public abstract class ConfigBeanBase{
 			}
 
 			this.info.setLastModifyTime(new Date());
+			
+			ConfigBeanManager.save(this, fname.getName());
 		}else{
 			throw new Exception("The update field[" + fieldName+ "] name or alias doesn't exist.");
 		}

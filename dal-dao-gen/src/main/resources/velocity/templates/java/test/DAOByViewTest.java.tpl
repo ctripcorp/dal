@@ -21,7 +21,7 @@ public class ${host.getPojoClassName()}DaoTest {
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 			
 			//Get the count
-			System.out.println(dao.Count(null));
+			System.out.println(dao.count(null));
 			
 			//Get all records
 			List<${host.getPojoClassName()}> ls = dao.getAll(null);

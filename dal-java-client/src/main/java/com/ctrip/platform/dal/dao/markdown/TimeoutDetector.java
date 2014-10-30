@@ -69,15 +69,13 @@ public class TimeoutDetector implements ErrorDetector{
 	}
 
 	public static boolean isTimeOutException(ErrorContext ctx){
-		if(ctx.getCost() >= ConfigBeanFactory.getTimeoutMarkDownBean().getTimeoutThreshold() * 1000){
-			if(ctx.getDbCategory() == DatabaseCategory.SqlServer){
-				if(ctx.getMsg().startsWith("The query has timed out") || ctx.getMsg().startsWith("查询超时")){
-					return true;
-				}
-			} else{
-				if(ctx.getExType().toString().equalsIgnoreCase(MySQLTimeoutException.class.toString())){
-					return true;
-				}
+		if(ctx.getDbCategory() == DatabaseCategory.SqlServer){
+			if(ctx.getMsg().startsWith("The query has timed out") || ctx.getMsg().startsWith("查询超时")){
+				return true;
+			}
+		} else{
+			if(ctx.getExType().toString().equalsIgnoreCase(MySQLTimeoutException.class.toString())){
+				return true;
 			}
 		}
 		return false;

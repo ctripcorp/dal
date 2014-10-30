@@ -29,6 +29,7 @@ public class MarkdownAndUpIntergration {
 	public void markdownSuccessTest() throws Exception {
 		String logicName = "dao_test";
 		//Mark Down
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
 		ConfigBeanFactory.getMarkdownConfigBean().markdown(logicName);
 		try{
 			this.testQuery(logicName);
@@ -50,6 +51,9 @@ public class MarkdownAndUpIntergration {
 	@Test
 	public void markdownMulipleSlavesTest(){
 		String logicName = "HA_Test";
+		
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
+		
 		//Mark Down
 		ConfigBeanFactory.getMarkdownConfigBean().markdown("dao_test_1");
 		ConfigBeanFactory.getMarkdownConfigBean().markdown("dao_test_2");		

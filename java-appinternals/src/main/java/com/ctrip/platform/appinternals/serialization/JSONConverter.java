@@ -19,9 +19,14 @@ public class JSONConverter implements Converter{
 			MarshallingContext context) {
 		ConfigBeanBase bean = (ConfigBeanBase)source;
 		for (ConfigName cname : bean.getFieldNames()) {
-			writer.startNode(cname.getName());
+			String nodeName = cname.getAlias();
+			if(nodeName == null || nodeName.isEmpty()){
+				nodeName = cname.getName();
+			}
+			writer.startNode(nodeName);
 			try {
-				writer.setValue(bean.get(cname.getName()));
+				if(cname.getGetMethod() != null)
+					writer.setValue(bean.get(cname.getName()));
 			} catch (Exception e) {
 				writer.setValue(e.getMessage());
 			}

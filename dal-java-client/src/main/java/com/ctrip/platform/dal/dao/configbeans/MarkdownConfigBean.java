@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.configbeans;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -17,7 +18,7 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.markdown.Markdown;
 import com.ctrip.platform.dal.dao.markdown.MarkupManager;
 
-@BeanMeta(alias = "arch-data-common-bean-markdownmarkupbean")
+@BeanMeta(alias = "arch-data-common-bean-markdownbean")
 public class MarkdownConfigBean extends ConfigBeanBase {
 	
 	private static Logger logger = LoggerFactory.getLogger(MarkdownConfigBean.class);
@@ -26,14 +27,17 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 	private volatile boolean appMarkDown = false;
 
 	@BeanMeta(alias = "EnableAutoMarkDown")
-	private volatile boolean enableAutoMarkDown = true;
+	private volatile boolean enableAutoMarkDown = false;
 
 	@BeanMeta(alias = "AutoMarkUpBatches")
-	private volatile int autoMarkUpVolume = 100;
+	private volatile int autoMarkUpVolume = -1;
 
 	@BeanMeta(alias = "MarkDownKeys")
 	private volatile String markDownKeys = "";
 
+	@BeanMeta(alias = "AutoMarkDowns")
+	private volatile String autoMarkDowns="";
+	
 	@BeanMeta(alias = "AllInOneKeys")
 	private volatile String allInOneKeys = "";
 
@@ -41,13 +45,15 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 	private volatile String autoMarkUpSchedule = "1,3,5";
 
 	@BeanMeta(alias = "AutoMarkUpDelay")
-	private volatile int autoMarkUpDelay = 60;
+	private volatile int autoMarkUpDelay = 120;
 
 	@BeanMeta(omit = true)
 	private int[] markUpSchedule = new int[] { 1, 3, 5 };
 
 	@BeanMeta(omit = true)
 	private Map<String, Markdown> marks = new HashMap<String, Markdown>();
+	@BeanMeta(omit = true)
+	private Set<String> autoDowns = new HashSet<String>();
 	@BeanMeta(omit = true)
 	private Lock lock = new ReentrantLock();
 
@@ -101,6 +107,8 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 				// TODO Auto-generated method stub
 			}
 		});
+
+		
 	}
 
 	public boolean isAppMarkDown() {
@@ -139,11 +147,15 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 	}
 
 	public synchronized boolean markdown(String dbname) {
-		if (!this.marks.containsKey(dbname)) {
-			this.marks.put(dbname, new Markdown(true));
-			this.markDownKeys = StringUtils.join(this.getMarks(), ",");
+		if(this.isEnableAutoMarkDown()){
+			if (!this.marks.containsKey(dbname)) {
+				this.marks.put(dbname, new Markdown(true));
+				this.markDownKeys = StringUtils.join(this.getMarks(), ",");
+			}
+			return this.marks.containsKey(dbname);
+		}else{
+			return this.autoDowns.add(dbname);
 		}
-		return this.marks.containsKey(dbname);
 	}
 
 	public synchronized void markup(String dbname) {
@@ -223,5 +235,9 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 
 	public int[] getMarkUpSchedule() {
 		return markUpSchedule;
+	}
+
+	public String getAutoMarkDowns() {
+		return StringUtils.join(this.autoDowns, ",");
 	}
 }

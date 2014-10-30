@@ -52,8 +52,6 @@ public class MarkdownManager {
 	}
 
 	public static void detect(DalConnection conn, long start, Throwable e) {
-		if(!ConfigBeanFactory.getMarkdownConfigBean().isEnableAutoMarkDown())
-			return;
 		long cost = System.currentTimeMillis() - start;
 		if (conn != null && conn.getMeta() != null && e instanceof SQLException) {
 			ErrorContext ctx = new ErrorContext(

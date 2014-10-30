@@ -121,7 +121,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 		}
 	} 
 	
-#if($host.hasPk() && $host.generateAPI(1,2,3,13,14,15,22,23,24,34,35,36))
+#if($host.hasPk() && $host.generateAPI(1,13,2,14,3,15))
 #if($host.isIntegerPk())
 	@Test
 	public void testQueryByPk() {
@@ -156,7 +156,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 #end
 #end
 
-#if($host.generateAPI(3,15,24,36))
+#if($host.generateAPI(2,14,3,15))
 	@Test
 	public void testQueryByPkWithEnitity(){
 		${host.getPojoClassName()} pk = testdata[0];
@@ -173,7 +173,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	}
 #end
 
-#if($host.generateAPI(4,16,25,37))
+#if($host.generateAPI(4,16))
 	@Test
 	public void testCount(){
 		int count = -1;
@@ -187,7 +187,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	}
 #end
 
-#if($host.generateAPI(5,17,26,38))
+#if($host.generateAPI(5,17))
 	@Test
 	public void testQueryByPage(){
 		int pageNo = 1;
@@ -206,7 +206,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	}
 #end
 
-#if($host.generateAPI(6,18,27))
+#if($host.generateAPI(6,18))
 	@Test
 	public void testGetAll(){
 		try{
@@ -236,7 +236,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 		}
 	}
 #end
-#if($host.getSpInsert().getType=="sp3" && $host.generateAPI(8,29,39))
+#if($host.getSpInsert().getType=="sp3" && $host.generateAPI(39))
 	@Test
 	public void testMultipleInsert(){
 		${host.getPojoClassName()}[] pojos = testdata2;
@@ -310,139 +310,35 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 #if($host.getSpDelete().isExist())
 #if($host.generateAPI(20))
 	@Test
-	public void testDelete(){
+	public void testDelete() throws SQLException {
 		 ${host.getPojoClassName()} daoPojo = testdata2[0];
 		 ${host.getPojoClassName()} ret = null;
-#if($host.isHasIdentity())
-		 KeyHolder holder = new KeyHolder();
-#end
-		 try{
-#if($host.isHasIdentity())
-		    dao.insert(new DalHints(), holder, daoPojo);
-			daoPojo.set${host.getPrimaryKeys().get(0).getCapitalizedName()}((${host.getPrimaryKeyType()})holder.getKey());
-#else
-		    dao.insert(new DalHints(), daoPojo);
-#end
-			ret = dao.queryByPk(daoPojo, new DalHints());
-			assertTrue(null != ret);
-			
-			dao.delete(new DalHints(), daoPojo);
-			
-			//TODO: Verify the result
-			ret = dao.queryByPk(daoPojo, new DalHints());		
-			assertTrue(null == ret);
-		 }catch (SQLException e) {
-			e.printStackTrace();
-		}
+		 dao.delete(new DalHints(), daoPojo);
 	}
 #end
 	
 #if($host.getSpInsert().getType=="sp3" && $host.generateAPI(40))
 	@Test
-	public void testMultipleDelete(){
+	public void testMultipleDelete() throws SQLException {
 		${host.getPojoClassName()}[] pojos = testdata2;
-		${host.getPojoClassName()} ret = null;
-#if($host.isHasIdentity())
-		KeyHolder holder = new KeyHolder();
-#end
-		try{
-			for(int i = 0; i < pojos.length; i++){
-				ret = null;
-#if($host.isHasIdentity())
-		        dao.insert(new DalHints(), holder, pojos[i]);
-				pojos[i].set${host.getPrimaryKeys().get(0).getCapitalizedName()}(holder.getKey(i).intValue());
-#else
-		        dao.insert(new DalHints(), pojos[i]);
-#end
-				ret = dao.queryByPk(pojos[i], new DalHints());
-				assertTrue(null != ret);
-			}
-			
-			dao.delete(new DalHints(), pojos);
-			
-			//TODO: Verify the result
-			for(int i = 0; i < pojos.length; i++){
-				ret = null;
-				ret = dao.queryByPk(pojos[i], new DalHints());
-				assertTrue(null == ret);
-			}
-			
-		}catch (SQLException e) {
-			e.printStackTrace();
-		}
+		dao.delete(new DalHints(), pojos);
 	}
 #end
 #else
 #if($host.generateAPI(10,31))
 	@Test
-	public void testMultipleDelete(){
+	public void testMultipleDelete() throws SQLException {
 		${host.getPojoClassName()}[] pojos = testdata2;
-		${host.getPojoClassName()} ret = null;
-#if($host.isHasIdentity())
-		KeyHolder holder = new KeyHolder();
-#end
-		try{
-			
-			for(int i = 0; i < pojos.length; i++){
-				ret = null;
-#if($host.isHasIdentity())
-		        dao.insert(new DalHints(), holder, pojos[i]);
-				pojos[i].set${host.getPrimaryKeys().get(0).getCapitalizedName()}(holder.getKey(i).intValue());
-#else
-		         dao.insert(new DalHints(), pojos[i]);
-#end
-				ret = dao.queryByPk(pojos[i], new DalHints());
-				assertTrue(null != ret);
-			}
-			
-			dao.delete(new DalHints(), pojos);
-			
-			//TODO: Verify the result
-			for(int i = 0; i < pojos.length; i++){
-				ret = null;
-				ret = dao.queryByPk(pojos[i], new DalHints());
-				assertTrue(null == ret);
-			}
-		}catch (SQLException e) {
-			fail(e.getMessage());
-		}
+		dao.delete(new DalHints(), pojos);
 	}
 #end
 
 #if($host.generateAPI(11,32))
 	@Test
-	public void testBatchDelete(){
+	public void testBatchDelete() throws SQLException {
 		${host.getPojoClassName()}[] pojos = testdata2;
-		${host.getPojoClassName()} ret = null;
-#if($host.isHasIdentity())
-		KeyHolder holder = new KeyHolder();
-#end
-		try{
-			for(int i = 0; i < pojos.length; i++){
-				ret = null;
-#if($host.isHasIdentity())
-		        dao.insert(new DalHints(),holder, pojos[i]);
-				pojos[i].set${host.getPrimaryKeys().get(0).getCapitalizedName()}(holder.getKey(i).intValue());
-#else
-		        dao.insert(new DalHints(), pojos[i]);
-#end
-				ret = dao.queryByPk(pojos[i], new DalHints());			
-				assertTrue(null != ret);
-			}
-			
-			int[] rows = dao.batchDelete(new DalHints(), pojos);
-			
-			//TODO: Verify the result
-			for(int i = 0; i < pojos.length; i++){
-				ret = null;
-				ret = dao.queryByPk(pojos[i], new DalHints());
-				assertTrue(null == ret);
-			}
-
-			assertTrue(null != rows && rows.length == pojos.length);
-		}catch (SQLException e) {
-			fail(e.getMessage());
-		}
+		int[] rows = dao.batchDelete(new DalHints(), pojos);
+		assertTrue(null != rows && rows.length >= 0);
 	}
 #end
 #end
@@ -450,72 +346,20 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 #if($host.getSpUpdate().isExist())
 #if($host.generateAPI(21))
 	@Test
-	public void testUpdate(){
+	public void testUpdate() throws SQLException {
 		 ${host.getPojoClassName()} pojos = testdata2[0];
-		 ${host.getPojoClassName()} ret = null;
-		 try{
-#if($host.isHasIdentity())
-		    KeyHolder keyHolder = new KeyHolder();
-			dao.insert(new DalHints(), keyHolder, pojos);
-			pojos.set${host.getPrimaryKeyName()}((${host.getPrimaryKeyType()})keyHolder.getKey(0));
-			
-			ret = dao.queryByPk(pojos, new DalHints());
-			assertNotNull(ret);
-#else
-			dao.insert(new DalHints(), pojos);
-			ret = dao.queryByPk(pojos, new DalHints());
-			assertTrue(null != ret);
-#end
-			//Change the values of pojos
-			int row = dao.update(new DalHints(), pojos);
-			assertTrue(row >= 0);
-			
-			ret = dao.queryByPk(pojos, new DalHints());
-			//TODO: Verify the result
-			assertTrue(null != ret);
-			
-		 }catch (SQLException e) {
-			e.printStackTrace();
-		}
+		 //Change the values of pojos
+		 int row = dao.update(new DalHints(), pojos);
+		 assertTrue(row >= 0);
 	}
 #end
 #else
-#if($host.generateAPI(12,33,41))
+#if($host.generateAPI(12,33))
 	@Test
-	public void testMultipleUpdate(){
+	public void testMultipleUpdate() throws SQLException {
 		${host.getPojoClassName()}[] pojos = testdata2;
-		${host.getPojoClassName()} ret = null;
-#if($host.isHasIdentity())
-		KeyHolder holder = new KeyHolder();
-#end
-		try{
-			for(int i = 0; i < pojos.length; i++){
-				ret = null;
-    			
-#if($host.isHasIdentity())
-		        dao.insert(new DalHints(), holder, pojos[i]);
-				pojos[i].set${host.getPrimaryKeys().get(0).getCapitalizedName()}(holder.getKey(i).intValue());
-#else
-		        dao.insert(new DalHints(), pojos[i]);
-#end
-				ret = dao.queryByPk(pojos[0], new DalHints());
-				assertTrue(null != ret);
-			}
-			
-			//TODO: Change the pojos
-			dao.update(new DalHints(), pojos);
-			
-			for(int i = 0; i < pojos.length; i++){
-				ret = null;
-				ret = dao.queryByPk(pojos[0], new DalHints());
-				
-				//TODO: Verify the result
-				assertTrue(null != ret);
-			}
-			
-		}catch (SQLException e) {
-			e.printStackTrace();
-		}
+		//TODO: Change the pojos
+		dao.update(new DalHints(), pojos);
 	}
 #end
 #end

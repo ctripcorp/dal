@@ -21,4 +21,11 @@ public @interface BeanMeta {
 	 * 		Configurable or not
 	 */
 	boolean omit() default false;
+	
+	/**
+	 * If this option is set false
+	 * the field will not be persisted
+	 * @return
+	 */
+	boolean persistence() default true;
 }

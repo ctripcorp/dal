@@ -55,23 +55,25 @@ public class ConfigBeanManager {
 			String className = bean.getBeanInfo().getFullName();
 			String propName = "";
 			for(ConfigName field : bean.getFieldNames()){
-				propName = className + "." + field.getName();
-				String propVal = storage.get(propName);
-				if(null == propVal){
-					try {
-						storage.set(propName, bean.get(field.getName()));
-					} catch (Exception e) {
-						logger.error(String.format("Save field[%] for bean[%s] failed",
-								field.getName(), className));
+				if(field.isPersistence() && bean.getBeanInfo().isPersistence()){
+					propName = className + "." + field.getName();
+					String propVal = storage.get(propName);
+					if(null == propVal){
+						try {
+							storage.set(propName, bean.get(field.getName()));
+						} catch (Exception e) {
+							logger.error(String.format("Save field[%] for bean[%s] failed",
+									field.getName(), className));
+						}
+					}else{
+						try {
+							if(field.getSetMethod() != null)
+								bean.set(field.getName(), propVal);
+						} catch (Exception e) {
+							logger.error(String.format("Load field[%s] for bean[%s] failed",
+									field.getName(), className));
+						}		
 					}
-				}else{
-					try {
-						if(field.getSetMethod() != null)
-							bean.set(field.getName(), propVal);
-					} catch (Exception e) {
-						logger.error(String.format("Load field[%s] for bean[%s] failed",
-								field.getName(), className));
-					}		
 				}
 			}
 		}

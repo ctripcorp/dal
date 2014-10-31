@@ -16,6 +16,7 @@ import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.ctrip.platform.appinternals.Result;
 import com.ctrip.platform.appinternals.serialization.JSONConverter;
 import com.ctrip.platform.appinternals.serialization.XMLConverter;
 import com.thoughtworks.xstream.XStream;
@@ -82,6 +83,11 @@ public class Helper {
 		jsonStream.alias(alias, type);
 		jsonStream.registerConverter(new JSONConverter());
 		return jsonStream.toXML(model);
+	}
+	
+	public static String toChangeResultJson(Result result){
+		return String.format("{\"Message\":\"Success\",\"IsSuccess\":\"True\"}", result.getMessage(), result.isSueccess() ? "Ture" : "False");
+		
 	}
 
 	public static String sendPost(String url, String param) {

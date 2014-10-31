@@ -59,7 +59,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	public void testGetAll(){
 		try{
 			List<${host.getPojoClassName()}> pojos = dao.getAll(new DalHints());
-			int count = dao.Count(new DalHints());
+			int count = dao.count(new DalHints());
 			//TODO: Verify the result.
 			assertTrue(null != pojos && pojos.size() == count);
 		}catch (SQLException e) {
@@ -71,7 +71,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	public void testCount(){
 		int count = -1;
 		try{
-			count = dao.Count(new DalHints());
+			count = dao.count(new DalHints());
 			List<${host.getPojoClassName()}> pojos = dao.getAll(new DalHints());
 			//TODO: Verify the result.
 			assertTrue(count >= pojos.size());

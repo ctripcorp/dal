@@ -55,6 +55,7 @@ public class ${host.getDbSetName()}SpDaoUnitTest {
 		}
 	}
 #foreach($h in $host.getSpHosts())
+#if($h.isSp3())
 	//Test batch call ${h.getSpName()} method
 	@Test
 	public void testCall${h.getPojoClassName()}(){
@@ -66,7 +67,7 @@ public class ${host.getDbSetName()}SpDaoUnitTest {
 			e.printStackTrace();
 		}
 	}
-	
+#end	
 	//Test call ${h.getSpName()} method
 	@Test
 	public void testCall${h.getPojoClassName()}(){

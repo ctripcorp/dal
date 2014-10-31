@@ -84,13 +84,23 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 		this.addChangeEvent("autoMarkUpSchedule", new ChangeEvent() {
 			@Override
 			public void end(Object oldVal, String newVal) throws Exception {
-				if (newVal == null || newVal.isEmpty())
-					throw new Exception();
 				String[] tokens = newVal.trim().split(",");
 				int[] temp = new int[tokens.length];
 				for (int i = 0; i < tokens.length; i++) {
 					temp[i] = Integer.parseInt(tokens[i]);
-					if (temp[i] < 1 && temp[i] > 9) {
+				}
+				markUpSchedule = temp;
+			}
+
+			@Override
+			public void before(Object oldVal, String newVal) throws Exception {
+				if (newVal == null || newVal.isEmpty())
+					throw new Exception("The value can't be empty");
+				String[] tokens = newVal.trim().split(",");
+				int[] temp = new int[tokens.length];
+				for (int i = 0; i < tokens.length; i++) {
+					temp[i] = Integer.parseInt(tokens[i]);
+					if (temp[i] < 1 || temp[i] > 9) {
 						throw new Exception(
 								"The auto mark up schedule must be greater than 0 and lesser than 9");
 					}
@@ -99,12 +109,6 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 								"The auto mark up schedule must be ascending order");
 					}
 				}
-				markUpSchedule = temp;
-			}
-
-			@Override
-			public void before(Object oldVal, String newVal) throws Exception {
-				// TODO Auto-generated method stub
 			}
 		});
 

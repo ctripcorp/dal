@@ -86,7 +86,7 @@ public class Helper {
 	}
 	
 	public static String toChangeResultJson(Result result){
-		return String.format("{\"Message\":\"Success\",\"IsSuccess\":\"True\"}", result.getMessage(), result.isSueccess() ? "Ture" : "False");
+		return String.format("{\"Message\":\"%s\",\"IsSuccess\":\"%s\"}", result.getMessage(), result.isSueccess() ? "Ture" : "False");
 		
 	}
 

@@ -211,6 +211,7 @@ public class HATest {
 							mockFailOverThrow(hints.getHA());
 						}
 						else{
+							//Here fail over to the third slave
 							while(rs.next()){
 								return rs.getInt(1);
 							}
@@ -244,6 +245,7 @@ public class HATest {
 							mockFailOverThrow(hints.getHA());
 						}
 						else{
+							//Here fail over to master
 							while(rs.next()){
 								return rs.getInt(1);
 							}

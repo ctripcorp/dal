@@ -154,7 +154,7 @@ public class AppInternalsServlet extends HttpServlet {
 							ctx.getRemoteip()));
 				}
 				ctx.getContent().append(
-						Helper.toJSON(Result.class, "Result", result));
+						Helper.toChangeResultJson(result));
 			}
 		}
 	}

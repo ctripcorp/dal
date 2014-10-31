@@ -43,6 +43,7 @@ public abstract class ConfigBeanBase{
 			}catch(NoSuchMethodException ex){ }
 			ConfigName pname = new ConfigName();
 			pname.setName(field.getName());
+			pname.setPersistence(falias.persistence());
 			pname.setClazz(field.getType());
 			pname.setGetMethod(getMethod);
 			pname.setSetMethod(setMethod);
@@ -57,6 +58,7 @@ public abstract class ConfigBeanBase{
 			this.info.setAlias(alias.alias());
 		}
 		this.info.setName(this.getClass().getSimpleName());
+		this.info.setPersistence(alias.persistence());
 		this.info.setFullName(this.getClass().getName().replace(".", "-"));
 	}
 	
@@ -95,8 +97,8 @@ public abstract class ConfigBeanBase{
 			}
 
 			this.info.setLastModifyTime(new Date());
-			
-			ConfigBeanManager.save(this, fname.getName());
+			if(fname.isPersistence() || this.info.isPersistence())
+				ConfigBeanManager.save(this, fname.getName());
 		}else{
 			throw new Exception("The update field[" + fieldName + "] name or alias doesn't exist.");
 		}

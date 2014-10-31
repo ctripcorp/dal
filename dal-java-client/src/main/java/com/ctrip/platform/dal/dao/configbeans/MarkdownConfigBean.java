@@ -23,7 +23,7 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 	
 	private static Logger logger = LoggerFactory.getLogger(MarkdownConfigBean.class);
 	
-	@BeanMeta(alias = "AppMarkDown")
+	@BeanMeta(alias = "AppMarkDown", persistence = false)
 	private volatile boolean appMarkDown = false;
 
 	@BeanMeta(alias = "EnableAutoMarkDown")
@@ -32,10 +32,10 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 	@BeanMeta(alias = "AutoMarkUpBatches")
 	private volatile int autoMarkUpVolume = -1;
 
-	@BeanMeta(alias = "MarkDownKeys")
+	@BeanMeta(alias = "MarkDownKeys", persistence = false)
 	private volatile String markDownKeys = "";
 
-	@BeanMeta(alias = "AutoMarkDowns")
+	@BeanMeta(alias = "AutoMarkDowns", persistence = false)
 	private volatile String autoMarkDowns="";
 	
 	@BeanMeta(alias = "AllInOneKeys")

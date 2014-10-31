@@ -9,6 +9,7 @@ public class ConfigName {
 	private Class<?> clazz;
 	private Method getMethod;
 	private Method setMethod;
+	private boolean persistence = true;
 	
 	public boolean isRead() {
 		return this.getMethod != null && this.getMethod.getModifiers() == Modifier.PUBLIC;
@@ -56,4 +57,13 @@ public class ConfigName {
 	public void setAlias(String alias) {
 		this.alias = alias;
 	}
+
+	public boolean isPersistence() {
+		return persistence;
+	}
+
+	public void setPersistence(boolean persistence) {
+		this.persistence = persistence;
+	}
+	
 }

@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class ConfigInfo{
 	private String name;
+	private boolean persistence = true;
 	private String fullName;
 	private String alias;
 	private Date lastModifyTime;
@@ -37,4 +38,11 @@ public class ConfigInfo{
 	public void setAlias(String alias) {
 		this.alias = alias;
 	}
+	public boolean isPersistence() {
+		return persistence;
+	}
+	public void setPersistence(boolean persistence) {
+		this.persistence = persistence;
+	}
+	
 }

@@ -143,6 +143,10 @@ public final class DalTableDao<T> {
 		initDbSpecific();
 	}
 	
+	public DalClient getClient() {
+		return client;
+	}
+	
 	public DatabaseCategory getDatabaseCategory() {
 		return dbCategory;
 	}

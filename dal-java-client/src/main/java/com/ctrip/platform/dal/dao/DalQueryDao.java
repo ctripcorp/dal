@@ -24,6 +24,10 @@ public final class DalQueryDao {
 	public DalQueryDao(String logicDbName) {
 		this.client = DalClientFactory.getClient(logicDbName);
 	}
+	
+	public DalClient getClient() {
+		return client;
+	}
 
 	/**
 	 * Execute query by the given sql with parameters. The result will be wrapped into type defined by the given mapper.

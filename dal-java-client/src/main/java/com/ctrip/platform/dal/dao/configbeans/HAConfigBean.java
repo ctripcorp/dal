@@ -7,7 +7,7 @@ import com.ctrip.platform.appinternals.annotations.BeanMeta;
 import com.ctrip.platform.appinternals.configuration.ChangeEvent;
 import com.ctrip.platform.appinternals.configuration.ConfigBeanBase;
 
-@BeanMeta(alias = "haconf")
+@BeanMeta(alias = "arch-data-common-bean-habean")
 public class HAConfigBean extends ConfigBeanBase{
 	@BeanMeta(alias = "HAEnabled")
 	private volatile boolean enable = false;

@@ -25,30 +25,48 @@ public class DatabaseSelector {
 	
 	public String select() throws DalException{
 		if(this.isSelect){
-			List<String> dbNames = this.selectNotMarkdownDbNames(this.slaves);
-			if(dbNames.isEmpty()){
-				dbNames = this.selectNotMarkdownDbNames(this.masters);
+			String dbName = this.getDbFromSlave();
+			if(null == dbName){
+				dbName = this.getDbFromMaster();
 			}
 			if(!(this.isNullOrEmpty(this.slaves) && this.isNullOrEmpty(this.masters))){
-				if(dbNames.isEmpty()){
+				if(null == dbName){
 					throw new DalException(ErrorCode.MarkdownConnection, 
 							this.toDbNames(this.masters) + ", " + this.toDbNames(this.slaves));
 				}
-				return this.getRandomRealDbName(dbNames);
+				return dbName;
 			}else{
 				throw new DalException(ErrorCode.NullLogicDbName);
 			}
 		} else{
-			List<String> dbNames = this.selectNotMarkdownDbNames(this.masters);
+			String dbName = this.getDbFromMaster();
 			if(!this.isNullOrEmpty(this.masters)){
-				if(dbNames.isEmpty())
+				if(null == dbName)
 					throw new DalException(ErrorCode.MarkdownConnection, this.toDbNames(this.masters));
-				return this.getRandomRealDbName(dbNames);
+				return dbName;
 			}
 			else{
 				throw new DalException(ErrorCode.NullLogicDbName);
 			}
 		}
+	}
+	
+	private String getDbFromMaster(){
+		if(this.masters == null || this.masters.isEmpty())
+			return null;
+		List<String> dbNames = this.selectNotMarkdownDbNames(this.masters);
+		if(dbNames.isEmpty())
+			return null;
+		return this.getRandomRealDbName(dbNames);
+	}
+	
+	private String getDbFromSlave(){
+		if(this.slaves == null || this.masters.isEmpty())
+			return null;
+		List<String> dbNames = this.selectNotMarkdownDbNames(this.slaves);
+		if(dbNames.isEmpty())
+			return null;
+		return this.getRandomRealDbName(dbNames);
 	}
 	
 	private String getRandomRealDbName(List<String> dbs){

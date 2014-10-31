@@ -101,7 +101,7 @@ public class DalConnectionManager {
 
 		if(!ConfigBeanFactory.getHAConfigBean().isEnable() 
 				|| action.operation != DalEventEnum.QUERY)
-			return _doInConnection(action, hints);;
+			return _doInConnection(action, hints);
 
 		DalHA highAvalible = new DalHA();
 		hints.setHA(highAvalible);

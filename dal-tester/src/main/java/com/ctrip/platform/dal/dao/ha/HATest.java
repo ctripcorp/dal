@@ -222,6 +222,11 @@ public class HATest {
 		Assert.assertEquals(3, count ==null ? 0 : count.intValue());
 	}
 
+	@Test
+	public void testHAWithMarkdowns(){
+		
+	}
+	
 	private SQLException createException(int errorCode) {
 		SQLException mockex = EasyMock.createMock(SQLException.class);
 		EasyMock.expect(mockex.getMessage()).andReturn("test").times(Integer.MAX_VALUE);

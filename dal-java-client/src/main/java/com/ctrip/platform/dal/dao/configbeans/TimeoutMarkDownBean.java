@@ -14,7 +14,7 @@ public class TimeoutMarkDownBean extends ConfigBeanBase{
 	@BeanMeta(alias = "SamplingDuration")
     private volatile int samplingDuration = 120;
 	@BeanMeta(alias = "TimeoutThreshold")
-	private volatile int timeoutThreshold = 1;
+	private volatile int timeoutThreshold = 30;
 	@BeanMeta(alias = "ErrorCountThreshold")
     private volatile int errorCountThreshold = 300;
 	@BeanMeta(alias = "ErrorPercentThreshold")

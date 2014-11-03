@@ -177,6 +177,8 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 			Map<String, Markdown> temp = new HashMap<String, Markdown>();
 			if (newVal == null || newVal.isEmpty()) {
 				for (String mark : this.getMarks()) {
+					if(autoDowns.contains(mark))
+						autoDowns.remove(mark);
 					logger.info(String.format("Database %s has been marked up manually.", mark));
 				}
 				this.marks = temp;
@@ -193,6 +195,8 @@ public class MarkdownConfigBean extends ConfigBeanBase {
 			// The new value need to be marked up on auto mark down
 			for (String key : marks.keySet()) {
 				if (!temp.containsKey(key)) {
+					if(autoDowns.contains(key))
+						autoDowns.remove(key);
 					logger.info(String.format("Database %s has been marked up manually.", key));
 				}
 			}

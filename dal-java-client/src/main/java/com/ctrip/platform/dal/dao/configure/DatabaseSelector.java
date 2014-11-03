@@ -30,7 +30,7 @@ public class DatabaseSelector {
 				dbName = this.getDbFromMaster();
 			}
 			if(!(this.isNullOrEmpty(this.slaves) && this.isNullOrEmpty(this.masters))){
-				if(null == dbName){
+				if(null == dbName && (this.ha == null || !this.ha.isOver())){
 					throw new DalException(ErrorCode.MarkdownConnection, 
 							this.toDbNames(this.masters) + ", " + this.toDbNames(this.slaves));
 				}
@@ -41,7 +41,7 @@ public class DatabaseSelector {
 		} else{
 			String dbName = this.getDbFromMaster();
 			if(!this.isNullOrEmpty(this.masters)){
-				if(null == dbName)
+				if(null == dbName && (this.ha == null || !this.ha.isOver()))
 					throw new DalException(ErrorCode.MarkdownConnection, this.toDbNames(this.masters));
 				return dbName;
 			}
@@ -61,7 +61,7 @@ public class DatabaseSelector {
 	}
 	
 	private String getDbFromSlave(){
-		if(this.slaves == null || this.masters.isEmpty())
+		if(this.slaves == null || this.slaves.isEmpty())
 			return null;
 		List<String> dbNames = this.selectNotMarkdownDbNames(this.slaves);
 		if(dbNames.isEmpty())

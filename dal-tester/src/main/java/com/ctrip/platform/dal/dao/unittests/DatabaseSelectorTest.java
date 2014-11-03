@@ -23,6 +23,10 @@ public class DatabaseSelectorTest {
 	private static final String S2 = "S2";
 	private static final String S3 = "S3";
 	
+	static{
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
+	}
+	
 	@Before
 	public void setUp(){
 		ConfigBeanFactory.getMarkdownConfigBean().markup(M1);

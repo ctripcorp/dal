@@ -49,7 +49,7 @@ public class CSharpMethodHost {
 	public String getParameterDeclaration() {
 		List<String> paramsDeclaration = new ArrayList<String>();
 		for(CSharpParameterHost parameter: parameters) {
-			if(ConditionType.In == parameter.getConditionType()){
+			if(ConditionType.In == parameter.getConditionType() || parameter.isInParameter()){
 				paramsDeclaration.add(String.format("List<%s> %s", parameter.getType(), WordUtils.uncapitalize(parameter.getAlias())));
 			}else if(parameter.getConditionType() == ConditionType.IsNull
 					|| parameter.getConditionType() == ConditionType.IsNotNull){ 

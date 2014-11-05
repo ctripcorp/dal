@@ -23,8 +23,9 @@ public class Permission {
 	}
 	
 	public boolean hasWrite(String ip){
-		return InnerAddress.isLocal(ip) || 
-				this.users != null && this.users.containsKey(ip) ? this.users.get(ip).isWrite() : false;
+		if(InnerAddress.isLocal(ip))
+			return true;
+		return this.users != null && this.users.containsKey(ip) ? this.users.get(ip).isWrite() : false;
 	}
 	
 	public void addUser(String ip, int permission){

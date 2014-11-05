@@ -19,22 +19,14 @@ public class Permission {
 	}
 	
 	public boolean hasRead(String ip){
-		return true;
-		/*if(isLocal(ip))
-			return true;
-		return this.users != null && this.users.containsKey(ip) ? this.users.get(ip).isRead() : false;*/
+		return InnerAddress.isInner(ip);
 	}
 	
 	public boolean hasWrite(String ip){
-		if(isLocal(ip))
-			return true;
-		return this.users != null && this.users.containsKey(ip) ? this.users.get(ip).isWrite() : false;
+		return InnerAddress.isLocal(ip) || 
+				this.users != null && this.users.containsKey(ip) ? this.users.get(ip).isWrite() : false;
 	}
 	
-	private boolean isLocal(String ip){
-		return ip != null && 
-				(ip.equalsIgnoreCase("127.0.0.1") || ip.equalsIgnoreCase("0:0:0:0:0:0:0:1"));
-	}
 	public void addUser(String ip, int permission){
 		if(!this.users.containsKey(ip)){
 			this.users.put(ip, new IPVisitor());

@@ -97,7 +97,6 @@ public class AppInternalsServlet extends HttpServlet {
 					this.doConfiguration(ctx);
 				} catch (Exception e) {
 					ctx.getContent().append(e.getMessage());
-					return;
 				}
 			}
 		} else {
@@ -148,7 +147,7 @@ public class AppInternalsServlet extends HttpServlet {
 					try {
 						for (String key : ctx.getParameters().keySet()) {
 							if (key.equalsIgnoreCase("action")
-									|| key.equalsIgnoreCase("format"))
+									|| key.equalsIgnoreCase("format") || key.equalsIgnoreCase("u"))
 								continue;
 							bean.set(key, ctx.getParameters().get(key));
 						}

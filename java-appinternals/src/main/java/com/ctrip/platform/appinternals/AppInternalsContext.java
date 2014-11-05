@@ -39,10 +39,7 @@ public class AppInternalsContext {
 			}
 		}
 		this.parseQueryString(request.getQueryString());
-		this.parseFromat();
-		if(this.parameters.containsKey("mip")){
-			this.remoteip = this.parameters.get("mip");
-		}
+		this.parseFromat();	
 	}
 
 	public String getRemoteip() {

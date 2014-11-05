@@ -22,7 +22,7 @@ import com.ctrip.platform.appinternals.permission.Permission;
 public class AppInternalsServlet extends HttpServlet {
 	private Logger logger = LoggerFactory.getLogger(AppInternalsServlet.class);
 	private static final String URL_TEMPLATE = "请输入正确的RUL格式， 格式如下：<br /> http://{host}/[{virtualDir}]/AppInternals/?(.*)";
-	private static final String NOPERMISSION = "Sorry,Your IP Address %s Doesn't Have Read/Write Permission.";
+	private static final String NOPERMISSION = "Sorry,You do not have permission.";
 	private static final String APPINTERNALS = "appinternals";
 	private static final String CONFIGURATION = "configurations";
 	private static final String preAddr = "cfx:";
@@ -100,7 +100,7 @@ public class AppInternalsServlet extends HttpServlet {
 				}
 			}
 		} else {
-			ctx.getContent().append(NOPERMISSION, ctx.getRemoteip());
+			ctx.getContent().append(NOPERMISSION);
 		}
 
 		this.doResponse(response, ctx.getContent());
@@ -157,8 +157,7 @@ public class AppInternalsServlet extends HttpServlet {
 						result.setMessage(e.getMessage());
 					}
 				} else {
-					result.setMessage(String.format(NOPERMISSION,
-							ctx.getRemoteip()));
+					result.setMessage(NOPERMISSION);
 				}
 				ctx.getContent().append(
 						Helper.toChangeResultJson(result));

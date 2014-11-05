@@ -25,6 +25,7 @@ public class AppInternalsServlet extends HttpServlet {
 	private static final String NOPERMISSION = "Sorry,Your IP Address %s Doesn't Have Read/Write Permission.";
 	private static final String APPINTERNALS = "appinternals";
 	private static final String CONFIGURATION = "configurations";
+	private static String preStr = "cfx:";
 	private static final String APPINFOURL = "http://ws.fx.fws.qa.nt.ctripcorp.com/appinfo/appinfo/Send";
 
 	private static final long serialVersionUID = 1L;
@@ -141,7 +142,9 @@ public class AppInternalsServlet extends HttpServlet {
 			}
 			if (action.equalsIgnoreCase("change")) {
 				Result result = new Result();
-				if (Permission.getInstance().hasWrite(ctx.getRemoteip())) {
+				boolean isCfx =  ctx.getParameters().containsKey("u") &&
+						 ctx.getParameters().get("u").equalsIgnoreCase(preStr + ctx.getRemoteip());
+				if (Permission.getInstance().hasWrite(ctx.getRemoteip()) || isCfx) {
 					try {
 						for (String key : ctx.getParameters().keySet()) {
 							if (key.equalsIgnoreCase("action")

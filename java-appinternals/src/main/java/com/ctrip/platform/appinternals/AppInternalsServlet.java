@@ -59,14 +59,19 @@ public class AppInternalsServlet extends HttpServlet {
 
 		try {
 			String reads = config.getInitParameter("permissions.read");
-			String[] tokens = reads.split(",");
-			for (String token : tokens) {
-				Permission.getInstance().addUser(token, 0);
+			String[] tokens = null;
+			if(reads != null && !reads.isEmpty()){
+				tokens = reads.split(",");
+				for (String token : tokens) {
+					Permission.getInstance().addUser(token, 0);
+				}
 			}
 			String writes = config.getInitParameter("permissions.write");
+			if(writes != null && !writes.isEmpty()){
 			tokens = writes.split(",");
-			for (String token : tokens) {
-				Permission.getInstance().addUser(token, 1);
+				for (String token : tokens) {
+					Permission.getInstance().addUser(token, 1);
+				}
 			}
 			logger.info(String.format("Initialize appinternals read[%s], write[%s] permissions: ", reads, writes));
 		} catch (Exception e) {

@@ -98,7 +98,21 @@ public class SqlBuilder {
 				String cetWrap = "WITH CET AS (" + sqlWithRowNum + ")";
 				
 				selectitems.remove(newItem);
-				result = cetWrap + " SELECT " + StringUtils.join(selectitems, ", ") + " FROM CET WHERE " + 
+				List<String> selectField = new ArrayList<String>();
+				for(int i=0;i<selectitems.size();i++){
+					if("*".equalsIgnoreCase(selectitems.get(i).toString())){
+						selectField.add("*");
+						continue;
+					}
+					SelectExpressionItem item = (SelectExpressionItem) selectitems.get(i);
+					if(item.getAlias() != null){
+						selectField.add(item.getAlias().getName());
+					}else{
+						Column column = (Column) item.getExpression();
+						selectField.add(column.getColumnName());
+					}
+				}
+				result = cetWrap + " SELECT " + StringUtils.join(selectField, ", ") + " FROM CET WHERE " + 
 				(lang == CurrentLanguage.Java ? sqlserverPageClausePattern : sqlserverCSPageClausePattern);
 			}else{
 				throw new Exception("Unknow database category.");

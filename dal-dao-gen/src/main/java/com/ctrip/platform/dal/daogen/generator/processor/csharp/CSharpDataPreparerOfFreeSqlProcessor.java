@@ -158,7 +158,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		method.setScalarType(task.getScalarType());
 		method.setPojoType(task.getPojoType());
 		
-		Pattern ptn = Pattern.compile("@([^\\s]+)", Pattern.CASE_INSENSITIVE);
+		Pattern ptn = Pattern.compile("@([^\\s\\(\\)]+)", Pattern.CASE_INSENSITIVE);
 		Matcher mt = ptn.matcher(method.getSql());
 		Queue<String> sqlParamQueue = new LinkedList<String>();
 		while(mt.find()){

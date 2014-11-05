@@ -1,7 +1,9 @@
 package com.ctrip.platform.appinternals.permission;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -9,10 +11,15 @@ import com.ctrip.platform.appinternals.helpers.IPv4Util;
 
 public class InnerAddress {
 	private static Map<String, Rangle> innerIps = new HashMap<String, Rangle>();
+	private static Set<String> locals = new HashSet<String>();
 	static{
 		innerIps.put("10", new Rangle(IPv4Util.ipToInt("10.0.0.0"), IPv4Util.ipToInt("10.255.255.255")));
 		innerIps.put("192", new Rangle(IPv4Util.ipToInt("192.168.0.0"), IPv4Util.ipToInt("192.168.255.255")));
 		innerIps.put("172", new Rangle(IPv4Util.ipToInt("172.16.0.0"), IPv4Util.ipToInt("172.31.255.255")));
+		
+		locals.add("::1");
+		locals.add("127.0.0.1");
+		locals.add("0:0:0:0:0:0:0:1");
 	}
 	public static boolean isInner(String ip){
 		if(ip == null || ip.isEmpty())
@@ -33,6 +40,6 @@ public class InnerAddress {
 	public static boolean isLocal(String ip){
 		if(ip == null || ip.isEmpty())
 			return false;
-		return ip.equalsIgnoreCase("127.0.0.1") || ip.equalsIgnoreCase("::1");
+		return locals.contains(ip);
 	}
 }

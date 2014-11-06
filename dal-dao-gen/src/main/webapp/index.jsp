@@ -59,7 +59,7 @@
       </div>
 
       <!--Begin project modal-->
-      <div class="modal fade" id="projectModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+      <div class="modal fade" id="projectModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0" is_root="0">
          <div class="modal-dialog">
             <div class="modal-content">
 				<div class="modal-header">
@@ -70,6 +70,7 @@
 				<div class="modal-body">
                   <div class="row-fluid">
                      <div class="control-group">
+                     	<input id="project_group_id" type="hidden" value="">
                         <input id="project_id" type="hidden" value="">
                         <label class="control-label popup_label" style="width: 110px;">项目名称</label>
                         <input id="name" class="span9 input-sm" type="text">
@@ -87,11 +88,16 @@
                         <input id="dalconfigname" class="span9 input-sm" type="text">
                      </div>
                   </div>
+                  <div class="row-fluid">
+                     <div class="control-group">
+                       	<label class="control-label popup_label" style="width:125px;">所属Team：</label>
+                       	<span id="user_group_pj" class="label label-info">Info</span>
+                  	</div>
+                  </div>
                </div>
                <div class="modal-footer">
                		<label id="proj_error_msg" class="control-label popup_label" style="color:red;"></label>
-               	   <a href="#" class="ctip" data-toggle="tooltip"
-						data-placement="top" title=""
+               	   <a href="#" class="ctip" data-toggle="tooltip" data-placement="top" title=""
 						data-original-title="代码生成器按照项目来组织代码，因此，同一个用户可以新建多个项目，每个项目生成的代码相互独立，互不干扰。"> <img class="helpicon"
 						src="/static/images/help.jpg">
 					</a>

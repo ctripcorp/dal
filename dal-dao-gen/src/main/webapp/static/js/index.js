@@ -8,6 +8,10 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', '#addProj', function (event) {
+        if($("#projectModal").attr("is_root") == "0"){
+            alert("请选择一个DAL Team节点，再操作！");
+            return;
+        }
         $("#projectModal").attr("is_update", "0");
         $("#name").val("");
         $("#namespace").val("");
@@ -16,9 +20,12 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', '#editProj', function (event) {
+        if($("#projectModal").attr("is_root") == "1") {
+            alert("请单击一个项目，再操作！");
+            return;
+        }
         var selectedProject = $.jstree.reference("#jstree_projects").get_selected();
-        if(selectedProject == undefined || selectedProject.length < 1 ||
-            selectedProject[0] == -1){
+        if(selectedProject == undefined || selectedProject.length < 1 || selectedProject[0] == -1){
             alert("请单击一个项目，再操作！");
             return;
         }
@@ -34,6 +41,10 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', '#delProj', function (event) {
+        if($("#projectModal").attr("is_root") == "1") {
+            alert("请单击一个项目，再操作！");
+            return;
+        }
         var selectedProject = $.jstree.reference("#jstree_projects").get_selected();
         if(selectedProject == undefined || selectedProject.length < 1 ||
             selectedProject[0] == -1){
@@ -81,15 +92,15 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', '#save_proj', function (event) {
-        $("#proj_error_msg").html('');
+        $("#proj_error_msg").empty();
         var post_data = {};
         var currentid = $("#project_id").val();
-        if ($("#projectModal").attr("is_update") == "1" &&
-            currentid != undefined && currentid != "") {
+        if ($("#projectModal").attr("is_update") == "1" && currentid != undefined && currentid != "") {
             post_data["action"] = "update";
             post_data["id"] = currentid;
         } else {
             post_data["action"] = "insert";
+            post_data["project_group_id"] = $("#project_group_id").val();
         }
         post_data["name"] = $("#name").val();
         post_data["namespace"] = $("#namespace").val();

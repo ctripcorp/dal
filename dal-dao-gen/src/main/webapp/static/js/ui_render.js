@@ -235,13 +235,22 @@
                 +'<div id="jstree_projects"></div>');
 
             $('#jstree_projects').on('select_node.jstree', function (e, obj) {
-                if(obj.node.id != -1){
-//                    window.render.render_grid();
-
+                $("#projectModal").attr("is_root", "0");
+                w2ui['grid'].current_project = null;
+                if(obj.node.id != -1 && obj.node.original.namespace != undefined){
                     w2ui['grid'].current_project = obj.node.id;
-//                    window.render.render_preview();
+                    $.get("/rest/group/onegroup?id="+obj.node.original['dal_group_id'] +"&rand=" + Math.random()).done(function(data){
+                        $("#user_group_pj").html(data['group_name']);
+                    }).fail(function(){
+                        $("#user_group_pj").html('unknown');
+                    });
                     w2ui['grid_toolbar'].click('refreshDAO', null);
                     $("#refreshFiles").trigger('click');
+                }
+                if(obj.node.id != -1 && obj.node.original.namespace === undefined) {
+                    $("#project_group_id").val(obj.node.id);
+                    $("#user_group_pj").html(obj.node.text);
+                    $("#projectModal").attr("is_root", "1");
                 }
             }).jstree({
                 'core': {
@@ -249,7 +258,11 @@
                     'multiple': false,
                     'data': {
                         'url': function (node) {
-                            return node.id == "#" ? "/rest/project?root=true&rand=" + Math.random() : "/rest/project?rand=" + Math.random();
+                            if(node.id == "#"){
+                                return "/rest/project/userGroups?root=true&rand=" + Math.random();
+                            } else {
+                                return "/rest/project/groupprojects?groupId=" + node.id + "&rand=" + Math.random();
+                            }
                         }
                     }
                 },

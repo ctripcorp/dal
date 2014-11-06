@@ -1,4 +1,3 @@
-
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.util.ArrayList;
@@ -22,6 +21,9 @@ import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalGenerator;
+import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
+import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
+import com.ctrip.platform.dal.daogen.dao.UserGroupDao;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
@@ -33,6 +35,7 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
+import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpDalGenerator;
 import com.ctrip.platform.dal.daogen.generator.java.JavaDalGenerator;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -44,33 +47,36 @@ public class ProjectResource {
 
 	private static Logger log = Logger.getLogger(ProjectResource.class);
 	
+	private static DalGroupDao group_dao = null;
+	private static DaoOfProject project = null;	
+	private static UserGroupDao ugDao = null;
+	
+	static{
+		group_dao = SpringBeanGetter.getDaoOfDalGroup();
+		project = SpringBeanGetter.getDaoOfProject();
+		ugDao = SpringBeanGetter.getDalUserGroupDao();
+	}
+	
 	@GET
 	@Path("users")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<LoginUser> getUsers() {
 		return SpringBeanGetter.getDaoOfLoginUser().getAllUsers();
 	}
-
+	
 	@GET
+	@Path("userGroups")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Project> getProjects(@QueryParam("root") boolean root) {
-		
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
-		LoginUser user1 = null;
+	public List<DalGroup> getUserGroups(@QueryParam("root") boolean root) {
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
+		LoginUser user = null;
 		try {
-			user1 = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+			user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		} catch (Exception e) {
 			log.warn("",e);
 		}
-		String rootName = "组内所有项目";
-		if(user1!=null){
-			DalGroup dalGroup = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(user1.getGroupId());
-			if(dalGroup!=null){
-				rootName = dalGroup.getGroup_name() + rootName;
-			}
-		}else{
-			LoginUser user = new LoginUser();
+		if(user == null) {
+			user = new LoginUser();
 			user.setUserNo(userNo);
 			user.setUserName(AssertionHolder.getAssertion().getPrincipal()
 					.getAttributes().get("sn").toString());
@@ -78,31 +84,47 @@ public class ProjectResource {
 					.getAttributes().get("mail").toString());
 			try {
 				SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
+				user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 			} catch (Exception e) {
 				log.warn("",e);
 			}
 		}
-		
-		if(root){
-			List<Project> roots = new ArrayList<Project>();
-			Project p = new Project();
-			p.setId(-1);
-			p.setName(rootName);
-			p.setText(rootName);
-			p.setNamespace("com.ctrip.platform");
-			p.setIcon("fa fa-folder-o");
-			p.setChildren(true);
-			roots.add(p);
-			return roots;
+		List<DalGroup> groups = new ArrayList<DalGroup>();
+		List<UserGroup> urGroups = ugDao.getUserGroupByUserId(user.getId());
+		if(urGroups!=null && urGroups.size()>1) {
+			for(UserGroup urgroup : urGroups) {
+				DalGroup dalGroup = group_dao.getDalGroupById(urgroup.getGroup_id());
+				dalGroup.setText(dalGroup.getGroup_name());
+				dalGroup.setIcon("fa fa-folder-o");
+				dalGroup.setChildren(true);
+				groups.add(dalGroup);
+			}
+		} else {
+			DalGroup group = new DalGroup();
+			group.setText("请先加入DAL Team");
+			group.setIcon("fa fa-folder-o");
+			group.setChildren(true);
+			groups.add(group);
 		}
+		return groups;
+	}
+	
+	@GET
+	@Path("groupprojects")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Project> getGroupProjects(@QueryParam("groupId") String groupId) {
 
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-		
-		if(user==null){
-			log.error("user "+userNo+ " is not exist in table of login_users.");
+		int groupID = -1;
+		try{
+			groupID = Integer.parseInt(groupId);
+		}catch(NumberFormatException  ex){
+			log.error("Add member failed", ex);
+			Status status = Status.ERROR;
+			status.setInfo("Illegal group id");
+			return null;
 		}
 		
-		return SpringBeanGetter.getDaoOfProject().getProjectByGroupId(user.getGroupId());
+		return project.getProjectByGroupId(groupID);
 
 	}
 
@@ -120,7 +142,8 @@ public class ProjectResource {
 			@FormParam("name") String name,
 			@FormParam("namespace") String namespace,
 			@FormParam("dalconfigname") String dalconfigname,
-			@FormParam("action") String action) {
+			@FormParam("action") String action,
+			@FormParam("project_group_id") int project_group_id) {
 
 		Project proj = new Project();
 
@@ -151,7 +174,7 @@ public class ProjectResource {
 			proj.setName(name);
 			proj.setNamespace(namespace);
 			proj.setDal_config_name(dalconfigname);
-			proj.setDal_group_id(user.getGroupId());
+			proj.setDal_group_id(project_group_id);
 			SpringBeanGetter.getDaoOfProject().insertProject(proj);
 		} else if (action.equals("update")) {
 			List<Project>  pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
@@ -497,6 +520,63 @@ public class ProjectResource {
 		}
 		return result;
 	}
+	
+//	@GET
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public List<Project> getProjects(@QueryParam("root") boolean root) {
+//		
+//		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
+//		
+//		LoginUser user1 = null;
+//		try {
+//			user1 = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+//		} catch (Exception e) {
+//			log.warn("",e);
+//		}
+//		String rootName = "组内所有项目";
+//		if(user1!=null){
+//			DalGroup dalGroup = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(user1.getGroupId());
+//			List<UserGroup> urGroups = ugDao.getUserGroupByUserId(user1.getId());
+//			if(dalGroup!=null){
+//				rootName = dalGroup.getGroup_name() + rootName;
+//			}
+//		}else{
+//			LoginUser user = new LoginUser();
+//			user.setUserNo(userNo);
+//			user.setUserName(AssertionHolder.getAssertion().getPrincipal()
+//					.getAttributes().get("sn").toString());
+//			user.setUserEmail(AssertionHolder.getAssertion().getPrincipal()
+//					.getAttributes().get("mail").toString());
+//			try {
+//				SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
+//			} catch (Exception e) {
+//				log.warn("",e);
+//			}
+//		}
+//		
+//		if(root){
+//			List<Project> roots = new ArrayList<Project>();
+//			Project p = new Project();
+//			p.setId(-1);
+//			p.setName(rootName);
+//			p.setText(rootName);
+//			p.setNamespace("com.ctrip.platform");
+//			p.setIcon("fa fa-folder-o");
+//			p.setChildren(true);
+//			roots.add(p);
+//			return roots;
+//		}
+//
+//		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+//		
+//		if(user==null){
+//			log.error("user "+userNo+ " is not exist in table of login_users.");
+//		}
+//		
+//		return SpringBeanGetter.getDaoOfProject().getProjectByGroupId(user.getGroupId());
+//
+//	}
+	
 	
 //	@POST
 //	@Path("share_proj")

@@ -10,6 +10,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
@@ -45,6 +46,13 @@ public class DalGroupResource {
 	public List<DalGroup> getAllGroup(){
 		List<DalGroup> groups =  dal_dao.getAllGroups();
 		return groups;
+	}
+	
+	@GET
+	@Path("onegroup")
+	@Produces(MediaType.APPLICATION_JSON)
+	public DalGroup getProject(@QueryParam("id") String id) {
+		return dal_dao.getDalGroupById(Integer.valueOf(id));
 	}
 	
 	@POST

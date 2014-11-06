@@ -76,10 +76,19 @@ public class DaoOfLoginUser {
 	
 	public List<LoginUser> getUserByGroupId(int groupId) {
 
+		String sql = ""
+				+ "SELECT tb2.id, "
+				+ "       tb2.user_no, "
+				+ "       tb2.user_name, "
+				+ "       tb2.user_email, "
+				+ "       tb1.group_id AS dal_group_id "
+				+ "FROM   user_group tb1 "
+				+ "       LEFT JOIN login_users tb2 "
+				+ "              ON tb1.user_id = tb2.id "
+				+ "WHERE  tb1.group_id = ? ";
 		try {
 			return this.jdbcTemplate
-					.query(
-							"select id, user_no, user_name, user_email,dal_group_id from login_users where dal_group_id = ?",
+					.query(sql,//"select id, user_no, user_name, user_email,dal_group_id from login_users where dal_group_id = ?"
 							new Object[] { groupId },
 							new RowMapper<LoginUser>() {
 								public LoginUser mapRow(ResultSet rs, int rowNum)

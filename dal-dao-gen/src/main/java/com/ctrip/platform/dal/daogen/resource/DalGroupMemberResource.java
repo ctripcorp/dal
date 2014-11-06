@@ -18,9 +18,11 @@ import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
 import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
+import com.ctrip.platform.dal.daogen.dao.UserGroupDao;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
@@ -38,10 +40,12 @@ public class DalGroupMemberResource {
 	
 	private static DalGroupDao group_dao = null;
 	private static DaoOfLoginUser user_dao = null;
+	private static UserGroupDao ugDao = null;
 	
 	static{
 		group_dao = SpringBeanGetter.getDaoOfDalGroup();
 		user_dao = SpringBeanGetter.getDaoOfLoginUser();
+		ugDao = SpringBeanGetter.getDalUserGroupDao();
 	}
 	
 
@@ -117,16 +121,17 @@ public class DalGroupMemberResource {
 		}
 		
 		LoginUser user = user_dao.getUserById(userID);
-		if(null != user && user.getGroupId() > 0){
-			DalGroup group = group_dao.getDalGroupById(user.getGroupId());
-			Status status = Status.ERROR;
-			status.setInfo(user.getUserName()+" is already added in "+group.getGroup_comment());
-			return status;
-		}
+//		if(null != user && user.getGroupId() > 0){
+//			DalGroup group = group_dao.getDalGroupById(user.getGroupId());
+//			Status status = Status.ERROR;
+//			status.setInfo(user.getUserName()+" is already added in "+group.getGroup_comment());
+//			return status;
+//		}
 		
-		int ret = user_dao.updateUserGroup(userID, groupID);
+//		int ret = user_dao.updateUserGroup(userID, groupID);
+		int ret = ugDao.insertUserGroup(userID, groupID);
 		if(ret <= 0){
-			log.error("Add dal group member failed, caused by db operation failed, pls check the spring log");
+			log.error("Add dal group member failed, caused by db operation failed, pls check the log.");
 			Status status = Status.ERROR;
 			status.setInfo("Add operation failed.");
 			return status;
@@ -170,9 +175,10 @@ public class DalGroupMemberResource {
 			return status;
 		}
 
-		int ret = user_dao.updateUserGroup(userID, null);
+//		int ret = user_dao.updateUserGroup(userID, null);
+		int ret = ugDao.deleteUserFromGroup(userID, groupID);
 		if(ret <= 0){
-			log.error("Delete memeber failed, caused by db operation failed, pls check the spring log");
+			log.error("Delete memeber failed, caused by db operation failed, pls check the log.");
 			Status status = Status.ERROR;
 			status.setInfo("Delete operation failed.");
 			return status;
@@ -182,13 +188,27 @@ public class DalGroupMemberResource {
 
 	private boolean validatePermision(String userNo,int groupId){
 		LoginUser user = user_dao.getUserByNo(userNo);
-		if(null != user && user.getGroupId() == DalGroupResource.SUPER_GROUP_ID){
-			return true;
+		//用户加入的所有组
+		List<UserGroup> urgroups = ugDao.getUserGroupByUserId(user.getId());
+		if(urgroups==null){
+			return false;
 		}
-		if(null != user && user.getGroupId() == groupId){
-			return true;
+		for(UserGroup ug : urgroups){
+			if(ug.getGroup_id() == DalGroupResource.SUPER_GROUP_ID){
+				return true;
+			}
+			if(ug.getGroup_id() == groupId){
+				return true;
+			}
 		}
 		return false;
+//		if(null != user && user.getGroupId() == DalGroupResource.SUPER_GROUP_ID){
+//			return true;
+//		}
+//		if(null != user && user.getGroupId() == groupId){
+//			return true;
+//		}
+//		return false;
 	}
 	
 	

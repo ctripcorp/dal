@@ -14,6 +14,7 @@ import com.ctrip.platform.dal.daogen.dao.DaoOfDatabaseSet;
 import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
 import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
 import com.ctrip.platform.dal.daogen.dao.DaoOfUserProject;
+import com.ctrip.platform.dal.daogen.dao.UserGroupDao;
 
 public class SpringBeanGetter {
 
@@ -39,6 +40,8 @@ public class SpringBeanGetter {
 	
 	private static DalApiDao dalApiDao;
 	
+	private static UserGroupDao dalUserGroupDao;
+	
 	static {
 		daoOfProject = (DaoOfProject) context.getBean("projectDao");
 		
@@ -54,6 +57,8 @@ public class SpringBeanGetter {
 		daoOfDatabaseSet = (DaoOfDatabaseSet) context.getBean("dalDatabaseSet");
 		
 		dalApiDao = (DalApiDao) context.getBean("dalApiDao");
+		
+		dalUserGroupDao = (UserGroupDao) context.getBean("dalUserGroupDao");
 	}
 
 	public static DaoOfProject getDaoOfProject() {
@@ -95,5 +100,10 @@ public class SpringBeanGetter {
 	public static DalApiDao getDalApiDao() {
 		return dalApiDao;
 	}
+
+	public static UserGroupDao getDalUserGroupDao() {
+		return dalUserGroupDao;
+	}
+
 
 }

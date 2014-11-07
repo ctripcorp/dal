@@ -2,9 +2,9 @@
 #if($host.generateAPI(46,53) && !$host.isSpa())
 #set($returnType=[])
 #foreach($p in $host.getColumns())
-	#if($p.isIdentity() || $p.isPrimary())
-		#set($success = $returnType.add(${p.getType()}))
-	#end
+#if($p.isIdentity() || $p.isPrimary())
+#set($success = $returnType.add(${p.getType()}))
+#end
 #end
 #if($returnType.size()<1)
 	#set($success = $returnType.add("int"))

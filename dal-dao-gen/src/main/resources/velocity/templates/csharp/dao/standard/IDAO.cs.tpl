@@ -22,10 +22,20 @@ namespace ${host.getNameSpace()}.Interface.IDao
         /// <param name="${WordUtils.uncapitalize(${host.getClassName()})}">${host.getClassName()}实体对象</param>
 #if($host.isSpa())
         /// <returns>状态代码</returns>
+		int Insert${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize(${host.getClassName()})});
 #else
-        /// <returns>新增的主键</returns>
+        /// <returns>新增的主键,如果有多个主键则返回第一个主键</returns>
+#set($returnType=[])
+#foreach($p in $host.getColumns())
+#if($p.isIdentity() || $p.isPrimary())
+#set($success = $returnType.add(${p.getType()}))
 #end
-        int Insert${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize(${host.getClassName()})});
+#end
+#if($returnType.size()<1)
+	#set($success = $returnType.add("int"))
+#end
+		$returnType.get(0) Insert${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())})
+#end   
 #end
 #if($host.getPrimaryKeys().size() == 0)
         /*由于没有PK，不能生成Update和Delete方法

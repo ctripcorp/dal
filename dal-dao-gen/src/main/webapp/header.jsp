@@ -47,7 +47,7 @@
 					<li><a href="javascript:;"
 						onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">DAL框架使用说明</a>
 					</li>
-					<li><a href="mailto:R%26Dsysdev_dal@Ctrip.com">联系我们</a></li>
+					<li><a href="mailto:rdfxdal@Ctrip.com">联系我们</a></li>
 				</ul>
 			</li>
 			<li class="dropdown user">

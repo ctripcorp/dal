@@ -74,3 +74,12 @@
         }
     });
 })(jQuery);
+
+(function($, window){
+    window.alert = function(data) {
+        $("#overrideAlertErrorNoticeDivMsg").html(data);
+        $("#overrideAlertErrorNoticeDiv").modal({
+            "backdrop": "static"
+        });
+    };
+})(jQuery, window);

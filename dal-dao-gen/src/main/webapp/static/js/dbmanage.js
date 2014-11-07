@@ -23,7 +23,7 @@
             w2ui['grid'].add(allGroupDBs);
             $("body").unblock();
         }).fail(function (data) {
-                alert("获取Group失败!");
+                alert("获取DAL Team失败!");
             });
     };
 
@@ -31,7 +31,7 @@
         $("#error_msg").html('');
         var current_group = w2ui['grid'].current_group;
         if(current_group==null || current_group==''){
-            alert('请先选择Group');
+            alert('请先选择一个DAL Team!');
             return;
         }
         ajaxutil.reload_dbservers();
@@ -46,7 +46,7 @@
         var records = w2ui['grid'].getSelection();
         var record = w2ui['grid'].get(records[0]);
         if(record==null || record==''){
-            alert("请先选择一个db");
+            alert("请先选择一个Database.");
             return;
         }
         $("#databases2").val(record["dbname"]);
@@ -75,7 +75,7 @@
                     });
             }
         }else{
-            alert('请选择一个db！');
+            alert('请选择一个Database！');
         }
 
     };
@@ -83,7 +83,7 @@
     var transferDB = function(){
         var current_group = w2ui['grid'].current_group;
         if(current_group==null || current_group==''){
-            alert('请先选择Group');
+            alert('请先选择一个DAL Team！');
             return;
         }
         $("#transferdb_error_msg").html("");
@@ -118,11 +118,11 @@
                 $("body").unblock();
                 $("#transferDbModal").modal();
             }).fail(function (data) {
-                    alert('获取所有DAL Group失败.');
+                    alert('获取所有DAL Team失败.');
                     $("body").unblock();
                 });
         }else{
-            alert('请选择一个db！');
+            alert('请选择一个Database！');
         }
     };
 

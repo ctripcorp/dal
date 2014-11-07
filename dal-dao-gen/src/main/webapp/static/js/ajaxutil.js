@@ -195,12 +195,17 @@
                 post_task_table_view_sp(postData);
             }
         },
-        reload_dbservers: function (callback,groupDBs) {
+        reload_dbservers: function (callback, groupDBs, groupId) {
             cblock($("body"));
 
             var url = "/rest/db/dbs?rand=" + Math.random();
             if(groupDBs!=null && groupDBs!=''){
-                url+="&groupDBs=true";
+                url += "&groupDBs=true";
+            }
+            if(groupId!=undefined && groupId!=null && groupId!=''){
+                url += "&groupId=" + groupId;
+            } else {
+                url += "&groupId=-1";
             }
             $.get(url).done(function (data) {
                 //$("select[id$=servers] > option:gt(0)").remove();

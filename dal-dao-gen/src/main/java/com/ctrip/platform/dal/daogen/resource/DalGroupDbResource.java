@@ -22,12 +22,14 @@ import org.jasig.cas.client.util.AssertionHolder;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
 import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
+import com.ctrip.platform.dal.daogen.dao.UserGroupDao;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -47,11 +49,13 @@ public class DalGroupDbResource {
 	private static DalGroupDao group_dao = null;
 	private static DaoOfLoginUser user_dao = null;
 	private static DalGroupDBDao group_db_dao = null;
+	private static UserGroupDao ugDao = null;
 	
 	static{
 		group_dao = SpringBeanGetter.getDaoOfDalGroup();
 		user_dao = SpringBeanGetter.getDaoOfLoginUser();
 		group_db_dao = SpringBeanGetter.getDaoOfDalGroupDB();
+		ugDao = SpringBeanGetter.getDalUserGroupDao();
 	}
 
 	@GET
@@ -110,8 +114,6 @@ public class DalGroupDbResource {
 		return dbs;
 	}
 	
-	
-	
 	@POST
 	@Path("add")
 	public Status add(@FormParam("groupId") String groupId,
@@ -164,7 +166,7 @@ public class DalGroupDbResource {
 			return status;
 		}
 		if(ret <= 0){
-			log.error("Add dal group db failed, caused by db operation failed, pls check the spring log");
+			log.error("Add dal group db failed, caused by db operation failed, pls check the log.");
 			Status status = Status.ERROR;
 			status.setInfo("Add operation failed.");
 			return status;
@@ -211,7 +213,6 @@ public class DalGroupDbResource {
 			status.setInfo("你没有当前DAL Team的操作权限.");
 			return status;
 		}
-		
 		
 		int ret = group_db_dao.updateGroupDB(dbID, comment);
 		if(ret <= 0){
@@ -313,26 +314,34 @@ public class DalGroupDbResource {
 	}
 	
 	private boolean validatePermision(String userNo,int groupId){
+		boolean havaPermision = false;
 		LoginUser user = user_dao.getUserByNo(userNo);
-		if(null != user && user.getGroupId() == DalGroupResource.SUPER_GROUP_ID){
-			return true;
+		List<UserGroup> urGroups = ugDao.getUserGroupByUserId(user.getId());
+		if (urGroups!=null && urGroups.size()>0) {
+			for (UserGroup urGroup : urGroups) {
+				if (urGroup.getGroup_id() == groupId) {
+					havaPermision = true;
+				}
+			}
 		}
-		if(null != user && user.getGroupId() == groupId){
-			return true;
-		}
-		return false;
+		return havaPermision;
 	}
 	
 	private boolean validateTransferPermision(String userNo,int dbId){
 		LoginUser user = user_dao.getUserByNo(userNo);
-		if(user!=null && user.getGroupId()==DalGroupResource.SUPER_GROUP_ID){
-			return true;
+		if(user==null){
+			return false;
 		}
-		List<DalGroupDB> groupDbs = group_db_dao.getGroupDBsByGroup(user.getGroupId());
-		if(groupDbs!=null && groupDbs.size()>0){
-			for(DalGroupDB db:groupDbs){
-				if(db.getId()==dbId){
-					return true;
+		List<UserGroup> urGroups = ugDao.getUserGroupByUserId(user.getId());
+		if(urGroups!=null && urGroups.size()>0){
+			for(UserGroup urGroup : urGroups){
+				List<DalGroupDB> groupDbs = group_db_dao.getGroupDBsByGroup(urGroup.getGroup_id());
+				if(groupDbs!=null && groupDbs.size()>0){
+					for(DalGroupDB db:groupDbs){
+						if(db.getId()==dbId){
+							return true;
+						}
+					}
 				}
 			}
 		}
@@ -377,19 +386,4 @@ public class DalGroupDbResource {
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

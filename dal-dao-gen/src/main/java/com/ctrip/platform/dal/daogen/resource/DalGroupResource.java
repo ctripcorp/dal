@@ -18,12 +18,14 @@ import org.jasig.cas.client.util.AssertionHolder;
 
 import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
 import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
+import com.ctrip.platform.dal.daogen.dao.UserGroupDao;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Project;
+import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 @Resource
@@ -34,10 +36,12 @@ public class DalGroupResource {
 	public static final int SUPER_GROUP_ID = 1; //The default supper user group
 	private static DalGroupDao dal_dao = null;
 	private static DaoOfLoginUser user_dao = null;
+	private static UserGroupDao ugDao = null;
 	
 	static{
 		dal_dao = SpringBeanGetter.getDaoOfDalGroup();
 		user_dao = SpringBeanGetter.getDaoOfLoginUser();
+		ugDao = SpringBeanGetter.getDalUserGroupDao();
 	}
 	
 	@GET
@@ -71,7 +75,6 @@ public class DalGroupResource {
 			return status;
 		}
 		
-		//TODO: How to validate the userNo has the permission or not to operate the dal_group table
 		if(!this.validate(userNo)){
 			Status status = Status.ERROR;
 			status.setInfo("你没有当前DAL Team的操作权限.");
@@ -221,6 +224,14 @@ public class DalGroupResource {
 	
 	private boolean validate(String userNo){
 		LoginUser user = user_dao.getUserByNo(userNo);
-		return null != user && user.getGroupId() == SUPER_GROUP_ID;
+		List<UserGroup> urGroups = ugDao.getUserGroupByUserId(user.getId());
+		if(urGroups!=null && urGroups.size()>0){
+			for(UserGroup urGroup : urGroups) {
+				if(urGroup.getGroup_id() == SUPER_GROUP_ID){
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

@@ -20,11 +20,13 @@ import org.jasig.cas.client.util.AssertionHolder;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDatabaseSet;
 import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
+import com.ctrip.platform.dal.daogen.dao.UserGroupDao;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
@@ -42,11 +44,13 @@ public class DalGroupDbSetResource {
 	private static DalGroupDao group_dao = null;
 	private static DaoOfLoginUser user_dao = null;
 	private static DaoOfDatabaseSet dbset_dao = null;
+	private static UserGroupDao ugDao = null;
 	
 	static{
 		group_dao = SpringBeanGetter.getDaoOfDalGroup();
 		user_dao = SpringBeanGetter.getDaoOfLoginUser();
 		dbset_dao = SpringBeanGetter.getDaoOfDatabaseSet();
+		ugDao = SpringBeanGetter.getDalUserGroupDao();
 	}
 
 	@GET
@@ -60,7 +64,6 @@ public class DalGroupDbSetResource {
 			group.setChildren(false);
 		}
 		return groups;
-
 	}
 	
 	@GET
@@ -153,7 +156,7 @@ public class DalGroupDbSetResource {
 		dbset.setGroupId(groupID);
 		ret = dbset_dao.insertDatabaseSet(dbset);
 		if(ret <= 0){
-			log.error("Add database set failed, caused by db operation failed, pls check the spring log");
+			log.error("Add database set failed, caused by db operation failed, pls check the log.");
 			Status status = Status.ERROR;
 			status.setInfo("Add operation failed.");
 			return status;
@@ -433,16 +436,18 @@ public class DalGroupDbSetResource {
 		return Status.OK;
 	}
 	
-	
 	private boolean validatePermision(String userNo,int groupId){
+		boolean havaPermision = false;
 		LoginUser user = user_dao.getUserByNo(userNo);
-		if(null != user && user.getGroupId() == DalGroupResource.SUPER_GROUP_ID){
-			return true;
+		List<UserGroup> urGroups = ugDao.getUserGroupByUserId(user.getId());
+		if (urGroups!=null && urGroups.size()>0) {
+			for (UserGroup urGroup : urGroups) {
+				if (urGroup.getGroup_id() == groupId) {
+					havaPermision = true;
+				}
+			}
 		}
-		if(null != user && user.getGroupId() == groupId){
-			return true;
-		}
-		return false;
+		return havaPermision;
 	}
 	
 }

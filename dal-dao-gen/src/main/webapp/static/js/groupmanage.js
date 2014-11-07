@@ -16,7 +16,7 @@
             w2ui['grid'].add(allGroup);
             $("body").unblock();
         }).fail(function (data) {
-                alert("获取所有Group失败!");
+                alert("获取所有DAL Team失败!");
             });
     };
 
@@ -34,7 +34,7 @@
         var records = w2ui['grid'].getSelection();
         var record = w2ui['grid'].get(records[0]);
         if(record==null || record==''){
-            alert("请先选择一个DAL Team");
+            alert("请先选择一个DAL Team！");
             return;
         }
         $("#name2").val(record["group_name"]);
@@ -64,7 +64,7 @@
                     });
             }
         }else{
-            alert('请选择一个group！');
+            alert('请选择一个DAL Team！');
         }
     };
 
@@ -237,7 +237,7 @@
                         $("#error_msg2").html("执行异常:"+data);
                     });
             }else{
-                alert('请选择一个group！');
+                alert('请选择一个DAL Team！');
             }
         });
     });

@@ -640,7 +640,7 @@
 //            }
             $("body").unblock();
         }).fail(function(data){
-                $("#error_msg").text("获取表的信息失败，是否有权限");
+                $("#error_msg").text("获取表的信息失败，请检查是否有权限！");
                 $("body").unblock();
             });
     };

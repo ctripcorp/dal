@@ -41,15 +41,13 @@ jQuery(document).ready(function () {
             case "download":
                 cblock($("body"));
                 var obj = w2ui['sidebar'].get(event.target);
-                var url  = "/rest/file/download?id=" + obj.project_id+
-                    "&name=" + obj.relativeName;
+                var url  = "/rest/file/download?id=" + obj.project_id + "&name=" + obj.relativeName;
                 if(obj.project_id == undefined){
                     url =  "/rest/file/download?id=" + obj.id;
 
                 }
 
-                $.get(url
-                , function (data) {
+                $.get(url , function (data) {
                     $("body").unblock();
                     window.location.href = data;
                 });

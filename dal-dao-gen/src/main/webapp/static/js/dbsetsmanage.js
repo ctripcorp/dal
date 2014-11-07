@@ -64,7 +64,7 @@
         $("#adddbset_error_msg").html('');
         var current_group = w2ui['grid'].current_group;
         if (current_group == null || current_group == '') {
-            alert('请先选择Group');
+            alert('请先选择一个DAL Team！');
             return;
         }
         $("#dbsetname").val('');
@@ -77,7 +77,7 @@
         $("#updatedbset_error_msg").html('');
         var current_group = w2ui['grid'].current_group;
         if (current_group == null || current_group == '') {
-            alert('请先选择Group');
+            alert('请先选择一个DAL Team！');
             return;
         }
 
@@ -99,7 +99,7 @@
     var delDbSet = function(){
         var current_group = w2ui['grid'].current_group;
         if (current_group == null || current_group == '') {
-            alert('请先选择Group');
+            alert('请先选择一个DAL Team！');
             return;
         }
 
@@ -121,30 +121,36 @@
                     alert(data.info);
                 }
             }).fail(function (data) {
-                    alert("执行异常");
+                    alert("删除失败！");
                 });
         }
     };
 
     var addDbSetEntry = function(){
-        $("#adddbsetentry_error_msg").html('');
+        $("#adddbsetentry_error_msg").empty();
+        var current_group = w2ui['grid'].current_group;
+        if (current_group == null || current_group == '') {
+            alert('请先选择一个DAL Team！');
+            return;
+        }
         var records = w2ui['grid'].getSelection();
         var record = w2ui['grid'].get(records[0]);
         if(record==null || record==''){
-            alert("请先选择一个databaseSet");
+            alert("请先选择一个databaseSet！");
             return;
         }
-        window.ajaxutil.reload_dbservers(null,true);
+        window.ajaxutil.reload_dbservers(null, true, current_group);
         $("#addDbsetEntryModal").modal({
             "backdrop": "static"
         });
     };
 
     var editDbSetEntry = function(){
+        $("#updatedbsetentry_error_msg").empty();
         var records = w2ui['previewgrid'].getSelection();
         var record = w2ui['previewgrid'].get(records[0]);
         if(record==null || record==''){
-            alert("请先选择一个databaseSet Entry");
+            alert("请先选择一个databaseSet Entry！");
             return;
         }
         $("#dbsetentryname2").val(record['name']);
@@ -152,7 +158,7 @@
         $("#sharding2").val(record['sharding']);
         cblock($("body"));
 
-        $.get("/rest/db/dbs?rand=" + Math.random()+"&groupDBs=true").done(function (data) {
+        $.get("/rest/db/dbs?rand=" + Math.random()+"&groupDBs=true&groupId="+w2ui['grid'].current_group).done(function (data) {
 
             if ($("#databases2")[0] != undefined && $("#databases2")[0].selectize != undefined) {
                 $("#databases2")[0].selectize.clearOptions();
@@ -192,21 +198,21 @@
     var delDbSetEntry = function(){
         var current_group = w2ui['grid'].current_group;
         if (current_group == null || current_group == '') {
-            alert('请先选择Group');
+            alert('请先选择一个DAL Team！');
             return;
         }
 
         var records1 = w2ui['grid'].getSelection();
         var record1 = w2ui['grid'].get(records1[0]);
         if(record1==null || record1==''){
-            alert("请先选择一个databaseSet");
+            alert("请先选择一个databaseSet！");
             return;
         }
 
         var records2 = w2ui['previewgrid'].getSelection();
         var record2 = w2ui['previewgrid'].get(records2[0]);
         if(record2==null || record2==''){
-            alert("请先选择一个databaseSet Entry");
+            alert("请先选择一个databaseSet Entry！");
             return;
         }
 
@@ -221,10 +227,9 @@
                     alert(data.info);
                 }
             }).fail(function (data) {
-                    alert("执行异常");
+                    alert("删除失败！");
                 });
         }
-
     };
 
     Render.prototype = {

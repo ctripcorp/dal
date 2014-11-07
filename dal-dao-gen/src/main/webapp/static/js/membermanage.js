@@ -23,7 +23,7 @@
             w2ui['grid'].add(allMember);
             $("body").unblock();
         }).fail(function (data) {
-                alert("获取所有Member失败!");
+                alert("获取所有用户列表失败!");
             });
     };
 
@@ -31,7 +31,7 @@
         $("#error_msg").html('');
         var current_group = w2ui['grid'].current_group;
         if(current_group==null || current_group==''){
-            alert('请先选择Group');
+            alert('请先选择一个DAL Team！');
             return;
         }
         reload_all_members();
@@ -60,7 +60,7 @@
                     });
             }
         }else{
-            alert('请选择一个member！');
+            alert('请选择一个用户！');
         }
 
     };
@@ -103,11 +103,11 @@
     var applyAdd = function () {
         var current_group = w2ui['grid'].current_group;
         if (current_group == null || current_group == '') {
-            alert('请先选择Group');
+            alert('请先选择DAL Team！');
             return;
         }
         cblock($("body"));
-        var emailUrl = 'mailto:R%26Dsysdev_dal@Ctrip.com';
+        var emailUrl = 'mailto:rdfxdal@Ctrip.com';
         $.get("/rest/member/groupuser?groupId=" + current_group + "&rand=" + Math.random(),function (data) {
             if(data!=null && data.length>0){
                 emailUrl='mailto:'+data[0]['userEmail'];
@@ -266,7 +266,7 @@
         $("#save_member").click(function(){
             var id = $("#members").val();
             if(id==null){
-                $("#error_msg").html('请选择member!');
+                $("#error_msg").html('请选择用户!');
             }else{
                 var current_group = w2ui['grid'].current_group;
                 $.post("/rest/member/add", {

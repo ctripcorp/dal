@@ -26,6 +26,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
+import com.ctrip.platform.dal.daogen.dao.UserGroupDao;
 import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
@@ -33,6 +34,7 @@ import com.ctrip.platform.dal.daogen.domain.TableSpNames;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.utils.AllInOneConfigParser;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
@@ -49,11 +51,14 @@ public class DatabaseResource {
 	private static ClassLoader classLoader;
 	private static ObjectMapper mapper = new ObjectMapper();
 	
+	private static UserGroupDao ugDao = null;
+	
 	static {
 		classLoader = Thread.currentThread().getContextClassLoader();
 		if (classLoader == null) {
 			classLoader = Configuration.class.getClassLoader();
 		}
+		ugDao = SpringBeanGetter.getDalUserGroupDao();
 	}
 	
 	@GET
@@ -95,7 +100,7 @@ public class DatabaseResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("connectionTest")
-	public Status addAllInOneDB(@FormParam("dbtype") String dbtype,
+	public Status connectionTest(@FormParam("dbtype") String dbtype,
 			@FormParam("dbaddress") String dbaddress,
 			@FormParam("dbport") String dbport,
 			@FormParam("dbuser") String dbuser,
@@ -131,7 +136,7 @@ public class DatabaseResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("addNewAllInOneDB")
-	public Status addAllInOneDB(@FormParam("dbtype") String dbtype,
+	public Status addNewAllInOneDB(@FormParam("dbtype") String dbtype,
 			@FormParam("allinonename") String allinonename,@FormParam("dbaddress") String dbaddress,
 			@FormParam("dbport") String dbport,@FormParam("dbuser") String dbuser,
 			@FormParam("dbpassword") String dbpassword,@FormParam("dbcatalog") String dbcatalog) {
@@ -140,13 +145,11 @@ public class DatabaseResource {
 		
 		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
 		
-		if(allDbDao.getGroupDBByDbName(allinonename)!=null){
+		if (allDbDao.getGroupDBByDbName(allinonename)!=null) {
 			status = Status.ERROR;
 			status.setInfo(allinonename+"已经存在!");
 			return status;
-		}else{
-			String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
-			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		} else {
 			DalGroupDB groupDb = new DalGroupDB();
 			groupDb.setDbname(allinonename);
 			groupDb.setDb_address(dbaddress);
@@ -155,17 +158,33 @@ public class DatabaseResource {
 			groupDb.setDb_password(dbpassword);
 			groupDb.setDb_catalog(dbcatalog);
 			groupDb.setDb_providerName(DatabaseType.valueOf(dbtype).getValue());
-			groupDb.setDal_group_id(user.getGroupId()==0?-1:user.getGroupId());
+			groupDb.setDal_group_id(-1);
 			allDbDao.insertDalGroupDB(groupDb);
 		}
 		
 		return Status.OK;
 	}
 	
+	private boolean validatePermision(int userId, int db_group_id) {
+		boolean havaPermision = false;
+		List<UserGroup> urGroups = ugDao.getUserGroupByUserId(userId);
+		if (urGroups!=null && urGroups.size()>0) {
+			for (UserGroup urGroup : urGroups) {
+				if (urGroup.getGroup_id() == DalGroupResource.SUPER_GROUP_ID){
+					havaPermision = true;
+				}
+				if (urGroup.getGroup_id() == db_group_id) {
+					havaPermision = true;
+				}
+			}
+		}
+		return havaPermision;
+	}
+	
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("deleteAllInOneDB")
-	public Status addAllInOneDB(@FormParam("allinonename") String allinonename) {
+	public Status deleteAllInOneDB(@FormParam("allinonename") String allinonename) {
 		
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
@@ -176,17 +195,13 @@ public class DatabaseResource {
 		DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		
-		if (user.getGroupId() != DalGroupResource.SUPER_GROUP_ID){
-			if(user.getGroupId()==0 || user.getGroupId() == -1 || user.getGroupId() != groupDb.getDal_group_id()){
-				status = Status.ERROR;
-				status.setInfo("你没有当前DataBase的操作权限.");
-				return status;
-			}
+		if (!validatePermision(user.getId(), groupDb.getDal_group_id())) {
+			status = Status.ERROR;
+			status.setInfo("你没有当前DataBase的操作权限.");
+		} else {
+			allDbDao.deleteDalGroupDB(groupDb.getId());		
 		}
-		
-		allDbDao.deleteDalGroupDB(groupDb.getId());		
-		
-		return Status.OK;
+		return status;
 	}
 	
 	@POST
@@ -203,12 +218,10 @@ public class DatabaseResource {
 		DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		
-		if (user.getGroupId() != DalGroupResource.SUPER_GROUP_ID){
-			if(user.getGroupId()==0 || user.getGroupId() == -1 || user.getGroupId() != groupDb.getDal_group_id()){
-				status = Status.ERROR;
-				status.setInfo("你没有当前DataBase的操作权限.");
-				return status;
-			}
+		if (!validatePermision(user.getId(), groupDb.getDal_group_id())) {
+			status = Status.ERROR;
+			status.setInfo("你没有当前DataBase的操作权限.");
+			return status;
 		}
 		
 		try {
@@ -248,17 +261,14 @@ public class DatabaseResource {
 			return status;
 		}
 		
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		DalGroupDB groupDb = allDbDao.getGroupDBByDbId(id);
 		
-		if (user.getGroupId() != DalGroupResource.SUPER_GROUP_ID){
-			if(user.getGroupId()==0 || user.getGroupId() == -1 || user.getGroupId() != groupDb.getDal_group_id()){
-				status = Status.ERROR;
-				status.setInfo("你没有当前DataBase的操作权限.");
-				return status;
-			}
+		if (!validatePermision(user.getId(), groupDb.getDal_group_id())) {
+			status = Status.ERROR;
+			status.setInfo("你没有当前DataBase的操作权限.");
+			return status;
 		}
 		
 		allDbDao.updateGroupDB(id, allinonename, dbaddress, dbport, dbuser, dbpassword, dbcatalog, DatabaseType.valueOf(dbtype).getValue());
@@ -269,14 +279,12 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("dbs")
-	public String getDbNames(@QueryParam("groupDBs") boolean groupDBs) {
-		if(groupDBs){
-			String userNo = AssertionHolder.getAssertion().getPrincipal()
-					.getAttributes().get("employee").toString();
-			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-			if(user!=null){
-				List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(user.getGroupId());
+	public String getDbNames(@QueryParam("groupDBs") boolean groupDBs,
+			@QueryParam("groupId") int groupId) {
+		if(groupDBs) {
+			if(-1 != groupId && groupId>0) {
 				Set<String> sets = new HashSet<String>();
+				List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
 				for(DalGroupDB db:dbs){
 					sets.add(db.getDbname());
 				}
@@ -286,7 +294,7 @@ public class DatabaseResource {
 					e.printStackTrace();
 				}
 			}
-		}else{
+		} else {
 			try {
 				List<String> dbAllinOneNames = SpringBeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
 				return mapper.writeValueAsString(dbAllinOneNames);

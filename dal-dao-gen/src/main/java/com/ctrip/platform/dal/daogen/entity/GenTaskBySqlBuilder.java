@@ -3,6 +3,8 @@ package com.ctrip.platform.dal.daogen.entity;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
 
@@ -38,6 +40,7 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	
 	private String update_user_no;
 	private Timestamp update_time;
+	private String str_update_time;
 	private String comment;
 	
 	//当crud_type取值为select时，此字段才有意义，可取值：Single、First、List，表示select返回的结果类型
@@ -73,6 +76,9 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		task.setPagination(rs.getBoolean("pagination"));
 		task.setOrderby(rs.getString("orderby"));
 
+		Date date = new Date(task.getUpdate_time().getTime());
+		task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+		
 		return task;
 	}
 
@@ -250,6 +256,14 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 
 	public void setOrderby(String orderby) {
 		this.orderby = orderby;
+	}
+
+	public String getStr_update_time() {
+		return str_update_time;
+	}
+
+	public void setStr_update_time(String str_update_time) {
+		this.str_update_time = str_update_time;
 	}
 
 }

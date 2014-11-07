@@ -390,7 +390,7 @@
                 }, {
                     field: 'comment',
                     caption: '方法描述',
-                    size: '20%',
+                    size: '10%',
                     resizable:true
                 }, {
                     field: 'sql_style',
@@ -400,7 +400,12 @@
                 },{
                     field: 'update_user_no',
                     caption: '最后修改User',
-                    size: '10%',
+                    size: '7%',
+                    resizable:true
+                },{
+                    field: 'str_update_time',
+                    caption: '修改时间',
+                    size: '13%',
                     resizable:true
                 }],
                 records: [],

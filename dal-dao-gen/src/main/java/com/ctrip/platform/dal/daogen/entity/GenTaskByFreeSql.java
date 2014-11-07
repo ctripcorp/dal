@@ -5,6 +5,8 @@ package com.ctrip.platform.dal.daogen.entity;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
 
@@ -25,6 +27,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	private int version;
 	private String update_user_no;
 	private Timestamp update_time;
+	private String str_update_time;
 	private String comment;
 	//可取值：Single、First、List，表示select返回的结果类型
 	private String scalarType;
@@ -61,6 +64,9 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		task.setPagination(rs.getBoolean("pagination"));
 		task.setSql_style(rs.getString("sql_style"));
 
+		Date date = new Date(task.getUpdate_time().getTime());
+		task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+		
 		return task;
 	}
 
@@ -229,6 +235,14 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
 	public void setSql_style(String sql_style) {
 		this.sql_style = sql_style;
+	}
+
+	public String getStr_update_time() {
+		return str_update_time;
+	}
+
+	public void setStr_update_time(String str_update_time) {
+		this.str_update_time = str_update_time;
 	}
 
 }

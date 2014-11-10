@@ -47,3 +47,22 @@
 		return baseClient.batchCall(callSql, parametersList, hints);
 	}
 #end
+#if($host.getSpUpdate().isExist() && $host.getSpUpdate().getType()=="sp3" && $host.generateAPI(95)) 
+	/**
+	 * Batch SP update without out parameters
+	 * Return how many rows been affected for each of parameters
+	 */
+	public int[] update(DalHints hints, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.size() == 0)
+			return new int[0];
+		hints = DalHints.createIfAbsent(hints);
+		String callSql = client.buildCallSql(BATCH_UPDATE_SP_NAME, parser.getFields(daoPojos.get(0)).size());
+		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
+		for(int i = 0; i< daoPojos.size(); i++){
+			StatementParameters parameters = new StatementParameters();
+			client.addParametersByName(parameters, parser.getFields(daoPojos.get(i)));
+			parametersList[i] = parameters;
+		}
+		return baseClient.batchCall(callSql, parametersList, hints);
+	}
+#end

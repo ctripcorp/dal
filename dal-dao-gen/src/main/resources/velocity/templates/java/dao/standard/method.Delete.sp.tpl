@@ -51,3 +51,24 @@
 		return baseClient.batchCall(callSql, parametersList, hints);
 	}
 #end
+#if($host.getSpDelete().isExist() && $host.getSpDelete().getType()=="sp3" && $host.generateAPI(94))
+	/**
+	 * Batch SP delete without out parameters
+	 * Return how many rows been affected for each of parameters
+	 */
+	public int[] delete(DalHints hints, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.size() == 0)
+			return new int[0];
+		hints = DalHints.createIfAbsent(hints);
+		String callSql = client.buildCallSql(BATCH_DELETE_SP_NAME, $host.getSpDelete().getParameters().size());
+		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
+		for(int i = 0; i< daoPojos.size(); i++){
+			StatementParameters parameters = new StatementParameters();
+#foreach($p in $host.getSpDelete().getParameters())
+		    parameters.set("${p.getName()}", ${p.getJavaTypeDisplay()}, daoPojos.get(i).get${p.getName()}());
+#end
+			parametersList[i] = parameters;
+		}
+		return baseClient.batchCall(callSql, parametersList, hints);
+	}
+#end

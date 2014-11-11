@@ -91,7 +91,7 @@ public class ProjectResource {
 		}
 		List<DalGroup> groups = new ArrayList<DalGroup>();
 		List<UserGroup> urGroups = ugDao.getUserGroupByUserId(user.getId());
-		if(urGroups!=null && urGroups.size()>1) {
+		if(urGroups!=null && urGroups.size()>=1) {
 			for(UserGroup urgroup : urGroups) {
 				DalGroup dalGroup = group_dao.getDalGroupById(urgroup.getGroup_id());
 				dalGroup.setText(dalGroup.getGroup_name());

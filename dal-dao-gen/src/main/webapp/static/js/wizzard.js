@@ -355,6 +355,14 @@
         postData["project_id"] = current_project;
         postData["db_set_name"] = $("#databases").val();
         postData["daoName"] = daoName;
+        postData["is_update"] = $("#page1").attr('is_update');
+        if(postData["is_update"]=='1'){
+            var records = w2ui['grid'].getSelection();
+            var record = w2ui['grid'].get(records[0]);
+            postData["dao_id"] = record["id"];
+        } else {
+            postData["dao_id"] = "-1";
+        }
         $.ajax({
             type: "POST",
             async: false,

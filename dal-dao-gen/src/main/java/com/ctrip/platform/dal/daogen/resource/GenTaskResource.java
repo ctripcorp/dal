@@ -106,7 +106,9 @@ public class GenTaskResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Status checkDaoNameConflict(@FormParam("project_id") int project_id,
 			@FormParam("db_set_name") String db_set_name,
-			@FormParam("daoName") String daoName){
+			@FormParam("daoName") String daoName,
+			@FormParam("is_update") String is_update,
+			@FormParam("dao_id") int dao_id){
 		
 		Status status = Status.ERROR;
 		
@@ -119,6 +121,8 @@ public class GenTaskResource {
 		//在同一个project中，不同数据库下面不能存在相同的表名或者Dao类名
 		if(tableViewSpTasks!=null && tableViewSpTasks.size()>0){
 			for(GenTaskByTableViewSp task:tableViewSpTasks){
+				if("1".equalsIgnoreCase(is_update) && task.getId() == dao_id)//修改操作，过滤掉修改的当前记录
+					continue;
 				String []daoClassName = daoName.split(",");
 				for(String name:daoClassName){
 					if(task.getTable_names().toLowerCase().indexOf(name.toLowerCase())>-1 && 
@@ -133,6 +137,8 @@ public class GenTaskResource {
 		
 		if(autoTasks!=null && autoTasks.size()>0){
 			for(GenTaskBySqlBuilder task:autoTasks){
+				if("1".equalsIgnoreCase(is_update) && task.getId() == dao_id)//修改操作，过滤掉修改的当前记录
+					continue;
 				if(task.getTable_name().equalsIgnoreCase(daoName) && 
 						!task.getDatabaseSetName().equalsIgnoreCase(db_set_name)){
 					status.setInfo("在同一个project中，不同数据库下面不能存在相同的表名.<br/>"
@@ -144,6 +150,8 @@ public class GenTaskResource {
 		
 		if(sqlTasks!=null && sqlTasks.size()>0){
 			for(GenTaskByFreeSql task:sqlTasks){
+				if("1".equalsIgnoreCase(is_update) && task.getId() == dao_id)//修改操作，过滤掉修改的当前记录
+					continue;
 				if(task.getClass_name().equalsIgnoreCase(daoName) && 
 						!task.getDatabaseSetName().equalsIgnoreCase(db_set_name)){
 					status.setInfo("在同一个project中，不同数据库下面不能存在相同的DAO类名.<br/>"

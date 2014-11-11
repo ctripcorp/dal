@@ -216,12 +216,10 @@ public class ProjectResource {
 	@Path("addLackDbset")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Status addLackDbset(@FormParam("project_id") int project_id) {
-		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-		int groupId = user.getGroupId();
+		int groupId = SpringBeanGetter.getDaoOfProject().getProjectByID(project_id).getDal_group_id();
 		String info = addLackDb(project_id);
 		
-		Set<String> notExistDbset = getLackDbset(groupId,project_id);
+		Set<String> notExistDbset = getLackDbset(groupId, project_id);
 		for(String dbsetName:notExistDbset){
 			List<DatabaseSet> dbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbsetName);
 			if(null != dbsets && dbsets.size() > 0){
@@ -230,9 +228,9 @@ public class ProjectResource {
 				List<String> dbAllinOneNames = SpringBeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
 				Set<String> allInOneDbnames = new HashSet<String>(dbAllinOneNames);
 				if(allInOneDbnames.contains(dbsetName)){
-					info+=genDefaultDbset(groupId,dbsetName);
+					info += genDefaultDbset(groupId, dbsetName);
 				}else{
-					info+="<span style='color:red;'>databaseSet Name --> "+dbsetName+"在数据库中不存在，请手动添加!"+"</span><br/>";
+					info += "<span style='color:red;'>databaseSet Name --> "+dbsetName+"在数据库中不存在，请手动添加!"+"</span><br/>";
 				}
 			}
 		}
@@ -253,7 +251,7 @@ public class ProjectResource {
 	 * 生成默认的databaseSet和databaseSet Entry
 	 * @param dbname
 	 */
-	private String genDefaultDbset(int groupId,String dbname){
+	private String genDefaultDbset(int groupId, String dbname){
 		DatabaseSet dbset = new DatabaseSet();
 		dbset.setName(dbname);
 		dbset.setProvider("sqlProvider");
@@ -355,26 +353,25 @@ public class ProjectResource {
 	private Status validatePermision(String userNo,int project_id){
 		Status status = Status.ERROR;
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-		int groupId = -1;
-		if(user!=null){
-			groupId = user.getGroupId();
-			if(groupId <=0){
-				status.setInfo("你没有权限生成代码.请先加入一个DAL Team.");
-				return status;
-			}
-		}else{
-			status.setInfo(userNo + "is not exist in system.");
+		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
+		if(urGroups == null) {
+			status.setInfo("你没有权限生成代码.请先加入一个DAL Team.");
 			return status;
 		}
-		
+		if(urGroups.size() < 1) {
+			status.setInfo("你没有权限生成代码.请先加入一个DAL Team.");
+			return status;
+		}
+		int groupId = -1;
+		groupId = SpringBeanGetter.getDaoOfProject().getProjectByID(project_id).getDal_group_id();
 		String info = "";
 		//验证project的task所需要的databaseSet在组内是否存在
-		status = validateDbsetPermision(groupId,project_id);
+		status = validateDbsetPermision(groupId, project_id);
 		if(status.getCode().equals(Status.ERROR.getCode())){
 			info = status.getInfo();
 		}
 		//验证project的task所需要的database在组内是否存在
-		status = validateDbPermision(groupId,project_id);
+		status = validateDbPermision(groupId, project_id);
 		if(status.getCode().equals(Status.ERROR.getCode())){
 			info += "</br>" + status.getInfo();
 		}
@@ -390,7 +387,7 @@ public class ProjectResource {
 	private Status validateDbsetPermision(int groupId,int project_id){
 		Status status = Status.ERROR;
 		
-		Set<String> notExistDbset = getLackDbset(groupId,project_id);
+		Set<String> notExistDbset = getLackDbset(groupId, project_id);
 		
 		if(notExistDbset==null || notExistDbset.size()<=0){
 			return Status.OK;
@@ -409,7 +406,7 @@ public class ProjectResource {
 		}
 	}
 	
-	private Set<String> getLackDbset(int groupId,int project_id){
+	private Set<String> getLackDbset(int groupId, int project_id){
 		List<DatabaseSet> groupDbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
 		Set<String> group_dbset_names = new HashSet<String>();
 		for(DatabaseSet dbset : groupDbsets){
@@ -444,7 +441,7 @@ public class ProjectResource {
 		return notExistDbset;
 	}
 	
-	private Status validateDbPermision(int groupId,int project_id){
+	private Status validateDbPermision(int groupId, int project_id){
 		Status status = Status.ERROR;
 		
 		Set<String> notExistDb = getLackDatabase(groupId, project_id);

@@ -23,27 +23,37 @@
     };
 
     var addDB = function(){
-        $("#error_msg").html('');
-        $("#add_new_db_step1").show();
-        $("#add_new_db_step2").hide();
-        $("#conn_test").show();
-        $("#add_new_db_next").show();
-        $("#add_new_db_prev").hide();
-        $("#add_new_db_save").hide();
-        if ($("#dbcatalog")[0] != undefined && $("#dbcatalog")[0].selectize != undefined) {
-            $("#dbcatalog")[0].selectize.clearOptions();
-        } else {
-            $("#dbcatalog").selectize({
-                valueField: 'id',
-                labelField: 'title',
-                searchField: 'title',
-                sortField: 'title',
-                options: [],
-                create: false
-            });
-        }
-        $("#addDbModal").modal({
-            "backdrop": "static"
+        $.get("/rest/project/userGroups?root=true&rand=" + Math.random()).done(function (data) {
+            if (data.length < 1) {
+                alert("请先加入一个DAL Team.");
+            } else {
+                $("#error_msg").html('');
+                $("#add_new_db_step1").show();
+                $("#add_new_db_step2").hide();
+                $("#conn_test").show();
+                $("#add_new_db_next").show();
+                $("#add_new_db_prev").hide();
+                $("#add_new_db_save").hide();
+                if ($("#dbcatalog")[0] != undefined && $("#dbcatalog")[0].selectize != undefined) {
+                    $("#dbcatalog")[0].selectize.clearOptions();
+                } else {
+                    $("#dbcatalog").selectize({
+                        valueField: 'id',
+                        labelField: 'title',
+                        searchField: 'title',
+                        sortField: 'title',
+                        options: [],
+                        create: false
+                    });
+                }
+                $("#addDbModal").modal({
+                    "backdrop": "static"
+                });
+            }
+            $("body").unblock();
+        }).fail(function (data) {
+            alert('获取用户加入的所有DAL Team失败.');
+            $("body").unblock();
         });
     };
 

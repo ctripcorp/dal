@@ -108,7 +108,9 @@ public class GenTaskResource {
 			@FormParam("db_set_name") String db_set_name,
 			@FormParam("daoName") String daoName,
 			@FormParam("is_update") String is_update,
-			@FormParam("dao_id") int dao_id){
+			@FormParam("dao_id") int dao_id,
+			@FormParam("prefix") String prefix,
+			@FormParam("suffix") String suffix){
 		
 		Status status = Status.ERROR;
 		
@@ -125,11 +127,18 @@ public class GenTaskResource {
 					continue;
 				String []daoClassName = daoName.split(",");
 				for(String name:daoClassName){
-					if(task.getTable_names().toLowerCase().indexOf(name.toLowerCase())>-1 && 
-							!task.getDatabaseSetName().equalsIgnoreCase(db_set_name)){
-						status.setInfo("在同一个project中，不同数据库下面不能存在相同的表名或者DAO类名.<br/>"
-							+"逻辑数据库"+task.getDatabaseSetName()+"下已经存在"+name+"表.");
-						return status;
+					name = name.replaceAll("("+prefix+")?", "");
+					name = name + suffix;
+					String []existTableName = task.getTable_names().split(",");
+					for(String tableName : existTableName) {
+						tableName = tableName.replaceAll("("+prefix+")?", "");
+						String existDaoName = tableName + task.getTable_names();
+						if (existDaoName.equalsIgnoreCase(name) && 
+								!task.getDatabaseSetName().equalsIgnoreCase(db_set_name)) {
+							status.setInfo("在同一个project中，不同数据库下面不能存在相同的表名或者DAO类名.<br/>"
+									+"逻辑数据库"+task.getDatabaseSetName()+"下已经存在"+name+"表.");
+								return status;
+						}
 					}
 				}
 			}

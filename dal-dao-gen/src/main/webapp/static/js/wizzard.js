@@ -347,11 +347,16 @@
      *
      * @param daoName
      */
-    var checkDaoNameConflict = function(daoName){
+    var checkDaoNameConflict = function(daoName, data){
         var checkDaoNameConflictResult = false;
         cblock($("body"));
         var current_project = w2ui['grid'].current_project;
-        var postData = {};
+        var postData = {
+            "prefix" : "",
+            "suffix" : "",
+            "dao_id" : "-1"
+        };
+        postData = $.extend(postData, data);
         postData["project_id"] = current_project;
         postData["db_set_name"] = $("#databases").val();
         postData["daoName"] = daoName;
@@ -360,8 +365,6 @@
             var records = w2ui['grid'].getSelection();
             var record = w2ui['grid'].get(records[0]);
             postData["dao_id"] = record["id"];
-        } else {
-            postData["dao_id"] = "-1";
         }
         $.ajax({
             type: "POST",
@@ -385,7 +388,10 @@
             $.showMsg("error_msg","请选择表!");
             return;
         }
-        if(checkDaoNameConflict($('#table_list').multipleSelect('getSelects').join(","))){
+        if(checkDaoNameConflict($('#table_list').multipleSelect('getSelects').join(","),{
+            "prefix" : $("#prefix").val(),
+            "suffix" : $("#suffix").val()
+        })){
             return;
         }
         cblock($("body"));

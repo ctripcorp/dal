@@ -127,16 +127,18 @@ public class GenTaskResource {
 					continue;
 				String []daoClassName = daoName.split(",");
 				for(String name:daoClassName){
-					name = name.replaceAll("("+prefix+")?", "");
+					if(name.indexOf(prefix) == 0)
+						name = name.replaceFirst(prefix, "");
 					name = name + suffix;
 					String []existTableName = task.getTable_names().split(",");
 					for(String tableName : existTableName) {
-						tableName = tableName.replaceAll("("+prefix+")?", "");
-						String existDaoName = tableName + task.getTable_names();
+						if(tableName.indexOf(task.getPrefix()) == 0)
+							tableName = tableName.replaceFirst(task.getPrefix(), "");
+						String existDaoName = tableName + task.getSuffix();
 						if (existDaoName.equalsIgnoreCase(name) && 
 								!task.getDatabaseSetName().equalsIgnoreCase(db_set_name)) {
-							status.setInfo("在同一个project中，不同数据库下面不能存在相同的表名或者DAO类名.<br/>"
-									+"逻辑数据库"+task.getDatabaseSetName()+"下已经存在"+name+"表.");
+							status.setInfo("在同一个project中，不同数据库下面不能定义相同的表名或者DAO类名.<br/>"
+									+"逻辑数据库"+task.getDatabaseSetName()+"下已经存在名为"+name+"的DAO.");
 								return status;
 						}
 					}
@@ -150,8 +152,8 @@ public class GenTaskResource {
 					continue;
 				if(task.getTable_name().equalsIgnoreCase(daoName) && 
 						!task.getDatabaseSetName().equalsIgnoreCase(db_set_name)){
-					status.setInfo("在同一个project中，不同数据库下面不能存在相同的表名.<br/>"
-							+"逻辑数据库"+task.getDatabaseSetName()+"下已经存在"+daoName+"表.");
+					status.setInfo("在同一个project中，不同数据库下面不能定义相同的表名.<br/>"
+							+"逻辑数据库"+task.getDatabaseSetName()+"下已经存在名为"+daoName+"的DAO.");
 					return status;
 				}
 			}
@@ -163,8 +165,8 @@ public class GenTaskResource {
 					continue;
 				if(task.getClass_name().equalsIgnoreCase(daoName) && 
 						!task.getDatabaseSetName().equalsIgnoreCase(db_set_name)){
-					status.setInfo("在同一个project中，不同数据库下面不能存在相同的DAO类名.<br/>"
-							+"逻辑数据库"+task.getDatabaseSetName()+"下已经存在"+daoName+"类.");
+					status.setInfo("在同一个project中，不同数据库下面不能定义相同的DAO类名.<br/>"
+							+"逻辑数据库"+task.getDatabaseSetName()+"下已经存在名为"+daoName+"的DAO.");
 					return status;
 				}
 			}

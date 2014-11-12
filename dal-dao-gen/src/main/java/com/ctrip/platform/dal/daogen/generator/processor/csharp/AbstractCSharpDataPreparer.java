@@ -371,8 +371,8 @@ public class AbstractCSharpDataPreparer{
 	
 	protected String getPojoClassName(String prefix, String suffix, String table) {
 		String className = table;
-		if (null != prefix && !prefix.isEmpty()) {
-			className = className.substring(prefix.length());
+		if (null != prefix && !prefix.isEmpty() && className.indexOf(prefix)==0) {
+			className = className.replaceFirst(prefix, "");
 		}
 		if (null != suffix && !suffix.isEmpty()) {
 			className = className + WordUtils.capitalize(suffix);

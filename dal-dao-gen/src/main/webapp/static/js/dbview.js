@@ -24,9 +24,7 @@
 
     var addDB = function(){
         $.get("/rest/project/userGroups?root=true&rand=" + Math.random()).done(function (data) {
-            if (data.length < 1) {
-                alert("请先加入一个DAL Team.");
-            } else {
+            if ( data.length > 0 && data[0]['id'] > 0 ) {
                 $("#error_msg").html('');
                 $("#add_new_db_step1").show();
                 $("#add_new_db_step2").hide();
@@ -49,6 +47,8 @@
                 $("#addDbModal").modal({
                     "backdrop": "static"
                 });
+            } else {
+                alert("请先加入一个DAL Team.");
             }
             $("body").unblock();
         }).fail(function (data) {

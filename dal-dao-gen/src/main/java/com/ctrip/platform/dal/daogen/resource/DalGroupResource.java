@@ -60,6 +60,13 @@ public class DalGroupResource {
 	}
 	
 	@POST
+	@Path("keepSession")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String keepSession(@FormParam("id") String id) {
+		return "true";
+	}
+	
+	@POST
 	@Path("add")
 	public Status add(@FormParam("groupName") String groupName,
 			@FormParam("groupComment") String groupComment){

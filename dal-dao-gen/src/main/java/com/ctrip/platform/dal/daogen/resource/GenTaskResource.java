@@ -150,7 +150,25 @@ public class GenTaskResource {
 			for(GenTaskBySqlBuilder task:autoTasks){
 				if("1".equalsIgnoreCase(is_update) && task.getId() == dao_id)//修改操作，过滤掉修改的当前记录
 					continue;
-				if(task.getTable_name().equalsIgnoreCase(daoName) && 
+				String existBuildSqlTableName = task.getTable_name();
+				String existBuildSqlDaoName = existBuildSqlTableName;
+				
+				if(tableViewSpTasks!=null && tableViewSpTasks.size()>0) {
+					for(GenTaskByTableViewSp tableTask:tableViewSpTasks) {
+						String []tableNames = tableTask.getTable_names().split(",");
+						for(String tableName : tableNames) {
+							if(tableName.equalsIgnoreCase(existBuildSqlTableName)) {
+								if(tableName.indexOf(tableTask.getPrefix()) == 0)
+									tableName = tableName.replaceFirst(tableTask.getPrefix(), "");
+								tableName = tableName + tableTask.getSuffix();
+								existBuildSqlDaoName = tableName;
+								break;
+							}
+						}
+					}
+				}
+				
+				if(existBuildSqlDaoName.equalsIgnoreCase(daoName) && 
 						!task.getDatabaseSetName().equalsIgnoreCase(db_set_name)){
 					status.setInfo("在同一个project中，不同数据库下面不能定义相同的表名.<br/>"
 							+"逻辑数据库"+task.getDatabaseSetName()+"下已经存在名为"+daoName+"的DAO.");

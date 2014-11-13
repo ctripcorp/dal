@@ -82,4 +82,13 @@
             "backdrop": "static"
         });
     };
+
+    var keepSession = function() {
+        $.post("/rest/group/keepSession", {id:1}, function (data) {
+            // do nothing
+        });
+    };
+
+    setInterval(keepSession, 20*60*1000);
+
 })(jQuery, window);

@@ -101,8 +101,8 @@
 	</servlet-mapping>
 	
 	<session-config>
-	<!-- Default to 600 minute session timeouts -->
-	<session-timeout>600</session-timeout>
+	<!-- Default to 60 minute session timeouts -->
+	<session-timeout>60</session-timeout>
 	</session-config>
 	
 	<welcome-file-list>

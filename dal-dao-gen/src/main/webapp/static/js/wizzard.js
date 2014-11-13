@@ -152,6 +152,9 @@
                         $('#sp_list').multipleSelect('setSelects', record.sp_names.split(","));
                     }
                     if(record.suffix != undefined){
+                        $('#prefix').val(record.prefix);
+                    }
+                    if(record.suffix != undefined){
                         $('#suffix').val(record.suffix);
                     }
                 }

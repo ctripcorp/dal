@@ -114,6 +114,8 @@ public class GenTaskResource {
 		
 		Status status = Status.ERROR;
 		
+		daoName = daoName.replaceAll("_", "");
+		
 		List<GenTaskByTableViewSp> tableViewSpTasks = daoByTableViewSp.getTasksByProjectId(project_id);
 		
 		List<GenTaskBySqlBuilder> autoTasks = autoTask.getTasksByProjectId(Integer.valueOf(project_id));
@@ -126,11 +128,11 @@ public class GenTaskResource {
 				if("1".equalsIgnoreCase(is_update) && task.getId() == dao_id)//修改操作，过滤掉修改的当前记录
 					continue;
 				String []daoClassName = daoName.split(",");
-				for(String name:daoClassName){
+				for(String name : daoClassName){
 					if(name.indexOf(prefix) == 0)
 						name = name.replaceFirst(prefix, "");
 					name = name + suffix;
-					String []existTableName = task.getTable_names().split(",");
+					String []existTableName = task.getTable_names().replaceAll("_", "").split(",");
 					for(String tableName : existTableName) {
 						if(tableName.indexOf(task.getPrefix()) == 0)
 							tableName = tableName.replaceFirst(task.getPrefix(), "");
@@ -150,12 +152,12 @@ public class GenTaskResource {
 			for(GenTaskBySqlBuilder task:autoTasks){
 				if("1".equalsIgnoreCase(is_update) && task.getId() == dao_id)//修改操作，过滤掉修改的当前记录
 					continue;
-				String existBuildSqlTableName = task.getTable_name();
+				String existBuildSqlTableName = task.getTable_name().replaceAll("_", "");
 				String existBuildSqlDaoName = existBuildSqlTableName;
 				
 				if(tableViewSpTasks!=null && tableViewSpTasks.size()>0) {
 					for(GenTaskByTableViewSp tableTask:tableViewSpTasks) {
-						String []tableNames = tableTask.getTable_names().split(",");
+						String []tableNames = tableTask.getTable_names().replaceAll("_", "").split(",");
 						for(String tableName : tableNames) {
 							if(tableName.equalsIgnoreCase(existBuildSqlTableName)) {
 								if(tableName.indexOf(tableTask.getPrefix()) == 0)

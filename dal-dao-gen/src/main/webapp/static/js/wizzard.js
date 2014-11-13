@@ -1241,6 +1241,8 @@
 
         clear: function(){
             $("#error_msg").html("");
+
+            $("#prefix").val("");
             //默认后缀
             $("#suffix").val("Gen");
 

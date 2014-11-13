@@ -276,13 +276,13 @@
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
-                           <label class="control-label popup_label">移除DAO类名前缀：</label>
+                           <label class="control-label popup_label">移除DAO名前缀：</label>
                            <input type="text" id="prefix" class="span9 popup_text input-sm">
                         </div>
                      </div>
                      <div class="row-fluid">
                         <div class="control-group">
-                           <label class="control-label popup_label">添加DAO类名后缀：</label>
+                           <label class="control-label popup_label">添加DAO名后缀：</label>
                            <input type="text" id="suffix" class="span9 popup_text input-sm">
                         </div>
                      </div>

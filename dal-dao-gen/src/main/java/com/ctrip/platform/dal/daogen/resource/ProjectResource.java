@@ -158,7 +158,15 @@ public class ProjectResource {
 			return status;
 		}
 		
-		if(user.getGroupId()<=0){
+		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
+		
+		if(urGroups==null){
+			Status status = Status.ERROR;
+			status.setInfo("请先加入某个DAL Team.");
+			return status;
+		}
+		
+		if(urGroups.size()<1) {
 			Status status = Status.ERROR;
 			status.setInfo("请先加入某个DAL Team.");
 			return status;

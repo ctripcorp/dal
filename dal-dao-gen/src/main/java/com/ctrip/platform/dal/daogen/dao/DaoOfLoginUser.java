@@ -113,7 +113,7 @@ public class DaoOfLoginUser {
 					Connection connection) throws SQLException {
 				PreparedStatement ps = connection
 						.prepareStatement(
-								"insert into login_users ( user_no, user_name, user_email ) values (?,?,?,?) ON DUPLICATE KEY UPDATE user_no = ?",
+								"insert into login_users ( user_no, user_name, user_email ) values (?,?,?) ON DUPLICATE KEY UPDATE user_no = ?",
 								Statement.RETURN_GENERATED_KEYS);
 				ps.setString(1, data.getUserNo());
 				ps.setString(2, data.getUserName());
@@ -128,12 +128,12 @@ public class DaoOfLoginUser {
 
 	}
 	
-	public int updateUserGroup(int userId,Integer groupId){
-		return this.jdbcTemplate
-				.update("update login_users set dal_group_id=?"
-						+ " where id=?",
-						groupId,
-						userId);
-	}
+//	public int updateUserGroup(int userId,Integer groupId){
+//		return this.jdbcTemplate
+//				.update("update login_users set dal_group_id=?"
+//						+ " where id=?",
+//						groupId,
+//						userId);
+//	}
 
 }

@@ -29,7 +29,7 @@ public class DaoOfLoginUser {
 	public List<LoginUser> getAllUsers() {
 
 		return this.jdbcTemplate.query(
-				"select id, user_no, user_name, user_email,dal_group_id from login_users",
+				"select id, user_no, user_name, user_email from login_users",
 				new RowMapper<LoginUser>() {
 					public LoginUser mapRow(ResultSet rs, int rowNum)
 							throws SQLException {
@@ -42,7 +42,7 @@ public class DaoOfLoginUser {
 		try {
 			return this.jdbcTemplate
 					.queryForObject(
-							"select id, user_no, user_name, user_email,dal_group_id from login_users where id = ?",
+							"select id, user_no, user_name, user_email from login_users where id = ?",
 							new Object[] { userId },
 							new RowMapper<LoginUser>() {
 								public LoginUser mapRow(ResultSet rs, int rowNum)
@@ -61,7 +61,7 @@ public class DaoOfLoginUser {
 		try {
 			return this.jdbcTemplate
 					.queryForObject(
-							"select id, user_no, user_name, user_email,dal_group_id from login_users where user_no = ?",
+							"select id, user_no, user_name, user_email from login_users where user_no = ?",
 							new Object[] { userNo },
 							new RowMapper<LoginUser>() {
 								public LoginUser mapRow(ResultSet rs, int rowNum)
@@ -80,8 +80,8 @@ public class DaoOfLoginUser {
 				+ "SELECT tb2.id, "
 				+ "       tb2.user_no, "
 				+ "       tb2.user_name, "
-				+ "       tb2.user_email, "
-				+ "       tb1.group_id AS dal_group_id "
+				+ "       tb2.user_email "
+//				+ "       tb1.group_id AS dal_group_id "
 				+ "FROM   user_group tb1 "
 				+ "       LEFT JOIN login_users tb2 "
 				+ "              ON tb1.user_id = tb2.id "
@@ -113,13 +113,13 @@ public class DaoOfLoginUser {
 					Connection connection) throws SQLException {
 				PreparedStatement ps = connection
 						.prepareStatement(
-								"insert into login_users ( user_no, user_name, user_email,dal_group_id ) values (?,?,?,?) ON DUPLICATE KEY UPDATE user_no = ?",
+								"insert into login_users ( user_no, user_name, user_email ) values (?,?,?,?) ON DUPLICATE KEY UPDATE user_no = ?",
 								Statement.RETURN_GENERATED_KEYS);
 				ps.setString(1, data.getUserNo());
 				ps.setString(2, data.getUserName());
 				ps.setString(3, data.getUserEmail());
-				ps.setInt(4, data.getGroupId());
-				ps.setString(5, data.getUserNo());
+//				ps.setInt(4, data.getGroupId());
+				ps.setString(4, data.getUserNo());
 				return ps;
 			}
 		}, holder);

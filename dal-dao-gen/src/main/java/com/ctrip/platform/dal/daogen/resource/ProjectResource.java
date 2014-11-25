@@ -225,7 +225,7 @@ public class ProjectResource {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Status addLackDbset(@FormParam("project_id") int project_id) {
 		int groupId = SpringBeanGetter.getDaoOfProject().getProjectByID(project_id).getDal_group_id();
-		String info = addLackDb(project_id);
+		String info = addLackDb(project_id, groupId);
 		
 		Set<String> notExistDbset = getLackDbset(groupId, project_id);
 		for(String dbsetName:notExistDbset){
@@ -281,10 +281,7 @@ public class ProjectResource {
 		return info;
 	}
 	
-	private String addLackDb(int project_id){
-		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-		int groupId = user.getGroupId();
+	private String addLackDb(int project_id, int groupId){
 		Set<String> notExistDb = getLackDatabase(groupId, project_id);
 		List<String> dbAllinOneNames = SpringBeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
 		Set<String> allInOneDbnames = new HashSet<String>(dbAllinOneNames);

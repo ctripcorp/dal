@@ -13,8 +13,15 @@ public class LoginUser {
 	
 	private String userEmail;
 	
-	private int groupId;
-
+	public static LoginUser visitRow(ResultSet rs) throws SQLException {
+		LoginUser task = new LoginUser();
+		task.setId(rs.getInt(1));
+		task.setUserNo(rs.getString(2));
+		task.setUserName(rs.getString(3));
+		task.setUserEmail(rs.getString(4));
+		return task;
+	}
+	
 	public int getId() {
 		return id;
 	}
@@ -47,22 +54,4 @@ public class LoginUser {
 		this.userEmail = userEmail;
 	}
 	
-	public int getGroupId() {
-		return groupId;
-	}
-
-	public void setGroupId(int groupId) {
-		this.groupId = groupId;
-	}
-
-	public static LoginUser visitRow(ResultSet rs) throws SQLException {
-		LoginUser task = new LoginUser();
-		task.setId(rs.getInt(1));
-		task.setUserNo(rs.getString(2));
-		task.setUserName(rs.getString(3));
-		task.setUserEmail(rs.getString(4));
-		task.setGroupId(rs.getInt(5));
-		return task;
-	}
-
 }

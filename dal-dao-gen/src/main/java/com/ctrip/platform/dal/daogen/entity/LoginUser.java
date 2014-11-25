@@ -13,6 +13,8 @@ public class LoginUser {
 	
 	private String userEmail;
 	
+	private String permision;//组员的权限
+	
 	public static LoginUser visitRow(ResultSet rs) throws SQLException {
 		LoginUser task = new LoginUser();
 		task.setId(rs.getInt(1));
@@ -52,6 +54,14 @@ public class LoginUser {
 
 	public void setUserEmail(String userEmail) {
 		this.userEmail = userEmail;
+	}
+
+	public String getPermision() {
+		return permision;
+	}
+
+	public void setPermision(String permision) {
+		this.permision = permision;
 	}
 	
 }

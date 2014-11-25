@@ -28,7 +28,7 @@
     };
 
     var addMember = function(){
-        $("#error_msg").html('');
+        $("#error_msg").empty();
         var current_group = w2ui['grid'].current_group;
         if(current_group==null || current_group==''){
             alert('请先选择一个DAL Team！');
@@ -40,14 +40,40 @@
         });
     };
 
+    var updateMember = function() {
+        $("#up_error_msg").empty();
+        var current_group = w2ui['grid'].current_group;
+        if(current_group==null || current_group==''){
+            alert('请先选择一个DAL Team！');
+            return;
+        }
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if (record != null) {
+            if (record['userName'] == 'Limited') {
+                $("#up_permision").val('2');
+            } else {
+                $("#up_permision").val('1');
+            }
+            $("#user_name").html(record['userName']);
+            $("#updateUserModal").modal({
+                "backdrop": "static"
+            });
+        } else {
+            alert('请选择一个用户！');
+        }
+
+    };
+
     var delMember = function(){
         var records = w2ui['grid'].getSelection();
         var record = w2ui['grid'].get(records[0]);
+        var current_group = w2ui['grid'].current_group;
         if(record!=null){
             if (confirm("Are you sure to delete?")) {
                 $.post("/rest/member/delete", {
                     userId:record["id"],
-                    groupId:record['groupId']
+                    groupId:current_group
                 },function (data) {
                     if (data.code == "OK") {
                         $("#memberModal").modal('hide');
@@ -198,6 +224,11 @@
                         icon: 'fa fa-times'
                     }, {
                         type: 'button',
+                        id: 'upMember',
+                        caption: '权限修改',
+                        icon: 'fa fa-edit'
+                    }, {
+                        type: 'button',
                         id: 'applyAdd',
                         caption: '申请加入DAL Team',
                         icon: 'fa fa-envelope'
@@ -215,6 +246,9 @@
                                 break;
                             case 'applyAdd':
                                 applyAdd();
+                                break;
+                            case 'upMember':
+                                updateMember();
                                 break;
                         }
                     }
@@ -237,6 +271,12 @@
                 }, {
                     field: 'userEmail',
                     caption: '组员邮件地址',
+                    size: '50%',
+                    sortable: true,
+                    attr: 'align=center'
+                }, {
+                    field: 'permision',
+                    caption: '组员权限',
                     size: '50%',
                     sortable: true,
                     attr: 'align=center'
@@ -263,6 +303,7 @@
     });
 
     jQuery(document).ready(function(){
+
         $("#save_member").click(function(){
             var id = $("#members").val();
             if(id==null){
@@ -271,7 +312,8 @@
                 var current_group = w2ui['grid'].current_group;
                 $.post("/rest/member/add", {
                     groupId : current_group,
-                    userId : id
+                    userId : id,
+                    permision : $("#permision").val()
                 },function (data) {
                     if (data.code == "OK") {
                         $("#memberModal").modal('hide');
@@ -284,6 +326,27 @@
                     });
             }
         });
+
+        $("#save_up_member").click(function(){
+            var records = w2ui['grid'].getSelection();
+            var record = w2ui['grid'].get(records[0]);
+            var user_id = record['id'];
+            $.post("/rest/member/update", {
+                groupId : w2ui['grid'].current_group,
+                userId : user_id,
+                permision :$("#up_permision").val()
+            },function (data) {
+                if (data.code == "OK") {
+                    $("#updateUserModal").modal('hide');
+                    refreshMember();
+                } else {
+                    $("#up_error_msg").html(data.info);
+                }
+            }).fail(function (data) {
+                $("#up_error_msg").html(data.info);
+            });
+        });
+
     });
 
 })(window);

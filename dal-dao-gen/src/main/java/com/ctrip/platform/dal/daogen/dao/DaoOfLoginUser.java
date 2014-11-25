@@ -80,20 +80,26 @@ public class DaoOfLoginUser {
 				+ "SELECT tb2.id, "
 				+ "       tb2.user_no, "
 				+ "       tb2.user_name, "
-				+ "       tb2.user_email "
-//				+ "       tb1.group_id AS dal_group_id "
+				+ "       tb2.user_email, "
+				+ "       tb1.permision "
 				+ "FROM   user_group tb1 "
 				+ "       LEFT JOIN login_users tb2 "
 				+ "              ON tb1.user_id = tb2.id "
 				+ "WHERE  tb1.group_id = ? ";
 		try {
 			return this.jdbcTemplate
-					.query(sql,//"select id, user_no, user_name, user_email,dal_group_id from login_users where dal_group_id = ?"
+					.query(sql,
 							new Object[] { groupId },
 							new RowMapper<LoginUser>() {
 								public LoginUser mapRow(ResultSet rs, int rowNum)
 										throws SQLException {
-									return LoginUser.visitRow(rs);
+									LoginUser task = new LoginUser();
+									task.setId(rs.getInt(1));
+									task.setUserNo(rs.getString(2));
+									task.setUserName(rs.getString(3));
+									task.setUserEmail(rs.getString(4));
+									task.setPermision(rs.getString(5));
+									return task;
 								}
 							});
 		} catch (DataAccessException ex) {
@@ -118,7 +124,6 @@ public class DaoOfLoginUser {
 				ps.setString(1, data.getUserNo());
 				ps.setString(2, data.getUserName());
 				ps.setString(3, data.getUserEmail());
-//				ps.setInt(4, data.getGroupId());
 				ps.setString(4, data.getUserNo());
 				return ps;
 			}
@@ -128,12 +133,4 @@ public class DaoOfLoginUser {
 
 	}
 	
-//	public int updateUserGroup(int userId,Integer groupId){
-//		return this.jdbcTemplate
-//				.update("update login_users set dal_group_id=?"
-//						+ " where id=?",
-//						groupId,
-//						userId);
-//	}
-
 }

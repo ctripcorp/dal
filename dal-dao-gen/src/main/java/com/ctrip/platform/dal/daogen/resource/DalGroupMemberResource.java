@@ -134,6 +134,17 @@ public class DalGroupMemberResource {
 		}
 		
 		LoginUser user = user_dao.getUserById(userID);
+		
+		List<UserGroup> ugGroups = ugDao.getUserGroupByUserId(user.getId());
+		Iterator<UserGroup> ite = ugGroups.iterator();
+		while(ite.hasNext()) {
+			if(ite.next().getGroup_id() == groupID) {
+				Status status = Status.ERROR;
+				status.setInfo("用户["+user.getUserName()+"]已经加入当前DAL Team.");
+				return status;
+			}
+		}
+		
 		int ret = ugDao.insertUserGroup(userID, groupID, permision);
 		if(ret <= 0){
 			log.error("Add dal group member failed, caused by db operation failed, pls check the log.");

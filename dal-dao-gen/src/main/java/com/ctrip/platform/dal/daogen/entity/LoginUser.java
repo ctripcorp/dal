@@ -13,7 +13,9 @@ public class LoginUser {
 	
 	private String userEmail;
 	
-	private String permision;//组员的权限
+	private String role;//组员的权限
+	
+	private String adduser;//是否可以添加组员
 	
 	public static LoginUser visitRow(ResultSet rs) throws SQLException {
 		LoginUser task = new LoginUser();
@@ -56,12 +58,20 @@ public class LoginUser {
 		this.userEmail = userEmail;
 	}
 
-	public String getPermision() {
-		return permision;
+	public String getRole() {
+		return role;
 	}
 
-	public void setPermision(String permision) {
-		this.permision = permision;
+	public void setRole(String role) {
+		this.role = role;
 	}
-	
+
+	public String getAdduser() {
+		return adduser;
+	}
+
+	public void setAdduser(String adduser) {
+		this.adduser = adduser;
+	}
+
 }

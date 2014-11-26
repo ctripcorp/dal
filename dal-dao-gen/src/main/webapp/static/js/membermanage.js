@@ -51,10 +51,16 @@
         var record = w2ui['grid'].get(records[0]);
         if (record != null) {
             if (record['userName'] == 'Limited') {
-                $("#up_permision").val('2');
+                $("#up_user_role").val('2');
             } else {
-                $("#up_permision").val('1');
+                $("#up_user_role").val('1');
             }
+            if (record['adduser']=='允许') {
+                $("#up_allowAddUser").prop("checked", true);
+            } else {
+                $("#up_allowAddUser").prop("checked", false);
+            }
+
             $("#user_name").html(record['userName']);
             $("#updateUserModal").modal({
                 "backdrop": "static"
@@ -265,19 +271,25 @@
                 columns: [{
                     field: 'userName',
                     caption: '组员名字',
-                    size: '50%',
+                    size: '25%',
                     sortable: true,
                     attr: 'align=center'
                 }, {
                     field: 'userEmail',
                     caption: '组员邮件地址',
-                    size: '50%',
+                    size: '25%',
                     sortable: true,
                     attr: 'align=center'
                 }, {
-                    field: 'permision',
-                    caption: '组员权限',
-                    size: '50%',
+                    field: 'role',
+                    caption: '组员角色',
+                    size: '25%',
+                    sortable: true,
+                    attr: 'align=center'
+                }, {
+                    field: 'adduser',
+                    caption: '管理组员',
+                    size: '25%',
                     sortable: true,
                     attr: 'align=center'
                 }],
@@ -313,7 +325,8 @@
                 $.post("/rest/member/add", {
                     groupId : current_group,
                     userId : id,
-                    permision : $("#permision").val()
+                    user_role : $("#user_role").val(),
+                    allowAddUser : $("#allowAddUser").prop("checked")
                 },function (data) {
                     if (data.code == "OK") {
                         $("#memberModal").modal('hide');
@@ -334,7 +347,8 @@
             $.post("/rest/member/update", {
                 groupId : w2ui['grid'].current_group,
                 userId : user_id,
-                permision :$("#up_permision").val()
+                user_role :$("#up_user_role").val(),
+                allowAddUser : $("#up_allowAddUser").prop("checked")
             },function (data) {
                 if (data.code == "OK") {
                     $("#updateUserModal").modal('hide');

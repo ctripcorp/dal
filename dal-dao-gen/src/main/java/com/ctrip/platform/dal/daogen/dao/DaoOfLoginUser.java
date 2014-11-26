@@ -81,7 +81,8 @@ public class DaoOfLoginUser {
 				+ "       tb2.user_no, "
 				+ "       tb2.user_name, "
 				+ "       tb2.user_email, "
-				+ "       tb1.permision "
+				+ "       tb1.role, "
+				+ "       tb1.adduser "
 				+ "FROM   user_group tb1 "
 				+ "       LEFT JOIN login_users tb2 "
 				+ "              ON tb1.user_id = tb2.id "
@@ -93,13 +94,14 @@ public class DaoOfLoginUser {
 							new RowMapper<LoginUser>() {
 								public LoginUser mapRow(ResultSet rs, int rowNum)
 										throws SQLException {
-									LoginUser task = new LoginUser();
-									task.setId(rs.getInt(1));
-									task.setUserNo(rs.getString(2));
-									task.setUserName(rs.getString(3));
-									task.setUserEmail(rs.getString(4));
-									task.setPermision(rs.getString(5));
-									return task;
+									LoginUser user = new LoginUser();
+									user.setId(rs.getInt(1));
+									user.setUserNo(rs.getString(2));
+									user.setUserName(rs.getString(3));
+									user.setUserEmail(rs.getString(4));
+									user.setRole(rs.getString(5));
+									user.setAdduser(rs.getString(6));
+									return user;
 								}
 							});
 		} catch (DataAccessException ex) {

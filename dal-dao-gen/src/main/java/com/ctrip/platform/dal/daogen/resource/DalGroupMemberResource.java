@@ -79,12 +79,17 @@ public class DalGroupMemberResource {
 		Iterator<LoginUser> ite = users.iterator();
 		while(ite.hasNext()) {
 			LoginUser user = ite.next();
-			if ("1".equalsIgnoreCase(user.getPermision())) {
-				user.setPermision("Admin");
-			} else if ("2".equalsIgnoreCase(user.getPermision())) {
-				user.setPermision("Limited");
+			if ("1".equalsIgnoreCase(user.getRole())) {
+				user.setRole("Admin");
+			} else if ("2".equalsIgnoreCase(user.getRole())) {
+				user.setRole("Limited");
 			} else {
-				user.setPermision("Unkown");
+				user.setRole("Unkown");
+			}
+			if ("1".equalsIgnoreCase(user.getAdduser())) {
+				user.setAdduser("允许");
+			} else {
+				user.setAdduser("禁止");
 			}
 		}
 		return users;
@@ -102,7 +107,8 @@ public class DalGroupMemberResource {
 	@Path("add")
 	public Status add(@FormParam("groupId") String groupId,
 			@FormParam("userId") String userId,
-			@FormParam("permision") int permision){
+			@FormParam("user_role") int user_role,
+			@FormParam("allowAddUser") boolean allowAddUser){
 		
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
@@ -144,8 +150,8 @@ public class DalGroupMemberResource {
 				return status;
 			}
 		}
-		
-		int ret = ugDao.insertUserGroup(userID, groupID, permision);
+		int adduser = allowAddUser==true? 1:2;
+		int ret = ugDao.insertUserGroup(userID, groupID, user_role, adduser);
 		if(ret <= 0){
 			log.error("Add dal group member failed, caused by db operation failed, pls check the log.");
 			Status status = Status.ERROR;
@@ -161,7 +167,8 @@ public class DalGroupMemberResource {
 	@Path("update")
 	public Status update(@FormParam("groupId") String groupId,
 			@FormParam("userId") String userId,
-			@FormParam("permision") int permision){
+			@FormParam("user_role") int user_role,
+			@FormParam("allowAddUser") boolean allowAddUser){
 		
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
@@ -191,8 +198,8 @@ public class DalGroupMemberResource {
 			status.setInfo("你没有当前DAL Team的操作权限.");
 			return status;
 		}
-		
-		int ret = ugDao.updateUserPersimion(userID, groupID, permision);
+		int adduser = allowAddUser==true? 1:2;
+		int ret = ugDao.updateUserPersimion(userID, groupID, user_role, adduser);
 		if(ret <= 0){
 			log.error("Update dal group user failed, caused by db operation failed, pls check the log.");
 			Status status = Status.ERROR;
@@ -257,7 +264,7 @@ public class DalGroupMemberResource {
 			if(ug.getGroup_id() == DalGroupResource.SUPER_GROUP_ID){
 				return true;
 			}
-			if(ug.getGroup_id() == groupId || ug.getPermision() == 1){
+			if(ug.getGroup_id() == groupId && ug.getAdduser()==1){
 				return true;
 			}
 		}

@@ -57,10 +57,14 @@ jQuery(document).ready(function () {
             post_data["id"] = selectedProject[0];
             post_data["action"] = "delete";
             $.post("/rest/project", post_data, function (data) {
-                window.ajaxutil.reload_projects();
-                w2ui['grid'].clear();
-                ace.edit("code_editor").setValue("");
-                $($("#jstree_files").children()[0]).html("");
+                if (data['code']!='OK'){
+                    alert(data['info']);
+                } else {
+                    window.ajaxutil.reload_projects();
+                    w2ui['grid'].clear();
+                    ace.edit("code_editor").setValue("");
+                    $($("#jstree_files").children()[0]).html("");
+                }
             }).fail(function(data){
                     alert("删除失败！");
                 });

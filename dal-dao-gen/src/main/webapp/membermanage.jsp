@@ -79,8 +79,8 @@
 					</div>
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label">用户权限：</label>
-							<select id="permision" class="span8">
+							<label class="control-label popup_label">组员角色：</label>
+							<select id="user_role" class="span8">
 								<option value="1">Admin</option>
 								<option value="2">Limited</option>
 							</select>&nbsp;
@@ -90,6 +90,12 @@
 								2、Limited权限的用户，可以使用组内的资源，但是生成代码需要通过审批."> 
 								<img class="helpicon" src="/static/images/help.jpg"/>
 							</a>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label">允许管理组员：</label>
+							<input id="allowAddUser" type="checkbox" checked="true">
 						</div>
 					</div>
 				</div>
@@ -121,8 +127,8 @@
 					</div>
 					<div class="row-fluid">
 						<div class="control-group">
-							<label class="control-label popup_label">用户权限：</label>
-							<select id="up_permision" class="span8">
+							<label class="control-label popup_label">组员角色：</label>
+							<select id="up_user_role" class="span8">
 								<option value="1">Admin</option>
 								<option value="2">Limited</option>
 							</select>&nbsp;
@@ -132,6 +138,12 @@
 								2、Limited权限的用户，可以使用组内的资源，但是生成代码需要通过审批."> 
 								<img class="helpicon" src="/static/images/help.jpg"/>
 							</a>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label">允许管理组员：</label>
+							<input id="up_allowAddUser" type="checkbox" checked="true">
 						</div>
 					</div>
 				</div>

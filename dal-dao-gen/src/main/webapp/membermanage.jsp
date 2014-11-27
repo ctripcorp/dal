@@ -77,6 +77,27 @@
 							</a>
 						</div>
 					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label">组员角色：</label>
+							<select id="user_role" class="span8">
+								<option value="1">Admin</option>
+								<option value="2">Limited</option>
+							</select>&nbsp;
+							<a href="#" class="ctip" data-toggle="tooltip"
+								data-placement="bottom" title=""
+								data-original-title="1、Admin权限的用户可以完全使用组内资源.<br/>
+								2、Limited权限的用户，可以使用组内的资源，但是生成代码需要通过审批."> 
+								<img class="helpicon" src="/static/images/help.jpg"/>
+							</a>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label">允许管理组员：</label>
+							<input id="allowAddUser" type="checkbox" checked="true">
+						</div>
+					</div>
 				</div>
 				<div class="modal-footer">
 					<label id="error_msg" class="control-label popup_label"
@@ -88,6 +109,53 @@
 		</div>
       </div>
       <!--End modal-->
+      
+      <div class="modal fade" id="updateUserModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">权限修改</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label">组员姓名：</label>
+							<span id="user_name" class="label label-info" style="margin-left:15px">Info</span>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label">组员角色：</label>
+							<select id="up_user_role" class="span8">
+								<option value="1">Admin</option>
+								<option value="2">Limited</option>
+							</select>&nbsp;
+							<a href="#" class="ctip" data-toggle="tooltip"
+								data-placement="bottom" title=""
+								data-original-title="1、Admin权限的用户可以完全使用组内资源.<br/>
+								2、Limited权限的用户，可以使用组内的资源，但是生成代码需要通过审批."> 
+								<img class="helpicon" src="/static/images/help.jpg"/>
+							</a>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label">允许管理组员：</label>
+							<input id="up_allowAddUser" type="checkbox" checked="true">
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<label id="up_error_msg" class="control-label popup_label"
+						style="color: red;"></label>
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button id="save_up_member" type="button" class="btn btn-primary">保存</button>
+				</div>
+			</div>
+		</div>
+      </div>
       
     <!-- JS and analytics only. -->
 	<!-- Bootstrap core JavaScript================================================== -->

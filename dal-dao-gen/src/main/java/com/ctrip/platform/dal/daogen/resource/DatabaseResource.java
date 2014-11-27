@@ -71,8 +71,18 @@ public class DatabaseResource {
 		Status status = Status.OK;
 		
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
+		boolean havePersimion = false;
+		if (urGroups!=null && urGroups.size()>0) {
+			for (UserGroup ug : urGroups) {
+				if (ug.getGroup_id() == DalGroupResource.SUPER_GROUP_ID) {
+					havePersimion = true;
+					break;
+				}
+			}
+		} 
 		
-		if (user.getGroupId() != DalGroupResource.SUPER_GROUP_ID){
+		if (!havePersimion){
 			status = Status.ERROR;
 			status.setInfo("You have no permision, only DAL Admin Team can do this.");
 			return status;

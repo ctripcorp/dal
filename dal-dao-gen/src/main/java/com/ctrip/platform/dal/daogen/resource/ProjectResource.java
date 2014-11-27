@@ -1,7 +1,9 @@
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -183,8 +185,19 @@ public class ProjectResource {
 			proj.setNamespace(namespace);
 			proj.setDal_config_name(dalconfigname);
 			proj.setDal_group_id(project_group_id);
+			proj.setUpdate_user_no(user.getUserName()+"("+userNo+")");
+			proj.setUpdate_time(new Timestamp(System.currentTimeMillis()));
 			SpringBeanGetter.getDaoOfProject().insertProject(proj);
-		} else if (action.equals("update")) {
+			return Status.OK;
+		} 
+		
+		if (!validateProjectUpdatePermision(userNo, id, project_group_id)) {
+			Status status = Status.ERROR;
+			status.setInfo("你没有当前Project的操作权限.");
+			return status;
+		}
+		
+		if (action.equals("update")) {
 			List<Project>  pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
 			if(null != pjs && pjs.size() > 0){
 				for(Project temp:pjs){
@@ -195,13 +208,13 @@ public class ProjectResource {
 					}
 				}
 			}
-			
 			proj.setId(id);
 			proj.setName(name);
 			proj.setNamespace(namespace);
 			proj.setDal_config_name(dalconfigname);
+			proj.setUpdate_user_no(user.getUserName()+"("+userNo+")");
+			proj.setUpdate_time(new Timestamp(System.currentTimeMillis()));
 			SpringBeanGetter.getDaoOfProject().updateProject(proj);
-
 		} else if (action.equals("delete")) {
 			proj.setId(Integer.valueOf(id));
 			if (SpringBeanGetter.getDaoOfProject().deleteProject(proj) > 0) {
@@ -214,6 +227,28 @@ public class ProjectResource {
 		return Status.OK;
 
 	}
+	
+	private boolean validateProjectUpdatePermision(String userNo, int prjId, int project_group_id) {
+
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		
+		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(project_group_id, user.getId());
+		Iterator<UserGroup> ite = urGroups.iterator();
+		while (ite.hasNext()) {
+			UserGroup ug = ite.next();
+			if (ug.getRole() == 1) {// the admin of current team
+				return true;
+			} 
+		}
+		
+		Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(prjId);
+		String update_user_no = user.getUserName()+"("+userNo+")";
+		if (update_user_no.equalsIgnoreCase(prj.getUpdate_user_no())) {
+			return true;
+		}
+		
+		return false;
+	}
 
 	/**
 	 * 一键添加project缺失的databaseSet
@@ -225,7 +260,7 @@ public class ProjectResource {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Status addLackDbset(@FormParam("project_id") int project_id) {
 		int groupId = SpringBeanGetter.getDaoOfProject().getProjectByID(project_id).getDal_group_id();
-		String info = addLackDb(project_id);
+		String info = addLackDb(project_id, groupId);
 		
 		Set<String> notExistDbset = getLackDbset(groupId, project_id);
 		for(String dbsetName:notExistDbset){
@@ -281,10 +316,7 @@ public class ProjectResource {
 		return info;
 	}
 	
-	private String addLackDb(int project_id){
-		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-		int groupId = user.getGroupId();
+	private String addLackDb(int project_id, int groupId){
 		Set<String> notExistDb = getLackDatabase(groupId, project_id);
 		List<String> dbAllinOneNames = SpringBeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
 		Set<String> allInOneDbnames = new HashSet<String>(dbAllinOneNames);

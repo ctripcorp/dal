@@ -1,6 +1,7 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -75,6 +76,22 @@ public class DalGroupMemberResource {
 			return null;
 		}
 		List<LoginUser> users = user_dao.getUserByGroupId(groupId);
+		Iterator<LoginUser> ite = users.iterator();
+		while(ite.hasNext()) {
+			LoginUser user = ite.next();
+			if ("1".equalsIgnoreCase(user.getRole())) {
+				user.setRole("Admin");
+			} else if ("2".equalsIgnoreCase(user.getRole())) {
+				user.setRole("Limited");
+			} else {
+				user.setRole("Unkown");
+			}
+			if ("1".equalsIgnoreCase(user.getAdduser())) {
+				user.setAdduser("允许");
+			} else {
+				user.setAdduser("禁止");
+			}
+		}
 		return users;
 	}
 	
@@ -89,7 +106,9 @@ public class DalGroupMemberResource {
 	@POST
 	@Path("add")
 	public Status add(@FormParam("groupId") String groupId,
-			@FormParam("userId") String userId){
+			@FormParam("userId") String userId,
+			@FormParam("user_role") int user_role,
+			@FormParam("allowAddUser") boolean allowAddUser){
 		
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
@@ -121,15 +140,18 @@ public class DalGroupMemberResource {
 		}
 		
 		LoginUser user = user_dao.getUserById(userID);
-//		if(null != user && user.getGroupId() > 0){
-//			DalGroup group = group_dao.getDalGroupById(user.getGroupId());
-//			Status status = Status.ERROR;
-//			status.setInfo(user.getUserName()+" is already added in "+group.getGroup_comment());
-//			return status;
-//		}
 		
-//		int ret = user_dao.updateUserGroup(userID, groupID);
-		int ret = ugDao.insertUserGroup(userID, groupID);
+		List<UserGroup> ugGroups = ugDao.getUserGroupByUserId(user.getId());
+		Iterator<UserGroup> ite = ugGroups.iterator();
+		while(ite.hasNext()) {
+			if(ite.next().getGroup_id() == groupID) {
+				Status status = Status.ERROR;
+				status.setInfo("用户["+user.getUserName()+"]已经加入当前DAL Team.");
+				return status;
+			}
+		}
+		int adduser = allowAddUser==true? 1:2;
+		int ret = ugDao.insertUserGroup(userID, groupID, user_role, adduser);
 		if(ret <= 0){
 			log.error("Add dal group member failed, caused by db operation failed, pls check the log.");
 			Status status = Status.ERROR;
@@ -137,6 +159,52 @@ public class DalGroupMemberResource {
 			return status;
 		}else{
 			transferProjectToGroup(user.getUserNo(), groupID);
+		}
+		return Status.OK;
+	}
+	
+	@POST
+	@Path("update")
+	public Status update(@FormParam("groupId") String groupId,
+			@FormParam("userId") String userId,
+			@FormParam("user_role") int user_role,
+			@FormParam("allowAddUser") boolean allowAddUser){
+		
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+		
+		if(null == userNo || null == groupId || null == userId){
+			log.error(String.format("Add member failed, caused by illegal parameters: "
+					+ "[groupId=%s, userId=%s]",groupId, userId));
+			Status status = Status.ERROR;
+			status.setInfo("Illegal parameters.");
+			return status;
+		}
+		
+		int groupID = -1;
+		int userID = -1;
+		try{
+			groupID = Integer.parseInt(groupId);
+			userID =  Integer.parseInt(userId);
+		}catch(NumberFormatException  ex){
+			log.error("Add member failed", ex);
+			Status status = Status.ERROR;
+			status.setInfo("Illegal group id");
+			return status;
+		}
+		
+		if (!this.validatePermision(userNo, groupID)) {
+			Status status = Status.ERROR;
+			status.setInfo("你没有当前DAL Team的操作权限.");
+			return status;
+		}
+		int adduser = allowAddUser==true? 1:2;
+		int ret = ugDao.updateUserPersimion(userID, groupID, user_role, adduser);
+		if(ret <= 0){
+			log.error("Update dal group user failed, caused by db operation failed, pls check the log.");
+			Status status = Status.ERROR;
+			status.setInfo("Update operation failed.");
+			return status;
 		}
 		return Status.OK;
 	}
@@ -175,7 +243,6 @@ public class DalGroupMemberResource {
 			return status;
 		}
 
-//		int ret = user_dao.updateUserGroup(userID, null);
 		int ret = ugDao.deleteUserFromGroup(userID, groupID);
 		if(ret <= 0){
 			log.error("Delete memeber failed, caused by db operation failed, pls check the log.");
@@ -197,18 +264,11 @@ public class DalGroupMemberResource {
 			if(ug.getGroup_id() == DalGroupResource.SUPER_GROUP_ID){
 				return true;
 			}
-			if(ug.getGroup_id() == groupId){
+			if(ug.getGroup_id() == groupId && ug.getAdduser()==1){
 				return true;
 			}
 		}
 		return false;
-//		if(null != user && user.getGroupId() == DalGroupResource.SUPER_GROUP_ID){
-//			return true;
-//		}
-//		if(null != user && user.getGroupId() == groupId){
-//			return true;
-//		}
-//		return false;
 	}
 	
 	

@@ -148,6 +148,13 @@ public class GenTaskByTableViewResource {
 				
 			}
 			
+			for (DalApi api: apis) {
+				String method_declaration = api.getMethod_declaration();
+				method_declaration = method_declaration.replaceAll("<", "&lt;");
+				method_declaration = method_declaration.replaceAll(">", "&gt;");
+				api.setMethod_declaration(method_declaration);
+			}
+			
 			java.util.Collections.sort(apis, new Comparator<DalApi>(){
 				@Override
 				public int compare(DalApi o1, DalApi o2) {

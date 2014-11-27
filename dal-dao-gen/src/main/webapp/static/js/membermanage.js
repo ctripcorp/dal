@@ -28,7 +28,7 @@
     };
 
     var addMember = function(){
-        $("#error_msg").html('');
+        $("#error_msg").empty();
         var current_group = w2ui['grid'].current_group;
         if(current_group==null || current_group==''){
             alert('请先选择一个DAL Team！');
@@ -40,14 +40,46 @@
         });
     };
 
+    var updateMember = function() {
+        $("#up_error_msg").empty();
+        var current_group = w2ui['grid'].current_group;
+        if(current_group==null || current_group==''){
+            alert('请先选择一个DAL Team！');
+            return;
+        }
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if (record != null) {
+            if (record['userName'] == 'Limited') {
+                $("#up_user_role").val('2');
+            } else {
+                $("#up_user_role").val('1');
+            }
+            if (record['adduser']=='允许') {
+                $("#up_allowAddUser").prop("checked", true);
+            } else {
+                $("#up_allowAddUser").prop("checked", false);
+            }
+
+            $("#user_name").html(record['userName']);
+            $("#updateUserModal").modal({
+                "backdrop": "static"
+            });
+        } else {
+            alert('请选择一个用户！');
+        }
+
+    };
+
     var delMember = function(){
         var records = w2ui['grid'].getSelection();
         var record = w2ui['grid'].get(records[0]);
+        var current_group = w2ui['grid'].current_group;
         if(record!=null){
             if (confirm("Are you sure to delete?")) {
                 $.post("/rest/member/delete", {
                     userId:record["id"],
-                    groupId:record['groupId']
+                    groupId:current_group
                 },function (data) {
                     if (data.code == "OK") {
                         $("#memberModal").modal('hide');
@@ -198,6 +230,11 @@
                         icon: 'fa fa-times'
                     }, {
                         type: 'button',
+                        id: 'upMember',
+                        caption: '权限修改',
+                        icon: 'fa fa-edit'
+                    }, {
+                        type: 'button',
                         id: 'applyAdd',
                         caption: '申请加入DAL Team',
                         icon: 'fa fa-envelope'
@@ -216,6 +253,9 @@
                             case 'applyAdd':
                                 applyAdd();
                                 break;
+                            case 'upMember':
+                                updateMember();
+                                break;
                         }
                     }
                 },
@@ -231,13 +271,25 @@
                 columns: [{
                     field: 'userName',
                     caption: '组员名字',
-                    size: '50%',
+                    size: '25%',
                     sortable: true,
                     attr: 'align=center'
                 }, {
                     field: 'userEmail',
                     caption: '组员邮件地址',
-                    size: '50%',
+                    size: '25%',
+                    sortable: true,
+                    attr: 'align=center'
+                }, {
+                    field: 'role',
+                    caption: '组员角色',
+                    size: '25%',
+                    sortable: true,
+                    attr: 'align=center'
+                }, {
+                    field: 'adduser',
+                    caption: '管理组员',
+                    size: '25%',
                     sortable: true,
                     attr: 'align=center'
                 }],
@@ -263,6 +315,7 @@
     });
 
     jQuery(document).ready(function(){
+
         $("#save_member").click(function(){
             var id = $("#members").val();
             if(id==null){
@@ -271,7 +324,9 @@
                 var current_group = w2ui['grid'].current_group;
                 $.post("/rest/member/add", {
                     groupId : current_group,
-                    userId : id
+                    userId : id,
+                    user_role : $("#user_role").val(),
+                    allowAddUser : $("#allowAddUser").prop("checked")
                 },function (data) {
                     if (data.code == "OK") {
                         $("#memberModal").modal('hide');
@@ -284,6 +339,28 @@
                     });
             }
         });
+
+        $("#save_up_member").click(function(){
+            var records = w2ui['grid'].getSelection();
+            var record = w2ui['grid'].get(records[0]);
+            var user_id = record['id'];
+            $.post("/rest/member/update", {
+                groupId : w2ui['grid'].current_group,
+                userId : user_id,
+                user_role :$("#up_user_role").val(),
+                allowAddUser : $("#up_allowAddUser").prop("checked")
+            },function (data) {
+                if (data.code == "OK") {
+                    $("#updateUserModal").modal('hide');
+                    refreshMember();
+                } else {
+                    $("#up_error_msg").html(data.info);
+                }
+            }).fail(function (data) {
+                $("#up_error_msg").html(data.info);
+            });
+        });
+
     });
 
 })(window);

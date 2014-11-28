@@ -5,6 +5,9 @@
 
     };
 
+    /**
+     * reload current dal team user
+     */
     var refreshMember = function () {
         w2ui['grid'].clear();
         var current_group = w2ui['grid'].current_group;
@@ -40,7 +43,54 @@
         });
     };
 
-    var updateMember = function() {
+    var reload_all_groups = function () {
+        cblock($("body"));
+
+        $.get("/rest/group/get?rand=" + Math.random()).done(function (data) {
+
+            if ($("#group_list")[0] != undefined && $("#group_list")[0].selectize != undefined) {
+                $("#group_list")[0].selectize.clearOptions();
+            } else {
+                $("#group_list").selectize({
+                    valueField: 'id',
+                    labelField: 'title',
+                    searchField: 'title',
+                    sortField: 'title',
+                    options: [],
+                    create: false
+                });
+            }
+
+            var allDalTeam = [];
+            $.each(data, function (index, value) {
+                allDalTeam.push({
+                    id: value['id'],
+                    title: value['group_name']
+                });
+            });
+            $("#group_list")[0].selectize.addOption(allDalTeam);
+            $("#group_list")[0].selectize.refreshOptions(false);
+
+            $("body").unblock();
+        }).fail(function (data) {
+            $("body").unblock();
+        });
+    };
+
+    var addDalTeam = function() {
+        $("#add_group_error_msg").empty();
+        var current_group = w2ui['grid'].current_group;
+        if(current_group==null || current_group==''){
+            alert('请先选择一个DAL Team！');
+            return;
+        }
+        reload_all_groups();
+        $("#addDalTeamModal").modal({
+            "backdrop": "static"
+        });
+    };
+
+    var updateUserPermision = function() {
         $("#up_error_msg").empty();
         var current_group = w2ui['grid'].current_group;
         if(current_group==null || current_group==''){
@@ -49,7 +99,25 @@
         }
         var records = w2ui['grid'].getSelection();
         var record = w2ui['grid'].get(records[0]);
-        if (record != null) {
+        if (record == null) {
+            alert('请选择一个用户！');
+        } else if (record['dalTeam']===true) {
+            if (record['userName'] == 'Limited') {
+                $("#up_group_role").val('2');
+            } else {
+                $("#up_group_role").val('1');
+            }
+            if (record['adduser']=='允许') {
+                $("#up_allowGroupAddUser").prop("checked", true);
+            } else {
+                $("#up_allowGroupAddUser").prop("checked", false);
+            }
+
+            $("#group_name").html(record['userName']);
+            $("#updateDALTeamModal").modal({
+                "backdrop": "static"
+            });
+        } else {
             if (record['userName'] == 'Limited') {
                 $("#up_user_role").val('2');
             } else {
@@ -65,8 +133,6 @@
             $("#updateUserModal").modal({
                 "backdrop": "static"
             });
-        } else {
-            alert('请选择一个用户！');
         }
 
     };
@@ -79,7 +145,8 @@
             if (confirm("Are you sure to delete?")) {
                 $.post("/rest/member/delete", {
                     userId:record["id"],
-                    groupId:current_group
+                    groupId:current_group,
+                    isDalTeam : record['dalTeam']
                 },function (data) {
                     if (data.code == "OK") {
                         $("#memberModal").modal('hide');
@@ -96,7 +163,9 @@
         }
 
     };
-
+    /**
+     * reload the user exits in codegen system
+     */
     var reload_all_members = function () {
         cblock($("body"));
 
@@ -225,6 +294,11 @@
                         icon: 'fa fa-plus'
                     }, {
                         type: 'button',
+                        id: 'addDalTeam',
+                        caption: '添加Dal Team',
+                        icon: 'fa fa-plus'
+                    },{
+                        type: 'button',
                         id: 'delMember',
                         caption: '删除组员',
                         icon: 'fa fa-times'
@@ -247,6 +321,9 @@
                             case 'addMember':
                                 addMember();
                                 break;
+                            case 'addDalTeam':
+                                addDalTeam();
+                                break;
                             case 'delMember':
                                 delMember();
                                 break;
@@ -254,7 +331,7 @@
                                 applyAdd();
                                 break;
                             case 'upMember':
-                                updateMember();
+                                updateUserPermision();
                                 break;
                         }
                     }
@@ -322,7 +399,7 @@
                 $("#error_msg").html('请选择用户!');
             }else{
                 var current_group = w2ui['grid'].current_group;
-                $.post("/rest/member/add", {
+                $.post("/rest/member/addUser", {
                     groupId : current_group,
                     userId : id,
                     user_role : $("#user_role").val(),
@@ -358,6 +435,51 @@
                 }
             }).fail(function (data) {
                 $("#up_error_msg").html(data.info);
+            });
+        });
+
+        $("#save_add_group").click(function(){
+            var id = $("#group_list").val();
+            if(id==null){
+                $("#add_group_error_msg").html('请选择一个DAL Team!');
+            }else{
+                var current_group = w2ui['grid'].current_group;
+                $.post("/rest/member/addGroup", {
+                    currentGroupId : current_group,
+                    childGroupId : id,
+                    child_group_role : $("#group_role").val(),
+                    allowGroupAddUser : $("#allowGroupAddUser").prop("checked")
+                },function (data) {
+                    if (data.code == "OK") {
+                        $("#addDalTeamModal").modal('hide');
+                        refreshMember();
+                    } else {
+                        $("#add_group_error_msg").html(data.info);
+                    }
+                }).fail(function (data) {
+                    $("#add_group_error_msg").html(data.info);
+                });
+            }
+        });
+
+        $("#save_up_group").click(function(){
+            var records = w2ui['grid'].getSelection();
+            var record = w2ui['grid'].get(records[0]);
+            var child_group_id = record['id'];
+            $.post("/rest/member/updateGroup", {
+                currentGroupId : w2ui['grid'].current_group,
+                child_group_id : child_group_id,
+                child_group_role : $("#up_group_role").val(),
+                allowGroupAddUser : $("#up_allowGroupAddUser").prop("checked")
+            },function (data) {
+                if (data.code == "OK") {
+                    $("#updateDALTeamModal").modal('hide');
+                    refreshMember();
+                } else {
+                    $("#up_group_error_msg").html(data.info);
+                }
+            }).fail(function (data) {
+                $("#up_group_error_msg").html(data.info);
             });
         });
 

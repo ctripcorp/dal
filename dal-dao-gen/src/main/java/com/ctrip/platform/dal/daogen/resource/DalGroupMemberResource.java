@@ -1,6 +1,7 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.sql.Timestamp;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
 import com.ctrip.platform.dal.daogen.dao.UserGroupDao;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
+import com.ctrip.platform.dal.daogen.entity.GroupRelation;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.entity.UserProject;
@@ -68,14 +70,14 @@ public class DalGroupMemberResource {
 	@Path("groupuser")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<LoginUser> getGroupUsers(@QueryParam("groupId") String id) {
-		int groupId = -1;
+		int currentGroupId = -1;
 		try{
-			groupId = Integer.parseInt(id);
+			currentGroupId = Integer.parseInt(id);
 		}catch(NumberFormatException  ex){
 			log.error("get Group Users failed", ex);
 			return null;
 		}
-		List<LoginUser> users = user_dao.getUserByGroupId(groupId);
+		List<LoginUser> users = user_dao.getUserByGroupId(currentGroupId);
 		Iterator<LoginUser> ite = users.iterator();
 		while(ite.hasNext()) {
 			LoginUser user = ite.next();
@@ -92,6 +94,31 @@ public class DalGroupMemberResource {
 				user.setAdduser("禁止");
 			}
 		}
+		List<GroupRelation> relations = SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
+		Iterator<GroupRelation> gite = relations.iterator();
+		while (gite.hasNext()) {
+			GroupRelation relation = gite.next();
+			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(relation.getChild_group_id());
+			LoginUser user =  new LoginUser();
+			user.setId(group.getId());
+			user.setUserName(group.getGroup_name());
+			user.setUserEmail(group.getGroup_comment());
+			if (1==relation.getChild_group_role()) {
+				user.setRole("Admin");
+			} else if (2==relation.getChild_group_role()) {
+				user.setRole("Limited");
+			} else {
+				user.setRole("Unkown");
+			}
+			if (1==relation.getAdduser()) {
+				user.setAdduser("允许");
+			} else {
+				user.setAdduser("禁止");
+			}
+			user.setDalTeam(true);
+			users.add(user);
+		}
+		
 		return users;
 	}
 	
@@ -104,8 +131,8 @@ public class DalGroupMemberResource {
 	}
 	
 	@POST
-	@Path("add")
-	public Status add(@FormParam("groupId") String groupId,
+	@Path("addUser")
+	public Status addUser(@FormParam("groupId") String groupId,
 			@FormParam("userId") String userId,
 			@FormParam("user_role") int user_role,
 			@FormParam("allowAddUser") boolean allowAddUser){
@@ -210,42 +237,123 @@ public class DalGroupMemberResource {
 	}
 	
 	@POST
-	@Path("delete")
-	public Status delete(@FormParam("groupId") String groupId,
-			@FormParam("userId") String userId){
-
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
+	@Path("addGroup")
+	public Status addGroup(@FormParam("currentGroupId") int currentGroupId,
+			@FormParam("childGroupId") int childGroupId,
+			@FormParam("child_group_role") int child_group_role,
+			@FormParam("allowGroupAddUser") boolean allowGroupAddUser){
 		
-		if(null == userNo || null == groupId || null == userId){
-			log.error(String.format("Add member failed, caused by illegal parameters: "
-					+ "[groupId=%s, userId=%s]",groupId, userId));
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
+		
+		if(null == userNo) {
+			log.error(String.format("Add group failed, caused by illegal parameters:[userNo=%s]",userNo));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
 		}
 		
-		int groupID = -1;
-		int userID = -1;
-		try{
-			groupID = Integer.parseInt(groupId);
-			userID =  Integer.parseInt(userId);
-		}catch(NumberFormatException  ex){
-			log.error("Add member failed", ex);
-			Status status = Status.ERROR;
-			status.setInfo("Illegal group id");
-			return status;
-		}
-		
-		if(!this.validatePermision(userNo,groupID)){
+		if(!this.validatePermision(userNo, currentGroupId)){
 			Status status = Status.ERROR;
 			status.setInfo("你没有当前DAL Team的操作权限.");
 			return status;
 		}
-
-		int ret = ugDao.deleteUserFromGroup(userID, groupID);
+		
+		GroupRelation relation = SpringBeanGetter.getGroupRelationDao().getGroupRelationByCurrentGroupIdAndChildGroupId(currentGroupId, childGroupId);
+		if (relation!=null) {
+			DalGroup dalGroup = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(childGroupId);
+			Status status = Status.ERROR;
+			status.setInfo("DAL Team["+dalGroup.getGroup_name()+"]已经加入当前DAL Team.");
+			return status;
+		}
+		
+		int adduser = allowGroupAddUser==true? 1:2;
+		relation = new GroupRelation();
+		relation.setAdduser(adduser);
+		relation.setChild_group_id(childGroupId);
+		relation.setChild_group_role(child_group_role);
+		relation.setCurrent_group_id(currentGroupId);
+		relation.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+		String upNo = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getUserName();
+		relation.setUpdate_user_no(upNo);
+		int ret = SpringBeanGetter.getGroupRelationDao().insertChildGroup(relation);
 		if(ret <= 0){
-			log.error("Delete memeber failed, caused by db operation failed, pls check the log.");
+			log.error("Add dal group failed, caused by db operation failed, pls check the log.");
+			Status status = Status.ERROR;
+			status.setInfo("Add operation failed.");
+			return status;
+		}
+		return Status.OK;
+	}
+	
+	@POST
+	@Path("updateGroup")
+	public Status updateGroup(@FormParam("currentGroupId") int currentGroupId,
+			@FormParam("child_group_id") int childGroupId,
+			@FormParam("child_group_role") int childGroupRole,
+			@FormParam("allowGroupAddUser") boolean allowGroupAddUser){
+		
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
+		
+		if(null == userNo){
+			log.error(String.format("Add member failed, caused by illegal parameters:[userNo=%s]", userNo));
+			Status status = Status.ERROR;
+			status.setInfo("Illegal parameters.");
+			return status;
+		}
+		
+		if (!this.validatePermision(userNo, currentGroupId)) {
+			Status status = Status.ERROR;
+			status.setInfo("你没有当前DAL Team的操作权限.");
+			return status;
+		}
+		int adduser = allowGroupAddUser==true? 1:2;
+		String updateUserNo = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getUserName();
+		int ret = SpringBeanGetter.getGroupRelationDao().updateGroupRelation(currentGroupId, childGroupId, childGroupRole, adduser, updateUserNo, new Timestamp(System.currentTimeMillis()));
+		if(ret <= 0){
+			log.error("Update dal group failed, caused by db operation failed, pls check the log.");
+			Status status = Status.ERROR;
+			status.setInfo("Update operation failed.");
+			return status;
+		}
+		return Status.OK;
+	}
+	
+	@POST
+	@Path("delete")
+	public Status delete(@FormParam("groupId") int currentGroupId,
+			@FormParam("userId") int userId,
+			@FormParam("isDalTeam") boolean isDalTeam) {
+
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
+		
+		if(null == userNo){
+			log.error(String.format("Add member failed, caused by illegal parameters: [userNo=%s]", userNo));
+			Status status = Status.ERROR;
+			status.setInfo("Illegal parameters.");
+			return status;
+		}
+		
+		if(!this.validatePermision(userNo, currentGroupId)){
+			Status status = Status.ERROR;
+			status.setInfo("你没有当前DAL Team的操作权限.");
+			return status;
+		}
+		
+		if (isDalTeam) {
+			int childGroupId = userId;
+			int ret = SpringBeanGetter.getGroupRelationDao().deleteChildGroupByCurrentGroupIdAndChildGroupId(currentGroupId, childGroupId);
+			if(ret <= 0){
+				log.error("Delete dal team failed, caused by db operation failed, pls check the log.");
+				Status status = Status.ERROR;
+				status.setInfo("Delete operation failed.");
+				return status;
+			}
+			return Status.OK;
+		}
+
+		int ret = ugDao.deleteUserFromGroup(userId, currentGroupId);
+		if(ret <= 0){
+			log.error("Delete user failed, caused by db operation failed, pls check the log.");
 			Status status = Status.ERROR;
 			status.setInfo("Delete operation failed.");
 			return status;

@@ -51,6 +51,10 @@
     <bean id = "dalUserGroupDao" class = "com.ctrip.platform.dal.daogen.dao.UserGroupDao">
     	<property name="dataSource" ref="dataSource" />
     </bean>
+    
+    <bean id = "groupRelationDao" class = "com.ctrip.platform.dal.daogen.dao.GroupRelationDao">
+    	<property name="dataSource" ref="dataSource" />
+    </bean>
 
     <bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">   
         <property name="poolProperties"> 

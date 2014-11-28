@@ -110,13 +110,64 @@
       </div>
       <!--End modal-->
       
+      <!--Begin modal-->
+      <div class="modal fade" id="addDalTeamModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">添加DAL Team</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label">DAL Team列表：</label>
+							<select id="group_list" class="span8">
+							</select>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label">DAL Team角色：</label>
+							<select id="group_role" class="span8">
+								<option value="1">Admin</option>
+								<option value="2">Limited</option>
+							</select>&nbsp;
+							<a href="#" class="ctip" data-toggle="tooltip"
+								data-placement="bottom" title=""
+								data-original-title="1、Admin权限的用户组可以完全使用组内资源.<br/>
+								2、Limited权限的用户组，可以使用组内的资源，但是生成代码需要通过审批."> 
+								<img class="helpicon" src="/static/images/help.jpg"/>
+							</a>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width:129px">允许管理组员：</label>
+							<input id="allowGroupAddUser" type="checkbox" checked="true">
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<label id="add_group_error_msg" class="control-label popup_label"
+						style="color: red;"></label>
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button id="save_add_group" type="button" class="btn btn-primary">保存</button>
+				</div>
+			</div>
+		</div>
+      </div>
+      <!--End modal-->
+      
+      <!--Begin modal-->
       <div class="modal fade" id="updateUserModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
          <div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal"
 						aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="myModalLabel">权限修改</h4>
+					<h4 class="modal-title" id="myModalLabel">User权限修改</h4>
 				</div>
 				<div class="modal-body">
 					<div class="row-fluid">
@@ -156,6 +207,56 @@
 			</div>
 		</div>
       </div>
+      <!--End modal-->
+      
+      <!--Begin modal-->
+      <div class="modal fade" id="updateDALTeamModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">DAL Team权限修改</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label">DAL Team名称：</label>
+							<span id="group_name" class="label label-info" style="margin-left:15px">Info</span>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label">DAL Team角色：</label>
+							<select id="up_group_role" class="span8">
+								<option value="1">Admin</option>
+								<option value="2">Limited</option>
+							</select>&nbsp;
+							<a href="#" class="ctip" data-toggle="tooltip"
+								data-placement="bottom" title=""
+								data-original-title="1、Admin权限的用户组可以完全使用组内资源.<br/>
+								2、Limited权限的用户组，可以使用组内的资源，但是生成代码需要通过审批."> 
+								<img class="helpicon" src="/static/images/help.jpg"/>
+							</a>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="control-group">
+							<label class="control-label popup_label" style="width:129px">允许管理组员：</label>
+							<input id="up_allowGroupAddUser" type="checkbox" checked="true">
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<label id="up_group_error_msg" class="control-label popup_label"
+						style="color: red;"></label>
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button id="save_up_group" type="button" class="btn btn-primary">保存</button>
+				</div>
+			</div>
+		</div>
+      </div>
+      <!--End modal-->
       
     <!-- JS and analytics only. -->
 	<!-- Bootstrap core JavaScript================================================== -->

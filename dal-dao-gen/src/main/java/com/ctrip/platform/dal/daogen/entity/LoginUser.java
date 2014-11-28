@@ -12,10 +12,11 @@ public class LoginUser {
 	private String userName;
 	
 	private String userEmail;
-	
+
+	//以下属性仅在组员管理界面中使用
 	private String role;//组员的权限
-	
 	private String adduser;//是否可以添加组员
+	private boolean isDalTeam = false;//true:是DAL Team，false:是正常用户
 	
 	public static LoginUser visitRow(ResultSet rs) throws SQLException {
 		LoginUser task = new LoginUser();
@@ -74,4 +75,12 @@ public class LoginUser {
 		this.adduser = adduser;
 	}
 
+	public boolean isDalTeam() {
+		return isDalTeam;
+	}
+
+	public void setDalTeam(boolean isDalTeam) {
+		this.isDalTeam = isDalTeam;
+	}
+	
 }

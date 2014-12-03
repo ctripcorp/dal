@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -34,6 +36,7 @@ import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
+import com.ctrip.platform.dal.daogen.entity.GroupRelation;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
@@ -92,19 +95,41 @@ public class ProjectResource {
 		List<DalGroup> groups = new ArrayList<DalGroup>();
 		List<UserGroup> urGroups = ugDao.getUserGroupByUserId(user.getId());
 		if(urGroups!=null && urGroups.size()>=1) {
+			Set<Integer> groupIds = new HashSet<Integer>();
 			for(UserGroup urgroup : urGroups) {
-				DalGroup dalGroup = group_dao.getDalGroupById(urgroup.getGroup_id());
-				dalGroup.setText(dalGroup.getGroup_name());
-				dalGroup.setIcon("fa fa-folder-o");
-				dalGroup.setChildren(true);
-				groups.add(dalGroup);
+				groupIds.add(urgroup.getGroup_id());
 			}
+			groups = getAllJoinedDalGroup(groupIds);
 		} else {
 			DalGroup group = new DalGroup();
 			group.setText("请先加入DAL Team");
 			group.setIcon("fa fa-folder-o");
 			group.setChildren(true);
 			groups.add(group);
+		}
+		return groups;
+	}
+	
+	private List<DalGroup> getAllJoinedDalGroup(Set<Integer> groupIds) {
+		Set<Integer> parentGroupIds = new HashSet<Integer>();
+		for(Integer childGroupId : groupIds) {
+			List<GroupRelation> relations = SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByChildGroupId(childGroupId);
+			if (relations==null || relations.size()<1) {
+				continue;
+			}
+			for (GroupRelation relation : relations) {
+				parentGroupIds.add(relation.getCurrent_group_id());
+			}
+		}
+		// the group that user have joined
+		groupIds.addAll(parentGroupIds);
+		List<DalGroup> groups = new ArrayList<DalGroup>();
+		for (Integer groupId : groupIds) {
+			DalGroup dalGroup = group_dao.getDalGroupById(groupId);
+			dalGroup.setText(dalGroup.getGroup_name());
+			dalGroup.setIcon("fa fa-folder-o");
+			dalGroup.setChildren(true);
+			groups.add(dalGroup);
 		}
 		return groups;
 	}
@@ -123,17 +148,14 @@ public class ProjectResource {
 			status.setInfo("Illegal group id");
 			return null;
 		}
-		
 		return project.getProjectByGroupId(groupID);
-
 	}
 
 	@GET
 	@Path("project")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Project getProject(@QueryParam("id") String id) {
-		return SpringBeanGetter.getDaoOfProject().getProjectByID(
-				Integer.valueOf(id));
+		return SpringBeanGetter.getDaoOfProject().getProjectByID(Integer.valueOf(id));
 	}
 
 	@POST
@@ -147,8 +169,7 @@ public class ProjectResource {
 
 		Project proj = new Project();
 
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
 		
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		
@@ -160,18 +181,12 @@ public class ProjectResource {
 		
 		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
 		
-		if(urGroups==null){
+		if(urGroups==null || urGroups.size()<1){
 			Status status = Status.ERROR;
 			status.setInfo("请先加入某个DAL Team.");
 			return status;
 		}
 		
-		if(urGroups.size()<1) {
-			Status status = Status.ERROR;
-			status.setInfo("请先加入某个DAL Team.");
-			return status;
-		}
-
 		if (action.equals("insert")) {
 			List<Project>  pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
 			if(null != pjs && pjs.size() > 0){
@@ -226,7 +241,34 @@ public class ProjectResource {
 
 	}
 	
+	@POST
+	@Path("projectPermisionCheck")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Status projectPermisionCheck(@FormParam("prjId") int prjId) {
+		
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
+		
+		if (!validateProjectUpdatePermision(userNo, prjId, -1)) {
+			Status status = Status.ERROR;
+			status.setInfo("你没有当前DAO的操作权限.");
+			return status;
+		}
+		return Status.OK;
+	}
+	
 	private boolean validateProjectUpdatePermision(String userNo, int prjId, int project_group_id) {
+
+		boolean havePermision = false;
+		project_group_id = SpringBeanGetter.getDaoOfProject().getProjectByID(prjId).getDal_group_id();
+		havePermision = validateProjectUpdatePermisionInCurrentGroup(userNo, prjId, project_group_id);
+		if (havePermision) {
+			return havePermision;
+		}
+		havePermision = validateProjectUpdatePermisionInChildGroup(userNo, prjId, project_group_id);
+		return havePermision;
+	}
+	
+	private boolean validateProjectUpdatePermisionInCurrentGroup(String userNo, int prjId, int project_group_id) {
 
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		
@@ -234,18 +276,101 @@ public class ProjectResource {
 		Iterator<UserGroup> ite = urGroups.iterator();
 		while (ite.hasNext()) {
 			UserGroup ug = ite.next();
-			if (ug.getRole() == 1) {// the admin of current team
+			if (ug.getRole() == 1) {// the user is the original team user, at the same time is also the admin of current team
 				return true;
 			} 
 		}
 		
 		Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(prjId);
 		String update_user_no = user.getUserName()+"("+userNo+")";
+		//the user is the original team user, but is not admin, so can only modify prj which is created by himself
 		if (update_user_no.equalsIgnoreCase(prj.getUpdate_user_no())) {
 			return true;
 		}
 		
 		return false;
+	}
+	
+	private boolean validateProjectUpdatePermisionInChildGroup(String userNo, int prjId, int project_group_id) {
+		
+		List<GroupRelation> relations = SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(project_group_id);
+		if (relations==null || relations.size()<1) {
+			return false;
+		}
+		
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		
+		for (GroupRelation relation : relations) {
+			if (relation.getChild_group_role() == 1) {// the child group, but have admin role permision
+				List<UserGroup> exists = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(relation.getChild_group_id(), user.getId());
+				if (exists!=null && exists.size()>0) { // the user is in the specific group whic have permison to modify the prj
+					return true;
+				}
+			} else { // the child group which only have limited permison
+				Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(prjId);
+				String updateUN = prj.getUpdate_user_no();
+				if (updateUN==null || updateUN.isEmpty()) { //the prj have no update user info
+					// check the user is or not in the current group
+					int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
+					List<UserGroup> check = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(project_group_id, userId);
+					if (check!=null && check.size()>0) {
+						return true;
+					}
+					return false;
+				}
+				
+				Pattern pattern = Pattern.compile(".+\\((\\w+)\\).*");
+				Matcher m = pattern.matcher(updateUN);
+				String upNo = "";
+				if (m.find()) {
+					upNo = m.group(1);
+				}
+				if (upNo.equalsIgnoreCase(userNo)) {
+					return true;
+				}
+				// the owner of the current project
+				LoginUser currentPrjUser = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(upNo);
+				if (currentPrjUser == null) {
+					return false;
+				}
+				// the group that the owner of the current prj have been joined in
+				List<UserGroup> currentPrjUserGroup = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(currentPrjUser.getId());
+				if (currentPrjUserGroup==null || currentPrjUserGroup.size()<1) {
+					return false;
+				}
+				
+				//now check, the user who want to modify the prj is or not in the same group compare with the current prj owner
+				int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
+				Set<Integer> childGroupIds = getChildGroupId(project_group_id);
+				Iterator<UserGroup> ite = currentPrjUserGroup.iterator();
+				while (ite.hasNext()) {
+					UserGroup ug = ite.next();
+					if (!childGroupIds.contains(ug.getGroup_id())) {
+						continue;
+					}
+					List<UserGroup> exists = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(ug.getGroup_id(), userId);
+					if (exists!=null && exists.size()>0) {
+						return true;
+					}
+				}
+			}
+		}
+		
+		
+		return false;
+	}
+	
+	private Set<Integer> getChildGroupId(int currentGroupId) {
+		Set<Integer> sets = new HashSet<Integer>();
+		List<GroupRelation> relations = SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
+		if (relations == null) {
+			return sets;
+		}
+		
+		for (GroupRelation relation : relations) {
+			sets.add(relation.getChild_group_id());
+		}
+		return sets;
 	}
 
 	/**

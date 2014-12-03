@@ -3,6 +3,8 @@ package com.ctrip.platform.dal.daogen.entity;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Project {
 	
@@ -19,6 +21,7 @@ public class Project {
 	private String update_user_no;
 	
 	private Timestamp update_time;
+	private String str_update_time="";
 	
 	private String text;
 	
@@ -36,6 +39,11 @@ public class Project {
         project.setDal_config_name(rs.getString(5));
         project.setUpdate_user_no(rs.getString(6));
         project.setUpdate_time(rs.getTimestamp(7));
+        try {
+			Date date = new Date(project.getUpdate_time().getTime());
+			project.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+		} catch (Throwable e) {
+		}
         project.setText(project.getName());
         project.setChildren(false);
         project.setIcon("fa fa-tasks");
@@ -121,6 +129,14 @@ public class Project {
 
 	public void setUpdate_time(Timestamp update_time) {
 		this.update_time = update_time;
+	}
+
+	public String getStr_update_time() {
+		return str_update_time;
+	}
+
+	public void setStr_update_time(String str_update_time) {
+		this.str_update_time = str_update_time;
 	}
 
 }

@@ -85,7 +85,7 @@
               <div class="modal-body">
 				  <div class="row-fluid">
 						<div class="control-group">
-							<label id="overrideAlertErrorNoticeDivMsg" class="label label-danger"></label>
+							<label id="overrideAlertErrorNoticeDivMsg"></label>
 						</div>
 					</div>
 	              </div>

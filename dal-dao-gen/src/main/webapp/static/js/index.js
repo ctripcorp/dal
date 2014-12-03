@@ -8,6 +8,7 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', '#addProj', function (event) {
+        $("#proj_error_msg").empty();
         if($("#projectModal").attr("is_root") == "0"){
             alert("请选择一个DAL Team节点，再操作！");
             return;
@@ -20,6 +21,7 @@ jQuery(document).ready(function () {
     });
 
     $(document.body).on('click', '#editProj', function (event) {
+        $("#proj_error_msg").empty();
         if($("#projectModal").attr("is_root") == "1") {
             alert("请单击一个项目，再操作！");
             return;
@@ -35,6 +37,12 @@ jQuery(document).ready(function () {
             $("#name").val(project.text);
             $("#namespace").val(project.namespace);
             $("#dalconfigname").val(project['dal_config_name']);
+            $("#prj_update_user").html(project['update_user_no']==null?'Unknown':project['update_user_no']);
+            if (project['str_update_time']==null || project['str_update_time']=='') {
+                $("#prj_update_time").html('Unknown');
+            } else {
+                $("#prj_update_time").html(project['str_update_time']);
+            }
         }
         $("#projectModal").attr("is_update", "1");
         $("#projectModal").modal();

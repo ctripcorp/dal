@@ -93,7 +93,6 @@ public class DaoOfProject {
 								}
 							});
 		} catch (DataAccessException ex) {
-			ex.printStackTrace();
 			return null;
 		}
 	}
@@ -141,7 +140,7 @@ public class DaoOfProject {
 	public int updateProject(Project project) {
 		try {
 			return this.jdbcTemplate
-					.update("update project set name=?, namespace=?, dal_config_name=?,update_user_no=?,update_time? where id=?",
+					.update("update project set name=?, namespace=?, dal_config_name=?, update_user_no=?, update_time=? where id=?",
 							project.getName(),
 							project.getNamespace(), 
 							project.getDal_config_name(),

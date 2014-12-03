@@ -70,6 +70,48 @@
             });
     };
 
+    var haveUpdateDaoPermision = function() {
+        var havePermision = false;
+        var current_project = w2ui['grid'].current_project;
+        if (current_project == undefined) {
+            if (w2ui['sidebar'].nodes.length < 1 || w2ui['sidebar'].nodes[0].nodes.length < 1)
+                return;
+            current_project = w2ui['sidebar'].nodes[0].nodes[0].id;
+        }
+        cblock($("body"));
+        $.ajax({
+            type: "POST",
+            async: false,
+            url: "/rest/project/projectPermisionCheck",
+            data: {
+                'prjId' : current_project
+            },
+            dataType: "json",
+            success: function (data) {
+                if (data.code == "OK") {
+                    havePermision = true;
+                } else {
+                    var selectedProject = $.jstree.reference("#jstree_projects").get_selected();
+                    var project = $.jstree.reference("#jstree_projects").get_node(selectedProject[0]).original;
+                    var errMsg = '你没有当前DAO的操作权限.';
+                    if (project['update_user_no']!=null && project['update_user_no']!='') {
+                        errMsg += "<br/>当前Dao对应Project的所属User为：" + project['update_user_no'];
+                    } else {
+                        errMsg += "<br/>当前Dao对应Project的所属User为：Unknown";
+                    }
+                    if (project['str_update_time']!=null && project['str_update_time']!='') {
+                        errMsg += "<br/>当前Dao对应Project的最后修改时间：" + project['update_user_no'];
+                    } else {
+                        errMsg += "<br/>当前Dao对应Project的最后修改时间：Unknown";
+                    }
+                    alert(errMsg);
+                }
+                $("body").unblock();
+            }
+        });
+        return havePermision;
+    };
+
     var addDAO = function(){
         var current_project = w2ui['grid'].current_project;
         if(current_project==null || current_project==''){
@@ -110,6 +152,9 @@
         var record = w2ui['grid'].get(records[0]);
         if(record==null || record==''){
             alert("请先选择一个DAO");
+            return;
+        }
+        if (!haveUpdateDaoPermision()) {
             return;
         }
         window.wizzard.clear();
@@ -153,6 +198,9 @@
         var record = w2ui['grid'].get(records[0]);
         if (record == null || record == '') {
             alert("请先选择一个DAO");
+            return;
+        }
+        if (!haveUpdateDaoPermision()) {
             return;
         }
         if (confirm("Are you sure to delete?")) {

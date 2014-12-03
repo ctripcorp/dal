@@ -94,6 +94,18 @@
                        	<span id="user_group_pj" class="label label-info">Info</span>
                   	</div>
                   </div>
+                  <div class="row-fluid">
+                     <div class="control-group">
+                       	<label class="control-label popup_label" style="width:125px;">上次修改User：</label>
+                       	<span id="prj_update_user" class="label label-info">Unknow</span>
+                  	</div>
+                  </div>
+                  <div class="row-fluid">
+                     <div class="control-group">
+                       	<label class="control-label popup_label" style="width:125px;">上次修改时间：</label>
+                       	<span id="prj_update_time" class="label label-info">Unknow</span>
+                  	</div>
+                  </div>
                </div>
                <div class="modal-footer">
                		<label id="proj_error_msg" class="control-label popup_label" style="color:red;"></label>

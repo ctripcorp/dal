@@ -46,6 +46,19 @@ public class GroupRelationDao {
 						});
 	}
 	
+	public List<GroupRelation> getAllGroupRelationByChildGroupId(Integer childGroupId) {
+		return this.jdbcTemplate
+				.query("SELECT id, current_group_id, child_group_id, child_group_role, adduser, update_user_no "
+						+ ",update_time FROM group_relation where child_group_id=?",
+						new Object[]{childGroupId},
+						new RowMapper<GroupRelation>() {
+							public GroupRelation mapRow(ResultSet rs, int rowNum)
+									throws SQLException {
+								return GroupRelation.visitRow(rs);
+							}
+						});
+	}
+	
 	public GroupRelation getGroupRelationByCurrentGroupIdAndChildGroupId(Integer currentGroupId, Integer childGroupId) {
 		List<GroupRelation> result = this.jdbcTemplate
 				.query("SELECT id, current_group_id, child_group_id, child_group_role, adduser, update_user_no "

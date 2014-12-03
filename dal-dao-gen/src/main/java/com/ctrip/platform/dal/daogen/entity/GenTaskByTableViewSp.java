@@ -25,7 +25,7 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 	private int version;
 	private String update_user_no;
 	private Timestamp update_time;
-	private String str_update_time;
+	private String str_update_time = "";
 	private String comment;
 	//csharp 或者 java，表示C#风格或者Java风格，@Name or ?
 	private String sql_style;
@@ -59,9 +59,11 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp> {
 		task.setSql_style(rs.getString("sql_style"));
 		task.setApi_list(rs.getString("api_list"));
 
-		Date date = new Date(task.getUpdate_time().getTime());
-		task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
-		
+		try {
+			Date date = new Date(task.getUpdate_time().getTime());
+			task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+		} catch (Throwable e) {
+		}
 		return task;
 	}
 

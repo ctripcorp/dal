@@ -219,7 +219,8 @@
         if (confirm("Are you sure to delete?")) {
             $.post("/rest/groupdbset/deletedbsetEntry", {
                 groupId : w2ui['grid'].current_group,
-                dbsetEntryId : record2['id']
+                dbsetEntryId : record2['id'],
+                "dbsetId":record2['databaseSet_Id']
             },function (data) {
                 if (data.code == "OK") {
                     refreshDbSetEntry();
@@ -385,8 +386,18 @@
                 }, {
                     field: 'shardingStrategy',
                     caption: 'shardStrategy',
-                    size: '60%',
+                    size: '35%',
                     sortable: true,
+                    resizable:true
+                },{
+                    field: 'update_user_no',
+                    caption: '修改User',
+                    size: '12%',
+                    resizable:true
+                },{
+                    field: 'str_update_time',
+                    caption: '修改时间',
+                    size: '13%',
                     resizable:true
                 }],
                 records: [],
@@ -497,8 +508,18 @@
                 }, {
                     field: 'connectionString',
                     caption: 'connectionString',
-                    size: '45%',
+                    size: '20%',
                     sortable: true,
+                    resizable:true
+                },{
+                    field: 'update_user_no',
+                    caption: '修改User',
+                    size: '12%',
+                    resizable:true
+                },{
+                    field: 'str_update_time',
+                    caption: '修改时间',
+                    size: '13%',
                     resizable:true
                 }],
                 records: [],

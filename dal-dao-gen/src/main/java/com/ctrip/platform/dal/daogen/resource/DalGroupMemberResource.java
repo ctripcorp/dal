@@ -69,14 +69,7 @@ public class DalGroupMemberResource {
 	@GET
 	@Path("groupuser")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<LoginUser> getGroupUsers(@QueryParam("groupId") String id) {
-		int currentGroupId = -1;
-		try{
-			currentGroupId = Integer.parseInt(id);
-		}catch(NumberFormatException  ex){
-			log.error("get Group Users failed", ex);
-			return null;
-		}
+	public List<LoginUser> getGroupUsers(@QueryParam("groupId") int currentGroupId) {
 		List<LoginUser> users = user_dao.getUserByGroupId(currentGroupId);
 		Iterator<LoginUser> ite = users.iterator();
 		while(ite.hasNext()) {
@@ -132,37 +125,29 @@ public class DalGroupMemberResource {
 	
 	@POST
 	@Path("addUser")
-	public Status addUser(@FormParam("groupId") String groupId,
-			@FormParam("userId") String userId,
+	public Status addUser(@FormParam("groupId") int currentGroupId,
+			@FormParam("userId") int userID,
 			@FormParam("user_role") int user_role,
 			@FormParam("allowAddUser") boolean allowAddUser){
 		
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
 		
-		if(null == userNo || null == groupId || null == userId){
-			log.error(String.format("Add member failed, caused by illegal parameters: "
-					+ "[groupId=%s, userId=%s]",groupId, userId));
+		if (null == userNo) {
+			log.error(String.format("Add member failed, caused by illegal parameters:userNo=%s", userNo));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
 		}
 		
-		int groupID = -1;
-		int userID = -1;
-		try{
-			groupID = Integer.parseInt(groupId);
-			userID =  Integer.parseInt(userId);
-		}catch(NumberFormatException  ex){
-			log.error("Add member failed", ex);
+		if (!this.validatePermision(userNo, currentGroupId)) {
 			Status status = Status.ERROR;
-			status.setInfo("Illegal group id");
+			status.setInfo("你没有当前DAL Team的组员操作权限.");
 			return status;
 		}
 		
-		if(!this.validatePermision(userNo,groupID)){
+		if (!this.validatePermision(userNo, currentGroupId, user_role)) {
 			Status status = Status.ERROR;
-			status.setInfo("你没有当前DAL Team的操作权限.");
+			status.setInfo("你所授予的权限大于你所拥有的权限.");
 			return status;
 		}
 		
@@ -170,63 +155,56 @@ public class DalGroupMemberResource {
 		
 		List<UserGroup> ugGroups = ugDao.getUserGroupByUserId(user.getId());
 		Iterator<UserGroup> ite = ugGroups.iterator();
-		while(ite.hasNext()) {
-			if(ite.next().getGroup_id() == groupID) {
+		while (ite.hasNext()) {
+			if (ite.next().getGroup_id() == currentGroupId) {
 				Status status = Status.ERROR;
 				status.setInfo("用户["+user.getUserName()+"]已经加入当前DAL Team.");
 				return status;
 			}
 		}
 		int adduser = allowAddUser==true? 1:2;
-		int ret = ugDao.insertUserGroup(userID, groupID, user_role, adduser);
-		if(ret <= 0){
+		int ret = ugDao.insertUserGroup(userID, currentGroupId, user_role, adduser);
+		if (ret <= 0) {
 			log.error("Add dal group member failed, caused by db operation failed, pls check the log.");
 			Status status = Status.ERROR;
 			status.setInfo("Add operation failed.");
 			return status;
 		}else{
-			transferProjectToGroup(user.getUserNo(), groupID);
+			transferProjectToGroup(user.getUserNo(), currentGroupId);
 		}
 		return Status.OK;
 	}
 	
 	@POST
 	@Path("update")
-	public Status update(@FormParam("groupId") String groupId,
-			@FormParam("userId") String userId,
+	public Status update(@FormParam("groupId") int currentGroupId,
+			@FormParam("userId") int userID,
 			@FormParam("user_role") int user_role,
 			@FormParam("allowAddUser") boolean allowAddUser){
 		
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
 		
-		if(null == userNo || null == groupId || null == userId){
-			log.error(String.format("Add member failed, caused by illegal parameters: "
-					+ "[groupId=%s, userId=%s]",groupId, userId));
+		if(null == userNo){
+			log.error(String.format("Add member failed, caused by illegal parameters:userNo=%s", userNo));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
 		}
 		
-		int groupID = -1;
-		int userID = -1;
-		try{
-			groupID = Integer.parseInt(groupId);
-			userID =  Integer.parseInt(userId);
-		}catch(NumberFormatException  ex){
-			log.error("Add member failed", ex);
+		if (!this.validatePermision(userNo, currentGroupId)) {
 			Status status = Status.ERROR;
-			status.setInfo("Illegal group id");
+			status.setInfo("你没有当前DAL Team的组员操作权限.");
 			return status;
 		}
 		
-		if (!this.validatePermision(userNo, groupID)) {
+		if (!this.validatePermision(userNo, currentGroupId, user_role)) {
 			Status status = Status.ERROR;
-			status.setInfo("你没有当前DAL Team的操作权限.");
+			status.setInfo("你所授予的权限大于你所拥有的权限.");
 			return status;
 		}
+		
 		int adduser = allowAddUser==true? 1:2;
-		int ret = ugDao.updateUserPersimion(userID, groupID, user_role, adduser);
+		int ret = ugDao.updateUserPersimion(userID, currentGroupId, user_role, adduser);
 		if(ret <= 0){
 			log.error("Update dal group user failed, caused by db operation failed, pls check the log.");
 			Status status = Status.ERROR;
@@ -252,9 +230,21 @@ public class DalGroupMemberResource {
 			return status;
 		}
 		
+		if (currentGroupId == childGroupId) {
+			Status status = Status.ERROR;
+			status.setInfo("不能将当前组加入当前组.");
+			return status;
+		}
+		
 		if(!this.validatePermision(userNo, currentGroupId)){
 			Status status = Status.ERROR;
-			status.setInfo("你没有当前DAL Team的操作权限.");
+			status.setInfo("你没有当前DAL Team的组员操作权限.");
+			return status;
+		}
+		
+		if (!this.validatePermision(userNo, currentGroupId, child_group_role)) {
+			Status status = Status.ERROR;
+			status.setInfo("你所授予的权限大于你所拥有的权限.");
 			return status;
 		}
 		
@@ -273,7 +263,8 @@ public class DalGroupMemberResource {
 		relation.setChild_group_role(child_group_role);
 		relation.setCurrent_group_id(currentGroupId);
 		relation.setUpdate_time(new Timestamp(System.currentTimeMillis()));
-		String upNo = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getUserName();
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		String upNo = user.getUserName()+"("+userNo+")";
 		relation.setUpdate_user_no(upNo);
 		int ret = SpringBeanGetter.getGroupRelationDao().insertChildGroup(relation);
 		if(ret <= 0){
@@ -303,9 +294,16 @@ public class DalGroupMemberResource {
 		
 		if (!this.validatePermision(userNo, currentGroupId)) {
 			Status status = Status.ERROR;
-			status.setInfo("你没有当前DAL Team的操作权限.");
+			status.setInfo("你没有当前DAL Team的组员操作权限.");
 			return status;
 		}
+		
+		if (!this.validatePermision(userNo, currentGroupId, childGroupRole)) {
+			Status status = Status.ERROR;
+			status.setInfo("你所授予的权限大于你所拥有的权限.");
+			return status;
+		}
+		
 		int adduser = allowGroupAddUser==true? 1:2;
 		String updateUserNo = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getUserName();
 		int ret = SpringBeanGetter.getGroupRelationDao().updateGroupRelation(currentGroupId, childGroupId, childGroupRole, adduser, updateUserNo, new Timestamp(System.currentTimeMillis()));
@@ -335,7 +333,7 @@ public class DalGroupMemberResource {
 		
 		if(!this.validatePermision(userNo, currentGroupId)){
 			Status status = Status.ERROR;
-			status.setInfo("你没有当前DAL Team的操作权限.");
+			status.setInfo("你没有当前DAL Team的组员操作权限.");
 			return status;
 		}
 		
@@ -361,29 +359,106 @@ public class DalGroupMemberResource {
 		return Status.OK;
 	}
 
-	private boolean validatePermision(String userNo,int groupId){
+	private boolean validatePermision(String userNo, int currentGroupId) {
+		boolean havePermision = false;
+		havePermision = validateUserPermisionInCurrentGroup(userNo, currentGroupId);
+		if (havePermision) {
+			return havePermision;
+		}
+		havePermision = validateUserPermisionInChildGroup(userNo, currentGroupId);
+		return havePermision;
+	}
+	
+	private boolean validateUserPermisionInCurrentGroup(String userNo, int currentGroupId) {
 		LoginUser user = user_dao.getUserByNo(userNo);
 		//用户加入的所有组
 		List<UserGroup> urgroups = ugDao.getUserGroupByUserId(user.getId());
-		if(urgroups==null){
+		if (urgroups==null) {
 			return false;
 		}
-		for(UserGroup ug : urgroups){
-			if(ug.getGroup_id() == DalGroupResource.SUPER_GROUP_ID){
+		for (UserGroup ug : urgroups) {
+			if (ug.getGroup_id() == DalGroupResource.SUPER_GROUP_ID && ug.getAdduser()==1) {
 				return true;
 			}
-			if(ug.getGroup_id() == groupId && ug.getAdduser()==1){
+			if (ug.getGroup_id() == currentGroupId && ug.getAdduser()==1) {
 				return true;
 			}
 		}
 		return false;
 	}
 	
+	private boolean validateUserPermisionInChildGroup(String userNo, int currentGroupId) {
+		boolean havePermison = false;
+		int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
+		List<GroupRelation> relations = SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
+		Iterator<GroupRelation> ite = relations.iterator();
+		while (ite.hasNext()) {
+			GroupRelation relation = ite.next();
+			if (relation.getAdduser() == 1) { // the child group can manage the current parent group user
+				//then check the user whether or not exist in this child group
+				List<UserGroup> ugs = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(relation.getChild_group_id(), userId);
+				if (ugs!=null && ugs.size()>0) {
+					havePermison = true;
+				}
+			}
+		}
+		return havePermison;
+	}
+
+	private boolean validatePermision(String userNo, int currentGroupId, int user_role) {
+		boolean havePermision = false;
+		havePermision = validateUserPermisionInCurrentGroup(userNo, currentGroupId, user_role);
+		if (havePermision) {
+			return havePermision;
+		}
+		havePermision = validateUserPermisionInChildGroup(userNo, currentGroupId, user_role);
+		return havePermision;
+	}
+	
+	private boolean validateUserPermisionInCurrentGroup(String userNo, int currentGroupId, int user_role) {
+		LoginUser user = user_dao.getUserByNo(userNo);
+		//用户加入的所有组
+		List<UserGroup> urgroups = ugDao.getUserGroupByUserId(user.getId());
+		if (urgroups==null) {
+			return false;
+		}
+		for (UserGroup ug : urgroups) {
+			if (ug.getGroup_id() == DalGroupResource.SUPER_GROUP_ID && ug.getAdduser()==1 && ug.getRole()<=user_role) {
+				return true;
+			}
+			if (ug.getGroup_id() == currentGroupId && ug.getAdduser()==1 && ug.getRole()<=user_role) {
+				return true;
+			}
+			if (ug.getGroup_id() == currentGroupId && ug.getAdduser()==1 && ug.getRole()<=user_role) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean validateUserPermisionInChildGroup(String userNo, int currentGroupId, int user_role) {
+		boolean havePermison = false;
+		int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
+		List<GroupRelation> relations = SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
+		Iterator<GroupRelation> ite = relations.iterator();
+		while (ite.hasNext()) {
+			GroupRelation relation = ite.next();
+			if (relation.getAdduser() == 1) { // the child group can manage the current parent group user
+				//then check the user whether or not exist in this child group
+				List<UserGroup> ugs = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(relation.getChild_group_id(), userId);
+				if (ugs!=null && ugs.size()>0) {// user is in the child group
+					if (relation.getChild_group_role()<=user_role) { // check the child group role, which must greater than the given role
+						havePermison = true;
+					}
+				}
+			}
+		}
+		return havePermison;
+	}
 	
 	private void transferProjectToGroup(String userNo, int groupId){
 		//当前用户的所有Project
-		List<UserProject> userProjects = SpringBeanGetter.getDaoOfUserProject()
-				.getUserProjectsByUser(userNo);
+		List<UserProject> userProjects = SpringBeanGetter.getDaoOfUserProject().getUserProjectsByUser(userNo);
 		for(UserProject proj : userProjects){
 			int project_id = proj.getProject_id();
 			//project_id符合当前迭代的Project，且在user_project中id最小

@@ -80,10 +80,8 @@ public class ProjectResource {
 		if(user == null) {
 			user = new LoginUser();
 			user.setUserNo(userNo);
-			user.setUserName(AssertionHolder.getAssertion().getPrincipal()
-					.getAttributes().get("sn").toString());
-			user.setUserEmail(AssertionHolder.getAssertion().getPrincipal()
-					.getAttributes().get("mail").toString());
+			user.setUserName(AssertionHolder.getAssertion().getPrincipal().getAttributes().get("sn").toString());
+			user.setUserEmail(AssertionHolder.getAssertion().getPrincipal().getAttributes().get("mail").toString());
 			try {
 				SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
 				user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);

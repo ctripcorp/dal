@@ -27,7 +27,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	private int version;
 	private String update_user_no;
 	private Timestamp update_time;
-	private String str_update_time;
+	private String str_update_time="";
 	private String comment;
 	//可取值：Single、First、List，表示select返回的结果类型
 	private String scalarType;
@@ -64,9 +64,11 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		task.setPagination(rs.getBoolean("pagination"));
 		task.setSql_style(rs.getString("sql_style"));
 
-		Date date = new Date(task.getUpdate_time().getTime());
-		task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
-		
+		try {
+			Date date = new Date(task.getUpdate_time().getTime());
+			task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+		} catch (Throwable e) {
+		}
 		return task;
 	}
 

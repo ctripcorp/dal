@@ -1,8 +1,14 @@
 
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -25,6 +31,7 @@ import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
+import com.ctrip.platform.dal.daogen.entity.GroupRelation;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -69,15 +76,8 @@ public class DalGroupDbSetResource {
 	@GET
 	@Path("getDbset")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DatabaseSet> getDatabaseSetByGroupId(@QueryParam("groupId") String id,
+	public List<DatabaseSet> getDatabaseSetByGroupId(@QueryParam("groupId") int groupId,
 			@QueryParam("daoFlag") boolean daoFlag) {
-		int groupId = -1;
-		try{
-			groupId = Integer.parseInt(id);
-		}catch(NumberFormatException  ex){
-			log.error("get DatabaseSet failed", ex);
-			return null;
-		}
 		List<DatabaseSet> dbsets = dbset_dao.getAllDatabaseSetByGroupId(groupId);
 		if(!daoFlag){
 			return dbsets;
@@ -112,26 +112,14 @@ public class DalGroupDbSetResource {
 	public Status addDbset(@FormParam("name") String name,
 			@FormParam("provider") String provider,
 			@FormParam("shardingStrategy") String shardingStrategy,
-			@FormParam("groupId") String groupId){
+			@FormParam("groupId") int groupID){
 		
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
 		
-		if(null == userNo || null == groupId){
-			log.error(String.format("Add Dbset failed, caused by illegal parameters: "
-					+ "[userNo=%s, groupId=%s]",userNo, groupId));
+		if(null == userNo){
+			log.error(String.format("Add Dbset failed, caused by illegal parameters:[userNo=%s]", userNo));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
-			return status;
-		}
-		
-		int groupID = -1;
-		try{
-			groupID = Integer.parseInt(groupId);
-		}catch(NumberFormatException  ex){
-			log.error("Add Dbset failed", ex);
-			Status status = Status.ERROR;
-			status.setInfo("Illegal group id");
 			return status;
 		}
 		
@@ -154,6 +142,10 @@ public class DalGroupDbSetResource {
 		dbset.setProvider(provider);
 		dbset.setShardingStrategy(shardingStrategy);
 		dbset.setGroupId(groupID);
+		dbset.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		String upNo = user.getUserName()+"("+userNo+")";
+		dbset.setUpdate_user_no(upNo);
 		ret = dbset_dao.insertDatabaseSet(dbset);
 		if(ret <= 0){
 			log.error("Add database set failed, caused by db operation failed, pls check the log.");
@@ -167,38 +159,30 @@ public class DalGroupDbSetResource {
 	
 	@POST
 	@Path("updateDbset")
-	public Status updateDbset(@FormParam("id") String id,
+	public Status updateDbset(@FormParam("id") int iD,
 			@FormParam("name") String name,
 			@FormParam("provider") String provider,
 			@FormParam("shardingStrategy") String shardingStrategy,
-			@FormParam("groupId") String groupId){
+			@FormParam("groupId") int groupID){
 		
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
 		
-		if(null == userNo || null == groupId){
-			log.error(String.format("Update Dbset failed, caused by illegal parameters: "
-					+ "[userNo=%s, groupId=%s]",userNo, groupId));
+		if(null == userNo){
+			log.error(String.format("Update Dbset failed, caused by illegal parameters:[userNo=%s]", userNo));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
-			return status;
-		}
-		
-		int iD = -1;
-		int groupID = -1;
-		try{
-			iD = Integer.parseInt(id);
-			groupID = Integer.parseInt(groupId);
-		}catch(NumberFormatException  ex){
-			log.error("Update Dbset failed", ex);
-			Status status = Status.ERROR;
-			status.setInfo("Illegal group id");
 			return status;
 		}
 		
 		if(!this.validatePermision(userNo,groupID)){
 			Status status = Status.ERROR;
 			status.setInfo("你没有当前DAL Team的操作权限.");
+			return status;
+		}
+		
+		if (!validatePermision(userNo, groupID, iD)) {
+			Status status = Status.ERROR;
+			status.setInfo("你只能操作你们组创建的逻辑数据库.");
 			return status;
 		}
 		
@@ -220,6 +204,10 @@ public class DalGroupDbSetResource {
 		dbset.setProvider(provider);
 		dbset.setShardingStrategy(shardingStrategy);
 		dbset.setGroupId(groupID);
+		dbset.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		String upNo = user.getUserName()+"("+userNo+")";
+		dbset.setUpdate_user_no(upNo);
 		ret = dbset_dao.updateDatabaseSet(dbset);
 		if(ret <= 0){
 			log.error("Update database set failed, caused by db operation failed, pls check the spring log");
@@ -233,35 +221,27 @@ public class DalGroupDbSetResource {
 	
 	@POST
 	@Path("deletedbset")
-	public Status deleteDbset(@FormParam("groupId") String groupId,
-			@FormParam("dbsetId") String dbset_Id){
+	public Status deleteDbset(@FormParam("groupId") int groupID,
+			@FormParam("dbsetId") int dbsetID){
 
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
 		
-		if(null == userNo || null == groupId || null == dbset_Id){
-			log.error(String.format("Delete databaseSet failed, caused by illegal parameters: "
-					+ "[groupId=%s, dbsetId=%s]",groupId, dbset_Id));
+		if (null == userNo) {
+			log.error(String.format("Delete databaseSet failed, caused by illegal parameters:[userNo=%s]", userNo));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
-			return status;
-		}
-		
-		int groupID = -1;
-		int dbsetID = -1;
-		try{
-			groupID = Integer.parseInt(groupId);
-			dbsetID =  Integer.parseInt(dbset_Id);
-		}catch(NumberFormatException  ex){
-			log.error("Delete databaseSet failed", ex);
-			Status status = Status.ERROR;
-			status.setInfo("Illegal group id");
 			return status;
 		}
 		
 		if(!this.validatePermision(userNo,groupID)){
 			Status status = Status.ERROR;
 			status.setInfo("你没有当前DAL Team的操作权限.");
+			return status;
+		}
+		
+		if (!validatePermision(userNo, groupID, dbsetID)) {
+			Status status = Status.ERROR;
+			status.setInfo("你只能操作你们组创建的逻辑数据库.");
 			return status;
 		}
 
@@ -282,33 +262,19 @@ public class DalGroupDbSetResource {
 			@FormParam("databaseType") String databaseType,
 			@FormParam("sharding") String sharding,
 			@FormParam("connectionString") String connectionString,
-			@FormParam("dbsetId") String dbsetId,
-			@FormParam("groupId") String groupId){
+			@FormParam("dbsetId") int dbsetID,
+			@FormParam("groupId") int groupID){
 		
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
 		
-		if(null == userNo || null == dbsetId){
-			log.error(String.format("Add Dbset Entry failed, caused by illegal parameters: "
-					+ "[userNo=%s, dbsetId=%s]",userNo, dbsetId));
+		if(null == userNo){
+			log.error(String.format("Add Dbset Entry failed, caused by illegal parameters:[userNo=%s]", userNo));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
 		}
 		
-		int dbsetID = -1;
-		int groupID = -1;
-		try{
-			dbsetID = Integer.parseInt(dbsetId);
-			groupID = Integer.parseInt(groupId);
-		}catch(NumberFormatException  ex){
-			log.error("Add Dbset Entry failed", ex);
-			Status status = Status.ERROR;
-			status.setInfo("Illegal group id");
-			return status;
-		}
-		
-		if(!this.validatePermision(userNo,groupID)){
+		if(!this.validatePermision(userNo, groupID)){
 			Status status = Status.ERROR;
 			status.setInfo("你没有当前DAL Team的操作权限.");
 			return status;
@@ -321,6 +287,10 @@ public class DalGroupDbSetResource {
 		dbsetEntry.setSharding(sharding);
 		dbsetEntry.setConnectionString(connectionString);
 		dbsetEntry.setDatabaseSet_Id(dbsetID);
+		dbsetEntry.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		String upNo = user.getUserName()+"("+userNo+")";
+		dbsetEntry.setUpdate_user_no(upNo);
 		ret = dbset_dao.insertDatabaseSetEntry(dbsetEntry);
 		if(ret <= 0){
 			log.error("Add databaseSet Entry failed, caused by db operation failed, pls check the spring log");
@@ -334,42 +304,32 @@ public class DalGroupDbSetResource {
 	
 	@POST
 	@Path("updateDbsetEntry")
-	public Status updateDbsetEntry(@FormParam("id") String id,
+	public Status updateDbsetEntry(@FormParam("id") int dbsetEntyID,
 			@FormParam("name") String name,
 			@FormParam("databaseType") String databaseType,
 			@FormParam("sharding") String sharding,
 			@FormParam("connectionString") String connectionString,
-			@FormParam("dbsetId") String dbsetId,
-			@FormParam("groupId") String groupId){
+			@FormParam("dbsetId") int dbsetID,
+			@FormParam("groupId") int groupID){
 		
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
 		
-		if(null == userNo || null == dbsetId){
-			log.error(String.format("Update Dbset Entry failed, caused by illegal parameters: "
-					+ "[userNo=%s, dbsetId=%s]",userNo, dbsetId));
+		if(null == userNo){
+			log.error(String.format("Update Dbset Entry failed, caused by illegal parameters:[userNo=%s]", userNo));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
-			return status;
-		}
-		
-		int dbsetEntyID = -1;
-		int dbsetID = -1;
-		int groupID = -1;
-		try{
-			dbsetEntyID = Integer.parseInt(id);
-			dbsetID = Integer.parseInt(dbsetId);
-			groupID = Integer.parseInt(groupId);
-		}catch(NumberFormatException  ex){
-			log.error("Update Dbset Entry failed", ex);
-			Status status = Status.ERROR;
-			status.setInfo("Illegal group id");
 			return status;
 		}
 		
 		if(!this.validatePermision(userNo,groupID)){
 			Status status = Status.ERROR;
 			status.setInfo("你没有当前DAL Team的操作权限.");
+			return status;
+		}
+		
+		if (!validatePermision(userNo, groupID, dbsetID)) {
+			Status status = Status.ERROR;
+			status.setInfo("你只能操作你们组创建的逻辑数据库.");
 			return status;
 		}
 		
@@ -381,6 +341,10 @@ public class DalGroupDbSetResource {
 		dbsetEntry.setSharding(sharding);
 		dbsetEntry.setConnectionString(connectionString);
 		dbsetEntry.setDatabaseSet_Id(dbsetID);
+		dbsetEntry.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		String upNo = user.getUserName()+"("+userNo+")";
+		dbsetEntry.setUpdate_user_no(upNo);
 		ret = dbset_dao.updateDatabaseSetEntry(dbsetEntry);
 		if(ret <= 0){
 			log.error("Update databaseSet Entry failed, caused by db operation failed, pls check the spring log");
@@ -394,35 +358,28 @@ public class DalGroupDbSetResource {
 	
 	@POST
 	@Path("deletedbsetEntry")
-	public Status deleteDbsetEntry(@FormParam("groupId") String groupId,
-			@FormParam("dbsetEntryId") String dbsetEntryId){
+	public Status deleteDbsetEntry(@FormParam("groupId") int groupID,
+			@FormParam("dbsetEntryId") int dbsetEntryID,
+			@FormParam("dbsetId") int dbsetID){
 
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
 		
-		if(null == userNo || null == groupId || null == dbsetEntryId){
-			log.error(String.format("Delete databaseSet Entry failed, caused by illegal parameters: "
-					+ "[groupId=%s, dbsetId=%s]",groupId, dbsetEntryId));
+		if(null == userNo){
+			log.error(String.format("Delete databaseSet Entry failed, caused by illegal parameters:[userNo=%s]", userNo));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
-			return status;
-		}
-		
-		int groupID = -1;
-		int dbsetEntryID = -1;
-		try{
-			groupID = Integer.parseInt(groupId);
-			dbsetEntryID =  Integer.parseInt(dbsetEntryId);
-		}catch(NumberFormatException  ex){
-			log.error("Delete databaseSet Entry failed", ex);
-			Status status = Status.ERROR;
-			status.setInfo("Illegal group id");
 			return status;
 		}
 		
 		if(!this.validatePermision(userNo,groupID)){
 			Status status = Status.ERROR;
 			status.setInfo("你没有当前DAL Team的操作权限.");
+			return status;
+		}
+		
+		if (!validatePermision(userNo, groupID, dbsetID)) {
+			Status status = Status.ERROR;
+			status.setInfo("你只能操作你们组创建的逻辑数据库.");
 			return status;
 		}
 
@@ -436,18 +393,121 @@ public class DalGroupDbSetResource {
 		return Status.OK;
 	}
 	
-	private boolean validatePermision(String userNo,int groupId){
-		boolean havaPermision = false;
+	private boolean validatePermision(String userNo, int currentGroupId) {
+		boolean havePermision = false;
+		havePermision = validateUserPermisionInCurrentGroup(userNo, currentGroupId);
+		if (havePermision) {
+			return havePermision;
+		}
+		havePermision = validateUserPermisionInChildGroup(userNo, currentGroupId);
+		return havePermision;
+	}
+	
+	private boolean validateUserPermisionInCurrentGroup(String userNo, int currentGroupId) {
 		LoginUser user = user_dao.getUserByNo(userNo);
-		List<UserGroup> urGroups = ugDao.getUserGroupByUserId(user.getId());
-		if (urGroups!=null && urGroups.size()>0) {
-			for (UserGroup urGroup : urGroups) {
-				if (urGroup.getGroup_id() == groupId) {
-					havaPermision = true;
-				}
+		//用户加入的所有组
+		List<UserGroup> urgroups = ugDao.getUserGroupByUserId(user.getId());
+		if (urgroups==null) {
+			return false;
+		}
+		for (UserGroup ug : urgroups) {
+			if (ug.getGroup_id() == currentGroupId) {
+				return true;
 			}
 		}
-		return havaPermision;
+		return false;
+	}
+	
+	private boolean validateUserPermisionInChildGroup(String userNo, int currentGroupId) {
+		boolean havePermison = false;
+		int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
+		List<GroupRelation> relations = SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
+		Iterator<GroupRelation> ite = relations.iterator();
+		while (ite.hasNext()) {
+			GroupRelation relation = ite.next();
+			//then check the user whether or not exist in this child group
+			List<UserGroup> ugs = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(relation.getChild_group_id(), userId);
+			if (ugs!=null && ugs.size()>0) {
+				havePermison = true;
+			}
+		}
+		return havePermison;
+	}
+	
+	private boolean validatePermision(String userNo, int currentGroupId, int pk_DbSetId) {
+		boolean havePermision = false;
+		havePermision = validateUserPermisionInCurrentGroup(userNo, currentGroupId);
+		if (havePermision) {
+			return havePermision;
+		}
+		havePermision = validateUserPermisionInChildGroup(userNo, currentGroupId, pk_DbSetId);
+		return havePermision;
+	}
+	
+	private boolean validateUserPermisionInChildGroup(String userNo, int currentGroupId, int pk_DbSetId) {
+		DatabaseSet dbset = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetById(pk_DbSetId);
+		if (dbset==null) {
+			return false;
+		}
+		String updateUN = dbset.getUpdate_user_no();
+		if (updateUN==null || updateUN.isEmpty()) { //the dbset have no update user info
+			// check the user is or not in the current group
+			int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
+			List<UserGroup> check = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(currentGroupId, userId);
+			if (check!=null && check.size()>0) {
+				return true;
+			}
+			return false;
+		}
+		Pattern pattern = Pattern.compile(".+\\((\\w+)\\).*");
+		Matcher m = pattern.matcher(updateUN);
+		String upNo = "";
+		if (m.find()) {
+			upNo = m.group(1);
+		}
+		if (upNo.equalsIgnoreCase(userNo)) {
+			return true;
+		}
+		// the owner of the current database set
+		LoginUser currentDbSetUser = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(upNo);
+		if (currentDbSetUser == null) {
+			return false;
+		}
+		// the group that the owner of the current database set have been joined in
+		List<UserGroup> currentDbSetUserGroup = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(currentDbSetUser.getId());
+		if (currentDbSetUserGroup==null || currentDbSetUserGroup.size()<1) {
+			return false;
+		}
+		
+		//now check, the user who want to modify the dbset is or not in the same group compare with the current dbset owner
+		int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
+		Set<Integer> childGroupIds = getChildGroupId(currentGroupId);
+		Iterator<UserGroup> ite = currentDbSetUserGroup.iterator();
+		while (ite.hasNext()) {
+			UserGroup ug = ite.next();
+			if (!childGroupIds.contains(ug.getGroup_id())) {
+				continue;
+			}
+			List<UserGroup> exists = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(ug.getGroup_id(), userId);
+			if (exists!=null && exists.size()>0) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private Set<Integer> getChildGroupId(int currentGroupId) {
+		Set<Integer> sets = new HashSet<Integer>();
+		List<GroupRelation> relations = SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
+		if (relations == null) {
+			return sets;
+		}
+		
+		for (GroupRelation relation : relations) {
+			sets.add(relation.getChild_group_id());
+		}
+		return sets;
 	}
 	
 }

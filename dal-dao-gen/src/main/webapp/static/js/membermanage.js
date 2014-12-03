@@ -92,6 +92,7 @@
 
     var updateUserPermision = function() {
         $("#up_error_msg").empty();
+        $("#up_group_error_msg").empty();
         var current_group = w2ui['grid'].current_group;
         if(current_group==null || current_group==''){
             alert('请先选择一个DAL Team！');
@@ -102,7 +103,7 @@
         if (record == null) {
             alert('请选择一个用户！');
         } else if (record['dalTeam']===true) {
-            if (record['userName'] == 'Limited') {
+            if (record['role'] == 'Limited') {
                 $("#up_group_role").val('2');
             } else {
                 $("#up_group_role").val('1');
@@ -118,7 +119,7 @@
                 "backdrop": "static"
             });
         } else {
-            if (record['userName'] == 'Limited') {
+            if (record['role'] == 'Limited') {
                 $("#up_user_role").val('2');
             } else {
                 $("#up_user_role").val('1');

@@ -2,6 +2,9 @@ package com.ctrip.platform.dal.daogen.entity;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
 
@@ -12,6 +15,10 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
 	private String connectionString;
 	private int databaseSet_Id;
 	
+	private String update_user_no;
+	private Timestamp update_time;
+	private String str_update_time="";
+	
 	public static DatabaseSetEntry visitRow(ResultSet rs) throws SQLException {
 		DatabaseSetEntry entry = new DatabaseSetEntry();
 		entry.setId(rs.getInt(1));
@@ -20,6 +27,13 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
 		entry.setSharding(rs.getString(4));
 		entry.setConnectionString(rs.getString(5));
 		entry.setDatabaseSet_Id(rs.getInt(6));
+		entry.setUpdate_user_no(rs.getString("update_user_no"));
+		entry.setUpdate_time(rs.getTimestamp("update_time"));
+		try {
+			Date date = new Date(entry.getUpdate_time().getTime());
+			entry.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+		} catch (Throwable e) {
+		}
 		return entry;
 	}
 	
@@ -64,6 +78,30 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
 	}
 	public void setDatabaseSet_Id(int databaseSet_Id) {
 		this.databaseSet_Id = databaseSet_Id;
+	}
+
+	public String getUpdate_user_no() {
+		return update_user_no;
+	}
+
+	public void setUpdate_user_no(String update_user_no) {
+		this.update_user_no = update_user_no;
+	}
+
+	public Timestamp getUpdate_time() {
+		return update_time;
+	}
+
+	public void setUpdate_time(Timestamp update_time) {
+		this.update_time = update_time;
+	}
+
+	public String getStr_update_time() {
+		return str_update_time;
+	}
+
+	public void setStr_update_time(String str_update_time) {
+		this.str_update_time = str_update_time;
 	}
 
 }

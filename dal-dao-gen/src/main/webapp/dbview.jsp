@@ -1,6 +1,6 @@
 <%@page pageEncoding="UTF-8"%>
 <%
-	String codegenpageflag = Long.toString(System.currentTimeMillis());
+	String codegenpageflag = "1.3.2";
 	request.setAttribute("codegenpageflag", codegenpageflag);
 %>
 <!DOCTYPE html>

@@ -30,7 +30,7 @@ public class DataSourceUtil {
 	private static final String DRIVER_SQLSERVRE = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 	
 	// dbAddress+port+user+password,DataSource
-	private static Map<String,DataSource> cache = new ConcurrentHashMap<String,DataSource>();
+	private static volatile Map<String,DataSource> cache = new ConcurrentHashMap<String,DataSource>();
 	
 	public static Connection getConnection(String address, String port,
 			String userName, String password, String driverClass) throws SQLException{

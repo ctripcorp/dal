@@ -2,6 +2,7 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,6 +26,7 @@ import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.GroupRelation;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.entity.UserProject;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -59,7 +61,7 @@ public class DalGroupMemberResource {
 		List<DalGroup> groups =  group_dao.getAllGroups();
 		for(DalGroup group:groups){
 			group.setText(group.getGroup_name());
-			group.setIcon("fa fa-folder-o");
+			group.setIcon("fa fa-group");
 			group.setChildren(false);
 		}
 		return groups;
@@ -357,6 +359,29 @@ public class DalGroupMemberResource {
 			return status;
 		}
 		return Status.OK;
+	}
+	
+	
+	@GET
+	@Path("approveuser")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<LoginUser> getApproveUsers(@QueryParam("projectId") int projectId) {
+		Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(projectId);
+		if (prj==null) {
+			return null;
+		}
+		DalGroup dalGroup = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(prj.getDal_group_id());
+		if (dalGroup==null) {
+			return null;
+		}
+		List<LoginUser> users =  SpringBeanGetter.getDaoOfLoginUser().getUserByGroupId(dalGroup.getId());
+		List<LoginUser> result = new ArrayList<LoginUser>();
+		for (LoginUser user : users) {
+			if ("1".equalsIgnoreCase(user.getRole())) {
+				result.add(user);
+			}
+		}
+		return result;
 	}
 
 	private boolean validatePermision(String userNo, int currentGroupId) {

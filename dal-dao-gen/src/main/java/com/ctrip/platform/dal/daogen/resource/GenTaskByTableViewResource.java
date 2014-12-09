@@ -67,8 +67,7 @@ public class GenTaskByTableViewResource {
 			@FormParam("action") String action,
 			@FormParam("comment") String comment,
 			@FormParam("sql_style") String sql_style,// C#风格或者Java风格
-			@FormParam("api_list") String api_list
-			) {
+			@FormParam("api_list") String api_list ) {
 		GenTaskByTableViewSp task = new GenTaskByTableViewSp();
 
 		if (action.equalsIgnoreCase("delete")) {

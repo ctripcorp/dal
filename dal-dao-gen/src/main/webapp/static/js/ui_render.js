@@ -226,6 +226,49 @@
         }
     };
 
+    var applyApprove = function() {
+        $("#approve_error_msg").empty();
+        var current_project = w2ui['grid'].current_project;
+        if(current_project==null || current_project==''){
+            alert('请先选择Project');
+            return;
+        }
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if(record==null || record==''){
+            alert("请先选择一个DAO.如果需要多选，请先按住ctrl键.");
+            return;
+        }
+        $.get("/rest/member/approveuser?projectId="+record['project_id']+"&rand=" + Math.random()).done(function (data) {
+            if ($("#approve_user")[0] != undefined && $("#approve_user")[0].selectize != undefined) {
+                $("#approve_user")[0].selectize.clearOptions();
+            } else {
+                $("#approve_user").selectize({
+                    valueField: 'id',
+                    labelField: 'title',
+                    searchField: 'title',
+                    sortField: 'title',
+                    options: [],
+                    create: false
+                });
+            }
+            var allMembers = [];
+            $.each(data, function (index, value) {
+                allMembers.push({
+                    id: value['id'],
+                    title: value['userName']
+                });
+            });
+            $("#approve_user")[0].selectize.addOption(allMembers);
+            $("#approve_user")[0].selectize.refreshOptions(false);
+        }).fail(function (data) {
+            alert('获取审批人员列表失败');
+        });
+        $("#approveModal").modal({
+            "backdrop": "static"
+        });
+    };
+
     var generateCode = function(){
         var current_project = w2ui['grid'].current_project;
         if(current_project==null || current_project==''){
@@ -336,7 +379,7 @@
                     //toolbarSave: true,
                     toolbarEdit: false
                 },
-                multiSelect: false,
+                multiSelect: true,
                 toolbar: {
                     items: [{
                         type: 'break'
@@ -364,6 +407,11 @@
                         type: 'break'
                     }, {
                         type: 'button',
+                        id: 'applyApprove',
+                        caption: '发起审批',
+                        icon: 'fa fa-envelope'
+                    }, {
+                        type: 'button',
                         id: 'generateCode',
                         caption: '生成代码',
                         icon: 'fa fa-play'
@@ -381,6 +429,9 @@
                                 break;
                             case 'delDAO':
                                 delDAO();
+                                break;
+                            case 'applyApprove':
+                                applyApprove();
                                 break;
                             case 'generateCode':
                                 generateCode();
@@ -433,7 +484,7 @@
                 }, {
                     field: 'sql_content',
                     caption: '预览',
-                    size: '15%',
+                    size: '10%',
                     resizable:true
                 }, {
                     field: 'comment',
@@ -454,6 +505,11 @@
                     field: 'str_update_time',
                     caption: '修改时间',
                     size: '13%',
+                    resizable:true
+                },{
+                    field: 'str_approved',
+                    caption: '审批状态',
+                    size: '5%',
                     resizable:true
                 }],
                 records: [],
@@ -627,6 +683,41 @@
         $(document.body).on('change', "#viewCode", function (event) {
             $("#refreshFiles").trigger('click');
         });
+
+        $(document.body).on('click', "#submit_approve", function (event) {
+            var userId = $("#approve_user").val();
+            if (userId==null || userId=='') {
+                $("#approve_error_msg").html('请选择审批人!');
+                return;
+            }
+            var records = w2ui['grid'].getSelection();
+            var taskId =[];
+            var taskType = [];
+            for(var i=0; i<records.length; i++) {
+                var record = w2ui['grid'].get(records[i]);
+                taskId.push(record['id']);
+                taskType.push(record['task_type']);
+            }
+
+            cblock($("body"));
+            $.post("/rest/task/approveTask", {
+                taskId : taskId.join(','),
+                taskType : taskType.join(','),
+                userId : userId
+            }, function (data) {
+                if (data['code']!='OK'){
+                    $("#approve_error_msg").html(data['info']);
+                } else {
+                    $("#approveModal").modal('hide');
+                    alert('审批提交成功，邮件已发送.');
+                }
+                $("body").unblock();
+            }).fail(function(data){
+                alert("审批提交失败，邮件不能发送！");
+                $("body").unblock();
+            });
+        });
+
 
     });
 

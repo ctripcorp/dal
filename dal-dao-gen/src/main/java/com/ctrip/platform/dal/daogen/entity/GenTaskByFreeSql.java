@@ -39,6 +39,10 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	//csharp 或者 java，表示C#风格或者Java风格，@Name or ?
 	private String sql_style;
 	
+	private int approved;
+	private String str_approved;
+	private String approveMsg;
+	
 	public static GenTaskByFreeSql visitRow(ResultSet rs) throws SQLException {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 		task.setId(rs.getInt(1));
@@ -63,8 +67,20 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		task.setPojoType(rs.getString("pojoType"));
 		task.setPagination(rs.getBoolean("pagination"));
 		task.setSql_style(rs.getString("sql_style"));
+		
+		task.setApproved(rs.getInt("approved"));
+		task.setApproveMsg(rs.getString("approveMsg"));
 
 		try {
+			if (task.getApproved()==1) {
+				task.setStr_approved("未审批");
+			} else if (task.getApproved()==2) {
+				task.setStr_approved("通过");
+			} else if (task.getApproved()==3) {
+				task.setStr_approved("未通过");
+			} else {
+				task.setStr_approved("未知");
+			}
 			Date date = new Date(task.getUpdate_time().getTime());
 			task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
 		} catch (Throwable e) {
@@ -245,6 +261,30 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
 	public void setStr_update_time(String str_update_time) {
 		this.str_update_time = str_update_time;
+	}
+
+	public int getApproved() {
+		return approved;
+	}
+
+	public void setApproved(int approved) {
+		this.approved = approved;
+	}
+
+	public String getStr_approved() {
+		return str_approved;
+	}
+
+	public void setStr_approved(String str_approved) {
+		this.str_approved = str_approved;
+	}
+
+	public String getApproveMsg() {
+		return approveMsg;
+	}
+
+	public void setApproveMsg(String approveMsg) {
+		this.approveMsg = approveMsg;
 	}
 
 }

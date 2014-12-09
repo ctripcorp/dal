@@ -2,6 +2,8 @@ package com.ctrip.platform.dal.daogen.utils;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -56,6 +58,25 @@ public final class GenUtils {
 		}
 
 		return true;
+	}
+	
+	/**
+	 * 根据Velocity模板，生成相应的文件
+	 * @param context VelocityHost
+	 * @param resultFilePath 生成的文件路径
+	 * @param templateFile Velocity模板文件 
+	 * @return
+	 */
+	public static String mergeVelocityContext(VelocityContext context, String templateFile) {
+		Writer writer = null;
+		try {
+			writer = new StringWriter();
+			Velocity.mergeTemplate(templateFile, "UTF-8", context, writer);
+		} finally {
+			JavaIOUtils.closeWriter(writer);
+		}
+
+		return writer.toString();
 	}
 
 }

@@ -216,7 +216,7 @@
             }
             window.location.href = emailUrl;
         }).fail(function (data) {
-
+            alert(data);
             });
         $("body").unblock();
     };
@@ -292,23 +292,23 @@
                         type: 'button',
                         id: 'addMember',
                         caption: '添加组员',
-                        icon: 'fa fa-plus'
+                        icon: 'fa fa-user'
                     }, {
                         type: 'button',
                         id: 'addDalTeam',
                         caption: '添加Dal Team',
-                        icon: 'fa fa-plus'
+                        icon: 'fa fa-group'
                     },{
                         type: 'button',
                         id: 'delMember',
                         caption: '删除组员',
                         icon: 'fa fa-times'
-                    }, {
+                    },{
                         type: 'button',
                         id: 'upMember',
                         caption: '权限修改',
                         icon: 'fa fa-edit'
-                    }, {
+                    },{
                         type: 'button',
                         id: 'applyAdd',
                         caption: '申请加入DAL Team',

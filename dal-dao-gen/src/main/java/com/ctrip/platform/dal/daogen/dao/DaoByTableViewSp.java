@@ -33,17 +33,42 @@ public class DaoByTableViewSp {
 			return this.jdbcTemplate
 					.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
 							+ "cud_by_sp,pagination,generated,version,update_user_no,update_time,"
-							+ "comment,sql_style,api_list from task_table where project_id=?",
+							+ "comment,sql_style,api_list,approved,approveMsg from task_table "
+							+ "where project_id=?",
 							new Object[] { iD },
 							new RowMapper<GenTaskByTableViewSp>() {
-								public GenTaskByTableViewSp mapRow(
-										ResultSet rs, int rowNum)
-										throws SQLException {
+								public GenTaskByTableViewSp mapRow(ResultSet rs, int rowNum) throws SQLException {
 									return GenTaskByTableViewSp.visitRow(rs);
 								}
 							});
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * 根据task主键查询任务
+	 * 
+	 * @param iD
+	 * @return
+	 */
+	public GenTaskByTableViewSp getTasksByTaskId(int taskId) {
+		
+		try {
+			List<GenTaskByTableViewSp> list = this.jdbcTemplate
+					.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
+							+ "cud_by_sp,pagination,generated,version,update_user_no,update_time,"
+							+ "comment,sql_style,api_list,approved,approveMsg from task_table "
+							+ "where id=?",
+							new Object[] { taskId },
+							new RowMapper<GenTaskByTableViewSp>() {
+								public GenTaskByTableViewSp mapRow(ResultSet rs, int rowNum) throws SQLException {
+									return GenTaskByTableViewSp.visitRow(rs);
+								}
+							});
+			return list!=null && list.size()>0 ? list.get(0) : null;
+		} catch (DataAccessException ex) {
 			return null;
 		}
 	}
@@ -55,13 +80,11 @@ public class DaoByTableViewSp {
 		this.jdbcTemplate
 				.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,"
 						+ "pagination,generated,version,update_user_no,update_time,comment,"
-						+ "sql_style,api_list from task_table where project_id=?",
+						+ "sql_style,api_list,approved,approveMsg from task_table where project_id=?",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
-							public void processRow(ResultSet rs)
-									throws SQLException {
-								GenTaskByTableViewSp task = GenTaskByTableViewSp
-										.visitRow(rs);
+							public void processRow(ResultSet rs) throws SQLException {
+								GenTaskByTableViewSp task = GenTaskByTableViewSp.visitRow(rs);
 
 								task.setGenerated(true);
 								if (updateTask(task) > 0) {
@@ -79,13 +102,12 @@ public class DaoByTableViewSp {
 		this.jdbcTemplate
 				.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
 						+ "cud_by_sp,pagination,generated,version,update_user_no,update_time,"
-						+ "comment,sql_style,api_list from task_table where project_id=? and generated=false",
+						+ "comment,sql_style,api_list,approved,approveMsg from task_table "
+						+ "where project_id=? and generated=false",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
-							public void processRow(ResultSet rs)
-									throws SQLException {
-								GenTaskByTableViewSp task = GenTaskByTableViewSp
-										.visitRow(rs);
+							public void processRow(ResultSet rs) throws SQLException {
+								GenTaskByTableViewSp task = GenTaskByTableViewSp.visitRow(rs);
 
 								task.setGenerated(true);
 								if (updateTask(task) > 0) {
@@ -101,7 +123,8 @@ public class DaoByTableViewSp {
 			return this.jdbcTemplate
 					.update("insert into task_table ( project_id,  db_name,table_names,view_names,sp_names,"
 							+ "prefix,suffix,cud_by_sp,pagination,generated,version,update_user_no,update_time,"
-							+ "comment,sql_style,api_list) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+							+ "comment,sql_style,api_list,approved,approveMsg)"
+							+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 							task.getProject_id(), task.getDatabaseSetName(),
 							task.getTable_names(), task.getView_names(),
 							task.getSp_names(), task.getPrefix(),
@@ -112,7 +135,9 @@ public class DaoByTableViewSp {
 							task.getUpdate_time(),
 							task.getComment(),
 							task.getSql_style(),
-							task.getApi_list());
+							task.getApi_list(),
+							task.getApproved(),
+							task.getApproveMsg());
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
 			return -1;
@@ -124,8 +149,7 @@ public class DaoByTableViewSp {
 			return this.jdbcTemplate.queryForObject(
 					"select version from task_table where id =?",
 					new Object[] { id }, new RowMapper<Integer>() {
-						public Integer mapRow(ResultSet rs, int rowNum)
-								throws SQLException {
+						public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
 							return rs.getInt(1);
 						}
 					});
@@ -141,7 +165,7 @@ public class DaoByTableViewSp {
 					.update("update task_table set project_id=?,db_name=?,table_names=?,view_names=?,sp_names=?,"
 							+ "prefix=?,suffix=?,cud_by_sp=?,pagination=?,generated=?,version=version+1,"
 							+ "update_user_no=?,update_time=?,comment=?,sql_style=?,"
-							+ "api_list=? where id=? and version=?",
+							+ "api_list=?,approved=?,approveMsg=? where id=? and version=?",
 
 							task.getProject_id(), task.getDatabaseSetName(),
 							task.getTable_names(), task.getView_names(),
@@ -153,6 +177,8 @@ public class DaoByTableViewSp {
 							task.getComment(),
 							task.getSql_style(),
 							task.getApi_list(),
+							task.getApproved(),
+							task.getApproveMsg(),
 							task.getId(), 
 							task.getVersion());
 		} catch (DataAccessException ex) {

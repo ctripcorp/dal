@@ -27,6 +27,7 @@
 					<li><a href="dbsetsmanage.jsp">逻辑数据库管理</a></li>
 				</ul>
 			</li>
+			<li id="eventmanagejsp"><a href="eventmanage.jsp">审批管理</a></li>
 			<li id="groupmanagejsp"><a href="groupmanage.jsp">组管理</a></li>
 		</ul>
 		<ul class="nav navbar-nav navbar-right">

@@ -186,6 +186,15 @@ public class DaoByTableViewSp {
 			return -1;
 		}
 	}
+	
+	public int updateTask(int taskId, int approved) {
+		try {
+			return this.jdbcTemplate.update("update task_table set approved=? where id=?", approved, taskId);
+		} catch (DataAccessException ex) {
+			ex.printStackTrace();
+			return -1;
+		}
+	}
 
 	public int deleteTask(GenTaskByTableViewSp task) {
 		try {

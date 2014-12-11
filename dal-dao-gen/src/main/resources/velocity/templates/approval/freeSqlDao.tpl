@@ -6,7 +6,7 @@
     <td>自定义SQL</td>
     <td>${task.getSql_content()}</td>
     <td>${task.getComment()}</td>
-    <td><a href="">同意</a></td>
-    <td><a href="">拒绝</a></td>
+	<td><a href="${approveUrl}taskId=${task.getId()}&taskType=sql&approveFlag=2">同意</a></td>
+    <td><a href="${approveUrl}taskId=${task.getId()}&taskType=sql&approveFlag=3">拒绝</a></td>
   </tr>
 #end

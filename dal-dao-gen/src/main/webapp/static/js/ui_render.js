@@ -409,7 +409,7 @@
                         type: 'button',
                         id: 'applyApprove',
                         caption: '发起审批',
-                        icon: 'fa fa-envelope'
+                        icon: 'fa fa-mail-forward'
                     }, {
                         type: 'button',
                         id: 'generateCode',

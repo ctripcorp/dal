@@ -4,6 +4,7 @@ package com.ctrip.platform.dal.daogen.utils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.ctrip.platform.dal.daogen.dao.ApproveTaskDao;
 import com.ctrip.platform.dal.daogen.dao.DalApiDao;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
@@ -45,6 +46,8 @@ public class SpringBeanGetter {
 	
 	private static GroupRelationDao groupRelationDao;
 	
+	private static ApproveTaskDao approveTaskDao;
+	
 	static {
 		daoOfProject = (DaoOfProject) context.getBean("projectDao");
 		
@@ -64,6 +67,7 @@ public class SpringBeanGetter {
 		dalUserGroupDao = (UserGroupDao) context.getBean("dalUserGroupDao");
 		
 		groupRelationDao = (GroupRelationDao) context.getBean("groupRelationDao");
+		approveTaskDao = (ApproveTaskDao) context.getBean("approveTaskDao");
 	}
 
 	public static DaoOfProject getDaoOfProject() {
@@ -112,6 +116,10 @@ public class SpringBeanGetter {
 
 	public static GroupRelationDao getGroupRelationDao() {
 		return groupRelationDao;
+	}
+
+	public static ApproveTaskDao getApproveTaskDao() {
+		return approveTaskDao;
 	}
 
 }

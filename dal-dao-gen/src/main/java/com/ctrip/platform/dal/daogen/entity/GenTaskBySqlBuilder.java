@@ -90,7 +90,7 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 			} else if (task.getApproved()==3) {
 				task.setStr_approved("未通过");
 			} else {
-				task.setStr_approved("未知");
+				task.setStr_approved("通过");
 			}
 			Date date = new Date(task.getUpdate_time().getTime());
 			task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));

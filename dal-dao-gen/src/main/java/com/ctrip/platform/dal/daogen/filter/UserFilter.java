@@ -30,8 +30,7 @@ public class UserFilter implements Filter {
 			HttpServletRequest httprequest = (HttpServletRequest) arg0;
 			HttpSession session = httprequest.getSession();
 			if(session.getAttribute("loginUserName")==null || "".equals(session.getAttribute("loginUserName"))){
-				String userNo = AssertionHolder.getAssertion().getPrincipal()
-						.getAttributes().get("employee").toString();
+				String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
 				LoginUser user = null;
 				user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 				if(user==null){

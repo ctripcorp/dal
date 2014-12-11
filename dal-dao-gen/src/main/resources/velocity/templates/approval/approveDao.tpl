@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html>
 <head>
@@ -31,7 +30,9 @@ table.gridtable td {
 </head>
 
 <body>
-<!-- Table goes in the document BODY -->
+你好，${approveUser}：<br/>
+	我创建了以下DAO，现在需要生成这些DAO的dal代码，请审批，审批地址如下：
+    ****
 <table class="gridtable">
   <tr>
     <th>逻辑数据库</th>
@@ -40,7 +41,7 @@ table.gridtable td {
     <th>类型</th>
     <th>预览</th>
     <th>方法描述</th>
-    <th colspan="2">审批</th>
+	<th colspan="2">审批</th>
   </tr>
 #parse("templates/approval/standardDao.tpl")
 #parse("templates/approval/buildSqlDao.tpl")

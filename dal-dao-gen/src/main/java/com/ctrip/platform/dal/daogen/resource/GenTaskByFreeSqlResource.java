@@ -97,6 +97,8 @@ public class GenTaskByFreeSqlResource {
 			}else{
 				task.setPojoType("EntityType");
 			}
+			task.setApproved(1);
+			task.setApproveMsg("");
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);

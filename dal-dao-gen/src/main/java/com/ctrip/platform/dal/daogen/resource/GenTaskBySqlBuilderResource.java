@@ -100,6 +100,8 @@ public class GenTaskBySqlBuilderResource {
 			task.setScalarType(scalarType);
 			task.setPagination(pagination);
 			task.setOrderby(orderby);
+			task.setApproved(1);
+			task.setApproveMsg("");
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);

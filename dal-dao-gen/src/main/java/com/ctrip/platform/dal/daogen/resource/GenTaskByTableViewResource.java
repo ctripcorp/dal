@@ -94,6 +94,8 @@ public class GenTaskByTableViewResource {
 			task.setComment(comment);
 			task.setSql_style(sql_style);
 			task.setApi_list(api_list);
+			task.setApproved(1);
+			task.setApproveMsg("");
 			
 			if(action.equalsIgnoreCase("update")){
 				task.setId(id);

@@ -12,6 +12,8 @@
             $("#groupmanagejsp").addClass("active");
         }else if(href.indexOf("membermanage")!=-1){
             $("#membermanagejsp").addClass("active");
+        }else if(href.indexOf("eventmanage")!=-1){
+            $("#eventmanagejsp").addClass("active");
         }else if(href.indexOf("welcome")!=-1){
             $("#welcomejsp").addClass("active");
         }else{

@@ -291,7 +291,6 @@ public class GenTaskResource {
 		
 		try {
 			email.addTo(approver.getUserEmail());
-			email.addBcc(user.getUserEmail());
 			email.setFrom(user.getUserEmail(), user.getUserName());
 			email.setSubject("Codegen DAO 审批");
 			email.setHtmlMsg(msg);

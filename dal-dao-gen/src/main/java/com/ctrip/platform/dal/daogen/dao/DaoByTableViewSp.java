@@ -187,9 +187,9 @@ public class DaoByTableViewSp {
 		}
 	}
 	
-	public int updateTask(int taskId, int approved) {
+	public int updateTask(int taskId, int approved, String approveMsg) {
 		try {
-			return this.jdbcTemplate.update("update task_table set approved=? where id=?", approved, taskId);
+			return this.jdbcTemplate.update("update task_table set approved=?, approveMsg=? where id=?", approved, approveMsg, taskId);
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
 			return -1;

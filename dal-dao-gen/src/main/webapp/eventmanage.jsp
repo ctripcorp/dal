@@ -56,6 +56,32 @@
       
       <div id="main_layout"></div>
       
+      <!--Begin modal-->
+      <div class="modal fade" id="refuseModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+         <div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">审批意见</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row-fluid">
+                     	<div class="control-group">
+                           <label class="control-label popup_label" style="width:140px;">请输入审批意见：</label>
+                           <textarea id="approveMsg" class="span12 popup_text input-sm" rows="4"></textarea>
+                        </div>
+                     </div>
+				</div>
+				<div class="modal-footer">
+					<label id="error_msg" class="control-label popup_label" style="color: red;"></label>
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button id="refuse_dao" type="button" class="btn btn-primary">保存</button>
+				</div>
+			</div>
+		</div>
+      </div>
+      <!--End modal-->
+      
 	<!-- Bootstrap core JavaScript================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script src="/static/jquery/jquery-1.10.2.min.js?codegen=${codegenpageflag}"></script>

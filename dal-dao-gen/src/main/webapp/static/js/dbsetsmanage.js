@@ -56,8 +56,9 @@
             w2ui['previewgrid'].add(allGroupDbsetEnty);
             $("body").unblock();
         }).fail(function (data) {
-                alert("获取组内所有DatabaseSetEntry失败!");
-            });
+            alert("获取组内所有DatabaseSetEntry失败!");
+            $("body").unblock();
+        });
     };
 
     var addDbSet = function () {

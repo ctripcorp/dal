@@ -61,7 +61,7 @@ public class ApproveTaskDao {
 	
 	public int deleteApproveTaskByTaskIdAndType(Integer id, String taskType) {
 		try {
-			return this.jdbcTemplate.update("delete from approve_task where task_id=? and task_type", id, taskType);
+			return this.jdbcTemplate.update("delete from approve_task where task_id=? and task_type=?", id, taskType);
 		} catch (DataAccessException ex) {
 			ex.printStackTrace();
 			return -1;

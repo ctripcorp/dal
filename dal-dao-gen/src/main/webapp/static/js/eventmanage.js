@@ -54,11 +54,41 @@
     };
 
     var approveOk = function() {
-
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if(record==null || record==''){
+            alert('请先选择一个待审批事件!');
+            return;
+        }
+        cblock($("body"));
+        $.get("/rest/task/taskApproveOperation?taskId=" + record['task_id']
+            + "&taskType=" + record['task_type']
+            + "&approveFlag=2"
+            + "&rand=" + Math.random(),function (data) {
+            if (data['code'] != 'OK') {
+                alert(data['info']);
+            } else {
+                alert("审批操作成功!");
+                w2ui['grid_toolbar'].click('refreshAllApproveDAO', null);
+            }
+            $("body").unblock();
+        }).fail(function (data) {
+            alert("审批操作失败!");
+            $("body").unblock();
+        });
     };
 
     var approveRefuse = function() {
-
+        $("#error_msg").empty();
+        var records = w2ui['grid'].getSelection();
+        var record = w2ui['grid'].get(records[0]);
+        if(record==null || record==''){
+            alert('请先选择一个待审批事件!');
+            return;
+        }
+        $("#refuseModal").modal({
+            "backdrop": "static"
+        });
     };
 
     Render.prototype = {
@@ -216,10 +246,10 @@
                             case 'refreshApproveTaskDetail':
                                 refreshApproveTaskDetail();
                                 break;
-                            case 'addDbSetEntry':
+                            case 'approveOk':
                                 approveOk();
                                 break;
-                            case 'editDbSetEntry':
+                            case 'approveRefuse':
                                 approveRefuse();
                                 break;
                         }
@@ -261,127 +291,36 @@
 
     jQuery(document).ready(function(){
 
-        $(document.body).on('click', '#save_adddbset', function (event) {
-            var dbsetname = $("#dbsetname").val();
-            var provider = $("#provider").val();
-            var shardingStrategy = $("#shardingStrategy").val();
-            if (dbsetname == null || dbsetname == "") {
-                $("#adddbset_error_msg").html('databaseSet name 不能为空!');
-                return;
-            }
-            $.post("/rest/groupdbset/addDbset", {
-                "name": dbsetname,
-                "provider":provider,
-                "shardingStrategy":shardingStrategy,
-                "groupId":w2ui['grid'].current_group
-            }, function (data) {
-                if (data.code == "OK") {
-                    $("#addDbsetModal").modal('hide');
-                    refreshDbSet();
-                } else {
-                    $("#adddbset_error_msg").html(data.info);
-                }
-            });
-        });
-
-        $(document.body).on('click', '#save_adddbsetentry', function (event) {
-            var dbsetentryname = $("#dbsetentryname").val();
-            var databaseType = $("#databaseType").val();
-            var sharding = $("#sharding").val();
-            var  connectionString = $("#databases").val();
-            if (dbsetentryname == null || dbsetentryname == "") {
-                $("#adddbsetentry_error_msg").html('databaseSet Entry name 不能为空!');
-                return;
-            }
-            if (connectionString == null || connectionString == "") {
-                $("#adddbsetentry_error_msg").html('请选择connectionString!');
-                return;
-            }
+        $(document.body).on('click', '#refuse_dao', function (event) {
             var records = w2ui['grid'].getSelection();
             var record = w2ui['grid'].get(records[0]);
-            $.post("/rest/groupdbset/addDbsetEntry", {
-                "name": dbsetentryname,
-                "databaseType":databaseType,
-                "sharding":sharding,
-                "connectionString":connectionString,
-                "dbsetId":record['id'],
-                "groupId":w2ui['grid'].current_group
-            }, function (data) {
-                if (data.code == "OK") {
-                    $("#addDbsetEntryModal").modal('hide');
-                    refreshDbSetEntry();
-                } else {
-                    $("#adddbsetentry_error_msg").html(data.info);
-                }
-            });
-        });
-
-        $(document.body).on('click', '#save_updatedbset', function (event) {
-            var dbsetname = $("#dbsetname2").val();
-            var provider = $("#provider2").val();
-            var shardingStrategy = $("#shardingStrategy2").val();
-            if (dbsetname == null || dbsetname == "") {
-                $("#updatedbset_error_msg").html('databaseSet name 不能为空!');
+            if(record==null || record==''){
+                alert('请先选择一个待审批事件!');
                 return;
             }
-            var records = w2ui['grid'].getSelection();
-            var record = w2ui['grid'].get(records[0]);
-            $.post("/rest/groupdbset/updateDbset", {
-                "id":record['id'],
-                "name": dbsetname,
-                "provider":provider,
-                "shardingStrategy":shardingStrategy,
-                "groupId":w2ui['grid'].current_group
-            }, function (data) {
-                if (data.code == "OK") {
-                    $("#updateDbsetModal").modal('hide');
-                    refreshDbSet();
-                } else {
-                    $("#updatedbset_error_msg").html(data.info);
-                }
-            });
-        });
-
-        $(document.body).on('click', '#save_updatedbsetentry', function (event) {
-            $("#updatedbsetentry_error_msg").html('');
-            var dbsetentryname = $("#dbsetentryname2").val();
-            var databaseType = $("#databaseType2").val();
-            var sharding = $("#sharding2").val();
-            var connectionString = $("#databases2").val();
-            if (dbsetentryname == null || dbsetentryname == "") {
-                $("#updatedbsetentry_error_msg").html('databaseSet entry name 不能为空!');
+            var approveMsg = $("#approveMsg").val();
+            if (approveMsg==null || $.trim(approveMsg)=='') {
+                $("#error_msg").html('请输入审批意见！');
                 return;
             }
-            if (connectionString == null || connectionString == "") {
-                $("#updatedbsetentry_error_msg").html('请选择connectionString');
-                return;
-            }
-            var records = w2ui['previewgrid'].getSelection();
-            var record = w2ui['previewgrid'].get(records[0]);
-            $.post("/rest/groupdbset/updateDbsetEntry", {
-                "id":record['id'],
-                "name": dbsetentryname,
-                "databaseType":databaseType,
-                "sharding":sharding,
-                "connectionString":connectionString,
-                "dbsetId":record['databaseSet_Id'],
-                "groupId":w2ui['grid'].current_group
-            }, function (data) {
-                if (data.code == "OK") {
-                    $("#updateDbsetEntryModal").modal('hide');
-                    refreshDbSetEntry();
+            cblock($("body"));
+            $.get("/rest/task/taskApproveOperation?taskId=" + record['task_id']
+                + "&taskType=" + record['task_type']
+                + "&approveFlag=3"
+                + "&approveMsg=" + $("#approveMsg").val()
+                + "&rand=" + Math.random(),function (data) {
+                if (data['code'] != 'OK') {
+                    $("#error_msg").html(data['info']);
                 } else {
-                    $("#updatedbsetentry_error_msg").html(data.info);
+                    $("#refuseModal").modal('hide');
+                    w2ui['grid_toolbar'].click('refreshAllApproveDAO', null);
                 }
+                $("body").unblock();
+            }).fail(function (data) {
+                alert("审批操作失败!");
+                $("#refuseModal").modal('hide');
+                $("body").unblock();
             });
-        });
-
-        $(document.body).on('change', '#databases', function (event) {
-            $("#dbsetentryname").val($("#databases").val());
-        });
-
-        $(document.body).on('change', '#databases2', function (event) {
-            $("#dbsetentryname2").val($("#databases2").val());
         });
 
     });

@@ -31,8 +31,8 @@ table.gridtable td {
 
 <body>
 你好，${approveUser}：<br/>
-	我创建了以下DAO，现在需要生成这些DAO的dal代码，请审批，审批地址如下：
-    ****
+&nbsp;&nbsp;我创建了以下DAO，现在需要生成这些DAO的dal代码，请审批，审批地址如下：<br/>
+    <h2><a href="${myApprovelTaskUrl}">点我进行审批</a></h2>
 <table class="gridtable">
   <tr>
     <th>逻辑数据库</th>

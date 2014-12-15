@@ -22,6 +22,7 @@ public class JavaCodeGenContext implements CodeGenContext{
 	
 	protected int projectId;
 	protected boolean regenerate;
+	private boolean ignoreApproveStatus;
 	protected Progress progress;
 	protected String namespace;
 	public String generatePath;
@@ -156,6 +157,14 @@ public class JavaCodeGenContext implements CodeGenContext{
 
 	public void setDalConfigHost(DalConfigHost dalConfigHost) {
 		this.dalConfigHost = dalConfigHost;
+	}
+
+	public boolean isIgnoreApproveStatus() {
+		return ignoreApproveStatus;
+	}
+
+	public void setIgnoreApproveStatus(boolean ignoreApproveStatus) {
+		this.ignoreApproveStatus = ignoreApproveStatus;
 	}
 
 }

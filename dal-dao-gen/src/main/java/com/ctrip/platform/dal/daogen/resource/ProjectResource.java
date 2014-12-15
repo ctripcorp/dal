@@ -491,10 +491,10 @@ public class ProjectResource {
 			CodeGenContext context = null;
 			if (language.equals("java")) {
 				generator = new JavaDalGenerator();
-				context = generator.createContext(id, true, progress, newPojo);
+				context = generator.createContext(id, true, progress, newPojo, false);
 			} else if (language.equals("cs")){
 				generator = new CSharpDalGenerator();
-				context = generator.createContext(id, true, progress, newPojo);
+				context = generator.createContext(id, true, progress, newPojo, false);
 			}
 			generator.prepareDirectory(context);
 			generator.prepareData(context);

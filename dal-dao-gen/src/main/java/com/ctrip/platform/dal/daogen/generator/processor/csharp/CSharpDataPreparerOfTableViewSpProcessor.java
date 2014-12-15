@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -60,27 +61,48 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 		int projectId = ctx.getProjectId();
 		boolean regenerate = ctx.isRegenerate();
 		final Progress progress = ctx.getProgress();
-		List<GenTaskByTableViewSp> _tableViewSps;
-		List<GenTaskBySqlBuilder> _tempSqlBuilders;
+		List<GenTaskByTableViewSp> tableViewSpTasks;
+		List<GenTaskBySqlBuilder> sqlBuilderTasks;
 		if (regenerate) {
-			_tableViewSps = daoByTableViewSp.updateAndGetAllTasks(projectId);
-			_tempSqlBuilders = daoBySqlBuilder.updateAndGetAllTasks(projectId);
-			prepareDbFromTableViewSp(ctx, _tableViewSps, _tempSqlBuilders);
+			tableViewSpTasks = daoByTableViewSp.updateAndGetAllTasks(projectId);
+			sqlBuilderTasks = daoBySqlBuilder.updateAndGetAllTasks(projectId);
+			prepareDbFromTableViewSp(ctx, tableViewSpTasks, sqlBuilderTasks);
 		} else {
-			_tableViewSps = daoByTableViewSp.updateAndGetTasks(projectId);
-			_tempSqlBuilders = daoBySqlBuilder.updateAndGetTasks(projectId);
+			tableViewSpTasks = daoByTableViewSp.updateAndGetTasks(projectId);
+			sqlBuilderTasks = daoBySqlBuilder.updateAndGetTasks(projectId);
 			prepareDbFromTableViewSp(ctx, 
 					daoByTableViewSp.getTasksByProjectId(projectId),
 					daoBySqlBuilder.getTasksByProjectId(projectId));
 		}
+		
+		if (!ctx.isIgnoreApproveStatus() && tableViewSpTasks!=null && tableViewSpTasks.size()>0) {
+			Iterator<GenTaskByTableViewSp> ite = tableViewSpTasks.iterator();
+			while (ite.hasNext()) {
+				int approved = ite.next().getApproved(); 
+				if (approved!=2 && approved!=0) {
+					ite.remove();
+				}
+			}
+		}
+		
+		if (!ctx.isIgnoreApproveStatus() && sqlBuilderTasks!=null && sqlBuilderTasks.size()>0) {
+			Iterator<GenTaskBySqlBuilder> ite = sqlBuilderTasks.iterator();
+			while (ite.hasNext()) {
+				int approved = ite.next().getApproved(); 
+				if (approved!=2 && approved!=0) {
+					ite.remove();
+				}
+			}
+		}
+		
 		Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.getSqlBuilders();
-		for (GenTaskBySqlBuilder _t : _tempSqlBuilders) {
+		for (GenTaskBySqlBuilder _t : sqlBuilderTasks) {
 			_sqlBuilders.add(_t);
 		}
 
 		final Queue<CSharpTableHost> _spHosts = ctx.getSpHosts();
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
-		for (final GenTaskByTableViewSp tableViewSp : _tableViewSps) {
+		for (final GenTaskByTableViewSp tableViewSp : tableViewSpTasks) {
 			final String[] viewNames = StringUtils.split(tableViewSp.getView_names(), ",");
 			final String[] tableNames = StringUtils.split(tableViewSp.getTable_names(), ",");
 			final String[] spNames = StringUtils.split(tableViewSp.getSp_names(), ",");

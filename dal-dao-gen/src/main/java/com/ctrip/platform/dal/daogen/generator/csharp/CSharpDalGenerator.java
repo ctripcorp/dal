@@ -26,7 +26,7 @@ public class CSharpDalGenerator implements DalGenerator {
 	
 	@Override
 	public CodeGenContext createContext(int projectId, boolean regenerate,
-			Progress progress, boolean newPojo) throws Exception {
+			Progress progress, boolean newPojo, boolean ignoreApproveStatus) throws Exception {
 		CSharpCodeGenContext ctx = null;
 		try {
 			Map<String, Boolean> hints = new HashMap<String, Boolean>();
@@ -35,11 +35,9 @@ public class CSharpDalGenerator implements DalGenerator {
 			ctx.setNewPojo(newPojo);
 			Project project = SpringBeanGetter.getDaoOfProject().getProjectByID(ctx.getProjectId());
 			DalConfigHost dalConfigHost = null;
-			if (project.getDal_config_name() != null
-					&& !project.getDal_config_name().isEmpty()) {
+			if (project.getDal_config_name() != null && !project.getDal_config_name().isEmpty()) {
 				dalConfigHost = new DalConfigHost(project.getDal_config_name());
-			} else if (project.getNamespace() != null
-					&& !project.getNamespace().isEmpty()) {
+			} else if (project.getNamespace() != null && !project.getNamespace().isEmpty()) {
 				dalConfigHost = new DalConfigHost(project.getNamespace());
 			} else {
 				dalConfigHost = new DalConfigHost("");

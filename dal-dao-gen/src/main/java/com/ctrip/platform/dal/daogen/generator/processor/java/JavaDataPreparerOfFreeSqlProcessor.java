@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.generator.processor.java;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -50,17 +51,27 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 		final Map<String, JavaMethodHost> _freeSqlPojoHosts = ctx.get_freeSqlPojoHosts();
 		final Queue<FreeSqlHost> _freeSqlHosts = ctx.getFreeSqlHosts();
 		DaoByFreeSql daoByFreeSql = SpringBeanGetter.getDaoByFreeSql();
-		List<GenTaskByFreeSql> _freeSqls;
+		List<GenTaskByFreeSql> freeSqlTasks;
 		if (ctx.isRegenerate()) {
-			_freeSqls = daoByFreeSql.updateAndGetAllTasks(projectId);
-			prepareDbFromFreeSql(ctx, _freeSqls);
+			freeSqlTasks = daoByFreeSql.updateAndGetAllTasks(projectId);
+			prepareDbFromFreeSql(ctx, freeSqlTasks);
 		} else {
-			_freeSqls = daoByFreeSql.updateAndGetTasks(projectId);
+			freeSqlTasks = daoByFreeSql.updateAndGetTasks(projectId);
 			prepareDbFromFreeSql(ctx, daoByFreeSql.getTasksByProjectId(projectId));
+		}
+		
+		if (!ctx.isIgnoreApproveStatus() && freeSqlTasks!=null && freeSqlTasks.size()>0) {
+			Iterator<GenTaskByFreeSql> ite = freeSqlTasks.iterator();
+			while (ite.hasNext()) {
+				int approved = ite.next().getApproved(); 
+				if (approved!=2 && approved!=0) {
+					ite.remove();
+				}
+			}
 		}
 
 		// 按照DbName以及ClassName做一次GroupBy(相同DbName的GenTaskByFreeSql作为一组)，且ClassName不区分大小写
-		final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(_freeSqls);
+		final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(freeSqlTasks);
 
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 		// 以DbName以及ClassName为维度，为每个维度生成一个DAO类

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -66,17 +67,27 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 		boolean regenerate = ctx.isRegenerate();
 		final Progress progress = ctx.getProgress();
 		final String namespace = ctx.getNamespace();
-		List<GenTaskByFreeSql> _freeSqls;
+		List<GenTaskByFreeSql> freeSqlTasks;
 		if (regenerate) {
-			_freeSqls = daoByFreeSql.updateAndGetAllTasks(projectId);
-			prepareDbFromFreeSql(ctx, _freeSqls);
+			freeSqlTasks = daoByFreeSql.updateAndGetAllTasks(projectId);
+			prepareDbFromFreeSql(ctx, freeSqlTasks);
 		} else {
-			_freeSqls = daoByFreeSql.updateAndGetTasks(projectId);
+			freeSqlTasks = daoByFreeSql.updateAndGetTasks(projectId);
 			prepareDbFromFreeSql(ctx, daoByFreeSql.getTasksByProjectId(projectId));
+		}
+		
+		if (!ctx.isIgnoreApproveStatus() && freeSqlTasks!=null && freeSqlTasks.size()>0) {
+			Iterator<GenTaskByFreeSql> ite = freeSqlTasks.iterator();
+			while (ite.hasNext()) {
+				int approved = ite.next().getApproved(); 
+				if (approved!=2 && approved!=0) {
+					ite.remove();
+				}
+			}
 		}
 
 		// 首先按照DbName以及ClassName做一次GroupBy，且ClassName不区分大小写
-		final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(_freeSqls);
+		final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(freeSqlTasks);
 
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 		final Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts = ctx.getFreeSqlPojoHosts();

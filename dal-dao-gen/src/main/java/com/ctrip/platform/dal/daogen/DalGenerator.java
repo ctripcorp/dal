@@ -5,7 +5,7 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 public interface DalGenerator {
 
 	public CodeGenContext createContext(int projectId, boolean regenerate,
-			Progress progress, boolean newPojo) throws Exception;
+			Progress progress, boolean newPojo, boolean ignoreApproveStatus) throws Exception;
 
 	public void prepareDirectory(CodeGenContext codeGenCtx) throws Exception;
 

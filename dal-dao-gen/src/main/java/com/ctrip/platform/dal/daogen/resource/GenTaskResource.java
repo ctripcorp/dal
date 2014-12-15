@@ -514,7 +514,7 @@ public class GenTaskResource {
 			Progress progress = new Progress();
 			if ("java".equalsIgnoreCase(task.getSql_style())) {
 				generator = new JavaDalGenerator();
-				context = generator.createContext(task.getProject_id(), true, progress, true);
+				context = generator.createContext(task.getProject_id(), true, progress, true, true);
 				generator.prepareData(context);
 				JavaCodeGenContext ctx = (JavaCodeGenContext)context;
 				Queue<JavaTableHost> tableHosts = ctx.getTableHosts();
@@ -532,7 +532,7 @@ public class GenTaskResource {
 				}
 			} else {
 				generator = new CSharpDalGenerator();
-				context = generator.createContext(task.getProject_id(), true, progress, true);
+				context = generator.createContext(task.getProject_id(), true, progress, true, true);
 				generator.prepareData(context);
 				CSharpCodeGenContext ctx = (CSharpCodeGenContext)context;
 				Queue<CSharpTableHost> tableHosts = ctx.getTableViewHosts();
@@ -563,7 +563,7 @@ public class GenTaskResource {
 			Progress progress = new Progress();
 			if ("java".equalsIgnoreCase(task.getSql_style())) {
 				generator = new JavaDalGenerator();
-				context = generator.createContext(task.getProject_id(), true, progress, true);
+				context = generator.createContext(task.getProject_id(), true, progress, true, true);
 				generator.prepareData(context);
 				JavaCodeGenContext ctx = (JavaCodeGenContext)context;
 				Queue<FreeSqlHost> freeSqlHosts = ctx.getFreeSqlHosts();
@@ -581,7 +581,7 @@ public class GenTaskResource {
 				}
 			} else {
 				generator = new CSharpDalGenerator();
-				context = generator.createContext(task.getProject_id(), true, progress, true);
+				context = generator.createContext(task.getProject_id(), true, progress, true, true);
 				generator.prepareData(context);
 				CSharpCodeGenContext ctx = (CSharpCodeGenContext)context;
 				Queue<CSharpFreeSqlHost> freeSqlHosts = ctx.getFreeSqlHosts();

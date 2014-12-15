@@ -51,7 +51,6 @@ public class DalGroupProjectResource {
 			group.setChildren(true);
 		}
 		return groups;
-		
 	}
 	
 	@GET

@@ -22,6 +22,7 @@ public class CSharpCodeGenContext implements CodeGenContext {
 	
 	private int projectId;
 	private boolean regenerate;
+	private boolean ignoreApproveStatus;
 	private Progress progress;
 	private Map<String,?> hints;
 	private String namespace;
@@ -198,6 +199,14 @@ public class CSharpCodeGenContext implements CodeGenContext {
 
 	public void setDalConfigHost(DalConfigHost dalConfigHost) {
 		this.dalConfigHost = dalConfigHost;
+	}
+
+	public boolean isIgnoreApproveStatus() {
+		return ignoreApproveStatus;
+	}
+
+	public void setIgnoreApproveStatus(boolean ignoreApproveStatus) {
+		this.ignoreApproveStatus = ignoreApproveStatus;
 	}
 
 }

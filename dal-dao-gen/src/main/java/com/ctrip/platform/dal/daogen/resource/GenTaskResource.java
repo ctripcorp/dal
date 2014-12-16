@@ -230,7 +230,7 @@ public class GenTaskResource {
 		int len = request.getRequestURI().length();
 		String host = request.getRequestURL().toString();
 		host = host.substring(0, len);
-		String approveUrl = host + "rest/task/taskApproveOperation?";
+		String approveUrl = host + "rest/task/taskApproveOperationForEmail?";
 		String myApprovelTaskUrl = host + "eventmanage.jsp";
 		
 		String []taskIds = taskId.split(",");
@@ -300,6 +300,81 @@ public class GenTaskResource {
 		}
 		
 		return Status.OK;
+	}
+	
+	@GET
+	@Path("taskApproveOperationForEmail")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String taskApproveOperationForEmail(@QueryParam("taskId") int taskId,
+			@QueryParam("taskType") String taskType,
+			@QueryParam("approveFlag") int approveFlag,
+			@QueryParam("approveMsg") String approveMsg) {
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		if (user == null) {
+			return "please login fisrt.";
+		}
+		
+		ApproveTask task = haveApprovePermision(user.getId(), taskId, taskType);
+		if (task == null) {
+			return "Dao have been approved.";
+		}
+		
+		List<GenTaskByTableViewSp> tableViewSpTasks = new ArrayList<GenTaskByTableViewSp>();
+		List<GenTaskBySqlBuilder> autoTasks = new ArrayList<GenTaskBySqlBuilder>();
+		List<GenTaskByFreeSql> sqlTasks = new ArrayList<GenTaskByFreeSql>();
+		
+		if ("table_view_sp".equalsIgnoreCase(taskType)) {
+			SpringBeanGetter.getDaoByTableViewSp().updateTask(taskId, approveFlag, approveMsg);
+			SpringBeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
+			tableViewSpTasks.add(SpringBeanGetter.getDaoByTableViewSp().getTasksByTaskId(taskId));
+		} else if ("auto".equalsIgnoreCase(taskType)) {
+			SpringBeanGetter.getDaoBySqlBuilder().updateTask(taskId, approveFlag, approveMsg);
+			SpringBeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
+			autoTasks.add(SpringBeanGetter.getDaoBySqlBuilder().getTasksByTaskId(taskId));
+		} else if ("sql".equalsIgnoreCase(taskType)) {
+			SpringBeanGetter.getDaoByFreeSql().updateTask(taskId, approveFlag, approveMsg);
+			SpringBeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
+			sqlTasks.add(SpringBeanGetter.getDaoByFreeSql().getTasksByTaskId(taskId));
+		}
+		
+		java.util.Collections.sort(tableViewSpTasks);
+		java.util.Collections.sort(autoTasks);
+		java.util.Collections.sort(sqlTasks);
+
+		LoginUser noticeUsr = SpringBeanGetter.getDaoOfLoginUser().getUserById(task.getCreate_user_id());
+		
+		VelocityContext context = GenUtils.buildDefaultVelocityContext();
+		context.put("standardDao", tableViewSpTasks);
+		context.put("autoDao", autoTasks);
+		context.put("sqlDao", sqlTasks);
+		String msg = "你好，" + noticeUsr.getUserName() + ":<br/>&nbsp;&nbsp;你提交的DAO已审批，审批";
+		if (approveFlag == 2) {
+			msg += "通过。";
+		} else {
+			msg += "未通过。";
+		}
+		if (approveMsg != null) {
+			msg += "<br/>&nbsp;&nbsp;审批意见：" + approveMsg;
+		}
+		context.put("msg", msg);
+		String mailMsg = GenUtils.mergeVelocityContext(context, "templates/approval/approveResult.tpl");
+		
+		HtmlEmail email = new HtmlEmail();
+		email.setHostName("appmail.sh.ctriptravel.com");
+		email.setAuthentication("appmail107", "rm36vesybc");
+		try {
+			email.addTo(noticeUsr.getUserEmail());
+			email.setFrom(user.getUserEmail(), user.getUserName());
+			email.setSubject("Codegen DAO 审批结果通知");
+			email.setHtmlMsg(mailMsg);
+			email.send();
+		} catch (EmailException e) {
+			e.printStackTrace();
+		}
+		
+		return "Success Approved.";
+		
 	}
 	
 	@GET

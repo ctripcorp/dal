@@ -94,7 +94,7 @@ public class ${host.getClassName()}DaoUnitTest {
 			e.printStackTrace();
 		}
 #else
-		try
+		try{
     		${method.getPojoClassName()} results = dao.${method.getName()}(${method.getParameterNames("")});
     		//TODO: Verify the results here
     		assertTrue(results != null);

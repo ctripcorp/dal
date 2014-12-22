@@ -535,12 +535,14 @@ public class DbUtils {
 					allColumns.add(host);
 				}
 			} else if (language == CurrentLanguage.Java) {
+				Map<String, Integer> columnSqlType = getColumnSqlType(allInOneName, tableName);
 				Map<String, Class<?>> typeMapper = getSqlType2JavaTypeMaper(allInOneName, tableName);
 				while (allColumnsRs.next()) {
 					JavaParameterHost host = new JavaParameterHost();
 					String typeName = allColumnsRs.getString("TYPE_NAME");
-					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
+//					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
+					host.setSqlType(columnSqlType.get(host.getName()));
 					Class<?> javaClass = null;
 					if(null != typeMapper && typeMapper.containsKey(host.getName()) ){
 						javaClass = typeMapper.get(host.getName());
@@ -619,9 +621,54 @@ public class DbUtils {
 					e.printStackTrace();
 					javaType = Consts.jdbcSqlTypeToJavaClass.get(sqlType);
 				}
-				if(!map.containsKey(sqlType) && null != javaType) {
-//					map.put(sqlType, javaType);
+				if(!map.containsKey(columnName) && null != javaType) {
 					map.put(columnName, javaType);
+				}
+			}
+			
+		} catch (SQLException e) {
+			log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]",
+					allInOneName, tableViewName), e);
+		} catch(Exception e){
+			log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]",
+					allInOneName, tableViewName), e);
+		}
+		finally {
+			JdbcUtils.closeResultSet(rs);
+			JdbcUtils.closeConnection(connection);
+			
+		}
+		return map;
+	}
+	
+	private static Map<String, Integer> getColumnSqlType(String allInOneName, String tableViewName) {
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		Connection connection = null;
+		ResultSet rs = null;
+		try {
+			connection = DataSourceUtil.getConnection(allInOneName);
+			String dbType = null;
+			if (Consts.databaseType.containsKey(allInOneName)) {
+				dbType = Consts.databaseType.get(allInOneName);
+			} else {
+				dbType = connection.getMetaData().getDatabaseProductName();
+				Consts.databaseType.put(allInOneName, dbType);
+			}
+			
+			String sql = "select * from %s %s";
+			if(dbType.equalsIgnoreCase("Microsoft SQL Server")){
+				sql = "select top 1 * from " + tableViewName;
+			} else {
+				sql = "select * from " + tableViewName + " limit 1";
+			}
+			PreparedStatement ps = connection.prepareStatement(sql);
+			rs = ps.executeQuery();
+			ResultSetMetaData rsMeta = rs.getMetaData();
+			for(int i=1;i<=rsMeta.getColumnCount();i++){
+				String columnName = rsMeta.getColumnName(i);
+				Integer sqlType = rsMeta.getColumnType(i);
+				if(!map.containsKey(columnName) && null != sqlType) {
+					map.put(columnName, sqlType);
 				}
 			}
 			

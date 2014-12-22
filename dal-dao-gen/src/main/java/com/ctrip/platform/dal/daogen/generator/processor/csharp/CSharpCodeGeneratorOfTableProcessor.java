@@ -91,6 +91,13 @@ public class CSharpCodeGeneratorOfTableProcessor implements DalProcessor {
 										host.getClassName()),
 								"templates/csharp/test/DAOTest.cs.tpl");
 						
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Test/%sUnitTest.cs",
+										mavenLikeDir.getAbsolutePath(),
+										host.getClassName()),
+								"templates/csharp/test/DAOUnitTest.cs.tpl");
+						
 						result.setSuccessal(true);
 					}catch(Exception e){
 						log.error(result.getTaskName() + "exception", e);

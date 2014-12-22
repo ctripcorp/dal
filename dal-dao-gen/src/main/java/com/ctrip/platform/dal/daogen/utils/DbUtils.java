@@ -535,15 +535,15 @@ public class DbUtils {
 					allColumns.add(host);
 				}
 			} else if (language == CurrentLanguage.Java) {
-				Map<Integer, Class<?>> typeMapper = getSqlType2JavaTypeMaper(allInOneName, tableName);
+				Map<String, Class<?>> typeMapper = getSqlType2JavaTypeMaper(allInOneName, tableName);
 				while (allColumnsRs.next()) {
 					JavaParameterHost host = new JavaParameterHost();
 					String typeName = allColumnsRs.getString("TYPE_NAME");
 					host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
 					host.setName(allColumnsRs.getString("COLUMN_NAME"));
 					Class<?> javaClass = null;
-					if(null != typeMapper && typeMapper.containsKey(host.getSqlType()) ){
-						javaClass = typeMapper.get(host.getSqlType());
+					if(null != typeMapper && typeMapper.containsKey(host.getName()) ){
+						javaClass = typeMapper.get(host.getName());
 					}else{
 						javaClass = Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
 					}
@@ -586,8 +586,8 @@ public class DbUtils {
 		return null;
 	}
 
-	private static Map<Integer, Class<?>> getSqlType2JavaTypeMaper(String allInOneName, String tableViewName) {
-		Map<Integer, Class<?>> map = new HashMap<Integer, Class<?>>();;
+	private static Map<String, Class<?>> getSqlType2JavaTypeMaper(String allInOneName, String tableViewName) {
+		Map<String, Class<?>> map = new HashMap<String, Class<?>>();
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
@@ -610,6 +610,7 @@ public class DbUtils {
 			rs = ps.executeQuery();
 			ResultSetMetaData rsMeta = rs.getMetaData();
 			for(int i=1;i<=rsMeta.getColumnCount();i++){
+				String columnName = rsMeta.getColumnName(i);
 				Integer sqlType = rsMeta.getColumnType(i);
 				Class<?> javaType = null;
 				try {
@@ -619,24 +620,11 @@ public class DbUtils {
 					javaType = Consts.jdbcSqlTypeToJavaClass.get(sqlType);
 				}
 				if(!map.containsKey(sqlType) && null != javaType) {
-					map.put(sqlType, javaType);
+//					map.put(sqlType, javaType);
+					map.put(columnName, javaType);
 				}
 			}
 			
-//			rs = connection.getMetaData().getColumns(null, null, tableViewName, null);
-//			ResultSetMetaData rsmd = rs.getMetaData();
-//			for(int i = 1; i <= rsmd.getColumnCount(); i++) {
-//				Integer sqlType = rsmd.getColumnType(i);
-//				Class<?> javaType = null;
-//				try {
-//					javaType = Class.forName(rsmd.getColumnClassName(i));
-//				} catch (ClassNotFoundException e) {
-//					e.printStackTrace();
-//				}
-//				if(!map.containsKey(sqlType) && null != javaType) {
-//					map.put(sqlType, javaType);
-//				}
-//			}
 		} catch (SQLException e) {
 			log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]",
 					allInOneName, tableViewName), e);

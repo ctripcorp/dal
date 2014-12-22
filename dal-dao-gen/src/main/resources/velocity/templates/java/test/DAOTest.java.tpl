@@ -105,7 +105,7 @@ public class ${host.getPojoClassName()}DaoTest {
 #end
 #else
 #foreach($p in $method.getParameters())
-		    ${p.getClassDisplayName()} ${p.getAlias()}${suffix} = null; //set you value here
+		    ${p.getClassDisplayName()} ${p.getAlias()}${suffix} = null; //set your value here
 #end
 			int affectedRows${suffix} = dao.${method.getName()}(${method.getParameterNames($suffix)});
 			System.out.println(affectedRows${suffix});

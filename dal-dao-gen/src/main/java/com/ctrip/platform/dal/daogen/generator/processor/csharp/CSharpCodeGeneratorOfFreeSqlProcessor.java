@@ -99,6 +99,12 @@ public class CSharpCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
 										.normalizeVariable(host.getClassName())),
 								"templates/csharp/test/FreeSqlTest.cs.tpl");
 						
+						GenUtils.mergeVelocityContext(context,
+								String.format("%s/Test/%sUnitTest.cs", mavenLikeDir
+										.getAbsolutePath(), CommonUtils
+										.normalizeVariable(host.getClassName())),
+								"templates/csharp/test/FreeSqlUnitTest.cs.tpl");
+						
 						result.setSuccessal(true);
 					}catch(Exception e){
 						log.error(result.getTaskName() + "exception", e);

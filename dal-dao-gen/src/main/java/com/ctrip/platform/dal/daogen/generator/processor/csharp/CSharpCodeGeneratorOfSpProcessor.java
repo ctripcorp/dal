@@ -81,6 +81,13 @@ public class CSharpCodeGeneratorOfSpProcessor implements DalProcessor {
 										host.getClassName()),
 								"templates/csharp/test/SpTest.cs.tpl");
 						
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Test/%sUnitTest.cs",
+										mavenLikeDir.getAbsolutePath(),
+										host.getClassName()),
+								"templates/csharp/test/SpUnitTest.cs.tpl");
+						
 						result.setSuccessal(true);
 					}catch(Exception e){
 						log.error(result.getTaskName() + "exception", e);

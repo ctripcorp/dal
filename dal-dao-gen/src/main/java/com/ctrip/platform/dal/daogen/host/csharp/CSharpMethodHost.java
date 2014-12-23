@@ -65,6 +65,11 @@ public class CSharpMethodHost {
 		
 		return StringUtils.join(paramsDeclaration, ", ");
 	}
+	
+	public boolean paramTypeIsNotNull(CSharpParameterHost parameter) {
+		return parameter.getConditionType() != ConditionType.IsNull
+				&& parameter.getConditionType() != ConditionType.IsNotNull;
+	}
 
 	public String getCrud_type() {
 		return crud_type;

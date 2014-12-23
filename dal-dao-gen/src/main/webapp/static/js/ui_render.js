@@ -93,7 +93,7 @@
                 } else {
                     var selectedProject = $.jstree.reference("#jstree_projects").get_selected();
                     var project = $.jstree.reference("#jstree_projects").get_node(selectedProject[0]).original;
-                    var errMsg = '你没有当前DAO的操作权限.';
+                    var errMsg = '你没有当前Project下的DAO的操作权限.';
                     if (project['update_user_no']!=null && project['update_user_no']!='') {
                         errMsg += "<br/>当前Dao对应Project的所属User为：" + project['update_user_no'];
                     } else {
@@ -103,6 +103,7 @@
                         errMsg += "<br/>当前Dao对应Project的最后修改时间：" + project['update_user_no'];
                     } else {
                         errMsg += "<br/>当前Dao对应Project的最后修改时间：Unknown";
+                        errMsg += "<br/><span style='color:red'>请注意：若Project的所属User为Unknown，则只有具有当前组Admin角色权限的用户可以进行此Project的增删改操作.</span>";
                     }
                     alert(errMsg);
                 }
@@ -116,6 +117,9 @@
         var current_project = w2ui['grid'].current_project;
         if(current_project==null || current_project==''){
             alert('请先选择Project');
+            return;
+        }
+        if (!haveUpdateDaoPermision()) {
             return;
         }
         window.wizzard.clear();

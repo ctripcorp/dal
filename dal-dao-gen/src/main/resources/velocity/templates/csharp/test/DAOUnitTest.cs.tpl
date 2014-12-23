@@ -16,8 +16,9 @@ namespace ${host.getNameSpace()}.Test
     {
 
 		I${host.getClassName()}Dao ${WordUtils.uncapitalize($host.getClassName())}Dao = DALFactory.${host.getClassName()}Dao;
+
 ### standard dao unit test begin
-#if($host.generateAPI(59) && $host.isHasSptD())		
+#if($host.generateAPI(59) && $host.isHasSptD())
 		[TestMethod]
         public void TestBulkDelete${host.getClassName()}()
         {
@@ -143,7 +144,106 @@ namespace ${host.getNameSpace()}.Test
 		
 #end
 ### build sql dao unit test begin
+## build sql for cud
+#foreach($method in $host.getExtraMethods())
+#if($method.getCrud_type() != "select")
+		[TestMethod]
+		public void Test${method.getName()}
+		{
+#foreach ($p in $method.getParameters())
+#if ($method.paramTypeIsNotNull($p))
+		    ${p.getType()} ${WordUtils.uncapitalize($p.getAlias().replace("@",""))};
+#end
+#end
+#if ($method.isPaging())
+		    int pageNo;
+			int pageSize;
+#end
+	        int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+		}
 		
+#end
+#end
+##实体类型且返回First
+#foreach($method in $host.getExtraMethods())
+#if($method.isFirstOrSingle() && !$method.isSampleType())
+	    [TestMethod]
+		public void Test${method.getName()} 
+		{
+#foreach ($p in $method.getParameters())
+#if ($method.paramTypeIsNotNull($p))
+		    ${p.getType()} ${WordUtils.uncapitalize($p.getAlias().replace("@",""))};
+#end
+#end	
+#if ($method.isPaging())
+		    int pageNo;
+			int pageSize;
+#end
+			${host.getClassName()} ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+		}
+		
+#end
+#end
+##实体类型或简单类型且返回分页List
+#foreach($method in $host.getExtraMethods())
+#if(!$method.isFirstOrSingle() && $method.getCrud_type() == "select" && $method.isPaging())
+	    [TestMethod]
+		public void Test${method.getName()}
+		{
+#foreach ($p in $method.getParameters())
+#if ($method.paramTypeIsNotNull($p))
+		    ${p.getType()} ${WordUtils.uncapitalize($p.getAlias().replace("@",""))};
+#end
+#end	
+#if ($method.isPaging())
+		    int pageNo;
+			int pageSize;
+#end
+	        IList<${host.getClassName()}> ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+		}
+		
+#end
+#end	
+##实体类型或简单类型且返回List
+#foreach($method in $host.getExtraMethods())
+#if(!$method.isFirstOrSingle() && $method.getCrud_type() == "select" && !$method.isPaging())
+		[TestMethod]
+		public void Test${method.getName()}
+		{
+#foreach ($p in $method.getParameters())
+#if ($method.paramTypeIsNotNull($p))
+		    ${p.getType()} ${WordUtils.uncapitalize($p.getAlias().replace("@",""))};
+#end
+#end	
+#if ($method.isPaging())
+		    int pageNo;
+			int pageSize;
+#end
+	        IList<${host.getClassName()}> ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+		}
+		
+#end
+#end	
+##简单类型并且返回值是First
+#foreach($method in $host.getExtraMethods())
+#if($method.isFirstOrSingle() && $method.isSampleType())
+		[TestMethod]
+		public void Test${method.getName()}
+		{
+#foreach ($p in $method.getParameters())
+#if ($method.paramTypeIsNotNull($p))
+		    ${p.getType()} ${WordUtils.uncapitalize($p.getAlias().replace("@",""))};
+#end
+#end	
+#if ($method.isPaging())
+		    int pageNo;
+			int pageSize;
+#end
+	        object ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+		}
+		
+#end
+#end	
     }
 	
 }

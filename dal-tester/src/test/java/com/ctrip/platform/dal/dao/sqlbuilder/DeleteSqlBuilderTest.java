@@ -39,5 +39,10 @@ public class DeleteSqlBuilderTest {
 		
 		builder.buildParameters();
 		Assert.assertEquals(5, builder.getStatementParameterIndex());
+		
+		Assert.assertEquals(4, builder.buildParameters().size());
+		Assert.assertEquals(1, builder.buildParameters().get(0).getIndex());
+		Assert.assertEquals("a", builder.buildParameters().get(0).getName());
+		Assert.assertEquals(Types.INTEGER, builder.buildParameters().get(0).getSqlType());
 	}
 }

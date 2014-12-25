@@ -157,6 +157,10 @@ public class SelectSqlBuilderTest {
 		Assert.assertEquals(expected, builder.build().trim());
 		Assert.assertEquals(27, builder.buildParameters().size());
 		Assert.assertEquals(28, builder.getStatementParameterIndex());
+		
+		Assert.assertEquals(27, builder.buildParameters().get(26).getIndex());
+		Assert.assertEquals("inNullable4", builder.buildParameters().get(26).getName());
+		Assert.assertEquals(Types.INTEGER, builder.buildParameters().get(26).getSqlType());
 		 
 	}
 	

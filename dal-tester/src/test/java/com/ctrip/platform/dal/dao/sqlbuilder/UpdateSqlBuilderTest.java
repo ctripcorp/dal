@@ -41,6 +41,15 @@ public class UpdateSqlBuilderTest {
 		Assert.assertEquals(expect_sql, sql);
 		builder.buildParameters();
 		Assert.assertEquals(10, builder.getStatementParameterIndex());
+		
+		Assert.assertEquals(9, builder.buildParameters().size());
+		Assert.assertEquals(3, builder.buildParameters().get(2).getIndex());
+		Assert.assertEquals("addr", builder.buildParameters().get(2).getName());
+		Assert.assertEquals(Types.VARCHAR, builder.buildParameters().get(2).getSqlType());
+		
+		Assert.assertEquals(9, builder.buildParameters().get(8).getIndex());
+		Assert.assertEquals("c", builder.buildParameters().get(8).getName());
+		Assert.assertEquals(Types.INTEGER, builder.buildParameters().get(8).getSqlType());
 	}
 
 }

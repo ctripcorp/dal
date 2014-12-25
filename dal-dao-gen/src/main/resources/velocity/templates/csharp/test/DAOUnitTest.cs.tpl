@@ -4,13 +4,15 @@ using System.Linq;
 using System.Text;
 using Arch.Data;
 using Arch.Data.DbEngine;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ${host.getNameSpace()}.Entity.DataModel;
 using ${host.getNameSpace()}.Interface.IDao;
 using ${host.getNameSpace()}.Dao;
 
+
 namespace ${host.getNameSpace()}.Test
 {
-	//在实际使用的时候，您需要根据不同的情形传入合法的参数来运行test case
+	//在实际使用的时候，您需要根据不同的情形初始化参数值并反注释函数来运行test case
 	[TestClass]
     public class ${host.getClassName()}UnitTest
     {
@@ -23,7 +25,7 @@ namespace ${host.getNameSpace()}.Test
         public void TestBulkDelete${host.getClassName()}()
         {
             IList<${host.getClassName()}> ${WordUtils.uncapitalize($host.getClassName())}List;
-			int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.BulkDelete${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())}List);
+			//int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.BulkDelete${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())}List);
         }
 		
 #end
@@ -32,7 +34,7 @@ namespace ${host.getNameSpace()}.Test
         public void TestBulkInsert${host.getClassName()}()
         {
 			IList<${host.getClassName()}> ${WordUtils.uncapitalize($host.getClassName())}List;
-			int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.BulkInsert${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())}List);
+			//int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.BulkInsert${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())}List);
         }
 		
 #end
@@ -41,7 +43,7 @@ namespace ${host.getNameSpace()}.Test
         public void TestBulkUpdate${host.getClassName()}()
         {
 			IList<${host.getClassName()}> ${WordUtils.uncapitalize($host.getClassName())}List;
-            int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.BulkUpdate${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())}List);
+            //int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.BulkUpdate${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())}List);
         }
 		
 #end		
@@ -58,7 +60,7 @@ namespace ${host.getNameSpace()}.Test
         public void TestDelete${host.getClassName()}1()
         {
             ${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())};
-			int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.Delete${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())});
+			//int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.Delete${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())});
         }
 		
 #end
@@ -69,7 +71,7 @@ namespace ${host.getNameSpace()}.Test
 #foreach ($p in $host.getSpaDelete().getParameters())
 		    ${p.getType()} ${WordUtils.uncapitalize($p.getName().replace("@",""))};
 #end
-            int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.Delete${host.getClassName()}(#foreach ($p in $host.getSpaDelete().getParameters()) ${WordUtils.uncapitalize($p.getName().replace("@",""))}#if($foreach.count != $host.getSpaDelete().getParameters().size()),#end#end);
+            //int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.Delete${host.getClassName()}(#foreach ($p in $host.getSpaDelete().getParameters()) ${WordUtils.uncapitalize($p.getName().replace("@",""))}#if($foreach.count != $host.getSpaDelete().getParameters().size()),#end#end);
         }
 		
 #end
@@ -80,7 +82,7 @@ namespace ${host.getNameSpace()}.Test
         public void TestFindByPk()
         {
             ${pk.getType()} ${WordUtils.uncapitalize($pk.getName())};
-			${host.getClassName()} obj = ${WordUtils.uncapitalize($host.getClassName())}Dao.FindByPk(${WordUtils.uncapitalize($pk.getName())});
+			//${host.getClassName()} obj = ${WordUtils.uncapitalize($host.getClassName())}Dao.FindByPk(${WordUtils.uncapitalize($pk.getName())});
         }
 		
 #elseif($host.getPrimaryKeys().size() >= 2)
@@ -90,7 +92,7 @@ namespace ${host.getNameSpace()}.Test
 #foreach ($cpk in $host.getPrimaryKeys())
 		     ${cpk.getType()} ${WordUtils.uncapitalize($cpk.getName())};
 #end
-	         ${host.getClassName()} obj = ${WordUtils.uncapitalize($host.getClassName())}Dao.FindByPk(#foreach ($cpk in $host.getPrimaryKeys())${WordUtils.uncapitalize($cpk.getName())}#if($foreach.count != $host.getPrimaryKeys().size()),#end#end);
+	         //${host.getClassName()} obj = ${WordUtils.uncapitalize($host.getClassName())}Dao.FindByPk(#foreach ($cpk in $host.getPrimaryKeys())${WordUtils.uncapitalize($cpk.getName())}#if($foreach.count != $host.getPrimaryKeys().size()),#end#end);
 		}
 		
 #end
@@ -110,7 +112,7 @@ namespace ${host.getNameSpace()}.Test
             ${host.getClassName()} obj;
 			int pagesize;
 			int pageNo;
-			IList<${host.getClassName()}> ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.GetListByPage(obj, pagesize, pageNo);
+			//IList<${host.getClassName()}> ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.GetListByPage(obj, pagesize, pageNo);
         }
 		
 #end
@@ -120,7 +122,7 @@ namespace ${host.getNameSpace()}.Test
         public void TestInsert${host.getClassName()}()
         {
 			${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())};
-            int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.Insert${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())});
+            //int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.Insert${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())});
         }
 		
 #end
@@ -130,7 +132,7 @@ namespace ${host.getNameSpace()}.Test
         public void TestInsert${host.getClassName()}()
         {
             ${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())};
-			${WordUtils.uncapitalize($host.getClassName())}Dao.Insert${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())});
+			//${WordUtils.uncapitalize($host.getClassName())}Dao.Insert${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())});
         }
 		
 #end		
@@ -139,7 +141,7 @@ namespace ${host.getNameSpace()}.Test
         public void TestUpdate${host.getClassName()}()
         {
 			${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())};
-            int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.Update${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())});
+            //int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.Update${host.getClassName()}(${WordUtils.uncapitalize($host.getClassName())});
         }
 		
 #end
@@ -159,7 +161,7 @@ namespace ${host.getNameSpace()}.Test
 		    int pageNo;
 			int pageSize;
 #end
-	        int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+	        //int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
 		}
 		
 #end
@@ -179,7 +181,7 @@ namespace ${host.getNameSpace()}.Test
 		    int pageNo;
 			int pageSize;
 #end
-			${host.getClassName()} ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+			//${host.getClassName()} ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
 		}
 		
 #end
@@ -199,7 +201,7 @@ namespace ${host.getNameSpace()}.Test
 		    int pageNo;
 			int pageSize;
 #end
-	        IList<${host.getClassName()}> ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+	        //IList<${host.getClassName()}> ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
 		}
 		
 #end
@@ -219,7 +221,7 @@ namespace ${host.getNameSpace()}.Test
 		    int pageNo;
 			int pageSize;
 #end
-	        IList<${host.getClassName()}> ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+	        //IList<${host.getClassName()}> ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
 		}
 		
 #end
@@ -239,7 +241,7 @@ namespace ${host.getNameSpace()}.Test
 		    int pageNo;
 			int pageSize;
 #end
-	        object ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+	        //object ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
 		}
 		
 #end

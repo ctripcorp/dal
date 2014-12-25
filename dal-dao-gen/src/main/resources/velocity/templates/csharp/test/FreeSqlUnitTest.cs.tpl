@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using Arch.Data;
 using Arch.Data.DbEngine;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ${host.getNameSpace()}.Entity.DataModel;
 using ${host.getNameSpace()}.Dao;
 
 namespace ${host.getNameSpace()}.Test
 {
-	//在实际使用的时候，您需要根据不同的情形传入合法的参数来运行test case
+	//在实际使用的时候，您需要根据不同的情形初始化参数值并反注释函数来运行test case
 	[TestClass]
     public class ${host.getClassName()}UnitTest
     {
@@ -20,7 +21,7 @@ namespace ${host.getNameSpace()}.Test
 #foreach($method in $host.getMethods())
 #if($method.getCrud_type()=="update")
         [TestMethod]
-        public void Test${method.getName()}
+        public void Test${method.getName()}()
 		{
 #foreach ($p in $method.getParameters())
 #if ($method.paramTypeIsNotNull($p))
@@ -31,7 +32,7 @@ namespace ${host.getNameSpace()}.Test
 		    int pageNo;
 			int pageSize;
 #end
-	        int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+	        //int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
 		}
 		
 #end	
@@ -40,7 +41,7 @@ namespace ${host.getNameSpace()}.Test
 #foreach($method in $host.getMethods())
 #if($method.isFirstOrSingle() && $method.getCrud_type()!="update")
 		[TestMethod]
-        public void Test${method.getName()}
+        public void Test${method.getName()}()
 		{
 #foreach ($p in $method.getParameters())
 #if ($method.paramTypeIsNotNull($p))
@@ -52,9 +53,9 @@ namespace ${host.getNameSpace()}.Test
 			int pageSize;
 #end
 #if($method.isSampleType())
-	        object ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+	        //object ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
 #else
-		    ${method.getPojoName()} ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+		    //${method.getPojoName()} ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
 #end	
 		}
 		
@@ -64,7 +65,7 @@ namespace ${host.getNameSpace()}.Test
 #foreach($method in $host.getMethods())
 #if(!$method.isFirstOrSingle() && $method.getCrud_type()!="update")
 		[TestMethod]
-        public void Test${method.getName()}
+        public void Test${method.getName()}()
 		{
 #foreach ($p in $method.getParameters())
 #if ($method.paramTypeIsNotNull($p))
@@ -75,7 +76,7 @@ namespace ${host.getNameSpace()}.Test
 		    int pageNo;
 			int pageSize;
 #end
-	        IList<${method.getPojoName()}> ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
+	        //IList<${method.getPojoName()}> ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
 		}
 		
 #end	

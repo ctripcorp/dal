@@ -41,10 +41,10 @@ public abstract class AbstractSqlBuilder {
 		parameters = new StatementParameters();
 		index = 1;
 		for(FieldEntry entry : selectOrUpdataFieldEntrys){
-			parameters.set(index++, entry.getSqlType(), entry.getParamValue());
+			parameters.set(index++, entry.getFieldName(), entry.getSqlType(), entry.getParamValue());
 		}
 		for(FieldEntry entry : whereFieldEntrys){
-			parameters.set(index++, entry.getSqlType(), entry.getParamValue());
+			parameters.set(index++, entry.getFieldName(), entry.getSqlType(), entry.getParamValue());
 		}
 		return this.parameters;
 	}

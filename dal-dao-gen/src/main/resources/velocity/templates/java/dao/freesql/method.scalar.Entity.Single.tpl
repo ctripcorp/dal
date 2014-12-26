@@ -16,9 +16,9 @@
 		int i = 1;
 #foreach($p in $method.getParameters())
 #if($p.isInParameter())
-		i = parameters.setInParameter(i, ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+		i = parameters.setInParameter(i, "${p.getAlias()}", ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #else
-		parameters.set(i++, ${p.getJavaTypeDisplay()}, ${p.getName()});
+		parameters.set(i++, "${p.getAlias()}", ${p.getJavaTypeDisplay()}, ${p.getName()});
 #end
 #end
 #end

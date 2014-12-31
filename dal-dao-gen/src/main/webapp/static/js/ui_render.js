@@ -541,7 +541,12 @@
 
             w2ui['main_layout'].content('preview', w2ui['sub_layout']);
 
-            w2ui['sub_layout'].content('left', '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a id="refreshFiles" href="javascript:void(0);"><i class="fa fa-refresh"></i>刷新</a>&nbsp;&nbsp;<a id="downloadFiles" href="javascript:;"><i class="fa fa-download"></i>下载Zip包</a>&nbsp;&nbsp;<select id="viewCode"><option value="cs">C#</option><option value="java">Java</option></select></div>'+'<div id="jstree_files"></div>');
+            w2ui['sub_layout'].content('left', '<div style="background-color: #eee; padding: 5px 10px 5px 10px; border-bottom: 1px solid silver">' +
+                '<a id="refreshFiles" href="javascript:void(0);"><i class="fa fa-refresh"></i>刷新</a>&nbsp;&nbsp;' +
+                '<a id="downloadFiles" href="javascript:;"><i class="fa fa-download"></i>下载</a>&nbsp;&nbsp;' +
+                '<a id="eraseFiles" href="javascript:;"><i class="fa fa-eraser"></i>清除</a>&nbsp;&nbsp;' +
+                '<select id="viewCode"><option value="cs">C#</option><option value="java">Java</option></select></div>'+
+                '<div id="jstree_files"></div>');
 
             $('#jstree_files').on('select_node.jstree', function (e, obj) {
                 if(obj.node.original.type == "file"){
@@ -722,6 +727,32 @@
             });
         });
 
+        $(document.body).on('click', "#eraseFiles", function (event) {
+            var current_project = w2ui['grid'].current_project;
+            if (current_project == undefined) {
+                if (w2ui['sidebar'].nodes.length < 1 || w2ui['sidebar'].nodes[0].nodes.length < 1)
+                    return;
+                current_project = w2ui['sidebar'].nodes[0].nodes[0].id;
+            }
+            if(current_project==null || current_project==''){
+                return;
+            }
+
+            cblock($("body"));
+            $.post("/rest/project/eraseFiles", {
+                'prjId' : current_project
+            }, function (data) {
+                $("#refreshFiles").trigger('click');
+                if (data['code']!='OK'){
+                    alert(data['info']);
+                }
+                $("body").unblock();
+            }).fail(function(data){
+                alert("清除代码失败！");
+                $("body").unblock();
+            });
+
+        });
 
     });
 

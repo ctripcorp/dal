@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.daogen.resource;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,9 +22,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.jasig.cas.client.util.AssertionHolder;
 
+import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalGenerator;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
@@ -253,6 +257,21 @@ public class ProjectResource {
 			status.setInfo("你没有当前DAO的操作权限.");
 			return status;
 		}
+		return Status.OK;
+	}
+	
+	@POST
+	@Path("eraseFiles")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Status eraseFiles(@FormParam("prjId") int prjId) {
+		String path = Configuration.get("gen_code_path");
+		File dir = new File(String.format("%s/%s", path, prjId));
+		if (dir.exists())
+			try {
+				FileUtils.forceDelete(dir);
+			} catch (IOException e) {
+				log.warn(e.getMessage(), e);
+			}
 		return Status.OK;
 	}
 	

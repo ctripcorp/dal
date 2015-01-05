@@ -19,6 +19,9 @@ public class ${host.getPojoClassName()}DaoTest {
 			DalClientFactory.initClientFactory(); // load from class-path Dal.config
 			//DalClientFactory.initClientFactory("E:/DalMult.config"); // load from the specified Dal.config file path
 			
+			//如果要开启Dal Java Client Factory的warm up功能，可以在应用main函数中调用以下函数实现
+			//DalClientFactory.warmUpConnections();
+			
 			${host.getPojoClassName()}Dao dao = new ${host.getPojoClassName()}Dao();
 		
 			//Query by perimary key
@@ -116,7 +119,10 @@ public class ${host.getPojoClassName()}DaoTest {
 			System.exit(1);
 		} catch (Exception e) {
 			e.printStackTrace();
-		} 
+		} finally {
+			//Release All resource the Dal client used.
+			//DalClientFactory.shutdownFactory();
+		}
 	}
 
 }

@@ -280,6 +280,12 @@ public class DalGroupDbSetResource {
 			return status;
 		}
 		
+		if (!validatePermision(userNo, groupID, dbsetID)) {
+			Status status = Status.ERROR;
+			status.setInfo("你只能操作你们组创建的逻辑数据库.");
+			return status;
+		}
+		
 		int ret = -1;
 		DatabaseSetEntry dbsetEntry = new DatabaseSetEntry();
 		dbsetEntry.setName(name);

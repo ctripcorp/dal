@@ -82,7 +82,7 @@ public class FileResource {
 				element.setChildren(f.isDirectory());
 				if(element.isChildren()){
 					element.setType("folder");
-					element.setIcon("fa fa-folder-o");
+					element.setIcon("fa fa-folder-open-o");
 				}else{
 					element.setType("file");
 					element.setIcon("fa fa-file");

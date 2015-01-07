@@ -47,7 +47,7 @@ public class DalGroupProjectResource {
 		List<DalGroup> groups =  group_dao.getAllGroups();
 		for(DalGroup group:groups){
 			group.setText(group.getGroup_name());
-			group.setIcon("fa fa-folder-o");
+			group.setIcon("fa fa-folder-open-o");
 			group.setChildren(true);
 		}
 		return groups;

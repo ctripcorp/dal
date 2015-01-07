@@ -107,7 +107,7 @@ public class ProjectResource {
 		} else {
 			DalGroup group = new DalGroup();
 			group.setText("请先加入DAL Team");
-			group.setIcon("fa fa-folder-o");
+			group.setIcon("fa fa-folder-open-o");
 			group.setChildren(true);
 			groups.add(group);
 		}
@@ -131,7 +131,7 @@ public class ProjectResource {
 		for (Integer groupId : groupIds) {
 			DalGroup dalGroup = group_dao.getDalGroupById(groupId);
 			dalGroup.setText(dalGroup.getGroup_name());
-			dalGroup.setIcon("fa fa-folder-o");
+			dalGroup.setIcon("fa fa-folder-open-o");
 			dalGroup.setChildren(true);
 			groups.add(dalGroup);
 		}

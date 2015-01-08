@@ -131,4 +131,4 @@
 	 */
 	ctx.sprintf = sprintf;
 	ctx.vsprintf = vsprintf;
-})(typeof exports != "undefined" ? exports : window);
+})(window);

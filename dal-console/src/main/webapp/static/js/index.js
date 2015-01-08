@@ -15,7 +15,7 @@ jQuery(document).ready(function () {
             resizable: true,
             style: 'border-right: 1px solid silver;'
         }, {
-            type: 'main',
+            type: 'main'
         }, {
             type: 'preview',
             size: '50%',
@@ -43,14 +43,14 @@ jQuery(document).ready(function () {
                 icon: 'fa fa-archive',
                 onClick: function (event) {
                     loadDbConfig();
-                },
+                }
             }, {
                 id: 'node_conf',
                 text: 'DAS节点配置',
                 icon: 'fa fa-bullseye',
                 onClick: function (event) {
                     loadDasNodeConfig();
-                },
+                }
             }]
         }, {
             id: 'all_monitors',
@@ -64,13 +64,13 @@ jQuery(document).ready(function () {
                 icon: 'fa fa-comment',
                 onClick: function (event) {
                     loadDasNodeMonitor();
-                },
+                }
             }, {
                 id: 'sql_monitor',
                 text: 'SQL执行监控',
                 icon: 'fa fa-comments'
             }]
-        }],
+        }]
     }));
     //End tree side bar
 
@@ -223,7 +223,7 @@ var loadDbConfig = function () {
                     id: 'delMaster',
                     caption: '删除Master',
                     icon: 'fa fa-times'
-                }, ],
+                } ],
                 onClick: function (target, data) {
                     switch (target) {
                     case 'refreshMaster':
@@ -290,7 +290,7 @@ var loadDbConfig = function () {
                 field: 'connectStr',
                 caption: '连接字符串',
                 type: 'text'
-            }, ],
+            } ],
             columns: [{
                 field: 'logicName',
                 caption: '逻辑数据库名',
@@ -303,14 +303,14 @@ var loadDbConfig = function () {
                 caption: '驱动类',
                 size: '30%',
                 sortable: true,
-                resizable: true,
+                resizable: true
             }, {
                 field: 'connectStr',
                 caption: '连接字符串',
                 size: '50%',
                 sortable: true,
-                resizable: true,
-            }, ],
+                resizable: true
+            } ],
             onDblClick: function (event) {
                 w2ui['subDbConfig'].clear();
                 var masterName = w2ui['dbConfig'].get(event.recid).logicName;
@@ -363,7 +363,7 @@ var loadDbConfig = function () {
                     id: 'delSlave',
                     caption: '删除Slave',
                     icon: 'fa fa-times'
-                }, ],
+                } ],
                 onClick: function (target, data) {
                     switch (target) {
                     case 'addSlave':
@@ -419,7 +419,7 @@ var loadDbConfig = function () {
                 field: 'connectStr',
                 caption: '连接字符串',
                 type: 'text'
-            }, ],
+            } ],
             columns: [{
                 field: 'logicName',
                 caption: 'Slave名',
@@ -432,14 +432,14 @@ var loadDbConfig = function () {
                 caption: '驱动类',
                 size: '30%',
                 sortable: true,
-                resizable: true,
+                resizable: true
             }, {
                 field: 'connectStr',
                 caption: '连接字符串',
                 size: '50%',
                 sortable: true,
-                resizable: true,
-            }, ],
+                resizable: true
+            } ],
             records: []
         });
     }
@@ -492,7 +492,7 @@ var loadDasNodeConfig = function () {
                     id: 'delNode',
                     caption: '删除节点',
                     icon: 'fa fa-times'
-                }, ],
+                } ],
                 onClick: function (target, data) {
                     switch (target) {
                     case 'refreshNode':
@@ -553,7 +553,7 @@ var loadDasNodeConfig = function () {
                 field: 'workDir',
                 caption: '工作目录',
                 type: 'text'
-            }, ],
+            } ],
             columns: [{
                 field: 'ip',
                 caption: 'IP地址',
@@ -575,7 +575,7 @@ var loadDasNodeConfig = function () {
                 caption: '默认堆大小',
                 size: '25%',
                 sortable: true
-            }, ],
+            } ],
             records: []
         });
     }
@@ -609,7 +609,7 @@ var loadDasNodeConfig = function () {
                     id: 'delPort',
                     caption: '删除端口',
                     icon: 'fa fa-times'
-                }, ],
+                } ],
                 onClick: function (target, data) {
                     switch (target) {
                     case 'refreshPort':
@@ -695,7 +695,7 @@ var loadDasNodeMonitor = function () {
                     id: 'stopWorker',
                     caption: '停止Worker',
                     icon: 'fa fa-times'
-                }, ],
+                } ],
                 onClick: function (target, data) {
                     switch (target) {
                     case 'refreshMonitor':
@@ -781,7 +781,7 @@ var loadDasNodeMonitor = function () {
                 field: 'ip',
                 caption: 'IP地址',
                 type: 'text'
-            }, ],
+            } ],
             columns: [{
                 field: 'type',
                 caption: '类型',
@@ -809,7 +809,7 @@ var loadDasNodeMonitor = function () {
                 caption: 'JVM性能',
                 size: '30%',
                 sortable: true
-            }, ],
+            } ],
             records: []
         });
     }

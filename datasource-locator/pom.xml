@@ -14,7 +14,7 @@
   <url>http://maven.apache.org</url>
   <dependencies>
 	<dependency>
-      <groupId>com.ctrip.datasource</groupId>
+      <groupId>com.ctrip.platform</groupId>
       <artifactId>datasource-local</artifactId>
       <version>1.0.2</version>
 	  <scope>provided</scope>

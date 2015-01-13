@@ -16,7 +16,7 @@
       <version>1.1.2</version>
     </dependency>
     <dependency>
-      <groupId>com.ctrip.datasource</groupId>
+      <groupId>com.ctrip.platform</groupId>
       <artifactId>datasource-locator</artifactId>
       <version>1.0</version>
     </dependency>

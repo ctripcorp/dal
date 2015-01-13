@@ -17,9 +17,9 @@
 			<version>1.3.1</version>
 		</dependency>
 		<dependency>
-			<groupId>com.ctrip.datasource</groupId>
+			<groupId>com.ctrip.platform</groupId>
 			<artifactId>datasource-local</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ctrip.platform</groupId>

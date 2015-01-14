@@ -528,8 +528,8 @@ public class DbUtils {
 					host.setNullable(allColumnsRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
 					host.setValueType(Consts.CSharpValueTypes.contains(host.getType()));
 					// 仅获取String类型的长度
-					 if (host.getType().equalsIgnoreCase("string"))
-						 host.setLength(length);
+					if ("string".equalsIgnoreCase(host.getType()))
+						host.setLength(length);
 
 					// COLUMN_SIZE
 					allColumns.add(host);

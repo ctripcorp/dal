@@ -19,12 +19,8 @@ import com.ctrip.security.encryption.Crypto;
 public class AllInOneConfigParser {
 
 	private static final Log log = LogFactory.getLog(AllInOneConfigParser.class);
-	private static final String DB_CONFIG_FILE = "/opt/ctrip/appdata/allinone.config";
-	private static final String DB_CONFIG_FILE_DES = "/opt/ctrip/appdata/database.config";
-	private static final String DB_CONFIG_FILE_DES_Old = "/opt/ctrip/AppData/Database.Config";
-	private static final String WIN_DB_CONFIG_FILE = "/D:/website/ctripappdata/allinone.config";
-	private static final String WIN_DB_CONFIG_FILE_DES = "/D:/website/ctripappdata/database.config";
-	//private static final String DB_CONFIG_FILE_DEV = "/Database-dev.config";
+	private static final String LINUX_DB_CONFIG_FILE = "/opt/ctrip/AppData/Database.Config";
+	private static final String WIN_DB_CONFIG_FILE = "/D:/WebSites/CtripAppData/Database.Config";
 	private static final Pattern dbLinePattern = Pattern
 			.compile(" name=\"([^\"]+)\" connectionString=\"([^\"]+)\"");
 	private static final Pattern dburlPattern = Pattern
@@ -74,36 +70,29 @@ public class AllInOneConfigParser {
 	
 	private void initDBAllInOneConfig(){
 		try{
-			String fileName=DB_CONFIG_FILE;
+			String fileName = LINUX_DB_CONFIG_FILE;
 			try{
 				String osName=System.getProperty("os.name");
 				if(osName!=null && osName.startsWith("Windows")){
 					File conFile=new File(WIN_DB_CONFIG_FILE);
 					if(!conFile.exists()){
-						fileName=WIN_DB_CONFIG_FILE_DES;
-						isDES=true;
+						log.warn(WIN_DB_CONFIG_FILE + " is not exist.");
 					}else{
 						fileName=WIN_DB_CONFIG_FILE;
 					}
-				}else{
-					File conFile=new File(DB_CONFIG_FILE);
+				} else {
+					File conFile=new File(LINUX_DB_CONFIG_FILE);
 					if(!conFile.exists()){
-						conFile=new File(DB_CONFIG_FILE_DES_Old);
-						if(!conFile.exists()){
-							fileName=DB_CONFIG_FILE_DES;
-						}else{
-							fileName=DB_CONFIG_FILE_DES_Old;
-						}
-						isDES=true;
+						log.warn(LINUX_DB_CONFIG_FILE + " is not exist.");
 					}
 				}
 			}catch(SecurityException ex){
-				log.info(ex.getMessage());
+				log.warn(ex.getMessage());
 			}
 			parseDBAllInOneConfig(new FileReader(fileName));
 			log.info("Allinone: using db config:"+fileName+", isDES:"+isDES);
 		}catch(Exception e){
-			log.info("No database config file");
+			log.warn("No database config file can be found.");
 		}
 	}
 	

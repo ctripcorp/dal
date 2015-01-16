@@ -19,7 +19,7 @@ namespace ${host.getNameSpace()}.Test
 		[TestMethod]
         public void TestExec${host.getClassName()}()
         {
-			${host.getClassName()} ${WordUtils.uncapitalize(${host.getClassName()})};
+			//${host.getClassName()} ${WordUtils.uncapitalize(${host.getClassName()})};
             //int ret = DALFactory.${host.getClassName()}Dao.Exec${host.getClassName()}(${WordUtils.uncapitalize(${host.getClassName()})});
         }
         

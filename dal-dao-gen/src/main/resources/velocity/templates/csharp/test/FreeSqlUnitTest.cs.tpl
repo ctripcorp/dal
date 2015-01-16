@@ -25,12 +25,12 @@ namespace ${host.getNameSpace()}.Test
 		{
 #foreach ($p in $method.getParameters())
 #if ($method.paramTypeIsNotNull($p))
-		    ${p.getType()} ${WordUtils.uncapitalize($p.getAlias().replace("@",""))};
+		    //${p.getType()} ${WordUtils.uncapitalize($p.getAlias().replace("@",""))};
 #end
 #end
 #if ($method.isPaging())
-		    int pageNo;
-			int pageSize;
+		    //int pageNo;
+			//int pageSize;
 #end
 	        //int ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
 		}
@@ -45,12 +45,12 @@ namespace ${host.getNameSpace()}.Test
 		{
 #foreach ($p in $method.getParameters())
 #if ($method.paramTypeIsNotNull($p))
-		    ${p.getType()} ${WordUtils.uncapitalize($p.getAlias().replace("@",""))};
+		    //${p.getType()} ${WordUtils.uncapitalize($p.getAlias().replace("@",""))};
 #end
 #end
 #if ($method.isPaging())
-		    int pageNo;
-			int pageSize;
+		    //int pageNo;
+			//int pageSize;
 #end
 #if($method.isSampleType())
 	        //object ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
@@ -69,12 +69,12 @@ namespace ${host.getNameSpace()}.Test
 		{
 #foreach ($p in $method.getParameters())
 #if ($method.paramTypeIsNotNull($p))
-		    ${p.getType()} ${WordUtils.uncapitalize($p.getAlias().replace("@",""))};
+		    //${p.getType()} ${WordUtils.uncapitalize($p.getAlias().replace("@",""))};
 #end
 #end
 #if ($method.isPaging())
-		    int pageNo;
-			int pageSize;
+		    //int pageNo;
+			//int pageSize;
 #end
 	        //IList<${method.getPojoName()}> ret = ${WordUtils.uncapitalize($host.getClassName())}Dao.${method.getName()}(#foreach ($p in $method.getParameters())${WordUtils.uncapitalize($p.getAlias().replace("@",""))}#if($foreach.count != $method.getParameters().size()),#end#end#if($method.isPaging()),pageNo,pageSize#end);
 		}

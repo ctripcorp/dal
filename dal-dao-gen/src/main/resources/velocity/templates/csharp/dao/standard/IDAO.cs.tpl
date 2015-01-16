@@ -34,7 +34,7 @@ namespace ${host.getNameSpace()}.Interface.IDao
 #if($returnType.size()<1)
 	#set($success = $returnType.add("int"))
 #end
-		$returnType.get(0) Insert${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())})
+		$returnType.get(0) Insert${host.getClassName()}(${host.getClassName()} ${WordUtils.uncapitalize($host.getClassName())});
 #end   
 #end
 #if($host.getPrimaryKeys().size() == 0)

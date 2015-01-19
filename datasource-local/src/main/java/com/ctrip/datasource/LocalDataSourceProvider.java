@@ -23,7 +23,7 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
 	
 	//private final ConcurrentHashMap<String,DataSource> dataSourcePool = new ConcurrentHashMap<String,DataSource>();
 	
-	final Map<String,String[]> props = AllInOneConfigParser.newInstance().getDBAllInOneConfig();
+	final Map<String,String[]> props = DatabaseConfigParser.newInstance().getDBAllInOneConfig();
 	
 	
 	@SuppressWarnings("unchecked")
@@ -49,7 +49,6 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
 					ds=d;
 				}
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				log.error("Creating DataSource "+name+" error:"+e.getMessage(), e);
 			}
 		}
@@ -90,28 +89,7 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
 		
         ds.createPool();
         
-        log.info("Datasource "+name+" created, Driver:"+prop[3]);
-		
-		/*DruidDataSource ds = new DruidDataSource();
-		ds.setDriverClassName(prop[3]);
-        ds.setUrl(prop[0]);
-        ds.setUsername(prop[1]);
-        ds.setPassword(prop[2]);
-
-        ds.setInitialSize(1);
-        ds.setMinIdle(1);
-        ds.setMaxActive(20);
-        ds.setMaxWait(60000);
-
-        ds.setTimeBetweenEvictionRunsMillis(60000);
-        ds.setMinEvictableIdleTimeMillis(60000);
-        ds.setValidationQuery("SELECT 'x'");
-        ds.setTestWhileIdle(true);
-        ds.setTestOnBorrow(false);
-        ds.setTestOnReturn(false);
-        ds.init();
-        
-        log.info("druid datasource inited");*/
+        log.info("Datasource " + name + " created, Driver:"+prop[3]);
 		
 		return ds;
 

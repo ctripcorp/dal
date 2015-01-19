@@ -12,7 +12,7 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.jdbc.pool.DataSourceFactory;
 
-import com.ctrip.datasource.AllInOneConfigParser;
+import com.ctrip.datasource.DatabaseConfigParser;
 
 public class CtripDataSourceFactory extends DataSourceFactory{
 	
@@ -27,7 +27,7 @@ public class CtripDataSourceFactory extends DataSourceFactory{
             return null;
         }
         Reference ref = (Reference) obj;
-        Map<String,String[]> props = AllInOneConfigParser.newInstance().getDBAllInOneConfig();
+        Map<String,String[]> props = DatabaseConfigParser.newInstance().getDBAllInOneConfig();
         String dbKey=name.toString();
         if(dbKey==null){
         	log.error("No jndi name info in config file");

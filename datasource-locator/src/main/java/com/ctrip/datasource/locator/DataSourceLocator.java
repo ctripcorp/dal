@@ -1,7 +1,5 @@
 package com.ctrip.datasource.locator;
 
-//import java.util.concurrent.atomic.AtomicBoolean;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -10,37 +8,48 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import com.ctrip.framework.clogging.agent.metrics.IMetric;
+import com.ctrip.framework.clogging.agent.metrics.MetricManager;
+
 public class DataSourceLocator {
-	private static volatile DataSourceLocator datasourceLocator = new DataSourceLocator();
-	//private static AtomicBoolean exists = new AtomicBoolean(false);
-	private Context envContext=null;
-	private Map<String,DataSource> localDataSource=null;
 	
-	private DataSourceLocator(){
-			try {
-				Context initContext= new InitialContext();
-				envContext  = (Context)initContext.lookup("java:/comp/env");
-				
-				if(envContext==null){
-					initLocalDataSourceFactory();
-				}
-				
-			} catch (NamingException e) {
-				// TODO Auto-generated catch block
+	private static volatile DataSourceLocator datasourceLocator = new DataSourceLocator();
+	
+	private static IMetric metricLogger = MetricManager.getMetricer();
+	
+	private static final String DataSource_Type = "arch.dal.datasource.type";
+	
+	private Context envContext = null;
+	
+	private Map<String,DataSource> localDataSource = null;
+	
+	private DataSourceLocator() {
+		try {
+			Context initContext = new InitialContext();
+			envContext = (Context) initContext.lookup("java:/comp/env");
+
+			if (envContext == null) {
 				initLocalDataSourceFactory();
-			} 
+			} else {
+				try {
+					//Tag Name默认会加上appid和hostip，所以这个不需要额外加
+					metricLogger.log(DataSource_Type, 1L);
+				} catch(Throwable e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (NamingException e) {
+			initLocalDataSourceFactory();
+		}
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void initLocalDataSourceFactory(){
 		try {
 			Class dsfClass = Class.forName("com.ctrip.datasource.LocalDataSourceProvider");
-			//Thread.currentThread().getContextClassLoader()
-			//Class dsfClass = this.getClass().getClassLoader().loadClass("com.ctrip.datasource.LocalDataSourceProvider");
-			localDataSource=(Map<String,DataSource>)dsfClass.newInstance();
+			localDataSource = (Map<String,DataSource>)dsfClass.newInstance();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -48,11 +57,10 @@ public class DataSourceLocator {
 		if(datasourceLocator==null){
 			synchronized(DataSourceLocator.class){
 				if(datasourceLocator==null){
-					datasourceLocator=new DataSourceLocator();
+					datasourceLocator = new DataSourceLocator();
 				}
 			}
 		}
-		
 		return datasourceLocator;
 	}
 	
@@ -67,7 +75,6 @@ public class DataSourceLocator {
 			try {
 				return (DataSource)envContext.lookup("jdbc/"+name);
 			} catch (NamingException e) {
-				//e.printStackTrace();
 				throw e;
 			}
 		}
@@ -76,8 +83,6 @@ public class DataSourceLocator {
 			try {
 				return localDataSource.get(name);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
 				throw e;
 			} 
 		}

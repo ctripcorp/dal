@@ -11,6 +11,10 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
+import com.ctrip.datasource.configure.DatabaseConfigParser;
+import com.ctrip.datasource.configure.DatabasePoolConfigParser;
+import com.ctrip.datasource.configure.DatabasePoolConifg;
+
 public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource> extends ConcurrentHashMap<K,V>{
 
 	
@@ -23,7 +27,7 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
 	
 	//private final ConcurrentHashMap<String,DataSource> dataSourcePool = new ConcurrentHashMap<String,DataSource>();
 	
-	final Map<String,String[]> props = DatabaseConfigParser.newInstance().getDBAllInOneConfig();
+	private final Map<String,String[]> props = DatabaseConfigParser.newInstance().getDBAllInOneConfig();
 	
 	
 	@SuppressWarnings("unchecked")
@@ -59,6 +63,11 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
 	
 	private DataSource createDataSource(Object name) throws SQLException{
 		
+		DatabasePoolConifg poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg((String)name);
+		if (poolConfig == null) {
+			poolConfig = new DatabasePoolConifg();
+		}
+		
 		String[] prop = props.get(name);
 		
 		PoolProperties p = new PoolProperties();
@@ -68,20 +77,22 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
         p.setPassword(prop[2]);
         p.setDriverClassName(prop[3]);
         p.setJmxEnabled(true);
-        p.setTestWhileIdle(false);
-        p.setTestOnBorrow(true);
-        p.setValidationQuery("SELECT 1");
-        p.setTestOnReturn(false);
-        p.setValidationInterval(30000);
-        p.setTimeBetweenEvictionRunsMillis(30000);
-        p.setMaxActive(100);
-        p.setInitialSize(10);
-        p.setMaxWait(10000);
-        p.setRemoveAbandonedTimeout(60);
-        p.setMinEvictableIdleTimeMillis(30000);
-        p.setMinIdle(10);
-        p.setLogAbandoned(true);
-        p.setRemoveAbandoned(true);
+        
+        p.setTestWhileIdle(poolConfig.isTestWhileIdle());
+        p.setTestOnBorrow(poolConfig.isTestOnBorrow());
+        p.setValidationQuery(poolConfig.getValidationQuery());
+        p.setTestOnReturn(poolConfig.isTestOnReturn());
+        p.setValidationInterval(poolConfig.getValidationInterval());
+        p.setTimeBetweenEvictionRunsMillis(poolConfig.getTimeBetweenEvictionRunsMillis());
+        p.setMaxActive(poolConfig.getMaxActive());
+        p.setInitialSize(poolConfig.getInitialSize());
+        p.setMaxWait(poolConfig.getMaxWait());
+        p.setRemoveAbandonedTimeout(poolConfig.getRemoveAbandonedTimeout());
+        p.setMinEvictableIdleTimeMillis(poolConfig.getMinEvictableIdleTimeMillis());
+        p.setMinIdle(poolConfig.getMinIdle());
+        p.setLogAbandoned(poolConfig.isLogAbandoned());
+        p.setRemoveAbandoned(poolConfig.isRemoveAbandoned());
+        
         p.setJdbcInterceptors(
           "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"+
           "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
@@ -89,7 +100,7 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
 		
         ds.createPool();
         
-        log.info("Datasource " + name + " created, Driver:"+prop[3]);
+        log.info("Datasource[name=" + name + ", url=" + prop[0] + ", Driver=" + prop[3] + "] created.");
 		
 		return ds;
 

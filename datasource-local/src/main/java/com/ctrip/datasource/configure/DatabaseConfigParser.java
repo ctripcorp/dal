@@ -1,4 +1,4 @@
-package com.ctrip.datasource;
+package com.ctrip.datasource.configure;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,8 +40,9 @@ public class DatabaseConfigParser {
 			.compile("(port)=([^;]+)",Pattern.CASE_INSENSITIVE);
 	private static final String PORT_SPLIT = ",";
 	private static final String DBURL_SQLSERVER = "jdbc:sqlserver://%s:%s;DatabaseName=%s";
-	private static final String DBURL_MYSQL = "jdbc:mysql://%s:%s/%s?useUnicode=true&characterEncoding=%s"
-			+"&rewriteBatchedStatements=true&allowMultiQueries=true";
+	private static final String DBURL_MYSQL = "jdbc:mysql://%s:%s/%s?useUnicode=true&characterEncoding=%s";
+//	private static final String DBURL_MYSQL = "jdbc:mysql://%s:%s/%s?useUnicode=true&characterEncoding=%s"
+//			+"&rewriteBatchedStatements=true&allowMultiQueries=true";
 	private static final String DEFAULT_ENCODING = "UTF-8";
 	private static final String DEFAULT_PORT = "3306";
 	private static final String DRIVER_MYSQL ="com.mysql.jdbc.Driver";
@@ -114,7 +115,9 @@ public class DatabaseConfigParser {
 				}
 				String name = getAttribute(databaseEntry, DATABASE_ENTRY_NAME);
 				String connectionString = getAttribute(databaseEntry, DATABASE_ENTRY_CONNECTIONSTRING);
-				props.put(name, parseDBConnString(connectionString));
+				DatabasePoolConifg poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
+				String[] prop = parseDBConnString(connectionString, poolConfig);
+				props.put(name, prop);
 			}
 			in.close();
 		} catch (Throwable e) {
@@ -181,7 +184,7 @@ public class DatabaseConfigParser {
 	 * 
 	 * @return new String[]{url,username,passwd,driver}
 	 */
-	private String[] parseDBConnString(String connStr) {
+	private String[] parseDBConnString(String connStr, DatabasePoolConifg poolConfig) {
 		String[] dbInfos = new String[] { "", "", "","" };
 		if (connStr!=null && -1==connStr.indexOf(';')) { // connStr was encrypted
 			try {
@@ -205,6 +208,9 @@ public class DatabaseConfigParser {
 				dbhost = dburls[0];
 				if (dburls.length == 2) {// is sqlserver
 					dbInfos[0] = String.format(DBURL_SQLSERVER, dbhost, dburls[1], dbname);
+					if (poolConfig!=null && poolConfig.getOption()!=null && poolConfig.getOption().length()>0) {
+						dbInfos[0] = dbInfos[0] + ";" + poolConfig.getOption();
+					}
 					dbInfos[3] = DRIVER_SQLSERVRE;
 				} else {// should be mysql
 					matcher = dbcharsetPattern.matcher(connStr);
@@ -218,6 +224,9 @@ public class DatabaseConfigParser {
 						dbInfos[0] = String.format(DBURL_MYSQL, dbhost, matcher.group(2), dbname, charset);
 					} else {
 						dbInfos[0] = String.format(DBURL_MYSQL, dbhost, DEFAULT_PORT, dbname, charset);
+					}
+					if (poolConfig!=null && poolConfig.getOption()!=null && poolConfig.getOption().length()>0) {
+						dbInfos[0] = dbInfos[0] + "&" + poolConfig.getOption().replaceAll(";", "&");
 					}
 					dbInfos[3] = DRIVER_MYSQL;
 				}
@@ -239,5 +248,4 @@ public class DatabaseConfigParser {
 		}
 		return dbInfos;
 	}
-
 }

@@ -15,7 +15,8 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+              option=""/>
+     <!-- option="rewriteBatchedStatements=true;allowMultiQueries=true" -->
      <Resource name="dao_test_1"
               testWhileIdle="true"
               testOnBorrow="true"
@@ -31,7 +32,7 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+              option=""/>
      <Resource name="HotelPubDB"
               testWhileIdle="true"
               testOnBorrow="true"

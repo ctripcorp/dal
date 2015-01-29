@@ -77,11 +77,15 @@ public class DatabaseConfigParser {
 		if (location != null && location.length() > 0) {
 			if (DATABASE_CONFIG_LOCATION.equalsIgnoreCase(location)) {
 				URL url = super.getClass().getResource(CLASSPATH_CONFIG_FILE);
-				fileName = url.getFile();
-				try {
-					in = url.openStream();
-				} catch (IOException e) {
-					log.error(e.getMessage(), e);
+				if (url==null) {
+					log.error(CLASSPATH_CONFIG_FILE + " is not exist in the root of classpath.");
+				} else {
+					fileName = url.getFile();
+					try {
+						in = url.openStream();
+					} catch (IOException e) {
+						log.error(e.getMessage(), e);
+					}
 				}
 			} else {
 				File conFile = new File(location);

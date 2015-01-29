@@ -49,10 +49,10 @@ public class DataSourceLocatorTest {
 			Assert.assertEquals("dao_test", conn.getCatalog());
 			conn.close();
 			
-			DataSource ds2 = DataSourceLocator.newInstance().getDataSource("HotelPubDB");
+			DataSource ds2 = DataSourceLocator.newInstance().getDataSource("AbacusDB_SELECT_1");
 			Connection conn2 = ds2.getConnection();
 			Assert.assertNotNull(conn2);
-			Assert.assertEquals("HotelPubDB", conn2.getCatalog());
+			Assert.assertEquals("AbacusDB", conn2.getCatalog());
 			conn2.close();
 			
 		} catch (Exception e) {

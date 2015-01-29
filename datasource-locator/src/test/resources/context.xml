@@ -1,8 +1,11 @@
 <!-- 
-	location属于用于指定Database.Config文件的位置，取值Demo如下：
+	location属于用于指定Database.Config文件的位置，取值说明如下：
 	1、$classpath ： 直接从classpath根目录读取Database.Config文件
 	2、/D:/WebSites/CtripAppData/Database.Config ：从Windows系统指定目录读取
 	3、/opt/ctrip/AppData/Database.Config ：从Linux系统指定目录读取
+	4、若不配置location属性，默认会进行如下判断：
+		4.1、Windows系统从目录/D:/WebSites/CtripAppData/Database.Config读取
+		4.2、Linux系统从目录/opt/ctrip/AppData/Database.Config读取（路径区分大小写）
  -->
 <Context location="$classpath" reloadable="true">
 	<!-- 数据库连接池属性配置 -->

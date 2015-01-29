@@ -2,7 +2,10 @@ package com.ctrip.datasource.configure;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +27,7 @@ import com.ctrip.security.encryption.Crypto;
 public class DatabaseConfigParser {
 
 	private static final Log log = LogFactory.getLog(DatabaseConfigParser.class);
+	private static final String CLASSPATH_CONFIG_FILE = "/Database.Config";
 	private static final String LINUX_DB_CONFIG_FILE = "/opt/ctrip/AppData/Database.Config";
 	private static final String WIN_DB_CONFIG_FILE = "/D:/WebSites/CtripAppData/Database.Config";
 	private static final Pattern dburlPattern = Pattern
@@ -56,6 +60,8 @@ public class DatabaseConfigParser {
 	
 	private Map<String, String[]> props = new HashMap<String, String[]>();
 	
+	private static final String DATABASE_CONFIG_LOCATION = "$classpath";
+	
 	private DatabaseConfigParser() {
 		initDBAllInOneConfig();
 	}
@@ -65,42 +71,77 @@ public class DatabaseConfigParser {
 	}
 	
 	private void initDBAllInOneConfig() {
-		String osName = null;
-		try{
-			osName=System.getProperty("os.name");
-		} catch(SecurityException ex) {
-			log.error(ex.getMessage());
-			throw new RuntimeException(ex.getMessage(), ex);
-		}
+		InputStream in = null;
 		String fileName = null;
-		if (osName!=null && osName.startsWith("Windows")) {
-			File conFile = new File(WIN_DB_CONFIG_FILE);
-			if (!conFile.exists()) {
-				log.error(WIN_DB_CONFIG_FILE + " is not exist.");
-				throw new RuntimeException(WIN_DB_CONFIG_FILE + " is not exist.");
+		String location = DatabasePoolConfigParser.getInstance().getDatabaseConfigLocation();
+		if (location != null && location.length() > 0) {
+			if (DATABASE_CONFIG_LOCATION.equalsIgnoreCase(location)) {
+				URL url = super.getClass().getResource(CLASSPATH_CONFIG_FILE);
+				fileName = url.getFile();
+				try {
+					in = url.openStream();
+				} catch (IOException e) {
+					log.error(e.getMessage(), e);
+				}
 			} else {
-				fileName = WIN_DB_CONFIG_FILE;
+				File conFile = new File(location);
+				if (!conFile.exists()) {
+					log.error(location + " is not exist.");
+					throw new RuntimeException(location + " is not exist.");
+				} else {
+					fileName = location;
+					try {
+						in = new FileInputStream(conFile);
+					} catch (FileNotFoundException e) {
+						log.error(e.getMessage(), e);
+					}
+				}
 			}
 		} else {
-			File conFile = new File(LINUX_DB_CONFIG_FILE);
-			if(!conFile.exists()) {
-				log.error(LINUX_DB_CONFIG_FILE + " is not exist.");
-				throw new RuntimeException(LINUX_DB_CONFIG_FILE + " is not exist.");
+			String osName = null;
+			try{
+				osName=System.getProperty("os.name");
+			} catch(SecurityException ex) {
+				log.error(ex.getMessage());
+				throw new RuntimeException(ex.getMessage(), ex);
+			}
+			if (osName!=null && osName.startsWith("Windows")) {
+				File conFile = new File(WIN_DB_CONFIG_FILE);
+				if (!conFile.exists()) {
+					log.error(WIN_DB_CONFIG_FILE + " is not exist.");
+					throw new RuntimeException(WIN_DB_CONFIG_FILE + " is not exist.");
+				} else {
+					fileName = WIN_DB_CONFIG_FILE;
+					try {
+						in = new FileInputStream(conFile);
+					} catch (FileNotFoundException e) {
+						log.error(e.getMessage(), e);
+					}
+				}
 			} else {
-				fileName = LINUX_DB_CONFIG_FILE;
+				File conFile = new File(LINUX_DB_CONFIG_FILE);
+				if(!conFile.exists()) {
+					log.error(LINUX_DB_CONFIG_FILE + " is not exist.");
+					throw new RuntimeException(LINUX_DB_CONFIG_FILE + " is not exist.");
+				} else {
+					fileName = LINUX_DB_CONFIG_FILE;
+					try {
+						in = new FileInputStream(conFile);
+					} catch (FileNotFoundException e) {
+						log.error(e.getMessage(), e);
+					}
+				}
 			}
 		}
-		if (fileName != null) {
-			parseDBAllInOneConfig(fileName);
+		
+		if (in != null) {
+			parseDBAllInOneConfig(in);
 			log.info("Allinone: using db config: "+fileName);
 		}
 	}
 	
-	private void parseDBAllInOneConfig(String fileName) {
-		InputStream in = null;
+	private void parseDBAllInOneConfig(InputStream in) {
 		try {
-			File conFile = new File(fileName);
-			in = new FileInputStream(conFile);
 			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
 			Element root = doc.getDocumentElement();
 			List<Node> databaseEntryList = getChildNodes(root, DATABASE_ENTRY);

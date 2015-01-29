@@ -21,6 +21,8 @@ public class DatabasePoolConfigParser {
 	private static DatabasePoolConfigParser poolConfigParser = new DatabasePoolConfigParser();
 	private static final String DBPOOL_CONFIG = "context.xml";
 	
+	private static final String LOCATION = "location";
+	
 	private static final String RESOURCE_NODE = "Resource";
 	private static final String NAME = "name";
 	private static final String TESTWHILEIDLE = "testWhileIdle";
@@ -40,6 +42,8 @@ public class DatabasePoolConfigParser {
 	private static final String OPTION = "option";
 	
 	private Map<String, DatabasePoolConifg> poolConfigs = new HashMap<String, DatabasePoolConifg>();
+	
+	private String databaseConfigLocation = null;
 	
 	private DatabasePoolConfigParser() {
 		try {
@@ -61,6 +65,10 @@ public class DatabasePoolConfigParser {
 		return poolConfigs.get(name);
 	}
 		
+	public String getDatabaseConfigLocation() {
+		return databaseConfigLocation;
+	}
+
 	private void parse(InputStream in) throws Exception {
 		try {
 			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
@@ -79,6 +87,9 @@ public class DatabasePoolConfigParser {
 	
 	private void parseDocument(Document doc) throws Exception {
 		Element root = doc.getDocumentElement();
+		if (hasAttribute(root, LOCATION)) {
+			databaseConfigLocation = getAttribute(root, LOCATION);
+		}
 		List<Node> resourceList = getChildNodes(root, RESOURCE_NODE);
 		for (Node resource : resourceList) {
 			DatabasePoolConifg poolConfig = parseResource(resource);
@@ -162,11 +173,11 @@ public class DatabasePoolConfigParser {
 		return nodes;
 	}
 
-	private boolean hasAttribute(Node node, String attributeName){
+	private boolean hasAttribute(Node node, String attributeName) {
 		return node.getAttributes().getNamedItem(attributeName) != null;		
 	}
 	
-	private String getAttribute(Node node, String attributeName){
+	private String getAttribute(Node node, String attributeName) {
 		return node.getAttributes().getNamedItem(attributeName).getNodeValue();
 	}
 	

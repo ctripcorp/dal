@@ -18,14 +18,9 @@ import com.ctrip.datasource.configure.DatabasePoolConifg;
 public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource> extends ConcurrentHashMap<K,V>{
 
 	
-	/**
-	 * serialVersionUID
-	 */
 	private static final long serialVersionUID = -5752249323568785554L;
 
 	private static final Log log = LogFactory.getLog(LocalDataSourceProvider.class);
-	
-	//private final ConcurrentHashMap<String,DataSource> dataSourcePool = new ConcurrentHashMap<String,DataSource>();
 	
 	private final Map<String,String[]> props = DatabaseConfigParser.newInstance().getDBAllInOneConfig();
 	
@@ -41,7 +36,7 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public V get(Object name){
+	public V get(Object name) {
 		
 		V ds = super.get(name); 
 		

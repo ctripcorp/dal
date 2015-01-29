@@ -1,22 +1,12 @@
+<!-- 
+	location属于用于指定Database.Config文件的位置，取值Demo如下：
+	1、$classpath ： 直接从classpath根目录读取Database.Config文件
+	2、/D:/WebSites/CtripAppData/Database.Config ：从Windows系统指定目录读取
+	3、/opt/ctrip/AppData/Database.Config ：从Linux系统指定目录读取
+ -->
 <Context location="$classpath" reloadable="true">
 	<!-- 数据库连接池属性配置 -->
 	<Resource name="dao_test"
-              testWhileIdle="true"
-              testOnBorrow="true"
-              testOnReturn="false"
-              validationQuery="SELECT 1"
-              validationInterval="30000"
-              timeBetweenEvictionRunsMillis="30000"
-              maxActive="100"
-              minIdle="10"
-              maxWait="10000"
-              initialSize="10"
-              removeAbandonedTimeout="60"
-              removeAbandoned="true"
-              logAbandoned="true"
-              minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
-     <Resource name="dao_test_1"
               testWhileIdle="true"
               testOnBorrow="true"
               testOnReturn="true"
@@ -32,8 +22,24 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
-     <Resource name="HotelPubDB"
+	<Resource name="dao_test_select"
               testWhileIdle="true"
+              testOnBorrow="true"
+              testOnReturn="false"
+              validationQuery="SELECT 1"
+              validationInterval="30000"
+              timeBetweenEvictionRunsMillis="30000"
+              maxActive="100"
+              minIdle="10"
+              maxWait="1000"
+              initialSize="10"
+              removeAbandonedTimeout="60"
+              removeAbandoned="true"
+              logAbandoned="true"
+              minEvictableIdleTimeMillis="30000"
+              option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+    <Resource name="HotelPubDB"
+           	  testWhileIdle="true"
               testOnBorrow="true"
               testOnReturn="false"
               validationQuery="SELECT 1"

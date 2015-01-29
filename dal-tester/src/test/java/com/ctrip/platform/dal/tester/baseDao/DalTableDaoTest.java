@@ -360,12 +360,11 @@ public class DalTableDaoTest {
 			p.setAddress("insert test 6");
 			pList[2] = p;
 			
-			int[] counts = dao.batchInsert(hints, pList);
-			int count = 0;
-			for(int t: counts)
-				count+=t;
-			
-			assertEquals(3, count);
+			int[] results = dao.batchInsert(hints, pList);
+			assertEquals(3, results.length);
+			for(int i = 0; i< 3; i++){
+				assertTrue(results[i] > 0);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();

@@ -541,8 +541,10 @@ public class DalTabelDaoMySqlTest {
 			entities[i] = model;
 		}
 		int[] res = dao.batchInsert(new DalHints(), entities);
-		Assert.assertArrayEquals(new int[]{1,1,1}, res);
-		
+		Assert.assertTrue(res.length == 3);
+		for (int i = 0; i < 3; i++){
+			Assert.assertTrue(res[i] > 0);
+		}
 	}
 	
 	/**

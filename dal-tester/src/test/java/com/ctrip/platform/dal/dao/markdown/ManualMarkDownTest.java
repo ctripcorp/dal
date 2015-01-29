@@ -25,6 +25,7 @@ public class ManualMarkDownTest {
 	public void appMarkdownTest(){
 		ConfigBeanFactory.getMarkdownConfigBean().setAppMarkDown(true);
 		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
+		ConfigBeanFactory.getMarkdownConfigBean().setAppMarkDown(false);
 	}
 	
 	@Test

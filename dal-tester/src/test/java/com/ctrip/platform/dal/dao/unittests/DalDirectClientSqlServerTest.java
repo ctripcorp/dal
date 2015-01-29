@@ -596,7 +596,7 @@ public class DalDirectClientSqlServerTest {
 	 * @throws SQLException
 	 */
 	@Test
-	public void callTestWithParametersNoResultsParameter() throws SQLException {
+	public void callTestWithParametersAndNoResultsParameter() throws SQLException {
 		String callSql = "{call " + SP_I_NAME + "(?,?,?)}";
 		StatementParameters parameters = new StatementParameters();
 		parameters.set("quantity", Types.INTEGER, 10);
@@ -608,9 +608,9 @@ public class DalDirectClientSqlServerTest {
 		Assert.assertTrue(null != res);
 		Assert.assertEquals(0, res.size());
 		
-		List<ClientTestModel> models = this.queryModelsByIds(4);
-		Assert.assertEquals(1, models.size());
-		Assert.assertEquals("SZ INFO", models.get(0).getAddress());
+		List<ClientTestModel> models = this.queryModelsByIds();
+		Assert.assertEquals(4, models.size());
+		//Assert.assertEquals("SZ INFO", models.get(0).getAddress());
 	}
 	
 	/**

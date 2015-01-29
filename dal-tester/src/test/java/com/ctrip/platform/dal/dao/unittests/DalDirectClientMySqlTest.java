@@ -384,7 +384,9 @@ public class DalDirectClientMySqlTest {
 		DalHints hints = new DalHints();
 		int[] counts = client.batchUpdate(sql, parameterList, hints);
 		Assert.assertEquals(2, counts.length);
-		Assert.assertArrayEquals(new int[] { 1, 1 }, counts);
+		for (int i = 0; i < 2; i++){
+			Assert.assertTrue(counts[i] > 0);
+		}
 
 		List<ClientTestModel> models = this.queryModelsByIds();
 		Assert.assertEquals(5, models.size());

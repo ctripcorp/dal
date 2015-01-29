@@ -44,6 +44,7 @@ public class AsyncMarkupManagerTest {
 	@Test
 	public void asyncMarkupWithRollbackTest() throws InterruptedException{
 		final String dbName = "dao_test";
+		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
 		ConfigBeanFactory.getMarkdownConfigBean().markdown(dbName);
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
 		
@@ -56,12 +57,12 @@ public class AsyncMarkupManagerTest {
 						if(passed)
 						AsyncMarkupManager.callback(new ErrorContext(dbName,DatabaseCategory.MySql, 
 								1000, new MySQLTimeoutException()));
-						/*try {
+						try {
 							Thread.sleep(10);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
-						}*/
+						}
 						System.out.println(passed);
 					}
 					AysncMarkupPhase pro = AsyncMarkupManager.getStatus(dbName);

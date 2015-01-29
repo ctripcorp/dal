@@ -53,7 +53,9 @@ public class CtripDataSourceFactory extends DataSourceFactory{
         	return null; 
         }
         
-        return super.getObjectInstance(ref, name, nameCtx, environment);
+        Object ins = super.getObjectInstance(ref, name, nameCtx, environment); 
+        log.info("Datasource[name=" + dbKey + ", Driver=" + props.get(dbKey)[3] + "] created.");
+        return ins;
       
     }
 	

@@ -95,7 +95,7 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
 		
         ds.createPool();
         
-        log.info("Datasource[name=" + name + ", url=" + prop[0] + ", Driver=" + prop[3] + "] created.");
+        log.info("Datasource[name=" + name + ", Driver=" + prop[3] + "] created.");
 		
 		return ds;
 

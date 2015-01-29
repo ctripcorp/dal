@@ -33,7 +33,8 @@ public class DataSourceLocator {
 			} else {
 				try {
 					//Tag Name默认会加上appid和hostip，所以这个不需要额外加
-					metricLogger.log(DataSource_Type, 1L);
+					if (metricLogger != null)
+						metricLogger.log(DataSource_Type, 1L);
 				} catch(Throwable e) {
 					e.printStackTrace();
 				}

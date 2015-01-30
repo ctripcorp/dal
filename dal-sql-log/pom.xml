@@ -23,6 +23,11 @@
   		<artifactId>clogging-agent</artifactId>
   		<version>${central-logging-version}</version>
 	</dependency>
+	  <dependency>
+		  <groupId>com.dianping.cat</groupId>
+		  <artifactId>cat-client</artifactId>
+		  <version>1.2.3</version>
+	  </dependency>
   </dependencies>
   
   <version>1.3.0</version>

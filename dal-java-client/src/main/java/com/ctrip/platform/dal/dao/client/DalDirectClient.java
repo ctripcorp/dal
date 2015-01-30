@@ -337,7 +337,7 @@ public class DalDirectClient implements DalClient {
 	
 	private <T> T doInTransaction(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
-		return transManager.doInTransaction(action, hints);
+			return transManager.doInTransaction(action, hints);
 	}
 	
 	public Connection getConnection(DalHints hints, ConnectionAction<?> action) throws SQLException {

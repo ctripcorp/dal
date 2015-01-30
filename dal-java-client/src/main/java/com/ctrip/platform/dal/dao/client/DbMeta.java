@@ -72,4 +72,6 @@ public class DbMeta {
 	public String getShardId() {
 		return shardId;
 	}
+
+	public String getUrl(){return  url; }
 }

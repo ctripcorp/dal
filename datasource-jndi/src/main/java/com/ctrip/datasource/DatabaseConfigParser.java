@@ -40,8 +40,9 @@ public class DatabaseConfigParser {
 			.compile("(port)=([^;]+)",Pattern.CASE_INSENSITIVE);
 	private static final String PORT_SPLIT = ",";
 	private static final String DBURL_SQLSERVER = "jdbc:sqlserver://%s:%s;DatabaseName=%s";
-	private static final String DBURL_MYSQL = "jdbc:mysql://%s:%s/%s?useUnicode=true&characterEncoding=%s"
-			+"&rewriteBatchedStatements=true&allowMultiQueries=true";
+	private static final String DBURL_MYSQL = "jdbc:mysql://%s:%s/%s?useUnicode=true&characterEncoding=%s";
+//	private static final String DBURL_MYSQL = "jdbc:mysql://%s:%s/%s?useUnicode=true&characterEncoding=%s"
+//			+"&rewriteBatchedStatements=true&allowMultiQueries=true";
 	private static final String DEFAULT_ENCODING = "UTF-8";
 	private static final String DEFAULT_PORT = "3306";
 	private static final String DRIVER_MYSQL ="com.mysql.jdbc.Driver";

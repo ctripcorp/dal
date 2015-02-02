@@ -1,4 +1,4 @@
-<Context location="$classpath" reloadable="true">
+<Context location="$classpath">
 	<!-- 数据库连接池属性配置 -->
 	<Resource name="dao_test"
               testWhileIdle="true"

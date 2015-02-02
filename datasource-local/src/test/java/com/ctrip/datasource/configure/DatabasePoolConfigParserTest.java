@@ -57,5 +57,13 @@ public class DatabasePoolConfigParserTest {
 		Assert.assertEquals(10000, config.getMaxWait());
 		Assert.assertEquals("sendTimeAsDateTime=false", config.getOption());
 	}
+	
+	@Test
+	public void test4() {
+		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test_1");
+		Assert.assertEquals("dao_test_1", config.getName());
+		Assert.assertEquals(500, config.getMaxWait());
+		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true", config.getConnectionProperties());
+	}
 
 }

@@ -43,7 +43,7 @@ public class DataSourceLocatorTest {
 	@Test
 	public void testGetDataSource() {
 		try {
-			DataSource ds = DataSourceLocator.newInstance().getDataSource("dao_test");
+			DataSource ds = DataSourceLocator.newInstance().getDataSource("dao_test_1");
 			Connection conn = ds.getConnection();
 			Assert.assertNotNull(conn);
 			Assert.assertEquals("dao_test", conn.getCatalog());

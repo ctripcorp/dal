@@ -39,6 +39,7 @@ public class DatabasePoolConfigParser {
 	private static final String REMOVEABANDONED = "removeAbandoned";
 	private static final String LOGABANDONED = "logAbandoned";
 	private static final String MINEVICTABLEIDLETIMEMILLIS = "minEvictableIdleTimeMillis";
+	private static final String CONNECTIONPROPERTIES = "connectionProperties";
 	private static final String OPTION = "option";
 	
 	private Map<String, DatabasePoolConifg> poolConfigs = new HashMap<String, DatabasePoolConifg>();
@@ -155,6 +156,9 @@ public class DatabasePoolConfigParser {
 		if (hasAttribute(resource, MINEVICTABLEIDLETIMEMILLIS)) {
 			int minEvictableIdleTimeMillis = Integer.parseInt(getAttribute(resource, MINEVICTABLEIDLETIMEMILLIS));
 			poolConfig.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
+		}
+		if (hasAttribute(resource, CONNECTIONPROPERTIES)) {
+			poolConfig.setConnectionProperties(getAttribute(resource, CONNECTIONPROPERTIES));
 		}
 		if (hasAttribute(resource, OPTION)) {
 			poolConfig.setOption(getAttribute(resource, OPTION));

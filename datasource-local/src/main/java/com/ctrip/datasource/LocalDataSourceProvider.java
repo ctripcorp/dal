@@ -87,6 +87,7 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
         p.setMinIdle(poolConfig.getMinIdle());
         p.setLogAbandoned(poolConfig.isLogAbandoned());
         p.setRemoveAbandoned(poolConfig.isRemoveAbandoned());
+        p.setConnectionProperties(poolConfig.getConnectionProperties());
         
         p.setJdbcInterceptors(
           "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"+

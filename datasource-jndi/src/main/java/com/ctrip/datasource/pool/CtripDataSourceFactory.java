@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.naming.Context;
 import javax.naming.Name;
+import javax.naming.RefAddr;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
@@ -17,7 +18,8 @@ import com.ctrip.datasource.DatabaseConfigParser;
 public class CtripDataSourceFactory extends DataSourceFactory{
 	
 	private static final Log log = LogFactory.getLog(CtripDataSourceFactory.class);
-	    	
+
+	private static final String OPTION = "option";
 
 	@Override
     public Object getObjectInstance(Object obj, Name name, Context nameCtx,
@@ -36,14 +38,13 @@ public class CtripDataSourceFactory extends DataSourceFactory{
         if(dbKey.indexOf('/')>0){
         	dbKey=dbKey.substring(dbKey.lastIndexOf('/'),dbKey.length()-1);
         }
-        //String dbKey= ref.get(DB_KEY).getContent().toString();
-        if (props.containsKey(dbKey)){
+        if (props.containsKey(dbKey)) {
         	String[] prop=props.get(dbKey);
-        	ref.add(new StringRefAddr(PROP_URL, prop[0]));
+        	ref.add(new StringRefAddr(PROP_URL, wrapUrl(ref, prop)));
         	ref.add(new StringRefAddr(PROP_USERNAME, prop[1]));
         	ref.add(new StringRefAddr(PROP_PASSWORD, prop[2]));
         	ref.add(new StringRefAddr(PROP_DRIVERCLASSNAME, prop[3]));
-        }else{
+        } else {
         	java.util.Iterator<String> s =props.keySet().iterator();
         	StringBuilder sb = new StringBuilder();
         	while(s.hasNext())
@@ -59,6 +60,21 @@ public class CtripDataSourceFactory extends DataSourceFactory{
       
     }
 	
-
+	private String wrapUrl(Reference ref, String[] prop) {
+		RefAddr addr = ref.get(OPTION);
+		String url = prop[0];
+		if (addr == null) {
+			return url;
+		}
+		String option = (String)addr.getContent();
+		if (option!=null && option.length()>0) {
+			if ( DatabaseConfigParser.DRIVER_MYSQL.equals(prop[3]) ) {
+				url = url + "&" + option.replaceAll(";", "&");;
+			} else {
+				url = url + ";" + option;
+			}
+		}
+		return url;
+	}
 	
 }

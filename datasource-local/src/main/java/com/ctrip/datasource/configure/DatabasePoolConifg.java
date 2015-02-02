@@ -17,6 +17,7 @@ public class DatabasePoolConifg {
 	private boolean removeAbandoned = true;
 	private boolean logAbandoned = true;
 	private int minEvictableIdleTimeMillis = 30000;
+	private String connectionProperties = null;
 	private String option = null;
 	
 	public String getName() {
@@ -108,6 +109,12 @@ public class DatabasePoolConifg {
 	}
 	public void setMinEvictableIdleTimeMillis(int minEvictableIdleTimeMillis) {
 		this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
+	}
+	public String getConnectionProperties() {
+		return connectionProperties;
+	}
+	public void setConnectionProperties(String connectionProperties) {
+		this.connectionProperties = connectionProperties;
 	}
 	public String getOption() {
 		return option;

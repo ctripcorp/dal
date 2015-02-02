@@ -45,8 +45,8 @@ public class DatabaseConfigParser {
 //			+"&rewriteBatchedStatements=true&allowMultiQueries=true";
 	private static final String DEFAULT_ENCODING = "UTF-8";
 	private static final String DEFAULT_PORT = "3306";
-	private static final String DRIVER_MYSQL ="com.mysql.jdbc.Driver";
-	private static final String DRIVER_SQLSERVRE ="com.microsoft.sqlserver.jdbc.SQLServerDriver";
+	public static final String DRIVER_MYSQL ="com.mysql.jdbc.Driver";
+	public static final String DRIVER_SQLSERVRE ="com.microsoft.sqlserver.jdbc.SQLServerDriver";
 	
 	private static String DATABASE_ENTRY = "add";
 	private static String DATABASE_ENTRY_NAME = "name";

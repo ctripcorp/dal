@@ -56,7 +56,7 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
 		
 	}
 	
-	private DataSource createDataSource(Object name) throws SQLException{
+	private DataSource createDataSource(Object name) throws SQLException {
 		
 		DatabasePoolConifg poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg((String)name);
 		if (poolConfig == null) {
@@ -64,6 +64,10 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
 		}
 		
 		String[] prop = props.get(name);
+		
+		if (prop == null) {
+			throw new SQLException("the all-in-one file does not hava any configure infomation for " + name);
+		}
 		
 		PoolProperties p = new PoolProperties();
 		

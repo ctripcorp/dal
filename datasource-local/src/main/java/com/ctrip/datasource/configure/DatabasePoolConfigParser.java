@@ -1,6 +1,7 @@
 package com.ctrip.datasource.configure;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +53,13 @@ public class DatabasePoolConfigParser {
 			if (classLoader == null) {
 				classLoader = DatabasePoolConfigParser.class.getClassLoader();
 			}
-			parse(classLoader.getResource(DBPOOL_CONFIG).openStream());
+			URL url = classLoader.getResource(DBPOOL_CONFIG);
+			if (url == null) {
+				log.warn(DBPOOL_CONFIG + " is not exist in the root of classpath.");
+			} else {
+				parse(url.openStream());
+				log.info("datasource property will use file :" + url.getFile());
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}

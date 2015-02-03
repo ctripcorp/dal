@@ -1,5 +1,6 @@
 package com.ctrip.datasource.locator;
 
+import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +15,8 @@ import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 public class DataSourceLocator {
 	
 	private static volatile DataSourceLocator datasourceLocator = new DataSourceLocator();
+	
+	private static final String DBPOOL_CONFIG = "/context.xml";
 	
 	private static IMetric metricLogger = MetricManager.getMetricer();
 	
@@ -41,6 +44,10 @@ public class DataSourceLocator {
 			}
 		} catch (NamingException e) {
 			initLocalDataSourceFactory();
+		}
+		if (envContext != null && contextExist()) {
+			throw new RuntimeException("JNDI datasource and local datasource is conflicting, "
+					+ "you must choose only one to use. ");
 		}
 	}
 	
@@ -97,5 +104,18 @@ public class DataSourceLocator {
 			return localDataSource.keySet();
 		}
 		return null;
+	}
+	
+	private boolean contextExist() {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		if (classLoader == null) {
+			classLoader = DataSourceLocator.class.getClassLoader();
+		}
+		URL url = classLoader.getResource(DBPOOL_CONFIG);
+		if (url == null) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

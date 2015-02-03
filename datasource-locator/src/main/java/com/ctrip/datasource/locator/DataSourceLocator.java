@@ -26,7 +26,7 @@ public class DataSourceLocator {
 	private DataSourceLocator() {
 		try {
 			Context initContext = new InitialContext();
-			envContext = (Context) initContext.lookup("java:/comp/env");
+			envContext = (Context) initContext.lookup("java:/comp/env/jdbc/");
 
 			if (envContext == null) {
 				initLocalDataSourceFactory();
@@ -74,7 +74,7 @@ public class DataSourceLocator {
 	public DataSource getDataSource(String name) throws Exception{
 		if(envContext!=null){
 			try {
-				return (DataSource)envContext.lookup("jdbc/"+name);
+				return (DataSource)envContext.lookup(name);
 			} catch (NamingException e) {
 				throw e;
 			}

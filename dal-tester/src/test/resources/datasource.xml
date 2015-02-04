@@ -1,6 +1,6 @@
-<Context location="$classpath">
+<Datasources location="$classpath">
 	<!-- 数据库连接池属性配置 -->
-	<Resource name="dao_test"
+	<Datasource name="dao_test"
               testWhileIdle="true"
               testOnBorrow="true"
               testOnReturn="false"
@@ -17,7 +17,7 @@
               minEvictableIdleTimeMillis="30000"
               option=""/>
      <!-- option="rewriteBatchedStatements=true;allowMultiQueries=true" -->
-     <Resource name="dao_test_1"
+     <Datasource name="dao_test_1"
               testWhileIdle="true"
               testOnBorrow="true"
               testOnReturn="true"
@@ -31,9 +31,8 @@
               removeAbandonedTimeout="60"
               removeAbandoned="true"
               logAbandoned="true"
-              minEvictableIdleTimeMillis="30000"
-              option=""/>
-     <Resource name="HotelPubDB"
+              minEvictableIdleTimeMillis="30000"/>
+     <Datasource name="HotelPubDB"
               testWhileIdle="true"
               testOnBorrow="true"
               testOnReturn="false"
@@ -49,4 +48,4 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               option="sendTimeAsDateTime=false"/>
-</Context>
+</Datasources>

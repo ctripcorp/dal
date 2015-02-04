@@ -7,9 +7,9 @@
 		4.1、Windows系统从目录/D:/WebSites/CtripAppData/Database.Config读取
 		4.2、Linux系统从目录/opt/ctrip/AppData/Database.Config读取（路径区分大小写）
  -->
-<Context location="$classpath">
+<Datasources location="$classpath">
 	<!-- 数据库连接池属性配置 -->
-	<Resource name="dao_test"
+	<Datasource name="dao_test"
               testWhileIdle="true"
               testOnBorrow="true"
               testOnReturn="true"
@@ -25,7 +25,7 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
-	<Resource name="dao_test_select"
+	<Datasource name="dao_test_select"
               testWhileIdle="true"
               testOnBorrow="true"
               testOnReturn="false"
@@ -41,7 +41,7 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
-    <Resource name="HotelPubDB"
+    <Datasource name="HotelPubDB"
            	  testWhileIdle="true"
               testOnBorrow="true"
               testOnReturn="false"
@@ -57,7 +57,7 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               option="sendTimeAsDateTime=false"/>
-    <Resource name="dao_test_1"
+    <Datasource name="dao_test_1"
               testWhileIdle="true"
               testOnBorrow="true"
               testOnReturn="true"
@@ -73,4 +73,4 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true"/>
-</Context>
+</Datasources>

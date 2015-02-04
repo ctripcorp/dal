@@ -20,11 +20,11 @@ public class DatabasePoolConfigParser {
 	
 	private static final Log log = LogFactory.getLog(DatabasePoolConfigParser.class);
 	private static DatabasePoolConfigParser poolConfigParser = new DatabasePoolConfigParser();
-	private static final String DBPOOL_CONFIG = "context.xml";
+	private static final String DBPOOL_CONFIG = "datasource.xml";
 	
 	private static final String LOCATION = "location";
 	
-	private static final String RESOURCE_NODE = "Resource";
+	private static final String RESOURCE_NODE = "Datasource";
 	private static final String NAME = "name";
 	private static final String TESTWHILEIDLE = "testWhileIdle";
 	private static final String TESTONBORROW = "testOnBorrow";

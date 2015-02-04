@@ -4,7 +4,7 @@ public class DatabasePoolConifg {
 	
 	private String name = null;
 	private boolean testWhileIdle = true;
-	private boolean testOnBorrow = true;
+	private boolean testOnBorrow = false;
 	private boolean testOnReturn = false;
 	private String validationQuery = "SELECT 1";
 	private long validationInterval = 30000L;

@@ -1,5 +1,6 @@
 package com.ctrip.datasource.locator;
 
+import java.io.File;
 import java.net.URL;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +17,7 @@ public class DataSourceLocator {
 	
 	private static volatile DataSourceLocator datasourceLocator = new DataSourceLocator();
 	
-	private static final String DBPOOL_CONFIG = "/context.xml";
+	private static final String DBPOOL_CONFIG = "datasource.xml";
 	
 	private static IMetric metricLogger = MetricManager.getMetricer();
 	
@@ -115,7 +116,12 @@ public class DataSourceLocator {
 		if (url == null) {
 			return false;
 		} else {
-			return true;
+			File file = new File(url.getFile());
+			if (file.exists()) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 	}
 }

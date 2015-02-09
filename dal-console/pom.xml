@@ -5,18 +5,18 @@
 	<parent>
 		<groupId>com.ctrip.platform</groupId>
 		<artifactId>dal-all</artifactId>
-		<version>1.1.1</version>
+		<version>${dal-all-version}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>dal-console</artifactId>
-	<version>1.1.1</version>
+	<version>${dal-console-version}</version>
 	<packaging>war</packaging>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.ctrip.platform</groupId>
 			<artifactId>dal-server-common</artifactId>
-			<version>1.0.0</version>
+			<version>${dal-server-common-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.ws.rs</groupId>

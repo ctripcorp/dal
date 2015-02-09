@@ -3,9 +3,9 @@
   <parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-all</artifactId>
-    <version>1.0.0</version>
+    <version>${dal-all-version}</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>dal-name-srv</artifactId>
-  <version>1.0.0</version>
+  <version>${dal-name-srv-version}</version>
 </project>

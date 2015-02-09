@@ -6,12 +6,12 @@
 	<parent>
 		<artifactId>dal-all</artifactId>
 		<groupId>com.ctrip.platform</groupId>
-		<version>1.1.2</version>
+		<version>${dal-all-version}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>datasource-local</artifactId>
 	<name>datasource local</name>
-	<version>2.0.1</version>
+	<version>${datasource-local-version}</version>
 	<url>http://maven.apache.org</url>
 	<dependencies>
 		<dependency>

@@ -6,11 +6,11 @@
 	<parent>
 		<artifactId>dal-all</artifactId>
 		<groupId>com.ctrip.platform</groupId>
-		<version>1.1.2</version>
+		<version>${dal-all-version}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>datasource-jndi</artifactId>
-	<version>2.0.1</version>
+	<version>${datasource-jndi-version}</version>
 	<name>datasource jndi</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>

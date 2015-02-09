@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ctrip.platform</groupId>
 	<artifactId>dal-all</artifactId>
-	<version>1.1.2</version>
+	<version>${dal-all-version}</version>
 	<packaging>pom</packaging>
 	<modules>
 		<module>dal-java-client</module>
@@ -23,6 +23,22 @@
 		<module>datasource-locator</module>
 	</modules>
 	<properties>
+		<dal-all-version>1.1.3</dal-all-version>
+		<dal-java-client-version>1.3.3</dal-java-client-version>
+		<dal-das-version>1.1.2</dal-das-version>
+		<dal-console-version>1.1.2</dal-console-version>
+		<dal-ctrl-version>1.1.2</dal-ctrl-version>
+		<dal-dao-gen-version>1.3.3</dal-dao-gen-version>
+		<dal-name-srv-version>1.0.1</dal-name-srv-version>
+		<dal-common-version>1.1.3</dal-common-version>
+		<dal-tester-version>1.3.2</dal-tester-version>
+		<dal-server-common-version>1.1.2</dal-server-common-version>
+		<dal-java-ext-version>1.3.2</dal-java-ext-version>
+		<dal-sql-log-version>1.3.2-SNAPSHOT</dal-sql-log-version>
+		<datasource-jndi-version>2.0.2</datasource-jndi-version>
+		<datasource-local-version>2.0.2</datasource-local-version>
+		<datasource-locator-version>2.0.2</datasource-locator-version>
+		
 		<environment>local</environment>
 		<file_encoding>UTF-8</file_encoding>
 		<spring-version>4.0.0.RELEASE</spring-version>

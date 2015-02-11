@@ -20,13 +20,13 @@ public class DataSourceLocator {
 	
 	private static final Log log = LogFactory.getLog(DataSourceLocator.class);
 	
-	private static volatile DataSourceLocator datasourceLocator = new DataSourceLocator();
+	private static IMetric metricLogger = MetricManager.getMetricer();
 	
 	private static final String DBPOOL_CONFIG = "datasource.xml";
 	
-	private static IMetric metricLogger = MetricManager.getMetricer();
-	
 	private static final String DataSource_Type = "arch.dal.datasource.type";
+	
+	private static volatile DataSourceLocator datasourceLocator = new DataSourceLocator();
 	
 	private Context envContext = null;
 	

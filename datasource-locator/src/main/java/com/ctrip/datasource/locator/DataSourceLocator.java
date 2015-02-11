@@ -10,6 +10,9 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+
 import com.ctrip.framework.clogging.agent.metrics.IMetric;
 import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 
@@ -27,6 +30,8 @@ public class DataSourceLocator {
 	
 	private Map<String,DataSource> localDataSource = null;
 	
+	private static final Log log = LogFactory.getLog(DataSourceLocator.class);
+	
 	private DataSourceLocator() {
 		try {
 			Context initContext = new InitialContext();
@@ -35,13 +40,7 @@ public class DataSourceLocator {
 			if (envContext == null) {
 				initLocalDataSourceFactory();
 			} else {
-				try {
-					//Tag Name默认会加上appid和hostip，所以这个不需要额外加
-					if (metricLogger != null)
-						metricLogger.log(DataSource_Type, 1L);
-				} catch(Throwable e) {
-					e.printStackTrace();
-				}
+				log.error("The current datasource type is jndi.");
 			}
 		} catch (NamingException e) {
 			initLocalDataSourceFactory();
@@ -79,8 +78,15 @@ public class DataSourceLocator {
 	 * @return
 	 * @throws NamingException
 	 */
-	public DataSource getDataSource(String name) throws Exception{
+	public DataSource getDataSource(String name) throws Exception {
 		if(envContext!=null){
+			try {
+				//Tag Name默认会加上appid和hostip，所以这个不需要额外加
+				if (metricLogger != null)
+					metricLogger.log(DataSource_Type, 1L);
+			} catch(Throwable e) {
+				e.printStackTrace();
+			}
 			try {
 				return (DataSource)envContext.lookup(name);
 			} catch (NamingException e) {
@@ -89,6 +95,13 @@ public class DataSourceLocator {
 		}
 		
 		if(localDataSource!=null){
+			try {
+				//Tag Name默认会加上appid和hostip，所以这个不需要额外加
+				if (metricLogger != null)
+					metricLogger.log(DataSource_Type, 0L);
+			} catch(Throwable e) {
+				e.printStackTrace();
+			}
 			try {
 				return localDataSource.get(name);
 			} catch (Exception e) {

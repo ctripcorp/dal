@@ -18,6 +18,8 @@ import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 
 public class DataSourceLocator {
 	
+	private static final Log log = LogFactory.getLog(DataSourceLocator.class);
+	
 	private static volatile DataSourceLocator datasourceLocator = new DataSourceLocator();
 	
 	private static final String DBPOOL_CONFIG = "datasource.xml";
@@ -29,8 +31,6 @@ public class DataSourceLocator {
 	private Context envContext = null;
 	
 	private Map<String,DataSource> localDataSource = null;
-	
-	private static final Log log = LogFactory.getLog(DataSourceLocator.class);
 	
 	private DataSourceLocator() {
 		try {

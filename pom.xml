@@ -18,8 +18,6 @@
 		<module>dal-server-common</module>
 		<module>dal-java-ext</module>
 		<module>dal-sql-log</module>
-		<module>datasource-jndi</module>
-		<module>datasource-local</module>
 		<module>datasource-locator</module>
 	</modules>
 	<properties>

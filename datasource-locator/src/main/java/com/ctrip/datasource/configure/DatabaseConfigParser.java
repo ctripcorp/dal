@@ -96,7 +96,7 @@ public class DatabaseConfigParser {
 	
 	private void parseDBAllInOneConfig(URL url) {
 		if (url == null) {
-			String msg = CLASSPATH_CONFIG_FILE + " is not exist in the root of classpath.";
+			String msg = CLASSPATH_CONFIG_FILE + " is not exist in the root directory of classpath.";
 			log.error(msg);
 			throw new RuntimeException(msg);
 		}

@@ -55,7 +55,7 @@ public class DatabasePoolConfigParser {
 			}
 			URL url = classLoader.getResource(DBPOOL_CONFIG);
 			if (url == null) {
-				log.warn(DBPOOL_CONFIG + " is not exist in the root of classpath.");
+				log.warn(DBPOOL_CONFIG + " is not exist in the root directory of classpath.");
 			} else {
 				parse(url.openStream());
 				log.info("datasource property will use file :" + url.getFile());

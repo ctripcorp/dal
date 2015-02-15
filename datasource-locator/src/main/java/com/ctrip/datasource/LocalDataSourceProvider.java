@@ -15,39 +15,38 @@ import com.ctrip.datasource.configure.DatabaseConfigParser;
 import com.ctrip.datasource.configure.DatabasePoolConfigParser;
 import com.ctrip.datasource.configure.DatabasePoolConifg;
 
-public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource> extends ConcurrentHashMap<K,V>{
-
-	
-	private static final long serialVersionUID = -5752249323568785554L;
+public class LocalDataSourceProvider {
 
 	private static final Log log = LogFactory.getLog(LocalDataSourceProvider.class);
 	
 	private final Map<String,String[]> props = DatabaseConfigParser.newInstance().getDBAllInOneConfig();
 	
+	private static final ConcurrentHashMap<String,DataSource> cache = new ConcurrentHashMap<String,DataSource>();
 	
-	@SuppressWarnings("unchecked")
-	public Set<K> keySet(){
-		return (Set<K>) props.keySet();
+	public Set<String> keySet(){
+		return props.keySet();
 	}
 		
-	/**
-	 * override
-	 * @param data source name
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public V get(Object name) {
+	public DataSource get(String name) {
 		
-		V ds = super.get(name); 
+		DataSource ds = cache.get(name); 
 		
-		if(ds==null){
+		if (ds != null) {
+			return ds;
+		}
+		
+		synchronized (LocalDataSourceProvider.class) {
+			ds = cache.get(name); 
+			if (ds != null) {
+				return ds;
+			}
 			try {
-				ds = (V)createDataSource(name);
-				V d = this.putIfAbsent((K)name, ds);
-				if(d!=null){
-					ds=d;
+				ds = createDataSource(name);
+				DataSource d = cache.putIfAbsent(name, ds);
+				if(d != null){
+					ds = d;
 				}
-			} catch (SQLException e) {
+			} catch (Throwable e) {
 				log.error("Creating DataSource "+name+" error:"+e.getMessage(), e);
 			}
 		}
@@ -56,9 +55,9 @@ public class LocalDataSourceProvider<K extends CharSequence,V extends DataSource
 		
 	}
 	
-	private DataSource createDataSource(Object name) throws SQLException {
+	private DataSource createDataSource(String name) throws SQLException {
 		
-		DatabasePoolConifg poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg((String)name);
+		DatabasePoolConifg poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
 		if (poolConfig == null) {
 			poolConfig = new DatabasePoolConifg();
 		}

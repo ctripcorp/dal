@@ -2,7 +2,6 @@ package com.ctrip.datasource.locator;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Map;
 import java.util.Set;
 
 import javax.naming.Context;
@@ -13,6 +12,7 @@ import javax.sql.DataSource;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
+import com.ctrip.datasource.LocalDataSourceProvider;
 import com.ctrip.framework.clogging.agent.metrics.IMetric;
 import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 
@@ -30,7 +30,7 @@ public class DataSourceLocator {
 	
 	private Context envContext = null;
 	
-	private Map<String,DataSource> localDataSource = null;
+	private LocalDataSourceProvider localDataSource = null;
 	
 	private DataSourceLocator() {
 		try {
@@ -38,26 +38,16 @@ public class DataSourceLocator {
 			envContext = (Context) initContext.lookup("java:/comp/env/jdbc/");
 
 			if (envContext == null) {
-				initLocalDataSourceFactory();
+				localDataSource = new LocalDataSourceProvider();
 			} else {
 				log.error("The current datasource type is jndi.");
 			}
 		} catch (NamingException e) {
-			initLocalDataSourceFactory();
+			localDataSource = new LocalDataSourceProvider();
 		}
 		if (envContext != null && contextExist()) {
 			throw new RuntimeException("JNDI datasource and local datasource is conflicting, "
 					+ "you must choose only one to use. ");
-		}
-	}
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void initLocalDataSourceFactory(){
-		try {
-			Class dsfClass = Class.forName("com.ctrip.datasource.LocalDataSourceProvider");
-			localDataSource = (Map<String,DataSource>)dsfClass.newInstance();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
 		}
 	}
 	
@@ -75,7 +65,7 @@ public class DataSourceLocator {
 	/**
 	 * Get DataSource by real db source name
 	 * @param name
-	 * @return
+	 * @return DataSource
 	 * @throws NamingException
 	 */
 	public DataSource getDataSource(String name) throws Exception {

@@ -8,10 +8,10 @@ public class DatabasePoolConifg {
 	private boolean testOnReturn = false;
 	private String validationQuery = "SELECT 1";
 	private long validationInterval = 30000L;
-	private int timeBetweenEvictionRunsMillis = 30000;
+	private int timeBetweenEvictionRunsMillis = 5000;
 	private int maxActive = 100;
 	private int minIdle = 10;
-	private int maxWait = 10000;
+	private int maxWait = 30000;
 	private int initialSize = 10;
 	private int removeAbandonedTimeout = 60;
 	private boolean removeAbandoned = true;

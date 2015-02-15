@@ -6,14 +6,14 @@ public class Resource {
 	private String type = "javax.sql.DataSource";
 	private String factory = "com.ctrip.datasource.pool.CtripDataSourceFactory";
 	private boolean testWhileIdle = true;
-	private boolean testOnBorrow = true;
+	private boolean testOnBorrow = false;
 	private boolean testOnReturn = false;
 	private String validationQuery = "SELECT 1";
 	private int validationInterval = 30000;
-	private int timeBetweenEvictionRunsMillis = 30000;
+	private int timeBetweenEvictionRunsMillis = 5000;
 	private int maxActive = 100;
 	private int minIdle = 10;
-	private int maxWait = 10000;
+	private int maxWait = 30000;
 	private int initialSize = 10;
 	private int removeAbandonedTimeout = 60;
 	private boolean removeAbandoned = true;
@@ -24,7 +24,8 @@ public class Resource {
 			+ "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer";
 	
 	public Resource(String name){
-		this.name = String.format("jdbc/%s", name);
+//		this.name = String.format("jdbc/%s", name);
+		this.name = name;
 	}
 
 	public String getName() {

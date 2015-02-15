@@ -1,6 +1,6 @@
 <Context docBase="$host.getDocBase()" path="$host.getPath()" crossContext="true" reloadable="true">
 #foreach($resource in $host.getResources())
-	<Resource name="${resource.getName()}{$DBDataCenter}"
+	<Resource name="jdbc/${resource.getName()}{$DBDataCenter}"
                    auth="$resource.getAuth()"
                    type="$resource.getType()"
                    factory="$resource.getFactory()"

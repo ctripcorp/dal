@@ -73,9 +73,7 @@ public class DatabaseConfigParser {
 		if (location != null && location.length() > 0) {
 			if (DATABASE_CONFIG_LOCATION.equalsIgnoreCase(location)) {
 				URL url = super.getClass().getResource(CLASSPATH_CONFIG_FILE);
-				parseDBAllInOneConfig(url);
-			} else {
-				parseDBAllInOneConfig(location);
+				location = url == null ? null: url.getFile();
 			}
 		} else {
 			String osName = null;
@@ -85,48 +83,21 @@ public class DatabaseConfigParser {
 				log.error(ex.getMessage());
 				throw new RuntimeException(ex.getMessage(), ex);
 			}
-			if (osName!=null && osName.startsWith("Windows")) {
-				parseDBAllInOneConfig(WIN_DB_CONFIG_FILE);
-			} else {
-				parseDBAllInOneConfig(LINUX_DB_CONFIG_FILE);
-			}
+			location = osName!=null && osName.startsWith("Windows") ? WIN_DB_CONFIG_FILE : LINUX_DB_CONFIG_FILE;
 		}
 		
+		parseDBAllInOneConfig(location);
 	}
 	
-	private void parseDBAllInOneConfig(URL url) {
-		if (url == null) {
-			String msg = CLASSPATH_CONFIG_FILE + " is not exist in the root directory of classpath.";
-			log.error(msg);
-			throw new RuntimeException(msg);
-		}
-		try {
-			parseDBAllInOneConfig(url.openStream(), url.getFile());
-		} catch (IOException e) {
-			log.error(e.getMessage(), e);
-			throw new RuntimeException(e.getMessage(), e);
-		}
-	}
-	
-	private void parseDBAllInOneConfig(String path) {
-		File conFile = new File(path);
-		if (!conFile.exists()) {
-			String msg = path + " is not exist.";
-			log.error(msg);
-			throw new RuntimeException(msg);
-		} else {
-			try {
-				parseDBAllInOneConfig(new FileInputStream(conFile), path);
-			} catch (FileNotFoundException e) {
-				log.error(e.getMessage(), e);
-				throw new RuntimeException(e.getMessage(), e);
-			}
-		}
-	}
-	
-	private void parseDBAllInOneConfig(InputStream in, String absolutePath) {
+	private void parseDBAllInOneConfig(String absolutePath) {
+		if (absolutePath == null) 
+			throw new RuntimeException("Can not find the Database.Config file.");
+
+		FileInputStream in = null;
 		try {
 			log.info("Allinone: using db config: " + absolutePath);
+			File conFile = new File(absolutePath);
+			in = new FileInputStream(conFile);
 			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
 			Element root = doc.getDocumentElement();
 			List<Node> databaseEntryList = getChildNodes(root, DATABASE_ENTRY);
@@ -147,7 +118,7 @@ public class DatabaseConfigParser {
 			}
 			in.close();
 		} catch (Throwable e) {
-			String msg = "Read db config file error, msg: "+e.getMessage();
+			String msg = String.format("Read %s file error, msg: %s", absolutePath, e.getMessage());
 			log.error(msg, e);
 			throw new RuntimeException(msg, e);
 		} finally {

@@ -10,24 +10,23 @@ public class DatabasePoolConifg {
 	
 	public DatabasePoolConifg() {
 		poolProperties = new PoolProperties();
-		poolProperties.setTestWhileIdle(true);
-		poolProperties.setTestOnBorrow(false);
-		poolProperties.setTestOnReturn(false);
-		poolProperties.setValidationQuery("SELECT 1");
-		poolProperties.setValidationInterval(30000);
-		poolProperties.setTimeBetweenEvictionRunsMillis(30000);
-		poolProperties.setMaxActive(100);
-		poolProperties.setMinIdle(10);
-		poolProperties.setMaxWait(10000);
-		poolProperties.setInitialSize(10);
-		poolProperties.setRemoveAbandonedTimeout(60);
-		poolProperties.setRemoveAbandoned(true);
-		poolProperties.setLogAbandoned(true);
-		poolProperties.setMinEvictableIdleTimeMillis(30000);
-		poolProperties.setConnectionProperties(null);
-		poolProperties.setJmxEnabled(true);
-		poolProperties.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"+
-		          "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
+		poolProperties.setTestWhileIdle(DatabasePoolConfigParser.DEFUALT_TESTWHILEIDLE);
+		poolProperties.setTestOnBorrow(DatabasePoolConfigParser.DEFUALT_TESTONBORROW);
+		poolProperties.setTestOnReturn(DatabasePoolConfigParser.DEFUALT_TESTONRETURN);
+		poolProperties.setValidationQuery(DatabasePoolConfigParser.DEFUALT_VALIDATIONQUERY);
+		poolProperties.setValidationInterval(DatabasePoolConfigParser.DEFUALT_VALIDATIONINTERVAL);
+		poolProperties.setTimeBetweenEvictionRunsMillis(DatabasePoolConfigParser.DEFUALT_TIMEBETWEENEVICTIONRUNSMILLIS);
+		poolProperties.setMaxActive(DatabasePoolConfigParser.DEFUALT_MAXACTIVE);
+		poolProperties.setMinIdle(DatabasePoolConfigParser.DEFUALT_MINIDLE);
+		poolProperties.setMaxWait(DatabasePoolConfigParser.DEFUALT_MAXWAIT);
+		poolProperties.setInitialSize(DatabasePoolConfigParser.DEFUALT_INITIALSIZE);
+		poolProperties.setRemoveAbandonedTimeout(DatabasePoolConfigParser.DEFUALT_REMOVEABANDONEDTIMEOUT);
+		poolProperties.setRemoveAbandoned(DatabasePoolConfigParser.DEFUALT_REMOVEABANDONED);
+		poolProperties.setLogAbandoned(DatabasePoolConfigParser.DEFUALT_LOGABANDONED);
+		poolProperties.setMinEvictableIdleTimeMillis(DatabasePoolConfigParser.DEFUALT_MINEVICTABLEIDLETIMEMILLIS);
+		poolProperties.setConnectionProperties(DatabasePoolConfigParser.DEFUALT_CONNECTIONPROPERTIES);
+		poolProperties.setJmxEnabled(DatabasePoolConfigParser.DEFUALT_JMXENABLED);
+		poolProperties.setJdbcInterceptors(DatabasePoolConfigParser.DEFUALT_JDBCINTERCEPTORS);
 	}
 	
 	public String getName() {

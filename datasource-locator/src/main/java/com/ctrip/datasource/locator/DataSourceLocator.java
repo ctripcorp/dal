@@ -26,11 +26,11 @@ public class DataSourceLocator {
 	
 	private static final String DBPOOL_CONFIG = "datasource.xml";
 	
-	private static final String DataSource_Type = "arch.dal.datasource.type";
+	private static final String DATASOURCE_TYPE = "arch.dal.datasource.type";
 	
-	private static final Map<String, String> jndiTag = new HashMap<String, String>();
+	private static final Map<String, String> TAG_JNDI = new HashMap<String, String>();
 	
-	private static final Map<String, String> localTag = new HashMap<String, String>();
+	private static final Map<String, String> TAG_LOCAL = new HashMap<String, String>();
 	
 	private static volatile DataSourceLocator datasourceLocator = new DataSourceLocator();
 	
@@ -39,8 +39,8 @@ public class DataSourceLocator {
 	private LocalDataSourceProvider localDataSource = null;
 	
 	static {
-		jndiTag.put("source", "jndi");
-		localTag.put("source", "local");
+		TAG_JNDI.put("source", "jndi");
+		TAG_LOCAL.put("source", "local");
 	}
 	
 	private DataSourceLocator() {
@@ -82,21 +82,13 @@ public class DataSourceLocator {
 	public DataSource getDataSource(String name) throws Exception {
 		if(envContext!=null){
 			//Tag Name默认会加上appid和hostip，所以这个不需要额外加
-			metricLogger.log(DataSource_Type, 1L, jndiTag);
-			try {
-				return (DataSource)envContext.lookup(name);
-			} catch (NamingException e) {
-				throw e;
-			}
+			metricLogger.log(DATASOURCE_TYPE, 1L, TAG_JNDI);
+			return (DataSource)envContext.lookup(name);
 		}
 		
 		if(localDataSource!=null){
-			metricLogger.log(DataSource_Type, 1L, localTag);
-			try {
-				return localDataSource.get(name);
-			} catch (Exception e) {
-				throw e;
-			} 
+			metricLogger.log(DATASOURCE_TYPE, 1L, TAG_LOCAL);
+			return localDataSource.get(name);
 		}
 		
 		return null;

@@ -2,6 +2,8 @@ package com.ctrip.datasource.locator;
 
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.naming.Context;
@@ -26,11 +28,20 @@ public class DataSourceLocator {
 	
 	private static final String DataSource_Type = "arch.dal.datasource.type";
 	
+	private static final Map<String, String> jndiTag = new HashMap<String, String>();
+	
+	private static final Map<String, String> localTag = new HashMap<String, String>();
+	
 	private static volatile DataSourceLocator datasourceLocator = new DataSourceLocator();
 	
 	private Context envContext = null;
 	
 	private LocalDataSourceProvider localDataSource = null;
+	
+	static {
+		jndiTag.put("source", "jndi");
+		localTag.put("source", "local");
+	}
 	
 	private DataSourceLocator() {
 		try {
@@ -46,8 +57,8 @@ public class DataSourceLocator {
 			localDataSource = new LocalDataSourceProvider();
 		}
 		if (envContext != null && contextExist()) {
-			throw new RuntimeException("JNDI datasource and local datasource is conflicting, "
-					+ "you must choose only one to use. ");
+			throw new RuntimeException("JNDI datasource and local datasource are both exist, "
+					+ "you need to remove JNDI settings from server.xml and use local instead.");
 		}
 	}
 	
@@ -70,12 +81,8 @@ public class DataSourceLocator {
 	 */
 	public DataSource getDataSource(String name) throws Exception {
 		if(envContext!=null){
-			try {
-				//Tag Name默认会加上appid和hostip，所以这个不需要额外加
-				metricLogger.log(DataSource_Type, -1L);
-			} catch(Throwable e) {
-				e.printStackTrace();
-			}
+			//Tag Name默认会加上appid和hostip，所以这个不需要额外加
+			metricLogger.log(DataSource_Type, 1L, jndiTag);
 			try {
 				return (DataSource)envContext.lookup(name);
 			} catch (NamingException e) {
@@ -84,12 +91,7 @@ public class DataSourceLocator {
 		}
 		
 		if(localDataSource!=null){
-			try {
-				//Tag Name默认会加上appid和hostip，所以这个不需要额外加
-				metricLogger.log(DataSource_Type, 1L);
-			} catch(Throwable e) {
-				e.printStackTrace();
-			}
+			metricLogger.log(DataSource_Type, 1L, localTag);
 			try {
 				return localDataSource.get(name);
 			} catch (Exception e) {

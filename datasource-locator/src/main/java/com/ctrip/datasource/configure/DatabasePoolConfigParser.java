@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -108,64 +109,65 @@ public class DatabasePoolConfigParser {
 	private DatabasePoolConifg parseResource(Node resource) {
 		DatabasePoolConifg poolConfig = new DatabasePoolConifg();
 		poolConfig.setName(getAttribute(resource, NAME));
+		PoolProperties prop = poolConfig.getPoolProperties();
 		if (hasAttribute(resource, TESTWHILEIDLE)) {
 			boolean testWhileIdle = Boolean.parseBoolean(getAttribute(resource, TESTWHILEIDLE));
-			poolConfig.setTestWhileIdle(testWhileIdle);
+			prop.setTestWhileIdle(testWhileIdle);
 		}
 		if (hasAttribute(resource, TESTONBORROW)) {
 			boolean testOnBorrow = Boolean.parseBoolean(getAttribute(resource, TESTONBORROW));
-			poolConfig.setTestOnBorrow(testOnBorrow);
+			prop.setTestOnBorrow(testOnBorrow);
 		}
 		if (hasAttribute(resource, TESTONRETURN)) {
 			boolean testOnReturn = Boolean.parseBoolean(getAttribute(resource, TESTONRETURN));
-			poolConfig.setTestOnReturn(testOnReturn);
+			prop.setTestOnReturn(testOnReturn);
 		}
 		if (hasAttribute(resource, VALIDATIONQUERY)) {
 			String validationQuery = getAttribute(resource, VALIDATIONQUERY);
-			poolConfig.setValidationQuery(validationQuery);
+			prop.setValidationQuery(validationQuery);
 		}
 		if (hasAttribute(resource, VALIDATIONINTERVAL)) {
 			long validationInterval = Long.parseLong(getAttribute(resource, VALIDATIONINTERVAL));
-			poolConfig.setValidationInterval(validationInterval);
+			prop.setValidationInterval(validationInterval);
 		}
 		if (hasAttribute(resource, TIMEBETWEENEVICTIONRUNSMILLIS)) {
 			int timeBetweenEvictionRunsMillis = Integer.parseInt(getAttribute(resource, TIMEBETWEENEVICTIONRUNSMILLIS));
-			poolConfig.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
+			prop.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
 		}
 		if (hasAttribute(resource, MAXACTIVE)) {
 			int maxActive = Integer.parseInt(getAttribute(resource, MAXACTIVE));
-			poolConfig.setMaxActive(maxActive);
+			prop.setMaxActive(maxActive);
 		}
 		if (hasAttribute(resource, MINIDLE)) {
 			int minIdle = Integer.parseInt(getAttribute(resource, MINIDLE));
-			poolConfig.setMinIdle(minIdle);
+			prop.setMinIdle(minIdle);
 		}
 		if (hasAttribute(resource, MAXWAIT)) {
 			int maxWait = Integer.parseInt(getAttribute(resource, MAXWAIT));
-			poolConfig.setMaxWait(maxWait);
+			prop.setMaxWait(maxWait);
 		}
 		if (hasAttribute(resource, INITIALSIZE)) {
 			int initialSize = Integer.parseInt(getAttribute(resource, INITIALSIZE));
-			poolConfig.setInitialSize(initialSize);
+			prop.setInitialSize(initialSize);
 		}
 		if (hasAttribute(resource, REMOVEABANDONEDTIMEOUT)) {
 			int removeAbandonedTimeout = Integer.parseInt(getAttribute(resource, REMOVEABANDONEDTIMEOUT));
-			poolConfig.setRemoveAbandonedTimeout(removeAbandonedTimeout);
+			prop.setRemoveAbandonedTimeout(removeAbandonedTimeout);
 		}
 		if (hasAttribute(resource, REMOVEABANDONED)) {
 			boolean removeAbandoned = Boolean.parseBoolean(getAttribute(resource, REMOVEABANDONED));
-			poolConfig.setRemoveAbandoned(removeAbandoned);
+			prop.setRemoveAbandoned(removeAbandoned);
 		}
 		if (hasAttribute(resource, LOGABANDONED)) {
 			boolean logAbandoned = Boolean.parseBoolean(getAttribute(resource, LOGABANDONED));
-			poolConfig.setLogAbandoned(logAbandoned);
+			prop.setLogAbandoned(logAbandoned);
 		}
 		if (hasAttribute(resource, MINEVICTABLEIDLETIMEMILLIS)) {
 			int minEvictableIdleTimeMillis = Integer.parseInt(getAttribute(resource, MINEVICTABLEIDLETIMEMILLIS));
-			poolConfig.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
+			prop.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
 		}
 		if (hasAttribute(resource, CONNECTIONPROPERTIES)) {
-			poolConfig.setConnectionProperties(getAttribute(resource, CONNECTIONPROPERTIES));
+			prop.setConnectionProperties(getAttribute(resource, CONNECTIONPROPERTIES));
 		}
 		if (hasAttribute(resource, OPTION)) {
 			poolConfig.setOption(getAttribute(resource, OPTION));

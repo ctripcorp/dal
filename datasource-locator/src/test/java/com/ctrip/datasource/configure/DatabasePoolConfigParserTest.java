@@ -26,7 +26,7 @@ public class DatabasePoolConfigParserTest {
 	public void test1() {
 		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test");
 		Assert.assertEquals("dao_test", config.getName());
-		Assert.assertEquals(500, config.getMaxWait());
+		Assert.assertEquals(500, config.getPoolProperties().getMaxWait());
 		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true", config.getOption());
 	}
 	
@@ -34,19 +34,19 @@ public class DatabasePoolConfigParserTest {
 	public void test2() {
 		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test_select");
 		Assert.assertEquals("dao_test_select", config.getName());
-		Assert.assertEquals(true, config.isTestWhileIdle());
-		Assert.assertEquals(true, config.isTestOnBorrow());
-		Assert.assertEquals("SELECT 1", config.getValidationQuery());
-		Assert.assertEquals(30000, config.getValidationInterval());
-		Assert.assertEquals(30000, config.getTimeBetweenEvictionRunsMillis());
-		Assert.assertEquals(100, config.getMaxActive());
-		Assert.assertEquals(10, config.getMinIdle());
-		Assert.assertEquals(1000, config.getMaxWait());
-		Assert.assertEquals(10, config.getInitialSize());
-		Assert.assertEquals(60, config.getRemoveAbandonedTimeout());
-		Assert.assertEquals(true, config.isRemoveAbandoned());
-		Assert.assertEquals(true, config.isLogAbandoned());
-		Assert.assertEquals(30000, config.getMinEvictableIdleTimeMillis());
+		Assert.assertEquals(true, config.getPoolProperties().isTestWhileIdle());
+		Assert.assertEquals(true, config.getPoolProperties().isTestOnBorrow());
+		Assert.assertEquals("SELECT 1", config.getPoolProperties().getValidationQuery());
+		Assert.assertEquals(30000, config.getPoolProperties().getValidationInterval());
+		Assert.assertEquals(30000, config.getPoolProperties().getTimeBetweenEvictionRunsMillis());
+		Assert.assertEquals(100, config.getPoolProperties().getMaxActive());
+		Assert.assertEquals(10, config.getPoolProperties().getMinIdle());
+		Assert.assertEquals(1000, config.getPoolProperties().getMaxWait());
+		Assert.assertEquals(10, config.getPoolProperties().getInitialSize());
+		Assert.assertEquals(60, config.getPoolProperties().getRemoveAbandonedTimeout());
+		Assert.assertEquals(true, config.getPoolProperties().isRemoveAbandoned());
+		Assert.assertEquals(true, config.getPoolProperties().isLogAbandoned());
+		Assert.assertEquals(30000, config.getPoolProperties().getMinEvictableIdleTimeMillis());
 		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true", config.getOption());
 	}
 	
@@ -54,7 +54,7 @@ public class DatabasePoolConfigParserTest {
 	public void test3() {
 		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("HotelPubDB");
 		Assert.assertEquals("HotelPubDB", config.getName());
-		Assert.assertEquals(10000, config.getMaxWait());
+		Assert.assertEquals(10000, config.getPoolProperties().getMaxWait());
 		Assert.assertEquals("sendTimeAsDateTime=false", config.getOption());
 	}
 	
@@ -62,8 +62,8 @@ public class DatabasePoolConfigParserTest {
 	public void test4() {
 		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test_1");
 		Assert.assertEquals("dao_test_1", config.getName());
-		Assert.assertEquals(500, config.getMaxWait());
-		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true", config.getConnectionProperties());
+		Assert.assertEquals(500, config.getPoolProperties().getMaxWait());
+		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true", config.getPoolProperties().getConnectionProperties());
 	}
 
 }

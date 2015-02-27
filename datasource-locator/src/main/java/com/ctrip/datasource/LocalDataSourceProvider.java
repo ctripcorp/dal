@@ -44,7 +44,9 @@ public class LocalDataSourceProvider {
 				ds = createDataSource(name);
 				cache.put(name, ds);
 			} catch (Throwable e) {
-				log.error("Creating DataSource "+name+" error:"+e.getMessage(), e);
+				String msg = "Creating DataSource "+name+" error:"+e.getMessage();
+				log.error(msg, e);
+				throw new RuntimeException(msg, e);
 			}
 		}
 		return ds;

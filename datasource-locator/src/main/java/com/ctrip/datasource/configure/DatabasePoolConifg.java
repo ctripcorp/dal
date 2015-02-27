@@ -10,23 +10,23 @@ public class DatabasePoolConifg {
 	
 	public DatabasePoolConifg() {
 		poolProperties = new PoolProperties();
-		poolProperties.setTestWhileIdle(DatabasePoolConfigParser.DEFUALT_TESTWHILEIDLE);
-		poolProperties.setTestOnBorrow(DatabasePoolConfigParser.DEFUALT_TESTONBORROW);
-		poolProperties.setTestOnReturn(DatabasePoolConfigParser.DEFUALT_TESTONRETURN);
-		poolProperties.setValidationQuery(DatabasePoolConfigParser.DEFUALT_VALIDATIONQUERY);
-		poolProperties.setValidationInterval(DatabasePoolConfigParser.DEFUALT_VALIDATIONINTERVAL);
-		poolProperties.setTimeBetweenEvictionRunsMillis(DatabasePoolConfigParser.DEFUALT_TIMEBETWEENEVICTIONRUNSMILLIS);
-		poolProperties.setMaxActive(DatabasePoolConfigParser.DEFUALT_MAXACTIVE);
-		poolProperties.setMinIdle(DatabasePoolConfigParser.DEFUALT_MINIDLE);
-		poolProperties.setMaxWait(DatabasePoolConfigParser.DEFUALT_MAXWAIT);
-		poolProperties.setInitialSize(DatabasePoolConfigParser.DEFUALT_INITIALSIZE);
-		poolProperties.setRemoveAbandonedTimeout(DatabasePoolConfigParser.DEFUALT_REMOVEABANDONEDTIMEOUT);
-		poolProperties.setRemoveAbandoned(DatabasePoolConfigParser.DEFUALT_REMOVEABANDONED);
-		poolProperties.setLogAbandoned(DatabasePoolConfigParser.DEFUALT_LOGABANDONED);
-		poolProperties.setMinEvictableIdleTimeMillis(DatabasePoolConfigParser.DEFUALT_MINEVICTABLEIDLETIMEMILLIS);
-		poolProperties.setConnectionProperties(DatabasePoolConfigParser.DEFUALT_CONNECTIONPROPERTIES);
-		poolProperties.setJmxEnabled(DatabasePoolConfigParser.DEFUALT_JMXENABLED);
-		poolProperties.setJdbcInterceptors(DatabasePoolConfigParser.DEFUALT_JDBCINTERCEPTORS);
+		poolProperties.setTestWhileIdle(DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE);
+		poolProperties.setTestOnBorrow(DatabasePoolConfigParser.DEFAULT_TESTONBORROW);
+		poolProperties.setTestOnReturn(DatabasePoolConfigParser.DEFAULT_TESTONRETURN);
+		poolProperties.setValidationQuery(DatabasePoolConfigParser.DEFAULT_VALIDATIONQUERY);
+		poolProperties.setValidationInterval(DatabasePoolConfigParser.DEFAULT_VALIDATIONINTERVAL);
+		poolProperties.setTimeBetweenEvictionRunsMillis(DatabasePoolConfigParser.DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS);
+		poolProperties.setMaxActive(DatabasePoolConfigParser.DEFAULT_MAXACTIVE);
+		poolProperties.setMinIdle(DatabasePoolConfigParser.DEFAULT_MINIDLE);
+		poolProperties.setMaxWait(DatabasePoolConfigParser.DEFAULT_MAXWAIT);
+		poolProperties.setInitialSize(DatabasePoolConfigParser.DEFAULT_INITIALSIZE);
+		poolProperties.setRemoveAbandonedTimeout(DatabasePoolConfigParser.DEFAULT_REMOVEABANDONEDTIMEOUT);
+		poolProperties.setRemoveAbandoned(DatabasePoolConfigParser.DEFAULT_REMOVEABANDONED);
+		poolProperties.setLogAbandoned(DatabasePoolConfigParser.DEFAULT_LOGABANDONED);
+		poolProperties.setMinEvictableIdleTimeMillis(DatabasePoolConfigParser.DEFAULT_MINEVICTABLEIDLETIMEMILLIS);
+		poolProperties.setConnectionProperties(DatabasePoolConfigParser.DEFAULT_CONNECTIONPROPERTIES);
+		poolProperties.setJmxEnabled(DatabasePoolConfigParser.DEFAULT_JMXENABLED);
+		poolProperties.setJdbcInterceptors(DatabasePoolConfigParser.DEFAULT_JDBCINTERCEPTORS);
 	}
 	
 	public String getName() {

@@ -44,23 +44,23 @@ public class DatabasePoolConfigParser {
 	private static final String CONNECTIONPROPERTIES = "connectionProperties";
 	private static final String OPTION = "option";
 	
-	public static final boolean DEFUALT_TESTWHILEIDLE = true;
-	public static final boolean DEFUALT_TESTONBORROW = false;
-	public static final boolean DEFUALT_TESTONRETURN = false;
-	public static final String DEFUALT_VALIDATIONQUERY = "SELECT 1";
-	public static final long DEFUALT_VALIDATIONINTERVAL = 30000L;
-	public static final int DEFUALT_TIMEBETWEENEVICTIONRUNSMILLIS = 30000;
-	public static final int DEFUALT_MAXACTIVE = 100;
-	public static final int DEFUALT_MINIDLE = 10;
-	public static final int DEFUALT_MAXWAIT = 10000;
-	public static final int DEFUALT_INITIALSIZE = 10;
-	public static final int DEFUALT_REMOVEABANDONEDTIMEOUT = 60;
-	public static final boolean DEFUALT_REMOVEABANDONED = true;
-	public static final boolean DEFUALT_LOGABANDONED = true;
-	public static final int DEFUALT_MINEVICTABLEIDLETIMEMILLIS = 30000;
-	public static final String DEFUALT_CONNECTIONPROPERTIES = null;
-	public static final boolean DEFUALT_JMXENABLED = true;
-	public static final String DEFUALT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"+
+	public static final boolean DEFAULT_TESTWHILEIDLE = true;
+	public static final boolean DEFAULT_TESTONBORROW = false;
+	public static final boolean DEFAULT_TESTONRETURN = false;
+	public static final String DEFAULT_VALIDATIONQUERY = "SELECT 1";
+	public static final long DEFAULT_VALIDATIONINTERVAL = 30000L;
+	public static final int DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS = 30000;
+	public static final int DEFAULT_MAXACTIVE = 100;
+	public static final int DEFAULT_MINIDLE = 10;
+	public static final int DEFAULT_MAXWAIT = 10000;
+	public static final int DEFAULT_INITIALSIZE = 10;
+	public static final int DEFAULT_REMOVEABANDONEDTIMEOUT = 60;
+	public static final boolean DEFAULT_REMOVEABANDONED = true;
+	public static final boolean DEFAULT_LOGABANDONED = true;
+	public static final int DEFAULT_MINEVICTABLEIDLETIMEMILLIS = 30000;
+	public static final String DEFAULT_CONNECTIONPROPERTIES = null;
+	public static final boolean DEFAULT_JMXENABLED = true;
+	public static final String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"+
 	          "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer";
 	
 	private Map<String, DatabasePoolConifg> poolConfigs = new HashMap<String, DatabasePoolConifg>();

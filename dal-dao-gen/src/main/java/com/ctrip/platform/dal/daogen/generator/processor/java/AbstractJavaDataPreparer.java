@@ -62,7 +62,7 @@ public class AbstractJavaDataPreparer{
 			String tableName) throws Exception {
 		JavaCodeGenContext ctx = (JavaCodeGenContext)codeGenCtx;
 		if(!DbUtils.tableExists(tableViewSp.getAllInOneName(), tableName)){
-			throw new Exception(String.format("The table doesn't exist, pls check", tableViewSp.getAllInOneName(), tableName));
+			throw new Exception(String.format("The table[%s,%s] doesn't exist, pls check", tableViewSp.getAllInOneName(), tableName));
 		}
 		JavaTableHost tableHost = new JavaTableHost();
 		tableHost.setPackageName(ctx.getNamespace());

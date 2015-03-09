@@ -29,7 +29,7 @@ public class JavaTableHost {
 	private String api_list;
 	
 	public boolean generateAPI(Integer ...apiID){
-		if(api_list==null || api_list.isEmpty() || api_list==""){
+		if(api_list==null || api_list.isEmpty()){
 			return true;
 		}
 		String []list = api_list.split(",");

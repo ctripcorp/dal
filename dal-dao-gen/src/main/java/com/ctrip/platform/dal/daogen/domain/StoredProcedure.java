@@ -33,7 +33,7 @@ public class StoredProcedure implements Comparable<StoredProcedure> {
 		if (obj instanceof StoredProcedure) {
 			StoredProcedure castedObj = (StoredProcedure) obj;
 			return castedObj.getName().equals(this.getName());
-		}else if(obj instanceof String){
+		} else if (obj instanceof String) {
 			String castedObj = (String) obj;
 			return castedObj.equals(this.getName());
 		}

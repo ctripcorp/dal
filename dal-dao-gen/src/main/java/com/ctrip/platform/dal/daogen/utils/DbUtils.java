@@ -33,62 +33,47 @@ public class DbUtils {
 	
 	private static Logger log = Logger.getLogger(DbUtils.class);
 	private static List<Integer> validMode = new ArrayList<Integer>();
-	private static Pattern inRegxPattern = null;
+	private static Pattern inRegxPattern = Pattern.compile("in\\s(@\\w+)", java.util.regex.Pattern.CASE_INSENSITIVE);
 
 	static {
 		validMode.add(DatabaseMetaData.procedureColumnIn);
 		validMode.add(DatabaseMetaData.procedureColumnInOut);
 		validMode.add(DatabaseMetaData.procedureColumnOut);
-		inRegxPattern = Pattern.compile("in\\s(@\\w+)", java.util.regex.Pattern.CASE_INSENSITIVE);
 	}
 
 	public static boolean tableExists(String allInOneName, String tableName) {
-
-		boolean result = false;
 		ResultSet rs = null;
 		Connection connection = null;
 		try {
+			String dbType = getDbType(allInOneName);
 			connection = DataSourceUtil.getConnection(allInOneName);
-
-			String dbType = null;
-			if (Consts.databaseType.containsKey(allInOneName)) {
-				dbType = Consts.databaseType.get(allInOneName);
-			} else {
-				dbType = connection.getMetaData().getDatabaseProductName();
-				Consts.databaseType.put(allInOneName, dbType);
-			}
-
 			if (dbType.equals("Microsoft SQL Server")) {
-
 				String sql = "select Name from sysobjects where xtype  = 'u' and status>=0 and Name=?";
-				PreparedStatement statement = connection.prepareStatement(sql,
-						ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-				statement.setString(1, tableName);
-				rs = statement.executeQuery();
-				result = rs.next();
-				
+				rs = query(connection, sql, tableName);
+				return rs.next();
 			} else {
 				rs = connection.getMetaData().getTables(null, null, tableName, new String[]{"TABLE"});
-				result = rs.next();
+				return rs.next();
 			}
 		} catch (Exception e) {
-			log.error(String.format("get table exists error: [allInOneName=%s;tableName=%s]", 
-					allInOneName, tableName), e);
+			log.error(String.format("get table exists error: [allInOneName=%s;tableName=%s]", allInOneName, tableName), e);
 		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(rs, connection);
 		}
-
-		return result;
+		return false;
+	}
+	
+	private static ResultSet query(Connection connection, String sql, Object ...param) throws SQLException {
+		PreparedStatement statement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		if (param != null && param.length>0) {
+			for (int i=0;i<param.length;i++)
+				statement.setObject(i+1, param[i]);
+		}
+		return statement.executeQuery();
 	}
 
 	/**
 	 * 获取所有表名
-	 * 
-	 * @param server
-	 * @param allInOneName
-	 * @return
-	 * @throws Exception
 	 */
 	public static List<String> getAllTableNames(String allInOneName) throws Exception {
 		List<String> results = new ArrayList<String>();
@@ -96,193 +81,112 @@ public class DbUtils {
 		ResultSet rs = null;
 		try {
 			connection = DataSourceUtil.getConnection(allInOneName);
-			String dbType = null;
-			if (Consts.databaseType.containsKey(allInOneName)) {
-				dbType = Consts.databaseType.get(allInOneName);
-			} else {
-				dbType = connection.getMetaData().getDatabaseProductName();
-				Consts.databaseType.put(allInOneName, dbType);
-			}
-
 			rs = connection.getMetaData().getTables(null, "dbo", "%", new String[]{"TABLE"});
-			String tableName = null;
 			while (rs.next()) {
-				tableName = rs.getString("TABLE_NAME");
-				if(tableName.toLowerCase().equals("sysdiagrams")){
+				String tableName = rs.getString("TABLE_NAME");
+				if ("sysdiagrams".equals(tableName.toLowerCase()))
 					continue;
-				}
 				results.add(rs.getString("TABLE_NAME"));
 			}
 		} catch(Exception e) {
-			log.warn(e.getMessage(), e);
-			throw e;
+			handleException(null, e);
 		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(rs, connection);
 		}
-
 		return results;
 	}
 
 	public static boolean viewExists(String allInOneName, String viewName) {
-		boolean result = false;
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
+			String dbType = getDbType(allInOneName);
 			connection = DataSourceUtil.getConnection(allInOneName);
-			String dbType = null;
-			if (Consts.databaseType.containsKey(allInOneName)) {
-				dbType = Consts.databaseType.get(allInOneName);
-			} else {
-				dbType = connection.getMetaData().getDatabaseProductName();
-				Consts.databaseType.put(allInOneName, dbType);
-			}
-
-			if (dbType.equals("Microsoft SQL Server")) {
-
+			if ("Microsoft SQL Server".equals(dbType)) {
 				String sql = "select Name from sysobjects where xtype ='v' and status>=0 and Name = ?";
-				PreparedStatement statement = connection.prepareStatement(sql,
-						ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-				statement.setString(1, viewName);
-				rs = statement.executeQuery();
-				result = rs.next();
-				
+				rs = query(connection, sql, viewName);
+				return rs.next();
 			} else {
 				rs = connection.getMetaData().getTables(null, null, viewName, new String[]{ "VIEW" });
-				result = rs.next();
+				return rs.next();
 			}
 		} catch (Exception e) {
 			log.error(String.format("get view exists error: [allInOneName=%s;viewName=%s]", 
 					allInOneName, viewName), e);
 		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(rs, connection);
 		}
-
-		return result;
+		return false;
 	}
 
 	/**
 	 * 获取所有视图
-	 * 
-	 * @param server
-	 * @param allInOneName
-	 * @return
-	 * @throws Exception
 	 */
 	public static List<String> getAllViewNames(String allInOneName) throws Exception {
-
 		List<String> results = new ArrayList<String>();
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
 			connection = DataSourceUtil.getConnection(allInOneName);
-			String dbType = null;
-			if (Consts.databaseType.containsKey(allInOneName)) {
-				dbType = Consts.databaseType.get(allInOneName);
-			} else {
-				dbType = connection.getMetaData().getDatabaseProductName();
-				Consts.databaseType.put(allInOneName, dbType);
-			}
-
 			rs = connection.getMetaData().getTables(null, "dbo", "%", new String[]{"VIEW"});
-			while (rs.next()) {
+			while (rs.next())
 				results.add(rs.getString("TABLE_NAME"));
-			}
 		} catch(Exception e) {
-			log.warn(e.getMessage(), e);
-			throw e;
+			handleException(null, e);
 		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(rs, connection);
 		}
-
 		return results;
 	}
 
 	public static boolean spExists(String allInOneName, final StoredProcedure sp) {
-
-		boolean result = false;
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
+			String dbType = getDbType(allInOneName);
 			connection = DataSourceUtil.getConnection(allInOneName);
-			String dbType = null;
-			if (Consts.databaseType.containsKey(allInOneName)) {
-				dbType = Consts.databaseType.get(allInOneName);
-			} else {
-				dbType = connection.getMetaData().getDatabaseProductName();
-				Consts.databaseType.put(allInOneName, dbType);
-			}
 			// 如果是Sql Server，通过Sql语句获取所有表和视图的名称
 			if (dbType.equals("Microsoft SQL Server")) {
-
 				String sql = "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE' and SPECIFIC_SCHEMA=? and SPECIFIC_NAME=?";
-				PreparedStatement statement = connection.prepareStatement(sql,
-						ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-				statement.setString(1, sp.getSchema());
-				statement.setString(2, sp.getName());
-				rs = statement.executeQuery();
-				result = rs.next();
-				
+				rs = query(connection, sql, sp.getSchema(), sp.getName());
+				return rs.next();
 			}
 		} catch (Exception e) {
-			log.error(String.format("get sp exists error: [allInOneName=%s;spName=%s]", 
-					allInOneName, sp.getName()), e);
+			log.error(String.format("get sp exists error: [allInOneName=%s;spName=%s]", allInOneName, sp.getName()), e);
 		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(rs, connection);
 		}
-		return result;
+		return false;
 	}
 
 	public static List<StoredProcedure> getAllSpNames(String allInOneName) throws Exception {
-
 		List<StoredProcedure> results = new ArrayList<StoredProcedure>();
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
+			String dbType = getDbType(allInOneName);
 			connection = DataSourceUtil.getConnection(allInOneName);
-			String dbType = null;
-			if (Consts.databaseType.containsKey(allInOneName)) {
-				dbType = Consts.databaseType.get(allInOneName);
-			} else {
-				dbType = connection.getMetaData().getDatabaseProductName();
-				Consts.databaseType.put(allInOneName, dbType);
-			}
-
 			// 如果是Sql Server，通过Sql语句获取所有视图的名称
 			if (dbType.equals("Microsoft SQL Server")) {
-
 				String sql = "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE'";
-				PreparedStatement statement = connection.prepareStatement(sql,
-						ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-				rs = statement.executeQuery();
+				rs = query(connection, sql);
 				while(rs.next()){
 					StoredProcedure sp = new StoredProcedure();
 					sp.setSchema(rs.getString(1));
 					sp.setName(rs.getString(2));
 					results.add(sp);
 				}
-				
 			}
 		} catch (SQLException e) {
-			log.warn(String.format("get all sp names error: [allInOneName=%s]", allInOneName), e);
-			throw e;
+			handleException(String.format("get all sp names error: [allInOneName=%s]", allInOneName), e);
 		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(rs, connection);
 		}
 		return results;
 	}
 
 	/**
 	 * 获取存储过程的所有参数
-	 * 
-	 * @param server
-	 * @param allInOneName
-	 * @param sp
-	 * @return
 	 */
 	public static List<AbstractParameterHost> getSpParams(String allInOneName,
 			StoredProcedure sp, CurrentLanguage language) {
@@ -291,7 +195,6 @@ public class DbUtils {
 		List<AbstractParameterHost> parameters = new ArrayList<AbstractParameterHost>();
 		try {
 			connection = DataSourceUtil.getConnection(allInOneName);
-
 			spParamRs = connection.getMetaData().getProcedureColumns(null, sp.getSchema(), sp.getName(), null);
 			boolean terminal = false;
 			if (language == CurrentLanguage.CSharp) {
@@ -303,8 +206,8 @@ public class DbUtils {
 					}
 
 					CSharpParameterHost host = new CSharpParameterHost();
-					DbType dbType =getDotNetDbType(spParamRs.getString("TYPE_NAME"), spParamRs
-							.getInt("DATA_TYPE"), spParamRs.getInt("LENGTH"));
+					DbType dbType =getDotNetDbType(spParamRs.getString("TYPE_NAME"), 
+							spParamRs.getInt("DATA_TYPE"), spParamRs.getInt("LENGTH"));
 					host.setDbType(dbType);
 					host.setNullable(spParamRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
 
@@ -350,13 +253,13 @@ public class DbUtils {
 
 					host.setName(spParamRs.getString("COLUMN_NAME").replace("@",""));
 					Class<?> javaClass = Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
-					if(null == javaClass){
-						if(-153 == host.getSqlType()){
+					if (null == javaClass) {
+						if (-153 == host.getSqlType()) {
 							log.error(String.format("The Table-Valued Parameters is not support for JDBC. [%s, %s]", 
 									allInOneName, sp.getName()));
 							terminal = true;
 							break;
-						}else{
+						} else {
 							log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", 
 									host.getName(), allInOneName, sp.getName(), host.getSqlType(), javaClass));
 							terminal = true;
@@ -364,7 +267,6 @@ public class DbUtils {
 						}
 					}
 					host.setJavaClass(javaClass);
-
 					parameters.add(host);
 				}
 			}
@@ -373,14 +275,12 @@ public class DbUtils {
 			log.error(String.format("get sp params error: [allInOneName=%s;spName=%s;language=%s]", 
 					allInOneName, sp.getName(), language.name()), e);
 		} finally {
-			JdbcUtils.closeResultSet(spParamRs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(spParamRs, connection);
 		}
 		return null;
 	}
 
 	public static List<String> getPrimaryKeyNames(String allInOneName, String tableName) {
-
 		Connection connection = null;
 		// 获取所有主键
 		ResultSet primaryKeyRs = null;
@@ -388,18 +288,13 @@ public class DbUtils {
 		try {
 			connection = DataSourceUtil.getConnection(allInOneName);
 			primaryKeyRs = connection.getMetaData().getPrimaryKeys(null, null, tableName);
-
-			while (primaryKeyRs.next()) {
+			while (primaryKeyRs.next())
 				primaryKeys.add(primaryKeyRs.getString("COLUMN_NAME"));
-			}
 		} catch (Exception e) {
-			log.error(String.format("get primary key names error: [allInOneName=%s;tableName=%s]", 
-					allInOneName, tableName), e);
+			log.error(String.format("get primary key names error: [allInOneName=%s;tableName=%s]", allInOneName, tableName), e);
 		} finally {
-			JdbcUtils.closeResultSet(primaryKeyRs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(primaryKeyRs, connection);
 		}
-
 		return primaryKeys;
 	}
 	
@@ -425,13 +320,11 @@ public class DbUtils {
 
 	public static List<AbstractParameterHost> getAllColumnNames(String allInOneName,
 			String tableName, CurrentLanguage language) {
-
 		Connection connection = null;
 		ResultSet allColumnsRs = null;
 		List<AbstractParameterHost> allColumns = new ArrayList<AbstractParameterHost>();
 		try {
 			connection = DataSourceUtil.getConnection(allInOneName);
-
 			allColumnsRs = connection.getMetaData().getColumns(null, null, tableName, null);
 			boolean terminal = false;
 			if (language == CurrentLanguage.CSharp) {
@@ -500,16 +393,13 @@ public class DbUtils {
 					allColumns.add(host);
 				}
 			}
-
 			return terminal ? null : allColumns;
 		} catch (Exception e) {
 			log.error(String.format("get all column names error: [allInOneName=%s;tableName=%s;language=%s]", 
 					allInOneName, tableName, language), e);
 		} finally {
-			JdbcUtils.closeResultSet(allColumnsRs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(allColumnsRs, connection);
 		}
-
 		return null;
 	}
 
@@ -518,23 +408,15 @@ public class DbUtils {
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
+			String dbType = getDbType(allInOneName);
 			connection = DataSourceUtil.getConnection(allInOneName);
-			String dbType = null;
-			if (Consts.databaseType.containsKey(allInOneName)) {
-				dbType = Consts.databaseType.get(allInOneName);
-			} else {
-				dbType = connection.getMetaData().getDatabaseProductName();
-				Consts.databaseType.put(allInOneName, dbType);
-			}
-			
 			String sql = null;
 			if(dbType.equalsIgnoreCase("Microsoft SQL Server")){
 				sql = "select top 1 * from " + tableViewName;
 			} else {
 				sql = "select * from " + tableViewName + " limit 1";
 			}
-			PreparedStatement ps = connection.prepareStatement(sql);
-			rs = ps.executeQuery();
+			rs = query(connection, sql);
 			ResultSetMetaData rsMeta = rs.getMetaData();
 			for(int i=1;i<=rsMeta.getColumnCount();i++){
 				String columnName = rsMeta.getColumnName(i);
@@ -550,13 +432,11 @@ public class DbUtils {
 					map.put(columnName, javaType);
 				}
 			}
-			
 		} catch(Exception e){
 			log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]",
 					allInOneName, tableViewName), e);
 		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(rs, connection);
 		}
 		return map;
 	}
@@ -566,23 +446,15 @@ public class DbUtils {
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
+			String dbType = getDbType(allInOneName);
 			connection = DataSourceUtil.getConnection(allInOneName);
-			String dbType = null;
-			if (Consts.databaseType.containsKey(allInOneName)) {
-				dbType = Consts.databaseType.get(allInOneName);
-			} else {
-				dbType = connection.getMetaData().getDatabaseProductName();
-				Consts.databaseType.put(allInOneName, dbType);
-			}
-			
 			String sql = null;
 			if(dbType.equalsIgnoreCase("Microsoft SQL Server")){
 				sql = "select top 1 * from " + tableViewName;
 			} else {
 				sql = "select * from " + tableViewName + " limit 1";
 			}
-			PreparedStatement ps = connection.prepareStatement(sql);
-			rs = ps.executeQuery();
+			rs = query(connection, sql);
 			ResultSetMetaData rsMeta = rs.getMetaData();
 			for(int i=1;i<=rsMeta.getColumnCount();i++){
 				String columnName = rsMeta.getColumnName(i);
@@ -595,8 +467,7 @@ public class DbUtils {
 			log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]",
 					allInOneName, tableViewName), e);
 		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(rs, connection);
 		}
 		return map;
 	}
@@ -624,8 +495,7 @@ public class DbUtils {
 			} else{
 				testSql = testSql.replace("select", "select top(1)");
 			}
-			PreparedStatement ps = connection.prepareStatement(testSql);
-			rs = ps.executeQuery();
+			rs = query(connection, testSql);
 			ResultSetMetaData rsMeta = rs.getMetaData();
 			
 			if(language == CurrentLanguage.CSharp){
@@ -665,8 +535,7 @@ public class DbUtils {
 			log.error(String.format("get select field error: [allInOneName=%s;sql=%s;language=%s]", 
 					allInOneName, sql, language), e);
 		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(rs, connection);
 		}
 		return hosts;
 	}
@@ -688,7 +557,6 @@ public class DbUtils {
 			String replacedSql = temp.replaceAll("[@:]\\w+", "?");
 
 			connection = DataSourceUtil.getConnection(allInOneName);
-
 			PreparedStatement ps = connection.prepareStatement(replacedSql);
 
 			int index = 0;
@@ -768,12 +636,11 @@ public class DbUtils {
 				return paramHosts;
 			}
 		} catch(Exception e) {
-			log.warn(e.getMessage(), e);
-			throw e;
+			handleException(null, e);
 		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(rs, connection);
 		}
+		return null;
 	}
 	
 	public static Object mockATest(int javaSqlTypes) {
@@ -803,7 +670,6 @@ public class DbUtils {
 	}
 
 	public static String getDbType(String allInOneName) throws Exception {
-
 		String dbType = null;
 		if (Consts.databaseType.containsKey(allInOneName)) {
 			dbType = Consts.databaseType.get(allInOneName);
@@ -811,26 +677,20 @@ public class DbUtils {
 			Connection connection = null;
 			try {
 				connection = DataSourceUtil.getConnection(allInOneName);
-
 				dbType = connection.getMetaData().getDatabaseProductName();
 				Consts.databaseType.put(allInOneName, dbType);
-
 			} catch(Exception e) {
-				log.warn(e.getMessage(), e);
-				throw e;
+				handleException(null, e);
 			} finally {
-				JdbcUtils.closeConnection(connection);
+				releaseResource(null, connection);
 			}
 		}
 		return dbType;
 	}
 	
 	public static DatabaseCategory getDatabaseCategory(String allInOneName) throws Exception {
-
 		DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
-
-		String dbType = DbUtils.getDbType(allInOneName);
-
+		String dbType = getDbType(allInOneName);
 		if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
 			dbCategory = DatabaseCategory.MySql;
 		}
@@ -857,21 +717,25 @@ public class DbUtils {
 		ResultSet rs = null;
 		try {
 			connection = DataSourceUtil.getConnection(allInOneName);
-			PreparedStatement stmt = connection.prepareStatement(sql);
-			stmt.setObject(1, tableName);
-			rs = stmt.executeQuery();
-			while (rs.next()) {
-				map.put(rs.getString("name").toLowerCase(),
-						rs.getString("description"));
-			}
+			rs = query(connection, sql, tableName);
+			while (rs.next())
+				map.put(rs.getString("name").toLowerCase(), rs.getString("description"));
 		} catch(Exception e) {
-			log.warn(e.getMessage(), e);
-			throw e;
+			handleException(null, e);
 		} finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeConnection(connection);
+			releaseResource(rs, connection);
 		}
 		return map;
+	}
+	
+	private static void releaseResource(ResultSet rs, Connection conn) {
+		JdbcUtils.closeResultSet(rs);
+		JdbcUtils.closeConnection(conn);
+	}
+	
+	private static void handleException(String msg, Exception e) throws Exception {
+		log.warn(msg==null?e.getMessage():msg, e);
+		throw e;
 	}
 	
 }

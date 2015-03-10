@@ -257,14 +257,12 @@ public class DbUtils {
 						if (-153 == host.getSqlType()) {
 							log.error(String.format("The Table-Valued Parameters is not support for JDBC. [%s, %s]", 
 									allInOneName, sp.getName()));
-							terminal = true;
-							break;
 						} else {
 							log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", 
 									host.getName(), allInOneName, sp.getName(), host.getSqlType(), javaClass));
-							terminal = true;
-							break;
 						}
+						terminal = true;
+						break;
 					}
 					host.setJavaClass(javaClass);
 					parameters.add(host);
@@ -376,11 +374,9 @@ public class DbUtils {
 									host.getName(), allInOneName, tableName, host.getSqlType(), javaClass));
 							terminal = true;
 							break;
-						}
-						else if(null != typeName && typeName.equalsIgnoreCase("datetimeoffset")){
+						} else if(null != typeName && typeName.equalsIgnoreCase("datetimeoffset")){
 							javaClass = DateTimeOffset.class;
-						}
-						else{
+						} else {
 							log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", 
 									host.getName(), allInOneName, tableName, host.getSqlType(), javaClass));
 							terminal = true;
@@ -411,7 +407,7 @@ public class DbUtils {
 			String dbType = getDbType(allInOneName);
 			connection = DataSourceUtil.getConnection(allInOneName);
 			String sql = null;
-			if(dbType.equalsIgnoreCase("Microsoft SQL Server")){
+			if ("Microsoft SQL Server".equalsIgnoreCase(dbType)) {
 				sql = "select top 1 * from " + tableViewName;
 			} else {
 				sql = "select * from " + tableViewName + " limit 1";
@@ -456,7 +452,7 @@ public class DbUtils {
 			}
 			rs = query(connection, sql);
 			ResultSetMetaData rsMeta = rs.getMetaData();
-			for(int i=1;i<=rsMeta.getColumnCount();i++){
+			for (int i=1;i<=rsMeta.getColumnCount();i++) {
 				String columnName = rsMeta.getColumnName(i);
 				Integer sqlType = rsMeta.getColumnType(i);
 				if(!map.containsKey(columnName) && null != sqlType) {
@@ -541,29 +537,23 @@ public class DbUtils {
 	}
 	
 	public static List<AbstractParameterHost> testAQuerySql(String allInOneName, String sql,
-			String params,CurrentLanguage language , boolean justTest) throws Exception {
+			String params, CurrentLanguage language, boolean justTest) throws Exception {
 		String[] parameters = params.split(";");
-
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
-			
 			Matcher m = inRegxPattern.matcher(sql);
 			String temp=sql;
 			while(m.find()) {
 				temp = temp.replace(m.group(1), String.format("(?) "));
 	    	}
-			
 			String replacedSql = temp.replaceAll("[@:]\\w+", "?");
-
 			connection = DataSourceUtil.getConnection(allInOneName);
 			PreparedStatement ps = connection.prepareStatement(replacedSql);
-
 			int index = 0;
 			for (String param : parameters) {
 				if (param != null && !param.isEmpty()) {
 					String[] tuple = param.split(",");
-
 					try {
 						index = Integer.valueOf(tuple[0]);
 					} catch (NumberFormatException ex) {
@@ -572,24 +562,19 @@ public class DbUtils {
 					ps.setObject(index, mockATest(Integer.valueOf(tuple[1])), Integer.valueOf(tuple[1]));
 				}
 			}
-
 			rs = ps.executeQuery();
-			
-			if(justTest) {
+			if (justTest) {
 				return new ArrayList<AbstractParameterHost>();
 			}
-
 			ResultSetMetaData rsMeta = rs.getMetaData();
-			if(language == CurrentLanguage.CSharp){
+			if (language == CurrentLanguage.CSharp) {
 				List<AbstractParameterHost> pHosts = new ArrayList<AbstractParameterHost>();
 				for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
 					CSharpParameterHost pHost = new CSharpParameterHost();
 					pHost.setName(rsMeta.getColumnLabel(i));
 					String typename = rsMeta.getColumnTypeName(i);
 					int dataType = rsMeta.getColumnType(i);
-					
 					DbType dbType;
-
 					if (null != typename && typename.equalsIgnoreCase("year")) {
 						dbType = DbType.Int16;
 					} else if (null != typename && typename.equalsIgnoreCase("uniqueidentifier")) {
@@ -601,7 +586,6 @@ public class DbUtils {
 					} else {
 						dbType =DbType.getDbTypeFromJdbcType(dataType);
 					}
-					
 					pHost.setDbType(dbType);
 					pHost.setType(DbType.getCSharpType(pHost.getDbType()));
 					pHost.setIdentity(false);
@@ -632,7 +616,6 @@ public class DbUtils {
 					paramHost.setLength(rsMeta.getColumnDisplaySize(i));
 					paramHosts.add(paramHost);
 				}
-				
 				return paramHosts;
 			}
 		} catch(Exception e) {

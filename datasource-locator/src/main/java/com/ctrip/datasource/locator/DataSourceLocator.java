@@ -82,17 +82,26 @@ public class DataSourceLocator {
 	public DataSource getDataSource(String name) throws Exception {
 		if(envContext!=null){
 			//Tag Name默认会加上appid和hostip，所以这个不需要额外加
-			metricLogger.log(DATASOURCE_TYPE, 1L, TAG_JNDI);
+			metric(TAG_JNDI);
 			return (DataSource)envContext.lookup(name);
 		}
 		
 		if(localDataSource!=null){
-			metricLogger.log(DATASOURCE_TYPE, 1L, TAG_LOCAL);
+			metric(TAG_LOCAL);
 			return localDataSource.get(name);
 		}
 		
 		return null;
 		
+	}
+	
+	private void metric(Map<String, String> tag) {
+		try {
+			//Tag Name默认会加上appid和hostip，所以这个不需要额外加
+			metricLogger.log(DATASOURCE_TYPE, 1L, tag);
+		} catch(Throwable e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public Set<String> getDBNames(){

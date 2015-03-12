@@ -126,5 +126,7 @@ public enum DalHintEnum {
 	/**
 	 * The detail affected rows by DB and Table shard Id
 	 */
-	detailResults;
+	detailResults,
+
+	tableName
 }

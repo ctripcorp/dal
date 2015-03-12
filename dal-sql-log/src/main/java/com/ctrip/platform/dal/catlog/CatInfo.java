@@ -18,7 +18,7 @@ public class CatInfo {
 
             case CALL:
             case BATCH_CALL:
-                return "STORED_PROCEDURE";
+                return "SP";
             default:
                 return "UNKNOWN";
 

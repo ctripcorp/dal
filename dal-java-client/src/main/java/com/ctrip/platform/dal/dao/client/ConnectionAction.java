@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.ctrip.framework.clogging.agent.config.LogConfig;
+import com.ctrip.platform.dal.catlog.CatInfo;
 import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -21,6 +22,9 @@ import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
 import com.ctrip.platform.dal.sql.logging.LogEntry;
 import com.ctrip.platform.dal.sql.logging.MetricsLogger;
+import com.dianping.cat.Cat;
+import com.dianping.cat.CatConstants;
+import com.dianping.cat.message.Transaction;
 
 public abstract class ConnectionAction<T> {
 	public DalEventEnum operation;
@@ -38,7 +42,6 @@ public abstract class ConnectionAction<T> {
 	public PreparedStatement preparedStatement;
 	public CallableStatement callableStatement;
 	public ResultSet rs;
-	
 	public long start;
 	public LogEntry entry = new LogEntry();
 	
@@ -105,6 +108,7 @@ public abstract class ConnectionAction<T> {
 	public void initLogEntry(String logicDbName, DalHints hints) {
 		entry.setSensitive(hints.is(DalHintEnum.sensitive));
 		entry.setEvent(operation);
+		entry.setTableName(hints.getString(DalHintEnum.tableName));
 		entry.setCommandType();
 		entry.setCallString(callString);
 		
@@ -125,7 +129,7 @@ public abstract class ConnectionAction<T> {
 			entry.setPramemters(parameters.toLogString());
 			hints.setParameters(parameters);
 		}
-		
+		entry.startCatTransaction();
 		entry.setTransactional(DalTransactionManager.isInTransaction());
 	}
 	
@@ -136,6 +140,7 @@ public abstract class ConnectionAction<T> {
 	public void end(Object result, Throwable e) throws SQLException {
 		log(result, e);	
 		handleException(e);
+		entry.catTransactionComplete();
 	}
 
 	private void log(Object result, Throwable e) {

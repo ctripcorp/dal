@@ -124,54 +124,11 @@ public class DalConnectionManager {
 
 	private <T> T _doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
-		if(action == null || action.operation == null){
-			return _doInConnectionWithoutCat(action, hints);
-		}else{
-			return _doInConnectionWithCat(action, hints);
-		}
-	}
-	private <T> T _doInConnectionWithCat(ConnectionAction<T> action, DalHints hints)
-			throws SQLException {
-		action.initLogEntry(logicDbName, hints);
-		action.start();
-
-		Throwable ex = null;
-		T result = null;
-		String sqlType = CatInfo.getTypeSQLInfo(action.operation);
-		Transaction t = Cat.newTransaction(CatConstants.TYPE_SQL, sqlType);
-		try {
-			result = action.execute();
-			if(action.sql != null)
-				t.addData(action.sql);
-			if(action.sqls != null)
-				t.addData(StringUtils.join(action.sqls, ";"));
-			Cat.logEvent(CatConstants.TYPE_SQL_METHOD, sqlType, Message.SUCCESS, "");
-			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, action.connHolder.getMeta().getUrl());
-			t.setStatus(Transaction.SUCCESS);
-		} catch (Throwable e) {
-			MarkdownManager.detect(action.connHolder, action.start, e);
-			ex = e;
-			t.setStatus(e);
-			Cat.logError(e);
-		} finally {
-			DalWatcher.endExectue();
-			action.populateDbMeta();
-			action.cleanup();
-			t.complete();
-		}
-
-		action.end(result, ex);
-		return result;
-	}
-
-	private <T> T _doInConnectionWithoutCat(ConnectionAction<T> action, DalHints hints)
-			throws SQLException {
-		action.initLogEntry(logicDbName, hints);
-		action.start();
-		
 		Throwable ex = null;
 		T result = null;
 		try {
+			action.initLogEntry(logicDbName, hints);
+			action.start();
 			result = action.execute();
 		} catch (Throwable e) {
 			MarkdownManager.detect(action.connHolder, action.start, e);

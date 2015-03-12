@@ -10,6 +10,11 @@ import com.ctrip.framework.clogging.agent.trace.ITrace;
 import com.ctrip.framework.clogging.agent.trace.TraceManager;
 import com.ctrip.framework.clogging.domain.thrift.LogLevel;
 import com.ctrip.framework.clogging.domain.thrift.LogType;
+import com.dianping.cat.Cat;
+import com.dianping.cat.CatConstants;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
+import org.apache.commons.lang.StringUtils;
 
 public class DalLogger {
 	public static final String TITLE = "Dal Fx";
@@ -34,6 +39,7 @@ public class DalLogger {
 		entry.setSuccess(true);
 		entry.setResultCount(count);
 		log(entry);
+		entry.catTransactionSuccess();
 	}
 
 	public static void fail(LogEntry entry, long duration, Throwable e) {
@@ -42,6 +48,7 @@ public class DalLogger {
 		entry.setErrorMsg(e.getMessage());
 		entry.setException(e);
 		log(entry);
+		entry.catTransactionFailed(e);
 	}
 
 	public static void log(LogEntry entry) {

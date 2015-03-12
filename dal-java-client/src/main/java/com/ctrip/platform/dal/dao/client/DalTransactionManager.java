@@ -82,80 +82,25 @@ public class DalTransactionManager {
 		transactionHolder.set(null);
 	}
 
-	public <T> T doInTransaction(ConnectionAction<T> action, DalHints hints)
-			throws SQLException {
-		if(action == null || action.operation == null || action.operation == DalEventEnum.EXECUTE){
-			return doTransactionWithoutCat(action, hints);
-		}else{
-			return _doInTransactionWithCat(action, hints);
-		}
-	}
-
-	public <T> T doTransactionWithoutCat(ConnectionAction<T> action, DalHints hints)throws SQLException{
-		action.initLogEntry(connManager.getLogicDbName(), hints);
-		action.start();
-
+	public <T> T doInTransaction(ConnectionAction<T> action, DalHints hints)throws SQLException{
 		Throwable ex = null;
 		T result = null;
-		int level = 0;
+		int level;
 		try {
+			action.initLogEntry(connManager.getLogicDbName(), hints);
+			action.start();
 			level = startTransaction(hints, action.operation);
 
 			result = action.execute();
 
 			endTransaction(level);
 		} catch (Throwable e) {
-			System.out.println(action.sql);
-			System.out.println(action.sqls);
-			MarkdownManager.detect(action.connHolder, action.start, e);
-			e.printStackTrace();
 			ex = e;
 			rollbackTransaction();
+			MarkdownManager.detect(action.connHolder, action.start, e);
 		}finally{
 			action.populateDbMeta();
 			action.cleanup();
-		}
-
-		action.end(result, ex);
-
-		return result;
-	}
-
-	public <T> T _doInTransactionWithCat(ConnectionAction<T> action, DalHints hints) throws SQLException{
-		action.initLogEntry(connManager.getLogicDbName(), hints);
-		action.start();
-
-		Throwable ex = null;
-		T result = null;
-		int level = 0;
-		String sqlType = CatInfo.getTypeSQLInfo(action.operation);
-		Transaction t = Cat.newTransaction(CatConstants.TYPE_SQL, sqlType);
-		try {
-			level = startTransaction(hints, action.operation);
-
-			result = action.execute();
-
-			endTransaction(level);
-
-			if(action.sql != null)
-				t.addData(action.sql);
-			if(action.sqls != null)
-				t.addData(StringUtils.join(action.sqls, ";"));
-			Cat.logEvent(CatConstants.TYPE_SQL_METHOD, sqlType, Message.SUCCESS, "");
-			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, action.connHolder.getMeta().getUrl());
-			t.setStatus(Transaction.SUCCESS);
-		} catch (Throwable e) {
-			MarkdownManager.detect(action.connHolder, action.start, e);
-			e.printStackTrace();
-			ex = e;
-			rollbackTransaction();
-
-			t.setStatus(e);
-			Cat.logError(e);
-		}finally{
-			action.populateDbMeta();
-			action.cleanup();
-			t.complete();
 		}
 
 		action.end(result, ex);

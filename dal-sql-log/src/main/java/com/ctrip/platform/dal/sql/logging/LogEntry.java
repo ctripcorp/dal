@@ -64,7 +64,6 @@ public class LogEntry {
 
 	private Transaction catTransaction;
 	private String sqlType;
-	private String tableName;
 
 	private Throwable exception;
 	
@@ -94,16 +93,16 @@ public class LogEntry {
 		this.event = event;
 	}
 
-	public void setTableName(String tableName) {
-		this.tableName = tableName == null ? CommonUtil.parseTableName(sqls) : tableName;
-	}
-
 	public void startCatTransaction(){
 		try {
-			sqlType = event == null ? "dal_test" : CatInfo.getTypeSQLInfo(event);
-			catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, tableName + "." + sqlType);
-			catTransaction.addData(sqls == null ? "" : StringUtils.join(sqls, ","));
-			catTransaction.addData(getEncryptParameters());
+			sqlType = getDao() + "." + getMethod();
+			catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, sqlType);
+			if(pramemters != null){
+				catTransaction.addData(sqls == null ? "" : StringUtils.join(sqls, ";") + System.lineSeparator() + getEncryptParameters());
+			}else {
+				catTransaction.addData(sqls == null ? "" : StringUtils.join(sqls, ";"));
+			}
+
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -111,9 +110,10 @@ public class LogEntry {
 
 	public void catTransactionSuccess(){
 		try {
-			Cat.logEvent(CatConstants.TYPE_SQL_METHOD, sqlType, Message.SUCCESS, "");
-			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, dbUrl);
+			String method = event == null ? "dal_test" : CatInfo.getTypeSQLInfo(event);
 			Cat.logEvent("DAL.version", "(java):" + DalClientVersion.version);
+			Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, "");
+			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, dbUrl);
 			catTransaction.setStatus(Transaction.SUCCESS);
 		} catch (Throwable e) {
 			e.printStackTrace();

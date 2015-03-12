@@ -108,7 +108,6 @@ public abstract class ConnectionAction<T> {
 	public void initLogEntry(String logicDbName, DalHints hints) {
 		entry.setSensitive(hints.is(DalHintEnum.sensitive));
 		entry.setEvent(operation);
-		entry.setTableName(hints.getString(DalHintEnum.tableName));
 		entry.setCommandType();
 		entry.setCallString(callString);
 		

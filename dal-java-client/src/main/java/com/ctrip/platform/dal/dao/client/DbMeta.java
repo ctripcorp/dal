@@ -19,12 +19,14 @@ public class DbMeta {
 	private String shardId;
 	private boolean isMaster;
 	private String url;
+	private String host;
 
 	private DbMeta(Connection conn, String realDbName, DatabaseCategory dbCategory, String shardId, boolean master) throws SQLException {
 		DatabaseMetaData meta = conn.getMetaData();
 
 		databaseName = conn.getCatalog();
-		url = CommonUtil.parseHostFromDBURL(meta.getURL());
+		url = meta.getURL();
+		host = CommonUtil.parseHostFromDBURL(url);
 		userName = meta.getUserName();
 		
 		allInOneKey = realDbName;
@@ -35,7 +37,8 @@ public class DbMeta {
 	
 	public void populate(LogEntry entry) {
 		entry.setDatabaseName(databaseName);
-		entry.setServerAddress(url);
+		entry.setServerAddress(host);
+		entry.setDbUrl(url);
 		entry.setUserName(userName);
 		entry.setMaster(isMaster);
 		entry.setShardId(shardId);
@@ -72,6 +75,4 @@ public class DbMeta {
 	public String getShardId() {
 		return shardId;
 	}
-
-	public String getUrl(){return  url; }
 }

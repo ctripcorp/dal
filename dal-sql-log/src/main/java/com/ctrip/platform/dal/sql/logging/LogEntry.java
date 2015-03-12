@@ -9,6 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ctrip.platform.dal.catlog.CatInfo;
+import com.dianping.cat.Cat;
+import com.dianping.cat.CatConstants;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -48,12 +53,18 @@ public class LogEntry {
 	private boolean isMaster;
 	private String shardId;
 	private String serverAddress;
+	private String dbUrl;
 	private String commandType;
 	private String userName;
 	private int resultCount;
 	private String dao;
 	private String method;
 	private String source;
+
+	private Transaction catTransaction;
+	private String sqlType;
+	private String tableName;
+
 	private Throwable exception;
 	
 	static {
@@ -80,6 +91,37 @@ public class LogEntry {
 	
 	public void setEvent(DalEventEnum event) {
 		this.event = event;
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName == null ? CommonUtil.parseTableName(sqls) : tableName;
+	}
+
+	public void startCatTransaction(){
+		sqlType = event == null ? "dal_test" : CatInfo.getTypeSQLInfo(event);
+		catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, tableName + "." + sqlType);
+		catTransaction.addData(sqls == null ? "" : StringUtils.join(sqls, ","));
+		catTransaction.addData(getEncryptParameters());
+	}
+
+	public void catTransactionSuccess(){
+		Cat.logEvent(CatConstants.TYPE_SQL_METHOD, sqlType, Message.SUCCESS, "");
+		Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, dbUrl);
+		Cat.logEvent("DAL.version", "(java):" + DalClientVersion.version);
+		catTransaction.setStatus(Transaction.SUCCESS);
+	}
+
+	public void catTransactionFailed(Throwable e){
+		catTransaction.setStatus(e);
+		Cat.logError(e);
+	}
+
+	public void catTransactionComplete(){
+		try {
+			catTransaction.complete();
+		}catch (Throwable e){
+			e.printStackTrace();
+		}
 	}
 
 	public boolean isSensitive() {
@@ -156,6 +198,10 @@ public class LogEntry {
 
 	public void setDatabaseName(String databaseName) {
 		this.databaseName = databaseName;
+	}
+
+	public void setDbUrl(String dbUrl) {
+		this.dbUrl = dbUrl;
 	}
 
 	public String getServerAddress() {
@@ -300,6 +346,9 @@ public class LogEntry {
 
 	private String getParams(){
 		StringBuilder sbout = new StringBuilder();
+		if(this.pramemters == null || this.pramemters.length <= 0){
+			return sbout.toString();
+		}
 		if(this.event == DalEventEnum.QUERY || 
 				this.event == DalEventEnum.UPDATE_SIMPLE ||
 				this.event == DalEventEnum.UPDATE_KH ||
@@ -354,9 +403,8 @@ public class LogEntry {
 			}
 		}
 	}
-	
-	public String toJson(){
-		String sqlTpl = this.sensitive ?  SQLHIDDENString : this.getSqlTpl();
+
+	private String getEncryptParameters(){
 		String params = "";
 		if(this.sensitive){
 			try {
@@ -367,6 +415,13 @@ public class LogEntry {
 		} else {
 			params = this.getParams();
 		}
+		return params;
+	}
+
+
+	public String toJson(){
+		String sqlTpl = this.sensitive ?  SQLHIDDENString : this.getSqlTpl();
+		String params = getEncryptParameters();
 		int tplLength = sqlTpl.length();
 		int paramsLength = params.length();
 		if(tplLength + paramsLength > LOG_LIMIT){

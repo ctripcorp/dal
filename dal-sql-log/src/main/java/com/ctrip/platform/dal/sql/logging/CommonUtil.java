@@ -1,6 +1,14 @@
 package com.ctrip.platform.dal.sql.logging;
 
+import java.util.regex.Pattern;
+
 public class CommonUtil {
+    private static final String tableNamePattern = "";
+    private static final Pattern tableNameRegex;
+    static {
+        tableNameRegex = Pattern.compile(tableNamePattern, Pattern.CASE_INSENSITIVE);
+    }
+
 	public static int GetHashCode(String str) {
 		int hash, i;
 		char[] arr = str.toCharArray();
@@ -56,4 +64,8 @@ public class CommonUtil {
          }      
         return sb.toString();     
 	}
+
+    public static String parseTableName(String... sql){
+         return "";
+    }
 }

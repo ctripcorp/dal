@@ -97,12 +97,11 @@ public class LogEntry {
 		try {
 			sqlType = getDao() + "." + getMethod();
 			catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, sqlType);
+			catTransaction.addData(sqls == null ? "" : StringUtils.join(sqls, ";"));
+			catTransaction.addData(System.lineSeparator());
 			if(pramemters != null){
-				catTransaction.addData(sqls == null ? "" : StringUtils.join(sqls, ";") + System.lineSeparator() + getEncryptParameters());
-			}else {
-				catTransaction.addData(sqls == null ? "" : StringUtils.join(sqls, ";"));
+				catTransaction.addData(getEncryptParameters());
 			}
-
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}

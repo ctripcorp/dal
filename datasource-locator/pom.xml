@@ -39,6 +39,7 @@
 			<groupId>com.ctrip.security</groupId>
 			<artifactId>encryption</artifactId>
 			<version>1.0.0.2</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.ctrip.framework.clogging</groupId>

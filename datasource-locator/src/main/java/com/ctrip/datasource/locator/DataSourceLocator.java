@@ -80,13 +80,12 @@ public class DataSourceLocator {
 	 * @throws NamingException
 	 */
 	public DataSource getDataSource(String name) throws Exception {
-		if(envContext!=null){
-			//Tag Name默认会加上appid和hostip，所以这个不需要额外加
+		if(envContext!=null) {
 			metric(TAG_JNDI);
 			return (DataSource)envContext.lookup(name);
 		}
 		
-		if(localDataSource!=null){
+		if(localDataSource!=null) {
 			metric(TAG_LOCAL);
 			return localDataSource.get(name);
 		}

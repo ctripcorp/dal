@@ -20,16 +20,16 @@ import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 import com.ctrip.platform.dal.sql.logging.LogEntry;
 
 public class ConnectionActionTest {
-	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";
+	private static final String connectionString = "HotelPubDB";
 	
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
-		conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-		return new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn));
+		conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
+		return new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
 	}
 	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
-		return new DalConnectionManager(logicDbName, DalConfigureFactory.load());
+		return new DalConnectionManager(connectionString, DalConfigureFactory.load());
 	}
 	
 	@Test
@@ -81,7 +81,7 @@ public class ConnectionActionTest {
 	public void testEnd() {
 		TestConnectionAction test = new TestConnectionAction();
 		test.start();
-		test.initLogEntry(logicDbName, new DalHints());
+		test.initLogEntry(connectionString, new DalHints());
 		Object result = null;
 		Throwable e = null;
 		try {
@@ -105,7 +105,7 @@ public class ConnectionActionTest {
 			TestConnectionAction test = new TestConnectionAction();
 			test.connHolder = getDalConnection();
 			test.statement = test.connHolder.getConn().createStatement();
-			test.rs = test.statement.executeQuery("select * from City");
+			test.rs = test.statement.executeQuery("select * from Hotel");
 			test.rs.next();
 			test.cleanup();
 			assertNotNull(test);

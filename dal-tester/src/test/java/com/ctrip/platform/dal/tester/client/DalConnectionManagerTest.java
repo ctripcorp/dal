@@ -14,10 +14,10 @@ import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 
 public class DalConnectionManagerTest {
-	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";
+	private static final String connectionString = "HotelPubDB";
 	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
-		return new DalConnectionManager(logicDbName, DalConfigureFactory.load());
+		return new DalConnectionManager(connectionString, DalConfigureFactory.load());
 	}
 	
 	@Test
@@ -48,7 +48,7 @@ public class DalConnectionManagerTest {
 				public Object execute() throws Exception {
 					connHolder = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
 					statement = connHolder.getConn().createStatement();
-					rs = statement.executeQuery("select * from City");
+					rs = statement.executeQuery("select * from Hotel");
 					rs.next();
 					return null;
 				}

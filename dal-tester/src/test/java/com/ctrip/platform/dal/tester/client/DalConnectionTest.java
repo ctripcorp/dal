@@ -19,14 +19,14 @@ import com.ctrip.platform.dal.dao.client.DbMeta;
 import com.ctrip.platform.dal.sql.logging.LogEntry;
 
 public class DalConnectionTest {
-	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";
+	private static final String connectionString = "HotelPubDB";
 	
 	@Test
 	public void testDalConnection() throws SQLException {
 		Connection conn = null;
 		try {
-			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn));
+			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
 			assertNotNull(test);
 		} catch (Throwable e){
 			fail();
@@ -41,8 +41,8 @@ public class DalConnectionTest {
 	public void testGetConn() throws SQLException {
 		Connection conn = null;
 		try {
-			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn));
+			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
 			assertNotNull(test.getConn());
 		} catch (Throwable e){
 			fail();
@@ -57,8 +57,8 @@ public class DalConnectionTest {
 	public void testGetMeta() throws SQLException {
 		Connection conn = null;
 		try {
-			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn));
+			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
 			assertNotNull(test.getMeta());
 			LogEntry entry = new LogEntry();
 			
@@ -78,8 +78,8 @@ public class DalConnectionTest {
 	public void testGetCatalog()throws SQLException {
 		Connection conn = null;
 		try {
-			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn));
+			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
 			assertNotNull(test.getDatabaseName());
 		} catch (Throwable e){
 			fail();
@@ -94,8 +94,8 @@ public class DalConnectionTest {
 	public void testSetAutoCommit() throws SQLException {
 		Connection conn = null;
 		try {
-			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn));
+			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
 			test.setAutoCommit(false);
 			assertFalse(conn.getAutoCommit());
 			test.setAutoCommit(true);
@@ -113,8 +113,8 @@ public class DalConnectionTest {
 	public void testApplyHints() throws SQLException {
 		Connection conn = null;
 		try {
-			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn));
+			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
 			DalHints hints = new DalHints();
 			hints.setIsolationLevel(Connection.TRANSACTION_SERIALIZABLE);
 			test.applyHints(hints);
@@ -136,11 +136,11 @@ public class DalConnectionTest {
 	public void testClose() throws SQLException {
 		Connection conn = null;
 		try {
-			conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn));
+			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
+			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
 
 			Statement statement = test.getConn().createStatement();
-			ResultSet rs = statement.executeQuery("select * from City");
+			ResultSet rs = statement.executeQuery("select * from Hotel");
 			rs.next();
 
 			test.close();

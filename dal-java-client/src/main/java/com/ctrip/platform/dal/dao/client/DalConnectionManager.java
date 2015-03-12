@@ -124,11 +124,12 @@ public class DalConnectionManager {
 
 	private <T> T _doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
+		action.initLogEntry(logicDbName, hints);
+		action.start();
+		
 		Throwable ex = null;
 		T result = null;
 		try {
-			action.initLogEntry(logicDbName, hints);
-			action.start();
 			result = action.execute();
 		} catch (Throwable e) {
 			MarkdownManager.detect(action.connHolder, action.start, e);

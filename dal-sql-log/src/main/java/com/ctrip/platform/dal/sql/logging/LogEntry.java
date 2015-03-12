@@ -14,6 +14,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -98,22 +99,34 @@ public class LogEntry {
 	}
 
 	public void startCatTransaction(){
-		sqlType = event == null ? "dal_test" : CatInfo.getTypeSQLInfo(event);
-		catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, tableName + "." + sqlType);
-		catTransaction.addData(sqls == null ? "" : StringUtils.join(sqls, ","));
-		catTransaction.addData(getEncryptParameters());
+		try {
+			sqlType = event == null ? "dal_test" : CatInfo.getTypeSQLInfo(event);
+			catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, tableName + "." + sqlType);
+			catTransaction.addData(sqls == null ? "" : StringUtils.join(sqls, ","));
+			catTransaction.addData(getEncryptParameters());
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void catTransactionSuccess(){
-		Cat.logEvent(CatConstants.TYPE_SQL_METHOD, sqlType, Message.SUCCESS, "");
-		Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, dbUrl);
-		Cat.logEvent("DAL.version", "(java):" + DalClientVersion.version);
-		catTransaction.setStatus(Transaction.SUCCESS);
+		try {
+			Cat.logEvent(CatConstants.TYPE_SQL_METHOD, sqlType, Message.SUCCESS, "");
+			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, dbUrl);
+			Cat.logEvent("DAL.version", "(java):" + DalClientVersion.version);
+			catTransaction.setStatus(Transaction.SUCCESS);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void catTransactionFailed(Throwable e){
-		catTransaction.setStatus(e);
-		Cat.logError(e);
+		try {
+			catTransaction.setStatus(e);
+			Cat.logError(e);
+		} catch (Throwable e1) {
+			e1.printStackTrace();
+		}
 	}
 
 	public void catTransactionComplete(){

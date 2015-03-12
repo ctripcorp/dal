@@ -10,11 +10,6 @@ import com.ctrip.framework.clogging.agent.trace.ITrace;
 import com.ctrip.framework.clogging.agent.trace.TraceManager;
 import com.ctrip.framework.clogging.domain.thrift.LogLevel;
 import com.ctrip.framework.clogging.domain.thrift.LogType;
-import com.dianping.cat.Cat;
-import com.dianping.cat.CatConstants;
-import com.dianping.cat.message.Message;
-import com.dianping.cat.message.Transaction;
-import org.apache.commons.lang.StringUtils;
 
 public class DalLogger {
 	public static final String TITLE = "Dal Fx";

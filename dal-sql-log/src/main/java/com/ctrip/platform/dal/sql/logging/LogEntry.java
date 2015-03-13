@@ -98,7 +98,7 @@ public class LogEntry {
 			sqlType = getDao() + "." + getMethod();
 			catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, sqlType);
 			catTransaction.addData(sqls == null ? "" : StringUtils.join(sqls, ";"));
-			catTransaction.addData(System.lineSeparator());
+			catTransaction.addData("\n");
 			if(pramemters != null){
 				catTransaction.addData(getEncryptParameters());
 			}

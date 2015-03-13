@@ -29,6 +29,7 @@ import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.host.java.JavaColumnNameResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.sql.validate.SQLValidation;
 import com.ctrip.platform.dal.daogen.sql.validate.ValidateResult;
@@ -316,7 +317,8 @@ public class GenTaskBySqlBuilderResource {
 	private Map<String,Integer> getTableColumnSqlType(String set_name, String table_name){
 		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
 		String dbName = databaseSetEntry.getConnectionString();
-		List<AbstractParameterHost> paramsHost = DbUtils.getAllColumnNames(dbName, table_name, CurrentLanguage.Java);
+		List<AbstractParameterHost> paramsHost = DbUtils.getAllColumnNames(dbName, table_name, 
+				new JavaColumnNameResultSetExtractor(dbName, table_name));
 		Map<String,Integer> map = new HashMap<String,Integer>();
 		for(int i=0;i<paramsHost.size();i++){
 			JavaParameterHost paramHost = (JavaParameterHost) paramsHost.get(i);

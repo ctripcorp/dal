@@ -23,6 +23,7 @@ import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.host.java.ContextHost;
+import com.ctrip.platform.dal.daogen.host.java.JavaColumnNameResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.java.JavaMethodHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
@@ -77,9 +78,9 @@ public class AbstractJavaDataPreparer{
 		// 主键及所有列
 		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
 				tableViewSp.getAllInOneName(), tableName);
-		List<AbstractParameterHost> allColumnsAbstract = DbUtils
-				.getAllColumnNames(tableViewSp.getAllInOneName(), tableName,
-						CurrentLanguage.Java);
+		List<AbstractParameterHost> allColumnsAbstract = 
+				DbUtils.getAllColumnNames(tableViewSp.getAllInOneName(), tableName,
+						new JavaColumnNameResultSetExtractor(tableViewSp.getAllInOneName(), tableName));
 		if(null == allColumnsAbstract){
 			throw new Exception(String.format("The column names of tabel[%s, %s] is null", 
 					tableViewSp.getAllInOneName(), tableName));

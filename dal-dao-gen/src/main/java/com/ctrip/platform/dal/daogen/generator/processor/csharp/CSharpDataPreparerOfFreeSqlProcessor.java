@@ -30,6 +30,7 @@ import com.ctrip.platform.dal.daogen.host.csharp.CSharpFreeSqlHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpFreeSqlPojoHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpMethodHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpParameterHost;
+import com.ctrip.platform.dal.daogen.host.csharp.CsharpGivenSqlRSMDExtractor;
 import com.ctrip.platform.dal.daogen.host.csharp.DatabaseHost;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
@@ -251,7 +252,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 
 		for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(
 				task.getAllInOneName(), task.getSql_content(), task.getParameters(),
-				CurrentLanguage.CSharp, false)) {
+				new CsharpGivenSqlRSMDExtractor(), false)) {
 			pHosts.add((CSharpParameterHost) _ahost);
 		}
 

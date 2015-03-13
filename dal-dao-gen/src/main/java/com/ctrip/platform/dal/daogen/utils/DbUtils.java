@@ -13,14 +13,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import microsoft.sql.DateTimeOffset;
-
 import org.apache.log4j.Logger;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.common.enums.DbType;
-import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
@@ -32,7 +29,7 @@ import com.mysql.jdbc.StringUtils;
 public class DbUtils {
 	
 	private static Logger log = Logger.getLogger(DbUtils.class);
-	private static List<Integer> validMode = new ArrayList<Integer>();
+	public static List<Integer> validMode = new ArrayList<Integer>();
 	private static Pattern inRegxPattern = Pattern.compile("in\\s(@\\w+)", java.util.regex.Pattern.CASE_INSENSITIVE);
 
 	static {
@@ -98,11 +95,11 @@ public class DbUtils {
 			rs = statement.executeQuery();
 			return extractor.extract(rs);
 		} catch (Exception ex) {
-			log.warn(ex.getMessage(), ex);
-			throw ex;
+			handleException(null, ex);
 		} finally {
 			releaseResource(rs, connection);
 		}
+		return null;
 	}
 	
 	private static ResultSet query(Connection connection, String sql, Object ...param) throws SQLException {
@@ -147,6 +144,7 @@ public class DbUtils {
 		return false;
 	}
 
+	
 	/**
 	 * 获取所有视图
 	 */
@@ -213,99 +211,18 @@ public class DbUtils {
 		return results;
 	}
 	
-	private static List<AbstractParameterHost> convertSpParamsToCsharpParam(ResultSet spParamRs) throws SQLException {
-		List<AbstractParameterHost> parameters = new ArrayList<AbstractParameterHost>();
-		while (spParamRs.next()) {
-			int paramMode = spParamRs.getShort("COLUMN_TYPE");
-
-			if (!validMode.contains(paramMode)) {
-				continue;
-			}
-
-			CSharpParameterHost host = new CSharpParameterHost();
-			DbType dbType =getDotNetDbType(spParamRs.getString("TYPE_NAME"), 
-					spParamRs.getInt("DATA_TYPE"), spParamRs.getInt("LENGTH"));
-			host.setDbType(dbType);
-			host.setNullable(spParamRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
-
-			if (paramMode == DatabaseMetaData.procedureColumnIn) {
-				host.setDirection(ParameterDirection.Input);
-			} else if (paramMode == DatabaseMetaData.procedureColumnInOut) {
-				host.setDirection(ParameterDirection.InputOutput);
-			} else {
-				host.setDirection(ParameterDirection.Output);
-			}
-
-			host.setName(spParamRs.getString("COLUMN_NAME"));
-			host.setType(DbType.getCSharpType(host.getDbType()));
-			host.setNullable(spParamRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
-
-			if (host.getType() == null) {
-				host.setType("string");
-				host.setDbType(DbType.AnsiString);
-			}
-			parameters.add(host);
-		}
-		return parameters;
-	}
-	
-	private static List<AbstractParameterHost> convertSpParamsToJavaParam(String allInOneName, String spName, ResultSet spParamRs) throws SQLException {
-		List<AbstractParameterHost> parameters = new ArrayList<AbstractParameterHost>();
-		while (spParamRs.next()) {
-			int paramMode = spParamRs.getShort("COLUMN_TYPE");
-			// For My Sql, there is no ORDINAL_POSITION
-			// int paramIndex = spParams.getInt("ORDINAL_POSITION");
-			if (!validMode.contains(paramMode)) {
-				continue;
-			}
-
-			JavaParameterHost host = new JavaParameterHost();
-			// host.setIndex(paramIndex);
-			host.setSqlType(spParamRs.getInt("DATA_TYPE"));
-
-			if (paramMode == DatabaseMetaData.procedureColumnIn) {
-				host.setDirection(ParameterDirection.Input);
-			} else if (paramMode == DatabaseMetaData.procedureColumnInOut) {
-				host.setDirection(ParameterDirection.InputOutput);
-			} else {
-				host.setDirection(ParameterDirection.Output);
-			}
-
-			host.setName(spParamRs.getString("COLUMN_NAME").replace("@",""));
-			Class<?> javaClass = Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
-			if (null == javaClass) {
-				if (-153 == host.getSqlType()) {
-					log.error(String.format("The Table-Valued Parameters is not support for JDBC. [%s, %s]", allInOneName, spName));
-				} else {
-					log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", 
-							host.getName(), allInOneName, spName, host.getSqlType(), javaClass));
-				}
-				return null;
-			}
-			host.setJavaClass(javaClass);
-			parameters.add(host);
-		}
-		return parameters;
-	}
-
 	/**
 	 * 获取存储过程的所有参数
 	 */
-	public static List<AbstractParameterHost> getSpParams(String allInOneName,
-			StoredProcedure sp, CurrentLanguage language) {
+	public static <T> T getSpParams(String allInOneName, StoredProcedure sp, ResultSetExtractor<T> extractor) {
 		Connection connection = null;
 		ResultSet spParamRs = null;
 		try {
 			connection = DataSourceUtil.getConnection(allInOneName);
 			spParamRs = connection.getMetaData().getProcedureColumns(null, sp.getSchema(), sp.getName(), null);
-			if (language == CurrentLanguage.CSharp) {
-				return convertSpParamsToCsharpParam(spParamRs);
-			} else if (language == CurrentLanguage.Java) {
-				return convertSpParamsToJavaParam(allInOneName, sp.getName(), spParamRs);
-			}
+			return extractor.extract(spParamRs);
 		} catch (Exception e) {
-			log.error(String.format("get sp params error: [allInOneName=%s;spName=%s;language=%s]", 
-					allInOneName, sp.getName(), language.name()), e);
+			log.error(String.format("get sp params error: [allInOneName=%s;spName=%s;]", allInOneName, sp.getName()), e);
 		} finally {
 			releaseResource(spParamRs, connection);
 		}
@@ -330,7 +247,7 @@ public class DbUtils {
 		return primaryKeys;
 	}
 	
-	private static DbType getDotNetDbType(String typeName, int dataType, int length) {
+	public static DbType getDotNetDbType(String typeName, int dataType, int length) {
 		DbType dbType;
 		if (null != typeName && typeName.equalsIgnoreCase("year")) {
 			dbType = DbType.Int16;
@@ -350,99 +267,22 @@ public class DbUtils {
 		return dbType;
 	}
 	
-	private static List<AbstractParameterHost> convertColumnNamesToCsharpParam(ResultSet allColumnsRs, String allInOneName,
-			String tableName) throws Exception {
-		List<AbstractParameterHost> allColumns = new ArrayList<AbstractParameterHost>();
-		Map<String,String> columnComment = getSqlserverColumnComment(allInOneName, tableName);
-		while (allColumnsRs.next()) {
-			CSharpParameterHost host = new CSharpParameterHost();
-			String typeName = allColumnsRs.getString("TYPE_NAME");
-			int dataType = allColumnsRs.getInt("DATA_TYPE");
-			int length = allColumnsRs.getInt("COLUMN_SIZE");
-			
-			//特殊处理
-			host.setDbType(getDotNetDbType(typeName, dataType, length));
-			//host.setName(CommonUtils.normalizeVariable(allColumnsRs.getString("COLUMN_NAME")));
-			host.setName(allColumnsRs.getString("COLUMN_NAME"));
-			String remark = allColumnsRs.getString("REMARKS");
-			if(remark == null){
-				String description = columnComment.get(allColumnsRs.getString("COLUMN_NAME").toLowerCase());
-				remark = description==null?"":description;
-			}
-			host.setComment(remark.replace("\n", " "));
-			host.setType(DbType.getCSharpType(host.getDbType()));
-			host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
-			host.setNullable(allColumnsRs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
-			host.setValueType(Consts.CSharpValueTypes.contains(host.getType()));
-			// 仅获取String类型的长度
-			if ("string".equalsIgnoreCase(host.getType()))
-				host.setLength(length);
-
-			allColumns.add(host);
-		}
-		return allColumns;
-	}
-	
-	private static List<AbstractParameterHost> convertColumnNamesToJavaParam(ResultSet allColumnsRs, String allInOneName,
-			String tableName) throws SQLException {
-		List<AbstractParameterHost> allColumns = new ArrayList<AbstractParameterHost>();
-		Map<String, Integer> columnSqlType = getColumnSqlType(allInOneName, tableName);
-		Map<String, Class<?>> typeMapper = getSqlType2JavaTypeMaper(allInOneName, tableName);
-		while (allColumnsRs.next()) {
-			JavaParameterHost host = new JavaParameterHost();
-			String typeName = allColumnsRs.getString("TYPE_NAME");
-			host.setName(allColumnsRs.getString("COLUMN_NAME"));
-//			host.setSqlType(allColumnsRs.getInt("DATA_TYPE"));
-			host.setSqlType(columnSqlType.get(host.getName()));
-			Class<?> javaClass = null;
-			if(null != typeMapper && typeMapper.containsKey(host.getName()) ){
-				javaClass = typeMapper.get(host.getName());
-			}else{
-				javaClass = Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
-			}
-			if(null == javaClass){
-				if(null != typeName && typeName.equalsIgnoreCase("sql_variant")){
-					log.fatal(String.format("The sql_variant is not support by java.[%s, %s, %s, %s, %s]", 
-							host.getName(), allInOneName, tableName, host.getSqlType(), javaClass));
-					return null;
-				} else if(null != typeName && typeName.equalsIgnoreCase("datetimeoffset")){
-					javaClass = DateTimeOffset.class;
-				} else {
-					log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", 
-							host.getName(), allInOneName, tableName, host.getSqlType(), javaClass));
-					return null;
-				}
-			}
-			host.setJavaClass(javaClass);
-			host.setIndex(allColumnsRs.getInt("ORDINAL_POSITION"));
-			host.setIdentity(allColumnsRs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
-			allColumns.add(host);
-		}
-		return allColumns;
-	}
-
-	public static List<AbstractParameterHost> getAllColumnNames(String allInOneName,
-			String tableName, CurrentLanguage language) {
+	public static <T> T getAllColumnNames(String allInOneName, String tableName, ResultSetExtractor<T> extractor) {
 		Connection connection = null;
 		ResultSet allColumnsRs = null;
 		try {
 			connection = DataSourceUtil.getConnection(allInOneName);
 			allColumnsRs = connection.getMetaData().getColumns(null, null, tableName, null);
-			if (language == CurrentLanguage.CSharp) {
-				return convertColumnNamesToCsharpParam(allColumnsRs, allInOneName, tableName);
-			} else if (language == CurrentLanguage.Java) {
-				return convertColumnNamesToJavaParam(allColumnsRs, allInOneName, tableName); 
-			}
+			return extractor.extract(allColumnsRs);
 		} catch (Exception e) {
-			log.error(String.format("get all column names error: [allInOneName=%s;tableName=%s;language=%s]", 
-					allInOneName, tableName, language), e);
+			log.error(String.format("get all column names error: [allInOneName=%s;tableName=%s;]", allInOneName, tableName), e);
 		} finally {
 			releaseResource(allColumnsRs, connection);
 		}
 		return null;
 	}
 
-	private static Map<String, Class<?>> getSqlType2JavaTypeMaper(String allInOneName, String tableViewName) {
+	public static Map<String, Class<?>> getSqlType2JavaTypeMaper(String allInOneName, String tableViewName) {
 		Map<String, Class<?>> map = new HashMap<String, Class<?>>();
 		Connection connection = null;
 		ResultSet rs = null;
@@ -479,7 +319,7 @@ public class DbUtils {
 		return map;
 	}
 	
-	private static Map<String, Integer> getColumnSqlType(String allInOneName, String tableViewName) {
+	public static Map<String, Integer> getColumnSqlType(String allInOneName, String tableViewName) {
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		Connection connection = null;
 		ResultSet rs = null;
@@ -578,63 +418,8 @@ public class DbUtils {
 		return hosts;
 	}
 	
-	private static List<AbstractParameterHost> buildParameterHostByGivenSqlRs(ResultSet rs, CurrentLanguage language) throws SQLException {
-		ResultSetMetaData rsMeta = rs.getMetaData();
-		if (language == CurrentLanguage.CSharp) {
-			List<AbstractParameterHost> pHosts = new ArrayList<AbstractParameterHost>();
-			for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-				CSharpParameterHost pHost = new CSharpParameterHost();
-				pHost.setName(rsMeta.getColumnLabel(i));
-				String typename = rsMeta.getColumnTypeName(i);
-				int dataType = rsMeta.getColumnType(i);
-				DbType dbType;
-				if (null != typename && typename.equalsIgnoreCase("year")) {
-					dbType = DbType.Int16;
-				} else if (null != typename && typename.equalsIgnoreCase("uniqueidentifier")) {
-					dbType = DbType.Guid;
-				} else if (null != typename && typename.equalsIgnoreCase("sql_variant")) {
-					dbType = DbType.Object;
-				} else if (-155 == dataType) {
-					dbType = DbType.DateTimeOffset;
-				} else {
-					dbType =DbType.getDbTypeFromJdbcType(dataType);
-				}
-				pHost.setDbType(dbType);
-				pHost.setType(DbType.getCSharpType(pHost.getDbType()));
-				pHost.setIdentity(false);
-				pHost.setNullable(false);
-				pHost.setPrimary(false);
-				pHost.setLength(rsMeta.getColumnDisplaySize(i));
-				pHosts.add(pHost);
-			}
-			return pHosts;
-		} else {
-			List<AbstractParameterHost> paramHosts = new ArrayList<AbstractParameterHost>();
-			for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-				JavaParameterHost paramHost = new JavaParameterHost();
-				paramHost.setName(rsMeta.getColumnLabel(i));
-				paramHost.setSqlType(rsMeta.getColumnType(i));
-				//paramHost.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType()));
-				Class<?> javaClass = null;
-				try {
-					javaClass = Class.forName(rsMeta.getColumnClassName(i));
-				} catch (Exception e) {
-					e.printStackTrace();
-					javaClass = Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType());
-				}
-				paramHost.setJavaClass(javaClass);
-				paramHost.setIdentity(false);
-				paramHost.setNullable(false);
-				paramHost.setPrimary(false);
-				paramHost.setLength(rsMeta.getColumnDisplaySize(i));
-				paramHosts.add(paramHost);
-			}
-			return paramHosts;
-		}
-	}
-	
 	public static List<AbstractParameterHost> testAQuerySql(String allInOneName, String sql,
-			String params, CurrentLanguage language, boolean justTest) throws Exception {
+			String params, ResultSetMetaDataExtractor<List<AbstractParameterHost>> extractor, boolean justTest) throws Exception {
 		String[] parameters = params.split(";");
 		Connection connection = null;
 		ResultSet rs = null;
@@ -660,7 +445,7 @@ public class DbUtils {
 				}
 			}
 			rs = ps.executeQuery();
-			return justTest ? new ArrayList<AbstractParameterHost>() : buildParameterHostByGivenSqlRs(rs, language);
+			return justTest ? new ArrayList<AbstractParameterHost>() : extractor.extract(rs.getMetaData());
 		} catch(Exception e) {
 			handleException(null, e);
 		} finally {
@@ -723,7 +508,7 @@ public class DbUtils {
 		return dbCategory;
 	}
 	
-	private static Map<String,String> getSqlserverColumnComment(String allInOneName, String tableName) throws Exception {
+	public static Map<String,String> getSqlserverColumnComment(String allInOneName, String tableName) throws Exception {
 		Map<String,String> map = new HashMap<String,String>();
 		if(getDatabaseCategory(allInOneName)==DatabaseCategory.MySql){
 			return map;

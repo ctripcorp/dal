@@ -22,11 +22,12 @@ import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
-import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
+import com.ctrip.platform.dal.daogen.host.csharp.CsharpColumnNameResultSetExtractor;
+import com.ctrip.platform.dal.daogen.host.csharp.CsharpSpParamResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.csharp.DatabaseHost;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
@@ -303,9 +304,9 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 			throw new Exception(String.format("视图 %s 不存在，请编辑DAO再生成", view));
 		}
 
-		List<AbstractParameterHost> allColumnsAbstract = DbUtils
-				.getAllColumnNames(tableViewSp.getAllInOneName(), view,
-						CurrentLanguage.CSharp);
+		List<AbstractParameterHost> allColumnsAbstract = 
+				DbUtils.getAllColumnNames(tableViewSp.getAllInOneName(), view, 
+						new CsharpColumnNameResultSetExtractor(tableViewSp.getAllInOneName(), view));
 
 		List<CSharpParameterHost> allColumns = new ArrayList<CSharpParameterHost>();
 		for (AbstractParameterHost h : allColumnsAbstract) {
@@ -349,7 +350,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 		}
 
 		List<AbstractParameterHost> params = DbUtils.getSpParams(
-				tableViewSp.getAllInOneName(), currentSp, CurrentLanguage.CSharp);
+				tableViewSp.getAllInOneName(), currentSp, new CsharpSpParamResultSetExtractor());
 
 		List<CSharpParameterHost> realParams = new ArrayList<CSharpParameterHost>();
 		for (AbstractParameterHost p : params) {

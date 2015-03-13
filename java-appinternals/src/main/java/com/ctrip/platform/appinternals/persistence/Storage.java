@@ -60,7 +60,7 @@ public class Storage {
 			now = new Date();
 			this.prop.store(ous, "Update at: " + now.toString());
 		}catch(Exception e){
-			logger.error(String.format("Save properties[%] failed.", file.getPath()), e);
+			logger.error(String.format("Save properties[%s] failed.", file.getPath()), e);
 		}
 	}
 	

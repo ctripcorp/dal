@@ -42,25 +42,67 @@ public class DbUtils {
 	}
 
 	public static boolean tableExists(String allInOneName, String tableName) {
+		try {
+			return objectExist(allInOneName, "u", tableName);
+		} catch(Exception e) {
+			log.error(String.format("get table exists error: [allInOneName=%s;tableName=%s]", allInOneName, tableName), e);
+		}
+		return false;
+	}
+	
+	private static boolean objectExist(String allInOneName, String objectType, String objectName) throws Exception {
+		String dbType = getDbType(allInOneName);
+		if (dbType.equals("Microsoft SQL Server")) {
+			return mssqlObjectExist(allInOneName, objectType, objectName);
+		} else {
+			return mysqlObjectExist(allInOneName, objectType, objectName);
+		}
+	}
+	
+	private static boolean mssqlObjectExist(String allInOneName, String objectType, String objectName) throws Exception {
+		String sql = "select Name from sysobjects where xtype = ? and status>=0 and Name=?";
+		return query(allInOneName, sql, new Object[]{objectType, objectName}, new ResultSetExtractor<Boolean>(){
+			@Override
+			public Boolean extract(ResultSet rs) throws SQLException {
+				return rs.next();
+			}
+		});
+	}
+	
+	private static boolean mysqlObjectExist(String allInOneName, String objectType, String objectName) {
 		ResultSet rs = null;
 		Connection connection = null;
 		try {
-			String dbType = getDbType(allInOneName);
 			connection = DataSourceUtil.getConnection(allInOneName);
-			if (dbType.equals("Microsoft SQL Server")) {
-				String sql = "select Name from sysobjects where xtype  = 'u' and status>=0 and Name=?";
-				rs = query(connection, sql, tableName);
-				return rs.next();
-			} else {
-				rs = connection.getMetaData().getTables(null, null, tableName, new String[]{"TABLE"});
-				return rs.next();
-			}
-		} catch (Exception e) {
-			log.error(String.format("get table exists error: [allInOneName=%s;tableName=%s]", allInOneName, tableName), e);
+			objectType = "u".equalsIgnoreCase(objectType) ? "TABLE" : "VIEW";
+			rs = connection.getMetaData().getTables(null, null, objectName, new String[]{objectType});
+			return rs.next();
+		} catch(Exception ex) {
+			log.warn(ex.getMessage(), ex);
 		} finally {
 			releaseResource(rs, connection);
 		}
 		return false;
+	}
+	
+	private static <T> T query(String allInOneName, String sql, Object []params, ResultSetExtractor<T> extractor) throws Exception {
+		ResultSet rs = null;
+		Connection connection = null;
+		try {
+			connection = DataSourceUtil.getConnection(allInOneName);
+			PreparedStatement statement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			if (params != null && params.length > 0) {
+				for (int i=0;i<params.length;i++)
+					statement.setObject(i+1, params[i]);
+			}
+			rs = statement.executeQuery();
+			return extractor.extract(rs);
+		} catch (Exception ex) {
+			log.warn(ex.getMessage(), ex);
+			throw ex;
+		} finally {
+			releaseResource(rs, connection);
+		}
 	}
 	
 	private static ResultSet query(Connection connection, String sql, Object ...param) throws SQLException {
@@ -97,24 +139,10 @@ public class DbUtils {
 	}
 
 	public static boolean viewExists(String allInOneName, String viewName) {
-		Connection connection = null;
-		ResultSet rs = null;
 		try {
-			String dbType = getDbType(allInOneName);
-			connection = DataSourceUtil.getConnection(allInOneName);
-			if ("Microsoft SQL Server".equals(dbType)) {
-				String sql = "select Name from sysobjects where xtype ='v' and status>=0 and Name = ?";
-				rs = query(connection, sql, viewName);
-				return rs.next();
-			} else {
-				rs = connection.getMetaData().getTables(null, null, viewName, new String[]{ "VIEW" });
-				return rs.next();
-			}
-		} catch (Exception e) {
-			log.error(String.format("get view exists error: [allInOneName=%s;viewName=%s]", 
-					allInOneName, viewName), e);
-		} finally {
-			releaseResource(rs, connection);
+			return objectExist(allInOneName, "v", viewName);
+		} catch(Exception e) {
+			log.error(String.format("get view exists error: [allInOneName=%s;viewName=%s]", allInOneName, viewName), e);
 		}
 		return false;
 	}

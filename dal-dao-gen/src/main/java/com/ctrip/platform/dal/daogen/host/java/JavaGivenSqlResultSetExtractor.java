@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -7,12 +8,13 @@ import java.util.List;
 
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
-import com.ctrip.platform.dal.daogen.utils.ResultSetMetaDataExtractor;
+import com.ctrip.platform.dal.daogen.utils.ResultSetExtractor;
 
-public class JavaGivenSqlRSMDExtractor implements ResultSetMetaDataExtractor<List<AbstractParameterHost>> {
+public class JavaGivenSqlResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
 
 	@Override
-	public List<AbstractParameterHost> extract(ResultSetMetaData rsmd) throws SQLException {
+	public List<AbstractParameterHost> extract(ResultSet rs) throws SQLException {
+		ResultSetMetaData rsmd = rs.getMetaData();
 		List<AbstractParameterHost> paramHosts = new ArrayList<AbstractParameterHost>();
 		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 			JavaParameterHost paramHost = new JavaParameterHost();

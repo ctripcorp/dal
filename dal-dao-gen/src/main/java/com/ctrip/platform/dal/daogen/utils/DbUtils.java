@@ -20,10 +20,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
-import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
-import com.ctrip.platform.dal.daogen.host.csharp.CSharpParameterHost;
-import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.mysql.jdbc.StringUtils;
 
 public class DbUtils {
@@ -102,15 +99,6 @@ public class DbUtils {
 		return null;
 	}
 	
-	private static ResultSet query(Connection connection, String sql, Object ...param) throws SQLException {
-		PreparedStatement statement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-		if (param != null && param.length>0) {
-			for (int i=0;i<param.length;i++)
-				statement.setObject(i+1, param[i]);
-		}
-		return statement.executeQuery();
-	}
-
 	/**
 	 * 获取所有表名
 	 */
@@ -143,7 +131,6 @@ public class DbUtils {
 		}
 		return false;
 	}
-
 	
 	/**
 	 * 获取所有视图
@@ -166,49 +153,46 @@ public class DbUtils {
 	}
 
 	public static boolean spExists(String allInOneName, final StoredProcedure sp) {
-		Connection connection = null;
-		ResultSet rs = null;
 		try {
-			String dbType = getDbType(allInOneName);
-			connection = DataSourceUtil.getConnection(allInOneName);
 			// 如果是Sql Server，通过Sql语句获取所有表和视图的名称
-			if (dbType.equals("Microsoft SQL Server")) {
+			if ( !isMySqlServer(allInOneName) ) {
 				String sql = "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE' and SPECIFIC_SCHEMA=? and SPECIFIC_NAME=?";
-				rs = query(connection, sql, sp.getSchema(), sp.getName());
-				return rs.next();
+				return query(allInOneName, sql, new Object[]{sp.getSchema(), sp.getName()}, new ResultSetExtractor<Boolean>() {
+					@Override
+					public Boolean extract(ResultSet rs) throws SQLException {
+						return rs.next();
+					}
+				});
 			}
 		} catch (Exception e) {
 			log.error(String.format("get sp exists error: [allInOneName=%s;spName=%s]", allInOneName, sp.getName()), e);
-		} finally {
-			releaseResource(rs, connection);
 		}
 		return false;
 	}
 
 	public static List<StoredProcedure> getAllSpNames(String allInOneName) throws Exception {
-		List<StoredProcedure> results = new ArrayList<StoredProcedure>();
-		Connection connection = null;
-		ResultSet rs = null;
 		try {
-			String dbType = getDbType(allInOneName);
-			connection = DataSourceUtil.getConnection(allInOneName);
 			// 如果是Sql Server，通过Sql语句获取所有视图的名称
-			if (dbType.equals("Microsoft SQL Server")) {
+			if ( !isMySqlServer(allInOneName) ) {
 				String sql = "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE'";
-				rs = query(connection, sql);
-				while(rs.next()){
-					StoredProcedure sp = new StoredProcedure();
-					sp.setSchema(rs.getString(1));
-					sp.setName(rs.getString(2));
-					results.add(sp);
-				}
+				return query(allInOneName, sql, null, new ResultSetExtractor<List<StoredProcedure>>() {
+					@Override
+					public List<StoredProcedure> extract(ResultSet rs) throws SQLException {
+						List<StoredProcedure> results = new ArrayList<StoredProcedure>();
+						while(rs.next()){
+							StoredProcedure sp = new StoredProcedure();
+							sp.setSchema(rs.getString(1));
+							sp.setName(rs.getString(2));
+							results.add(sp);
+						}
+						return results;
+					}
+				});
 			}
 		} catch (SQLException e) {
 			handleException(String.format("get all sp names error: [allInOneName=%s]", allInOneName), e);
-		} finally {
-			releaseResource(rs, connection);
 		}
-		return results;
+		return new ArrayList<StoredProcedure>();
 	}
 	
 	/**
@@ -283,143 +267,105 @@ public class DbUtils {
 	}
 
 	public static Map<String, Class<?>> getSqlType2JavaTypeMaper(String allInOneName, String tableViewName) {
-		Map<String, Class<?>> map = new HashMap<String, Class<?>>();
-		Connection connection = null;
-		ResultSet rs = null;
 		try {
-			String dbType = getDbType(allInOneName);
-			connection = DataSourceUtil.getConnection(allInOneName);
-			String sql = null;
-			if ("Microsoft SQL Server".equalsIgnoreCase(dbType)) {
-				sql = "select top 1 * from " + tableViewName;
-			} else {
-				sql = "select * from " + tableViewName + " limit 1";
-			}
-			rs = query(connection, sql);
-			ResultSetMetaData rsMeta = rs.getMetaData();
-			for(int i=1;i<=rsMeta.getColumnCount();i++){
-				String columnName = rsMeta.getColumnName(i);
-				Integer sqlType = rsMeta.getColumnType(i);
-				Class<?> javaType = null;
-				try {
-					javaType = Class.forName(rsMeta.getColumnClassName(i));
-				} catch (Exception e) {
-					e.printStackTrace();
-					javaType = Consts.jdbcSqlTypeToJavaClass.get(sqlType);
+			String sql = buildColumnSql(allInOneName, tableViewName);
+			return query(allInOneName, sql, null, new ResultSetExtractor<Map<String, Class<?>>>() {
+				@Override
+				public Map<String, Class<?>> extract(ResultSet rs) throws SQLException {
+					Map<String, Class<?>> map = new HashMap<String, Class<?>>();
+					ResultSetMetaData rsMeta = rs.getMetaData();
+					for(int i=1;i<=rsMeta.getColumnCount();i++){
+						String columnName = rsMeta.getColumnName(i);
+						Integer sqlType = rsMeta.getColumnType(i);
+						Class<?> javaType = null;
+						try {
+							javaType = Class.forName(rsMeta.getColumnClassName(i));
+						} catch (Exception e) {
+							e.printStackTrace();
+							javaType = Consts.jdbcSqlTypeToJavaClass.get(sqlType);
+						}
+						if(!map.containsKey(columnName) && null != javaType)
+							map.put(columnName, javaType);
+					}
+					return map;
 				}
-				if(!map.containsKey(columnName) && null != javaType)
-					map.put(columnName, javaType);
-			}
+			});
 		} catch(Exception e){
 			log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]",
 					allInOneName, tableViewName), e);
-		} finally {
-			releaseResource(rs, connection);
 		}
-		return map;
+		return new HashMap<String, Class<?>>();
+	}
+	
+	private static String buildColumnSql(String allInOneName, String tableViewName) throws Exception {
+		if( isMySqlServer(allInOneName) ){
+			return "select * from " + tableViewName + " limit 1";
+		} else {
+			return "select top 1 * from " + tableViewName;
+		}
 	}
 	
 	public static Map<String, Integer> getColumnSqlType(String allInOneName, String tableViewName) {
-		Map<String, Integer> map = new HashMap<String, Integer>();
-		Connection connection = null;
-		ResultSet rs = null;
 		try {
-			String dbType = getDbType(allInOneName);
-			connection = DataSourceUtil.getConnection(allInOneName);
-			String sql = null;
-			if(dbType.equalsIgnoreCase("Microsoft SQL Server")){
-				sql = "select top 1 * from " + tableViewName;
-			} else {
-				sql = "select * from " + tableViewName + " limit 1";
-			}
-			rs = query(connection, sql);
-			ResultSetMetaData rsMeta = rs.getMetaData();
-			for (int i=1;i<=rsMeta.getColumnCount();i++) {
-				String columnName = rsMeta.getColumnName(i);
-				Integer sqlType = rsMeta.getColumnType(i);
-				if(!map.containsKey(columnName) && null != sqlType) {
-					map.put(columnName, sqlType);
+			String sql = buildColumnSql(allInOneName, tableViewName);
+			return query(allInOneName, sql, null, new ResultSetExtractor<Map<String, Integer>>() {
+				@Override
+				public Map<String, Integer> extract(ResultSet rs) throws SQLException {
+					ResultSetMetaData rsMeta = rs.getMetaData();
+					Map<String, Integer> map = new HashMap<String, Integer>();
+					for (int i=1;i<=rsMeta.getColumnCount();i++) {
+						String columnName = rsMeta.getColumnName(i);
+						Integer sqlType = rsMeta.getColumnType(i);
+						if(!map.containsKey(columnName) && null != sqlType) {
+							map.put(columnName, sqlType);
+						}
+					}
+					return map;
 				}
-			}
+			});
 		} catch(Exception e){
 			log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]",
 					allInOneName, tableViewName), e);
-		} finally {
-			releaseResource(rs, connection);
 		}
-		return map;
+		return new HashMap<String, Integer>();
 	}
 	
+	private static boolean isMySqlServer(String allInOneName) throws Exception {
+		Connection connection = null;
+		try {
+			String dbType = getDbType(allInOneName);
+			connection = DataSourceUtil.getConnection(allInOneName);
+			if(dbType.equalsIgnoreCase("Microsoft SQL Server")){
+				return false;
+			} else {
+				return true;
+			}
+		} finally {
+			releaseResource(null, connection);
+		}
+	}
 	
-	public static List<AbstractParameterHost> getSelectFieldHosts(String allInOneName, String sql, CurrentLanguage language) {
-		List<AbstractParameterHost> hosts = new ArrayList<AbstractParameterHost>();
+	public static List<AbstractParameterHost> getSelectFieldHosts(String allInOneName, String sql, 
+			ResultSetExtractor<List<AbstractParameterHost>> extractor) {
 		String testSql = sql;
 		int whereIndex = StringUtils.indexOfIgnoreCase(testSql, "where");
 		if(whereIndex > 0)
 			testSql = sql.substring(0, whereIndex);
-
-		Connection connection = null;
-		ResultSet rs = null;
 		try {
-			connection = DataSourceUtil.getConnection(allInOneName);
-			DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
-			String dbType = DbUtils.getDbType(allInOneName);
-			if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
-				dbCategory = DatabaseCategory.MySql;
-			}
-			
-			if(dbCategory.equals(DatabaseCategory.MySql)){
+			if( isMySqlServer(allInOneName) ){
 				testSql = testSql + " limit 1";
 			} else{
 				testSql = testSql.replace("select", "select top(1)");
 			}
-			rs = query(connection, testSql);
-			ResultSetMetaData rsMeta = rs.getMetaData();
-			
-			if(language == CurrentLanguage.CSharp){
-				for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-					CSharpParameterHost pHost = new CSharpParameterHost();
-					pHost.setName(rsMeta.getColumnLabel(i));
-					pHost.setDbType(DbType.getDbTypeFromJdbcType(rsMeta.getColumnType(i)));
-					pHost.setType(DbType.getCSharpType(pHost.getDbType()));
-					pHost.setIdentity(false);
-					pHost.setNullable(true);
-					pHost.setValueType(Consts.CSharpValueTypes.contains(pHost.getType()));
-					pHost.setPrimary(false);
-					pHost.setLength(rsMeta.getColumnDisplaySize(i));
-					hosts.add(pHost);
-				}
-			} else {
-				for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-					JavaParameterHost paramHost = new JavaParameterHost();
-					paramHost.setName(rsMeta.getColumnLabel(i));
-					paramHost.setSqlType(rsMeta.getColumnType(i));
-					Class<?> javaClass = null;
-					try {
-						javaClass = Class.forName(rsMeta.getColumnClassName(i));
-					} catch (Exception e) {
-						log.warn(e.getMessage(), e);
-						javaClass = Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType());
-					}
-					paramHost.setJavaClass(javaClass);
-					paramHost.setIdentity(false);
-					paramHost.setNullable(false);
-					paramHost.setPrimary(false);
-					paramHost.setLength(rsMeta.getColumnDisplaySize(i));
-					hosts.add(paramHost);
-				}
-			}
+			return query(allInOneName, testSql, null, extractor);
 		} catch (Exception e) {
-			log.error(String.format("get select field error: [allInOneName=%s;sql=%s;language=%s]", 
-					allInOneName, sql, language), e);
-		} finally {
-			releaseResource(rs, connection);
+			log.error(String.format("get select field error: [allInOneName=%s;sql=%s;]", allInOneName, sql), e);
 		}
-		return hosts;
+		return new ArrayList<AbstractParameterHost>(); 
 	}
 	
 	public static List<AbstractParameterHost> testAQuerySql(String allInOneName, String sql,
-			String params, ResultSetMetaDataExtractor<List<AbstractParameterHost>> extractor, boolean justTest) throws Exception {
+			String params, ResultSetExtractor<List<AbstractParameterHost>> extractor, boolean justTest) throws Exception {
 		String[] parameters = params.split(";");
 		Connection connection = null;
 		ResultSet rs = null;
@@ -445,7 +391,7 @@ public class DbUtils {
 				}
 			}
 			rs = ps.executeQuery();
-			return justTest ? new ArrayList<AbstractParameterHost>() : extractor.extract(rs.getMetaData());
+			return justTest ? new ArrayList<AbstractParameterHost>() : extractor.extract(rs);
 		} catch(Exception e) {
 			handleException(null, e);
 		} finally {
@@ -510,7 +456,7 @@ public class DbUtils {
 	
 	public static Map<String,String> getSqlserverColumnComment(String allInOneName, String tableName) throws Exception {
 		Map<String,String> map = new HashMap<String,String>();
-		if(getDatabaseCategory(allInOneName)==DatabaseCategory.MySql){
+		if( isMySqlServer(allInOneName) ){
 			return map;
 		}
 		String sql = ""
@@ -524,19 +470,15 @@ public class DbUtils {
 				+ "WHERE  sys.columns.object_id = sys.tables.object_id "
 				+ "       AND sys.tables.name = ? "
 				+ "ORDER  BY sys.columns.column_id ";
-		Connection connection = null;
-		ResultSet rs = null;
-		try {
-			connection = DataSourceUtil.getConnection(allInOneName);
-			rs = query(connection, sql, tableName);
-			while (rs.next())
-				map.put(rs.getString("name").toLowerCase(), rs.getString("description"));
-		} catch(Exception e) {
-			handleException(null, e);
-		} finally {
-			releaseResource(rs, connection);
-		}
-		return map;
+		return query(allInOneName, sql, new Object[]{tableName}, new ResultSetExtractor<Map<String,String>>() {
+			@Override
+			public Map<String, String> extract(ResultSet rs) throws SQLException {
+				Map<String,String> map = new HashMap<String,String>();
+				while (rs.next())
+					map.put(rs.getString("name").toLowerCase(), rs.getString("description"));
+				return map;
+			}
+		});
 	}
 	
 	private static void releaseResource(ResultSet rs, Connection conn) {

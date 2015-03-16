@@ -28,7 +28,9 @@ import com.ctrip.platform.dal.daogen.host.csharp.CSharpMethodHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpParameterHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpSpaOperationHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
+import com.ctrip.platform.dal.daogen.host.csharp.CsharpColumnNameResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
+import com.ctrip.platform.dal.daogen.host.java.JavaSelectFieldResultSetExtractor;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -72,9 +74,9 @@ public class AbstractCSharpDataPreparer{
 		}
 
 		// 主键及所有列
-		List<AbstractParameterHost> allColumnsAbstract = DbUtils
-				.getAllColumnNames(tableViewSp.getAllInOneName(), table,
-						CurrentLanguage.CSharp);
+		List<AbstractParameterHost> allColumnsAbstract = 
+				DbUtils.getAllColumnNames(tableViewSp.getAllInOneName(), table, 
+						new CsharpColumnNameResultSetExtractor(tableViewSp.getAllInOneName(), table));
 
 		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
 				tableViewSp.getAllInOneName(), table);
@@ -197,7 +199,7 @@ public class AbstractCSharpDataPreparer{
 			
 			List<AbstractParameterHost> paramAbstractHosts = 
 					DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), 
-							CurrentLanguage.Java);
+							new JavaSelectFieldResultSetExtractor());
 			List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
 			for (AbstractParameterHost phost : paramAbstractHosts) {
 				paramHosts.add((JavaParameterHost)phost);

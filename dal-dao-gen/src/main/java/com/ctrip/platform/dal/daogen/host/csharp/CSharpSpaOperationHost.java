@@ -1,11 +1,9 @@
-
 package com.ctrip.platform.dal.daogen.host.csharp;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
-import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 
@@ -66,7 +64,7 @@ public class CSharpSpaOperationHost {
 		}
 		
 		if(host.exist){
-			List<AbstractParameterHost> parameters =  DbUtils.getSpParams(dbName, currentSp, CurrentLanguage.CSharp);
+			List<AbstractParameterHost> parameters =  DbUtils.getSpParams(dbName, currentSp, new CsharpSpParamResultSetExtractor());
 			List<CSharpParameterHost> realParams = new ArrayList<CSharpParameterHost>();
 			for(AbstractParameterHost _host: parameters){
 				realParams.add((CSharpParameterHost)_host);

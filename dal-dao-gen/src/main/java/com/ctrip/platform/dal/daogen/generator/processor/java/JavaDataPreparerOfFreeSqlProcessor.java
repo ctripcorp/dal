@@ -19,10 +19,10 @@ import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.Progress;
-import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.java.FreeSqlHost;
+import com.ctrip.platform.dal.daogen.host.java.JavaGivenSqlResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.java.JavaMethodHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
@@ -128,7 +128,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 
 							for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(task.getAllInOneName(),
 											task.getSql_content(), task.getParameters(),
-											CurrentLanguage.Java, false)) {
+											new JavaGivenSqlResultSetExtractor(), false)) {
 								paramHosts.add((JavaParameterHost) _ahost);
 							}
 

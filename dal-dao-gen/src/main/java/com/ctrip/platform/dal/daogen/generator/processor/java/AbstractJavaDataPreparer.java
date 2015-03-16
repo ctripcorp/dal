@@ -18,13 +18,14 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Resource;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
-import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.host.java.ContextHost;
+import com.ctrip.platform.dal.daogen.host.java.JavaColumnNameResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.java.JavaMethodHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
+import com.ctrip.platform.dal.daogen.host.java.JavaSelectFieldResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
 import com.ctrip.platform.dal.daogen.host.java.SpOperationHost;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
@@ -77,9 +78,9 @@ public class AbstractJavaDataPreparer{
 		// 主键及所有列
 		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
 				tableViewSp.getAllInOneName(), tableName);
-		List<AbstractParameterHost> allColumnsAbstract = DbUtils
-				.getAllColumnNames(tableViewSp.getAllInOneName(), tableName,
-						CurrentLanguage.Java);
+		List<AbstractParameterHost> allColumnsAbstract = 
+				DbUtils.getAllColumnNames(tableViewSp.getAllInOneName(), tableName,
+						new JavaColumnNameResultSetExtractor(tableViewSp.getAllInOneName(), tableName));
 		if(null == allColumnsAbstract){
 			throw new Exception(String.format("The column names of tabel[%s, %s] is null", 
 					tableViewSp.getAllInOneName(), tableName));
@@ -228,7 +229,8 @@ public class AbstractJavaDataPreparer{
 			}
 			// select sql have select field and where condition clause
 			List<AbstractParameterHost> paramAbstractHosts = 
-					DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), CurrentLanguage.Java);
+					DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), 
+							new JavaSelectFieldResultSetExtractor());
 			List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
 			for (AbstractParameterHost phost : paramAbstractHosts) {
 				paramHosts.add((JavaParameterHost)phost);

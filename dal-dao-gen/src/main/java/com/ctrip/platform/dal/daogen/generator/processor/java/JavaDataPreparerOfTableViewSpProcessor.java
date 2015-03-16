@@ -19,10 +19,11 @@ import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
-import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.host.java.JavaColumnNameResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
+import com.ctrip.platform.dal.daogen.host.java.JavaSpParamResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
 import com.ctrip.platform.dal.daogen.host.java.SpDbHost;
 import com.ctrip.platform.dal.daogen.host.java.SpHost;
@@ -247,7 +248,8 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 		List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(
 				tableViewSp.getAllInOneName(), viewName);
 		List<AbstractParameterHost> params = DbUtils.getAllColumnNames(
-				tableViewSp.getAllInOneName(), viewName, CurrentLanguage.Java);
+				tableViewSp.getAllInOneName(), viewName, 
+				new JavaColumnNameResultSetExtractor(tableViewSp.getAllInOneName(), viewName));
 		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 		if(null == params){
 			throw new Exception(String.format("The column names of view[%s, %s] is null", 
@@ -296,7 +298,8 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 		spHost.setPojoClassName(className);
 		spHost.setSpName(spName);
 		List<AbstractParameterHost> params = DbUtils.getSpParams(
-				tableViewSp.getAllInOneName(), currentSp, CurrentLanguage.Java);
+				tableViewSp.getAllInOneName(), currentSp, 
+				new JavaSpParamResultSetExtractor(tableViewSp.getAllInOneName(), currentSp.getName()));
 		List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
 		String callParams = "";
 		if(null == params){

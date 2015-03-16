@@ -110,7 +110,7 @@ public class LogEntry {
 	public void catTransactionSuccess(){
 		try {
 			String method = event == null ? "dal_test" : CatInfo.getTypeSQLInfo(event);
-			Cat.logEvent("DAL.version", "(java):" + DalClientVersion.version);
+			Cat.logEvent("DAL.version", "java-" + DalClientVersion.version);
 			Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, "");
 			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, dbUrl);
 			catTransaction.setStatus(Transaction.SUCCESS);

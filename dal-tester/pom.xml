@@ -8,18 +8,18 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>dal-tester</artifactId>
-	<version>1.3.2</version>
+	<version>1.3.3</version>
 	<name>com.ctrip.platform.dal.tester</name>
 	<dependencies>
 		<dependency>
 			<groupId>com.ctrip.platform</groupId>
 			<artifactId>dal-java-client</artifactId>
-			<version>1.3.3</version>
+			<version>1.3.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ctrip.platform</groupId>
 			<artifactId>dal-java-ext</artifactId>
-			<version>1.3.2</version>
+			<version>1.3.3</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

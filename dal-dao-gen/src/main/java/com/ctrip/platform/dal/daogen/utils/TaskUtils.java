@@ -2,10 +2,11 @@ package com.ctrip.platform.dal.daogen.utils;
 
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -13,20 +14,17 @@ import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 
 public class TaskUtils {
 	
-	public static final int BATCH_SIZE = 50;
+	private static Logger logger = Logger.getLogger(TaskUtils.class);
 	
-	private static ExecutorService executor = Executors.newCachedThreadPool();
+	private static ExecutorService executor = new ThreadPoolExecutor(20,
+            50,
+            120,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<Runnable>());
 	
 	public static void invokeBatch(Logger log, List<Callable<ExecuteResult>> tasks) {
-		int loop = tasks.size();
 		try {
-			for(int i = 0; i < loop; i += BATCH_SIZE){
-				TaskUtils.log(log,
-						executor.invokeAll(
-								tasks.subList(i, Math.min(loop, i + BATCH_SIZE))
-							)
-						);
-			}
+			TaskUtils.log( log, executor.invokeAll(tasks) );
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -38,10 +36,8 @@ public class TaskUtils {
 				ExecuteResult result = future.get();
 				log.info(String.format("Execute [%s] task completed: %s", 
 						result.getTaskName(), result.isSuccessal()));
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
 			}
 		}
 	}

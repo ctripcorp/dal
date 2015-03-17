@@ -96,7 +96,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			dao.delete(new DalHints(), testdata[i]);
 #if($host.isHasIdentity())
 		    dao.insert(new DalHints(), keyHolder, testdata[i]);
-			testdata[i].set${host.getPrimaryKeyName()}((${host.getPrimaryKeyType()})keyHolder.getKey(i));
+			##testdata[i].set${host.getPrimaryKeyName()}((${host.getPrimaryKeyType()})keyHolder.getKey(i));
 #else
 		    dao.insert(new DalHints(), testdata[i]);
 #end	    

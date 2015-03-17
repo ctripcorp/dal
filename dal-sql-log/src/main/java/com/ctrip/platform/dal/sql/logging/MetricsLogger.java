@@ -29,7 +29,7 @@ public class MetricsLogger {
     private static final String DB = "DB";
     
     public static final String CLIENT = "Client";
-	private static final String CLIENT_NAME = "Java " + DalClientVersion.version;
+	//private static final String CLIENT_NAME = "Java " + DalClientVersion.version;
     
 	//private static Queue<MasterSlaveMetrics> msQueue = new ConcurrentLinkedQueue<MasterSlaveMetrics>();
 	//private static Map<String, MasterSlaveMetrics> msCache = new HashMap<String, MasterSlaveMetrics>();
@@ -44,19 +44,19 @@ public class MetricsLogger {
 	}
 	
 	public static void success(LogEntry entry, long duration) {
-		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), SUCCESS, duration);
-		report(entry.getDatabaseName(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name());
+		report(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), SUCCESS, duration);
+		report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name());
 	}
 	
 	public static void fail(LogEntry entry, long duration) {
-		report(entry.getDao(), entry.getMethod(), entry.getSqlSize(), FAIL, duration);
+		report(entry.getDao(), entry.getMethod(),entry.getClientVersion(), entry.getSqlSize(), FAIL, duration);
 	}
 	
 	public static void shutdown(){
 		//sender.shutdown();
 	}
 	
-	public static void report(String databaseSet, String databaseType,String operationType){
+	public static void report(String databaseSet, String version, String databaseType,String operationType){
 		MasterSlaveMetrics data = new MasterSlaveMetrics();
 		data.count = 1;
 		data.databaseSet = databaseSet;
@@ -67,11 +67,11 @@ public class MetricsLogger {
 		data.tags.put(DB, data.databaseSet);
 		data.tags.put(DBTYPE, data.databaseType);
 		data.tags.put(OPTTYPE, data.operationType);
-		data.tags.put(CLIENT, CLIENT_NAME);
+		data.tags.put(CLIENT, "Java " + version);
 		
 		metricLogger.log(MASTER_SLAVE_COUNT, data.count, data.tags);
 	}
-	public static void report(String dao, String method, int size, String status, long duration) {
+	public static void report(String dao, String method, String version, int size, String status, long duration) {
 		long cost = duration;
         if (size < 200)
         {
@@ -103,7 +103,7 @@ public class MetricsLogger {
         tags.put(METHOD, md.method);
         tags.put(STATUS, md.status);
         tags.put(SIZE, String.valueOf(md.size));
-        tags.put(CLIENT, CLIENT_NAME);
+        tags.put(CLIENT, "Java " + version);
         md.tags = tags;
         
         metricLogger.log(COUNT, md.count, md.tags);    

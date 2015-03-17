@@ -22,20 +22,20 @@ public class Metrics {
 	}
 	
 	public static void success(LogEntry entry, long duration) {
-		report(entry.getDatabaseName(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name());
-		SQLInfo info = new SQLInfo(entry.getDao(), entry.getMethod(), entry.getSqlSize(), SUCCESS);
+		report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name());
+		SQLInfo info = new SQLInfo(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), SUCCESS);
 		metric.log(SQLInfo.COST, duration * ticksPerMillisecond, info.toTag());
 		metric.log(SQLInfo.COUNT, 1, info.toTag());
 	}
 	
 	public static void fail(LogEntry entry, long duration) {
-		SQLInfo info = new SQLInfo(entry.getDao(), entry.getMethod(), entry.getSqlSize(), FAIL);
+		SQLInfo info = new SQLInfo(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), FAIL);
 		metric.log(SQLInfo.COST, duration * ticksPerMillisecond, info.toTag());
 		metric.log(SQLInfo.COUNT, 1, info.toTag());
 	}
 	
-	private static void report(String databaseSet, String databaseType,String operationType){
-		OptInfo info = new OptInfo(databaseSet, databaseType, operationType);
+	private static void report(String databaseSet, String version, String databaseType,String operationType){
+		OptInfo info = new OptInfo(databaseSet,version, databaseType, operationType);
 		metric.log(OptInfo.KEY, 1, info.toTag());
 	}
 }

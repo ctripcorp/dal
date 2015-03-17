@@ -9,6 +9,9 @@
   </parent>
   <artifactId>dal-java-client</artifactId>
   <version>1.3.4</version>
+  <properties>
+    <ver.version>${project.version}</ver.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.ctrip.platform</groupId>
@@ -53,4 +56,15 @@
     	<version>1.0.1</version>
     </dependency>
   </dependencies>
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>**/*.prop</include>
+        </includes>
+      </resource>
+    </resources>
+  </build>
 </project>

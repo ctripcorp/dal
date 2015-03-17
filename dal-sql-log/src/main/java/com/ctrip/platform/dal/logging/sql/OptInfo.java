@@ -3,13 +3,11 @@ package com.ctrip.platform.dal.logging.sql;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ctrip.platform.dal.sql.logging.DalClientVersion;
-
 public class OptInfo {
 	public static final String KEY = "arch.dal.rw.count";
 	
 	public static final String CLIENT = "Client";
-	private static final String CLIENT_NAME = "Java " + DalClientVersion.version;
+	private String version ;
 	
     private static final String DB = "DB";
 	private String databaseSet;
@@ -20,8 +18,9 @@ public class OptInfo {
 	private static final String OPTTYPE = "OperationType";
 	private String operationType;
 	
-	public OptInfo(String databaseSet, String databaseType,String operationType){
+	public OptInfo(String databaseSet, String version, String databaseType,String operationType){
 		this.databaseSet = databaseSet;
+		this.version = "Java " + version;
 		this.databaseType = databaseType;
 		this.operationType = operationType;
 	}
@@ -50,7 +49,7 @@ public class OptInfo {
 		tag.put(DB, this.databaseSet);
 		tag.put(DBTYPE, this.databaseType);
 		tag.put(OPTTYPE, this.operationType);
-		tag.put(CLIENT, CLIENT_NAME);
+		tag.put(CLIENT, this.version);
 		return tag;
 	}
 }

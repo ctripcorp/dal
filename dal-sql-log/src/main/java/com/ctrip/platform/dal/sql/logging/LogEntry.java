@@ -61,6 +61,7 @@ public class LogEntry {
 	private String dao;
 	private String method;
 	private String source;
+	private String clientVersion;
 
 	private Transaction catTransaction;
 	private String sqlType;
@@ -110,7 +111,7 @@ public class LogEntry {
 	public void catTransactionSuccess(){
 		try {
 			String method = event == null ? "dal_test" : CatInfo.getTypeSQLInfo(event);
-			Cat.logEvent("DAL.version", "java-" + DalClientVersion.version);
+			Cat.logEvent("DAL.version", "java-" + this.getClientVersion());
 			Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, "");
 			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, dbUrl);
 			catTransaction.setStatus(Transaction.SUCCESS);
@@ -134,6 +135,14 @@ public class LogEntry {
 		}catch (Throwable e){
 			e.printStackTrace();
 		}
+	}
+
+	public void setClientVersion(String clientVersion) {
+		this.clientVersion = clientVersion;
+	}
+
+	public String getClientVersion() {
+		return clientVersion;
 	}
 
 	public boolean isSensitive() {

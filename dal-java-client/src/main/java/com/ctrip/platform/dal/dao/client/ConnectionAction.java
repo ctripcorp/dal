@@ -13,10 +13,7 @@ import java.util.Set;
 
 import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.platform.dal.catlog.CatInfo;
-import com.ctrip.platform.dal.dao.DalCommand;
-import com.ctrip.platform.dal.dao.DalHintEnum;
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
@@ -106,6 +103,7 @@ public abstract class ConnectionAction<T> {
 	 * so it must be put after startTransaction. It is not require so for doInConnection
 	 */
 	public void initLogEntry(String logicDbName, DalHints hints) {
+		entry.setClientVersion(Version.getVersion());
 		entry.setSensitive(hints.is(DalHintEnum.sensitive));
 		entry.setEvent(operation);
 		entry.setCommandType();

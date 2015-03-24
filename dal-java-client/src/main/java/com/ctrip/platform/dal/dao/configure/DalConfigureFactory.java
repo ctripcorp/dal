@@ -17,6 +17,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.client.DalLogger;
 
 /*
 <dal name="dal.prize.test">
@@ -110,7 +111,9 @@ public class DalConfigureFactory {
 		String name = getAttribute(root, NAME);
 		Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS));
 		
-		return new DalConfigure(name, databaseSets);
+		String dalLoggerImpl = "com.ctrip.platform.dal.sql.logging.DalLogger";
+		DalLogger logger = (DalLogger)Class.forName(dalLoggerImpl).newInstance();
+		return new DalConfigure(name, databaseSets, logger);
 	}
 	
 	private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode) throws Exception {

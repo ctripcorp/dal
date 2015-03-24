@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.ctrip.datasource.locator.DataSourceLocator;
-import com.ctrip.platform.dal.catlog.CatInfo;
+import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
@@ -14,14 +14,8 @@ import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
-import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 import com.ctrip.platform.dal.sql.logging.DalLogger;
 import com.ctrip.platform.dal.sql.logging.DalWatcher;
-import com.dianping.cat.Cat;
-import com.dianping.cat.CatConstants;
-import com.dianping.cat.message.Message;
-import com.dianping.cat.message.Transaction;
-import org.apache.commons.lang.StringUtils;
 
 public class DalConnectionManager {
 	private DalConfigure config;
@@ -34,6 +28,10 @@ public class DalConnectionManager {
 	
 	public String getLogicDbName() {
 		return logicDbName;
+	}
+	
+	public DalConfigure getConfig() {
+		return config;
 	}
 
 	public DalConnection getNewConnection(DalHints hints, boolean useMaster, DalEventEnum operation)
@@ -124,7 +122,7 @@ public class DalConnectionManager {
 
 	private <T> T _doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
-		action.initLogEntry(logicDbName, hints);
+		action.initLogEntry(logicDbName, hints, config.getDalLogger());
 		action.start();
 		
 		Throwable ex = null;

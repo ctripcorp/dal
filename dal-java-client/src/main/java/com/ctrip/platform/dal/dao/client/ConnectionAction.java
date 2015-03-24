@@ -12,19 +12,12 @@ import java.util.List;
 import java.util.Set;
 
 import com.ctrip.framework.clogging.agent.config.LogConfig;
-import com.ctrip.platform.dal.catlog.CatInfo;
 import com.ctrip.platform.dal.dao.DalCommand;
+import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
-import com.ctrip.platform.dal.sql.logging.DalEventEnum;
-import com.ctrip.platform.dal.sql.logging.DalLogger;
-import com.ctrip.platform.dal.sql.logging.LogEntry;
 import com.ctrip.platform.dal.sql.logging.MetricsLogger;
-import com.dianping.cat.Cat;
-import com.dianping.cat.CatConstants;
-import com.dianping.cat.message.Transaction;
 
 public abstract class ConnectionAction<T> {
 	public DalEventEnum operation;
@@ -43,6 +36,8 @@ public abstract class ConnectionAction<T> {
 	public CallableStatement callableStatement;
 	public ResultSet rs;
 	public long start;
+	
+	public DalLogger logger;
 	public LogEntry entry = new LogEntry();
 	
 	void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
@@ -105,7 +100,9 @@ public abstract class ConnectionAction<T> {
 	 * createLogEntry will check whether current operation is in transaction. 
 	 * so it must be put after startTransaction. It is not require so for doInConnection
 	 */
-	public void initLogEntry(String logicDbName, DalHints hints) {
+	public void initLogEntry(String logicDbName, DalHints hints, DalLogger logger) {
+		entry = logger.createLogEntry();
+		
 		entry.setSensitive(hints.is(DalHintEnum.sensitive));
 		entry.setEvent(operation);
 		entry.setCommandType();
@@ -134,6 +131,7 @@ public abstract class ConnectionAction<T> {
 	
 	public void start() {
 		start = System.currentTimeMillis();
+		logger.start(entry);
 	}
 	
 	public void end(Object result, Throwable e) throws SQLException {

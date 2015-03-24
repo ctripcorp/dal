@@ -2,15 +2,9 @@ package com.ctrip.platform.dal.dao.client;
 
 import java.sql.SQLException;
 
-import com.ctrip.platform.dal.catlog.CatInfo;
+import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
-import com.ctrip.platform.dal.sql.logging.DalEventEnum;
-import com.dianping.cat.Cat;
-import com.dianping.cat.CatConstants;
-import com.dianping.cat.message.Message;
-import com.dianping.cat.message.Transaction;
-import org.apache.commons.lang.StringUtils;
 
 public class DalTransactionManager {
 	private DalConnectionManager connManager;
@@ -87,7 +81,7 @@ public class DalTransactionManager {
 		T result = null;
 		int level;
 		try {
-			action.initLogEntry(connManager.getLogicDbName(), hints);
+			action.initLogEntry(connManager.getLogicDbName(), hints, connManager.getConfig().getDalLogger());
 			action.start();
 			level = startTransaction(hints, action.operation);
 

@@ -13,6 +13,7 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalCommand;
+import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
@@ -22,7 +23,6 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
-import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 /**

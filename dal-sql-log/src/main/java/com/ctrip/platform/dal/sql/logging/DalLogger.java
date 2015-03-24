@@ -13,13 +13,26 @@ import com.ctrip.framework.clogging.domain.thrift.LogType;
 
 public class DalLogger {
 	public static final String TITLE = "Dal Fx";
-	public static final String LOG_NAME = "DAL Java Client " + DalClientVersion.version;
+	//public static final String LOG_NAME = "DAL Java Client " + DalClientVersion.version;
+	private static final String CLIENT_VERSION = "dal.client.version";
 	public static AtomicBoolean simplifyLogging = new AtomicBoolean(false);
 
 	public static ThreadLocal<DalWatcher> watcher = new ThreadLocal<DalWatcher>();
 
-	private static ILog logger = LogManager.getLogger(LOG_NAME);
-	private static ITrace trace = TraceManager.getTracer(LOG_NAME);
+	private static ILog logger;
+	private static ITrace trace;
+
+	static {
+		String clientVersion = System.getProperty(CLIENT_VERSION);
+		if(clientVersion == null){
+			logger = LogManager.getLogger(DalLogger.class);
+			trace = TraceManager.getTracer(DalLogger.class);
+		}else {
+			logger = LogManager.getLogger("DAL Java Client " + clientVersion);
+			trace = TraceManager.getTracer("DAL Java Client " + clientVersion);
+		}
+
+	}
 
 	public static boolean isSimplifyLogging() {
 		return simplifyLogging.get();

@@ -3,8 +3,6 @@ package com.ctrip.platform.dal.logging.markdown;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ctrip.platform.dal.sql.logging.DalClientVersion;
-
 
 public class MarkDownInfo {	
 	public static final String KEY = "arch.dal.markdown.info";
@@ -25,13 +23,14 @@ public class MarkDownInfo {
 	private MarkDownReason reason;
 	
 	public static final String CLIENT = "Client";
-	private static final String CLIENT_NAME = "Java " + DalClientVersion.version;
+	private String version;
 	
 	private int total = 0;
 	private int fail = 0;
 
-	public MarkDownInfo(String allinoneKey, MarkDownPolicy policy, long duration){
+	public MarkDownInfo(String allinoneKey,String version, MarkDownPolicy policy, long duration){
 		this.allInOneKey = allinoneKey;
+		this.version = "Java " + version;
 		this.policy = policy;
 		this.duration = duration;
 	}
@@ -92,7 +91,7 @@ public class MarkDownInfo {
 		tag.put(MarkDown_Status, this.status);
 		tag.put(MarkDown_SamplingDuration, this.duration.toString());
 		tag.put(MarkDown_MarkDownReason, this.reason.toString().toLowerCase());
-		tag.put(CLIENT, CLIENT_NAME);
+		tag.put(CLIENT, this.version);
 		return tag;
 	}
 }

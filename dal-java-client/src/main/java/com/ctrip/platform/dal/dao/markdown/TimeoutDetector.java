@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.markdown;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ctrip.platform.dal.dao.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,7 @@ public class TimeoutDetector implements ErrorDetector{
 			ConfigBeanFactory.getMarkdownConfigBean().markdown(key);
 			logger.info(String.format("Database %s has been marked down automatically", key));
 		}
-		MarkDownInfo info = new MarkDownInfo(key, MarkDownPolicy.TIMEOUT, dc.getDuration());
+		MarkDownInfo info = new MarkDownInfo(key, Version.getVersion(), MarkDownPolicy.TIMEOUT, dc.getDuration());
 		
 		info.setReason(reason);	
 		info.setStatus("Total");

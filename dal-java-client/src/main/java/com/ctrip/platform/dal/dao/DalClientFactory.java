@@ -7,9 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
+import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
-import com.ctrip.platform.dal.sql.logging.MetricsLogger;
 
 public class DalClientFactory {
 	private static Logger logger = LoggerFactory.getLogger(DalClientFactory.class);
@@ -106,12 +106,16 @@ public class DalClientFactory {
 		return config;
 	}
 
+	public static DalLogger getDalLogger() {
+		return getDalConfigure().getDalLogger();
+	}
+	
 	/**
 	 * Release All resource the Dal client used.
 	 */
 	public static void shutdownFactory() {
 		logger.info("Start shutdown Dal Java Client Factory");
-		MetricsLogger.shutdown();
+		getDalLogger().shutdown();
 		logger.info("Dal Java Client Factory is shutdown");
 	}
 }

@@ -14,16 +14,16 @@ import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
-import com.ctrip.platform.dal.sql.logging.DalLogger;
-import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 public class DalConnectionManager {
 	private DalConfigure config;
 	private String logicDbName;
+	private DalLogger logger;
 
 	public DalConnectionManager(String logicDbName, DalConfigure config) {
 		this.logicDbName = logicDbName;
 		this.config = config;
+		this.logger = config.getDalLogger();
 	}
 	
 	public String getLogicDbName() {
@@ -56,7 +56,7 @@ public class DalConnectionManager {
 		}
 		catch(SQLException ex)
 		{
-			DalLogger.logGetConnectionFailed(realDbName, ex);
+			logger.getConnectionFailed(realDbName, ex);
 			throw ex;
 		}
 		return connHolder;
@@ -93,7 +93,7 @@ public class DalConnectionManager {
 		try {	
 			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
 			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), shardId, isMaster, conn);
-			return new DalConnection(conn, meta);
+			return new DalConnection(conn, meta, logger);
 		} catch (Throwable e) {
 			throw new DalException(ErrorCode.CantGetConnection, e, allInOneKey);
 		}

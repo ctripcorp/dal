@@ -17,7 +17,7 @@ import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.sql.logging.MetricsLogger;
+import com.ctrip.platform.dal.dao.Version;
 
 public abstract class ConnectionAction<T> {
 	public DalEventEnum operation;
@@ -106,7 +106,6 @@ public abstract class ConnectionAction<T> {
 		entry.setClientVersion(Version.getVersion());
 		entry.setSensitive(hints.is(DalHintEnum.sensitive));
 		entry.setEvent(operation);
-		entry.setCommandType();
 		entry.setCallString(callString);
 		
 		if(sqls != null)	
@@ -126,7 +125,7 @@ public abstract class ConnectionAction<T> {
 			entry.setPramemters(parameters.toLogString());
 			hints.setParameters(parameters);
 		}
-		entry.startCatTransaction();
+//		entry.startCatTransaction();
 		entry.setTransactional(DalTransactionManager.isInTransaction());
 	}
 	
@@ -138,21 +137,21 @@ public abstract class ConnectionAction<T> {
 	public void end(Object result, Throwable e) throws SQLException {
 		log(result, e);	
 		handleException(e);
-		entry.catTransactionComplete();
+//		entry.catTransactionComplete();
 	}
 
 	private void log(Object result, Throwable e) {
 		try {
 			long duration = System.currentTimeMillis() - start;
-			if(e == null) {
-				DalLogger.success(entry, duration, fetchQueryRows(result));
-				MetricsLogger.success(entry, duration);
-			}else{
-				DalLogger.fail(entry, duration, e);
-				MetricsLogger.fail(entry, duration);
-			}
+//			if(e == null) {
+//				logger.success(entry, duration, fetchQueryRows(result));
+//				MetricsLogger.success(entry, duration);
+//			}else{
+//				DalLogger.fail(entry, duration, e);
+//				MetricsLogger.fail(entry, duration);
+//			}
 		} catch (Throwable e1) {
-			DalLogger.error("Can not log", e1);
+			logger.error("Can not log", e1);
 		}
 	}
 
@@ -172,7 +171,7 @@ public abstract class ConnectionAction<T> {
 			try {
 				rs.close();
 			} catch (Throwable e) {
-				DalLogger.error("Close result set failed.", e);
+				logger.error("Close result set failed.", e);
 			}
 		}
 		rs = null;
@@ -191,7 +190,7 @@ public abstract class ConnectionAction<T> {
 			try {
 				_statement.close();
 			} catch (Throwable e) {
-				DalLogger.error("Close statement failed.", e);
+				logger.error("Close statement failed.", e);
 			}
 		}		
 	}

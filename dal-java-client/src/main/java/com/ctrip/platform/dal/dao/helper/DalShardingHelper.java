@@ -12,11 +12,10 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
-import com.ctrip.platform.dal.dao.client.DbMeta;
+import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
-import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 public class DalShardingHelper {
 	public static boolean isShardingEnabled(String logicDbName) {

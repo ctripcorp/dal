@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.logging.markdown;
+package com.ctrip.platform.dal.dao.markdown;
 
 public enum MarkDownReason {
 	ERRORCOUNT,

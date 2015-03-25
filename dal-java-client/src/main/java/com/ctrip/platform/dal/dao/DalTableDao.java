@@ -21,11 +21,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper.BulkTask;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
-import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 /**
  * Base table DAO wraps common CRUD for particular table. The generated table

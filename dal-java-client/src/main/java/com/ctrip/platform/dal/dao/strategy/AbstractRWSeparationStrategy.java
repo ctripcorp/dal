@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.dao.strategy;
 
+import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
-import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 
 public abstract class AbstractRWSeparationStrategy implements DalShardingStrategy {
 	@Override

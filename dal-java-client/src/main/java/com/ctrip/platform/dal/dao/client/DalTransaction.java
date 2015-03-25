@@ -5,7 +5,6 @@ import java.sql.SQLException;
 
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
-import com.ctrip.platform.dal.sql.logging.DalLogger;
 
 public class DalTransaction  {
 	private String logicDbName;
@@ -13,11 +12,13 @@ public class DalTransaction  {
 	private int level = 0;
 	private boolean rolledBack = false;
 	private boolean completed = false;
+	private DalLogger logger;
 	
-	public DalTransaction(DalConnection connHolder, String logicDbName) throws SQLException{
+	public DalTransaction(DalConnection connHolder, String logicDbName, DalLogger logger) throws SQLException{
 		this.logicDbName = logicDbName;
 		this.connHolder = connHolder;
 		connHolder.getConn().setAutoCommit(false);
+		this.logger = logger;
 	}
 	
 	public void validate(String logicDbName) throws SQLException {
@@ -79,7 +80,7 @@ public class DalTransaction  {
 			else
 				conn.rollback();
 		} catch (Throwable e) {
-			DalLogger.error("Can not commit or rollback on current connection", e);
+			logger.error("Can not commit or rollback on current connection", e);
 		}
 
 		try {

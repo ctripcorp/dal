@@ -10,6 +10,8 @@ import com.ctrip.framework.clogging.agent.trace.ITrace;
 import com.ctrip.framework.clogging.agent.trace.TraceManager;
 import com.ctrip.framework.clogging.domain.thrift.LogLevel;
 import com.ctrip.framework.clogging.domain.thrift.LogType;
+import com.ctrip.platform.dal.dao.DalEventEnum;
+import com.ctrip.platform.dal.dao.client.DalWatcher;
 
 public class DalLogger {
 	public static final String TITLE = "Dal Fx";
@@ -42,7 +44,7 @@ public class DalLogger {
 		simplifyLogging.set(simplify);
 	}
 
-	public static void success(LogEntry entry, long duration, int count) {
+	public static void success(CtripLogEntry entry, long duration, int count) {
 		entry.setDuration(duration);
 		entry.setSuccess(true);
 		entry.setResultCount(count);
@@ -50,7 +52,7 @@ public class DalLogger {
 		entry.catTransactionSuccess();
 	}
 
-	public static void fail(LogEntry entry, long duration, Throwable e) {
+	public static void fail(CtripLogEntry entry, long duration, Throwable e) {
 		entry.setDuration(duration);
 		entry.setSuccess(false);
 		entry.setErrorMsg(e.getMessage());
@@ -59,7 +61,7 @@ public class DalLogger {
 		entry.catTransactionFailed(e);
 	}
 
-	public static void log(LogEntry entry) {
+	public static void log(CtripLogEntry entry) {
 		if (isSimplifyLogging()) {
 			if (entry.getException() == null) {
 				logger.info(TITLE, entry.toJson(), entry.getTag());

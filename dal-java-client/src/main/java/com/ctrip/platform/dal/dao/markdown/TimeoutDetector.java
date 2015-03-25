@@ -3,22 +3,25 @@ package com.ctrip.platform.dal.dao.markdown;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ctrip.platform.dal.dao.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ctrip.framework.clogging.agent.aggregator.impl.Metrics;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.Version;
+import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.dao.configbeans.TimeoutMarkDownBean;
-import com.ctrip.platform.dal.logging.markdown.MarkDownInfo;
-import com.ctrip.platform.dal.logging.markdown.MarkDownPolicy;
-import com.ctrip.platform.dal.logging.markdown.MarkDownReason;
-import com.ctrip.platform.dal.sql.logging.Metrics;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class TimeoutDetector implements ErrorDetector{
-	private static Logger logger = LoggerFactory.getLogger(TimeoutDetector.class);
 	private Map<String, DetectorCounter> data = new ConcurrentHashMap<String, DetectorCounter>();
+	private DalLogger logger;
+	
+	public TimeoutDetector() {
+		this.logger = DalClientFactory.getDalLogger();
+	}
 	
 	/**
 	 * This method will be invoked by one thread.
@@ -56,10 +59,9 @@ public class TimeoutDetector implements ErrorDetector{
 		MarkDownInfo info = new MarkDownInfo(key, Version.getVersion(), MarkDownPolicy.TIMEOUT, dc.getDuration());
 		
 		info.setReason(reason);	
-		info.setStatus("Total");
-		Metrics.report(info, dc.getRequestTimes());
-		info.setStatus("Fail");
-		Metrics.report(info, dc.getErrors());
+		info.setTotal(dc.getRequestTimes());
+		info.setFail(dc.getErrors());
+		logger.markdown(info);
 		
 		dc.reset();
 	}

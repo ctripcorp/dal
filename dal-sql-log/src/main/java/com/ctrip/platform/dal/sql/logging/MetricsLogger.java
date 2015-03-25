@@ -43,12 +43,12 @@ public class MetricsLogger {
 		//sender.scheduleAtFixedRate(new MetrixReporter(), 1, 1, TimeUnit.MINUTES);
 	}
 	
-	public static void success(LogEntry entry, long duration) {
+	public static void success(CtripLogEntry entry, long duration) {
 		report(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), SUCCESS, duration);
 		report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name());
 	}
 	
-	public static void fail(LogEntry entry, long duration) {
+	public static void fail(CtripLogEntry entry, long duration) {
 		report(entry.getDao(), entry.getMethod(),entry.getClientVersion(), entry.getSqlSize(), FAIL, duration);
 	}
 	

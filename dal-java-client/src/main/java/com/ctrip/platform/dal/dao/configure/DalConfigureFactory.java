@@ -111,7 +111,7 @@ public class DalConfigureFactory {
 		String name = getAttribute(root, NAME);
 		Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS));
 		
-		String dalLoggerImpl = "com.ctrip.platform.dal.sql.logging.DalLogger";
+		String dalLoggerImpl = "com.ctrip.platform.dal.sql.logging.CtripDalLogger";
 		DalLogger logger = (DalLogger)Class.forName(dalLoggerImpl).newInstance();
 		return new DalConfigure(name, databaseSets, logger);
 	}

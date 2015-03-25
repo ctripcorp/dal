@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.dao.client;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.ctrip.platform.dal.sql.logging.DalEventEnum;
+import com.ctrip.platform.dal.dao.DalEventEnum;
 
 public class LogEntry {
 	private static Set<String> execludedClasses = null;
@@ -29,6 +29,7 @@ public class LogEntry {
 	private String dao;
 	private String method;
 	private String source;
+	private String clientVersion;
 
 	private Throwable exception;
 	
@@ -55,6 +56,19 @@ public class LogEntry {
 	
 	public void setEvent(DalEventEnum event) {
 		this.event = event;
+		
+		String commandType;
+		
+		if(this.event == DalEventEnum.CALL || 
+				this.event == DalEventEnum.BATCH_CALL)
+			commandType = "SP";
+		else if(this.event == DalEventEnum.QUERY)
+			commandType = "Query";
+		else {
+			commandType = "Execute";
+		}
+		
+		setCommandType(commandType);
 	}
 
 	public boolean isSensitive() {
@@ -149,15 +163,8 @@ public class LogEntry {
 		return commandType;
 	}
 
-	public void setCommandType() {
-		if(this.event == DalEventEnum.CALL || 
-				this.event == DalEventEnum.BATCH_CALL)
-			this.commandType = "SP";
-		else if(this.event == DalEventEnum.QUERY)
-			this.commandType = "Query";
-		else {
-			this.commandType = "Execute";
-		}
+	public void setCommandType(String commandType) {
+		this.commandType = commandType;
 	}
 
 	public String getUserName() {
@@ -226,6 +233,14 @@ public class LogEntry {
 
 	public String getDbUrl() {
 		return dbUrl;
+	}
+
+	public String getClientVersion() {
+		return clientVersion;
+	}
+
+	public void setClientVersion(String clientVersion) {
+		this.clientVersion = clientVersion;
 	}
 
 	public int getSqlSize(){

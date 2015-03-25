@@ -9,10 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import com.ctrip.framework.clogging.agent.MessageManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
-import com.ctrip.platform.dal.sql.logging.DalLogger;
-import com.ctrip.platform.dal.sql.logging.DalWatcher;
 
 public class DalClientFactoryListener implements ServletContextListener {
 	private Logger logger = LoggerFactory.getLogger(DalClientFactoryListener.class);
@@ -23,7 +22,6 @@ public class DalClientFactoryListener implements ServletContextListener {
 		
 		String DalConfigPath = context.getInitParameter("com.ctrip.platform.dal.dao.DalConfigPath");
 		String warmUp = context.getInitParameter("com.ctrip.platform.dal.dao.DalWarmUp");
-		String simplifyLogging = context.getInitParameter("com.ctrip.platform.dal.dao.SimplifyLogging");
 
 		try {
 			if(DalConfigPath == null || DalConfigPath.trim().length() == 0)
@@ -34,7 +32,6 @@ public class DalClientFactoryListener implements ServletContextListener {
 			if(Boolean.parseBoolean(warmUp))
 				DalClientFactory.warmUpConnections();
 			
-			DalLogger.setSimplifyLogging(Boolean.parseBoolean(simplifyLogging));
 			ConfigBeanFactory.init();
 
 		} catch (Exception e) {

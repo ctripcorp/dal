@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.logging.markdown;
+package com.ctrip.platform.dal.dao.markdown;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,8 +25,8 @@ public class MarkDownInfo {
 	public static final String CLIENT = "Client";
 	private String version;
 	
-	private int total = 0;
-	private int fail = 0;
+	private long total = 0;
+	private long fail = 0;
 
 	public MarkDownInfo(String allinoneKey,String version, MarkDownPolicy policy, long duration){
 		this.allInOneKey = allinoneKey;
@@ -60,19 +60,19 @@ public class MarkDownInfo {
 		this.reason = reason;
 	}
 	
-	public void incrementTotal(){
-		this.total ++;
+	public void setTotal(long total){
+		this.total = total;
 	}
 	
-	public int getTotal(){
+	public long getTotal(){
 		return this.total;
 	}
 	
-	public void incrementFail(){
-		this.fail ++;
+	public void setFail(long fail){
+		this.fail = fail;
 	}
 	
-	public int getFail(){
+	public long getFail(){
 		return this.fail;
 	}
 	

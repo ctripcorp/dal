@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.catlog;
 
-import com.ctrip.platform.dal.sql.logging.DalEventEnum;
+import com.ctrip.platform.dal.dao.DalEventEnum;
+
 
 /**
  * Created by wcyuan on 2015/1/30.

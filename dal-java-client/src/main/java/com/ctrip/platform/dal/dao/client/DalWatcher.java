@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.sql.logging;
+package com.ctrip.platform.dal.dao.client;
 
 public class DalWatcher {
 	private static ThreadLocal<CostRecorder> costRecorder = new ThreadLocal<CostRecorder>();

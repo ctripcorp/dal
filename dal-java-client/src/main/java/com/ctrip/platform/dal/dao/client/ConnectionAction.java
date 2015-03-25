@@ -125,7 +125,7 @@ public abstract class ConnectionAction<T> {
 			entry.setPramemters(parameters.toLogString());
 			hints.setParameters(parameters);
 		}
-//		entry.startCatTransaction();
+
 		entry.setTransactional(DalTransactionManager.isInTransaction());
 	}
 	
@@ -137,19 +137,16 @@ public abstract class ConnectionAction<T> {
 	public void end(Object result, Throwable e) throws SQLException {
 		log(result, e);	
 		handleException(e);
-//		entry.catTransactionComplete();
 	}
 
 	private void log(Object result, Throwable e) {
 		try {
-			long duration = System.currentTimeMillis() - start;
-//			if(e == null) {
-//				logger.success(entry, duration, fetchQueryRows(result));
-//				MetricsLogger.success(entry, duration);
-//			}else{
-//				DalLogger.fail(entry, duration, e);
-//				MetricsLogger.fail(entry, duration);
-//			}
+			entry.setDuration(System.currentTimeMillis() - start);
+			if(e == null) {
+				logger.success(entry, fetchQueryRows(result));
+			}else{
+				logger.fail(entry, e);
+			}
 		} catch (Throwable e1) {
 			logger.error("Can not log", e1);
 		}

@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.ctrip.platform.dal.catlog.CatInfo;
 import com.ctrip.platform.dal.dao.DalEventEnum;
-import com.ctrip.platform.dal.dao.client.DasProto.SqlParameters;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -39,54 +38,15 @@ public class CtripLogEntry extends LogEntry {
 	private static final String ERRORCDE_PATTERN = "SYS%sL%s";
 	
 	private static ConcurrentHashMap<String, Integer> hashes = null;
-	
 
 	private Transaction catTransaction;
-	private String sqlType;
 
-	private Throwable exception;
-
-	public void startCatTransaction(){
-		try {
-			sqlType = getDao() + "." + getMethod();
-			catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, sqlType);
-			catTransaction.addData(getSqls() == null ? "" : StringUtils.join(getSqls(), ";"));
-			catTransaction.addData("\n");
-			if(getPramemters() != null){
-				catTransaction.addData(getEncryptParameters());
-			}
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+	public Transaction getCatTransaction() {
+		return catTransaction;
 	}
 
-	public void catTransactionSuccess(){
-		try {
-			String method = getEvent() == null ? "dal_test" : CatInfo.getTypeSQLInfo(getEvent());
-			Cat.logEvent("DAL.version", "java-" + this.getClientVersion());
-			Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, "");
-			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, getDbUrl());
-			catTransaction.setStatus(Transaction.SUCCESS);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void catTransactionFailed(Throwable e){
-		try {
-			catTransaction.setStatus(e);
-			Cat.logError(e);
-		} catch (Throwable e1) {
-			e1.printStackTrace();
-		}
-	}
-
-	public void catTransactionComplete(){
-		try {
-			catTransaction.complete();
-		}catch (Throwable e){
-			e.printStackTrace();
-		}
+	public void setCatTransaction(Transaction catTransaction) {
+		this.catTransaction = catTransaction;
 	}
 
 	private String getSqlTpl(){
@@ -167,13 +127,15 @@ public class CtripLogEntry extends LogEntry {
 	}
 	
 	private String getErrorCode(){
-		if(this.exception == null)
+		Throwable exception = getException();
+		
+		if(exception == null)
 			return "NA";
 		else{
-			if(this.exception instanceof DalException){
-				DalException dalEx = (DalException)this.exception;
+			if(exception instanceof DalException){
+				DalException dalEx = (DalException)exception;
 				return String.format(ERRORCDE_PATTERN, 5, dalEx.getErrorCode());
-			}else if(this.exception instanceof SQLException){
+			}else if(exception instanceof SQLException){
 				return String.format(ERRORCDE_PATTERN, 1, "0000");
 			}else{
 				return String.format(ERRORCDE_PATTERN, 5, ErrorCode.Unknown.getCode());
@@ -181,7 +143,7 @@ public class CtripLogEntry extends LogEntry {
 		}
 	}
 
-	private String getEncryptParameters(){
+	public String getEncryptParameters(){
 		String params = "";
 		if(isSensitive()){
 			try {
@@ -211,7 +173,7 @@ public class CtripLogEntry extends LogEntry {
 		try {
 			params = URLEncoder.encode(params, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			setErrorMsg(getErrorMsg() + DalLogger.getExceptionStack(e));
+			setErrorMsg(getErrorMsg() + DalCLogger.getExceptionStack(e));
 			params = "";
 		}
 		

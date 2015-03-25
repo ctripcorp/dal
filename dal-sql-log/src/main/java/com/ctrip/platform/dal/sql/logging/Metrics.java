@@ -13,7 +13,7 @@ public class Metrics {
 	private static String SUCCESS = "success";
 	private static String FAIL = "fail";
 	
-	public static void report(MarkDownInfo info, long value){
+	public static void report(MarkDownInfo info){
 		info.setStatus("Total");
 		metric.log(MarkDownInfo.KEY, info.getTotal(), info.toTag());
 
@@ -21,8 +21,8 @@ public class Metrics {
 		metric.log(MarkDownInfo.KEY, info.getFail(), info.toTag());
 	}
 	
-	public static void report(MarkupInfo info, int value){
-		metric.log(MarkupInfo.KEY, value, info.toTag());
+	public static void report(MarkupInfo info){
+		metric.log(MarkupInfo.KEY, info.getQualifies(), info.toTag());
 	}
 	
 	public static void success(CtripLogEntry entry, long duration) {

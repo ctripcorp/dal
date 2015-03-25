@@ -13,7 +13,7 @@ import com.ctrip.framework.clogging.domain.thrift.LogType;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 
-public class DalLogger {
+public class DalCLogger {
 	public static final String TITLE = "Dal Fx";
 	//public static final String LOG_NAME = "DAL Java Client " + DalClientVersion.version;
 	private static final String CLIENT_VERSION = "dal.client.version";
@@ -27,8 +27,8 @@ public class DalLogger {
 	static {
 		String clientVersion = System.getProperty(CLIENT_VERSION);
 		if(clientVersion == null){
-			logger = LogManager.getLogger(DalLogger.class);
-			trace = TraceManager.getTracer(DalLogger.class);
+			logger = LogManager.getLogger(DalCLogger.class);
+			trace = TraceManager.getTracer(DalCLogger.class);
 		}else {
 			logger = LogManager.getLogger("DAL Java Client " + clientVersion);
 			trace = TraceManager.getTracer("DAL Java Client " + clientVersion);
@@ -44,21 +44,17 @@ public class DalLogger {
 		simplifyLogging.set(simplify);
 	}
 
-	public static void success(CtripLogEntry entry, long duration, int count) {
-		entry.setDuration(duration);
+	public static void success(CtripLogEntry entry, int count) {
 		entry.setSuccess(true);
 		entry.setResultCount(count);
 		log(entry);
-		entry.catTransactionSuccess();
 	}
 
-	public static void fail(CtripLogEntry entry, long duration, Throwable e) {
-		entry.setDuration(duration);
+	public static void fail(CtripLogEntry entry, Throwable e) {
 		entry.setSuccess(false);
 		entry.setErrorMsg(e.getMessage());
 		entry.setException(e);
 		log(entry);
-		entry.catTransactionFailed(e);
 	}
 
 	public static void log(CtripLogEntry entry) {

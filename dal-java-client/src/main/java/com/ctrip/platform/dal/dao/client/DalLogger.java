@@ -12,18 +12,18 @@ public interface DalLogger {
 	 */
 	void initLogger(Map<String, String> settings);
 	
-	void info(String desc);
+	void info(String msg);
 	
-	void warn(String desc);
+	void warn(String msg);
 	
-	void error(String desc, Throwable e);
+	void error(String msg, Throwable e);
 	
 	/**
 	 * Fail on getting connections fro the given logic DB
-	 * @param logicDb
+	 * @param dbName
 	 * @param e
 	 */
-	void getConnectionFailed(String logicDb, Throwable e);
+	void getConnectionFailed(String dbName, Throwable e);
 	
 	/**
 	 * To create a context for current DB operation 
@@ -39,17 +39,13 @@ public interface DalLogger {
 	
 	/**
 	 * The DB operation is completed successfully
-	 * @param result
-	 * @param entry
 	 */
-	void success(Object result, LogEntry entry);
+	void success(LogEntry entry, int count);
 	
 	/**
 	 * The DB operation is fail
-	 * @param e
-	 * @param entry
 	 */
-	void fail(Throwable e, LogEntry entry);
+	void fail(LogEntry entry, Throwable e);
 	
 	/**
 	 * The DB is marked down because of error count threshold is reached

@@ -16,6 +16,7 @@ public class CtripDalLogger implements DalLogger {
 	@Override
 	public void initLogger(Map<String, String> settings) {
 		// TODO Auto-generated method stub
+		DalCLogger.setSimplifyLogging(true);
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
 import com.ctrip.platform.dal.dao.client.DalLogger;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 
@@ -107,7 +108,11 @@ public class DalClientFactory {
 	}
 
 	public static DalLogger getDalLogger() {
-		return getDalConfigure().getDalLogger();
+		try{
+			return getDalConfigure().getDalLogger();
+		}catch(Throwable e) {
+			return new DefaultLogger();
+		}
 	}
 	
 	/**

@@ -23,7 +23,7 @@ public class DalTransactionManager {
 		if(transaction == null) {
 			transaction = new DalTransaction( 
 					getConnection(hints, true, operation), 
-					connManager.getLogicDbName(), logger);
+					connManager.getLogicDbName());
 			
 			transactionHolder.set(transaction);
 		}
@@ -83,7 +83,7 @@ public class DalTransactionManager {
 		T result = null;
 		int level;
 		try {
-			action.initLogEntry(connManager.getLogicDbName(), hints, connManager.getConfig().getDalLogger());
+			action.initLogEntry(connManager.getLogicDbName(), hints);
 			action.start();
 			level = startTransaction(hints, action.operation);
 

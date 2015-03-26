@@ -17,7 +17,6 @@ import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.client.DbMeta;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
-import com.ctrip.platform.dal.sql.logging.LogEntry;
 
 public class ConnectionActionTest {
 	private static final String connectionString = "HotelPubDB";
@@ -46,7 +45,7 @@ public class ConnectionActionTest {
 		try {
 			test.connHolder = getDalConnection();
 			test.populateDbMeta();
-			assertNotNull(test.entry.getTag().get(LogEntry.TAG_DATABASE_NAME));
+			assertNotNull(test.entry.getDatabaseName());
 			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_USER_NAME)); be removed
 			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_SERVER_ADDRESS)); be removed
 		} catch (Exception e) {
@@ -61,7 +60,7 @@ public class ConnectionActionTest {
 		try {
 			DalTransactionManager tranManager = new DalTransactionManager(getDalConnectionManager());
 			tranManager.doInTransaction(test, new DalHints());
-			assertNotNull(test.entry.getTag().get(LogEntry.TAG_DATABASE_NAME));
+			assertNotNull(test.entry.getDatabaseName());
 			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_USER_NAME)); be removed
 			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_SERVER_ADDRESS)); be removed
 		} catch (Exception e) {
@@ -87,15 +86,12 @@ public class ConnectionActionTest {
 		try {
 			Thread.sleep(10l);
 			test.end(result, e);
-			String msStr = test.entry.getTag().get(LogEntry.TAG_DURATION_TIME);
-			long ms = Long.parseLong(msStr.substring(0, msStr.length() - 2));
-			assertTrue( ms >= 10);
-			assertEquals(0, Long.parseLong(test.entry.getTag().get(LogEntry.TAG_RECORD_COUNT)));
+			assertTrue( test.entry.getDuration() >= 10);
+			assertEquals(0, test.entry.getResultCount());
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			fail("There should be no exception here");
 		}
-		test.entry.getTag().get(LogEntry.TAG_RECORD_COUNT);
 		assertTrue(test.start > 0);
 	}
 

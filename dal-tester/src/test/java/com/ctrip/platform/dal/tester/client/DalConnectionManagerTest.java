@@ -6,12 +6,12 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.ConnectionAction;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
-import com.ctrip.platform.dal.sql.logging.DalEventEnum;
 
 public class DalConnectionManagerTest {
 	private static final String connectionString = "HotelPubDB";

@@ -39,8 +39,7 @@ public class DefaultLogger implements DalLogger {
 
 	@Override
 	public LogEntry createLogEntry() {
-		// TODO Auto-generated method stub
-		return null;
+		return new LogEntry();
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -14,11 +15,11 @@ public class DalTransaction  {
 	private boolean completed = false;
 	private DalLogger logger;
 	
-	public DalTransaction(DalConnection connHolder, String logicDbName, DalLogger logger) throws SQLException{
+	public DalTransaction(DalConnection connHolder, String logicDbName) throws SQLException{
 		this.logicDbName = logicDbName;
 		this.connHolder = connHolder;
 		connHolder.getConn().setAutoCommit(false);
-		this.logger = logger;
+		this.logger = DalClientFactory.getDalLogger();
 	}
 	
 	public void validate(String logicDbName) throws SQLException {

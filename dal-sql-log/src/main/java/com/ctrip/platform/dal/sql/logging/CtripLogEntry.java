@@ -9,16 +9,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.ctrip.platform.dal.catlog.CatInfo;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 import com.ctrip.security.encryption.AESCrypto;
-import com.dianping.cat.Cat;
-import com.dianping.cat.CatConstants;
-import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
 public class CtripLogEntry extends LogEntry {
@@ -37,7 +33,7 @@ public class CtripLogEntry extends LogEntry {
 	private static final String JSON_PATTERN = "{\"HasSql\":\"%s\",\"Hash\":\"%s\",\"SqlTpl\":\"%s\",\"Param\":\"%s\",\"IsSuccess\":\"%s\",\"ErrorMsg\":\"%s\", \"CostDetail\":\"%s\"}";
 	private static final String ERRORCDE_PATTERN = "SYS%sL%s";
 	
-	private static ConcurrentHashMap<String, Integer> hashes = null;
+	private static ConcurrentHashMap<String, Integer> hashes = new ConcurrentHashMap<String, Integer>();
 
 	private Transaction catTransaction;
 

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.ctrip.framework.clogging.agent.config.LogConfig;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -37,8 +38,8 @@ public abstract class ConnectionAction<T> {
 	public ResultSet rs;
 	public long start;
 	
-	public DalLogger logger;
-	public LogEntry entry = new LogEntry();
+	public DalLogger logger = DalClientFactory.getDalLogger();
+	public LogEntry entry;
 	
 	void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
 		this.operation = operation;
@@ -100,8 +101,8 @@ public abstract class ConnectionAction<T> {
 	 * createLogEntry will check whether current operation is in transaction. 
 	 * so it must be put after startTransaction. It is not require so for doInConnection
 	 */
-	public void initLogEntry(String logicDbName, DalHints hints, DalLogger logger) {
-		entry = logger.createLogEntry();
+	public void initLogEntry(String logicDbName, DalHints hints) {
+		this.entry = logger.createLogEntry();
 		
 		entry.setClientVersion(Version.getVersion());
 		entry.setSensitive(hints.is(DalHintEnum.sensitive));

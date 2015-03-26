@@ -93,7 +93,7 @@ public class DalConnectionManager {
 		try {	
 			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
 			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), shardId, isMaster, conn);
-			return new DalConnection(conn, meta, logger);
+			return new DalConnection(conn, meta);
 		} catch (Throwable e) {
 			throw new DalException(ErrorCode.CantGetConnection, e, allInOneKey);
 		}
@@ -122,7 +122,7 @@ public class DalConnectionManager {
 
 	private <T> T _doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
-		action.initLogEntry(logicDbName, hints, config.getDalLogger());
+		action.initLogEntry(logicDbName, hints);
 		action.start();
 		
 		Throwable ex = null;

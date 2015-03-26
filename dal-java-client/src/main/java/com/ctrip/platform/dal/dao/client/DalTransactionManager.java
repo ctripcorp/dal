@@ -8,13 +8,11 @@ import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 
 public class DalTransactionManager {
 	private DalConnectionManager connManager;
-	private DalLogger logger;
 
 	private static final ThreadLocal<DalTransaction> transactionHolder = new ThreadLocal<DalTransaction>();
 
 	public DalTransactionManager(DalConnectionManager connManager) {
 		this.connManager = connManager;
-		this.logger = connManager.getConfig().getDalLogger();
 	}
 	
 	private int startTransaction(DalHints hints, DalEventEnum operation) throws SQLException {

@@ -35,6 +35,9 @@ public class LogEntry {
 	
 	static {
 		execludedClasses = new HashSet<String>();
+		execludedClasses.add("com.ctrip.platform.dal.dao.client.ConnectionAction");
+		execludedClasses.add("com.ctrip.platform.dal.dao.client.DalConnectionManager");
+		execludedClasses.add("com.ctrip.platform.dal.dao.client.DalTransactionManager");
 		execludedClasses.add("com.ctrip.platform.dal.dao.client.DalDirectClient");
 		execludedClasses.add("com.ctrip.platform.dal.dao.DalTableDao");
 		execludedClasses.add("com.ctrip.platform.dal.dao.DalQueryDao");
@@ -44,10 +47,7 @@ public class LogEntry {
 		StackTraceElement[] callers = Thread.currentThread().getStackTrace();
 		for (int i = 4; i < callers.length; i++) {
 			StackTraceElement caller = callers[i];
-//			if (execludedClasses.contains(caller.getClassName()))
-//				continue;
-			
-			if(caller.getClassName().startsWith("com.ctrip.platform.dal.dao"))
+			if (execludedClasses.contains(caller.getClassName()))
 				continue;
 			
 			dao = caller.getClassName();

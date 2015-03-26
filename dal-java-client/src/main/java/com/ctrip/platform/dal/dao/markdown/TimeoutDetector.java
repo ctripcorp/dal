@@ -3,10 +3,6 @@ package com.ctrip.platform.dal.dao.markdown;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ctrip.framework.clogging.agent.aggregator.impl.Metrics;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.Version;

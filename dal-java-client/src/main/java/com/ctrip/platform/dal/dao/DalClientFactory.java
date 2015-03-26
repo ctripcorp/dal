@@ -108,11 +108,7 @@ public class DalClientFactory {
 	}
 
 	public static DalLogger getDalLogger() {
-		try{
-			return getDalConfigure().getDalLogger();
-		}catch(Throwable e) {
-			return new DefaultLogger();
-		}
+		return getDalConfigure().getDalLogger();
 	}
 	
 	/**

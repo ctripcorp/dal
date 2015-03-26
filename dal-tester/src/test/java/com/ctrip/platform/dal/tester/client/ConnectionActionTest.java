@@ -10,6 +10,7 @@ import java.sql.Connection;
 import org.junit.Test;
 
 import com.ctrip.datasource.locator.DataSourceLocator;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.ConnectionAction;
 import com.ctrip.platform.dal.dao.client.DalConnection;
@@ -17,8 +18,17 @@ import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.client.DbMeta;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
+import com.ctrip.platform.dal.sql.logging.CtripLogEntry;
 
 public class ConnectionActionTest {
+	static{
+		try {
+			DalClientFactory.initClientFactory();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private static final String connectionString = "HotelPubDB";
 	
 	private DalConnection getDalConnection() throws Exception {
@@ -60,7 +70,8 @@ public class ConnectionActionTest {
 		try {
 			DalTransactionManager tranManager = new DalTransactionManager(getDalConnectionManager());
 			tranManager.doInTransaction(test, new DalHints());
-			assertNotNull(test.entry.getDatabaseName());
+//			assertNotNull(test.entry.getDatabaseName());
+			assertNotNull(((CtripLogEntry)test.entry).getTag().get(CtripLogEntry.TAG_DATABASE_NAME));
 			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_USER_NAME)); be removed
 			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_SERVER_ADDRESS)); be removed
 		} catch (Exception e) {

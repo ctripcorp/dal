@@ -44,9 +44,12 @@ public class LogEntry {
 		StackTraceElement[] callers = Thread.currentThread().getStackTrace();
 		for (int i = 4; i < callers.length; i++) {
 			StackTraceElement caller = callers[i];
-			if (execludedClasses.contains(caller.getClassName()))
+//			if (execludedClasses.contains(caller.getClassName()))
+//				continue;
+			
+			if(caller.getClassName().startsWith("com.ctrip.platform.dal.dao"))
 				continue;
-
+			
 			dao = caller.getClassName();
 			method = caller.getMethodName();
 			source = caller.toString();

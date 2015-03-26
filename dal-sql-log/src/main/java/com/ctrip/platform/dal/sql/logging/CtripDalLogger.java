@@ -12,11 +12,19 @@ public class CtripDalLogger implements DalLogger {
 	private static final String ENABLED = "switch";
 	private static final String SAMPLING = "sampling";
 	private static final String ENCRYPT = "encrypt";
+	private static final String SIMPLIFIED = "simplified";
 	
 	@Override
 	public void initLogger(Map<String, String> settings) {
-		// TODO Auto-generated method stub
-		DalCLogger.setSimplifyLogging(true);
+		if(settings == null)
+			return;
+		
+		if(settings.containsKey(SIMPLIFIED))
+			DalCLogger.setSimplifyLogging(Boolean.parseBoolean(settings.get(SIMPLIFIED)));
+		
+		if(settings.containsKey(ENCRYPT))
+			DalCLogger.setSimplifyLogging(Boolean.parseBoolean(settings.get(SIMPLIFIED)));
+
 	}
 
 	@Override

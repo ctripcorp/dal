@@ -139,7 +139,7 @@ public class CtripLogEntry extends LogEntry {
 		}
 	}
 
-	public String getEncryptParameters(){
+	public String getEncryptParameters(boolean encryptLogging){
 		String params = "";
 		if(isSensitive()){
 			try {
@@ -154,9 +154,9 @@ public class CtripLogEntry extends LogEntry {
 	}
 
 
-	public String toJson(){
+	public String toJson(boolean encryptLogging){
 		String sqlTpl = isSensitive() ?  SQLHIDDENString : this.getSqlTpl();
-		String params = getEncryptParameters();
+		String params = getEncryptParameters(encryptLogging);
 		int tplLength = sqlTpl.length();
 		int paramsLength = params.length();
 		if(tplLength + paramsLength > LOG_LIMIT){

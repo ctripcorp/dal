@@ -1,14 +1,8 @@
 package com.ctrip.platform.dal.sql.logging;
 
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 
-import com.ctrip.framework.clogging.domain.thrift.LogLevel;
 import com.ctrip.platform.dal.catlog.CatInfo;
-import com.ctrip.platform.dal.dao.client.LogEntry;
-import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
-import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.Message;
@@ -23,7 +17,7 @@ public class DalCatLogger {
 			catTransaction.addData(entry.getSqls() == null ? "" : StringUtils.join(entry.getSqls(), ";"));
 			catTransaction.addData("\n");
 			if(entry.getPramemters() != null){
-				catTransaction.addData(entry.getEncryptParameters());
+				catTransaction.addData(entry.getEncryptParameters(DalCLogger.isEncryptLogging()));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();

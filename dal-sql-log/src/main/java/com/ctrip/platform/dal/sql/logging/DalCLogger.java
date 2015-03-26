@@ -18,6 +18,7 @@ public class DalCLogger {
 	//public static final String LOG_NAME = "DAL Java Client " + DalClientVersion.version;
 	private static final String CLIENT_VERSION = "dal.client.version";
 	public static AtomicBoolean simplifyLogging = new AtomicBoolean(false);
+	public static AtomicBoolean encryptLogging = new AtomicBoolean(true);
 
 	public static ThreadLocal<DalWatcher> watcher = new ThreadLocal<DalWatcher>();
 
@@ -44,6 +45,14 @@ public class DalCLogger {
 		simplifyLogging.set(simplify);
 	}
 
+	public static void setEncryptLogging(boolean encrypt) {
+		encryptLogging.set(encrypt);
+	}
+	
+	public static boolean isEncryptLogging() {
+		return encryptLogging.get();
+	}
+	
 	public static void success(CtripLogEntry entry, int count) {
 		entry.setSuccess(true);
 		entry.setResultCount(count);
@@ -60,16 +69,16 @@ public class DalCLogger {
 	public static void log(CtripLogEntry entry) {
 		if (isSimplifyLogging()) {
 			if (entry.getException() == null) {
-				logger.info(TITLE, entry.toJson(), entry.getTag());
+				logger.info(TITLE, entry.toJson(isEncryptLogging()), entry.getTag());
 			} else {
-				logger.error(TITLE, entry.toJson(), entry.getTag());
+				logger.error(TITLE, entry.toJson(isEncryptLogging()), entry.getTag());
 			}
 		} else {
 			if (entry.getException() == null)
-				trace.log(LogType.SQL, LogLevel.ERROR, TITLE, entry.toJson(),
+				trace.log(LogType.SQL, LogLevel.ERROR, TITLE, entry.toJson(isEncryptLogging()),
 						entry.getTag());
 			else
-				trace.log(LogType.SQL, LogLevel.ERROR, TITLE, entry.toJson(),
+				trace.log(LogType.SQL, LogLevel.ERROR, TITLE, entry.toJson(isEncryptLogging()),
 						entry.getTag());
 		}
 	}

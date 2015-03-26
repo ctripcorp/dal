@@ -16,6 +16,8 @@ public class CtripDalLogger implements DalLogger {
 	
 	@Override
 	public void initLogger(Map<String, String> settings) {
+		DalCLogger.setSimplifyLogging(true);
+		
 		if(settings == null)
 			return;
 		
@@ -23,7 +25,7 @@ public class CtripDalLogger implements DalLogger {
 			DalCLogger.setSimplifyLogging(Boolean.parseBoolean(settings.get(SIMPLIFIED)));
 		
 		if(settings.containsKey(ENCRYPT))
-			DalCLogger.setSimplifyLogging(Boolean.parseBoolean(settings.get(SIMPLIFIED)));
+			DalCLogger.setEncryptLogging(Boolean.parseBoolean(settings.get(ENCRYPT)));
 
 	}
 

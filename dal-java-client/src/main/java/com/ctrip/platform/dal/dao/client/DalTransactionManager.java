@@ -77,13 +77,15 @@ public class DalTransactionManager {
 	}
 
 	public <T> T doInTransaction(ConnectionAction<T> action, DalHints hints)throws SQLException{
+		action.initLogEntry(connManager.getLogicDbName(), hints, connManager.getLogger());
+		action.start();
+
 		Throwable ex = null;
 		T result = null;
 		int level;
 		try {
-			action.initLogEntry(connManager.getLogicDbName(), hints);
-			action.start();
 			level = startTransaction(hints, action.operation);
+			action.populateDbMeta();
 
 			result = action.execute();
 
@@ -93,7 +95,6 @@ public class DalTransactionManager {
 			rollbackTransaction();
 			MarkdownManager.detect(action.connHolder, action.start, e);
 		}finally{
-			action.populateDbMeta();
 			action.cleanup();
 		}
 

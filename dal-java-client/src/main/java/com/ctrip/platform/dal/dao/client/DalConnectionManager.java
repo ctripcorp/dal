@@ -20,10 +20,10 @@ public class DalConnectionManager {
 	private String logicDbName;
 	private DalLogger logger;
 
-	public DalConnectionManager(String logicDbName, DalConfigure config) {
+	public DalConnectionManager(String logicDbName, DalConfigure config, DalLogger logger) {
 		this.logicDbName = logicDbName;
 		this.config = config;
-		this.logger = config.getDalLogger();
+		this.logger = logger;;
 	}
 	
 	public String getLogicDbName() {
@@ -32,6 +32,10 @@ public class DalConnectionManager {
 	
 	public DalConfigure getConfig() {
 		return config;
+	}
+	
+	public DalLogger getLogger() {
+		return logger;
 	}
 
 	public DalConnection getNewConnection(DalHints hints, boolean useMaster, DalEventEnum operation)
@@ -93,7 +97,7 @@ public class DalConnectionManager {
 		try {	
 			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
 			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), shardId, isMaster, conn);
-			return new DalConnection(conn, meta);
+			return new DalConnection(conn, meta, logger);
 		} catch (Throwable e) {
 			throw new DalException(ErrorCode.CantGetConnection, e, allInOneKey);
 		}
@@ -122,7 +126,7 @@ public class DalConnectionManager {
 
 	private <T> T _doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
-		action.initLogEntry(logicDbName, hints);
+		action.initLogEntry(logicDbName, hints, logger);
 		action.start();
 		
 		Throwable ex = null;

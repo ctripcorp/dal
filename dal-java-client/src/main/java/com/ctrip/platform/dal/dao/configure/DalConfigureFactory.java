@@ -18,6 +18,7 @@ import org.w3c.dom.NodeList;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalLogger;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
 
 /*
 <dal name="dal.prize.test">
@@ -35,12 +36,14 @@ import com.ctrip.platform.dal.dao.client.DalLogger;
     <add name="mySqlProvider" type="Arch.Data.MySqlProvider.MySqlDatabaseProvider,Arch.Data.MySqlProvider"/>
   </databaseProviders>
    
-  <logListeners>
-    <add name="clog" type="Arch.Data.Common.Logging.Listeners.CentralLoggingListener,Arch.Data" level="Information" setting=""/>
-    <add name="textfile" type="Arch.Data.Common.Logging.Listeners.TextFileListener,Arch.Data" level="Information" setting="FileSize=4;FilePath=D:\log;FileName={0:yyyy_MM_dd_HH_mm_ss}.log;"/>
-  </logListeners>
-   
-  <metrics name="centrallogging"/>
+  <logListener enabled="true/false">
+	<logger>com.xxx.xxx.xxx</logger>
+    <settings>
+	  <encrypt>true</encrypt>
+	  <sampling>false</sampling>
+	  <simplified>true</simplified>
+	<settings>
+  </logListener>
 </dal>
  */
 // For java we only process databaseSets. log and providers are covered elsewhere.
@@ -60,6 +63,10 @@ public class DalConfigureFactory {
 	private static String SHARDING = "sharding";
 	private static String CONNECTION_STRING = "connectionString";
 	private static String MASTER = "Master";
+	private static String LOG_LISTENER = "LogListener";
+	private static String ENABLED = "enabled";
+	private static String LOGGER = "logger";
+	private static String SETTINGS = "settings";
 
 	/**
 	 * Load frmo classpath
@@ -111,8 +118,7 @@ public class DalConfigureFactory {
 		String name = getAttribute(root, NAME);
 		Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS));
 		
-		String dalLoggerImpl = "com.ctrip.platform.dal.sql.logging.CtripDalLogger";
-		DalLogger logger = (DalLogger)Class.forName(dalLoggerImpl).newInstance();
+		DalLogger logger = readLogListener(getChildNode(root, LOG_LISTENER));
 		return new DalConfigure(name, databaseSets, logger);
 	}
 	
@@ -161,6 +167,38 @@ public class DalConfigureFactory {
 				getAttribute(dataBaseNode, CONNECTION_STRING));
 	}
 	
+	private DalLogger readLogListener(Node logListenerNode) throws Exception {
+		DalLogger logger = new DefaultLogger();
+		if(logListenerNode == null)
+			return logger;
+		
+		if(hasAttribute(logListenerNode, ENABLED)){
+			boolean enabled = Boolean.parseBoolean(getAttribute(logListenerNode, ENABLED));
+			if(enabled == false)
+				return logger;
+		}
+		
+		Node loggerNode = getChildNode(logListenerNode, LOGGER);
+		if(loggerNode == null)
+			return logger;
+
+		logger = (DalLogger)Class.forName(loggerNode.getTextContent()).newInstance();
+		
+		Node settingsNode = getChildNode(logListenerNode, SETTINGS);
+		Map<String, String> settings = new HashMap<>();
+
+		if(settingsNode != null) {
+			NodeList children = settingsNode.getChildNodes();
+			for(int i = 0; i < children.getLength(); i++) {
+				if(children.item(i).getNodeType() == Node.ELEMENT_NODE)
+					settings.put(children.item(i).getNodeName(), children.item(i).getTextContent());
+			}
+		}
+		
+		logger.initLogger(settings);
+		return  logger;
+	}
+	
 	private Node getChildNode(Node node, String name) {
 		NodeList children = node.getChildNodes();
 		Node found = null;
@@ -190,11 +228,5 @@ public class DalConfigureFactory {
 	
 	private String getAttribute(Node node, String attributeName){
 		return node.getAttributes().getNamedItem(attributeName).getNodeValue();
-//		NamedNodeMap map = node.getAttributes();
-//		for(int i = 0; i < map.getLength(); i++)
-//			if(attributeName.equals(map.item(i).getNodeName()))
-//				return map.item(i).getNodeValue();
-//
-//		return null;
 	}
 }

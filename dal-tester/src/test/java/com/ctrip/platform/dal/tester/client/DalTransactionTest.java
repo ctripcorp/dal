@@ -13,6 +13,7 @@ import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DalTransaction;
 import com.ctrip.platform.dal.dao.client.DbMeta;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
 
 public class DalTransactionTest {
 	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";
@@ -20,7 +21,7 @@ public class DalTransactionTest {
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
 		conn = DataSourceLocator.newInstance().getDataSource(logicDbName).getConnection();
-		return new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn));
+		return new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn), new DefaultLogger());
 	}
 
 	@Test

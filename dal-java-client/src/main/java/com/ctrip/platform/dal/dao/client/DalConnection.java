@@ -14,11 +14,11 @@ public class DalConnection {
 	private DbMeta meta;
 	private DalLogger logger;
 	
-	public DalConnection(Connection conn, DbMeta meta) throws SQLException {
+	public DalConnection(Connection conn, DbMeta meta, DalLogger logger) throws SQLException {
 		this.oldIsolationLevel = conn.getTransactionIsolation();
 		this.conn = conn;
 		this.meta = meta;
-		this.logger = DalClientFactory.getDalLogger();
+		this.logger = logger;
 	}
 
 	public Connection getConn() {
@@ -29,6 +29,10 @@ public class DalConnection {
 		return meta;
 	}
 	
+	public DalLogger getLogger() {
+		return logger;
+	}
+
 	public String getDatabaseName() throws SQLException {
 		return meta.getDatabaseName();
 	}

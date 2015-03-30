@@ -13,13 +13,14 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.ConnectionAction;
 import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 
 public class DalTransactionManagerTest {
 	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";
 	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
-		return new DalConnectionManager(logicDbName, DalConfigureFactory.load());
+		return new DalConnectionManager(logicDbName, DalConfigureFactory.load(), new DefaultLogger());
 	}
 	
 	@Test

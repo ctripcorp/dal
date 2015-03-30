@@ -5,6 +5,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
@@ -56,7 +57,7 @@ public class AsyncMarkupManagerTest {
 						boolean passed = AsyncMarkupManager.isPass(dbName);
 						if(passed)
 						AsyncMarkupManager.callback(new ErrorContext(dbName,DatabaseCategory.MySql, 
-								1000, new MySQLTimeoutException()));
+								1000, new MySQLTimeoutException(), new DefaultLogger()));
 						try {
 							Thread.sleep(10);
 						} catch (InterruptedException e) {

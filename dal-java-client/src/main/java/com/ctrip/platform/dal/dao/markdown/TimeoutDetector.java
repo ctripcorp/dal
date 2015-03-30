@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
@@ -13,11 +12,6 @@ import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class TimeoutDetector implements ErrorDetector{
 	private Map<String, DetectorCounter> data = new ConcurrentHashMap<String, DetectorCounter>();
-	private DalLogger logger;
-	
-	public TimeoutDetector() {
-		this.logger = DalClientFactory.getDalLogger();
-	}
 	
 	/**
 	 * This method will be invoked by one thread.
@@ -38,16 +32,16 @@ public class TimeoutDetector implements ErrorDetector{
 		dt.incrementRequest();
 		
 		if(dt.getErrors() >= tmb.getErrorCountThreshold()){
-			this.markdown(ctx.getName(), dt, MarkDownReason.ERRORCOUNT);
+			this.markdown(ctx.getName(), dt, MarkDownReason.ERRORCOUNT, ctx.getLogger());
 		}else if(dt.getRequestTimes() >= tmb.getErrorPercentReferCount()){
 			float percent = (dt.getErrors() + 0.0f) /dt.getRequestTimes();
 			if(percent >= tmb.getErrorPercentThreshold()){
-				this.markdown(ctx.getName(), dt, MarkDownReason.ERRORPERCENT);
+				this.markdown(ctx.getName(), dt, MarkDownReason.ERRORPERCENT, ctx.getLogger());
 			}
 		}
 	}
 	
-	private void markdown(String key, DetectorCounter dc, MarkDownReason reason){
+	private void markdown(String key, DetectorCounter dc, MarkDownReason reason, DalLogger logger){
 		if(ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown()){
 			ConfigBeanFactory.getMarkdownConfigBean().markdown(key);
 			logger.info(String.format("Database %s has been marked down automatically", key));

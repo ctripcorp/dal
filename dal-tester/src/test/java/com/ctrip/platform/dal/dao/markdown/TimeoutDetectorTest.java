@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
@@ -40,7 +41,7 @@ public class TimeoutDetectorTest {
 				ct = random.nextBoolean() ? DatabaseCategory.MySql : DatabaseCategory.SqlServer;
 				e = this.mockTimeoutException(ct);
 			}
-			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
+			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e, new DefaultLogger());
 			detector.detect(ctx);
 		}
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
@@ -68,7 +69,7 @@ public class TimeoutDetectorTest {
 					e1.printStackTrace();
 				}
 			}
-			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
+			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e, new DefaultLogger());
 			detector.detect(ctx);
 		}
 		Assert.assertFalse(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
@@ -88,7 +89,7 @@ public class TimeoutDetectorTest {
 				ct = random.nextBoolean() ? DatabaseCategory.MySql : DatabaseCategory.SqlServer;
 				e = this.mockTimeoutException(ct);
 			}
-			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
+			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e, new DefaultLogger());
 			detector.detect(ctx);
 		}
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
@@ -98,22 +99,22 @@ public class TimeoutDetectorTest {
 	public void isTimeOutExceptionTest(){
 		DatabaseCategory ct = DatabaseCategory.MySql;
 		SQLException e = this.mockTimeoutException(ct);
-		ErrorContext ctx = new ErrorContext(dbName, ct, 10000, e);
+		ErrorContext ctx = new ErrorContext(dbName, ct, 10000, e, new DefaultLogger());
 		Assert.assertTrue(TimeoutDetector.isTimeOutException(ctx));
 		
 		ct = DatabaseCategory.SqlServer;
 		e = this.mockTimeoutException(ct);
-		ctx = new ErrorContext(dbName, ct, 10000, e);
+		ctx = new ErrorContext(dbName, ct, 10000, e, new DefaultLogger());
 		Assert.assertTrue(TimeoutDetector.isTimeOutException(ctx));
 		
 		ct = DatabaseCategory.SqlServer;
 		e = new SQLException("查询超时");
-		ctx = new ErrorContext(dbName, ct, 10000, e);
+		ctx = new ErrorContext(dbName, ct, 10000, e, new DefaultLogger());
 		Assert.assertTrue(TimeoutDetector.isTimeOutException(ctx));
 		
 		ct = DatabaseCategory.MySql;
 		e = this.mockNotTimeoutException();
-		ctx = new ErrorContext(dbName, ct, 10000, e);
+		ctx = new ErrorContext(dbName, ct, 10000, e, new DefaultLogger());
 		Assert.assertFalse(TimeoutDetector.isTimeOutException(ctx));
 	}
 	

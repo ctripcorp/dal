@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.ctrip.framework.clogging.agent.config.LogConfig;
-import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -38,7 +37,7 @@ public abstract class ConnectionAction<T> {
 	public ResultSet rs;
 	public long start;
 	
-	public DalLogger logger = DalClientFactory.getDalLogger();
+	public DalLogger logger;
 	public LogEntry entry;
 	
 	void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
@@ -85,7 +84,9 @@ public abstract class ConnectionAction<T> {
 	
 	public void populateDbMeta() {
 		DbMeta meta = null;
-		
+
+		entry.setTransactional(DalTransactionManager.isInTransaction());
+
 		if(DalTransactionManager.isInTransaction()) {
 			meta = DalTransactionManager.getCurrentDbMeta();
 		} else {
@@ -97,11 +98,8 @@ public abstract class ConnectionAction<T> {
 			meta.populate(entry);
 	}
 	
-	/*
-	 * createLogEntry will check whether current operation is in transaction. 
-	 * so it must be put after startTransaction. It is not require so for doInConnection
-	 */
-	public void initLogEntry(String logicDbName, DalHints hints) {
+	public void initLogEntry(String logicDbName, DalHints hints, DalLogger logger) {
+		this.logger = logger;
 		this.entry = logger.createLogEntry();
 		
 		entry.setClientVersion(Version.getVersion());
@@ -126,8 +124,6 @@ public abstract class ConnectionAction<T> {
 			entry.setPramemters(parameters.toLogString());
 			hints.setParameters(parameters);
 		}
-
-		entry.setTransactional(DalTransactionManager.isInTransaction());
 	}
 	
 	public void start() {

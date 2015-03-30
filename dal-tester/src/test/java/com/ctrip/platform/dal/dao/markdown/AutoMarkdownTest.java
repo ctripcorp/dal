@@ -11,6 +11,7 @@ import org.junit.Test;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DbMeta;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
@@ -116,6 +117,7 @@ public class AutoMarkdownTest {
 		EasyMock.expect(meta.getDatabaseCategory()).andReturn(DatabaseCategory.MySql).times(1);
 		
 		EasyMock.expect(conn.getMeta()).andReturn(meta).times(3);
+		EasyMock.expect(conn.getLogger()).andReturn(new DefaultLogger()).times(3);
 		
 		EasyMock.replay(meta, conn);
 		return conn;

@@ -17,8 +17,8 @@ import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.client.DbMeta;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
-import com.ctrip.platform.dal.sql.logging.CtripLogEntry;
 
 public class ConnectionActionTest {
 	static{
@@ -34,24 +34,24 @@ public class ConnectionActionTest {
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
 		conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
-		return new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
+		return new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn), new DefaultLogger());
 	}
 	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
-		return new DalConnectionManager(connectionString, DalConfigureFactory.load());
+		return new DalConnectionManager(connectionString, DalConfigureFactory.load(), new DefaultLogger());
 	}
 	
 	@Test
 	public void testInitLogEntry() {
 		TestConnectionAction test = new TestConnectionAction();
-		test.initLogEntry("Test", new DalHints());
+		test.initLogEntry("Test", new DalHints(), new DefaultLogger());
 		assertNotNull(test.entry);
 	}
 
 	@Test
 	public void testPopulateDbMetaOutofTransaction() {
 		TestConnectionAction test = new TestConnectionAction();
-		test.initLogEntry("Test", new DalHints());
+		test.initLogEntry("Test", new DalHints(), new DefaultLogger());
 		try {
 			test.connHolder = getDalConnection();
 			test.populateDbMeta();
@@ -71,7 +71,7 @@ public class ConnectionActionTest {
 			DalTransactionManager tranManager = new DalTransactionManager(getDalConnectionManager());
 			tranManager.doInTransaction(test, new DalHints());
 //			assertNotNull(test.entry.getDatabaseName());
-			assertNotNull(((CtripLogEntry)test.entry).getTag().get(CtripLogEntry.TAG_DATABASE_NAME));
+			assertNotNull((test.entry).getDatabaseName());
 			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_USER_NAME)); be removed
 			//assertNotNull(test.entry.getTag().get(LogEntry.TAG_SERVER_ADDRESS)); be removed
 		} catch (Exception e) {
@@ -83,6 +83,7 @@ public class ConnectionActionTest {
 	@Test
 	public void testStart() {
 		TestConnectionAction test = new TestConnectionAction();
+		test.initLogEntry(connectionString, new DalHints(), new DefaultLogger());
 		test.start();
 		assertTrue(test.start > 0);
 	}
@@ -90,8 +91,8 @@ public class ConnectionActionTest {
 	@Test
 	public void testEnd() {
 		TestConnectionAction test = new TestConnectionAction();
+		test.initLogEntry(connectionString, new DalHints(), new DefaultLogger());
 		test.start();
-		test.initLogEntry(connectionString, new DalHints());
 		Object result = null;
 		Throwable e = null;
 		try {

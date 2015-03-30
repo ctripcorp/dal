@@ -16,17 +16,22 @@ import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DbMeta;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.client.LogEntry;
 
 public class DalConnectionTest {
 	private static final String connectionString = "HotelPubDB";
+	
+	private DalConnection getConnection(Connection conn) throws SQLException {
+		return new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn), new DefaultLogger());
+	}
 	
 	@Test
 	public void testDalConnection() throws SQLException {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
+			DalConnection test = getConnection(conn);
 			assertNotNull(test);
 		} catch (Throwable e){
 			fail();
@@ -42,7 +47,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
+			DalConnection test = getConnection(conn);
 			assertNotNull(test.getConn());
 		} catch (Throwable e){
 			fail();
@@ -58,7 +63,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
+			DalConnection test = getConnection(conn);
 			assertNotNull(test.getMeta());
 			LogEntry entry = new LogEntry();
 			
@@ -79,7 +84,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
+			DalConnection test = getConnection(conn);
 			assertNotNull(test.getDatabaseName());
 		} catch (Throwable e){
 			fail();
@@ -95,7 +100,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
+			DalConnection test = getConnection(conn);
 			test.setAutoCommit(false);
 			assertFalse(conn.getAutoCommit());
 			test.setAutoCommit(true);
@@ -114,7 +119,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
+			DalConnection test = getConnection(conn);
 			DalHints hints = new DalHints();
 			hints.setIsolationLevel(Connection.TRANSACTION_SERIALIZABLE);
 			test.applyHints(hints);
@@ -137,7 +142,7 @@ public class DalConnectionTest {
 		Connection conn = null;
 		try {
 			conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
-			DalConnection test = new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
+			DalConnection test = getConnection(conn);
 
 			Statement statement = test.getConn().createStatement();
 			ResultSet rs = statement.executeQuery("select * from Hotel");

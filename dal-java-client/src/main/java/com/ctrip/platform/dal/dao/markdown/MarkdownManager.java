@@ -56,7 +56,7 @@ public class MarkdownManager {
 		if (conn != null && conn.getMeta() != null && e instanceof SQLException) {
 			ErrorContext ctx = new ErrorContext(
 					conn.getMeta().getAllInOneKey(), conn.getMeta()
-							.getDatabaseCategory(), cost, (SQLException) e);
+							.getDatabaseCategory(), cost, (SQLException) e, conn.getLogger());
 			exqueue.add(ctx);
 			MarkupManager.rollback(ctx);
 		}

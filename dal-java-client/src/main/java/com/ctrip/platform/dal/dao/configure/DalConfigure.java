@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
-import com.ctrip.platform.dal.dao.client.DefaultLogger;
 
 public class DalConfigure {
 	private String name;
@@ -18,7 +17,7 @@ public class DalConfigure {
 	public DalConfigure(String name, Map<String, DatabaseSet> databaseSets, DalLogger dalLogger) {
 		this.name = name;
 		this.databaseSets.putAll(databaseSets);
-		this.dalLogger = dalLogger == null ? new DefaultLogger() : dalLogger;
+		this.dalLogger = dalLogger;
 	}
 	
 	public String getName() {

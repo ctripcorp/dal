@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
@@ -43,7 +44,7 @@ public class AutoMarkupTest {
 				ct = random.nextBoolean() ? DatabaseCategory.MySql : DatabaseCategory.SqlServer;
 				e = this.mockTimeoutException(ct);
 			}
-			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
+			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e, new DefaultLogger());
 			detector.detect(ctx);
 		}
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
@@ -76,7 +77,7 @@ public class AutoMarkupTest {
 				ct = random.nextBoolean() ? DatabaseCategory.MySql : DatabaseCategory.SqlServer;
 				e = this.mockTimeoutException(ct);
 			}
-			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
+			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e, new DefaultLogger());
 			detector.detect(ctx);
 		}
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
@@ -92,7 +93,7 @@ public class AutoMarkupTest {
 			if(i == 9){
 				MarkupManager.rollback(new ErrorContext(dbName, 
 						DatabaseCategory.MySql, 1000, 
-						mockTimeoutException(DatabaseCategory.MySql)));
+						mockTimeoutException(DatabaseCategory.MySql), new DefaultLogger()));
 			}
 		}
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));

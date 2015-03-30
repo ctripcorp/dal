@@ -19,6 +19,7 @@ public class DalCLogger {
 	private static final String CLIENT_VERSION = "dal.client.version";
 	public static AtomicBoolean simplifyLogging = new AtomicBoolean(false);
 	public static AtomicBoolean encryptLogging = new AtomicBoolean(true);
+	public static AtomicBoolean samplingLogging = new AtomicBoolean(false);
 
 	public static ThreadLocal<DalWatcher> watcher = new ThreadLocal<DalWatcher>();
 
@@ -53,6 +54,14 @@ public class DalCLogger {
 		return encryptLogging.get();
 	}
 	
+	public static boolean isSamplingLogging() {
+		return samplingLogging.get();
+	}
+
+	public static void setSamplingLogging(boolean sampling) {
+		samplingLogging.set(sampling);
+	}
+
 	public static void success(CtripLogEntry entry, int count) {
 		entry.setSuccess(true);
 		entry.setResultCount(count);

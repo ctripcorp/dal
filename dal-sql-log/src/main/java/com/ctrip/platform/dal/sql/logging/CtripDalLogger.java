@@ -9,18 +9,18 @@ import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 
 public class CtripDalLogger implements DalLogger {
-	private static final String ENABLED = "switch";
 	private static final String SAMPLING = "sampling";
 	private static final String ENCRYPT = "encrypt";
 	private static final String SIMPLIFIED = "simplified";
 	
 	@Override
 	public void initLogger(Map<String, String> settings) {
-		DalCLogger.setSimplifyLogging(true);
-		
 		if(settings == null)
 			return;
 		
+		if(settings.containsKey(SAMPLING))
+			DalCLogger.setSamplingLogging(Boolean.parseBoolean(settings.get(SAMPLING)));
+
 		if(settings.containsKey(SIMPLIFIED))
 			DalCLogger.setSimplifyLogging(Boolean.parseBoolean(settings.get(SIMPLIFIED)));
 		

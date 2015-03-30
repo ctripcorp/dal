@@ -116,23 +116,25 @@ public class DalConfigureFactory {
 		Element root = doc.getDocumentElement();
 
 		String name = getAttribute(root, NAME);
-		Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS));
-		
+
 		DalLogger logger = readLogListener(getChildNode(root, LOG_LISTENER));
+		
+		Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS), logger);
+		
 		return new DalConfigure(name, databaseSets, logger);
 	}
 	
-	private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode) throws Exception {
+	private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode, DalLogger logger) throws Exception {
 		List<Node> databaseSetList = getChildNodes(databaseSetsNode, DATABASE_SET);
 		Map<String, DatabaseSet> databaseSets = new HashMap<String, DatabaseSet>();
 		for(int i = 0;i < databaseSetList.size(); i++) {
-			DatabaseSet databaseSet = readDatabaseSet(databaseSetList.get(i));
+			DatabaseSet databaseSet = readDatabaseSet(databaseSetList.get(i), logger);
 			databaseSets.put(databaseSet.getName(), databaseSet);
 		}
 		return databaseSets;
 	}
 	
-	private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {
+	private DatabaseSet readDatabaseSet(Node databaseSetNode, DalLogger logger) throws Exception {
 		List<Node> databaseList = getChildNodes(databaseSetNode, ADD);
 		Map<String, DataBase> databases = new HashMap<String, DataBase>();
 		for(int i = 0;i < databaseList.size(); i++) {
@@ -145,18 +147,18 @@ public class DalConfigureFactory {
 					getAttribute(databaseSetNode, NAME),
 					getAttribute(databaseSetNode, PROVIDER),
 					getAttribute(databaseSetNode, SHARD_STRATEGY),
-					databases );
+					databases, logger);
 		else if(hasAttribute(databaseSetNode, SHARDING_STRATEGY))
 			return new DatabaseSet(
 					getAttribute(databaseSetNode, NAME),
 					getAttribute(databaseSetNode, PROVIDER),
 					getAttribute(databaseSetNode, SHARDING_STRATEGY),
-					databases );
+					databases, logger);
 		else
 			return new DatabaseSet(
 					getAttribute(databaseSetNode, NAME),
 					getAttribute(databaseSetNode, PROVIDER),
-					databases );
+					databases, logger);
 	}
 	
 	private DataBase readDataBase(Node dataBaseNode) {

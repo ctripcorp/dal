@@ -5,6 +5,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 
 public class ManualMarkDownTest {
@@ -24,29 +25,29 @@ public class ManualMarkDownTest {
 	@Test
 	public void appMarkdownTest(){
 		ConfigBeanFactory.getMarkdownConfigBean().setAppMarkDown(true);
-		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
+		Assert.assertTrue(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 		ConfigBeanFactory.getMarkdownConfigBean().setAppMarkDown(false);
 	}
 	
 	@Test
 	public void manualMarkdownTest() throws Exception {
 		ConfigBeanFactory.getMarkdownConfigBean().set("markDownKeys", dbName);
-		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
+		Assert.assertTrue(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 	}
 
 	@Test
 	public void manualMarkdownCanBeMarkupTest() throws Exception{
 		ConfigBeanFactory.getMarkdownConfigBean().set("markDownKeys", dbName);
-		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
+		Assert.assertTrue(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 		
 		ConfigBeanFactory.getMarkdownConfigBean().set("markDownKeys", "");
-		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
+		Assert.assertFalse(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 	}
 	
 	@Test
 	public void manualMarkdownCantBeAutoMarkupTest() throws Exception{
 		ConfigBeanFactory.getMarkdownConfigBean().set("markDownKeys", dbName);
-		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
+		Assert.assertTrue(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 		
 		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpVolume(1);
 		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
@@ -56,9 +57,9 @@ public class ManualMarkDownTest {
 		Thread.sleep(2000);
 		
 		for (int i = 0; i < MarkupPhase.length * 2 + 1; i++) {
-			MarkdownManager.isMarkdown(dbName);
+			MarkdownManager.isMarkdown(dbName, new DefaultLogger());
 		}
 		
-		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
+		Assert.assertTrue(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 	}
 }

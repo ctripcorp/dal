@@ -38,7 +38,7 @@ public class ConnectionActionTest {
 	}
 	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
-		return new DalConnectionManager(connectionString, DalConfigureFactory.load(), new DefaultLogger());
+		return new DalConnectionManager(connectionString, DalConfigureFactory.load());
 	}
 	
 	@Test

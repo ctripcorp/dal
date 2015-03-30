@@ -43,12 +43,12 @@ public class AutoMarkdownTest {
 		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
 		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(10);
 		
-		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
+		Assert.assertFalse(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 		for (int i = 0; i < 10; i++) {
 			MarkdownManager.detect(this.mockDalConnection(), 1000, this.mockTimeoutException());
 		}
 		Thread.sleep(1000); //Wait the collection thread complete
-		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));		
+		Assert.assertTrue(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));		
 	}
 	
 	@Test
@@ -57,7 +57,7 @@ public class AutoMarkdownTest {
 		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
 		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
 		
-		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
+		Assert.assertFalse(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 		for (int i = 0; i < 10; i++) {
 			MarkdownManager.detect(this.mockDalConnection(), 1000, this.mockTimeoutException());
 		}
@@ -72,12 +72,12 @@ public class AutoMarkdownTest {
 		Thread.sleep(2000); //Wait auto mark up delay
 		for (int i = 0; i < MarkupPhase.length; i++) {
 			if(i >= 7)
-				Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
+				Assert.assertFalse(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 			else{
-				Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
+				Assert.assertTrue(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 			}
 		}
-		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
+		Assert.assertFalse(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 		Assert.assertFalse(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
 	}
 	
@@ -87,7 +87,7 @@ public class AutoMarkdownTest {
 		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
 		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
 		
-		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
+		Assert.assertFalse(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 		for (int i = 0; i < 10; i++) {
 			MarkdownManager.detect(this.mockDalConnection(), 1000, this.mockTimeoutException());
 		}
@@ -100,7 +100,7 @@ public class AutoMarkdownTest {
 		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3");
 		
 		for (int i = 0; i < MarkupPhase.length; i++) {
-			Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
+			Assert.assertTrue(MarkdownManager.isMarkdown(dbName, new DefaultLogger()));
 		}
 
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));

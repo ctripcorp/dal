@@ -20,7 +20,7 @@ public class DalTransactionManagerTest {
 	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";
 	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
-		return new DalConnectionManager(logicDbName, DalConfigureFactory.load(), new DefaultLogger());
+		return new DalConnectionManager(logicDbName, DalConfigureFactory.load());
 	}
 	
 	@Test

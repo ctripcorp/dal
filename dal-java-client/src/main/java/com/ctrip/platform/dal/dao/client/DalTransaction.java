@@ -19,7 +19,7 @@ public class DalTransaction  {
 		this.logicDbName = logicDbName;
 		this.connHolder = connHolder;
 		connHolder.getConn().setAutoCommit(false);
-		this.logger = DalClientFactory.getDalLogger();
+		this.logger = connHolder.getLogger();
 	}
 	
 	public void validate(String logicDbName) throws SQLException {

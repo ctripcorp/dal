@@ -34,7 +34,7 @@ public class DalDirectClient implements DalClient {
 	private DalTransactionManager transManager;
 
 	public DalDirectClient(DalConfigure config, String logicDbName, DalLogger logger) {
-		connManager = new DalConnectionManager(logicDbName, config, logger);
+		connManager = new DalConnectionManager(logicDbName, config);
 		transManager = new DalTransactionManager(connManager);
 	}
 

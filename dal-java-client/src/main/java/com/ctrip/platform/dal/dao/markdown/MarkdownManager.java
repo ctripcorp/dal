@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.ctrip.platform.dal.dao.client.DalConnection;
+import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.dao.configbeans.MarkdownConfigBean;
 
@@ -29,7 +30,7 @@ public class MarkdownManager {
 				durations, TimeUnit.MICROSECONDS);
 	}
 
-	public static boolean isMarkdown(String key) {
+	public static boolean isMarkdown(String key, DalLogger logger) {
 		MarkdownConfigBean mcb = ConfigBeanFactory.getMarkdownConfigBean();
 		if (mcb.isAppMarkDown()) {
 			return true;
@@ -44,7 +45,7 @@ public class MarkdownManager {
 			if ((System.currentTimeMillis() - item.getMarkdownTime()) <= mcb.getAutoMarkUpDelay() * 1000)
 				return true;
 
-			if (!MarkupManager.isPass(key)) {
+			if (!MarkupManager.isPass(key, logger)) {
 				return true;
 			}
 		}

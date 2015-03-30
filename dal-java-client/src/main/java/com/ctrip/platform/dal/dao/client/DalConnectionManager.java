@@ -20,10 +20,10 @@ public class DalConnectionManager {
 	private String logicDbName;
 	private DalLogger logger;
 
-	public DalConnectionManager(String logicDbName, DalConfigure config, DalLogger logger) {
+	public DalConnectionManager(String logicDbName, DalConfigure config) {
 		this.logicDbName = logicDbName;
 		this.config = config;
-		this.logger = logger;;
+		this.logger = config.getDalLogger();
 	}
 	
 	public String getLogicDbName() {

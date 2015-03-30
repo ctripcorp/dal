@@ -11,14 +11,13 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.ConnectionAction;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DalConnectionManager;
-import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 
 public class DalConnectionManagerTest {
 	private static final String connectionString = "HotelPubDB";
 	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
-		return new DalConnectionManager(connectionString, DalConfigureFactory.load(), new DefaultLogger());
+		return new DalConnectionManager(connectionString, DalConfigureFactory.load());
 	}
 	
 	@Test

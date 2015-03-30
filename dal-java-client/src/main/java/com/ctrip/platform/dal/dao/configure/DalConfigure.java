@@ -6,18 +6,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ctrip.datasource.locator.DataSourceLocator;
+import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 
 public class DalConfigure {
 	private String name;
 	private Map<String, DatabaseSet> databaseSets = new ConcurrentHashMap<String, DatabaseSet>();
 	private DalLogger dalLogger;
+	private DalConnectionLocator locator;
 	
-	public DalConfigure(String name, Map<String, DatabaseSet> databaseSets, DalLogger dalLogger) {
+	public DalConfigure(String name, Map<String, DatabaseSet> databaseSets, DalLogger dalLogger, DalConnectionLocator locator) {
 		this.name = name;
 		this.databaseSets.putAll(databaseSets);
 		this.dalLogger = dalLogger;
+		this.locator = locator;
 	}
 	
 	public String getName() {
@@ -40,7 +42,7 @@ public class DalConfigure {
 			for(DataBase db: dbs.values()) {
 				Connection conn = null;
 				try {
-					conn = DataSourceLocator.newInstance().getDataSource(db.getConnectionString()).getConnection();
+					conn = locator.getConnection(db.getConnectionString());
 				} catch (Throwable e) {
 					e.printStackTrace();
 				}finally {
@@ -67,5 +69,9 @@ public class DalConfigure {
 
 	public DalLogger getDalLogger() {
 		return dalLogger;
+	}
+
+	public DalConnectionLocator getLocator() {
+		return locator;
 	}
 }

@@ -9,7 +9,6 @@ import java.sql.Connection;
 
 import org.junit.Test;
 
-import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.ConnectionAction;
@@ -33,7 +32,7 @@ public class ConnectionActionTest {
 	
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
-		conn = DataSourceLocator.newInstance().getDataSource(connectionString).getConnection();
+		conn = DalClientFactory.getDalConfigure().getLocator().getConnection(connectionString);
 		return new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn), new DefaultLogger());
 	}
 	

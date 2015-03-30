@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -19,11 +18,13 @@ public class DalConnectionManager {
 	private DalConfigure config;
 	private String logicDbName;
 	private DalLogger logger;
+	private DalConnectionLocator locator;
 
 	public DalConnectionManager(String logicDbName, DalConfigure config) {
 		this.logicDbName = logicDbName;
 		this.config = config;
 		this.logger = config.getDalLogger();
+		this.locator = config.getLocator();
 	}
 	
 	public String getLogicDbName() {
@@ -95,7 +96,7 @@ public class DalConnectionManager {
 		}
 		
 		try {	
-			conn = DataSourceLocator.newInstance().getDataSource(allInOneKey).getConnection();
+			conn = locator.getConnection(allInOneKey);
 			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), shardId, isMaster, conn);
 			return new DalConnection(conn, meta, logger);
 		} catch (Throwable e) {

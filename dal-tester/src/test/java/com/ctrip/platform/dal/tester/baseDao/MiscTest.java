@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.datasource.locator.DataSourceLocator;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -85,7 +84,7 @@ public class MiscTest {
 	public static void main(String[] args) {
 		try {
 			DalClientFactory.initClientFactory();
-			Connection conn = DataSourceLocator.newInstance().getDataSource("local-test-mzang").getConnection();
+			Connection conn = DalClientFactory.getDalConfigure().getLocator().getConnection("local-test-mzang");
 			
 			testSqlServer("AccDB_INSERT_1");
 			

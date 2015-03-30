@@ -17,6 +17,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.DefaultLogger;
 
@@ -44,6 +45,14 @@ import com.ctrip.platform.dal.dao.client.DefaultLogger;
 	  <simplified>true</simplified>
 	<settings>
   </logListener>
+  <ConnectionLocator>
+    <locator>com.xxx.xxx.xxx</locator>
+    <settings>
+	  <encrypt>true</encrypt>
+	  <sampling>false</sampling>
+	  <simplified>true</simplified>
+	<settings>
+  </ConnectionLocator>
 </dal>
  */
 // For java we only process databaseSets. log and providers are covered elsewhere.
@@ -67,6 +76,8 @@ public class DalConfigureFactory {
 	private static String ENABLED = "enabled";
 	private static String LOGGER = "logger";
 	private static String SETTINGS = "settings";
+	private static String CONNECTION_LOCATOR = "ConnectionLocator";
+	private static String LOCATOR = "locator";
 
 	/**
 	 * Load frmo classpath
@@ -119,9 +130,11 @@ public class DalConfigureFactory {
 
 		DalLogger logger = readLogListener(getChildNode(root, LOG_LISTENER));
 		
+		DalConnectionLocator locator = readConnectionLocator(getChildNode(root, CONNECTION_LOCATOR));
+		
 		Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS), logger);
 		
-		return new DalConfigure(name, databaseSets, logger);
+		return new DalConfigure(name, databaseSets, logger, locator);
 	}
 	
 	private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode, DalLogger logger) throws Exception {
@@ -167,6 +180,31 @@ public class DalConfigureFactory {
 				getAttribute(dataBaseNode, DATABASE_TYPE).equals(MASTER),
 				getAttribute(dataBaseNode, SHARDING),
 				getAttribute(dataBaseNode, CONNECTION_STRING));
+	}
+	
+	private DalConnectionLocator readConnectionLocator(Node connLocatorNode) throws Exception {
+		if(connLocatorNode == null)
+			throw new NullPointerException("There is no ConnectionLocator node found. Please check manul to setup dal config properly.");
+		
+		Node locatorNode = getChildNode(connLocatorNode, LOCATOR);
+		if(locatorNode == null)
+			throw new NullPointerException("There is no locator node found. Please check manul to setup dal config properly.");
+
+		DalConnectionLocator locator = (DalConnectionLocator)Class.forName(locatorNode.getTextContent()).newInstance();
+		
+		Node settingsNode = getChildNode(connLocatorNode, SETTINGS);
+		Map<String, String> settings = new HashMap<>();
+
+		if(settingsNode != null) {
+			NodeList children = settingsNode.getChildNodes();
+			for(int i = 0; i < children.getLength(); i++) {
+				if(children.item(i).getNodeType() == Node.ELEMENT_NODE)
+					settings.put(children.item(i).getNodeName(), children.item(i).getTextContent());
+			}
+		}
+		
+		locator.initLocator(settings);
+		return locator;
 	}
 	
 	private DalLogger readLogListener(Node logListenerNode) throws Exception {

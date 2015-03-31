@@ -43,10 +43,14 @@ public abstract class ConfigBeanBase{
 			}catch(NoSuchMethodException ex){ }
 			ConfigName pname = new ConfigName();
 			pname.setName(field.getName());
-			pname.setPersistence(falias.persistence());
+			
+			if(falias !=null)
+				pname.setPersistence(falias.persistence());
+			
 			pname.setClazz(field.getType());
 			pname.setGetMethod(getMethod);
 			pname.setSetMethod(setMethod);
+
 			if(falias != null && !falias.alias().isEmpty()){
 				pname.setAlias(falias.alias());
 				this.aliases.put(falias.alias(), pname.getName());
@@ -56,9 +60,10 @@ public abstract class ConfigBeanBase{
 		BeanMeta alias = this.getClass().getAnnotation(BeanMeta.class);
 		if(alias != null){
 			this.info.setAlias(alias.alias());
+			this.info.setPersistence(alias.persistence());
 		}
 		this.info.setName(this.getClass().getSimpleName());
-		this.info.setPersistence(alias.persistence());
+		
 		this.info.setFullName(this.getClass().getName().replace(".", "-"));
 	}
 	

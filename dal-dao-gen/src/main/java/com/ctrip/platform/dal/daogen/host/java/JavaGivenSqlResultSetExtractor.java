@@ -6,14 +6,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.jdbc.core.ResultSetExtractor;
+
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
-import com.ctrip.platform.dal.daogen.utils.ResultSetExtractor;
 
 public class JavaGivenSqlResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
 
 	@Override
-	public List<AbstractParameterHost> extract(ResultSet rs) throws SQLException {
+	public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		List<AbstractParameterHost> paramHosts = new ArrayList<AbstractParameterHost>();
 		for (int i = 1; i <= rsmd.getColumnCount(); i++) {

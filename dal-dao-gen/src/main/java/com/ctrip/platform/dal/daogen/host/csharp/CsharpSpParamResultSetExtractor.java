@@ -6,16 +6,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.jdbc.core.ResultSetExtractor;
+
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.ResultSetExtractor;
 
 public class CsharpSpParamResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
 
 	@Override
-	public List<AbstractParameterHost> extract(ResultSet rs) throws SQLException {
+	public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
 		List<AbstractParameterHost> parameters = new ArrayList<AbstractParameterHost>();
 		while (rs.next()) {
 			int paramMode = rs.getShort("COLUMN_TYPE");

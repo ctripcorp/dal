@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 import microsoft.sql.DateTimeOffset;
 
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.ResultSetExtractor;
 
 public class JavaColumnNameResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
 
@@ -29,7 +29,7 @@ public class JavaColumnNameResultSetExtractor implements ResultSetExtractor<List
 	}
 
 	@Override
-	public List<AbstractParameterHost> extract(ResultSet rs) throws SQLException {
+	public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
 		
 		List<AbstractParameterHost> allColumns = new ArrayList<AbstractParameterHost>();
 		Map<String, Integer> columnSqlType = DbUtils.getColumnSqlType(allInOneName, tableName);

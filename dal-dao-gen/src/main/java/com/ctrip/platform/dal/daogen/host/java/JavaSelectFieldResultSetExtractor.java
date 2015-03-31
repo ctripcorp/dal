@@ -7,17 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
-import com.ctrip.platform.dal.daogen.utils.ResultSetExtractor;
 
 public class JavaSelectFieldResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
 
 	private static Logger log = Logger.getLogger(JavaSelectFieldResultSetExtractor.class);
 	
 	@Override
-	public List<AbstractParameterHost> extract(ResultSet rs) throws SQLException {
+	public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
 		ResultSetMetaData rsMeta = rs.getMetaData();
 		List<AbstractParameterHost> hosts = new ArrayList<AbstractParameterHost>();
 		for (int i = 1; i <= rsMeta.getColumnCount(); i++) {

@@ -36,11 +36,6 @@
       <version>${google-pb-version}</version>
     </dependency>
     <dependency>
-		<groupId>com.ctrip.security</groupId>
-		<artifactId>encryption</artifactId>
-		<version>${ctrip-security-version}</version>
-	</dependency>
-    <dependency>
     	<groupId>com.ctrip.platform</groupId>
     	<artifactId>java-appinternals</artifactId>
     	<version>1.0.2</version>

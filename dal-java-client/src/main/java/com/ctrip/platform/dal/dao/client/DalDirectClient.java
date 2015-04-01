@@ -44,10 +44,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<T> action = new ConnectionAction<T>() {
 			@Override
 			public T execute() throws Exception {
-				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-
-				DalWatcher.endConnect();
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
 				DalWatcher.beginExecute();
@@ -68,9 +65,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
 			public Integer execute() throws Exception {
-				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalWatcher.endConnect();
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
 				
@@ -92,9 +87,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
 			public Integer execute() throws Exception {
-				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalWatcher.endConnect();
 
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints, generatedKeyHolder);
 				
@@ -123,9 +116,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			public int[] execute() throws Exception {
-				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalWatcher.endConnect();
 				
 				statement = createStatement(conn, hints);
 				for(String sql: sqls)
@@ -149,9 +140,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			public int[] execute() throws Exception {
-				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalWatcher.endConnect();
 				
 				statement = createPreparedStatement(conn, sql, parametersList, hints);
 				
@@ -219,9 +208,7 @@ public class DalDirectClient implements DalClient {
 					}
 				}
                 
-				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalWatcher.endConnect();
 				
 				callableStatement = createCallableStatement(conn, callString, parameters, hints);
 				
@@ -251,10 +238,7 @@ public class DalDirectClient implements DalClient {
 		ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
 			@Override
 			public int[] execute() throws Exception {
-				
-				DalWatcher.beginConnect();
 				conn = getConnection(hints, this);
-				DalWatcher.endConnect();
 				
 				callableStatement = createCallableStatement(conn, callString, parametersList, hints);
 
@@ -340,8 +324,13 @@ public class DalDirectClient implements DalClient {
 	}
 	
 	public Connection getConnection(DalHints hints, ConnectionAction<?> action) throws SQLException {
+		DalWatcher.beginConnect();
+
 		action.connHolder = transManager.getConnection(hints, action.operation);
-		return action.connHolder.getConn();
+		Connection conn = action.connHolder.getConn();
+
+		DalWatcher.endConnect();
+		return conn;
 	}
 	
 	private Statement createStatement(Connection conn, DalHints hints) throws Exception {

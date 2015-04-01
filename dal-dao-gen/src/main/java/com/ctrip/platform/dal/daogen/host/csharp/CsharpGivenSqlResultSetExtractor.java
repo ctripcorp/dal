@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
 import com.ctrip.platform.dal.common.enums.DbType;
+import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 
 public class CsharpGivenSqlResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
@@ -37,9 +38,10 @@ public class CsharpGivenSqlResultSetExtractor implements ResultSetExtractor<List
 			pHost.setDbType(dbType);
 			pHost.setType(DbType.getCSharpType(pHost.getDbType()));
 			pHost.setIdentity(false);
-			pHost.setNullable(false);
+			pHost.setNullable(rsmd.isNullable(i)==1 ? true : false);
 			pHost.setPrimary(false);
 			pHost.setLength(rsmd.getColumnDisplaySize(i));
+			pHost.setValueType(Consts.CSharpValueTypes.contains(pHost.getType()));
 			pHosts.add(pHost);
 		}
 		return pHosts;

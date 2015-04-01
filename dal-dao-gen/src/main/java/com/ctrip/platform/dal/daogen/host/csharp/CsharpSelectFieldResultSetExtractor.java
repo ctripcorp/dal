@@ -24,7 +24,7 @@ public class CsharpSelectFieldResultSetExtractor implements ResultSetExtractor<L
 			pHost.setDbType(DbType.getDbTypeFromJdbcType(rsMeta.getColumnType(i)));
 			pHost.setType(DbType.getCSharpType(pHost.getDbType()));
 			pHost.setIdentity(false);
-			pHost.setNullable(true);
+			pHost.setNullable(rsMeta.isNullable(i)==1 ? true : false);
 			pHost.setValueType(Consts.CSharpValueTypes.contains(pHost.getType()));
 			pHost.setPrimary(false);
 			pHost.setLength(rsMeta.getColumnDisplaySize(i));

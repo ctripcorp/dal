@@ -33,7 +33,7 @@ public class JavaSelectFieldResultSetExtractor implements ResultSetExtractor<Lis
 			}
 			paramHost.setJavaClass(javaClass);
 			paramHost.setIdentity(false);
-			paramHost.setNullable(false);
+			paramHost.setNullable(rsMeta.isNullable(i)==1 ? true : false);
 			paramHost.setPrimary(false);
 			paramHost.setLength(rsMeta.getColumnDisplaySize(i));
 			hosts.add(paramHost);

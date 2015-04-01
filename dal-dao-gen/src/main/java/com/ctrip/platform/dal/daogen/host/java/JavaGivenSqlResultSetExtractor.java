@@ -31,7 +31,7 @@ public class JavaGivenSqlResultSetExtractor implements ResultSetExtractor<List<A
 			}
 			paramHost.setJavaClass(javaClass);
 			paramHost.setIdentity(false);
-			paramHost.setNullable(false);
+			paramHost.setNullable(rsmd.isNullable(i)==1 ? true : false);
 			paramHost.setPrimary(false);
 			paramHost.setLength(rsmd.getColumnDisplaySize(i));
 			paramHosts.add(paramHost);

@@ -44,7 +44,7 @@ public class MetricsLogger {
 	}
 	
 	public static void success(CtripLogEntry entry, long duration) {
-		report(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), SUCCESS, duration);
+		report(entry.getDao(), entry.getMethod(), entry.getClientVersion(), entry.getSqlSize(), SUCCESS, duration);
 		report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name());
 	}
 	

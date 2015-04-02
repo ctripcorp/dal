@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ctrip.platform</groupId>
 	<artifactId>dal-all</artifactId>
-	<version>1.1.3</version>
+	<version>1.1.4</version>
 	<packaging>pom</packaging>
 	<modules>
 		<module>dal-java-client</module>
@@ -17,8 +17,7 @@
 		<module>dal-tester</module>
 		<module>dal-server-common</module>
 		<module>dal-java-ext</module>
-		<module>dal-sql-log</module>
-		<module>datasource-locator</module>
+		<module>ctrip-dal-client</module>
 	</modules>
 	<properties>
 		<!-- 
@@ -57,7 +56,6 @@
 		<mysql-version>5.1.28</mysql-version>
 		<sqlserver-version>4.0</sqlserver-version>
 		<jtds-version>1.2.8</jtds-version>
-		<central-logging-version>3.2.5</central-logging-version>
 		<google-pb-version>2.5.0</google-pb-version>
 		<google-guice-version>4.0-beta</google-guice-version>
 		<google-guava-version>14.0.1</google-guava-version>
@@ -76,7 +74,6 @@
 		<jetty-javax-el-version>2.2.0.v201108011116</jetty-javax-el-version>
 		<javax-persistence-version>1.0.2</javax-persistence-version>
 		<ctrip-security-version>1.0.0.2</ctrip-security-version>
-		<cat-client-version>1.3.0</cat-client-version>
 	</properties>
 	<profiles>
 		<profile>

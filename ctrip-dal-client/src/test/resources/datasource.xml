@@ -1,0 +1,76 @@
+<!-- 
+	location属于用于指定Database.Config文件的位置，取值说明如下：
+	1、$classpath ： 直接从classpath根目录读取Database.Config文件
+	2、/D:/WebSites/CtripAppData/Database.Config ：从Windows系统指定目录读取
+	3、/opt/ctrip/AppData/Database.Config ：从Linux系统指定目录读取
+	4、若不配置location属性，默认会进行如下判断：
+		4.1、Windows系统从目录/D:/WebSites/CtripAppData/Database.Config读取
+		4.2、Linux系统从目录/opt/ctrip/AppData/Database.Config读取（路径区分大小写）
+ -->
+<Datasources location="$classpath">
+	<!-- 数据库连接池属性配置 -->
+	<Datasource name="dao_test"
+              testWhileIdle="true"
+              testOnBorrow="true"
+              testOnReturn="true"
+              validationQuery="SELECT 1"
+              validationInterval="30000"
+              timeBetweenEvictionRunsMillis="30000"
+              maxActive="100"
+              minIdle="10"
+              maxWait="500"
+              initialSize="10"
+              removeAbandonedTimeout="60"
+              removeAbandoned="true"
+              logAbandoned="true"
+              minEvictableIdleTimeMillis="30000"
+              option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+	<Datasource name="dao_test_select"
+              testWhileIdle="true"
+              testOnBorrow="true"
+              testOnReturn="false"
+              validationQuery="SELECT 1"
+              validationInterval="30000"
+              timeBetweenEvictionRunsMillis="30000"
+              maxActive="100"
+              minIdle="10"
+              maxWait="1000"
+              initialSize="10"
+              removeAbandonedTimeout="60"
+              removeAbandoned="true"
+              logAbandoned="true"
+              minEvictableIdleTimeMillis="30000"
+              option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+    <Datasource name="HotelPubDB"
+           	  testWhileIdle="true"
+              testOnBorrow="true"
+              testOnReturn="false"
+              validationQuery="SELECT 1"
+              validationInterval="30000"
+              timeBetweenEvictionRunsMillis="30000"
+              maxActive="100"
+              minIdle="10"
+              maxWait="10000"
+              initialSize="10"
+              removeAbandonedTimeout="60"
+              removeAbandoned="true"
+              logAbandoned="true"
+              minEvictableIdleTimeMillis="30000"
+              option="sendTimeAsDateTime=false"/>
+    <Datasource name="dao_test_1"
+              testWhileIdle="true"
+              testOnBorrow="true"
+              testOnReturn="true"
+              validationQuery="SELECT 1"
+              validationInterval="30000"
+              timeBetweenEvictionRunsMillis="30000"
+              maxActive="100"
+              minIdle="10"
+              maxWait="500"
+              initialSize="10"
+              removeAbandonedTimeout="60"
+              removeAbandoned="true"
+              logAbandoned="true"
+              minEvictableIdleTimeMillis="30000"
+              connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+</Datasources>

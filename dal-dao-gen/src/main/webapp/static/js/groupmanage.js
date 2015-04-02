@@ -68,6 +68,15 @@
         }
     };
 
+    var applyAddTeam = function() {
+        var form = $("<form></form>");
+        form.attr('action',"mailto:rdfxdal@Ctrip.com");
+        form.attr('method','post');
+        form.appendTo("body");
+        form.css('display','none');
+        form.submit();
+    };
+
     Render.prototype = {
         render_layout: function (render_obj) {
             $(render_obj).w2layout({
@@ -115,6 +124,12 @@
                         },
                         {
                             type: 'button',
+                            id: 'applyAddTeam',
+                            caption: '申请添加DAL Team',
+                            icon: 'fa fa-envelope'
+                        },
+                        {
+                            type: 'button',
                             id: 'addGroup',
                             caption: '添加DAL Team',
                             icon: 'fa fa-plus'
@@ -145,6 +160,9 @@
                                 break;
                             case 'delGroup':
                                 delGroup();
+                                break;
+                            case 'applyAddTeam':
+                                applyAddTeam();
                                 break;
                         }
                     }

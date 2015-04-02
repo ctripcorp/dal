@@ -13,4 +13,13 @@
 		</databaseSet>
 #end
 	</databaseSets>
+	<LogListener enabled="true">
+		<logger>com.ctrip.platform.dal.sql.logging.CtripDalLogger</logger>
+        <settings>
+			<encrypt>false</encrypt>
+        </settings>
+	</LogListener>
+	<ConnectionLocator>
+		<locator>com.ctrip.datasource.locator.CtripDalConnectionLocator</locator>
+	</ConnectionLocator>
 </dal>

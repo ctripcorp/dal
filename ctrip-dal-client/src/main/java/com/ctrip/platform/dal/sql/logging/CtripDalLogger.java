@@ -63,7 +63,7 @@ public class CtripDalLogger implements DalLogger {
 	public void success(LogEntry entry, int count) {
 		try {
 			DalCLogger.success((CtripLogEntry)entry, count);
-			MetricsLogger.success((CtripLogEntry)entry, entry.getDuration());
+			Metrics.success((CtripLogEntry)entry, entry.getDuration());
 			DalCatLogger.catTransactionSuccess((CtripLogEntry)entry);
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -74,7 +74,7 @@ public class CtripDalLogger implements DalLogger {
 	public void fail(LogEntry entry, Throwable e) {
 		try {
 			DalCLogger.fail((CtripLogEntry)entry, e);
-			MetricsLogger.fail((CtripLogEntry)entry, entry.getDuration());
+			Metrics.fail((CtripLogEntry)entry, entry.getDuration());
 			DalCatLogger.catTransactionFailed((CtripLogEntry)entry, e);
 		} catch (Throwable ex) {
 			ex.printStackTrace();

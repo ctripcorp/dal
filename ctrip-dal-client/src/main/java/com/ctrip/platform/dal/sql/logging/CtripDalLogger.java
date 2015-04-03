@@ -46,7 +46,7 @@ public class CtripDalLogger implements DalLogger {
 
 	@Override
 	public void getConnectionFailed(String dbName, Throwable e) {
-		DalCLogger.logGetConnectionFailed(dbName, e);
+		DalCLogger.getConnectionFailed(dbName, e);
 	}
 
 	@Override

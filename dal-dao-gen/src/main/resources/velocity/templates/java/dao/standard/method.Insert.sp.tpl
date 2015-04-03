@@ -39,7 +39,7 @@
 		    map.put("${p.getName()}", parameters.get("${p.getName()}", ParameterDirection.InputOutput).getValue());
 #end
 #if($p.getDirection().name() == "Output")
-		    map.put("${p.getName()}", parameters.get("${p.getName()}", ParameterDirection.InputOutput).getValue())
+		    map.put("${p.getName()}", parameters.get("${p.getName()}", ParameterDirection.Output).getValue())
 #end
 #end
 	        holder.getKeyList().add(map);

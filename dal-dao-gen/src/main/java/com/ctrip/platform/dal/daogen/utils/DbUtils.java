@@ -352,7 +352,7 @@ public class DbUtils {
 	}
 	
 	public static List<AbstractParameterHost> testAQuerySql(String allInOneName, final String sql, final String params, 
-			final ResultSetExtractor<List<AbstractParameterHost>> extractor, final boolean justTest) throws Exception {
+			final ResultSetExtractor<List<AbstractParameterHost>> extractor) throws Exception {
 		return execute(allInOneName, new ConnectionCallback<List<AbstractParameterHost>>() {
 			@Override
 			public List<AbstractParameterHost> doInConnection(Connection connection) throws SQLException, DataAccessException {
@@ -377,7 +377,7 @@ public class DbUtils {
 					}
 				}
 				ResultSet rs = ps.executeQuery();
-				return justTest ? new ArrayList<AbstractParameterHost>() : extractor.extractData(rs);
+				return extractor.extractData(rs);
 			}
 		});
 	}

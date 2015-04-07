@@ -584,7 +584,7 @@ public class SQLValidation {
 			case java.sql.Types.OTHER:
 				return null;
 			case java.sql.Types.CHAR:
-				return val.charAt(0);
+				return val;
 			case java.sql.Types.DATE:
 				return Date.valueOf(val);
 			case java.sql.Types.TIME:

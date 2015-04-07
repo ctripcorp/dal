@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class SQLValidation {
 			if(null == obj)
 				mockedVals[i] = "null";
 			else
-				mockedVals[i] = obj instanceof String ? 
+				mockedVals[i] = obj instanceof String && sqlTypes[i]!=10001? //10001 <---> uniqueidentifier
 						"'" + obj.toString() + "'" : obj.toString();
 		}
 		return mockedVals;
@@ -187,7 +188,10 @@ public class SQLValidation {
 			connection.setAutoCommit(false);
 			PreparedStatement stat = connection.prepareStatement(SqlBuilder.net2Java(sql));
 			for (int i = 1; i <= paramsTypes.length; i++) {
-				stat.setObject(i, mockedVals[i-1], paramsTypes[i-1]);
+				if (paramsTypes[i-1] == 10001)
+					stat.setObject(i, mockedVals[i-1].toString().getBytes(), Types.BINARY);
+				else 
+					stat.setObject(i, mockedVals[i-1], paramsTypes[i-1]);
 			}
 			int rows = stat.executeUpdate();
 			status.setAffectRows(rows);
@@ -267,8 +271,7 @@ public class SQLValidation {
 			String dbType = getDBType(connection, dbName);
 			if(dbType == "MySQL"){
 				mysqlQuery(connection, sql, status, paramsTypes, mockedVals);
-			}
-			else if(dbType.equals("Microsoft SQL Server")){
+			} else if(dbType.equals("Microsoft SQL Server")){
 				sqlserverQueryWithoutExplain(connection, sql, status, paramsTypes, mockedVals);
 			}
 			
@@ -304,7 +307,10 @@ public class SQLValidation {
 			try{
 				stat = connection.prepareStatement(SqlBuilder.net2Java(sql));
 				for (int i = 1; i <= paramsTypes.length; i++) {
-					stat.setObject(i, vals[i-1], paramsTypes[i-1]);
+					if (paramsTypes[i-1] == 10001)
+						stat.setObject(i, vals[i-1].toString().getBytes(), Types.BINARY);
+					else 
+						stat.setObject(i, vals[i-1], paramsTypes[i-1]);
 				}
 				rs = stat.executeQuery();
 				int affectRows = 0;
@@ -526,6 +532,8 @@ public class SQLValidation {
 			case java.sql.Types.LONGNVARCHAR:
 			case java.sql.Types.LONGVARCHAR:
 				return "TT";
+			case 10001: //uniqueidentifier
+				return "C4AECF65-1D5C-47B6-BFFC-0C9550C4E158";
 			default:
 				return null;
 			
@@ -597,6 +605,8 @@ public class SQLValidation {
 			case java.sql.Types.NVARCHAR:
 			case java.sql.Types.LONGNVARCHAR:
 			case java.sql.Types.LONGVARCHAR:
+				return val;
+			case 10001: //uniqueidentifier
 				return val;
 			default:
 				return null;

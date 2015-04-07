@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -309,6 +310,9 @@ public class DbUtils {
 					for (int i=1;i<=rsMeta.getColumnCount();i++) {
 						String columnName = rsMeta.getColumnName(i);
 						Integer sqlType = rsMeta.getColumnType(i);
+						if ("uniqueidentifier".equals(rsMeta.getColumnTypeName(i))) {
+							sqlType = 10001;
+						}
 						if(!map.containsKey(columnName) && null != sqlType) {
 							map.put(columnName, sqlType);
 						}
@@ -373,7 +377,10 @@ public class DbUtils {
 						} catch (NumberFormatException ex) {
 							index++;
 						}
-						ps.setObject(index, mockATest(Integer.valueOf(tuple[1])), Integer.valueOf(tuple[1]));
+						if(Integer.valueOf(tuple[1]) == 10001)
+							ps.setObject(index, mockATest(Integer.valueOf(tuple[1])), Types.BINARY);
+						else
+							ps.setObject(index, mockATest(Integer.valueOf(tuple[1])), Integer.valueOf(tuple[1]));
 					}
 				}
 				ResultSet rs = ps.executeQuery();
@@ -403,6 +410,8 @@ public class DbUtils {
 				return "10:00:00";
 			case java.sql.Types.TIMESTAMP:
 				return "2012-01-01 10:00:00";
+			case 10001://uniqueidentifier
+				return new byte[]{};
 			default:
 				return "test";
 		}

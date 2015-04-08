@@ -299,4 +299,11 @@ public class DalShardingHelper {
 		T execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException;
 		T merge(List<T> results);
 	}
+	
+	public static abstract class AbstractIntArrayBulkTask implements BulkTask<int[]> {
+		@Override
+		public int[] merge(List<int[]> results) {
+			return DalShardingHelper.combine(results.toArray(new int[results.size()][]));
+		}
+	}
 }

@@ -13,8 +13,7 @@ import java.util.Map;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
-import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
-import com.ctrip.platform.dal.dao.helper.DalShardingHelper.BulkTask;
+import com.ctrip.platform.dal.dao.helper.DalShardingHelper.AbstractIntArrayBulkTask;
 
 /**
  * This DAO is to simplify Ctrip special MS Sql Server CUD case. 
@@ -194,15 +193,10 @@ public class CtripTableSpDao<T> {
 			return executeByDbShard(logicDbName, rawTableName, hints, client.getPojosFields(daoPojos), new BatchInsertSp3Task());
 	}
 	
-	private class BatchInsertSp3Task implements BulkTask<int[]> {
+	private class BatchInsertSp3Task extends AbstractIntArrayBulkTask {
 		@Override
 		public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
 			return batchInsertSp3ByTable(hints, shaffled);
-		}
-
-		@Override
-		public int[] merge(List<int[]> results) {
-			return DalShardingHelper.combine(results.toArray(new int[results.size()][]));
 		}
 	}
 	
@@ -223,7 +217,6 @@ public class CtripTableSpDao<T> {
 		hints.addDetailResults(result);
 		return result; 
 	}
-
 
 	/**
 	 * SP delete
@@ -266,15 +259,10 @@ public class CtripTableSpDao<T> {
 			return executeByDbShard(logicDbName, rawTableName, hints, client.getPojosFields(daoPojos), new BatchDeleteSp3Task());
 	}
 
-	private class BatchDeleteSp3Task implements BulkTask<int[]> {
+	private class BatchDeleteSp3Task  extends AbstractIntArrayBulkTask {
 		@Override
 		public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
 			return batchDeleteSp3ByTable(hints, shaffled);
-		}
-
-		@Override
-		public int[] merge(List<int[]> results) {
-			return DalShardingHelper.combine(results.toArray(new int[results.size()][]));
 		}
 	}
 	
@@ -335,15 +323,10 @@ public class CtripTableSpDao<T> {
 			return executeByDbShard(logicDbName, rawTableName, hints, client.getPojosFields(daoPojos), new BatchUpdateSp3Task());
 	}
 	
-	private class BatchUpdateSp3Task implements BulkTask<int[]> {
+	private class BatchUpdateSp3Task extends AbstractIntArrayBulkTask {
 		@Override
 		public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
 			return batchUpdateSp3ByTable(hints, shaffled);
-		}
-
-		@Override
-		public int[] merge(List<int[]> results) {
-			return DalShardingHelper.combine(results.toArray(new int[results.size()][]));
 		}
 	}
 

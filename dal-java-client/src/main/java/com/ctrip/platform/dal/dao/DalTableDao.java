@@ -402,7 +402,7 @@ public final class DalTableDao<T> {
 		detectDistributedTransaction(logicDbName, hints, pojos);
 		
 		int count = 0;
-		hints = hints.clone();
+		hints = hints.clone();// To avoid shard id being polluted by each pojos
 		for (Map<String, ?> fields : pojos) {
 			DalWatcher.begin();
 			filterAutoIncrementPrimaryFields(fields);
@@ -802,8 +802,7 @@ public final class DalTableDao<T> {
 			Map<String, ?> entries) {
 		int index = parameters.size() + 1;
 		for (Map.Entry<String, ?> entry : entries.entrySet()) {
-			parameters.set(index++, entry.getKey(), getColumnType(entry.getKey()),
-					entry.getValue());
+			parameters.set(index++, entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
 		}
 	}
 
@@ -837,8 +836,23 @@ public final class DalTableDao<T> {
 	public void addParametersByName(StatementParameters parameters,
 			Map<String, ?> entries) {
 		for (Map.Entry<String, ?> entry : entries.entrySet()) {
-			parameters.set(entry.getKey(), getColumnType(entry.getKey()),
-					entry.getValue());
+			parameters.set(entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
+		}
+	}
+
+	/**
+	 * Add all the entries into the parameters by name. The parameter name will
+	 * be the entry key, value will be entry value. The value can be null. This
+	 * method will be used to set input parameters for stored procedure.
+	 * 
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param entries Key value pairs to be added into parameters
+	 */
+	public void addParametersByName(StatementParameters parameters,
+			Map<String, ?> entries, String[] validColumns) {
+		for(String column : validColumns){
+			if(entries.containsKey(column))
+				parameters.set(column, getColumnType(column), entries.get(column));
 		}
 	}
 
@@ -879,18 +893,18 @@ public final class DalTableDao<T> {
 				combine(PLACE_HOLDER, paramCount, COLUMN_SEPARATOR));
 	}
 	
-	private boolean isEmpty(List<T> daoPojos) {
+	public boolean isEmpty(List<T> daoPojos) {
 		return null == daoPojos || daoPojos.size() == 0;
 	}
 	
-	private boolean isEmpty(T... daoPojos) {
+	public boolean isEmpty(T... daoPojos) {
 		if(null == daoPojos)
 			return true;
 		
 		return daoPojos.length == 1 && daoPojos[0] == null;
 	}
 	
-	private List<Map<String, ?>> getPojosFields(List<T> daoPojos) {
+	public List<Map<String, ?>> getPojosFields(List<T> daoPojos) {
 		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
 		if (null == daoPojos || daoPojos.size() < 1)
 			return pojoFields;
@@ -902,7 +916,7 @@ public final class DalTableDao<T> {
 		return pojoFields;
 	}
 
-	private String getLogicDbName() {
+	public String getLogicDbName() {
 		return parser.getDatabaseName();
 	}
 

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.catlog;
+package com.ctrip.platform.dal.sql.logging;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
 

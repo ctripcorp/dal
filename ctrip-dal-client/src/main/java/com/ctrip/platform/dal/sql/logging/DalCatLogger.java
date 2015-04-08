@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.sql.logging;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.ctrip.platform.dal.catlog.CatInfo;
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.Message;

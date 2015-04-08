@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.logging.sql;
+package com.ctrip.platform.dal.sql.logging;
 
 import java.util.HashMap;
 import java.util.Map;

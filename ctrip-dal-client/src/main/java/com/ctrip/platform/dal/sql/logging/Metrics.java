@@ -7,8 +7,6 @@ import com.ctrip.framework.clogging.agent.metrics.IMetric;
 import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
-import com.ctrip.platform.dal.logging.sql.OptInfo;
-import com.ctrip.platform.dal.logging.sql.SQLInfo;
 
 public class Metrics {
 	private static final String AllInOneKey = "AllInOneKey";

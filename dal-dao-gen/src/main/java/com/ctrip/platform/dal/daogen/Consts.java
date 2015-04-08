@@ -105,6 +105,9 @@ public class Consts {
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.NCHAR, String.class);
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.LONGNVARCHAR, String.class);
 		
+		//uniqueidentifier
+		jdbcSqlTypeToJavaClass.put(10001, String.class);
+		
 		// Used as an argument to CallableStatement.registerOutParameter
 		//jdbcSqlTypeToJavaClass.put(java.sql.Types.OTHER, "Object");
 		
@@ -162,6 +165,9 @@ public class Consts {
 		jdbcSqlTypeDisplay.put(java.sql.Types.NCHAR, "Types.NCHAR");
 		jdbcSqlTypeDisplay.put(java.sql.Types.LONGNVARCHAR, "Types.LONGNVARCHAR");
 		jdbcSqlTypeDisplay.put(microsoft.sql.Types.DATETIMEOFFSET, "microsoft.sql.Types.DATETIMEOFFSET");
+		
+		//uniqueidentifier
+		jdbcSqlTypeDisplay.put(10001, "Types.CHAR");
 	}
 	
 

@@ -128,7 +128,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 
 							for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(task.getAllInOneName(),
 											task.getSql_content(), task.getParameters(),
-											new JavaGivenSqlResultSetExtractor(), false)) {
+											new JavaGivenSqlResultSetExtractor())) {
 								paramHosts.add((JavaParameterHost) _ahost);
 							}
 

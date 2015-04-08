@@ -57,7 +57,7 @@
 		<dependency>
 			<groupId>com.dianping.cat</groupId>
 			<artifactId>cat-client</artifactId>
-			<version>1.3.0</version>
+			<version>1.3.3</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -78,14 +78,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<distributionManagement>
-		<repository>
-			<id>nexus-releases</id>
-			<url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>nexus-snapshots</id>
-			<url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
 </project>

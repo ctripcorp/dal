@@ -26,20 +26,13 @@ public class SQLInfo {
 		this.dao = dao;
 		this.method = method;
 		this.version = "Java " + version;
-		if (size < 200)
-        {
+		if (size < 200) {
             this.size = 200;
-        }
-        else if (size < 1000)
-        {
+        } else if (size < 1000) {
         	this.size = 1000;
-        }
-        else if (size < 5000)
-        {
+        } else if (size < 5000) {
         	this.size = 5000;
-        }
-        else
-        {
+        } else {
         	this.size = 99999;
         }
 		this.status = status;

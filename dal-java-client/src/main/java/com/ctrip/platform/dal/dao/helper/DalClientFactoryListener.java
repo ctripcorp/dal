@@ -41,14 +41,9 @@ public class DalClientFactoryListener implements ServletContextListener {
 	
 	public void contextDestroyed(ServletContextEvent sce) {
 		DalClientFactory.shutdownFactory();
-		ServletContext context = sce.getServletContext();
 		
-		String closeClogWhenExit = context.getInitParameter("com.ctrip.platform.dal.dao.closeClogWhenExit");
-
-		if(Boolean.parseBoolean(closeClogWhenExit)) {
-			logger.info("shutdown clogging");
-			MessageManager.getInstance().shutdown();
-		}
+		logger.info("shutdown clogging");
+		MessageManager.getInstance().shutdown();
 		
 		logger.info("DalWatcher has been destoryed");
 		DalWatcher.destroy();

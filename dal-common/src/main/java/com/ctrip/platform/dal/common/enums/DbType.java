@@ -93,6 +93,8 @@ public enum DbType {
     	jdbcTypeToNetDbType.put(java.sql.Types.NCHAR,String);
     	jdbcTypeToNetDbType.put(java.sql.Types.NVARCHAR,String);
     	jdbcTypeToNetDbType.put(java.sql.Types.LONGNVARCHAR,String);
+    	//10001 ---> uniqueidentifier
+    	jdbcTypeToNetDbType.put(10001, Guid);
     	//jdbcTypeToNetDbType.put(-150, Object);
     	/*
     	jdbcTypeToNetDbType.put(java.sql.Types.NULL,Binary);

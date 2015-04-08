@@ -37,6 +37,7 @@
         + "<option value='-2'>binary----byte[]</option>"
         + "<option value='-3'>VarBinary----byte[]</option>"
         + "<option value='-4'>LongVarBinary----byte[]</option>"
+        + "<option value='10001'>uniqueidentifier----Guid</option>"
         + "</select></div><br>";
 
     var step1 = function(record, current){

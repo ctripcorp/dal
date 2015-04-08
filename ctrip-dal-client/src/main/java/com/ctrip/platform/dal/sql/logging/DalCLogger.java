@@ -92,22 +92,6 @@ public class DalCLogger {
 		}
 	}
 
-	public static void logGetConnectionFailed(String realDbName, Throwable e) {
-		try {
-			String msg = getExceptionStack(e);
-
-			String logMsg = "Connectiing to " + realDbName
-					+ " database failed." + System.lineSeparator()
-					+ System.lineSeparator()
-					+ "********** Exception Info **********"
-					+ System.lineSeparator() + msg;
-			log("Get connection", DalEventEnum.CONNECTION_FAILED,
-					LogLevel.ERROR, logMsg);
-		} catch (Throwable e1) {
-			e1.printStackTrace();
-		}
-	}
-
 	public static void error(String desc, Throwable e) {
 		try {
 			String msg = getExceptionStack(e);
@@ -122,17 +106,18 @@ public class DalCLogger {
 		}
 	}
 
-	public static void log(String name, DalEventEnum event, LogLevel level,
-			String msg) {
+	public static void getConnectionFailed(String realDbName, Throwable e) {
 		StringBuffer sbuffer = new StringBuffer();
-		sbuffer.append(String.format("Log Name: %s" + System.lineSeparator(),
-				name));
-		sbuffer.append(String.format("Event: %s" + System.lineSeparator(),
-				event.getEventId()));
-		sbuffer.append(String.format("Message: %s " + System.lineSeparator(),
-				msg));
+		sbuffer.append(String.format("Log Name: %s" + System.lineSeparator(), "Get connection"));
+		sbuffer.append(String.format("Event: %s" + System.lineSeparator(), 
+				DalEventEnum.CONNECTION_FAILED.getEventId()));
+		
+		String msg= "Connectiing to " + realDbName
+				+ " database failed." + System.lineSeparator();
 
-		log(level, sbuffer.toString());
+		sbuffer.append(String.format("Message: %s " + System.lineSeparator(), msg));
+		
+		error(sbuffer.toString(), e);
 	}
 	
 	public static void log(LogLevel level, String pattern, Object... args){

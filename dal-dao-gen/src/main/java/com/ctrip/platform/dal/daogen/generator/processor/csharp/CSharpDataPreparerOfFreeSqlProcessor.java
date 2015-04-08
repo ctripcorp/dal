@@ -252,7 +252,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 
 		for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(
 				task.getAllInOneName(), task.getSql_content(), task.getParameters(),
-				new CsharpGivenSqlResultSetExtractor(), false)) {
+				new CsharpGivenSqlResultSetExtractor())) {
 			pHosts.add((CSharpParameterHost) _ahost);
 		}
 

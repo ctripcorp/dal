@@ -6,6 +6,7 @@ import java.util.Map;
 import com.ctrip.framework.clogging.agent.metrics.IMetric;
 import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 
+@Deprecated
 public class MetricsLogger {
 	private static final String COUNT = "arch.dal.sql.count";
 	private static final String COST = "arch.dal.sql.cost";
@@ -20,29 +21,14 @@ public class MetricsLogger {
 	private static final String SIZE = "Size";
 	private static final String STATUS = "Status";
 	
-	//private static Queue<MetricsData> statusQueue = new ConcurrentLinkedQueue<MetricsData>();
-	//private static Map<String, MetricsData> metrixCache = new HashMap<String, MetricsData>();
-	
-	
 	private static final String DBTYPE = "DBType";
     private static final String OPTTYPE = "OperationType";
     private static final String DB = "DB";
     
     public static final String CLIENT = "Client";
-	//private static final String CLIENT_NAME = "Java " + DalClientVersion.version;
     
-	//private static Queue<MasterSlaveMetrics> msQueue = new ConcurrentLinkedQueue<MasterSlaveMetrics>();
-	//private static Map<String, MasterSlaveMetrics> msCache = new HashMap<String, MasterSlaveMetrics>();
-	
-	//private static ScheduledExecutorService sender;
-
 	private static IMetric metricLogger = MetricManager.getMetricer();
 
-	static {
-		//sender = Executors.newSingleThreadScheduledExecutor();
-		//sender.scheduleAtFixedRate(new MetrixReporter(), 1, 1, TimeUnit.MINUTES);
-	}
-	
 	public static void success(CtripLogEntry entry, long duration) {
 		report(entry.getDao(), entry.getMethod(), entry.getClientVersion(), entry.getSqlSize(), SUCCESS, duration);
 		report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name());

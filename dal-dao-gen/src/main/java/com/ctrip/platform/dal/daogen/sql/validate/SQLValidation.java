@@ -189,7 +189,7 @@ public class SQLValidation {
 			PreparedStatement stat = connection.prepareStatement(SqlBuilder.net2Java(sql));
 			for (int i = 1; i <= paramsTypes.length; i++) {
 				if (paramsTypes[i-1] == 10001)
-					stat.setObject(i, mockedVals[i-1].toString().getBytes(), Types.BINARY);
+					stat.setObject(i, mockedVals[i-1], Types.CHAR);
 				else 
 					stat.setObject(i, mockedVals[i-1], paramsTypes[i-1]);
 			}
@@ -308,7 +308,7 @@ public class SQLValidation {
 				stat = connection.prepareStatement(SqlBuilder.net2Java(sql));
 				for (int i = 1; i <= paramsTypes.length; i++) {
 					if (paramsTypes[i-1] == 10001)
-						stat.setObject(i, vals[i-1].toString().getBytes(), Types.BINARY);
+						stat.setObject(i, vals[i-1], Types.CHAR);
 					else 
 						stat.setObject(i, vals[i-1], paramsTypes[i-1]);
 				}

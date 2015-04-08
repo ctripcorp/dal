@@ -106,7 +106,7 @@ public class Consts {
 		jdbcSqlTypeToJavaClass.put(java.sql.Types.LONGNVARCHAR, String.class);
 		
 		//uniqueidentifier
-		jdbcSqlTypeToJavaClass.put(10001, byte[].class);
+		jdbcSqlTypeToJavaClass.put(10001, String.class);
 		
 		// Used as an argument to CallableStatement.registerOutParameter
 		//jdbcSqlTypeToJavaClass.put(java.sql.Types.OTHER, "Object");
@@ -167,7 +167,7 @@ public class Consts {
 		jdbcSqlTypeDisplay.put(microsoft.sql.Types.DATETIMEOFFSET, "microsoft.sql.Types.DATETIMEOFFSET");
 		
 		//uniqueidentifier
-		jdbcSqlTypeDisplay.put(10001, "Types.BINARY");
+		jdbcSqlTypeDisplay.put(10001, "Types.CHAR");
 	}
 	
 

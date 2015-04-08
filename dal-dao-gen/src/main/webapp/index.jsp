@@ -1,6 +1,6 @@
 <%@page pageEncoding="UTF-8"%>
 <%
-	String codegenpageflag = "1.3.2";
+	String codegenpageflag = "1.3.4";
 	request.setAttribute("codegenpageflag", codegenpageflag);
 %>
 <!DOCTYPE html>

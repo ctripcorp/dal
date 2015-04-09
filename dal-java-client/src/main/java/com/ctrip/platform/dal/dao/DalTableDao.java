@@ -22,7 +22,7 @@ import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
-import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
+import com.ctrip.platform.dal.dao.helper.DalShardingHelper.AbstractIntArrayBulkTask;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper.BulkTask;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
@@ -372,9 +372,7 @@ public final class DalTableDao<T> {
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, T... daoPojos)
 			throws SQLException {
-		if(isEmpty(daoPojos)) return 0;
-		
-		return insert(hints, keyHolder, Arrays.asList(daoPojos));
+		return execute(hints, daoPojos, new SingleInsertTast(keyHolder));
 	}
 	
 	/**
@@ -396,6 +394,20 @@ public final class DalTableDao<T> {
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos)
 			throws SQLException {
+		return execute(hints, daoPojos, new SingleInsertTast(keyHolder));
+	}
+	
+	private interface SingleTask {
+		int execute(DalHints hints, Map<String, ?> daoPojo) throws SQLException;
+	}
+	
+	public int execute(DalHints hints, T[] daoPojos, SingleTask task) throws SQLException {
+		if(isEmpty(daoPojos)) return 0;
+		
+		return execute(hints, Arrays.asList(daoPojos), task);
+	}
+	
+	public int execute(DalHints hints, List<T> daoPojos, SingleTask task) throws SQLException {
 		if(isEmpty(daoPojos)) return 0;
 
 		List<Map<String, ?>> pojos = getPojosFields(daoPojos);
@@ -404,7 +416,28 @@ public final class DalTableDao<T> {
 		int count = 0;
 		hints = hints.clone();// To avoid shard id being polluted by each pojos
 		for (Map<String, ?> fields : pojos) {
-			DalWatcher.begin();
+			DalWatcher.begin();// TODO check if we needed
+
+			try {
+				task.execute(hints, fields);
+			} catch (SQLException e) {
+				// TODO do we need log error here?
+				if (hints.isStopOnError())
+					throw e;
+			}
+		}
+		return count;	
+	}
+	
+	private class SingleInsertTast implements SingleTask {
+		private KeyHolder keyHolder;
+		
+		public SingleInsertTast(KeyHolder keyHolder) {
+			this.keyHolder = keyHolder;
+		}
+		
+		@Override
+		public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
 			filterAutoIncrementPrimaryFields(fields);
 			
 			String insertSql = buildInsertSql(hints, fields);
@@ -412,20 +445,12 @@ public final class DalTableDao<T> {
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
 
-			try {
-				if (keyHolder == null)
-					count += client.update(insertSql, parameters, hints);
-				else
-					count += client.update(insertSql, parameters, hints,
-							keyHolder);
-			} catch (SQLException e) {
-				if (hints.isStopOnError())
-					throw e;
-			}
+			return keyHolder == null ?
+				client.update(insertSql, parameters, hints):
+				client.update(insertSql, parameters, hints, keyHolder);
 		}
-		return count;
 	}
-
+	
 	/**
 	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
@@ -438,11 +463,8 @@ public final class DalTableDao<T> {
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
-			T... daoPojos) throws SQLException {
-		if(isEmpty(daoPojos)) return 0;
-		
-		return combinedInsert(hints, keyHolder, Arrays.asList(daoPojos));
+	public int combinedInsert(DalHints hints, KeyHolder keyHolder, T... daoPojos) throws SQLException {
+		return execute(hints, daoPojos, new CombinedInsertTask(keyHolder), 0);
 	}
 	
 	/**
@@ -459,14 +481,7 @@ public final class DalTableDao<T> {
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
 			List<T> daoPojos) throws SQLException {
-		if(isEmpty(daoPojos)) return 0;
-		
-		hints.setDetailResults(new DalDetailResults<KeyHolder>());
-		
-		if(isAlreadySharded(logicDbName, rawTableName, hints))
-			return combinedInsertByTable(hints, keyHolder, getPojosFields(daoPojos));
-		else
-			return executeByDbShard(logicDbName, rawTableName, hints, getPojosFields(daoPojos), new CombinedInsertTask(keyHolder));
+		return execute(hints, daoPojos, new CombinedInsertTask(keyHolder), 0);
 	}
 	
 	private class CombinedInsertTask implements BulkTask<Integer> {
@@ -477,48 +492,41 @@ public final class DalTableDao<T> {
 		}
 		
 		@Override
-		public Integer execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
-			return combinedInsertByTable(hints, keyHolder, shaffled);
-		}
-
-		@Override
 		public Integer merge(List<Integer> results) {
 			int value = 0;
 			for(Integer i: results) value += i;
 			return value;
 		}
-	}
-	
-	private int combinedInsertByTable(DalHints hints, KeyHolder keyHolder, List<Map<String, ?>> daoPojos) throws SQLException {
-		DalWatcher.begin();
-		
-		StatementParameters parameters = new StatementParameters();
-		StringBuilder values = new StringBuilder();
 
-		int startIndex = 1;
-		for (Map<String, ?> vfields: daoPojos) {
-			filterAutoIncrementPrimaryFields(vfields);
-			int paramCount = addParameters(startIndex, parameters, vfields, validColumnsForInsert);
-			startIndex += paramCount;
-			values.append(String.format("(%s),",
-					this.combine("?", paramCount, ",")));
+		@Override
+		public Integer execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+			StatementParameters parameters = new StatementParameters();
+			StringBuilder values = new StringBuilder();
+
+			int startIndex = 1;
+			for (Map<String, ?> vfields: daoPojos) {
+				filterAutoIncrementPrimaryFields(vfields);
+				int paramCount = addParameters(startIndex, parameters, vfields, validColumnsForInsert);
+				startIndex += paramCount;
+				values.append(String.format("(%s),",
+						combine("?", paramCount, ",")));
+			}
+
+			String sql = String.format(TMPL_SQL_MULTIPLE_INSERT,
+					getTableName(hints), columnsForInsert,
+					values.substring(0, values.length() - 2) + ")");
+
+			if(keyHolder == null) {
+				return client.update(sql, parameters, hints);
+			} else{
+				KeyHolder tmpHolder = new KeyHolder();
+				int count = client.update(sql, parameters, hints, tmpHolder);
+				keyHolder.merge(tmpHolder);
+				hints.addDetailResults(tmpHolder);
+				return count;
+			}
 		}
-
-		String sql = String.format(TMPL_SQL_MULTIPLE_INSERT,
-				getTableName(hints), columnsForInsert,
-				values.substring(0, values.length() - 2) + ")");
-
-		if(keyHolder == null) {
-			return client.update(sql, parameters, hints);
-		} else{
-			KeyHolder tmpHolder = new KeyHolder();
-			int count = client.update(sql, parameters, hints, tmpHolder);
-			keyHolder.merge(tmpHolder);
-			hints.addDetailResults(tmpHolder);
-			return count;
-		}
 	}
-	
 	
 	/**
 	 * Insert pojos in batch mode. 
@@ -530,14 +538,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
-		if(isEmpty(daoPojos)) return new int[0];
-		
-		hints.setDetailResults(new DalDetailResults<int[]>());
-		
-		if(isAlreadySharded(getLogicDbName(), rawTableName, hints))
-			return batchInsertByTable(hints, getPojosFields(daoPojos));
-		else
-			return executeByDbShard(logicDbName, rawTableName, hints, getPojosFields(daoPojos), new BatchInsertTask());
+		return execute(hints, daoPojos, new BatchInsertTask(), new int[0]);
 	}
 	
 
@@ -551,39 +552,26 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
-		if(isEmpty(daoPojos)) return new int[0];
-		
-		return batchInsert(hints, Arrays.asList(daoPojos));
+		return execute(hints, daoPojos, new BatchInsertTask(), new int[0]);
 	}
 
-	private class BatchInsertTask implements BulkTask<int[]> {
+	private class BatchInsertTask extends AbstractIntArrayBulkTask {
 		@Override
-		public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
-			return batchInsertByTable(hints, shaffled);
-		}
+		public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+			StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
+			int i = 0;
+			for (Map<String, ?> fields : daoPojos) {
+				filterAutoIncrementPrimaryFields(fields);
+				StatementParameters parameters = new StatementParameters();
+				addParameters(parameters, fields);
+				parametersList[i++] = parameters;
+			}
 
-		@Override
-		public int[] merge(List<int[]> results) {
-			return DalShardingHelper.combine(results.toArray(new int[results.size()][]));
+			String batchInsertSql = buildBatchInsertSql(getTableName(hints));
+			int[] result = client.batchUpdate(batchInsertSql, parametersList, hints);
+			hints.addDetailResults(result);
+			return result;
 		}
-	}
-	
-	private int[] batchInsertByTable(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
-		DalWatcher.begin();
-		
-		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
-		int i = 0;
-		for (Map<String, ?> fields : daoPojos) {
-			filterAutoIncrementPrimaryFields(fields);
-			StatementParameters parameters = new StatementParameters();
-			addParameters(parameters, fields);
-			parametersList[i++] = parameters;
-		}
-
-		String batchInsertSql = buildBatchInsertSql(getTableName(hints));
-		int[] result = client.batchUpdate(batchInsertSql, parametersList, hints);
-		hints.addDetailResults(result);
-		return result;
 	}
 	
 	/**
@@ -595,27 +583,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int delete(DalHints hints, List<T> daoPojos) throws SQLException {
-		if(isEmpty(daoPojos)) return 0;
-
-		List<Map<String, ?>> pojos = getPojosFields(daoPojos);
-		detectDistributedTransaction(logicDbName, hints, pojos);
-		
-		int count = 0;
-		hints = hints.clone();
-		for (Map<String, ?>  fields: pojos) {
-			DalWatcher.begin();
-			StatementParameters parameters = new StatementParameters();
-			addParameters(parameters, fields, parser.getPrimaryKeyNames());
-			try {
-				String deleteSql = buildDeleteSql(getTableName(hints, parameters, fields));
-
-				count += client.update(deleteSql, parameters, hints.setFields(fields));
-			} catch (SQLException e) {
-				if (hints.isStopOnError())
-					throw e;
-			}
-		}
-		return count;
+		return execute(hints, daoPojos, new SingleDeleteTast());
 	}
 	
 	/**
@@ -627,12 +595,20 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int delete(DalHints hints, T... daoPojos) throws SQLException {
-		if(isEmpty(daoPojos)) return 0;
-		
-		return delete(hints, Arrays.asList(daoPojos));
+		return execute(hints, daoPojos, new SingleDeleteTast());
 	}
 	
+	private class SingleDeleteTast implements SingleTask {
+		@Override
+		public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
+			StatementParameters parameters = new StatementParameters();
+			addParameters(parameters, fields, parser.getPrimaryKeyNames());
+			String deleteSql = buildDeleteSql(getTableName(hints, parameters, fields));
 
+			return client.update(deleteSql, parameters, hints.setFields(fields));
+		}
+	}
+	
 	/**
 	 * Delete the given pojo list in batch. 
 	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
@@ -643,9 +619,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
-		if(isEmpty(daoPojos)) return new int[0];
-		
-		return batchDelete(hints, Arrays.asList(daoPojos));
+		return execute(hints, daoPojos, new BatchDeleteTask(), new int[0]);
 	}
 	
 	/**
@@ -658,44 +632,26 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
-		if(isEmpty(daoPojos)) return new int[0];
-
-		hints.setDetailResults(new DalDetailResults<int[]>());
-		
-		if(isAlreadySharded(getLogicDbName(), rawTableName, hints))
-			return batchDeleteByTable(hints, getPojosFields(daoPojos));
-		else
-			return executeByDbShard(logicDbName, rawTableName, hints, getPojosFields(daoPojos), new BatchDeleteTask());
+		return execute(hints, daoPojos, new BatchDeleteTask(), new int[0]);
 	}
 	
-	private class BatchDeleteTask implements BulkTask<int[]> {
+	private class BatchDeleteTask extends AbstractIntArrayBulkTask {
 		@Override
-		public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
-			return batchDeleteByTable(hints, shaffled);
+		public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+			StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
+			int i = 0;
+			List<String> pkNames = Arrays.asList(parser.getPrimaryKeyNames());
+			for (Map<String, ?> pojo : daoPojos) {
+				StatementParameters parameters = new StatementParameters();
+				addParameters(1, parameters, pojo, pkNames);
+				parametersList[i++] = parameters;
+			}
+			
+			String deleteSql = buildDeleteSql(getTableName(hints));
+			int[] result = client.batchUpdate(deleteSql, parametersList, hints);
+			hints.addDetailResults(result);
+			return result;
 		}
-
-		@Override
-		public int[] merge(List<int[]> results) {
-			return DalShardingHelper.combine(results.toArray(new int[results.size()][]));
-		}
-	}
-	
-	private int[] batchDeleteByTable(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
-		DalWatcher.begin();
-		
-		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
-		int i = 0;
-		List<String> pkNames = Arrays.asList(parser.getPrimaryKeyNames());
-		for (Map<String, ?> pojo : daoPojos) {
-			StatementParameters parameters = new StatementParameters();
-			addParameters(1, parameters, pojo, pkNames);
-			parametersList[i++] = parameters;
-		}
-		
-		String deleteSql = buildDeleteSql(getTableName(hints));
-		int[] result = client.batchUpdate(deleteSql, parametersList, hints);
-		hints.addDetailResults(result);
-		return result;
 	}
 	
 	/**
@@ -712,9 +668,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int update(DalHints hints, T... daoPojos) throws SQLException {
-		if(isEmpty(daoPojos)) return 0;
-		
-		return this.update(hints, Arrays.asList(daoPojos));
+		return execute(hints, daoPojos, new SingleUpdateTast());
 	}
 	
 	/**
@@ -731,33 +685,53 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int update(DalHints hints, List<T> daoPojos) throws SQLException {
-		if(isEmpty(daoPojos)) return 0;
-
-		List<Map<String, ?>> pojos = getPojosFields(daoPojos);
-		detectDistributedTransaction(logicDbName, hints, pojos);
-		
-		int count = 0;
-		for (int i = 0; i < daoPojos.size(); i++) {
-			DalWatcher.begin();
-			Map<String, ?> fields = pojos.get(i);
+		return execute(hints, daoPojos, new SingleUpdateTast());
+	}
+	
+	private class SingleUpdateTast implements SingleTask {
+		@Override
+		public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
 			String updateSql = buildUpdateSql(getTableName(hints, fields), fields, hints);
 
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
-			addParameters(parameters, parser.getPrimaryKeys(daoPojos.get(i)));
+			addParameters(parameters, fields, parser.getPrimaryKeyNames());
 
-			try {
-				if (fields.size() == 0)
-					throw new DalException(ErrorCode.ValidateFieldCount);
-
-				count += client.update(updateSql, parameters, hints);
-			} catch (SQLException e) {
-				if (hints.isStopOnError())
-					throw e;
-			}
+			return client.update(updateSql, parameters, hints);
 		}
-		return count;
 	}
+	
+	public int[] batchUpdate(DalHints hints, T... daoPojos) throws SQLException {
+		return execute(hints, daoPojos, new BatchUpdateTask(), new int[0]);
+	}
+
+	/**
+	 * Batch SP update without out parameters Return how many rows been affected
+	 * for each of parameters
+	 */
+	public int[] batchUpdate(DalHints hints, List<T> daoPojos) throws SQLException {
+		return execute(hints, daoPojos, new BatchUpdateTask(), new int[0]);
+	}
+	
+	private class BatchUpdateTask extends AbstractIntArrayBulkTask {
+		@Override
+		public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+			StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
+			int i = 0;
+			List<String> pkNames = Arrays.asList(parser.getPrimaryKeyNames());
+			for (Map<String, ?> pojo : daoPojos) {
+				StatementParameters parameters = new StatementParameters();
+				addParameters(1, parameters, pojo, pkNames);
+				parametersList[i++] = parameters;
+			}
+			
+			String deleteSql = buildDeleteSql(getTableName(hints));
+			int[] result = client.batchUpdate(deleteSql, parametersList, hints);
+			hints.addDetailResults(result);
+			return result;
+		}
+	}
+
 
 	/**
 	 * Delete for the given where clause and parameters.
@@ -790,6 +764,23 @@ public final class DalTableDao<T> {
 		return client.update(sql, parameters, hints);
 	}
 
+	public <K> K execute(DalHints hints, T[] daoPojos, BulkTask<K> task, K emptyValue) throws SQLException {
+		if(isEmpty(daoPojos)) return emptyValue;
+		
+		return execute(hints, Arrays.asList(daoPojos), task, emptyValue);
+	}
+	
+	public <K> K execute(DalHints hints, List<T> daoPojos, BulkTask<K> task, K emptyValue) throws SQLException {
+		if(isEmpty(daoPojos)) return emptyValue;
+		
+		hints.setDetailResults(new DalDetailResults<K>());
+
+		if(isAlreadySharded(logicDbName, rawTableName, hints))
+			return task.execute(hints, getPojosFields(daoPojos));
+		else
+			return executeByDbShard(logicDbName, rawTableName, hints, getPojosFields(daoPojos), task);
+	}
+	
 	/**
 	 * Add all the entries into the parameters by index. The parameter index
 	 * will depends on the index of the entry in the entry set, value will be
@@ -810,7 +801,7 @@ public final class DalTableDao<T> {
 			Map<String, ?> entries, String[] validColumns) {
 		int index = parameters.size() + 1;
 		for(String column : validColumns){
-			parameters.set(index++, column, this.getColumnType(column), entries.get(column));
+			parameters.set(index++, column, getColumnType(column), entries.get(column));
 		}
 	}
 	
@@ -819,7 +810,7 @@ public final class DalTableDao<T> {
 		int count = 0;
 		for(String column : validColumns){
 			if(entries.containsKey(column))
-				parameters.set(count + start, column, this.getColumnType(column), entries.get(column));
+				parameters.set(count + start, column, getColumnType(column), entries.get(column));
 			count++;
 		}
 		return count;
@@ -914,10 +905,6 @@ public final class DalTableDao<T> {
 		}
 		
 		return pojoFields;
-	}
-
-	public String getLogicDbName() {
-		return parser.getDatabaseName();
 	}
 
 	private boolean isPrimaryKey(String fieldName){

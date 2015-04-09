@@ -1,11 +1,8 @@
 package com.ctrip.platform.dal.dao;
 
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.detectDistributedTransaction;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.executeByDbShard;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isAlreadySharded;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,19 +48,15 @@ public class CtripTableSpDao<T> {
 	private DalScalarExtractor extractor = new DalScalarExtractor();
 	private DalTableDao<T> client;
 	private DalClient baseClient;
-	private String idName;
 	private String[] inOutPramNames;
 	private String[] outputPramNames;
 	
 	private String logicDbName;
-	private String rawTableName;
 	
 
 	public CtripTableSpDao(DalParser<T> parser, String[] inOutPramNames, String[] outputPramNames) {
 		this.baseClient = DalClientFactory.getClient(parser.getDatabaseName());
 		this.client = new DalTableDao<T>(parser);
-		// Check with YKN about the naming convention
-		this.idName = parser.getPrimaryKeyNames()[0];
 		
 		String tableName = parser.getTableName();
 		insertSP3 = String.format(INSERT_SP3_TPL, tableName);
@@ -78,7 +71,6 @@ public class CtripTableSpDao<T> {
 		this.inOutPramNames = inOutPramNames;
 		this.outputPramNames = outputPramNames;
 		this.logicDbName = parser.getDatabaseName();
-		this.rawTableName = parser.getTableName();
 	}
 
 	/**
@@ -173,9 +165,7 @@ public class CtripTableSpDao<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
-		if(client.isEmpty(daoPojos)) return new int[0];
-		
-		return batchInsert(hints, Arrays.asList(daoPojos));
+		return client.execute(hints, daoPojos, new BatchInsertSp3Task(), new int[0]);
 	}
 
 	/**
@@ -183,39 +173,25 @@ public class CtripTableSpDao<T> {
 	 * for each of parameters
 	 **/
 	public int[] batchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
-		if(client.isEmpty(daoPojos)) return new int[0];
-
-		hints.setDetailResults(new DalDetailResults<int[]>());
-		
-		if(isAlreadySharded(client.getLogicDbName(), rawTableName, hints))
-			return batchInsertSp3ByTable(hints, client.getPojosFields(daoPojos));
-		else
-			return executeByDbShard(logicDbName, rawTableName, hints, client.getPojosFields(daoPojos), new BatchInsertSp3Task());
+		return client.execute(hints, daoPojos, new BatchInsertSp3Task(), new int[0]);
 	}
 	
 	private class BatchInsertSp3Task extends AbstractIntArrayBulkTask {
 		@Override
-		public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
-			return batchInsertSp3ByTable(hints, shaffled);
+		public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+			String callSql = client.buildCallSql(insertSP3, parser.getColumnNames().length);
+			StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
+			
+			for (int i = 0; i < daoPojos.size(); i++) {
+				StatementParameters parameters = new StatementParameters();
+				client.addParametersByName(parameters, daoPojos.get(i));
+				parametersList[i] = parameters;
+			}
+			
+			int[] result = baseClient.batchCall(callSql, parametersList, hints);
+			hints.addDetailResults(result);
+			return result; 
 		}
-	}
-	
-	// Ctrip does not have shard by table case.
-	private int[] batchInsertSp3ByTable(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
-		DalWatcher.begin();
-
-		String callSql = client.buildCallSql(insertSP3, parser.getColumnNames().length);
-		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
-		
-		for (int i = 0; i < daoPojos.size(); i++) {
-			StatementParameters parameters = new StatementParameters();
-			client.addParametersByName(parameters, daoPojos.get(i));
-			parametersList[i] = parameters;
-		}
-		
-		int[] result = baseClient.batchCall(callSql, parametersList, hints);
-		hints.addDetailResults(result);
-		return result; 
 	}
 
 	/**
@@ -239,9 +215,7 @@ public class CtripTableSpDao<T> {
 	 * for each of parameters
 	 */
 	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
-		if (client.isEmpty(daoPojos)) return new int[0];
-		
-		return batchDelete(hints, Arrays.asList(daoPojos));
+		return client.execute(hints, daoPojos, new BatchDeleteSp3Task(), new int[0]);
 	}
 
 	/**
@@ -249,37 +223,24 @@ public class CtripTableSpDao<T> {
 	 * for each of parameters
 	 */
 	public int[] batchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
-		if(client.isEmpty(daoPojos)) return new int[0];
-		
-		hints.setDetailResults(new DalDetailResults<int[]>());
-		
-		if(isAlreadySharded(client.getLogicDbName(), rawTableName, hints))
-			return batchDeleteSp3ByTable(hints, client.getPojosFields(daoPojos));
-		else
-			return executeByDbShard(logicDbName, rawTableName, hints, client.getPojosFields(daoPojos), new BatchDeleteSp3Task());
+		return client.execute(hints, daoPojos, new BatchDeleteSp3Task(), new int[0]);
 	}
 
 	private class BatchDeleteSp3Task  extends AbstractIntArrayBulkTask {
 		@Override
-		public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
-			return batchDeleteSp3ByTable(hints, shaffled);
+		public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+			String callSql = client.buildCallSql(deleteSP3, parser.getPrimaryKeyNames().length);
+			StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
+			for (int i = 0; i < daoPojos.size(); i++) {
+				StatementParameters parameters = new StatementParameters();
+				client.addParametersByName(parameters, daoPojos.get(i), parser.getPrimaryKeyNames());
+				parametersList[i] = parameters;
+			}
+			
+			int[] result = baseClient.batchCall(callSql, parametersList, hints);
+			hints.addDetailResults(result);
+			return result;
 		}
-	}
-	
-	private int[] batchDeleteSp3ByTable(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
-		DalWatcher.begin();
-		
-		String callSql = client.buildCallSql(deleteSP3, parser.getPrimaryKeyNames().length);
-		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
-		for (int i = 0; i < daoPojos.size(); i++) {
-			StatementParameters parameters = new StatementParameters();
-			client.addParametersByName(parameters, daoPojos.get(i), parser.getPrimaryKeyNames());
-			parametersList[i] = parameters;
-		}
-		
-		int[] result = baseClient.batchCall(callSql, parametersList, hints);
-		hints.addDetailResults(result);
-		return result;
 	}
 
 	/**
@@ -303,9 +264,7 @@ public class CtripTableSpDao<T> {
 	 * for each of parameters
 	 */
 	public int[] batchUpdate(DalHints hints, T... daoPojos) throws SQLException {
-		if (client.isEmpty(daoPojos)) return new int[0];
-		
-		return batchUpdate(hints, Arrays.asList(daoPojos));
+		return client.execute(hints, daoPojos, new BatchUpdateSp3Task(), new int[0]);
 	}
 
 	/**
@@ -313,41 +272,25 @@ public class CtripTableSpDao<T> {
 	 * for each of parameters
 	 */
 	public int[] batchUpdate(DalHints hints, List<T> daoPojos) throws SQLException {
-		if (client.isEmpty(daoPojos)) return new int[0];
-
-		hints.setDetailResults(new DalDetailResults<int[]>());
-		
-		if(isAlreadySharded(client.getLogicDbName(), rawTableName, hints))
-			return batchUpdateSp3ByTable(hints, client.getPojosFields(daoPojos));
-		else
-			return executeByDbShard(logicDbName, rawTableName, hints, client.getPojosFields(daoPojos), new BatchUpdateSp3Task());
+		return client.execute(hints, daoPojos, new BatchUpdateSp3Task(), new int[0]);
 	}
 	
 	private class BatchUpdateSp3Task extends AbstractIntArrayBulkTask {
 		@Override
-		public int[] execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException {
-			return batchUpdateSp3ByTable(hints, shaffled);
+		public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+			String callSql = client.buildCallSql(updateSP3, parser.getColumnNames().length);
+			StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
+			
+			for (int i = 0; i < daoPojos.size(); i++) {
+				StatementParameters parameters = new StatementParameters();
+				client.addParametersByName(parameters, daoPojos.get(i));
+				parametersList[i] = parameters;
+			}
+			
+			int[] result = baseClient.batchCall(callSql, parametersList, hints);
+			hints.addDetailResults(result);
+			return result;
 		}
-	}
-
-	private int[] batchUpdateSp3ByTable(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
-		DalWatcher.begin();
-
-		hints = DalHints.createIfAbsent(hints);
-
-		String callSql = client.buildCallSql(updateSP3, parser.getColumnNames().length);
-		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
-		
-		for (int i = 0; i < daoPojos.size(); i++) {
-			StatementParameters parameters = new StatementParameters();
-			client.addParametersByName(parameters, daoPojos.get(i));
-			parametersList[i] = parameters;
-		}
-		
-		int[] result = baseClient.batchCall(callSql, parametersList, hints);
-		hints.addDetailResults(result);
-		return result;
-
 	}
 
 	private String prepareSpCall(String SpName, StatementParameters parameters,

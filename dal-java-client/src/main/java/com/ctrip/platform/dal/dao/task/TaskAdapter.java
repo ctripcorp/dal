@@ -1,0 +1,372 @@
+package com.ctrip.platform.dal.dao.task;
+
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.buildShardStr;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.getDatabaseSet;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardingEnabled;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.locateTableShardId;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalClient;
+import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHintEnum;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.DalQueryDao;
+import com.ctrip.platform.dal.dao.StatementParameters;
+
+/**
+ * TODO do we need query task?
+ * @author jhhe
+ *
+ */
+public class TaskAdapter<T> {
+	public static final String GENERATED_KEY = "GENERATED_KEY";
+
+	//public static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
+	public static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
+	public static final String TMPL_SQL_MULTIPLE_INSERT = "INSERT INTO %s(%s) VALUES %s";
+	public static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
+	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
+
+	public static final String COLUMN_SEPARATOR = ", ";
+	public static final String PLACE_HOLDER = "?";
+	public static final String TMPL_SET_VALUE = "%s=?";
+	public static final String AND = " AND ";
+	public static final String OR = " OR ";
+	public static final String TMPL_CALL = "{call %s(%s)}";
+
+	public String findtmp = "SELECT * FROM %s WHERE %s";
+	
+	protected DalClient client;
+	protected DalQueryDao queryDao;
+	protected DalParser<T> parser;
+
+	protected final String logicDbName;
+	protected DatabaseCategory dbCategory;
+	protected String pkSql;
+	protected Set<String> pkColumns;
+	protected String columnsForInsert;
+	protected List<String> validColumnsForInsert;
+	protected Map<String, Integer> columnTypes = new HashMap<String, Integer>();
+	protected Character startDelimiter;
+	protected Character endDelimiter;
+	
+	public boolean tableShardingEnabled;
+	protected String rawTableName;
+
+	public TaskAdapter(DalParser<T> parser) {
+		this.client = DalClientFactory.getClient(parser.getDatabaseName());
+		this.parser = parser;
+		this.logicDbName = parser.getDatabaseName();
+		queryDao = new DalQueryDao(parser.getDatabaseName());
+
+		rawTableName = parser.getTableName();
+		tableShardingEnabled = isTableShardingEnabled(logicDbName, rawTableName);
+		initColumnTypes();
+		
+		dbCategory = getDatabaseSet(logicDbName).getDatabaseCategory();
+		setDatabaseCategory(dbCategory);
+	}
+	
+	public void initDbSpecific() {
+		pkSql = initPkSql();
+		validColumnsForInsert = buildValidColumnsForInsert();
+		columnsForInsert = combineColumns(validColumnsForInsert, COLUMN_SEPARATOR);
+	}
+	
+	/**
+	 * This is to set DatabaseCategory to initialize startDelimiter/endDelimiter and findtmp.
+	 * This will apply db specific settings. So the dao is no longer reusable across different dbs.
+	 * @param dBCategory The target Db category
+	 */
+	public void setDatabaseCategory(DatabaseCategory dbCategory) {
+		if(DatabaseCategory.MySql == dbCategory) {
+			startDelimiter = '`';
+			endDelimiter = startDelimiter;
+		} else if(DatabaseCategory.SqlServer == dbCategory ) {
+			startDelimiter = '[';
+			endDelimiter = ']';
+			findtmp = "SELECT * FROM %s WITH (NOLOCK) WHERE %s";
+		} else
+			throw new RuntimeException("Such Db category not suported yet");
+		initDbSpecific();
+	}
+	
+	public String getTableName(DalHints hints) throws SQLException {
+		return getTableName(hints, null, null);
+	}
+	
+	public String getTableName(DalHints hints, StatementParameters parameters) throws SQLException {
+		return getTableName(hints, parameters, null);
+	}
+	
+	public String getTableName(DalHints hints, Map<String, ?> fields) throws SQLException {
+		return getTableName(hints, null, fields);
+	}
+	
+	public String getTableName(DalHints hints, StatementParameters parameters, Map<String, ?> fields) throws SQLException {
+		if(tableShardingEnabled == false)
+			return parser.getTableName();
+		
+		hints.cleanUp();
+		return rawTableName + buildShardStr(logicDbName, locateTableShardId(logicDbName, hints, parameters, fields));
+	}
+	
+	/**
+	 * Add all the entries into the parameters by index. The parameter index
+	 * will depends on the index of the entry in the entry set, value will be
+	 * entry value. The value can be null.
+	 * 
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param entries Key value pairs to be added into parameters
+	 */
+	public void addParameters(StatementParameters parameters,
+			Map<String, ?> entries) {
+		int index = parameters.size() + 1;
+		for (Map.Entry<String, ?> entry : entries.entrySet()) {
+			parameters.set(index++, entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
+		}
+	}
+
+	public void addParameters(StatementParameters parameters,
+			Map<String, ?> entries, String[] validColumns) {
+		int index = parameters.size() + 1;
+		for(String column : validColumns){
+			parameters.set(index++, column, getColumnType(column), entries.get(column));
+		}
+	}
+	
+	public int addParameters(int start, StatementParameters parameters,
+			Map<String, ?> entries, List<String> validColumns) {
+		int count = 0;
+		for(String column : validColumns){
+			if(entries.containsKey(column))
+				parameters.set(count + start, column, getColumnType(column), entries.get(column));
+			count++;
+		}
+		return count;
+	}
+
+	/**
+	 * Add all the entries into the parameters by name. The parameter name will
+	 * be the entry key, value will be entry value. The value can be null. This
+	 * method will be used to set input parameters for stored procedure.
+	 * 
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param entries Key value pairs to be added into parameters
+	 */
+	public void addParametersByName(StatementParameters parameters,
+			Map<String, ?> entries) {
+		for (Map.Entry<String, ?> entry : entries.entrySet()) {
+			parameters.set(entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
+		}
+	}
+
+	/**
+	 * Add all the entries into the parameters by name. The parameter name will
+	 * be the entry key, value will be entry value. The value can be null. This
+	 * method will be used to set input parameters for stored procedure.
+	 * 
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param entries Key value pairs to be added into parameters
+	 */
+	public void addParametersByName(StatementParameters parameters,
+			Map<String, ?> entries, String[] validColumns) {
+		for(String column : validColumns){
+			if(entries.containsKey(column))
+				parameters.set(column, getColumnType(column), entries.get(column));
+		}
+	}
+
+	/**
+	 * Get the column type defined in java.sql.Types.
+	 * 
+	 * @param columnName The column name of the table
+	 * @return value defined in java.sql.Types
+	 */
+	public int getColumnType(String columnName) {
+		return columnTypes.get(columnName);
+	}
+
+	/**
+	 * Remove all the null value in the given map.
+	 * 
+	 * @param fields
+	 * @return the original map reference
+	 */
+	public Map<String, ?> filterNullFileds(Map<String, ?> fields) {
+		for (String columnName : parser.getColumnNames()) {
+			if (fields.get(columnName) == null)
+				fields.remove(columnName);
+		}
+		return fields;
+	}
+
+	public Map<String, ?> removeAutoIncrementPrimaryFields(Map<String, ?> fields){
+		// This is bug here, for My Sql, auto incremental id and be part of the joint primary key.
+		// But for Ctrip, a table must have a pk defined by sigle column as mandatory, so we don't have problem here
+		if(parser.isAutoIncrement())
+			fields.remove(parser.getPrimaryKeyNames()[0]);
+		return fields;
+	}
+	
+	public String buildCallSql(String spName, int paramCount) {
+		return String.format(TMPL_CALL, spName,
+				combine(PLACE_HOLDER, paramCount, COLUMN_SEPARATOR));
+	}
+	
+	public boolean isEmpty(List<?> daoPojos) {
+		return null == daoPojos || daoPojos.size() == 0;
+	}
+	
+	public List<Map<String, ?>> getPojosFields(List<T> daoPojos) {
+		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
+		if (null == daoPojos || daoPojos.size() < 1)
+			return pojoFields;
+		
+		for (T pojo: daoPojos){
+			pojoFields.add(parser.getFields(pojo));
+		}
+		
+		return pojoFields;
+	}
+
+	public boolean isPrimaryKey(String fieldName){
+		return pkColumns.contains(fieldName);
+	}
+	
+	public String initPkSql() {
+		pkColumns = new HashSet<String>();
+		Collections.addAll(pkColumns, parser.getPrimaryKeyNames());
+
+		// Build primary key template
+		String template = combine(TMPL_SET_VALUE, parser.getPrimaryKeyNames().length, AND);
+
+		return String.format(template, (Object[]) quote(parser.getPrimaryKeyNames()));
+	}
+
+	// Build a lookup table
+	public void initColumnTypes() {
+		String[] cloumnNames = parser.getColumnNames();
+		int[] columnsTypes = parser.getColumnTypes();
+		for (int i = 0; i < cloumnNames.length; i++) {
+			columnTypes.put(cloumnNames[i], columnsTypes[i]);
+		}
+	}
+	
+	public Map<String, ?> getPrimaryKeys(Map<String, ?> fields) {
+		Map<String, Object> pks = new HashMap<>();
+		for(String pkName: parser.getPrimaryKeyNames())
+			pks.put(pkName, fields.get(pkName));
+		return pks;
+	}
+
+
+	public String buildInsertSql(DalHints hints, Map<String, ?> fields) throws SQLException {
+		filterNullFileds(fields);
+		Set<String> remainedColumns = fields.keySet();
+		String cloumns = combineColumns(remainedColumns, COLUMN_SEPARATOR);
+		String values = combine(PLACE_HOLDER, remainedColumns.size(),
+				COLUMN_SEPARATOR);
+
+		return String.format(TMPL_SQL_INSERT, getTableName(hints, fields), cloumns,
+				values);
+	}
+	
+	public List<String> buildValidColumnsForInsert() {
+		List<String> validColumns = new ArrayList<String>();
+		for(String s : parser.getColumnNames()){
+			if(!(parser.isAutoIncrement() && isPrimaryKey(s)))
+				validColumns.add(s);
+		}
+		
+		return validColumns;
+
+	}
+	
+	public String buildBatchInsertSql(String tableName) {
+		int validColumnsSize = parser.getColumnNames().length;
+		if(parser.isAutoIncrement())
+			validColumnsSize--;
+		
+		String values = combine(PLACE_HOLDER, validColumnsSize,
+				COLUMN_SEPARATOR);
+
+		return String.format(TMPL_SQL_INSERT, tableName, columnsForInsert,
+				values);
+	}
+
+
+	public String buildDeleteSql(String tableName) {
+		return String.format(TMPL_SQL_DELETE, tableName, pkSql);
+	}
+
+	public String buildWhereClause(Map<String, ?> fields) {
+		return String.format(combine(TMPL_SET_VALUE, fields.size(), AND),
+				quote(fields.keySet()));
+	}
+
+	public String combineColumns(Collection<String> values, String separator) {
+		StringBuilder valuesSb = new StringBuilder();
+		int i = 0;
+		for (String value : values) {
+			quote(valuesSb, value);
+			if (++i < values.size())
+				valuesSb.append(separator);
+		}
+		return valuesSb.toString();
+	}
+
+	public String combine(String value, int count, String separator) {
+		StringBuilder valuesSb = new StringBuilder();
+
+		for (int i = 1; i <= count; i++) {
+			valuesSb.append(value);
+			if (i < count)
+				valuesSb.append(separator);
+		}
+		return valuesSb.toString();
+	}
+	
+	public String quote(String column) {
+		if(startDelimiter == null)
+			return column;
+		return new StringBuilder().append(startDelimiter).append(column).append(endDelimiter).toString();
+	}
+
+	public StringBuilder quote(StringBuilder sb, String column) {
+		if(startDelimiter == null)
+			return sb.append(column);
+		return sb.append(startDelimiter).append(column).append(endDelimiter);
+	}
+	
+	public Object[] quote(Set<String> columns) {
+		if(startDelimiter == null)
+			return columns.toArray();
+		
+		Object[] quatedColumns = columns.toArray();
+		for(int i = 0; i < quatedColumns.length; i++)
+			quatedColumns[i] = quote((String)quatedColumns[i]);
+		return quatedColumns;
+	}
+	
+	public String[] quote(String[] columns) {
+		if(startDelimiter == null)
+			return columns;
+		String[] quatedColumns = new String[columns.length];
+		for(int i = 0; i < columns.length; i++)
+			quatedColumns[i] = quote(columns[i]);
+		return quatedColumns;
+	}
+}

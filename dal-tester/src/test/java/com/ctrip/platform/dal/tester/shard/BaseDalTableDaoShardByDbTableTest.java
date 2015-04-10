@@ -1378,8 +1378,8 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		int res = 0;
 		try {
 			res = dao.insert(hints.clone(), entities);
-			Assert.fail();
 		} catch (Exception e) {
+			Assert.fail();
 		}
 
 		for(int i = 0; i < tableMod; i++) {
@@ -1521,8 +1521,8 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		int res;
 		try {
 			res = dao.insert(hints.clone(), entities);
-			Assert.fail();
 		} catch (Exception e) {
+			Assert.fail();
 		}
 
 		for(int i = 0; i < tableMod; i++) {

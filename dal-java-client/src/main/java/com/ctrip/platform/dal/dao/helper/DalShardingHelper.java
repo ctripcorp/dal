@@ -16,6 +16,7 @@ import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
+import com.ctrip.platform.dal.dao.task.BulkTask;
 
 public class DalShardingHelper {
 	public static boolean isShardingEnabled(String logicDbName) {
@@ -295,15 +296,15 @@ public class DalShardingHelper {
 		return totalCounts;
 	}
 	
-	public static interface BulkTask<T> {
-		T execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException;
-		T merge(List<T> results);
-	}
-	
-	public static abstract class AbstractIntArrayBulkTask implements BulkTask<int[]> {
-		@Override
-		public int[] merge(List<int[]> results) {
-			return DalShardingHelper.combine(results.toArray(new int[results.size()][]));
-		}
-	}
+//	public static interface BulkTask<T> {
+//		T execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException;
+//		T merge(List<T> results);
+//	}
+//	
+//	public static abstract class AbstractIntArrayBulkTask implements BulkTask<int[]> {
+//		@Override
+//		public int[] merge(List<int[]> results) {
+//			return DalShardingHelper.combine(results.toArray(new int[results.size()][]));
+//		}
+//	}
 }

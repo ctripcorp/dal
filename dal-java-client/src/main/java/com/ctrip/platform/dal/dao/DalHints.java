@@ -17,7 +17,17 @@ import com.ctrip.platform.dal.dao.client.DalHA;
  */
 public class DalHints {
 	private Map<DalHintEnum, Object> hints = new LinkedHashMap<DalHintEnum, Object>();
+	// It is not so nice to put keyholder here, but to make Task stateless, I have no other choice
+	private KeyHolder keyHolder;
 	
+	public KeyHolder getKeyHolder() {
+		return keyHolder;
+	}
+
+	public void setKeyHolder(KeyHolder keyHolder) {
+		this.keyHolder = keyHolder;
+	}
+
 	public static DalHints createIfAbsent(DalHints hints) {
 		return hints == null ? new DalHints() : hints;
 	}

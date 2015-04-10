@@ -41,6 +41,7 @@ public interface DalClient {
 	 * Update against the given sql and parameters. The generated keys will be 
 	 * returned in generatedKeyHolder. This is most used for insert into table 
 	 * which has auto incremental primary key.
+	 * TODO we should remove this, put keyholder into hints
 	 * 
 	 * @param sql The sql statement to be executed
 	 * @param parameters A container that holds all the necessary parameters

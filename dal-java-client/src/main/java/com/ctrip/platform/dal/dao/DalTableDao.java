@@ -24,6 +24,8 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper.AbstractIntArrayBulkTask;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper.BulkTask;
+import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
+import com.ctrip.platform.dal.dao.task.TaskFactory;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -69,6 +71,9 @@ public final class DalTableDao<T> {
 	private boolean tableShardingEnabled;
 	private String rawTableName;
 
+	
+	private TaskFactory factory; 
+			
 	public DalTableDao(DalParser<T> parser) {
 		this.client = DalClientFactory.getClient(parser.getDatabaseName());
 		this.parser = parser;
@@ -81,6 +86,8 @@ public final class DalTableDao<T> {
 		
 		dbCategory = getDatabaseSet(logicDbName).getDatabaseCategory();
 		setDatabaseCategory(dbCategory);
+		
+		factory = new DefaultTaskFactory<T>(parser);
 	}
 	
 	private void initDbSpecific() {
@@ -372,6 +379,7 @@ public final class DalTableDao<T> {
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, T... daoPojos)
 			throws SQLException {
+		hints.setKeyHolder(keyHolder);
 		return execute(hints, daoPojos, new SingleInsertTast(keyHolder));
 	}
 	
@@ -397,7 +405,7 @@ public final class DalTableDao<T> {
 		return execute(hints, daoPojos, new SingleInsertTast(keyHolder));
 	}
 	
-	private interface SingleTask {
+	public static interface SingleTask {
 		int execute(DalHints hints, Map<String, ?> daoPojo) throws SQLException;
 	}
 	
@@ -419,13 +427,14 @@ public final class DalTableDao<T> {
 			DalWatcher.begin();// TODO check if we needed
 
 			try {
-				task.execute(hints, fields);
+				count += task.execute(hints, fields);
 			} catch (SQLException e) {
 				// TODO do we need log error here?
 				if (hints.isStopOnError())
 					throw e;
 			}
 		}
+		
 		return count;	
 	}
 	
@@ -691,12 +700,15 @@ public final class DalTableDao<T> {
 	private class SingleUpdateTast implements SingleTask {
 		@Override
 		public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
+			if (fields.size() == 0)
+				throw new DalException(ErrorCode.ValidateFieldCount);
+			
 			String updateSql = buildUpdateSql(getTableName(hints, fields), fields, hints);
 
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, fields);
 			addParameters(parameters, fields, parser.getPrimaryKeyNames());
-
+			
 			return client.update(updateSql, parameters, hints);
 		}
 	}
@@ -731,7 +743,6 @@ public final class DalTableDao<T> {
 			return result;
 		}
 	}
-
 
 	/**
 	 * Delete for the given where clause and parameters.

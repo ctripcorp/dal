@@ -36,6 +36,11 @@
       <version>${google-pb-version}</version>
     </dependency>
     <dependency>
+	  <groupId>commons-codec</groupId>
+	  <artifactId>commons-codec</artifactId>
+	  <version>1.4</version>
+	</dependency>
+    <dependency>
     	<groupId>com.ctrip.platform</groupId>
     	<artifactId>java-appinternals</artifactId>
     	<version>1.0.2</version>

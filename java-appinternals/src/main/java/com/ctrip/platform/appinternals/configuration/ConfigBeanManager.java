@@ -19,8 +19,7 @@ public class ConfigBeanManager {
 	static{
 		cache = new ConcurrentHashMap<String, ConfigBeanBase>();
 		alais = new ConcurrentHashMap<String, String>();
-		String classPath = Thread.currentThread().getContextClassLoader()
-				.getResource("").getPath();
+		String classPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
 		storage = new Storage(classPath);
 		storage.load();
 	}

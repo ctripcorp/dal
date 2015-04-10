@@ -43,6 +43,8 @@ import com.ctrip.platform.dal.dao.client.DefaultLogger;
 	  <encrypt>true</encrypt>
 	  <sampling>false</sampling>
 	  <simplified>true</simplified>
+	  <asyncLogging>true</asyncLogging>
+	  <capacity>10000</capacity>
 	<settings>
   </logListener>
   <ConnectionLocator>

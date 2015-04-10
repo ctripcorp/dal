@@ -99,8 +99,7 @@ public class Helper {
 			URLConnection conn = realUrl.openConnection();
 			conn.setRequestProperty("accept", "*/*");
 			conn.setRequestProperty("connection", "Keep-Alive");
-			conn.setRequestProperty("user-agent",
-					"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+			conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
 			out = new PrintWriter(conn.getOutputStream());
@@ -133,12 +132,10 @@ public class Helper {
 	public static String getIPV4() {
 		String ipv4 = "";
 		try {
-			Enumeration<NetworkInterface> interfaces = NetworkInterface
-					.getNetworkInterfaces();
+			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			while (interfaces.hasMoreElements()) {
 				NetworkInterface current = interfaces.nextElement();
-				if (!current.isUp() || current.isLoopback()
-						|| current.isVirtual())
+				if (!current.isUp() || current.isLoopback() || current.isVirtual())
 					continue;
 				Enumeration<InetAddress> addresses = current.getInetAddresses();
 				while (addresses.hasMoreElements()) {
@@ -169,7 +166,6 @@ public class Helper {
 			if(stream != null)
 				stream.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -179,7 +175,6 @@ public class Helper {
 			if(stream != null)
 				stream.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

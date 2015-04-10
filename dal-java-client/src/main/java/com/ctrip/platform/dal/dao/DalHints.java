@@ -46,6 +46,7 @@ public class DalHints {
 		if(fields != null)
 			newHints.setFields(new LinkedHashMap<String, Object>(fields));
 		
+		newHints.keyHolder = keyHolder;
 		return newHints;
 	}
 	

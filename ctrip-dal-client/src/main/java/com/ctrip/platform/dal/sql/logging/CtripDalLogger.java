@@ -8,6 +8,11 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ctrip.framework.clogging.agent.MessageManager;
+import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.framework.clogging.domain.thrift.LogLevel;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.LogEntry;
@@ -15,6 +20,8 @@ import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 
 public class CtripDalLogger implements DalLogger {
+	
+	private Logger logger = LoggerFactory.getLogger(CtripDalLogger.class);
 	
 	private static final String SAMPLING = "sampling";
 	private static final String ENCRYPT = "encrypt";
@@ -209,9 +216,17 @@ public class CtripDalLogger implements DalLogger {
 			Metrics.report(markup);
 		}
 	}
+	
+	@Override
+	public String getAppID() {
+		return LogConfig.getAppID();
+	}
 
 	@Override
 	public void shutdown() {
+		logger.info("shutdown clogging");
+		MessageManager.getInstance().shutdown();
 		executor.shutdown();
 	}
+	
 }

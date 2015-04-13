@@ -50,10 +50,8 @@ public class AppInternalsServlet extends HttpServlet {
 			infoBuilder.setProcessorCount();
 
 			logger.debug(infoBuilder.getJsonAppInfo());
-			String result = Helper.sendPost(APPINFOURL,
-					infoBuilder.getJsonAppInfo());
-			logger.info(String.format(
-					"Initialize register app internals completed: %s", result));
+			String result = Helper.sendPost(APPINFOURL, infoBuilder.getJsonAppInfo());
+			logger.info(String.format("Initialize register app internals completed: %s", result));
 		} catch (Exception e) {
 			logger.error("Initialize register app internals failed", e);
 		}
@@ -159,8 +157,7 @@ public class AppInternalsServlet extends HttpServlet {
 				} else {
 					result.setMessage(NOPERMISSION);
 				}
-				ctx.getContent().append(
-						Helper.toChangeResultJson(result));
+				ctx.getContent().append(Helper.toChangeResultJson(result));
 			}
 		}
 	}

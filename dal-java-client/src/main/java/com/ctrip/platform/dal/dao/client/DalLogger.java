@@ -59,6 +59,8 @@ public interface DalLogger {
 	 */
 	void markup(MarkupInfo markup);
 	
+	String getAppID();
+	
 	/**
 	 * The system is going to be shutdown
 	 */

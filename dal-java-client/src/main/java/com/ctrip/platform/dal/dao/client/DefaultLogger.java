@@ -61,4 +61,9 @@ public class DefaultLogger implements DalLogger {
 	@Override
 	public void shutdown() {
 	}
+
+	@Override
+	public String getAppID() {
+		return "999999";
+	}
 }

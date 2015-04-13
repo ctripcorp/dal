@@ -10,10 +10,12 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 
-import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.platform.appinternals.helpers.Helper;
 
 public class AppInfoBuilder {
+	
+	private static String _AppID = "";
+	 
 	private AppInfo info;
 	
 	public AppInfoBuilder(AppInfo info){
@@ -27,7 +29,7 @@ public class AppInfoBuilder {
 	}
 	
 	public void setAppId(){
-		this.info.setAppID(LogConfig.getAppID());
+		this.info.setAppID(_AppID);
 	}
 	
 	public void setDomain(String domain){
@@ -118,4 +120,10 @@ public class AppInfoBuilder {
 	public String getJsonAppInfo(){
 		return Helper.toJSON(AppInfo.class, "appinfo", this.info);	
 	}
+
+	public static void set_AppID(String appID) {
+		_AppID = appID;
+	}
+	
+	
 }

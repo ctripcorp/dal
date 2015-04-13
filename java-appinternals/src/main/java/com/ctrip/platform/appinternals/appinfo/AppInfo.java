@@ -32,6 +32,7 @@ public class AppInfo {
 	public void setAppID(String appID) {
 		AppID = appID;
 	}
+
 	public String getDomain() {
 		return Domain;
 	}

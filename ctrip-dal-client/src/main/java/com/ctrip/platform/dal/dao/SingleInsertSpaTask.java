@@ -21,6 +21,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	}
 
 	public void initialize(DalParser<T> parser) {
+		super.initialize(parser);
 		String tableName = parser.getTableName();
 		insertSPA = String.format(INSERT_SPA_TPL, tableName);
 	}

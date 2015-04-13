@@ -167,3 +167,5 @@ pip-log.txt
 
 # Mac crap
 .DS_Store
+/ctrip-dal-client/.classpath
+/ctrip-dal-client/.project

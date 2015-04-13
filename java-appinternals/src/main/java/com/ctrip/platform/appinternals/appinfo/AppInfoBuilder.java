@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 
-import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.platform.appinternals.helpers.Helper;
 
 public class AppInfoBuilder {
@@ -24,10 +23,6 @@ public class AppInfoBuilder {
 		SimpleDateFormat tf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date date = new Date();
 		this.info.setAppStartTime(tf.format(date));
-	}
-	
-	public void setAppId(){
-		this.info.setAppID(LogConfig.getAppID());
 	}
 	
 	public void setDomain(String domain){

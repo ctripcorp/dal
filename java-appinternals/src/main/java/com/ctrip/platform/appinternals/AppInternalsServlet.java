@@ -40,7 +40,6 @@ public class AppInternalsServlet extends HttpServlet {
 			infoBuilder.setPhyDirectory(sct.getRealPath("/"));
 			infoBuilder.setStartTime();
 			infoBuilder.setAssemblyInfos(sct.getRealPath("/WEB-INF/lib"));
-			infoBuilder.setAppId();
 			infoBuilder.setDomain(config.getInitParameter("domain"));
 			infoBuilder.setPost(config.getInitParameter("port"));
 			infoBuilder.setIPV4();

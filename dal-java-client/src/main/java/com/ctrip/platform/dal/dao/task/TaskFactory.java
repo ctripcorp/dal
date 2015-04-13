@@ -5,18 +5,18 @@ package com.ctrip.platform.dal.dao.task;
  * @author jhhe
  *
  */
-public interface TaskFactory {
-	SingleTask createSingleInsertTask();
+public interface TaskFactory<T> extends DaoTask<T> {
+	SingleTask<T> createSingleInsertTask();
 	
-	SingleTask createSingleDeleteTask();
+	SingleTask<T> createSingleDeleteTask();
 
-	SingleTask createSingleUpdateTask();
+	SingleTask<T> createSingleUpdateTask();
 	
-	BulkTask<Integer> createCombinedInsertTask();
+	BulkTask<Integer, T> createCombinedInsertTask();
 	
-	BulkTask<int[]> createBatchInsertTask();
+	BulkTask<int[], T> createBatchInsertTask();
 
-	BulkTask<int[]> createBatchDeleteTask();
+	BulkTask<int[], T> createBatchDeleteTask();
 
-	BulkTask<int[]> createBatchUpdateTask();
+	BulkTask<int[], T> createBatchUpdateTask();
 }

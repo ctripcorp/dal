@@ -4,14 +4,10 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class SingleInsertTast<T> extends TaskAdapter<T> implements SingleTask {
-	public SingleInsertTast(DalParser<T> parser) {
-		super(parser);
-	}
+public class SingleInsertTast<T> extends TaskAdapter<T> implements SingleTask<T> {
 	
 	@Override
 	public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {

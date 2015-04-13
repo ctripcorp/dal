@@ -243,7 +243,7 @@ public class DalShardingHelper {
 			throw new SQLException("Operation is not allowed in different database shard within current transaction. Current shardId: " + DalTransactionManager.getCurrentDbMeta().getShardId() + ". Requeted shardId: " + shardId);
 	}
 	
-	public static <T> T executeByDbShard(String logicDbName, String rawTableName, DalHints hints, List<Map<String, ?>>  daoPojos, BulkTask<T> task) throws SQLException {
+	public static <T, K> T executeByDbShard(String logicDbName, String rawTableName, DalHints hints, List<Map<String, ?>>  daoPojos, BulkTask<T, K> task) throws SQLException {
 		DalWatcher.crossShardBegin();
 		T result;
 		
@@ -264,7 +264,7 @@ public class DalShardingHelper {
 		return result; 
 	}
 	
-	public static <T> T executeByTableShard(String logicDbName, String tabelName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask<T> task) throws SQLException {
+	public static <T, K> T executeByTableShard(String logicDbName, String tabelName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask<T, K> task) throws SQLException {
 		if(isTableShardingEnabled(logicDbName, tabelName)) {
 			DalHints tmpHints = hints.clone();
 			Map<String, List<Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, hints.getTableShardId(), daoPojos);

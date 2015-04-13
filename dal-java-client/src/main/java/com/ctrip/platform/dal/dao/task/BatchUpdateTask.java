@@ -11,11 +11,10 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-//TODO fix logic
 public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 	private String updateColumns;
-	public BatchUpdateTask(DalParser<T> parser) {
-		super(parser);
+	public void initialize(DalParser<T> parser) {
+		super.initialize(parser);
 		updateColumns = initUpdateColumns();
 	}
 

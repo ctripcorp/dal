@@ -6,13 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class BatchDeleteTask<T> extends AbstractIntArrayBulkTask<T> {
-	public BatchDeleteTask(DalParser<T> parser) {
-		super(parser);
-	}
 
 	@Override
 	public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {

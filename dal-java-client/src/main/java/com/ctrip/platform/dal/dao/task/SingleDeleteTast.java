@@ -4,13 +4,9 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class SingleDeleteTast<T> extends TaskAdapter<T> implements SingleTask {
-	public SingleDeleteTast(DalParser<T> parser) {
-		super(parser);
-	}
+public class SingleDeleteTast<T> extends TaskAdapter<T> implements SingleTask<T> {
 
 	@Override
 	public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {

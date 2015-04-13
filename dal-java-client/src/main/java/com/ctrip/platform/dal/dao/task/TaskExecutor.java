@@ -26,14 +26,14 @@ public class TaskExecutor<T> {
 		rawTableName = parser.getTableName();
 	}
 	
-	public int execute(DalHints hints, T[] daoPojos, SingleTask task) throws SQLException {
+	public int execute(DalHints hints, T[] daoPojos, SingleTask<T> task) throws SQLException {
 		if(isEmpty(daoPojos)) return 0;
 		
 		return execute(hints, Arrays.asList(daoPojos), task);
 	}
 	
 	// TODO revise return type
-	public int execute(DalHints hints, List<T> daoPojos, SingleTask task) throws SQLException {
+	public int execute(DalHints hints, List<T> daoPojos, SingleTask<T> task) throws SQLException {
 		if(isEmpty(daoPojos)) return 0;
 
 		List<Map<String, ?>> pojos = getPojosFields(daoPojos);
@@ -56,13 +56,13 @@ public class TaskExecutor<T> {
 		return count;	
 	}
 	
-	public <K> K execute(DalHints hints, T[] daoPojos, BulkTask<K> task, K emptyValue) throws SQLException {
+	public <K> K execute(DalHints hints, T[] daoPojos, BulkTask<K, T> task, K emptyValue) throws SQLException {
 		if(isEmpty(daoPojos)) return emptyValue;
 		
 		return execute(hints, Arrays.asList(daoPojos), task, emptyValue);
 	}
 	
-	public <K> K execute(DalHints hints, List<T> daoPojos, BulkTask<K> task, K emptyValue) throws SQLException {
+	public <K> K execute(DalHints hints, List<T> daoPojos, BulkTask<K, T> task, K emptyValue) throws SQLException {
 		if(isEmpty(daoPojos)) return emptyValue;
 		
 		hints.setDetailResults(new DalDetailResults<K>());

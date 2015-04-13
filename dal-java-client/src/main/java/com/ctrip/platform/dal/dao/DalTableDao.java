@@ -85,7 +85,8 @@ public final class DalTableDao<T> {
 		dbCategory = getDatabaseSet(logicDbName).getDatabaseCategory();
 		setDatabaseCategory(dbCategory);
 		
-		factory = new DefaultTaskFactory<T>(parser);
+		factory = new DefaultTaskFactory<T>();
+		factory.initialize(parser);
 		executor = new TaskExecutor<>(parser);
 	}
 	

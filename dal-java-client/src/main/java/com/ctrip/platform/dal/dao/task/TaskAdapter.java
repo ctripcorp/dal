@@ -19,7 +19,6 @@ import java.util.Set;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalQueryDao;
@@ -30,7 +29,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
  * @author jhhe
  *
  */
-public class TaskAdapter<T> {
+public class TaskAdapter<T> implements DaoTask<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
 
 	//public static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
@@ -52,7 +51,7 @@ public class TaskAdapter<T> {
 	protected DalQueryDao queryDao;
 	protected DalParser<T> parser;
 
-	protected final String logicDbName;
+	protected String logicDbName;
 	protected DatabaseCategory dbCategory;
 	protected String pkSql;
 	protected Set<String> pkColumns;
@@ -65,7 +64,7 @@ public class TaskAdapter<T> {
 	public boolean tableShardingEnabled;
 	protected String rawTableName;
 
-	public TaskAdapter(DalParser<T> parser) {
+	public void initialize(DalParser<T> parser) {
 		this.client = DalClientFactory.getClient(parser.getDatabaseName());
 		this.parser = parser;
 		this.logicDbName = parser.getDatabaseName();

@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalHints;
 
-public interface BulkTask<T> {
+public interface BulkTask<T, K> extends DaoTask<K> {
 	T execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException;
 	T merge(List<T> results);
 }

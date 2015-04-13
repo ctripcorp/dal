@@ -2,44 +2,53 @@ package com.ctrip.platform.dal.dao.task;
 
 import com.ctrip.platform.dal.dao.DalParser;
 
-public class DefaultTaskFactory<T> implements TaskFactory {
-	private DalParser<T> parser;
-	public DefaultTaskFactory(DalParser<T> parser) {
-		this.parser = parser;
-	}
+public class DefaultTaskFactory<T> implements TaskFactory<T> {
+	private SingleInsertTast<T> singleInsertTast = new SingleInsertTast<T>();
+	private SingleDeleteTast<T> singleDeleteTast = new SingleDeleteTast<T>();
+	private SingleUpdateTast<T> singleUpdateTast = new SingleUpdateTast<T>();
+	private CombinedInsertTask<T> combinedInsertTask = new CombinedInsertTask<T>();
 	
+	private BatchInsertTask<T> batchInsertTask = new BatchInsertTask<T>();
+	private BatchDeleteTask<T> batchDeleteTask = new BatchDeleteTask<T>();
+	private BatchUpdateTask<T> batchUpdateTask = new BatchUpdateTask<T>();
+
 	@Override
-	public SingleTask createSingleInsertTask() {
-		return new SingleInsertTast<T>(parser);
+	public void initialize(DalParser<T> parser) {
+		singleInsertTast.initialize(parser);
 	}
 
 	@Override
-	public SingleTask createSingleDeleteTask() {
-		return new SingleDeleteTast<T>(parser);
+	public SingleTask<T> createSingleInsertTask() {
+		return singleInsertTast;
 	}
 
 	@Override
-	public SingleTask createSingleUpdateTask() {
-		return new SingleUpdateTast<T>(parser);
+	public SingleTask<T> createSingleDeleteTask() {
+		return singleDeleteTast ;
 	}
 
 	@Override
-	public BulkTask<Integer> createCombinedInsertTask() {
-		return new CombinedInsertTask<T>(parser);
+	public SingleTask<T> createSingleUpdateTask() {
+		return singleUpdateTast;
 	}
 
 	@Override
-	public BulkTask<int[]> createBatchInsertTask() {
-		return new BatchInsertTask<T>(parser);
+	public BulkTask<Integer, T> createCombinedInsertTask() {
+		return combinedInsertTask;
 	}
 
 	@Override
-	public BulkTask<int[]> createBatchDeleteTask() {
-		return new BatchDeleteTask<T>(parser);
+	public BulkTask<int[], T> createBatchInsertTask() {
+		return batchInsertTask;
 	}
 
 	@Override
-	public BulkTask<int[]> createBatchUpdateTask() {
-		return new BatchUpdateTask<T>(parser);
+	public BulkTask<int[], T> createBatchDeleteTask() {
+		return batchDeleteTask;
+	}
+
+	@Override
+	public BulkTask<int[], T> createBatchUpdateTask() {
+		return batchUpdateTask;
 	}
 }

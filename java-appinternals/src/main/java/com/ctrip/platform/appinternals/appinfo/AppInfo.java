@@ -3,7 +3,7 @@ package com.ctrip.platform.appinternals.appinfo;
 import java.util.List;
 
 public class AppInfo {
-    private static String AppID = "";
+    private String AppID = "";
     private String Domain = "";
     private String Port = "";
     private String AppStartTime = "";
@@ -26,10 +26,10 @@ public class AppInfo {
     private String SystemPageSize = "";
     private List<AssemblyInfo> AssemblyInfos;
     
-    public static String getAppID() {
+	public String getAppID() {
 		return AppID;
 	}
-	public static void setAppID(String appID) {
+	public void setAppID(String appID) {
 		AppID = appID;
 	}
 

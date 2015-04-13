@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.configbeans;
 
-import com.ctrip.platform.appinternals.appinfo.AppInfo;
+import com.ctrip.platform.appinternals.appinfo.AppInfoBuilder;
 import com.ctrip.platform.appinternals.configuration.ConfigBeanManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 
@@ -11,7 +11,7 @@ public class ConfigBeanFactory {
 	
 	public static void init() throws Exception {
 		ConfigBeanManager.register(habean, mkbean, tmkbean);
-		AppInfo.setAppID(DalClientFactory.getDalLogger().getAppID());
+		AppInfoBuilder.set_AppID(DalClientFactory.getDalLogger().getAppID());
 	}
 	
 	public static HAConfigBean getHAConfigBean(){

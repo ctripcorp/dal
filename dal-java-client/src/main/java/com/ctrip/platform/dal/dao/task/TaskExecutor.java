@@ -17,7 +17,6 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalDetailResults;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
@@ -201,7 +200,7 @@ public class TaskExecutor<T> {
 		return daoPojos.length == 1 && daoPojos[0] == null;
 	}
 	
-	public List<Map<String, ?>> getPojosFields(List<T> daoPojos) {
+	private List<Map<String, ?>> getPojosFields(List<T> daoPojos) {
 		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
 		if (null == daoPojos || daoPojos.size() < 1)
 			return pojoFields;

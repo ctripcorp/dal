@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.helper;
 
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isShardingEnabled;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -225,7 +227,7 @@ public class DalShardingHelper {
 		}
 	}
 	
-	private static void detectDistributedTransaction(Set<String> shardIds) throws SQLException {
+	public static void detectDistributedTransaction(Set<String> shardIds) throws SQLException {
 		if(!DalTransactionManager.isInTransaction())
 			return;
 		
@@ -242,69 +244,4 @@ public class DalShardingHelper {
 		if(shardId.equals(DalTransactionManager.getCurrentDbMeta().getShardId()))
 			throw new SQLException("Operation is not allowed in different database shard within current transaction. Current shardId: " + DalTransactionManager.getCurrentDbMeta().getShardId() + ". Requeted shardId: " + shardId);
 	}
-	
-	public static <T, K> T executeByDbShard(String logicDbName, String rawTableName, DalHints hints, List<Map<String, ?>>  daoPojos, BulkTask<T, K> task) throws SQLException {
-		DalWatcher.crossShardBegin();
-		T result;
-		
-		if(isShardingEnabled(logicDbName)) {
-			List<T> results = new LinkedList<>();
-			Map<String, List<Map<String, ?>>> shuffled = shuffle(logicDbName, hints.getShardId(), daoPojos);
-			for(String shard: shuffled.keySet()) {
-				hints.inShard(shard);
-				T tmpResult = executeByTableShard(logicDbName, rawTableName, hints, shuffled.get(shard), task);
-				results.add(tmpResult);
-			}
-			result = task.merge(results);
-		} else {
-			result = executeByTableShard(logicDbName, rawTableName, hints, daoPojos, task);
-		}
-		
-		DalWatcher.crossShardEnd();
-		return result; 
-	}
-	
-	public static <T, K> T executeByTableShard(String logicDbName, String tabelName, DalHints hints, List<Map<String, ?>> daoPojos, BulkTask<T, K> task) throws SQLException {
-		if(isTableShardingEnabled(logicDbName, tabelName)) {
-			DalHints tmpHints = hints.clone();
-			Map<String, List<Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, hints.getTableShardId(), daoPojos);
-			
-			List<T> results = new ArrayList<T>(pojosInTable.size());
-			for(String curTableShardId: pojosInTable.keySet()) {
-				tmpHints.inTableShard(curTableShardId);
-				T result = task.execute(tmpHints, pojosInTable.get(curTableShardId));
-				results.add(result);
-			}
-			return task.merge(results);
-		}else{
-			return task.execute(hints, daoPojos);
-		}
-	}
-	
-	public static int[] combine(int[]... counts) {
-		int total = 0;
-		for(int[] countsInTable: counts)
-			total += countsInTable.length;
-		
-		int[] totalCounts = new int[total];
-		int cur = 0;
-		for(int[] countsInTable: counts) {
-			System.arraycopy(countsInTable, 0, totalCounts, cur, countsInTable.length);
-			cur += countsInTable.length;
-		}
-		
-		return totalCounts;
-	}
-	
-//	public static interface BulkTask<T> {
-//		T execute(DalHints hints, List<Map<String, ?>> shaffled) throws SQLException;
-//		T merge(List<T> results);
-//	}
-//	
-//	public static abstract class AbstractIntArrayBulkTask implements BulkTask<int[]> {
-//		@Override
-//		public int[] merge(List<int[]> results) {
-//			return DalShardingHelper.combine(results.toArray(new int[results.size()][]));
-//		}
-//	}
 }

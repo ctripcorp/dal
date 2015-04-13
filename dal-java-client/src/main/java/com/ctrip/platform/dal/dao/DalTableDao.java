@@ -36,17 +36,12 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
 public final class DalTableDao<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
 
-	//private static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
-	private static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
-	private static final String TMPL_SQL_MULTIPLE_INSERT = "INSERT INTO %s(%s) VALUES %s";
 	private static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
-	private static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
 
 	private static final String COLUMN_SEPARATOR = ", ";
 	private static final String PLACE_HOLDER = "?";
 	private static final String TMPL_SET_VALUE = "%s=?";
 	private static final String AND = " AND ";
-	private static final String OR = " OR ";
 	private static final String TMPL_CALL = "{call %s(%s)}";
 
 	private String findtmp = "SELECT * FROM %s WHERE %s";
@@ -59,8 +54,6 @@ public final class DalTableDao<T> {
 	private DatabaseCategory dbCategory;
 	private String pkSql;
 	private Set<String> pkColumns;
-	private String columnsForInsert;
-	private List<String> validColumnsForInsert;
 	private Map<String, Integer> columnTypes = new HashMap<String, Integer>();
 	private Character startDelimiter;
 	private Character endDelimiter;
@@ -69,7 +62,7 @@ public final class DalTableDao<T> {
 	private String rawTableName;
 
 	
-	private TaskFactory factory;
+	private TaskFactory<T> factory;
 	private TaskExecutor<T> executor; 
 			
 	public DalTableDao(DalParser<T> parser) {
@@ -90,48 +83,6 @@ public final class DalTableDao<T> {
 		executor = new TaskExecutor<>(parser);
 	}
 	
-	private void initDbSpecific() {
-		pkSql = initPkSql();
-		validColumnsForInsert = buildValidColumnsForInsert();
-		columnsForInsert = combineColumns(validColumnsForInsert, COLUMN_SEPARATOR);
-	}
-	
-	/**
-	 * Specify the delimiter used to quote column name. The delimiter will be used as
-	 * both start and end delimiter. This is useful when column name happens 
-	 * to be keyword of target database and the start and end delimiter are the same.
-	 * @param delimiter the char used to quote column name.
-	 * @deprecated Use setDatabaseCategory instead of calling individule setXxx
-	 */
-	public void setDelimiter(Character delimiter) {
-		startDelimiter = delimiter;
-		endDelimiter = delimiter;
-		initDbSpecific();
-	}
-
-	/**
-	 * Specify the sql template for find by primary key
-	 * @param tmp the sql template for find by primary key
-	 * @deprecated Use setDatabaseCategory instead of calling individule setXxx
-	 */
-	public void setFindTemplate(String tmp){
-		this.findtmp = tmp;
-		initDbSpecific();
-	}
-	
-	/**
-	 * Specify the start and end delimiter used to quote column name.  
-	 * This is useful when column name happens  to be keyword of target database.
-	 * @param startDelimiter the start char used quote column name on .
-	 * @param endDelimiter the end char used to quote column name.
-	 * @deprecated Use setDatabaseCategory instead of calling individule setXxx
-	 */
-	public void setDelimiter(Character startDelimiter, Character endDelimiter) {
-		this.startDelimiter = startDelimiter;
-		this.endDelimiter = endDelimiter;
-		initDbSpecific();
-	}
-	
 	/**
 	 * This is to set DatabaseCategory to initialize startDelimiter/endDelimiter and findtmp.
 	 * This will apply db specific settings. So the dao is no longer reusable across different dbs.
@@ -147,7 +98,8 @@ public final class DalTableDao<T> {
 			findtmp = "SELECT * FROM %s WITH (NOLOCK) WHERE %s";
 		} else
 			throw new RuntimeException("Such Db category not suported yet");
-		initDbSpecific();
+
+		pkSql = initPkSql();
 	}
 	
 	public DalClient getClient() {
@@ -379,9 +331,7 @@ public final class DalTableDao<T> {
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, T... daoPojos)
 			throws SQLException {
-		hints.setKeyHolder(keyHolder);
-		return executor.execute(hints, daoPojos, factory.createSingleInsertTask());
-//		return execute(hints, daoPojos, new SingleInsertTast(keyHolder));
+		return executor.execute(hints.setKeyHolder(keyHolder), daoPojos, factory.createSingleInsertTask());
 	}
 	
 	/**
@@ -403,64 +353,7 @@ public final class DalTableDao<T> {
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos)
 			throws SQLException {
-		hints.setKeyHolder(keyHolder);
-		return executor.execute(hints, daoPojos, factory.createSingleInsertTask());
-//		return execute(hints, daoPojos, new SingleInsertTast(keyHolder));
-	}
-	
-	public static interface SingleTask {
-		int execute(DalHints hints, Map<String, ?> daoPojo) throws SQLException;
-	}
-	
-	public int execute(DalHints hints, T[] daoPojos, SingleTask task) throws SQLException {
-		if(isEmpty(daoPojos)) return 0;
-		
-		return execute(hints, Arrays.asList(daoPojos), task);
-	}
-	
-	public int execute(DalHints hints, List<T> daoPojos, SingleTask task) throws SQLException {
-		if(isEmpty(daoPojos)) return 0;
-
-		List<Map<String, ?>> pojos = getPojosFields(daoPojos);
-		detectDistributedTransaction(logicDbName, hints, pojos);
-		
-		int count = 0;
-		hints = hints.clone();// To avoid shard id being polluted by each pojos
-		for (Map<String, ?> fields : pojos) {
-			DalWatcher.begin();// TODO check if we needed
-
-			try {
-				count += task.execute(hints, fields);
-			} catch (SQLException e) {
-				// TODO do we need log error here?
-				if (hints.isStopOnError())
-					throw e;
-			}
-		}
-		
-		return count;	
-	}
-	
-	private class SingleInsertTast implements SingleTask {
-		private KeyHolder keyHolder;
-		
-		public SingleInsertTast(KeyHolder keyHolder) {
-			this.keyHolder = keyHolder;
-		}
-		
-		@Override
-		public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
-			filterAutoIncrementPrimaryFields(fields);
-			
-			String insertSql = buildInsertSql(hints, fields);
-
-			StatementParameters parameters = new StatementParameters();
-			addParameters(parameters, fields);
-
-			return keyHolder == null ?
-				client.update(insertSql, parameters, hints):
-				client.update(insertSql, parameters, hints, keyHolder);
-		}
+		return executor.execute(hints.setKeyHolder(keyHolder), daoPojos, factory.createSingleInsertTask());
 	}
 	
 	/**
@@ -476,9 +369,7 @@ public final class DalTableDao<T> {
 	 * @throws SQLException
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder, T... daoPojos) throws SQLException {
-		hints.setKeyHolder(keyHolder);
-		return executor.execute(hints, daoPojos, factory.createCombinedInsertTask(), 0);
-//		return execute(hints, daoPojos, new CombinedInsertTask(keyHolder), 0);
+		return executor.execute(hints.setKeyHolder(keyHolder), daoPojos, factory.createCombinedInsertTask(), 0);
 	}
 	
 	/**
@@ -495,54 +386,8 @@ public final class DalTableDao<T> {
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder,
 			List<T> daoPojos) throws SQLException {
-		hints.setKeyHolder(keyHolder);
-		return executor.execute(hints, daoPojos, factory.createCombinedInsertTask(), 0);
-//		return execute(hints, daoPojos, new CombinedInsertTask(keyHolder), 0);
+		return executor.execute(hints.setKeyHolder(keyHolder), daoPojos, factory.createCombinedInsertTask(), 0);
 	}
-//	
-//	private class CombinedInsertTask implements BulkTask<Integer> {
-//		private KeyHolder keyHolder;
-//		
-//		public CombinedInsertTask(KeyHolder keyHolder) {
-//			this.keyHolder = keyHolder;
-//		}
-//		
-//		@Override
-//		public Integer merge(List<Integer> results) {
-//			int value = 0;
-//			for(Integer i: results) value += i;
-//			return value;
-//		}
-//
-//		@Override
-//		public Integer execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
-//			StatementParameters parameters = new StatementParameters();
-//			StringBuilder values = new StringBuilder();
-//
-//			int startIndex = 1;
-//			for (Map<String, ?> vfields: daoPojos) {
-//				filterAutoIncrementPrimaryFields(vfields);
-//				int paramCount = addParameters(startIndex, parameters, vfields, validColumnsForInsert);
-//				startIndex += paramCount;
-//				values.append(String.format("(%s),",
-//						combine("?", paramCount, ",")));
-//			}
-//
-//			String sql = String.format(TMPL_SQL_MULTIPLE_INSERT,
-//					getTableName(hints), columnsForInsert,
-//					values.substring(0, values.length() - 2) + ")");
-//
-//			if(keyHolder == null) {
-//				return client.update(sql, parameters, hints);
-//			} else{
-//				KeyHolder tmpHolder = new KeyHolder();
-//				int count = client.update(sql, parameters, hints, tmpHolder);
-//				keyHolder.merge(tmpHolder);
-//				hints.addDetailResults(tmpHolder);
-//				return count;
-//			}
-//		}
-//	}
 	
 	/**
 	 * Insert pojos in batch mode. 
@@ -555,7 +400,6 @@ public final class DalTableDao<T> {
 	 */
 	public int[] batchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
 		return executor.execute(hints, daoPojos, factory.createBatchInsertTask(), new int[0]);
-//		return execute(hints, daoPojos, new BatchInsertTask(), new int[0]);
 	}
 	
 
@@ -570,28 +414,8 @@ public final class DalTableDao<T> {
 	 */
 	public int[] batchInsert(DalHints hints, T... daoPojos) throws SQLException {
 		return executor.execute(hints, daoPojos, factory.createBatchInsertTask(), new int[0]);
-//		return execute(hints, daoPojos, new BatchInsertTask(), new int[0]);
 	}
 
-//	private class BatchInsertTask extends AbstractIntArrayBulkTask {
-//		@Override
-//		public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
-//			StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
-//			int i = 0;
-//			for (Map<String, ?> fields : daoPojos) {
-//				filterAutoIncrementPrimaryFields(fields);
-//				StatementParameters parameters = new StatementParameters();
-//				addParameters(parameters, fields);
-//				parametersList[i++] = parameters;
-//			}
-//
-//			String batchInsertSql = buildBatchInsertSql(getTableName(hints));
-//			int[] result = client.batchUpdate(batchInsertSql, parametersList, hints);
-//			hints.addDetailResults(result);
-//			return result;
-//		}
-//	}
-//	
 	/**
 	 * Delete the given pojos list one by one.
 	 * 
@@ -602,7 +426,6 @@ public final class DalTableDao<T> {
 	 */
 	public int delete(DalHints hints, List<T> daoPojos) throws SQLException {
 		return executor.execute(hints, daoPojos, factory.createSingleDeleteTask());
-//		return execute(hints, daoPojos, new SingleDeleteTast());
 	}
 	
 	/**
@@ -615,18 +438,6 @@ public final class DalTableDao<T> {
 	 */
 	public int delete(DalHints hints, T... daoPojos) throws SQLException {
 		return executor.execute(hints, daoPojos, factory.createSingleDeleteTask());
-//		return execute(hints, daoPojos, new SingleDeleteTast());
-	}
-	
-	private class SingleDeleteTast implements SingleTask {
-		@Override
-		public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
-			StatementParameters parameters = new StatementParameters();
-			addParameters(parameters, fields, parser.getPrimaryKeyNames());
-			String deleteSql = buildDeleteSql(getTableName(hints, parameters, fields));
-
-			return client.update(deleteSql, parameters, hints.setFields(fields));
-		}
 	}
 	
 	/**
@@ -640,7 +451,6 @@ public final class DalTableDao<T> {
 	 */
 	public int[] batchDelete(DalHints hints, T... daoPojos) throws SQLException {
 		return executor.execute(hints, daoPojos, factory.createBatchDeleteTask(), new int[0]);
-//		return execute(hints, daoPojos, new BatchDeleteTask(), new int[0]);
 	}
 	
 	/**
@@ -654,27 +464,7 @@ public final class DalTableDao<T> {
 	 */
 	public int[] batchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
 		return executor.execute(hints, daoPojos, factory.createBatchDeleteTask(), new int[0]);
-//		return execute(hints, daoPojos, new BatchDeleteTask(), new int[0]);
 	}
-	
-//	private class BatchDeleteTask extends AbstractIntArrayBulkTask {
-//		@Override
-//		public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
-//			StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
-//			int i = 0;
-//			List<String> pkNames = Arrays.asList(parser.getPrimaryKeyNames());
-//			for (Map<String, ?> pojo : daoPojos) {
-//				StatementParameters parameters = new StatementParameters();
-//				addParameters(1, parameters, pojo, pkNames);
-//				parametersList[i++] = parameters;
-//			}
-//			
-//			String deleteSql = buildDeleteSql(getTableName(hints));
-//			int[] result = client.batchUpdate(deleteSql, parametersList, hints);
-//			hints.addDetailResults(result);
-//			return result;
-//		}
-//	}
 	
 	/**
 	 * Update the given pojo list one by one. By default, if a field of pojo is null value,
@@ -691,7 +481,6 @@ public final class DalTableDao<T> {
 	 */
 	public int update(DalHints hints, T... daoPojos) throws SQLException {
 		return executor.execute(hints, daoPojos, factory.createSingleUpdateTask());
-//		return execute(hints, daoPojos, new SingleUpdateTast());
 	}
 	
 	/**
@@ -709,28 +498,10 @@ public final class DalTableDao<T> {
 	 */
 	public int update(DalHints hints, List<T> daoPojos) throws SQLException {
 		return executor.execute(hints, daoPojos, factory.createSingleUpdateTask());
-//		return execute(hints, daoPojos, new SingleUpdateTast());
-	}
-	
-	private class SingleUpdateTast implements SingleTask {
-		@Override
-		public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
-			if (fields.size() == 0)
-				throw new DalException(ErrorCode.ValidateFieldCount);
-			
-			String updateSql = buildUpdateSql(getTableName(hints, fields), fields, hints);
-
-			StatementParameters parameters = new StatementParameters();
-			addParameters(parameters, fields);
-			addParameters(parameters, fields, parser.getPrimaryKeyNames());
-			
-			return client.update(updateSql, parameters, hints);
-		}
 	}
 	
 	public int[] batchUpdate(DalHints hints, T... daoPojos) throws SQLException {
 		return executor.execute(hints, daoPojos, factory.createBatchUpdateTask(), new int[0]);
-//		return execute(hints, daoPojos, new BatchUpdateTask(), new int[0]);
 	}
 
 	/**
@@ -739,28 +510,8 @@ public final class DalTableDao<T> {
 	 */
 	public int[] batchUpdate(DalHints hints, List<T> daoPojos) throws SQLException {
 		return executor.execute(hints, daoPojos, factory.createBatchUpdateTask(), new int[0]);
-//		return execute(hints, daoPojos, new BatchUpdateTask(), new int[0]);
 	}
 	
-//	private class BatchUpdateTask extends AbstractIntArrayBulkTask {
-//		@Override
-//		public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
-//			StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
-//			int i = 0;
-//			List<String> pkNames = Arrays.asList(parser.getPrimaryKeyNames());
-//			for (Map<String, ?> pojo : daoPojos) {
-//				StatementParameters parameters = new StatementParameters();
-//				addParameters(1, parameters, pojo, pkNames);
-//				parametersList[i++] = parameters;
-//			}
-//			
-//			String deleteSql = buildDeleteSql(getTableName(hints));
-//			int[] result = client.batchUpdate(deleteSql, parametersList, hints);
-//			hints.addDetailResults(result);
-//			return result;
-//		}
-//	}
-
 	/**
 	 * Delete for the given where clause and parameters.
 	 * 
@@ -792,23 +543,6 @@ public final class DalTableDao<T> {
 		return client.update(sql, parameters, hints);
 	}
 
-//	public <K> K execute(DalHints hints, T[] daoPojos, BulkTask<K> task, K emptyValue) throws SQLException {
-//		if(isEmpty(daoPojos)) return emptyValue;
-//		
-//		return execute(hints, Arrays.asList(daoPojos), task, emptyValue);
-//	}
-//	
-//	public <K> K execute(DalHints hints, List<T> daoPojos, BulkTask<K> task, K emptyValue) throws SQLException {
-//		if(isEmpty(daoPojos)) return emptyValue;
-//		
-//		hints.setDetailResults(new DalDetailResults<K>());
-//
-//		if(isAlreadySharded(logicDbName, rawTableName, hints))
-//			return task.execute(hints, getPojosFields(daoPojos));
-//		else
-//			return executeByDbShard(logicDbName, rawTableName, hints, getPojosFields(daoPojos), task);
-//	}
-	
 	/**
 	 * Add all the entries into the parameters by index. The parameter index
 	 * will depends on the index of the entry in the entry set, value will be
@@ -817,24 +551,21 @@ public final class DalTableDao<T> {
 	 * @param parameters A container that holds all the necessary parameters
 	 * @param entries Key value pairs to be added into parameters
 	 */
-	public void addParameters(StatementParameters parameters,
-			Map<String, ?> entries) {
+	public void addParameters(StatementParameters parameters, Map<String, ?> entries) {
 		int index = parameters.size() + 1;
 		for (Map.Entry<String, ?> entry : entries.entrySet()) {
 			parameters.set(index++, entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
 		}
 	}
 
-	private void addParameters(StatementParameters parameters,
-			Map<String, ?> entries, String[] validColumns) {
+	public void addParameters(StatementParameters parameters, Map<String, ?> entries, String[] validColumns) {
 		int index = parameters.size() + 1;
 		for(String column : validColumns){
 			parameters.set(index++, column, getColumnType(column), entries.get(column));
 		}
 	}
 	
-	private int addParameters(int start, StatementParameters parameters,
-			Map<String, ?> entries, List<String> validColumns) {
+	public int addParameters(int start, StatementParameters parameters, Map<String, ?> entries, List<String> validColumns) {
 		int count = 0;
 		for(String column : validColumns){
 			if(entries.containsKey(column))
@@ -852,8 +583,7 @@ public final class DalTableDao<T> {
 	 * @param parameters A container that holds all the necessary parameters
 	 * @param entries Key value pairs to be added into parameters
 	 */
-	public void addParametersByName(StatementParameters parameters,
-			Map<String, ?> entries) {
+	public void addParametersByName(StatementParameters parameters, Map<String, ?> entries) {
 		for (Map.Entry<String, ?> entry : entries.entrySet()) {
 			parameters.set(entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
 		}
@@ -867,8 +597,7 @@ public final class DalTableDao<T> {
 	 * @param parameters A container that holds all the necessary parameters
 	 * @param entries Key value pairs to be added into parameters
 	 */
-	public void addParametersByName(StatementParameters parameters,
-			Map<String, ?> entries, String[] validColumns) {
+	public void addParametersByName(StatementParameters parameters, Map<String, ?> entries, String[] validColumns) {
 		for(String column : validColumns){
 			if(entries.containsKey(column))
 				parameters.set(column, getColumnType(column), entries.get(column));
@@ -935,10 +664,6 @@ public final class DalTableDao<T> {
 		return pojoFields;
 	}
 
-	private boolean isPrimaryKey(String fieldName){
-		return pkColumns.contains(fieldName);
-	}
-	
 	private String initPkSql() {
 		pkColumns = new HashSet<String>();
 		Collections.addAll(pkColumns, parser.getPrimaryKeyNames());
@@ -958,77 +683,9 @@ public final class DalTableDao<T> {
 		}
 	}
 
-	private String buildInsertSql(DalHints hints, Map<String, ?> fields) throws SQLException {
-		filterNullFileds(fields);
-		Set<String> remainedColumns = fields.keySet();
-		String cloumns = combineColumns(remainedColumns, COLUMN_SEPARATOR);
-		String values = combine(PLACE_HOLDER, remainedColumns.size(),
-				COLUMN_SEPARATOR);
-
-		return String.format(TMPL_SQL_INSERT, getTableName(hints, fields), cloumns,
-				values);
-	}
-	
-	private List<String> buildValidColumnsForInsert() {
-		List<String> validColumns = new ArrayList<String>();
-		for(String s : parser.getColumnNames()){
-			if(!(parser.isAutoIncrement() && isPrimaryKey(s)))
-				validColumns.add(s);
-		}
-		
-		return validColumns;
-
-	}
-	
-	private String buildBatchInsertSql(String tableName) {
-		int validColumnsSize = parser.getColumnNames().length;
-		if(parser.isAutoIncrement())
-			validColumnsSize--;
-		
-		String values = combine(PLACE_HOLDER, validColumnsSize,
-				COLUMN_SEPARATOR);
-
-		return String.format(TMPL_SQL_INSERT, tableName, columnsForInsert,
-				values);
-	}
-
-
-	private String buildDeleteSql(String tableName) {
-		return String.format(TMPL_SQL_DELETE, tableName, pkSql);
-	}
-
-	private String buildUpdateSql(String tableName, Map<String, ?> fields, DalHints hints) {
-		// Remove null value when hints is not DalHintEnum.updateNullField or
-		// primary key
-		for (String column : parser.getColumnNames()) {
-			if ((fields.get(column) == null && !hints
-					.is(DalHintEnum.updateNullField))
-					|| isPrimaryKey(column))
-				fields.remove(column);
-		}
-
-		String columns = String.format(
-				combine(TMPL_SET_VALUE, fields.size(), COLUMN_SEPARATOR),
-				quote(fields.keySet()));
-
-		return String.format(TMPL_SQL_UPDATE, tableName, columns,
-				pkSql);
-	}
-
 	private String buildWhereClause(Map<String, ?> fields) {
 		return String.format(combine(TMPL_SET_VALUE, fields.size(), AND),
 				quote(fields.keySet()));
-	}
-
-	private String combineColumns(Collection<String> values, String separator) {
-		StringBuilder valuesSb = new StringBuilder();
-		int i = 0;
-		for (String value : values) {
-			quote(valuesSb, value);
-			if (++i < values.size())
-				valuesSb.append(separator);
-		}
-		return valuesSb.toString();
 	}
 
 	private String combine(String value, int count, String separator) {
@@ -1048,12 +705,6 @@ public final class DalTableDao<T> {
 		return new StringBuilder().append(startDelimiter).append(column).append(endDelimiter).toString();
 	}
 
-	private StringBuilder quote(StringBuilder sb, String column) {
-		if(startDelimiter == null)
-			return sb.append(column);
-		return sb.append(startDelimiter).append(column).append(endDelimiter);
-	}
-	
 	private Object[] quote(Set<String> columns) {
 		if(startDelimiter == null)
 			return columns.toArray();

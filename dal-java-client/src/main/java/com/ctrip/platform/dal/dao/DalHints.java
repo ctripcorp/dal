@@ -24,8 +24,9 @@ public class DalHints {
 		return keyHolder;
 	}
 
-	public void setKeyHolder(KeyHolder keyHolder) {
+	public DalHints setKeyHolder(KeyHolder keyHolder) {
 		this.keyHolder = keyHolder;
+		return this;
 	}
 
 	public static DalHints createIfAbsent(DalHints hints) {

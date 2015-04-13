@@ -48,7 +48,6 @@ public class DalTableDaoTest {
 			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(DATABASE_NAME);
 			dao = new DalTableDao<ClientTestModel>(clientTestParser);
-			dao.setDelimiter('`');
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

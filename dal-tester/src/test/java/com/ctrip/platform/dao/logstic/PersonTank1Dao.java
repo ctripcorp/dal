@@ -25,7 +25,6 @@ public class PersonTank1Dao {
 
 	public PersonTank1Dao() {
 		this.client = new DalTableDao<PersonTank1>(parser);
-		this.client.setDelimiter('`','`');
 		this.queryDao = new DalQueryDao(DATA_BASE);
 		this.rowextractor = new DalRowMapperExtractor<PersonTank1>(parser); 
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);

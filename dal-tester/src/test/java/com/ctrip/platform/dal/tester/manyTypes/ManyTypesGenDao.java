@@ -28,7 +28,6 @@ public class ManyTypesGenDao {
 
 	public ManyTypesGenDao() {
 		this.client = new DalTableDao<ManyTypesGen>(parser);
-		this.client.setDelimiter('`','`');
 		this.queryDao = new DalQueryDao(DATA_BASE);
 		this.rowextractor = new DalRowMapperExtractor<ManyTypesGen>(parser); 
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);

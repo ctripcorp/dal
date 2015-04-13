@@ -3,8 +3,8 @@ package com.ctrip.platform.dal.dao.task;
 import com.ctrip.platform.dal.dao.DalParser;
 
 public class DefaultTaskFactory<T> implements TaskFactory<T> {
-	private SingleInsertTast<T> singleInsertTast = new SingleInsertTast<T>();
-	private SingleDeleteTast<T> singleDeleteTast = new SingleDeleteTast<T>();
+	private SingleInsertTask<T> singleInsertTast = new SingleInsertTask<T>();
+	private SingleDeleteTask<T> singleDeleteTast = new SingleDeleteTask<T>();
 	private SingleUpdateTast<T> singleUpdateTast = new SingleUpdateTast<T>();
 	private CombinedInsertTask<T> combinedInsertTask = new CombinedInsertTask<T>();
 	
@@ -15,6 +15,14 @@ public class DefaultTaskFactory<T> implements TaskFactory<T> {
 	@Override
 	public void initialize(DalParser<T> parser) {
 		singleInsertTast.initialize(parser);
+		singleDeleteTast.initialize(parser);
+		singleUpdateTast.initialize(parser);
+		combinedInsertTask.initialize(parser);
+		
+		batchInsertTask.initialize(parser);
+		batchDeleteTask.initialize(parser);
+		batchUpdateTask.initialize(parser);
+		
 	}
 
 	@Override

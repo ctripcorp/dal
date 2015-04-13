@@ -28,7 +28,6 @@ public class ManyTypesTank1Dao {
 
 	public ManyTypesTank1Dao() {
 		this.client = new DalTableDao<ManyTypesTank1>(parser);
-		this.client.setDelimiter('`','`');
 		this.queryDao = new DalQueryDao(DATA_BASE);
 		this.rowextractor = new DalRowMapperExtractor<ManyTypesTank1>(parser); 
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);

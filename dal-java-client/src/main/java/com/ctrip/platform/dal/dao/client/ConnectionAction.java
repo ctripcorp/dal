@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.ctrip.framework.clogging.agent.config.LogConfig;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -210,7 +210,7 @@ public abstract class ConnectionAction<T> {
 	}
 
 	private String wrapAPPID(String sql){
-		return "/*" + LogConfig.getAppID() + "*/" + sql;
+		return "/*" + DalClientFactory.getDalLogger().getAppID() + "*/" + sql;
 	}
 	
 	public abstract T execute() throws Exception;

@@ -7,7 +7,6 @@ import javax.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctrip.framework.clogging.agent.MessageManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
@@ -41,9 +40,6 @@ public class DalClientFactoryListener implements ServletContextListener {
 	
 	public void contextDestroyed(ServletContextEvent sce) {
 		DalClientFactory.shutdownFactory();
-		
-		logger.info("shutdown clogging");
-		MessageManager.getInstance().shutdown();
 		
 		logger.info("DalWatcher has been destoryed");
 		DalWatcher.destroy();

@@ -3,35 +3,28 @@ package com.ctrip.platform.dal.dao;
 import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class BatchDeleteSp3TaskTest {
-	private final static String DATABASE_NAME_MYSQL = "dao_test_mysql_tableShard";
+
+	private final static String DATABASE_NAME_MYSQL = "SimpleShard";
 	
-	private final static String TABLE_NAME = "dal_client_test";
-	private final static int mod = 4;
+	private final static String TABLE_NAME = "People";
 	
-	private final static String DROP_TABLE_SQL_MYSQL_TPL = "DROP TABLE IF EXISTS " + TABLE_NAME + "_%d";
-	
-	//Create the the table
-	private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"_%d("
-			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-			+ "quantity int,"
-			+ "tableIndex int,"
-			+ "type smallint, "
-			+ "address VARCHAR(64) not null, "
-			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
-	
-	private static DalClient clientMySql;
-	
+	private static DalClient client;
 	static {
 		try {
 			DalClientFactory.initClientFactory();
-			clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
+			client = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -39,40 +32,23 @@ public class BatchDeleteSp3TaskTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		DalHints hints = new DalHints();
-		String[] sqls = null;
-		for(int i = 0; i < mod; i++) {
-			sqls = new String[] { 
-					String.format(DROP_TABLE_SQL_MYSQL_TPL,i), 
-					String.format(CREATE_TABLE_SQL_MYSQL_TPL, i)};
-			clientMySql.batchUpdate(sqls, hints);
-		}
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		DalHints hints = new DalHints();
-		String[] sqls = null;
-		for(int i = 0; i < mod; i++) {
-			sqls = new String[] { String.format(DROP_TABLE_SQL_MYSQL_TPL, i)};
-			clientMySql.batchUpdate(sqls, hints);
-		}
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		DalHints hints = new DalHints();
 		String[] insertSqls = null;
-		for(int i = 0; i < mod; i++) {
-			insertSqls = new String[i + 1];
-			for(int j = 0; j < i + 1; j ++) {
-				int id = j + 1;
-				int quantity = 10 + j;
-				insertSqls[j] = "INSERT INTO " + TABLE_NAME + "_"+ i
-						+ " VALUES(" + id + ", " + quantity + ", " + i + ",1, 'SH INFO', NULL)";
-			}
-			clientMySql.batchUpdate(insertSqls, hints);
+		insertSqls = new String[3];
+		for(int i = 0; i < 3; i ++) {
+			int id = i;
+			insertSqls[i] = "INSERT INTO " + TABLE_NAME +"[PeopleID], [Name] ,[CityID] ,[ProvinceID] ,[CountryID])"
+					+ " VALUES(" + id + ", " + "test name" + ", " + i + ",1, 1)";
 		}
+		client.batchUpdate(insertSqls, hints);
 	}
 
 	@After
@@ -81,12 +57,44 @@ public class BatchDeleteSp3TaskTest {
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
 		try {
-			for(int i = 0; i < mod; i++) {
-				clientMySql.update(sql + "_" + i, parameters, hints);
-			}
+			client.update(sql, parameters, hints.inShard(0));
 		} catch (SQLException e) {
 			e.printStackTrace();
 			fail();
 		}
 	}
+	
+	@Test
+	public void testExecute() {
+		BatchDeleteSp3Task<People> test = new BatchDeleteSp3Task<>();
+		PeopleParser parser = new PeopleParser();
+		test.initialize(parser);
+		
+		People p1 = new People();
+	 	p1.setPeopleID((long)1);
+	 	p1.setName("test");
+	 	p1.setCityID(-1);
+	 	p1.setProvinceID(-1);
+	 	p1.setCountryID(-1);
+
+		try {
+			test.execute(new DalHints().inShard(0), parser.getFields(p1));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
+	private <T> List<Map<String, ?>> getPojosFields(List<T> daoPojos) {
+		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
+		if (null == daoPojos || daoPojos.size() < 1)
+			return pojoFields;
+		
+		for (T pojo: daoPojos){
+			pojoFields.add(parser.getFields(pojo));
+		}
+		
+		return pojoFields;
+	}
+
 }

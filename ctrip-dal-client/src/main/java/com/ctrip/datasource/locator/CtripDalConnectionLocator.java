@@ -8,8 +8,11 @@ import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 
 public class CtripDalConnectionLocator implements DalConnectionLocator {
 	private DataSourceLocator locator;
+	private String dc;
 	@Override
 	public void initLocator(Map<String, String> settings) {
+		String tmpDc = settings.get("dc");
+		dc = tmpDc == null ? "" : tmpDc;
 		locator = DataSourceLocator.newInstance();
 	}
 
@@ -20,7 +23,7 @@ public class CtripDalConnectionLocator implements DalConnectionLocator {
 
 	@Override
 	public Connection getConnection(String name) throws Exception {
-		return locator.getDataSource(name).getConnection();
+		return locator.getDataSource(name + dc).getConnection();
 	}
 
 }

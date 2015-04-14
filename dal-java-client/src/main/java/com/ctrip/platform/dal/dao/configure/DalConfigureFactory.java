@@ -50,9 +50,7 @@ import com.ctrip.platform.dal.dao.client.DefaultLogger;
   <ConnectionLocator>
     <locator>com.xxx.xxx.xxx</locator>
     <settings>
-	  <encrypt>true</encrypt>
-	  <sampling>false</sampling>
-	  <simplified>true</simplified>
+	  <dc>{$DBDataCenter}</dc>
 	<settings>
   </ConnectionLocator>
 </dal>

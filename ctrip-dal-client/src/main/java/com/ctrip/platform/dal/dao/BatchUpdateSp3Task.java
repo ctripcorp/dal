@@ -12,6 +12,7 @@ public class BatchUpdateSp3Task<T> extends AbstractIntArrayBulkTask<T> {
 	private String updateSP3;
 	
 	public void initialize(DalParser<T> parser) {
+		super.initialize(parser);
 		String tableName = parser.getTableName();
 		updateSP3 = String.format(UPDATE_SP3_TPL, tableName);
 	}

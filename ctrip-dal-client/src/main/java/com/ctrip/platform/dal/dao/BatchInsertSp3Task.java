@@ -12,6 +12,7 @@ public class BatchInsertSp3Task<T> extends AbstractIntArrayBulkTask<T> {
 	private String insertSP3;
 
 	public void initialize(DalParser<T> parser) {
+		super.initialize(parser);
 		String tableName = parser.getTableName();
 		insertSP3 = String.format(INSERT_SP3_TPL, tableName);
 	}

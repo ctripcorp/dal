@@ -1,16 +1,15 @@
 package com.ctrip.platform.dal.dao;
 
-import static org.junit.Assert.fail;
-
 import java.sql.SQLException;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class SingleInsertSpaTaskTest {
+public class SingleUpdateSpaTaskTest {
 	private final static String DATABASE_NAME = "SimpleShard";
 	
 	private final static String TABLE_NAME = "People";
@@ -35,7 +34,13 @@ public class SingleInsertSpaTaskTest {
 
 	@Before
 	public void setUp() throws Exception {
-		client.update("DELETE FROM " + TABLE_NAME, new StatementParameters(), new DalHints().inShard(0));
+		String[] insertSqls = new String[4];
+		insertSqls[0] = "SET IDENTITY_INSERT "+ TABLE_NAME + " ON";
+		insertSqls[1] = "DELETE FROM " + TABLE_NAME;
+		insertSqls[2] = "INSERT INTO " + TABLE_NAME +" ([PeopleID], [Name], [CityID], [ProvinceID], [CountryID])"
+					+ " VALUES(" + 1 + ", " + "'test name' , 1, 1, 1)";
+		insertSqls[3] = "SET IDENTITY_INSERT "+ TABLE_NAME + " OFF";
+		client.batchUpdate(insertSqls, new DalHints().inShard(0));
 	}
 
 	@After
@@ -45,7 +50,7 @@ public class SingleInsertSpaTaskTest {
 	
 	@Test
 	public void testExecute() {
-		SingleInsertSpaTask<People> test = new SingleInsertSpaTask<>(new String[]{"PeopleID"}, null);
+		SingleUpdateSpaTask<People> test = new SingleUpdateSpaTask<>();
 		PeopleParser parser = new PeopleParser();
 		test.initialize(parser);
 		
@@ -60,7 +65,7 @@ public class SingleInsertSpaTaskTest {
 			test.execute(new DalHints().inShard(0), parser.getFields(p1));
 		} catch (SQLException e) {
 			e.printStackTrace();
-			fail();
+			Assert.fail();
 		}
 	}
 }

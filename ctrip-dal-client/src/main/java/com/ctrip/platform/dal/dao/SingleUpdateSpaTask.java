@@ -10,6 +10,7 @@ public class SingleUpdateSpaTask<T> extends CtripSpaTask<T> {
 	private static final String RET_CODE = "retcode";
 	
 	public void initialize(DalParser<T> parser) {
+		super.initialize(parser);
 		String tableName = parser.getTableName();
 		updateSPA = String.format(UPDATE_SPA_TPL, tableName);		
 	}

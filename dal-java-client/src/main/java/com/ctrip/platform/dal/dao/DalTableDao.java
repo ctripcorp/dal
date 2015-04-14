@@ -1,15 +1,11 @@
 package com.ctrip.platform.dal.dao;
 
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.buildShardStr;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.detectDistributedTransaction;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.getDatabaseSet;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardingEnabled;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.locateTableShardId;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +16,7 @@ import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
+import com.ctrip.platform.dal.dao.task.DefaultTaskExecutor;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 import com.ctrip.platform.dal.dao.task.TaskExecutor;
 import com.ctrip.platform.dal.dao.task.TaskFactory;
@@ -66,6 +63,18 @@ public final class DalTableDao<T> {
 	private TaskExecutor<T> executor; 
 			
 	public DalTableDao(DalParser<T> parser) {
+		this(parser, new DefaultTaskFactory<T>());
+	}
+	
+	public DalTableDao(DalParser<T> parser, TaskFactory<T> factory) {
+		this(parser, factory, new DefaultTaskExecutor<T>(parser));
+	}
+	
+	public DalTableDao(DalParser<T> parser, TaskExecutor<T> executor) {
+		this(parser, new DefaultTaskFactory<T>(), executor);
+	}
+	
+	public DalTableDao(DalParser<T> parser, TaskFactory<T> factory, TaskExecutor<T> executor) {
 		this.client = DalClientFactory.getClient(parser.getDatabaseName());
 		this.parser = parser;
 		this.logicDbName = parser.getDatabaseName();
@@ -78,9 +87,9 @@ public final class DalTableDao<T> {
 		dbCategory = getDatabaseSet(logicDbName).getDatabaseCategory();
 		setDatabaseCategory(dbCategory);
 		
-		factory = new DefaultTaskFactory<T>();
+		this.factory = factory;
 		factory.initialize(parser);
-		executor = new TaskExecutor<>(parser);
+		this.executor = executor;
 	}
 	
 	/**

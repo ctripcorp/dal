@@ -3,14 +3,20 @@ package com.ctrip.platform.dal.dao;
 import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class SingleInsertSpaTaskTest {
+public class BatchInsertSp3TaskTest {
+
 	private final static String DATABASE_NAME = "SimpleShard";
 	
 	private final static String TABLE_NAME = "People";
@@ -45,22 +51,41 @@ public class SingleInsertSpaTaskTest {
 	
 	@Test
 	public void testExecute() {
-		SingleInsertSpaTask<People> test = new SingleInsertSpaTask<>(new String[]{"PeopleID"}, null);
+		BatchInsertSp3Task<People> test = new BatchInsertSp3Task<>();
 		PeopleParser parser = new PeopleParser();
 		test.initialize(parser);
 		
-		People p1 = new People();
-	 	p1.setPeopleID((long)1);
-	 	p1.setName("test");
-	 	p1.setCityID(-1);
-	 	p1.setProvinceID(-1);
-	 	p1.setCountryID(-1);
-
+		List<People> p = new ArrayList<>();
+		
+		for(int i = 0; i < 3; i++) {
+			People p1 = new People();
+		 	p1.setPeopleID((long)i);
+		 	p1.setName("test");
+		 	p1.setCityID(-1);
+		 	p1.setProvinceID(-1);
+		 	p1.setCountryID(-1);
+		 	p.add(p1);
+		}
+		
 		try {
-			test.execute(new DalHints().inShard(0), parser.getFields(p1));
+			DalHints hints = new DalHints();
+			hints.setDetailResults(new DalDetailResults<int[]>());
+			test.execute(hints.inShard(0), getPojosFields(p, parser));
 		} catch (SQLException e) {
 			e.printStackTrace();
-			fail();
+			Assert.fail();
 		}
+	}
+	
+	private <T> List<Map<String, ?>> getPojosFields(List<T> daoPojos, DalParser<T> parser) {
+		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
+		if (null == daoPojos || daoPojos.size() < 1)
+			return pojoFields;
+		
+		for (T pojo: daoPojos){
+			pojoFields.add(parser.getFields(pojo));
+		}
+		
+		return pojoFields;
 	}
 }

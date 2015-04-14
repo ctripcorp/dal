@@ -12,6 +12,7 @@ public class BatchDeleteSp3Task<T> extends AbstractIntArrayBulkTask<T> {
 	private String deleteSP3;
 	
 	public void initialize(DalParser<T> parser) {
+		super.initialize(parser);
 		String tableName = parser.getTableName();
 		deleteSP3 = String.format(DELETE_SP3_TPL, tableName);
 	}
@@ -30,5 +31,4 @@ public class BatchDeleteSp3Task<T> extends AbstractIntArrayBulkTask<T> {
 		hints.addDetailResults(result);
 		return result;
 	}
-
 }

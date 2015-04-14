@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.dao;
 
-import static org.junit.Assert.fail;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -15,7 +13,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class BatchDeleteSp3TaskTest {
+public class BatchUpdateSp3TaskTest {
 
 	private final static String DATABASE_NAME = "SimpleShard";
 	
@@ -62,7 +60,7 @@ public class BatchDeleteSp3TaskTest {
 	
 	@Test
 	public void testExecute() {
-		BatchDeleteSp3Task<People> test = new BatchDeleteSp3Task<>();
+		BatchUpdateSp3Task<People> test = new BatchUpdateSp3Task<>();
 		PeopleParser parser = new PeopleParser();
 		test.initialize(parser);
 		
@@ -99,5 +97,4 @@ public class BatchDeleteSp3TaskTest {
 		
 		return pojoFields;
 	}
-
 }

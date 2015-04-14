@@ -9,6 +9,7 @@ public class SingleDeleteSpaTask<T> extends CtripSpaTask<T> {
 	private String deleteSPA;
 	
 	public void initialize(DalParser<T> parser) {
+		super.initialize(parser);
 		String tableName = parser.getTableName();
 		deleteSPA = String.format(DELETE_SPA_TPL, tableName);
 	}

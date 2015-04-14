@@ -70,7 +70,28 @@ public class DalGroupDbSetResource {
 			group.setIcon("fa fa-folder-o");
 			group.setChildren(false);
 		}
-		return groups;
+		return sortGroups(groups);
+	}
+	
+	private List<DalGroup> sortGroups(List<DalGroup> groups) {
+		List<DalGroup> result = new ArrayList<DalGroup>(groups.size());
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
+		LoginUser user = user_dao.getUserByNo(userNo);
+		List<UserGroup> joinedGroups = ugDao.getUserGroupByUserId(user.getId());
+		if (joinedGroups != null && joinedGroups.size()>0) {
+			for (UserGroup joinedGroup : joinedGroups) {
+				Iterator<DalGroup> ite = groups.iterator();
+				while(ite.hasNext()) {
+					DalGroup group = ite.next();
+					if (group.getId() == joinedGroup.getGroup_id()) {
+						result.add(group);
+						ite.remove();
+					}
+				}
+			}
+			result.addAll(groups);
+		}
+		return result;
 	}
 	
 	@GET

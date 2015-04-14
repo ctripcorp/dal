@@ -2,8 +2,10 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -68,8 +70,29 @@ public class DalGroupDbResource {
 			group.setIcon("fa fa-folder-o");
 			group.setChildren(false);
 		}
-		return groups;
+		return sortGroups(groups);
 
+	}
+	
+	private List<DalGroup> sortGroups(List<DalGroup> groups) {
+		List<DalGroup> result = new ArrayList<DalGroup>(groups.size());
+		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
+		LoginUser user = user_dao.getUserByNo(userNo);
+		List<UserGroup> joinedGroups = ugDao.getUserGroupByUserId(user.getId());
+		if (joinedGroups != null && joinedGroups.size()>0) {
+			for (UserGroup joinedGroup : joinedGroups) {
+				Iterator<DalGroup> ite = groups.iterator();
+				while(ite.hasNext()) {
+					DalGroup group = ite.next();
+					if (group.getId() == joinedGroup.getGroup_id()) {
+						result.add(group);
+						ite.remove();
+					}
+				}
+			}
+			result.addAll(groups);
+		}
+		return result;
 	}
 	
 	@GET

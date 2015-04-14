@@ -7,8 +7,11 @@ import java.util.Set;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 
 public class CtripDalConnectionLocator implements DalConnectionLocator {
+	
 	private DataSourceLocator locator;
+	
 	private String dc;
+	
 	@Override
 	public void initLocator(Map<String, String> settings) {
 		String tmpDc = settings.get("dc");

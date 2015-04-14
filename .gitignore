@@ -174,3 +174,5 @@ pip-log.txt
 /datasource-jndi/.classpath
 /datasource-jndi/.project
 /dal-tester/.classpath
+/dal-java-client/.classpath
+/dal-common/.classpath

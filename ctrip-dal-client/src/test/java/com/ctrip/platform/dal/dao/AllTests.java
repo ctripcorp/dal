@@ -12,6 +12,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	SingleInsertSpaTaskTest.class, 
 	SingleDeleteSpaTaskTest.class, 
 	SingleUpdateSpaTaskTest.class, 
+	CtripTableSpDaoTest.class,
 	})
 public class AllTests {
 

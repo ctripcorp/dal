@@ -45,7 +45,7 @@ public class SingleInsertSpaTaskTest {
 	
 	@Test
 	public void testExecute() {
-		SingleInsertSpaTask<People> test = new SingleInsertSpaTask<>(new String[]{"PeopleID"}, null);
+		SingleInsertSpaTask<People> test = new SingleInsertSpaTask<>();
 		PeopleParser parser = new PeopleParser();
 		test.initialize(parser);
 		

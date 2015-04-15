@@ -13,6 +13,7 @@ import com.ctrip.platform.dal.dao.task.TaskFactory;
  * 2. If there is only SP3 for the table, both batch and non-batch will using SP3
  * 3. If there is only SPA for the table, only non-batch CUD supported
  * 4. If there is no SP3 or SPA, the original DalTableDao should be used.
+ * 5. For insert SP3 and SPA, the auto incremental Id will be used as output parameter
  * 
  * For sharding support: it is confirmed from DBA that Ctrip has shard by DB case, but no shard by table case.
  * For inout, out parameter: only insert SP3/SPA has inout/out parameter
@@ -20,7 +21,7 @@ import com.ctrip.platform.dal.dao.task.TaskFactory;
  * @author jhhe
  */
 public class CtripSpTaskFactory<T> implements TaskFactory<T>{
-	private SingleInsertSpaTask<T> singleInsertSpaTask;
+	private SingleInsertSpaTask<T> singleInsertSpaTask = new SingleInsertSpaTask<>();
 	private SingleDeleteSpaTask<T> singleDeleteSpaTask = new SingleDeleteSpaTask<>();
 	private SingleUpdateSpaTask<T> singleUpdateSpaTask = new SingleUpdateSpaTask<>();
 
@@ -28,10 +29,6 @@ public class CtripSpTaskFactory<T> implements TaskFactory<T>{
 	private BatchDeleteSp3Task<T> batchDeleteSp3Task = new BatchDeleteSp3Task<>();
 	private BatchUpdateSp3Task<T> batchUpdateSp3Task = new BatchUpdateSp3Task<>();
 
-	public CtripSpTaskFactory(String[] inOutPramNames, String[] outputPramNames) {
-		singleInsertSpaTask = new SingleInsertSpaTask<>(inOutPramNames, outputPramNames);
-	}
-	
 	@Override
 	public void initialize(DalParser<T> parser) {
 		singleInsertSpaTask.initialize(parser);

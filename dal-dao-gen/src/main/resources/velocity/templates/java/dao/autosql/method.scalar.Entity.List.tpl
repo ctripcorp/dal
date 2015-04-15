@@ -18,10 +18,13 @@
 		builder.orderBy(${method.getOrderByExp()});
 #end
 	    String sql = builder.build();
+		StatementParameters parameters = builder.buildParameters();
 #if($method.isPaging())
-		sql = String.format(sql, ${host.pageBegain()}, ${host.pageEnd()});
+		int index =  builder.getStatementParameterIndex();
+		parameters.set(index++, Types.INTEGER, ${host.pageBegain()});
+		parameters.set(index++, Types.INTEGER, ${host.pageEnd()});
 #end
-		return queryDao.query(sql, builder.buildParameters(), hints, parser);
+		return queryDao.query(sql, parameters, hints, parser);
 	}
 #end
 #end

@@ -131,13 +131,14 @@
                <div class="modal-body">
                   <div class="row-fluid">
                      <div class="control-group">
-                           <label class="control-label popup_label">语言：</label>
-                       <select id="regen_language" class="span9 pupup_text">
+                     	<label class="control-label popup_label">语言：</label>
+                       	<select id="regen_language" class="span10 pupup_text">
                            <option value="cs">C#代码</option>
                            <option value="java">Java代码</option>
                         </select>
                      </div>
                   </div>
+                  <!-- 
                   <div class="row-fluid"> 
                      <div class="control-group">
                            <label class="control-label popup_label">方式：</label>
@@ -147,6 +148,7 @@
                         </select>
                      </div>
                   </div>
+                   -->
                   <div class="row-fluid useNewPojo">
                      <label class="popup_label"><input id="newPojo" type="checkbox" checked="checked">生成代码时附带数据库中的类型（DAL Fx>V1.2.0.6）</label>
                   </div>

@@ -8,13 +8,16 @@
 			throw new SQLException("Illigal pagesize or pageNo, pls check");	
         StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
-		String sql = "";
 #if($host.getDatabaseCategory().name() == "MySql" )
-		sql = String.format(PAGE_MYSQL_PATTERN, (pageNo - 1) * pageSize, pageSize);
+		String sql = PAGE_MYSQL_PATTERN;
+		parameters.set(1, Types.INTEGER, (pageNo - 1) * pageSize);
+		parameters.set(2, Types.INTEGER, pageSize);
 #else
+		String sql = PAGE_SQL_PATTERN;
 		int fromRownum = (pageNo - 1) * pageSize + 1;
         int endRownum = pageSize * pageNo;
-		sql = String.format(PAGE_SQL_PATTERN, fromRownum, endRownum);
+		parameters.set(1, Types.INTEGER, fromRownum);
+		parameters.set(2, Types.INTEGER, endRownum);
 #end
 		return this.baseClient.query(sql, parameters, hints, rowextractor);
 	}

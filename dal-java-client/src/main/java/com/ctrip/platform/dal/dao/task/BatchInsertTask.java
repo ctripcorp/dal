@@ -7,7 +7,8 @@ import java.util.Map;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class BatchInsertTask<T> extends AbstractIntArrayBulkTask<T> {
+public class BatchInsertTask<T> extends BaseInsertTask<T> implements BulkTask<int[], T> {
+	private static final String TMPL_SQL_INSERT = "INSERT INTO %s (%s) VALUES(%s)";
 
 	@Override
 	public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
@@ -26,5 +27,20 @@ public class BatchInsertTask<T> extends AbstractIntArrayBulkTask<T> {
 		return result;
 	}
 
+	private String buildBatchInsertSql(String tableName) {
+		int validColumnsSize = parser.getColumnNames().length;
+		if(parser.isAutoIncrement())
+			validColumnsSize--;
+		
+		String values = combine(PLACE_HOLDER, validColumnsSize,
+				COLUMN_SEPARATOR);
 
+		return String.format(TMPL_SQL_INSERT, tableName, columnsForInsert,
+				values);
+	}
+	
+	@Override
+	public int[] merge(List<int[]> results) {
+		return mergeIntArray(results);
+	}	
 }

@@ -9,7 +9,8 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
-public class SingleUpdateTast<T> extends TaskAdapter<T> implements SingleTask<T> {
+public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T> {
+	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
 
 	@Override
 	public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {

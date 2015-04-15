@@ -3,9 +3,9 @@ package com.ctrip.platform.dal.dao.task;
 import com.ctrip.platform.dal.dao.DalParser;
 
 public class DefaultTaskFactory<T> implements TaskFactory<T> {
-	private SingleInsertTask<T> singleInsertTast = new SingleInsertTask<T>();
-	private SingleDeleteTask<T> singleDeleteTast = new SingleDeleteTask<T>();
-	private SingleUpdateTast<T> singleUpdateTast = new SingleUpdateTast<T>();
+	private SingleInsertTask<T> singleInsertTask = new SingleInsertTask<T>();
+	private SingleDeleteTask<T> singleDeleteTask = new SingleDeleteTask<T>();
+	private SingleUpdateTask<T> singleUpdateTask = new SingleUpdateTask<T>();
 	private CombinedInsertTask<T> combinedInsertTask = new CombinedInsertTask<T>();
 	
 	private BatchInsertTask<T> batchInsertTask = new BatchInsertTask<T>();
@@ -14,9 +14,9 @@ public class DefaultTaskFactory<T> implements TaskFactory<T> {
 
 	@Override
 	public void initialize(DalParser<T> parser) {
-		singleInsertTast.initialize(parser);
-		singleDeleteTast.initialize(parser);
-		singleUpdateTast.initialize(parser);
+		singleInsertTask.initialize(parser);
+		singleDeleteTask.initialize(parser);
+		singleUpdateTask.initialize(parser);
 		combinedInsertTask.initialize(parser);
 		
 		batchInsertTask.initialize(parser);
@@ -27,17 +27,17 @@ public class DefaultTaskFactory<T> implements TaskFactory<T> {
 
 	@Override
 	public SingleTask<T> createSingleInsertTask() {
-		return singleInsertTast;
+		return singleInsertTask;
 	}
 
 	@Override
 	public SingleTask<T> createSingleDeleteTask() {
-		return singleDeleteTast ;
+		return singleDeleteTask;
 	}
 
 	@Override
 	public SingleTask<T> createSingleUpdateTask() {
-		return singleUpdateTast;
+		return singleUpdateTask;
 	}
 
 	@Override

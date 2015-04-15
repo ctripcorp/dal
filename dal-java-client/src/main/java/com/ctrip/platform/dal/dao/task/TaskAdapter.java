@@ -33,10 +33,6 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
 
 	//public static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
-	public static final String TMPL_SQL_INSERT = "INSERT INTO %s(%s) VALUES(%s)";
-	public static final String TMPL_SQL_MULTIPLE_INSERT = "INSERT INTO %s(%s) VALUES %s";
-	public static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
-	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
 
 	public static final String COLUMN_SEPARATOR = ", ";
 	public static final String PLACE_HOLDER = "?";
@@ -55,8 +51,6 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	protected DatabaseCategory dbCategory;
 	protected String pkSql;
 	protected Set<String> pkColumns;
-	protected String columnsForInsert;
-	protected List<String> validColumnsForInsert;
 	protected Map<String, Integer> columnTypes = new HashMap<String, Integer>();
 	protected Character startDelimiter;
 	protected Character endDelimiter;
@@ -80,8 +74,6 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	
 	public void initDbSpecific() {
 		pkSql = initPkSql();
-		validColumnsForInsert = buildValidColumnsForInsert();
-		columnsForInsert = combineColumns(validColumnsForInsert, COLUMN_SEPARATOR);
 	}
 	
 	/**
@@ -272,45 +264,6 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	}
 
 
-	public String buildInsertSql(DalHints hints, Map<String, ?> fields) throws SQLException {
-		filterNullFileds(fields);
-		Set<String> remainedColumns = fields.keySet();
-		String cloumns = combineColumns(remainedColumns, COLUMN_SEPARATOR);
-		String values = combine(PLACE_HOLDER, remainedColumns.size(),
-				COLUMN_SEPARATOR);
-
-		return String.format(TMPL_SQL_INSERT, getTableName(hints, fields), cloumns,
-				values);
-	}
-	
-	public List<String> buildValidColumnsForInsert() {
-		List<String> validColumns = new ArrayList<String>();
-		for(String s : parser.getColumnNames()){
-			if(!(parser.isAutoIncrement() && isPrimaryKey(s)))
-				validColumns.add(s);
-		}
-		
-		return validColumns;
-
-	}
-	
-	public String buildBatchInsertSql(String tableName) {
-		int validColumnsSize = parser.getColumnNames().length;
-		if(parser.isAutoIncrement())
-			validColumnsSize--;
-		
-		String values = combine(PLACE_HOLDER, validColumnsSize,
-				COLUMN_SEPARATOR);
-
-		return String.format(TMPL_SQL_INSERT, tableName, columnsForInsert,
-				values);
-	}
-
-
-	public String buildDeleteSql(String tableName) {
-		return String.format(TMPL_SQL_DELETE, tableName, pkSql);
-	}
-
 	public String buildWhereClause(Map<String, ?> fields) {
 		return String.format(combine(TMPL_SET_VALUE, fields.size(), AND),
 				quote(fields.keySet()));
@@ -367,5 +320,22 @@ public class TaskAdapter<T> implements DaoTask<T> {
 		for(int i = 0; i < columns.length; i++)
 			quatedColumns[i] = quote(columns[i]);
 		return quatedColumns;
+	}
+
+	public int[] mergeIntArray(List<int[]> results) {
+		int[][] counts = results.toArray(new int[results.size()][]);
+
+		int total = 0;
+		for(int[] countsInTable: counts)
+			total += countsInTable.length;
+		
+		int[] totalCounts = new int[total];
+		int cur = 0;
+		for(int[] countsInTable: counts) {
+			System.arraycopy(countsInTable, 0, totalCounts, cur, countsInTable.length);
+			cur += countsInTable.length;
+		}
+		
+		return totalCounts;
 	}
 }

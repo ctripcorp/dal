@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class BatchDeleteTask<T> extends AbstractIntArrayBulkTask<T> {
+	private static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
 
 	@Override
 	public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
@@ -25,5 +26,9 @@ public class BatchDeleteTask<T> extends AbstractIntArrayBulkTask<T> {
 		int[] result = client.batchUpdate(deleteSql, parametersList, hints);
 		hints.addDetailResults(result);
 		return result;
+	}
+	
+	public String buildDeleteSql(String tableName) {
+		return String.format(TMPL_SQL_DELETE, tableName, pkSql);
 	}
 }

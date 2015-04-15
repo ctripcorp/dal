@@ -12,6 +12,8 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
+	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
+
 	private String updateColumns;
 	public void initialize(DalParser<T> parser) {
 		super.initialize(parser);

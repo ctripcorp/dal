@@ -8,8 +8,9 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class CombinedInsertTask<T> extends TaskAdapter<T> implements BulkTask<Integer, T> {
-	
+public class CombinedInsertTask<T> extends BaseInsertTask<T> implements BulkTask<Integer, T> {
+	public static final String TMPL_SQL_MULTIPLE_INSERT = "INSERT INTO %s(%s) VALUES %s";
+
 	@Override
 	public Integer execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
 		StatementParameters parameters = new StatementParameters();

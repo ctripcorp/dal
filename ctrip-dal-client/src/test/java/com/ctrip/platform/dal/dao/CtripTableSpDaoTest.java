@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class CtripTableSpDaoTest {
 		try {
 			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(DATABASE_NAME);
-			dao = new DalTableDao<>(new PeopleParser(), new CtripSpTaskFactory<People>(new String[]{"PeopleID"}, null));
+			dao = new DalTableDao<>(new PeopleParser(), new CtripSpTaskFactory<People>());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -62,7 +62,28 @@ public class CtripTableSpDaoTest {
 	}
 	
 	@Test
-	public void testInsert() {
+	public void testInsert() throws Exception {
+		List<People> p = new ArrayList<>();
+		
+		int oldCount = getCount(0);
+		for(int i = 0; i < 3; i++) {
+			People p1 = new People();
+		 	p1.setPeopleID((long)i);
+		 	p1.setName("test");
+		 	p1.setCityID(-1);
+		 	p1.setProvinceID(-1);
+		 	p1.setCountryID(-1);
+		 	p.add(p1);
+		}
+		
+		DalHints hints = new DalHints();
+		hints.setDetailResults(new DalDetailResults<int[]>());
+		dao.insert(hints.inShard(0), p);
+		assertEquals(6, getCount(0));
+	}
+	
+	@Test
+	public void testCombinedInsert() throws Exception {
 		List<People> p = new ArrayList<>();
 		
 		for(int i = 0; i < 3; i++) {
@@ -75,13 +96,57 @@ public class CtripTableSpDaoTest {
 		 	p.add(p1);
 		}
 		
+		DalHints hints = new DalHints();
+		hints.setDetailResults(new DalDetailResults<int[]>());
 		try {
-			DalHints hints = new DalHints();
-			hints.setDetailResults(new DalDetailResults<int[]>());
-			dao.insert(hints.inShard(0), p);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			Assert.fail();
+			dao.combinedInsert(hints.inShard(0), null, p);
+			fail();
+		} catch (Exception e) {
 		}
+		assertEquals(3, getCount(0));
+	}
+
+	@Test
+	public void testBatchInsert() throws Exception {
+		List<People> p = new ArrayList<>();
+		
+		for(int i = 0; i < 3; i++) {
+			People p1 = new People();
+		 	p1.setPeopleID((long)i);
+		 	p1.setName("test");
+		 	p1.setCityID(-1);
+		 	p1.setProvinceID(-1);
+		 	p1.setCountryID(-1);
+		 	p.add(p1);
+		}
+		
+		DalHints hints = new DalHints();
+		hints.setDetailResults(new DalDetailResults<int[]>());
+		dao.batchInsert(hints.inShard(0), p);
+		assertEquals(6, getCount(0));
+	}
+	
+	@Test
+	public void testDelete() throws Exception {
+		List<People> p = new ArrayList<>();
+		
+		for(int i = 0; i < 3; i++) {
+			People p1 = new People();
+		 	p1.setPeopleID((long)i);
+		 	p1.setName("test");
+		 	p1.setCityID(-1);
+		 	p1.setProvinceID(-1);
+		 	p1.setCountryID(-1);
+		 	p.add(p1);
+		}
+		
+		DalHints hints = new DalHints();
+		hints.setDetailResults(new DalDetailResults<int[]>());
+		dao.delete(hints.inShard(0), p);
+		assertEquals(0, getCount(0));
+	}
+	
+	private int getCount(int shardId) throws SQLException {
+		return dao.query("1=1", new StatementParameters(), new DalHints().inShard(shardId)).size();
 	}
 }

@@ -10,20 +10,18 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	private static final String INSERT_SPA_TPL = "spA_%s_i";
 
 	private String insertSPA;
-	private String[] inOutPramNames;
-	private String[] outputPramNames;
+	private String outputIdName;
 	
 	private static final String RET_CODE = "retcode";
 	
-	public SingleInsertSpaTask(String[] inOutPramNames, String[] outputPramNames) {
-		this.inOutPramNames = inOutPramNames;
-		this.outputPramNames = outputPramNames;
+	public SingleInsertSpaTask() {
 	}
 
 	public void initialize(DalParser<T> parser) {
 		super.initialize(parser);
 		String tableName = parser.getTableName();
 		insertSPA = String.format(INSERT_SPA_TPL, tableName);
+		this.outputIdName = parser.isAutoIncrement() ? parser.getPrimaryKeyNames()[0] : null;
 	}
 	
 	@Override
@@ -41,14 +39,8 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	}
 	
 	private void register(StatementParameters parameters, Map<String, ?> fields) {
-		if(inOutPramNames != null) {
-			for(String name: inOutPramNames)
-				parameters.registerInOut(name, getColumnType(name), fields.get(name));
-		}
-		
-		if(outputPramNames != null){
-			for(String name: outputPramNames)
-				parameters.registerOut(name, getColumnType(name));
+		if(outputIdName != null) {
+			parameters.registerInOut(outputIdName, getColumnType(outputIdName), fields.get(outputIdName));
 		}
 	}
 	
@@ -56,14 +48,8 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 		if(holder == null) return;
 		
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
-		if(inOutPramNames != null) {
-			for(String name: inOutPramNames)
-				map.put(name, parameters.get(name, ParameterDirection.InputOutput).getValue());
-		}
-		
-		if(outputPramNames != null){
-			for(String name: outputPramNames)
-				map.put(name, parameters.get(name, ParameterDirection.Output).getValue());
+		if(outputIdName != null) {
+			map.put(outputIdName, parameters.get(outputIdName, ParameterDirection.InputOutput).getValue());
 		}
 		
 		holder.getKeyList().add(map);

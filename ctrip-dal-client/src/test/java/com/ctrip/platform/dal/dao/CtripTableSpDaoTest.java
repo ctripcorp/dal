@@ -146,6 +146,70 @@ public class CtripTableSpDaoTest {
 		assertEquals(0, getCount(0));
 	}
 	
+	@Test
+	public void testBatchDelete() throws Exception {
+		List<People> p = new ArrayList<>();
+		
+		for(int i = 0; i < 3; i++) {
+			People p1 = new People();
+		 	p1.setPeopleID((long)i);
+		 	p1.setName("test");
+		 	p1.setCityID(-1);
+		 	p1.setProvinceID(-1);
+		 	p1.setCountryID(-1);
+		 	p.add(p1);
+		}
+		
+		DalHints hints = new DalHints();
+		hints.setDetailResults(new DalDetailResults<int[]>());
+		dao.batchDelete(hints.inShard(0), p);
+		assertEquals(0, getCount(0));
+	}
+	
+	@Test
+	public void testUpdate() throws Exception {
+		List<People> p = new ArrayList<>();
+		
+		for(int i = 0; i < 3; i++) {
+			People p1 = new People();
+		 	p1.setPeopleID((long)i);
+		 	p1.setName("test");
+		 	p1.setCityID(-1);
+		 	p1.setProvinceID(-1);
+		 	p1.setCountryID(-1);
+		 	p.add(p1);
+		}
+		
+		DalHints hints = new DalHints();
+		hints.setDetailResults(new DalDetailResults<int[]>());
+		dao.update(hints.inShard(0), p);
+		
+		for(People p1: p)
+			assertEquals("test", dao.queryByPk(p1, hints).getName());
+	}
+	
+	@Test
+	public void testBatchUpdate() throws Exception {
+		List<People> p = new ArrayList<>();
+		
+		for(int i = 0; i < 3; i++) {
+			People p1 = new People();
+		 	p1.setPeopleID((long)i);
+		 	p1.setName("test");
+		 	p1.setCityID(-1);
+		 	p1.setProvinceID(-1);
+		 	p1.setCountryID(-1);
+		 	p.add(p1);
+		}
+		
+		DalHints hints = new DalHints();
+		hints.setDetailResults(new DalDetailResults<int[]>());
+		dao.batchUpdate(hints.inShard(0), p);
+		
+		for(People p1: p)
+			assertEquals("test", dao.queryByPk(p1, hints).getName());
+	}
+	
 	private int getCount(int shardId) throws SQLException {
 		return dao.query("1=1", new StatementParameters(), new DalHints().inShard(shardId)).size();
 	}

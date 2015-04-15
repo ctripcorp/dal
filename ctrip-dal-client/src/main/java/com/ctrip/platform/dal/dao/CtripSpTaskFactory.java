@@ -21,7 +21,7 @@ import com.ctrip.platform.dal.dao.task.TaskFactory;
  * @author jhhe
  */
 public class CtripSpTaskFactory<T> implements TaskFactory<T>{
-	private SingleInsertSpaTask<T> singleInsertSpaTask;
+	private SingleInsertSpaTask<T> singleInsertSpaTask = new SingleInsertSpaTask<>();
 	private SingleDeleteSpaTask<T> singleDeleteSpaTask = new SingleDeleteSpaTask<>();
 	private SingleUpdateSpaTask<T> singleUpdateSpaTask = new SingleUpdateSpaTask<>();
 
@@ -29,10 +29,6 @@ public class CtripSpTaskFactory<T> implements TaskFactory<T>{
 	private BatchDeleteSp3Task<T> batchDeleteSp3Task = new BatchDeleteSp3Task<>();
 	private BatchUpdateSp3Task<T> batchUpdateSp3Task = new BatchUpdateSp3Task<>();
 
-	public CtripSpTaskFactory() {
-		singleInsertSpaTask = new SingleInsertSpaTask<>();
-	}
-	
 	@Override
 	public void initialize(DalParser<T> parser) {
 		singleInsertSpaTask.initialize(parser);

@@ -7,8 +7,7 @@
 	**/
 	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {	
 #if($method.isPaging())
-		String sqlPattern = "${method.getPagingSql($host.getDatabaseCategory())}";
-		String sql = String.format(sqlPattern, ${host.pageBegain()}, ${host.pageEnd()});
+		String sql = "${method.getPagingSql($host.getDatabaseCategory())}";
 #else
 		String sql = "${method.getSql()}";
 #end
@@ -17,8 +16,10 @@
 #end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
-#if($method.hasParameters())
+#if($method.hasParameters() || $method.isPaging())
 		int i = 1;
+#end		
+#if($method.hasParameters())
 #foreach($p in $method.getParameters())
 #if($p.isInParameter())
 		i = parameters.setInParameter(i, "${p.getAlias()}", ${p.getJavaTypeDisplay()}, ${p.getAlias()});
@@ -26,6 +27,10 @@
 		parameters.set(i++, "${p.getAlias()}", ${p.getJavaTypeDisplay()}, ${p.getName()});
 #end
 #end
+#end
+#if($method.isPaging())
+		parameters.set(i++, Types.INTEGER, ${host.pageBegain()});
+		parameters.set(i++, Types.INTEGER, ${host.pageEnd()});
 #end
 		return queryDao.query(sql, parameters, hints, ${method.getPojoClassName()}.class);
 	}

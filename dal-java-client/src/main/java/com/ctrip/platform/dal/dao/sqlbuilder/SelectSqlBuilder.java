@@ -106,7 +106,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	}
 	
 	private String buildPaginationSql4MySQL(){
-		return buildSelectSql()+" limit %s, %s";
+		return buildSelectSql()+" limit ?, ?";
 	}
 	
 	private String buildPaginationSql4SqlServer(){
@@ -125,7 +125,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 		this.tableName = "CET";
 		sql.append(" FROM ").append(tableName);
 		this.tableName = temp;
-		sql.append(" WHERE rownum BETWEEN %s AND %s");
+		sql.append(" WHERE rownum BETWEEN ? AND ?");
 		
 		return sql.toString();
 	}

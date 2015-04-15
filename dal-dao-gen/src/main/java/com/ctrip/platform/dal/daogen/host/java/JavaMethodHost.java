@@ -302,7 +302,7 @@ public class JavaMethodHost {
 	
 	public String getPagingSql(DatabaseCategory dbType) 
 			throws Exception{
-        return SqlBuilder.pagingQuerySql(sql, dbType, CurrentLanguage.Java);
+        return SqlBuilder.pagingQuerySql(sql, dbType, CurrentLanguage.Java).replaceAll("%s", "?");
 	}
 	
 	public boolean hasParameters(){

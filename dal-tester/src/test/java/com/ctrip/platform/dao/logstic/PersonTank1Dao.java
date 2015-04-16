@@ -1,14 +1,25 @@
 package com.ctrip.platform.dao.logstic;
 
-import com.ctrip.platform.dal.dao.*;
-import com.ctrip.platform.dal.dao.helper.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.ctrip.platform.dal.dao.DalClient;
+import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.DalQueryDao;
+import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.KeyHolder;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
+import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
 public class PersonTank1Dao {
 	private static final String DATA_BASE = "dao_test";
@@ -91,7 +102,7 @@ public class PersonTank1Dao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
 		hints = DalHints.createIfAbsent(hints);
-		client.insert(hints, null, daoPojos);
+		client.insert(hints, null, Arrays.asList(daoPojos));
 	}
 	
 	/**
@@ -101,7 +112,7 @@ public class PersonTank1Dao {
 		if(null == daoPojos || daoPojos.length == 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
-		return client.batchInsert(hints, daoPojos);
+		return client.batchInsert(hints, Arrays.asList(daoPojos));
 	}
 
 	/**
@@ -112,7 +123,7 @@ public class PersonTank1Dao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
 		hints = DalHints.createIfAbsent(hints);
-		client.insert(hints, keyHolder, daoPojos);
+		client.insert(hints, keyHolder, Arrays.asList(daoPojos));
 	}
 
 	/**
@@ -123,7 +134,7 @@ public class PersonTank1Dao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
 		hints = DalHints.createIfAbsent(hints);
-		client.delete(hints, daoPojos);
+		client.delete(hints, Arrays.asList(daoPojos));
 	}
 	
 	/**
@@ -133,7 +144,7 @@ public class PersonTank1Dao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
-		return client.batchDelete(hints, daoPojos);
+		return client.batchDelete(hints, Arrays.asList(daoPojos));
 	}
 
 	/**
@@ -144,7 +155,7 @@ public class PersonTank1Dao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
 		hints = DalHints.createIfAbsent(hints);
-		client.update(hints, daoPojos);
+		client.update(hints, Arrays.asList(daoPojos));
 	}
 
 		/**

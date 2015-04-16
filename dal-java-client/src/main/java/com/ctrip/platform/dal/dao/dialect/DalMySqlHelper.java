@@ -1,7 +1,9 @@
 package com.ctrip.platform.dal.dao.dialect;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,20 +28,19 @@ public class DalMySqlHelper<T> {
 		this.client = DalClientFactory.getClient(this.parser.getDatabaseName());
 	}
 
-	@SuppressWarnings("unchecked")
-	public int replace(KeyHolder holder, DalHints hints, T... entities) throws SQLException{
-		if(null == entities || entities.length == 0)
+	public int replace(KeyHolder holder, DalHints hints, List<T> entities) throws SQLException{
+		if(null == entities || entities.size() == 0)
 			return 0;
-		Map<String, ?> fields = this.parser.getFields(entities[0]);
+		Map<String, ?> fields = this.parser.getFields(entities.get(0));
 		Set<String> remainedColumns = fields.keySet();
 		String cloumns = combine(remainedColumns, COLUMN_SEPARATOR);
-		int count = entities.length;
+		int count = entities.size();
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
 
 		int startIndex = 1;
 		for (int i = 0; i < count; i++) {
-			Map<String, ?> vfields = parser.getFields(entities[i]);
+			Map<String, ?> vfields = parser.getFields(entities.get(i));
 			int paramCount = addParameters(startIndex, parameters, vfields);
 			startIndex += paramCount;
 			values.append(String.format("(%s),",
@@ -53,6 +54,12 @@ public class DalMySqlHelper<T> {
 		return null == holder ? this.client.update(sql, parameters, hints)
 				: this.client.update(sql, parameters, hints, holder);
 	}
+	
+	@SuppressWarnings("unchecked")
+	public int replace(KeyHolder holder, DalHints hints, T... entities) throws SQLException{
+		return replace(holder, hints, Arrays.asList(entities));
+	}
+	
 	
 	private int addParameters(int start, StatementParameters parameters,
 			Map<String, ?> entries) {

@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +99,7 @@ public class TestTableDao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
 		DalHints hints = new DalHints();
-		client.insert(hints, keyHolder, daoPojos);
+		client.insert(hints, keyHolder, Arrays.asList(daoPojos));
 	}
 	
 	public static class TestTableParser extends AbstractDalParser<TestTable> {

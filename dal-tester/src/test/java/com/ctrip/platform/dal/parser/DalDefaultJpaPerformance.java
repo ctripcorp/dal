@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.parser;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -74,9 +75,9 @@ public class DalDefaultJpaPerformance {
 	 * 		The actual insert success count
 	 * @throws SQLException
 	 */
-	public int randomInsert(int count) throws SQLException{
+	public int[] randomInsert(int count) throws SQLException{
 		if(0 == count)
-			return 0;
+			return new int[0];
 		ClientTestModel[] entities = new ClientTestModel[count];
 		Random random = new Random();
 		for (int i = 0; i < count; i++) {
@@ -89,7 +90,7 @@ public class DalDefaultJpaPerformance {
 			model.setLastChanged(new Timestamp(System.currentTimeMillis()));
 			entities[i] = model;
 		}
-		return dao.insert(new DalHints(), entities);
+		return dao.insert(new DalHints(), Arrays.asList(entities));
 	}
 	
 	/**
@@ -101,7 +102,7 @@ public class DalDefaultJpaPerformance {
 	 * 		The actual update success count
 	 * @throws SQLException
 	 */
-	public int updateLastChangedTime(String whereClause) throws SQLException{
+	public int[] updateLastChangedTime(String whereClause) throws SQLException{
 		List<ClientTestModel> entities = this.query(whereClause);
 		for (ClientTestModel model : entities) {
 			model.setLastChanged(new Timestamp(System.currentTimeMillis()));
@@ -117,11 +118,11 @@ public class DalDefaultJpaPerformance {
 	 * 		The actual update success count
 	 * @throws SQLException
 	 */
-	public int update(List<ClientTestModel> entities) throws SQLException{
+	public int[] update(List<ClientTestModel> entities) throws SQLException{
 		ClientTestModel[] models = new ClientTestModel[entities.size()];
 		entities.toArray(models);
 		DalHints hints = new DalHints();	
-		return dao.update(hints, models);
+		return dao.update(hints, Arrays.asList(models));
 	}
 	
 	/**

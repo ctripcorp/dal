@@ -4,11 +4,12 @@ import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.detectDistribu
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isAlreadySharded;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isShardingEnabled;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardingEnabled;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffle;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffleByTable;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +19,6 @@ import com.ctrip.platform.dal.dao.DalDetailResults;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
-import com.ctrip.platform.dal.dao.configure.DalConfigure;
-import com.ctrip.platform.dal.dao.configure.DatabaseSet;
-import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 
 public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 	private DalParser<T> parser;
@@ -33,40 +31,36 @@ public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 		rawTableName = parser.getTableName();
 	}
 	
-	public int execute(DalHints hints, T[] daoPojos, SingleTask<T> task) throws SQLException {
-		if(isEmpty(daoPojos)) return 0;
+	public int execute(DalHints hints, T daoPojo, SingleTask<T> task) throws SQLException {
+		if(daoPojo == null) 
+			throw new NullPointerException("The given pojo is null.");
 		
-		return execute(hints, Arrays.asList(daoPojos), task);
+		List<T> daoPojos = new ArrayList<>(1);
+		daoPojos.add(daoPojo);
+		return execute(hints, daoPojos, task)[0];
 	}
 	
-	// TODO revise return type
-	public int execute(DalHints hints, List<T> daoPojos, SingleTask<T> task) throws SQLException {
-		if(isEmpty(daoPojos)) return 0;
+	public int[] execute(DalHints hints, List<T> daoPojos, SingleTask<T> task) throws SQLException {
+		if(isEmpty(daoPojos)) return new int[0];
 
 		List<Map<String, ?>> pojos = getPojosFields(daoPojos);
 		detectDistributedTransaction(logicDbName, hints, pojos);
 		
-		int count = 0;
+		int[] counts = new int[daoPojos.size()];
 		hints = hints.clone();// To avoid shard id being polluted by each pojos
-		for (Map<String, ?> fields : pojos) {
+		for (int i = 0; i < pojos.size(); i++) {
 			DalWatcher.begin();// TODO check if we needed
 
 			try {
-				count += task.execute(hints, fields);
+				counts[i] = task.execute(hints, pojos.get(i));
 			} catch (SQLException e) {
-				// TODO do we need log error here?
+				DalClientFactory.getDalLogger().error("Error when execute insert pojo", e);
 				if (hints.isStopOnError())
 					throw e;
 			}
 		}
 		
-		return count;	
-	}
-	
-	public <K> K execute(DalHints hints, T[] daoPojos, BulkTask<K, T> task, K emptyValue) throws SQLException {
-		if(isEmpty(daoPojos)) return emptyValue;
-		
-		return execute(hints, Arrays.asList(daoPojos), task, emptyValue);
+		return counts;	
 	}
 	
 	public <K> K execute(DalHints hints, List<T> daoPojos, BulkTask<K, T> task, K emptyValue) throws SQLException {
@@ -118,92 +112,15 @@ public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 		}
 	}
 	
-	/**
-	 * Group pojos by shard id. Should be only used for DB that support sharding.
-	 * 
-	 * @param logicDbName
-	 * @param pojos
-	 * @return Grouped pojos
-	 * @throws SQLException In case locate shard id faild
-	 */
-	private static Map<String, List<Map<String, ?>>> shuffle(String logicDbName, String shardId, List<Map<String, ?>> daoPojos) throws SQLException {
-		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
-		
-		DalConfigure config = DalClientFactory.getDalConfigure();
-		
-		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
-		DalShardingStrategy strategy = dbSet.getStrategy();
-		
-		DalHints tmpHints = new DalHints();
-		for(Map<String, ?> pojo:daoPojos) {
-			
-			String tmpShardId = shardId == null ? 
-					strategy.locateDbShard(config, logicDbName, tmpHints.setFields(pojo)) :
-					shardId;
-			
-			dbSet.validate(tmpShardId);
-
-			List<Map<String, ?>> pojosInShard = shuffled.get(tmpShardId);
-			if(pojosInShard == null) {
-				pojosInShard = new LinkedList<Map<String, ?>>();
-				shuffled.put(tmpShardId, pojosInShard);
-			}
-			
-			pojosInShard.add(pojo);
-		}
-		
-		detectDistributedTransaction(shuffled.keySet());
-		
-		return shuffled;
-	}
-	
-	/**
-	 * Shuffle by table shard id.
-	 * @param logicDbName
-	 * @param pojos
-	 * @return
-	 * @throws SQLException
-	 */
-	private static Map<String, List<Map<String, ?>>> shuffleByTable(String logicDbName, String tableShardId, List<Map<String, ?>> pojos) throws SQLException {
-		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
-		DalConfigure config = DalClientFactory.getDalConfigure();
-		
-		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
-		DalShardingStrategy strategy = dbSet.getStrategy();
-		
-		DalHints tmpHints = new DalHints();
-		for(Map<String, ?> fields: pojos) {
-			String shardId = tableShardId == null ?
-					strategy.locateTableShard(config, logicDbName, tmpHints.setFields(fields)) :
-					tableShardId;
-
-			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
-			if(pojosInShard == null) {
-				pojosInShard = new LinkedList<Map<String, ?>>();
-				shuffled.put(shardId, pojosInShard);
-			}
-			
-			pojosInShard.add(fields);
-		}
-		
-		return shuffled;
-	}
-	
 	private boolean isEmpty(List<T> daoPojos) {
-		return null == daoPojos || daoPojos.size() == 0;
-	}
-	
-	private boolean isEmpty(T... daoPojos) {
 		if(null == daoPojos)
-			return true;
+			throw new NullPointerException("The given pojos are null.");
 		
-		return daoPojos.length == 1 && daoPojos[0] == null;
+		return daoPojos.size() == 0;
 	}
 	
 	private List<Map<String, ?>> getPojosFields(List<T> daoPojos) {
 		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
-		if (null == daoPojos || daoPojos.size() < 1)
-			return pojoFields;
 		
 		for (T pojo: daoPojos){
 			pojoFields.add(parser.getFields(pojo));

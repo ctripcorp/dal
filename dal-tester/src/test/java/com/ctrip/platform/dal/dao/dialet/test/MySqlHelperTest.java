@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,13 +39,13 @@ public class MySqlHelperTest {
 	@Test
 	public void replaceTest() throws SQLException {
 		int count = 3;
-		Person[] persons = new Person[count];
+		List<Person> persons = new ArrayList<>();
 		for(int i = 1; i <= count; i++){
 		    Person pojo1 = new Person();
 		    pojo1.setID(i);
 		    pojo1.setName("forest" + i);
 		    pojo1.setBirth(new Timestamp(System.currentTimeMillis()));
-		    persons[i-1] = pojo1;
+		    persons.add(pojo1);
 		}
 		
 		client.delete(hints, persons);
@@ -56,7 +57,7 @@ public class MySqlHelperTest {
 		assertTrue(generateKeys.size() == 3);
 		assertTrue(generateKeys.get(0).containsKey("GENERATED_KEY"));
 		
-		persons[1].setName("jack1");
+		persons.get(1).setName("jack1");
 		helper.replace(holder, new DalHints(), persons);	
 		Person rep = client.queryByPk(2, hints);
 		assertTrue(rep.getName().equals("jack1"));
@@ -91,13 +92,13 @@ public class MySqlHelperTest {
 	@Test
 	public void multipleInsert() throws SQLException {
 		int count = 3;
-		Person[] persons = new Person[count];
+		List<Person> persons = new ArrayList<>();
 		for(int i = 1; i <= count; i++){
 		    Person pojo1 = new Person();
 		    pojo1.setID(i);
 		    pojo1.setName("forest" + i);
 		    pojo1.setBirth(new Timestamp(System.currentTimeMillis()));
-		    persons[i-1] = pojo1;
+		    persons.add(pojo1);
 		}
 
 		KeyHolder holder = new KeyHolder();

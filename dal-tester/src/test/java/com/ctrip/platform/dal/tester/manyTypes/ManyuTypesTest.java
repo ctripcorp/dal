@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.tester.manyTypes;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,12 +41,16 @@ public class ManyuTypesTest {
 			Manytypes p = new Manytypes();
 //			ret = p.setNameAndAddress(name,address);
 			
+			List<Manytypes> pl = new ArrayList<>();
 			p.setBigIntCol(1L);
 			p.setBinaryCol("BinaryCol".getBytes());
-			dao.insert(hints, p, p, p);
+			pl.add(p);
+			pl.add(p);
+			pl.add(p);
+			dao.insert(hints, pl);
 			
 			KeyHolder kh = new KeyHolder();
-			dao.insert(hints, kh, p, p, p);
+			dao.insert(hints, kh, pl);
 			List<Map<String, Object>> k = kh.getKeyList();
 			
 			p.setId((Integer)k.get(0).get(DalTableDao.GENERATED_KEY));

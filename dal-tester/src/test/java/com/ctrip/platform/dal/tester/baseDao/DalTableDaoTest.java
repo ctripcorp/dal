@@ -4,13 +4,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
 import org.junit.AfterClass;
+
 import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -196,7 +199,7 @@ public class DalTableDaoTest {
 			p.setAddress("insert test 6");
 			pList[2] = p;
 			
-			assertEquals(3, dao.insert(hints, pList));			
+			assertArrayEquals(new int[]{1, 1, 1}, dao.insert(hints, Arrays.asList(pList)));			
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -284,7 +287,7 @@ public class DalTableDaoTest {
 			pList[2] = p;
 			
 			KeyHolder keyHolder = new KeyHolder();
-			dao.insert(hints, keyHolder, pList);
+			dao.insert(hints, keyHolder, Arrays.asList(pList));
 			assertEquals(3, keyHolder.size());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -311,7 +314,7 @@ public class DalTableDaoTest {
 			pList[2] = p;
 			
 			KeyHolder keyHolder = new KeyHolder();
-			dao.combinedInsert(hints, keyHolder, pList);
+			dao.combinedInsert(hints, keyHolder, Arrays.asList(pList));
 			assertEquals(3, keyHolder.size());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -335,8 +338,8 @@ public class DalTableDaoTest {
 			pList[2] = p;
 			
 			hints = new DalHints(DalHintEnum.continueOnError);
-			int count = dao.insert(hints, pList);
-			assertEquals(2, count);
+			int[] count = dao.insert(hints, Arrays.asList(pList));
+			assertArrayEquals(new int[]{1, 0, 1}, count);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -359,7 +362,7 @@ public class DalTableDaoTest {
 			p.setAddress("insert test 6");
 			pList[2] = p;
 			
-			int[] results = dao.batchInsert(hints, pList);
+			int[] results = dao.batchInsert(hints, Arrays.asList(pList));
 			assertEquals(3, results.length);
 			for(int i = 0; i< 3; i++){
 				assertTrue(results[i] > 0);

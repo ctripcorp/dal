@@ -34,12 +34,12 @@ public class TaskAdapter<T> implements DaoTask<T> {
 
 	//public static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
 
-	public static final String COLUMN_SEPARATOR = ", ";
-	public static final String PLACE_HOLDER = "?";
-	public static final String TMPL_SET_VALUE = "%s=?";
-	public static final String AND = " AND ";
-	public static final String OR = " OR ";
-	public static final String TMPL_CALL = "{call %s(%s)}";
+	protected static final String COLUMN_SEPARATOR = ", ";
+	protected static final String PLACE_HOLDER = "?";
+	protected static final String TMPL_SET_VALUE = "%s=?";
+	protected static final String AND = " AND ";
+	protected static final String OR = " OR ";
+	protected static final String TMPL_CALL = "{call %s(%s)}";
 
 	public String findtmp = "SELECT * FROM %s WHERE %s";
 	

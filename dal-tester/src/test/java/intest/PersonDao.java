@@ -2,10 +2,12 @@ package intest;
 
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.helper.*;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +96,7 @@ public class PersonDao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
 		DalHints hints = new DalHints();
-		client.insert(hints, null, daoPojos);
+		client.insert(hints, null, Arrays.asList(daoPojos));
 	}
 	
 	/**
@@ -104,7 +106,7 @@ public class PersonDao {
 		if(null == daoPojos || daoPojos.length == 0)
 			return new int[0];
 		DalHints hints = new DalHints();
-		return client.batchInsert(hints, daoPojos);
+		return client.batchInsert(hints, Arrays.asList(daoPojos));
 	}
 
 	/**
@@ -115,7 +117,7 @@ public class PersonDao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
 		DalHints hints = new DalHints();
-		client.insert(hints, keyHolder, daoPojos);
+		client.insert(hints, keyHolder, Arrays.asList(daoPojos));
 	}
 
 	/**
@@ -126,7 +128,7 @@ public class PersonDao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
 		DalHints hints = new DalHints();
-		client.delete(hints, daoPojos);
+		client.delete(hints, Arrays.asList(daoPojos));
 	}
 	
 	/**
@@ -136,7 +138,7 @@ public class PersonDao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return new int[0];
 		DalHints hints = new DalHints();
-		return client.batchDelete(hints, daoPojos);
+		return client.batchDelete(hints, Arrays.asList(daoPojos));
 	}
 
 	/**
@@ -146,7 +148,7 @@ public class PersonDao {
 	public void update(DalHints hints, Person...daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
-		client.update(hints, daoPojos);
+		client.update(hints, Arrays.asList(daoPojos));
 	}
 
 

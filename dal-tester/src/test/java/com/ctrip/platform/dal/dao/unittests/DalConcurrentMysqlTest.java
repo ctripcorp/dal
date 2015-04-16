@@ -64,7 +64,7 @@ public class DalConcurrentMysqlTest {
 		String[] sqls = new String[] { DROP_TABLE_SQL, CREATE_TABLE_SQL};
 		client.batchUpdate(sqls, hints);
 		
-		ClientTestModel[] models = new ClientTestModel[INSERT_COUNT];
+		List<ClientTestModel> models = new ArrayList<>();
 		for (int i = 0; i < INSERT_COUNT; i++) {
 			ClientTestModel model = new ClientTestModel();
 			model.setAddress("SH-" + i);
@@ -72,13 +72,13 @@ public class DalConcurrentMysqlTest {
 			model.setQuantity(i%10);
 			model.setType((short)(i%3));
 			
-			models[i] = model;
+			models.add(model);
 		}
 		
 		KeyHolder holder = new KeyHolder();
 		
-		int count = dao.insert(hints,holder, models);
-		System.out.println("The insert ClientTestModel count: " + count);	
+		int[] counts = dao.insert(hints,holder, models);
+		System.out.println("The insert ClientTestModel count: " + counts);	
 		generateIds = holder.getIdList();
 		System.out.println("Ids: " + generateIds.size());
 		

@@ -14,6 +14,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
 
+	private String[] updateColumnNames;
 	private String updateColumns;
 	public void initialize(DalParser<T> parser) {
 		super.initialize(parser);
@@ -28,7 +29,7 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		for (Map<String, ?> pojo : daoPojos) {
 			StatementParameters parameters = new StatementParameters();
 
-			addParameters(parameters, pojo);
+			addParameters(parameters, pojo, updateColumnNames);
 			addParameters(parameters, pojo, parser.getPrimaryKeyNames());
 			
 			parametersList[i++] = parameters;
@@ -48,6 +49,8 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		for (String column : parser.getPrimaryKeyNames()) {
 			nonPkColumns.remove(column);
 		}
+		
+		updateColumnNames = nonPkColumns.toArray(new String[nonPkColumns.size()]);
 
 		return String.format(
 				combine(TMPL_SET_VALUE, nonPkColumns.size(), COLUMN_SEPARATOR),

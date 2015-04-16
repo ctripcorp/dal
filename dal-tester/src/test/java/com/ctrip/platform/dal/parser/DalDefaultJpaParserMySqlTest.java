@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.parser;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -85,17 +86,22 @@ public class DalDefaultJpaParserMySqlTest {
 			models[i] = model;
 		}
 		DalHints hints = new DalHints();
-		int res = dao.insert(hints, models);
-		Assert.assertEquals(ROW_COUNT, res);
+		int[] res = dao.insert(hints, Arrays.asList(models));
+		assertEquals(ROW_COUNT, res);
 		
 		StatementParameters parameters = new StatementParameters();
 		List<ClientTestModel> db_models = dao.query("true", parameters, hints);
 		Assert.assertEquals(ROW_COUNT, db_models.size());
-		db_models.toArray(models);
-		res = dao.delete(hints, models);
-		Assert.assertEquals(ROW_COUNT, res);
+		res = dao.delete(hints, db_models);
+		assertEquals(ROW_COUNT, res);
 	}
 	
+	private void assertEquals(int expected, int[] res) {
+		int total = 0;
+		for(int t: res)total+=t;
+		Assert.assertEquals(expected, total);
+	}
+
 	@Test
 	public void testBatch() throws SQLException {
 		ClientTestModel[] models = new ClientTestModel[ROW_COUNT];
@@ -107,16 +113,15 @@ public class DalDefaultJpaParserMySqlTest {
 			models[i] = model;
 		}
 		DalHints hints = new DalHints();
-		int[] res = dao.batchInsert(hints, models);
+		int[] res = dao.batchInsert(hints, Arrays.asList(models));
 		Assert.assertEquals(ROW_COUNT, res.length);
 		
 		StatementParameters parameters = new StatementParameters();
 		List<ClientTestModel> db_models = dao.query("true", parameters, hints);
 		Assert.assertEquals(ROW_COUNT, db_models.size());
 		
-		db_models.toArray(models);
-		int ress = dao.delete(hints, models);
-		Assert.assertEquals(ROW_COUNT, ress);
+		res = dao.delete(hints, db_models);
+		assertEquals(ROW_COUNT, res);
 	}
 
 

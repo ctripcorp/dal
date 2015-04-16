@@ -287,28 +287,32 @@ public class DalTableDaoSqlServerTest {
 	 */
 	@Test
 	public void testInsertCheckForData() throws SQLException{
-		int res;
+		int[] res;
 		ClientTestModel model = null;
-		res = dao.insert(new DalHints(), model);
-		Assert.assertEquals(0, res);
-		
-		ClientTestModel[] models = null;
-		res = dao.insert(new DalHints(), models);
-		Assert.assertEquals(0, res);
-
-		models = new ClientTestModel[0];
-		res = dao.insert(new DalHints(), models);
-		Assert.assertEquals(0, res);
+		try {
+			dao.insert(new DalHints(), model);
+			Assert.fail();
+		} catch (Exception e) {
+		}
 		
 		List<ClientTestModel> modelList = null;
-		res = dao.insert(new DalHints(), modelList);
-		Assert.assertEquals(0, res);
+		try {
+			res = dao.insert(new DalHints(), modelList);
+			Assert.fail();
+		} catch (Exception e) {
+		}
 		
 		modelList = new ArrayList<>();
 		res = dao.insert(new DalHints(), modelList);
-		Assert.assertEquals(0, res);
+		assertEquals(0, res);
 	}
-		
+
+	private void assertEquals(int expected, int[] res) {
+		int total = 0;
+		for(int t: res)total+=t;
+		Assert.assertEquals(expected, total);
+	}
+
 	/**
 	 * Test Insert multiple entities one by one
 	 * @throws SQLException
@@ -328,44 +332,6 @@ public class DalTableDaoSqlServerTest {
 	 * @throws SQLException
 	 */
 	@Test
-	public void testInsertDouble() throws SQLException{
-		ClientTestModel model = new ClientTestModel();
-		model.setQuantity(10 + 1%3);
-		model.setType(((Number)(1%3)).shortValue());
-		model.setAddress("CTRIP");
-
-		ClientTestModel model2 = new ClientTestModel();
-		model2.setQuantity(10 + 1%3);
-		model2.setType(((Number)(1%3)).shortValue());
-		model2.setAddress("CTRIP");
-		
-		int res = dao.insert(new DalHints(), model, model2);
-		Assert.assertEquals(4+2, DalTestHelper.getCount(dao));
-	}
-
-	/**
-	 * Test Insert multiple entities one by one
-	 * @throws SQLException
-	 */
-	@Test
-	public void testInsertMultiple() throws SQLException{
-		ClientTestModel[] entities = new ClientTestModel[3];
-		for (int i = 0; i < 3; i++) {
-			ClientTestModel model = new ClientTestModel();
-			model.setQuantity(10 + 1%3);
-			model.setType(((Number)(1%3)).shortValue());
-			model.setAddress("CTRIP");
-			entities[i] = model;
-		}
-		int res = dao.insert(new DalHints(), entities);
-		Assert.assertEquals(3, DalTestHelper.getCount(dao, "address='CTRIP'"));
-	}
-	
-	/**
-	 * Test Insert multiple entities one by one
-	 * @throws SQLException
-	 */
-	@Test
 	public void testInsertMultipleAsList() throws SQLException{
 		List<ClientTestModel> entities = new ArrayList<ClientTestModel>();
 		for (int i = 0; i < 3; i++) {
@@ -375,35 +341,8 @@ public class DalTableDaoSqlServerTest {
 			model.setAddress("CTRIP");
 			entities.add(model);
 		}
-		int res = dao.insert(new DalHints(), entities);
+		dao.insert(new DalHints(), entities);
 		Assert.assertEquals(3, DalTestHelper.getCount(dao, "address='CTRIP'"));
-	}
-	
-	/**
-	 * Test Test Insert multiple entities one by one with continueOnError hints
-	 * @throws SQLException
-	 */
-	@Test
-	public void testInsertMultipleWithContinueOnErrorHints() throws SQLException{
-		ClientTestModel[] entities = new ClientTestModel[3];
-		for (int i = 0; i < 3; i++) {
-			ClientTestModel model = new ClientTestModel();
-			model.setQuantity(10 + 1%3);
-			model.setType(((Number)(1%3)).shortValue());
-			if(i==1){
-				model.setAddress("CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
-						+ "CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
-						+ "CTRIPCTRIPCTRIPCTRIP");
-			}
-			else{
-				model.setAddress("CTRIP");
-			}
-			entities[i] = model;
-		}
-		
-		DalHints hints = new DalHints(DalHintEnum.continueOnError);
-		int res = dao.insert(hints, entities);
-		Assert.assertEquals(4+2, DalTestHelper.getCount(dao));
 	}
 
 	/**
@@ -429,31 +368,8 @@ public class DalTableDaoSqlServerTest {
 		}
 		
 		DalHints hints = new DalHints(DalHintEnum.continueOnError);
-		int res = dao.insert(hints, entities);
+		dao.insert(hints, entities);
 		Assert.assertEquals(4+2, DalTestHelper.getCount(dao));
-	}
-	
-	/**
-	 * Test Insert multiple entities with key-holder
-	 * @throws SQLException
-	 */
-	@Test
-	public void testInsertMultipleWithKeyHolder() throws SQLException{
-		ClientTestModel[] entities = new ClientTestModel[3];
-		for (int i = 0; i < 3; i++) {
-			ClientTestModel model = new ClientTestModel();
-			model.setQuantity(10 + 1%3);
-			model.setType(((Number)(1%3)).shortValue());
-			model.setAddress("CTRIP");
-			entities[i] = model;
-		}
-		KeyHolder holder = new KeyHolder();
-		int res = dao.insert(new DalHints(),null, entities);
-//		Assert.assertEquals(3, res);
-//		Assert.assertEquals(3, holder.getKeyList().size());		 
-//		Assert.assertTrue(holder.getKey(0).longValue() > 0);
-//		Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEYS"));
-		Assert.assertEquals(4+3, DalTestHelper.getCount(dao));
 	}
 	
 	/**
@@ -471,7 +387,7 @@ public class DalTableDaoSqlServerTest {
 			entities.add(model);
 		}
 		KeyHolder holder = new KeyHolder();
-		int res = dao.insert(new DalHints(),null, entities);
+		dao.insert(new DalHints(),null, entities);
 //		Assert.assertEquals(3, res);
 //		Assert.assertEquals(3, holder.getKeyList().size());
 //		Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEYS"));
@@ -481,66 +397,29 @@ public class DalTableDaoSqlServerTest {
 	@Test
 	public void testCombinedInsertCheckForData() throws SQLException{
 		int res;
-		ClientTestModel model = null;
-		res = dao.combinedInsert(new DalHints(), null, model);
-		Assert.assertEquals(0, res);
-		
-		ClientTestModel[] models = null;
-		res = dao.combinedInsert(new DalHints(), null, models);
-		Assert.assertEquals(0, res);
-
-		models = new ClientTestModel[0];
-		res = dao.combinedInsert(new DalHints(), null, models);
-		Assert.assertEquals(0, res);
 		
 		List<ClientTestModel> modelList = null;
-		res = dao.combinedInsert(new DalHints(), null, modelList);
-		Assert.assertEquals(0, res);
+		try {
+			res = dao.combinedInsert(new DalHints(), null, modelList);
+			Assert.fail();
+		} catch (Exception e) {
+		}
 		
 		modelList = new ArrayList<>();
 		res = dao.combinedInsert(new DalHints(), null, modelList);
 		Assert.assertEquals(0, res);
 	}
 
-	/**
-	 * Test Insert multiple entities with one SQL Statement
-	 * @throws SQLException
-	 */
-	@Test
-	public void testCombinedInsert() throws SQLException{
-		ClientTestModel[] entities = new ClientTestModel[3];
-		for (int i = 0; i < 3; i++) {
-			ClientTestModel model = new ClientTestModel();
-			model.setQuantity(10 + 1%3);
-			model.setType(((Number)(1%3)).shortValue());
-			model.setAddress("CTRIP");
-			entities[i] = model;
-		}
-		KeyHolder holder = new KeyHolder();
-		DalHints hints = new DalHints();
-		int res = dao.combinedInsert(hints, null, entities);
-//		Assert.assertEquals(3, res);
-		Assert.assertEquals(4+3, DalTestHelper.getCount(dao));
-	}
-	
 	@Test
 	public void testBatchInsertCheckForData() throws SQLException{
 		int[] res;
-		ClientTestModel model = null;
-		res = dao.batchInsert(new DalHints(), model);
-		Assert.assertArrayEquals(new int[0], res);
-		
-		ClientTestModel[] models = null;
-		res = dao.batchInsert(new DalHints(), models);
-		Assert.assertArrayEquals(new int[0], res);
-
-		models = new ClientTestModel[0];
-		res = dao.batchInsert(new DalHints(), models);
-		Assert.assertArrayEquals(new int[0], res);
 		
 		List<ClientTestModel> modelList = null;
-		res = dao.batchInsert(new DalHints(), modelList);
-		Assert.assertArrayEquals(new int[0], res);
+		try {
+			res = dao.batchInsert(new DalHints(), modelList);
+			Assert.fail();
+		} catch (Exception e) {
+		}
 		
 		modelList = new ArrayList<>();
 		res = dao.batchInsert(new DalHints(), modelList);
@@ -553,15 +432,15 @@ public class DalTableDaoSqlServerTest {
 	 */
 	@Test
 	public void testBatchInsert() throws SQLException{
-		ClientTestModel[] entities = new ClientTestModel[3];
+		List<ClientTestModel> modelList = new ArrayList<>();
 		for (int i = 0; i < 3; i++) {
 			ClientTestModel model = new ClientTestModel();
 			model.setQuantity(10 + 1%3);
 			model.setType(((Number)(1%3)).shortValue());
 			model.setAddress("CTRIP");
-			entities[i] = model;
+			modelList.add(model);
 		}
-		int[] res = dao.batchInsert(new DalHints(), entities);
+		dao.batchInsert(new DalHints(), modelList);
 //		Assert.assertArrayEquals(new int[]{1,1,1}, res);
 		Assert.assertEquals(7, DalTestHelper.getCount(dao));
 	}
@@ -572,34 +451,26 @@ public class DalTableDaoSqlServerTest {
 	 */
 	@Test
 	public void testDeleteMultiple() throws SQLException{
-		ClientTestModel[] entities = new ClientTestModel[3];
+		List<ClientTestModel> modelList = new ArrayList<>();
 		for (int i = 0; i < 3; i++) {
 			ClientTestModel model = new ClientTestModel();
 			model.setId(i+1);
-			entities[i] = model;
+			modelList.add(model);
 		}
-		int res = dao.delete(new DalHints(), entities);
+		dao.delete(new DalHints(), modelList);
 		Assert.assertEquals(4-3, DalTestHelper.getCount(dao));
 	}
 	
 	@Test
 	public void testBatchDeleteCheckForData() throws SQLException{
 		int[] res;
-		ClientTestModel model = null;
-		res = dao.batchDelete(new DalHints(), model);
-		Assert.assertArrayEquals(new int[0], res);
-		
-		ClientTestModel[] models = null;
-		res = dao.batchDelete(new DalHints(), models);
-		Assert.assertArrayEquals(new int[0], res);
-
-		models = new ClientTestModel[0];
-		res = dao.batchDelete(new DalHints(), models);
-		Assert.assertArrayEquals(new int[0], res);
 		
 		List<ClientTestModel> modelList = null;
-		res = dao.batchDelete(new DalHints(), modelList);
-		Assert.assertArrayEquals(new int[0], res);
+		try {
+			res = dao.batchDelete(new DalHints(), modelList);
+			Assert.fail();
+		} catch (Exception e) {
+		}
 		
 		modelList = new ArrayList<>();
 		res = dao.batchDelete(new DalHints(), modelList);
@@ -612,39 +483,31 @@ public class DalTableDaoSqlServerTest {
 	 */
 	@Test
 	public void testBatchDelete() throws SQLException{
-		ClientTestModel[] entities = new ClientTestModel[3];
+		List<ClientTestModel> modelList = new ArrayList<>();
 		for (int i = 0; i < 3; i++) {
 			ClientTestModel model = new ClientTestModel();
 			model.setId(i+1);
-			entities[i] = model;
+			modelList.add(model);
 		}
-		int[] res = dao.batchDelete(new DalHints(), entities);
+		dao.batchDelete(new DalHints(), modelList);
 //		Assert.assertArrayEquals(new int[]{1,1,1}, res);
 		Assert.assertEquals(1, DalTestHelper.getCount(dao));
 	}
 	
 	@Test
 	public void testUpdateCheckForData() throws SQLException{
-		int res;
-		ClientTestModel model = null;
-		res = dao.update(new DalHints(), model);
-		Assert.assertEquals(0, res);
-		
-		ClientTestModel[] models = null;
-		res = dao.update(new DalHints(), models);
-		Assert.assertEquals(0, res);
-
-		models = new ClientTestModel[0];
-		res = dao.update(new DalHints(), models);
-		Assert.assertEquals(0, res);
+		int[] res;
 		
 		List<ClientTestModel> modelList = null;
-		res = dao.update(new DalHints(), modelList);
-		Assert.assertEquals(0, res);
-		
+		try {
+			res = dao.update(new DalHints(), modelList);
+			Assert.fail();
+		} catch (Exception e) {
+		}
+
 		modelList = new ArrayList<>();
 		res = dao.update(new DalHints(), modelList);
-		Assert.assertEquals(0, res);
+		assertEquals(0, res);
 	}
 	
 	/**
@@ -654,14 +517,36 @@ public class DalTableDaoSqlServerTest {
 	@Test
 	public void testUpdateMultiple() throws SQLException{
 		DalHints hints = new DalHints();
-		ClientTestModel[] entities = new ClientTestModel[3];
+		List<ClientTestModel> modelList = new ArrayList<>();
 		for (int i = 0; i < 3; i++) {
 			ClientTestModel model = new ClientTestModel();
 			model.setId(i+1);
 			model.setAddress("CTRIP");
-			entities[i] = model;
+			modelList.add(model);
 		}
-		int res = dao.update(hints, entities);
+		dao.update(hints, modelList);
+		Assert.assertEquals(3, DalTestHelper.getCount(dao, "address='CTRIP'"));
+		
+		ClientTestModel model = dao.queryByPk(1, hints);
+		Assert.assertTrue(null != model);
+		Assert.assertEquals("CTRIP", model.getAddress());
+	}
+	
+	/**
+	 * Test update multiple entities with primary key
+	 * @throws SQLException
+	 */
+	@Test
+	public void testBatchUpdate() throws SQLException{
+		DalHints hints = new DalHints();
+		List<ClientTestModel> modelList = new ArrayList<>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setId(i+1);
+			model.setAddress("CTRIP");
+			modelList.add(model);
+		}
+		dao.batchUpdate(hints, modelList);
 		Assert.assertEquals(3, DalTestHelper.getCount(dao, "address='CTRIP'"));
 		
 		ClientTestModel model = dao.queryByPk(1, hints);

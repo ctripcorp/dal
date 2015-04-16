@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -203,7 +204,7 @@ public class CrossShardTableDaoTest {
 			 * com.microsoft.sqlserver.jdbc.SQLServerException: 已生成用于更新的结果集。
 			 * 	at com.microsoft.sqlserver.jdbc.SQLServerException.makeFromDriverError(SQLServerException.java:171)
 			 */
-			dao.combinedInsert(new DalHints(), null, pList);
+			dao.combinedInsert(new DalHints(), null, Arrays.asList(pList));
 			
 			assertEquals(1, getCount(0));
 			assertEquals(2, getCount(1));
@@ -244,7 +245,7 @@ public class CrossShardTableDaoTest {
 			p.setAddress("aaa");
 			pList[2] = p;
 			
-			dao.combinedInsert(new DalHints(), null, pList);
+			dao.combinedInsert(new DalHints(), null, Arrays.asList(pList));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -279,7 +280,7 @@ public class CrossShardTableDaoTest {
 			pList[2] = p;
 			
 			hints = new DalHints();
-			int[] counts = dao.batchInsert(hints, pList);
+			int[] counts = dao.batchInsert(hints, Arrays.asList(pList));
 			
 			assertEquals(3, counts.length);
 			
@@ -309,7 +310,7 @@ public class CrossShardTableDaoTest {
 			p.setId(3);
 			pList[2] = p;
 			
-			int[] counts = dao.batchDelete(hints, pList);
+			int[] counts = dao.batchDelete(hints, Arrays.asList(pList));
 			
 			assertEquals(3, counts.length);
 			

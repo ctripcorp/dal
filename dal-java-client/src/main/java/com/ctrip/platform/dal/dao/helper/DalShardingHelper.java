@@ -112,7 +112,7 @@ public class DalShardingHelper {
 	 * @return Grouped pojos
 	 * @throws SQLException In case locate shard id faild
 	 */
-	private static Map<String, List<Map<String, ?>>> shuffle(String logicDbName, String shardId, List<Map<String, ?>> daoPojos) throws SQLException {
+	public static Map<String, List<Map<String, ?>>> shuffle(String logicDbName, String shardId, List<Map<String, ?>> daoPojos) throws SQLException {
 		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
 		
 		DalConfigure config = DalClientFactory.getDalConfigure();
@@ -150,7 +150,7 @@ public class DalShardingHelper {
 	 * @return
 	 * @throws SQLException
 	 */
-	private static Map<String, List<Map<String, ?>>> shuffleByTable(String logicDbName, String tableShardId, List<Map<String, ?>> pojos) throws SQLException {
+	public static Map<String, List<Map<String, ?>>> shuffleByTable(String logicDbName, String tableShardId, List<Map<String, ?>> pojos) throws SQLException {
 		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		

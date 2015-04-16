@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.tester.manyTypes;
 
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.helper.*;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -9,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,28 +89,7 @@ public class ManyTypesGenDao {
 		result = this.baseClient.query(ALL_SQL_PATTERN, parameters, hints, rowextractor);
 		return result;
 	}
-
-	/**
-	 * SQL insert
-	 * Note: there must be one non-null field in daoPojo
-	**/
-	public void insert(DalHints hints, ManyTypesGen...daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.length <= 0)
-			return;
-		hints = DalHints.createIfAbsent(hints);
-		client.insert(hints, null, daoPojos);
-	}
 	
-	/**
-	 * SQL insert with batch mode
-	**/
-	public int[] batchInsert(DalHints hints, ManyTypesGen...daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.length == 0)
-			return new int[0];
-		hints = DalHints.createIfAbsent(hints);
-		return client.batchInsert(hints, daoPojos);
-	}
-
 	/**
 	 * SQL insert with keyHolder
 	 * Note: there must be one non-null field in daoPojo
@@ -117,7 +98,7 @@ public class ManyTypesGenDao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
 		hints = DalHints.createIfAbsent(hints);
-		client.insert(hints, keyHolder, daoPojos);
+		client.insert(hints, keyHolder, Arrays.asList(daoPojos));
 	}
 
 	/**
@@ -128,7 +109,7 @@ public class ManyTypesGenDao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
 		hints = DalHints.createIfAbsent(hints);
-		client.delete(hints, daoPojos);
+		client.delete(hints, Arrays.asList(daoPojos));
 	}
 	
 	/**
@@ -138,7 +119,7 @@ public class ManyTypesGenDao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
-		return client.batchDelete(hints, daoPojos);
+		return client.batchDelete(hints, Arrays.asList(daoPojos));
 	}
 
 	/**
@@ -149,7 +130,7 @@ public class ManyTypesGenDao {
 		if(null == daoPojos || daoPojos.length <= 0)
 			return;
 		hints = DalHints.createIfAbsent(hints);
-		client.update(hints, daoPojos);
+		client.update(hints, Arrays.asList(daoPojos));
 	}
 
 

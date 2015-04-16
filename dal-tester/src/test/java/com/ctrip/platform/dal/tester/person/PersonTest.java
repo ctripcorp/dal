@@ -19,7 +19,7 @@ public class PersonTest {
 			Person p = new Person();
 			p.setAddress("Address");
 			p.setName("Name");
-			dao.insert(hints, p, p, p);
+			dao.insert(hints, p);
 //			dao.query(null, null, null);
 		} catch (Throwable e) {
 			e.printStackTrace();

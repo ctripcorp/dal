@@ -7,7 +7,7 @@ import java.util.Map;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class BatchInsertTask<T> extends BaseInsertTask<T> implements BulkTask<int[], T> {
+public class BatchInsertTask<T> extends InsertTaskAdapter<T> implements BulkTask<int[], T> {
 	private static final String TMPL_SQL_INSERT = "INSERT INTO %s (%s) VALUES(%s)";
 
 	@Override

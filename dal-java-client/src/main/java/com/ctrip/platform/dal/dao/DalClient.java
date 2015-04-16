@@ -38,22 +38,6 @@ public interface DalClient {
 			throws SQLException;
 
 	/**
-	 * Update against the given sql and parameters. The generated keys will be 
-	 * returned in generatedKeyHolder. This is most used for insert into table 
-	 * which has auto incremental primary key.
-	 * TODO we should remove this, put keyholder into hints
-	 * 
-	 * @param sql The sql statement to be executed
-	 * @param parameters A container that holds all the necessary parameters
-	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param generatedKeyHolder
-	 * @return how many rows been affected
-	 * @throws SQLException when things going wrong during the execution
-	 */
-	int update(String sql, StatementParameters parameters, DalHints hints,
-			KeyHolder generatedKeyHolder) throws SQLException;
-
-	/**
 	 * Batch update for given sqls.The default behavior is execute in transaction.
 	 * You can overwrite this by set forceAutoCommit in hints.
 	 * 

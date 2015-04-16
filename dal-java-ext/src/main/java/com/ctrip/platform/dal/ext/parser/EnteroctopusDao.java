@@ -93,7 +93,7 @@ public class EnteroctopusDao {
 		String sql = insertBuilder.substring(0, insertBuilder.length() - 2) + ")";
 		
 		DalHints hints = new DalHints();
-		this.client.update(sql, parameters, hints, generatedKeyHolder);
+		this.client.update(sql, parameters, hints.setKeyHolder(generatedKeyHolder));
 		return generatedKeyHolder;
 	}
 	

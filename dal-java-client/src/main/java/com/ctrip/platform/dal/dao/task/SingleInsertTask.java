@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleTask<T> {
@@ -18,9 +17,6 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 		StatementParameters parameters = new StatementParameters();
 		addParameters(parameters, fields);
 		
-		KeyHolder keyHolder = hints.getKeyHolder();
-		return keyHolder == null ?
-			client.update(insertSql, parameters, hints):
-			client.update(insertSql, parameters, hints, keyHolder);
+		return client.update(insertSql, parameters, hints);
 	}
 }

@@ -34,13 +34,6 @@ public class DalDasClient implements DalClient {
 	}
 
 	@Override
-	public int update(String sql, StatementParameters parameters,
-			DalHints hints, KeyHolder generatedKeyHolder) throws SQLException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public int[] batchUpdate(String[] sqls, DalHints hints) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;

@@ -33,7 +33,7 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 			return client.update(sql, parameters, hints);
 		} else{
 			KeyHolder tmpHolder = new KeyHolder();
-			int count = client.update(sql, parameters, hints, tmpHolder);
+			int count = client.update(sql, parameters, hints.clone().setKeyHolder(tmpHolder));
 			keyHolder.merge(tmpHolder);
 			hints.addDetailResults(tmpHolder);
 			return count;

@@ -62,38 +62,23 @@ public class DalDirectClient implements DalClient {
 	@Override
 	public int update(String sql, StatementParameters parameters, final DalHints hints)
 			throws SQLException {
+		final KeyHolder generatedKeyHolder = hints.getKeyHolder();
 		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
 			@Override
 			public Integer execute() throws Exception {
 				conn = getConnection(hints, this);
 				
-				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
-				
-				DalWatcher.beginExecute();
-				int ret = preparedStatement.executeUpdate();
-				DalWatcher.endExectue();
-				
-				return ret;
-			}
-		};
-		action.populate(DalEventEnum.UPDATE_SIMPLE, sql, parameters);
-		
-		return doInConnection(action, hints);
-	}
-
-	@Override
-	public int update(String sql, StatementParameters parameters,
-			final DalHints hints, final KeyHolder generatedKeyHolder) throws SQLException {
-		ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
-			@Override
-			public Integer execute() throws Exception {
-				conn = getConnection(hints, this);
-
-				preparedStatement = createPreparedStatement(conn, sql, parameters, hints, generatedKeyHolder);
+				if(generatedKeyHolder == null)
+					preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
+				else
+					preparedStatement = createPreparedStatement(conn, sql, parameters, hints, generatedKeyHolder);
 				
 				DalWatcher.beginExecute();
 				int rows = preparedStatement.executeUpdate();
 				DalWatcher.endExectue();
+				
+				if(generatedKeyHolder == null)
+					return rows;
 				
 				List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
 				rs = preparedStatement.getGeneratedKeys();
@@ -106,7 +91,7 @@ public class DalDirectClient implements DalClient {
 				return rows;
 			}
 		};
-		action.populate(DalEventEnum.UPDATE_KH, sql, parameters);
+		action.populate(generatedKeyHolder == null ?DalEventEnum.UPDATE_SIMPLE:DalEventEnum.UPDATE_KH, sql, parameters);
 		
 		return doInConnection(action, hints);
 	}

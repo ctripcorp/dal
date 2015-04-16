@@ -275,7 +275,7 @@ public class DalDirectClientMySqlTest {
 		StatementParameters parameters = new StatementParameters();
 		KeyHolder holder = new KeyHolder();
 		DalHints hints = new DalHints();
-		int count = client.update(insertSql, parameters, hints, holder);
+		int count = client.update(insertSql, parameters, hints.setKeyHolder(holder));
 		Assert.assertEquals(1, count);
 		Assert.assertEquals(1, holder.getKeyList().size());
 		Assert.assertTrue(holder.getKeyList().get(0)

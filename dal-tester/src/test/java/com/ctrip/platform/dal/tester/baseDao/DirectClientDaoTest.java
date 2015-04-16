@@ -87,7 +87,7 @@ public class DirectClientDaoTest {
 
 			System.out.println("Executing" + insert);
 			KeyHolder kh = new KeyHolder();
-			client.update(insert, parameters, hints, kh);
+			client.update(insert, parameters, hints.setKeyHolder(kh));
 			
 			long id = kh.getKey().longValue();
 			

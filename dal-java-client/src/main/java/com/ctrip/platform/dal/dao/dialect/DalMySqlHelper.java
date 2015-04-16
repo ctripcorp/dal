@@ -52,7 +52,7 @@ public class DalMySqlHelper<T> {
 				values.substring(0, values.length() - 2) + ")");
 
 		return null == holder ? this.client.update(sql, parameters, hints)
-				: this.client.update(sql, parameters, hints, holder);
+				: this.client.update(sql, parameters, hints.setKeyHolder(holder));
 	}
 	
 	@SuppressWarnings("unchecked")

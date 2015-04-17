@@ -6,18 +6,27 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.ConnectionAction;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DalConnectionManager;
-import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 
 public class DalConnectionManagerTest {
+	
 	private static final String connectionString = "HotelPubDB";
 	
+	static{
+		try {
+			DalClientFactory.initClientFactory();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
-		return new DalConnectionManager(connectionString, DalConfigureFactory.load());
+		return new DalConnectionManager(connectionString, DalClientFactory.getDalConfigure());
 	}
 	
 	@Test
@@ -53,6 +62,7 @@ public class DalConnectionManagerTest {
 					return null;
 				}
 			};
+			action.operation = DalEventEnum.EXECUTE;
 			test.doInConnection(action, hints);
 			assertTrue(action.conn == null);
 			assertTrue(action.statement == null);

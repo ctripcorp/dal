@@ -54,21 +54,20 @@ public class AsyncMarkupManagerTest {
 				public void run() {
 					for (int j = 0; j < 300; j++) {
 						boolean passed = AsyncMarkupManager.isPass(dbName);
-						if(passed)
-						AsyncMarkupManager.callback(new ErrorContext(dbName,DatabaseCategory.MySql, 
-								1000, new MySQLTimeoutException()));
+						if (passed)
+							AsyncMarkupManager.callback(new ErrorContext(dbName, DatabaseCategory.MySql, 1000,
+									new MySQLTimeoutException()));
 						try {
 							Thread.sleep(10);
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						System.out.println(passed);
+//						System.out.println(passed);
 					}
 					AysncMarkupPhase pro = AsyncMarkupManager.getStatus(dbName);
-					System.out.println("total: " + pro.getTotalCount() + ", passed: " + pro.getPassed() + 
-							", phase: " + pro.getPhaseIndex() + ", markdown: " + 
-							ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+//					System.out.println("total: " + pro.getTotalCount() + ", passed: " + pro.getPassed() + 
+//							", phase: " + pro.getPhaseIndex() + ", markdown: " + 
+//							ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
 				}});
 			tt.start();
 			tt.join();

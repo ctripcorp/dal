@@ -34,7 +34,7 @@ public class AysncMarkupPhase {
 	}
 	
 	public synchronized void resetConter(){
-		System.out.println("##########################################" + (this.passedCount.get() + 0.0f)/this.totalCount.get());
+//		System.out.println("##########################################" + (this.passedCount.get() + 0.0f)/this.totalCount.get());
 		this.totalCount.set(0);
 		this.passedCount.set(0);
 		this.rollbackCount.set(0);

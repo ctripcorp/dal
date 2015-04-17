@@ -15,8 +15,7 @@ public class AsyncMarkupManager {
 	
 	static{
 		manager = Executors.newSingleThreadScheduledExecutor(); 
-		manager.scheduleAtFixedRate(new DetectMarkup(), durations,
-				durations, TimeUnit.MICROSECONDS);
+		manager.scheduleAtFixedRate(new DetectMarkup(), durations, durations, TimeUnit.MICROSECONDS);
 	}
 	
 	public static boolean isPass(String key){

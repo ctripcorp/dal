@@ -10,6 +10,7 @@ import java.sql.Connection;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.ConnectionAction;
 import com.ctrip.platform.dal.dao.client.DalConnection;
@@ -126,6 +127,11 @@ public class ConnectionActionTest {
 	}
 	
 	private static class TestConnectionAction extends ConnectionAction<Object>{
+		
+		public TestConnectionAction() {
+			this.operation = DalEventEnum.EXECUTE;
+		}
+		
 		@Override
 		public Object execute() throws Exception {
 			return null;

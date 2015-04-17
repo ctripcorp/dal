@@ -8,18 +8,27 @@ import static org.junit.Assert.fail;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.ConnectionAction;
 import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
-import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 
 public class DalTransactionManagerTest {
+	
 	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";
 	
+	static{
+		try {
+			DalClientFactory.initClientFactory();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
-		return new DalConnectionManager(logicDbName, DalConfigureFactory.load());
+		return new DalConnectionManager(logicDbName, DalClientFactory.getDalConfigure());
 	}
 	
 	@Test
@@ -43,6 +52,7 @@ public class DalTransactionManagerTest {
 					return null;
 				}
 			};
+			action.operation = DalEventEnum.EXECUTE;
 			test.doInTransaction(action, new DalHints());
 		} catch (Exception e) {
 			fail();
@@ -62,6 +72,7 @@ public class DalTransactionManagerTest {
 					return null;
 				}
 			};
+			action.operation = DalEventEnum.EXECUTE;
 			test.doInTransaction(action, hints);
 		} catch (Exception e) {
 			fail();
@@ -81,6 +92,7 @@ public class DalTransactionManagerTest {
 					return null;
 				}
 			};
+			action.operation = DalEventEnum.EXECUTE;
 			test.doInTransaction(action, hints);
 		} catch (Exception e) {
 			fail();
@@ -102,6 +114,7 @@ public class DalTransactionManagerTest {
 					return null;
 				}
 			};
+			action.operation = DalEventEnum.EXECUTE;
 			test.doInTransaction(action, hints);
 		} catch (Exception e) {
 			fail();
@@ -123,10 +136,11 @@ public class DalTransactionManagerTest {
 					return null;
 				}
 			};
+			action.operation = DalEventEnum.EXECUTE;
 			test.doInTransaction(action, hints);
 		} catch (Exception e) {
-			fail();
 			e.printStackTrace();
+			fail();
 		}
 		assertFalse(DalTransactionManager.isInTransaction());
 		assertNull(DalTransactionManager.getCurrentDbMeta());
@@ -143,6 +157,7 @@ public class DalTransactionManagerTest {
 					throw new NullPointerException("test");
 				}
 			};
+			action.operation = DalEventEnum.EXECUTE;
 			test.doInTransaction(action, hints);
 			fail();
 		} catch (Exception e) {

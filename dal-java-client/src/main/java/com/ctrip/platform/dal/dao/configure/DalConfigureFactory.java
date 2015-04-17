@@ -89,8 +89,7 @@ public class DalConfigureFactory {
 	 * @throws Exception
 	 */
 	public static DalConfigure load() throws Exception {
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		if (classLoader == null) {
 			classLoader = DalClientFactory.class.getClassLoader();
 		}

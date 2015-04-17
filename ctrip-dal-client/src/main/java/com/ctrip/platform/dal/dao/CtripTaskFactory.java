@@ -36,7 +36,6 @@ public class CtripTaskFactory implements DalTaskFactory {
 		//Do noting for now
 	}
 
-
 	private <T> DatabaseCategory getDbCategory(DalParser<T> parser) {
 		DatabaseCategory dbCategory = DalClientFactory.getDalConfigure().getDatabaseSet(parser.getDatabaseName()).getDatabaseCategory();
 		if(DatabaseCategory.MySql == dbCategory || DatabaseCategory.SqlServer == dbCategory )

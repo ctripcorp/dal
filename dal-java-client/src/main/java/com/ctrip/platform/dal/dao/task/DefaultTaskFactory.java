@@ -1,62 +1,62 @@
 package com.ctrip.platform.dal.dao.task;
 
+import java.util.Map;
+
 import com.ctrip.platform.dal.dao.DalParser;
 
-public class DefaultTaskFactory<T> implements TaskFactory<T> {
-	private SingleInsertTask<T> singleInsertTask = new SingleInsertTask<T>();
-	private SingleDeleteTask<T> singleDeleteTask = new SingleDeleteTask<T>();
-	private SingleUpdateTask<T> singleUpdateTask = new SingleUpdateTask<T>();
-	private CombinedInsertTask<T> combinedInsertTask = new CombinedInsertTask<T>();
-	
-	private BatchInsertTask<T> batchInsertTask = new BatchInsertTask<T>();
-	private BatchDeleteTask<T> batchDeleteTask = new BatchDeleteTask<T>();
-	private BatchUpdateTask<T> batchUpdateTask = new BatchUpdateTask<T>();
+public class DefaultTaskFactory implements DalTaskFactory {
 
 	@Override
-	public void initialize(DalParser<T> parser) {
-		singleInsertTask.initialize(parser);
-		singleDeleteTask.initialize(parser);
-		singleUpdateTask.initialize(parser);
-		combinedInsertTask.initialize(parser);
-		
-		batchInsertTask.initialize(parser);
-		batchDeleteTask.initialize(parser);
-		batchUpdateTask.initialize(parser);
-		
+	public void initialize(Map<String, ?> settings) {
+		//Do noting for now
 	}
 
 	@Override
-	public SingleTask<T> createSingleInsertTask() {
+	public <T> SingleTask<T> createSingleInsertTask(DalParser<T> parser) {
+		SingleInsertTask<T> singleInsertTask = new SingleInsertTask<T>();
+		singleInsertTask.initialize(parser);
 		return singleInsertTask;
 	}
 
 	@Override
-	public SingleTask<T> createSingleDeleteTask() {
+	public <T> SingleTask<T> createSingleDeleteTask(DalParser<T> parser) {
+		SingleDeleteTask<T> singleDeleteTask = new SingleDeleteTask<T>();
+		singleDeleteTask.initialize(parser);
 		return singleDeleteTask;
 	}
 
 	@Override
-	public SingleTask<T> createSingleUpdateTask() {
+	public <T> SingleTask<T> createSingleUpdateTask(DalParser<T> parser) {
+		SingleUpdateTask<T> singleUpdateTask = new SingleUpdateTask<T>();
+		singleUpdateTask.initialize(parser);
 		return singleUpdateTask;
 	}
 
 	@Override
-	public BulkTask<Integer, T> createCombinedInsertTask() {
+	public <T> BulkTask<Integer, T> createCombinedInsertTask(DalParser<T> parser) {
+		CombinedInsertTask<T> combinedInsertTask = new CombinedInsertTask<T>();
+		combinedInsertTask.initialize(parser);
 		return combinedInsertTask;
 	}
 
 	@Override
-	public BulkTask<int[], T> createBatchInsertTask() {
+	public <T> BulkTask<int[], T> createBatchInsertTask(DalParser<T> parser) {
+		BatchInsertTask<T> batchInsertTask = new BatchInsertTask<T>();
+		batchInsertTask.initialize(parser);
 		return batchInsertTask;
 	}
 
 	@Override
-	public BulkTask<int[], T> createBatchDeleteTask() {
+	public <T> BulkTask<int[], T> createBatchDeleteTask(DalParser<T> parser) {
+		BatchDeleteTask<T> batchDeleteTask = new BatchDeleteTask<T>();
+		batchDeleteTask.initialize(parser);
 		return batchDeleteTask;
 	}
 
 	@Override
-	public BulkTask<int[], T> createBatchUpdateTask() {
+	public <T> BulkTask<int[], T> createBatchUpdateTask(DalParser<T> parser) {
+		BatchUpdateTask<T> batchUpdateTask = new BatchUpdateTask<T>();
+		batchUpdateTask.initialize(parser);
 		return batchUpdateTask;
 	}
 }

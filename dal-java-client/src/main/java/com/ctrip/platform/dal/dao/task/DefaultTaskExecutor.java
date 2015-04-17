@@ -9,7 +9,6 @@ import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffleByTable
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +31,9 @@ public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 	}
 	
 	public int execute(DalHints hints, T daoPojo, SingleTask<T> task) throws SQLException {
-		if(daoPojo == null) 
-			throw new NullPointerException("The given pojo is null.");
+		if(daoPojo == null) throw new NullPointerException("The given pojo is null.");
+		
+		validate(task);
 		
 		List<T> daoPojos = new ArrayList<>(1);
 		daoPojos.add(daoPojo);
@@ -42,6 +42,8 @@ public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 	
 	public int[] execute(DalHints hints, List<T> daoPojos, SingleTask<T> task) throws SQLException {
 		if(isEmpty(daoPojos)) return new int[0];
+		
+		validate(task);
 
 		List<Map<String, ?>> pojos = getPojosFields(daoPojos);
 		detectDistributedTransaction(logicDbName, hints, pojos);
@@ -65,6 +67,8 @@ public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 	
 	public <K> K execute(DalHints hints, List<T> daoPojos, BulkTask<K, T> task, K emptyValue) throws SQLException {
 		if(isEmpty(daoPojos)) return emptyValue;
+		
+		validate(task);
 		
 		hints.setDetailResults(new DalDetailResults<K>());
 
@@ -117,6 +121,11 @@ public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 			throw new NullPointerException("The given pojos are null.");
 		
 		return daoPojos.size() == 0;
+	}
+	
+	private void validate(DaoTask<T> task) {
+		if(task == null)
+			throw new NullPointerException("The given dao task is null. Means the calling DAO method is not supported. Please contact your DAL team.");
 	}
 	
 	private List<Map<String, ?>> getPojosFields(List<T> daoPojos) {

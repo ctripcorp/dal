@@ -20,6 +20,8 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.DefaultLogger;
+import com.ctrip.platform.dal.dao.task.DalTaskFactory;
+import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 
 /*
 <dal name="dal.prize.test">
@@ -73,7 +75,9 @@ public class DalConfigureFactory {
 	private static String CONNECTION_STRING = "connectionString";
 	private static String MASTER = "Master";
 	private static String LOG_LISTENER = "LogListener";
+	private static String TASK_FACTORY = "TaskFactory";
 	private static String ENABLED = "enabled";
+	private static String FACTORY = "factory";
 	private static String LOGGER = "logger";
 	private static String SETTINGS = "settings";
 	private static String CONNECTION_LOCATOR = "ConnectionLocator";
@@ -130,11 +134,13 @@ public class DalConfigureFactory {
 
 		DalLogger logger = readLogListener(getChildNode(root, LOG_LISTENER));
 		
+		DalTaskFactory factory = readTaskFactory(getChildNode(root, TASK_FACTORY));
+		
 		DalConnectionLocator locator = readConnectionLocator(getChildNode(root, CONNECTION_LOCATOR));
 		
 		Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS), logger);
 		
-		return new DalConfigure(name, databaseSets, logger, locator);
+		return new DalConfigure(name, databaseSets, logger, locator, factory);
 	}
 	
 	private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode, DalLogger logger) throws Exception {
@@ -237,6 +243,32 @@ public class DalConfigureFactory {
 		
 		logger.initLogger(settings);
 		return  logger;
+	}
+	
+	private DalTaskFactory readTaskFactory(Node taskFactoryNode) throws Exception {
+		DalTaskFactory factory = new DefaultTaskFactory();
+		if(taskFactoryNode == null)
+			return factory;
+		
+		Node factoryNode = getChildNode(taskFactoryNode, FACTORY);
+		if(factoryNode == null)
+			return factory;
+
+		factory = (DalTaskFactory)Class.forName(factoryNode.getTextContent()).newInstance();
+		
+		Node settingsNode = getChildNode(taskFactoryNode, SETTINGS);
+		Map<String, String> settings = new HashMap<>();
+
+		if(settingsNode != null) {
+			NodeList children = settingsNode.getChildNodes();
+			for(int i = 0; i < children.getLength(); i++) {
+				if(children.item(i).getNodeType() == Node.ELEMENT_NODE)
+					settings.put(children.item(i).getNodeName(), children.item(i).getTextContent());
+			}
+		}
+		
+		factory.initialize(settings);
+		return  factory;
 	}
 	
 	private Node getChildNode(Node node, String name) {

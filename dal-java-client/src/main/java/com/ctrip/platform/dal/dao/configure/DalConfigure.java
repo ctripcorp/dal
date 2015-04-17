@@ -8,14 +8,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
+import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 
 public class DalConfigure {
 	private String name;
 	private Map<String, DatabaseSet> databaseSets = new ConcurrentHashMap<String, DatabaseSet>();
 	private DalLogger dalLogger;
 	private DalConnectionLocator locator;
+	private DalTaskFactory facory;
 	
-	public DalConfigure(String name, Map<String, DatabaseSet> databaseSets, DalLogger dalLogger, DalConnectionLocator locator) {
+	public DalConfigure(String name, Map<String, DatabaseSet> databaseSets, DalLogger dalLogger, DalConnectionLocator locator, DalTaskFactory facory) {
 		this.name = name;
 		this.databaseSets.putAll(databaseSets);
 		this.dalLogger = dalLogger;
@@ -73,5 +75,9 @@ public class DalConfigure {
 
 	public DalConnectionLocator getLocator() {
 		return locator;
+	}
+
+	public DalTaskFactory getFacory() {
+		return facory;
 	}
 }

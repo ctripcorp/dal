@@ -1,14 +1,14 @@
 package com.ctrip.platform.dal.dao;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class CtripTableSpDaoTest {
 		try {
 			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(DATABASE_NAME);
-			dao = new DalTableDao<>(new PeopleParser(), new CtripSpTaskFactory<People>());
+			dao = new DalTableDao<>(new PeopleParser());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

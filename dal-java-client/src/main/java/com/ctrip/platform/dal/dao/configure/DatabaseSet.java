@@ -179,7 +179,7 @@ public class DatabaseSet {
 			return getRandomRealDbName(ha, slaveCandidates);
 
 		return getRandomRealDbName(ha, masterCandidates);*/
-		DatabaseSelector selector = new DatabaseSelector(ha, masterCandidates, slaveCandidates, isSelect, logger);
+		DatabaseSelector selector = new DatabaseSelector(ha, masterCandidates, slaveCandidates, isSelect);
 		return selector.select();
 	}
 	

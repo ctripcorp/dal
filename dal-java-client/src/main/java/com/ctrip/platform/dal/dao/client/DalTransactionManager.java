@@ -77,7 +77,7 @@ public class DalTransactionManager {
 	}
 
 	public <T> T doInTransaction(ConnectionAction<T> action, DalHints hints)throws SQLException{
-		action.initLogEntry(connManager.getLogicDbName(), hints, connManager.getLogger());
+		action.initLogEntry(connManager.getLogicDbName(), hints);
 		action.start();
 
 		Throwable ex = null;

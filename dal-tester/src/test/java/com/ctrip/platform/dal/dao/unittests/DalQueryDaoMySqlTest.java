@@ -42,7 +42,6 @@ public class DalQueryDaoMySqlTest {
 			client = new DalQueryDao(DATABASE_NAME);
 			mapper = new ClientTestDalRowMapper();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 	@BeforeClass
@@ -153,7 +152,6 @@ public class DalQueryDaoMySqlTest {
 			client.queryForObject(sql, param, hints, mapper);
 			Assert.fail();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -184,7 +182,6 @@ public class DalQueryDaoMySqlTest {
 			client.queryForObjectNullable(sql, param, hints, mapper);
 			Assert.fail();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -213,7 +210,6 @@ public class DalQueryDaoMySqlTest {
 			client.queryForObject(sql, param, hints, Long.class);
 			Assert.fail();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -246,7 +242,6 @@ public class DalQueryDaoMySqlTest {
 			client.queryForObjectNullable(sql, param, hints, Long.class);
 			Assert.fail();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -275,7 +270,6 @@ public class DalQueryDaoMySqlTest {
 			client.queryFirst(sql, param, hints, mapper);
 			Assert.fail();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -333,7 +327,6 @@ public class DalQueryDaoMySqlTest {
 			Integer result = client.queryFirst(sql, param, hints, Integer.class);
 			Assert.fail();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -394,7 +387,6 @@ public class DalQueryDaoMySqlTest {
 			List<ClientTestModel> models = client.queryTop(sql, param, hints, mapper, 1000);
 			Assert.fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -426,7 +418,6 @@ public class DalQueryDaoMySqlTest {
 			client.queryTop(sql, param, hints, Integer.class, 1000);
 			Assert.fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -462,7 +453,6 @@ public class DalQueryDaoMySqlTest {
 			models = client.queryFrom(sql, param, hints, mapper, 0, 10);
 			Assert.fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -496,7 +486,6 @@ public class DalQueryDaoMySqlTest {
 			client.queryFrom(sql, param, hints, Integer.class, 0, 10);
 			Assert.fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 

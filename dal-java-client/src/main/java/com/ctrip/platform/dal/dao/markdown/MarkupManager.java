@@ -2,8 +2,6 @@ package com.ctrip.platform.dal.dao.markdown;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ctrip.platform.dal.dao.client.DalLogger;
-
 public class MarkupManager {
 	
 	private static ConcurrentHashMap<String, MarkupProcedure> markups = new ConcurrentHashMap<String, MarkupProcedure>();
@@ -12,8 +10,8 @@ public class MarkupManager {
 	 * @param key
 	 * @return
 	 */
-	public static boolean isPass(String key, DalLogger logger){
-		return getMarkup(key, logger).isPass();
+	public static boolean isPass(String key){
+		return getMarkup(key).isPass();
 	}
 	
 	/**
@@ -23,7 +21,7 @@ public class MarkupManager {
 	public static void rollback(ErrorContext ctx){
 		if(TimeoutDetector.isTimeOutException(ctx) && 
 				markups.containsKey(ctx.getName())){
-			getMarkup(ctx.getName(), ctx.getLogger()).rollback();
+			getMarkup(ctx.getName()).rollback();
 		}
 	}
 	
@@ -31,9 +29,9 @@ public class MarkupManager {
 		markups.remove(key);
 	}
 	
-	public static MarkupProcedure getMarkup(String key, DalLogger logger){
+	public static MarkupProcedure getMarkup(String key){
 		if(!markups.containsKey(key))
-			markups.putIfAbsent(key, new MarkupProcedure(key, logger));
+			markups.putIfAbsent(key, new MarkupProcedure(key));
 		return markups.get(key);
 	}
 	

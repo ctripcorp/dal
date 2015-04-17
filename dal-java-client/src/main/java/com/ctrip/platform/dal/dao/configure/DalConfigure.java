@@ -22,6 +22,7 @@ public class DalConfigure {
 		this.databaseSets.putAll(databaseSets);
 		this.dalLogger = dalLogger;
 		this.locator = locator;
+		this.facory = facory;
 	}
 	
 	public String getName() {

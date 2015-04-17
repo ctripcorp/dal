@@ -63,20 +63,30 @@ public class DalDefaultJpaParserSqlServerTest {
 	}
 	
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+	public static void setUpBeforeClass(){
 		DalHints hints = new DalHints();
 		String[] sqls = new String[] { 
 				String.format(DROP_TABLE_SQL, parser.getTableName(), parser.getTableName()), 
 				String.format(CREATE_TABLE_SQL, parser.getTableName())};
-		client.batchUpdate(sqls, hints);
+		try {
+			client.batchUpdate(sqls, hints);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
 	}
 
 	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
+	public static void tearDownAfterClass(){
 		DalHints hints = new DalHints();
 		String[] sqls = new String[] { 
 				String.format(DROP_TABLE_SQL, parser.getTableName(), parser.getTableName())};
-		client.batchUpdate(sqls, hints);
+		try {
+			client.batchUpdate(sqls, hints);
+		} catch (SQLException e) {
+			Assert.fail();
+			e.printStackTrace();
+		}
 	}
 
 	@Test

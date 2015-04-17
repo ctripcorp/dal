@@ -13,7 +13,6 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DalTransaction;
 import com.ctrip.platform.dal.dao.client.DbMeta;
-import com.ctrip.platform.dal.dao.client.DefaultLogger;
 
 public class DalTransactionTest {
 	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";
@@ -29,7 +28,7 @@ public class DalTransactionTest {
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
 		conn = DalClientFactory.getDalConfigure().getLocator().getConnection(logicDbName);
-		return new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn), new DefaultLogger());
+		return new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn));
 	}
 
 	@Test
@@ -125,7 +124,6 @@ public class DalTransactionTest {
 			test.startTransaction();
 			fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}finally {
 			if(test != null && test.getConnection() != null)
 				test.getConnection().close();
@@ -164,7 +162,6 @@ public class DalTransactionTest {
 			test.endTransaction(level + 1);
 			fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}finally {
 			if(test != null && test.getConnection() != null)
 				test.getConnection().close();
@@ -179,7 +176,6 @@ public class DalTransactionTest {
 			test.endTransaction(level - 1);
 			fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}finally {
 			if(test != null && test.getConnection() != null)
 				test.getConnection().close();

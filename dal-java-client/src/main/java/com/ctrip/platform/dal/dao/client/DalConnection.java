@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 
@@ -13,11 +14,11 @@ public class DalConnection {
 	private DbMeta meta;
 	private DalLogger logger;
 	
-	public DalConnection(Connection conn, DbMeta meta, DalLogger logger) throws SQLException {
+	public DalConnection(Connection conn, DbMeta meta) throws SQLException {
 		this.oldIsolationLevel = conn.getTransactionIsolation();
 		this.conn = conn;
 		this.meta = meta;
-		this.logger = logger;
+		this.logger = DalClientFactory.getDalLogger();;
 	}
 
 	public Connection getConn() {
@@ -26,10 +27,6 @@ public class DalConnection {
 
 	public DbMeta getMeta() {
 		return meta;
-	}
-	
-	public DalLogger getLogger() {
-		return logger;
 	}
 
 	public String getDatabaseName() throws SQLException {

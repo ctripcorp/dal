@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.dao.markdown;
 import java.sql.SQLException;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.client.DalLogger;
 
 public class ErrorContext {
 	private String name;
@@ -13,9 +12,8 @@ public class ErrorContext {
 	private long cost;
 	private Class<?> exType;
 	private long time;
-	private DalLogger logger;
 	
-	public ErrorContext(String name, DatabaseCategory dbCategory, long cost, SQLException e, DalLogger logger){
+	public ErrorContext(String name, DatabaseCategory dbCategory, long cost, SQLException e){
 		this.name = name;
 		this.dbCategory = dbCategory;
 		this.cost = cost;
@@ -23,7 +21,6 @@ public class ErrorContext {
 		this.exType = e.getClass();
 		this.msg = e.getMessage();
 		this.time = System.currentTimeMillis();
-		this.logger = logger;
 	}
 
 	public String getName() {
@@ -52,9 +49,5 @@ public class ErrorContext {
 
 	public String getMsg() {
 		return msg;
-	}
-
-	public DalLogger getLogger() {
-		return logger;
 	}
 }

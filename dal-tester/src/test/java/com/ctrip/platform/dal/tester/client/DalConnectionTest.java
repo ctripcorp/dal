@@ -16,7 +16,6 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DbMeta;
-import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.client.LogEntry;
 
 public class DalConnectionTest {
@@ -31,7 +30,7 @@ public class DalConnectionTest {
 	
 	private DalConnection getConnection() throws Exception {
 		Connection conn = DalClientFactory.getDalConfigure().getLocator().getConnection(connectionString);
-		return new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn), new DefaultLogger());
+		return new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
 	}
 	
 	@Test

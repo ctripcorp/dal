@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.markdown;
 
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
@@ -12,9 +13,9 @@ public class MarkupProcedure {
 	private int qualifies = 0;
 	private MarkupPhase phase = null;
 
-	public MarkupProcedure(String name, DalLogger logger){
+	public MarkupProcedure(String name){
 		this.name = name;
-		this.logger = logger;
+		this.logger = DalClientFactory.getDalLogger();
 		this.init();
 	}
 	

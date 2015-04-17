@@ -16,7 +16,6 @@ import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.client.DbMeta;
-import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 
 public class ConnectionActionTest {
@@ -33,7 +32,7 @@ public class ConnectionActionTest {
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
 		conn = DalClientFactory.getDalConfigure().getLocator().getConnection(connectionString);
-		return new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn), new DefaultLogger());
+		return new DalConnection(conn, DbMeta.createIfAbsent(connectionString, null, null, true, conn));
 	}
 	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
@@ -43,14 +42,14 @@ public class ConnectionActionTest {
 	@Test
 	public void testInitLogEntry() {
 		TestConnectionAction test = new TestConnectionAction();
-		test.initLogEntry("Test", new DalHints(), new DefaultLogger());
+		test.initLogEntry("Test", new DalHints());
 		assertNotNull(test.entry);
 	}
 
 	@Test
 	public void testPopulateDbMetaOutofTransaction() {
 		TestConnectionAction test = new TestConnectionAction();
-		test.initLogEntry("Test", new DalHints(), new DefaultLogger());
+		test.initLogEntry("Test", new DalHints());
 		try {
 			test.connHolder = getDalConnection();
 			test.populateDbMeta();
@@ -82,7 +81,7 @@ public class ConnectionActionTest {
 	@Test
 	public void testStart() {
 		TestConnectionAction test = new TestConnectionAction();
-		test.initLogEntry(connectionString, new DalHints(), new DefaultLogger());
+		test.initLogEntry(connectionString, new DalHints());
 		test.start();
 		assertTrue(test.start > 0);
 	}
@@ -90,7 +89,7 @@ public class ConnectionActionTest {
 	@Test
 	public void testEnd() {
 		TestConnectionAction test = new TestConnectionAction();
-		test.initLogEntry(connectionString, new DalHints(), new DefaultLogger());
+		test.initLogEntry(connectionString, new DalHints());
 		test.start();
 		Object result = null;
 		Throwable e = null;

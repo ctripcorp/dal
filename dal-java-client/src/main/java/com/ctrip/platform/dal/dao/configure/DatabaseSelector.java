@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 import com.ctrip.platform.dal.dao.client.DalHA;
-import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
@@ -16,14 +15,12 @@ public class DatabaseSelector {
 	private List<DataBase> slaves;
 	private DalHA ha;
 	private boolean isSelect;
-	private DalLogger logger;
 	
-	public DatabaseSelector(DalHA ha, List<DataBase> masters, List<DataBase> slaves, boolean isSelect, DalLogger logger){
+	public DatabaseSelector(DalHA ha, List<DataBase> masters, List<DataBase> slaves, boolean isSelect){
 		this.ha = ha;
 		this.masters = masters;
 		this.slaves = slaves;
 		this.isSelect= isSelect;
-		this.logger = logger;
 	}
 	
 	public String select() throws DalException{
@@ -97,7 +94,7 @@ public class DatabaseSelector {
 		List<String> dbNames = new ArrayList<String>();
 		if(!this.isNullOrEmpty(dbs)){
 			for (DataBase database : dbs) {
-				if(!MarkdownManager.isMarkdown(database.getConnectionString(), logger))
+				if(!MarkdownManager.isMarkdown(database.getConnectionString()))
 				{
 					dbNames.add(database.getConnectionString());
 				}

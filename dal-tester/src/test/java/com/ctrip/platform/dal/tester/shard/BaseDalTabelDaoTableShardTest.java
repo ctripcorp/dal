@@ -668,7 +668,6 @@ public abstract class BaseDalTabelDaoTableShardTest {
 			res = dao.insert(new DalHints(), holder, entities);
 			Assert.fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 
 		for(int i = 0; i < mod; i++) {
@@ -950,7 +949,6 @@ public abstract class BaseDalTabelDaoTableShardTest {
 			res = dao.update(hints, entities);
 			Assert.fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		
 		// By tabelShard

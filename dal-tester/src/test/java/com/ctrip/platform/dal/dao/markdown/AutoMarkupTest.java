@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
@@ -44,7 +43,7 @@ public class AutoMarkupTest {
 				ct = random.nextBoolean() ? DatabaseCategory.MySql : DatabaseCategory.SqlServer;
 				e = this.mockTimeoutException(ct);
 			}
-			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e, new DefaultLogger());
+			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
 			detector.detect(ctx);
 		}
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
@@ -56,12 +55,12 @@ public class AutoMarkupTest {
 		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3,5");
 		
 		for (int i = 0; i < MarkupPhase.length * 2 + 1; i++) {
-			MarkupManager.isPass(dbName, new DefaultLogger());
+			MarkupManager.isPass(dbName);
 		}
 		Assert.assertFalse(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
 		
-		Assert.assertEquals(0, MarkupManager.getMarkup(dbName, new DefaultLogger()).getCurrentPhase().getTotal());
-		Assert.assertEquals(1, MarkupManager.getMarkup(dbName, new DefaultLogger()).getNextPhaseIndex());
+		Assert.assertEquals(0, MarkupManager.getMarkup(dbName).getCurrentPhase().getTotal());
+		Assert.assertEquals(1, MarkupManager.getMarkup(dbName).getNextPhaseIndex());
 	}
 	
 	@Test
@@ -77,7 +76,7 @@ public class AutoMarkupTest {
 				ct = random.nextBoolean() ? DatabaseCategory.MySql : DatabaseCategory.SqlServer;
 				e = this.mockTimeoutException(ct);
 			}
-			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e, new DefaultLogger());
+			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
 			detector.detect(ctx);
 		}
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
@@ -89,23 +88,23 @@ public class AutoMarkupTest {
 		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3");
 		
 		for (int i = 0; i < MarkupPhase.length + 1; i++) {
-			MarkupManager.isPass(dbName, new DefaultLogger());
+			MarkupManager.isPass(dbName);
 			if(i == 9){
 				MarkupManager.rollback(new ErrorContext(dbName, 
 						DatabaseCategory.MySql, 1000, 
-						mockTimeoutException(DatabaseCategory.MySql), new DefaultLogger()));
+						mockTimeoutException(DatabaseCategory.MySql)));
 			}
 		}
 		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
 		
-		Assert.assertEquals(1, MarkupManager.getMarkup(dbName, new DefaultLogger()).getCurrentPhase().getTotal());
-		Assert.assertEquals(1, MarkupManager.getMarkup(dbName, new DefaultLogger()).getNextPhaseIndex());
+		Assert.assertEquals(1, MarkupManager.getMarkup(dbName).getCurrentPhase().getTotal());
+		Assert.assertEquals(1, MarkupManager.getMarkup(dbName).getNextPhaseIndex());
 	}
 	
 	@Test
 	public void MarkupInfoTest(){
 		Assert.assertEquals("No Info", MarkupManager.getMarkupInfo(dbName));
-		MarkupManager.isPass(dbName, new DefaultLogger());
+		MarkupManager.isPass(dbName);
 		Assert.assertEquals("total:1--loop:1", MarkupManager.getMarkupInfo(dbName));
 	}
 	

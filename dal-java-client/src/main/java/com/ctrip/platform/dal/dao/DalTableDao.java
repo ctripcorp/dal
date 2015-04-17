@@ -41,7 +41,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	private TaskExecutor<T> executor; 
 			
 	public DalTableDao(DalParser<T> parser) {
-		this(parser, new DefaultTaskFactory());
+		this(parser, DalClientFactory.getTaskFactory());
 	}
 	
 	public DalTableDao(DalParser<T> parser, DalTaskFactory factory) {
@@ -49,7 +49,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 	
 	public DalTableDao(DalParser<T> parser, TaskExecutor<T> executor) {
-		this(parser, new DefaultTaskFactory(), executor);
+		this(parser, DalClientFactory.getTaskFactory(), executor);
 	}
 	
 	public DalTableDao(DalParser<T> parser, DalTaskFactory factory, TaskExecutor<T> executor) {

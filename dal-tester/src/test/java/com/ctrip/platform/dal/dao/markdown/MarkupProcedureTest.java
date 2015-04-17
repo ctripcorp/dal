@@ -5,7 +5,6 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 
 public class MarkupProcedureTest {
@@ -34,7 +33,7 @@ public class MarkupProcedureTest {
 		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
 		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3");
 		
-		MarkupProcedure procedure = new MarkupProcedure("dao_test", new DefaultLogger());
+		MarkupProcedure procedure = new MarkupProcedure("dao_test");
 		for (int i = 0; i < MarkupPhase.length; i++) {
 			if(i >= 7)
 				Assert.assertTrue(procedure.isPass());
@@ -53,7 +52,7 @@ public class MarkupProcedureTest {
 		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
 		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3,5");
 		
-		MarkupProcedure procedure = new MarkupProcedure("dao_test", new DefaultLogger());
+		MarkupProcedure procedure = new MarkupProcedure("dao_test");
 		for (int i = 0; i < MarkupPhase.length * 2; i++) {
 			if(i >= 7 && i < 10 || i >= 15){
 				Assert.assertTrue(procedure.isPass());
@@ -71,7 +70,7 @@ public class MarkupProcedureTest {
 		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
 		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
 		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3,5");
-		MarkupProcedure procedure = new MarkupProcedure("dao_test", new DefaultLogger());
+		MarkupProcedure procedure = new MarkupProcedure("dao_test");
 		for (int i = 0; i < MarkupPhase.length * 2; i++) {
 			procedure.isPass();
 			if(i == 13){

@@ -46,7 +46,6 @@ public class DalQueryDaoSqlServerTest {
 			client = new DalQueryDao(DATABASE_NAME);
 			mapper = new ClientTestDalRowMapper();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -160,7 +159,6 @@ public class DalQueryDaoSqlServerTest {
 			client.queryForObject(sql, param, hints, mapper);
 			Assert.fail();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -194,7 +192,6 @@ public class DalQueryDaoSqlServerTest {
 			client.queryForObjectNullable(sql, param, hints, mapper);
 			Assert.fail();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -224,7 +221,6 @@ public class DalQueryDaoSqlServerTest {
 			client.queryForObject(sql, param, hints, Long.class);
 			Assert.fail();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -257,7 +253,6 @@ public class DalQueryDaoSqlServerTest {
 			client.queryForObjectNullable(sql, param, hints, Long.class);
 			Assert.fail();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -288,7 +283,6 @@ public class DalQueryDaoSqlServerTest {
 			Assert.fail();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 
@@ -348,7 +342,6 @@ public class DalQueryDaoSqlServerTest {
 			Integer result = client.queryFirst(sql, param, hints, Integer.class);
 			Assert.fail();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -412,7 +405,6 @@ public class DalQueryDaoSqlServerTest {
 					mapper, 1000);
 			Assert.fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -446,7 +438,6 @@ public class DalQueryDaoSqlServerTest {
 					Integer.class, 1000);
 			Assert.fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -487,7 +478,6 @@ public class DalQueryDaoSqlServerTest {
 					mapper, 0, 10);
 			Assert.fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -527,7 +517,6 @@ public class DalQueryDaoSqlServerTest {
 					Integer.class, 0, 10);
 			Assert.fail();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 	

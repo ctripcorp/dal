@@ -98,7 +98,7 @@ public class DalClientFactory {
 		// Verify if it is existed
 		config.getDatabaseSet(logicDbName);
 
-		return new DalDirectClient(getDalConfigure(), logicDbName, getDalLogger());
+		return new DalDirectClient(getDalConfigure(), logicDbName);
 	}
 	
 	public static DalConfigure getDalConfigure() {
@@ -116,7 +116,7 @@ public class DalClientFactory {
 	
 	public static DalTaskFactory getTaskFactory() {
 		DalConfigure config = configureRef.get();
-		return config == null ? new DefaultTaskFactory() : null;
+		return config == null ? new DefaultTaskFactory() : config.getFacory();
 	}
 	
 	/**

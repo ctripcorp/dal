@@ -37,7 +37,7 @@ public abstract class ConnectionAction<T> {
 	public ResultSet rs;
 	public long start;
 	
-	public DalLogger logger;
+	public DalLogger logger = DalClientFactory.getDalLogger();
 	public LogEntry entry;
 	
 	void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
@@ -98,8 +98,7 @@ public abstract class ConnectionAction<T> {
 			meta.populate(entry);
 	}
 	
-	public void initLogEntry(String logicDbName, DalHints hints, DalLogger logger) {
-		this.logger = logger;
+	public void initLogEntry(String logicDbName, DalHints hints) {
 		this.entry = logger.createLogEntry();
 		
 		entry.setClientVersion(Version.getVersion());

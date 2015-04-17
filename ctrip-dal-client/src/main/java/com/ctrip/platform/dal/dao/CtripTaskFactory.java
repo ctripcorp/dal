@@ -95,7 +95,7 @@ public class CtripTaskFactory implements DalTaskFactory {
 		if(DatabaseCategory.MySql == dbCategory)
 			bulkTask = new CombinedInsertTask<T>();
 		else
-			bulkTask = null;
+			return null;
 
 		bulkTask.initialize(parser);
 		return bulkTask;

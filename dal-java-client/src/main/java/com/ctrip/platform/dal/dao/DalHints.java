@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.client.DalHA;
+import com.ctrip.platform.dal.dao.task.DalAsyncCallback;
 
 /**
  * Additional parameters used to indicate how DAL behaves for each of the operation.
@@ -20,6 +21,8 @@ public class DalHints {
 	// It is not so nice to put keyholder here, but to make Task stateless, I have no other choice
 	private KeyHolder keyHolder;
 	
+	private DalAsyncCallback asyncCallback;
+	
 	public KeyHolder getKeyHolder() {
 		return keyHolder;
 	}
@@ -27,6 +30,15 @@ public class DalHints {
 	public DalHints setKeyHolder(KeyHolder keyHolder) {
 		this.keyHolder = keyHolder;
 		return this;
+	}
+	
+	public DalHints setDalAsyncCallback(DalAsyncCallback callback) {
+		this.asyncCallback = callback;
+		return this;
+	}
+	
+	public DalAsyncCallback getDalAsyncCallback() {
+		return asyncCallback;
 	}
 
 	public static DalHints createIfAbsent(DalHints hints) {
@@ -189,6 +201,15 @@ public class DalHints {
 	public DalHints continueOnError() {
 		set(DalHintEnum.continueOnError);
 		return this;
+	}
+	
+	public DalHints asyncExecuteCUD() {
+		set(DalHintEnum.asyncExecuteCUD);
+		return this;
+	}
+	
+	public boolean isAsyncExecuteCUD() {
+		return is(DalHintEnum.asyncExecuteCUD);
 	}
 	
 	public boolean isStopOnError() {

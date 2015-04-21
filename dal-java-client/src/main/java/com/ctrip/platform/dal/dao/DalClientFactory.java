@@ -11,6 +11,7 @@ import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
+import com.ctrip.platform.dal.dao.task.DefaultTaskExecutor;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 
@@ -125,6 +126,7 @@ public class DalClientFactory {
 	public static void shutdownFactory() {
 		logger.info("Start shutdown Dal Java Client Factory");
 		getDalLogger().shutdown();
+		DefaultTaskExecutor.shutdownAsyncTaskExecutor();
 		logger.info("Dal Java Client Factory is shutdown");
 	}
 }

@@ -12,6 +12,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalDetailResults;
@@ -20,14 +26,26 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 
 public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
+	
 	private DalParser<T> parser;
 	private final String logicDbName;
 	private final String rawTableName;
+	
+	private static ExecutorService service = null;
+	
+	static {
+		service = new ThreadPoolExecutor(5, 10, 10L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+	}
 
 	public DefaultTaskExecutor(DalParser<T> parser) {
 		this.parser = parser;
 		logicDbName = parser.getDatabaseName();
 		rawTableName = parser.getTableName();
+	}
+	
+	public static void shutdownAsyncTaskExecutor() {
+		if (service != null)
+			service.shutdown();
 	}
 	
 	public int execute(DalHints hints, T daoPojo, SingleTask<T> task) throws SQLException {
@@ -40,36 +58,69 @@ public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 		return execute(hints, daoPojos, task)[0];
 	}
 	
-	public int[] execute(DalHints hints, List<T> daoPojos, SingleTask<T> task) throws SQLException {
+	public int[] execute(final DalHints hints, final List<T> daoPojos, final SingleTask<T> task) throws SQLException {
 		if(isEmpty(daoPojos)) return new int[0];
 		
 		validate(task);
 
-		List<Map<String, ?>> pojos = getPojosFields(daoPojos);
+		final List<Map<String, ?>> pojos = getPojosFields(daoPojos);
 		detectDistributedTransaction(logicDbName, hints, pojos);
 		
+		if (hints.isAsyncExecuteCUD()) {
+			doInAsyncExecutor(hints, new Callable<int[]>() {
+				@Override
+				public int[] call() throws Exception {
+					return internalExecute(hints, daoPojos, pojos, task);
+				}
+			});
+			return new int[0];
+		} else {
+			return internalExecute(hints, daoPojos, pojos, task);
+		}
+	}
+	
+	private int[] internalExecute(DalHints hints, List<T> daoPojos, List<Map<String, ?>> pojos, SingleTask<T> task) throws SQLException {
 		int[] counts = new int[daoPojos.size()];
-		hints = hints.clone();// To avoid shard id being polluted by each pojos
+		DalHints localHints = hints.clone();// To avoid shard id being polluted by each pojos
 		for (int i = 0; i < pojos.size(); i++) {
 			DalWatcher.begin();// TODO check if we needed
-
 			try {
-				counts[i] = task.execute(hints, pojos.get(i));
+				counts[i] = task.execute(localHints, pojos.get(i));
 			} catch (SQLException e) {
 				DalClientFactory.getDalLogger().error("Error when execute insert pojo", e);
-				if (hints.isStopOnError())
+				if (localHints.isStopOnError())
 					throw e;
 			}
 		}
-		
 		return counts;	
 	}
 	
-	public <K> K execute(DalHints hints, List<T> daoPojos, BulkTask<K, T> task, K emptyValue) throws SQLException {
+	public <K> K execute(final DalHints hints, final List<T> daoPojos, final BulkTask<K, T> task, final K emptyValue) throws SQLException {
 		if(isEmpty(daoPojos)) return emptyValue;
 		
 		validate(task);
 		
+		if (hints.isAsyncExecuteCUD()) {
+			doInAsyncExecutor(hints, new Callable<K>() {
+				@Override
+				public K call() throws Exception {
+					return internalExecute(hints, daoPojos, task, emptyValue);
+				}
+			});
+			return null;
+		} else {
+			return internalExecute(hints, daoPojos, task, emptyValue);
+		}
+	}
+	
+	private void doInAsyncExecutor(DalHints hints, Callable<?> callable) throws SQLException {
+		Future<?> result = service.submit(callable);
+		DalAsyncCallback callback = hints.getDalAsyncCallback();
+		if (callback != null)
+			callback.setResult(result);
+	}
+	
+	private <K> K internalExecute(DalHints hints, List<T> daoPojos, BulkTask<K, T> task, K emptyValue) throws SQLException {
 		hints.setDetailResults(new DalDetailResults<K>());
 
 		if(isAlreadySharded(logicDbName, rawTableName, hints))

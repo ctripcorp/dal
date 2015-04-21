@@ -59,22 +59,15 @@ public class MetricsLogger {
 	}
 	public static void report(String dao, String method, String version, int size, String status, long duration) {
 		long cost = duration;
-        if (size < 200)
-        {
-            size = 200;
-        }
-        else if (size < 1000)
-        {
-            size = 1000;
-        }
-        else if (size < 5000)
-        {
-            size = 5000;
-        }
-        else
-        {
-            size = 99999;
-        }
+		if (size < 200) {
+			size = 200;
+		} else if (size < 1000) {
+			size = 1000;
+		} else if (size < 5000) {
+			size = 5000;
+		} else {
+			size = 99999;
+		}
 
         MetricsData md = new MetricsData();
         md.method = method;
@@ -106,12 +99,11 @@ public class MetricsLogger {
         Map<String, String> tags;
     }
 	
-	 private static class MasterSlaveMetrics
-     {
-         String databaseSet;
-         String databaseType;
-         String operationType;
-         long count;
-         Map<String, String> tags;
-     }
+	private static class MasterSlaveMetrics {
+		String databaseSet;
+		String databaseType;
+		String operationType;
+		long count;
+		Map<String, String> tags;
+	}
 }

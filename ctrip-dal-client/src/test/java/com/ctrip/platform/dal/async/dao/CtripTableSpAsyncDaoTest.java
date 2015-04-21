@@ -21,7 +21,7 @@ import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.task.DalAsyncCallback;
 
-public class CtripTableSpDaoTest {
+public class CtripTableSpAsyncDaoTest {
 
 	private final static String DATABASE_NAME = "SimpleShard";
 	

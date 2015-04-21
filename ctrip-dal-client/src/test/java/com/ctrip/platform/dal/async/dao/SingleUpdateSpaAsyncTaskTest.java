@@ -15,7 +15,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.SingleUpdateSpaTask;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class SingleUpdateSpaTaskTest {
+public class SingleUpdateSpaAsyncTaskTest {
 	private final static String DATABASE_NAME = "SimpleShard";
 	
 	private final static String TABLE_NAME = "People";

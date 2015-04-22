@@ -27,7 +27,11 @@ public class DalCatLogger {
 		try {
 			String method = entry.getEvent() == null ? "dal_test" : CatInfo.getTypeSQLInfo(entry.getEvent());
 			Cat.logEvent("DAL.version", "java-" + entry.getClientVersion());
-			Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, "");
+			if(entry.getPramemters() != null){
+				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, entry.getEncryptParameters(DalCLogger.isEncryptLogging()));
+			} else {
+				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, "");
+			}
 			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
 			entry.getCatTransaction().setStatus(Transaction.SUCCESS);
 			entry.getCatTransaction().complete();

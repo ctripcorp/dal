@@ -17,7 +17,7 @@ public class ${host.getPojoClassName()}Dao {
 	private static final String PAGE_SQL_PATTERN = "WITH CTE AS (select *, row_number() over(order by ${host.getOverColumns()} desc ) as rownum" 
 			+" from ${host.getTableName()} (nolock)) select * from CTE where rownum between ? and ?";
 #end
-
+#*
 #if($host.isSp())
 #if($host.getSpInsert().isExist())
 	private static final String BASIC_INSERT_SP_NAME = "${host.getSpInsert().getBasicSpName()}";
@@ -35,7 +35,7 @@ public class ${host.getPojoClassName()}Dao {
 	private static final String RET_CODE = "retcode";
 #end
 #end
-	
+*#	
 	private DalParser<${host.getPojoClassName()}> parser = new ${host.getPojoClassName()}Parser();
 	private DalScalarExtractor extractor = new DalScalarExtractor();
 	private DalRowMapperExtractor<${host.getPojoClassName()}> rowextractor = null;
@@ -50,14 +50,14 @@ public class ${host.getPojoClassName()}Dao {
 #parse("templates/java/dao/standard/method.count.tpl")
 #parse("templates/java/dao/standard/method.queryByPage.tpl")
 #parse("templates/java/dao/standard/method.getAll.tpl")
-#parse("templates/java/dao/standard/method.Insert.sp.tpl")
+##parse("templates/java/dao/standard/method.Insert.sp.tpl")
 #parse("templates/java/dao/standard/method.Insert.notSp.tpl")
-#parse("templates/java/dao/standard/method.Delete.sp.tpl")
+##parse("templates/java/dao/standard/method.Delete.sp.tpl")
 #parse("templates/java/dao/standard/method.Delete.notSp.tpl")
-#parse("templates/java/dao/standard/method.Update.sp.tpl")
+##parse("templates/java/dao/standard/method.Update.sp.tpl")
 #parse("templates/java/dao/standard/method.Update.notSp.tpl")
 #parse("templates/java/dao/autosql/DAO.java.tpl")
-#parse("templates/java/dao/standard/method.sp.prepareSpCall.tpl")
+##parse("templates/java/dao/standard/method.sp.prepareSpCall.tpl")
 
 	public static class ${host.getPojoClassName()}Parser extends AbstractDalParser<${host.getPojoClassName()}> {
 		public static final String DATABASE_NAME = "${host.getDbSetName()}";

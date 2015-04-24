@@ -141,7 +141,7 @@ public class CtripLogEntry extends LogEntry {
 
 	public String getEncryptParameters(boolean encryptLogging){
 		String params = "";
-		if(isSensitive() || encryptLogging){
+		if(encryptLogging){
 			try {
 				params = AESCrypto.getInstance().encrypt(this.getParams());
 			} catch (Exception e) {

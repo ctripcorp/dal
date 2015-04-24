@@ -86,7 +86,7 @@ public class CtripTableSpAsyncDaoTest {
 		
 		DalHints hints = new DalHints();
 		DalAsyncCallback callback = new DalAsyncCallback();
-		hints.asyncExecuteCUD().setDalAsyncCallback(callback);
+		hints.asyncExecution().setDalAsyncCallback(callback);
 		hints.setDetailResults(new DalDetailResults<int[]>());
 		dao.insert(hints.inShard(0), p);
 		int[]affected = (int[]) callback.getFuture().get();
@@ -110,7 +110,7 @@ public class CtripTableSpAsyncDaoTest {
 		
 		DalHints hints = new DalHints();
 		DalAsyncCallback callback = new DalAsyncCallback();
-		hints.asyncExecuteCUD().setDalAsyncCallback(callback);
+		hints.asyncExecution().setDalAsyncCallback(callback);
 		hints.setDetailResults(new DalDetailResults<int[]>());
 		try {
 			dao.combinedInsert(hints.inShard(0), null, p);
@@ -138,7 +138,7 @@ public class CtripTableSpAsyncDaoTest {
 		
 		DalHints hints = new DalHints();
 		DalAsyncCallback callback = new DalAsyncCallback();
-		hints.asyncExecuteCUD().setDalAsyncCallback(callback);
+		hints.asyncExecution().setDalAsyncCallback(callback);
 		hints.setDetailResults(new DalDetailResults<int[]>());
 		dao.batchInsert(hints.inShard(0), p);
 		int[]affected = (int[]) callback.getFuture().get();
@@ -162,7 +162,7 @@ public class CtripTableSpAsyncDaoTest {
 		
 		DalHints hints = new DalHints();
 		DalAsyncCallback callback = new DalAsyncCallback();
-		hints.asyncExecuteCUD().setDalAsyncCallback(callback);
+		hints.asyncExecution().setDalAsyncCallback(callback);
 		hints.setDetailResults(new DalDetailResults<int[]>());
 		dao.delete(hints.inShard(0), p);
 		int[]affected = (int[]) callback.getFuture().get();
@@ -186,7 +186,7 @@ public class CtripTableSpAsyncDaoTest {
 		
 		DalHints hints = new DalHints();
 		DalAsyncCallback callback = new DalAsyncCallback();
-		hints.asyncExecuteCUD().setDalAsyncCallback(callback);
+		hints.asyncExecution().setDalAsyncCallback(callback);
 		hints.setDetailResults(new DalDetailResults<int[]>());
 		dao.batchDelete(hints.inShard(0), p);
 		callback.getFuture().get();
@@ -209,7 +209,7 @@ public class CtripTableSpAsyncDaoTest {
 		
 		DalHints hints = new DalHints();
 		DalAsyncCallback callback = new DalAsyncCallback();
-		hints.asyncExecuteCUD().setDalAsyncCallback(callback);
+		hints.asyncExecution().setDalAsyncCallback(callback);
 		hints.setDetailResults(new DalDetailResults<int[]>());
 		dao.update(hints.inShard(0), p);
 		callback.getFuture().get();
@@ -233,7 +233,7 @@ public class CtripTableSpAsyncDaoTest {
 		
 		DalHints hints = new DalHints();
 		DalAsyncCallback callback = new DalAsyncCallback();
-		hints.asyncExecuteCUD().setDalAsyncCallback(callback);
+		hints.asyncExecution().setDalAsyncCallback(callback);
 		hints.setDetailResults(new DalDetailResults<int[]>());
 		dao.batchUpdate(hints.inShard(0), p);
 		

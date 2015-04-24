@@ -203,13 +203,13 @@ public class DalHints {
 		return this;
 	}
 	
-	public DalHints asyncExecuteCUD() {
-		set(DalHintEnum.asyncExecuteCUD);
+	public DalHints asyncExecution() {
+		set(DalHintEnum.asyncExecution);
 		return this;
 	}
 	
-	public boolean isAsyncExecuteCUD() {
-		return is(DalHintEnum.asyncExecuteCUD);
+	public boolean isAsyncExecution() {
+		return is(DalHintEnum.asyncExecution);
 	}
 	
 	public boolean isStopOnError() {

@@ -66,7 +66,7 @@ public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 		final List<Map<String, ?>> pojos = getPojosFields(daoPojos);
 		detectDistributedTransaction(logicDbName, hints, pojos);
 		
-		if (hints.isAsyncExecuteCUD()) {
+		if (hints.isAsyncExecution()) {
 			doInAsyncExecutor(hints, new Callable<int[]>() {
 				@Override
 				public int[] call() throws Exception {
@@ -100,7 +100,7 @@ public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 		
 		validate(task);
 		
-		if (hints.isAsyncExecuteCUD()) {
+		if (hints.isAsyncExecution()) {
 			doInAsyncExecutor(hints, new Callable<K>() {
 				@Override
 				public K call() throws Exception {

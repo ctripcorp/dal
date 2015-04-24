@@ -68,7 +68,7 @@ public class SingleDeleteSpaAsyncTaskTest {
 	 	p1.setCountryID(-1);
 
 		try {
-			test.execute(new DalHints().inShard(0).asyncExecuteCUD(), parser.getFields(p1));
+			test.execute(new DalHints().inShard(0).asyncExecution(), parser.getFields(p1));
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Assert.fail();

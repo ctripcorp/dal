@@ -77,7 +77,7 @@ public class BatchInsertSp3AsyncTaskTest {
 		try {
 			DalHints hints = new DalHints();
 			DalAsyncCallback callback = new DalAsyncCallback();
-			hints.asyncExecuteCUD().setDalAsyncCallback(callback);
+			hints.asyncExecution().setDalAsyncCallback(callback);
 			hints.setDetailResults(new DalDetailResults<int[]>());
 			test.execute(hints.inShard(0), getPojosFields(p, parser));
 		} catch (SQLException e) {

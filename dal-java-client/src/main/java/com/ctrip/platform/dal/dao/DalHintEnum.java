@@ -131,6 +131,6 @@ public enum DalHintEnum {
 	/**
 	 * Indicate the cud operation will async execute
 	 */
-	asyncExecuteCUD
+	asyncExecution
 	
 }

@@ -110,8 +110,13 @@ public class DatabaseConfigParser {
 				String name = getAttribute(databaseEntry, DATABASE_ENTRY_NAME);
 				String connectionString = getAttribute(databaseEntry, DATABASE_ENTRY_CONNECTIONSTRING);
 				DatabasePoolConifg poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
-				String[] prop = parseDBConnString(connectionString, poolConfig);
-				props.put(name, prop);
+				try {
+					String[] prop = parseDBConnString(name, connectionString, poolConfig);
+					props.put(name, prop);
+				} catch(Throwable e) {
+					String msg = String.format("Read %s file error, msg: %s", absolutePath, e.getMessage());
+					log.error(msg, e);
+				}
 			}
 			in.close();
 		} catch (Throwable e) {
@@ -179,14 +184,14 @@ public class DatabaseConfigParser {
 	 * 
 	 * @return new String[]{url,username,passwd,driver}
 	 */
-	private String[] parseDBConnString(String connStr, DatabasePoolConifg poolConfig) {
+	private String[] parseDBConnString(String name, String connStr, DatabasePoolConifg poolConfig) {
 		String[] dbInfos = new String[] { "", "", "","" };
 		if (connStr!=null && -1==connStr.indexOf(';')) { // connStr was encrypted
 			try {
 				connStr = Crypto.getInstance().decrypt(connStr);
 			} catch(Exception e) {
-				log.error("decode connectionString exception, msg:" + e.getMessage(), e);
-				throw new RuntimeException("decode connectionString exception, msg:" + e.getMessage(), e);
+				log.error("decode " + name + " connectionString exception, msg:" + e.getMessage(), e);
+				throw new RuntimeException("decode " + name + " connectionString exception, msg:" + e.getMessage(), e);
 			}
 		}
 		try {

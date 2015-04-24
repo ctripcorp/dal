@@ -113,7 +113,7 @@ public class DatabaseConfigParser {
 				}
 				String name = getAttribute(databaseEntry, DATABASE_ENTRY_NAME);
 				String connectionString = getAttribute(databaseEntry, DATABASE_ENTRY_CONNECTIONSTRING);
-				props.put(name, parseDBConnString(connectionString));
+				props.put(name, parseDBConnString(name, connectionString));
 			}
 			in.close();
 		} catch (Throwable e) {
@@ -179,13 +179,13 @@ public class DatabaseConfigParser {
 	 * 
 	 * @return new String[]{url,username,passwd,driver}
 	 */
-	private String[] parseDBConnString(String connStr) {
+	private String[] parseDBConnString(String name, String connStr) {
 		String[] dbInfos = new String[] { "", "", "","" };
 		if (connStr!=null && -1==connStr.indexOf(';')) { // connStr was encrypted
 			try {
 				connStr = Crypto.getInstance().decrypt(connStr);
 			} catch(Exception e) {
-				log.error("decode connectionString exception, msg:" + e.getMessage(), e);
+				log.error("decode " + name + " connectionString exception, msg:" + e.getMessage(), e);
 			}
 		}
 		try {

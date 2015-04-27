@@ -19,7 +19,7 @@ import org.w3c.dom.NodeList;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
-import com.ctrip.platform.dal.dao.client.DefaultLogger;
+import com.ctrip.platform.dal.dao.client.NullLogger;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 
@@ -213,7 +213,7 @@ public class DalConfigureFactory {
 	}
 	
 	private DalLogger readLogListener(Node logListenerNode) throws Exception {
-		DalLogger logger = new DefaultLogger();
+		DalLogger logger = new NullLogger();
 		if(logListenerNode == null)
 			return logger;
 		

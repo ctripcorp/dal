@@ -6,12 +6,11 @@ import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 
 /**
- * logger that is based on log4j. It is useful when you want to quick start your DAL project without
- * a specified logger
+ * Used when logger is disabled
  * @author jhhe
  *
  */
-public class DefaultLogger implements DalLogger {
+public class NullLogger implements DalLogger {
 
 	@Override
 	public void initLogger(Map<String, String> settings) {

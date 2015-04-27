@@ -14,10 +14,6 @@ public class DalCatLogger {
 			Transaction catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, sqlType);
 			entry.setCatTransaction(catTransaction);
 			catTransaction.addData(entry.getSqls() == null ? "" : StringUtils.join(entry.getSqls(), ";"));
-			catTransaction.addData("\n");
-			if(entry.getPramemters() != null){
-				catTransaction.addData(entry.getEncryptParameters(DalCLogger.isEncryptLogging()));
-			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}

@@ -63,11 +63,11 @@ public class LogEntry {
 		String commandType;
 		
 		if(this.event == DalEventEnum.CALL || 
-				this.event == DalEventEnum.BATCH_CALL)
+				this.event == DalEventEnum.BATCH_CALL) {
 			commandType = "SP";
-		else if(this.event == DalEventEnum.QUERY)
+		} else if(this.event == DalEventEnum.QUERY) {
 			commandType = "Query";
-		else {
+		} else {
 			commandType = "Execute";
 		}
 		
@@ -246,25 +246,24 @@ public class LogEntry {
 		this.clientVersion = clientVersion;
 	}
 
-	public int getSqlSize(){
+	public int getSqlSize() {
 		int size = 0;
-		if(this.event == DalEventEnum.QUERY || 
-				this.event == DalEventEnum.UPDATE_SIMPLE ||
-				this.event == DalEventEnum.UPDATE_KH ||
-				this.event == DalEventEnum.BATCH_UPDATE_PARAM){
-			size = null != this.sqls && this.sqls.length > 0 ?  
-					this.sqls[0].length() : 0;
+		if (this.event == DalEventEnum.QUERY
+				|| this.event == DalEventEnum.UPDATE_SIMPLE
+				|| this.event == DalEventEnum.UPDATE_KH
+				|| this.event == DalEventEnum.BATCH_UPDATE_PARAM) {
+			size = null != this.sqls && this.sqls.length > 0 ? this.sqls[0].length() : 0;
 		}
-		if(this.event == DalEventEnum.BATCH_UPDATE){
-			for(String sqll : this.sqls){
+		if (this.event == DalEventEnum.BATCH_UPDATE) {
+			for (String sqll : this.sqls) {
 				size += sqll.length();
 			}
 		}
-		if(this.event == DalEventEnum.CALL || 
-				this.event == DalEventEnum.BATCH_CALL){
+		if (this.event == DalEventEnum.CALL
+				|| this.event == DalEventEnum.BATCH_CALL) {
 			size = this.callString.length();
 		}
-		
+
 		return size;
 	}
 }

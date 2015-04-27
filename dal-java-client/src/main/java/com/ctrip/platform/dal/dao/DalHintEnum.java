@@ -52,7 +52,9 @@ public enum DalHintEnum {
 	forceAutoCommit,
 	
 	/* 
-	 * Settings for initialize statement 
+	 * Settings for initialize statement.
+	 * Sets the number of seconds the driver will wait for a Statement object to execute to the given number of seconds.
+	 * zero means there is no limit.
 	 */
 	timeout,
 	

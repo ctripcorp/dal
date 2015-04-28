@@ -134,24 +134,22 @@ public class SqlBuilder {
 		}
 		sql.append(PlainSelect.getStringList(plain.getSelectItems()));
 		if (plain.getFromItem() != null) {
-			sql.append(" FROM ").append(plain.getFromItem());
+			sql.append(" FROM ").append(plain.getFromItem()).append(" WITH (NOLOCK) ");
 			if (plain.getJoins() != null) {
 				Iterator<Join> it = plain.getJoins().iterator();
 				while (it.hasNext()) {
 					Join join = it.next();
 					if (join.isSimple()) {
-						sql.append(", ").append(join);
+						sql.append(", ").append(join).append(" WITH (NOLOCK) ");
 					} else {
-						sql.append(" ").append(join);
+						String temp = join.toString().replace(join.getRightItem().toString(), join.getRightItem().toString() + " WITH (NOLOCK) ");
+						sql.append(" ").append(temp);
 					}
 				}
 			}
 			// sql += getFormatedList(joins, "", false, false);
 			if (plain.getWhere() != null) {
-				sql.append(" WITH (NOLOCK) WHERE ").append(plain.getWhere());
-			}
-			else{
-				sql.append(" WITH (NOLOCK)");
+				sql.append(" WHERE ").append(plain.getWhere());
 			}
 			if (plain.getOracleHierarchical() != null) {
 				sql.append(plain.getOracleHierarchical().toString());

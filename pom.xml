@@ -54,7 +54,7 @@
 		<netty-version>4.0.4</netty-version>
 		<javassist-version>3.16.1-GA</javassist-version>
 		<mysql-version>5.1.28</mysql-version>
-		<sqlserver-version>4.0</sqlserver-version>
+		<sqlserver-version>4.0.2206</sqlserver-version>
 		<jtds-version>1.2.8</jtds-version>
 		<google-pb-version>2.5.0</google-pb-version>
 		<google-guice-version>4.0-beta</google-guice-version>

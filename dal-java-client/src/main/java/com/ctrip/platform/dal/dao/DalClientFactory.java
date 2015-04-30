@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
 import com.ctrip.platform.dal.dao.client.DalLogger;
-import com.ctrip.platform.dal.dao.client.DefaultLogger;
+import com.ctrip.platform.dal.dao.client.NullLogger;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
+import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DefaultTaskExecutor;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
-import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 
 public class DalClientFactory {
 	private static Logger logger = LoggerFactory.getLogger(DalClientFactory.class);
@@ -112,7 +112,7 @@ public class DalClientFactory {
 
 	public static DalLogger getDalLogger() {
 		DalConfigure config = configureRef.get();
-		return config == null ? new DefaultLogger() : config.getDalLogger();
+		return config == null ? new NullLogger() : config.getDalLogger();
 	}
 	
 	public static DalTaskFactory getTaskFactory() {

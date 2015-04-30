@@ -10,7 +10,7 @@ public class DalAsyncCallback {
 		return this.result;
 	}
 	
-	void setResult(Future<?> result) {
+	public void setResult(Future<?> result) {
 		this.result = result;
 	}
 	

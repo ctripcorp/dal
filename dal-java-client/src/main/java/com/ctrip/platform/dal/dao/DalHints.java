@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.task.DalAsyncCallback;
@@ -186,6 +187,34 @@ public class DalHints {
 	
 	public DalHints setParameters(StatementParameters parameters) {
 		return set(DalHintEnum.parameters, parameters);
+	}
+	
+	public DalHints inAllShards() {
+		set(DalHintEnum.allShards);
+		return this;
+	}
+	
+	public boolean isAllShards() {
+		return is(DalHintEnum.allShards);
+	}
+	
+	public DalHints inShards(Set<String> shards) {
+		hints.put(DalHintEnum.shards, shards);
+		return this;
+	}
+	
+	public Set<String> getShards() {
+		return (Set<String>)hints.get(DalHintEnum.shards);
+	}
+	
+	public <K, T> DalHints mergeBy(ResultMerger<K, T> merger) {
+		hints.put(DalHintEnum.resultMerger, merger);
+		return this;
+	}
+
+	public DalHints parallelExecution() {
+		set(DalHintEnum.parallelExecution);
+		return this;
 	}
 	
 	public DalHints masterOnly() {

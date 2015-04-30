@@ -47,6 +47,26 @@ public enum DalHintEnum {
 	tableShard,
 	
 	/*
+	 * Indicate that the query will be executed in all shards 
+	 */
+	allShards,
+	
+	/*
+	 * Indicate that the query will be executed in the given shards 
+	 */
+	shards,
+	
+	/*
+	 * The comparator that is used to sort query result 
+	 */
+	resultMerger,
+	
+	/*
+	 * Indicate if the DB operation can be executed in parallel way 
+	 */
+	parallelExecution,
+	
+	/*
 	 * used in batch sp, when set the connection auto commit will be true.
 	 */
 	forceAutoCommit,
@@ -131,6 +151,15 @@ public enum DalHintEnum {
 	/**
 	 * Indicate the cud operation will async execute
 	 */
-	asyncExecution
+	asyncExecution,
 	
+	/**
+	 * Indicate the queryCallback for async execution
+	 */
+	queryCallback,
+	
+	/**
+	 * Indicate the futureResult for async execution when queryCallback is not specified
+	 */
+	futureResult,
 }

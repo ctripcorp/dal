@@ -2,11 +2,25 @@ package com.ctrip.platform.dal.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+import com.ctrip.platform.dal.dao.client.DalLogger;
+import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.dao.task.DalAsyncCallback;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -19,10 +33,14 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
 public final class DalQueryDao {
 	private static final String COUNT_MISMATCH_MSG = "It is expected to return only %d result. But the actually count is %d.";
 	private static final String NO_RESULT_MSG = "There is no result found!";
+	private String logicDbName;
 	private DalClient client;
+	private DalLogger logger;
 
 	public DalQueryDao(String logicDbName) {
+		this.logicDbName = logicDbName;
 		this.client = DalClientFactory.getClient(logicDbName);
+		this.logger = DalClientFactory.getDalLogger();
 	}
 	
 	public DalClient getClient() {
@@ -285,6 +303,92 @@ public final class DalQueryDao {
 	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int start, int count) throws SQLException {
 		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
 		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), start, count));
+	}
+
+	private static ExecutorService service = null;
+	
+	static {
+		service = new ThreadPoolExecutor(5, 100, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+	}
+
+//	public <T> T merge(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor) throws SQLException {
+//		
+//	}
+//	
+//	public <T> T commonQuery(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor) throws SQLException {
+//		
+//	}
+	public <T> T commonQuery(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor) throws SQLException {
+		if (hints.isAsyncExecution()) {
+			doInAsyncExecutor(hints, new Callable<T>() {
+				@Override
+				public T call() throws Exception {
+					return internalQuery(sql, parameters, hints, extractor);
+				}
+			});
+			return null;
+			
+		} else {
+			return internalQuery(sql, parameters, hints, extractor);
+		}
+	}
+	
+	private void doInAsyncExecutor(DalHints hints, Callable<?> callable) throws SQLException {
+		Future<?> result = service.submit(callable);
+		QueryCallback qc = (QueryCallback)hints.get(DalHintEnum.queryCallback);
+		
+		if (qc != null)
+			qc.onResult(result);
+		else
+			hints.set(DalHintEnum.futureResult, result);
+	}
+
+	
+	private <K, T> K internalQuery(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor) throws SQLException {
+		// Check if it is in (distributed) transaction
+		Set<String> shards = null;
+		if(hints.is(DalHintEnum.allShards)) {
+			DatabaseSet set = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName);
+			logger.warn("Query on all shards detected: " + sql);
+			shards = set.getAllShards();
+		} else {
+			shards = (Set<String>)hints.get(DalHintEnum.shards);
+		}
+		
+		if(shards == null)
+			return (K)client.query(sql, parameters, hints, extractor);
+
+		// Check if we need fork/join fx
+		ResultMerger<K, T> merger = (ResultMerger<K, T>)hints.get(DalHintEnum.resultMerger);
+		Map<String, T> results = new HashMap<>();
+		if(hints.is(DalHintEnum.parallelExecution)) {
+			Map<String, Future<T>> resultFutures = new HashMap<>();
+			for(final String shard: shards) {
+				resultFutures.put(shard, service.submit(new  Callable<T>() {
+					@Override
+					public T call() throws Exception {
+						return client.query(sql, parameters, hints.clone().inShard(shard), extractor);
+					}
+				}));
+			}
+			for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet())
+				try {
+					results.put(entry.getKey(), entry.getValue().get());
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}// Handle timeout and execution exception
+		}else {
+			for(final String shard: shards)
+				results.put(shard, client.query(sql, parameters, hints.clone().inShard(shard), extractor));
+		}
+
+		for(Map.Entry<String, T> entry: results.entrySet()) {
+			merger.addPartial(entry.getKey(), entry.getValue());
+		}
+		
+		return merger.merge();
 	}
 	
 	/**

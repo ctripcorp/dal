@@ -111,15 +111,13 @@ public abstract class ConnectionAction<T> {
 		else
 			entry.setSqls(sql);
 
-		if(null != parametersList)
-		{
+		if (null != parametersList) {
 			String[] params = new String[parametersList.length];
 			for (int i = 0; i < parametersList.length; i++) {
 				params[i] = parametersList[i].toLogString();
 			}
 			entry.setPramemters(params);
-		}
-		else if(parameters != null){
+		} else if (parameters != null) {
 			entry.setPramemters(parameters.toLogString());
 			hints.setParameters(parameters);
 		}

@@ -12,6 +12,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 
 public class DalStatementCreator {
 	private static final int DEFAULT_RESULT_SET_TYPE = ResultSet.TYPE_FORWARD_ONLY;
@@ -139,8 +140,14 @@ public class DalStatementCreator {
 			statement.setMaxRows(maxRows);
 
 		Integer timeout = (Integer)hints.get(DalHintEnum.timeout);
-		if (timeout != null && timeout > 0)
+		if (timeout != null && timeout >= 0) {
 			statement.setQueryTimeout(timeout);
+		} else {
+			timeout = ConfigBeanFactory.getTimeoutMarkDownBean().getTimeoutThreshold();
+			if (timeout >= 0)
+				statement.setQueryTimeout(timeout);
+		}
+		
 	}
 	
 	private int getResultSetType(DalHints hints) {

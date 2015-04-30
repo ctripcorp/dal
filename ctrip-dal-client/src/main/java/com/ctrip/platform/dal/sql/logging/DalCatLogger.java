@@ -14,10 +14,6 @@ public class DalCatLogger {
 			Transaction catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, sqlType);
 			entry.setCatTransaction(catTransaction);
 			catTransaction.addData(entry.getSqls() == null ? "" : StringUtils.join(entry.getSqls(), ";"));
-			catTransaction.addData("\n");
-			if(entry.getPramemters() != null){
-				catTransaction.addData(entry.getEncryptParameters(DalCLogger.isEncryptLogging()));
-			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -28,7 +24,7 @@ public class DalCatLogger {
 			String method = entry.getEvent() == null ? "dal_test" : CatInfo.getTypeSQLInfo(entry.getEvent());
 			Cat.logEvent("DAL.version", "java-" + entry.getClientVersion());
 			if(entry.getPramemters() != null){
-				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, entry.getEncryptParameters(DalCLogger.isEncryptLogging()));
+				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, entry.getEncryptParameters(DalCLogger.isEncryptLogging()).replaceAll(",", "&"));
 			} else {
 				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, "");
 			}

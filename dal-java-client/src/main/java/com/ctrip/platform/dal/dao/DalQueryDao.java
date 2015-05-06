@@ -339,17 +339,26 @@ public final class DalQueryDao {
 		// Check if it is in (distributed) transaction
 		Set<String> shards = getShards(sql, hints);
 		
+		T result;
 		// Not the cross shard query, just query normally
-		if(shards == null)
-			return client.query(sql, parameters, hints, extractor);
+		if(shards == null) 
+			result = client.query(sql, parameters, hints, extractor);
+		else
+			result = crossShardQuery(sql, parameters, hints, extractor, shards);
 
+		handleCallback(hints, result);
+		return result;
+	}
+
+	private <T> T crossShardQuery(final String sql,
+			final StatementParameters parameters, final DalHints hints,
+			final DalResultSetExtractor<T> extractor, Set<String> shards)
+			throws SQLException {
+		T result;
 		ResultMerger<T> merger = (ResultMerger<T>)hints.get(DalHintEnum.resultMerger);
 		if(merger == null)
 			throw new NullPointerException("For query in several shards, you need to specify DalHintEnum.resultMerger to merge the result");
 		
-		// Check if we need fork/join fx
-		T result;
-
 		// TODO we need decide if we want the default behavior is parallel or sequencial
 		// Get raw result
 		if(hints.is(DalHintEnum.parallelExecution)) {
@@ -357,9 +366,6 @@ public final class DalQueryDao {
 		}else {
 			result = sequentialQuery(sql, parameters, hints, extractor, shards, merger);
 		}
-
-		handleCallback(hints, result);
-
 		return result;
 	}
 

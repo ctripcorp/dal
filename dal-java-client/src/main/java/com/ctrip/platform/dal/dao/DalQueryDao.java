@@ -348,41 +348,38 @@ public final class DalQueryDao {
 			throw new NullPointerException("For query in several shards, you need to specify DalHintEnum.resultMerger to merge the result");
 		
 		// Check if we need fork/join fx
-		Map<String, T> results;
+		T result;
 
 		// TODO we need decide if we want the default behavior is parallel or sequencial
 		// Get raw result
 		if(hints.is(DalHintEnum.parallelExecution)) {
-			results = parallelQuery(sql, parameters, hints, extractor, shards);
+			result = parallelQuery(sql, parameters, hints, extractor, shards, merger);
 		}else {
-			results = sequentialQuery(sql, parameters, hints, extractor, shards);
+			result = sequentialQuery(sql, parameters, hints, extractor, shards, merger);
 		}
 
-		// Merge results
-		for(Map.Entry<String, T> entry: results.entrySet()) {
-			merger.addPartial(entry.getKey(), entry.getValue());
-		}
-		
-		T finalResult = merger.merge();
+		handleCallback(hints, result);
+
+		return result;
+	}
+
+	private <T> void handleCallback(final DalHints hints, T result) {
 		QueryCallback qc = (QueryCallback)hints.get(DalHintEnum.queryCallback);
 		if (qc != null)
-			qc.onResult(finalResult);
-
-		return finalResult;
+			qc.onResult(result);
 	}
 
-	private <T> Map<String, T> sequentialQuery(final String sql,
+	private <T> T sequentialQuery(final String sql,
 			final StatementParameters parameters, final DalHints hints,
-			final DalResultSetExtractor<T> extractor, Set<String> shards) throws SQLException {
-		Map<String, T> results = new HashMap<>();
+			final DalResultSetExtractor<T> extractor, Set<String> shards, ResultMerger<T> merger) throws SQLException {
 		for(final String shard: shards)
-			results.put(shard, client.query(sql, parameters, hints.clone().inShard(shard), extractor));
-		return results;
+			merger.addPartial(shard, client.query(sql, parameters, hints.clone().inShard(shard), extractor));
+		return merger.merge();
 	}
 
-	private <T> Map<String, T> parallelQuery(final String sql,
+	private <T> T parallelQuery(final String sql,
 			final StatementParameters parameters, final DalHints hints,
-			final DalResultSetExtractor<T> extractor, Set<String> shards) {
+			final DalResultSetExtractor<T> extractor, Set<String> shards, ResultMerger<T> merger) {
 		Map<String, T> results = new HashMap<>();
 		Map<String, Future<T>> resultFutures = new HashMap<>();
 		for(final String shard: shards)
@@ -391,14 +388,14 @@ public final class DalQueryDao {
 
 		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet())
 			try {
-				results.put(entry.getKey(), entry.getValue().get());
+				merger.addPartial(entry.getKey(), entry.getValue().get());
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
 				e.printStackTrace();
 			}// Handle timeout and execution exception
 		
-		return results;
+		return merger.merge();
 	}
 
 	private Set<String> getShards(final String sql, final DalHints hints) {

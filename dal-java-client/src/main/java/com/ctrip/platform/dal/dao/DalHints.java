@@ -207,7 +207,7 @@ public class DalHints {
 		return (Set<String>)hints.get(DalHintEnum.shards);
 	}
 	
-	public <K, T> DalHints mergeBy(ResultMerger<K, T> merger) {
+	public <T> DalHints mergeBy(ResultMerger<T> merger) {
 		hints.put(DalHintEnum.resultMerger, merger);
 		return this;
 	}

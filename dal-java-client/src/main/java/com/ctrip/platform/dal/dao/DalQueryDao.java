@@ -311,42 +311,98 @@ public final class DalQueryDao {
 		service = new ThreadPoolExecutor(5, 100, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 	}
 
-//	public <T> T merge(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor) throws SQLException {
-//		
-//	}
-//	
-//	public <T> T commonQuery(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor) throws SQLException {
-//		
-//	}
+	/**
+	 * factors to consider:
+	 * 1. sync/async [v]
+	 * 2. callback or no callback [v]
+	 * 3. merger or no merger
+	 * 4. result is same as each shard or different 
+	 * @param sql
+	 * @param parameters
+	 * @param hints
+	 * @param extractor
+	 * @return
+	 * @throws SQLException
+	 */
 	public <T> T commonQuery(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor) throws SQLException {
-		if (hints.isAsyncExecution()) {
-			doInAsyncExecutor(hints, new Callable<T>() {
-				@Override
-				public T call() throws Exception {
-					return internalQuery(sql, parameters, hints, extractor);
-				}
-			});
+		if (hints.isAsyncExecution() || hints.is(DalHintEnum.queryCallback)) {
+			hints.set(DalHintEnum.futureResult, service.submit(new Callable<T>() {public T call() throws Exception {
+					return internalQuery(sql, parameters, hints, extractor);}}));
 			return null;
-			
-		} else {
-			return internalQuery(sql, parameters, hints, extractor);
 		}
+		
+		//There is no callback
+		return internalQuery(sql, parameters, hints, extractor);
 	}
 	
-	private void doInAsyncExecutor(DalHints hints, Callable<?> callable) throws SQLException {
-		Future<?> result = service.submit(callable);
-		QueryCallback qc = (QueryCallback)hints.get(DalHintEnum.queryCallback);
+	private <T> T internalQuery(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor) throws SQLException {
+		// Check if it is in (distributed) transaction
+		Set<String> shards = getShards(sql, hints);
 		
+		// Not the cross shard query, just query normally
+		if(shards == null)
+			return client.query(sql, parameters, hints, extractor);
+
+		ResultMerger<T> merger = (ResultMerger<T>)hints.get(DalHintEnum.resultMerger);
+		if(merger == null)
+			throw new NullPointerException("For query in several shards, you need to specify DalHintEnum.resultMerger to merge the result");
+		
+		// Check if we need fork/join fx
+		Map<String, T> results;
+
+		// TODO we need decide if we want the default behavior is parallel or sequencial
+		// Get raw result
+		if(hints.is(DalHintEnum.parallelExecution)) {
+			results = parallelQuery(sql, parameters, hints, extractor, shards);
+		}else {
+			results = sequentialQuery(sql, parameters, hints, extractor, shards);
+		}
+
+		// Merge results
+		for(Map.Entry<String, T> entry: results.entrySet()) {
+			merger.addPartial(entry.getKey(), entry.getValue());
+		}
+		
+		T finalResult = merger.merge();
+		QueryCallback qc = (QueryCallback)hints.get(DalHintEnum.queryCallback);
 		if (qc != null)
-			qc.onResult(result);
-		else
-			hints.set(DalHintEnum.futureResult, result);
+			qc.onResult(finalResult);
+
+		return finalResult;
 	}
 
-	
-	private <K, T> K internalQuery(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor) throws SQLException {
-		// Check if it is in (distributed) transaction
-		Set<String> shards = null;
+	private <T> Map<String, T> sequentialQuery(final String sql,
+			final StatementParameters parameters, final DalHints hints,
+			final DalResultSetExtractor<T> extractor, Set<String> shards) throws SQLException {
+		Map<String, T> results = new HashMap<>();
+		for(final String shard: shards)
+			results.put(shard, client.query(sql, parameters, hints.clone().inShard(shard), extractor));
+		return results;
+	}
+
+	private <T> Map<String, T> parallelQuery(final String sql,
+			final StatementParameters parameters, final DalHints hints,
+			final DalResultSetExtractor<T> extractor, Set<String> shards) {
+		Map<String, T> results = new HashMap<>();
+		Map<String, Future<T>> resultFutures = new HashMap<>();
+		for(final String shard: shards)
+			resultFutures.put(shard, service.submit(new  Callable<T>() {public T call() throws Exception {
+					return client.query(sql, parameters, hints.clone().inShard(shard), extractor);}}));
+
+		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet())
+			try {
+				results.put(entry.getKey(), entry.getValue().get());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}// Handle timeout and execution exception
+		
+		return results;
+	}
+
+	private Set<String> getShards(final String sql, final DalHints hints) {
+		Set<String> shards;
 		if(hints.is(DalHintEnum.allShards)) {
 			DatabaseSet set = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName);
 			logger.warn("Query on all shards detected: " + sql);
@@ -354,41 +410,7 @@ public final class DalQueryDao {
 		} else {
 			shards = (Set<String>)hints.get(DalHintEnum.shards);
 		}
-		
-		if(shards == null)
-			return (K)client.query(sql, parameters, hints, extractor);
-
-		// Check if we need fork/join fx
-		ResultMerger<K, T> merger = (ResultMerger<K, T>)hints.get(DalHintEnum.resultMerger);
-		Map<String, T> results = new HashMap<>();
-		if(hints.is(DalHintEnum.parallelExecution)) {
-			Map<String, Future<T>> resultFutures = new HashMap<>();
-			for(final String shard: shards) {
-				resultFutures.put(shard, service.submit(new  Callable<T>() {
-					@Override
-					public T call() throws Exception {
-						return client.query(sql, parameters, hints.clone().inShard(shard), extractor);
-					}
-				}));
-			}
-			for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet())
-				try {
-					results.put(entry.getKey(), entry.getValue().get());
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					e.printStackTrace();
-				}// Handle timeout and execution exception
-		}else {
-			for(final String shard: shards)
-				results.put(shard, client.query(sql, parameters, hints.clone().inShard(shard), extractor));
-		}
-
-		for(Map.Entry<String, T> entry: results.entrySet()) {
-			merger.addPartial(entry.getKey(), entry.getValue());
-		}
-		
-		return merger.merge();
+		return shards;
 	}
 	
 	/**

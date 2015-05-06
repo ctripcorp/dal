@@ -34,7 +34,7 @@ public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 	private static ExecutorService service = null;
 	
 	static {
-		service = new ThreadPoolExecutor(5, 10, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+		service = new ThreadPoolExecutor(5, 50, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 	}
 
 	public DefaultTaskExecutor(DalParser<T> parser) {

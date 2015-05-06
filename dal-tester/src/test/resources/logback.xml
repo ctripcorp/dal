@@ -11,6 +11,6 @@
 		<serverPort>63100</serverPort>
 	</appender>
 	<root level="INFO">
-		<appender-ref ref="CentralLogging" />
+		<appender-ref ref="stdout" />
 	</root>
 </configuration>

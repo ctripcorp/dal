@@ -361,11 +361,11 @@ public final class DalQueryDao {
 		
 		// TODO we need decide if we want the default behavior is parallel or sequencial
 		// Get raw result
-		if(hints.is(DalHintEnum.parallelExecution)) {
+		if(hints.is(DalHintEnum.parallelExecution))
 			result = parallelQuery(sql, parameters, hints, extractor, shards, merger);
-		}else {
+		else
 			result = sequentialQuery(sql, parameters, hints, extractor, shards, merger);
-		}
+
 		return result;
 	}
 

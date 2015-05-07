@@ -1,13 +1,13 @@
 package com.ctrip.platform.dal.dao;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.thoughtworks.xstream.mapper.ArrayMapper;
 
 public interface ResultMerger<T> {
 	void addPartial(String shard, T partial);
@@ -38,7 +38,6 @@ public interface ResultMerger<T> {
 			return result;
 		}
 	}
-
 
 	static class IntSummary implements ResultMerger<Integer>{
 		private int total;
@@ -75,6 +74,38 @@ public interface ResultMerger<T> {
 
 		@Override
 		public Double merge() {
+			return total;
+		}
+	}
+
+	static class BigIntegerSummary implements ResultMerger<BigInteger>{
+		private BigInteger total;
+		@Override
+		public void addPartial(String shard, BigInteger partial) {
+			if(total == null)
+				total = partial;
+			else
+				total.add(partial);
+		}
+
+		@Override
+		public BigInteger merge() {
+			return total;
+		}
+	}
+
+	static class BigDecimalSummary implements ResultMerger<BigDecimal>{
+		private BigDecimal total;
+		@Override
+		public void addPartial(String shard, BigDecimal partial) {
+			if(total == null)
+				total = partial;
+			else
+				total.add(partial);
+		}
+
+		@Override
+		public BigDecimal merge() {
 			return total;
 		}
 	}
@@ -175,4 +206,73 @@ public interface ResultMerger<T> {
 		}
 	}
 
+	static class BigIntegerAverage implements ResultMerger<Map<String, Number>>{
+		private int count;
+		private BigInteger sum;
+		private String countColumn;
+		private String sumColumn;
+		private String averageColumn;
+		
+		public BigIntegerAverage() {this("count", "sum", "average");}
+		
+		public BigIntegerAverage(String countColumn, String sumColumn, String averageColumn) {
+			this.countColumn = countColumn;
+			this.sumColumn = sumColumn;
+			this.averageColumn = averageColumn;
+		}
+		
+		@Override
+		public void addPartial(String shard, Map<String, Number> partial) {
+			count += partial.get(countColumn).intValue();
+			if(sum == null)
+				sum = (BigInteger)partial.get(sumColumn);
+			else
+				sum.add((BigInteger)partial.get(sumColumn));
+		}
+
+		@Override
+		public Map<String, Number> merge() {
+			Map<String, Number> result = new HashMap<>();
+			result.put(countColumn, count);
+			result.put(sumColumn, sum);
+			result.put(averageColumn, sum.divide(new BigInteger(String.valueOf(count))));
+			
+			return result;
+		}
+	}
+
+	static class BigDecimalAverage implements ResultMerger<Map<String, Number>>{
+		private int count;
+		private BigDecimal sum;
+		private String countColumn;
+		private String sumColumn;
+		private String averageColumn;
+		
+		public BigDecimalAverage() {this("count", "sum", "average");}
+		
+		public BigDecimalAverage(String countColumn, String sumColumn, String averageColumn) {
+			this.countColumn = countColumn;
+			this.sumColumn = sumColumn;
+			this.averageColumn = averageColumn;
+		}
+		
+		@Override
+		public void addPartial(String shard, Map<String, Number> partial) {
+			count += partial.get(countColumn).intValue();
+			if(sum == null)
+				sum = (BigDecimal)partial.get(sumColumn);
+			else
+				sum.add((BigDecimal)partial.get(sumColumn));
+		}
+
+		@Override
+		public Map<String, Number> merge() {
+			Map<String, Number> result = new HashMap<>();
+			result.put(countColumn, count);
+			result.put(sumColumn, sum);
+			result.put(averageColumn, sum.divide(new BigDecimal(String.valueOf(count))));
+			
+			return result;
+		}
+	}
 }

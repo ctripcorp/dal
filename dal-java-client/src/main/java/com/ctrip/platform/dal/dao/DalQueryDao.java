@@ -326,8 +326,11 @@ public final class DalQueryDao {
 	 */
 	public <T> T commonQuery(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor) throws SQLException {
 		if (hints.isAsyncExecution() || hints.is(DalHintEnum.queryCallback)) {
-			hints.set(DalHintEnum.futureResult, service.submit(new Callable<T>() {public T call() throws Exception {
-					return internalQuery(sql, parameters, hints, extractor);}}));
+			Future<T> future = service.submit(new Callable<T>() {public T call() throws Exception {
+					return internalQuery(sql, parameters, hints, extractor);}});
+			
+			if(hints.isAsyncExecution())
+				hints.set(DalHintEnum.futureResult, future); 
 			return null;
 		}
 		
@@ -354,19 +357,11 @@ public final class DalQueryDao {
 			final StatementParameters parameters, final DalHints hints,
 			final DalResultSetExtractor<T> extractor, Set<String> shards)
 			throws SQLException {
-		T result;
 		ResultMerger<T> merger = (ResultMerger<T>)hints.get(DalHintEnum.resultMerger);
 		if(merger == null)
 			throw new NullPointerException("For query in several shards, you need to specify DalHintEnum.resultMerger to merge the result");
 		
-		// TODO we need decide if we want the default behavior is parallel or sequencial
-		// Get raw result
-		if(hints.is(DalHintEnum.parallelExecution))
-			result = parallelQuery(sql, parameters, hints, extractor, shards, merger);
-		else
-			result = sequentialQuery(sql, parameters, hints, extractor, shards, merger);
-
-		return result;
+		return parallelQuery(sql, parameters, hints, extractor, shards, merger);
 	}
 
 	private <T> void handleCallback(final DalHints hints, T result) {
@@ -375,24 +370,15 @@ public final class DalQueryDao {
 			qc.onResult(result);
 	}
 
-	private <T> T sequentialQuery(final String sql,
-			final StatementParameters parameters, final DalHints hints,
-			final DalResultSetExtractor<T> extractor, Set<String> shards, ResultMerger<T> merger) throws SQLException {
-		for(final String shard: shards)
-			merger.addPartial(shard, client.query(sql, parameters, hints.clone().inShard(shard), extractor));
-		return merger.merge();
-	}
-
 	private <T> T parallelQuery(final String sql,
 			final StatementParameters parameters, final DalHints hints,
 			final DalResultSetExtractor<T> extractor, Set<String> shards, ResultMerger<T> merger) {
-		Map<String, T> results = new HashMap<>();
 		Map<String, Future<T>> resultFutures = new HashMap<>();
 		for(final String shard: shards)
 			resultFutures.put(shard, service.submit(new  Callable<T>() {public T call() throws Exception {
 					return client.query(sql, parameters, hints.clone().inShard(shard), extractor);}}));
 
-		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet())
+		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet()) {
 			try {
 				merger.addPartial(entry.getKey(), entry.getValue().get());
 			} catch (InterruptedException e) {
@@ -400,6 +386,7 @@ public final class DalQueryDao {
 			} catch (ExecutionException e) {
 				e.printStackTrace();
 			}// Handle timeout and execution exception
+		}
 		
 		return merger.merge();
 	}

@@ -212,11 +212,6 @@ public class DalHints {
 		return this;
 	}
 
-	public DalHints parallelExecution() {
-		set(DalHintEnum.parallelExecution);
-		return this;
-	}
-	
 	public DalHints masterOnly() {
 		set(DalHintEnum.masterOnly, true);
 		return this;

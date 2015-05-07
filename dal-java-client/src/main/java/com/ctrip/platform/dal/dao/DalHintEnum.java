@@ -62,11 +62,6 @@ public enum DalHintEnum {
 	resultMerger,
 	
 	/*
-	 * Indicate if the DB operation can be executed in parallel way 
-	 */
-	parallelExecution,
-	
-	/*
 	 * used in batch sp, when set the connection auto commit will be true.
 	 */
 	forceAutoCommit,

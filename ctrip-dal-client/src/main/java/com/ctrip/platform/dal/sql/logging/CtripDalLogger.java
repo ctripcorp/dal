@@ -1,12 +1,6 @@
 package com.ctrip.platform.dal.sql.logging;
 
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,54 +10,19 @@ import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.framework.clogging.domain.thrift.LogLevel;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.LogEntry;
+import com.ctrip.platform.dal.dao.client.LoggerAdapter;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 
-public class CtripDalLogger implements DalLogger {
+public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 	
 	private Logger logger = LoggerFactory.getLogger(CtripDalLogger.class);
 	
-	private static final String SAMPLING = "sampling";
-	private static final String ENCRYPT = "encrypt";
-	private static final String SIMPLIFIED = "simplified";
-	private static final String ASYNCLOGGING = "asyncLogging";
-	private static final String CAPACITY = "capacity";
-	
-	private static boolean asyncLogging = true;
-	
-	private static ExecutorService executor = null;
-	
 	@Override
 	public void initLogger(Map<String, String> settings) {
-		if(settings == null)
-			return;
-		
-		if(settings.containsKey(SAMPLING))
-			DalCLogger.setSamplingLogging(Boolean.parseBoolean(settings.get(SAMPLING)));
-
-		if(settings.containsKey(SIMPLIFIED))
-			DalCLogger.setSimplifyLogging(Boolean.parseBoolean(settings.get(SIMPLIFIED)));
-		
-		if(settings.containsKey(ENCRYPT))
-			DalCLogger.setEncryptLogging(Boolean.parseBoolean(settings.get(ENCRYPT)));
-		
-		if(settings.containsKey(ASYNCLOGGING))
-			asyncLogging = Boolean.parseBoolean(settings.get(ASYNCLOGGING));
-		
-		if (settings.containsKey(CAPACITY)) {
-			executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-					new ArrayBlockingQueue<Runnable>(Integer.parseInt(settings.get(CAPACITY)), true),
-					new RejectedExecutionHandler() {
-						@Override
-						public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-							//do nothing
-						}
-					});
-		} else {
-			executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-					new LinkedBlockingQueue<Runnable>());
-		}
-		
+		super.initLogger(settings);
+		DalCLogger.setEncryptLogging(encryptLogging);
+		DalCLogger.setSimplifyLogging(simplifyLogging);
 	}
 
 	@Override
@@ -143,6 +102,8 @@ public class CtripDalLogger implements DalLogger {
 	
 	@Override
 	public void success(final LogEntry entry, final int count) {
+		if (samplingLogging && !validate(entry) )
+			return;
 		if (asyncLogging) {
 			executor.submit(new Runnable() {
 				@Override
@@ -188,7 +149,7 @@ public class CtripDalLogger implements DalLogger {
 			ex.printStackTrace();
 		}
 	}
-
+	
 	@Override
 	public void markdown(final MarkDownInfo markdown) {
 		if (asyncLogging) {
@@ -226,7 +187,7 @@ public class CtripDalLogger implements DalLogger {
 	public void shutdown() {
 		logger.info("shutdown clogging");
 		MessageManager.getInstance().shutdown();
-		executor.shutdown();
+		super.shutdown();
 	}
 	
 }

@@ -1,21 +1,13 @@
 package com.ctrip.platform.dal.dao.client;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
+import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 
@@ -25,56 +17,15 @@ import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
  * @author jhhe
  *
  */
-public class DefaultLogger implements DalLogger {
+public class DefaultLogger extends LoggerAdapter implements DalLogger {
 	
 	private Logger logger = LoggerFactory.getLogger(DefaultLogger.class);
 	
 	private static final String LINESEPARATOR = System.lineSeparator();
 	
-	private static final String SAMPLING = "sampling";
-	private static final String ENCRYPT = "encrypt";
-	private static final String SIMPLIFIED = "simplified";
-	private static final String ASYNCLOGGING = "asyncLogging";
-	private static final String CAPACITY = "capacity";
-	
-	private static boolean sampling = false;
-	private static boolean encrypt = true;
-	private static boolean simplified = false;
-	
-	private static boolean asyncLogging = true;
-	
-	private static ExecutorService executor = null;
-
 	@Override
 	public void initLogger(Map<String, String> settings) {
-		if(settings == null)
-			return;
-		
-		if(settings.containsKey(SAMPLING))
-			sampling = Boolean.parseBoolean(settings.get(SAMPLING));
-
-		if(settings.containsKey(SIMPLIFIED))
-			simplified = Boolean.parseBoolean(settings.get(SIMPLIFIED));
-		
-		if(settings.containsKey(ENCRYPT))
-			encrypt = Boolean.parseBoolean(settings.get(ENCRYPT));
-		
-		if(settings.containsKey(ASYNCLOGGING))
-			asyncLogging = Boolean.parseBoolean(settings.get(ASYNCLOGGING));
-		
-		if (settings.containsKey(CAPACITY)) {
-			executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-					new ArrayBlockingQueue<Runnable>(Integer.parseInt(settings.get(CAPACITY)), true),
-					new RejectedExecutionHandler() {
-						@Override
-						public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-							//do nothing
-						}
-					});
-		} else {
-			executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-					new LinkedBlockingQueue<Runnable>());
-		}
+		super.initLogger(settings);
 	}
 
 	@Override
@@ -148,7 +99,7 @@ public class DefaultLogger implements DalLogger {
 	
 	private void logError(String desc, Throwable e) {
 		try {
-			String msg = getExceptionStack(e);
+			String msg = LoggerHelper.getExceptionStack(e);
 
 			String logMsg = desc + System.lineSeparator()
 					+ System.lineSeparator()
@@ -160,20 +111,6 @@ public class DefaultLogger implements DalLogger {
 		}
 	}
 	
-	private String getExceptionStack(Throwable e) {
-		String msg = e.getMessage();
-		try {
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			e.printStackTrace(pw);
-			msg = sw.toString();
-		} catch (Throwable e2) {
-			msg = "bad getErrorInfoFromException";
-		}
-
-		return msg;
-	}
-
 	@Override
 	public LogEntry createLogEntry() {
 		return new LogEntry();
@@ -186,6 +123,8 @@ public class DefaultLogger implements DalLogger {
 
 	@Override
 	public void success(final LogEntry entry, final int count) {
+		if (samplingLogging && !validate(entry) )
+			return;
 		if (asyncLogging) {
 			executor.submit(new Runnable() {
 				@Override
@@ -205,11 +144,11 @@ public class DefaultLogger implements DalLogger {
 			msg.append("\t").append("source : ").append(entry.getSource()).append(LINESEPARATOR);
 			String sql = "*";
 			if (!entry.isSensitive()) {
-				sql = getSql(entry);
+				sql = LoggerHelper.getSqlTpl(entry);
 			}
 			msg.append("\t").append("sql: ").append(sql).append(LINESEPARATOR);;
 			if (entry.getPramemters() != null) {
-				msg.append("\t").append("parameters : ").append(getEncryptParameters(encrypt, entry)).append(LINESEPARATOR);
+				msg.append("\t").append("parameters : ").append(getEncryptParameters(encryptLogging, entry)).append(LINESEPARATOR);
 			} else {
 				msg.append("\t").append("parameters : ").append(LINESEPARATOR);
 			}
@@ -221,59 +160,18 @@ public class DefaultLogger implements DalLogger {
 		}
 	}
 	
-	private String getSql(LogEntry entry){
-		DalEventEnum event = entry.getEvent();
-		
-		if(event == DalEventEnum.QUERY || event == DalEventEnum.UPDATE_SIMPLE ||
-				event == DalEventEnum.UPDATE_KH || event == DalEventEnum.BATCH_UPDATE_PARAM){
-			return entry.getSqls() != null && entry.getSqls().length > 0 ? entry.getSqls()[0] : "";
-		}
-		if (event == DalEventEnum.BATCH_UPDATE) {
-			return Arrays.toString(entry.getSqls());
-		}
-		if(event == DalEventEnum.CALL || event == DalEventEnum.BATCH_CALL){
-			return entry.getCallString();
-		}
-		
-		return "";
-	}
-	
 	private String getEncryptParameters(boolean encryptLogging, LogEntry entry){
 		String params = "";
 		if(encryptLogging){
 			try {
-				params = new String(Base64.encodeBase64(this.getParams(entry).getBytes()));
+				params = new String(Base64.encodeBase64(LoggerHelper.getParams(entry).getBytes()));
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
 		} else {
-			params = getParams(entry);
+			params = LoggerHelper.getParams(entry);
 		}
 		return params;
-	}
-	
-	private String getParams(LogEntry entry){
-		DalEventEnum event = entry.getEvent();
-		String[] pramemters = entry.getPramemters();
-		
-		StringBuilder sbout = new StringBuilder();
-		if(pramemters == null || pramemters.length <= 0){
-			return sbout.toString();
-		}
-		if(event == DalEventEnum.QUERY || 
-				event == DalEventEnum.UPDATE_SIMPLE ||
-				event == DalEventEnum.UPDATE_KH ||
-				event == DalEventEnum.CALL){
-			return null != pramemters && pramemters.length > 0 ? pramemters[0] : "";
-		}
-		if(event == DalEventEnum.BATCH_UPDATE_PARAM ||
-				event == DalEventEnum.BATCH_CALL){
-			for(String param : pramemters){
-				sbout.append(param + ";");
-			}
-			return sbout.substring(0, sbout.length() - 1);
-		}
-		return "";
 	}
 	
 	@Override
@@ -343,7 +241,7 @@ public class DefaultLogger implements DalLogger {
 	@Override
 	public void shutdown() {
 		logger.info("shutdown DefaultLogger.");
-		executor.shutdown();
+		super.shutdown();
 	}
 
 	@Override

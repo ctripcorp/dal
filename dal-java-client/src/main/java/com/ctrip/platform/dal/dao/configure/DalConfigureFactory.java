@@ -44,6 +44,8 @@ import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
     <settings>
 	  <encrypt>true</encrypt>
 	  <sampling>false</sampling>
+	  <samplingLow>60</samplingLow>
+	  <samplingHigh>5</samplingHigh>
 	  <simplified>true</simplified>
 	  <asyncLogging>true</asyncLogging>
 	  <capacity>10000</capacity>

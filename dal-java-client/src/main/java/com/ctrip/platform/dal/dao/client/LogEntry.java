@@ -33,6 +33,8 @@ public class LogEntry {
 
 	private Throwable exception;
 	
+	private long createTime = System.currentTimeMillis();
+	
 	static {
 		execludedClasses = new HashSet<String>();
 		execludedClasses.add("com.ctrip.platform.dal.dao.client.ConnectionAction");
@@ -244,6 +246,14 @@ public class LogEntry {
 
 	public void setClientVersion(String clientVersion) {
 		this.clientVersion = clientVersion;
+	}
+	
+	public long getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(long createTime) {
+		this.createTime = createTime;
 	}
 
 	public int getSqlSize() {

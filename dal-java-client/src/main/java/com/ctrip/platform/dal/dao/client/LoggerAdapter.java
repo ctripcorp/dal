@@ -4,10 +4,13 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 
@@ -27,9 +30,12 @@ public abstract class LoggerAdapter implements DalLogger {
 	protected static boolean samplingLogging = false;
 	protected static long samplingLow = 60 * 60 * 1000;//milliseconds
 	protected static long samplingHigh = 5 * 60 * 1000;//milliseconds
-	//key is sql hash code
-	protected static final ConcurrentHashMap<Integer, Long> logEntryCache = new ConcurrentHashMap<Integer, Long>();
-	protected static int CacheSizeLimit = 5000;
+	//key is the sql hash code
+	private static final ConcurrentHashMap<Integer, Long> logEntryCache = new ConcurrentHashMap<Integer, Long>();
+	private static int CacheSizeLimit = 5000;
+	
+	private static ScheduledExecutorService scheduler = null;
+	private static final AtomicBoolean isClearingCache = new AtomicBoolean(false);
 	
 	protected static boolean asyncLogging = true;
 	
@@ -40,6 +46,18 @@ public abstract class LoggerAdapter implements DalLogger {
 		if(settings == null)
 			return;
 		
+		initSampling(settings);
+
+		if(settings.containsKey(SIMPLIFIED))
+			simplifyLogging = Boolean.parseBoolean(settings.get(SIMPLIFIED));
+		
+		if(settings.containsKey(ENCRYPT))
+			encryptLogging = Boolean.parseBoolean(settings.get(ENCRYPT));
+		
+		initAsyncLogging(settings);
+	}
+	
+	private void initSampling(Map<String, String> settings) {
 		if(settings.containsKey(SAMPLING))
 			samplingLogging = Boolean.parseBoolean(settings.get(SAMPLING));
 		
@@ -48,13 +66,35 @@ public abstract class LoggerAdapter implements DalLogger {
 		
 		if(settings.containsKey(SAMPLINGHIGH))
 			samplingHigh = Integer.parseInt(settings.get(SAMPLINGHIGH)) * 60 * 1000;
-
-		if(settings.containsKey(SIMPLIFIED))
-			simplifyLogging = Boolean.parseBoolean(settings.get(SIMPLIFIED));
 		
-		if(settings.containsKey(ENCRYPT))
-			encryptLogging = Boolean.parseBoolean(settings.get(ENCRYPT));
-		
+		if (samplingLogging) {
+			scheduler = Executors.newScheduledThreadPool(1);
+			scheduler.scheduleAtFixedRate(new Runnable() {
+				@Override
+				public void run() {
+					clearCache();
+				}
+			}, 5, 30, TimeUnit.SECONDS);
+		}
+	}
+	
+	private void clearCache() {
+		int currentCount = logEntryCache.size();
+		if (CacheSizeLimit > currentCount) 
+			return;
+		isClearingCache.set(true);
+		for(Map.Entry<Integer, Long> entry : logEntryCache.entrySet()) {
+			Integer key = entry.getKey();
+			long old = entry.getValue();
+			long now = System.currentTimeMillis();
+			if ( (now - old) > samplingLow ) {
+				logEntryCache.remove(key);
+			} 
+		}
+		isClearingCache.set(false);
+	}
+	
+	private void initAsyncLogging(Map<String, String> settings) {
 		if(settings.containsKey(ASYNCLOGGING))
 			asyncLogging = Boolean.parseBoolean(settings.get(ASYNCLOGGING));
 		
@@ -68,14 +108,16 @@ public abstract class LoggerAdapter implements DalLogger {
 						}
 					});
 		} else {
-			executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-					new LinkedBlockingQueue<Runnable>());
+			executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
 		}
 	}
 	
 	@Override
 	public void shutdown() {
-		executor.shutdown();
+		if (executor != null)
+			executor.shutdown();
+		if (scheduler != null)
+			scheduler.shutdown();
 	}
 	
 
@@ -89,8 +131,10 @@ public abstract class LoggerAdapter implements DalLogger {
      * @return true表可以发送, false 表不可以发送
      */
 	protected boolean validate(LogEntry entry) {
+		if ( isClearingCache.get() )
+			return false;
 		String sqlTpl = LoggerHelper.getSqlTpl(entry);
-		if (LoggerHelper.SQLHIDDENString.equals(sqlTpl) || "".equals(sqlTpl))
+		if (LoggerHelper.SQLHIDDENString.equals(sqlTpl) || "".equals(sqlTpl) )
 			return true;
 		int hashCode = LoggerHelper.getHashCode(sqlTpl);
 		long now = System.currentTimeMillis();
@@ -103,7 +147,7 @@ public abstract class LoggerAdapter implements DalLogger {
 			return false;
 		} else { 
 			//将原来的日期更新为当前时间
-			logEntryCache.replace(hashCode, System.currentTimeMillis());
+			logEntryCache.put(hashCode, System.currentTimeMillis());
 			return true;
 		}
 	}
@@ -116,8 +160,4 @@ public abstract class LoggerAdapter implements DalLogger {
 		return true;
 	}
 	
-	private void clearCache(long now, long interval) {
-		int currentCount = logEntryCache.size();
-		if (CacheSizeLimit > currentCount) return;
-	}
 }

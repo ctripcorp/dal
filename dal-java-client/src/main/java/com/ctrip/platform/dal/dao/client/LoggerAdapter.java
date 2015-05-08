@@ -32,7 +32,7 @@ public abstract class LoggerAdapter implements DalLogger {
 	protected static long samplingHigh = 5 * 60 * 1000;//milliseconds
 	//key is the sql hash code
 	private static final ConcurrentHashMap<Integer, Long> logEntryCache = new ConcurrentHashMap<Integer, Long>();
-	private static int CacheSizeLimit = 5000;
+	private static final int CacheSizeLimit = 5000;
 	
 	private static ScheduledExecutorService scheduler = null;
 	private static final AtomicBoolean isClearingCache = new AtomicBoolean(false);

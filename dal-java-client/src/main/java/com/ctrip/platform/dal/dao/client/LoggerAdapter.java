@@ -11,6 +11,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 
@@ -24,6 +25,8 @@ public abstract class LoggerAdapter implements DalLogger {
 	
 	private static final String  SAMPLINGLOW = "samplingLow";
 	private static final String  SAMPLINGHIGH = "samplingHigh";
+	private static final String  SAMPLEMAXNUM = "sampleMaxNum";
+	private static final String  SAMPLECLEARINTERVAL = "sampleClearInterval";
 	
 	protected static boolean simplifyLogging = false;
 	protected static boolean encryptLogging = true;
@@ -32,7 +35,8 @@ public abstract class LoggerAdapter implements DalLogger {
 	protected static long samplingHigh = 5 * 60 * 1000;//milliseconds
 	//key is the sql hash code
 	private static final ConcurrentHashMap<Integer, Long> logEntryCache = new ConcurrentHashMap<Integer, Long>();
-	private static final int CacheSizeLimit = 5000;
+	protected static int sampleMaxNum = 5000;
+	protected static int sampleClearInterval = 30;
 	
 	private static ScheduledExecutorService scheduler = null;
 	private static final AtomicBoolean isClearingCache = new AtomicBoolean(false);
@@ -61,6 +65,12 @@ public abstract class LoggerAdapter implements DalLogger {
 		if(settings.containsKey(SAMPLING))
 			samplingLogging = Boolean.parseBoolean(settings.get(SAMPLING));
 		
+		if(settings.containsKey(SAMPLEMAXNUM))
+			sampleMaxNum = Integer.parseInt(settings.get(SAMPLEMAXNUM));
+		
+		if(settings.containsKey(SAMPLECLEARINTERVAL))
+			sampleClearInterval = Integer.parseInt(settings.get(SAMPLECLEARINTERVAL));
+			
 		if(settings.containsKey(SAMPLINGLOW))
 			samplingLow = Integer.parseInt(settings.get(SAMPLINGLOW)) * 60 * 1000;
 		
@@ -74,13 +84,13 @@ public abstract class LoggerAdapter implements DalLogger {
 				public void run() {
 					clearCache();
 				}
-			}, 5, 30, TimeUnit.SECONDS);
+			}, 5, sampleClearInterval, TimeUnit.SECONDS);
 		}
 	}
 	
 	private void clearCache() {
 		int currentCount = logEntryCache.size();
-		if (CacheSizeLimit > currentCount) 
+		if (sampleMaxNum > currentCount) 
 			return;
 		isClearingCache.set(true);
 		for(Map.Entry<Integer, Long> entry : logEntryCache.entrySet()) {
@@ -140,6 +150,8 @@ public abstract class LoggerAdapter implements DalLogger {
 		long now = System.currentTimeMillis();
 		Long old = logEntryCache.putIfAbsent(hashCode, now);
 		if (old == null) {
+			if (logEntryCache.size() > sampleMaxNum)
+				logEntryCache.remove(hashCode);
 			return true;
 		}
 		boolean userLow = useLow(entry);

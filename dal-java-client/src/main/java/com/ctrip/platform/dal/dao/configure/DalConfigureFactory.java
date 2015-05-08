@@ -46,6 +46,8 @@ import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 	  <sampling>false</sampling>
 	  <samplingLow>60</samplingLow>
 	  <samplingHigh>5</samplingHigh>
+	  <sampleMaxNum>5000</sampleMaxNum>
+	  <sampleClearInterval>30</sampleClearInterval>
 	  <simplified>true</simplified>
 	  <asyncLogging>true</asyncLogging>
 	  <capacity>10000</capacity>

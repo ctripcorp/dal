@@ -131,13 +131,12 @@ public abstract class LoggerAdapter implements DalLogger {
 	
 
     /**
-     * 1. 如果是 Warning/Error/Fatal, 直接写入
-     * 2. 如果是Info及以下，进行如下操作
-     * 	  a. 算出不带Where条件的Hash
-     *    b. 如果此Sql有参数，查找此Hash一个小时之前是否有过执行，如果有，发送，并将此hash的最后执行时间修改为当前时间
-     *    c. 如果此Sql没有参数，查找此Hash在5分钟之前是否有过执行，如果有，发送，并将此hash的最后执行时间修改为当前时间
+     * 1. If log level is Warning/Error/Fatal, then immediately write with out validate.
+     * 2. If log level is Info or less-than Info, validate according the below
+     *    a. If the SQL have parameters, the log will send only once in the low interval minutes default is sixty minutes.
+     *    b. If the SQL do not have any parameters, the log will send only once in the high interval minutes default is five minutes.
      * @param entry
-     * @return true表可以发送, false 表不可以发送
+     * @return  The log can be sent only when returning value is true
      */
 	protected boolean validate(LogEntry entry) {
 		if ( isClearingCache.get() )
@@ -157,7 +156,7 @@ public abstract class LoggerAdapter implements DalLogger {
 		if ( (now - old) < (userLow ? samplingLow : samplingHigh) ) {
 			return false;
 		} else { 
-			//将原来的日期更新为当前时间
+			//update the old timestamp associated the sqlTpl to now
 			logEntryCache.put(hashCode, System.currentTimeMillis());
 			return true;
 		}
@@ -165,7 +164,7 @@ public abstract class LoggerAdapter implements DalLogger {
 	
 	private boolean useLow(LogEntry entry) {
 		String[] pramemters = entry.getPramemters();
-		//有参数时，用low
+		//use low when have parameters, otherwise use high.
 		if (pramemters == null || pramemters.length <= 0)
 			return false;
 		return true;

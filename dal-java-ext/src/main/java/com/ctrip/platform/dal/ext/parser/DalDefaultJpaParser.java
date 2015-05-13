@@ -67,9 +67,10 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 	public T map(ResultSet rs, int rowNum) throws SQLException {
 		try {
 			T instance = this.clazz.newInstance();
-			for (int i = 0; i < this.getColumnNames().length; i++) {
-				Field field = this.fieldsMap.get(this.getColumnNames()[i]);
-				EntityManager.setValue(field, instance, rs.getObject(this.getColumnNames()[i]));
+			String[] primaryKeyNames = this.getPrimaryKeyNames();
+			for (int i = 0; i < primaryKeyNames.length; i++) {
+				Field field = this.fieldsMap.get(primaryKeyNames[i]);
+				EntityManager.setValue(field, instance, rs.getObject(primaryKeyNames[i]));
 			}
 			return instance;
 		} catch (Exception e) {

@@ -113,28 +113,23 @@ public class EntityManager {
 	
 	public static void setValue(Field field, Object entity, Object val)
 			throws ReflectiveOperationException {
-		if (field.getType().equals(Integer.class)
-				|| field.getType().equals(int.class)) {
+		if (field.getType().equals(Integer.class) || field.getType().equals(int.class)) {
 			field.set(entity, ((Number) val).intValue());
 			return;
 		}
-		if (field.getType().equals(Long.class)
-				|| field.getType().equals(long.class)) {
+		if (field.getType().equals(Long.class) || field.getType().equals(long.class)) {
 			field.set(entity, ((Number) val).longValue());
 			return;
 		}
-		if (field.getType().equals(Short.class)
-				|| field.getType().equals(short.class)) {
+		if (field.getType().equals(Short.class) || field.getType().equals(short.class)) {
 			field.set(entity, ((Number) val).shortValue());
 			return;
 		}
-		if (field.getType().equals(Float.class)
-				|| field.getType().equals(float.class)) {
+		if (field.getType().equals(Float.class) || field.getType().equals(float.class)) {
 			field.set(entity, ((Number) val).floatValue());
 			return;
 		}
-		if (field.getType().equals(Double.class)
-				|| field.getType().equals(double.class)) {
+		if (field.getType().equals(Double.class) || field.getType().equals(double.class)) {
 			field.set(entity, ((Number) val).doubleValue());
 			return;
 		}

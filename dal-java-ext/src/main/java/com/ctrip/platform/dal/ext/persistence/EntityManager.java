@@ -36,7 +36,7 @@ public class EntityManager {
 	
 	private void emptyCheck(Field[] fields) throws SQLException {
 		if (null == fields || fields.length == 0)
-			throw new SQLException("The entity has not any fields.");
+			throw new SQLException("The entity[" + clazz.getName() +"] has not any fields.");
 	}
 	
 	public String getTableName() {
@@ -98,7 +98,7 @@ public class EntityManager {
 			Field field = fields[i];
 			SqlType sqlType = field.getAnnotation(SqlType.class);
 			if (sqlType == null)
-				throw new SQLException("The SqlType of field can not be null.");
+				throw new SQLException("Each field of entity[" + clazz.getName() +"] must declare it's SqlType annotation.");
 			columnTypes[i] = sqlType.value();
 		}
 		return columnTypes;

@@ -12,8 +12,10 @@ public class PerformanceTest {
 		DalClientFactory.initClientFactory();
 		int count = 100;
 		String queryWhere = "id < 100";
+		normal(count, queryWhere);	
 		jpa(count, queryWhere);
-		//normal(count, queryWhere);	
+		normal(count, queryWhere);	
+		jpa(count, queryWhere);
 		System.exit(1);
 	}
 	

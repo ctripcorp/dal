@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.parser;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,7 +18,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -26,7 +26,7 @@ import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.unittests.DalTestHelper;
 import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
-import com.ctrip.platform.dal.ext.parser.DefaultLoader;
+import com.ctrip.platform.dal.ext.persistence.SqlType;
 
 /**
  * Test the default Jpa Parser with sql server database
@@ -51,8 +51,7 @@ public class DalDefaultJpaParserSqlServerTest {
 	private static DalParser<ClientTestModel> parser = null;
 	static {
 		try {
-			parser = DalDefaultJpaParser.create(ClientTestModel.class, 
-					new DefaultLoader(DatabaseCategory.SqlServer), "HotelPubDB");
+			parser = DalDefaultJpaParser.create(ClientTestModel.class, "HotelPubDB");
 			
 			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(parser.getDatabaseName());	
@@ -144,18 +143,23 @@ public class DalDefaultJpaParserSqlServerTest {
 	public static class ClientTestModel {
 		@Id
 		@GeneratedValue(strategy = GenerationType.AUTO)
+		@SqlType(value = Types.INTEGER)
 		private Integer id;
 		
 		@Column(name="quantity")
+		@SqlType(value = Types.INTEGER)
 		private Integer quan;
 		
 		@Column
+		@SqlType(value = Types.SMALLINT)
 		private Short type;
 		
 		@Column(length=50)
+		@SqlType(value = Types.VARCHAR)
 		private String address;
 		
 		@Column(nullable =false, insertable=false, name="last_changed")
+		@SqlType(value = Types.TIMESTAMP)
 		private Timestamp lastChanged;
 
 		public Integer getId() {

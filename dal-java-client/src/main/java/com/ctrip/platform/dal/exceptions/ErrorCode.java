@@ -12,6 +12,16 @@ public enum ErrorCode {
 	AssertGreatThan(ErrorClassify.Assert, 5001, "There is no result found!"),
 	
 	/**
+	 * It is expected to return only 1 or no result. But the actually count is more than 1.
+	 */
+	AssertSingle(ErrorClassify.Assert, 5002, "It is expected to return only 1 result. But the actually count is more than 1"),
+	
+	/**
+	 * It is expected to return only 1 or no result. But the actually count is more than 1.
+	 */
+	AssertNull(ErrorClassify.Assert, 5003, "It is expected to return 1 result. But found none"),
+	
+	/**
 	 * The primary key of this table is consists of more than one column
 	 */
 	ValidatePrimaryKeyCount(ErrorClassify.Validate, 5100, "The primary key of this table is consists of more than one column"),

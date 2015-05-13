@@ -57,9 +57,14 @@ public enum DalHintEnum {
 	shards,
 	
 	/*
-	 * The comparator that is used to sort query result 
+	 * The merger that is used to merge query result 
 	 */
 	resultMerger,
+	
+	/*
+	 * The comparator that is used to sort query result with default merger 
+	 */
+	resultSorter,
 	
 	/*
 	 * used in batch sp, when set the connection auto commit will be true.

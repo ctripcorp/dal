@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,10 +16,14 @@ import java.util.concurrent.TimeUnit;
 
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+import com.ctrip.platform.dal.dao.helper.DalFirstResultMerger;
+import com.ctrip.platform.dal.dao.helper.DalListMerger;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
+import com.ctrip.platform.dal.dao.helper.DalRangedResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
-import com.ctrip.platform.dal.dao.task.DalAsyncCallback;
+import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
+import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -31,11 +34,11 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
  *
  */
 public final class DalQueryDao {
-	private static final String COUNT_MISMATCH_MSG = "It is expected to return only %d result. But the actually count is %d.";
-	private static final String NO_RESULT_MSG = "There is no result found!";
 	private String logicDbName;
 	private DalClient client;
 	private DalLogger logger;
+	private static final boolean REQUIRE_SINGLE = true;
+	private static final boolean NULLABLE = true;
 
 	public DalQueryDao(String logicDbName) {
 		this.logicDbName = logicDbName;
@@ -59,7 +62,7 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> query(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
-		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper));
+		return queryList(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper));
 	}
 
 	/**
@@ -74,7 +77,7 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> query(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()));
+		return queryList(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()));
 	}
 
 	/**
@@ -88,7 +91,7 @@ public final class DalQueryDao {
 	 */
 	public void query(String sql, StatementParameters parameters, DalHints hints, DalRowCallback callback) 
 			throws SQLException {
-		client.query(sql, parameters, hints, new DalRowCallbackExtractor(callback));
+		queryList(sql, parameters, hints, new DalRowCallbackExtractor(callback));
 	}
 
 	/**
@@ -105,8 +108,7 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
-		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper));
-		return requireSingle(result);
+		return queryForObject(sql, parameters, hints, mapper, !NULLABLE);
 	}
 
 	/**
@@ -123,8 +125,7 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryForObjectNullable(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
-		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper));
-		return requireSingleNullable(result);
+		return queryForObject(sql, parameters, hints, mapper, NULLABLE);
 	}
 
 	/**
@@ -141,8 +142,7 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()));
-		return requireSingle(result);
+		return queryForObject(sql, parameters, hints, new DalObjectRowMapper<T>(), !NULLABLE);
 	}
 
 	/**
@@ -159,10 +159,9 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryForObjectNullable(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()));
-		return requireSingleNullable(result);
+		return queryForObject(sql, parameters, hints, new DalObjectRowMapper<T>(), NULLABLE);
 	}
-
+	
 	/**
 	 * Query for the first object in the result. It is expected that there is at least one result should be found.
 	 * If there is no result found, it will throws exception to indicate the exceptional case.
@@ -177,8 +176,7 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
-		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, 1));
-		return requireFirst(result);
+		return queryFirst(sql, parameters, hints, mapper, !NULLABLE);
 	}
 
 	/**
@@ -195,8 +193,7 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryFirstNullable(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
-		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, 1));
-		return requireFirstNullable(result);
+		return queryFirst(sql, parameters, hints, mapper, NULLABLE);
 	}
 	
 	/**
@@ -213,8 +210,7 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), 1));
-		return requireFirst(result);
+		return queryFirst(sql, parameters, hints, new DalObjectRowMapper<T>(), !NULLABLE);
 	}
 
 	/**
@@ -231,8 +227,7 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryFirstNullable(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		List<T> result = client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), 1));
-		return requireFirstNullable(result);
+		return queryFirst(sql, parameters, hints, new DalObjectRowMapper<T>(), NULLABLE);
 	}
 
 	/**
@@ -250,7 +245,7 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> queryTop(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int count) 
 			throws SQLException {
-		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, count));
+		return queryRange(sql, parameters, hints, mapper, 0, count);
 	}
 
 	/**
@@ -268,7 +263,7 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> queryTop(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int count) 
 			throws SQLException {
-		return client.query(sql, parameters, hints,  new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), count));
+		return queryRange(sql, parameters, hints,  new DalObjectRowMapper<T>(), 0, count);
 	}
 
 	/**
@@ -285,7 +280,7 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count) throws SQLException {
 		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
-		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, start, count));
+		return queryRange(sql, parameters, hints, mapper, start, count);
 	}
 
 	/**
@@ -302,12 +297,37 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int start, int count) throws SQLException {
 		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
-		return client.query(sql, parameters, hints, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>(), start, count));
+		return queryRange(sql, parameters, hints, new DalObjectRowMapper<T>(), start, count);
+	}
+	
+	private <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, boolean nullable) 
+			throws SQLException {
+		setDefaultMerger(hints, new DalSingleResultMerger<>());
+		return commonQuery(sql, parameters, hints, new DalSingleResultExtractor<T>(mapper, true), nullable);
 	}
 
+	private <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, boolean nullable) 
+			throws SQLException {
+		setDefaultMerger(hints, new DalFirstResultMerger<>(hints.getSorter()));
+		return commonQuery(sql, parameters, hints, new DalSingleResultExtractor<T>(mapper, false), nullable);
+	}
+
+	private <T> List<T> queryList(String sql, StatementParameters parameters, DalHints hints, DalResultSetExtractor<List<T>> extractor) 
+			throws SQLException {
+		setDefaultMerger(hints, new DalListMerger<>(hints.getSorter()));
+		return commonQuery(sql, parameters, hints, extractor, NULLABLE);
+	}
+	
+	private <T> List<T> queryRange(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count) 
+			throws SQLException {
+		setDefaultMerger(hints, new DalRangedResultMerger<>(hints.getSorter(), start, count));
+		return commonQuery(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, start, count), NULLABLE);
+	}
+	
 	private static ExecutorService service = null;
 	
 	static {
+		//TODO add shutdown hook/add global thread pool
 		service = new ThreadPoolExecutor(5, 100, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 	}
 
@@ -324,10 +344,10 @@ public final class DalQueryDao {
 	 * @return
 	 * @throws SQLException
 	 */
-	public <T> T commonQuery(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor) throws SQLException {
+	private <T> T commonQuery(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor, final boolean nullable) throws SQLException {
 		if (hints.isAsyncExecution() || hints.is(DalHintEnum.queryCallback)) {
 			Future<T> future = service.submit(new Callable<T>() {public T call() throws Exception {
-					return internalQuery(sql, parameters, hints, extractor);}});
+					return internalQuery(sql, parameters, hints, extractor, nullable);}});
 			
 			if(hints.isAsyncExecution())
 				hints.set(DalHintEnum.futureResult, future); 
@@ -335,10 +355,10 @@ public final class DalQueryDao {
 		}
 		
 		//There is no callback
-		return internalQuery(sql, parameters, hints, extractor);
+		return internalQuery(sql, parameters, hints, extractor, nullable);
 	}
 	
-	private <T> T internalQuery(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor) throws SQLException {
+	private <T> T internalQuery(String sql, StatementParameters parameters, DalHints hints, DalResultSetExtractor<T> extractor, boolean nullable) throws SQLException {
 		// Check if it is in (distributed) transaction
 		Set<String> shards = getShards(sql, hints);
 		
@@ -349,7 +369,11 @@ public final class DalQueryDao {
 		else
 			result = crossShardQuery(sql, parameters, hints, extractor, shards);
 
+		if(result == null && !nullable)
+			throw new DalException(ErrorCode.AssertNull);
+		
 		handleCallback(hints, result);
+		
 		return result;
 	}
 
@@ -372,25 +396,35 @@ public final class DalQueryDao {
 
 	private <T> T parallelQuery(final String sql,
 			final StatementParameters parameters, final DalHints hints,
-			final DalResultSetExtractor<T> extractor, Set<String> shards, ResultMerger<T> merger) {
+			final DalResultSetExtractor<T> extractor, Set<String> shards, ResultMerger<T> merger) throws SQLException {
 		Map<String, Future<T>> resultFutures = new HashMap<>();
 		for(final String shard: shards)
 			resultFutures.put(shard, service.submit(new  Callable<T>() {public T call() throws Exception {
 					return client.query(sql, parameters, hints.clone().inShard(shard), extractor);}}));
 
+		// TODO Handle timeout and execution exception
 		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet()) {
 			try {
 				merger.addPartial(entry.getKey(), entry.getValue().get());
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
-				e.printStackTrace();
-			}// Handle timeout and execution exception
+				if(hints.isStopOnError())
+					throw DalException.wrap(ErrorCode.Unknown, e);
+				
+				DalClientFactory.getDalLogger().warn("There is error during parallel execute query: " + e.getMessage());
+			}
 		}
 		
 		return merger.merge();
 	}
 
+	private <T> void setDefaultMerger(DalHints hints, ResultMerger<T> merger) {
+		if (hints.is(DalHintEnum.allShards) || hints.is(DalHintEnum.shards)) {
+			hints.setIfAbsent(DalHintEnum.resultMerger, merger);
+		}
+	}
+	
 	private Set<String> getShards(final String sql, final DalHints hints) {
 		Set<String> shards;
 		if(hints.is(DalHintEnum.allShards)) {
@@ -401,72 +435,5 @@ public final class DalQueryDao {
 			shards = (Set<String>)hints.get(DalHintEnum.shards);
 		}
 		return shards;
-	}
-	
-	/**
-	 * Get result from given list of T. If there is 0 or more than 1 element found, throws exception. 
-	 * Else return the first element.
-	 * 
-	 * @param result The container that hold 0 or more than 1 element.
-	 * @return Null if no result found or first element in the results.
-	 * @throws SQLException if there is 0 or more than 1 element in the result
-	 */
-	private <T> T requireSingle(List<T> result) throws SQLException {
-		assertEquals(1, result.size());
-		return result.get(0);
-	}
-
-	/**
-	 * Get result from given list of T. If there is no result found, return null. 
-	 * If there is more than 1 element found, throws exception.
-	 * Else return the first element.
-	 * 
-	 * @param result The container that hold 0 or more than 1 element.
-	 * @return Null if no result found or first element in the results.
-	 * @throws SQLException if there is more than 1 element in the result
-	 */
-	private <T> T requireSingleNullable(List<T> result) throws SQLException {
-		if(result.size() == 0)
-			return null;
-		
-		assertEquals(1, result.size());
-		return result.get(0);
-	}
-
-	/**
-	 * Get result from given list of T. If there is no element found, throws exception. 
-	 * Else return the first element.
-	 * 
-	 * @param result The container that hold 0 or more than 1 element.
-	 * @return Null if no result found or first element in the results.
-	 * @throws SQLException if there is 0 or more than 1 element in the result
-	 */
-	private <T> T requireFirst(List<T> result) throws SQLException {
-		assertGreatThan(0, result.size(), NO_RESULT_MSG);
-		return result.get(0);
-	}
-
-	/**
-	 * Get result from given list of T. If there is no element found, return null. 
-	 * Else return the first element.
-	 * 
-	 * @param result The container that hold 0 or more than 1 element.
-	 * @return Null if no result found or first element in the results.
-	 * @throws SQLException if there is more than 1 element in the result
-	 */
-	private <T> T requireFirstNullable(List<T> result) throws SQLException {
-		return result.size() == 0 ? null : result.get(0);
-	}
-
-	private void assertEquals(int expected, int actual) throws SQLException{
-		if(expected != actual)
-			throw new DalException(ErrorCode.AssertEqual, expected, actual);
-	}
-
-	private void assertGreatThan(int expected, int actual, String message) throws SQLException{
-		if(actual > expected)
-			return;
-		
-		throw new DalException(ErrorCode.AssertGreatThan);
 	}
 }

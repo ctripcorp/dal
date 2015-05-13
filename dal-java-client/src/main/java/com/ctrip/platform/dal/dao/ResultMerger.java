@@ -2,43 +2,14 @@ package com.ctrip.platform.dal.dao;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public interface ResultMerger<T> {
-	void addPartial(String shard, T partial);
-	T merge();
+	void addPartial(String shard, T partial) throws SQLException;
+	T merge() throws SQLException;
 	
-	static class ListMerger implements ResultMerger<List<?>>{
-		private List<Object> result = new ArrayList<>();
-		private Comparator<Object> comparator;
-		
-		public ListMerger() {
-			this(null);
-		}
-		
-		public ListMerger(Comparator<Object> comparator) {
-			this.comparator = comparator;
-		}
-		
-		
-		@Override
-		public void addPartial(String shard, List<?> partial) {
-			result.addAll(partial);
-		}
-
-		@Override
-		public List<?> merge() {
-			if(comparator != null)
-				Collections.sort(result, comparator);
-			return result;
-		}
-	}
-
 	static class IntSummary implements ResultMerger<Integer>{
 		private int total;
 		@Override

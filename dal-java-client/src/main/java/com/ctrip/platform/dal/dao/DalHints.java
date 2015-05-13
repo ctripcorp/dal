@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -131,6 +132,14 @@ public class DalHints {
 		return this;
 	}
 	
+	public DalHints setIfAbsent(DalHintEnum hint, Object value) {
+		if(is(hint))
+			return this;
+		
+		hints.put(hint, value);
+		return this;
+	}
+
 	public DalHints inShard(String shardId) {
 		hints.put(DalHintEnum.shard, shardId);
 		return this;
@@ -212,6 +221,15 @@ public class DalHints {
 		return this;
 	}
 
+	public <T> DalHints sortBy(Comparator<T> sorter) {
+		hints.put(DalHintEnum.resultSorter, sorter);
+		return this;
+	}
+
+	public <T> Comparator<T> getSorter() {
+		return (Comparator<T>)get(DalHintEnum.resultSorter);
+	}
+
 	public DalHints masterOnly() {
 		set(DalHintEnum.masterOnly, true);
 		return this;
@@ -234,6 +252,11 @@ public class DalHints {
 	
 	public boolean isAsyncExecution() {
 		return is(DalHintEnum.asyncExecution);
+	}
+	
+	public DalHints callbackWith(QueryCallback callback) {
+		set(DalHintEnum.queryCallback, callback);
+		return this;
 	}
 	
 	public boolean isStopOnError() {

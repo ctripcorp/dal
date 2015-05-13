@@ -146,8 +146,7 @@ public abstract class ConnectionAction<T> {
 		}
 	}
 
-	private int fetchQueryRows(Object result)
-	{
+	private int fetchQueryRows(Object result) {
 		return null != result && result instanceof Collection<?> ? ((Collection<?>)result).size() : 0;
 	}
 	

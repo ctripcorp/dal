@@ -7,11 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.lang3.StringUtils;
-
-import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.client.LogEntry;
+import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 import com.ctrip.security.encryption.AESCrypto;
@@ -45,26 +43,6 @@ public class CtripLogEntry extends LogEntry {
 		this.catTransaction = catTransaction;
 	}
 
-	private String getSqlTpl(){
-		DalEventEnum event = getEvent();
-		
-		if(event == DalEventEnum.QUERY || 
-				event == DalEventEnum.UPDATE_SIMPLE ||
-				event == DalEventEnum.UPDATE_KH ||
-				event == DalEventEnum.BATCH_UPDATE_PARAM){
-			return getSqls() != null && getSqls().length > 0 ? getSqls()[0] : "";
-		}
-		if(event == DalEventEnum.BATCH_UPDATE){
-			return StringUtils.join(getSqls(), ";");
-		}
-		if(event == DalEventEnum.CALL || 
-				event == DalEventEnum.BATCH_CALL){
-			return getCallString();
-		}
-		
-		return "";
-	}
-	
 	private boolean hasHashCode(String sqlTpl, int hashCode){
 		if(!hashes.containsKey(sqlTpl)){
 			hashes.put(sqlTpl, hashCode);
@@ -74,30 +52,6 @@ public class CtripLogEntry extends LogEntry {
 		}
 	}
 
-	private String getParams(){
-		DalEventEnum event = getEvent();
-		String[] pramemters = getPramemters();
-		
-		StringBuilder sbout = new StringBuilder();
-		if(pramemters == null || pramemters.length <= 0){
-			return sbout.toString();
-		}
-		if(event == DalEventEnum.QUERY || 
-				event == DalEventEnum.UPDATE_SIMPLE ||
-				event == DalEventEnum.UPDATE_KH ||
-				event == DalEventEnum.CALL){
-			return null != pramemters && pramemters.length > 0 ? pramemters[0] : "";
-		}
-		if(event == DalEventEnum.BATCH_UPDATE_PARAM ||
-				event == DalEventEnum.BATCH_CALL){
-			for(String param : pramemters){
-				sbout.append(param + ";");
-			}
-			return sbout.substring(0, sbout.length() - 1);
-		}
-		return "";
-	}
-	
 	public Map<String, String> getTag() {
 		
 		String dbName = "";
@@ -139,37 +93,37 @@ public class CtripLogEntry extends LogEntry {
 		}
 	}
 
-	public String getEncryptParameters(boolean encryptLogging){
+	public String getEncryptParameters(boolean encryptLogging, LogEntry entry){
 		String params = "";
 		if(encryptLogging){
 			try {
-				params = AESCrypto.getInstance().encrypt(this.getParams());
+				params = AESCrypto.getInstance().encrypt(LoggerHelper.getParams(entry));
 			} catch (Exception e) {
 				setErrorMsg(e.getMessage());
 			}
 		} else {
-			params = this.getParams();
+			params = LoggerHelper.getParams(entry);
 		}
 		return params;
 	}
 
 
-	public String toJson(boolean encryptLogging){
-		String sqlTpl = isSensitive() ?  SQLHIDDENString : this.getSqlTpl();
-		String params = getEncryptParameters(encryptLogging);
+	public String toJson(boolean encryptLogging, LogEntry entry){
+		String sqlTpl = LoggerHelper.getSqlTpl(entry);
+		String params = getEncryptParameters(encryptLogging, entry);
 		int tplLength = sqlTpl.length();
 		int paramsLength = params.length();
 		if(tplLength + paramsLength > LOG_LIMIT){
 			sqlTpl = sqlTpl.substring(0, tplLength > LOG_LIMIT ? LOG_LIMIT : tplLength);
 			params = "over long with param, can not be recorded";
 		}
-		int hashCode = CommonUtil.GetHashCode(sqlTpl);
+		int hashCode = LoggerHelper.getHashCode(sqlTpl);
 		boolean existed = this.hasHashCode(sqlTpl, hashCode);
 		
 		try {
 			params = URLEncoder.encode(params, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			setErrorMsg(getErrorMsg() + DalCLogger.getExceptionStack(e));
+			setErrorMsg(getErrorMsg() + LoggerHelper.getExceptionStack(e));
 			params = "";
 		}
 		

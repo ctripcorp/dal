@@ -28,20 +28,16 @@ import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
  *            The JPA Entity
  */
 public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
-	private static ConcurrentHashMap<String, DalParser<?>> cache = null;
+	private static final ConcurrentHashMap<String, DalParser<?>> cache = new ConcurrentHashMap<String, DalParser<?>>();
 	private Map<String, Field> fieldsMap;
 	private Class<T> clazz;
 	private Field identity;
 	private boolean autoIncrement;
 	private Loader loader;
 	
-	static {
-		cache = new ConcurrentHashMap<String, DalParser<?>>();
-	}
-
 	private DalDefaultJpaParser(Class<T> clazz, Loader loader, boolean autoIncrement,
 			String dataBaseName, String tableName,
-			String[] columns,String[] primaryKeyColumns, int[] columnTypes,
+			String[] columns, String[] primaryKeyColumns, int[] columnTypes,
 			Map<String, Field> fieldsMap){
 		super(dataBaseName, tableName, columns, primaryKeyColumns, columnTypes);
 		this.clazz = clazz;
@@ -50,39 +46,33 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 		this.fieldsMap = fieldsMap;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <T> DalParser<T> create(Class<T> clazz, Loader loader,
-			String databaseName) throws SQLException {
+	public static <T> DalParser<T> create(Class<T> clazz, Loader loader, String databaseName) throws SQLException {
 		if (!cache.contains(clazz.getName())) {
 			
 			String tableName = "";
-			String[] columns = null;
+			String[] columnNames = null;
 			int[] columnTypes = null;
-			String[] primaryKeys = null;
 			boolean autoIncrement = false;
 			
 			Map<String, Field> fieldsMap = new HashMap<String, Field>();
 			Entity entityAnnot = clazz.getAnnotation(Entity.class);
 			if (null == entityAnnot)
-				throw new SQLException("The parse class: + " + clazz.getName() + 
-						"is not a JPA Entity, pls check.");
+				throw new SQLException("The parse class: + " + clazz.getName() +  "is not a JPA Entity, pls check.");
 			tableName = entityAnnot.name();
 			Field[] fields = clazz.getDeclaredFields();
 			if (null == fields || fields.length == 0)
 				throw new SQLException("The parse class has not any fields.");
-			columns = new String[fields.length];
+			columnNames = new String[fields.length];
 			columnTypes = new int[fields.length];
-			List<String> keys = new ArrayList<String>();
+			List<String> primaryKeyNames = new ArrayList<String>();
 			
 			for (int i = 0; i < fields.length; i++) {
 				Field field = fields[i];
 				field.setAccessible(true);
 				
-				GeneratedValue generatedValue = field
-						.getAnnotation(GeneratedValue.class);
-				if (null != generatedValue
-						&& (generatedValue.strategy() == GenerationType.AUTO || generatedValue
-								.strategy() == GenerationType.IDENTITY)) {
+				GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
+				if (null != generatedValue && (generatedValue.strategy() == GenerationType.AUTO 
+						|| generatedValue.strategy() == GenerationType.IDENTITY)) {
 					autoIncrement = true;
 				}
 				
@@ -90,27 +80,25 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 				Column column = field.getAnnotation(Column.class);
 				Basic basic = field.getAnnotation(Basic.class);
 				if (null != column) {
-					columns[i] = column.name().isEmpty() ? field.getName() : column
-							.name();
+					columnNames[i] = column.name().isEmpty() ? field.getName() : column.name();
 					columnTypes[i] = loader.getSqlType(field.getType());
 				} else if (null == basic || null == id) {
-					columns[i] = field.getName();
+					columnNames[i] = field.getName();
 					columnTypes[i] = loader.getSqlType(field.getType());
 				}
 				
 				if(id != null){
-					keys.add(columns[i]);
+					primaryKeyNames.add(columnNames[i]);
 				}
-				if(!fieldsMap.containsKey(columns[i]))
-					fieldsMap.put(columns[i], field);
+				if(!fieldsMap.containsKey(columnNames[i]))
+					fieldsMap.put(columnNames[i], field);
 			}
-			
-			primaryKeys = new String[keys.size()];
-			keys.toArray(primaryKeys);
+			String[] primaryKeys = new String[primaryKeyNames.size()];
+			primaryKeyNames.toArray(primaryKeys);
 			
 			cache.put(clazz.getName(), new DalDefaultJpaParser<T>(
-					clazz, loader,autoIncrement, databaseName, tableName, 
-					columns, primaryKeys, columnTypes,fieldsMap));
+					clazz, loader, autoIncrement, databaseName, tableName, 
+					columnNames, primaryKeys, columnTypes, fieldsMap));
 		}
 		return (DalParser<T>) cache.get(clazz.getName());
 	}

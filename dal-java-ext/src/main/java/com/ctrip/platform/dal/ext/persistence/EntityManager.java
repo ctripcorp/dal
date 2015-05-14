@@ -102,7 +102,7 @@ public class EntityManager {
 			Field field = fields[i];
 			Type sqlType = field.getAnnotation(Type.class);
 			if (sqlType == null)
-				throw new SQLException("Each field of entity[" + clazz.getName() +"] must declare it's SqlType annotation.");
+				throw new SQLException("Each field of entity[" + clazz.getName() +"] must declare it's Type annotation.");
 			columnTypes[i] = sqlType.value();
 		}
 		return columnTypes;

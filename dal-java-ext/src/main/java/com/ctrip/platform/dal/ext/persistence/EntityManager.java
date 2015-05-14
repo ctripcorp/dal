@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * 
@@ -40,10 +41,13 @@ public class EntityManager {
 	}
 	
 	public String getTableName() {
+		Table table = clazz.getAnnotation(Table.class);
+		if (table != null && (!table.name().isEmpty()))
+			return table.name();
 		Entity entity = clazz.getAnnotation(Entity.class);
-		if (entity == null)
-			return clazz.getSimpleName();
-		return entity.name();
+		if ( entity != null && (!entity.name().isEmpty()) )
+			return entity.name();
+		return clazz.getSimpleName();
 	}
 	
 	public boolean isAutoIncrement() throws SQLException {
@@ -113,6 +117,9 @@ public class EntityManager {
 	
 	public static void setValue(Field field, Object entity, Object val)
 			throws ReflectiveOperationException {
+		field.setAccessible(true);
+		if (val == null)
+			field.set(entity, val);
 		if (field.getType().equals(Integer.class) || field.getType().equals(int.class)) {
 			field.set(entity, ((Number) val).intValue());
 			return;

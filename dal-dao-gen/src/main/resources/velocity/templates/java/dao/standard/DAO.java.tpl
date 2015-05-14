@@ -1,5 +1,6 @@
 package ${host.getPackageName()};
 
+import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
 #foreach( $field in ${host.getDaoImports()} )
 import ${field};
 #end
@@ -36,7 +37,8 @@ public class ${host.getPojoClassName()}Dao {
 #end
 #end
 *#	
-	private DalParser<${host.getPojoClassName()}> parser = new ${host.getPojoClassName()}Parser();
+##	private DalParser<${host.getPojoClassName()}> parser = new ${host.getPojoClassName()}Parser();
+	private DalParser<${host.getPojoClassName()}> parser = null;	
 	private DalScalarExtractor extractor = new DalScalarExtractor();
 	private DalRowMapperExtractor<${host.getPojoClassName()}> rowextractor = null;
 	private DalTableDao<${host.getPojoClassName()}> client;
@@ -59,6 +61,7 @@ public class ${host.getPojoClassName()}Dao {
 #parse("templates/java/dao/autosql/DAO.java.tpl")
 ##parse("templates/java/dao/standard/method.sp.prepareSpCall.tpl")
 
+#*
 	public static class ${host.getPojoClassName()}Parser extends AbstractDalParser<${host.getPojoClassName()}> {
 		public static final String DATABASE_NAME = "${host.getDbSetName()}";
 		public static final String TABLE_NAME = "${host.getTableName()}";
@@ -131,4 +134,5 @@ public class ${host.getPojoClassName()}Dao {
 			return map;
 		}
 	}
+*#	
 }

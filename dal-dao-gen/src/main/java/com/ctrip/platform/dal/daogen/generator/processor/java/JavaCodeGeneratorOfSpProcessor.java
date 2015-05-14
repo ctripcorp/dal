@@ -49,35 +49,30 @@ public class JavaCodeGeneratorOfSpProcessor implements DalProcessor {
 				public ExecuteResult call() throws Exception {
 					ExecuteResult result = new ExecuteResult("Generate SP[" + host.getDbSetName() + "] Dao, Pojo, Test");
 					progress.setOtherMessage(result.getTaskName());
-					try
-					{
+					try {
 						VelocityContext context = GenUtils.buildDefaultVelocityContext();
 						context.put("host", host);
 						
 						GenUtils.mergeVelocityContext(
 								context,
-								String.format("%s/Dao/%sSpDao.java",
-										mavenLikeDir.getAbsolutePath(),
-										host.getDbSetName()),
+								String.format("%s/Dao/%sSpDao.java", mavenLikeDir.getAbsolutePath(), host.getDbSetName()),
 								"templates/java/DAOBySp.java.tpl");
 	
-						GenUtils.mergeVelocityContext(context, String.format(
-								"%s/Test/%sSpDaoTest.java",
-								mavenLikeDir.getAbsolutePath(), host.getDbSetName()),
+						GenUtils.mergeVelocityContext(
+								context, 
+								String.format("%s/Test/%sSpDaoTest.java", mavenLikeDir.getAbsolutePath(), host.getDbSetName()),
 								"templates/java/test/DAOBySpTest.java.tpl");
 						
-						GenUtils.mergeVelocityContext(context, String.format(
-								"%s/Test/%sSpDaoUnitTest.java",
-								mavenLikeDir.getAbsolutePath(), host.getDbSetName()),
+						GenUtils.mergeVelocityContext(
+								context, 
+								String.format("%s/Test/%sSpDaoUnitTest.java", mavenLikeDir.getAbsolutePath(), host.getDbSetName()),
 								"templates/java/test/DAOBySpUnitTest.java.tpl");
 	
 						for (SpHost sp : host.getSpHosts()) {
 							context.put("host", sp);
 							GenUtils.mergeVelocityContext(
 									context,
-									String.format("%s/Entity/%s.java",
-											mavenLikeDir.getAbsolutePath(),
-											sp.getPojoClassName()),
+									String.format("%s/Entity/%s.java", mavenLikeDir.getAbsolutePath(), sp.getPojoClassName()),
 									"templates/java/Pojo.java.tpl");
 						}
 						result.setSuccessal(true);

@@ -49,15 +49,12 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
 				public ExecuteResult call() throws Exception {
 					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getPojoClassName() + "] Pojo");
 					progress.setOtherMessage(result.getTaskName());
-					try
-					{
+					try {
 						VelocityContext context = GenUtils.buildDefaultVelocityContext();
 						context.put("host", host);
 						GenUtils.mergeVelocityContext(
 								context,
-								String.format("%s/Entity/%s.java",
-										mavenLikeDir.getAbsolutePath(),
-										host.getPojoClassName()),
+								String.format("%s/Entity/%s.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
 								"templates/java/Pojo.java.tpl");
 						result.setSuccessal(true);
 					}catch(Exception e){
@@ -77,28 +74,23 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
 				public ExecuteResult call() throws Exception {
 					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Dap, Test");
 					progress.setOtherMessage(result.getTaskName());
-					try
-					{
+					try {
 						VelocityContext context = GenUtils.buildDefaultVelocityContext();
 						context.put("host", host);
 						
 						GenUtils.mergeVelocityContext(
 								context,
-								String.format("%s/Dao/%sDao.java",
-										mavenLikeDir.getAbsolutePath(),
-										host.getClassName()),
+								String.format("%s/Dao/%sDao.java", mavenLikeDir.getAbsolutePath(), host.getClassName()),
 								"templates/java/dao/freesql/FreeSqlDAO.java.tpl");
 	
-						GenUtils.mergeVelocityContext(context,
-								String.format("%s/Test/%sDaoTest.java",
-										mavenLikeDir.getAbsolutePath(),
-										host.getClassName()),
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Test/%sDaoTest.java", mavenLikeDir.getAbsolutePath(), host.getClassName()),
 								"templates/java/test/FreeSqlDAOTest.java.tpl");
 						
-						GenUtils.mergeVelocityContext(context,
-								String.format("%s/Test/%sDaoUnitTest.java",
-										mavenLikeDir.getAbsolutePath(),
-										host.getClassName()),
+						GenUtils.mergeVelocityContext(
+								context,
+								String.format("%s/Test/%sDaoUnitTest.java", mavenLikeDir.getAbsolutePath(), host.getClassName()),
 								"templates/java/test/FreeSqlDaoUnitTest.java.tpl");
 						
 						result.setSuccessal(true);

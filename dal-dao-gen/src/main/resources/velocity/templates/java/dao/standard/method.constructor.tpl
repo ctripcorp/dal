@@ -1,5 +1,6 @@
 ##构造函数
-	public ${host.getPojoClassName()}Dao() {
+	public ${host.getPojoClassName()}Dao() throws SQLException {
+		parser = DalDefaultJpaParser.create(${host.getPojoClassName()}.class, DATA_BASE);
 		this.client = new DalTableDao<${host.getPojoClassName()}>(parser);
 		dbCategory = this.client.getDatabaseCategory();
 #*

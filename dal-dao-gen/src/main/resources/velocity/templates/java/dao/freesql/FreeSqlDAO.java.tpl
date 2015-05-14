@@ -47,7 +47,19 @@ public class ${host.getClassName()}Dao {
 			${method.getPojoClassName()} pojo = new ${method.getPojoClassName()}();
 			
 #foreach( $field in ${method.getFields()} )
-			pojo.set${field.getCapitalizedName()}((${field.getClassDisplayName()})rs.getObject("${field.getName()}"));
+#if(${field.getClassDisplayName()} == "Integer")
+		    if (rs.getObject("${field.getName()}") != null)
+				pojo.set${field.getCapitalizedName()}(((Number)rs.getObject("${field.getName()}")).intValue());
+		    else
+				pojo.set${field.getCapitalizedName()}((${field.getClassDisplayName()})rs.getObject("${field.getName()}"));
+#elseif(${field.getClassDisplayName()} == "Long")
+		    if (rs.getObject("${field.getName()}") != null)
+				pojo.set${field.getCapitalizedName()}(((Number)rs.getObject("${field.getName()}")).longValue());
+			else
+				pojo.set${field.getCapitalizedName()}((${field.getClassDisplayName()})rs.getObject("${field.getName()}"));
+#else
+		    pojo.set${field.getCapitalizedName()}((${field.getClassDisplayName()})rs.getObject("${field.getName()}"));
+#end	
 #end
 
 			return pojo;

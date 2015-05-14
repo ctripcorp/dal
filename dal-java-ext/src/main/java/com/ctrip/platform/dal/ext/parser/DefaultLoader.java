@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 
+@Deprecated
 public class DefaultLoader extends Loader{
 
 	private static Map<Class<?>, Integer> ms_sql_server = null;

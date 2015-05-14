@@ -28,12 +28,7 @@ import com.ctrip.platform.dal.dao.unittests.DalTestHelper;
 import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
 import com.ctrip.platform.dal.ext.persistence.Type;
 
-/**
- * Test the default Jpa Parser with sql server database
- * @author wcyuan
- * @version 2014-05-08
- */
-public class DalDefaultJpaParserSqlServerTest {
+public class DalDefaultJpaParserSqlServerTest2 {
 	private final static int ROW_COUNT = 100;
 	private final static String DROP_TABLE_SQL = "IF EXISTS ("
 			+ "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
@@ -41,7 +36,7 @@ public class DalDefaultJpaParserSqlServerTest {
 
 	// Create the the table
 	private final static String CREATE_TABLE_SQL = "CREATE TABLE %s"
-			+ "(" + "Id int NOT NULL IDENTITY(1,1) PRIMARY KEY, "
+			+ "(" + "Id bigint NOT NULL IDENTITY(1,1) PRIMARY KEY, "
 			+ "quantity int,type smallint, " + "address varchar(64) not null,"
 			+ "last_changed datetime default getdate())";
 	
@@ -105,6 +100,8 @@ public class DalDefaultJpaParserSqlServerTest {
 		StatementParameters parameters = new StatementParameters();
 		List<ClientTestModel> db_models = dao.query("1=1", parameters, hints);
 		Assert.assertEquals(ROW_COUNT, db_models.size());
+		Assert.assertNotNull(db_models.get(1).getId());
+		Assert.assertTrue(db_models.get(2).getId() > 0);
 		
 		res = dao.delete(hints, db_models);
 		Assert.assertEquals(0, DalTestHelper.getCount(dao));
@@ -144,7 +141,7 @@ public class DalDefaultJpaParserSqlServerTest {
 		@Id
 		@GeneratedValue(strategy = GenerationType.AUTO)
 		@Type(value = Types.INTEGER)
-		private Integer id;
+		private Integer id;// The real db column type is bigint(refer to long in java), but here set it to Integer
 		
 		@Column(name="quantity")
 		@Type(value = Types.INTEGER)

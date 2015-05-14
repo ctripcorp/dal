@@ -48,35 +48,28 @@ public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
 				public ExecuteResult call() throws Exception {
 					ExecuteResult result = new ExecuteResult("Generate Table[" + host.getDbSetName() + "." + host.getTableName() + "] Dao, Pojo, Test");
 					progress.setOtherMessage(result.getTaskName());
-					try
-					{
+					try {
 						VelocityContext context = GenUtils.buildDefaultVelocityContext();
 						context.put("host", host);
 						
 						GenUtils.mergeVelocityContext(
 								context,
-								String.format("%s/Dao/%sDao.java",
-										mavenLikeDir.getAbsolutePath(),
-										host.getPojoClassName()),
+								String.format("%s/Dao/%sDao.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
 								"templates/java/dao/standard/DAO.java.tpl");
 	
 						GenUtils.mergeVelocityContext(
 								context,
-								String.format("%s/Entity/%s.java",
-										mavenLikeDir.getAbsolutePath(),
-										host.getPojoClassName()),
-								"templates/java/Pojo.java.tpl");
+								String.format("%s/Entity/%s.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
+								"templates/java/StandardDaoPojo.java.tpl");
 	
-						GenUtils.mergeVelocityContext(context, String.format(
-								"%s/Test/%sDaoTest.java",
-								mavenLikeDir.getAbsolutePath(),
-								host.getPojoClassName()),
+						GenUtils.mergeVelocityContext(
+								context, 
+								String.format("%s/Test/%sDaoTest.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
 								"templates/java/test/DAOTest.java.tpl");
 						
-						GenUtils.mergeVelocityContext(context, String.format(
-								"%s/Test/%sDaoUnitTest.java",
-								mavenLikeDir.getAbsolutePath(),
-								host.getPojoClassName()),
+						GenUtils.mergeVelocityContext(
+								context, 
+								String.format("%s/Test/%sDaoUnitTest.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
 								"templates/java/test/DaoUnitTests.java.tpl");
 						
 						result.setSuccessal(true);

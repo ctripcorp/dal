@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import junit.framework.Assert;
 
@@ -24,34 +25,25 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.unittests.DalTestHelper;
 import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
 import com.ctrip.platform.dal.ext.persistence.Type;
 
-/**
- * Test the default Jpa Parser with sql server database
- * @author wcyuan
- * @version 2014-05-08
- */
-public class DalDefaultJpaParserSqlServerTest {
+public class DalDefaultJpaParserMySqlTest2 {
 	private final static int ROW_COUNT = 100;
-	private final static String DROP_TABLE_SQL = "IF EXISTS ("
-			+ "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
-			+ "WHERE TABLE_NAME = '%s') DROP TABLE  %s";
-
-	// Create the the table
-	private final static String CREATE_TABLE_SQL = "CREATE TABLE %s"
-			+ "(" + "Id int NOT NULL IDENTITY(1,1) PRIMARY KEY, "
-			+ "quantity int,type smallint, " + "address varchar(64) not null,"
-			+ "last_changed datetime default getdate())";
-	
+	private final static String DROP_TABLE_SQL = "DROP TABLE IF EXISTS %s";
+	private final static String CREATE_TABLE_SQL = "CREATE TABLE %s("
+			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
+			+ "quantity int,"
+			+ "type smallint, "
+			+ "address VARCHAR(64) not null, "
+			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
 	
 	private static DalClient client = null;
 	private static DalTableDao<ClientTestModel> dao = null;
 	private static DalParser<ClientTestModel> parser = null;
 	static {
 		try {
-			parser = DalDefaultJpaParser.create(ClientTestModel.class, "HotelPubDB");
+			parser = DalDefaultJpaParser.create(ClientTestModel.class, "dao_test");
 			
 			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(parser.getDatabaseName());	
@@ -62,30 +54,20 @@ public class DalDefaultJpaParserSqlServerTest {
 	}
 	
 	@BeforeClass
-	public static void setUpBeforeClass(){
+	public static void setUpBeforeClass() throws Exception {
 		DalHints hints = new DalHints();
 		String[] sqls = new String[] { 
-				String.format(DROP_TABLE_SQL, parser.getTableName(), parser.getTableName()), 
+				String.format(DROP_TABLE_SQL, parser.getTableName()), 
 				String.format(CREATE_TABLE_SQL, parser.getTableName())};
-		try {
-			client.batchUpdate(sqls, hints);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			Assert.fail();
-		}
+		client.batchUpdate(sqls, hints);
 	}
 
 	@AfterClass
-	public static void tearDownAfterClass(){
+	public static void tearDownAfterClass() throws Exception {
 		DalHints hints = new DalHints();
 		String[] sqls = new String[] { 
-				String.format(DROP_TABLE_SQL, parser.getTableName(), parser.getTableName())};
-		try {
-			client.batchUpdate(sqls, hints);
-		} catch (SQLException e) {
-			Assert.fail();
-			e.printStackTrace();
-		}
+				String.format(DROP_TABLE_SQL, parser.getTableName()) };
+		client.batchUpdate(sqls, hints);
 	}
 
 	@Test
@@ -100,14 +82,15 @@ public class DalDefaultJpaParserSqlServerTest {
 		}
 		DalHints hints = new DalHints();
 		int[] res = dao.insert(hints, Arrays.asList(models));
-		Assert.assertEquals(ROW_COUNT, DalTestHelper.getCount(dao));
+		assertEquals(ROW_COUNT, res);
 		
 		StatementParameters parameters = new StatementParameters();
-		List<ClientTestModel> db_models = dao.query("1=1", parameters, hints);
+		List<ClientTestModel> db_models = dao.query("true", parameters, hints);
+		Assert.assertNotNull(db_models.get(1).getId());
+		Assert.assertTrue(db_models.get(2).getId() > 0);
 		Assert.assertEquals(ROW_COUNT, db_models.size());
-		
 		res = dao.delete(hints, db_models);
-		Assert.assertEquals(0, DalTestHelper.getCount(dao));
+		assertEquals(ROW_COUNT, res);
 	}
 	
 	private void assertEquals(int expected, int[] res) {
@@ -131,42 +114,43 @@ public class DalDefaultJpaParserSqlServerTest {
 		Assert.assertEquals(ROW_COUNT, res.length);
 		
 		StatementParameters parameters = new StatementParameters();
-		List<ClientTestModel> db_models = dao.query("1=1", parameters, hints);
+		List<ClientTestModel> db_models = dao.query("true", parameters, hints);
 		Assert.assertEquals(ROW_COUNT, db_models.size());
 		
-		dao.delete(hints, db_models);
-		Assert.assertEquals(0, DalTestHelper.getCount(dao));
+		res = dao.delete(hints, db_models);
+		assertEquals(ROW_COUNT, res);
 	}
 
-	
-	@Entity(name="dal_client_test")
+
+	@Entity
+	@Table(name="dal_client_test")
 	public static class ClientTestModel {
 		@Id
 		@GeneratedValue(strategy = GenerationType.AUTO)
-		@Type(value = Types.INTEGER)
-		private Integer id;
+		@Type(value=Types.BIGINT)
+		private Long id; // The real db column type is int, but here set it to Long
 		
 		@Column(name="quantity")
-		@Type(value = Types.INTEGER)
+		@Type(value=Types.INTEGER)
 		private Integer quan;
 		
 		@Column
-		@Type(value = Types.SMALLINT)
+		@Type(value=Types.SMALLINT)
 		private Short type;
 		
 		@Column(length=50)
-		@Type(value = Types.VARCHAR)
+		@Type(value=Types.VARCHAR)
 		private String address;
 		
 		@Column(nullable =false, insertable=false, name="last_changed")
-		@Type(value = Types.TIMESTAMP)
+		@Type(value=Types.TIMESTAMP)
 		private Timestamp lastChanged;
 
-		public Integer getId() {
+		public Long getId() {
 			return id;
 		}
 
-		public void setId(int id) {
+		public void setId(Long id) {
 			this.id = id;
 		}
 

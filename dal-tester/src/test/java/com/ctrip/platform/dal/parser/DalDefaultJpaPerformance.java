@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.parser;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -22,7 +23,7 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
-import com.ctrip.platform.dal.ext.parser.DefaultLoader;
+import com.ctrip.platform.dal.ext.persistence.Type;
 
 /**
  * Used for performance test
@@ -45,8 +46,7 @@ public class DalDefaultJpaPerformance {
 	
 	public DalDefaultJpaPerformance(DatabaseCategory dbCategory,String dbName){
 		try {
-			parser = DalDefaultJpaParser.create(ClientTestModel.class, 
-					new DefaultLoader(dbCategory), dbName);
+			parser = DalDefaultJpaParser.create(ClientTestModel.class, dbName);
 			client = DalClientFactory.getClient(parser.getDatabaseName());
 			dao = new DalTableDao<ClientTestModel>(parser);
 		} catch (Exception e) {
@@ -76,7 +76,7 @@ public class DalDefaultJpaPerformance {
 	 * @throws SQLException
 	 */
 	public int[] randomInsert(int count) throws SQLException{
-		if(0 == count)
+		if (0 == count)
 			return new int[0];
 		ClientTestModel[] entities = new ClientTestModel[count];
 		Random random = new Random();
@@ -85,7 +85,7 @@ public class DalDefaultJpaPerformance {
 			int seed = random.nextInt(5);
 			model.setId(null);
 			model.setQuantity(seed + 10);
-			model.setType(((Number)(i%3)).shortValue());
+			model.setType(((Number) (i % 3)).shortValue());
 			model.setAddress("CTRIP");
 			model.setLastChanged(new Timestamp(System.currentTimeMillis()));
 			entities[i] = model;
@@ -119,10 +119,8 @@ public class DalDefaultJpaPerformance {
 	 * @throws SQLException
 	 */
 	public int[] update(List<ClientTestModel> entities) throws SQLException{
-		ClientTestModel[] models = new ClientTestModel[entities.size()];
-		entities.toArray(models);
-		DalHints hints = new DalHints();	
-		return dao.update(hints, Arrays.asList(models));
+		DalHints hints = new DalHints();
+		return dao.update(hints, entities);
 	}
 	
 	/**
@@ -145,18 +143,23 @@ public class DalDefaultJpaPerformance {
 	public  static class ClientTestModel{
 		@Id
 		@GeneratedValue(strategy = GenerationType.AUTO)
+		@Type(value = Types.INTEGER)
 		private Integer id;
 		
 		@Column
+		@Type(value = Types.INTEGER)
 		private Integer quantity;
 		
 		@Column
+		@Type(value = Types.SMALLINT)
 		private Short type;
 		
 		@Column
+		@Type(value = Types.VARCHAR)
 		private String address;
 		
 		@Column(name="last_changed")
+		@Type(value = Types.TIMESTAMP)
 		private Timestamp lastChanged;
 
 		public Integer getId() {

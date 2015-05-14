@@ -280,8 +280,7 @@ public class JavaTableHost {
 	public Set<String> getPojoImports() {
 		Set<String> imports = new TreeSet<String>();
 
-		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(
-				fields);
+		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(fields);
 		for (JavaParameterHost field : allTypes) {
 			Class<?> clazz = field.getJavaClass();
 			if (byte[].class.equals(clazz))

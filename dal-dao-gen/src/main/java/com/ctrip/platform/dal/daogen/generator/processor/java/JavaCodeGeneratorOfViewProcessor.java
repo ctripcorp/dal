@@ -49,35 +49,28 @@ public class JavaCodeGeneratorOfViewProcessor implements DalProcessor {
 				public ExecuteResult call() throws Exception {					
 					ExecuteResult result = new ExecuteResult("Generate View[" + host.getDbSetName() + "." + host.getViewName() + "] Dao");
 					progress.setOtherMessage(result.getTaskName());
-					try
-					{
+					try {
 						VelocityContext context = GenUtils.buildDefaultVelocityContext();
 						context.put("host", host);
 						
 						GenUtils.mergeVelocityContext(
 								context,
-								String.format("%s/Dao/%sDao.java",
-										mavenLikeDir.getAbsolutePath(),
-										host.getPojoClassName()),
+								String.format("%s/Dao/%sDao.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
 								"templates/java/ViewDAO.java.tpl");
 	
 						GenUtils.mergeVelocityContext(
 								context,
-								String.format("%s/Entity/%s.java",
-										mavenLikeDir.getAbsolutePath(),
-										host.getPojoClassName()),
+								String.format("%s/Entity/%s.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
 								"templates/java/Pojo.java.tpl");
 	
-						GenUtils.mergeVelocityContext(context, String.format(
-								"%s/Test/%sDaoTest.java",
-								mavenLikeDir.getAbsolutePath(),
-								host.getPojoClassName()),
+						GenUtils.mergeVelocityContext(
+								context, 
+								String.format( "%s/Test/%sDaoTest.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
 								"templates/java/test/DAOByViewTest.java.tpl");
 						
-						GenUtils.mergeVelocityContext(context, String.format(
-								"%s/Test/%sDaoUnitTest.java",
-								mavenLikeDir.getAbsolutePath(),
-								host.getPojoClassName()),
+						GenUtils.mergeVelocityContext(
+								context, 
+								String.format("%s/Test/%sDaoUnitTest.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
 								"templates/java/test/DAOByViewUnitTest.java.tpl");
 						
 						result.setSuccessal(true);

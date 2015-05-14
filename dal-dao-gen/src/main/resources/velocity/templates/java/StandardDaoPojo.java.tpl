@@ -6,7 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import com.ctrip.platform.dal.ext.persistence.SqlType;
+import com.ctrip.platform.dal.ext.persistence.Type;
 import java.sql.Types;
 #foreach( $field in ${host.getPojoImports()} )
 import ${field};
@@ -27,7 +27,7 @@ public class ${host.getPojoClassName()} implements DalPojo {
 #if(${field.isIdentity()})
 	@GeneratedValue(strategy = GenerationType.AUTO)
 #end
-	@SqlType(value=${field.getJavaTypeDisplay()})
+	@Type(value=${field.getJavaTypeDisplay()})
 	private ${field.getClassDisplayName()} ${field.getUncapitalizedName()};
 #end
 

@@ -100,7 +100,7 @@ public class EntityManager {
 		int[] columnTypes = new int[length];
 		for (int i = 0; i < length; i++) {
 			Field field = fields[i];
-			SqlType sqlType = field.getAnnotation(SqlType.class);
+			Type sqlType = field.getAnnotation(Type.class);
 			if (sqlType == null)
 				throw new SQLException("Each field of entity[" + clazz.getName() +"] must declare it's SqlType annotation.");
 			columnTypes[i] = sqlType.value();

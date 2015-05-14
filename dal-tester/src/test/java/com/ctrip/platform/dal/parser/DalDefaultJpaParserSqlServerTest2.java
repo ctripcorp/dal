@@ -26,7 +26,7 @@ import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.unittests.DalTestHelper;
 import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
-import com.ctrip.platform.dal.ext.persistence.SqlType;
+import com.ctrip.platform.dal.ext.persistence.Type;
 
 public class DalDefaultJpaParserSqlServerTest2 {
 	private final static int ROW_COUNT = 100;
@@ -140,23 +140,23 @@ public class DalDefaultJpaParserSqlServerTest2 {
 	public static class ClientTestModel {
 		@Id
 		@GeneratedValue(strategy = GenerationType.AUTO)
-		@SqlType(value = Types.INTEGER)
+		@Type(value = Types.INTEGER)
 		private Integer id;// The real db column type is bigint(refer to long in java), but here set it to Integer
 		
 		@Column(name="quantity")
-		@SqlType(value = Types.INTEGER)
+		@Type(value = Types.INTEGER)
 		private Integer quan;
 		
 		@Column
-		@SqlType(value = Types.SMALLINT)
+		@Type(value = Types.SMALLINT)
 		private Short type;
 		
 		@Column(length=50)
-		@SqlType(value = Types.VARCHAR)
+		@Type(value = Types.VARCHAR)
 		private String address;
 		
 		@Column(nullable =false, insertable=false, name="last_changed")
-		@SqlType(value = Types.TIMESTAMP)
+		@Type(value = Types.TIMESTAMP)
 		private Timestamp lastChanged;
 
 		public Integer getId() {

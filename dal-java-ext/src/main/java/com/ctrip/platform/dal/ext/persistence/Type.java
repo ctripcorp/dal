@@ -6,6 +6,6 @@ import java.lang.annotation.Target;
 
 @Target({ java.lang.annotation.ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SqlType {
+public @interface Type {
 	public abstract int value();
 }

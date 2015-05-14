@@ -26,7 +26,7 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
-import com.ctrip.platform.dal.ext.persistence.SqlType;
+import com.ctrip.platform.dal.ext.persistence.Type;
 
 public class DalDefaultJpaParserMySqlTest2 {
 	private final static int ROW_COUNT = 100;
@@ -127,23 +127,23 @@ public class DalDefaultJpaParserMySqlTest2 {
 	public static class ClientTestModel {
 		@Id
 		@GeneratedValue(strategy = GenerationType.AUTO)
-		@SqlType(value=Types.BIGINT)
+		@Type(value=Types.BIGINT)
 		private Long id; // The real db column type is int, but here set it to Long
 		
 		@Column(name="quantity")
-		@SqlType(value=Types.INTEGER)
+		@Type(value=Types.INTEGER)
 		private Integer quan;
 		
 		@Column
-		@SqlType(value=Types.SMALLINT)
+		@Type(value=Types.SMALLINT)
 		private Short type;
 		
 		@Column(length=50)
-		@SqlType(value=Types.VARCHAR)
+		@Type(value=Types.VARCHAR)
 		private String address;
 		
 		@Column(nullable =false, insertable=false, name="last_changed")
-		@SqlType(value=Types.TIMESTAMP)
+		@Type(value=Types.TIMESTAMP)
 		private Timestamp lastChanged;
 
 		public Long getId() {

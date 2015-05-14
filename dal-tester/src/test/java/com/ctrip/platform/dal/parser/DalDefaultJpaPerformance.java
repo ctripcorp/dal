@@ -23,7 +23,7 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
-import com.ctrip.platform.dal.ext.persistence.SqlType;
+import com.ctrip.platform.dal.ext.persistence.Type;
 
 /**
  * Used for performance test
@@ -143,23 +143,23 @@ public class DalDefaultJpaPerformance {
 	public  static class ClientTestModel{
 		@Id
 		@GeneratedValue(strategy = GenerationType.AUTO)
-		@SqlType(value = Types.INTEGER)
+		@Type(value = Types.INTEGER)
 		private Integer id;
 		
 		@Column
-		@SqlType(value = Types.INTEGER)
+		@Type(value = Types.INTEGER)
 		private Integer quantity;
 		
 		@Column
-		@SqlType(value = Types.SMALLINT)
+		@Type(value = Types.SMALLINT)
 		private Short type;
 		
 		@Column
-		@SqlType(value = Types.VARCHAR)
+		@Type(value = Types.VARCHAR)
 		private String address;
 		
 		@Column(name="last_changed")
-		@SqlType(value = Types.TIMESTAMP)
+		@Type(value = Types.TIMESTAMP)
 		private Timestamp lastChanged;
 
 		public Integer getId() {

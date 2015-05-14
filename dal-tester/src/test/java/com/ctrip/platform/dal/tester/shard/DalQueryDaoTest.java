@@ -1,29 +1,31 @@
 package com.ctrip.platform.dal.tester.shard;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalQueryDao;
+import com.ctrip.platform.dal.dao.DalRowCallback;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.QueryCallback;
+import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.ShortRowMapper;
 
@@ -131,21 +133,63 @@ public class DalQueryDaoTest {
 
 	
 	private StatementParameters parameters = new StatementParameters();
-	private DalHints hints = new DalHints();
 	private String sqlList = "select * from " + TABLE_NAME;
 	private String sqlListQuantity = "select quantity from " + TABLE_NAME;
 	private String sqlObject = "select * from " + TABLE_NAME + " where id = ?";
 	private String sqlNoResult = "select * from " + TABLE_NAME + " where id = -1";
 	
+	private class TestComparator implements Comparator<Short>{
+		@Override
+		public int compare(Short o1, Short o2) {
+			return o1.compareTo(o2);
+		}
+	}
+	
+	private class TestResultMerger implements ResultMerger<List<Short>> {
+		List<Short> result = new ArrayList<>();
+
+		public void addPartial(String shard, List<Short> partial) throws SQLException {
+			result.addAll(partial);
+		}
+
+		public List<Short> merge() throws SQLException {
+			Collections.sort(result);
+			Collections.reverse(result);
+			return result;
+		}
+	 }
+	
+	private class TestQueryCallback implements QueryCallback {
+
+		@Override
+		public <T> void onResult(T result) {
+			assertNotNull(result);
+			List value = (List)result;
+			assertEquals(6, value.size());
+		}
+	}
+	
+	//Factors: sync/async; merger/no merger; sorter/no sorter, callback/no callback
+	
+	/**
+	 * The template method under test
+	 * @throws SQLException 
+	 */
+	 private List<Short> queryListInAllShard(DalHints hints) throws SQLException {
+		return new DalQueryDao(DATABASE_NAME).query(
+				sqlList, parameters, 
+				hints.inAllShards(), 
+				new ShortRowMapper());
+	}
+	
 	@Test
-	public void testQueryListAllShards() {
+	public void testQueryListAllShardsSync() {
 		try {
-			DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
-			List<Short> result = dao.query(
-					sqlList, parameters, 
-					hints.inAllShards(), 
-					Short.class);
+			DalHints hints = new DalHints();
+			List<Short> result = queryListInAllShard(hints);
 			assertEquals(6, result.size());
+			Short t = result.get(0);
+			assertEquals(new Short((short)1), t);
 		} catch (Exception e) {
 			fail();
 		}
@@ -154,24 +198,10 @@ public class DalQueryDaoTest {
 	@Test
 	public void testQueryListAllShardsAsync() {
 		try {
-			DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
-			List<Short> result = dao.query(
-					sqlList, parameters, 
-					hints.inAllShards().asyncExecution().callbackWith(new MyQueryCallback()), 
-					Short.class);
-		} catch (Exception e) {
-			fail();
-		}
-	}
-	
-	@Test
-	public void testQueryListAllShardsAsyncWithoutCallback() {
-		try {
-			DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
-			List<Short> result = dao.query(
-					sqlList, parameters, 
-					hints.inAllShards().asyncExecution(), Short.class);
-			Future<List<Short>> fr = (Future<List<Short>>)hints.get(DalHintEnum.futureResult);
+			DalHints hints = new DalHints();
+			List<Short> result = queryListInAllShard(hints.asyncExecution());
+			Future<List<Short>> fr = (Future<List<Short>>)hints.getAsyncResult();
+			Short s = fr.get().get(0);
 			assertEquals(6, fr.get().size());
 		} catch (Exception e) {
 			fail();
@@ -179,17 +209,22 @@ public class DalQueryDaoTest {
 	}
 	
 	@Test
-	public void testQueryListAllShardsInParallel() {
+	public void testQueryListAllShardsWithMerger() {
 		try {
-			DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
-			List<Short> result = dao.query(
-					sqlList, parameters, 
-					hints.inAllShards().sortBy(new Comparator<Short>() {
-						@Override
-						public int compare(Short o1, Short o2) {
-							return o2.compareTo(o1);
-						}
-					}), new ShortRowMapper());
+			DalHints hints = new DalHints();
+			List<Short> result = queryListInAllShard(hints.mergeBy(new TestResultMerger()));
+			Short t = result.get(0);
+			assertEquals(new Short((short)3), t);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryListAllShardsWithSorter() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryListInAllShard(hints.sortBy(new TestComparator()));
 			assertEquals(6, result.size());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -197,14 +232,55 @@ public class DalQueryDaoTest {
 		}
 	}
 
-	private class MyQueryCallback implements QueryCallback {
-
-		@Override
-		public <T> void onResult(T result) {
-			Assert.assertNotNull(result);
+	@Test
+	public void testQueryListAllShardsWithCallback() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryListInAllShard(hints.callbackWith(new TestQueryCallback()));
+			assertNull(result);
+		} catch (Exception e) {
+			fail();
 		}
 	}
 	
+	@Test
+	public void testQueryListAllShardsSyncWithClass() {
+		try {
+			DalHints hints = new DalHints();
+			List<Integer> result = new DalQueryDao(DATABASE_NAME).query(
+					sqlListQuantity, parameters, 
+					hints.inAllShards(), 
+					Integer.class);
+			assertEquals(6, result.size());
+			Integer t = result.get(0);
+			assertEquals(new Integer(10), t);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryListAllShardsSyncWithRowCallback() {
+		try {
+			DalHints hints = new DalHints();
+			TestDalRowCallback callback = new TestDalRowCallback();
+			new DalQueryDao(DATABASE_NAME).query(
+					sqlListQuantity, parameters, 
+					hints.inAllShards(), 
+					callback);
+			// 66 = (10 + 11 + 12)*2
+			assertEquals(66, callback.result.get());
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	private static class TestDalRowCallback implements DalRowCallback {
+		AtomicInteger result = new AtomicInteger();
+		public void process(ResultSet rs) throws SQLException {
+			result.addAndGet(rs.getShort("quantity"));
+		}
+	}
 	
 //	@Test
 //	public void testQueryClassForList() {
@@ -217,12 +293,6 @@ public class DalQueryDaoTest {
 //		}
 //	}
 //	
-//	private static class DalRowCallbackTest implements DalRowCallback {
-//		int result = 0;
-//		public void process(ResultSet rs) throws SQLException {
-//			result+=rs.getShort("quantity");
-//		}
-//	}
 //	
 //	@Test
 //	public void testQueryCallbackForList() {

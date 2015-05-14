@@ -67,6 +67,8 @@ public final class DalQueryDao {
 
 	/**
 	 * Execute query by the given sql with parameters. The result will be the list of instance of the given clazz.
+	 * Please don't use this when clazz is Short because ResultSet will return Integer instead of Short.
+	 * In such case, please use ShortRowMapper. 
 	 * 
 	 * @param sql The sql statement to be executed
 	 * @param parameters A container that holds all the necessary parameters

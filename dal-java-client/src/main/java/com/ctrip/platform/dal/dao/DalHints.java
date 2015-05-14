@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.task.DalAsyncCallback;
@@ -251,7 +252,11 @@ public class DalHints {
 	}
 	
 	public boolean isAsyncExecution() {
-		return is(DalHintEnum.asyncExecution);
+		return is(DalHintEnum.asyncExecution) || is(DalHintEnum.queryCallback);
+	}
+	
+	public Future<?> getAsyncResult() {
+		return (Future<?>)get(DalHintEnum.futureResult);
 	}
 	
 	public DalHints callbackWith(QueryCallback callback) {

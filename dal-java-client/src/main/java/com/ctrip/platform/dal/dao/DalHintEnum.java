@@ -155,6 +155,11 @@ public enum DalHintEnum {
 	 */
 	asyncExecution,
 	
+	/*
+	 * To execute CURD in sequential way. 
+	 */
+	sequentialExecution,
+	
 	/**
 	 * Indicate the queryCallback for async execution
 	 */

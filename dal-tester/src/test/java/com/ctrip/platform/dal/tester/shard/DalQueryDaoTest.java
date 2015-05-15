@@ -1,6 +1,9 @@
 package com.ctrip.platform.dal.tester.shard;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -102,7 +105,7 @@ public class DalQueryDaoTest {
 				int id = j + 1;
 				int quantity = 10 + j;
 				insertSqls[j + 1] = "INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
-							+ " VALUES(" + id + ", " + quantity + ",1, 'SH INFO')";
+							+ " VALUES(" + id + ", " + quantity + "," + i + ", 'SH INFO')";
 			}
 					
 			insertSqls[4] = "SET IDENTITY_INSERT "+ TABLE_NAME +" OFF";
@@ -135,7 +138,8 @@ public class DalQueryDaoTest {
 	private StatementParameters parameters = new StatementParameters();
 	private String sqlList = "select * from " + TABLE_NAME;
 	private String sqlListQuantity = "select quantity from " + TABLE_NAME;
-	private String sqlObject = "select * from " + TABLE_NAME + " where id = ?";
+	private String sqlObject = "select * from " + TABLE_NAME + " where id = ? and type=0";
+	private String sqlFirst = "select * from " + TABLE_NAME + " where id = ?";
 	private String sqlNoResult = "select * from " + TABLE_NAME + " where id = -1";
 	
 	private class TestComparator implements Comparator<Short>{
@@ -275,10 +279,354 @@ public class DalQueryDaoTest {
 		}
 	}
 	
+	@Test
+	public void testQueryListAllShardsSyncWithRowCallbackSequential() {
+		try {
+			DalHints hints = new DalHints();
+			TestDalRowCallback callback = new TestDalRowCallback();
+			new DalQueryDao(DATABASE_NAME).query(
+					sqlListQuantity, parameters, 
+					hints.inAllShards().sequentialExecute(), 
+					callback);
+			// 66 = (10 + 11 + 12)*2
+			assertEquals(66, callback.result.get());
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
 	private static class TestDalRowCallback implements DalRowCallback {
 		AtomicInteger result = new AtomicInteger();
 		public void process(ResultSet rs) throws SQLException {
 			result.addAndGet(rs.getShort("quantity"));
+		}
+	}
+	
+	private static class TestDalRowCallback2 implements DalRowCallback {
+		int result;
+		public void process(ResultSet rs) throws SQLException {
+			result+=rs.getShort("quantity");
+		}
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////
+	// QueryForObject Tests
+	//////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * The template method under test
+	 * @throws SQLException 
+	 */
+	private ClientTestModel queryForObjectInAllShard(DalHints hints) throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		parameters.set(1, 1);
+		return new DalQueryDao(DATABASE_NAME).queryForObject(
+				sqlObject, parameters, 
+				hints.inAllShards(), 
+				new ClientTestDalRowMapper());
+	}
+	
+	@Test
+	public void testQueryForObjectAllShardsSync() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result = queryForObjectInAllShard(hints);
+			assertNotNull(result);
+			assertEquals(1, result.id);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryForObjectAllShardsSyncFail() {
+		try {
+			DalHints hints = new DalHints();
+			StatementParameters parameters = new StatementParameters();
+			parameters.set(1, 1);
+			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryForObject(
+					sqlFirst, parameters, 
+					hints.inAllShards(), 
+					new ClientTestDalRowMapper());
+			fail();
+		} catch (Exception e) {
+		}
+	}
+	
+	@Test
+	public void testQueryForObjectAllShardsAsync() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result = queryForObjectInAllShard(hints.asyncExecution());
+			assertNull(result);
+			Future<ClientTestModel> fr = (Future<ClientTestModel>)hints.getAsyncResult();
+			assertNotNull(fr.get());
+			assertEquals(1, fr.get().id);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryForObjectAllShardsAsyncFail() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryForObject(
+					sqlFirst, parameters, 
+					hints.inAllShards().asyncExecution(), 
+					new ClientTestDalRowMapper());
+			assertNull(result);
+			Future<ClientTestModel> fr = (Future<ClientTestModel>)hints.getAsyncResult();
+			fr.get();
+			fail();
+		} catch (Exception e) {
+		}
+	}
+	
+	private class TestSingleResultMerger<T> implements ResultMerger<T>{
+		private T result;
+		
+		@Override
+		public void addPartial(String shard, T partial) throws SQLException {
+			result = partial;
+		}
+
+		@Override
+		public T merge() {
+			return result;
+		}
+	}
+	
+	@Test
+	public void testQueryForObjectAllShardsWithMerger() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result =queryForObjectInAllShard(hints.mergeBy(new TestSingleResultMerger()));
+			assertNotNull(result);
+			assertEquals(1, result.id);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryForObjectAllShardsNullable() {
+		try {
+			DalHints hints = new DalHints();
+			StatementParameters parameters = new StatementParameters();
+			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryForObjectNullable(
+					sqlNoResult, parameters, 
+					hints.inAllShards(), 
+					new ClientTestDalRowMapper());
+			assertNull(result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	private class TestQueryCallback2 implements QueryCallback {
+		Object result;
+		@Override
+		public <T> void onResult(T result) {
+			this.result = result;
+		}
+	}
+	
+
+
+	@Test
+	public void testQueryForObjectAllShardsWithCallback() {
+		try {
+			TestQueryCallback2 callback = new TestQueryCallback2();
+			DalHints hints = new DalHints();
+			ClientTestModel result = queryForObjectInAllShard(hints.callbackWith(callback));
+			assertNull(result);
+			assertEquals(result, callback.result);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
+	
+	@Test
+	public void testQueryForObjectAllShardsSyncWithClass() {
+		try {
+			DalHints hints = new DalHints();
+			StatementParameters parameters = new StatementParameters();
+			parameters.set(1, 1);
+			Integer result = dao.queryForObject(
+					sqlObject, parameters, 
+					hints.inAllShards(), 
+					Integer.class);
+			assertEquals(1, result.intValue());
+		} catch (Exception e) {
+			fail();
+		}
+	}
+
+	@Test
+	public void testQueryForObjectAllShardsSyncWithClassNullable() {
+		try {
+			DalHints hints = new DalHints();
+			StatementParameters parameters = new StatementParameters();
+			Integer result = dao.queryForObjectNullable(
+					sqlNoResult, parameters, 
+					hints.inAllShards(), 
+					Integer.class);
+			assertNull(result);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+
+	//////////////////////////////////////////////////////////////////////////////
+	// QueryFirst Tests
+	//////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * The template method under test
+	 * @throws SQLException 
+	 */
+	private ClientTestModel queryFirstInAllShard(DalHints hints) throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		parameters.set(1, 1);
+		return new DalQueryDao(DATABASE_NAME).queryFirst(
+				sqlFirst, parameters, 
+				hints.inAllShards(), 
+				new ClientTestDalRowMapper());
+	}
+	
+	@Test
+	public void testQueryFirstAllShardsSync() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result = queryFirstInAllShard(hints);
+			assertNotNull(result);
+			assertEquals(1, result.id);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryFirstAllShardsSyncFail() {
+		try {
+			DalHints hints = new DalHints();
+			StatementParameters parameters = new StatementParameters();
+			parameters.set(1, 1);
+			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryFirst(
+					sqlNoResult, parameters, 
+					hints.inAllShards(), 
+					new ClientTestDalRowMapper());
+			fail();
+		} catch (Exception e) {
+		}
+	}
+	
+	@Test
+	public void testQueryFirstAllShardsAsync() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result = queryFirstInAllShard(hints.asyncExecution());
+			assertNull(result);
+			Future<ClientTestModel> fr = (Future<ClientTestModel>)hints.getAsyncResult();
+			assertNotNull(fr.get());
+			assertEquals(1, fr.get().id);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryFirstAllShardsAsyncFail() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryForObject(
+					sqlNoResult, parameters, 
+					hints.inAllShards().asyncExecution(), 
+					new ClientTestDalRowMapper());
+			assertNull(result);
+			Future<ClientTestModel> fr = (Future<ClientTestModel>)hints.getAsyncResult();
+			fr.get();
+			fail();
+		} catch (Exception e) {
+		}
+	}
+	
+	@Test
+	public void testQueryFirstAllShardsWithMerger() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result =queryFirstInAllShard(hints.mergeBy(new TestSingleResultMerger()));
+			assertNotNull(result);
+			assertEquals(1, result.id);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryFirstAllShardsNullable() {
+		try {
+			DalHints hints = new DalHints();
+			StatementParameters parameters = new StatementParameters();
+			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryFirstNullable(
+					sqlNoResult, parameters, 
+					hints.inAllShards(), 
+					new ClientTestDalRowMapper());
+			assertNull(result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryFirstAllShardsWithCallback() {
+		try {
+			TestQueryCallback2 callback = new TestQueryCallback2();
+			DalHints hints = new DalHints();
+			ClientTestModel result = queryFirstInAllShard(hints.callbackWith(callback));
+			assertNull(result);
+			assertEquals(result, callback.result);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryFirstAllShardsSyncWithClass() {
+		try {
+			DalHints hints = new DalHints();
+			StatementParameters parameters = new StatementParameters();
+			parameters.set(1, 1);
+			Integer result = dao.queryFirst(
+					sqlFirst, parameters, 
+					hints.inAllShards(), 
+					Integer.class);
+			assertEquals(1, result.intValue());
+		} catch (Exception e) {
+			fail();
+		}
+	}
+
+	@Test
+	public void testQueryFirstAllShardsSyncWithClassNullable() {
+		try {
+			DalHints hints = new DalHints();
+			StatementParameters parameters = new StatementParameters();
+			Integer result = dao.queryFirstNullable(
+					sqlNoResult, parameters, 
+					hints.inAllShards(), 
+					Integer.class);
+			assertNull(result);
+		} catch (Exception e) {
+			fail();
 		}
 	}
 	

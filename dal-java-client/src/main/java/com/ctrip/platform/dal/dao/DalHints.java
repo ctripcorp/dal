@@ -231,6 +231,11 @@ public class DalHints {
 		return (Comparator<T>)get(DalHintEnum.resultSorter);
 	}
 
+	public <T> DalHints sequentialExecute() {
+		set(DalHintEnum.sequentialExecution);
+		return this;
+	}
+
 	public DalHints masterOnly() {
 		set(DalHintEnum.masterOnly, true);
 		return this;

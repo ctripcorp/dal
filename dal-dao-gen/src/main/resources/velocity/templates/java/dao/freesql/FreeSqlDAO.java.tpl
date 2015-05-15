@@ -4,24 +4,32 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
+import com.ctrip.platform.dal.ext.persistence.DalDefaultJpaMapper;
 import com.ctrip.platform.dal.dao.helper.*;
 
 public class ${host.getClassName()}Dao {
+
 	private static final String DATA_BASE = "${host.getDbSetName()}";
 	
 #if($host.hasQuery())
-	private DalQueryDao queryDao;
+	private DalQueryDao queryDao = null;
 #end
 #if($host.hasUpdate())
-	private DalClient baseClient;
+	private DalClient baseClient = null;
 #end
 
 #foreach( $method in ${host.getMethods()} )
 #if(!$method.isEmptyFields() && !$method.isSampleType())
-	private ${method.getPojoClassName()}RowMapper ${method.getVariableName()}RowMapper = new ${method.getPojoClassName()}RowMapper();
+	private DalRowMapper<?> ${method.getVariableName()}RowMapper = null;
 #end
+
 #end
-	public ${host.getClassName()}Dao() {
+	public ${host.getClassName()}Dao() throws SQLException {
+#foreach( $method in ${host.getMethods()} )
+#if(!$method.isEmptyFields() && !$method.isSampleType())
+		this.${method.getVariableName()}RowMapper = DalDefaultJpaMapper.create(${method.getPojoClassName()}.class, DATA_BASE);
+#end
+#end	
 #if($host.hasQuery())
 		this.queryDao = new DalQueryDao(DATA_BASE);
 #end
@@ -29,7 +37,6 @@ public class ${host.getClassName()}Dao {
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 #end
 	}
-
 #parse("templates/java/dao/freesql/method.scalar.Simple.List.tpl")
 #parse("templates/java/dao/freesql/method.scalar.Simple.Single.tpl")
 #parse("templates/java/dao/freesql/method.scalar.Simple.First.tpl")
@@ -38,33 +45,4 @@ public class ${host.getClassName()}Dao {
 #parse("templates/java/dao/freesql/method.scalar.Entity.First.tpl")
 #parse("templates/java/dao/freesql/method.cud.tpl")
 
-#foreach( $method in ${host.getMethods()} )
-#if(!$method.isEmptyFields()&& !$method.isSampleType())
-	private class ${method.getPojoClassName()}RowMapper implements DalRowMapper<${method.getPojoClassName()}> {
-
-		@Override
-		public ${method.getPojoClassName()} map(ResultSet rs, int rowNum) throws SQLException {
-			${method.getPojoClassName()} pojo = new ${method.getPojoClassName()}();
-			
-#foreach( $field in ${method.getFields()} )
-#if(${field.getClassDisplayName()} == "Integer")
-		    if (rs.getObject("${field.getName()}") != null)
-				pojo.set${field.getCapitalizedName()}(((Number)rs.getObject("${field.getName()}")).intValue());
-		    else
-				pojo.set${field.getCapitalizedName()}((${field.getClassDisplayName()})rs.getObject("${field.getName()}"));
-#elseif(${field.getClassDisplayName()} == "Long")
-		    if (rs.getObject("${field.getName()}") != null)
-				pojo.set${field.getCapitalizedName()}(((Number)rs.getObject("${field.getName()}")).longValue());
-			else
-				pojo.set${field.getCapitalizedName()}((${field.getClassDisplayName()})rs.getObject("${field.getName()}"));
-#else
-		    pojo.set${field.getCapitalizedName()}((${field.getClassDisplayName()})rs.getObject("${field.getName()}"));
-#end	
-#end
-
-			return pojo;
-		}
-	}
-#end
-#end
 }

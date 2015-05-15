@@ -48,7 +48,7 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 	}
 
 	public static <T> void createAndCacheParser(Class<T> clazz, String databaseName) throws SQLException {
-		EntityManager manager = new EntityManager(clazz);
+		EntityManager<T> manager = new EntityManager<T>(clazz);
 		String tableName = manager.getTableName();
 		boolean autoIncrement = manager.isAutoIncrement();
 		String[] primaryKeyNames = manager.getPrimaryKeyNames();
@@ -67,13 +67,13 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 	public T map(ResultSet rs, int rowNum) throws SQLException {
 		try {
 			T instance = this.clazz.newInstance();
-			String[] primaryKeyNames = this.getPrimaryKeyNames();
-			for (int i = 0; i < primaryKeyNames.length; i++) {
-				Field field = this.fieldsMap.get(primaryKeyNames[i]);
-				EntityManager.setValue(field, instance, rs.getObject(primaryKeyNames[i]));
+			String[] columnNames = this.getColumnNames();
+			for (int i = 0; i < columnNames.length; i++) {
+				Field field = this.fieldsMap.get(columnNames[i]);
+				EntityManager.setValue(field, instance, rs.getObject(columnNames[i]));
 			}
 			return instance;
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			throw new SQLException(e);
 		}
 	}
@@ -90,9 +90,7 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 				Object val = this.identity.get(pojo);
 				if (val instanceof Number)
 					return (Number) val;
-			} catch (IllegalArgumentException e) {
-				throw new RuntimeException(e);
-			} catch (IllegalAccessException e) {
+			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -120,15 +118,16 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 	@Override
 	public Map<String, ?> getFields(T pojo) {
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
-		for (int i = 0; i < this.getColumnNames().length; i++) {
+		String[] columnNames = this.getColumnNames();
+		for (int i = 0; i < columnNames.length; i++) {
 			try {
-				Field field = this.fieldsMap.get(this.getColumnNames()[i]);
+				Field field = this.fieldsMap.get(columnNames[i]);
 				if (this.autoIncrement && field.equals(this.identity)) {
-					map.put(this.getColumnNames()[i], null);
+					map.put(columnNames[i], null);
 					continue;
 				}
 				Object val = EntityManager.getValue(field, pojo);
-				map.put(this.getColumnNames()[i], val);
+				map.put(columnNames[i], val);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

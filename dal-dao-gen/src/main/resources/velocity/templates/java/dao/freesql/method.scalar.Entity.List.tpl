@@ -32,7 +32,7 @@
 		parameters.set(i++, Types.INTEGER, ${host.pageBegain()});
 		parameters.set(i++, Types.INTEGER, ${host.pageEnd()});
 #end
-		return queryDao.query(sql, parameters, hints, ${method.getVariableName()}RowMapper);
+		return (List<${method.getPojoClassName()}>)queryDao.query(sql, parameters, hints, ${method.getVariableName()}RowMapper);
 	}
 #end
 #end

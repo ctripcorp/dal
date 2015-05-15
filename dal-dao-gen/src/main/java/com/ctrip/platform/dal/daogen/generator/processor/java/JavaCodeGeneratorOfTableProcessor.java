@@ -60,7 +60,7 @@ public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
 						GenUtils.mergeVelocityContext(
 								context,
 								String.format("%s/Entity/%s.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
-								"templates/java/StandardDaoPojo.java.tpl");
+								"templates/java/Pojo.java.tpl");
 	
 						GenUtils.mergeVelocityContext(
 								context, 

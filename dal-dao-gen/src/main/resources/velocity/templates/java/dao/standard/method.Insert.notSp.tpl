@@ -1,4 +1,4 @@
-#if($host.generateAPI(7,28))
+#if($host.generateAPI(7,19))
 	/**
 	 * Insert pojo and get the generated PK back in keyHolder. 
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
@@ -6,8 +6,6 @@
 	 * 
 	 * @param hints
 	 *            Additional parameters that instruct how DAL Client perform database operation.
-	 * @param keyHolder
-	 *            holder for generated primary keys
 	 * @param daoPojo
 	 *            pojo to be inserted
 	 * @return how many rows been affected
@@ -17,7 +15,7 @@
 		if(null == daoPojo)
 			return 0;
 		hints = DalHints.createIfAbsent(hints);
-		return client.insert(hints, null, daoPojo);
+		return client.insert(hints, daoPojo);
 	}
 #end
 #if($host.generateAPI(75,77))
@@ -41,7 +39,7 @@
 		return client.insert(hints, daoPojos);
 	}
 #end
-#if($host.generateAPI(9,30))
+#if($host.generateAPI(9,73))
 	/**
 	 * Insert pojo and get the generated PK back in keyHolder. 
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
@@ -88,19 +86,6 @@
 		return client.insert(hints, keyHolder, daoPojos);
 	}
 #end
-#*
-#if($host.generateAPI(8,29))
-	/**
-	 * SQL insert with batch mode
-	**/
-	public int[] batchInsert(DalHints hints, ${host.getPojoClassName()}...daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.length == 0)
-			return new int[0];
-		hints = DalHints.createIfAbsent(hints);
-		return client.batchInsert(hints, daoPojos);
-	}
-#end
-*#
 #if($host.generateAPI(80,81))
 	/**
 	 * Insert pojos in batch mode. 

@@ -19,12 +19,12 @@ import javax.persistence.Table;
  * @author gzxia
  * 
  */
-public class EntityManager {
+public class EntityManager<T> {
 
-	private Class<?> clazz = null;
+	private Class<T> clazz = null;
 	private Field[] fields = null;
 	
-	public EntityManager(Class<?> clazz) throws SQLException {
+	public EntityManager(Class<T> clazz) throws SQLException {
 		this.clazz = clazz;
 		this.fields = getFields(clazz);
 	}
@@ -40,9 +40,13 @@ public class EntityManager {
 			throw new SQLException("The entity[" + clazz.getName() +"] has not any fields.");
 	}
 	
+	public Class<T> getClazz() {
+		return this.clazz;
+	}
+	
 	public String getTableName() {
 		Table table = clazz.getAnnotation(Table.class);
-		if (table != null && (!table.name().isEmpty()))
+		if (table != null && table.name() != null)
 			return table.name();
 		Entity entity = clazz.getAnnotation(Entity.class);
 		if ( entity != null && (!entity.name().isEmpty()) )
@@ -102,7 +106,7 @@ public class EntityManager {
 			Field field = fields[i];
 			Type sqlType = field.getAnnotation(Type.class);
 			if (sqlType == null)
-				throw new SQLException("Each field of entity[" + clazz.getName() +"] must declare it's SqlType annotation.");
+				throw new SQLException("Each field of entity[" + clazz.getName() +"] must declare it's Type annotation.");
 			columnTypes[i] = sqlType.value();
 		}
 		return columnTypes;
@@ -118,8 +122,10 @@ public class EntityManager {
 	public static void setValue(Field field, Object entity, Object val)
 			throws ReflectiveOperationException {
 		field.setAccessible(true);
-		if (val == null)
+		if (val == null) {
 			field.set(entity, val);
+			return;
+		}
 		if (field.getType().equals(Integer.class) || field.getType().equals(int.class)) {
 			field.set(entity, ((Number) val).intValue());
 			return;

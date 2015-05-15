@@ -22,7 +22,7 @@
 #end
 #end
 #end
-		return queryDao.queryForObjectNullable(sql, parameters, hints, ${method.getVariableName()}RowMapper);
+		return (${method.getPojoClassName()})queryDao.queryForObjectNullable(sql, parameters, hints, ${method.getVariableName()}RowMapper);
 	}
 #end
 #end

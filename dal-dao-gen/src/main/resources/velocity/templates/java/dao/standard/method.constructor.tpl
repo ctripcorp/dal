@@ -3,15 +3,6 @@
 		parser = DalDefaultJpaParser.create(${host.getPojoClassName()}.class, DATA_BASE);
 		this.client = new DalTableDao<${host.getPojoClassName()}>(parser);
 		dbCategory = this.client.getDatabaseCategory();
-#*
-		this.client.setDatabaseCategory(dbCategory);
-#if($host.getDatabaseCategory().name() == "MySql")
-		this.client.setDelimiter('`','`');
-#else
-		this.client.setDelimiter('[',']');
-		this.client.setFindTemplate("SELECT * FROM %s WITH (NOLOCK) WHERE %s");
-#end
-*#
 #if($host.hasMethods())
 		this.queryDao = new DalQueryDao(DATA_BASE);
 #end

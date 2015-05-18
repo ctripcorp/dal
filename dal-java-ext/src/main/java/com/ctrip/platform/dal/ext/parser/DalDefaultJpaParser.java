@@ -90,7 +90,7 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 				Object val = this.identity.get(pojo);
 				if (val instanceof Number)
 					return (Number) val;
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -107,7 +107,7 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 					Field field = this.fieldsMap.get(primaryKeyNames[i]);
 					Object val = EntityManager.getValue(field, pojo);
 					map.put(primaryKeyNames[i], val);
-				} catch (ReflectiveOperationException e) {
+				} catch (Throwable e) {
 					throw new RuntimeException(e);
 				}
 			}
@@ -128,7 +128,7 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 				}
 				Object val = EntityManager.getValue(field, pojo);
 				map.put(columnNames[i], val);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				throw new RuntimeException(e);
 			}
 		}

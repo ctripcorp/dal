@@ -119,11 +119,27 @@ public class EntityManager<T> {
 		return field.getName();
 	}
 	
+	private static final HashMap<Class<?>, Object> primaryTypeDefaultValue = new HashMap<Class<?>, Object>();
+	
+	static {
+		primaryTypeDefaultValue.put(byte.class, 	(byte) 0);
+		primaryTypeDefaultValue.put(short.class,	(short)0);
+		primaryTypeDefaultValue.put(int.class, 		(int)0);
+		primaryTypeDefaultValue.put(long.class, 	(long)0);
+		primaryTypeDefaultValue.put(float.class, 	(float)0.0f);
+		primaryTypeDefaultValue.put(double.class, 	(double)0.0d);
+		primaryTypeDefaultValue.put(char.class, 	(char)'\u0000');
+		primaryTypeDefaultValue.put(boolean.class, 	false);
+	}
+	
 	public static void setValue(Field field, Object entity, Object val)
 			throws ReflectiveOperationException {
 		field.setAccessible(true);
 		if (val == null) {
-			field.set(entity, val);
+			if (primaryTypeDefaultValue.containsKey(field.getType()))
+				setDefaultValue(field, entity);
+			else
+				field.set(entity, val);
 			return;
 		}
 		if (field.getType().equals(Integer.class) || field.getType().equals(int.class)) {
@@ -132,6 +148,10 @@ public class EntityManager<T> {
 		}
 		if (field.getType().equals(Long.class) || field.getType().equals(long.class)) {
 			field.set(entity, ((Number) val).longValue());
+			return;
+		}
+		if (field.getType().equals(Byte.class) || field.getType().equals(byte.class)) {
+			field.set(entity, ((Number) val).byteValue());
 			return;
 		}
 		if (field.getType().equals(Short.class) || field.getType().equals(short.class)) {
@@ -147,6 +167,11 @@ public class EntityManager<T> {
 			return;
 		}
 		field.set(entity, val);
+	}
+	
+	private static void setDefaultValue(Field field, Object entity) throws IllegalArgumentException, IllegalAccessException {
+		Class<?> type = field.getType();
+		field.set(entity, primaryTypeDefaultValue.get(type));
 	}
 	
 	public static Object getValue(Field field, Object entity) throws IllegalArgumentException, IllegalAccessException {

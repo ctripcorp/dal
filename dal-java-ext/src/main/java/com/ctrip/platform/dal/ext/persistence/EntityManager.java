@@ -78,6 +78,21 @@ public class EntityManager<T> {
 		return primaryKeys;
 	}
 	
+	public Field[] getIdentity() {
+		List<Field> identities = new ArrayList<Field>();
+		for (int i = 0; i < fields.length; i++) {
+			Field field = fields[i];
+			Id id = field.getAnnotation(Id.class);
+			GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
+			if (id != null && generatedValue != null && generatedValue.strategy() == GenerationType.AUTO) {
+				identities.add(field);
+			}
+		}
+		Field[] result = new Field[identities.size()];
+		identities.toArray(result);
+		return result;
+	}
+	
 	public Map<String, Field> getFieldMap() throws SQLException {
 		Map<String, Field> fieldsMap = new HashMap<String, Field>();
 		for (int i = 0; i < fields.length; i++) {
@@ -137,7 +152,7 @@ public class EntityManager<T> {
 		field.setAccessible(true);
 		if (val == null) {
 			if (primaryTypeDefaultValue.containsKey(field.getType()))
-				setDefaultValue(field, entity);
+				field.set(entity, primaryTypeDefaultValue.get(field.getType()));
 			else
 				field.set(entity, val);
 			return;
@@ -167,11 +182,6 @@ public class EntityManager<T> {
 			return;
 		}
 		field.set(entity, val);
-	}
-	
-	private static void setDefaultValue(Field field, Object entity) throws IllegalArgumentException, IllegalAccessException {
-		Class<?> type = field.getType();
-		field.set(entity, primaryTypeDefaultValue.get(type));
 	}
 	
 	public static Object getValue(Field field, Object entity) throws IllegalArgumentException, IllegalAccessException {

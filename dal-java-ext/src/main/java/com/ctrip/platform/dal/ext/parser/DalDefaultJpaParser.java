@@ -28,9 +28,10 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 	private DalDefaultJpaParser(Class<T> clazz, boolean autoIncrement,
 			String dataBaseName, String tableName,
 			String[] columns, String[] primaryKeyColumns, int[] columnTypes,
-			Map<String, Field> fieldsMap){
+			Map<String, Field> fieldsMap, Field identity){
 		super(dataBaseName, tableName, columns, primaryKeyColumns, columnTypes);
 		this.clazz = clazz;
+		this.identity = identity;
 		this.autoIncrement = autoIncrement;
 		this.fieldsMap = fieldsMap;
 	}
@@ -55,10 +56,10 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 		Map<String, Field> fieldsMap = manager.getFieldMap();
 		String[] columnNames = manager.getColumnNames();
 		int[] columnTypes = manager.getColumnTypes();
-		
+		Field[] identities = manager.getIdentity();
+		Field identity = identities != null && identities.length == 1 ? identities[0] : null;
 		DalParser<T> parser = new DalDefaultJpaParser<T>(
-				clazz, autoIncrement, databaseName, tableName, 
-				columnNames, primaryKeyNames, columnTypes, fieldsMap);
+				clazz, autoIncrement, databaseName, tableName, columnNames, primaryKeyNames, columnTypes, fieldsMap, identity);
 		
 		cache.put(clazz.getName(), parser);
 	}
@@ -85,9 +86,9 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 
 	@Override
 	public Number getIdentityValue(T pojo) {
-		if (pojo.getClass().equals(this.clazz)) {
+		if (pojo.getClass().equals(this.clazz) && identity != null) {
 			try {
-				Object val = this.identity.get(pojo);
+				Object val = EntityManager.getValue(identity, pojo);
 				if (val instanceof Number)
 					return (Number) val;
 			} catch (Throwable e) {
@@ -122,10 +123,6 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 		for (int i = 0; i < columnNames.length; i++) {
 			try {
 				Field field = this.fieldsMap.get(columnNames[i]);
-				if (this.autoIncrement && field.equals(this.identity)) {
-					map.put(columnNames[i], null);
-					continue;
-				}
 				Object val = EntityManager.getValue(field, pojo);
 				map.put(columnNames[i], val);
 			} catch (Throwable e) {

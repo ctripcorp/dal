@@ -29,7 +29,7 @@ public class EntityManager<T> {
 		this.fields = getFields(clazz);
 	}
 	
-	private Field[] getFields(Class<?> clazz) throws SQLException {
+	private Field[] getFields(Class<T> clazz) throws SQLException {
 		Field[] fields = clazz.getDeclaredFields();
 		emptyCheck(fields);
 		return fields;
@@ -38,10 +38,6 @@ public class EntityManager<T> {
 	private void emptyCheck(Field[] fields) throws SQLException {
 		if (null == fields || fields.length == 0)
 			throw new SQLException("The entity[" + clazz.getName() +"] has not any fields.");
-	}
-	
-	public Class<T> getClazz() {
-		return this.clazz;
 	}
 	
 	public String getTableName() {

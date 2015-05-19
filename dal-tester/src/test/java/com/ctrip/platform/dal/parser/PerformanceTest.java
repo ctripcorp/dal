@@ -11,7 +11,7 @@ public class PerformanceTest {
 		
 		DalClientFactory.initClientFactory();
 		int count = 100;
-		String queryWhere = "id < 100";
+		String queryWhere = "id < " + count;
 		normal(count, queryWhere);	
 		jpa(count, queryWhere);
 		normal(count, queryWhere);	
@@ -23,8 +23,11 @@ public class PerformanceTest {
 		DalDefaultJpaPerformance performancer = new DalDefaultJpaPerformance(DatabaseCategory.MySql, "dao_test");
 		performancer.dropAndCreateTable();
 		long start = System.currentTimeMillis();
+		
 		performancer.randomInsert(insertCount);
+		
 		List<DalDefaultJpaPerformance.ClientTestModel> models = performancer.query(queryWhere);
+		
 		for (DalDefaultJpaPerformance.ClientTestModel model : models) {
 			model.setAddress("PIS");
 		}
@@ -36,8 +39,11 @@ public class PerformanceTest {
 		NormalParserPerformance performancer = new NormalParserPerformance();
 		performancer.dropAndCreateTable();
 		long start = System.currentTimeMillis();
+		
 		performancer.randomInsert(insertCount);
+		
 		List<NormalParserPerformance.ClientTestModel> models = performancer.query(queryWhere);
+		
 		for (NormalParserPerformance.ClientTestModel model : models) {
 			model.setAddress("PIS");
 		}

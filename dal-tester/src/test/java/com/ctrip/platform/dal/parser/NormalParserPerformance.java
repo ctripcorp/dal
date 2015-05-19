@@ -80,7 +80,7 @@ public class NormalParserPerformance {
 			model.setLastChanged(new Timestamp(System.currentTimeMillis()));
 			entities[i] = model;
 		}
-		return dao.insert(new DalHints(), Arrays.asList(entities));
+		return dao.batchInsert(new DalHints(), Arrays.asList(entities));
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class NormalParserPerformance {
 	 */
 	public int[] update(List<ClientTestModel> entities) throws SQLException {
 		DalHints hints = new DalHints();
-		return dao.update(hints, entities);
+		return dao.batchUpdate(hints, entities);
 	}
 
 	/**

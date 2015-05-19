@@ -25,10 +25,6 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
 import com.ctrip.platform.dal.ext.persistence.Type;
 
-/**
- * Used for performance test
- * @author wcyuan
- */
 public class DalDefaultJpaPerformance {
 	private static Logger log = Logger.getLogger("performance");
 	
@@ -37,7 +33,18 @@ public class DalDefaultJpaPerformance {
 			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
 			+ "quantity int,"
 			+ "type smallint, "
-			+ "address VARCHAR(64) not null, "
+			+ "score float, "
+			+ "orderid bigint, "
+			+ "address1 VARCHAR(64) not null, "
+			+ "address2 VARCHAR(64) not null, "
+			+ "address3 VARCHAR(64) not null, "
+			+ "address4 VARCHAR(64) not null, "
+			+ "address5 VARCHAR(64) not null, "
+			+ "address6 VARCHAR(64) not null, "
+			+ "address7 VARCHAR(64) not null, "
+			+ "address8 VARCHAR(64) not null, "
+			+ "address9 VARCHAR(64) not null, "
+			+ "address10 VARCHAR(64) not null, "
 			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
 	
 	private DalParser<ClientTestModel> parser = null;
@@ -86,7 +93,18 @@ public class DalDefaultJpaPerformance {
 			model.setId(null);
 			model.setQuantity(seed + 10);
 			model.setType(((Number) (i % 3)).shortValue());
-			model.setAddress("CTRIP");
+			model.setScore(((Number) (i % 3)).floatValue());
+			model.setOrderid(((Number) (i % 3)).longValue());
+			model.setAddress1("CTRIP");
+			model.setAddress2("CTRIP");
+			model.setAddress3("CTRIP");
+			model.setAddress4("CTRIP");
+			model.setAddress5("CTRIP");
+			model.setAddress6("CTRIP");
+			model.setAddress7("CTRIP");
+			model.setAddress8("CTRIP");
+			model.setAddress9("CTRIP");
+			model.setAddress10("CTRIP");
 			model.setLastChanged(new Timestamp(System.currentTimeMillis()));
 			entities[i] = model;
 		}
@@ -155,8 +173,52 @@ public class DalDefaultJpaPerformance {
 		private Short type;
 		
 		@Column
+		@Type(value = Types.FLOAT)
+		private float score;
+		
+		@Column
+		@Type(value = Types.BIGINT)
+		private long orderid;
+		
+		@Column
 		@Type(value = Types.VARCHAR)
-		private String address;
+		private String address1;
+		
+		@Column
+		@Type(value = Types.VARCHAR)
+		private String address2;
+		
+		@Column
+		@Type(value = Types.VARCHAR)
+		private String address3;
+		
+		@Column
+		@Type(value = Types.VARCHAR)
+		private String address4;
+		
+		@Column
+		@Type(value = Types.VARCHAR)
+		private String address5;
+		
+		@Column
+		@Type(value = Types.VARCHAR)
+		private String address6;
+		
+		@Column
+		@Type(value = Types.VARCHAR)
+		private String address7;
+		
+		@Column
+		@Type(value = Types.VARCHAR)
+		private String address8;
+		
+		@Column
+		@Type(value = Types.VARCHAR)
+		private String address9;
+		
+		@Column
+		@Type(value = Types.VARCHAR)
+		private String address10;
 		
 		@Column(name="last_changed")
 		@Type(value = Types.TIMESTAMP)
@@ -186,16 +248,104 @@ public class DalDefaultJpaPerformance {
 			this.type = type;
 		}
 
-		public String getAddress() {
-			return address;
+		public String getAddress1() {
+			return address1;
 		}
 
-		public void setAddress(String address) {
-			this.address = address;
+		public long getOrderid() {
+			return orderid;
+		}
+
+		public void setOrderid(long orderid) {
+			this.orderid = orderid;
+		}
+
+		public void setAddress1(String address1) {
+			this.address1 = address1;
+		}
+
+		public String getAddress2() {
+			return address2;
+		}
+
+		public void setAddress2(String address2) {
+			this.address2 = address2;
+		}
+
+		public String getAddress3() {
+			return address3;
+		}
+
+		public void setAddress3(String address3) {
+			this.address3 = address3;
+		}
+
+		public String getAddress4() {
+			return address4;
+		}
+
+		public void setAddress4(String address4) {
+			this.address4 = address4;
+		}
+
+		public String getAddress5() {
+			return address5;
+		}
+
+		public void setAddress5(String address5) {
+			this.address5 = address5;
+		}
+
+		public String getAddress6() {
+			return address6;
+		}
+
+		public void setAddress6(String address6) {
+			this.address6 = address6;
+		}
+
+		public String getAddress7() {
+			return address7;
+		}
+
+		public void setAddress7(String address7) {
+			this.address7 = address7;
+		}
+
+		public String getAddress8() {
+			return address8;
+		}
+
+		public void setAddress8(String address8) {
+			this.address8 = address8;
+		}
+
+		public String getAddress9() {
+			return address9;
+		}
+
+		public void setAddress9(String address9) {
+			this.address9 = address9;
+		}
+
+		public String getAddress10() {
+			return address10;
+		}
+
+		public void setAddress10(String address10) {
+			this.address10 = address10;
 		}
 
 		public Timestamp getLastChanged() {
 			return lastChanged;
+		}
+
+		public float getScore() {
+			return score;
+		}
+
+		public void setScore(float score) {
+			this.score = score;
 		}
 
 		public void setLastChanged(Timestamp lastChanged) {

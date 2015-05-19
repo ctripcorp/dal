@@ -25,8 +25,20 @@ public class NormalParserPerformance {
 	private final static String DROP_TABLE_SQL = "DROP TABLE IF EXISTS %s";
 	private final static String CREATE_TABLE_SQL = "CREATE TABLE %s("
 			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-			+ "quantity int," + "type smallint, "
-			+ "address VARCHAR(64) not null, "
+			+ "quantity int," 
+			+ "type smallint, "
+			+ "score float, "
+			+ "orderid bigint, "
+			+ "address1 VARCHAR(64) not null, "
+			+ "address2 VARCHAR(64) not null, "
+			+ "address3 VARCHAR(64) not null, "
+			+ "address4 VARCHAR(64) not null, "
+			+ "address5 VARCHAR(64) not null, "
+			+ "address6 VARCHAR(64) not null, "
+			+ "address7 VARCHAR(64) not null, "
+			+ "address8 VARCHAR(64) not null, "
+			+ "address9 VARCHAR(64) not null, "
+			+ "address10 VARCHAR(64) not null, "
 			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
 
 	private DalParser<ClientTestModel> parser = null;
@@ -76,7 +88,18 @@ public class NormalParserPerformance {
 			model.setId(null);
 			model.setQuantity(seed + 10);
 			model.setType(((Number) (i % 3)).shortValue());
-			model.setAddress("CTRIP");
+			model.setScore(((Number) (i % 3)).floatValue());
+			model.setOrderid(((Number) (i % 3)).longValue());
+			model.setAddress1("CTRIP");
+			model.setAddress2("CTRIP");
+			model.setAddress3("CTRIP");
+			model.setAddress4("CTRIP");
+			model.setAddress5("CTRIP");
+			model.setAddress6("CTRIP");
+			model.setAddress7("CTRIP");
+			model.setAddress8("CTRIP");
+			model.setAddress9("CTRIP");
+			model.setAddress10("CTRIP");
 			model.setLastChanged(new Timestamp(System.currentTimeMillis()));
 			entities[i] = model;
 		}
@@ -131,17 +154,22 @@ public class NormalParserPerformance {
 			AbstractDalParser<ClientTestModel> {
 		public static final String DATABASE_NAME = "dao_test";
 		public static final String TABLE_NAME = "jpa_performance_test";
-		private static final String[] COLUMNS = new String[] { "id",
-				"quantity", "type", "address", "last_changed" };
+		private static final String[] COLUMNS = new String[] { 
+				"id", "quantity", "type", "score", "orderid",
+				"address1","address2","address3","address4","address5",
+				"address6","address7","address8","address9","address10", 
+				"last_changed" };
 
 		private static final String[] PRIMARY_KEYS = new String[] { "id", };
 
-		private static final int[] COLUMN_TYPES = new int[] { Types.INTEGER,
-				Types.INTEGER, Types.SMALLINT, Types.VARCHAR, Types.TIMESTAMP };
+		private static final int[] COLUMN_TYPES = new int[] {
+				Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.FLOAT, Types.BIGINT,
+				Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, 
+				Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, 
+				Types.TIMESTAMP };
 
 		public NormalParser() {
-			super(DATABASE_NAME, TABLE_NAME, COLUMNS, PRIMARY_KEYS,
-					COLUMN_TYPES);
+			super(DATABASE_NAME, TABLE_NAME, COLUMNS, PRIMARY_KEYS, COLUMN_TYPES);
 		}
 
 		@Override
@@ -167,7 +195,18 @@ public class NormalParserPerformance {
 			map.put("id", pojo.getId());
 			map.put("quantity", pojo.getQuantity());
 			map.put("type", pojo.getType());
-			map.put("address", pojo.getAddress());
+			map.put("score", pojo.getScore());
+			map.put("orderid", pojo.getOrderid());
+			map.put("address1", pojo.getAddress1());
+			map.put("address2", pojo.getAddress2());
+			map.put("address3", pojo.getAddress3());
+			map.put("address4", pojo.getAddress4());
+			map.put("address5", pojo.getAddress5());
+			map.put("address6", pojo.getAddress6());
+			map.put("address7", pojo.getAddress7());
+			map.put("address8", pojo.getAddress8());
+			map.put("address9", pojo.getAddress9());
+			map.put("address10", pojo.getAddress10());
 			map.put("last_changed", pojo.getLastChanged());
 			return map;
 		}
@@ -179,7 +218,18 @@ public class NormalParserPerformance {
 			model.setId(((Number) rs.getObject("id")).intValue());
 			model.setQuantity(((Number) rs.getObject("quantity")).intValue());
 			model.setType(((Number) rs.getObject("type")).shortValue());
-			model.setAddress(rs.getString("address"));
+			model.setScore(((Number) rs.getObject("score")).floatValue());
+			model.setOrderid(((Number) rs.getObject("orderid")).longValue());
+			model.setAddress1(rs.getString("address1"));
+			model.setAddress2(rs.getString("address2"));
+			model.setAddress3(rs.getString("address3"));
+			model.setAddress4(rs.getString("address4"));
+			model.setAddress5(rs.getString("address5"));
+			model.setAddress6(rs.getString("address6"));
+			model.setAddress7(rs.getString("address7"));
+			model.setAddress8(rs.getString("address8"));
+			model.setAddress9(rs.getString("address9"));
+			model.setAddress10(rs.getString("address10"));
 			model.setLastChanged((Timestamp) rs.getObject("last_changed"));
 			return model;
 		}
@@ -190,7 +240,18 @@ public class NormalParserPerformance {
 		private Integer id;
 		private Integer quantity;
 		private Short type;
-		private String address;
+		private float score;
+		private long orderid;
+		private String address1;
+		private String address2;
+		private String address3;
+		private String address4;
+		private String address5;
+		private String address6;
+		private String address7;
+		private String address8;
+		private String address9;
+		private String address10;
 		private Timestamp last_changed;
 
 		public Integer getId() {
@@ -217,12 +278,108 @@ public class NormalParserPerformance {
 			this.type = type;
 		}
 
-		public String getAddress() {
-			return address;
+		public String getAddress1() {
+			return address1;
 		}
 
-		public void setAddress(String address) {
-			this.address = address;
+		public void setAddress1(String address1) {
+			this.address1 = address1;
+		}
+
+		public long getOrderid() {
+			return orderid;
+		}
+
+		public void setOrderid(long orderid) {
+			this.orderid = orderid;
+		}
+
+		public String getAddress2() {
+			return address2;
+		}
+
+		public void setAddress2(String address2) {
+			this.address2 = address2;
+		}
+
+		public String getAddress3() {
+			return address3;
+		}
+
+		public void setAddress3(String address3) {
+			this.address3 = address3;
+		}
+
+		public String getAddress4() {
+			return address4;
+		}
+
+		public void setAddress4(String address4) {
+			this.address4 = address4;
+		}
+
+		public String getAddress5() {
+			return address5;
+		}
+
+		public void setAddress5(String address5) {
+			this.address5 = address5;
+		}
+
+		public String getAddress6() {
+			return address6;
+		}
+
+		public void setAddress6(String address6) {
+			this.address6 = address6;
+		}
+
+		public String getAddress7() {
+			return address7;
+		}
+
+		public float getScore() {
+			return score;
+		}
+
+		public void setScore(float score) {
+			this.score = score;
+		}
+
+		public void setAddress7(String address7) {
+			this.address7 = address7;
+		}
+
+		public String getAddress8() {
+			return address8;
+		}
+
+		public void setAddress8(String address8) {
+			this.address8 = address8;
+		}
+
+		public String getAddress9() {
+			return address9;
+		}
+
+		public void setAddress9(String address9) {
+			this.address9 = address9;
+		}
+
+		public String getAddress10() {
+			return address10;
+		}
+
+		public void setAddress10(String address10) {
+			this.address10 = address10;
+		}
+
+		public Timestamp getLast_changed() {
+			return last_changed;
+		}
+
+		public void setLast_changed(Timestamp last_changed) {
+			this.last_changed = last_changed;
 		}
 
 		public Timestamp getLastChanged() {

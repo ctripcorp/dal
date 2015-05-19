@@ -9,6 +9,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	DalDefaultJpaParserMySqlTest.class,
 	DalDefaultJpaParserSqlServerTest.class,
 	DalDefaultJpaParserMySqlTest2.class,
-	DalDefaultJpaParserSqlServerTest2.class
+	DalDefaultJpaParserSqlServerTest2.class,
+	DalDefaultJpaParserTest.class
 })
 public class AllTest {}

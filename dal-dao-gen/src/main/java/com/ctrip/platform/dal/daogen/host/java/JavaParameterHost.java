@@ -202,6 +202,8 @@ public class JavaParameterHost extends AbstractParameterHost {
 	public Object getValidationValue() {
 		if (stringTypes.contains(sqlType))
 			return "\"" + validationValue + "\"";
+		if (validationValue == null)
+			return "null";
 		return validationValue;
 	}
 

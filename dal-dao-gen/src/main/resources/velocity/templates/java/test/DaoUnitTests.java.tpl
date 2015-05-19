@@ -213,5 +213,5 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 		int[] ret = dao.batchUpdate(hints, daoPojos);
 	}
 #end
-
+#parse("templates/java/test/BuildSQLDaoUnitTests.java.tpl")
 }

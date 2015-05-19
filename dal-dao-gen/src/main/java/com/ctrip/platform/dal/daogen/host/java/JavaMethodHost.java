@@ -170,17 +170,16 @@ public class JavaMethodHost {
 	public void setClassName(String className) {
 		this.className = className;
 	}
-	
+
 	public String getVariableName() {
 		return WordUtils.uncapitalize(pojoClassName);
 	}
-	
-	public String getInClauses()
-	{
+
+	public String getInClauses() {
 		return StringUtils.join(this.inClauses, ",");
 	}
-	
-	public boolean isInClauses(){
+
+	public boolean isInClauses() {
 		return this.inClauses != null && !this.inClauses.isEmpty();
 	}
 	
@@ -238,6 +237,18 @@ public class JavaMethodHost {
 		return StringUtils.join(paramsDeclaration, ", ");
 	}
 	
+	public String getUpdateParameterNames(String suffix) {
+		List<String> params = new ArrayList<String>();
+		for(JavaParameterHost parameter: this.updateSetParameters) {
+			params.add(parameter.getAlias() + (null != suffix ? suffix : ""));
+		}
+		for(JavaParameterHost parameter: this.parameters) {
+			params.add(parameter.getAlias() + (null != suffix ? suffix : ""));
+		}
+		params.add("new DalHints()");
+		return StringUtils.join(params, ", ");
+	}
+	
 	public String getUpdateParameterDeclaration() {
 		List<String> paramsDeclaration = new ArrayList<String>();
 		for(JavaParameterHost parameter : updateSetParameters){
@@ -280,21 +291,19 @@ public class JavaMethodHost {
 		return imports;
 	}
 	
-	public List<String> getParamComments()
-	{
+	public List<String> getParamComments() {
 		List<String> params = new ArrayList<String>();
-		for(JavaParameterHost parameter: parameters) {
-			if(!parameter.isConditional())
+		for (JavaParameterHost parameter : parameters) {
+			if (!parameter.isConditional())
 				params.add(parameter.getAlias() + ": set clause");
 		}
 		return params;
 	}
-	
-	public List<String> getConditionComments()
-	{
+
+	public List<String> getConditionComments() {
 		List<String> params = new ArrayList<String>();
-		for(JavaParameterHost parameter: parameters) {
-			if(parameter.isConditional())
+		for (JavaParameterHost parameter : parameters) {
+			if (parameter.isConditional())
 				params.add(parameter.getAlias() + ": where clause");
 		}
 		return params;

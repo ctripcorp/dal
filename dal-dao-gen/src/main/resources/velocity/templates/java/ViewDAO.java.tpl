@@ -29,7 +29,7 @@ public class ${host.getPojoClassName()}Dao {
 	 */
 	public ${host.getPojoClassName()}Dao() {
 		this.client = DalClientFactory.getClient(DATA_BASE);
-		this.mapper = new ${host.getPojoClassName()}RowMapper();
+		this.mapper = DalDefaultJpaMapper.create(${host.getPojoClassName()}.class, DATA_BASE);
 		this.extractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(this.mapper);
 		this.scalarExtractor = new DalScalarExtractor();
 	}
@@ -77,20 +77,4 @@ public class ${host.getPojoClassName()}Dao {
 		return this.client.query(sql, parameters, hints, extractor);
 	}
 
-	/**
-	  * Map the sql result-set to ${host.getPojoClassName()} instance
-	**/
-	private class ${host.getPojoClassName()}RowMapper implements DalRowMapper<${host.getPojoClassName()}> {
-
-		@Override
-		public ${host.getPojoClassName()} map(ResultSet rs, int rowNum) throws SQLException {
-			${host.getPojoClassName()} pojo = new ${host.getPojoClassName()}();
-			
-#foreach( $field in ${host.getFields()} )
-			pojo.set${field.getCapitalizedName()}((${field.getClassDisplayName()})rs.getObject("${field.getName()}"));
-#end
-
-			return pojo;
-		}
-	}
 }

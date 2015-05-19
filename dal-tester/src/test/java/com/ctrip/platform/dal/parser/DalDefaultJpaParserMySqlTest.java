@@ -27,11 +27,6 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
 import com.ctrip.platform.dal.ext.persistence.Type;
 
-/**
- * Test the default Jpa Parser with mysql database
- * @author wcyuan
- * @version 2014-05-08
- */
 public class DalDefaultJpaParserMySqlTest {
 	private final static int ROW_COUNT = 100;
 	private final static String DROP_TABLE_SQL = "DROP TABLE IF EXISTS %s";

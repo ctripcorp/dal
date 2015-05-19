@@ -83,10 +83,10 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
 								String.format("%s/Dao/%sDao.java", mavenLikeDir.getAbsolutePath(), host.getClassName()),
 								"templates/java/dao/freesql/FreeSqlDAO.java.tpl");
 	
-						GenUtils.mergeVelocityContext(
-								context,
-								String.format("%s/Test/%sDaoTest.java", mavenLikeDir.getAbsolutePath(), host.getClassName()),
-								"templates/java/test/FreeSqlDAOTest.java.tpl");
+//						GenUtils.mergeVelocityContext(
+//								context,
+//								String.format("%s/Test/%sDaoTest.java", mavenLikeDir.getAbsolutePath(), host.getClassName()),
+//								"templates/java/test/FreeSqlDAOTest.java.tpl");
 						
 						GenUtils.mergeVelocityContext(
 								context,

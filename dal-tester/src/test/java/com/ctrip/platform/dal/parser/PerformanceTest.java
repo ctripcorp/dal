@@ -11,6 +11,7 @@ public class PerformanceTest {
 		
 		DalClientFactory.initClientFactory();
 		DalClientFactory.warmUpConnections();
+		jpa(1, "id < 1");
 		int[] samples = new int[]{1,10,100,1000,2000,3000,4000,6000,8000,10000};
 		for (int count : samples) {
 			System.out.println(String.format("%1$s条insert, %1$s条query，%1$s条update（下面的每行数据代表一次完整的insert、query、update执行）", count));

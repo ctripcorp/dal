@@ -63,10 +63,10 @@ public class JavaCodeGeneratorOfViewProcessor implements DalProcessor {
 								String.format("%s/Entity/%s.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
 								"templates/java/Pojo.java.tpl");
 	
-						GenUtils.mergeVelocityContext(
-								context, 
-								String.format( "%s/Test/%sDaoTest.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
-								"templates/java/test/DAOByViewTest.java.tpl");
+//						GenUtils.mergeVelocityContext(
+//								context, 
+//								String.format( "%s/Test/%sDaoTest.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
+//								"templates/java/test/DAOByViewTest.java.tpl");
 						
 						GenUtils.mergeVelocityContext(
 								context, 

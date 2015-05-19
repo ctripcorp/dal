@@ -58,10 +58,10 @@ public class JavaCodeGeneratorOfSpProcessor implements DalProcessor {
 								String.format("%s/Dao/%sSpDao.java", mavenLikeDir.getAbsolutePath(), host.getDbSetName()),
 								"templates/java/DAOBySp.java.tpl");
 	
-						GenUtils.mergeVelocityContext(
-								context, 
-								String.format("%s/Test/%sSpDaoTest.java", mavenLikeDir.getAbsolutePath(), host.getDbSetName()),
-								"templates/java/test/DAOBySpTest.java.tpl");
+//						GenUtils.mergeVelocityContext(
+//								context, 
+//								String.format("%s/Test/%sSpDaoTest.java", mavenLikeDir.getAbsolutePath(), host.getDbSetName()),
+//								"templates/java/test/DAOBySpTest.java.tpl");
 						
 						GenUtils.mergeVelocityContext(
 								context, 

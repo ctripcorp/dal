@@ -323,7 +323,7 @@ public final class DalQueryDao {
 	private <T> List<T> queryRange(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count) 
 			throws SQLException {
 		setDefaultMerger(hints, new DalRangedResultMerger<>(hints.getSorter(), start, count));
-		return commonQuery(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, start, count), NULLABLE);
+		return commonQuery(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper), NULLABLE);
 	}
 	
 	private static ExecutorService service = null;

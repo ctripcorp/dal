@@ -630,6 +630,205 @@ public class DalQueryDaoTest {
 		}
 	}
 	
+	//////////////////////////////////////////////////////////////////////////////
+	// QueryTop Tests
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * The template method under test
+	 * @throws SQLException 
+	 */
+	 private List<Short> queryTopInAllShard(DalHints hints) throws SQLException {
+		return new DalQueryDao(DATABASE_NAME).queryTop(
+				sqlList, parameters, 
+				hints.inAllShards(), 
+				new ShortRowMapper(), 4);
+	}
+	
+	@Test
+	public void testQueryTopAllShardsSync() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryTopInAllShard(hints);
+			assertEquals(4, result.size());
+			Short t = result.get(0);
+			assertEquals(new Short((short)1), t);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryTopAllShardsAsync() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryTopInAllShard(hints.asyncExecution());
+			Future<List<Short>> fr = (Future<List<Short>>)hints.getAsyncResult();
+			Short s = fr.get().get(0);
+			assertEquals(new Short((short)1), s);
+			assertEquals(4, fr.get().size());
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryTopAllShardsWithMerger() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryTopInAllShard(hints.mergeBy(new TestResultMerger()));
+			Short t = result.get(0);
+			assertEquals(new Short((short)3), t);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryTopAllShardsWithSorter() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryTopInAllShard(hints.sortBy(new TestComparator()));
+			assertEquals(4, result.size());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testQueryTopAllShardsWithCallback() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryTopInAllShard(hints.callbackWith(new TestQueryCallback()));
+			assertNull(result);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryTopAllShardsSyncWithClass() {
+		try {
+			DalHints hints = new DalHints();
+			List<Integer> result = new DalQueryDao(DATABASE_NAME).queryTop(
+					sqlListQuantity, parameters, 
+					hints.inAllShards(), 
+					Integer.class, 4);
+			assertEquals(4, result.size());
+			Integer t = result.get(0);
+			assertEquals(new Integer(10), t);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+
+	
+	//////////////////////////////////////////////////////////////////////////////
+	// QueryFrom Tests
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * The template method under test
+	 * @throws SQLException 
+	 */
+	 private List<Short> queryFromInAllShard(DalHints hints) throws SQLException {
+		return new DalQueryDao(DATABASE_NAME).queryFrom(
+				sqlList, parameters, 
+				hints.inAllShards(), 
+				new ShortRowMapper(), 2, 4);
+	}
+	
+	@Test
+	public void testQueryFromAllShardsSync() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryFromInAllShard(hints);
+			assertEquals(4, result.size());
+
+			//[3, 1, 2, 3]
+			assertEquals(new Short((short)3), result.get(0));
+			assertEquals(new Short((short)1), result.get(1));
+			assertEquals(new Short((short)2), result.get(2));
+			assertEquals(new Short((short)3), result.get(3));
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryFromAllShardsAsync() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryFromInAllShard(hints.asyncExecution());
+			assertNull(result);
+			Future<List<Short>> fr = (Future<List<Short>>)hints.getAsyncResult();
+			result = fr.get();
+
+			//[3, 1, 2, 3]
+			assertEquals(new Short((short)3), result.get(0));
+			assertEquals(new Short((short)1), result.get(1));
+			assertEquals(new Short((short)2), result.get(2));
+			assertEquals(new Short((short)3), result.get(3));
+			assertEquals(4, fr.get().size());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryFromAllShardsWithMerger() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryFromInAllShard(hints.mergeBy(new TestResultMerger()));
+			Short t = result.get(0);
+			assertEquals(new Short((short)3), t);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryFromAllShardsWithSorter() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryFromInAllShard(hints.sortBy(new TestComparator()));
+			assertEquals(4, result.size());
+		} catch (Exception e) {
+			fail();
+		}
+	}
+
+	@Test
+	public void testQueryFromAllShardsWithCallback() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryFromInAllShard(hints.callbackWith(new TestQueryCallback()));
+			assertNull(result);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryFromAllShardsSyncWithClass() {
+		try {
+			DalHints hints = new DalHints();
+			List<Integer> result = new DalQueryDao(DATABASE_NAME).queryFrom(
+					sqlListQuantity, parameters, 
+					hints.inAllShards(), 
+					Integer.class, 2, 4);
+			assertEquals(4, result.size());
+			assertEquals(new Integer(12), result.get(0));
+			assertEquals(new Integer(10), result.get(1));
+			assertEquals(new Integer(11), result.get(2));
+			assertEquals(new Integer(12), result.get(3));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	
 //	@Test
 //	public void testQueryClassForList() {
 //		try {

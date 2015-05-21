@@ -6,7 +6,6 @@ import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardin
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.locateTableShardId;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;

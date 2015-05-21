@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.tester.shard;
+package com.ctrip.platform.dal.tester.crossShard;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

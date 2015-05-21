@@ -26,7 +26,6 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 
 public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
-	
 	private DalParser<T> parser;
 	private final String logicDbName;
 	private final String rawTableName;

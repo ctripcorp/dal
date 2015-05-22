@@ -24,9 +24,9 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.helper.Type;
 import com.ctrip.platform.dal.dao.unittests.DalTestHelper;
-import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
-import com.ctrip.platform.dal.ext.persistence.Type;
 
 public class DalDefaultJpaParserSqlServerTest2 {
 	private final static int ROW_COUNT = 100;

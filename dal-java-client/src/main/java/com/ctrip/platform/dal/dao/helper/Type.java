@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.ext.persistence;
+package com.ctrip.platform.dal.dao.helper;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

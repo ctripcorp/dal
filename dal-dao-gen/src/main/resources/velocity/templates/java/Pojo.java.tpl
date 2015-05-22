@@ -6,7 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import com.ctrip.platform.dal.ext.persistence.Type;
+import com.ctrip.platform.dal.dao.helper.Type;
 import java.sql.Types;
 #foreach( $field in ${host.getPojoImports()} )
 import ${field};

@@ -4,7 +4,7 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
-import com.ctrip.platform.dal.ext.persistence.DalDefaultJpaMapper;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
 
 public class ${host.getPojoClassName()}Dao {
 
@@ -31,7 +31,7 @@ public class ${host.getPojoClassName()}Dao {
 	 */
 	public ${host.getPojoClassName()}Dao() throws SQLException {
 		this.client = DalClientFactory.getClient(DATA_BASE);
-		this.mapper = DalDefaultJpaMapper.create(${host.getPojoClassName()}.class, DATA_BASE);
+		this.mapper = DalDefaultJpaMapper.create(${host.getPojoClassName()}.class);
 		this.extractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(this.mapper);
 		this.scalarExtractor = new DalScalarExtractor();
 	}

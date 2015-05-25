@@ -22,17 +22,19 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 	private Field identity;
 	private boolean autoIncrement;
 	private DalRowMapper<T> rowMapper;
+	private String[] sensitiveColumnNames; 
 	
 	private DalDefaultJpaParser(Class<T> clazz, boolean autoIncrement,
-			String dataBaseName, String tableName,
-			String[] columns, String[] primaryKeyColumns, int[] columnTypes,
-			Map<String, Field> fieldsMap, Field identity, DalRowMapper<T> rowMapper){
+			String dataBaseName, String tableName, String[] columns, 
+			String[] primaryKeyColumns, int[] columnTypes, Map<String, Field> fieldsMap, 
+			Field identity, DalRowMapper<T> rowMapper, String[] sensitiveColumnNames) {
 		super(dataBaseName, tableName, columns, primaryKeyColumns, columnTypes);
 		this.clazz = clazz;
 		this.identity = identity;
 		this.autoIncrement = autoIncrement;
 		this.fieldsMap = fieldsMap;
 		this.rowMapper = rowMapper;
+		this.sensitiveColumnNames = sensitiveColumnNames;
 	}
 
 	public static <T> DalParser<T> create(Class<T> clazz, String databaseName) throws SQLException {
@@ -46,9 +48,10 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 		Field[] identities = manager.getIdentity();
 		Field identity = identities != null && identities.length == 1 ? identities[0] : null;
 		DalRowMapper<T> rowMapper = DalDefaultJpaMapper.create(clazz);
+		String[] sensitiveColumnNames = manager.getSensitiveColumnNames();
 		return new DalDefaultJpaParser<T>(
-				clazz, autoIncrement, databaseName, tableName, columnNames, 
-				primaryKeyNames, columnTypes, fieldsMap, identity, rowMapper);
+				clazz, autoIncrement, databaseName, tableName, columnNames, primaryKeyNames,
+				columnTypes, fieldsMap, identity, rowMapper, sensitiveColumnNames);
 	}
 
 	@Override
@@ -108,5 +111,8 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 		}
 		return map;
 	}
-
+	
+	public String[] getSensitiveColumnNames() {
+		return this.sensitiveColumnNames;
+	}
 }

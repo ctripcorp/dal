@@ -67,6 +67,19 @@ public class EntityManager<T> {
 		return false;
 	}
 	
+	public String[] getSensitiveColumnNames() {
+		List<String> sensitiveColumnNames = new ArrayList<String>();
+		for (int i = 0; i < fields.length; i++) {
+			Field field = fields[i];
+			Sensitive sensitive = field.getAnnotation(Sensitive.class);
+			if (sensitive != null)
+				sensitiveColumnNames.add(getColumnName(field));
+		}
+		String[] scns = new String[sensitiveColumnNames.size()];
+		sensitiveColumnNames.toArray(scns);
+		return scns;
+	}
+	
 	public String[] getPrimaryKeyNames() throws SQLException {
 		List<String> primaryKeyNames = new ArrayList<String>();
 		for (int i = 0; i < fields.length; i++) {

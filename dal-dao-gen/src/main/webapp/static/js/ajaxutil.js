@@ -62,31 +62,51 @@
         var paramList = [];
         var paramValues = [];
         var paramNullable = [];
+        var paramSensitive = [];
         $.each($("#param_list_auto").children("div"), function (index, value) {
             var first = $(value).children("input").eq(0);
             var second = $(value).children("input").eq(1);
 //            var second = $(value).children("select").eq(0);
 //            paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
-            paramList.push( $(first).val());
+            paramList.push($(first).val());
             paramValues.push($(first).val());
             paramNullable.push($(second).is(":checked"));
+            if (postData["sql_style"] != "csharp") {
+                var third = $(value).children("input").eq(2);
+                paramSensitive.push($(third).is(":checked"));
+            }
         });
 
         var selectedConditions = [];
         var index2 = 0;
-        $.each($("#selected_condition option"), function (index, value) {
-            var temp = $(value).val().split(",");
-            if(temp[1]=="6"){//between
-                selectedConditions.push(sprintf("%s,%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1],
-                    paramNullable[index2]));
-                index2+=2;
-            }else if(temp[1]=="9" || temp[1]=="10"){// is null or is not null
-                selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], temp[0]));
-            }else{
-                selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2],paramNullable[index2]));
-                index2++;
-            }
-        });
+        if (postData["sql_style"] == "csharp") {
+            $.each($("#selected_condition option"), function (index, value) {
+                var temp = $(value).val().split(",");
+                if(temp[1]=="6"){//between
+                    selectedConditions.push(sprintf("%s,%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1], paramNullable[index2]));
+                    index2+=2;
+                }else if(temp[1]=="9" || temp[1]=="10"){// is null or is not null
+                    selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], temp[0]));
+                }else{
+                    selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0], temp[1], paramValues[index2],paramNullable[index2]));
+                    index2++;
+                }
+            });
+        } else {
+            $.each($("#selected_condition option"), function (index, value) {
+                var temp = $(value).val().split(",");
+                if(temp[1]=="6"){//between
+                    selectedConditions.push(sprintf("%s,%s,%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramValues[index2+1],
+                        paramNullable[index2], paramSensitive[index2]));
+                    index2+=2;
+                }else if(temp[1]=="9" || temp[1]=="10"){// is null or is not null
+                    selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1], temp[0]));
+                }else{
+                    selectedConditions.push(sprintf("%s,%s,%s,%s,%s", temp[0], temp[1], paramValues[index2], paramNullable[index2], paramSensitive[index2]));
+                    index2++;
+                }
+            });
+        }
 
         postData["condition"] = selectedConditions.join(";");
         postData["params"] = paramList.join(";");
@@ -143,7 +163,12 @@
         $.each($("#param_list").children("div"), function (index, value) {
             var first = $(value).children("input").eq(0);
             var second = $(value).children("select").eq(0);
-            paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
+            if (postData["sql_style"] == "csharp") {
+                paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
+            } else {
+                var third = $(value).children("div").eq(0).children(":checkbox").eq(0);
+                paramList.push(sprintf("%s,%s,%s", $(first).val(), $(second).val(), $(third).is(":checked")));
+            }
         });
         postData["params"] = paramList.join(";");
 

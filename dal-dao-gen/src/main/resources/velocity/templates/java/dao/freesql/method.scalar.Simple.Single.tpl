@@ -15,10 +15,14 @@
 #if($method.hasParameters())
 		int i = 1;
 #foreach($p in $method.getParameters())
+#set($sensitiveflag = "")	
+#if(${p.isSensitive()})
+#set($sensitiveflag = "Sensitive")
+#end	
 #if($p.isInParameter())
-		i = parameters.setInParameter(i, "${p.getAlias()}", ${p.getJavaTypeDisplay()}, ${p.getAlias()});
+		i = parameters.set$!{sensitiveflag}InParameter(i, "${p.getAlias()}", ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #else
-		parameters.set(i++, "${p.getAlias()}", ${p.getJavaTypeDisplay()}, ${p.getName()});
+		parameters.set$!{sensitiveflag}(i++, "${p.getAlias()}", ${p.getJavaTypeDisplay()}, ${p.getName()});
 #end
 #end
 #end

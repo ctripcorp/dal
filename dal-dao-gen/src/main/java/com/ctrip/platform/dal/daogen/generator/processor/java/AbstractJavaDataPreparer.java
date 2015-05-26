@@ -367,9 +367,14 @@ public class AbstractJavaDataPreparer{
 						boolean nullable = tokens.length >= 5?Boolean.valueOf(tokens[4]):false;
 						host_ls.setNullable(nullable);
 						host_bw.setNullable(nullable);
+						boolean sensitive = tokens.length >= 6?Boolean.valueOf(tokens[5]):false;
+						host_ls.setSensitive(sensitive);
+						host_bw.setSensitive(sensitive);
 					}else{
 						boolean nullable = tokens.length >= 4?Boolean.valueOf(tokens[3]):false;
 						host_ls.setNullable(nullable);
+						boolean sensitive = tokens.length >= 5?Boolean.valueOf(tokens[4]):false;
+						host_ls.setSensitive(sensitive);
 					}
 					break;
 				}

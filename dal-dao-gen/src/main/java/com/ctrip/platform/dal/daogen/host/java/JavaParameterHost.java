@@ -43,6 +43,8 @@ public class JavaParameterHost extends AbstractParameterHost {
 	private boolean conditional;
 
 	private ConditionType conditionType;
+	
+	private boolean sensitive = false;//whether the param is sensitive
 
 	public JavaParameterHost() {
 	}
@@ -61,6 +63,7 @@ public class JavaParameterHost extends AbstractParameterHost {
 		this.conditionType = host.getConditionType();
 		this.validationValue = host.getValidationValue();
 		this.conditional = host.isConditional();
+		this.sensitive = host.isSensitive();
 	}
 
 	public boolean isInParameter() {
@@ -81,6 +84,14 @@ public class JavaParameterHost extends AbstractParameterHost {
 
 	public void setNullable(boolean nullable) {
 		this.nullable = nullable;
+	}
+	
+	public boolean isSensitive() {
+		return sensitive;
+	}
+
+	public void setSensitive(boolean sensitive) {
+		this.sensitive = sensitive;
 	}
 
 	public ParameterDirection getDirection() {

@@ -75,10 +75,26 @@ public class StatementParameters {
 		return i;
 	}
 	
+	public int setSensitiveInParameter(int index, int sqlType, List<?> values) {
+		int i = index;
+		for(Object val : values){
+			this.setSensitive(i++, sqlType, val);
+		}
+		return i;
+	}
+	
 	public int setInParameter(int index, String name, int sqlType, List<?> values) {
 		int i = index;
 		for(Object val : values){
 			this.set(i++, name, sqlType, val);
+		}
+		return i;
+	}
+	
+	public int setSensitiveInParameter(int index, String name, int sqlType, List<?> values) {
+		int i = index;
+		for(Object val : values){
+			this.setSensitive(i++, name, sqlType, val);
 		}
 		return i;
 	}

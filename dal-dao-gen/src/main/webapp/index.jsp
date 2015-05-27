@@ -482,7 +482,7 @@
 	               </div>
                	  <div class="steps step2-2-2 row-fluid" from="">
                      <div class="row-fluid" id="param_list_auto_div">
-                           <label class="control-label popup_label">填写条件参数名,并选择参数是否支持NULL值</label>
+                           <label class="control-label popup_label">填写条件参数名,选择参数是否支持NULL值</label>
                      </div>  
                      <div id="param_list_auto" class="row-fluid input-sm">      
                      </div>

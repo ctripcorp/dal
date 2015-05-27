@@ -704,19 +704,19 @@
             return;
         }
         $("#error_msg").empty();
-        if(crud_option=="insert"){
-            $("#param_list_auto_div").hide();
-            $("#param_list_auto").hide();
-        }
 
         var paramHtml = "";
         if ($("#sql_style").val() == "csharp") {
             paramHtml = step2_2_1_csharp(record,current,crud_option);
         }else{
-            paramHtml = step2_2_1_java(record,current,crud_option);
+            if(crud_option=="insert"){
+                paramHtml = step2_2_1_java_insert(record,current,crud_option);
+            } else {
+                paramHtml = step2_2_1_java(record,current,crud_option);
+            }
         }
 
-        if(paramHtml.length==0 || crud_option=="insert"){
+        if(paramHtml.length==0){
             $("#param_list_auto_div").hide();
             $("#param_list_auto").empty();
         }else{
@@ -801,6 +801,41 @@
                 paramHtml = paramHtml + sprintf(variableHtml_ForJAVA, conName, nullable, sensitive)+"</div><br/>";
             }else{
                 paramHtml = paramHtml + sprintf(variableHtml_ForJAVA, sprintf("param%s", i), nullable, sensitive)+"</div><br/>";
+            }
+        }
+        return paramHtml;
+    };
+
+    var variableHtml_ForJAVA_Insert = '<div class="row-fluid"><input type="text" class="span3" value="%s" disabled>'+
+        ' <input type="checkbox" style="display:none">&nbsp;&nbsp;参数敏感：<input type="checkbox" %s ></div><br/>';
+
+    var step2_2_1_java_insert = function(record,current,crud_option) {
+        var paramHtml = "";
+        var conVal = new Array();
+        var conNullable = new Array();
+        var sensitives = new Array();
+        if ($("#page1").attr('is_update') == "1") {
+            // 模式： Age,6,aa,nullable,sensitive;Name,1,param2,nullable,sensitive;
+            var conditions = record['condition'].split(";");
+            for(var j=0;j<conditions.length;j++){
+                var con = conditions[j];
+                var keyValue = con.split(",");
+                conVal.push(keyValue[2]);
+                conNullable.push(keyValue[3]);
+                sensitives.push(keyValue[4]);
+            }
+        }
+
+        var selectedInsertFields = $('#fields').multipleSelect('getSelects');
+        for (var i=0; i < selectedInsertFields.length; i++) {
+            var conName = conVal.shift();
+            var sensitive = sensitives.shift();
+            sensitive = sensitive!=undefined?sensitive:'false';
+            sensitive = sensitive!='false'?'checked="checked"':"";
+            if(conName!=null && conName!="" && conName!="undefined"){
+                paramHtml = paramHtml + sprintf(variableHtml_ForJAVA_Insert, conName, sensitive);
+            }else{
+                paramHtml = paramHtml + sprintf(variableHtml_ForJAVA_Insert, selectedInsertFields[i], sensitive);
             }
         }
         return paramHtml;

@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
+import java.sql.Types;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -207,12 +208,13 @@ public class JavaParameterHost extends AbstractParameterHost {
 	static {
 		stringTypes.add(java.sql.Types.CHAR);
 		stringTypes.add(java.sql.Types.VARCHAR);
+		stringTypes.add(Types.NVARCHAR);
 		stringTypes.add(java.sql.Types.LONGVARCHAR);
 	}
 
 	public Object getValidationValue() {
 		if (stringTypes.contains(sqlType))
-			return "\"" + validationValue + "\"";
+			return "\"" + "\"";
 		if (validationValue == null)
 			return "null";
 		return validationValue;

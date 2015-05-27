@@ -1,8 +1,10 @@
 package com.ctrip.platform.dal.daogen.generator.processor.java;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 import org.apache.commons.lang.StringUtils;
@@ -286,9 +288,18 @@ public class AbstractJavaDataPreparer{
 			
 			// Have no where condition
 			String[] fields = StringUtils.split(builder.getFields(), ",");
+			Map<String,Boolean> sensitive = new HashMap<String,Boolean>();
+			String conditions = builder.getCondition();
+			if (conditions != null) {
+				String[] temp = conditions.split(";");
+				for (String field : temp) {
+					sensitive.put(field.split(",")[0], Boolean.parseBoolean(field.split(",")[4]));
+				}
+			}
 			for (String field : fields) {
 				for (JavaParameterHost pHost : allColumns) {
 					if (pHost.getName().equals(field)) {
+						pHost.setSensitive(sensitive.get(field));
 						parameters.add(pHost);
 						break;
 					}

@@ -108,6 +108,15 @@
             });
         }
 
+        if ($("#crud_option").val() == "insert") {
+            selectedConditions = [];
+            $.each($("#param_list_auto").children("div"), function (index, value) {
+                // 模式： Age,6,aa,nullable,sensitive;Name,1,param2,nullable,sensitive;
+                selectedConditions.push(sprintf("%s,%s,%s,%s,%s", paramValues[index], 1, paramValues[index],
+                    paramNullable[index], paramSensitive[index]));
+            });
+        }
+
         postData["condition"] = selectedConditions.join(";");
         postData["params"] = paramList.join(";");
 

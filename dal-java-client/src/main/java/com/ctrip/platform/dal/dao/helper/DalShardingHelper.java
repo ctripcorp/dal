@@ -174,6 +174,7 @@ public class DalShardingHelper {
 	 * Verify if shard id is already set for potential corss shard batch operation.
 	 * This includes combined insert, batch insert and batch delete.
 	 * It will first check if sharding is enabled. Then detect if necessary sharding id can be located.
+	 * This applies to both db and table shard.
 	 * If all meet, then allow the operation 
 	 * TODO do more analyze of the logic here
 	 * @param logicDbName

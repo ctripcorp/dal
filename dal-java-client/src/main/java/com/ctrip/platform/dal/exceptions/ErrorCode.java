@@ -22,6 +22,11 @@ public enum ErrorCode {
 	AssertNull(ErrorClassify.Assert, 5003, "It is expected to return 1 result. But found none"),
 	
 	/**
+	 * It is expected to return only 1 or no result. But the actually count is more than 1.
+	 */
+	NotSupported(ErrorClassify.Assert, 5004, "The requested operation is not supported"),
+
+	/**
 	 * The primary key of this table is consists of more than one column
 	 */
 	ValidatePrimaryKeyCount(ErrorClassify.Validate, 5100, "The primary key of this table is consists of more than one column"),
@@ -45,6 +50,21 @@ public enum ErrorCode {
 	 * Can not convert generated key to number
 	 */
 	ValidateKeyHolderConvert(ErrorClassify.Validate, 5104, "Can not convert generated key to number"),
+	
+	/**
+	 * Sql cannot be null
+	 */
+	ValidateSql(ErrorClassify.Validate, 5105, "The given sql is null"),
+	
+	/**
+	 * Pojos cannot be null
+	 */
+	ValidatePojoList(ErrorClassify.Validate, 5106, "The given pojo list is null"),
+	
+	/**
+	 * Task cannot be null
+	 */
+	ValidateTask(ErrorClassify.Validate, 5107, "The given dao task is null. Means the calling DAO method is not supported. Please contact your DAL team."),
 	
 	/**
 	 * Can not locate shard for %s

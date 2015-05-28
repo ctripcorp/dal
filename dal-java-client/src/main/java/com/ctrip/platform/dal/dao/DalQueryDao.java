@@ -404,15 +404,11 @@ public final class DalQueryDao {
 					return client.query(sql, parameters, hints.clone().inShard(shard), extractor);}}));
 
 		ResultMerger<T> merger = (ResultMerger<T>)hints.get(DalHintEnum.resultMerger);
-		// TODO Handle timeout and execution exception
 		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet()) {
 			try {
 				merger.addPartial(entry.getKey(), entry.getValue().get());
 			} catch (Throwable e) {
-				if(hints.isStopOnError())
-					throw DalException.wrap(ErrorCode.Unknown, e);
-				
-				DalClientFactory.getDalLogger().warn("There is error during parallel execute query: " + e.getMessage());
+				hints.handleError("There is error during parallel execute query: ", e);;
 			}
 		}
 		
@@ -427,10 +423,7 @@ public final class DalQueryDao {
 			try {
 				merger.addPartial(shard, client.query(sql, parameters, hints.clone().inShard(shard), extractor));
 			} catch (Throwable e) {
-				if(hints.isStopOnError())
-					throw DalException.wrap(ErrorCode.Unknown, e);
-				
-				DalClientFactory.getDalLogger().warn("There is error during parallel execute query: " + e.getMessage());
+				hints.handleError("There is error during parallel execute query: ", e);
 			}
 		}
 		

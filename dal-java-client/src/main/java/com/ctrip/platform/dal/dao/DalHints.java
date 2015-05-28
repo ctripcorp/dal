@@ -9,6 +9,8 @@ import java.util.concurrent.Future;
 
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.task.DalAsyncCallback;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 /**
  * Additional parameters used to indicate how DAL behaves for each of the operation.
@@ -256,6 +258,13 @@ public class DalHints {
 		return this;
 	}
 	
+	/**
+	 * If asyncExecution is set or there is callback, we assume it is asynchronized execution.
+	 * And in this case the futureResult will always be populated with Future<?>.
+	 * If there is callback, the result will be pass to callback also.
+	 *  
+	 * @return
+	 */
 	public boolean isAsyncExecution() {
 		return is(DalHintEnum.asyncExecution) || is(DalHintEnum.queryCallback);
 	}
@@ -271,6 +280,14 @@ public class DalHints {
 	
 	public boolean isStopOnError() {
 		return !is(DalHintEnum.continueOnError);
+	}
+
+	public void handleError(String msg, Throwable e) throws DalException {
+		if(isStopOnError())
+			throw DalException.wrap(e);
+
+		// Just make sure error is not swallowed by us
+		DalClientFactory.getDalLogger().error(msg, e);
 	}
 
 	public DalHints setIsolationLevel(int isolationLevel) {

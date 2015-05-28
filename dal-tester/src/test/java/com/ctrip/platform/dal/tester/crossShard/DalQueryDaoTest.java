@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,6 +31,8 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.QueryCallback;
 import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
+import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.ShortRowMapper;
 
 public class DalQueryDaoTest {
@@ -78,6 +81,12 @@ public class DalQueryDaoTest {
 				clientSqlSvr.update(sqls[j], parameters, hints.inShard(i));
 			}
 		}
+		/*
+		String sql = "DECLARE @AAA AS TABLE (ID int,NAME CHAR(20));"+
+				"INSERT INTO @AAA VALUES (1,'AA');"+
+				"SELECT * FROM @AAA;";
+		List<Map<String, Object>> rs = clientSqlSvr.query(sql, parameters, hints, new DalRowMapperExtractor<>(new DalColumnMapRowMapper()));
+		System.out.println(rs);*/
 	}
 
 	@AfterClass

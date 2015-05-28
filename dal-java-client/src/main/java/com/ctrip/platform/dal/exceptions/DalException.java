@@ -36,6 +36,10 @@ public class DalException extends SQLException{
 		return this.errorCode.getCode();
 	}
 	
+	public static DalException wrap(Throwable e) {
+		return e instanceof DalException ? (DalException)e: new DalException(ErrorCode.Unknown, e);
+	}
+	
 	public static DalException wrap(ErrorCode defaultError, Throwable e) {
 		return e instanceof DalException ? (DalException)e: new DalException(defaultError, e);
 	}

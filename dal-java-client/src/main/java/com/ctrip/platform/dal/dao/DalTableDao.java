@@ -436,7 +436,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int delete(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
-		DalWatcher.begin();
+//		return new ResultMerger.IntSummary();
 		return client.update(String.format(TMPL_SQL_DELETE,
 				getTableName(hints, parameters), whereClause), parameters, hints);
 	}
@@ -452,7 +452,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int update(String sql, StatementParameters parameters, DalHints hints)
 			throws SQLException {
-		DalWatcher.begin();
+//		return new ResultMerger.IntSummary();
 		return client.update(sql, parameters, hints);
 	}
 }

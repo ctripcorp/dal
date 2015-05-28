@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
+import java.sql.Types;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,6 +44,8 @@ public class JavaParameterHost extends AbstractParameterHost {
 	private boolean conditional;
 
 	private ConditionType conditionType;
+	
+	private boolean sensitive = false;//whether the param is sensitive
 
 	public JavaParameterHost() {
 	}
@@ -61,6 +64,7 @@ public class JavaParameterHost extends AbstractParameterHost {
 		this.conditionType = host.getConditionType();
 		this.validationValue = host.getValidationValue();
 		this.conditional = host.isConditional();
+		this.sensitive = host.isSensitive();
 	}
 
 	public boolean isInParameter() {
@@ -81,6 +85,14 @@ public class JavaParameterHost extends AbstractParameterHost {
 
 	public void setNullable(boolean nullable) {
 		this.nullable = nullable;
+	}
+	
+	public boolean isSensitive() {
+		return sensitive;
+	}
+
+	public void setSensitive(boolean sensitive) {
+		this.sensitive = sensitive;
 	}
 
 	public ParameterDirection getDirection() {
@@ -196,12 +208,13 @@ public class JavaParameterHost extends AbstractParameterHost {
 	static {
 		stringTypes.add(java.sql.Types.CHAR);
 		stringTypes.add(java.sql.Types.VARCHAR);
+		stringTypes.add(Types.NVARCHAR);
 		stringTypes.add(java.sql.Types.LONGVARCHAR);
 	}
 
 	public Object getValidationValue() {
 		if (stringTypes.contains(sqlType))
-			return "\"" + validationValue + "\"";
+			return "\"" + "\"";
 		if (validationValue == null)
 			return "null";
 		return validationValue;

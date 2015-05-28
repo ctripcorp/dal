@@ -1,15 +1,13 @@
-package com.ctrip.platform.dal.ext.parser;
+package com.ctrip.platform.dal.dao.helper;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
-import com.ctrip.platform.dal.ext.persistence.EntityManager;
+import com.ctrip.platform.dal.dao.DalRowMapper;
 
 /**
  * 
@@ -19,36 +17,27 @@ import com.ctrip.platform.dal.ext.persistence.EntityManager;
  */
 public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 	
-	private static final ConcurrentHashMap<String, DalParser<?>> cache = new ConcurrentHashMap<String, DalParser<?>>();
 	private Map<String, Field> fieldsMap;
 	private Class<T> clazz;
 	private Field identity;
 	private boolean autoIncrement;
+	private DalRowMapper<T> rowMapper;
+	private String[] sensitiveColumnNames; 
 	
 	private DalDefaultJpaParser(Class<T> clazz, boolean autoIncrement,
-			String dataBaseName, String tableName,
-			String[] columns, String[] primaryKeyColumns, int[] columnTypes,
-			Map<String, Field> fieldsMap, Field identity){
+			String dataBaseName, String tableName, String[] columns, 
+			String[] primaryKeyColumns, int[] columnTypes, Map<String, Field> fieldsMap, 
+			Field identity, DalRowMapper<T> rowMapper, String[] sensitiveColumnNames) {
 		super(dataBaseName, tableName, columns, primaryKeyColumns, columnTypes);
 		this.clazz = clazz;
 		this.identity = identity;
 		this.autoIncrement = autoIncrement;
 		this.fieldsMap = fieldsMap;
+		this.rowMapper = rowMapper;
+		this.sensitiveColumnNames = sensitiveColumnNames;
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <T> DalParser<T> create(Class<T> clazz, String databaseName) throws SQLException {
-		if (!cache.contains(clazz.getName())) {
-			synchronized (DalDefaultJpaParser.class) {
-				if (!cache.contains(clazz.getName())) {
-					createAndCacheParser(clazz, databaseName);
-				}
-			}
-		}
-		return (DalParser<T>) cache.get(clazz.getName());
-	}
-
-	public static <T> void createAndCacheParser(Class<T> clazz, String databaseName) throws SQLException {
 		EntityManager<T> manager = new EntityManager<T>(clazz);
 		String tableName = manager.getTableName();
 		boolean autoIncrement = manager.isAutoIncrement();
@@ -58,25 +47,16 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 		int[] columnTypes = manager.getColumnTypes();
 		Field[] identities = manager.getIdentity();
 		Field identity = identities != null && identities.length == 1 ? identities[0] : null;
-		DalParser<T> parser = new DalDefaultJpaParser<T>(
-				clazz, autoIncrement, databaseName, tableName, columnNames, primaryKeyNames, columnTypes, fieldsMap, identity);
-		
-		cache.put(clazz.getName(), parser);
+		DalRowMapper<T> rowMapper = DalDefaultJpaMapper.create(clazz);
+		String[] sensitiveColumnNames = manager.getSensitiveColumnNames();
+		return new DalDefaultJpaParser<T>(
+				clazz, autoIncrement, databaseName, tableName, columnNames, primaryKeyNames,
+				columnTypes, fieldsMap, identity, rowMapper, sensitiveColumnNames);
 	}
-	
+
 	@Override
 	public T map(ResultSet rs, int rowNum) throws SQLException {
-		try {
-			T instance = this.clazz.newInstance();
-			String[] columnNames = this.getColumnNames();
-			for (int i = 0; i < columnNames.length; i++) {
-				Field field = this.fieldsMap.get(columnNames[i]);
-				EntityManager.setValue(field, instance, rs.getObject(columnNames[i]));
-			}
-			return instance;
-		} catch (Throwable e) {
-			throw new SQLException(e);
-		}
+		return rowMapper.map(rs, rowNum);
 	}
 
 	@Override
@@ -131,5 +111,8 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 		}
 		return map;
 	}
-
+	
+	public String[] getSensitiveColumnNames() {
+		return this.sensitiveColumnNames;
+	}
 }

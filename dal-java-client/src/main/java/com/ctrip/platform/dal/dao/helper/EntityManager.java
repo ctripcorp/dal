@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.ext.persistence;
+package com.ctrip.platform.dal.dao.helper;
 
 import java.lang.reflect.Field;
 import java.sql.SQLException;
@@ -32,12 +32,18 @@ public class EntityManager<T> {
 	private Field[] getFields(Class<T> clazz) throws SQLException {
 		Field[] fields = clazz.getDeclaredFields();
 		emptyCheck(fields);
+		setFieldAccessible(fields);
 		return fields;
 	}
 	
 	private void emptyCheck(Field[] fields) throws SQLException {
 		if (null == fields || fields.length == 0)
-			throw new SQLException("The entity[" + clazz.getName() +"] has not any fields.");
+			throw new SQLException("The entity[" + clazz.getName() +"] has no fields.");
+	}
+	
+	private void setFieldAccessible(Field[] fields) {
+		for(Field field : fields)
+			field.setAccessible(true);
 	}
 	
 	public String getTableName() {
@@ -59,6 +65,19 @@ public class EntityManager<T> {
 			}
 		}
 		return false;
+	}
+	
+	public String[] getSensitiveColumnNames() {
+		List<String> sensitiveColumnNames = new ArrayList<String>();
+		for (int i = 0; i < fields.length; i++) {
+			Field field = fields[i];
+			Sensitive sensitive = field.getAnnotation(Sensitive.class);
+			if (sensitive != null)
+				sensitiveColumnNames.add(getColumnName(field));
+		}
+		String[] scns = new String[sensitiveColumnNames.size()];
+		sensitiveColumnNames.toArray(scns);
+		return scns;
 	}
 	
 	public String[] getPrimaryKeyNames() throws SQLException {
@@ -130,27 +149,10 @@ public class EntityManager<T> {
 		return field.getName();
 	}
 	
-	private static final HashMap<Class<?>, Object> primaryTypeDefaultValue = new HashMap<Class<?>, Object>();
-	
-	static {
-		primaryTypeDefaultValue.put(byte.class, 	(byte) 0);
-		primaryTypeDefaultValue.put(short.class,	(short)0);
-		primaryTypeDefaultValue.put(int.class, 		(int)0);
-		primaryTypeDefaultValue.put(long.class, 	(long)0);
-		primaryTypeDefaultValue.put(float.class, 	(float)0.0f);
-		primaryTypeDefaultValue.put(double.class, 	(double)0.0d);
-		primaryTypeDefaultValue.put(char.class, 	(char)'\u0000');
-		primaryTypeDefaultValue.put(boolean.class, 	false);
-	}
-	
 	public static void setValue(Field field, Object entity, Object val)
 			throws ReflectiveOperationException {
-		field.setAccessible(true);
 		if (val == null) {
-			if (primaryTypeDefaultValue.containsKey(field.getType()))
-				field.set(entity, primaryTypeDefaultValue.get(field.getType()));
-			else
-				field.set(entity, val);
+			field.set(entity, val);
 			return;
 		}
 		if (field.getType().equals(Integer.class) || field.getType().equals(int.class)) {
@@ -181,7 +183,6 @@ public class EntityManager<T> {
 	}
 	
 	public static Object getValue(Field field, Object entity) throws IllegalArgumentException, IllegalAccessException {
-		field.setAccessible(true);
 		return field.get(entity);
 	}
 }

@@ -1,9 +1,10 @@
 package ${host.getPackageName()};
 
-import com.ctrip.platform.dal.ext.parser.DalDefaultJpaParser;
 #foreach( $field in ${host.getDaoImports()} )
 import ${field};
 #end
+
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 
 public class ${host.getPojoClassName()}Dao {
 	private static final String DATA_BASE = "${host.getDbSetName()}";

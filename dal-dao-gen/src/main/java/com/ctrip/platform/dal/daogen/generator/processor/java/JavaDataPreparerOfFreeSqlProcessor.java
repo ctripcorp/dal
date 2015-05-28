@@ -113,6 +113,8 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 							p.setSqlType(Integer.valueOf(splitedParam[1]));
 							p.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(p.getSqlType()));
 							p.setValidationValue(DbUtils.mockATest(p.getSqlType()));
+							boolean sensitive = splitedParam.length >= 3? Boolean.parseBoolean(splitedParam[2]) : false;
+							p.setSensitive(sensitive);
 							params.add(p);
 						}
 						SqlBuilder.rebuildJavaInClauseSQL(task.getSql_content(), params);

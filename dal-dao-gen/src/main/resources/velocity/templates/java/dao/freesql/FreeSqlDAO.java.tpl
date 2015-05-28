@@ -4,7 +4,6 @@ package ${host.getPackageName()};
 import ${field};
 #end
 
-import com.ctrip.platform.dal.ext.persistence.DalDefaultJpaMapper;
 import com.ctrip.platform.dal.dao.helper.*;
 
 public class ${host.getClassName()}Dao {
@@ -20,14 +19,14 @@ public class ${host.getClassName()}Dao {
 
 #foreach( $method in ${host.getMethods()} )
 #if(!$method.isEmptyFields() && !$method.isSampleType())
-	private DalRowMapper<?> ${method.getVariableName()}RowMapper = null;
+	private DalRowMapper<${method.getPojoClassName()}> ${method.getVariableName()}RowMapper = null;
 #end
 
 #end
 	public ${host.getClassName()}Dao() throws SQLException {
 #foreach( $method in ${host.getMethods()} )
 #if(!$method.isEmptyFields() && !$method.isSampleType())
-		this.${method.getVariableName()}RowMapper = DalDefaultJpaMapper.create(${method.getPojoClassName()}.class, DATA_BASE);
+		this.${method.getVariableName()}RowMapper = DalDefaultJpaMapper.create(${method.getPojoClassName()}.class);
 #end
 #end	
 #if($host.hasQuery())

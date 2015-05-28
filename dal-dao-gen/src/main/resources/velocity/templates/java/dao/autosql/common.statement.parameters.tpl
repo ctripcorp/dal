@@ -3,52 +3,52 @@
 #set($first = "")
 #foreach($p in $method.getParameters())
 #if(${p.getConditionType()} == "Equal" && ${p.isNullable()} )
-		builder.$!{first}equalNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}equalNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end	
 #if(${p.getConditionType()} == "Equal" && !${p.isNullable()} )
-		builder.$!{first}equal("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}equal("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "NotEqual" && ${p.isNullable()} ) 
-		builder.$!{first}notEqualNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}notEqualNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "NotEqual" && !${p.isNullable()} ) 
-		builder.$!{first}notEqual("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}notEqual("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "Great" && ${p.isNullable()} )
-		builder.$!{first}greaterThanNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}greaterThanNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "Great" && !${p.isNullable()} )
-		builder.$!{first}greaterThan("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}greaterThan("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "lessThan" && ${p.isNullable()} ) 
-		builder.$!{first}lessThanNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}lessThanNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "lessThan" && !${p.isNullable()} ) 
-		builder.$!{first}lessThan("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}lessThan("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "GreatAndEqual" && ${p.isNullable()} ) 
-		builder.$!{first}greaterThanEqualsNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}greaterThanEqualsNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "GreatAndEqual" && !${p.isNullable()} ) 
-		builder.$!{first}greaterThanEquals("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}greaterThanEquals("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "LessAndEqual" && ${p.isNullable()} ) 
-		builder.$!{first}lessThanEqualsNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}lessThanEqualsNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "LessAndEqual" && !${p.isNullable()} ) 
-		builder.$!{first}lessThanEquals("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}lessThanEquals("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "Like" && ${p.isNullable()} ) 
-		builder.$!{first}likeNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}likeNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "Like" && !${p.isNullable()} ) 
-		builder.$!{first}like("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}like("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "In" && ${p.isNullable()} ) 
-		builder.$!{first}inNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}inNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "In" && !${p.isNullable()} ) 
-		builder.$!{first}in("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
+		builder.$!{first}in("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end
 #if(${p.getConditionType()} == "IsNull") 
 		builder.$!{first}isNull("${p.getName()}");
@@ -60,11 +60,11 @@
 #set($success = $bwVals.add(${p.getAlias()}))
 #end
 #if(${p.getConditionType()} == "Between" && ${p.isNullable()} && $bwVals.size()==2)
-		builder.$!{first}betweenNullable( "${p.getName()}", $bwVals.get(0), $bwVals.get(1), ${p.getJavaTypeDisplay()});
+		builder.$!{first}betweenNullable( "${p.getName()}", $bwVals.get(0), $bwVals.get(1), ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #set($bwVals = [])		
 #end
 #if(${p.getConditionType()} == "Between" && !${p.isNullable()} && $bwVals.size()==2)
-		builder.$!{first}between( "${p.getName()}", $bwVals.get(0), $bwVals.get(1), ${p.getJavaTypeDisplay()});
+		builder.$!{first}between( "${p.getName()}", $bwVals.get(0), $bwVals.get(1), ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #set($bwVals = [])		
 #end
 #if(${p.getConditionType()} == "Between" )

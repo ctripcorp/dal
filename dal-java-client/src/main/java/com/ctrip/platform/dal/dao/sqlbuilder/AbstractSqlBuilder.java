@@ -40,11 +40,17 @@ public abstract class AbstractSqlBuilder {
 	public StatementParameters buildParameters(){
 		parameters = new StatementParameters();
 		index = 1;
-		for(FieldEntry entry : selectOrUpdataFieldEntrys){
-			parameters.set(index++, entry.getFieldName(), entry.getSqlType(), entry.getParamValue());
+		for(FieldEntry entry : selectOrUpdataFieldEntrys) {
+			if (entry.isSensitive())
+				parameters.setSensitive(index++, entry.getFieldName(), entry.getSqlType(), entry.getParamValue());
+			else
+				parameters.set(index++, entry.getFieldName(), entry.getSqlType(), entry.getParamValue());
 		}
 		for(FieldEntry entry : whereFieldEntrys){
-			parameters.set(index++, entry.getFieldName(), entry.getSqlType(), entry.getParamValue());
+			if (entry.isSensitive())
+				parameters.setSensitive(index++, entry.getFieldName(), entry.getSqlType(), entry.getParamValue());
+			else
+				parameters.set(index++, entry.getFieldName(), entry.getSqlType(), entry.getParamValue());
 		}
 		return this.parameters;
 	}
@@ -109,6 +115,8 @@ public abstract class AbstractSqlBuilder {
 		return this;
 	}
 	
+	private static final boolean DEFAULT_SENSITIVE = false;
+	
 	/**
 	 *  等于操作，且字段值不能为NULL，否则会抛出SQLException
 	 * @param field 字段
@@ -117,7 +125,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder equal(String field, Object paramValue, int sqlType) throws SQLException {
-		return addParam(field, "=", paramValue, sqlType);
+		return equal(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder equal(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
+		return addParam(field, "=", paramValue, sqlType, sensitive);
 	}
 	
 	/**
@@ -128,7 +140,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder equalNullable(String field, Object paramValue, int sqlType) {
-		return addParamNullable(field, "=", paramValue, sqlType);
+		return equalNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder equalNullable(String field, Object paramValue, int sqlType, boolean sensitive) {
+		return addParamNullable(field, "=", paramValue, sqlType, sensitive);
 	}
 
 	/**
@@ -139,7 +155,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder notEqual(String field, Object paramValue, int sqlType) throws SQLException {
-		return addParam(field, "!=", paramValue, sqlType);
+		return notEqual(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder notEqual(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
+		return addParam(field, "!=", paramValue, sqlType, sensitive);
 	}
 	
 	/**
@@ -150,7 +170,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder notEqualNullable(String field, Object paramValue, int sqlType) {
-		return addParamNullable(field, "!=", paramValue, sqlType);
+		return notEqualNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder notEqualNullable(String field, Object paramValue, int sqlType, boolean sensitive) {
+		return addParamNullable(field, "!=", paramValue, sqlType, sensitive);
 	}
 
 	/**
@@ -161,7 +185,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder greaterThan(String field, Object paramValue, int sqlType) throws SQLException {
-		return addParam(field, ">", paramValue, sqlType);
+		return greaterThan(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder greaterThan(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
+		return addParam(field, ">", paramValue, sqlType, sensitive);
 	}
 	
 	/**
@@ -172,7 +200,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder greaterThanNullable(String field, Object paramValue, int sqlType) {
-		return addParamNullable(field, ">", paramValue, sqlType);
+		return greaterThanNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder greaterThanNullable(String field, Object paramValue, int sqlType, boolean sensitive) {
+		return addParamNullable(field, ">", paramValue, sqlType, sensitive);
 	}
 
 	/**
@@ -183,7 +215,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder greaterThanEquals(String field, Object paramValue, int sqlType) throws SQLException {
-		return addParam(field, ">=", paramValue, sqlType);
+		return greaterThanEquals(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder greaterThanEquals(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
+		return addParam(field, ">=", paramValue, sqlType, sensitive);
 	}
 	
 	/**
@@ -194,7 +230,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder greaterThanEqualsNullable(String field, Object paramValue, int sqlType) {
-		return addParamNullable(field, ">=", paramValue, sqlType);
+		return greaterThanEqualsNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder greaterThanEqualsNullable(String field, Object paramValue, int sqlType, boolean sensitive) {
+		return addParamNullable(field, ">=", paramValue, sqlType, sensitive);
 	}
 
 	/**
@@ -205,7 +245,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder lessThan(String field, Object paramValue, int sqlType) throws SQLException {
-		return addParam(field, "<", paramValue, sqlType);
+		return lessThan(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder lessThan(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
+		return addParam(field, "<", paramValue, sqlType, sensitive);
 	}
 	
 	/**
@@ -216,7 +260,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder lessThanNullable(String field, Object paramValue, int sqlType) {
-		return addParamNullable(field, "<", paramValue, sqlType);
+		return lessThanNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder lessThanNullable(String field, Object paramValue, int sqlType, boolean sensitive) {
+		return addParamNullable(field, "<", paramValue, sqlType, sensitive);
 	}
 
 	/**
@@ -227,7 +275,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder lessThanEquals(String field, Object paramValue, int sqlType) throws SQLException {
-		return addParam(field, "<=", paramValue, sqlType);
+		return lessThanEquals(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder lessThanEquals(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
+		return addParam(field, "<=", paramValue, sqlType, sensitive);
 	}
 	
 	/**
@@ -238,7 +290,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder lessThanEqualsNullable(String field, Object paramValue, int sqlType) {
-		return addParamNullable(field, "<=", paramValue, sqlType);
+		return lessThanEqualsNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder lessThanEqualsNullable(String field, Object paramValue, int sqlType, boolean sensitive) {
+		return addParamNullable(field, "<=", paramValue, sqlType, sensitive);
 	}
 
 	/**
@@ -250,15 +306,19 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder between(String field, Object paramValue1, Object paramValue2, int sqlType) throws SQLException {
+		return between(field, paramValue1, paramValue2, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder between(String field, Object paramValue1, Object paramValue2, int sqlType, boolean sensitive) throws SQLException {
 		if (paramValue1 == null || paramValue2 == null) {
 			and = or = false;
 			throw new SQLException(field + " is not support null value.");
 		} else {
 			appendConcate();
 			whereExp.append(" ").append(field).append(" BETWEEN ? AND ?");
-			FieldEntry entry1 = new FieldEntry(field, paramValue1, sqlType);
+			FieldEntry entry1 = new FieldEntry(field, paramValue1, sqlType, sensitive);
 			whereFieldEntrys.add(entry1);
-			FieldEntry entry2 = new FieldEntry(field, paramValue2, sqlType);
+			FieldEntry entry2 = new FieldEntry(field, paramValue2, sqlType, sensitive);
 			whereFieldEntrys.add(entry2);
 		}
 		return this;
@@ -272,16 +332,20 @@ public abstract class AbstractSqlBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public AbstractSqlBuilder betweenNullable( String field, Object paramValue1, Object paramValue2, int sqlType) {
+	public AbstractSqlBuilder betweenNullable(String field, Object paramValue1, Object paramValue2, int sqlType) {
+		return betweenNullable(field, paramValue1, paramValue2, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder betweenNullable(String field, Object paramValue1, Object paramValue2, int sqlType, boolean sensitive) {
 		if(paramValue1 == null || paramValue2 == null){
 			//如果paramValue==null，则field不会作为条件加入到最终的SQL中。
 			and = or = false;
 		}else{
 			appendConcate();
 			whereExp.append(" ").append(field).append(" BETWEEN ? AND ?");
-			FieldEntry entry1 = new FieldEntry(field, paramValue1, sqlType);
+			FieldEntry entry1 = new FieldEntry(field, paramValue1, sqlType, sensitive);
 			whereFieldEntrys.add(entry1);
-			FieldEntry entry2 = new FieldEntry(field, paramValue2, sqlType);
+			FieldEntry entry2 = new FieldEntry(field, paramValue2, sqlType, sensitive);
 			whereFieldEntrys.add(entry2);
 		}
 		return this;
@@ -295,7 +359,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder like(String field, Object paramValue, int sqlType) throws SQLException {
-		return addParam(field, "LIKE", paramValue, sqlType);
+		return like(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder like(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
+		return addParam(field, "LIKE", paramValue, sqlType, sensitive);
 	}
 	
 	/**
@@ -306,7 +374,11 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder likeNullable(String field, Object paramValue, int sqlType) {
-		return addParamNullable(field, "LIKE", paramValue, sqlType);
+		return likeNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder likeNullable(String field, Object paramValue, int sqlType, boolean sensitive) {
+		return addParamNullable(field, "LIKE", paramValue, sqlType, sensitive);
 	}
 
 	/**
@@ -317,6 +389,10 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder in(String field, List<?> paramValues, int sqlType) throws SQLException {
+		return in(field, paramValues, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder in(String field, List<?> paramValues, int sqlType, boolean sensitive) throws SQLException {
 		if(null == paramValues){
 			and = or = false;
 			throw new SQLException(field + " must have more than one value.");
@@ -331,7 +407,7 @@ public abstract class AbstractSqlBuilder {
 				throw new SQLException(field + " is not support null value.");
 			}
 		}
-		return addInParam(field, paramValues, sqlType);
+		return addInParam(field, paramValues, sqlType, sensitive);
 	}
 	
 	/**
@@ -343,6 +419,10 @@ public abstract class AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public AbstractSqlBuilder inNullable(String field, List<?> paramValues, int sqlType) throws SQLException {
+		return inNullable(field, paramValues, sqlType, DEFAULT_SENSITIVE);
+	}
+	
+	public AbstractSqlBuilder inNullable(String field, List<?> paramValues, int sqlType, boolean sensitive) throws SQLException {
 		if(null == paramValues){
 			and = or = false;
 			return this;
@@ -361,7 +441,7 @@ public abstract class AbstractSqlBuilder {
 			and = or = false;
 			return this;
 		}
-		return addInParam(field, paramValues, sqlType);
+		return addInParam(field, paramValues, sqlType, sensitive);
 	}
 	
 	/**
@@ -386,7 +466,7 @@ public abstract class AbstractSqlBuilder {
 		return this;
 	}
 	
-	private AbstractSqlBuilder addInParam(String field, List<?> paramValues, int sqlType){
+	private AbstractSqlBuilder addInParam(String field, List<?> paramValues, int sqlType, boolean sensitive){
 		StringBuilder temp = new StringBuilder();
 		temp.append(" in ( ");
 		for(int i=0,size=paramValues.size();i<size;i++){
@@ -394,7 +474,7 @@ public abstract class AbstractSqlBuilder {
 			if(i!=size-1){
 				temp.append(", ");
 			}
-			FieldEntry entry = new FieldEntry(field, paramValues.get(i), sqlType);
+			FieldEntry entry = new FieldEntry(field, paramValues.get(i), sqlType, sensitive);
 			whereFieldEntrys.add(entry);
 		}
 		temp.append(" )");
@@ -403,11 +483,11 @@ public abstract class AbstractSqlBuilder {
 		return this;
 	}
 	
-	private AbstractSqlBuilder addParam(String field, String condition, Object paramValue, int sqlType) throws SQLException{
+	private AbstractSqlBuilder addParam(String field, String condition, Object paramValue, int sqlType, boolean sensitive) throws SQLException{
 		if(paramValue != null){
 			appendConcate();
 			whereExp.append(" ").append(field).append(" ").append(condition).append(" ?");
-			FieldEntry entry = new FieldEntry(field, paramValue, sqlType);
+			FieldEntry entry = new FieldEntry(field, paramValue, sqlType, sensitive);
 			whereFieldEntrys.add(entry);
 		}else{
 			and = or = false;
@@ -416,11 +496,11 @@ public abstract class AbstractSqlBuilder {
 		return this;
 	}
 	
-	private AbstractSqlBuilder addParamNullable(String field, String condition, Object paramValue, int sqlType){
+	private AbstractSqlBuilder addParamNullable(String field, String condition, Object paramValue, int sqlType, boolean sensitive){
 		if(paramValue != null){
 			appendConcate();
 			whereExp.append(" ").append(field).append(" ").append(condition).append(" ?");
-			FieldEntry entry = new FieldEntry(field, paramValue, sqlType);
+			FieldEntry entry = new FieldEntry(field, paramValue, sqlType, sensitive);
 			whereFieldEntrys.add(entry);
 		}else{
 			//如果paramValue==null，则field不会作为条件加入到最终的SQL中。

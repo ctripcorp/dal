@@ -14,6 +14,35 @@
     var variableHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">'+
         ' &nbsp;&nbsp;允许NULL值：<input type="checkbox" %s >';
 
+    var variableHtml_ForJAVA = '<div class="row-fluid"><input type="text" class="span3" value="%s">'+
+        ' &nbsp;&nbsp;允许NULL值：<input type="checkbox" %s >&nbsp;&nbsp;参数敏感：<input type="checkbox" %s >';
+
+    var variable_typesHtml_ForJAVA = '<select %s class="span5">'
+        + "<option value='_please_select'>--参数类型--</option>"
+        + "<option value='-7'>Bit----Boolean</option>"
+        + "<option value='-6'>TinyInt----Byte</option>"
+        + "<option value='5'>SmallInt----Short</option>"
+        + "<option value='4'>Integer----int</option>"
+        + "<option value='-5'>BigInt----long</option>"
+        + "<option value='7'>Real----Float</option>"
+        + "<option value='8'>Double</option>"
+        + "<option value='3'>Decimal</option>"
+        + "<option value='2'>Numeric</option>"
+        + "<option value='1'>Char----String</option>"
+        + "<option value='12'>Varchar----String</option>"
+        + "<option value='-1'>LongVarchar----String</option>"
+        + "<option value='-15'>Nchar----String</option>"
+        + "<option value='-9'>NVarchar----String</option>"
+        + "<option value='-16'>LongNVarchar----String</option>"
+        + "<option value='91'>Date</option>"
+        + "<option value='92'>Time</option>"
+        + "<option value='93'>Timestamp</option>"
+        + "<option value='-2'>binary----byte[]</option>"
+        + "<option value='-3'>VarBinary----byte[]</option>"
+        + "<option value='-4'>LongVarBinary----byte[]</option>"
+        + "<option value='10001'>uniqueidentifier----Guid</option>"
+        + "</select><div>&nbsp;&nbsp;&nbsp;&nbsp;参数敏感：<input type='checkbox' checked='checked'></div></div><br>";
+
     var variable_typesHtml = '<select %s class="span5">'
         + "<option value='_please_select'>--参数类型--</option>"
         + "<option value='-7'>Bit----Boolean</option>"
@@ -675,19 +704,19 @@
             return;
         }
         $("#error_msg").empty();
-        if(crud_option=="insert"){
-            $("#param_list_auto_div").hide();
-            $("#param_list_auto").hide();
-        }
 
         var paramHtml = "";
         if ($("#sql_style").val() == "csharp") {
             paramHtml = step2_2_1_csharp(record,current,crud_option);
         }else{
-            paramHtml = step2_2_1_java(record,current,crud_option);
+            if(crud_option=="insert"){
+                paramHtml = step2_2_1_java_insert(record,current,crud_option);
+            } else {
+                paramHtml = step2_2_1_java(record,current,crud_option);
+            }
         }
 
-        if(paramHtml.length==0 || crud_option=="insert"){
+        if(paramHtml.length==0){
             $("#param_list_auto_div").hide();
             $("#param_list_auto").empty();
         }else{
@@ -730,8 +759,9 @@
 
         var conVal = new Array();
         var conNullable = new Array();
+        var sensitives = new Array();
         if ($("#page1").attr('is_update') == "1") {
-            // 模式： Age,6,aa,bb;Name,1,param2;
+            // 模式： Age,6,aa,bb,nullable,sensitive;Name,1,param2,nullable,sensitive;
             var conditions = record['condition'].split(";");
             for(var j=0;j<conditions.length;j++){
                 var con = conditions[j];
@@ -742,11 +772,14 @@
                     conVal.push(keyValue[3]);
                     conNullable.push(keyValue[4]);
                     conNullable.push(keyValue[4]);
+                    sensitives.push(keyValue[5]);
+                    sensitives.push(keyValue[5]);
                 }else if(keyValue[1]=="9" || keyValue[1]=="10"){
                     continue;// is null、is not null don't need param
                 }else{
                     conVal.push(keyValue[2]);
                     conNullable.push(keyValue[3]);
+                    sensitives.push(keyValue[4]);
                 }
             }
         }
@@ -761,10 +794,48 @@
             var nullable = conNullable.shift();
             nullable = nullable!=undefined?nullable:'false';
             nullable = nullable!='false'?'checked="checked"':"";
+            var sensitive = sensitives.shift();
+            sensitive = sensitive!=undefined?sensitive:'false';
+            sensitive = sensitive!='false'?'checked="checked"':"";
             if(conName!=null && conName!=""){
-                paramHtml = paramHtml + sprintf(variableHtml, conName, nullable)+"</div><br/>";
+                paramHtml = paramHtml + sprintf(variableHtml_ForJAVA, conName, nullable, sensitive)+"</div><br/>";
             }else{
-                paramHtml = paramHtml + sprintf(variableHtml, sprintf("param%s", i), nullable)+"</div><br/>";
+                paramHtml = paramHtml + sprintf(variableHtml_ForJAVA, sprintf("param%s", i), nullable, sensitive)+"</div><br/>";
+            }
+        }
+        return paramHtml;
+    };
+
+    var variableHtml_ForJAVA_Insert = '<div class="row-fluid"><input type="text" class="span3" value="%s" disabled>'+
+        ' <input type="checkbox" style="display:none">&nbsp;&nbsp;参数敏感：<input type="checkbox" %s ></div><br/>';
+
+    var step2_2_1_java_insert = function(record,current,crud_option) {
+        var paramHtml = "";
+        var conVal = new Array();
+        var conNullable = new Array();
+        var sensitives = new Array();
+        if ($("#page1").attr('is_update') == "1") {
+            // 模式： Age,6,aa,nullable,sensitive;Name,1,param2,nullable,sensitive;
+            var conditions = record['condition'].split(";");
+            for(var j=0;j<conditions.length;j++){
+                var con = conditions[j];
+                var keyValue = con.split(",");
+                conVal.push(keyValue[2]);
+                conNullable.push(keyValue[3]);
+                sensitives.push(keyValue[4]);
+            }
+        }
+
+        var selectedInsertFields = $('#fields').multipleSelect('getSelects');
+        for (var i=0; i < selectedInsertFields.length; i++) {
+            var conName = conVal.shift();
+            var sensitive = sensitives.shift();
+            sensitive = sensitive!=undefined?sensitive:'false';
+            sensitive = sensitive!='false'?'checked="checked"':"";
+            if(conName!=null && conName!="" && conName!="undefined"){
+                paramHtml = paramHtml + sprintf(variableHtml_ForJAVA_Insert, conName, sensitive);
+            }else{
+                paramHtml = paramHtml + sprintf(variableHtml_ForJAVA_Insert, selectedInsertFields[i], sensitive);
             }
         }
         return paramHtml;
@@ -1018,6 +1089,7 @@
         return true;
     };
 
+
     var step2_3_2 = function(record,current){
         if(!existKeyword_Nolock()){
             return;
@@ -1050,33 +1122,47 @@
         while ((result = regexIndex.exec(sqlContent))) {
             i++;
             var temp = conVal.shift();
-            if(temp!=null && temp!=""){
-                htmls = htmls
-                    + sprintf(variableHtmlOrigin, temp)
-                    + sprintf(variable_typesHtml,
-                    sprintf("id='db_type_%s'", sprintf("param%s", i)));
-            }else{
-                htmls = htmls
-                    + sprintf(variableHtmlOrigin, sprintf("param%s", i))
-                    + sprintf(variable_typesHtml,
-                    sprintf("id='db_type_%s'", sprintf("param%s", i)));
+            if ($("#sql_style").val() == "csharp") {
+                if(temp!=null && temp!=""){
+                    htmls = htmls + sprintf(variableHtmlOrigin, temp) +
+                        sprintf(variable_typesHtml, sprintf("id='db_type_%s'", sprintf("param%s", i)));
+                }else{
+                    htmls = htmls + sprintf(variableHtmlOrigin, sprintf("param%s", i)) +
+                        sprintf(variable_typesHtml, sprintf("id='db_type_%s'", sprintf("param%s", i)));
+                }
+            } else {
+                if(temp!=null && temp!=""){
+                    htmls = htmls + sprintf(variableHtmlOrigin, temp) +
+                        sprintf(variable_typesHtml_ForJAVA, sprintf("id='db_type_%s'", sprintf("param%s", i)));
+                }else{
+                    htmls = htmls + sprintf(variableHtmlOrigin, sprintf("param%s", i)) +
+                        sprintf(variable_typesHtml_ForJAVA, sprintf("id='db_type_%s'", sprintf("param%s", i)));
+                }
             }
+
         }
         if (htmls.length == 0) {
             while ((result = regexNames.exec(sqlContent))) {
                 i++;
                 var temp = conVal.shift();
-                if(temp!=null && temp!=""){
-                    htmls = htmls
-                        + sprintf(variableHtmlOrigin, temp)
-                        + sprintf(variable_typesHtml,
-                        sprintf("id='db_type_%s'", sprintf("param%s", i)));
-                }else{
-                    var realName = result[1];
-                    htmls = htmls
-                        + sprintf(variableHtmlOrigin, realName)
-                        + sprintf(variable_typesHtml,
-                        sprintf("id='db_type_%s'", realName));
+                if ($("#sql_style").val() == "csharp") {
+                    if(temp!=null && temp!=""){
+                        htmls = htmls + sprintf(variableHtmlOrigin, temp)
+                            + sprintf(variable_typesHtml, sprintf("id='db_type_%s'", sprintf("param%s", i)));
+                    }else{
+                        var realName = result[1];
+                        htmls = htmls + sprintf(variableHtmlOrigin, realName)
+                            + sprintf(variable_typesHtml, sprintf("id='db_type_%s'", realName));
+                    }
+                } else {
+                    if(temp!=null && temp!=""){
+                        htmls = htmls + sprintf(variableHtmlOrigin, temp)
+                            + sprintf(variable_typesHtml_ForJAVA, sprintf("id='db_type_%s'", sprintf("param%s", i)));
+                    }else{
+                        var realName = result[1];
+                        htmls = htmls + sprintf(variableHtmlOrigin, realName)
+                            + sprintf(variable_typesHtml_ForJAVA, sprintf("id='db_type_%s'", realName));
+                    }
                 }
             }
         }
@@ -1092,10 +1178,17 @@
         if ($("#page1").attr('is_update') == "1") {
             splitedParams = record.parameters.split(";");
             $.each(splitedParams, function (index, value) {
-                if(index<=i){
+                if(index <= i){
                     var resultParams = value.split(",");
-                    var paramIndex = index+1;
+                    var paramIndex = index + 1;
                     $("#db_type_param"+paramIndex).val(resultParams[1]);
+                    if ($("#sql_style").val() != "csharp") {
+                        var chk = $("#db_type_param"+paramIndex).siblings('div').children(":checkbox");
+                        var sensitive = resultParams[2];
+                        sensitive = sensitive!=undefined ? sensitive:'false';
+                        if (sensitive == 'false')
+                            chk.prop("checked", false);
+                    }
                 }
             });
         }

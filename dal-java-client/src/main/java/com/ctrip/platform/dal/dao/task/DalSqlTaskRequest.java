@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.task;
 
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.detectDistributedTransaction;
+
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +16,7 @@ import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -25,6 +28,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	private DalHints hints;
 	private SqlTask<T> task;
 	private ResultMerger<T> merger;
+	private Set<String> shards;
 	
 	public DalSqlTaskRequest(String logicDbName, String sql, StatementParameters parameters, DalHints hints, SqlTask<T> task, ResultMerger<T> merger) {
 		logger = DalClientFactory.getDalLogger();
@@ -34,17 +38,20 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		this.hints = hints;
 		this.task = task;
 		this.merger = merger;
+		this.shards = getShards();
 	}
 	
 	@Override
 	public void validate() throws SQLException {
 		if(sql == null)
 			throw new DalException(ErrorCode.ValidateSql);
+		
+		detectDistributedTransaction(shards);
 	}
 
 	@Override
 	public boolean isCrossShard() {
-		return hints.is(DalHintEnum.allShards) || hints.is(DalHintEnum.shards);
+		return shards != null && shards.size() > 1;
 	}
 
 	@Override
@@ -56,7 +63,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	@Override
 	public Map<String, Callable<T>> createTasks() throws SQLException {
 		Map<String, Callable<T>> tasks = new HashMap<>();
-		for(String shard: getShards())
+		for(String shard: shards)
 			tasks.put(shard, createTask());
 
 		return tasks;

@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.dao.task;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,11 +21,12 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 	}
 
 	@Override
-	public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
 
-		for (Map<String, ?> pojo : daoPojos) {
+		for (Integer index :daoPojos.keySet()) {
+			Map<String, ?> pojo = daoPojos.get(index);
 			StatementParameters parameters = new StatementParameters();
 
 			addParameters(parameters, pojo, updateColumnNames);
@@ -38,7 +38,6 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		String batchUpdateSql = buildBatchUpdateSql(getTableName(hints));
 		
 		int[] result = client.batchUpdate(batchUpdateSql, parametersList, hints);
-		hints.addDetailResults(result);
 		return result;
 	}
 	

@@ -10,7 +10,6 @@ import java.util.concurrent.Future;
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.task.DalAsyncCallback;
 import com.ctrip.platform.dal.exceptions.DalException;
-import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 /**
  * Additional parameters used to indicate how DAL behaves for each of the operation.
@@ -292,21 +291,6 @@ public class DalHints {
 
 	public DalHints setIsolationLevel(int isolationLevel) {
 		set(DalHintEnum.isolationLevel, isolationLevel);
-		return this;
-	}
-	
-	public <T> DalHints setDetailResults(DalDetailResults<T> detailResults) {
-		set(DalHintEnum.detailResults, detailResults);
-		return this;
-	}
-
-	public DalDetailResults getDetailResults() {
-		return (DalDetailResults)get(DalHintEnum.detailResults);
-	}	
-
-	public <T> DalHints addDetailResults(T result) {
-		DalDetailResults<T> detailResults = (DalDetailResults<T>)get(DalHintEnum.detailResults);
-		detailResults.addResult(getShardId(), getTableShardId(), result);
 		return this;
 	}
 }

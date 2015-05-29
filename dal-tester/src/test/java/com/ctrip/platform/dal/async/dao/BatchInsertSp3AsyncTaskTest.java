@@ -2,7 +2,7 @@ package com.ctrip.platform.dal.async.dao;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +16,6 @@ import org.junit.Test;
 import com.ctrip.platform.dal.dao.BatchInsertSp3Task;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalDetailResults;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -78,7 +77,6 @@ public class BatchInsertSp3AsyncTaskTest {
 			DalHints hints = new DalHints();
 			DalAsyncCallback callback = new DalAsyncCallback();
 			hints.asyncExecution().setDalAsyncCallback(callback);
-			hints.setDetailResults(new DalDetailResults<int[]>());
 			test.execute(hints.inShard(0), getPojosFields(p, parser));
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -86,13 +84,14 @@ public class BatchInsertSp3AsyncTaskTest {
 		}
 	}
 	
-	private <T> List<Map<String, ?>> getPojosFields(List<T> daoPojos, DalParser<T> parser) {
-		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
+	private <T> Map<Integer, Map<String, ?>> getPojosFields(List<T> daoPojos, DalParser<T> parser) {
+		Map<Integer, Map<String, ?>> pojoFields = new HashMap<>();
 		if (null == daoPojos || daoPojos.size() < 1)
 			return pojoFields;
 		
+		int i = 0;
 		for (T pojo: daoPojos){
-			pojoFields.add(parser.getFields(pojo));
+			pojoFields.put(i++, parser.getFields(pojo));
 		}
 		
 		return pojoFields;

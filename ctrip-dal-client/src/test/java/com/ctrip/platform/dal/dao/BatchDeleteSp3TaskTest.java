@@ -1,10 +1,8 @@
 package com.ctrip.platform.dal.dao;
 
-import static org.junit.Assert.fail;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -80,7 +78,6 @@ public class BatchDeleteSp3TaskTest {
 		
 		try {
 			DalHints hints = new DalHints();
-			hints.setDetailResults(new DalDetailResults<int[]>());
 			test.execute(hints.inShard(0), getPojosFields(p, parser));
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -88,16 +85,16 @@ public class BatchDeleteSp3TaskTest {
 		}
 	}
 	
-	private <T> List<Map<String, ?>> getPojosFields(List<T> daoPojos, DalParser<T> parser) {
-		List<Map<String, ?>> pojoFields = new LinkedList<Map<String, ?>>();
+	private <T> Map<Integer, Map<String, ?>> getPojosFields(List<T> daoPojos, DalParser<T> parser) {
+		Map<Integer, Map<String, ?>> pojoFields = new HashMap<>();
 		if (null == daoPojos || daoPojos.size() < 1)
 			return pojoFields;
 		
+		int i = 0;
 		for (T pojo: daoPojos){
-			pojoFields.add(parser.getFields(pojo));
+			pojoFields.put(i++, parser.getFields(pojo));
 		}
 		
 		return pojoFields;
 	}
-
 }

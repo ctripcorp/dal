@@ -12,19 +12,19 @@ public class BatchDeleteTask<T> extends AbstractIntArrayBulkTask<T> {
 	private static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
 
 	@Override
-	public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
-		int i = 0;
 		List<String> pkNames = Arrays.asList(parser.getPrimaryKeyNames());
-		for (Map<String, ?> pojo : daoPojos) {
+
+		int i = 0;
+		for (Integer index :daoPojos.keySet()) {
 			StatementParameters parameters = new StatementParameters();
-			addParameters(1, parameters, pojo, pkNames);
+			addParameters(1, parameters, daoPojos.get(index), pkNames);
 			parametersList[i++] = parameters;
 		}
 		
 		String deleteSql = buildDeleteSql(getTableName(hints));
 		int[] result = client.batchUpdate(deleteSql, parametersList, hints);
-		hints.addDetailResults(result);
 		return result;
 	}
 	

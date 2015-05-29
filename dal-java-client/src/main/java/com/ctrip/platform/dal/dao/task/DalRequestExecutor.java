@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.dao.task;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -11,43 +10,39 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.QueryCallback;
 import com.ctrip.platform.dal.dao.ResultMerger;
-import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
-import com.ctrip.platform.dal.dao.configure.DatabaseSet;
-import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 /**
- * Support execute given sql and parameter in single, all or multiple shards
+ * Common reuqest executor that support execute request that is of pojo or 
+ * sql in single, all or multiple shards
  * 
  * @author jhhe
- *
  */
 public class DalRequestExecutor {
-	private String logicDbName;
-	
-	public DalRequestExecutor(String logicDbName) {
-		this.logicDbName = logicDbName;
-	}
-	
 	private static ExecutorService service = null;
 	
 	static {
 		service = new ThreadPoolExecutor(5, 50, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 	}
 
+	/**
+	 * TODO make the shutdown register
+	 */
 	public static void shutdownAsyncTaskExecutor() {
 		if (service != null)
 			service.shutdown();
 	}
 
+	public <T> T execute(final DalHints hints, final DalRequest<T> request) throws SQLException {
+		return execute(hints, request, false);
+	}
+	
 	public <T> T execute(final DalHints hints, final DalRequest<T> request, final boolean nullable) throws SQLException {
 		// TODO change queryCallback to ResultCallback
 		// TODO add performance tracking DalWatcher.begin();
@@ -72,7 +67,10 @@ public class DalRequestExecutor {
 		
 		T result;
 
-		if(DalShardingHelper.isShardingEnabled(logicDbName) && request.isCrossShard())
+		/**
+		 * TODO make sure detect distributed transaction 
+		 */
+		if(request.isCrossShard())
 			result = crossShardExecute(hints, request);
 		else
 			result = nonCrossShardExecute(hints, request);

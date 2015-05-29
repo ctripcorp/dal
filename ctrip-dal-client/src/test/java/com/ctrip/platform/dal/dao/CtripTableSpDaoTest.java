@@ -65,7 +65,6 @@ public class CtripTableSpDaoTest {
 	public void testInsert() throws Exception {
 		List<People> p = new ArrayList<>();
 		
-		int oldCount = getCount(0);
 		for(int i = 0; i < 3; i++) {
 			People p1 = new People();
 		 	p1.setPeopleID((long)i);
@@ -77,7 +76,6 @@ public class CtripTableSpDaoTest {
 		}
 		
 		DalHints hints = new DalHints();
-		hints.setDetailResults(new DalDetailResults<int[]>());
 		dao.insert(hints.inShard(0), p);
 		assertEquals(6, getCount(0));
 	}
@@ -97,7 +95,6 @@ public class CtripTableSpDaoTest {
 		}
 		
 		DalHints hints = new DalHints();
-		hints.setDetailResults(new DalDetailResults<int[]>());
 		try {
 			dao.combinedInsert(hints.inShard(0), null, p);
 			fail();
@@ -121,7 +118,6 @@ public class CtripTableSpDaoTest {
 		}
 		
 		DalHints hints = new DalHints();
-		hints.setDetailResults(new DalDetailResults<int[]>());
 		dao.batchInsert(hints.inShard(0), p);
 		assertEquals(6, getCount(0));
 	}
@@ -141,7 +137,6 @@ public class CtripTableSpDaoTest {
 		}
 		
 		DalHints hints = new DalHints();
-		hints.setDetailResults(new DalDetailResults<int[]>());
 		dao.delete(hints.inShard(0), p);
 		assertEquals(0, getCount(0));
 	}
@@ -161,7 +156,6 @@ public class CtripTableSpDaoTest {
 		}
 		
 		DalHints hints = new DalHints();
-		hints.setDetailResults(new DalDetailResults<int[]>());
 		dao.batchDelete(hints.inShard(0), p);
 		assertEquals(0, getCount(0));
 	}
@@ -181,7 +175,6 @@ public class CtripTableSpDaoTest {
 		}
 		
 		DalHints hints = new DalHints();
-		hints.setDetailResults(new DalDetailResults<int[]>());
 		dao.update(hints.inShard(0), p);
 		
 		for(People p1: p)
@@ -203,7 +196,6 @@ public class CtripTableSpDaoTest {
 		}
 		
 		DalHints hints = new DalHints();
-		hints.setDetailResults(new DalDetailResults<int[]>());
 		dao.batchUpdate(hints.inShard(0), p);
 		
 		for(People p1: p)

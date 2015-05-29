@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.task;
 
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.detectDistributedTransaction;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,28 +15,31 @@ import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
+	private String logicDbName;
 	private DalHints hints;
 	private List<Map<String, ?>> daoPojos;
 	private SingleTask<T> task;
 
-	private DalSingleTaskRequest(DalHints hints, SingleTask<T> task) {
+	private DalSingleTaskRequest(String logicDbName, DalHints hints, SingleTask<T> task) {
+		this.logicDbName = logicDbName;
 		this.task = task;
 		this.hints = hints;
 	}
 	
-	public DalSingleTaskRequest(DalHints hints, Map<String, ?> daoPojo, SingleTask<T> task) {
-		this(hints, task);
+	public DalSingleTaskRequest(String logicDbName, DalHints hints, T rawPojo, SingleTask<T> task) {
+		this(logicDbName, hints, task);
 
-		if(daoPojo == null) 
+		if(rawPojo == null) 
 			throw new NullPointerException("The given pojo is null.");
 
-		daoPojos = new ArrayList<>(1);
-		daoPojos.add(daoPojo);
+		List<T> rawPojos = new ArrayList<>(1);
+		rawPojos.add(rawPojo);
+		this.daoPojos = task.getPojosFields(rawPojos);
 	}
 
-	public DalSingleTaskRequest(DalHints hints, List<Map<String, ?>> daoPojos, SingleTask<T> task) {
-		this(hints, task);
-		this.daoPojos = daoPojos;
+	public DalSingleTaskRequest(String logicDbName, DalHints hints, List<T> rawPojos, SingleTask<T> task) {
+		this(logicDbName, hints, task);
+		this.daoPojos = task.getPojosFields(rawPojos);
 	}
 	
 	@Override
@@ -44,6 +49,8 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 
 		if(task == null)
 			throw new DalException(ErrorCode.ValidateTask);
+		
+		detectDistributedTransaction(logicDbName, hints, daoPojos);
 	}
 	
 	@Override

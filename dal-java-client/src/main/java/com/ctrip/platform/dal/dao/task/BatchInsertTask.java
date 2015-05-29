@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalHints;
@@ -11,19 +10,27 @@ public class BatchInsertTask<T> extends InsertTaskAdapter<T> implements BulkTask
 	private static final String TMPL_SQL_INSERT = "INSERT INTO %s (%s) VALUES(%s)";
 
 	@Override
-	public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+	public int[] getEmptyValue() {
+		return new int[0];
+	}	
+
+	@Override
+	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
-		for (Map<String, ?> fields : daoPojos) {
-			removeAutoIncrementPrimaryFields(fields);
+		
+		for (Integer index :daoPojos.keySet()) {
+			Map<String, ?> pojo = daoPojos.get(index);
+			
+			removeAutoIncrementPrimaryFields(pojo);
+			
 			StatementParameters parameters = new StatementParameters();
-			addParameters(parameters, fields);
+			addParameters(parameters, pojo);
 			parametersList[i++] = parameters;
 		}
 
 		String batchInsertSql = buildBatchInsertSql(getTableName(hints));
 		int[] result = client.batchUpdate(batchInsertSql, parametersList, hints);
-		hints.addDetailResults(result);
 		return result;
 	}
 
@@ -40,7 +47,7 @@ public class BatchInsertTask<T> extends InsertTaskAdapter<T> implements BulkTask
 	}
 	
 	@Override
-	public int[] merge(List<int[]> results) {
-		return mergeIntArray(results);
-	}	
+	public BulkTaskResultMerger<int[]> createMerger() {
+		return new ShardedIntArrayResultMerger();
+	}
 }

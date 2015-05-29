@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.helper;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -107,8 +108,8 @@ public class DalShardingHelper {
 	 * @return Grouped pojos
 	 * @throws SQLException In case locate shard id faild
 	 */
-	public static Map<String, List<Map<String, ?>>> shuffle(String logicDbName, String shardId, List<Map<String, ?>> daoPojos) throws SQLException {
-		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
+	public static Map<String, Map<Integer, Map<String, ?>>> shuffle(String logicDbName, String shardId, List<Map<String, ?>> daoPojos) throws SQLException {
+		Map<String, Map<Integer, Map<String, ?>>> shuffled = new HashMap<>();
 		
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		
@@ -116,7 +117,8 @@ public class DalShardingHelper {
 		DalShardingStrategy strategy = dbSet.getStrategy();
 		
 		DalHints tmpHints = new DalHints();
-		for(Map<String, ?> pojo:daoPojos) {
+		for (int i = 0; i < daoPojos.size(); i++) {
+			Map<String, ?> pojo = daoPojos.get(i);
 			
 			String tmpShardId = shardId == null ? 
 					strategy.locateDbShard(config, logicDbName, tmpHints.setFields(pojo)) :
@@ -124,13 +126,13 @@ public class DalShardingHelper {
 			
 			dbSet.validate(tmpShardId);
 
-			List<Map<String, ?>> pojosInShard = shuffled.get(tmpShardId);
+			Map<Integer, Map<String, ?>> pojosInShard = shuffled.get(tmpShardId);
 			if(pojosInShard == null) {
-				pojosInShard = new LinkedList<Map<String, ?>>();
+				pojosInShard = new LinkedHashMap<>();
 				shuffled.put(tmpShardId, pojosInShard);
 			}
 			
-			pojosInShard.add(pojo);
+			pojosInShard.put(i, pojo);
 		}
 		
 		detectDistributedTransaction(shuffled.keySet());
@@ -145,26 +147,28 @@ public class DalShardingHelper {
 	 * @return
 	 * @throws SQLException
 	 */
-	public static Map<String, List<Map<String, ?>>> shuffleByTable(String logicDbName, String tableShardId, List<Map<String, ?>> pojos) throws SQLException {
-		Map<String, List<Map<String, ?>>> shuffled = new HashMap<String, List<Map<String, ?>>>();
+	public static Map<String, Map<Integer, Map<String, ?>>> shuffleByTable(String logicDbName, String tableShardId, Map<Integer, Map<String, ?>> pojos) throws SQLException {
+		Map<String, Map<Integer, Map<String, ?>>> shuffled = new HashMap<>();
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
 		DalShardingStrategy strategy = dbSet.getStrategy();
 		
 		DalHints tmpHints = new DalHints();
-		for(Map<String, ?> fields: pojos) {
+		for (Integer index: pojos.keySet()) {
+			Map<String, ?> fields = pojos.get(index);
+
 			String shardId = tableShardId == null ?
 					strategy.locateTableShard(config, logicDbName, tmpHints.setFields(fields)) :
 					tableShardId;
 
-			List<Map<String, ?>> pojosInShard = shuffled.get(shardId);
+			Map<Integer, Map<String, ?>> pojosInShard = shuffled.get(shardId);
 			if(pojosInShard == null) {
-				pojosInShard = new LinkedList<Map<String, ?>>();
+				pojosInShard = new LinkedHashMap<>();
 				shuffled.put(shardId, pojosInShard);
 			}
 			
-			pojosInShard.add(fields);
+			pojosInShard.put(index, fields);
 		}
 		
 		return shuffled;
@@ -225,6 +229,9 @@ public class DalShardingHelper {
 	
 	public static void detectDistributedTransaction(Set<String> shardIds) throws SQLException {
 		if(!DalTransactionManager.isInTransaction())
+			return;
+		
+		if(shardIds == null)
 			return;
 		
 		// Not allowed for distributed transaction

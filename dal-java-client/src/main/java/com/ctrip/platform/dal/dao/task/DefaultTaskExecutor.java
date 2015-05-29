@@ -120,14 +120,15 @@ public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 	}
 	
 	private <K> K internalExecute(DalHints hints, List<T> daoPojos, BulkTask<K, T> task, K emptyValue) throws SQLException {
-		hints.setDetailResults(new DalDetailResults<K>());
-
-		if(isAlreadySharded(logicDbName, rawTableName, hints))
-			return task.execute(hints, getPojosFields(daoPojos));
-		else
-			return executeByDbShard(logicDbName, rawTableName, hints, getPojosFields(daoPojos), task);
+//		hints.setDetailResults(new DalDetailResults<K>());
+//
+//		if(isAlreadySharded(logicDbName, rawTableName, hints))
+//			return task.execute(hints, getPojosFields(daoPojos));
+//		else
+//			return executeByDbShard(logicDbName, rawTableName, hints, getPojosFields(daoPojos), task);
+		return null;
 	}
-	
+/*	
 	private <K> K executeByDbShard(String logicDbName, String rawTableName, DalHints hints, List<Map<String, ?>>  daoPojos, BulkTask<K, T> task) throws SQLException {
 		DalWatcher.crossShardBegin();
 		K result;
@@ -166,6 +167,7 @@ public class DefaultTaskExecutor<T> implements TaskExecutor<T> {
 		}
 	}
 	
+	*/
 	private boolean isEmpty(List<T> daoPojos) {
 		if(null == daoPojos)
 			throw new NullPointerException("The given pojos are null.");

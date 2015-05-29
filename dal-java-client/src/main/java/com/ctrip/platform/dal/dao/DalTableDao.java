@@ -7,12 +7,12 @@ import java.util.Map;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.task.BulkTask;
-import com.ctrip.platform.dal.dao.task.DefaultTaskExecutor;
-import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
+import com.ctrip.platform.dal.dao.task.DalBulkTaskRequest;
+import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
+import com.ctrip.platform.dal.dao.task.DalSingleTaskRequest;
+import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.SingleTask;
 import com.ctrip.platform.dal.dao.task.TaskAdapter;
-import com.ctrip.platform.dal.dao.task.TaskExecutor;
-import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -38,21 +38,21 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	private BulkTask<int[], T> batchDeleteTask;
 	private BulkTask<int[], T> batchUpdateTask;
 
-	private TaskExecutor<T> executor; 
+	private DalRequestExecutor executor; 
 			
 	public DalTableDao(DalParser<T> parser) {
 		this(parser, DalClientFactory.getTaskFactory());
 	}
 	
 	public DalTableDao(DalParser<T> parser, DalTaskFactory factory) {
-		this(parser, factory, new DefaultTaskExecutor<T>(parser));
+		this(parser, factory, new DalRequestExecutor());
 	}
 	
-	public DalTableDao(DalParser<T> parser, TaskExecutor<T> executor) {
+	public DalTableDao(DalParser<T> parser, DalRequestExecutor executor) {
 		this(parser, DalClientFactory.getTaskFactory(), executor);
 	}
 	
-	public DalTableDao(DalParser<T> parser, DalTaskFactory factory, TaskExecutor<T> executor) {
+	public DalTableDao(DalParser<T> parser, DalTaskFactory factory, DalRequestExecutor executor) {
 		initialize(parser);
 		initTasks(factory);
 		this.executor = executor;
@@ -242,7 +242,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int insert(DalHints hints, T daoPojo)
 			throws SQLException {
-		return executor.execute(hints, daoPojo, singleInsertTask);
+		return executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleInsertTask))[0];
 	}
 	
 	/**
@@ -261,7 +261,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, T daoPojo)
 			throws SQLException {
-		return executor.execute(hints.setKeyHolder(keyHolder), daoPojo, singleInsertTask);
+		return executor.execute(hints.setKeyHolder(keyHolder), new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleInsertTask))[0];
 	}
 	
 	/**
@@ -300,7 +300,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int[] insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos)
 			throws SQLException {
-		return executor.execute(hints.setKeyHolder(keyHolder), daoPojos, singleInsertTask);
+		return executor.execute(hints.setKeyHolder(keyHolder), new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleInsertTask));
 	}
 	
 	/**
@@ -317,7 +317,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int combinedInsert(DalHints hints, List<T> daoPojos) 
 			throws SQLException {
-		return executor.execute(hints, daoPojos, combinedInsertTask, 0);
+		return executor.execute(hints, new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedInsertTask));
 	}
 	
 	/**
@@ -334,7 +334,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos) 
 			throws SQLException {
-		return executor.execute(hints.setKeyHolder(keyHolder), daoPojos, combinedInsertTask, 0);
+		return executor.execute(hints.setKeyHolder(keyHolder), new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedInsertTask));
 	}
 	
 	/**
@@ -347,7 +347,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
-		return executor.execute(hints, daoPojos, batchInsertTask, new int[0]);
+		return executor.execute(hints, new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchInsertTask));
 	}
 	
 	/**
@@ -359,7 +359,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @throws SQLException
 	 */
 	public int delete(DalHints hints, T daoPojo) throws SQLException {
-		return executor.execute(hints, daoPojo, singleDeleteTask);
+		return executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleDeleteTask))[0];
 	}
 	
 	/**
@@ -371,7 +371,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @throws SQLException
 	 */
 	public int[] delete(DalHints hints, List<T> daoPojos) throws SQLException {
-		return executor.execute(hints, daoPojos, singleDeleteTask);
+		return executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleDeleteTask));
 	}
 	
 	/**
@@ -384,7 +384,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @throws SQLException
 	 */
 	public int[] batchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
-		return executor.execute(hints, daoPojos, batchDeleteTask, new int[0]);
+		return executor.execute(hints, new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchDeleteTask));
 	}
 	
 	/**
@@ -401,7 +401,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @throws SQLException
 	 */
 	public int update(DalHints hints, T daoPojo) throws SQLException {
-		return executor.execute(hints, daoPojo, singleUpdateTask);
+		return executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleUpdateTask))[0];
 	}
 	
 	/**
@@ -418,11 +418,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @throws SQLException
 	 */
 	public int[] update(DalHints hints, List<T> daoPojos) throws SQLException {
-		return executor.execute(hints, daoPojos, singleUpdateTask);
+		return executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleUpdateTask));
 	}
 	
 	public int[] batchUpdate(DalHints hints, List<T> daoPojos) throws SQLException {
-		return executor.execute(hints, daoPojos, batchUpdateTask, new int[0]);
+		return executor.execute(hints, new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchUpdateTask));
 	}
 	
 	/**

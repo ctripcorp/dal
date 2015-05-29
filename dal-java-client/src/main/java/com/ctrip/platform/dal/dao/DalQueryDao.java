@@ -2,20 +2,10 @@ package com.ctrip.platform.dal.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import com.ctrip.platform.dal.dao.client.DalLogger;
-import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.helper.DalFirstResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalListMerger;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
@@ -24,8 +14,9 @@ import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
-import com.ctrip.platform.dal.exceptions.DalException;
-import com.ctrip.platform.dal.exceptions.ErrorCode;
+import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
+import com.ctrip.platform.dal.dao.task.DalSqlTaskRequest;
+import com.ctrip.platform.dal.dao.task.QuerySqlTask;
 
 /**
  * DAO class that provides common query based functions.
@@ -36,14 +27,17 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
 public final class DalQueryDao {
 	private String logicDbName;
 	private DalClient client;
-	private DalLogger logger;
-	private static final boolean REQUIRE_SINGLE = true;
 	private static final boolean NULLABLE = true;
+	private DalRequestExecutor executor;
 
 	public DalQueryDao(String logicDbName) {
+		this(logicDbName, new DalRequestExecutor());
+	}
+	
+	public DalQueryDao(String logicDbName, DalRequestExecutor executor) {
 		this.logicDbName = logicDbName;
 		this.client = DalClientFactory.getClient(logicDbName);
-		this.logger = DalClientFactory.getDalLogger();
+		this.executor = executor;
 	}
 	
 	public DalClient getClient() {
@@ -304,33 +298,26 @@ public final class DalQueryDao {
 	
 	private <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, boolean nullable) 
 			throws SQLException {
-		setDefaultMerger(hints, new DalSingleResultMerger<>());
-		return commonQuery(sql, parameters, hints, new DalSingleResultExtractor<T>(mapper, true), nullable);
+		ResultMerger<T> defaultMerger = new DalSingleResultMerger<>();
+		return commonQuery(sql, parameters, hints, new DalSingleResultExtractor<T>(mapper, true), defaultMerger, nullable);
 	}
 
 	private <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, boolean nullable) 
 			throws SQLException {
-		setDefaultMerger(hints, new DalFirstResultMerger<>(hints.getSorter()));
-		return commonQuery(sql, parameters, hints, new DalSingleResultExtractor<T>(mapper, false), nullable);
+		ResultMerger<T> defaultMerger = new DalFirstResultMerger<>((Comparator<T>)hints.getSorter());
+		return commonQuery(sql, parameters, hints, new DalSingleResultExtractor<T>(mapper, false), defaultMerger, nullable);
 	}
 
 	private <T> List<T> queryList(String sql, StatementParameters parameters, DalHints hints, DalResultSetExtractor<List<T>> extractor) 
 			throws SQLException {
-		setDefaultMerger(hints, new DalListMerger<>(hints.getSorter()));
-		return commonQuery(sql, parameters, hints, extractor, NULLABLE);
+		ResultMerger<List<T>> defaultMerger = new DalListMerger<>((Comparator<T>)hints.getSorter());
+		return commonQuery(sql, parameters, hints, extractor, defaultMerger, NULLABLE);
 	}
 	
 	private <T> List<T> queryRange(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count) 
 			throws SQLException {
-		setDefaultMerger(hints, new DalRangedResultMerger<>(hints.getSorter(), start, count));
-		return commonQuery(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper), NULLABLE);
-	}
-	
-	private static ExecutorService service = null;
-	
-	static {
-		//TODO add shutdown hook/add global thread pool
-		service = new ThreadPoolExecutor(5, 100, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+		ResultMerger<List<T>> defaultMerger = new DalRangedResultMerger<>((Comparator<T>)hints.getSorter(), start, count);
+		return commonQuery(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper), defaultMerger, NULLABLE);
 	}
 
 	/**
@@ -346,105 +333,121 @@ public final class DalQueryDao {
 	 * @return
 	 * @throws SQLException
 	 */
-	private <T> T commonQuery(final String sql, final StatementParameters parameters, final DalHints hints, final DalResultSetExtractor<T> extractor, final boolean nullable) throws SQLException {
-		if (hints.isAsyncExecution() || hints.is(DalHintEnum.queryCallback)) {
-			Future<T> future = service.submit(new Callable<T>() {public T call() throws Exception {
-					return internalQuery(sql, parameters, hints, extractor, nullable);}});
-			
-			if(hints.isAsyncExecution())
-				hints.set(DalHintEnum.futureResult, future); 
-			return null;
-		}
+	private <T> T commonQuery(
+			String sql, StatementParameters parameters, 
+			DalHints hints, DalResultSetExtractor<T> extractor,
+			ResultMerger<T> defaultMerger,
+			boolean nullable) throws SQLException {
+		ResultMerger<T> merger = hints.is(DalHintEnum.resultMerger) ?
+					(ResultMerger<T>)hints.get(DalHintEnum.resultMerger) : 
+					defaultMerger;
 		
-		//There is no callback
-		return internalQuery(sql, parameters, hints, extractor, nullable);
+		DalSqlTaskRequest<T> request = new DalSqlTaskRequest<>(
+				logicDbName, sql, parameters, hints, 
+				new QuerySqlTask<>(extractor), merger);
+		
+		return executor.execute(hints, request, nullable);
 	}
 	
-	private <T> T internalQuery(String sql, StatementParameters parameters, DalHints hints, DalResultSetExtractor<T> extractor, boolean nullable) throws SQLException {
-		// Check if it is in (distributed) transaction
-		Set<String> shards = getShards(sql, hints);
-		
-		T result;
-		// Not the cross shard query, just query normally
-		if(shards == null) 
-			result = client.query(sql, parameters, hints, extractor);
-		else
-			result = crossShardQuery(sql, parameters, hints, extractor, shards);
-
-		if(result == null && !nullable)
-			throw new DalException(ErrorCode.AssertNull);
-		
-		handleCallback(hints, result);
-		
-		return result;
-	}
-
-	private <T> T crossShardQuery(final String sql,
-			final StatementParameters parameters, final DalHints hints,
-			final DalResultSetExtractor<T> extractor, Set<String> shards)
-			throws SQLException {
-		if(hints.is(DalHintEnum.sequentialExecution))
-			return seqncialQuery(sql, parameters, hints, extractor, shards);
-		else
-			return parallelQuery(sql, parameters, hints, extractor, shards);
-	}
-
-	private <T> void handleCallback(final DalHints hints, T result) {
-		QueryCallback qc = (QueryCallback)hints.get(DalHintEnum.queryCallback);
-		if (qc != null)
-			qc.onResult(result);
-	}
-
-	private <T> T parallelQuery(final String sql,
-			final StatementParameters parameters, final DalHints hints,
-			final DalResultSetExtractor<T> extractor, Set<String> shards) throws SQLException {
-		Map<String, Future<T>> resultFutures = new HashMap<>();
-		for(final String shard: shards)
-			resultFutures.put(shard, service.submit(new  Callable<T>() {public T call() throws Exception {
-					return client.query(sql, parameters, hints.clone().inShard(shard), extractor);}}));
-
-		ResultMerger<T> merger = (ResultMerger<T>)hints.get(DalHintEnum.resultMerger);
-		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet()) {
-			try {
-				merger.addPartial(entry.getKey(), entry.getValue().get());
-			} catch (Throwable e) {
-				hints.handleError("There is error during parallel execute query: ", e);;
-			}
-		}
-		
-		return merger.merge();
-	}
-
-	private <T> T seqncialQuery(final String sql,
-			final StatementParameters parameters, final DalHints hints,
-			final DalResultSetExtractor<T> extractor, Set<String> shards) throws SQLException {
-		ResultMerger<T> merger = (ResultMerger<T>)hints.get(DalHintEnum.resultMerger);
-		for(final String shard: shards) {
-			try {
-				merger.addPartial(shard, client.query(sql, parameters, hints.clone().inShard(shard), extractor));
-			} catch (Throwable e) {
-				hints.handleError("There is error during parallel execute query: ", e);
-			}
-		}
-		
-		return merger.merge();
-	}
-	
-	private <T> void setDefaultMerger(DalHints hints, ResultMerger<T> merger) {
-		if (hints.is(DalHintEnum.allShards) || hints.is(DalHintEnum.shards)) {
-			hints.setIfAbsent(DalHintEnum.resultMerger, merger);
-		}
-	}
-	
-	private Set<String> getShards(final String sql, final DalHints hints) {
-		Set<String> shards;
-		if(hints.is(DalHintEnum.allShards)) {
-			DatabaseSet set = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName);
-			logger.warn("Query on all shards detected: " + sql);
-			shards = set.getAllShards();
-		} else {
-			shards = (Set<String>)hints.get(DalHintEnum.shards);
-		}
-		return shards;
-	}
+//	private static ExecutorService service = null;
+//	
+//	static {
+//		//TODO add shutdown hook/add global thread pool
+//		service = new ThreadPoolExecutor(5, 100, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+//	}
+//		if (hints.isAsyncExecution() || hints.is(DalHintEnum.queryCallback)) {
+//			Future<T> future = service.submit(new Callable<T>() {public T call() throws Exception {
+//					return internalQuery(sql, parameters, hints, extractor, nullable);}});
+//			
+//			if(hints.isAsyncExecution())
+//				hints.set(DalHintEnum.futureResult, future); 
+//			return null;
+//		}
+//		
+//		//There is no callback
+//		return internalQuery(sql, parameters, hints, extractor, nullable);
+//	}
+//	
+//	private <T> T internalQuery(String sql, StatementParameters parameters, DalHints hints, DalResultSetExtractor<T> extractor, boolean nullable) throws SQLException {
+//		// Check if it is in (distributed) transaction
+//		Set<String> shards = getShards(sql, hints);
+//		
+//		T result;
+//		// Not the cross shard query, just query normally
+//		if(shards == null) 
+//			result = client.query(sql, parameters, hints, extractor);
+//		else
+//			result = crossShardQuery(sql, parameters, hints, extractor, shards);
+//
+//		if(result == null && !nullable)
+//			throw new DalException(ErrorCode.AssertNull);
+//		
+//		handleCallback(hints, result);
+//		
+//		return result;
+//	}
+//
+//	private <T> T crossShardQuery(final String sql,
+//			final StatementParameters parameters, final DalHints hints,
+//			final DalResultSetExtractor<T> extractor, Set<String> shards)
+//			throws SQLException {
+//		if(hints.is(DalHintEnum.sequentialExecution))
+//			return seqncialQuery(sql, parameters, hints, extractor, shards);
+//		else
+//			return parallelQuery(sql, parameters, hints, extractor, shards);
+//	}
+//
+//	private <T> void handleCallback(final DalHints hints, T result) {
+//		QueryCallback qc = (QueryCallback)hints.get(DalHintEnum.queryCallback);
+//		if (qc != null)
+//			qc.onResult(result);
+//	}
+//
+//	private <T> T parallelQuery(final String sql,
+//			final StatementParameters parameters, final DalHints hints,
+//			final DalResultSetExtractor<T> extractor, Set<String> shards) throws SQLException {
+//		Map<String, Future<T>> resultFutures = new HashMap<>();
+//		for(final String shard: shards)
+//			resultFutures.put(shard, service.submit(new  Callable<T>() {public T call() throws Exception {
+//					return client.query(sql, parameters, hints.clone().inShard(shard), extractor);}}));
+//
+//		ResultMerger<T> merger = (ResultMerger<T>)hints.get(DalHintEnum.resultMerger);
+//		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet()) {
+//			try {
+//				merger.addPartial(entry.getKey(), entry.getValue().get());
+//			} catch (Throwable e) {
+//				hints.handleError("There is error during parallel execute query: ", e);;
+//			}
+//		}
+//		
+//		return merger.merge();
+//	}
+//
+//	private <T> T seqncialQuery(final String sql,
+//			final StatementParameters parameters, final DalHints hints,
+//			final DalResultSetExtractor<T> extractor, Set<String> shards) throws SQLException {
+//		ResultMerger<T> merger = (ResultMerger<T>)hints.get(DalHintEnum.resultMerger);
+//		for(final String shard: shards) {
+//			try {
+//				merger.addPartial(shard, client.query(sql, parameters, hints.clone().inShard(shard), extractor));
+//			} catch (Throwable e) {
+//				hints.handleError("There is error during parallel execute query: ", e);
+//			}
+//		}
+//		
+//		return merger.merge();
+//	}
+//	
+//	
+//	private Set<String> getShards(final String sql, final DalHints hints) {
+//		Set<String> shards;
+//		if(hints.is(DalHintEnum.allShards)) {
+//			DatabaseSet set = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName);
+//			logger.warn("Query on all shards detected: " + sql);
+//			shards = set.getAllShards();
+//		} else {
+//			shards = (Set<String>)hints.get(DalHintEnum.shards);
+//		}
+//		return shards;
+//	}
 }

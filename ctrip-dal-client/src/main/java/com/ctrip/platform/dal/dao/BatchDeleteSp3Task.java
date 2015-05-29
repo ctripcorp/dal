@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.task.AbstractIntArrayBulkTask;
@@ -18,17 +17,18 @@ public class BatchDeleteSp3Task<T> extends AbstractIntArrayBulkTask<T> {
 	}
 
 	@Override
-	public int[] execute(DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
 		String callSql = buildCallSql(deleteSP3, parser.getPrimaryKeyNames().length);
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
-		for (int i = 0; i < daoPojos.size(); i++) {
+
+		int i = 0;
+		for (Integer index :daoPojos.keySet()) {
 			StatementParameters parameters = new StatementParameters();
-			addParametersByName(parameters, daoPojos.get(i), parser.getPrimaryKeyNames());
-			parametersList[i] = parameters;
+			addParametersByName(parameters, daoPojos.get(index), parser.getPrimaryKeyNames());
+			parametersList[i++] = parameters;
 		}
 		
 		int[] result = client.batchCall(callSql, parametersList, hints);
-		hints.addDetailResults(result);
 		return result;
 	}
 }

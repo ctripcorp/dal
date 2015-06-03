@@ -8,7 +8,7 @@ import org.punit.runner.SoloRunner;
 import org.punit.watcher.MemoryWatcher;
 
 import com.ctrip.platform.dal.dao.unittests.DalConcurrentMysqlTest;
-import com.ctrip.platform.dal.dao.unittests.DalConcurrentSqlServerTest;
+import com.ctrip.platform.dal.dao.unittests.DalConcurrentSqlServerTestStub;
 import com.ctrip.platform.dal.dao.unittests.DalDirectClientMySqlTest;
 import com.ctrip.platform.dal.dao.unittests.DalDirectClientSqlServerTest;
 
@@ -30,7 +30,7 @@ public class DalMultipleThreadTest {
 		crunner.addEventListener(new OverviewReporter(new ImageRender()));
 		crunner.methodRunner().addWatcher(new MemoryWatcher());
 		
-		crunner.run(DalConcurrentSqlServerTest.class);
+		crunner.run(DalConcurrentSqlServerTestStub.class);
 		crunner.run(DalConcurrentMysqlTest.class);
 		System.exit(1);
 	}

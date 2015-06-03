@@ -17,6 +17,9 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
 public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 	private String logicDbName;
 	private DalHints hints;
+	private boolean isList;
+	private T rawPojo;
+	private List<T> rawPojos;
 	private List<Map<String, ?>> daoPojos;
 	private SingleTask<T> task;
 
@@ -29,27 +32,34 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 	public DalSingleTaskRequest(String logicDbName, DalHints hints, T rawPojo, SingleTask<T> task) {
 		this(logicDbName, hints, task);
 
-		if(rawPojo == null) 
-			throw new NullPointerException("The given pojo is null.");
-
-		List<T> rawPojos = new ArrayList<>(1);
-		rawPojos.add(rawPojo);
-		this.daoPojos = task.getPojosFields(rawPojos);
+		this.rawPojo = rawPojo;
+		isList = false;
 	}
 
 	public DalSingleTaskRequest(String logicDbName, DalHints hints, List<T> rawPojos, SingleTask<T> task) {
 		this(logicDbName, hints, task);
-		this.daoPojos = task.getPojosFields(rawPojos);
+		this.rawPojos = rawPojos;
+		isList = true;
 	}
 	
 	@Override
 	public void validate() throws SQLException {
-		if(null == daoPojos)
+		if(isList && null == rawPojos)
 			throw new DalException(ErrorCode.ValidatePojoList);
 
+		if(isList == false && null == rawPojo)
+			throw new DalException(ErrorCode.ValidatePojo);
+		
 		if(task == null)
 			throw new DalException(ErrorCode.ValidateTask);
 		
+		if(isList == false){
+			rawPojos = new ArrayList<>(1);
+			rawPojos.add(rawPojo);
+		}
+
+		daoPojos = task.getPojosFields(rawPojos);
+			
 		detectDistributedTransaction(logicDbName, hints, daoPojos);
 	}
 	

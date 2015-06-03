@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ctrip.platform.dal.dao.DalHints;
+
 /**
  * Can be used for both DB and Table shard
  * @author jhhe
@@ -13,7 +15,7 @@ public class ShardedIntArrayResultMerger implements BulkTaskResultMerger<int[]>{
 	private Map<String , Integer[]> indexByShard = new HashMap<>();
 	private Map<String , int[]> affectedRowsByShard = new HashMap<>();
 	
-	public void recordPartial(String shard, Integer[] partialIndex) {
+	public void recordPartial(String shard, DalHints hints, Integer[] partialIndex) {
 		indexByShard.put(shard, partialIndex);
 	}
 	

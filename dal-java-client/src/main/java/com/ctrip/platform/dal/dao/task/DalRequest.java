@@ -8,11 +8,11 @@ import com.ctrip.platform.dal.dao.ResultMerger;
 
 public interface DalRequest<T> {
 	/**
-	 * Validate the request
+	 * Validate request
 	 * @throws SQLException
 	 */
 	void validate() throws SQLException;
-	
+
 	/**
 	 * @return true if it is cross shard
 	 */

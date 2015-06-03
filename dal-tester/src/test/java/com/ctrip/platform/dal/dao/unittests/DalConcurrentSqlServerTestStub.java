@@ -26,7 +26,7 @@ import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
-public class DalConcurrentSqlServerTest {
+public class DalConcurrentSqlServerTestStub {
 	private final static String DATABASE_NAME = "HotelPubDB";
 	private final static String TABLE_NAME = "dal_client_test";
 	private static List<Number> generateIds;

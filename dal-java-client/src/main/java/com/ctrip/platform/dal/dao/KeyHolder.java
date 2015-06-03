@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class KeyHolder {
+	private final Map<Integer, Map<String, Object>> allKeys = new ConcurrentHashMap<>();
+
 	private final List<Map<String, Object>> keyList = new LinkedList<Map<String, Object>>();
 
 	public int size() {
@@ -82,7 +85,17 @@ public class KeyHolder {
 		}
 	}
 	
-	public void merge(KeyHolder tmpHolder) {
-		keyList.addAll(tmpHolder.keyList);
+	public void addPatial(Integer[] indexList, KeyHolder tmpHolder) {
+		int i = 0;
+		for(Integer index: indexList) {
+			allKeys.put(index, tmpHolder.keyList.get(i++));
+		}
+	}
+	
+	public void merge() {
+		// This may be called more than once for shard by Db and table case
+		keyList.clear();
+		for(int i = 0; i < allKeys.size(); i++)
+			keyList.add(allKeys.get(i));
 	}
 }

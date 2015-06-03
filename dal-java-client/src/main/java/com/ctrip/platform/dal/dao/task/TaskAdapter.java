@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -231,6 +232,14 @@ public class TaskAdapter<T> implements DaoTask<T> {
 		
 		return pojoFields;
 	}
+	
+	public Map<Integer, Map<String, ?>> getPojosFieldsMap(List<T> daoPojos) {
+		Map<Integer, Map<String, ?>> daoPojosMaps = new LinkedHashMap<>();
+		for(int i = 0; i < daoPojos.size(); i ++) 
+			daoPojosMaps.put(i, parser.getFields(daoPojos.get(i)));
+		return daoPojosMaps;
+	}
+
 
 	public boolean isPrimaryKey(String fieldName){
 		return pkColumns.contains(fieldName);

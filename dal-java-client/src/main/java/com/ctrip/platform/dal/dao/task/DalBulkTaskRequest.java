@@ -20,6 +20,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	private String logicDbName;
 	private String rawTableName;
 	private DalHints hints;
+	private List<T> rawPojos;
 	private List<Map<String, ?>> daoPojos;
 	private BulkTask<K, T> task;
 	private BulkTaskResultMerger<K> dbShardMerger;
@@ -29,18 +30,20 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		this.logicDbName = logicDbName;
 		this.rawTableName = rawTableName;
 		this.hints = hints;
-		this.daoPojos = task.getPojosFields(rawPojos);
+		this.rawPojos = rawPojos;
 		this.task = task;
 		dbShardMerger = task.createMerger();
 	}
 
 	@Override
 	public void validate() throws SQLException {
-		if(null == daoPojos)
+		if(null == rawPojos)
 			throw new DalException(ErrorCode.ValidatePojoList);
-		
+
 		if(task == null)
 			throw new DalException(ErrorCode.ValidateTask);
+
+		daoPojos = task.getPojosFields(rawPojos);
 	}
 	
 	@Override
@@ -83,9 +86,12 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		
 		for(String shard: shuffled.keySet()) {
 			Map<Integer, Map<String, ?>> pojosInShard = shuffled.get(shard);
-			dbShardMerger.recordPartial(shard, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
+			
+			DalHints tmpHints = hints.clone().inShard(shard);
+			dbShardMerger.recordPartial(shard, tmpHints, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
+			
 			tasks.put(shard, new BulkTaskCallable<>(
-					logicDbName, rawTableName, hints.clone().inShard(shard), shuffled.get(shard), task));
+					logicDbName, rawTableName, tmpHints, shuffled.get(shard), task));
 		}
 
 		return tasks; 
@@ -117,14 +123,16 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			
 			if(isTableShardingEnabled(logicDbName, rawTableName)) {
 				BulkTaskResultMerger<K> merger = task.createMerger();
+				
 				DalHints tmpHints = hints.clone();
 				Map<String, Map<Integer, Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, hints.getTableShardId(), shaffled);
 				
 				for(String curTableShardId: pojosInTable.keySet()) {
 					Map<Integer, Map<String, ?>> pojosInShard = pojosInTable.get(curTableShardId);
-					merger.recordPartial(curTableShardId, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
 					
 					tmpHints.inTableShard(curTableShardId);
+					merger.recordPartial(curTableShardId, tmpHints, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
+					
 					K partial = task.execute(tmpHints, pojosInShard);
 					merger.addPartial(curTableShardId, partial);
 					

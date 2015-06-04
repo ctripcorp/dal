@@ -6,10 +6,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 public class SingleInsertTaskSqlSvrTest extends SingleInsertTaskTestStub {
-	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr";
-	
 	public SingleInsertTaskSqlSvrTest() {
-		super(DATABASE_NAME_SQLSVR);
+		super(SqlServerTestInitializer.DATABASE_NAME_SQLSVR);
 	}
 	
 	@BeforeClass

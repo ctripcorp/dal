@@ -6,10 +6,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 public class UpdateSqlTaskSqlSvrTest extends UpdateSqlTaskTestStub {
-	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr";
-	
 	public UpdateSqlTaskSqlSvrTest() {
-		super(DATABASE_NAME_SQLSVR);
+		super(SqlServerTestInitializer.DATABASE_NAME_SQLSVR);
 	}
 	
 	@BeforeClass
@@ -31,5 +29,4 @@ public class UpdateSqlTaskSqlSvrTest extends UpdateSqlTaskTestStub {
 	public void tearDown() throws Exception {
 		SqlServerTestInitializer.tearDown();
 	}
-
 }

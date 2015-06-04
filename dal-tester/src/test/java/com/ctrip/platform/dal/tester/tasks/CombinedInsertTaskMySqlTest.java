@@ -5,28 +5,29 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-public class SingleDeleteTaskSqlSvrTest extends SingleDeleteTaskTestStub {
-	public SingleDeleteTaskSqlSvrTest() {
-		super(SqlServerTestInitializer.DATABASE_NAME_SQLSVR);
+public class CombinedInsertTaskMySqlTest extends CombinedInsertTaskTestStub {
+	public CombinedInsertTaskMySqlTest() {
+		super(MySqlTestInitializer.DATABASE_NAME_MYSQL);
 	}
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		SqlServerTestInitializer.setUpBeforeClass();
+		MySqlTestInitializer.setUpBeforeClass();
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		SqlServerTestInitializer.tearDownAfterClass();
+		MySqlTestInitializer.tearDownAfterClass();
 	}
 
 	@Before
 	public void setUp() throws Exception {
-		SqlServerTestInitializer.setUp();
+		MySqlTestInitializer.setUp();
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		SqlServerTestInitializer.tearDown();
+		MySqlTestInitializer.tearDown();
 	}
+
 }

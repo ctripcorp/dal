@@ -6,11 +6,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 public class CombinedInsertTaskSqlSvrTest extends CombinedInsertTaskTestStub {
-	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr";
-	
 	public CombinedInsertTaskSqlSvrTest() {
-		super(DATABASE_NAME_SQLSVR);
+		super(SqlServerTestInitializer.DATABASE_NAME_SQLSVR);
 	}
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		SqlServerTestInitializer.setUpBeforeClass();

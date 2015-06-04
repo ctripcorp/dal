@@ -42,12 +42,12 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 
 		if(task == null)
 			throw new DalException(ErrorCode.ValidateTask);
-
-		daoPojos = task.getPojosFields(rawPojos);
 	}
 	
 	@Override
 	public boolean isCrossShard() throws SQLException {
+		daoPojos = task.getPojosFields(rawPojos);
+		
 		if(isAlreadySharded(logicDbName, rawTableName, hints))
 			return false;
 		
@@ -87,11 +87,10 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		for(String shard: shuffled.keySet()) {
 			Map<Integer, Map<String, ?>> pojosInShard = shuffled.get(shard);
 			
-			DalHints tmpHints = hints.clone().inShard(shard);
-			dbShardMerger.recordPartial(shard, tmpHints, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
+			dbShardMerger.recordPartial(shard, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
 			
 			tasks.put(shard, new BulkTaskCallable<>(
-					logicDbName, rawTableName, tmpHints, shuffled.get(shard), task));
+					logicDbName, rawTableName, hints.clone().inShard(shard), shuffled.get(shard), task));
 		}
 
 		return tasks; 
@@ -131,7 +130,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 					Map<Integer, Map<String, ?>> pojosInShard = pojosInTable.get(curTableShardId);
 					
 					tmpHints.inTableShard(curTableShardId);
-					merger.recordPartial(curTableShardId, tmpHints, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
+					merger.recordPartial(curTableShardId, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
 					
 					K partial = task.execute(tmpHints, pojosInShard);
 					merger.addPartial(curTableShardId, partial);

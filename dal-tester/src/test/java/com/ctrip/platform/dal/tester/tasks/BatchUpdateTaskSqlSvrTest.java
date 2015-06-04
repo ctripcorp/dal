@@ -6,11 +6,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 public class BatchUpdateTaskSqlSvrTest extends BatchUpdateTaskTestStub {
-	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr";
-	
 	public BatchUpdateTaskSqlSvrTest() {
-		super(DATABASE_NAME_SQLSVR);
+		super(SqlServerTestInitializer.DATABASE_NAME_SQLSVR);
 	}
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		SqlServerTestInitializer.setUpBeforeClass();

@@ -334,7 +334,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos) 
 			throws SQLException {
-		return executor.execute(hints.setKeyHolder(keyHolder), new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedInsertTask));
+		int result = executor.execute(hints.setKeyHolder(keyHolder), new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedInsertTask));
+		if(keyHolder != null)
+			keyHolder.merge();
+		
+		return result;
 	}
 	
 	/**

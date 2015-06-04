@@ -11,7 +11,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class SqlServerTestInitializer {
-	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr";
+	public final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr";
 	
 	private final static String TABLE_NAME = "dal_client_test";
 
@@ -45,7 +45,6 @@ public class SqlServerTestInitializer {
 		String[] sqls = null;
 		// For SQL server
 		hints = new DalHints();
-		StatementParameters parameters = new StatementParameters();
 		sqls = new String[] { DROP_TABLE_SQL_SQLSVR_TPL, CREATE_TABLE_SQL_SQLSVR_TPL};
 		clientSqlSvr.batchUpdate(sqls, hints);
 	}
@@ -84,9 +83,6 @@ public class SqlServerTestInitializer {
 		String sql = "DELETE FROM " + TABLE_NAME;
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
-		sql = "DELETE FROM " + TABLE_NAME;
-		parameters = new StatementParameters();
-		hints = new DalHints();
 		clientSqlSvr.update(sql, parameters, hints);
 	}
 }

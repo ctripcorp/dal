@@ -16,6 +16,17 @@ import org.junit.runners.Suite.SuiteClasses;
 	QuerySqlTaskSqlSvrTest.class,
 	DeleteSqlTaskSqlSvrTest.class,
 	UpdateSqlTaskSqlSvrTest.class,
+
+	BatchDeleteTaskMySqlTest.class,
+	BatchInsertTaskMySqlTest.class,
+	BatchUpdateTaskMySqlTest.class,
+	CombinedInsertTaskMySqlTest.class,
+	SingleDeleteTaskMySqlTest.class,
+	SingleInsertTaskMySqlTest.class,
+	SingleUpdateTaskMySqlTest.class,
+	QuerySqlTaskMySqlTest.class,
+	DeleteSqlTaskMySqlTest.class,
+	UpdateSqlTaskMySqlTest.class,
 })
 public class AllTest {
 

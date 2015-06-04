@@ -93,7 +93,6 @@ public class KeyHolder {
 	}
 	
 	public void merge() {
-		// This may be called more than once for shard by Db and table case
 		keyList.clear();
 		for(int i = 0; i < allKeys.size(); i++)
 			keyList.add(allKeys.get(i));

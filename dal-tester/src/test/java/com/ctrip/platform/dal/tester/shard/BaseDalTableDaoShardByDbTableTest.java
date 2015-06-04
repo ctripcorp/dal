@@ -1925,10 +1925,15 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 			model.setAddress("1234");
 		}
 		
-		res = dao.batchUpdate(new DalHints(), entities);
-		assertResEquals(4, res);
-		for(ClientTestModel model: entities)
-			Assert.assertEquals("1234", dao.queryByPk(model, new DalHints()).getAddress());
+		try {
+			res = dao.batchUpdate(new DalHints(), entities);
+			assertResEquals(4, res);
+			for(ClientTestModel model: entities)
+				Assert.assertEquals("1234", dao.queryByPk(model, new DalHints()).getAddress());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
 	}
 	
 	/**
@@ -2229,25 +2234,28 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 			KeyHolder keyHolder = createKeyHolder();
 			DalHints hints = new DalHints();
 			dao.combinedInsert(hints, keyHolder, Arrays.asList(pList));
-			assertKeyHolderCrossShard(keyHolder, hints.getDetailResults());
+			assertKeyHolderCrossShard(keyHolder);
 			for(int i = 0; i < mod; i++) {
 				for(int j = 0; j < tableMod; j++) {
 					Assert.assertEquals(j + 1, getCount(i, j));
 				}
 			}
 		} catch (Exception e) {
-			
+			e.printStackTrace();
 			Assert.fail();
 		}
 	}
 
-	public void assertKeyHolderCrossShard(KeyHolder holder, DalDetailResults<KeyHolder> detailResults) throws SQLException {
+	public void assertKeyHolderCrossShard(KeyHolder holder) throws SQLException {
 		if(!ASSERT_ALLOWED)
 			return;
 
+		int x = 0;
 		for(int i = 0; i < mod; i++) {
 			for(int j = 0; j < tableMod; j++) {
-				Assert.assertEquals(j + 1, detailResults.getResult(String.valueOf(i), String.valueOf(j)).size());
+				for(int k = 0; k < j + 1; k ++) {
+					Assert.assertEquals(k + 1, holder.getKey(k++));
+				}
 			}
 		}
 	}
@@ -2283,7 +2291,7 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 				}
 			}
 		} catch (Exception e) {
-			
+			e.printStackTrace();
 			Assert.fail();
 		}
 	}
@@ -2323,7 +2331,7 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 				}
 			}
 		} catch (Exception e) {
-			
+			e.printStackTrace();
 			Assert.fail();
 		}
 	}

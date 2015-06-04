@@ -7,7 +7,7 @@ import org.junit.BeforeClass;
 
 public class CombinedInsertTaskSqlSvrTest extends CombinedInsertTaskTestStub {
 	public CombinedInsertTaskSqlSvrTest() {
-		super(SqlServerTestInitializer.DATABASE_NAME_SQLSVR);
+		super(SqlServerTestInitializer.DATABASE_NAME_SQLSVR, false);
 	}
 	
 	@BeforeClass

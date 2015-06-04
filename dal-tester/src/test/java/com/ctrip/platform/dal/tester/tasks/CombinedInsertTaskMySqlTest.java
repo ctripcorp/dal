@@ -7,7 +7,7 @@ import org.junit.BeforeClass;
 
 public class CombinedInsertTaskMySqlTest extends CombinedInsertTaskTestStub {
 	public CombinedInsertTaskMySqlTest() {
-		super(MySqlTestInitializer.DATABASE_NAME_MYSQL);
+		super(MySqlTestInitializer.DATABASE_NAME_MYSQL, true);
 	}
 	
 	@BeforeClass

@@ -94,6 +94,8 @@ public class DalRequestExecutor {
 	private <T> T crossShardExecute(DalHints hints, DalRequest<T> request) throws SQLException {
 		DalWatcher.crossShardBegin();
 		
+		hints.set(DalHintEnum.sequentialExecution);
+				
 		T result = hints.is(DalHintEnum.sequentialExecution)?
 				seqncialExecute(hints, request):
 				parallelExecute(hints, request);

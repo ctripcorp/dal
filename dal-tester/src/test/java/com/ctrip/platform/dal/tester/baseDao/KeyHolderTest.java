@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao;
+package com.ctrip.platform.dal.tester.baseDao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -17,6 +17,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+
+import com.ctrip.platform.dal.dao.KeyHolder;
 
 public class KeyHolderTest {
 

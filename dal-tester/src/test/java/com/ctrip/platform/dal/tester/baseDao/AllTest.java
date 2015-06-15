@@ -9,5 +9,6 @@ import org.junit.runners.Suite.SuiteClasses;
 	DalQueryDaoTest.class,
 	DalTableDaoTest.class,
 	DirectClientDaoShardTest.class,
+	KeyHolderTest.class,
 })
 public class AllTest {}

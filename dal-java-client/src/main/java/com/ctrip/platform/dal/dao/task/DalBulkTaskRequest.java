@@ -32,7 +32,6 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		this.hints = hints;
 		this.rawPojos = rawPojos;
 		this.task = task;
-		dbShardMerger = task.createMerger();
 	}
 
 	@Override
@@ -42,6 +41,8 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 
 		if(task == null)
 			throw new DalException(ErrorCode.ValidateTask);
+
+		dbShardMerger = task.createMerger();
 	}
 	
 	@Override

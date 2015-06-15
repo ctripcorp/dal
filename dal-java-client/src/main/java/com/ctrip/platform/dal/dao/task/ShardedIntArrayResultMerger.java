@@ -3,8 +3,7 @@ package com.ctrip.platform.dal.dao.task;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.ctrip.platform.dal.dao.DalHints;
+import java.util.TreeMap;
 
 /**
  * Can be used for both DB and Table shard
@@ -13,7 +12,7 @@ import com.ctrip.platform.dal.dao.DalHints;
  */
 public class ShardedIntArrayResultMerger implements BulkTaskResultMerger<int[]>{
 	private Map<String , Integer[]> indexByShard = new HashMap<>();
-	private Map<String , int[]> affectedRowsByShard = new HashMap<>();
+	private Map<Integer, Integer> affectedRowsMap = new TreeMap<>();
 	
 	public void recordPartial(String shard, Integer[] partialIndex) {
 		indexByShard.put(shard, partialIndex);
@@ -21,26 +20,22 @@ public class ShardedIntArrayResultMerger implements BulkTaskResultMerger<int[]>{
 	
 	@Override
 	public void addPartial(String shard, int[] affectedRows) throws SQLException {
-		affectedRowsByShard.put(shard, affectedRows);
+		Integer[] indexList = indexByShard.get(shard);
+		int i = 0;
+		for(Integer index: indexList)
+			affectedRowsMap.put(index, affectedRows[i++]);
 	}
 
 	@Override
 	public int[] merge() throws SQLException {
 		int count = 0;
 		
-		for(Integer[] index: indexByShard.values())
-			count += index.length;
+		int[] affectedRowsList = new int[affectedRowsMap.size()];
 		
-		int[] result = new int[count];
+		int i = 0;
+		for(Integer affectedRows: affectedRowsMap.values())
+			affectedRowsList[i++] = affectedRows;
 		
-		for(String shard: indexByShard.keySet()) {
-			Integer[] index = indexByShard.get(shard);
-			int[] affectedRows = affectedRowsByShard.get(shard);
-			for(int i = 0; i < index.length; i++) {
-				result[index[i]] = affectedRows[i];
-			}
-		}
-		
-		return result;
+		return affectedRowsList;
 	}
 }

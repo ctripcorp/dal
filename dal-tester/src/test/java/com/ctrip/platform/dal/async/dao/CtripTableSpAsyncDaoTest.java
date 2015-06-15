@@ -19,6 +19,7 @@ import com.ctrip.platform.dal.dao.DalDetailResults;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 import com.ctrip.platform.dal.dao.task.DalAsyncCallback;
 
 public class CtripTableSpAsyncDaoTest {
@@ -181,10 +182,13 @@ public class CtripTableSpAsyncDaoTest {
 		}
 		
 		DalHints hints = new DalHints();
-		DalAsyncCallback callback = new DalAsyncCallback();
-		hints.asyncExecution().setDalAsyncCallback(callback);
+		DefaultResultCallback callback = new DefaultResultCallback();
+		hints.callbackWith(callback);
 		dao.batchDelete(hints.inShard(0), p);
-		callback.getFuture().get();
+		
+		Thread.sleep(100);
+		Integer i = (Integer)callback.getResult();
+		
 		assertEquals(0, getCount(0));
 	}
 	

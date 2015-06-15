@@ -27,6 +27,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	QuerySqlTaskMySqlTest.class,
 	DeleteSqlTaskMySqlTest.class,
 	UpdateSqlTaskMySqlTest.class,
+	
+	ShardedIntArrayResultMergerTest.class,
 })
 public class AllTest {
 

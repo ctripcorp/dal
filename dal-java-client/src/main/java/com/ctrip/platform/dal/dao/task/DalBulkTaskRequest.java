@@ -63,6 +63,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 
 	@Override
 	public Callable<K> createTask() throws SQLException {
+		hints = hints.clone();
 		// If only one shard is shuffled
 		if(shuffled != null) {
 			if(shuffled.size() == 0)
@@ -121,25 +122,30 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			if(shaffled.isEmpty()) return task.getEmptyValue();
 			
 			if(isTableShardingEnabled(logicDbName, rawTableName)) {
-				BulkTaskResultMerger<K> merger = task.createMerger();
-				
-				DalHints tmpHints = hints.clone();
-				Map<String, Map<Integer, Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, hints.getTableShardId(), shaffled);
-				
-				for(String curTableShardId: pojosInTable.keySet()) {
-					Map<Integer, Map<String, ?>> pojosInShard = pojosInTable.get(curTableShardId);
-					
-					tmpHints.inTableShard(curTableShardId);
-					merger.recordPartial(curTableShardId, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
-					
-					K partial = task.execute(tmpHints, pojosInShard);
-					merger.addPartial(curTableShardId, partial);
-					
-				}
-				return merger.merge();
+				return executeByTableShards();
 			}else{
 				return task.execute(hints, shaffled);
 			}
+		}
+
+		private K executeByTableShards() throws SQLException {
+			BulkTaskResultMerger<K> merger = task.createMerger();
+			
+			Map<String, Map<Integer, Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, hints.getTableShardId(), shaffled);
+			
+			DalHints tmpHints;
+			for(String curTableShardId: pojosInTable.keySet()) {
+				Map<Integer, Map<String, ?>> pojosInShard = pojosInTable.get(curTableShardId);
+				tmpHints = hints.clone();
+				
+				tmpHints.inTableShard(curTableShardId);
+				merger.recordPartial(curTableShardId, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
+				
+				K partial = task.execute(tmpHints, pojosInShard);
+				merger.addPartial(curTableShardId, partial);
+				
+			}
+			return merger.merge();
 		}
 	}	
 }

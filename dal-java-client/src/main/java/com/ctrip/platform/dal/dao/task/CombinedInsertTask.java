@@ -41,6 +41,8 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 			KeyHolder tmpHolder = new KeyHolder();
 			int count = client.update(sql, parameters, hints.setKeyHolder(tmpHolder));
 			keyHolder.addPatial(daoPojos.keySet().toArray(new Integer[daoPojos.size()]), tmpHolder);
+			//Must set back, or the following call will be work on wrong keyholder
+			hints.setKeyHolder(keyHolder);
 			return count;
 		}
 	}

@@ -163,7 +163,7 @@ public enum DalHintEnum {
 	/**
 	 * Indicate the queryCallback for async execution
 	 */
-	queryCallback,
+	resultCallback,
 	
 	/**
 	 * Indicate the futureResult for async execution when queryCallback is not specified

@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.QueryCallback;
+import com.ctrip.platform.dal.dao.DalResultCallback;
 import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -94,8 +94,6 @@ public class DalRequestExecutor {
 	private <T> T crossShardExecute(DalHints hints, DalRequest<T> request) throws SQLException {
 		DalWatcher.crossShardBegin();
 		
-		hints.set(DalHintEnum.sequentialExecution);
-				
 		T result = hints.is(DalHintEnum.sequentialExecution)?
 				seqncialExecute(hints, request):
 				parallelExecute(hints, request);
@@ -106,7 +104,7 @@ public class DalRequestExecutor {
 	}
 
 	private <T> void handleCallback(final DalHints hints, T result) {
-		QueryCallback qc = (QueryCallback)hints.get(DalHintEnum.queryCallback);
+		DalResultCallback qc = (DalResultCallback)hints.get(DalHintEnum.resultCallback);
 		if (qc != null)
 			qc.onResult(result);
 	}

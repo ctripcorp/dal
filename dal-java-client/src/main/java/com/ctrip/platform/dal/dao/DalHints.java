@@ -265,15 +265,15 @@ public class DalHints {
 	 * @return
 	 */
 	public boolean isAsyncExecution() {
-		return is(DalHintEnum.asyncExecution) || is(DalHintEnum.queryCallback);
+		return is(DalHintEnum.asyncExecution) || is(DalHintEnum.resultCallback);
 	}
 	
 	public Future<?> getAsyncResult() {
 		return (Future<?>)get(DalHintEnum.futureResult);
 	}
 	
-	public DalHints callbackWith(QueryCallback callback) {
-		set(DalHintEnum.queryCallback, callback);
+	public DalHints callbackWith(DalResultCallback callback) {
+		set(DalHintEnum.resultCallback, callback);
 		return this;
 	}
 	

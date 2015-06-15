@@ -1,5 +1,5 @@
 package com.ctrip.platform.dal.dao;
 
-public interface QueryCallback {
+public interface DalResultCallback {
 	<T> void onResult(T result);
 }

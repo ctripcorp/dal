@@ -16,7 +16,6 @@ import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
-import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -56,8 +55,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 
 	@Override
 	public Callable<T> createTask() throws SQLException {
-		//TODO To avoid concurrent threading issue, we may need to clone hints or parameters here
-		return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), sql, parameters, hints, task);
+		return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), sql, parameters, hints.clone(), task);
 	}
 
 	@Override

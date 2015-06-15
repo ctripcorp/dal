@@ -28,7 +28,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowCallback;
 import com.ctrip.platform.dal.dao.DalRowMapper;
-import com.ctrip.platform.dal.dao.QueryCallback;
+import com.ctrip.platform.dal.dao.DalResultCallback;
 import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
@@ -172,7 +172,7 @@ public class DalQueryDaoTest {
 		}
 	 }
 	
-	private class TestQueryCallback implements QueryCallback {
+	private class TestQueryCallback implements DalResultCallback {
 
 		@Override
 		public <T> void onResult(T result) {
@@ -435,7 +435,7 @@ public class DalQueryDaoTest {
 		}
 	}
 	
-	private class TestQueryCallback2 implements QueryCallback {
+	private class TestQueryCallback2 implements DalResultCallback {
 		Object result;
 		@Override
 		public <T> void onResult(T result) {

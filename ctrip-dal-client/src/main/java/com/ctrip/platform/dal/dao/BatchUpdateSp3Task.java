@@ -25,7 +25,7 @@ public class BatchUpdateSp3Task<T> extends AbstractIntArrayBulkTask<T> {
 		for (Integer index :daoPojos.keySet()) {
 			StatementParameters parameters = new StatementParameters();
 			addParametersByName(parameters, daoPojos.get(index));
-			parametersList[i] = parameters;
+			parametersList[i++] = parameters;
 		}
 		
 		int[] result = client.batchCall(callSql, parametersList, hints);

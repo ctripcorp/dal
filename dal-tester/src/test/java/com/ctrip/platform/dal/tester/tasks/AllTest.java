@@ -29,6 +29,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	UpdateSqlTaskMySqlTest.class,
 	
 	ShardedIntArrayResultMergerTest.class,
+	DalSingleTaskRequestTest.class,
+	DalBulkTaskRequestTest.class
 })
 public class AllTest {
 

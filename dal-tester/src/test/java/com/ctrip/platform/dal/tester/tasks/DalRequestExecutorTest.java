@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.tester.tasks;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -8,14 +10,11 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
 
-import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.junit.AfterClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalResultCallback;
 import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 import com.ctrip.platform.dal.dao.task.DalRequest;

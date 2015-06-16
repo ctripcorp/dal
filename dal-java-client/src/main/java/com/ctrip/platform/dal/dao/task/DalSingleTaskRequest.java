@@ -70,7 +70,7 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 	}
 
 	@Override
-	public Callable<int[]> createTask() throws SQLException {
+	public Callable<int[]> createTask() {
 		return new SingleTaskCallable<>(hints, daoPojos, task);
 	}
 

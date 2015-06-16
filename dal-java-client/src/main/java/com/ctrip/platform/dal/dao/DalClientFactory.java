@@ -126,7 +126,7 @@ public class DalClientFactory {
 	public static void shutdownFactory() {
 		logger.info("Start shutdown Dal Java Client Factory");
 		getDalLogger().shutdown();
-		DalRequestExecutor.shutdownAsyncTaskExecutor();
+		DalRequestExecutor.shutdown();
 		logger.info("Dal Java Client Factory is shutdown");
 	}
 }

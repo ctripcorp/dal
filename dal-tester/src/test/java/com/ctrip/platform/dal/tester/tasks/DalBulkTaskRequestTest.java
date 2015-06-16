@@ -22,7 +22,6 @@ import com.ctrip.platform.dal.dao.task.ShardedIntResultMerger;
 public class DalBulkTaskRequestTest {
 	private class TestPojo {
 		Integer index;
-		TestPojo(){}
 		TestPojo(Integer index){
 			this.index = index;
 		}
@@ -179,12 +178,43 @@ public class DalBulkTaskRequestTest {
 
 	@Test
 	public void testCreateTasks() {
-		fail("Not yet implemented");
+		DalBulkTaskRequest<Integer, TestPojo> test = null;
+		List<TestPojo> pojos = null;
+		Map<String, Callable<Integer>> tasks = null;
+		try {
+			// Shuffled in two shards
+			pojos = new ArrayList<TestPojo>();
+			pojos.add(new TestPojo(0));
+			pojos.add(new TestPojo(1));
+			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints(), pojos, new TestBulkTask());
+			test.validate();
+			test.isCrossShard();
+			tasks = test.createTasks();
+			assertEquals(2, tasks.size());
+			
+			assertEquals(1, tasks.get("0").call().intValue());
+			assertEquals(1, tasks.get("1").call().intValue());
+		} catch (Exception e) {
+			fail();
+		}
 	}
 
 	@Test
 	public void testGetMerger() {
-		fail("Not yet implemented");
+		DalBulkTaskRequest<Integer, TestPojo> test = null;
+		List<TestPojo> pojos = null;
+		Map<String, Callable<Integer>> tasks = null;
+		try {
+			// Shuffled in two shards
+			pojos = new ArrayList<TestPojo>();
+			pojos.add(new TestPojo(0));
+			pojos.add(new TestPojo(1));
+			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints(), pojos, new TestBulkTask());
+			test.validate();
+			assertNotNull(test.getMerger());
+		} catch (Exception e) {
+			fail();
+		}
 	}
 
 }

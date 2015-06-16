@@ -34,7 +34,7 @@ public class DalRequestExecutor {
 	/**
 	 * TODO make the shutdown register
 	 */
-	public static void shutdownAsyncTaskExecutor() {
+	public static void shutdown() {
 		if (service != null)
 			service.shutdown();
 	}

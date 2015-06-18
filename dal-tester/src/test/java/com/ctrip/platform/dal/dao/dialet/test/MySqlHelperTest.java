@@ -8,15 +8,88 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
+import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.dialect.DalMySqlHelper;
 
 public class MySqlHelperTest {
+	private final static String DATABASE_NAME_MYSQL = PersonParser.DATABASE_NAME;
+	
+	private final static String TABLE_NAME = PersonParser.TABLE_NAME;
+	
+	private final static String DROP_TABLE_SQL_MYSQL_TPL = "DROP TABLE IF EXISTS " + TABLE_NAME;
+	
+	//Create the the table
+	private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"("
+			+ "ID int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
+			+ "Address VARCHAR(64), "
+			+ "Telephone VARCHAR(64), "
+			+ "Name VARCHAR(64), "
+			+ "Age int,"
+			+ "Gender int,"
+			+ "Birth timestamp default CURRENT_TIMESTAMP,"
+			+ "PartmentID int)";
+	
+	private static DalClient clientMySql;
+	
+	static {
+		try {
+			DalClientFactory.initClientFactory();
+			clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@BeforeClass
+	public static void setUpBeforeClass() {
+		DalHints hints = new DalHints();
+		String[] sqls = new String[]{DROP_TABLE_SQL_MYSQL_TPL, CREATE_TABLE_SQL_MYSQL_TPL};
+		try {
+			clientMySql.batchUpdate(sqls, hints);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+		DalHints hints = new DalHints();
+		String[] sqls = new String[]{DROP_TABLE_SQL_MYSQL_TPL};
+		clientMySql.batchUpdate(sqls, hints);
+	}
+
+	@Before
+	public void setUp() throws Exception {
+		DalHints hints = new DalHints();
+		String[] insertSqls = null;
+		List<Person> plist = new ArrayList<>();
+		for(int i = 0; i < 3; i++) {
+			Person p = new Person();
+			p.setID(i+1);
+			p.setName("forest");
+			plist.add(p);
+		}
+		client.insert(hints, plist);
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		String sql = "DELETE FROM " + TABLE_NAME;
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+		clientMySql.update(sql, parameters, hints);
+	}
 
 	private static DalMySqlHelper<Person> helper = null;
 	private static DalTableDao<Person> client = null;

@@ -24,6 +24,7 @@ public class DalTableDaoShardByDbTableMySqlTest extends BaseDalTableDaoShardByDb
 	private final static int tableMod = 4;
 	
 	//Create the the table
+	private final static String DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL = "DROP TABLE IF EXISTS " + TABLE_NAME;
 	private final static String DROP_TABLE_SQL_MYSQL_TPL = "DROP TABLE IF EXISTS " + TABLE_NAME + "_%d";
 	
 	//Create the the table
@@ -75,6 +76,7 @@ public class DalTableDaoShardByDbTableMySqlTest extends BaseDalTableDaoShardByDb
 		// For SQL server
 		hints = new DalHints();
 		for(int i = 0; i < mod; i++) {
+			clientMySql.update(DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL, new StatementParameters(), hints.inShard(i));
 			for(int j = 0; j < tableMod; j++) {
 				sqls = new String[] { 
 						String.format(DROP_TABLE_SQL_MYSQL_TPL, j), 
@@ -91,6 +93,7 @@ public class DalTableDaoShardByDbTableMySqlTest extends BaseDalTableDaoShardByDb
 		//For Sql Server
 		hints = new DalHints();
 		for(int i = 0; i < mod; i++) {
+			clientMySql.update(DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL, new StatementParameters(), hints.inShard(i));
 			sqls = new String[tableMod];
 			for(int j = 0; j < tableMod; j++) {
 				sqls[j] = String.format(DROP_TABLE_SQL_MYSQL_TPL, j);

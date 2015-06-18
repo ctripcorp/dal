@@ -1,6 +1,10 @@
 package com.ctrip.platform.dal.tester.tasks;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -9,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.junit.AfterClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;

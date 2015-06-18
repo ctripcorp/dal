@@ -30,7 +30,10 @@ import org.junit.runners.Suite.SuiteClasses;
 	
 	ShardedIntArrayResultMergerTest.class,
 	DalSingleTaskRequestTest.class,
-	DalBulkTaskRequestTest.class
+	DalBulkTaskRequestTest.class,
+	DalSingleTaskRequestTest.class,
+	DalSqlTaskRequestTest.class,
+	
 })
 public class AllTest {
 

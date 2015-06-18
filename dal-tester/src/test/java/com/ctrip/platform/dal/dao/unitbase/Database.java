@@ -81,7 +81,11 @@ public class Database {
 		hints.set(DalHintEnum.operation, DalEventEnum.UPDATE_SIMPLE);
 		StatementParameters parameters = new StatementParameters();
 		for (String sql : sqls) {
-			this.client.update(sql, parameters, hints);
+			try {
+				this.client.update(sql, parameters, hints);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

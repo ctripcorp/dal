@@ -46,14 +46,14 @@ public class PersonParser extends AbstractDalParser<Person> {
 	public Person map(ResultSet rs, int rowNum) throws SQLException {
 		Person pojo = new Person();
 		
-		pojo.setID((Integer)rs.getObject("ID"));
+		pojo.setID(rs.getInt("ID"));
 		pojo.setAddress((String)rs.getObject("Address"));
 		pojo.setTelephone((String)rs.getObject("Telephone"));
 		pojo.setName((String)rs.getObject("Name"));
-		pojo.setAge((Integer)rs.getObject("Age"));
-		pojo.setGender((Integer)rs.getObject("Gender"));
+		pojo.setAge(rs.getInt("Age"));
+		pojo.setGender(rs.getInt("Gender"));
 		pojo.setBirth((Timestamp)rs.getObject("Birth"));
-		pojo.setPartmentID((Integer)rs.getObject("PartmentID"));
+		pojo.setPartmentID(rs.getInt("PartmentID"));
 
 		return pojo;
 	}

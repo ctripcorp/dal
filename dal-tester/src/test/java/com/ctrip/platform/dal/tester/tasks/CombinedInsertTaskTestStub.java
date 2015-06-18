@@ -38,8 +38,11 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 			hints.setKeyHolder(new KeyHolder());
 		try {
 			test.execute(hints, getAllMap());
-			if(enableKeyHolder)
+			if(enableKeyHolder){
+				// You have to merge before get size
+				hints.getKeyHolder().merge();
 				assertEquals(3, hints.getKeyHolder().size());
+			}
 			assertEquals(3+3, getCount());
 		} catch (SQLException e) {
 			e.printStackTrace();

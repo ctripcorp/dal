@@ -14,7 +14,6 @@ public class DalCatLogger {
 			String sqlType = entry.getDao() + "." + entry.getMethod();
 			Transaction catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, sqlType);
 			entry.setCatTransaction(catTransaction);
-			catTransaction.addData(entry.getSqls() == null ? "" : StringUtils.join(entry.getSqls(), ";"));
 			
 			String method = entry.getEvent() == null ? "dal_test" : CatInfo.getTypeSQLInfo(entry.getEvent());
 			Cat.logEvent("DAL.version", "java-" + entry.getClientVersion());
@@ -24,6 +23,9 @@ public class DalCatLogger {
 				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, "");
 			}
 			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
+			
+			catTransaction.addData(entry.getSqls() == null ? "" : StringUtils.join(entry.getSqls(), ";"));
+			
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}

@@ -21,6 +21,7 @@ public class DalCatLogger {
 
 	public static void catTransactionSuccess(CtripLogEntry entry){
 		try {
+			//TODO move to start
 			String method = entry.getEvent() == null ? "dal_test" : CatInfo.getTypeSQLInfo(entry.getEvent());
 			Cat.logEvent("DAL.version", "java-" + entry.getClientVersion());
 			if(entry.getPramemters() != null){
@@ -29,6 +30,7 @@ public class DalCatLogger {
 				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, "");
 			}
 			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
+			
 			entry.getCatTransaction().setStatus(Transaction.SUCCESS);
 			entry.getCatTransaction().complete();
 		} catch (Throwable e) {

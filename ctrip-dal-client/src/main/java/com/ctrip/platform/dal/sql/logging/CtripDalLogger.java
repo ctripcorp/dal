@@ -118,9 +118,9 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 	
 	private void recordSuccess(final LogEntry entry, final int count) {
 		try {
+			DalCatLogger.catTransactionSuccess((CtripLogEntry)entry);
 			DalCLogger.success((CtripLogEntry)entry, count);
 			Metrics.success((CtripLogEntry)entry, entry.getDuration());
-			DalCatLogger.catTransactionSuccess((CtripLogEntry)entry);
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -142,9 +142,9 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 	
 	private void recordFail(final LogEntry entry, final Throwable e) {
 		try {
+			DalCatLogger.catTransactionFailed((CtripLogEntry)entry, e);
 			DalCLogger.fail((CtripLogEntry)entry, e);
 			Metrics.fail((CtripLogEntry)entry, entry.getDuration());
-			DalCatLogger.catTransactionFailed((CtripLogEntry)entry, e);
 		} catch (Throwable ex) {
 			ex.printStackTrace();
 		}

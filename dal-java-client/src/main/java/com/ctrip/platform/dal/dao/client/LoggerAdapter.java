@@ -14,6 +14,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 
+/**
+ * 
+ * Implements the common logic.
+ * 
+ * @author gzxia
+ *
+ */
 public abstract class LoggerAdapter implements DalLogger {
 	
 	private static final String SAMPLING = "sampling";

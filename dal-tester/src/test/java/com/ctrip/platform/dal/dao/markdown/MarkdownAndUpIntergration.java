@@ -55,15 +55,15 @@ public class MarkdownAndUpIntergration {
 		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
 		
 		//Mark Down
-		ConfigBeanFactory.getMarkdownConfigBean().markdown("dao_test_1");
-		ConfigBeanFactory.getMarkdownConfigBean().markdown("dao_test_2");		
+		ConfigBeanFactory.getMarkdownConfigBean().markdown("ha_test_1");
+		ConfigBeanFactory.getMarkdownConfigBean().markdown("ha_test_2");		
 		try{
 			this.testQuery(logicName);		
 		}catch(Exception e){
 			Assert.fail();
 		}
 		
-		ConfigBeanFactory.getMarkdownConfigBean().markdown("dao_test");
+		ConfigBeanFactory.getMarkdownConfigBean().markdown("ha_test");
 		try{
 			this.testQuery(logicName);
 			Assert.fail();

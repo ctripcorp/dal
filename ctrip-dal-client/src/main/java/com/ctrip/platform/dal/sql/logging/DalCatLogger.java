@@ -8,19 +8,13 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
 public class DalCatLogger {
+	
 	public static void start(CtripLogEntry entry) {
 		try {
 			String sqlType = entry.getDao() + "." + entry.getMethod();
 			Transaction catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, sqlType);
 			entry.setCatTransaction(catTransaction);
-			catTransaction.addData(entry.getSqls() == null ? "" : StringUtils.join(entry.getSqls(), ";"));
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void catTransactionSuccess(CtripLogEntry entry){
-		try {
+			
 			String method = entry.getEvent() == null ? "dal_test" : CatInfo.getTypeSQLInfo(entry.getEvent());
 			Cat.logEvent("DAL.version", "java-" + entry.getClientVersion());
 			if(entry.getPramemters() != null){
@@ -29,6 +23,16 @@ public class DalCatLogger {
 				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, "");
 			}
 			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
+			
+			catTransaction.addData(entry.getSqls() == null ? "" : StringUtils.join(entry.getSqls(), ";"));
+			
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void catTransactionSuccess(CtripLogEntry entry){
+		try {
 			entry.getCatTransaction().setStatus(Transaction.SUCCESS);
 			entry.getCatTransaction().complete();
 		} catch (Throwable e) {

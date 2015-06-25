@@ -10,9 +10,12 @@ import com.ctrip.platform.dal.dao.task.BulkTask;
 import com.ctrip.platform.dal.dao.task.DalBulkTaskRequest;
 import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
 import com.ctrip.platform.dal.dao.task.DalSingleTaskRequest;
+import com.ctrip.platform.dal.dao.task.DalSqlTaskRequest;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
+import com.ctrip.platform.dal.dao.task.DeleteSqlTask;
 import com.ctrip.platform.dal.dao.task.SingleTask;
 import com.ctrip.platform.dal.dao.task.TaskAdapter;
+import com.ctrip.platform.dal.dao.task.UpdateSqlTask;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -26,8 +29,6 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
 public final class DalTableDao<T> extends TaskAdapter<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
 
-	private static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
-
 	private SingleTask<T> singleInsertTask;
 	private SingleTask<T> singleDeleteTask;
 	private SingleTask<T> singleUpdateTask;
@@ -37,6 +38,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	private BulkTask<int[], T> batchInsertTask;
 	private BulkTask<int[], T> batchDeleteTask;
 	private BulkTask<int[], T> batchUpdateTask;
+	
+	private DeleteSqlTask<T> deleteSqlTask;
+	private UpdateSqlTask<T> updateSqlTask;
 
 	private DalRequestExecutor executor; 
 			
@@ -68,6 +72,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		batchInsertTask = factory.createBatchInsertTask(parser);
 		batchDeleteTask = factory.createBatchDeleteTask(parser);
 		batchUpdateTask = factory.createBatchUpdateTask(parser);
+		
+		deleteSqlTask = factory.createDeleteSqlTask(parser);
+		updateSqlTask = factory.createUpdateSqlTask(parser);
 	}
 	
 	public DalClient getClient() {
@@ -440,9 +447,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int delete(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
-//		return new ResultMerger.IntSummary();
-		return client.update(String.format(TMPL_SQL_DELETE,
-				getTableName(hints, parameters), whereClause), parameters, hints);
+		return executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, whereClause, parameters, hints, deleteSqlTask, new ResultMerger.IntSummary()));
 	}
 
 	/**
@@ -456,7 +461,6 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int update(String sql, StatementParameters parameters, DalHints hints)
 			throws SQLException {
-//		return new ResultMerger.IntSummary();
-		return client.update(sql, parameters, hints);
+		return executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, sql, parameters, hints, updateSqlTask, new ResultMerger.IntSummary()));
 	}
 }

@@ -61,8 +61,9 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	@Override
 	public Map<String, Callable<T>> createTasks() throws SQLException {
 		Map<String, Callable<T>> tasks = new HashMap<>();
-		for(String shard: shards)
-			tasks.put(shard, createTask());
+		for(String shard: shards) {
+			tasks.put(shard, new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), sql, parameters, hints.clone().inShard(shard), task));
+		}
 
 		return tasks;
 	}

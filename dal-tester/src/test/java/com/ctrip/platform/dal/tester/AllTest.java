@@ -19,5 +19,6 @@ import org.junit.runners.Suite.SuiteClasses;
 	com.ctrip.platform.dal.dao.sqlbuilder.AllTests.class,
 	com.ctrip.platform.dal.dao.helpers.AllTests.class,
 	com.ctrip.platform.dal.tester.tasks.AllTest.class,
+	com.ctrip.platform.dal.tester.crossShard.AllTest.class,
 })
 public class AllTest {}

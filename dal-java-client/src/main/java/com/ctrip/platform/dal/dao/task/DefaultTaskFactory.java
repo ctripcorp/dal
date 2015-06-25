@@ -59,4 +59,18 @@ public class DefaultTaskFactory implements DalTaskFactory {
 		batchUpdateTask.initialize(parser);
 		return batchUpdateTask;
 	}
+
+	@Override
+	public <T> DeleteSqlTask<T> createDeleteSqlTask(DalParser<T> parser) {
+		DeleteSqlTask<T> deleteSqlTask = new DeleteSqlTask<T>();
+		deleteSqlTask.initialize(parser);
+		return deleteSqlTask;
+	}
+
+	@Override
+	public <T> UpdateSqlTask<T> createUpdateSqlTask(DalParser<T> parser) {
+		UpdateSqlTask<T> updateSqlTask = new UpdateSqlTask<T>();
+		updateSqlTask.initialize(parser);
+		return updateSqlTask;
+	}
 }

@@ -9,9 +9,11 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -1161,6 +1163,53 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		res = dao.delete(whereClause, parameters, new DalHints().setShardColValue("tableIndex", 3));
 		assertResEquals(3, res);
 		Assert.assertEquals(0, dao.query(whereClause, parameters, new DalHints().setShardColValue("tableIndex", 3)).size());
+		
+		insertBack();
+	}
+	
+	/**
+	 * Test delete entities with where clause and parameters
+	 * @throws SQLException
+	 */
+	@Test
+	public void testDeleteWithWhereClauseAllShards() throws SQLException{
+		String whereClause = "type=?";
+		StatementParameters parameters = new StatementParameters();
+		parameters.set(1, Types.SMALLINT, 1);
+
+		DalHints hints = new DalHints();
+		int res;
+		
+		// By allShards
+		Assert.assertEquals(3, getCountByDb(dao, 0));
+		Assert.assertEquals(3, getCountByDb(dao, 1));
+		res = dao.delete(whereClause, parameters, new DalHints().inAllShards());
+		assertResEquals(6, res);
+		Assert.assertEquals(0, dao.query(whereClause, parameters, new DalHints().inAllShards()).size());
+	}
+	
+	/**
+	 * Test delete entities with where clause and parameters
+	 * @throws SQLException
+	 */
+	@Test
+	public void testDeleteWithWhereClauseShards() throws SQLException{
+		String whereClause = "type=?";
+		StatementParameters parameters = new StatementParameters();
+		parameters.set(1, Types.SMALLINT, 1);
+
+		DalHints hints = new DalHints();
+		int res;
+		
+		// By shards
+		Set<String> shards = new HashSet<>();
+		shards.add("0");
+		shards.add("1");
+		Assert.assertEquals(3, getCountByDb(dao, 0));
+		Assert.assertEquals(3, getCountByDb(dao, 1));
+		res = dao.delete(whereClause, parameters, new DalHints().inShards(shards));
+		assertResEquals(6, res);
+		Assert.assertEquals(0, dao.query(whereClause, parameters, new DalHints().inShards(shards)).size());
 	}
 	
 	/**
@@ -1208,10 +1257,54 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		res = dao.update(sql, parameters, new DalHints().setShardColValue("tableIndex", 3));
 		assertResEquals(1, res);
 		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardColValue("tableIndex", 3)).getAddress());
-
 	}
 	
-		@Test
+	/**
+	 * Test plain update with SQL
+	 * @throws SQLException
+	 */
+	@Test
+	public void testUpdatePlainAllShards() throws SQLException{
+		String sql = "UPDATE " + TABLE_NAME
+				+ " SET address = 'CTRIP' WHERE id = 1";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+		int res;
+		
+		// By allShards
+		sql = "UPDATE " + TABLE_NAME
+				+ " SET address = 'CTRIP' WHERE id = 1";
+		res = dao.update(sql, parameters, new DalHints().inAllShards());
+		assertResEquals(2, res);
+		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
+		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(1)).getAddress());
+	}
+	
+	/**
+	 * Test plain update with SQL
+	 * @throws SQLException
+	 */
+	@Test
+	public void testUpdatePlainShards() throws SQLException{
+		String sql = "UPDATE " + TABLE_NAME
+				+ " SET address = 'CTRIP' WHERE id = 1";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints();
+		int res;
+		
+		// By shards
+		Set<String> shards = new HashSet<>();
+		shards.add("0");
+		shards.add("1");
+		sql = "UPDATE " + TABLE_NAME
+				+ " SET address = 'CTRIP' WHERE id = 1";
+		res = dao.update(sql, parameters, new DalHints().inShards(shards));
+		assertResEquals(2, res);
+		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
+		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(1)).getAddress());
+	}
+	
+	@Test
 	public void testCrossShardInsert() {
 		try {
 			int res = 0;

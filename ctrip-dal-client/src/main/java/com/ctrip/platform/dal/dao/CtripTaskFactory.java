@@ -8,11 +8,14 @@ import com.ctrip.platform.dal.dao.task.BatchInsertTask;
 import com.ctrip.platform.dal.dao.task.BatchUpdateTask;
 import com.ctrip.platform.dal.dao.task.BulkTask;
 import com.ctrip.platform.dal.dao.task.CombinedInsertTask;
+import com.ctrip.platform.dal.dao.task.DalTaskFactory;
+import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
+import com.ctrip.platform.dal.dao.task.DeleteSqlTask;
 import com.ctrip.platform.dal.dao.task.SingleDeleteTask;
 import com.ctrip.platform.dal.dao.task.SingleInsertTask;
 import com.ctrip.platform.dal.dao.task.SingleTask;
 import com.ctrip.platform.dal.dao.task.SingleUpdateTask;
-import com.ctrip.platform.dal.dao.task.DalTaskFactory;
+import com.ctrip.platform.dal.dao.task.UpdateSqlTask;
 
 /**
  * This Factory is to unify Ctrip special MS Sql Server CUD case and common my sql case. 
@@ -31,9 +34,13 @@ import com.ctrip.platform.dal.dao.task.DalTaskFactory;
  * @author jhhe
  */
 public class CtripTaskFactory implements DalTaskFactory {
+	private DefaultTaskFactory defaultFactory;
 	@Override
 	public void initialize(Map<String, ?> settings) {
 		//Do noting for now
+		
+		defaultFactory = new DefaultTaskFactory();
+		defaultFactory.initialize(settings);
 	}
 
 	private <T> DatabaseCategory getDbCategory(DalParser<T> parser) {
@@ -46,99 +53,80 @@ public class CtripTaskFactory implements DalTaskFactory {
 		
 	@Override
 	public <T> SingleTask<T> createSingleInsertTask(DalParser<T> parser) {
-		DatabaseCategory dbCategory = getDbCategory(parser);
-		SingleTask<T> singleTask;
-		
-		if(DatabaseCategory.MySql == dbCategory)
-			singleTask = new SingleInsertTask<T>();
-		else
-			singleTask = new SingleInsertSpaTask<>();
-		
+		if(DatabaseCategory.MySql == getDbCategory(parser))
+			return defaultFactory.createSingleInsertTask(parser);
+
+		SingleTask<T> singleTask = new SingleInsertSpaTask<>();
 		singleTask.initialize(parser);
 		return singleTask;
 	}
 
 	@Override
 	public <T> SingleTask<T> createSingleDeleteTask(DalParser<T> parser) {
-		DatabaseCategory dbCategory = getDbCategory(parser);
-		SingleTask<T> singleTask;
+		if(DatabaseCategory.MySql == getDbCategory(parser))
+			return defaultFactory.createSingleDeleteTask(parser);
 
-		if(DatabaseCategory.MySql == dbCategory)
-			singleTask = new SingleDeleteTask<T>();
-		else
-			singleTask = new SingleDeleteSpaTask<>();
-
+		SingleTask<T> singleTask = new SingleDeleteSpaTask<>();
 		singleTask.initialize(parser);
 		return singleTask;
 	}
 
 	@Override
 	public <T> SingleTask<T> createSingleUpdateTask(DalParser<T> parser) {
-		DatabaseCategory dbCategory = getDbCategory(parser);
-		SingleTask<T> singleTask;
+		if(DatabaseCategory.MySql == getDbCategory(parser))
+			return defaultFactory.createSingleUpdateTask(parser);
 
-		if(DatabaseCategory.MySql == dbCategory)
-			singleTask = new SingleUpdateTask<T>();
-		else
-			singleTask = new SingleUpdateSpaTask<>();
-
+		SingleTask<T> singleTask = new SingleUpdateSpaTask<>();
 		singleTask.initialize(parser);
 		return singleTask;
 	}
 
 	@Override
 	public <T> BulkTask<Integer, T> createCombinedInsertTask(DalParser<T> parser) {
-		DatabaseCategory dbCategory = getDbCategory(parser);
-		BulkTask<Integer, T> bulkTask;
-
-		if(DatabaseCategory.MySql == dbCategory)
-			bulkTask = new CombinedInsertTask<T>();
-		else
-			return null;
-
-		bulkTask.initialize(parser);
-		return bulkTask;
+		if(DatabaseCategory.MySql == getDbCategory(parser))
+			return defaultFactory.createCombinedInsertTask(parser);
+		
+		//For sqlserver, this operation is not supported in ctrip
+		return null;
 	}
 
 	@Override
 	public <T> BulkTask<int[], T> createBatchInsertTask(DalParser<T> parser) {
-		DatabaseCategory dbCategory = getDbCategory(parser);
-		BulkTask<int[], T> bulkTask;
+		if(DatabaseCategory.MySql == getDbCategory(parser))
+			return defaultFactory.createBatchInsertTask(parser);
 
-		if(DatabaseCategory.MySql == dbCategory)
-			bulkTask = new BatchInsertTask<T>();
-		else
-			bulkTask = new BatchInsertSp3Task<T>();
-
+		BulkTask<int[], T> bulkTask = new BatchInsertSp3Task<T>();
 		bulkTask.initialize(parser);
 		return bulkTask;
 	}
 
 	@Override
 	public <T> BulkTask<int[], T> createBatchDeleteTask(DalParser<T> parser) {
-		DatabaseCategory dbCategory = getDbCategory(parser);
-		BulkTask<int[], T> bulkTask;
+		if(DatabaseCategory.MySql == getDbCategory(parser))
+			return defaultFactory.createBatchDeleteTask(parser);
 
-		if(DatabaseCategory.MySql == dbCategory)
-			bulkTask = new BatchDeleteTask<T>();
-		else
-			bulkTask = new BatchDeleteSp3Task<T>();
-
+		BulkTask<int[], T> bulkTask = new BatchDeleteSp3Task<T>();
 		bulkTask.initialize(parser);
 		return bulkTask;
 	}
 
 	@Override
 	public <T> BulkTask<int[], T> createBatchUpdateTask(DalParser<T> parser) {
-		DatabaseCategory dbCategory = getDbCategory(parser);
-		BulkTask<int[], T> bulkTask;
+		if(DatabaseCategory.MySql == getDbCategory(parser))
+			return defaultFactory.createBatchUpdateTask(parser);
 
-		if(DatabaseCategory.MySql == dbCategory)
-			bulkTask = new BatchUpdateTask<T>();
-		else
-			bulkTask = new BatchUpdateSp3Task<T>();
-
+		BulkTask<int[], T> bulkTask = new BatchUpdateSp3Task<T>();
 		bulkTask.initialize(parser);
 		return bulkTask;
+	}
+
+	@Override
+	public <T> DeleteSqlTask<T> createDeleteSqlTask(DalParser<T> parser) {
+		return defaultFactory.createDeleteSqlTask(parser);
+	}
+
+	@Override
+	public <T> UpdateSqlTask<T> createUpdateSqlTask(DalParser<T> parser) {
+		return defaultFactory.createUpdateSqlTask(parser);
 	}
 }

@@ -25,4 +25,8 @@ public interface DalTaskFactory {
 	<T> BulkTask<int[], T> createBatchDeleteTask(DalParser<T> parser);
 
 	<T> BulkTask<int[], T> createBatchUpdateTask(DalParser<T> parser);
+	
+	<T> DeleteSqlTask<T> createDeleteSqlTask(DalParser<T> parser);
+	
+	<T> UpdateSqlTask<T> createUpdateSqlTask(DalParser<T> parser);
 }

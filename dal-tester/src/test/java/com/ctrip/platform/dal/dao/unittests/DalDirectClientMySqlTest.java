@@ -277,7 +277,7 @@ public class DalDirectClientMySqlTest {
 		DalHints hints = new DalHints();
 		int count = client.update(insertSql, parameters, hints.setKeyHolder(holder));
 		Assert.assertEquals(1, count);
-		Assert.assertEquals(1, holder.getKeyList().size());
+		Assert.assertEquals(1, holder.size());
 		Assert.assertTrue(holder.getKeyList().get(0)
 				.containsKey("GENERATED_KEY"));
 	}

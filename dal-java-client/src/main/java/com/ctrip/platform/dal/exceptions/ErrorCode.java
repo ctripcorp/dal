@@ -52,24 +52,29 @@ public enum ErrorCode {
 	ValidateKeyHolderConvert(ErrorClassify.Validate, 5104, "Can not convert generated key to number"),
 	
 	/**
+	 * The insertion is fail or not completed yet.
+	 */
+	KeyGenerationFailOrNotCompleted(ErrorClassify.Validate, 5105, "The insertion is fail or not completed yet."),
+	
+	/**
 	 * Sql cannot be null
 	 */
-	ValidateSql(ErrorClassify.Validate, 5105, "The given sql is null"),
+	ValidateSql(ErrorClassify.Validate, 5200, "The given sql is null"),
 	
 	/**
 	 * Pojos cannot be null
 	 */
-	ValidatePojoList(ErrorClassify.Validate, 5106, "The given pojo list is null"),
+	ValidatePojoList(ErrorClassify.Validate, 5201, "The given pojo list is null"),
 	
 	/**
 	 * Pojos cannot be null
 	 */
-	ValidatePojo(ErrorClassify.Validate, 5107, "The given pojo is null"),
+	ValidatePojo(ErrorClassify.Validate, 5202, "The given pojo is null"),
 	
 	/**
 	 * Task cannot be null
 	 */
-	ValidateTask(ErrorClassify.Validate, 5107, "The given dao task is null. Means the calling DAO method is not supported. Please contact your DAL team."),
+	ValidateTask(ErrorClassify.Validate, 5203, "The given dao task is null. Means the calling DAO method is not supported. Please contact your DAL team."),
 	
 	/**
 	 * Can not locate shard for %s

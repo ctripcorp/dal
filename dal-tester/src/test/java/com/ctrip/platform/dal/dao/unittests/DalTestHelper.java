@@ -59,7 +59,7 @@ public class DalTestHelper {
 	public static void assertKeyHolder(KeyHolder holder) throws SQLException {
 		if(holder == null)
 			return;
-		Assert.assertEquals(3, holder.getKeyList().size());		 
+		Assert.assertEquals(3, holder.size());		 
 		Assert.assertTrue(holder.getKey(0).longValue() > 0);
 		Assert.assertTrue(holder.getKeyList().get(0).containsKey(GENERATED_KEY));
 	}

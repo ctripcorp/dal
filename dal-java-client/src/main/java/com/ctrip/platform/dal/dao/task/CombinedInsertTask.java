@@ -35,16 +35,15 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 				values.substring(0, values.length() - 2) + ")");
 
 		KeyHolder keyHolder = hints.getKeyHolder();
-		if(keyHolder == null) {
-			return client.update(sql, parameters, hints);
-		} else{
-			KeyHolder tmpHolder = new KeyHolder();
-			int count = client.update(sql, parameters, hints.setKeyHolder(tmpHolder));
+		KeyHolder tmpHolder = keyHolder != null && keyHolder.isRequireMerge() ? new KeyHolder() : keyHolder;
+		
+		int count = client.update(sql, parameters, hints.setKeyHolder(tmpHolder));
+		
+		if(tmpHolder != null)
 			keyHolder.addPatial(daoPojos.keySet().toArray(new Integer[daoPojos.size()]), tmpHolder);
-			//Must set back, or the following call will be work on wrong keyholder
-			hints.setKeyHolder(keyHolder);
-			return count;
-		}
+		
+		hints.setKeyHolder(keyHolder);
+		return count;
 	}
 
 	@Override

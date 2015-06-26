@@ -44,7 +44,6 @@ public class DalRequestExecutor {
 	}
 	
 	public <T> T execute(final DalHints hints, final DalRequest<T> request, final boolean nullable) throws SQLException {
-		// TODO change queryCallback to ResultCallback
 		// TODO add performance tracking DalWatcher.begin();
 
 		if (hints.isAsyncExecution()) {

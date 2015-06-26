@@ -42,7 +42,6 @@ public class DalSqlTaskRequestTest {
 				throws SQLException {
 			return i;
 		}
-		
 	}
 
 	@Test

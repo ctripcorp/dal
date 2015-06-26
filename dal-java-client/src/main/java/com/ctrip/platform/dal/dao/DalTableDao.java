@@ -249,7 +249,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int insert(DalHints hints, T daoPojo)
 			throws SQLException {
-		return executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleInsertTask))[0];
+		return getSafeResult(executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleInsertTask)));
 	}
 	
 	/**
@@ -268,7 +268,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, T daoPojo)
 			throws SQLException {
-		return executor.execute(hints.setKeyHolder(keyHolder), new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleInsertTask))[0];
+		return getSafeResult(executor.execute(setSize(hints, keyHolder, daoPojo), new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleInsertTask)));
 	}
 	
 	/**
@@ -307,7 +307,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int[] insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos)
 			throws SQLException {
-		return executor.execute(hints.setKeyHolder(keyHolder), new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleInsertTask));
+		return executor.execute(setSize(hints, keyHolder, daoPojos), new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleInsertTask));
 	}
 	
 	/**
@@ -324,7 +324,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int combinedInsert(DalHints hints, List<T> daoPojos) 
 			throws SQLException {
-		return executor.execute(hints, new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedInsertTask));
+		return combinedInsert(hints, null, daoPojos);
 	}
 	
 	/**
@@ -341,11 +341,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos) 
 			throws SQLException {
-		int result = executor.execute(hints.setKeyHolder(keyHolder), new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedInsertTask));
-		if(keyHolder != null)
-			keyHolder.merge();
-		
-		return result;
+		return getSafeResult(executor.execute(setSize(hints, keyHolder, daoPojos), new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedInsertTask)));
 	}
 	
 	/**
@@ -370,7 +366,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @throws SQLException
 	 */
 	public int delete(DalHints hints, T daoPojo) throws SQLException {
-		return executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleDeleteTask))[0];
+		return getSafeResult(getSafeResult(executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleDeleteTask))));
 	}
 	
 	/**
@@ -412,7 +408,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @throws SQLException
 	 */
 	public int update(DalHints hints, T daoPojo) throws SQLException {
-		return executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleUpdateTask))[0];
+		return getSafeResult(executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleUpdateTask)));
 	}
 	
 	/**
@@ -447,7 +443,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int delete(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
-		return executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, whereClause, parameters, hints, deleteSqlTask, new ResultMerger.IntSummary()));
+		return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, whereClause, parameters, hints, deleteSqlTask, new ResultMerger.IntSummary())));
 	}
 
 	/**
@@ -461,6 +457,32 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int update(String sql, StatementParameters parameters, DalHints hints)
 			throws SQLException {
-		return executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, sql, parameters, hints, updateSqlTask, new ResultMerger.IntSummary()));
+		return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, sql, parameters, hints, updateSqlTask, new ResultMerger.IntSummary())));
+	}
+	
+	private int getSafeResult(Integer value) {
+		if(value == null)
+			return 0;
+		return value;
+	}
+	
+	private int getSafeResult(int[] counts) {
+		if(counts == null)
+			return 0;
+		return counts[0];
+	}
+	
+	private DalHints setSize(DalHints hints, KeyHolder keyHolder, List<T> pojos) {
+		if(keyHolder != null && pojos != null)
+			keyHolder.setSize(pojos.size());
+		
+		return hints.setKeyHolder(keyHolder);
+	}
+
+	private DalHints setSize(DalHints hints, KeyHolder keyHolder, T pojo) {
+		if(keyHolder != null && pojo != null)
+			keyHolder.setSize(1);
+		
+		return hints.setKeyHolder(keyHolder);
 	}
 }

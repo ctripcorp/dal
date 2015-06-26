@@ -259,7 +259,7 @@ public class DalHints {
 	
 	/**
 	 * If asyncExecution is set or there is callback, we assume it is asynchronized execution.
-	 * And in this case the futureResult will always be populated with Future<?>.
+	 * And in this case the futureResult will always be populated with Future.
 	 * If there is callback, the result will be pass to callback also.
 	 *  
 	 * @return

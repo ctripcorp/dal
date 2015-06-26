@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -784,7 +785,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 	private void assertKeyHolder(KeyHolder holder) throws SQLException {
 		if(!ASSERT_ALLOWED)
 			return;
-		Assert.assertEquals(3, holder.getKeyList().size());		 
+		Assert.assertEquals(3, holder.size());		 
 		Assert.assertTrue(holder.getKey(0).longValue() > 0);
 		Assert.assertTrue(holder.getKeyList().get(0).containsKey(GENERATED_KEY));
 	}
@@ -1184,6 +1185,32 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		Assert.assertEquals(3, getCountByDb(dao, 0));
 		Assert.assertEquals(3, getCountByDb(dao, 1));
 		res = dao.delete(whereClause, parameters, new DalHints().inAllShards());
+		assertResEquals(6, res);
+		Assert.assertEquals(0, dao.query(whereClause, parameters, new DalHints().inAllShards()).size());
+	}
+	
+	/**
+	 * Test delete entities with where clause and parameters
+	 * @throws SQLException
+	 */
+	@Test
+	public void testDeleteWithWhereClauseAllShardsAsync() throws SQLException{
+		String whereClause = "type=?";
+		StatementParameters parameters = new StatementParameters();
+		parameters.set(1, Types.SMALLINT, 1);
+
+		DalHints hints = new DalHints();
+		int res;
+		
+		// By allShards
+		Assert.assertEquals(3, getCountByDb(dao, 0));
+		Assert.assertEquals(3, getCountByDb(dao, 1));
+		res = dao.delete(whereClause, parameters, hints.inAllShards().asyncExecution());
+		try {
+			res = (Integer)hints.getAsyncResult().get();
+		} catch (Exception e) {
+			Assert.fail();
+		}
 		assertResEquals(6, res);
 		Assert.assertEquals(0, dao.query(whereClause, parameters, new DalHints().inAllShards()).size());
 	}

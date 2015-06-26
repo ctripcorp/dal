@@ -52,6 +52,6 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 			map.put(outputIdName, parameters.get(outputIdName, ParameterDirection.InputOutput).getValue());
 		}
 		
-		holder.getKeyList().add(map);
+		holder.addKey(map);
 	}
 }

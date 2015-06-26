@@ -366,7 +366,7 @@ public class DalTabelDaoMySqlTest {
 		KeyHolder holder = new KeyHolder();
 		int[] res = dao.insert(new DalHints(),holder, entities);
 		assertEquals(3, res);
-		Assert.assertEquals(3, holder.getKeyList().size());
+		Assert.assertEquals(3, holder.size());
 		Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEY"));
 	}
 	
@@ -404,7 +404,7 @@ public class DalTabelDaoMySqlTest {
 		DalHints hints = new DalHints();
 		int res = dao.combinedInsert(hints, holder, entities);
 		Assert.assertEquals(3, res);
-		Assert.assertEquals(3, holder.getKeyList().size());
+		Assert.assertEquals(3, holder.size());
 		Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEY"));		
 	}
 	

@@ -65,6 +65,8 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	@Override
 	public Callable<K> createTask() throws SQLException {
 		hints = hints.clone();
+		handleKeyHolder(false);
+		
 		// If only one shard is shuffled
 		if(shuffled != null) {
 			if(shuffled.size() == 0)
@@ -86,6 +88,9 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	public Map<String, Callable<K>> createTasks() throws SQLException {
 		Map<String, Callable<K>> tasks = new HashMap<>();
 		
+		// I know this is not so elegant.
+		handleKeyHolder(true);
+		
 		for(String shard: shuffled.keySet()) {
 			Map<Integer, Map<String, ?>> pojosInShard = shuffled.get(shard);
 			
@@ -96,6 +101,13 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		}
 
 		return tasks; 
+	}
+	
+	private void handleKeyHolder(boolean requireMerge) {
+		if(hints.getKeyHolder() == null)
+			return;
+		
+		hints.getKeyHolder().requireMerge();
 	}
 
 	@Override
@@ -134,6 +146,10 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			
 			Map<String, Map<Integer, Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, hints.getTableShardId(), shaffled);
 			
+			if(pojosInTable.size() > 1 && hints.getKeyHolder() != null) {
+				hints.getKeyHolder().requireMerge();
+			}
+				
 			DalHints tmpHints;
 			for(String curTableShardId: pojosInTable.keySet()) {
 				Map<Integer, Map<String, ?>> pojosInShard = pojosInTable.get(curTableShardId);
@@ -148,5 +164,5 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			}
 			return merger.merge();
 		}
-	}	
+	}
 }

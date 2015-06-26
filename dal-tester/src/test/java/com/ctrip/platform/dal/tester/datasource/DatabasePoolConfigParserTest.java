@@ -1,10 +1,13 @@
-package com.ctrip.datasource.configure;
+package com.ctrip.platform.dal.tester.datasource;
 
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
+import com.ctrip.platform.dal.dao.configure.DatabasePoolConifg;
 
 public class DatabasePoolConfigParserTest {
 
@@ -26,7 +29,7 @@ public class DatabasePoolConfigParserTest {
 	public void test1() {
 		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test");
 		Assert.assertEquals("dao_test", config.getName());
-		Assert.assertEquals(500, config.getPoolProperties().getMaxWait());
+		Assert.assertEquals(10000, config.getPoolProperties().getMaxWait());
 		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true", config.getOption());
 	}
 	
@@ -60,9 +63,9 @@ public class DatabasePoolConfigParserTest {
 	
 	@Test
 	public void test4() {
-		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test_1");
-		Assert.assertEquals("dao_test_1", config.getName());
-		Assert.assertEquals(500, config.getPoolProperties().getMaxWait());
+		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test_select");
+		Assert.assertEquals("dao_test_select", config.getName());
+		Assert.assertEquals(1000, config.getPoolProperties().getMaxWait());
 		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true", config.getPoolProperties().getConnectionProperties());
 	}
 

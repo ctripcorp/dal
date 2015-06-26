@@ -1,4 +1,4 @@
-package com.ctrip.datasource;
+package com.ctrip.platform.dal.tester.datasource;
 
 import java.sql.Connection;
 
@@ -8,13 +8,16 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.ctrip.datasource.locator.DataSourceLocator;
+import com.ctrip.datasource.configure.CtripConnectionStringParser;
+import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
+import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 
 public class DataSourceLocatorTest {
 
 	@Test
 	public void testGetMySqlDataSource() throws Exception {
-		DataSource ds = DataSourceLocator.newInstance().getDataSource("dao_test");
+		ConnectionStringParser parser = new CtripConnectionStringParser();
+		DataSource ds = DataSourceLocator.newInstance(parser).getDataSource("dao_test");
 		Assert.assertNotNull(ds);
 		Connection conn = ds.getConnection();
 		Assert.assertNotNull(conn);
@@ -24,7 +27,8 @@ public class DataSourceLocatorTest {
 	
 	@Test
 	public void testGetSqlServerDataSource() throws Exception {
-		DataSource ds = DataSourceLocator.newInstance().getDataSource("HotelPubDB");
+		ConnectionStringParser parser = new CtripConnectionStringParser();
+		DataSource ds = DataSourceLocator.newInstance(parser).getDataSource("HotelPubDB");
 		Assert.assertNotNull(ds);
 		Connection conn = ds.getConnection();
 		Assert.assertNotNull(conn);
@@ -34,14 +38,15 @@ public class DataSourceLocatorTest {
 		
 	@Test
 	public void testGetDataSource() throws Exception {
-		DataSource ds = DataSourceLocator.newInstance().getDataSource("dao_test_1");
+		ConnectionStringParser parser = new CtripConnectionStringParser();
+		DataSource ds = DataSourceLocator.newInstance(parser).getDataSource("dao_test_1");
 		Assert.assertNotNull(ds);
 		Connection conn = ds.getConnection();
 		Assert.assertNotNull(conn);
-		Assert.assertEquals("dao_test", conn.getCatalog());
+		Assert.assertEquals("dao_test_1", conn.getCatalog());
 		conn.close();
 		
-		DataSource ds2 = DataSourceLocator.newInstance().getDataSource("AbacusDB_SELECT_1");
+		DataSource ds2 = DataSourceLocator.newInstance(parser).getDataSource("AbacusDB_SELECT_1");
 		Assert.assertNotNull(ds2);
 		Connection conn2 = ds2.getConnection();
 		Assert.assertNotNull(conn2);

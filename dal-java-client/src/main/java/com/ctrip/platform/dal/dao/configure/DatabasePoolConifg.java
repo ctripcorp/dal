@@ -1,4 +1,4 @@
-package com.ctrip.datasource.configure;
+package com.ctrip.platform.dal.dao.configure;
 
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 

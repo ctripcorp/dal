@@ -1,4 +1,4 @@
-package com.ctrip.datasource.configure;
+package com.ctrip.platform.dal.dao.configure;
 
 import java.io.InputStream;
 import java.net.URL;

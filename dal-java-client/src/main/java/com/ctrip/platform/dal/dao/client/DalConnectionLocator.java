@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 public interface DalConnectionLocator {
-	void initLocator(Map<String, String> settings);
+	void initLocator(Map<String, String> settings) throws Exception ;
 	
 	Set<String> getDBNames();
 	

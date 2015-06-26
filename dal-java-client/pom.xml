@@ -50,6 +50,11 @@
     	<artifactId>persistence-api</artifactId>
     	<version>${javax-persistence-version}</version>
     </dependency>
+    <dependency>
+		<groupId>org.apache.tomcat</groupId>
+		<artifactId>tomcat-jdbc</artifactId>
+		<version>7.0.52</version>
+	</dependency>
   </dependencies>
   <build>
     <resources>

@@ -1,4 +1,4 @@
-package com.ctrip.datasource.configure;
+package com.ctrip.platform.dal.dao.configure;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,8 +18,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import com.ctrip.security.encryption.Crypto;
 
 public class DatabaseConfigParser {
 
@@ -51,17 +49,27 @@ public class DatabaseConfigParser {
 	private static String DATABASE_ENTRY_NAME = "name";
 	private static String DATABASE_ENTRY_CONNECTIONSTRING = "connectionString";
 	
-	private static DatabaseConfigParser allInOneConfigParser = new DatabaseConfigParser();
+	private static DatabaseConfigParser allInOneConfigParser = null;
 	
 	private Map<String, String[]> props = new HashMap<String, String[]>();
 	
 	private static final String DATABASE_CONFIG_LOCATION = "$classpath";
 	
-	private DatabaseConfigParser() {
+	private ConnectionStringParser connStrParser;
+	
+	private DatabaseConfigParser(ConnectionStringParser parser) {
+		this.connStrParser = parser;
 		initDBAllInOneConfig();
 	}
 	
-	public static DatabaseConfigParser newInstance() {
+	public static DatabaseConfigParser newInstance(ConnectionStringParser parser) {
+		if(allInOneConfigParser==null){
+			synchronized(DatabaseConfigParser.class){
+				if(allInOneConfigParser==null){
+					allInOneConfigParser = new DatabaseConfigParser(parser);
+				}
+			}
+		}
 		return allInOneConfigParser;
 	}
 	
@@ -186,14 +194,15 @@ public class DatabaseConfigParser {
 	 */
 	private String[] parseDBConnString(String name, String connStr, DatabasePoolConifg poolConfig) {
 		String[] dbInfos = new String[] { "", "", "","" };
-		if (connStr!=null && -1==connStr.indexOf(';')) { // connStr was encrypted
-			try {
-				connStr = Crypto.getInstance().decrypt(connStr);
-			} catch(Exception e) {
-				log.error("decode " + name + " connectionString exception, msg:" + e.getMessage(), e);
-				throw new RuntimeException("decode " + name + " connectionString exception, msg:" + e.getMessage(), e);
-			}
-		}
+		connStr = connStrParser.decrypt(name, connStr);
+//		if (connStr!=null && -1==connStr.indexOf(';')) { // connStr was encrypted
+//			try {
+//				connStr = Crypto.getInstance().decrypt(connStr);
+//			} catch(Exception e) {
+//				log.error("decode " + name + " connectionString exception, msg:" + e.getMessage(), e);
+//				throw new RuntimeException("decode " + name + " connectionString exception, msg:" + e.getMessage(), e);
+//			}
+//		}
 		try {
 			String dbname = null, charset = null, dbhost = null;
 			Matcher matcher = dbnamePattern.matcher(connStr);

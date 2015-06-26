@@ -195,14 +195,6 @@ public class DatabaseConfigParser {
 	private String[] parseDBConnString(String name, String connStr, DatabasePoolConifg poolConfig) {
 		String[] dbInfos = new String[] { "", "", "","" };
 		connStr = connStrParser.decrypt(name, connStr);
-//		if (connStr!=null && -1==connStr.indexOf(';')) { // connStr was encrypted
-//			try {
-//				connStr = Crypto.getInstance().decrypt(connStr);
-//			} catch(Exception e) {
-//				log.error("decode " + name + " connectionString exception, msg:" + e.getMessage(), e);
-//				throw new RuntimeException("decode " + name + " connectionString exception, msg:" + e.getMessage(), e);
-//			}
-//		}
 		try {
 			String dbname = null, charset = null, dbhost = null;
 			Matcher matcher = dbnamePattern.matcher(connStr);

@@ -39,7 +39,7 @@ public class DatabaseConfigParserTest {
 		Assert.assertEquals("uws_AllInOneKey_dev", prop[1]);
 		Assert.assertEquals("!QAZ@WSX1qaz2wsx", prop[2]);
 	}
-
+	
 	@Test
 	public void testNormal() throws Exception {
 		ConnectionStringParser parser = new CtripConnectionStringParser();

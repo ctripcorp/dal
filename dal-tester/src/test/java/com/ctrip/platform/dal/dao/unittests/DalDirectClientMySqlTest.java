@@ -34,7 +34,7 @@ import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
  * @version 2014-05-04
  */
 public class DalDirectClientMySqlTest {
-	private final static String DATABASE_NAME = "dao_test";
+	private final static String DATABASE_NAME = "dao_test_mysql";
 	
 	private final static String TABLE_NAME = "dal_client_test";
 	private final static String SP_I_NAME = "dal_client_test_i";

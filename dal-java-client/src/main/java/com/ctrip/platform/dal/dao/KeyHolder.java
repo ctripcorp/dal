@@ -113,6 +113,7 @@ public class KeyHolder {
 			}
 			return idList;
 		} catch (Throwable e) {
+			e.printStackTrace();
 			throw new DalException(ErrorCode.ValidateKeyHolderConvert, e);
 		}
 	}
@@ -148,7 +149,10 @@ public class KeyHolder {
 			merge();
 	}
 	
-	private void merge() {
+	private synchronized void merge() {
+		if(merged.get())
+			return;
+		
 		keyList.clear();
 		for(int i = 0; i < allKeys.size(); i++)
 			keyList.add(allKeys.get(i));

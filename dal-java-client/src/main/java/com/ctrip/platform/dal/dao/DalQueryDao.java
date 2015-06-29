@@ -281,7 +281,10 @@ public final class DalQueryDao {
 
 	/**
 	 * Execute query and return partial result against the given start and count.
-	 *   
+	 * If the query is executed under cross shard mode(all shards, or in some shards), 
+	 * the result will be ranged after result from all shard is collected and sorted.
+	 * For non-corss shard case, just do the range when walk through result set.
+	 *  
 	 * @param sql The sql statement to be executed
 	 * @param parameters A container that holds all the necessary parameters
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
@@ -316,8 +319,17 @@ public final class DalQueryDao {
 	
 	private <T> List<T> queryRange(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count) 
 			throws SQLException {
-		ResultMerger<List<T>> defaultMerger = new DalRangedResultMerger<>((Comparator<T>)hints.getSorter(), start, count);
-		return commonQuery(sql, parameters, hints, new DalRowMapperExtractor<T>(mapper, start, count), defaultMerger, NULLABLE);
+		ResultMerger<List<T>> defaultMerger;
+		DalRowMapperExtractor<T> extractor;
+		if(hints.isAllShards() || hints.isInShards()) {
+			defaultMerger = new DalRangedResultMerger<>((Comparator<T>)hints.getSorter(), start, count);
+			extractor = new DalRowMapperExtractor<T>(mapper);
+		} else {
+			defaultMerger = new DalListMerger<>((Comparator<T>)hints.getSorter());
+			extractor = new DalRowMapperExtractor<T>(mapper, start, count);
+		}
+		
+		return commonQuery(sql, parameters, hints, extractor, defaultMerger, NULLABLE);
 	}
 
 	/**

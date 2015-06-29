@@ -214,6 +214,10 @@ public class DalHints {
 		return this;
 	}
 	
+	public boolean isInShards() {
+		return is(DalHintEnum.shards);
+	}
+	
 	public Set<String> getShards() {
 		return (Set<String>)hints.get(DalHintEnum.shards);
 	}

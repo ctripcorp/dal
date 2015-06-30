@@ -321,11 +321,12 @@ public final class DalQueryDao {
 			throws SQLException {
 		ResultMerger<List<T>> defaultMerger;
 		DalRowMapperExtractor<T> extractor;
+		
 		if(hints.isAllShards() || hints.isInShards()) {
 			defaultMerger = new DalRangedResultMerger<>((Comparator<T>)hints.getSorter(), start, count);
 			extractor = new DalRowMapperExtractor<T>(mapper);
 		} else {
-			defaultMerger = new DalListMerger<>((Comparator<T>)hints.getSorter());
+			defaultMerger = null;// No need for non cross shard operation
 			extractor = new DalRowMapperExtractor<T>(mapper, start, count);
 		}
 		

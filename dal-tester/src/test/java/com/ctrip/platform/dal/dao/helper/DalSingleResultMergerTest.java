@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.helpers;
+package com.ctrip.platform.dal.dao.helper;
 
 import java.sql.SQLException;
 

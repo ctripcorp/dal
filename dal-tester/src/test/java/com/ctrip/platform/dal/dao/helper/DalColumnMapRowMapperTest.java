@@ -22,7 +22,7 @@ import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 
 public class DalColumnMapRowMapperTest {
-	private final static String DATABASE_NAME = "HotelPubDB";
+	private final static String DATABASE_NAME = "dao_test_sqlsvr";
 
 	private final static String TABLE_NAME = "dal_client_test";
 	

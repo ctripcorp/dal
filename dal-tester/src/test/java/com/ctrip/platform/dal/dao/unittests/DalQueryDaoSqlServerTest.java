@@ -22,7 +22,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class DalQueryDaoSqlServerTest {
 	private final static int ROW_COUNT = 1000;
-	private final static String DATABASE_NAME = "HotelPubDB";
+	private final static String DATABASE_NAME = "dao_test_sqlsvr";
 	private final static String TABLE_NAME = "dal_client_test";
 
 	private final static String DROP_TABLE_SQL = "IF EXISTS ("

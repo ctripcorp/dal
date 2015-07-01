@@ -26,7 +26,7 @@ import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class DalTableDaoSqlServerTest {
-	private final static String DATABASE_NAME = "HotelPubDB";
+	private final static String DATABASE_NAME = "dao_test_sqlsvr";
 	private final static String TABLE_NAME = "dal_client_test";
 
 	private final static String DROP_TABLE_SQL = "IF EXISTS ("
@@ -590,7 +590,7 @@ public class DalTableDaoSqlServerTest {
 	}
 	
 	private static class ClientTestDalParser implements DalParser<ClientTestModel>{
-		private static final String databaseName="HotelPubDB";
+		private static final String databaseName="dao_test_sqlsvr";
 		private static final String tableName= "dal_client_test";
 		private static final String[] columnNames = new String[]{
 			"id","quantity","type","address","last_changed"

@@ -6,6 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	DalQueryDaoTest.class,
+	DalQueryDaoMySqlTest.class,
+	DalQueryDaoSqlSvrTest.class,
 })
 public class AllTest {}

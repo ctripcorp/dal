@@ -4,6 +4,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -12,10 +16,30 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.ConnectionAction;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DalConnectionManager;
+import com.ctrip.platform.dal.tester.tasks.SqlServerTestInitializer;
 
 public class DalConnectionManagerTest {
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		SqlServerTestInitializer.setUpBeforeClass();
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+		SqlServerTestInitializer.tearDownAfterClass();
+	}
+
+	@Before
+	public void setUp() throws Exception {
+		SqlServerTestInitializer.setUp();
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		SqlServerTestInitializer.tearDown();
+	}
 	
-	private static final String connectionString = "HotelPubDB";
+	private static final String connectionString = "dao_test_sqlsvr";
 	
 	static{
 		try {
@@ -57,7 +81,7 @@ public class DalConnectionManagerTest {
 				public Object execute() throws Exception {
 					connHolder = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
 					statement = connHolder.getConn().createStatement();
-					rs = statement.executeQuery("select * from Hotel");
+					rs = statement.executeQuery("select * from " + SqlServerTestInitializer.TABLE_NAME);
 					rs.next();
 					return null;
 				}

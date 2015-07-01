@@ -7,6 +7,10 @@ import static org.junit.Assert.fail;
 
 import java.sql.Connection;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -18,8 +22,29 @@ import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.client.DbMeta;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
+import com.ctrip.platform.dal.tester.tasks.SqlServerTestInitializer;
 
 public class ConnectionActionTest {
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		SqlServerTestInitializer.setUpBeforeClass();
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+		SqlServerTestInitializer.tearDownAfterClass();
+	}
+
+	@Before
+	public void setUp() throws Exception {
+		SqlServerTestInitializer.setUp();
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		SqlServerTestInitializer.tearDown();
+	}
+	
 	static{
 		try {
 			DalClientFactory.initClientFactory();
@@ -28,7 +53,7 @@ public class ConnectionActionTest {
 		}
 	}
 	
-	private static final String connectionString = "HotelPubDB";
+	private static final String connectionString = "dao_test_sqlsvr";
 	
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
@@ -112,7 +137,7 @@ public class ConnectionActionTest {
 			TestConnectionAction test = new TestConnectionAction();
 			test.connHolder = getDalConnection();
 			test.statement = test.connHolder.getConn().createStatement();
-			test.rs = test.statement.executeQuery("select * from Hotel");
+			test.rs = test.statement.executeQuery("select * from " + SqlServerTestInitializer.TABLE_NAME);
 			test.rs.next();
 			test.cleanup();
 			assertNotNull(test);

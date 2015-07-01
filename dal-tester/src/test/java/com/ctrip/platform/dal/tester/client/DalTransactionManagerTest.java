@@ -17,7 +17,7 @@ import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 
 public class DalTransactionManagerTest {
 	
-	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";
+	private static final String logicDbName = "dao_test_sqlsvr";
 	
 	static{
 		try {

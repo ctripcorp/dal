@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.dao.ha;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.easymock.classextension.EasyMock;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -226,7 +225,7 @@ public class HATest {
 	@Test
 	public void testHAWithMarkdowns() throws Exception{
 		ConfigBeanFactory.getMarkdownConfigBean().init();
-		ConfigBeanFactory.getMarkdownConfigBean().set("markDownKeys", "dao_test_1");
+		ConfigBeanFactory.getMarkdownConfigBean().set("markDownKeys", "ha_test_1");//dao_test_1
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database2.getTableName();
 		Integer count = 0;

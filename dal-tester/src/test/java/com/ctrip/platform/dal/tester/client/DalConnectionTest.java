@@ -10,6 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -17,9 +21,30 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DbMeta;
 import com.ctrip.platform.dal.dao.client.LogEntry;
+import com.ctrip.platform.dal.tester.tasks.SqlServerTestInitializer;
 
 public class DalConnectionTest {
-	private static final String connectionString = "HotelPubDB";
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		SqlServerTestInitializer.setUpBeforeClass();
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+		SqlServerTestInitializer.tearDownAfterClass();
+	}
+
+	@Before
+	public void setUp() throws Exception {
+		SqlServerTestInitializer.setUp();
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		SqlServerTestInitializer.tearDown();
+	}
+
+	private static final String connectionString = "dao_test_sqlsvr";
 	static{
 		try {
 			DalClientFactory.initClientFactory();
@@ -147,7 +172,7 @@ public class DalConnectionTest {
 			DalConnection test = getConnection();
 
 			Statement statement = test.getConn().createStatement();
-			ResultSet rs = statement.executeQuery("select * from Hotel");
+			ResultSet rs = statement.executeQuery("select * from " + SqlServerTestInitializer.TABLE_NAME);
 			rs.next();
 
 			conn = test.getConn();

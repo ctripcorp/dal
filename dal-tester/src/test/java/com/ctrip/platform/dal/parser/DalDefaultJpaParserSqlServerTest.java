@@ -46,7 +46,7 @@ public class DalDefaultJpaParserSqlServerTest {
 	private static DalParser<ClientTestModel> parser = null;
 	static {
 		try {
-			parser = DalDefaultJpaParser.create(ClientTestModel.class, "HotelPubDB");
+			parser = DalDefaultJpaParser.create(ClientTestModel.class, "dao_test_sqlsvr");
 			
 			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(parser.getDatabaseName());	

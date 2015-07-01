@@ -7,15 +7,40 @@ import static org.junit.Assert.fail;
 
 import java.sql.Connection;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DalTransaction;
 import com.ctrip.platform.dal.dao.client.DbMeta;
+import com.ctrip.platform.dal.tester.tasks.SqlServerTestInitializer;
 
 public class DalTransactionTest {
-	private static final String logicDbName = "HtlOvsPubDB_INSERT_1";
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		SqlServerTestInitializer.setUpBeforeClass();
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+		SqlServerTestInitializer.tearDownAfterClass();
+	}
+
+	@Before
+	public void setUp() throws Exception {
+		SqlServerTestInitializer.setUp();
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		SqlServerTestInitializer.tearDown();
+	}
+
+	private static final String logicDbName = "dao_test_sqlsvr";
 
 	static{
 		try {

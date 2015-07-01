@@ -13,7 +13,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 public class SqlServerTestInitializer {
 	public final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr";
 	
-	private final static String TABLE_NAME = "dal_client_test";
+	public final static String TABLE_NAME = "dal_client_test";
 
 	//Create the the table
 	private final static String DROP_TABLE_SQL_SQLSVR_TPL = "IF EXISTS ("

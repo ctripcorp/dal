@@ -31,9 +31,8 @@ public class DalQueryDaoMySqlTest extends DalQueryDaoTest {
 	
 	//Create the the table
 	private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"("
-			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
+			+ "id int NOT NULL PRIMARY KEY AUTO_INCREMENT, "
 			+ "quantity int,"
-			+ "tableIndex int,"
 			+ "type smallint, "
 			+ "address VARCHAR(64) not null, "
 			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
@@ -74,13 +73,13 @@ public class DalQueryDaoMySqlTest extends DalQueryDaoTest {
 		DalHints hints = new DalHints();
 		String[] insertSqls = null;
 		for(int i = 0; i < mod; i++) {
-			insertSqls = new String[] {
-					"INSERT INTO " + TABLE_NAME
-							+ " VALUES(1, 10, " + i + " ,1, 'SH INFO', NULL)",
-					"INSERT INTO " + TABLE_NAME
-							+ " VALUES(2, 11, " + i + " ,1, 'BJ INFO', NULL)",
-					"INSERT INTO " + TABLE_NAME
-							+ " VALUES(3, 12, " + i + " ,1, 'SZ INFO', NULL)" };
+			insertSqls = new String[3];
+			for(int j = 0; j < 3; j ++) {
+				int id = j + 1;
+				int quantity = 10 + j;
+				insertSqls[j] = "INSERT INTO " + TABLE_NAME + "(Id, quantity,type,address)"
+							+ " VALUES(" + id + ", " + quantity + "," + i + ", 'SH INFO')";
+			}
 			int[] counts = clientMySql.batchUpdate(insertSqls, hints.inShard(i));
 			assertArrayEquals(new int[] { 1, 1, 1 }, counts);
 		}

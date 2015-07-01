@@ -365,6 +365,7 @@ public abstract class DalQueryDaoTest {
 					Integer.class);
 			assertEquals(1, result.intValue());
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 	}

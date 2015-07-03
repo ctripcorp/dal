@@ -29,6 +29,7 @@ public class DalTableDaoShardByDbMySqlTest extends BaseDalTableDaoShardByDbTest 
 	private final static String DROP_TABLE_SQL_MYSQL_TPL = "DROP TABLE IF EXISTS " + TABLE_NAME;
 	
 	//Create the the table
+	// Note that id is UNSIGNED int, which maps to Long in java when using rs.getObject()
 	private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"("
 			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
 			+ "quantity int,"

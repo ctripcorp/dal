@@ -4,6 +4,8 @@ import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 
+import junit.framework.Assert;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -57,7 +59,22 @@ public class SingleInsertSpaTaskTest {
 	 	p1.setCountryID(-1);
 
 		try {
-			test.execute(new DalHints().inShard(0), parser.getFields(p1));
+			KeyHolder keyHolder = new KeyHolder();
+			DalHints hints = new DalHints();
+			hints.setKeyHolder(keyHolder);
+			
+			test.execute(hints.inShard(0), parser.getFields(p1));
+			Number id1 = keyHolder.getKey();
+			Assert.assertTrue(id1.intValue() > 0);
+			//----------
+			keyHolder = new KeyHolder();
+			hints = new DalHints();
+			hints.setKeyHolder(keyHolder);
+			
+			test.execute(hints.inShard(0), parser.getFields(p1));
+			Number id2 = keyHolder.getKey();
+			Assert.assertTrue(id2.intValue() > 0);
+			Assert.assertTrue(id2.intValue() - id1.intValue() == 1);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			fail();

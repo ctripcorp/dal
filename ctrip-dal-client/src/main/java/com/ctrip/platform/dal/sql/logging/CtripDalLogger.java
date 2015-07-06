@@ -102,8 +102,6 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 	
 	@Override
 	public void success(final LogEntry entry, final int count) {
-		if (samplingLogging && !validate(entry) )
-			return;
 		if (asyncLogging) {
 			executor.submit(new Runnable() {
 				@Override
@@ -119,6 +117,8 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 	private void recordSuccess(final LogEntry entry, final int count) {
 		try {
 			DalCatLogger.catTransactionSuccess((CtripLogEntry)entry);
+			if (samplingLogging && !validate(entry) )
+				return;
 			DalCLogger.success((CtripLogEntry)entry, count);
 			Metrics.success((CtripLogEntry)entry, entry.getDuration());
 		} catch (Throwable e) {

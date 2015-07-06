@@ -91,7 +91,6 @@ public class DalTransactionManager {
 
 			endTransaction(level);
 		} catch (Throwable e) {
-			e.printStackTrace();
 			ex = e;
 			rollbackTransaction();
 			MarkdownManager.detect(action.connHolder, action.start, e);

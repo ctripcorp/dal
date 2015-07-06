@@ -47,7 +47,7 @@ public abstract class LoggerAdapter implements DalLogger {
 	private static ScheduledExecutorService scheduler = null;
 	private static final AtomicBoolean isClearingCache = new AtomicBoolean(false);
 	
-	protected static boolean asyncLogging = true;
+	protected static boolean asyncLogging = false;
 	
 	protected static ExecutorService executor = null;
 

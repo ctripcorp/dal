@@ -299,7 +299,7 @@ public class AbstractJavaDataPreparer{
 			for (String field : fields) {
 				for (JavaParameterHost pHost : allColumns) {
 					if (pHost.getName().equals(field)) {
-						pHost.setSensitive(sensitive.get(field));
+						pHost.setSensitive(sensitive.get(field) == null ? false : sensitive.get(field));
 						parameters.add(pHost);
 						break;
 					}

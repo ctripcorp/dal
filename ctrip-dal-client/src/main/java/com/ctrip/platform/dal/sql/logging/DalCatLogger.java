@@ -25,6 +25,8 @@ public class DalCatLogger {
 			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
 			
 			catTransaction.addData(entry.getSqls() == null ? "" : StringUtils.join(entry.getSqls(), ";"));
+			if (entry.getCallString() != null && entry.getCallString().length() > 0)
+				catTransaction.addData(entry.getCallString());
 			
 		} catch (Throwable e) {
 			e.printStackTrace();

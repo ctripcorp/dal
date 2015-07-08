@@ -22,9 +22,10 @@ public class DalCatLogger {
 			} else {
 				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, "");
 			}
-			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
 			
 			catTransaction.addData(entry.getSqls() == null ? "" : StringUtils.join(entry.getSqls(), ";"));
+			if (entry.getCallString() != null && entry.getCallString().length() > 0)
+				catTransaction.addData(entry.getCallString());
 			
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -33,6 +34,7 @@ public class DalCatLogger {
 
 	public static void catTransactionSuccess(CtripLogEntry entry){
 		try {
+			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
 			entry.getCatTransaction().setStatus(Transaction.SUCCESS);
 			entry.getCatTransaction().complete();
 		} catch (Throwable e) {
@@ -42,6 +44,7 @@ public class DalCatLogger {
 
 	public static void catTransactionFailed(CtripLogEntry entry, Throwable e){
 		try {
+			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
 			entry.getCatTransaction().setStatus(e);
 			Cat.logError(e);
 			entry.getCatTransaction().complete();

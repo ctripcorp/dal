@@ -43,6 +43,7 @@ import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 	<logger>com.xxx.xxx.xxx</logger>
     <settings>
 	  <encrypt>true</encrypt>
+	  <secretKey>dalctripcn</secretKey>
 	  <sampling>false</sampling>
 	  <samplingLow>60</samplingLow>
 	  <samplingHigh>5</samplingHigh>

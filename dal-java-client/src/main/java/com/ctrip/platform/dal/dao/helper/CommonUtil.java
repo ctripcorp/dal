@@ -61,84 +61,8 @@ public class CommonUtil {
 //	public static String tagSql(String sql) {
 //		return APPID_COMMENT + sql;
 //	}
-    
 
 
-    /**
-     * For encrypt input/output parameters
-     * @param encryptString
-     * @return
-     */
-	public static String desEncrypt(String encryptString) {
-		if (encryptString == null)
-			return null;
-
-		try {
-			byte[] keyBytes = key.substring(0, 8).getBytes("UTF-8");
-			Key key = new javax.crypto.spec.SecretKeySpec(keyBytes, "DES");
-			Cipher encryptCipher;
-
-			encryptCipher = Cipher.getInstance("DES");
-			encryptCipher.init(Cipher.ENCRYPT_MODE, key);
-
-			byte[] inputByteArray = encryptString.getBytes("UTF-8");
-			byte[] encryptedByteArray = encryptCipher.doFinal(inputByteArray);
-			return new String(Base64.encodeBase64(encryptedByteArray));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-        
-//        byte[] keyIV = keyBytes;
-//        byte[] inputByteArray = Encoding.UTF8.GetBytes(encryptString);
-//        using (DESCryptoServiceProvider provider = new DESCryptoServiceProvider())
-//        {
-//            MemoryStream mStream = new MemoryStream();
-//            CryptoStream cStream = new CryptoStream(mStream, provider.CreateEncryptor(keyBytes, keyIV), CryptoStreamMode.Write);
-//            cStream.Write(inputByteArray, 0, inputByteArray.Length);
-//            cStream.FlushFinalBlock();
-//            return Convert.ToBase64String(mStream.ToArray());
-//        }
-    }
-
-    /**
-     * For decrypt input/output parameters
-     * @param encryptString
-     * @return
-     */
-	public static String desDecrypt(String encryptString) {
-		if (encryptString == null)
-			return null;
-
-		try {
-			byte[] keyBytes = key.substring(0, 8).getBytes("UTF-8");
-			Key key = new javax.crypto.spec.SecretKeySpec(keyBytes, "DES");
-			Cipher decryptCipher;
-
-			decryptCipher = Cipher.getInstance("DES");
-			decryptCipher.init(Cipher.DECRYPT_MODE, key);
-
-			byte[] encryptedByteArray = Base64.decodeBase64(encryptString
-					.getBytes());
-			return new String(decryptCipher.doFinal(encryptedByteArray));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return encryptString;
-//
-//        byte[] keyBytes = Encoding.UTF8.GetBytes(key.Substring(0, 8));
-//        byte[] keyIV = keyBytes;
-//        byte[] inputByteArray = Convert.FromBase64String(decryptString);
-//        using (DESCryptoServiceProvider provider = new DESCryptoServiceProvider())
-//        {
-//            MemoryStream mStream = new MemoryStream();
-//            CryptoStream cStream = new CryptoStream(mStream, provider.CreateDecryptor(keyBytes, keyIV), CryptoStreamMode.Write);
-//            cStream.Write(inputByteArray, 0, inputByteArray.Length);
-//            cStream.FlushFinalBlock();
-//            return Encoding.UTF8.GetString(mStream.ToArray());
-//        }
-    }
-    
 	public static String null2NA(String str) {
 		return null != str ? str : "NA";
 	}

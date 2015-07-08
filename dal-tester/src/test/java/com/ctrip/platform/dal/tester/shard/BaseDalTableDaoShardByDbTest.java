@@ -2,6 +2,11 @@ package com.ctrip.platform.dal.tester.shard;
 
 import static com.ctrip.platform.dal.dao.unittests.DalTestHelper.deleteAllShardsByDb;
 import static com.ctrip.platform.dal.dao.unittests.DalTestHelper.getCountByDb;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,19 +20,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalDetailResults;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.DalResultCallback;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 
 public abstract class BaseDalTableDaoShardByDbTest {
 	private boolean ASSERT_ALLOWED = false;
@@ -58,21 +63,21 @@ public abstract class BaseDalTableDaoShardByDbTest {
 
 	public void assertResEquals(int exp, int res) {
 		if(ASSERT_ALLOWED)
-			Assert.assertEquals(exp, res);
+			assertEquals(exp, res);
 	}
 	
 	public void assertResEquals(int[] exp, int[] res) {
-		Assert.assertEquals(exp.length, res.length);
+		assertEquals(exp.length, res.length);
 		
 		if(ASSERT_ALLOWED)
-			Assert.assertArrayEquals(exp, res);
+			assertArrayEquals(exp, res);
 	}
 
 	public void assertResEquals(int exp, int[] res) {
 		if(ASSERT_ALLOWED) {
 			int total = 0;
 			for(int t: res)total+=t;
-			Assert.assertEquals(exp, total);
+			assertEquals(exp, total);
 		}
 	}
 	
@@ -90,32 +95,185 @@ public abstract class BaseDalTableDaoShardByDbTest {
 				model = dao.queryByPk(1, new DalHints().inShard(String.valueOf(i)));
 			else
 				model = dao.queryByPk(1, new DalHints().inShard(i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 
 			// By shardValue
 			if(i%2 == 0)
 				model = dao.queryByPk(1, new DalHints().setShardValue(String.valueOf(i)));
 			else
 				model = dao.queryByPk(1, new DalHints().setShardValue(i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 
 			// By shardColValue
 			if(i%2 == 0)
 				model = dao.queryByPk(1, new DalHints().setShardColValue("index", String.valueOf(i)));
 			else
 				model = dao.queryByPk(1, new DalHints().setShardColValue("index", i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 
 			// By shardColValue
 			if(i%2 == 0)
 				model = dao.queryByPk(1, new DalHints().setShardColValue("tableIndex", String.valueOf(i)));
 			else
 				model = dao.queryByPk(1, new DalHints().setShardColValue("tableIndex", i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
+		}
+	}
+	
+	private ClientTestModel getModel(DalHints hints) throws SQLException {
+		try {
+			return (ClientTestModel)hints.getAsyncResult().get();
+		} catch (Exception e) {
+			throw new SQLException(e);
+		}
+	}
+
+	private ClientTestModel getModel(DefaultResultCallback callback) throws SQLException { 
+		while(callback.getResult() == null)
+			try {
+				Thread.yield();
+			} catch (Exception e) {
+				throw new SQLException(e);
+			}
+		
+		return (ClientTestModel)callback.getResult();
+	}
+
+	@Test
+	public void testQueryByPkAsync() throws SQLException {
+		ClientTestModel model = null;
+		DalHints hints;
+		for(int i = 0; i < mod; i++) {
+			// By shard
+			hints = new DalHints().asyncExecution();
+			if(i%2 == 0)
+				model = dao.queryByPk(1, hints.inShard(String.valueOf(i)));
+			else
+				model = dao.queryByPk(1, hints.inShard(i));
+			
+			assertNull(model);
+			model = getModel(hints);
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
+
+			// By shardValue
+			hints = new DalHints().asyncExecution();
+			if(i%2 == 0)
+				model = dao.queryByPk(1, hints.setShardValue(String.valueOf(i)));
+			else
+				model = dao.queryByPk(1, hints.setShardValue(i));
+
+			assertNull(model);
+			model = getModel(hints);
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
+
+			// By shardColValue
+			hints = new DalHints().asyncExecution();
+			if(i%2 == 0)
+				model = dao.queryByPk(1, hints.setShardColValue("index", String.valueOf(i)));
+			else
+				model = dao.queryByPk(1, hints.setShardColValue("index", i));
+			
+			assertNull(model);
+			model = getModel(hints);
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
+
+			// By shardColValue
+			hints = new DalHints().asyncExecution();
+			if(i%2 == 0)
+				model = dao.queryByPk(1, hints.setShardColValue("tableIndex", String.valueOf(i)));
+			else
+				model = dao.queryByPk(1, hints.setShardColValue("tableIndex", i));
+
+			assertNull(model);
+			model = getModel(hints);
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
+		}
+	}
+
+	private class TestQueryResultCallback implements DalResultCallback {
+		private AtomicReference<ClientTestModel> model = new AtomicReference<>();
+		
+		@Override
+		public <T> void onResult(T result) {
+			model.set((ClientTestModel)result);
+		}
+		
+		public ClientTestModel get() {
+			while(model.get() == null)
+				try {
+					Thread.sleep(1);
+				} catch (Exception e) {
+					return null;
+				}
+			return model.get();
+		}
+	}
+	
+	@Test
+	public void testQueryByPkCallback() throws SQLException {
+		ClientTestModel model = null;
+		DalHints hints;
+		TestQueryResultCallback callback;
+		for(int i = 0; i < mod; i++) {
+			// By shard
+			callback = new TestQueryResultCallback();
+			hints = new DalHints().callbackWith(callback);
+			if(i%2 == 0)
+				model = dao.queryByPk(1, hints.inShard(String.valueOf(i)));
+			else
+				model = dao.queryByPk(1, hints.inShard(i));
+			
+			assertNull(model);
+			model = callback.get();
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
+
+			// By shardValue
+			callback = new TestQueryResultCallback();
+			hints = new DalHints().callbackWith(callback);
+			if(i%2 == 0)
+				model = dao.queryByPk(1, hints.setShardValue(String.valueOf(i)));
+			else
+				model = dao.queryByPk(1, hints.setShardValue(i));
+
+			assertNull(model);
+			model = callback.get();
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
+
+			// By shardColValue
+			callback = new TestQueryResultCallback();
+			hints = new DalHints().callbackWith(callback);
+			if(i%2 == 0)
+				model = dao.queryByPk(1, hints.setShardColValue("index", String.valueOf(i)));
+			else
+				model = dao.queryByPk(1, hints.setShardColValue("index", i));
+			
+			assertNull(model);
+			model = callback.get();
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
+
+			// By shardColValue
+			callback = new TestQueryResultCallback();
+			hints = new DalHints().callbackWith(callback);
+			if(i%2 == 0)
+				model = dao.queryByPk(1, hints.setShardColValue("tableIndex", String.valueOf(i)));
+			else
+				model = dao.queryByPk(1, hints.setShardColValue("tableIndex", i));
+
+			assertNull(model);
+			model = callback.get();
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 		}
 	}
 
@@ -134,29 +292,29 @@ public abstract class BaseDalTableDaoShardByDbTest {
 
 			// By shard
 			model = dao.queryByPk(pk, new DalHints().inShard(i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 
 			// By shardValue
 			model = dao.queryByPk(pk, new DalHints().setShardValue(i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 
 			// By shardColValue
 			model = dao.queryByPk(pk, new DalHints().setShardColValue("index", i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 			
 			// By shardColValue
 			model = dao.queryByPk(pk, new DalHints().setShardColValue("tableIndex", i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 
 			// By fields
 			pk.setTableIndex(i);
 			model = dao.queryByPk(pk, new DalHints());
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 		}
 	}
 	
@@ -174,23 +332,23 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			
 			// By shard
 			model = dao.queryByPk(pk, new DalHints().inShard(i));
-			Assert.assertNull(model);
+			assertNull(model);
 
 			// By shardValue
 			model = dao.queryByPk(pk, new DalHints().setShardValue(i));
-			Assert.assertNull(model);
+			assertNull(model);
 
 			// By shardColValue
 			model = dao.queryByPk(pk, new DalHints().setShardColValue("index", i));
-			Assert.assertNull(model);
+			assertNull(model);
 			
 			// By shardColValue
 			model = dao.queryByPk(pk, new DalHints().setShardColValue("tableIndex", i));
-			Assert.assertNull(model);
+			assertNull(model);
 
 			// By fields
 			model = dao.queryByPk(pk, new DalHints());
-			Assert.assertNull(model);
+			assertNull(model);
 		}
 	}
 
@@ -210,24 +368,24 @@ public abstract class BaseDalTableDaoShardByDbTest {
 
 			// By shard
 			models = dao.queryLike(pk, new DalHints().inShard(i));
-			Assert.assertEquals(3, models.size());
+			assertEquals(3, models.size());
 
 			// By shardValue
 			models = dao.queryLike(pk, new DalHints().setShardValue(i));
-			Assert.assertEquals(3, models.size());
+			assertEquals(3, models.size());
 
 			// By shardColValue
 			models = dao.queryLike(pk, new DalHints().setShardColValue("index", i));
-			Assert.assertEquals(3, models.size());
+			assertEquals(3, models.size());
 
 			// By shardColValue
 			models = dao.queryLike(pk, new DalHints().setShardColValue("tableIndex", i));
-			Assert.assertEquals(3, models.size());
+			assertEquals(3, models.size());
 
 			// By fields
 			pk.setTableIndex(i);
 			models = dao.queryLike(pk, new DalHints());
-			Assert.assertEquals(3, models.size());
+			assertEquals(3, models.size());
 		}
 	}
 	
@@ -247,27 +405,27 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			
 			// By shard
 			models = dao.query(whereClause, parameters, new DalHints().inShard(i));
-			Assert.assertEquals(1, models.size());
-			Assert.assertEquals("SH INFO", models.get(0).getAddress());
-			Assert.assertEquals(models.get(0).getTableIndex(), new Integer(i));
+			assertEquals(1, models.size());
+			assertEquals("SH INFO", models.get(0).getAddress());
+			assertEquals(models.get(0).getTableIndex(), new Integer(i));
 
 			// By shardValue
 			models = dao.query(whereClause, parameters, new DalHints().setShardValue(i));
-			Assert.assertEquals(1, models.size());
-			Assert.assertEquals("SH INFO", models.get(0).getAddress());
-			Assert.assertEquals(models.get(0).getTableIndex(), new Integer(i));
+			assertEquals(1, models.size());
+			assertEquals("SH INFO", models.get(0).getAddress());
+			assertEquals(models.get(0).getTableIndex(), new Integer(i));
 
 			// By shardColValue
 			models = dao.query(whereClause, parameters, new DalHints().setShardColValue("index", i));
-			Assert.assertEquals(1, models.size());
-			Assert.assertEquals("SH INFO", models.get(0).getAddress());
-			Assert.assertEquals(models.get(0).getTableIndex(), new Integer(i));
+			assertEquals(1, models.size());
+			assertEquals("SH INFO", models.get(0).getAddress());
+			assertEquals(models.get(0).getTableIndex(), new Integer(i));
 
 			// By shardColValue
 			models = dao.query(whereClause, parameters, new DalHints().setShardColValue("tableIndex", i));
-			Assert.assertEquals(1, models.size());
-			Assert.assertEquals("SH INFO", models.get(0).getAddress());
-			Assert.assertEquals(models.get(0).getTableIndex(), new Integer(i));
+			assertEquals(1, models.size());
+			assertEquals("SH INFO", models.get(0).getAddress());
+			assertEquals(models.get(0).getTableIndex(), new Integer(i));
 
 			// By parameters
 			whereClause += " and tableIndex=?";
@@ -277,8 +435,8 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			parameters.set(3, "tableIndex", Types.SMALLINT, i);
 
 			models = dao.query(whereClause, parameters, new DalHints());
-			Assert.assertEquals(1, models.size());
-			Assert.assertEquals(models.get(0).getTableIndex(), new Integer(i));
+			assertEquals(1, models.size());
+			assertEquals(models.get(0).getTableIndex(), new Integer(i));
 		}
 	}
 	
@@ -297,23 +455,23 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			parameters.set(1, Types.SMALLINT, 1);
 
 			model = dao.queryFirst(whereClause, parameters, new DalHints().inShard(i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 
 			// By shardValue
 			model = dao.queryFirst(whereClause, parameters, new DalHints().setShardValue(i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 
 			// By shardColValue
 			model = dao.queryFirst(whereClause, parameters, new DalHints().setShardColValue("index", i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 			
 			// By shardColValue
 			model = dao.queryFirst(whereClause, parameters, new DalHints().setShardColValue("tableIndex", i));
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 
 			// By parameters
 			whereClause += " and tableIndex=?";
@@ -321,8 +479,8 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			parameters.set(1, "type", Types.SMALLINT, 1);
 			parameters.set(2, "tableIndex", Types.SMALLINT, i);
 			model = dao.queryFirst(whereClause, parameters, new DalHints());
-			Assert.assertEquals(1, model.getId().intValue());
-			Assert.assertEquals(i, model.getTableIndex().intValue());
+			assertEquals(1, model.getId().intValue());
+			assertEquals(i, model.getTableIndex().intValue());
 		}
 	}
 	
@@ -337,7 +495,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		parameters.set(1, Types.SMALLINT, 10);
 		try{
 			dao.queryFirst(whereClause, parameters, new DalHints().inShard(1));
-			Assert.fail();
+			fail();
 		}catch(Throwable e) {
 		}
 	}
@@ -357,19 +515,19 @@ public abstract class BaseDalTableDaoShardByDbTest {
 
 			// By shard
 			models = dao.queryTop(whereClause, parameters, new DalHints().inShard(i), i + 1);
-			Assert.assertEquals(i + 1, models.size());
+			assertEquals(i + 1, models.size());
 			
 			// By shardValue
 			models = dao.queryTop(whereClause, parameters, new DalHints().setShardValue(i), i + 1);
-			Assert.assertEquals(i + 1, models.size());
+			assertEquals(i + 1, models.size());
 
 			// By shardColValue
 			models = dao.queryTop(whereClause, parameters, new DalHints().setShardColValue("index", i), i + 1);
-			Assert.assertEquals(i + 1, models.size());
+			assertEquals(i + 1, models.size());
 			
 			// By shardColValue
 			models = dao.queryTop(whereClause, parameters, new DalHints().setShardColValue("tableIndex", i), i + 1);
-			Assert.assertEquals(i + 1, models.size());
+			assertEquals(i + 1, models.size());
 
 			whereClause += " and tableIndex=?";
 			// By parameters
@@ -377,7 +535,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			parameters.set(1, "type", Types.SMALLINT, 1);
 			parameters.set(2, "tableIndex", Types.SMALLINT, i);
 			models = dao.queryTop(whereClause, parameters, new DalHints(), i + 1);
-			Assert.assertEquals(i + 1, models.size());
+			assertEquals(i + 1, models.size());
 		}
 	}
 	
@@ -394,13 +552,13 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		List<ClientTestModel> models;
 		try {
 			models = dao.queryTop(whereClause, parameters, new DalHints(), 2);
-			Assert.fail();
+			fail();
 		} catch (Exception e) {
 		}
 		
 		models = dao.queryTop(whereClause, parameters, new DalHints().inShard(1), 2);
-		Assert.assertTrue(null != models);
-		Assert.assertEquals(0, models.size());
+		assertTrue(null != models);
+		assertEquals(0, models.size());
 	}
 	
 	/**
@@ -418,19 +576,19 @@ public abstract class BaseDalTableDaoShardByDbTest {
 
 			// By shard
 			models = dao.queryFrom(whereClause, parameters, new DalHints().inShard(i), 0, i + 1);
-			Assert.assertEquals(i + 1, models.size());
+			assertEquals(i + 1, models.size());
 		
 			// By shardValue
 			models = dao.queryFrom(whereClause, parameters, new DalHints().setShardValue(i), 0, i + 1);
-			Assert.assertEquals(i + 1, models.size());
+			assertEquals(i + 1, models.size());
 
 			// By shardColValue
 			models = dao.queryFrom(whereClause, parameters, new DalHints().setShardColValue("index", i), 0, i + 1);
-			Assert.assertEquals(i + 1, models.size());
+			assertEquals(i + 1, models.size());
 
 			// By shardColValue
 			models = dao.queryFrom(whereClause, parameters, new DalHints().setShardColValue("tableIndex", i), 0, i + 1);
-			Assert.assertEquals(i + 1, models.size());
+			assertEquals(i + 1, models.size());
 		}
 
 		whereClause += " and tableIndex=?";
@@ -441,7 +599,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			parameters.set(2, "tableIndex", Types.SMALLINT, i);
 
 			models = dao.queryFrom(whereClause, parameters, new DalHints(), 0, i + 1);
-			Assert.assertEquals(i + 1, models.size());
+			assertEquals(i + 1, models.size());
 		}
 	}
 	
@@ -459,23 +617,23 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			
 			// By shard
 			models = dao.queryFrom(whereClause, parameters, new DalHints().inShard(i), 0, 10);
-			Assert.assertTrue(null != models);
-			Assert.assertEquals(3, models.size());
+			assertTrue(null != models);
+			assertEquals(3, models.size());
 
 			// By shardValue
 			models = dao.queryFrom(whereClause, parameters, new DalHints().setShardValue(i), 0, 10);
-			Assert.assertTrue(null != models);
-			Assert.assertEquals(3, models.size());
+			assertTrue(null != models);
+			assertEquals(3, models.size());
 
 			// By shardColValue
 			models = dao.queryFrom(whereClause, parameters, new DalHints().setShardColValue("index", i), 0, 10);
-			Assert.assertTrue(null != models);
-			Assert.assertEquals(3, models.size());
+			assertTrue(null != models);
+			assertEquals(3, models.size());
 			
 			// By shardColValue
 			models = dao.queryFrom(whereClause, parameters, new DalHints().setShardColValue("tableIndex", i), 0, 10);
-			Assert.assertTrue(null != models);
-			Assert.assertEquals(3, models.size());
+			assertTrue(null != models);
+			assertEquals(3, models.size());
 		}
 	}
 	
@@ -493,23 +651,23 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			
 			// By shard
 			models = dao.queryFrom(whereClause, parameters, new DalHints().inShard(i), 0, 10);
-			Assert.assertTrue(null != models);
-			Assert.assertEquals(0, models.size());
+			assertTrue(null != models);
+			assertEquals(0, models.size());
 
 			// By shardValue
 			models = dao.queryFrom(whereClause, parameters, new DalHints().setShardValue(i), 0, 10);
-			Assert.assertTrue(null != models);
-			Assert.assertEquals(0, models.size());
+			assertTrue(null != models);
+			assertEquals(0, models.size());
 
 			// By shardColValue
 			models = dao.queryFrom(whereClause, parameters, new DalHints().setShardColValue("index", i), 0, 10);
-			Assert.assertTrue(null != models);
-			Assert.assertEquals(0, models.size());
+			assertTrue(null != models);
+			assertEquals(0, models.size());
 			
 			// By shardColValue
 			models = dao.queryFrom(whereClause, parameters, new DalHints().setShardColValue("tableIndex", i), 0, 10);
-			Assert.assertTrue(null != models);
-			Assert.assertEquals(0, models.size());
+			assertTrue(null != models);
+			assertEquals(0, models.size());
 		}
 	}
 	
@@ -526,7 +684,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int res;
 		try {
 			res = dao.insert(new DalHints(), model);
-			Assert.fail();
+			fail();
 		} catch (Exception e) {
 		}
 		
@@ -535,28 +693,206 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			// By shard
 			res = dao.insert(new DalHints().inShard(i), model);
 			assertResEquals(1, res);
-			Assert.assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
 
 			// By shardValue
 			res = dao.insert(new DalHints().setShardValue(i), model);
 			assertResEquals(1, res);
-			Assert.assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
 
 			// By shardColValue
 			res = dao.insert(new DalHints().setShardColValue("index", i), model);
 			assertResEquals(1, res);
-			Assert.assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
 			
 			// By shardColValue
 			res = dao.insert(new DalHints().setShardColValue("tableIndex", i), model);
 			assertResEquals(1, res);
-			Assert.assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
 			
 			// By fields
 			model.setTableIndex(i);
 			res = dao.insert(new DalHints(), model);
 			assertResEquals(1, res);
-			Assert.assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+		}
+	}
+
+	private int getInt(DalHints hints) throws SQLException {
+		try {
+			return ((int[])hints.getAsyncResult().get())[0];
+		} catch (Exception e) {
+			try {
+				return (Integer)hints.getAsyncResult().get();
+			} catch (Exception e1) {
+				throw new SQLException(e1);
+			}
+		}
+	}
+
+	private int[] getIntArray(DalHints hints) throws SQLException {
+		try {
+			return (int[])hints.getAsyncResult().get();
+		} catch (Exception e) {
+			throw new SQLException(e);
+		}
+	}
+
+	@Test
+	public void testInsertSingleAsync() throws SQLException{
+		ClientTestModel model = new ClientTestModel();
+		model.setQuantity(10 + 1%3);
+		model.setType(((Number)(1%3)).shortValue());
+		model.setAddress("CTRIP");
+		int res;
+		try {
+			res = dao.insert(new DalHints(), model);
+			fail();
+		} catch (Exception e) {
+		}
+		
+		DalHints hints;
+		for(int i = 0; i < mod; i++) {
+			int j = 1;
+			// By shard
+			hints = new DalHints().asyncExecution();
+			res = dao.insert(hints.inShard(i), model);
+			assertEquals(0, res);
+			res = getInt(hints);
+			assertResEquals(1, res);
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+
+			// By shardValue
+			hints = new DalHints().asyncExecution();
+			res = dao.insert(hints.setShardValue(i), model);
+			assertEquals(0, res);
+			res = getInt(hints);
+			assertResEquals(1, res);
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+
+			// By shardColValue
+			hints = new DalHints().asyncExecution();
+			res = dao.insert(hints.setShardColValue("index", i), model);
+			assertEquals(0, res);
+			res = getInt(hints);
+			assertResEquals(1, res);
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+			
+			// By shardColValue
+			hints = new DalHints().asyncExecution();
+			res = dao.insert(hints.setShardColValue("tableIndex", i), model);
+			assertEquals(0, res);
+			res = getInt(hints);
+			assertResEquals(1, res);
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+			
+			// By fields
+			hints = new DalHints().asyncExecution();
+			model.setTableIndex(i);
+			res = dao.insert(hints, model);
+			assertEquals(0, res);
+			res = getInt(hints);
+			assertResEquals(1, res);
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+		}
+	}
+
+	private class IntCallback implements DalResultCallback {
+		AtomicReference<Object> result = new AtomicReference<>();
+		@Override
+		public <T> void onResult(T result) {
+			this.result.set(result);;
+		}
+		
+		public int getInt() {
+			while(result.get() == null)
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e1) {
+				}
+			try {
+				return ((int[])result.get())[0];
+			} catch (Throwable e) {
+				return 0;
+			}
+		}
+		
+		public int[] getIntArray() {
+			while(result.get() == null)
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e1) {
+				}
+			try {
+				return (int[])result.get();
+			} catch (Throwable e) {
+				return null;
+			}
+		}
+	}
+	
+	@Test
+	public void testInsertSingleCallback() throws SQLException{
+		ClientTestModel model = new ClientTestModel();
+		model.setQuantity(10 + 1%3);
+		model.setType(((Number)(1%3)).shortValue());
+		model.setAddress("CTRIP");
+		int res;
+		try {
+			res = dao.insert(new DalHints(), model);
+			fail();
+		} catch (Exception e) {
+		}
+		
+		DalHints hints;
+		IntCallback callback;
+		for(int i = 0; i < mod; i++) {
+			int j = 1;
+			// By shard
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			res = dao.insert(hints.inShard(i), model);
+			assertEquals(0, res);
+			res = callback.getInt();
+			assertResEquals(1, res);
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+
+			// By shardValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			res = dao.insert(hints.setShardValue(i), model);
+			assertEquals(0, res);
+			res = callback.getInt();
+			assertResEquals(1, res);
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+
+			// By shardColValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			res = dao.insert(hints.setShardColValue("index", i), model);
+			assertEquals(0, res);
+			res = callback.getInt();
+			assertResEquals(1, res);
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+			
+			// By shardColValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			res = dao.insert(hints.setShardColValue("tableIndex", i), model);
+			assertEquals(0, res);
+			res = callback.getInt();
+			assertResEquals(1, res);
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
+			
+			// By fields
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			model.setTableIndex(i);
+			res = dao.insert(hints, model);
+			assertEquals(0, res);
+			res = callback.getInt();
+			assertResEquals(1, res);
+			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
 		}
 	}
 
@@ -578,7 +914,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int[] res;
 		try {
 			res = dao.insert(new DalHints(), entities);
-			Assert.fail();
+			fail();
 		} catch (Exception e) {
 		}
 
@@ -587,22 +923,22 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			// By shard
 			res = dao.insert(new DalHints().inShard(i), entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 
 			// By shardValue
 			res = dao.insert(new DalHints().setShardValue(i), entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 
 			// By shardColValue
 			res = dao.insert(new DalHints().setShardColValue("index", i), entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			
 			// By shardColValue
 			res = dao.insert(new DalHints().setShardColValue("tableIndex", i), entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			
 			// By fields same shard
 			entities.get(0).setTableIndex(i);
@@ -610,7 +946,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			entities.get(2).setTableIndex(i);
 			res = dao.insert(new DalHints(), entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 		}
 		
 		deleteAllShardsByDb(dao, mod);
@@ -621,8 +957,93 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		entities.get(2).setTableIndex(2);
 		res = dao.insert(new DalHints().continueOnError(), entities);
 		assertResEquals(3, res);
-		Assert.assertEquals(2, getCountByDb(dao, 0));
-		Assert.assertEquals(1, getCountByDb(dao, 1));
+		assertEquals(2, getCountByDb(dao, 0));
+		assertEquals(1, getCountByDb(dao, 1));
+	}
+	
+	@Test
+	public void testInsertMultipleAsListAsyncCallback() throws SQLException{
+		DalHints hints;
+		IntCallback callback;
+
+		List<ClientTestModel> entities = new ArrayList<ClientTestModel>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setQuantity(10 + 1%3);
+			model.setType(((Number)(1%3)).shortValue());
+			model.setAddress("CTRIP");
+			entities.add(model);
+		}
+
+		int[] res;
+		try {
+			res = dao.insert(new DalHints(), entities);
+			fail();
+		} catch (Exception e) {
+		}
+
+		for(int i = 0; i < mod; i++) {
+			int j = 1;
+			// By shard
+			hints = new DalHints().asyncExecution();
+			res = dao.insert(hints.inShard(i), entities);
+			assertNull(res);
+			res = getIntArray(hints);
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+
+			// By shardValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			res = dao.insert(hints.setShardValue(i), entities);
+			assertNull(res);
+			res = callback.getIntArray();
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+
+			// By shardColValue
+			hints = new DalHints().asyncExecution();
+			res = dao.insert(hints.setShardColValue("index", i), entities);
+			assertNull(res);
+			res = getIntArray(hints);
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			
+			// By shardColValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			res = dao.insert(hints.setShardColValue("tableIndex", i), entities);
+			assertNull(res);
+			res = callback.getIntArray();
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			
+			// By fields same shard
+			hints = new DalHints().asyncExecution();
+			entities.get(0).setTableIndex(i);
+			entities.get(1).setTableIndex(i);
+			entities.get(2).setTableIndex(i);
+			res = dao.insert(hints, entities);
+			assertNull(res);
+			res = getIntArray(hints);
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+		}
+		
+		deleteAllShardsByDb(dao, mod);
+		
+		// By fields not same shard
+		callback = new IntCallback();
+		hints = new DalHints().callbackWith(callback);
+		entities.get(0).setTableIndex(0);
+		entities.get(1).setTableIndex(1);
+		entities.get(2).setTableIndex(2);
+		res = dao.insert(hints.continueOnError(), entities);
+		assertNull(res);
+		res = callback.getIntArray();
+		assertResEquals(3, res);
+		assertEquals(2, getCountByDb(dao, 0));
+		assertEquals(1, getCountByDb(dao, 1));
 	}
 	
 	/**
@@ -650,7 +1071,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int[] res;
 		try {
 			res = dao.insert(new DalHints(), entities);
-			Assert.fail();
+			fail();
 		} catch (Exception e) {
 		}
 
@@ -659,22 +1080,22 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			// By shard
 			res = dao.insert(new DalHints().continueOnError().inShard(i), entities);
 			assertResEquals(2, res);
-			Assert.assertEquals(3 + j++ * 2, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 2, getCountByDb(dao, i));
 
 			// By shardValue
 			res = dao.insert(new DalHints().continueOnError().setShardValue(i), entities);
 			assertResEquals(2, res);
-			Assert.assertEquals(3 + j++ * 2, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 2, getCountByDb(dao, i));
 
 			// By shardColValue
 			res = dao.insert(new DalHints().continueOnError().setShardColValue("index", i), entities);
 			assertResEquals(2, res);
-			Assert.assertEquals(3 + j++ * 2, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 2, getCountByDb(dao, i));
 			
 			// By shardColValue
 			res = dao.insert(new DalHints().continueOnError().setShardColValue("tableIndex", i), entities);
 			assertResEquals(2, res);
-			Assert.assertEquals(3 + j++ * 2, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 2, getCountByDb(dao, i));
 			
 			// By fields same shard
 			entities.get(0).setTableIndex(i);
@@ -682,7 +1103,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			entities.get(2).setTableIndex(i);
 			res = dao.insert(new DalHints().continueOnError(), entities);
 			assertResEquals(2, res);
-			Assert.assertEquals(3 + j++ * 2, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 2, getCountByDb(dao, i));
 		}
 		
 		deleteAllShardsByDb(dao, mod);
@@ -693,8 +1114,102 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		entities.get(2).setTableIndex(2);
 		res = dao.insert(new DalHints().continueOnError(), entities);
 		assertResEquals(2, res);
-		Assert.assertEquals(2, getCountByDb(dao, 0));
-		Assert.assertEquals(0, getCountByDb(dao, 1));
+		assertEquals(2, getCountByDb(dao, 0));
+		assertEquals(0, getCountByDb(dao, 1));
+	}
+
+	@Test
+	public void testInsertMultipleAsListWithContinueOnErrorHintsAsyncCallback() throws SQLException{
+		DalHints hints;
+		IntCallback callback;
+
+		List<ClientTestModel> entities = new ArrayList<ClientTestModel>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setQuantity(10 + 1%3);
+			model.setType(((Number)(1%3)).shortValue());
+			if(i==1){
+				model.setAddress("CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+						+ "CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+						+ "CTRIPCTRIPCTRIPCTRIP");
+			}
+			else{
+				model.setAddress("CTRIP");
+			}
+			entities.add(model);
+		}
+		
+		int[] res;
+		try {
+			res = dao.insert(new DalHints(), entities);
+			fail();
+		} catch (Exception e) {
+		}
+
+		for(int i = 0; i < mod; i++) {
+			int j = 1;
+			// By shard
+			hints = new DalHints().asyncExecution();
+			res = dao.insert(hints.continueOnError().inShard(i), entities);
+			assertNull(res);
+			res = getIntArray(hints);
+			assertResEquals(2, res);
+			assertEquals(3 + j++ * 2, getCountByDb(dao, i));
+
+			// By shardValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			res = dao.insert(hints.continueOnError().setShardValue(i), entities);
+			assertNull(res);
+			res = callback.getIntArray();
+			assertResEquals(2, res);
+			assertEquals(3 + j++ * 2, getCountByDb(dao, i));
+
+			// By shardColValue
+			hints = new DalHints().asyncExecution();
+			res = dao.insert(hints.continueOnError().setShardColValue("index", i), entities);
+			assertNull(res);
+			res = getIntArray(hints);
+			assertResEquals(2, res);
+			assertResEquals(2, res);
+			assertEquals(3 + j++ * 2, getCountByDb(dao, i));
+			
+			// By shardColValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			res = dao.insert(hints.continueOnError().setShardColValue("tableIndex", i), entities);
+			assertNull(res);
+			res = callback.getIntArray();
+			assertResEquals(2, res);
+			assertEquals(3 + j++ * 2, getCountByDb(dao, i));
+			
+			// By fields same shard
+			hints = new DalHints().asyncExecution();
+			entities.get(0).setTableIndex(i);
+			entities.get(1).setTableIndex(i);
+			entities.get(2).setTableIndex(i);
+			res = dao.insert(hints.continueOnError(), entities);
+			assertNull(res);
+			res = getIntArray(hints);
+			assertResEquals(2, res);
+			assertResEquals(2, res);
+			assertEquals(3 + j++ * 2, getCountByDb(dao, i));
+		}
+		
+		deleteAllShardsByDb(dao, mod);
+		
+		// By fields not same shard
+		callback = new IntCallback();
+		hints = new DalHints().callbackWith(callback);
+		entities.get(0).setTableIndex(0);
+		entities.get(1).setTableIndex(1);
+		entities.get(2).setTableIndex(2);
+		res = dao.insert(hints.continueOnError(), entities);
+		assertNull(res);
+		res = callback.getIntArray();
+		assertResEquals(2, res);
+		assertEquals(2, getCountByDb(dao, 0));
+		assertEquals(0, getCountByDb(dao, 1));
 	}
 
 	/**
@@ -716,7 +1231,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int[] res;
 		try {
 			res = dao.insert(new DalHints(), holder, entities);
-			Assert.fail();
+			fail();
 		} catch (Exception e) {
 			
 		}
@@ -727,7 +1242,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			holder = createKeyHolder();
 			res = dao.insert(new DalHints().inShard(i), holder, entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			assertResEquals(3, res);
 			assertKeyHolder(holder);
 
@@ -735,7 +1250,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			holder = createKeyHolder();
 			res = dao.insert(new DalHints().setShardValue(i), holder, entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			assertResEquals(3, res);
 			assertKeyHolder(holder);
 			
@@ -743,7 +1258,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			holder = createKeyHolder();
 			res = dao.insert(new DalHints().setShardColValue("index", i), holder, entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			assertResEquals(3, res);
 			assertKeyHolder(holder);
 			
@@ -751,7 +1266,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			holder = createKeyHolder();
 			res = dao.insert(new DalHints().setShardColValue("tableIndex", i), holder, entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			assertResEquals(3, res);
 			assertKeyHolder(holder);
 			
@@ -762,7 +1277,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			entities.get(2).setTableIndex(i);
 			res = dao.insert(new DalHints(), holder, entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			assertResEquals(3, res);
 			assertKeyHolder(holder);
 		}
@@ -776,8 +1291,113 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		entities.get(2).setTableIndex(2);
 		res = dao.insert(new DalHints(), holder, entities);
 		assertResEquals(3, res);
-		Assert.assertEquals(2, getCountByDb(dao, 0));
-		Assert.assertEquals(1, getCountByDb(dao, 1));
+		assertEquals(2, getCountByDb(dao, 0));
+		assertEquals(1, getCountByDb(dao, 1));
+		assertResEquals(3, res);
+		assertKeyHolder(holder);
+	}
+	
+	@Test
+	public void testInsertMultipleAsListWithKeyHolderAsyncCallback() throws SQLException{
+		DalHints hints;
+		IntCallback callback;
+
+		List<ClientTestModel> entities = new ArrayList<ClientTestModel>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setQuantity(10 + 1%3);
+			model.setType(((Number)(1%3)).shortValue());
+			model.setAddress("CTRIP");
+			entities.add(model);
+		}
+
+		KeyHolder holder = createKeyHolder();
+		int[] res;
+		try {
+			res = dao.insert(new DalHints(), holder, entities);
+			fail();
+		} catch (Exception e) {
+			
+		}
+
+		for(int i = 0; i < mod; i++) {
+			int j = 1;
+			// By shard
+			hints = new DalHints().asyncExecution();
+			holder = createKeyHolder();
+			res = dao.insert(hints.inShard(i), holder, entities);
+			assertNull(res);
+			res = getIntArray(hints);
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertResEquals(3, res);
+			assertKeyHolder(holder);
+
+			// By shardValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			holder = createKeyHolder();
+			res = dao.insert(hints.setShardValue(i), holder, entities);
+			assertNull(res);
+			res = callback.getIntArray();
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertResEquals(3, res);
+			assertKeyHolder(holder);
+			
+			// By shardColValue
+			hints = new DalHints().asyncExecution();
+			holder = createKeyHolder();
+			res = dao.insert(hints.setShardColValue("index", i), holder, entities);
+			assertNull(res);
+			res = getIntArray(hints);
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertResEquals(3, res);
+			assertKeyHolder(holder);
+			
+			// By shardColValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			holder = createKeyHolder();
+			res = dao.insert(hints.setShardColValue("tableIndex", i), holder, entities);
+			assertNull(res);
+			res = callback.getIntArray();
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertResEquals(3, res);
+			assertKeyHolder(holder);
+			
+			// By fields same shard
+			hints = new DalHints().asyncExecution();
+			holder = createKeyHolder();
+			entities.get(0).setTableIndex(i);
+			entities.get(1).setTableIndex(i);
+			entities.get(2).setTableIndex(i);
+			res = dao.insert(hints, holder, entities);
+			assertNull(res);
+			res = getIntArray(hints);
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertResEquals(3, res);
+			assertKeyHolder(holder);
+		}
+		
+		deleteAllShardsByDb(dao, mod);
+		
+		// By fields not same shard
+		callback = new IntCallback();
+		hints = new DalHints().callbackWith(callback);
+		holder = createKeyHolder();
+		entities.get(0).setTableIndex(0);
+		entities.get(1).setTableIndex(1);
+		entities.get(2).setTableIndex(2);
+		res = dao.insert(hints, holder, entities);
+		assertNull(res);
+		res = callback.getIntArray();
+		assertResEquals(3, res);
+		assertEquals(2, getCountByDb(dao, 0));
+		assertEquals(1, getCountByDb(dao, 1));
 		assertResEquals(3, res);
 		assertKeyHolder(holder);
 	}
@@ -785,9 +1405,9 @@ public abstract class BaseDalTableDaoShardByDbTest {
 	private void assertKeyHolder(KeyHolder holder) throws SQLException {
 		if(!ASSERT_ALLOWED)
 			return;
-		Assert.assertEquals(3, holder.size());		 
-		Assert.assertTrue(holder.getKey(0).longValue() > 0);
-		Assert.assertTrue(holder.getKeyList().get(0).containsKey(GENERATED_KEY));
+		assertEquals(3, holder.size());		 
+		assertTrue(holder.getKey(0).longValue() > 0);
+		assertTrue(holder.getKeyList().get(0).containsKey(GENERATED_KEY));
 	}
 	
 	/**
@@ -809,7 +1429,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int res;
 		try {
 			res = dao.combinedInsert(new DalHints(), holder, entities);
-			Assert.fail();
+			fail();
 		} catch (Exception e) {
 			
 		}
@@ -821,34 +1441,106 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			holder = createKeyHolder();
 			res = dao.combinedInsert(new DalHints().inShard(i), holder, entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			assertKeyHolder(holder);
 
 			// By shardValue
 			holder = createKeyHolder();
 			res = dao.combinedInsert(new DalHints().setShardValue(i), holder, entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			assertKeyHolder(holder);
 
 			// By shardColValue
 			holder = createKeyHolder();
 			res = dao.combinedInsert(new DalHints().setShardColValue("index", i), holder, entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			assertKeyHolder(holder);
 
 			// By shardColValue
 			holder = createKeyHolder();
 			res = dao.combinedInsert(new DalHints().setShardColValue("tableIndex", i), holder, entities);
 			assertResEquals(3, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			assertKeyHolder(holder);
 		}
 		
 		// For combined insert, the shard id must be defined or change bd deduced.
 	}
 	
+	@Test
+	public void testCombinedInsertAsyncCallback() throws SQLException{
+		DalHints hints;
+		IntCallback callback;
+
+		List<ClientTestModel> entities = new ArrayList<>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setQuantity(10 + 1%3);
+			model.setType(((Number)(1%3)).shortValue());
+			model.setAddress("CTRIP");
+			entities.add(model);
+		}
+		
+		KeyHolder holder = createKeyHolder();
+		int res;
+		try {
+			res = dao.combinedInsert(new DalHints(), holder, entities);
+			fail();
+		} catch (Exception e) {
+			
+		}
+		
+		for(int i = 0; i < mod; i++) {
+			int j = 1;
+
+			// By shard
+			hints = new DalHints().asyncExecution();
+			holder = createKeyHolder();
+			res = dao.combinedInsert(hints.inShard(i), holder, entities);
+			assertEquals(0, res);
+			res = getInt(hints);
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertKeyHolder(holder);
+
+			// By shardValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			holder = createKeyHolder();
+			res = dao.combinedInsert(hints.setShardValue(i), holder, entities);
+			assertEquals(0, res);
+			res = callback.getInt();
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertKeyHolder(holder);
+
+			// By shardColValue
+			hints = new DalHints().asyncExecution();
+			holder = createKeyHolder();
+			res = dao.combinedInsert(hints.setShardColValue("index", i), holder, entities);
+			assertEquals(0, res);
+			res = getInt(hints);
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertKeyHolder(holder);
+
+			// By shardColValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			holder = createKeyHolder();
+			res = dao.combinedInsert(hints.setShardColValue("tableIndex", i), holder, entities);
+			assertEquals(0, res);
+			res = callback.getInt();
+			assertResEquals(3, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertKeyHolder(holder);
+		}
+		
+		// For combined insert, the shard id must be defined or change bd deduced.
+	}
+
 	/**
 	 * Test Batch Insert multiple entities
 	 * @throws SQLException
@@ -867,7 +1559,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int[] res;
 		try {
 			res = dao.batchInsert(new DalHints(), entities);
-			Assert.fail();
+			fail();
 		} catch (Exception e) {
 			
 		}
@@ -877,27 +1569,89 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			// By shard
 			res = dao.batchInsert(new DalHints().inShard(i), entities);
 			assertResEquals(new int[]{1,1,1}, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			
 			// By shardValue
 			res = dao.batchInsert(new DalHints().setShardValue(i), entities);
 			assertResEquals(new int[]{1,1,1}, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 
 			// By shardColValue
 			res = dao.batchInsert(new DalHints().setShardColValue("index", i), entities);
 			assertResEquals(new int[]{1,1,1}, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 			
 			// By shardColValue
 			res = dao.batchInsert(new DalHints().setShardColValue("tableIndex", i), entities);
 			assertResEquals(new int[]{1,1,1}, res);
-			Assert.assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
 		}
 		
 		// For combined insert, the shard id must be defined or change bd deduced.
 	}
 	
+	@Test
+	public void testBatchInsertAsyncCallback() throws SQLException{
+		DalHints hints;
+		IntCallback callback;
+
+		List<ClientTestModel> entities = new ArrayList<>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setQuantity(10 + 1%3);
+			model.setType(((Number)(1%3)).shortValue());
+			model.setAddress("CTRIP");
+			entities.add(model);
+		}
+
+		int[] res;
+		try {
+			res = dao.batchInsert(new DalHints(), entities);
+			fail();
+		} catch (Exception e) {
+			
+		}
+		
+		for(int i = 0; i < mod; i++) {
+			int j = 1;
+			// By shard
+			hints = new DalHints().asyncExecution();
+			res = dao.batchInsert(hints.inShard(i), entities);
+			assertNull(res);
+			res = getIntArray(hints);
+			assertResEquals(new int[]{1,1,1}, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			
+			// By shardValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			res = dao.batchInsert(hints.setShardValue(i), entities);
+			assertNull(res);
+			res = callback.getIntArray();
+			assertResEquals(new int[]{1,1,1}, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+
+			// By shardColValue
+			hints = new DalHints().asyncExecution();
+			res = dao.batchInsert(hints.setShardColValue("index", i), entities);
+			assertNull(res);
+			res = getIntArray(hints);
+			assertResEquals(new int[]{1,1,1}, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+			
+			// By shardColValue
+			callback = new IntCallback();
+			hints = new DalHints().callbackWith(callback);
+			res = dao.batchInsert(hints.setShardColValue("tableIndex", i), entities);
+			assertNull(res);
+			res = callback.getIntArray();
+			assertResEquals(new int[]{1,1,1}, res);
+			assertEquals(3 + j++ * 3, getCountByDb(dao, i));
+		}
+		
+		// For combined insert, the shard id must be defined or change bd deduced.
+	}
+		
 	public abstract void insertBack();
 	
 	/**
@@ -918,30 +1672,30 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		
 		int[] res;
 		// By shard
-		Assert.assertEquals(3, getCountByDb(dao, 0));
+		assertEquals(3, getCountByDb(dao, 0));
 		res = dao.delete(new DalHints().inShard(0), entities);
 		assertResEquals(3, res);
-		Assert.assertEquals(0, getCountByDb(dao, 0));
+		assertEquals(0, getCountByDb(dao, 0));
 
 		// By shardValue
-		Assert.assertEquals(3, getCountByDb(dao, 1));
+		assertEquals(3, getCountByDb(dao, 1));
 		res = dao.delete(new DalHints().setShardValue(1), entities);
 		assertResEquals(3, res);
-		Assert.assertEquals(0, getCountByDb(dao, 1));
+		assertEquals(0, getCountByDb(dao, 1));
 
 		insertBack();
 		
 		// By shardColValue
-		Assert.assertEquals(3, getCountByDb(dao, 0));
+		assertEquals(3, getCountByDb(dao, 0));
 		res = dao.delete(new DalHints().setShardColValue("index", 2), entities);
 		assertResEquals(3, res);
-		Assert.assertEquals(0, getCountByDb(dao, 0));
+		assertEquals(0, getCountByDb(dao, 0));
 		
 		// By shardColValue
-		Assert.assertEquals(3, getCountByDb(dao, 1));
+		assertEquals(3, getCountByDb(dao, 1));
 		res = dao.delete(new DalHints().setShardColValue("tableIndex", 3), entities);
 		assertResEquals(3, res);
-		Assert.assertEquals(0, getCountByDb(dao, 1));
+		assertEquals(0, getCountByDb(dao, 1));
 		
 		// By fields same shard
 		// holder = createKeyHolder();
@@ -949,15 +1703,92 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		entities.get(1).setTableIndex(1);
 		entities.get(2).setTableIndex(2);
 		dao.insert(new DalHints(), entities);
-		Assert.assertEquals(2, getCountByDb(dao, 0));
-		Assert.assertEquals(1, getCountByDb(dao, 1));
+		assertEquals(2, getCountByDb(dao, 0));
+		assertEquals(1, getCountByDb(dao, 1));
 		entities.set(0, dao.queryTop("1=1", new StatementParameters(), new DalHints().inShard(0), 2).get(0));
 		entities.set(1, dao.queryFirst("1=1", new StatementParameters(), new DalHints().inShard(1)));
 		entities.set(2, dao.queryTop("1=1", new StatementParameters(), new DalHints().inShard(0), 2).get(1));
 		res = dao.delete(new DalHints(), entities);
 		assertResEquals(3, res);
-		Assert.assertEquals(0, getCountByDb(dao, 0));
-		Assert.assertEquals(0, getCountByDb(dao, 1));
+		assertEquals(0, getCountByDb(dao, 0));
+		assertEquals(0, getCountByDb(dao, 1));
+	}
+	
+	@Test
+	public void testDeleteMultipleAsyncCallback() throws SQLException{
+		DalHints hints;
+		IntCallback callback;
+
+		List<ClientTestModel> entities = new ArrayList<>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setId(i+1);
+			model.setQuantity(10 + 1%3);
+			model.setType(((Number)(1%3)).shortValue());
+			model.setAddress("CTRIP");
+			entities.add(model);
+		}
+		
+		int[] res;
+		// By shard
+		hints = new DalHints().asyncExecution();
+		assertEquals(3, getCountByDb(dao, 0));
+		res = dao.delete(hints.inShard(0), entities);
+		assertNull(res);
+		res = getIntArray(hints);
+		assertResEquals(3, res);
+		assertEquals(0, getCountByDb(dao, 0));
+
+		// By shardValue
+		callback = new IntCallback();
+		hints = new DalHints().callbackWith(callback);
+		assertEquals(3, getCountByDb(dao, 1));
+		res = dao.delete(hints.setShardValue(1), entities);
+		assertNull(res);
+		res = callback.getIntArray();
+		assertResEquals(3, res);
+		assertEquals(0, getCountByDb(dao, 1));
+
+		insertBack();
+		
+		// By shardColValue
+		hints = new DalHints().asyncExecution();
+		assertEquals(3, getCountByDb(dao, 0));
+		res = dao.delete(hints.setShardColValue("index", 2), entities);
+		assertNull(res);
+		res = getIntArray(hints);
+		assertResEquals(3, res);
+		assertEquals(0, getCountByDb(dao, 0));
+		
+		// By shardColValue
+		callback = new IntCallback();
+		hints = new DalHints().callbackWith(callback);
+		assertEquals(3, getCountByDb(dao, 1));
+		res = dao.delete(hints.setShardColValue("tableIndex", 3), entities);
+		assertNull(res);
+		res = callback.getIntArray();
+		assertResEquals(3, res);
+		assertEquals(0, getCountByDb(dao, 1));
+		
+		// By fields same shard
+		// holder = createKeyHolder();
+		entities.get(0).setTableIndex(0);
+		entities.get(1).setTableIndex(1);
+		entities.get(2).setTableIndex(2);
+		dao.insert(new DalHints(), entities);
+		assertEquals(2, getCountByDb(dao, 0));
+		assertEquals(1, getCountByDb(dao, 1));
+		callback = new IntCallback();
+		hints = new DalHints().callbackWith(callback);
+		entities.set(0, dao.queryTop("1=1", new StatementParameters(), new DalHints().inShard(0), 2).get(0));
+		entities.set(1, dao.queryFirst("1=1", new StatementParameters(), new DalHints().inShard(1)));
+		entities.set(2, dao.queryTop("1=1", new StatementParameters(), new DalHints().inShard(0), 2).get(1));
+		res = dao.delete(hints, entities);
+		assertNull(res);
+		res = callback.getIntArray();
+		assertResEquals(3, res);
+		assertEquals(0, getCountByDb(dao, 0));
+		assertEquals(0, getCountByDb(dao, 1));
 	}
 	
 	/**
@@ -979,47 +1810,126 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int[] res;
 		try {
 			res = dao.batchDelete(new DalHints(), entities);
-			Assert.fail();
+			fail();
 		} catch (Exception e) {
 			
 		}
 		
 		// By shard
-		Assert.assertEquals(3, getCountByDb(dao, 0));
+		assertEquals(3, getCountByDb(dao, 0));
 		res = dao.batchDelete(new DalHints().inShard(0), entities);
 		assertResEquals(new int[]{1,1,1}, res);
-		Assert.assertEquals(0, getCountByDb(dao, 0));
+		assertEquals(0, getCountByDb(dao, 0));
 
 		// By shardValue
-		Assert.assertEquals(3, getCountByDb(dao, 1));
+		assertEquals(3, getCountByDb(dao, 1));
 		res = dao.batchDelete(new DalHints().setShardValue(1), entities);
 		assertResEquals(new int[]{1,1,1}, res);
-		Assert.assertEquals(0, getCountByDb(dao, 1));
+		assertEquals(0, getCountByDb(dao, 1));
 		
 		insertBack();
 
 		// By shardColValue
-		Assert.assertEquals(3, getCountByDb(dao, 0));
+		assertEquals(3, getCountByDb(dao, 0));
 		res = dao.batchDelete(new DalHints().setShardColValue("index", 2), entities);
 		assertResEquals(new int[]{1,1,1}, res);
-		Assert.assertEquals(0, getCountByDb(dao, 0));
+		assertEquals(0, getCountByDb(dao, 0));
 		
 		// By shardColValue
-		Assert.assertEquals(3, getCountByDb(dao, 1));
+		assertEquals(3, getCountByDb(dao, 1));
 		res = dao.batchDelete(new DalHints().setShardColValue("tableIndex", 3), entities);
 		assertResEquals(new int[]{1,1,1}, res);
-		Assert.assertEquals(0, getCountByDb(dao, 1));
+		assertEquals(0, getCountByDb(dao, 1));
 		
 		// By fields same shard
 		entities.get(0).setTableIndex(0);
 		entities.get(1).setTableIndex(0);
 		entities.get(2).setTableIndex(0);
 		dao.insert(new DalHints(), entities);
-		Assert.assertEquals(3, getCountByDb(dao, 0));
+		assertEquals(3, getCountByDb(dao, 0));
 		List<ClientTestModel> result = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
 		res = dao.batchDelete(new DalHints().inShard(0), result);
 		assertResEquals(new int[]{1,1,1}, res);
-		Assert.assertEquals(0, getCountByDb(dao, 0));
+		assertEquals(0, getCountByDb(dao, 0));
+	}
+	
+	@Test
+	public void testBatchDeleteAsyncCallback() throws SQLException{
+		DalHints hints;
+		IntCallback callback;
+
+		List<ClientTestModel> entities = new ArrayList<>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setId(i+1);
+			model.setQuantity(10 + 1%3);
+			model.setType(((Number)(1%3)).shortValue());
+			model.setAddress("CTRIP");
+			entities.add(model);
+		}
+		
+		int[] res;
+		try {
+			res = dao.batchDelete(new DalHints(), entities);
+			fail();
+		} catch (Exception e) {
+			
+		}
+		
+		// By shard
+		hints = new DalHints().asyncExecution();
+		assertEquals(3, getCountByDb(dao, 0));
+		res = dao.batchDelete(hints.inShard(0), entities);
+		assertNull(res);
+		res = getIntArray(hints);
+		assertResEquals(new int[]{1,1,1}, res);
+		assertEquals(0, getCountByDb(dao, 0));
+
+		// By shardValue
+		callback = new IntCallback();
+		hints = new DalHints().callbackWith(callback);
+		assertEquals(3, getCountByDb(dao, 1));
+		res = dao.batchDelete(hints.setShardValue(1), entities);
+		assertNull(res);
+		res = callback.getIntArray();
+		assertResEquals(new int[]{1,1,1}, res);
+		assertEquals(0, getCountByDb(dao, 1));
+		
+		insertBack();
+
+		// By shardColValue
+		hints = new DalHints().asyncExecution();
+		assertEquals(3, getCountByDb(dao, 0));
+		res = dao.batchDelete(hints.setShardColValue("index", 2), entities);
+		assertNull(res);
+		res = getIntArray(hints);
+		assertResEquals(new int[]{1,1,1}, res);
+		assertEquals(0, getCountByDb(dao, 0));
+		
+		// By shardColValue
+		callback = new IntCallback();
+		hints = new DalHints().callbackWith(callback);
+		assertEquals(3, getCountByDb(dao, 1));
+		res = dao.batchDelete(hints.setShardColValue("tableIndex", 3), entities);
+		assertNull(res);
+		res = callback.getIntArray();
+		assertResEquals(new int[]{1,1,1}, res);
+		assertEquals(0, getCountByDb(dao, 1));
+		
+		// By fields same shard
+		entities.get(0).setTableIndex(0);
+		entities.get(1).setTableIndex(0);
+		entities.get(2).setTableIndex(0);
+		dao.insert(new DalHints(), entities);
+		assertEquals(3, getCountByDb(dao, 0));
+		List<ClientTestModel> result = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
+
+		hints = new DalHints().asyncExecution();
+		res = dao.batchDelete(hints.inShard(0), result);
+		assertNull(res);
+		res = getIntArray(hints);
+		assertResEquals(new int[]{1,1,1}, res);
+		assertEquals(0, getCountByDb(dao, 0));
 	}
 	
 	/**
@@ -1041,7 +1951,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int[] ress;
 		try {
 			ress = dao.update(hints, entities);
-			Assert.fail();
+			fail();
 		} catch (Exception e) {
 			
 		}
@@ -1051,25 +1961,25 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		entities.get(0).setAddress("test1");
 		res = dao.update(new DalHints().inShard(0), entities.get(0));
 		assertResEquals(1, res);
-		Assert.assertEquals("test1", dao.queryByPk(1, hints.inShard(0)).getAddress());
+		assertEquals("test1", dao.queryByPk(1, hints.inShard(0)).getAddress());
 
 		// By shardValue
 		entities.get(1).setQuantity(-11);
 		res = dao.update(new DalHints().setShardValue(1), entities.get(1));
 		assertResEquals(1, res);
-		Assert.assertEquals(-11, dao.queryByPk(2, hints.inShard(1)).getQuantity().intValue());
+		assertEquals(-11, dao.queryByPk(2, hints.inShard(1)).getQuantity().intValue());
 		
 		// By shardColValue
 		entities.get(2).setType((short)3);
 		res = dao.update(new DalHints().setShardColValue("index", 2), entities.get(2));
 		assertResEquals(1, res);
-		Assert.assertEquals((short)3, dao.queryByPk(3, hints.inShard(0)).getType().shortValue());
+		assertEquals((short)3, dao.queryByPk(3, hints.inShard(0)).getType().shortValue());
 
 		// By shardColValue
 		entities.get(0).setAddress("testa");
 		res = dao.update(new DalHints().setShardColValue("tableIndex", 3), entities.get(0));
 		assertResEquals(1, res);
-		Assert.assertEquals("testa", dao.queryByPk(1, hints.inShard(1)).getAddress());
+		assertEquals("testa", dao.queryByPk(1, hints.inShard(1)).getAddress());
 		
 		// By fields same shard
 		// holder = createKeyHolder();
@@ -1083,7 +1993,87 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		assertResEquals(3, res);
 		List<ClientTestModel> result = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
 		for(ClientTestModel m: result)
-			Assert.assertEquals("1234", m.getAddress());
+			assertEquals("1234", m.getAddress());
+	}
+	
+	@Test
+	public void testUpdateMultipleAsyncCallback() throws SQLException{
+		DalHints hints;
+		IntCallback callback;
+
+		hints = new DalHints();
+		List<ClientTestModel> entities = new ArrayList<>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setId(i+1);
+			model.setAddress("CTRIP");
+			entities.add(model);
+		}
+		
+		
+		int[] ress;
+		try {
+			ress = dao.update(hints, entities);
+			fail();
+		} catch (Exception e) {
+			
+		}
+		
+		int res;
+		// By shard
+		hints = new DalHints().asyncExecution();
+		entities.get(0).setAddress("test1");
+		res = dao.update(hints.inShard(0), entities.get(0));
+		assertEquals(0, res);
+		res = getInt(hints);
+		assertResEquals(1, res);
+		assertEquals("test1", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
+
+		// By shardValue
+		callback = new IntCallback();
+		hints = new DalHints().callbackWith(callback);
+		entities.get(1).setQuantity(-11);
+		res = dao.update(hints.setShardValue(1), entities.get(1));
+		assertEquals(0, res);
+		res = callback.getInt();
+		assertResEquals(1, res);
+		assertEquals(-11, dao.queryByPk(2, new DalHints().inShard(1)).getQuantity().intValue());
+		
+		// By shardColValue
+		hints = new DalHints().asyncExecution();
+		entities.get(2).setType((short)3);
+		res = dao.update(hints.setShardColValue("index", 2), entities.get(2));
+		assertEquals(0, res);
+		res = getInt(hints);
+		assertResEquals(1, res);
+		assertEquals((short)3, dao.queryByPk(3, new DalHints().inShard(0)).getType().shortValue());
+
+		// By shardColValue
+		callback = new IntCallback();
+		hints = new DalHints().callbackWith(callback);
+		entities.get(0).setAddress("testa");
+		res = dao.update(hints.setShardColValue("tableIndex", 3), entities.get(0));
+		assertEquals(0, res);
+		res = callback.getInt();
+		assertResEquals(1, res);
+		assertEquals("testa", dao.queryByPk(1, new DalHints().inShard(1)).getAddress());
+		
+		// By fields same shard
+		// holder = createKeyHolder();
+		hints = new DalHints().asyncExecution();
+		entities.get(0).setTableIndex(0);
+		entities.get(0).setAddress("1234");
+		entities.get(1).setTableIndex(0);
+		entities.get(1).setAddress("1234");
+		entities.get(2).setTableIndex(0);
+		entities.get(2).setAddress("1234");
+		ress = dao.update(hints, entities);
+		assertNull(ress);
+		res = getInt(hints);
+		assertResEquals(3, res);
+		List<ClientTestModel> result = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
+		for(ClientTestModel m: result)
+			assertEquals("1234", m.getAddress());
 	}
 	
 	@Test
@@ -1101,7 +2091,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int[] ress;
 		try {
 			ress = dao.batchUpdate(hints, entities);
-			Assert.fail();
+			fail();
 		} catch (Exception e) {
 			
 		}
@@ -1118,9 +2108,84 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		assertResEquals(3, ress);
 		List<ClientTestModel> result = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
 		for(ClientTestModel m: result)
-			Assert.assertEquals("1234", m.getAddress());
+			assertEquals("1234", m.getAddress());
 	}
 	
+	public void testBatchUpdateMultipleAsync() throws SQLException{
+		DalHints hints = new DalHints();
+		List<ClientTestModel> entities = new ArrayList<>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setId(i+1);
+			model.setAddress("CTRIP");
+			entities.add(model);
+		}
+		
+		
+		int[] ress;
+		try {
+			ress = dao.batchUpdate(hints, entities);
+			fail();
+		} catch (Exception e) {
+			
+		}
+		
+		// By fields same shard
+		// holder = createKeyHolder();
+		entities.get(0).setTableIndex(0);
+		entities.get(0).setAddress("1234");
+		entities.get(1).setTableIndex(0);
+		entities.get(1).setAddress("1234");
+		entities.get(2).setTableIndex(0);
+		entities.get(2).setAddress("1234");
+		hints = new DalHints().asyncExecution();
+		ress = dao.batchUpdate(hints, entities);
+		assertNull(ress);
+		ress = getIntArray(hints);
+		assertResEquals(3, ress);
+		List<ClientTestModel> result = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
+		for(ClientTestModel m: result)
+			assertEquals("1234", m.getAddress());
+	}
+	
+	public void testBatchUpdateMultipleCallback() throws SQLException{
+		DalHints hints = new DalHints();
+		List<ClientTestModel> entities = new ArrayList<>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setId(i+1);
+			model.setAddress("CTRIP");
+			entities.add(model);
+		}
+		
+		
+		int[] ress;
+		try {
+			ress = dao.batchUpdate(hints, entities);
+			fail();
+		} catch (Exception e) {
+			
+		}
+		
+		// By fields same shard
+		// holder = createKeyHolder();
+		entities.get(0).setTableIndex(0);
+		entities.get(0).setAddress("1234");
+		entities.get(1).setTableIndex(0);
+		entities.get(1).setAddress("1234");
+		entities.get(2).setTableIndex(0);
+		entities.get(2).setAddress("1234");
+		IntCallback callback = new IntCallback();
+		hints = new DalHints().callbackWith(callback);
+		ress = dao.batchUpdate(hints, entities);
+		assertNull(ress);
+		ress = callback.getIntArray();
+		assertResEquals(3, ress);
+		List<ClientTestModel> result = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
+		for(ClientTestModel m: result)
+			assertEquals("1234", m.getAddress());
+	}
+
 	/**
 	 * Test delete entities with where clause and parameters
 	 * @throws SQLException
@@ -1135,7 +2200,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int res;
 		try {
 			res = dao.delete(whereClause, parameters, hints);
-			Assert.fail();
+			fail();
 		} catch (Exception e) {
 			
 		}
@@ -1143,27 +2208,27 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		// By shard
 		res = dao.delete(whereClause, parameters, new DalHints().inShard(0));
 		assertResEquals(3, res);
-		Assert.assertEquals(0, dao.query(whereClause, parameters, new DalHints().inShard(0)).size());
+		assertEquals(0, dao.query(whereClause, parameters, new DalHints().inShard(0)).size());
 
 		// By shardValue
-		Assert.assertEquals(3, getCountByDb(dao, 1));
+		assertEquals(3, getCountByDb(dao, 1));
 		res = dao.delete(whereClause, parameters, new DalHints().setShardValue(1));
 		assertResEquals(3, res);
-		Assert.assertEquals(0, dao.query(whereClause, parameters, new DalHints().setShardValue(1)).size());
+		assertEquals(0, dao.query(whereClause, parameters, new DalHints().setShardValue(1)).size());
 		
 		insertBack();
 
 		// By shardColValue
-		Assert.assertEquals(3, getCountByDb(dao, 0));
+		assertEquals(3, getCountByDb(dao, 0));
 		res = dao.delete(whereClause, parameters, new DalHints().setShardColValue("index", 2));
 		assertResEquals(3, res);
-		Assert.assertEquals(0, dao.query(whereClause, parameters, new DalHints().setShardColValue("index", 2)).size());
+		assertEquals(0, dao.query(whereClause, parameters, new DalHints().setShardColValue("index", 2)).size());
 		
 		// By shardColValue
-		Assert.assertEquals(3, getCountByDb(dao, 1));
+		assertEquals(3, getCountByDb(dao, 1));
 		res = dao.delete(whereClause, parameters, new DalHints().setShardColValue("tableIndex", 3));
 		assertResEquals(3, res);
-		Assert.assertEquals(0, dao.query(whereClause, parameters, new DalHints().setShardColValue("tableIndex", 3)).size());
+		assertEquals(0, dao.query(whereClause, parameters, new DalHints().setShardColValue("tableIndex", 3)).size());
 		
 		insertBack();
 	}
@@ -1182,11 +2247,11 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int res;
 		
 		// By allShards
-		Assert.assertEquals(3, getCountByDb(dao, 0));
-		Assert.assertEquals(3, getCountByDb(dao, 1));
+		assertEquals(3, getCountByDb(dao, 0));
+		assertEquals(3, getCountByDb(dao, 1));
 		res = dao.delete(whereClause, parameters, new DalHints().inAllShards());
 		assertResEquals(6, res);
-		Assert.assertEquals(0, dao.query(whereClause, parameters, new DalHints().inAllShards()).size());
+		assertEquals(0, dao.query(whereClause, parameters, new DalHints().inAllShards()).size());
 	}
 	
 	/**
@@ -1203,16 +2268,36 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int res;
 		
 		// By allShards
-		Assert.assertEquals(3, getCountByDb(dao, 0));
-		Assert.assertEquals(3, getCountByDb(dao, 1));
+		assertEquals(3, getCountByDb(dao, 0));
+		assertEquals(3, getCountByDb(dao, 1));
 		res = dao.delete(whereClause, parameters, hints.inAllShards().asyncExecution());
 		try {
 			res = (Integer)hints.getAsyncResult().get();
 		} catch (Exception e) {
-			Assert.fail();
+			fail();
 		}
 		assertResEquals(6, res);
-		Assert.assertEquals(0, dao.query(whereClause, parameters, new DalHints().inAllShards()).size());
+		assertEquals(0, dao.query(whereClause, parameters, new DalHints().inAllShards()).size());
+	}
+	
+	@Test
+	public void testDeleteWithWhereClauseAllShardsCallback() throws SQLException{
+		String whereClause = "type=?";
+		StatementParameters parameters = new StatementParameters();
+		parameters.set(1, Types.SMALLINT, 1);
+
+		IntCallback callback = new IntCallback();
+		DalHints hints = new DalHints().callbackWith(callback);
+		int res;
+		
+		// By allShards
+		assertEquals(3, getCountByDb(dao, 0));
+		assertEquals(3, getCountByDb(dao, 1));
+		res = dao.delete(whereClause, parameters, hints.inAllShards().asyncExecution());
+		assertEquals(0, res);
+		res = callback.getInt();
+		assertResEquals(6, res);
+		assertEquals(0, dao.query(whereClause, parameters, new DalHints().inAllShards()).size());
 	}
 	
 	/**
@@ -1232,13 +2317,60 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		Set<String> shards = new HashSet<>();
 		shards.add("0");
 		shards.add("1");
-		Assert.assertEquals(3, getCountByDb(dao, 0));
-		Assert.assertEquals(3, getCountByDb(dao, 1));
+		assertEquals(3, getCountByDb(dao, 0));
+		assertEquals(3, getCountByDb(dao, 1));
 		res = dao.delete(whereClause, parameters, new DalHints().inShards(shards));
 		assertResEquals(6, res);
-		Assert.assertEquals(0, dao.query(whereClause, parameters, new DalHints().inShards(shards)).size());
+		assertEquals(0, dao.query(whereClause, parameters, new DalHints().inShards(shards)).size());
 	}
 	
+	@Test
+	public void testDeleteWithWhereClauseShardsAsync() throws SQLException{
+		String whereClause = "type=?";
+		StatementParameters parameters = new StatementParameters();
+		parameters.set(1, Types.SMALLINT, 1);
+
+		DalHints hints = new DalHints().asyncExecution();
+		int res;
+		
+		// By shards
+		Set<String> shards = new HashSet<>();
+		shards.add("0");
+		shards.add("1");
+		assertEquals(3, getCountByDb(dao, 0));
+		assertEquals(3, getCountByDb(dao, 1));
+		res = dao.delete(whereClause, parameters, hints.inShards(shards));
+		assertEquals(0, res);
+		res = getInt(hints);
+		assertResEquals(6, res);
+		assertEquals(0, dao.query(whereClause, parameters, new DalHints().inShards(shards)).size());
+	}
+	
+	@Test
+	public void testDeleteWithWhereClauseShardsCallback() throws SQLException{
+		String whereClause = "type=?";
+		StatementParameters parameters = new StatementParameters();
+		parameters.set(1, Types.SMALLINT, 1);
+
+		DalHints hints = new DalHints();
+		IntCallback callback = new IntCallback();
+		hints.callbackWith(callback);
+		
+		int res;
+		
+		// By shards
+		Set<String> shards = new HashSet<>();
+		shards.add("0");
+		shards.add("1");
+		assertEquals(3, getCountByDb(dao, 0));
+		assertEquals(3, getCountByDb(dao, 1));
+		res = dao.delete(whereClause, parameters, hints.inShards(shards));
+		assertEquals(0, res);
+		res = callback.getInt();
+		assertResEquals(6, res);
+		assertEquals(0, dao.query(whereClause, parameters, new DalHints().inShards(shards)).size());
+	}
+
 	/**
 	 * Test plain update with SQL
 	 * @throws SQLException
@@ -1252,7 +2384,7 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		int res;
 		try {
 			res = dao.update(sql, parameters, hints);
-			Assert.fail();
+			fail();
 		} catch (Exception e) {
 			
 		}
@@ -1262,28 +2394,28 @@ public abstract class BaseDalTableDaoShardByDbTest {
 				+ " SET address = 'CTRIP' WHERE id = 1";
 		res = dao.update(sql, parameters, new DalHints().inShard(0));
 		assertResEquals(1, res);
-		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
 
 		// By shardValue
 		sql = "UPDATE " + TABLE_NAME
 				+ " SET address = 'CTRIP' WHERE id = 1";
 		res = dao.update(sql, parameters, new DalHints().setShardValue(1));
 		assertResEquals(1, res);
-		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardValue(1)).getAddress());
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardValue(1)).getAddress());
 		
 		// By shardColValue
 		sql = "UPDATE " + TABLE_NAME
 				+ " SET address = 'CTRIP' WHERE id = 1";
 		res = dao.update(sql, parameters, new DalHints().setShardColValue("index", 2));
 		assertResEquals(1, res);
-		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardColValue("index", 2)).getAddress());
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardColValue("index", 2)).getAddress());
 		
 		// By shardColValue
 		sql = "UPDATE " + TABLE_NAME
 				+ " SET address = 'CTRIP' WHERE id = 1";
 		res = dao.update(sql, parameters, new DalHints().setShardColValue("tableIndex", 3));
 		assertResEquals(1, res);
-		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardColValue("tableIndex", 3)).getAddress());
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardColValue("tableIndex", 3)).getAddress());
 	}
 	
 	/**
@@ -1303,8 +2435,48 @@ public abstract class BaseDalTableDaoShardByDbTest {
 				+ " SET address = 'CTRIP' WHERE id = 1";
 		res = dao.update(sql, parameters, new DalHints().inAllShards());
 		assertResEquals(2, res);
-		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
-		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(1)).getAddress());
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(1)).getAddress());
+	}
+	
+	@Test
+	public void testUpdatePlainAllShardsAsync() throws SQLException{
+		String sql = "UPDATE " + TABLE_NAME
+				+ " SET address = 'CTRIP' WHERE id = 1";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints().asyncExecution();
+		int res;
+		
+		// By allShards
+		sql = "UPDATE " + TABLE_NAME
+				+ " SET address = 'CTRIP' WHERE id = 1";
+		res = dao.update(sql, parameters, hints.inAllShards());
+		assertEquals(0, res);
+		res = getInt(hints);
+		assertResEquals(2, res);
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(1)).getAddress());
+	}
+	
+	@Test
+	public void testUpdatePlainAllShardsCallback() throws SQLException{
+		String sql = "UPDATE " + TABLE_NAME
+				+ " SET address = 'CTRIP' WHERE id = 1";
+		StatementParameters parameters = new StatementParameters();
+		IntCallback callback = new IntCallback();
+		DalHints hints = new DalHints().callbackWith(callback);
+		
+		int res;
+		
+		// By allShards
+		sql = "UPDATE " + TABLE_NAME
+				+ " SET address = 'CTRIP' WHERE id = 1";
+		res = dao.update(sql, parameters, hints.inAllShards());
+		assertEquals(0, res);
+		res = callback.getInt();
+		assertResEquals(2, res);
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(1)).getAddress());
 	}
 	
 	/**
@@ -1327,10 +2499,55 @@ public abstract class BaseDalTableDaoShardByDbTest {
 				+ " SET address = 'CTRIP' WHERE id = 1";
 		res = dao.update(sql, parameters, new DalHints().inShards(shards));
 		assertResEquals(2, res);
-		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
-		Assert.assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(1)).getAddress());
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(1)).getAddress());
 	}
 	
+	@Test
+	public void testUpdatePlainShardsAsync() throws SQLException{
+		String sql = "UPDATE " + TABLE_NAME
+				+ " SET address = 'CTRIP' WHERE id = 1";
+		StatementParameters parameters = new StatementParameters();
+		DalHints hints = new DalHints().asyncExecution();
+		int res;
+		
+		// By shards
+		Set<String> shards = new HashSet<>();
+		shards.add("0");
+		shards.add("1");
+		sql = "UPDATE " + TABLE_NAME
+				+ " SET address = 'CTRIP' WHERE id = 1";
+		res = dao.update(sql, parameters, hints.inShards(shards));
+		assertEquals(0, res);
+		res = getInt(hints);
+		assertResEquals(2, res);
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(1)).getAddress());
+	}
+
+	@Test
+	public void testUpdatePlainShardsCallback() throws SQLException{
+		String sql = "UPDATE " + TABLE_NAME
+				+ " SET address = 'CTRIP' WHERE id = 1";
+		StatementParameters parameters = new StatementParameters();
+		IntCallback callback = new IntCallback();
+		DalHints hints = new DalHints().callbackWith(callback);
+		int res;
+		
+		// By shards
+		Set<String> shards = new HashSet<>();
+		shards.add("0");
+		shards.add("1");
+		sql = "UPDATE " + TABLE_NAME
+				+ " SET address = 'CTRIP' WHERE id = 1";
+		res = dao.update(sql, parameters, hints.inShards(shards));
+		assertEquals(0, res);
+		res = callback.getInt();
+		assertResEquals(2, res);
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(0)).getAddress());
+		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inShard(1)).getAddress());
+	}
+
 	@Test
 	public void testCrossShardInsert() {
 		try {
@@ -1376,19 +2593,19 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			p.setTableIndex(5);
 			pList[5] = p;
 			
-			Assert.assertEquals(0, getCountByDb(dao, 0));
-			Assert.assertEquals(0, getCountByDb(dao, 1));
+			assertEquals(0, getCountByDb(dao, 0));
+			assertEquals(0, getCountByDb(dao, 1));
 
 			KeyHolder keyholder = createKeyHolder();
 			DalHints hints = new DalHints();
 			res = dao.combinedInsert(hints, keyholder, Arrays.asList(pList));
 			assertResEquals(6, res);
-			Assert.assertEquals(3, getCountByDb(dao, 0));
-			Assert.assertEquals(3, getCountByDb(dao, 1));
+			assertEquals(3, getCountByDb(dao, 0));
+			assertEquals(3, getCountByDb(dao, 1));
 			assertKeyHolderCrossShard(keyholder);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Assert.fail();
+			fail();
 		}
 	}
 
@@ -1396,13 +2613,13 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		if(!ASSERT_ALLOWED)
 			return;
 
-		Assert.assertEquals(6, holder.size());
+		assertEquals(6, holder.size());
 //		for(int i = 0; i < mod; i++) {
-//			Assert.assertEquals(3, detailResults.getResultByDb(String.valueOf(i)).size());
+//			assertEquals(3, detailResults.getResultByDb(String.valueOf(i)).size());
 //		}
 //		for(int i = 0; i < 6; i++) {
-//			Assert.assertTrue(holder.getKey(i).longValue() > 0);
-//			Assert.assertTrue(holder.getKeyList().get(i).containsKey(GENERATED_KEY));
+//			assertTrue(holder.getKey(i).longValue() > 0);
+//			assertTrue(holder.getKeyList().get(i).containsKey(GENERATED_KEY));
 //		}
 	}
 		
@@ -1456,14 +2673,14 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			int[] resx = dao.batchInsert(hints, Arrays.asList(pList));
 			new DalHints().get(DalHintEnum.detailResults);
 			
-			Assert.assertEquals(6, resx.length);
-			Assert.assertEquals(3, getCountByDb(dao, 0));
-			Assert.assertEquals(3, getCountByDb(dao, 1));
+			assertEquals(6, resx.length);
+			assertEquals(3, getCountByDb(dao, 0));
+			assertEquals(3, getCountByDb(dao, 1));
 			
 			assertResEquals(new int[]{1, 1, 1, 1, 1, 1}, resx);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Assert.fail();
+			fail();
 		}
 	}
 	
@@ -1512,14 +2729,14 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			
 			DalHints hints = new DalHints();
 			res = dao.batchDelete(hints, Arrays.asList(pList));
-			Assert.assertEquals(0, getCountByDb(dao, 0));
-			Assert.assertEquals(0, getCountByDb(dao, 1));
+			assertEquals(0, getCountByDb(dao, 0));
+			assertEquals(0, getCountByDb(dao, 1));
 			
 			assertResEquals(new int[]{1, 1, 1, 1, 1, 1}, res);
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			Assert.fail();
+			fail();
 		}
 	}
 

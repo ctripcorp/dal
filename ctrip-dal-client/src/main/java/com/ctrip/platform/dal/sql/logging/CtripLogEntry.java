@@ -12,7 +12,6 @@ import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
-import com.ctrip.security.encryption.AESCrypto;
 import com.dianping.cat.message.Transaction;
 
 public class CtripLogEntry extends LogEntry {
@@ -97,7 +96,7 @@ public class CtripLogEntry extends LogEntry {
 		String params = "";
 		if(encryptLogging){
 			try {
-				params = AESCrypto.getInstance().encrypt(LoggerHelper.getParams(entry));
+				params = CommonUtil.desEncrypt(LoggerHelper.getParams(entry));
 			} catch (Exception e) {
 				setErrorMsg(e.getMessage());
 			}

@@ -25,6 +25,7 @@ public abstract class LoggerAdapter implements DalLogger {
 	
 	private static final String SAMPLING = "sampling";
 	private static final String ENCRYPT = "encrypt";
+	private static final String SECRETKEY = "secretKey";
 	private static final String SIMPLIFIED = "simplified";
 	private static final String ASYNCLOGGING = "asyncLogging";
 	private static final String CAPACITY = "capacity";
@@ -36,6 +37,7 @@ public abstract class LoggerAdapter implements DalLogger {
 	
 	protected static boolean simplifyLogging = false;
 	protected static boolean encryptLogging = true;
+	public static String secretKey = "dalctripcn";
 	protected static boolean samplingLogging = false;
 	protected static long samplingLow = 60 * 60 * 1000;//milliseconds
 	protected static long samplingHigh = 5 * 60 * 1000;//milliseconds
@@ -63,6 +65,9 @@ public abstract class LoggerAdapter implements DalLogger {
 		
 		if(settings.containsKey(ENCRYPT))
 			encryptLogging = Boolean.parseBoolean(settings.get(ENCRYPT));
+		
+		if(settings.containsKey(SECRETKEY))
+			secretKey = settings.get(SECRETKEY);
 		
 		initAsyncLogging(settings);
 	}

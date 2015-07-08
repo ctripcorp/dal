@@ -29,6 +29,7 @@ public class DalTabelDaoTableShardMySqlTest extends BaseDalTabelDaoTableShardTes
 	private final static String TABLE_NAME = "dal_client_test";
 	private final static int mod = 4;
 	
+	private final static String DROP_TABLE_SQL_MYSQL = "DROP TABLE IF EXISTS " + TABLE_NAME;
 	private final static String DROP_TABLE_SQL_MYSQL_TPL = "DROP TABLE IF EXISTS " + TABLE_NAME + "_%d";
 	
 	//Create the the table
@@ -58,6 +59,7 @@ public class DalTabelDaoTableShardMySqlTest extends BaseDalTabelDaoTableShardTes
 		String[] sqls = null;
 		for(int i = 0; i < mod; i++) {
 			sqls = new String[] { 
+					DROP_TABLE_SQL_MYSQL,
 					String.format(DROP_TABLE_SQL_MYSQL_TPL,i), 
 					String.format(CREATE_TABLE_SQL_MYSQL_TPL, i)};
 			clientMySql.batchUpdate(sqls, hints);

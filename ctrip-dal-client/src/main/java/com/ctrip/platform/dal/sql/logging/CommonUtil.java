@@ -85,5 +85,29 @@ public class CommonUtil {
 		}
         
     }
+	
+	/**
+     * For decrypt input/output parameters
+     * @param encryptString
+     * @return
+     */
+	public static String desDecrypt(String encryptString) {
+		if (encryptString == null)
+			return null;
+		try {
+			byte[] keyBytes = key.substring(0, 8).getBytes("UTF-8");
+			Key key = new javax.crypto.spec.SecretKeySpec(keyBytes, "DES");
+			Cipher decryptCipher;
+
+			decryptCipher = Cipher.getInstance("DES");
+			decryptCipher.init(Cipher.DECRYPT_MODE, key);
+
+			byte[] encryptedByteArray = Base64.decodeBase64(encryptString.getBytes());
+			return new String(decryptCipher.doFinal(encryptedByteArray));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return encryptString;
+    }
 
 }

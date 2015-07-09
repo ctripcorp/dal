@@ -16,7 +16,6 @@
 		<module>dal-common</module>
 		<module>dal-tester</module>
 		<module>dal-server-common</module>
-		<module>dal-java-ext</module>
 		<module>ctrip-dal-client</module>
 	</modules>
 	<properties>

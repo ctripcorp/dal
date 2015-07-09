@@ -2609,6 +2609,133 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		}
 	}
 
+	@Test
+	public void testCrossShardInsertAsync() {
+		try {
+			int res = 0;
+			deleteAllShardsByDb(dao, mod);
+			
+			ClientTestModel p = new ClientTestModel();
+			
+			ClientTestModel[] pList = new ClientTestModel[6];
+			p = new ClientTestModel();
+			p.setId(1);
+			p.setAddress("aaa");
+			p.setTableIndex(0);
+			pList[0] = p;
+			
+			p = new ClientTestModel();
+			p.setId(2);
+			p.setAddress("aaa");
+			p.setTableIndex(1);
+			pList[1] = p;
+			
+			p = new ClientTestModel();
+			p.setId(3);
+			p.setAddress("aaa");
+			p.setTableIndex(2);
+			pList[2] = p;
+			
+			p = new ClientTestModel();
+			p.setId(4);
+			p.setAddress("aaa");
+			p.setTableIndex(3);
+			pList[3] = p;
+			
+			p = new ClientTestModel();
+			p.setId(5);
+			p.setAddress("aaa");
+			p.setTableIndex(4);
+			pList[4] = p;
+			
+			p = new ClientTestModel();
+			p.setId(5);
+			p.setAddress("aaa");
+			p.setTableIndex(5);
+			pList[5] = p;
+			
+			assertEquals(0, getCountByDb(dao, 0));
+			assertEquals(0, getCountByDb(dao, 1));
+
+			KeyHolder keyholder = createKeyHolder();
+			DalHints hints = new DalHints().asyncExecution();
+			res = dao.combinedInsert(hints, keyholder, Arrays.asList(pList));
+			assertEquals(0, res);
+			res = getInt(hints);
+			assertResEquals(6, res);
+			assertEquals(3, getCountByDb(dao, 0));
+			assertEquals(3, getCountByDb(dao, 1));
+			assertKeyHolderCrossShard(keyholder);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testCrossShardInsertCallback() {
+		try {
+			int res = 0;
+			deleteAllShardsByDb(dao, mod);
+			
+			ClientTestModel p = new ClientTestModel();
+			
+			ClientTestModel[] pList = new ClientTestModel[6];
+			p = new ClientTestModel();
+			p.setId(1);
+			p.setAddress("aaa");
+			p.setTableIndex(0);
+			pList[0] = p;
+			
+			p = new ClientTestModel();
+			p.setId(2);
+			p.setAddress("aaa");
+			p.setTableIndex(1);
+			pList[1] = p;
+			
+			p = new ClientTestModel();
+			p.setId(3);
+			p.setAddress("aaa");
+			p.setTableIndex(2);
+			pList[2] = p;
+			
+			p = new ClientTestModel();
+			p.setId(4);
+			p.setAddress("aaa");
+			p.setTableIndex(3);
+			pList[3] = p;
+			
+			p = new ClientTestModel();
+			p.setId(5);
+			p.setAddress("aaa");
+			p.setTableIndex(4);
+			pList[4] = p;
+			
+			p = new ClientTestModel();
+			p.setId(5);
+			p.setAddress("aaa");
+			p.setTableIndex(5);
+			pList[5] = p;
+			
+			assertEquals(0, getCountByDb(dao, 0));
+			assertEquals(0, getCountByDb(dao, 1));
+
+			KeyHolder keyholder = createKeyHolder();
+			IntCallback callback = new IntCallback();
+			DalHints hints = new DalHints().callbackWith(callback);
+			res = dao.combinedInsert(hints, keyholder, Arrays.asList(pList));
+			assertEquals(0,  res);
+			res = callback.getInt();
+			assertResEquals(6, res);
+			assertEquals(3, getCountByDb(dao, 0));
+			assertEquals(3, getCountByDb(dao, 1));
+			assertKeyHolderCrossShard(keyholder);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
 	public void assertKeyHolderCrossShard(KeyHolder holder) throws SQLException {
 		if(!ASSERT_ALLOWED)
 			return;
@@ -2622,7 +2749,6 @@ public abstract class BaseDalTableDaoShardByDbTest {
 //			assertTrue(holder.getKeyList().get(i).containsKey(GENERATED_KEY));
 //		}
 	}
-		
 		
 	@Test
 	public void testCrossShardBatchInsert() {
@@ -2671,7 +2797,129 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			
 			DalHints hints = new DalHints();
 			int[] resx = dao.batchInsert(hints, Arrays.asList(pList));
-			new DalHints().get(DalHintEnum.detailResults);
+			
+			assertEquals(6, resx.length);
+			assertEquals(3, getCountByDb(dao, 0));
+			assertEquals(3, getCountByDb(dao, 1));
+			
+			assertResEquals(new int[]{1, 1, 1, 1, 1, 1}, resx);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testCrossShardBatchInsertAsync() {
+		try {
+			Map<String, int[]>  res;
+			deleteAllShardsByDb(dao, mod);
+			
+			ClientTestModel p = new ClientTestModel();
+			
+			ClientTestModel[] pList = new ClientTestModel[6];
+			p = new ClientTestModel();
+			p.setId(1);
+			p.setAddress("aaa");
+			p.setTableIndex(0);
+			pList[0] = p;
+			
+			p = new ClientTestModel();
+			p.setId(2);
+			p.setAddress("aaa");
+			p.setTableIndex(1);
+			pList[1] = p;
+			
+			p = new ClientTestModel();
+			p.setId(3);
+			p.setAddress("aaa");
+			p.setTableIndex(2);
+			pList[2] = p;
+			
+			p = new ClientTestModel();
+			p.setId(4);
+			p.setAddress("aaa");
+			p.setTableIndex(3);
+			pList[3] = p;
+			
+			p = new ClientTestModel();
+			p.setId(5);
+			p.setAddress("aaa");
+			p.setTableIndex(4);
+			pList[4] = p;
+			
+			p = new ClientTestModel();
+			p.setId(5);
+			p.setAddress("aaa");
+			p.setTableIndex(5);
+			pList[5] = p;
+			
+			DalHints hints = new DalHints().asyncExecution();
+			int[] resx = dao.batchInsert(hints, Arrays.asList(pList));
+			assertNull(resx);
+			resx = getIntArray(hints);
+			
+			assertEquals(6, resx.length);
+			assertEquals(3, getCountByDb(dao, 0));
+			assertEquals(3, getCountByDb(dao, 1));
+			
+			assertResEquals(new int[]{1, 1, 1, 1, 1, 1}, resx);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testCrossShardBatchInsertCallback() {
+		try {
+			Map<String, int[]>  res;
+			deleteAllShardsByDb(dao, mod);
+			
+			ClientTestModel p = new ClientTestModel();
+			
+			ClientTestModel[] pList = new ClientTestModel[6];
+			p = new ClientTestModel();
+			p.setId(1);
+			p.setAddress("aaa");
+			p.setTableIndex(0);
+			pList[0] = p;
+			
+			p = new ClientTestModel();
+			p.setId(2);
+			p.setAddress("aaa");
+			p.setTableIndex(1);
+			pList[1] = p;
+			
+			p = new ClientTestModel();
+			p.setId(3);
+			p.setAddress("aaa");
+			p.setTableIndex(2);
+			pList[2] = p;
+			
+			p = new ClientTestModel();
+			p.setId(4);
+			p.setAddress("aaa");
+			p.setTableIndex(3);
+			pList[3] = p;
+			
+			p = new ClientTestModel();
+			p.setId(5);
+			p.setAddress("aaa");
+			p.setTableIndex(4);
+			pList[4] = p;
+			
+			p = new ClientTestModel();
+			p.setId(5);
+			p.setAddress("aaa");
+			p.setTableIndex(5);
+			pList[5] = p;
+			
+			IntCallback callback = new IntCallback();
+			DalHints hints = new DalHints().callbackWith(callback);
+			int[] resx = dao.batchInsert(hints, Arrays.asList(pList));
+			assertNull(resx);
+			resx = callback.getIntArray();
 			
 			assertEquals(6, resx.length);
 			assertEquals(3, getCountByDb(dao, 0));
@@ -2729,6 +2977,123 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			
 			DalHints hints = new DalHints();
 			res = dao.batchDelete(hints, Arrays.asList(pList));
+			assertEquals(0, getCountByDb(dao, 0));
+			assertEquals(0, getCountByDb(dao, 1));
+			
+			assertResEquals(new int[]{1, 1, 1, 1, 1, 1}, res);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testCrossShardDeleteAsync() {
+		try {
+			int[] res;
+			ClientTestModel p = new ClientTestModel();
+			
+			ClientTestModel[] pList = new ClientTestModel[6];
+			p = new ClientTestModel();
+			p.setId(1);
+			p.setAddress("aaa");
+			p.setTableIndex(0);
+			pList[0] = p;
+			
+			p = new ClientTestModel();
+			p.setId(1);
+			p.setAddress("aaa");
+			p.setTableIndex(1);
+			pList[1] = p;
+			
+			p = new ClientTestModel();
+			p.setId(2);
+			p.setAddress("aaa");
+			p.setTableIndex(2);
+			pList[2] = p;
+			
+			p = new ClientTestModel();
+			p.setId(2);
+			p.setAddress("aaa");
+			p.setTableIndex(3);
+			pList[3] = p;
+			
+			p = new ClientTestModel();
+			p.setId(3);
+			p.setAddress("aaa");
+			p.setTableIndex(5);
+			pList[4] = p;
+			
+			p = new ClientTestModel();
+			p.setId(3);
+			p.setAddress("aaa");
+			p.setTableIndex(6);
+			pList[5] = p;
+			
+			DalHints hints = new DalHints().asyncExecution();
+			res = dao.batchDelete(hints, Arrays.asList(pList));
+			assertNull(res);
+			res = getIntArray(hints);
+			assertEquals(0, getCountByDb(dao, 0));
+			assertEquals(0, getCountByDb(dao, 1));
+			
+			assertResEquals(new int[]{1, 1, 1, 1, 1, 1}, res);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testCrossShardDeleteCallback() {
+		try {
+			int[] res;
+			ClientTestModel p = new ClientTestModel();
+			
+			ClientTestModel[] pList = new ClientTestModel[6];
+			p = new ClientTestModel();
+			p.setId(1);
+			p.setAddress("aaa");
+			p.setTableIndex(0);
+			pList[0] = p;
+			
+			p = new ClientTestModel();
+			p.setId(1);
+			p.setAddress("aaa");
+			p.setTableIndex(1);
+			pList[1] = p;
+			
+			p = new ClientTestModel();
+			p.setId(2);
+			p.setAddress("aaa");
+			p.setTableIndex(2);
+			pList[2] = p;
+			
+			p = new ClientTestModel();
+			p.setId(2);
+			p.setAddress("aaa");
+			p.setTableIndex(3);
+			pList[3] = p;
+			
+			p = new ClientTestModel();
+			p.setId(3);
+			p.setAddress("aaa");
+			p.setTableIndex(5);
+			pList[4] = p;
+			
+			p = new ClientTestModel();
+			p.setId(3);
+			p.setAddress("aaa");
+			p.setTableIndex(6);
+			pList[5] = p;
+			
+			IntCallback callback = new IntCallback();
+			DalHints hints = new DalHints().callbackWith(callback);
+			res = dao.batchDelete(hints, Arrays.asList(pList));
+			assertNull(res);
+			res = callback.getIntArray();
 			assertEquals(0, getCountByDb(dao, 0));
 			assertEquals(0, getCountByDb(dao, 1));
 			

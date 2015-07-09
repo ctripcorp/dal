@@ -146,11 +146,6 @@ public enum DalHintEnum {
 	updateNullField,
 	
 	/**
-	 * The detail affected rows by DB and Table shard Id
-	 */
-	detailResults,
-	
-	/**
 	 * Indicate the cud operation will async execute
 	 */
 	asyncExecution,

@@ -19,13 +19,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalResultCallback;
@@ -794,40 +792,6 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			res = getInt(hints);
 			assertResEquals(1, res);
 			assertEquals(3 + j++ * 1, getCountByDb(dao, i));
-		}
-	}
-
-	private class IntCallback implements DalResultCallback {
-		AtomicReference<Object> result = new AtomicReference<>();
-		@Override
-		public <T> void onResult(T result) {
-			this.result.set(result);;
-		}
-		
-		public int getInt() {
-			while(result.get() == null)
-				try {
-					Thread.sleep(1);
-				} catch (InterruptedException e1) {
-				}
-			try {
-				return ((int[])result.get())[0];
-			} catch (Throwable e) {
-				return 0;
-			}
-		}
-		
-		public int[] getIntArray() {
-			while(result.get() == null)
-				try {
-					Thread.sleep(1);
-				} catch (InterruptedException e1) {
-				}
-			try {
-				return (int[])result.get();
-			} catch (Throwable e) {
-				return null;
-			}
 		}
 	}
 	

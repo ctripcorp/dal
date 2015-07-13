@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,6 +18,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.DalResultCallback;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -50,6 +52,64 @@ public abstract class BaseDalTabelDaoTableShardTest {
 	 */
 	@Test
 	public void testQueryByPk() throws SQLException {
+		ClientTestModel model = null;
+		
+		for(int i = 0; i < mod; i++) {
+			// By tabelShard
+			if(i%2 == 0)
+				model = dao.queryByPk(1, new DalHints().inTableShard(String.valueOf(i)));
+			else
+				model = dao.queryByPk(1, new DalHints().inTableShard(i));
+			Assert.assertEquals(1, model.getId().intValue());
+			Assert.assertEquals(i, model.getTableIndex().intValue());
+
+			// By tableShardValue
+			if(i%2 == 0)
+				model = dao.queryByPk(1, new DalHints().setTableShardValue(String.valueOf(i)));
+			else
+				model = dao.queryByPk(1, new DalHints().setTableShardValue(i));
+			Assert.assertEquals(1, model.getId().intValue());
+			Assert.assertEquals(i, model.getTableIndex().intValue());
+
+			// By shardColValue
+			if(i%2 == 0)
+				model = dao.queryByPk(1, new DalHints().setShardColValue("index", String.valueOf(i)));
+			else
+				model = dao.queryByPk(1, new DalHints().setShardColValue("index", i));
+			Assert.assertEquals(1, model.getId().intValue());
+			Assert.assertEquals(i, model.getTableIndex().intValue());
+
+			// By shardColValue
+			if(i%2 == 0)
+				model = dao.queryByPk(1, new DalHints().setShardColValue("tableIndex", String.valueOf(i)));
+			else
+				model = dao.queryByPk(1, new DalHints().setShardColValue("tableIndex", i));
+			Assert.assertEquals(1, model.getId().intValue());
+			Assert.assertEquals(i, model.getTableIndex().intValue());
+		}
+	}
+
+	private class TestQueryResultCallback implements DalResultCallback {
+		private AtomicReference<ClientTestModel> model = new AtomicReference<>();
+		
+		@Override
+		public <T> void onResult(T result) {
+			model.set((ClientTestModel)result);
+		}
+		
+		public ClientTestModel get() {
+			while(model.get() == null)
+				try {
+					Thread.sleep(1);
+				} catch (Exception e) {
+					return null;
+				}
+			return model.get();
+		}
+	}
+
+	@Test
+	public void testQueryByPkAsyncCallback() throws SQLException {
 		ClientTestModel model = null;
 		
 		for(int i = 0; i < mod; i++) {

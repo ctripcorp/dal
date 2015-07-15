@@ -75,6 +75,12 @@ public abstract class DalQueryDaoTest {
 			List value = (List)result;
 			assertEquals(6, value.size());
 		}
+
+		@Override
+		public void onError(Throwable e) {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 	
 	//Factors: sync/async; merger/no merger; sorter/no sorter, callback/no callback
@@ -473,6 +479,11 @@ public abstract class DalQueryDaoTest {
 		@Override
 		public <T> void onResult(T result) {
 			this.result = result;
+		}
+		@Override
+		public void onError(Throwable e) {
+			// TODO Auto-generated method stub
+			
 		}
 	}
 

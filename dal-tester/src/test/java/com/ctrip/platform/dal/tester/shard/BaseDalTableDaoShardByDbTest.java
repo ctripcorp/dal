@@ -213,6 +213,12 @@ public abstract class BaseDalTableDaoShardByDbTest {
 				}
 			return model.get();
 		}
+
+		@Override
+		public void onError(Throwable e) {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 	
 	@Test

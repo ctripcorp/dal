@@ -62,22 +62,29 @@ public class DalRequestExecutor {
 	}
 
 	private <T> T internalExecute(DalHints hints, DalRequest<T> request, boolean nullable) throws SQLException {
-		request.validate();
+		T result = null;
+		Throwable error = null;
 		
-		T result;
+		try {
+			request.validate();
+			
+			/**
+			 * TODO make sure detect distributed transaction 
+			 */
+			if(request.isCrossShard())
+				result = crossShardExecute(hints, request);
+			else
+				result = nonCrossShardExecute(hints, request);
 
-		/**
-		 * TODO make sure detect distributed transaction 
-		 */
-		if(request.isCrossShard())
-			result = crossShardExecute(hints, request);
-		else
-			result = nonCrossShardExecute(hints, request);
-
-		if(result == null && !nullable)
-			throw new DalException(ErrorCode.AssertNull);
+			if(result == null && !nullable)
+				throw new DalException(ErrorCode.AssertNull);
+		} catch (Throwable e) {
+			error = e;
+		}
 		
-		handleCallback(hints, result);
+		handleCallback(hints, result, error);
+		if(error != null)
+			throw DalException.wrap(error);
 		
 		return result;
 	}
@@ -102,10 +109,15 @@ public class DalRequestExecutor {
 			
 	}
 
-	private <T> void handleCallback(final DalHints hints, T result) {
+	private <T> void handleCallback(final DalHints hints, T result, Throwable error) {
 		DalResultCallback qc = (DalResultCallback)hints.get(DalHintEnum.resultCallback);
-		if (qc != null)
+		if (qc == null)
+			return;
+		
+		if(error == null)
 			qc.onResult(result);
+		else
+			qc.onError(error);
 	}
 
 	private <T> T parallelExecute(DalHints hints, DalRequest<T> request) throws SQLException {

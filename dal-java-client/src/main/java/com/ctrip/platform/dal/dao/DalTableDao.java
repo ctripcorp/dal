@@ -126,7 +126,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		String selectSql = String.format(findtmp,
 				getTableName(hints, parameters, fields), pkSql);
 
-		return queryDao.queryForObjectNullable(selectSql, parameters, hints.clone().setFields(fields), parser);
+		return queryDao.queryForObjectNullable(selectSql, parameters, hints.setFields(fields), parser);
 	}
 
 	/**
@@ -146,7 +146,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		addParameters(parameters, queryCriteria);
 		String whereClause = buildWhereClause(queryCriteria);
 
-		return query(whereClause, parameters, hints.clone().setFields(fields));
+		return query(whereClause, parameters, hints.setFields(fields));
 	}
 
 	/**

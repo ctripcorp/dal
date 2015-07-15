@@ -2188,6 +2188,7 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 	}
 	
 	private void testDeleteMultipleByFields(DalHints hints) throws SQLException{
+		reset();
 		int[] res;
 		
 		// By fields not same shard

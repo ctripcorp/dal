@@ -6,7 +6,10 @@ public class IntCallback extends DefaultResultCallback {
 	public int getInt() {
 		waitForDone();
 		try {
-			return ((int[])getResult())[0];
+			if(getResult() instanceof Integer)
+				return (Integer)getResult();
+			else
+				return ((int[])getResult())[0];
 		} catch (Throwable e) {
 			return 0;
 		}

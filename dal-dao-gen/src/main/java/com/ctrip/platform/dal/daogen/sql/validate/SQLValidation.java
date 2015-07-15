@@ -9,6 +9,9 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -196,11 +199,10 @@ public class SQLValidation {
 			int rows = stat.executeUpdate();
 			status.setAffectRows(rows);
 			status.setPassed(true).append("Validate Successfully");
-		}catch(Exception e){
+		} catch(Exception e){
 			status.append(e.getMessage());
 			log.error("Validate update failed", e);
-		}
-		finally{
+		} finally {
 			ResourceUtils.rollback(connection);
 			ResourceUtils.close(connection);
 		}
@@ -519,7 +521,7 @@ public class SQLValidation {
 			case java.sql.Types.CHAR:
 				return "X";
 			case java.sql.Types.DATE:
-				return Date.valueOf("2012-01-01");
+				return java.sql.Date.valueOf("2012-01-01");
 			case java.sql.Types.TIME:
 				return Time.valueOf("10:00:00");
 			case java.sql.Types.TIMESTAMP:
@@ -594,7 +596,8 @@ public class SQLValidation {
 			case java.sql.Types.CHAR:
 				return val;
 			case java.sql.Types.DATE:
-				return Date.valueOf(val);
+//				return Date.valueOf(val);
+				return parseDate(val);
 			case java.sql.Types.TIME:
 				return Time.valueOf(val);
 			case java.sql.Types.TIMESTAMP:
@@ -612,5 +615,16 @@ public class SQLValidation {
 				return null;
 		
 		}
+	}
+	
+	private static Date parseDate(String val) {
+		DateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			java.util.Date cur = format1.parse(val);
+			return new Date(cur.getTime());
+		} catch (ParseException e) {
+			log.warn(e.getMessage());
+		}
+		return null;
 	}
 }

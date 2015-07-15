@@ -47,7 +47,7 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 		int[] columnTypes = manager.getColumnTypes();
 		Field[] identities = manager.getIdentity();
 		Field identity = identities != null && identities.length == 1 ? identities[0] : null;
-		DalRowMapper<T> rowMapper = DalDefaultJpaMapper.create(clazz);
+		DalRowMapper<T> rowMapper = new DalDefaultJpaMapper<T>(clazz);
 		String[] sensitiveColumnNames = manager.getSensitiveColumnNames();
 		return new DalDefaultJpaParser<T>(
 				clazz, autoIncrement, databaseName, tableName, columnNames, primaryKeyNames,

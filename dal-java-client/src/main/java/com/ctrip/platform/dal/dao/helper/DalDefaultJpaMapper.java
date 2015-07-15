@@ -13,17 +13,13 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T> {
 	private String[] columnNames = null;
 	private Map<String, Field> fieldsMap = null;
 	
-	private DalDefaultJpaMapper(Class<T> clazz) throws SQLException {
+	public DalDefaultJpaMapper(Class<T> clazz) throws SQLException {
 		this.clazz = clazz;
 		EntityManager<T> manager = new EntityManager<T>(clazz);
 		this.columnNames = manager.getColumnNames();
 		this.fieldsMap = manager.getFieldMap();
 	}
 	
-	public static <T> DalRowMapper<T> create(Class<T> clazz) throws SQLException {
-		return new DalDefaultJpaMapper<T>(clazz);
-	}
-
 	@Override
 	public T map(ResultSet rs, int rowNum) throws SQLException {
 		try {

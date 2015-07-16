@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 import com.ctrip.platform.dal.dao.client.DalHA;
-import com.ctrip.platform.dal.dao.task.DalAsyncCallback;
 import com.ctrip.platform.dal.exceptions.DalException;
 
 /**
@@ -21,11 +21,11 @@ import com.ctrip.platform.dal.exceptions.DalException;
  * @author jhhe
  */
 public class DalHints {
-	private Map<DalHintEnum, Object> hints = new LinkedHashMap<DalHintEnum, Object>();
+	private Map<DalHintEnum, Object> hints = new ConcurrentHashMap<DalHintEnum, Object>();
 	// It is not so nice to put keyholder here, but to make Task stateless, I have no other choice
 	private KeyHolder keyHolder;
 	
-	private DalAsyncCallback asyncCallback;
+	private static final Object NULL = new Object();
 	
 	public KeyHolder getKeyHolder() {
 		return keyHolder;
@@ -36,15 +36,6 @@ public class DalHints {
 		return this;
 	}
 	
-	public DalHints setDalAsyncCallback(DalAsyncCallback callback) {
-		this.asyncCallback = callback;
-		return this;
-	}
-	
-	public DalAsyncCallback getDalAsyncCallback() {
-		return asyncCallback;
-	}
-
 	public static DalHints createIfAbsent(DalHints hints) {
 		return hints == null ? new DalHints() : hints;
 	}
@@ -73,7 +64,9 @@ public class DalHints {
 	 * Make sure only shardId, tableShardId, shardValue, shardColValue will be used to locate shard Id.
 	 */
 	public DalHints cleanUp() {
-		return setFields(null).setParameters(null);
+		hints.remove(DalHintEnum.fields);
+		hints.remove(DalHintEnum.parameters);
+		return this;
 	}
 	
 	public DalHints(DalHintEnum...hints) {
@@ -125,7 +118,7 @@ public class DalHints {
 	}
 	
 	public DalHints set(DalHintEnum hint) {
-		set(hint, null);
+		set(hint, NULL);
 		return this;
 	}
 	
@@ -193,10 +186,16 @@ public class DalHints {
 	}
 	
 	public DalHints setFields(Map<String, ?> fields) {
+		if(fields == null)
+			return this;
+		
 		return set(DalHintEnum.fields, fields);
 	}
 	
 	public DalHints setParameters(StatementParameters parameters) {
+		if(parameters == null)
+			return this;
+
 		return set(DalHintEnum.parameters, parameters);
 	}
 	
@@ -286,11 +285,11 @@ public class DalHints {
 	}
 
 	public void handleError(String msg, Throwable e) throws DalException {
-		if(isStopOnError())
-			throw DalException.wrap(e);
-
 		// Just make sure error is not swallowed by us
 		DalClientFactory.getDalLogger().error(msg, e);
+
+		if(isStopOnError())
+			throw DalException.wrap(e);
 	}
 
 	public DalHints setIsolationLevel(int isolationLevel) {

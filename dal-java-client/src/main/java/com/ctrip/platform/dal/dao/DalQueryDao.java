@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.List;
 
-import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.helper.DalFirstResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalListMerger;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;

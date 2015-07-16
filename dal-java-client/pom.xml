@@ -8,7 +8,7 @@
     <relativePath>../pom.xml</relativePath> 
   </parent>
   <artifactId>dal-java-client</artifactId>
-  <version>1.3.5</version>
+  <version>1.4.0</version>
   <properties>
     <ver.version>${project.version}</ver.version>
   </properties>

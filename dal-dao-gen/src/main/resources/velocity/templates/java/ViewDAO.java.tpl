@@ -31,7 +31,7 @@ public class ${host.getPojoClassName()}Dao {
 	 */
 	public ${host.getPojoClassName()}Dao() throws SQLException {
 		this.client = DalClientFactory.getClient(DATA_BASE);
-		this.mapper = DalDefaultJpaMapper.create(${host.getPojoClassName()}.class);
+		this.mapper = new DalDefaultJpaMapper(${host.getPojoClassName()}.class);
 		this.extractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(this.mapper);
 		this.scalarExtractor = new DalScalarExtractor();
 	}

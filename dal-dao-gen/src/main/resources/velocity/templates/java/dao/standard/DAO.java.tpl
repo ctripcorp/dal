@@ -7,7 +7,7 @@ import ${field};
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 
 public class ${host.getPojoClassName()}Dao {
-	private static final String DATA_BASE = "${host.getDbSetName()}";
+    private static final String DATA_BASE = "${host.getDbSetName()}";
 	private static DatabaseCategory dbCategory = null;
 #if($host.getDatabaseCategory().name() == "MySql")
 	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getTableName()}";

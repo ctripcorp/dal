@@ -3,11 +3,13 @@ package com.ctrip.platform.dal.dao.helper;
 import com.ctrip.platform.dal.dao.DalParser;
 
 public abstract class AbstractDalParser<T> implements DalParser<T> {
-	private String dataBaseName;
-	private String tableName;
-	private String[] columns;
-	private String[] primaryKeyColumns;
-	private int[] columnTypes;
+	protected String dataBaseName;
+	protected String tableName;
+	protected String[] columns;
+	protected String[] primaryKeyColumns;
+	protected int[] columnTypes;
+	
+	public AbstractDalParser(){}
 	
 	public AbstractDalParser(
 			String dataBaseName,

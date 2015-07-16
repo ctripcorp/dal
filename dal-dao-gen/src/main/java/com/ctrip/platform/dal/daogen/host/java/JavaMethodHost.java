@@ -40,6 +40,8 @@ public class JavaMethodHost {
 	
 	private List<JavaParameterHost> updateSetParameters;
 	
+	private String dbSetName;
+	
 	public String getOrderByExp() {
 		return orderByExp;
 	}
@@ -346,4 +348,13 @@ public class JavaMethodHost {
 	public boolean isUpdate(){
 		return this.crud_type != null && this.crud_type.equalsIgnoreCase("update");
 	}
+
+	public String getDbSetName() {
+		return dbSetName;
+	}
+
+	public void setDbSetName(String dbSetName) {
+		this.dbSetName = dbSetName;
+	}
+	
 }

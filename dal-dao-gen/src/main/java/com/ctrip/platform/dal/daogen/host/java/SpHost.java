@@ -15,6 +15,8 @@ public class SpHost {
 	private String spName;
 	private String callParameters;
 	private List<JavaParameterHost> fields = new ArrayList<JavaParameterHost>();
+	
+	private String dbSetName;
 
 	public Set<String> getDaoImports() {
 		Set<String> imports = new TreeSet<String>();
@@ -111,5 +113,14 @@ public class SpHost {
 	public String getCallParameters() {
 		return this.callParameters;
 	}
+
+	public String getDbSetName() {
+		return dbSetName;
+	}
+
+	public void setDbSetName(String dbSetName) {
+		this.dbSetName = dbSetName;
+	}
+	
 
 }

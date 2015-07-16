@@ -26,6 +26,7 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalPojo;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.helper.Database;
 import com.ctrip.platform.dal.dao.helper.Type;
 
 public class DalDefaultJpaParserTest {
@@ -36,9 +37,8 @@ public class DalDefaultJpaParserTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		DalClientFactory.initClientFactory();
-		personParser = DalDefaultJpaParser.create(PersonEntity.class, "dao_test_M");
-		allTypesParser = DalDefaultJpaParser.create(AllTypesEntity.class, "dao_test_S");
-				
+		personParser = new DalDefaultJpaParser(PersonEntity.class);
+		allTypesParser = new DalDefaultJpaParser(AllTypesEntity.class);
 	}
 
 	@AfterClass
@@ -86,6 +86,7 @@ public class DalDefaultJpaParserTest {
 	}
 	
 	@Entity
+	@Database(name="dao_test_M")
 	@Table(name="person")
 	static class PersonEntity implements DalPojo {
 		
@@ -129,6 +130,7 @@ public class DalDefaultJpaParserTest {
 	}
 	
 	@Entity
+	@Database(name="dao_test_S")
 	@Table(name="All_Types")
 	static class AllTypesEntity implements DalPojo {
 		

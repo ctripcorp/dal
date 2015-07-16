@@ -26,7 +26,7 @@ public class ${host.getClassName()}Dao {
 	public ${host.getClassName()}Dao() throws SQLException {
 #foreach( $method in ${host.getMethods()} )
 #if(!$method.isEmptyFields() && !$method.isSampleType())
-		this.${method.getVariableName()}RowMapper = DalDefaultJpaMapper.create(${method.getPojoClassName()}.class);
+		this.${method.getVariableName()}RowMapper = new DalDefaultJpaMapper(${method.getPojoClassName()}.class);
 #end
 #end	
 #if($host.hasQuery())

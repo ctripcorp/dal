@@ -27,7 +27,7 @@ public class PerformanceTest {
 	}
 	
 	public static void jpa(int insertCount, String queryWhere) throws SQLException{
-		DalDefaultJpaPerformance performancer = new DalDefaultJpaPerformance(DatabaseCategory.MySql, "dao_test");
+		DalDefaultJpaPerformance performancer = new DalDefaultJpaPerformance(DatabaseCategory.MySql);
 		performancer.dropAndCreateTable();
 		long start = System.currentTimeMillis();
 		performancer.randomInsert(insertCount);

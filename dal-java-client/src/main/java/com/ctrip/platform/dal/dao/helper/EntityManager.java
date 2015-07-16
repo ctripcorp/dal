@@ -46,6 +46,13 @@ public class EntityManager<T> {
 			field.setAccessible(true);
 	}
 	
+	public String getDatabaseName() {
+		Database db = clazz.getAnnotation(Database.class);
+		if (db != null && db.name() != null)
+			return db.name();
+		throw new RuntimeException("The entity must configure Database annotation.");
+	}
+	
 	public String getTableName() {
 		Table table = clazz.getAnnotation(Table.class);
 		if (table != null && table.name() != null)

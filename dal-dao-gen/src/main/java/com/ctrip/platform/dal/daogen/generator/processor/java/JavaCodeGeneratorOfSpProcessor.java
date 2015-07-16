@@ -69,6 +69,7 @@ public class JavaCodeGeneratorOfSpProcessor implements DalProcessor {
 								"templates/java/test/DAOBySpUnitTest.java.tpl");
 	
 						for (SpHost sp : host.getSpHosts()) {
+							sp.setDbSetName(host.getDbSetName());
 							context.put("host", sp);
 							GenUtils.mergeVelocityContext(
 									context,

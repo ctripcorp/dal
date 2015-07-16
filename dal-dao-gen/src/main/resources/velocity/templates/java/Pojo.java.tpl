@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import com.ctrip.platform.dal.dao.helper.Type;
+import com.ctrip.platform.dal.dao.helper.Database;
 import java.sql.Types;
 #foreach( $field in ${host.getPojoImports()} )
 import ${field};
@@ -15,6 +16,7 @@ import ${field};
 import com.ctrip.platform.dal.dao.DalPojo;
 
 @Entity
+@Database(name="$!{host.getDbSetName()}")
 @Table(name="$!{host.getTableName()}")
 public class ${host.getPojoClassName()} implements DalPojo {
 #foreach( $field in ${host.getFields()} )

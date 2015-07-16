@@ -25,6 +25,7 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.helper.Database;
 import com.ctrip.platform.dal.dao.helper.Type;
 import com.ctrip.platform.dal.dao.unittests.DalTestHelper;
 
@@ -46,7 +47,7 @@ public class DalDefaultJpaParserSqlServerTest {
 	private static DalParser<ClientTestModel> parser = null;
 	static {
 		try {
-			parser = DalDefaultJpaParser.create(ClientTestModel.class, "dao_test_sqlsvr");
+			parser = new DalDefaultJpaParser(ClientTestModel.class);
 			
 			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(parser.getDatabaseName());	
@@ -135,6 +136,7 @@ public class DalDefaultJpaParserSqlServerTest {
 
 	
 	@Entity(name="dal_client_test")
+	@Database(name="dao_test_sqlsvr")
 	public static class ClientTestModel {
 		@Id
 		@GeneratedValue(strategy = GenerationType.AUTO)

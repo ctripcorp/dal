@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 
 /**
@@ -24,36 +23,22 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 	private DalRowMapper<T> rowMapper;
 	private String[] sensitiveColumnNames; 
 	
-	private DalDefaultJpaParser(Class<T> clazz, boolean autoIncrement,
-			String dataBaseName, String tableName, String[] columns, 
-			String[] primaryKeyColumns, int[] columnTypes, Map<String, Field> fieldsMap, 
-			Field identity, DalRowMapper<T> rowMapper, String[] sensitiveColumnNames) {
-		super(dataBaseName, tableName, columns, primaryKeyColumns, columnTypes);
-		this.clazz = clazz;
-		this.identity = identity;
-		this.autoIncrement = autoIncrement;
-		this.fieldsMap = fieldsMap;
-		this.rowMapper = rowMapper;
-		this.sensitiveColumnNames = sensitiveColumnNames;
-	}
-
-	public static <T> DalParser<T> create(Class<T> clazz, String databaseName) throws SQLException {
+	public DalDefaultJpaParser(Class<T> clazz) throws SQLException {
 		EntityManager<T> manager = new EntityManager<T>(clazz);
-		String tableName = manager.getTableName();
-		boolean autoIncrement = manager.isAutoIncrement();
-		String[] primaryKeyNames = manager.getPrimaryKeyNames();
-		Map<String, Field> fieldsMap = manager.getFieldMap();
-		String[] columnNames = manager.getColumnNames();
-		int[] columnTypes = manager.getColumnTypes();
+		this.dataBaseName = manager.getDatabaseName();
+		this.tableName = manager.getTableName();
+		this.columns = manager.getColumnNames();
+		this.primaryKeyColumns = manager.getPrimaryKeyNames();
+		this.columnTypes = manager.getColumnTypes();
+		this.clazz = clazz;
+		this.autoIncrement = manager.isAutoIncrement();
+		this.fieldsMap = manager.getFieldMap();
 		Field[] identities = manager.getIdentity();
-		Field identity = identities != null && identities.length == 1 ? identities[0] : null;
-		DalRowMapper<T> rowMapper = new DalDefaultJpaMapper<T>(clazz);
-		String[] sensitiveColumnNames = manager.getSensitiveColumnNames();
-		return new DalDefaultJpaParser<T>(
-				clazz, autoIncrement, databaseName, tableName, columnNames, primaryKeyNames,
-				columnTypes, fieldsMap, identity, rowMapper, sensitiveColumnNames);
+		this.identity = identities != null && identities.length == 1 ? identities[0] : null;
+		this.rowMapper = new DalDefaultJpaMapper<T>(clazz);
+		this.sensitiveColumnNames = manager.getSensitiveColumnNames();
 	}
-
+	
 	@Override
 	public T map(ResultSet rs, int rowNum) throws SQLException {
 		return rowMapper.map(rs, rowNum);

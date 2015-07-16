@@ -23,6 +23,7 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.helper.Database;
 import com.ctrip.platform.dal.dao.helper.Type;
 
 public class DalDefaultJpaPerformance {
@@ -51,9 +52,9 @@ public class DalDefaultJpaPerformance {
 	private DalTableDao<ClientTestModel> dao = null;
 	private static DalClient client = null;
 	
-	public DalDefaultJpaPerformance(DatabaseCategory dbCategory,String dbName){
+	public DalDefaultJpaPerformance(DatabaseCategory dbCategory){
 		try {
-			parser = DalDefaultJpaParser.create(ClientTestModel.class, dbName);
+			parser = new DalDefaultJpaParser(ClientTestModel.class);
 			client = DalClientFactory.getClient(parser.getDatabaseName());
 			dao = new DalTableDao<ClientTestModel>(parser);
 		} catch (Exception e) {
@@ -158,6 +159,7 @@ public class DalDefaultJpaPerformance {
 	
 	 
 	@Entity(name="jpa_performance_test")
+	@Database(name="dao_test")
 	public  static class ClientTestModel{
 		@Id
 		@GeneratedValue(strategy = GenerationType.AUTO)

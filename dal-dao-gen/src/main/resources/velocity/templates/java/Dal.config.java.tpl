@@ -22,7 +22,7 @@
 	<ConnectionLocator>
       <locator>com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator</locator>
       <settings>
-		 <dc></dc>
+		 <dc>{$DBDataCenter}</dc>
 		 <connectionStringParser>com.ctrip.datasource.configure.CtripConnectionStringParser</connectionStringParser>
 	  </settings>
   </ConnectionLocator>

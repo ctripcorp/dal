@@ -7,7 +7,7 @@ import java.util.List;
 
 import microsoft.sql.DateTimeOffset;
 
-import com.ctrip.fx.octopus.util.Time;
+//import com.ctrip.fx.octopus.util.Time;
 import com.ctrip.platform.dal.dao.*;
 
 public class TestTableDaoTest {
@@ -50,7 +50,7 @@ public class TestTableDaoTest {
 			model.setSmallint(Short.valueOf("1"));
 			model.setSmallmoney(BigDecimal.ONE);
 			model.setText("This is text");
-			model.setText(Time.toString(System.currentTimeMillis()));
+//			model.setText(Time.toString(System.currentTimeMillis()));
 			model.setTimestamp(null);
 			model.setTinyint(Short.valueOf("16"));
 			model.setVarchar("V");

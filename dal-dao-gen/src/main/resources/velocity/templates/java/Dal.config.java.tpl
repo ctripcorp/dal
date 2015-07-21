@@ -20,10 +20,13 @@
         </settings>
 	</LogListener>
 	<ConnectionLocator>
-      <locator>com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator</locator>
-      <settings>
-		 <dc>{$DBDataCenter}</dc>
-		 <connectionStringParser>com.ctrip.datasource.configure.CtripConnectionStringParser</connectionStringParser>
-	  </settings>
-  </ConnectionLocator>
+		<locator>com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator</locator>
+		<settings>
+			<dc>{$DBDataCenter}</dc>
+			<connectionStringParser>com.ctrip.datasource.configure.CtripConnectionStringParser</connectionStringParser>
+		</settings>
+	</ConnectionLocator>
+	<TaskFactory>
+		<factory>com.ctrip.platform.dal.dao.CtripTaskFactory</factory>
+	</TaskFactory>
 </dal>

@@ -26,11 +26,45 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T> {
 			T instance = this.clazz.newInstance();
 			for (int i = 0; i < columnNames.length; i++) {
 				Field field = fieldsMap.get(columnNames[i]);
-				EntityManager.setValue(field, instance, rs.getObject(columnNames[i]));
+				setValue(field, instance, rs.getObject(columnNames[i]));
 			}
 			return instance;
 		} catch (Throwable e) {
 			throw new SQLException(e);
 		}
+	}
+
+	private void setValue(Field field, Object entity, Object val)
+			throws ReflectiveOperationException {
+		if (val == null) {
+			field.set(entity, val);
+			return;
+		}
+		// The following order is optimized for most cases 
+		if (field.getType().equals(Long.class) || field.getType().equals(long.class)) {
+			field.set(entity, ((Number) val).longValue());
+			return;
+		}
+		if (field.getType().equals(Integer.class) || field.getType().equals(int.class)) {
+			field.set(entity, ((Number) val).intValue());
+			return;
+		}
+		if (field.getType().equals(Double.class) || field.getType().equals(double.class)) {
+			field.set(entity, ((Number) val).doubleValue());
+			return;
+		}
+		if (field.getType().equals(Float.class) || field.getType().equals(float.class)) {
+			field.set(entity, ((Number) val).floatValue());
+			return;
+		}
+		if (field.getType().equals(Byte.class) || field.getType().equals(byte.class)) {
+			field.set(entity, ((Number) val).byteValue());
+			return;
+		}
+		if (field.getType().equals(Short.class) || field.getType().equals(short.class)) {
+			field.set(entity, ((Number) val).shortValue());
+			return;
+		}
+		field.set(entity, val);
 	}
 }

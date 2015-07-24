@@ -53,7 +53,7 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 	public Number getIdentityValue(T pojo) {
 		if (pojo.getClass().equals(this.clazz) && identity != null) {
 			try {
-				Object val = EntityManager.getValue(identity, pojo);
+				Object val = identity.get(pojo);
 				if (val instanceof Number)
 					return (Number) val;
 			} catch (Throwable e) {
@@ -65,39 +65,27 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 
 	@Override
 	public Map<String, ?> getPrimaryKeys(T pojo) {
-		Map<String, Object> map = new LinkedHashMap<String, Object>();
-		String[] primaryKeyNames = this.getPrimaryKeyNames();
-		if (primaryKeyNames != null) {
-			for (int i = 0; i < primaryKeyNames.length; i++) {
-				try {
-					Field field = this.fieldsMap.get(primaryKeyNames[i]);
-					Object val = EntityManager.getValue(field, pojo);
-					map.put(primaryKeyNames[i], val);
-				} catch (Throwable e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-		return map;
+		return getFields(getPrimaryKeyNames(), pojo);
 	}
 
 	@Override
 	public Map<String, ?> getFields(T pojo) {
+		return getFields(getColumnNames(), pojo);
+	}
+	
+	public String[] getSensitiveColumnNames() {
+		return this.sensitiveColumnNames;
+	}
+	
+	private Map<String, ?> getFields(String[] columnNames, T pojo) {
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
-		String[] columnNames = this.getColumnNames();
-		for (int i = 0; i < columnNames.length; i++) {
+		for (String columnName: columnNames) {
 			try {
-				Field field = this.fieldsMap.get(columnNames[i]);
-				Object val = EntityManager.getValue(field, pojo);
-				map.put(columnNames[i], val);
+				map.put(columnName, fieldsMap.get(columnName).get(pojo));
 			} catch (Throwable e) {
 				throw new RuntimeException(e);
 			}
 		}
 		return map;
-	}
-	
-	public String[] getSensitiveColumnNames() {
-		return this.sensitiveColumnNames;
 	}
 }

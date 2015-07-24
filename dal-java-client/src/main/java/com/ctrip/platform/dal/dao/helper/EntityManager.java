@@ -155,41 +155,4 @@ public class EntityManager<T> {
 			return column.name().isEmpty() ? field.getName() : column.name();
 		return field.getName();
 	}
-	
-	public static void setValue(Field field, Object entity, Object val)
-			throws ReflectiveOperationException {
-		if (val == null) {
-			field.set(entity, val);
-			return;
-		}
-		if (field.getType().equals(Integer.class) || field.getType().equals(int.class)) {
-			field.set(entity, ((Number) val).intValue());
-			return;
-		}
-		if (field.getType().equals(Long.class) || field.getType().equals(long.class)) {
-			field.set(entity, ((Number) val).longValue());
-			return;
-		}
-		if (field.getType().equals(Byte.class) || field.getType().equals(byte.class)) {
-			field.set(entity, ((Number) val).byteValue());
-			return;
-		}
-		if (field.getType().equals(Short.class) || field.getType().equals(short.class)) {
-			field.set(entity, ((Number) val).shortValue());
-			return;
-		}
-		if (field.getType().equals(Float.class) || field.getType().equals(float.class)) {
-			field.set(entity, ((Number) val).floatValue());
-			return;
-		}
-		if (field.getType().equals(Double.class) || field.getType().equals(double.class)) {
-			field.set(entity, ((Number) val).doubleValue());
-			return;
-		}
-		field.set(entity, val);
-	}
-	
-	public static Object getValue(Field field, Object entity) throws IllegalArgumentException, IllegalAccessException {
-		return field.get(entity);
-	}
 }

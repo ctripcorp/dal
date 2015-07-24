@@ -23,9 +23,8 @@ public class ${host.getPojoClassName()} implements DalPojo {
 	
 #if(${field.isPrimary()})
 	@Id
-#else
-	@Column(name="${field.getUncapitalizedName()}")
-#end	
+#end
+	@Column(name="${field.getName()}")
 #if(${field.isIdentity()})
 	@GeneratedValue(strategy = GenerationType.AUTO)
 #end

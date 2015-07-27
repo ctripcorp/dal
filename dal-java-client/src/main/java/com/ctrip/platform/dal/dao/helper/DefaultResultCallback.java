@@ -22,22 +22,16 @@ public class DefaultResultCallback implements DalResultCallback {
 		done.set(true);
 	}
 	
-	public void waitForDone() {
+	public void waitForDone() throws InterruptedException {
 		while(done.get() == false)
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-			}
+			Thread.sleep(1);
 	}
 
-	public void waitForDone(int timeout) {
+	public void waitForDone(int timeout) throws InterruptedException {
 		int i = 0;
 		while(done.get() == false && i < timeout) {
-			try {
-				i++;
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-			}
+			i++;
+			Thread.sleep(1);
 		}
 	}
 

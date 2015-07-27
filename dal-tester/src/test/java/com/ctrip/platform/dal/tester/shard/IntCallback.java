@@ -4,7 +4,11 @@ import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 
 public class IntCallback extends DefaultResultCallback {
 	public int getInt() {
-		waitForDone();
+		try {
+			waitForDone();
+		} catch (InterruptedException e1) {
+			throw new RuntimeException(e1);
+		}
 		try {
 			if(getResult() instanceof Integer)
 				return (Integer)getResult();
@@ -16,7 +20,11 @@ public class IntCallback extends DefaultResultCallback {
 	}
 	
 	public int[] getIntArray() {
-		waitForDone();
+		try {
+			waitForDone();
+		} catch (InterruptedException e1) {
+			throw new RuntimeException(e1);
+		}
 		try {
 			return (int[])getResult();
 		} catch (Throwable e) {

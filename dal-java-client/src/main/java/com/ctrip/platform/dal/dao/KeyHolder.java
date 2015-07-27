@@ -49,6 +49,17 @@ public class KeyHolder {
 		return merged.get();
 	}
 	
+	public void waitForMerge() throws InterruptedException {
+		while(isMerged() == false)
+			Thread.sleep(1);
+	}
+	
+	public void waitForMerge(int timeout) throws InterruptedException {
+		int i = 0;
+		while(isMerged() == false && timeout > i++)
+			Thread.sleep(1);
+	}
+	
 	/**
 	 * Get the generated Id. The type is of Number.
 	 * @return id in number

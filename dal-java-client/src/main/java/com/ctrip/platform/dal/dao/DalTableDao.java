@@ -249,7 +249,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int insert(DalHints hints, T daoPojo)
 			throws SQLException {
-		return getSafeResult(executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleInsertTask)));
+		return insert(hints, hints.getKeyHolder(), daoPojo);
 	}
 	
 	/**
@@ -285,7 +285,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @return how many rows been affected
 	 */
 	public int[] insert(DalHints hints, List<T> daoPojos) throws SQLException {
-		return insert(hints, null, daoPojos);
+		return insert(hints, hints.getKeyHolder(), daoPojos);
 	}
 
 	/**
@@ -324,7 +324,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int combinedInsert(DalHints hints, List<T> daoPojos) 
 			throws SQLException {
-		return combinedInsert(hints, null, daoPojos);
+		return combinedInsert(hints, hints.getKeyHolder(), daoPojos);
 	}
 	
 	/**

@@ -96,12 +96,22 @@ public abstract class BaseDalTabelDaoTableShardTest {
 	private class TestQueryResultCallback extends DefaultResultCallback {
 		
 		public ClientTestModel get() {
-			waitForDone();
+			try {
+				waitForDone();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return (ClientTestModel)getResult();
 		}
 
 		public List<ClientTestModel> getModels() {
-			waitForDone();
+			try {
+				waitForDone();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return (List<ClientTestModel>)getResult();
 		}
 	}

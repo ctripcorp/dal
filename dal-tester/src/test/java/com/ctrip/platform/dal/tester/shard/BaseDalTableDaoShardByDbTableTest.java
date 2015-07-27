@@ -2,9 +2,7 @@ package com.ctrip.platform.dal.tester.shard;
 
 import static com.ctrip.platform.dal.dao.unittests.DalTestHelper.deleteAllShardsByDbTable;
 import static com.ctrip.platform.dal.dao.unittests.DalTestHelper.getCountByDbTable;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -142,12 +140,22 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 	private class TestQueryResultCallback extends DefaultResultCallback {
 		
 		public ClientTestModel get() {
-			waitForDone();
+			try {
+				waitForDone();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return (ClientTestModel)getResult();
 		}
 
 		public List<ClientTestModel> getModels() {
-			waitForDone();
+			try {
+				waitForDone();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return (List<ClientTestModel>)getResult();
 		}
 	}
@@ -180,7 +188,11 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		assertNull(model);
 		if(hints.is(DalHintEnum.resultCallback)){
 			TestQueryResultCallback callback = (TestQueryResultCallback)hints.get(DalHintEnum.resultCallback);
-			callback.waitForDone();
+			try {
+				callback.waitForDone();
+			} catch (InterruptedException e) {
+				throw new SQLException(e);
+			}
 			if(callback.isSuccess())
 				return callback.get();
 			else
@@ -202,7 +214,11 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		assertNull(models);
 		if(hints.is(DalHintEnum.resultCallback)){
 			TestQueryResultCallback callback = (TestQueryResultCallback)hints.get(DalHintEnum.resultCallback);
-			callback.waitForDone();
+			try {
+				callback.waitForDone();
+			} catch (InterruptedException e) {
+				throw new SQLException(e);
+			}
 			if(callback.isSuccess())
 				return callback.getModels();
 			else
@@ -222,7 +238,11 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		assertEquals(0, res);
 		if(hints.is(DalHintEnum.resultCallback)){
 			IntCallback callback = (IntCallback)hints.get(DalHintEnum.resultCallback);
-			callback.waitForDone();
+			try {
+				callback.waitForDone();
+			} catch (InterruptedException e) {
+				throw new SQLException(e);
+			}
 			if(callback.isSuccess())
 				return callback.getInt();
 			else
@@ -246,7 +266,10 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		assertNull(res);
 		if(hints.is(DalHintEnum.resultCallback)){
 			IntCallback callback = (IntCallback)hints.get(DalHintEnum.resultCallback);
-			callback.waitForDone();
+			try {
+				callback.waitForDone();
+			} catch (InterruptedException e) {
+				throw new SQLException(e);			}
 			if(callback.isSuccess())
 				return callback.getIntArray();
 			else
@@ -262,14 +285,22 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 	private void assertFail(Object model, DalHints hints) {
 		assertNull(model);
 		DefaultResultCallback callback = (DefaultResultCallback)hints.get(DalHintEnum.resultCallback);
-		callback.waitForDone();
+		try {
+			callback.waitForDone();
+		} catch (InterruptedException e) {
+			fail(e.toString());
+		}
 		assertTrue(!callback.isSuccess());
 	}	
 
 	private void assertFail(int res, DalHints hints) {
 		assertEquals(0, res);
 		DefaultResultCallback callback = (DefaultResultCallback)hints.get(DalHintEnum.resultCallback);
-		callback.waitForDone();
+		try {
+			callback.waitForDone();
+		} catch (InterruptedException e) {
+			fail(e.toString());
+		}
 		assertTrue(!callback.isSuccess());
 	}
 	

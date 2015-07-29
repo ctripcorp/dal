@@ -16,6 +16,7 @@ import javax.persistence.Table;
 
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.annotation.Sensitive;
+import com.ctrip.platform.dal.dao.annotation.Type;
 
 /**
  * 

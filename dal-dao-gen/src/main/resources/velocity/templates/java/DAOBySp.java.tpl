@@ -55,9 +55,8 @@ public class ${host.getDbSetName()}SpDao {
   
 		/* To specify returned result(not the output or inputoutput parameter)
 		DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
-		param = StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName("result").build();
-		parameters.add(param);
-
+		parameters.setResultsParameter("result", extractor);
+		
 		param  = StatementParameter.newBuilder().setResultsParameter(true).setName("count").build();
 		parameters.add(param);
 		*/

@@ -25,8 +25,8 @@ import org.junit.Test;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalPojo;
+import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
-import com.ctrip.platform.dal.dao.helper.Database;
 import com.ctrip.platform.dal.dao.helper.Type;
 
 public class DalDefaultJpaParserTest {

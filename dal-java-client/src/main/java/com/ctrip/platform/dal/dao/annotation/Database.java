@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.helper;
+package com.ctrip.platform.dal.dao.annotation;
 
 import java.lang.annotation.Target;
 import java.lang.annotation.Retention;

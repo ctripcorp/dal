@@ -38,7 +38,7 @@
     <dependency>
 	  <groupId>commons-codec</groupId>
 	  <artifactId>commons-codec</artifactId>
-	  <version>1.4</version>
+	  <version>1.8</version>
 	</dependency>
     <dependency>
     	<groupId>com.ctrip.platform</groupId>
@@ -54,6 +54,16 @@
 		<groupId>org.apache.tomcat</groupId>
 		<artifactId>tomcat-jdbc</artifactId>
 		<version>7.0.52</version>
+	</dependency>
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+		<version>${mysql-version}</version>
+	</dependency>
+	<dependency>
+		<groupId>com.microsoft.sqlserver</groupId>
+		<artifactId>sqljdbc</artifactId>
+		<version>${sqlserver-version}</version>
 	</dependency>
   </dependencies>
   <build>

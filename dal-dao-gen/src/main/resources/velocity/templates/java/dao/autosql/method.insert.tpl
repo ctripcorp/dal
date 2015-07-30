@@ -24,7 +24,7 @@
 		parameters.set$!{sensitiveflag}(i++, "${p.getAlias()}", ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #end
 #end
-		return baseClient.update(sql, parameters, hints);
+		return client.update(sql, parameters, hints);
 	}
 #end
 #end

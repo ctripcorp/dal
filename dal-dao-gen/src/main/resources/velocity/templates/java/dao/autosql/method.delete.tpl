@@ -8,7 +8,7 @@
 		DeleteSqlBuilder builder = new DeleteSqlBuilder("${method.getTableName()}", dbCategory);
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 	    String sql = builder.build();
-		return baseClient.update(sql, builder.buildParameters(), hints);
+		return client.update(sql, builder.buildParameters(), hints);
 	}
 #end
 #end

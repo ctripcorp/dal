@@ -21,7 +21,6 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 	private Field identity;
 	private boolean autoIncrement;
 	private DalRowMapper<T> rowMapper;
-	private String[] sensitiveColumnNames; 
 	
 	public DalDefaultJpaParser(Class<T> clazz) throws SQLException {
 		EntityManager<T> manager = new EntityManager<T>(clazz);

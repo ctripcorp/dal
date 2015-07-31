@@ -7,8 +7,11 @@ public interface DalParser<T> extends DalRowMapper<T> {
 	String getTableName();
 	
 	String[] getColumnNames();
+
 	String[] getPrimaryKeyNames();
 	int[] getColumnTypes();
+
+	String[] getSensitiveColumnNames();
 	
 	/**
 	 * Assumption: the auto incremental column is also the primary key. 

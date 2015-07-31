@@ -25,6 +25,7 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 
 public abstract class BaseDalTableDaoShardByDbTableTest {
@@ -3272,19 +3273,19 @@ Shard 1
 		}
 	}
 
-	private class ClientTestDalParser implements DalParser<ClientTestModel>{
+	static private class ClientTestDalParser extends AbstractDalParser<ClientTestModel>{
 		private String databaseName;
 		private static final String tableName= "dal_client_test";
-		private String[] columnNames = new String[]{
+		private static final String[] columnNames = new String[]{
 			"id","quantity","dbIndex","tableIndex","type","address","last_changed"
 		};
-		private String[] primaryKeyNames = new String[]{"id"};
-		private int[] columnTypes = new int[]{
+		private static final String[] primaryKeyNames = new String[]{"id"};
+		private static final int[] columnTypes = new int[]{
 			Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.VARCHAR, Types.TIMESTAMP
 		};
 		
 		public ClientTestDalParser(String databaseName) {
-			this.databaseName = databaseName;
+			super(databaseName, tableName, columnNames, primaryKeyNames, columnTypes);
 		}
 		
 		@Override
@@ -3299,31 +3300,6 @@ Shard 1
 			model.setAddress(rs.getString(6));
 			model.setLastChanged(rs.getTimestamp(7));
 			return model;
-		}
-
-		@Override
-		public String getDatabaseName() {
-			return databaseName;
-		}
-
-		@Override
-		public String getTableName() {
-			return tableName;
-		}
-
-		@Override
-		public String[] getColumnNames() {
-			return columnNames;
-		}
-
-		@Override
-		public String[] getPrimaryKeyNames() {
-			return primaryKeyNames;
-		}
-
-		@Override
-		public int[] getColumnTypes() {
-			return columnTypes;
 		}
 
 		@Override

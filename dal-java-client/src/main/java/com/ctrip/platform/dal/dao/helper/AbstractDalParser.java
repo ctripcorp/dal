@@ -8,6 +8,7 @@ public abstract class AbstractDalParser<T> implements DalParser<T> {
 	protected String[] columns;
 	protected String[] primaryKeyColumns;
 	protected int[] columnTypes;
+	protected String[] sensitiveColumnNames;
 	
 	public AbstractDalParser(){}
 	
@@ -24,6 +25,21 @@ public abstract class AbstractDalParser<T> implements DalParser<T> {
 		this.columnTypes = columnTypes;
 	}
 	
+	public AbstractDalParser(
+			String dataBaseName,
+			String tableName,
+			String[] columns,
+			String[] primaryKeyColumns,
+			int[] columnTypes,
+			String[] sensitiveColumnNames) {
+		this(dataBaseName,
+				tableName,
+				columns,
+				primaryKeyColumns,
+				columnTypes);
+		this.sensitiveColumnNames = sensitiveColumnNames;
+	}
+	
 	@Override
 	public String getDatabaseName() {
 		return dataBaseName;
@@ -38,7 +54,7 @@ public abstract class AbstractDalParser<T> implements DalParser<T> {
 	public String[] getColumnNames() {
 		return columns;
 	}
-
+	
 	@Override
 	public String[] getPrimaryKeyNames() {
 		return primaryKeyColumns;
@@ -47,5 +63,10 @@ public abstract class AbstractDalParser<T> implements DalParser<T> {
 	@Override
 	public int[] getColumnTypes() {
 		return columnTypes;
+	}
+
+	@Override
+	public String[] getSensitiveColumnNames() {
+		return sensitiveColumnNames;
 	}
 }

@@ -24,6 +24,7 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
 public class DalConcurrentSqlServerTestStub {
@@ -182,7 +183,7 @@ public class DalConcurrentSqlServerTestStub {
 		}
 	}
 	
-	private static class ClientTestDalParser implements DalParser<ClientTestModel>{
+	private static class ClientTestDalParser extends AbstractDalParser<ClientTestModel>{
 		private static final String databaseName="HotelPubDB";
 		private static final String tableName= "dal_client_test";
 		private static final String[] columnNames = new String[]{
@@ -192,6 +193,11 @@ public class DalConcurrentSqlServerTestStub {
 		private static final int[] columnTypes = new int[]{
 			Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.VARCHAR, Types.TIMESTAMP
 		};
+		
+		public ClientTestDalParser() {
+			super(databaseName, tableName, columnNames, primaryKeyNames, columnTypes);
+		}
+
 		@Override
 		public ClientTestModel map(ResultSet rs, int rowNum)
 				throws SQLException {
@@ -202,31 +208,6 @@ public class DalConcurrentSqlServerTestStub {
 			model.setAddress(rs.getString(4));
 			model.setLastChanged(rs.getTimestamp(5));
 			return model;
-		}
-
-		@Override
-		public String getDatabaseName() {
-			return databaseName;
-		}
-
-		@Override
-		public String getTableName() {
-			return tableName;
-		}
-
-		@Override
-		public String[] getColumnNames() {
-			return columnNames;
-		}
-
-		@Override
-		public String[] getPrimaryKeyNames() {
-			return primaryKeyNames;
-		}
-
-		@Override
-		public int[] getColumnTypes() {
-			return columnTypes;
 		}
 
 		@Override

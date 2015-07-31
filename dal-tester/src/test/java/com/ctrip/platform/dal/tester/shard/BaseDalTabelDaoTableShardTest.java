@@ -1,6 +1,9 @@
 package com.ctrip.platform.dal.tester.shard;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,8 +14,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
 
@@ -21,10 +22,10 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.DalResultCallback;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 
 public abstract class BaseDalTabelDaoTableShardTest {
@@ -3022,7 +3023,7 @@ public abstract class BaseDalTabelDaoTableShardTest {
 		}
 	}
 	
-	private static class ClientTestDalParser implements DalParser<ClientTestModel>{
+	private static class ClientTestDalParser extends AbstractDalParser<ClientTestModel>{
 		private String databaseName;
 		private static final String tableName= "dal_client_test";
 		private static final String[] columnNames = new String[]{
@@ -3034,7 +3035,7 @@ public abstract class BaseDalTabelDaoTableShardTest {
 		};
 		
 		public ClientTestDalParser(String databaseName) {
-			this.databaseName = databaseName;
+			super(databaseName, tableName, columnNames, primaryKeyNames, columnTypes);
 		}
 
 		@Override
@@ -3048,31 +3049,6 @@ public abstract class BaseDalTabelDaoTableShardTest {
 			model.setAddress(rs.getString(5));
 			model.setLastChanged(rs.getTimestamp(6));
 			return model;
-		}
-
-		@Override
-		public String getDatabaseName() {
-			return databaseName;
-		}
-
-		@Override
-		public String getTableName() {
-			return tableName;
-		}
-
-		@Override
-		public String[] getColumnNames() {
-			return columnNames;
-		}
-
-		@Override
-		public String[] getPrimaryKeyNames() {
-			return primaryKeyNames;
-		}
-
-		@Override
-		public int[] getColumnTypes() {
-			return columnTypes;
 		}
 
 		@Override

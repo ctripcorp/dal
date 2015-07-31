@@ -10,8 +10,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 
-public class DalManytypesParser implements DalParser<Manytypes> {
+public class DalManytypesParser extends AbstractDalParser<Manytypes> {
 	public static final String DATABASE_NAME = "dao_test";
 	public static final String TABLE_NAME = "ManyTypes";
 	private static final String[] COLUMNS = new String[]{
@@ -76,6 +77,11 @@ public class DalManytypesParser implements DalParser<Manytypes> {
 		12,
 	};
 	
+	public DalManytypesParser() {
+		super(DATABASE_NAME, TABLE_NAME, COLUMNS, PRIMARY_KEYS, COLUMN_TYPES);
+	}
+
+
 	@Override
 	public Manytypes map(ResultSet rs, int rowNum) throws SQLException {
 		Manytypes pojo = new Manytypes();

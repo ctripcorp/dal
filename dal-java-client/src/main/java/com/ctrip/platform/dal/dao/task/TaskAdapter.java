@@ -261,6 +261,9 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	}
 	
 	public boolean isSensitive(String fieldName){
+		if(sensitiveColumns.isEmpty())
+			return false;
+		
 		return sensitiveColumns.contains(fieldName);
 	}
 	

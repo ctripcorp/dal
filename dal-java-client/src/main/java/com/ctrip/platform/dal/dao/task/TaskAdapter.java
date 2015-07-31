@@ -51,6 +51,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	protected DatabaseCategory dbCategory;
 	protected String pkSql;
 	protected Set<String> pkColumns;
+	protected Set<String> sensitiveColumns;
 	protected Map<String, Integer> columnTypes = new HashMap<String, Integer>();
 	protected Character startDelimiter;
 	protected Character endDelimiter;
@@ -70,6 +71,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 		
 		dbCategory = getDatabaseSet(logicDbName).getDatabaseCategory();
 		setDatabaseCategory(dbCategory);
+		initSensitiveColumns();
 	}
 	
 	public void initDbSpecific() {
@@ -126,7 +128,11 @@ public class TaskAdapter<T> implements DaoTask<T> {
 			Map<String, ?> entries) {
 		int index = parameters.size() + 1;
 		for (Map.Entry<String, ?> entry : entries.entrySet()) {
-			parameters.set(index++, entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
+			String fieldName = entry.getKey();
+			if(isSensitive(fieldName))
+				parameters.setSensitive(index++, entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
+			else
+				parameters.set(index++, entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
 		}
 	}
 
@@ -134,7 +140,10 @@ public class TaskAdapter<T> implements DaoTask<T> {
 			Map<String, ?> entries, String[] validColumns) {
 		int index = parameters.size() + 1;
 		for(String column : validColumns){
-			parameters.set(index++, column, getColumnType(column), entries.get(column));
+			if(isSensitive(column))
+				parameters.setSensitive(index++, column, getColumnType(column), entries.get(column));
+			else
+				parameters.set(index++, column, getColumnType(column), entries.get(column));
 		}
 	}
 	
@@ -142,7 +151,9 @@ public class TaskAdapter<T> implements DaoTask<T> {
 			Map<String, ?> entries, List<String> validColumns) {
 		int count = 0;
 		for(String column : validColumns){
-			if(entries.containsKey(column))
+			if(isSensitive(column))
+				parameters.setSensitive(count + start, column, getColumnType(column), entries.get(column));
+			else
 				parameters.set(count + start, column, getColumnType(column), entries.get(column));
 			count++;
 		}
@@ -160,7 +171,11 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	public void addParametersByName(StatementParameters parameters,
 			Map<String, ?> entries) {
 		for (Map.Entry<String, ?> entry : entries.entrySet()) {
-			parameters.set(entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
+			String fieldName = entry.getKey();
+			if(isSensitive(fieldName))
+				parameters.setSensitive(entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
+			else
+				parameters.set(entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
 		}
 	}
 
@@ -245,6 +260,10 @@ public class TaskAdapter<T> implements DaoTask<T> {
 		return pkColumns.contains(fieldName);
 	}
 	
+	public boolean isSensitive(String fieldName){
+		return sensitiveColumns.contains(fieldName);
+	}
+	
 	public String initPkSql() {
 		pkColumns = new HashSet<String>();
 		Collections.addAll(pkColumns, parser.getPrimaryKeyNames());
@@ -253,6 +272,12 @@ public class TaskAdapter<T> implements DaoTask<T> {
 		String template = combine(TMPL_SET_VALUE, parser.getPrimaryKeyNames().length, AND);
 
 		return String.format(template, (Object[]) quote(parser.getPrimaryKeyNames()));
+	}
+
+	public void initSensitiveColumns() {
+		sensitiveColumns = new HashSet<String>();
+		if(parser.getSensitiveColumnNames() != null)
+			Collections.addAll(sensitiveColumns, parser.getSensitiveColumnNames());
 	}
 
 	// Build a lookup table

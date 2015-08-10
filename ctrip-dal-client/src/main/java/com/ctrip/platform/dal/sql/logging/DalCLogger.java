@@ -9,6 +9,7 @@ import com.ctrip.framework.clogging.agent.trace.TraceManager;
 import com.ctrip.framework.clogging.domain.thrift.LogLevel;
 import com.ctrip.framework.clogging.domain.thrift.LogType;
 import com.ctrip.platform.dal.dao.DalEventEnum;
+import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 
@@ -25,15 +26,8 @@ public class DalCLogger {
 	private static ITrace trace;
 
 	static {
-		String clientVersion = System.getProperty(CLIENT_VERSION);
-		if(clientVersion == null){
-			logger = LogManager.getLogger(DalCLogger.class);
-			trace = TraceManager.getTracer(DalCLogger.class);
-		}else {
-			logger = LogManager.getLogger("DAL Java Client " + clientVersion);
-			trace = TraceManager.getTracer("DAL Java Client " + clientVersion);
-		}
-
+		logger = LogManager.getLogger("DAL Java Client " + Version.getVersion());
+		trace = TraceManager.getTracer("DAL Java Client " + Version.getVersion());
 	}
 
 	public static boolean isSimplifyLogging() {

@@ -16,9 +16,7 @@ import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 
 public class DalClientFactory {
-	private static Logger logger = LoggerFactory.getLogger(DalClientFactory.class);
-	private static final String CLIENT_VERSION = "dal.client.version";
-//	private static AtomicReference<DruidDataSourceWrapper> connPool = new AtomicReference<DruidDataSourceWrapper>();
+	private static Logger logger = LoggerFactory.getLogger(Version.getLoggerName());
 
 	private static AtomicReference<DalConfigure> configureRef = new AtomicReference<DalConfigure>();
 
@@ -87,10 +85,6 @@ public class DalClientFactory {
 	}
 
 	public static DalClient getClient(String logicDbName) {
-		String version = System.getProperty(CLIENT_VERSION);
-		if(version == null){
-			System.setProperty(CLIENT_VERSION, Version.getVersion());
-		}
 		if (logicDbName == null)
 			throw new NullPointerException("Database Set name can not be null");
 

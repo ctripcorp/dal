@@ -33,4 +33,9 @@ public class Version {
     public static String getVersion() {
         return version;
     }
+    
+    public static String getLoggerName() {
+        return "DAL Java Client " + version;
+    }
+
 }

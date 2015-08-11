@@ -15,8 +15,6 @@ import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 
 public class DalCLogger {
 	public static final String TITLE = "Dal Fx";
-	//public static final String LOG_NAME = "DAL Java Client " + DalClientVersion.version;
-	private static final String CLIENT_VERSION = "dal.client.version";
 	public static AtomicBoolean simplifyLogging = new AtomicBoolean(false);
 	public static AtomicBoolean encryptLogging = new AtomicBoolean(true);
 
@@ -26,8 +24,8 @@ public class DalCLogger {
 	private static ITrace trace;
 
 	static {
-		logger = LogManager.getLogger("DAL Java Client " + Version.getVersion());
-		trace = TraceManager.getTracer("DAL Java Client " + Version.getVersion());
+		logger = LogManager.getLogger(Version.getLoggerName());
+		trace = TraceManager.getTracer(Version.getLoggerName());
 	}
 
 	public static boolean isSimplifyLogging() {

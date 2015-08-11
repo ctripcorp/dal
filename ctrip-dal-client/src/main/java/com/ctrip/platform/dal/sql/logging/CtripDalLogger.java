@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.ctrip.framework.clogging.agent.MessageManager;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.framework.clogging.domain.thrift.LogLevel;
+import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
@@ -16,7 +17,7 @@ import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 
 public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 	
-	private Logger logger = LoggerFactory.getLogger(CtripDalLogger.class);
+	private Logger logger = LoggerFactory.getLogger(Version.getLoggerName());
 	
 	@Override
 	public void initLogger(Map<String, String> settings) {

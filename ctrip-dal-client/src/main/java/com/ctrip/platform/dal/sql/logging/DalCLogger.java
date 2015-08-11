@@ -67,12 +67,9 @@ public class DalCLogger {
 				logger.error(TITLE, entry.toJson(isEncryptLogging(), entry), entry.getTag());
 			}
 		} else {
-			if (entry.getException() == null)
-				trace.log(LogType.SQL, LogLevel.ERROR, TITLE, entry.toJson(isEncryptLogging(), entry),
-						entry.getTag());
-			else
-				trace.log(LogType.SQL, LogLevel.ERROR, TITLE, entry.toJson(isEncryptLogging(), entry),
-						entry.getTag());
+			LogLevel level = entry.getException() == null ? LogLevel.INFO : LogLevel.ERROR;
+			trace.log(LogType.SQL, level, TITLE, entry.toJson(isEncryptLogging(), entry),
+					entry.getTag());
 		}
 	}
 

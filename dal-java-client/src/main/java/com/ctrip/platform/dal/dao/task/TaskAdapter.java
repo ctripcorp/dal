@@ -190,12 +190,10 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	public void addParametersByName(StatementParameters parameters,
 			Map<String, ?> entries, String[] validColumns) {
 		for(String column : validColumns){
-			if(entries.containsKey(column)) {
-				if(isSensitive(column))
-					parameters.setSensitive(column, getColumnType(column), entries.get(column));
-				else
-					parameters.set(column, getColumnType(column), entries.get(column));
-			}
+			if(isSensitive(column))
+				parameters.setSensitive(column, getColumnType(column), entries.get(column));
+			else
+				parameters.set(column, getColumnType(column), entries.get(column));
 		}
 	}
 

@@ -20,6 +20,7 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.NullLogger;
+import com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 
@@ -139,12 +140,12 @@ public class DalConfigureFactory {
 
 		String name = getAttribute(root, NAME);
 
-		DalLogger logger = readLogListener(getChildNode(root, LOG_LISTENER));
+		DalLogger logger = readInitializer(getChildNode(root, LOG_LISTENER), new NullLogger(), LOGGER);
 		
-		DalTaskFactory factory = readTaskFactory(getChildNode(root, TASK_FACTORY));
+		DalTaskFactory factory = readInitializer(getChildNode(root, TASK_FACTORY), new DefaultTaskFactory(), FACTORY);
 		
-		DalConnectionLocator locator = readConnectionLocator(getChildNode(root, CONNECTION_LOCATOR));
-		
+		DalConnectionLocator locator = readInitializer(getChildNode(root, CONNECTION_LOCATOR), new DefaultDalConnectionLocator(), LOCATOR);
+
 		Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS), logger);
 		
 		return new DalConfigure(name, databaseSets, logger, locator, factory);
@@ -195,75 +196,27 @@ public class DalConfigureFactory {
 				getAttribute(dataBaseNode, CONNECTION_STRING));
 	}
 	
-	private DalConnectionLocator readConnectionLocator(Node connLocatorNode) throws Exception {
-		if(connLocatorNode == null)
-			throw new NullPointerException("There is no ConnectionLocator node found. Please check manul to setup dal config properly.");
+	private <T extends DalComponent> T readInitializer(Node node, T defaultImpl, String implNodeName) throws Exception {
+		if(node == null)
+			return defaultImpl;
 		
-		Node locatorNode = getChildNode(connLocatorNode, LOCATOR);
-		if(locatorNode == null)
-			throw new NullPointerException("There is no locator node found. Please check manul to setup dal config properly.");
-
-		DalConnectionLocator locator = (DalConnectionLocator)Class.forName(locatorNode.getTextContent()).newInstance();
-		
-		Node settingsNode = getChildNode(connLocatorNode, SETTINGS);
-		Map<String, String> settings = new HashMap<>();
-
-		if(settingsNode != null) {
-			NodeList children = settingsNode.getChildNodes();
-			for(int i = 0; i < children.getLength(); i++) {
-				if(children.item(i).getNodeType() == Node.ELEMENT_NODE)
-					settings.put(children.item(i).getNodeName(), children.item(i).getTextContent());
-			}
-		}
-		
-		locator.initLocator(settings);
-		return locator;
-	}
-	
-	private DalLogger readLogListener(Node logListenerNode) throws Exception {
-		DalLogger logger = new NullLogger();
-		if(logListenerNode == null)
-			return logger;
-		
-		if(hasAttribute(logListenerNode, ENABLED)){
-			boolean enabled = Boolean.parseBoolean(getAttribute(logListenerNode, ENABLED));
+		if(hasAttribute(node, ENABLED)){
+			boolean enabled = Boolean.parseBoolean(getAttribute(node, ENABLED));
 			if(enabled == false)
-				return logger;
+				return defaultImpl;
 		}
 		
-		Node loggerNode = getChildNode(logListenerNode, LOGGER);
+		Node loggerNode = getChildNode(node, implNodeName);
 		if(loggerNode == null)
-			return logger;
+			return defaultImpl;
 
-		logger = (DalLogger)Class.forName(loggerNode.getTextContent()).newInstance();
-		
-		Node settingsNode = getChildNode(logListenerNode, SETTINGS);
-		Map<String, String> settings = new HashMap<>();
-
-		if(settingsNode != null) {
-			NodeList children = settingsNode.getChildNodes();
-			for(int i = 0; i < children.getLength(); i++) {
-				if(children.item(i).getNodeType() == Node.ELEMENT_NODE)
-					settings.put(children.item(i).getNodeName(), children.item(i).getTextContent());
-			}
-		}
-		
-		logger.initLogger(settings);
-		return  logger;
+		T initializer = (T)Class.forName(loggerNode.getTextContent()).newInstance();
+		initializer.initialize(getSettings(node));
+		return  initializer;
 	}
 	
-	private DalTaskFactory readTaskFactory(Node taskFactoryNode) throws Exception {
-		DalTaskFactory factory = new DefaultTaskFactory();
-		if(taskFactoryNode == null)
-			return factory;
-		
-		Node factoryNode = getChildNode(taskFactoryNode, FACTORY);
-		if(factoryNode == null)
-			return factory;
-
-		factory = (DalTaskFactory)Class.forName(factoryNode.getTextContent()).newInstance();
-		
-		Node settingsNode = getChildNode(taskFactoryNode, SETTINGS);
+	private Map<String, String> getSettings(Node pNode) {
+		Node settingsNode = getChildNode(pNode, SETTINGS);
 		Map<String, String> settings = new HashMap<>();
 
 		if(settingsNode != null) {
@@ -273,9 +226,7 @@ public class DalConfigureFactory {
 					settings.put(children.item(i).getNodeName(), children.item(i).getTextContent());
 			}
 		}
-		
-		factory.initialize(settings);
-		return  factory;
+		return settings;
 	}
 	
 	private Node getChildNode(Node node, String name) {

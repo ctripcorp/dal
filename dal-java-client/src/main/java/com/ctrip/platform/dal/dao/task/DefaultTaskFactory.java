@@ -7,8 +7,7 @@ import com.ctrip.platform.dal.dao.DalParser;
 public class DefaultTaskFactory implements DalTaskFactory {
 
 	@Override
-	public void initialize(Map<String, ?> settings) {
-		//Do noting for now
+	public void initialize(Map<String, String> settings) {
 	}
 
 	@Override

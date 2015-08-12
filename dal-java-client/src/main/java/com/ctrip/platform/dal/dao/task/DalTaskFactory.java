@@ -1,17 +1,14 @@
 package com.ctrip.platform.dal.dao.task;
 
-import java.util.Map;
-
 import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.configure.DalComponent;
 
 /**
  * All tasks should be staeless
  * @author jhhe
  *
  */
-public interface DalTaskFactory {
-	void initialize(Map<String, ?> settings);
-	
+public interface DalTaskFactory extends DalComponent {
 	<T> SingleTask<T> createSingleInsertTask(DalParser<T> parser);
 	
 	<T> SingleTask<T> createSingleDeleteTask(DalParser<T> parser);

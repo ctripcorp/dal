@@ -20,8 +20,8 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 	private Logger logger = LoggerFactory.getLogger(Version.getLoggerName());
 	
 	@Override
-	public void initLogger(Map<String, String> settings) {
-		super.initLogger(settings);
+	public void initialize(Map<String, String> settings) {
+		super.initialize(settings);
 		DalCLogger.setEncryptLogging(encryptLogging);
 		DalCLogger.setSimplifyLogging(simplifyLogging);
 	}

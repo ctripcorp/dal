@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
+import com.ctrip.platform.dal.dao.configure.DefaultConnectionStringParser;
 
 public class DefaultDalConnectionLocator implements DalConnectionLocator {
 	
@@ -14,10 +15,15 @@ public class DefaultDalConnectionLocator implements DalConnectionLocator {
 	private String dc;
 	
 	@Override
-	public void initLocator(Map<String, String> settings) throws Exception {
+	public void initialize(Map<String, String> settings) throws Exception {
 		String tmpDc = settings.get("dc");
 		dc = tmpDc == null ? "" : tmpDc;
-		ConnectionStringParser parser = (ConnectionStringParser) Class.forName(settings.get("connectionStringParser")).newInstance();
+		
+		ConnectionStringParser parser = new DefaultConnectionStringParser();
+		if(settings.containsKey("connectionStringParser")){
+			parser = (ConnectionStringParser) Class.forName(settings.get("connectionStringParser")).newInstance();
+		}
+		
 		locator = DataSourceLocator.newInstance(parser);
 	}
 

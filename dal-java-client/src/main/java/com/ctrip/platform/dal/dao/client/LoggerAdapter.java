@@ -54,7 +54,7 @@ public abstract class LoggerAdapter implements DalLogger {
 	protected static ExecutorService executor = null;
 
 	@Override
-	public void initLogger(Map<String, String> settings) {
+	public void initialize(Map<String, String> settings) {
 		if(settings == null)
 			return;
 		

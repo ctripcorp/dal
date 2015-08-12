@@ -25,11 +25,6 @@ public class DefaultLogger extends LoggerAdapter implements DalLogger {
 	private static final String LINESEPARATOR = System.lineSeparator();
 	
 	@Override
-	public void initLogger(Map<String, String> settings) {
-		super.initLogger(settings);
-	}
-
-	@Override
 	public void info(final String desc) {
 		if (asyncLogging) {
 			executor.submit(new Runnable() {

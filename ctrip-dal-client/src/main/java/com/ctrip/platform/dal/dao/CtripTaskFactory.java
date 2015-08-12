@@ -35,10 +35,9 @@ import com.ctrip.platform.dal.dao.task.UpdateSqlTask;
  */
 public class CtripTaskFactory implements DalTaskFactory {
 	private DefaultTaskFactory defaultFactory;
+	
 	@Override
-	public void initialize(Map<String, ?> settings) {
-		//Do noting for now
-		
+	public void initialize(Map<String, String> settings) {
 		defaultFactory = new DefaultTaskFactory();
 		defaultFactory.initialize(settings);
 	}

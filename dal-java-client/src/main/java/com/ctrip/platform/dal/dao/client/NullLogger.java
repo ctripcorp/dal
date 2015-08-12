@@ -13,7 +13,7 @@ import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 public class NullLogger implements DalLogger {
 
 	@Override
-	public void initLogger(Map<String, String> settings) {
+	public void initialize(Map<String, String> settings) {
 	}
 
 	@Override

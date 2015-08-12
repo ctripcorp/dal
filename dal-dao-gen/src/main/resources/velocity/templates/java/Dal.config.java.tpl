@@ -13,14 +13,13 @@
 		</databaseSet>
 #end
 	</databaseSets>
-	<LogListener enabled="true">
+	<LogListener>
 		<logger>com.ctrip.platform.dal.sql.logging.CtripDalLogger</logger>
         <settings>
 			<encrypt>false</encrypt>
         </settings>
 	</LogListener>
 	<ConnectionLocator>
-		<locator>com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator</locator>
 		<settings>
 			<dc>{$DBDataCenter}</dc>
 			<connectionStringParser>com.ctrip.datasource.configure.CtripConnectionStringParser</connectionStringParser>

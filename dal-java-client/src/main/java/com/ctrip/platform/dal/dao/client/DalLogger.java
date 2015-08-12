@@ -1,17 +1,10 @@
 package com.ctrip.platform.dal.dao.client;
 
-import java.util.Map;
-
+import com.ctrip.platform.dal.dao.configure.DalComponent;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 
-public interface DalLogger {
-	/**
-	 * To initialize logger's settings
-	 * @param settings
-	 */
-	void initLogger(Map<String, String> settings);
-	
+public interface DalLogger extends DalComponent {
 	void info(String msg);
 	
 	void warn(String msg);

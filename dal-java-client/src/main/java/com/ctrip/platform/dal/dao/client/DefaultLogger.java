@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
+import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
@@ -19,7 +20,7 @@ import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
  */
 public class DefaultLogger extends LoggerAdapter implements DalLogger {
 	
-	private Logger logger = LoggerFactory.getLogger(DefaultLogger.class);
+	private Logger logger = LoggerFactory.getLogger(Version.getLoggerName());
 	
 	private static final String LINESEPARATOR = System.lineSeparator();
 	

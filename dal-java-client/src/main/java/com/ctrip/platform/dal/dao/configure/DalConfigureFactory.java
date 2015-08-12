@@ -23,22 +23,21 @@ import com.ctrip.platform.dal.dao.client.NullLogger;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 
-/*
+/* 
+ * The following are sample dal.config
 <dal name="dal.prize.test">
-  <databaseSets>
-    <!--这里需要注意，mod的取值，如果city_id余2，则要么是1，要么是0，那么在下面配置的时候，sharding字段的取值就需要覆盖所有情况-->
-    <databaseSet name="shardingtestMaster" provider="sqlProvider"  shardStrategy="class=Arch.Data.DbEngine.Shard.ShardModStrategy;columns=city_id;mod=2" >
-      <add name="shardingtestMaster_M1" databaseType="Master" sharding="0" connectionString="shardingtestMaster"/>
-      <add name="shardingtestMaster_M2" databaseType="Master" sharding="1" connectionString="shardingtestMaster"/>
-      <add name="shardingtestMaster_S1" databaseType="Slave" sharding="0" connectionString="shardingtestSlave"/>
-      <add name="shardingtestMaster_S2" databaseType="Slave" sharding="1" connectionString="shardingtestSlave"/>
-    </databaseSet>
-  </databaseSets>
-  <databaseProviders>
-    <add name="sqlProvider" type="Arch.Data.DbEngine.Providers.SqlDatabaseProvider,Arch.Data"/>
-    <add name="mySqlProvider" type="Arch.Data.MySqlProvider.MySqlDatabaseProvider,Arch.Data.MySqlProvider"/>
-  </databaseProviders>
-   
+  <databaseSets>
+    <databaseSet name="SimpleShard" provider="sqlProvider" shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=index,tableIndex;mod=2;">
+      <add  name="dao_test_sqlsvr_dbShard_0" databaseType="Master" sharding="0" connectionString="SimpleShard_0"/>
+      <add  name="dao_test_sqlsvr_dbShard_1" databaseType="Master" sharding="1" connectionString="SimpleShard_1"/>
+    </databaseSet>
+    <databaseSet name="HotelPubDB" provider="sqlProvider">
+      <add  name="HotelPubDB_M" databaseType="Master" sharding="" connectionString="dao_test_sqlsvr"/>
+      <add  name="HotelPubDB_S1" databaseType="Slave" sharding="" connectionString="dao_test_sqlsvr"/>
+      <add  name="HotelPubDB_S2" databaseType="Slave" sharding="" connectionString="dao_test_sqlsvr"/>
+      <add  name="HotelPubDB_S3" databaseType="Slave" sharding="" connectionString="dao_test_sqlsvr"/>
+    </databaseSet>
+  </databaseSets>
   <logListener enabled="true/false">
 	<logger>com.xxx.xxx.xxx</logger>
     <settings>
@@ -58,8 +57,12 @@ import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
     <locator>com.xxx.xxx.xxx</locator>
     <settings>
 	  <dc>{$DBDataCenter}</dc>
+	  <connectionStringParser>com.xxx.xxx.xxx</connectionStringParser>
 	<settings>
   </ConnectionLocator>
+  <TaskFactory>
+      <factory>com.xxx.xxx.xxx</factory>
+  </TaskFactory>
 </dal>
  */
 // For java we only process databaseSets. log and providers are covered elsewhere.

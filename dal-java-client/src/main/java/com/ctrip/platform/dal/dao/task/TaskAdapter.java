@@ -128,11 +128,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 			Map<String, ?> entries) {
 		int index = parameters.size() + 1;
 		for (Map.Entry<String, ?> entry : entries.entrySet()) {
-			String fieldName = entry.getKey();
-			if(isSensitive(fieldName))
-				parameters.setSensitive(index++, entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
-			else
-				parameters.set(index++, entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
+			addParameter(parameters, index++, entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -140,10 +136,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 			Map<String, ?> entries, String[] validColumns) {
 		int index = parameters.size() + 1;
 		for(String column : validColumns){
-			if(isSensitive(column))
-				parameters.setSensitive(index++, column, getColumnType(column), entries.get(column));
-			else
-				parameters.set(index++, column, getColumnType(column), entries.get(column));
+			addParameter(parameters, index++, column, entries.get(column));
 		}
 	}
 	
@@ -151,15 +144,12 @@ public class TaskAdapter<T> implements DaoTask<T> {
 			Map<String, ?> entries, List<String> validColumns) {
 		int count = 0;
 		for(String column : validColumns){
-			if(isSensitive(column))
-				parameters.setSensitive(count + start, column, getColumnType(column), entries.get(column));
-			else
-				parameters.set(count + start, column, getColumnType(column), entries.get(column));
+			addParameter(parameters, count + start, column, entries.get(column));
 			count++;
 		}
 		return count;
 	}
-
+	
 	/**
 	 * Add all the entries into the parameters by name. The parameter name will
 	 * be the entry key, value will be entry value. The value can be null. This
@@ -171,11 +161,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	public void addParametersByName(StatementParameters parameters,
 			Map<String, ?> entries) {
 		for (Map.Entry<String, ?> entry : entries.entrySet()) {
-			String fieldName = entry.getKey();
-			if(isSensitive(fieldName))
-				parameters.setSensitive(entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
-			else
-				parameters.set(entry.getKey(), getColumnType(entry.getKey()), entry.getValue());
+			addParameter(parameters, entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -190,11 +176,22 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	public void addParametersByName(StatementParameters parameters,
 			Map<String, ?> entries, String[] validColumns) {
 		for(String column : validColumns){
-			if(isSensitive(column))
-				parameters.setSensitive(column, getColumnType(column), entries.get(column));
-			else
-				parameters.set(column, getColumnType(column), entries.get(column));
+			addParameter(parameters, column, entries.get(column));
 		}
+	}
+
+	private void addParameter(StatementParameters parameters, int index, String columnName, Object value) {
+		if(isSensitive(columnName))
+			parameters.setSensitive(index, columnName, getColumnType(columnName), value);
+		else
+			parameters.set(index, columnName, getColumnType(columnName), value);
+	}
+
+	private void addParameter(StatementParameters parameters, String columnName, Object value) {
+		if(isSensitive(columnName))
+			parameters.setSensitive(columnName, getColumnType(columnName), value);
+		else
+			parameters.set(columnName, getColumnType(columnName), value);
 	}
 
 	/**

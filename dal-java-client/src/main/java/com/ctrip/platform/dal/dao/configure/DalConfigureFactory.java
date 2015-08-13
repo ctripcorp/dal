@@ -19,7 +19,7 @@ import org.w3c.dom.NodeList;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
-import com.ctrip.platform.dal.dao.client.NullLogger;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
@@ -43,15 +43,7 @@ import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 	<logger>com.xxx.xxx.xxx</logger>
     <settings>
 	  <encrypt>true</encrypt>
-	  <secretKey>dalctripcn</secretKey>
 	  <sampling>false</sampling>
-	  <samplingLow>60</samplingLow>
-	  <samplingHigh>5</samplingHigh>
-	  <sampleMaxNum>5000</sampleMaxNum>
-	  <sampleClearInterval>30</sampleClearInterval>
-	  <simplified>true</simplified>
-	  <asyncLogging>true</asyncLogging>
-	  <capacity>10000</capacity>
 	<settings>
   </logListener>
   <ConnectionLocator>
@@ -85,7 +77,6 @@ public class DalConfigureFactory {
 	private static String MASTER = "Master";
 	private static String LOG_LISTENER = "LogListener";
 	private static String TASK_FACTORY = "TaskFactory";
-	private static String ENABLED = "enabled";
 	private static String FACTORY = "factory";
 	private static String LOGGER = "logger";
 	private static String SETTINGS = "settings";
@@ -140,11 +131,11 @@ public class DalConfigureFactory {
 
 		String name = getAttribute(root, NAME);
 
-		DalLogger logger = readInitializer(getChildNode(root, LOG_LISTENER), new NullLogger(), LOGGER);
+		DalLogger logger = readComponent(root, LOG_LISTENER, new DefaultLogger(), LOGGER);
 		
-		DalTaskFactory factory = readInitializer(getChildNode(root, TASK_FACTORY), new DefaultTaskFactory(), FACTORY);
+		DalTaskFactory factory = readComponent(root, TASK_FACTORY, new DefaultTaskFactory(), FACTORY);
 		
-		DalConnectionLocator locator = readInitializer(getChildNode(root, CONNECTION_LOCATOR), new DefaultDalConnectionLocator(), LOCATOR);
+		DalConnectionLocator locator = readComponent(root, CONNECTION_LOCATOR, new DefaultDalConnectionLocator(), LOCATOR);
 
 		Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS), logger);
 		
@@ -196,23 +187,19 @@ public class DalConfigureFactory {
 				getAttribute(dataBaseNode, CONNECTION_STRING));
 	}
 	
-	private <T extends DalComponent> T readInitializer(Node node, T defaultImpl, String implNodeName) throws Exception {
+	private <T extends DalComponent> T readComponent(Node root, String componentName, T defaultImpl, String implNodeName) throws Exception {
+		Node node = getChildNode(root, componentName);
 		if(node == null)
 			return defaultImpl;
 		
-		if(hasAttribute(node, ENABLED)){
-			boolean enabled = Boolean.parseBoolean(getAttribute(node, ENABLED));
-			if(enabled == false)
-				return defaultImpl;
-		}
-		
-		Node loggerNode = getChildNode(node, implNodeName);
-		if(loggerNode == null)
-			return defaultImpl;
+		T component = defaultImpl;
 
-		T initializer = (T)Class.forName(loggerNode.getTextContent()).newInstance();
-		initializer.initialize(getSettings(node));
-		return  initializer;
+		Node loggerNode = getChildNode(node, implNodeName);
+		if(loggerNode != null)
+			component = (T)Class.forName(loggerNode.getTextContent()).newInstance();
+
+		component.initialize(getSettings(node));
+		return  component;
 	}
 	
 	private Map<String, String> getSettings(Node pNode) {

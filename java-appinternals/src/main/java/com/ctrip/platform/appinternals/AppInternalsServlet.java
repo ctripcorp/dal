@@ -26,7 +26,6 @@ public class AppInternalsServlet extends HttpServlet {
 	private static final String APPINTERNALS = "appinternals";
 	private static final String CONFIGURATION = "configurations";
 	private static final String preAddr = "cfx:";
-	private static final String APPINFOURL = "http://ws.fx.fws.qa.nt.ctripcorp.com/appinfo/appinfo/Send";
 
 	private static final long serialVersionUID = 1L;
 
@@ -49,8 +48,9 @@ public class AppInternalsServlet extends HttpServlet {
 			infoBuilder.setIs64BitOS();
 			infoBuilder.setProcessorCount();
 
+			String appInfoUrl = config.getInitParameter("appInfoUrl");
 			logger.debug(infoBuilder.getJsonAppInfo());
-			String result = Helper.sendPost(APPINFOURL, infoBuilder.getJsonAppInfo());
+			String result = Helper.sendPost(appInfoUrl, infoBuilder.getJsonAppInfo());
 			logger.info(String.format("Initialize register app internals completed: %s", result));
 		} catch (Exception e) {
 			logger.error("Initialize register app internals failed", e);

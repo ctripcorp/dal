@@ -1,5 +1,6 @@
 package com.ctrip.platform.appinternals.appinfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AppInfo {
@@ -25,7 +26,14 @@ public class AppInfo {
     private String PhyMemory = "";
     private String SystemPageSize = "";
     private List<AssemblyInfo> AssemblyInfos;
+    private List<String> DataBaseSets = new ArrayList<>();
     
+	public List<String> getDataBaseSets() {
+		return DataBaseSets;
+	}
+	public void setDataBaseSets(List<String> dataBaseSets) {
+		DataBaseSets = dataBaseSets;
+	}
 	public String getAppID() {
 		return AppID;
 	}

@@ -48,10 +48,10 @@ public class AppInternalsServlet extends HttpServlet {
 			infoBuilder.setIs64BitOS();
 			infoBuilder.setProcessorCount();
 
-			String appInfoUrl = config.getInitParameter("appInfoUrl");
-			logger.debug(infoBuilder.getJsonAppInfo());
-			String result = Helper.sendPost(appInfoUrl, infoBuilder.getJsonAppInfo());
-			logger.info(String.format("Initialize register app internals completed: %s", result));
+//			String appInfoUrl = config.getInitParameter("appInfoUrl");
+//			logger.debug(infoBuilder.getJsonAppInfo());
+//			String result = Helper.sendPost(appInfoUrl, infoBuilder.getJsonAppInfo());
+//			logger.info(String.format("Initialize register app internals completed: %s", result));
 		} catch (Exception e) {
 			logger.error("Initialize register app internals failed", e);
 		}

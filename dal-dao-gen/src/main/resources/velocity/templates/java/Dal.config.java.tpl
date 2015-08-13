@@ -15,9 +15,6 @@
 	</databaseSets>
 	<LogListener>
 		<logger>com.ctrip.platform.dal.sql.logging.CtripDalLogger</logger>
-        <settings>
-			<encrypt>false</encrypt>
-        </settings>
 	</LogListener>
 	<ConnectionLocator>
 		<settings>

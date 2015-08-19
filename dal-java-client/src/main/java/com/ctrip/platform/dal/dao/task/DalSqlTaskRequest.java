@@ -55,7 +55,12 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 
 	@Override
 	public Callable<T> createTask() throws SQLException {
-		return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), sql, parameters, hints.clone(), task);
+		DalHints tmpHints = hints.clone();
+		if(shards != null && shards.size() == 1) {
+			tmpHints.inShard(shards.iterator().next());
+		}
+
+		return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), sql, parameters, tmpHints, task);
 	}
 
 	@Override
@@ -74,13 +79,13 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	}
 	
 	private Set<String> getShards() {
-		Set<String> shards;
+		Set<String> shards = null;
 		
 		if(hints.is(DalHintEnum.allShards)) {
 			DatabaseSet set = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName);
 			shards = set.getAllShards();
 			logger.warn("Execute on all shards detected: " + sql);
-		} else {
+		} else if(hints.is(DalHintEnum.shards)){
 			shards = (Set<String>)hints.get(DalHintEnum.shards);
 			logger.warn("Execute on multiple shards detected: " + sql);
 		}

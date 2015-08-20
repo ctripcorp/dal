@@ -6,7 +6,7 @@
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 		List<${host.getPojoClassName()}> result = null;
-		result = this.baseClient.query(ALL_SQL_PATTERN, parameters, hints, rowextractor);
+		result = queryDao.query(ALL_SQL_PATTERN, parameters, hints, parser);
 		return result;
 	}
 #end

@@ -296,4 +296,10 @@ public class DalHints {
 		set(DalHintEnum.isolationLevel, isolationLevel);
 		return this;
 	}
+	
+	public DalHints timeout(int seconds) {
+		set(DalHintEnum.timeout, seconds);
+		return this;
+	}
+	
 }

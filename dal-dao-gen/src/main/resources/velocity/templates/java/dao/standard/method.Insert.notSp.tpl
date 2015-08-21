@@ -103,7 +103,7 @@
 		return client.batchInsert(hints, daoPojos);
 	}
 #end
-#if($host.generateAPI(82,83))
+#if($host.generateAPI(82,83) and !$host.getSpInsert().isExist())
 	/**
 	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
@@ -123,7 +123,7 @@
 		return client.combinedInsert(hints, daoPojos);
 	}
 #end
-#if($host.generateAPI(84,85))
+#if($host.generateAPI(84,85) and !$host.getSpInsert().isExist())
 	/**
 	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.

@@ -21,7 +21,6 @@ public class ${host.getPojoClassName()}Dao {
 #end
 	private DalParser<${host.getPojoClassName()}> parser = null;	
 	private DalScalarExtractor extractor = new DalScalarExtractor();
-	private DalRowMapperExtractor<${host.getPojoClassName()}> rowextractor = null;
 	private DalTableDao<${host.getPojoClassName()}> client;
 #if($host.hasMethods())
 	private DalQueryDao queryDao = null;

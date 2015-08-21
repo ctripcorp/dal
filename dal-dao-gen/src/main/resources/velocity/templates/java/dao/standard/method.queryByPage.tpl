@@ -19,6 +19,6 @@
 		parameters.set(1, Types.INTEGER, fromRownum);
 		parameters.set(2, Types.INTEGER, endRownum);
 #end
-		return this.baseClient.query(sql, parameters, hints, rowextractor);
+		return queryDao.query(sql, parameters, hints, parser);
 	}
 #end

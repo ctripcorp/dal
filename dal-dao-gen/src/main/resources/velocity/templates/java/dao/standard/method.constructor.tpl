@@ -6,6 +6,5 @@
 #if($host.hasMethods())
 		this.queryDao = new DalQueryDao(DATA_BASE);
 #end
-		this.rowextractor = new DalRowMapperExtractor<${host.getPojoClassName()}>(parser); 
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}

@@ -167,10 +167,6 @@ pip-log.txt
 
 # Mac crap
 .DS_Store
-/ctrip-dal-client/.classpath
-/ctrip-dal-client/.project
-/java-appinternals/.classpath
-/java-appinternals/.project
 /datasource-jndi/.classpath
 /datasource-jndi/.project
 /dal-tester/.classpath

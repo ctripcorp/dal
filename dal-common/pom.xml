@@ -3,21 +3,11 @@
   <parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-all</artifactId>
-    <version>1.1.4</version>
+    <version>1.1.5</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>dal-common</artifactId>
   <dependencies>
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>${mysql-version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.sqlserver</groupId>
-      <artifactId>sqljdbc</artifactId>
-      <version>${sqlserver-version}</version>
-    </dependency>
     <dependency>
       <groupId>net.sourceforge.jtds</groupId>
       <artifactId>jtds</artifactId>
@@ -39,5 +29,5 @@
       <version>${jackson-version}</version>
     </dependency>      
   </dependencies>
-  <version>1.1.4</version>
+  <version>1.1.5</version>
 </project>

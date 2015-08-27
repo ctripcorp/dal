@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.unittests;
 
+import static org.junit.Assert.assertEquals;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -441,9 +443,11 @@ public class DalTabelDaoMySqlTest {
 		}
 		int[] res = dao.batchInsert(new DalHints(), entities);
 		Assert.assertTrue(res.length == 3);
-		for (int i = 0; i < 3; i++){
-			Assert.assertTrue(res[i] > 0);
-		}
+		Assert.assertEquals(3, dao.query("id>4", new StatementParameters(), new DalHints()).size());
+
+//		for (int i = 0; i < 3; i++){
+//			Assert.assertTrue(res[i] > 0);
+//		}
 	}
 	
 	/**

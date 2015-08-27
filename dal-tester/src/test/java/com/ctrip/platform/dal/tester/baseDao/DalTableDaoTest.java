@@ -365,9 +365,11 @@ public class DalTableDaoTest {
 			
 			int[] results = dao.batchInsert(hints, Arrays.asList(pList));
 			assertEquals(3, results.length);
-			for(int i = 0; i< 3; i++){
-				assertTrue(results[i] > 0);
-			}
+			assertEquals(3, dao.query("id>3", new StatementParameters(), hints).size());
+//
+//			for(int i = 0; i< 3; i++){
+//				assertTrue(results[i] > 0);
+//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();

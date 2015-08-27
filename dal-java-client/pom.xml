@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-all</artifactId>
-    <version>1.1.4</version>
+    <version>1.1.5</version>
     <relativePath>../pom.xml</relativePath> 
   </parent>
   <artifactId>dal-java-client</artifactId>
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>com.ctrip.platform</groupId>
       <artifactId>dal-common</artifactId>
-      <version>1.1.4</version>
+      <version>1.1.5</version>
     </dependency>
 	<dependency>
 		<groupId>javax.servlet</groupId>
@@ -56,15 +56,15 @@
 		<version>7.0.52</version>
 	</dependency>
 	<dependency>
-		<groupId>mysql</groupId>
-		<artifactId>mysql-connector-java</artifactId>
-		<version>${mysql-version}</version>
-	</dependency>
-	<dependency>
-		<groupId>com.microsoft.sqlserver</groupId>
-		<artifactId>sqljdbc</artifactId>
-		<version>${sqlserver-version}</version>
-	</dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.31</version>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.sqlserver</groupId>
+      <artifactId>sqljdbc</artifactId>
+      <version>4.0.2206</version>
+    </dependency>
   </dependencies>
   <build>
     <resources>

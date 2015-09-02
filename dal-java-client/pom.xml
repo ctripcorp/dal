@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-all</artifactId>
-    <version>1.1.5</version>
+    <version>1.1.4</version>
     <relativePath>../pom.xml</relativePath> 
   </parent>
   <artifactId>dal-java-client</artifactId>
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>com.ctrip.platform</groupId>
       <artifactId>dal-common</artifactId>
-      <version>1.1.5</version>
+      <version>1.1.4</version>
     </dependency>
 	<dependency>
 		<groupId>javax.servlet</groupId>

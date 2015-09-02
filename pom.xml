@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ctrip.platform</groupId>
 	<artifactId>dal-all</artifactId>
-	<version>1.1.5</version>
+	<version>1.1.4</version>
 	<packaging>pom</packaging>
 	<modules>
 		<module>dal-java-client</module>
@@ -13,7 +13,6 @@
 		<module>dal-ctrl</module>
 		<module>dal-dao-gen</module>
 		<module>dal-common</module>
-		<module>dal-tester</module>
 		<module>dal-server-common</module>
 	</modules>
 	<properties>

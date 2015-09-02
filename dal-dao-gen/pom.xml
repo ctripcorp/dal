@@ -22,6 +22,16 @@
 			<artifactId>dom4j</artifactId>
 			<version>1.6.1</version>
 		</dependency>
+	    <dependency>
+    	  	<groupId>mysql</groupId>
+      		<artifactId>mysql-connector-java</artifactId>
+      		<version>5.1.31</version>
+    	</dependency>
+    	<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>sqljdbc</artifactId>
+			<version>4.0.2206</version>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

@@ -147,11 +147,11 @@
 	</build>
 	<distributionManagement>
 		<repository>
-			<id>releases</id>
+			<id>nexus-releases</id>
 			<url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxrelease</url>
 		</repository>
 		<snapshotRepository>
-			<id>snapshots</id>
+			<id>nexus-snapshots</id>
 			<url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxsnapshot</url>
 		</snapshotRepository> 
 	</distributionManagement>

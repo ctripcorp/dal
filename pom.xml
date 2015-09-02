@@ -153,6 +153,6 @@
 		<snapshotRepository>
 			<id>nexus-snapshots</id>
 			<url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxsnapshot</url>
-		</snapshotRepository> 
+		</snapshotRepository>
 	</distributionManagement>
 </project>

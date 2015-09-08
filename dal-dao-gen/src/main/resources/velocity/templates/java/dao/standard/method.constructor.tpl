@@ -3,8 +3,6 @@
 		parser = new DalDefaultJpaParser<>(${host.getPojoClassName()}.class);
 		this.client = new DalTableDao<${host.getPojoClassName()}>(parser);
 		dbCategory = this.client.getDatabaseCategory();
-#if($host.hasMethods())
 		this.queryDao = new DalQueryDao(DATA_BASE);
-#end
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}

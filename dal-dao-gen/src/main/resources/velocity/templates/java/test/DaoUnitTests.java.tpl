@@ -137,7 +137,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 		int[] affected = dao.insert(hints, daoPojos);
 	}
 #end
-#if($host.generateAPI(82,83))
+#if($host.generateAPI(82,83) and !$host.getSpInsert().isExist())
 	
 	@Test
 	public void testCombinedInsert1() throws Exception {
@@ -146,7 +146,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 		int affected = dao.combinedInsert(hints, daoPojos);
 	}
 #end
-#if($host.generateAPI(84,85))
+#if($host.generateAPI(84,85) and !$host.getSpInsert().isExist())
 	
 	@Test
 	public void testCombinedInsert2() throws Exception {

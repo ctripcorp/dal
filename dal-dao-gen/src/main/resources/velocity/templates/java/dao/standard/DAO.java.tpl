@@ -22,9 +22,7 @@ public class ${host.getPojoClassName()}Dao {
 	private DalParser<${host.getPojoClassName()}> parser = null;	
 	private DalScalarExtractor extractor = new DalScalarExtractor();
 	private DalTableDao<${host.getPojoClassName()}> client;
-#if($host.hasMethods())
 	private DalQueryDao queryDao = null;
-#end
 	private DalClient baseClient;
 	
 #parse("templates/java/dao/standard/method.constructor.tpl")

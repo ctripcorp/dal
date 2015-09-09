@@ -111,7 +111,6 @@
 	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
-	 * @param keyHolder holder for generated primary keys
 	 * @param daoPojos list of pojos to be inserted
 	 * @return how many rows been affected
 	 * @throws SQLException

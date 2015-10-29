@@ -27,6 +27,10 @@ public class DatabasePoolConfigParser {
 	
 	private static final String RESOURCE_NODE = "Datasource";
 	private static final String NAME = "name";
+	private static final String USER_NAME = "userName";
+	private static final String PASSWORD = "password";
+	private static final String CONNECTION_URL = "connectionUrl";
+	private static final String DRIVER_CLASS_NAME = "driverClassName";
 	private static final String TESTWHILEIDLE = "testWhileIdle";
 	private static final String TESTONBORROW = "testOnBorrow";
 	private static final String TESTONRETURN = "testOnReturn";
@@ -129,6 +133,20 @@ public class DatabasePoolConfigParser {
 		DatabasePoolConifg poolConfig = new DatabasePoolConifg();
 		poolConfig.setName(getAttribute(resource, NAME));
 		PoolProperties prop = poolConfig.getPoolProperties();
+		// The following are key connection parameters, developer do not need to provide them in case the configure provider is set
+		if (hasAttribute(resource, USER_NAME)) {
+			prop.setUsername(getAttribute(resource, USER_NAME));
+		}
+		if (hasAttribute(resource, PASSWORD)) {
+			prop.setPassword(getAttribute(resource, PASSWORD));
+		}
+		if (hasAttribute(resource, CONNECTION_URL)) {
+			prop.setUrl(getAttribute(resource, CONNECTION_URL));
+		}
+		if (hasAttribute(resource, DRIVER_CLASS_NAME)) {
+			prop.setDriverClassName(getAttribute(resource, DRIVER_CLASS_NAME));
+		}
+		// The following are common options
 		if (hasAttribute(resource, TESTWHILEIDLE)) {
 			boolean testWhileIdle = Boolean.parseBoolean(getAttribute(resource, TESTWHILEIDLE));
 			prop.setTestWhileIdle(testWhileIdle);

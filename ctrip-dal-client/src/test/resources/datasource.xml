@@ -9,7 +9,7 @@
  -->
 <Datasources location="$classpath">
 	<!-- 数据库连接池属性配置 -->
-	<Datasource name="dao_test"
+	<Datasource name="SimpleShard_0"
               testWhileIdle="true"
               testOnBorrow="true"
               testOnReturn="true"
@@ -25,7 +25,7 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
-	<Datasource name="dao_test_select"
+	<Datasource name="SimpleShard_0"
               testWhileIdle="true"
               testOnBorrow="true"
               testOnReturn="false"
@@ -41,7 +41,7 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
-    <Datasource name="HotelPubDB"
+    <Datasource name="dao_test_sqlsvr"
            	  testWhileIdle="true"
               testOnBorrow="true"
               testOnReturn="false"
@@ -57,20 +57,4 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               option="sendTimeAsDateTime=false"/>
-    <Datasource name="dao_test_1"
-              testWhileIdle="true"
-              testOnBorrow="true"
-              testOnReturn="true"
-              validationQuery="SELECT 1"
-              validationInterval="30000"
-              timeBetweenEvictionRunsMillis="30000"
-              maxActive="100"
-              minIdle="10"
-              maxWait="500"
-              initialSize="10"
-              removeAbandonedTimeout="60"
-              removeAbandoned="true"
-              logAbandoned="true"
-              minEvictableIdleTimeMillis="30000"
-              connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true"/>
 </Datasources>

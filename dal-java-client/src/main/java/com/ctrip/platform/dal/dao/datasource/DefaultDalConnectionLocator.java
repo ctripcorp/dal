@@ -5,36 +5,34 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
-import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
-import com.ctrip.platform.dal.dao.configure.DefaultConnectionStringParser;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
+import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
 
 public class DefaultDalConnectionLocator implements DalConnectionLocator {
-	
+	public static final String DATASOURCE_CONFIG_PROVIDER = "dataSourceConfigureProvider";
+
 	private DataSourceLocator locator;
-	
-	private String dc;
+	private DataSourceConfigureProvider provider;
 	
 	@Override
 	public void initialize(Map<String, String> settings) throws Exception {
-		String tmpDc = settings.get("dc");
-		dc = tmpDc == null ? "" : tmpDc;
-		
-		ConnectionStringParser parser = new DefaultConnectionStringParser();
-		if(settings.containsKey("connectionStringParser")){
-			parser = (ConnectionStringParser) Class.forName(settings.get("connectionStringParser")).newInstance();
+		provider = new DefaultDataSourceConfigureProvider();
+		if(settings.containsKey(DATASOURCE_CONFIG_PROVIDER)){
+			provider = (DataSourceConfigureProvider) Class.forName(settings.get(DATASOURCE_CONFIG_PROVIDER)).newInstance();
 		}
 		
-		locator = DataSourceLocator.newInstance(parser);
+		provider.initialize(settings);
+		
+		locator = new DataSourceLocator(provider);
 	}
 
 	@Override
-	public Set<String> getDBNames() {
-		return locator.getDBNames();
+	public void setup(Set<String> dbNames) {
+		provider.setup(dbNames);
 	}
-
+	
 	@Override
 	public Connection getConnection(String name) throws Exception {
-		return locator.getDataSource(name + dc).getConnection();
+		return locator.getDataSource(name).getConnection();
 	}
-
 }

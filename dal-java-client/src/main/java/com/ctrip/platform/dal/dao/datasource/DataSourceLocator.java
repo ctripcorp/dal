@@ -1,32 +1,38 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import java.util.Set;
+import java.sql.SQLException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
+
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
+import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
+import com.ctrip.platform.dal.dao.configure.DatabasePoolConifg;
+import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
 
 
 public class DataSourceLocator {
+	private static final Log log = LogFactory.getLog(DataSourceLocator.class);
 	
-	private static volatile DataSourceLocator datasourceLocator = null;
+	private static final ConcurrentHashMap<String,DataSource> cache = new ConcurrentHashMap<String,DataSource>();
 	
-	private LocalDataSourceProvider localDataSource = null;
+	private DataSourceConfigureProvider provider;
 	
-	private DataSourceLocator(ConnectionStringParser parser) {
-		localDataSource = new LocalDataSourceProvider(parser);
+	public DataSourceLocator(DataSourceConfigureProvider provider) {
+		this.provider = provider;
 	}
 	
-	public static DataSourceLocator newInstance(ConnectionStringParser parser){
-		if(datasourceLocator==null){
-			synchronized(DataSourceLocator.class){
-				if(datasourceLocator==null){
-					datasourceLocator = new DataSourceLocator(parser);
-				}
-			}
-		}
-		return datasourceLocator;
+	/**
+	 * This is used for initialize datasource for thirdparty framework
+	 */
+	public DataSourceLocator() {
+		this(new DefaultDataSourceConfigureProvider());
 	}
 	
 	/**
@@ -36,11 +42,61 @@ public class DataSourceLocator {
 	 * @throws NamingException
 	 */
 	public DataSource getDataSource(String name) throws Exception {
-		return localDataSource.get(name);
+		DataSource ds = cache.get(name); 
+		
+		if (ds != null) {
+			return ds;
+		}
+		
+		synchronized (this.getClass()) {
+			ds = cache.get(name); 
+			if (ds != null) {
+				return ds;
+			}
+			try {
+				ds = createDataSource(name);
+				cache.put(name, ds);
+			} catch (Throwable e) {
+				String msg = "Creating DataSource "+name+" error:"+e.getMessage();
+				log.error(msg, e);
+				throw new RuntimeException(msg, e);
+			}
+		}
+		return ds;
 	}
 	
-	public Set<String> getDBNames(){
-		return localDataSource.keySet();
+	private DataSource createDataSource(String name) throws SQLException {
+		DatabasePoolConifg poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
+		DataSourceConfigure config = provider.getDataSourceConfigure(name);
+		
+		if (config == null && poolConfig == null) {
+			throw new SQLException("Can not find any connection configure for " + name);
+		}
+		
+		if (poolConfig == null) {
+			// Create default connection pool configure
+			poolConfig = new DatabasePoolConifg();
+		}
+		
+		PoolProperties p = poolConfig.getPoolProperties();
+		
+		/**
+		 * It is assumed that user name/password/url/driver class name are provided in pool config
+		 * If not, it should be provided by the config provider
+		 */
+		if (config != null) {
+			p.setUrl(config.getConnectionUrl());
+	        p.setUsername(config.getUserName());
+	        p.setPassword(config.getPassword());
+	        p.setDriverClassName(config.getDriverClass());
+		}
+		
+        org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource(p);
+		
+        ds.createPool();
+        
+        log.info("Datasource[name=" + name + ", Driver=" + config.getDriverClass() + "] created.");
+		
+		return ds;
 	}
-	
 }

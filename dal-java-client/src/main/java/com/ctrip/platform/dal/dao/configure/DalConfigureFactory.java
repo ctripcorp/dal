@@ -49,8 +49,10 @@ import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
   <ConnectionLocator>
     <locator>com.xxx.xxx.xxx</locator>
     <settings>
-	  <dc>{$DBDataCenter}</dc>
-	  <connectionStringParser>com.xxx.xxx.xxx</connectionStringParser>
+	  <dataSourceConfigureProvider>com.xxx.xxx.xxx</dataSourceConfigureProvider>
+	  <serviceAddress>http:...</serviceAddress>
+	  <appid>123456</appid>
+	  <forceLocalConfig>true/false</forceLocalConfig>
 	<settings>
   </ConnectionLocator>
   <TaskFactory>

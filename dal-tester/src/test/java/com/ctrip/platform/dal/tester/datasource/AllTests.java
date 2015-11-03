@@ -5,7 +5,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ DatabaseConfigParserTest.class,
+@SuiteClasses({ 
 		DatabasePoolConfigParserTest.class, 
 		DataSourceLocatorTest.class })
 public class AllTests {

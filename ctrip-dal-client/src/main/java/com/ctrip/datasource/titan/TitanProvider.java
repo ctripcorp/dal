@@ -30,17 +30,21 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.ctrip.datasource.configure.AllInOneConfigureReader;
 import com.ctrip.datasource.configure.ConnectionStringParser;
+import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
+import com.dianping.cat.Cat;
 
 public class TitanProvider implements DataSourceConfigureProvider {
-	private static final Log log = LogFactory.getLog(TitanProvider.class);
+	// This is to make sure we can get APPID if user really set so
+	private static final Logger logger = LoggerFactory.getLogger(TitanProvider.class);
+	private static final String EMPTY_ID = "999999";
 	
 	public static final String SERVICE_ADDRESS = "serviceAddress";
 	public static final String APPID = "appid";
@@ -59,9 +63,23 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	private Map<String, DataSourceConfigure> dataSourceConfigures;
 	
 	public void initialize(Map<String, String> settings) throws Exception {
+		logger.info("Initialize Titan provider");
 		svcUrl = settings.get(SERVICE_ADDRESS);
 		appid = settings.get(APPID);
+		
+		// First try 
+		if(appid == null || appid.isEmpty()) {
+			appid = getPreConfiguredAppId();
+		}
+		
 		forceLocal = Boolean.parseBoolean(settings.get(FORCE_LOCAL_CONFIG));
+	}
+	
+	public static String getPreConfiguredAppId() {
+		String appid = LogConfig.getAppID();
+		if(appid == null || appid.equals(EMPTY_ID))
+			appid = Cat.getManager().getDomain();
+		return appid;
 	}
 	
 	public void setSvcUrl(String svcUrl) {
@@ -81,7 +99,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 			// If it is not local dev environment or the AllInOne file does not exist
 			dataSourceConfigures = getDataSourceConfigures(dbNames);
 			
-			if(dataSourceConfigures == null) {
+			if(dataSourceConfigures.isEmpty()) {
 				dbNames = getProdDbNames(dbNames);
 				dataSourceConfigures = getDataSourceConfigures(dbNames);
 			}
@@ -134,7 +152,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	            
 	            for(TitanData data: resp.getData()) {
 		            if(data.getErrorCode() != null) {
-		            	log.warn(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
+		            	logger.warn(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
 		            } else {
 		            	//Decrypt raw connection string
 		            	result.put(data.getName(), parseConfig(data.getName(), decrypt(data.getConnectionString())));

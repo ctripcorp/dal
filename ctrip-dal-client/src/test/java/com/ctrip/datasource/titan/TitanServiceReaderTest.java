@@ -12,10 +12,15 @@ import org.junit.Test;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 
 public class TitanServiceReaderTest {
+	
+	@Test
+	public void testGetAppid() {
+		Assert.assertEquals("930201", TitanProvider.getPreConfiguredAppId());
+	}
+	
 	@Test
 	public void testGet() {
 		String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query";
-		String uat = "https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query";
 		TitanProvider provider = new TitanProvider();
 		Set<String> dbNames = new HashSet<>();
 		dbNames.add("AbacusDB_INSERT_1");
@@ -23,7 +28,6 @@ public class TitanServiceReaderTest {
 		dbNames.add("test");
 		
 		Map<String, String> settings = new HashMap<>();
-		settings.put(TitanProvider.APPID, "1222");
 		settings.put(TitanProvider.SERVICE_ADDRESS, fws);
 		settings.put(TitanProvider.FORCE_LOCAL_CONFIG, "false");
 		try {

@@ -91,7 +91,7 @@ public class ConnectionStringParser {
 		return config;
 	}
 
-	public DataSourceConfigure applyOptions(String name, DataSourceConfigure config) {
+	private DataSourceConfigure applyOptions(String name, DataSourceConfigure config) {
 		DatabasePoolConifg poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
 		if(poolConfig == null)
 			return config;

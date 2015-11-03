@@ -6,8 +6,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -141,6 +143,8 @@ public class DalConfigureFactory {
 
 		Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS), logger);
 		
+		locator.setup(getAllDbNames(databaseSets));
+		
 		return new DalConfigure(name, databaseSets, logger, locator, factory);
 	}
 	
@@ -153,6 +157,17 @@ public class DalConfigureFactory {
 		}
 		return databaseSets;
 	}
+	
+	private Set<String> getAllDbNames(Map<String, DatabaseSet> databaseSets) {
+		Set<String> dbNames = new HashSet<>();
+		for(DatabaseSet dbSet: databaseSets.values()){
+			for(DataBase db: dbSet.getDatabases().values()) {
+				dbNames.add(db.getConnectionString());
+			}
+		}
+		return dbNames;
+	}
+
 	
 	private DatabaseSet readDatabaseSet(Node databaseSetNode, DalLogger logger) throws Exception {
 		List<Node> databaseList = getChildNodes(databaseSetNode, ADD);

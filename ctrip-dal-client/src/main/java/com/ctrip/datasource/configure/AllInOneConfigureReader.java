@@ -37,12 +37,12 @@ public class AllInOneConfigureReader {
 	private static final String DATABASE_CONFIG_LOCATION = "$classpath";
 	private ConnectionStringParser parser = new ConnectionStringParser();
 	
-	public Map<String, DataSourceConfigure> getDataSourceConfigures(Set<String> dbNames, boolean forceLocal) {
+	public Map<String, DataSourceConfigure> getDataSourceConfigures(Set<String> dbNames, boolean useLocal) {
 		String location = getAllInOneConfigLocation();
 		if (location == null) 
 			return null;
 
-		return parseDBAllInOneConfig(location, dbNames, forceLocal);
+		return parseDBAllInOneConfig(location, dbNames, useLocal);
 	}
 	
 	private String getAllInOneConfigLocation() {
@@ -66,7 +66,7 @@ public class AllInOneConfigureReader {
 		return location;
 	}
 	
-	private Map<String, DataSourceConfigure> parseDBAllInOneConfig(String absolutePath, Set<String> dbNames, boolean forceLocal) {
+	private Map<String, DataSourceConfigure> parseDBAllInOneConfig(String absolutePath, Set<String> dbNames, boolean useLocal) {
 		Map<String, DataSourceConfigure> dataSourceConfigures = new HashMap<>();
 		
 		FileInputStream in = null;
@@ -81,7 +81,7 @@ public class AllInOneConfigureReader {
 			 * If the version is not set or forceLocal is not true, we assume it is not dev environment. In this case
 			 * we should use titan service
 			 */
-			if(!(hasAttribute(root, DEV_FLAG) || forceLocal)){
+			if(!(hasAttribute(root, DEV_FLAG) || useLocal)){
 				return null;
 			}
 			

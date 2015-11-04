@@ -48,12 +48,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	
 	public static final String SERVICE_ADDRESS = "serviceAddress";
 	public static final String APPID = "appid";
-	public static final String FORCE_LOCAL_CONFIG = "forceLocalConfig";
+	public static final String USE_LOCAL_CONFIG = "useLocalConfig";
 	private static final String PROD_SUFFIX = "_SH";
 	
 	private String svcUrl;
 	private String appid;
-	private boolean forceLocal;
+	private boolean useLocal;
 	private ConnectionStringParser parser = new ConnectionStringParser();
 	
 	/**
@@ -72,7 +72,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 			appid = getPreConfiguredAppId();
 		}
 		
-		forceLocal = Boolean.parseBoolean(settings.get(FORCE_LOCAL_CONFIG));
+		useLocal = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
 	}
 	
 	public static String getPreConfiguredAppId() {
@@ -93,8 +93,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	@Override
 	public void setup(Set<String> dbNames) {
 		// Assume it is local
-		if(svcUrl == null || forceLocal) {
-			dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, forceLocal);
+		if(svcUrl == null || useLocal) {
+			dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal);
 		} else {
 			// If it is not local dev environment or the AllInOne file does not exist
 			dataSourceConfigures = getDataSourceConfigures(dbNames);

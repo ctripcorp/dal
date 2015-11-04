@@ -6,9 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
@@ -18,7 +18,7 @@ import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
 
 
 public class DataSourceLocator {
-	private static final Log log = LogFactory.getLog(DataSourceLocator.class);
+	private static final Logger logger = LoggerFactory.getLogger(DataSourceLocator.class);
 	
 	private static final ConcurrentHashMap<String,DataSource> cache = new ConcurrentHashMap<String,DataSource>();
 	
@@ -58,7 +58,7 @@ public class DataSourceLocator {
 				cache.put(name, ds);
 			} catch (Throwable e) {
 				String msg = "Creating DataSource "+name+" error:"+e.getMessage();
-				log.error(msg, e);
+				logger.error(msg, e);
 				throw new RuntimeException(msg, e);
 			}
 		}
@@ -95,7 +95,7 @@ public class DataSourceLocator {
 		
         ds.createPool();
         
-        log.info("Datasource[name=" + name + ", Driver=" + config.getDriverClass() + "] created.");
+        logger.info("Datasource[name=" + name + ", Driver=" + config.getDriverClass() + "] created.");
 		
 		return ds;
 	}

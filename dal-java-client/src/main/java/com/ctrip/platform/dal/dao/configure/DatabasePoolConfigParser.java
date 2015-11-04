@@ -9,17 +9,19 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
+
 public class DatabasePoolConfigParser {
 	
-	private static final Log log = LogFactory.getLog(DatabasePoolConfigParser.class);
+	private static final Logger logger = LoggerFactory.getLogger(DataSourceLocator.class);
 	private static DatabasePoolConfigParser poolConfigParser = new DatabasePoolConfigParser();
 	private static final String DBPOOL_CONFIG = "datasource.xml";
 	
@@ -79,13 +81,13 @@ public class DatabasePoolConfigParser {
 			}
 			URL url = classLoader.getResource(DBPOOL_CONFIG);
 			if (url == null) {
-				log.warn(DBPOOL_CONFIG + " is not exist in the root directory of classpath.");
+				logger.warn(DBPOOL_CONFIG + " is not exist in the root directory of classpath.");
 			} else {
 				parse(url.openStream());
-				log.info("datasource property will use file :" + url.getFile());
+				logger.info("datasource property will use file :" + url.getFile());
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 	}
 	
@@ -111,7 +113,7 @@ public class DatabasePoolConfigParser {
 				try {
 					in.close();
 				} catch (Throwable e1) {
-					log.warn(e1.getMessage(), e1);
+					logger.warn(e1.getMessage(), e1);
 				}
 			}
 		}

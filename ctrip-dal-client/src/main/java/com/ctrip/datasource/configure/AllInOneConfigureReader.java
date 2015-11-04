@@ -11,8 +11,8 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -24,7 +24,7 @@ import com.ctrip.security.encryption.Crypto;
 
 public class AllInOneConfigureReader {
 
-	private static final Log log = LogFactory.getLog(AllInOneConfigureReader.class);
+	private static final Logger logger = LoggerFactory.getLogger(AllInOneConfigureReader.class);
 	private static final String CLASSPATH_CONFIG_FILE = "/Database.Config";
 	private static final String LINUX_DB_CONFIG_FILE = "/opt/ctrip/AppData/Database.Config";
 	private static final String WIN_DB_CONFIG_FILE = "/D:/WebSites/CtripAppData/Database.Config";
@@ -57,7 +57,7 @@ public class AllInOneConfigureReader {
 			try{
 				osName=System.getProperty("os.name");
 			} catch(SecurityException ex) {
-				log.error(ex.getMessage());
+				logger.error(ex.getMessage());
 				throw new RuntimeException(ex.getMessage(), ex);
 			}
 			location = osName!=null && osName.startsWith("Windows") ? WIN_DB_CONFIG_FILE : LINUX_DB_CONFIG_FILE;
@@ -71,7 +71,7 @@ public class AllInOneConfigureReader {
 		
 		FileInputStream in = null;
 		try {
-			log.info("Allinone: using db config: " + absolutePath);
+			logger.info("Allinone: using db config: " + absolutePath);
 			File conFile = new File(absolutePath);
 			in = new FileInputStream(conFile);
 			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
@@ -82,6 +82,7 @@ public class AllInOneConfigureReader {
 			 * we should use titan service
 			 */
 			if(!(hasAttribute(root, DEV_FLAG) || useLocal)){
+				logger.info("No Version found in Databse.config or useLocal is not set in Dal.config.");
 				return null;
 			}
 			
@@ -104,7 +105,7 @@ public class AllInOneConfigureReader {
 					dataSourceConfigures.put(name, config);
 				} catch(Throwable e) {
 					String msg = String.format("Read %s file error, msg: %s", absolutePath, e.getMessage());
-					log.error(msg, e);
+					logger.error(msg, e);
 				}
 			}
 			in.close();
@@ -112,14 +113,14 @@ public class AllInOneConfigureReader {
 			return dataSourceConfigures;
 		} catch (Throwable e) {
 			String msg = String.format("Read %s file error, msg: %s", absolutePath, e.getMessage());
-			log.error(msg, e);
+			logger.error(msg, e);
 			throw new RuntimeException(msg, e);
 		} finally {
 			if (in != null) {
 				try{
 					in.close();
 				} catch(Throwable e1) {
-					log.warn(e1);
+					logger.warn(e1.toString());
 				}
 			}
 		}
@@ -130,7 +131,7 @@ public class AllInOneConfigureReader {
 			try {
 				return Crypto.getInstance().decrypt(connStr);
 			} catch(Exception e) {
-				log.error("decode " + dbname + " connectionString exception, msg:" + e.getMessage(), e);
+				logger.error("decode " + dbname + " connectionString exception, msg:" + e.getMessage(), e);
 				throw new RuntimeException("decode " + dbname + " connectionString exception, msg:" + e.getMessage(), e);
 			}
 		} else {

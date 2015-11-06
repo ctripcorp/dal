@@ -39,8 +39,10 @@ public class AllInOneConfigureReader {
 	
 	public Map<String, DataSourceConfigure> getDataSourceConfigures(Set<String> dbNames, boolean useLocal) {
 		String location = getAllInOneConfigLocation();
-		if (location == null) 
+		if (location == null) {
+			logger.error("Can not locate " + CLASSPATH_CONFIG_FILE);
 			return null;
+		}
 
 		return parseDBAllInOneConfig(location, dbNames, useLocal);
 	}
@@ -48,8 +50,16 @@ public class AllInOneConfigureReader {
 	private String getAllInOneConfigLocation() {
 		String location = DatabasePoolConfigParser.getInstance().getDatabaseConfigLocation();
 		if (location != null && location.length() > 0) {
+
 			if (DATABASE_CONFIG_LOCATION.equalsIgnoreCase(location)) {
-				URL url = super.getClass().getResource(CLASSPATH_CONFIG_FILE);
+				logger.info("Looking up Database.config in classpath...");
+
+				ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+				if (classLoader == null) {
+					classLoader = AllInOneConfigureReader.class.getClassLoader();
+				}
+					
+				URL url = classLoader.getResource(CLASSPATH_CONFIG_FILE);
 				location = url == null ? null: url.getFile();
 			}
 		} else {

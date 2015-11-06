@@ -96,7 +96,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	@Override
 	public void setup(Set<String> dbNames) {
 		// Assume it is local
-		if(svcUrl == null || useLocal) {
+		if(svcUrl == null || svcUrl.isEmpty() || useLocal) {
 			dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal);
 		} else {
 			// If it is not local dev environment or the AllInOne file does not exist

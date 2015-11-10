@@ -8,9 +8,12 @@ import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
 import com.ctrip.platform.dal.dao.client.DalLogger;
+import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.client.NullLogger;
+import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
+import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
@@ -69,6 +72,8 @@ public class DalClientFactory {
 				configureRef.set(DalConfigureFactory.load(path));
 				logger.info("Successfully initialized Dal Java Client Factory with " + path);
 			}
+			
+			ConfigBeanFactory.init();
 		}
 	}
 	
@@ -98,10 +103,22 @@ public class DalClientFactory {
 	
 	public static DalConfigure getDalConfigure() {
 		DalConfigure config = configureRef.get();
-		if (config == null)
+		if (config != null)
+			return config;
+		
+		try {
+			initClientFactory();
+			config = configureRef.get();
+		} catch (Exception e) {
 			throw new IllegalStateException(
-					"DalClientFactory has not been not initialized or initilization fail");
-		return config;
+					"DalClientFactory has not been not initialized or initilization fail", e);
+		}
+		
+		if (config != null)
+			return config;
+
+		throw new IllegalStateException(
+				"DalClientFactory has not been not initialized or initilization fail");
 	}
 
 	public static DalLogger getDalLogger() {
@@ -120,7 +137,14 @@ public class DalClientFactory {
 	public static void shutdownFactory() {
 		logger.info("Start shutdown Dal Java Client Factory");
 		getDalLogger().shutdown();
+		
 		DalRequestExecutor.shutdown();
 		logger.info("Dal Java Client Factory is shutdown");
+
+		MarkdownManager.shutdown();
+		logger.info("Markdown Manager has been destoryed");
+
+		DalWatcher.destroy();
+		logger.info("DalWatcher has been destoryed");
 	}
 }

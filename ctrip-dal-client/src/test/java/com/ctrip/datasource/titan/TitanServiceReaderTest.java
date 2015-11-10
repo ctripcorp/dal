@@ -19,13 +19,12 @@ public class TitanServiceReaderTest {
 	}
 	
 	@Test
-	public void testGetFromTitanService() {
+	public void testGetFromTitanServiceSuccess() {
 		String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query";
 		TitanProvider provider = new TitanProvider();
 		Set<String> dbNames = new HashSet<>();
 		dbNames.add("AbacusDB_INSERT_1");
 		dbNames.add("CrawlerResultMDB");
-		dbNames.add("test");
 		
 		Map<String, String> settings = new HashMap<>();
 		settings.put(TitanProvider.SERVICE_ADDRESS, fws);
@@ -41,11 +40,48 @@ public class TitanServiceReaderTest {
 
 			result = provider.getDataSourceConfigure("CrawlerResultMDB");
 			Assert.assertNotNull(result);
-			
-			result = provider.getDataSourceConfigure("test");
-			Assert.assertNull(result);
 		} catch (Exception e) {
 			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
+	@Test
+	public void testGetFromTitanServiceFail() {
+		String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query";
+		TitanProvider provider = new TitanProvider();
+		Set<String> dbNames = new HashSet<>();
+		dbNames.add("AbacusDB_INSERT_1");
+		dbNames.add("CrawlerResultMDB");
+		dbNames.add("test");
+		
+		Map<String, String> settings = new HashMap<>();
+		settings.put(TitanProvider.SERVICE_ADDRESS, fws);
+		settings.put(TitanProvider.USE_LOCAL_CONFIG, "false");
+		try {
+			provider.initialize(settings);
+			provider.setup(dbNames);
+			Assert.fail();
+		} catch (Exception e) {
+		}
+	}
+	
+	@Test
+	public void testGetFromTitanServiceProd() {
+		String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query";
+		TitanProvider provider = new TitanProvider();
+		Set<String> dbNames = new HashSet<>();
+		dbNames.add("test1");
+		dbNames.add("test2");
+		
+		Map<String, String> settings = new HashMap<>();
+		settings.put(TitanProvider.SERVICE_ADDRESS, fws);
+		settings.put(TitanProvider.USE_LOCAL_CONFIG, "false");
+		try {
+			provider.initialize(settings);
+			provider.setup(dbNames);
+			// Can not test from local environment
+		} catch (Exception e) {
 		}
 	}
 	
@@ -83,6 +119,7 @@ public class TitanServiceReaderTest {
 			Assert.assertNull(result);
 		} catch (Exception e) {
 			e.printStackTrace();
+			Assert.fail();
 		}
 	}
 	
@@ -119,6 +156,7 @@ public class TitanServiceReaderTest {
 			Assert.assertNull(result);
 		} catch (Exception e) {
 			e.printStackTrace();
+			Assert.fail();
 		}
 	}
 

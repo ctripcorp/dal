@@ -1,6 +1,7 @@
 package com.ctrip.datasource.titan;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -37,7 +38,6 @@ import com.alibaba.fastjson.JSON;
 import com.ctrip.datasource.configure.AllInOneConfigureReader;
 import com.ctrip.datasource.configure.ConnectionStringParser;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
-import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.dianping.cat.Cat;
@@ -100,12 +100,24 @@ public class TitanProvider implements DataSourceConfigureProvider {
 			dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal);
 		} else {
 			// If it is not local dev environment or the AllInOne file does not exist
-			dataSourceConfigures = getDataSourceConfigures(dbNames);
-			
-			if(dataSourceConfigures.isEmpty()) {
-				dbNames = getProdDbNames(dbNames);
+			try {
 				dataSourceConfigures = getDataSourceConfigures(dbNames);
+				return;
+			} catch (Throwable e) {
+				logger.warn("Cannot found config from Titan service for " + dbNames, e);
 			}
+			
+			logger.info("Try to reloacte with \"_SH\"");
+			Map<String, DataSourceConfigure> tmpdataSourceConfigures = null;
+			try {
+				tmpdataSourceConfigures = getDataSourceConfigures(getProdDbNames(dbNames));
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to retrieve config with \"_SH\"", e);
+			}
+
+			dataSourceConfigures = new HashMap<>();
+			for(String name: dbNames)
+				dataSourceConfigures.put(name, tmpdataSourceConfigures.get(name + PROD_SUFFIX));
 		}
 	}
 	
@@ -126,7 +138,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		return prodDbNames;
 	}
 	
-	private Map<String, DataSourceConfigure> getDataSourceConfigures(Set<String> dbNames) {
+	private Map<String, DataSourceConfigure> getDataSourceConfigures(Set<String> dbNames) throws Exception{
 		logger.info("Start getting all in one connection string from titan service.");
 		long start = System.currentTimeMillis();
 		
@@ -137,37 +149,33 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		String ids = sb.substring(0, sb.length()-1);
         Map<String, DataSourceConfigure> result = new HashMap<>();
 
-	    try {
-	        URI uri = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid).build();
-	        HttpClient sslClient = initWeakSSLClient();
-	        if (sslClient != null) {
-	            HttpGet httpGet = new HttpGet();
-	            httpGet.setURI(uri);
+        URI uri = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid).build();
+        HttpClient sslClient = initWeakSSLClient();
+        if (sslClient != null) {
+            HttpGet httpGet = new HttpGet();
+            httpGet.setURI(uri);
 
-	            HttpResponse response = sslClient.execute(httpGet);
+            HttpResponse response = sslClient.execute(httpGet);
 
-	            HttpEntity entity = response.getEntity();
+            HttpEntity entity = response.getEntity();
 
-	            String content = EntityUtils.toString(entity);
+            String content = EntityUtils.toString(entity);
 
-	            TitanResponse resp = JSON.parseObject(content, TitanResponse.class);
-	            
-	            if(!"200".equals(resp.getStatus())) {
-	            	throw new RuntimeException(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s", resp.getStatus(), resp.getMessage()));
-	            }
-	            
-	            for(TitanData data: resp.getData()) {
-		            if(data.getErrorCode() != null) {
-		            	logger.warn(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
-		            } else {
-		            	//Decrypt raw connection string
-		            	result.put(data.getName(), parseConfig(data.getName(), decrypt(data.getConnectionString())));
-		            }
-	            }
-	        }
-	    } catch (Exception e) {
-        	throw new RuntimeException(e);
-	    }
+            TitanResponse resp = JSON.parseObject(content, TitanResponse.class);
+            
+            if(!"200".equals(resp.getStatus())) {
+            	throw new RuntimeException(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s", resp.getStatus(), resp.getMessage()));
+            }
+            
+            for(TitanData data: resp.getData()) {
+            	//Fail fast
+	            if(data.getErrorCode() != null)
+	            	throw new RuntimeException(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
+
+            	//Decrypt raw connection string
+            	result.put(data.getName(), parseConfig(data.getName(), decrypt(data.getConnectionString())));
+            }
+        }
 	    
 	    long cost = System.currentTimeMillis() - start;
 		logger.info("Time costed by getting all in one connection string from titan service(ms): " + cost);

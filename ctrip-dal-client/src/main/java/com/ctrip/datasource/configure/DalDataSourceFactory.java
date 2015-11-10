@@ -12,7 +12,7 @@ public class DalDataSourceFactory {
 	private TitanProvider provider = new TitanProvider();
 
 	/**
-	 * In case user has clog or cat configured
+	 * Create DataSource for given name. In case user has clog or cat configured. The name will be same for both PROD and DEV environment
 	 * @param allInOneKey
 	 * @param svcUrl
 	 * @return
@@ -23,7 +23,7 @@ public class DalDataSourceFactory {
 	}
 	
 	/**
-	 * In case user has no clog or cat configured
+	 * Create DataSource for given name. In case user has no clog or cat configured. The name will be same for both PROD and DEV environment 
 	 * @param allInOneKey
 	 * @param svcUrl
 	 * @param appid

@@ -1,6 +1,6 @@
 <Datasources>
 #foreach($resource in $host.getResources())	
-	<Datasource name="${resource.getName()}{$DBDataCenter}"
+	<Datasource name="${resource.getName()}"
               testWhileIdle="true"
               testOnBorrow="false"
               testOnReturn="false"

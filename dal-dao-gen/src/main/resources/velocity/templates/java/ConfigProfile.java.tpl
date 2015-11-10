@@ -10,37 +10,54 @@
 		<!--dataCenter属性，可以是如下值: sh,nt,sh2或者ALL，也可以是sh,nt,sh2中任意多个值的并集，以逗号分隔 -->
 		<!--以上5个属性共同组成了一个元数据，可以唯一的标识一个环境 -->
 		<add name="dev" target="dev" iis="ALL" net="ALL" dataCenter="sh" />
-		<add name="test" target="test" iis="ALL" net="ALL" dataCenter="ALL" />
 		<add name="fws" target="fws" iis="ALL" net="ALL" dataCenter="ALL" />
 		<add name="fat" target="fat" iis="ALL" net="ALL" dataCenter="ALL" />
 		<add name="lpt" target="lpt" iis="ALL" net="ALL" dataCenter="ALL" />
-		<add name="uat" target="uat" iis="ALL" net="ALL" dataCenter="ALL" />
 		<add name="uat_nt" target="uat_nt" iis="ALL" net="ALL" dataCenter="ALL" />
 		<add name="prd" target="prd" iis="ALL" net="ALL" dataCenter="sh" />
 	</environments>
 	<!--environments节点有多少个子节点，则下文中必须出现同样数量的节点，且名称必须与上文中的name属性一致 -->
+	<dev>
+		<LoggingServer.V2.IP>collector.logging.fws.qa.nt.ctripcorp.com</LoggingServer.V2.IP>
+		<LoggingServer.V2.Port>63100</LoggingServer.V2.Port>
+		<appInternals.appInfoUrl>http://ws.fx.fws.qa.nt.ctripcorp.com/appinfo/appinfo/Send</appInternals.appInfoUrl>
+		<appInternals.permissions.write>10.32.21.21</appInternals.permissions.write>
+		<appInternals.permissions.read>10.32.21.21</appInternals.permissions.read>
+		<CFX_DataSource_ServiceUrl></CFX_DataSource_ServiceUrl>
+	</dev>
 	<fat>
-		<DBDataCenter></DBDataCenter>
+		<LoggingServer.V2.IP>collector.logging.fws.qa.nt.ctripcorp.com</LoggingServer.V2.IP>
+		<LoggingServer.V2.Port>63100</LoggingServer.V2.Port>
+		<appInternals.appInfoUrl>http://ws.fx.fws.qa.nt.ctripcorp.com/appinfo/appinfo/Send</appInternals.appInfoUrl>
+		<appInternals.permissions.write>10.32.21.21</appInternals.permissions.write>
+		<appInternals.permissions.read>10.32.21.21</appInternals.permissions.read>
+		<CFX_DataSource_ServiceUrl></CFX_DataSource_ServiceUrl>
 	</fat>
 	<lpt>
-		<DBDataCenter></DBDataCenter>
+		<LoggingServer.V2.IP>collector.logging.lpt.qa.nt.ctripcorp.com</LoggingServer.V2.IP>
+		<LoggingServer.V2.Port>63100</LoggingServer.V2.Port>
+		<appInternals.appInfoUrl>http://ws.fx.fws.qa.nt.ctripcorp.com/appinfo/appinfo/Send</appInternals.appInfoUrl>
+		<appInternals.permissions.write>10.2.4.42</appInternals.permissions.write>
+		<CFX_DataSource_ServiceUrl>https://ws.titan.lpt.qa.nt.ctripcorp.com/titanservice/query</CFX_DataSource_ServiceUrl>
 	</lpt>
-	<dev>
-		<DBDataCenter></DBDataCenter>
-	</dev>
-	<test>
-		<DBDataCenter></DBDataCenter>
-	</test>
 	<fws>
-		<DBDataCenter></DBDataCenter>
+		<LoggingServer.V2.IP>collector.logging.fws.qa.nt.ctripcorp.com</LoggingServer.V2.IP>
+		<LoggingServer.V2.Port>63100</LoggingServer.V2.Port>
+		<appInternals.appInfoUrl>http://ws.fx.fws.qa.nt.ctripcorp.com/appinfo/appinfo/Send</appInternals.appInfoUrl>
+		<appInternals.permissions.read>10.32.21.21</appInternals.permissions.read>
+		<appInternals.permissions.write>10.32.21.21</appInternals.permissions.write>
+		<CFX_DataSource_ServiceUrl>https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query</CFX_DataSource_ServiceUrl>
 	</fws>
-	<uat>
-		<DBDataCenter></DBDataCenter>
-	</uat>
 	<uat_nt>
-		<DBDataCenter></DBDataCenter>
+		<LoggingServer.V2.IP>collector.logging.uat.qa.nt.ctripcorp.com</LoggingServer.V2.IP>
+		<LoggingServer.V2.Port>63100</LoggingServer.V2.Port>
+		<appInternals.permissions.write>10.2.24.129</appInternals.permissions.write>
+		<CFX_DataSource_ServiceUrl>https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query</CFX_DataSource_ServiceUrl>
 	</uat_nt>
 	<prd>
-		<DBDataCenter>_SH</DBDataCenter>
+		<LoggingServer.V2.IP>collector.logging.sh.ctriptravel.com</LoggingServer.V2.IP>
+		<LoggingServer.V2.Port>63100</LoggingServer.V2.Port>
+		<appInternals.permissions.write>192.168.79.237,192.168.79.236,192.168.79.235,192.168.79.234</appInternals.permissions.write>
+		<CFX_DataSource_ServiceUrl>https://ws.titan.ctripcorp.com/titanservice/query</CFX_DataSource_ServiceUrl>
 	</prd>
 </profile>

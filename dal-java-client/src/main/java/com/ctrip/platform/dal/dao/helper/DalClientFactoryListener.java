@@ -8,9 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.client.DalWatcher;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
-import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 
 public class DalClientFactoryListener implements ServletContextListener {
 	private Logger logger = LoggerFactory.getLogger(DalClientFactoryListener.class);
@@ -30,9 +27,6 @@ public class DalClientFactoryListener implements ServletContextListener {
 			
 			if(Boolean.parseBoolean(warmUp))
 				DalClientFactory.warmUpConnections();
-			
-			ConfigBeanFactory.init();
-
 		} catch (Exception e) {
 			logger.error("Error when init client factory", e);
 		}
@@ -40,11 +34,5 @@ public class DalClientFactoryListener implements ServletContextListener {
 	
 	public void contextDestroyed(ServletContextEvent sce) {
 		DalClientFactory.shutdownFactory();
-		
-		logger.info("DalWatcher has been destoryed");
-		DalWatcher.destroy();
-		
-		logger.info("Markdown Manager has been destoryed");
-		MarkdownManager.shutdown();
 	}
 }

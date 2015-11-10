@@ -25,7 +25,7 @@ import com.ctrip.security.encryption.Crypto;
 public class AllInOneConfigureReader {
 
 	private static final Logger logger = LoggerFactory.getLogger(AllInOneConfigureReader.class);
-	private static final String CLASSPATH_CONFIG_FILE = "/Database.Config";
+	private static final String CLASSPATH_CONFIG_FILE = "Database.Config";
 	private static final String LINUX_DB_CONFIG_FILE = "/opt/ctrip/AppData/Database.Config";
 	private static final String WIN_DB_CONFIG_FILE = "/D:/WebSites/CtripAppData/Database.Config";
 	

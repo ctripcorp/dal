@@ -13,6 +13,7 @@ public class ConfigBeanFactory {
 	public static void init() throws Exception {
 		ConfigBeanManager.register(habean, mkbean, tmkbean);
 		AppInfoBuilder.set_AppID(DalClientFactory.getDalLogger().getAppID());
+		MarkdownManager.init();
 	}
 	
 	public static void shutdown(){

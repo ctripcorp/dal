@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
@@ -14,19 +15,30 @@ import com.ctrip.platform.dal.dao.configbeans.MarkdownConfigBean;
 
 public class MarkdownManager {
 	private static final int durations = 1000;
-	private static ScheduledExecutorService manager = null;
+	private static AtomicReference<ScheduledExecutorService> managerRef = new AtomicReference<>();
 
-	private static List<ErrorDetector> detectors = new ArrayList<ErrorDetector>();
+	private static AtomicReference<List<ErrorDetector>> detectorsRef = new AtomicReference<>();
 	private static ConcurrentLinkedQueue<ErrorContext> exqueue = new ConcurrentLinkedQueue<ErrorContext>();
 
-	static {
-		manager = Executors.newSingleThreadScheduledExecutor();
-		detectors.add(new TimeoutDetector());
-		detectors.add(new LoginFailDetector());
-		detectors.add(new NullObjectDetector());
+	public static void init() {
+		if(managerRef.get() !=null)
+			return;
+		
+		synchronized (managerRef) {
+			if(managerRef.get() !=null)
+				return;
+			
+			ArrayList<ErrorDetector> detectors = new ArrayList<ErrorDetector>();
+			detectors.add(new TimeoutDetector());
+			detectors.add(new LoginFailDetector());
+			detectors.add(new NullObjectDetector());
 
-		manager.scheduleAtFixedRate(new CollectExceptionTask(), durations,
-				durations, TimeUnit.MICROSECONDS);
+			detectorsRef.set(detectors);
+			ScheduledExecutorService manager = Executors.newSingleThreadScheduledExecutor();
+			manager.scheduleAtFixedRate(new CollectExceptionTask(), durations,
+					durations, TimeUnit.MICROSECONDS);
+			managerRef.set(manager);
+		}
 	}
 
 	public static boolean isMarkdown(String key) {
@@ -63,7 +75,7 @@ public class MarkdownManager {
 	}
 	
 	public static void shutdown(){
-		manager.shutdownNow();
+		managerRef.get().shutdownNow();
 	}
 
 	private static class CollectExceptionTask implements Runnable {
@@ -74,7 +86,7 @@ public class MarkdownManager {
 				while (ctx != null) {
 					if (!ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(
 							ctx.getName())) {
-						for (ErrorDetector mk : detectors) {
+						for (ErrorDetector mk : detectorsRef.get()) {
 							mk.detect(ctx);
 						}
 					}
@@ -87,6 +99,6 @@ public class MarkdownManager {
 	}
 	
 	public static String getDebugInfo(String key){
-		return ((TimeoutDetector)detectors.get(0)).toDebugInfo(key);
+		return ((TimeoutDetector)detectorsRef.get().get(0)).toDebugInfo(key);
 	}
 }

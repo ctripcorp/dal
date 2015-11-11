@@ -25,6 +25,13 @@ public class DalWatcher {
 		}
 	}
 	
+	public static void init(){
+		if(costRecorder!= null)
+			return;
+		
+		costRecorder = new ThreadLocal<CostRecorder>();
+	}
+	
 	public static void destroy(){
 		if(costRecorder!= null) {
 			costRecorder.remove();

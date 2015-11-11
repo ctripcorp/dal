@@ -71,6 +71,7 @@ public class DalClientFactory {
 			}
 			
 			ConfigBeanFactory.init();
+			DalWatcher.init();
 		}
 	}
 	
@@ -141,5 +142,6 @@ public class DalClientFactory {
 
 		DalWatcher.destroy();
 		logger.info("DalWatcher has been destoryed");
+		configureRef.set(null);
 	}
 }

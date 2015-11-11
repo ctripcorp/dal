@@ -9,14 +9,11 @@ import org.slf4j.LoggerFactory;
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
-import com.ctrip.platform.dal.dao.client.NullLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
-import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
-import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 
 public class DalClientFactory {
 	private static Logger logger = LoggerFactory.getLogger(Version.getLoggerName());
@@ -78,7 +75,7 @@ public class DalClientFactory {
 	}
 	
 	public static Set<String> getAllDB(){
-		return configureRef.get().getAllDB();
+		return getDalConfigure().getAllDB();
 	}
 
 	/**
@@ -98,7 +95,7 @@ public class DalClientFactory {
 		// Verify if it is existed
 		config.getDatabaseSet(logicDbName);
 
-		return new DalDirectClient(getDalConfigure(), logicDbName);
+		return new DalDirectClient(config, logicDbName);
 	}
 	
 	public static DalConfigure getDalConfigure() {
@@ -111,7 +108,7 @@ public class DalClientFactory {
 			config = configureRef.get();
 		} catch (Exception e) {
 			throw new IllegalStateException(
-					"DalClientFactory has not been not initialized or initilization fail", e);
+					"DalClientFactory initilization fail", e);
 		}
 		
 		if (config != null)
@@ -122,13 +119,11 @@ public class DalClientFactory {
 	}
 
 	public static DalLogger getDalLogger() {
-		DalConfigure config = configureRef.get();
-		return config == null ? new NullLogger() : config.getDalLogger();
+		return getDalConfigure().getDalLogger();
 	}
 	
 	public static DalTaskFactory getTaskFactory() {
-		DalConfigure config = configureRef.get();
-		return config == null ? new DefaultTaskFactory() : config.getFacory();
+		return getDalConfigure().getFacory();
 	}
 	
 	/**
@@ -141,7 +136,7 @@ public class DalClientFactory {
 		DalRequestExecutor.shutdown();
 		logger.info("Dal Java Client Factory is shutdown");
 
-		MarkdownManager.shutdown();
+		ConfigBeanFactory.shutdown();
 		logger.info("Markdown Manager has been destoryed");
 
 		DalWatcher.destroy();

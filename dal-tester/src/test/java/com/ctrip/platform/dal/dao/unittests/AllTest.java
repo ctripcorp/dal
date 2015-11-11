@@ -12,6 +12,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	DalQueryDaoSqlServerTest.class,
 	DalTabelDaoMySqlTest.class,
 	DalTableDaoSqlServerTest.class,
-	DatabaseSelectorTest.class
+	DatabaseSelectorTest.class,
+	DalClientFactoryTest.class,
+	DalClientFactoryLazeLoadTest.class,
 })
 public class AllTest {}

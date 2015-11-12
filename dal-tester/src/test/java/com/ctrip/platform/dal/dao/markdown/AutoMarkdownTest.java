@@ -11,7 +11,6 @@ import org.junit.Test;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DbMeta;
-import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
@@ -21,7 +20,7 @@ public class AutoMarkdownTest {
 
 	static{
 		try {
-			ConfigBeanFactory.getMarkdownConfigBean().init();
+			ConfigBeanFactory.init();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

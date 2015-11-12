@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -25,18 +26,31 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
  * @author jhhe
  */
 public class DalRequestExecutor {
-	private static ExecutorService service = null;
-	
-	static {
-		service = new ThreadPoolExecutor(5, 50, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-	}
+	private static AtomicReference<ExecutorService> serviceRef = new AtomicReference<>();
 
-	/**
-	 * TODO make the shutdown register
-	 */
+	public static void init(){
+		if(serviceRef.get() != null)
+			return;
+		
+		synchronized (DalRequestExecutor.class) {
+			if(serviceRef.get() != null)
+				return;
+			
+			serviceRef.set(new ThreadPoolExecutor(5, 50, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>()));
+		}
+	} 
+	
 	public static void shutdown() {
-		if (service != null)
-			service.shutdown();
+		if (serviceRef.get() == null)
+			return;
+		
+		synchronized (DalRequestExecutor.class) {
+			if (serviceRef.get() == null)
+				return;
+			
+			serviceRef.get().shutdown();
+			serviceRef.set(null);
+		}
 	}
 
 	public <T> T execute(final DalHints hints, final DalRequest<T> request) throws SQLException {
@@ -47,7 +61,7 @@ public class DalRequestExecutor {
 		// TODO add performance tracking DalWatcher.begin();
 
 		if (hints.isAsyncExecution()) {
-			Future<T> future = service.submit(new Callable<T>() {
+			Future<T> future = serviceRef.get().submit(new Callable<T>() {
 				public T call() throws Exception {
 					return internalExecute(hints, request, nullable);
 				}
@@ -125,7 +139,7 @@ public class DalRequestExecutor {
 		Map<String, Future<T>> resultFutures = new HashMap<>();
 		
 		for(final String shard: tasks.keySet())
-			resultFutures.put(shard, service.submit(tasks.get(shard)));
+			resultFutures.put(shard, serviceRef.get().submit(tasks.get(shard)));
 
 		// TODO Handle timeout and execution exception
 		ResultMerger<T> merger = request.getMerger();

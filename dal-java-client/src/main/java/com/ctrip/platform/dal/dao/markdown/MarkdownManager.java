@@ -24,7 +24,7 @@ public class MarkdownManager {
 		if(managerRef.get() !=null)
 			return;
 		
-		synchronized (managerRef) {
+		synchronized (MarkdownManager.class) {
 			if(managerRef.get() !=null)
 				return;
 			
@@ -38,6 +38,19 @@ public class MarkdownManager {
 			manager.scheduleAtFixedRate(new CollectExceptionTask(), durations,
 					durations, TimeUnit.MICROSECONDS);
 			managerRef.set(manager);
+		}
+	}
+
+	public static void shutdown(){
+		if(managerRef.get() ==null)
+			return;
+		
+		synchronized (MarkdownManager.class) {
+			if(managerRef.get() ==null)
+				return;
+			
+			managerRef.get().shutdownNow();
+			managerRef.set(null);
 		}
 	}
 
@@ -74,10 +87,6 @@ public class MarkdownManager {
 		}
 	}
 	
-	public static void shutdown(){
-		managerRef.get().shutdownNow();
-	}
-
 	private static class CollectExceptionTask implements Runnable {
 		@Override
 		public void run() {

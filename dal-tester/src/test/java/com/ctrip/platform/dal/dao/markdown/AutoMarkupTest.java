@@ -20,7 +20,6 @@ public class AutoMarkupTest {
 			ConfigBeanFactory.getTimeoutMarkDownBean().init();
 			ConfigBeanFactory.getMarkdownConfigBean().init();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

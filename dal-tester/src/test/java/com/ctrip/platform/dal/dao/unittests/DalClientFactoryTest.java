@@ -84,7 +84,7 @@ public class DalClientFactoryTest {
 	@Test
 	public void testShutdownFactory() {
 		try {
-//			DalClientFactory.shutdownFactory();
+			DalClientFactory.shutdownFactory();
 		} catch (Throwable e) {
 			Assert.fail();
 		}

@@ -2465,6 +2465,11 @@ public abstract class BaseDalTabelDaoTableShardTest {
 	
 	@Test
 	public void testUpdatePlainAsyncCallback() throws SQLException{
+		try {
+			DalClientFactory.initClientFactory();
+		} catch (Exception e1) {
+			fail();
+		}
 		String sql = "UPDATE " + TABLE_NAME
 				+ " SET address = 'CTRIP' WHERE id = 1";
 		StatementParameters parameters = new StatementParameters();
@@ -2625,7 +2630,6 @@ public abstract class BaseDalTabelDaoTableShardTest {
 			assertEquals(1, getCount(2));
 			assertEquals(1, getCount(3));
 		} catch (Exception e) {
-			
 			fail();
 		}
 	}

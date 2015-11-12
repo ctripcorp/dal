@@ -62,16 +62,19 @@ public class DalClientFactory {
 				return;
 			}
 			
+			DalConfigure config = null;
 			if(path == null) {
-				configureRef.set(DalConfigureFactory.load());
+				config = DalConfigureFactory.load();
 				logger.info("Successfully initialized Dal Java Client Factory");
 			} else {
-				configureRef.set(DalConfigureFactory.load(path));
+				config = DalConfigureFactory.load(path);
 				logger.info("Successfully initialized Dal Java Client Factory with " + path);
 			}
 			
-			ConfigBeanFactory.init();
 			DalWatcher.init();
+			DalRequestExecutor.init();
+			configureRef.set(config);
+			ConfigBeanFactory.init();
 		}
 	}
 	
@@ -131,17 +134,28 @@ public class DalClientFactory {
 	 * Release All resource the Dal client used.
 	 */
 	public static void shutdownFactory() {
-		logger.info("Start shutdown Dal Java Client Factory");
-		getDalLogger().shutdown();
-		
-		DalRequestExecutor.shutdown();
-		logger.info("Dal Java Client Factory is shutdown");
+		if (configureRef.get() == null) {
+			logger.warn("Dal Java Client Factory is already shutdown.");
+			return;
+		}
 
-		ConfigBeanFactory.shutdown();
-		logger.info("Markdown Manager has been destoryed");
+		synchronized (DalClientFactory.class) {
+			if (configureRef.get() == null) {
+				return;
+			}
+			
+			logger.info("Start shutdown Dal Java Client Factory");
+			getDalLogger().shutdown();
+			
+			DalRequestExecutor.shutdown();
+			logger.info("Dal Java Client Factory is shutdown");
 
-		DalWatcher.destroy();
-		logger.info("DalWatcher has been destoryed");
-		configureRef.set(null);
+			ConfigBeanFactory.shutdown();
+			logger.info("Markdown Manager has been destoryed");
+
+			DalWatcher.destroy();
+			logger.info("DalWatcher has been destoryed");
+			configureRef.set(null);
+		}
 	}
 }

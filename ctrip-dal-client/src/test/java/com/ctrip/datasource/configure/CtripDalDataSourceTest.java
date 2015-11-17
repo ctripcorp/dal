@@ -45,4 +45,14 @@ public class CtripDalDataSourceTest {
 			Assert.fail(e.getMessage());
 		}
 	}
+
+	@Test
+	public void testGetDataSourceTitanSuccess2() {
+		DalDataSourceFactory dl = new DalDataSourceFactory();
+		try {
+			Assert.assertNotNull(dl.createDataSource("PkgWorkflowDB_W", fws, "12233"));
+		} catch (Exception e) {
+			Assert.fail(e.getMessage());
+		}
+	}
 }

@@ -1,4 +1,3 @@
-
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.sql.Timestamp;
@@ -36,24 +35,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 生成模板(包含基础的增删改查操作)
+ * 
  * @author gzxia
- *
+ * 
  */
 @Resource
 @Singleton
 @Path("task/table")
 public class GenTaskByTableViewResource {
 
-	private static DaoByTableViewSp daoByTableViewSp;
-	
-	private static DalApiDao dalApiDao;
-	
 	private static ObjectMapper mapper = new ObjectMapper();
-
-	static {
-		daoByTableViewSp = SpringBeanGetter.getDaoByTableViewSp();
-		dalApiDao = SpringBeanGetter.getDalApiDao();
-	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -71,18 +62,20 @@ public class GenTaskByTableViewResource {
 			@FormParam("action") String action,
 			@FormParam("comment") String comment,
 			@FormParam("sql_style") String sql_style,// C#风格或者Java风格
-			@FormParam("api_list") String api_list ) {
+			@FormParam("api_list") String api_list) {
 		GenTaskByTableViewSp task = new GenTaskByTableViewSp();
 
 		if (action.equalsIgnoreCase("delete")) {
 			task.setId(id);
-			if (0 >= daoByTableViewSp.deleteTask(task)) {
+			if (0 >= SpringBeanGetter.getDaoByTableViewSp().deleteTask(task)) {
 				return Status.ERROR;
-			}	
-		}else{
-			String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
-			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-			
+			}
+		} else {
+			String userNo = AssertionHolder.getAssertion().getPrincipal()
+					.getAttributes().get("employee").toString();
+			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(
+					userNo);
+
 			task.setProject_id(project_id);
 			task.setDatabaseSetName(set_name);
 			task.setTable_names(table_names);
@@ -92,7 +85,7 @@ public class GenTaskByTableViewResource {
 			task.setSuffix(suffix);
 			task.setCud_by_sp(cud_by_sp);
 			task.setPagination(pagination);
-			task.setUpdate_user_no(user.getUserName()+"("+userNo+")");
+			task.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
 			task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
 			task.setComment(comment);
 			task.setSql_style(sql_style);
@@ -103,17 +96,20 @@ public class GenTaskByTableViewResource {
 				task.setApproved(2);
 			}
 			task.setApproveMsg("");
-			
-			if(action.equalsIgnoreCase("update")){
+
+			if (action.equalsIgnoreCase("update")) {
 				task.setId(id);
-				task.setVersion(daoByTableViewSp.getVersionById(id));
-				if (0 >= daoByTableViewSp.updateTask(task)) {
+				task.setVersion(SpringBeanGetter.getDaoByTableViewSp()
+						.getVersionById(id));
+				if (0 >= SpringBeanGetter.getDaoByTableViewSp()
+						.updateTask(task)) {
 					return Status.ERROR;
 				}
-			}else{
+			} else {
 				task.setGenerated(false);
 				task.setVersion(1);
-				if (0 >= daoByTableViewSp.insertTask(task)) {
+				if (0 >= SpringBeanGetter.getDaoByTableViewSp()
+						.insertTask(task)) {
 					return Status.ERROR;
 				}
 			}
@@ -121,84 +117,101 @@ public class GenTaskByTableViewResource {
 
 		return Status.OK;
 	}
-	
+
 	private boolean needApproveTask(int projectId, int userId) {
-		Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(projectId);
+		Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(
+				projectId);
 		if (prj == null) {
 			return true;
 		}
-		List<UserGroup> lst = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(prj.getDal_group_id(), userId);
-		if (lst!=null && lst.size()>0 && lst.get(0).getRole()==1){
+		List<UserGroup> lst = SpringBeanGetter.getDalUserGroupDao()
+				.getUserGroupByGroupIdAndUserId(prj.getDal_group_id(), userId);
+		if (lst != null && lst.size() > 0 && lst.get(0).getRole() == 1) {
 			return false;
 		}
-		//all child group
-		List<GroupRelation> grs = SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(prj.getDal_group_id());
-		if (grs==null || grs.size()<1) {
+		// all child group
+		List<GroupRelation> grs = SpringBeanGetter.getGroupRelationDao()
+				.getAllGroupRelationByCurrentGroupId(prj.getDal_group_id());
+		if (grs == null || grs.size() < 1) {
 			return true;
 		}
-		//check user is or not in the child group which have admin role
+		// check user is or not in the child group which have admin role
 		Iterator<GroupRelation> ite = grs.iterator();
 		while (ite.hasNext()) {
 			GroupRelation gr = ite.next();
 			if (gr.getChild_group_role() == 1) {
 				int groupId = gr.getChild_group_id();
-				List<UserGroup> test = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(groupId, userId);
-				if (test!=null && test.size()>0) {
+				List<UserGroup> test = SpringBeanGetter.getDalUserGroupDao()
+						.getUserGroupByGroupIdAndUserId(groupId, userId);
+				if (test != null && test.size() > 0) {
 					return false;
 				}
 			}
 		}
 		return true;
 	}
-	
+
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("apiList")
 	public Status getApiList(@QueryParam("db_name") String db_set_name,
 			@QueryParam("table_names") String table_names,
 			@QueryParam("sql_style") String sql_style// C#风格或者Java风格
-			) {
+	) {
 		Status status = Status.OK;
-		
+
 		try {
 			List<DalApi> apis = null;
-			
-			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
 
-			DatabaseCategory dbCategory = DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString());
-			
-			if("csharp".equalsIgnoreCase(sql_style)){
-				if(dbCategory == DatabaseCategory.MySql){
-					apis = dalApiDao.getDalApiByLanguageAndDbtype("csharp", "MySQL");
-				}else{
-					apis = dalApiDao.getDalApiByLanguageAndDbtype("csharp", "SQLServer");
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter
+					.getDaoOfDatabaseSet()
+					.getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
+
+			DatabaseCategory dbCategory = DbUtils
+					.getDatabaseCategory(databaseSetEntry.getConnectionString());
+
+			if ("csharp".equalsIgnoreCase(sql_style)) {
+				if (dbCategory == DatabaseCategory.MySql) {
+					apis = SpringBeanGetter.getDalApiDao()
+							.getDalApiByLanguageAndDbtype("csharp", "MySQL");
+				} else {
+					apis = SpringBeanGetter
+							.getDalApiDao()
+							.getDalApiByLanguageAndDbtype("csharp", "SQLServer");
 				}
-			}else{
-				
-				if(dbCategory == DatabaseCategory.MySql){
-					apis = dalApiDao.getDalApiByLanguageAndDbtype("java", "MySQL");
-				}else{
-//					SpType spType = spType(databaseSetEntry.getConnectionString(), table_names);
-//					apis = dalApiDao.getDalApiByLanguageAndDbtypeAndSptype("java", "SQLServer", spType.getValue());
-					apis = dalApiDao.getDalApiByLanguageAndDbtype("java", "SQLServer");
+			} else {
+
+				if (dbCategory == DatabaseCategory.MySql) {
+					apis = SpringBeanGetter.getDalApiDao()
+							.getDalApiByLanguageAndDbtype("java", "MySQL");
+				} else {
+					// SpType spType =
+					// spType(databaseSetEntry.getConnectionString(),
+					// table_names);
+					// apis =
+					// SpringBeanGetter.getDalApiDao().getDalApiByLanguageAndDbtypeAndSptype("java",
+					// "SQLServer", spType.getValue());
+					apis = SpringBeanGetter.getDalApiDao()
+							.getDalApiByLanguageAndDbtype("java", "SQLServer");
 				}
-				
+
 			}
-			
-			for (DalApi api: apis) {
+
+			for (DalApi api : apis) {
 				String method_declaration = api.getMethod_declaration();
 				method_declaration = method_declaration.replaceAll("<", "&lt;");
 				method_declaration = method_declaration.replaceAll(">", "&gt;");
 				api.setMethod_declaration(method_declaration);
 			}
-			
-			java.util.Collections.sort(apis, new Comparator<DalApi>(){
+
+			java.util.Collections.sort(apis, new Comparator<DalApi>() {
 				@Override
 				public int compare(DalApi o1, DalApi o2) {
-					return o1.getMethod_declaration().compareToIgnoreCase(o2.getMethod_declaration());
+					return o1.getMethod_declaration().compareToIgnoreCase(
+							o2.getMethod_declaration());
 				}
 			});
-			
+
 			status.setInfo(mapper.writeValueAsString(apis));
 		} catch (Exception e) {
 			status = Status.ERROR;
@@ -207,48 +220,48 @@ public class GenTaskByTableViewResource {
 		}
 		return status;
 	}
-	
-//	private SpType spType(String db_set_name,String table_names){
-//		try {
-//			List<StoredProcedure> sps = DbUtils.getAllSpNames(db_set_name);
-//			if(sps!=null && sps.size()>0){
-//				StringBuilder spNames = new StringBuilder();
-//				for(StoredProcedure sp:sps){
-//					spNames.append(sp.getName()+",");
-//				}
-//				for(String tableName : table_names.split(",")){
-//					if(spNames.indexOf(String.format("spA_%s", tableName))>0){
-//						return SpType.SPA;
-//					}else if(spNames.indexOf(String.format("sp3_%s", tableName))>0){
-//						return SpType.SP3;
-//					}else{
-//						return SpType.NotSP;
-//					}
-//				}
-//			}else{
-//				return SpType.NotSP;
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return SpType.NotSP;
-//	}
-//	
-//	enum SpType{
-//		
-//		SPA("spa"),
-//		SP3("sp3"),
-//		NotSP("not sp");
-//		
-//		private String value;
-//		
-//		SpType(String val){
-//			this.value = val;
-//		}
-//		
-//		public String getValue(){
-//			return this.value;
-//		}
-//	}
+
+	// private SpType spType(String db_set_name,String table_names){
+	// try {
+	// List<StoredProcedure> sps = DbUtils.getAllSpNames(db_set_name);
+	// if(sps!=null && sps.size()>0){
+	// StringBuilder spNames = new StringBuilder();
+	// for(StoredProcedure sp:sps){
+	// spNames.append(sp.getName()+",");
+	// }
+	// for(String tableName : table_names.split(",")){
+	// if(spNames.indexOf(String.format("spA_%s", tableName))>0){
+	// return SpType.SPA;
+	// }else if(spNames.indexOf(String.format("sp3_%s", tableName))>0){
+	// return SpType.SP3;
+	// }else{
+	// return SpType.NotSP;
+	// }
+	// }
+	// }else{
+	// return SpType.NotSP;
+	// }
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// }
+	// return SpType.NotSP;
+	// }
+	//
+	// enum SpType{
+	//
+	// SPA("spa"),
+	// SP3("sp3"),
+	// NotSP("not sp");
+	//
+	// private String value;
+	//
+	// SpType(String val){
+	// this.value = val;
+	// }
+	//
+	// public String getValue(){
+	// return this.value;
+	// }
+	// }
 
 }

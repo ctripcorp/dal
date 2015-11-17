@@ -33,69 +33,64 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 @Path("group")
 public class DalGroupResource {
 	private static Logger log = Logger.getLogger(DalGroupResource.class);
-	public static final int SUPER_GROUP_ID = 1; //The default supper user group
-	private static DalGroupDao dal_dao = null;
-	private static DaoOfLoginUser user_dao = null;
-	private static UserGroupDao ugDao = null;
-	
-	static{
-		dal_dao = SpringBeanGetter.getDaoOfDalGroup();
-		user_dao = SpringBeanGetter.getDaoOfLoginUser();
-		ugDao = SpringBeanGetter.getDalUserGroupDao();
-	}
-	
+	public static final int SUPER_GROUP_ID = 1; // The default supper user group
+
 	@GET
 	@Path("get")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DalGroup> getAllGroup(){
-		List<DalGroup> groups =  dal_dao.getAllGroups();
+	public List<DalGroup> getAllGroup() {
+		List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup()
+				.getAllGroups();
 		return groups;
 	}
-	
+
 	@GET
 	@Path("onegroup")
 	@Produces(MediaType.APPLICATION_JSON)
 	public DalGroup getProject(@QueryParam("id") String id) {
-		return dal_dao.getDalGroupById(Integer.valueOf(id));
+		return SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(
+				Integer.valueOf(id));
 	}
-	
+
 	@POST
 	@Path("keepSession")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String keepSession(@FormParam("id") String id) {
 		return "true";
 	}
-	
+
 	@POST
 	@Path("add")
 	public Status add(@FormParam("groupName") String groupName,
-			@FormParam("groupComment") String groupComment){
-		
+			@FormParam("groupComment") String groupComment) {
+
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
-		
-		if(null == userNo || null == groupName || groupName.isEmpty()){
-			log.error(String.format("Add dal group failed, caused by illegal parameters: "
-					+ "[groupName=%s, groupComment=%s]",groupName, groupComment));
+
+		if (null == userNo || null == groupName || groupName.isEmpty()) {
+			log.error(String.format(
+					"Add dal group failed, caused by illegal parameters: "
+							+ "[groupName=%s, groupComment=%s]", groupName,
+					groupComment));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
 		}
-		
-		if(!this.validate(userNo)){
+
+		if (!this.validate(userNo)) {
 			Status status = Status.ERROR;
 			status.setInfo("你没有当前DAL Team的操作权限.");
 			return status;
 		}
-		
+
 		DalGroup group = new DalGroup();
 		group.setGroup_name(groupName);
 		group.setGroup_comment(groupComment);
 		group.setCreate_user_no(userNo);
 		group.setCreate_time(new Timestamp(System.currentTimeMillis()));
-		
-		int ret = dal_dao.insertDalGroup(group);
-		if(ret <= 0){
+
+		int ret = SpringBeanGetter.getDaoOfDalGroup().insertDalGroup(group);
+		if (ret <= 0) {
 			log.error("Add dal group failed, caused by db operation failed, pls check the spring log");
 			Status status = Status.ERROR;
 			status.setInfo("Add operation failed.");
@@ -103,64 +98,69 @@ public class DalGroupResource {
 		}
 		return Status.OK;
 	}
-	
+
 	@POST
 	@Path("delete")
-	public Status delete(@FormParam("id") String id){
+	public Status delete(@FormParam("id") String id) {
 
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
-		
-		if(null == userNo || null == id || id.isEmpty()){
-			log.error(String.format("Delete dal group failed, caused by illegal parameters "
-					+ "[ids=%s]", id));
+
+		if (null == userNo || null == id || id.isEmpty()) {
+			log.error(String.format(
+					"Delete dal group failed, caused by illegal parameters "
+							+ "[ids=%s]", id));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
 		}
-		
-		if(!this.validate(userNo)){
+
+		if (!this.validate(userNo)) {
 			Status status = Status.ERROR;
 			status.setInfo("你没有当前DAL Team的操作权限.");
 			return status;
 		}
 		int groupId = -1;
-		try{
+		try {
 			groupId = Integer.parseInt(id);
-		}catch(NumberFormatException  ex){
+		} catch (NumberFormatException ex) {
 			log.error("Delete dal group failed", ex);
 			Status status = Status.ERROR;
 			status.setInfo("Illegal group id");
 			return status;
 		}
-		
-		List<Project> prjs = SpringBeanGetter.getDaoOfProject().getProjectByGroupId(groupId);
-		if(prjs!=null && prjs.size()>0){
+
+		List<Project> prjs = SpringBeanGetter.getDaoOfProject()
+				.getProjectByGroupId(groupId);
+		if (prjs != null && prjs.size() > 0) {
 			Status status = Status.ERROR;
 			status.setInfo("当前DAL Team中还有Project，请清空Project后再操作！");
 			return status;
 		}
-		List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
-		if(dbs!=null && dbs.size()>0){
+		List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB()
+				.getGroupDBsByGroup(groupId);
+		if (dbs != null && dbs.size() > 0) {
 			Status status = Status.ERROR;
 			status.setInfo("当前DAL Team中还有DataBase，请清空DataBase后再操作！");
 			return status;
 		}
-		List<DatabaseSet> dbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
-		if(dbsets!=null && dbsets.size()>0){
+		List<DatabaseSet> dbsets = SpringBeanGetter.getDaoOfDatabaseSet()
+				.getAllDatabaseSetByGroupId(groupId);
+		if (dbsets != null && dbsets.size() > 0) {
 			Status status = Status.ERROR;
 			status.setInfo("当前DAL Team中还有DataBaseSet，请清空DataBaseSet后再操作！");
 			return status;
 		}
-		List<LoginUser> us = user_dao.getUserByGroupId(groupId);
-		if(us!=null && us.size()>0){
+		List<LoginUser> us = SpringBeanGetter.getDaoOfLoginUser()
+				.getUserByGroupId(groupId);
+		if (us != null && us.size() > 0) {
 			Status status = Status.ERROR;
 			status.setInfo("当前DAL Team中还有Member，请清空Member后再操作！");
 			return status;
 		}
 
-		int ret = dal_dao.deleteDalGroup(groupId);	
-		if(ret <= 0){
+		int ret = SpringBeanGetter.getDaoOfDalGroup().deleteDalGroup(groupId);
+		if (ret <= 0) {
 			log.error("Delete dal group failed, caused by db operation failed, pls check the spring log");
 			Status status = Status.ERROR;
 			status.setInfo("Delete operation failed.");
@@ -168,59 +168,62 @@ public class DalGroupResource {
 		}
 		return Status.OK;
 	}
-	
+
 	@POST
 	@Path("update")
 	public Status update(@FormParam("groupId") String id,
 			@FormParam("groupName") String groupName,
-			@FormParam("groupComment") String groupComment){
-		
+			@FormParam("groupComment") String groupComment) {
+
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
-		
-		if(null == userNo || null == id || id.isEmpty()){
-			log.error(String.format("Update dal group failed, caused by illegal parameters, "
-					+ "[id=%s, groupName=%s, groupComment=%s]", id, groupName, groupComment));
+
+		if (null == userNo || null == id || id.isEmpty()) {
+			log.error(String.format(
+					"Update dal group failed, caused by illegal parameters, "
+							+ "[id=%s, groupName=%s, groupComment=%s]", id,
+					groupName, groupComment));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
 		}
-		
-		if(!this.validate(userNo)){
+
+		if (!this.validate(userNo)) {
 			Status status = Status.ERROR;
 			status.setInfo("你没有当前DAL Team的操作权限.");
 			return status;
 		}
-		
+
 		int groupId = -1;
-		try{
+		try {
 			groupId = Integer.parseInt(id);
-		}catch(NumberFormatException  ex){
+		} catch (NumberFormatException ex) {
 			log.error("Update dal group failed", ex);
 			Status status = Status.ERROR;
 			status.setInfo("Illegal group id");
 			return status;
 		}
-		
-		DalGroup group = dal_dao.getDalGroupById(groupId);
-		if(null == group) {
+
+		DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(
+				groupId);
+		if (null == group) {
 			log.error("Update dal group failed, caused by group_id specifed not existed.");
 			Status status = Status.ERROR;
 			status.setInfo("Group id not existed");
 			return status;
 		}
-		if(null != groupName && !groupName.trim().isEmpty()){
+		if (null != groupName && !groupName.trim().isEmpty()) {
 			group.setGroup_name(groupName);
 		}
-		if(null != groupComment && !groupComment.trim().isEmpty()){
+		if (null != groupComment && !groupComment.trim().isEmpty()) {
 			group.setGroup_comment(groupComment);
 		}
-			
-		group.setCreate_time(new Timestamp(System.currentTimeMillis()));
-		
-		int ret = dal_dao.updateDalGroup(group);
 
-		if(ret <= 0){
+		group.setCreate_time(new Timestamp(System.currentTimeMillis()));
+
+		int ret = SpringBeanGetter.getDaoOfDalGroup().updateDalGroup(group);
+
+		if (ret <= 0) {
 			log.error("Delete dal group failed, caused by db operation failed, pls check the spring log");
 			Status status = Status.ERROR;
 			status.setInfo("update operation failed.");
@@ -228,13 +231,27 @@ public class DalGroupResource {
 		}
 		return Status.OK;
 	}
-	
-	private boolean validate(String userNo){
-		LoginUser user = user_dao.getUserByNo(userNo);
-		List<UserGroup> urGroups = ugDao.getUserGroupByUserId(user.getId());
-		if(urGroups!=null && urGroups.size()>0){
-			for(UserGroup urGroup : urGroups) {
-				if(urGroup.getGroup_id() == SUPER_GROUP_ID){
+
+	@GET
+	@Path("isSuperUser")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Status isSuperUser() {
+		Status status = Status.OK;
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+		Boolean flag = validate(userNo);
+		status.setInfo(flag.toString());
+		return status;
+	}
+
+	private boolean validate(String userNo) {
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(
+				userNo);
+		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao()
+				.getUserGroupByUserId(user.getId());
+		if (urGroups != null && urGroups.size() > 0) {
+			for (UserGroup urGroup : urGroups) {
+				if (urGroup.getGroup_id() == SUPER_GROUP_ID) {
 					return true;
 				}
 			}

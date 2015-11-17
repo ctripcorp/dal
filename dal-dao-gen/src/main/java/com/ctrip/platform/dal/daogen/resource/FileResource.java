@@ -41,12 +41,9 @@ import com.ctrip.platform.dal.daogen.utils.ZipFolder;
 @Path("file")
 public class FileResource {
 
-	private static DaoOfProject daoOfProject;
-	
 	private static String generatePath;
 
 	static {
-		daoOfProject = SpringBeanGetter.getDaoOfProject();
 		generatePath = Configuration.get("gen_code_path");
 	}
 
@@ -80,10 +77,10 @@ public class FileResource {
 				}
 				element.setText(f.getName());
 				element.setChildren(f.isDirectory());
-				if(element.isChildren()){
+				if (element.isChildren()) {
 					element.setType("folder");
 					element.setIcon("fa fa-folder-open-o");
-				}else{
+				} else {
 					element.setType("file");
 					element.setIcon("fa fa-file");
 				}
@@ -135,7 +132,8 @@ public class FileResource {
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public String download(@QueryParam("id") String id,
 			@QueryParam("language") String name,
-			@Context HttpServletRequest request,@Context HttpServletResponse response) throws Exception {
+			@Context HttpServletRequest request,
+			@Context HttpServletResponse response) throws Exception {
 
 		File f = null;
 		if (null != name && !name.isEmpty()) {
@@ -144,9 +142,10 @@ public class FileResource {
 			f = new File(generatePath, id);
 		}
 
-		Project proj = daoOfProject.getProjectByID(Integer.valueOf(id));
+		Project proj = SpringBeanGetter.getDaoOfProject().getProjectByID(
+				Integer.valueOf(id));
 		DateFormat format1 = new SimpleDateFormat("yyyyMMddHHmmss");
-	    String date = format1.format(new Date());
+		String date = format1.format(new Date());
 		final String zipFileName = proj.getName() + "-" + date + ".zip";
 
 		if (f.isFile()) {
@@ -154,13 +153,13 @@ public class FileResource {
 		} else {
 			new ZipFolder(f.getAbsolutePath()).zipIt(zipFileName);
 		}
-		
+
 		FileInputStream fis = null;
 		BufferedInputStream buff = null;
 		OutputStream myout = null;
-		
-		String path = generatePath+"/"+zipFileName;
-		
+
+		String path = generatePath + "/" + zipFileName;
+
 		File file = new File(path);
 
 		try {
@@ -170,9 +169,12 @@ public class FileResource {
 			} else {
 				response.setContentType("application/zip;charset=utf-8");
 				response.setContentLength((int) file.length());
-				response.setHeader("Content-Disposition","attachment;filename="+ new String(file.getName().getBytes("gbk"),"iso-8859-1"));
+				response.setHeader("Content-Disposition",
+						"attachment;filename="
+								+ new String(file.getName().getBytes("gbk"),
+										"iso-8859-1"));
 			}
-//			response.reset();
+			// response.reset();
 			fis = new FileInputStream(file);
 			buff = new BufferedInputStream(fis);
 			byte[] b = new byte[1024];
@@ -200,9 +202,9 @@ public class FileResource {
 				e.printStackTrace();
 			}
 		}
-		
+
 		return "";
-		
+
 	}
 
 	private void zipFile(File fileToZip, String zipFileName) {
@@ -232,30 +234,32 @@ public class FileResource {
 			JavaIOUtils.closeOutputStream(zos);
 		}
 	}
-	
-//	@GET
-//	@Path("download")
-//	@Produces(MediaType.TEXT_PLAIN)
-//	public String download(@QueryParam("id") String id,
-//			@QueryParam("language") String name) {
-//		File f = null;
-//		if (null != name && !name.isEmpty()) {
-//			f = new File(new File(generatePath, id), name);
-//		} else {
-//			f = new File(generatePath, id);
-//		}
-//
-//		Project proj = daoOfProject.getProjectByID(Integer.valueOf(id));
-//
-//		String zipFileName = proj.getName() + "-" + System.currentTimeMillis() + ".zip";
-//
-//		if (f.isFile()) {
-//			zipFile(f, zipFileName);
-//		} else {
-//			new ZipFolder(f.getAbsolutePath()).zipIt(zipFileName);
-//		}
-//
-//		return String.format("%s/files/%s", Configuration.get("codegen_url"), zipFileName);
-//	}
+
+	// @GET
+	// @Path("download")
+	// @Produces(MediaType.TEXT_PLAIN)
+	// public String download(@QueryParam("id") String id,
+	// @QueryParam("language") String name) {
+	// File f = null;
+	// if (null != name && !name.isEmpty()) {
+	// f = new File(new File(generatePath, id), name);
+	// } else {
+	// f = new File(generatePath, id);
+	// }
+	//
+	// Project proj = daoOfProject.getProjectByID(Integer.valueOf(id));
+	//
+	// String zipFileName = proj.getName() + "-" + System.currentTimeMillis() +
+	// ".zip";
+	//
+	// if (f.isFile()) {
+	// zipFile(f, zipFileName);
+	// } else {
+	// new ZipFolder(f.getAbsolutePath()).zipIt(zipFileName);
+	// }
+	//
+	// return String.format("%s/files/%s", Configuration.get("codegen_url"),
+	// zipFileName);
+	// }
 
 }

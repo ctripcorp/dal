@@ -1,4 +1,3 @@
-
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.sql.Connection;
@@ -50,17 +49,13 @@ public class DatabaseResource {
 
 	private static ClassLoader classLoader;
 	private static ObjectMapper mapper = new ObjectMapper();
-	
-	private static UserGroupDao ugDao = null;
-	
 	static {
 		classLoader = Thread.currentThread().getContextClassLoader();
 		if (classLoader == null) {
 			classLoader = Configuration.class.getClassLoader();
 		}
-		ugDao = SpringBeanGetter.getDalUserGroupDao();
 	}
-	
+
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("merge")
@@ -69,44 +64,48 @@ public class DatabaseResource {
 				.getAttributes().get("employee").toString();
 
 		Status status = Status.OK;
-		
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
+
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(
+				userNo);
+		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao()
+				.getUserGroupByUserId(user.getId());
 		boolean havePersimion = false;
-		if (urGroups!=null && urGroups.size()>0) {
+		if (urGroups != null && urGroups.size() > 0) {
 			for (UserGroup ug : urGroups) {
 				if (ug.getGroup_id() == DalGroupResource.SUPER_GROUP_ID) {
 					havePersimion = true;
 					break;
 				}
 			}
-		} 
-		
-		if (!havePersimion){
+		}
+
+		if (!havePersimion) {
 			status = Status.ERROR;
 			status.setInfo("You have no permision, only DAL Admin Team can do this.");
 			return status;
 		}
-		
+
 		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
-		
-		Map<String, DalGroupDB> allDbs = new AllInOneConfigParser(Configuration.get("all_in_one")).getDBAllInOneConfig();
+
+		Map<String, DalGroupDB> allDbs = new AllInOneConfigParser(
+				Configuration.get("all_in_one")).getDBAllInOneConfig();
 		Set<String> keys = allDbs.keySet();
-		for(String key:keys){
+		for (String key : keys) {
 			DalGroupDB db = allDbDao.getGroupDBByDbName(key);
-			if(db==null){
+			if (db == null) {
 				allDbDao.insertDalGroupDB(allDbs.get(key));
-			}else{
+			} else {
 				DalGroupDB fileDB = allDbs.get(key);
-				allDbDao.updateGroupDB(db.getId(), key, fileDB.getDb_address(), 
-						fileDB.getDb_port(),fileDB.getDb_user(), fileDB.getDb_password(),
-						fileDB.getDb_catalog(), fileDB.getDb_providerName());
+				allDbDao.updateGroupDB(db.getId(), key, fileDB.getDb_address(),
+						fileDB.getDb_port(), fileDB.getDb_user(),
+						fileDB.getDb_password(), fileDB.getDb_catalog(),
+						fileDB.getDb_providerName());
 			}
 		}
 
 		return Status.OK;
 	}
-	
+
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("connectionTest")
@@ -119,11 +118,11 @@ public class DatabaseResource {
 		Connection conn = null;
 		ResultSet rs = null;
 		try {
-			conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword,
-							DatabaseType.valueOf(dbtype).getValue());
+			conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser,
+					dbpassword, DatabaseType.valueOf(dbtype).getValue());
 			rs = conn.getMetaData().getCatalogs();
 			Set<String> allCatalog = new HashSet<String>();
-			while(rs.next()){
+			while (rs.next()) {
 				allCatalog.add(rs.getString("TABLE_CAT"));
 			}
 			status.setInfo(mapper.writeValueAsString(allCatalog));
@@ -142,22 +141,25 @@ public class DatabaseResource {
 
 		return status;
 	}
-	
+
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("addNewAllInOneDB")
 	public Status addNewAllInOneDB(@FormParam("dbtype") String dbtype,
-			@FormParam("allinonename") String allinonename,@FormParam("dbaddress") String dbaddress,
-			@FormParam("dbport") String dbport,@FormParam("dbuser") String dbuser,
-			@FormParam("dbpassword") String dbpassword,@FormParam("dbcatalog") String dbcatalog) {
+			@FormParam("allinonename") String allinonename,
+			@FormParam("dbaddress") String dbaddress,
+			@FormParam("dbport") String dbport,
+			@FormParam("dbuser") String dbuser,
+			@FormParam("dbpassword") String dbpassword,
+			@FormParam("dbcatalog") String dbcatalog) {
 
 		Status status = Status.OK;
-		
+
 		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
-		
-		if (allDbDao.getGroupDBByDbName(allinonename)!=null) {
+
+		if (allDbDao.getGroupDBByDbName(allinonename) != null) {
 			status = Status.ERROR;
-			status.setInfo(allinonename+"已经存在!");
+			status.setInfo(allinonename + "已经存在!");
 			return status;
 		} else {
 			DalGroupDB groupDb = new DalGroupDB();
@@ -171,16 +173,17 @@ public class DatabaseResource {
 			groupDb.setDal_group_id(-1);
 			allDbDao.insertDalGroupDB(groupDb);
 		}
-		
+
 		return Status.OK;
 	}
-	
+
 	private boolean validatePermision(int userId, int db_group_id) {
 		boolean havaPermision = false;
-		List<UserGroup> urGroups = ugDao.getUserGroupByUserId(userId);
-		if (urGroups!=null && urGroups.size()>0) {
+		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao()
+				.getUserGroupByUserId(userId);
+		if (urGroups != null && urGroups.size() > 0) {
 			for (UserGroup urGroup : urGroups) {
-				if (urGroup.getGroup_id() == DalGroupResource.SUPER_GROUP_ID){
+				if (urGroup.getGroup_id() == DalGroupResource.SUPER_GROUP_ID) {
 					havaPermision = true;
 				}
 				if (urGroup.getGroup_id() == db_group_id) {
@@ -190,56 +193,61 @@ public class DatabaseResource {
 		}
 		return havaPermision;
 	}
-	
+
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("deleteAllInOneDB")
-	public Status deleteAllInOneDB(@FormParam("allinonename") String allinonename) {
-		
+	public Status deleteAllInOneDB(
+			@FormParam("allinonename") String allinonename) {
+
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
 
 		Status status = Status.OK;
-		
+
 		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
 		DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-		
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(
+				userNo);
+
 		if (!validatePermision(user.getId(), groupDb.getDal_group_id())) {
 			status = Status.ERROR;
 			status.setInfo("你没有当前DataBase的操作权限.");
 		} else {
-			allDbDao.deleteDalGroupDB(groupDb.getId());		
+			allDbDao.deleteDalGroupDB(groupDb.getId());
 		}
 		return status;
 	}
-	
+
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("getOneDB")
 	public Status getOneDB(@FormParam("allinonename") String allinonename) {
-		
+
 		String userNo = AssertionHolder.getAssertion().getPrincipal()
 				.getAttributes().get("employee").toString();
 
 		Status status = Status.OK;
-		
+
 		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
 		DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-		
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(
+				userNo);
+
 		if (!validatePermision(user.getId(), groupDb.getDal_group_id())) {
 			status = Status.ERROR;
 			status.setInfo("你没有当前DataBase的操作权限.");
 			return status;
 		}
-		
+
 		try {
-			if(DatabaseType.MySQL.getValue().equals(groupDb.getDb_providerName())){
+			if (DatabaseType.MySQL.getValue().equals(
+					groupDb.getDb_providerName())) {
 				groupDb.setDb_providerName(DatabaseType.MySQL.toString());
-			}else if(DatabaseType.SQLServer.getValue().equals(groupDb.getDb_providerName())){
+			} else if (DatabaseType.SQLServer.getValue().equals(
+					groupDb.getDb_providerName())) {
 				groupDb.setDb_providerName(DatabaseType.SQLServer.toString());
-			}else{
+			} else {
 				groupDb.setDb_providerName("no");
 			}
 			status.setInfo(mapper.writeValueAsString(groupDb));
@@ -247,55 +255,63 @@ public class DatabaseResource {
 			status = Status.ERROR;
 			status.setInfo(e.getMessage());
 			return status;
-		}		
-		
+		}
+
 		return Status.OK;
 	}
-	
+
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("updateDB")
-	public Status updateDB(@FormParam("id") int id,@FormParam("dbtype") String dbtype,
-			@FormParam("allinonename") String allinonename,@FormParam("dbaddress") String dbaddress,
-			@FormParam("dbport") String dbport,@FormParam("dbuser") String dbuser,
-			@FormParam("dbpassword") String dbpassword,@FormParam("dbcatalog") String dbcatalog) {
+	public Status updateDB(@FormParam("id") int id,
+			@FormParam("dbtype") String dbtype,
+			@FormParam("allinonename") String allinonename,
+			@FormParam("dbaddress") String dbaddress,
+			@FormParam("dbport") String dbport,
+			@FormParam("dbuser") String dbuser,
+			@FormParam("dbpassword") String dbpassword,
+			@FormParam("dbcatalog") String dbcatalog) {
 
 		Status status = Status.OK;
-		
+
 		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
 		DalGroupDB db = allDbDao.getGroupDBByDbName(allinonename);
-		
-		if(db!=null && db.getId()!=id){
+
+		if (db != null && db.getId() != id) {
 			status = Status.ERROR;
-			status.setInfo(allinonename+"已经存在!");
+			status.setInfo(allinonename + "已经存在!");
 			return status;
 		}
-		
-		String userNo = AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+
+		String userNo = AssertionHolder.getAssertion().getPrincipal()
+				.getAttributes().get("employee").toString();
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(
+				userNo);
 		DalGroupDB groupDb = allDbDao.getGroupDBByDbId(id);
-		
+
 		if (!validatePermision(user.getId(), groupDb.getDal_group_id())) {
 			status = Status.ERROR;
 			status.setInfo("你没有当前DataBase的操作权限.");
 			return status;
 		}
-		
-		allDbDao.updateGroupDB(id, allinonename, dbaddress, dbport, dbuser, dbpassword, dbcatalog, DatabaseType.valueOf(dbtype).getValue());
-		
+
+		allDbDao.updateGroupDB(id, allinonename, dbaddress, dbport, dbuser,
+				dbpassword, dbcatalog, DatabaseType.valueOf(dbtype).getValue());
+
 		return Status.OK;
 	}
-	
+
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("dbs")
 	public String getDbNames(@QueryParam("groupDBs") boolean groupDBs,
 			@QueryParam("groupId") int groupId) {
-		if(groupDBs) {
-			if(-1 != groupId && groupId>0) {
+		if (groupDBs) {
+			if (-1 != groupId && groupId > 0) {
 				Set<String> sets = new HashSet<String>();
-				List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
-				for(DalGroupDB db:dbs){
+				List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB()
+						.getGroupDBsByGroup(groupId);
+				for (DalGroupDB db : dbs) {
 					sets.add(db.getDbname());
 				}
 				try {
@@ -306,7 +322,8 @@ public class DatabaseResource {
 			}
 		} else {
 			try {
-				List<String> dbAllinOneNames = SpringBeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
+				List<String> dbAllinOneNames = SpringBeanGetter
+						.getDaoOfDalGroupDB().getAllDbAllinOneNames();
 				return mapper.writeValueAsString(dbAllinOneNames);
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
@@ -318,9 +335,12 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("tables")
-	public String getTableNames(@QueryParam("db_name") String db_set) throws Exception {
+	public String getTableNames(@QueryParam("db_name") String db_set)
+			throws Exception {
 		try {
-			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set);
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter
+					.getDaoOfDatabaseSet()
+					.getMasterDatabaseSetEntryByDatabaseSetName(db_set);
 			String dbName = databaseSetEntry.getConnectionString();
 			List<String> results = DbUtils.getAllTableNames(dbName);
 			java.util.Collections.sort(results);
@@ -345,9 +365,11 @@ public class DatabaseResource {
 
 		Connection connection = null;
 		try {
-			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(dbName);
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter
+					.getDaoOfDatabaseSet()
+					.getMasterDatabaseSetEntryByDatabaseSetName(dbName);
 			String db_Name = databaseSetEntry.getConnectionString();
-			
+
 			connection = DataSourceUtil.getConnection(db_Name);
 			Set<String> indexedColumns = new HashSet<String>();
 			Set<String> primaryKeys = new HashSet<String>();
@@ -432,33 +454,35 @@ public class DatabaseResource {
 		List<String> tables;
 		List<StoredProcedure> sps;
 		try {
-			
-			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(setName);
+
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter
+					.getDaoOfDatabaseSet()
+					.getMasterDatabaseSetEntryByDatabaseSetName(setName);
 			String dbName = databaseSetEntry.getConnectionString();
 			views = DbUtils.getAllViewNames(dbName);
 			tables = DbUtils.getAllTableNames(dbName);
 			sps = DbUtils.getAllSpNames(dbName);
 			sps = filterSP(tables, sps);
-			
-			java.util.Collections.sort(views, new Comparator<String>(){
+
+			java.util.Collections.sort(views, new Comparator<String>() {
 				@Override
 				public int compare(String o1, String o2) {
 					return o1.toLowerCase().compareTo(o2.toLowerCase());
 				}
 			});
-			java.util.Collections.sort(tables,  new Comparator<String>(){
+			java.util.Collections.sort(tables, new Comparator<String>() {
 				@Override
 				public int compare(String o1, String o2) {
 					return o1.toLowerCase().compareTo(o2.toLowerCase());
 				}
 			});
 			java.util.Collections.sort(sps);
-			
+
 			tableSpNames.setSps(sps);
 			tableSpNames.setViews(views);
 			tableSpNames.setTables(tables);
 			tableSpNames.setDbType(DbUtils.getDbType(dbName));
-			
+
 			status.setInfo(mapper.writeValueAsString(tableSpNames));
 		} catch (Exception e1) {
 			status = Status.ERROR;
@@ -467,47 +491,40 @@ public class DatabaseResource {
 		}
 		return status;
 	}
-	
-	private List<StoredProcedure> filterSP(List<String> tables, List<StoredProcedure> sps){
+
+	private List<StoredProcedure> filterSP(List<String> tables,
+			List<StoredProcedure> sps) {
 		List<StoredProcedure> result = new ArrayList<StoredProcedure>();
-		if(tables!=null && sps!=null && tables.size()>0 && sps.size()>0){
-			for(StoredProcedure sp:sps){
-				String spName = sp.getName()!=null?sp.getName().toLowerCase():null;
+		if (tables != null && sps != null && tables.size() > 0
+				&& sps.size() > 0) {
+			for (StoredProcedure sp : sps) {
+				String spName = sp.getName() != null ? sp.getName()
+						.toLowerCase() : null;
 				boolean isSpAOrSp3orSpT = false;
-				for(String tableName:tables){
+				for (String tableName : tables) {
 					tableName = tableName.toLowerCase();
-					if(spName==null || "".equals(spName)){
+					if (spName == null || "".equals(spName)) {
 						isSpAOrSp3orSpT = true;
 						break;
 					}
-					if(spName.indexOf(String.format("spa_%s", tableName))>-1
-							|| spName.indexOf(String.format("sp3_%s", tableName))>-1
-							|| spName.indexOf(String.format("spt_%s", tableName))>-1){
+					if (spName.indexOf(String.format("spa_%s", tableName)) > -1
+							|| spName.indexOf(String
+									.format("sp3_%s", tableName)) > -1
+							|| spName.indexOf(String
+									.format("spt_%s", tableName)) > -1) {
 						isSpAOrSp3orSpT = true;
 						break;
 					}
 				}
-				if(!isSpAOrSp3orSpT){
+				if (!isSpAOrSp3orSpT) {
 					result.add(sp);
 				}
 			}
 		}
 		return result;
 	}
-	
+
 	public static void main(String[] args) {
 		System.out.println("123".indexOf("12"));
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -202,68 +202,64 @@ CREATE TABLE IF NOT EXISTS `config_template` (
 	,INDEX `lang_type`(`lang_type`)
 	);
 
-INSERT INTO `config_template` (
-	`config_type`
-	,`lang_type`
-	,`template`
-	)
-VALUES (
-	1
-	,1
-	,''
-	);
+INSERT INTO `config_template` (`config_type`,`lang_type`,`template`) VALUES
+	(1,1,''),(2,1,''),(3,1,''),(1,2,''),(2,2,''),(3,2,'');
 
-INSERT INTO `config_template` (
-	`config_type`
-	,`lang_type`
-	,`template`
-	)
-VALUES (
-	2
-	,1
-	,''
-	);
-
-INSERT INTO `config_template` (
-	`config_type`
-	,`lang_type`
-	,`template`
-	)
-VALUES (
-	3
-	,1
-	,''
-	);
-
-INSERT INTO `config_template` (
-	`config_type`
-	,`lang_type`
-	,`template`
-	)
-VALUES (
-	1
-	,2
-	,''
-	);
-
-INSERT INTO `config_template` (
-	`config_type`
-	,`lang_type`
-	,`template`
-	)
-VALUES (
-	2
-	,2
-	,''
-	);
-
-INSERT INTO `config_template` (
-	`config_type`
-	,`lang_type`
-	,`template`
-	)
-VALUES (
-	3
-	,2
-	,''
-	);
+INSERT INTO `api_list` (`id`, `language`, `db_type`, `crud_type`, `method_declaration`, `method_description`, `sp_type`) VALUES
+	(1, 'java', 'MySQL', 'select', 'T queryByPk(Number id, DalHints hints)', 'Query according to the primary keys', 'not sp'),
+	(2, 'java', 'MySQL', 'select', 'T queryByPk(Key1, key2, key3... DalHints hints)', 'Query according to the multiple primary keys', 'not sp'),
+	(3, 'java', 'MySQL', 'select', 'T queryByPk(T pk, DalHints hints)', 'Query according to the Entity which contains primary keys', 'not sp'),
+	(4, 'java', 'MySQL', 'select', 'int count(DalHints hints)', 'Get the count of records', 'not sp'),
+	(5, 'java', 'MySQL', 'select', 'List<T> queryByPage(int pageSize, int pageNo, DalHints hints)', 'Query by pagination on the whole table', 'not sp'),
+	(6, 'java', 'MySQL', 'select', 'List<T> getAll(DalHints hints)', 'Get the records of the table', 'not sp'),
+	(7, 'java', 'MySQL', 'insert', 'int insert(DalHints hints, T daoPojos)', 'Insert pojo into table', 'not sp'),
+	(9, 'java', 'MySQL', 'insert', 'int insert(DalHints hints, KeyHolder keyHolder, T daoPojo)', 'Insert pojo and get the generated PK back in keyHolder', 'not sp'),
+	(10, 'java', 'MySQL', 'delete', 'int delete(DalHints hints, T daoPojos)', 'Delete POJOs from table according to primary key', 'not sp'),
+	(12, 'java', 'MySQL', 'update', 'int update(DalHints hints, T daoPojo)', 'Update the given pojo', 'not sp'),
+	(13, 'java', 'SQLServer', 'select', 'T queryByPk(Number id, DalHints hints)', 'Query according to the primary keys', 'spa sp3 notSp'),
+	(14, 'java', 'SQLServer', 'select', 'T queryByPk(Key1, key2, key3... DalHints hints)', 'Query according to the multiple primary keys', 'spa sp3 notSp'),
+	(15, 'java', 'SQLServer', 'select', 'T queryByPk(T pk, DalHints hints)', 'Query according to the Entity which contains primary keys', 'spa sp3 notSp'),
+	(16, 'java', 'SQLServer', 'select', 'int count(DalHints hints)', 'Get the count of records', 'spa sp3 notSp'),
+	(17, 'java', 'SQLServer', 'select', 'List<T> queryByPage(int pageSize, int pageNo, DalHints hints)', 'Query by pagination on the whole table', 'spa sp3 notSp'),
+	(18, 'java', 'SQLServer', 'select', 'List<T> getAll(DalHints hints)', 'Ge the records of the table', 'spa notSp'),
+	(19, 'java', 'SQLServer', 'insert', 'int insert(DalHints hints, T daoPojo)', 'Insert one POJO into table using insert SPA', 'spa'),
+	(31, 'java', 'SQLServer', 'delete', 'int delete(DalHints hints, T daoPojo)', 'Delete POJO from table according to primary key', 'not sp'),
+	(33, 'java', 'SQLServer', 'update', 'int update(DalHints hints, T daoPojo)', 'Update the given pojo', 'not sp'),
+	(42, 'csharp', 'MySQL', 'select', 'T FindByPk(int id )', '根据主键获取T信息', 'not sp'),
+	(43, 'csharp', 'MySQL', 'select', 'IList<T> GetAll()', '获取所有T信息', 'not sp'),
+	(44, 'csharp', 'MySQL', 'select', 'long Count()', '取得总记录数', 'not sp'),
+	(45, 'csharp', 'MySQL', 'select', 'IList<T> GetListByPage(T obj, int pagesize, int pageNo)', '检索T，带翻页', 'not sp'),
+	(46, 'csharp', 'MySQL', 'insert', 'int InsertT(T t)', '插入T', 'not sp'),
+	(47, 'csharp', 'MySQL', 'update', 'int UpdateT(T t)', '修改T', 'not sp'),
+	(48, 'csharp', 'MySQL', 'delete', 'int DeleteT(T t)', '删除T', 'not sp'),
+	(49, 'csharp', 'SQLServer', 'select', 'T FindByPk(int id)', '根据主键获取T信息', 'not sp'),
+	(50, 'csharp', 'SQLServer', 'select', 'IList<T> GetAll()', '获取所有T信息', 'not sp'),
+	(51, 'csharp', 'SQLServer', 'select', 'long Count()', '取得总记录数', 'not sp'),
+	(52, 'csharp', 'SQLServer', 'select', 'IList<T> GetListByPage(T obj, int pagesize, int pageNo)', '检索T，带翻页', 'not sp'),
+	(53, 'csharp', 'SQLServer', 'insert', 'int InsertT(T t)', '插入T', 'not sp'),
+	(54, 'csharp', 'SQLServer', 'insert', 'int BulkInsertT(IList<T> tList)', '批量插入T', 'not sp'),
+	(55, 'csharp', 'SQLServer', 'update', 'int UpdateT(T t)', '修改T', 'not sp'),
+	(56, 'csharp', 'SQLServer', 'update', 'int BulkUpdateT(IList<T> tList)', '批量修改T', 'not sp'),
+	(57, 'csharp', 'SQLServer', 'delete', 'int DeleteT(T t)', '删除T', 'not sp'),
+	(58, 'csharp', 'SQLServer', 'delete', 'int DeleteT(int id)', '删除T', 'not sp'),
+	(59, 'csharp', 'SQLServer', 'delete', 'int BulkDelete(IList<T> tList)', '批量删除T', 'not sp'),
+	(73, 'java', 'SQLServer', 'insert', 'int insert(DalHints hints, KeyHolder keyHolder, T daoPojo)', 'Insert one POJO into table  and get the generated PK back in keyHolder', 'spa'),
+	(74, 'csharp', 'MySQL', 'insert', 'bool BulkInsertT(IList<T> tList)', '批量插入T', 'not sp'),
+	(75, 'java', 'MySQL', 'insert', 'int[] insert(DalHints hints, List<T> daoPojos)', 'Insert pojos one by one', 'not sp'),
+	(77, 'java', 'SQLServer', 'insert', 'int[] insert(DalHints hints, List<T> daoPojos)', 'Insert pojos', 'not sp'),
+	(78, 'java', 'MySQL', 'insert', 'int[] insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos)', 'Insert pojos and get the generated PK back in keyHolder', 'not sp'),
+	(79, 'java', 'SQLServer', 'insert', 'int[] insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos)', 'Insert pojos and get the generated PK back in keyHolder', 'not sp'),
+	(80, 'java', 'MySQL', 'insert', 'int[] batchInsert(DalHints hints, List<T> daoPojos)', 'Insert pojos in batch mode', 'not sp'),
+	(81, 'java', 'SQLServer', 'insert', 'int[] batchInsert(DalHints hints, List<T> daoPojos)', 'Insert pojos in batch mode', 'not sp'),
+	(82, 'java', 'MySQL', 'insert', 'int combinedInsert(DalHints hints, List<T> daoPojos)', 'Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder', 'not sp'),
+	(83, 'java', 'SQLServer', 'insert', 'int combinedInsert(DalHints hints, List<T> daoPojos)', 'Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder', 'not sp'),
+	(84, 'java', 'MySQL', 'insert', 'int combinedInsert(DalHints hints,KeyHolder keyHolder,List<T> pojos)', 'Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder', 'not sp'),
+	(85, 'java', 'SQLServer', 'insert', 'int combinedInsert(DalHints hints,KeyHolder keyHolder,List<T> pojos)', 'Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder', 'not sp'),
+	(86, 'java', 'MySQL', 'delete', 'int[] delete(DalHints hints, List<T> daoPojos)', 'Delete the given pojos list one by one', 'not sp'),
+	(87, 'java', 'SQLServer', 'delete', 'int[] delete(DalHints hints, List<T> daoPojos)', 'Delete the given pojos list one by one', 'not sp'),
+	(88, 'java', 'MySQL', 'delete', 'int[] batchDelete(DalHints hints, List<T> daoPojos)', 'Delete the given pojo list in batch.', 'not sp'),
+	(89, 'java', 'SQLServer', 'delete', 'int[] batchDelete(DalHints hints, List<T> daoPojos)', 'Delete the given pojo list in batch.', 'not sp'),
+	(90, 'java', 'MySQL', 'update', 'int[] update(DalHints hints, List<T> daoPojos)', 'Update the given pojos one by one', 'not sp'),
+	(91, 'java', 'SQLServer', 'update', 'int[] update(DalHints hints, List<T> daoPojos)', 'Update the given pojos', 'not sp'),
+	(96, 'java', 'MySQL', 'update', 'int[] batchUpdate(DalHints hints, List<T> daoPojos)', 'Update the given pojo list in batch', 'not sp'),
+	(97, 'java', 'SQLServer', 'update', 'int[] batchUpdate(DalHints hints, List<T> daoPojos)', 'Update the given pojo list in batch', 'not sp');

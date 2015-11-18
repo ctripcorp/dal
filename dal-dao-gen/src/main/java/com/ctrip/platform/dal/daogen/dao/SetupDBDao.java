@@ -23,7 +23,7 @@ public class SetupDBDao {
 		}
 
 		try {
-			String[] array = sqlScript.toUpperCase().split(";");
+			String[] array = sqlScript.split(";"); // toUpperCase().
 			this.jdbcTemplate.batchUpdate(array);
 			result = true;
 		} catch (DataAccessException e) {

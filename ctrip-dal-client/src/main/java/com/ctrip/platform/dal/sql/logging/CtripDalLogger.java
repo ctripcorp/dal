@@ -187,7 +187,10 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 	@Override
 	public void shutdown() {
 		logger.info("shutdown clogging");
-		MessageManager.getInstance().shutdown();
+		try {
+			MessageManager.getInstance().shutdown();
+		} catch (Throwable e) {
+		}
 		super.shutdown();
 	}
 	

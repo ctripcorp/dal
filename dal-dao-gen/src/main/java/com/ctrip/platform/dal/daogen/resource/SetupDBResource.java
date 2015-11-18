@@ -47,6 +47,7 @@ public class SetupDBResource {
 	private static ClassLoader classLoader = null;
 	private static ObjectMapper mapper = new ObjectMapper();
 
+	private static String webXml = "web.xml";
 	private static String jdbcProperties = "jdbc.properties";
 	private static String jdbcDriverClassName = "jdbc.driverClassName";
 	private static String jdbcUrl = "jdbc.url";
@@ -262,8 +263,8 @@ public class SetupDBResource {
 					dbaddress, dbport, dbcatalog));
 			properties.setProperty(jdbcUsername, dbuser);
 			properties.setProperty(jdbcPassword, dbpassword);
-			URL url = classLoader.getResource(jdbcProperties);
-			String path = url.getPath();
+			URL url = classLoader.getResource(webXml);
+			String path = url.getPath().replace(webXml, jdbcProperties);
 			FileOutputStream fileOutputStream = new FileOutputStream(path);
 			properties.store(fileOutputStream, "");
 			fileOutputStream.close();

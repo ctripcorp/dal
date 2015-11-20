@@ -25,42 +25,54 @@ import com.ctrip.security.encryption.Crypto;
 public class AllInOneConfigureReader {
 
 	private static final Logger logger = LoggerFactory.getLogger(AllInOneConfigureReader.class);
-	private static final String CLASSPATH_CONFIG_FILE = "Database.Config";
-	private static final String LINUX_DB_CONFIG_FILE = "/opt/ctrip/AppData/Database.Config";
-	private static final String WIN_DB_CONFIG_FILE = "/D:/WebSites/CtripAppData/Database.Config";
+	private static final String CONFIG_FILE = "Database.Config";
+	private static final String LINUX_DB_CONFIG_FILE = "/opt/ctrip/AppData/" + CONFIG_FILE;
+	private static final String WIN_DB_CONFIG_FILE = "/D:/WebSites/CtripAppData/" + CONFIG_FILE;
 	
 	private static String DATABASE_ENTRY = "add";
 	private static String DATABASE_ENTRY_NAME = "name";
 	private static String DATABASE_ENTRY_CONNECTIONSTRING = "connectionString";
 	private static String DEV_FLAG = "Version";
 	
-	private static final String DATABASE_CONFIG_LOCATION = "$classpath";
+	private static final String CLASSPATH_LOCATION = "$classpath";
 	private ConnectionStringParser parser = new ConnectionStringParser();
 	
 	public Map<String, DataSourceConfigure> getDataSourceConfigures(Set<String> dbNames, boolean useLocal) {
 		String location = getAllInOneConfigLocation();
-		if (location == null) {
-			logger.error("Can not locate " + CLASSPATH_CONFIG_FILE);
-			return null;
-		}
-
-		return parseDBAllInOneConfig(location, dbNames, useLocal);
+		
+		Map<String, DataSourceConfigure> config = parseDBAllInOneConfig(location, dbNames, useLocal);
+		
+		validate(dbNames, config.keySet());
+		
+		return config;
 	}
 	
+	private void validate(Set<String> dbNames, Set<String> dbConfigNames) {
+		if(dbConfigNames.containsAll(dbNames))
+			return;
+		
+		dbNames.removeAll(dbConfigNames);
+		
+		logger.error("Cannot load config for the following DB: " + dbNames.toString());
+		throw new RuntimeException("Cannot load config for the following DB: " + dbNames.toString());
+	}
+
 	private String getAllInOneConfigLocation() {
 		String location = DatabasePoolConfigParser.getInstance().getDatabaseConfigLocation();
 		if (location != null && location.length() > 0) {
 
-			if (DATABASE_CONFIG_LOCATION.equalsIgnoreCase(location)) {
-				logger.info("Looking up Database.config in classpath...");
+			if (CLASSPATH_LOCATION.equalsIgnoreCase(location)) {
+				logger.info("Looking up Database.Config in classpath...");
 
 				ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 				if (classLoader == null) {
 					classLoader = AllInOneConfigureReader.class.getClassLoader();
 				}
 					
-				URL url = classLoader.getResource(CLASSPATH_CONFIG_FILE);
-				location = url == null ? null: url.getFile();
+				URL url = classLoader.getResource(CONFIG_FILE);
+				if (url == null)
+					throw new RuntimeException("Can not locate " + CONFIG_FILE + " from classpath");
+				location = url.getFile();
 			}
 		} else {
 			String osName = null;
@@ -110,13 +122,10 @@ public class AllInOneConfigureReader {
 					continue;
 				
 				String connectionString = getAttribute(databaseEntry, DATABASE_ENTRY_CONNECTIONSTRING);
-				try {
-					DataSourceConfigure config = parser.parse(name, decrypt(name, connectionString));
-					dataSourceConfigures.put(name, config);
-				} catch(Throwable e) {
-					String msg = String.format("Read %s file error, msg: %s", absolutePath, e.getMessage());
-					logger.error(msg, e);
-				}
+
+				logger.info("Try to read config for " + name);
+				DataSourceConfigure config = parser.parse(name, decrypt(name, connectionString));
+				dataSourceConfigures.put(name, config);
 			}
 			in.close();
 			

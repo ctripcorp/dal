@@ -101,7 +101,7 @@ public class ProjectResource {
 		} else {
 			DalGroup group = new DalGroup();
 			group.setText("请先加入DAL Team");
-			group.setIcon("fa fa-folder-open-o");
+			group.setIcon("glyphicon glyphicon-folder-open");
 			group.setChildren(true);
 			groups.add(group);
 		}
@@ -128,7 +128,7 @@ public class ProjectResource {
 			DalGroup dalGroup = SpringBeanGetter.getDaoOfDalGroup()
 					.getDalGroupById(groupId);
 			dalGroup.setText(dalGroup.getGroup_name());
-			dalGroup.setIcon("fa fa-folder-open-o");
+			dalGroup.setIcon("glyphicon glyphicon-folder-open");
 			dalGroup.setChildren(true);
 			groups.add(dalGroup);
 		}
@@ -149,7 +149,10 @@ public class ProjectResource {
 			status.setInfo("Illegal group id");
 			return null;
 		}
-		return SpringBeanGetter.getDaoOfProject().getProjectByGroupId(groupID);
+
+		List<Project> list = SpringBeanGetter.getDaoOfProject()
+				.getProjectByGroupId(groupID);
+		return list;
 	}
 
 	@GET

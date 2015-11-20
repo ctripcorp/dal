@@ -1,6 +1,6 @@
 <%@page pageEncoding="UTF-8"%>
 <%
-	String codegenpageflag = "1.3.2";
+	String codegenpageflag = "1.3.4";
 	request.setAttribute("codegenpageflag", codegenpageflag);
 %>
 <!DOCTYPE html>
@@ -24,9 +24,9 @@
 	rel="stylesheet" />
 <link rel="stylesheet"
 	href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}" />
-<link
+<!-- <link
 	href="/static/font-awesome/css/font-awesome.css?codegen=${codegenpageflag}"
-	rel="stylesheet">
+	rel="stylesheet"> -->
 <link href="/static/css/multiple-select.css?codegen=${codegenpageflag}"
 	rel="stylesheet">
 <link

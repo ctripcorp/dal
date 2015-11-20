@@ -15,7 +15,7 @@
 <title>Ctrip DAO Generator</title>
 <!-- Bootstrap core CSS -->
 <link
-	href="/static/bootstrap/css/bootstrap.css?codegen=${codegenpageflag}"
+	href="/static/bootstrap/css/bootstrap.min.css?codegen=${codegenpageflag}"
 	rel="stylesheet">
 <link
 	href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${codegenpageflag}"
@@ -24,9 +24,9 @@
 	rel="stylesheet" />
 <link rel="stylesheet"
 	href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}" />
-<link
+<!-- <link
 	href="/static/font-awesome/css/font-awesome.css?codegen=${codegenpageflag}"
-	rel="stylesheet">
+	rel="stylesheet"> -->
 <link href="/static/css/multiple-select.css?codegen=${codegenpageflag}"
 	rel="stylesheet">
 <link
@@ -128,7 +128,7 @@
 						style="color: red;"></label> <a href="#" class="ctip"
 						data-toggle="tooltip" data-placement="top" title=""
 						data-original-title="代码生成器按照项目来组织代码，因此，同一个用户可以新建多个项目，每个项目生成的代码相互独立，互不干扰。">
-						<img class="helpicon" src="/static/images/help.jpg">
+						<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
 					</a>
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
 					<button id="save_proj" type="button" class="btn btn-primary">保存</button>
@@ -233,7 +233,7 @@
 						1、将当前Project缺少的数据库自动添加到所属DAL Team。<br/>
 						2、将当前Project缺少的逻辑数据库自动新增并添加到所属DAL Team。<br/>
 						">
-						<img class="helpicon" src="/static/images/help.jpg">
+						<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
 					</a>
 					<button id="add_lack_dbset" type="button" class="btn btn-primary">一键补全</button>
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -260,11 +260,10 @@
 							&nbsp;2.2、构建SQL：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
 							&nbsp;2.3、自定义SQL：在这种模式下面，我们可以自定义SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
 							">
-						<img style="margin-bottom: 15px; height: 25px; width: 25px"
-						class="helpicon" id="help" src="/static/images/help.jpg">
+						<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
 					</a>
 					<button type="button" class="close" data-dismiss="modal"
-						aria-hidden="true" style="margin-top: 3px">&times;</button>
+						aria-hidden="true" style="margin-top: 8px">&times;</button>
 				</div>
 				<div class="modal-body"
 					style="position: relative; overflow: auto; width: auto;">
@@ -527,8 +526,7 @@
 						</div>
 						<div id="param_list_auto" class="row-fluid input-sm"></div>
 						<div class="row-fluid">
-							<br />
-							<br />
+							<br /> <br />
 							<div style="clear: both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
 						</div>
 						<div class="row-fluid">
@@ -542,8 +540,7 @@
 						</div>
 						<div id="auto_sql_mock_value" class="row-fluid input-sm"></div>
 						<div class="row-fluid">
-							<br />
-							<br />
+							<br /> <br />
 							<div style="clear: both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
 						</div>
 						<div class="row-fluid">
@@ -581,8 +578,7 @@
 							</table>
 						</div>
 						<div class="row-fluid">
-							<br />
-							<br />
+							<br /> <br />
 							<div style="clear: both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
 						</div>
 						<div class="row-fluid">
@@ -648,8 +644,7 @@
 						</div>
 						<div id="param_list" class="row-fluid input-sm"></div>
 						<div class="row-fluid">
-							<br />
-							<br />
+							<br /> <br />
 							<div style="clear: both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
 						</div>
 						<div class="row-fluid">
@@ -663,8 +658,7 @@
 						</div>
 						<div id="free_sql_mock_value" class="row-fluid input-sm"></div>
 						<div class="row-fluid">
-							<br />
-							<br />
+							<br /> <br />
 							<div style="clear: both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
 						</div>
 						<div class="row-fluid">
@@ -702,8 +696,7 @@
 							</table>
 						</div>
 						<div class="row-fluid">
-							<br />
-							<br />
+							<br /> <br />
 							<div style="clear: both; padding-top: 8px">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
 						</div>
 						<div class="row-fluid">

@@ -192,27 +192,27 @@
                         type: 'button',
                         id: 'refreshDB',
                         caption: '刷新',
-                        icon: 'fa fa-refresh'
+                        icon: 'glyphicon glyphicon-refresh'
                     }, {
                         type: 'button',
                         id: 'addDB',
                         caption: '添加DB',
-                        icon: 'fa fa-plus'
+                        icon: 'glyphicon glyphicon-plus'
                     }, {
                         type: 'button',
                         id: 'editDB',
                         caption: '修改DB',
-                        icon: 'fa fa-edit'
+                        icon: 'glyphicon glyphicon-edit'
                     }, {
                         type: 'button',
                         id: 'delDB',
                         caption: '删除DB',
-                        icon: 'fa fa-times'
+                        icon: 'glyphicon glyphicon-remove'
                     }, {
                         type: 'button',
                         id: 'transferDB',
                         caption: '转移DB',
-                        icon: 'fa fa-exchange'
+                        icon: 'glyphicon glyphicon-transfer'
                     }],
                     onClick: function (target, data) {
                         switch (target) {

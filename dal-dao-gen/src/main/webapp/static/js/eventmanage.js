@@ -146,7 +146,7 @@
                         type: 'button',
                         id: 'refreshAllApproveDAO',
                         caption: '刷新',
-                        icon: 'fa fa-refresh'
+                        icon: 'glyphicon glyphicon-refresh'
                     }],
                     onClick: function (target, data) {
                         switch (target) {
@@ -229,17 +229,17 @@
                         type: 'button',
                         id: 'refreshApproveTaskDetail',
                         caption: '刷新',
-                        icon: 'fa fa-refresh'
+                        icon: 'glyphicon glyphicon-refresh'
                     }, {
                         type: 'button',
                         id: 'approveOk',
                         caption: '同意',
-                        icon: 'fa fa-check'
+                        icon: 'glyphicon glyphicon-ok'
                     }, {
                         type: 'button',
                         id: 'approveRefuse',
                         caption: '拒绝',
-                        icon: 'fa fa-times'
+                        icon: 'glyphicon glyphicon-remove'
                     }],
                     onClick: function (target, data) {
                         switch (target) {

@@ -20,9 +20,7 @@ public abstract class AbstractSqlBuilder {
 	
 	private StringBuilder whereExp = new StringBuilder();
 	
-	private boolean and = false;
-	
-	private boolean or  = false;
+	private List<WhereClauseEntry> whereClauseEntries = new ArrayList<>();
 	
 	private List<FieldEntry> whereFieldEntrys = new ArrayList<FieldEntry>();
 	
@@ -90,11 +88,7 @@ public abstract class AbstractSqlBuilder {
 	 * @return
 	 */
 	public String getWhereExp(){
-		if(whereExp.toString().length()>0){
-			return "WHERE"+ whereExp.toString();
-		}else{
-			return "";
-		}
+		return whereExp.toString().trim().isEmpty()? "": "WHERE"+ whereExp.toString();
 	}
 	
 	/**
@@ -102,7 +96,7 @@ public abstract class AbstractSqlBuilder {
 	 * @return
 	 */
 	public AbstractSqlBuilder and(){
-		and = true;
+		add(OperatorClauseEntry.AND());
 		return this;
 	}
 	
@@ -111,7 +105,7 @@ public abstract class AbstractSqlBuilder {
 	 * @return
 	 */
 	public AbstractSqlBuilder or(){
-		or = true;
+		add(OperatorClauseEntry.OR());
 		return this;
 	}
 	
@@ -310,18 +304,10 @@ public abstract class AbstractSqlBuilder {
 	}
 	
 	public AbstractSqlBuilder between(String field, Object paramValue1, Object paramValue2, int sqlType, boolean sensitive) throws SQLException {
-		if (paramValue1 == null || paramValue2 == null) {
-			and = or = false;
+		if (paramValue1 == null || paramValue2 == null)
 			throw new SQLException(field + " is not support null value.");
-		} else {
-			appendConcate();
-			whereExp.append(" ").append(field).append(" BETWEEN ? AND ?");
-			FieldEntry entry1 = new FieldEntry(field, paramValue1, sqlType, sensitive);
-			whereFieldEntrys.add(entry1);
-			FieldEntry entry2 = new FieldEntry(field, paramValue2, sqlType, sensitive);
-			whereFieldEntrys.add(entry2);
-		}
-		return this;
+
+		return add(new BetweenClauseEntry(field, paramValue1, paramValue2, sqlType, sensitive));
 	}
 	
 	/**
@@ -337,18 +323,11 @@ public abstract class AbstractSqlBuilder {
 	}
 	
 	public AbstractSqlBuilder betweenNullable(String field, Object paramValue1, Object paramValue2, int sqlType, boolean sensitive) {
-		if(paramValue1 == null || paramValue2 == null){
-			//如果paramValue==null，则field不会作为条件加入到最终的SQL中。
-			and = or = false;
-		}else{
-			appendConcate();
-			whereExp.append(" ").append(field).append(" BETWEEN ? AND ?");
-			FieldEntry entry1 = new FieldEntry(field, paramValue1, sqlType, sensitive);
-			whereFieldEntrys.add(entry1);
-			FieldEntry entry2 = new FieldEntry(field, paramValue2, sqlType, sensitive);
-			whereFieldEntrys.add(entry2);
-		}
-		return this;
+		//如果paramValue==null，则field不会作为条件加入到最终的SQL中。
+		if(paramValue1 == null || paramValue2 == null)
+			return this;
+
+		return add(new BetweenClauseEntry(field, paramValue1, paramValue2, sqlType, sensitive));
 	}
 
 	/**
@@ -393,20 +372,13 @@ public abstract class AbstractSqlBuilder {
 	}
 	
 	public AbstractSqlBuilder in(String field, List<?> paramValues, int sqlType, boolean sensitive) throws SQLException {
-		if(null == paramValues){
-			and = or = false;
+		if(null == paramValues || paramValues.size() == 0)
 			throw new SQLException(field + " must have more than one value.");
-		}
-		if(paramValues.size() == 0){
-			and = or = false;
-			throw new SQLException(field + " must have more than one value.");
-		}
-		for(Object obj:paramValues){
-			if(obj==null){
-				and = or = false;
+
+		for(Object obj:paramValues)
+			if(obj==null)
 				throw new SQLException(field + " is not support null value.");
-			}
-		}
+
 		return addInParam(field, paramValues, sqlType, sensitive);
 	}
 	
@@ -424,23 +396,24 @@ public abstract class AbstractSqlBuilder {
 	
 	public AbstractSqlBuilder inNullable(String field, List<?> paramValues, int sqlType, boolean sensitive) throws SQLException {
 		if(null == paramValues){
-			and = or = false;
 			return this;
 		}
+		
 		if(paramValues.size() == 0){
-			and = or = false;
 			throw new SQLException(field + " must have more than one value.");
 		}
+		
 		Iterator<?> ite = paramValues.iterator();
 		while(ite.hasNext()){
 			if(ite.next()==null){
 				ite.remove();
 			}
 		}
-		if(paramValues.size()<1){
-			and = or = false;
+		
+		if(paramValues.size() == 0){
 			return this;
 		}
+		
 		return addInParam(field, paramValues, sqlType, sensitive);
 	}
 	
@@ -450,9 +423,7 @@ public abstract class AbstractSqlBuilder {
 	 * @return
 	 */
 	public AbstractSqlBuilder isNull(String field){
-		appendConcate();
-		whereExp.append(" ").append(field).append(" IS NULL");
-		return this;
+		return add(new NullClauseEntry(field, true));
 	}
 	
 	/**
@@ -461,62 +432,131 @@ public abstract class AbstractSqlBuilder {
 	 * @return
 	 */
 	public AbstractSqlBuilder isNotNull(String field){
-		appendConcate();
-		whereExp.append(" ").append(field).append(" IS NOT NULL");
-		return this;
+		return add(new NullClauseEntry(field, false));
 	}
 	
 	private AbstractSqlBuilder addInParam(String field, List<?> paramValues, int sqlType, boolean sensitive){
-		StringBuilder temp = new StringBuilder();
-		temp.append(" in ( ");
-		for(int i=0,size=paramValues.size();i<size;i++){
-			temp.append("?");
-			if(i!=size-1){
-				temp.append(", ");
-			}
-			FieldEntry entry = new FieldEntry(field, paramValues.get(i), sqlType, sensitive);
-			whereFieldEntrys.add(entry);
-		}
-		temp.append(" )");
-		appendConcate();
-		whereExp.append(" ").append(field).append(temp);
-		return this;
+		return add(new InClauseEntry(field, paramValues, sqlType, sensitive));
 	}
 	
 	private AbstractSqlBuilder addParam(String field, String condition, Object paramValue, int sqlType, boolean sensitive) throws SQLException{
-		if(paramValue != null){
-			appendConcate();
-			whereExp.append(" ").append(field).append(" ").append(condition).append(" ?");
-			FieldEntry entry = new FieldEntry(field, paramValue, sqlType, sensitive);
-			whereFieldEntrys.add(entry);
-		}else{
-			and = or = false;
-			throw new SQLException(field + " is not support null value.");
-		}
-		return this;
+		if(paramValue == null)
+			throw new SQLException(field + " is not support null value.");	
+
+		return add(new SingleClauseEntry(field, condition, paramValue, sqlType, sensitive));
 	}
 	
 	private AbstractSqlBuilder addParamNullable(String field, String condition, Object paramValue, int sqlType, boolean sensitive){
-		if(paramValue != null){
-			appendConcate();
-			whereExp.append(" ").append(field).append(" ").append(condition).append(" ?");
-			FieldEntry entry = new FieldEntry(field, paramValue, sqlType, sensitive);
-			whereFieldEntrys.add(entry);
-		}else{
-			//如果paramValue==null，则field不会作为条件加入到最终的SQL中。
-			and = or = false;
-		}
-		return this;
+		if(paramValue == null)
+			return this;
+		
+		return add(new SingleClauseEntry(field, condition, paramValue, sqlType, sensitive));
 	}
 	
-	private void appendConcate(){
-		if(and){
-			whereExp.append(" AND ");
+	private static abstract class WhereClauseEntry {
+		private String clause; 
+		
+		public boolean isOperator() {
+			return false;
 		}
-		if(or){
-			whereExp.append(" OR ");
+		
+		public void setClause(String clause) {
+			this.clause = clause;
 		}
-		and = or = false;
+		
+		public String getClause() {
+			return clause;
+		}
+		
+		public void addFieldEntry(List<FieldEntry> whereFieldEntrys){
+			
+		}
+	}
+	
+	private static class SingleClauseEntry extends WhereClauseEntry {
+		private FieldEntry entry;
+		
+		public SingleClauseEntry(String field, String condition, Object paramValue, int sqlType, boolean sensitive) {
+			setClause(String.format("%s %s ?", field, condition));
+			entry = new FieldEntry(field, paramValue, sqlType, sensitive);
+		}
+
+		@Override
+		public void addFieldEntry(List<FieldEntry> whereFieldEntrys) {
+			whereFieldEntrys.add(entry);
+		}
+	}
+	
+	private static class BetweenClauseEntry extends WhereClauseEntry {
+		private FieldEntry entry1;
+		private FieldEntry entry2;
+		
+		public BetweenClauseEntry(String field, Object paramValue1, Object paramValue2, int sqlType, boolean sensitive) {
+			setClause(field + " BETWEEN ? AND ?");
+			entry1 = new FieldEntry(field, paramValue1, sqlType, sensitive);
+			entry2 = new FieldEntry(field, paramValue2, sqlType, sensitive);
+		}
+
+		@Override
+		public void addFieldEntry(List<FieldEntry> whereFieldEntrys) {
+			whereFieldEntrys.add(entry1);
+			whereFieldEntrys.add(entry2);
+		}
 	}
 
+	private static class InClauseEntry extends WhereClauseEntry {
+		private List<FieldEntry> entries;
+		
+		public InClauseEntry(String field, List<?> paramValues, int sqlType, boolean sensitive){
+			StringBuilder temp = new StringBuilder();
+			temp.append(field).append(" in ( ");
+			
+			entries = new ArrayList<>(paramValues.size());
+			for(int i=0,size=paramValues.size();i<size;i++){
+				temp.append("?");
+				if(i!=size-1){
+					temp.append(", ");
+				}
+				FieldEntry entry = new FieldEntry(field, paramValues.get(i), sqlType, sensitive);
+				entries.add(entry);
+			}
+			temp.append(" )");
+			setClause(temp.toString());
+		}
+
+		@Override
+		public void addFieldEntry(List<FieldEntry> whereFieldEntrys) {
+			whereFieldEntrys.addAll(entries);
+		}
+	}
+	
+	private static class NullClauseEntry extends WhereClauseEntry {
+		public NullClauseEntry(String field, boolean isNull) {
+			setClause(field + (isNull ? " IS NULL" : " IS NOT NULL"));
+		}
+	}
+	
+	private static class OperatorClauseEntry extends WhereClauseEntry {
+		public OperatorClauseEntry(String operator) {
+			setClause(operator); 
+		}
+		
+		@Override
+		public boolean isOperator() {
+			return true;
+		}
+		
+		static OperatorClauseEntry AND() {
+			return new OperatorClauseEntry("AND");
+		}
+
+		static OperatorClauseEntry OR() {
+			return new OperatorClauseEntry("OR");
+		}
+	}
+	
+	private AbstractSqlBuilder add(WhereClauseEntry entry) {
+		whereClauseEntries.add(entry);
+		return this;
+	}
 }

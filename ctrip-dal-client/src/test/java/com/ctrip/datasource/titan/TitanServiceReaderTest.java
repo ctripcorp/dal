@@ -93,7 +93,6 @@ public class TitanServiceReaderTest {
 		dbNames.add("SimpleShard_1");
 		dbNames.add("dao_test_sqlsvr");
 		dbNames.add("dao_test_mysql");
-		dbNames.add("test");
 		
 		Map<String, String> settings = new HashMap<>();
 		settings.put(TitanProvider.USE_LOCAL_CONFIG, "true");
@@ -114,12 +113,31 @@ public class TitanServiceReaderTest {
 
 			result = provider.getDataSourceConfigure("dao_test_mysql");
 			Assert.assertNotNull(result);
-
-			result = provider.getDataSourceConfigure("test");
-			Assert.assertNull(result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
+		}
+	}
+	
+	@Test
+	public void testGetFromLocalConfigWitUsingSettingFail() {
+		TitanProvider provider = new TitanProvider();
+		Set<String> dbNames = new HashSet<>();
+		dbNames.add("SimpleShard_0");
+		dbNames.add("SimpleShard_1");
+		dbNames.add("dao_test_sqlsvr");
+		dbNames.add("dao_test_mysql");
+		dbNames.add("test");
+		
+		Map<String, String> settings = new HashMap<>();
+		settings.put(TitanProvider.USE_LOCAL_CONFIG, "true");
+		try {
+			provider.initialize(settings);
+			provider.setup(dbNames);
+			
+			Assert.fail();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -131,7 +149,6 @@ public class TitanServiceReaderTest {
 		dbNames.add("SimpleShard_1");
 		dbNames.add("dao_test_sqlsvr");
 		dbNames.add("dao_test_mysql");
-		dbNames.add("test");
 		
 		Map<String, String> settings = new HashMap<>();
 		try {
@@ -151,13 +168,27 @@ public class TitanServiceReaderTest {
 
 			result = provider.getDataSourceConfigure("dao_test_mysql");
 			Assert.assertNotNull(result);
-
-			result = provider.getDataSourceConfigure("test");
-			Assert.assertNull(result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
 		}
 	}
 
+	@Test
+	public void testGetFromLocalConfigWitUsingConfigVersionFlagFail() {
+		TitanProvider provider = new TitanProvider();
+		Set<String> dbNames = new HashSet<>();
+		dbNames.add("SimpleShard_0");
+		dbNames.add("test");
+		
+		Map<String, String> settings = new HashMap<>();
+		try {
+			provider.initialize(settings);
+			provider.setup(dbNames);
+			
+			Assert.fail();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

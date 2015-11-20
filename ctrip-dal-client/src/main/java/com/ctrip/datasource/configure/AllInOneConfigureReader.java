@@ -32,7 +32,8 @@ public class AllInOneConfigureReader {
 	private static String DATABASE_ENTRY = "add";
 	private static String DATABASE_ENTRY_NAME = "name";
 	private static String DATABASE_ENTRY_CONNECTIONSTRING = "connectionString";
-	private static String DEV_FLAG = "Version";
+	private static String VERSION = "Version";
+	private static String DEV_FLAG = "dev";
 	
 	private static final String CLASSPATH_LOCATION = "$classpath";
 	private ConnectionStringParser parser = new ConnectionStringParser();
@@ -103,7 +104,7 @@ public class AllInOneConfigureReader {
 			 * If the version is not set or forceLocal is not true, we assume it is not dev environment. In this case
 			 * we should use titan service
 			 */
-			if(!(hasAttribute(root, DEV_FLAG) || useLocal)){
+			if(!(isDevVersion(root) || useLocal)){
 				logger.info("No Version found in Databse.config or useLocal is not set in Dal.config.");
 				return null;
 			}
@@ -175,5 +176,13 @@ public class AllInOneConfigureReader {
 	
 	private boolean hasAttribute(Node node, String attributeName) {
 		return node.getAttributes().getNamedItem(attributeName) != null;		
+	}
+	
+	private boolean isDevVersion(Node node) {
+		if(!hasAttribute(node, VERSION))
+			return false;
+		
+		String version = getAttribute(node, VERSION);
+		return DEV_FLAG.equalsIgnoreCase(version);		
 	}	
 }

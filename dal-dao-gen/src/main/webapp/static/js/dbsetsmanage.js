@@ -462,32 +462,32 @@
 						type : 'button',
 						id : 'refreshDbSet',
 						caption : '刷新',
-						icon : 'fa fa-refresh'
+						icon : 'glyphicon glyphicon-refresh'
 					}, {
 						type : 'button',
 						id : 'addDbSet',
 						caption : '添加dbSet',
-						icon : 'fa fa-plus'
+						icon : 'glyphicon glyphicon-plus'
 					}, {
 						type : 'button',
 						id : 'editDbSet',
 						caption : '修改dbSet',
-						icon : 'fa fa-edit'
+						icon : 'glyphicon glyphicon-edit'
 					}, {
 						type : 'button',
 						id : 'delDbSet',
 						caption : '删除dbSet',
-						icon : 'fa fa-times'
+						icon : 'glyphicon glyphicon-remove'
 					}, {
 						type : 'button',
 						id : 'showDalConfigDemo',
 						caption : '配置Demo',
-						icon : 'fa fa-question'
+						icon : 'glyphicon glyphicon-duplicate'
 					}, {
 						type : 'button',
 						id : 'configTemplate',
 						caption : '配置模板',
-						icon : 'fa fa-file-code-o'
+						icon : 'glyphicon glyphicon-file'
 					} ],
 					onClick : function(target, data) {
 						switch (target) {
@@ -590,22 +590,22 @@
 						type : 'button',
 						id : 'refreshDbSetEntry',
 						caption : '刷新',
-						icon : 'fa fa-refresh'
+						icon : 'glyphicon glyphicon-refresh'
 					}, {
 						type : 'button',
 						id : 'addDbSetEntry',
 						caption : '添加dbSet entry',
-						icon : 'fa fa-plus'
+						icon : 'glyphicon glyphicon-plus'
 					}, {
 						type : 'button',
 						id : 'editDbSetEntry',
 						caption : '修改dbSet entry',
-						icon : 'fa fa-edit'
+						icon : 'glyphicon glyphicon-edit'
 					}, {
 						type : 'button',
 						id : 'delDbSetEntry',
 						caption : '删除dbSet entry',
-						icon : 'fa fa-times'
+						icon : 'glyphicon glyphicon-remove'
 					} ],
 					onClick : function(target, data) {
 						switch (target) {

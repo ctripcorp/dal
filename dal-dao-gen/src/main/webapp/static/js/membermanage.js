@@ -287,32 +287,32 @@
                         type: 'button',
                         id: 'refreshMember',
                         caption: '刷新',
-                        icon: 'fa fa-refresh'
+                        icon: 'glyphicon glyphicon-refresh'
                     }, {
                         type: 'button',
                         id: 'addMember',
                         caption: '添加组员',
-                        icon: 'fa fa-user'
+                        icon: 'glyphicon glyphicon-user'
                     }, {
                         type: 'button',
                         id: 'addDalTeam',
                         caption: '添加Dal Team',
-                        icon: 'fa fa-group'
+                        icon: 'glyphicon glyphicon-th'
                     },{
                         type: 'button',
                         id: 'delMember',
                         caption: '删除组员',
-                        icon: 'fa fa-times'
+                        icon: 'glyphicon glyphicon-remove'
                     },{
                         type: 'button',
                         id: 'upMember',
                         caption: '权限修改',
-                        icon: 'fa fa-edit'
+                        icon: 'glyphicon glyphicon-edit'
                     },{
                         type: 'button',
                         id: 'applyAdd',
                         caption: '申请加入DAL Team',
-                        icon: 'fa fa-envelope'
+                        icon: 'glyphicon glyphicon-envelope'
                     }],
                     onClick: function (target, data) {
                         switch (target) {

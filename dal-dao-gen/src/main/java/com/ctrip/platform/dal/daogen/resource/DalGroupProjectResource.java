@@ -40,7 +40,7 @@ public class DalGroupProjectResource {
 				.getAllGroups();
 		for (DalGroup group : groups) {
 			group.setText(group.getGroup_name());
-			group.setIcon("fa fa-folder-open-o");
+			group.setIcon("glyphicon glyphicon-folder-open");
 			group.setChildren(true);
 		}
 		return groups;

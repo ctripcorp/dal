@@ -1,8 +1,5 @@
-
-
 <%@page pageEncoding="UTF-8"%>
-<%@ page import="org.jasig.cas.client.util.AssertionHolder"%>
-
+<%@page import="org.jasig.cas.client.util.AssertionHolder"%>
 <nav class="navbar navbar-inverse navbar-embossed navbar-fixed-top"
 	role="navigation">
 	<div class="navbar-header">
@@ -15,10 +12,11 @@
 			<li id="indexjsp"><a href="index.jsp">代码生成器</a></li>
 			<li id="codeviewjsp"><a href="codeview.jsp">项目一览</a></li>
 			<li id="membermanagejsp"><a href="membermanage.jsp">组员管理</a></li>
-			<li id="dbmanagejsp" class="dropdown"><a href="javascript:;"
-				class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
+			<li id="dbmanagejsp" class="dropdown"><a
+				href="javascript:void(0);" class="dropdown-toggle"
+				data-toggle="dropdown" data-hover="dropdown"
 				data-close-others="true"> <span class="username">数据库管理</span> <i
-					class="fa fa-angle-down"> </i>
+					class="glyphicon glyphicon-menu-down" aria-hidden="true"> </i>
 			</a> <span class="dropdown-arrow dropdown-arrow-inverse"
 				style="margin-top: 1px"></span>
 				<ul class="dropdown-menu dropdown-inverse"
@@ -35,7 +33,7 @@
 			<li class="dropdown"><a href="javascript:;"
 				class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
 				data-close-others="true"> <span class="username"> 帮助 </span> <i
-					class="fa fa-angle-down"> </i>
+					class="glyphicon glyphicon-menu-down" aria-hidden="true"> </i>
 			</a> <span class="dropdown-arrow dropdown-arrow-inverse"
 				style="margin-top: 1px"></span>
 				<ul class="dropdown-menu dropdown-inverse"
@@ -52,13 +50,13 @@
 				class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
 				data-close-others="true"> <span class="username"> <%=request.getSession().getAttribute("loginUserName")%>
 						<%-- AssertionHolder.getAssertion().getPrincipal().getAttributes().get("sn") --%>
-				</span> <i class="fa fa-angle-down"> </i>
+				</span> <i class="glyphicon glyphicon-menu-down" aria-hidden="true"> </i>
 			</a> <span class="dropdown-arrow dropdown-arrow-inverse"
 				style="margin-top: 1px"></span>
 				<ul class="dropdown-menu dropdown-inverse"
 					style="margin-top: 8px !important">
-					<li><a href="/logout.jsp"> <i class="fa fa-power-off">
-						</i> 注销
+					<li><a href="/logout.jsp"> <i
+							class="glyphicon glyphicon-log-out" aria-hidden="true"> </i> 注销
 					</a></li>
 				</ul></li>
 			<li style="margin-right: 28px !important"></li>
@@ -67,7 +65,6 @@
 	</div>
 	<!-- /.navbar-collapse -->
 </nav>
-
 <div class="modal fade" id="overrideAlertErrorNoticeDiv" tabindex="-1"
 	role="dialog" aria-labelledby="generateCodeProcessLabel"
 	aria-hidden="true" style="z-index: 999999 !important">

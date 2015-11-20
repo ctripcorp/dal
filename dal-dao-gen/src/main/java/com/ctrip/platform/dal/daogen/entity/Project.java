@@ -46,7 +46,7 @@ public class Project {
 		}
         project.setText(project.getName());
         project.setChildren(false);
-        project.setIcon("fa fa-tasks");
+        project.setIcon("glyphicon glyphicon-tasks");
         return project;
 	}
 

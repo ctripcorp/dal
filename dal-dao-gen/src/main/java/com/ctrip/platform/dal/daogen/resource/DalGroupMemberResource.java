@@ -51,7 +51,7 @@ public class DalGroupMemberResource {
 				.getAllGroups();
 		for (DalGroup group : groups) {
 			group.setText(group.getGroup_name());
-			group.setIcon("fa fa-group");
+			group.setIcon("glyphicon glyphicon-th");
 			group.setChildren(false);
 		}
 		return sortGroups(groups);

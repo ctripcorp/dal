@@ -79,10 +79,10 @@ public class FileResource {
 				element.setChildren(f.isDirectory());
 				if (element.isChildren()) {
 					element.setType("folder");
-					element.setIcon("fa fa-folder-open-o");
+					element.setIcon("glyphicon glyphicon-folder-open");
 				} else {
 					element.setType("file");
-					element.setIcon("fa fa-file");
+					element.setIcon("glyphicon glyphicon-file");
 				}
 				files.add(element);
 			}

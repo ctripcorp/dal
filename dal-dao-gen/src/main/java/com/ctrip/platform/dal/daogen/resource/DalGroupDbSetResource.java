@@ -56,7 +56,7 @@ public class DalGroupDbSetResource {
 				.getAllGroups();
 		for (DalGroup group : groups) {
 			group.setText(group.getGroup_name());
-			group.setIcon("fa fa-folder-o");
+			group.setIcon("glyphicon glyphicon-folder-close");
 			group.setChildren(false);
 		}
 		return sortGroups(groups);

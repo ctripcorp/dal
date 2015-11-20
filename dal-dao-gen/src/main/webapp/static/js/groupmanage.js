@@ -120,31 +120,31 @@
                             type: 'button',
                             id: 'refreshGroup',
                             caption: '刷新',
-                            icon: 'fa fa-refresh'
+                            icon: 'glyphicon glyphicon-refresh'
                         },
                         {
                             type: 'button',
                             id: 'applyAddTeam',
                             caption: '申请添加DAL Team',
-                            icon: 'fa fa-envelope'
+                            icon: 'glyphicon glyphicon-envelope'
                         },
                         {
                             type: 'button',
                             id: 'addGroup',
                             caption: '添加DAL Team',
-                            icon: 'fa fa-plus'
+                            icon: 'glyphicon glyphicon-plus'
                         },
                         {
                             type: 'button',
                             id: 'editGroup',
                             caption: '修改DAL Team',
-                            icon: 'fa fa-edit'
+                            icon: 'glyphicon glyphicon-edit'
                         },
                         {
                             type: 'button',
                             id: 'delGroup',
                             caption: '删除DAL Team',
-                            icon: 'fa fa-times'
+                            icon: 'glyphicon glyphicon-remove'
                         }
                     ],
                     onClick: function (target, data) {

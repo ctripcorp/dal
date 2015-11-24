@@ -148,7 +148,7 @@
 					<h4 class="modal-title">生成方式，如果有删除，请选择重新生成</h4>
 				</div>
 				<div class="modal-body">
-					<div class="row-fluid">
+					<div class="row-fluid" style="display: none;">
 						<div class="control-group">
 							<label class="control-label popup_label">语言：</label> <select
 								id="regen_language" class="span10 pupup_text">

@@ -99,9 +99,10 @@
 		$("#next_step").attr("disabled", "true");
 		$("#next_step").text("正在加载...");
 		$("#next_step").removeClass("btn-primary");
-		$.get(
-				sprintf("/rest/db/table_sps?db_name=%s&rand=%s",
-						$("#databases").val(), Math.random())).done(
+		$.get("/rest/db/table_sps", {
+			db_name : $("#databases").val(),
+			rand : Math.random()
+		}).done(
 				function(retValue) {
 					if (retValue.code != 'OK') {
 						$("#error_msg").text(retValue.info);
@@ -237,8 +238,11 @@
 
 		cblock($("body"));
 		$.get(
-				sprintf("/rest/db/tables?db_name=%s&rand=%s", $("#databases")
-						.val(), Math.random()),
+				"/rest/db/tables",
+				{
+					db_name : $("#databases").val(),
+					rand : Math.random()
+				},
 				function(data) {
 					var results = [];
 					$.each(data, function(index, value) {
@@ -465,12 +469,14 @@
 		var data = undefined;
 		$
 				.get(
-						sprintf(
-								"/rest/task/table/apiList?db_name=%s&table_names=%s&sql_style=%s&rand=%s",
-								$("#databases").val(),
-								$('#table_list').multipleSelect('getSelects')
-										.join(","), $("#sql_style").val(), Math
-										.random()))
+						"/rest/task/table/apiList",
+						{
+							db_name : $("#databases").val(),
+							table_names : $('#table_list').multipleSelect(
+									'getSelects').join(","),
+							sql_style : $("#sql_style").val(),
+							rand : Math.random()
+						})
 				.done(
 						function(retValue) {
 							if (retValue.code != 'OK') {
@@ -638,13 +644,15 @@
 		$("select[id$=conditions] > option:gt(0)").remove();
 		$("select[id$=orderby_field] > option:gt(0)").remove();
 
-		var url = sprintf("/rest/db/fields?table_name=%s&db_name=%s&rand=%s",
-				$("#tables").val(), $("#databases").val(), Math.random());
-
 		cblock($("body"));
 		$
 				.get(
-						url,
+						"/rest/db/fields",
+						{
+							table_name : $("#tables").val(),
+							db_name : $("#databases").val(),
+							rand : Math.random()
+						},
 						function(data) {
 							var fieldList = [];
 							var values = [];

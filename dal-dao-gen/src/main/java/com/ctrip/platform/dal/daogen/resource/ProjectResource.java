@@ -574,20 +574,22 @@ public class ProjectResource {
 			log.info(String.format(
 					"begain generate project: [id=%s; regen=%s; language=%s]",
 					id, true, language));
+
 			DalGenerator generator = null;
 			CodeGenContext context = null;
-			if (language.equals("java")) {
+			HashSet<String> hashSet = getProjectSqlStyles(id);
+			if (hashSet.contains("java")) {
 				generator = new JavaDalGenerator();
 				context = generator.createContext(id, true, progress, newPojo,
 						false);
-			} else if (language.equals("cs")) {
+				generateLanguageProject(generator, context);
+			}
+			if (hashSet.contains("csharp")) { // cs
 				generator = new CSharpDalGenerator();
 				context = generator.createContext(id, true, progress, newPojo,
 						false);
+				generateLanguageProject(generator, context);
 			}
-			generator.prepareDirectory(context);
-			generator.prepareData(context);
-			generator.generateCode(context);
 			status = Status.OK;
 			log.info(String.format("generate project[%s] completed.", id));
 		} catch (Exception e) {
@@ -600,6 +602,48 @@ public class ProjectResource {
 		}
 
 		return status;
+	}
+
+	private void generateLanguageProject(DalGenerator generator,
+			CodeGenContext context) throws Exception {
+		if (generator == null || context == null) {
+			return;
+		}
+		generator.prepareDirectory(context);
+		generator.prepareData(context);
+		generator.generateCode(context);
+	}
+
+	private HashSet<String> getProjectSqlStyles(int projectId) {
+		HashSet<String> hashSet = new HashSet<String>();
+		List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter
+				.getDaoBySqlBuilder().getTasksByProjectId(projectId);
+
+		if (autoTasks != null && autoTasks.size() > 0) {
+			for (GenTaskBySqlBuilder genTaskBySqlBuilder : autoTasks) {
+				hashSet.add(genTaskBySqlBuilder.getSql_style());
+			}
+		}
+
+		List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter
+				.getDaoByTableViewSp().getTasksByProjectId(projectId);
+
+		if (tableViewSpTasks != null && tableViewSpTasks.size() > 0) {
+			for (GenTaskByTableViewSp genTaskByTableViewSp : tableViewSpTasks) {
+				hashSet.add(genTaskByTableViewSp.getSql_style());
+			}
+		}
+
+		List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql()
+				.getTasksByProjectId(projectId);
+
+		if (sqlTasks != null && sqlTasks.size() > 0) {
+			for (GenTaskByFreeSql genTaskByFreeSql : sqlTasks) {
+				hashSet.add(genTaskByFreeSql.getSql_style());
+			}
+		}
+
+		return hashSet;
 	}
 
 	private Status validatePermision(String userNo, int project_id) {

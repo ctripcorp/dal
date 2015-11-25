@@ -24,7 +24,6 @@
 	rel="stylesheet" />
 <link rel="stylesheet"
 	href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}" />
-<!-- <link href="/static/font-awesome/css/font-awesome.css?codegen=${codegenpageflag}" rel="stylesheet"> -->
 <link href="/static/css/multiple-select.css?codegen=${codegenpageflag}"
 	rel="stylesheet">
 <link
@@ -85,9 +84,8 @@
 							<label class="control-label popup_label">用户列表：</label> <select
 								id="members" class="span8">
 							</select>&nbsp; <a href="#" class="ctip" data-toggle="tooltip"
-								data-placement="bottom" title=""
-								data-original-title="不在列表中的User，请先登录系统。"> <span
-								class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+								data-placement="bottom" title="不在列表中的User，请先登录系统。"> <span
+								class="glyphicon glyphicon-question-sign"></span>
 							</a>
 						</div>
 					</div>
@@ -98,8 +96,8 @@
 								<option value="1">Admin</option>
 								<option value="2">Limited</option>
 							</select>&nbsp; <a href="#" class="ctip" data-toggle="tooltip"
-								data-placement="bottom" title=""
-								data-original-title="1、Admin权限的用户可以完全使用组内资源.<br/>
+								data-placement="bottom"
+								title="1、Admin权限的用户可以完全使用组内资源.<br/>
 								2、Limited权限的用户，可以使用组内的资源，但是生成代码需要通过审批.">
 								<span class="glyphicon glyphicon-question-sign"
 								aria-hidden="true"></span>
@@ -150,8 +148,8 @@
 								<option value="1">Admin</option>
 								<option value="2">Limited</option>
 							</select>&nbsp; <a href="#" class="ctip" data-toggle="tooltip"
-								data-placement="bottom" title=""
-								data-original-title="1、Admin权限的用户组可以完全使用组内资源.<br/>
+								data-placement="bottom"
+								title="1、Admin权限的用户组可以完全使用组内资源.<br/>
 								2、Limited权限的用户组，可以使用组内的资源，但是生成代码需要通过审批.">
 								<span class="glyphicon glyphicon-question-sign"
 								aria-hidden="true"></span>
@@ -202,8 +200,8 @@
 								<option value="1">Admin</option>
 								<option value="2">Limited</option>
 							</select>&nbsp; <a href="#" class="ctip" data-toggle="tooltip"
-								data-placement="bottom" title=""
-								data-original-title="1、Admin权限的用户可以完全使用组内资源.<br/>
+								data-placement="bottom"
+								title="1、Admin权限的用户可以完全使用组内资源.<br/>
 								2、Limited权限的用户，可以使用组内的资源，但是生成代码需要通过审批.">
 								<span class="glyphicon glyphicon-question-sign"
 								aria-hidden="true"></span>
@@ -254,8 +252,8 @@
 								<option value="1">Admin</option>
 								<option value="2">Limited</option>
 							</select>&nbsp; <a href="#" class="ctip" data-toggle="tooltip"
-								data-placement="bottom" title=""
-								data-original-title="1、Admin权限的用户组可以完全使用组内资源.<br/>
+								data-placement="bottom"
+								title="1、Admin权限的用户组可以完全使用组内资源.<br/>
 								2、Limited权限的用户组，可以使用组内的资源，但是生成代码需要通过审批.">
 								<span class="glyphicon glyphicon-question-sign"
 								aria-hidden="true"></span>

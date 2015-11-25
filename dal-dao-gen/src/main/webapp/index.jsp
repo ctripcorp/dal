@@ -24,9 +24,6 @@
 	rel="stylesheet" />
 <link rel="stylesheet"
 	href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}" />
-<!-- <link
-	href="/static/font-awesome/css/font-awesome.css?codegen=${codegenpageflag}"
-	rel="stylesheet"> -->
 <link href="/static/css/multiple-select.css?codegen=${codegenpageflag}"
 	rel="stylesheet">
 <link
@@ -64,13 +61,10 @@
 	      <script src="/static/Flat-UI-master/js/respond.min.js"></script>
 	    <![endif]-->
 </head>
-
 <body>
-
 	<!-- Docs master nav -->
 	<%@ include file="header.jsp"%>
 	<div id="main_layout"></div>
-
 	<!--Begin project modal-->
 	<div class="modal fade" id="projectModal" tabindex="-1" role="dialog"
 		aria-labelledby="myModalLabel" aria-hidden="true" is_update="0"
@@ -126,9 +120,9 @@
 				<div class="modal-footer">
 					<label id="proj_error_msg" class="control-label popup_label"
 						style="color: red;"></label> <a href="#" class="ctip"
-						data-toggle="tooltip" data-placement="top" title=""
-						data-original-title="代码生成器按照项目来组织代码，因此，同一个用户可以新建多个项目，每个项目生成的代码相互独立，互不干扰。">
-						<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+						data-toggle="tooltip" data-placement="top"
+						title="代码生成器按照项目来组织代码，因此，同一个用户可以新建多个项目，每个项目生成的代码相互独立，互不干扰。"> <span
+						class="glyphicon glyphicon-question-sign"></span>
 					</a>
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
 					<button id="save_proj" type="button" class="btn btn-primary">保存</button>
@@ -137,7 +131,6 @@
 		</div>
 	</div>
 	<!--End project modal-->
-
 	<div class="modal fade" id="generateCode" tabindex="-1" role="dialog"
 		aria-labelledby="generateCodeLabel" aria-hidden="true">
 		<div class="modal-dialog">
@@ -148,7 +141,7 @@
 					<h4 class="modal-title">生成方式，如果有删除，请选择重新生成</h4>
 				</div>
 				<div class="modal-body">
-					<div class="row-fluid">
+					<div class="row-fluid" style="display: none;">
 						<div class="control-group">
 							<label class="control-label popup_label">语言：</label> <select
 								id="regen_language" class="span10 pupup_text">
@@ -207,7 +200,6 @@
 		</div>
 	</div>
 	<!-- /.modal -->
-
 	<div class="modal fade" id="generateCodeProcessErrorDiv" tabindex="-1"
 		role="dialog" aria-labelledby="generateCodeProcessLabel"
 		aria-hidden="true">
@@ -228,12 +220,12 @@
 				</div>
 				<div class="modal-footer">
 					<a href="#" class="ctip" data-toggle="tooltip" data-placement="top"
-						title="" html="1"
-						data-original-title="一键补全，功能描述：<br/>
+						html="1"
+						title="一键补全，功能描述：<br/>
 						1、将当前Project缺少的数据库自动添加到所属DAL Team。<br/>
 						2、将当前Project缺少的逻辑数据库自动新增并添加到所属DAL Team。<br/>
 						">
-						<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+						<span class="glyphicon glyphicon-question-sign"></span>
 					</a>
 					<button id="add_lack_dbset" type="button" class="btn btn-primary">一键补全</button>
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -241,9 +233,7 @@
 			</div>
 		</div>
 	</div>
-
 	<!--Begin wizard-->
-
 	<div class="modal fade" id="page1" tabindex="-1" role="dialog"
 		aria-labelledby="page1_label" aria-hidden="true" is_update="0">
 		<div class="modal-dialog">
@@ -254,13 +244,13 @@
 						style="margin-left: 359px !important; margin-right: 0px !important"
 						href="#" class="ctip" data-toggle="tooltip"
 						data-placement="bottom"
-						data-original-title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>
+						title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>
 							2、目前，DAO代码生成方式有三种：<br/>
 							&nbsp;2.1、标准DAO：在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。<br/>
 							&nbsp;2.2、构建SQL：在这种模式下面，我们需要选择数据库、表，以及将要生成DAO类型（增、删、改、查之一），再选择对应的字段，最后构建出一个SQL语句。<br/>
 							&nbsp;2.3、自定义SQL：在这种模式下面，我们可以自定义SQL语句，指定生成的DAO类名、实体类名、方法名。<br/>
 							">
-						<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+						<span class="glyphicon glyphicon-question-sign"></span>
 					</a>
 					<button type="button" class="close" data-dismiss="modal"
 						aria-hidden="true" style="margin-top: 8px">&times;</button>
@@ -302,7 +292,6 @@
 							</div>
 						</div>
 					</div>
-
 					<div class="steps step2-1 row-fluid">
 						<div class="row-fluid">
 							<div class="control-group">
@@ -350,7 +339,6 @@
 								type="checkbox" checked="true">增加分页方法</label>
 						</div>
 					</div>
-
 					<div class="steps step2-1-2 row-fluid">
 						<div class="panel-group" id="accordion">
 							<div class="panel panel-default">
@@ -415,7 +403,6 @@
 							</div>
 						</div>
 					</div>
-
 					<div class="steps step2-2 row-fluid">
 						<div class="row-fluid">
 							<div class="control-group">
@@ -435,7 +422,6 @@
 								</select>
 							</div>
 						</div>
-
 						<div class="row-fluid method_name_class">
 							<div class="control-group">
 								<label class="control-label popup_label">生成的方法名：</label> <input
@@ -586,7 +572,6 @@
 								style="height: 200px;"></div>
 						</div>
 					</div>
-
 					<div class="steps step2-3-1 row-fluid" from=""
 						style="height: auto;">
 						<div class="row-fluid" style="margin-bottom: 12px">
@@ -639,6 +624,28 @@
 						</div>
 					</div>
 					<div class="steps step2-3-3 row-fluid" from="">
+						<div class="panel-group" id="divAccordion">
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h4 class="panel-title">
+										<a data-toggle="collapse" data-parent="#divAccordion"
+											href="#divMapping">DAL与数据库类型的映射关系(点击展开)</a>
+									</h4>
+								</div>
+								<div id="divMapping" class="panel-collapse collapse">
+									<div class="panel-body">
+										<ul>
+											<li><a
+												href="http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081345"
+												target="view_window" class="ctip">DAL for .NET</a></li>
+											<li><a
+												href="http://conf.ctripcorp.com/pages/viewpage.action?pageId=54481337"
+												target="view_window" class="ctip">DAL for Java</a></li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
 						<div class="row-fluid" id="param_list_free_div">
 							<label class="control-label popup_label">填写参数名/参数Index，并选择数据类型</label>
 						</div>
@@ -722,13 +729,9 @@
 		<!-- /.modal-content -->
 	</div>
 	<!-- /.modal-dialog -->
-
 	<div id="main_layout2" style="display: none; padding-top: 1px;">
-
 	</div>
-
 	<!--End wizard-->
-
 	<!--Begin modal-->
 	<div class="modal fade" id="approveModal" tabindex="-1" role="dialog"
 		aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
@@ -758,7 +761,6 @@
 		</div>
 	</div>
 	<!--End modal-->
-
 	<!-- JS and analytics only. -->
 	<!-- Bootstrap core JavaScript================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
@@ -778,10 +780,10 @@
 	<script src="/static/js/cblock.js?codegen=${codegenpageflag}"></script>
 	<script src="/static/js/header.js?codegen=${codegenpageflag}"></script>
 	<script src="/static/js/ajaxutil.js?codegen=${codegenpageflag}"></script>
-	<script src="/static/js/sql_builder.js?codegen=${codegenpageflag}"></script>
-	<script src="/static/js/wizzard.js?codegen=${codegenpageflag}"></script>
 	<script src="/static/js/ui_render.js?codegen=${codegenpageflag}"></script>
-	<script src="/static/js/index.js?codegen=${codegenpageflag}"></script>
+	<script src="/static/js/wizzard.js?codegen=${codegenpageflag}"></script>
 	<script src="/static/js/progress.js?codegen=${codegenpageflag}"></script>
+	<script src="/static/js/sql_builder.js?codegen=${codegenpageflag}"></script>
+	<script src="/static/js/index.js?codegen=${codegenpageflag}"></script>
 </body>
 </html>

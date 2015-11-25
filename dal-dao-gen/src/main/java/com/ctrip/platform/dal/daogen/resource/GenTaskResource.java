@@ -61,15 +61,14 @@ public class GenTaskResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public TaskAggeragation getTasks(@QueryParam("project_id") int id) {
-
 		List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter
-				.getDaoBySqlBuilder().getTasksByProjectId(Integer.valueOf(id));
+				.getDaoBySqlBuilder().getTasksByProjectId(id);
 
 		List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter
 				.getDaoByTableViewSp().getTasksByProjectId(id);
 
 		List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql()
-				.getTasksByProjectId(Integer.valueOf(id));
+				.getTasksByProjectId(id);
 
 		TaskAggeragation allTasks = new TaskAggeragation();
 

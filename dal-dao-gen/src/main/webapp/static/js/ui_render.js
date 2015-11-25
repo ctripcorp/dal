@@ -349,11 +349,11 @@
 							'left',
 							'<div style="color: #34495E !important;font-size: 15px;background-color: #eee; padding: 7px 5px 6px 20px; border-bottom: 1px solid silver">'
 									+ '<a id="addProj" href="javascript:void(0);">'
-									+ '<i class="glyphicon glyphicon-plus" aria-hidden="true"></i>&nbsp;添加</a>'
+									+ '<i class="glyphicon glyphicon-plus" ></i>&nbsp;添加</a>'
 									+ '&nbsp;&nbsp;<a id="editProj" href="javascript:void(0);">'
-									+ '<i class="glyphicon glyphicon-edit" aria-hidden="true"></i>&nbsp;修改</a>'
+									+ '<i class="glyphicon glyphicon-edit" ></i>&nbsp;修改</a>'
 									+ '&nbsp;&nbsp;<a id="delProj" href="javascript:void(0);">'
-									+ '<i class="glyphicon glyphicon-remove" aria-hidden="true"></i>&nbsp;删除</a>'
+									+ '<i class="glyphicon glyphicon-remove" ></i>&nbsp;删除</a>'
 									+ "</div>"
 									+ '<div id="jstree_projects"></div>');
 
@@ -597,9 +597,9 @@
 					.content(
 							'left',
 							'<div style="background-color: #eee; padding: 5px 10px 5px 10px; border-bottom: 1px solid silver">'
-									+ '<a id="refreshFiles" href="javascript:void(0);"><i class="glyphicon glyphicon-refresh" aria-hidden="true"></i>&nbsp;刷新</a>&nbsp;'
-									+ '<a id="downloadFiles" href="javascript:void(0);"><i class="glyphicon glyphicon-download-alt" aria-hidden="true"></i>&nbsp;下载</a>&nbsp;'
-									+ '<a id="eraseFiles" href="javascript:void(0);"><i class="glyphicon glyphicon-erase" aria-hidden="true"></i>&nbsp;清除</a>&nbsp;'
+									+ '<a id="refreshFiles" href="javascript:void(0);"><i class="glyphicon glyphicon-refresh"></i>&nbsp;刷新</a>&nbsp;'
+									+ '<a id="downloadFiles" href="javascript:void(0);"><i class="glyphicon glyphicon-download-alt"></i>&nbsp;下载</a>&nbsp;'
+									+ '<a id="eraseFiles" href="javascript:void(0);"><i class="glyphicon glyphicon-erase"></i>&nbsp;清除</a>&nbsp;'
 									+ '<select id="viewCode"><option value="cs">C#</option><option value="java">Java</option></select></div>'
 									+ '<div id="jstree_files"></div>');
 

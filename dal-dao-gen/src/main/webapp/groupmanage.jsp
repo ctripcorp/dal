@@ -25,7 +25,6 @@
 <link
 	href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}"
 	rel="stylesheet" />
-<!--<link href="/static/font-awesome/css/font-awesome.css?codegen=${codegenpageflag}" rel="stylesheet">-->
 <link href="/static/css/multiple-select.css?codegen=${codegenpageflag}"
 	rel="stylesheet">
 <link
@@ -84,9 +83,9 @@
 								class="control-label popup_label" style="width: 100px;">Team
 								Name:</label> <input id="name" class="span7 input-sm" type="text">&nbsp;
 							<a href="#" class="ctip" data-toggle="tooltip"
-								data-placement="right" title=""
-								data-original-title="一个业务线DAL Team对应一个Group Name。"> <span
-								class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+								data-placement="right" title="一个业务线DAL Team对应一个Group Name。">
+								<span class="glyphicon glyphicon-question-sign"
+								aria-hidden="true"></span>
 							</a>
 						</div>
 					</div>

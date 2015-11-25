@@ -25,9 +25,6 @@
 <link
 	href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}"
 	rel="stylesheet" />
-<!-- <link
-	href="/static/font-awesome/css/font-awesome.css?codegen=${codegenpageflag}"
-	rel="stylesheet"> -->
 <link href="/static/css/multiple-select.css?codegen=${codegenpageflag}"
 	rel="stylesheet">
 <link
@@ -89,8 +86,8 @@
 							<label class="control-label popup_label" style="width: 80px;">数据库：</label>
 							<select id="databases" class="span8"></select> <a
 								href="dbview.jsp" target="_blank" class="ctip"
-								data-toggle="tooltip" data-placement="right" title="" html="1"
-								data-original-title="如果没有找到，请到数据库一览界面添加Database!"> 没有找到？ </a>
+								data-toggle="tooltip" data-placement="right" html="1"
+								title="如果没有找到，请到数据库一览界面添加Database!"> 没有找到？ </a>
 						</div>
 					</div>
 					<div class="row-fluid">
@@ -105,8 +102,8 @@
 								type="checkbox" checked="checked">
 								保存时生成默认的逻辑数据库（databaseSet和databaseSet Entry) <a href="#"
 								class="ctip" data-toggle="tooltip" data-placement="bottom"
-								title="" html="1"
-								data-original-title="
+								html="1"
+								title="
 									&lt; databaseSet name='XXX' provider='sqlProvider' shardStrategy=' ' &gt; </br>
 							            &lt; add  name='XXX' databaseType='Master' sharding=' ' connectionString='XXX'/ &gt; </br>
 							        &lt; /databaseSet &gt;</br>其中XXX即为所选择的数据库名">

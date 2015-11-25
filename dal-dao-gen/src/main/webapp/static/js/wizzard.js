@@ -397,17 +397,16 @@
 			checked : 'checked'
 		}));
 		var temp = "<a href='#' class='ctip' data-toggle='tooltip' data-placement='top' style='float:right'"
-				+ " data-original-title='"
+				+ " title='' data-original-title='"
 				+ value['method_description']
 				+ "'>"
-				+ "<span class='glyphicon glyphicon-question-sign' aria-hidden='true'></span></a>";
+				+ "<span class='glyphicon glyphicon-question-sign'></span></a>";
 		$("#dal_api_" + value['id'])
 				.wrap("<label class='popup_label'></label>").after(
 						value['method_declaration']);
 		$("#dal_api_" + value['id']).parent().append($(temp));
 		$("#" + id + " > label[class='popup_label']").wrapAll(
 				"<div class='row-fluid'></div>");
-		$("#" + id + " a[data-toggle='tooltip']").tooltip('hide');
 	};
 
 	/**

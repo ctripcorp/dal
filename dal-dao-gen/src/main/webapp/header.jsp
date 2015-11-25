@@ -16,7 +16,7 @@
 				href="javascript:void(0);" class="dropdown-toggle"
 				data-toggle="dropdown" data-hover="dropdown"
 				data-close-others="true"> <span class="username">数据库管理</span> <i
-					class="glyphicon glyphicon-menu-down" aria-hidden="true"> </i>
+					class="glyphicon glyphicon-menu-down"> </i>
 			</a> <span class="dropdown-arrow dropdown-arrow-inverse"
 				style="margin-top: 1px"></span>
 				<ul class="dropdown-menu dropdown-inverse"
@@ -33,7 +33,7 @@
 			<li class="dropdown"><a href="javascript:;"
 				class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
 				data-close-others="true"> <span class="username"> 帮助 </span> <i
-					class="glyphicon glyphicon-menu-down" aria-hidden="true"> </i>
+					class="glyphicon glyphicon-menu-down"> </i>
 			</a> <span class="dropdown-arrow dropdown-arrow-inverse"
 				style="margin-top: 1px"></span>
 				<ul class="dropdown-menu dropdown-inverse"
@@ -50,13 +50,13 @@
 				class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
 				data-close-others="true"> <span class="username"> <%=request.getSession().getAttribute("loginUserName")%>
 						<%-- AssertionHolder.getAssertion().getPrincipal().getAttributes().get("sn") --%>
-				</span> <i class="glyphicon glyphicon-menu-down" aria-hidden="true"> </i>
+				</span> <i class="glyphicon glyphicon-menu-down"> </i>
 			</a> <span class="dropdown-arrow dropdown-arrow-inverse"
 				style="margin-top: 1px"></span>
 				<ul class="dropdown-menu dropdown-inverse"
 					style="margin-top: 8px !important">
 					<li><a href="/logout.jsp"> <i
-							class="glyphicon glyphicon-log-out" aria-hidden="true"> </i> 注销
+							class="glyphicon glyphicon-log-out"> </i> 注销
 					</a></li>
 				</ul></li>
 			<li style="margin-right: 28px !important"></li>

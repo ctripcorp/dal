@@ -71,8 +71,8 @@
 					trigger : 'hover',
 					html : true
 				};
-				$('.ctip').tooltip(options);
 
+				$('[data-toggle="tooltip"]').tooltip(options);
 			});
 
 	$(function() {
@@ -87,7 +87,6 @@
 				.match(/version\/([\d.]+).*safari/)) ? Sys.safari = s[1] : 0;
 
 		// 以下进行测试
-
 		if (Sys.ie) {
 			scan = "您使用的ie内核" + Sys.ie + "浏览器，建议您使用chrome浏览器";
 			alert(scan);

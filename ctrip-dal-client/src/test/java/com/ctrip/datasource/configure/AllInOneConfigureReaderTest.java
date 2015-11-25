@@ -17,7 +17,8 @@ public class AllInOneConfigureReaderTest {
 		dbNames.add("SimpleShard_1");
 		dbNames.add("dao_test_sqlsvr");
 		dbNames.add("dao_test_mysql");
-		reader.getDataSourceConfigures(dbNames, true);
+		dbNames.add("PayBaseDB_INSERT_2");
+		reader.getDataSourceConfigures(dbNames, true).get("PayBaseDB_INSERT_2").getPassword();
 	}
 
 	@Test

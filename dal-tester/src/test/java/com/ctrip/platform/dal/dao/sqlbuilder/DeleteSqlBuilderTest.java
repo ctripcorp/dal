@@ -32,8 +32,8 @@ public class DeleteSqlBuilderTest {
 		
 		String build_sql = builder.build();
 		
-		String expected_sql = "DELETE FROM Person WHERE a = ? AND  b in ( ?, ? ) "
-				+ "AND  b LIKE ? AND  c IS NOT NULL AND  e IS NULL";
+		String expected_sql = "DELETE FROM Person WHERE a = ? AND b in ( ?, ? ) "
+				+ "AND b LIKE ? AND c IS NOT NULL AND e IS NULL";
 		
 		Assert.assertEquals(expected_sql, build_sql);
 		

@@ -8,7 +8,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({ 
 	DeleteSqlBuilderTest.class, 
 	SelectSqlBuilderTest.class,
-	UpdateSqlBuilderTest.class })
+	UpdateSqlBuilderTest.class,
+	AbstractBuilderTest.class})
 public class AllTests {
 
 }

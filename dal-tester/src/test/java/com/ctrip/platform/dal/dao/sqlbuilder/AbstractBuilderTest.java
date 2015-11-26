@@ -14,6 +14,33 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 public class AbstractBuilderTest {
 
 	@Test
+	public void testNullValue() throws SQLException {
+		List<String> in = new ArrayList<String>();
+		in.add("12");
+		in.add("12");
+		
+		SelectSqlBuilder builder = new SelectSqlBuilder("People", DatabaseCategory.MySql, false);
+		
+		builder.select("PeopleID","Name","CityID");
+		
+		builder.equal("a", "paramValue", Types.INTEGER);
+		builder.and().in("b", in, Types.INTEGER);
+		builder.and().likeNullable("b", null, Types.INTEGER);
+		builder.and().between("c", "paramValue1", "paramValue2", Types.INTEGER);
+		builder.and().betweenNullable("d", null, "paramValue2", Types.INTEGER);
+		builder.and().isNull("sss");
+		builder.orderBy("PeopleID", false);
+		
+		String sql = builder.buildFirst();
+		
+		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM People "
+				+ "WHERE a = ? AND b in ( ?, ? ) AND c BETWEEN ? AND ? "
+				+ "AND sss IS NULL ORDER BY `PeopleID` DESC limit 0,1";
+		
+		Assert.assertEquals(expect_sql, sql);
+	}
+	
+	@Test
 	public void testEqual() throws SQLException {
 		validate("equal", "WHERE a = ?");
 		validate("equalNull", "");

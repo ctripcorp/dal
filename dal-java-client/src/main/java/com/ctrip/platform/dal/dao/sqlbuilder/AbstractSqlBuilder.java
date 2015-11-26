@@ -173,7 +173,7 @@ public abstract class AbstractSqlBuilder {
 
 		while(filtered.size() > 0) {
 			WhereClauseEntry entry = filtered.getLast();
-			// Remove any leading AND/OR/NOT (BOT is both operator and clause)
+			// Remove any leading AND/OR/NOT (NOT is both operator and clause)
 			if(entry.isOperator()) {
 				filtered.removeLast();
 				continue;

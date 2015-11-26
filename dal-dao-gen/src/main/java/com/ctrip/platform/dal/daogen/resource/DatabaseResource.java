@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -120,6 +121,7 @@ public class DatabaseResource {
 		try {
 			conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser,
 					dbpassword, DatabaseType.valueOf(dbtype).getValue());
+			// conn.setNetworkTimeout(Executors.newFixedThreadPool(1), 5000);
 			rs = conn.getMetaData().getCatalogs();
 			Set<String> allCatalog = new HashSet<String>();
 			while (rs.next()) {

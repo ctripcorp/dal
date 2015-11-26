@@ -17,55 +17,62 @@ public class DataSourceUtil {
 
 	private static final String DBURL_MYSQL_CACHE1 = "jdbc:mysql://%s:%s/?useUnicode=true&characterEncoding=utf8";
 	private static final String DBURL_SQLSERVER_CACHE1 = "jdbc:sqlserver://%s:%s;sendTimeAsDateTime=false";
-	
+
 	private static final String DBURL_MYSQL_CACHE2 = "jdbc:mysql://%s:%s/%s?useUnicode=true&characterEncoding=utf8";
 	private static final String DBURL_SQLSERVER_CACHE2 = "jdbc:sqlserver://%s:%s;DatabaseName=%s;sendTimeAsDateTime=false";
-	
+
 	private static final String DRIVER_MYSQL = "com.mysql.jdbc.Driver";
 	private static final String DRIVER_SQLSERVRE = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-	
+
 	// dbAddress+port+user+password,DataSource
-	private static volatile Map<String,DataSource> cache1 = new ConcurrentHashMap<String,DataSource>();
-	
+	private static volatile Map<String, DataSource> cache1 = new ConcurrentHashMap<String, DataSource>();
+
 	// dbAddress+catalog+port+user+password,DataSource
-	private static volatile Map<String,DataSource> cache2 = new ConcurrentHashMap<String,DataSource>();
-	
+	private static volatile Map<String, DataSource> cache2 = new ConcurrentHashMap<String, DataSource>();
+
 	public static Connection getConnection(String address, String port,
-			String userName, String password, String driverClass) throws SQLException{
+			String userName, String password, String driverClass)
+			throws SQLException {
 		validateParam(address, port, userName, password, driverClass);
-		String key = address.trim() + port.trim() + userName.trim() + password.trim();
+		String key = address.trim() + port.trim() + userName.trim()
+				+ password.trim();
 		DataSource ds = cache1.get(key);
-		if(ds!=null){
+		if (ds != null) {
 			Connection conn = ds.getConnection();
 			return conn;
 		}
-		synchronized(DataSourceUtil.class){
+		synchronized (DataSourceUtil.class) {
 			ds = cache1.get(key);
-			if (ds!=null) {
+			if (ds != null) {
 				Connection conn = ds.getConnection();
 				return conn;
 			} else {
-				DataSource newDS = createDataSource(address.trim(), port.trim(),
-						userName.trim(), password.trim(), driverClass.trim());
+				DataSource newDS = createDataSource(address.trim(),
+						port.trim(), userName.trim(), password.trim(),
+						driverClass.trim());
 				cache1.put(key, newDS);
 				Connection conn = newDS.getConnection();
 				return conn;
 			}
 		}
 	}
-	
-	public static Connection getConnection(String allInOneName) throws SQLException {
+
+	public static Connection getConnection(String allInOneName)
+			throws SQLException {
 		return getDataSource(allInOneName).getConnection();
 	}
-	
-	public static DataSource getDataSource(String allInOneName) throws SQLException {
+
+	public static DataSource getDataSource(String allInOneName)
+			throws SQLException {
 		if (isEmpty(allInOneName)) {
-			throw new SQLException("the param allInOneName is null. So can not get DataSourse.");
+			throw new SQLException(
+					"the param allInOneName is null. So can not get DataSourse.");
 		}
 		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
 		DalGroupDB db = allDbDao.getGroupDBByDbName(allInOneName);
 		if (db == null) {
-			throw new SQLException(allInOneName + " is not exist in the table of alldbs.");
+			throw new SQLException(allInOneName
+					+ " is not exist in the table of alldbs.");
 		}
 		String address = db.getDb_address();
 		String port = db.getDb_port();
@@ -73,19 +80,22 @@ public class DataSourceUtil {
 		String password = db.getDb_password();
 		String driverClass = db.getDb_providerName();
 		String catalog = db.getDb_catalog();
-		validateParam(allInOneName, address, port, catalog, userName, password, driverClass);
-		String key = address.trim() + catalog.trim() + port.trim() + userName.trim() + password.trim();
+		validateParam(allInOneName, address, port, catalog, userName, password,
+				driverClass);
+		String key = address.trim() + catalog.trim() + port.trim()
+				+ userName.trim() + password.trim();
 		DataSource ds = cache2.get(key);
-		if(ds!=null){
+		if (ds != null) {
 			return ds;
 		}
-		synchronized(DataSourceUtil.class){
+		synchronized (DataSourceUtil.class) {
 			ds = cache2.get(key);
-			if (ds!=null) {
+			if (ds != null) {
 				return ds;
 			} else {
-				DataSource newDS = createDataSource(address.trim(), port.trim(), catalog.trim(),
-						userName.trim(), password.trim(), driverClass.trim());
+				DataSource newDS = createDataSource(address.trim(),
+						port.trim(), catalog.trim(), userName.trim(),
+						password.trim(), driverClass.trim());
 				cache2.put(key, newDS);
 				return newDS;
 			}
@@ -93,7 +103,8 @@ public class DataSourceUtil {
 	}
 
 	private static DataSource createDataSource(String address, String port,
-			String userName, String password, String driverClass) throws SQLException {
+			String userName, String password, String driverClass)
+			throws SQLException {
 		String url = "";
 		String driver = getDriverClass(driverClass);
 		if (DRIVER_MYSQL.equals(driver)) {
@@ -103,9 +114,10 @@ public class DataSourceUtil {
 		}
 		return createDataSource(url, userName, password, driver);
 	}
-	
-	private static DataSource createDataSource(String address, String port, String catalog,
-			String userName, String password, String driverClass) throws SQLException {
+
+	private static DataSource createDataSource(String address, String port,
+			String catalog, String userName, String password, String driverClass)
+			throws SQLException {
 		String url = "";
 		String driver = getDriverClass(driverClass);
 		if (DRIVER_MYSQL.equals(driver)) {
@@ -115,18 +127,20 @@ public class DataSourceUtil {
 		}
 		return createDataSource(url, userName, password, driver);
 	}
-	
-	private static String getDriverClass(String driverClass) throws SQLException {
+
+	private static String getDriverClass(String driverClass)
+			throws SQLException {
 		if (DatabaseType.MySQL.getValue().equals(driverClass)) {
 			return DRIVER_MYSQL;
 		} else if (DatabaseType.SQLServer.getValue().equals(driverClass)) {
 			return DRIVER_SQLSERVRE;
 		} else {
-			throw new SQLException("database type is illegal, it can be MySQL or SQLServer.");
+			throw new SQLException(
+					"database type is illegal, it can be MySQL or SQLServer.");
 		}
 	}
-	
-	private static DataSource createDataSource(String url, String userName, 
+
+	private static DataSource createDataSource(String url, String userName,
 			String password, String driverClass) throws SQLException {
 
 		PoolProperties p = new PoolProperties();
@@ -144,7 +158,8 @@ public class DataSourceUtil {
 		p.setTimeBetweenEvictionRunsMillis(30000);
 		p.setMaxActive(100);
 		p.setInitialSize(10);
-		p.setMaxWait(20000);
+		p.setMaxWait(5000); // 20000
+		p.setValidationQueryTimeout(5);
 		p.setRemoveAbandonedTimeout(60);
 		p.setMinEvictableIdleTimeMillis(30000);
 		p.setMinIdle(10);
@@ -153,14 +168,16 @@ public class DataSourceUtil {
 		p.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
 				+ "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
 
-		org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource(p);
+		org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource(
+				p);
 
 		ds.createPool();
 		return ds;
 	}
-	
-	private static void validateParam(String address, String port, String userName, 
-			String password, String driverClass) throws SQLException {
+
+	private static void validateParam(String address, String port,
+			String userName, String password, String driverClass)
+			throws SQLException {
 		if (isEmpty(address)) {
 			throw new SQLException("the address is null.");
 		}
@@ -182,29 +199,34 @@ public class DataSourceUtil {
 			String port, String catalog, String userName, String password,
 			String driverClass) throws SQLException {
 		if (isEmpty(address)) {
-			throw new SQLException("the address of " + allInOneName + " is null.");
+			throw new SQLException("the address of " + allInOneName
+					+ " is null.");
 		}
 		if (isEmpty(port)) {
 			throw new SQLException("the port of " + allInOneName + " is null.");
 		}
 		if (isEmpty(userName)) {
-			throw new SQLException("the userName of " + allInOneName + " is null.");
+			throw new SQLException("the userName of " + allInOneName
+					+ " is null.");
 		}
 		if (isEmpty(password)) {
-			throw new SQLException("the password of " + allInOneName + " is null.");
+			throw new SQLException("the password of " + allInOneName
+					+ " is null.");
 		}
 		if (isEmpty(catalog)) {
-			throw new SQLException("the catalog of " + allInOneName + " is null.");
+			throw new SQLException("the catalog of " + allInOneName
+					+ " is null.");
 		}
 		if (isEmpty(driverClass)) {
-			throw new SQLException("the driverClass of " + allInOneName + " is null.");
+			throw new SQLException("the driverClass of " + allInOneName
+					+ " is null.");
 		}
 	}
-	
+
 	private static boolean isEmpty(String str) {
 		if (str != null && (!"".equals(str.trim())))
 			return false;
 		return true;
 	}
-	
+
 }

@@ -138,6 +138,10 @@ public abstract class AbstractSqlBuilder {
 		if(entry.isBracket() && ((BracketClauseEntry)entry).isLeft())
 			return true;
 			
+		// AND/OR/NOT AND/OR
+		if(entry.isOperator()) {
+			return true;
+		}
 		return false;
 	}
 	

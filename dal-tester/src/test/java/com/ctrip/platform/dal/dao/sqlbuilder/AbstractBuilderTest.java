@@ -138,6 +138,12 @@ public class AbstractBuilderTest {
 		validate("( ( ( equalNull ) ) ) OR ( ( ( equalNull ) ) )", "");
 		validate("NOT ( NOT ( NOT ( NOT equalNull ) ) ) OR ( ( ( equalNull ) ) )", "");
 	}
+	
+	@Test
+	public void testOr() throws SQLException {
+		validate("equal OR equal", "WHERE a = ? OR a = ?");
+		validate("equal AND ( equal OR equal )", "WHERE a = ? AND ( a = ? OR a = ? )");
+	}
 
 	public void validate(String exp, String expected) throws SQLException {
 		SelectSqlBuilder builder = new SelectSqlBuilder("People", DatabaseCategory.SqlServer, false);
@@ -191,6 +197,8 @@ public class AbstractBuilderTest {
 				case ")":
 					builder.rightBracket();
 					break;
+				default:
+					Assert.fail("Unknown token: " + token);
 			}
 		}
 		

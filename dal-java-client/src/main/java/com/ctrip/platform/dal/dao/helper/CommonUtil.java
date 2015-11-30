@@ -1,34 +1,15 @@
 package com.ctrip.platform.dal.dao.helper;
 
-import java.security.Key;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.crypto.Cipher;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 
 public class CommonUtil {
-//    private static final String APPID_COMMENT;
-//    public static String MACHINE;
-    private static String key = "dalctripcn";
     private static Pattern hostRegxPattern = null;
 
 	static {
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("/* ").append(LogConfig.getAppID()).append(", ");
-		try {
-//			InetAddress s = InetAddress.getLocalHost();
-//			MACHINE = s.getHostName();
-//			sb.append(MACHINE);
-		} catch (Throwable e) {
-//			MACHINE = "UNKNOW";
-//			sb.append(MACHINE);
-		}
-//		sb.append("*/\n");
-//		APPID_COMMENT = sb.toString();
-
 		String regEx = "(?<=://)[\\w\\-_]+(\\.[\\w\\-_]+)+(?=[,|:|;])";
 		hostRegxPattern = Pattern.compile(regEx);
 	}
@@ -52,16 +33,6 @@ public class CommonUtil {
 		}
 		return sqlSections[0].hashCode();
 	}
-
-    /**
-     * Only add this tag to SQL. No tag for stored procedure.
-     * @param sql
-     * @return
-     */
-//	public static String tagSql(String sql) {
-//		return APPID_COMMENT + sql;
-//	}
-
 
 	public static String null2NA(String str) {
 		return null != str ? str : "NA";
@@ -94,17 +65,4 @@ public class CommonUtil {
 		hash += (hash << 15);
 		return hash;
 	}
-
-    
-    /*public static void main(String[] args) {
-    	String sql = "select * from Person where Id = ?";
-    	String hash = getHashCode4SQLString(sql);
-    	String enSql = desEncrypt(sql);
-    	String deSql = desDecrypt(enSql);
-    	System.out.println(sql);
-    	System.out.println(hash);
-    	System.out.println(enSql);
-    	System.out.println(deSql);
-    	System.out.println(deSql.equals(sql));
-    }*/
 }

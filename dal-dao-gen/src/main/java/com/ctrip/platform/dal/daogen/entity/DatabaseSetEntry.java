@@ -13,12 +13,15 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
 	private String databaseType;
 	private String sharding;
 	private String connectionString;
+	private String allInOneConnectionString;
+	private String providerName;
+
 	private int databaseSet_Id;
-	
+
 	private String update_user_no;
 	private Timestamp update_time;
-	private String str_update_time="";
-	
+	private String str_update_time = "";
+
 	public static DatabaseSetEntry visitRow(ResultSet rs) throws SQLException {
 		DatabaseSetEntry entry = new DatabaseSetEntry();
 		entry.setId(rs.getInt(1));
@@ -31,51 +34,80 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
 		entry.setUpdate_time(rs.getTimestamp("update_time"));
 		try {
 			Date date = new Date(entry.getUpdate_time().getTime());
-			entry.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+			entry.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+					.format(date));
 		} catch (Throwable e) {
 		}
 		return entry;
 	}
-	
+
 	@Override
 	public int compareTo(DatabaseSetEntry o) {
-		return (this.id+this.name+this.databaseType+this.sharding+this.connectionString).compareTo(o.getId()+
-				o.getName()+o.getDatabaseType()+o.getSharding()+o.getConnectionString());
+		return (this.id + this.name + this.databaseType + this.sharding + this.connectionString)
+				.compareTo(o.getId() + o.getName() + o.getDatabaseType()
+						+ o.getSharding() + o.getConnectionString());
 	}
-	
+
 	public int getId() {
 		return id;
 	}
+
 	public void setId(int id) {
 		this.id = id;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	public String getDatabaseType() {
 		return databaseType;
 	}
+
 	public void setDatabaseType(String databaseType) {
 		this.databaseType = databaseType;
 	}
+
 	public String getSharding() {
 		return sharding == null ? "" : sharding;
 	}
+
 	public void setSharding(String sharding) {
 		this.sharding = sharding;
 	}
+
 	public String getConnectionString() {
 		return connectionString;
 	}
+
 	public void setConnectionString(String connectionString) {
 		this.connectionString = connectionString;
 	}
+
+	public String getAllInOneConnectionString() {
+		return allInOneConnectionString;
+	}
+
+	public void setAllInOneConnectionString(String allInOneConnectionString) {
+		this.allInOneConnectionString = allInOneConnectionString;
+	}
+
+	public String getProviderName() {
+		return providerName;
+	}
+
+	public void setProviderName(String providerName) {
+		this.providerName = providerName;
+	}
+
 	public int getDatabaseSet_Id() {
 		return databaseSet_Id;
 	}
+
 	public void setDatabaseSet_Id(int databaseSet_Id) {
 		this.databaseSet_Id = databaseSet_Id;
 	}

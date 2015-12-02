@@ -191,4 +191,29 @@ public class TitanServiceReaderTest {
 			e.printStackTrace();
 		}
 	}
+
+	@Test
+	public void testGetFromTitanServiceUser() {
+		String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query";
+		TitanProvider provider = new TitanProvider();
+		Set<String> dbNames = new HashSet<>();
+		dbNames.add("PkgWorkflowDB_W");
+		
+		Map<String, String> settings = new HashMap<>();
+		settings.put(TitanProvider.SERVICE_ADDRESS, fws);
+		settings.put(TitanProvider.USE_LOCAL_CONFIG, "false");
+		try {
+			provider.initialize(settings);
+			provider.setup(dbNames);
+			
+			DataSourceConfigure result = null;
+			
+			result = provider.getDataSourceConfigure("PkgWorkflowDB_W");
+			Assert.assertNotNull(result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+
 }

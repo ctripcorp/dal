@@ -31,7 +31,7 @@
 		<appInternals.appInfoUrl>http://ws.fx.fws.qa.nt.ctripcorp.com/appinfo/appinfo/Send</appInternals.appInfoUrl>
 		<appInternals.permissions.write>10.32.21.21</appInternals.permissions.write>
 		<appInternals.permissions.read>10.32.21.21</appInternals.permissions.read>
-		<CFX_DataSource_ServiceUrl></CFX_DataSource_ServiceUrl>
+		<CFX_DataSource_ServiceUrl>https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query</CFX_DataSource_ServiceUrl>
 	</fat>
 	<lpt>
 		<LoggingServer.V2.IP>collector.logging.lpt.qa.nt.ctripcorp.com</LoggingServer.V2.IP>

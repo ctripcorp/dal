@@ -100,23 +100,23 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		} else {
 			// If it is not local dev environment or the AllInOne file does not exist
 			try {
-				dataSourceConfigures = getDataSourceConfigures(dbNames);
+				Map<String, String> rawConnStrings = getConnectionStrings(dbNames);
+				dataSourceConfigures = getDataSourceConfigures(rawConnStrings);
 				return;
 			} catch (Throwable e) {
 				logger.warn("Cannot found config from Titan service for " + dbNames, e);
 			}
 			
 			logger.info("Try to reloacte with \"_SH\"");
-			Map<String, DataSourceConfigure> tmpdataSourceConfigures = null;
+			Map<String, String> rawConnStrings = new HashMap<>();
 			try {
-				tmpdataSourceConfigures = getDataSourceConfigures(getProdDbNames(dbNames));
+				Map<String, String> tmpRawConnStrings = getConnectionStrings(getProdDbNames(dbNames));
+				for(String name: dbNames)
+					rawConnStrings.put(name, tmpRawConnStrings.get(name + PROD_SUFFIX));
+				dataSourceConfigures = getDataSourceConfigures(rawConnStrings);
 			} catch (Exception e) {
 				throw new RuntimeException("Failed to retrieve config with \"_SH\"", e);
 			}
-
-			dataSourceConfigures = new HashMap<>();
-			for(String name: dbNames)
-				dataSourceConfigures.put(name, tmpdataSourceConfigures.get(name + PROD_SUFFIX));
 		}
 	}
 	
@@ -137,7 +137,16 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		return prodDbNames;
 	}
 	
-	private Map<String, DataSourceConfigure> getDataSourceConfigures(Set<String> dbNames) throws Exception{
+	private Map<String, DataSourceConfigure> getDataSourceConfigures(Map<String, String> rawConnStrings) throws Exception{
+		Map<String, DataSourceConfigure> configures = new HashMap<>();
+		for(Map.Entry<String, String> entry: rawConnStrings.entrySet()) {
+			configures.put(entry.getKey(), parseConfig(entry.getKey(), decrypt(entry.getValue())));
+		}
+		
+		return configures;
+	}
+	
+	private Map<String, String> getConnectionStrings(Set<String> dbNames) throws Exception{
 		logger.info("Start getting all in one connection string from titan service.");
 		long start = System.currentTimeMillis();
 		
@@ -146,7 +155,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 			sb.append(name).append(",");
 
 		String ids = sb.substring(0, sb.length()-1);
-        Map<String, DataSourceConfigure> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>();
 
         URI uri = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid).build();
         HttpClient sslClient = initWeakSSLClient();
@@ -172,7 +181,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	            	throw new RuntimeException(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
 
             	//Decrypt raw connection string
-            	result.put(data.getName(), parseConfig(data.getName(), decrypt(data.getConnectionString())));
+            	result.put(data.getName(), data.getConnectionString());
             }
         }
 	    

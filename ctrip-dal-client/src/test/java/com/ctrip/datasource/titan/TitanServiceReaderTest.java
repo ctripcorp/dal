@@ -216,4 +216,28 @@ public class TitanServiceReaderTest {
 		}
 	}
 
+	// This test simulate _SH case in PROD. You have to hijack TitanProvide to make PROD_SUFFIX = _W
+//	@Test
+//	public void testGetFromTitanService_SH() {
+//		String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query";
+//		TitanProvider provider = new TitanProvider();
+//		Set<String> dbNames = new HashSet<>();
+//		dbNames.add("PkgWorkflowDB");
+//		
+//		Map<String, String> settings = new HashMap<>();
+//		settings.put(TitanProvider.SERVICE_ADDRESS, fws);
+//		settings.put(TitanProvider.USE_LOCAL_CONFIG, "false");
+//		try {
+//			provider.initialize(settings);
+//			provider.setup(dbNames);
+//			
+//			DataSourceConfigure result = null;
+//			
+//			result = provider.getDataSourceConfigure("PkgWorkflowDB");
+//			Assert.assertNotNull(result);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			Assert.fail();
+//		}
+//	}
 }

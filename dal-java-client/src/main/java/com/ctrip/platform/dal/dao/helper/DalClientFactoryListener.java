@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 
 public class DalClientFactoryListener implements ServletContextListener {
 	private Logger logger = LoggerFactory.getLogger(DalClientFactoryListener.class);
@@ -27,6 +28,12 @@ public class DalClientFactoryListener implements ServletContextListener {
 			
 			if(Boolean.parseBoolean(warmUp))
 				DalClientFactory.warmUpConnections();
+			
+			/* The startup and shutdown of ConfigBeanFactory must be done here.
+			 * Because only web app can have classes folder for bean.properties
+			 */
+			ConfigBeanFactory.init();
+
 		} catch (Exception e) {
 			logger.error("Error when init client factory", e);
 		}
@@ -34,5 +41,7 @@ public class DalClientFactoryListener implements ServletContextListener {
 	
 	public void contextDestroyed(ServletContextEvent sce) {
 		DalClientFactory.shutdownFactory();
+
+		ConfigBeanFactory.shutdown();
 	}
 }

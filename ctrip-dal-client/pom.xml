@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ctrip.platform</groupId>
 	<artifactId>ctrip-dal-client</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.1.1</version>
 	<name>ctrip-dal-client</name>
 	<properties>
 		<file_encoding>UTF-8</file_encoding>

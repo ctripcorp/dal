@@ -74,7 +74,6 @@ public class DalClientFactory {
 			DalWatcher.init();
 			DalRequestExecutor.init();
 			configureRef.set(config);
-			ConfigBeanFactory.init();
 		}
 	}
 	
@@ -146,12 +145,10 @@ public class DalClientFactory {
 			
 			logger.info("Start shutdown Dal Java Client Factory");
 			getDalLogger().shutdown();
+			logger.info("Dal Logger is shutdown");
 			
 			DalRequestExecutor.shutdown();
 			logger.info("Dal Java Client Factory is shutdown");
-
-			ConfigBeanFactory.shutdown();
-			logger.info("Markdown Manager has been destoryed");
 
 			DalWatcher.destroy();
 			logger.info("DalWatcher has been destoryed");

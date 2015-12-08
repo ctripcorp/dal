@@ -9,11 +9,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.dao.configbeans.MarkdownConfigBean;
 
 public class MarkdownManager {
+	private static Logger logger = LoggerFactory.getLogger(MarkdownManager.class);
 	private static final int durations = 1000;
 	private static AtomicReference<ScheduledExecutorService> managerRef = new AtomicReference<>();
 
@@ -51,6 +55,7 @@ public class MarkdownManager {
 			
 			managerRef.get().shutdownNow();
 			managerRef.set(null);
+			logger.info("Markdown Manager has been destoryed");
 		}
 	}
 

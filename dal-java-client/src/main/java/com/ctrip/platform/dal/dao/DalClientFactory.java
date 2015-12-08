@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
@@ -73,6 +72,7 @@ public class DalClientFactory {
 			
 			DalWatcher.init();
 			DalRequestExecutor.init();
+			
 			configureRef.set(config);
 		}
 	}
@@ -108,12 +108,12 @@ public class DalClientFactory {
 		
 		try {
 			initClientFactory();
-			config = configureRef.get();
 		} catch (Exception e) {
 			throw new IllegalStateException(
 					"DalClientFactory initilization fail", e);
 		}
 		
+		config = configureRef.get();
 		if (config != null)
 			return config;
 
@@ -143,15 +143,20 @@ public class DalClientFactory {
 				return;
 			}
 			
-			logger.info("Start shutdown Dal Java Client Factory");
-			getDalLogger().shutdown();
-			logger.info("Dal Logger is shutdown");
-			
-			DalRequestExecutor.shutdown();
-			logger.info("Dal Java Client Factory is shutdown");
+			try {
+				logger.info("Start shutdown Dal Java Client Factory");
+				getDalLogger().shutdown();
+				logger.info("Dal Logger is shutdown");
+				
+				DalRequestExecutor.shutdown();
+				logger.info("Dal Java Client Factory is shutdown");
 
-			DalWatcher.destroy();
-			logger.info("DalWatcher has been destoryed");
+				DalWatcher.destroy();
+				logger.info("DalWatcher has been destoryed");
+			} catch (Throwable e) {
+				logger.error("Error during shutdown", e);
+			}
+			
 			configureRef.set(null);
 		}
 	}

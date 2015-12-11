@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<connectionStrings>
+<connectionStrings Version="dev">
 #foreach($entry in $host.getDatabaseSetEntryMap())
-	<add name="${entry.getConnectionString()}" connectionString="${entry.getAllInOneConnectionString()}" />
+	<add name="${entry.getConnectionString()}" connectionString="${entry.getAllInOneConnectionString()}" providerName="${entry.getProviderName()}"/>
 #end
 </connectionStrings>

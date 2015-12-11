@@ -45,7 +45,7 @@ public class CSharpCodeGeneratorOfOthersProcessor implements DalProcessor {
 
 		GenUtils.mergeVelocityContext(
 				context,
-				String.format("%s/Config/Database.config.tpl",
+				String.format("%s/Config/Database.config",
 						csMavenLikeDir.getAbsolutePath()),
 				"templates/csharp/Database.config.cs.tpl");
 

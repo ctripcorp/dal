@@ -10,7 +10,8 @@ public class ConnectionStringUtil {
 			String address, String port, String username, String password,
 			String database) {
 		String connectionString = null;
-		if (providerName == DatabaseType.SQLServer.getValue().toLowerCase()) {
+		if (providerName
+				.equals(DatabaseType.SQLServer.getValue().toLowerCase())) {
 			connectionString = String.format(sqlServerConnectinoStringPattern,
 					address, port, username, password, database);
 		} else {

@@ -16,6 +16,7 @@ import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 
 public class DalGroupDBDao {
 
+       // private JdbcTemplate jdbcTemplate;
 	private JdbcTemplate jdbcTemplate;
 
 	public void setDataSource(DataSource dataSource) {

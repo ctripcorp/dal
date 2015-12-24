@@ -18,6 +18,7 @@ public class TestWorker extends DasService {
 	private static final String hostPort = "csm-haddop02.dev.sh.ctripcorp.com:2181,csm-haddop03.dev.sh.ctripcorp.com:2181,csm-haddop04.dev.sh.ctripcorp.com:2181";
 	private String path;
 	private String port;
+	//private String parent;
 	private String parent;
 
 	TestWorker(String port, String parent) throws Exception {

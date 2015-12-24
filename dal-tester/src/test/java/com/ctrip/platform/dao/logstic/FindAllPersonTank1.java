@@ -17,6 +17,7 @@ public class FindAllPersonTank1 implements DalPojo {
 	}
 
 	public void setID(Integer iD) {
+
 		this.iD = iD;
 	}
 

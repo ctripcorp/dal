@@ -522,5 +522,17 @@ jQuery(document)
 										$(this).is(":checked"));
 							});
 
+					$("#chk_custom_allShard").click(
+							function() {
+								$("#chk_custom_shards").prop("disabled",
+										$(this).is(":checked"));
+							});
+
+					$("#chk_custom_shards").click(
+							function() {
+								$("#chk_custom_allShard").prop("disabled",
+										$(this).is(":checked"));
+							});
+
 					window.ajaxutil.reload_projects();
 				});

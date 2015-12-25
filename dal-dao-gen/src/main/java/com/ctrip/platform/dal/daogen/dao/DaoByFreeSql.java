@@ -17,6 +17,7 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 
 public class DaoByFreeSql {
 
+        //private JdbcTemplate jdbcTemplate;
 	private JdbcTemplate jdbcTemplate;
 
 	public void setDataSource(DataSource dataSource) {

@@ -7,6 +7,18 @@
 	**/
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
+#if($method.isAllShard())
+		hints.inAllShards();
+#end
+#if($method.isShards())
+		hints.inShards(shards);
+#end
+#if($method.isAsync())
+		hints.asyncExecution();
+#end
+#if($method.isCallback())
+		hints.callbackWith(callback);
+#end
 		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory, false);
 		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")

@@ -3,7 +3,6 @@
 //step2
 //step3-1 -> step3-2
 (function(window, undefined) {
-
 	var Render = function() {
 
 	};

@@ -70,10 +70,9 @@ public class GenTaskBySqlBuilderResource {
 			@FormParam("comment") String comment,
 			@FormParam("scalarType") String scalarType,
 			@FormParam("pagination") boolean pagination,
-			@FormParam("orderby") String orderby) {
-
+			@FormParam("orderby") String orderby,
+			@FormParam("hints") String hints) {
 		Status status = Status.OK;
-
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 
 		if (action.equalsIgnoreCase("delete")) {
@@ -101,6 +100,8 @@ public class GenTaskBySqlBuilderResource {
 			task.setScalarType(scalarType);
 			task.setPagination(pagination);
 			task.setOrderby(orderby);
+			task.setHints(hints);
+
 			if (needApproveTask(project_id, user.getId())) {
 				task.setApproved(1);
 			} else {

@@ -13,11 +13,11 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	private int id;
 
 	private int project_id;
-	
+
 	private String allInOneName;
-	
+
 	private String databaseSetName;
-	
+
 	private String table_name;
 
 	private String class_name;
@@ -33,36 +33,39 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	private String condition;
 
 	private String sql_content;
-	
+
 	private boolean generated;
-	
+
 	private int version;
-	
+
 	private String update_user_no;
 	private Timestamp update_time;
-	private String str_update_time="";
+	private String str_update_time = "";
 	private String comment;
-	
-	//当crud_type取值为select时，此字段才有意义，可取值：Single、First、List，表示select返回的结果类型
+
+	// 当crud_type取值为select时，此字段才有意义，可取值：Single、First、List，表示select返回的结果类型
 	private String scalarType;
-	//是否增加分页方法，true：增加
+	// 是否增加分页方法，true：增加
 	private boolean pagination;
-	//存放order by 信息，值demo：id，asc 或者 id，desc
+	// 存放order by 信息，值demo：id，asc 或者 id，desc
 	private String orderby;
-	
+
 	private int approved;
 	private String str_approved;
 	private String approveMsg;
-	
-	public static GenTaskBySqlBuilder visitRow(ResultSet rs) throws SQLException {
+
+	private String hints;
+
+	public static GenTaskBySqlBuilder visitRow(ResultSet rs)
+			throws SQLException {
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		
+
 		String databaseSet = rs.getString(3);
 		task.setAllInOneName(DatabaseSetUtils.getAllInOneName(databaseSet));
 		task.setDatabaseSetName(databaseSet);
-		
+
 		task.setTable_name(rs.getString(4));
 		task.setClass_name(rs.getString(5));
 		task.setMethod_name(rs.getString(6));
@@ -81,19 +84,21 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		task.setOrderby(rs.getString("orderby"));
 		task.setApproved(rs.getInt("approved"));
 		task.setApproveMsg(rs.getString("approveMsg"));
+		task.setHints(rs.getString("hints"));
 
 		try {
-			if (task.getApproved()==1) {
+			if (task.getApproved() == 1) {
 				task.setStr_approved("未审批");
-			} else if (task.getApproved()==2) {
+			} else if (task.getApproved() == 2) {
 				task.setStr_approved("通过");
-			} else if (task.getApproved()==3) {
+			} else if (task.getApproved() == 3) {
 				task.setStr_approved("未通过");
 			} else {
 				task.setStr_approved("通过");
 			}
 			Date date = new Date(task.getUpdate_time().getTime());
-			task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+			task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+					.format(date));
 		} catch (Throwable e) {
 		}
 		return task;
@@ -101,18 +106,18 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 
 	@Override
 	public int compareTo(GenTaskBySqlBuilder o) {
-		int result =  this.getAllInOneName().compareTo(o.getAllInOneName());
-		if(result != 0){
+		int result = this.getAllInOneName().compareTo(o.getAllInOneName());
+		if (result != 0) {
 			return result;
 		}
-		
+
 		result = this.getTable_name().compareTo(o.getTable_name());
-		if(result != 0){
+		if (result != 0) {
 			return result;
 		}
-		
+
 		return this.getMethod_name().compareTo(o.getMethod_name());
-		
+
 	}
 
 	public String getDatabaseSetName() {
@@ -250,7 +255,7 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-	
+
 	public String getScalarType() {
 		return scalarType;
 	}
@@ -307,4 +312,11 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder> {
 		this.approveMsg = approveMsg;
 	}
 
+	public String getHints() {
+		return hints;
+	}
+
+	public void setHints(String hints) {
+		this.hints = hints;
+	}
 }

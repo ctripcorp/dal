@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -25,23 +26,34 @@ public class JavaMethodHost {
 	private List<JavaParameterHost> parameters;
 	// Only for free sql query dao
 	private List<JavaParameterHost> fields;
-	
+
 	private String scalarType;
 	private String pojoType;
-	
+
 	private boolean paging;
-	
+
 	private List<String> inClauses = new ArrayList<String>();
-	
+
 	// below is only for auto sql dao
 	private String field;
 	private String tableName;
-	private String orderByExp="";
-	
+	private String orderByExp = "";
+
 	private List<JavaParameterHost> updateSetParameters;
-	
+
 	private String dbSetName;
-	
+
+	private String hints = null;
+	private HashSet<String> hintsSet = null;
+	private Boolean isAllShard = null;
+	private Boolean isShards = null;
+	private Boolean isAsync = null;
+	private Boolean isCallback = null;
+	private String allShard = "allShard";
+	private String shards = "shards";
+	private String async = "async";
+	private String callback = "callback";
+
 	public String getOrderByExp() {
 		return orderByExp;
 	}
@@ -54,7 +66,8 @@ public class JavaMethodHost {
 		return updateSetParameters;
 	}
 
-	public void setUpdateSetParameters(List<JavaParameterHost> updateSetParameters) {
+	public void setUpdateSetParameters(
+			List<JavaParameterHost> updateSetParameters) {
 		this.updateSetParameters = updateSetParameters;
 	}
 
@@ -83,8 +96,8 @@ public class JavaMethodHost {
 	}
 
 	public String getPojoClassName() {
-		if(this.isSampleType()){
-			if(null != this.fields && !this.fields.isEmpty()){
+		if (this.isSampleType()) {
+			if (null != this.fields && !this.fields.isEmpty()) {
 				return this.fields.get(0).getClassDisplayName();
 			}
 		}
@@ -136,11 +149,11 @@ public class JavaMethodHost {
 	}
 
 	public String getPojoType() {
-		if(null != this.pojoType)
+		if (null != this.pojoType)
 			return this.pojoType;
-		if(null != this.fields && this.fields.size() == 1){
+		if (null != this.fields && this.fields.size() == 1) {
 			return "SimpleType";
-		}else{
+		} else {
 			return "";
 		}
 	}
@@ -164,7 +177,7 @@ public class JavaMethodHost {
 	public void setParameters(List<JavaParameterHost> parameters) {
 		this.parameters = parameters;
 	}
-	
+
 	public String getClassName() {
 		return className;
 	}
@@ -184,7 +197,7 @@ public class JavaMethodHost {
 	public boolean isInClauses() {
 		return this.inClauses != null && !this.inClauses.isEmpty();
 	}
-	
+
 	public boolean isPaging() {
 		return paging;
 	}
@@ -196,103 +209,117 @@ public class JavaMethodHost {
 	public String getParameterNames() {
 		String[] params = new String[parameters.size()];
 		int i = 0;
-		for(JavaParameterHost parameter: parameters) {
+		for (JavaParameterHost parameter : parameters) {
 			params[i++] = parameter.getAlias();
 		}
-		
+
 		return StringUtils.join(params, ", ");
 	}
-	
+
 	public String getParameterNames(String suffix) {
 		List<String> params = new ArrayList<String>();
-		for(JavaParameterHost parameter: parameters) {
+		for (JavaParameterHost parameter : parameters) {
 			params.add(parameter.getAlias() + (null != suffix ? suffix : ""));
 		}
-		if(this.isPaging() && this.isQuery()){
+		if (this.isPaging() && this.isQuery()) {
 			params.add("1");
 			params.add("10");
 		}
 		params.add("new DalHints()");
 		return StringUtils.join(params, ", ");
 	}
-	
+
 	public String getParameterDeclaration() {
 		List<String> paramsDeclaration = new ArrayList<String>();
-		for(JavaParameterHost parameter: parameters) {
-			if(ConditionType.In == parameter.getConditionType()){
-				paramsDeclaration.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
+		for (JavaParameterHost parameter : parameters) {
+			if (ConditionType.In == parameter.getConditionType()) {
+				paramsDeclaration.add(String.format("List<%s> %s",
+						parameter.getClassDisplayName(), parameter.getAlias()));
 				this.inClauses.add(parameter.getAlias());
-			}else if(parameter.getConditionType() == ConditionType.IsNull
-					|| parameter.getConditionType() == ConditionType.IsNotNull){ 
-				continue;//is null、is not null don't hava param
-			}else{
-				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
+			} else if (parameter.getConditionType() == ConditionType.IsNull
+					|| parameter.getConditionType() == ConditionType.IsNotNull) {
+				continue;// is null、is not null don't hava param
+			} else {
+				paramsDeclaration.add(String.format("%s %s",
+						parameter.getClassDisplayName(), parameter.getAlias()));
 			}
 		}
-		if(this.paging && this.crud_type.equalsIgnoreCase("select")){
+		if (this.paging && this.crud_type.equalsIgnoreCase("select")) {
 			paramsDeclaration.add("int pageNo");
 			paramsDeclaration.add("int pageSize");
 		}
-		
+
 		paramsDeclaration.add("DalHints hints");
-		
+
+		if (isShards()) {
+			paramsDeclaration.add("Set<String> shards");
+		}
+		if (isCallback()) {
+			paramsDeclaration.add("DalResultCallback callback");
+		}
 		return StringUtils.join(paramsDeclaration, ", ");
 	}
-	
+
 	public String getUpdateParameterNames(String suffix) {
 		List<String> params = new ArrayList<String>();
-		for(JavaParameterHost parameter: this.updateSetParameters) {
+		for (JavaParameterHost parameter : this.updateSetParameters) {
 			params.add(parameter.getAlias() + (null != suffix ? suffix : ""));
 		}
-		for(JavaParameterHost parameter: this.parameters) {
+		for (JavaParameterHost parameter : this.parameters) {
 			params.add(parameter.getAlias() + (null != suffix ? suffix : ""));
 		}
 		params.add("new DalHints()");
 		return StringUtils.join(params, ", ");
 	}
-	
+
 	public String getUpdateParameterDeclaration() {
 		List<String> paramsDeclaration = new ArrayList<String>();
-		for(JavaParameterHost parameter : updateSetParameters){
-			if(ConditionType.In == parameter.getConditionType()){
-				paramsDeclaration.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
+		for (JavaParameterHost parameter : updateSetParameters) {
+			if (ConditionType.In == parameter.getConditionType()) {
+				paramsDeclaration.add(String.format("List<%s> %s",
+						parameter.getClassDisplayName(), parameter.getAlias()));
 				this.inClauses.add(parameter.getAlias());
-			}else{
-				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
+			} else {
+				paramsDeclaration.add(String.format("%s %s",
+						parameter.getClassDisplayName(), parameter.getAlias()));
 			}
 		}
-		for(JavaParameterHost parameter : parameters) {
-			if(ConditionType.In == parameter.getConditionType()){
-				paramsDeclaration.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
+		for (JavaParameterHost parameter : parameters) {
+			if (ConditionType.In == parameter.getConditionType()) {
+				paramsDeclaration.add(String.format("List<%s> %s",
+						parameter.getClassDisplayName(), parameter.getAlias()));
 				this.inClauses.add(parameter.getAlias());
-			}else if(parameter.getConditionType() == ConditionType.IsNull
-					|| parameter.getConditionType() == ConditionType.IsNotNull){ 
-				continue;//is null、is not null don't hava param
-			}else{
-				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
+			} else if (parameter.getConditionType() == ConditionType.IsNull
+					|| parameter.getConditionType() == ConditionType.IsNotNull) {
+				continue;// is null、is not null don't hava param
+			} else {
+				paramsDeclaration.add(String.format("%s %s",
+						parameter.getClassDisplayName(), parameter.getAlias()));
 			}
 		}
-		
+
 		paramsDeclaration.add("DalHints hints");
-		
+
 		return StringUtils.join(paramsDeclaration, ", ");
 	}
 
 	public Set<String> getPojoImports() {
 		Set<String> imports = new TreeSet<String>();
 
-		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(fields);
-		for(JavaParameterHost field: allTypes) {
+		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(
+				fields);
+		for (JavaParameterHost field : allTypes) {
 			Class<?> clazz = field.getJavaClass();
-			if(byte[].class.equals(clazz))
+			if (byte[].class.equals(clazz))
 				continue;
-			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))
+			if (clazz.getPackage().getName()
+					.equals(String.class.getPackage().getName()))
 				continue;
 			imports.add(clazz.getName());
 		}
 		return imports;
 	}
-	
+
 	public List<String> getParamComments() {
 		List<String> params = new ArrayList<String>();
 		for (JavaParameterHost parameter : parameters) {
@@ -310,43 +337,46 @@ public class JavaMethodHost {
 		}
 		return params;
 	}
-	
-	public String getPagingSql(DatabaseCategory dbType) 
-			throws Exception{
-        return SqlBuilder.pagingQuerySql(sql, dbType, CurrentLanguage.Java).replaceAll("%s", "?");
+
+	public String getPagingSql(DatabaseCategory dbType) throws Exception {
+		return SqlBuilder.pagingQuerySql(sql, dbType, CurrentLanguage.Java)
+				.replaceAll("%s", "?");
 	}
-	
-	public boolean hasParameters(){
+
+	public boolean hasParameters() {
 		return null != this.parameters && !this.parameters.isEmpty();
 	}
-	
-	public boolean isEmptyFields()
-	{
+
+	public boolean isEmptyFields() {
 		return null == this.fields || this.fields.isEmpty();
 	}
-	
-	public boolean isSampleType(){
+
+	public boolean isSampleType() {
 		return this.getPojoType().equalsIgnoreCase("SimpleType");
 	}
-	
-	public boolean isReturnList(){
-		return this.scalarType == null || this.scalarType.equalsIgnoreCase("List");
+
+	public boolean isReturnList() {
+		return this.scalarType == null
+				|| this.scalarType.equalsIgnoreCase("List");
 	}
-	
-	public boolean isReturnSingle(){
+
+	public boolean isReturnSingle() {
 		return scalarType != null && this.scalarType.equalsIgnoreCase("Single");
 	}
-	
-	public boolean isReturnFirst(){
-		return this.scalarType != null && this.scalarType.equalsIgnoreCase("First");
+
+	public boolean isReturnFirst() {
+		return this.scalarType != null
+				&& this.scalarType.equalsIgnoreCase("First");
 	}
-	
-	public boolean isQuery(){
-		return this.crud_type == null || this.crud_type.isEmpty() || this.crud_type.equalsIgnoreCase("select");
+
+	public boolean isQuery() {
+		return this.crud_type == null || this.crud_type.isEmpty()
+				|| this.crud_type.equalsIgnoreCase("select");
 	}
-	
-	public boolean isUpdate(){
-		return this.crud_type != null && this.crud_type.equalsIgnoreCase("update");
+
+	public boolean isUpdate() {
+		return this.crud_type != null
+				&& this.crud_type.equalsIgnoreCase("update");
 	}
 
 	public String getDbSetName() {
@@ -356,5 +386,60 @@ public class JavaMethodHost {
 	public void setDbSetName(String dbSetName) {
 		this.dbSetName = dbSetName;
 	}
-	
+
+	public String getHints() {
+		return hints;
+	}
+
+	public void setHints(String hints) {
+		this.hints = hints;
+	}
+
+	private HashSet<String> getHintsSet() {
+		if (this.hintsSet == null) {
+			this.hintsSet = new HashSet<String>();
+			if (this.hints == null || this.hints.length() == 0) {
+				return this.hintsSet;
+			}
+			String[] array = this.hints.split(";");
+			if (array != null && array.length > 0) {
+				for (String string : array) {
+					this.hintsSet.add(string);
+				}
+			}
+		}
+		return this.hintsSet;
+	}
+
+	public boolean isAllShard() {
+		if (isAllShard == null) {
+			HashSet<String> hashSet = getHintsSet();
+			isAllShard = hashSet.contains(allShard);
+		}
+		return isAllShard.booleanValue();
+	}
+
+	public boolean isShards() {
+		if (isShards == null) {
+			HashSet<String> hashSet = getHintsSet();
+			isShards = hashSet.contains(shards);
+		}
+		return isShards.booleanValue();
+	}
+
+	public boolean isAsync() {
+		if (isAsync == null) {
+			HashSet<String> hashSet = getHintsSet();
+			isAsync = hashSet.contains(async);
+		}
+		return isAsync.booleanValue();
+	}
+
+	public boolean isCallback() {
+		if (isCallback == null) {
+			HashSet<String> hashSet = getHintsSet();
+			isCallback = hashSet.contains(callback);
+		}
+		return isCallback.booleanValue();
+	}
 }

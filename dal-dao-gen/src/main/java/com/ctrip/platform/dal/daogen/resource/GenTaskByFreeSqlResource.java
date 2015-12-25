@@ -61,9 +61,8 @@ public class GenTaskByFreeSqlResource {
 			@FormParam("comment") String comment,
 			@FormParam("scalarType") String scalarType,
 			@FormParam("pagination") boolean pagination,
-			@FormParam("sql_style") String sql_style// C#风格或者Java风格
-	) {
-
+			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
+			@FormParam("hints") String hints) {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 
 		if (action.equalsIgnoreCase("delete")) {
@@ -104,6 +103,7 @@ public class GenTaskByFreeSqlResource {
 			}
 
 			task.setApproveMsg("");
+			task.setHints(hints);
 
 			if (action.equalsIgnoreCase("update")) {
 				task.setId(id);

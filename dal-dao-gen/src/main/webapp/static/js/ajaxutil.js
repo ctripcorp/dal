@@ -3,7 +3,6 @@
 //step2
 //step3-1 -> step3-2
 (function(window, undefined) {
-
 	var AjaxUtil = function() {
 
 	};
@@ -133,6 +132,16 @@
 					index2++;
 				}
 			});
+
+			// java hints
+			var hints = [];
+			var cbHints = $("#buildJavaHints :checkbox:checked");
+			if (cbHints != undefined && cbHints.length > 0) {
+				$.each(cbHints, function(i, n) {
+					hints.push($(cbHints[i]).val());
+				});
+			}
+			postData["hints"] = hints.join(";");
 		}
 
 		if ($("#crud_option").val() == "insert") {
@@ -215,6 +224,17 @@
 					}
 				});
 		postData["params"] = paramList.join(";");
+
+		if (postData["sql_style"] == "java") {
+			var hints = [];
+			var cbHints = $("#customJavaHints :checkbox:checked");
+			if (cbHints != undefined && cbHints.length > 0) {
+				$.each(cbHints, function(i, n) {
+					hints.push($(cbHints[i]).val());
+				});
+			}
+			postData["hints"] = hints.join(";");
+		}
 
 		$.post("/rest/task/sql", postData, function(data) {
 			if (data.code == "OK") {

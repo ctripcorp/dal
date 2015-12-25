@@ -3,18 +3,17 @@
 //step2
 //step3-1 -> step3-2
 (function(window, undefined) {
-
 	var wizzard = function() {
-
 	};
 
 	var variableHtmlOrigin = '<div class="row-fluid"><input type="text" class="span3" value="%s">';
 
 	var variableHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">'
-			+ ' &nbsp;&nbsp;允许NULL值：<input type="checkbox" %s >';
+			+ ' <label class="popup_label">&nbsp;<input type="checkbox" %s >允许NULL值</label>';
 
 	var variableHtml_ForJAVA = '<div class="row-fluid"><input type="text" class="span3" value="%s">'
-			+ ' &nbsp;&nbsp;允许NULL值：<input type="checkbox" %s >&nbsp;&nbsp;参数敏感：<input type="checkbox" %s >';
+			+ ' <label class="popup_label">&nbsp;<input type="checkbox" %s >允许NULL值</label>'
+			+ ' <label class="popup_label">&nbsp;&nbsp;<input type="checkbox" %s >参数敏感</label>';
 
 	var variable_typesHtml_ForJAVA = '<select %s class="span5">'
 			+ "<option value='_please_select'>--参数类型--</option>"
@@ -817,17 +816,6 @@
 								$(".step2-2-1-1").hide();
 								$(".step2-2-1-2").show();
 							}
-							// if("java"==$("#sql_style").val() &&
-							// "select"==$("#crud_option").val()){
-							// $('#fields').multipleSelect('setSelects',
-							// values);
-							// $('#fields').multipleSelect('disable');
-							// }else{
-							// $('#fields').multipleSelect('enable');
-							// }
-							// if ($("#page1").attr('is_update') != "1") {
-							// window.sql_builder.build();
-							// }
 							$("body").unblock();
 						}).fail(function(data) {
 					$("#error_msg").text("获取表的信息失败，请检查是否有权限！");
@@ -853,6 +841,7 @@
 		var paramHtml = "";
 		if ($("#sql_style").val() == "csharp") {
 			paramHtml = step2_2_1_csharp(record, current, crud_option);
+			$("#buildJavaHints").hide();
 		} else {
 			if (crud_option == "insert") {
 				paramHtml = step2_2_1_java_insert(record, current, crud_option);
@@ -870,12 +859,30 @@
 			$("#param_list_auto").html(paramHtml);
 		}
 
+		// bind java hints
+		if ($("#page1").attr('is_update') == "1") {
+			if (record.hints != undefined && record.hints.length > 0) {
+				var array = record.hints.split(";");
+				if (array != undefined && array.length > 0) {
+					// clear checkboxes
+					var cbHints = $("#buildJavaHints :checkbox");
+					if (cbHints != undefined && cbHints.length > 0) {
+						$.each(cbHints, function(i, n) {
+							$(cbHints[i]).prop("checked", false);
+						});
+					}
+					$.each(array, function(i, n) {
+						$("#chk_build_" + n).prop("checked", true);
+					});
+				}
+			}
+		}
+
 		window.sql_builder.buildPagingSQL(function() {
 			$("#error_msg").empty();
 			current.hide();
 			$(".step2-2-2").show();
 		});
-
 	};
 
 	var step2_2_1_getSelectedConditionParamCount = function() {
@@ -895,7 +902,6 @@
 	};
 
 	var step2_2_1_java = function(record, current, crud_option) {
-
 		// 解析Sql语句，提取出参数
 		var regexIndex = /(\?{1})/igm;
 		var sqlContent = ace.edit("sql_builder").getValue(), result;
@@ -997,7 +1003,6 @@
 	};
 
 	var step2_2_1_csharp = function(record, current, crud_option) {
-
 		// 解析Sql语句，提取出参数
 		var regexNames = /[@:](\w+)/igm;
 		var sqlContent = ace.edit("sql_builder").getValue(), result;
@@ -1389,6 +1394,10 @@
 			$("#param_list").html(htmls);
 		}
 
+		if ($("#sql_style").val() == "csharp") {
+			$("#customJavaHints").hide();
+		}
+
 		if ($("#page1").attr('is_update') == "1") {
 			splitedParams = record.parameters.split(";");
 			$.each(splitedParams, function(index, value) {
@@ -1407,6 +1416,22 @@
 					}
 				}
 			});
+
+			if (record.hints != undefined && record.hints.length > 0) {
+				var array = record.hints.split(";");
+				if (array != undefined && array.length > 0) {
+					// clear checkboxes
+					var cbHints = $("#customJavaHints :checkbox");
+					if (cbHints != undefined && cbHints.length > 0) {
+						$.each(cbHints, function(i, n) {
+							$(cbHints[i]).prop("checked", false);
+						});
+					}
+					$.each(array, function(i, n) {
+						$("#chk_custom_" + n).prop("checked", true);
+					});
+				}
+			}
 		}
 
 		window.sql_builder.buildPagingSQL(function() {
@@ -1414,7 +1439,6 @@
 			current.hide();
 			$(".step2-3-3").show();
 		});
-
 	};
 
 	var step2_3_3 = function(record, current) {
@@ -1576,7 +1600,6 @@
 	};
 
 	wizzard.prototype = {
-
 		clear : function() {
 			$("#error_msg").html("");
 

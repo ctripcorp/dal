@@ -21,6 +21,7 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 public class JavaDalGenerator implements DalGenerator {
 	
 	private Logger log = Logger.getLogger(JavaDalGenerator.class);
+
 	
 	@Override
 	public CodeGenContext createContext(int projectId, boolean regenerate,

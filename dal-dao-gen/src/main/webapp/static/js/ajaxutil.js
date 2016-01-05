@@ -71,17 +71,17 @@
 		var paramValues = [];
 		var paramNullable = [];
 		var paramSensitive = [];
-		$.each($("#param_list_auto").children("div"), function(index, value) {
-			var first = $(value).children("input").eq(0);
-			var second = $(value).children("input").eq(1);
+		$.each($("#param_list_auto").children("div"), function(i, n) {
+			var first = $(n).find("input").eq(0);
+			var second = $(n).find(":checkbox").eq(0);
 			// var second = $(value).children("select").eq(0);
 			// paramList.push(sprintf("%s,%s", $(first).val(),
 			// $(second).val()));
 			paramList.push($(first).val());
 			paramValues.push($(first).val());
 			paramNullable.push($(second).is(":checked"));
-			if (postData["sql_style"] != "csharp") {
-				var third = $(value).children("input").eq(2);
+			if (postData["sql_style"] == "java") {
+				var third = $(n).find(":checkbox").eq(1);
 				paramSensitive.push($(third).is(":checked"));
 			}
 		});
@@ -89,8 +89,8 @@
 		var selectedConditions = [];
 		var idx = 0;
 		if (postData["sql_style"] == "csharp") {
-			$.each($("#selected_condition option"), function(index, value) {
-				var temp = $(value).val().split(",");
+			$.each($("#selected_condition option"), function(i, n) {
+				var temp = $(n).val().split(",");
 				if (temp[1] == "6") {// between
 					selectedConditions.push(sprintf("%s,%s,%s,%s,%s", temp[0],
 							temp[1], paramValues[idx], paramValues[idx + 1],

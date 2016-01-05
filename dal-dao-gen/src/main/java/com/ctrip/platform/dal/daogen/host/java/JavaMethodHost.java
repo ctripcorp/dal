@@ -232,12 +232,18 @@ public class JavaMethodHost {
 	public String getParameterDeclaration() {
 		List<String> paramsDeclaration = new ArrayList<String>();
 		for (JavaParameterHost parameter : parameters) {
-			if (ConditionType.In == parameter.getConditionType()) {
+			ConditionType conditionType = parameter.getConditionType();
+			if (ConditionType.In == conditionType) {
 				paramsDeclaration.add(String.format("List<%s> %s",
 						parameter.getClassDisplayName(), parameter.getAlias()));
 				this.inClauses.add(parameter.getAlias());
-			} else if (parameter.getConditionType() == ConditionType.IsNull
-					|| parameter.getConditionType() == ConditionType.IsNotNull) {
+			} else if (conditionType == ConditionType.IsNull
+					|| conditionType == ConditionType.IsNotNull
+					|| conditionType == ConditionType.And
+					|| conditionType == ConditionType.Or
+					|| conditionType == ConditionType.Not
+					|| conditionType == ConditionType.LeftBracket
+					|| conditionType == ConditionType.RightBracket) {
 				continue;// is null、is not null don't hava param
 			} else {
 				paramsDeclaration.add(String.format("%s %s",

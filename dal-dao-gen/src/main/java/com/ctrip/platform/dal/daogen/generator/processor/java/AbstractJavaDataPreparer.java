@@ -395,6 +395,13 @@ public class AbstractJavaDataPreparer {
 		String[] conditions = StringUtils.split(builder.getCondition(), ";");
 		for (String condition : conditions) {
 			String[] tokens = StringUtils.split(condition, ",");
+			if (tokens.length == 1) { //
+				JavaParameterHost host = new JavaParameterHost();
+				host.setConditionType(ConditionType.valueOf(Integer
+						.parseInt(tokens[0])));
+				parameters.add(host);
+				continue;
+			}
 			String name = tokens[0];
 			int type = tokens.length >= 2 ? CommonUtils.tryParse(tokens[1], -1)
 					: -1;
@@ -404,12 +411,12 @@ public class AbstractJavaDataPreparer {
 					JavaParameterHost host_ls = new JavaParameterHost(pHost);
 					host_ls.setAlias(alias);
 					host_ls.setConditional(true);
-					if (-1 != type)
+					if (type != -1)
 						host_ls.setConditionType(ConditionType.valueOf(type));
 
 					parameters.add(host_ls);
 					// Between need an extra parameter
-					if (ConditionType.Between == host_ls.getConditionType()) {
+					if (host_ls.getConditionType() == ConditionType.Between) {
 						JavaParameterHost host_bw = new JavaParameterHost(
 								host_ls);
 						String alias_bw = tokens.length >= 4 ? tokens[3] : "";
@@ -438,5 +445,4 @@ public class AbstractJavaDataPreparer {
 		}
 		return parameters;
 	}
-
 }

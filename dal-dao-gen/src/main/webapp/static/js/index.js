@@ -286,28 +286,55 @@ jQuery(document)
 								}
 							});
 
-					$("#add_condition").click(
-							function() {
-								var selectedField = $("#conditions").val();
-								var selectedCondition = $("#condition_values")
-										.val();
-								if (selectedField != "-1"
-										&& selectedCondition != "-1") {
-									$("#selected_condition").append(
-											$('<option>', {
-												value : sprintf("%s,%s",
-														selectedField,
-														selectedCondition),
-												text : sprintf("%s %s", $(
-														"#conditions").find(
-														":selected").text(), $(
-														"#condition_values")
-														.find(":selected")
-														.text())
-											}));
-									window.sql_builder.build();
-								}
-							});
+					$("#add_condition")
+							.click(
+									function() {
+										var selectedFieldValue = $(
+												"#conditions").val();
+										var selectedConditionValue = $(
+												"#condition_values").val();
+										var selectedFieldText = $("#conditions")
+												.find(":selected").text();
+										var selectedConditionText = $(
+												"#condition_values").find(
+												":selected").text();
+										var array = [ "And", "Or", "Not", "(",
+												")" ];
+
+										if ($.inArray(selectedConditionText,
+												array) > -1) {
+											$("#selected_condition")
+													.append(
+															$(
+																	'<option>',
+																	{
+																		value : sprintf(
+																				"%s",
+																				selectedConditionValue),
+																		text : sprintf(
+																				"%s",
+																				selectedConditionText)
+																	}));
+											window.sql_builder.build();
+										} else if (selectedFieldValue != "-1"
+												&& selectedConditionValue != "-1") {
+											$("#selected_condition")
+													.append(
+															$(
+																	'<option>',
+																	{
+																		value : sprintf(
+																				"%s,%s",
+																				selectedFieldValue,
+																				selectedConditionValue),
+																		text : sprintf(
+																				"%s %s",
+																				selectedFieldText,
+																				selectedConditionText)
+																	}));
+											window.sql_builder.build();
+										}
+									});
 
 					$("#del_condition").click(function() {
 						$("#selected_condition").find(":selected").remove();

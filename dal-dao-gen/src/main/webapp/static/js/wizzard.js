@@ -752,28 +752,11 @@
 										&& record.condition != "") {
 									var selectedConditions = record.condition
 											.split(";");
-									$
-											.each(
-													selectedConditions,
-													function(index, value) {
-														$("#selected_condition")
-																.append(
-																		$(
-																				'<option>',
-																				{
-																					value : value,
-																					text : sprintf(
-																							"%s %s",
-																							value
-																									.split(',')[0],
-																							$(
-																									sprintf(
-																											"#condition_values > option[value='%s']",
-																											value
-																													.split(',')[1]))
-																									.text())
-																				}));
-													});
+									$.each(selectedConditions, function(index,
+											value) {
+										var array = value.split(",");
+										getOption(value, array);
+									});
 								}
 								var sql_builder = ace.edit("sql_builder");
 								sql_builder.setTheme("ace/theme/monokai");
@@ -821,6 +804,38 @@
 					$("#error_msg").text("获取表的信息失败，请检查是否有权限！");
 					$("body").unblock();
 				});
+	};
+
+	var getOption = function(value, array) {
+		if (array.length == 1) {
+			$("#selected_condition")
+					.append(
+							$(
+									'<option>',
+									{
+										value : value,
+										text : $(
+												sprintf(
+														"#condition_values > option[value='%s']",
+														value)).text()
+									}));
+		} else if (array.length > 1) {
+			$("#selected_condition")
+					.append(
+							$(
+									'<option>',
+									{
+										value : value,
+										text : sprintf(
+												"%s %s",
+												array[0],
+												$(
+														sprintf(
+																"#condition_values > option[value='%s']",
+																array[1]))
+														.text())
+									}));
+		}
 	};
 
 	var step2_2_1 = function(record, current) {
@@ -1080,28 +1095,29 @@
 		postData["pagination"] = $("#auto_sql_pagination").is(":checked");
 
 		var paramValues = [];
-		$.each($("#param_list_auto").children("div"), function(index, value) {
-			var first = $(value).children("input").eq(0);
+		$.each($("#param_list_auto").children("div"), function(i, n) {
+			var first = $(n).children("input").eq(0);
 			paramValues.push($(first).val());
 		});
 		var selectedConditions = [];
-		var index2 = 0;
-		$.each($("#selected_condition option"),
-				function(index, value) {
-					var temp = $(value).val().split(",");
-					if (temp[1] == "6") {// between
-						selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0],
-								temp[1], paramValues[index2],
-								paramValues[index2 + 1]));
-						index2 += 2;
-					} else if (temp[1] == "9" || temp[1] == "10") {
-						// is null 、is not null do not get mock value
-					} else {
-						selectedConditions.push(sprintf("%s,%s,%s", temp[0],
-								temp[1], paramValues[index2]));
-						index2++;
-					}
-				});
+		var count = 0;
+		$.each($("#selected_condition option"), function(i, n) {
+			var temp = $(n).val().split(",");
+			if (temp.length == 1) {
+				return; // equals continue
+			}
+			if (temp[1] == "6") {// between
+				selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0],
+						temp[1], paramValues[count], paramValues[count + 1]));
+				count += 2;
+			} else if (temp[1] == "9" || temp[1] == "10") {
+				// is null 、is not null do not get mock value
+			} else {
+				selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1],
+						paramValues[count]));
+				count++;
+			}
+		});
 
 		postData["condition"] = selectedConditions.join(";");
 		var mockValueHtml = '<div class="row-fluid">'
@@ -1176,23 +1192,24 @@
 		});
 
 		var selectedConditions = [];
-		var index2 = 0;
-		$.each($("#selected_condition option"),
-				function(index, value) {
-					var temp = $(value).val().split(",");
-					if (temp[1] == "6") {// between
-						selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0],
-								temp[1], paramValues[index2],
-								paramValues[index2 + 1]));
-						index2 += 2;
-					} else if (temp[1] == "9" || temp[1] == "10") {
-						// is null 、is not null do not have mock value
-					} else {
-						selectedConditions.push(sprintf("%s,%s,%s", temp[0],
-								temp[1], paramValues[index2]));
-						index2++;
-					}
-				});
+		var count = 0;
+		$.each($("#selected_condition option"), function(i, n) {
+			var temp = $(n).val().split(",");
+			if (temp.length == 1) {
+				return;
+			}
+			if (temp[1] == "6") {// between
+				selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0],
+						temp[1], paramValues[count], paramValues[count + 1]));
+				count += 2;
+			} else if (temp[1] == "9" || temp[1] == "10") {
+				// is null 、is not null do not have mock value
+			} else {
+				selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1],
+						paramValues[count]));
+				count++;
+			}
+		});
 		postData["condition"] = selectedConditions.join(";");
 		postData["sql_content"] = ace.edit("sql_builder").getValue();
 
@@ -1209,7 +1226,6 @@
 					mockValues.push($(first).val());
 				});
 		postData["mockValues"] = mockValues.join(";");
-
 		$("#auto_sql_validate_result").empty();
 		$
 				.post(
@@ -1259,7 +1275,6 @@
 						}).fail(function(data) {
 					alert("保存出错！");
 				});
-
 	};
 
 	var step2_2_4 = function() {

@@ -462,6 +462,11 @@
 										<option value='8'>In</option>
 										<option value='9'>Is null</option>
 										<option value='10'>Is not null</option>
+										<option value='11'>And</option>
+										<option value='12'>Or</option>
+										<option value='13'>Not</option>
+										<option value='14'>(</option>
+										<option value='15'>)</option>
 									</select> <input id="add_condition" type="button"
 										class="span2 btn btn-primary popup_text input-sm" value="添加">
 								</div>

@@ -44,6 +44,11 @@
 					<li><a href="javascript:;"
 						onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">DAL框架使用说明</a>
 					</li>
+					<li><a href="javascript:;"
+						onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=74094596', '_blank');">SQL
+							Server使用规范</a></li>
+					<li><a href="javascript:;"
+						onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=55383965', '_blank');">MySQL开发规范详解</a></li>
 					<li><a href="mailto:rdfxdal@Ctrip.com">联系我们</a></li>
 				</ul></li>
 			<li class="dropdown user"><a href="javascript:;"

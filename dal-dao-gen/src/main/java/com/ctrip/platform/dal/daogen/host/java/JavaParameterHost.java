@@ -44,8 +44,8 @@ public class JavaParameterHost extends AbstractParameterHost {
 	private boolean conditional;
 
 	private ConditionType conditionType;
-	
-	private boolean sensitive = false;//whether the param is sensitive
+
+	private boolean sensitive = false;// whether the param is sensitive
 
 	public JavaParameterHost() {
 	}
@@ -86,7 +86,7 @@ public class JavaParameterHost extends AbstractParameterHost {
 	public void setNullable(boolean nullable) {
 		this.nullable = nullable;
 	}
-	
+
 	public boolean isSensitive() {
 		return sensitive;
 	}
@@ -178,23 +178,26 @@ public class JavaParameterHost extends AbstractParameterHost {
 
 	public String getCapitalizedName() {
 		String tempName = name.replace("@", "");
-//		if (tempName.contains("_")) {
-//			tempName = WordUtils.capitalizeFully(tempName.replace('_', ' '))
-//					.replace(" ", "");
-//		}
+		// if (tempName.contains("_")) {
+		// tempName = WordUtils.capitalizeFully(tempName.replace('_', ' '))
+		// .replace(" ", "");
+		// }
 		return WordUtils.capitalize(tempName);
 	}
 
 	public String getUncapitalizedName() {
 		String tempName = name.replace("@", "");
-//		if (tempName.contains("_")) {
-//			tempName = WordUtils.capitalizeFully(tempName.replace('_', ' '))
-//					.replace(" ", "");
-//		}
+		// if (tempName.contains("_")) {
+		// tempName = WordUtils.capitalizeFully(tempName.replace('_', ' '))
+		// .replace(" ", "");
+		// }
 		return WordUtils.uncapitalize(tempName);
 	}
 
 	public String getClassDisplayName() {
+		if (javaClass == null) {
+			return "";
+		}
 		if (byte[].class.equals(javaClass))
 			return "byte[]";
 		return javaClass.getSimpleName();
@@ -223,5 +226,5 @@ public class JavaParameterHost extends AbstractParameterHost {
 	public void setValidationValue(Object validationValue) {
 		this.validationValue = validationValue;
 	}
-	
+
 }

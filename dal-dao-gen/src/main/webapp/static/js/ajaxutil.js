@@ -4,7 +4,6 @@
 //step3-1 -> step3-2
 (function(window, undefined) {
 	var AjaxUtil = function() {
-
 	};
 
 	/**
@@ -32,7 +31,6 @@
 			$("#page1").modal('hide');
 			w2ui["grid_toolbar"].click('refreshDAO', null);
 			if ($("#gen_on_save").is(":checked")) {
-				// window.ajaxutil.generate_code($("#gen_language").val());
 				$("#generateCode").modal({
 					"backdrop" : "static"
 				});
@@ -74,9 +72,6 @@
 		$.each($("#param_list_auto").children("div"), function(i, n) {
 			var first = $(n).find("input").eq(0);
 			var second = $(n).find(":checkbox").eq(0);
-			// var second = $(value).children("select").eq(0);
-			// paramList.push(sprintf("%s,%s", $(first).val(),
-			// $(second).val()));
 			paramList.push($(first).val());
 			paramValues.push($(first).val());
 			paramNullable.push($(second).is(":checked"));
@@ -89,26 +84,32 @@
 		var selectedConditions = [];
 		var idx = 0;
 		if (postData["sql_style"] == "csharp") {
-			$.each($("#selected_condition option"), function(i, n) {
-				var temp = $(n).val().split(",");
-				if (temp[1] == "6") {// between
-					selectedConditions.push(sprintf("%s,%s,%s,%s,%s", temp[0],
-							temp[1], paramValues[idx], paramValues[idx + 1],
-							paramNullable[idx]));
-					idx += 2;
-				} else if (temp[1] == "9" || temp[1] == "10") {// is
-					// null
-					// or is
-					// not
-					// null
-					selectedConditions.push(sprintf("%s,%s,%s", temp[0],
-							temp[1], temp[0]));
-				} else {
-					selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0],
-							temp[1], paramValues[idx], paramNullable[idx]));
-					idx++;
-				}
-			});
+			$.each($("#selected_condition option"),
+					function(i, n) {
+						var temp = $(n).val().split(",");
+						if (temp.length == 1) {
+							selectedConditions.push(temp[0]);
+						} else if (temp.length > 1) {
+							if (temp[1] == "6") {
+								// between
+								selectedConditions.push(sprintf(
+										"%s,%s,%s,%s,%s", temp[0], temp[1],
+										paramValues[idx], paramValues[idx + 1],
+										paramNullable[idx]));
+								idx += 2;
+							} else if (temp[1] == "9" || temp[1] == "10") {
+								// is null
+								// is not null
+								selectedConditions.push(sprintf("%s,%s,%s",
+										temp[0], temp[1], temp[0]));
+							} else {
+								selectedConditions.push(sprintf("%s,%s,%s,%s",
+										temp[0], temp[1], paramValues[idx],
+										paramNullable[idx]));
+								idx++;
+							}
+						}
+					});
 		} else {
 			$.each($("#selected_condition option"), function(i, n) {
 				var temp = $(n).val().split(",");
@@ -124,8 +125,7 @@
 						idx += 2;
 					} else if (temp[1] == "9" || temp[1] == "10") {
 						// is null
-						// or is
-						// not null
+						// is not null
 						selectedConditions.push(sprintf("%s,%s,%s", temp[0],
 								temp[1], temp[0]));
 					} else {
@@ -407,7 +407,6 @@
 							+ "&daoFlag=true&groupId="
 							+ project['dal_group_id']).done(
 					function(data) {
-
 						if ($("#databases")[0] != undefined
 								&& $("#databases")[0].selectize != undefined) {
 							$("#databases")[0].selectize.clearOptions();
@@ -483,5 +482,4 @@
 	};
 
 	window.ajaxutil = new AjaxUtil();
-
 })(window);

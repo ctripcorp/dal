@@ -462,6 +462,11 @@
 										<option value='8'>In</option>
 										<option value='9'>Is null</option>
 										<option value='10'>Is not null</option>
+										<option value='11'>And</option>
+										<option value='12'>Or</option>
+										<option value='13'>Not</option>
+										<option value='14'>(</option>
+										<option value='15'>)</option>
 									</select> <input id="add_condition" type="button"
 										class="span2 btn btn-primary popup_text input-sm" value="添加">
 								</div>
@@ -510,9 +515,25 @@
 						<div class="row-fluid" id="param_list_auto_div">
 							<label class="control-label popup_label">填写条件参数名,选择参数是否支持NULL值</label>
 						</div>
-						<div id="param_list_auto" class="row-fluid input-sm"></div>
 						<div class="row-fluid">
-							<br /> <br />
+							<div id="param_list_auto" class="row-fluid input-sm"></div>
+						</div>
+						<br />
+						<div id="buildJavaHints">
+							<div class="row-fluid">Hints:</div>
+							<div class="row-fluid">
+								<label class="popup_label"><input
+									id="chk_build_allShard" type="checkbox" value="allShard">allShard&nbsp;&nbsp;</label>
+								<label class="popup_label"><input id="chk_build_shards"
+									type="checkbox" value="shards">shards&nbsp;&nbsp;</label> <label
+									class="popup_label"><input id="chk_build_async"
+									type="checkbox" value="async">async&nbsp;&nbsp;</label> <label
+									class="popup_label"><input id="chk_build_callback"
+									type="checkbox" value="callback">callback</label>
+							</div>
+						</div>
+						<br />
+						<div class="row-fluid">
 							<div style="clear: both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
 						</div>
 						<div class="row-fluid">
@@ -649,9 +670,25 @@
 						<div class="row-fluid" id="param_list_free_div">
 							<label class="control-label popup_label">填写参数名/参数Index，并选择数据类型</label>
 						</div>
-						<div id="param_list" class="row-fluid input-sm"></div>
 						<div class="row-fluid">
-							<br /> <br />
+							<div id="param_list" class="row-fluid input-sm"></div>
+						</div>
+						<br />
+						<div id="customJavaHints">
+							<div class="row-fluid">Hints:</div>
+							<div class="row-fluid">
+								<label class="popup_label"><input
+									id="chk_custom_allShard" type="checkbox" value="allShard">allShard&nbsp;&nbsp;</label>
+								<label class="popup_label"><input id="chk_custom_shards"
+									type="checkbox" value="shards">shards&nbsp;&nbsp;</label> <label
+									class="popup_label"><input id="chk_custom_async"
+									type="checkbox" value="async">async&nbsp;&nbsp;</label> <label
+									class="popup_label"><input id="chk_custom_callback"
+									type="checkbox" value="callback">callback</label>
+							</div>
+						</div>
+						<br />
+						<div class="row-fluid">
 							<div style="clear: both">以下SQL语句为只读，如果需要修改，请点击上一步，进行修改。</div>
 						</div>
 						<div class="row-fluid">

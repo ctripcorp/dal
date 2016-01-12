@@ -22,42 +22,51 @@ import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 
 public class JavaCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
 
-	private static Logger log = Logger.getLogger(JavaCodeGeneratorOfFreeSqlProcessor.class);
-	
+	private static Logger log = Logger
+			.getLogger(JavaCodeGeneratorOfFreeSqlProcessor.class);
+
 	public void process(CodeGenContext context) throws Exception {
-		JavaCodeGenContext ctx = (JavaCodeGenContext)context;
+		JavaCodeGenContext ctx = (JavaCodeGenContext) context;
 		int projectId = ctx.getProjectId();
-		File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
-		
-		List<Callable<ExecuteResult>> freeCallables = generateFreeSqlDao(ctx, dir);
-			
+		File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(),
+				projectId));
+
+		List<Callable<ExecuteResult>> freeCallables = generateFreeSqlDao(ctx,
+				dir);
+
 		TaskUtils.invokeBatch(log, freeCallables);
 	}
 
-	private List<Callable<ExecuteResult>> generateFreeSqlDao(CodeGenContext codeGenCtx, 
-			final File mavenLikeDir) {
-		JavaCodeGenContext ctx = (JavaCodeGenContext)codeGenCtx;
+	private List<Callable<ExecuteResult>> generateFreeSqlDao(
+			CodeGenContext codeGenCtx, final File mavenLikeDir) {
+		JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
 		final Progress progress = ctx.getProgress();
 		List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
 
-		Map<String, JavaMethodHost> _freeSqlPojoHosts = ctx.get_freeSqlPojoHosts();
+		Map<String, JavaMethodHost> _freeSqlPojoHosts = ctx
+				.get_freeSqlPojoHosts();
 		for (final JavaMethodHost host : _freeSqlPojoHosts.values()) {
-			if(host.isSampleType())
+			if (host.isSampleType())
 				continue;
 			Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 				@Override
 				public ExecuteResult call() throws Exception {
-					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getPojoClassName() + "] Pojo");
+					ExecuteResult result = new ExecuteResult(
+							"Generate Free SQL[" + host.getPojoClassName()
+									+ "] Pojo");
 					progress.setOtherMessage(result.getTaskName());
 					try {
-						VelocityContext context = GenUtils.buildDefaultVelocityContext();
+						VelocityContext context = GenUtils
+								.buildDefaultVelocityContext();
 						context.put("host", host);
 						GenUtils.mergeVelocityContext(
 								context,
-								String.format("%s/Entity/%s.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
+								String.format("%s/Entity/%s.java",
+										mavenLikeDir.getAbsolutePath(),
+										host.getPojoClassName()),
 								"templates/java/Pojo.java.tpl");
 						result.setSuccessal(true);
-					}catch(Exception e){
+					} catch (Exception e) {
 						log.error(result.getTaskName() + " exception", e);
 					}
 					return result;
@@ -72,29 +81,30 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
 
 				@Override
 				public ExecuteResult call() throws Exception {
-					ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Dap, Test");
+					ExecuteResult result = new ExecuteResult(
+							"Generate Free SQL[" + host.getClassName()
+									+ "] Dap, Test");
 					progress.setOtherMessage(result.getTaskName());
 					try {
-						VelocityContext context = GenUtils.buildDefaultVelocityContext();
+						VelocityContext context = GenUtils
+								.buildDefaultVelocityContext();
 						context.put("host", host);
-						
+
 						GenUtils.mergeVelocityContext(
 								context,
-								String.format("%s/Dao/%sDao.java", mavenLikeDir.getAbsolutePath(), host.getClassName()),
+								String.format("%s/Dao/%sDao.java",
+										mavenLikeDir.getAbsolutePath(),
+										host.getClassName()),
 								"templates/java/dao/freesql/FreeSqlDAO.java.tpl");
-	
-//						GenUtils.mergeVelocityContext(
-//								context,
-//								String.format("%s/Test/%sDaoTest.java", mavenLikeDir.getAbsolutePath(), host.getClassName()),
-//								"templates/java/test/FreeSqlDAOTest.java.tpl");
-						
-						GenUtils.mergeVelocityContext(
-								context,
-								String.format("%s/Test/%sDaoUnitTest.java", mavenLikeDir.getAbsolutePath(), host.getClassName()),
+
+						GenUtils.mergeVelocityContext(context, String.format(
+								"%s/Test/%sDaoUnitTest.java",
+								mavenLikeDir.getAbsolutePath(),
+								host.getClassName()),
 								"templates/java/test/FreeSqlDaoUnitTest.java.tpl");
-						
+
 						result.setSuccessal(true);
-					}catch(Exception e){
+					} catch (Exception e) {
 						log.error(result.getTaskName() + " exception", e);
 					}
 					return result;

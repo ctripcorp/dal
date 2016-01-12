@@ -16,8 +16,7 @@ public class ${host.getPojoClassName()}Dao {
 #else
 	private static final String COUNT_SQL_PATTERN = "SELECT count(1) from ${host.getTableName()} WITH (NOLOCK)";
 	private static final String ALL_SQL_PATTERN = "SELECT * FROM ${host.getTableName()} WITH (NOLOCK)";
-	private static final String PAGE_SQL_PATTERN = "WITH CTE AS (select *, row_number() over(order by ${host.getOverColumns()} desc ) as rownum" 
-			+" from ${host.getTableName()} (nolock)) select * from CTE where rownum between ? and ?";
+	private static final String PAGE_SQL_PATTERN = "select * from ${host.getTableName()} (nolock) order by ${host.getOverColumns()} desc OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";	
 #end
 	private DalParser<${host.getPojoClassName()}> parser = null;	
 	private DalScalarExtractor extractor = new DalScalarExtractor();

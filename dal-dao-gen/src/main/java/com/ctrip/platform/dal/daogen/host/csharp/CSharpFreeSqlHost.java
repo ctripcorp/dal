@@ -7,13 +7,13 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 public class CSharpFreeSqlHost {
 
 	private String nameSpace;
-	
+
 	private String dbSetName;
-	
+
 	private String className;
-	
+
 	private List<CSharpMethodHost> methods;
-	
+
 	private DatabaseCategory databaseCategory;
 
 	public String getNameSpace() {
@@ -55,21 +55,21 @@ public class CSharpFreeSqlHost {
 	public void setDatabaseCategory(DatabaseCategory databaseCategory) {
 		this.databaseCategory = databaseCategory;
 	}
-	
-	public String pageBegain(){
-		if(this.databaseCategory == DatabaseCategory.MySql){
-			return "(pageNo - 1) * pageSize";
-		}else{
-			return "(pageNo - 1) * pageSize + 1";
-		}
+
+	public String pageBegain() {
+		return "(pageNo - 1) * pageSize";
+		/*
+		 * if (this.databaseCategory == DatabaseCategory.MySql) { return
+		 * "(pageNo - 1) * pageSize"; } else { return
+		 * "(pageNo - 1) * pageSize + 1"; }
+		 */
 	}
-	
-	public String pageEnd(){
-		if(this.databaseCategory == DatabaseCategory.MySql){
-			return "pageSize";
-		}else{
-			return "pageSize * pageNo";
-		}
+
+	public String pageEnd() {
+		return "pageSize";
+		/*
+		 * if (this.databaseCategory == DatabaseCategory.MySql) { return
+		 * "pageSize"; } else { return "pageSize * pageNo"; }
+		 */
 	}
 }
-

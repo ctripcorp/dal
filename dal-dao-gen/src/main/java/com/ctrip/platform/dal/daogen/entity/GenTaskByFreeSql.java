@@ -1,5 +1,3 @@
-
-
 package com.ctrip.platform.dal.daogen.entity;
 
 import java.sql.ResultSet;
@@ -19,7 +17,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	private String class_name;
 	private String pojo_name;
 	private String method_name;
-	//操作类型，可取值:select、update
+	// 操作类型，可取值:select、update
 	private String crud_type;
 	private String sql_content;
 	private String parameters;
@@ -27,29 +25,31 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	private int version;
 	private String update_user_no;
 	private Timestamp update_time;
-	private String str_update_time="";
+	private String str_update_time = "";
 	private String comment;
-	//可取值：Single、First、List，表示select返回的结果类型
+	// 可取值：Single、First、List，表示select返回的结果类型
 	private String scalarType;
-	//实体类型，取值：EntityType、SimpleType，分别表示实体类型、简单类型
-	//若取值为SimpleType，则pojo_name的值为：简单类型
+	// 实体类型，取值：EntityType、SimpleType，分别表示实体类型、简单类型
+	// 若取值为SimpleType，则pojo_name的值为：简单类型
 	private String pojoType;
-	//是否增加分页方法，true：增加
+	// 是否增加分页方法，true：增加
 	private boolean pagination;
-	//csharp 或者 java，表示C#风格或者Java风格，@Name or ?
+	// csharp 或者 java，表示C#风格或者Java风格，@Name or ?
 	private String sql_style;
-	
+
 	private int approved;
 	private String str_approved;
 	private String approveMsg;
-	
+
+	private String hints;
+
 	public static GenTaskByFreeSql visitRow(ResultSet rs) throws SQLException {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 		task.setId(rs.getInt(1));
 		task.setProject_id(rs.getInt(2));
-		
+
 		String databaseSet = rs.getString(3);
-		
+
 		task.setAllInOneName(DatabaseSetUtils.getAllInOneName(databaseSet));
 		task.setDatabaseSetName(databaseSet);
 		task.setClass_name(rs.getString(4));
@@ -67,22 +67,25 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		task.setPojoType(rs.getString("pojoType"));
 		task.setPagination(rs.getBoolean("pagination"));
 		task.setSql_style(rs.getString("sql_style"));
-		
+
 		task.setApproved(rs.getInt("approved"));
 		task.setApproveMsg(rs.getString("approveMsg"));
 
+		task.setHints(rs.getString("hints"));
+
 		try {
-			if (task.getApproved()==1) {
+			if (task.getApproved() == 1) {
 				task.setStr_approved("未审批");
-			} else if (task.getApproved()==2) {
+			} else if (task.getApproved() == 2) {
 				task.setStr_approved("通过");
-			} else if (task.getApproved()==3) {
+			} else if (task.getApproved() == 3) {
 				task.setStr_approved("未通过");
 			} else {
 				task.setStr_approved("通过");
 			}
 			Date date = new Date(task.getUpdate_time().getTime());
-			task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+			task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+					.format(date));
 		} catch (Throwable e) {
 		}
 		return task;
@@ -90,16 +93,16 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 
 	@Override
 	public int compareTo(GenTaskByFreeSql o) {
-		int result =  this.getAllInOneName().compareTo(o.getAllInOneName());
-		if(result != 0){
+		int result = this.getAllInOneName().compareTo(o.getAllInOneName());
+		if (result != 0) {
 			return result;
 		}
-		
+
 		result = this.getClass_name().compareTo(o.getClass_name());
-		if(result != 0){
+		if (result != 0) {
 			return result;
 		}
-		
+
 		return this.getMethod_name().compareTo(o.getMethod_name());
 	}
 
@@ -138,8 +141,8 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	public String getAllInOneName() {
 		return allInOneName;
 	}
-	
-	public void setAllInOneName(String allInOneName){
+
+	public void setAllInOneName(String allInOneName) {
 		this.allInOneName = allInOneName;
 	}
 
@@ -222,7 +225,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-	
+
 	public String getScalarType() {
 		return scalarType;
 	}
@@ -287,4 +290,11 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
 		this.approveMsg = approveMsg;
 	}
 
+	public String getHints() {
+		return hints;
+	}
+
+	public void setHints(String hints) {
+		this.hints = hints;
+	}
 }

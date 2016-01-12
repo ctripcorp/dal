@@ -3,18 +3,17 @@
 //step2
 //step3-1 -> step3-2
 (function(window, undefined) {
-
 	var wizzard = function() {
-
 	};
 
 	var variableHtmlOrigin = '<div class="row-fluid"><input type="text" class="span3" value="%s">';
 
 	var variableHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">'
-			+ ' &nbsp;&nbsp;允许NULL值：<input type="checkbox" %s >';
+			+ ' <label class="popup_label">&nbsp;<input type="checkbox" %s >允许NULL值</label>';
 
 	var variableHtml_ForJAVA = '<div class="row-fluid"><input type="text" class="span3" value="%s">'
-			+ ' &nbsp;&nbsp;允许NULL值：<input type="checkbox" %s >&nbsp;&nbsp;参数敏感：<input type="checkbox" %s >';
+			+ ' <label class="popup_label">&nbsp;<input type="checkbox" %s >允许NULL值</label>'
+			+ ' <label class="popup_label">&nbsp;&nbsp;<input type="checkbox" %s >参数敏感</label>';
 
 	var variable_typesHtml_ForJAVA = '<select %s class="span5">'
 			+ "<option value='_please_select'>--参数类型--</option>"
@@ -753,28 +752,11 @@
 										&& record.condition != "") {
 									var selectedConditions = record.condition
 											.split(";");
-									$
-											.each(
-													selectedConditions,
-													function(index, value) {
-														$("#selected_condition")
-																.append(
-																		$(
-																				'<option>',
-																				{
-																					value : value,
-																					text : sprintf(
-																							"%s %s",
-																							value
-																									.split(',')[0],
-																							$(
-																									sprintf(
-																											"#condition_values > option[value='%s']",
-																											value
-																													.split(',')[1]))
-																									.text())
-																				}));
-													});
+									$.each(selectedConditions, function(index,
+											value) {
+										var array = value.split(",");
+										getOption(value, array);
+									});
 								}
 								var sql_builder = ace.edit("sql_builder");
 								sql_builder.setTheme("ace/theme/monokai");
@@ -817,22 +799,43 @@
 								$(".step2-2-1-1").hide();
 								$(".step2-2-1-2").show();
 							}
-							// if("java"==$("#sql_style").val() &&
-							// "select"==$("#crud_option").val()){
-							// $('#fields').multipleSelect('setSelects',
-							// values);
-							// $('#fields').multipleSelect('disable');
-							// }else{
-							// $('#fields').multipleSelect('enable');
-							// }
-							// if ($("#page1").attr('is_update') != "1") {
-							// window.sql_builder.build();
-							// }
 							$("body").unblock();
 						}).fail(function(data) {
 					$("#error_msg").text("获取表的信息失败，请检查是否有权限！");
 					$("body").unblock();
 				});
+	};
+
+	var getOption = function(value, array) {
+		if (array.length == 1) {
+			$("#selected_condition")
+					.append(
+							$(
+									'<option>',
+									{
+										value : value,
+										text : $(
+												sprintf(
+														"#condition_values > option[value='%s']",
+														value)).text()
+									}));
+		} else if (array.length > 1) {
+			$("#selected_condition")
+					.append(
+							$(
+									'<option>',
+									{
+										value : value,
+										text : sprintf(
+												"%s %s",
+												array[0],
+												$(
+														sprintf(
+																"#condition_values > option[value='%s']",
+																array[1]))
+														.text())
+									}));
+		}
 	};
 
 	var step2_2_1 = function(record, current) {
@@ -853,6 +856,7 @@
 		var paramHtml = "";
 		if ($("#sql_style").val() == "csharp") {
 			paramHtml = step2_2_1_csharp(record, current, crud_option);
+			$("#buildJavaHints").hide();
 		} else {
 			if (crud_option == "insert") {
 				paramHtml = step2_2_1_java_insert(record, current, crud_option);
@@ -870,12 +874,30 @@
 			$("#param_list_auto").html(paramHtml);
 		}
 
+		// bind java hints
+		if ($("#page1").attr('is_update') == "1") {
+			if (record.hints != undefined && record.hints.length > 0) {
+				var array = record.hints.split(";");
+				if (array != undefined && array.length > 0) {
+					// clear checkboxes
+					var cbHints = $("#buildJavaHints :checkbox");
+					if (cbHints != undefined && cbHints.length > 0) {
+						$.each(cbHints, function(i, n) {
+							$(cbHints[i]).prop("checked", false);
+						});
+					}
+					$.each(array, function(i, n) {
+						$("#chk_build_" + n).prop("checked", true);
+					});
+				}
+			}
+		}
+
 		window.sql_builder.buildPagingSQL(function() {
 			$("#error_msg").empty();
 			current.hide();
 			$(".step2-2-2").show();
 		});
-
 	};
 
 	var step2_2_1_getSelectedConditionParamCount = function() {
@@ -895,7 +917,6 @@
 	};
 
 	var step2_2_1_java = function(record, current, crud_option) {
-
 		// 解析Sql语句，提取出参数
 		var regexIndex = /(\?{1})/igm;
 		var sqlContent = ace.edit("sql_builder").getValue(), result;
@@ -997,7 +1018,6 @@
 	};
 
 	var step2_2_1_csharp = function(record, current, crud_option) {
-
 		// 解析Sql语句，提取出参数
 		var regexNames = /[@:](\w+)/igm;
 		var sqlContent = ace.edit("sql_builder").getValue(), result;
@@ -1075,28 +1095,29 @@
 		postData["pagination"] = $("#auto_sql_pagination").is(":checked");
 
 		var paramValues = [];
-		$.each($("#param_list_auto").children("div"), function(index, value) {
-			var first = $(value).children("input").eq(0);
+		$.each($("#param_list_auto").children("div"), function(i, n) {
+			var first = $(n).children("input").eq(0);
 			paramValues.push($(first).val());
 		});
 		var selectedConditions = [];
-		var index2 = 0;
-		$.each($("#selected_condition option"),
-				function(index, value) {
-					var temp = $(value).val().split(",");
-					if (temp[1] == "6") {// between
-						selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0],
-								temp[1], paramValues[index2],
-								paramValues[index2 + 1]));
-						index2 += 2;
-					} else if (temp[1] == "9" || temp[1] == "10") {
-						// is null 、is not null do not get mock value
-					} else {
-						selectedConditions.push(sprintf("%s,%s,%s", temp[0],
-								temp[1], paramValues[index2]));
-						index2++;
-					}
-				});
+		var count = 0;
+		$.each($("#selected_condition option"), function(i, n) {
+			var temp = $(n).val().split(",");
+			if (temp.length == 1) {
+				return; // equals continue
+			}
+			if (temp[1] == "6") {// between
+				selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0],
+						temp[1], paramValues[count], paramValues[count + 1]));
+				count += 2;
+			} else if (temp[1] == "9" || temp[1] == "10") {
+				// is null 、is not null do not get mock value
+			} else {
+				selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1],
+						paramValues[count]));
+				count++;
+			}
+		});
 
 		postData["condition"] = selectedConditions.join(";");
 		var mockValueHtml = '<div class="row-fluid">'
@@ -1171,23 +1192,24 @@
 		});
 
 		var selectedConditions = [];
-		var index2 = 0;
-		$.each($("#selected_condition option"),
-				function(index, value) {
-					var temp = $(value).val().split(",");
-					if (temp[1] == "6") {// between
-						selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0],
-								temp[1], paramValues[index2],
-								paramValues[index2 + 1]));
-						index2 += 2;
-					} else if (temp[1] == "9" || temp[1] == "10") {
-						// is null 、is not null do not have mock value
-					} else {
-						selectedConditions.push(sprintf("%s,%s,%s", temp[0],
-								temp[1], paramValues[index2]));
-						index2++;
-					}
-				});
+		var count = 0;
+		$.each($("#selected_condition option"), function(i, n) {
+			var temp = $(n).val().split(",");
+			if (temp.length == 1) {
+				return;
+			}
+			if (temp[1] == "6") {// between
+				selectedConditions.push(sprintf("%s,%s,%s,%s", temp[0],
+						temp[1], paramValues[count], paramValues[count + 1]));
+				count += 2;
+			} else if (temp[1] == "9" || temp[1] == "10") {
+				// is null 、is not null do not have mock value
+			} else {
+				selectedConditions.push(sprintf("%s,%s,%s", temp[0], temp[1],
+						paramValues[count]));
+				count++;
+			}
+		});
 		postData["condition"] = selectedConditions.join(";");
 		postData["sql_content"] = ace.edit("sql_builder").getValue();
 
@@ -1204,7 +1226,6 @@
 					mockValues.push($(first).val());
 				});
 		postData["mockValues"] = mockValues.join(";");
-
 		$("#auto_sql_validate_result").empty();
 		$
 				.post(
@@ -1254,7 +1275,6 @@
 						}).fail(function(data) {
 					alert("保存出错！");
 				});
-
 	};
 
 	var step2_2_4 = function() {
@@ -1389,6 +1409,10 @@
 			$("#param_list").html(htmls);
 		}
 
+		if ($("#sql_style").val() == "csharp") {
+			$("#customJavaHints").hide();
+		}
+
 		if ($("#page1").attr('is_update') == "1") {
 			splitedParams = record.parameters.split(";");
 			$.each(splitedParams, function(index, value) {
@@ -1407,6 +1431,22 @@
 					}
 				}
 			});
+
+			if (record.hints != undefined && record.hints.length > 0) {
+				var array = record.hints.split(";");
+				if (array != undefined && array.length > 0) {
+					// clear checkboxes
+					var cbHints = $("#customJavaHints :checkbox");
+					if (cbHints != undefined && cbHints.length > 0) {
+						$.each(cbHints, function(i, n) {
+							$(cbHints[i]).prop("checked", false);
+						});
+					}
+					$.each(array, function(i, n) {
+						$("#chk_custom_" + n).prop("checked", true);
+					});
+				}
+			}
 		}
 
 		window.sql_builder.buildPagingSQL(function() {
@@ -1414,7 +1454,6 @@
 			current.hide();
 			$(".step2-3-3").show();
 		});
-
 	};
 
 	var step2_3_3 = function(record, current) {
@@ -1576,7 +1615,6 @@
 	};
 
 	wizzard.prototype = {
-
 		clear : function() {
 			$("#error_msg").html("");
 

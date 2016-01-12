@@ -14,95 +14,99 @@ public class FreeSqlHost {
 	private List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
 	private List<JavaParameterHost> fields;
 	private DatabaseCategory databaseCategory;
-	
+
 	public Set<String> getDaoImports() {
 		Set<String> imports = new TreeSet<String>();
 		imports.add("com.ctrip.platform.dal.dao.*");
 		imports.add("com.ctrip.platform.dal.dao.helper.*");
-		
+
 		imports.add(java.sql.ResultSet.class.getName());
 		imports.add(java.sql.SQLException.class.getName());
-		imports.add( java.sql.Types.class.getName());
-		imports.add( java.util.List.class.getName());
+		imports.add(java.sql.Types.class.getName());
+		imports.add(java.util.List.class.getName());
 
 		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>();
-		for(JavaMethodHost method: methods) {
-			if(null != method.getParameters())
+		for (JavaMethodHost method : methods) {
+			if (null != method.getParameters())
 				allTypes.addAll(method.getParameters());
-			if(null != method.getFields())
+			if (null != method.getFields())
 				allTypes.addAll(method.getFields());
 		}
-		
-		for(JavaParameterHost field: allTypes) {
+
+		for (JavaParameterHost field : allTypes) {
 			Class<?> clazz = field.getJavaClass();
-			if(byte[].class.equals(clazz))
+			if (byte[].class.equals(clazz))
 				continue;
-			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))
+			if (clazz.getPackage().getName()
+					.equals(String.class.getPackage().getName()))
 				continue;
 			imports.add(clazz.getName());
 		}
 		return imports;
 	}
-	
-	public Set<String> getTestImports()
-	{
+
+	public Set<String> getTestImports() {
 		Set<String> imports = new TreeSet<String>();
 		imports.add(java.util.List.class.getName());
 		imports.addAll(this.getPojoImports());
 		return imports;
 	}
-	
+
 	public Set<String> getPojoImports() {
 		Set<String> imports = new TreeSet<String>();
 
 		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>();
-		for(JavaParameterHost field: allTypes) {
+		for (JavaParameterHost field : allTypes) {
 			Class<?> clazz = field.getJavaClass();
-			if(byte[].class.equals(clazz))
+			if (byte[].class.equals(clazz))
 				continue;
-			if(clazz.getPackage().getName().equals(String.class.getPackage().getName()))
+			if (clazz.getPackage().getName()
+					.equals(String.class.getPackage().getName()))
 				continue;
 			imports.add(clazz.getName());
 		}
 		return imports;
 	}
-	public String pageBegain(){
-		if(this.databaseCategory == DatabaseCategory.MySql){
-			return "(pageNo - 1) * pageSize";
-		}else{
-			return "(pageNo - 1) * pageSize + 1";
-		}
+
+	public String pageBegain() {
+		return "(pageNo - 1) * pageSize";
+		/*
+		 * if (this.databaseCategory == DatabaseCategory.MySql) { return
+		 * "(pageNo - 1) * pageSize"; } else { return
+		 * "(pageNo - 1) * pageSize + 1"; }
+		 */
 	}
-	
-	public String pageEnd(){
-		if(this.databaseCategory == DatabaseCategory.MySql){
-			return "pageSize";
-		}else{
-			return "pageSize * pageNo";
-		}
+
+	public String pageEnd() {
+		return "pageSize";
+		/*
+		 * if (this.databaseCategory == DatabaseCategory.MySql) { return
+		 * "pageSize"; } else { return "pageSize * pageNo"; }
+		 */
 	}
-	public boolean hasQuery(){
+
+	public boolean hasQuery() {
 		boolean hasQuery = false;
 		for (JavaMethodHost mtd : this.methods) {
-			if(mtd.isQuery()){
+			if (mtd.isQuery()) {
 				hasQuery = true;
 				break;
 			}
 		}
 		return hasQuery;
 	}
-	
-	public boolean hasUpdate(){
+
+	public boolean hasUpdate() {
 		boolean hasUpdate = false;
 		for (JavaMethodHost mtd : this.methods) {
-			if(mtd.isUpdate()){
+			if (mtd.isUpdate()) {
 				hasUpdate = true;
 				break;
 			}
 		}
 		return hasUpdate;
 	}
-	
+
 	public List<JavaParameterHost> getFields() {
 		return fields;
 	}
@@ -142,7 +146,7 @@ public class FreeSqlHost {
 	public void setMethods(List<JavaMethodHost> methods) {
 		this.methods = methods;
 	}
-	
+
 	public DatabaseCategory getDatabaseCategory() {
 		return databaseCategory;
 	}

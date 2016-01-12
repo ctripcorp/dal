@@ -38,6 +38,30 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 		this.sensitiveColumnNames = manager.getSensitiveColumnNames();
 	}
 	
+	/**
+	 * To allow config DB name
+	 * @param clazz
+	 * @param dataBaseName
+	 * @throws SQLException
+	 */
+	public DalDefaultJpaParser(Class<T> clazz, String dataBaseName) throws SQLException {
+		this(clazz);
+		this.dataBaseName = dataBaseName;
+	}
+	
+	/**
+	 * To allow config DB and table name
+	 * @param clazz
+	 * @param dataBaseName
+	 * @param tableName
+	 * @throws SQLException
+	 */
+	public DalDefaultJpaParser(Class<T> clazz, String dataBaseName, String tableName) throws SQLException {
+		this(clazz);
+		this.dataBaseName = dataBaseName;
+		this.tableName = tableName;
+	}
+	
 	@Override
 	public T map(ResultSet rs, int rowNum) throws SQLException {
 		return rowMapper.map(rs, rowNum);

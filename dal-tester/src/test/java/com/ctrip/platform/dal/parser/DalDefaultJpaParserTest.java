@@ -85,6 +85,25 @@ public class DalDefaultJpaParserTest {
 		Assert.assertTrue(allTypesParser.getIdentityValue(allTypes).longValue() == Long.MAX_VALUE);
 	}
 	
+	@Test
+	public void testConstructByDbname() throws Exception {
+		DalParser<PersonEntity> parser = new DalDefaultJpaParser(PersonEntity.class);
+
+		Assert.assertEquals("dao_test_M", parser.getDatabaseName());
+		Assert.assertEquals("person", parser.getTableName());
+
+		String testDbName = "test";
+		String testTabeleName = "test2";
+		
+		parser = new DalDefaultJpaParser(PersonEntity.class, testDbName);
+		Assert.assertEquals(testDbName, parser.getDatabaseName());
+		Assert.assertEquals("person", parser.getTableName());
+
+		parser = new DalDefaultJpaParser(PersonEntity.class, testDbName, testTabeleName);
+		Assert.assertEquals(testDbName, parser.getDatabaseName());
+		Assert.assertEquals(testTabeleName, parser.getTableName());
+}
+	
 	@Entity
 	@Database(name="dao_test_M")
 	@Table(name="person")

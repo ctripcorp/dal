@@ -47,7 +47,10 @@ public class DalDefaultJpaParserSqlServerTest {
 	private static DalParser<ClientTestModel> parser = null;
 	static {
 		try {
-			parser = new DalDefaultJpaParser(ClientTestModel.class);
+			String dbName="dao_test_sqlsvr";
+			String tableName="dal_client_test";
+
+			parser = new DalDefaultJpaParser(ClientTestModel.class, dbName, tableName);
 			
 			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(parser.getDatabaseName());	
@@ -135,8 +138,8 @@ public class DalDefaultJpaParserSqlServerTest {
 	}
 
 	
-	@Entity(name="dal_client_test")
-	@Database(name="dao_test_sqlsvr")
+	@Entity(name="123")
+	@Database(name="456")
 	public static class ClientTestModel {
 		@Id
 		@GeneratedValue(strategy = GenerationType.AUTO)

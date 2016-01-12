@@ -43,7 +43,10 @@ public class DalDefaultJpaParserMySqlTest {
 	private static DalParser<ClientTestModel> parser = null;
 	static {
 		try {
-			parser = new DalDefaultJpaParser(ClientTestModel.class);
+			String dbName="dao_test";
+			String tableName="dal_client_test";
+
+			parser = new DalDefaultJpaParser(ClientTestModel.class, dbName, tableName);
 			
 			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(parser.getDatabaseName());	
@@ -120,8 +123,8 @@ public class DalDefaultJpaParserMySqlTest {
 	}
 
 
-	@Database(name="dao_test")
-	@Entity(name="dal_client_test")
+	@Database(name="123")
+	@Entity(name="123")
 	public static class ClientTestModel {
 		@Id
 		@GeneratedValue(strategy = GenerationType.AUTO)

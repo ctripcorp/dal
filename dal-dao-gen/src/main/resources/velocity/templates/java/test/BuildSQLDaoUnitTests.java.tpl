@@ -5,9 +5,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-	    int ret = dao.${method.getName()}(${method.getParameterNames("")});
+	    //int ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end
@@ -18,12 +18,12 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getUpdateSetParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-	    int ret = dao.${method.getName()}(${method.getUpdateParameterNames("")});
+	    //int ret = dao.${method.getName()}(${method.getUpdateParameterNames("")});
 	}
 #end
 #end
@@ -36,9 +36,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-	    ${host.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
+	    //${host.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end
@@ -52,9 +52,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-	    List<${host.getPojoClassName()}> ret = dao.${method.getName()}(${method.getParameterNames("")});
+	    //List<${host.getPojoClassName()}> ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end
@@ -68,9 +68,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-	    ${host.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
+	    //${host.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end
@@ -84,9 +84,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-	    ${host.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
+	    //${host.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end
@@ -100,9 +100,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-	    List<${method.getPojoClassName()}> ret = dao.${method.getName()}(${method.getParameterNames("")});
+	    //List<${method.getPojoClassName()}> ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end
@@ -116,9 +116,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = $!{p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = $!{p.getValidationValue()};// Test value here
 #end
-	    ${method.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
+	    //${method.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end

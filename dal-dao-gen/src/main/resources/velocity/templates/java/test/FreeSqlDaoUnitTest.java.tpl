@@ -44,9 +44,9 @@ public class ${host.getClassName()}DaoUnitTest {
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-	    int ret = dao.${method.getName()}(${method.getParameterNames("")});
+	    //int ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end
@@ -59,9 +59,9 @@ public class ${host.getClassName()}DaoUnitTest {
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-		${method.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
+		//${method.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end
@@ -75,9 +75,9 @@ public class ${host.getClassName()}DaoUnitTest {
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-		List<${method.getPojoClassName()}> ret = dao.${method.getName()}(${method.getParameterNames("")});
+		//List<${method.getPojoClassName()}> ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end
@@ -91,9 +91,9 @@ public class ${host.getClassName()}DaoUnitTest {
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-		${method.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
+		//${method.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end
@@ -107,9 +107,9 @@ public class ${host.getClassName()}DaoUnitTest {
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-		${method.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
+		//${method.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end
@@ -123,9 +123,9 @@ public class ${host.getClassName()}DaoUnitTest {
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-		List<${method.getPojoClassName()}> ret = dao.${method.getName()}(${method.getParameterNames("")});
+		//List<${method.getPojoClassName()}> ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end
@@ -139,9 +139,9 @@ public class ${host.getClassName()}DaoUnitTest {
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
-		${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-		${method.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
+		//${method.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
 #end
 #end

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.host.csharp;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +16,9 @@ import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 
 public class CsharpColumnNameResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
-
 	private String allInOneName;
 	private String tableName;
-	
+
 	public CsharpColumnNameResultSetExtractor(String allInOneName, String tableName) {
 		super();
 		this.allInOneName = allInOneName;
@@ -34,20 +34,20 @@ public class CsharpColumnNameResultSetExtractor implements ResultSetExtractor<Li
 		} catch (Exception e) {
 			throw new SQLException(e.getMessage(), e);
 		}
+
 		while (rs.next()) {
 			CSharpParameterHost host = new CSharpParameterHost();
 			String typeName = rs.getString("TYPE_NAME");
 			int dataType = rs.getInt("DATA_TYPE");
 			int length = rs.getInt("COLUMN_SIZE");
-			
-			//特殊处理
-			host.setDbType(DbUtils.getDotNetDbType(typeName, dataType, length));
-			//host.setName(CommonUtils.normalizeVariable(allColumnsRs.getString("COLUMN_NAME")));
+			boolean isUnsigned = DbUtils.isColumnUnsigned(typeName);
+			// 特殊处理
+			host.setDbType(DbUtils.getDotNetDbType(typeName, dataType, length, isUnsigned));
 			host.setName(rs.getString("COLUMN_NAME"));
 			String remark = rs.getString("REMARKS");
-			if(remark == null){
+			if (remark == null) {
 				String description = columnComment.get(rs.getString("COLUMN_NAME").toLowerCase());
-				remark = description==null?"":description;
+				remark = description == null ? "" : description;
 			}
 			host.setComment(remark.replace("\n", " "));
 			host.setType(DbType.getCSharpType(host.getDbType()));

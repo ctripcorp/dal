@@ -26,8 +26,8 @@ public class CsharpSpParamResultSetExtractor implements ResultSetExtractor<List<
 			}
 
 			CSharpParameterHost host = new CSharpParameterHost();
-			DbType dbType = DbUtils.getDotNetDbType(rs.getString("TYPE_NAME"), 
-					rs.getInt("DATA_TYPE"), rs.getInt("LENGTH"));
+			DbType dbType = DbUtils.getDotNetDbType(rs.getString("TYPE_NAME"), rs.getInt("DATA_TYPE"),
+					rs.getInt("LENGTH"), false);
 			host.setDbType(dbType);
 			host.setNullable(rs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
 

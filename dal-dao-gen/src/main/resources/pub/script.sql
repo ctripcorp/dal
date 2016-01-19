@@ -126,6 +126,7 @@ CREATE TABLE IF NOT EXISTS `task_auto` (
 	,`orderby` VARCHAR(45) NULL DEFAULT NULL
 	,`approved` INT (11) NULL DEFAULT NULL
 	,`approveMsg` LONGTEXT NULL
+	,`hints` VARCHAR(200) NULL DEFAULT NULL
 	,PRIMARY KEY (`id`)
 	);
 
@@ -150,6 +151,7 @@ CREATE TABLE IF NOT EXISTS `task_sql` (
 	,`sql_style` VARCHAR(45) NULL DEFAULT NULL
 	,`approved` INT (11) NULL DEFAULT NULL
 	,`approveMsg` LONGTEXT NULL
+	,`hints` VARCHAR(200) NULL DEFAULT NULL
 	,PRIMARY KEY (`id`)
 	);
 

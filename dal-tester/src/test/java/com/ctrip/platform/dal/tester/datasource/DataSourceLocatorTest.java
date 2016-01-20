@@ -33,16 +33,27 @@ public class DataSourceLocatorTest {
 		s.add("MySqlShard_1");
 		s.add("SqlSvrShard_0");
 		s.add("SqlSvrShard_1");
-		s.add("MultiThreadingTest");
 		s.add("AbacusDB_SEC");
 		p.setup(s);
 
+		DataSourceLocator dsl = new DataSourceLocator(p);
 		for(String name: s) {
-			DataSource ds = new DataSourceLocator(p).getDataSource(name);
+			DataSource ds = dsl.getDataSource(name);
 			Assert.assertNotNull(ds);
 			Connection conn = ds.getConnection();
 			Assert.assertNotNull(conn);
 			conn.close();
 		}
 	}
+	
+	@Test
+	public void testGetFromDataSourceXml() throws Exception {
+		DataSource ds = new DataSourceLocator().getDataSource("allinonelessdatasource");
+		Assert.assertNotNull(ds);
+		Connection conn = ds.getConnection();
+		conn.createStatement().executeQuery("select 1");
+		Assert.assertNotNull(conn);
+		conn.close();
+	}
+
 }

@@ -95,7 +95,7 @@ public class DataSourceLocator {
 		
         ds.createPool();
         
-        logger.info("Datasource[name=" + name + ", Driver=" + config.getDriverClass() + "] created.");
+        logger.info("Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.");
 		
 		return ds;
 	}

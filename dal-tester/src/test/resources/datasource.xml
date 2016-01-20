@@ -160,4 +160,23 @@
               minEvictableIdleTimeMillis="30000"
               option="rewriteBatchedStatements=true;allowMultiQueries=true"
               connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+         <Datasource name="allinonelessdatasource"
+              userName="root"
+              password="!QAZ@WSX1qaz2wsx"
+              connectionUrl="jdbc:mysql://DST56614:3306/Shard_0?useUnicode=true&amp;characterEncoding=UTF-8"
+              driverClassName="com.mysql.jdbc.Driver"
+              testWhileIdle="true"
+              testOnBorrow="true"
+              testOnReturn="false"
+              validationQuery="SELECT 1"
+              validationInterval="30000"
+              timeBetweenEvictionRunsMillis="30000"
+              maxActive="100"
+              minIdle="10"
+              maxWait="1000"
+              initialSize="10"
+              removeAbandonedTimeout="60"
+              removeAbandoned="true"
+              logAbandoned="true"
+              minEvictableIdleTimeMillis="30000"/>
 </Datasources>

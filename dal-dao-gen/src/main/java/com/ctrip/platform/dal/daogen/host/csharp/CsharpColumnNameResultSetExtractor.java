@@ -37,20 +37,23 @@ public class CsharpColumnNameResultSetExtractor implements ResultSetExtractor<Li
 
 		while (rs.next()) {
 			CSharpParameterHost host = new CSharpParameterHost();
+			String columnName = rs.getString("COLUMN_NAME");
+			host.setName(columnName);
 			String typeName = rs.getString("TYPE_NAME");
+			boolean isUnsigned = DbUtils.isColumnUnsigned(typeName);
 			int dataType = rs.getInt("DATA_TYPE");
 			int length = rs.getInt("COLUMN_SIZE");
-			boolean isUnsigned = DbUtils.isColumnUnsigned(typeName);
 			// 特殊处理
-			host.setDbType(DbUtils.getDotNetDbType(typeName, dataType, length, isUnsigned));
-			host.setName(rs.getString("COLUMN_NAME"));
+			DbType dbType = DbUtils.getDotNetDbType(typeName, dataType, length, isUnsigned);
+			host.setDbType(dbType);
 			String remark = rs.getString("REMARKS");
 			if (remark == null) {
-				String description = columnComment.get(rs.getString("COLUMN_NAME").toLowerCase());
+				String description = columnComment.get(columnName.toLowerCase());
 				remark = description == null ? "" : description;
 			}
 			host.setComment(remark.replace("\n", " "));
-			host.setType(DbType.getCSharpType(host.getDbType()));
+			String type = DbType.getCSharpType(host.getDbType());
+			host.setType(type);
 			host.setIdentity(rs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
 			host.setNullable(rs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
 			host.setValueType(Consts.CSharpValueTypes.contains(host.getType()));
@@ -62,5 +65,4 @@ public class CsharpColumnNameResultSetExtractor implements ResultSetExtractor<Li
 		}
 		return allColumns;
 	}
-
 }

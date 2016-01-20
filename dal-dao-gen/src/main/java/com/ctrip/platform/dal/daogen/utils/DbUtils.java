@@ -241,6 +241,14 @@ public class DbUtils {
 			dbType = DbType.Guid;
 		} else if (typeName != null && typeName.equalsIgnoreCase("sql_variant")) {
 			dbType = DbType.Object;
+		} else if (typeName != null && typeName.equalsIgnoreCase("datetime")) {
+			dbType = DbType.DateTime;
+		} else if (typeName != null && typeName.equalsIgnoreCase("datetime2")) {
+			dbType = DbType.DateTime2;
+		} else if (typeName != null && typeName.equalsIgnoreCase("smalldatetime")) {
+			dbType = DbType.DateTime;
+		} else if (typeName != null && typeName.equalsIgnoreCase("xml")) {
+			dbType = DbType.Xml;
 		} else if (dataType == java.sql.Types.CHAR && length > 1) {
 			dbType = DbType.AnsiString;
 		} else if (dataType == -155) {

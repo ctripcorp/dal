@@ -2,6 +2,21 @@
 #set($bwVals = []) 
 #set($first = "")
 #foreach($p in $method.getParameters())
+#if(${p.getConditionType()} == "LeftBracket")
+				query.LeftBracket();
+#end
+#if(${p.getConditionType()} == "RightBracket")
+				query.RightBracket();
+#end
+#if(${p.getConditionType()} == "And")
+				query.And();
+#end
+#if(${p.getConditionType()} == "Or")
+				query.Or();
+#end
+#if(${p.getConditionType()} == "Not")
+				query.Not();
+#end
 #if(${p.getConditionType()} == "Equal" && ${p.isNullable()})
 				query.$!{first}EqualNullable("${p.getName()}", ${p.getNameToFirstLetterLower()});
 #end
@@ -67,23 +82,6 @@
 #if($first=="" && $bwVals.size()!=1 && $bwVals.size()!=2)
 #set($first = "And().")
 #end
-#else
-#set($first = "And().")
-#end
-#if(${p.getConditionType()} == "And")
-#set($first = "And().")
-#end
-#if(${p.getConditionType()} == "Or")
-#set($first = "Or().")
-#end
-#if(${p.getConditionType()} == "Not")
-#set($first = "Not().")
-#end
-#if(${p.getConditionType()} == "LeftBracket")
-#set($first = "LeftBracket().")
-#end
-#if(${p.getConditionType()} == "RightBracket")
-#set($first = "RightBracket().")
 #end
 #end
 #end

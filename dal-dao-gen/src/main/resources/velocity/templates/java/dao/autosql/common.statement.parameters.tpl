@@ -2,6 +2,21 @@
 #set($bwVals = []) 
 #set($first = "")
 #foreach($p in $method.getParameters())
+#if(${p.getConditionType()} == "LeftBracket")
+		builder.leftBracket();
+#end
+#if(${p.getConditionType()} == "RightBracket")
+		builder.rightBracket();
+#end
+#if(${p.getConditionType()} == "And")
+		builder.and();
+#end
+#if(${p.getConditionType()} == "Or")
+		builder.or();
+#end
+#if(${p.getConditionType()} == "Not")
+		builder.not();
+#end
 #if(${p.getConditionType()} == "Equal" && ${p.isNullable()})
 		builder.$!{first}equalNullable("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()}, ${p.isSensitive()});
 #end	
@@ -71,23 +86,6 @@
 #if($first=="" && $bwVals.size()!=1 && $bwVals.size()!=2)
 #set($first = "and().")
 #end
-#else
-#set($first = "and().")
-#end
-#if(${p.getConditionType()} == "And")
-#set($first = "and().")
-#end
-#if(${p.getConditionType()} == "Or")
-#set($first = "or().")
-#end
-#if(${p.getConditionType()} == "Not")
-#set($first = "not().")
-#end
-#if(${p.getConditionType()} == "LeftBracket")
-#set($first = "leftBracket().")
-#end
-#if(${p.getConditionType()} == "RightBracket")
-#set($first = "rightBracket().")
 #end
 #end
 #end

@@ -66,10 +66,10 @@
 				query.$!{first}In("${p.getName()}", ${p.getNameToFirstLetterLower()});
 #end
 #if(${p.getConditionType()} == "IsNull")
-				query.$!{first}Equal("${p.getName()}", null);
+				query.$!{first}IsNull("${p.getName()}");
 #end
 #if(${p.getConditionType()} == "IsNotNull")
-				query.$!{first}NotEqual("${p.getName()}", null);
+				query.$!{first}IsNotNull("${p.getName()}");
 #end
 #if(${p.getConditionType()} == "Between")
 #set($success = $bwVals.add(${p.getNameToFirstLetterLower()}))

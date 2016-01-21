@@ -901,188 +901,189 @@
 	};
 
 	var step2_2_1_getSelectedConditionParamCount = function() {
-		var conditionParamCount = 0;
-		$('#selected_condition>option').each(
-				function(index, value) {
-					conditionParamCount++;
-					if (value["value"].split(",")[1] == "6") {
-						conditionParamCount++;
-					} else if (value["value"].split(",")[1] == "9"
-							|| value["value"].split(",")[1] == "10") {
-						// is null、is not null don't need param
-						conditionParamCount--;
-					}
-				});
-		return conditionParamCount;
+		var count = 0;
+		$('#selected_condition>option').each(function(index, value) {
+			var array = value["value"].split(",");
+			if (array.length == 1) {
+				return; // continue
+			}
+			count++;
+			var operator = array[1];
+			if (operator == "6") {
+				count++;
+			} else if (operator == "9" || operator == "10") {
+				count--; // is null、is notnull don't need param
+			}
+		});
+		return count;
 	};
 
 	var step2_2_1_java = function(record, current, crud_option) {
 		// 解析Sql语句，提取出参数
 		var regexIndex = /(\?{1})/igm;
-		var sqlContent = ace.edit("sql_builder").getValue(), result;
-		var paramHtml = "";
+		var content = ace.edit("sql_builder").getValue(), result;
+		var html = "";
 
-		var conditionParamCount = step2_2_1_getSelectedConditionParamCount();
-
-		var conVal = new Array();
-		var conNullable = new Array();
+		var count = step2_2_1_getSelectedConditionParamCount();
+		var names = new Array();
+		var nullables = new Array();
 		var sensitives = new Array();
 		if ($("#page1").attr('is_update') == "1") {
 			// 模式：
 			// Age,6,aa,bb,nullable,sensitive;Name,1,param2,nullable,sensitive;
 			var conditions = record['condition'].split(";");
 			for (var j = 0; j < conditions.length; j++) {
-				var con = conditions[j];
-				var keyValue = con.split(",");
+				var condition = conditions[j];
+				var array = condition.split(",");
+				var operator = array[1];
 				// Between类型的操作符需要特殊处理
-				if (keyValue[1] == "6") {
-					conVal.push(keyValue[2]);
-					conVal.push(keyValue[3]);
-					conNullable.push(keyValue[4]);
-					conNullable.push(keyValue[4]);
-					sensitives.push(keyValue[5]);
-					sensitives.push(keyValue[5]);
-				} else if (keyValue[1] == "9" || keyValue[1] == "10") {
+				if (operator == "6") {
+					names.push(array[2]);
+					names.push(array[3]);
+					nullables.push(array[4]);
+					nullables.push(array[4]);
+					sensitives.push(array[5]);
+					sensitives.push(array[5]);
+				} else if (operator == "9" || operator == "10") {
 					continue;// is null、is not null don't need param
 				} else {
-					conVal.push(keyValue[2]);
-					conNullable.push(keyValue[3]);
-					sensitives.push(keyValue[4]);
+					names.push(array[2]);
+					nullables.push(array[3]);
+					sensitives.push(array[4]);
 				}
 			}
 		}
 
 		var i = 0;
-		while ((result = regexIndex.exec(sqlContent))) { // 按照java风格解析
-			if (conditionParamCount == i && "update" == crud_option) {
+		while ((result = regexIndex.exec(content))) { // 按照java风格解析
+			if (count == i && crud_option == "update") {
 				break;
 			}
 			i++;
-			var conName = conVal.shift();
-			var nullable = conNullable.shift();
+			var name = names.shift();
+			var nullable = nullables.shift();
 			nullable = nullable != undefined ? nullable : 'false';
 			nullable = nullable != 'false' ? 'checked="checked"' : "";
 			var sensitive = sensitives.shift();
 			sensitive = sensitive != undefined ? sensitive : 'false';
 			sensitive = sensitive != 'false' ? 'checked="checked"' : "";
-			if (conName != null && conName != "") {
-				paramHtml = paramHtml
-						+ sprintf(variableHtml_ForJAVA, conName, nullable,
+			if (name != null && name != "") {
+				html = html
+						+ sprintf(variableHtml_ForJAVA, name, nullable,
 								sensitive) + "</div><br/>";
 			} else {
-				paramHtml = paramHtml
+				html = html
 						+ sprintf(variableHtml_ForJAVA, sprintf("param%s", i),
 								nullable, sensitive) + "</div><br/>";
 			}
 		}
-		return paramHtml;
+		return html;
 	};
 
 	var variableHtml_ForJAVA_Insert = '<div class="row-fluid"><input type="text" class="span3" value="%s" disabled>'
 			+ ' <input type="checkbox" style="display:none">&nbsp;&nbsp;参数敏感：<input type="checkbox" %s ></div><br/>';
 
 	var step2_2_1_java_insert = function(record, current, crud_option) {
-		var paramHtml = "";
-		var conVal = new Array();
-		var conNullable = new Array();
+		var html = "";
+		var names = new Array();
+		var nullables = new Array();
 		var sensitives = new Array();
 		if ($("#page1").attr('is_update') == "1") {
 			// 模式： Age,6,aa,nullable,sensitive;Name,1,param2,nullable,sensitive;
 			var conditions = record['condition'].split(";");
 			for (var j = 0; j < conditions.length; j++) {
-				var con = conditions[j];
-				var keyValue = con.split(",");
-				conVal.push(keyValue[2]);
-				conNullable.push(keyValue[3]);
-				sensitives.push(keyValue[4]);
+				var condition = conditions[j];
+				var array = condition.split(",");
+				names.push(array[2]);
+				nullables.push(array[3]);
+				sensitives.push(array[4]);
 			}
 		}
 
-		var selectedInsertFields = $('#fields').multipleSelect('getSelects');
-		for (var i = 0; i < selectedInsertFields.length; i++) {
-			var conName = conVal.shift();
+		var fields = $('#fields').multipleSelect('getSelects');
+		for (var i = 0; i < fields.length; i++) {
+			var name = names.shift();
 			var sensitive = sensitives.shift();
 			sensitive = sensitive != undefined ? sensitive : 'false';
 			sensitive = sensitive != 'false' ? 'checked="checked"' : "";
-			if (conName != null && conName != "" && conName != "undefined") {
-				paramHtml = paramHtml
-						+ sprintf(variableHtml_ForJAVA_Insert, conName,
-								sensitive);
+			if (name != null && name != "" && name != "undefined") {
+				html = html
+						+ sprintf(variableHtml_ForJAVA_Insert, name, sensitive);
 			} else {
-				paramHtml = paramHtml
-						+ sprintf(variableHtml_ForJAVA_Insert,
-								selectedInsertFields[i], sensitive);
+				html = html
+						+ sprintf(variableHtml_ForJAVA_Insert, fields[i],
+								sensitive);
 			}
 		}
-		return paramHtml;
+		return html;
 	};
 
 	var step2_2_1_csharp = function(record, current, crud_option) {
 		// 解析Sql语句，提取出参数
 		var regexNames = /[@:](\w+)/igm;
-		var sqlContent = ace.edit("sql_builder").getValue(), result;
-		var paramHtml = "";
+		var content = ace.edit("sql_builder").getValue(), result;
+		var html = "";
 
-		var conditionParamCount = step2_2_1_getSelectedConditionParamCount();
-
-		var conVal = new Array();
-		var conNullable = new Array();
+		var count = step2_2_1_getSelectedConditionParamCount();
+		var names = new Array();
+		var nullables = new Array();
 		if ($("#page1").attr('is_update') == "1") {
 			// 模式： Age,6,aa,bb;Name,1,param2;
 			var conditions = record['condition'].split(";");
 			for (var j = 0; j < conditions.length; j++) {
-				var con = conditions[j];
-				var keyValue = con.split(",");
+				var condition = conditions[j];
+				var array = condition.split(",");
+				if (array.length == 1) {
+					continue;
+				}
 				// Between类型的操作符需要特殊处理
-				if (keyValue[1] == "6") {
-					conVal.push(keyValue[2]);
-					conVal.push(keyValue[3]);
-					conNullable.push(keyValue[4]);
-					conNullable.push(keyValue[4]);
-				} else if (keyValue[1] == "9" || keyValue[1] == "10") {
+				if (array[1] == "6") {
+					names.push(array[2]);
+					names.push(array[3]);
+					nullables.push(array[4]);
+					nullables.push(array[4]);
+				} else if (array[1] == "9" || array[1] == "10") {
 					continue;// is null、is not null don't need param
 				} else {
-					conVal.push(keyValue[2]);
-					conNullable.push(keyValue[3]);
+					names.push(array[2]);
+					nullables.push(array[3]);
 				}
 			}
 		}
 
-		var sqlTemp = sqlContent;
+		var sqlTemp = content;
 		var namesStack = new Array();
 		while ((result = regexNames.exec(sqlTemp))) {
-			if ("update" == crud_option) {
+			if (crud_option == "update") {
 				namesStack.push(result[1]);
 			}
 		}
-		var delCount = namesStack.length - conditionParamCount;
+		var delCount = namesStack.length - count;
 		for (var si = 0; si < delCount; si++) {
 			namesStack.shift();
 		}
 		var i = 0;
-		while ((result = regexNames.exec(sqlContent))) {// 按照c#风格解析
-			if (conditionParamCount == i && "update" == crud_option) {
+		while ((result = regexNames.exec(content))) {// 按照c#风格解析
+			if (count == i && crud_option == "update") {
 				break;
 			}
 			i++;
-			var temp = conVal.shift();
-			var nullable = conNullable.shift();
+			var temp = names.shift();
+			var nullable = nullables.shift();
 			nullable = nullable != undefined ? nullable : 'false';
 			nullable = nullable != 'false' ? 'checked="checked"' : "";
 			if (temp != null && temp != "") {
 				namesStack.shift();
-				paramHtml = paramHtml + sprintf(variableHtml, temp, nullable)
+				html = html + sprintf(variableHtml, temp, nullable)
 						+ "</div><br/>";
 			} else {
 				var realName = "update" == crud_option ? namesStack.shift()
 						: result[1];
-				paramHtml = paramHtml
-						+ sprintf(variableHtml, realName, nullable)
+				html = html + sprintf(variableHtml, realName, nullable)
 						+ "</div><br/>";
 			}
-
 		}
-		return paramHtml;
+		return html;
 	};
 
 	var step2_2_2 = function(record, current) {

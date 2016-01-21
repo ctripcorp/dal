@@ -35,10 +35,10 @@
 #if(${p.getConditionType()} == "Great" && !${p.isNullable()})
 				query.$!{first}GreaterThan("${p.getName()}", ${p.getNameToFirstLetterLower()});
 #end
-#if(${p.getConditionType()} == "lessThan" && ${p.isNullable()})
+#if(${p.getConditionType()} == "Less" && ${p.isNullable()})
 				query.$!{first}LessThanNullable("${p.getName()}", ${p.getNameToFirstLetterLower()});
 #end
-#if(${p.getConditionType()} == "lessThan" && !${p.isNullable()})
+#if(${p.getConditionType()} == "Less" && !${p.isNullable()})
 				query.$!{first}LessThan("${p.getName()}", ${p.getNameToFirstLetterLower()});
 #end
 #if(${p.getConditionType()} == "GreatAndEqual" && ${p.isNullable()})
@@ -74,9 +74,13 @@
 #if(${p.getConditionType()} == "Between")
 #set($success = $bwVals.add(${p.getNameToFirstLetterLower()}))
 #end
-#if(${p.getConditionType()} == "Between" && $bwVals.size()==2)
-				query.$!{first}Constrain("${p.getName()}").Between($bwVals.get(0), $bwVals.get(1));
-#set($bwVals = [])		
+#if(${p.getConditionType()} == "Between" && ${p.isNullable()} && $bwVals.size()==2)
+				query.$!{first}BetweenNullable("${p.getName()}", $bwVals.get(0), $bwVals.get(1));
+#set($bwVals = [])
+#end
+#if(${p.getConditionType()} == "Between" && !${p.isNullable()} && $bwVals.size()==2)
+				query.$!{first}Between("${p.getName()}", $bwVals.get(0), $bwVals.get(1));
+#set($bwVals = [])
 #end
 #if(${p.getConditionType()} == "Between")
 #if($first=="" && $bwVals.size()!=1 && $bwVals.size()!=2)

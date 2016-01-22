@@ -66,8 +66,7 @@ public class JavaMethodHost {
 		return updateSetParameters;
 	}
 
-	public void setUpdateSetParameters(
-			List<JavaParameterHost> updateSetParameters) {
+	public void setUpdateSetParameters(List<JavaParameterHost> updateSetParameters) {
 		this.updateSetParameters = updateSetParameters;
 	}
 
@@ -234,20 +233,16 @@ public class JavaMethodHost {
 		for (JavaParameterHost parameter : parameters) {
 			ConditionType conditionType = parameter.getConditionType();
 			if (ConditionType.In == conditionType) {
-				paramsDeclaration.add(String.format("List<%s> %s",
-						parameter.getClassDisplayName(), parameter.getAlias()));
+				paramsDeclaration
+						.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
 				this.inClauses.add(parameter.getAlias());
-			} else if (conditionType == ConditionType.IsNull
-					|| conditionType == ConditionType.IsNotNull
-					|| conditionType == ConditionType.And
-					|| conditionType == ConditionType.Or
-					|| conditionType == ConditionType.Not
-					|| conditionType == ConditionType.LeftBracket
+			} else if (conditionType == ConditionType.IsNull || conditionType == ConditionType.IsNotNull
+					|| conditionType == ConditionType.And || conditionType == ConditionType.Or
+					|| conditionType == ConditionType.Not || conditionType == ConditionType.LeftBracket
 					|| conditionType == ConditionType.RightBracket) {
 				continue;// is null、is not null don't hava param
 			} else {
-				paramsDeclaration.add(String.format("%s %s",
-						parameter.getClassDisplayName(), parameter.getAlias()));
+				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
 			}
 		}
 		if (this.paging && this.crud_type.equalsIgnoreCase("select")) {
@@ -282,25 +277,23 @@ public class JavaMethodHost {
 		List<String> paramsDeclaration = new ArrayList<String>();
 		for (JavaParameterHost parameter : updateSetParameters) {
 			if (ConditionType.In == parameter.getConditionType()) {
-				paramsDeclaration.add(String.format("List<%s> %s",
-						parameter.getClassDisplayName(), parameter.getAlias()));
+				paramsDeclaration
+						.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
 				this.inClauses.add(parameter.getAlias());
 			} else {
-				paramsDeclaration.add(String.format("%s %s",
-						parameter.getClassDisplayName(), parameter.getAlias()));
+				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
 			}
 		}
 		for (JavaParameterHost parameter : parameters) {
 			if (ConditionType.In == parameter.getConditionType()) {
-				paramsDeclaration.add(String.format("List<%s> %s",
-						parameter.getClassDisplayName(), parameter.getAlias()));
+				paramsDeclaration
+						.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
 				this.inClauses.add(parameter.getAlias());
 			} else if (parameter.getConditionType() == ConditionType.IsNull
 					|| parameter.getConditionType() == ConditionType.IsNotNull) {
 				continue;// is null、is not null don't hava param
 			} else {
-				paramsDeclaration.add(String.format("%s %s",
-						parameter.getClassDisplayName(), parameter.getAlias()));
+				paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
 			}
 		}
 
@@ -312,14 +305,12 @@ public class JavaMethodHost {
 	public Set<String> getPojoImports() {
 		Set<String> imports = new TreeSet<String>();
 
-		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(
-				fields);
+		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(fields);
 		for (JavaParameterHost field : allTypes) {
 			Class<?> clazz = field.getJavaClass();
 			if (byte[].class.equals(clazz))
 				continue;
-			if (clazz.getPackage().getName()
-					.equals(String.class.getPackage().getName()))
+			if (clazz.getPackage().getName().equals(String.class.getPackage().getName()))
 				continue;
 			imports.add(clazz.getName());
 		}
@@ -345,8 +336,7 @@ public class JavaMethodHost {
 	}
 
 	public String getPagingSql(DatabaseCategory dbType) throws Exception {
-		return SqlBuilder.pagingQuerySql(sql, dbType, CurrentLanguage.Java)
-				.replaceAll("%s", "?");
+		return SqlBuilder.pagingQuerySql(sql, dbType, CurrentLanguage.Java).replaceAll("%s", "?");
 	}
 
 	public boolean hasParameters() {
@@ -362,8 +352,7 @@ public class JavaMethodHost {
 	}
 
 	public boolean isReturnList() {
-		return this.scalarType == null
-				|| this.scalarType.equalsIgnoreCase("List");
+		return this.scalarType == null || this.scalarType.equalsIgnoreCase("List");
 	}
 
 	public boolean isReturnSingle() {
@@ -371,18 +360,15 @@ public class JavaMethodHost {
 	}
 
 	public boolean isReturnFirst() {
-		return this.scalarType != null
-				&& this.scalarType.equalsIgnoreCase("First");
+		return this.scalarType != null && this.scalarType.equalsIgnoreCase("First");
 	}
 
 	public boolean isQuery() {
-		return this.crud_type == null || this.crud_type.isEmpty()
-				|| this.crud_type.equalsIgnoreCase("select");
+		return this.crud_type == null || this.crud_type.isEmpty() || this.crud_type.equalsIgnoreCase("select");
 	}
 
 	public boolean isUpdate() {
-		return this.crud_type != null
-				&& this.crud_type.equalsIgnoreCase("update");
+		return this.crud_type != null && this.crud_type.equalsIgnoreCase("update");
 	}
 
 	public String getDbSetName() {

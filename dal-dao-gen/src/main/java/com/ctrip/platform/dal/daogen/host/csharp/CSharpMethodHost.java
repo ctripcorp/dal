@@ -15,29 +15,29 @@ import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 
 public class CSharpMethodHost {
-	
+
 	private String crud_type;
-	
+
 	private String name;
-	
+
 	private String sql;
-	
+
 	private List<CSharpParameterHost> parameters;
-	
+
 	private CSharpFreeSqlPojoHost pojohost;
-	
+
 	private List<JavaParameterHost> fields;
-	
+
 	private String pojoName;
-	
+
 	private String scalarType;
-	
+
 	private String pojoType;
-	
+
 	private boolean paging;
-	
-	private String orderByExp="";
-	
+
+	private String orderByExp = "";
+
 	public String getOrderByExp() {
 		return orderByExp;
 	}
@@ -48,24 +48,28 @@ public class CSharpMethodHost {
 
 	public String getParameterDeclaration() {
 		List<String> paramsDeclaration = new ArrayList<String>();
-		for(CSharpParameterHost parameter: parameters) {
-			if(ConditionType.In == parameter.getConditionType() || parameter.isInParameter()){
-				paramsDeclaration.add(String.format("List<%s> %s", parameter.getType(), WordUtils.uncapitalize(parameter.getAlias())));
-			}else if(parameter.getConditionType() == ConditionType.IsNull
-					|| parameter.getConditionType() == ConditionType.IsNotNull){ 
-				continue;//is null、is not null don't hava param
-			}else{
-				paramsDeclaration.add(String.format("%s %s", parameter.getType(), WordUtils.uncapitalize(parameter.getAlias())));
+		for (CSharpParameterHost parameter : parameters) {
+			ConditionType conditionType = parameter.getConditionType();
+			if (conditionType == ConditionType.In || parameter.isInParameter()) {
+				paramsDeclaration.add(String.format("List<%s> %s", parameter.getType(),
+						WordUtils.uncapitalize(parameter.getAlias())));
+			} else if (conditionType == ConditionType.IsNull || conditionType == ConditionType.IsNotNull
+					|| conditionType == ConditionType.And || conditionType == ConditionType.Or
+					|| conditionType == ConditionType.Not || conditionType == ConditionType.LeftBracket
+					|| conditionType == ConditionType.RightBracket) {
+				continue;// is null、is not null don't hava param
+			} else {
+				paramsDeclaration
+						.add(String.format("%s %s", parameter.getType(), WordUtils.uncapitalize(parameter.getAlias())));
 			}
 		}
-		if(this.paging && this.crud_type.equalsIgnoreCase("select")){
+		if (this.paging && this.crud_type.equalsIgnoreCase("select")) {
 			paramsDeclaration.add("int pageNo");
 			paramsDeclaration.add("int pageSize");
 		}
-		
 		return StringUtils.join(paramsDeclaration, ", ");
 	}
-	
+
 	public boolean paramTypeIsNotNull(CSharpParameterHost parameter) {
 		return parameter.getConditionType() != ConditionType.IsNull
 				&& parameter.getConditionType() != ConditionType.IsNotNull;
@@ -90,24 +94,24 @@ public class CSharpMethodHost {
 	public String getSql() {
 		return sql.replaceAll("[\r\n\t]", " ").replaceAll(" {2,}", " ");
 	}
-	
+
 	public String getBuildCudSql() {
 		String temp = sql;
 		String regex = "(?i)In *\\(@\\w+\\)";
 		Pattern pattern = Pattern.compile(regex);
 		Matcher m = pattern.matcher(sql);
 		int index = 0;
-		while(m.find()){
+		while (m.find()) {
 			temp = temp.replaceFirst(regex, String.format("IN ({%s})", index++));
 		}
 		return temp;
 	}
-	
+
 	public String getSql(DatabaseCategory databaseCategory) {
-		if(databaseCategory == DatabaseCategory.MySql){
+		if (databaseCategory == DatabaseCategory.MySql) {
 			return sql + " limit 0,1";
 		}
-		if(databaseCategory == DatabaseCategory.SqlServer){
+		if (databaseCategory == DatabaseCategory.SqlServer) {
 			return sql.replaceFirst("(?i)select", "SELECT TOP 1 ");
 		}
 		return sql;
@@ -150,11 +154,11 @@ public class CSharpMethodHost {
 	}
 
 	public String getPojoType() {
-		if(null != this.pojoType)
+		if (null != this.pojoType)
 			return this.pojoType;
-		if(null != this.fields && this.fields.size() == 1){
+		if (null != this.fields && this.fields.size() == 1) {
 			return "SimpleType";
-		}else{
+		} else {
 			return "";
 		}
 	}
@@ -163,7 +167,6 @@ public class CSharpMethodHost {
 		this.pojoType = pojoType;
 	}
 
-	
 	public CSharpFreeSqlPojoHost getPojohost() {
 		return pojohost;
 	}
@@ -180,27 +183,24 @@ public class CSharpMethodHost {
 		this.pojohost = pojohost;
 	}
 
-	public boolean isFirstOrSingle(){
-		return (this.scalarType!= null) && 
-				(!this.scalarType.isEmpty()) &&
-				(this.scalarType.equalsIgnoreCase("First") ||
-						this.scalarType.equalsIgnoreCase("Single"));
+	public boolean isFirstOrSingle() {
+		return (this.scalarType != null) && (!this.scalarType.isEmpty())
+				&& (this.scalarType.equalsIgnoreCase("First") || this.scalarType.equalsIgnoreCase("Single"));
 	}
-	
-	public boolean isSampleType(){
+
+	public boolean isSampleType() {
 		return this.getPojoType().equalsIgnoreCase("SimpleType");
 	}
-	
-	public CSharpParameterHost  getSinglePojoFieldHost(){
+
+	public CSharpParameterHost getSinglePojoFieldHost() {
 		return this.pojohost.getColumns().get(0);
 	}
-	
-	public String getPagingSql(DatabaseCategory dbType) 
-			throws Exception{
-        return SqlBuilder.pagingQuerySql(sql, dbType, CurrentLanguage.CSharp);
+
+	public String getPagingSql(DatabaseCategory dbType) throws Exception {
+		return SqlBuilder.pagingQuerySql(sql, dbType, CurrentLanguage.CSharp);
 	}
-	
-	public boolean hasParameters(){
+
+	public boolean hasParameters() {
 		return null != this.parameters && !this.parameters.isEmpty();
 	}
 }

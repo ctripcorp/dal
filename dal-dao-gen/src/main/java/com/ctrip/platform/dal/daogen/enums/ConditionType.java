@@ -3,9 +3,8 @@ package com.ctrip.platform.dal.daogen.enums;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 
 public enum ConditionType {
-	Unknow(-1), Equal(0), NotEqual(1), Great(2), Less(3), GreatAndEqual(4), LessAndEqual(
-			5), Between(6), Like(7), In(8), IsNull(9), IsNotNull(10), And(11), Or(
-			12), Not(13), LeftBracket(14), RightBracket(15);
+	Unknow(-1), Equal(0), NotEqual(1), Great(2), Less(3), GreatAndEqual(4), LessAndEqual(5), Between(6), Like(7), In(
+			8), IsNull(9), IsNotNull(10), And(11), Or(12), Not(13), LeftBracket(14), RightBracket(15);
 
 	private int intVal;
 

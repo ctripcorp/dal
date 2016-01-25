@@ -95,7 +95,8 @@
 								selectedConditions.push(sprintf(
 										"%s,%s,%s,%s,%s", temp[0], temp[1],
 										paramValues[idx], paramValues[idx + 1],
-										paramNullable[idx]));
+										paramNullable[idx]
+												|| paramNullable[idx + 1]));
 								idx += 2;
 							} else if (temp[1] == "9" || temp[1] == "10") {
 								// is null
@@ -120,7 +121,8 @@
 						// between
 						selectedConditions.push(sprintf("%s,%s,%s,%s,%s,%s",
 								temp[0], temp[1], paramValues[idx],
-								paramValues[idx + 1], paramNullable[idx],
+								paramValues[idx + 1], paramNullable[idx]
+										|| paramNullable[idx + 1],
 								paramSensitive[idx]));
 						idx += 2;
 					} else if (temp[1] == "9" || temp[1] == "10") {

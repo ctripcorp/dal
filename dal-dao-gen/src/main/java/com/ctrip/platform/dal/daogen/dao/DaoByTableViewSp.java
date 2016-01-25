@@ -32,7 +32,7 @@ public class DaoByTableViewSp {
 		try {
 			return this.jdbcTemplate
 					.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
-							+ "cud_by_sp,pagination,generated,version,update_user_no,update_time,"
+							+ "cud_by_sp,pagination,`generated`,version,update_user_no,update_time,"
 							+ "comment,sql_style,api_list,approved,approveMsg from task_table "
 							+ "where project_id=?",
 							new Object[] { iD },
@@ -58,7 +58,7 @@ public class DaoByTableViewSp {
 		try {
 			List<GenTaskByTableViewSp> list = this.jdbcTemplate
 					.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
-							+ "cud_by_sp,pagination,generated,version,update_user_no,update_time,"
+							+ "cud_by_sp,pagination,`generated`,version,update_user_no,update_time,"
 							+ "comment,sql_style,api_list,approved,approveMsg from task_table "
 							+ "where id=?",
 							new Object[] { taskId },
@@ -79,7 +79,7 @@ public class DaoByTableViewSp {
 
 		this.jdbcTemplate
 				.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,"
-						+ "pagination,generated,version,update_user_no,update_time,comment,"
+						+ "pagination,`generated`,version,update_user_no,update_time,comment,"
 						+ "sql_style,api_list,approved,approveMsg from task_table where project_id=?",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
@@ -101,9 +101,9 @@ public class DaoByTableViewSp {
 
 		this.jdbcTemplate
 				.query("select id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
-						+ "cud_by_sp,pagination,generated,version,update_user_no,update_time,"
+						+ "cud_by_sp,pagination,`generated`,version,update_user_no,update_time,"
 						+ "comment,sql_style,api_list,approved,approveMsg from task_table "
-						+ "where project_id=? and generated=false",
+						+ "where project_id=? and `generated`=false",
 						new Object[] { projectId }, new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs) throws SQLException {
@@ -122,7 +122,7 @@ public class DaoByTableViewSp {
 		try {
 			return this.jdbcTemplate
 					.update("insert into task_table ( project_id,  db_name,table_names,view_names,sp_names,"
-							+ "prefix,suffix,cud_by_sp,pagination,generated,version,update_user_no,update_time,"
+							+ "prefix,suffix,cud_by_sp,pagination,`generated`,version,update_user_no,update_time,"
 							+ "comment,sql_style,api_list,approved,approveMsg)"
 							+ " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 							task.getProject_id(), task.getDatabaseSetName(),
@@ -163,7 +163,7 @@ public class DaoByTableViewSp {
 		try {
 			return this.jdbcTemplate
 					.update("update task_table set project_id=?,db_name=?,table_names=?,view_names=?,sp_names=?,"
-							+ "prefix=?,suffix=?,cud_by_sp=?,pagination=?,generated=?,version=version+1,"
+							+ "prefix=?,suffix=?,cud_by_sp=?,pagination=?,`generated`=?,version=version+1,"
 							+ "update_user_no=?,update_time=?,comment=?,sql_style=?,"
 							+ "api_list=?,approved=?,approveMsg=? where id=? and version=?",
 

@@ -9,6 +9,8 @@ import com.ctrip.platform.dal.dao.configure.DalComponent;
  *
  */
 public interface DalTaskFactory extends DalComponent {
+	String getProperty(String key);
+	
 	<T> SingleTask<T> createSingleInsertTask(DalParser<T> parser);
 	
 	<T> SingleTask<T> createSingleDeleteTask(DalParser<T> parser);

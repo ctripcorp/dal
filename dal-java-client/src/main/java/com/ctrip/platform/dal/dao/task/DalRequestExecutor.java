@@ -27,8 +27,11 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
  */
 public class DalRequestExecutor {
 	private static AtomicReference<ExecutorService> serviceRef = new AtomicReference<>();
+	
+	public static final String MAX_POOL_SIZE = "maxPoolSize";
+	public static final int DEFAULT_MAX_POOL_SIZE = 50;
 
-	public static void init(){
+	public static void init(String maxPoolSizeStr){
 		if(serviceRef.get() != null)
 			return;
 		
@@ -36,7 +39,11 @@ public class DalRequestExecutor {
 			if(serviceRef.get() != null)
 				return;
 			
-			serviceRef.set(new ThreadPoolExecutor(5, 50, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>()));
+			int maxPoolSize = DEFAULT_MAX_POOL_SIZE;
+			if(maxPoolSizeStr != null)
+				maxPoolSize = Integer.parseInt(maxPoolSizeStr);
+			
+			serviceRef.set(new ThreadPoolExecutor(5, maxPoolSize, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>()));
 		}
 	} 
 	

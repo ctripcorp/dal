@@ -3,18 +3,11 @@ package com.ctrip.platform.dal.dao;
 import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.task.BatchDeleteTask;
-import com.ctrip.platform.dal.dao.task.BatchInsertTask;
-import com.ctrip.platform.dal.dao.task.BatchUpdateTask;
 import com.ctrip.platform.dal.dao.task.BulkTask;
-import com.ctrip.platform.dal.dao.task.CombinedInsertTask;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 import com.ctrip.platform.dal.dao.task.DeleteSqlTask;
-import com.ctrip.platform.dal.dao.task.SingleDeleteTask;
-import com.ctrip.platform.dal.dao.task.SingleInsertTask;
 import com.ctrip.platform.dal.dao.task.SingleTask;
-import com.ctrip.platform.dal.dao.task.SingleUpdateTask;
 import com.ctrip.platform.dal.dao.task.UpdateSqlTask;
 
 /**
@@ -40,6 +33,11 @@ public class CtripTaskFactory implements DalTaskFactory {
 	public void initialize(Map<String, String> settings) {
 		defaultFactory = new DefaultTaskFactory();
 		defaultFactory.initialize(settings);
+	}
+
+	@Override
+	public String getProperty(String key) {
+		return defaultFactory.getProperty(key);
 	}
 
 	private <T> DatabaseCategory getDbCategory(DalParser<T> parser) {

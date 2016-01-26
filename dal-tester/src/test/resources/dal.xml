@@ -119,4 +119,9 @@
 		 <dataSourceConfigureProvider>com.ctrip.datasource.titan.TitanProvider</dataSourceConfigureProvider>
 	  </settings>
   </ConnectionLocator>
+  <TaskFactory>
+      <settings>
+		 <maxPoolSize>100</maxPoolSize>
+	  </settings>
+  </TaskFactory>
 </dal>

@@ -71,7 +71,7 @@ public class DalClientFactory {
 			}
 			
 			DalWatcher.init();
-			DalRequestExecutor.init();
+			DalRequestExecutor.init(config.getFacory().getProperty(DalRequestExecutor.MAX_POOL_SIZE));
 			
 			configureRef.set(config);
 		}

@@ -5,11 +5,18 @@ import java.util.Map;
 import com.ctrip.platform.dal.dao.DalParser;
 
 public class DefaultTaskFactory implements DalTaskFactory {
-
+	private Map<String, String> settings;
+	
 	@Override
 	public void initialize(Map<String, String> settings) {
+		this.settings = settings;
 	}
 
+	@Override
+	public String getProperty(String key) {
+		return settings.get(key);
+	}
+	
 	@Override
 	public <T> SingleTask<T> createSingleInsertTask(DalParser<T> parser) {
 		SingleInsertTask<T> singleInsertTask = new SingleInsertTask<T>();

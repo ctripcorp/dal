@@ -11,6 +11,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	DalConnectionTest.class,
 	DalTransactionManagerTest.class,
 	DalTransactionTest.class,
+	DalShardingHelperTest.class,
+	DalConfigureFactoryTest.class,
 })
 public class AllTest {
 

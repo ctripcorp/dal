@@ -66,6 +66,7 @@ import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 
 public class DalConfigureFactory {
 	private static DalConfigureFactory factory = new DalConfigureFactory();
+	private static final String DAL_XML = "dal.xml";
 	private static final String DAL_CONFIG = "Dal.config";
 
 	private static String NAME = "name";
@@ -88,7 +89,8 @@ public class DalConfigureFactory {
 	private static String LOCATOR = "locator";
 
 	/**
-	 * Load frmo classpath
+	 * Load from classpath. For historic reason, we support both dal.xml and Dal.config
+	 * for configure name. 
 	 * @return
 	 * @throws Exception
 	 */
@@ -97,8 +99,16 @@ public class DalConfigureFactory {
 		if (classLoader == null) {
 			classLoader = DalClientFactory.class.getClassLoader();
 		}
-
-		return load(classLoader.getResource(DAL_CONFIG));
+		
+		URL dalconfigUrl = classLoader.getResource(DAL_XML);
+		if(dalconfigUrl == null )
+			dalconfigUrl = classLoader.getResource(DAL_CONFIG);
+		
+		if(dalconfigUrl == null)
+			throw new IllegalStateException(
+					"Can not find " + DAL_XML + " or " + DAL_CONFIG + " to initilize dal configure");
+		
+		return load(dalconfigUrl);
 	}
 		
 	public static DalConfigure load(URL url) throws Exception {
@@ -206,22 +216,25 @@ public class DalConfigureFactory {
 	
 	private <T extends DalComponent> T readComponent(Node root, String componentName, T defaultImpl, String implNodeName) throws Exception {
 		Node node = getChildNode(root, componentName);
-		if(node == null)
-			return defaultImpl;
-		
 		T component = defaultImpl;
-
-		Node loggerNode = getChildNode(node, implNodeName);
-		if(loggerNode != null)
-			component = (T)Class.forName(loggerNode.getTextContent()).newInstance();
-
+		
+		if(node != null){
+			Node implNode = getChildNode(node, implNodeName);
+			if(implNode != null)
+				component = (T)Class.forName(implNode.getTextContent()).newInstance();
+		}
+		
 		component.initialize(getSettings(node));
 		return  component;
 	}
 	
 	private Map<String, String> getSettings(Node pNode) {
-		Node settingsNode = getChildNode(pNode, SETTINGS);
 		Map<String, String> settings = new HashMap<>();
+		
+		if(pNode == null)
+			return settings;
+					
+		Node settingsNode = getChildNode(pNode, SETTINGS);
 
 		if(settingsNode != null) {
 			NodeList children = settingsNode.getChildNodes();

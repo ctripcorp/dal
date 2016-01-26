@@ -33,7 +33,7 @@ public class DalClientFactoryTest {
 
 	@Test
 	public void testGetAllDB() {
-		assertEquals(12, DalClientFactory.getAllDB().size());
+		assertEquals(15, DalClientFactory.getAllDB().size());
 	}
 
 	@Test

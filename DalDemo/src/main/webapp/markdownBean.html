@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<h3>Markdown Bean Configure</h3>
+<ul>
+ <li><a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean?action=change&AppMarkDown=true" target="console">Markdown App</a></li>
+ <li><a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean?action=change&AppMarkDown=false" target="console">Markup App</a></li>
+ <li><a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean?action=change&EnableAutoMarkDown=true" target="console">Enable Auto Markdown</a></li>
+ <li><a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean?action=change&EnableAutoMarkDown=false" target="console">Disable Auto Markdown</a></li>
+ <li><a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean?action=change&MarkDownKeys=" target="console">Markup DB</a></li>
+</ul>
+
+<h4>MarkDownKeys</h4>
+用户可以手工填写需要MarkDown的AllInOneKey，如果满足MarkDown条件，且EnableAutoMarkDown为True， 则DAL会填入需要MarkDown的AllInOneKey
+<br/>
+<a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean?action=change&MarkDownKeys=SimpleShard_0" target="console">Markdown SimpleShard_0 DB</a>
+<br/>
+<a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean?action=change&MarkDownKeys=SimpleShard_1" target="console">Markdown SimpleShard_1 DB</a>
+<br/>
+<a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean?action=change&MarkDownKeys=SimpleShard_0,SimpleShard_1" target="console">Markdown both SimpleShard_0 and SimpleShard_1</a>
+<form action="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean" method="get" target="console">
+	<input type="hidden" name="action" value="change">
+	<input type="text" name="MarkDownKeys"><input type="submit" value="set"> <br/>
+</form>
+
+<h4>AutoMarkUpBatches</h4>
+MarkUp尝试放量的次数，如果为不大于0的整数，达到AutoMarkUpDelay的值时，则直接MarkUp; AutoMarkUpBatches大于0时，是否Mark up以放量的批次(AutoMarkUpSchedule)为准
+<br/>
+<a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean?action=change&AutoMarkUpBatches=0" target="console">Set AutoMarkUpVolume to 0</a>
+<form action="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean" method="get" target="console">
+	<input type="hidden" name="action" value="change">
+	<input type="text" name="AutoMarkUpBatches"><input type="submit" value="set">
+</form>
+
+<h4>AutoMarkUpDelay</h4>
+秒，AutoMarkUpBatches不大于0时，自动MarkDown后，120秒开始MarkUp。<br/>
+<a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean?action=change&AutoMarkUpDelay=30" target="console">Set AutoMarkUpDelay to 30 seconds</a>
+<form action="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean" method="get" target="console">
+	<input type="hidden" name="action" value="change">
+	<input type="text" name="AutoMarkUpDelay"><input type="submit" value="set">
+</form>
+</body>
+</html>

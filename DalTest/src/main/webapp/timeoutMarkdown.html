@@ -6,23 +6,34 @@
 <body>
 
 <h3><a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-TimeoutMarkDownBean?action=view&format=xml" target="console">Timeout Markdown Bean</a></h3>
+
+<h4>Instruction</h4>
+<ul>
+ <li>First enable auto markedown</li>
+ <li>Then enable timeout markedown</li>
+ <li>Change timeout errroc ount threshold</li>
+  <li>Make timeout request</li>
+</ul>
+
+<h3>Timeout Markdown Bean Configure</h3>
 <ul>
  <li><a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean?action=change&EnableAutoMarkDown=true" target="console">Enable Auto Markdown</a></li>
  <li><a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-MarkdownConfigBean?action=change&EnableAutoMarkDown=false" target="console">Disable Auto Markdown</a></li>
 </ul>
 
-<h4>通过DAL向MultiThreadingTest DB发请求</h4>
-<a href="/DalTest/PeoplePortal?action=timeout" target="console">Make time consuming request</a><br>
-<a href="/DalTest/PeoplePortal?action=nontimeout" target="console">Make normal request</a><br>
-
-<h3>Timeout Markdown Bean Configure</h3>
 <ul>
  <li><a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-TimeoutMarkDownBean?action=change&EnableTimeoutMarkDown=true" target="console">Enable Timeout Markdown</a></li>
  <li><a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-TimeoutMarkDownBean?action=change&EnableTimeoutMarkDown=false" target="console">Disable Timeout Markdown</a></li>
 </ul>
 
+<h4>通过DAL向MultiThreadingTest DB发请求</h4>
+<ul>
+ <li><a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-TimeoutMarkDownBean?action=change&ErrorCountThreshold=2" target="console">Set the minimum number of tolerance timeout to 2</a></li>
+ <li><a href="/DalTest/PeoplePortal?action=timeout" target="console">Make time consuming request</a></li>
+ <li><a href="/DalTest/PeoplePortal?action=nontimeout" target="console">Make normal request</a></li>
+</ul>
+
 <h4>ErrorCountThreshold</h4>
-<a href="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-TimeoutMarkDownBean?action=change&ErrorCountThreshold=2" target="console">Set the minimum number of tolerance timeout to 2</a>
 <form action="/DalTest/appinternals/configurations/beans/com-ctrip-platform-dal-dao-configbeans-TimeoutMarkDownBean" method="get" target="console">
 	<input type="hidden" name="action" value="change">
 	超时数量阀值。例如过去120秒内超过300以上个的timeout错误，则mark down该Database。<br/>

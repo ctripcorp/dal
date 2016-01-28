@@ -7,7 +7,7 @@
 /bin
 /target
 /_ConfigTemp
-Dal.Config
+Dal.config
 datasource.xml
 logback.xml
 web.xml

@@ -105,6 +105,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 				return;
 			} catch (Throwable e) {
 				logger.warn("Cannot found config from Titan service for " + dbNames);
+				logger.warn("This is normal for production. Dal will try to reloacte with \"_SH\"");
 			}
 			
 			logger.info("Try to reloacte with \"_SH\"");

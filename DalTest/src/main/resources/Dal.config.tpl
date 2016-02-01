@@ -2,8 +2,8 @@
 	<databaseSets>
 		<databaseSet name="SqlServerSimpleShard" provider="sqlProvider"
              shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=CityID,tableIndex;mod=2;">
-            <add name="daltestS1db" databaseType="Master" sharding="1" connectionString="daltestS1db"/>   
-            <add name="daltestS0db" databaseType="Master" sharding="0" connectionString="daltestS0db"/>   
+            <add name="daltestS1db" databaseType="Master" sharding="1" connectionString="SimpleShard_1"/>   
+            <add name="daltestS0db" databaseType="Master" sharding="0" connectionString="SimpleShard_0"/>   
 		</databaseSet>
 		<databaseSet name="MultiThreadingTest" provider="sqlProvider">
 			<add name="MultiThreadingTest" databaseType="Master" sharding="" connectionString="MultiThreadingTest"/>   

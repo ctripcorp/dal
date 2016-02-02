@@ -25,6 +25,9 @@
 #if($method.isAsync())
 		hints.asyncExecution();
 #end
+#if($method.isCallback())
+		hints.callbackWith(callback);
+#end
 #if($method.hasParameters() || $method.isPaging())
 		int i = 1;
 #end

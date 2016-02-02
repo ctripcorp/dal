@@ -298,7 +298,12 @@ public class JavaMethodHost {
 		}
 
 		paramsDeclaration.add("DalHints hints");
-
+		if (isShards()) {
+			paramsDeclaration.add("Set<String> shards");
+		}
+		if (isCallback()) {
+			paramsDeclaration.add("DalResultCallback callback");
+		}
 		return StringUtils.join(paramsDeclaration, ", ");
 	}
 

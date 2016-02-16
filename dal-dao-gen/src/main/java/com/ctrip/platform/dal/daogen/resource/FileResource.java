@@ -29,7 +29,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import com.ctrip.platform.dal.common.util.Configuration;
-import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
 import com.ctrip.platform.dal.daogen.domain.W2uiElement;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
@@ -40,7 +39,6 @@ import com.ctrip.platform.dal.daogen.utils.ZipFolder;
 @Singleton
 @Path("file")
 public class FileResource {
-
 	private static String generatePath;
 
 	static {
@@ -49,8 +47,7 @@ public class FileResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<W2uiElement> getFiles(@QueryParam("id") String id,
-			@QueryParam("language") String language,
+	public List<W2uiElement> getFiles(@QueryParam("id") String id, @QueryParam("language") String language,
 			@QueryParam("name") String name) {
 		List<W2uiElement> files = new ArrayList<W2uiElement>();
 
@@ -67,8 +64,7 @@ public class FileResource {
 				if (null == name || name.isEmpty()) {
 					element.setId(String.format("%s_%d", id, files.size()));
 				} else {
-					element.setId(String.format("%s_%s_%d", id,
-							name.replace("\\", ""), files.size()));
+					element.setId(String.format("%s_%s_%d", id, name.replace("\\", ""), files.size()));
 				}
 				if (null == name || name.isEmpty()) {
 					element.setData(f.getName());
@@ -94,8 +90,7 @@ public class FileResource {
 	@GET
 	@Path("content")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getFileContent(@QueryParam("id") String id,
-			@QueryParam("language") String language,
+	public String getFileContent(@QueryParam("id") String id, @QueryParam("language") String language,
 			@QueryParam("name") String name) {
 		File f = new File(new File(new File(generatePath, id), language), name);
 		StringBuilder sb = new StringBuilder();
@@ -130,10 +125,8 @@ public class FileResource {
 	@GET
 	@Path("download")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public String download(@QueryParam("id") String id,
-			@QueryParam("language") String name,
-			@Context HttpServletRequest request,
-			@Context HttpServletResponse response) throws Exception {
+	public String download(@QueryParam("id") String id, @QueryParam("language") String name,
+			@Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
 
 		File f = null;
 		if (null != name && !name.isEmpty()) {
@@ -142,8 +135,7 @@ public class FileResource {
 			f = new File(generatePath, id);
 		}
 
-		Project proj = SpringBeanGetter.getDaoOfProject().getProjectByID(
-				Integer.valueOf(id));
+		Project proj = SpringBeanGetter.getDaoOfProject().getProjectByID(Integer.valueOf(id));
 		DateFormat format1 = new SimpleDateFormat("yyyyMMddHHmmss");
 		String date = format1.format(new Date());
 		final String zipFileName = proj.getName() + "-" + date + ".zip";
@@ -170,9 +162,7 @@ public class FileResource {
 				response.setContentType("application/zip;charset=utf-8");
 				response.setContentLength((int) file.length());
 				response.setHeader("Content-Disposition",
-						"attachment;filename="
-								+ new String(file.getName().getBytes("gbk"),
-										"iso-8859-1"));
+						"attachment;filename=" + new String(file.getName().getBytes("gbk"), "iso-8859-1"));
 			}
 			// response.reset();
 			fis = new FileInputStream(file);
@@ -214,8 +204,7 @@ public class FileResource {
 		ZipOutputStream zos = null;
 		try {
 
-			FileOutputStream fos = new FileOutputStream(new File(generatePath,
-					zipFileName));
+			FileOutputStream fos = new FileOutputStream(new File(generatePath, zipFileName));
 			zos = new ZipOutputStream(fos);
 			ZipEntry ze = new ZipEntry(fileToZip.getName());
 			zos.putNextEntry(ze);
@@ -234,32 +223,5 @@ public class FileResource {
 			JavaIOUtils.closeOutputStream(zos);
 		}
 	}
-
-	// @GET
-	// @Path("download")
-	// @Produces(MediaType.TEXT_PLAIN)
-	// public String download(@QueryParam("id") String id,
-	// @QueryParam("language") String name) {
-	// File f = null;
-	// if (null != name && !name.isEmpty()) {
-	// f = new File(new File(generatePath, id), name);
-	// } else {
-	// f = new File(generatePath, id);
-	// }
-	//
-	// Project proj = daoOfProject.getProjectByID(Integer.valueOf(id));
-	//
-	// String zipFileName = proj.getName() + "-" + System.currentTimeMillis() +
-	// ".zip";
-	//
-	// if (f.isFile()) {
-	// zipFile(f, zipFileName);
-	// } else {
-	// new ZipFolder(f.getAbsolutePath()).zipIt(zipFileName);
-	// }
-	//
-	// return String.format("%s/files/%s", Configuration.get("codegen_url"),
-	// zipFileName);
-	// }
 
 }

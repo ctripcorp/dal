@@ -1,5 +1,6 @@
 <%@page pageEncoding="UTF-8"%>
-<%@page import="org.jasig.cas.client.util.AssertionHolder"%>
+<%@page
+	import="com.ctrip.platform.dal.daogen.utils.AssertionHolderManager"%>
 <nav class="navbar navbar-inverse navbar-embossed navbar-fixed-top"
 	role="navigation">
 	<div class="navbar-header">
@@ -27,6 +28,8 @@
 				</ul></li>
 			<li id="eventmanagejsp"><a href="eventmanage.jsp">审批管理</a></li>
 			<li id="groupmanagejsp"><a href="groupmanage.jsp">组管理</a></li>
+			<li id="usermanagejsp" style="display: none;"><a
+				href="usermanage.jsp">用户管理</a></li>
 		</ul>
 		<ul class="nav navbar-nav navbar-right">
 			<li id="welcomejsp" style="display: none"><a href="welcome.jsp">Tutorial</a></li>
@@ -54,7 +57,7 @@
 			<li class="dropdown user"><a href="javascript:;"
 				class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
 				data-close-others="true"> <span class="username"> <%=request.getSession().getAttribute("loginUserName")%>
-						<%-- AssertionHolder.getAssertion().getPrincipal().getAttributes().get("sn") --%>
+						<%-- AssertionHolderManager.getName() --%>
 				</span> <i class="glyphicon glyphicon-menu-down"> </i>
 			</a> <span class="dropdown-arrow dropdown-arrow-inverse"
 				style="margin-top: 1px"></span>

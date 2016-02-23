@@ -44,8 +44,8 @@ public class DaoOfLoginUser {
 							return LoginUser.visitRow(rs);
 						}
 					});
-		} catch (DataAccessException ex) {
-			ex.printStackTrace();
+		} catch (DataAccessException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -59,7 +59,8 @@ public class DaoOfLoginUser {
 							return LoginUser.visitRow(rs);
 						}
 					});
-		} catch (DataAccessException ex) {
+		} catch (DataAccessException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -82,8 +83,8 @@ public class DaoOfLoginUser {
 					return user;
 				}
 			});
-		} catch (DataAccessException ex) {
-			ex.printStackTrace();
+		} catch (DataAccessException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -111,8 +112,8 @@ public class DaoOfLoginUser {
 		try {
 			return this.jdbcTemplate.update("update login_users set user_no=?, user_name=?, user_email=? where id=?",
 					user.getUserNo(), user.getUserName(), user.getUserEmail(), user.getId());
-		} catch (DataAccessException ex) {
-			ex.printStackTrace();
+		} catch (DataAccessException e) {
+			e.printStackTrace();
 			return -1;
 		}
 	}
@@ -120,8 +121,8 @@ public class DaoOfLoginUser {
 	public int deleteUser(int userId) {
 		try {
 			return this.jdbcTemplate.update("delete from login_users where id=?", userId);
-		} catch (DataAccessException ex) {
-			ex.printStackTrace();
+		} catch (DataAccessException e) {
+			e.printStackTrace();
 			return -1;
 		}
 	}

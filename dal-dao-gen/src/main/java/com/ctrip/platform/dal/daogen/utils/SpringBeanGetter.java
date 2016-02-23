@@ -99,8 +99,7 @@ public class SpringBeanGetter {
 
 	public static DaoByTableViewSp getDaoByTableViewSp() {
 		if (daoByTableViewSp == null) {
-			daoByTableViewSp = (DaoByTableViewSp) context
-					.getBean("daoByTableViewSp");
+			daoByTableViewSp = (DaoByTableViewSp) context.getBean("daoByTableViewSp");
 		}
 		return daoByTableViewSp;
 	}
@@ -114,8 +113,7 @@ public class SpringBeanGetter {
 
 	public static DaoOfUserProject getDaoOfUserProject() {
 		if (daoOfUserProject == null) {
-			daoOfUserProject = (DaoOfUserProject) context
-					.getBean("userProjectDao");
+			daoOfUserProject = (DaoOfUserProject) context.getBean("userProjectDao");
 		}
 		return daoOfUserProject;
 	}
@@ -136,8 +134,7 @@ public class SpringBeanGetter {
 
 	public static DaoOfDatabaseSet getDaoOfDatabaseSet() {
 		if (daoOfDatabaseSet == null) {
-			daoOfDatabaseSet = (DaoOfDatabaseSet) context
-					.getBean("dalDatabaseSet");
+			daoOfDatabaseSet = (DaoOfDatabaseSet) context.getBean("dalDatabaseSet");
 		}
 		return daoOfDatabaseSet;
 	}
@@ -158,8 +155,7 @@ public class SpringBeanGetter {
 
 	public static GroupRelationDao getGroupRelationDao() {
 		if (groupRelationDao == null) {
-			groupRelationDao = (GroupRelationDao) context
-					.getBean("groupRelationDao");
+			groupRelationDao = (GroupRelationDao) context.getBean("groupRelationDao");
 		}
 		return groupRelationDao;
 	}
@@ -180,8 +176,7 @@ public class SpringBeanGetter {
 
 	public static ConfigTemplateDao getConfigTemplateDao() {
 		if (configTemplateDao == null) {
-			configTemplateDao = (ConfigTemplateDao) context
-					.getBean("configTemplateDao");
+			configTemplateDao = (ConfigTemplateDao) context.getBean("configTemplateDao");
 		}
 		return configTemplateDao;
 	}

@@ -192,7 +192,8 @@
 			var postData = {
 				userNo : userNo,
 				userName : userName,
-				userEmail : userEmail
+				userEmail : userEmail,
+				password : '111111'
 			};
 
 			if (userNo == null || $.trim(userNo) == '') {

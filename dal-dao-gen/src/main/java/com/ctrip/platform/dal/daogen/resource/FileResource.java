@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.ZipFolder;
+import com.google.common.base.Charsets;
 
 @Resource
 @Singleton
@@ -162,7 +164,7 @@ public class FileResource {
 				response.setContentType("application/zip;charset=utf-8");
 				response.setContentLength((int) file.length());
 				response.setHeader("Content-Disposition",
-						"attachment;filename=" + new String(file.getName().getBytes("gbk"), "iso-8859-1"));
+						"attachment;filename=" + new String(file.getName().getBytes(Charsets.UTF_8), "UTF-8"));
 			}
 			// response.reset();
 			fis = new FileInputStream(file);

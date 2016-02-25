@@ -1,7 +1,5 @@
 (function(window, undefined) {
-
 	var Render = function() {
-
 	};
 
 	var showConfigTemplateButton = function() {
@@ -104,7 +102,7 @@
 	};
 
 	var updateConfigTemplate = function() {
-		if (confirm("Are you sure to save changes?")) {
+		if (confirm("您确定要保存更改吗?")) {
 			cblock($("body"));
 			$.post("/rest/configTemplate/updateConfigTemplate", {
 				id : $("#txt_id").val(),
@@ -113,7 +111,7 @@
 				template : $("#txt_configtemplate").val()
 			}).done(function(data) {
 				if (data.code == "OK") {
-					$("#configtemplate_error_msg").html("Saved successful.");
+					$("#configtemplate_error_msg").html("保存成功.");
 				}
 			});
 			$("body").unblock();
@@ -293,7 +291,6 @@
 						+ "&groupDBs=true&groupId="
 						+ w2ui['grid'].current_group).done(
 				function(data) {
-
 					if ($("#databases2")[0] != undefined
 							&& $("#databases2")[0].selectize != undefined) {
 						$("#databases2")[0].selectize.clearOptions();
@@ -334,25 +331,25 @@
 	var delDbSetEntry = function() {
 		var current_group = w2ui['grid'].current_group;
 		if (current_group == null || current_group == '') {
-			alert('请先选择一个DAL Team！');
+			alert('请先选择一个 DAL Team！');
 			return;
 		}
 
 		var records1 = w2ui['grid'].getSelection();
 		var record1 = w2ui['grid'].get(records1[0]);
 		if (record1 == null || record1 == '') {
-			alert("请先选择一个databaseSet！");
+			alert("请先选择一个 databaseSet！");
 			return;
 		}
 
 		var records2 = w2ui['previewgrid'].getSelection();
 		var record2 = w2ui['previewgrid'].get(records2[0]);
 		if (record2 == null || record2 == '') {
-			alert("请先选择一个databaseSet Entry！");
+			alert("请先选择一个 databaseSet Entry！");
 			return;
 		}
 
-		if (confirm("Are you sure to delete?")) {
+		if (confirm("您确定要删除吗?")) {
 			$.post("/rest/groupdbset/deletedbsetEntry", {
 				groupId : w2ui['grid'].current_group,
 				dbsetEntryId : record2['id'],
@@ -372,15 +369,10 @@
 	Render.prototype = {
 		renderAll : function() {
 			$('#main_layout').height($(document).height() - 55);
-
 			window.render.render_layout($('#main_layout'));
-
 			window.render.render_sidebar();
-
 			window.render.render_grid();
-
 			window.render.render_preview();
-
 			$(window).resize(function() {
 				$('#main_layout').height($(document).height() - 50);
 			});
@@ -447,12 +439,9 @@
 					footer : true,
 					toolbarReload : false,
 					toolbarColumns : false,
-					// toolbarSearch: false,
 					toolbarAdd : false,
 					toolbarDelete : false,
-					// toolbarSave: true,
 					toolbarEdit : false
-				// selectColumn: true
 				},
 				multiSelect : false,
 				toolbar : {
@@ -466,22 +455,22 @@
 					}, {
 						type : 'button',
 						id : 'addDbSet',
-						caption : '添加dbSet',
+						caption : '添加 dbSet',
 						icon : 'glyphicon glyphicon-plus'
 					}, {
 						type : 'button',
 						id : 'editDbSet',
-						caption : '修改dbSet',
+						caption : '修改 dbSet',
 						icon : 'glyphicon glyphicon-edit'
 					}, {
 						type : 'button',
 						id : 'delDbSet',
-						caption : '删除dbSet',
+						caption : '删除 dbSet',
 						icon : 'glyphicon glyphicon-remove'
 					}, {
 						type : 'button',
 						id : 'showDalConfigDemo',
-						caption : '配置Demo',
+						caption : '配置 Demo',
 						icon : 'glyphicon glyphicon-duplicate'
 					}, {
 						type : 'button',
@@ -545,7 +534,7 @@
 					resizable : true
 				}, {
 					field : 'update_user_no',
-					caption : '修改User',
+					caption : '修改 User',
 					size : '12%',
 					resizable : true
 				}, {
@@ -580,7 +569,6 @@
 					toolbarAdd : false,
 					toolbarDelete : false,
 					toolbarEdit : false
-				// selectColumn: true
 				},
 				multiSelect : false,
 				toolbar : {
@@ -594,17 +582,17 @@
 					}, {
 						type : 'button',
 						id : 'addDbSetEntry',
-						caption : '添加dbSet entry',
+						caption : '添加 dbSet entry',
 						icon : 'glyphicon glyphicon-plus'
 					}, {
 						type : 'button',
 						id : 'editDbSetEntry',
-						caption : '修改dbSet entry',
+						caption : '修改 dbSet entry',
 						icon : 'glyphicon glyphicon-edit'
 					}, {
 						type : 'button',
 						id : 'delDbSetEntry',
-						caption : '删除dbSet entry',
+						caption : '删除 dbSet entry',
 						icon : 'glyphicon glyphicon-remove'
 					} ],
 					onClick : function(target, data) {
@@ -667,7 +655,7 @@
 					resizable : true
 				}, {
 					field : 'update_user_no',
-					caption : '修改User',
+					caption : '修改 User',
 					size : '12%',
 					resizable : true
 				}, {
@@ -689,7 +677,6 @@
 	jQuery(document)
 			.ready(
 					function() {
-
 						$(document.body).on(
 								'click',
 								'#save_adddbset',

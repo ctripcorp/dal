@@ -12,8 +12,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
-import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
-import com.ctrip.platform.dal.daogen.dao.DaoOfProject;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.Project;
@@ -36,8 +34,7 @@ public class DalGroupProjectResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<DalGroup> getGroups(@QueryParam("root") boolean root) {
 
-		List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup()
-				.getAllGroups();
+		List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
 		for (DalGroup group : groups) {
 			group.setText(group.getGroup_name());
 			group.setIcon("glyphicon glyphicon-folder-open");

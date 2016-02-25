@@ -25,7 +25,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.jasig.cas.client.util.AssertionHolder;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import com.ctrip.platform.dal.common.util.Configuration;
@@ -35,6 +34,7 @@ import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.AddUser;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.enums.RoleType;
+import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -105,17 +105,13 @@ public class SetupDBResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("initializeDb")
-	public Status initializeDb(@FormParam("dbaddress") String dbaddress,
-			@FormParam("dbport") String dbport,
-			@FormParam("dbuser") String dbuser,
-			@FormParam("dbpassword") String dbpassword,
-			@FormParam("dbcatalog") String dbcatalog,
-			@FormParam("groupName") String groupName,
+	public Status initializeDb(@FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
+			@FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
+			@FormParam("dbcatalog") String dbcatalog, @FormParam("groupName") String groupName,
 			@FormParam("groupComment") String groupComment) {
 		Status status = Status.OK;
 		try {
-			boolean jdbcResult = initializeJdbcProperties(dbaddress, dbport,
-					dbuser, dbpassword, dbcatalog);
+			boolean jdbcResult = initializeJdbcProperties(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
 			if (!jdbcResult) {
 				status = Status.ERROR;
 				status.setInfo("Error occured while initializing the jdbc.properties file.");
@@ -144,17 +140,15 @@ public class SetupDBResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("connectionTest")
-	public Status connectionTest(@FormParam("dbtype") String dbtype,
-			@FormParam("dbaddress") String dbaddress,
-			@FormParam("dbport") String dbport,
-			@FormParam("dbuser") String dbuser,
+	public Status connectionTest(@FormParam("dbtype") String dbtype, @FormParam("dbaddress") String dbaddress,
+			@FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
 			@FormParam("dbpassword") String dbpassword) {
 		Status status = Status.OK;
 		Connection conn = null;
 		ResultSet rs = null;
 		try {
-			conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser,
-					dbpassword, DatabaseType.valueOf(dbtype).getValue());
+			conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword,
+					DatabaseType.valueOf(dbtype).getValue());
 			rs = conn.getMetaData().getCatalogs();
 			Set<String> allCatalog = new HashSet<String>();
 			while (rs.next()) {
@@ -208,8 +202,7 @@ public class SetupDBResource {
 
 	private boolean tableConsistent() throws Exception {
 		boolean result = false;
-		Set<String> catalogTableNames = SpringBeanGetter.getSetupDBDao()
-				.getCatalogTableNames(null);
+		Set<String> catalogTableNames = SpringBeanGetter.getSetupDBDao().getCatalogTableNames(null);
 		if (catalogTableNames == null || catalogTableNames.size() == 0) {
 			return result;
 		}
@@ -251,16 +244,14 @@ public class SetupDBResource {
 		return set;
 	}
 
-	private boolean initializeJdbcProperties(String dbaddress, String dbport,
-			String dbuser, String dbpassword, String dbcatalog) {
+	private boolean initializeJdbcProperties(String dbaddress, String dbport, String dbuser, String dbpassword,
+			String dbcatalog) {
 		boolean result = false;
 		try {
 			Properties properties = new Properties();
-			properties
-					.setProperty(jdbcDriverClassName, "com.mysql.jdbc.Driver"); // Currently
-																				// fixed.
-			properties.setProperty(jdbcUrl, String.format(jdbcUrlTemplate,
-					dbaddress, dbport, dbcatalog));
+			properties.setProperty(jdbcDriverClassName, "com.mysql.jdbc.Driver"); // Currently
+																					// fixed.
+			properties.setProperty(jdbcUrl, String.format(jdbcUrlTemplate, dbaddress, dbport, dbcatalog));
 			properties.setProperty(jdbcUsername, dbuser);
 			properties.setProperty(jdbcPassword, dbpassword);
 			URL url = classLoader.getResource(webXml);
@@ -281,8 +272,7 @@ public class SetupDBResource {
 		if (scriptPath == null || scriptPath.length() == 0) {
 			return null;
 		}
-		InputStream inputStream = this.getClass().getClassLoader()
-				.getResourceAsStream(scriptPath);
+		InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(scriptPath);
 		InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 		BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 		StringBuffer stringBuffer = new StringBuffer();
@@ -309,26 +299,20 @@ public class SetupDBResource {
 		return SpringBeanGetter.getSetupDBDao().executeSqlScript(scriptContent);
 	}
 
-	private boolean setupAdmin(String groupName, String groupComment)
-			throws Exception {
+	private boolean setupAdmin(String groupName, String groupComment) throws Exception {
 		boolean result = false;
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
+		String userNo = AssertionHolderManager.getEmployee();
 		if (userNo == null || groupName == null || groupName.isEmpty()) {
 			return result;
 		}
 
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(
-				userNo);
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		if (user == null) {
 			user = new LoginUser();
 			user.setUserNo(userNo);
-			user.setUserName(AssertionHolder.getAssertion().getPrincipal()
-					.getAttributes().get("sn").toString());
-			user.setUserEmail(AssertionHolder.getAssertion().getPrincipal()
-					.getAttributes().get("mail").toString());
-			int userResult = SpringBeanGetter.getDaoOfLoginUser().insertUser(
-					user);
+			user.setUserName(AssertionHolderManager.getName());
+			user.setUserEmail(AssertionHolderManager.getMail());
+			int userResult = SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
 			if (userResult <= 0) {
 				return result;
 			}
@@ -342,15 +326,13 @@ public class SetupDBResource {
 		group.setCreate_user_no(userNo);
 		group.setCreate_time(new Timestamp(System.currentTimeMillis()));
 
-		int groupResult = SpringBeanGetter.getDaoOfDalGroup().insertDalGroup(
-				group);
+		int groupResult = SpringBeanGetter.getDaoOfDalGroup().insertDalGroup(group);
 		if (groupResult <= 0) {
 			return result;
 		}
 
-		int userGroupResult = SpringBeanGetter.getDalUserGroupDao()
-				.insertUserGroup(user.getId(), DalGroupResource.SUPER_GROUP_ID,
-						RoleType.Admin.getValue(), AddUser.Allow.getValue());
+		int userGroupResult = SpringBeanGetter.getDalUserGroupDao().insertUserGroup(user.getId(),
+				DalGroupResource.SUPER_GROUP_ID, RoleType.Admin.getValue(), AddUser.Allow.getValue());
 		if (userGroupResult <= 0) {
 			return result;
 		}

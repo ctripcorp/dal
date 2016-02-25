@@ -13,9 +13,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.jasig.cas.client.util.AssertionHolder;
-
-import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
@@ -26,6 +23,7 @@ import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.sql.validate.SQLValidation;
 import com.ctrip.platform.dal.daogen.sql.validate.ValidateResult;
+import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
@@ -36,32 +34,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 复杂查询（额外生成实体类）
  * 
  * @author gzxia
- * 
+ * @modified yn.wang
  */
+
 @Resource
 @Singleton
 @Path("task/sql")
 public class GenTaskByFreeSqlResource {
-
 	private static ObjectMapper mapper = new ObjectMapper();
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Status addTask(@FormParam("id") int id,
-			@FormParam("project_id") int project_id,
-			@FormParam("db_name") String set_name,
-			@FormParam("class_name") String class_name,
-			@FormParam("pojo_name") String pojo_name,
-			@FormParam("method_name") String method_name,
-			@FormParam("crud_type") String crud_type,
-			@FormParam("sql_content") String sql_content,
-			@FormParam("params") String params,
-			@FormParam("version") int version,
-			@FormParam("action") String action,
-			@FormParam("comment") String comment,
-			@FormParam("scalarType") String scalarType,
-			@FormParam("pagination") boolean pagination,
-			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
+	public Status addTask(@FormParam("id") int id, @FormParam("project_id") int project_id,
+			@FormParam("db_name") String set_name, @FormParam("class_name") String class_name,
+			@FormParam("pojo_name") String pojo_name, @FormParam("method_name") String method_name,
+			@FormParam("crud_type") String crud_type, @FormParam("sql_content") String sql_content,
+			@FormParam("params") String params, @FormParam("version") int version, @FormParam("action") String action,
+			@FormParam("comment") String comment, @FormParam("scalarType") String scalarType,
+			@FormParam("pagination") boolean pagination, @FormParam("sql_style") String sql_style, // C#风格或者Java风格
 			@FormParam("hints") String hints) {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 
@@ -71,10 +61,8 @@ public class GenTaskByFreeSqlResource {
 				return Status.ERROR;
 			}
 		} else {
-			String userNo = AssertionHolder.getAssertion().getPrincipal()
-					.getAttributes().get("employee").toString();
-			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(
-					userNo);
+			String userNo = AssertionHolderManager.getEmployee();
+			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
 			task.setProject_id(project_id);
 			task.setDatabaseSetName(set_name);
@@ -107,8 +95,7 @@ public class GenTaskByFreeSqlResource {
 
 			if (action.equalsIgnoreCase("update")) {
 				task.setId(id);
-				task.setVersion(SpringBeanGetter.getDaoByFreeSql()
-						.getVersionById(id));
+				task.setVersion(SpringBeanGetter.getDaoByFreeSql().getVersionById(id));
 				if (0 >= SpringBeanGetter.getDaoByFreeSql().updateTask(task)) {
 					Status status = Status.ERROR;
 					status.setInfo("更新出错，数据是否合法？或者已经有同名方法？");
@@ -129,8 +116,7 @@ public class GenTaskByFreeSqlResource {
 	}
 
 	private boolean needApproveTask(int projectId, int userId) {
-		Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(
-				projectId);
+		Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(projectId);
 		if (prj == null) {
 			return true;
 		}
@@ -151,8 +137,8 @@ public class GenTaskByFreeSqlResource {
 			GroupRelation gr = ite.next();
 			if (gr.getChild_group_role() == 1) {
 				int groupId = gr.getChild_group_id();
-				List<UserGroup> test = SpringBeanGetter.getDalUserGroupDao()
-						.getUserGroupByGroupIdAndUserId(groupId, userId);
+				List<UserGroup> test = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(groupId,
+						userId);
 				if (test != null && test.size() > 0) {
 					return false;
 				}
@@ -163,26 +149,22 @@ public class GenTaskByFreeSqlResource {
 
 	@POST
 	@Path("buildPagingSQL")
-	public Status buildPagingSQL(@FormParam("db_name") String db_set_name,// dbset
+	public Status buildPagingSQL(@FormParam("db_name") String db_set_name, // dbset
 																			// name
 			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
 			@FormParam("sql_content") String sql_content) {
 		Status status = Status.OK;
 		try {
-			DatabaseSetEntry databaseSetEntry = SpringBeanGetter
-					.getDaoOfDatabaseSet()
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet()
 					.getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
-			CurrentLanguage lang = (sql_content.contains("@") || "csharp"
-					.equals(sql_style)) ? CurrentLanguage.CSharp
+			CurrentLanguage lang = (sql_content.contains("@") || "csharp".equals(sql_style)) ? CurrentLanguage.CSharp
 					: CurrentLanguage.Java;
 			String pagingSQL = SqlBuilder.pagingQuerySql(sql_content,
-					DbUtils.getDatabaseCategory(databaseSetEntry
-							.getConnectionString()), lang);
+					DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), lang);
 			status.setInfo(pagingSQL);
 		} catch (Exception e) {
 			status = Status.ERROR;
-			status.setInfo(e.getMessage() == null ? e.getCause().getMessage()
-					: e.getMessage());
+			status.setInfo(e.getMessage() == null ? e.getCause().getMessage() : e.getMessage());
 			return status;
 		}
 
@@ -222,13 +204,9 @@ public class GenTaskByFreeSqlResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("sqlValidate")
-	public Status validateSQL(@FormParam("db_name") String set_name,
-			@FormParam("crud_type") String crud_type,
-			@FormParam("sql_content") String sql_content,
-			@FormParam("params") String params,
-			@FormParam("pagination") boolean pagination,
-			@FormParam("mockValues") String mockValues) {
-
+	public Status validateSQL(@FormParam("db_name") String set_name, @FormParam("crud_type") String crud_type,
+			@FormParam("sql_content") String sql_content, @FormParam("params") String params,
+			@FormParam("pagination") boolean pagination, @FormParam("mockValues") String mockValues) {
 		Status status = Status.OK;
 
 		try {
@@ -236,27 +214,23 @@ public class GenTaskByFreeSqlResource {
 			int[] sqlTypes = getSqlTypes(params);
 			String[] vals = mockValues.split(";");
 
-			DatabaseSetEntry databaseSetEntry = SpringBeanGetter
-					.getDaoOfDatabaseSet()
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet()
 					.getMasterDatabaseSetEntryByDatabaseSetName(set_name);
 			String dbName = databaseSetEntry.getConnectionString();
 
 			ValidateResult validResult = null;
 			String resultPrefix = "The affected rows is ";
 			if (pagination && "select".equalsIgnoreCase(crud_type)) {
-				sql_content = SqlBuilder.pagingQuerySql(sql_content,
-						DbUtils.getDatabaseCategory(dbName),
+				sql_content = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(dbName),
 						CurrentLanguage.Java);
 				sql_content = String.format(sql_content, 1, 2);
 			}
 
 			if ("select".equalsIgnoreCase(crud_type)) {
-				validResult = SQLValidation.queryValidate(dbName, sql_content,
-						sqlTypes, vals);
+				validResult = SQLValidation.queryValidate(dbName, sql_content, sqlTypes, vals);
 				resultPrefix = "The result count is ";
 			} else {
-				validResult = SQLValidation.updateValidate(dbName, sql_content,
-						sqlTypes, vals);
+				validResult = SQLValidation.updateValidate(dbName, sql_content, sqlTypes, vals);
 			}
 
 			if (validResult != null && validResult.isPassed()) {
@@ -272,32 +246,6 @@ public class GenTaskByFreeSqlResource {
 		}
 
 		return status;
-
 	}
-
-	// @POST
-	// @Produces(MediaType.APPLICATION_JSON)
-	// @Path("test_sql")
-	// public Status verifyQuery(@FormParam("db_name") String set_name,
-	// @FormParam("sql_content") String sql,
-	// @FormParam("params") String params) {
-	//
-	// Status status = Status.OK;
-	//
-	// DatabaseSetEntry databaseSetEntry =
-	// SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
-	// String dbName = databaseSetEntry.getConnectionString();
-	//
-	// try {
-	// DbUtils.testAQuerySql(dbName, sql, params, CurrentLanguage.CSharp, true);
-	// } catch (Exception e) {
-	// status = Status.ERROR;
-	// status.setInfo(e.getMessage());
-	// return status;
-	// }
-	//
-	// return status;
-	//
-	// }
 
 }

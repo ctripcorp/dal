@@ -17,9 +17,9 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.entity.Project;
 
 public class DaoOfLoginUser {
-
 	private JdbcTemplate jdbcTemplate;
 
 	public void setDataSource(DataSource dataSource) {
@@ -27,112 +27,104 @@ public class DaoOfLoginUser {
 	}
 
 	public List<LoginUser> getAllUsers() {
-
-		return this.jdbcTemplate.query(
-				"select id, user_no, user_name, user_email from login_users",
+		return this.jdbcTemplate.query("select id, user_no, user_name, user_email from login_users",
 				new RowMapper<LoginUser>() {
-					public LoginUser mapRow(ResultSet rs, int rowNum)
-							throws SQLException {
+					public LoginUser mapRow(ResultSet rs, int rowNum) throws SQLException {
 						return LoginUser.visitRow(rs);
 					}
 				});
 	}
-	
+
 	public LoginUser getUserById(int userId) {
 		try {
-			return this.jdbcTemplate
-					.queryForObject(
-							"select id, user_no, user_name, user_email from login_users where id = ?",
-							new Object[] { userId },
-							new RowMapper<LoginUser>() {
-								public LoginUser mapRow(ResultSet rs, int rowNum)
-										throws SQLException {
-									return LoginUser.visitRow(rs);
-								}
-							});
-		} catch (DataAccessException ex) {
-			ex.printStackTrace();
+			return this.jdbcTemplate.queryForObject(
+					"select id, user_no, user_name, user_email from login_users where id = ?", new Object[] { userId },
+					new RowMapper<LoginUser>() {
+						public LoginUser mapRow(ResultSet rs, int rowNum) throws SQLException {
+							return LoginUser.visitRow(rs);
+						}
+					});
+		} catch (DataAccessException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
 
 	public LoginUser getUserByNo(String userNo) {
-
 		try {
-			return this.jdbcTemplate
-					.queryForObject(
-							"select id, user_no, user_name, user_email from login_users where user_no = ?",
-							new Object[] { userNo },
-							new RowMapper<LoginUser>() {
-								public LoginUser mapRow(ResultSet rs, int rowNum)
-										throws SQLException {
-									return LoginUser.visitRow(rs);
-								}
-							});
-		} catch (DataAccessException ex) {
+			return this.jdbcTemplate.queryForObject(
+					"select id, user_no, user_name, user_email from login_users where user_no = ?",
+					new Object[] { userNo }, new RowMapper<LoginUser>() {
+						public LoginUser mapRow(ResultSet rs, int rowNum) throws SQLException {
+							return LoginUser.visitRow(rs);
+						}
+					});
+		} catch (DataAccessException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
-	
-	public List<LoginUser> getUserByGroupId(int groupId) {
 
-		String sql = ""
-				+ "SELECT tb2.id, "
-				+ "       tb2.user_no, "
-				+ "       tb2.user_name, "
-				+ "       tb2.user_email, "
-				+ "       tb1.role, "
-				+ "       tb1.adduser "
-				+ "FROM   user_group tb1 "
-				+ "       LEFT JOIN login_users tb2 "
-				+ "              ON tb1.user_id = tb2.id "
+	public List<LoginUser> getUserByGroupId(int groupId) {
+		String sql = "" + "SELECT tb2.id, " + "       tb2.user_no, " + "       tb2.user_name, "
+				+ "       tb2.user_email, " + "       tb1.role, " + "       tb1.adduser " + "FROM   user_group tb1 "
+				+ "       LEFT JOIN login_users tb2 " + "              ON tb1.user_id = tb2.id "
 				+ "WHERE  tb1.group_id = ? ";
 		try {
-			return this.jdbcTemplate
-					.query(sql,
-							new Object[] { groupId },
-							new RowMapper<LoginUser>() {
-								public LoginUser mapRow(ResultSet rs, int rowNum)
-										throws SQLException {
-									LoginUser user = new LoginUser();
-									user.setId(rs.getInt(1));
-									user.setUserNo(rs.getString(2));
-									user.setUserName(rs.getString(3));
-									user.setUserEmail(rs.getString(4));
-									user.setRole(rs.getString(5));
-									user.setAdduser(rs.getString(6));
-									return user;
-								}
-							});
-		} catch (DataAccessException ex) {
-			ex.printStackTrace();
+			return this.jdbcTemplate.query(sql, new Object[] { groupId }, new RowMapper<LoginUser>() {
+				public LoginUser mapRow(ResultSet rs, int rowNum) throws SQLException {
+					LoginUser user = new LoginUser();
+					user.setId(rs.getInt(1));
+					user.setUserNo(rs.getString(2));
+					user.setUserName(rs.getString(3));
+					user.setUserEmail(rs.getString(4));
+					user.setRole(rs.getString(5));
+					user.setAdduser(rs.getString(6));
+					return user;
+				}
+			});
+		} catch (DataAccessException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
-	
-	public int insertUser(final LoginUser data) {
 
+	public int insertUser(final LoginUser user) {
 		KeyHolder holder = new GeneratedKeyHolder();
-
 		this.jdbcTemplate.update(new PreparedStatementCreator() {
-
 			@Override
-			public PreparedStatement createPreparedStatement(
-					Connection connection) throws SQLException {
-				PreparedStatement ps = connection
-						.prepareStatement(
-								"insert into login_users ( user_no, user_name, user_email ) values (?,?,?) ON DUPLICATE KEY UPDATE user_no = ?",
-								Statement.RETURN_GENERATED_KEYS);
-				ps.setString(1, data.getUserNo());
-				ps.setString(2, data.getUserName());
-				ps.setString(3, data.getUserEmail());
-				ps.setString(4, data.getUserNo());
+			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+				PreparedStatement ps = connection.prepareStatement(
+						"insert into login_users ( user_no, user_name, user_email ) values (?,?,?) ON DUPLICATE KEY UPDATE user_no = ?",
+						Statement.RETURN_GENERATED_KEYS);
+				ps.setString(1, user.getUserNo());
+				ps.setString(2, user.getUserName());
+				ps.setString(3, user.getUserEmail());
+				ps.setString(4, user.getUserNo());
 				return ps;
 			}
 		}, holder);
 
 		return holder.getKey().intValue();
-
 	}
-	
+
+	public int updateUser(LoginUser user) {
+		try {
+			return this.jdbcTemplate.update("update login_users set user_no=?, user_name=?, user_email=? where id=?",
+					user.getUserNo(), user.getUserName(), user.getUserEmail(), user.getId());
+		} catch (DataAccessException e) {
+			e.printStackTrace();
+			return -1;
+		}
+	}
+
+	public int deleteUser(int userId) {
+		try {
+			return this.jdbcTemplate.update("delete from login_users where id=?", userId);
+		} catch (DataAccessException e) {
+			e.printStackTrace();
+			return -1;
+		}
+	}
+
 }

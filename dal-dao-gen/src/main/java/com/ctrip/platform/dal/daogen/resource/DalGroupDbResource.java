@@ -18,12 +18,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
-import org.jasig.cas.client.util.AssertionHolder;
 
-import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
-import com.ctrip.platform.dal.daogen.dao.DalGroupDao;
-import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
-import com.ctrip.platform.dal.daogen.dao.UserGroupDao;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
@@ -32,6 +27,7 @@ import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
@@ -39,38 +35,34 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
  * DAL database of group manage.
  * 
  * @author gzxia
- * 
+ * @modified yn.wang
  */
+
 @Resource
 @Singleton
 @Path("groupdb")
 public class DalGroupDbResource {
-
 	private static Logger log = Logger.getLogger(DalGroupDbResource.class);
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<DalGroup> getGroups(@QueryParam("root") boolean root) {
+		List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
 
-		List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup()
-				.getAllGroups();
 		for (DalGroup group : groups) {
 			group.setText(group.getGroup_name());
 			group.setIcon("glyphicon glyphicon-folder-close");
 			group.setChildren(false);
 		}
-		return sortGroups(groups);
 
+		return sortGroups(groups);
 	}
 
 	private List<DalGroup> sortGroups(List<DalGroup> groups) {
 		List<DalGroup> result = new ArrayList<DalGroup>(groups.size());
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(
-				userNo);
-		List<UserGroup> joinedGroups = SpringBeanGetter.getDalUserGroupDao()
-				.getUserGroupByUserId(user.getId());
+		String userNo = AssertionHolderManager.getEmployee();
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		List<UserGroup> joinedGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
 		if (joinedGroups != null && joinedGroups.size() > 0) {
 			for (UserGroup joinedGroup : joinedGroups) {
 				Iterator<DalGroup> ite = groups.iterator();
@@ -98,8 +90,7 @@ public class DalGroupDbResource {
 			log.error("get Group Users failed", ex);
 			return null;
 		}
-		List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB()
-				.getGroupDBsByGroup(groupId);
+		List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
 		return dbs;
 	}
 
@@ -107,18 +98,14 @@ public class DalGroupDbResource {
 	@Path("allgroupdbs")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<DalGroupDB> getAllGroupDbs() {
-
-		List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB()
-				.getAllGroupDbs();
+		List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getAllGroupDbs();
 		for (DalGroupDB db : dbs) {
 			db.setDb_user("******");
 			db.setDb_password("******");
 
-			if (DatabaseType.SQLServer.getValue().equals(
-					db.getDb_providerName())) {
+			if (DatabaseType.SQLServer.getValue().equals(db.getDb_providerName())) {
 				db.setDb_providerName("SQLServer");
-			} else if (DatabaseType.MySQL.getValue().equals(
-					db.getDb_providerName())) {
+			} else if (DatabaseType.MySQL.getValue().equals(db.getDb_providerName())) {
 				db.setDb_providerName("MySQL");
 			} else {
 				db.setDb_providerName("unknown");
@@ -135,18 +122,13 @@ public class DalGroupDbResource {
 
 	@POST
 	@Path("add")
-	public Status add(@FormParam("groupId") String groupId,
-			@FormParam("dbname") String dbname,
-			@FormParam("comment") String comment,
-			@FormParam("gen_default_dbset") boolean gen_default_dbset) {
+	public Status add(@FormParam("groupId") String groupId, @FormParam("dbname") String dbname,
+			@FormParam("comment") String comment, @FormParam("gen_default_dbset") boolean gen_default_dbset) {
+		String userNo = AssertionHolderManager.getEmployee();
 
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
-
-		if (null == userNo || null == groupId || null == dbname) {
-			log.error(String.format(
-					"Add member failed, caused by illegal parameters: "
-							+ "[groupId=%s, dbname=%s]", groupId, dbname));
+		if (userNo == null || groupId == null || dbname == null) {
+			log.error(String.format("Add member failed, caused by illegal parameters: " + "[groupId=%s, dbname=%s]",
+					groupId, dbname));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
@@ -168,23 +150,18 @@ public class DalGroupDbResource {
 			return status;
 		}
 
-		DalGroupDB groupdb = SpringBeanGetter.getDaoOfDalGroupDB()
-				.getGroupDBByDbName(dbname);
+		DalGroupDB groupdb = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
 		if (null != groupdb && groupdb.getDal_group_id() > 0) {
-			DalGroup group = SpringBeanGetter.getDaoOfDalGroup()
-					.getDalGroupById(groupdb.getDal_group_id());
+			DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDal_group_id());
 			Status status = Status.ERROR;
-			status.setInfo(groupdb.getDbname() + " is already added in "
-					+ group.getGroup_name());
+			status.setInfo(groupdb.getDbname() + " is already added in " + group.getGroup_name());
 			return status;
 		}
 
 		int ret = -1;
 		if (null != groupdb) {
-			ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(
-					groupdb.getId(), groupID);
-			SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(
-					groupdb.getId(), comment);
+			ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), groupID);
+			SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), comment);
 		} else {
 			Status status = Status.ERROR;
 			status.setInfo(dbname + " 不存在，请先到数据库一览界面添加DB.");
@@ -206,16 +183,13 @@ public class DalGroupDbResource {
 
 	@POST
 	@Path("update")
-	public Status update(@FormParam("groupId") String groupId,
-			@FormParam("dbId") String dbId, @FormParam("comment") String comment) {
+	public Status update(@FormParam("groupId") String groupId, @FormParam("dbId") String dbId,
+			@FormParam("comment") String comment) {
+		String userNo = AssertionHolderManager.getEmployee();
 
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
-
-		if (null == userNo || null == groupId || null == dbId) {
-			log.error(String.format(
-					"Add member failed, caused by illegal parameters: "
-							+ "[groupId=%s, dbId=%s]", groupId, dbId));
+		if (userNo == null || groupId == null || dbId == null) {
+			log.error(String.format("Add member failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
+					groupId, dbId));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
@@ -239,8 +213,7 @@ public class DalGroupDbResource {
 			return status;
 		}
 
-		int ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID,
-				comment);
+		int ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID, comment);
 		if (ret <= 0) {
 			log.error("Update dal group db failed, caused by db operation failed, pls check the spring log");
 			Status status = Status.ERROR;
@@ -253,16 +226,12 @@ public class DalGroupDbResource {
 
 	@POST
 	@Path("delete")
-	public Status delete(@FormParam("groupId") String groupId,
-			@FormParam("dbId") String dbId) {
+	public Status delete(@FormParam("groupId") String groupId, @FormParam("dbId") String dbId) {
+		String userNo = AssertionHolderManager.getEmployee();
 
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
-
-		if (null == userNo || null == groupId || null == dbId) {
-			log.error(String.format(
-					"Delete db failed, caused by illegal parameters: "
-							+ "[groupId=%s, dbId=%s]", groupId, dbId));
+		if (userNo == null || groupId == null || dbId == null) {
+			log.error(String.format("Delete db failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
+					groupId, dbId));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
@@ -298,16 +267,12 @@ public class DalGroupDbResource {
 
 	@POST
 	@Path("transferdb")
-	public Status transferdb(@FormParam("groupId") String groupId,
-			@FormParam("dbId") String dbId) {
+	public Status transferdb(@FormParam("groupId") String groupId, @FormParam("dbId") String dbId) {
+		String userNo = AssertionHolderManager.getEmployee();
 
-		String userNo = AssertionHolder.getAssertion().getPrincipal()
-				.getAttributes().get("employee").toString();
-
-		if (null == userNo || null == groupId || null == dbId) {
-			log.error(String.format(
-					"transfer db failed, caused by illegal parameters: "
-							+ "[groupId=%s, dbId=%s]", groupId, dbId));
+		if (userNo == null || groupId == null || dbId == null) {
+			log.error(String.format("transfer db failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
+					groupId, dbId));
 			Status status = Status.ERROR;
 			status.setInfo("Illegal parameters.");
 			return status;
@@ -331,8 +296,7 @@ public class DalGroupDbResource {
 			return status;
 		}
 
-		int ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID,
-				groupID);
+		int ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID, groupID);
 		if (ret <= 0) {
 			log.error("transfer db failed, caused by db operation failed, pls check the spring log");
 			Status status = Status.ERROR;
@@ -344,10 +308,8 @@ public class DalGroupDbResource {
 
 	private boolean validatePermision(String userNo, int groupId) {
 		boolean havaPermision = false;
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(
-				userNo);
-		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao()
-				.getUserGroupByUserId(user.getId());
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
 		if (urGroups != null && urGroups.size() > 0) {
 			for (UserGroup urGroup : urGroups) {
 				if (urGroup.getGroup_id() == groupId) {
@@ -359,18 +321,15 @@ public class DalGroupDbResource {
 	}
 
 	private boolean validateTransferPermision(String userNo, int dbId) {
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(
-				userNo);
+		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		if (user == null) {
 			return false;
 		}
-		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao()
-				.getUserGroupByUserId(user.getId());
+		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
 		if (urGroups != null && urGroups.size() > 0) {
 			for (UserGroup urGroup : urGroups) {
-				List<DalGroupDB> groupDbs = SpringBeanGetter
-						.getDaoOfDalGroupDB().getGroupDBsByGroup(
-								urGroup.getGroup_id());
+				List<DalGroupDB> groupDbs = SpringBeanGetter.getDaoOfDalGroupDB()
+						.getGroupDBsByGroup(urGroup.getGroup_id());
 				if (groupDbs != null && groupDbs.size() > 0) {
 					for (DalGroupDB db : groupDbs) {
 						if (db.getId() == dbId) {
@@ -389,8 +348,7 @@ public class DalGroupDbResource {
 	 * @param dbname
 	 */
 	private void genDefaultDbset(int groupId, String dbname) {
-		List<DatabaseSet> exist = SpringBeanGetter.getDaoOfDatabaseSet()
-				.getAllDatabaseSetByName(dbname);
+		List<DatabaseSet> exist = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname);
 		if (exist != null && exist.size() > 0) {
 			return;
 		}
@@ -408,11 +366,9 @@ public class DalGroupDbResource {
 		}
 
 		dbset.setGroupId(groupId);
-		int ret = SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(
-				dbset);
+		int ret = SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
 		if (ret > 0) {
-			dbset = SpringBeanGetter.getDaoOfDatabaseSet()
-					.getAllDatabaseSetByName(dbname).get(0);
+			dbset = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname).get(0);
 
 			DatabaseSetEntry entry = new DatabaseSetEntry();
 			entry.setDatabaseSet_Id(dbset.getId());
@@ -420,8 +376,7 @@ public class DalGroupDbResource {
 			entry.setName(dbname);
 			entry.setConnectionString(dbname);
 
-			SpringBeanGetter.getDaoOfDatabaseSet()
-					.insertDatabaseSetEntry(entry);
+			SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSetEntry(entry);
 		}
 	}
 

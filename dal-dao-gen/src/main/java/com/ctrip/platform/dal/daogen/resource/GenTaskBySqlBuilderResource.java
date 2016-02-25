@@ -15,10 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.jasig.cas.client.util.AssertionHolder;
-
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
@@ -32,6 +29,7 @@ import com.ctrip.platform.dal.daogen.host.java.JavaColumnNameResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.sql.validate.SQLValidation;
 import com.ctrip.platform.dal.daogen.sql.validate.ValidateResult;
+import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
@@ -42,35 +40,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 构建SQL（生成的代码绑定到模板）
  * 
  * @author gzxia
- * 
+ * @modified yn.wang
  */
+
 @Resource
 @Singleton
 @Path("task/auto")
 public class GenTaskBySqlBuilderResource {
-
 	private static ObjectMapper mapper = new ObjectMapper();
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Status addTask(
-			@FormParam("id") int id,
-			@FormParam("project_id") int project_id,
-			@FormParam("db_name") String set_name,
-			@FormParam("table_name") String table_name,
-			@FormParam("method_name") String method_name,
-			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
-			@FormParam("crud_type") String crud_type,
-			@FormParam("fields") String fields,
-			@FormParam("condition") String condition,
-			@FormParam("sql_content") String sql_content,
-			@FormParam("version") int version,
-			@FormParam("action") String action,
-			@FormParam("params") String params,
-			@FormParam("comment") String comment,
-			@FormParam("scalarType") String scalarType,
-			@FormParam("pagination") boolean pagination,
-			@FormParam("orderby") String orderby,
+	public Status addTask(@FormParam("id") int id, @FormParam("project_id") int project_id,
+			@FormParam("db_name") String set_name, @FormParam("table_name") String table_name,
+			@FormParam("method_name") String method_name, @FormParam("sql_style") String sql_style, // C#风格或者Java风格
+			@FormParam("crud_type") String crud_type, @FormParam("fields") String fields,
+			@FormParam("condition") String condition, @FormParam("sql_content") String sql_content,
+			@FormParam("version") int version, @FormParam("action") String action, @FormParam("params") String params,
+			@FormParam("comment") String comment, @FormParam("scalarType") String scalarType,
+			@FormParam("pagination") boolean pagination, @FormParam("orderby") String orderby,
 			@FormParam("hints") String hints) {
 		Status status = Status.OK;
 		GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
@@ -81,10 +69,8 @@ public class GenTaskBySqlBuilderResource {
 				return Status.ERROR;
 			}
 		} else {
-			String userNo = AssertionHolder.getAssertion().getPrincipal()
-					.getAttributes().get("employee").toString();
-			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(
-					userNo);
+			String userNo = AssertionHolderManager.getEmployee();
+			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
 			task.setProject_id(project_id);
 			task.setDatabaseSetName(set_name);
@@ -111,8 +97,7 @@ public class GenTaskBySqlBuilderResource {
 
 			if (action.equalsIgnoreCase("update")) {
 				task.setId(id);
-				task.setVersion(SpringBeanGetter.getDaoBySqlBuilder()
-						.getVersionById(id));
+				task.setVersion(SpringBeanGetter.getDaoBySqlBuilder().getVersionById(id));
 				task.setSql_content(sql_content);
 				if (0 >= SpringBeanGetter.getDaoBySqlBuilder().updateTask(task)) {
 					status = Status.ERROR;
@@ -135,8 +120,7 @@ public class GenTaskBySqlBuilderResource {
 	}
 
 	private boolean needApproveTask(int projectId, int userId) {
-		Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(
-				projectId);
+		Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(projectId);
 		if (prj == null) {
 			return true;
 		}
@@ -157,8 +141,8 @@ public class GenTaskBySqlBuilderResource {
 			GroupRelation gr = ite.next();
 			if (gr.getChild_group_role() == 1) {
 				int groupId = gr.getChild_group_id();
-				List<UserGroup> test = SpringBeanGetter.getDalUserGroupDao()
-						.getUserGroupByGroupIdAndUserId(groupId, userId);
+				List<UserGroup> test = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(groupId,
+						userId);
 				if (test != null && test.size() > 0) {
 					return false;
 				}
@@ -169,20 +153,17 @@ public class GenTaskBySqlBuilderResource {
 
 	@POST
 	@Path("buildPagingSQL")
-	public Status buildPagingSQL(@FormParam("db_name") String db_set_name,// dbset
+	public Status buildPagingSQL(@FormParam("db_name") String db_set_name, // dbset
 																			// name
 			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
 			@FormParam("sql_content") String sql_content) {
 		Status status = Status.OK;
 		try {
-			DatabaseSetEntry databaseSetEntry = SpringBeanGetter
-					.getDaoOfDatabaseSet()
+			DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet()
 					.getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
-			CurrentLanguage lang = "java".equals(sql_style) ? CurrentLanguage.Java
-					: CurrentLanguage.CSharp;
+			CurrentLanguage lang = "java".equals(sql_style) ? CurrentLanguage.Java : CurrentLanguage.CSharp;
 			String pagingSQL = SqlBuilder.pagingQuerySql(sql_content,
-					DbUtils.getDatabaseCategory(databaseSetEntry
-							.getConnectionString()), lang);
+					DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString()), lang);
 			status.setInfo(pagingSQL);
 		} catch (Exception e) {
 			status = Status.ERROR;
@@ -195,15 +176,12 @@ public class GenTaskBySqlBuilderResource {
 
 	@POST
 	@Path("getDatabaseCategory")
-	public Status getDatabaseCategory(
-			@FormParam("db_set_name") String db_set_name) {
+	public Status getDatabaseCategory(@FormParam("db_set_name") String db_set_name) {
 		Status status = Status.OK;
-		DatabaseSetEntry databaseSetEntry = SpringBeanGetter
-				.getDaoOfDatabaseSet()
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet()
 				.getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
 		try {
-			DatabaseCategory category = DbUtils
-					.getDatabaseCategory(databaseSetEntry.getConnectionString());
+			DatabaseCategory category = DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString());
 			if (DatabaseCategory.MySql == category) {
 				status.setInfo("MySql");
 			} else {
@@ -219,15 +197,11 @@ public class GenTaskBySqlBuilderResource {
 
 	@POST
 	@Path("getMockValue")
-	public Status getMockValue(@FormParam("db_name") String set_name,
-			@FormParam("table_name") String table_name,
-			@FormParam("crud_type") String crud_type,
-			@FormParam("fields") String fields,
-			@FormParam("condition") String condition,
-			@FormParam("pagination") boolean pagination) {
+	public Status getMockValue(@FormParam("db_name") String set_name, @FormParam("table_name") String table_name,
+			@FormParam("crud_type") String crud_type, @FormParam("fields") String fields,
+			@FormParam("condition") String condition, @FormParam("pagination") boolean pagination) {
 		Status status = Status.OK;
-		int[] sqlTypes = getSqlTypes(set_name, table_name, crud_type, fields,
-				condition);
+		int[] sqlTypes = getSqlTypes(set_name, table_name, crud_type, fields, condition);
 		Object[] values = SQLValidation.mockStringValues(sqlTypes);
 		try {
 			status.setInfo(mapper.writeValueAsString(values));
@@ -238,8 +212,7 @@ public class GenTaskBySqlBuilderResource {
 		return status;
 	}
 
-	private int[] getSqlTypes(String set_name, String table_name,
-			String crud_type, String fields, String condition) {
+	private int[] getSqlTypes(String set_name, String table_name, String crud_type, String fields, String condition) {
 		if ("select".equalsIgnoreCase(crud_type)) {
 			return getSelectSqlTypes(set_name, table_name, condition);
 		} else if ("insert".equalsIgnoreCase(crud_type)) {
@@ -252,57 +225,46 @@ public class GenTaskBySqlBuilderResource {
 		return new int[0];
 	}
 
-	private int[] getDeleteSqlTypes(String set_name, String table_name,
-			String condition) {
+	private int[] getDeleteSqlTypes(String set_name, String table_name, String condition) {
 		return getWhereConditionSqlTypes(set_name, table_name, condition);
 	}
 
-	private int[] getUpdateSqlTypes(String set_name, String table_name,
-			String fields, String condition) {
+	private int[] getUpdateSqlTypes(String set_name, String table_name, String fields, String condition) {
 		int[] fieldSqlTypes = getFieldSqlTypes(set_name, table_name, fields);
-		int[] whereConditionSqlTypes = getWhereConditionSqlTypes(set_name,
-				table_name, condition);
-		int[] mergeSqlTypes = new int[fieldSqlTypes.length
-				+ whereConditionSqlTypes.length];
+		int[] whereConditionSqlTypes = getWhereConditionSqlTypes(set_name, table_name, condition);
+		int[] mergeSqlTypes = new int[fieldSqlTypes.length + whereConditionSqlTypes.length];
 		for (int i = 0; i < fieldSqlTypes.length; i++) {
 			mergeSqlTypes[i] = fieldSqlTypes[i];
 		}
-		for (int i = fieldSqlTypes.length; i < fieldSqlTypes.length
-				+ whereConditionSqlTypes.length; i++) {
+		for (int i = fieldSqlTypes.length; i < fieldSqlTypes.length + whereConditionSqlTypes.length; i++) {
 			mergeSqlTypes[i] = whereConditionSqlTypes[i - fieldSqlTypes.length];
 		}
 		return mergeSqlTypes;
 	}
 
-	private int[] getInsertSqlTypes(String set_name, String table_name,
-			String fields) {
+	private int[] getInsertSqlTypes(String set_name, String table_name, String fields) {
 		return getFieldSqlTypes(set_name, table_name, fields);
 	}
 
-	private int[] getSelectSqlTypes(String set_name, String table_name,
-			String condition) {
+	private int[] getSelectSqlTypes(String set_name, String table_name, String condition) {
 		return getWhereConditionSqlTypes(set_name, table_name, condition);
 	}
 
-	private int[] getFieldSqlTypes(String set_name, String table_name,
-			String fields) {
+	private int[] getFieldSqlTypes(String set_name, String table_name, String fields) {
 		if (fields == null || "".equals(fields)) {
 			return new int[0];
 		}
-		Map<String, Integer> tableColumnSqlType = getTableColumnSqlType(
-				set_name, table_name);
+		Map<String, Integer> tableColumnSqlType = getTableColumnSqlType(set_name, table_name);
 		String[] insertFields = fields.split(",");
 		int[] insertFieldSqlTypes = new int[insertFields.length];
 		int index = 0;
 		for (String field : insertFields) {
-			insertFieldSqlTypes[index++] = tableColumnSqlType.get(field
-					.toLowerCase());
+			insertFieldSqlTypes[index++] = tableColumnSqlType.get(field.toLowerCase());
 		}
 		return insertFieldSqlTypes;
 	}
 
-	private int[] getWhereConditionSqlTypes(String set_name, String table_name,
-			String condition) {
+	private int[] getWhereConditionSqlTypes(String set_name, String table_name, String condition) {
 		int whereConditionCount = 0;
 		if (condition != null && !condition.isEmpty()) {
 			String[] whereConditions = condition.split(";");
@@ -318,20 +280,16 @@ public class GenTaskBySqlBuilderResource {
 			return new int[0];
 		}
 		int[] whereConditionSqlTypes = new int[whereConditionCount];
-		Map<String, Integer> tableColumnSqlType = getTableColumnSqlType(
-				set_name, table_name);
+		Map<String, Integer> tableColumnSqlType = getTableColumnSqlType(set_name, table_name);
 		String[] whereConditions = condition.split(";");
 		int index = 0;
 		for (String whereCondition : whereConditions) {
 			String columnName = whereCondition.split(",")[0].toLowerCase();
 			if ("6".equals(whereCondition.split(",")[1])) {
-				whereConditionSqlTypes[index++] = tableColumnSqlType
-						.get(columnName);
-				whereConditionSqlTypes[index++] = tableColumnSqlType
-						.get(columnName);
+				whereConditionSqlTypes[index++] = tableColumnSqlType.get(columnName);
+				whereConditionSqlTypes[index++] = tableColumnSqlType.get(columnName);
 			} else {
-				whereConditionSqlTypes[index++] = tableColumnSqlType
-						.get(columnName);
+				whereConditionSqlTypes[index++] = tableColumnSqlType.get(columnName);
 			}
 		}
 		return whereConditionSqlTypes;
@@ -343,15 +301,12 @@ public class GenTaskBySqlBuilderResource {
 	 * @param table_name
 	 * @return <column alias, sqltype>
 	 */
-	private Map<String, Integer> getTableColumnSqlType(String set_name,
-			String table_name) {
-		DatabaseSetEntry databaseSetEntry = SpringBeanGetter
-				.getDaoOfDatabaseSet()
+	private Map<String, Integer> getTableColumnSqlType(String set_name, String table_name) {
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet()
 				.getMasterDatabaseSetEntryByDatabaseSetName(set_name);
 		String dbName = databaseSetEntry.getConnectionString();
-		List<AbstractParameterHost> paramsHost = DbUtils.getAllColumnNames(
-				dbName, table_name, new JavaColumnNameResultSetExtractor(
-						dbName, table_name));
+		List<AbstractParameterHost> paramsHost = DbUtils.getAllColumnNames(dbName, table_name,
+				new JavaColumnNameResultSetExtractor(dbName, table_name));
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		for (int i = 0; i < paramsHost.size(); i++) {
 			JavaParameterHost paramHost = (JavaParameterHost) paramsHost.get(i);
@@ -363,23 +318,16 @@ public class GenTaskBySqlBuilderResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("sqlValidate")
-	public Status validateSQL(@FormParam("db_name") String set_name,
-			@FormParam("table_name") String table_name,
-			@FormParam("crud_type") String crud_type,
-			@FormParam("fields") String fields,
-			@FormParam("condition") String condition,
-			@FormParam("sql_content") String sql_content,
-			@FormParam("pagination") boolean pagination,
-			@FormParam("mockValues") String mockValues) {
-
+	public Status validateSQL(@FormParam("db_name") String set_name, @FormParam("table_name") String table_name,
+			@FormParam("crud_type") String crud_type, @FormParam("fields") String fields,
+			@FormParam("condition") String condition, @FormParam("sql_content") String sql_content,
+			@FormParam("pagination") boolean pagination, @FormParam("mockValues") String mockValues) {
 		Status status = Status.OK;
 		sql_content = sql_content.replaceAll("[@:]\\w+", "?");
-		int[] sqlTypes = getSqlTypes(set_name, table_name, crud_type, fields,
-				condition);
+		int[] sqlTypes = getSqlTypes(set_name, table_name, crud_type, fields, condition);
 		String[] vals = mockValues.split(";");
 
-		DatabaseSetEntry databaseSetEntry = SpringBeanGetter
-				.getDaoOfDatabaseSet()
+		DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet()
 				.getMasterDatabaseSetEntryByDatabaseSetName(set_name);
 		String dbName = databaseSetEntry.getConnectionString();
 
@@ -387,18 +335,15 @@ public class GenTaskBySqlBuilderResource {
 		String resultPrefix = "The affected rows is ";
 		try {
 			if (pagination && "select".equalsIgnoreCase(crud_type)) {
-				sql_content = SqlBuilder.pagingQuerySql(sql_content,
-						DbUtils.getDatabaseCategory(dbName),
+				sql_content = SqlBuilder.pagingQuerySql(sql_content, DbUtils.getDatabaseCategory(dbName),
 						CurrentLanguage.Java);
 				sql_content = String.format(sql_content, 1, 2);
 			}
 			if ("select".equalsIgnoreCase(crud_type)) {
-				validResult = SQLValidation.queryValidate(dbName, sql_content,
-						sqlTypes, vals);
+				validResult = SQLValidation.queryValidate(dbName, sql_content, sqlTypes, vals);
 				resultPrefix = "The result count is ";
 			} else {
-				validResult = SQLValidation.updateValidate(dbName, sql_content,
-						sqlTypes, vals);
+				validResult = SQLValidation.updateValidate(dbName, sql_content, sqlTypes, vals);
 			}
 		} catch (Exception e) {
 			status = Status.ERROR;

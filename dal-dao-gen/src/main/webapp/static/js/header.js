@@ -50,16 +50,18 @@
 				$("li[class='active']").removeClass("active");
 				if (href.indexOf("codeview") != -1) {
 					$("#codeviewjsp").addClass("active");
+				} else if (href.indexOf("membermanage") != -1) {
+					$("#membermanagejsp").addClass("active");
 				} else if (href.indexOf("dbmanage") != -1
 						|| href.indexOf("dbsetsmanage") != -1
 						|| href.indexOf("dbview") != -1) {
 					$("#dbmanagejsp").addClass("active");
-				} else if (href.indexOf("groupmanage") != -1) {
-					$("#groupmanagejsp").addClass("active");
-				} else if (href.indexOf("membermanage") != -1) {
-					$("#membermanagejsp").addClass("active");
 				} else if (href.indexOf("eventmanage") != -1) {
 					$("#eventmanagejsp").addClass("active");
+				} else if (href.indexOf("groupmanage") != -1) {
+					$("#groupmanagejsp").addClass("active");
+				} else if (href.indexOf("usermanage") != -1) {
+					$("#usermanagejsp").addClass("active");
 				} else if (href.indexOf("welcome") != -1) {
 					$("#welcomejsp").addClass("active");
 				} else {

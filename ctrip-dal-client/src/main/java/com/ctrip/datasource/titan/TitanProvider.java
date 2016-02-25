@@ -158,6 +158,9 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		String ids = sb.substring(0, sb.length()-1);
         Map<String, String> result = new HashMap<>();
 
+		// In case the white space like " " or enter is appended
+		svcUrl = svcUrl.trim();
+
         URI uri = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid).build();
         HttpClient sslClient = initWeakSSLClient();
         if (sslClient != null) {

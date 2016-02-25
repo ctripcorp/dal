@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ctrip.platform</groupId>
 	<artifactId>ctrip-dal-client</artifactId>
-	<version>1.0.1.6</version>
+	<version>1.0.2</version>
 	<name>ctrip-dal-client</name>
 	<properties>
 		<file_encoding>UTF-8</file_encoding>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>com.ctrip.platform</groupId>
 			<artifactId>dal-java-client</artifactId>
-			<version>1.4.1.5</version>
+			<version>1.4.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

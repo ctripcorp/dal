@@ -60,6 +60,34 @@ public class DalDirectClient implements DalClient {
 	}
 
 	@Override
+	public List<?> query(String sql, StatementParameters parameters, final DalHints hints, final List<DalResultSetExtractor<?>> extractors) 
+			throws SQLException {
+		ConnectionAction<List<?>> action = new ConnectionAction<List<?>>() {
+			@Override
+			public List<?> execute() throws Exception {
+				conn = getConnection(hints, this);
+				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
+				List<Object> result = new ArrayList<>();
+				DalWatcher.beginExecute();
+
+				preparedStatement.execute();
+				for(DalResultSetExtractor<?> extractor: extractors) {
+		            ResultSet resultSet = preparedStatement.getResultSet();
+	            	result.add((Object)extractor.extract(resultSet));
+	                preparedStatement.getMoreResults();
+				}
+
+				DalWatcher.endExectue();
+				
+				return result;
+			}
+		};
+		action.populate(DalEventEnum.QUERY, sql, parameters);
+		
+		return doInConnection(action, hints);
+	}
+	
+	@Override
 	public int update(String sql, StatementParameters parameters, final DalHints hints)
 			throws SQLException {
 		final KeyHolder generatedKeyHolder = hints.getKeyHolder();
@@ -340,5 +368,5 @@ public class DalDirectClient implements DalClient {
 	
 	private CallableStatement createCallableStatement(Connection conn,  String sql, StatementParameters[] parametersList, DalHints hints) throws Exception {
 		return stmtCreator.createCallableStatement(conn, sql, parametersList, hints);
-	}	
+	}
 }

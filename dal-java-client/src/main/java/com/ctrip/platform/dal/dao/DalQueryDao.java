@@ -13,8 +13,10 @@ import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
+import com.ctrip.platform.dal.dao.helper.MultipleQueryRequest;
 import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
 import com.ctrip.platform.dal.dao.task.DalSqlTaskRequest;
+import com.ctrip.platform.dal.dao.task.MultipleQueryTask;
 import com.ctrip.platform.dal.dao.task.QuerySqlTask;
 
 /**
@@ -88,7 +90,25 @@ public final class DalQueryDao {
 			throws SQLException {
 		queryList(sql, parameters, hints, new DalRowCallbackExtractor(callback));
 	}
-
+	
+	/**
+	 * Execute query by the given sqls with parameters. The result will be wrapped into type defined by the given extractors.
+	 * 
+	 * @param mqr The multiple query request value object
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @return List of entities that represent the query result.
+	 * @throws SQLException when things going wrong during the execution
+	 */
+	public List<?> query(MultipleQueryRequest mqr, StatementParameters parameters, DalHints hints) 
+			throws SQLException {
+		DalSqlTaskRequest<List<?>> request = new DalSqlTaskRequest<>(
+				logicDbName, mqr.getSqls(), parameters, hints, 
+				new MultipleQueryTask(mqr.getExtractors()), mqr.getMergers());
+		
+		return executor.execute(hints, request, NULLABLE);
+	}
+	
 	/**
 	 * Query for the only object in the result. It is expected that there is only one result should be found.
 	 * If there is no result or more than 1 result found, it will throws exception to indicate the exceptional case.

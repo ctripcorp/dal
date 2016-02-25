@@ -26,6 +26,20 @@ public interface DalClient {
 			DalResultSetExtractor<T> extractor) throws SQLException;
 
 	/**
+	 * Query against the given sql and parameters. The sql is combined by multiple select clause,
+	 * the result will be extracted one by one by the given extractors list
+	 * 
+	 * @param sql The sql statement to be executed
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param extractors helper used to convert result to desired type
+	 * @return the extracted result from the result set
+	 * @throws SQLException when things going wrong during the execution
+	 */
+	List<?> query(String sql, StatementParameters parameters, DalHints hints, 
+			List<DalResultSetExtractor<?>> extractors) throws SQLException;
+
+	/**
 	 * Update against the given sql and parameters.
 	 *  
 	 * @param sql The sql statement to be executed

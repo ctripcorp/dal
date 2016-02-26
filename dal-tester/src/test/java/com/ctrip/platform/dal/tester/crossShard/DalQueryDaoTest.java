@@ -8,12 +8,20 @@ import static org.junit.Assert.fail;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 import org.junit.Test;
 
@@ -24,6 +32,10 @@ import com.ctrip.platform.dal.dao.DalRowCallback;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
+import com.ctrip.platform.dal.dao.helper.DalListMerger;
+import com.ctrip.platform.dal.dao.helper.MultipleQueryRequest;
 import com.ctrip.platform.dal.dao.helper.ShortRowMapper;
 
 public abstract class DalQueryDaoTest {
@@ -184,6 +196,89 @@ public abstract class DalQueryDaoTest {
 		}
 	}
 
+	private class ClientTestModelComparator implements Comparator<ClientTestModel>{
+		@Override
+		public int compare(ClientTestModel o1, ClientTestModel o2) {
+			return new Integer(o1.getId()).compareTo(o2.getId());
+		}
+	}
+
+	private class InteregrComparator implements Comparator<Integer>{
+		@Override
+		public int compare(Integer o1, Integer o2) {
+			return o1.compareTo(o2);
+		}
+	}
+	
+	private class TestDalRowCallback3 implements DalRowCallback {
+
+		@Override
+		public void process(ResultSet rs) throws SQLException {
+		}
+	}
+
+	private List queryMultipleAllShards(DalHints hints) throws SQLException {
+		String[] sqls = new String[] {
+				sqlList,sqlListQuantity,sqlObject,sqlNoResult
+		};
+		
+		DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
+		
+		StatementParameters parameters = new StatementParameters();
+		parameters.set(1, Types.INTEGER, 1);
+		
+		MultipleQueryRequest select = new MultipleQueryRequest();
+		// TODO add all add method
+		select.add(sqlList, new ClientTestDalRowMapper());//mapper
+		select.add(sqlList, new ClientTestDalRowMapper(), new DalListMerger<ClientTestModel>());//merger
+		select.add(sqlList, ClientTestModel.class, new ClientTestModelComparator());//sorter
+		select.add(sqlListQuantity, Integer.class, new DalListMerger<Integer>());//merger
+		select.add(sqlObject, Integer.class, new InteregrComparator());//soter
+		select.add(sqlNoResult, new TestDalRowCallback3());//callback
+
+		return dao.query(select, parameters, hints.inAllShards());
+	}
+	
+	@Test
+	public void testQueryMultipleAllShards() {
+		try {
+			List list = queryMultipleAllShards(new DalHints());
+			
+			assertEquals(6, list.size());
+			assertEquals(6, ((List)list.get(0)).size());
+			assertEquals(6, ((List)list.get(1)).size());
+			assertEquals(6, ((List)list.get(2)).size());
+			assertEquals(6, ((List)list.get(3)).size());
+			assertEquals(1, ((List)list.get(4)).size());
+			assertEquals(0, ((List)list.get(5)).size());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryMultipleAllShardsAsync() {
+		try {
+			DalHints hints = new DalHints();
+			List list = queryMultipleAllShards(hints.asyncExecution());
+			
+			assertNull(list);
+			list = (List)hints.getAsyncResult().get();
+			assertEquals(6, list.size());
+			assertEquals(6, ((List)list.get(0)).size());
+			assertEquals(6, ((List)list.get(1)).size());
+			assertEquals(6, ((List)list.get(2)).size());
+			assertEquals(6, ((List)list.get(3)).size());
+			assertEquals(1, ((List)list.get(4)).size());
+			assertEquals(0, ((List)list.get(5)).size());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
 	@Test
 	public void testQueryListAllShardsWithCallback() {
 		try {
@@ -1111,11 +1206,30 @@ public abstract class DalQueryDaoTest {
 		}
 	}
 	
-	private static class ClientTestModel {
+	@Entity
+	@Database(name="SqlServerSimpleShard")
+	@Table(name="People")
+	public static class ClientTestModel {
+		@Id
+		@Column(name="id")
+		@GeneratedValue(strategy = GenerationType.AUTO)
+		@Type(value=Types.BIGINT)
 		private int id;
+
+		@Column(name="quantity")
+		@Type(value=Types.INTEGER)
 		private int quantity;
+
+		@Column(name="type")
+		@Type(value=Types.SMALLINT)
 		private short type;
+		
+		@Column(name="address")
+		@Type(value=Types.VARCHAR)
 		private String address;
+		
+		@Column(name="last_changed")
+		@Type(value=Types.TIMESTAMP)
 		private Timestamp lastChanged;
 
 		public int getId() {

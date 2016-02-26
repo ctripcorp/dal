@@ -44,22 +44,19 @@ public class MultipleQueryRequest {
 	}
 	
 	public <T> MultipleQueryRequest add(String sql, Class<T> clazz) throws SQLException {
-		DalListMerger<T> defaultMerger = new DalListMerger<>();
-		
+		return add(sql, clazz, new DalListMerger<T>());
+	}
+	
+	public <T> MultipleQueryRequest add(String sql, Class<T> clazz, ResultMerger<List<T>> merger) throws SQLException {
 		Table table = clazz.getAnnotation(Table.class);
 		if (table == null)
-			return add(sql, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()), defaultMerger);
+			return add(sql, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()), merger);
 		
-		return add(sql, new DalRowMapperExtractor<T>(new DalDefaultJpaMapper<T>(clazz)), defaultMerger);
+		return add(sql, new DalRowMapperExtractor<T>(new DalDefaultJpaMapper<T>(clazz)), merger);
 	}
 	
-	public <T> MultipleQueryRequest add(String sql, Class<T> clazz, ResultMerger<List<T>> merger) {
-		return add(sql, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()), merger);
-	}
-	
-	public <T> MultipleQueryRequest add(String sql, Class<T> clazz, Comparator<T> sorter) {
-		ResultMerger<List<T>> defaultMerger = new DalListMerger<>(sorter);
-		return add(sql, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()), defaultMerger);
+	public <T> MultipleQueryRequest add(String sql, Class<T> clazz, Comparator<T> sorter) throws SQLException {
+		return add(sql, clazz, new DalListMerger<T>(sorter));
 	}
 	
 	public MultipleQueryRequest add(String sql, DalRowCallback callback) {

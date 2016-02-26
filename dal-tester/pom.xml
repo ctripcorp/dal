@@ -12,7 +12,7 @@
 		<dependency>
 			<groupId>com.ctrip.platform</groupId>
 			<artifactId>ctrip-dal-client</artifactId>
-			<version>1.0.1.6</version>
+			<version>1.0.2</version>
 		</dependency>
 		<dependency>
 		    <groupId>com.ctrip.security</groupId>

@@ -1,12 +1,23 @@
 package com.ctrip.platform.dal.tester.baseDao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -18,9 +29,15 @@ import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalQueryDao;
+import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowCallback;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
+import com.ctrip.platform.dal.dao.helper.MultipleQueryRequest;
+import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
+import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.FixedValueRowMapper;
 
 public class DalQueryDaoTest {
@@ -151,8 +168,36 @@ public class DalQueryDaoTest {
 			e.printStackTrace();
 		}
 	}
-	
-	
+		
+	@Test
+	public void testQueryMultiple() {
+		try {
+			String[] sqls = new String[] {
+					sqlList,sqlListQuantity,sqlObject,sqlNoResult
+			};
+			
+			DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
+			
+			StatementParameters parameters = new StatementParameters();
+			parameters.set(1, Types.INTEGER, 1);
+			
+			MultipleQueryRequest mqr = new MultipleQueryRequest();
+			
+			mqr.add(sqlList, new ClientTestDalRowMapper());
+			mqr.add(sqlList, ClientTestModel.class);
+			mqr.add(sqlListQuantity, Integer.class);
+			mqr.add(sqlObject, Integer.class);
+			mqr.add(sqlNoResult, Integer.class);
+
+			List list = dao.query(mqr, parameters, hints);
+			
+			assertEquals(5, list.size());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
 	
 	@Test
 	public void testQueryForObject() {
@@ -294,11 +339,30 @@ public class DalQueryDaoTest {
 		}
 	}
 	
-	private static class ClientTestModel {
+	@Entity
+	@Database(name="SqlServerSimpleShard")
+	@Table(name="People")
+	public static class ClientTestModel {
+		@Id
+		@Column(name="id")
+		@GeneratedValue(strategy = GenerationType.AUTO)
+		@Type(value=Types.BIGINT)
 		private int id;
+
+		@Column(name="quantity")
+		@Type(value=Types.INTEGER)
 		private int quantity;
+
+		@Column(name="type")
+		@Type(value=Types.SMALLINT)
 		private short type;
+		
+		@Column(name="address")
+		@Type(value=Types.VARCHAR)
 		private String address;
+		
+		@Column(name="last_changed")
+		@Type(value=Types.TIMESTAMP)
 		private Timestamp lastChanged;
 
 		public int getId() {

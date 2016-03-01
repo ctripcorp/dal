@@ -221,6 +221,19 @@ public class DalHints {
 		return (Set<String>)hints.get(DalHintEnum.shards);
 	}
 	
+	public DalHints shardBy(String parameterName) {
+		hints.put(DalHintEnum.shardBy, parameterName);
+		return this;
+	}
+	
+	public String getShardBy() {
+		return (String)hints.get(DalHintEnum.shardBy);
+	}
+	
+	public boolean isShardBy() {
+		return is(DalHintEnum.shardBy);
+	}
+	
 	public <T> DalHints mergeBy(ResultMerger<T> merger) {
 		hints.put(DalHintEnum.resultMerger, merger);
 		return this;

@@ -7,7 +7,7 @@ import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.client.DasProto;
 import com.google.protobuf.ByteString;
 
-public class StatementParameter {
+public class StatementParameter implements Comparable<StatementParameter> {
 
 	Builder currentBuilder;
 
@@ -293,4 +293,8 @@ public class StatementParameter {
 		}
 	}
 
+	@Override
+	public int compareTo(StatementParameter o) {
+		return this.currentBuilder.index_ - o.currentBuilder.index_;
+	}
 }

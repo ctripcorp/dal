@@ -57,6 +57,11 @@ public enum DalHintEnum {
 	shards,
 	
 	/*
+	 * Indicate name of the parameter that will partition shards for the request. 
+	 */
+	shardBy,
+	
+	/*
 	 * The merger that is used to merge query result 
 	 */
 	resultMerger,

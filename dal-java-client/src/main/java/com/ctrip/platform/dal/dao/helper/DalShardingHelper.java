@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.helper;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -132,6 +133,46 @@ public class DalShardingHelper {
 			}
 			
 			pojosInShard.put(i, pojo);
+		}
+		
+		detectDistributedTransaction(shuffled.keySet());
+		
+		return shuffled;
+	}
+	
+	/**
+	 * Shuffle by given values like id list for DB shard
+	 * @param logicDbName
+	 * @param parameters
+	 * @return
+	 * @throws SQLException
+	 */
+	public static Map<String, List<?>> shuffle(String logicDbName, List<?> parameters) throws SQLException {
+		Map<String, List<?>> shuffled = new HashMap<>();
+		
+		DalConfigure config = DalClientFactory.getDalConfigure();
+		
+		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
+		DalShardingStrategy strategy = dbSet.getStrategy();
+		
+		DalHints tmpHints = new DalHints();
+		for (int i = 0; i < parameters.size(); i++) {
+			Object value = parameters.get(i);
+			
+			String tmpShardId = strategy.locateDbShard(config, logicDbName, tmpHints.setShardValue(value));
+			// If this can not be located
+			if(tmpShardId == null)
+				return null;
+			
+			dbSet.validate(tmpShardId);
+
+			List pojosInShard = shuffled.get(tmpShardId);
+			if(pojosInShard == null) {
+				pojosInShard = new LinkedList();
+				shuffled.put(tmpShardId, pojosInShard);
+			}
+			
+			pojosInShard.add(value);
 		}
 		
 		detectDistributedTransaction(shuffled.keySet());

@@ -244,13 +244,7 @@ public abstract class DalQueryDaoTest {
 		try {
 			List list = queryMultipleAllShards(new DalHints());
 			
-			assertEquals(6, list.size());
-			assertEquals(6, ((List)list.get(0)).size());
-			assertEquals(6, ((List)list.get(1)).size());
-			assertEquals(6, ((List)list.get(2)).size());
-			assertEquals(6, ((List)list.get(3)).size());
-			assertEquals(1, ((List)list.get(4)).size());
-			assertEquals(0, ((List)list.get(5)).size());
+			assertMultipleResult(list);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -265,18 +259,22 @@ public abstract class DalQueryDaoTest {
 			
 			assertNull(list);
 			list = (List)hints.getAsyncResult().get();
-			assertEquals(6, list.size());
-			assertEquals(6, ((List)list.get(0)).size());
-			assertEquals(6, ((List)list.get(1)).size());
-			assertEquals(6, ((List)list.get(2)).size());
-			assertEquals(6, ((List)list.get(3)).size());
-			assertEquals(1, ((List)list.get(4)).size());
-			assertEquals(0, ((List)list.get(5)).size());
+			assertMultipleResult(list);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
 		}
+	}
+
+	private void assertMultipleResult(List list) {
+		assertEquals(6, list.size());
+		assertEquals(6, ((List)list.get(0)).size());
+		assertEquals(6, ((List)list.get(1)).size());
+		assertEquals(6, ((List)list.get(2)).size());
+		assertEquals(6, ((List)list.get(3)).size());
+		assertEquals(1, ((List)list.get(4)).size());
+		assertEquals(0, ((List)list.get(5)).size());
 	}
 	
 	@Test

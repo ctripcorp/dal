@@ -22,6 +22,7 @@ public class ResponseBuilder implements Processor {
 		WebContext context = (WebContext)ctx;
 		DalHints hints = context.getHints();
 		HttpServletResponse response = context.getResponse();
+		response.setContentType("text/html;charset=UTF-8");
 		try {
 			if(context.isSupported()) {
 				buildResponse(context.getResponsValue(), hints, response);

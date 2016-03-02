@@ -26,18 +26,30 @@ public class XunitPeoplePortal extends HttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		try {
 			dao = new PeopleDao();
-			XunitFactory f = XunitFactory.load("dal_demo.xunit");
-			demo = f.getProcessor("main");
+			demo = XunitFactory.load("dal_demo.xunit").getProcessor("main");
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}
 	}
 
 	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+	 *      response)
 	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		 WebContext context = new WebContext(request, response, dao);
-		 demo.process(context);
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		WebContext context = new WebContext(request, response, dao);
+		try {
+			demo.process(context);
+		} catch (Exception e) {
+			throw new ServletException(e);
+		}
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request, response);
 	}
 }

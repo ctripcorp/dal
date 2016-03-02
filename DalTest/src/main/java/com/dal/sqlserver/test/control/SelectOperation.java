@@ -17,7 +17,7 @@ public class SelectOperation implements Processor {
 	@Override
 	public void process(Context ctx) {
 		WebContext context = (WebContext)ctx;
-		DalHints hints = context.readHints();
+		DalHints hints = context.getHints();
 		PeopleDao dao = context.getDao();
 		
 		Object value = null;

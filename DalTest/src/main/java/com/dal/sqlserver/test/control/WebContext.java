@@ -19,6 +19,7 @@ import com.xross.tools.xunit.Context;
 public class WebContext implements Context {
 	private HttpServletRequest request;
 	private HttpServletResponse response;
+	private DalHints hints;
 	private PeopleDao dao;
 	private Object responsValue;
 	private boolean supported = true;
@@ -30,6 +31,12 @@ public class WebContext implements Context {
 		this.dao = dao;
 	}
 	
+	public DalHints getHints() {
+		return hints;
+	}
+	public void setHints(DalHints hints) {
+		this.hints = hints;
+	}
 	public boolean isSupported() {
 		return supported;
 	}
@@ -95,36 +102,6 @@ public class WebContext implements Context {
 		}
 		
 		return pList;
-	}
-	
-	public DalHints readHints() {
-		DalHints hints = new DalHints();
-
-		String a = request.getParameter("enableKeyHolder");
-		if("on".equals(a))
-			hints.setKeyHolder(new KeyHolder());
-
-		String value = get("shardConstrain");
-		if("inShard".equals(value)) {
-			value = get("Shard");
-			if(value != null)
-				hints.inShard(value);
-		} else if("inAllShards".equals(value)){
-			hints.inAllShards();
-		} else if("inShards".equals(value)){
-			Set<String> shards = new HashSet<>();
-			value = get("Shards");
-			shards.addAll(Arrays.asList(value.split(",")));
-			hints.inShards(shards);
-		}
-		
-		value = get("invocationMode");
-		if("asynchronours".equals(value))
-			hints.asyncExecution();
-		else if("callback".equals(value))
-			hints.callbackWith(new DefaultResultCallback());
-		
-		return hints;
 	}
 	
 	public String get(String name) {

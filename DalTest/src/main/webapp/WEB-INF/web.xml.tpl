@@ -37,7 +37,8 @@
 		<description></description>
 		<display-name>DalDaoTest</display-name>
 		<servlet-name>DalDaoTest</servlet-name>
-		<servlet-class>com.dal.sqlserver.test.PeoplePortal</servlet-class>
+		<!--<servlet-class>com.dal.sqlserver.test.PeoplePortal</servlet-class>-->
+		<servlet-class>com.dal.sqlserver.test.XunitPeoplePortal</servlet-class>
 	</servlet>
 	<servlet-mapping>
 	  <servlet-name>DalDaoTest</servlet-name>

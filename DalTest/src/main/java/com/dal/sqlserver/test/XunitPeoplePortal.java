@@ -26,7 +26,8 @@ public class XunitPeoplePortal extends HttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		try {
 			dao = new PeopleDao();
-			demo = XunitFactory.load("dal_demo.xunit").getProcessor("main");
+			XunitFactory f = XunitFactory.load("dal_demo.xunit");
+			demo = f.getProcessor("main");
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}

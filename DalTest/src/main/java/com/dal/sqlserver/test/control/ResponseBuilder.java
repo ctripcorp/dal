@@ -20,7 +20,7 @@ public class ResponseBuilder implements Processor {
 	@Override
 	public void process(Context ctx) {
 		WebContext context = (WebContext)ctx;
-		DalHints hints = context.readHints();
+		DalHints hints = context.getHints();
 		HttpServletResponse response = context.getResponse();
 		try {
 			if(context.isSupported()) {

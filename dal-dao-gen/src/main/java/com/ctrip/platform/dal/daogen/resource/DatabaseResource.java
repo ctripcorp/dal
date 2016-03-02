@@ -12,12 +12,14 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.springframework.jdbc.support.JdbcUtils;
@@ -34,9 +36,9 @@ import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.utils.AllInOneConfigParser;
-import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,8 +60,8 @@ public class DatabaseResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("merge")
-	public Status mergeDB() {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status mergeDB(@Context HttpServletRequest request) {
+		String userNo = RequestUtil.getUserNo(request);
 		Status status = Status.OK;
 
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
@@ -184,8 +186,9 @@ public class DatabaseResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("deleteAllInOneDB")
-	public Status deleteAllInOneDB(@FormParam("allinonename") String allinonename) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status deleteAllInOneDB(@Context HttpServletRequest request,
+			@FormParam("allinonename") String allinonename) {
+		String userNo = RequestUtil.getUserNo(request);
 		Status status = Status.OK;
 
 		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
@@ -204,8 +207,8 @@ public class DatabaseResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("getOneDB")
-	public Status getOneDB(@FormParam("allinonename") String allinonename) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status getOneDB(@Context HttpServletRequest request, @FormParam("allinonename") String allinonename) {
+		String userNo = RequestUtil.getUserNo(request);
 		Status status = Status.OK;
 
 		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
@@ -239,10 +242,11 @@ public class DatabaseResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("updateDB")
-	public Status updateDB(@FormParam("id") int id, @FormParam("dbtype") String dbtype,
-			@FormParam("allinonename") String allinonename, @FormParam("dbaddress") String dbaddress,
-			@FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
-			@FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog) {
+	public Status updateDB(@Context HttpServletRequest request, @FormParam("id") int id,
+			@FormParam("dbtype") String dbtype, @FormParam("allinonename") String allinonename,
+			@FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
+			@FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
+			@FormParam("dbcatalog") String dbcatalog) {
 		Status status = Status.OK;
 		DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
 		DalGroupDB db = allDbDao.getGroupDBByDbName(allinonename);
@@ -253,7 +257,7 @@ public class DatabaseResource {
 			return status;
 		}
 
-		String userNo = AssertionHolderManager.getEmployee();
+		String userNo = RequestUtil.getUserNo(request);
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		DalGroupDB groupDb = allDbDao.getGroupDBByDbId(id);
 

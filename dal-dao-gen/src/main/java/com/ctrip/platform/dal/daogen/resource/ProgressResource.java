@@ -1,4 +1,3 @@
-
 package com.ctrip.platform.dal.daogen.resource;
 
 import java.util.Map;
@@ -7,14 +6,16 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import com.ctrip.platform.dal.daogen.entity.Progress;
-import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 
 /**
  *
@@ -46,14 +47,15 @@ public class ProgressResource {
 	@Path("/poll")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Progress poll(@QueryParam("project_id") int project_id, @QueryParam("regenerate") boolean regen,
-			@QueryParam("language") String language, @QueryParam("random") String random) {
+	public Progress poll(@Context HttpServletRequest request, @QueryParam("project_id") int project_id,
+			@QueryParam("regenerate") boolean regen, @QueryParam("language") String language,
+			@QueryParam("random") String random) {
 		try {
 			TimeUnit.SECONDS.sleep(1);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		String userNo = AssertionHolderManager.getEmployee();
+		String userNo = RequestUtil.getUserNo(request);
 		Progress progress = getProgress(userNo, project_id, random);
 		if (FINISH.equals(progress.getStatus())) {
 			release(progress);

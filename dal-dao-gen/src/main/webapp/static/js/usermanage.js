@@ -37,6 +37,7 @@
 			return;
 		}
 		$("#userNo2").val(record["userNo"]);
+		$("#userNo2").prop("readonly", true);
 		$("#userName2").val(record["userName"]);
 		$("#userEmail2").val(record["userEmail"]);
 		$("#userModal2").modal({

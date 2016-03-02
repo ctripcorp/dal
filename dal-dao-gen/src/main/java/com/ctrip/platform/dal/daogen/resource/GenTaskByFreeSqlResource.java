@@ -6,11 +6,13 @@ import java.util.List;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import com.ctrip.platform.dal.daogen.domain.Status;
@@ -23,8 +25,8 @@ import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.sql.validate.SQLValidation;
 import com.ctrip.platform.dal.daogen.sql.validate.ValidateResult;
-import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,13 +47,14 @@ public class GenTaskByFreeSqlResource {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Status addTask(@FormParam("id") int id, @FormParam("project_id") int project_id,
-			@FormParam("db_name") String set_name, @FormParam("class_name") String class_name,
-			@FormParam("pojo_name") String pojo_name, @FormParam("method_name") String method_name,
-			@FormParam("crud_type") String crud_type, @FormParam("sql_content") String sql_content,
-			@FormParam("params") String params, @FormParam("version") int version, @FormParam("action") String action,
-			@FormParam("comment") String comment, @FormParam("scalarType") String scalarType,
-			@FormParam("pagination") boolean pagination, @FormParam("sql_style") String sql_style, // C#风格或者Java风格
+	public Status addTask(@Context HttpServletRequest request, @FormParam("id") int id,
+			@FormParam("project_id") int project_id, @FormParam("db_name") String set_name,
+			@FormParam("class_name") String class_name, @FormParam("pojo_name") String pojo_name,
+			@FormParam("method_name") String method_name, @FormParam("crud_type") String crud_type,
+			@FormParam("sql_content") String sql_content, @FormParam("params") String params,
+			@FormParam("version") int version, @FormParam("action") String action, @FormParam("comment") String comment,
+			@FormParam("scalarType") String scalarType, @FormParam("pagination") boolean pagination,
+			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
 			@FormParam("hints") String hints) {
 		GenTaskByFreeSql task = new GenTaskByFreeSql();
 
@@ -61,7 +64,7 @@ public class GenTaskByFreeSqlResource {
 				return Status.ERROR;
 			}
 		} else {
-			String userNo = AssertionHolderManager.getEmployee();
+			String userNo = RequestUtil.getUserNo(request);
 			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
 			task.setProject_id(project_id);

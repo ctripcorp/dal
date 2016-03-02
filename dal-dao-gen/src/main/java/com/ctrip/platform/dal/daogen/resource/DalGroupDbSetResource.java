@@ -11,12 +11,14 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
@@ -28,7 +30,7 @@ import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.GroupRelation;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
-import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
@@ -46,7 +48,7 @@ public class DalGroupDbSetResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DalGroup> getGroups(@QueryParam("root") boolean root) {
+	public List<DalGroup> getGroups(@Context HttpServletRequest request, @QueryParam("root") boolean root) {
 		List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
 
 		for (DalGroup group : groups) {
@@ -55,12 +57,12 @@ public class DalGroupDbSetResource {
 			group.setChildren(false);
 		}
 
-		return sortGroups(groups);
+		String userNo = RequestUtil.getUserNo(request);
+		return sortGroups(groups, userNo);
 	}
 
-	private List<DalGroup> sortGroups(List<DalGroup> groups) {
+	private List<DalGroup> sortGroups(List<DalGroup> groups, String userNo) {
 		List<DalGroup> result = new ArrayList<DalGroup>(groups.size());
-		String userNo = AssertionHolderManager.getEmployee();
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		List<UserGroup> joinedGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
 		if (joinedGroups != null && joinedGroups.size() > 0) {
@@ -117,9 +119,10 @@ public class DalGroupDbSetResource {
 
 	@POST
 	@Path("addDbset")
-	public Status addDbset(@FormParam("name") String name, @FormParam("provider") String provider,
-			@FormParam("shardingStrategy") String shardingStrategy, @FormParam("groupId") int groupID) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status addDbset(@Context HttpServletRequest request, @FormParam("name") String name,
+			@FormParam("provider") String provider, @FormParam("shardingStrategy") String shardingStrategy,
+			@FormParam("groupId") int groupID) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null) {
 			log.error(String.format("Add Dbset failed, caused by illegal parameters:[userNo=%s]", userNo));
@@ -164,10 +167,10 @@ public class DalGroupDbSetResource {
 
 	@POST
 	@Path("updateDbset")
-	public Status updateDbset(@FormParam("id") int iD, @FormParam("name") String name,
-			@FormParam("provider") String provider, @FormParam("shardingStrategy") String shardingStrategy,
-			@FormParam("groupId") int groupID) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status updateDbset(@Context HttpServletRequest request, @FormParam("id") int iD,
+			@FormParam("name") String name, @FormParam("provider") String provider,
+			@FormParam("shardingStrategy") String shardingStrategy, @FormParam("groupId") int groupID) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null) {
 			log.error(String.format("Update Dbset failed, caused by illegal parameters:[userNo=%s]", userNo));
@@ -223,8 +226,9 @@ public class DalGroupDbSetResource {
 
 	@POST
 	@Path("deletedbset")
-	public Status deleteDbset(@FormParam("groupId") int groupID, @FormParam("dbsetId") int dbsetID) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status deleteDbset(@Context HttpServletRequest request, @FormParam("groupId") int groupID,
+			@FormParam("dbsetId") int dbsetID) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null) {
 			log.error(String.format("Delete databaseSet failed, caused by illegal parameters:[userNo=%s]", userNo));
@@ -258,10 +262,11 @@ public class DalGroupDbSetResource {
 
 	@POST
 	@Path("addDbsetEntry")
-	public Status addDbsetEntry(@FormParam("name") String name, @FormParam("databaseType") String databaseType,
-			@FormParam("sharding") String sharding, @FormParam("connectionString") String connectionString,
-			@FormParam("dbsetId") int dbsetID, @FormParam("groupId") int groupID) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status addDbsetEntry(@Context HttpServletRequest request, @FormParam("name") String name,
+			@FormParam("databaseType") String databaseType, @FormParam("sharding") String sharding,
+			@FormParam("connectionString") String connectionString, @FormParam("dbsetId") int dbsetID,
+			@FormParam("groupId") int groupID) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null) {
 			log.error(String.format("Add Dbset Entry failed, caused by illegal parameters:[userNo=%s]", userNo));
@@ -306,11 +311,11 @@ public class DalGroupDbSetResource {
 
 	@POST
 	@Path("updateDbsetEntry")
-	public Status updateDbsetEntry(@FormParam("id") int dbsetEntyID, @FormParam("name") String name,
-			@FormParam("databaseType") String databaseType, @FormParam("sharding") String sharding,
-			@FormParam("connectionString") String connectionString, @FormParam("dbsetId") int dbsetID,
-			@FormParam("groupId") int groupID) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status updateDbsetEntry(@Context HttpServletRequest request, @FormParam("id") int dbsetEntyID,
+			@FormParam("name") String name, @FormParam("databaseType") String databaseType,
+			@FormParam("sharding") String sharding, @FormParam("connectionString") String connectionString,
+			@FormParam("dbsetId") int dbsetID, @FormParam("groupId") int groupID) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null) {
 			log.error(String.format("Update Dbset Entry failed, caused by illegal parameters:[userNo=%s]", userNo));
@@ -356,9 +361,9 @@ public class DalGroupDbSetResource {
 
 	@POST
 	@Path("deletedbsetEntry")
-	public Status deleteDbsetEntry(@FormParam("groupId") int groupID, @FormParam("dbsetEntryId") int dbsetEntryID,
-			@FormParam("dbsetId") int dbsetID) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status deleteDbsetEntry(@Context HttpServletRequest request, @FormParam("groupId") int groupID,
+			@FormParam("dbsetEntryId") int dbsetEntryID, @FormParam("dbsetId") int dbsetID) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null) {
 			log.error(

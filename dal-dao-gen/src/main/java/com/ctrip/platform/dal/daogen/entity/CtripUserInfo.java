@@ -1,17 +1,21 @@
-package com.ctrip.platform.dal.daogen.utils;
+package com.ctrip.platform.dal.daogen.entity;
 
 import org.jasig.cas.client.util.AssertionHolder;
+import com.ctrip.platform.dal.daogen.UserInfo;
 
-public class AssertionHolderManager {
-	public static String getEmployee() {
+public class CtripUserInfo implements UserInfo {
+	@Override
+	public String getEmployee(String userNo) {
 		return AssertionHolder.getAssertion().getPrincipal().getAttributes().get("employee").toString();
 	}
 
-	public static String getName() {
+	@Override
+	public String getName(String userNo) {
 		return AssertionHolder.getAssertion().getPrincipal().getAttributes().get("sn").toString();
 	}
 
-	public static String getMail() {
+	@Override
+	public String getMail(String userNo) {
 		return AssertionHolder.getAssertion().getPrincipal().getAttributes().get("mail").toString();
 	}
 }

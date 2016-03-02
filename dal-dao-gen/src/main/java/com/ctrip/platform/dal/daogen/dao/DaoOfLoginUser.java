@@ -100,7 +100,7 @@ public class DaoOfLoginUser {
 				ps.setString(1, user.getUserNo());
 				ps.setString(2, user.getUserName());
 				ps.setString(3, user.getUserEmail());
-				ps.setString(4, user.getUserNo());
+				ps.setString(4, user.getPassword());
 				return ps;
 			}
 		}, holder);

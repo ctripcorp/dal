@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -20,6 +21,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.FileUtils;
@@ -43,7 +45,7 @@ import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpDalGenerator;
 import com.ctrip.platform.dal.daogen.generator.java.JavaDalGenerator;
-import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 @Resource
@@ -62,8 +64,8 @@ public class ProjectResource {
 	@GET
 	@Path("userGroups")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DalGroup> getUserGroups(@QueryParam("root") boolean root) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public List<DalGroup> getUserGroups(@Context HttpServletRequest request, @QueryParam("root") boolean root) {
+		String userNo = RequestUtil.getUserNo(request);
 		LoginUser user = null;
 		try {
 			user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
@@ -73,8 +75,8 @@ public class ProjectResource {
 		if (user == null) {
 			user = new LoginUser();
 			user.setUserNo(userNo);
-			user.setUserName(AssertionHolderManager.getName());
-			user.setUserEmail(AssertionHolderManager.getMail());
+			user.setUserName(UserInfoResource.getInstance().getName(null));
+			user.setUserEmail(UserInfoResource.getInstance().getMail(null));
 			try {
 				SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
 				user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
@@ -82,12 +84,13 @@ public class ProjectResource {
 				log.warn("", e);
 			}
 		}
+
 		List<DalGroup> groups = new ArrayList<DalGroup>();
-		List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
-		if (urGroups != null && urGroups.size() >= 1) {
+		List<UserGroup> userGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
+		if (userGroups != null && userGroups.size() >= 1) {
 			Set<Integer> groupIds = new HashSet<Integer>();
-			for (UserGroup urgroup : urGroups) {
-				groupIds.add(urgroup.getGroup_id());
+			for (UserGroup userGroup : userGroups) {
+				groupIds.add(userGroup.getGroup_id());
 			}
 			groups = getAllJoinedDalGroup(groupIds);
 		} else {
@@ -97,6 +100,7 @@ public class ProjectResource {
 			group.setChildren(true);
 			groups.add(group);
 		}
+
 		return groups;
 	}
 
@@ -129,7 +133,6 @@ public class ProjectResource {
 	@Path("groupprojects")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Project> getGroupProjects(@QueryParam("groupId") String groupId) {
-
 		int groupID = -1;
 		try {
 			groupID = Integer.parseInt(groupId);
@@ -153,11 +156,12 @@ public class ProjectResource {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Status addProject(@FormParam("id") int id, @FormParam("name") String name,
-			@FormParam("namespace") String namespace, @FormParam("dalconfigname") String dalconfigname,
-			@FormParam("action") String action, @FormParam("project_group_id") int project_group_id) {
+	public Status addProject(@Context HttpServletRequest request, @FormParam("id") int id,
+			@FormParam("name") String name, @FormParam("namespace") String namespace,
+			@FormParam("dalconfigname") String dalconfigname, @FormParam("action") String action,
+			@FormParam("project_group_id") int project_group_id) {
 		Project proj = new Project();
-		String userNo = AssertionHolderManager.getEmployee();
+		String userNo = RequestUtil.getUserNo(request);
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
 		if (user == null) {
@@ -231,8 +235,8 @@ public class ProjectResource {
 	@POST
 	@Path("projectPermisionCheck")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Status projectPermisionCheck(@FormParam("prjId") int prjId) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status projectPermisionCheck(@Context HttpServletRequest request, @FormParam("prjId") int prjId) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (!validateProjectUpdatePermision(userNo, prjId, -1)) {
 			Status status = Status.ERROR;
@@ -489,11 +493,11 @@ public class ProjectResource {
 	@POST
 	@Path("generate")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Status generateProject(@FormParam("project_id") int id, @FormParam("regenerate") boolean regen,
-			@FormParam("language") String language, @FormParam("newPojo") boolean newPojo,
-			@FormParam("random") String random) {
+	public Status generateProject(@Context HttpServletRequest request, @FormParam("project_id") int id,
+			@FormParam("regenerate") boolean regen, @FormParam("language") String language,
+			@FormParam("newPojo") boolean newPojo, @FormParam("random") String random) {
 		Status status = null;
-		String userNo = AssertionHolderManager.getEmployee();
+		String userNo = RequestUtil.getUserNo(request);
 		Progress progress = ProgressResource.getProgress(userNo, id, random);
 
 		status = validatePermision(userNo, id);

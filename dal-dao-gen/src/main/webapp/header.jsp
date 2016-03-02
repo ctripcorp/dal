@@ -1,6 +1,6 @@
 <%@page pageEncoding="UTF-8"%>
-<%@page
-	import="com.ctrip.platform.dal.daogen.utils.AssertionHolderManager"%>
+<%@page import="com.ctrip.platform.dal.daogen.resource.UserInfoResource"%>
+<%@page import="com.ctrip.platform.dal.daogen.Consts"%>
 <nav class="navbar navbar-inverse navbar-embossed navbar-fixed-top"
 	role="navigation">
 	<div class="navbar-header">
@@ -56,8 +56,7 @@
 				</ul></li>
 			<li class="dropdown user"><a href="javascript:;"
 				class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
-				data-close-others="true"> <span class="username"> <%=request.getSession().getAttribute("loginUserName")%>
-						<%-- AssertionHolderManager.getName() --%>
+				data-close-others="true"> <span class="username"> <%=request.getSession().getAttribute(Consts.USER_NAME)%>
 				</span> <i class="glyphicon glyphicon-menu-down"> </i>
 			</a> <span class="dropdown-arrow dropdown-arrow-inverse"
 				style="margin-top: 1px"></span>

@@ -69,21 +69,4 @@ public abstract class JavaIOUtils {
 		}
 	}
 
-	public static void main(String[] args) {
-		File rootFolder = new File(
-				"E:/linkwork/src/java_src/dal/dal-dao-gen/gen/1/cs");
-		
-		//rootFolder.listFiles((FileFilter) FileFilterUtils.directoryFileFilter());
-		
-		for(File f : rootFolder.listFiles()){
-			System.out.println(f.getName());
-		}
-		
-//		for (File f : FileUtils.listFilesAndDirs(new File(
-//				"E:/linkwork/src/java_src/dal/dal-dao-gen/gen/1"),
-//				TrueFileFilter.INSTANCE, DirectoryFileFilter.DIRECTORY)) {
-//			System.out.println(f.getAbsolutePath());
-//		}
-	}
-
 }

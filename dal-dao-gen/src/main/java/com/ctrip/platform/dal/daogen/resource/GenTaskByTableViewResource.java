@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -14,6 +15,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
@@ -25,8 +27,8 @@ import com.ctrip.platform.dal.daogen.entity.GroupRelation;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
-import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -45,12 +47,13 @@ public class GenTaskByTableViewResource {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Status addTask(@FormParam("id") int id, @FormParam("project_id") int project_id,
-			@FormParam("db_name") String set_name, @FormParam("table_names") String table_names,
-			@FormParam("view_names") String view_names, @FormParam("sp_names") String sp_names,
-			@FormParam("prefix") String prefix, @FormParam("suffix") String suffix,
-			@FormParam("cud_by_sp") boolean cud_by_sp, @FormParam("pagination") boolean pagination,
-			@FormParam("version") int version, @FormParam("action") String action, @FormParam("comment") String comment,
+	public Status addTask(@Context HttpServletRequest request, @FormParam("id") int id,
+			@FormParam("project_id") int project_id, @FormParam("db_name") String set_name,
+			@FormParam("table_names") String table_names, @FormParam("view_names") String view_names,
+			@FormParam("sp_names") String sp_names, @FormParam("prefix") String prefix,
+			@FormParam("suffix") String suffix, @FormParam("cud_by_sp") boolean cud_by_sp,
+			@FormParam("pagination") boolean pagination, @FormParam("version") int version,
+			@FormParam("action") String action, @FormParam("comment") String comment,
 			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
 			@FormParam("api_list") String api_list) {
 		GenTaskByTableViewSp task = new GenTaskByTableViewSp();
@@ -61,7 +64,7 @@ public class GenTaskByTableViewResource {
 				return Status.ERROR;
 			}
 		} else {
-			String userNo = AssertionHolderManager.getEmployee();
+			String userNo = RequestUtil.getUserNo(request);
 			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
 			task.setProject_id(project_id);

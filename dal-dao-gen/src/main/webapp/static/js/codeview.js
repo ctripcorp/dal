@@ -229,7 +229,7 @@
 					resizable : true
 				}, {
 					field : 'update_user_no',
-					caption : '最后修改User',
+					caption : '最后修改',
 					size : '10%',
 					resizable : true
 				} ],

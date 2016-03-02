@@ -24,7 +24,7 @@
 		<div class='navbar-inner'>
 			<div class='container'>
 				<div class='app_logo'>
-					<a class="home" href="/explore"><img alt="Logo white"
+					<a class="home" href=""><img alt="Logo white"
 						src="/static/images/logo.png" /> </a>
 				</div>
 				<h1 class='title'></h1>
@@ -50,17 +50,15 @@
 							</div>
 							<div class='login-body'>
 								<div class="new_user" id="signin_user">
-									<input class="form-control top" placeholder="用户名"
-										required="required" autofocus="autofocus" autocapitalize="off"
-										autocorrect="off" type="text" value="" name="user[login]"
-										id="user_login" /> <input class="form-control bottom"
+									<input id="user_login" class="form-control top"
+										placeholder="工号" required="required" autofocus="autofocus"
+										type="text" data-toggle="tooltip" data-placement="top" /> <input
+										id="user_password" class="form-control bottom"
 										placeholder="密码" required="required" type="password"
-										name="user[password]" id="user_password" />
+										data-toggle="tooltip" data-placement="top" />
 									<div class='remember-me checkbox'>
 										<label for='user_remember_me'> <input
-											name="user[remember_me]" type="hidden" value="0" /><input
-											type="checkbox" value="1" name="user[remember_me]"
-											id="user_remember_me" /> <span>记住我</span>
+											id="user_remember_me" type="checkbox" /> <span>记住我</span>
 										</label>
 									</div>
 									<div>
@@ -77,7 +75,6 @@
 								</div>
 								<div class='login-body'>
 									<div class="new_user" id="user_signup">
-										<div class='devise-errors'></div>
 										<div>
 											<input id="user_no_sign_up" class="form-control top"
 												placeholder="工号" required="required" type="text"
@@ -115,5 +112,6 @@
 	</div>
 	<script src="/static/assets/application.js?codegen=${codegenpageflag}"></script>
 	<script src="/static/js/login.js?codegen=${codegenpageflag}"></script>
+	<script src="/static/js/js.cookie.min.js?codegen=${codegenpageflag}"></script>
 </body>
 </html>

@@ -5,12 +5,14 @@ import java.util.List;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
@@ -22,7 +24,7 @@ import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
-import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 @Resource
@@ -56,8 +58,9 @@ public class DalGroupResource {
 
 	@POST
 	@Path("add")
-	public Status add(@FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status add(@Context HttpServletRequest request, @FormParam("groupName") String groupName,
+			@FormParam("groupComment") String groupComment) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null || groupName == null || groupName.isEmpty()) {
 			log.error(String.format(
@@ -92,8 +95,8 @@ public class DalGroupResource {
 
 	@POST
 	@Path("delete")
-	public Status delete(@FormParam("id") String id) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status delete(@Context HttpServletRequest request, @FormParam("id") String id) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null || id == null || id.isEmpty()) {
 			log.error(String.format("Delete dal group failed, caused by illegal parameters " + "[ids=%s]", id));
@@ -154,9 +157,9 @@ public class DalGroupResource {
 
 	@POST
 	@Path("update")
-	public Status update(@FormParam("groupId") String id, @FormParam("groupName") String groupName,
-			@FormParam("groupComment") String groupComment) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status update(@Context HttpServletRequest request, @FormParam("groupId") String id,
+			@FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null || id == null || id.isEmpty()) {
 			log.error(String.format("Update dal group failed, caused by illegal parameters, "
@@ -212,9 +215,9 @@ public class DalGroupResource {
 	@GET
 	@Path("isSuperUser")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Status isSuperUser() {
+	public Status isSuperUser(@Context HttpServletRequest request) {
 		Status status = Status.OK;
-		String userNo = AssertionHolderManager.getEmployee();
+		String userNo = RequestUtil.getUserNo(request);
 		Boolean flag = validate(userNo);
 		status.setInfo(flag.toString());
 		return status;

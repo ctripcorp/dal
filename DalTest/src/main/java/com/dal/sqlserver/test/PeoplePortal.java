@@ -14,7 +14,6 @@ import java.util.Set;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,8 +32,10 @@ import com.ctrip.platform.dal.sql.logging.CommonUtil;
 
 /**
  * Servlet implementation class PeoplePortal
+ * This the old traditional way to build a servlet based application. Just keep it here for your reference and comparing.
+ * Please refer to XunitPeoplePortal for build app with xunit
  */
-@WebServlet("/PeoplePortal")
+//@WebServlet("/PeoplePortal")
 public class PeoplePortal extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private PeopleDao dao;

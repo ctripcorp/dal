@@ -8,11 +8,13 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
@@ -29,8 +31,8 @@ import com.ctrip.platform.dal.daogen.host.java.JavaColumnNameResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.sql.validate.SQLValidation;
 import com.ctrip.platform.dal.daogen.sql.validate.ValidateResult;
-import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -51,9 +53,10 @@ public class GenTaskBySqlBuilderResource {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Status addTask(@FormParam("id") int id, @FormParam("project_id") int project_id,
-			@FormParam("db_name") String set_name, @FormParam("table_name") String table_name,
-			@FormParam("method_name") String method_name, @FormParam("sql_style") String sql_style, // C#风格或者Java风格
+	public Status addTask(@Context HttpServletRequest request, @FormParam("id") int id,
+			@FormParam("project_id") int project_id, @FormParam("db_name") String set_name,
+			@FormParam("table_name") String table_name, @FormParam("method_name") String method_name,
+			@FormParam("sql_style") String sql_style, // C#风格或者Java风格
 			@FormParam("crud_type") String crud_type, @FormParam("fields") String fields,
 			@FormParam("condition") String condition, @FormParam("sql_content") String sql_content,
 			@FormParam("version") int version, @FormParam("action") String action, @FormParam("params") String params,
@@ -69,7 +72,7 @@ public class GenTaskBySqlBuilderResource {
 				return Status.ERROR;
 			}
 		} else {
-			String userNo = AssertionHolderManager.getEmployee();
+			String userNo = RequestUtil.getUserNo(request);
 			LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
 			task.setProject_id(project_id);

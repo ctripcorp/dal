@@ -18,11 +18,13 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.springframework.jdbc.support.JdbcUtils;
@@ -34,8 +36,8 @@ import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.AddUser;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.enums.RoleType;
-import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,24 +46,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Singleton
 @Path("setupDb")
 public class SetupDBResource {
+	private static final Object LOCK = new Object();
 	private static ClassLoader classLoader = null;
 	private static ObjectMapper mapper = new ObjectMapper();
 
-	private static String webXml = "web.xml";
-	private static String jdbcProperties = "jdbc.properties";
-	private static String jdbcDriverClassName = "jdbc.driverClassName";
-	private static String jdbcUrl = "jdbc.url";
-	private static String jdbcUsername = "jdbc.username";
-	private static String jdbcPassword = "jdbc.password";
+	private static final String WEB_XML = "web.xml";
+	private static final String JDBC_PROPERTIES = "jdbc.properties";
+	private static final String JDBC_DRIVER_CLASS_NAME = "jdbc.driverClassName";
+	private static final String JDBC_URL = "jdbc.url";
+	private static final String JDBC_USERNAME = "jdbc.username";
+	private static final String JDBC_PASSWORD = "jdbc.password";
 	private String jdbcUrlTemplate = "jdbc:mysql://%s:%s/%s";
-	private static String scriptFile = "script.sql";
-	private static String createTable = "CREATE TABLE";
+	private static final String SCRIPT_FILE = "script.sql";
+	private static final String CREATE_TABLE = "CREATE TABLE";
 	private boolean initialized = false;
 
 	static {
-		classLoader = Thread.currentThread().getContextClassLoader();
-		if (classLoader == null) {
-			classLoader = Configuration.class.getClassLoader();
+		synchronized (LOCK) {
+			classLoader = Thread.currentThread().getContextClassLoader();
+			if (classLoader == null) {
+				classLoader = Configuration.class.getClassLoader();
+			}
 		}
 	}
 
@@ -76,7 +81,7 @@ public class SetupDBResource {
 		}
 
 		try {
-			boolean result = resourceExists(jdbcProperties);
+			boolean result = resourceExists(JDBC_PROPERTIES);
 			if (result) {
 				boolean valid = jdbcPropertiesValid();
 				if (!valid) {
@@ -105,10 +110,10 @@ public class SetupDBResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("initializeDb")
-	public Status initializeDb(@FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
-			@FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
-			@FormParam("dbcatalog") String dbcatalog, @FormParam("groupName") String groupName,
-			@FormParam("groupComment") String groupComment) {
+	public Status initializeDb(@Context HttpServletRequest request, @FormParam("dbaddress") String dbaddress,
+			@FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
+			@FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog,
+			@FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment) {
 		Status status = Status.OK;
 		try {
 			boolean jdbcResult = initializeJdbcProperties(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
@@ -124,7 +129,8 @@ public class SetupDBResource {
 				status.setInfo("Error occured while setting up the tables.");
 				return status;
 			}
-			boolean isSetupAdmin = setupAdmin(groupName, groupComment);
+			LoginUser user = RequestUtil.getUserInfo(request);
+			boolean isSetupAdmin = setupAdmin(groupName, groupComment, user);
 			if (!isSetupAdmin) {
 				status = Status.ERROR;
 				status.setInfo("Error occured while setting up the admin.");
@@ -187,15 +193,15 @@ public class SetupDBResource {
 	private boolean jdbcPropertiesValid() throws Exception {
 		boolean result = true;
 		Properties properties = new Properties();
-		InputStream inStream = classLoader.getResourceAsStream(jdbcProperties);
+		InputStream inStream = classLoader.getResourceAsStream(JDBC_PROPERTIES);
 		properties.load(inStream);
-		String driverClassName = properties.getProperty(jdbcDriverClassName);
+		String driverClassName = properties.getProperty(JDBC_DRIVER_CLASS_NAME);
 		result &= (driverClassName != null);
-		String url = properties.getProperty(jdbcUrl);
+		String url = properties.getProperty(JDBC_URL);
 		result &= (url != null);
-		String userName = properties.getProperty(jdbcUsername);
+		String userName = properties.getProperty(JDBC_USERNAME);
 		result &= (userName != null);
-		String password = properties.getProperty(jdbcPassword);
+		String password = properties.getProperty(JDBC_PASSWORD);
 		result &= (password != null);
 		return result;
 	}
@@ -206,7 +212,7 @@ public class SetupDBResource {
 		if (catalogTableNames == null || catalogTableNames.size() == 0) {
 			return result;
 		}
-		String scriptContent = getScriptContent(scriptFile);
+		String scriptContent = getScriptContent(SCRIPT_FILE);
 		Set<String> scriptTableNames = getScriptTableNames(scriptContent);
 		result = true;
 		if (scriptTableNames != null && scriptTableNames.size() > 0) {
@@ -229,7 +235,7 @@ public class SetupDBResource {
 
 		String[] array = script.toUpperCase().split(";");
 		for (int i = 0; i < array.length; i++) {
-			int beginIndex = array[i].indexOf(createTable);
+			int beginIndex = array[i].indexOf(CREATE_TABLE);
 			if (beginIndex == -1) {
 				continue;
 			}
@@ -249,13 +255,13 @@ public class SetupDBResource {
 		boolean result = false;
 		try {
 			Properties properties = new Properties();
-			properties.setProperty(jdbcDriverClassName, "com.mysql.jdbc.Driver"); // Currently
-																					// fixed.
-			properties.setProperty(jdbcUrl, String.format(jdbcUrlTemplate, dbaddress, dbport, dbcatalog));
-			properties.setProperty(jdbcUsername, dbuser);
-			properties.setProperty(jdbcPassword, dbpassword);
-			URL url = classLoader.getResource(webXml);
-			String path = url.getPath().replace(webXml, jdbcProperties);
+			properties.setProperty(JDBC_DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver"); // Currently
+																						// fixed.
+			properties.setProperty(JDBC_URL, String.format(jdbcUrlTemplate, dbaddress, dbport, dbcatalog));
+			properties.setProperty(JDBC_USERNAME, dbuser);
+			properties.setProperty(JDBC_PASSWORD, dbpassword);
+			URL url = classLoader.getResource(WEB_XML);
+			String path = url.getPath().replace(WEB_XML, JDBC_PROPERTIES);
 			FileOutputStream fileOutputStream = new FileOutputStream(path);
 			properties.store(fileOutputStream, "");
 			fileOutputStream.close();
@@ -287,43 +293,41 @@ public class SetupDBResource {
 	}
 
 	private void initializeConfig() throws Exception {
-		SpringBeanGetter.initializeApplicationContext();
+		SpringBeanGetter.refreshApplicationContext();
 	}
 
 	private boolean setupTables() throws Exception, InvocationTargetException {
-		boolean scriptExists = resourceExists(scriptFile);
+		boolean scriptExists = resourceExists(SCRIPT_FILE);
 		if (!scriptExists) {
 			throw new Exception("script.sql not found.");
 		}
-		String scriptContent = getScriptContent(scriptFile);
+		String scriptContent = getScriptContent(SCRIPT_FILE);
 		return SpringBeanGetter.getSetupDBDao().executeSqlScript(scriptContent);
 	}
 
-	private boolean setupAdmin(String groupName, String groupComment) throws Exception {
+	private boolean setupAdmin(String groupName, String groupComment, LoginUser user) throws Exception {
 		boolean result = false;
-		String userNo = AssertionHolderManager.getEmployee();
-		if (userNo == null || groupName == null || groupName.isEmpty()) {
+		if (groupName == null || groupName.isEmpty()) {
 			return result;
 		}
 
-		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		if (user == null) {
 			user = new LoginUser();
-			user.setUserNo(userNo);
-			user.setUserName(AssertionHolderManager.getName());
-			user.setUserEmail(AssertionHolderManager.getMail());
+			user.setUserNo(UserInfoResource.getInstance().getEmployee(null));
+			user.setUserName(UserInfoResource.getInstance().getName(null));
+			user.setUserEmail(UserInfoResource.getInstance().getMail(null));
 			int userResult = SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
 			if (userResult <= 0) {
 				return result;
 			}
-			user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+			user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(user.getUserNo());
 		}
 
 		DalGroup group = new DalGroup();
 		group.setId(DalGroupResource.SUPER_GROUP_ID);
 		group.setGroup_name(groupName);
 		group.setGroup_comment(groupComment);
-		group.setCreate_user_no(userNo);
+		group.setCreate_user_no(user.getUserNo());
 		group.setCreate_time(new Timestamp(System.currentTimeMillis()));
 
 		int groupResult = SpringBeanGetter.getDaoOfDalGroup().insertDalGroup(group);

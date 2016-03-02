@@ -27,13 +27,11 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 @Singleton
 @Path("projectview")
 public class DalGroupProjectResource {
-
 	private static Logger log = Logger.getLogger(DalGroupProjectResource.class);
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<DalGroup> getGroups(@QueryParam("root") boolean root) {
-
 		List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
 		for (DalGroup group : groups) {
 			group.setText(group.getGroup_name());
@@ -47,7 +45,6 @@ public class DalGroupProjectResource {
 	@Path("groupprojects")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Project> getGroupProjects(@QueryParam("groupId") String groupId) {
-
 		int groupID = -1;
 		try {
 			groupID = Integer.parseInt(groupId);
@@ -59,7 +56,6 @@ public class DalGroupProjectResource {
 		}
 
 		return SpringBeanGetter.getDaoOfProject().getProjectByGroupId(groupID);
-
 	}
 
 }

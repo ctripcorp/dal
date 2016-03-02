@@ -20,6 +20,7 @@ import com.ctrip.platform.dal.daogen.dao.SetupDBDao;
 import com.ctrip.platform.dal.daogen.dao.UserGroupDao;
 
 public class SpringBeanGetter {
+	private static final Object LOCK = new Object();
 
 	private static ApplicationContext context = null;
 
@@ -53,130 +54,178 @@ public class SpringBeanGetter {
 
 	private static ConfigTemplateDao configTemplateDao = null;
 
-	public static void initializeApplicationContext() {
-		context = null;
-		context = new ClassPathXmlApplicationContext("spring.xml");
+	static {
+		refreshApplicationContext();
 	}
 
-	public static void initializeDao() {
-		daoOfProject = null;
-		daoBySqlBuilder = null;
-		daoByFreeSql = null;
-		daoByTableViewSp = null;
-		daoOfLoginUser = null;
-		daoOfUserProject = null;
-		daoOfDalGroup = null;
-		daoOfDalGroupDB = null;
-		daoOfDatabaseSet = null;
-		dalApiDao = null;
-		dalUserGroupDao = null;
-		groupRelationDao = null;
-		approveTaskDao = null;
-		setupDBDao = null;
-		configTemplateDao = null;
+	public static void refreshApplicationContext() {
+		synchronized (LOCK) {
+			context = null;
+			context = new ClassPathXmlApplicationContext("spring.xml");
+		}
 	}
 
 	public static DaoOfProject getDaoOfProject() {
 		if (daoOfProject == null) {
-			daoOfProject = (DaoOfProject) context.getBean("projectDao");
+			synchronized (LOCK) {
+				if (daoOfProject == null) {
+					daoOfProject = (DaoOfProject) context.getBean("projectDao");
+				}
+			}
 		}
 		return daoOfProject;
 	}
 
 	public static DaoBySqlBuilder getDaoBySqlBuilder() {
 		if (daoBySqlBuilder == null) {
-			daoBySqlBuilder = (DaoBySqlBuilder) context.getBean("autoTaskDao");
+			synchronized (LOCK) {
+				if (daoBySqlBuilder == null) {
+					daoBySqlBuilder = (DaoBySqlBuilder) context.getBean("autoTaskDao");
+				}
+			}
 		}
 		return daoBySqlBuilder;
 	}
 
 	public static DaoByFreeSql getDaoByFreeSql() {
 		if (daoByFreeSql == null) {
-			daoByFreeSql = (DaoByFreeSql) context.getBean("sqlTaskDao");
+			synchronized (LOCK) {
+				if (daoByFreeSql == null) {
+					daoByFreeSql = (DaoByFreeSql) context.getBean("sqlTaskDao");
+				}
+			}
 		}
 		return daoByFreeSql;
 	}
 
 	public static DaoByTableViewSp getDaoByTableViewSp() {
 		if (daoByTableViewSp == null) {
-			daoByTableViewSp = (DaoByTableViewSp) context.getBean("daoByTableViewSp");
+			synchronized (LOCK) {
+				if (daoByTableViewSp == null) {
+					daoByTableViewSp = (DaoByTableViewSp) context.getBean("daoByTableViewSp");
+				}
+			}
 		}
 		return daoByTableViewSp;
 	}
 
 	public static DaoOfLoginUser getDaoOfLoginUser() {
 		if (daoOfLoginUser == null) {
-			daoOfLoginUser = (DaoOfLoginUser) context.getBean("loginUserDao");
+			synchronized (LOCK) {
+				if (daoOfLoginUser == null) {
+					daoOfLoginUser = (DaoOfLoginUser) context.getBean("loginUserDao");
+				}
+			}
 		}
 		return daoOfLoginUser;
 	}
 
 	public static DaoOfUserProject getDaoOfUserProject() {
 		if (daoOfUserProject == null) {
-			daoOfUserProject = (DaoOfUserProject) context.getBean("userProjectDao");
+			synchronized (LOCK) {
+				if (daoOfUserProject == null) {
+					daoOfUserProject = (DaoOfUserProject) context.getBean("userProjectDao");
+				}
+			}
 		}
 		return daoOfUserProject;
 	}
 
 	public static DalGroupDao getDaoOfDalGroup() {
 		if (daoOfDalGroup == null) {
-			daoOfDalGroup = (DalGroupDao) context.getBean("dalGroup");
+			synchronized (LOCK) {
+				if (daoOfDalGroup == null) {
+					daoOfDalGroup = (DalGroupDao) context.getBean("dalGroup");
+				}
+			}
 		}
 		return daoOfDalGroup;
 	}
 
 	public static DalGroupDBDao getDaoOfDalGroupDB() {
 		if (daoOfDalGroupDB == null) {
-			daoOfDalGroupDB = (DalGroupDBDao) context.getBean("dalGroupDB");
+			synchronized (LOCK) {
+				if (daoOfDalGroupDB == null) {
+					daoOfDalGroupDB = (DalGroupDBDao) context.getBean("dalGroupDB");
+				}
+			}
 		}
 		return daoOfDalGroupDB;
 	}
 
 	public static DaoOfDatabaseSet getDaoOfDatabaseSet() {
 		if (daoOfDatabaseSet == null) {
-			daoOfDatabaseSet = (DaoOfDatabaseSet) context.getBean("dalDatabaseSet");
+			synchronized (LOCK) {
+				if (daoOfDatabaseSet == null) {
+					daoOfDatabaseSet = (DaoOfDatabaseSet) context.getBean("dalDatabaseSet");
+				}
+			}
 		}
 		return daoOfDatabaseSet;
 	}
 
 	public static DalApiDao getDalApiDao() {
 		if (dalApiDao == null) {
-			dalApiDao = (DalApiDao) context.getBean("dalApiDao");
+			synchronized (LOCK) {
+				if (dalApiDao == null) {
+					dalApiDao = (DalApiDao) context.getBean("dalApiDao");
+				}
+			}
 		}
 		return dalApiDao;
 	}
 
 	public static UserGroupDao getDalUserGroupDao() {
 		if (dalUserGroupDao == null) {
-			dalUserGroupDao = (UserGroupDao) context.getBean("dalUserGroupDao");
+			synchronized (LOCK) {
+				if (dalUserGroupDao == null) {
+					dalUserGroupDao = (UserGroupDao) context.getBean("dalUserGroupDao");
+				}
+			}
 		}
 		return dalUserGroupDao;
 	}
 
 	public static GroupRelationDao getGroupRelationDao() {
 		if (groupRelationDao == null) {
-			groupRelationDao = (GroupRelationDao) context.getBean("groupRelationDao");
+			synchronized (LOCK) {
+				if (groupRelationDao == null) {
+					groupRelationDao = (GroupRelationDao) context.getBean("groupRelationDao");
+				}
+			}
 		}
 		return groupRelationDao;
 	}
 
 	public static ApproveTaskDao getApproveTaskDao() {
 		if (approveTaskDao == null) {
-			approveTaskDao = (ApproveTaskDao) context.getBean("approveTaskDao");
+			synchronized (LOCK) {
+				if (approveTaskDao == null) {
+					approveTaskDao = (ApproveTaskDao) context.getBean("approveTaskDao");
+				}
+			}
 		}
 		return approveTaskDao;
 	}
 
 	public static SetupDBDao getSetupDBDao() {
 		if (setupDBDao == null) {
-			setupDBDao = (SetupDBDao) context.getBean("setupDBDao");
+			synchronized (LOCK) {
+				if (setupDBDao == null) {
+					setupDBDao = (SetupDBDao) context.getBean("setupDBDao");
+				}
+			}
 		}
 		return setupDBDao;
 	}
 
 	public static ConfigTemplateDao getConfigTemplateDao() {
 		if (configTemplateDao == null) {
-			configTemplateDao = (ConfigTemplateDao) context.getBean("configTemplateDao");
+			synchronized (LOCK) {
+				if (configTemplateDao == null) {
+					configTemplateDao = (ConfigTemplateDao) context.getBean("configTemplateDao");
+				}
+			}
 		}
 		return configTemplateDao;
 	}

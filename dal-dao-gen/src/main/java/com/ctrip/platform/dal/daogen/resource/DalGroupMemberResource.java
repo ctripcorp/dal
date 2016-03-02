@@ -7,12 +7,14 @@ import java.util.List;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
@@ -24,7 +26,7 @@ import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.entity.UserProject;
-import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
@@ -42,7 +44,7 @@ public class DalGroupMemberResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DalGroup> getGroups(@QueryParam("root") boolean root) {
+	public List<DalGroup> getGroups(@Context HttpServletRequest request, @QueryParam("root") boolean root) {
 		List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
 
 		for (DalGroup group : groups) {
@@ -51,12 +53,12 @@ public class DalGroupMemberResource {
 			group.setChildren(false);
 		}
 
-		return sortGroups(groups);
+		String userNo = RequestUtil.getUserNo(request);
+		return sortGroups(groups, userNo);
 	}
 
-	private List<DalGroup> sortGroups(List<DalGroup> groups) {
+	private List<DalGroup> sortGroups(List<DalGroup> groups, String userNo) {
 		List<DalGroup> result = new ArrayList<DalGroup>(groups.size());
-		String userNo = AssertionHolderManager.getEmployee();
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		List<UserGroup> joinedGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
 		if (joinedGroups != null && joinedGroups.size() > 0) {
@@ -135,9 +137,10 @@ public class DalGroupMemberResource {
 
 	@POST
 	@Path("addUser")
-	public Status addUser(@FormParam("groupId") int currentGroupId, @FormParam("userId") int userID,
-			@FormParam("user_role") int user_role, @FormParam("allowAddUser") boolean allowAddUser) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status addUser(@Context HttpServletRequest request, @FormParam("groupId") int currentGroupId,
+			@FormParam("userId") int userID, @FormParam("user_role") int user_role,
+			@FormParam("allowAddUser") boolean allowAddUser) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null) {
 			log.error(String.format("Add member failed, caused by illegal parameters:userNo=%s", userNo));
@@ -183,9 +186,10 @@ public class DalGroupMemberResource {
 
 	@POST
 	@Path("update")
-	public Status update(@FormParam("groupId") int currentGroupId, @FormParam("userId") int userID,
-			@FormParam("user_role") int user_role, @FormParam("allowAddUser") boolean allowAddUser) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status update(@Context HttpServletRequest request, @FormParam("groupId") int currentGroupId,
+			@FormParam("userId") int userID, @FormParam("user_role") int user_role,
+			@FormParam("allowAddUser") boolean allowAddUser) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null) {
 			log.error(String.format("Add member failed, caused by illegal parameters:userNo=%s", userNo));
@@ -219,10 +223,10 @@ public class DalGroupMemberResource {
 
 	@POST
 	@Path("addGroup")
-	public Status addGroup(@FormParam("currentGroupId") int currentGroupId, @FormParam("childGroupId") int childGroupId,
-			@FormParam("child_group_role") int child_group_role,
+	public Status addGroup(@Context HttpServletRequest request, @FormParam("currentGroupId") int currentGroupId,
+			@FormParam("childGroupId") int childGroupId, @FormParam("child_group_role") int child_group_role,
 			@FormParam("allowGroupAddUser") boolean allowGroupAddUser) {
-		String userNo = AssertionHolderManager.getEmployee();
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null) {
 			log.error(String.format("Add group failed, caused by illegal parameters:[userNo=%s]", userNo));
@@ -280,10 +284,10 @@ public class DalGroupMemberResource {
 
 	@POST
 	@Path("updateGroup")
-	public Status updateGroup(@FormParam("currentGroupId") int currentGroupId,
+	public Status updateGroup(@Context HttpServletRequest request, @FormParam("currentGroupId") int currentGroupId,
 			@FormParam("child_group_id") int childGroupId, @FormParam("child_group_role") int childGroupRole,
 			@FormParam("allowGroupAddUser") boolean allowGroupAddUser) {
-		String userNo = AssertionHolderManager.getEmployee();
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null) {
 			log.error(String.format("Add member failed, caused by illegal parameters:[userNo=%s]", userNo));
@@ -319,9 +323,9 @@ public class DalGroupMemberResource {
 
 	@POST
 	@Path("delete")
-	public Status delete(@FormParam("groupId") int currentGroupId, @FormParam("userId") int userId,
-			@FormParam("isDalTeam") boolean isDalTeam) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status delete(@Context HttpServletRequest request, @FormParam("groupId") int currentGroupId,
+			@FormParam("userId") int userId, @FormParam("isDalTeam") boolean isDalTeam) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null) {
 			log.error(String.format("Add member failed, caused by illegal parameters: [userNo=%s]", userNo));

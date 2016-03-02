@@ -46,8 +46,8 @@ import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.host.java.FreeSqlHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaMethodHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
-import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 @Resource
@@ -187,15 +187,13 @@ public class GenTaskResource {
 	@POST
 	@Path("approveTask")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Status approveTask(@FormParam("taskId") String taskId, @FormParam("taskType") String taskType,
-			@FormParam("userId") int userId, @Context HttpServletRequest request) {
+	public Status approveTask(@Context HttpServletRequest request, @FormParam("taskId") String taskId,
+			@FormParam("taskType") String taskType, @FormParam("userId") int userId) {
 		Status status = Status.ERROR;
 		LoginUser approver = SpringBeanGetter.getDaoOfLoginUser().getUserById(userId);
 		if (approver == null) {
 			return status;
 		}
-
-		// todo
 
 		int len = request.getRequestURI().length();
 		String host = request.getRequestURL().toString();
@@ -210,7 +208,7 @@ public class GenTaskResource {
 		List<GenTaskBySqlBuilder> autoTasks = new ArrayList<GenTaskBySqlBuilder>();
 		List<GenTaskByFreeSql> sqlTasks = new ArrayList<GenTaskByFreeSql>();
 
-		String userNo = AssertionHolderManager.getEmployee();
+		String userNo = RequestUtil.getUserNo(request);
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
 		ApproveTask at = new ApproveTask();
@@ -275,10 +273,10 @@ public class GenTaskResource {
 	@GET
 	@Path("taskApproveOperationForEmail")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String taskApproveOperationForEmail(@QueryParam("taskId") int taskId,
+	public String taskApproveOperationForEmail(@Context HttpServletRequest request, @QueryParam("taskId") int taskId,
 			@QueryParam("taskType") String taskType, @QueryParam("approveFlag") int approveFlag,
 			@QueryParam("approveMsg") String approveMsg) {
-		String userNo = AssertionHolderManager.getEmployee();
+		String userNo = RequestUtil.getUserNo(request);
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		if (user == null) {
 			return "please login fisrt.";
@@ -348,10 +346,11 @@ public class GenTaskResource {
 	@GET
 	@Path("taskApproveOperation")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Status taskApproveOperation(@QueryParam("taskId") int taskId, @QueryParam("taskType") String taskType,
-			@QueryParam("approveFlag") int approveFlag, @QueryParam("approveMsg") String approveMsg) {
+	public Status taskApproveOperation(@Context HttpServletRequest request, @QueryParam("taskId") int taskId,
+			@QueryParam("taskType") String taskType, @QueryParam("approveFlag") int approveFlag,
+			@QueryParam("approveMsg") String approveMsg) {
 		Status status = Status.ERROR;
-		String userNo = AssertionHolderManager.getEmployee();
+		String userNo = RequestUtil.getUserNo(request);
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		if (user == null) {
 			status.setInfo("please login fisrt.");
@@ -435,8 +434,8 @@ public class GenTaskResource {
 	@GET
 	@Path("getMyApproveTask")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<ApproveTask> getMyApproveTask(@QueryParam("rand") String rand) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public List<ApproveTask> getMyApproveTask(@Context HttpServletRequest request, @QueryParam("rand") String rand) {
+		String userNo = RequestUtil.getUserNo(request);
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		List<ApproveTask> result = SpringBeanGetter.getApproveTaskDao().getAllApproveTaskByApproverId(user.getId());
 		Iterator<ApproveTask> ite = result.iterator();

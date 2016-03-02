@@ -9,12 +9,14 @@ import java.util.List;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
@@ -27,8 +29,8 @@ import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
-import com.ctrip.platform.dal.daogen.utils.AssertionHolderManager;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 /**
@@ -46,7 +48,7 @@ public class DalGroupDbResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DalGroup> getGroups(@QueryParam("root") boolean root) {
+	public List<DalGroup> getGroups(@Context HttpServletRequest request, @QueryParam("root") boolean root) {
 		List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
 
 		for (DalGroup group : groups) {
@@ -55,12 +57,12 @@ public class DalGroupDbResource {
 			group.setChildren(false);
 		}
 
-		return sortGroups(groups);
+		String userNo = RequestUtil.getUserNo(request);
+		return sortGroups(groups, userNo);
 	}
 
-	private List<DalGroup> sortGroups(List<DalGroup> groups) {
+	private List<DalGroup> sortGroups(List<DalGroup> groups, String userNo) {
 		List<DalGroup> result = new ArrayList<DalGroup>(groups.size());
-		String userNo = AssertionHolderManager.getEmployee();
 		LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 		List<UserGroup> joinedGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
 		if (joinedGroups != null && joinedGroups.size() > 0) {
@@ -122,9 +124,10 @@ public class DalGroupDbResource {
 
 	@POST
 	@Path("add")
-	public Status add(@FormParam("groupId") String groupId, @FormParam("dbname") String dbname,
-			@FormParam("comment") String comment, @FormParam("gen_default_dbset") boolean gen_default_dbset) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status add(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
+			@FormParam("dbname") String dbname, @FormParam("comment") String comment,
+			@FormParam("gen_default_dbset") boolean gen_default_dbset) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null || groupId == null || dbname == null) {
 			log.error(String.format("Add member failed, caused by illegal parameters: " + "[groupId=%s, dbname=%s]",
@@ -183,9 +186,9 @@ public class DalGroupDbResource {
 
 	@POST
 	@Path("update")
-	public Status update(@FormParam("groupId") String groupId, @FormParam("dbId") String dbId,
-			@FormParam("comment") String comment) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status update(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
+			@FormParam("dbId") String dbId, @FormParam("comment") String comment) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null || groupId == null || dbId == null) {
 			log.error(String.format("Add member failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
@@ -226,8 +229,9 @@ public class DalGroupDbResource {
 
 	@POST
 	@Path("delete")
-	public Status delete(@FormParam("groupId") String groupId, @FormParam("dbId") String dbId) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status delete(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
+			@FormParam("dbId") String dbId) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null || groupId == null || dbId == null) {
 			log.error(String.format("Delete db failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
@@ -267,8 +271,9 @@ public class DalGroupDbResource {
 
 	@POST
 	@Path("transferdb")
-	public Status transferdb(@FormParam("groupId") String groupId, @FormParam("dbId") String dbId) {
-		String userNo = AssertionHolderManager.getEmployee();
+	public Status transferdb(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
+			@FormParam("dbId") String dbId) {
+		String userNo = RequestUtil.getUserNo(request);
 
 		if (userNo == null || groupId == null || dbId == null) {
 			log.error(String.format("transfer db failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",

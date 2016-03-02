@@ -1,8 +1,10 @@
 package com.dal.sqlserver.test.control;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import com.ctrip.platform.dal.dao.DalHints;
+import com.dal.sqlserver.test.People;
 import com.dal.sqlserver.test.PeopleDao;
 import com.xross.tools.xunit.Context;
 import com.xross.tools.xunit.Processor;
@@ -25,13 +27,16 @@ public class SelectOperation implements Processor {
 				value = dao.getAll(hints);
 				break;
 			case "queryByPage":
-				value = dao.batchUpdate(hints, context.readPeopleList());
+				int pageSize = context.getInt("pageSize"); 
+				int pageNo = context.getInt("pageNo");
+				value  = dao.queryByPage(pageSize, pageNo, hints);
 				break;
 			case "count":
 				value = dao.count(hints);
 				break;
 			case "deleteAll":
-				value = dao.getAll(hints);
+				List<People> pList = dao.getAll(hints);
+				value = dao.delete(hints, pList);
 				break;
 			default:
 				break;

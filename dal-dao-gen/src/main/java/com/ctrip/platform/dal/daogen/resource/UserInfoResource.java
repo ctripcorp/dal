@@ -72,7 +72,6 @@ public class UserInfoResource {
 
 	private static UserInfo getUserInfo()
 			throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-		UserInfo userInfo = null;
 		String className = getUserInfoClassName();
 		if (className == null || className.isEmpty()) {
 			clazz = Class.forName(DEFAULT_USER_INFO); // set to default
@@ -80,8 +79,7 @@ public class UserInfoResource {
 			clazz = Class.forName(className);
 		}
 
-		userInfo = (UserInfo) clazz.newInstance();
-		return userInfo;
+		return (UserInfo) clazz.newInstance();
 	}
 
 	private static String getUserInfoClassName() throws IOException {

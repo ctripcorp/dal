@@ -1,13 +1,6 @@
 package com.dal.sqlserver.test.control;
 
-import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.ctrip.datasource.configure.DalDataSourceFactory;
 import com.ctrip.platform.dal.dao.DalClient;
@@ -26,7 +19,7 @@ public class ManagementAndTimeout implements Processor {
 	@Override
 	public void process(Context ctx) {
 		WebContext context = (WebContext)ctx;
-		DalHints hints = context.getHints();
+		DalHints hints = context.getHints().timeout(1);
 		PeopleDao dao = context.getDao();
 		
 		DalClient client = DalClientFactory.getClient("MultiThreadingTest");

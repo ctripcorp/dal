@@ -30,7 +30,7 @@ jQuery(document)
 													{
 														name : 'sidebar',
 														img : null,
-														topHTML : '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a href="javascript:void(0);" onclick="reloadProjects();"><i class="glyphicon glyphicon-refresh"></i>刷新</a></div>',
+														topHTML : '<div style="background-color: #eee; padding: 10px 5px 10px 20px; border-bottom: 1px solid silver"><a href="javascript:;" onclick="reloadProjects();"><i class="glyphicon glyphicon-refresh"></i>刷新</a></div>',
 														nodes : [ {
 															id : 'all_projects',
 															text : '所有项目',

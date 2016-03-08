@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -392,7 +391,7 @@ public class ProjectResource {
     /**
      * 一键添加project缺失的databaseSet
      *
-     * @param projId
+     * @param project_id
      * @return
      */
     @POST
@@ -576,11 +575,11 @@ public class ProjectResource {
         LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
         if (urGroups == null) {
-            status.setInfo("你没有权限生成代码.请先加入一个DAL Team.");
+            status.setInfo("你没有权限生成代码.请先加入一个 DAL Team.");
             return status;
         }
         if (urGroups.size() < 1) {
-            status.setInfo("你没有权限生成代码.请先加入一个DAL Team.");
+            status.setInfo("你没有权限生成代码.请先加入一个 DAL Team.");
             return status;
         }
         int groupId = -1;

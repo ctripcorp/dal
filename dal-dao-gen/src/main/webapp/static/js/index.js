@@ -5,7 +5,7 @@ $(function () {
         $('#main_layout').height($(document).height() - 50);
     });
 
-    $("#addProj").click(function () {
+    $(document.body).on("click", "#addProj", function () {
         $("#proj_error_msg").empty();
         if ($("#projectModal").attr("is_root") == "0") {
             alert("请选择一个DAL Team节点，再操作！");
@@ -18,7 +18,7 @@ $(function () {
         $("#projectModal").modal();
     });
 
-    $("#editProj").click(function () {
+    $(document.body).on("click", "#editProj", function () {
         $("#proj_error_msg").empty();
         if ($("#projectModal").attr("is_root") == "1") {
             alert("请单击一个项目，再操作！");
@@ -46,7 +46,7 @@ $(function () {
         $("#projectModal").modal();
     });
 
-    $("#delProj").click(function () {
+    $(document.body).on("click", "#delProj", function () {
         if ($("#projectModal").attr("is_root") == "1") {
             alert("请单击一个项目，再操作！");
             return;
@@ -56,7 +56,7 @@ $(function () {
             alert("请单击一个项目，再操作！");
             return;
         }
-        if (confirm("Are you sure to delete this project?")) {
+        if (confirm("您确定要删除该项目吗?")) {
             var post_data = {};
             post_data["id"] = selectedProject[0];
             post_data["action"] = "delete";
@@ -75,7 +75,7 @@ $(function () {
         }
     });
 
-    $("#shareProj").click(function () {
+    $(document.body).on("click", "#shareProj", function () {
         var selectedProject = $.jstree.reference("#jstree_projects").get_selected();
         if (selectedProject == undefined || selectedProject.length < 1 || selectedProject[0] == -1) {
             alert("请单击一个项目，再操作！");
@@ -99,26 +99,24 @@ $(function () {
         });
 
         if ($("#users").val() != "_please_select") {
-            $.post("/rest/project/share_proj",
-                {
-                    "id": $.jstree.reference("#jstree_projects").get_selected()[0],
-                    "userNo": $("#users").val()
-                },
-                function (data) {
-                    if (data.code == "OK") {
-                        alert("分享成功！");
-                    } else {
-                        alert("分享失败，此用户可能已经可以操作该项目了!");
-                    }
+            $.post("/rest/project/share_proj", {
+                "id": $.jstree.reference("#jstree_projects").get_selected()[0],
+                "userNo": $("#users").val()
+            }, function (data) {
+                if (data.code == "OK") {
+                    alert("分享成功！");
+                } else {
+                    alert("分享失败，此用户可能已经可以操作该项目了!");
+                }
 
-                    $("#shareProject").modal("hide");
-                }).fail(function (data) {
-                    alert("分享失败!");
-                });
+                $("#shareProject").modal("hide");
+            }).fail(function (data) {
+                alert("分享失败!");
+            });
         }
     });
 
-    $("#save_proj").click(function () {
+    $(document.body).on("click", "#save_proj", function () {
         $("#proj_error_msg").empty();
         var post_data = {};
         var currentid = $("#project_id").val();
@@ -160,7 +158,7 @@ $(function () {
         });
     });
 
-    $("regen_language").click(function () {
+    $(document.body).on("click", "regen_language", function () {
         if ($("#regen_language").val() == "cs") {
             $(".useNewPojo").show();
         } else {
@@ -168,45 +166,41 @@ $(function () {
         }
     });
 
-    $("#add_condition").click(function () {
+    $(document.body).on("click", "#add_condition", function () {
         var selectedFieldValue = $("#conditions").val();
         var selectedConditionValue = $("#condition_values").val();
         var selectedFieldText = $("#conditions").find(":selected").text();
         var selectedConditionText = $("#condition_values").find(":selected").text();
         var array = ["And", "Or", "Not", "(", ")"];
 
-        if ($.inArray(selectedConditionText,
-                array) > -1) {
-            $("#selected_condition").append($('<option>',
-                {
-                    value: sprintf("%s", selectedConditionValue),
-                    text: sprintf("%s", selectedConditionText)
-                }));
+        if ($.inArray(selectedConditionText, array) > -1) {
+            $("#selected_condition").append($('<option>', {
+                value: sprintf("%s", selectedConditionValue), text: sprintf("%s", selectedConditionText)
+            }));
             window.sql_builder.build();
         } else if (selectedFieldValue != "-1" && selectedConditionValue != "-1") {
-            $("#selected_condition").append($('<option>',
-                {
-                    value: sprintf("%s,%s", selectedFieldValue, selectedConditionValue),
-                    text: sprintf("%s %s", selectedFieldText, selectedConditionText)
-                }));
+            $("#selected_condition").append($('<option>', {
+                value: sprintf("%s,%s", selectedFieldValue, selectedConditionValue),
+                text: sprintf("%s %s", selectedFieldText, selectedConditionText)
+            }));
             window.sql_builder.build();
         }
     });
 
-    $("#del_condition").click(function () {
+    $(document.body).on("click", "#del_condition", function () {
         $("#selected_condition").find(":selected").remove();
         window.sql_builder.build();
     });
 
-    $("#orderby_field").change(function () {
+    $(document.body).on("change", "#orderby_field", function () {
         window.sql_builder.build();
     });
 
-    $("#orderby_sort").change(function () {
+    $(document.body).on("change", "#orderby_sort", function () {
         window.sql_builder.build();
     });
 
-    $("#auto_sql_scalarType").change(function () {
+    $(document.body).on("change", "#auto_sql_scalarType", function () {
         var scalar = $("#auto_sql_scalarType").val();
         $("#error_msg").empty();
         if (scalar == 'List') {
@@ -229,7 +223,7 @@ $(function () {
         }
     });
 
-    $("#free_sql_scalarType").change(function () {
+    $(document.body).on("change", "#free_sql_scalarType", function () {
         var scalar = $("#free_sql_scalarType").val();
         if (scalar != 'List') {
             $("#free_sql_pagination").attr({"checked": false, "disabled": "disabled"});
@@ -244,22 +238,22 @@ $(function () {
         }
     });
 
-    $("#next_step").click(function () {
+    $(document.body).on("click", "#next_step", function () {
         var current_step = $("div.steps:visible");
         window.wizzard.next(current_step);
     });
 
-    $("#prev_step").click(function () {
+    $(document.body).on("click", "#prev_step", function () {
         var current_step = $("div.steps:visible");
         window.wizzard.previous(current_step);
     });
 
-    $("#layout_main_layout_resizer_preview").mouseleave(function () {
+    $(document.body).on("mouseleave", "#layout_main_layout_resizer_preview", function () {
         ace.edit("code_editor").resize();
     });
 
     // 一键添加缺失dbset和db
-    $("#add_lack_dbset").click(function () {
+    $(document.body).on("click", "#add_lack_dbset", function () {
         var current_project = w2ui['grid'].current_project;
         $.post("/rest/project/addLackDbset", {"project_id": current_project}, function (data) {
             $("#generateCodeProcessErrorMess").html(data.info);
@@ -268,7 +262,7 @@ $(function () {
         });
     });
 
-    $("#gen_style").click(function () {
+    $(document.body).on("click", "#gen_style", function () {
         $("#error_msg").css("color", "black");
         if ($("#gen_style").val() == "table_view_sp") {
             $("#error_msg").html("在这种模式下面，我们只需要选择数据库、表、视图、存储过程、视图，之后将生成对应的增、删、改、查的代码。");
@@ -281,7 +275,7 @@ $(function () {
         }
     });
 
-    $("#free_sql_crud_option").change(function () {
+    $(document.body).on("change", "#free_sql_crud_option", function () {
         if ($("#free_sql_crud_option").val() == 'select') {
             $("#sql_pojo_name_div").show();
             $("#free_sql_scalarTypeDiv").show();
@@ -291,7 +285,7 @@ $(function () {
         }
     });
 
-    $("#databases,#gen_style").click(function () {
+    $(document.body).on("click", "#databases,#gen_style", function () {
         var records = w2ui['grid'].getSelection();
         var record = null;
         if (records.length > 0) {
@@ -306,19 +300,19 @@ $(function () {
         }
     });
 
-    $("#chk_build_allShard").click(function () {
+    $(document.body).on("click", "#chk_build_allShard", function () {
         $("#chk_build_shards").prop("disabled", $(this).is(":checked"));
     });
 
-    $("#chk_build_shards").click(function () {
+    $(document.body).on("click", "#chk_build_shards", function () {
         $("#chk_build_allShard").prop("disabled", $(this).is(":checked"));
     });
 
-    $("#chk_custom_allShard").click(function () {
+    $(document.body).on("click", "#chk_custom_allShard", function () {
         $("#chk_custom_shards").prop("disabled", $(this).is(":checked"));
     });
 
-    $("#chk_custom_shards").click(function () {
+    $(document.body).on("click", "#chk_custom_shards", function () {
         $("#chk_custom_allShard").prop("disabled", $(this).is(":checked"));
     });
 

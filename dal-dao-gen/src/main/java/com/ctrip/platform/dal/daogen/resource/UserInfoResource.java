@@ -27,7 +27,6 @@ public class UserInfoResource {
     private static ClassLoader classLoader = null;
     private static final String CONF_PROPERTIES = "conf.properties";
     private static final String USER_INFO_CLASS_NAME = "userinfo_class";
-    private static Class<?> clazz = null;
 
     private static UserInfo userInfo = null;
     private static final String DEFAULT_USER_INFO = "com.ctrip.platform.dal.daogen.entity.DefaultUserInfo";
@@ -81,7 +80,7 @@ public class UserInfoResource {
             return DefaultUserInfo.getInstance(); // set to default
         }
 
-        clazz = Class.forName(className);
+        Class<?> clazz = Class.forName(className);
         return (UserInfo) clazz.newInstance();
     }
 

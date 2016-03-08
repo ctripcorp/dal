@@ -1,92 +1,83 @@
 (function () {
     var checkSetupDb = function () {
         cblock($("body"));
-        $
-            .get("/rest/setupDb/setupDbCheck?rand=" + Math.random())
-            .done(
-            function (data) {
-                if (data.code != "OK") {
-                    $("#setup_error_msg").html('');
-                    $("#setup_db_step1").show();
-                    $("#setup_db_step2").hide();
-                    $("#setup_conn_test").show();
-                    $("#setup_db_next").show();
-                    $("#setup_db_prev").hide();
-                    $("#setup_db_save").hide();
-                    if ($("#setupdbcatalog")[0] != undefined
-                        && $("#setupdbcatalog")[0].selectize != undefined) {
-                        $("#setupdbcatalog")[0].selectize
-                            .clearOptions();
-                    } else {
-                        $("#setupdbcatalog").selectize({
-                            valueField: 'id',
-                            labelField: 'title',
-                            searchField: 'title',
-                            sortField: 'title',
-                            options: [],
-                            create: false
-                        });
-                    }
-
-                    if (data.info == "!jdbc"
-                        || data.info == "!valid") {
-                        $("#setupDbModal").modal({
-                            "backdrop": "static"
-                        });
-                    }
+        $.get("/rest/setupDb/setupDbCheck", {rand: Math.random()}).done(function (data) {
+            if (data.code != "OK") {
+                $("#setup_error_msg").html('');
+                $("#setup_db_step1").show();
+                $("#setup_db_step2").hide();
+                $("#setup_conn_test").show();
+                $("#setup_db_next").show();
+                $("#setup_db_prev").hide();
+                $("#setup_db_save").hide();
+                if ($("#setupdbcatalog")[0] != undefined && $("#setupdbcatalog")[0].selectize != undefined) {
+                    $("#setupdbcatalog")[0].selectize.clearOptions();
                 } else {
-                    if (data.info == "initialized") {
-                        initialized = true;
-                        window.location.href = "index.jsp";
-                    }
+                    $("#setupdbcatalog").selectize({
+                        valueField: 'id',
+                        labelField: 'title',
+                        searchField: 'title',
+                        sortField: 'title',
+                        options: [],
+                        create: false
+                    });
                 }
-                $("body").unblock();
-            });
+
+                if (data.info == "!jdbc" || data.info == "!valid") {
+                    $("#setupDbModal").modal({
+                        "backdrop": "static"
+                    });
+                }
+            } else {
+                if (data.info == "initialized") {
+                    initialized = true;
+                    window.location.href = "index.jsp";
+                }
+            }
+            $("body").unblock();
+        });
     };
 
-    $(window).load(
-        function () {
-            var href = location.href;
-            $("li[class='active']").removeClass("active");
-            if (href.indexOf("codeview") != -1) {
-                $("#codeviewjsp").addClass("active");
-            } else if (href.indexOf("membermanage") != -1) {
-                $("#membermanagejsp").addClass("active");
-            } else if (href.indexOf("dbmanage") != -1
-                || href.indexOf("dbsetsmanage") != -1
-                || href.indexOf("dbview") != -1) {
-                $("#dbmanagejsp").addClass("active");
-            } else if (href.indexOf("eventmanage") != -1) {
-                $("#eventmanagejsp").addClass("active");
-            } else if (href.indexOf("groupmanage") != -1) {
-                $("#groupmanagejsp").addClass("active");
-            } else if (href.indexOf("usermanage") != -1) {
-                $("#usermanagejsp").addClass("active");
-            } else if (href.indexOf("welcome") != -1) {
-                $("#welcomejsp").addClass("active");
-            } else {
-                $("#indexjsp").addClass("active");
-            }
+    $(window).load(function () {
+        var href = location.href;
+        $("li[class='active']").removeClass("active");
+        if (href.indexOf("codeview") != -1) {
+            $("#codeviewjsp").addClass("active");
+        } else if (href.indexOf("membermanage") != -1) {
+            $("#membermanagejsp").addClass("active");
+        } else if (href.indexOf("dbmanage") != -1 || href.indexOf("dbsetsmanage") != -1 || href.indexOf("dbview") != -1) {
+            $("#dbmanagejsp").addClass("active");
+        } else if (href.indexOf("eventmanage") != -1) {
+            $("#eventmanagejsp").addClass("active");
+        } else if (href.indexOf("groupmanage") != -1) {
+            $("#groupmanagejsp").addClass("active");
+        } else if (href.indexOf("usermanage") != -1) {
+            $("#usermanagejsp").addClass("active");
+        } else if (href.indexOf("welcome") != -1) {
+            $("#welcomejsp").addClass("active");
+        } else {
+            $("#indexjsp").addClass("active");
+        }
 
-            var options = {
-                animation: true,
-                trigger: 'hover',
-                html: true
-            };
+        var options = {
+            animation: true,
+            trigger: 'hover',
+            html: true
+        };
 
-            $('[data-toggle="tooltip"]').tooltip(options);
-        });
+        $('[data-toggle="tooltip"]').tooltip(options);
+    });
 
     $(function () {
         var Sys = {};
         var ua = navigator.userAgent.toLowerCase();
         var s;
         var scan;
-        (s = ua.match(/msie ([\d.]+)/)) ? Sys.ie = s[1] : (s = ua
-            .match(/firefox\/([\d.]+)/)) ? Sys.firefox = s[1] : (s = ua
-            .match(/chrome\/([\d.]+)/)) ? Sys.chrome = s[1] : (s = ua
-            .match(/opera.([\d.]+)/)) ? Sys.opera = s[1] : (s = ua
-            .match(/version\/([\d.]+).*safari/)) ? Sys.safari = s[1] : 0;
+        (s = ua.match(/msie ([\d.]+)/)) ? Sys.ie = s[1] :
+            (s = ua.match(/firefox\/([\d.]+)/)) ? Sys.firefox = s[1] :
+                (s = ua.match(/chrome\/([\d.]+)/)) ? Sys.chrome = s[1] :
+                    (s = ua.match(/opera.([\d.]+)/)) ? Sys.opera = s[1] :
+                        (s = ua.match(/version\/([\d.]+).*safari/)) ? Sys.safari = s[1] : 0;
 
         // 以下进行测试
         if (Sys.ie) {
@@ -109,11 +100,11 @@
             alert(scan);
         }
 
-        $("#setup_conn_test").click(function () {
+        $(document.body).on("click", "#setup_conn_test", function () {
             connectionTest("connection successful");
         });
 
-        $("#setup_db_prev").click(function () {
+        $(document.body).on("click", "#setup_db_prev", function () {
             $("#setup_db_step1").show();
             $("#setup_db_step2").hide();
             $("#setup_conn_test").show();
@@ -123,7 +114,7 @@
             $("#setup_error_msg").html(" ");
         });
 
-        $("#setup_db_next").click(function () {
+        $(document.body).on("click", "#setup_db_next", function () {
             var dbAddress = $("#setupdbaddress").val();
             var dbPort = $("#setupdbport").val();
             var dbUser = $("#setupdbuser").val();
@@ -154,7 +145,7 @@
             connectionTest("");
         });
 
-        $("#setup_db_save").click(function () {
+        $(document.body).on("click", "#setup_db_save", function () {
             var dbAddress = $("#setupdbaddress").val();
             var dbPort = $("#setupdbport").val();
             var dbUser = $("#setupdbuser").val();
@@ -271,9 +262,7 @@
 (function ($, window) {
     window.alert = function (data) {
         $("#overrideAlertErrorNoticeDivMsg").html(data);
-        $("#overrideAlertErrorNoticeDiv").modal({
-            "backdrop": "static"
-        });
+        $("#overrideAlertErrorNoticeDiv").modal({"backdrop": "static"});
     };
 
     var keepSession = function () {

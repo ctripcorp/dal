@@ -171,8 +171,8 @@ public class DirectClientDaoTest {
 			parameters.registerOut("pName", Types.VARCHAR);
 			
 			DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
-			parameters.add(StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName("result").build());
-			parameters.add(StatementParameter.newBuilder().setResultsParameter(true).setName("count").build());
+			parameters.add(new StatementParameter().setResultsParameter(true).setResultSetExtractor(extractor).setName("result"));
+			parameters.add(new StatementParameter().setResultsParameter(true).setName("count"));
 
 			System.out.println(client.call("call getPersonById(?, ?)", parameters, hints));
 			

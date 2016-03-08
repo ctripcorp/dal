@@ -12,7 +12,7 @@ public class StatementParameters {
 	private List<StatementParameter> parameters = new LinkedList<StatementParameter>();
 
 	// Set when there is IN parameter
-	private boolean needExpand = false;
+	private boolean hasInParameter = false;
 	
 	public StatementParameters add(StatementParameter parameter) {
 		parameters.add(parameter);
@@ -20,79 +20,77 @@ public class StatementParameters {
 	}
 	
 	public StatementParameters set(int index, Object value) {
-		return add(StatementParameter.Builder.set(index, value).build());
+		return add(new StatementParameter(index, value));
 	}
 	
 	public StatementParameters set(int index, int sqlType, Object value) {
-		return add(StatementParameter.Builder.set(index, sqlType, value).build());
+		return add(new StatementParameter(index, sqlType, value));
 	}
 
 	public StatementParameters set(int index, String name, int sqlType, Object value) {
-		return add(StatementParameter.Builder.set(index, sqlType, value).setName(name).build());
+		return add(new StatementParameter(index, sqlType, value).setName(name));
 	}
 
 	public StatementParameters set(String name, int sqlType, Object value) {
-		return add(StatementParameter.Builder.set(name, sqlType, value).build());
+		return add(new StatementParameter(name, sqlType, value));
 	}
 
 	public StatementParameters registerInOut(String name, int sqlType, Object value) {
-		return add(StatementParameter.Builder.registerInOut(name, sqlType, value).build());
+		return add(StatementParameter.registerInOut(name, sqlType, value));
 	}
 	
 	public StatementParameters registerOut(String name, int sqlType) {
-		return add(StatementParameter.Builder.registerOut(name, sqlType).build());
+		return add(StatementParameter.registerOut(name, sqlType));
 	}
 	
 	public StatementParameters setSensitive(int index, int sqlType, Object value) {
-		return add(StatementParameter.Builder.set(index, sqlType, value).setSensitive(true).build());
+		return add(new StatementParameter(index, sqlType, value).setSensitive(true));
 	}
 
 	public StatementParameters setSensitive(int index, String name, int sqlType, Object value) {
-		return add(StatementParameter.Builder.set(index, sqlType, value).setSensitive(true).setName(name).build());
+		return add(new StatementParameter(index, sqlType, value).setSensitive(true).setName(name));
 	}
 	
 	public StatementParameters setSensitive(String name, int sqlType, Object value) {
-		return add(StatementParameter.Builder.set(name, sqlType, value).setSensitive(true).build());
+		return add(new StatementParameter(name, sqlType, value).setSensitive(true));
 	}
 
 	public StatementParameters registerInOutSensitive(String name, int sqlType, Object value) {
-		return add(StatementParameter.Builder.registerInOut(name, sqlType, value).setSensitive(true).build());
+		return add(StatementParameter.registerInOut(name, sqlType, value).setSensitive(true));
 	}
 	
 	public StatementParameters registerOutSensitive(String name, int sqlType) {
-		return add(StatementParameter.Builder.registerOut(name, sqlType).setSensitive(true).build());
+		return add(StatementParameter.registerOut(name, sqlType).setSensitive(true));
 	}
 	
 	public StatementParameters setResultsParameter(String name) {
-		return add(StatementParameter.newBuilder().setResultsParameter(true).setName(name).build());
+		return add(new StatementParameter().setResultsParameter(true).setName(name));
 	}
 	
 	public StatementParameters setResultsParameter(String name, DalResultSetExtractor<?> extractor) {
-		return add(StatementParameter.newBuilder().setResultsParameter(true).setResultSetExtractor(extractor).setName(name).build());
+		return add(new StatementParameter().setResultsParameter(true).setResultSetExtractor(extractor).setName(name));
+	}
+	
+	public int setInParameter(int index, String name, int sqlType, List<?> values, boolean sensitive) {
+		add(new StatementParameter(index++, sqlType, values).setName(name).setSensitive(sensitive).setInParam(true));
+		hasInParameter = true;
+		return index;
 	}
 	
 	public int setInParameter(int index, int sqlType, List<?> values) {
-		set(index++, sqlType, values);
-		needExpand = true;
-		return index;
+		return setInParameter(index, null, sqlType, values, false);
 	}
 	
 	public int setSensitiveInParameter(int index, int sqlType, List<?> values) {
-		setSensitive(index++, sqlType, values);
-		needExpand = true;
-		return index;
+		return setInParameter(index, null, sqlType, values, true);
 	}
 	
 	public int setInParameter(int index, String name, int sqlType, List<?> values) {
-		set(index++, name, sqlType, values);
-		needExpand = true;
-		return index;
+		return setInParameter(index, name, sqlType, values, false);	
 	}
 	
 	public int setSensitiveInParameter(int index, String name, int sqlType, List<?> values) {
-		setSensitive(index++, name, sqlType, values);
-		needExpand = true;
-		return index;
+		return setInParameter(index, name, sqlType, values, true);
 	}
 	
 	public int size() {
@@ -137,38 +135,36 @@ public class StatementParameters {
 		for(StatementParameter parameter: parameters){
 			Object pValue = name.equals(parameter.getName()) ? value: parameter.getValue();
 			
-			tempParameters.add(StatementParameter.Builder.
-					set(parameter.getIndex(), parameter.getSqlType(), pValue).
-					setName(parameter.getName()).
-					setSensitive(parameter.isSensitive()).build());
+			tempParameters.add(new StatementParameter(parameter).setValue(pValue));
 		}
 		
 		return tempParameters;
 	}
 	
 	/**
-	 * This must be executed after duplicateWith
+	 * Expand in parameters if necessary. This must be executed before execution
 	 */
-	public void expand() {
+	public void compile() {
 		//There is no IN parameter
-		if(needExpand == false)
+		if(!hasInParameter)
 			return;
 		
 		//To be safe, order parameters by original index
 		Collections.sort(parameters);
+		// Make a copy of original parameters
+		List<StatementParameter> tmpParameters = new LinkedList<StatementParameter>(parameters);
+
+		// The change will be made into original parameters
 		int i = 0;
-		while(i < parameters.size()) {
-			StatementParameter p = parameters.get(i);
-			if(p.getValue() instanceof List<?>){
-				List<?> values = (List<?>)p.getValue();
-				for(Object val : values){
-					parameters.add(StatementParameter.Builder.
-							set(++i, p.getSqlType(), val).
-							setName(p.getName()).
-							setSensitive(p.isSensitive()).build());
+		for(StatementParameter p: tmpParameters) {
+			if(p.isInParam()) {
+				List<?> values = p.getValue();
+				for(Object val : values) {
+					parameters.add(i, new StatementParameter(p).setIndex((i+1)).setInParam(false));
+					i++;
 				}
-			}else{
-				p.currentBuilder.setIndex(++i);
+			}else {
+				p.setIndex(++i);
 			}
 		}
 	}

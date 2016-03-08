@@ -8,293 +8,262 @@ import com.ctrip.platform.dal.dao.client.DasProto;
 import com.google.protobuf.ByteString;
 
 public class StatementParameter implements Comparable<StatementParameter> {
+	private boolean defaultType;
+	
+	private DbType dbType;
+	
+	private int sqlType;
 
-	Builder currentBuilder;
+	private ParameterDirection direction;
 
-	private StatementParameter(Builder builder) {
-		currentBuilder = builder;
+	private boolean nullable;
+
+	private String name;
+
+	private int index;
+
+	private boolean sensitive;
+
+	private Object value;
+	private boolean inParam;
+	
+	private boolean resultsParameter;
+	private DalResultSetExtractor<?> resultSetExtractor;
+
+	public StatementParameter() {}
+	
+	public StatementParameter(StatementParameter template) {
+		this.defaultType = template.defaultType;
+		this.dbType = template.dbType;
+		this.sqlType = template.sqlType;
+		this.direction = template.direction;
+		this.nullable = template.nullable;
+		this.name = template.name;
+		this.index = template.index;
+		this.sensitive = template.sensitive;
+		
+		this.value = template.value;
+		this.inParam = template.inParam;
+		
+		this.resultsParameter = template.resultsParameter;
+		this.resultSetExtractor = template.resultSetExtractor;
 	}
-
-	public static Builder newBuilder() {
-		return Builder.create();
+	
+	public StatementParameter(int index, int sqlType, Object value) {
+		this.index = index;
+		this.sqlType = sqlType;
+		this.value = value;
+		this.direction = ParameterDirection.Input;
 	}
-
-	public DasProto.SqlParameters build2SqlParameters() {
-		return currentBuilder.build2SqlParameters();
+	
+	public StatementParameter(int index, Object value) {
+		this.index = index;
+		this.defaultType = true;
+		this.value = value;
+		this.direction = ParameterDirection.Input;
+	}
+	
+	public StatementParameter(String name, int sqlType, Object value) {
+		this.index = -1;
+		this.name = name;
+		this.sqlType = sqlType;
+		this.value = value;
+		this.direction = ParameterDirection.Input;
+	}
+	
+	public static StatementParameter registerInOut(String name, int sqlType, Object value) {
+		StatementParameter parameter = new StatementParameter(name, sqlType, value);
+		parameter.setDirection(ParameterDirection.InputOutput);
+		return parameter;
+	}
+	
+	public static StatementParameter registerOut(String name, int sqlType) {
+		StatementParameter parameter = new StatementParameter(name, sqlType, null);
+		parameter.setDirection(ParameterDirection.Output);
+		return parameter;
 	}
 	
 	public boolean isDefaultType(){
-		return currentBuilder.defaultType_;
+		return defaultType;
 	}
 	
-	// TODO use builder to build parameter can be optimized 
 	public DbType getDbType() {
-		return currentBuilder.dbType_;
+		return dbType;
 	}
 
 	public int getSqlType() {
-		return currentBuilder.sqlType_;
+		return sqlType;
 	}
 
 	public ParameterDirection getDirection() {
-		return currentBuilder.direction_;
+		return direction;
 	}
 
 	public boolean isNullable() {
-		return currentBuilder.nullable_;
+		return nullable;
 	}
 
 	public String getName() {
-		return currentBuilder.name_;
+		return name;
 	}
 
 	public int getIndex() {
-		return currentBuilder.index_;
+		return index;
 	}
 
 	public boolean isSensitive() {
-		return currentBuilder.sensitive_;
+		return sensitive;
 	}
 
-	public Object getValue() {
-		return currentBuilder.value_;
+	public <T> T getValue() {
+		return (T)value;
 	}
 	
-	public void setValue(Object value) {
-		currentBuilder.value_ = value;;
+	public boolean isInParam() {
+		return inParam;
 	}
-	
+
 	public boolean isResultsParameter() {
-		return currentBuilder.resultsParameter_;
+		return resultsParameter;
 	}
 
 	public DalResultSetExtractor<?> getResultSetExtractor() {
-		return currentBuilder.resultSetExtractor_;
+		return resultSetExtractor;
 	}
 	
 	public boolean isInputParameter() {
 		if(isResultsParameter())
 			return false;
-		return 	currentBuilder.direction_ == ParameterDirection.Input || currentBuilder.direction_ == ParameterDirection.InputOutput;
+		return 	direction == ParameterDirection.Input || direction == ParameterDirection.InputOutput;
 	}
 	
 	public boolean isOutParameter() {
-		if(currentBuilder.resultsParameter_ || currentBuilder.direction_ == null)
+		if(resultsParameter || direction == null)
 			return false;
-		return 	currentBuilder.direction_ == ParameterDirection.Output || currentBuilder.direction_ == ParameterDirection.InputOutput;
+		return 	direction == ParameterDirection.Output || direction == ParameterDirection.InputOutput;
 	}
 	
-	public static final class Builder {
+	public StatementParameter setSqlType(int sqlType) {
+		this.sqlType = sqlType;
+		return this;
+	}
+	
+	public StatementParameter setDirection(ParameterDirection direction) {
+		this.direction = direction;
+		return this;
+	}
 
-		private Builder() {
+	public StatementParameter setNullable(boolean nullable) {
+		this.nullable = nullable;
+		return this;
+	}
 
+	public StatementParameter setName(String name) {
+		this.name = name;
+		return this;
+	}
+
+	public StatementParameter setIndex(int index) {
+		this.index = index;
+		return this;
+	}
+
+	public StatementParameter setSensitive(boolean sensitive) {
+		this.sensitive = sensitive;
+		return this;
+	}
+
+	public StatementParameter setValue(Object value) {
+		this.value = value;
+		return this;
+	}
+	
+	public StatementParameter setInParam(boolean inParam) {
+		this.inParam = inParam;
+		return this;
+	}
+
+	public StatementParameter setResultsParameter(boolean resultsParameter) {
+		this.resultsParameter = resultsParameter;
+		return this;
+	}
+
+	public StatementParameter setResultSetExtractor(DalResultSetExtractor<?> resultSetExtractor) {
+		this.resultSetExtractor = resultSetExtractor;
+		return this;
+	}
+
+	public StatementParameter setDefaultType(boolean defaultType){
+		this.defaultType = defaultType;
+		return this;
+	}
+	
+	public DasProto.SqlParameters build2SqlParameters() {
+		DasProto.SqlParameters.Builder builder = DasProto.SqlParameters
+				.newBuilder();
+		builder.setDbType(dbType.getIntVal());
+		builder.setDirection(direction.getIntVal());
+		builder.setIsNull(nullable);
+		builder.setName(name);
+		builder.setIndex(index);
+		builder.setSensitive(sensitive);
+
+		DasProto.AvailableType.Builder valueBuilder = DasProto.AvailableType
+				.newBuilder();
+
+		switch (dbType) {
+		case Binary:
+			builder.setValue(valueBuilder.setCurrent(5)
+					.setBytesArg(ByteString.copyFrom((byte[]) value))
+					.build());
+			break;
+		case Boolean:
+			builder.setValue(valueBuilder.setCurrent(0)
+					.setBoolArg(Boolean.parseBoolean(value.toString()))
+					.build());
+			break;
+		case Byte:
+		case SByte:
+		case Int16:
+		case Int32:
+		case UInt16:
+		case UInt32:
+		case StringFixedLength:
+			builder.setValue(valueBuilder.setCurrent(1)
+					.setInt32Arg(Integer.parseInt(value.toString()))
+					.build());
+			break;
+		case Int64:
+		case UInt64:
+			builder.setValue(valueBuilder.setCurrent(2)
+					.setInt64Arg(Long.parseLong(value.toString())).build());
+			break;
+		case DateTime:
+			builder.setValue(valueBuilder.setCurrent(2)
+					.setInt64Arg(((Date) value).getTime()).build());
+			break;
+		case Single:
+		case Double:
+			builder.setValue(valueBuilder.setCurrent(3)
+					.setDoubleArg(Double.parseDouble(value.toString()))
+					.build());
+			break;
+		case String:
+		case Decimal:
+			builder.setValue(valueBuilder.setCurrent(4)
+					.setStringArg(value.toString()).build());
+			break;
+		default:
+			builder.setValue(valueBuilder.setCurrent(4)
+					.setStringArg(value.toString()).build());
+			break;
 		}
 
-		public static Builder create() {
-			return new Builder();
-		}
-
-		public static Builder set(int index, int sqlType, Object value) {
-			Builder builder = new Builder();
-			
-			builder.index_ = index;
-			builder.sqlType_ = sqlType;
-			builder.value_ = value;
-			builder.direction_ = ParameterDirection.Input;
-			
-			return builder;
-		}
-		
-		public static Builder set(int index, Object value) {
-			Builder builder = new Builder();
-			
-			builder.index_ = index;
-			builder.defaultType_ = true;
-			builder.value_ = value;
-			builder.direction_ = ParameterDirection.Input;
-			
-			return builder;
-		}
-		
-		public static Builder set(String name, int sqlType, Object value) {
-			Builder builder = new Builder();
-			
-			builder.index_ = -1;
-			builder.name_ = name;
-			builder.sqlType_ = sqlType;
-			builder.value_ = value;
-			builder.direction_ = ParameterDirection.Input;
-			
-			return builder;
-		}
-		
-		public static Builder registerInOut(String name, int sqlType, Object value) {
-			Builder builder = new Builder();
-			
-			builder.index_ = -1;
-			builder.sqlType_ = sqlType;
-			builder.name_ = name;
-			builder.value_ = value;
-			builder.direction_ = ParameterDirection.InputOutput;
-			
-			return builder;
-		}
-		
-		public static Builder registerOut(String name, int sqlType) {
-			Builder builder = new Builder();
-			
-			builder.index_ = -1;
-			builder.sqlType_ = sqlType;
-			builder.name_ = name;
-			builder.direction_ = ParameterDirection.Output;
-			
-			return builder;
-		}
-		
-		private boolean defaultType_;
-		
-		private DbType dbType_;
-		
-		private int sqlType_;
-
-		private ParameterDirection direction_;
-
-		private boolean nullable_;
-
-		private String name_;
-
-		private int index_;
-
-		private boolean sensitive_;
-
-		private Object value_;
-		
-		private boolean resultsParameter_;
-		private DalResultSetExtractor<?> resultSetExtractor_;
-		
-		public Builder setSqlType(int sqlType) {
-			sqlType_ = sqlType;
-			return this;
-		}
-		
-
-		public Builder setDirection(ParameterDirection direction) {
-			direction_ = direction;
-			return this;
-		}
-
-		public Builder setNullable(boolean nullable) {
-			nullable_ = nullable;
-			return this;
-		}
-
-		public Builder setName(String name) {
-			name_ = name;
-			return this;
-		}
-
-		public Builder setIndex(int index) {
-			index_ = index;
-			return this;
-		}
-
-		public Builder setSensitive(boolean sensitive) {
-			sensitive_ = sensitive;
-			return this;
-		}
-
-		public Builder setValue(Object value) {
-			value_ = value;
-			return this;
-		}
-		
-		public Builder setResultsParameter(boolean resultsParameter) {
-			resultsParameter_ = resultsParameter;
-			return this;
-		}
-
-		public Builder setResultSetExtractor(DalResultSetExtractor<?> resultSetExtractor) {
-			resultSetExtractor_ = resultSetExtractor;
-			return this;
-		}
-
-		public Builder setDefaultType(boolean defaultType){
-			defaultType_ = defaultType;
-			return this;
-		}
-		
-		public StatementParameter build() {
-			return new StatementParameter(this);
-		}
-
-		DasProto.SqlParameters build2SqlParameters() {
-
-			DasProto.SqlParameters.Builder builder = DasProto.SqlParameters
-					.newBuilder();
-			builder.setDbType(dbType_.getIntVal());
-			builder.setDirection(direction_.getIntVal());
-			builder.setIsNull(nullable_);
-			builder.setName(name_);
-			builder.setIndex(index_);
-			builder.setSensitive(sensitive_);
-
-			DasProto.AvailableType.Builder valueBuilder = DasProto.AvailableType
-					.newBuilder();
-
-			switch (dbType_) {
-			case Binary:
-				builder.setValue(valueBuilder.setCurrent(5)
-						.setBytesArg(ByteString.copyFrom((byte[]) value_))
-						.build());
-				break;
-			case Boolean:
-				builder.setValue(valueBuilder.setCurrent(0)
-						.setBoolArg(Boolean.parseBoolean(value_.toString()))
-						.build());
-				break;
-			case Byte:
-			case SByte:
-			case Int16:
-			case Int32:
-			case UInt16:
-			case UInt32:
-			case StringFixedLength:
-				builder.setValue(valueBuilder.setCurrent(1)
-						.setInt32Arg(Integer.parseInt(value_.toString()))
-						.build());
-				break;
-			case Int64:
-			case UInt64:
-				builder.setValue(valueBuilder.setCurrent(2)
-						.setInt64Arg(Long.parseLong(value_.toString())).build());
-				break;
-			case DateTime:
-				builder.setValue(valueBuilder.setCurrent(2)
-						.setInt64Arg(((Date) value_).getTime()).build());
-				break;
-			case Single:
-			case Double:
-				builder.setValue(valueBuilder.setCurrent(3)
-						.setDoubleArg(Double.parseDouble(value_.toString()))
-						.build());
-				break;
-			case String:
-			case Decimal:
-				builder.setValue(valueBuilder.setCurrent(4)
-						.setStringArg(value_.toString()).build());
-				break;
-			default:
-				builder.setValue(valueBuilder.setCurrent(4)
-						.setStringArg(value_.toString()).build());
-				break;
-			}
-
-			return builder.build();
-		}
+		return builder.build();
 	}
 
 	@Override
 	public int compareTo(StatementParameter o) {
-		return this.currentBuilder.index_ - o.currentBuilder.index_;
+		return this.index - o.index;
 	}
 }

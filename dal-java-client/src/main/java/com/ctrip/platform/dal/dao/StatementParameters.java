@@ -158,6 +158,8 @@ public class StatementParameters {
 		int i = 0;
 		for(StatementParameter p: tmpParameters) {
 			if(p.isInParam()) {
+				// Remove the original
+				parameters.remove(p);
 				List<?> values = p.getValue();
 				for(Object val : values) {
 					parameters.add(i, new StatementParameter(p).setIndex((i+1)).setInParam(false));

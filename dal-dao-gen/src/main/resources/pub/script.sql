@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS `login_users` (
 	,`user_no` VARCHAR(45) NULL DEFAULT NULL
 	,`user_name` VARCHAR(45) NULL DEFAULT NULL
 	,`user_email` VARCHAR(45) NULL DEFAULT NULL
+	,`password` VARCHAR(128) NULL DEFAULT NULL
 	,PRIMARY KEY (`id`)
 	,UNIQUE INDEX `user_no_UNIQUE`(`user_no`)
 	);

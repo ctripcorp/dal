@@ -11,9 +11,6 @@ public class StatementParameters {
 	
 	private List<StatementParameter> parameters = new LinkedList<StatementParameter>();
 
-	// Set when there is IN parameter
-	private boolean hasInParameter = false;
-	
 	public StatementParameters add(StatementParameter parameter) {
 		parameters.add(parameter);
 		return this;
@@ -73,7 +70,6 @@ public class StatementParameters {
 	
 	public int setInParameter(int index, String name, int sqlType, List<?> values, boolean sensitive) {
 		add(new StatementParameter(index++, sqlType, values).setName(name).setSensitive(sensitive).setInParam(true));
-		hasInParameter = true;
 		return index;
 	}
 	
@@ -145,12 +141,17 @@ public class StatementParameters {
 	 * Expand in parameters if necessary. This must be executed before execution
 	 */
 	public void compile() {
-		//There is no IN parameter
-		if(!hasInParameter)
+		boolean hasInParam = false;
+		for(StatementParameter p: parameters)
+			if(p.isInParam())
+				hasInParam = true;
+
+		if(!hasInParam)
 			return;
 		
 		//To be safe, order parameters by original index
 		Collections.sort(parameters);
+
 		// Make a copy of original parameters
 		List<StatementParameter> tmpParameters = new LinkedList<StatementParameter>(parameters);
 
@@ -162,7 +163,7 @@ public class StatementParameters {
 				parameters.remove(p);
 				List<?> values = p.getValue();
 				for(Object val : values) {
-					parameters.add(i, new StatementParameter(p).setIndex((i+1)).setInParam(false));
+					parameters.add(i, new StatementParameter(p).setIndex((i+1)).setInParam(false).setValue(val));
 					i++;
 				}
 			}else {

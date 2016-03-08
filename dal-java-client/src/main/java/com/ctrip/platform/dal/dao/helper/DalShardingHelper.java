@@ -162,7 +162,7 @@ public class DalShardingHelper {
 			String tmpShardId = strategy.locateDbShard(config, logicDbName, tmpHints.setShardValue(value));
 			// If this can not be located
 			if(tmpShardId == null)
-				return null;
+				throw new NullPointerException("Can not locate shard id for " + value);
 			
 			dbSet.validate(tmpShardId);
 

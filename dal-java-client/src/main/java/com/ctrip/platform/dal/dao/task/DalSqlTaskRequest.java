@@ -18,7 +18,6 @@ import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalLogger;
-import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
@@ -34,7 +33,8 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	private Set<String> shards;
 	private Map<String, List<?>> parametersByShard;
 	
-	public DalSqlTaskRequest(String logicDbName, String sql, StatementParameters parameters, DalHints hints, SqlTask<T> task, ResultMerger<T> merger) {
+	public DalSqlTaskRequest(String logicDbName, String sql, StatementParameters parameters, DalHints hints, SqlTask<T> task, ResultMerger<T> merger)
+			 throws SQLException {
 		logger = DalClientFactory.getDalLogger();
 		this.logicDbName = logicDbName;
 		this.sql = sql;
@@ -42,6 +42,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		this.hints = hints;
 		this.task = task;
 		this.merger = merger;
+		shards = getShards();
 	}
 	
 	@Override
@@ -49,7 +50,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		if(sql == null)
 			throw new DalException(ErrorCode.ValidateSql);
 		
-		detectDistributedTransaction(shards = getShards());
+		detectDistributedTransaction(shards);
 	}
 
 	@Override
@@ -70,6 +71,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	@Override
 	public Map<String, Callable<T>> createTasks() throws SQLException {
 		Map<String, Callable<T>> tasks = new HashMap<>();
+		
 		if(parametersByShard == null) {
 			// Create by given shards
 			for(String shard: shards) {
@@ -78,10 +80,11 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		}else{
 			// Create by sharded values
 			for(Map.Entry<String, ?> shard: parametersByShard.entrySet()) {
-				StatementParameters tempParameters = parameters.duplicateWith(shard.getKey(), (List)shard.getValue());
+				StatementParameters tempParameters = parameters.duplicateWith(hints.getShardBy(), (List)shard.getValue());
 				tasks.put(shard.getKey(), new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), sql, tempParameters, hints.clone().inShard(shard.getKey()), task));
 			}
 		}
+		
 		return tasks;
 	}
 
@@ -96,22 +99,18 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 			return null;
 		
 		if(hints.isAllShards()) {
-			DatabaseSet set = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName);
-			shards = set.getAllShards();
-			logger.warn("Execute on all shards detected: " + sql);
+			shards = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getAllShards();
 		} else if(hints.isInShards()){
 			shards = (Set<String>)hints.get(DalHintEnum.shards);
-			logger.warn("Execute on multiple shards detected: " + sql);
 		} else if(hints.isShardBy()){
-			String shardColName = hints.getShardBy();
 			// Check parameters. It can only surpport DB shard at this level
-			StatementParameter parameter = parameters.get(shardColName, ParameterDirection.Input);
-			if(parameter.getValue() instanceof List) {
-				parametersByShard = DalShardingHelper.shuffle(logicDbName, (List)parameter.getValue());
-				if(parametersByShard != null)
-					return parametersByShard.keySet();
-			}
+			StatementParameter parameter = parameters.get(hints.getShardBy(), ParameterDirection.Input);
+			parametersByShard = DalShardingHelper.shuffle(logicDbName, (List)parameter.getValue());
+			shards = parametersByShard.keySet();
 		}
+		
+		if(shards != null && shards.size() > 1)
+			logger.warn("Execute on multiple shards detected: " + sql);
 		
 		return shards;
 	}
@@ -126,9 +125,11 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		public SqlTaskCallable(DalClient client, String sql, StatementParameters parameters, DalHints hints, SqlTask<T> task){
 			this.client = client;
 			this.sql = sql;
-			this.parameters = parameters;
 			this.hints = hints;
-			this.task = task;			
+			this.task = task;
+
+			this.parameters = parameters;
+			parameters.compile();
 		}
 
 		@Override

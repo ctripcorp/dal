@@ -7,7 +7,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -56,7 +59,7 @@ public class DalSqlTaskRequestTest {
 	}
 
 	@Test
-	public void testIsCrossShard() {
+	public void testIsCrossShard() throws SQLException {
 		DalSqlTaskRequest<Integer> test = null;
 		
 		DalHints hints = new DalHints();
@@ -78,7 +81,7 @@ public class DalSqlTaskRequestTest {
 	}
 
 	@Test
-	public void testCreateTask() {
+	public void testCreateTask() throws SQLException {
 		DalSqlTaskRequest<Integer> test = null;
 		
 		DalHints hints = new DalHints();
@@ -96,6 +99,7 @@ public class DalSqlTaskRequestTest {
 		DalSqlTaskRequest<Integer> test = null;
 		
 		try {
+			// In all shards
 			DalHints hints = new DalHints();
 			hints = new DalHints();
 			hints.inAllShards();
@@ -108,17 +112,43 @@ public class DalSqlTaskRequestTest {
 			assertEquals(2, i);
 
 			
+			// In shards
 			hints = new DalHints();
 			Set<String> shards = new HashSet<>();
 			shards.add("0");
 			shards.add("1");
-			hints.inAllShards();
+			hints.inShards(shards);
 			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "", new StatementParameters(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
+			tasks = test.createTasks();
 			i = 0;
 			for(Callable<Integer> task: tasks.values()){
 				i += task.call().intValue();
 			}
 			assertEquals(2, i);
+			
+			// Shard by in parameter
+			hints = new DalHints();
+			hints.shardBy("index");
+			StatementParameters p = new StatementParameters();
+			p.set(1, 1);
+			
+			List<Integer> l = new ArrayList<>();
+			l.add(1);
+			l.add(2);
+			l.add(3);
+			l.add(4);
+			
+			p.setInParameter(2, "index", Types.INTEGER, l);
+			p.set(3, 1);
+			
+			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "", p, hints, new TestSqlTask(1), new ResultMerger.IntSummary());
+			tasks = test.createTasks();
+			i = 0;
+			for(Callable<Integer> task: tasks.values()){
+				i += task.call().intValue();
+			}
+			assertEquals(2, i);
+			
 		} catch (Exception e) {
 			fail();
 		}
@@ -127,7 +157,7 @@ public class DalSqlTaskRequestTest {
 	}
 
 	@Test
-	public void testGetMerger() {
+	public void testGetMerger() throws SQLException {
 		DalSqlTaskRequest<Integer> test = null;
 		
 		DalHints hints = new DalHints();

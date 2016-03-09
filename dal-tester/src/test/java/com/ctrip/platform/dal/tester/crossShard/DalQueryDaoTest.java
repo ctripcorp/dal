@@ -57,6 +57,7 @@ public abstract class DalQueryDaoTest {
 	private String sqlObject = "select * from " + TABLE_NAME + " where id = ? and type=0";
 	private String sqlFirst = "select * from " + TABLE_NAME + " where id = ?";
 	private String sqlNoResult = "select * from " + TABLE_NAME + " where id = -1";
+	private String sqlInParam = "select * from " + TABLE_NAME + " where id in (?)";
 	
 	private class TestComparator implements Comparator<Short>{
 		@Override
@@ -108,6 +109,22 @@ public abstract class DalQueryDaoTest {
 				new ShortRowMapper());
 	}
 	
+	 private List<Short> queryListForInParam(DalHints hints) throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		
+		List<Integer> inParam = new ArrayList<>();
+		inParam.add(1);
+		inParam.add(2);
+		inParam.add(3);
+		inParam.add(4);
+		
+		parameters.setInParameter(1, "index", Types.INTEGER, inParam);
+		return new DalQueryDao(DATABASE_NAME).query(
+				sqlInParam, parameters, 
+				hints.shardBy("index"), 
+				new ShortRowMapper());
+	}
+	 
 	@Test
 	public void testQueryListAllShards() {
 		try {
@@ -195,7 +212,20 @@ public abstract class DalQueryDaoTest {
 			fail();
 		}
 	}
-
+	
+	//
+	@Test
+	public void testQueryListInParams() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryListForInParam(hints);
+			assertEquals(6, result.size());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
 	private class ClientTestModelComparator implements Comparator<ClientTestModel>{
 		@Override
 		public int compare(ClientTestModel o1, ClientTestModel o2) {

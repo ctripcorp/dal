@@ -1,11 +1,11 @@
 package com.ctrip.platform.dal.tester.tasks;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -33,6 +33,40 @@ public class BatchInsertTaskTestStub extends TaskTestStub {
 			int[] result = test.execute(hints, getAllMap());
 			assertEquals(3, result.length);
 			assertEquals(6, getCount());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testExecuteWithDiableAutoIncrementalId() {
+		BatchInsertTask<ClientTestModel> test = new BatchInsertTask<>();
+		test.initialize(getParser());
+		DalHints hints = new DalHints().diableAutoIncrementalId();
+		
+		try {
+			Map<Integer, Map<String, ?>> pojos = getAllMap();
+			int i = 111;
+			for(Map<String, ?> pojo: pojos.values()) {
+				((Map)pojo).put("id", new Integer(i++));
+			}
+			
+			int[] result = test.execute(hints, pojos);
+			assertEquals(3, result.length);
+			assertEquals(6, getCount());
+			
+			pojos = getAllMap();
+			Set<Integer> ids = new HashSet<>();
+			
+			for(Map<String, ?> pojo: pojos.values()) {
+				ids.add((Integer)pojo.get("id"));
+			}
+			
+			assertTrue(ids.contains(111));
+			assertTrue(ids.contains(112));
+			assertTrue(ids.contains(113));
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			fail();

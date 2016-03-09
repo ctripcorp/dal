@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
@@ -11,7 +12,8 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 	
 	@Override
 	public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
-		removeAutoIncrementPrimaryFields(fields);
+		if(!hints.is(DalHintEnum.diableAutoIncrementalId))
+			removeAutoIncrementPrimaryFields(fields);
 		
 		String insertSql = buildInsertSql(hints, fields);
 

@@ -315,4 +315,8 @@ public class DalHints {
 		return this;
 	}
 	
+	public DalHints diableAutoIncrementalId() {
+		set(DalHintEnum.diableAutoIncrementalId);
+		return this;
+	}
 }

@@ -19,6 +19,7 @@ import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
+import com.ctrip.platform.dal.dao.helper.SQLParser;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -103,6 +104,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		} else if(hints.isInShards()){
 			shards = (Set<String>)hints.get(DalHintEnum.shards);
 		} else if(hints.isShardBy()){
+			// The new code gen will set hints shardBy to indicate this is a potential cross shard operation
 			// Check parameters. It can only surpport DB shard at this level
 			StatementParameter parameter = parameters.get(hints.getShardBy(), ParameterDirection.Input);
 			parametersByShard = DalShardingHelper.shuffle(logicDbName, (List)parameter.getValue());
@@ -122,13 +124,22 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		private DalHints hints;
 		private SqlTask<T> task;
 
-		public SqlTaskCallable(DalClient client, String sql, StatementParameters parameters, DalHints hints, SqlTask<T> task){
+		public SqlTaskCallable(DalClient client, String sql, StatementParameters parameters, DalHints hints, SqlTask<T> task)
+				throws SQLException {
 			this.client = client;
 			this.sql = sql;
 			this.hints = hints;
 			this.task = task;
-
 			this.parameters = parameters;
+			
+			compile();
+		}
+		
+		private void compile() throws SQLException {
+			if(!parameters.containsInParameter())
+				return;
+			
+			sql = SQLParser.parse(sql, parameters.getAllInParameters());
 			parameters.compile();
 		}
 

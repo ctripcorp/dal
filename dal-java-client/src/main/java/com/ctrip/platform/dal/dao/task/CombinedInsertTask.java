@@ -1,8 +1,10 @@
 package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -20,18 +22,23 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
 
+		List<String> usedValidColumnsForInsert = hints.is(DalHintEnum.diableAutoIncrementalId) ? validColumnsForInsertWithId: validColumnsForInsert;
+		String usedColumnsForInsert = hints.is(DalHintEnum.diableAutoIncrementalId) ? columnsForInsertWithId: columnsForInsert;
+
 		int startIndex = 1;
 		for (Integer index :daoPojos.keySet()) {
 			Map<String, ?> vfields = daoPojos.get(index);
 			
-			removeAutoIncrementPrimaryFields(vfields);
-			int paramCount = addParameters(startIndex, parameters, vfields, validColumnsForInsert);
+			if(!hints.is(DalHintEnum.diableAutoIncrementalId))
+				removeAutoIncrementPrimaryFields(vfields);
+			
+			int paramCount = addParameters(startIndex, parameters, vfields, usedValidColumnsForInsert);
 			startIndex += paramCount;
 			values.append(String.format("(%s),", combine("?", paramCount, ",")));
 		}
 
 		String sql = String.format(TMPL_SQL_MULTIPLE_INSERT,
-				getTableName(hints), columnsForInsert,
+				getTableName(hints), usedColumnsForInsert,
 				values.substring(0, values.length() - 2) + ")");
 
 		KeyHolder keyHolder = hints.getKeyHolder();

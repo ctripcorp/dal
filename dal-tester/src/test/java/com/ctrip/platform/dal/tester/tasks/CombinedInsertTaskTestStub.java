@@ -2,9 +2,13 @@ package com.ctrip.platform.dal.tester.tasks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -38,6 +42,46 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 			hints.setKeyHolder(new KeyHolder());
 		try {
 			test.execute(hints, getAllMap());
+			if(enableKeyHolder){
+				// You have to merge before get size
+				assertEquals(3, hints.getKeyHolder().size());
+			}
+			assertEquals(3+3, getCount());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testExecuteWithId() {
+		CombinedInsertTask<ClientTestModel> test = new CombinedInsertTask<>();
+		test.initialize(new ClientTestDalParser(dbName));
+		DalHints hints = new DalHints().diableAutoIncrementalId();
+		if(enableKeyHolder)
+			hints.setKeyHolder(new KeyHolder());
+		try {
+			Map<Integer, Map<String, ?>> pojos = getAllMap();
+			int i = 111;
+			for(Map<String, ?> pojo: pojos.values()) {
+				((Map)pojo).put("id", new Integer(i++));
+			}
+			
+			int result = test.execute(hints, pojos);
+			assertEquals(3, result);
+			assertEquals(6, getCount());
+			
+			pojos = getAllMap();
+			Set<Integer> ids = new HashSet<>();
+			
+			for(Map<String, ?> pojo: pojos.values()) {
+				ids.add((Integer)pojo.get("id"));
+			}
+			
+			assertTrue(ids.contains(111));
+			assertTrue(ids.contains(112));
+			assertTrue(ids.contains(113));
+				
 			if(enableKeyHolder){
 				// You have to merge before get size
 				assertEquals(3, hints.getKeyHolder().size());

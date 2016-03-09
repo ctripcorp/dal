@@ -169,4 +169,9 @@ public enum DalHintEnum {
 	 * Indicate the futureResult for async execution when queryCallback is not specified
 	 */
 	futureResult,
+	
+	/**
+	 * Disable auto incremental id, do not remove id from pojo
+	 */
+	diableAutoIncrementalId
 }

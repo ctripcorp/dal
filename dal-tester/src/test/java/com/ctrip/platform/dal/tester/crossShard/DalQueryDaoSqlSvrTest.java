@@ -62,12 +62,6 @@ public class DalQueryDaoSqlSvrTest extends DalQueryDaoTest {
 				clientSqlSvr.update(sqls[j], parameters, hints.inShard(i));
 			}
 		}
-		/*
-		String sql = "DECLARE @AAA AS TABLE (ID int,NAME CHAR(20));"+
-				"INSERT INTO @AAA VALUES (1,'AA');"+
-				"SELECT * FROM @AAA;";
-		List<Map<String, Object>> rs = clientSqlSvr.query(sql, parameters, hints, new DalRowMapperExtractor<>(new DalColumnMapRowMapper()));
-		System.out.println(rs);*/
 	}
 
 	@AfterClass

@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -137,16 +138,27 @@ public class StatementParameters {
 		return tempParameters;
 	}
 	
+	public List<List<?>> getAllInParameters() {
+		List<List<?>> inParams = new ArrayList<>();
+		for(StatementParameter parameter: parameters)
+			if(parameter.isInParam())
+				inParams.add((List<?>)parameter.getValue());
+			
+		return inParams;
+	}
+	
+	public boolean containsInParameter() {
+		for(StatementParameter p: parameters)
+			if(p.isInParam())
+				return true;
+		return false;
+	}
+	
 	/**
 	 * Expand in parameters if necessary. This must be executed before execution
 	 */
 	public void compile() {
-		boolean hasInParam = false;
-		for(StatementParameter p: parameters)
-			if(p.isInParam())
-				hasInParam = true;
-
-		if(!hasInParam)
+		if(!containsInParameter())
 			return;
 		
 		//To be safe, order parameters by original index

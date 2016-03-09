@@ -72,7 +72,7 @@ public class ${host.getPojoClassName()}Dao {
 		sql = String.format(PAGE_MYSQL_PATTERN, (pageNo - 1) * pagesize, pagesize);
 #else
 		int fromRownum = (pageNo - 1) * pagesize + 1;
-        int endRownum = pagesize * pageNo;
+        int endRownum = pagesize;
 		sql = String.format(PAGE_SQL_PATTERN, fromRownum, endRownum);
 #end
 		return this.client.query(sql, parameters, hints, extractor);

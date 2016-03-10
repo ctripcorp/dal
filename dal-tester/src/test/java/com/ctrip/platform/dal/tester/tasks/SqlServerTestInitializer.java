@@ -85,4 +85,14 @@ public class SqlServerTestInitializer {
 		DalHints hints = new DalHints();
 		clientSqlSvr.update(sql, parameters, hints);
 	}
+	
+	@Before
+	public static void turnOnIdentityInsert() throws Exception {
+		clientSqlSvr.batchUpdate(new String[]{"SET IDENTITY_INSERT "+ TABLE_NAME + " ON"}, new DalHints());
+	}
+
+	@After
+	public static void turnOffIdentityInsert() throws Exception {
+		clientSqlSvr.batchUpdate(new String[]{"SET IDENTITY_INSERT "+ TABLE_NAME + " OFF"}, new DalHints());
+	}	
 }

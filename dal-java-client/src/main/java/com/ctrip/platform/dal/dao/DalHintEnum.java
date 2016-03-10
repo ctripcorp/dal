@@ -171,7 +171,7 @@ public enum DalHintEnum {
 	futureResult,
 	
 	/**
-	 * Disable auto incremental id, do not remove id from pojo
+	 * allow insert incremental id. So DAL will not remove id from pojo before any of the inser operation
 	 */
-	diableAutoIncrementalId
+	enableIdentityInsert
 }

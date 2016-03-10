@@ -1,6 +1,10 @@
 package com.ctrip.platform.dal.tester.tasks;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -43,9 +47,12 @@ public class BatchInsertTaskTestStub extends TaskTestStub {
 	public void testExecuteWithDiableAutoIncrementalId() {
 		BatchInsertTask<ClientTestModel> test = new BatchInsertTask<>();
 		test.initialize(getParser());
-		DalHints hints = new DalHints().diableAutoIncrementalId();
+		DalHints hints = new DalHints().enableIdentityInsert();
 		
 		try {
+			if(this instanceof BatchInsertTaskSqlSvrTest)
+				SqlServerTestInitializer.turnOnIdentityInsert();
+			
 			Map<Integer, Map<String, ?>> pojos = getAllMap();
 			int i = 111;
 			for(Map<String, ?> pojo: pojos.values()) {
@@ -66,8 +73,10 @@ public class BatchInsertTaskTestStub extends TaskTestStub {
 			assertTrue(ids.contains(111));
 			assertTrue(ids.contains(112));
 			assertTrue(ids.contains(113));
-			
-		} catch (SQLException e) {
+
+			if(this instanceof BatchInsertTaskSqlSvrTest)
+				SqlServerTestInitializer.turnOffIdentityInsert();
+		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
 		}

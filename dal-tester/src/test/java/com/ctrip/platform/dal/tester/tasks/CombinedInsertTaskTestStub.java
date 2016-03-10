@@ -57,18 +57,20 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 	public void testExecuteWithId() {
 		CombinedInsertTask<ClientTestModel> test = new CombinedInsertTask<>();
 		test.initialize(new ClientTestDalParser(dbName));
-		DalHints hints = new DalHints().diableAutoIncrementalId();
+		DalHints hints = new DalHints().enableIdentityInsert();
 		if(enableKeyHolder)
 			hints.setKeyHolder(new KeyHolder());
 		try {
+			if(this instanceof CombinedInsertTaskSqlSvrTest)
+				SqlServerTestInitializer.turnOnIdentityInsert();
+
 			Map<Integer, Map<String, ?>> pojos = getAllMap();
 			int i = 111;
 			for(Map<String, ?> pojo: pojos.values()) {
 				((Map)pojo).put("id", new Integer(i++));
 			}
 			
-			int result = test.execute(hints, pojos);
-			assertEquals(3, result);
+			test.execute(hints, pojos);
 			assertEquals(6, getCount());
 			
 			pojos = getAllMap();
@@ -87,7 +89,10 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 				assertEquals(3, hints.getKeyHolder().size());
 			}
 			assertEquals(3+3, getCount());
-		} catch (SQLException e) {
+			
+			if(this instanceof CombinedInsertTaskSqlSvrTest)
+				SqlServerTestInitializer.turnOffIdentityInsert();
+		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
 		}

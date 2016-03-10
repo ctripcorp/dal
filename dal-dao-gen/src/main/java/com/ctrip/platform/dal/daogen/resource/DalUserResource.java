@@ -82,6 +82,7 @@ public class DalUserResource {
             return status;
         }
 
+        password = MD5Util.parseStrToMd5L32(password);
         LoginUser user = new LoginUser();
         user.setUserNo(userNo);
         user.setUserName(userName);
@@ -242,7 +243,7 @@ public class DalUserResource {
 
     @POST
     @Path("signup")
-    public Status userSignUp(@FormParam("userNo") String userNo, @FormParam("userName") String userName,
+    public Status userSignUp(@Context HttpServletRequest request, @FormParam("userNo") String userNo, @FormParam("userName") String userName,
                              @FormParam("userEmail") String userEmail, @FormParam("password") String password) {
         Status status = Status.ERROR;
         if (userNo == null || userNo.isEmpty()) {
@@ -272,10 +273,11 @@ public class DalUserResource {
         try {
             int result = SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
             if (result < 1) {
-                log.error("创建用户失败");
-                status.setInfo("创建用户失败");
+                log.error("用户创建失败");
+                status.setInfo("用户创建失败");
                 return status;
             }
+            setSession(request, user);
             status = status.OK;
         } catch (Exception e) {
             String message = e.getMessage() == null ? e.toString() : e.getMessage();

@@ -92,6 +92,10 @@ public class DaoOfLoginUser {
     }
 
     public int insertUser(final LoginUser user) {
+        int error = -1;
+        if (user == null || user.getUserNo() == null) {
+            return error;
+        }
         KeyHolder holder = new GeneratedKeyHolder();
         this.jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
@@ -103,7 +107,7 @@ public class DaoOfLoginUser {
                 ps.setString(2, user.getUserName());
                 ps.setString(3, user.getUserEmail());
                 ps.setString(4, user.getPassword());
-                ps.setString(5, user.getPassword());
+                ps.setString(5, user.getUserNo());
                 return ps;
             }
         }, holder);

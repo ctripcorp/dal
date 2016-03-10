@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -22,14 +21,14 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
 
-		List<String> usedValidColumnsForInsert = hints.is(DalHintEnum.diableAutoIncrementalId) ? validColumnsForInsertWithId: validColumnsForInsert;
-		String usedColumnsForInsert = hints.is(DalHintEnum.diableAutoIncrementalId) ? columnsForInsertWithId: columnsForInsert;
+		List<String> usedValidColumnsForInsert = hints.isIdentityInsertDisabled() ? validColumnsForInsert: validColumnsForInsertWithId;
+		String usedColumnsForInsert = hints.isIdentityInsertDisabled() ? columnsForInsert: columnsForInsertWithId;
 
 		int startIndex = 1;
 		for (Integer index :daoPojos.keySet()) {
 			Map<String, ?> vfields = daoPojos.get(index);
 			
-			if(!hints.is(DalHintEnum.diableAutoIncrementalId))
+			if(hints.isIdentityInsertDisabled())
 				removeAutoIncrementPrimaryFields(vfields);
 			
 			int paramCount = addParameters(startIndex, parameters, vfields, usedValidColumnsForInsert);

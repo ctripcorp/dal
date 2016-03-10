@@ -315,8 +315,12 @@ public class DalHints {
 		return this;
 	}
 	
-	public DalHints diableAutoIncrementalId() {
-		set(DalHintEnum.diableAutoIncrementalId);
+	public DalHints enableIdentityInsert() {
+		set(DalHintEnum.enableIdentityInsert);
 		return this;
+	}
+
+	public boolean isIdentityInsertDisabled() {
+		return !is(DalHintEnum.enableIdentityInsert);
 	}
 }

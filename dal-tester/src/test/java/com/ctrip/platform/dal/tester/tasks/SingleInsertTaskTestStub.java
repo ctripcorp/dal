@@ -40,9 +40,12 @@ public class SingleInsertTaskTestStub extends TaskTestStub {
 	public void testExecuteWithId() {
 		SingleInsertTask<ClientTestModel> test = new SingleInsertTask<>();
 		test.initialize(getParser());
-		DalHints hints = new DalHints().diableAutoIncrementalId();
+		DalHints hints = new DalHints().enableIdentityInsert();
 		
 		try {
+			if(this instanceof SingleInsertTaskSqlSvrTest)
+				SqlServerTestInitializer.turnOnIdentityInsert();
+
 			Map<String, ?> pojo = getAllMap().get(0);
 			((Map)pojo).put("id", new Integer(210));
 			int result = test.execute(hints, pojo);
@@ -56,8 +59,10 @@ public class SingleInsertTaskTestStub extends TaskTestStub {
 			}
 			
 			assertTrue(ids.contains(210));
-			
-		} catch (SQLException e) {
+
+			if(this instanceof SingleInsertTaskSqlSvrTest)
+				SqlServerTestInitializer.turnOffIdentityInsert();
+		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
 		}

@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-import sun.org.mozilla.javascript.internal.ast.IfStatement;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 

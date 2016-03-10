@@ -95,7 +95,7 @@ public class DalSqlTaskRequestTest {
 	}
 
 	@Test
-	public void testCreateTasks() {
+	public void testCreateTasksInAllShards() {
 		DalSqlTaskRequest<Integer> test = null;
 		
 		try {
@@ -111,23 +111,43 @@ public class DalSqlTaskRequestTest {
 			}
 			assertEquals(2, i);
 
-			
+		} catch (Exception e) {
+			fail();
+		}
+		
+		assertNotNull(test.getMerger());			
+	}
+
+	@Test
+	public void testCreateTasksInShards() {
+		DalSqlTaskRequest<Integer> test = null;
+		try {
 			// In shards
-			hints = new DalHints();
+			DalHints hints = new DalHints();
 			Set<String> shards = new HashSet<>();
 			shards.add("0");
 			shards.add("1");
 			hints.inShards(shards);
 			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "", new StatementParameters(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
-			tasks = test.createTasks();
-			i = 0;
+			Map<String, Callable<Integer>> tasks = test.createTasks();
+			int i = 0;
 			for(Callable<Integer> task: tasks.values()){
 				i += task.call().intValue();
 			}
 			assertEquals(2, i);
+		} catch (Exception e) {
+			fail();
+		}
+		
+		assertNotNull(test.getMerger());			
+	}
 			
+	@Test
+	public void testCreateTasksByInParameters() {
+		DalSqlTaskRequest<Integer> test = null;
+		try {
 			// Shard by in parameter
-			hints = new DalHints();
+			DalHints hints = new DalHints();
 			hints.shardBy("index");
 			StatementParameters p = new StatementParameters();
 			p.set(1, 1);
@@ -142,8 +162,8 @@ public class DalSqlTaskRequestTest {
 			p.set(3, 1);
 			
 			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "", p, hints, new TestSqlTask(1), new ResultMerger.IntSummary());
-			tasks = test.createTasks();
-			i = 0;
+			Map<String, Callable<Integer>> tasks = test.createTasks();
+			int i = 0;
 			for(Callable<Integer> task: tasks.values()){
 				i += task.call().intValue();
 			}

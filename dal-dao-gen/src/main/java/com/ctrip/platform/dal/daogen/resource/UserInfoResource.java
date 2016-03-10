@@ -8,8 +8,14 @@ import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.UserInfo;
 import com.ctrip.platform.dal.daogen.entity.DefaultUserInfo;
 
+import javax.annotation.Resource;
+import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 public class UserInfoResource {
     private UserInfoResource() {
@@ -29,7 +35,10 @@ public class UserInfoResource {
     private static final String USER_INFO_CLASS_NAME = "userinfo_class";
 
     private static UserInfo userInfo = null;
-    private static final String DEFAULT_USER_INFO = "com.ctrip.platform.dal.daogen.entity.DefaultUserInfo";
+
+    public static boolean isDefaultInstance() {
+        return userInfo instanceof DefaultUserInfo;
+    }
 
     static {
         try {
@@ -94,4 +103,5 @@ public class UserInfoResource {
     public void logOut(HttpServletRequest request, HttpServletResponse response) {
         userInfo.logOut(request, response);
     }
+
 }

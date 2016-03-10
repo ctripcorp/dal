@@ -51,6 +51,9 @@ public class DaoOfLoginUser {
     }
 
     public LoginUser getUserByNo(String userNo) {
+        if (userNo == null || userNo.isEmpty()) {
+            return null;
+        }
         try {
             return this.jdbcTemplate.queryForObject(
                     "SELECT id, user_no, user_name, user_email, password FROM login_users WHERE user_no = ?",

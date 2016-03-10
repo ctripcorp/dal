@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.daogen.entity;
 
+import sun.org.mozilla.javascript.internal.ast.IfStatement;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -20,6 +22,9 @@ public class LoginUser {
     private boolean isDalTeam = false;// true:是DAL Team，false:是正常用户
 
     public static LoginUser visitRow(ResultSet rs) throws SQLException {
+        if (rs == null) {
+            return null;
+        }
         LoginUser user = new LoginUser();
         user.setId(rs.getInt(1));
         user.setUserNo(rs.getString(2));

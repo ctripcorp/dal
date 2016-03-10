@@ -1,5 +1,5 @@
-(function () {
-    var checkSetupDb = function () {
+(function (window, document, undefined) {
+    function checkSetupDb() {
         cblock($("body"));
         $.get("/rest/setupDb/setupDbCheck", {rand: Math.random()}).done(function (data) {
             if (data.code != "OK") {
@@ -38,35 +38,50 @@
         });
     };
 
-    $(window).load(function () {
-        var href = location.href;
-        $("li[class='active']").removeClass("active");
-        if (href.indexOf("codeview") != -1) {
-            $("#codeviewjsp").addClass("active");
-        } else if (href.indexOf("membermanage") != -1) {
-            $("#membermanagejsp").addClass("active");
-        } else if (href.indexOf("dbmanage") != -1 || href.indexOf("dbsetsmanage") != -1 || href.indexOf("dbview") != -1) {
-            $("#dbmanagejsp").addClass("active");
-        } else if (href.indexOf("eventmanage") != -1) {
-            $("#eventmanagejsp").addClass("active");
-        } else if (href.indexOf("groupmanage") != -1) {
-            $("#groupmanagejsp").addClass("active");
-        } else if (href.indexOf("usermanage") != -1) {
-            $("#usermanagejsp").addClass("active");
-        } else if (href.indexOf("welcome") != -1) {
-            $("#welcomejsp").addClass("active");
-        } else {
-            $("#indexjsp").addClass("active");
-        }
+    function connectionTest(successInfo) {
+        $("#setup_error_msg").html("正在连接数据库，请稍等...");
+        var dbType = $("#setupdbtype").val();
+        var dbAddress = $("#setupdbaddress").val();
+        var dbPort = $("#setupdbport").val();
+        var dbUser = $("#setupdbuser").val();
+        var dbPassword = $("#setupdbpassword").val();
+        cblock($("body"));
+        $.post("/rest/setupDb/connectionTest", {
+            "dbtype": dbType,
+            "dbaddress": dbAddress,
+            "dbport": dbPort,
+            "dbuser": dbUser,
+            "dbpassword": dbPassword
+        }, function (data) {
+            if (data.code == "OK") {
+                var allCatalog = [];
+                $.each($.parseJSON(data.info), function (index, value) {
+                    allCatalog.push({
+                        id: value,
+                        title: value
+                    });
+                });
+                $("#setupdbcatalog")[0].selectize.clearOptions();
+                $("#setupdbcatalog")[0].selectize.addOption(allCatalog);
+                $("#setupdbcatalog")[0].selectize.refreshOptions(false);
+                $("#setup_error_msg").html(successInfo);
+            } else {
+                $("#setup_error_msg").html(data.info);
+            }
+            $("body").unblock();
+        }).fail(function (data) {
+            $("#setup_error_msg").text(data);
+            $("body").unblock();
+        });
+    };
 
-        var options = {
-            animation: true,
-            trigger: 'hover',
-            html: true
-        };
-
-        $('[data-toggle="tooltip"]').tooltip(options);
-    });
+    function checkInstance() {
+        $.get("/rest/user/isDefault", {rand: Math.random()}, function (data) {
+            if (data == "true") {
+                $("#usermanagejsp").show();
+            }
+        });
+    }
 
     $(function () {
         var Sys = {};
@@ -99,6 +114,34 @@
             scan = "您使用的是safari内核" + Sys.safari + "浏览器，建议您使用chrome浏览器";
             alert(scan);
         }
+
+        var href = window.location.href;
+        $("li[class='active']").removeClass("active");
+        if (href.indexOf("codeview") != -1) {
+            $("#codeviewjsp").addClass("active");
+        } else if (href.indexOf("membermanage") != -1) {
+            $("#membermanagejsp").addClass("active");
+        } else if (href.indexOf("dbmanage") != -1 || href.indexOf("dbsetsmanage") != -1 || href.indexOf("dbview") != -1) {
+            $("#dbmanagejsp").addClass("active");
+        } else if (href.indexOf("eventmanage") != -1) {
+            $("#eventmanagejsp").addClass("active");
+        } else if (href.indexOf("groupmanage") != -1) {
+            $("#groupmanagejsp").addClass("active");
+        } else if (href.indexOf("usermanage") != -1) {
+            $("#usermanagejsp").addClass("active");
+        } else if (href.indexOf("welcome") != -1) {
+            $("#welcomejsp").addClass("active");
+        } else {
+            $("#indexjsp").addClass("active");
+        }
+
+        var options = {
+            animation: true,
+            trigger: 'hover',
+            html: true
+        };
+
+        $('[data-toggle="tooltip"]').tooltip(options);
 
         $(document.body).on("click", "#setup_conn_test", function () {
             connectionTest("connection successful");
@@ -206,47 +249,11 @@
             });
         });
 
-        var connectionTest = function (successInfo) {
-            $("#setup_error_msg").html("正在连接数据库，请稍等...");
-            var dbType = $("#setupdbtype").val();
-            var dbAddress = $("#setupdbaddress").val();
-            var dbPort = $("#setupdbport").val();
-            var dbUser = $("#setupdbuser").val();
-            var dbPassword = $("#setupdbpassword").val();
-            cblock($("body"));
-            $.post("/rest/setupDb/connectionTest", {
-                "dbtype": dbType,
-                "dbaddress": dbAddress,
-                "dbport": dbPort,
-                "dbuser": dbUser,
-                "dbpassword": dbPassword
-            }, function (data) {
-                if (data.code == "OK") {
-                    var allCatalog = [];
-                    $.each($.parseJSON(data.info), function (index, value) {
-                        allCatalog.push({
-                            id: value,
-                            title: value
-                        });
-                    });
-                    $("#setupdbcatalog")[0].selectize.clearOptions();
-                    $("#setupdbcatalog")[0].selectize.addOption(allCatalog);
-                    $("#setupdbcatalog")[0].selectize.refreshOptions(false);
-                    $("#setup_error_msg").html(successInfo);
-                } else {
-                    $("#setup_error_msg").html(data.info);
-                }
-                $("body").unblock();
-            }).fail(function (data) {
-                $("#setup_error_msg").text(data);
-                $("body").unblock();
-            });
-        };
-
         // check setup db
         checkSetupDb();
+        checkInstance();
     });
-})();
+})(window, document);
 
 (function ($) {
     $.extend({

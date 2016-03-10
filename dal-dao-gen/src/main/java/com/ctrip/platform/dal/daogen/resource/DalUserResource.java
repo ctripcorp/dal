@@ -17,6 +17,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import com.ctrip.platform.dal.daogen.Consts;
+import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import org.apache.log4j.Logger;
 
@@ -286,4 +287,20 @@ public class DalUserResource {
         return status;
     }
 
+    @GET
+    @Path("isSuperUser")
+    @Produces(MediaType.APPLICATION_JSON)
+    public boolean isSuperUser(@Context HttpServletRequest request) {
+        String userNo = RequestUtil.getUserNo(request);
+        return DalGroupResource.validate(userNo);
+    }
+
+    @GET
+    @Path("isDefault")
+    public boolean isDefaultInstance(@Context HttpServletRequest request) {
+        boolean result = true;
+        result &= isSuperUser(request);
+        result &= UserInfoResource.isDefaultInstance();
+        return result;
+    }
 }

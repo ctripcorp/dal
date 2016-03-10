@@ -1,10 +1,10 @@
-(function (window, undefined) {
+(function (window, document, undefined) {
     var Render = function () {
     };
 
     var showConfigTemplateButton = function () {
-        $.get("/rest/group/isSuperUser", {rand: Math.random()}).done(function (data) {
-            if (data.info == "false") {
+        $.get("/rest/user/isSuperUser", {rand: Math.random()}).done(function (data) {
+            if (data == "false") {
                 $("#tb_grid_toolbar_item_configTemplate").hide();
             }
         });
@@ -769,4 +769,4 @@
             updateConfigTemplate();
         });
     });
-})(window);
+})(window, document);

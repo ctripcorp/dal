@@ -161,7 +161,7 @@ public class DalSqlTaskRequestTest {
 			p.setInParameter(2, "index", Types.INTEGER, l);
 			p.set(3, 1);
 			
-			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "", p, hints, new TestSqlTask(1), new ResultMerger.IntSummary());
+			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "select * from tablea where id = ? and id in (?) and id = ?", p, hints, new TestSqlTask(1), new ResultMerger.IntSummary());
 			Map<String, Callable<Integer>> tasks = test.createTasks();
 			int i = 0;
 			for(Callable<Integer> task: tasks.values()){

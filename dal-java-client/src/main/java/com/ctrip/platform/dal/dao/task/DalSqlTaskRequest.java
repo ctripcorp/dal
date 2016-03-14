@@ -136,10 +136,11 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		}
 		
 		private void compile() throws SQLException {
+			// If there is no in clause, just return
 			if(!parameters.containsInParameter())
 				return;
 			
-			sql = SQLParser.parse(sql, parameters.getAllInParameters());
+			sql = SQLParser.compile(sql, parameters.getAllInParameters());
 			parameters.compile();
 		}
 

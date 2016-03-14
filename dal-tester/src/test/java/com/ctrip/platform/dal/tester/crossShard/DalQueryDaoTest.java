@@ -57,7 +57,7 @@ public abstract class DalQueryDaoTest {
 	private String sqlObject = "select * from " + TABLE_NAME + " where id = ? and type=0";
 	private String sqlFirst = "select * from " + TABLE_NAME + " where id = ?";
 	private String sqlNoResult = "select * from " + TABLE_NAME + " where id = -1";
-	private String sqlInParam = "select * from " + TABLE_NAME + " where id in (?)";
+	private String sqlInParam = "select * from " + TABLE_NAME + " where type in (?)";
 	
 	private class TestComparator implements Comparator<Short>{
 		@Override
@@ -109,22 +109,6 @@ public abstract class DalQueryDaoTest {
 				new ShortRowMapper());
 	}
 	
-	 private List<Short> queryListForInParam(DalHints hints) throws SQLException {
-		StatementParameters parameters = new StatementParameters();
-		
-		List<Integer> inParam = new ArrayList<>();
-		inParam.add(1);
-		inParam.add(2);
-		inParam.add(3);
-		inParam.add(4);
-		
-		parameters.setInParameter(1, "index", Types.INTEGER, inParam);
-		return new DalQueryDao(DATABASE_NAME).query(
-				sqlInParam, parameters, 
-				hints.shardBy("index"), 
-				new ShortRowMapper());
-	}
-	 
 	@Test
 	public void testQueryListAllShards() {
 		try {
@@ -190,6 +174,31 @@ public abstract class DalQueryDaoTest {
 			DalHints hints = new DalHints();
 			List<Short> result = queryListInAllShard(hints.sortBy(new TestComparator()));
 			assertEquals(6, result.size());
+
+			Short t = result.get(0);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)1), t);
+			
+			t = result.get(1);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)1), t);
+
+			t = result.get(2);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)2), t);
+
+			t = result.get(3);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)2), t);
+
+			t = result.get(4);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)3), t);
+
+			t = result.get(5);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)3), t);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -207,13 +216,56 @@ public abstract class DalQueryDaoTest {
 			result = fr.get();
 			
 			assertEquals(6, result.size());
+			
+			Short t = result.get(0);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)1), t);
+			
+			t = result.get(1);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)1), t);
+
+			t = result.get(2);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)2), t);
+
+			t = result.get(3);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)2), t);
+
+			t = result.get(4);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)3), t);
+
+			t = result.get(5);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)3), t);
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
 		}
 	}
 	
-	//
+	// Test in parameters
+	 private List<Short> queryListForInParam(DalHints hints) throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		
+		List<Integer> inParam = new ArrayList<>();
+		inParam.add(0);
+		inParam.add(1);
+		inParam.add(2);
+		inParam.add(3);
+		inParam.add(4);
+		
+		parameters.setInParameter(1, "type", Types.INTEGER, inParam);
+		return new DalQueryDao(DATABASE_NAME).query(
+				sqlInParam, parameters, 
+				hints.shardBy("type"), 
+				new ShortRowMapper());
+	}
+	 
 	@Test
 	public void testQueryListInParams() {
 		try {
@@ -226,6 +278,134 @@ public abstract class DalQueryDaoTest {
 		}
 	}
 	
+	@Test
+	public void testQueryListInParamsAsync() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryListForInParam(hints.asyncExecution());
+			
+			assertNull(result);
+			Future<List<Short>> fr = (Future<List<Short>>)hints.getAsyncResult();
+			result = fr.get();
+			
+			Short s = result.get(0);
+			assertEquals(6, fr.get().size());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryListInParamsWithMerger() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryListForInParam(hints.mergeBy(new TestResultMerger()));
+			Short t = result.get(0);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)3), t);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryListInParamsWithMergerAsync() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryListForInParam(hints.mergeBy(new TestResultMerger()).asyncExecution());
+
+			assertNull(result);
+			Future<List<Short>> fr = (Future<List<Short>>)hints.getAsyncResult();
+			result = fr.get();
+			
+			Short t = result.get(0);
+			assertEquals(new Short((short)3), t);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryListInParamsWithSorter() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryListForInParam(hints.sortBy(new TestComparator()));
+			Short t = result.get(0);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)1), t);
+			
+			t = result.get(1);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)1), t);
+
+			t = result.get(2);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)2), t);
+
+			t = result.get(3);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)2), t);
+
+			t = result.get(4);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)3), t);
+
+			t = result.get(5);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)3), t);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testQueryListInParamsWithSorterAsync() {
+		try {
+			DalHints hints = new DalHints();
+			List<Short> result = queryListForInParam(hints.sortBy(new TestComparator()).asyncExecution());
+
+			assertNull(result);
+			Future<List<Short>> fr = (Future<List<Short>>)hints.getAsyncResult();
+			result = fr.get();
+			
+			Short t = result.get(0);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)1), t);
+			
+			t = result.get(1);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)1), t);
+
+			t = result.get(2);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)2), t);
+
+			t = result.get(3);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)2), t);
+
+			t = result.get(4);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)3), t);
+
+			t = result.get(5);
+			assertEquals(6, result.size());
+			assertEquals(new Short((short)3), t);
+
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+		
 	private class ClientTestModelComparator implements Comparator<ClientTestModel>{
 		@Override
 		public int compare(ClientTestModel o1, ClientTestModel o2) {

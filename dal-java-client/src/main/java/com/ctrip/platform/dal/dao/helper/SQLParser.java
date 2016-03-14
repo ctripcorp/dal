@@ -8,12 +8,28 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.ctrip.platform.dal.dao.DalClientFactory;
+
 public class SQLParser {
 	private static String regEx = null;
 	private static Pattern inRegxPattern = null;
 	static{
 		 regEx="(?i)In *\\(? *\\? *\\)?";
 		 inRegxPattern = Pattern.compile(regEx);
+	}
+	
+	/**
+	 * To disable the original expand logic before shard by in parameters
+	 * @deprecated The new code gen will not include generation of this invocation
+	 * @return just the original sql
+	 * @throws SQLException
+	 */
+	public static String parse(String original, List... parms) throws SQLException
+	{
+		DalClientFactory.getDalLogger().warn(
+				"In case you see this message, you are using old generated code. Please regenerate code or just remove the invocation of this method from the generated code.");
+
+		return original;
 	}
 	
 	/**
@@ -27,9 +43,9 @@ public class SQLParser {
 	 * 		Combined SQL
 	 * @throws SQLException
 	 */
-	public static String parse(String original, List... parms) throws SQLException
+	public static String compile(String original, List<List<?>> parms) throws SQLException
 	{
-		if(null == parms || parms.length == 0)
+		if(null == parms || parms.size() == 0)
 			return original;
 		StringBuffer temp = new StringBuffer();
 		Matcher m = inRegxPattern.matcher(original);
@@ -42,15 +58,15 @@ public class SQLParser {
     	}
 		plains.add(original.substring(start, original.length()));
 		
-		if(plains.size() != parms.length + 1){
+		if(plains.size() != parms.size() + 1){
 			throw new SQLException(String.format("SQL Parser failed. The count of in parameters[%s] not match parameter count[%s]", 
-					plains.size() - 1, parms.length));
+					plains.size() - 1, parms.size()));
 		}
 		
 		int index = 0;
-		for (; index < parms.length; index++) {
-			List<String> qus = new ArrayList<String>(parms[index].size());
-			for(int j = 0; j < parms[index].size(); j ++)
+		for (; index < parms.size(); index++) {
+			List<String> qus = new ArrayList<String>(parms.get(index).size());
+			for(int j = 0; j < parms.get(index).size(); j ++)
 				qus.add("?");
 			temp.append(plains.get(index))
 				.append(String.format("In (%s)", StringUtils.join(qus, ",")))
@@ -59,19 +75,5 @@ public class SQLParser {
 		temp.append(plains.get(index));
 		
 		return temp.toString();
-	}
-	
-	public static void main(String[] args) throws SQLException
-	{
-		String sql = "SELECT * FROM Person WHERE ID In ? AND Age In( ?)And Age BETWEEN ? AND ? ";
-		List<String> param = new ArrayList<String>();
-		param.add("1");
-		param.add("2");
-		
-		String parseSql = SQLParser.parse(sql, param, param);
-		
-		System.out.println(parseSql);
-		
-		System.exit(1);
 	}
 }

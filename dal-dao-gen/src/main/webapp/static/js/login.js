@@ -1,4 +1,4 @@
-(function (window, undefined) {
+(function ($, window, undefined) {
     function showTooltip(obj, text) {
         obj.tooltip("hide");
         obj.attr("data-original-title", "");
@@ -23,7 +23,85 @@
         }
     }
 
+    function signIn() {
+        var userNo = $("#user_login");
+        if (!checkInput(userNo)) {
+            return;
+        }
+        var password = $("#user_password");
+        if (!checkInput(password)) {
+            return;
+        }
+
+        var parameters = {
+            userNo: userNo.val(),
+            password: password.val()
+        };
+        $.post("/rest/user/signin", parameters, function (data) {
+            if (data.code == "OK") {
+                processCookies();
+                window.location.href = "index.jsp";
+            } else if (data.code == "Error") {
+                showTooltip(userNo, data.info);
+            }
+        });
+    }
+
+    function signUp() {
+        var userNo = $("#user_no_sign_up");
+        if (!checkInput(userNo)) {
+            return;
+        }
+        var userName = $("#user_name_sign_up");
+        if (!checkInput(userName)) {
+            return;
+        }
+        var email = $("#user_email_sign_up");
+        if (!checkInput(email)) {
+            return;
+        }
+        var password = $("#user_password_sign_up");
+        if (!checkInput(password)) {
+            return;
+        }
+        var values = {
+            userNo: userNo.val()
+        };
+
+        $.post("/rest/user/exist", values, function (data) {
+            if (data.code == "OK") {
+                var parameters = {
+                    userNo: userNo.val(),
+                    userName: userName.val(),
+                    userEmail: email.val(),
+                    password: password.val()
+                };
+                $.post("/rest/user/signup", parameters, function (result) {
+                    if (result.code == "OK") {
+                        window.location.href = "index.jsp";
+                    } else if (result.code == "Error") {
+                        showTooltip(userNo, result.info);
+                    }
+                });
+            } else if (data.code == "Error") {
+                showTooltip(userNo, data.info);
+            }
+        });
+    }
+
     $(function () {
+        $(document.body).on("keydown", function (event) {
+            if (event.keyCode == 13) {
+                var isEmpty = $("#user_password_sign_up").val().length > 0;
+                if (isEmpty == true) {
+                    signUp();
+                }
+                else {
+                    signIn();
+                }
+            }
+        });
+
         var cookieUserNo = Cookies.get("userno");
         if (cookieUserNo != undefined) {
             $("#user_login").val(cookieUserNo);
@@ -31,69 +109,11 @@
         }
 
         $(document.body).on("click", "#signin", function () {
-            var userNo = $("#user_login");
-            if (!checkInput(userNo)) {
-                return;
-            }
-            var password = $("#user_password");
-            if (!checkInput(password)) {
-                return;
-            }
-
-            var parameters = {
-                userNo: userNo.val(),
-                password: password.val()
-            };
-            $.post("/rest/user/signin", parameters, function (data) {
-                if (data.code == "OK") {
-                    processCookies();
-                    window.location.href = "index.jsp";
-                } else if (data.code == "Error") {
-                    showTooltip(userNo, data.info);
-                }
-            });
+            signIn();
         });
 
         $(document.body).on("click", "#signup", function () {
-            var userNo = $("#user_no_sign_up");
-            if (!checkInput(userNo)) {
-                return;
-            }
-            var userName = $("#user_name_sign_up");
-            if (!checkInput(userName)) {
-                return;
-            }
-            var email = $("#user_email_sign_up");
-            if (!checkInput(email)) {
-                return;
-            }
-            var password = $("#user_password_sign_up");
-            if (!checkInput(password)) {
-                return;
-            }
-            var values = {
-                userNo: userNo.val()
-            };
-
-            $.post("/rest/user/exist", values, function (data) {
-                if (data.code == "OK") {
-                    var parameters = {
-                        userNo: userNo.val(),
-                        userName: userName.val(),
-                        userEmail: email.val(),
-                        password: password.val()
-                    };
-                    $.post("/rest/user/signup", parameters, function (result) {
-                        if (result.code == "OK") {
-                            window.location.href = "index.jsp";
-                        } else if (result.code == "Error") {
-                            showTooltip(userNo, result.info);
-                        }
-                    });
-                } else if (data.code == "Error") {
-                    showTooltip(userNo, data.info);
-                }
-            });
+            signUp();
         });
     });
-})(window);
+})(jQuery, window);

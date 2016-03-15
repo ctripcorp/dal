@@ -14,7 +14,7 @@
 		parameters.set(2, Types.INTEGER, pageSize);
 #else
 		String sql = PAGE_SQL_PATTERN;
-		int fromRownum = (pageNo - 1) * pageSize + 1;
+		int fromRownum = (pageNo - 1) * pageSize;
         int endRownum = pageSize;
 		parameters.set(1, Types.INTEGER, fromRownum);
 		parameters.set(2, Types.INTEGER, endRownum);

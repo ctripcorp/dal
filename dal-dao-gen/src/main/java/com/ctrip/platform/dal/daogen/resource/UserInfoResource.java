@@ -1,21 +1,14 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.UserInfo;
 import com.ctrip.platform.dal.daogen.entity.DefaultUserInfo;
 
-import javax.annotation.Resource;
-import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 public class UserInfoResource {
     private UserInfoResource() {

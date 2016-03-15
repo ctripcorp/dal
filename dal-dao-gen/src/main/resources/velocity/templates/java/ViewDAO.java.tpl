@@ -71,7 +71,7 @@ public class ${host.getPojoClassName()}Dao {
 #if($host.getDatabaseCategory().name() == "MySql" )
 		sql = String.format(PAGE_MYSQL_PATTERN, (pageNo - 1) * pagesize, pagesize);
 #else
-		int fromRownum = (pageNo - 1) * pagesize + 1;
+		int fromRownum = (pageNo - 1) * pagesize;
         int endRownum = pagesize;
 		sql = String.format(PAGE_SQL_PATTERN, fromRownum, endRownum);
 #end

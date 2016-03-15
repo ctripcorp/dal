@@ -28,7 +28,7 @@
         <ul class="nav navbar-nav navbar-right">
             <li id="welcomejsp" style="display: none"><a href="welcome.jsp">Tutorial</a></li>
             <li class="dropdown"><a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"
-                                    data-hover="dropdown" data-close-others="true"> <span class="username"> 帮助 </span>
+                                    data-hover="dropdown" data-close-others="true"> <span class="username">帮助</span>
                 <i class="glyphicon glyphicon-menu-down"> </i>
             </a> <span class="dropdown-arrow dropdown-arrow-inverse"
                        style="margin-top: 1px"></span>
@@ -36,17 +36,20 @@
                     style="margin-top: 8px !important">
                     <li><a href="javascript:;"
                            onclick="window.open('http://conf.ctripcorp.com/display/FRAM/DAL+Code+Generator', '_blank');">Code
-                        Gen使用说明</a></li>
+                        Gen 使用说明</a></li>
                     <li><a href="javascript:;"
-                           onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">DAL框架使用说明</a>
+                           onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">DAL
+                        框架使用说明</a>
                     </li>
                     <li><a href="javascript:;"
                            onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=74094596', '_blank');">SQL
-                        Server使用规范</a></li>
+                        Server 使用规范</a></li>
                     <li><a href="javascript:;"
-                           onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=55383965', '_blank');">MySQL开发规范详解</a>
+                           onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=55383965', '_blank');">MySQL
+                        开发规范详解</a>
                     </li>
-                    <li><a href="mailto:rdfxdal@Ctrip.com">联系我们</a></li>
+                    <li><a href="mailto:rdfxdal@Ctrip.com"><span class="glyphicon glyphicon-envelope"></span>&nbsp;联系我们</a>
+                    </li>
                 </ul>
             </li>
             <li class="dropdown user"><a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"
@@ -55,7 +58,9 @@
 				</span> <i class="glyphicon glyphicon-menu-down"> </i>
             </a> <span class="dropdown-arrow dropdown-arrow-inverse" style="margin-top: 1px"></span>
                 <ul class="dropdown-menu dropdown-inverse" style="margin-top: 8px !important">
-                    <li><a id="logout" href="/logout.jsp"> <i class="glyphicon glyphicon-log-out"> </i> 注销
+                    <li id="menu_password" style="display: none"><a id="password" href="javascript:;"><span
+                            class="glyphicon glyphicon-user"></span>&nbsp;更改密码</a></li>
+                    <li><a id="logout" href="/logout.jsp"><span class="glyphicon glyphicon-log-out"></span>&nbsp;注销
                     </a></li>
                 </ul>
             </li>
@@ -167,3 +172,41 @@
     </div>
 </div>
 <!--End modal-->
+<div class="modal fade" id="passwordModal" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">更改密码</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row-fluid">
+                    <div class="control-group">
+                        <label class="control-label popup_label" style="width: 100px;">旧密码:</label>
+                        <input id="oldPassword" class="span7 input-sm" type="password">&nbsp;
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="control-group">
+                        <label class="control-label popup_label" style="width: 100px;">新密码:</label>
+                        <input id="newPassword" class="span7 input-sm" type="password">&nbsp;
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="control-group">
+                        <label class="control-label popup_label" style="width: 100px;">确认新密码:</label>
+                        <input id="confirmPassword" class="span7 input-sm" type="password">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <label id="password_error_msg" class="control-label popup_label"
+                       style="color: red;"></label>
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button id="change_password" type="button" class="btn btn-primary">添加</button>
+            </div>
+        </div>
+    </div>
+</div>

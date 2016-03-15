@@ -1,6 +1,12 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.util.List;
+import com.ctrip.platform.dal.daogen.Consts;
+import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.utils.MD5Util;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import org.apache.log4j.Logger;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -8,23 +14,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import com.ctrip.platform.dal.daogen.Consts;
-import com.ctrip.platform.dal.daogen.entity.UserGroup;
-import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import org.apache.log4j.Logger;
-
-import com.ctrip.platform.dal.daogen.domain.Status;
-import com.ctrip.platform.dal.daogen.entity.LoginUser;
-import com.ctrip.platform.dal.daogen.utils.MD5Util;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import java.util.List;
 
 @Resource
 @Singleton
@@ -298,11 +291,64 @@ public class DalUserResource {
     }
 
     @GET
-    @Path("isDefault")
-    public boolean isDefaultInstance(@Context HttpServletRequest request) {
+    @Path("isDefaultUser")
+    public boolean isDefaultUser(@Context HttpServletRequest request) {
+        return UserInfoResource.isDefaultInstance();
+    }
+
+    @GET
+    @Path("isDefaultSuperUser")
+    public boolean isDefaultSuperUser(@Context HttpServletRequest request) {
         boolean result = true;
+        result &= isDefaultUser(request);
         result &= isSuperUser(request);
-        result &= UserInfoResource.isDefaultInstance();
         return result;
+    }
+
+    @POST
+    @Path("checkPassword")
+    public boolean checkPassword(@Context HttpServletRequest request, @FormParam("password") String password) {
+        boolean result = false;
+        if (password == null || password.isEmpty()) {
+            return result;
+        }
+
+        String userNo = RequestUtil.getUserNo(request);
+        LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+        if (user != null) {
+            String pass = MD5Util.parseStrToMd5L32(password);
+            String userPass = user.getPassword();
+            if (userPass != null && !userPass.isEmpty()) {
+                if (pass.equals(userPass)) {
+                    result = true;
+                }
+            }
+        }
+        return result;
+    }
+
+    @POST
+    @Path("changePassword")
+    public boolean changePassword(@Context HttpServletRequest request, @FormParam("password") String password) {
+        boolean result = false;
+        if (password == null || password.isEmpty()) {
+            return result;
+        }
+
+        try {
+            LoginUser user = RequestUtil.getUserInfo(request);
+            String pass = MD5Util.parseStrToMd5L32(password);
+            user.setPassword(pass);
+            result = SpringBeanGetter.getDaoOfLoginUser().updateUserPassword(user) > 0;
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @POST
+    @Path("logOut")
+    public void logOut(@Context HttpServletRequest request, @Context HttpServletResponse response) {
+        UserInfoResource.getInstance().logOut(request, response);
     }
 }

@@ -8,6 +8,7 @@ import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 
 public class DefaultUserInfo implements UserInfo {
     private DefaultUserInfo() {
@@ -61,6 +62,16 @@ public class DefaultUserInfo implements UserInfo {
     public void logOut(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = RequestUtil.getSession(request);
         session.invalidate();
+        String url = request.getRequestURL().toString();
+        String uri = request.getRequestURI();
+        int endIndex = url.length() - uri.length();
+        StringBuilder loginUrl = new StringBuilder(url.substring(0, endIndex));
+        loginUrl.append("/login.jsp");
+        try {
+            response.sendRedirect(loginUrl.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

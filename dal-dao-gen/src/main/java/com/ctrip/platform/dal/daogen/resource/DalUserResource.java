@@ -286,14 +286,22 @@ public class DalUserResource {
     @Path("isSuperUser")
     @Produces(MediaType.APPLICATION_JSON)
     public boolean isSuperUser(@Context HttpServletRequest request) {
+        Boolean result = RequestUtil.isSuperUser(request);
+        if (result != null) {
+            return result.booleanValue();
+        }
+
+        HttpSession session = RequestUtil.getSession(request);
         String userNo = RequestUtil.getUserNo(request);
-        return DalGroupResource.validate(userNo);
+        boolean value = DalGroupResource.validate(userNo);
+        session.setAttribute(Consts.SUPER_USER, value);
+        return value;
     }
 
     @GET
     @Path("isDefaultUser")
     public boolean isDefaultUser(@Context HttpServletRequest request) {
-        return UserInfoResource.isDefaultInstance();
+        return UserInfoResource.isDefaultInstance(request);
     }
 
     @GET

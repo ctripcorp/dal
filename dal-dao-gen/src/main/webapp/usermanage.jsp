@@ -14,24 +14,13 @@
     <meta name="author" content="">
     <title>Ctrip DAO Generator</title>
     <!-- Bootstrap core CSS -->
-    <link
-            href="/static/bootstrap/css/bootstrap.min.css?codegen=${codegenpageflag}"
-            rel="stylesheet">
-    <link
-            href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${codegenpageflag}"
-            rel="stylesheet">
-    <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=${codegenpageflag}"
-          rel="stylesheet"/>
-    <link
-            href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}"
-            rel="stylesheet"/>
-    <link href="/static/css/multiple-select.css?codegen=${codegenpageflag}"
-          rel="stylesheet">
-    <link
-            href="/static/css/selectize.bootstrap3.css?codegen=${codegenpageflag}"
-            rel="stylesheet">
-    <link href="/static/css/common.css?codegen=${codegenpageflag}"
-          rel="stylesheet">
+    <link href="/static/bootstrap/css/bootstrap.min.css?codegen=${codegenpageflag}" rel="stylesheet">
+    <link href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${codegenpageflag}" rel="stylesheet">
+    <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=${codegenpageflag}" rel="stylesheet"/>
+    <link href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}" rel="stylesheet"/>
+    <link href="/static/css/multiple-select.css?codegen=${codegenpageflag}" rel="stylesheet">
+    <link href="/static/css/selectize.bootstrap3.css?codegen=${codegenpageflag}" rel="stylesheet">
+    <link href="/static/css/common.css?codegen=${codegenpageflag}" rel="stylesheet">
 
     <!-- Documentation extras -->
     <!--
@@ -51,9 +40,7 @@
     <!-- Favicons -->
     <link rel="shortcut icon" href="/static/images/favicon.ico">
     <!-- Loading Flat UI -->
-    <link
-            href="/static/Flat-UI-master/css/flat-ui.css?codegen=${codegenpageflag}"
-            rel="stylesheet">
+    <link href="/static/Flat-UI-master/css/flat-ui.css?codegen=${codegenpageflag}" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
     <!--[if lt IE 9]>
@@ -67,14 +54,13 @@
 
 <div id="main_layout"></div>
 <!--Begin modal-->
-<div class="modal fade" id="userModal" tabindex="-1" role="dialog"
-     aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true"
+     is_update="0">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"
-                        aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="myModalLabel">添加用户</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="addModalLabel">添加用户</h4>
             </div>
             <div class="modal-body">
                 <div class="row-fluid">
@@ -97,8 +83,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <label id="error_msg" class="control-label popup_label"
-                       style="color: red;"></label>
+                <label id="error_msg" class="control-label popup_label" style="color: red;"></label>
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 <button id="save_user" type="button" class="btn btn-primary">添加</button>
             </div>
@@ -108,14 +93,13 @@
 <!--End modal-->
 
 <!--Begin modal-->
-<div class="modal fade" id="userModal2" tabindex="-1" role="dialog"
-     aria-labelledby="myModalLabel" aria-hidden="true" is_update="0">
+<div class="modal fade" id="userModal2" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel"
+     aria-hidden="true" is_update="0">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"
-                        aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="myModalLabel">更新用户</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="updateModalLabel">更新用户</h4>
             </div>
             <div class="modal-body">
                 <div class="row-fluid">
@@ -138,8 +122,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <label id="error_msg2" class="control-label popup_label"
-                       style="color: red;"></label>
+                <label id="error_msg2" class="control-label popup_label" style="color: red;"></label>
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 <button id="update_user" type="button" class="btn btn-primary">更新</button>
             </div>
@@ -148,13 +131,12 @@
 </div>
 <!--End modal-->
 
-<div class="modal fade" id="errorNoticeDiv" tabindex="-1" role="dialog"
-     aria-labelledby="generateCodeProcessLabel" aria-hidden="true">
+<div class="modal fade" id="errorNoticeDiv" tabindex="-1" role="dialog" aria-labelledby="generateCodeProcessLabel"
+     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"
-                        aria-hidden="true">&times;</button>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title">错误提示</h4>
             </div>
             <div class="modal-body">
@@ -174,20 +156,15 @@
 <!-- JS and analytics only. -->
 <!-- Bootstrap core JavaScript================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-<script
-        src="/static/jquery/jquery-1.10.2.min.js?codegen=${codegenpageflag}"></script>
-<script
-        src="/static/bootstrap/js/bootstrap.min.js?codegen=${codegenpageflag}"></script>
+<script src="/static/jquery/jquery-1.10.2.min.js?codegen=${codegenpageflag}"></script>
+<script src="/static/bootstrap/js/bootstrap.min.js?codegen=${codegenpageflag}"></script>
 <script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=${codegenpageflag}"></script>
 <script src="/static/jstree/jstree.js?codegen=${codegenpageflag}"></script>
-<script
-        src="/static/jquery/jquery.blockui.min.js?codegen=${codegenpageflag}"></script>
+<script src="/static/jquery/jquery.blockui.min.js?codegen=${codegenpageflag}"></script>
 <script src="/static/js/sprintf.js?codegen=${codegenpageflag}"></script>
-<script
-        src="/static/jquery/jquery.multiple.select.js?codegen=${codegenpageflag}"></script>
+<script src="/static/jquery/jquery.multiple.select.js?codegen=${codegenpageflag}"></script>
 <script src="/static/js/selectize.min.js?codegen=${codegenpageflag}"></script>
 <script src="/static/js/cblock.js?codegen=${codegenpageflag}"></script>
-
 <script src="/static/js/header.js?codegen=${codegenpageflag}"></script>
 <script src="/static/js/usermanage.js?codegen=${codegenpageflag}"></script>
 </body>

@@ -1,11 +1,14 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.UserInfo;
 import com.ctrip.platform.dal.daogen.entity.DefaultUserInfo;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -29,8 +32,16 @@ public class UserInfoResource {
 
     private static UserInfo userInfo = null;
 
-    public static boolean isDefaultInstance() {
-        return userInfo instanceof DefaultUserInfo;
+    public static boolean isDefaultInstance(HttpServletRequest request) {
+        Boolean result = RequestUtil.isDefaultUser(request);
+        if (result != null) {
+            return result.booleanValue();
+        }
+
+        boolean value = userInfo instanceof DefaultUserInfo;
+        HttpSession session = RequestUtil.getSession(request);
+        session.setAttribute(Consts.DEFAULT_USER, value);
+        return value;
     }
 
     static {

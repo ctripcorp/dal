@@ -13,4 +13,16 @@
 		</databaseSet>
 #end
 	</databaseSets>
+	<LogListener>
+		<logger>com.ctrip.platform.dal.sql.logging.CtripDalLogger</logger>
+	</LogListener>
+	<ConnectionLocator>
+		<settings>
+			<serviceAddress>{$CFX_DataSource_ServiceUrl}</serviceAddress>
+			<dataSourceConfigureProvider>com.ctrip.datasource.titan.TitanProvider</dataSourceConfigureProvider>
+		</settings>
+	</ConnectionLocator>
+	<TaskFactory>
+		<factory>com.ctrip.platform.dal.dao.CtripTaskFactory</factory>
+	</TaskFactory>
 </dal>

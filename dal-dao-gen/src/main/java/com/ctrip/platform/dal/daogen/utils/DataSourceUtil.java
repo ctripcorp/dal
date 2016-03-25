@@ -1,17 +1,15 @@
 package com.ctrip.platform.dal.daogen.utils;
 
+import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
+import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
+import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.sql.DataSource;
-
-import org.apache.tomcat.jdbc.pool.PoolProperties;
-
-import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
-import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
-import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 
 public class DataSourceUtil {
 

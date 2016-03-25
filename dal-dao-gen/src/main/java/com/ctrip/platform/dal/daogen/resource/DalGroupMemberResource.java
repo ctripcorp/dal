@@ -1,33 +1,21 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.*;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import org.apache.log4j.Logger;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import org.apache.log4j.Logger;
-
-import com.ctrip.platform.dal.daogen.domain.Status;
-import com.ctrip.platform.dal.daogen.entity.DalGroup;
-import com.ctrip.platform.dal.daogen.entity.GroupRelation;
-import com.ctrip.platform.dal.daogen.entity.LoginUser;
-import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.entity.UserGroup;
-import com.ctrip.platform.dal.daogen.entity.UserProject;
-import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * DAL Member Manage.

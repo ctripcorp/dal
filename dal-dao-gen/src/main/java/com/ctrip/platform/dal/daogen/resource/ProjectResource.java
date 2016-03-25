@@ -1,5 +1,23 @@
 package com.ctrip.platform.dal.daogen.resource;
 
+import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.daogen.CodeGenContext;
+import com.ctrip.platform.dal.daogen.DalGenerator;
+import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.*;
+import com.ctrip.platform.dal.daogen.generator.csharp.CSharpDalGenerator;
+import com.ctrip.platform.dal.daogen.generator.java.JavaDalGenerator;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+
+import javax.annotation.Resource;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -9,43 +27,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.annotation.Resource;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
-
-import com.ctrip.platform.dal.common.util.Configuration;
-import com.ctrip.platform.dal.daogen.CodeGenContext;
-import com.ctrip.platform.dal.daogen.DalGenerator;
-import com.ctrip.platform.dal.daogen.domain.Status;
-import com.ctrip.platform.dal.daogen.entity.DalGroup;
-import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
-import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
-import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
-import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
-import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
-import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
-import com.ctrip.platform.dal.daogen.entity.GroupRelation;
-import com.ctrip.platform.dal.daogen.entity.LoginUser;
-import com.ctrip.platform.dal.daogen.entity.Progress;
-import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.entity.UserGroup;
-import com.ctrip.platform.dal.daogen.generator.csharp.CSharpDalGenerator;
-import com.ctrip.platform.dal.daogen.generator.java.JavaDalGenerator;
-import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 @Resource
 @Singleton

@@ -1,19 +1,17 @@
 package com.ctrip.platform.dal.daogen.host.csharp;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.jdbc.core.ResultSetExtractor;
-
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
+import org.springframework.jdbc.core.ResultSetExtractor;
+
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class CsharpColumnNameResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
 	private String allInOneName;

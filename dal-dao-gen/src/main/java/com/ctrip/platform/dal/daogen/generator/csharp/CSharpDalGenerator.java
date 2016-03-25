@@ -1,24 +1,16 @@
 package com.ctrip.platform.dal.daogen.generator.csharp;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalGenerator;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.generator.processor.csharp.CSharpDirectoryPreparerProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.csharp.CSharpCodeGeneratorOfFreeSqlProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.csharp.CSharpDataPreparerOfFreeSqlProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.csharp.CSharpCodeGeneratorOfOthersProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.csharp.CSharpCodeGeneratorOfSpProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.csharp.CSharpDataPreparerOfSqlBuilderProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.csharp.CSharpCodeGeneratorOfTableProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.csharp.CSharpDataPreparerOfTableViewSpProcessor;
+import com.ctrip.platform.dal.daogen.generator.processor.csharp.*;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import org.apache.log4j.Logger;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CSharpDalGenerator implements DalGenerator {
 	

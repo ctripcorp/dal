@@ -1,25 +1,5 @@
 package com.ctrip.platform.dal.daogen.sql.validate;
 
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-
-import microsoft.sql.DateTimeOffset;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.ORMUtils;
@@ -27,6 +7,17 @@ import com.ctrip.platform.dal.daogen.utils.ResourceUtils;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import microsoft.sql.DateTimeOffset;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import java.math.BigDecimal;
+import java.sql.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SQLValidation {
 	

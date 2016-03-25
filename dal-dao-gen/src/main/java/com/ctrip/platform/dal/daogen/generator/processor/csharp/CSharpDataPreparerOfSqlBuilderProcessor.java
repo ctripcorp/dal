@@ -1,14 +1,5 @@
 package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.Callable;
-
-import org.apache.log4j.Logger;
-
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalProcessor;
@@ -21,6 +12,10 @@ import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
+import org.apache.log4j.Logger;
+
+import java.util.*;
+import java.util.concurrent.Callable;
 
 public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
 

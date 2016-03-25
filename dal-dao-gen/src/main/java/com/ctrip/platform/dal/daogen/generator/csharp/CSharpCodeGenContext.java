@@ -1,13 +1,5 @@
 package com.ctrip.platform.dal.daogen.generator.csharp;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Pattern;
-
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
@@ -17,6 +9,14 @@ import com.ctrip.platform.dal.daogen.host.csharp.CSharpFreeSqlHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpFreeSqlPojoHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.host.csharp.DatabaseHost;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Pattern;
 
 public class CSharpCodeGenContext implements CodeGenContext {
 	

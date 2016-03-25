@@ -1,8 +1,7 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import com.ctrip.platform.dal.daogen.entity.Progress;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -13,9 +12,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import com.ctrip.platform.dal.daogen.entity.Progress;
-import com.ctrip.platform.dal.daogen.utils.RequestUtil;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  *

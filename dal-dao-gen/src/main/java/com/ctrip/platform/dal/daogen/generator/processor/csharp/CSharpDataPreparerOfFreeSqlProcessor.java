@@ -1,21 +1,5 @@
 package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
-import org.apache.log4j.Logger;
-
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalProcessor;
@@ -26,17 +10,16 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
-import com.ctrip.platform.dal.daogen.host.csharp.CSharpFreeSqlHost;
-import com.ctrip.platform.dal.daogen.host.csharp.CSharpFreeSqlPojoHost;
-import com.ctrip.platform.dal.daogen.host.csharp.CSharpMethodHost;
-import com.ctrip.platform.dal.daogen.host.csharp.CSharpParameterHost;
-import com.ctrip.platform.dal.daogen.host.csharp.CsharpGivenSqlResultSetExtractor;
-import com.ctrip.platform.dal.daogen.host.csharp.DatabaseHost;
-import com.ctrip.platform.dal.daogen.utils.CommonUtils;
-import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
-import com.ctrip.platform.dal.daogen.utils.TaskUtils;
+import com.ctrip.platform.dal.daogen.host.csharp.*;
+import com.ctrip.platform.dal.daogen.utils.*;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
+import org.apache.log4j.Logger;
+
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
 

@@ -1,18 +1,17 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
+import com.ctrip.platform.dal.common.enums.ParameterDirection;
+import com.ctrip.platform.dal.daogen.Consts;
+import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.utils.DbUtils;
+import org.apache.log4j.Logger;
+import org.springframework.jdbc.core.ResultSetExtractor;
+
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.log4j.Logger;
-import org.springframework.jdbc.core.ResultSetExtractor;
-
-import com.ctrip.platform.dal.common.enums.ParameterDirection;
-import com.ctrip.platform.dal.daogen.Consts;
-import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
-import com.ctrip.platform.dal.daogen.utils.DbUtils;
 
 public class JavaSpParamResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
 

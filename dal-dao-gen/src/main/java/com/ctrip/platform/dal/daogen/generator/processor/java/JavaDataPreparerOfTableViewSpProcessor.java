@@ -1,15 +1,5 @@
 package com.ctrip.platform.dal.daogen.generator.processor.java;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.Callable;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder;
@@ -21,16 +11,15 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
-import com.ctrip.platform.dal.daogen.host.java.JavaColumnNameResultSetExtractor;
-import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
-import com.ctrip.platform.dal.daogen.host.java.JavaSpParamResultSetExtractor;
-import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
-import com.ctrip.platform.dal.daogen.host.java.SpDbHost;
-import com.ctrip.platform.dal.daogen.host.java.SpHost;
-import com.ctrip.platform.dal.daogen.host.java.ViewHost;
+import com.ctrip.platform.dal.daogen.host.java.*;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import java.util.*;
+import java.util.concurrent.Callable;
 
 public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPreparer implements DalProcessor {
 

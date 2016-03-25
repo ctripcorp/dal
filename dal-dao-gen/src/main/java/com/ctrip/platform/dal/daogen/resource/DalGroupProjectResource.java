@@ -1,6 +1,10 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.util.List;
+import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.DalGroup;
+import com.ctrip.platform.dal.daogen.entity.Project;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import org.apache.log4j.Logger;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -9,13 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
-import org.apache.log4j.Logger;
-
-import com.ctrip.platform.dal.daogen.domain.Status;
-import com.ctrip.platform.dal.daogen.entity.DalGroup;
-import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import java.util.List;
 
 /**
  * DAL Project & Code 一览

@@ -1,18 +1,13 @@
 package com.ctrip.platform.dal.daogen.host;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.alibaba.druid.sql.ast.statement.SQLWithSubqueryClause.Entry;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.utils.ConnectionStringUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+
+import java.util.*;
 
 public class DalConfigHost {
 	private String name;

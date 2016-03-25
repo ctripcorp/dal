@@ -1,17 +1,5 @@
 package com.ctrip.platform.dal.daogen.generator.processor.java;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.Callable;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
-import org.apache.log4j.Logger;
-
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.DalProcessor;
@@ -29,6 +17,12 @@ import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
+import org.apache.log4j.Logger;
+
+import java.util.*;
+import java.util.concurrent.Callable;
 
 public class JavaDataPreparerOfFreeSqlProcessor extends
 		AbstractJavaDataPreparer implements DalProcessor {

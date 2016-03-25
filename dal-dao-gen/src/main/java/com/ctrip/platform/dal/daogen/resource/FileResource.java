@@ -1,21 +1,12 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.daogen.domain.W2uiElement;
+import com.ctrip.platform.dal.daogen.entity.Project;
+import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.ZipFolder;
+import com.google.common.base.Charsets;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -27,14 +18,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import com.ctrip.platform.dal.common.util.Configuration;
-import com.ctrip.platform.dal.daogen.domain.W2uiElement;
-import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import com.ctrip.platform.dal.daogen.utils.ZipFolder;
-import com.google.common.base.Charsets;
+import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Resource
 @Singleton

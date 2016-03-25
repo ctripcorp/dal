@@ -1,16 +1,5 @@
 package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
-
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDatabaseSet;
@@ -24,17 +13,19 @@ import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
-import com.ctrip.platform.dal.daogen.host.csharp.CSharpMethodHost;
-import com.ctrip.platform.dal.daogen.host.csharp.CSharpParameterHost;
-import com.ctrip.platform.dal.daogen.host.csharp.CSharpSpaOperationHost;
-import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
-import com.ctrip.platform.dal.daogen.host.csharp.CsharpColumnNameResultSetExtractor;
+import com.ctrip.platform.dal.daogen.host.csharp.*;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaSelectFieldResultSetExtractor;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AbstractCSharpDataPreparer {
 

@@ -1,22 +1,13 @@
 package com.ctrip.platform.dal.daogen.generator.java;
 
-import org.apache.log4j.Logger;
-
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalGenerator;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.generator.processor.java.JavaDirectoryPreparerProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.java.JavaCodeGeneratorOfFreeSqlProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.java.JavaDataPreparerOfFreeSqlProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.java.JavaCodeGeneratorOfOthersProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.java.JavaCodeGeneratorOfSpProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.java.JavaDataPreparerOfSqlBuilderProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.java.JavaCodeGeneratorOfTableProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.java.JavaDataPreparerOfTableViewSpProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.java.JavaCodeGeneratorOfViewProcessor;
+import com.ctrip.platform.dal.daogen.generator.processor.java.*;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import org.apache.log4j.Logger;
 
 public class JavaDalGenerator implements DalGenerator {
 	

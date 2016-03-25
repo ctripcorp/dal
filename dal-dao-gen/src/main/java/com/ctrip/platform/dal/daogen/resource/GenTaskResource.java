@@ -1,41 +1,11 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-
-import javax.annotation.Resource;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
-import org.apache.velocity.VelocityContext;
-
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalGenerator;
 import com.ctrip.platform.dal.daogen.domain.FreeSqlClassPojoNames;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.domain.TaskAggeragation;
-import com.ctrip.platform.dal.daogen.entity.ApproveTask;
-import com.ctrip.platform.dal.daogen.entity.DalApi;
-import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
-import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
-import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
-import com.ctrip.platform.dal.daogen.entity.LoginUser;
-import com.ctrip.platform.dal.daogen.entity.Progress;
+import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpDalGenerator;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
@@ -49,6 +19,18 @@ import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
+import org.apache.velocity.VelocityContext;
+
+import javax.annotation.Resource;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import java.sql.Timestamp;
+import java.util.*;
 
 @Resource
 @Singleton

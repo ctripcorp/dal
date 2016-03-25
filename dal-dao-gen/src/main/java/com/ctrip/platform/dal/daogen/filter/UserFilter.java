@@ -1,20 +1,14 @@
 package com.ctrip.platform.dal.daogen.filter;
 
-import java.io.IOException;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpSession;
-
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.resource.UserInfoResource;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
 
 public class UserFilter implements Filter {
 

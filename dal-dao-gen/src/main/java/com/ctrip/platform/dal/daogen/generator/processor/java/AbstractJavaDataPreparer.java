@@ -1,38 +1,22 @@
 package com.ctrip.platform.dal.daogen.generator.processor.java;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
-
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.dao.DaoOfDatabaseSet;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
-import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
-import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
-import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
-import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
-import com.ctrip.platform.dal.daogen.entity.Resource;
+import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
-import com.ctrip.platform.dal.daogen.host.java.ContextHost;
-import com.ctrip.platform.dal.daogen.host.java.JavaColumnNameResultSetExtractor;
-import com.ctrip.platform.dal.daogen.host.java.JavaMethodHost;
-import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
-import com.ctrip.platform.dal.daogen.host.java.JavaSelectFieldResultSetExtractor;
-import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
-import com.ctrip.platform.dal.daogen.host.java.SpOperationHost;
+import com.ctrip.platform.dal.daogen.host.java.*;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
+
+import java.util.*;
 
 public class AbstractJavaDataPreparer {
 

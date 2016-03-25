@@ -1,22 +1,16 @@
 package com.ctrip.platform.dal.daogen.generator.java;
 
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
-import com.ctrip.platform.dal.daogen.host.java.ContextHost;
-import com.ctrip.platform.dal.daogen.host.java.FreeSqlHost;
-import com.ctrip.platform.dal.daogen.host.java.JavaMethodHost;
-import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
-import com.ctrip.platform.dal.daogen.host.java.SpDbHost;
-import com.ctrip.platform.dal.daogen.host.java.SpHost;
-import com.ctrip.platform.dal.daogen.host.java.ViewHost;
+import com.ctrip.platform.dal.daogen.host.java.*;
+
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class JavaCodeGenContext implements CodeGenContext{
 	

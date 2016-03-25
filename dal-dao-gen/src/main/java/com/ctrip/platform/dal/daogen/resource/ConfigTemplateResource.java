@@ -1,20 +1,5 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.annotation.Resource;
-import javax.inject.Singleton;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-
 import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.Config;
@@ -23,6 +8,15 @@ import com.ctrip.platform.dal.daogen.entity.Language;
 import com.ctrip.platform.dal.daogen.enums.ConfigType;
 import com.ctrip.platform.dal.daogen.enums.LanguageType;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+
+import javax.annotation.Resource;
+import javax.inject.Singleton;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 @Resource
 @Singleton

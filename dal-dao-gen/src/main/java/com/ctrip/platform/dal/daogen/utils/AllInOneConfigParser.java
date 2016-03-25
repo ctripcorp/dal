@@ -1,21 +1,16 @@
 package com.ctrip.platform.dal.daogen.utils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
+import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import org.apache.log4j.Logger;
+
+import java.io.*;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
-
-import com.ctrip.platform.dal.common.util.Configuration;
-import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
-import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 
 public class AllInOneConfigParser {
 

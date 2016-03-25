@@ -1,15 +1,14 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
-import java.sql.Types;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.apache.commons.lang.WordUtils;
-
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
+import org.apache.commons.lang.WordUtils;
+
+import java.sql.Types;
+import java.util.HashSet;
+import java.util.Set;
 
 public class JavaParameterHost extends AbstractParameterHost {
 

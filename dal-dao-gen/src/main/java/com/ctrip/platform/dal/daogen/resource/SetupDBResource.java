@@ -104,10 +104,7 @@ public class SetupDBResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("initializeDb")
-    public Status initializeDb(@Context HttpServletRequest request, @FormParam("dbaddress") String dbaddress,
-                               @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
-                               @FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog,
-                               @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment) {
+    public Status initializeDb(@Context HttpServletRequest request, @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog, @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment) {
         Status status = Status.OK;
         try {
             boolean jdbcResult = initializeJdbcProperties(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
@@ -140,17 +137,14 @@ public class SetupDBResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("connectionTest")
-    public Status connectionTest(@FormParam("dbtype") String dbtype, @FormParam("dbaddress") String dbaddress,
-                                 @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
-                                 @FormParam("dbpassword") String dbpassword) {
+    public Status connectionTest(@FormParam("dbtype") String dbtype, @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword) {
         Status status = Status.OK;
         Connection conn = null;
         ResultSet rs = null;
         try {
-            conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword,
-                    DatabaseType.valueOf(dbtype).getValue());
+            conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword, DatabaseType.valueOf(dbtype).getValue());
             rs = conn.getMetaData().getCatalogs();
-            Set<String> allCatalog = new HashSet<String>();
+            Set<String> allCatalog = new HashSet<>();
             while (rs.next()) {
                 allCatalog.add(rs.getString("TABLE_CAT"));
             }
@@ -222,7 +216,7 @@ public class SetupDBResource {
     }
 
     private Set<String> getScriptTableNames(String script) {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         if (script == null || script.length() == 0) {
             return set;
         }
@@ -244,8 +238,7 @@ public class SetupDBResource {
         return set;
     }
 
-    private boolean initializeJdbcProperties(String dbaddress, String dbport, String dbuser, String dbpassword,
-                                             String dbcatalog) {
+    private boolean initializeJdbcProperties(String dbaddress, String dbport, String dbuser, String dbpassword, String dbcatalog) {
         boolean result = false;
         try {
             Properties properties = new Properties();
@@ -329,8 +322,7 @@ public class SetupDBResource {
             return result;
         }
 
-        int userGroupResult = SpringBeanGetter.getDalUserGroupDao().insertUserGroup(user.getId(),
-                DalGroupResource.SUPER_GROUP_ID, RoleType.Admin.getValue(), AddUser.Allow.getValue());
+        int userGroupResult = SpringBeanGetter.getDalUserGroupDao().insertUserGroup(user.getId(), DalGroupResource.SUPER_GROUP_ID, RoleType.Admin.getValue(), AddUser.Allow.getValue());
         if (userGroupResult <= 0) {
             return result;
         }

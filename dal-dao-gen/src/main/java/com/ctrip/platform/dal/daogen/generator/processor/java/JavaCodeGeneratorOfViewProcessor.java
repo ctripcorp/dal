@@ -18,7 +18,6 @@ import java.util.Queue;
 import java.util.concurrent.Callable;
 
 public class JavaCodeGeneratorOfViewProcessor implements DalProcessor {
-
     private static Logger log = Logger.getLogger(JavaCodeGeneratorOfViewProcessor.class);
 
     @Override
@@ -26,22 +25,17 @@ public class JavaCodeGeneratorOfViewProcessor implements DalProcessor {
         JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         int projectId = ctx.getProjectId();
         File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
-
         List<Callable<ExecuteResult>> viewCallables = generateViewDao(ctx, dir);
-
         TaskUtils.invokeBatch(log, viewCallables);
     }
 
-    private List<Callable<ExecuteResult>> generateViewDao(CodeGenContext codeGenCtx,
-                                                          final File mavenLikeDir) {
-
+    private List<Callable<ExecuteResult>> generateViewDao(CodeGenContext codeGenCtx, final File mavenLikeDir) {
         JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
         final Progress progress = ctx.getProgress();
         Queue<ViewHost> _viewHosts = ctx.getViewHosts();
-        List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
+        List<Callable<ExecuteResult>> results = new ArrayList<>();
 
         for (final ViewHost host : _viewHosts) {
-
             Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 
                 @Override

@@ -1,31 +1,19 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import java.sql.Timestamp;
-import java.util.List;
+import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.*;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
+import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import org.apache.log4j.Logger;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import org.apache.log4j.Logger;
-
-import com.ctrip.platform.dal.daogen.domain.Status;
-import com.ctrip.platform.dal.daogen.entity.DalGroup;
-import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
-import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
-import com.ctrip.platform.dal.daogen.entity.LoginUser;
-import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.entity.UserGroup;
-import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import java.sql.Timestamp;
+import java.util.List;
 
 @Resource
 @Singleton
@@ -58,14 +46,11 @@ public class DalGroupResource {
 
     @POST
     @Path("add")
-    public Status add(@Context HttpServletRequest request, @FormParam("groupName") String groupName,
-                      @FormParam("groupComment") String groupComment) {
+    public Status add(@Context HttpServletRequest request, @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment) {
         String userNo = RequestUtil.getUserNo(request);
 
         if (userNo == null || groupName == null || groupName.isEmpty()) {
-            log.error(String.format(
-                    "Add dal group failed, caused by illegal parameters: " + "[groupName=%s, groupComment=%s]",
-                    groupName, groupComment));
+            log.error(String.format("Add dal group failed, caused by illegal parameters: " + "[groupName=%s, groupComment=%s]", groupName, groupComment));
             Status status = Status.ERROR;
             status.setInfo("Illegal parameters.");
             return status;
@@ -157,13 +142,11 @@ public class DalGroupResource {
 
     @POST
     @Path("update")
-    public Status update(@Context HttpServletRequest request, @FormParam("groupId") String id,
-                         @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment) {
+    public Status update(@Context HttpServletRequest request, @FormParam("groupId") String id, @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment) {
         String userNo = RequestUtil.getUserNo(request);
 
         if (userNo == null || id == null || id.isEmpty()) {
-            log.error(String.format("Update dal group failed, caused by illegal parameters, "
-                    + "[id=%s, groupName=%s, groupComment=%s]", id, groupName, groupComment));
+            log.error(String.format("Update dal group failed, caused by illegal parameters, " + "[id=%s, groupName=%s, groupComment=%s]", id, groupName, groupComment));
             Status status = Status.ERROR;
             status.setInfo("Illegal parameters.");
             return status;

@@ -12,7 +12,7 @@ public class CSharpCodeGeneratorOfOthersProcessor implements DalProcessor {
 
     @Override
     public void process(CodeGenContext context) throws Exception {
-        generateCommonCode((CodeGenContext) context);
+        generateCommonCode(context);
     }
 
     /**
@@ -20,11 +20,8 @@ public class CSharpCodeGeneratorOfOthersProcessor implements DalProcessor {
      */
     private void generateCommonCode(CodeGenContext codeGenCtx) {
         CSharpCodeGenContext ctx = (CSharpCodeGenContext) codeGenCtx;
-
         final int id = ctx.getProjectId();
-
         final VelocityContext context = GenUtils.buildDefaultVelocityContext();
-
         final File csMavenLikeDir = new File(String.format("%s/%s/cs", ctx.getGeneratePath(), id));
         context.put("host", ctx.getDalConfigHost());
         context.put("dbs", ctx.getDbHosts().values());

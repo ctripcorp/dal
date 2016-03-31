@@ -1,332 +1,318 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import org.apache.commons.lang.StringUtils;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import java.util.*;
 
 public class JavaTableHost {
-	private DatabaseCategory databaseCategory;
-	private String packageName;
-	private String dbSetName;
-	private String tableName;
-	private String pojoClassName;
-	private List<JavaParameterHost> fields;
-	private List<JavaParameterHost> primaryKeys;
-	private boolean hasIdentity;
-	private String identityColumnName;
-	private boolean Sp;
-	private SpOperationHost SpInsert;
-	private SpOperationHost SpDelete;
-	private SpOperationHost SpUpdate;
-	private List<JavaMethodHost> methods = new ArrayList<JavaMethodHost>();
-	
-	private String api_list;
-	
-	public boolean generateAPI(Integer ...apiID){
-		if(api_list==null || api_list.isEmpty()){
-			return true;
-		}
-		String []list = api_list.split(",");
-		Arrays.sort(list);
-		for(int i=0;i<apiID.length;i++){
-			if(Arrays.binarySearch(list, "dal_api_"+apiID[i])>=0){
-				return true;
-			}
-		}
-		return false;
-	}
+    private DatabaseCategory databaseCategory;
+    private String packageName;
+    private String dbSetName;
+    private String tableName;
+    private String pojoClassName;
+    private List<JavaParameterHost> fields;
+    private List<JavaParameterHost> primaryKeys;
+    private boolean hasIdentity;
+    private String identityColumnName;
+    private boolean Sp;
+    private SpOperationHost SpInsert;
+    private SpOperationHost SpDelete;
+    private SpOperationHost SpUpdate;
+    private List<JavaMethodHost> methods = new ArrayList<>();
 
-	public String getPackageName() {
-		return packageName;
-	}
+    private String api_list;
 
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
-	}
+    public boolean generateAPI(Integer... apiID) {
+        if (api_list == null || api_list.isEmpty()) {
+            return true;
+        }
+        String[] list = api_list.split(",");
+        Arrays.sort(list);
+        for (int i = 0; i < apiID.length; i++) {
+            if (Arrays.binarySearch(list, "dal_api_" + apiID[i]) >= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	public boolean isSp() {
-		return Sp;
-	}
+    public String getPackageName() {
+        return packageName;
+    }
 
-	public void setSp(boolean isSp) {
-		this.Sp = isSp;
-	}
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
 
-	public boolean isSpa() {
-		return null != this.SpInsert && this.SpInsert.isExist();
-	}
+    public boolean isSp() {
+        return Sp;
+    }
 
-	public String getDbSetName() {
-		return dbSetName;
-	}
+    public void setSp(boolean isSp) {
+        this.Sp = isSp;
+    }
 
-	public void setDbSetName(String dbSetName) {
-		this.dbSetName = dbSetName;
-	}
+    public boolean isSpa() {
+        return null != this.SpInsert && this.SpInsert.isExist();
+    }
 
-	public String getTableName() {
-		return tableName;
-	}
+    public String getDbSetName() {
+        return dbSetName;
+    }
 
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
+    public void setDbSetName(String dbSetName) {
+        this.dbSetName = dbSetName;
+    }
 
-	public String getPojoClassName() {
-		return pojoClassName;
-	}
+    public String getTableName() {
+        return tableName;
+    }
 
-	public void setPojoClassName(String pojoClassName) {
-		this.pojoClassName = pojoClassName;
-	}
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
 
-	public List<JavaMethodHost> getMethods() {
-		return methods;
-	}
+    public String getPojoClassName() {
+        return pojoClassName;
+    }
 
-	public void setMethods(List<JavaMethodHost> methods) {
-		this.methods = methods;
-	}
+    public void setPojoClassName(String pojoClassName) {
+        this.pojoClassName = pojoClassName;
+    }
 
-	public boolean hasMethods() {
-		return this.methods != null && !this.methods.isEmpty();
-	}
+    public List<JavaMethodHost> getMethods() {
+        return methods;
+    }
 
-	public List<JavaParameterHost> getFields() {
-		return fields;
-	}
+    public void setMethods(List<JavaMethodHost> methods) {
+        this.methods = methods;
+    }
 
-	public void setFields(List<JavaParameterHost> fields) {
-		this.fields = fields;
-	}
+    public boolean hasMethods() {
+        return this.methods != null && !this.methods.isEmpty();
+    }
 
-	public List<JavaParameterHost> getPrimaryKeys() {
-		return primaryKeys;
-	}
+    public List<JavaParameterHost> getFields() {
+        return fields;
+    }
 
-	public void setPrimaryKeys(List<JavaParameterHost> primaryKeys) {
-		this.primaryKeys = primaryKeys;
-	}
+    public void setFields(List<JavaParameterHost> fields) {
+        this.fields = fields;
+    }
 
-	public boolean isHasIdentity() {
-		return hasIdentity;
-	}
+    public List<JavaParameterHost> getPrimaryKeys() {
+        return primaryKeys;
+    }
 
-	public void setHasIdentity(boolean hasIdentity) {
-		this.hasIdentity = hasIdentity;
-	}
+    public void setPrimaryKeys(List<JavaParameterHost> primaryKeys) {
+        this.primaryKeys = primaryKeys;
+    }
 
-	public String getCapitalizedIdentityColumnName() {
-		for (JavaParameterHost field : fields) {
-			if (field.getName().equals(identityColumnName))
-				return field.getCapitalizedName();
-		}
-		return null;
-	}
+    public boolean isHasIdentity() {
+        return hasIdentity;
+    }
 
-	public String getIdentityColumnName() {
-		return identityColumnName;
-	}
+    public void setHasIdentity(boolean hasIdentity) {
+        this.hasIdentity = hasIdentity;
+    }
 
-	public void setIdentityColumnName(String identityColumnName) {
-		this.identityColumnName = identityColumnName;
-	}
+    public String getCapitalizedIdentityColumnName() {
+        for (JavaParameterHost field : fields) {
+            if (field.getName().equals(identityColumnName))
+                return field.getCapitalizedName();
+        }
+        return null;
+    }
 
-	public SpOperationHost getSpInsert() {
-		return SpInsert;
-	}
+    public String getIdentityColumnName() {
+        return identityColumnName;
+    }
 
-	public void setSpInsert(SpOperationHost SpInsert) {
-		this.SpInsert = SpInsert;
-	}
+    public void setIdentityColumnName(String identityColumnName) {
+        this.identityColumnName = identityColumnName;
+    }
 
-	public SpOperationHost getSpDelete() {
-		return SpDelete;
-	}
+    public SpOperationHost getSpInsert() {
+        return SpInsert;
+    }
 
-	public void setSpDelete(SpOperationHost SpDelete) {
-		this.SpDelete = SpDelete;
-	}
+    public void setSpInsert(SpOperationHost SpInsert) {
+        this.SpInsert = SpInsert;
+    }
 
-	public SpOperationHost getSpUpdate() {
-		return SpUpdate;
-	}
+    public SpOperationHost getSpDelete() {
+        return SpDelete;
+    }
 
-	public void setSpUpdate(SpOperationHost SpUpdate) {
-		this.SpUpdate = SpUpdate;
-	}
+    public void setSpDelete(SpOperationHost SpDelete) {
+        this.SpDelete = SpDelete;
+    }
 
-	public DatabaseCategory getDatabaseCategory() {
-		return databaseCategory;
-	}
+    public SpOperationHost getSpUpdate() {
+        return SpUpdate;
+    }
 
-	public void setDatabaseCategory(DatabaseCategory databaseCategory) {
-		this.databaseCategory = databaseCategory;
-	}
-	
-	public String getApi_list() {
-		return api_list;
-	}
+    public void setSpUpdate(SpOperationHost SpUpdate) {
+        this.SpUpdate = SpUpdate;
+    }
 
-	public void setApi_list(String api_list) {
-		this.api_list = api_list;
-	}
+    public DatabaseCategory getDatabaseCategory() {
+        return databaseCategory;
+    }
 
-	public boolean isIntegerPk() {
-		return primaryKeys.size() == 1
-				&& (primaryKeys.get(0).getJavaClass().equals(Integer.class) || primaryKeys
-						.get(0).getJavaClass().equals(Long.class));
-	}
-	
-	public String pageBegain(){
-		if(this.databaseCategory == DatabaseCategory.MySql){
-			return "(pageNo - 1) * pageSize";
-		}else{
-			return "(pageNo - 1) * pageSize + 1";
-		}
-	}
-	
-	public String pageEnd(){
-		if(this.databaseCategory == DatabaseCategory.MySql){
-			return "pageSize";
-		}else{
-			return "pageSize * pageNo";
-		}
-	}
+    public void setDatabaseCategory(DatabaseCategory databaseCategory) {
+        this.databaseCategory = databaseCategory;
+    }
 
-	public String getPkParameterDeclaration() {
-		List<String> paramsDeclaration = new ArrayList<String>();
-		for (JavaParameterHost parameter : primaryKeys) {
-			paramsDeclaration.add(String.format("%s %s",
-					parameter.getClassDisplayName(),
-					parameter.getUncapitalizedName()));
-		}
-		paramsDeclaration.add(String.format("%s %s", "DalHints", "hints"));
-		return StringUtils.join(paramsDeclaration, ", ");
-	}
+    public String getApi_list() {
+        return api_list;
+    }
 
-	public String getPkParametersList() {
-		List<String> paramsList = new ArrayList<String>();
-		for (JavaParameterHost parameter : primaryKeys) {
-			paramsList.add(parameter.getUncapitalizedName());
-		}
-		paramsList.add("new DalHints()");
+    public void setApi_list(String api_list) {
+        this.api_list = api_list;
+    }
 
-		return StringUtils.join(paramsList, ",");
-	}
+    public boolean isIntegerPk() {
+        return primaryKeys.size() == 1 && (primaryKeys.get(0).getJavaClass().equals(Integer.class) || primaryKeys.get(0).getJavaClass().equals(Long.class));
+    }
 
-	public boolean hasPk() {
-		return null != primaryKeys && !primaryKeys.isEmpty();
-	}
+    public String pageBegain() {
+        if (this.databaseCategory == DatabaseCategory.MySql) {
+            return "(pageNo - 1) * pageSize";
+        } else {
+            return "(pageNo - 1) * pageSize + 1";
+        }
+    }
 
-	public Set<String> getDaoImports() {
-		Set<String> imports = new TreeSet<String>();
-		imports.add("com.ctrip.platform.dal.common.enums.DatabaseCategory");
-		imports.add("com.ctrip.platform.dal.dao.*");
-		imports.add("com.ctrip.platform.dal.dao.helper.*");
-		imports.add("com.ctrip.platform.dal.dao.sqlbuilder.*");
+    public String pageEnd() {
+        if (this.databaseCategory == DatabaseCategory.MySql) {
+            return "pageSize";
+        } else {
+            return "pageSize * pageNo";
+        }
+    }
 
-		imports.add(java.sql.ResultSet.class.getName());
-		imports.add(java.sql.SQLException.class.getName());
-		imports.add(java.util.Map.class.getName());
-		imports.add(java.util.LinkedHashMap.class.getName());
-		imports.add(java.sql.Types.class.getName());
-		imports.add(java.util.List.class.getName());
+    public String getPkParameterDeclaration() {
+        List<String> paramsDeclaration = new ArrayList<>();
+        for (JavaParameterHost parameter : primaryKeys) {
+            paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getUncapitalizedName()));
+        }
+        paramsDeclaration.add(String.format("%s %s", "DalHints", "hints"));
+        return StringUtils.join(paramsDeclaration, ", ");
+    }
 
-		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(
-				fields);
-		for (JavaMethodHost method : methods) {
-			allTypes.addAll(method.getParameters());
-		}
+    public String getPkParametersList() {
+        List<String> paramsList = new ArrayList<>();
+        for (JavaParameterHost parameter : primaryKeys) {
+            paramsList.add(parameter.getUncapitalizedName());
+        }
 
-		if (SpInsert != null)
-			allTypes.addAll(SpInsert.getParameters());
-		if (SpDelete != null)
-			allTypes.addAll(SpDelete.getParameters());
-		if (SpUpdate != null)
-			allTypes.addAll(SpUpdate.getParameters());
+        paramsList.add("new DalHints()");
+        return StringUtils.join(paramsList, ",");
+    }
 
-		for (JavaParameterHost field : allTypes) {
-			if (null != field.getDirection()
-					&& (field.getDirection().name().equals("InputOutput") 
-							|| field.getDirection().name().equals("InputOutput")))
-				imports.add(com.ctrip.platform.dal.common.enums.ParameterDirection.class.getName());
-			Class<?> clazz = field.getJavaClass();
-			if (byte[].class.equals(clazz))
-				continue;
-			if (null == clazz)
-				continue;
-			if (clazz.getPackage().getName().equals(String.class.getPackage().getName()))
-				continue;
-			imports.add(clazz.getName());
-		}
+    public boolean hasPk() {
+        return null != primaryKeys && !primaryKeys.isEmpty();
+    }
 
-		return imports;
-	}
+    public Set<String> getDaoImports() {
+        Set<String> imports = new TreeSet<>();
+        imports.add("com.ctrip.platform.dal.common.enums.DatabaseCategory");
+        imports.add("com.ctrip.platform.dal.dao.*");
+        imports.add("com.ctrip.platform.dal.dao.helper.*");
+        imports.add("com.ctrip.platform.dal.dao.sqlbuilder.*");
 
-	public Set<String> getTestImports() {
-		Set<String> imports = new TreeSet<String>();
-		imports.add(java.util.List.class.getName());
-		imports.addAll(this.getPojoImports());
-		return imports;
-	}
+        imports.add(java.sql.ResultSet.class.getName());
+        imports.add(java.sql.SQLException.class.getName());
+        imports.add(java.util.Map.class.getName());
+        imports.add(java.util.LinkedHashMap.class.getName());
+        imports.add(java.sql.Types.class.getName());
+        imports.add(java.util.List.class.getName());
 
-	public Set<String> getPojoImports() {
-		Set<String> imports = new TreeSet<String>();
+        List<JavaParameterHost> allTypes = new ArrayList<>(fields);
+        for (JavaMethodHost method : methods) {
+            allTypes.addAll(method.getParameters());
+        }
 
-		List<JavaParameterHost> allTypes = new ArrayList<JavaParameterHost>(fields);
-		for (JavaParameterHost field : allTypes) {
-			Class<?> clazz = field.getJavaClass();
-			if (byte[].class.equals(clazz))
-				continue;
-			if (clazz.getPackage().getName().equals(String.class.getPackage().getName()))
-				continue;
-			imports.add(clazz.getName());
-		}
-		return imports;
-	}
+        if (SpInsert != null)
+            allTypes.addAll(SpInsert.getParameters());
+        if (SpDelete != null)
+            allTypes.addAll(SpDelete.getParameters());
+        if (SpUpdate != null)
+            allTypes.addAll(SpUpdate.getParameters());
 
-	/**
-	 * Get the CTE order by columns to generate row-number
-	 * 
-	 * @return
-	 */
-	public String getOverColumns() {
-		List<String> tokens = new ArrayList<String>();
-		for (JavaParameterHost p : this.fields) {
-			if (p.isPrimary())
-				tokens.add(p.getName());
-		}
-		if (tokens.size() > 0)
-			return StringUtils.join(tokens, ",");
-		else
-			return this.fields.get(0).getName();
-	}
+        for (JavaParameterHost field : allTypes) {
+            if (null != field.getDirection() && (field.getDirection().name().equals("InputOutput") || field.getDirection().name().equals("InputOutput")))
+                imports.add(com.ctrip.platform.dal.common.enums.ParameterDirection.class.getName());
+            Class<?> clazz = field.getJavaClass();
+            if (byte[].class.equals(clazz))
+                continue;
+            if (null == clazz)
+                continue;
+            if (clazz.getPackage().getName().equals(String.class.getPackage().getName()))
+                continue;
+            imports.add(clazz.getName());
+        }
 
-	public String getPrimaryKeyName() throws Exception{
-		if(this.getPrimaryKeys() == null && this.getPrimaryKeys().size() != 1)
-			throw new Exception("The multiple primary key is not allowed here!");
-		return this.getPrimaryKeys().get(0).getCapitalizedName();
-	}
-	
-	public String getPrimaryKeyType() throws Exception{
-		if(this.getPrimaryKeys() == null && this.getPrimaryKeys().size() != 1)
-			throw new Exception("The multiple primary key is not allowed here!");
-		return this.getPrimaryKeys().get(0).getClassDisplayName();
-	}
-	
-	public String getScalarColumn() {
-		return (null != this.fields && !this.fields.isEmpty()) ? this.fields
-				.get(0).getClassDisplayName() : "";
-	}
+        return imports;
+    }
 
-	public boolean isSampleType() {
-		return null != this.fields && this.fields.size() == 1;
-	}
+    public Set<String> getTestImports() {
+        Set<String> imports = new TreeSet<>();
+        imports.add(java.util.List.class.getName());
+        imports.addAll(this.getPojoImports());
+        return imports;
+    }
+
+    public Set<String> getPojoImports() {
+        Set<String> imports = new TreeSet<>();
+        List<JavaParameterHost> allTypes = new ArrayList<>(fields);
+        for (JavaParameterHost field : allTypes) {
+            Class<?> clazz = field.getJavaClass();
+            if (byte[].class.equals(clazz))
+                continue;
+            if (clazz.getPackage().getName().equals(String.class.getPackage().getName()))
+                continue;
+            imports.add(clazz.getName());
+        }
+        return imports;
+    }
+
+    /**
+     * Get the CTE order by columns to generate row-number
+     *
+     * @return
+     */
+    public String getOverColumns() {
+        List<String> tokens = new ArrayList<>();
+        for (JavaParameterHost p : this.fields) {
+            if (p.isPrimary())
+                tokens.add(p.getName());
+        }
+        if (tokens.size() > 0)
+            return StringUtils.join(tokens, ",");
+        else
+            return this.fields.get(0).getName();
+    }
+
+    public String getPrimaryKeyName() throws Exception {
+        if (this.getPrimaryKeys() == null && this.getPrimaryKeys().size() != 1)
+            throw new Exception("The multiple primary key is not allowed here!");
+        return this.getPrimaryKeys().get(0).getCapitalizedName();
+    }
+
+    public String getPrimaryKeyType() throws Exception {
+        if (this.getPrimaryKeys() == null && this.getPrimaryKeys().size() != 1)
+            throw new Exception("The multiple primary key is not allowed here!");
+        return this.getPrimaryKeys().get(0).getClassDisplayName();
+    }
+
+    public String getScalarColumn() {
+        return (null != this.fields && !this.fields.isEmpty()) ? this.fields.get(0).getClassDisplayName() : "";
+    }
+
+    public boolean isSampleType() {
+        return null != this.fields && this.fields.size() == 1;
+    }
 }

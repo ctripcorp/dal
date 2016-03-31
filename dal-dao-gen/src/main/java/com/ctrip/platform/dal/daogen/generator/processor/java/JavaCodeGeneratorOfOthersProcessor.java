@@ -9,7 +9,6 @@ import org.apache.velocity.VelocityContext;
 import java.io.File;
 
 public class JavaCodeGeneratorOfOthersProcessor implements DalProcessor {
-
     @Override
     public void process(CodeGenContext context) throws Exception {
         JavaCodeGenContext ctx = (JavaCodeGenContext) context;

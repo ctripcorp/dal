@@ -18,18 +18,14 @@ import java.util.Queue;
 import java.util.concurrent.Callable;
 
 public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
-
     private static Logger log = Logger.getLogger(JavaCodeGeneratorOfTableProcessor.class);
 
     @Override
     public void process(CodeGenContext context) throws Exception {
-
         JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         int projectId = ctx.getProjectId();
         File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
-
         List<Callable<ExecuteResult>> tableCallables = generateTableDao(ctx, dir);
-
         TaskUtils.invokeBatch(log, tableCallables);
     }
 
@@ -37,10 +33,9 @@ public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
         JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
         final Progress progress = ctx.getProgress();
         Queue<JavaTableHost> _tableHosts = ctx.getTableHosts();
-        List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
+        List<Callable<ExecuteResult>> results = new ArrayList<>();
 
         for (final JavaTableHost host : _tableHosts) {
-
             Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 
                 @Override

@@ -13,7 +13,7 @@
 		<add name="fws" target="fws" iis="ALL" net="ALL" dataCenter="ALL" />
 		<add name="fat" target="fat" iis="ALL" net="ALL" dataCenter="ALL" />
 		<add name="lpt" target="lpt" iis="ALL" net="ALL" dataCenter="ALL" />
-		<add name="uat_nt" target="uat_nt" iis="ALL" net="ALL" dataCenter="ALL" />
+		<add name="uat" target="uat" iis="ALL" net="ALL" dataCenter="ALL" />
 		<add name="prd" target="prd" iis="ALL" net="ALL" dataCenter="ALL" />
 	</environments>
 	<!--environments节点有多少个子节点，则下文中必须出现同样数量的节点，且名称必须与上文中的name属性一致 -->
@@ -48,12 +48,12 @@
 		<appInternals.permissions.write>10.32.21.21</appInternals.permissions.write>
 		<CFX_DataSource_ServiceUrl>https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query</CFX_DataSource_ServiceUrl>
 	</fws>
-	<uat_nt>
+	<uat>
 		<LoggingServer.V2.IP>collector.logging.uat.qa.nt.ctripcorp.com</LoggingServer.V2.IP>
 		<LoggingServer.V2.Port>63100</LoggingServer.V2.Port>
 		<appInternals.permissions.write>10.2.24.129</appInternals.permissions.write>
 		<CFX_DataSource_ServiceUrl>https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query</CFX_DataSource_ServiceUrl>
-	</uat_nt>
+	</uat>
 	<prd>
 		<LoggingServer.V2.IP>collector.logging.sh.ctriptravel.com</LoggingServer.V2.IP>
 		<LoggingServer.V2.Port>63100</LoggingServer.V2.Port>

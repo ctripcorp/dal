@@ -28,7 +28,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AbstractCSharpDataPreparer {
-
     private static DaoOfDatabaseSet daoOfDatabaseSet;
 
     static {
@@ -121,9 +120,8 @@ public class AbstractCSharpDataPreparer {
         return tableHost;
     }
 
-    private List<GenTaskBySqlBuilder> filterExtraMethods(Queue<GenTaskBySqlBuilder> sqlBuilders, String dbName,
-                                                         String table) {
-        List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<GenTaskBySqlBuilder>();
+    private List<GenTaskBySqlBuilder> filterExtraMethods(Queue<GenTaskBySqlBuilder> sqlBuilders, String dbName, String table) {
+        List<GenTaskBySqlBuilder> currentTableBuilders = new ArrayList<>();
 
         Iterator<GenTaskBySqlBuilder> iter = sqlBuilders.iterator();
         while (iter.hasNext()) {
@@ -137,9 +135,8 @@ public class AbstractCSharpDataPreparer {
         return currentTableBuilders;
     }
 
-    private List<CSharpMethodHost> buildSqlBuilderMethodHost(List<CSharpParameterHost> allColumns,
-                                                             List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
-        List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
+    private List<CSharpMethodHost> buildSqlBuilderMethodHost(List<CSharpParameterHost> allColumns, List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
+        List<CSharpMethodHost> methods = new ArrayList<>();
         methods.addAll(buildSelectMethodHosts(allColumns, currentTableBuilders));
         methods.addAll(buildDeleteMethodHosts(allColumns, currentTableBuilders));
         methods.addAll(buildInsertMethodHosts(allColumns, currentTableBuilders));
@@ -147,9 +144,8 @@ public class AbstractCSharpDataPreparer {
         return methods;
     }
 
-    private List<CSharpMethodHost> buildSelectMethodHosts(List<CSharpParameterHost> allColumns,
-                                                          List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
-        List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
+    private List<CSharpMethodHost> buildSelectMethodHosts(List<CSharpParameterHost> allColumns, List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
+        List<CSharpMethodHost> methods = new ArrayList<>();
 
         for (GenTaskBySqlBuilder builder : currentTableBuilders) {
             if (!builder.getCrud_type().equals("select")) {
@@ -174,9 +170,8 @@ public class AbstractCSharpDataPreparer {
             method.setScalarType(builder.getScalarType());
             method.setPaging(builder.isPagination());
 
-            List<AbstractParameterHost> paramAbstractHosts = DbUtils.getSelectFieldHosts(builder.getAllInOneName(),
-                    builder.getSql_content(), new JavaSelectFieldResultSetExtractor());
-            List<JavaParameterHost> paramHosts = new ArrayList<JavaParameterHost>();
+            List<AbstractParameterHost> paramAbstractHosts = DbUtils.getSelectFieldHosts(builder.getAllInOneName(), builder.getSql_content(), new JavaSelectFieldResultSetExtractor());
+            List<JavaParameterHost> paramHosts = new ArrayList<>();
             for (AbstractParameterHost phost : paramAbstractHosts) {
                 paramHosts.add((JavaParameterHost) phost);
             }
@@ -200,7 +195,7 @@ public class AbstractCSharpDataPreparer {
     private List<CSharpParameterHost> buildSqlParamName(List<CSharpParameterHost> whereParams, String sql) {
         Pattern ptn = Pattern.compile("@([^\\s]+)", Pattern.CASE_INSENSITIVE);
         Matcher mt = ptn.matcher(sql);
-        Queue<String> sqlParamQueue = new LinkedList<String>();
+        Queue<String> sqlParamQueue = new LinkedList<>();
         while (mt.find()) {
             sqlParamQueue.add(mt.group(1));
         }
@@ -213,9 +208,8 @@ public class AbstractCSharpDataPreparer {
         return whereParams;
     }
 
-    private List<CSharpMethodHost> buildDeleteMethodHosts(List<CSharpParameterHost> allColumns,
-                                                          List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
-        List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
+    private List<CSharpMethodHost> buildDeleteMethodHosts(List<CSharpParameterHost> allColumns, List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
+        List<CSharpMethodHost> methods = new ArrayList<>();
 
         for (GenTaskBySqlBuilder builder : currentTableBuilders) {
             if (!builder.getCrud_type().equals("delete")) {
@@ -235,9 +229,8 @@ public class AbstractCSharpDataPreparer {
         return methods;
     }
 
-    private List<CSharpMethodHost> buildInsertMethodHosts(List<CSharpParameterHost> allColumns,
-                                                          List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
-        List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
+    private List<CSharpMethodHost> buildInsertMethodHosts(List<CSharpParameterHost> allColumns, List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
+        List<CSharpMethodHost> methods = new ArrayList<>();
 
         for (GenTaskBySqlBuilder builder : currentTableBuilders) {
             if (!builder.getCrud_type().equals("insert")) {
@@ -250,7 +243,7 @@ public class AbstractCSharpDataPreparer {
             method.setScalarType(builder.getScalarType());
             method.setPaging(builder.isPagination());
 
-            List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
+            List<CSharpParameterHost> parameters = new ArrayList<>();
             if (method.getCrud_type().equals("insert")) {
                 String[] fields = StringUtils.split(builder.getFields(), ",");
                 for (String field : fields) {
@@ -268,9 +261,8 @@ public class AbstractCSharpDataPreparer {
         return methods;
     }
 
-    private List<CSharpMethodHost> buildUpdateMethodHosts(List<CSharpParameterHost> allColumns,
-                                                          List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
-        List<CSharpMethodHost> methods = new ArrayList<CSharpMethodHost>();
+    private List<CSharpMethodHost> buildUpdateMethodHosts(List<CSharpParameterHost> allColumns, List<GenTaskBySqlBuilder> currentTableBuilders) throws Exception {
+        List<CSharpMethodHost> methods = new ArrayList<>();
 
         for (GenTaskBySqlBuilder builder : currentTableBuilders) {
             if (!builder.getCrud_type().equals("update")) {
@@ -283,7 +275,7 @@ public class AbstractCSharpDataPreparer {
             method.setScalarType(builder.getScalarType());
             method.setPaging(builder.isPagination());
 
-            List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
+            List<CSharpParameterHost> parameters = new ArrayList<>();
 
             String[] fields = StringUtils.split(builder.getFields(), ",");
             for (String field : fields) {
@@ -309,9 +301,8 @@ public class AbstractCSharpDataPreparer {
         return methods;
     }
 
-    private List<CSharpParameterHost> buildMethodParameterHost4SqlConditin(GenTaskBySqlBuilder builder,
-                                                                           List<CSharpParameterHost> allColumns) {
-        List<CSharpParameterHost> parameters = new ArrayList<CSharpParameterHost>();
+    private List<CSharpParameterHost> buildMethodParameterHost4SqlConditin(GenTaskBySqlBuilder builder, List<CSharpParameterHost> allColumns) {
+        List<CSharpParameterHost> parameters = new ArrayList<>();
         String[] conditions = StringUtils.split(builder.getCondition(), ";");
         for (String condition : conditions) {
             String[] tokens = StringUtils.split(condition, ",");

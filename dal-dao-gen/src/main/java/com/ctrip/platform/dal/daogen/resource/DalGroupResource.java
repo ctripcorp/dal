@@ -46,14 +46,11 @@ public class DalGroupResource {
 
     @POST
     @Path("add")
-    public Status add(@Context HttpServletRequest request, @FormParam("groupName") String groupName,
-                      @FormParam("groupComment") String groupComment) {
+    public Status add(@Context HttpServletRequest request, @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment) {
         String userNo = RequestUtil.getUserNo(request);
 
         if (userNo == null || groupName == null || groupName.isEmpty()) {
-            log.error(String.format(
-                    "Add dal group failed, caused by illegal parameters: " + "[groupName=%s, groupComment=%s]",
-                    groupName, groupComment));
+            log.error(String.format("Add dal group failed, caused by illegal parameters: " + "[groupName=%s, groupComment=%s]", groupName, groupComment));
             Status status = Status.ERROR;
             status.setInfo("Illegal parameters.");
             return status;
@@ -145,13 +142,11 @@ public class DalGroupResource {
 
     @POST
     @Path("update")
-    public Status update(@Context HttpServletRequest request, @FormParam("groupId") String id,
-                         @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment) {
+    public Status update(@Context HttpServletRequest request, @FormParam("groupId") String id, @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment) {
         String userNo = RequestUtil.getUserNo(request);
 
         if (userNo == null || id == null || id.isEmpty()) {
-            log.error(String.format("Update dal group failed, caused by illegal parameters, "
-                    + "[id=%s, groupName=%s, groupComment=%s]", id, groupName, groupComment));
+            log.error(String.format("Update dal group failed, caused by illegal parameters, " + "[id=%s, groupName=%s, groupComment=%s]", id, groupName, groupComment));
             Status status = Status.ERROR;
             status.setInfo("Illegal parameters.");
             return status;

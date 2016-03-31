@@ -52,8 +52,7 @@ public class DalUserResource {
 
     @POST
     @Path("add")
-    public Status addUser(@FormParam("userNo") String userNo, @FormParam("userName") String userName,
-                          @FormParam("userEmail") String userEmail, @FormParam("password") String password) {
+    public Status addUser(@FormParam("userNo") String userNo, @FormParam("userName") String userName, @FormParam("userEmail") String userEmail, @FormParam("password") String password) {
         if (userNo == null) {
             log.error(String.format("Add user failed, caused by illegal parameters:userNo=%s", userNo));
             Status status = Status.ERROR;
@@ -102,8 +101,7 @@ public class DalUserResource {
 
     @POST
     @Path("update")
-    public Status update(@FormParam("userId") int userId, @FormParam("userNo") String userNo,
-                         @FormParam("userName") String userName, @FormParam("userEmail") String userEmail) {
+    public Status update(@FormParam("userId") int userId, @FormParam("userNo") String userNo, @FormParam("userName") String userName, @FormParam("userEmail") String userEmail) {
         if (userNo == null) {
             log.error(String.format("Update user failed, caused by illegal parameters:userNo=%s", userNo));
             Status status = Status.ERROR;
@@ -236,8 +234,7 @@ public class DalUserResource {
 
     @POST
     @Path("signup")
-    public Status userSignUp(@Context HttpServletRequest request, @FormParam("userNo") String userNo, @FormParam("userName") String userName,
-                             @FormParam("userEmail") String userEmail, @FormParam("password") String password) {
+    public Status userSignUp(@Context HttpServletRequest request, @FormParam("userNo") String userNo, @FormParam("userName") String userName, @FormParam("userEmail") String userEmail, @FormParam("password") String password) {
         Status status = Status.ERROR;
         if (userNo == null || userNo.isEmpty()) {
             status.setInfo(userNumberNullMessage);

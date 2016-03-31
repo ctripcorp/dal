@@ -13,10 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CsharpSpParamResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
-
     @Override
     public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
-        List<AbstractParameterHost> parameters = new ArrayList<AbstractParameterHost>();
+        List<AbstractParameterHost> parameters = new ArrayList<>();
         while (rs.next()) {
             int paramMode = rs.getShort("COLUMN_TYPE");
 

@@ -12,153 +12,152 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class JavaCodeGenContext implements CodeGenContext{
-	
-	protected int projectId;
-	protected boolean regenerate;
-	private boolean ignoreApproveStatus;
-	protected Progress progress;
-	protected String namespace;
-	public String generatePath;
-	
-	protected Queue<GenTaskBySqlBuilder> sqlBuilders = new ConcurrentLinkedQueue<GenTaskBySqlBuilder>();
-	protected DalConfigHost dalConfigHost;
-	
-	protected Queue<JavaTableHost> tableHosts = new ConcurrentLinkedQueue<JavaTableHost>();
-	protected Queue<ViewHost> viewHosts = new ConcurrentLinkedQueue<ViewHost>();
-	//<SpDbHost dbName, SpDbHost>
-	protected Map<String, SpDbHost> spHostMaps = new ConcurrentHashMap<String, SpDbHost>();
-	protected Queue<SpHost> spHosts = new ConcurrentLinkedQueue<SpHost>();
-	protected ContextHost contextHost = new ContextHost();
-	protected Queue<FreeSqlHost> freeSqlHosts = new ConcurrentLinkedQueue<FreeSqlHost>();
-	//<JavaMethodHost pojoClassName, JavaMethodHost>
-	protected Map<String, JavaMethodHost> freeSqlPojoHosts = new ConcurrentHashMap<String, JavaMethodHost>();
-	
-	public JavaCodeGenContext(int projectId, boolean regenerate,
-			Progress progress) {
-		this.projectId = projectId;
-		this.regenerate = regenerate;
-		this.progress = progress;
-		this.generatePath = Configuration.get("gen_code_path");
-	}
+public class JavaCodeGenContext implements CodeGenContext {
+    protected int projectId;
+    protected boolean regenerate;
+    private boolean ignoreApproveStatus;
+    protected Progress progress;
+    protected String namespace;
+    public String generatePath;
 
-	public Queue<JavaTableHost> getTableHosts() {
-		return tableHosts;
-	}
+    protected Queue<GenTaskBySqlBuilder> sqlBuilders = new ConcurrentLinkedQueue<>();
+    protected DalConfigHost dalConfigHost;
 
-	public void setTableHosts(Queue<JavaTableHost> tableHosts) {
-		this.tableHosts = tableHosts;
-	}
+    protected Queue<JavaTableHost> tableHosts = new ConcurrentLinkedQueue<>();
+    protected Queue<ViewHost> viewHosts = new ConcurrentLinkedQueue<>();
+    //<SpDbHost dbName, SpDbHost>
+    protected Map<String, SpDbHost> spHostMaps = new ConcurrentHashMap<>();
+    protected Queue<SpHost> spHosts = new ConcurrentLinkedQueue<>();
+    protected ContextHost contextHost = new ContextHost();
+    protected Queue<FreeSqlHost> freeSqlHosts = new ConcurrentLinkedQueue<>();
+    //<JavaMethodHost pojoClassName, JavaMethodHost>
+    protected Map<String, JavaMethodHost> freeSqlPojoHosts = new ConcurrentHashMap<>();
 
-	public Queue<ViewHost> getViewHosts() {
-		return viewHosts;
-	}
+    public JavaCodeGenContext(int projectId, boolean regenerate, Progress progress) {
+        this.projectId = projectId;
+        this.regenerate = regenerate;
+        this.progress = progress;
+        this.generatePath = Configuration.get("gen_code_path");
+    }
 
-	public void setViewHosts(Queue<ViewHost> viewHosts) {
-		this.viewHosts = viewHosts;
-	}
+    public Queue<JavaTableHost> getTableHosts() {
+        return tableHosts;
+    }
 
-	public Map<String, SpDbHost> getSpHostMaps() {
-		return spHostMaps;
-	}
+    public void setTableHosts(Queue<JavaTableHost> tableHosts) {
+        this.tableHosts = tableHosts;
+    }
 
-	public void setSpHostMaps(Map<String, SpDbHost> spHostMaps) {
-		this.spHostMaps = spHostMaps;
-	}
+    public Queue<ViewHost> getViewHosts() {
+        return viewHosts;
+    }
 
-	public Queue<SpHost> getSpHosts() {
-		return spHosts;
-	}
+    public void setViewHosts(Queue<ViewHost> viewHosts) {
+        this.viewHosts = viewHosts;
+    }
 
-	public void setSpHosts(Queue<SpHost> spHosts) {
-		this.spHosts = spHosts;
-	}
+    public Map<String, SpDbHost> getSpHostMaps() {
+        return spHostMaps;
+    }
 
-	public ContextHost getContextHost() {
-		return contextHost;
-	}
+    public void setSpHostMaps(Map<String, SpDbHost> spHostMaps) {
+        this.spHostMaps = spHostMaps;
+    }
 
-	public void setContextHost(ContextHost contextHost) {
-		this.contextHost = contextHost;
-	}
+    public Queue<SpHost> getSpHosts() {
+        return spHosts;
+    }
 
-	public Queue<FreeSqlHost> getFreeSqlHosts() {
-		return freeSqlHosts;
-	}
+    public void setSpHosts(Queue<SpHost> spHosts) {
+        this.spHosts = spHosts;
+    }
 
-	public void setFreeSqlHosts(Queue<FreeSqlHost> freeSqlHosts) {
-		this.freeSqlHosts = freeSqlHosts;
-	}
+    public ContextHost getContextHost() {
+        return contextHost;
+    }
 
-	public Map<String, JavaMethodHost> get_freeSqlPojoHosts() {
-		return freeSqlPojoHosts;
-	}
+    public void setContextHost(ContextHost contextHost) {
+        this.contextHost = contextHost;
+    }
 
-	public void setFreeSqlPojoHosts(Map<String, JavaMethodHost> freeSqlPojoHosts) {
-		this.freeSqlPojoHosts = freeSqlPojoHosts;
-	}
-	public int getProjectId() {
-		return projectId;
-	}
+    public Queue<FreeSqlHost> getFreeSqlHosts() {
+        return freeSqlHosts;
+    }
 
-	public void setProjectId(int projectId) {
-		this.projectId = projectId;
-	}
+    public void setFreeSqlHosts(Queue<FreeSqlHost> freeSqlHosts) {
+        this.freeSqlHosts = freeSqlHosts;
+    }
 
-	public boolean isRegenerate() {
-		return regenerate;
-	}
+    public Map<String, JavaMethodHost> get_freeSqlPojoHosts() {
+        return freeSqlPojoHosts;
+    }
 
-	public void setRegenerate(boolean regenerate) {
-		this.regenerate = regenerate;
-	}
+    public void setFreeSqlPojoHosts(Map<String, JavaMethodHost> freeSqlPojoHosts) {
+        this.freeSqlPojoHosts = freeSqlPojoHosts;
+    }
 
-	public Progress getProgress() {
-		return progress;
-	}
+    public int getProjectId() {
+        return projectId;
+    }
 
-	public void setProgress(Progress progress) {
-		this.progress = progress;
-	}
+    public void setProjectId(int projectId) {
+        this.projectId = projectId;
+    }
 
-	public String getNamespace() {
-		return namespace;
-	}
+    public boolean isRegenerate() {
+        return regenerate;
+    }
 
-	public void setNamespace(String namespace) {
-		this.namespace = namespace;
-	}
+    public void setRegenerate(boolean regenerate) {
+        this.regenerate = regenerate;
+    }
 
-	public String getGeneratePath() {
-		return generatePath;
-	}
+    public Progress getProgress() {
+        return progress;
+    }
 
-	public void setGeneratePath(String generatePath) {
-		this.generatePath = generatePath;
-	}
+    public void setProgress(Progress progress) {
+        this.progress = progress;
+    }
 
-	public Queue<GenTaskBySqlBuilder> getSqlBuilders() {
-		return sqlBuilders;
-	}
+    public String getNamespace() {
+        return namespace;
+    }
 
-	public void setSqlBuilders(Queue<GenTaskBySqlBuilder> sqlBuilders) {
-		this.sqlBuilders = sqlBuilders;
-	}
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
 
-	public DalConfigHost getDalConfigHost() {
-		return dalConfigHost;
-	}
+    public String getGeneratePath() {
+        return generatePath;
+    }
 
-	public void setDalConfigHost(DalConfigHost dalConfigHost) {
-		this.dalConfigHost = dalConfigHost;
-	}
+    public void setGeneratePath(String generatePath) {
+        this.generatePath = generatePath;
+    }
 
-	public boolean isIgnoreApproveStatus() {
-		return ignoreApproveStatus;
-	}
+    public Queue<GenTaskBySqlBuilder> getSqlBuilders() {
+        return sqlBuilders;
+    }
 
-	public void setIgnoreApproveStatus(boolean ignoreApproveStatus) {
-		this.ignoreApproveStatus = ignoreApproveStatus;
-	}
+    public void setSqlBuilders(Queue<GenTaskBySqlBuilder> sqlBuilders) {
+        this.sqlBuilders = sqlBuilders;
+    }
+
+    public DalConfigHost getDalConfigHost() {
+        return dalConfigHost;
+    }
+
+    public void setDalConfigHost(DalConfigHost dalConfigHost) {
+        this.dalConfigHost = dalConfigHost;
+    }
+
+    public boolean isIgnoreApproveStatus() {
+        return ignoreApproveStatus;
+    }
+
+    public void setIgnoreApproveStatus(boolean ignoreApproveStatus) {
+        this.ignoreApproveStatus = ignoreApproveStatus;
+    }
 
 }

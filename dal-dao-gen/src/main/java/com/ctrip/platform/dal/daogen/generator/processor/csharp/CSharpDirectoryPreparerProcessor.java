@@ -1,52 +1,51 @@
 package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.commons.io.FileUtils;
-
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
+import org.apache.commons.io.FileUtils;
 
-public class CSharpDirectoryPreparerProcessor implements DalProcessor{
+import java.io.File;
+import java.io.IOException;
 
-	@Override
-	public void process(CodeGenContext context) throws Exception {
-		CSharpCodeGenContext ctx = (CSharpCodeGenContext)context;
-		int projectId = ctx.getProjectId();
-		boolean regenerate = ctx.isRegenerate();
-		File mavenLikeDir = new File(String.format("%s/%s/cs", ctx.getGeneratePath(), projectId));
+public class CSharpDirectoryPreparerProcessor implements DalProcessor {
 
-		try {
-			if (mavenLikeDir.exists() && regenerate){
-				FileUtils.forceDelete(mavenLikeDir);
-			}
-			
-			File idaoDir = new File(mavenLikeDir, "IDao");
-			File daoDir = new File(mavenLikeDir, "Dao");
-			File entityDir = new File(mavenLikeDir, "Entity");
-			File testDir = new File(mavenLikeDir, "Test");
-			File configDir = new File(mavenLikeDir, "Config");
+    @Override
+    public void process(CodeGenContext context) throws Exception {
+        CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
+        int projectId = ctx.getProjectId();
+        boolean regenerate = ctx.isRegenerate();
+        File mavenLikeDir = new File(String.format("%s/%s/cs", ctx.getGeneratePath(), projectId));
 
-			if (!idaoDir.exists()) {
-				FileUtils.forceMkdir(idaoDir);
-			}
-			if (!daoDir.exists()) {
-				FileUtils.forceMkdir(daoDir);
-			}
-			if (!entityDir.exists()) {
-				FileUtils.forceMkdir(entityDir);
-			}
-			if (!testDir.exists()) {
-				FileUtils.forceMkdir(testDir);
-			}
-			if (!configDir.exists()) {
-				FileUtils.forceMkdir(configDir);
-			}
-		} catch (IOException e) {
-			throw e;
-		}
-	}
+        try {
+            if (mavenLikeDir.exists() && regenerate) {
+                FileUtils.forceDelete(mavenLikeDir);
+            }
+
+            File idaoDir = new File(mavenLikeDir, "IDao");
+            File daoDir = new File(mavenLikeDir, "Dao");
+            File entityDir = new File(mavenLikeDir, "Entity");
+            File testDir = new File(mavenLikeDir, "Test");
+            File configDir = new File(mavenLikeDir, "Config");
+
+            if (!idaoDir.exists()) {
+                FileUtils.forceMkdir(idaoDir);
+            }
+            if (!daoDir.exists()) {
+                FileUtils.forceMkdir(daoDir);
+            }
+            if (!entityDir.exists()) {
+                FileUtils.forceMkdir(entityDir);
+            }
+            if (!testDir.exists()) {
+                FileUtils.forceMkdir(testDir);
+            }
+            if (!configDir.exists()) {
+                FileUtils.forceMkdir(configDir);
+            }
+        } catch (IOException e) {
+            throw e;
+        }
+    }
 
 }

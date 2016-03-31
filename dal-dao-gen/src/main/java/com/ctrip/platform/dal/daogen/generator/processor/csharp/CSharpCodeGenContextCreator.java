@@ -7,25 +7,23 @@ import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
-public class CSharpCodeGenContextCreator  implements DalProcessor {
-
-	@Override
-	public void process(CodeGenContext context) throws Exception {
-		CSharpCodeGenContext ctx = (CSharpCodeGenContext)context;
-
-		Project project = SpringBeanGetter.getDaoOfProject().getProjectByID(ctx.getProjectId());
-		DalConfigHost dalConfigHost = null;
-		if (project.getDal_config_name() != null
-				&& !project.getDal_config_name().isEmpty()) {
-			dalConfigHost = new DalConfigHost(project.getDal_config_name());
-		} else if (project.getNamespace() != null
-				&& !project.getNamespace().isEmpty()) {
-			dalConfigHost = new DalConfigHost(project.getNamespace());
-		} else {
-			dalConfigHost = new DalConfigHost("");
-		}
-		ctx.setDalConfigHost(dalConfigHost);
-		ctx.setNamespace(project.getNamespace());
-	} 
+public class CSharpCodeGenContextCreator implements DalProcessor {
+    @Override
+    public void process(CodeGenContext context) throws Exception {
+        CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
+        Project project = SpringBeanGetter.getDaoOfProject().getProjectByID(ctx.getProjectId());
+        DalConfigHost dalConfigHost = null;
+        if (project.getDal_config_name() != null
+                && !project.getDal_config_name().isEmpty()) {
+            dalConfigHost = new DalConfigHost(project.getDal_config_name());
+        } else if (project.getNamespace() != null
+                && !project.getNamespace().isEmpty()) {
+            dalConfigHost = new DalConfigHost(project.getNamespace());
+        } else {
+            dalConfigHost = new DalConfigHost("");
+        }
+        ctx.setDalConfigHost(dalConfigHost);
+        ctx.setNamespace(project.getNamespace());
+    }
 
 }

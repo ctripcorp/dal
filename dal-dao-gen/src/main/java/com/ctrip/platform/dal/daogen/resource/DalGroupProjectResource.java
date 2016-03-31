@@ -17,43 +17,42 @@ import java.util.List;
 
 /**
  * DAL Project & Code 一览
- * 
+ *
  * @author gzxia
- * 
  */
 @Resource
 @Singleton
 @Path("projectview")
 public class DalGroupProjectResource {
-	private static Logger log = Logger.getLogger(DalGroupProjectResource.class);
+    private static Logger log = Logger.getLogger(DalGroupProjectResource.class);
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<DalGroup> getGroups(@QueryParam("root") boolean root) {
-		List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
-		for (DalGroup group : groups) {
-			group.setText(group.getGroup_name());
-			group.setIcon("glyphicon glyphicon-folder-open");
-			group.setChildren(true);
-		}
-		return groups;
-	}
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<DalGroup> getGroups(@QueryParam("root") boolean root) {
+        List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
+        for (DalGroup group : groups) {
+            group.setText(group.getGroup_name());
+            group.setIcon("glyphicon glyphicon-folder-open");
+            group.setChildren(true);
+        }
+        return groups;
+    }
 
-	@GET
-	@Path("groupprojects")
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<Project> getGroupProjects(@QueryParam("groupId") String groupId) {
-		int groupID = -1;
-		try {
-			groupID = Integer.parseInt(groupId);
-		} catch (NumberFormatException ex) {
-			log.error("Add member failed", ex);
-			Status status = Status.ERROR;
-			status.setInfo("Illegal group id");
-			return null;
-		}
+    @GET
+    @Path("groupprojects")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Project> getGroupProjects(@QueryParam("groupId") String groupId) {
+        int groupID = -1;
+        try {
+            groupID = Integer.parseInt(groupId);
+        } catch (NumberFormatException ex) {
+            log.error("Add member failed", ex);
+            Status status = Status.ERROR;
+            status.setInfo("Illegal group id");
+            return null;
+        }
 
-		return SpringBeanGetter.getDaoOfProject().getProjectByGroupId(groupID);
-	}
+        return SpringBeanGetter.getDaoOfProject().getProjectByGroupId(groupID);
+    }
 
 }

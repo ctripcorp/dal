@@ -11,14 +11,12 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class UserFilter implements Filter {
-
     @Override
     public void destroy() {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         try {
             HttpSession session = RequestUtil.getSession(request);
             Object userInfo = session.getAttribute(Consts.USER_INFO);

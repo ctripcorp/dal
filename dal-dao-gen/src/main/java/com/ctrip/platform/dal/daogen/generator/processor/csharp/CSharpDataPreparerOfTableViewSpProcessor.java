@@ -24,7 +24,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
-
     private static Logger log = Logger.getLogger(CSharpDataPreparerOfTableViewSpProcessor.class);
 
     private static DaoBySqlBuilder daoBySqlBuilder;
@@ -39,7 +38,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
     public void process(CodeGenContext context) throws Exception {
         List<Callable<ExecuteResult>> _tableViewSpCallables;
         try {
-            _tableViewSpCallables = prepareTableViewSp((CodeGenContext) context);
+            _tableViewSpCallables = prepareTableViewSp(context);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -89,7 +88,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
         }
 
         final Queue<CSharpTableHost> _spHosts = ctx.getSpHosts();
-        List<Callable<ExecuteResult>> results = new ArrayList<Callable<ExecuteResult>>();
+        List<Callable<ExecuteResult>> results = new ArrayList<>();
         for (final GenTaskByTableViewSp tableViewSp : tableViewSpTasks) {
             final String[] viewNames = StringUtils.split(tableViewSp.getView_names(), ",");
             final String[] tableNames = StringUtils.split(tableViewSp.getTable_names(), ",");

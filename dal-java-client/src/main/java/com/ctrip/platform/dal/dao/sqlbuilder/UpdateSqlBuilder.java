@@ -10,17 +10,11 @@ public class UpdateSqlBuilder extends AbstractSqlBuilder {
 	
 	private StringBuilder sql = new StringBuilder();
 	
-	private String tableName = "";
-	
 	private List<String> updateFieldNames =  new ArrayList<String>();
 	
 	public UpdateSqlBuilder(String tableName, DatabaseCategory dBCategory) throws SQLException {
 		super(dBCategory);
-		if(tableName!=null && !tableName.isEmpty()){
-			this.tableName = tableName;
-		}else{
-			throw new SQLException("table name is illegal.");
-		}
+		setTableName(tableName);
 	}
 
 	public UpdateSqlBuilder update(String fieldName, Object paramValue, int sqlType){
@@ -31,8 +25,17 @@ public class UpdateSqlBuilder extends AbstractSqlBuilder {
 	}
 	
 	public String build(){
+		return build(getTableName());
+	}
+	
+	@Override
+	public String buildWith(String shardStr) {
+		return build(getTableName(shardStr));
+	}
+	
+	private String build(String effectiveTableName) {
 		sql = new StringBuilder("UPDATE");
-		sql.append(" ").append(tableName);
+		sql.append(" ").append(effectiveTableName);
 		sql.append(buildUpdateField());
 		sql.append(" ").append(this.getWhereExp());
 		return sql.toString();
@@ -49,5 +52,4 @@ public class UpdateSqlBuilder extends AbstractSqlBuilder {
 		}
 		return setFields.toString();
 	}
-	
 }

@@ -8,22 +8,24 @@ public class DeleteSqlBuilder extends AbstractSqlBuilder {
 	
 	private StringBuilder sql = new StringBuilder();
 	
-	private String tableName = "";
-	
 	public DeleteSqlBuilder(String tableName, DatabaseCategory dBCategory) throws SQLException{
 		super(dBCategory);
-		if(tableName!=null && !tableName.isEmpty()){
-			this.tableName = tableName;
-		}else{
-			throw new SQLException("table name is illegal.");
-		}
+		setTableName(tableName);
 	}
 	
 	public String build(){
+		return build(getTableName());
+	}
+	
+	@Override
+	public String buildWith(String shardStr) {
+		return build(getTableName(shardStr));
+	}
+	
+	private String build(String effectiveTableName) {
 		sql = new StringBuilder("DELETE FROM");
-		sql.append(" ").append(tableName);
+		sql.append(" ").append(effectiveTableName);
 		sql.append(" ").append(this.getWhereExp());
 		return sql.toString();
 	}
-	
 }

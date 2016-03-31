@@ -1,11 +1,18 @@
 package com.ctrip.platform.dal.dao;
 
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
+import com.ctrip.platform.dal.dao.helper.DalListMerger;
+import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.InsertSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
 import com.ctrip.platform.dal.dao.task.BulkTask;
 import com.ctrip.platform.dal.dao.task.DalBulkTaskRequest;
 import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
@@ -13,6 +20,7 @@ import com.ctrip.platform.dal.dao.task.DalSingleTaskRequest;
 import com.ctrip.platform.dal.dao.task.DalSqlTaskRequest;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DeleteSqlTask;
+import com.ctrip.platform.dal.dao.task.QuerySqlTask;
 import com.ctrip.platform.dal.dao.task.SingleTask;
 import com.ctrip.platform.dal.dao.task.TaskAdapter;
 import com.ctrip.platform.dal.dao.task.UpdateSqlTask;
@@ -166,6 +174,33 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		String selectSql = String.format(findtmp,
 				getTableName(hints, parameters), whereClause);
 		return queryDao.query(selectSql, parameters, hints, parser);
+	}
+
+	/**
+	 * Query by the given where clause and parameters. The where clause can
+	 * contain value placeholder "?". The parameter should match the index of
+	 * the placeholder.
+	 * 
+	 * @param whereClause the where section for the search statement.
+	 * @param parameters A container that holds all the necessary parameters 
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @return List of pojos that meet the search criteria
+	 * @throws SQLException
+	 */
+	public List<T> query(SelectSqlBuilder queryBuilder, DalHints hints) throws SQLException {
+		DalWatcher.begin();
+		ResultMerger<List<T>> defaultMerger = new DalListMerger<>((Comparator<T>)hints.getSorter());
+		
+		ResultMerger<List<T>> merger = hints.is(DalHintEnum.resultMerger) ?
+				(ResultMerger<List<T>>)hints.get(DalHintEnum.resultMerger) : 
+				defaultMerger;
+
+				
+		DalSqlTaskRequest<List<T>> request = new DalSqlTaskRequest<>(
+				logicDbName, queryBuilder, hints,
+				new QuerySqlTask<>(new DalRowMapperExtractor<T>(parser)), merger);
+	
+		return executor.execute(hints, request, true);
 	}
 
 	/**
@@ -357,6 +392,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		return executor.execute(hints, new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchInsertTask));
 	}
 	
+	public int insert(InsertSqlBuilder insertBuilder, DalHints hints) throws SQLException {
+		return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, insertBuilder, hints, updateSqlTask, new ResultMerger.IntSummary())));
+	}
+
 	/**
 	 * Delete the given pojo.
 	 * 
@@ -447,6 +486,19 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 
 	/**
+	 * Delete for the given delet sql builder.
+	 * 
+	 * @param whereClause the condition specified for delete operation
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
+	public int delete(DeleteSqlBuilder deleteBuilder, DalHints hints) throws SQLException {
+		return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, deleteBuilder, hints, deleteSqlTask, new ResultMerger.IntSummary())));
+	}
+
+	/**
 	 * Update for the given where clause and parameters.
 	 * 
 	 * @param sql the statement that used to update the db.
@@ -458,6 +510,20 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	public int update(String sql, StatementParameters parameters, DalHints hints)
 			throws SQLException {
 		return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, sql, parameters, hints, updateSqlTask, new ResultMerger.IntSummary())));
+	}
+	
+	/**
+	 * Update for the given where clause and parameters.
+	 * 
+	 * @param sql the statement that used to update the db.
+	 * @param parameters A container that holds all the necessary parameters
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
+	public int update(UpdateSqlBuilder updateBuilder, DalHints hints)
+			throws SQLException {
+		return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, updateBuilder, hints, updateSqlTask, new ResultMerger.IntSummary())));
 	}
 	
 	private int getSafeResult(Integer value) {

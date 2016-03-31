@@ -10,8 +10,6 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	
 	private StringBuilder sql = new StringBuilder("SELECT ");
 	
-	private String tableName = "";
-	
 	private List<String> selectField =  new ArrayList<String>();
 	
 	private String orderByField =  "";
@@ -32,12 +30,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 			DatabaseCategory dBCategory, boolean isPagination)
 			throws SQLException {
 		super(dBCategory);
-		if (tableName != null && !tableName.isEmpty()) {
-			this.tableName = tableName;
-		} else {
-			throw new SQLException("table name is illegal.");
-		}
-		this.isPagination = isPagination;
+		setTableName(tableName);
 	}
 	
 	/**
@@ -69,25 +62,33 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	 * @return
 	 */
 	public String build(){
+		return build(getTableName());
+	}
+	
+	public String buildWith(String shardStr) {
+		return build(getTableName(shardStr));
+	}
+	
+	private String build(String effectiveTableName){
 		if(this.isPagination && DatabaseCategory.MySql == this.dBCategory){
-			return this.buildPaginationSql4MySQL();
+			return this.buildPaginationSql4MySQL(effectiveTableName);
 		}
 		if(this.isPagination && DatabaseCategory.SqlServer == this.dBCategory){
-			return this.buildPaginationSql4SqlServer();
+			return this.buildPaginationSql4SqlServer(effectiveTableName);
 		}
-		return this.buildSelectSql();
+		return this.buildSelectSql(effectiveTableName);
 	}
 	
 	/**
 	 * 对于select first，会在语句中追加limit 0,1(MySQL)或者top 1(SQL Server)：
 	 * @return
 	 */
-	public String buildFirst(){
+	public String buildFirst(String effectiveTableName){
 		if(DatabaseCategory.SqlServer == this.dBCategory){
 			sql = new StringBuilder("SELECT TOP 1 ");
 		}
 		sql.append(buildSelectField());
-		sql.append(" FROM ").append(this.wrapTableName(tableName));
+		sql.append(" FROM ").append(this.wrapTableName(effectiveTableName));
 		sql.append(" ").append(this.getWhereExp());
 		sql.append(" ").append(buildOrderbyExp());
 		if(DatabaseCategory.MySql == this.dBCategory){
@@ -96,36 +97,32 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 		return sql.toString();
 	}
 	
-	private String buildSelectSql(){
+	private String buildSelectSql(String effectiveTableName){
 		sql = new StringBuilder("SELECT ");
 		sql.append(buildSelectField());
-		sql.append(" FROM ").append(this.wrapTableName(tableName));
+		sql.append(" FROM ").append(this.wrapTableName(effectiveTableName));
 		sql.append(" ").append(this.getWhereExp());
 		sql.append(" ").append(buildOrderbyExp());
 		return sql.toString();
 	}
 	
-	private String buildPaginationSql4MySQL(){
-		return buildSelectSql()+" limit ?, ?";
+	private String buildPaginationSql4MySQL(String effectiveTableName){
+		return buildSelectSql(effectiveTableName)+" limit ?, ?";
 	}
 	
-	private String buildPaginationSql4SqlServer(){
+	private String buildPaginationSql4SqlServer(String effectiveTableName){
 		sql = new StringBuilder("SELECT ");
 		String rowColumnField = "ROW_NUMBER() OVER ( " + buildOrderbyExp() + ") AS rownum";
 		selectField.add(rowColumnField);
 		sql.append(buildSelectField());
-		sql.append(" FROM ").append(this.wrapTableName(tableName));
+		sql.append(" FROM ").append(this.wrapTableName(effectiveTableName));
 		sql.append(" ").append(this.getWhereExp());
 		String cetWrap = "WITH CET AS (" + sql.toString() + ")";
 		
 		selectField.remove(selectField.size()-1);
 		sql = new StringBuilder(cetWrap+" SELECT ");
 		sql.append(buildSelectField());
-		String temp = this.tableName;
-		this.tableName = "CET";
-		sql.append(" FROM ").append(tableName);
-		this.tableName = temp;
-		sql.append(" WHERE rownum BETWEEN ? AND ?");
+		sql.append(" FROM CET WHERE rownum BETWEEN ? AND ?");
 		
 		return sql.toString();
 	}
@@ -167,13 +164,3 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	}
 	
 }
-
-
-
-
-
-
-
-
-
-

@@ -31,7 +31,7 @@ public class AbstractBuilderTest {
 		builder.and().isNull("sss");
 		builder.orderBy("PeopleID", false);
 		
-		String sql = builder.buildFirst();
+		String sql = builder.buildFirst(builder.getTableName());
 		
 		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM People "
 				+ "WHERE a = ? AND b in ( ?, ? ) AND c BETWEEN ? AND ? "

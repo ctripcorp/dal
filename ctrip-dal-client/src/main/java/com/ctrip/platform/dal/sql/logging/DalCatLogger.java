@@ -8,6 +8,8 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
 public class DalCatLogger {
+	private static final String RECORD_COUNT = "DAL.recordCount";
+	private static final String DAL_VERSION = "DAL.version";
 	
 	public static void start(CtripLogEntry entry) {
 		try {
@@ -16,7 +18,7 @@ public class DalCatLogger {
 			entry.setCatTransaction(catTransaction);
 			
 			String method = entry.getEvent() == null ? "dal_test" : CatInfo.getTypeSQLInfo(entry.getEvent());
-			Cat.logEvent("DAL.version", "java-" + entry.getClientVersion());
+			Cat.logEvent(DAL_VERSION, "java-" + entry.getClientVersion());
 			if(entry.getPramemters() != null){
 				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, entry.getEncryptParameters(DalCLogger.isEncryptLogging(), entry).replaceAll(",", "&"));
 			} else {
@@ -35,6 +37,7 @@ public class DalCatLogger {
 	public static void catTransactionSuccess(CtripLogEntry entry){
 		try {
 			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
+			Cat.logSizeEvent(RECORD_COUNT, entry.getResultCount());
 			entry.getCatTransaction().setStatus(Transaction.SUCCESS);
 			entry.getCatTransaction().complete();
 		} catch (Throwable e) {
@@ -45,6 +48,7 @@ public class DalCatLogger {
 	public static void catTransactionFailed(CtripLogEntry entry, Throwable e){
 		try {
 			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
+			Cat.logSizeEvent(RECORD_COUNT, entry.getResultCount());
 			entry.getCatTransaction().setStatus(e);
 			Cat.logError(e);
 			entry.getCatTransaction().complete();

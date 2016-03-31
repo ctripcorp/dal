@@ -9,7 +9,7 @@ import java.util.List;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public abstract class AbstractSqlBuilder {
+public abstract class AbstractSqlBuilder implements SqlBuilder {
 	
 	protected DatabaseCategory dBCategory = DatabaseCategory.MySql;
 	
@@ -23,6 +23,8 @@ public abstract class AbstractSqlBuilder {
 	
 	private List<FieldEntry> whereFieldEntrys = new ArrayList<FieldEntry>();
 	
+	private String tableName;
+
 	public AbstractSqlBuilder(DatabaseCategory dBCategory) throws SQLException{
 		if(dBCategory==null){
 			throw new SQLException("DatabaseCategory can't be null.");
@@ -30,6 +32,24 @@ public abstract class AbstractSqlBuilder {
 		this.dBCategory = dBCategory;
 	}
 	
+	public String getTableName() {
+		return tableName;
+	}
+	
+	public String getTableName(String shardStr) {
+		return tableName + shardStr;
+	}
+	
+	public void setTableShardInfo(String shardStr) {
+	}
+
+	public void setTableName(String tableName) throws SQLException {
+		if(tableName ==null || tableName.isEmpty())
+			throw new SQLException("table name is illegal.");
+		
+		this.tableName = tableName;
+	}
+
 	/**
 	 * 获取StatementParameters
 	 * @return
@@ -66,11 +86,20 @@ public abstract class AbstractSqlBuilder {
 	 * @return
 	 */
 	public String wrapField(String fieldName){
+		return wrapField(dBCategory, fieldName);
+	}
+	
+	/**
+	 * 对字段进行包裹，数据库是MySQL则用 `进行包裹，数据库是SqlServer则用[]进行包裹
+	 * @param fieldName
+	 * @return
+	 */
+	public static String wrapField(DatabaseCategory dbCategory, String fieldName){
 		if("*".equalsIgnoreCase(fieldName) || fieldName.contains("ROW_NUMBER")){
 			return fieldName;
-		}else if(dBCategory == DatabaseCategory.MySql){
+		}else if(dbCategory == DatabaseCategory.MySql){
 			return "`" + fieldName + "`";
-		}else if(dBCategory == DatabaseCategory.SqlServer){
+		}else if(dbCategory == DatabaseCategory.SqlServer){
 			return "[" + fieldName + "]";
 		}
 		return fieldName;

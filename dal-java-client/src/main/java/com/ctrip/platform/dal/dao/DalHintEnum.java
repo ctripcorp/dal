@@ -173,5 +173,10 @@ public enum DalHintEnum {
 	/**
 	 * allow insert incremental id. So DAL will not remove id from pojo before any of the inser operation
 	 */
-	enableIdentityInsert
+	enableIdentityInsert,
+	
+	/**
+	 * cloumn names that will be excluded for CUD
+	 */
+	excludedColumns,
 }

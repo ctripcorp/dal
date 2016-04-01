@@ -30,9 +30,8 @@ public class DaoOfLoginUser {
 
     public LoginUser getUserById(int userId) {
         try {
-            return jdbcTemplate.queryForObject(
-                    "SELECT id, user_no, user_name, user_email, password FROM login_users WHERE id = ?", new Object[]{userId},
-                    new RowMapper<LoginUser>() {
+            return jdbcTemplate.queryForObject("SELECT id, user_no, user_name, user_email, password FROM login_users WHERE id = ?",
+                    new Object[]{userId}, new RowMapper<LoginUser>() {
                         public LoginUser mapRow(ResultSet rs, int rowNum) throws SQLException {
                             return LoginUser.visitRow(rs);
                         }
@@ -48,8 +47,7 @@ public class DaoOfLoginUser {
             return null;
         }
         try {
-            return jdbcTemplate.queryForObject(
-                    "SELECT id, user_no, user_name, user_email, password FROM login_users WHERE user_no = ?",
+            return jdbcTemplate.queryForObject("SELECT id, user_no, user_name, user_email, password FROM login_users WHERE user_no = ?",
                     new Object[]{userNo}, new RowMapper<LoginUser>() {
                         public LoginUser mapRow(ResultSet rs, int rowNum) throws SQLException {
                             return LoginUser.visitRow(rs);
@@ -92,8 +90,7 @@ public class DaoOfLoginUser {
         jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement ps = connection.prepareStatement(
-                        "INSERT INTO login_users ( user_no, user_name, user_email, password ) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE user_no = ?",
+                PreparedStatement ps = connection.prepareStatement("INSERT INTO login_users ( user_no, user_name, user_email, password ) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE user_no = ?",
                         Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, user.getUserNo());
                 ps.setString(2, user.getUserName());
@@ -112,8 +109,7 @@ public class DaoOfLoginUser {
             return -1;
         }
         try {
-            return jdbcTemplate.update("UPDATE login_users SET user_no=?, user_name=?, user_email=? WHERE id=?",
-                    user.getUserNo(), user.getUserName(), user.getUserEmail(), user.getId());
+            return jdbcTemplate.update("UPDATE login_users SET user_no=?, user_name=?, user_email=? WHERE id=?", user.getUserNo(), user.getUserName(), user.getUserEmail(), user.getId());
         } catch (DataAccessException e) {
             e.printStackTrace();
             return -1;

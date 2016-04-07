@@ -29,14 +29,12 @@
 #if($method.getOrderByExp()!="")
 		builder.orderBy(${method.getOrderByExp()});
 #end
-	    String sql = builder.build();
-		StatementParameters parameters = builder.buildParameters();
 #if($method.isPaging())
 		int index =  builder.getStatementParameterIndex();
 		parameters.set(index++, Types.INTEGER, ${host.pageBegain()});
 		parameters.set(index++, Types.INTEGER, ${host.pageEnd()});
 #end
-		return queryDao.query(sql, parameters, hints, parser);
+		return client.query(builder, hints);
 	}
 #end
 #end

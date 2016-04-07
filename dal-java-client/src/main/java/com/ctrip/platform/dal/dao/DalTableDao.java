@@ -7,8 +7,11 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
+import com.ctrip.platform.dal.dao.helper.DalFirstResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalListMerger;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
+import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
 import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.InsertSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
@@ -220,6 +223,38 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		String selectSql = String.format(findtmp,
 				getTableName(hints, parameters), whereClause);
 		return queryDao.queryFirstNullable(selectSql, parameters, hints, parser);
+	}
+
+	public T queryFirst(SelectSqlBuilder queryBuilder, DalHints hints) throws SQLException {
+		DalWatcher.begin();
+		ResultMerger<T> defaultMerger = new DalFirstResultMerger<>((Comparator<T>)hints.getSorter());
+		
+		ResultMerger<T> merger = hints.is(DalHintEnum.resultMerger) ?
+				(ResultMerger<T>)hints.get(DalHintEnum.resultMerger) : 
+				defaultMerger;
+
+				
+		DalSqlTaskRequest<T> request = new DalSqlTaskRequest<>(
+				logicDbName, queryBuilder, hints,
+				new QuerySqlTask<>(new DalSingleResultExtractor<T>(parser, false)), merger);
+	
+		return executor.execute(hints, request, true);
+	}
+	
+	public T querySingle(SelectSqlBuilder queryBuilder, DalHints hints) throws SQLException {
+		DalWatcher.begin();
+		ResultMerger<T> defaultMerger = new DalSingleResultMerger<>();
+		
+		ResultMerger<T> merger = hints.is(DalHintEnum.resultMerger) ?
+				(ResultMerger<T>)hints.get(DalHintEnum.resultMerger) : 
+				defaultMerger;
+
+				
+		DalSqlTaskRequest<T> request = new DalSqlTaskRequest<>(
+				logicDbName, queryBuilder, hints,
+				new QuerySqlTask<>(new DalSingleResultExtractor<T>(parser, true)), merger);
+	
+		return executor.execute(hints, request, true);
 	}
 
 	/**

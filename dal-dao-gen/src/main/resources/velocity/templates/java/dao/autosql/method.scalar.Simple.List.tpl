@@ -23,20 +23,19 @@
 #if($method.isCallback())
 		hints.callbackWith(callback);
 #end
-		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory, $isPagination);
+#if($method.isPaging())
+		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory, pageNo, pageSize);
+#else
+		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory);
+#end
+
 		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 #if($method.getOrderByExp()!="")
 		builder.orderBy(${method.getOrderByExp()});
 #end
-        String sql = builder.build();
-		StatementParameters parameters = builder.buildParameters();
-#if($method.isPaging())
-		int index =  builder.getStatementParameterIndex();
-		parameters.set(index++, Types.INTEGER, ${host.pageBegain()});
-		parameters.set(index++, Types.INTEGER, ${host.pageEnd()});
-#end
-		return queryDao.query(sql, parameters, hints, ${method.getPojoClassName()}.class);
+
+		return client.query(builder, hints);
 	}
 #end
 #end

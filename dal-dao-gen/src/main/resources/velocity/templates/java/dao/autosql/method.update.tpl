@@ -18,12 +18,13 @@
 		hints.callbackWith(callback);
 #end
 		UpdateSqlBuilder builder = new UpdateSqlBuilder("${method.getTableName()}", dbCategory);
+
 #foreach($p in $method.getUpdateSetParameters())
 		builder.update("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
 #end	
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
-		String sql = builder.build();
-		return client.update(sql, builder.buildParameters(), hints);
+
+		return client.update(builder, hints);
 	}
 #end
 #end

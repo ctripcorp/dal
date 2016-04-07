@@ -43,12 +43,16 @@ public class AllInOneConfigureReader {
 		
 		Map<String, DataSourceConfigure> config = parseDBAllInOneConfig(location, dbNames, useLocal);
 		
-		validate(dbNames, config.keySet());
+		validate(dbNames, config);
 		
 		return config;
 	}
 	
-	private void validate(Set<String> dbNames, Set<String> dbConfigNames) {
+	private void validate(Set<String> dbNames, Map<String, DataSourceConfigure> config) {
+		if(config == null)
+			throw new RuntimeException("Cannot load config");
+		
+		Set<String> dbConfigNames = config.keySet();
 		if(dbConfigNames.containsAll(dbNames))
 			return;
 		

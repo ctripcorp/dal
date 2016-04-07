@@ -1,10 +1,12 @@
 package com.ctrip.platform.dal.dao.sqlbuilder;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class SelectSqlBuilder extends AbstractSqlBuilder {
 	
@@ -13,26 +15,60 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	private List<String> selectField =  new ArrayList<String>();
 	
 	private String orderByField =  "";
+	private boolean onlyFirst = false;
 	
 	//是否升序
 	private boolean ascending = true;
 	
 	private boolean isPagination = false;
+	private int pageNo;
+	private int pageSize;
 	
 	/**
-	 * 
 	 * @param tableName 表名
 	 * @param dBCategory 数据库类型
 	 * @param isPagination 是否分页
 	 * @throws SQLException
+	 * @Deprecated use the other two constructor instead
 	 */
 	public SelectSqlBuilder(String tableName,
 			DatabaseCategory dBCategory, boolean isPagination)
 			throws SQLException {
 		super(dBCategory);
 		setTableName(tableName);
+		this.isPagination = isPagination;
 	}
 	
+	/**
+	 * Construct build without pagenation
+	 * @param tableName 表名
+	 * @param dBCategory 数据库类型
+	 * @throws SQLException
+	 */
+	public SelectSqlBuilder(String tableName,
+			DatabaseCategory dBCategory)
+			throws SQLException {
+		super(dBCategory);
+		setTableName(tableName);
+		this.isPagination = false;
+	}
+	
+	/**
+	 * Construct with pagenation
+	 * @param tableName
+	 * @param dBCategory
+	 * @param pageNo
+	 * @param pageSize
+	 * @throws SQLException
+	 */
+	public SelectSqlBuilder(String tableName,
+			DatabaseCategory dBCategory, int pageNo, int pageSize)
+			throws SQLException {
+		super(dBCategory);
+		setTableName(tableName);
+		this.isPagination = true;
+	}
+
 	/**
 	 * 添加select字段
 	 * @param fieldName
@@ -57,6 +93,11 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 		return this;
 	}
 	
+	public SelectSqlBuilder onlyFirst() {
+		onlyFirst = true;
+		return this;
+	}
+	
 	/**
 	 * 构建SQL语句
 	 * @return
@@ -69,13 +110,25 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 		return build(getTableName(shardStr));
 	}
 	
+	public StatementParameters buildParameters(){
+		parameters = super.buildParameters();
+		
+		parameters.set(index++, Types.INTEGER, (pageNo - 1) * pageSize);
+		parameters.set(index++, Types.INTEGER, pageSize); 
+		
+		return this.parameters;
+	}
+	
 	private String build(String effectiveTableName){
-		if(this.isPagination && DatabaseCategory.MySql == this.dBCategory){
+		if(onlyFirst)
+			return buildFirst(effectiveTableName);
+		
+		if(this.isPagination && DatabaseCategory.MySql == this.dBCategory)
 			return this.buildPaginationSql4MySQL(effectiveTableName);
-		}
-		if(this.isPagination && DatabaseCategory.SqlServer == this.dBCategory){
+
+		if(this.isPagination && DatabaseCategory.SqlServer == this.dBCategory)
 			return this.buildPaginationSql4SqlServer(effectiveTableName);
-		}
+
 		return this.buildSelectSql(effectiveTableName);
 	}
 	
@@ -83,7 +136,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	 * 对于select first，会在语句中追加limit 0,1(MySQL)或者top 1(SQL Server)：
 	 * @return
 	 */
-	public String buildFirst(String effectiveTableName){
+	private String buildFirst(String effectiveTableName){
 		if(DatabaseCategory.SqlServer == this.dBCategory){
 			sql = new StringBuilder("SELECT TOP 1 ");
 		}

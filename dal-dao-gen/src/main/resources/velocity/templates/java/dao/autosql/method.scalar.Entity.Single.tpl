@@ -19,11 +19,11 @@
 #if($method.isCallback())
 		hints.callbackWith(callback);
 #end
-		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory, false);
+		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory);
 		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
-	    String sql = builder.build();
-		return queryDao.queryForObjectNullable(sql, builder.buildParameters(), hints, parser);
+
+		return client.query(builder, hints);
 	}
 #end
 #end

@@ -22,8 +22,8 @@
 		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory, false);
 		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
-	    String sql = builder.build();
-		return queryDao.queryForObjectNullable(sql, builder.buildParameters(), hints, ${method.getPojoClassName()}.class);
+
+		return client.querySingle(builder, hints);
 	}
 #end
 #end

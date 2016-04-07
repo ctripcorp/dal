@@ -20,7 +20,7 @@ import com.ctrip.platform.dal.dao.task.MultipleQueryTask;
 import com.ctrip.platform.dal.dao.task.QuerySqlTask;
 
 /**
- * DAO class that provides common query based functions.
+ * DAO class that provides common query based functions. It only support DB shard. It is usually used for free style query dao
  *  
  * @author jhhe
  *

@@ -5,19 +5,8 @@
 	**/
 	public int ${method.getName()} (${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-#if($method.isAllShard())
-		hints.inAllShards();
-#end
-#if($method.isShards())
-		hints.inShards(shards);
-#end
-#if($method.isAsync())
-		hints.asyncExecution();
-#end
-#if($method.isCallback())
-		hints.callbackWith(callback);
-#end
-		InsertSqlBuilder builder = new InsertSqlBuilder("${method.getTableName()}", dbCategory);
+#parse("templates/java/Hints.java.tpl")
+		int i = 1;
 #foreach($p in $method.getParameters())
 #set($sensitiveflag = "")	
 #if(${p.isSensitive()})

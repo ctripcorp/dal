@@ -16,18 +16,7 @@
 #end
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
-#if($method.isAllShard())
-		hints.inAllShards();
-#end
-#if($method.isShards())
-		hints.inShards(shards);
-#end
-#if($method.isAsync())
-		hints.asyncExecution();
-#end
-#if($method.isCallback())
-		hints.callbackWith(callback);
-#end
+#parse("templates/java/Hints.java.tpl")
 #if($method.hasParameters() || $method.isPaging())
 		int i = 1;
 #end

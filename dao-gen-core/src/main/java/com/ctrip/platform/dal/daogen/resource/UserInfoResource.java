@@ -86,8 +86,7 @@ public class UserInfoResource {
         return DefaultUserInfo.getInstance().getMail(userNo);
     }
 
-    private static UserInfo getUserInfo()
-            throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    private static UserInfo getUserInfo() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         String className = getUserInfoClassName();
         if (className == null || className.isEmpty()) {
             return DefaultUserInfo.getInstance(); // set to default

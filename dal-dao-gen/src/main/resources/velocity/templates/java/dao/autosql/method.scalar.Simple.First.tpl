@@ -7,27 +7,15 @@
 	**/
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-#if($method.isAllShard())
-		hints.inAllShards();
-#end
-#if($method.isShards())
-		hints.inShards(shards);
-#end
-#if($method.isAsync())
-		hints.asyncExecution();
-#end
-#if($method.isCallback())
-		hints.callbackWith(callback);
-#end
+#parse("templates/java/Hints.java.tpl")
 		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory, false);
 		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 #if($method.getOrderByExp()!="")
 		builder.orderBy(${method.getOrderByExp()});
 #end
-	    builder.onlyFirst();
-
-		return client.query(builder, hints, ${method.getPojoClassName()}.class);
+	    String sql = builder.buildFirst();
+		return queryDao.queryFirstNullable(sql, builder.buildParameters(), hints, ${method.getPojoClassName()}.class);
 	}
 #end
 #end

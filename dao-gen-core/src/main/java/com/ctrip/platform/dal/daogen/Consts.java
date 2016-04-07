@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Consts {
-
     /**
      * Key：数字 Value：对应的数据库表达式，如等于表达式为'='
      */
@@ -27,11 +26,11 @@ public class Consts {
     public static List<String> CSharpValueTypes;
 
     static {
-        CSharpValueTypes = new ArrayList<String>();
-        WhereConditionMap = new HashMap<String, String>();
-        jdbcSqlTypeToJavaClass = new HashMap<Integer, Class<?>>();
-        SystemDatabases = new ArrayList<String>();
-        databaseType = new ConcurrentHashMap<String, String>();
+        CSharpValueTypes = new ArrayList<>();
+        WhereConditionMap = new HashMap<>();
+        jdbcSqlTypeToJavaClass = new HashMap<>();
+        SystemDatabases = new ArrayList<>();
+        databaseType = new ConcurrentHashMap<>();
 
         CSharpValueTypes.add("sbyte");
         CSharpValueTypes.add("byte");
@@ -131,7 +130,7 @@ public class Consts {
 		 * jdbcSqlTypeToJavaClass.put(java.sql.Types.SQLXML, "Integer");
 		 */
 
-        jdbcSqlTypeDisplay = new HashMap<Integer, String>();
+        jdbcSqlTypeDisplay = new HashMap<>();
         jdbcSqlTypeDisplay.put(java.sql.Types.BIT, "Types.BIT");
 
         // Recommended using Short for Byte

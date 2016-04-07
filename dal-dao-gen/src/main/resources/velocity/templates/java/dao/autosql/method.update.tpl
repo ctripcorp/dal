@@ -5,24 +5,11 @@
 	**/
 	public int ${method.getName()} (${method.getUpdateParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-#if($method.isAllShard())
-		hints.inAllShards();
-#end
-#if($method.isShards())
-		hints.inShards(shards);
-#end
-#if($method.isAsync())
-		hints.asyncExecution();
-#end
-#if($method.isCallback())
-		hints.callbackWith(callback);
-#end
+#parse("templates/java/Hints.java.tpl")
 		UpdateSqlBuilder builder = new UpdateSqlBuilder("${method.getTableName()}", dbCategory);
-
 #foreach($p in $method.getUpdateSetParameters())
 		builder.update("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
 #end	
-#parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 
 		return client.update(builder, hints);
 	}

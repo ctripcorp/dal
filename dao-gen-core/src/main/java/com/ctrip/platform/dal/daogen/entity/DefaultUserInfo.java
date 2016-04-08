@@ -14,12 +14,10 @@ public class DefaultUserInfo implements UserInfo {
     private DefaultUserInfo() {
     }
 
-    private static class Lazy {
-        private static final DefaultUserInfo INSTANCE = new DefaultUserInfo();
-    }
+    private static final DefaultUserInfo INSTANCE = new DefaultUserInfo();
 
     public static final DefaultUserInfo getInstance() {
-        return Lazy.INSTANCE;
+        return INSTANCE;
     }
 
     private static final DaoOfLoginUser userDao = SpringBeanGetter.getDaoOfLoginUser();

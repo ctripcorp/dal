@@ -150,19 +150,19 @@ public class DataSourceUtil {
 
     private static void validateParam(String address, String port, String userName, String password, String driverClass) throws SQLException {
         if (isEmpty(address)) {
-            throw new SQLException("the address is null.");
+            throw new SQLException("The address is null.");
         }
         if (isEmpty(port)) {
-            throw new SQLException("the port is null.");
+            throw new SQLException("The port is null.");
         }
         if (isEmpty(userName)) {
-            throw new SQLException("the userName is null.");
+            throw new SQLException("The userName is null.");
         }
         if (isEmpty(password)) {
-            throw new SQLException("the password is null.");
+            throw new SQLException("The password is null.");
         }
         if (isEmpty(driverClass)) {
-            throw new SQLException("the driverClass is null.");
+            throw new SQLException("The driverClass is null.");
         }
     }
 

@@ -14,25 +14,47 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class UserInfoResource {
-    private UserInfoResource() {
-    }
-
-    private static class Lazy {
-        private static final UserInfoResource INSTANCE = new UserInfoResource();
-    }
-
-    public static final UserInfoResource getInstance() {
-        return Lazy.INSTANCE;
-    }
-
     private static final Object LOCK = new Object();
-    private static ClassLoader classLoader = null;
-    private static final String CONF_PROPERTIES = "conf.properties";
-    private static final String USER_INFO_CLASS_NAME = "userinfo_class";
+    private ClassLoader classLoader = null;
+    private final String CONF_PROPERTIES = "conf.properties";
+    private final String USER_INFO_CLASS_NAME = "userinfo_class";
+    private UserInfo userInfo = null;
 
-    private static UserInfo userInfo = null;
+    private UserInfoResource() {
+        try {
+            classLoader = Thread.currentThread().getContextClassLoader();
+            if (classLoader == null) {
+                classLoader = Configuration.class.getClassLoader();
+            }
+            userInfo = getUserInfo();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoClassDefFoundError e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
 
-    public static boolean isDefaultInstance(HttpServletRequest request) {
+    private static UserInfoResource INSTANCE = null;
+
+    public static UserInfoResource getInstance() {
+        if (INSTANCE == null) {
+            synchronized (LOCK) {
+                if (INSTANCE == null) {
+                    INSTANCE = new UserInfoResource();
+                }
+            }
+        }
+
+        return INSTANCE;
+    }
+
+    public boolean isDefaultInstance(HttpServletRequest request) {
         Boolean result = RequestUtil.isDefaultUser(request);
         if (result != null) {
             return result.booleanValue();
@@ -42,27 +64,6 @@ public class UserInfoResource {
         HttpSession session = RequestUtil.getSession(request);
         session.setAttribute(Consts.DEFAULT_USER, value);
         return value;
-    }
-
-    static {
-        try {
-            synchronized (LOCK) {
-                classLoader = Thread.currentThread().getContextClassLoader();
-                if (classLoader == null) {
-                    classLoader = Configuration.class.getClassLoader();
-                }
-
-                userInfo = getUserInfo();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
     }
 
     public String getEmployee(String userNo) {
@@ -86,7 +87,7 @@ public class UserInfoResource {
         return DefaultUserInfo.getInstance().getMail(userNo);
     }
 
-    private static UserInfo getUserInfo() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    private UserInfo getUserInfo() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         String className = getUserInfoClassName();
         if (className == null || className.isEmpty()) {
             return DefaultUserInfo.getInstance(); // set to default
@@ -96,7 +97,7 @@ public class UserInfoResource {
         return (UserInfo) clazz.newInstance();
     }
 
-    private static String getUserInfoClassName() throws IOException {
+    private String getUserInfoClassName() throws IOException {
         Properties properties = new Properties();
         InputStream inStream = classLoader.getResourceAsStream(CONF_PROPERTIES);
         properties.load(inStream);

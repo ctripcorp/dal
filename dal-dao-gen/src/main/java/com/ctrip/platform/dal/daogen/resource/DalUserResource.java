@@ -298,7 +298,7 @@ public class DalUserResource {
     @GET
     @Path("isDefaultUser")
     public boolean isDefaultUser(@Context HttpServletRequest request) {
-        return UserInfoResource.isDefaultInstance(request);
+        return UserInfoResource.getInstance().isDefaultInstance(request);
     }
 
     @GET

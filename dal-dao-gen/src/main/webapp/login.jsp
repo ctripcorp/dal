@@ -12,12 +12,13 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Ctrip DAO Generator</title>
-    <link href="/static/images/favicon.ico" rel="shortcut icon"
-          type="image/vnd.microsoft.icon"/>
-    <link href="/static/assets/application.css?codegen=${codegenpageflag}"
-          media="all" rel="stylesheet"/>
-    <link href="/static/assets/print.css?codegen=${codegenpageflag}"
-          media="print" rel="stylesheet"/>
+    <link href="/static/images/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
+    <link href="/static/assets/application.css?codegen=${codegenpageflag}" media="all" rel="stylesheet"/>
+    <link href="/static/assets/print.css?codegen=${codegenpageflag}" media="print" rel="stylesheet"/>
+    <link href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${codegenpageflag}" rel="stylesheet">
+    <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=${codegenpageflag}" rel="stylesheet"/>
+    <link href="/static/css/selectize.bootstrap3.css?codegen=${codegenpageflag}" rel="stylesheet">
+    <link href="/static/css/common.css?codegen=${codegenpageflag}" rel="stylesheet">
 </head>
 <body class='ui_mars login-page application'>
 <header class='navbar navbar-fixed-top navbar-gitlab'>
@@ -111,8 +112,132 @@
         </div>
     </div>
 </div>
+<!--Begin modal-->
+<div class="modal fade" id="setupDbModal" tabindex="-1" role="dialog" aria-labelledby="setupModalLabel"
+     aria-hidden="true" is_update="0">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="setupModalLabel">Setup Database</h4>
+            </div>
+            <div class="modal-body">
+                <div id="setup_db_step1" class="row-fluid">
+                    <div class="row-fluid" style="display: none;">
+                        <div class="control-group">
+                            <label class="control-label popup_label" style="width: 130px;">数据库类型:</label>
+                            <select id="setupdbtype" class="span8">
+                                <option value="no">请选择</option>
+                                <option value="MySQL" selected="selected">MySQL</option>
+                                <option value="SQLServer">SQLServer</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label"
+                                   style="width: 130px;text-align: right;" title="数据库地址">DB Address:</label> <input
+                                id="setupdbaddress" class="span8 input-sm" type="text">
+                        </div>
+                    </div>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label"
+                                   style="width: 130px;text-align: right;" title="数据库端口">DB Port:</label> <input
+                                id="setupdbport" class="span8 input-sm" type="text">
+                        </div>
+                    </div>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label"
+                                   style="width: 130px;text-align: right;" title="数据库登录用户">DB User:</label> <input
+                                id="setupdbuser" class="span8 input-sm" type="text">
+                        </div>
+                    </div>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label"
+                                   style="width: 130px;text-align: right;" title="数据库登录用户密码">DB Password:</label> <input
+                                id="setupdbpassword" class="span8 input-sm" type="text">
+                        </div>
+                    </div>
+                </div>
+                <div id="setup_db_step2" class="row-fluid">
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label" style="width: 130px;text-align: right;"
+                                   title="数据库">DB
+                                Catalog:</label> <select id="setupdbcatalog" class="span8"></select>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label" style="width: 130px;text-align: right;" title="组名">Team
+                                Name:</label> <input
+                                id="setupdbgroupname" class="span8 input-sm" type="text">
+                        </div>
+                    </div>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label"
+                                   style="width: 130px;text-align: right;" title="备注">Comment:</label>
+                            <input id="setupdbcomment" class="span8 input-sm" type="text">
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label" style="width: 130px;text-align: right;"
+                                   title="管理员工号">Admin
+                                No:</label> <input
+                                id="setupdbadminno" class="span8 input-sm" type="text">
+                        </div>
+                    </div>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label"
+                                   style="width: 130px;text-align: right;" title="管理员姓名">Name:</label> <input
+                                id="setupdbadminname" class="span8 input-sm" type="text">
+                        </div>
+                    </div>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label"
+                                   style="width: 130px;text-align: right;" title="管理员邮件地址">Email:</label> <input
+                                id="setupdbadminemail" class="span8 input-sm" type="text">
+                        </div>
+                    </div>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label"
+                                   style="width: 130px;text-align: right;" title="管理员密码">Password:</label> <input
+                                id="setupdbadminpass" class="span8 input-sm" type="password">
+                        </div>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="control-group">
+                        <label id="setup_error_msg" class="control-label popup_label"
+                               style="color: red;width: 200px;"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="setup_conn_test" type="button" class="btn btn-success">连接测试</button>
+                <button id="setup_db_next" type="button" class="btn btn-primary">下一步</button>
+                <button id="setup_db_prev" type="button" class="btn btn-info">上一步</button>
+                <button id="setup_db_save" type="button" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End modal-->
 <script src="/static/assets/application.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/login.js?codegen=${codegenpageflag}"></script>
+<script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=${codegenpageflag}"></script>
 <script src="/static/js/js.cookie.min.js?codegen=${codegenpageflag}"></script>
+<script src="/static/js/cblock.js?codegen=${codegenpageflag}"></script>
+<script src="/static/js/selectize.min.js?codegen=${codegenpageflag}"></script>
+<script src="/static/js/login.js?codegen=${codegenpageflag}"></script>
 </body>
 </html>

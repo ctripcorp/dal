@@ -17,7 +17,7 @@
     <link href="/static/bootstrap/css/bootstrap.min.css?codegen=${codegenpageflag}" rel="stylesheet">
     <link href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${codegenpageflag}" rel="stylesheet">
     <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=${codegenpageflag}" rel="stylesheet"/>
-    <link rel="stylesheet" href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}"/>
+    <link href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}" rel="stylesheet"/>
     <link href="/static/css/multiple-select.css?codegen=${codegenpageflag}" rel="stylesheet">
     <link href="/static/css/selectize.bootstrap3.css?codegen=${codegenpageflag}" rel="stylesheet">
     <link href="/static/css/common.css?codegen=${codegenpageflag}" rel="stylesheet">

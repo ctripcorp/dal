@@ -8,7 +8,7 @@ import com.ctrip.platform.dal.daogen.enums.AddUser;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.enums.RoleType;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
-import com.ctrip.platform.dal.daogen.utils.RequestUtil;
+import com.ctrip.platform.dal.daogen.utils.MD5Util;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +48,8 @@ public class SetupDBResource {
     private String jdbcUrlTemplate = "jdbc:mysql://%s:%s/%s";
     private static final String SCRIPT_FILE = "script.sql";
     private static final String CREATE_TABLE = "CREATE TABLE";
-    private boolean initialized = false;
+    private static boolean initialized = false;
+    private static Boolean jdbcInitialized = null;
 
     static {
         synchronized (LOCK) {
@@ -57,6 +58,22 @@ public class SetupDBResource {
                 classLoader = Configuration.class.getClassLoader();
             }
         }
+    }
+
+    public static boolean isJdbcInitialized() {
+        if (jdbcInitialized == null) {
+            synchronized (LOCK) {
+                if (jdbcInitialized == null) {
+                    try {
+                        jdbcInitialized = resourceExists(JDBC_PROPERTIES) & jdbcPropertiesValid();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        return jdbcInitialized.booleanValue();
     }
 
     @GET
@@ -88,6 +105,7 @@ public class SetupDBResource {
                 synchronized (LOCK) {
                     if (!initialized) {
                         initialized = true;
+                        jdbcInitialized = true;
                     }
                 }
 
@@ -104,7 +122,10 @@ public class SetupDBResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("initializeDb")
-    public Status initializeDb(@Context HttpServletRequest request, @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog, @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment) {
+    public Status initializeDb(@Context HttpServletRequest request, @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
+                               @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog,
+                               @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment, @FormParam("adminNo") String adminNo,
+                               @FormParam("adminName") String adminName, @FormParam("adminEmail") String adminEmail, @FormParam("adminPass") String adminPass) {
         Status status = Status.OK;
         try {
             boolean jdbcResult = initializeJdbcProperties(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
@@ -120,8 +141,18 @@ public class SetupDBResource {
                 status.setInfo("Error occured while setting up the tables.");
                 return status;
             }
-            LoginUser user = RequestUtil.getUserInfo(request);
-            boolean isSetupAdmin = setupAdmin(groupName, groupComment, user);
+
+            DalGroup group = new DalGroup();
+            group.setGroup_name(groupName);
+            group.setGroup_comment(groupComment);
+
+            LoginUser user = new LoginUser();
+            user.setUserNo(adminNo);
+            user.setUserName(adminName);
+            user.setUserEmail(adminEmail);
+            user.setPassword(MD5Util.parseStrToMd5L32(adminPass));
+
+            boolean isSetupAdmin = setupAdmin(group, user);
             if (!isSetupAdmin) {
                 status = Status.ERROR;
                 status.setInfo("Error occured while setting up the admin.");
@@ -165,7 +196,7 @@ public class SetupDBResource {
         return status;
     }
 
-    private boolean resourceExists(String fileName) {
+    private static boolean resourceExists(String fileName) {
         boolean result = false;
         if (fileName == null || fileName.length() == 0) {
             return result;
@@ -178,7 +209,7 @@ public class SetupDBResource {
         return result;
     }
 
-    private boolean jdbcPropertiesValid() throws Exception {
+    private static boolean jdbcPropertiesValid() throws Exception {
         boolean result = true;
         Properties properties = new Properties();
         InputStream inStream = classLoader.getResourceAsStream(JDBC_PROPERTIES);
@@ -292,28 +323,28 @@ public class SetupDBResource {
         return SpringBeanGetter.getSetupDBDao().executeSqlScript(scriptContent);
     }
 
-    private boolean setupAdmin(String groupName, String groupComment, LoginUser user) throws Exception {
+    private boolean setupAdmin(DalGroup dalGroup, LoginUser user) throws Exception {
         boolean result = false;
+        String groupName = dalGroup.getGroup_name();
         if (groupName == null || groupName.isEmpty()) {
             return result;
         }
 
-        if (user == null) {
-            user = new LoginUser();
-            user.setUserNo(UserInfoResource.getInstance().getEmployee(null));
-            user.setUserName(UserInfoResource.getInstance().getName(null));
-            user.setUserEmail(UserInfoResource.getInstance().getMail(null));
-            int userResult = SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
-            if (userResult <= 0) {
-                return result;
-            }
-            user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(user.getUserNo());
+        String userName = user.getUserName();
+        if (userName == null || userName.isEmpty()) {
+            return result;
         }
+
+        int userResult = SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
+        if (userResult <= 0) {
+            return result;
+        }
+        user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(user.getUserNo());
 
         DalGroup group = new DalGroup();
         group.setId(DalGroupResource.SUPER_GROUP_ID);
-        group.setGroup_name(groupName);
-        group.setGroup_comment(groupComment);
+        group.setGroup_name(dalGroup.getGroup_name());
+        group.setGroup_comment(dalGroup.getGroup_comment());
         group.setCreate_user_no(user.getUserNo());
         group.setCreate_time(new Timestamp(System.currentTimeMillis()));
 

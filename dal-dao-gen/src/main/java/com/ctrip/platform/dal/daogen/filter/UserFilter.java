@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.filter;
 
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.resource.SetupDBResource;
 import com.ctrip.platform.dal.daogen.resource.UserInfoResource;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -21,22 +22,24 @@ public class UserFilter implements Filter {
             HttpSession session = RequestUtil.getSession(request);
             Object userInfo = session.getAttribute(Consts.USER_INFO);
             if (userInfo == null) {
-                // SSO
-                String userNo = UserInfoResource.getInstance().getEmployee(null);
-                if (userNo != null && !userNo.isEmpty()) {
-                    LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-                    if (user == null) {
-                        user = new LoginUser();
-                        user.setUserNo(userNo);
-                        user.setUserName(UserInfoResource.getInstance().getName(null));
-                        user.setUserEmail(UserInfoResource.getInstance().getMail(null));
-                        SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
+                if (SetupDBResource.isJdbcInitialized()) {
+                    // SSO
+                    String userNo = UserInfoResource.getInstance().getEmployee(null);
+                    if (userNo != null && !userNo.isEmpty()) {
+                        LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+                        if (user == null) {
+                            user = new LoginUser();
+                            user.setUserNo(userNo);
+                            user.setUserName(UserInfoResource.getInstance().getName(null));
+                            user.setUserEmail(UserInfoResource.getInstance().getMail(null));
+                            SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
+                        }
+                        session.setAttribute(Consts.USER_INFO, user);
+                        session.setAttribute(Consts.USER_NAME, user.getUserName());
                     }
-                    session.setAttribute(Consts.USER_INFO, user);
-                    session.setAttribute(Consts.USER_NAME, user.getUserName());
                 }
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         } finally {
             chain.doFilter(request, response);

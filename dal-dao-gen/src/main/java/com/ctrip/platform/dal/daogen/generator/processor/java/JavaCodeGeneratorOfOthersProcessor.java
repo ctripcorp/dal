@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.daogen.generator.processor.java;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
+import com.ctrip.platform.dal.daogen.resource.UserInfoResource;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import org.apache.velocity.VelocityContext;
 
@@ -14,10 +15,15 @@ public class JavaCodeGeneratorOfOthersProcessor implements DalProcessor {
         JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         int projectId = ctx.getProjectId();
         File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
+        boolean isDefaultInstance = UserInfoResource.getInstance().isDefaultInstance();
 
         VelocityContext vltCcontext = GenUtils.buildDefaultVelocityContext();
         vltCcontext.put("host", ctx.getDalConfigHost());
-        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/Dal.config.tpl", dir.getAbsolutePath()), "templates/java/Dal.config.java.tpl");
+        if (!isDefaultInstance) {
+            GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/Dal.config.tpl", dir.getAbsolutePath()), "templates/java/Dal.config.java.tpl");
+        } else {
+            GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/Dal.xml", dir.getAbsolutePath()), "templates/java/Dal.config.java.tpl");
+        }
 
         GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/Database.Config", dir.getAbsolutePath()), "templates/java/Database.config.java.tpl");
 
@@ -25,7 +31,9 @@ public class JavaCodeGeneratorOfOthersProcessor implements DalProcessor {
         GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/datasource.xml", dir.getAbsolutePath()), "templates/java/DataSource.java.tpl");
 
         vltCcontext.put("host", "");
-        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/ConfigProfile.xml", dir.getAbsolutePath()), "templates/java/ConfigProfile.java.tpl");
+        if (!isDefaultInstance) {
+            GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/ConfigProfile.xml", dir.getAbsolutePath()), "templates/java/ConfigProfile.java.tpl");
+        }
     }
 
 }

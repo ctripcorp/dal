@@ -288,16 +288,19 @@
 
             if ("MySQL" == dbType) {
                 $("#dbaddress").val('pub.mysql.db.dev.sh.ctripcorp.com');
+                $("#dbport").val("28747");
                 $("#dbuser").val('uws_dbticket');
                 $("#dbpassword").val('kgd8v5CenyoMjtg1uwzj');
             } else if ("SQLServer" == dbType) {
                 $("#dbaddress").val('devdb.dev.sh.ctriptravel.com');
+                $("#dbport").val("28747");
                 $("#dbuser").val('uws_AllInOneKey_dev');
                 $("#dbpassword").val('!QAZ@WSX1qaz2wsx');
             } else {
-                $("#dbaddress").val('');
-                $("#dbuser").val('');
-                $("#dbpassword").val('');
+                $("#dbaddress").val("");
+                $("#dbport").val("");
+                $("#dbuser").val("");
+                $("#dbpassword").val("");
             }
         };
 
@@ -392,7 +395,7 @@
         });
 
         $(document.body).on("click", "#conn_test", function () {
-            getAllCatalog("connection successful");
+            getAllCatalog("连接成功。");
         });
 
         $(document.body).on("click", "#add_new_db_save", function () {
@@ -520,7 +523,7 @@
         };
 
         $(document.body).on("click", "#update_conn_test", function () {
-            getUpdateCatalog("connection successful");
+            getUpdateCatalog("连接成功。");
         });
 
         $(document.body).on("click", "#update_db_next", function () {

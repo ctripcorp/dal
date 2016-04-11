@@ -31,7 +31,7 @@
         var records = w2ui['grid'].getSelection();
         var record = w2ui['grid'].get(records[0]);
         if (record == null || record == '') {
-            alert("请先选择一个用戶");
+            alert("请先选择一个用户");
             return;
         }
         $("#userNo2").val(record["userNo"]);
@@ -182,11 +182,12 @@
             var userNo = $("#userNo").val();
             var userName = $("#userName").val();
             var userEmail = $("#userEmail").val();
+            var defaultPass = $("#defaultPass").val();
             var postData = {
                 userNo: userNo,
                 userName: userName,
                 userEmail: userEmail,
-                password: '111111'
+                password: defaultPass
             };
 
             if (userNo == null || $.trim(userNo) == '') {

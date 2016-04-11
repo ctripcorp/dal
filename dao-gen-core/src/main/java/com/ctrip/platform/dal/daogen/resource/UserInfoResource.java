@@ -19,6 +19,7 @@ public class UserInfoResource {
     private final String CONF_PROPERTIES = "conf.properties";
     private final String USER_INFO_CLASS_NAME = "userinfo_class";
     private UserInfo userInfo = null;
+    private Boolean isDefaultUser = null;
 
     private UserInfoResource() {
         try {
@@ -54,13 +55,24 @@ public class UserInfoResource {
         return INSTANCE;
     }
 
-    public boolean isDefaultInstance(HttpServletRequest request) {
+    public boolean isDefaultInstance() {
+        if (isDefaultUser == null) {
+            synchronized (LOCK) {
+                if (isDefaultUser == null) {
+                    isDefaultUser = userInfo instanceof DefaultUserInfo;
+                }
+            }
+        }
+        return isDefaultUser.booleanValue();
+    }
+
+    public boolean isDefaultInstanceByRequest(HttpServletRequest request) {
         Boolean result = RequestUtil.isDefaultUser(request);
         if (result != null) {
             return result.booleanValue();
         }
 
-        boolean value = userInfo instanceof DefaultUserInfo;
+        boolean value = isDefaultInstance();
         HttpSession session = RequestUtil.getSession(request);
         session.setAttribute(Consts.DEFAULT_USER, value);
         return value;

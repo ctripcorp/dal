@@ -81,6 +81,12 @@
                         <input id="userEmail" class="span7 input-sm" type="text">
                     </div>
                 </div>
+                <div class="row-fluid">
+                    <div class="control-group">
+                        <label class="control-label popup_label" style="width: 100px;">默认密码:</label>
+                        <span id="defaultPass" class="span7">111111</span>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <label id="error_msg" class="control-label popup_label" style="color: red;"></label>

@@ -19,7 +19,7 @@
         <module>dao-gen-core</module>
     </modules>
     <properties>
-        <environment>local</environment>
+        <environment>open</environment>
         <file_encoding>UTF-8</file_encoding>
         <spring-version>4.0.0.RELEASE</spring-version>
         <commons-net-version>3.3</commons-net-version>

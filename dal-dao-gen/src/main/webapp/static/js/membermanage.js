@@ -228,7 +228,7 @@
             w2ui['main_layout'].content(
                 'left',
                 '<div style="color: #34495E !important;font-size: 15px;background-color: #eee; padding: 7px 5px 6px 20px; border-bottom: 1px solid silver">'
-                + 'ALL DAL Team'
+                + '所有 DAL Team'
                 + "</div>"
                 + '<div id="jstree_groups"></div>');
 

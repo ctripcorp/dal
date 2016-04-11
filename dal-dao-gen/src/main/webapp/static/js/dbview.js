@@ -193,7 +193,7 @@
                     type: 'text'
                 }, {
                     field: 'comment',
-                    caption: '所属DAL Team',
+                    caption: '所属 DAL Team',
                     type: 'text'
                 }, {
                     field: 'db_address',
@@ -217,7 +217,7 @@
                     resizable: true
                 }, {
                     field: 'comment',
-                    caption: '所属DAL Team',
+                    caption: '所属 DAL Team',
                     size: '15%',
                     attr: 'align=center',
                     sortable: true,
@@ -338,7 +338,11 @@
         };
 
         $(document.body).on("change", "#dbtype", function () {
-            setDefaultAddDbVal();
+            $.get("/rest/user/isDefaultUser", {rand: Math.random()}, function (data) {
+                if (data == "false") {
+                    setDefaultAddDbVal();
+                }
+            });
         });
 
         $(document.body).on("click", "#add_new_db_next", function () {

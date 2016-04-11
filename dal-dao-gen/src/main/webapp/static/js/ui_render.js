@@ -489,7 +489,7 @@
                     resizable: true
                 }, {
                     field: 'sql_style',
-                    caption: 'SQL风格',
+                    caption: 'SQL 风格',
                     size: '5%',
                     resizable: true
                 }, {

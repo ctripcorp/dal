@@ -79,26 +79,26 @@
                 </div>
                 <div class="row-fluid">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 110px;">Dal.configName</label> <input
+                        <label class="control-label popup_label" style="width: 110px;">Dal.config Name</label><input
                             id="dalconfigname" class="span9 input-sm" type="text">
                     </div>
                 </div>
                 <div class="row-fluid">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 125px;">所属Team：</label>
+                        <label class="control-label popup_label" style="width: 125px;">所属 Team：</label>
                         <span id="user_group_pj" class="label label-info">Info</span>
                     </div>
                 </div>
                 <div class="row-fluid">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 125px;">上次修改：</label>
-                        <span id="prj_update_user" class="label label-info">Unknow</span>
+                        <label class="control-label popup_label" style="width: 125px;">最后修改：</label>
+                        <span id="prj_update_user" class="label label-info">Unknown</span>
                     </div>
                 </div>
                 <div class="row-fluid">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 125px;">上次修改时间：</label>
-                        <span id="prj_update_time" class="label label-info">Unknow</span>
+                        <label class="control-label popup_label" style="width: 125px;">修改时间：</label>
+                        <span id="prj_update_time" class="label label-info">Unknown</span>
                     </div>
                 </div>
             </div>
@@ -215,7 +215,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <label class="modal-title" id="page1_label" style="font-size: 25px; font-weight: bold">DAO生成向导</label>
+                <label class="modal-title" id="page1_label" style="font-size: 25px; font-weight: bold">DAO 生成向导</label>
                 <a style="margin-left: 359px !important; margin-right: 0px !important" href="#" class="ctip"
                    data-toggle="tooltip" data-placement="bottom" title="1、如果在列表中没有找到你需要的逻辑数据库，请到逻辑数据库管理界面追加。<br/>
 							2、目前，DAO代码生成方式有三种：<br/>

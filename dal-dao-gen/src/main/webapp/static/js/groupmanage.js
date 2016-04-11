@@ -147,7 +147,7 @@
                 },
                 searches: [{
                     field: 'group_name',
-                    caption: 'Team Name',
+                    caption: 'Team 名称',
                     type: 'text'
                 }, {
                     field: 'group_comment',
@@ -156,7 +156,7 @@
                 }],
                 columns: [{
                     field: 'group_name',
-                    caption: 'Team Name',
+                    caption: 'Team 名称',
                     size: '50%',
                     sortable: true,
                     attr: 'align=center'

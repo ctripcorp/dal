@@ -364,7 +364,7 @@
             w2ui['main_layout'].content(
                 'left',
                 '<div style="color: #34495E !important;font-size: 15px;background-color: #eee; padding: 7px 5px 6px 20px; border-bottom: 1px solid silver">'
-                + 'ALL DAL Team'
+                + '所有 DAL Team'
                 + "</div>"
                 + '<div id="jstree_groups"></div>');
 
@@ -473,7 +473,7 @@
                 }],
                 columns: [{
                     field: 'name',
-                    caption: 'databaseSet Name',
+                    caption: 'databaseSet 名称',
                     size: '25%',
                     sortable: true,
                     resizable: true
@@ -491,12 +491,12 @@
                     resizable: true
                 }, {
                     field: 'update_user_no',
-                    caption: '修改 User',
+                    caption: '最后修改',
                     size: '12%',
                     resizable: true
                 }, {
                     field: 'str_update_time',
-                    caption: '修改时间',
+                    caption: '最后修改时间',
                     size: '13%',
                     resizable: true
                 }],
@@ -588,7 +588,7 @@
                 }],
                 columns: [{
                     field: 'name',
-                    caption: 'databaseSet Entry Name',
+                    caption: 'databaseSet Entry 名称',
                     size: '25%',
                     sortable: true,
                     resizable: true
@@ -612,12 +612,12 @@
                     resizable: true
                 }, {
                     field: 'update_user_no',
-                    caption: '修改 User',
+                    caption: '最后修改',
                     size: '12%',
                     resizable: true
                 }, {
                     field: 'str_update_time',
-                    caption: '修改时间',
+                    caption: '最后修改时间',
                     size: '13%',
                     resizable: true
                 }],

@@ -603,7 +603,7 @@
                             $("#code_editor_fullscreen:first-child").prepend('<img id="code_fullscreen_back" src="/static/images/back.jpg" alt="全屏" class="code-fullscreen" />');
                         }
                         code_editor_fullscreen = ace.edit("code_editor_fullscreen");
-                        if ("java" == $("#viewCode").val()) {
+                        if ($("#viewCode").val() == "java") {
                             code_editor_fullscreen.getSession().setMode("ace/mode/java");
                         } else {
                             code_editor_fullscreen.getSession().setMode("ace/mode/csharp");

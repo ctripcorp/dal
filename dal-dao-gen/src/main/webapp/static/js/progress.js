@@ -70,7 +70,7 @@
         Progress.errorStatus = undefined;
         Progress.random = undefined;
         progress.stop($("#generateCodeProcessDiv"));
-        $("#viewCode").val($("#regen_language").val());
+        //$("#viewCode").val($("#regen_language").val());
         $("#refreshFiles").trigger("click");
     };
 

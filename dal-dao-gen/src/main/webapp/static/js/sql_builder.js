@@ -2,7 +2,7 @@
     var sql_builder = function () {
     };
 
-    // global
+    // make it global
     whereCondition = {
         "0": "=",
         "1": "!=",

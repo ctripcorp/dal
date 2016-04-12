@@ -376,14 +376,18 @@
             $("#generateCode").modal("hide");
             var random = new Date().valueOf();
             progress.start($("#generateCodeProcessDiv"), random);
+            var language = $("#regen_language").val();
             $.post("/rest/project/generate", {
                 "project_id": w2ui['grid'].current_project,
                 "regenerate": $("#regenerate").val() == "regenerate",
-                "language": $("#regen_language").val(),
+                "language": language,
                 "newPojo": $("#newPojo").is(":checked"),
                 "random": random
             }, function (data) {
-                if (data.code != "OK") {
+                if (data.code == "OK") {
+                    $("#viewCode").val(data.info);
+                }
+                else {
                     $("#generateCodeProcessErrorMess").html(data.info);
                     $("#generateCodeProcessErrorDiv").modal();
                     progress.reportException("generate success return but not ok");

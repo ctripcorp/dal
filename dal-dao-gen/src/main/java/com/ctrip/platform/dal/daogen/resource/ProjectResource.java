@@ -32,6 +32,9 @@ import java.util.regex.Pattern;
 @Singleton
 @Path("project")
 public class ProjectResource {
+    private static final String JAVA = "java";
+    private static final String CS = "csharp";
+
     private static Logger log = Logger.getLogger(ProjectResource.class);
 
     @GET
@@ -472,17 +475,21 @@ public class ProjectResource {
             DalGenerator generator = null;
             CodeGenContext context = null;
             HashSet<String> hashSet = getProjectSqlStyles(id);
-            if (hashSet.contains("java")) {
+            String code = "";
+            if (hashSet.contains(JAVA)) {
+                code = JAVA;
                 generator = new JavaDalGenerator();
                 context = generator.createContext(id, true, progress, newPojo, false);
                 generateLanguageProject(generator, context);
             }
-            if (hashSet.contains("csharp")) { // cs
+            if (hashSet.contains(CS)) { // cs
+                code = CS;
                 generator = new CSharpDalGenerator();
                 context = generator.createContext(id, true, progress, newPojo, false);
                 generateLanguageProject(generator, context);
             }
             status = Status.OK;
+            status.setInfo(code);
             log.info(String.format("generate project[%s] completed.", id));
         } catch (Exception e) {
             status = Status.ERROR;

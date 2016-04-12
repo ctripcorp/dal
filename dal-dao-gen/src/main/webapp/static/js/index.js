@@ -167,19 +167,33 @@ $(function () {
     });
 
     $(document.body).on("click", "#add_condition", function () {
+        var selectedCondition = $("#selected_condition");
         var selectedFieldValue = $("#conditions").val();
         var selectedConditionValue = $("#condition_values").val();
         var selectedFieldText = $("#conditions").find(":selected").text();
         var selectedConditionText = $("#condition_values").find(":selected").text();
-        var array = ["And", "Or", "Not", "(", ")"];
+        var array = [whereCondition["11"], whereCondition["12"], whereCondition["13"], whereCondition["14"], whereCondition["15"]]; //And,Or,Not,(,)
+        var operator = [whereCondition["11"], whereCondition["12"], whereCondition["13"]];  //And,Or,Not
+        var lastOption = $("#selected_condition > option:last");
+
+        //add AND operator automatically
+        if (lastOption.length > 0) {
+            if (lastOption.val().indexOf(",") > -1) {
+                if ($.inArray(selectedConditionText, operator) == -1) {
+                    selectedCondition.append($('<option>', {
+                        value: "11", text: whereCondition["11"]
+                    }));
+                }
+            }
+        }
 
         if ($.inArray(selectedConditionText, array) > -1) {
-            $("#selected_condition").append($('<option>', {
+            selectedCondition.append($('<option>', {
                 value: sprintf("%s", selectedConditionValue), text: sprintf("%s", selectedConditionText)
             }));
             window.sql_builder.build();
         } else if (selectedFieldValue != "-1" && selectedConditionValue != "-1") {
-            $("#selected_condition").append($('<option>', {
+            selectedCondition.append($('<option>', {
                 value: sprintf("%s,%s", selectedFieldValue, selectedConditionValue),
                 text: sprintf("%s %s", selectedFieldText, selectedConditionText)
             }));

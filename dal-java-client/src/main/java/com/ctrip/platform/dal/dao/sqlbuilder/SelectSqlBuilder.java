@@ -113,8 +113,10 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	public StatementParameters buildParameters(){
 		parameters = super.buildParameters();
 		
-		parameters.set(index++, Types.INTEGER, (pageNo - 1) * pageSize);
-		parameters.set(index++, Types.INTEGER, pageSize); 
+		if(isPagination) {
+			parameters.set(index++, Types.INTEGER, (pageNo - 1) * pageSize);
+			parameters.set(index++, Types.INTEGER, pageSize); 
+		}
 		
 		return this.parameters;
 	}

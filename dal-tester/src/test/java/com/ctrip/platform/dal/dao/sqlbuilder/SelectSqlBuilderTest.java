@@ -300,7 +300,8 @@ public class SelectSqlBuilderTest {
 		builder.and().isNull("sss");
 		builder.orderBy("PeopleID", false);
 		
-		String sql = builder.buildFirst(builder.getTableName());
+		builder.onlyFirst();
+		String sql = builder.build();
 		
 		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM People "
 				+ "WHERE a = ? AND b in ( ?, ? ) AND b LIKE ? AND c BETWEEN ? AND ? "
@@ -329,7 +330,8 @@ public class SelectSqlBuilderTest {
 		
 		builder.orderBy("PeopleID", true);
 		
-		String sql = builder.buildFirst(builder.getTableName());
+		builder.onlyFirst();
+		String sql = builder.build();
 		
 		String expect_sql = "SELECT TOP 1 [PeopleID], [Name], [CityID] FROM People WITH (NOLOCK) "
 				+ "WHERE a = ? AND b in ( ?, ? ) AND b LIKE ? AND c BETWEEN ? AND ? "

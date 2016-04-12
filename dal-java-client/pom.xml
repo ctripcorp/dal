@@ -8,7 +8,6 @@
 	<properties>
 		<ver.version>${project.version}</ver.version>
 		<javax-persistence-version>1.0.2</javax-persistence-version>
-		<google-pb-version>2.5.0</google-pb-version>
 		<commons-codec-version>1.8</commons-codec-version>
 		<java-appinternals-version>1.0.4</java-appinternals-version>
 		<sqljdbc-version>4.0.2206</sqljdbc-version>
@@ -31,11 +30,6 @@
 			<artifactId>javax.servlet</artifactId>
 			<version>${javax.servlet-version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.protobuf</groupId>
-			<artifactId>protobuf-java</artifactId>
-			<version>${google-pb-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>

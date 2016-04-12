@@ -61,7 +61,7 @@ public class ConfigBeanManager {
 						try {
 							storage.set(propName, bean.get(field.getName()));
 						} catch (Exception e) {
-							logger.error(String.format("Save field[%] for bean[%s] failed",
+							logger.error(String.format("Save field[%s] for bean[%s] failed",
 									field.getName(), className));
 						}
 					}else{
@@ -86,7 +86,7 @@ public class ConfigBeanManager {
 		try {
 			storage.set(propName, bean.get(fieldName));
 		} catch (Exception e) {
-			logger.error(String.format("Save field[%] for bean[%s] failed",
+			logger.error(String.format("Save field[%s] for bean[%s] failed",
 					fieldName, bean.getBeanInfo().getFullName()));
 		}
 		

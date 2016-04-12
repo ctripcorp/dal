@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.daogen;
 
-import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.resource.ProjectResource;
+import com.ctrip.platform.dal.daogen.utils.Configuration;
 import org.glassfish.jersey.message.filtering.EntityFilteringFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 

@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.host.csharp;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 
 import java.util.Arrays;
 import java.util.Collections;

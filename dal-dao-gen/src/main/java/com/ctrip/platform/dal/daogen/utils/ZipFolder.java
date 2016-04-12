@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.daogen.utils;
 
-import com.ctrip.platform.dal.common.util.Configuration;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

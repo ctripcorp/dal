@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.daogen.host.csharp;
 
-import java.util.List;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import java.util.List;
 
 public class CSharpFreeSqlHost {
 

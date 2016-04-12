@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
@@ -218,7 +218,7 @@ public class JavaTableHost {
 
     public Set<String> getDaoImports() {
         Set<String> imports = new TreeSet<>();
-        imports.add("com.ctrip.platform.dal.common.enums.DatabaseCategory");
+        imports.add("com.ctrip.platform.dal.daogen.enums.DatabaseCategory");
         imports.add("com.ctrip.platform.dal.dao.*");
         imports.add("com.ctrip.platform.dal.dao.helper.*");
         imports.add("com.ctrip.platform.dal.dao.sqlbuilder.*");
@@ -244,7 +244,7 @@ public class JavaTableHost {
 
         for (JavaParameterHost field : allTypes) {
             if (null != field.getDirection() && (field.getDirection().name().equals("InputOutput") || field.getDirection().name().equals("InputOutput")))
-                imports.add(com.ctrip.platform.dal.common.enums.ParameterDirection.class.getName());
+                imports.add(com.ctrip.platform.dal.daogen.enums.ParameterDirection.class.getName());
             Class<?> clazz = field.getJavaClass();
             if (byte[].class.equals(clazz))
                 continue;

@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.UserInfo;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import org.jasig.cas.client.util.AssertionHolder;

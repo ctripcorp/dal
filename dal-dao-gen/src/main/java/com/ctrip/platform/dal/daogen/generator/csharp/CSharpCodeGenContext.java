@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.generator.csharp;
 
-import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.Progress;

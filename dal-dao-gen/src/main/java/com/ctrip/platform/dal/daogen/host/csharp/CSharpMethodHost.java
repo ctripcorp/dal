@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.host.csharp;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;

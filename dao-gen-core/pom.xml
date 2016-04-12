@@ -48,11 +48,6 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.ctrip.platform</groupId>
-            <artifactId>dal-common</artifactId>
-            <version>1.1.4</version>
-        </dependency>
-        <dependency>
             <groupId>dom4j</groupId>
             <artifactId>dom4j</artifactId>
             <version>1.6.1</version>
@@ -216,6 +211,11 @@
             <groupId>com.github.jsqlparser</groupId>
             <artifactId>jsqlparser</artifactId>
             <version>${jsqlparser-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-version}</version>
         </dependency>
     </dependencies>
     <build>

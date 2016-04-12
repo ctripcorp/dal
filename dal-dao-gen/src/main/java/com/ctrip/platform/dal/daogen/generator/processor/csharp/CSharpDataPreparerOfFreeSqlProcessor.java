@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 
-import com.ctrip.platform.dal.common.enums.DbType;
+import com.ctrip.platform.dal.daogen.enums.DbType;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.dao.DaoByFreeSql;

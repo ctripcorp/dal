@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
 import com.ctrip.platform.dal.daogen.domain.Status;

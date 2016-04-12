@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalGenerator;
 import com.ctrip.platform.dal.daogen.domain.Status;

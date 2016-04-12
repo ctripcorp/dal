@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import com.ctrip.platform.dal.common.util.Configuration;
+import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
@@ -21,6 +21,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
+import java.lang.String;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.sql.Connection;
@@ -39,7 +40,7 @@ public class SetupDBResource {
     private static ClassLoader classLoader = null;
     private static ObjectMapper mapper = new ObjectMapper();
 
-    private static final String WEB_XML = "web.xml";
+    private static final java.lang.String WEB_XML = "web.xml";
     private static final String JDBC_PROPERTIES = "jdbc.properties";
     private static final String JDBC_DRIVER_CLASS_NAME = "jdbc.driverClassName";
     private static final String JDBC_URL = "jdbc.url";
@@ -168,7 +169,9 @@ public class SetupDBResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("connectionTest")
-    public Status connectionTest(@FormParam("dbtype") String dbtype, @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword) {
+    public Status connectionTest(@FormParam("dbtype") String dbtype, @FormParam("dbaddress") String dbaddress,
+                                 @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
+                                 @FormParam("dbpassword") String dbpassword) {
         Status status = Status.OK;
         Connection conn = null;
         ResultSet rs = null;
@@ -225,9 +228,9 @@ public class SetupDBResource {
         return result;
     }
 
-    private boolean tableConsistent() throws Exception {
+    private boolean tableConsistent(String catalog) throws Exception {
         boolean result = false;
-        Set<String> catalogTableNames = SpringBeanGetter.getSetupDBDao().getCatalogTableNames(null);
+        Set<String> catalogTableNames = SpringBeanGetter.getSetupDBDao().getCatalogTableNames(catalog);
         if (catalogTableNames == null || catalogTableNames.size() == 0) {
             return result;
         }

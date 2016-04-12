@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
-import com.ctrip.platform.dal.common.enums.ParameterDirection;
+import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;

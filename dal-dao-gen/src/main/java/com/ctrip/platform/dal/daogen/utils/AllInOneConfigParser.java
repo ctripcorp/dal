@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.daogen.utils;
 
-import com.ctrip.platform.dal.common.util.Configuration;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import org.apache.log4j.Logger;

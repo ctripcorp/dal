@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.daogen.utils;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.common.enums.DbType;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.enums.DbType;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;

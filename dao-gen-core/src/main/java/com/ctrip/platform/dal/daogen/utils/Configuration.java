@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.daogen;
+package com.ctrip.platform.dal.daogen.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

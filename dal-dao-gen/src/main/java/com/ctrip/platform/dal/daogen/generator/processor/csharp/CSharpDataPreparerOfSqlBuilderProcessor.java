@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;

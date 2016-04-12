@@ -2,16 +2,50 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <groupId>com.ctrip.platform</groupId>
-        <artifactId>dal-all</artifactId>
-        <version>1.1.4</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dao-gen-core</artifactId>
     <version>1.0.0</version>
+    <properties>
+        <file_encoding>UTF-8</file_encoding>
+        <spring-version>4.0.0.RELEASE</spring-version>
+        <commons-email-version>1.3.3</commons-email-version>
+        <commons-net-version>3.3</commons-net-version>
+        <commons-dbcp-version>1.4</commons-dbcp-version>
+        <commons-lang-version>3.3.2</commons-lang-version>
+        <commons-log-version>1.1</commons-log-version>
+        <apache-http-version>4.0.1</apache-http-version>
+        <apache-zk-version>3.4.5-cdh4.2.0</apache-zk-version>
+        <apache-velocity-version>1.7</apache-velocity-version>
+        <commons-io-version>2.4</commons-io-version>
+        <slf4j-version>1.7.5</slf4j-version>
+        <logback-version>1.0.11</logback-version>
+        <log4j-version>1.2.17</log4j-version>
+        <netty-version>4.0.4</netty-version>
+        <javassist-version>3.16.1-GA</javassist-version>
+        <jtds-version>1.2.8</jtds-version>
+        <google-pb-version>2.5.0</google-pb-version>
+        <google-guice-version>4.0-beta</google-guice-version>
+        <google-guava-version>14.0.1</google-guava-version>
+        <reflections-version>0.9.8</reflections-version>
+        <ali-druid-version>0.2.25</ali-druid-version>
+        <mongo-version>2.11.3</mongo-version>
+        <ws-rs-version>2.0</ws-rs-version>
+        <jasig-cas-version>3.1.12</jasig-cas-version>
+        <jersey-version>2.3.1</jersey-version>
+        <jaxb-impl-version>2.2.7</jaxb-impl-version>
+        <jackson-version>2.3.1</jackson-version>
+        <jetty-servlet-version>3.0.0.v201112011016</jetty-servlet-version>
+        <jetty-server-version>9.0.6.v20130930</jetty-server-version>
+        <jetty-webapp-version>9.0.6.v20130930</jetty-webapp-version>
+        <jetty-glassfish-version>2.2.2.v201112011158</jetty-glassfish-version>
+        <jetty-javax-el-version>2.2.0.v201108011116</jetty-javax-el-version>
+        <javax-persistence-version>1.0.2</javax-persistence-version>
+        <jsqlparser-version>0.9</jsqlparser-version>
+        <junit-version>4.4</junit-version>
+        <sqljdbc-version>4.0.2206</sqljdbc-version>
+        <tomcat-jdbc-version>7.0.52</tomcat-jdbc-version>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
@@ -31,12 +65,12 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc</artifactId>
-            <version>4.0.2206</version>
+            <version>${sqljdbc-version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.4</version>
+            <version>${junit-version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -46,12 +80,12 @@
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-jdbc</artifactId>
-            <version>7.0.52</version>
+            <version>${tomcat-jdbc-version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-email</artifactId>
-            <version>1.3.3</version>
+            <version>${commons-email-version}</version>
         </dependency>
         <dependency>
             <groupId>commons-net</groupId>
@@ -181,7 +215,7 @@
         <dependency>
             <groupId>com.github.jsqlparser</groupId>
             <artifactId>jsqlparser</artifactId>
-            <version>0.9</version>
+            <version>${jsqlparser-version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -208,4 +242,14 @@
             </plugin>
         </plugins>
     </build>
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxrelease</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxsnapshot</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

@@ -2,12 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <groupId>com.ctrip.platform</groupId>
-        <artifactId>dal-all</artifactId>
-        <version>1.1.4</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
@@ -15,6 +9,7 @@
     <packaging>war</packaging>
     <properties>
         <environment>local</environment>
+        <file_encoding>UTF-8</file_encoding>
     </properties>
     <dependencies>
         <dependency>
@@ -35,6 +30,32 @@
             <type>warpath</type>
         </dependency>
     </dependencies>
+    <profiles>
+        <profile>
+            <id>pub</id>
+            <properties>
+                <environment>pub</environment>
+            </properties>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>release</value>
+                </property>
+            </activation>
+        </profile>
+        <profile>
+            <id>local</id>
+            <properties>
+                <environment>local</environment>
+            </properties>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>local</value>
+                </property>
+            </activation>
+        </profile>
+    </profiles>
     <build>
         <resources>
             <resource>
@@ -60,27 +81,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.codehaus.mojo</groupId>-->
-            <!--<artifactId>exec-maven-plugin</artifactId>-->
-            <!--<version>1.4.0</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>file</id>-->
-            <!--<phase>generate-resources</phase>-->
-            <!--<goals>-->
-            <!--<goal>exec</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--<configuration>-->
-            <!--<executable>copy</executable>-->
-            <!--<arguments>-->
-            <!--<argument>${project.basedir}\src\main\resources\${environment}\web.xml</argument>-->
-            <!--<argument>${project.basedir}\src\main\webapp\WEB-INF\web.xml</argument>-->
-            <!--</arguments>-->
-            <!--</configuration>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -125,4 +125,14 @@
             </plugin>
         </plugins>
     </build>
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxrelease</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxsnapshot</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

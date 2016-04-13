@@ -10,7 +10,7 @@
 #foreach($p in $method.getUpdateSetParameters())
 		builder.update("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
 #end	
-
+#parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 		return client.update(builder, hints);
 	}
 #end

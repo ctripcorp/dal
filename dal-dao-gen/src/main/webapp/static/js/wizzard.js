@@ -626,8 +626,8 @@
             });
             if ($("#page1").attr('is_update') == "1") {
                 if (!$.isEmpty(record["orderby"])) {
-                    $("#orderby_field").val(record["orderby"].split(',')[0]);
-                    $("#orderby_sort").val(record["orderby"].split(',')[1]);
+                    $("#orderby_field").val(record["orderby"].split(",")[0]);
+                    $("#orderby_sort").val(record["orderby"].split(",")[1]);
                 }
                 if (record["scalarType"]) {
                     $("#auto_sql_scalarType").val(record["scalarType"]);
@@ -636,12 +636,21 @@
                 }
                 $("#auto_sql_pagination").prop('checked', record['pagination']);
                 $('#fields').multipleSelect('setSelects', record.fields.split(","));
-                if (record.condition != undefined && record.condition != "") {
+                if (record.condition != undefined && record.condition.length > 0) {
                     var selectedConditions = record.condition.split(";");
-                    $.each(selectedConditions, function (index, value) {
-                        var array = value.split(",");
-                        getOption(value, array);
-                    });
+                    if (selectedConditions != undefined && selectedConditions.length > 0) {
+                        var length = selectedConditions.length;
+                        for (var i = 0; i < length; i++) {
+                            var array = selectedConditions[i].split(",");
+                            getOption(selectedConditions[i], array);
+                            //fix legacy conditions
+                            var next = i + 1;
+                            if (next < length) {
+                                var nextArray = selectedConditions[next].split(",");
+                                getLegacyOption(array, nextArray);
+                            }
+                        }
+                    }
                 }
                 var sql_builder = ace.edit("sql_builder");
                 sql_builder.setTheme("ace/theme/monokai");
@@ -686,21 +695,34 @@
         });
     };
 
+    var getLegacyOption = function (array, nextArray) {
+        if (array != undefined && array.length > 1) {
+            if (nextArray != undefined && nextArray.length > 1) {
+                var value = "11";
+                $("#selected_condition").append(
+                    $('<option>', {
+                        value: value, //"And"
+                        text: $(sprintf("#condition_values > option[value='%s']", value)).text()
+                    }));
+            }
+        }
+    };
+
     var getOption = function (value, array) {
-        if (array.length == 1) {
-            $("#selected_condition").append(
-                $('<option>',
-                    {
+        if (array != undefined) {
+            if (array.length == 1) {
+                $("#selected_condition").append(
+                    $('<option>', {
                         value: value,
                         text: $(sprintf("#condition_values > option[value='%s']", value)).text()
                     }));
-        } else if (array.length > 1) {
-            $("#selected_condition").append(
-                $('<option>',
-                    {
+            } else if (array.length > 1) {
+                $("#selected_condition").append(
+                    $('<option>', {
                         value: value,
                         text: sprintf("%s %s", array[0], $(sprintf("#condition_values > option[value='%s']", array[1])).text())
                     }));
+            }
         }
     };
 

@@ -172,14 +172,13 @@ $(function () {
         var selectedConditionValue = $("#condition_values").val();
         var selectedFieldText = $("#conditions").find(":selected").text();
         var selectedConditionText = $("#condition_values").find(":selected").text();
-        var array = [whereCondition["11"], whereCondition["12"], whereCondition["13"], whereCondition["14"], whereCondition["15"]]; //And,Or,Not,(,)
-        var operator = [whereCondition["11"], whereCondition["12"], whereCondition["13"]];  //And,Or,Not
+        var array = [whereCondition["11"], whereCondition["12"], whereCondition["13"], "(", ")"]; //And,Or,Not,(,)
         var lastOption = $("#selected_condition > option:last");
 
         //add AND operator automatically
         if (lastOption.length > 0) {
             if (lastOption.val().indexOf(",") > -1) {
-                if ($.inArray(selectedConditionText, operator) == -1) {
+                if ($.inArray(selectedConditionText, array) == -1) {
                     selectedCondition.append($('<option>', {
                         value: "11", text: whereCondition["11"]
                     }));

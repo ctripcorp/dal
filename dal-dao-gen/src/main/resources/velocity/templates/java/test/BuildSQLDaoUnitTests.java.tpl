@@ -5,7 +5,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
+#if (!${p.isOperator()})
 		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+#end
 #end
 	    //int ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
@@ -18,7 +20,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getUpdateSetParameters())
+#if (!${p.isOperator()})
 		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+#end
 #end
 #foreach($p in $method.getParameters())
 		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
@@ -36,7 +40,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
+#if (!${p.isOperator()})
 		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+#end
 #end
 	    //${host.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
@@ -52,7 +58,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
+#if (!${p.isOperator()})
 		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+#end
 #end
 	    //List<${host.getPojoClassName()}> ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
@@ -68,7 +76,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
+#if (!${p.isOperator()})
 		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+#end
 #end
 	    //${host.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
@@ -84,7 +94,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
+#if (!${p.isOperator()})
 		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+#end
 #end
 	    //${host.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
@@ -100,7 +112,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
+#if (!${p.isOperator()})
 		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+#end
 #end
 	    //List<${method.getPojoClassName()}> ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}
@@ -116,7 +130,9 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getParameters())
+#if (!${p.isOperator()})
 		//${p.getClassDisplayName()} ${p.getAlias()} = $!{p.getValidationValue()};// Test value here
+#end
 #end
 	    //${method.getPojoClassName()} ret = dao.${method.getName()}(${method.getParameterNames("")});
 	}

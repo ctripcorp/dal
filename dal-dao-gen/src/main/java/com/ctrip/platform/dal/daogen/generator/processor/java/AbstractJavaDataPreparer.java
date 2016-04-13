@@ -324,6 +324,7 @@ public class AbstractJavaDataPreparer {
             if (tokens.length == 1) { //
                 JavaParameterHost host = new JavaParameterHost();
                 host.setConditionType(ConditionType.valueOf(Integer.parseInt(tokens[0])));
+                host.setOperator(true);
                 parameters.add(host);
                 continue;
             }

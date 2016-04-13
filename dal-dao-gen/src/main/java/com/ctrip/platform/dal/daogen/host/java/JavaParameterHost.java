@@ -46,6 +46,8 @@ public class JavaParameterHost extends AbstractParameterHost {
 
     private boolean sensitive = false;// whether the param is sensitive
 
+    private boolean operator = false; //whether is opearator and,or,not
+
     public JavaParameterHost() {
     }
 
@@ -64,6 +66,7 @@ public class JavaParameterHost extends AbstractParameterHost {
         this.validationValue = host.getValidationValue();
         this.conditional = host.isConditional();
         this.sensitive = host.isSensitive();
+        this.operator = host.isOperator();
     }
 
     public boolean isInParameter() {
@@ -172,6 +175,14 @@ public class JavaParameterHost extends AbstractParameterHost {
 
     public void setPrimary(boolean primary) {
         this.primary = primary;
+    }
+
+    public boolean isOperator() {
+        return operator;
+    }
+
+    public void setOperator(boolean operator) {
+        this.operator = operator;
     }
 
     public String getCapitalizedName() {

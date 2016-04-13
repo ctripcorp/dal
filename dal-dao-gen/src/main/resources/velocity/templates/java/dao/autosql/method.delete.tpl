@@ -8,7 +8,7 @@
 #parse("templates/java/Hints.java.tpl")
 		DeleteSqlBuilder builder = new DeleteSqlBuilder("${method.getTableName()}", dbCategory);
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
-	return client.delete(builder, hints);
+		return client.delete(builder, hints);
 	}
 #end
 #end

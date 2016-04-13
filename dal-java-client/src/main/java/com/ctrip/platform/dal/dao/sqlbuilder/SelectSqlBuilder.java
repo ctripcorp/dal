@@ -9,8 +9,8 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class SelectSqlBuilder extends AbstractSqlBuilder {
-	
-	private StringBuilder sql = new StringBuilder("SELECT ");
+	private String findtmp = "SELECT * FROM %s WHERE %s";
+	private String whereClause;
 	
 	private List<String> selectField =  new ArrayList<String>();
 	
@@ -50,7 +50,6 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 			throws SQLException {
 		super(dBCategory);
 		setTableName(tableName);
-		this.isPagination = false;
 	}
 	
 	/**
@@ -69,6 +68,20 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 		this.isPagination = true;
 	}
 
+	/**
+	 * In case user specify a where clause to build a quick customized method
+	 * @param tableName
+	 * @param whereClause
+	 * @param dBCategory
+	 * @throws SQLException
+	 */
+	public SelectSqlBuilder(String tableName, String whereClause, 
+			DatabaseCategory dBCategory)
+			throws SQLException {
+		this(tableName, dBCategory);
+		this.whereClause = whereClause;
+	}
+	
 	/**
 	 * 添加select字段
 	 * @param fieldName
@@ -122,6 +135,9 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	}
 	
 	private String build(String effectiveTableName){
+		if(whereClause != null)
+			return String.format(findtmp, effectiveTableName, whereClause);
+			
 		if(onlyFirst)
 			return buildFirst(effectiveTableName);
 		
@@ -139,9 +155,11 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	 * @return
 	 */
 	private String buildFirst(String effectiveTableName){
+		StringBuilder sql = new StringBuilder("SELECT ");
 		if(DatabaseCategory.SqlServer == this.dBCategory){
 			sql = new StringBuilder("SELECT TOP 1 ");
 		}
+		
 		sql.append(buildSelectField());
 		sql.append(" FROM ").append(this.wrapTableName(effectiveTableName));
 		sql.append(" ").append(this.getWhereExp());
@@ -153,6 +171,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	}
 	
 	private String buildSelectSql(String effectiveTableName){
+		StringBuilder sql = new StringBuilder("SELECT ");
 		sql = new StringBuilder("SELECT ");
 		sql.append(buildSelectField());
 		sql.append(" FROM ").append(this.wrapTableName(effectiveTableName));
@@ -166,7 +185,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	}
 	
 	private String buildPaginationSql4SqlServer(String effectiveTableName){
-		sql = new StringBuilder("SELECT ");
+		StringBuilder sql = new StringBuilder("SELECT ");
 		String rowColumnField = "ROW_NUMBER() OVER ( " + buildOrderbyExp() + ") AS rownum";
 		selectField.add(rowColumnField);
 		sql.append(buildSelectField());

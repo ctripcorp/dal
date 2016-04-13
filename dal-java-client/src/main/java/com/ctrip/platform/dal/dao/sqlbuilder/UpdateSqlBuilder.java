@@ -7,16 +7,19 @@ import java.util.List;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 
 public class UpdateSqlBuilder extends AbstractSqlBuilder {
-	
-	private StringBuilder sql = new StringBuilder();
-	
 	private List<String> updateFieldNames =  new ArrayList<String>();
+	private String updateSql;
 	
 	public UpdateSqlBuilder(String tableName, DatabaseCategory dBCategory) throws SQLException {
 		super(dBCategory);
 		setTableName(tableName);
 	}
 
+	public UpdateSqlBuilder(String tableName, String updateSql, DatabaseCategory dBCategory) throws SQLException {
+		super(dBCategory);
+		this.updateSql = updateSql;
+	}
+	
 	public UpdateSqlBuilder update(String fieldName, Object paramValue, int sqlType){
 		FieldEntry field = new FieldEntry(fieldName,paramValue,sqlType);
 		selectOrUpdataFieldEntrys.add(field);
@@ -34,7 +37,11 @@ public class UpdateSqlBuilder extends AbstractSqlBuilder {
 	}
 	
 	private String build(String effectiveTableName) {
-		sql = new StringBuilder("UPDATE");
+		// In case user provides the rqw sql
+		if(updateSql != null)
+			return updateSql;
+		
+		StringBuilder sql = new StringBuilder("UPDATE");
 		sql.append(" ").append(effectiveTableName);
 		sql.append(buildUpdateField());
 		sql.append(" ").append(this.getWhereExp());

@@ -5,12 +5,17 @@ import java.sql.SQLException;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 
 public class DeleteSqlBuilder extends AbstractSqlBuilder {
-	
-	private StringBuilder sql = new StringBuilder();
+	private String whereClause;
 	
 	public DeleteSqlBuilder(String tableName, DatabaseCategory dBCategory) throws SQLException{
 		super(dBCategory);
 		setTableName(tableName);
+	}
+	
+	public DeleteSqlBuilder(String tableName, String whereClause, DatabaseCategory dBCategory) throws SQLException{
+		super(dBCategory);
+		setTableName(tableName);
+		this.whereClause = whereClause;
 	}
 	
 	public String build(){
@@ -23,9 +28,13 @@ public class DeleteSqlBuilder extends AbstractSqlBuilder {
 	}
 	
 	private String build(String effectiveTableName) {
-		sql = new StringBuilder("DELETE FROM");
-		sql.append(" ").append(effectiveTableName);
-		sql.append(" ").append(this.getWhereExp());
+		StringBuilder sql = new StringBuilder("DELETE FROM");
+		sql.append(" ").append(effectiveTableName).append(" ");
+		if(whereClause == null)
+			sql.append(this.getWhereExp());
+		else
+			sql.append("WHERE ").append(whereClause);
+		
 		return sql.toString();
 	}
 }

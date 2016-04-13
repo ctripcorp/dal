@@ -62,7 +62,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	
 	@Override
 	public void validate() throws SQLException {
-		if(sql == null)
+		if(sql == null && builder == null)
 			throw new DalException(ErrorCode.ValidateSql);
 		
 		detectDistributedTransaction(shards);

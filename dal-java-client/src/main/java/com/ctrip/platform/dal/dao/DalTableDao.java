@@ -173,10 +173,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public List<T> query(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
-		DalWatcher.begin();
-		String selectSql = String.format(findtmp,
-				getTableName(hints, parameters), whereClause);
-		return queryDao.query(selectSql, parameters, hints, parser);
+		return query(new SelectSqlBuilder(rawTableName, whereClause, dbCategory), hints);
 	}
 
 	/**
@@ -517,7 +514,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int delete(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
-		return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, whereClause, parameters, hints, deleteSqlTask, new ResultMerger.IntSummary())));
+		return delete(new DeleteSqlBuilder(rawTableName, whereClause, dbCategory), hints);
 	}
 
 	/**
@@ -534,7 +531,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 
 	/**
-	 * Update for the given where clause and parameters.
+	 * Update for the given sql and parameters.
 	 * 
 	 * @param sql the statement that used to update the db.
 	 * @param parameters A container that holds all the necessary parameters
@@ -544,7 +541,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int update(String sql, StatementParameters parameters, DalHints hints)
 			throws SQLException {
-		return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, sql, parameters, hints, updateSqlTask, new ResultMerger.IntSummary())));
+		return update(new UpdateSqlBuilder(rawTableName, sql, dbCategory), hints);
 	}
 	
 	/**

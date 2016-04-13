@@ -110,7 +110,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	
 	public String getTableName(DalHints hints, StatementParameters parameters, Map<String, ?> fields) throws SQLException {
 		if(tableShardingEnabled == false)
-			return parser.getTableName();
+			return rawTableName;
 		
 		hints.cleanUp();
 		return rawTableName + buildShardStr(logicDbName, locateTableShardId(logicDbName, hints, parameters, fields));

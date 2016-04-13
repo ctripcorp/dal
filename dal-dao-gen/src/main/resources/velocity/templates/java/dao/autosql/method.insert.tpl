@@ -14,7 +14,7 @@
 #end
 		builder.set$!{sensitiveflag}("${p.getName()}", ${p.getAlias()}, ${p.getJavaTypeDisplay()});
 #end
-#end
 		return client.insert(builder, hints);
 	}
+#end
 #end

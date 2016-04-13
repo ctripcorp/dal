@@ -282,7 +282,10 @@ public class JavaMethodHost {
                 paramsDeclaration.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
                 this.inClauses.add(parameter.getAlias());
             } else if (parameter.getConditionType() == ConditionType.IsNull
-                    || parameter.getConditionType() == ConditionType.IsNotNull) {
+                    || parameter.getConditionType() == ConditionType.IsNotNull
+                    || parameter.getConditionType() == ConditionType.And || parameter.getConditionType() == ConditionType.Or
+                    || parameter.getConditionType() == ConditionType.Not || parameter.getConditionType() == ConditionType.LeftBracket
+                    || parameter.getConditionType() == ConditionType.RightBracket) {
                 continue;// is null、is not null don't hava param
             } else {
                 paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));

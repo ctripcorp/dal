@@ -218,7 +218,7 @@ public class JavaTableHost {
 
     public Set<String> getDaoImports() {
         Set<String> imports = new TreeSet<>();
-        imports.add("com.ctrip.platform.dal.daogen.enums.DatabaseCategory");
+        imports.add("com.ctrip.platform.dal.common.enums.DatabaseCategory");
         imports.add("com.ctrip.platform.dal.dao.*");
         imports.add("com.ctrip.platform.dal.dao.helper.*");
         imports.add("com.ctrip.platform.dal.dao.sqlbuilder.*");

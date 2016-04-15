@@ -1,5 +1,5 @@
 body {
-	padding-top: 53px;
+    padding-top: 53px;
 }
 
 /* .dal-navbar {
@@ -15,82 +15,82 @@ body {
     background-color: #3b73af;
 } */
 #main_layout {
-	height: 100%;
-	/* padding-top: 19px; */
+    height: 100%;
+    /* padding-top: 19px; */
 }
 
 .logo {
-	padding: 5px;
-	float: left;
+    padding: 5px;
+    float: left;
 }
 
 .popup_text {
-	float: right !important;
-	padding-top: 1px;
+    float: right !important;
+    padding-top: 1px;
 }
 
 .popup_label {
-	float: left;
-	min-height: 30px;
-	line-height: 30px;
+    float: left;
+    min-height: 30px;
+    line-height: 30px;
 }
 
 label.btn {
-	height: 30px;
+    height: 30px;
 }
 
 .w2ui-reset * {
-	font-size: 12px;
+    font-size: 12px;
 }
 
 .selectize-dropdown {
-	margin-left: 0 !important;
+    margin-left: 0 !important;
 }
 
 .jstree-anchor {
-	font-family: Verdana, Arial;
-	color: #34495E !important;
-	font-size: 14px;
+    font-family: Verdana, Arial;
+    color: #34495E !important;
+    font-size: 14px;
 }
 
 .code-fullscreen {
-	position: relative;
-	float: right;
-	top: 15px;
-	right: 25px;
-	z-index: 999999;
-	height: 30px;
-	width: 30px;
-	cursor: pointer
+    position: relative;
+    float: right;
+    top: 15px;
+    right: 25px;
+    z-index: 999999;
+    height: 30px;
+    width: 30px;
+    cursor: pointer
 }
 
 .modal-body div {
-	margin-bottom: 3px;
+    margin-bottom: 3px;
 }
 
 ul.navbar-nav li {
-	margin-right: 1px;
+    margin-right: 1px;
 }
 
 ul.navbar-nav li:last-child {
-	margin-bottom: 1px;
+    margin-bottom: 1px;
 }
 
 .ctip {
-	margin: 0px 9px 0px 0px;
+    margin: 0px 9px 0px 0px;
 }
 
 .helpicon {
-	border: 0px;
-	width: 30px;
-	height: 30px;
+    border: 0px;
+    width: 30px;
+    height: 30px;
 }
 
 div[class*='tooltip'] {
-	text-align: left;
+    text-align: left;
 }
 
 div[class*='tooltip-inner'] {
-	width: 95% !important;
-	min-width: 200px;
+    width: 95% !important;
+    min-width: 200px;
 }

@@ -122,7 +122,52 @@ public class SetupDBResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("tableConsistentCheck")
+    public Status tableConsistentCheck(@FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
+                                       @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
+                                       @FormParam("dbcatalog") String dbcatalog) {
+        Status status = Status.ERROR;
+
+        try {
+            boolean jdbcInitialized = initializeJdbcProperties(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
+            if (jdbcInitialized) {
+                boolean result = tableConsistent(dbcatalog);
+                if (result) {
+                    status = Status.OK;
+                }
+                boolean flag = clearJdbcProperties();
+            }
+        } catch (Exception e) {
+            status = Status.ERROR;
+            status.setInfo(e.getMessage());
+        }
+
+        return status;
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("initializeJdbc")
+    public Status initializeJdbc(@FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
+                                 @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
+                                 @FormParam("dbcatalog") String dbcatalog) {
+        Status status = Status.OK;
+        try {
+            boolean result = initializeJdbcProperties(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
+            if (!result) {
+                status = Status.ERROR;
+            }
+        } catch (Exception e) {
+            status = Status.ERROR;
+            status.setInfo(e.getMessage());
+        }
+        return status;
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("initializeDb")
+
     public Status initializeDb(@Context HttpServletRequest request, @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
                                @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog,
                                @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment, @FormParam("adminNo") String adminNo,
@@ -135,7 +180,8 @@ public class SetupDBResource {
                 status.setInfo("Error occured while initializing the jdbc.properties file.");
                 return status;
             }
-            initializeConfig();
+
+            initializeConfig(); //to be deleted
             boolean isSetupTables = setupTables();
             if (!isSetupTables) {
                 status = Status.ERROR;
@@ -218,13 +264,13 @@ public class SetupDBResource {
         InputStream inStream = classLoader.getResourceAsStream(JDBC_PROPERTIES);
         properties.load(inStream);
         String driverClassName = properties.getProperty(JDBC_DRIVER_CLASS_NAME);
-        result &= (driverClassName != null);
+        result &= (driverClassName != null && driverClassName.trim().length() > 0);
         String url = properties.getProperty(JDBC_URL);
-        result &= (url != null);
+        result &= (url != null && url.trim().length() > 0);
         String userName = properties.getProperty(JDBC_USERNAME);
-        result &= (userName != null);
+        result &= (userName != null && userName.trim().length() > 0);
         String password = properties.getProperty(JDBC_PASSWORD);
-        result &= (password != null);
+        result &= (password != null && password.trim().length() > 0);
         return result;
     }
 
@@ -262,6 +308,7 @@ public class SetupDBResource {
                 continue;
             }
 
+            beginIndex += CREATE_TABLE.length();
             int endIndex = array[i].indexOf("(");
             String temp = array[i].substring(beginIndex, endIndex);
             String tableName = temp.replaceAll("`", "").trim();
@@ -281,6 +328,28 @@ public class SetupDBResource {
             properties.setProperty(JDBC_URL, String.format(jdbcUrlTemplate, dbaddress, dbport, dbcatalog));
             properties.setProperty(JDBC_USERNAME, dbuser);
             properties.setProperty(JDBC_PASSWORD, dbpassword);
+            URL url = classLoader.getResource(WEB_XML);
+            String path = url.getPath().replace(WEB_XML, JDBC_PROPERTIES);
+            FileOutputStream fileOutputStream = new FileOutputStream(path);
+            properties.store(fileOutputStream, "");
+            fileOutputStream.close();
+            result = true;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private boolean clearJdbcProperties() {
+        boolean result = false;
+        try {
+            Properties properties = new Properties();
+            properties.setProperty(JDBC_DRIVER_CLASS_NAME, "");
+            properties.setProperty(JDBC_URL, "");
+            properties.setProperty(JDBC_USERNAME, "");
+            properties.setProperty(JDBC_PASSWORD, "");
             URL url = classLoader.getResource(WEB_XML);
             String path = url.getPath().replace(WEB_XML, JDBC_PROPERTIES);
             FileOutputStream fileOutputStream = new FileOutputStream(path);

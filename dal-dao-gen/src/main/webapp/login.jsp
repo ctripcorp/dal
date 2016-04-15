@@ -168,6 +168,13 @@
                             <label class="control-label popup_label" style="width: 130px;text-align: right;"
                                    title="数据库">DB
                                 Catalog:</label> <select id="setupdbcatalog" class="span8"></select>
+                            <img src="/static/images/ajax-loading.gif" id="loading"
+                                 style="height: 20px;width: 20px;">
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label popup_label" style="width: 130px;text-align: right;">
+                                &nbsp;</label>
+                            <button id="setup_db_use" type="button" class="btn btn-primary">使用已有资源</button>
                         </div>
                     </div>
                     <hr/>

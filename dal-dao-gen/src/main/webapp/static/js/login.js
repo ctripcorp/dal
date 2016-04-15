@@ -75,6 +75,58 @@
         });
     }
 
+    function checkTableConsistent() {
+        var loading = $("#loading");
+        loading.show();
+        var disabled = "disabled";
+        var prev = $("#setup_db_prev");
+        var save = $("#setup_db_save");
+        prev.attr(disabled, disabled);
+        save.attr(disabled, disabled);
+        var using = $("#setup_db_use");
+
+        $.post("/rest/setupDb/tableConsistentCheck", {
+                dbaddress: $("#setupdbaddress").val(),
+                dbport: $("#setupdbport").val(),
+                dbuser: $("#setupdbuser").val(),
+                dbpassword: $("#setupdbpassword").val(),
+                dbcatalog: $("#setupdbcatalog").val(),
+                rand: Math.random()
+            },
+            function (data) {
+                loading.hide();
+                prev.removeAttr(disabled);
+                save.removeAttr(disabled);
+                if (data.code == "OK") {
+                    //confirm
+
+                    using.show();
+                }
+                else {
+                    using.hide();
+                }
+            });
+    }
+
+    function usingCurrentCatalog() {
+        cblock($("body"));
+        $.post("/rest/setupDb/initializeJdbc", {
+            dbaddress: $("#setupdbaddress").val(),
+            dbport: $("#setupdbport").val(),
+            dbuser: $("#setupdbuser").val(),
+            dbpassword: $("#setupdbpassword").val(),
+            dbcatalog: $("#setupdbcatalog").val(),
+            rand: Math.random()
+        }, function (data) {
+            if (data.code == "OK") {
+                window.location.href = "login.jsp";
+            } else {
+                $("#setup_error_msg").html(data);
+            }
+            $("body").unblock();
+        });
+    }
+
     function dbNext() {
         var dbAddress = $("#setupdbaddress").val();
         var dbPort = $("#setupdbport").val();
@@ -187,7 +239,7 @@
             rand: Math.random()
         }, function (data) {
             if (data.code == "OK") {
-                $("#setup_error_msg").html("初始化成功.");
+                $("#setup_error_msg").html("初始化成功。");
                 window.location.href = "login.jsp";
             } else {
                 $("#setup_error_msg").html(data.info);
@@ -312,8 +364,13 @@
             $("#user_remember_me").attr("checked", true);
         }
 
+        var loading = $("#loading");
+        loading.hide();
+        var using = $("#setup_db_use");
+        using.hide();
+
         $(document.body).on("click", "#setup_conn_test", function () {
-            connectionTest("连接成功.");
+            connectionTest("连接成功。");
         });
 
         $(document.body).on("click", "#setup_db_prev", function () {
@@ -327,6 +384,7 @@
         });
 
         $(document.body).on("click", "#setup_db_next", function () {
+            connectionTest("");
             dbNext();
         });
 
@@ -340,6 +398,14 @@
 
         $(document.body).on("click", "#signup", function () {
             signUp();
+        });
+
+        $(document.body).on("change", "#setupdbcatalog", function () {
+            checkTableConsistent();
+        });
+
+        $(document.body).on("click", "#setup_db_use", function () {
+            usingCurrentCatalog();
         });
 
         checkSetupDb();

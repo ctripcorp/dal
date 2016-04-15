@@ -1,4 +1,20 @@
-CREATE TABLE IF NOT EXISTS `alldbs` (
+DROP TABLE IF EXISTS `alldbs`;
+DROP TABLE IF EXISTS `api_list`;
+DROP TABLE IF EXISTS `approve_task`;
+DROP TABLE IF EXISTS `databasesetentry`;
+DROP TABLE IF EXISTS `databaseset`;
+DROP TABLE IF EXISTS `group_relation`;
+DROP TABLE IF EXISTS `dal_group`;
+DROP TABLE IF EXISTS `login_users`;
+DROP TABLE IF EXISTS `project`;
+DROP TABLE IF EXISTS `task_auto`;
+DROP TABLE IF EXISTS `task_sql`;
+DROP TABLE IF EXISTS `task_table`;
+DROP TABLE IF EXISTS `user_group`;
+DROP TABLE IF EXISTS `user_project`;
+DROP TABLE IF EXISTS `config_template`;
+
+CREATE TABLE `alldbs` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`dbname` VARCHAR(100) NULL DEFAULT NULL COLLATE 'utf8_bin'
 	,`comment` TEXT NULL
@@ -14,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `alldbs` (
 	,INDEX `FK_Reference_3`(`dal_group_id`)
 	);
 
-CREATE TABLE IF NOT EXISTS `api_list` (
+CREATE TABLE `api_list` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`language` VARCHAR(45) NULL DEFAULT NULL
 	,`db_type` VARCHAR(45) NULL DEFAULT NULL
@@ -25,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `api_list` (
 	,PRIMARY KEY (`id`)
 	);
 
-CREATE TABLE IF NOT EXISTS `approve_task` (
+CREATE TABLE `approve_task` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`task_id` INT (11) NULL DEFAULT NULL
 	,`task_type` VARCHAR(45) NULL DEFAULT NULL
@@ -35,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `approve_task` (
 	,PRIMARY KEY (`id`)
 	);
 
-CREATE TABLE IF NOT EXISTS `dal_group` (
+CREATE TABLE `dal_group` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`group_name` VARCHAR(100) NULL DEFAULT NULL
 	,`group_comment` TEXT NULL
@@ -44,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `dal_group` (
 	,PRIMARY KEY (`id`)
 	);
 
-CREATE TABLE IF NOT EXISTS `databaseset` (
+CREATE TABLE `databaseset` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`name` VARCHAR(150) NOT NULL
 	,`provider` VARCHAR(100) NULL DEFAULT NULL
@@ -58,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `databaseset` (
 	,CONSTRAINT `FK_Reference_4` FOREIGN KEY (`groupId`) REFERENCES `dal_group`(`id`)
 	);
 
-CREATE TABLE IF NOT EXISTS `databasesetentry` (
+CREATE TABLE `databasesetentry` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`name` TEXT NOT NULL
 	,`databaseType` VARCHAR(50) NOT NULL
@@ -72,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `databasesetentry` (
 	,CONSTRAINT `FK_Reference_5` FOREIGN KEY (`databaseSet_Id`) REFERENCES `databaseset`(`id`)
 	);
 
-CREATE TABLE IF NOT EXISTS `group_relation` (
+CREATE TABLE `group_relation` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`current_group_id` INT (11) NULL DEFAULT NULL
 	,`child_group_id` INT (11) NULL DEFAULT NULL
@@ -84,7 +100,7 @@ CREATE TABLE IF NOT EXISTS `group_relation` (
 	,UNIQUE INDEX `uq_Index_1`(`current_group_id`, `child_group_id`)
 	);
 
-CREATE TABLE IF NOT EXISTS `login_users` (
+CREATE TABLE `login_users` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`user_no` VARCHAR(45) NULL DEFAULT NULL
 	,`user_name` VARCHAR(45) NULL DEFAULT NULL
@@ -94,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `login_users` (
 	,UNIQUE INDEX `user_no_UNIQUE`(`user_no`)
 	);
 
-CREATE TABLE IF NOT EXISTS `project` (
+CREATE TABLE `project` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`name` VARCHAR(45) NULL DEFAULT NULL
 	,`namespace` VARCHAR(45) NULL DEFAULT NULL
@@ -106,7 +122,7 @@ CREATE TABLE IF NOT EXISTS `project` (
 	)
 	AUTO_INCREMENT=10000;
 
-CREATE TABLE IF NOT EXISTS `task_auto` (
+CREATE TABLE `task_auto` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`project_id` INT (11) NULL DEFAULT NULL
 	,`db_name` VARCHAR(45) NULL DEFAULT NULL
@@ -132,7 +148,7 @@ CREATE TABLE IF NOT EXISTS `task_auto` (
 	,PRIMARY KEY (`id`)
 	);
 
-CREATE TABLE IF NOT EXISTS `task_sql` (
+CREATE TABLE `task_sql` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`db_name` VARCHAR(45) NULL DEFAULT NULL
 	,`class_name` VARCHAR(45) NULL DEFAULT NULL
@@ -157,7 +173,7 @@ CREATE TABLE IF NOT EXISTS `task_sql` (
 	,PRIMARY KEY (`id`)
 	);
 
-CREATE TABLE IF NOT EXISTS `task_table` (
+CREATE TABLE `task_table` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`project_id` INT (11) NULL DEFAULT NULL
 	,`db_name` VARCHAR(45) NULL DEFAULT NULL
@@ -180,7 +196,7 @@ CREATE TABLE IF NOT EXISTS `task_table` (
 	,PRIMARY KEY (`id`)
 	);
 
-CREATE TABLE IF NOT EXISTS `user_group` (
+CREATE TABLE `user_group` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`user_id` INT (11) NULL DEFAULT NULL
 	,`group_id` INT (11) NULL DEFAULT NULL
@@ -189,14 +205,14 @@ CREATE TABLE IF NOT EXISTS `user_group` (
 	,PRIMARY KEY (`id`)
 	);
 
-CREATE TABLE IF NOT EXISTS `user_project` (
+CREATE TABLE `user_project` (
 	`id` INT (11) NOT NULL AUTO_INCREMENT
 	,`project_id` INT (11) NULL DEFAULT NULL
 	,`user_no` VARCHAR(45) NULL DEFAULT NULL
 	,PRIMARY KEY (`id`)
 	);
 
-CREATE TABLE IF NOT EXISTS `config_template` (
+CREATE TABLE `config_template` (
 	`id` INT (2) NOT NULL AUTO_INCREMENT
 	,`config_type` INT (2) NULL DEFAULT NULL
 	,`lang_type` INT (2) NULL DEFAULT NULL

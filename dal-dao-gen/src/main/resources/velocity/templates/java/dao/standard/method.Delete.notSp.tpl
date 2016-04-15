@@ -1,4 +1,5 @@
 #if($host.generateAPI(10,31))
+
 	/**
 	 * Delete the given pojo.
 	 * 
@@ -15,6 +16,7 @@
 	}
 #end
 #if($host.generateAPI(86,87))
+
 	/**
 	 * Delete the given pojos list one by one.
 	 * 
@@ -31,6 +33,7 @@
 	}
 #end
 #if($host.generateAPI(88,89))
+
 	/**
 	 * Delete the given pojo list in batch. 
 	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.

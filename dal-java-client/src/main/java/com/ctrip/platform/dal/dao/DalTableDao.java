@@ -9,12 +9,15 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.helper.DalFirstResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalListMerger;
+import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
 import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.InsertSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.QueryBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.BaseQueryBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.SqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
 import com.ctrip.platform.dal.dao.task.BulkTask;
 import com.ctrip.platform.dal.dao.task.DalBulkTaskRequest;
@@ -54,6 +57,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	private UpdateSqlTask<T> updateSqlTask;
 
 	private DalRequestExecutor executor; 
+	private static final boolean NULLABLE = true;
 			
 	public DalTableDao(DalParser<T> parser) {
 		this(parser, DalClientFactory.getTaskFactory());
@@ -110,14 +114,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		if (parser.getPrimaryKeyNames().length != 1)
 			throw new DalException(ErrorCode.ValidatePrimaryKeyCount);
 
-		DalWatcher.begin();
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, getColumnType(parser.getPrimaryKeyNames()[0]), id);
 
-		String selectSql = String.format(findtmp,
-				getTableName(hints, parameters), pkSql);
-
-		return queryDao.queryForObjectNullable(selectSql, parameters, hints, parser);
+		return queryObject(new BaseQueryBuilder(rawTableName, dbCategory).where(pkSql).with(parameters).nullable(), hints);
 	}
 	
 	/**
@@ -129,15 +129,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @throws SQLException
 	 */
 	public T queryByPk(T pk, DalHints hints) throws SQLException {
-		DalWatcher.begin();
 		StatementParameters parameters = new StatementParameters();
 		addParameters(parameters, parser.getPrimaryKeys(pk));
 
-		Map<String, ?> fields = parser.getFields(pk);
-		String selectSql = String.format(findtmp,
-				getTableName(hints, parameters, fields), pkSql);
-
-		return queryDao.queryForObjectNullable(selectSql, parameters, hints.setFields(fields), parser);
+		return queryObject(new BaseQueryBuilder(rawTableName, dbCategory).where(pkSql).with(parameters).nullable(), hints.setFields(parser.getFields(pk)));
 	}
 
 	/**
@@ -150,7 +145,6 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @throws SQLException
 	 */
 	public List<T> queryLike(T sample, DalHints hints) throws SQLException {
-		DalWatcher.begin();
 		StatementParameters parameters = new StatementParameters();
 		Map<String, ?> fields = parser.getFields(sample);
 		Map<String, ?> queryCriteria = filterNullFileds(fields);
@@ -173,7 +167,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public List<T> query(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
-		return query(new SelectSqlBuilder(rawTableName, whereClause, dbCategory), hints);
+		return query(new BaseQueryBuilder(rawTableName, dbCategory).where(whereClause).with(parameters), hints);
 	}
 
 	/**
@@ -187,20 +181,14 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @return List of pojos that meet the search criteria
 	 * @throws SQLException
 	 */
-	public List<T> query(SelectSqlBuilder queryBuilder, DalHints hints) throws SQLException {
+	public List<T> query(QueryBuilder queryBuilder, DalHints hints) throws SQLException {
 		DalWatcher.begin();
-		ResultMerger<List<T>> defaultMerger = new DalListMerger<>((Comparator<T>)hints.getSorter());
-		
-		ResultMerger<List<T>> merger = hints.is(DalHintEnum.resultMerger) ?
-				(ResultMerger<List<T>>)hints.get(DalHintEnum.resultMerger) : 
-				defaultMerger;
+		return commonQuery(queryBuilder.mapWith(parser).nullable(), hints);
+	}
 
-				
-		DalSqlTaskRequest<List<T>> request = new DalSqlTaskRequest<>(
-				logicDbName, queryBuilder, hints,
-				new QuerySqlTask<>(new DalRowMapperExtractor<T>(parser)), merger);
-	
-		return executor.execute(hints, request, true);
+	public <K> List<K> query(QueryBuilder queryBuilder, DalHints hints, Class<K> clazz) throws SQLException {
+		DalWatcher.begin();
+		return commonQuery(queryBuilder.mapWith(new DalObjectRowMapper<K>()).nullable(), hints);
 	}
 
 	/**
@@ -216,42 +204,32 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public T queryFirst(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
-		DalWatcher.begin();
-		String selectSql = String.format(findtmp,
-				getTableName(hints, parameters), whereClause);
-		return queryDao.queryFirstNullable(selectSql, parameters, hints, parser);
+		return queryObject(new BaseQueryBuilder(rawTableName, dbCategory).where(whereClause).with(parameters).requireFirst().nullable(), hints);
 	}
 
-	public T queryFirst(SelectSqlBuilder queryBuilder, DalHints hints) throws SQLException {
+	/**
+	 * Query pojo for the given query builder.
+	 * @param queryBuilder select builder which represents the query criteria
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @return
+	 * @throws SQLException
+	 */
+	public T queryObject(QueryBuilder queryBuilder, DalHints hints) throws SQLException {
 		DalWatcher.begin();
-		ResultMerger<T> defaultMerger = new DalFirstResultMerger<>((Comparator<T>)hints.getSorter());
-		
-		ResultMerger<T> merger = hints.is(DalHintEnum.resultMerger) ?
-				(ResultMerger<T>)hints.get(DalHintEnum.resultMerger) : 
-				defaultMerger;
-
-				
-		DalSqlTaskRequest<T> request = new DalSqlTaskRequest<>(
-				logicDbName, queryBuilder, hints,
-				new QuerySqlTask<>(new DalSingleResultExtractor<T>(parser, false)), merger);
-	
-		return executor.execute(hints, request, true);
+		return commonQuery(queryBuilder.mapWith(parser), hints);
 	}
 	
-	public T querySingle(SelectSqlBuilder queryBuilder, DalHints hints) throws SQLException {
+	/**
+	 * Query object for the given type for the given query builder.
+	 * @param queryBuilder select builder which represents the query criteria
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param clazz the class which the returned result belongs to.
+	 * @return
+	 * @throws SQLException
+	 */
+	public <K> K queryObject(QueryBuilder queryBuilder, DalHints hints, Class<K> clazz) throws SQLException {
 		DalWatcher.begin();
-		ResultMerger<T> defaultMerger = new DalSingleResultMerger<>();
-		
-		ResultMerger<T> merger = hints.is(DalHintEnum.resultMerger) ?
-				(ResultMerger<T>)hints.get(DalHintEnum.resultMerger) : 
-				defaultMerger;
-
-				
-		DalSqlTaskRequest<T> request = new DalSqlTaskRequest<>(
-				logicDbName, queryBuilder, hints,
-				new QuerySqlTask<>(new DalSingleResultExtractor<T>(parser, true)), merger);
-	
-		return executor.execute(hints, request, true);
+		return commonQuery(queryBuilder.mapWith(new DalObjectRowMapper<K>()), hints);
 	}
 
 	/**
@@ -269,10 +247,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public List<T> queryTop(String whereClause, StatementParameters parameters,
 			DalHints hints, int count) throws SQLException {
-		DalWatcher.begin();
-		String selectSql = String.format(findtmp,
-				getTableName(hints, parameters), whereClause);
-		return queryDao.queryTop(selectSql, parameters, hints, parser, count);
+		return query(new BaseQueryBuilder(rawTableName, dbCategory).where(whereClause).with(parameters).top(count), hints);
 	}
 
 	/**
@@ -294,12 +269,17 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 			StatementParameters parameters, DalHints hints, int start, int count)
 			throws SQLException {
 		DalWatcher.begin();
-		String selectSql = String.format(findtmp,
-				getTableName(hints, parameters), whereClause);
-		return queryDao.queryFrom(selectSql, parameters, hints, parser, start,
-				count);
+		return query(new BaseQueryBuilder(rawTableName, dbCategory).where(whereClause).with(parameters).range(start, count), hints);
 	}
 
+	private <K> K commonQuery(QueryBuilder builder, DalHints hints) throws SQLException {
+		DalSqlTaskRequest<K> request = new DalSqlTaskRequest<>(
+				logicDbName, builder, hints, 
+				new QuerySqlTask<>((DalResultSetExtractor<K>)builder.getResultExtractor(hints)), (ResultMerger<K>)builder.getResultMerger(hints));
+		
+		return executor.execute(hints, request, builder.isNullable());
+	}
+	
 	/**
 	 * Insert pojo and get the generated PK back in keyHolder. 
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.

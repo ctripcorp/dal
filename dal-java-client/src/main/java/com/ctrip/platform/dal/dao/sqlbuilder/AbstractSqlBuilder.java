@@ -25,7 +25,12 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
 	
 	private String tableName;
 
-	public AbstractSqlBuilder(DatabaseCategory dBCategory) throws SQLException{
+	public AbstractSqlBuilder(String tableName, DatabaseCategory dBCategory) throws SQLException{
+		if(tableName ==null || tableName.isEmpty())
+			throw new SQLException("table name is illegal.");
+		
+		this.tableName = tableName;
+		
 		if(dBCategory==null){
 			throw new SQLException("DatabaseCategory can't be null.");
 		}
@@ -41,13 +46,6 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
 	}
 	
 	public void setTableShardInfo(String shardStr) {
-	}
-
-	public void setTableName(String tableName) throws SQLException {
-		if(tableName ==null || tableName.isEmpty())
-			throw new SQLException("table name is illegal.");
-		
-		this.tableName = tableName;
 	}
 
 	/**

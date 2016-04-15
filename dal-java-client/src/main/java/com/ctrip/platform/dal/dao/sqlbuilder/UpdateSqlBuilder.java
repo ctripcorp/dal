@@ -10,13 +10,12 @@ public class UpdateSqlBuilder extends AbstractSqlBuilder {
 	private List<String> updateFieldNames =  new ArrayList<String>();
 	private String updateSql;
 	
-	public UpdateSqlBuilder(String tableName, DatabaseCategory dBCategory) throws SQLException {
-		super(dBCategory);
-		setTableName(tableName);
+	public UpdateSqlBuilder(String tableName, DatabaseCategory dbCategory) throws SQLException {
+		super(tableName, dbCategory);
 	}
 
-	public UpdateSqlBuilder(String tableName, String updateSql, DatabaseCategory dBCategory) throws SQLException {
-		super(dBCategory);
+	public UpdateSqlBuilder(String tableName, String updateSql, DatabaseCategory dbCategory) throws SQLException {
+		super(tableName, dbCategory);
 		this.updateSql = updateSql;
 	}
 	

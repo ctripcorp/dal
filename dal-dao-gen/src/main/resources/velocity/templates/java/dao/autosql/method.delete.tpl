@@ -1,5 +1,6 @@
 #foreach($method in $host.getMethods())
 #if($method.getCrud_type() == "delete" )
+
 	/**
 	 * ${method.getComments()}
 	**/

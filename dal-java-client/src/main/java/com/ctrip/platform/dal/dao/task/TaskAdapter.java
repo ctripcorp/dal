@@ -41,7 +41,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	protected static final String OR = " OR ";
 	protected static final String TMPL_CALL = "{call %s(%s)}";
 
-	public String findtmp = "SELECT * FROM %s WHERE %s";
+	public static String findtmp = "SELECT * FROM %s WHERE %s";
 	
 	protected DalClient client;
 	protected DalQueryDao queryDao;

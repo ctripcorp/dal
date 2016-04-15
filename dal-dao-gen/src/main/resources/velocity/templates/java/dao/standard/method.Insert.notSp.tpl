@@ -1,4 +1,5 @@
 #if($host.generateAPI(7,19))
+
 	/**
 	 * Insert pojo and get the generated PK back in keyHolder. 
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
@@ -19,6 +20,7 @@
 	}
 #end
 #if($host.generateAPI(75,77))
+
 	/**
 	 * Insert pojos one by one. If you want to inert them in the batch mode,
 	 * user batchInsert instead. You can also use the combinedInsert.
@@ -40,6 +42,7 @@
 	}
 #end
 #if($host.generateAPI(9,73))
+
 	/**
 	 * Insert pojo and get the generated PK back in keyHolder. 
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
@@ -62,6 +65,7 @@
 	}
 #end
 #if($host.generateAPI(78,79))
+
 	/**
 	 * Insert pojos and get the generated PK back in keyHolder. 
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
@@ -87,6 +91,7 @@
 	}
 #end
 #if($host.generateAPI(80,81))
+
 	/**
 	 * Insert pojos in batch mode. 
 	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
@@ -104,6 +109,7 @@
 	}
 #end
 #if($host.generateAPI(82,83) and !$host.getSpInsert().isExist())
+
 	/**
 	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
@@ -123,6 +129,7 @@
 	}
 #end
 #if($host.generateAPI(84,85) and !$host.getSpInsert().isExist())
+
 	/**
 	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.

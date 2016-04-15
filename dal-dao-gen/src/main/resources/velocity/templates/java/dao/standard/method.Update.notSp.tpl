@@ -1,4 +1,5 @@
 #if($host.generateAPI(12,33))
+
 	/**
 	 * Update the given pojo . By default, if a field of pojo is null value,
 	 * that field will be ignored, so that it will not be updated. You can
@@ -20,6 +21,7 @@
 	}
 #end
 #if($host.generateAPI(90,91))
+
 	/**
 	 * Update the given pojo list one by one. By default, if a field of pojo is null value,
 	 * that field will be ignored, so that it will not be updated. You can
@@ -41,6 +43,7 @@
 	}
 #end
 #if($host.generateAPI(96,97))
+
 	/**
 	 * Update the given pojo list in batch. 
 	 * 

@@ -1,5 +1,6 @@
 #if($host.hasPk())
 #if($host.isIntegerPk() && $host.generateAPI(1,13))
+
 	/**
 	 * Query ${host.getPojoClassName()} by the specified ID
 	 * The ID must be a number
@@ -11,6 +12,7 @@
 	}
 #end
 #if(!$host.isIntegerPk() && $host.generateAPI(2,14))	
+
 	/**
 	 * Query ${host.getPojoClassName()} by complex primary key
 	**/
@@ -25,7 +27,8 @@
 	}
 #end
 #if($host.generateAPI(3,15))
-    /**
+
+	/**
 	 * Query ${host.getPojoClassName()} by ${host.getPojoClassName()} instance which the primary key is set
 	**/
 	public ${host.getPojoClassName()} queryByPk(${host.getPojoClassName()} pk, DalHints hints)
@@ -35,3 +38,13 @@
 	}
 #end
 #end
+
+	/**
+	 * Query against sample pojo. All not null attributes of the passed in pojo
+	 * will be used as search criteria.
+	**/
+	public ${host.getPojoClassName()} queryLike(${host.getPojoClassName()} sample, DalHints hints)
+			throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+		return client.queryLike(sample, hints);
+	}

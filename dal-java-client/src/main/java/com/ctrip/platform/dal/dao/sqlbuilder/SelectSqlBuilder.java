@@ -1,41 +1,38 @@
 package com.ctrip.platform.dal.dao.sqlbuilder;
 
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalResultSetExtractor;
+import com.ctrip.platform.dal.dao.DalRowMapper;
+import com.ctrip.platform.dal.dao.ResultMerger;
 
-public class SelectSqlBuilder extends AbstractSqlBuilder {
-	private String findtmp = "SELECT * FROM %s WHERE %s";
-	private String whereClause;
-	
+public class SelectSqlBuilder extends AbstractSqlBuilder implements QueryBuilder {
 	private List<String> selectField =  new ArrayList<String>();
 	
-	private String orderByField =  "";
-	private boolean onlyFirst = false;
-	
-	//是否升序
-	private boolean ascending = true;
+	private BaseQueryBuilder queryBuilder;
 	
 	private boolean isPagination = false;
-	private int pageNo;
-	private int pageSize;
+	private static final String MYSQL_PAGE_SUFFIX_TPL= " limit ?,?";
+	private static final String SQLSVR_PAGE_SUFFIX_TPL= " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 	
 	/**
+	 * Important Note: In this case, the generated code with set page info into statement parameters.
+	 * You are recommended to re-generate code using the code generator. The new code will use the other two constructor instead
+	 * 
 	 * @param tableName 表名
 	 * @param dBCategory 数据库类型
-	 * @param isPagination 是否分页
+	 * @param isPagination 是否分页. If it is true, it means the code is running with old generated code
 	 * @throws SQLException
-	 * @Deprecated use the other two constructor instead
+	 * @Deprecated
 	 */
 	public SelectSqlBuilder(String tableName,
-			DatabaseCategory dBCategory, boolean isPagination)
+			DatabaseCategory dbCategory, boolean isPagination)
 			throws SQLException {
-		super(dBCategory);
-		setTableName(tableName);
+		this(tableName, dbCategory);
 		this.isPagination = isPagination;
 	}
 	
@@ -46,10 +43,11 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public SelectSqlBuilder(String tableName,
-			DatabaseCategory dBCategory)
+			DatabaseCategory dbCategory)
 			throws SQLException {
-		super(dBCategory);
-		setTableName(tableName);
+		super(tableName, dbCategory);
+		queryBuilder = new BaseQueryBuilder(tableName, dbCategory);
+		queryBuilder.nullable();
 	}
 	
 	/**
@@ -61,25 +59,14 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	 * @throws SQLException
 	 */
 	public SelectSqlBuilder(String tableName,
-			DatabaseCategory dBCategory, int pageNo, int pageSize)
+			DatabaseCategory dbCategory, int pageNo, int pageSize)
 			throws SQLException {
-		super(dBCategory);
-		setTableName(tableName);
-		this.isPagination = true;
-	}
+		this(tableName, dbCategory);
+		
+		if(pageNo < 1 || pageSize < 1) 
+			throw new SQLException("Illigal pagesize or pageNo, please check");	
 
-	/**
-	 * In case user specify a where clause to build a quick customized method
-	 * @param tableName
-	 * @param whereClause
-	 * @param dBCategory
-	 * @throws SQLException
-	 */
-	public SelectSqlBuilder(String tableName, String whereClause, 
-			DatabaseCategory dBCategory)
-			throws SQLException {
-		this(tableName, dBCategory);
-		this.whereClause = whereClause;
+		queryBuilder.range((pageNo - 1) * pageSize, pageSize);
 	}
 	
 	/**
@@ -101,104 +88,101 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 	 * @return
 	 */
 	public SelectSqlBuilder orderBy(String fieldName, boolean ascending){
-		this.orderByField = fieldName;
-		this.ascending = ascending;
+		queryBuilder.orderBy(fieldName, ascending);
 		return this;
 	}
 	
-	public SelectSqlBuilder onlyFirst() {
-		onlyFirst = true;
+	public SelectSqlBuilder requireFirst() {
+		queryBuilder.requireFirst();
 		return this;
+	}
+	
+	public SelectSqlBuilder requireSingle() {
+		queryBuilder.requireSingle();
+		return this;
+	}
+	
+	public SelectSqlBuilder nullable() {
+		queryBuilder.nullable();
+		return this;
+	}
+	
+	public boolean isRequireFirst () {
+		return queryBuilder.isRequireFirst();
+	}
+
+	public boolean isRequireSingle() {
+		return queryBuilder.isRequireSingle();
+	}
+
+	public boolean isNullable() {
+		return queryBuilder.isNullable();
+	}
+
+	@Override
+	public <T> ResultMerger<T> getResultMerger(DalHints hints) {
+		return queryBuilder.getResultMerger(hints);
+	}
+
+	@Override
+	public <T> QueryBuilder mapWith(DalRowMapper<T> mapper) {
+		queryBuilder.mapWith(mapper);
+		return this;
+	}
+
+	@Override
+	public <T> DalResultSetExtractor<T> getResultExtractor(DalHints hints) {
+		return queryBuilder.getResultExtractor(hints);
 	}
 	
 	/**
-	 * 构建SQL语句
+	 * This method has to be backward compatible. The old generator will generated like
+	 *      String sql = builder.build();
+	 *      
+	 *      For page:
+	 *      StatementParameters parameters = builder.buildParameters();
+	 *      int index =  builder.getStatementParameterIndex();
+	 *      parameters.set(index++, Types.INTEGER, (pageNo - 1) * pageSize + 1);
+	 *      parameters.set(index++, Types.INTEGER, pageSize * pageNo);
+	 *      return queryDao.query(sql, parameters, hints, parser);
+	 *      
+	 *      Or for first result
+	 *      return queryDao.queryForObjectNullable(sql, builder.buildParameters(), hints, parser);
+	 *      
+	 *      Or for single result
+	 *      return queryDao.queryForObjectNullable(sql, builder.buildParameters(), hints, parser);
 	 * @return
 	 */
 	public String build(){
-		return build(getTableName());
-	}
-	
-	public String buildWith(String shardStr) {
-		return build(getTableName(shardStr));
-	}
-	
-	public StatementParameters buildParameters(){
-		parameters = super.buildParameters();
-		
-		if(isPagination) {
-			parameters.set(index++, Types.INTEGER, (pageNo - 1) * pageSize);
-			parameters.set(index++, Types.INTEGER, pageSize); 
-		}
-		
-		return this.parameters;
-	}
-	
-	private String build(String effectiveTableName){
-		if(whereClause != null)
-			return String.format(findtmp, effectiveTableName, whereClause);
-			
-		if(onlyFirst)
-			return buildFirst(effectiveTableName);
-		
-		if(this.isPagination && DatabaseCategory.MySql == this.dBCategory)
-			return this.buildPaginationSql4MySQL(effectiveTableName);
+		preBuild();
 
-		if(this.isPagination && DatabaseCategory.SqlServer == this.dBCategory)
-			return this.buildPaginationSql4SqlServer(effectiveTableName);
+		String sql = queryBuilder.build();
+		String suffix = DatabaseCategory.SqlServer == queryBuilder.getDbCategory() ? SQLSVR_PAGE_SUFFIX_TPL : MYSQL_PAGE_SUFFIX_TPL;
 
-		return this.buildSelectSql(effectiveTableName);
+		// If it is the old code gen case, we need to append page suffix
+		return isPagination ? sql + suffix : sql;
 	}
 	
 	/**
+	 * For backward compatible
 	 * 对于select first，会在语句中追加limit 0,1(MySQL)或者top 1(SQL Server)：
 	 * @return
 	 */
-	private String buildFirst(String effectiveTableName){
-		StringBuilder sql = new StringBuilder("SELECT ");
-		if(DatabaseCategory.SqlServer == this.dBCategory){
-			sql = new StringBuilder("SELECT TOP 1 ");
-		}
-		
-		sql.append(buildSelectField());
-		sql.append(" FROM ").append(this.wrapTableName(effectiveTableName));
-		sql.append(" ").append(this.getWhereExp());
-		sql.append(" ").append(buildOrderbyExp());
-		if(DatabaseCategory.MySql == this.dBCategory){
-			sql.append(" ").append("limit 0,1");
-		}
-		return sql.toString();
+	public String buildFirst(){
+		queryBuilder.requireFirst();
+		return build();
 	}
 	
-	private String buildSelectSql(String effectiveTableName){
-		StringBuilder sql = new StringBuilder("SELECT ");
-		sql = new StringBuilder("SELECT ");
-		sql.append(buildSelectField());
-		sql.append(" FROM ").append(this.wrapTableName(effectiveTableName));
-		sql.append(" ").append(this.getWhereExp());
-		sql.append(" ").append(buildOrderbyExp());
-		return sql.toString();
+	/**
+	 * Only the newly generated code will use this method
+	 */
+	public String buildWith(String shardStr) {
+		preBuild();
+		return queryBuilder.buildWith(shardStr);
 	}
 	
-	private String buildPaginationSql4MySQL(String effectiveTableName){
-		return buildSelectSql(effectiveTableName)+" limit ?, ?";
-	}
-	
-	private String buildPaginationSql4SqlServer(String effectiveTableName){
-		StringBuilder sql = new StringBuilder("SELECT ");
-		String rowColumnField = "ROW_NUMBER() OVER ( " + buildOrderbyExp() + ") AS rownum";
-		selectField.add(rowColumnField);
-		sql.append(buildSelectField());
-		sql.append(" FROM ").append(this.wrapTableName(effectiveTableName));
-		sql.append(" ").append(this.getWhereExp());
-		String cetWrap = "WITH CET AS (" + sql.toString() + ")";
-		
-		selectField.remove(selectField.size()-1);
-		sql = new StringBuilder(cetWrap+" SELECT ");
-		sql.append(buildSelectField());
-		sql.append(" FROM CET WHERE rownum BETWEEN ? AND ?");
-		
-		return sql.toString();
+	private void preBuild() {
+		queryBuilder.where(getWhereExp()).select(buildSelectField());
 	}
 	
 	private String buildSelectField(){
@@ -211,30 +195,4 @@ public class SelectSqlBuilder extends AbstractSqlBuilder {
 		}
 		return selectFields.toString();
 	}
-	
-	private String buildOrderbyExp(){
-		StringBuilder orderbyExp = new StringBuilder();
-		if(orderByField!=null && orderByField.length()>0){
-			orderbyExp.append("ORDER BY ");
-			String wrap = this.wrapField(orderByField);
-			wrap = ascending? wrap+" ASC":wrap+" DESC";
-			orderbyExp.append(wrap);
-		}
-		return orderbyExp.toString();
-	}
-	
-	/**
-	 * 对表名进行处理，如果数据库是SqlServer，则在表名称后追加关键字 WITH (NOLOCK)，其余均不作处理
-	 * @param tableName
-	 * @return
-	 */
-	private String wrapTableName(String tableName){
-		if(dBCategory == DatabaseCategory.MySql){
-			return tableName;
-		}else if(dBCategory == DatabaseCategory.SqlServer){
-			return tableName+" WITH (NOLOCK)";
-		}
-		return tableName;
-	}
-	
 }

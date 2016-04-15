@@ -6,12 +6,14 @@
 #if($method.isPaging())
 #set($isPagination = "true")	
 #end
+
 	/**
 	 * ${method.getComments()}
 	**/
 	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")
+
 #if($method.isPaging())
 		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory, pageNo, pageSize);
 #else
@@ -22,15 +24,8 @@
 #if($method.getOrderByExp()!="")
 		builder.orderBy(${method.getOrderByExp()});
 #end
-        String sql = builder.build();
-		StatementParameters parameters = builder.buildParameters();
-#if($method.isPaging())
-		int index =  builder.getStatementParameterIndex();
-		parameters.set(index++, Types.INTEGER, ${host.pageBegain()});
-		parameters.set(index++, Types.INTEGER, ${host.pageEnd()});
-#end
 
-		return client.query(builder, hints);
+		return client.query(builder, hints, ${method.getPojoClassName()}.class);
 	}
 #end
 #end

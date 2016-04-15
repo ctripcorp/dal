@@ -7,14 +7,12 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 public class DeleteSqlBuilder extends AbstractSqlBuilder {
 	private String whereClause;
 	
-	public DeleteSqlBuilder(String tableName, DatabaseCategory dBCategory) throws SQLException{
-		super(dBCategory);
-		setTableName(tableName);
+	public DeleteSqlBuilder(String tableName, DatabaseCategory dbCategory) throws SQLException{
+		super(tableName, dbCategory);
 	}
 	
-	public DeleteSqlBuilder(String tableName, String whereClause, DatabaseCategory dBCategory) throws SQLException{
-		super(dBCategory);
-		setTableName(tableName);
+	public DeleteSqlBuilder(String tableName, String whereClause, DatabaseCategory dbCategory) throws SQLException{
+		super(tableName, dbCategory);
 		this.whereClause = whereClause;
 	}
 	

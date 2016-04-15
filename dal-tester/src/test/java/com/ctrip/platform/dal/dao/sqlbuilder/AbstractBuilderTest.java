@@ -31,7 +31,7 @@ public class AbstractBuilderTest {
 		builder.and().isNull("sss");
 		builder.orderBy("PeopleID", false);
 		
-		builder.onlyFirst();
+		builder.requireFirst();
 		String sql = builder.build();
 		
 		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM People "

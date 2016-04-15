@@ -300,7 +300,7 @@ public class SelectSqlBuilderTest {
 		builder.and().isNull("sss");
 		builder.orderBy("PeopleID", false);
 		
-		builder.onlyFirst();
+		builder.requireFirst();
 		String sql = builder.build();
 		
 		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM People "
@@ -330,7 +330,7 @@ public class SelectSqlBuilderTest {
 		
 		builder.orderBy("PeopleID", true);
 		
-		builder.onlyFirst();
+		builder.requireFirst();
 		String sql = builder.build();
 		
 		String expect_sql = "SELECT TOP 1 [PeopleID], [Name], [CityID] FROM People WITH (NOLOCK) "

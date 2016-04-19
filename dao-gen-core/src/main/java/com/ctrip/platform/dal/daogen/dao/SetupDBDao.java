@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.dao;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.JdbcUtils;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
@@ -12,7 +13,7 @@ public class SetupDBDao {
     private JdbcTemplate jdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     public boolean executeSqlScript(String sqlScript) {
@@ -23,7 +24,7 @@ public class SetupDBDao {
 
         try {
             String[] array = sqlScript.split(";"); // toUpperCase().
-            this.jdbcTemplate.batchUpdate(array);
+            jdbcTemplate.batchUpdate(array);
             result = true;
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -33,13 +34,14 @@ public class SetupDBDao {
 
     public Set<String> getCatalogTableNames(String catalog) {
         Set<String> set = new HashSet<>();
+        ResultSet resultSet = null;
 
         try {
-            java.sql.DatabaseMetaData databaseMetaData = this.jdbcTemplate.getDataSource().getConnection().getMetaData();
+            java.sql.DatabaseMetaData databaseMetaData = jdbcTemplate.getDataSource().getConnection().getMetaData();
             if (databaseMetaData == null) {
                 return set;
             }
-            ResultSet resultSet = databaseMetaData.getTables(catalog, null, null, null);
+            resultSet = databaseMetaData.getTables(catalog, null, null, null);
             if (resultSet != null) {
                 while (resultSet.next()) {
                     String tableName = resultSet.getString("TABLE_NAME");
@@ -50,6 +52,8 @@ public class SetupDBDao {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            JdbcUtils.closeResultSet(resultSet);
         }
         return set;
     }

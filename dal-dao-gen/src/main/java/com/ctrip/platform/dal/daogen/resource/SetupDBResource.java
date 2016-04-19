@@ -1,12 +1,12 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.AddUser;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.enums.RoleType;
+import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.MD5Util;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -21,8 +21,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
-import java.lang.String;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -167,7 +165,6 @@ public class SetupDBResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("initializeDb")
-
     public Status initializeDb(@Context HttpServletRequest request, @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
                                @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog,
                                @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment, @FormParam("adminNo") String adminNo,
@@ -386,7 +383,7 @@ public class SetupDBResource {
         SpringBeanGetter.refreshApplicationContext();
     }
 
-    private boolean setupTables() throws Exception, InvocationTargetException {
+    private boolean setupTables() throws Exception {
         boolean scriptExists = resourceExists(SCRIPT_FILE);
         if (!scriptExists) {
             throw new Exception("script.sql not found.");

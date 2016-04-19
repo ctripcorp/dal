@@ -14,7 +14,7 @@
 		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 
-		return client.query(builder, hints);
+		return client.queryObject(builder, hints);
 	}
 #end
 #end

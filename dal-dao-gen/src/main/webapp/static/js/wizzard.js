@@ -820,6 +820,9 @@
             for (var j = 0; j < conditions.length; j++) {
                 var condition = conditions[j];
                 var array = condition.split(",");
+                if (array.length == 1) {
+                    continue;
+                }
                 var operator = array[1];
                 // Between类型的操作符需要特殊处理
                 if (operator == "6") {

@@ -41,7 +41,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	@Before
 	public void setUp() throws Exception {
 		for(int i = 0; i < 10; i++) {
-			${host.getPojoClassName()} daoPojo = new ${host.getPojoClassName()}();
+			${host.getPojoClassName()} daoPojo = createPojo(i);
 
 			try {
 				dao.insert(new DalHints().enableIdentityInsert(), daoPojo);
@@ -50,7 +50,34 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 			}
 		}
 	}
+	
+	private ${host.getPojoClassName()} createPojo(int index) {
+		${host.getPojoClassName()} daoPojo = new ${host.getPojoClassName()}();
 
+		//daoPojo.setId(index);
+		//daoPojo set not null field
+		
+		return daoPojo;
+	}
+
+	private void changePojo(${host.getPojoClassName()} daoPojo) {
+		// Change a field to make pojo different with original one
+	}
+	
+	private void changePojos(List<${host.getPojoClassName()}> daoPojos) {
+		for(${host.getPojoClassName()} daoPojo: daoPojos)
+			changePojo(daoPojo);
+	}
+	
+	private void verifyPojo(Workstation daoPojo) {
+		//assert changed value
+	}
+	
+	private void verifyPojos(List<Workstation> daoPojos) {
+		for(Workstation daoPojo: daoPojos)
+			verifyPojo(daoPojo);
+	}
+	
 	@After
 	public void tearDown() throws Exception {
 		dao.delete(null, dao.getAll(null));
@@ -69,7 +96,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	@Test
 	public void testDelete1() throws Exception {
 	    DalHints hints = new DalHints();
-		${host.getPojoClassName()} daoPojo = new ${host.getPojoClassName()}();
+		${host.getPojoClassName()} daoPojo = createPojo(1);
 		int affected = dao.delete(hints, daoPojo); 
 		assertEquals(1, affected);
 	}
@@ -107,7 +134,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	@Test
 	public void testInsert1() throws Exception {
 		DalHints hints = new DalHints();
-		${host.getPojoClassName()} daoPojo = new ${host.getPojoClassName()}();
+		${host.getPojoClassName()} daoPojo = createPojo(1);
 		int affected = dao.insert(hints, daoPojo);
 		assertEquals(1, affected);
 	}
@@ -128,7 +155,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	public void testInsert3() throws Exception {
 		DalHints hints = new DalHints();
 		KeyHolder keyHolder = new KeyHolder();
-		${host.getPojoClassName()} daoPojo = new ${host.getPojoClassName()}();
+		${host.getPojoClassName()} daoPojo = createPojo(1);
 		int affected = dao.insert(hints, keyHolder, daoPojo);
 		assertEquals(1, affected);
 		assertEquals(1, keyHolder.size());
@@ -202,7 +229,7 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	
 	@Test
 	public void testQueryByPk2() throws Exception {
-		${host.getPojoClassName()} pk = new ${host.getPojoClassName()}();
+		${host.getPojoClassName()} pk = createPojo(1);
 		DalHints hints = new DalHints();
 		${host.getPojoClassName()} affected = dao.queryByPk(pk, hints);
 		assertNotNull(affected);
@@ -214,11 +241,12 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	@Test
 	public void testUpdate1() throws Exception {
 		DalHints hints = new DalHints();
-		${host.getPojoClassName()} daoPojo = new ${host.getPojoClassName()}();
+		${host.getPojoClassName()} daoPojo = dao.queryByPk(createPojo(1), hints);
+		changePojo(daoPojo);
 		int affected = dao.update(hints, daoPojo);
 		assertEquals(1, ret);
-		daoPojo = dao.queryByPk(1, null);
-
+		daoPojo = dao.queryByPk(createPojo(1), null);
+		verifyPojo(daoPojo);
 	}
 #end
 #if($host.generateAPI(90,91))
@@ -227,7 +255,10 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	public void testUpdate2() throws Exception {
 		DalHints hints = new DalHints();
 		List<${host.getPojoClassName()}> daoPojos = dao.getAll(new DalHints());
+		changePojos(daoPojos);
 		int[] affected = dao.update(hints, daoPojos);
+		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  ret);
+		verifyPojos(dao.getAll(new DalHints()));
 	}
 #end
 #if($host.generateAPI(96,97))
@@ -235,8 +266,11 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	@Test
 	public void testBatchUpdate() throws Exception {
 		DalHints hints = new DalHints();
-		List<${host.getPojoClassName()}> daoPojos = null;
+		List<${host.getPojoClassName()}> daoPojos = dao.getAll(new DalHints());
+		changePojos(daoPojos);
 		int[] affected = dao.batchUpdate(hints, daoPojos);
+		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  ret);
+		verifyPojos(dao.getAll(new DalHints()));
 	}
 #end
 #parse("templates/java/test/BuildSQLDaoUnitTests.java.tpl")

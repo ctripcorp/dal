@@ -60,6 +60,7 @@ public class BaseQueryBuilder implements QueryBuilder {
 		
 		this.tableName = tableName;
 		this.dbCategory = dbCategory;
+		selectAll();
 	}
 	
 	public BaseQueryBuilder select(String columns) {
@@ -191,7 +192,7 @@ public class BaseQueryBuilder implements QueryBuilder {
 	
 	private String buildList(String effectiveTableName){
 		String tpl = DatabaseCategory.SqlServer == dbCategory ? SQLSVR_QUERY_TPL : MYSQL_QUERY_TPL;
-		return String.format(tpl, effectiveTableName, columns, getCompleteWhereExp());
+		return String.format(tpl, columns, effectiveTableName, getCompleteWhereExp());
 	}
 	
 	@Override

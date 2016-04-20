@@ -216,7 +216,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public T queryObject(QueryBuilder queryBuilder, DalHints hints) throws SQLException {
 		DalWatcher.begin();
-		return commonQuery(queryBuilder.mapWith(parser), hints);
+		return commonQuery(queryBuilder.mapWith(parser).requireSingle(), hints);
 	}
 	
 	/**
@@ -229,7 +229,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public <K> K queryObject(QueryBuilder queryBuilder, DalHints hints, Class<K> clazz) throws SQLException {
 		DalWatcher.begin();
-		return commonQuery(queryBuilder.mapWith(new DalObjectRowMapper<K>()), hints);
+		return commonQuery(queryBuilder.mapWith(new DalObjectRowMapper<K>()).requireSingle(), hints);
 	}
 
 	/**

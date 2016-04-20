@@ -36,98 +36,98 @@ public class AbstractBuilderTest {
 		
 		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM People "
 				+ "WHERE a = ? AND b in ( ?, ? ) AND c BETWEEN ? AND ? "
-				+ "AND sss IS NULL ORDER BY `PeopleID` DESC limit 0,1";
+				+ "AND sss IS NULL ORDER BY `PeopleID` DESC limit 1";
 		
 		Assert.assertEquals(expect_sql, sql);
 	}
 	
 	@Test
 	public void testEqual() throws SQLException {
-		validate("equal", "WHERE a = ?");
+		validate("equal", "a = ?");
 		validate("equalNull", "");
-		validate("equal AND equal", "WHERE a = ? AND a = ?");
-		validate("equal AND equalNull", "WHERE a = ?");
-		validate("equalNull AND equal", "WHERE a = ?");
+		validate("equal AND equal", "a = ? AND a = ?");
+		validate("equal AND equalNull", "a = ?");
+		validate("equalNull AND equal", "a = ?");
 		validate("equalNull AND equalNull", "");
 		
-		validate("( equal )", "WHERE ( a = ? )");
+		validate("( equal )", "( a = ? )");
 		validate("( equalNull )", "");
-		validate("( equal AND equal )", "WHERE ( a = ? AND a = ? )");
-		validate("( equal AND equalNull )", "WHERE ( a = ? )");
-		validate("( equalNull AND equal )", "WHERE ( a = ? )");
+		validate("( equal AND equal )", "( a = ? AND a = ? )");
+		validate("( equal AND equalNull )", "( a = ? )");
+		validate("( equalNull AND equal )", "( a = ? )");
 		validate("( equalNull AND equalNull )", "");
 	}
 	
 	@Test
 	public void testLike() throws SQLException {
-		validate("like", "WHERE a LIKE ?");
+		validate("like", "a LIKE ?");
 		validate("likeNull", "");
-		validate("like AND like", "WHERE a LIKE ? AND a LIKE ?");
-		validate("like AND likeNull", "WHERE a LIKE ?");
-		validate("likeNull AND like", "WHERE a LIKE ?");
+		validate("like AND like", "a LIKE ? AND a LIKE ?");
+		validate("like AND likeNull", "a LIKE ?");
+		validate("likeNull AND like", "a LIKE ?");
 		validate("likeNull AND likeNull", "");
 		
-		validate("( like )", "WHERE ( a LIKE ? )");
+		validate("( like )", "( a LIKE ? )");
 		validate("( likeNull )", "");
-		validate("( like AND like )", "WHERE ( a LIKE ? AND a LIKE ? )");
-		validate("( like AND likeNull )", "WHERE ( a LIKE ? )");
-		validate("( likeNull AND like )", "WHERE ( a LIKE ? )");
+		validate("( like AND like )", "( a LIKE ? AND a LIKE ? )");
+		validate("( like AND likeNull )", "( a LIKE ? )");
+		validate("( likeNull AND like )", "( a LIKE ? )");
 		validate("( likeNull AND likeNull )", "");
 	}
 	
 	@Test
 	public void testBetween() throws SQLException {
-		validate("between", "WHERE a BETWEEN ? AND ?");
+		validate("between", "a BETWEEN ? AND ?");
 		validate("betweenNull", "");
-		validate("between AND between", "WHERE a BETWEEN ? AND ? AND a BETWEEN ? AND ?");
-		validate("between AND betweenNull", "WHERE a BETWEEN ? AND ?");
-		validate("betweenNull AND between", "WHERE a BETWEEN ? AND ?");
+		validate("between AND between", "a BETWEEN ? AND ? AND a BETWEEN ? AND ?");
+		validate("between AND betweenNull", "a BETWEEN ? AND ?");
+		validate("betweenNull AND between", "a BETWEEN ? AND ?");
 		validate("betweenNull AND betweenNull", "");
 		
-		validate("( between )", "WHERE ( a BETWEEN ? AND ? )");
+		validate("( between )", "( a BETWEEN ? AND ? )");
 		validate("( betweenNull )", "");
-		validate("( between AND between )", "WHERE ( a BETWEEN ? AND ? AND a BETWEEN ? AND ? )");
-		validate("( between AND betweenNull )", "WHERE ( a BETWEEN ? AND ? )");
-		validate("( betweenNull AND between )", "WHERE ( a BETWEEN ? AND ? )");
+		validate("( between AND between )", "( a BETWEEN ? AND ? AND a BETWEEN ? AND ? )");
+		validate("( between AND betweenNull )", "( a BETWEEN ? AND ? )");
+		validate("( betweenNull AND between )", "( a BETWEEN ? AND ? )");
 		validate("( betweenNull AND betweenNull )", "");
 	}
 	
 	@Test
 	public void testIsNull() throws SQLException {
-		validate("isNull", "WHERE a IS NULL");
-		validate("isNull AND isNull", "WHERE a IS NULL AND a IS NULL");
+		validate("isNull", "a IS NULL");
+		validate("isNull AND isNull", "a IS NULL AND a IS NULL");
 		
-		validate("( isNull )", "WHERE ( a IS NULL )");
-		validate("( isNull AND isNull )", "WHERE ( a IS NULL AND a IS NULL )");
+		validate("( isNull )", "( a IS NULL )");
+		validate("( isNull AND isNull )", "( a IS NULL AND a IS NULL )");
 	}
 	
 	@Test
 	public void testIsNotNull() throws SQLException {
-		validate("isNotNull", "WHERE a IS NOT NULL");
-		validate("isNotNull AND isNotNull", "WHERE a IS NOT NULL AND a IS NOT NULL");
+		validate("isNotNull", "a IS NOT NULL");
+		validate("isNotNull AND isNotNull", "a IS NOT NULL AND a IS NOT NULL");
 		
-		validate("( isNotNull )", "WHERE ( a IS NOT NULL )");
-		validate("( isNotNull AND isNotNull )", "WHERE ( a IS NOT NULL AND a IS NOT NULL )");
+		validate("( isNotNull )", "( a IS NOT NULL )");
+		validate("( isNotNull AND isNotNull )", "( a IS NOT NULL AND a IS NOT NULL )");
 	}
 	
 	@Test
 	public void testNot() throws SQLException {
-		validate("NOT equal", "WHERE NOT a = ?");
+		validate("NOT equal", "NOT a = ?");
 		validate("NOT equalNull", "");
-		validate("NOT NOT NOT equal", "WHERE NOT NOT NOT a = ?");
+		validate("NOT NOT NOT equal", "NOT NOT NOT a = ?");
 		validate("NOT NOT NOT equalNull", "");
-		validate("NOT equal AND NOT equal", "WHERE NOT a = ? AND NOT a = ?");
-		validate("NOT equal AND NOT equalNull", "WHERE NOT a = ?");
-		validate("NOT equalNull AND NOT equal", "WHERE NOT a = ?");
+		validate("NOT equal AND NOT equal", "NOT a = ? AND NOT a = ?");
+		validate("NOT equal AND NOT equalNull", "NOT a = ?");
+		validate("NOT equalNull AND NOT equal", "NOT a = ?");
 		validate("NOT equalNull AND NOT equalNull", "");
 		
-		validate("( NOT equal )", "WHERE ( NOT a = ? )");
-		validate("( NOT NOT NOT equal )", "WHERE ( NOT NOT NOT a = ? )");
+		validate("( NOT equal )", "( NOT a = ? )");
+		validate("( NOT NOT NOT equal )", "( NOT NOT NOT a = ? )");
 		validate("( NOT equalNull )", "");
 		validate("( NOT NOT NOT equalNull )", "");
-		validate("( NOT equal AND NOT equal )", "WHERE ( NOT a = ? AND NOT a = ? )");
-		validate("( NOT equal AND NOT equalNull )", "WHERE ( NOT a = ? )");
-		validate("( NOT equalNull AND NOT equal )", "WHERE ( NOT a = ? )");
+		validate("( NOT equal AND NOT equal )", "( NOT a = ? AND NOT a = ? )");
+		validate("( NOT equal AND NOT equalNull )", "( NOT a = ? )");
+		validate("( NOT equalNull AND NOT equal )", "( NOT a = ? )");
 		validate("( NOT equalNull AND NOT equalNull )", "");
 	}
 	
@@ -142,8 +142,8 @@ public class AbstractBuilderTest {
 	
 	@Test
 	public void testOr() throws SQLException {
-		validate("equal OR equal", "WHERE a = ? OR a = ?");
-		validate("equal AND ( equal OR equal )", "WHERE a = ? AND ( a = ? OR a = ? )");
+		validate("equal OR equal", "a = ? OR a = ?");
+		validate("equal AND ( equal OR equal )", "a = ? AND ( a = ? OR a = ? )");
 	}
 
 	public void validate(String exp, String expected) throws SQLException {

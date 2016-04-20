@@ -152,7 +152,7 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
 		if(whereClause.isEmpty())
 			return "";
 		
-		return "WHERE "+ whereClause;
+		return whereClause;
 	}
 	
 	private boolean meltDownAndOrOperator(LinkedList<WhereClauseEntry> filtered) {

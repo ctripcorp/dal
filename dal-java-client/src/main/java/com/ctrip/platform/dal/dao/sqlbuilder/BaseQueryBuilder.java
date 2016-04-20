@@ -180,14 +180,14 @@ public class BaseQueryBuilder implements QueryBuilder {
 	
 	private String buildTop(String effectiveTableName){
 		if(DatabaseCategory.SqlServer == dbCategory)
-			return String.format(SQLSVR_QUERY_TOP_TPL, count, effectiveTableName, columns, getCompleteWhereExp());
+			return String.format(SQLSVR_QUERY_TOP_TPL, count, columns, effectiveTableName, getCompleteWhereExp());
 		else
-			return String.format(MYSQL_QUERY_TOP_TPL, effectiveTableName, columns, getCompleteWhereExp(), count);
+			return String.format(MYSQL_QUERY_TOP_TPL, columns, effectiveTableName, getCompleteWhereExp(), count);
 	}
 
 	private String buildPage(String effectiveTableName){
 		String tpl = DatabaseCategory.SqlServer == dbCategory ? SQLSVR_QUERY_PAGE_TPL : MYSQL_QUERY_PAGE_TPL;
-		return String.format(tpl, effectiveTableName, columns, getCompleteWhereExp(), start, count);
+		return String.format(tpl, columns, effectiveTableName, getCompleteWhereExp(), start, count);
 	}
 	
 	private String buildList(String effectiveTableName){

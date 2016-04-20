@@ -5,10 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class UpdateSqlBuilder extends AbstractSqlBuilder {
+	private static final String UPDATE_TPL = "UPDATE %s %s WHERE %s";
+
 	private List<String> updateFieldNames =  new ArrayList<String>();
 	private String updateSql;
+	private StatementParameters parameters;
 	
 	public UpdateSqlBuilder(String tableName, DatabaseCategory dbCategory) throws SQLException {
 		super(tableName, dbCategory);
@@ -26,6 +30,16 @@ public class UpdateSqlBuilder extends AbstractSqlBuilder {
 		return this;
 	}
 	
+	public UpdateSqlBuilder with(StatementParameters parameters) {
+		this.parameters = parameters;
+		return this;
+	}
+	
+	@Override
+	public StatementParameters buildParameters() {
+		return  parameters == null ? super.buildParameters() : parameters;
+	}
+	
 	public String build(){
 		return build(getTableName());
 	}
@@ -40,11 +54,7 @@ public class UpdateSqlBuilder extends AbstractSqlBuilder {
 		if(updateSql != null)
 			return updateSql;
 		
-		StringBuilder sql = new StringBuilder("UPDATE");
-		sql.append(" ").append(effectiveTableName);
-		sql.append(buildUpdateField());
-		sql.append(" ").append(this.getWhereExp());
-		return sql.toString();
+		return String.format(UPDATE_TPL, effectiveTableName, buildUpdateField(), getWhereExp());
 	}
 	
 	private String buildUpdateField(){

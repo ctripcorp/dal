@@ -494,7 +494,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int delete(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
-		return delete(new DeleteSqlBuilder(rawTableName, whereClause, dbCategory), hints);
+		return delete(new DeleteSqlBuilder(rawTableName, dbCategory).where(whereClause).with(parameters), hints);
 	}
 
 	/**

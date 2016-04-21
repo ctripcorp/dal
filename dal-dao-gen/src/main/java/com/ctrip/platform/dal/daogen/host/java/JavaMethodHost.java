@@ -204,6 +204,10 @@ public class JavaMethodHost {
         String[] params = new String[parameters.size()];
         int i = 0;
         for (JavaParameterHost parameter : parameters) {
+            ConditionType conditionType = parameter.getConditionType();
+            if (isExcludedParameter(conditionType)) {
+                continue;
+            }
             params[i++] = parameter.getAlias();
         }
 
@@ -213,6 +217,10 @@ public class JavaMethodHost {
     public String getParameterNames(String suffix) {
         List<String> params = new ArrayList<>();
         for (JavaParameterHost parameter : parameters) {
+            ConditionType conditionType = parameter.getConditionType();
+            if (isExcludedParameter(conditionType)) {
+                continue;
+            }
             params.add(parameter.getAlias() + (null != suffix ? suffix : ""));
         }
         if (this.isPaging() && this.isQuery()) {
@@ -230,11 +238,8 @@ public class JavaMethodHost {
             if (ConditionType.In == conditionType) {
                 paramsDeclaration.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
                 this.inClauses.add(parameter.getAlias());
-            } else if (conditionType == ConditionType.IsNull || conditionType == ConditionType.IsNotNull
-                    || conditionType == ConditionType.And || conditionType == ConditionType.Or
-                    || conditionType == ConditionType.Not || conditionType == ConditionType.LeftBracket
-                    || conditionType == ConditionType.RightBracket) {
-                continue;// is null、is not null don't hava param
+            } else if (isExcludedParameter(conditionType)) {
+                continue;
             } else {
                 paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
             }
@@ -261,6 +266,10 @@ public class JavaMethodHost {
             params.add(parameter.getAlias() + (null != suffix ? suffix : ""));
         }
         for (JavaParameterHost parameter : this.parameters) {
+            ConditionType conditionType = parameter.getConditionType();
+            if (isExcludedParameter(conditionType)) {
+                continue;
+            }
             params.add(parameter.getAlias() + (null != suffix ? suffix : ""));
         }
         params.add("new DalHints()");
@@ -278,15 +287,12 @@ public class JavaMethodHost {
             }
         }
         for (JavaParameterHost parameter : parameters) {
-            if (ConditionType.In == parameter.getConditionType()) {
+            ConditionType conditionType = parameter.getConditionType();
+            if (conditionType == ConditionType.In) {
                 paramsDeclaration.add(String.format("List<%s> %s", parameter.getClassDisplayName(), parameter.getAlias()));
                 this.inClauses.add(parameter.getAlias());
-            } else if (parameter.getConditionType() == ConditionType.IsNull
-                    || parameter.getConditionType() == ConditionType.IsNotNull
-                    || parameter.getConditionType() == ConditionType.And || parameter.getConditionType() == ConditionType.Or
-                    || parameter.getConditionType() == ConditionType.Not || parameter.getConditionType() == ConditionType.LeftBracket
-                    || parameter.getConditionType() == ConditionType.RightBracket) {
-                continue;// is null、is not null don't hava param
+            } else if (isExcludedParameter(conditionType)) {
+                continue;
             } else {
                 paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getAlias()));
             }
@@ -432,5 +438,15 @@ public class JavaMethodHost {
             isCallback = hashSet.contains(callback);
         }
         return isCallback.booleanValue();
+    }
+
+    private boolean isExcludedParameter(ConditionType conditionType) {
+        boolean result = false;
+        if (conditionType == ConditionType.IsNull || conditionType == ConditionType.IsNotNull
+                || conditionType == ConditionType.And || conditionType == ConditionType.Or || conditionType == ConditionType.Not
+                || conditionType == ConditionType.LeftBracket || conditionType == ConditionType.RightBracket) {
+            result = true;
+        }
+        return result;
     }
 }

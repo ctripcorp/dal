@@ -483,7 +483,7 @@ public class ProjectResource {
                 generateLanguageProject(generator, context);
             }
             if (hashSet.contains(CS)) { // cs
-                code = CS;
+                code = "cs";
                 generator = new CSharpDalGenerator();
                 context = generator.createContext(id, true, progress, newPojo, false);
                 generateLanguageProject(generator, context);

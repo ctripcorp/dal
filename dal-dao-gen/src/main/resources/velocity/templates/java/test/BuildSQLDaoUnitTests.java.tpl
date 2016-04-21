@@ -20,12 +20,12 @@
 	@Test
 	public void test${method.getName()}() throws Exception {
 #foreach($p in $method.getUpdateSetParameters())
+		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
+#end
+#foreach($p in $method.getParameters())
 #if (!${p.isOperator()})
 		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
-#end
-#foreach($p in $method.getParameters())
-		//${p.getClassDisplayName()} ${p.getAlias()} = ${p.getValidationValue()};// Test value here
 #end
 	    //int ret = dao.${method.getName()}(${method.getUpdateParameterNames("")});
 	}

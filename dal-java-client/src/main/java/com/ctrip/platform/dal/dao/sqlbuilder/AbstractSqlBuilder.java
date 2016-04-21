@@ -44,9 +44,6 @@ public abstract class AbstractSqlBuilder implements SqlBuilder {
 	public String getTableName(String shardStr) {
 		return tableName + shardStr;
 	}
-	
-	public void setTableShardInfo(String shardStr) {
-	}
 
 	/**
 	 * 获取StatementParameters

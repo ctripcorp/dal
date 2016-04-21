@@ -1,23 +1,17 @@
 package com.ctrip.platform.dal.dao;
 
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
-import com.ctrip.platform.dal.dao.helper.DalFirstResultMerger;
-import com.ctrip.platform.dal.dao.helper.DalListMerger;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
-import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
-import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
-import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
+import com.ctrip.platform.dal.dao.sqlbuilder.BaseQueryBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.SimpleUpdateBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.InsertSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.QueryBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.BaseQueryBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.SqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
 import com.ctrip.platform.dal.dao.task.BulkTask;
 import com.ctrip.platform.dal.dao.task.DalBulkTaskRequest;
@@ -511,7 +505,8 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 
 	/**
-	 * Update for the given sql and parameters.
+	 * Update for the given sql and parameters. The sql must be the standard update statement.
+	 * E.g. "UPDATE ABC SET ...." In case of table shard enabled, the 
 	 * 
 	 * @param sql the statement that used to update the db.
 	 * @param parameters A container that holds all the necessary parameters
@@ -521,7 +516,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int update(String sql, StatementParameters parameters, DalHints hints)
 			throws SQLException {
-		return update(new UpdateSqlBuilder(rawTableName, sql, dbCategory), hints);
+		return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, new SimpleUpdateBuilder(rawTableName, sql, dbCategory).with(parameters), hints, updateSqlTask, new ResultMerger.IntSummary())));
 	}
 	
 	/**

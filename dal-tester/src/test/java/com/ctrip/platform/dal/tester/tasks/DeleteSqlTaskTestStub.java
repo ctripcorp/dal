@@ -27,7 +27,7 @@ public class DeleteSqlTaskTestStub extends TaskTestStub {
 		parameters.set(1, Types.INTEGER, 1);
 		
 		try {
-			int result = test.execute(getClient(), "id=?", parameters, hints);
+			int result = test.execute(getClient(), "delete from dal_client_test where id=?", parameters, hints);
 //			assertEquals(1, result);
 			assertEquals(2, getCount());
 		} catch (SQLException e) {

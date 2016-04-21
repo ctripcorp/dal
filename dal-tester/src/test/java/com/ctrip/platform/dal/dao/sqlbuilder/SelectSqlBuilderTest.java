@@ -271,12 +271,16 @@ public class SelectSqlBuilderTest {
 		
 		String sql = builder.build();
 		
-		String expect_sql = "WITH CET AS (SELECT [PeopleID], [Name], [CityID], "
-				+ "ROW_NUMBER() OVER ( ORDER BY [PeopleID] ASC) AS rownum "
-				+ "FROM People WITH (NOLOCK) "
-				+ "WHERE a = ? AND b in ( ?, ? ) AND b LIKE ? AND c BETWEEN ? AND ? "
-				+ "AND sss IS NULL) "
-				+ "SELECT [PeopleID], [Name], [CityID] FROM CET WHERE rownum BETWEEN ? AND ?";
+//		String expect_sql = "WITH CET AS (SELECT [PeopleID], [Name], [CityID], "
+//				+ "ROW_NUMBER() OVER ( ORDER BY [PeopleID] ASC) AS rownum "
+//				+ "FROM People WITH (NOLOCK) "
+//				+ "WHERE a = ? AND b in ( ?, ? ) AND b LIKE ? AND c BETWEEN ? AND ? "
+//				+ "AND sss IS NULL) "
+//				+ "SELECT [PeopleID], [Name], [CityID] FROM CET WHERE rownum BETWEEN ? AND ?";
+		
+		String expect_sql = "SELECT [PeopleID], [Name], [CityID] FROM People WITH (NOLOCK) "
+				+ "WHERE a = ? AND b in ( ?, ? ) AND b LIKE ? AND c BETWEEN ? AND ? AND sss IS NULL ORDER BY [PeopleID] ASC "
+				+ "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 		
 		Assert.assertEquals(expect_sql, sql);
 		
@@ -305,7 +309,7 @@ public class SelectSqlBuilderTest {
 		
 		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM People "
 				+ "WHERE a = ? AND b in ( ?, ? ) AND b LIKE ? AND c BETWEEN ? AND ? "
-				+ "AND sss IS NULL ORDER BY `PeopleID` DESC limit 0,1";
+				+ "AND sss IS NULL ORDER BY `PeopleID` DESC limit 1";
 		
 		Assert.assertEquals(expect_sql, sql);
 		

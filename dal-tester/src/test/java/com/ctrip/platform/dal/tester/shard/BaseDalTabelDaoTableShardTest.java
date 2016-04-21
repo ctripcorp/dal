@@ -1,9 +1,6 @@
 package com.ctrip.platform.dal.tester.shard;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -833,6 +830,8 @@ public abstract class BaseDalTabelDaoTableShardTest {
 		try {
 			hints = new DalHints().asyncExecution();
 			models = dao.queryTop(whereClause, parameters, hints, 2);
+			// There is DalException throws here
+			Object o = hints.getAsyncResult().get();
 			fail();
 		} catch (Exception e) {
 		}
@@ -849,13 +848,17 @@ public abstract class BaseDalTabelDaoTableShardTest {
 		parameters.set(1, Types.SMALLINT, 10);
 		
 		List<ClientTestModel> models;
+		DefaultResultCallback callback = new DefaultResultCallback();
+		DalHints hints = new DalHints().callbackWith(callback);
+		models = dao.queryTop(whereClause, parameters, hints, 2);
 		try {
-			DefaultResultCallback callback = new DefaultResultCallback();
-			DalHints hints = new DalHints().callbackWith(callback);
-			models = dao.queryTop(whereClause, parameters, hints, 2);
-			fail();
-		} catch (Exception e) {
+			callback.waitForDone();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
+		assertTrue(!callback.isSuccess());
+		assertNull(callback.getResult());
+		assertNotNull(callback.getError());
 		
 		models = dao.queryTop(whereClause, parameters, new DalHints().inTableShard(1), 2);
 		assertTrue(null != models);
@@ -2436,27 +2439,27 @@ public abstract class BaseDalTabelDaoTableShardTest {
 		
 		// By tabelShard
 		sql = "UPDATE " + TABLE_NAME
-				+ "_0 SET address = 'CTRIP' WHERE id = 1";
+				+ " SET address = 'CTRIP' WHERE id = 1";
 		res = dao.update(sql, parameters, new DalHints().inTableShard(0));
 		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inTableShard(0)).getAddress());
 
 		// By tableShardValue
 		sql = "UPDATE " + TABLE_NAME
-				+ "_1 SET address = 'CTRIP' WHERE id = 1";
+				+ " SET address = 'CTRIP' WHERE id = 1";
 		assertEquals(2, getCount(1));
 		res = dao.update(sql, parameters, new DalHints().setTableShardValue(1));
 		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setTableShardValue(1)).getAddress());
 		
 		// By shardColValue
 		sql = "UPDATE " + TABLE_NAME
-				+ "_2 SET address = 'CTRIP' WHERE id = 1";
+				+ " SET address = 'CTRIP' WHERE id = 1";
 		assertEquals(3, getCount(2));
 		res = dao.update(sql, parameters, new DalHints().setShardColValue("index", 2));
 		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardColValue("index", 2)).getAddress());
 		
 		// By shardColValue
 		sql = "UPDATE " + TABLE_NAME
-				+ "_3 SET address = 'CTRIP' WHERE id = 1";
+				+ " SET address = 'CTRIP' WHERE id = 1";
 		assertEquals(4, getCount(3));
 		res = dao.update(sql, parameters, new DalHints().setShardColValue("tableIndex", 3));
 		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardColValue("tableIndex", 3)).getAddress());
@@ -2486,7 +2489,7 @@ public abstract class BaseDalTabelDaoTableShardTest {
 		
 		// By tabelShard
 		sql = "UPDATE " + TABLE_NAME
-				+ "_0 SET address = 'CTRIP' WHERE id = 1";
+				+ " SET address = 'CTRIP' WHERE id = 1";
 		hints = asyncHints();
 		res = dao.update(sql, parameters, hints.inTableShard(0));
 		res = assertInt(res, hints);
@@ -2494,7 +2497,7 @@ public abstract class BaseDalTabelDaoTableShardTest {
 
 		// By tableShardValue
 		sql = "UPDATE " + TABLE_NAME
-				+ "_1 SET address = 'CTRIP' WHERE id = 1";
+				+ " SET address = 'CTRIP' WHERE id = 1";
 		assertEquals(2, getCount(1));
 		hints = intHints();
 		res = dao.update(sql, parameters, hints.setTableShardValue(1));
@@ -2503,7 +2506,7 @@ public abstract class BaseDalTabelDaoTableShardTest {
 		
 		// By shardColValue
 		sql = "UPDATE " + TABLE_NAME
-				+ "_2 SET address = 'CTRIP' WHERE id = 1";
+				+ " SET address = 'CTRIP' WHERE id = 1";
 		assertEquals(3, getCount(2));
 		hints = asyncHints();
 		res = dao.update(sql, parameters, hints.setShardColValue("index", 2));
@@ -2512,7 +2515,7 @@ public abstract class BaseDalTabelDaoTableShardTest {
 		
 		// By shardColValue
 		sql = "UPDATE " + TABLE_NAME
-				+ "_3 SET address = 'CTRIP' WHERE id = 1";
+				+ " SET address = 'CTRIP' WHERE id = 1";
 		assertEquals(4, getCount(3));
 		hints = intHints();
 		res = dao.update(sql, parameters, hints.setShardColValue("tableIndex", 3));

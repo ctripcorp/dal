@@ -16,7 +16,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements QueryBuilder
 	private BaseQueryBuilder queryBuilder;
 	
 	private boolean isPagination = false;
-	private static final String MYSQL_PAGE_SUFFIX_TPL= " limit ?,?";
+	private static final String MYSQL_PAGE_SUFFIX_TPL= " limit ?, ?";
 	private static final String SQLSVR_PAGE_SUFFIX_TPL= " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 	
 	/**

@@ -3068,7 +3068,7 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		
 		// By tabelShard
 		sql = "UPDATE " + TABLE_NAME
-				+ "_0 SET address = 'CTRIP' WHERE id = 1";
+				+ " SET address = 'CTRIP' WHERE id = 1";
 		hints = copy(oldhints);
 		res = dao.update(sql, parameters, hints.inTableShard(0));
 		res = assertInt(res, hints);
@@ -3077,7 +3077,7 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 
 		// By tableShardValue
 		sql = "UPDATE " + TABLE_NAME
-				+ "_1 SET address = 'CTRIP' WHERE id = 1";
+				+ " SET address = 'CTRIP' WHERE id = 1";
 		Assert.assertEquals(2, getCount(shardId, 1));
 		hints = copy(oldhints);
 		res = dao.update(sql, parameters, hints.setTableShardValue(1));
@@ -3087,7 +3087,7 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		
 		// By shardColValue
 		sql = "UPDATE " + TABLE_NAME
-				+ "_2 SET address = 'CTRIP' WHERE id = 1";
+				+ " SET address = 'CTRIP' WHERE id = 1";
 		Assert.assertEquals(3, getCount(shardId, 2));
 		hints = copy(oldhints);
 		res = dao.update(sql, parameters, hints.setShardColValue("table", 2));
@@ -3097,7 +3097,7 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		
 		// By shardColValue
 		sql = "UPDATE " + TABLE_NAME
-				+ "_3 SET address = 'CTRIP' WHERE id = 1";
+				+ " SET address = 'CTRIP' WHERE id = 1";
 		Assert.assertEquals(4, getCount(shardId, 3));
 		hints = copy(oldhints);
 		res = dao.update(sql, parameters, hints.setShardColValue("tableIndex", 3));

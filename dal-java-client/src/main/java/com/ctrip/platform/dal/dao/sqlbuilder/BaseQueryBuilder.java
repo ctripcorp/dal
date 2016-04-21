@@ -34,7 +34,7 @@ public class BaseQueryBuilder implements QueryBuilder {
 	private static final String MYSQL_QUERY_TOP_TPL= "SELECT %s FROM %s WHERE %s limit %d";
 	private static final String SQLSVR_QUERY_TOP_TPL= "SELECT TOP %d %s FROM %s WITH (NOLOCK) WHERE %s";
 	
-	private static final String MYSQL_QUERY_PAGE_TPL= "SELECT %s FROM %s WHERE %s limit %d,%d";
+	private static final String MYSQL_QUERY_PAGE_TPL= "SELECT %s FROM %s WHERE %s limit %d, %d";
 	private static final String SQLSVR_QUERY_PAGE_TPL= "SELECT %s FROM %s WITH (NOLOCK) WHERE %s OFFSET %d ROWS FETCH NEXT %d ROWS ONLY";
 	
 	private String tableName;

@@ -9,7 +9,10 @@ import org.junit.runners.Suite.SuiteClasses;
 	DeleteSqlBuilderTest.class, 
 	SelectSqlBuilderTest.class,
 	UpdateSqlBuilderTest.class,
-	AbstractBuilderTest.class})
+	AbstractBuilderTest.class,
+	BaseQueryBuilderTest.class,
+	InsertSqlBuilderTest.class,
+	})
 public class AllTests {
 
 }

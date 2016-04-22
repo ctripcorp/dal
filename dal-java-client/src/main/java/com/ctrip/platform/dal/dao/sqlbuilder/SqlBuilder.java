@@ -19,7 +19,7 @@ public interface SqlBuilder extends Cloneable {
 	 * @param separator
 	 * @return
 	 */
-	String buildWith(String shardStr);
+	String build(String shardStr);
 	
 	/**
 	 * @return the parameters used

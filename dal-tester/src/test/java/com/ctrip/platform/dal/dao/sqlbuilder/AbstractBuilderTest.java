@@ -34,9 +34,9 @@ public class AbstractBuilderTest {
 		builder.requireFirst();
 		String sql = builder.build();
 		
-		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM People "
+		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM `People` "
 				+ "WHERE a = ? AND b in ( ?, ? ) AND c BETWEEN ? AND ? "
-				+ "AND sss IS NULL ORDER BY `PeopleID` DESC limit 1";
+				+ "AND sss IS NULL ORDER BY `PeopleID` DESC LIMIT 1";
 		
 		Assert.assertEquals(expect_sql, sql);
 	}

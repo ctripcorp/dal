@@ -20,15 +20,19 @@ public class SimpleUpdateBuilder implements SqlBuilder {
 	
 	@Override
 	public StatementParameters buildParameters() {
-		return  parameters;
+		return parameters;
 	}
 	
 	public String build(){
 		return updateSql;
 	}
 	
+	/**
+	 * Just replace the first old table name with new table name.
+	 * This won't work for complex sql
+	 */
 	@Override
-	public String buildWith(String shardStr) {
+	public String build(String shardStr) {
 		return updateSql.replaceFirst(tableName, tableName + shardStr);
 	}
 

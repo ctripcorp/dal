@@ -130,7 +130,7 @@ public class SelectSqlBuilderTest {
 		inParam5.add(null);
 		inParam5.add(null);
 		builder.and().inNullable("inNullable5", inParam5, Types.INTEGER);
-		String expected = "SELECT *, `id` FROM People WHERE "
+		String expected = "SELECT *, `id` FROM `People` WHERE "
 				+ "bw1 BETWEEN ? AND ? "
 				+ "AND bwNullable1 BETWEEN ? AND ? "
 				+ "AND eq1 = ? "
@@ -184,7 +184,7 @@ public class SelectSqlBuilderTest {
 		
 		String sql = builder.build();
 		
-		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM People "
+		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM `People` "
 				+ "WHERE a = ? AND b in ( ?, ? ) AND b LIKE ? AND c BETWEEN ? AND ? "
 				+ "AND sss IS NULL ORDER BY `PeopleID` DESC";
 		
@@ -213,7 +213,7 @@ public class SelectSqlBuilderTest {
 		
 		String sql = builder.build();
 		
-		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM People "
+		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM `People` "
 				+ "WHERE a = ? AND b in ( ?, ? ) AND b LIKE ? AND c BETWEEN ? AND ? "
 				+ "AND sss IS NULL ORDER BY `PeopleID` DESC limit ?, ?";
 		
@@ -242,7 +242,7 @@ public class SelectSqlBuilderTest {
 		
 		String sql = builder.build();
 		
-		String expect_sql = "SELECT [PeopleID], [Name], [CityID] FROM People WITH (NOLOCK) "
+		String expect_sql = "SELECT [PeopleID], [Name], [CityID] FROM [People] WITH (NOLOCK) "
 				+ "WHERE a = ? AND b in ( ?, ? ) AND b LIKE ? AND c BETWEEN ? AND ? "
 				+ "AND sss IS NULL ORDER BY [PeopleID] ASC";
 		
@@ -278,7 +278,7 @@ public class SelectSqlBuilderTest {
 //				+ "AND sss IS NULL) "
 //				+ "SELECT [PeopleID], [Name], [CityID] FROM CET WHERE rownum BETWEEN ? AND ?";
 		
-		String expect_sql = "SELECT [PeopleID], [Name], [CityID] FROM People WITH (NOLOCK) "
+		String expect_sql = "SELECT [PeopleID], [Name], [CityID] FROM [People] WITH (NOLOCK) "
 				+ "WHERE a = ? AND b in ( ?, ? ) AND b LIKE ? AND c BETWEEN ? AND ? AND sss IS NULL ORDER BY [PeopleID] ASC "
 				+ "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 		
@@ -307,9 +307,9 @@ public class SelectSqlBuilderTest {
 		builder.requireFirst();
 		String sql = builder.build();
 		
-		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM People "
+		String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM `People` "
 				+ "WHERE a = ? AND b in ( ?, ? ) AND b LIKE ? AND c BETWEEN ? AND ? "
-				+ "AND sss IS NULL ORDER BY `PeopleID` DESC limit 1";
+				+ "AND sss IS NULL ORDER BY `PeopleID` DESC LIMIT 1";
 		
 		Assert.assertEquals(expect_sql, sql);
 		
@@ -337,7 +337,7 @@ public class SelectSqlBuilderTest {
 		builder.requireFirst();
 		String sql = builder.build();
 		
-		String expect_sql = "SELECT TOP 1 [PeopleID], [Name], [CityID] FROM People WITH (NOLOCK) "
+		String expect_sql = "SELECT TOP 1 [PeopleID], [Name], [CityID] FROM [People] WITH (NOLOCK) "
 				+ "WHERE a = ? AND b in ( ?, ? ) AND b LIKE ? AND c BETWEEN ? AND ? "
 				+ "AND sss IS NULL ORDER BY [PeopleID] ASC";
 		

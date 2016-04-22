@@ -31,10 +31,10 @@ public class BaseQueryBuilder implements QueryBuilder {
 	 * 对于select first，会在语句中追加limit 0,1(MySQL)或者top 1(SQL Server)：
 	 * @return
 	 */
-	private static final String MYSQL_QUERY_TOP_TPL= "SELECT %s FROM %s WHERE %s limit %d";
+	private static final String MYSQL_QUERY_TOP_TPL= "SELECT %s FROM %s WHERE %s LIMIT %d";
 	private static final String SQLSVR_QUERY_TOP_TPL= "SELECT TOP %d %s FROM %s WITH (NOLOCK) WHERE %s";
 	
-	private static final String MYSQL_QUERY_PAGE_TPL= "SELECT %s FROM %s WHERE %s limit %d, %d";
+	private static final String MYSQL_QUERY_PAGE_TPL= "SELECT %s FROM %s WHERE %s LIMIT %d, %d";
 	private static final String SQLSVR_QUERY_PAGE_TPL= "SELECT %s FROM %s WITH (NOLOCK) WHERE %s OFFSET %d ROWS FETCH NEXT %d ROWS ONLY";
 	
 	private String tableName;
@@ -95,15 +95,17 @@ public class BaseQueryBuilder implements QueryBuilder {
 	}
 
 	public String build() {
-		return build(tableName);
+		return internalBuild(tableName);
 	}
 
 	@Override
-	public String buildWith(String shardStr) {
-		return build(tableName + shardStr);
+	public String build(String shardStr) {
+		return internalBuild(tableName + shardStr);
 	}
 
-	private String build(String effectiveTableName) {
+	private String internalBuild(String effectiveTableName) {
+		effectiveTableName = wrapField(effectiveTableName);
+		
 		if(requireFirst)
 			return buildFirst(effectiveTableName);
 		
@@ -124,7 +126,7 @@ public class BaseQueryBuilder implements QueryBuilder {
 		StringBuilder orderbyExp = new StringBuilder();
 
 		orderbyExp.append(ORDER_BY);
-		String wrap = this.wrapField(orderBy);
+		String wrap = wrapField(orderBy);
 		wrap += ascending? ASC: DESC;
 		orderbyExp.append(wrap);
 
@@ -137,23 +139,7 @@ public class BaseQueryBuilder implements QueryBuilder {
 	 * @return
 	 */
 	public String wrapField(String fieldName){
-		return wrapField(dbCategory, fieldName);
-	}
-	
-	/**
-	 * 对字段进行包裹，数据库是MySQL则用 `进行包裹，数据库是SqlServer则用[]进行包裹
-	 * @param fieldName
-	 * @return
-	 */
-	public static String wrapField(DatabaseCategory dbCategory, String fieldName){
-		if("*".equalsIgnoreCase(fieldName) || fieldName.contains("ROW_NUMBER")){
-			return fieldName;
-		}else if(dbCategory == DatabaseCategory.MySql){
-			return "`" + fieldName + "`";
-		}else if(dbCategory == DatabaseCategory.SqlServer){
-			return "[" + fieldName + "]";
-		}
-		return fieldName;
+		return AbstractSqlBuilder.wrapField(dbCategory, fieldName);
 	}
 	
 	public <T> ResultMerger<T> getResultMerger(DalHints hints){

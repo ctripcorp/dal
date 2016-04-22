@@ -2,9 +2,7 @@ package com.ctrip.platform.dal.dao.sqlbuilder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -41,15 +39,15 @@ public class InsertSqlBuilder implements SqlBuilder {
 	}
 	
 	public String build(){
-		return build(tableName);
+		return internalBuild(tableName);
 	}
 	
 	@Override
-	public String buildWith(String shardStr) {
-		return build(tableName + shardStr);
+	public String build(String shardStr) {
+		return internalBuild(tableName + shardStr);
 	}
 	
-	private String build(String effectiveTableName) {
+	private String internalBuild(String effectiveTableName) {
 		StringBuilder fieldsSb = new StringBuilder();
 		StringBuilder valueSb = new StringBuilder();
 
@@ -63,7 +61,7 @@ public class InsertSqlBuilder implements SqlBuilder {
 			}
 		}
 		
-		return String.format(TMPL_SQL_INSERT, effectiveTableName, fieldsSb.toString(),
+		return String.format(TMPL_SQL_INSERT, AbstractSqlBuilder.wrapField(dBCategory, effectiveTableName), fieldsSb.toString(),
 				valueSb.toString());
 	}
 		

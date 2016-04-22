@@ -176,9 +176,9 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements QueryBuilder
 	/**
 	 * Only the newly generated code will use this method
 	 */
-	public String buildWith(String shardStr) {
+	public String build(String shardStr) {
 		preBuild();
-		return queryBuilder.buildWith(shardStr);
+		return queryBuilder.build(shardStr);
 	}
 	
 	private void preBuild() {

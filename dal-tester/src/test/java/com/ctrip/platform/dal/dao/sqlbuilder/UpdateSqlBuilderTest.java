@@ -34,7 +34,7 @@ public class UpdateSqlBuilderTest {
 		
 		String sql = builder.build();
 		
-		String expect_sql = "UPDATE Person SET `name` = ?, `age` = ?, `addr` = ? "
+		String expect_sql = "UPDATE `Person` SET `name` = ?, `age` = ?, `addr` = ? "
 				+ "WHERE age = ? AND b in ( ?, ? ) AND b LIKE ? "
 				+ "AND c BETWEEN ? AND ? AND e IS NULL";
 

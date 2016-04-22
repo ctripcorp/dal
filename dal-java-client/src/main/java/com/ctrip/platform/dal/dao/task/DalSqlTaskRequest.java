@@ -111,7 +111,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 			return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), builder.build(), parameters, hints, task);
 			
 		String tableShardStr = buildShardStr(logicDbName, locateTableShardId(logicDbName, hints, parameters, null));
-		return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), builder.buildWith(tableShardStr), parameters, hints, task);
+		return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), builder.build(tableShardStr), parameters, hints, task);
 	}
 
 	@Override

@@ -14,7 +14,6 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 
 public class DeleteSqlBuilderTest {
 	
-	
 	@Test
 	public void test1() throws SQLException {
 		List<String> in = new ArrayList<String>();
@@ -32,10 +31,14 @@ public class DeleteSqlBuilderTest {
 		
 		String build_sql = builder.build();
 		
-		String expected_sql = "DELETE FROM Person WHERE a = ? AND b in ( ?, ? ) "
+		String expected_sql = "DELETE FROM `Person` WHERE a = ? AND b in ( ?, ? ) "
 				+ "AND b LIKE ? AND c IS NOT NULL AND e IS NULL";
 		
 		Assert.assertEquals(expected_sql, build_sql);
+		
+		expected_sql = "DELETE FROM `Person_0` WHERE a = ? AND b in ( ?, ? ) "
+				+ "AND b LIKE ? AND c IS NOT NULL AND e IS NULL";
+		Assert.assertEquals(expected_sql, builder.build("_0"));
 		
 		builder.buildParameters();
 		Assert.assertEquals(5, builder.getStatementParameterIndex());

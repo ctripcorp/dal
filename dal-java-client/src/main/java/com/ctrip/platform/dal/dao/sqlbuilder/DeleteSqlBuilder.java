@@ -16,7 +16,7 @@ public class DeleteSqlBuilder extends AbstractSqlBuilder {
 	}
 	
 	public String build(){
-		return build(getTableName());
+		return internalBuild(getTableName());
 	}
 	
 	public DeleteSqlBuilder where(String whereClause) {
@@ -35,12 +35,12 @@ public class DeleteSqlBuilder extends AbstractSqlBuilder {
 	}
 	
 	@Override
-	public String buildWith(String shardStr) {
-		return build(getTableName(shardStr));
+	public String build(String shardStr) {
+		return internalBuild(getTableName(shardStr));
 	}
 	
-	private String build(String effectiveTableName) {
+	private String internalBuild(String effectiveTableName) {
 		String whereStr = whereClause == null ? getWhereExp() : whereClause;
-		return String.format(DELETE_TPL, effectiveTableName, whereStr);
+		return String.format(DELETE_TPL, wrapField(effectiveTableName), whereStr);
 	}
 }

@@ -238,6 +238,8 @@ public class DbUtils {
             dbType = DbType.DateTimeOffset;
         } else if (dataType == Types.BIT && length > 1) {
             dbType = DbType.UInt64;
+        } else if (dataType == Types.TINYINT && !isUnsigned) {
+            dbType = DbType.SByte;
         } else if (dataType == Types.SMALLINT && isUnsigned) {
             dbType = DbType.UInt16;
         } else if (dataType == Types.INTEGER && isUnsigned) {

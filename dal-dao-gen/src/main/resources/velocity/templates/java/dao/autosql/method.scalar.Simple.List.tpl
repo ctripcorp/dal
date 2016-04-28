@@ -14,15 +14,14 @@
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")
 
-#if($method.isPaging())
-		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory, pageNo, pageSize);
-#else
 		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory);
-#end
 		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 #if($method.getOrderByExp()!="")
 		builder.orderBy(${method.getOrderByExp()});
+#end
+#if($method.isPaging())
+		builder.atPage(pageNo, pageSize);
 #end
 
 		return client.query(builder, hints, ${method.getPojoClassName()}.class);

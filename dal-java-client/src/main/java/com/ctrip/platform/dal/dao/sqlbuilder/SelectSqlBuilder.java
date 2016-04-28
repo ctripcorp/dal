@@ -27,7 +27,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements QueryBuilder
 	 * @param dBCategory 数据库类型
 	 * @param isPagination 是否分页. If it is true, it means the code is running with old generated code
 	 * @throws SQLException
-	 * @Deprecated
+	 * @Deprecated If you see this, please regenerate dal code with code gen
 	 */
 	public SelectSqlBuilder(String tableName,
 			DatabaseCategory dbCategory, boolean isPagination)
@@ -51,25 +51,6 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements QueryBuilder
 	}
 	
 	/**
-	 * Construct with pagenation
-	 * @param tableName
-	 * @param dBCategory
-	 * @param pageNo
-	 * @param pageSize
-	 * @throws SQLException
-	 */
-	public SelectSqlBuilder(String tableName,
-			DatabaseCategory dbCategory, int pageNo, int pageSize)
-			throws SQLException {
-		this(tableName, dbCategory);
-		
-		if(pageNo < 1 || pageSize < 1) 
-			throw new SQLException("Illigal pagesize or pageNo, please check");	
-
-		queryBuilder.range((pageNo - 1) * pageSize, pageSize);
-	}
-	
-	/**
 	 * 添加select字段
 	 * @param fieldName
 	 * @return
@@ -89,6 +70,21 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements QueryBuilder
 	 */
 	public SelectSqlBuilder orderBy(String fieldName, boolean ascending){
 		queryBuilder.orderBy(fieldName, ascending);
+		return this;
+	}
+	
+	/**
+	 * Construct with pagenation
+	 * @param pageNo
+	 * @param pageSize
+	 * @throws SQLException
+	 */
+	public SelectSqlBuilder atPage(int pageNo, int pageSize)
+			throws SQLException {
+		if(pageNo < 1 || pageSize < 1) 
+			throw new SQLException("Illigal pagesize or pageNo, please check");	
+
+		queryBuilder.range((pageNo - 1) * pageSize, pageSize);
 		return this;
 	}
 	

@@ -28,12 +28,11 @@ public class SimpleUpdateBuilder implements SqlBuilder {
 	}
 	
 	/**
-	 * Just replace the first old table name with new table name.
-	 * This won't work for complex sql
+	 * This not supported for table shard
 	 */
 	@Override
 	public String build(String shardStr) {
-		return updateSql.replaceFirst(tableName, tableName + shardStr);
+		throw new RuntimeException("For raw sql, the table shard opertion is not supported");
 	}
 
 	@Override

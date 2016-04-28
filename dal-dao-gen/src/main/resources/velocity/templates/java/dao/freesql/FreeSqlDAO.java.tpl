@@ -13,9 +13,6 @@ public class ${host.getClassName()}Dao {
 #if($host.hasQuery())
 	private DalQueryDao queryDao = null;
 #end
-#if($host.hasUpdate())
-	private DalClient baseClient = null;
-#end
 
 #foreach( $method in ${host.getMethods()} )
 #if(!$method.isEmptyFields() && !$method.isSampleType())
@@ -31,9 +28,6 @@ public class ${host.getClassName()}Dao {
 #end	
 #if($host.hasQuery())
 		this.queryDao = new DalQueryDao(DATA_BASE);
-#end
-#if($host.hasUpdate())
-		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 #end
 	}
 #parse("templates/java/dao/freesql/method.scalar.Simple.List.tpl")

@@ -4,14 +4,11 @@
 	 * ${method.getComments()}
 	**/
 	public int ${method.getName()} (${method.getParameterDeclaration()}) throws SQLException {
-#if(${method.getInClauses()} != "")
-		String sql = SQLParser.parse("${method.getSql()}",${method.getInClauses()});
-#else
-		String sql = SQLParser.parse("${method.getSql()}");
-#end
-		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")
+
+		String sql = "${method.getSql()}";
+		StatementParameters parameters = new StatementParameters();
 		int i = 1;
 #foreach($p in $method.getParameters())
 #set($sensitiveflag = "")	
@@ -24,7 +21,8 @@
 		parameters.set$!{sensitiveflag}(i++, "${p.getAlias()}", ${p.getJavaTypeDisplay()}, ${p.getAlias()});
 #end
 #end
-		return baseClient.update(sql, parameters, hints);
+
+		return queryDao.update(sql, parameters, hints);
 	}
 #end
 #end

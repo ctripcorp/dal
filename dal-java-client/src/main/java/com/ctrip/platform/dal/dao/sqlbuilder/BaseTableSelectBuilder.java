@@ -12,12 +12,13 @@ import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalFirstResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalListMerger;
+import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRangedResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
 
-public class BaseQueryBuilder implements QueryBuilder {
+public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 	private static final String ALL_COLUMNS = "*";
 	private static final String SPACE = " ";
 	private static final String ORDER_BY = "ORDER BY ";
@@ -54,7 +55,7 @@ public class BaseQueryBuilder implements QueryBuilder {
 	private int count;
 	private int start;
 
-	public BaseQueryBuilder(String tableName, DatabaseCategory dbCategory) throws SQLException {
+	public BaseTableSelectBuilder(String tableName, DatabaseCategory dbCategory) throws SQLException {
 		if(tableName ==null || tableName.isEmpty())
 			throw new SQLException("table name is illegal.");
 		
@@ -63,35 +64,39 @@ public class BaseQueryBuilder implements QueryBuilder {
 		selectAll();
 	}
 	
-	public BaseQueryBuilder select(String columns) {
+	public BaseTableSelectBuilder select(String columns) {
 		this.columns = columns;
 		return this;
 	}
 	
-	public BaseQueryBuilder selectAll() {
+	public BaseTableSelectBuilder selectAll() {
 		this.columns = ALL_COLUMNS;
 		return this;
 	}
 	
-	public BaseQueryBuilder where(String whereClause) {
+	public BaseTableSelectBuilder where(String whereClause) {
 		this.whereClause = whereClause;
 		return this;
 	}
 
-	public BaseQueryBuilder orderBy(String orderBy, boolean ascending) {
+	public BaseTableSelectBuilder orderBy(String orderBy, boolean ascending) {
 		this.orderBy = orderBy;
 		this.ascending = ascending;
 		return this;
 	}
 	
-	public BaseQueryBuilder with(StatementParameters parameters) {
+	public BaseTableSelectBuilder with(StatementParameters parameters) {
 		this.parameters = parameters;
 		return this;
 	}
 	
-	public <T> BaseQueryBuilder mapWith(DalRowMapper<T> mapper) {
+	public <T> BaseTableSelectBuilder mapWith(DalRowMapper<T> mapper) {
 		this.mapper = mapper;
 		return this;
+	}
+	
+	public SelectBuilder simpleType() {
+		return mapWith(new DalObjectRowMapper());
 	}
 
 	public String build() {
@@ -191,17 +196,17 @@ public class BaseQueryBuilder implements QueryBuilder {
 		return tableName;
 	}
 
-	public QueryBuilder requireFirst() {
+	public SelectBuilder requireFirst() {
 		requireFirst = true;
 		return this;
 	}
 	
-	public QueryBuilder requireSingle() {
+	public SelectBuilder requireSingle() {
 		requireSingle = true;
 		return this;
 	}
 	
-	public QueryBuilder nullable() {
+	public SelectBuilder nullable() {
 		nullable = true;
 		return this;
 	}
@@ -218,12 +223,12 @@ public class BaseQueryBuilder implements QueryBuilder {
 		return nullable;
 	}
 	
-	public QueryBuilder top(int count) {
+	public SelectBuilder top(int count) {
 		this.count = count;
 		return this;
 	}	
 
-	public QueryBuilder range(int start, int count) {
+	public SelectBuilder range(int start, int count) {
 		this.start = start;
 		this.count = count;
 		return this;
@@ -231,5 +236,14 @@ public class BaseQueryBuilder implements QueryBuilder {
 
 	public DatabaseCategory getDbCategory() {
 		return dbCategory;
+	}
+
+	public SelectBuilder atPage(int pageNo, int pageSize) throws SQLException {
+		if(pageNo < 1 || pageSize < 1) 
+			throw new SQLException("Illigal pagesize or pageNo, please check");	
+
+		range((pageNo - 1) * pageSize, pageSize);
+		
+		return this;
 	}
 }

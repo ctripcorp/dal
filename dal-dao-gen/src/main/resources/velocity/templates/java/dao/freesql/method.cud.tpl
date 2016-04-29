@@ -1,5 +1,6 @@
 #foreach($method in $host.getMethods())
 #if($method.getCrud_type() != "select")
+
 	/**
 	 * ${method.getComments()}
 	**/
@@ -7,7 +8,8 @@
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")
 
-		String sql = "${method.getSql()}";
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+		builder.setTemplate("${method.getSql()}");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;
 #foreach($p in $method.getParameters())
@@ -22,7 +24,7 @@
 #end
 #end
 
-		return queryDao.update(sql, parameters, hints);
+		return queryDao.update(builder, parameters, hints);
 	}
 #end
 #end

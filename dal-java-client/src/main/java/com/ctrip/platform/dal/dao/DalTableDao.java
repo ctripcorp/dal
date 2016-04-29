@@ -7,11 +7,11 @@ import java.util.Map;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
-import com.ctrip.platform.dal.dao.sqlbuilder.BaseQueryBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.BaseTableSelectBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.SimpleUpdateBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.InsertSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.QueryBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.SelectBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
 import com.ctrip.platform.dal.dao.task.BulkTask;
 import com.ctrip.platform.dal.dao.task.DalBulkTaskRequest;
@@ -51,7 +51,6 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	private UpdateSqlTask<T> updateSqlTask;
 
 	private DalRequestExecutor executor; 
-	private static final boolean NULLABLE = true;
 			
 	public DalTableDao(DalParser<T> parser) {
 		this(parser, DalClientFactory.getTaskFactory());
@@ -111,7 +110,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, getColumnType(parser.getPrimaryKeyNames()[0]), id);
 
-		return queryObject(new BaseQueryBuilder(rawTableName, dbCategory).where(pkSql).with(parameters).nullable(), hints);
+		return queryObject(new BaseTableSelectBuilder(rawTableName, dbCategory).where(pkSql).with(parameters).nullable(), hints);
 	}
 	
 	/**
@@ -126,7 +125,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		StatementParameters parameters = new StatementParameters();
 		addParameters(parameters, parser.getPrimaryKeys(pk));
 
-		return queryObject(new BaseQueryBuilder(rawTableName, dbCategory).where(pkSql).with(parameters).nullable(), hints.setFields(parser.getFields(pk)));
+		return queryObject(new BaseTableSelectBuilder(rawTableName, dbCategory).where(pkSql).with(parameters).nullable(), hints.setFields(parser.getFields(pk)));
 	}
 
 	/**
@@ -161,7 +160,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public List<T> query(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
-		return query(new BaseQueryBuilder(rawTableName, dbCategory).where(whereClause).with(parameters), hints);
+		return query(new BaseTableSelectBuilder(rawTableName, dbCategory).where(whereClause).with(parameters), hints);
 	}
 
 	/**
@@ -175,14 +174,14 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 * @return List of pojos that meet the search criteria
 	 * @throws SQLException
 	 */
-	public List<T> query(QueryBuilder queryBuilder, DalHints hints) throws SQLException {
+	public List<T> query(SelectBuilder selectBuilder, DalHints hints) throws SQLException {
 		DalWatcher.begin();
-		return commonQuery(queryBuilder.mapWith(parser).nullable(), hints);
+		return commonQuery(selectBuilder.mapWith(parser).nullable(), hints);
 	}
 
-	public <K> List<K> query(QueryBuilder queryBuilder, DalHints hints, Class<K> clazz) throws SQLException {
+	public <K> List<K> query(SelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
 		DalWatcher.begin();
-		return commonQuery(queryBuilder.mapWith(new DalObjectRowMapper<K>()).nullable(), hints);
+		return commonQuery(selectBuilder.mapWith(new DalObjectRowMapper<K>()).nullable(), hints);
 	}
 
 	/**
@@ -198,32 +197,32 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public T queryFirst(String whereClause, StatementParameters parameters,
 			DalHints hints) throws SQLException {
-		return queryObject(new BaseQueryBuilder(rawTableName, dbCategory).where(whereClause).with(parameters).requireFirst().nullable(), hints);
+		return queryObject(new BaseTableSelectBuilder(rawTableName, dbCategory).where(whereClause).with(parameters).requireFirst().nullable(), hints);
 	}
 
 	/**
 	 * Query pojo for the given query builder.
-	 * @param queryBuilder select builder which represents the query criteria
+	 * @param selectBuilder select builder which represents the query criteria
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return
 	 * @throws SQLException
 	 */
-	public T queryObject(QueryBuilder queryBuilder, DalHints hints) throws SQLException {
+	public T queryObject(SelectBuilder selectBuilder, DalHints hints) throws SQLException {
 		DalWatcher.begin();
-		return commonQuery(queryBuilder.mapWith(parser).requireSingle(), hints);
+		return commonQuery(selectBuilder.mapWith(parser).requireSingle(), hints);
 	}
 	
 	/**
 	 * Query object for the given type for the given query builder.
-	 * @param queryBuilder select builder which represents the query criteria
+	 * @param selectBuilder select builder which represents the query criteria
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param clazz the class which the returned result belongs to.
 	 * @return
 	 * @throws SQLException
 	 */
-	public <K> K queryObject(QueryBuilder queryBuilder, DalHints hints, Class<K> clazz) throws SQLException {
+	public <K> K queryObject(SelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
 		DalWatcher.begin();
-		return commonQuery(queryBuilder.mapWith(new DalObjectRowMapper<K>()).requireSingle(), hints);
+		return commonQuery(selectBuilder.mapWith(new DalObjectRowMapper<K>()).requireSingle(), hints);
 	}
 
 	/**
@@ -241,7 +240,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public List<T> queryTop(String whereClause, StatementParameters parameters,
 			DalHints hints, int count) throws SQLException {
-		return query(new BaseQueryBuilder(rawTableName, dbCategory).where(whereClause).with(parameters).top(count), hints);
+		return query(new BaseTableSelectBuilder(rawTableName, dbCategory).where(whereClause).with(parameters).top(count), hints);
 	}
 
 	/**
@@ -263,11 +262,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 			StatementParameters parameters, DalHints hints, int start, int count)
 			throws SQLException {
 		DalWatcher.begin();
-		return query(new BaseQueryBuilder(rawTableName, dbCategory).where(whereClause).with(parameters).range(start, count), hints);
+		return query(new BaseTableSelectBuilder(rawTableName, dbCategory).where(whereClause).with(parameters).range(start, count), hints);
 	}
 
-	private <K> K commonQuery(QueryBuilder builder, DalHints hints) throws SQLException {
-		DalSqlTaskRequest<K> request = new DalSqlTaskRequest<>(
+	private <K> K commonQuery(SelectBuilder builder, DalHints hints) throws SQLException {
+		DalSqlTaskRequest<K> request = new DalSqlTaskRequest<K>(
 				logicDbName, builder, hints, 
 				new QuerySqlTask<>((DalResultSetExtractor<K>)builder.getResultExtractor(hints)), (ResultMerger<K>)builder.getResultMerger(hints));
 		
@@ -506,7 +505,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
 	/**
 	 * Update for the given sql and parameters. The sql must be the standard update statement.
-	 * E.g. "UPDATE ABC SET ...." In case of table shard enabled, the 
+	 * E.g. "UPDATE ABC SET ....". Because it is the raw sql, table shard will not be supported
+	 * if the table name is logic one, you can provide real table name in sql if you want to update
+	 * certain phisical table.
 	 * 
 	 * @param sql the statement that used to update the db.
 	 * @param parameters A container that holds all the necessary parameters
@@ -516,7 +517,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public int update(String sql, StatementParameters parameters, DalHints hints)
 			throws SQLException {
-		return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, new SimpleUpdateBuilder(rawTableName, sql, dbCategory).with(parameters), hints, updateSqlTask, new ResultMerger.IntSummary())));
+		return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, new FreeUpdateSqlBuilder(dbCategory).setTemplate(sql).with(parameters), hints, updateSqlTask, new ResultMerger.IntSummary())));
 	}
 	
 	/**

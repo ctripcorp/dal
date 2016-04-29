@@ -77,6 +77,7 @@ public class SQLParserTests {
 		idList.add(names);
 		
 		String new_sql = SQLParser.compile(sql, idList);
+		System.out.println(new_sql);
 		
 		Assert.assertEquals(expected_sql, new_sql);
 	}

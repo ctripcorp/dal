@@ -21,6 +21,7 @@ import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.dao.helper.SQLParser;
 import com.ctrip.platform.dal.dao.sqlbuilder.SqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.TableSqlBuilder;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -104,14 +105,14 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	}
 	
 	private Callable<T> create(StatementParameters parameters, DalHints hints) throws SQLException {
-		if(builder == null)
+		if(builder == null || !(builder instanceof TableSqlBuilder))
 			return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), sql, parameters, hints, task);
 
-		if(!isTableShardingEnabled(logicDbName, builder.getTableName()))
+		if(!isTableShardingEnabled(logicDbName, ((TableSqlBuilder)builder).getTableName()))
 			return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), builder.build(), parameters, hints, task);
 			
 		String tableShardStr = buildShardStr(logicDbName, locateTableShardId(logicDbName, hints, parameters, null));
-		return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), builder.build(tableShardStr), parameters, hints, task);
+		return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), ((TableSqlBuilder)builder).build(tableShardStr), parameters, hints, task);
 	}
 
 	@Override

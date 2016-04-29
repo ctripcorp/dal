@@ -2,6 +2,7 @@
 #if($method.getCrud_type()=="select")
 ##简单类型并且返回值为Single
 #if($method.isSampleType() && $method.isReturnSingle())
+
 	/**
 	 * ${method.getComments()}
 	**/
@@ -9,7 +10,8 @@
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")
 
-		String sql = "${method.getSql()}";
+		FreeSelectSqlBuilder<${method.getPojoClassName()}> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		builder.setTemplate("${method.getSql()}");
 		StatementParameters parameters = new StatementParameters();
 #if($method.hasParameters())
 		int i = 1;
@@ -25,8 +27,9 @@
 #end
 #end
 #end
+		builder.simpleType().requireSingle().nullable();
 
-		return queryDao.queryForObjectNullable(sql, parameters, hints, ${method.getPojoClassName()}.class);
+		return queryDao.query(builder, parameters, hints);
 	}
 #end
 #end

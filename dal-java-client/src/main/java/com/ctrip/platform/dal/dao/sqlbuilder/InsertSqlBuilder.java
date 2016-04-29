@@ -7,7 +7,7 @@ import java.util.List;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class InsertSqlBuilder implements SqlBuilder {
+public class InsertSqlBuilder implements TableSqlBuilder {
 	public static final String TMPL_SQL_INSERT = "INSERT INTO %s (%s) VALUES(%s)";
 	protected static final String COLUMN_SEPARATOR = ", ";
 	protected static final String PLACE_HOLDER = "?";

@@ -1,7 +1,7 @@
 <Datasources>
 #foreach($resource in $host.getResources())	
 	<Datasource name="${resource.getName()}"
-              testWhileIdle="true"
+              testWhileIdle="false"
               testOnBorrow="false"
               testOnReturn="false"
               validationQuery="SELECT 1"

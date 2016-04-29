@@ -13,14 +13,18 @@ import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
-import com.ctrip.platform.dal.dao.helper.MultipleQueryRequest;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.MultipleSqlBuilder;
 import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
 import com.ctrip.platform.dal.dao.task.DalSqlTaskRequest;
+import com.ctrip.platform.dal.dao.task.FreeSqlUpdateTask;
 import com.ctrip.platform.dal.dao.task.MultipleQueryTask;
 import com.ctrip.platform.dal.dao.task.QuerySqlTask;
 
 /**
- * DAO class that provides common query based functions. It only support DB shard. It is usually used for free style query dao
+ * DAO class that provides multiple common query functions and simple update function.
+ * It supports DB shard. It is usually used for free style dao.
  *  
  * @author jhhe
  *
@@ -100,11 +104,21 @@ public final class DalQueryDao {
 	 * @return List of entities that represent the query result.
 	 * @throws SQLException when things going wrong during the execution
 	 */
-	public List<?> query(MultipleQueryRequest mqr, StatementParameters parameters, DalHints hints) 
+	public List<?> query(MultipleSqlBuilder mqr, StatementParameters parameters, DalHints hints) 
 			throws SQLException {
 		DalSqlTaskRequest<List<?>> request = new DalSqlTaskRequest<>(
 				logicDbName, mqr.getSqls(), parameters, hints, 
 				new MultipleQueryTask(mqr.getExtractors()), mqr.getMergers());
+		
+		return executor.execute(hints, request, NULLABLE);
+	}
+	
+	public <T> T query(FreeSelectSqlBuilder<T> builder, StatementParameters parameters, DalHints hints) throws SQLException {
+		ResultMerger<T> merger = (ResultMerger<T>)builder.getResultMerger(hints);
+		DalResultSetExtractor<T> extractor = builder.getResultExtractor(hints);
+		
+		DalSqlTaskRequest<T> request = new DalSqlTaskRequest<>(
+				logicDbName, builder.with(parameters), hints, new QuerySqlTask<>(extractor), merger);
 		
 		return executor.execute(hints, request, NULLABLE);
 	}
@@ -316,6 +330,16 @@ public final class DalQueryDao {
 	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int start, int count) throws SQLException {
 		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
 		return queryRange(sql, parameters, hints, new DalObjectRowMapper<T>(), start, count);
+	}
+	
+	public int update(FreeUpdateSqlBuilder builder, StatementParameters parameters, DalHints hints) throws SQLException {
+		return getSafeResult((Integer)executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, builder.with(parameters), hints, new FreeSqlUpdateTask(), new ResultMerger.IntSummary())));
+	}
+	
+	private int getSafeResult(Integer value) {
+		if(value == null)
+			return 0;
+		return value;
 	}
 	
 	private <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, boolean nullable) 

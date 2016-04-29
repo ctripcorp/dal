@@ -35,10 +35,10 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.annotation.Type;
-import com.ctrip.platform.dal.dao.helper.MultipleQueryRequest;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.FixedValueRowMapper;
+import com.ctrip.platform.dal.dao.sqlbuilder.MultipleSqlBuilder;
 
 public class DalQueryDaoTest {
 	private final static String DATABASE_NAME = "dao_test_sqlsvr";
@@ -181,7 +181,7 @@ public class DalQueryDaoTest {
 			StatementParameters parameters = new StatementParameters();
 			parameters.set(1, Types.INTEGER, 1);
 			
-			MultipleQueryRequest mqr = new MultipleQueryRequest();
+			MultipleSqlBuilder mqr = new MultipleSqlBuilder();
 			
 			mqr.add(sqlList, new ClientTestDalRowMapper());
 			mqr.add(sqlList, ClientTestModel.class);

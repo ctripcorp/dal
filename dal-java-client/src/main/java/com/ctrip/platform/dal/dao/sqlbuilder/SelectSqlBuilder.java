@@ -9,11 +9,12 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.ResultMerger;
+import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 
-public class SelectSqlBuilder extends AbstractSqlBuilder implements QueryBuilder {
+public class SelectSqlBuilder extends AbstractSqlBuilder implements SelectBuilder {
 	private List<String> selectField =  new ArrayList<String>();
 	
-	private BaseQueryBuilder queryBuilder;
+	private BaseTableSelectBuilder queryBuilder;
 	
 	private boolean isPagination = false;
 	private static final String MYSQL_PAGE_SUFFIX_TPL= " limit ?, ?";
@@ -46,7 +47,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements QueryBuilder
 			DatabaseCategory dbCategory)
 			throws SQLException {
 		super(tableName, dbCategory);
-		queryBuilder = new BaseQueryBuilder(tableName, dbCategory);
+		queryBuilder = new BaseTableSelectBuilder(tableName, dbCategory);
 		queryBuilder.nullable();
 	}
 	
@@ -81,10 +82,13 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements QueryBuilder
 	 */
 	public SelectSqlBuilder atPage(int pageNo, int pageSize)
 			throws SQLException {
-		if(pageNo < 1 || pageSize < 1) 
-			throw new SQLException("Illigal pagesize or pageNo, please check");	
+		queryBuilder.atPage(pageNo, pageSize);
+		return this;
+	}
 
-		queryBuilder.range((pageNo - 1) * pageSize, pageSize);
+	@Override
+	public SelectBuilder range(int start, int count) {
+		queryBuilder.range(start, count);
 		return this;
 	}
 	
@@ -121,11 +125,16 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements QueryBuilder
 	}
 
 	@Override
-	public <T> QueryBuilder mapWith(DalRowMapper<T> mapper) {
+	public <T> SelectBuilder mapWith(DalRowMapper<T> mapper) {
 		queryBuilder.mapWith(mapper);
 		return this;
 	}
-
+	
+	public SelectBuilder simpleType() {
+		queryBuilder.simpleType();
+		return this;
+	}
+	
 	@Override
 	public <T> DalResultSetExtractor<T> getResultExtractor(DalHints hints) {
 		return queryBuilder.getResultExtractor(hints);

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.helper;
+package com.ctrip.platform.dal.dao.sqlbuilder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -11,17 +11,26 @@ import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowCallback;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.ResultMerger;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
+import com.ctrip.platform.dal.dao.helper.DalListMerger;
+import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
+import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
+import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.dao.helper.MultipleResultMerger;
 
-public class MultipleQueryRequest {
+public class MultipleSqlBuilder implements SqlBuilder {
 	private StringBuilder sqls = new StringBuilder();
+	private StatementParameters parameters;
 	private List<DalResultSetExtractor<?>> extractors = new ArrayList<>();
 	private MultipleResultMerger mergers = new MultipleResultMerger();
+	
 	
 	/**
 	 * This extractor instance maybe used in more than one thread. Make sure it is thread safe.
 	 * To be thread safe is easy, just not keep any changeable state inside the object.
 	 */
-	public <T> MultipleQueryRequest add(String sql, DalResultSetExtractor<T> extractor, ResultMerger<T> merger) {
+	public <T> MultipleSqlBuilder add(String sql, DalResultSetExtractor<T> extractor, ResultMerger<T> merger) {
 		sql = sql.trim();
 		sqls.append(sql);
 		if(!sql.endsWith(";"))
@@ -41,7 +50,7 @@ public class MultipleQueryRequest {
 	 * @param mapper
 	 * @return
 	 */
-	public <T> MultipleQueryRequest add(String sql, DalRowMapper<T> mapper) {
+	public <T> MultipleSqlBuilder add(String sql, DalRowMapper<T> mapper) {
 		DalListMerger<T> defaultMerger = new DalListMerger<>();
 		return add(sql, new DalRowMapperExtractor<T>(mapper), defaultMerger);
 	}
@@ -51,7 +60,7 @@ public class MultipleQueryRequest {
 	 * To be thread safe is easy, just not keep any changeable state inside the object.
 	 * The default JPA parser is thread safe.
 	 */
-	public <T> MultipleQueryRequest add(String sql, DalRowMapper<T> mapper, ResultMerger<List<T>> merger) {
+	public <T> MultipleSqlBuilder add(String sql, DalRowMapper<T> mapper, ResultMerger<List<T>> merger) {
 		return add(sql, new DalRowMapperExtractor<T>(mapper), merger);
 	}
 	
@@ -60,7 +69,7 @@ public class MultipleQueryRequest {
 	 * To be thread safe is easy, just not keep any changeable state inside the object.
 	 * The default JPA parser is thread safe.
 	 */
-	public <T> MultipleQueryRequest add(String sql, DalRowMapper<T> mapper, Comparator<T> sorter) {
+	public <T> MultipleSqlBuilder add(String sql, DalRowMapper<T> mapper, Comparator<T> sorter) {
 		ResultMerger<List<T>> defaultMerger = new DalListMerger<>(sorter);
 		return add(sql, new DalRowMapperExtractor<T>(mapper), defaultMerger);
 	}
@@ -73,11 +82,11 @@ public class MultipleQueryRequest {
 	 * @return
 	 * @throws SQLException
 	 */
-	public <T> MultipleQueryRequest add(String sql, Class<T> clazz) throws SQLException {
+	public <T> MultipleSqlBuilder add(String sql, Class<T> clazz) throws SQLException {
 		return add(sql, clazz, new DalListMerger<T>());
 	}
 	
-	public <T> MultipleQueryRequest add(String sql, Class<T> clazz, ResultMerger<List<T>> merger) throws SQLException {
+	public <T> MultipleSqlBuilder add(String sql, Class<T> clazz, ResultMerger<List<T>> merger) throws SQLException {
 		Table table = clazz.getAnnotation(Table.class);
 		// If it is annotated DAL POJO
 		if (table != null)
@@ -86,11 +95,11 @@ public class MultipleQueryRequest {
 		return add(sql, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()), merger);
 	}
 	
-	public <T> MultipleQueryRequest add(String sql, Class<T> clazz, Comparator<T> sorter) throws SQLException {
+	public <T> MultipleSqlBuilder add(String sql, Class<T> clazz, Comparator<T> sorter) throws SQLException {
 		return add(sql, clazz, new DalListMerger<T>(sorter));
 	}
 	
-	public MultipleQueryRequest add(String sql, DalRowCallback callback) {
+	public MultipleSqlBuilder add(String sql, DalRowCallback callback) {
 		DalListMerger<Object> defaultMerger = new DalListMerger<>();
 		return add(sql, new DalRowCallbackExtractor(callback), defaultMerger);
 	}
@@ -105,5 +114,20 @@ public class MultipleQueryRequest {
 
 	public ResultMerger<List<?>> getMergers() {
 		return mergers;
+	}
+
+	@Override
+	public String build() {
+		return sqls.toString();
+	}
+
+	public MultipleSqlBuilder with(StatementParameters parameters) {
+		this.parameters = parameters;
+		return this;
+	}
+	
+	@Override
+	public StatementParameters buildParameters() {
+		return null;
 	}
 }

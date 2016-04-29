@@ -9,7 +9,7 @@ import java.util.List;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public abstract class AbstractSqlBuilder implements SqlBuilder {
+public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 	
 	protected DatabaseCategory dBCategory = DatabaseCategory.MySql;
 	

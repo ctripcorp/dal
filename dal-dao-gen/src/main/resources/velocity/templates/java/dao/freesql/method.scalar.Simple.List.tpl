@@ -2,6 +2,7 @@
 #if($method.getCrud_type()=="select")
 ##简单类型并且返回值是List
 #if($method.isSampleType() && $method.isReturnList())
+
 	/**
 	 * ${method.getComments()}
 	**/
@@ -9,13 +10,10 @@
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")
 
-#if($method.isPaging())
-		String sql = "${method.getPagingSql($host.getDatabaseCategory())}";
-#else
-		String sql = "${method.getSql()}";
-#end
+		FreeSelectSqlBuilder<${method.getPojoClassName()}> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		builder.setTemplate("${method.getSql()}");
 		StatementParameters parameters = new StatementParameters();
-#if($method.hasParameters() || $method.isPaging())
+#if($method.hasParameters())
 		int i = 1;
 #end		
 #if($method.hasParameters())
@@ -32,9 +30,9 @@
 #end
 #end
 #if($method.isPaging())
-		parameters.set(i++, Types.INTEGER, ${host.pageBegain()});
-		parameters.set(i++, Types.INTEGER, ${host.pageEnd()});
+		builder.atPage(pageNo, pageSize);
 #end
+		builder.simpleType();
 
 		return queryDao.query(sql, parameters, hints, ${method.getPojoClassName()}.class);
 	}

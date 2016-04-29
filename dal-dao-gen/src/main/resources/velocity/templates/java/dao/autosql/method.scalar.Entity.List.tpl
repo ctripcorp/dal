@@ -21,7 +21,7 @@
 		builder.orderBy(${method.getOrderByExp()});
 #end
 #if($method.isPaging())
-	builder.atPage(pageNo, pageSize);
+		builder.atPage(pageNo, pageSize);
 #end
 
 		return client.query(builder, hints);

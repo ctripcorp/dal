@@ -35,8 +35,8 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.annotation.Type;
 import com.ctrip.platform.dal.dao.helper.DalListMerger;
-import com.ctrip.platform.dal.dao.helper.MultipleQueryRequest;
 import com.ctrip.platform.dal.dao.helper.ShortRowMapper;
+import com.ctrip.platform.dal.dao.sqlbuilder.MultipleSqlBuilder;
 
 public abstract class DalQueryDaoTest {
 	private String DATABASE_NAME;
@@ -437,7 +437,7 @@ public abstract class DalQueryDaoTest {
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, Types.INTEGER, 1);
 		
-		MultipleQueryRequest select = new MultipleQueryRequest();
+		MultipleSqlBuilder select = new MultipleSqlBuilder();
 		// TODO add all add method
 		select.add(sqlList, new ClientTestDalRowMapper());//mapper
 		select.add(sqlList, new ClientTestDalRowMapper(), new DalListMerger<ClientTestModel>());//merger

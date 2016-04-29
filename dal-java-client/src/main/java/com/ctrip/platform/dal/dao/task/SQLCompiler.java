@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.helper;
+package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -8,28 +8,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.ctrip.platform.dal.dao.DalClientFactory;
-
-public class SQLParser {
+public class SQLCompiler {
 	private static String regEx = null;
 	private static Pattern inRegxPattern = null;
 	static{
 		 regEx="(?i)In *\\(? *\\? *\\)?";
 		 inRegxPattern = Pattern.compile(regEx);
-	}
-	
-	/**
-	 * To disable the original expand logic before shard by in parameters
-	 * @Deprecated If you see this, please regenerate dal code with code gen
-	 * @return just the original sql
-	 * @throws SQLException
-	 */
-	public static String parse(String original, List... parms) throws SQLException
-	{
-		DalClientFactory.getDalLogger().warn(
-				"In case you see this message, you are using old generated code. Please regenerate code or just remove the invocation of this method from the generated code.");
-
-		return original;
 	}
 	
 	/**

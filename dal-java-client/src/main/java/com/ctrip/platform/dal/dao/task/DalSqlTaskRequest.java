@@ -1,6 +1,9 @@
 package com.ctrip.platform.dal.dao.task;
 
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.*;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.buildShardStr;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.detectDistributedTransaction;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardingEnabled;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.locateTableShardId;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -19,7 +22,6 @@ import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
-import com.ctrip.platform.dal.dao.helper.SQLParser;
 import com.ctrip.platform.dal.dao.sqlbuilder.SqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.TableSqlBuilder;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -167,7 +169,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 			if(!parameters.containsInParameter())
 				return;
 			
-			sql = SQLParser.compile(sql, parameters.getAllInParameters());
+			sql = SQLCompiler.compile(sql, parameters.getAllInParameters());
 			parameters.compile();
 		}
 

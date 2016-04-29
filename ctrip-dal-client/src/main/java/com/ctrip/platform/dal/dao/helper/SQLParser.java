@@ -26,6 +26,7 @@ public class SQLParser {
 	 * @return
 	 * 		Combined SQL
 	 * @throws SQLException
+	 * @deprecated if you see this, please regenerated your code with code gen
 	 */
 	public static String parse(String original, List... parms) throws SQLException
 	{

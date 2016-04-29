@@ -9,17 +9,15 @@ import com.ctrip.platform.dal.dao.helper.*;
 public class ${host.getClassName()}Dao {
 
 	private static final String DATA_BASE = "${host.getDbSetName()}";
-	
-#if($host.hasQuery())
+	private static final DatabaseCategory dbCategory = DatabaseCategory.${host.getDatabaseCategory()};
 	private DalQueryDao queryDao = null;
-#end
 
 #foreach( $method in ${host.getMethods()} )
 #if(!$method.isEmptyFields() && !$method.isSampleType())
 	private DalRowMapper<${method.getPojoClassName()}> ${method.getVariableName()}RowMapper = null;
 #end
-
 #end
+
 	public ${host.getClassName()}Dao() throws SQLException {
 #foreach( $method in ${host.getMethods()} )
 #if(!$method.isEmptyFields() && !$method.isSampleType())
@@ -37,5 +35,4 @@ public class ${host.getClassName()}Dao {
 #parse("templates/java/dao/freesql/method.scalar.Entity.Single.tpl")
 #parse("templates/java/dao/freesql/method.scalar.Entity.First.tpl")
 #parse("templates/java/dao/freesql/method.cud.tpl")
-
 }

@@ -17,10 +17,10 @@ public class FreeSqlHost {
 
     public Set<String> getDaoImports() {
         Set<String> imports = new TreeSet<>();
+        imports.add("com.ctrip.platform.dal.common.enums.DatabaseCategory");
         imports.add("com.ctrip.platform.dal.dao.*");
-        imports.add("com.ctrip.platform.dal.dao.helper.*");
+        imports.add("com.ctrip.platform.dal.dao.sqlbuilder.*");
 
-        imports.add(java.sql.ResultSet.class.getName());
         imports.add(java.sql.SQLException.class.getName());
         imports.add(java.sql.Types.class.getName());
         imports.add(java.util.List.class.getName());

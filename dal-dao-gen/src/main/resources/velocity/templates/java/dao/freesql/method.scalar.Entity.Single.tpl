@@ -29,7 +29,7 @@
 #end
 		builder.mapWith(${method.getVariableName()}RowMapper).requireSingle().nullable();
 
-		return (${method.getPojoClassName()})queryDao.query(builder, parameters, hints, ${method.getVariableName()}RowMapper);
+		return (${method.getPojoClassName()})queryDao.query(builder, parameters, hints);
 	}
 #end
 #end

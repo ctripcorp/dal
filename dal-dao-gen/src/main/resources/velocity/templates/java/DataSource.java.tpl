@@ -18,11 +18,6 @@
               removeAbandonedTimeout="60"
               removeAbandoned="true"
               logAbandoned="true"
-#if (${resource.isOptionAppend()})
-              minEvictableIdleTimeMillis="30000"
-              option="sendStringParametersAsUnicode=false"/>
-#else
               minEvictableIdleTimeMillis="30000"/>
-#end
 #end			  
 </Datasources>

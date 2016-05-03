@@ -1,10 +1,10 @@
 <Datasources>
 #foreach($resource in $host.getResources())	
 	<Datasource name="${resource.getName()}"
-              userName="root"
-              password="123456"
-              connectionUrl="jdbc:mysql://127.0.0.1:3306/${resource.getName()}"
-              driverClassName="com.mysql.jdbc.Driver"
+              userName="${resource.getUserName()}"
+              password="${resource.getPassword()}"
+              connectionUrl="${resource.getConnectionUrl()}"
+              driverClassName="${resource.getDriverClassName()}"
               testWhileIdle="false"
               testOnBorrow="false"
               testOnReturn="false"
@@ -18,7 +18,11 @@
               removeAbandonedTimeout="60"
               removeAbandoned="true"
               logAbandoned="true"
+#if (${resource.isOptionAppend()})
               minEvictableIdleTimeMillis="30000"
               option="sendStringParametersAsUnicode=false"/>
+#else
+              minEvictableIdleTimeMillis="30000"/>
+#end
 #end			  
 </Datasources>

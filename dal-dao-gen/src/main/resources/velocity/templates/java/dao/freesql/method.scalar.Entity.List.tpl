@@ -30,9 +30,10 @@
 #end
 #end
 #if($method.isPaging())
-		builder.atPage(pageNo, pageSize);
-#end
+		builder.mapWith(${method.getVariableName()}RowMapper).atPage(pageNo, pageSize);
+#else
 		builder.mapWith(${method.getVariableName()}RowMapper);
+#end
 
 		return queryDao.query(builder, parameters, hints);
 	}

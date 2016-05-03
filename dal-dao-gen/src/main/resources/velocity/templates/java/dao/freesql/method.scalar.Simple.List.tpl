@@ -30,9 +30,10 @@
 #end
 #end
 #if($method.isPaging())
-		builder.atPage(pageNo, pageSize);
-#end
+		builder.simpleType().atPage(pageNo, pageSize);
+#else
 		builder.simpleType();
+#end
 
 		return queryDao.query(sql, parameters, hints, ${method.getPojoClassName()}.class);
 	}

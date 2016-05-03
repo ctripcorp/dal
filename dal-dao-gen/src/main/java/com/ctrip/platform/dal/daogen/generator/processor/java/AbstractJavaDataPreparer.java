@@ -28,20 +28,27 @@ public class AbstractJavaDataPreparer {
             return;
         }
         JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
-        DalConfigHost dalConfigHost = ctx.getDalConfigHost();
         ContextHost contextHost = ctx.getContextHost();
+        DalConfigHost dalConfigHost = ctx.getDalConfigHost();
         dalConfigHost.addDatabaseSet(sets);
         for (DatabaseSet databaseSet : sets) {
             List<DatabaseSetEntry> entries = daoOfDatabaseSet.getAllDatabaseSetEntryByDbsetid(databaseSet.getId());
-            if (null == entries || entries.isEmpty()) {
-                // log.error(String.format("The databaseSet[%s] does't contain any entries",
-                // databaseSet.getId()));
+            if (entries == null || entries.isEmpty()) {
                 continue;
             }
             dalConfigHost.addDatabaseSetEntry(entries);
+            Map<String, DatabaseSetEntry> map = dalConfigHost.getDatabaseSetEntryMap();
 
             for (DatabaseSetEntry entry : entries) {
-                contextHost.addResource(new Resource(entry.getConnectionString()));
+                String key = entry.getConnectionString();
+                if (map.containsKey(key)) {
+                    DatabaseSetEntry value = map.get(key);
+                    Resource resource = new Resource(value.getConnectionString(),
+                            value.getUserName(), value.getPassword(),
+                            value.getDbAddress(), value.getDbPort(), value.getDbCatalog(),
+                            value.getProviderName());
+                    contextHost.addResource(resource);
+                }
             }
         }
     }

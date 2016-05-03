@@ -21,6 +21,9 @@ public class DataSourceUtil {
     private static final String DRIVER_MYSQL = "com.mysql.jdbc.Driver";
     private static final String DRIVER_SQLSERVRE = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
+    private static final String DBURL_MYSQL_CACHE = "jdbc:mysql://%s:%s/%s";
+    private static final String DBURL_SQLSERVER_CACHE = "jdbc:sqlserver://%s:%s;DatabaseName=%s";
+
     // dbAddress+port+user+password,DataSource
     private static volatile Map<String, DataSource> cache1 = new ConcurrentHashMap<>();
 
@@ -108,7 +111,18 @@ public class DataSourceUtil {
         return createDataSource(url, userName, password, driver);
     }
 
-    private static String getDriverClass(String driverClass) throws SQLException {
+    public static String getConnectionUrl(String address, String port, String catalog, String driverClass) throws SQLException {
+        String url = "";
+        String driver = getDriverClass(driverClass);
+        if (DRIVER_MYSQL.equals(driver)) {
+            url = String.format(DBURL_MYSQL_CACHE, address, port, catalog);
+        } else {
+            url = String.format(DBURL_SQLSERVER_CACHE, address, port, catalog);
+        }
+        return url;
+    }
+
+    public static String getDriverClass(String driverClass) throws SQLException {
         if (DatabaseType.MySQL.getValue().equals(driverClass)) {
             return DRIVER_MYSQL;
         } else if (DatabaseType.SQLServer.getValue().equals(driverClass)) {

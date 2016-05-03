@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.daogen.entity;
 
+import com.ctrip.platform.dal.daogen.utils.ConnectionStringUtil;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -20,6 +22,12 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
     private String update_user_no;
     private Timestamp update_time;
     private String str_update_time = "";
+
+    private String userName;
+    private String password;
+    private String dbAddress;
+    private String dbPort;
+    private String dbCatalog;
 
     public static DatabaseSetEntry visitRow(ResultSet rs) throws SQLException {
         DatabaseSetEntry entry = new DatabaseSetEntry();
@@ -85,7 +93,7 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
     }
 
     public String getAllInOneConnectionString() {
-        return allInOneConnectionString;
+        return ConnectionStringUtil.GetConnectionString(getProviderName().toLowerCase(), getDbAddress(), getDbPort(), getUserName(), getPassword(), getDbCatalog());
     }
 
     public void setAllInOneConnectionString(String allInOneConnectionString) {
@@ -132,4 +140,43 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
         this.str_update_time = str_update_time;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getDbAddress() {
+        return dbAddress;
+    }
+
+    public void setDbAddress(String dbAddress) {
+        this.dbAddress = dbAddress;
+    }
+
+    public String getDbPort() {
+        return dbPort;
+    }
+
+    public void setDbPort(String dbPort) {
+        this.dbPort = dbPort;
+    }
+
+    public String getDbCatalog() {
+        return dbCatalog;
+    }
+
+    public void setDbCatalog(String dbCatalog) {
+        this.dbCatalog = dbCatalog;
+    }
 }

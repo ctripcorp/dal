@@ -1,10 +1,8 @@
 package com.ctrip.platform.dal.daogen.host;
 
-import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
-import com.ctrip.platform.dal.daogen.utils.ConnectionStringUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
 import java.util.*;
@@ -37,34 +35,34 @@ public class DalConfigHost {
         return this.databaseSetEntries.containsKey(setId) ? this.databaseSetEntries.get(setId).values() : null;
     }
 
-    public Collection<DatabaseSetEntry> getDatabaseSetEntryMap() {
-        Collection<DatabaseSetEntry> collection = null;
-        if (databaseSetEntryMap != null) {
-            collection = new ArrayList<>();
-            Map<String, DatabaseSetEntry> map = new HashMap<>();
+    public Map<String, DatabaseSetEntry> getDatabaseSetEntryMap() {
+        Map<String, DatabaseSetEntry> map = null;
+        if (databaseSetEntryMap != null && databaseSetEntryMap.size() > 0) {
+            map = new HashMap<>();
+            Set<String> set = new HashSet<>();
             for (Map.Entry<Integer, DatabaseSetEntry> entry : databaseSetEntryMap.entrySet()) {
-                String key = String.format("'%s'", entry.getValue().getConnectionString()); // getName()
-                if (!map.containsKey(key)) {
-                    map.put(key, entry.getValue());
-                }
+                String key = String.format("'%s'", entry.getValue().getConnectionString());
+                set.add(key);
             }
 
-            DalGroupDBDao dao = SpringBeanGetter.getDaoOfDalGroupDB();
-            List<DalGroupDB> dbs = dao.getGroupDbsByDbNames(map.keySet());
+            List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDbsByDbNames(set);
 
-            if (dbs != null) {
+            if (dbs != null && dbs.size() > 0) {
                 for (DalGroupDB db : dbs) {
                     DatabaseSetEntry e = new DatabaseSetEntry();
                     e.setConnectionString(db.getDbname());
-                    String connectionString = ConnectionStringUtil.GetConnectionString(db.getDb_providerName().toLowerCase(), db.getDb_address(), db.getDb_port(), db.getDb_user(), db.getDb_password(), db.getDb_catalog());
-                    e.setAllInOneConnectionString(connectionString);
                     e.setProviderName(db.getDb_providerName());
-                    collection.add(e);
+                    e.setDbAddress(db.getDb_address());
+                    e.setDbPort(db.getDb_port());
+                    e.setUserName(db.getDb_user());
+                    e.setPassword(db.getDb_password());
+                    e.setDbCatalog(db.getDb_catalog());
+                    map.put(e.getConnectionString(), e);
                 }
             }
         }
 
-        return collection;
+        return map;
     }
 
     public void addDatabaseSet(DatabaseSet set) {

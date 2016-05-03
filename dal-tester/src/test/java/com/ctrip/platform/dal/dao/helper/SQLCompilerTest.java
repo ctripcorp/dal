@@ -8,14 +8,14 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.ctrip.platform.dal.dao.helper.SQLParser;
+import com.ctrip.platform.dal.dao.task.SQLCompiler;
 
-public class SQLParserTests {
+public class SQLCompilerTest {
 
 	@Test
 	public void testNotInContains() throws SQLException {
 		String sql = "SELECT * FROM Person WHERE ID = ? AND Age > ?";
-		String new_sql = SQLParser.parse(sql);
+		String new_sql = SQLCompiler.compile(sql, null);
 		Assert.assertEquals(sql, new_sql);
 	}
 	
@@ -28,7 +28,7 @@ public class SQLParserTests {
 		ids.add(2);
 		List idList = new ArrayList<>();
 		idList.add(ids);
-		String new_sql = SQLParser.compile(sql, idList);
+		String new_sql = SQLCompiler.compile(sql, idList);
 		
 		Assert.assertEquals(expected_sql, new_sql);
 	}
@@ -42,7 +42,7 @@ public class SQLParserTests {
 		ids.add(2);
 		List idList = new ArrayList<>();
 		idList.add(ids);
-		String new_sql = SQLParser.compile(sql, idList);
+		String new_sql = SQLCompiler.compile(sql, idList);
 		
 		Assert.assertEquals(expected_sql, new_sql);
 	}
@@ -56,7 +56,7 @@ public class SQLParserTests {
 		ids.add(2);
 		List idList = new ArrayList<>();
 		idList.add(ids);
-		String new_sql = SQLParser.compile(sql, idList);
+		String new_sql = SQLCompiler.compile(sql, idList);
 		
 		Assert.assertEquals(expected_sql, new_sql);
 	}
@@ -76,7 +76,7 @@ public class SQLParserTests {
 		names.add("hi");
 		idList.add(names);
 		
-		String new_sql = SQLParser.compile(sql, idList);
+		String new_sql = SQLCompiler.compile(sql, idList);
 		System.out.println(new_sql);
 		
 		Assert.assertEquals(expected_sql, new_sql);

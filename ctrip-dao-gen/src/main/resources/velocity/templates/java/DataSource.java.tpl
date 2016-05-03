@@ -1,10 +1,6 @@
 <Datasources>
 #foreach($resource in $host.getResources())	
 	<Datasource name="${resource.getName()}"
-              userName="root"
-              password="123456"
-              connectionUrl="jdbc:mysql://127.0.0.1:3306/${resource.getName()}"
-              driverClassName="com.mysql.jdbc.Driver"
               testWhileIdle="false"
               testOnBorrow="false"
               testOnReturn="false"

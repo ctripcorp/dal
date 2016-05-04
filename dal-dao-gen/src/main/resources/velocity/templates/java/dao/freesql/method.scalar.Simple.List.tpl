@@ -10,7 +10,7 @@
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")
 
-		FreeSelectSqlBuilder<${method.getPojoClassName()}> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		FreeSelectSqlBuilder<List<${method.getPojoClassName()}>> builder = new FreeSelectSqlBuilder<>(dbCategory);
 		builder.setTemplate("${method.getSql()}");
 		StatementParameters parameters = new StatementParameters();
 #if($method.hasParameters())
@@ -35,7 +35,7 @@
 		builder.simpleType();
 #end
 
-		return queryDao.query(sql, parameters, hints, ${method.getPojoClassName()}.class);
+		return queryDao.query(builder, parameters, hints);
 	}
 #end
 #end

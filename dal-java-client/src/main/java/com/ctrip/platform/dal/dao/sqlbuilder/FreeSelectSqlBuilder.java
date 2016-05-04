@@ -70,26 +70,26 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 		return String.format(sql, start, count);
 	}
 
-	public <T> SelectBuilder mapWith(DalRowMapper<T> mapper) {
+	public <T> FreeSelectSqlBuilder<K> mapWith(DalRowMapper<T> mapper) {
 		this.mapper = mapper;
 		return this;
 	}
 
-	public SelectBuilder simpleType() {
+	public FreeSelectSqlBuilder<K> simpleType() {
 		return mapWith(new DalObjectRowMapper());
 	}
 
-	public SelectBuilder requireFirst() {
+	public FreeSelectSqlBuilder<K> requireFirst() {
 		requireFirst = true;
 		return this;
 	}
 	
-	public SelectBuilder requireSingle() {
+	public FreeSelectSqlBuilder<K> requireSingle() {
 		requireSingle = true;
 		return this;
 	}
 	
-	public SelectBuilder nullable() {
+	public FreeSelectSqlBuilder<K> nullable() {
 		nullable = true;
 		return this;
 	}
@@ -106,18 +106,18 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 		return nullable;
 	}
 	
-	public SelectBuilder top(int count) {
+	public FreeSelectSqlBuilder<K> top(int count) {
 		this.count = count;
 		return this;
 	}	
 
-	public SelectBuilder range(int start, int count) {
+	public FreeSelectSqlBuilder<K> range(int start, int count) {
 		this.start = start;
 		this.count = count;
 		return this;
 	}
 
-	public SelectBuilder atPage(int pageNo, int pageSize) throws SQLException {
+	public FreeSelectSqlBuilder<K> atPage(int pageNo, int pageSize) throws SQLException {
 		if(pageNo < 1 || pageSize < 1) 
 			throw new SQLException("Illigal pagesize or pageNo, please check");	
 

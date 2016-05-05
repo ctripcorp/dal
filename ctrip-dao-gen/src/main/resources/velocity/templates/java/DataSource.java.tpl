@@ -6,7 +6,7 @@
               testOnReturn="false"
               validationQuery="SELECT 1"
               validationInterval="30000"
-              timeBetweenEvictionRunsMillis="30000"
+              timeBetweenEvictionRunsMillis="5000"
               maxActive="100"
               minIdle="1"
               maxWait="10000"
@@ -16,9 +16,10 @@
               logAbandoned="true"
 #if (${resource.isOptionAppend()})
               minEvictableIdleTimeMillis="30000"
-              option="sendStringParametersAsUnicode=false"/>
+              option="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false"/>
 #else
-              minEvictableIdleTimeMillis="30000"/>
+              minEvictableIdleTimeMillis="30000"
+              option="rewriteBatchedStatements=true;allowMultiQueries=true/>
 #end
 #end			  
 </Datasources>

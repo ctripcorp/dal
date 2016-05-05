@@ -49,7 +49,13 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		this.task = task;
 		this.merger = merger;
 		shards = getShards();
+
+		//For backward compatible. Assume sql is already parsed, we need to expand the parameter to match the placeholder
+		if(parameters.containsInParameter())
+			parameters.compile();
 	}
+	
+	
 	
 	public DalSqlTaskRequest(String logicDbName, SqlBuilder builder, DalHints hints, SqlTask<T> task, ResultMerger<T> merger)
 			 throws SQLException {

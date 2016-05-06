@@ -14,56 +14,50 @@ public class DatabaseSelector {
 	private List<DataBase> masters;
 	private List<DataBase> slaves;
 	private DalHA ha;
+	private boolean masterOnly;
 	private boolean isSelect;
 	
-	public DatabaseSelector(DalHA ha, List<DataBase> masters, List<DataBase> slaves, boolean isSelect){
+	public DatabaseSelector(DalHA ha, List<DataBase> masters, List<DataBase> slaves, boolean masterOnly, boolean isSelect){
 		this.ha = ha;
 		this.masters = masters;
+		this.masterOnly = masterOnly;
 		this.slaves = slaves;
 		this.isSelect= isSelect;
 	}
 	
-	public String select() throws DalException{
-		if(this.isSelect){
-			String dbName = this.getDbFromSlave();
-			if(null == dbName){
-				dbName = this.getDbFromMaster();
-			}
-			if(!(this.isNullOrEmpty(this.slaves) && this.isNullOrEmpty(this.masters))){
-				if(null == dbName && (this.ha == null || !this.ha.isOver())){
-					throw new DalException(ErrorCode.MarkdownConnection, 
-							this.toDbNames(this.masters) + ", " + this.toDbNames(this.slaves));
-				}
-				return dbName;
-			}else{
-				throw new DalException(ErrorCode.NullLogicDbName);
-			}
-		} else{
-			String dbName = this.getDbFromMaster();
-			if(!this.isNullOrEmpty(this.masters)){
-				if(null == dbName && (this.ha == null || !this.ha.isOver()))
-					throw new DalException(ErrorCode.MarkdownConnection, this.toDbNames(this.masters));
-				return dbName;
-			}
-			else{
-				throw new DalException(ErrorCode.NullLogicDbName);
-			}
+	public String select() throws DalException {
+		if(masterOnly || !isSelect)
+			return getAvailableDbWithFallback(masters, null);
+		
+		return getAvailableDbWithFallback(slaves, masters);
+	}
+	
+	private String getAvailableDbWithFallback(List<DataBase> primary, List<DataBase> secondary) throws DalException {
+		if(isNullOrEmpty(primary) && isNullOrEmpty(secondary))
+			throw new DalException(ErrorCode.NullLogicDbName);
+		
+		String dbName = getAvailableDb(primary);
+		if(dbName != null)
+			return dbName;
+
+		dbName = getAvailableDb(secondary);
+		if(dbName != null)
+			return dbName;
+		
+		if(null == dbName && (this.ha == null || !this.ha.isOver())){
+			StringBuilder sb = new StringBuilder(toDbNames(primary));
+			if(isNullOrEmpty(secondary))
+				sb.append(", " + toDbNames(secondary));
+			throw new DalException(ErrorCode.MarkdownConnection, sb.toString());
 		}
+		
+		return dbName;
 	}
 	
-	private String getDbFromMaster(){
-		if(this.masters == null || this.masters.isEmpty())
+	private String getAvailableDb(List<DataBase> candidates){
+		if(isNullOrEmpty(candidates))
 			return null;
-		List<String> dbNames = this.selectNotMarkdownDbNames(this.masters);
-		if(dbNames.isEmpty())
-			return null;
-		return this.getRandomRealDbName(dbNames);
-	}
-	
-	private String getDbFromSlave(){
-		if(this.slaves == null || this.slaves.isEmpty())
-			return null;
-		List<String> dbNames = this.selectNotMarkdownDbNames(this.slaves);
+		List<String> dbNames = this.selectNotMarkdownDbNames(candidates);
 		if(dbNames.isEmpty())
 			return null;
 		return this.getRandomRealDbName(dbNames);

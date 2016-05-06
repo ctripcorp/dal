@@ -172,54 +172,6 @@ public class DatabaseSet {
 	}
 	
 	private String getRandomRealDbName(DalHA ha, boolean isMaster, boolean isSelect, List<DataBase> masterCandidates, List<DataBase> slaveCandidates) throws DalException {
-		/*if (isMaster)
-			return getRandomRealDbName(ha, masterCandidates);
-		
-		if (isSelect && slaveCandidates.size() > 0)
-			return getRandomRealDbName(ha, slaveCandidates);
-
-		return getRandomRealDbName(ha, masterCandidates);*/
-		DatabaseSelector selector = new DatabaseSelector(ha, masterCandidates, slaveCandidates, isSelect);
-		return selector.select();
+		return new DatabaseSelector(ha, masterCandidates, slaveCandidates, isMaster, isSelect).select();
 	}
-	
-/*	private String getRandomRealDbName(DalHA ha, List<DataBase> dbs) throws DalException {
-		List<String> availableDbNames = this.getNotMarkdownDbNames(dbs);
-		if(ha == null || availableDbNames.size() == 1){
-			int index = (int)(Math.random() * availableDbNames.size());	
-			return availableDbNames.get(index);
-		}else{
-			List<String> dbNames = new ArrayList<String>();
-			for (String database : availableDbNames) {
-				if(!ha.contains(database))
-					dbNames.add(database);
-			}
-			if(dbNames.isEmpty()){
-				ha.setOver(true);
-				return null;
-			}else{
-				int index = (int)(Math.random() * dbNames.size());
-				ha.addDB(dbNames.get(index));
-				return dbNames.get(index);
-			}
-		}
-	}
-	
-	private List<String> getNotMarkdownDbNames(List<DataBase> dbs) throws DalException{
-		List<String> dbNames = new ArrayList<String>();
-		List<String> markdownDbNames = new ArrayList<String>();
-		for (DataBase database : dbs) {
-			if(MarkdownManager.isMarkdown(database.getConnectionString())){
-				markdownDbNames.add(database.getConnectionString());
-			}else{
-				dbNames.add(database.getConnectionString());
-			}
-		}
-		if(dbNames.isEmpty()){
-			if(!markdownDbNames.isEmpty())
-				throw new DalException(ErrorCode.MarkdownConnection, StringUtils.join(markdownDbNames, ","));
-		}
-		
-		return dbNames;
-	}*/
 }

@@ -41,7 +41,7 @@ public class DatabaseSelectorTest {
 		DataBase db = new DataBase(M1, true, "", M1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
-		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false);
+		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false, false);
 		Assert.assertEquals(M1, selector.select());
 	}
 
@@ -51,7 +51,7 @@ public class DatabaseSelectorTest {
 		DataBase db = new DataBase(M1, true, "", M1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
-		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false);
+		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false, false);
 		try{
 			selector.select();
 		}catch(DalException e){
@@ -66,7 +66,7 @@ public class DatabaseSelectorTest {
 		dbs.add(new DataBase(M1, true, "", M1));
 		dbs.add(new DataBase(M2, true, "", M2));
 		
-		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false);
+		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false, false);
 		Assert.assertEquals(M2, selector.select());
 	}
 	
@@ -75,7 +75,7 @@ public class DatabaseSelectorTest {
 		DataBase db = new DataBase(S1, false, "", S1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
-		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, true);
+		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false, true);
 		Assert.assertEquals(S1, selector.select());
 	}
 	
@@ -85,7 +85,7 @@ public class DatabaseSelectorTest {
 		DataBase db = new DataBase(S1, false, "", S1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
-		DatabaseSelector selector = new DatabaseSelector(null, null, dbs, true);
+		DatabaseSelector selector = new DatabaseSelector(null, null, dbs, false, true);
 		try{
 			selector.select();
 		}catch(DalException e){
@@ -100,7 +100,7 @@ public class DatabaseSelectorTest {
 		dbs.add(new DataBase(S1, false, "", S1));
 		dbs.add(new DataBase(S2, false, "", S2));
 		
-		DatabaseSelector selector = new DatabaseSelector(null, null, dbs, true);
+		DatabaseSelector selector = new DatabaseSelector(null, null, dbs, false, true);
 		Assert.assertEquals(S2, selector.select());
 	}
 	
@@ -113,7 +113,7 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		
-		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, true);
+		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false, true);
 		String dbName = selector.select();
 		Assert.assertTrue(dbName.equals(S1) || dbName.equals(S2));
 	}
@@ -127,7 +127,7 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		
-		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false);
+		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false, false);
 		String dbName = selector.select();
 		Assert.assertTrue(dbName.equals(M1) || dbName.equals(M2));
 	}
@@ -143,7 +143,7 @@ public class DatabaseSelectorTest {
 		ConfigBeanFactory.getMarkdownConfigBean().markdown(S1);
 		ConfigBeanFactory.getMarkdownConfigBean().markdown(S2);
 		
-		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, true);
+		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false, true);
 		Assert.assertEquals(M1, selector.select());
 	}
 	
@@ -156,7 +156,7 @@ public class DatabaseSelectorTest {
 		DalHA ha = new DalHA();
 		ha.addDB(S1);
 		
-		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, true);
+		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, false, true);
 		Assert.assertEquals(S2, selector.select());
 	}
 	
@@ -170,7 +170,7 @@ public class DatabaseSelectorTest {
 		ha.addDB(S1);
 		ha.addDB(S2);
 		
-		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, true);
+		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, false, true);
 		Assert.assertNull(selector.select());
 	}
 	
@@ -183,7 +183,7 @@ public class DatabaseSelectorTest {
 		DalHA ha = new DalHA();
 		ConfigBeanFactory.getMarkdownConfigBean().markdown(S2);
 		
-		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, true);
+		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, false, true);
 		Assert.assertEquals(S1, selector.select());
 	}
 	
@@ -198,7 +198,7 @@ public class DatabaseSelectorTest {
 		ha.addDB(S1);
 		ConfigBeanFactory.getMarkdownConfigBean().markdown(S2);
 		
-		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, true);
+		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, false, true);
 		Assert.assertEquals(S3, selector.select());
 	}
 }

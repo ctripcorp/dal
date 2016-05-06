@@ -6,6 +6,21 @@ package com.ctrip.platform.dal.dao;
  * @author jhhe
  */
 public enum DalHintEnum {
+	/**
+	 * For user to set what ever he want
+	 */
+	userDefined1,
+
+	/**
+	 * For user to set what ever he want
+	 */
+	userDefined2,
+	
+	/**
+	 * For user to set what ever he want
+	 */
+	userDefined3,
+	
 	operation, //DalEventEnum
 
 	/*

@@ -75,6 +75,7 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	}
 	
 	/**
+	 * Query list of objects against type clazz with default list merger
 	 * The class can be normal Object that can be get from result set or the class of annotated DAL POJO.
 	 * The DalDefaultJpaMapper will be used as row mapper for later case.
 	 * @param sql
@@ -86,6 +87,15 @@ public class MultipleSqlBuilder implements SqlBuilder {
 		return add(sql, clazz, new DalListMerger<T>());
 	}
 	
+	/**
+	 * Query list of objects against type clazz with given list merger
+	 * The class can be normal Object that can be get from result set or the class of annotated DAL POJO.
+	 * @param sql
+	 * @param clazz
+	 * @param merger
+	 * @return
+	 * @throws SQLException
+	 */
 	public <T> MultipleSqlBuilder add(String sql, Class<T> clazz, ResultMerger<List<T>> merger) throws SQLException {
 		Table table = clazz.getAnnotation(Table.class);
 		// If it is annotated DAL POJO
@@ -95,10 +105,25 @@ public class MultipleSqlBuilder implements SqlBuilder {
 		return add(sql, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()), merger);
 	}
 	
+	/**
+	 * Query list of objects against type clazz with default list merger sort with given comparator.
+	 * The class can be normal Object that can be get from result set or the class of annotated DAL POJO.
+	 * @param sql
+	 * @param clazz
+	 * @param sorter
+	 * @return
+	 * @throws SQLException
+	 */
 	public <T> MultipleSqlBuilder add(String sql, Class<T> clazz, Comparator<T> sorter) throws SQLException {
 		return add(sql, clazz, new DalListMerger<T>(sorter));
 	}
 	
+	/**
+	 * Work with callback. There will be null return value.
+	 * @param sql
+	 * @param callback
+	 * @return
+	 */
 	public MultipleSqlBuilder add(String sql, DalRowCallback callback) {
 		DalListMerger<Object> defaultMerger = new DalListMerger<>();
 		return add(sql, new DalRowCallbackExtractor(callback), defaultMerger);

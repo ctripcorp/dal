@@ -10,6 +10,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -18,7 +19,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 public class DalQueryDaoMySqlTest extends DalQueryDaoTest {
 	
 	public DalQueryDaoMySqlTest() {
-		super(DATABASE_NAME_MYSQL);
+		super(DATABASE_NAME_MYSQL, DatabaseCategory.MySql);
 	}
 
 	private final static String DATABASE_NAME_MYSQL = "dao_test_mysql_dbShard";

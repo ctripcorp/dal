@@ -55,8 +55,6 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 			parameters.compile();
 	}
 	
-	
-	
 	public DalSqlTaskRequest(String logicDbName, SqlBuilder builder, DalHints hints, SqlTask<T> task, ResultMerger<T> merger)
 			 throws SQLException {
 		logger = DalClientFactory.getDalLogger();

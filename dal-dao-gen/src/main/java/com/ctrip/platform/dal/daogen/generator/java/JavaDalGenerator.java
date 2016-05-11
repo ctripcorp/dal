@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.generator.processor.java.*;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
+import com.ctrip.platform.dal.daogen.resource.UserInfoResource;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import org.apache.log4j.Logger;
 
@@ -64,7 +65,12 @@ public class JavaDalGenerator implements DalGenerator {
             new JavaCodeGeneratorOfViewProcessor().process(codeGenCtx);
             new JavaCodeGeneratorOfSpProcessor().process(codeGenCtx);
             new JavaCodeGeneratorOfFreeSqlProcessor().process(codeGenCtx);
-            new JavaCodeGeneratorOfOthersProcessor().process(codeGenCtx);
+            boolean isDefaultInstance = UserInfoResource.getInstance().isDefaultInstance();
+            if (isDefaultInstance) {
+                new CommonJavaCodeGeneratorOfOthersProcessor().process(codeGenCtx);
+            } else {
+                new CtripJavaCodeGeneratorOfOthersProcessor().process(codeGenCtx);
+            }
         } catch (Exception e) {
             log.warn("exception occur when generateCode", e);
             throw e;

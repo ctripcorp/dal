@@ -18,8 +18,14 @@ import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
 
+/**
+ * This builder is only for internal use of DalTableDao
+ * @author jhhe
+ *
+ */
 public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 	private static final String ALL_COLUMNS = "*";
+	private static final String COUNT = "COUNT(1)";
 	private static final String SPACE = " ";
 	private static final String ORDER_BY = "ORDER BY ";
 	private static final String ASC = " ASC";
@@ -64,14 +70,27 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 		selectAll();
 	}
 	
-	public BaseTableSelectBuilder select(String columns) {
-		this.columns = columns;
+	public BaseTableSelectBuilder select(String... selectedColumns) {
+		StringBuilder selectFields = new StringBuilder();
+		for(int i=0, count= selectedColumns.length; i < count; i++){
+			selectFields.append(this.wrapField(selectedColumns[i]));
+			if(i<count-1){
+				selectFields.append(", ");
+			}
+		}
+		
+		columns = selectFields.toString();
 		return this;
 	}
 	
 	public BaseTableSelectBuilder selectAll() {
 		this.columns = ALL_COLUMNS;
 		return this;
+	}
+	
+	public BaseTableSelectBuilder selectCount() {
+		this.columns = COUNT;
+		return this.simpleType();
 	}
 	
 	public BaseTableSelectBuilder where(String whereClause) {
@@ -95,7 +114,7 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 		return this;
 	}
 	
-	public SelectBuilder simpleType() {
+	public BaseTableSelectBuilder simpleType() {
 		return mapWith(new DalObjectRowMapper());
 	}
 
@@ -196,17 +215,17 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 		return tableName;
 	}
 
-	public SelectBuilder requireFirst() {
+	public BaseTableSelectBuilder requireFirst() {
 		requireFirst = true;
 		return this;
 	}
 	
-	public SelectBuilder requireSingle() {
+	public BaseTableSelectBuilder requireSingle() {
 		requireSingle = true;
 		return this;
 	}
 	
-	public SelectBuilder nullable() {
+	public BaseTableSelectBuilder nullable() {
 		nullable = true;
 		return this;
 	}
@@ -223,12 +242,12 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 		return nullable;
 	}
 	
-	public SelectBuilder top(int count) {
+	public BaseTableSelectBuilder top(int count) {
 		this.count = count;
 		return this;
 	}	
 
-	public SelectBuilder range(int start, int count) {
+	public BaseTableSelectBuilder range(int start, int count) {
 		this.start = start;
 		this.count = count;
 		return this;
@@ -238,7 +257,7 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 		return dbCategory;
 	}
 
-	public SelectBuilder atPage(int pageNo, int pageSize) throws SQLException {
+	public BaseTableSelectBuilder atPage(int pageNo, int pageSize) throws SQLException {
 		if(pageNo < 1 || pageSize < 1) 
 			throw new SQLException("Illigal pagesize or pageNo, please check");	
 

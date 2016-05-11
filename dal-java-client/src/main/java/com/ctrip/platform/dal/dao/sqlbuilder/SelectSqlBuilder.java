@@ -1,19 +1,14 @@
 package com.ctrip.platform.dal.dao.sqlbuilder;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.ResultMerger;
-import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 
 public class SelectSqlBuilder extends AbstractSqlBuilder implements SelectBuilder {
-	private List<String> selectField =  new ArrayList<String>();
-	
 	private BaseTableSelectBuilder queryBuilder;
 	
 	private boolean isPagination = false;
@@ -57,9 +52,17 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements SelectBuilde
 	 * @return
 	 */
 	public SelectSqlBuilder select(String ...fieldName){
-		for(String field:fieldName){
-			selectField.add(field);
-		}
+		queryBuilder.select(fieldName);
+		return this;
+	}
+	
+	public SelectSqlBuilder selectAll() {
+		queryBuilder.selectAll();
+		return this;
+	}
+	
+	public SelectSqlBuilder selectCount() {
+		queryBuilder.selectCount();
 		return this;
 	}
 	
@@ -87,7 +90,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements SelectBuilde
 	}
 
 	@Override
-	public SelectBuilder range(int start, int count) {
+	public SelectSqlBuilder range(int start, int count) {
 		queryBuilder.range(start, count);
 		return this;
 	}
@@ -125,12 +128,12 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements SelectBuilde
 	}
 
 	@Override
-	public <T> SelectBuilder mapWith(DalRowMapper<T> mapper) {
+	public <T> SelectSqlBuilder mapWith(DalRowMapper<T> mapper) {
 		queryBuilder.mapWith(mapper);
 		return this;
 	}
 	
-	public SelectBuilder simpleType() {
+	public SelectSqlBuilder simpleType() {
 		queryBuilder.simpleType();
 		return this;
 	}
@@ -187,17 +190,6 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements SelectBuilde
 	}
 	
 	private void preBuild() {
-		queryBuilder.where(getWhereExp()).select(buildSelectField());
-	}
-	
-	private String buildSelectField(){
-		StringBuilder selectFields = new StringBuilder();
-		for(int i=0,count=selectField.size();i<count;i++){
-			selectFields.append(this.wrapField(selectField.get(i)));
-			if(i<count-1){
-				selectFields.append(", ");
-			}
-		}
-		return selectFields.toString();
+		queryBuilder.where(getWhereExp());
 	}
 }

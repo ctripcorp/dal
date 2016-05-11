@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.net.ssl.SSLContext;
-
+import org.apache.http.client.config.RequestConfig;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -45,14 +45,17 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	// This is to make sure we can get APPID if user really set so
 	private static final Logger logger = LoggerFactory.getLogger(TitanProvider.class);
 	private static final String EMPTY_ID = "999999";
+	private static final int DEFAULT_TIMEOUT = 15 * 1000;
 	
 	public static final String SERVICE_ADDRESS = "serviceAddress";
 	public static final String APPID = "appid";
+	public static final String TIMEOUT = "timeout";
 	public static final String USE_LOCAL_CONFIG = "useLocalConfig";
 	private static final String PROD_SUFFIX = "_SH";
 	
 	private String svcUrl;
 	private String appid;
+	private int timeout;
 	private boolean useLocal;
 	private ConnectionStringParser parser = new ConnectionStringParser();
 	
@@ -75,6 +78,10 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		
 		useLocal = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
 		logger.info("Use local: " +useLocal);
+		
+		String timeoutStr = settings.get(TIMEOUT);
+		timeout = timeoutStr == null || timeoutStr.isEmpty() ? DEFAULT_TIMEOUT : Integer.parseInt(timeoutStr);
+		logger.info("Titan connection timeout: " + timeout);
 	}
 	
 	public static String getPreConfiguredAppId() {
@@ -237,12 +244,19 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	    PoolingHttpClientConnectionManager connMgr = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
 	    b.setConnectionManager(connMgr);
 
+	    /**
+	     * Set timeout option
+	     */
+	    RequestConfig.Builder configBuilder = RequestConfig.custom();
+        configBuilder.setConnectTimeout(timeout);
+        configBuilder.setSocketTimeout(timeout);
+	    b.setDefaultRequestConfig(configBuilder.build());
+
 	    // finally, build the HttpClient;
 	    //      -- done!
 	    HttpClient sslClient = b.build();
-
+	    
 	    return sslClient;
-
 	}
 	
 	private String decrypt(String dataSource) {

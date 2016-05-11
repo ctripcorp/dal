@@ -25,7 +25,6 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	private List<DalResultSetExtractor<?>> extractors = new ArrayList<>();
 	private MultipleResultMerger mergers = new MultipleResultMerger();
 	
-	
 	/**
 	 * This extractor instance maybe used in more than one thread. Make sure it is thread safe.
 	 * To be thread safe is easy, just not keep any changeable state inside the object.
@@ -153,6 +152,6 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	
 	@Override
 	public StatementParameters buildParameters() {
-		return null;
+		return parameters;
 	}
 }

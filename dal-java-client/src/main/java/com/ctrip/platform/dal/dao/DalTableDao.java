@@ -179,6 +179,18 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		return commonQuery(selectBuilder.mapWith(parser).nullable(), hints);
 	}
 
+	/**
+	 * Query by the given where clause and parameters. The where clause can
+	 * contain value placeholder "?". The parameter should match the index of
+	 * the placeholder.
+	 * 
+	 * @param whereClause the where section for the search statement.
+	 * @param parameters A container that holds all the necessary parameters 
+	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
+	 * @param clazz the return type, not the pojo, but simple type
+	 * @return List of pojos that meet the search criteria
+	 * @throws SQLException
+	 */
 	public <K> List<K> query(SelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
 		DalWatcher.begin();
 		return commonQuery(selectBuilder.mapWith(new DalObjectRowMapper<K>()).nullable(), hints);
@@ -397,6 +409,13 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		return executor.execute(hints, new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchInsertTask));
 	}
 	
+	/**
+	 * Insert with InsertSqlBuilder.
+	 * @param insertBuilder sql builder that represents the insert operation
+	 * @param hints
+	 * @return how many rows been affected for inserting each of the pojo
+	 * @throws SQLException
+	 */
 	public int insert(InsertSqlBuilder insertBuilder, DalHints hints) throws SQLException {
 		return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, insertBuilder, hints, updateSqlTask, new ResultMerger.IntSummary())));
 	}
@@ -491,10 +510,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 
 	/**
-	 * Delete for the given delet sql builder.
+	 * Delete for the given delete sql builder.
 	 * 
-	 * @param whereClause the condition specified for delete operation
-	 * @param parameters A container that holds all the necessary parameters
+	 * @param deleteBuilder the builder represents delete sql
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return how many rows been affected
 	 * @throws SQLException
@@ -521,9 +539,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 	
 	/**
-	 * Update for the given where clause and parameters.
+	 * Update for the given UpdateSqlBuilder and parameters.
 	 * 
-	 * @param sql the statement that used to update the db.
+	 * @param updateBuilder the builder that used to update the db.
 	 * @param parameters A container that holds all the necessary parameters
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return how many rows been affected

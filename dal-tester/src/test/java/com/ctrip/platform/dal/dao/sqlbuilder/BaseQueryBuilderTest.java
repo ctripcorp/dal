@@ -16,13 +16,13 @@ public class BaseQueryBuilderTest {
 
 		qb = new BaseTableSelectBuilder("Test", DatabaseCategory.MySql);
 		qb.select("columns").where("conditions").orderBy("ob", true);
-		assertEquals("SELECT columns FROM `Test` WHERE conditions ORDER BY `ob` ASC", qb.build());
-		assertEquals("SELECT columns FROM `Test_0` WHERE conditions ORDER BY `ob` ASC", qb.build("_0"));
+		assertEquals("SELECT `columns` FROM `Test` WHERE conditions ORDER BY `ob` ASC", qb.build());
+		assertEquals("SELECT `columns` FROM `Test_0` WHERE conditions ORDER BY `ob` ASC", qb.build("_0"));
 
 		qb = new BaseTableSelectBuilder("Test", DatabaseCategory.SqlServer);
 		qb.select("columns").where("conditions").orderBy("ob", true);
-		assertEquals("SELECT columns FROM [Test] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build());
-		assertEquals("SELECT columns FROM [Test_0] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build("_0"));
+		assertEquals("SELECT [columns] FROM [Test] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build());
+		assertEquals("SELECT [columns] FROM [Test_0] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build("_0"));
 	}
 
 	@Test
@@ -31,13 +31,13 @@ public class BaseQueryBuilderTest {
 		
 		qb = new BaseTableSelectBuilder("Test", DatabaseCategory.MySql);
 		qb.select("columns").where("conditions").orderBy("ob", true).requireFirst();
-		assertEquals("SELECT columns FROM `Test` WHERE conditions ORDER BY `ob` ASC LIMIT 1", qb.build());
-		assertEquals("SELECT columns FROM `Test_0` WHERE conditions ORDER BY `ob` ASC LIMIT 1", qb.build("_0"));
+		assertEquals("SELECT `columns` FROM `Test` WHERE conditions ORDER BY `ob` ASC LIMIT 1", qb.build());
+		assertEquals("SELECT `columns` FROM `Test_0` WHERE conditions ORDER BY `ob` ASC LIMIT 1", qb.build("_0"));
 
 		qb = new BaseTableSelectBuilder("Test", DatabaseCategory.SqlServer);
 		qb.select("columns").where("conditions").orderBy("ob", true).requireFirst();
-		assertEquals("SELECT TOP 1 columns FROM [Test] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build());
-		assertEquals("SELECT TOP 1 columns FROM [Test_0] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build("_0"));
+		assertEquals("SELECT TOP 1 [columns] FROM [Test] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build());
+		assertEquals("SELECT TOP 1 [columns] FROM [Test_0] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build("_0"));
 	}
 
 	@Test
@@ -46,13 +46,13 @@ public class BaseQueryBuilderTest {
 		
 		qb = new BaseTableSelectBuilder("Test", DatabaseCategory.MySql);
 		qb.select("columns").where("conditions").orderBy("ob", true).requireSingle();
-		assertEquals("SELECT columns FROM `Test` WHERE conditions ORDER BY `ob` ASC", qb.build());
-		assertEquals("SELECT columns FROM `Test_0` WHERE conditions ORDER BY `ob` ASC", qb.build("_0"));
+		assertEquals("SELECT `columns` FROM `Test` WHERE conditions ORDER BY `ob` ASC", qb.build());
+		assertEquals("SELECT `columns` FROM `Test_0` WHERE conditions ORDER BY `ob` ASC", qb.build("_0"));
 
 		qb = new BaseTableSelectBuilder("Test", DatabaseCategory.SqlServer);
 		qb.select("columns").where("conditions").orderBy("ob", true).requireSingle();
-		assertEquals("SELECT columns FROM [Test] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build());
-		assertEquals("SELECT columns FROM [Test_0] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build("_0"));
+		assertEquals("SELECT [columns] FROM [Test] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build());
+		assertEquals("SELECT [columns] FROM [Test_0] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build("_0"));
 	}
 
 	@Test
@@ -61,13 +61,13 @@ public class BaseQueryBuilderTest {
 		
 		qb = new BaseTableSelectBuilder("Test", DatabaseCategory.MySql);
 		qb.select("columns").where("conditions").orderBy("ob", true).top(5);
-		assertEquals("SELECT columns FROM `Test` WHERE conditions ORDER BY `ob` ASC LIMIT 5", qb.build());
-		assertEquals("SELECT columns FROM `Test_0` WHERE conditions ORDER BY `ob` ASC LIMIT 5", qb.build("_0"));
+		assertEquals("SELECT `columns` FROM `Test` WHERE conditions ORDER BY `ob` ASC LIMIT 5", qb.build());
+		assertEquals("SELECT `columns` FROM `Test_0` WHERE conditions ORDER BY `ob` ASC LIMIT 5", qb.build("_0"));
 
 		qb = new BaseTableSelectBuilder("Test", DatabaseCategory.SqlServer);
 		qb.select("columns").where("conditions").orderBy("ob", true).top(5);
-		assertEquals("SELECT TOP 5 columns FROM [Test] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build());
-		assertEquals("SELECT TOP 5 columns FROM [Test_0] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build("_0"));
+		assertEquals("SELECT TOP 5 [columns] FROM [Test] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build());
+		assertEquals("SELECT TOP 5 [columns] FROM [Test_0] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC", qb.build("_0"));
 	}
 	
 	@Test
@@ -76,12 +76,12 @@ public class BaseQueryBuilderTest {
 		
 		qb = new BaseTableSelectBuilder("Test", DatabaseCategory.MySql);
 		qb.select("columns").where("conditions").orderBy("ob", true).range(100,  200);
-		assertEquals("SELECT columns FROM `Test` WHERE conditions ORDER BY `ob` ASC LIMIT 100, 200", qb.build());
-		assertEquals("SELECT columns FROM `Test_0` WHERE conditions ORDER BY `ob` ASC LIMIT 100, 200", qb.build("_0"));
+		assertEquals("SELECT `columns` FROM `Test` WHERE conditions ORDER BY `ob` ASC LIMIT 100, 200", qb.build());
+		assertEquals("SELECT `columns` FROM `Test_0` WHERE conditions ORDER BY `ob` ASC LIMIT 100, 200", qb.build("_0"));
 
 		qb = new BaseTableSelectBuilder("Test", DatabaseCategory.SqlServer);
 		qb.select("columns").where("conditions").orderBy("ob", true).range(100,  200);
-		assertEquals("SELECT columns FROM [Test] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC OFFSET 100 ROWS FETCH NEXT 200 ROWS ONLY", qb.build());
-		assertEquals("SELECT columns FROM [Test_0] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC OFFSET 100 ROWS FETCH NEXT 200 ROWS ONLY", qb.build("_0"));
+		assertEquals("SELECT [columns] FROM [Test] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC OFFSET 100 ROWS FETCH NEXT 200 ROWS ONLY", qb.build());
+		assertEquals("SELECT [columns] FROM [Test_0] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC OFFSET 100 ROWS FETCH NEXT 200 ROWS ONLY", qb.build("_0"));
 	}
 }

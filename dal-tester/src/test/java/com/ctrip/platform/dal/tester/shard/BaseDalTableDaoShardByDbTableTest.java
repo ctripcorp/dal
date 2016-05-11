@@ -27,6 +27,7 @@ import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
+import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
 
 public abstract class BaseDalTableDaoShardByDbTableTest {
 	public final static String TABLE_NAME = "dal_client_test";
@@ -3067,40 +3068,37 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		}
 		
 		// By tabelShard
-		sql = "UPDATE " + TABLE_NAME
-				+ " SET address = 'CTRIP' WHERE id = 1";
+		UpdateSqlBuilder usb = new UpdateSqlBuilder(TABLE_NAME, dao.getDatabaseCategory());
+		usb.update("address", "CTRIP", Types.VARCHAR);
+		usb.equal("id", "1", Types.INTEGER);
+//		sql = "UPDATE " + TABLE_NAME
+//				+ " SET address = 'CTRIP' WHERE id = 1";
 		hints = copy(oldhints);
-		res = dao.update(sql, parameters, hints.inTableShard(0));
+		res = dao.update(usb, hints.inTableShard(0));
 		res = assertInt(res, hints);
 		assertResEquals(1, res);
 		Assert.assertEquals("CTRIP", queryByPk(hints.inTableShard(0)).getAddress());
 
 		// By tableShardValue
-		sql = "UPDATE " + TABLE_NAME
-				+ " SET address = 'CTRIP' WHERE id = 1";
 		Assert.assertEquals(2, getCount(shardId, 1));
 		hints = copy(oldhints);
-		res = dao.update(sql, parameters, hints.setTableShardValue(1));
+		res = dao.update(usb, hints.setTableShardValue(1));
 		res = assertInt(res, hints);
 		assertResEquals(1, res);
 		Assert.assertEquals("CTRIP", queryByPk(hints.setTableShardValue(1)).getAddress());
 		
 		// By shardColValue
-		sql = "UPDATE " + TABLE_NAME
-				+ " SET address = 'CTRIP' WHERE id = 1";
 		Assert.assertEquals(3, getCount(shardId, 2));
 		hints = copy(oldhints);
-		res = dao.update(sql, parameters, hints.setShardColValue("table", 2));
+		res = dao.update(usb, hints.setShardColValue("table", 2));
 		res = assertInt(res, hints);
 		assertResEquals(1, res);
 		Assert.assertEquals("CTRIP", queryByPk(hints.setShardColValue("table", 2)).getAddress());
 		
 		// By shardColValue
-		sql = "UPDATE " + TABLE_NAME
-				+ " SET address = 'CTRIP' WHERE id = 1";
 		Assert.assertEquals(4, getCount(shardId, 3));
 		hints = copy(oldhints);
-		res = dao.update(sql, parameters, hints.setShardColValue("tableIndex", 3));
+		res = dao.update(usb, hints.setShardColValue("tableIndex", 3));
 		res = assertInt(res, hints);
 		assertResEquals(1, res);
 		Assert.assertEquals("CTRIP", queryByPk(hints.setShardColValue("tableIndex", 3)).getAddress());

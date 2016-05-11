@@ -24,6 +24,7 @@ import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
+import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
 
 public abstract class BaseDalTabelDaoTableShardTest {
 	private boolean ASSERT_ALLOWED = true;
@@ -2438,30 +2439,25 @@ public abstract class BaseDalTabelDaoTableShardTest {
 		}
 		
 		// By tabelShard
-		sql = "UPDATE " + TABLE_NAME
-				+ " SET address = 'CTRIP' WHERE id = 1";
-		res = dao.update(sql, parameters, new DalHints().inTableShard(0));
+		UpdateSqlBuilder usb = new UpdateSqlBuilder(TABLE_NAME, dao.getDatabaseCategory());
+		usb.update("address", "CTRIP", Types.VARCHAR);
+		usb.equal("id", "1", Types.INTEGER);
+		res = dao.update(usb, new DalHints().inTableShard(0));
 		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inTableShard(0)).getAddress());
 
 		// By tableShardValue
-		sql = "UPDATE " + TABLE_NAME
-				+ " SET address = 'CTRIP' WHERE id = 1";
 		assertEquals(2, getCount(1));
-		res = dao.update(sql, parameters, new DalHints().setTableShardValue(1));
+		res = dao.update(usb, new DalHints().setTableShardValue(1));
 		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setTableShardValue(1)).getAddress());
 		
 		// By shardColValue
-		sql = "UPDATE " + TABLE_NAME
-				+ " SET address = 'CTRIP' WHERE id = 1";
 		assertEquals(3, getCount(2));
-		res = dao.update(sql, parameters, new DalHints().setShardColValue("index", 2));
+		res = dao.update(usb, new DalHints().setShardColValue("index", 2));
 		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardColValue("index", 2)).getAddress());
 		
 		// By shardColValue
-		sql = "UPDATE " + TABLE_NAME
-				+ " SET address = 'CTRIP' WHERE id = 1";
 		assertEquals(4, getCount(3));
-		res = dao.update(sql, parameters, new DalHints().setShardColValue("tableIndex", 3));
+		res = dao.update(usb, new DalHints().setShardColValue("tableIndex", 3));
 		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardColValue("tableIndex", 3)).getAddress());
 
 	}
@@ -2488,37 +2484,32 @@ public abstract class BaseDalTabelDaoTableShardTest {
 		}
 		
 		// By tabelShard
-		sql = "UPDATE " + TABLE_NAME
-				+ " SET address = 'CTRIP' WHERE id = 1";
+		UpdateSqlBuilder usb = new UpdateSqlBuilder(TABLE_NAME, dao.getDatabaseCategory());
+		usb.update("address", "CTRIP", Types.VARCHAR);
+		usb.equal("id", "1", Types.INTEGER);
 		hints = asyncHints();
-		res = dao.update(sql, parameters, hints.inTableShard(0));
+		res = dao.update(usb, hints.inTableShard(0));
 		res = assertInt(res, hints);
 		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().inTableShard(0)).getAddress());
 
 		// By tableShardValue
-		sql = "UPDATE " + TABLE_NAME
-				+ " SET address = 'CTRIP' WHERE id = 1";
 		assertEquals(2, getCount(1));
 		hints = intHints();
-		res = dao.update(sql, parameters, hints.setTableShardValue(1));
+		res = dao.update(usb, hints.setTableShardValue(1));
 		res = assertInt(res, hints);
 		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setTableShardValue(1)).getAddress());
 		
 		// By shardColValue
-		sql = "UPDATE " + TABLE_NAME
-				+ " SET address = 'CTRIP' WHERE id = 1";
 		assertEquals(3, getCount(2));
 		hints = asyncHints();
-		res = dao.update(sql, parameters, hints.setShardColValue("index", 2));
+		res = dao.update(usb, hints.setShardColValue("index", 2));
 		res = assertInt(res, hints);
 		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardColValue("index", 2)).getAddress());
 		
 		// By shardColValue
-		sql = "UPDATE " + TABLE_NAME
-				+ " SET address = 'CTRIP' WHERE id = 1";
 		assertEquals(4, getCount(3));
 		hints = intHints();
-		res = dao.update(sql, parameters, hints.setShardColValue("tableIndex", 3));
+		res = dao.update(usb, hints.setShardColValue("tableIndex", 3));
 		res = assertInt(res, hints);
 		assertEquals("CTRIP", dao.queryByPk(1, new DalHints().setShardColValue("tableIndex", 3)).getAddress());
 

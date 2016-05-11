@@ -202,6 +202,7 @@ public class TitanServiceReaderTest {
 		Map<String, String> settings = new HashMap<>();
 		settings.put(TitanProvider.SERVICE_ADDRESS, fws);
 		settings.put(TitanProvider.USE_LOCAL_CONFIG, "false");
+		settings.put(TitanProvider.TIMEOUT, "100");
 		try {
 			provider.initialize(settings);
 			provider.setup(dbNames);

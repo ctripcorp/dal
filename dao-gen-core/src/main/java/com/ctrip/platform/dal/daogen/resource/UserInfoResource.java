@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.UserInfo;
 import com.ctrip.platform.dal.daogen.entity.DefaultUserInfo;
+import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +20,8 @@ public class UserInfoResource {
     private final String USER_INFO_CLASS_NAME = "userinfo_class";
     private UserInfo userInfo = null;
     private Boolean isDefaultUser = null;
+
+    private final String PROCESSOR_CLASS_NAME = "processor_class";
 
     private UserInfoResource() {
         try {
@@ -110,10 +112,21 @@ public class UserInfoResource {
     }
 
     private String getUserInfoClassName() throws IOException {
+        return getClassNameFromConf(USER_INFO_CLASS_NAME);
+    }
+
+    public String getProcessorClassName() throws IOException {
+        return getClassNameFromConf(PROCESSOR_CLASS_NAME);
+    }
+
+    private String getClassNameFromConf(String className) throws IOException {
+        if (className == null || className.isEmpty()) {
+            return null;
+        }
         Properties properties = new Properties();
         InputStream inStream = classLoader.getResourceAsStream(CONF_PROPERTIES);
         properties.load(inStream);
-        return properties.getProperty(USER_INFO_CLASS_NAME);
+        return properties.getProperty(className);
     }
 
     public void logOut(HttpServletRequest request, HttpServletResponse response) {

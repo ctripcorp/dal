@@ -225,10 +225,10 @@ public class JavaTableHost {
 
         imports.add(java.sql.ResultSet.class.getName());
         imports.add(java.sql.SQLException.class.getName());
-        imports.add(java.util.Map.class.getName());
-        imports.add(java.util.LinkedHashMap.class.getName());
+        imports.add(Map.class.getName());
+        imports.add(LinkedHashMap.class.getName());
         imports.add(java.sql.Types.class.getName());
-        imports.add(java.util.List.class.getName());
+        imports.add(List.class.getName());
 
         List<JavaParameterHost> allTypes = new ArrayList<>(fields);
         for (JavaMethodHost method : methods) {
@@ -260,7 +260,7 @@ public class JavaTableHost {
 
     public Set<String> getTestImports() {
         Set<String> imports = new TreeSet<>();
-        imports.add(java.util.List.class.getName());
+        imports.add(List.class.getName());
         imports.addAll(this.getPojoImports());
         return imports;
     }

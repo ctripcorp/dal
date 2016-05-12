@@ -1,11 +1,11 @@
 package com.ctrip.platform.dal.daogen.generator.java;
 
-import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.host.java.*;
+import com.ctrip.platform.dal.daogen.utils.Configuration;
 
 import java.util.Map;
 import java.util.Queue;

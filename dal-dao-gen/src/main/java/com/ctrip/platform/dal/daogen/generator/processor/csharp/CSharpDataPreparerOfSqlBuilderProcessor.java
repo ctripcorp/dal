@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 
-import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
@@ -8,6 +7,7 @@ import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
@@ -41,7 +41,7 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
                     @Override
                     public ExecuteResult call() throws Exception {
                         /*progress.setOtherMessage("正在整理表 "
-								+ _table.getValue().getClass_name());*/
+                                + _table.getValue().getClass_name());*/
                         ExecuteResult result = new ExecuteResult("Build Extral SQL[" + _table.getValue().getAllInOneName() + "." + _table.getKey() + "] Host");
                         progress.setOtherMessage(result.getTaskName());
                         CSharpTableHost extraTableHost;

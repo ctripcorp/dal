@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
-import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.Consts;
+import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import org.apache.log4j.Logger;

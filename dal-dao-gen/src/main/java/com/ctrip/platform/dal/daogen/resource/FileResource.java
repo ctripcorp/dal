@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.domain.W2uiElement;
 import com.ctrip.platform.dal.daogen.entity.Project;
+import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.ZipFolder;

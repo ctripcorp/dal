@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.daogen.generator.csharp;
 
-import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.Progress;
@@ -9,6 +8,7 @@ import com.ctrip.platform.dal.daogen.host.csharp.CSharpFreeSqlHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpFreeSqlPojoHost;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.host.csharp.DatabaseHost;
+import com.ctrip.platform.dal.daogen.utils.Configuration;
 
 import java.util.Collections;
 import java.util.Map;

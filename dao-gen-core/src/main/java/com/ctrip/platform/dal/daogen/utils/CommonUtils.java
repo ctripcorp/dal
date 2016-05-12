@@ -1,9 +1,8 @@
 package com.ctrip.platform.dal.daogen.utils;
 
-import org.apache.log4j.Logger;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.log4j.Logger;
 
 public class CommonUtils {
     private static ObjectMapper objectMap;

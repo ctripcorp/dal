@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.daogen.host.csharp;
 
+import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.DbType;
-import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import org.springframework.jdbc.core.ResultSetExtractor;

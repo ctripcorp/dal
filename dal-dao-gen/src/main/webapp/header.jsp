@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" %>
-<%@page import="com.ctrip.platform.dal.daogen.resource.UserInfoResource" %>
+<%@page import="com.ctrip.platform.dal.daogen.resource.CustomizedResource" %>
 <%@page import="com.ctrip.platform.dal.daogen.Consts" %>
 <nav class="navbar navbar-inverse navbar-embossed navbar-fixed-top" role="navigation">
     <div class="navbar-header">

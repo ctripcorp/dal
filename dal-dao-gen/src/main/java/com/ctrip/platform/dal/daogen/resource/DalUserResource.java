@@ -298,7 +298,7 @@ public class DalUserResource {
     @GET
     @Path("isDefaultUser")
     public boolean isDefaultUser(@Context HttpServletRequest request) {
-        return UserInfoResource.getInstance().isDefaultInstanceByRequest(request);
+        return CustomizedResource.getInstance().isDefaultInstanceByRequest(request);
     }
 
     @GET
@@ -354,6 +354,6 @@ public class DalUserResource {
     @POST
     @Path("logOut")
     public void logOut(@Context HttpServletRequest request, @Context HttpServletResponse response) {
-        UserInfoResource.getInstance().logOut(request, response);
+        CustomizedResource.getInstance().logOut(request, response);
     }
 }

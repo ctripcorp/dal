@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class UserInfoResource {
+public class CustomizedResource {
     private static final Object LOCK = new Object();
     private ClassLoader classLoader = null;
     private final String CONF_PROPERTIES = "conf.properties";
@@ -21,9 +21,9 @@ public class UserInfoResource {
     private UserInfo userInfo = null;
     private Boolean isDefaultUser = null;
 
-    private final String PROCESSOR_CLASS_NAME = "processor_class";
+    private final String CONFIG_CLASS_NAME = "config_class";
 
-    private UserInfoResource() {
+    private CustomizedResource() {
         try {
             classLoader = Thread.currentThread().getContextClassLoader();
             if (classLoader == null) {
@@ -43,13 +43,13 @@ public class UserInfoResource {
         }
     }
 
-    private static UserInfoResource INSTANCE = null;
+    private static CustomizedResource INSTANCE = null;
 
-    public static UserInfoResource getInstance() {
+    public static CustomizedResource getInstance() {
         if (INSTANCE == null) {
             synchronized (LOCK) {
                 if (INSTANCE == null) {
-                    INSTANCE = new UserInfoResource();
+                    INSTANCE = new CustomizedResource();
                 }
             }
         }
@@ -115,8 +115,8 @@ public class UserInfoResource {
         return getClassNameFromConf(USER_INFO_CLASS_NAME);
     }
 
-    public String getProcessorClassName() throws IOException {
-        return getClassNameFromConf(PROCESSOR_CLASS_NAME);
+    public String getConfigClassName() throws IOException {
+        return getClassNameFromConf(CONFIG_CLASS_NAME);
     }
 
     private String getClassNameFromConf(String className) throws IOException {

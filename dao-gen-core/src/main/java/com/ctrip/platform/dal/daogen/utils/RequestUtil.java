@@ -2,7 +2,7 @@ package com.ctrip.platform.dal.daogen.utils;
 
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
-import com.ctrip.platform.dal.daogen.resource.UserInfoResource;
+import com.ctrip.platform.dal.daogen.resource.CustomizedResource;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -28,9 +28,9 @@ public class RequestUtil {
             user = (LoginUser) userInfo;
         } else {
             user = new LoginUser();
-            user.setUserNo(UserInfoResource.getInstance().getEmployee(null));
-            user.setUserName(UserInfoResource.getInstance().getName(null));
-            user.setUserEmail(UserInfoResource.getInstance().getMail(null));
+            user.setUserNo(CustomizedResource.getInstance().getEmployee(null));
+            user.setUserName(CustomizedResource.getInstance().getName(null));
+            user.setUserEmail(CustomizedResource.getInstance().getMail(null));
         }
 
         return user;

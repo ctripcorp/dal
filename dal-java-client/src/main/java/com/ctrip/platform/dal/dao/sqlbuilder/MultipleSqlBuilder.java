@@ -20,24 +20,16 @@ import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.MultipleResultMerger;
 
 public class MultipleSqlBuilder implements SqlBuilder {
-	private StringBuilder sqls = new StringBuilder();
-	private StatementParameters parameters;
-	private List<DalResultSetExtractor<?>> extractors = new ArrayList<>();
+	private List<QueryUnit> queryUnits = new ArrayList<>();
 	private MultipleResultMerger mergers = new MultipleResultMerger();
 	
 	/**
 	 * This extractor instance maybe used in more than one thread. Make sure it is thread safe.
 	 * To be thread safe is easy, just not keep any changeable state inside the object.
 	 */
-	public <T> MultipleSqlBuilder add(String sql, DalResultSetExtractor<T> extractor, ResultMerger<T> merger) {
-		sql = sql.trim();
-		sqls.append(sql);
-		if(!sql.endsWith(";"))
-			sqls.append(';');
-
-		extractors.add(extractor);
+	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, DalResultSetExtractor<T> extractor, ResultMerger<T> merger) {
+		queryUnits.add(new QueryUnit(sql,parameters, extractor));
 		mergers.add(merger);
-		
 		return this;
 	}
 		
@@ -45,13 +37,11 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * This mapper instance maybe used in more than one thread. Make sure it is thread safe.
 	 * To be thread safe is easy, just not keep any changeable state inside the object.
 	 * The default JPA parser is thread safe.
-	 * @param sql
-	 * @param mapper
 	 * @return
 	 */
-	public <T> MultipleSqlBuilder add(String sql, DalRowMapper<T> mapper) {
+	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, DalRowMapper<T> mapper) {
 		DalListMerger<T> defaultMerger = new DalListMerger<>();
-		return add(sql, new DalRowMapperExtractor<T>(mapper), defaultMerger);
+		return add(sql, parameters, new DalRowMapperExtractor<T>(mapper), defaultMerger);
 	}
 	
 	/**
@@ -59,8 +49,8 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * To be thread safe is easy, just not keep any changeable state inside the object.
 	 * The default JPA parser is thread safe.
 	 */
-	public <T> MultipleSqlBuilder add(String sql, DalRowMapper<T> mapper, ResultMerger<List<T>> merger) {
-		return add(sql, new DalRowMapperExtractor<T>(mapper), merger);
+	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, DalRowMapper<T> mapper, ResultMerger<List<T>> merger) {
+		return add(sql, parameters, new DalRowMapperExtractor<T>(mapper), merger);
 	}
 	
 	/**
@@ -68,9 +58,9 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * To be thread safe is easy, just not keep any changeable state inside the object.
 	 * The default JPA parser is thread safe.
 	 */
-	public <T> MultipleSqlBuilder add(String sql, DalRowMapper<T> mapper, Comparator<T> sorter) {
+	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, DalRowMapper<T> mapper, Comparator<T> sorter) {
 		ResultMerger<List<T>> defaultMerger = new DalListMerger<>(sorter);
-		return add(sql, new DalRowMapperExtractor<T>(mapper), defaultMerger);
+		return add(sql, parameters, new DalRowMapperExtractor<T>(mapper), defaultMerger);
 	}
 	
 	/**
@@ -82,8 +72,8 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public <T> MultipleSqlBuilder add(String sql, Class<T> clazz) throws SQLException {
-		return add(sql, clazz, new DalListMerger<T>());
+	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, Class<T> clazz) throws SQLException {
+		return add(sql, parameters, clazz, new DalListMerger<T>());
 	}
 	
 	/**
@@ -95,13 +85,13 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public <T> MultipleSqlBuilder add(String sql, Class<T> clazz, ResultMerger<List<T>> merger) throws SQLException {
+	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, Class<T> clazz, ResultMerger<List<T>> merger) throws SQLException {
 		Table table = clazz.getAnnotation(Table.class);
 		// If it is annotated DAL POJO
 		if (table != null)
-			return add(sql, new DalRowMapperExtractor<T>(new DalDefaultJpaMapper<T>(clazz)), merger);
+			return add(sql, parameters, new DalRowMapperExtractor<T>(new DalDefaultJpaMapper<T>(clazz)), merger);
 		
-		return add(sql, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()), merger);
+		return add(sql, parameters, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()), merger);
 	}
 	
 	/**
@@ -113,8 +103,8 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public <T> MultipleSqlBuilder add(String sql, Class<T> clazz, Comparator<T> sorter) throws SQLException {
-		return add(sql, clazz, new DalListMerger<T>(sorter));
+	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, Class<T> clazz, Comparator<T> sorter) throws SQLException {
+		return add(sql, parameters, clazz, new DalListMerger<T>(sorter));
 	}
 	
 	/**
@@ -123,35 +113,53 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * @param callback
 	 * @return
 	 */
-	public MultipleSqlBuilder add(String sql, DalRowCallback callback) {
+	public MultipleSqlBuilder add(String sql, StatementParameters parameters, DalRowCallback callback) {
 		DalListMerger<Object> defaultMerger = new DalListMerger<>();
-		return add(sql, new DalRowCallbackExtractor(callback), defaultMerger);
+		return add(sql, parameters, new DalRowCallbackExtractor(callback), defaultMerger);
 	}
 	
 	public List<DalResultSetExtractor<?>> getExtractors() {
+		List<DalResultSetExtractor<?>> extractors = new ArrayList<>();
+		for(QueryUnit unit: queryUnits)
+			extractors.add(unit.extractor);
 		return extractors;
 	}
 	
-	public String getSqls() {
-		return sqls.toString();
-	}
-
 	public ResultMerger<List<?>> getMergers() {
 		return mergers;
 	}
 
 	@Override
 	public String build() {
-		return sqls.toString();
+		StringBuilder sb = new StringBuilder();
+		List<DalResultSetExtractor<?>> extractors = new ArrayList<>();
+		for(QueryUnit unit: queryUnits) {
+			sb.append(unit.sql);
+			if(!unit.sql.endsWith(";"))
+				sb.append(';');
+		}
+
+		return sb.toString();
 	}
 
-	public MultipleSqlBuilder with(StatementParameters parameters) {
-		this.parameters = parameters;
-		return this;
-	}
-	
 	@Override
 	public StatementParameters buildParameters() {
+		StatementParameters parameters = new StatementParameters();
+		for(QueryUnit unit: queryUnits) {
+			parameters.addAll(unit.parameters);
+		}
 		return parameters;
+	}
+	
+	private class QueryUnit {
+		String sql;
+		StatementParameters parameters;
+		DalResultSetExtractor<?> extractor;
+		
+		<T> QueryUnit(String sql, StatementParameters parameters, DalResultSetExtractor<T> extractor) {
+			this.sql = sql.trim();
+			this.parameters = parameters;
+			this.extractor = extractor;
+		}
 	}
 }

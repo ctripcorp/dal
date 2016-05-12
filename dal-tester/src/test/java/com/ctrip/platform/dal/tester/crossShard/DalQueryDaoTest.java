@@ -504,14 +504,14 @@ public abstract class DalQueryDaoTest {
 		
 		MultipleSqlBuilder builder = new MultipleSqlBuilder();
 		// TODO add all add method
-		builder.add(sqlList, new ClientTestDalRowMapper());//mapper
-		builder.add(sqlList, new ClientTestDalRowMapper(), new DalListMerger<ClientTestModel>());//merger
-		builder.add(sqlList, ClientTestModel.class, new ClientTestModelComparator());//sorter
-		builder.add(sqlListQuantity, Integer.class, new DalListMerger<Integer>());//merger
-		builder.add(sqlObject, Integer.class, new InteregrComparator());//soter
-		builder.add(sqlNoResult, new TestDalRowCallback3());//callback
+		builder.add(sqlList, new StatementParameters(), new ClientTestDalRowMapper());//mapper
+		builder.add(sqlList, new StatementParameters(), new ClientTestDalRowMapper(), new DalListMerger<ClientTestModel>());//merger
+		builder.add(sqlList, new StatementParameters(), ClientTestModel.class, new ClientTestModelComparator());//sorter
+		builder.add(sqlListQuantity, new StatementParameters(), Integer.class, new DalListMerger<Integer>());//merger
+		builder.add(sqlObject, parameters, Integer.class, new InteregrComparator());//soter
+		builder.add(sqlNoResult, new StatementParameters(), new TestDalRowCallback3());//callback
 
-		return dao.query(builder, parameters, hints.inAllShards());
+		return dao.query(builder, hints.inAllShards());
 	}
 	
 	@Test

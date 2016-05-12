@@ -1,5 +1,6 @@
 package com.dal.sqlserver.test.control;
 
+import java.net.URLDecoder;
 import java.sql.Connection;
 
 import com.ctrip.datasource.configure.DalDataSourceFactory;
@@ -51,6 +52,9 @@ public class ManagementAndTimeout implements Processor {
 	private String decrypt(WebContext context) throws Exception {
 		String rawValue = context.get("value");
 		String str = CommonUtil.desDecrypt(rawValue);
+		if(rawValue.equals(str))
+			str = CommonUtil.desDecrypt(URLDecoder.decode(rawValue));
+
 		return rawValue.equals(str) ?
 				"Decrypt faild for:<br/>" + rawValue:
 					"Original Content is:<br/>" + str;

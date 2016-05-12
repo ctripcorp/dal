@@ -211,4 +211,21 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+         <Datasource name="dao_test_mysql"
+              testWhileIdle="true"
+              testOnBorrow="true"
+              testOnReturn="false"
+              validationQuery="SELECT 1"
+              validationInterval="30000"
+              timeBetweenEvictionRunsMillis="30000"
+              maxActive="100"
+              minIdle="10"
+              maxWait="1000"
+              initialSize="10"
+              removeAbandonedTimeout="60"
+              removeAbandoned="true"
+              logAbandoned="true"
+              minEvictableIdleTimeMillis="30000"
+              defaultTransactionIsolation="SERIALIZABLE"
+              connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true"/>
 </Datasources>

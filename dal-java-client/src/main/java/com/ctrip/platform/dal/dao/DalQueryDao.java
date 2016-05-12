@@ -99,15 +99,14 @@ public final class DalQueryDao {
 	 * Execute query by the given sqls with parameters. The result will be wrapped into type defined by the given extractors.
 	 * 
 	 * @param mqr The multiple query request value object
-	 * @param parameters A container that holds all the necessary parameters
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return List of entities that represent the query result.
 	 * @throws SQLException when things going wrong during the execution
 	 */
-	public List<?> query(MultipleSqlBuilder mqr, StatementParameters parameters, DalHints hints) 
+	public List<?> query(MultipleSqlBuilder mqr, DalHints hints) 
 			throws SQLException {
 		DalSqlTaskRequest<List<?>> request = new DalSqlTaskRequest<>(
-				logicDbName, mqr.getSqls(), parameters, hints, 
+				logicDbName, mqr.build(), mqr.buildParameters(), hints, 
 				new MultipleQueryTask(mqr.getExtractors()), mqr.getMergers());
 		
 		return executor.execute(hints, request, NULLABLE);

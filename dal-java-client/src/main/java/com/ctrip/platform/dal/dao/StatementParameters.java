@@ -17,6 +17,13 @@ public class StatementParameters {
 		return this;
 	}
 	
+	public StatementParameters addAll(StatementParameters extraParameters) {
+		int index = parameters.size() + 1;
+		for(StatementParameter p: extraParameters.values())
+			add(p.setIndex(index++));		
+		return this;
+	}
+	
 	public StatementParameters set(int index, Object value) {
 		return add(new StatementParameter(index, value));
 	}

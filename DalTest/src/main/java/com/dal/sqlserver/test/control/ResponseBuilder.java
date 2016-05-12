@@ -71,7 +71,9 @@ public class ResponseBuilder implements Processor {
 	}
 
 	private void writeResult(Object returnValue, PrintWriter writer) throws Exception {
-		if(returnValue instanceof Number)
+		if(returnValue instanceof String)
+			writer.write((String)returnValue);
+		else if(returnValue instanceof Number)
 			writer.write(returnValue.toString());
 		else if(returnValue instanceof int[]){
 			int[] values = (int[])returnValue;

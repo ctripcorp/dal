@@ -227,5 +227,5 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               defaultTransactionIsolation="SERIALIZABLE"
-              connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+              /><!-- connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true" -->
 </Datasources>

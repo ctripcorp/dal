@@ -16,10 +16,10 @@
               logAbandoned="true"
 #if (${resource.isOptionAppend()})
               minEvictableIdleTimeMillis="30000"
-              option="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false"/>
+              connectionProperties="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false"/>
 #else
               minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true/>
+              connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true/>
 #end
 #end			  
 </Datasources>

@@ -18,6 +18,7 @@
               removeAbandonedTimeout="60"
               removeAbandoned="true"
               logAbandoned="true"
-              minEvictableIdleTimeMillis="30000"/>
+              minEvictableIdleTimeMillis="30000"
+              connectionProperties=""/>
 #end			  
 </Datasources>

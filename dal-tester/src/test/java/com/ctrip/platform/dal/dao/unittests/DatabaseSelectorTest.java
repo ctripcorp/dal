@@ -43,6 +43,16 @@ public class DatabaseSelectorTest {
 		dbs.add(db);
 		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false, false);
 		Assert.assertEquals(M1, selector.select());
+		
+		selector = new DatabaseSelector(null, dbs, null, false, true);
+		Assert.assertEquals(M1, selector.select());
+		
+		//masterOnly
+		selector = new DatabaseSelector(null, dbs, null, true, false);
+		Assert.assertEquals(M1, selector.select());
+
+		selector = new DatabaseSelector(null, dbs, null, true, true);
+		Assert.assertEquals(M1, selector.select());
 	}
 
 	@Test
@@ -52,6 +62,21 @@ public class DatabaseSelectorTest {
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
 		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), e.getErrorCode());
+		}
+		
+		//masterOnly
+		selector = new DatabaseSelector(null, dbs, null, true, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), e.getErrorCode());
+		}
+
+		selector = new DatabaseSelector(null, dbs, null, true, true);
 		try{
 			selector.select();
 		}catch(DalException e){
@@ -68,6 +93,13 @@ public class DatabaseSelectorTest {
 		
 		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false, false);
 		Assert.assertEquals(M2, selector.select());
+		
+		//masterOnly
+		selector = new DatabaseSelector(null, dbs, null, true, false);
+		Assert.assertEquals(M2, selector.select());
+
+		selector = new DatabaseSelector(null, dbs, null, true, true);
+		Assert.assertEquals(M2, selector.select());
 	}
 	
 	@Test
@@ -77,6 +109,21 @@ public class DatabaseSelectorTest {
 		dbs.add(db);
 		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false, true);
 		Assert.assertEquals(S1, selector.select());
+		
+		//masterOnly
+		selector = new DatabaseSelector(null, dbs, null, true, true);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), e.getErrorCode());
+		}
+
+		selector = new DatabaseSelector(null, dbs, null, true, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), e.getErrorCode());
+		}
 	}
 	
 	@Test
@@ -91,6 +138,21 @@ public class DatabaseSelectorTest {
 		}catch(DalException e){
 			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), e.getErrorCode());
 		}
+		
+		//masterOnly
+		selector = new DatabaseSelector(null, null, dbs, true, true);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.NullLogicDbName.getCode(), e.getErrorCode());
+		}
+
+		selector = new DatabaseSelector(null, null, dbs, true, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.NullLogicDbName.getCode(), e.getErrorCode());
+		}
 	}
 	
 	@Test
@@ -102,6 +164,21 @@ public class DatabaseSelectorTest {
 		
 		DatabaseSelector selector = new DatabaseSelector(null, null, dbs, false, true);
 		Assert.assertEquals(S2, selector.select());
+		
+		//masterOnly
+		selector = new DatabaseSelector(null, null, dbs, false, true);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), e.getErrorCode());
+		}
+
+		selector = new DatabaseSelector(null, null, dbs, false, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.NullLogicDbName.getCode(), e.getErrorCode());
+		}
 	}
 	
 	@Test
@@ -116,6 +193,11 @@ public class DatabaseSelectorTest {
 		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false, true);
 		String dbName = selector.select();
 		Assert.assertTrue(dbName.equals(S1) || dbName.equals(S2));
+		
+		//masterOnly
+		selector = new DatabaseSelector(null, ms, ss, true, true);
+		dbName = selector.select();
+		Assert.assertTrue(dbName.equals(M1) || dbName.equals(M2));
 	}
 	
 	@Test
@@ -129,6 +211,11 @@ public class DatabaseSelectorTest {
 		
 		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false, false);
 		String dbName = selector.select();
+		Assert.assertTrue(dbName.equals(M1) || dbName.equals(M2));
+
+		//masterOnly
+		selector = new DatabaseSelector(null, ms, ss, true, false);
+		dbName = selector.select();
 		Assert.assertTrue(dbName.equals(M1) || dbName.equals(M2));
 	}
 	
@@ -145,6 +232,159 @@ public class DatabaseSelectorTest {
 		
 		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false, true);
 		Assert.assertEquals(M1, selector.select());
+
+		//masterOnly
+		selector = new DatabaseSelector(null, ms, ss, true, true);
+		Assert.assertEquals(M1, selector.select());
+		
+		selector = new DatabaseSelector(null, ms, ss, true, false);
+		Assert.assertEquals(M1, selector.select());
+
+		selector = new DatabaseSelector(null, ms, ss, false, false);
+		Assert.assertEquals(M1, selector.select());
+	}
+	
+	@Test
+	public void hasMixedMasterAndSlaveButMasterMarkdownTest() throws DalException{
+		List<DataBase> ms = new ArrayList<DataBase>();
+		ms.add(new DataBase(M1, true, "", M1));
+		List<DataBase> ss = new ArrayList<DataBase>();
+		ss.add(new DataBase(S1, false, "", S1));
+		ss.add(new DataBase(S2, false, "", S2));
+		
+		ConfigBeanFactory.getMarkdownConfigBean().markdown(M1);
+		
+		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false, true);
+		String dbName = selector.select();
+		Assert.assertTrue(dbName.equals(S1) || dbName.equals(S2));
+
+		//masterOnly
+		selector = new DatabaseSelector(null, ms, ss, true, true);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), e.getErrorCode());
+		}
+
+		selector = new DatabaseSelector(null, ms, ss, true, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), e.getErrorCode());
+		}
+
+		selector = new DatabaseSelector(null, ms, ss, false, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), e.getErrorCode());
+		}
+	}
+	
+	@Test
+	public void hasMixedMasterAndSlaveButOneMasterMarkdownTest() throws DalException{
+		List<DataBase> ms = new ArrayList<DataBase>();
+		ms.add(new DataBase(M1, true, "", M1));
+		ms.add(new DataBase(M2, true, "", M2));
+		List<DataBase> ss = new ArrayList<DataBase>();
+		ss.add(new DataBase(S1, false, "", S1));
+		ss.add(new DataBase(S2, false, "", S2));
+		
+		ConfigBeanFactory.getMarkdownConfigBean().markdown(M1);
+		
+		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false, true);
+		String dbName = selector.select();
+		Assert.assertTrue(dbName.equals(S1) || dbName.equals(S2));
+
+		//masterOnly
+		selector = new DatabaseSelector(null, ms, ss, true, true);
+		Assert.assertEquals(M2, selector.select());
+
+		selector = new DatabaseSelector(null, ms, ss, true, false);
+		Assert.assertEquals(M2, selector.select());
+
+		selector = new DatabaseSelector(null, ms, ss, false, false);
+		Assert.assertEquals(M2, selector.select());
+	}
+
+	@Test
+	public void hasHAMixedMasterAndSlaveButOneMasterMarkdownTest() throws DalException{
+		List<DataBase> ms = new ArrayList<DataBase>();
+		ms.add(new DataBase(M1, true, "", M1));
+		ms.add(new DataBase(M2, true, "", M2));
+		List<DataBase> ss = new ArrayList<DataBase>();
+		ss.add(new DataBase(S1, false, "", S1));
+		ss.add(new DataBase(S2, false, "", S2));
+		
+		ConfigBeanFactory.getMarkdownConfigBean().markdown(M1);
+		DalHA ha = new DalHA();
+		ha.addDB(S1);
+		
+		DatabaseSelector selector = new DatabaseSelector(ha, ms, ss, false, true);
+		String dbName = selector.select();
+		Assert.assertTrue(dbName.equals(S2));
+
+		//masterOnly
+		selector = new DatabaseSelector(ha, ms, ss, true, true);
+		Assert.assertEquals(M2, selector.select());
+
+		selector = new DatabaseSelector(ha, ms, ss, true, false);
+		Assert.assertEquals(M2, selector.select());
+
+		selector = new DatabaseSelector(ha, ms, ss, false, false);
+		Assert.assertEquals(M2, selector.select());
+		
+		ConfigBeanFactory.getMarkdownConfigBean().markdown(M2);
+		selector = new DatabaseSelector(ha, ms, ss, false, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), e.getErrorCode());
+		}
+	}
+
+	@Test
+	public void hasHAMixedMasterAndSlaveButOneSlaveMarkdownTest() throws DalException{
+		List<DataBase> ms = new ArrayList<DataBase>();
+		ms.add(new DataBase(M1, true, "", M1));
+		ms.add(new DataBase(M2, true, "", M2));
+		List<DataBase> ss = new ArrayList<DataBase>();
+		ss.add(new DataBase(S1, false, "", S1));
+		ss.add(new DataBase(S2, false, "", S2));
+		
+		ConfigBeanFactory.getMarkdownConfigBean().markdown(S1);
+		DalHA ha = new DalHA();
+		ha.addDB(M1);
+		
+		DatabaseSelector selector = new DatabaseSelector(ha, ms, ss, false, true);
+		String dbName = selector.select();
+		Assert.assertTrue(dbName.equals(S2));
+
+		//masterOnly
+		ha = new DalHA();
+		ha.addDB(M1);
+		selector = new DatabaseSelector(ha, ms, ss, true, true);
+		Assert.assertEquals(M2, selector.select());
+
+		ha = new DalHA();
+		ha.addDB(M1);
+		selector = new DatabaseSelector(ha, ms, ss, true, false);
+		Assert.assertEquals(M2, selector.select());
+
+		ha = new DalHA();
+		ha.addDB(M1);
+		selector = new DatabaseSelector(ha, ms, ss, false, false);
+		Assert.assertEquals(M2, selector.select());
+		
+		ha = new DalHA();
+		ha.addDB(M1);
+		ConfigBeanFactory.getMarkdownConfigBean().markdown(M2);
+		selector = new DatabaseSelector(ha, ms, ss, false, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), e.getErrorCode());
+		}
 	}
 	
 	@Test
@@ -158,6 +398,25 @@ public class DatabaseSelectorTest {
 		
 		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, false, true);
 		Assert.assertEquals(S2, selector.select());
+
+		//masterOnly
+		ha = new DalHA();
+		ha.addDB(S1);
+		selector = new DatabaseSelector(ha, null, ss, true, true);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.NullLogicDbName.getCode(), e.getErrorCode());
+		}
+
+		ha = new DalHA();
+		ha.addDB(S1);
+		selector = new DatabaseSelector(ha, null, ss, true, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.NullLogicDbName.getCode(), e.getErrorCode());
+		}
 	}
 	
 	@Test
@@ -172,6 +431,27 @@ public class DatabaseSelectorTest {
 		
 		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, false, true);
 		Assert.assertNull(selector.select());
+
+		//masterOnly
+		ha = new DalHA();
+		ha.addDB(S1);
+		ha.addDB(S2);
+		selector = new DatabaseSelector(ha, null, ss, true, true);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.NullLogicDbName.getCode(), e.getErrorCode());
+		}
+		
+		ha = new DalHA();
+		ha.addDB(S1);
+		ha.addDB(S2);
+		selector = new DatabaseSelector(ha, null, ss, true, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.NullLogicDbName.getCode(), e.getErrorCode());
+		}
 	}
 	
 	@Test
@@ -185,6 +465,23 @@ public class DatabaseSelectorTest {
 		
 		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, false, true);
 		Assert.assertEquals(S1, selector.select());
+		
+		//masterOnly
+		ha = new DalHA();
+		selector = new DatabaseSelector(ha, null, ss, true, true);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.NullLogicDbName.getCode(), e.getErrorCode());
+		}
+		
+		ha = new DalHA();
+		selector = new DatabaseSelector(ha, null, ss, true, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.NullLogicDbName.getCode(), e.getErrorCode());
+		}
 	}
 	
 	@Test
@@ -200,5 +497,24 @@ public class DatabaseSelectorTest {
 		
 		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, false, true);
 		Assert.assertEquals(S3, selector.select());
+
+		//masterOnly
+		ha = new DalHA();
+		ha.addDB(S1);
+		selector = new DatabaseSelector(ha, null, ss, true, true);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.NullLogicDbName.getCode(), e.getErrorCode());
+		}
+
+		ha = new DalHA();
+		ha.addDB(S1);
+		selector = new DatabaseSelector(ha, null, ss, true, false);
+		try{
+			selector.select();
+		}catch(DalException e){
+			Assert.assertEquals(ErrorCode.NullLogicDbName.getCode(), e.getErrorCode());
+		}
 	}
 }

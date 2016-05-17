@@ -19,7 +19,7 @@
               connectionProperties="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false"/>
 #else
               minEvictableIdleTimeMillis="30000"
-              connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true/>
+              connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true"/>
 #end
 #end			  
 </Datasources>

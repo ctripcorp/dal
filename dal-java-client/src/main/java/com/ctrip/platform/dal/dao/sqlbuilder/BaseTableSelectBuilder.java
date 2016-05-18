@@ -53,7 +53,9 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 
 	private StatementParameters parameters;
 	private DalRowMapper mapper;
-
+	private ResultMerger merger;
+	private DalResultSetExtractor extractor;
+	
 	private boolean requireFirst = false;
 	private boolean requireSingle = false;
 	private boolean nullable = false;
@@ -90,6 +92,8 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 	
 	public BaseTableSelectBuilder selectCount() {
 		this.columns = COUNT;
+		mergerWith(new LongNumberSummary());
+		requireSingle();
 		return this.simpleType();
 	}
 	
@@ -166,9 +170,24 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 		return AbstractSqlBuilder.wrapField(dbCategory, fieldName);
 	}
 	
+	@Override
+	public <T> BaseTableSelectBuilder mergerWith(ResultMerger<T> merger) {
+		this.merger = merger;
+		return this;
+	}
+
+	@Override
+	public <T> BaseTableSelectBuilder extractorWith(DalResultSetExtractor<T> extractor) {
+		this.extractor = extractor;
+		return this;
+	}
+	
 	public <T> ResultMerger<T> getResultMerger(DalHints hints){
 		if(hints.is(DalHintEnum.resultMerger))
 			return (ResultMerger<T>)hints.get(DalHintEnum.resultMerger);
+		
+		if(merger != null)
+			return merger;
 		
 		if(isRequireSingle() || isRequireFirst())
 			return isRequireSingle() ? new DalSingleResultMerger() : new DalFirstResultMerger((Comparator)hints.getSorter());
@@ -177,6 +196,9 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 	}
 
 	public <T> DalResultSetExtractor<T> getResultExtractor(DalHints hints) {
+		if(extractor != null)
+			return extractor;
+		
 		if(isRequireSingle() || isRequireFirst())
 			return new DalSingleResultExtractor<>(mapper, isRequireSingle());
 			
@@ -264,5 +286,18 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 		range((pageNo - 1) * pageSize, pageSize);
 		
 		return this;
+	}
+
+	private static class LongNumberSummary implements ResultMerger<Number>{
+		private long total;
+		@Override
+		public void addPartial(String shard, Number partial) {
+			total += partial.longValue();
+		}
+
+		@Override
+		public Number merge() {
+			return total;
+		}
 	}
 }

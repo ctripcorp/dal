@@ -6,7 +6,7 @@
 	public int count(DalHints hints) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
-		Number result = (Number)this.baseClient.query(COUNT_SQL_PATTERN, parameters, hints, extractor);
+		Number result = (Number)client.count(QUERY_ALL_CRITERIA, parameters, hints);
 		return result.intValue();
 	}
 #end

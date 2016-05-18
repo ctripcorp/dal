@@ -123,6 +123,18 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements SelectBuilde
 	}
 
 	@Override
+	public <T> SelectSqlBuilder mergerWith(ResultMerger<T> merger) {
+		queryBuilder.mergerWith(merger);
+		return this;
+	}
+
+	@Override
+	public <T> SelectSqlBuilder extractorWith(DalResultSetExtractor<T> extractor) {
+		queryBuilder.extractorWith(extractor);
+		return this;
+	}
+
+	@Override
 	public <T> ResultMerger<T> getResultMerger(DalHints hints) {
 		return queryBuilder.getResultMerger(hints);
 	}

@@ -7,6 +7,8 @@ import java.util.Map;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
+import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
+import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
 import com.ctrip.platform.dal.dao.sqlbuilder.BaseTableSelectBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
@@ -235,6 +237,16 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	public <K> K queryObject(SelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
 		DalWatcher.begin();
 		return commonQuery(selectBuilder.mapWith(new DalObjectRowMapper<K>()).requireSingle(), hints);
+	}
+
+	public Number count(String whereClause, StatementParameters parameters, DalHints hints) throws SQLException {
+		return count(new BaseTableSelectBuilder(rawTableName, dbCategory).where(whereClause).with(parameters).selectCount(), hints);
+	}
+	
+	//Assume selectCount() is already invoked
+	public Number count(SelectBuilder selectBuilder, DalHints hints) throws SQLException {
+		DalWatcher.begin();
+		return commonQuery(selectBuilder, hints);
 	}
 
 	/**

@@ -217,6 +217,32 @@ public class TitanServiceReaderTest {
 		}
 	}
 
+	@Test
+	public void testGetFromTitanServiceName() {
+		String name = "SecUGCdb_W";
+		String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query";
+		TitanProvider provider = new TitanProvider();
+		Set<String> dbNames = new HashSet<>();
+		dbNames.add(name);
+		
+		Map<String, String> settings = new HashMap<>();
+		settings.put(TitanProvider.SERVICE_ADDRESS, fws);
+		settings.put(TitanProvider.USE_LOCAL_CONFIG, "false");
+		settings.put(TitanProvider.TIMEOUT, "100");
+		try {
+			provider.initialize(settings);
+			provider.setup(dbNames);
+			
+			DataSourceConfigure result = null;
+			
+			result = provider.getDataSourceConfigure(name);
+			Assert.assertNotNull(result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
 	// This test simulate _SH case in PROD. You have to hijack TitanProvide to make PROD_SUFFIX = _W
 //	@Test
 //	public void testGetFromTitanService_SH() {

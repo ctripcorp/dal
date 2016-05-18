@@ -27,6 +27,8 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 	private StatementParameters parameters;
 	
 	private DalRowMapper mapper;
+	private ResultMerger merger;
+	private DalResultSetExtractor extractor;
 
 	private boolean requireFirst = false;
 	private boolean requireSingle = false;
@@ -126,9 +128,24 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 		return this;
 	}
 
+	@Override
+	public <T> FreeSelectSqlBuilder<K> mergerWith(ResultMerger<T> merger) {
+		this.merger = merger;
+		return this;
+	}
+
+	@Override
+	public <T> FreeSelectSqlBuilder<K> extractorWith(DalResultSetExtractor<T> extractor) {
+		this.extractor = extractor;
+		return this;
+	}
+
 	public <T> ResultMerger<T> getResultMerger(DalHints hints){
 		if(hints.is(DalHintEnum.resultMerger))
 			return (ResultMerger<T>)hints.get(DalHintEnum.resultMerger);
+		
+		if(merger != null)
+			return merger;
 		
 		if(isRequireSingle() || isRequireFirst())
 			return isRequireSingle() ? new DalSingleResultMerger() : new DalFirstResultMerger((Comparator)hints.getSorter());
@@ -137,6 +154,9 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 	}
 
 	public <T> DalResultSetExtractor<T> getResultExtractor(DalHints hints) {
+		if(extractor != null)
+			return extractor;
+
 		if(isRequireSingle() || isRequireFirst())
 			return new DalSingleResultExtractor<>(mapper, isRequireSingle());
 			

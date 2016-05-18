@@ -23,9 +23,13 @@ public interface SelectBuilder extends SqlBuilder {
 
 	boolean isNullable();
 	
+	<T> SelectBuilder mergerWith(ResultMerger<T> merger);
+	
 	<T> ResultMerger<T> getResultMerger(DalHints hints);
 
 	<T> SelectBuilder mapWith(DalRowMapper<T> mapper);
+	
+	<T> SelectBuilder extractorWith(DalResultSetExtractor<T> extractor);
 	
 	<T> DalResultSetExtractor<T> getResultExtractor(DalHints hints);
 }

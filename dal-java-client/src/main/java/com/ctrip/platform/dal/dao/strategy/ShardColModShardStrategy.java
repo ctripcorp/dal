@@ -14,6 +14,7 @@ import com.ctrip.platform.dal.dao.configure.DalConfigure;
 /**
  * This strategy locate both db and table shard by mod shard value.
  * The checking sequency is same for both DB and table shard:
+ * IMPORTANT NOTE: The table name is case sensitive!
  * Shard id
  * Shard value
  * Shard column values

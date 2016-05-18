@@ -7,19 +7,13 @@
 	public List<${host.getPojoClassName()}> queryByPage(int pageSize, int pageNo, DalHints hints)  throws SQLException {
 		if(pageNo < 1 || pageSize < 1) 
 			throw new SQLException("Illigal pagesize or pageNo, pls check");	
-        StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
-#if($host.getDatabaseCategory().name() == "MySql" )
-		String sql = PAGE_MYSQL_PATTERN;
-		parameters.set(1, Types.INTEGER, (pageNo - 1) * pageSize);
-		parameters.set(2, Types.INTEGER, pageSize);
-#else
-		String sql = PAGE_SQL_PATTERN;
-		int fromRownum = (pageNo - 1) * pageSize;
-        int endRownum = pageSize;
-		parameters.set(1, Types.INTEGER, fromRownum);
-		parameters.set(2, Types.INTEGER, endRownum);
-#end
-		return queryDao.query(sql, parameters, hints, parser);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder("${host.getPojoClassName()}", dbCategory);
+		builder.selectAll();
+		builder.atPage(pageNo, pageSize);
+		builder.orderBy("${host.getOverColumns()}", ASC);
+
+		return client.query(builder, hints);
 	}
 #end

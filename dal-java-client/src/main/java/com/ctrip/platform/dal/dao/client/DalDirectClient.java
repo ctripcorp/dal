@@ -95,7 +95,8 @@ public class DalDirectClient implements DalClient {
 			@Override
 			public Integer execute() throws Exception {
 				conn = getConnection(hints, this);
-				
+				// For old generated free update, the parameters is nit compiled before invoke direct client
+				parameters.compile();
 				if(generatedKeyHolder == null)
 					preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
 				else

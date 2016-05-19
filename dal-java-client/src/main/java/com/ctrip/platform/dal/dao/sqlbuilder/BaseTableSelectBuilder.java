@@ -30,6 +30,7 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 	private static final String ORDER_BY = "ORDER BY ";
 	private static final String ASC = " ASC";
 	private static final String DESC = " DESC";
+	private static final String QUERY_ALL_CRITERIA = "TRUE";
 	
 	private static final String MYSQL_QUERY_TPL= "SELECT %s FROM %s WHERE %s";
 	private static final String SQLSVR_QUERY_TPL= "SELECT %s FROM %s WITH (NOLOCK) WHERE %s";
@@ -98,7 +99,8 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 	}
 	
 	public BaseTableSelectBuilder where(String whereClause) {
-		this.whereClause = whereClause;
+		whereClause = whereClause.trim();
+		this.whereClause = whereClause.length() == 0 ? QUERY_ALL_CRITERIA : whereClause;
 		return this;
 	}
 

@@ -123,6 +123,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 					rawConnStrings.put(name, tmpRawConnStrings.get(name + PROD_SUFFIX));
 				dataSourceConfigures = getDataSourceConfigures(rawConnStrings);
 			} catch (Exception e) {
+				logger.error("Failed to retrieve config with \"_SH\"", e);
 				throw new RuntimeException("Failed to retrieve config with \"_SH\"", e);
 			}
 		}

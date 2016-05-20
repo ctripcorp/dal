@@ -8,7 +8,7 @@ import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.ResultMerger;
 
-public class SelectSqlBuilder extends AbstractSqlBuilder implements SelectBuilder {
+public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectBuilder {
 	private BaseTableSelectBuilder queryBuilder;
 	
 	private boolean isPagination = false;
@@ -20,7 +20,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements SelectBuilde
 	 * You are recommended to re-generate code using the code generator. The new code will use the other two constructor instead
 	 * 
 	 * @param tableName 表名
-	 * @param dBCategory 数据库类型
+	 * @param dbCategory 数据库类型
 	 * @param isPagination 是否分页. If it is true, it means the code is running with old generated code
 	 * @throws SQLException
 	 * @Deprecated If you see this, please regenerate dal code with code gen
@@ -28,24 +28,28 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements SelectBuilde
 	public SelectSqlBuilder(String tableName,
 			DatabaseCategory dbCategory, boolean isPagination)
 			throws SQLException {
-		this(tableName, dbCategory);
+		this();
+		from(tableName).setDatabaseCategory(dbCategory);
 		this.isPagination = isPagination;
 	}
 	
-	/**
-	 * Construct build without pagenation
-	 * @param tableName 表名
-	 * @param dBCategory 数据库类型
-	 * @throws SQLException
-	 */
-	public SelectSqlBuilder(String tableName,
-			DatabaseCategory dbCategory)
-			throws SQLException {
-		super(tableName, dbCategory);
-		queryBuilder = new BaseTableSelectBuilder(tableName, dbCategory);
+	public SelectSqlBuilder() {
+		queryBuilder = new BaseTableSelectBuilder();
 		queryBuilder.nullable();
 	}
+
+	public SelectSqlBuilder from(String tableName) throws SQLException {
+		super.from(tableName);
+		queryBuilder.from(tableName);
+		return this;
+	}
 	
+	public SelectSqlBuilder setDatabaseCategory(DatabaseCategory dbCategory) throws SQLException {
+		super.setDatabaseCategory(dbCategory);
+		queryBuilder.setDatabaseCategory(dbCategory);
+		return this;
+	}
+
 	/**
 	 * 添加select字段
 	 * @param fieldName

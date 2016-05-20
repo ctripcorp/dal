@@ -11,8 +11,26 @@ public class DeleteSqlBuilder extends AbstractSqlBuilder {
 	private String whereClause;
 	private StatementParameters parameters;
 	
+	/**
+	 * @deprecated not suggested anymore
+	 * @param tableName
+	 * @param dbCategory
+	 * @throws SQLException
+	 */
 	public DeleteSqlBuilder(String tableName, DatabaseCategory dbCategory) throws SQLException{
-		super(tableName, dbCategory);
+		from(tableName).setDatabaseCategory(dbCategory);
+	}
+	
+	public DeleteSqlBuilder(){}
+	
+	public DeleteSqlBuilder from(String tableName) throws SQLException {
+		super.from(tableName);
+		return this;
+	}
+	
+	public DeleteSqlBuilder setDatabaseCategory(DatabaseCategory dbCategory) throws SQLException {
+		super.setDatabaseCategory(dbCategory);
+		return this;
 	}
 	
 	public String build(){

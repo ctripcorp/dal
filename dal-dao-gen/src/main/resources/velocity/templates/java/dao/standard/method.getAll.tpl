@@ -1,11 +1,11 @@
 #if($host.generateAPI(6,18))
-
+	
 	/**
-	 * Get all records in the whole table
-	**/
-	public List<${host.getPojoClassName()}> getAll(DalHints hints) throws SQLException {
-		StatementParameters parameters = new StatementParameters();
+	 * Get all records from table
+	 */
+	public List<${host.getPojoClassName()}> queryAll(DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		return client.query(QUERY_ALL_CRITERIA, parameters, hints);
+		SelectSqlBuilder builder = new SelectSqlBuilder().selectAll();
+		return client.query(builder, hints);
 	}
 #end

@@ -11,8 +11,26 @@ public class UpdateSqlBuilder extends AbstractSqlBuilder {
 
 	private List<String> updateFieldNames =  new ArrayList<String>();
 	
+	/**
+	 * @deprecated
+	 * @param tableName
+	 * @param dbCategory
+	 * @throws SQLException
+	 */
 	public UpdateSqlBuilder(String tableName, DatabaseCategory dbCategory) throws SQLException {
-		super(tableName, dbCategory);
+		from(tableName).setDatabaseCategory(dbCategory);
+	}
+	
+	public UpdateSqlBuilder(){}
+	
+	public UpdateSqlBuilder from(String tableName) throws SQLException {
+		super.from(tableName);
+		return this;
+	}
+	
+	public UpdateSqlBuilder setDatabaseCategory(DatabaseCategory dBCategory) throws SQLException {
+		super.setDatabaseCategory(dBCategory);
+		return this;
 	}
 	
 	public UpdateSqlBuilder update(String fieldName, Object paramValue, int sqlType){

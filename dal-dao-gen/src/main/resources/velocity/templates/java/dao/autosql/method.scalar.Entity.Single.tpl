@@ -10,7 +10,7 @@
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")
 
-		SelectSqlBuilder builder = new SelectSqlBuilder("${method.getTableName()}", dbCategory);
+		SelectSqlBuilder builder = new SelectSqlBuilder();
 		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
 

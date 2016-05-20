@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.sqlbuilder;
 
 import java.sql.SQLException;
 import java.util.Comparator;
+import java.util.Objects;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -23,7 +24,7 @@ import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
  * @author jhhe
  *
  */
-public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
+public class BaseTableSelectBuilder implements TableSelectBuilder {
 	private static final String ALL_COLUMNS = "*";
 	private static final String COUNT = "COUNT(1)";
 	private static final String SPACE = " ";
@@ -64,15 +65,29 @@ public class BaseTableSelectBuilder implements SelectBuilder, TableSqlBuilder {
 	private int count;
 	private int start;
 
+	public BaseTableSelectBuilder() {
+		selectAll();
+	}
+	
 	public BaseTableSelectBuilder(String tableName, DatabaseCategory dbCategory) throws SQLException {
+		this();
+		from(tableName).setDatabaseCategory(dbCategory);
+	}
+	
+	public BaseTableSelectBuilder from(String tableName) throws SQLException {
 		if(tableName ==null || tableName.isEmpty())
 			throw new SQLException("table name is illegal.");
 		
 		this.tableName = tableName;
-		this.dbCategory = dbCategory;
-		selectAll();
+		return this;
 	}
 	
+	public BaseTableSelectBuilder setDatabaseCategory(DatabaseCategory dbCategory) throws SQLException {
+		Objects.requireNonNull(dbCategory, "DatabaseCategory can't be null.");
+		this.dbCategory = dbCategory;
+		return this;
+	}
+
 	public BaseTableSelectBuilder select(String... selectedColumns) {
 		StringBuilder selectFields = new StringBuilder();
 		for(int i=0, count= selectedColumns.length; i < count; i++){

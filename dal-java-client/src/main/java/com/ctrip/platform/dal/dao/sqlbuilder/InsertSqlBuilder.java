@@ -12,13 +12,18 @@ public class InsertSqlBuilder implements TableSqlBuilder {
 	protected static final String COLUMN_SEPARATOR = ", ";
 	protected static final String PLACE_HOLDER = "?";
 	
-	private DatabaseCategory dBCategory;
+	private DatabaseCategory dbCategory;
 	private String tableName;
 	private List<FieldEntry> fieldEntrys =  new ArrayList<FieldEntry>();
 	
-	public InsertSqlBuilder(String tableName, DatabaseCategory dBCategory) throws SQLException{
-		this.dBCategory = dBCategory;
+	public InsertSqlBuilder from(String tableName) throws SQLException {
 		this.tableName = tableName;
+		return this;
+	}
+	
+	public InsertSqlBuilder setDatabaseCategory(DatabaseCategory dbCategory) throws SQLException {
+		this.dbCategory = dbCategory;
+		return this;
 	}
 	
 	@Override
@@ -53,7 +58,7 @@ public class InsertSqlBuilder implements TableSqlBuilder {
 
 		int i = 0;
 		for(FieldEntry entry: fieldEntrys) {
-			fieldsSb.append(AbstractSqlBuilder.wrapField(dBCategory, entry.getFieldName()));
+			fieldsSb.append(AbstractSqlBuilder.wrapField(dbCategory, entry.getFieldName()));
 			valueSb.append(PLACE_HOLDER);
 			if (++i < fieldEntrys.size()) {
 				fieldsSb.append(COLUMN_SEPARATOR);
@@ -61,7 +66,7 @@ public class InsertSqlBuilder implements TableSqlBuilder {
 			}
 		}
 		
-		return String.format(TMPL_SQL_INSERT, AbstractSqlBuilder.wrapField(dBCategory, effectiveTableName), fieldsSb.toString(),
+		return String.format(TMPL_SQL_INSERT, AbstractSqlBuilder.wrapField(dbCategory, effectiveTableName), fieldsSb.toString(),
 				valueSb.toString());
 	}
 		

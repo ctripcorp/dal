@@ -5,13 +5,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 	
-	protected DatabaseCategory dBCategory = DatabaseCategory.MySql;
+	protected DatabaseCategory dbCategory = DatabaseCategory.MySql;
 	
 	protected StatementParameters parameters = new StatementParameters();
 	
@@ -25,16 +26,18 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 	
 	private String tableName;
 
-	public AbstractSqlBuilder(String tableName, DatabaseCategory dBCategory) throws SQLException{
+	public AbstractSqlBuilder from(String tableName) throws SQLException {
 		if(tableName ==null || tableName.isEmpty())
 			throw new SQLException("table name is illegal.");
 		
 		this.tableName = tableName;
-		
-		if(dBCategory==null){
-			throw new SQLException("DatabaseCategory can't be null.");
-		}
-		this.dBCategory = dBCategory;
+		return this;
+	}
+	
+	public AbstractSqlBuilder setDatabaseCategory(DatabaseCategory dbCategory) throws SQLException {
+		Objects.requireNonNull(dbCategory, "DatabaseCategory can't be null.");
+		this.dbCategory = dbCategory;
+		return this;
 	}
 	
 	public String getTableName() {
@@ -81,7 +84,7 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 	 * @return
 	 */
 	public String wrapField(String fieldName){
-		return wrapField(dBCategory, fieldName);
+		return wrapField(dbCategory, fieldName);
 	}
 	
 	/**

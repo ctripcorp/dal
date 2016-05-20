@@ -12,7 +12,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 public class InsertSqlBuilderTest {
 	@Test
 	public void testBuildMySql() throws SQLException {
-		InsertSqlBuilder isb = new InsertSqlBuilder("table", DatabaseCategory.MySql);
+		InsertSqlBuilder isb = new InsertSqlBuilder().from("table").setDatabaseCategory(DatabaseCategory.MySql);
 		
 		isb.set("f1", 1, Types.INTEGER);
 		isb.setSensitive("f2", "abc", Types.VARBINARY);
@@ -26,7 +26,7 @@ public class InsertSqlBuilderTest {
 
 	@Test
 	public void testBuildSqlsvr() throws SQLException {
-		InsertSqlBuilder isb = new InsertSqlBuilder("table", DatabaseCategory.SqlServer);
+		InsertSqlBuilder isb = new InsertSqlBuilder().from("table").setDatabaseCategory(DatabaseCategory.SqlServer);
 		
 		isb.set("f1", 1, Types.INTEGER);
 		isb.setSensitive("f2", "abc", Types.VARBINARY);

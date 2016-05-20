@@ -1,6 +1,14 @@
 package com.ctrip.platform.dal.dao.sqlbuilder;
 
+import java.sql.SQLException;
+
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+
 public interface TableSqlBuilder extends SqlBuilder {
+	TableSqlBuilder from(String tableName) throws SQLException;
+	
+	TableSqlBuilder setDatabaseCategory(DatabaseCategory dbCategory) throws SQLException;
+	
 	/**
 	 * @return raw table name without shard id if any
 	 */

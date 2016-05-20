@@ -3,11 +3,11 @@
 	/**
 	 * ${method.getComments()}
 	**/
-	public int ${method.getName()} (${method.getParameterDeclaration()}) throws SQLException {
+	public int ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 		#parse("templates/java/Hints.java.tpl")
 
-		InsertSqlBuilder builder = new InsertSqlBuilder("${method.getTableName()}", dbCategory);
+		InsertSqlBuilder builder = new InsertSqlBuilder();
 #foreach($p in $method.getParameters())
 #set($sensitiveflag = "")	
 #if(${p.isSensitive()})

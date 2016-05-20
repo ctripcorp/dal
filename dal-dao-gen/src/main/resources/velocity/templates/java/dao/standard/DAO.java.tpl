@@ -7,12 +7,7 @@ import ${field};
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 
 public class ${host.getPojoClassName()}Dao {
-	private static final String QUERY_ALL_CRITERIA = "TRUE";
-	private static final boolean ASC = true;
-
 	private DalTableDao<${host.getPojoClassName()}> client;
-	private DalParser<${host.getPojoClassName()}> parser;	
-	private static DatabaseCategory dbCategory;
 	
 #parse("templates/java/dao/standard/method.constructor.tpl")
 #parse("templates/java/dao/standard/method.queryByPk.tpl")

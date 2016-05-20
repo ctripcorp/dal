@@ -7,6 +7,7 @@ import ${field};
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 
 public class ${host.getPojoClassName()}Dao {
+	private static final boolean ASC = true;
 	private DalTableDao<${host.getPojoClassName()}> client;
 	
 #parse("templates/java/dao/standard/method.constructor.tpl")

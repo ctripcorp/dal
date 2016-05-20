@@ -31,7 +31,7 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	private static final String ORDER_BY = "ORDER BY ";
 	private static final String ASC = " ASC";
 	private static final String DESC = " DESC";
-	private static final String QUERY_ALL_CRITERIA = "TRUE";
+	private static final String QUERY_ALL_CRITERIA = "1=1";
 	
 	private static final String MYSQL_QUERY_TPL= "SELECT %s FROM %s WHERE %s";
 	private static final String SQLSVR_QUERY_TPL= "SELECT %s FROM %s WITH (NOLOCK) WHERE %s";

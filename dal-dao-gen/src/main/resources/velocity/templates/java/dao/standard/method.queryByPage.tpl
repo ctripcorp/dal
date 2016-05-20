@@ -7,7 +7,6 @@
 	public List<${host.getPojoClassName()}> queryAllByPage(int pageNo, int pageSize, DalHints hints)  throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		final boolean ASC = true;
 		SelectSqlBuilder builder = new SelectSqlBuilder();
 		builder.selectAll().atPage(pageNo, pageSize).orderBy("${host.getOverColumns()}", ASC);
 

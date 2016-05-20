@@ -281,6 +281,7 @@ public class JavaTableHost {
      */
     public String getOverColumns() {
         List<String> tokens = new ArrayList<>();
+        tokens.add("Name");
         for (JavaParameterHost p : this.fields) {
             if (p.isPrimary())
                 tokens.add(p.getName());

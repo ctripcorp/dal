@@ -93,7 +93,7 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 	 * @return
 	 */
 	public static String wrapField(DatabaseCategory dbCategory, String fieldName){
-		if("*".equalsIgnoreCase(fieldName) || fieldName.contains("ROW_NUMBER")){
+		if("*".equalsIgnoreCase(fieldName) || fieldName.contains("ROW_NUMBER") || fieldName.contains(",")){
 			return fieldName;
 		}else if(dbCategory == DatabaseCategory.MySql){
 			return "`" + fieldName + "`";

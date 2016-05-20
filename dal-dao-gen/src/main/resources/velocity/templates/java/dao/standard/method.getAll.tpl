@@ -5,7 +5,9 @@
 	 */
 	public List<${host.getPojoClassName()}> queryAll(DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		SelectSqlBuilder builder = new SelectSqlBuilder().selectAll();
+		
+		SelectSqlBuilder builder = new SelectSqlBuilder().selectAll().orderBy("${host.getOverColumns()}", ASC);
+		
 		return client.query(builder, hints);
 	}
 #end

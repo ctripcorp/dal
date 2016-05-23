@@ -14,7 +14,7 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
     private String databaseType;
     private String sharding;
     private String connectionString;
-    private String allInOneConnectionString;
+    //private String allInOneConnectionString;
     private String providerName;
 
     private int databaseSet_Id;
@@ -96,9 +96,11 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
         return ConnectionStringUtil.GetConnectionString(getProviderName().toLowerCase(), getDbAddress(), getDbPort(), getUserName(), getPassword(), getDbCatalog());
     }
 
+    /*
     public void setAllInOneConnectionString(String allInOneConnectionString) {
         this.allInOneConnectionString = allInOneConnectionString;
     }
+    */
 
     public String getProviderName() {
         return providerName;

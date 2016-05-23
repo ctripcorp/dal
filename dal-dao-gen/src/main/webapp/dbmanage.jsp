@@ -155,7 +155,7 @@
                 <label id="error_msg2" class="control-label popup_label"
                        style="color: red;"></label>
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button id="update_db" type="button" class="btn btn-primary">保存</button>
+                <button id="update_db" type="button" class="btn btn-primary">更新</button>
             </div>
         </div>
     </div>
@@ -176,7 +176,7 @@
             <div class="modal-body">
                 <div class="row-fluid">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 130px;">转入DAL
+                        <label class="control-label popup_label" style="width: 130px;">转入 DAL
                             Team:</label> <select id="transferGroup" class="span8"></select>
                     </div>
                 </div>

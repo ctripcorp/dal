@@ -123,7 +123,7 @@
                 <label id="password_error_msg" class="control-label popup_label"
                        style="color: red;"></label>
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button id="change_password" type="button" class="btn btn-primary">添加</button>
+                <button id="change_password" type="button" class="btn btn-primary">更改</button>
             </div>
         </div>
     </div>

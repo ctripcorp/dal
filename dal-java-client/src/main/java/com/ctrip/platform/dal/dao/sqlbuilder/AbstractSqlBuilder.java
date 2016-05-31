@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public abstract class AbstractSqlBuilder implements TableSqlBuilder {
@@ -66,16 +67,10 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 		parameters = new StatementParameters();
 		index = 1;
 		for(FieldEntry entry : selectOrUpdataFieldEntrys) {
-			if (entry.isSensitive())
-				parameters.setSensitive(index++, entry.getFieldName(), entry.getSqlType(), entry.getParamValue());
-			else
-				parameters.set(index++, entry.getFieldName(), entry.getSqlType(), entry.getParamValue());
+			parameters.add(new StatementParameter(index++, entry.getSqlType(), entry.getParamValue()).setSensitive(entry.isSensitive()).setName(entry.getFieldName()).setInParam(entry.isInParam()));
 		}
 		for(FieldEntry entry : whereFieldEntrys){
-			if (entry.isSensitive())
-				parameters.setSensitive(index++, entry.getFieldName(), entry.getSqlType(), entry.getParamValue());
-			else
-				parameters.set(index++, entry.getFieldName(), entry.getSqlType(), entry.getParamValue());
+			parameters.add(new StatementParameter(index++, entry.getSqlType(), entry.getParamValue()).setSensitive(entry.isSensitive()).setName(entry.getFieldName()).setInParam(entry.isInParam()));
 		}
 		return this.parameters;
 	}
@@ -683,7 +678,7 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 				create(field, paramValues, sqlType, sensitive, whereFieldEntrys);
 			else{
 				setClause(field + IN_CLAUSE);
-				whereFieldEntrys.add(new FieldEntry(field, paramValues, sqlType, sensitive));
+				whereFieldEntrys.add(new FieldEntry(field, paramValues, sqlType, sensitive).setInParam(true));
 			}
 		}
 		

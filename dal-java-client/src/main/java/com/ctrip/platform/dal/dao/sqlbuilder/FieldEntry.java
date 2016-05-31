@@ -1,14 +1,16 @@
 package com.ctrip.platform.dal.dao.sqlbuilder;
 
+import java.util.List;
+
 class FieldEntry {
 
 	private String fieldName;
 	private Object paramValue;
 	private int sqlType;
 	private boolean sensitive = false;
+	private boolean inParam = false;
 
 	public FieldEntry(String fieldName, Object paramValue, int sqlType) {
-		super();
 		this.fieldName = fieldName;
 		this.paramValue = paramValue;
 		this.sqlType = sqlType;
@@ -16,10 +18,7 @@ class FieldEntry {
 	
 	public FieldEntry(String fieldName, Object paramValue, int sqlType,
 			boolean sensitive) {
-		super();
-		this.fieldName = fieldName;
-		this.paramValue = paramValue;
-		this.sqlType = sqlType;
+		this(fieldName, paramValue, sqlType);
 		this.sensitive = sensitive;
 	}
 
@@ -55,4 +54,12 @@ class FieldEntry {
 		this.sensitive = sensitive;
 	}
 
+	public boolean isInParam() {
+		return inParam;
+	}
+
+	public FieldEntry setInParam(boolean inParam) {
+		this.inParam = inParam;
+		return this;
+	}
 }

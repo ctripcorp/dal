@@ -24,9 +24,7 @@ public class ${host.getClassName()}Dao {
 		this.${method.getVariableName()}RowMapper = new DalDefaultJpaMapper<>(${method.getPojoClassName()}.class);
 #end
 #end	
-#if($host.hasQuery())
 		this.queryDao = new DalQueryDao(DATA_BASE);
-#end
 	}
 #parse("templates/java/dao/freesql/method.scalar.Simple.List.tpl")
 #parse("templates/java/dao/freesql/method.scalar.Simple.Single.tpl")

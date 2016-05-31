@@ -281,7 +281,7 @@ public class DalUserResource {
 
     @GET
     @Path("isSuperUser")
-    @Produces(MediaType.APPLICATION_JSON)
+    //@Produces(MediaType.APPLICATION_JSON)
     public boolean isSuperUser(@Context HttpServletRequest request) {
         Boolean result = RequestUtil.isSuperUser(request);
         if (result != null) {

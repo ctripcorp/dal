@@ -136,7 +136,7 @@
                 <label id="error_msg2" class="control-label popup_label"
                        style="color: red;"></label>
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button id="update_group" type="button" class="btn btn-primary">保存</button>
+                <button id="update_group" type="button" class="btn btn-primary">更新</button>
             </div>
         </div>
     </div>

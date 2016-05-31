@@ -87,7 +87,7 @@
             <div class="modal-body">
                 <div class="row-fluid">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 130px;">connectionString</label>
+                        <label class="control-label popup_label" style="width: 130px;">connectionString:</label>
                         <select id="databases2" class="span8"></select>
                     </div>
                 </div>
@@ -100,7 +100,7 @@
                 </div>
                 <div class="row-fluid">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 130px;">databaseType</label>
+                        <label class="control-label popup_label" style="width: 130px;">databaseType:</label>
                         <select id="databaseType2" class="span8">
                             <option value="Master">Master</option>
                             <option value="Slave">Slave</option>

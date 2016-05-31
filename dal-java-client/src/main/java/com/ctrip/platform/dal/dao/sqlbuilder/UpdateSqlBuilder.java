@@ -19,6 +19,7 @@ public class UpdateSqlBuilder extends AbstractSqlBuilder {
 	 */
 	public UpdateSqlBuilder(String tableName, DatabaseCategory dbCategory) throws SQLException {
 		from(tableName).setDatabaseCategory(dbCategory);
+		setCompatible(true);
 	}
 	
 	public UpdateSqlBuilder(){}

@@ -19,6 +19,7 @@ public class DeleteSqlBuilder extends AbstractSqlBuilder {
 	 */
 	public DeleteSqlBuilder(String tableName, DatabaseCategory dbCategory) throws SQLException{
 		from(tableName).setDatabaseCategory(dbCategory);
+		setCompatible(true);
 	}
 	
 	public DeleteSqlBuilder(){}

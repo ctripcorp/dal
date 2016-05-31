@@ -25,6 +25,16 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 	private List<FieldEntry> whereFieldEntrys = new ArrayList<FieldEntry>();
 	
 	private String tableName;
+	
+	private boolean compatible = false;
+
+	public boolean isCompatible() {
+		return compatible;
+	}
+
+	public void setCompatible(boolean compatible) {
+		this.compatible = compatible;
+	}
 
 	public AbstractSqlBuilder from(String tableName) throws SQLException {
 		if(tableName ==null || tableName.isEmpty())
@@ -574,7 +584,7 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 	}
 	
 	private AbstractSqlBuilder addInParam(String field, List<?> paramValues, int sqlType, boolean sensitive){
-		return add(new InClauseEntry(field, paramValues, sqlType, sensitive, whereFieldEntrys));
+		return add(new InClauseEntry(field, paramValues, sqlType, sensitive, whereFieldEntrys, compatible));
 	}
 	
 	private AbstractSqlBuilder addParam(String field, String condition, Object paramValue, int sqlType, boolean sensitive) throws SQLException{
@@ -665,9 +675,19 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 	}
 
 	private static class InClauseEntry extends WhereClauseEntry {
+		private static final String IN_CLAUSE = " in ( ? )";
 		private List<FieldEntry> entries;
 		
-		public InClauseEntry(String field, List<?> paramValues, int sqlType, boolean sensitive, List<FieldEntry> whereFieldEntrys){
+		public InClauseEntry(String field, List<?> paramValues, int sqlType, boolean sensitive, List<FieldEntry> whereFieldEntrys, boolean compatible){
+			if(compatible)
+				create(field, paramValues, sqlType, sensitive, whereFieldEntrys);
+			else{
+				setClause(field + IN_CLAUSE);
+				whereFieldEntrys.add(new FieldEntry(field, paramValues, sqlType, sensitive));
+			}
+		}
+		
+		private void create(String field, List<?> paramValues, int sqlType, boolean sensitive, List<FieldEntry> whereFieldEntrys){
 			StringBuilder temp = new StringBuilder();
 			temp.append(field).append(" in ( ");
 			

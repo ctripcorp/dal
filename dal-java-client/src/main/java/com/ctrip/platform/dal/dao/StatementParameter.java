@@ -1,5 +1,8 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ctrip.platform.dal.common.enums.DbType;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 
@@ -38,11 +41,15 @@ public class StatementParameter implements Comparable<StatementParameter> {
 		this.index = template.index;
 		this.sensitive = template.sensitive;
 		
-		this.value = template.value;
-		this.inParam = template.inParam;
-		
 		this.resultsParameter = template.resultsParameter;
 		this.resultSetExtractor = template.resultSetExtractor;
+		
+		handleValue(template);
+	}
+	
+	private void handleValue(StatementParameter template) {
+		this.inParam = template.inParam;
+		value = inParam ? new ArrayList<>((List)template.value) : template.value;
 	}
 	
 	public StatementParameter(int index, int sqlType, Object value) {

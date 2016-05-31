@@ -97,7 +97,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		if(parametersByShard == null) {
 			// Create by given shards
 			for(String shard: shards) {
-				tasks.put(shard, create(parameters, hints.clone().inShard(shard)));
+				tasks.put(shard, create(parameters.duplicate(), hints.clone().inShard(shard)));
 			}
 		}else{
 			// Create by sharded values

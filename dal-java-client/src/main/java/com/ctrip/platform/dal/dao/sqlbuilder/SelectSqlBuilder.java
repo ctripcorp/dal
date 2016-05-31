@@ -31,6 +31,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 		this();
 		from(tableName).setDatabaseCategory(dbCategory);
 		this.isPagination = isPagination;
+		setCompatible(true);
 	}
 	
 	public SelectSqlBuilder() {

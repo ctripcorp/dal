@@ -124,8 +124,8 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 #if($host.generateAPI(6,18))
 	
 	@Test
-	public void testGetAll() throws Exception {
-		List<${host.getPojoClassName()}> list = dao.getAll(new DalHints());
+	public void testQueryAll() throws Exception {
+		List<${host.getPojoClassName()}> list = dao.queryAll(new DalHints());
 		assertEquals(10, list.size());
 	}
 #end
@@ -206,11 +206,11 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 #if($host.generateAPI(5,17))
 	
 	@Test
-	public void testQueryByPage() throws Exception {
+	public void testQueryAllByPage() throws Exception {
 		DalHints hints = new DalHints();
 		int pageSize = 100;
 		int pageNo = 1;
-		List<${host.getPojoClassName()}> list = dao.queryByPage(pageSize, pageNo, hints);
+		List<${host.getPojoClassName()}> list = dao.queryAllByPage(pageNo, pageSize, hints);
 		assertEquals(10, list.size());
 	}
 #end

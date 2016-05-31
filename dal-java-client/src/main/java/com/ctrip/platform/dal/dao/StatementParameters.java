@@ -145,6 +145,16 @@ public class StatementParameters {
 		return tempParameters;
 	}
 	
+	public StatementParameters duplicate() {
+		StatementParameters tempParameters = new StatementParameters();
+		
+		for(StatementParameter parameter: parameters){
+			tempParameters.add(new StatementParameter(parameter));
+		}
+		
+		return tempParameters;
+	}
+	
 	public List<List<?>> getAllInParameters() {
 		List<List<?>> inParams = new ArrayList<>();
 		for(StatementParameter parameter: parameters)

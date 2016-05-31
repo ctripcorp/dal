@@ -48,6 +48,7 @@ public class DatabasePoolConfigParser {
 	private static final String LOGABANDONED = "logAbandoned";
 	private static final String MINEVICTABLEIDLETIMEMILLIS = "minEvictableIdleTimeMillis";
 	private static final String CONNECTIONPROPERTIES = "connectionProperties";
+	private static final String INIT_SQL = "initSql";
 	private static final String OPTION = "option";
 	
 	public static final boolean DEFAULT_TESTWHILEIDLE = true;
@@ -208,6 +209,9 @@ public class DatabasePoolConfigParser {
 		if (hasAttribute(resource, CONNECTIONPROPERTIES)) {
 			prop.setConnectionProperties(getAttribute(resource, CONNECTIONPROPERTIES));
 		}
+		if (hasAttribute(resource, INIT_SQL)) {
+			prop.setInitSQL(getAttribute(resource, INIT_SQL));
+		}		
 		if (hasAttribute(resource, OPTION)) {
 			poolConfig.setOption(getAttribute(resource, OPTION));
 		}

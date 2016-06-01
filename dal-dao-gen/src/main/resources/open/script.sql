@@ -128,7 +128,7 @@ CREATE TABLE `task_auto` (
 	,`db_name` VARCHAR(45) NULL DEFAULT NULL
 	,`table_name` VARCHAR(45) NULL DEFAULT NULL
 	,`class_name` VARCHAR(45) NULL DEFAULT NULL
-	,`method_name` VARCHAR(45) NULL DEFAULT NULL
+	,`method_name` VARCHAR(100) NULL DEFAULT NULL
 	,`sql_style` VARCHAR(45) NULL DEFAULT NULL
 	,`crud_type` VARCHAR(45) NULL DEFAULT NULL
 	,`fields` TEXT NULL
@@ -153,7 +153,7 @@ CREATE TABLE `task_sql` (
 	,`db_name` VARCHAR(45) NULL DEFAULT NULL
 	,`class_name` VARCHAR(45) NULL DEFAULT NULL
 	,`pojo_name` VARCHAR(45) NULL DEFAULT NULL
-	,`method_name` VARCHAR(45) NULL DEFAULT NULL
+	,`method_name` VARCHAR(100) NULL DEFAULT NULL
 	,`crud_type` VARCHAR(45) NULL DEFAULT NULL
 	,`sql_content` TEXT NULL
 	,`project_id` INT (11) NULL DEFAULT NULL

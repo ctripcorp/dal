@@ -113,7 +113,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, getColumnType(parser.getPrimaryKeyNames()[0]), id);
 
-		return queryObject(new BaseTableSelectBuilder(rawTableName, dbCategory).where(pkSql).with(parameters).nullable(), hints);
+		return queryObject(new BaseTableSelectBuilder(rawTableName, dbCategory).where(pkSql).with(parameters).requireSingle().nullable(), hints);
 	}
 	
 	/**
@@ -128,7 +128,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		StatementParameters parameters = new StatementParameters();
 		addParameters(parameters, parser.getPrimaryKeys(pk));
 
-		return queryObject(new BaseTableSelectBuilder(rawTableName, dbCategory).where(pkSql).with(parameters).nullable(), hints.setFields(parser.getFields(pk)));
+		return queryObject(new BaseTableSelectBuilder(rawTableName, dbCategory).where(pkSql).with(parameters).requireSingle().nullable(), hints.setFields(parser.getFields(pk)));
 	}
 
 	/**

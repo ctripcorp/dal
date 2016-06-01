@@ -13,6 +13,7 @@
 		SelectSqlBuilder builder = new SelectSqlBuilder();
 		builder.select(${method.getField()});
 #parse("templates/java/dao/autosql/common.statement.parameters.tpl")
+		builder.requireSingle();
 
 		return client.queryObject(builder, hints, ${method.getPojoClassName()}.class);
 	}

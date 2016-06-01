@@ -216,7 +216,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 
 	/**
-	 * Query pojo for the given query builder.
+	 * Query pojo for the given query builder. The requireSingle or requireFirst MUST be set on bulder.
 	 * @param selectBuilder select builder which represents the query criteria
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return
@@ -224,11 +224,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public T queryObject(TableSelectBuilder selectBuilder, DalHints hints) throws SQLException {
 		DalWatcher.begin();
-		return commonQuery((TableSelectBuilder)selectBuilder.mapWith(parser).requireSingle(), hints);
+		return commonQuery((TableSelectBuilder)selectBuilder.mapWith(parser), hints);
 	}
 	
 	/**
-	 * Query object for the given type for the given query builder.
+	 * Query object for the given type for the given query builder. The requireSingle or requireFirst MUST be set on bulder.
 	 * @param selectBuilder select builder which represents the query criteria
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param clazz the class which the returned result belongs to.
@@ -237,7 +237,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public <K> K queryObject(TableSelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
 		DalWatcher.begin();
-		return commonQuery((TableSelectBuilder)selectBuilder.mapWith(new DalObjectRowMapper<K>()).requireSingle(), hints);
+		return commonQuery((TableSelectBuilder)selectBuilder.mapWith(new DalObjectRowMapper<K>()), hints);
 	}
 
 	public Number count(String whereClause, StatementParameters parameters, DalHints hints) throws SQLException {

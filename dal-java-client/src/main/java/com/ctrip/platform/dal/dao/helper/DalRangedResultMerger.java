@@ -25,7 +25,7 @@ public class DalRangedResultMerger<T> implements ResultMerger<List<T>>{
 	}
 	
 	public DalRangedResultMerger(int start, int count) {
-		this(null, 0, count);
+		this(null, start, count);
 	}
 
 	// Select from to

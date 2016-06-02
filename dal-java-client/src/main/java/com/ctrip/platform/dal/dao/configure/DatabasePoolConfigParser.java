@@ -39,6 +39,7 @@ public class DatabasePoolConfigParser {
 	private static final String VALIDATIONQUERY = "validationQuery";
 	private static final String VALIDATIONINTERVAL = "validationInterval";
 	private static final String TIMEBETWEENEVICTIONRUNSMILLIS = "timeBetweenEvictionRunsMillis";
+	private static final String MAX_AGE = "maxAge";
 	private static final String MAXACTIVE = "maxActive";
 	private static final String MINIDLE = "minIdle";
 	private static final String MAXWAIT = "maxWait";
@@ -173,6 +174,10 @@ public class DatabasePoolConfigParser {
 		if (hasAttribute(resource, TIMEBETWEENEVICTIONRUNSMILLIS)) {
 			int timeBetweenEvictionRunsMillis = Integer.parseInt(getAttribute(resource, TIMEBETWEENEVICTIONRUNSMILLIS));
 			prop.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
+		}
+		if (hasAttribute(resource, MAX_AGE)) {
+			int maxAge = Integer.parseInt(getAttribute(resource, MAX_AGE));
+			prop.setMaxAge(maxAge);
 		}
 		if (hasAttribute(resource, MAXACTIVE)) {
 			int maxActive = Integer.parseInt(getAttribute(resource, MAXACTIVE));

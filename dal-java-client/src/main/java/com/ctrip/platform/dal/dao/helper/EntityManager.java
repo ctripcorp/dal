@@ -26,28 +26,29 @@ import com.ctrip.platform.dal.dao.annotation.Type;
 public class EntityManager<T> {
 
 	private Class<T> clazz = null;
-	private Field[] fields = null;
+	private List<Field> fields = null;
 	
 	public EntityManager(Class<T> clazz) throws SQLException {
 		this.clazz = clazz;
 		this.fields = getFields(clazz);
 	}
 	
-	private Field[] getFields(Class<T> clazz) throws SQLException {
-		Field[] fields = clazz.getDeclaredFields();
-		emptyCheck(fields);
-		setFieldAccessible(fields);
-		return fields;
-	}
-	
-	private void emptyCheck(Field[] fields) throws SQLException {
-		if (null == fields || fields.length == 0)
+	private List<Field> getFields(Class<T> clazz) throws SQLException {
+		Field[] allFields = clazz.getDeclaredFields();
+		if (null == allFields || allFields.length == 0)
 			throw new SQLException("The entity[" + clazz.getName() +"] has no fields.");
-	}
-	
-	private void setFieldAccessible(Field[] fields) {
-		for(Field field : fields)
-			field.setAccessible(true);
+				
+		List<Field> fields = new ArrayList<>();
+		for (Field f: allFields) {
+			if (f.getAnnotation(Type.class) == null) {
+				continue;
+//				throw new SQLException("Each field of entity[" + clazz.getName() +"] must declare it's Type annotation.");
+			}
+			fields.add(f);
+			f.setAccessible(true);
+		}
+
+		return fields;
 	}
 	
 	public String getDatabaseName() {
@@ -80,8 +81,7 @@ public class EntityManager<T> {
 	
 	public String[] getSensitiveColumnNames() {
 		List<String> sensitiveColumnNames = new ArrayList<String>();
-		for (int i = 0; i < fields.length; i++) {
-			Field field = fields[i];
+		for (Field field: fields) {
 			Sensitive sensitive = field.getAnnotation(Sensitive.class);
 			if (sensitive != null)
 				sensitiveColumnNames.add(getColumnName(field));
@@ -93,8 +93,7 @@ public class EntityManager<T> {
 	
 	public String[] getPrimaryKeyNames() throws SQLException {
 		List<String> primaryKeyNames = new ArrayList<String>();
-		for (int i = 0; i < fields.length; i++) {
-			Field field = fields[i];
+		for (Field field: fields) {
 			Id id = field.getAnnotation(Id.class);
 			if(id != null)
 				primaryKeyNames.add(getColumnName(field));
@@ -106,8 +105,7 @@ public class EntityManager<T> {
 	
 	public Field[] getIdentity() {
 		List<Field> identities = new ArrayList<Field>();
-		for (int i = 0; i < fields.length; i++) {
-			Field field = fields[i];
+		for (Field field: fields) {
 			Id id = field.getAnnotation(Id.class);
 			GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
 			if (id != null && generatedValue != null && generatedValue.strategy() == GenerationType.AUTO) {
@@ -121,8 +119,7 @@ public class EntityManager<T> {
 	
 	public Map<String, Field> getFieldMap() throws SQLException {
 		Map<String, Field> fieldsMap = new HashMap<String, Field>();
-		for (int i = 0; i < fields.length; i++) {
-			Field field = fields[i];
+		for (Field field: fields) {
 			String columnName = getColumnName(field);
 			if(!fieldsMap.containsKey(columnName))
 				fieldsMap.put(columnName, field);
@@ -131,24 +128,20 @@ public class EntityManager<T> {
 	}
 	
 	public String[] getColumnNames() {
-		int length = fields.length;
-		String[] columnNames = new String[length];
-		for (int i = 0; i < length; i++) {
-			Field field = fields[i];
-			columnNames[i] = getColumnName(field);
+		String[] columnNames = new String[fields.size()];
+		int i = 0;
+		for (Field field: fields) {
+			columnNames[i++] = getColumnName(field);
 		}
 		return columnNames;
 	}
 	
 	public int[] getColumnTypes() throws SQLException {
-		int length = fields.length;
-		int[] columnTypes = new int[length];
-		for (int i = 0; i < length; i++) {
-			Field field = fields[i];
+		int[] columnTypes = new int[fields.size()];
+		int i = 0;
+		for (Field field: fields) {
 			Type sqlType = field.getAnnotation(Type.class);
-			if (sqlType == null)
-				throw new SQLException("Each field of entity[" + clazz.getName() +"] must declare it's Type annotation.");
-			columnTypes[i] = sqlType.value();
+			columnTypes[i++] = sqlType.value();
 		}
 		return columnTypes;
 	}

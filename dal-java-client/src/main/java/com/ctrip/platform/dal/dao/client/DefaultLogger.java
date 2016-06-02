@@ -142,7 +142,7 @@ public class DefaultLogger extends LoggerAdapter implements DalLogger {
 			if (!entry.isSensitive()) {
 				sql = LoggerHelper.getSqlTpl(entry);
 			}
-			msg.append("\t").append("sql: ").append(sql).append(LINESEPARATOR);;
+			msg.append("\t").append("sql: ").append(sql).append(LINESEPARATOR);
 			if (entry.getPramemters() != null) {
 				msg.append("\t").append("parameters : ").append(getEncryptParameters(encryptLogging, entry)).append(LINESEPARATOR);
 			} else {

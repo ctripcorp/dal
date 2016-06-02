@@ -18,7 +18,7 @@ public class DalConnection {
 		this.oldIsolationLevel = conn.getTransactionIsolation();
 		this.conn = conn;
 		this.meta = meta;
-		this.logger = DalClientFactory.getDalLogger();;
+		this.logger = DalClientFactory.getDalLogger();
 	}
 
 	public Connection getConn() {

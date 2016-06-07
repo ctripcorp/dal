@@ -27,7 +27,7 @@
 #end
                 sbSql.Append(string.Format("limit {0}, {1} ", (pageNo - 1) * pagesize, pagesize));
 #else
-                sbSql.Append(@"select ${StringUtils.join($host.getColumns(), ", ")} from ${host.getTableName()} ");
+                sbSql.Append(@"select ${StringUtils.join($host.getColumns(), ", ")} from ${host.getTableName()} (nolock) ");
 #if($host.getPrimaryKeys().size() > 0)
                 sbSql.Append(" order by ${StringUtils.join($array, ", ")} ");
 #else

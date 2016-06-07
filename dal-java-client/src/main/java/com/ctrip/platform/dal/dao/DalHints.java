@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -286,6 +287,31 @@ public class DalHints {
 	
 	public Future<?> getAsyncResult() {
 		return (Future<?>)get(DalHintEnum.futureResult);
+	}
+	
+	public <T> T getResult() throws Exception {
+		return (T)((Future<?>)get(DalHintEnum.futureResult)).get();
+	}
+	
+	public int getIntResult() throws Exception {
+		Object result = ((Future<?>)get(DalHintEnum.futureResult)).get();
+		if(result instanceof Number)
+			return ((Number)result).intValue();
+		
+		// Assume it is int[]
+		return ((int[])result)[0];
+	}
+	
+	public Integer getIntegerResult() throws Exception {
+		return (Integer)getResult();
+	}
+	
+	public int[] getIntArrayResult() throws Exception {
+		return (int[])((Future<?>)get(DalHintEnum.futureResult)).get();
+	}
+	
+	public <T> List<T> getListResult() throws Exception {
+		return (List<T>)((Future<?>)get(DalHintEnum.futureResult)).get();
 	}
 	
 	public DalHints callbackWith(DalResultCallback callback) {

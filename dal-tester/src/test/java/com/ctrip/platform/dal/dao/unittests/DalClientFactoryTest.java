@@ -33,7 +33,7 @@ public class DalClientFactoryTest {
 
 	@Test
 	public void testGetAllDB() {
-		assertEquals(15, DalClientFactory.getAllDB().size());
+		assertEquals(16, DalClientFactory.getAllDB().size());
 	}
 
 	@Test
@@ -48,7 +48,7 @@ public class DalClientFactoryTest {
 	@Test
 	public void testGetClient() {
 		Set<String> names = new HashSet<>();
-		names.add("MultiThreadingTest");
+//		names.add("MultiThreadingTest");
 		names.add("dao_test");
 		names.add("HA_Test_0");
 		names.add("HA_Test");

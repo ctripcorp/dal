@@ -1,13 +1,8 @@
 <dal name="dal.prize.test">
   <databaseSets>
-  	<!--
-	<databaseSet name="manytypes" provider="sqlProvider">
-        <add name="HotelPubDB" databaseType="Master" sharding="0" connectionString="HotelPubDB"/>   
-	</databaseSet>
-	-->
-	 <databaseSet name="MultiThreadingTest" provider="sqlProvider">
+<!-- 	 <databaseSet name="MultiThreadingTest" provider="sqlProvider">
         <add  name="MultiThreadingTest_M" databaseType="Master" sharding="" connectionString="MultiThreadingTest"/>
-     </databaseSet>
+     </databaseSet>-->
     <databaseSet name="dao_test" provider="mySqlProvider">
       <add  name="dao_test_M" databaseType="Master" sharding="" connectionString="dao_test"/>
     </databaseSet>
@@ -97,6 +92,11 @@
     <databaseSet name="dao_test_select" provider="mySqlProvider">
         <add name="dao_test_select" databaseType="Master" sharding="" connectionString="dao_test"/>   
 	</databaseSet>
+    <databaseSet name="MySqlSimpleShard" provider="mySqlProvider"
+         shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=CountryID;mod=2;tableColumns=CityID;tableMod=4;separator=_;shardedTables=person">
+        <add name="dal_shard_0" databaseType="Master" sharding="0" connectionString="dal_shard_0"/>   
+        <add name="dal_shard_1" databaseType="Master" sharding="1" connectionString="dal_shard_1"/>   
+    </databaseSet>
   </databaseSets>
   <LogListener enabled="true">
   	  <!--<logger>com.ctrip.platform.dal.dao.client.DefaultLogger</logger>-->

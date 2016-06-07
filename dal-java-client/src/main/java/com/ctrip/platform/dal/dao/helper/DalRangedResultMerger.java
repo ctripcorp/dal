@@ -51,6 +51,9 @@ public class DalRangedResultMerger<T> implements ResultMerger<List<T>>{
 		if(comparator != null)
 			Collections.sort(results, comparator);
 
-		return results.subList(start, start + count);
+		if(start >= results.size())
+			return new ArrayList<>();
+			
+		return start + count > results.size() ? results.subList(start, results.size()) : results.subList(start, start + count);
 	}
 }

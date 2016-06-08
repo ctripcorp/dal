@@ -40,6 +40,7 @@ import com.ctrip.platform.dal.dao.helper.SQLParser;
 import com.ctrip.platform.dal.dao.helper.ShortRowMapper;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.MultipleSqlBuilder;
+import com.ctrip.platform.dal.tester.baseDao.DalQueryDaoTest.ClientTestModel;
 
 public abstract class DalQueryDaoTest {
 	private String DATABASE_NAME;
@@ -62,6 +63,7 @@ public abstract class DalQueryDaoTest {
 	private String sqlFirst = "select * from " + TABLE_NAME + " where id = ?";
 	private String sqlNoResult = "select * from " + TABLE_NAME + " where id = -1";
 	private String sqlInParam = "select * from " + TABLE_NAME + " where type in (?)";
+	private String sqlIdInParam = "select * from " + TABLE_NAME + " where id in (?)";
 	
 	private class TestComparator implements Comparator<Short>{
 		@Override
@@ -493,10 +495,6 @@ public abstract class DalQueryDaoTest {
 	}
 
 	private List queryMultipleAllShards(DalHints hints) throws SQLException {
-		String[] sqls = new String[] {
-				sqlList,sqlListQuantity,sqlObject,sqlNoResult
-		};
-		
 		DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
 		
 		StatementParameters parameters = new StatementParameters();
@@ -510,6 +508,14 @@ public abstract class DalQueryDaoTest {
 		builder.add(sqlListQuantity, new StatementParameters(), Integer.class, new DalListMerger<Integer>());//merger
 		builder.add(sqlObject, parameters, Integer.class, new InteregrComparator());//soter
 		builder.add(sqlNoResult, new StatementParameters(), new TestDalRowCallback3());//callback
+		List<Integer> inParam = new ArrayList<>();
+		inParam.add(0);
+		inParam.add(1);
+		inParam.add(2);
+		inParam.add(3);
+		inParam.add(4);
+		parameters.setInParameter(1, "type", Types.INTEGER, inParam);
+		builder.add(sqlIdInParam, new StatementParameters(), ClientTestModel.class);
 
 		return dao.query(builder, hints.inAllShards());
 	}
@@ -543,13 +549,14 @@ public abstract class DalQueryDaoTest {
 	}
 
 	private void assertMultipleResult(List list) {
-		assertEquals(6, list.size());
+		assertEquals(7, list.size());
 		assertEquals(6, ((List)list.get(0)).size());
 		assertEquals(6, ((List)list.get(1)).size());
 		assertEquals(6, ((List)list.get(2)).size());
 		assertEquals(6, ((List)list.get(3)).size());
 		assertEquals(1, ((List)list.get(4)).size());
 		assertEquals(0, ((List)list.get(5)).size());
+		assertEquals(6, ((List)list.get(6)).size());
 	}
 	
 	@Test

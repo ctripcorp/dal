@@ -106,7 +106,7 @@ public final class DalQueryDao {
 	public List<?> query(MultipleSqlBuilder mqr, DalHints hints) 
 			throws SQLException {
 		DalSqlTaskRequest<List<?>> request = new DalSqlTaskRequest<>(
-				logicDbName, mqr.build(), mqr.buildParameters(), hints, 
+				logicDbName, mqr, hints, 
 				new MultipleQueryTask(mqr.getExtractors()), mqr.getMergers());
 		
 		return executor.execute(hints, request, NULLABLE);

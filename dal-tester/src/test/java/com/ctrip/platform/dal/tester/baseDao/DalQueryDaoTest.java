@@ -120,6 +120,7 @@ public class DalQueryDaoTest {
 	private String sqlListQuantity = "select quantity from " + TABLE_NAME;
 	private String sqlObject = "select * from " + TABLE_NAME + " where id = ?";
 	private String sqlNoResult = "select * from " + TABLE_NAME + " where id = -1";
+	private String sqlInList= "select * from " + TABLE_NAME + " where id in (?)";
 	
 	@Test
 	public void testQueryMapperForList() {
@@ -189,9 +190,19 @@ public class DalQueryDaoTest {
 			mqr.add(sqlObject, parameters, Integer.class);
 			mqr.add(sqlNoResult, new StatementParameters(), Integer.class);
 
+			List<Integer> inParam = new ArrayList<>();
+			inParam.add(0);
+			inParam.add(1);
+			inParam.add(2);
+			inParam.add(3);
+			inParam.add(4);
+			parameters.setInParameter(1, "type", Types.INTEGER, inParam);
+			mqr.add(sqlInList, new StatementParameters(), ClientTestModel.class);
+
 			List list = dao.query(mqr, hints);
 			
-			assertEquals(5, list.size());
+			assertEquals(6, list.size());
+			assertEquals(3, ((List)list.get(5)).size());
 			
 		} catch (Exception e) {
 			e.printStackTrace();

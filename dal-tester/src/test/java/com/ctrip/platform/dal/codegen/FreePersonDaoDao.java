@@ -162,16 +162,16 @@ public class FreePersonDaoDao {
 	/**
 	 * free update
 	**/
-	public int update (String name, Integer cityId, Integer countryId, DalHints hints) throws SQLException {
+	public int update (String name, List<Integer> cityId, List<Integer> countryID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
-		builder.setTemplate("INSERT INTO Person (`Name`,`CityId`,`CountryId`) VALUES ( ? , ? , ? )");
+		builder.setTemplate("UPDATE Person SET `Name`=? WHERE `CityId`IN (?) AND `CountryId` IN (?)");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;
 		parameters.setSensitive(i++, "name", Types.VARCHAR, name);
-		parameters.setSensitive(i++, "cityId", Types.INTEGER, cityId);
-		parameters.setSensitive(i++, "countryId", Types.INTEGER, countryId);
+		i = parameters.setSensitiveInParameter(i, "cityId", Types.INTEGER, cityId);
+		i = parameters.setSensitiveInParameter(i, "countryID", Types.INTEGER, countryID);
 
 		return queryDao.update(builder, parameters, hints);
 	}

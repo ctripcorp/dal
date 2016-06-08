@@ -7,5 +7,6 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
 	PersonDaoUnitTest.class,
+	FreePersonDaoDaoUnitTest.class,
 })
 public class AllTests {}

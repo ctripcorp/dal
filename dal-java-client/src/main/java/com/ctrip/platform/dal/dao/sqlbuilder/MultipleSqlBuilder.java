@@ -27,7 +27,7 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * This extractor instance maybe used in more than one thread. Make sure it is thread safe.
 	 * To be thread safe is easy, just not keep any changeable state inside the object.
 	 */
-	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, DalResultSetExtractor<T> extractor, ResultMerger<T> merger) {
+	public <T> MultipleSqlBuilder addQuery(String sql, StatementParameters parameters, DalResultSetExtractor<T> extractor, ResultMerger<T> merger) {
 		queryUnits.add(new QueryUnit(sql,parameters, extractor));
 		mergers.add(merger);
 		return this;
@@ -39,9 +39,9 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * The default JPA parser is thread safe.
 	 * @return
 	 */
-	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, DalRowMapper<T> mapper) {
+	public <T> MultipleSqlBuilder addQuery(String sql, StatementParameters parameters, DalRowMapper<T> mapper) {
 		DalListMerger<T> defaultMerger = new DalListMerger<>();
-		return add(sql, parameters, new DalRowMapperExtractor<T>(mapper), defaultMerger);
+		return addQuery(sql, parameters, new DalRowMapperExtractor<T>(mapper), defaultMerger);
 	}
 	
 	/**
@@ -49,8 +49,8 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * To be thread safe is easy, just not keep any changeable state inside the object.
 	 * The default JPA parser is thread safe.
 	 */
-	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, DalRowMapper<T> mapper, ResultMerger<List<T>> merger) {
-		return add(sql, parameters, new DalRowMapperExtractor<T>(mapper), merger);
+	public <T> MultipleSqlBuilder addQuery(String sql, StatementParameters parameters, DalRowMapper<T> mapper, ResultMerger<List<T>> merger) {
+		return addQuery(sql, parameters, new DalRowMapperExtractor<T>(mapper), merger);
 	}
 	
 	/**
@@ -58,9 +58,9 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * To be thread safe is easy, just not keep any changeable state inside the object.
 	 * The default JPA parser is thread safe.
 	 */
-	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, DalRowMapper<T> mapper, Comparator<T> sorter) {
+	public <T> MultipleSqlBuilder addQuery(String sql, StatementParameters parameters, DalRowMapper<T> mapper, Comparator<T> sorter) {
 		ResultMerger<List<T>> defaultMerger = new DalListMerger<>(sorter);
-		return add(sql, parameters, new DalRowMapperExtractor<T>(mapper), defaultMerger);
+		return addQuery(sql, parameters, new DalRowMapperExtractor<T>(mapper), defaultMerger);
 	}
 	
 	/**
@@ -72,8 +72,8 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, Class<T> clazz) throws SQLException {
-		return add(sql, parameters, clazz, new DalListMerger<T>());
+	public <T> MultipleSqlBuilder addQuery(String sql, StatementParameters parameters, Class<T> clazz) throws SQLException {
+		return addQuery(sql, parameters, clazz, new DalListMerger<T>());
 	}
 	
 	/**
@@ -85,13 +85,13 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, Class<T> clazz, ResultMerger<List<T>> merger) throws SQLException {
+	public <T> MultipleSqlBuilder addQuery(String sql, StatementParameters parameters, Class<T> clazz, ResultMerger<List<T>> merger) throws SQLException {
 		Table table = clazz.getAnnotation(Table.class);
 		// If it is annotated DAL POJO
 		if (table != null)
-			return add(sql, parameters, new DalRowMapperExtractor<T>(new DalDefaultJpaMapper<T>(clazz)), merger);
+			return addQuery(sql, parameters, new DalRowMapperExtractor<T>(new DalDefaultJpaMapper<T>(clazz)), merger);
 		
-		return add(sql, parameters, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()), merger);
+		return addQuery(sql, parameters, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()), merger);
 	}
 	
 	/**
@@ -103,8 +103,8 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * @return
 	 * @throws SQLException
 	 */
-	public <T> MultipleSqlBuilder add(String sql, StatementParameters parameters, Class<T> clazz, Comparator<T> sorter) throws SQLException {
-		return add(sql, parameters, clazz, new DalListMerger<T>(sorter));
+	public <T> MultipleSqlBuilder addQuery(String sql, StatementParameters parameters, Class<T> clazz, Comparator<T> sorter) throws SQLException {
+		return addQuery(sql, parameters, clazz, new DalListMerger<T>(sorter));
 	}
 	
 	/**
@@ -113,9 +113,9 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * @param callback
 	 * @return
 	 */
-	public MultipleSqlBuilder add(String sql, StatementParameters parameters, DalRowCallback callback) {
+	public MultipleSqlBuilder addQuery(String sql, StatementParameters parameters, DalRowCallback callback) {
 		DalListMerger<Object> defaultMerger = new DalListMerger<>();
-		return add(sql, parameters, new DalRowCallbackExtractor(callback), defaultMerger);
+		return addQuery(sql, parameters, new DalRowCallbackExtractor(callback), defaultMerger);
 	}
 	
 	public List<DalResultSetExtractor<?>> getExtractors() {

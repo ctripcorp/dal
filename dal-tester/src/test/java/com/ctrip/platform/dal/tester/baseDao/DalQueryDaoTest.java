@@ -184,11 +184,11 @@ public class DalQueryDaoTest {
 			
 			MultipleSqlBuilder mqr = new MultipleSqlBuilder();
 			
-			mqr.add(sqlList, new StatementParameters(), new ClientTestDalRowMapper());
-			mqr.add(sqlList, new StatementParameters(), ClientTestModel.class);
-			mqr.add(sqlListQuantity, new StatementParameters(), Integer.class);
-			mqr.add(sqlObject, parameters, Integer.class);
-			mqr.add(sqlNoResult, new StatementParameters(), Integer.class);
+			mqr.addQuery(sqlList, new StatementParameters(), new ClientTestDalRowMapper());
+			mqr.addQuery(sqlList, new StatementParameters(), ClientTestModel.class);
+			mqr.addQuery(sqlListQuantity, new StatementParameters(), Integer.class);
+			mqr.addQuery(sqlObject, parameters, Integer.class);
+			mqr.addQuery(sqlNoResult, new StatementParameters(), Integer.class);
 
 			List<Integer> inParam = new ArrayList<>();
 			inParam.add(0);
@@ -197,7 +197,7 @@ public class DalQueryDaoTest {
 			inParam.add(3);
 			inParam.add(4);
 			parameters.setInParameter(1, "type", Types.INTEGER, inParam);
-			mqr.add(sqlInList, new StatementParameters(), ClientTestModel.class);
+			mqr.addQuery(sqlInList, new StatementParameters(), ClientTestModel.class);
 
 			List list = dao.query(mqr, hints);
 			

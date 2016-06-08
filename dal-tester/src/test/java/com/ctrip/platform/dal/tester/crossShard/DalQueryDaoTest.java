@@ -502,12 +502,12 @@ public abstract class DalQueryDaoTest {
 		
 		MultipleSqlBuilder builder = new MultipleSqlBuilder();
 		// TODO add all add method
-		builder.add(sqlList, new StatementParameters(), new ClientTestDalRowMapper());//mapper
-		builder.add(sqlList, new StatementParameters(), new ClientTestDalRowMapper(), new DalListMerger<ClientTestModel>());//merger
-		builder.add(sqlList, new StatementParameters(), ClientTestModel.class, new ClientTestModelComparator());//sorter
-		builder.add(sqlListQuantity, new StatementParameters(), Integer.class, new DalListMerger<Integer>());//merger
-		builder.add(sqlObject, parameters, Integer.class, new InteregrComparator());//soter
-		builder.add(sqlNoResult, new StatementParameters(), new TestDalRowCallback3());//callback
+		builder.addQuery(sqlList, new StatementParameters(), new ClientTestDalRowMapper());//mapper
+		builder.addQuery(sqlList, new StatementParameters(), new ClientTestDalRowMapper(), new DalListMerger<ClientTestModel>());//merger
+		builder.addQuery(sqlList, new StatementParameters(), ClientTestModel.class, new ClientTestModelComparator());//sorter
+		builder.addQuery(sqlListQuantity, new StatementParameters(), Integer.class, new DalListMerger<Integer>());//merger
+		builder.addQuery(sqlObject, parameters, Integer.class, new InteregrComparator());//soter
+		builder.addQuery(sqlNoResult, new StatementParameters(), new TestDalRowCallback3());//callback
 		List<Integer> inParam = new ArrayList<>();
 		inParam.add(0);
 		inParam.add(1);
@@ -515,7 +515,7 @@ public abstract class DalQueryDaoTest {
 		inParam.add(3);
 		inParam.add(4);
 		parameters.setInParameter(1, "type", Types.INTEGER, inParam);
-		builder.add(sqlIdInParam, new StatementParameters(), ClientTestModel.class);
+		builder.addQuery(sqlIdInParam, new StatementParameters(), ClientTestModel.class);
 
 		return dao.query(builder, hints.inAllShards());
 	}

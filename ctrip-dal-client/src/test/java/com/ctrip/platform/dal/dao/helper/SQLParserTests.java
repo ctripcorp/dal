@@ -26,8 +26,8 @@ public class SQLParserTests {
 		List<Integer> ids = new ArrayList<Integer>();
 		ids.add(1);
 		ids.add(2);
-		List idList = new ArrayList<>();
-		idList.add(ids);
+		List[] idList = new List[1];
+		idList[0] = ids;
 		String new_sql = SQLParser.parse(sql, idList);
 		
 		Assert.assertEquals(expected_sql, new_sql);
@@ -40,8 +40,8 @@ public class SQLParserTests {
 		List<Integer> ids = new ArrayList<Integer>();
 		ids.add(1);
 		ids.add(2);
-		List idList = new ArrayList<>();
-		idList.add(ids);
+		List[] idList = new List[1];
+		idList[0] = ids;
 		String new_sql = SQLParser.parse(sql, idList);
 		
 		Assert.assertEquals(expected_sql, new_sql);
@@ -54,8 +54,8 @@ public class SQLParserTests {
 		List<Integer> ids = new ArrayList<Integer>();
 		ids.add(1);
 		ids.add(2);
-		List idList = new ArrayList<>();
-		idList.add(ids);
+		List[] idList = new List[1];
+		idList[0] = ids;
 		String new_sql = SQLParser.parse(sql, idList);
 		
 		Assert.assertEquals(expected_sql, new_sql);
@@ -68,13 +68,13 @@ public class SQLParserTests {
 		List<Integer> ids = new ArrayList<Integer>();
 		ids.add(1);
 		ids.add(2);
-		List idList = new ArrayList<>();
-		idList.add(ids);
+		List[] idList = new List[2];
+		idList[0] = ids;
 		
 		
 		List<String> names = new ArrayList<String>();
 		names.add("hi");
-		idList.add(names);
+		idList[1] = names;
 		
 		String new_sql = SQLParser.parse(sql, idList);
 		System.out.println(new_sql);

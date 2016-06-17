@@ -238,8 +238,8 @@ public class JavaTableHost {
             allTypes.addAll(SpUpdate.getParameters());
 
         for (JavaParameterHost field : allTypes) {
-            if (null != field.getDirection() && (field.getDirection().name().equals("InputOutput") || field.getDirection().name().equals("InputOutput")))
-                imports.add(com.ctrip.platform.dal.daogen.enums.ParameterDirection.class.getName());
+//            if (null != field.getDirection() && (field.getDirection().name().equals("InputOutput") || field.getDirection().name().equals("InputOutput")))
+//                imports.add(com.ctrip.platform.dal.daogen.enums.ParameterDirection.class.getName());
             Class<?> clazz = field.getJavaClass();
             if (byte[].class.equals(clazz))
                 continue;

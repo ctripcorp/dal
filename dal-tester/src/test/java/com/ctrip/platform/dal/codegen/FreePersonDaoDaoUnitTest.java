@@ -105,7 +105,7 @@ public class FreePersonDaoDaoUnitTest {
 		countryIds.add(2);
 		countryIds.add(3);
 	    
-		//The contry id 0 will be used for locating shard
+		//The contry id 0 will be used for locating shard, this is actually not recommended
 		int ret = dao.update(name, cityIds, countryIds, new DalHints());
 	    assertEquals(3, ret);
 	    

@@ -8,6 +8,11 @@
 		<databaseSet name="MultiThreadingTest" provider="sqlProvider">
 			<add name="MultiThreadingTest" databaseType="Master" sharding="" connectionString="MultiThreadingTest"/>   
 		</databaseSet>
+	    <databaseSet name="MySqlSimpleShard" provider="mySqlProvider"
+        	shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=CountryID;mod=2;tableColumns=CityID;tableMod=4;separator=_;shardedTables=person">
+	    	<add name="dal_shard_0" databaseType="Master" sharding="0" connectionString="dal_shard_0"/>   
+	    	<add name="dal_shard_1" databaseType="Master" sharding="1" connectionString="dal_shard_1"/>   
+	    </databaseSet>
 	</databaseSets>
 	<LogListener enabled="true">
 		<logger>com.ctrip.platform.dal.sql.logging.CtripDalLogger</logger>

@@ -63,6 +63,9 @@
                 <filtering>true</filtering>
             </resource>
             <resource>
+                <directory>src/main/resources/tars</directory>
+            </resource>
+            <resource>
                 <directory>src/main/resources/velocity</directory>
             </resource>
         </resources>

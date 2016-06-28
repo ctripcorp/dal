@@ -40,15 +40,17 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		for(int i = 0; i < 10; i++) {
-			${host.getPojoClassName()} daoPojo = createPojo(i);
-
-			try {
-				dao.insert(new DalHints().enableIdentityInsert(), daoPojo);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
+//		To prepare test data, you can simply uncomment the following.
+//		In case of DB and table shard, please revise the code to reflect shard
+//		for(int i = 0; i < 10; i++) {
+//			${host.getPojoClassName()} daoPojo = createPojo(i);
+//
+//			try {
+//				dao.insert(new DalHints().enableIdentityInsert(), daoPojo);
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}
+//		}
 	}
 	
 	private ${host.getPojoClassName()} createPojo(int index) {
@@ -80,7 +82,8 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	
 	@After
 	public void tearDown() throws Exception {
-		dao.delete(null, dao.queryAll(null));
+//		To clean up all test data
+//		dao.delete(null, dao.queryAll(null));
 	} 
 	
 #if($host.generateAPI(4,16))

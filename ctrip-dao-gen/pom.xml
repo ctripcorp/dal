@@ -32,18 +32,6 @@
     </dependencies>
     <profiles>
         <profile>
-            <id>pub</id>
-            <properties>
-                <environment>pub</environment>
-            </properties>
-            <activation>
-                <property>
-                    <name>env</name>
-                    <value>release</value>
-                </property>
-            </activation>
-        </profile>
-        <profile>
             <id>local</id>
             <properties>
                 <environment>local</environment>
@@ -52,6 +40,42 @@
                 <property>
                     <name>env</name>
                     <value>local</value>
+                </property>
+            </activation>
+        </profile>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <environment>dev</environment>
+            </properties>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>dev</value>
+                </property>
+            </activation>
+        </profile>
+        <profile>
+            <id>uat</id>
+            <properties>
+                <environment>uat</environment>
+            </properties>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>uat</value>
+                </property>
+            </activation>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <environment>prod</environment>
+            </properties>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>prod</value>
                 </property>
             </activation>
         </profile>
@@ -106,7 +130,7 @@
                 <executions>
                     <execution>
                         <id>copy-resources</id>
-                        <phase>generate-resources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -115,7 +139,7 @@
                             </outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/src/main/resources/${environment}
+                                    <directory>${project.build.directory}/classes
                                     </directory>
                                     <includes>
                                         <include>web.xml</include>

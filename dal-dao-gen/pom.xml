@@ -78,7 +78,7 @@
                     <executions>
                         <execution>
                             <id>copy-resources</id>
-                            <phase>generate-resources</phase>
+                            <phase>prepare-package</phase>
                             <goals>
                                 <goal>copy-resources</goal>
                             </goals>
@@ -87,7 +87,7 @@
                                 </outputDirectory>
                                 <resources>
                                     <resource>
-                                        <directory>${project.basedir}/src/main/resources/${environment}
+                                        <directory>${project.build.directory}/classes
                                         </directory>
                                         <includes>
                                             <include>web.xml</include>

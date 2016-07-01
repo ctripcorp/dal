@@ -19,7 +19,7 @@ public final class GenUtils {
         java.util.Properties pr = new java.util.Properties();
         pr.setProperty("resource.loader", "class");
         pr.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-        Velocity.init(pr);
+        //Velocity.init(pr);
     }
 
     /**

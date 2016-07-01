@@ -44,9 +44,15 @@ public class GenTaskResource {
         List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(id);
         TaskAggeragation allTasks = new TaskAggeragation();
 
-        java.util.Collections.sort(autoTasks);
-        java.util.Collections.sort(tableViewSpTasks);
-        java.util.Collections.sort(sqlTasks);
+        if (autoTasks != null && autoTasks.size() > 0) {
+            java.util.Collections.sort(autoTasks);
+        }
+        if (tableViewSpTasks != null && tableViewSpTasks.size() > 0) {
+            java.util.Collections.sort(tableViewSpTasks);
+        }
+        if (sqlTasks != null && sqlTasks.size() > 0) {
+            java.util.Collections.sort(sqlTasks);
+        }
 
         allTasks.setAutoTasks(autoTasks);
         allTasks.setTableViewSpTasks(tableViewSpTasks);

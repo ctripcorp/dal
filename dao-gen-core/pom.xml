@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dao-gen-core</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.3</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
         <spring-version>4.0.0.RELEASE</spring-version>
@@ -107,11 +107,6 @@
             <artifactId>spring-context</artifactId>
             <version>${spring-version}</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.jasig.cas.client</groupId>-->
-        <!--<artifactId>cas-client-core</artifactId>-->
-        <!--<version>${jasig-cas-version}</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.jasig.cas.client</groupId>
             <artifactId>cas-client-core-infosec-credis</artifactId>

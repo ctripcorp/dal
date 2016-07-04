@@ -107,11 +107,11 @@
             <artifactId>spring-context</artifactId>
             <version>${spring-version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.jasig.cas.client</groupId>
-            <artifactId>cas-client-core</artifactId>
-            <version>${jasig-cas-version}</version>
-        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>org.jasig.cas.client</groupId>-->
+        <!--<artifactId>cas-client-core</artifactId>-->
+        <!--<version>${jasig-cas-version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.jasig.cas.client</groupId>
             <artifactId>cas-client-core-infosec-credis</artifactId>

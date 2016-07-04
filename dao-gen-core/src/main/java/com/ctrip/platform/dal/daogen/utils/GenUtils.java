@@ -5,6 +5,7 @@ import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.VelocityEngine;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,10 +17,11 @@ public final class GenUtils {
 
     static {
         log = Logger.getLogger(GenUtils.class);
-        java.util.Properties pr = new java.util.Properties();
-        pr.setProperty("resource.loader", "class");
-        pr.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-        Velocity.init(pr);
+        java.util.Properties property = new java.util.Properties();
+        property.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM_CLASS, "org.apache.velocity.runtime.log.NullLogChute");
+        property.setProperty(VelocityEngine.RESOURCE_LOADER, "class");
+        property.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        Velocity.init(property);
     }
 
     /**

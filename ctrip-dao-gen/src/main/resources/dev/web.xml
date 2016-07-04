@@ -3,6 +3,26 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          metadata-complete="false" version="3.0">
 
+    <context-param>
+        <param-name>appid</param-name>
+        <param-value>930201</param-value>
+    </context-param>
+    <context-param>
+        <param-name>loggingServerIP</param-name>
+        <param-value>collector.logging.uat.qa.nt.ctripcorp.com</param-value>
+    </context-param>
+    <context-param>
+        <param-name>loggingServerPort</param-name>
+        <param-value>63100</param-value>
+    </context-param>
+    <context-param>
+        <param-name>credisServiceUrl</param-name>
+        <param-value>http://ws.config.framework.uat.qa.nt.ctripcorp.com/configws/</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.jasig.cas.client.credis.CRedisAppSettingListner</listener-class>
+    </listener>
     <listener>
         <listener-class>org.jasig.cas.client.session.SingleSignOutHttpSessionListener</listener-class>
     </listener>
@@ -27,12 +47,15 @@
             <param-name>serverName</param-name>
             <param-value>http://dal_codegen.dev.sh.ctripcorp.com</param-value>
         </init-param>
+        <init-param>
+            <param-name>redisClusterName</param-name>
+            <param-value>casClientPrincipal</param-value>
+        </init-param>
     </filter>
     <filter-mapping>
         <filter-name>CASFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
 
     <filter>
         <filter-name>CAS Validation Filter</filter-name>
@@ -49,6 +72,14 @@
             <param-name>encoding</param-name>
             <param-value>UTF-8</param-value>
         </init-param>
+        <init-param>
+            <param-name>useRedis</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>redisClusterName</param-name>
+            <param-value>casClientPrincipal</param-value>
+        </init-param>
     </filter>
     <filter-mapping>
         <filter-name>CAS Validation Filter</filter-name>
@@ -63,7 +94,6 @@
         <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
 
     <filter>
         <filter-name>CAS Assertion Thread Local Filter</filter-name>

@@ -7,6 +7,7 @@ import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.DbType;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
@@ -222,7 +223,13 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
         CSharpFreeSqlPojoHost freeSqlHost = new CSharpFreeSqlPojoHost();
         List<CSharpParameterHost> pHosts = new ArrayList<>();
 
-        for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(task.getAllInOneName(), task.getSql_content(), task.getParameters(), new CsharpGivenSqlResultSetExtractor())) {
+        DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
+        String dbType = DbUtils.getDbType(task.getAllInOneName());
+        if (dbType != null && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
+            dbCategory = DatabaseCategory.MySql;
+        }
+
+        for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(task.getAllInOneName(), task.getSql_content(), task.getParameters(), new CsharpGivenSqlResultSetExtractor(dbCategory))) {
             pHosts.add((CSharpParameterHost) _ahost);
         }
 

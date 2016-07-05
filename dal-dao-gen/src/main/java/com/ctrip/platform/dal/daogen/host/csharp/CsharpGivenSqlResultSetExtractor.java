@@ -1,8 +1,10 @@
 package com.ctrip.platform.dal.daogen.host.csharp;
 
 import com.ctrip.platform.dal.daogen.Consts;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.DbType;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.ResultSet;
@@ -12,37 +14,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CsharpGivenSqlResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
-    @Override
-    public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
-        ResultSetMetaData rsmd = rs.getMetaData();
-        List<AbstractParameterHost> pHosts = new ArrayList<>();
-        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-            CSharpParameterHost pHost = new CSharpParameterHost();
-            pHost.setName(rsmd.getColumnLabel(i));
-            String typename = rsmd.getColumnTypeName(i);
-            int dataType = rsmd.getColumnType(i);
-            DbType dbType;
-            if (null != typename && typename.equalsIgnoreCase("year")) {
-                dbType = DbType.Int16;
-            } else if (null != typename && typename.equalsIgnoreCase("uniqueidentifier")) {
-                dbType = DbType.Guid;
-            } else if (null != typename && typename.equalsIgnoreCase("sql_variant")) {
-                dbType = DbType.Object;
-            } else if (-155 == dataType) {
-                dbType = DbType.DateTimeOffset;
-            } else {
-                dbType = DbType.getDbTypeFromJdbcType(dataType);
-            }
-            pHost.setDbType(dbType);
-            pHost.setType(DbType.getCSharpType(pHost.getDbType()));
-            pHost.setIdentity(false);
-            pHost.setNullable(rsmd.isNullable(i) == 1 ? true : false);
-            pHost.setPrimary(false);
-            pHost.setLength(rsmd.getColumnDisplaySize(i));
-            pHost.setValueType(Consts.CSharpValueTypes.contains(pHost.getType()));
-            pHosts.add(pHost);
-        }
-        return pHosts;
+    private DatabaseCategory dbCategory;
+
+    public CsharpGivenSqlResultSetExtractor(DatabaseCategory dbCategory) {
+        super();
+        this.dbCategory = dbCategory;
     }
 
+    @Override
+    public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
+        List<AbstractParameterHost> hosts = new ArrayList<>();
+        if (rs == null) {
+            return hosts;
+        }
+
+        ResultSetMetaData metaData = rs.getMetaData();
+        int count = metaData.getColumnCount();
+        for (int i = 1; i <= count; i++) {
+            CSharpParameterHost host = new CSharpParameterHost();
+            String columnName = metaData.getColumnLabel(i);
+            host.setName(columnName);
+            String typeName = metaData.getColumnTypeName(i);
+            boolean isUnsigned = DbUtils.isColumnUnsigned(typeName);
+            int dataType = metaData.getColumnType(i);
+            int length = metaData.getColumnDisplaySize(i);
+            // 特殊处理
+            DbType dbType = DbUtils.getDotNetDbType(typeName, dataType, length, isUnsigned, dbCategory);
+            host.setDbType(dbType);
+            String type = DbType.getCSharpType(host.getDbType());
+            host.setType(type);
+            host.setIdentity(false);
+            host.setNullable(metaData.isNullable(i) == 1 ? true : false);
+            host.setPrimary(false);
+            host.setLength(length);
+            host.setValueType(Consts.CSharpValueTypes.contains(host.getType()));
+            hosts.add(host);
+        }
+
+        return hosts;
+    }
 }

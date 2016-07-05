@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>war</packaging>
     <properties>
         <environment>local</environment>
@@ -15,18 +15,18 @@
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dao-gen-core</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-dao-gen</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.4</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-dao-gen</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.4</version>
             <type>warpath</type>
         </dependency>
     </dependencies>

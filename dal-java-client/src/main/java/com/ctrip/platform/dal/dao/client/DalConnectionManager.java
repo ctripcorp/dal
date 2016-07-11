@@ -6,10 +6,10 @@ import java.sql.SQLException;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
@@ -108,7 +108,7 @@ public class DalConnectionManager {
 			throws SQLException {
 		// If HA disabled or not query, we just directly call _doInConnnection
 
-		if(!ConfigBeanFactory.getHAConfigBean().isEnable() 
+		if(!DalStatusManager.getHaStatus().isEnabled() 
 				|| action.operation != DalEventEnum.QUERY)
 			return _doInConnection(action, hints);
 

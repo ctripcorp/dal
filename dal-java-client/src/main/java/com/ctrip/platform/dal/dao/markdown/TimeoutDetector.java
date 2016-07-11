@@ -7,8 +7,8 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.client.DalLogger;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
-import com.ctrip.platform.dal.dao.configbeans.TimeoutMarkDownBean;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
+import com.ctrip.platform.dal.dao.status.TimeoutMarkdown;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class TimeoutDetector implements ErrorDetector{
@@ -20,7 +20,7 @@ public class TimeoutDetector implements ErrorDetector{
 	 */
 	@Override
 	public void detect(ErrorContext ctx) {	
-		TimeoutMarkDownBean tmb = ConfigBeanFactory.getTimeoutMarkDownBean();
+		TimeoutMarkdown tmb = DalStatusManager.getTimeoutMarkdown();
 		long duration = tmb.getSamplingDuration() * 1000 + 10;
 		if(!data.containsKey(ctx.getName()))
 			data.put(ctx.getName(), new DetectorCounter(duration));
@@ -44,8 +44,8 @@ public class TimeoutDetector implements ErrorDetector{
 	}
 	
 	private void markdown(String key, DetectorCounter dc, MarkDownReason reason){
-		if(ConfigBeanFactory.getTimeoutMarkDownBean().isEnableTimeoutMarkDown()){
-			ConfigBeanFactory.getMarkdownConfigBean().markdown(key);
+		if(DalStatusManager.getTimeoutMarkdown().isEnabled()){
+			MarkdownManager.autoMarkdown(key);
 			logger.info(String.format("Database %s has been marked down automatically", key));
 		}
 		MarkDownInfo info = new MarkDownInfo(key, Version.getVersion(), MarkDownPolicy.TIMEOUT, dc.getDuration());

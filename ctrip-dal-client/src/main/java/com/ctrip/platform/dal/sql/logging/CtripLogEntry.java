@@ -5,7 +5,6 @@ import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.client.LogEntry;
@@ -30,8 +29,6 @@ public class CtripLogEntry extends LogEntry {
 	private static final String JSON_PATTERN = "{\"HasSql\":\"%s\",\"Hash\":\"%s\",\"SqlTpl\":\"%s\",\"Param\":\"%s\",\"IsSuccess\":\"%s\",\"ErrorMsg\":\"%s\", \"CostDetail\":\"%s\"}";
 	private static final String ERRORCDE_PATTERN = "SYS%sL%s";
 	
-	private static ConcurrentHashMap<String, Integer> hashes = new ConcurrentHashMap<String, Integer>();
-
 	private Transaction catTransaction;
 
 	public Transaction getCatTransaction() {
@@ -40,15 +37,6 @@ public class CtripLogEntry extends LogEntry {
 
 	public void setCatTransaction(Transaction catTransaction) {
 		this.catTransaction = catTransaction;
-	}
-
-	private boolean hasHashCode(String sqlTpl, int hashCode){
-		if(!hashes.containsKey(sqlTpl)){
-			hashes.put(sqlTpl, hashCode);
-			return false;
-		}else{
-			return true;
-		}
 	}
 
 	public Map<String, String> getTag() {
@@ -106,7 +94,6 @@ public class CtripLogEntry extends LogEntry {
 		return params;
 	}
 
-
 	public String toJson(boolean encryptLogging, LogEntry entry){
 		String sqlTpl = LoggerHelper.getSqlTpl(entry);
 		String params = getEncryptParameters(encryptLogging, entry);
@@ -116,9 +103,7 @@ public class CtripLogEntry extends LogEntry {
 			sqlTpl = sqlTpl.substring(0, tplLength > LOG_LIMIT ? LOG_LIMIT : tplLength);
 			params = "over long with param, can not be recorded";
 		}
-		int hashCode = LoggerHelper.getHashCode(sqlTpl);
-		boolean existed = this.hasHashCode(sqlTpl, hashCode);
-		
+
 		try {
 			params = URLEncoder.encode(params, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -127,13 +112,12 @@ public class CtripLogEntry extends LogEntry {
 		}
 		
 		return String.format(JSON_PATTERN, 
-				existed ? 0 : 1, 
-				hashCode, 
+				1, 
+				"", 
 				sqlTpl, 
 				params,
 				isSuccess() ? 1 : 0, 
 				CommonUtil.string2Json(getErrorMsg()),
 				DalWatcher.toJson());
 	}
-
 }

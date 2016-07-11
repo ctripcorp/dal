@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 import com.ctrip.platform.dal.dao.task.DeleteSqlTask;
 import com.ctrip.platform.dal.dao.task.SingleTask;
 import com.ctrip.platform.dal.dao.task.UpdateSqlTask;
+import com.ctrip.platform.dal.dao.vi.ConfigBeanFactory;
 
 /**
  * This Factory is to unify Ctrip special MS Sql Server CUD case and common my sql case. 
@@ -33,6 +34,8 @@ public class CtripTaskFactory implements DalTaskFactory {
 	public void initialize(Map<String, String> settings) {
 		defaultFactory = new DefaultTaskFactory();
 		defaultFactory.initialize(settings);
+		// TO integrate VI here, it is not a good solution
+		ConfigBeanFactory.init();
 	}
 
 	@Override

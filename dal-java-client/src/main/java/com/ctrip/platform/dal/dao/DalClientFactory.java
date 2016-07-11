@@ -11,6 +11,7 @@ import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 
@@ -75,6 +76,9 @@ public class DalClientFactory {
 			
 			configureRef.set(config);
 		}
+		
+		// Post configure initialized
+		DalStatusManager.initialize(getAllDB());
 	}
 	
 	public static Set<String> getAllDB(){
@@ -151,6 +155,8 @@ public class DalClientFactory {
 				DalRequestExecutor.shutdown();
 				logger.info("Dal Java Client Factory is shutdown");
 
+				DalStatusManager.shutdown();
+				
 				DalWatcher.destroy();
 				logger.info("DalWatcher has been destoryed");
 			} catch (Throwable e) {

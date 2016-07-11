@@ -9,9 +9,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DbMeta;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class AutoMarkdownTest {
@@ -20,7 +21,7 @@ public class AutoMarkdownTest {
 
 	static{
 		try {
-			ConfigBeanFactory.init();
+			DalClientFactory.initClientFactory();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -29,18 +30,19 @@ public class AutoMarkdownTest {
 	
 	@Before
 	public void setUp(){
-		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(false);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(10000);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(10000);
-		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
-		ConfigBeanFactory.getMarkdownConfigBean().markup(dbName);
+		DalStatusManager.getTimeoutMarkdown().setEnabled(false);
+		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(10000);
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(10000);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		MarkdownManager.autoMarkdown(dbName);
+		MarkdownManager.autoMarkup(dbName);
 	}
 	
 	@Test
 	public void markdownSuccessTest() throws InterruptedException{
-		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(10);
+		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
+		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(5);
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(10);
 		
 		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
 		for (int i = 0; i < 10; i++) {
@@ -52,21 +54,21 @@ public class AutoMarkdownTest {
 	
 	@Test
 	public void markdownCanbeMarkupTest() throws Exception{
-		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
+		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
+		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(5);
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(1);
 		
 		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
 		for (int i = 0; i < 10; i++) {
 			MarkdownManager.detect(this.mockDalConnection(), 1000, this.mockTimeoutException());
 		}
 		Thread.sleep(1000);
-		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 		
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpVolume(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
-		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3");
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpVolume(1);
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(1);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpSchedule("3");
 		
 		Thread.sleep(2000); //Wait auto mark up delay
 		for (int i = 0; i < MarkupPhase.length; i++) {
@@ -77,32 +79,32 @@ public class AutoMarkdownTest {
 			}
 		}
 		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
-		Assert.assertFalse(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+		Assert.assertFalse(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 	}
 	
 	@Test
 	public void markdownDalayCantBeMarkupTest() throws Exception{
-		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
+		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
+		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(5);
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(1);
 		
 		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
 		for (int i = 0; i < 10; i++) {
 			MarkdownManager.detect(this.mockDalConnection(), 1000, this.mockTimeoutException());
 		}
 		Thread.sleep(1000);
-		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 		
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpVolume(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(10);
-		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
-		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3");
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpVolume(1);
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(10);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpSchedule("3");
 		
 		for (int i = 0; i < MarkupPhase.length; i++) {
 			Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
 		}
 
-		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 	}
 
 	private SQLException mockTimeoutException(){

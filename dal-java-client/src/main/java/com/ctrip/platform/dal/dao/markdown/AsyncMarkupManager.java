@@ -5,8 +5,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
-import com.ctrip.platform.dal.dao.configbeans.MarkdownConfigBean;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
+import com.ctrip.platform.dal.dao.status.MarkdownStatus;
 
 public class AsyncMarkupManager {
 	private static final int durations = 1000;
@@ -43,7 +43,7 @@ public class AsyncMarkupManager {
 		public void run() {
 			try {
 				for (AysncMarkupPhase pro : status.values()) {
-					MarkdownConfigBean mcb = ConfigBeanFactory.getMarkdownConfigBean();
+					MarkdownStatus mcb = DalStatusManager.getMarkdownStatus();
 					
 					//Roll back to the previous phase
 					if(pro.getRollbackCount() > 0){
@@ -64,7 +64,7 @@ public class AsyncMarkupManager {
 					}
 					//Marked up and reset the counter
 					if(pro.getPhaseIndex() >= mcb.getMarkUpSchedule().length){
-						ConfigBeanFactory.getMarkdownConfigBean().markup(pro.getName());
+						MarkdownManager.autoMarkup(pro.getName());
 						pro.resetConter();
 						pro.setPhaseIndex(0);
 					}

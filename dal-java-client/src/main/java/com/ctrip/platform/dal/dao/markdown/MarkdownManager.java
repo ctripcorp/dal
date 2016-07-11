@@ -13,8 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.client.DalConnection;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
-import com.ctrip.platform.dal.dao.configbeans.MarkdownConfigBean;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
+import com.ctrip.platform.dal.dao.status.DataSourceStatus;
+import com.ctrip.platform.dal.dao.status.MarkdownStatus;
 
 public class MarkdownManager {
 	private static Logger logger = LoggerFactory.getLogger(MarkdownManager.class);
@@ -58,22 +59,38 @@ public class MarkdownManager {
 			logger.info("Markdown Manager has been destoryed");
 		}
 	}
+	
+	public static void autoMarkdown(String dbname) {
+		DalStatusManager.getDataSourceStatus(dbname).setAutoMarkdown(true);
+	}
+
+	public static void autoMarkup(String dbname) {
+		DalStatusManager.getDataSourceStatus(dbname).setAutoMarkdown(false);
+
+		if(DalStatusManager.getMarkdownStatus().isEnableAutoMarkDown()){
+			MarkupManager.reset(dbname);
+		}	
+	}
 
 	public static boolean isMarkdown(String key) {
-		MarkdownConfigBean mcb = ConfigBeanFactory.getMarkdownConfigBean();
-		if (mcb.isAppMarkDown()) {
+		MarkdownStatus mcb = DalStatusManager.getMarkdownStatus();
+		if (mcb.isAppMarkDown())
 			return true;
-		}
-		Markdown item = mcb.getMarkItem(key);
-		if (item != null) {
-			// Manual markdeddown can only be markup manually.
-			if (!item.isAuto())
-				return true;
+		
+		boolean enableAutoMarkdown = mcb.isEnableAutoMarkDown();
+		DataSourceStatus item = DalStatusManager.getDataSourceStatus(key);
+		// Manual markdeddown can only be markup manually.
+		if (item.isManualMarkdown())
+			return true;
 
+		if(!enableAutoMarkdown)
+			return false;
+		
+		if (item.isAutoMarkdown()) {
 			// Timeout is not reached
-			if ((System.currentTimeMillis() - item.getMarkdownTime()) <= mcb.getAutoMarkUpDelay() * 1000)
+			if ((System.currentTimeMillis() - item.getAutoMarkdownTime()) <= mcb.getAutoMarkUpDelay() * 1000)
 				return true;
-
+	
 			if (!MarkupManager.isPass(key)) {
 				return true;
 			}
@@ -98,7 +115,7 @@ public class MarkdownManager {
 			try {
 				ErrorContext ctx = exqueue.poll();
 				while (ctx != null) {
-					if (!ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(
+					if (!DalStatusManager.getMarkdownStatus().isMarkdown(
 							ctx.getName())) {
 						for (ErrorDetector mk : detectorsRef.get()) {
 							mk.detect(ctx);

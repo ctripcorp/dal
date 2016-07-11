@@ -12,7 +12,7 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -29,8 +29,8 @@ public class MarkdownAndUpIntergration {
 	public void markdownSuccessTest() throws Exception {
 		String logicName = "dao_test";
 		//Mark Down
-		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
-		ConfigBeanFactory.getMarkdownConfigBean().markdown(logicName);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		MarkdownManager.autoMarkdown(logicName);
 		try{
 			this.testQuery(logicName);
 			Assert.fail();
@@ -39,7 +39,7 @@ public class MarkdownAndUpIntergration {
 					((DalException)e).getErrorCode());
 		}
 		//Mark up
-		ConfigBeanFactory.getMarkdownConfigBean().markup(logicName);
+		MarkdownManager.autoMarkup(logicName);
 		
 		try{
 			this.testQuery(logicName);		
@@ -52,18 +52,18 @@ public class MarkdownAndUpIntergration {
 	public void markdownMulipleSlavesTest(){
 		String logicName = "HA_Test";
 		
-		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
 		
-		//Mark Down
-		ConfigBeanFactory.getMarkdownConfigBean().markdown("ha_test_1");
-		ConfigBeanFactory.getMarkdownConfigBean().markdown("ha_test_2");		
+		//Mark Down. It has 3 slaves
+		MarkdownManager.autoMarkdown("ha_test_1");
+		MarkdownManager.autoMarkdown("ha_test_2");
 		try{
 			this.testQuery(logicName);		
 		}catch(Exception e){
 			Assert.fail();
 		}
 		
-		ConfigBeanFactory.getMarkdownConfigBean().markdown("ha_test");
+		MarkdownManager.autoMarkdown("ha_test");
 		try{
 			this.testQuery(logicName);
 			Assert.fail();
@@ -81,7 +81,6 @@ public class MarkdownAndUpIntergration {
 
 					@Override
 					public Integer extract(ResultSet rs) throws SQLException {
-						// TODO Auto-generated method stub
 						return null;
 					}
 				});

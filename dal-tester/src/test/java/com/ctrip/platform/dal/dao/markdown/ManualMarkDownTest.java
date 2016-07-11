@@ -5,14 +5,14 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
 
 public class ManualMarkDownTest {
 
 	private static final String dbName = "dao_test";
 	static{
 		try {
-			ConfigBeanFactory.getMarkdownConfigBean().init();
+//			DalStateManager.getMarkdownState().init();
 			DalClientFactory.initClientFactory();
 			DalClientFactory.getClient(dbName);
 		} catch (Exception e) {
@@ -23,35 +23,35 @@ public class ManualMarkDownTest {
 	
 	@Test
 	public void appMarkdownTest(){
-		ConfigBeanFactory.getMarkdownConfigBean().setAppMarkDown(true);
+		DalStatusManager.getMarkdownStatus().setAppMarkDown(true);
 		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
-		ConfigBeanFactory.getMarkdownConfigBean().setAppMarkDown(false);
+		DalStatusManager.getMarkdownStatus().setAppMarkDown(false);
 	}
 	
 	@Test
 	public void manualMarkdownTest() throws Exception {
-		ConfigBeanFactory.getMarkdownConfigBean().set("markDownKeys", dbName);
+		DalStatusManager.getDataSourceStatus(dbName).setManualMarkdown(true);
 		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
 	}
 
 	@Test
 	public void manualMarkdownCanBeMarkupTest() throws Exception{
-		ConfigBeanFactory.getMarkdownConfigBean().set("markDownKeys", dbName);
+		DalStatusManager.getDataSourceStatus(dbName).setManualMarkdown(true);
 		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
 		
-		ConfigBeanFactory.getMarkdownConfigBean().set("markDownKeys", "");
+		DalStatusManager.getDataSourceStatus(dbName).setManualMarkdown(false);
 		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
 	}
 	
 	@Test
 	public void manualMarkdownCantBeAutoMarkupTest() throws Exception{
-		ConfigBeanFactory.getMarkdownConfigBean().set("markDownKeys", dbName);
+		DalStatusManager.getDataSourceStatus(dbName).setManualMarkdown(true);
 		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
 		
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpVolume(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setAutoMarkUpDelay(1);
-		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
-		ConfigBeanFactory.getMarkdownConfigBean().set("autoMarkUpSchedule", "3,5");
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpVolume(1);
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(1);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpSchedule("3,5");
 		
 		Thread.sleep(2000);
 		

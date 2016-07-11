@@ -3,8 +3,8 @@ package com.ctrip.platform.dal.dao.markdown;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.client.DalLogger;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
-import com.ctrip.platform.dal.dao.configbeans.MarkdownConfigBean;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
+import com.ctrip.platform.dal.dao.status.MarkdownStatus;
 
 public class MarkupProcedure {
 	private DalLogger logger;
@@ -20,7 +20,7 @@ public class MarkupProcedure {
 	}
 	
 	public synchronized boolean isPass() {
-		MarkdownConfigBean mcb = ConfigBeanFactory.getMarkdownConfigBean();
+		MarkdownStatus mcb = DalStatusManager.getMarkdownStatus();
 		int autoMarkupCount = mcb.getAutoMarkUpVolume() * MarkupPhase.length;
 		
 		if(mcb.getAutoMarkUpVolume() <= 0){
@@ -40,7 +40,7 @@ public class MarkupProcedure {
 	}
 	
 	private boolean autoMarkup(){
-		ConfigBeanFactory.getMarkdownConfigBean().markup(this.name);
+		MarkdownManager.autoMarkup(name);
 		MarkupInfo marticsInfo = new MarkupInfo(this.name, Version.getVersion(), this.qualifies);
 		logger.info(String.format("Database %s has been marked up automatically", this.name));
 		logger.markup(marticsInfo);
@@ -49,8 +49,7 @@ public class MarkupProcedure {
 	}
 	
 	private void init(){
-		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
-				.getMarkUpSchedule();
+		int[] schedules = DalStatusManager.getMarkdownStatus().getMarkUpSchedule();
 		this.nextPhaseIndex = 1;
 		this.phase = new MarkupPhase(schedules[0]);
 	}
@@ -59,8 +58,7 @@ public class MarkupProcedure {
 		if(this.qualifies > 1){
 			this.qualifies --;
 		}
-		int[] schedules = ConfigBeanFactory.getMarkdownConfigBean()
-				.getMarkUpSchedule();
+		int[] schedules = DalStatusManager.getMarkdownStatus().getMarkUpSchedule();
 		if(this.nextPhaseIndex >= 1){
 			this.phase = new MarkupPhase(schedules[this.nextPhaseIndex - 1]);
 		}

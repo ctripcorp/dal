@@ -9,31 +9,6 @@
 	</context-param>
 	<display-name>DalTest</display-name>
 	<servlet>
-	  <servlet-name>AppInternalsServlet</servlet-name>
-	  <servlet-class>com.ctrip.platform.appinternals.AppInternalsServlet</servlet-class>
-	  <init-param>
-	  	  <param-name>appInfoUrl</param-name>
-	  	  <param-value>{$appInternals.appInfoUrl}</param-value>
-      </init-param>
-	  <init-param>
-      	  <param-name>permissions.read</param-name>
-          <param-value>{$appInternals.permissions.read}</param-value>
-      </init-param>
-	  <init-param>
-	      <param-name>permissions.write</param-name>
-	      <param-value>{$appInternals.permissions.write}</param-value>
-	  </init-param>
-	  <init-param>
-	      <param-name>domain</param-name><!-- Your real domain -->
-	      <param-value>dal.dev.nt.ctripcorp.com</param-value>
-	  </init-param>
-	  <init-param>
-	      <param-name>port</param-name><!-- Your public port to view and modify beans -->
-	      <param-value>80</param-value>
-	  </init-param>
-	  <load-on-startup>1</load-on-startup>
-	</servlet>
-	<servlet>
 		<description></description>
 		<display-name>DalDaoTest</display-name>
 		<servlet-name>DalDaoTest</servlet-name>
@@ -44,10 +19,6 @@
 	  <servlet-name>DalDaoTest</servlet-name>
 	  <url-pattern>/PeoplePortal/*</url-pattern>
 	</servlet-mapping>
-	<servlet-mapping>
-	  <servlet-name>AppInternalsServlet</servlet-name>
-	  <url-pattern>/appinternals/configurations/*</url-pattern>
-	</servlet-mapping>
 	<session-config>
 		<session-timeout>40</session-timeout>
 	</session-config>
@@ -57,4 +28,7 @@
 	<listener>
 		<listener-class>com.ctrip.platform.dal.dao.helper.DalClientFactoryListener</listener-class>
 	</listener>
+	<!-- <listener>
+		<listener-class>com.ctrip.framework.vi.VIServletContextListener</listener-class>
+	</listener> -->
 </web-app>

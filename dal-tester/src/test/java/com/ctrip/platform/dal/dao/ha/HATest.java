@@ -16,7 +16,7 @@ import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.client.DalHAManager;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.unitbase.Database;
 
 public class HATest {
@@ -32,8 +32,8 @@ public class HATest {
 				DatabaseCategory.MySql);
 		database3 = new Database("HA_Test_1", "dal_client_test", 
 				DatabaseCategory.MySql);
-		ConfigBeanFactory.getHAConfigBean().setEnable(true);
-		ConfigBeanFactory.getHAConfigBean().setRetryCount(3);
+		DalStatusManager.getHaStatus().setEnabled(true);
+		DalStatusManager.getHaStatus().setRetryCount(3);
 	}
 
 	@BeforeClass
@@ -224,8 +224,7 @@ public class HATest {
 
 	@Test
 	public void testHAWithMarkdowns() throws Exception{
-		ConfigBeanFactory.getMarkdownConfigBean().init();
-		ConfigBeanFactory.getMarkdownConfigBean().set("markDownKeys", "ha_test_1");//dao_test_1
+		DalStatusManager.getDataSourceStatus("ha_test_1").setManualMarkdown(true);
 		hints = new DalHints();
 		String sql = "SELECT Count(*) from " + database2.getTableName();
 		Integer count = 0;
@@ -254,7 +253,7 @@ public class HATest {
 				});
 		}catch(SQLException e){ }
 		Assert.assertEquals(3, count ==null ? 0 : count.intValue());
-		ConfigBeanFactory.getMarkdownConfigBean().set("markDownKeys", "");
+		DalStatusManager.getDataSourceStatus("ha_test_1").setManualMarkdown(false);
 	}
 	
 	private SQLException createException(int errorCode) {

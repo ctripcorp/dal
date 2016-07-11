@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.dao.markdown;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
 
 public class AysncMarkupPhase {
 	
@@ -23,7 +23,7 @@ public class AysncMarkupPhase {
 		this.totalCount.incrementAndGet();
 		boolean passed = true;
 		int index = this.getPhaseIndex();
-		int[] schedule = ConfigBeanFactory.getMarkdownConfigBean().getMarkUpSchedule();
+		int[] schedule = DalStatusManager.getMarkdownStatus().getMarkUpSchedule();
 		if(index <= schedule.length - 1 && random.nextInt(100)<= schedule[this.phaseIndex.get()] * 10){
 			passed = true;
 			this.passedCount.incrementAndGet();

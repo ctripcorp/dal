@@ -5,15 +5,15 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class AsyncMarkupManagerTest {
 	
 	public void asyncMarkupWithoutRollbackTest() throws InterruptedException {
 		final String dbName = "dao_test";
-		ConfigBeanFactory.getMarkdownConfigBean().markdown(dbName);
-		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+		MarkdownManager.autoMarkdown(dbName);
+		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 		
 		for (int i = 0; i < 10; i++) {
 			Thread tt = new Thread(new Runnable(){
@@ -32,21 +32,21 @@ public class AsyncMarkupManagerTest {
 					AysncMarkupPhase pro = AsyncMarkupManager.getStatus(dbName);
 					System.out.println("total: " + pro.getTotalCount() + ", passed: " + pro.getPassed() + 
 							", phase: " + pro.getPhaseIndex() + ", markdown: " + 
-							ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+							DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 				}});
 			tt.start();
 			tt.join();
 		}
 		
-		Assert.assertFalse(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+		Assert.assertFalse(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 	}
 	
 	@Test
 	public void asyncMarkupWithRollbackTest() throws InterruptedException{
 		final String dbName = "dao_test";
-		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
-		ConfigBeanFactory.getMarkdownConfigBean().markdown(dbName);
-		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		MarkdownManager.autoMarkdown(dbName);
+		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 		
 		for (int i = 0; i < 10; i++) {
 			Thread tt = new Thread(new Runnable(){
@@ -67,13 +67,13 @@ public class AsyncMarkupManagerTest {
 					AysncMarkupPhase pro = AsyncMarkupManager.getStatus(dbName);
 //					System.out.println("total: " + pro.getTotalCount() + ", passed: " + pro.getPassed() + 
 //							", phase: " + pro.getPhaseIndex() + ", markdown: " + 
-//							ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+//							DalStateManager.getMarkdownState().isMarkdown(dbName));
 				}});
 			tt.start();
 			tt.join();
 		}
 		
-		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 		Assert.assertEquals(0, AsyncMarkupManager.getStatus(dbName).getPhaseIndex());
 	}
 

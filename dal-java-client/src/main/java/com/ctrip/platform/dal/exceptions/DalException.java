@@ -2,8 +2,6 @@ package com.ctrip.platform.dal.exceptions;
 
 import java.sql.SQLException;
 
-import org.hamcrest.core.IsInstanceOf;
-
 public class DalException extends SQLException{
 	private static final long serialVersionUID = 1L;
 	private ErrorCode errorCode;

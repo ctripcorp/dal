@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class TimeoutDetectorTest {
@@ -19,20 +19,20 @@ public class TimeoutDetectorTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(10000);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercentReferCount(10000);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercentThreshold(1f);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setSamplingDuration(10000);
-		ConfigBeanFactory.getMarkdownConfigBean().markup(dbName);
+		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
+		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(10000);
+		DalStatusManager.getTimeoutMarkdown().setErrorPercentReferCount(10000);
+		DalStatusManager.getTimeoutMarkdown().setErrorPercentThreshold(1f);
+		DalStatusManager.getTimeoutMarkdown().setSamplingDuration(10000);
+		MarkdownManager.autoMarkup(dbName);
 	}
 	
 	@Test
 	public void countBaseLineMatchTest() {
 		TimeoutDetector detector = new TimeoutDetector();
-		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
+		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(5);
 		for (int i = 0; i < 10; i++) {
 			SQLException e = this.mockNotTimeoutException();
 			DatabaseCategory ct = DatabaseCategory.MySql;
@@ -43,16 +43,16 @@ public class TimeoutDetectorTest {
 			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
 			detector.detect(ctx);
 		}
-		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 	}
 	
 	
 	@Test
 	public void countBaseLineMatchButOverdueTest() {
 		TimeoutDetector detector = new TimeoutDetector();
-		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorCountThreshold(5);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setSamplingDuration(1);
+		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
+		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(5);
+		DalStatusManager.getTimeoutMarkdown().setSamplingDuration(1);
 		for (int i = 0; i < 10; i++) {
 			SQLException e = this.mockNotTimeoutException();
 			DatabaseCategory ct = DatabaseCategory.MySql;
@@ -71,16 +71,16 @@ public class TimeoutDetectorTest {
 			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
 			detector.detect(ctx);
 		}
-		Assert.assertFalse(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+		Assert.assertFalse(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 	}
 	
 	@Test
 	public void errorPercentMatchTest(){
 		TimeoutDetector detector = new TimeoutDetector();
-		ConfigBeanFactory.getTimeoutMarkDownBean().setEnableTimeoutMarkDown(true);
-		ConfigBeanFactory.getMarkdownConfigBean().setEnableAutoMarkDown(true);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercentReferCount(10);
-		ConfigBeanFactory.getTimeoutMarkDownBean().setErrorPercentThreshold(0.5f);
+		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		DalStatusManager.getTimeoutMarkdown().setErrorPercentReferCount(10);
+		DalStatusManager.getTimeoutMarkdown().setErrorPercentThreshold(0.5f);
 		for (int i = 0; i < 10; i++) {
 			SQLException e = this.mockNotTimeoutException();
 			DatabaseCategory ct = DatabaseCategory.MySql;
@@ -91,7 +91,7 @@ public class TimeoutDetectorTest {
 			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
 			detector.detect(ctx);
 		}
-		Assert.assertTrue(ConfigBeanFactory.getMarkdownConfigBean().isMarkdown(dbName));
+		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 	}
 	
 	@Test

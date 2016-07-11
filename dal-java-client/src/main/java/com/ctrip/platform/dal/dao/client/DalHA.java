@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.configbeans.ConfigBeanFactory;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
 
 public class DalHA {
 	private int retryCount = 0;
@@ -50,10 +50,10 @@ public class DalHA {
 		this.exception = ex;
 		this.increment();
 		if(dbCategory == DatabaseCategory.SqlServer)
-			this.retry = ConfigBeanFactory.getHAConfigBean()
+			this.retry = DalStatusManager.getHaStatus()
 				.getSqlservercodes().contains(this.exception.getErrorCode());
 		else{
-			this.retry = ConfigBeanFactory.getHAConfigBean()
+			this.retry = DalStatusManager.getHaStatus()
 					.getMysqlcodes().contains(this.exception.getErrorCode());
 		}
 	}
@@ -66,7 +66,7 @@ public class DalHA {
 
 	public boolean needTryAgain(){
 		return !this.isOver() && null != this.exception && 
-				this.retryCount < ConfigBeanFactory.getHAConfigBean().getRetryCount() && 
+				this.retryCount < DalStatusManager.getHaStatus().getRetryCount() && 
 				this.isRetry();
 	}
 	

@@ -22,7 +22,7 @@ public class MarkdownConfigBean extends BaseConfigBean {
 	@FieldInfo(name = "AutoMarkDowns", description = "AutoMarkDowns")
 	private String autoMarkDowns;
 	
-	@FieldInfo(name = "DatabaseSets", description = "DatabaseSets")
+	@FieldInfo(name = "DatabaseSetsName", description = "DatabaseSetsNames")
 	private String databaseSets;
 	
 	@FieldInfo(name = "AllInOneKeys", description = "AllInOneKeys")

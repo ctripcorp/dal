@@ -21,8 +21,8 @@ import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 public class DalStatusManager {
 	private static final String GLOBAL_CONFIG_DOMAIN_PREFIX = "com.ctrip.dal.client";
 	private static final String TYPE = "type";
-	private static final String LOGIC_DB_CONFIG_DOMAIN_PREFIX = "com.ctrip.dal.client.logicDb";
-	private static final String DATASOURCE_CONFIG_DOMAIN_PREFIX = "com.ctrip.dal.client.datasource";
+	private static final String LOGIC_DB_CONFIG_DOMAIN_PREFIX = "com.ctrip.dal.client.DatabaseSet";
+	private static final String DATASOURCE_CONFIG_DOMAIN_PREFIX = "com.ctrip.dal.client.DataSource";
 	
 	private static AtomicBoolean initialized = new AtomicBoolean(false);
 	private static AtomicReference<TimeoutMarkdown> timeoutMarkDownRef = new AtomicReference<>();

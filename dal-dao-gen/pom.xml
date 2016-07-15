@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-dao-gen</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.4</version>
     <packaging>war</packaging>
     <properties>
         <environment>open</environment>
@@ -14,7 +14,7 @@
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dao-gen-core</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.4</version>
         </dependency>
     </dependencies>
     <repositories>
@@ -78,7 +78,7 @@
                     <executions>
                         <execution>
                             <id>copy-resources</id>
-                            <phase>generate-resources</phase>
+                            <phase>prepare-package</phase>
                             <goals>
                                 <goal>copy-resources</goal>
                             </goals>
@@ -87,7 +87,7 @@
                                 </outputDirectory>
                                 <resources>
                                     <resource>
-                                        <directory>${project.basedir}/src/main/resources/${environment}
+                                        <directory>${project.build.directory}/classes
                                         </directory>
                                         <includes>
                                             <include>web.xml</include>

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.4</version>
     <packaging>war</packaging>
     <properties>
         <environment>local</environment>
@@ -15,34 +15,22 @@
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dao-gen-core</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-dao-gen</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.4</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-dao-gen</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.4</version>
             <type>warpath</type>
         </dependency>
     </dependencies>
     <profiles>
-        <profile>
-            <id>pub</id>
-            <properties>
-                <environment>pub</environment>
-            </properties>
-            <activation>
-                <property>
-                    <name>env</name>
-                    <value>release</value>
-                </property>
-            </activation>
-        </profile>
         <profile>
             <id>local</id>
             <properties>
@@ -55,12 +43,51 @@
                 </property>
             </activation>
         </profile>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <environment>dev</environment>
+            </properties>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>dev</value>
+                </property>
+            </activation>
+        </profile>
+        <profile>
+            <id>uat</id>
+            <properties>
+                <environment>uat</environment>
+            </properties>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>uat</value>
+                </property>
+            </activation>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <environment>prod</environment>
+            </properties>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>prod</value>
+                </property>
+            </activation>
+        </profile>
     </profiles>
     <build>
         <resources>
             <resource>
                 <directory>src/main/resources/${environment}</directory>
                 <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources/tars</directory>
             </resource>
             <resource>
                 <directory>src/main/resources/velocity</directory>
@@ -103,7 +130,7 @@
                 <executions>
                     <execution>
                         <id>copy-resources</id>
-                        <phase>generate-resources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -112,7 +139,7 @@
                             </outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/src/main/resources/${environment}
+                                    <directory>${project.build.directory}/classes
                                     </directory>
                                     <includes>
                                         <include>web.xml</include>

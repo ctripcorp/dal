@@ -9,16 +9,15 @@
 <!-- -->
 <configuration scan="true" scanPeriod="600 seconds" debug="false">
 
-	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
-		<encoder>
-			<pattern>[%5p][%d{MM-dd HH:mm:ss.SSS}][%t][%c:%L]-%m%n</pattern>
-		</encoder>
-	</appender>
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%5p][%d{MM-dd HH:mm:ss.SSS}][%t][%c:%L]-%m%n</pattern>
+        </encoder>
+    </appender>
 
- 
 
-	<root level="info">
-		<appender-ref ref="stdout" />
-	</root>
+    <root level="info">
+        <appender-ref ref="stdout"/>
+    </root>
 
 </configuration>

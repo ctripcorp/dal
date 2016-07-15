@@ -12,7 +12,7 @@
     </appender>
 
     <appender name="msgout" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="File" value="./codegen.msg.log"/>
+        <param name="File" value="/app/codegenlog/codegen.msg.log"/>
         <param name="Append" value="true"/>
         <param name="DatePattern" value="'.'yyyy-MM-dd'.log'"/>
         <layout class="org.apache.log4j.PatternLayout">
@@ -26,7 +26,7 @@
     </appender>
 
     <appender name="errorout" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="File" value="./codegen.error.log"/>
+        <param name="File" value="/app/codegenlog/codegen.error.log"/>
         <param name="Append" value="true"/>
         <param name="DatePattern" value="'.'yyyy-MM-dd'.log'"/>
         <layout class="org.apache.log4j.PatternLayout">

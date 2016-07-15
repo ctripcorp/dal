@@ -238,7 +238,7 @@ public class DbUtils {
             dbType = DbType.DateTimeOffset;
         } else if (dataType == Types.BIT && length > 1) {
             dbType = DbType.UInt64;
-        } else if (dataType == Types.TINYINT && !isUnsigned) {
+        } else if (dataType == Types.TINYINT && !isUnsigned && dbCategory == DatabaseCategory.MySql) {
             dbType = DbType.SByte;
         } else if (dataType == Types.SMALLINT && isUnsigned) {
             dbType = DbType.UInt16;

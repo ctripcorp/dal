@@ -29,6 +29,10 @@ public class CsharpColumnNameResultSetExtractor implements ResultSetExtractor<Li
     @Override
     public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
         List<AbstractParameterHost> allColumns = new ArrayList<>();
+        if (rs == null) {
+            return allColumns;
+        }
+
         Map<String, String> columnComment;
         try {
             columnComment = DbUtils.getSqlserverColumnComment(allInOneName, tableName);

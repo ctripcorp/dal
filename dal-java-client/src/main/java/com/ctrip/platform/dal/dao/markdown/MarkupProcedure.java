@@ -49,7 +49,7 @@ public class MarkupProcedure {
 	}
 	
 	private void init(){
-		int[] schedules = DalStatusManager.getMarkdownStatus().getMarkUpSchedule();
+		Integer[] schedules = DalStatusManager.getMarkdownStatus().getMarkUpSchedule();
 		this.nextPhaseIndex = 1;
 		this.phase = new MarkupPhase(schedules[0]);
 	}
@@ -58,7 +58,7 @@ public class MarkupProcedure {
 		if(this.qualifies > 1){
 			this.qualifies --;
 		}
-		int[] schedules = DalStatusManager.getMarkdownStatus().getMarkUpSchedule();
+		Integer[] schedules = DalStatusManager.getMarkdownStatus().getMarkUpSchedule();
 		if(this.nextPhaseIndex >= 1){
 			this.phase = new MarkupPhase(schedules[this.nextPhaseIndex - 1]);
 		}

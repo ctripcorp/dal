@@ -18,7 +18,7 @@ public class MarkdownStatus extends BaseStatus implements MarkdownStatusMBean {
 
 	private volatile int autoMarkUpDelay = 120;
 
-	private volatile int[] autoMarkUpSchedule = new int[] { 1, 3, 5 };
+	private volatile Integer[] autoMarkUpSchedule = new Integer[] { 1, 3, 5 };
 
 	public boolean isAppMarkDown() {
 		return this.appMarkDown;
@@ -72,11 +72,11 @@ public class MarkdownStatus extends BaseStatus implements MarkdownStatusMBean {
 		changed();
 	}
 
-	private int[] parseSchedule(String newAutoMarkUpSchedule) throws Exception {
+	private Integer[] parseSchedule(String newAutoMarkUpSchedule) throws Exception {
 		if (newAutoMarkUpSchedule == null || newAutoMarkUpSchedule.isEmpty())
 			throw new Exception("The value can't be empty");
 		String[] tokens = newAutoMarkUpSchedule.trim().split(",");
-		int[] temp = new int[tokens.length];
+		Integer[] temp = new Integer[tokens.length];
 		for (int i = 0; i < tokens.length; i++) {
 			temp[i] = Integer.parseInt(tokens[i]);
 			if (temp[i] < 1 || temp[i] > 9) {
@@ -91,7 +91,7 @@ public class MarkdownStatus extends BaseStatus implements MarkdownStatusMBean {
 		return temp;
 	}
 
-	public int[] getMarkUpSchedule() {
+	public Integer[] getMarkUpSchedule() {
 		return autoMarkUpSchedule;
 	}
 

@@ -23,7 +23,7 @@ public class AysncMarkupPhase {
 		this.totalCount.incrementAndGet();
 		boolean passed = true;
 		int index = this.getPhaseIndex();
-		int[] schedule = DalStatusManager.getMarkdownStatus().getMarkUpSchedule();
+		Integer[] schedule = DalStatusManager.getMarkdownStatus().getMarkUpSchedule();
 		if(index <= schedule.length - 1 && random.nextInt(100)<= schedule[this.phaseIndex.get()] * 10){
 			passed = true;
 			this.passedCount.incrementAndGet();

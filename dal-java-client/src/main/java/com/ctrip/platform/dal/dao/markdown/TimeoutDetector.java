@@ -6,14 +6,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.Version;
-import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.status.TimeoutMarkdown;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class TimeoutDetector implements ErrorDetector{
 	private Map<String, DetectorCounter> data = new ConcurrentHashMap<String, DetectorCounter>();
-	private DalLogger logger = DalClientFactory.getDalLogger();
 	
 	/**
 	 * This method will be invoked by one thread.
@@ -46,14 +44,14 @@ public class TimeoutDetector implements ErrorDetector{
 	private void markdown(String key, DetectorCounter dc, MarkDownReason reason){
 		if(DalStatusManager.getTimeoutMarkdown().isEnabled()){
 			MarkdownManager.autoMarkdown(key);
-			logger.info(String.format("Database %s has been marked down automatically", key));
+			DalClientFactory.getDalLogger().info(String.format("Database %s has been marked down automatically", key));
 		}
 		MarkDownInfo info = new MarkDownInfo(key, Version.getVersion(), MarkDownPolicy.TIMEOUT, dc.getDuration());
 		
 		info.setReason(reason);	
 		info.setTotal(dc.getRequestTimes());
 		info.setFail(dc.getErrors());
-		logger.markdown(info);
+		DalClientFactory.getDalLogger().markdown(info);
 		
 		dc.reset();
 	}

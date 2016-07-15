@@ -45,6 +45,9 @@ public class DalConnectionManager {
 		String realDbName = logicDbName;
 		try
 		{
+			if(DalStatusManager.getDatabaseSetStatus(logicDbName).isMarkdown())
+				throw new DalException(ErrorCode.MarkdownLogicDb, logicDbName);
+			
 			boolean isMaster = hints.is(DalHintEnum.masterOnly) || useMaster;
 			boolean isSelect = operation == DalEventEnum.QUERY;
 			

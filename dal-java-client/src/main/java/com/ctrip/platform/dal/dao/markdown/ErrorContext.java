@@ -7,19 +7,15 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 public class ErrorContext {
 	private String name;
 	private DatabaseCategory dbCategory;
-	private int errorCode;
-	private String msg;
+	private SQLException e;
 	private long cost;
-	private Class<?> exType;
 	private long time;
 	
 	public ErrorContext(String name, DatabaseCategory dbCategory, long cost, SQLException e){
 		this.name = name;
 		this.dbCategory = dbCategory;
 		this.cost = cost;
-		this.errorCode = e.getErrorCode();
-		this.exType = e.getClass();
-		this.msg = e.getMessage();
+		this.e = e;
 		this.time = System.currentTimeMillis();
 	}
 
@@ -32,11 +28,11 @@ public class ErrorContext {
 	}
 
 	public int getErrorCode() {
-		return errorCode;
+		return e.getErrorCode();
 	}
 
 	public Class<?> getExType() {
-		return exType;
+		return e.getClass();
 	}
 
 	public long getTime() {
@@ -48,6 +44,6 @@ public class ErrorContext {
 	}
 
 	public String getMsg() {
-		return msg;
+		return e.getMessage();
 	}
 }

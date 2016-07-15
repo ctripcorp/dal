@@ -1,26 +1,33 @@
 package com.ctrip.platform.dal.dao.markdown;
 
+import java.sql.SQLException;
+
 import junit.framework.Assert;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 
 public class ManualMarkDownTest {
 
 	private static final String dbName = "dao_test";
-	static{
+
+	@BeforeClass
+	public static void setUpBeforeClass() {
 		try {
-//			DalStateManager.getMarkdownState().init();
 			DalClientFactory.initClientFactory();
-			DalClientFactory.getClient(dbName);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			Assert.fail();
 		}
 	}
-	
+
 	@Test
 	public void appMarkdownTest(){
 		DalStatusManager.getMarkdownStatus().setAppMarkDown(true);
@@ -61,4 +68,24 @@ public class ManualMarkDownTest {
 		
 		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
 	}
+
+	@Test
+	public void logicDbMarkdownTest(){
+		String logicDb = "dao_test_sqlsvr_tableShard_simple";
+		
+		DalStatusManager.getDatabaseSetStatus(logicDb).setMarkdown(true);
+		DalClient client = DalClientFactory.getClient(logicDb);
+		try {
+			client.query("select 1", new StatementParameters(), new DalHints(), new DalScalarExtractor());
+			Assert.fail();
+		} catch (SQLException e) {
+		}
+		
+		DalStatusManager.getDatabaseSetStatus(logicDb).setMarkdown(false);
+		try {
+			client.query("select 1", new StatementParameters(), new DalHints(), new DalScalarExtractor());
+		} catch (SQLException e) {
+			Assert.fail();
+		}
+	}	
 }

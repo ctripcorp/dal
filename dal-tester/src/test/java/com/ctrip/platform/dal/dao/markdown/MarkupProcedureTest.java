@@ -3,21 +3,23 @@ package com.ctrip.platform.dal.dao.markdown;
 import junit.framework.Assert;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 
 public class MarkupProcedureTest {
-
-	static{
+	@BeforeClass
+	public static void setUpBeforeClass() {
 		try {
-//			DalStateManager.getMarkdownState().init();
+			DalClientFactory.initClientFactory();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			Assert.fail();
 		}
 	}
-	
+		
 	@Before
 	public void setUp() throws Exception{
 		DalStatusManager.getMarkdownStatus().setAutoMarkUpVolume(1000);

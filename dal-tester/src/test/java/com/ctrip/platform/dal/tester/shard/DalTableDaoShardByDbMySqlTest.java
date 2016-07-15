@@ -40,17 +40,10 @@ public class DalTableDaoShardByDbMySqlTest extends BaseDalTableDaoShardByDbTest 
 	
 	private static DalClient clientMySql;
 	
-	static {
-		try {
-			DalClientFactory.initClientFactory();
-			clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		DalClientFactory.initClientFactory();
+		clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
 		DalHints hints = new DalHints();
 		String[] sqls = null;
 		for(int i = 0; i < mod; i++) {

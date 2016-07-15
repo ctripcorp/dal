@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 
 /**
@@ -27,20 +28,23 @@ public class DalStatusManager {
 	private static AtomicReference<TimeoutMarkdown> timeoutMarkDownRef = new AtomicReference<>();
 	private static AtomicReference<HAStatus> haStatusRef = new AtomicReference<>();
 	private static AtomicReference<MarkdownStatus> markdownStatusRef = new AtomicReference<>();
+	private static Map<String, DatabaseSetStatus> logicDbs = new ConcurrentHashMap<>();
 	private static Map<String, DataSourceStatus> dataSources = new ConcurrentHashMap<>();
 	
-	public static synchronized void initialize(Set<String> dbNames) {
-		try {
+	public static void initialize(DalConfigure config) throws Exception {
+		if(initialized.get() == true)
+			return;
+		
+		synchronized (DalStatusManager.class) {
 			if(initialized.get() == true)
 				return;
-			
+
 			registerGlobal();
-			registerDataSources(dbNames);
+			registerDatabaseSets(config.getDatabaseSetNames());
+			registerDataSources(config.getDataSourceNames());
 			MarkdownManager.init();
 			
 			initialized.set(true);;
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -57,10 +61,20 @@ public class DalStatusManager {
 		mbs.registerMBean(markdownStatusRef.get(), getGlobalName(MarkdownStatus.class));
 	}
 
-	private static void registerDataSources(Set<String> dbNames) throws Exception {
+	private static void registerDatabaseSets(Set<String> logicDbNames) throws Exception {
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		
-		for(String name: dbNames) {
+		for(String name: logicDbNames) {
+			DatabaseSetStatus status = new DatabaseSetStatus(name);
+			mbs.registerMBean(status, new ObjectName(LOGIC_DB_CONFIG_DOMAIN_PREFIX, TYPE, name));
+			logicDbs.put(name, status);
+		}
+	}
+
+	private static void registerDataSources(Set<String> datasourceNames) throws Exception {
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		
+		for(String name: datasourceNames) {
 			DataSourceStatus status = new DataSourceStatus(name);
 			mbs.registerMBean(status, new ObjectName(DATASOURCE_CONFIG_DOMAIN_PREFIX, TYPE, name));
 			dataSources.put(name, status);
@@ -68,14 +82,24 @@ public class DalStatusManager {
 	}
 	
 	public static synchronized void shutdown() throws Exception {
+		if(initialized.get() == false)
+			return;
+		
 		MarkdownManager.shutdown();
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		mbs.unregisterMBean(getGlobalName(HAStatus.class));
 		mbs.unregisterMBean(getGlobalName(TimeoutMarkdown.class));
 		mbs.unregisterMBean(getGlobalName(MarkdownStatus.class));
+		
 		for(String name: dataSources.keySet())
 			mbs.unregisterMBean(new ObjectName(DATASOURCE_CONFIG_DOMAIN_PREFIX, TYPE, name));
 		dataSources.clear();
+		
+		for(String name: logicDbs.keySet())
+			mbs.unregisterMBean(new ObjectName(LOGIC_DB_CONFIG_DOMAIN_PREFIX, TYPE, name));
+		logicDbs.clear();
+		
+		initialized.set(false);
 	}
 	
 	private static ObjectName getGlobalName(Class clazz) throws Exception {
@@ -92,6 +116,10 @@ public class DalStatusManager {
 
 	public static MarkdownStatus getMarkdownStatus() {
 		return markdownStatusRef.get();
+	}
+	
+	public static DatabaseSetStatus getDatabaseSetStatus(String dbName) {
+		return logicDbs.get(dbName);
 	}
 	
 	public static DataSourceStatus getDataSourceStatus(String dbName) {

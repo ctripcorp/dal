@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -25,21 +26,24 @@ public class HATest {
 	private static Database database3 = null;
 	private static DalHints hints = new DalHints();
 	private static int markCount = 0;
-	static {
-		database = new Database("HA_Test_0", "dal_client_test",
-				DatabaseCategory.MySql);
-		database2 = new Database("HA_Test", "dal_client_test",
-				DatabaseCategory.MySql);
-		database3 = new Database("HA_Test_1", "dal_client_test", 
-				DatabaseCategory.MySql);
-		DalStatusManager.getHaStatus().setEnabled(true);
-		DalStatusManager.getHaStatus().setRetryCount(3);
-	}
 
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		database.init();
-		//database2.init();
+	public static void setUpBeforeClass() {
+		try {
+			DalClientFactory.initClientFactory();
+			database = new Database("HA_Test_0", "dal_client_test",
+					DatabaseCategory.MySql);
+			database2 = new Database("HA_Test", "dal_client_test",
+					DatabaseCategory.MySql);
+			database3 = new Database("HA_Test_1", "dal_client_test", 
+					DatabaseCategory.MySql);
+			DalStatusManager.getHaStatus().setEnabled(true);
+			DalStatusManager.getHaStatus().setRetryCount(3);
+			database.init();
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
 	}
 
 	@AfterClass

@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.dao.unittests;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.util.HashSet;
@@ -29,11 +28,6 @@ public class DalClientFactoryTest {
 	@Test
 	public void testInitClientFactoryString() {
 //		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetAllDB() {
-		assertEquals(16, DalClientFactory.getAllDB().size());
 	}
 
 	@Test
@@ -84,7 +78,7 @@ public class DalClientFactoryTest {
 	@Test
 	public void testShutdownFactory() {
 		try {
-			DalClientFactory.getAllDB();
+			DalClientFactory.getDalConfigure();
 			DalClientFactory.shutdownFactory();
 			DalClientFactory.shutdownFactory();
 			DalClientFactory.shutdownFactory();

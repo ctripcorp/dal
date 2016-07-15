@@ -60,7 +60,11 @@ public class DalConfigure {
 		}
 	}
 	
-	public Set<String> getAllDB(){
+	public Set<String> getDatabaseSetNames() {
+		return databaseSets.keySet();
+	}
+	
+	public Set<String> getDataSourceNames(){
 		Set<String> alldbs = new HashSet<String>();
 		for (DatabaseSet set : this.databaseSets.values()) {
 			for (DataBase db : set.getDatabases().values()) {

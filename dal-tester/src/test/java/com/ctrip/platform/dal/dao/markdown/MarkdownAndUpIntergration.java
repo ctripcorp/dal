@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import junit.framework.Assert;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClient;
@@ -17,14 +18,16 @@ import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class MarkdownAndUpIntergration {
-	static{
+	@BeforeClass
+	public static void setUpBeforeClass() {
 		try {
 			DalClientFactory.initClientFactory();
 		} catch (Exception e) {
 			e.printStackTrace();
+			Assert.fail();
 		}
 	}
-	
+		
 	@Test
 	public void markdownSuccessTest() throws Exception {
 		String logicName = "dao_test";

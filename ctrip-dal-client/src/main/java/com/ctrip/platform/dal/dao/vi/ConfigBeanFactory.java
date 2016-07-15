@@ -7,5 +7,8 @@ public class ConfigBeanFactory {
 		ComponentManager.register(HAConfigBean.class);
 		ComponentManager.register(MarkdownConfigBean.class);
 		ComponentManager.register(TimeoutMarkDownBean.class);
+		
+		ComponentManager.register(DatabaseSetConfig.class);
+		ComponentManager.register(DataSourceConfig.class);
 	}
 }

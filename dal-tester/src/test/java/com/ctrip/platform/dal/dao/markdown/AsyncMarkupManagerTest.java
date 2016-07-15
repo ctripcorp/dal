@@ -2,13 +2,24 @@ package com.ctrip.platform.dal.dao.markdown;
 
 import junit.framework.Assert;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class AsyncMarkupManagerTest {
+	@BeforeClass
+	public static void setUpBeforeClass() {
+		try {
+			DalClientFactory.initClientFactory();
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
 	
 	public void asyncMarkupWithoutRollbackTest() throws InterruptedException {
 		final String dbName = "dao_test";

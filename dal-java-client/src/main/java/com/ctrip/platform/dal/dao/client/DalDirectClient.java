@@ -269,26 +269,15 @@ public class DalDirectClient implements DalClient {
 	}
 	
 	private Map<String, Object> extractReturnedResults(CallableStatement statement, List<StatementParameter> resultParameters, int updateCount, DalHints hints) throws SQLException {
-
 		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
-		boolean moreResults;
-		if(hints != null && hints.is(DalHintEnum.skipResultsProcessing))
+		if(hints.is(DalHintEnum.skipResultsProcessing) || resultParameters.size() == 0)
 			return returnedResults;
 
-//		boolean skipUndeclaredResults = hints != null && hints.contains(DalHintEnum.skipUndeclaredResults);
-		if(resultParameters.size() == 0) {
-			// Just filter out all return values
-			do {
-				moreResults = statement.getMoreResults();
-				updateCount = statement.getUpdateCount();
-			}
-			while (moreResults || updateCount != -1);
-			return returnedResults;
-		}
-		
+		boolean moreResults;
 		int index = 0;
 		do {
-			
+			// If resultParameters is not the same as what exactly returned, there will be exception. You just
+			// need to add enough result parameter to avoid this or you can set skipResultsProcessing
 			String key = resultParameters.get(index).getName();
 			Object value = updateCount == -1?
 				resultParameters.get(index).getResultSetExtractor().extract(statement.getResultSet()) :

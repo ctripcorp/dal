@@ -29,17 +29,10 @@ public class MySqlTestInitializer {
 	
 	private static DalClient clientMySql;
 	
-	static {
-		try {
-			DalClientFactory.initClientFactory();
-			clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		DalClientFactory.initClientFactory();
+		clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
 		DalHints hints = new DalHints();
 		String[] sqls = new String[] {DROP_TABLE_SQL_MYSQL_TPL, CREATE_TABLE_SQL_MYSQL_TPL};
 		clientMySql.batchUpdate(sqls, hints);

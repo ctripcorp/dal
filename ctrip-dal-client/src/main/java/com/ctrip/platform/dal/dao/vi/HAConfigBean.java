@@ -5,7 +5,7 @@ import com.ctrip.framework.vi.annotation.FieldInfo;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.status.HAStatus;
 
-@ComponentStatus(id="arch-data-common-bean-haconfigbean",name="arch-data-common-bean-haconfigbean",description = "DAL HA Config")
+@ComponentStatus(id="com.ctrip.dal.client.HAConfigBean",name="com.ctrip.dal.client.HAConfigBean",description = "DAL HA Config")
 public class HAConfigBean extends BaseConfigBean {
 	@FieldInfo(name = "HAEnabled", description = "HAEnabled")
 	private boolean enable;

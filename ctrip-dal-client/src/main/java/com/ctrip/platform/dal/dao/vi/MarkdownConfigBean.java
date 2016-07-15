@@ -5,7 +5,7 @@ import com.ctrip.framework.vi.annotation.FieldInfo;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.status.MarkdownStatus;
 
-@ComponentStatus(id="arch-data-common-bean-markdownbean",name="arch-data-common-bean-markdownbean",description = "DAL Markdown Overview")
+@ComponentStatus(id="com.ctrip.dal.client.MarkdownConfigBean",name="com.ctrip.dal.client.MarkdownConfigBean",description = "DAL Markdown Overview")
 public class MarkdownConfigBean extends BaseConfigBean {
 	@FieldInfo(name = "AppMarkDown", description = "AppMarkDown")
 	private boolean appMarkDown = false;

@@ -14,7 +14,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	MarkupProcedureTest.class,
 	ManualMarkDownTest.class,
 	TimeBucketCounterTest.class,
-	AsyncMarkupManagerTest.class})
+	AsyncMarkupManagerTest.class,
+	})
 public class AllTests {
 
 }

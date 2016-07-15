@@ -5,7 +5,7 @@ import com.ctrip.framework.vi.annotation.FieldInfo;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.status.TimeoutMarkdown;
 
-@ComponentStatus(id="arch-data-common-bean-timeoutmarkdownbean",name="arch-data-common-bean-timeoutmarkdownbean",description = "DAL Timeout Markdown config")
+@ComponentStatus(id="com.ctrip.dal.client.TimeoutMarkDownBean",name="com.ctrip.dal.client.TimeoutMarkDownBean",description = "DAL Timeout Markdown config")
 public class TimeoutMarkDownBean extends BaseConfigBean {
 	@FieldInfo(name = "EnableTimeoutMarkDown", description = "EnableTimeoutMarkDown")
 	private boolean enableTimeoutMarkDown = false;

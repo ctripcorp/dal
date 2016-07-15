@@ -97,7 +97,7 @@ public class MarkdownStatus extends BaseStatus implements MarkdownStatusMBean {
 
 	public String getMarkDownKeys() {
 		Set<String> names = new HashSet<>();
-		for(String dbName: DalClientFactory.getAllDB()){
+		for(String dbName: DalClientFactory.getDalConfigure().getDataSourceNames()){
 			if(isMarkdown(dbName))
 				names.add(dbName);
 		}
@@ -106,12 +106,12 @@ public class MarkdownStatus extends BaseStatus implements MarkdownStatusMBean {
 	}
 
 	public String getDataSourceNames() {
-		return StringUtils.join(DalClientFactory.getAllDB(), ",");
+		return StringUtils.join(DalClientFactory.getDalConfigure().getDataSourceNames(), ",");
 	}
 
 	public String getAutoMarkDowns() {
 		Set<String> names = new HashSet<>();
-		for(String dbName: DalClientFactory.getAllDB()){
+		for(String dbName: DalClientFactory.getDalConfigure().getDataSourceNames()){
 			DataSourceStatus dss = DalStatusManager.getDataSourceStatus(dbName);
 			if(dss.isAutoMarkdown())
 				names.add(dbName);

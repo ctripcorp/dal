@@ -43,17 +43,10 @@ public class DalTableDaoShardByDbTest extends BaseDalTableDaoShardByDbTest {
 	
 	private static DalClient clientSqlSvr;
 	
-	static {
-		try {
-			DalClientFactory.initClientFactory();
-			clientSqlSvr = DalClientFactory.getClient(DATABASE_NAME_SQLSVR);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		DalClientFactory.initClientFactory();
+		clientSqlSvr = DalClientFactory.getClient(DATABASE_NAME_SQLSVR);
 		DalHints hints = new DalHints();
 		String[] sqls = null;
 		// For SQL server

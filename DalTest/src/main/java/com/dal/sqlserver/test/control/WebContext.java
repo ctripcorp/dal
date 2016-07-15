@@ -1,17 +1,12 @@
 package com.dal.sqlserver.test.control;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.KeyHolder;
-import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 import com.dal.sqlserver.test.People;
 import com.dal.sqlserver.test.PeopleDao;
 import com.xross.tools.xunit.Context;
@@ -112,6 +107,11 @@ public class WebContext implements Context {
 	public Integer getInt(String name) {
 		String value = request.getParameter(name);
 		return value == null || value.length() == 0 ? null : Integer.parseInt(value);
+	}
+
+	public Boolean getBoolean(String name) {
+		String value = request.getParameter(name);
+		return value == null || value.length() == 0 ? false : Boolean.parseBoolean(value);
 	}
 
 	public Long getLong(String name) {

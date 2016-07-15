@@ -6,6 +6,7 @@ import junit.framework.Assert;
 
 import org.easymock.classextension.EasyMock;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
@@ -18,13 +19,14 @@ import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 public class AutoMarkdownTest {
 
 	private static final String dbName = "dao_test";
-
-	static{
+	
+	@BeforeClass
+	public static void setUpBeforeClass() {
 		try {
 			DalClientFactory.initClientFactory();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			Assert.fail();
 		}
 	}
 	

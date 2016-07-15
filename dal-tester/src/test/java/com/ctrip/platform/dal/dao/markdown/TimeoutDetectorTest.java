@@ -6,9 +6,11 @@ import java.util.Random;
 import junit.framework.Assert;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
@@ -16,6 +18,15 @@ public class TimeoutDetectorTest {
 	
 	private Random random = new Random();
 	private String dbName = "dao_test";
+	
+	public static void setUpBeforeClass() {
+		try {
+			DalClientFactory.initClientFactory();
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
 	
 	@Before
 	public void setUp() throws Exception {

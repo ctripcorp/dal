@@ -34,14 +34,14 @@ public class MarkdownManager {
 				return;
 			
 			ArrayList<ErrorDetector> detectors = new ArrayList<ErrorDetector>();
+			// We currently only have Timeout case
 			detectors.add(new TimeoutDetector());
-			detectors.add(new LoginFailDetector());
-			detectors.add(new NullObjectDetector());
 
 			detectorsRef.set(detectors);
 			ScheduledExecutorService manager = Executors.newSingleThreadScheduledExecutor();
 			manager.scheduleAtFixedRate(new CollectExceptionTask(), durations,
 					durations, TimeUnit.MICROSECONDS);
+
 			managerRef.set(manager);
 		}
 	}
@@ -77,36 +77,40 @@ public class MarkdownManager {
 		if (mcb.isAppMarkDown())
 			return true;
 		
-		boolean enableAutoMarkdown = mcb.isEnableAutoMarkDown();
 		DataSourceStatus item = DalStatusManager.getDataSourceStatus(key);
-		// Manual markdeddown can only be markup manually.
+
+		// Manual markdown can only be markup manually.
 		if (item.isManualMarkdown())
 			return true;
 
-		if(!enableAutoMarkdown)
+		if(!mcb.isEnableAutoMarkDown())
 			return false;
 		
-		if (item.isAutoMarkdown()) {
-			// Timeout is not reached
-			if ((System.currentTimeMillis() - item.getAutoMarkdownTime()) <= mcb.getAutoMarkUpDelay() * 1000)
-				return true;
+		if (!item.isAutoMarkdown())
+			return false;
+
+		// Timeout is not reached
+		if ((System.currentTimeMillis() - item.getAutoMarkdownTime()) <= mcb.getAutoMarkUpDelay() * 1000)
+			return true;
 	
-			if (!MarkupManager.isPass(key)) {
-				return true;
-			}
-		}
-		return false;
+		if (MarkupManager.isPass(key))
+			return false;
+
+		return true;
 	}
 
 	public static void detect(DalConnection conn, long start, Throwable e) {
-		long cost = System.currentTimeMillis() - start;
-		if (conn != null && conn.getMeta() != null && e instanceof SQLException) {
-			ErrorContext ctx = new ErrorContext(
-					conn.getMeta().getAllInOneKey(), conn.getMeta()
-							.getDatabaseCategory(), cost, (SQLException) e);
-			exqueue.add(ctx);
-			MarkupManager.rollback(ctx);
-		}
+		if (conn == null || conn.getMeta() == null || !(e instanceof SQLException))
+			return;
+			
+		ErrorContext ctx = new ErrorContext(
+				conn.getMeta().getAllInOneKey(), 
+				conn.getMeta().getDatabaseCategory(), 
+				System.currentTimeMillis() - start, 
+				(SQLException) e);
+		
+		exqueue.add(ctx);
+		MarkupManager.rollback(ctx);
 	}
 	
 	private static class CollectExceptionTask implements Runnable {
@@ -115,8 +119,7 @@ public class MarkdownManager {
 			try {
 				ErrorContext ctx = exqueue.poll();
 				while (ctx != null) {
-					if (!DalStatusManager.getMarkdownStatus().isMarkdown(
-							ctx.getName())) {
+					if (!DalStatusManager.getMarkdownStatus().isMarkdown(ctx.getName())) {
 						for (ErrorDetector mk : detectorsRef.get()) {
 							mk.detect(ctx);
 						}
@@ -127,9 +130,5 @@ public class MarkdownManager {
 				e.printStackTrace();
 			}
 		}
-	}
-	
-	public static String getDebugInfo(String key){
-		return ((TimeoutDetector)detectorsRef.get().get(0)).toDebugInfo(key);
 	}
 }

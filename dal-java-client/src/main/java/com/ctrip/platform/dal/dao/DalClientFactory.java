@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.dao;
 
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
@@ -73,18 +72,13 @@ public class DalClientFactory {
 			
 			DalWatcher.init();
 			DalRequestExecutor.init(config.getFacory().getProperty(DalRequestExecutor.MAX_POOL_SIZE));
+			DalStatusManager.initialize(config);
 			
 			configureRef.set(config);
+			
 		}
-		
-		// Post configure initialized
-		DalStatusManager.initialize(getAllDB());
 	}
 	
-	public static Set<String> getAllDB(){
-		return getDalConfigure().getAllDB();
-	}
-
 	/**
 	 * Actively initialize connection pools for all the logic db in the
 	 * Dal.config

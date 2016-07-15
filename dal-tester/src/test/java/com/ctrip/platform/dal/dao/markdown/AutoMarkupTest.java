@@ -6,21 +6,25 @@ import java.util.Random;
 import junit.framework.Assert;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class AutoMarkupTest {
 
 	private static final String dbName = "dao_test";
-	static{
+
+	@BeforeClass
+	public static void setUpBeforeClass() {
 		try {
-//			DalStateManager.getTimeoutMarkDown().init();
-//			DalStateManager.getMarkdownState().init();
+			DalClientFactory.initClientFactory();
 		} catch (Exception e) {
 			e.printStackTrace();
+			Assert.fail();
 		}
 	}
 	

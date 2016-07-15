@@ -54,6 +54,25 @@ public class ActionCategoryLocator implements Locator {
 		ops.add("decrypt");
 		ops.add("checkConnection");
 		operationMap.put("management", ops);
+
+		ops = new HashSet<>();
+		ops.add("markdownApp");
+		ops.add("markupApp");
+		ops.add("enableAutoMarkdown");
+		ops.add("diableAutoMarkdown");
+		ops.add("markupAllDb");
+		ops.add("markdownByName");
+		ops.add("markdownBothSimpleShard");
+		ops.add("setAutoMarkupBatch");
+		ops.add("setAutoMarkupDelay");
+		ops.add("enableTimeoutMarkdown");
+		ops.add("setErrorCountThreshold");
+		ops.add("setSamplingDuration");
+		ops.add("setErrorPercentThreshold");
+		ops.add("setErrorPercentReferCount");
+		ops.add("setMySqlErrorCodes");
+		ops.add("setSqlServerErrorCodes");
+		operationMap.put("markdown", ops);
 	}
 
 	@Override

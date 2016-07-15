@@ -22,6 +22,8 @@ public interface MarkdownStatusMBean {
 
 	void setAutoMarkUpDelay(int autoMarkUpDelay);
 
+	String getDatabaseSetNames();
+
 	String getDataSourceNames();
 
 	String getMarkDownKeys();

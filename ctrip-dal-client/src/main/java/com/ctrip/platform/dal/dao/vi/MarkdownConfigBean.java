@@ -8,28 +8,31 @@ import com.ctrip.platform.dal.dao.status.MarkdownStatus;
 @ComponentStatus(id="com.ctrip.dal.client.MarkdownConfigBean",name="com.ctrip.dal.client.MarkdownConfigBean",description = "DAL Markdown Overview")
 public class MarkdownConfigBean extends BaseConfigBean {
 	@FieldInfo(name = "AppMarkDown", description = "AppMarkDown")
-	private boolean appMarkDown = false;
+	private boolean appMarkDown;
 
 	@FieldInfo(name = "EnableAutoMarkDown", description = "EnableAutoMarkDown")
-	private boolean enableAutoMarkDown = false;
+	private boolean enableAutoMarkDown;
 
 	@FieldInfo(name = "AutoMarkUpBatches", description = "AutoMarkUpBatches")
-	private int autoMarkUpVolume = -1;
+	private int autoMarkUpVolume;
 
 	@FieldInfo(name = "MarkDownKeys", description = "MarkDownKeys")
-	private String markDownKeys = "";
+	private String markDownKeys;
 
 	@FieldInfo(name = "AutoMarkDowns", description = "AutoMarkDowns")
-	private String autoMarkDowns="";
+	private String autoMarkDowns;
+	
+	@FieldInfo(name = "DatabaseSets", description = "DatabaseSets")
+	private String databaseSets;
 	
 	@FieldInfo(name = "AllInOneKeys", description = "AllInOneKeys")
-	private String allInOneKeys = "";
+	private String allInOneKeys;
 
 	@FieldInfo(name = "AutoMarkUpSchedule", description = "AutoMarkUpSchedule")
-	private String autoMarkUpSchedule = "1,3,5";
+	private String autoMarkUpSchedule;
 
 	@FieldInfo(name = "AutoMarkUpDelay", description = "AutoMarkUpDelay")
-	private int autoMarkUpDelay = 120;
+	private int autoMarkUpDelay;
 
 	public boolean isAppMarkDown() {
 		return this.appMarkDown;
@@ -49,6 +52,10 @@ public class MarkdownConfigBean extends BaseConfigBean {
 
 	public String getAllInOneKeys() {
 		return this.allInOneKeys;
+	}
+
+	public String getDatabaseSets() {
+		return databaseSets;
 	}
 
 	public boolean isEnableAutoMarkDown() {
@@ -99,5 +106,6 @@ public class MarkdownConfigBean extends BaseConfigBean {
 		allInOneKeys = ms.getDataSourceNames();
 		autoMarkUpSchedule = ms.getAutoMarkUpSchedule();
 		autoMarkUpDelay = ms.getAutoMarkUpDelay();
+		databaseSets = ms.getDatabaseSetNames();
 	}
 }

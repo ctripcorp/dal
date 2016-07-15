@@ -109,6 +109,10 @@ public class MarkdownStatus extends BaseStatus implements MarkdownStatusMBean {
 		return StringUtils.join(DalClientFactory.getDalConfigure().getDataSourceNames(), ",");
 	}
 
+	public String getDatabaseSetNames() {
+		return StringUtils.join(DalClientFactory.getDalConfigure().getDatabaseSetNames(), ",");
+	}
+	
 	public String getAutoMarkDowns() {
 		Set<String> names = new HashSet<>();
 		for(String dbName: DalClientFactory.getDalConfigure().getDataSourceNames()){

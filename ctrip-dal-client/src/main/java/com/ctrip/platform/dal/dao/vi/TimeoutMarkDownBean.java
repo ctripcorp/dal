@@ -8,28 +8,28 @@ import com.ctrip.platform.dal.dao.status.TimeoutMarkdown;
 @ComponentStatus(id="com.ctrip.dal.client.TimeoutMarkDownBean",name="com.ctrip.dal.client.TimeoutMarkDownBean",description = "DAL Timeout Markdown config")
 public class TimeoutMarkDownBean extends BaseConfigBean {
 	@FieldInfo(name = "EnableTimeoutMarkDown", description = "EnableTimeoutMarkDown")
-	private boolean enableTimeoutMarkDown = false;
+	private boolean enableTimeoutMarkDown;
 
 	@FieldInfo(name = "SamplingDuration", description = "SamplingDuration")
-    private int samplingDuration = 120;
+    private int samplingDuration;
 
 	@FieldInfo(name = "TimeoutThreshold", description = "TimeoutThreshold")
-	private int timeoutThreshold = 60;
+	private int timeoutThreshold;
 
 	@FieldInfo(name = "ErrorCountThreshold", description = "ErrorCountThreshold")
-    private int errorCountThreshold = 300;
+    private int errorCountThreshold;
 
 	@FieldInfo(name = "ErrorPercentThreshold", description = "ErrorPercentThreshold")
-    private float errorPercentThreshold = 0.5f;
+    private float errorPercentThreshold;
 
 	@FieldInfo(name = "ErrorPercentReferCount", description = "ErrorPercentReferCount")
-	private int errorPercentReferCount = 400;
+	private int errorPercentReferCount;
 	
 	@FieldInfo(name = "MySqlErrorCodes", description = "MySqlErrorCodes")
-    private String mySqlErrorCodes = "0";
+    private String mySqlErrorCodes;
 
 	@FieldInfo(name = "SqlServerErrorCodes", description = "SqlServerErrorCodes")
-    private String sqlServerErrorCodes = "-2";
+    private String sqlServerErrorCodes;
 
 	public boolean isEnableTimeoutMarkDown() {
 		return enableTimeoutMarkDown;

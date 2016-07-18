@@ -8,7 +8,6 @@
 /target
 /_ConfigTemp
 Dal.config
-datasource.xml
 logback.xml
 web.xml
 

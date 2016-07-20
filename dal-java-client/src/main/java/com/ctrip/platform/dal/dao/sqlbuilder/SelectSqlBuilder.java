@@ -19,11 +19,11 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 	 * Important Note: In this case, the generated code with set page info into statement parameters.
 	 * You are recommended to re-generate code using the code generator. The new code will use the other two constructor instead
 	 * 
+	 * @deprecated If you see this, please regenerate dal code with code gen
 	 * @param tableName 表名
 	 * @param dbCategory 数据库类型
 	 * @param isPagination 是否分页. If it is true, it means the code is running with old generated code
 	 * @throws SQLException
-	 * @Deprecated If you see this, please regenerate dal code with code gen
 	 */
 	public SelectSqlBuilder(String tableName,
 			DatabaseCategory dbCategory, boolean isPagination)

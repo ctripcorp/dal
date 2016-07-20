@@ -48,7 +48,10 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	
 	private String tableName;
 	private DatabaseCategory dbCategory;
-	private String columns;
+	
+	private String[] selectedColumns;
+	private String customized;
+	
 	private String whereClause;
 	private String orderBy;
 	private boolean ascending;
@@ -89,25 +92,20 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	}
 
 	public BaseTableSelectBuilder select(String... selectedColumns) {
-		StringBuilder selectFields = new StringBuilder();
-		for(int i=0, count= selectedColumns.length; i < count; i++){
-			selectFields.append(this.wrapField(selectedColumns[i]));
-			if(i<count-1){
-				selectFields.append(", ");
-			}
-		}
-		
-		columns = selectFields.toString();
+		this.selectedColumns = selectedColumns;
+		customized = null;
 		return this;
 	}
 	
 	public BaseTableSelectBuilder selectAll() {
-		this.columns = ALL_COLUMNS;
+		this.customized = ALL_COLUMNS;
+		selectedColumns = null;
 		return this;
 	}
 	
 	public BaseTableSelectBuilder selectCount() {
-		this.columns = COUNT;
+		this.customized = COUNT;
+		selectedColumns = null;
 		mergerWith(new LongNumberSummary());
 		requireSingle();
 		return this.simpleType();
@@ -229,19 +227,39 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	
 	private String buildTop(String effectiveTableName){
 		if(DatabaseCategory.SqlServer == dbCategory)
-			return String.format(SQLSVR_QUERY_TOP_TPL, count, columns, effectiveTableName, getCompleteWhereExp());
+			return String.format(SQLSVR_QUERY_TOP_TPL, count, buildColumns(), effectiveTableName, getCompleteWhereExp());
 		else
-			return String.format(MYSQL_QUERY_TOP_TPL, columns, effectiveTableName, getCompleteWhereExp(), count);
+			return String.format(MYSQL_QUERY_TOP_TPL, buildColumns(), effectiveTableName, getCompleteWhereExp(), count);
 	}
 
 	private String buildPage(String effectiveTableName){
 		String tpl = DatabaseCategory.SqlServer == dbCategory ? SQLSVR_QUERY_PAGE_TPL : MYSQL_QUERY_PAGE_TPL;
-		return String.format(tpl, columns, effectiveTableName, getCompleteWhereExp(), start, count);
+		return String.format(tpl, buildColumns(), effectiveTableName, getCompleteWhereExp(), start, count);
 	}
 	
 	private String buildList(String effectiveTableName){
 		String tpl = DatabaseCategory.SqlServer == dbCategory ? SQLSVR_QUERY_TPL : MYSQL_QUERY_TPL;
-		return String.format(tpl, columns, effectiveTableName, getCompleteWhereExp());
+		return String.format(tpl, buildColumns(), effectiveTableName, getCompleteWhereExp());
+	}
+	
+	private String buildColumns() {
+		if(customized != null)
+			return customized;
+		
+		if(selectedColumns != null) {
+			StringBuilder fieldBuf = new StringBuilder();
+			for(int i=0, count= selectedColumns.length; i < count; i++){
+				fieldBuf.append(this.wrapField(selectedColumns[i]));
+				if(i<count-1){
+					fieldBuf.append(", ");
+				}
+			}
+			
+			return fieldBuf.toString();
+		}
+		
+		// This will be an exceptional case
+		return SPACE;
 	}
 	
 	@Override

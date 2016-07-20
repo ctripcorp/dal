@@ -72,6 +72,8 @@ public class ActionCategoryLocator implements Locator {
 		ops.add("setErrorPercentReferCount");
 		ops.add("setMySqlErrorCodes");
 		ops.add("setSqlServerErrorCodes");
+		ops.add("markdownDbSet");
+		ops.add("markupDbSet");
 		operationMap.put("markdown", ops);
 	}
 

@@ -150,7 +150,7 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 		
 		StringBuilder sb = new StringBuilder();
 		for(WhereClauseEntry entry: filtered) {
-			sb.append(entry.getClause()).append(" ");
+			sb.append(entry.getClause(dbCategory)).append(" ");
 		}
 		
 		String whereClause = sb.toString().trim();
@@ -615,13 +615,8 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 			return false;
 		}
 		
-		public void setClause(String clause) {
-			this.clause = clause;
-		}
-		
-		public String getClause() {
-			return clause;
-		}
+		//To make it build late when DatabaseCategory is set
+		public abstract String getClause(DatabaseCategory dbCategory);
 		
 		public String toString() {
 			return clause;
@@ -636,19 +631,28 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 		public boolean isClause() {
 			return true;
 		}
+		
+		public String getClause(DatabaseCategory dbCategory) {
+			return "";
+		}
 	}
 	
 	private static class SingleClauseEntry extends WhereClauseEntry {
+		private String condition;
 		private FieldEntry entry;
 		
 		public SingleClauseEntry(String field, String condition, Object paramValue, int sqlType, boolean sensitive, List<FieldEntry> whereFieldEntrys) {
-			setClause(String.format("%s %s ?", field, condition));
+			this.condition = condition;
 			entry = new FieldEntry(field, paramValue, sqlType, sensitive);
 			whereFieldEntrys.add(entry);
 		}
 
 		public boolean isClause() {
 			return true;
+		}
+		
+		public String getClause(DatabaseCategory dbCategory) {
+			return String.format("%s %s ?", wrapField(dbCategory, entry.getFieldName()), condition);
 		}
 	}
 	
@@ -657,7 +661,6 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 		private FieldEntry entry2;
 		
 		public BetweenClauseEntry(String field, Object paramValue1, Object paramValue2, int sqlType, boolean sensitive, List<FieldEntry> whereFieldEntrys) {
-			setClause(field + " BETWEEN ? AND ?");
 			entry1 = new FieldEntry(field, paramValue1, sqlType, sensitive);
 			entry2 = new FieldEntry(field, paramValue2, sqlType, sensitive);
 			whereFieldEntrys.add(entry1);
@@ -667,24 +670,33 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 		public boolean isClause() {
 			return true;
 		}
+
+		public String getClause(DatabaseCategory dbCategory) {
+			return wrapField(dbCategory, entry1.getFieldName()) + " BETWEEN ? AND ?";
+		}
 	}
 
 	private static class InClauseEntry extends WhereClauseEntry {
+		private String field;
+		private String questionMarkList;
+		private boolean compatible;
 		private static final String IN_CLAUSE = " in ( ? )";
 		private List<FieldEntry> entries;
 		
 		public InClauseEntry(String field, List<?> paramValues, int sqlType, boolean sensitive, List<FieldEntry> whereFieldEntrys, boolean compatible){
+			this.field = field;
+			this.compatible = compatible;
+			
 			if(compatible)
 				create(field, paramValues, sqlType, sensitive, whereFieldEntrys);
 			else{
-				setClause(field + IN_CLAUSE);
 				whereFieldEntrys.add(new FieldEntry(field, paramValues, sqlType, sensitive).setInParam(true));
 			}
 		}
 		
 		private void create(String field, List<?> paramValues, int sqlType, boolean sensitive, List<FieldEntry> whereFieldEntrys){
 			StringBuilder temp = new StringBuilder();
-			temp.append(field).append(" in ( ");
+			temp.append(" in ( ");
 			
 			entries = new ArrayList<>(paramValues.size());
 			for(int i=0,size=paramValues.size();i<size;i++){
@@ -696,28 +708,41 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 				entries.add(entry);
 			}
 			temp.append(" )");
-			setClause(temp.toString());
+			questionMarkList = temp.toString();
 			whereFieldEntrys.addAll(entries);
 		}
 
 		public boolean isClause() {
 			return true;
 		}
+
+		public String getClause(DatabaseCategory dbCategory) {
+			return compatible ?
+					wrapField(dbCategory, field) + questionMarkList:
+						wrapField(dbCategory, field) + IN_CLAUSE;
+		}
 	}
 	
 	private static class NullClauseEntry extends WhereClauseEntry {
+		private String field;
+		private boolean isNull;
+		
 		public NullClauseEntry(String field, boolean isNull) {
-			setClause(field + (isNull ? " IS NULL" : " IS NOT NULL"));
+			this.field = field;
+			this.isNull=  isNull;
 		}
 
 		public boolean isClause() {
 			return true;
 		}
+		
+		public String getClause(DatabaseCategory dbCategory) {
+			return wrapField(dbCategory, field) + (isNull ? " IS NULL" : " IS NOT NULL");		
+		}
 	}
 	
 	private static class NotClauseEntry extends WhereClauseEntry {
 		public NotClauseEntry() {
-			setClause("NOT");
 		}
 
 		public boolean isClause() {
@@ -727,11 +752,20 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 		public boolean isOperator() {
 			return true;
 		}
+		
+		public String getClause(DatabaseCategory dbCategory) {
+			return "NOT";
+		}
 	}
 	
 	private static class OperatorClauseEntry extends WhereClauseEntry {
+		private String operator;
 		public OperatorClauseEntry(String operator) {
-			setClause(operator); 
+			this.operator = operator;
+		}
+		
+		public String getClause(DatabaseCategory dbCategory) {
+			return operator;
 		}
 		
 		@Override
@@ -751,10 +785,13 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 	private static class BracketClauseEntry extends WhereClauseEntry {
 		private boolean left;
 		public BracketClauseEntry(boolean isLeft) {
-			setClause(isLeft? "(" : ")"); 
 			left = isLeft;
 		}
-
+		
+		public String getClause(DatabaseCategory dbCategory) {
+			return left? "(" : ")";
+		}
+		
 		public boolean isBracket() {
 			return true;
 		}
@@ -771,7 +808,6 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 			return new BracketClauseEntry(false);
 		}
 	}
-
 	
 	private AbstractSqlBuilder add(WhereClauseEntry entry) {
 		whereClauseEntries.add(entry);

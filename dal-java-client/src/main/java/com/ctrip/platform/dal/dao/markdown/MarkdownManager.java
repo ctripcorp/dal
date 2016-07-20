@@ -119,9 +119,11 @@ public class MarkdownManager {
 			try {
 				ErrorContext ctx = exqueue.poll();
 				while (ctx != null) {
-					if (!DalStatusManager.getMarkdownStatus().isMarkdown(ctx.getName())) {
-						for (ErrorDetector mk : detectorsRef.get()) {
-							mk.detect(ctx);
+					if(DalStatusManager.getMarkdownStatus().isEnableAutoMarkDown()) {
+						if (!DalStatusManager.getMarkdownStatus().isMarkdown(ctx.getName())) {
+							for (ErrorDetector mk : detectorsRef.get()) {
+								mk.detect(ctx);
+							}
 						}
 					}
 					ctx = exqueue.poll();

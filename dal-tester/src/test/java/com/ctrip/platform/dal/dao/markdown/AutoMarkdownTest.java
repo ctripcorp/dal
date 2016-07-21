@@ -32,33 +32,32 @@ public class AutoMarkdownTest {
 	
 	@Before
 	public void setUp(){
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(false);
 		DalStatusManager.getTimeoutMarkdown().setEnabled(false);
-		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(10000);
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(10000);
-		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
-		MarkdownManager.autoMarkdown(dbName);
-		MarkdownManager.autoMarkup(dbName);
+		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(5);
+		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(10);
+		MarkdownManager.resetAutoMarkdowns();
 	}
 	
 	@Test
-	public void markdownSuccessTest() throws InterruptedException{
+	public void normalMarkdownAndUpTest() throws InterruptedException{
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
 		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
-		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(5);
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(10);
 		
 		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
 		for (int i = 0; i < 10; i++) {
 			MarkdownManager.detect(this.mockDalConnection(), 1000, this.mockTimeoutException());
 		}
 		Thread.sleep(1000); //Wait the collection thread complete
-		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));		
+		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
+		Thread.sleep(1000 * 10);
+		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
 	}
 	
 	@Test
-	public void markdownCanbeMarkupTest() throws Exception{
+	public void markdownAndDisableAutoMarkdownTest() throws Exception{
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
 		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
-		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(5);
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(1);
 		
 		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
 		for (int i = 0; i < 10; i++) {
@@ -67,46 +66,48 @@ public class AutoMarkdownTest {
 		Thread.sleep(1000);
 		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 		
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpVolume(1);
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(1);
-		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpSchedule("3");
-		
-		Thread.sleep(2000); //Wait auto mark up delay
-		for (int i = 0; i < MarkupPhase.length; i++) {
-			if(i >= 7)
-				Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
-			else{
-				Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
-			}
-		}
-		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
+		// Disable auto markdown
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(false);
 		Assert.assertFalse(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
-	}
-	
-	@Test
-	public void markdownDalayCantBeMarkupTest() throws Exception{
-		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
-		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(5);
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(1);
-		
-		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
-		for (int i = 0; i < 10; i++) {
-			MarkdownManager.detect(this.mockDalConnection(), 1000, this.mockTimeoutException());
-		}
-		Thread.sleep(1000);
-		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
-		
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpVolume(1);
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(10);
+
+		//Enable again
 		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpSchedule("3");
+		Assert.assertFalse(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 		
-		for (int i = 0; i < MarkupPhase.length; i++) {
-			Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
+		for (int i = 0; i < 4; i++) {
+			MarkdownManager.detect(this.mockDalConnection(), 1000, this.mockTimeoutException());
+			Assert.assertFalse(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 		}
+		
+		MarkdownManager.detect(this.mockDalConnection(), 1000, this.mockTimeoutException());
+		Thread.sleep(1000);
 
 		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
+	}
+	
+	@Test
+	public void disableMarkdownAndEnableMarkdown() throws Exception{
+		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
+		
+		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
+		for (int i = 0; i < 10; i++) {
+			MarkdownManager.detect(this.mockDalConnection(), 1000, this.mockTimeoutException());
+		}
+		Thread.sleep(1000);
+		Assert.assertFalse(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
+		
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		Assert.assertFalse(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
+		
+		for (int i = 0; i < 5; i++) {
+			MarkdownManager.detect(this.mockDalConnection(), 1000, this.mockTimeoutException());
+		}
+		Thread.sleep(1000);
+		
+		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
+		
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(false);
+		Assert.assertFalse(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
 	}
 
 	private SQLException mockTimeoutException(){

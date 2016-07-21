@@ -53,10 +53,6 @@ public class MarkdownOperation implements Processor {
 				DalStatusManager.getDataSourceStatus("SimpleShard_1").setManualMarkdown(true);
 				value = "markdownBothSimpleShard done";
 				break;
-			case "setAutoMarkupBatch":
-				DalStatusManager.getMarkdownStatus().setAutoMarkUpVolume(context.getInt("batch"));
-				value = "setAutoMarkupBatch " + context.getInt("batch") + " done";
-				break;
 			case "setAutoMarkupDelay":
 				DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(context.getInt("delay"));
 				value = "setAutoMarkupDelay " + context.getInt("delay") + " done";

@@ -1,12 +1,12 @@
 package com.ctrip.platform.dal.dao.status;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 
 public class MarkdownStatus extends BaseStatus implements MarkdownStatusMBean {
 
@@ -14,11 +14,7 @@ public class MarkdownStatus extends BaseStatus implements MarkdownStatusMBean {
 
 	private volatile boolean enableAutoMarkDown = false;
 
-	private volatile int autoMarkUpBatches = -1;
-
 	private volatile int autoMarkUpDelay = 120;
-
-	private volatile Integer[] autoMarkUpSchedule = new Integer[] { 1, 3, 5 };
 
 	public boolean isAppMarkDown() {
 		return this.appMarkDown;
@@ -29,11 +25,8 @@ public class MarkdownStatus extends BaseStatus implements MarkdownStatusMBean {
 		changed();
 	}
 
-	//TODO unify to MarkdownManager
 	public boolean isMarkdown(String dbname) {
-		return this.isAppMarkDown() || 
-				DalStatusManager.getDataSourceStatus(dbname).isManualMarkdown() ||
-				(enableAutoMarkDown && DalStatusManager.getDataSourceStatus(dbname).isAutoMarkdown());
+		return MarkdownManager.isMarkdown(dbname);
 	}
 
 	public boolean isEnableAutoMarkDown() {
@@ -42,15 +35,7 @@ public class MarkdownStatus extends BaseStatus implements MarkdownStatusMBean {
 
 	public void setEnableAutoMarkDown(boolean enableAutoMarkDown) {
 		this.enableAutoMarkDown = enableAutoMarkDown;
-		changed();
-	}
-
-	public int getAutoMarkUpVolume() {
-		return autoMarkUpBatches;
-	}
-
-	public void setAutoMarkUpVolume(int autoMarkupBatches) {
-		this.autoMarkUpBatches = autoMarkupBatches;
+		MarkdownManager.resetAutoMarkdowns();
 		changed();
 	}
 
@@ -61,38 +46,6 @@ public class MarkdownStatus extends BaseStatus implements MarkdownStatusMBean {
 	public void setAutoMarkUpDelay(int autoMarkUpDelay) {
 		this.autoMarkUpDelay = autoMarkUpDelay;
 		changed();
-	}
-
-	public String getAutoMarkUpSchedule() {
-		return StringUtils.join(Arrays.asList(autoMarkUpSchedule), ",");
-	}
-
-	public void setAutoMarkUpSchedule(String newAutoMarkUpSchedule) throws Exception {
-		autoMarkUpSchedule = parseSchedule(newAutoMarkUpSchedule);
-		changed();
-	}
-
-	private Integer[] parseSchedule(String newAutoMarkUpSchedule) throws Exception {
-		if (newAutoMarkUpSchedule == null || newAutoMarkUpSchedule.isEmpty())
-			throw new Exception("The value can't be empty");
-		String[] tokens = newAutoMarkUpSchedule.trim().split(",");
-		Integer[] temp = new Integer[tokens.length];
-		for (int i = 0; i < tokens.length; i++) {
-			temp[i] = Integer.parseInt(tokens[i]);
-			if (temp[i] < 1 || temp[i] > 9) {
-				throw new Exception(
-						"The auto mark up schedule must be greater than 0 and lesser than 9");
-			}
-			if (i > 0 && temp[i] <= temp[i - 1]) {
-				throw new Exception(
-						"The auto mark up schedule must be ascending order");
-			}
-		}
-		return temp;
-	}
-
-	public Integer[] getMarkUpSchedule() {
-		return autoMarkUpSchedule;
 	}
 
 	public String getMarkDownKeys() {

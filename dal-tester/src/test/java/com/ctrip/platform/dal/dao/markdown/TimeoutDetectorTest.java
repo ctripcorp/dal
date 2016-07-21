@@ -6,7 +6,6 @@ import java.util.Random;
 import junit.framework.Assert;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
@@ -35,7 +34,7 @@ public class TimeoutDetectorTest {
 		DalStatusManager.getTimeoutMarkdown().setErrorPercentReferCount(10000);
 		DalStatusManager.getTimeoutMarkdown().setErrorPercentThreshold(1f);
 		DalStatusManager.getTimeoutMarkdown().setSamplingDuration(10000);
-		MarkdownManager.autoMarkup(dbName);
+		MarkdownManager.resetAutoMarkdowns();
 	}
 	
 	@Test

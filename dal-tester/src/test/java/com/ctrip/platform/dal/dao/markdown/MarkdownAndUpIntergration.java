@@ -22,18 +22,26 @@ public class MarkdownAndUpIntergration {
 	public static void setUpBeforeClass() {
 		try {
 			DalClientFactory.initClientFactory();
+			DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(1);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
 		}
 	}
 		
+	private void autoMarkdown(String key) {
+		MarkDownInfo info = new MarkDownInfo(key, "1", MarkDownPolicy.TIMEOUT, 0);
+		info.setReason(MarkDownReason.ERRORCOUNT);
+		
+		MarkdownManager.autoMarkdown(info);
+	}
+	
 	@Test
 	public void markdownSuccessTest() throws Exception {
 		String logicName = "dao_test";
 		//Mark Down
 		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
-		MarkdownManager.autoMarkdown(logicName);
+		autoMarkdown(logicName);
 		try{
 			this.testQuery(logicName);
 			Assert.fail();
@@ -41,8 +49,9 @@ public class MarkdownAndUpIntergration {
 			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), 
 					((DalException)e).getErrorCode());
 		}
+		
 		//Mark up
-		MarkdownManager.autoMarkup(logicName);
+		Thread.sleep(1000 * 1);
 		
 		try{
 			this.testQuery(logicName);		
@@ -58,15 +67,16 @@ public class MarkdownAndUpIntergration {
 		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
 		
 		//Mark Down. It has 3 slaves
-		MarkdownManager.autoMarkdown("ha_test_1");
-		MarkdownManager.autoMarkdown("ha_test_2");
+		autoMarkdown("ha_test_1");
+		autoMarkdown("ha_test_2");
 		try{
 			this.testQuery(logicName);		
 		}catch(Exception e){
 			Assert.fail();
 		}
 		
-		MarkdownManager.autoMarkdown("ha_test");
+		autoMarkdown("ha_test");
+
 		try{
 			this.testQuery(logicName);
 			Assert.fail();

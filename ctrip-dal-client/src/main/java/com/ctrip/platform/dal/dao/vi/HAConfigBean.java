@@ -18,32 +18,6 @@ public class HAConfigBean extends BaseConfigBean {
 	
 	@FieldInfo(name = "MySqlHAErrorCodes", description = "MySqlHAErrorCodes")
 	private String mysqlErrorCodes;
-	
-	public boolean isEnable() {
-		return enable;
-	}
-
-	public void setEnable(boolean enable) {
-		this.enable = enable;
-	}
-	public int getRetryCount() {
-		return retryCount;
-	}
-	public void setRetryCount(int retryCount) {
-		this.retryCount = retryCount;
-	}
-	public String getSqlserverErrorCodes() {
-		return sqlserverErrorCodes;
-	}
-	public void setSqlserverErrorCodes(String sqlserverErrorCodes) {
-		this.sqlserverErrorCodes = sqlserverErrorCodes;
-	}
-	public String getMysqlErrorCodes() {
-		return mysqlErrorCodes;
-	}
-	public void setMysqlErrorCodes(String mysqlErrorCodes) {
-		this.mysqlErrorCodes = mysqlErrorCodes;
-	}
 
 	@Override
 	protected void register() {

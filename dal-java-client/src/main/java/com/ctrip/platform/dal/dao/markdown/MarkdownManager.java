@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.status.DataSourceStatus;
@@ -60,16 +62,18 @@ public class MarkdownManager {
 		}
 	}
 	
-	public static void autoMarkdown(String dbname) {
-		DalStatusManager.getDataSourceStatus(dbname).setAutoMarkdown(true);
+	public static void autoMarkdown(MarkDownInfo info) {
+		DalStatusManager.getDataSourceStatus(info.getDbKey()).setAutoMarkdown(true);
+
+		DalClientFactory.getDalLogger().info(String.format("Database %s has been marked down automatically", info.getDbKey()));
+		DalClientFactory.getDalLogger().markdown(info);
 	}
 
-	public static void autoMarkup(String dbname) {
-		DalStatusManager.getDataSourceStatus(dbname).setAutoMarkdown(false);
-
-		if(DalStatusManager.getMarkdownStatus().isEnableAutoMarkDown()){
-			MarkupManager.reset(dbname);
-		}	
+	public static void autoMarkup(MarkupInfo info) {
+		DalStatusManager.getDataSourceStatus(info.getDbKey()).setAutoMarkdown(false);
+		
+		DalClientFactory.getDalLogger().info(String.format("Database %s has been marked up automatically", info.getDbKey()));
+		DalClientFactory.getDalLogger().markup(info);
 	}
 
 	public static boolean isMarkdown(String key) {
@@ -93,10 +97,17 @@ public class MarkdownManager {
 		if ((System.currentTimeMillis() - item.getAutoMarkdownTime()) <= mcb.getAutoMarkUpDelay() * 1000)
 			return true;
 	
-		if (MarkupManager.isPass(key))
-			return false;
+		autoMarkup(new MarkupInfo(key, Version.getVersion(), 0));
 
-		return true;
+		return false;
+	}
+	
+	/**
+	 * Clear all auto markdown
+	 */
+	public static void resetAutoMarkdowns() {
+		for(String dbName: DalClientFactory.getDalConfigure().getDataSourceNames())
+			DalStatusManager.getDataSourceStatus(dbName).setAutoMarkdown(false);
 	}
 
 	public static void detect(DalConnection conn, long start, Throwable e) {
@@ -110,7 +121,6 @@ public class MarkdownManager {
 				(SQLException) e);
 		
 		exqueue.add(ctx);
-		MarkupManager.rollback(ctx);
 	}
 	
 	private static class CollectExceptionTask implements Runnable {

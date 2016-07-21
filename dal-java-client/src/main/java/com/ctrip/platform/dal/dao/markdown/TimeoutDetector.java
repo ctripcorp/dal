@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.status.TimeoutMarkdown;
@@ -19,6 +18,10 @@ public class TimeoutDetector implements ErrorDetector{
 	@Override
 	public void detect(ErrorContext ctx) {	
 		TimeoutMarkdown tmb = DalStatusManager.getTimeoutMarkdown();
+
+		if(!tmb.isEnabled())
+			return;
+
 		long duration = tmb.getSamplingDuration() * 1000 + 10;
 		if(!data.containsKey(ctx.getName()))
 			data.put(ctx.getName(), new DetectorCounter(duration));
@@ -42,17 +45,13 @@ public class TimeoutDetector implements ErrorDetector{
 	}
 	
 	private void markdown(String key, DetectorCounter dc, MarkDownReason reason){
-		if(DalStatusManager.getTimeoutMarkdown().isEnabled()){
-			MarkdownManager.autoMarkdown(key);
-			DalClientFactory.getDalLogger().info(String.format("Database %s has been marked down automatically", key));
-		}
 		MarkDownInfo info = new MarkDownInfo(key, Version.getVersion(), MarkDownPolicy.TIMEOUT, dc.getDuration());
 		
 		info.setReason(reason);	
 		info.setTotal(dc.getRequestTimes());
 		info.setFail(dc.getErrors());
-		DalClientFactory.getDalLogger().markdown(info);
 		
+		MarkdownManager.autoMarkdown(info);
 		dc.reset();
 	}
 	

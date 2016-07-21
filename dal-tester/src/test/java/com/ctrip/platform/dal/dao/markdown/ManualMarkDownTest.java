@@ -22,6 +22,7 @@ public class ManualMarkDownTest {
 	public static void setUpBeforeClass() {
 		try {
 			DalClientFactory.initClientFactory();
+			MarkdownManager.resetAutoMarkdowns();
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
@@ -55,10 +56,8 @@ public class ManualMarkDownTest {
 		DalStatusManager.getDataSourceStatus(dbName).setManualMarkdown(true);
 		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
 		
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpVolume(1);
 		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(1);
 		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpSchedule("3,5");
 		
 		Thread.sleep(2000);
 		

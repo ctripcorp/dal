@@ -10,14 +10,6 @@ public interface MarkdownStatusMBean {
 
 	void setEnableAutoMarkDown(boolean enableAutoMarkDown);
 
-	int getAutoMarkUpVolume();
-
-	void setAutoMarkUpVolume(int autoMarkupBatches);
-
-	String getAutoMarkUpSchedule();
-
-	void setAutoMarkUpSchedule(String autoMarkUpSchedule) throws Exception;
-
 	int getAutoMarkUpDelay();
 
 	void setAutoMarkUpDelay(int autoMarkUpDelay);

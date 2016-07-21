@@ -12,7 +12,9 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.configure.DataBase;
 import com.ctrip.platform.dal.dao.configure.DatabaseSelector;
+import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
+import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
@@ -34,13 +36,20 @@ public class DatabaseSelectorTest {
 		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
 	}
 
+	private void autoMarkdown(String key) {
+		MarkdownManager.autoMarkdown(new MarkDownInfo(key, "", null, 1));
+	}
+	private void autoMarkup(String key) {
+		MarkdownManager.autoMarkup(new MarkupInfo(key, "", 1));
+	}
+	
 	@Before
 	public void setUp() {
-		MarkdownManager.autoMarkup(M1);
-		MarkdownManager.autoMarkup(M2);
-		MarkdownManager.autoMarkup(S1);
-		MarkdownManager.autoMarkup(S2);
-		MarkdownManager.autoMarkup(S3);
+		autoMarkup(M1);
+		autoMarkup(M2);
+		autoMarkup(S1);
+		autoMarkup(S2);
+		autoMarkup(S3);
 	}
 
 	@Test
@@ -65,7 +74,7 @@ public class DatabaseSelectorTest {
 
 	@Test
 	public void hasMarkdownMasterTest() {
-		MarkdownManager.autoMarkdown(M1);
+		autoMarkdown(M1);
 		DataBase db = new DataBase(M1, true, "", M1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
@@ -98,7 +107,7 @@ public class DatabaseSelectorTest {
 
 	@Test
 	public void hasOneMarkdownMasterTest() throws DalException {
-		MarkdownManager.autoMarkdown(M1);
+		autoMarkdown(M1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(new DataBase(M1, true, "", M1));
 		dbs.add(new DataBase(M2, true, "", M2));
@@ -144,7 +153,7 @@ public class DatabaseSelectorTest {
 
 	@Test
 	public void hasMarkdownSlaveTest() {
-		MarkdownManager.autoMarkdown(S1);
+		autoMarkdown(S1);
 		DataBase db = new DataBase(S1, false, "", S1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
@@ -177,7 +186,7 @@ public class DatabaseSelectorTest {
 
 	@Test
 	public void hasOneMarkdownSlaveTest() throws DalException {
-		MarkdownManager.autoMarkdown(S1);
+		autoMarkdown(S1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(new DataBase(S1, false, "", S1));
 		dbs.add(new DataBase(S2, false, "", S2));
@@ -253,8 +262,8 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 
-		MarkdownManager.autoMarkdown(S1);
-		MarkdownManager.autoMarkdown(S2);
+		autoMarkdown(S1);
+		autoMarkdown(S2);
 
 		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false,
 				true);
@@ -280,7 +289,7 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 
-		MarkdownManager.autoMarkdown(M1);
+		autoMarkdown(M1);
 
 		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false,
 				true);
@@ -323,7 +332,7 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 
-		MarkdownManager.autoMarkdown(M1);
+		autoMarkdown(M1);
 
 		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false,
 				true);
@@ -351,7 +360,7 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 
-		MarkdownManager.autoMarkdown(M1);
+		autoMarkdown(M1);
 		DalHA ha = new DalHA();
 		ha.addDB(S1);
 
@@ -370,7 +379,7 @@ public class DatabaseSelectorTest {
 		selector = new DatabaseSelector(ha, ms, ss, false, false);
 		Assert.assertEquals(M2, selector.select());
 
-		MarkdownManager.autoMarkdown(M2);
+		autoMarkdown(M2);
 		selector = new DatabaseSelector(ha, ms, ss, false, false);
 		try {
 			selector.select();
@@ -390,7 +399,7 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 
-		MarkdownManager.autoMarkdown(S1);
+		autoMarkdown(S1);
 		DalHA ha = new DalHA();
 		ha.addDB(M1);
 
@@ -417,7 +426,7 @@ public class DatabaseSelectorTest {
 
 		ha = new DalHA();
 		ha.addDB(M1);
-		MarkdownManager.autoMarkdown(M2);
+		autoMarkdown(M2);
 		selector = new DatabaseSelector(ha, ms, ss, false, false);
 		try {
 			selector.select();
@@ -507,7 +516,7 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S2, false, "", S2));
 
 		DalHA ha = new DalHA();
-		MarkdownManager.autoMarkdown(S2);
+		autoMarkdown(S2);
 
 		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, false,
 				true);
@@ -542,7 +551,7 @@ public class DatabaseSelectorTest {
 
 		DalHA ha = new DalHA();
 		ha.addDB(S1);
-		MarkdownManager.autoMarkdown(S2);
+		autoMarkdown(S2);
 
 		DatabaseSelector selector = new DatabaseSelector(ha, null, ss, false,
 				true);

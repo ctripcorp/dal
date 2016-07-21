@@ -10,11 +10,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	DetectorCounterTest.class,
 	TimeoutDetectorTest.class,
 	AutoMarkdownTest.class,
-	AutoMarkupTest.class,
-	MarkupProcedureTest.class,
 	ManualMarkDownTest.class,
 	TimeBucketCounterTest.class,
-	AsyncMarkupManagerTest.class,
 	})
 public class AllTests {
 

@@ -13,6 +13,8 @@ import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.configure.DataBase;
 import com.ctrip.platform.dal.dao.configure.DatabaseSelector;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
+import com.ctrip.platform.dal.dao.markdown.MarkDownPolicy;
+import com.ctrip.platform.dal.dao.markdown.MarkDownReason;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
@@ -37,7 +39,10 @@ public class DatabaseSelectorTest {
 	}
 
 	private void autoMarkdown(String key) {
-		MarkdownManager.autoMarkdown(new MarkDownInfo(key, "", null, 1));
+		MarkDownInfo info = new MarkDownInfo(key, "1", MarkDownPolicy.TIMEOUT, 0);
+		info.setReason(MarkDownReason.ERRORCOUNT);
+		
+		MarkdownManager.autoMarkdown(info);
 	}
 	private void autoMarkup(String key) {
 		MarkdownManager.autoMarkup(new MarkupInfo(key, "", 1));

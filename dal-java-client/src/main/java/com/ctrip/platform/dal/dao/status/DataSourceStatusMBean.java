@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.status;
 
+import java.util.Date;
+
 public interface DataSourceStatusMBean {
 
 	boolean isManualMarkdown();
@@ -10,8 +12,8 @@ public interface DataSourceStatusMBean {
 
 	String getName();
 
-	long getManualMarkdownTime();
+	Date getManualMarkdownTime();
 
-	long getAutoMarkdownTime();
+	Date getAutoMarkdownTime();
 
 }

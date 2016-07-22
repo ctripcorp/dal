@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.status;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,9 +10,9 @@ public class DataSourceStatus extends BaseStatus implements DataSourceStatusMBea
 	
 	private String name;
 	private volatile boolean manualMarkdown = false;
-	private volatile long manualMarkdownTime;
+	private volatile Date manualMarkdownTime;
 	private volatile boolean autoMarkdown = false;
-	private volatile long autoMarkdownTime;
+	private volatile Date autoMarkdownTime;
 	
 	public DataSourceStatus(String name) {
 		this.name = name;
@@ -22,7 +24,7 @@ public class DataSourceStatus extends BaseStatus implements DataSourceStatusMBea
 	public void setManualMarkdown(boolean manualMarkdown) {
 		this.manualMarkdown = manualMarkdown;
 		if(manualMarkdown){
-			this.manualMarkdownTime = System.currentTimeMillis();
+			this.manualMarkdownTime = new Date();
 			logger.info(String.format("Database %s has been marked down manually.", name));
 		}else{
 			logger.info(String.format("Database %s has been marked up manually.", name));
@@ -36,7 +38,7 @@ public class DataSourceStatus extends BaseStatus implements DataSourceStatusMBea
 	public void setAutoMarkdown(boolean autoMarkdown) {
 		this.autoMarkdown = autoMarkdown;
 		if(autoMarkdown)
-			this.autoMarkdownTime = System.currentTimeMillis();
+			this.autoMarkdownTime = new Date();
 		changed();
 	}
 	
@@ -44,11 +46,11 @@ public class DataSourceStatus extends BaseStatus implements DataSourceStatusMBea
 		return name;
 	}
 
-	public long getManualMarkdownTime() {
+	public Date getManualMarkdownTime() {
 		return manualMarkdownTime;
 	}
 
-	public long getAutoMarkdownTime() {
+	public Date getAutoMarkdownTime() {
 		return autoMarkdownTime;
 	}
 }

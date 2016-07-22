@@ -52,8 +52,8 @@ public class DataSourceConfig implements NotificationListener {
 		DataSourceStatus dss = DalStatusManager.getDataSourceStatus(name);
 		manualMarkdown = dss.isManualMarkdown();
 		autoMarkdown = dss.isAutoMarkdown();
-		manualMarkdownTime = dss.getManualMarkdownTime() > 0 ? new Date(dss.getManualMarkdownTime()):null;
-		autoMarkdownTime = dss.getAutoMarkdownTime() > 0 ? new Date(dss.getAutoMarkdownTime()):null;
+		manualMarkdownTime = dss.getManualMarkdownTime();
+		autoMarkdownTime = dss.getAutoMarkdownTime();
 	}
 	
 	@Override

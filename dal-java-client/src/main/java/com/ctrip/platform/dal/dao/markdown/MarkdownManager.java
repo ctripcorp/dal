@@ -94,7 +94,7 @@ public class MarkdownManager {
 			return false;
 
 		// Timeout is not reached
-		if ((System.currentTimeMillis() - item.getAutoMarkdownTime()) <= mcb.getAutoMarkupDelay() * 1000)
+		if ((System.currentTimeMillis() - item.getAutoMarkdownTime().getTime()) <= mcb.getAutoMarkupDelay() * 1000)
 			return true;
 	
 		autoMarkup(new MarkupInfo(key, Version.getVersion(), 0));

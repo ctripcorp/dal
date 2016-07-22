@@ -9,64 +9,53 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 
 public class MarkdownStatus extends BaseStatus implements MarkdownStatusMBean {
+	private static final int DEFAULT_AUTO_MARKUP_DELAY = 30;
 
-	private volatile boolean appMarkDown = false;
+	private volatile boolean appMarkdown = false;
 
-	private volatile boolean enableAutoMarkDown = false;
+	private volatile boolean enableAutoMarkdown = false;
 
-	private volatile int autoMarkUpDelay = 120;
+	private volatile int autoMarkupDelay = DEFAULT_AUTO_MARKUP_DELAY;
 
-	public boolean isAppMarkDown() {
-		return this.appMarkDown;
+	public boolean isAppMarkdown() {
+		return this.appMarkdown;
 	}
 
-	public void setAppMarkDown(boolean markdown) {
-		this.appMarkDown = markdown;
+	public void setAppMarkdown(boolean markdown) {
+		this.appMarkdown = markdown;
 		changed();
 	}
 
-	public boolean isMarkdown(String dbname) {
-		return MarkdownManager.isMarkdown(dbname);
+	public boolean isEnableAutoMarkdown() {
+		return enableAutoMarkdown;
 	}
 
-	public boolean isEnableAutoMarkDown() {
-		return enableAutoMarkDown;
-	}
-
-	public void setEnableAutoMarkDown(boolean enableAutoMarkDown) {
-		this.enableAutoMarkDown = enableAutoMarkDown;
+	public void setEnableAutoMarkdown(boolean enableAutoMarkDown) {
+		this.enableAutoMarkdown = enableAutoMarkDown;
 		MarkdownManager.resetAutoMarkdowns();
 		changed();
 	}
 
-	public int getAutoMarkUpDelay() {
-		return autoMarkUpDelay;
+	public int getAutoMarkupDelay() {
+		return autoMarkupDelay;
 	}
 
-	public void setAutoMarkUpDelay(int autoMarkUpDelay) {
-		this.autoMarkUpDelay = autoMarkUpDelay;
+	public void setAutoMarkupDelay(int autoMarkUpDelay) {
+		this.autoMarkupDelay = autoMarkUpDelay;
 		changed();
 	}
 
-	public String getMarkDownKeys() {
+	public String getMarkdownKeys() {
 		Set<String> names = new HashSet<>();
 		for(String dbName: DalClientFactory.getDalConfigure().getDataSourceNames()){
-			if(isMarkdown(dbName))
+			if(MarkdownManager.isMarkdown(dbName))
 				names.add(dbName);
 		}
 
 		return StringUtils.join(names, ",");
 	}
 
-	public String getDataSourceNames() {
-		return StringUtils.join(DalClientFactory.getDalConfigure().getDataSourceNames(), ",");
-	}
-
-	public String getDatabaseSetNames() {
-		return StringUtils.join(DalClientFactory.getDalConfigure().getDatabaseSetNames(), ",");
-	}
-	
-	public String getAutoMarkDowns() {
+	public String getAutoMarkdownKeys() {
 		Set<String> names = new HashSet<>();
 		for(String dbName: DalClientFactory.getDalConfigure().getDataSourceNames()){
 			DataSourceStatus dss = DalStatusManager.getDataSourceStatus(dbName);

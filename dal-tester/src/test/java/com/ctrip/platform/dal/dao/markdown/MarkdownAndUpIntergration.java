@@ -22,7 +22,7 @@ public class MarkdownAndUpIntergration {
 	public static void setUpBeforeClass() {
 		try {
 			DalClientFactory.initClientFactory();
-			DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(1);
+			DalStatusManager.getMarkdownStatus().setAutoMarkupDelay(1);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
@@ -40,7 +40,7 @@ public class MarkdownAndUpIntergration {
 	public void markdownSuccessTest() throws Exception {
 		String logicName = "dao_test";
 		//Mark Down
-		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkdown(true);
 		autoMarkdown(logicName);
 		try{
 			this.testQuery(logicName);
@@ -64,7 +64,7 @@ public class MarkdownAndUpIntergration {
 	public void markdownMulipleSlavesTest(){
 		String logicName = "HA_Test";
 		
-		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkdown(true);
 		
 		//Mark Down. It has 3 slaves
 		autoMarkdown("ha_test_1");

@@ -16,19 +16,19 @@ public class MarkdownOperation implements Processor {
 		try {
 			switch (context.getAction()) {
 			case "markdownApp":
-				DalStatusManager.getMarkdownStatus().setAppMarkDown(true);
+				DalStatusManager.getMarkdownStatus().setAppMarkdown(true);
 				value = "markdown App done";
 				break;
 			case "markupApp":
-				DalStatusManager.getMarkdownStatus().setAppMarkDown(false);
+				DalStatusManager.getMarkdownStatus().setAppMarkdown(false);
 				value = "markup App done";
 				break;
 			case "enableAutoMarkdown":
-				DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+				DalStatusManager.getMarkdownStatus().setEnableAutoMarkdown(true);
 				value = "enableAutoMarkdown done";
 				break;
 			case "diableAutoMarkdown":
-				DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(false);
+				DalStatusManager.getMarkdownStatus().setEnableAutoMarkdown(false);
 				value = "diableAutoMarkdown done";
 				break;
 			case "markupAllDb":
@@ -54,7 +54,7 @@ public class MarkdownOperation implements Processor {
 				value = "markdownBothSimpleShard done";
 				break;
 			case "setAutoMarkupDelay":
-				DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(context.getInt("delay"));
+				DalStatusManager.getMarkdownStatus().setAutoMarkupDelay(context.getInt("delay"));
 				value = "setAutoMarkupDelay " + context.getInt("delay") + " done";
 				break;
 			case "enableTimeoutMarkdown":

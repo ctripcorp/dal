@@ -2,24 +2,20 @@ package com.ctrip.platform.dal.dao.status;
 
 public interface MarkdownStatusMBean {
 
-	boolean isAppMarkDown();
+	boolean isAppMarkdown();
 
-	void setAppMarkDown(boolean markdown);
+	void setAppMarkdown(boolean markdown);
 
-	boolean isEnableAutoMarkDown();
+	boolean isEnableAutoMarkdown();
 
-	void setEnableAutoMarkDown(boolean enableAutoMarkDown);
+	void setEnableAutoMarkdown(boolean enableAutoMarkdown);
 
-	int getAutoMarkUpDelay();
+	int getAutoMarkupDelay();
 
-	void setAutoMarkUpDelay(int autoMarkUpDelay);
+	void setAutoMarkupDelay(int autoMarkUpDelay);
 
-	String getDatabaseSetNames();
+	String getMarkdownKeys();
 
-	String getDataSourceNames();
-
-	String getMarkDownKeys();
-
-	String getAutoMarkDowns();
+	String getAutoMarkdownKeys();
 	
 }

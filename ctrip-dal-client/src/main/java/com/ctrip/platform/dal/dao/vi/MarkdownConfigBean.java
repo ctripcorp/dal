@@ -7,27 +7,21 @@ import com.ctrip.platform.dal.dao.status.MarkdownStatus;
 
 @ComponentStatus(id="com.ctrip.dal.client.MarkdownConfigBean",name="com.ctrip.dal.client.MarkdownConfigBean",description = "DAL Markdown Overview")
 public class MarkdownConfigBean extends BaseConfigBean {
-	@FieldInfo(name = "AppMarkDown", description = "AppMarkDown")
+	@FieldInfo(name = "AppMarkdown", description = "AppMarkdown")
 	private boolean appMarkDown;
 
-	@FieldInfo(name = "EnableAutoMarkDown", description = "EnableAutoMarkDown")
-	private boolean enableAutoMarkDown;
+	@FieldInfo(name = "EnableAutoMarkdown", description = "EnableAutoMarkdown")
+	private boolean enableAutoMarkdown;
 
 	@FieldInfo(name = "AutoMarkUpDelay", description = "AutoMarkUpDelay")
 	private int autoMarkUpDelay;
 
-	@FieldInfo(name = "MarkDownKeys", description = "MarkDownKeys")
-	private String markDownKeys;
+	@FieldInfo(name = "MarkdownKeys", description = "MarkdownKeys")
+	private String markdownKeys;
 
-	@FieldInfo(name = "AutoMarkDowns", description = "AutoMarkDowns")
-	private String autoMarkDowns;
+	@FieldInfo(name = "AutoMarkdowns", description = "AutoMarkdowns")
+	private String autoMarkdowns;
 	
-	@FieldInfo(name = "DatabaseSetsName", description = "DatabaseSetsNames")
-	private String databaseSets;
-	
-	@FieldInfo(name = "AllInOneKeys", description = "AllInOneKeys")
-	private String allInOneKeys;
-
 	@Override
 	protected void register() {
 		DalStatusManager.getMarkdownStatus().addNotificationListener(this, null, null);
@@ -36,12 +30,10 @@ public class MarkdownConfigBean extends BaseConfigBean {
 	@Override
 	protected void refresh() {
 		MarkdownStatus  ms = DalStatusManager.getMarkdownStatus();
-		appMarkDown = ms.isAppMarkDown();
-		enableAutoMarkDown = ms.isEnableAutoMarkDown();
-		autoMarkUpDelay = ms.getAutoMarkUpDelay();
-		markDownKeys = ms.getMarkDownKeys();
-		autoMarkDowns = ms.getAutoMarkDowns();
-		allInOneKeys = ms.getDataSourceNames();
-		databaseSets = ms.getDatabaseSetNames();
+		appMarkDown = ms.isAppMarkdown();
+		enableAutoMarkdown = ms.isEnableAutoMarkdown();
+		autoMarkUpDelay = ms.getAutoMarkupDelay();
+		markdownKeys = ms.getMarkdownKeys();
+		autoMarkdowns = ms.getAutoMarkdownKeys();
 	}
 }

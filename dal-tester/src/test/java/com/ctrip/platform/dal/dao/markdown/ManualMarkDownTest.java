@@ -31,9 +31,9 @@ public class ManualMarkDownTest {
 
 	@Test
 	public void appMarkdownTest(){
-		DalStatusManager.getMarkdownStatus().setAppMarkDown(true);
+		DalStatusManager.getMarkdownStatus().setAppMarkdown(true);
 		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
-		DalStatusManager.getMarkdownStatus().setAppMarkDown(false);
+		DalStatusManager.getMarkdownStatus().setAppMarkdown(false);
 	}
 	
 	@Test
@@ -56,8 +56,8 @@ public class ManualMarkDownTest {
 		DalStatusManager.getDataSourceStatus(dbName).setManualMarkdown(true);
 		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
 		
-		DalStatusManager.getMarkdownStatus().setAutoMarkUpDelay(1);
-		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		DalStatusManager.getMarkdownStatus().setAutoMarkupDelay(1);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkdown(true);
 		
 		Thread.sleep(2000);
 		

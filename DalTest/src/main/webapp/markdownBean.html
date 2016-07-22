@@ -37,17 +37,8 @@
 	<input type="text" name="name"><input type="submit" value="set"> <br/>
 </form>
 
-<h4>AutoMarkUpBatches</h4>
-MarkUp尝试放量的次数，如果为不大于0的整数，达到AutoMarkUpDelay的值时，则直接MarkUp; AutoMarkUpBatches大于0时，是否Mark up以放量的批次(AutoMarkUpSchedule)为准
-<br/>
-<a href="/DalTest/PeoplePortal?action=setAutoMarkupBatch&batch=0" target="console">Set AutoMarkUpVolume to 0</a>
-<form action="/DalTest/PeoplePortal" method="get" target="console">
-	<input type="hidden" name="action" value="setAutoMarkupBatch">
-	<input type="text" name="batch"><input type="submit" value="set">
-</form>
-
 <h4>AutoMarkUpDelay</h4>
-秒，AutoMarkUpBatches不大于0时，自动MarkDown后，120秒开始MarkUp。<br/>
+自动MarkDown后，多少秒开始MarkUp。<br/>
 <a href="/DalTest/PeoplePortal?action=setAutoMarkupDelay&delay=30" target="console">Set AutoMarkUpDelay to 30 seconds</a>
 <form action="/DalTest/PeoplePortal" method="get" target="console">
 	<input type="hidden" name="action" value="setAutoMarkupDelay">

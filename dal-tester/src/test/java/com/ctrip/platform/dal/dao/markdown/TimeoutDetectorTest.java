@@ -40,7 +40,7 @@ public class TimeoutDetectorTest {
 	@Test
 	public void countBaseLineMatchTest() {
 		TimeoutDetector detector = new TimeoutDetector();
-		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkdown(true);
 		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
 		DalStatusManager.getTimeoutMarkdown().setErrorCountThreshold(5);
 		for (int i = 0; i < 10; i++) {
@@ -53,7 +53,7 @@ public class TimeoutDetectorTest {
 			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
 			detector.detect(ctx);
 		}
-		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
+		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
 	}
 	
 	
@@ -81,14 +81,14 @@ public class TimeoutDetectorTest {
 			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
 			detector.detect(ctx);
 		}
-		Assert.assertFalse(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
+		Assert.assertFalse(MarkdownManager.isMarkdown(dbName));
 	}
 	
 	@Test
 	public void errorPercentMatchTest(){
 		TimeoutDetector detector = new TimeoutDetector();
 		DalStatusManager.getTimeoutMarkdown().setEnabled(true);
-		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkdown(true);
 		DalStatusManager.getTimeoutMarkdown().setErrorPercentReferCount(10);
 		DalStatusManager.getTimeoutMarkdown().setErrorPercentThreshold(0.5f);
 		for (int i = 0; i < 10; i++) {
@@ -101,7 +101,7 @@ public class TimeoutDetectorTest {
 			ErrorContext ctx = new ErrorContext(dbName, ct, 1000, e);
 			detector.detect(ctx);
 		}
-		Assert.assertTrue(DalStatusManager.getMarkdownStatus().isMarkdown(dbName));
+		Assert.assertTrue(MarkdownManager.isMarkdown(dbName));
 	}
 	
 	@Test

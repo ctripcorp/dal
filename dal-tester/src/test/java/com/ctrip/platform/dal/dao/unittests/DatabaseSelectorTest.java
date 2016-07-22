@@ -35,7 +35,7 @@ public class DatabaseSelectorTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		DalStatusManager.getMarkdownStatus().setEnableAutoMarkDown(true);
+		DalStatusManager.getMarkdownStatus().setEnableAutoMarkdown(true);
 	}
 
 	private void autoMarkdown(String key) {

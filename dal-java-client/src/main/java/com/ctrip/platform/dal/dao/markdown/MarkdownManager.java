@@ -78,7 +78,7 @@ public class MarkdownManager {
 
 	public static boolean isMarkdown(String key) {
 		MarkdownStatus mcb = DalStatusManager.getMarkdownStatus();
-		if (mcb.isAppMarkDown())
+		if (mcb.isAppMarkdown())
 			return true;
 		
 		DataSourceStatus item = DalStatusManager.getDataSourceStatus(key);
@@ -87,14 +87,14 @@ public class MarkdownManager {
 		if (item.isManualMarkdown())
 			return true;
 
-		if(!mcb.isEnableAutoMarkDown())
+		if(!mcb.isEnableAutoMarkdown())
 			return false;
 		
 		if (!item.isAutoMarkdown())
 			return false;
 
 		// Timeout is not reached
-		if ((System.currentTimeMillis() - item.getAutoMarkdownTime()) <= mcb.getAutoMarkUpDelay() * 1000)
+		if ((System.currentTimeMillis() - item.getAutoMarkdownTime()) <= mcb.getAutoMarkupDelay() * 1000)
 			return true;
 	
 		autoMarkup(new MarkupInfo(key, Version.getVersion(), 0));
@@ -129,8 +129,8 @@ public class MarkdownManager {
 			try {
 				ErrorContext ctx = exqueue.poll();
 				while (ctx != null) {
-					if(DalStatusManager.getMarkdownStatus().isEnableAutoMarkDown()) {
-						if (!DalStatusManager.getMarkdownStatus().isMarkdown(ctx.getName())) {
+					if(DalStatusManager.getMarkdownStatus().isEnableAutoMarkdown()) {
+						if (!isMarkdown(ctx.getName())) {
 							for (ErrorDetector mk : detectorsRef.get()) {
 								mk.detect(ctx);
 							}

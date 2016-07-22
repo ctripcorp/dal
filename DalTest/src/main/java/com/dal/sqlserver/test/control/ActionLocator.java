@@ -19,7 +19,7 @@ public class ActionLocator implements Locator {
 
 	@Override
 	public void setDefaultKey(String key) {
-		this.defaultKey = defaultKey;
+		this.defaultKey = key;
 	}
 
 	@Override

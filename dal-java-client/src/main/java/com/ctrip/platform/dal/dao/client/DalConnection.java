@@ -34,7 +34,8 @@ public class DalConnection {
 	}
 
 	public void setAutoCommit(boolean autoCommit) throws SQLException {
-		conn.setAutoCommit(autoCommit);
+		if(conn.getAutoCommit() != autoCommit)
+			conn.setAutoCommit(autoCommit);
 	}
 	
 	public void applyHints(DalHints hints) throws SQLException {

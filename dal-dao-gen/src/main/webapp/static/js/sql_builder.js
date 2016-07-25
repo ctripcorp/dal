@@ -109,10 +109,11 @@
                 wrapedFields.push(wrapColumn(value));
             });
 
+        var tableName = wrapColumn($("#tables").val());
         if (conditions != undefined && conditions.length > 0) {
-            select_sql_builder = sprintf("SELECT %s FROM %s WHERE %s", wrapedFields.join(","), wrapTable($("#tables").val()), conditions.join(" "));
+            select_sql_builder = sprintf("SELECT %s FROM %s WHERE %s", wrapedFields.join(","), wrapTable(tableName), conditions.join(" "));
         } else {
-            select_sql_builder = sprintf("SELECT %s FROM %s", wrapedFields.join(","), wrapTable($("#tables").val()));
+            select_sql_builder = sprintf("SELECT %s FROM %s", wrapedFields.join(","), wrapTable(tableName));
         }
 
         if ($("#orderby_field").val() != '-1') {

@@ -23,12 +23,12 @@
     };
 
     var wrapColumn = function (value) {
-        var MySQLDelimiter = '`';
-        var SQLServerDelimiter = ['[', ']'];
+        var mySQLDelimiter = '`';
+        var sqlServerDelimiter = ['[', ']'];
         if ($(".step2-2-1").attr("dbCatalog") == "MySql") {
-            value = sprintf("%s%s%s", MySQLDelimiter, value, MySQLDelimiter);
+            value = sprintf("%s%s%s", mySQLDelimiter, value, mySQLDelimiter);
         } else {
-            value = sprintf("%s%s%s", SQLServerDelimiter[0], value, SQLServerDelimiter[1]);
+            value = sprintf("%s%s%s", sqlServerDelimiter[0], value, sqlServerDelimiter[1]);
         }
         return value;
     };
@@ -116,7 +116,7 @@
         }
 
         if ($("#orderby_field").val() != '-1') {
-            select_sql_builder = sprintf("%s ORDER BY %s %s", select_sql_builder, $("#orderby_field").val(), $("#orderby_sort").val());
+            select_sql_builder = sprintf("%s ORDER BY %s %s", select_sql_builder, wrapColumn($("#orderby_field").val()), $("#orderby_sort").val());
         }
         ace.edit("sql_builder").setValue(select_sql_builder);
         ace.edit("sql_builder").setReadOnly(true);

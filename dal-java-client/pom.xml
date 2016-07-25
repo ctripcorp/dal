@@ -132,16 +132,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<distributionManagement>
-		<repository>
-			<uniqueVersion>false</uniqueVersion>
-			<id>nexus-releases</id>
-			<url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxrelease</url>
-		</repository>
-		<snapshotRepository>
-			<uniqueVersion>false</uniqueVersion>
-			<id>nexus-snapshots</id>
-			<url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxrelease</url>
-		</snapshotRepository>
-	</distributionManagement>
 </project>

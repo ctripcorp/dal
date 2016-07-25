@@ -138,7 +138,9 @@
             function (index, value) {
                 wrapedFields.push(wrapColumn(value));
             });
-        ace.edit("sql_builder").setValue(sprintf("INSERT INTO %s (%s) VALUES (%s)", $("#tables").val(), wrapedFields.join(","), placeHodler.join(",")));
+
+        var tableName = wrapColumn($("#tables").val());
+        ace.edit("sql_builder").setValue(sprintf("INSERT INTO %s (%s) VALUES (%s)", tableName, wrapedFields.join(","), placeHodler.join(",")));
         ace.edit("sql_builder").setReadOnly(true);
     };
 
@@ -153,19 +155,21 @@
                 }
             });
 
+        var tableName = wrapColumn($("#tables").val());
         if (conditions.length > 0) {
-            ace.edit("sql_builder").setValue(sprintf("UPDATE %s SET %s WHERE %s", $("#tables").val(), placeHodler.join(","), conditions.join(" ")));
+            ace.edit("sql_builder").setValue(sprintf("UPDATE %s SET %s WHERE %s", tableName, placeHodler.join(","), conditions.join(" ")));
         } else {
-            ace.edit("sql_builder").setValue(sprintf("UPDATE %s SET %s ", $("#tables").val(), placeHodler.join(",")));
+            ace.edit("sql_builder").setValue(sprintf("UPDATE %s SET %s ", tableName, placeHodler.join(",")));
         }
         ace.edit("sql_builder").setReadOnly(true);
     };
 
     var buildDeleteSQL = function (conditions) {
+        var tableName = wrapColumn($("#tables").val());
         if (conditions.length > 0) {
-            ace.edit("sql_builder").setValue(sprintf("DELETE FROM %s WHERE %s", $("#tables").val(), conditions.join(" ")));
+            ace.edit("sql_builder").setValue(sprintf("DELETE FROM %s WHERE %s", tableName, conditions.join(" ")));
         } else {
-            ace.edit("sql_builder").setValue(sprintf("DELETE FROM %s", $("#tables").val()));
+            ace.edit("sql_builder").setValue(sprintf("DELETE FROM %s", tableName));
         }
         ace.edit("sql_builder").setReadOnly(true);
     };

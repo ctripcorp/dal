@@ -163,9 +163,9 @@
 
     var buildDeleteSQL = function (conditions) {
         if (conditions.length > 0) {
-            ace.edit("sql_builder").setValue(sprintf("Delete FROM %s WHERE %s", $("#tables").val(), conditions.join(" ")));
+            ace.edit("sql_builder").setValue(sprintf("DELETE FROM %s WHERE %s", $("#tables").val(), conditions.join(" ")));
         } else {
-            ace.edit("sql_builder").setValue(sprintf("Delete FROM %s", $("#tables").val()));
+            ace.edit("sql_builder").setValue(sprintf("DELETE FROM %s", $("#tables").val()));
         }
         ace.edit("sql_builder").setReadOnly(true);
     };

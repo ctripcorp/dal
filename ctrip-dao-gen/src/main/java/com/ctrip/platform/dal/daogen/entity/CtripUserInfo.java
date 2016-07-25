@@ -48,4 +48,32 @@ public class CtripUserInfo implements UserInfo {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public DalGroupDB getDefaultDBInfo(String dbType) {
+        DalGroupDB db = new DalGroupDB();
+
+        if (dbType == null || dbType.isEmpty()) {
+            return db;
+        }
+
+        if (dbType.equals("MySQL")) {
+            db.setDb_address("pub.mysql.db.dev.sh.ctripcorp.com");
+            db.setDb_port("28747");
+            db.setDb_user("uws_dbticket");
+            db.setDb_password("kgd8v5CenyoMjtg1uwzj");
+        } else if (dbType.equals("SQLServer")) {
+            db.setDb_address("devdb.dev.sh.ctriptravel.com");
+            db.setDb_port("28747");
+            db.setDb_user("uws_AllInOneKey_dev");
+            db.setDb_password("!QAZ@WSX1qaz2wsx");
+        } else {
+            db.setDb_address("");
+            db.setDb_port("");
+            db.setDb_user("");
+            db.setDb_password("");
+        }
+        return db;
+    }
+
 }

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.resource;
 
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.UserInfo;
+import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DefaultUserInfo;
 import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
@@ -131,6 +132,10 @@ public class CustomizedResource {
 
     public void logOut(HttpServletRequest request, HttpServletResponse response) {
         userInfo.logOut(request, response);
+    }
+
+    public DalGroupDB getDefaultDBInfo(String dbType) {
+        return userInfo.getDefaultDBInfo(dbType);
     }
 
 }

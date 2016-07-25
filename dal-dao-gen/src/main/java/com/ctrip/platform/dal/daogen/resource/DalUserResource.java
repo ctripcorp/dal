@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.resource;
 
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.domain.Status;
+import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.utils.MD5Util;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
@@ -355,5 +356,11 @@ public class DalUserResource {
     @Path("logOut")
     public void logOut(@Context HttpServletRequest request, @Context HttpServletResponse response) {
         CustomizedResource.getInstance().logOut(request, response);
+    }
+
+    @POST
+    @Path("getDefaultDBInfo")
+    public DalGroupDB getDefaultDBInfo(@FormParam("dbType") String dbType) {
+        return CustomizedResource.getInstance().getDefaultDBInfo(dbType);
     }
 }

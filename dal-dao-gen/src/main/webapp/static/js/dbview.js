@@ -282,26 +282,18 @@
     });
 
     $(function () {
-        var setDefaultAddDbVal = function () {
+        var setDefaultDbVal = function () {
             $("#error_msg").html(" ");
             var dbType = $.trim($("#dbtype").val());
 
-            if ("MySQL" == dbType) {
-                $("#dbaddress").val('pub.mysql.db.dev.sh.ctripcorp.com');
-                $("#dbport").val("28747");
-                $("#dbuser").val('uws_dbticket');
-                $("#dbpassword").val('kgd8v5CenyoMjtg1uwzj');
-            } else if ("SQLServer" == dbType) {
-                $("#dbaddress").val('devdb.dev.sh.ctriptravel.com');
-                $("#dbport").val("28747");
-                $("#dbuser").val('uws_AllInOneKey_dev');
-                $("#dbpassword").val('!QAZ@WSX1qaz2wsx');
-            } else {
-                $("#dbaddress").val("");
-                $("#dbport").val("");
-                $("#dbuser").val("");
-                $("#dbpassword").val("");
-            }
+            $.post("/rest/user/getDefaultDBInfo", {
+                dbType: dbType
+            }, function (data) {
+                $("#dbaddress").val(data.db_address);
+                $("#dbport").val(data.db_port);
+                $("#dbuser").val(data.db_user);
+                $("#dbpassword").val(data.db_password);
+            });
         };
 
         var getAllCatalog = function (successInfo) {
@@ -343,7 +335,7 @@
         $(document.body).on("change", "#dbtype", function () {
             $.get("/rest/user/isDefaultUser", {rand: Math.random()}, function (data) {
                 if (data == "false") {
-                    setDefaultAddDbVal();
+                    setDefaultDbVal();
                 }
             });
         });

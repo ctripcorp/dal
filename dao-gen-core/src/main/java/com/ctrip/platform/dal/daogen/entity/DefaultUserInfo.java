@@ -72,4 +72,19 @@ public class DefaultUserInfo implements UserInfo {
         }
     }
 
+    @Override
+    public DalGroupDB getDefaultDBInfo(String dbType) {
+        DalGroupDB db = new DalGroupDB();
+
+        if (dbType == null || dbType.isEmpty()) {
+            return db;
+        }
+
+        db.setDb_address("");
+        db.setDb_port("");
+        db.setDb_user("");
+        db.setDb_password("");
+        return db;
+    }
+
 }

@@ -26,7 +26,6 @@
             <li id="usermanagejsp" style="display: none;"><a href="usermanage.jsp">用户管理</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-            <li id="welcomejsp" style="display: none"><a href="welcome.jsp">Tutorial</a></li>
             <li class="dropdown"><a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"
                                     data-hover="dropdown" data-close-others="true"> <span class="username">帮助</span>
                 <i class="glyphicon glyphicon-menu-down"> </i>

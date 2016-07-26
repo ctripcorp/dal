@@ -1,7 +1,12 @@
 <%@page pageEncoding="UTF-8" %>
+<%@page import="com.ctrip.platform.dal.daogen.utils.Configuration" %>
 <%
-    String codegenpageflag = "1.3.4";
-    request.setAttribute("codegenpageflag", codegenpageflag);
+    String version = Configuration.get("version");
+    String dotnetDbMapping = Configuration.get("dotnet_db_mapping");
+    String javaDbmapping = Configuration.get("java_db_mapping");
+    request.setAttribute("version", version);
+    request.setAttribute("dotnetDbMapping", dotnetDbMapping);
+    request.setAttribute("javaDbmapping", javaDbmapping);
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,13 +19,13 @@
     <meta name="author" content="">
     <title>Ctrip DAO Generator</title>
     <!-- Bootstrap core CSS -->
-    <link href="/static/bootstrap/css/bootstrap.min.css?codegen=${codegenpageflag}" rel="stylesheet">
-    <link href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${codegenpageflag}" rel="stylesheet">
-    <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=${codegenpageflag}" rel="stylesheet"/>
-    <link href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}" rel="stylesheet"/>
-    <link href="/static/css/multiple-select.css?codegen=${codegenpageflag}" rel="stylesheet">
-    <link href="/static/css/selectize.bootstrap3.css?codegen=${codegenpageflag}" rel="stylesheet">
-    <link href="/static/css/common.css?codegen=${codegenpageflag}" rel="stylesheet">
+    <link href="/static/bootstrap/css/bootstrap.min.css?codegen=${version}" rel="stylesheet">
+    <link href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${version}" rel="stylesheet">
+    <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=${version}" rel="stylesheet"/>
+    <link href="/static/jstree/themes/default/style.min.css?codegen=${version}" rel="stylesheet"/>
+    <link href="/static/css/multiple-select.css?codegen=${version}" rel="stylesheet">
+    <link href="/static/css/selectize.bootstrap3.css?codegen=${version}" rel="stylesheet">
+    <link href="/static/css/common.css?codegen=${version}" rel="stylesheet">
 
     <!-- Documentation extras -->
     <!--
@@ -624,9 +629,9 @@
                             <div id="divMapping" class="panel-collapse collapse">
                                 <div class="panel-body">
                                     <ul>
-                                        <li><a href="http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081345"
+                                        <li><a href="${dotnetDbMapping}"
                                                target="view_window" class="ctip">DAL for .NET</a></li>
-                                        <li><a href="http://conf.ctripcorp.com/pages/viewpage.action?pageId=54481337"
+                                        <li><a href="${javaDbmapping}"
                                                target="view_window" class="ctip">DAL for Java</a></li>
                                     </ul>
                                 </div>
@@ -763,22 +768,22 @@
 <!-- JS and analytics only. -->
 <!-- Bootstrap core JavaScript================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-<script src="/static/jquery/jquery-1.10.2.min.js?codegen=${codegenpageflag}"></script>
-<script src="/static/bootstrap/js/bootstrap.min.js?codegen=${codegenpageflag}"></script>
-<script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=${codegenpageflag}"></script>
-<script src="/static/jstree/jstree.js?codegen=${codegenpageflag}"></script>
-<script src="/static/jquery/jquery.blockui.min.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/sprintf.js?codegen=${codegenpageflag}"></script>
-<script src="/static/ace/ace.js?codegen=${codegenpageflag}"></script>
-<script src="/static/jquery/jquery.multiple.select.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/selectize.min.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/cblock.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/header.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/ajaxutil.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/ui_render.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/wizzard.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/progress.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/sql_builder.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/index.js?codegen=${codegenpageflag}"></script>
+<script src="/static/jquery/jquery-1.10.2.min.js?codegen=${version}"></script>
+<script src="/static/bootstrap/js/bootstrap.min.js?codegen=${version}"></script>
+<script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=${version}"></script>
+<script src="/static/jstree/jstree.js?codegen=${version}"></script>
+<script src="/static/jquery/jquery.blockui.min.js?codegen=${version}"></script>
+<script src="/static/js/sprintf.js?codegen=${version}"></script>
+<script src="/static/ace/ace.js?codegen=${version}"></script>
+<script src="/static/jquery/jquery.multiple.select.js?codegen=${version}"></script>
+<script src="/static/js/selectize.min.js?codegen=${version}"></script>
+<script src="/static/js/cblock.js?codegen=${version}"></script>
+<script src="/static/js/header.js?codegen=${version}"></script>
+<script src="/static/js/ajaxutil.js?codegen=${version}"></script>
+<script src="/static/js/ui_render.js?codegen=${version}"></script>
+<script src="/static/js/wizzard.js?codegen=${version}"></script>
+<script src="/static/js/progress.js?codegen=${version}"></script>
+<script src="/static/js/sql_builder.js?codegen=${version}"></script>
+<script src="/static/js/index.js?codegen=${version}"></script>
 </body>
 </html>

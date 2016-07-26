@@ -61,8 +61,21 @@
     };
 
     var applyAddTeam = function () {
+        var email = "";
+        $.ajax({
+            type: "GET",
+            url: "/rest/group/getDalTeamEmail",
+            data: {rand: Math.random()},
+            async: false,
+            success: function (data) {
+                if (data != null && data != undefined) {
+                    email = "mailto:" + data;
+                }
+            }
+        });
+
         var form = $("<form></form>");
-        form.attr('action', "mailto:rdfxdal@Ctrip.com");
+        form.attr('action', email);
         form.attr('method', 'post');
         form.appendTo("body");
         form.css('display', 'none');

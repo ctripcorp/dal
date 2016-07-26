@@ -10,9 +10,8 @@ using ${host.getNameSpace()}.Interface.IDao;
 
 namespace ${host.getNameSpace()}.Dao
 {
-   /// <summary>
-    /// 更多DAL接口功能，请参阅DAL Confluence，地址：
-    /// http://conf.ctripcorp.com/display/SysDev/Dal+Fx+API
+    /// <summary>
+    ///
     /// </summary>
     public partial class ${host.getClassName()}Dao : I${host.getClassName()}Dao
     {

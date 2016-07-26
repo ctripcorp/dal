@@ -1,6 +1,19 @@
 <%@page pageEncoding="UTF-8" %>
 <%@page import="com.ctrip.platform.dal.daogen.resource.CustomizedResource" %>
 <%@page import="com.ctrip.platform.dal.daogen.Consts" %>
+<%@page import="com.ctrip.platform.dal.daogen.utils.Configuration" %>
+<%
+    String codegenManual = Configuration.get("codegen_manual");
+    String dalManual = Configuration.get("dal_manual");
+    String sqlServerSpec = Configuration.get("sql_server_spec");
+    String mySqlSpec = Configuration.get("mysql_spec");
+    String dalTeamEmail = Configuration.get("dal_team_email");
+    request.setAttribute("codegenManual", codegenManual);
+    request.setAttribute("dalManual", dalManual);
+    request.setAttribute("sqlServerSpec", sqlServerSpec);
+    request.setAttribute("mySqlSpec", mySqlSpec);
+    request.setAttribute("dalTeamEmail", dalTeamEmail);
+%>
 <nav class="navbar navbar-inverse navbar-embossed navbar-fixed-top" role="navigation">
     <div class="navbar-header">
         <a href="index.jsp"> <img class="logo" src="/static/images/logo.png" style="padding: 5px; float: left;">
@@ -34,20 +47,21 @@
                 <ul class="dropdown-menu dropdown-inverse"
                     style="margin-top: 8px !important">
                     <li><a href="javascript:;"
-                           onclick="window.open('http://conf.ctripcorp.com/display/FRAM/DAL+Code+Generator', '_blank');">Code
+                           onclick="window.open('${codegenManual}', '_blank');">Code
                         Gen 使用说明</a></li>
                     <li><a href="javascript:;"
-                           onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=32081284', '_blank');">DAL
+                           onclick="window.open('${dalManual}', '_blank');">DAL
                         框架使用说明</a>
                     </li>
                     <li><a href="javascript:;"
-                           onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=74094596', '_blank');">SQL
+                           onclick="window.open('${sqlServerSpec}', '_blank');">SQL
                         Server 使用规范</a></li>
                     <li><a href="javascript:;"
-                           onclick="window.open('http://conf.ctripcorp.com/pages/viewpage.action?pageId=55383965', '_blank');">MySQL
+                           onclick="window.open('${mySqlSpec}', '_blank');">MySQL
                         开发规范详解</a>
                     </li>
-                    <li><a href="mailto:rdfxdal@Ctrip.com"><span class="glyphicon glyphicon-envelope"></span>&nbsp;联系我们</a>
+                    <li><a href="mailto:${dalTeamEmail}"><span
+                            class="glyphicon glyphicon-envelope"></span>&nbsp;联系我们</a>
                     </li>
                 </ul>
             </li>

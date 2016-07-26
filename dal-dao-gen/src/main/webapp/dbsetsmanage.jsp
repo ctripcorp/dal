@@ -1,7 +1,8 @@
 <%@page pageEncoding="UTF-8" %>
+<%@page import="com.ctrip.platform.dal.daogen.utils.Configuration" %>
 <%
-    String codegenpageflag = "1.3.4";
-    request.setAttribute("codegenpageflag", codegenpageflag);
+    String version = Configuration.get("version");
+    request.setAttribute("version", version);
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,24 +16,24 @@
     <title>Ctrip DAO Generator</title>
     <!-- Bootstrap core CSS -->
     <link
-            href="/static/bootstrap/css/bootstrap.min.css?codegen=${codegenpageflag}"
+            href="/static/bootstrap/css/bootstrap.min.css?codegen=${version}"
             rel="stylesheet">
     <link
-            href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${codegenpageflag}"
+            href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${version}"
             rel="stylesheet">
-    <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=${codegenpageflag}"
+    <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=${version}"
           rel="stylesheet"/>
     <link rel="stylesheet"
-          href="/static/jstree/themes/default/style.min.css?codegen=${codegenpageflag}"/>
+          href="/static/jstree/themes/default/style.min.css?codegen=${version}"/>
     <!-- <link
-	href="/static/font-awesome/css/font-awesome.css?codegen=${codegenpageflag}"
+	href="/static/font-awesome/css/font-awesome.css?codegen=${version}"
 	rel="stylesheet"> -->
-    <link href="/static/css/multiple-select.css?codegen=${codegenpageflag}"
+    <link href="/static/css/multiple-select.css?codegen=${version}"
           rel="stylesheet">
     <link
-            href="/static/css/selectize.bootstrap3.css?codegen=${codegenpageflag}"
+            href="/static/css/selectize.bootstrap3.css?codegen=${version}"
             rel="stylesheet">
-    <link href="/static/css/common.css?codegen=${codegenpageflag}"
+    <link href="/static/css/common.css?codegen=${version}"
           rel="stylesheet">
 
     <!-- Documentation extras -->
@@ -54,10 +55,10 @@
     <link rel="shortcut icon" href="/static/images/favicon.ico">
     <!-- Loading Flat UI -->
     <link
-            href="/static/Flat-UI-master/css/flat-ui.css?codegen=${codegenpageflag}"
+            href="/static/Flat-UI-master/css/flat-ui.css?codegen=${version}"
             rel="stylesheet">
     <link
-            href="/static/Flat-UI-master/css/demo.css?codegen=${codegenpageflag}"
+            href="/static/Flat-UI-master/css/demo.css?codegen=${version}"
             rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
@@ -351,22 +352,22 @@
 <!-- Bootstrap core JavaScript================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
 <script
-        src="/static/jquery/jquery-1.10.2.min.js?codegen=${codegenpageflag}"></script>
+        src="/static/jquery/jquery-1.10.2.min.js?codegen=${version}"></script>
 <script
-        src="/static/bootstrap/js/bootstrap.min.js?codegen=${codegenpageflag}"></script>
-<script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=${codegenpageflag}"></script>
-<script src="/static/jstree/jstree.js?codegen=${codegenpageflag}"></script>
+        src="/static/bootstrap/js/bootstrap.min.js?codegen=${version}"></script>
+<script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=${version}"></script>
+<script src="/static/jstree/jstree.js?codegen=${version}"></script>
 <script
-        src="/static/jquery/jquery.blockui.min.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/sprintf.js?codegen=${codegenpageflag}"></script>
+        src="/static/jquery/jquery.blockui.min.js?codegen=${version}"></script>
+<script src="/static/js/sprintf.js?codegen=${version}"></script>
 <script
-        src="/static/jquery/jquery.multiple.select.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/selectize.min.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/cblock.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/ajaxutil.js?codegen=${codegenpageflag}"></script>
+        src="/static/jquery/jquery.multiple.select.js?codegen=${version}"></script>
+<script src="/static/js/selectize.min.js?codegen=${version}"></script>
+<script src="/static/js/cblock.js?codegen=${version}"></script>
+<script src="/static/js/ajaxutil.js?codegen=${version}"></script>
 
-<script src="/static/js/header.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/dbsetsmanage.js?codegen=${codegenpageflag}"></script>
+<script src="/static/js/header.js?codegen=${version}"></script>
+<script src="/static/js/dbsetsmanage.js?codegen=${version}"></script>
 
 </body>
 </html>

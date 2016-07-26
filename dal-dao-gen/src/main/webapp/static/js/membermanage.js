@@ -195,12 +195,24 @@
             return;
         }
         cblock($("body"));
-        var emailUrl = 'mailto:rdfxdal@Ctrip.com';
+        var email = "";
+        $.ajax({
+            type: "GET",
+            url: "/rest/group/getDalTeamEmail",
+            data: {rand: Math.random()},
+            async: false,
+            success: function (data) {
+                if (data != null && data != undefined) {
+                    email = "mailto:" + data;
+                }
+            }
+        });
+
         $.get("/rest/member/groupuser", {groupId: current_group, rand: Math.random()}, function (data) {
             if (data != null && data.length > 0) {
-                emailUrl = 'mailto:' + data[0]['userEmail'];
+                email = 'mailto:' + data[0]['userEmail'];
             }
-            window.location.href = emailUrl;
+            window.location.href = email;
         }).fail(function (data) {
             alert(data);
         });

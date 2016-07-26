@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.resource;
 
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.*;
+import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import org.apache.log4j.Logger;
@@ -206,5 +207,11 @@ public class DalGroupResource {
             }
         }
         return false;
+    }
+
+    @GET
+    @Path("getDalTeamEmail")
+    public String getDalTeamEmail() {
+        return Configuration.get("dal_team_email");
     }
 }

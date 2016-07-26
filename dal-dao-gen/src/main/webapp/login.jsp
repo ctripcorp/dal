@@ -1,7 +1,8 @@
 <%@page pageEncoding="UTF-8" %>
+<%@page import="com.ctrip.platform.dal.daogen.utils.Configuration" %>
 <%
-    String codegenpageflag = "1.3.4";
-    request.setAttribute("codegenpageflag", codegenpageflag);
+    String version = Configuration.get("version");
+    request.setAttribute("version", version);
 %>
 <!DOCTYPE html>
 <html lang='en'>
@@ -13,12 +14,12 @@
     <meta name="author" content="">
     <title>Ctrip DAO Generator</title>
     <link href="/static/images/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
-    <link href="/static/assets/application.css?codegen=${codegenpageflag}" media="all" rel="stylesheet"/>
-    <link href="/static/assets/print.css?codegen=${codegenpageflag}" media="print" rel="stylesheet"/>
-    <link href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${codegenpageflag}" rel="stylesheet">
-    <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=${codegenpageflag}" rel="stylesheet"/>
-    <link href="/static/css/selectize.bootstrap3.css?codegen=${codegenpageflag}" rel="stylesheet">
-    <link href="/static/css/common.css?codegen=${codegenpageflag}" rel="stylesheet">
+    <link href="/static/assets/application.css?codegen=${version}" media="all" rel="stylesheet"/>
+    <link href="/static/assets/print.css?codegen=${version}" media="print" rel="stylesheet"/>
+    <link href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${version}" rel="stylesheet">
+    <link href="/static/w2ui/w2ui-1.3.2.min.css?codegen=${version}" rel="stylesheet"/>
+    <link href="/static/css/selectize.bootstrap3.css?codegen=${version}" rel="stylesheet">
+    <link href="/static/css/common.css?codegen=${version}" rel="stylesheet">
 </head>
 <body class='ui_mars login-page application'>
 <header class='navbar navbar-fixed-top navbar-gitlab'>
@@ -240,11 +241,11 @@
     </div>
 </div>
 <!--End modal-->
-<script src="/static/assets/application.js?codegen=${codegenpageflag}"></script>
-<script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/js.cookie.min.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/cblock.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/selectize.min.js?codegen=${codegenpageflag}"></script>
-<script src="/static/js/login.js?codegen=${codegenpageflag}"></script>
+<script src="/static/assets/application.js?codegen=${version}"></script>
+<script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=${version}"></script>
+<script src="/static/js/js.cookie.min.js?codegen=${version}"></script>
+<script src="/static/js/cblock.js?codegen=${version}"></script>
+<script src="/static/js/selectize.min.js?codegen=${version}"></script>
+<script src="/static/js/login.js?codegen=${version}"></script>
 </body>
 </html>

@@ -28,7 +28,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.ctrip.platform</groupId>
-			<artifactId>dal-java-client</artifactId>
+			<artifactId>dal-client</artifactId>
 			<version>1.5.0</version>
 		</dependency>
 		<dependency>

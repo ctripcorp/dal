@@ -312,9 +312,9 @@ public class DbUtils {
 
     private static String buildColumnSql(String allInOneName, String tableViewName) throws Exception {
         if (isMySqlServer(allInOneName)) {
-            return "select * from " + tableViewName + " limit 1";
+            return "select * from `" + tableViewName + "` limit 1";
         } else {
-            return "select top 1 * from " + tableViewName;
+            return "select top 1 * from [" + tableViewName + "]";
         }
     }
 

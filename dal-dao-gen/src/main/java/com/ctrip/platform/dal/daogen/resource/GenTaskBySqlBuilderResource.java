@@ -292,9 +292,11 @@ public class GenTaskBySqlBuilderResource {
         String dbName = databaseSetEntry.getConnectionString();
         List<AbstractParameterHost> paramsHost = DbUtils.getAllColumnNames(dbName, table_name, new JavaColumnNameResultSetExtractor(dbName, table_name));
         Map<String, Integer> map = new HashMap<>();
-        for (int i = 0; i < paramsHost.size(); i++) {
-            JavaParameterHost paramHost = (JavaParameterHost) paramsHost.get(i);
-            map.put(paramHost.getAlias().toLowerCase(), paramHost.getSqlType());
+        if (paramsHost != null) {
+            for (int i = 0; i < paramsHost.size(); i++) {
+                JavaParameterHost paramHost = (JavaParameterHost) paramsHost.get(i);
+                map.put(paramHost.getAlias().toLowerCase(), paramHost.getSqlType());
+            }
         }
         return map;
     }

@@ -455,19 +455,14 @@
             $("#error_msg").html(" ");
             var dbType = $.trim($("#dbtype_up").val());
 
-            if ("MySQL" == dbType) {
-                $("#dbaddress_up").val('pub.mysql.db.dev.sh.ctripcorp.com');
-                $("#dbuser_up").val('uws_dbticket');
-                $("#dbpassword_up").val('kgd8v5CenyoMjtg1uwzj');
-            } else if ("SQLServer" == dbType) {
-                $("#dbaddress_up").val('devdb.dev.sh.ctriptravel.com');
-                $("#dbuser_up").val('uws_AllInOneKey_dev');
-                $("#dbpassword_up").val('!QAZ@WSX1qaz2wsx');
-            } else {
-                $("#dbaddress_up").val('');
-                $("#dbuser_up").val('');
-                $("#dbpassword_up").val('');
-            }
+            $.post("/rest/user/getDefaultDBInfo", {
+                dbType: dbType
+            }, function (data) {
+                $("#dbaddress_up").val(data.db_address);
+                $("#dbport_up").val(data.db_port);
+                $("#dbuser_up").val(data.db_user);
+                $("#dbpassword_up").val(data.db_password);
+            });
         });
 
         var getUpdateCatalog = function (successInfo) {

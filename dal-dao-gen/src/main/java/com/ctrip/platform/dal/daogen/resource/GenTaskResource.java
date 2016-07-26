@@ -16,6 +16,7 @@ import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.host.java.FreeSqlHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaMethodHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
+import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -228,8 +229,8 @@ public class GenTaskResource {
         String msg = GenUtils.mergeVelocityContext(context, "templates/approval/approveDao.tpl");
 
         HtmlEmail email = new HtmlEmail();
-        email.setHostName("appmail.sh.ctriptravel.com");
-        email.setAuthentication("appmail107", "rm36vesybc");
+        email.setHostName(Configuration.get("email_host_name"));
+        email.setAuthentication(Configuration.get("email_user_name"), Configuration.get("email_password"));
 
         try {
             email.addTo(approver.getUserEmail());

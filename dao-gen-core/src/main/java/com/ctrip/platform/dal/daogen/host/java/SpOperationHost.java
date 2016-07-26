@@ -7,7 +7,6 @@ import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-//rules is according to http://conf.ctripcorp.com/pages/viewpage.action?pageId=54479645
 public class SpOperationHost {
     private boolean exist;
     private List<JavaParameterHost> parameters = new ArrayList<>();

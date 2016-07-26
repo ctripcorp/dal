@@ -301,8 +301,9 @@ public class GenTaskResource {
         String mailMsg = GenUtils.mergeVelocityContext(context, "templates/approval/approveResult.tpl");
 
         HtmlEmail email = new HtmlEmail();
-        email.setHostName("appmail.sh.ctriptravel.com");
-        email.setAuthentication("appmail107", "rm36vesybc");
+        email.setHostName(Configuration.get("email_host_name"));
+        email.setAuthentication(Configuration.get("email_user_name"), Configuration.get("email_password"));
+        
         try {
             email.addTo(noticeUsr.getUserEmail());
             email.setFrom(user.getUserEmail(), user.getUserName());
@@ -375,8 +376,9 @@ public class GenTaskResource {
         String mailMsg = GenUtils.mergeVelocityContext(context, "templates/approval/approveResult.tpl");
 
         HtmlEmail email = new HtmlEmail();
-        email.setHostName("appmail.sh.ctriptravel.com");
-        email.setAuthentication("appmail107", "rm36vesybc");
+        email.setHostName(Configuration.get("email_host_name"));
+        email.setAuthentication(Configuration.get("email_user_name"), Configuration.get("email_password"));
+
         try {
             email.addTo(noticeUsr.getUserEmail());
             email.setFrom(user.getUserEmail(), user.getUserName());

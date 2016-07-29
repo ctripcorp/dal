@@ -3,10 +3,10 @@
 <%
     String version = Configuration.get("version");
     String dotnetDbMapping = Configuration.get("dotnet_db_mapping");
-    String javaDbmapping = Configuration.get("java_db_mapping");
+    String javaDbMapping = Configuration.get("java_db_mapping");
     request.setAttribute("version", version);
     request.setAttribute("dotnetDbMapping", dotnetDbMapping);
-    request.setAttribute("javaDbmapping", javaDbmapping);
+    request.setAttribute("javaDbMapping", javaDbMapping);
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -631,7 +631,7 @@
                                     <ul>
                                         <li><a href="${dotnetDbMapping}"
                                                target="view_window" class="ctip">DAL for .NET</a></li>
-                                        <li><a href="${javaDbmapping}"
+                                        <li><a href="${javaDbMapping}"
                                                target="view_window" class="ctip">DAL for Java</a></li>
                                     </ul>
                                 </div>

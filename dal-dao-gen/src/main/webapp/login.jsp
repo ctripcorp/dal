@@ -74,7 +74,7 @@
                     <div class='prepend-top-20'>
                         <div class='login-box'>
                             <div class='login-heading'>
-                                <h3>创建账号</h3>
+                                <h3>创建帐号</h3>
                             </div>
                             <div class='login-body'>
                                 <div class="new_user" id="user_signup">

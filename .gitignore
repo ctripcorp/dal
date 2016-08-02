@@ -10,6 +10,8 @@
 #################
 ## Eclipse
 #################
+.classpath
+.project
 
 *.pydevproject
 .metadata

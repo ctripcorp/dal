@@ -14,14 +14,17 @@ import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
+import com.dianping.cat.status.ProductVersionManager;
 
 public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 	
 	private Logger logger = LoggerFactory.getLogger(Version.getLoggerName());
-	
+	private static final String DAL_VERSION = "DAL.version";
+
 	@Override
 	public void initialize(Map<String, String> settings) {
 		super.initialize(settings);
+		ProductVersionManager.getInstance().register(DAL_VERSION, Version.getVersion()); 
 		DalCLogger.setEncryptLogging(encryptLogging);
 		DalCLogger.setSimplifyLogging(simplifyLogging);
 	}
@@ -93,12 +96,17 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 			executor.submit(new Runnable() {
 				@Override
 				public void run() {
-					DalCatLogger.start((CtripLogEntry)entry);
+					recordStart((CtripLogEntry)entry);
 				}
 			});
 		} else {
-			DalCatLogger.start((CtripLogEntry)entry);
+			recordStart((CtripLogEntry)entry);
 		}
+	}
+	
+	private void recordStart(final LogEntry entry) {
+		DalCatLogger.start((CtripLogEntry)entry);
+		DalCLogger.start((CtripLogEntry)entry);
 	}
 	
 	@Override

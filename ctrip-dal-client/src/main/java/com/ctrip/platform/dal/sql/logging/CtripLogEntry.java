@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.ctrip.framework.clogging.agent.trace.ISpan;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
@@ -30,6 +31,7 @@ public class CtripLogEntry extends LogEntry {
 	private static final String ERRORCDE_PATTERN = "SYS%sL%s";
 	
 	private Transaction catTransaction;
+	private ISpan urlSpan;
 
 	public Transaction getCatTransaction() {
 		return catTransaction;
@@ -37,6 +39,14 @@ public class CtripLogEntry extends LogEntry {
 
 	public void setCatTransaction(Transaction catTransaction) {
 		this.catTransaction = catTransaction;
+	}
+	
+	public ISpan getUrlSpan() {
+		return urlSpan;
+	}
+
+	public void setUrlSpan(ISpan urlSpan) {
+		this.urlSpan = urlSpan;
 	}
 
 	public Map<String, String> getTag() {

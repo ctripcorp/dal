@@ -9,7 +9,6 @@ import com.dianping.cat.message.Transaction;
 
 public class DalCatLogger {
 	private static final String RECORD_COUNT = "DAL.recordCount";
-	private static final String DAL_VERSION = "DAL.version";
 	
 	public static void start(CtripLogEntry entry) {
 		try {
@@ -18,7 +17,6 @@ public class DalCatLogger {
 			entry.setCatTransaction(catTransaction);
 			
 			String method = entry.getEvent() == null ? "dal_test" : CatInfo.getTypeSQLInfo(entry.getEvent());
-			Cat.logEvent(DAL_VERSION, "java-" + entry.getClientVersion());
 			if(entry.getPramemters() != null){
 				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, entry.getEncryptParameters(DalCLogger.isEncryptLogging(), entry).replaceAll(",", "&"));
 			} else {

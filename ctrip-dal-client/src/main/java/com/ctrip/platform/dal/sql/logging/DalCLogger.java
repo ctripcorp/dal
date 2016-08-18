@@ -4,10 +4,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.ctrip.framework.clogging.agent.log.ILog;
 import com.ctrip.framework.clogging.agent.log.LogManager;
+import com.ctrip.framework.clogging.agent.trace.ISpan;
 import com.ctrip.framework.clogging.agent.trace.ITrace;
 import com.ctrip.framework.clogging.agent.trace.TraceManager;
 import com.ctrip.framework.clogging.domain.thrift.LogLevel;
 import com.ctrip.framework.clogging.domain.thrift.LogType;
+import com.ctrip.framework.clogging.domain.thrift.SpanType;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
@@ -44,20 +46,41 @@ public class DalCLogger {
 		return encryptLogging.get();
 	}
 	
+	public static void start(CtripLogEntry entry) {
+		try {
+			if (isSimplifyLogging())
+				return;
+			
+			// Trace is no longer work according to clog team
+			ISpan urlSpan = trace.startSpan("DAL", "DAL", SpanType.SQL);
+			entry.setUrlSpan(urlSpan);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void success(CtripLogEntry entry, int count) {
-		entry.setSuccess(true);
-		entry.setResultCount(count);
-		log(entry);
+		try {
+			entry.setSuccess(true);
+			entry.setResultCount(count);
+			log(entry);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void fail(CtripLogEntry entry, Throwable e) {
-		entry.setSuccess(false);
-		entry.setErrorMsg(e.getMessage());
-		entry.setException(e);
-		log(entry);
+		try {
+			entry.setSuccess(false);
+			entry.setErrorMsg(e.getMessage());
+			entry.setException(e);
+			log(entry);
+		} catch (Throwable e1) {
+			e1.printStackTrace();
+		}
 	}
 
-	public static void log(CtripLogEntry entry) {
+	private static void log(CtripLogEntry entry) {
 		if (isSimplifyLogging()) {
 			if (entry.getException() == null) {
 				logger.info(TITLE, entry.toJson(isEncryptLogging(), entry), entry.getTag());
@@ -65,9 +88,12 @@ public class DalCLogger {
 				logger.error(TITLE, entry.toJson(isEncryptLogging(), entry), entry.getTag());
 			}
 		} else {
+			// Trace is no longer work according to clog team
 			LogLevel level = entry.getException() == null ? LogLevel.INFO : LogLevel.ERROR;
 			trace.log(LogType.SQL, level, TITLE, entry.toJson(isEncryptLogging(), entry),
 					entry.getTag());
+			ISpan urlSpan = entry.getUrlSpan();
+			urlSpan.stop();
 		}
 	}
 
@@ -86,39 +112,42 @@ public class DalCLogger {
 	}
 
 	public static void getConnectionFailed(String realDbName, Throwable e) {
-		StringBuffer sbuffer = new StringBuffer();
-		sbuffer.append(String.format("Log Name: %s" + System.lineSeparator(), "Get connection"));
-		sbuffer.append(String.format("Event: %s" + System.lineSeparator(), 
-				DalEventEnum.CONNECTION_FAILED.getEventId()));
-		
-		String msg= "Connectiing to " + realDbName
-				+ " database failed." + System.lineSeparator();
+		try {
+			StringBuffer sbuffer = new StringBuffer();
+			sbuffer.append(String.format("Log Name: %s" + System.lineSeparator(), "Get connection"));
+			sbuffer.append(String.format("Event: %s" + System.lineSeparator(), 
+					DalEventEnum.CONNECTION_FAILED.getEventId()));
+			
+			String msg= "Connectiing to " + realDbName
+					+ " database failed." + System.lineSeparator();
 
-		sbuffer.append(String.format("Message: %s " + System.lineSeparator(), msg));
-		
-		error(sbuffer.toString(), e);
-	}
-	
-	public static void log(LogLevel level, String pattern, Object... args){
-		log(level, String.format(pattern, args));
+			sbuffer.append(String.format("Message: %s " + System.lineSeparator(), msg));
+			
+			error(sbuffer.toString(), e);
+		} catch (Throwable e1) {
+			e1.printStackTrace();
+		}
 	}
 	
 	public static void log(LogLevel level, String msg) {
-		switch (level) {
-		case DEBUG:
-			logger.debug(TITLE, msg);
-		case INFO:
-			logger.info(TITLE, msg);
-			break;
-		case ERROR:
-			logger.error(TITLE, msg);
-			break;
-		case FATAL:
-			logger.fatal(TITLE, msg);
-			break;
-		default:
-			break;
+		try {
+			switch (level) {
+			case DEBUG:
+				logger.debug(TITLE, msg);
+			case INFO:
+				logger.info(TITLE, msg);
+				break;
+			case ERROR:
+				logger.error(TITLE, msg);
+				break;
+			case FATAL:
+				logger.fatal(TITLE, msg);
+				break;
+			default:
+				break;
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
 		}
 	}
-
 }

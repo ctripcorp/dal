@@ -168,6 +168,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
 		// In case the white space like " " or enter is appended
 		svcUrl = svcUrl.trim();
+		logger.info(svcUrl);
 
         URI uri = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid).build();
         HttpClient sslClient = initWeakSSLClient();
@@ -184,13 +185,17 @@ public class TitanProvider implements DataSourceConfigureProvider {
             TitanResponse resp = JSON.parseObject(content, TitanResponse.class);
             
             if(!"200".equals(resp.getStatus())) {
+            	logger.error("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s", resp.getStatus(), resp.getMessage());
             	throw new RuntimeException(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s", resp.getStatus(), resp.getMessage()));
             }
             
             for(TitanData data: resp.getData()) {
+            	logger.info("Parsing " + data.getName());
             	//Fail fast
-	            if(data.getErrorCode() != null)
+	            if(data.getErrorCode() != null) {
+	            	logger.error(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
 	            	throw new RuntimeException(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
+	            }
 
             	//Decrypt raw connection string
             	result.put(data.getName(), data.getConnectionString());

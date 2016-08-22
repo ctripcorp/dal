@@ -29,7 +29,6 @@ public class PersonDaoUnitTest {
 	private static final String DATA_BASE = "MySqlSimpleShard";
 	//ShardColModShardStrategy;columns=CountryID;mod=2;tableColumns=CityID;tableMod=4;separator=_;shardedTables=person
 
-	private static DalClient client = null;
 	private static PersonDao dao = null;
 	
 	@BeforeClass
@@ -39,9 +38,8 @@ public class PersonDaoUnitTest {
 		* The Dal.config can be specified from class-path or local file path.
 		* One of follow three need to be enabled.
 		**/
-		DalClientFactory.initClientFactory(); // load from class-path Dal.config
-		DalClientFactory.warmUpConnections();
-		client = DalClientFactory.getClient(DATA_BASE);
+//		DalClientFactory.initClientFactory(); // load from class-path Dal.config
+//		DalClientFactory.warmUpConnections();
 		dao = new PersonDao();
 	}
 

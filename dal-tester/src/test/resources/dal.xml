@@ -104,7 +104,7 @@
       <settings>
         <encrypt>false</encrypt>
         <secretKey>dalctripcn</secretKey>
-        <simplified>true</simplified>
+        <simplified>false</simplified>
         <sampling>true</sampling>
         <samplingLow>2</samplingLow>
 	  	<samplingHigh>1</samplingHigh>

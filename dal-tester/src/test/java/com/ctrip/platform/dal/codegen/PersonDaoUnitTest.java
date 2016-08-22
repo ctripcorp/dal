@@ -133,6 +133,14 @@ public class PersonDaoUnitTest {
 	}
 	
 	@Test
+	public void testCountAllShards() throws Exception {
+		for(int j = 0; j < 4; j++) {
+			int affected = dao.count(new DalHints().inAllShards().inTableShard(j));
+			assertEquals(8, affected);
+		}
+	}
+	
+	@Test
 	public void testDelete1() throws Exception {
 	    DalHints hints = new DalHints();
 	    

@@ -27,20 +27,14 @@ public class DalClientFactoryListener implements ServletContextListener {
 			
 			if(Boolean.parseBoolean(warmUp))
 				DalClientFactory.warmUpConnections();
-			
-			/* The startup and shutdown of ConfigBeanFactory must be done here.
-			 * Because only web app can have classes folder for bean.properties
-			 */
-//			ConfigBeanFactory.init();
 
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			logger.error("Error when init client factory", e);
+			throw new RuntimeException(e);
 		}
 	}
 	
 	public void contextDestroyed(ServletContextEvent sce) {
 		DalClientFactory.shutdownFactory();
-
-//		ConfigBeanFactory.shutdown();
 	}
 }

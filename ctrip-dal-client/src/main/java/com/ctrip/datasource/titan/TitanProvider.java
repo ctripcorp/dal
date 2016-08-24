@@ -161,7 +161,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		
 		StringBuilder sb = new StringBuilder();
 		for(String name: dbNames)
-			sb.append(name).append(",");
+			sb.append(name.trim()).append(",");
 
 		String ids = sb.substring(0, sb.length()-1);
         Map<String, String> result = new HashMap<>();

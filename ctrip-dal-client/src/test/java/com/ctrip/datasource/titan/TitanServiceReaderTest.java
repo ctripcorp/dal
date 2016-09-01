@@ -245,11 +245,12 @@ public class TitanServiceReaderTest {
 	
 	@Test
 	public void testGetFromUATTitanService() {
-		String name = "GSCommunityDB_SELECT_1";
 		String uat = "https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query";
 		TitanProvider provider = new TitanProvider();
 		Set<String> dbNames = new HashSet<>();
-		dbNames.add(name);
+		dbNames.add("GSCommunityDB_SELECT_1");
+		dbNames.add("YouSearchDB");
+		dbNames.add("GSDestDB_SELECT_1");
 		
 		Map<String, String> settings = new HashMap<>();
 		settings.put(TitanProvider.SERVICE_ADDRESS, uat);
@@ -260,9 +261,11 @@ public class TitanServiceReaderTest {
 			provider.setup(dbNames);
 			
 			DataSourceConfigure result = null;
-			
-			result = provider.getDataSourceConfigure(name);
-			Assert.assertNotNull(result);
+
+			for(String name: dbNames) {
+				result = provider.getDataSourceConfigure(name);
+				Assert.assertNotNull(result);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();

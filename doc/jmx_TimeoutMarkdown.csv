@@ -1,0 +1,8 @@
+﻿名字,Default Value,说明
+EnableTimeoutMarkDown,false,timeout markdown策略的开关。
+ErrorCountThreshold,300,超时数量阀值。例如过去120秒内超过300以上个的timeout错误，则mark down该Database。
+ErrorPercentReferCount,400,超时比例基数阀值。配合ErrorPercentThreshold一起使用。
+ErrorPercentThreshold,0.5f,超时比例阀值，配合ErrorPercentReferCount使用。例如在过去120秒内出现400个错误，有50%为Timeout,即200个，则mark down该Database。
+MySqlErrorCodes,0（或者空）,My SQL timeout的ErrorCode，逗号分割，目前不填写即可。
+SamplingDuration,120,采样周期，单位秒。
+SqlServerErrorCodes,-2,SQL Server timeout的ErrorCode，逗号分割。

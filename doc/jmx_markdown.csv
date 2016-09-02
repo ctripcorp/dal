@@ -1,0 +1,6 @@
+﻿名字,说明
+AppMarkdown,整个DAL应用的markdown状态。如当前应用被MarkDown，该应用到所有数据库的访问均被拦截
+AutoMarkdowns,被自动markdown的数据库一览
+AutoMarkupDelay,自动markup的延时，缺省为30s
+EnableAutoMarkdown,是否允许自动markdown
+MarkdownKeys,被markdown的数据库一览，包括手动和自动

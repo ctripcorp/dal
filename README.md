@@ -33,5 +33,8 @@ Ctrip DAL是携程框架部开发的数据库访问框架，支持分库分表�
 * 万国新。C#客户端
 * 张钰。总体测试
 
+## 参考文档
+[Wiki](https://github.com/ctripcorp/dal/wiki)
+
 ## 技术支持
 [携程框架DAL团队](mailto:rdfxdal@Ctrip.com)

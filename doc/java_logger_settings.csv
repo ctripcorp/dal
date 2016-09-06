@@ -1,0 +1,10 @@
+﻿名称,说明,取值,缺省值
+encrypt,是否加密参数,true/false,true
+sampling,是否采样方式记录,true/false,false
+samplingLow,低频操作采样阀值（带参数的DAO操作）,数值（分）,60
+samplingHigh,高频操作采样阀值（无参数的DAO操作，固定查询之类）,数值（分）,5
+sampleMaxNum,采样最高数值,数值,5000
+sampleClearInterval,采样重置间隔,数值（秒）,30
+simplified,是否简化方式记录。如果为true，将输出log到clog，否则去trace,true/false,false
+asyncLogging,是否异步记录log。如发现log影响主流程执行，可以酌情考虑,true/false,false
+capacity,异步记录log的队列最大长度。超出部分丢弃,数值,无限制长度

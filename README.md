@@ -6,11 +6,11 @@ Ctrip DAL是携程框架部开发的数据库访问框架，支持代码生成�
 
 Ctrip DAL支持流行的分库分表操作，支持Java和C#，支持Mysql和MS SqlServer。使用该框架可以在有效地保护企业已有数据库投资的同时，迅速，可靠的为企业提供数据库访问层的横向扩展能力。整个框架包括代码生成器和客户端。工作模式是使用代码生成器在线生成代码，通过DAL客户端完成数据库操作。生成器具有丰富的向导指引，操作简单清晰，即可以批量生成标准DAO，也可以在方法级别定制数据库访问。客户端则可以简单的通过标准的maven方式添加依赖
 
-！[model](https://github.com/ctripcorp/dal/blob/master/doc/codegen_work_model.png)
+![model](https://github.com/ctripcorp/dal/blob/master/doc/codegen_work_model.png)
 
 Ctrip DAL与一般数据库框架最大的不同是从企业跨部门的角度，统一管理数据库相关资源。通过部署代码生成器，企业可以做到有效的管理全公司的DAL开发团队，明确数据库归属和定制数据库访问。通过代码生成器生成的标准DAO代码与客户端配合使用，可以大幅提高工作效率，保证代码质量。解决了业内常见的伴随业务成长而带来的系统维护困难，开发效率低下，代码风格五花八门，代码质量参差不齐等痛点问题。
 
-1[overview](https://github.com/ctripcorp/dal/blob/master/doc/codegen_overview.png)
+![overview](https://github.com/ctripcorp/dal/blob/master/doc/codegen_overview.png)
 
 ### 代码生成器简介
 代码生成器允许用户创建Dal团队，组织开发人员，管理数据库，创建DAO并生成代码。

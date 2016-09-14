@@ -1,9 +1,7 @@
 #if($host.generateAPI(7,19))
 
 	/**
-	 * Insert pojo and get the generated PK back in keyHolder. 
-	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
-	 * Please don't pass keyholder for MS SqlServer to avoid the failure.
+	 * Insert single pojo
 	 * 
 	 * @param hints
 	 *            Additional parameters that instruct how DAL Client perform database operation.
@@ -45,8 +43,8 @@
 
 	/**
 	 * Insert pojo and get the generated PK back in keyHolder. 
-	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
-	 * Please don't pass keyholder for MS SqlServer to avoid the failure.
+	 * If the "set no count on" for MS SqlServer is set, the operation may fail.
+	 * Please don't pass keyholder for MS SqlServer to avoid the failure in such case.
 	 * 
 	 * @param hints
 	 *            Additional parameters that instruct how DAL Client perform database operation.
@@ -68,8 +66,8 @@
 
 	/**
 	 * Insert pojos and get the generated PK back in keyHolder. 
-	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
-	 * Please don't pass keyholder for MS SqlServer to avoid the failure.
+	 * If the "set no count on" for MS SqlServer is set, the operation may fail.
+	 * Please don't pass keyholder for MS SqlServer to avoid the failure in such case.
 	 * 
 	 * @param hints
 	 *            Additional parameters that instruct how DAL Client perform database operation.
@@ -111,9 +109,7 @@
 #if($host.generateAPI(82,83) and !$host.getSpInsert().isExist())
 
 	/**
-	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
-	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
-	 * Please don't pass keyholder for MS SqlServer to avoid the failure.
+	 * Insert multiple pojos in one INSERT SQL
 	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
@@ -132,8 +128,8 @@
 
 	/**
 	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
-	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
-	 * Please don't pass keyholder for MS SqlServer to avoid the failure.
+	 * If the "set no count on" for MS SqlServer is set, the operation may fail.
+	 * Please don't pass keyholder for MS SqlServer to avoid the failure in such case.
 	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.

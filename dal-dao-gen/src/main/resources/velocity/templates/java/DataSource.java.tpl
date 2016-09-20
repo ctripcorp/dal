@@ -5,20 +5,24 @@
               password="${resource.getPassword()}"
               connectionUrl="${resource.getConnectionUrl()}"
               driverClassName="${resource.getDriverClassName()}"
-              testWhileIdle="true"
+              testWhileIdle="false"
               testOnBorrow="false"
               testOnReturn="false"
               validationQuery="SELECT 1"
               validationInterval="30000"
               timeBetweenEvictionRunsMillis="5000"
               maxActive="100"
-              minIdle="10"
+              minIdle="0"
               maxWait="10000"
               initialSize="10"
               removeAbandonedTimeout="60"
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              connectionProperties=""/>
+#if (${resource.isOptionAppend()})
+              connectionProperties="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false"/>
+#else
+              connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+#end
 #end			  
 </Datasources>

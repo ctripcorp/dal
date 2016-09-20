@@ -31,7 +31,6 @@
         <ali-druid-version>0.2.25</ali-druid-version>
         <mongo-version>2.11.3</mongo-version>
         <ws-rs-version>2.0</ws-rs-version>
-        <jasig-cas-version>3.1.12</jasig-cas-version>
         <jersey-version>2.3.1</jersey-version>
         <jaxb-impl-version>2.2.7</jaxb-impl-version>
         <jackson-version>2.3.1</jackson-version>
@@ -106,11 +105,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>${spring-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jasig.cas.client</groupId>
-            <artifactId>cas-client-core-infosec-credis</artifactId>
-            <version>${jasig-cas-version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.velocity</groupId>

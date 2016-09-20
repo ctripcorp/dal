@@ -63,5 +63,7 @@ Ctrip DAL与一般数据库框架最大的不同是从企业跨部门的角度�
 
 [Java客户端 配置与扩展](https://github.com/ctripcorp/dal/wiki/Java%E5%AE%A2%E6%88%B7%E7%AB%AF-%E9%85%8D%E7%BD%AE%E4%B8%8E%E6%89%A9%E5%B1%95)
 
+[Java客户端 Demo](https://github.com/ctripcorp/dal/wiki/Java%E5%AE%A2%E6%88%B7%E7%AB%AF-%E9%9B%86%E6%88%90%E8%AF%B4%E6%98%8E#demo-project)
+
 ## 技术支持
 [携程框架DAL团队](mailto:rdfxdal@Ctrip.com)

@@ -18,7 +18,7 @@ public class ConfigTemplateDao {
     }
 
     public List<ConfigTemplate> getAllConfigTemplates() {
-        return this.jdbcTemplate.query("SELECT ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE FROM CONFIG_TEMPLATE",
+        return this.jdbcTemplate.query("SELECT ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE FROM config_template",
                 new RowMapper<ConfigTemplate>() {
                     public ConfigTemplate mapRow(ResultSet rs, int rowNum) throws SQLException {
                         return ConfigTemplate.visitRow(rs);
@@ -27,7 +27,7 @@ public class ConfigTemplateDao {
     }
 
     public ConfigTemplate getConfigTemplateById(int templateId) {
-        return this.jdbcTemplate.queryForObject("SELECT ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE FROM CONFIG_TEMPLATE WHERE ID=?",
+        return this.jdbcTemplate.queryForObject("SELECT ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE FROM config_template WHERE ID=?",
                 new Object[]{templateId},
                 new RowMapper<ConfigTemplate>() {
                     public ConfigTemplate mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -40,7 +40,7 @@ public class ConfigTemplateDao {
         if (configTemplate == null) {
             return null;
         }
-        return this.jdbcTemplate.queryForObject("SELECT ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE FROM CONFIG_TEMPLATE WHERE CONFIG_TYPE=? AND LANG_TYPE=?",
+        return this.jdbcTemplate.queryForObject("SELECT ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE FROM config_template WHERE CONFIG_TYPE=? AND LANG_TYPE=?",
                 new Object[]{configTemplate.getConfig_type(), configTemplate.getLang_type()},
                 new RowMapper<ConfigTemplate>() {
                     public ConfigTemplate mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -53,7 +53,7 @@ public class ConfigTemplateDao {
         if (configTemplate == null) {
             return -1;
         }
-        return this.jdbcTemplate.update("INSERT INTO CONFIG_TEMPLATE(ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE) VALUES(?,?,?,?)",
+        return this.jdbcTemplate.update("INSERT INTO config_template(ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE) VALUES(?,?,?,?)",
                 configTemplate.getId(), configTemplate.getConfig_type(),
                 configTemplate.getLang_type(), configTemplate.getTemplate());
     }
@@ -63,7 +63,7 @@ public class ConfigTemplateDao {
             return -1;
         }
         try {
-            return this.jdbcTemplate.update("UPDATE CONFIG_TEMPLATE SET CONFIG_TYPE=?, LANG_TYPE=?, TEMPLATE=? WHERE ID=?",
+            return this.jdbcTemplate.update("UPDATE config_template SET CONFIG_TYPE=?, LANG_TYPE=?, TEMPLATE=? WHERE ID=?",
                     configTemplate.getConfig_type(), configTemplate.getLang_type(),
                     configTemplate.getTemplate(), configTemplate.getId());
         } catch (DataAccessException ex) {
@@ -77,7 +77,7 @@ public class ConfigTemplateDao {
             return -1;
         }
         try {
-            return this.jdbcTemplate.update("DELETE FROM CONFIG_TEMPLATE WHERE ID=?", configTemplate.getId());
+            return this.jdbcTemplate.update("DELETE FROM config_template WHERE ID=?", configTemplate.getId());
         } catch (DataAccessException ex) {
             ex.printStackTrace();
             return -1;

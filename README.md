@@ -67,3 +67,5 @@ Ctrip DAL与一般数据库框架最大的不同是从企业跨部门的角度�
 
 ## 技术支持
 [携程框架DAL团队](mailto:rdfxdal@Ctrip.com)
+
+![](https://github.com/ctripcorp/dal/blob/master/doc/Tech_Support_QQ.png)

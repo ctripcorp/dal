@@ -1,0 +1,412 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Arch.Data</RootNamespace>
+    <AssemblyName>Arch.Data</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
+    <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
+    <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
+    <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
+    <CodeContractsRuntimeCallSiteRequires>False</CodeContractsRuntimeCallSiteRequires>
+    <CodeContractsRuntimeSkipQuantifiers>False</CodeContractsRuntimeSkipQuantifiers>
+    <CodeContractsRunCodeAnalysis>False</CodeContractsRunCodeAnalysis>
+    <CodeContractsNonNullObligations>True</CodeContractsNonNullObligations>
+    <CodeContractsBoundsObligations>True</CodeContractsBoundsObligations>
+    <CodeContractsArithmeticObligations>True</CodeContractsArithmeticObligations>
+    <CodeContractsEnumObligations>True</CodeContractsEnumObligations>
+    <CodeContractsRedundantAssumptions>True</CodeContractsRedundantAssumptions>
+    <CodeContractsAssertsToContractsCheckBox>True</CodeContractsAssertsToContractsCheckBox>
+    <CodeContractsRedundantTests>True</CodeContractsRedundantTests>
+    <CodeContractsMissingPublicRequiresAsWarnings>True</CodeContractsMissingPublicRequiresAsWarnings>
+    <CodeContractsMissingPublicEnsuresAsWarnings>False</CodeContractsMissingPublicEnsuresAsWarnings>
+    <CodeContractsInferRequires>True</CodeContractsInferRequires>
+    <CodeContractsInferEnsures>False</CodeContractsInferEnsures>
+    <CodeContractsInferEnsuresAutoProperties>True</CodeContractsInferEnsuresAutoProperties>
+    <CodeContractsInferObjectInvariants>False</CodeContractsInferObjectInvariants>
+    <CodeContractsSuggestAssumptions>False</CodeContractsSuggestAssumptions>
+    <CodeContractsSuggestAssumptionsForCallees>False</CodeContractsSuggestAssumptionsForCallees>
+    <CodeContractsSuggestRequires>False</CodeContractsSuggestRequires>
+    <CodeContractsNecessaryEnsures>True</CodeContractsNecessaryEnsures>
+    <CodeContractsSuggestObjectInvariants>False</CodeContractsSuggestObjectInvariants>
+    <CodeContractsSuggestReadonly>True</CodeContractsSuggestReadonly>
+    <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
+    <CodeContractsShowSquigglies>True</CodeContractsShowSquigglies>
+    <CodeContractsUseBaseLine>False</CodeContractsUseBaseLine>
+    <CodeContractsEmitXMLDocs>False</CodeContractsEmitXMLDocs>
+    <CodeContractsCustomRewriterAssembly />
+    <CodeContractsCustomRewriterClass />
+    <CodeContractsLibPaths />
+    <CodeContractsExtraRewriteOptions />
+    <CodeContractsExtraAnalysisOptions />
+    <CodeContractsSQLServerOption />
+    <CodeContractsBaseLineFile />
+    <CodeContractsCacheAnalysisResults>True</CodeContractsCacheAnalysisResults>
+    <CodeContractsSkipAnalysisIfCannotConnectToCache>False</CodeContractsSkipAnalysisIfCannotConnectToCache>
+    <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
+    <CodeContractsBeingOptimisticOnExternal>True</CodeContractsBeingOptimisticOnExternal>
+    <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
+    <CodeContractsReferenceAssembly>%28none%29</CodeContractsReferenceAssembly>
+    <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Arch.Data.xml</DocumentationFile>
+    <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
+    <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
+    <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
+    <CodeContractsRuntimeCallSiteRequires>False</CodeContractsRuntimeCallSiteRequires>
+    <CodeContractsRuntimeSkipQuantifiers>False</CodeContractsRuntimeSkipQuantifiers>
+    <CodeContractsRunCodeAnalysis>True</CodeContractsRunCodeAnalysis>
+    <CodeContractsNonNullObligations>True</CodeContractsNonNullObligations>
+    <CodeContractsBoundsObligations>True</CodeContractsBoundsObligations>
+    <CodeContractsArithmeticObligations>True</CodeContractsArithmeticObligations>
+    <CodeContractsEnumObligations>True</CodeContractsEnumObligations>
+    <CodeContractsRedundantAssumptions>True</CodeContractsRedundantAssumptions>
+    <CodeContractsAssertsToContractsCheckBox>True</CodeContractsAssertsToContractsCheckBox>
+    <CodeContractsRedundantTests>True</CodeContractsRedundantTests>
+    <CodeContractsMissingPublicRequiresAsWarnings>True</CodeContractsMissingPublicRequiresAsWarnings>
+    <CodeContractsMissingPublicEnsuresAsWarnings>False</CodeContractsMissingPublicEnsuresAsWarnings>
+    <CodeContractsInferRequires>True</CodeContractsInferRequires>
+    <CodeContractsInferEnsures>False</CodeContractsInferEnsures>
+    <CodeContractsInferEnsuresAutoProperties>True</CodeContractsInferEnsuresAutoProperties>
+    <CodeContractsInferObjectInvariants>False</CodeContractsInferObjectInvariants>
+    <CodeContractsSuggestAssumptions>False</CodeContractsSuggestAssumptions>
+    <CodeContractsSuggestAssumptionsForCallees>False</CodeContractsSuggestAssumptionsForCallees>
+    <CodeContractsSuggestRequires>False</CodeContractsSuggestRequires>
+    <CodeContractsNecessaryEnsures>True</CodeContractsNecessaryEnsures>
+    <CodeContractsSuggestObjectInvariants>False</CodeContractsSuggestObjectInvariants>
+    <CodeContractsSuggestReadonly>True</CodeContractsSuggestReadonly>
+    <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
+    <CodeContractsShowSquigglies>True</CodeContractsShowSquigglies>
+    <CodeContractsUseBaseLine>False</CodeContractsUseBaseLine>
+    <CodeContractsEmitXMLDocs>False</CodeContractsEmitXMLDocs>
+    <CodeContractsCustomRewriterAssembly />
+    <CodeContractsCustomRewriterClass />
+    <CodeContractsLibPaths />
+    <CodeContractsExtraRewriteOptions />
+    <CodeContractsExtraAnalysisOptions />
+    <CodeContractsSQLServerOption />
+    <CodeContractsBaseLineFile />
+    <CodeContractsCacheAnalysisResults>True</CodeContractsCacheAnalysisResults>
+    <CodeContractsSkipAnalysisIfCannotConnectToCache>False</CodeContractsSkipAnalysisIfCannotConnectToCache>
+    <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
+    <CodeContractsBeingOptimisticOnExternal>True</CodeContractsBeingOptimisticOnExternal>
+    <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
+    <CodeContractsReferenceAssembly>%28none%29</CodeContractsReferenceAssembly>
+    <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Performance|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Performance\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\Arch.Data.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
+    <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
+    <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
+    <CodeContractsRuntimeCallSiteRequires>False</CodeContractsRuntimeCallSiteRequires>
+    <CodeContractsRuntimeSkipQuantifiers>False</CodeContractsRuntimeSkipQuantifiers>
+    <CodeContractsNonNullObligations>True</CodeContractsNonNullObligations>
+    <CodeContractsBoundsObligations>True</CodeContractsBoundsObligations>
+    <CodeContractsArithmeticObligations>True</CodeContractsArithmeticObligations>
+    <CodeContractsEnumObligations>True</CodeContractsEnumObligations>
+    <CodeContractsRedundantAssumptions>True</CodeContractsRedundantAssumptions>
+    <CodeContractsAssertsToContractsCheckBox>True</CodeContractsAssertsToContractsCheckBox>
+    <CodeContractsRedundantTests>True</CodeContractsRedundantTests>
+    <CodeContractsMissingPublicRequiresAsWarnings>True</CodeContractsMissingPublicRequiresAsWarnings>
+    <CodeContractsMissingPublicEnsuresAsWarnings>False</CodeContractsMissingPublicEnsuresAsWarnings>
+    <CodeContractsInferRequires>True</CodeContractsInferRequires>
+    <CodeContractsInferEnsures>False</CodeContractsInferEnsures>
+    <CodeContractsInferEnsuresAutoProperties>True</CodeContractsInferEnsuresAutoProperties>
+    <CodeContractsInferObjectInvariants>False</CodeContractsInferObjectInvariants>
+    <CodeContractsSuggestAssumptions>False</CodeContractsSuggestAssumptions>
+    <CodeContractsSuggestAssumptionsForCallees>False</CodeContractsSuggestAssumptionsForCallees>
+    <CodeContractsSuggestRequires>False</CodeContractsSuggestRequires>
+    <CodeContractsNecessaryEnsures>True</CodeContractsNecessaryEnsures>
+    <CodeContractsSuggestObjectInvariants>False</CodeContractsSuggestObjectInvariants>
+    <CodeContractsSuggestReadonly>True</CodeContractsSuggestReadonly>
+    <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
+    <CodeContractsShowSquigglies>True</CodeContractsShowSquigglies>
+    <CodeContractsUseBaseLine>False</CodeContractsUseBaseLine>
+    <CodeContractsEmitXMLDocs>False</CodeContractsEmitXMLDocs>
+    <CodeContractsCustomRewriterAssembly />
+    <CodeContractsCustomRewriterClass />
+    <CodeContractsLibPaths />
+    <CodeContractsExtraRewriteOptions />
+    <CodeContractsExtraAnalysisOptions />
+    <CodeContractsSQLServerOption />
+    <CodeContractsBaseLineFile />
+    <CodeContractsCacheAnalysisResults>True</CodeContractsCacheAnalysisResults>
+    <CodeContractsSkipAnalysisIfCannotConnectToCache>False</CodeContractsSkipAnalysisIfCannotConnectToCache>
+    <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
+    <CodeContractsBeingOptimisticOnExternal>True</CodeContractsBeingOptimisticOnExternal>
+    <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
+    <CodeContractsReferenceAssembly>%28none%29</CodeContractsReferenceAssembly>
+    <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'JPRelease|AnyCPU'">
+    <OutputPath>bin\JPRelease\</OutputPath>
+    <DefineConstants>TRACE;JPRelease</DefineConstants>
+    <DocumentationFile>bin\Release\Arch.Data.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'FlightRelease|AnyCPU'">
+    <OutputPath>bin\FlightRelease\</OutputPath>
+    <DefineConstants>TRACE;FlightRelease</DefineConstants>
+    <DocumentationFile>bin\Release\Arch.Data.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\Cat\ICatLogger.cs" />
+    <Compile Include="Common\Constant\Constants.cs" />
+    <Compile Include="Common\Enums\DatabaseProviderType.cs" />
+    <Compile Include="Common\Enums\MarkDownEnums.cs" />
+    <Compile Include="Common\Enums\MethodType.cs" />
+    <Compile Include="Common\Enums\OrderDirection.cs" />
+    <Compile Include="Common\Enums\SqlStatementType.cs" />
+    <Compile Include="Common\Logging\Configuration\ListenerElement.cs" />
+    <Compile Include="Common\Logging\Configuration\ListenerElementCollection.cs" />
+    <Compile Include="Common\Logging\Configuration\LoggingElement.cs" />
+    <Compile Include="Common\Util\AssemblyUtil.cs" />
+    <Compile Include="Common\Util\ExecutorManager.cs" />
+    <Compile Include="Common\Util\RWSplittingManager.cs" />
+    <Compile Include="Common\Vi\AbstractDALBean.cs" />
+    <Compile Include="Common\Vi\AbstractHABean.cs" />
+    <Compile Include="Common\Vi\AbstractMarkDownBean.cs" />
+    <Compile Include="Common\Vi\AbstractTimeoutMarkDownBean.cs" />
+    <Compile Include="Common\Vi\BeanProxy.cs" />
+    <Compile Include="Common\Vi\IBean.cs" />
+    <Compile Include="Common\Vi\IBeanProxy.cs" />
+    <Compile Include="Common\Vi\IDALBean.cs" />
+    <Compile Include="Common\Vi\IHABean.cs" />
+    <Compile Include="Common\Vi\IMarkDownBean.cs" />
+    <Compile Include="Common\Vi\ITimeoutMarkDownBean.cs" />
+    <Compile Include="DbEngine\Configuration\ExecutorElement.cs" />
+    <Compile Include="DbEngine\Configuration\RWSplittingElement.cs" />
+    <Compile Include="Common\Logging\DefaultLogger.cs" />
+    <Compile Include="Common\Logging\ILogEntry.cs" />
+    <Compile Include="Common\Logging\ILogger.cs" />
+    <Compile Include="Common\Tracing\Configuration\TracingElement.cs" />
+    <Compile Include="Common\Enums\DALState.cs" />
+    <Compile Include="Common\Util\HintsUtil.cs" />
+    <Compile Include="Common\Util\LogManager.cs" />
+    <Compile Include="Common\Util\SplitUtil.cs" />
+    <Compile Include="Common\Vi\BeanManager.cs" />
+    <Compile Include="Dao\BaseDaoFactory.cs" />
+    <Compile Include="Common\Constant\DALExtStatementConstant.cs" />
+    <Compile Include="Common\Metrics\Configuration\MetricsElement.cs" />
+    <Compile Include="Common\Util\CommonUtil.cs" />
+    <Compile Include="Dao\BaseDao.cs">
+    </Compile>
+    <Compile Include="Exceptions\DalException.cs" />
+    <Compile Include="Dao\IDialectDao.cs" />
+    <Compile Include="Dao\MySqlDialectDao.cs" />
+    <Compile Include="DbEngine\Configuration\ConnectionLocatorElement.cs" />
+    <Compile Include="DbEngine\Configuration\DatabaseElement.cs" />
+    <Compile Include="DbEngine\Configuration\DatabaseElementCollection.cs" />
+    <Compile Include="DbEngine\Configuration\DatabaseProviderElement.cs" />
+    <Compile Include="DbEngine\Configuration\DatabaseProviderElementCollection.cs" />
+    <Compile Include="DbEngine\Configuration\DatabaseSetElement.cs" />
+    <Compile Include="DbEngine\Configuration\DatabaseSetElementCollection.cs" />
+    <Compile Include="DbEngine\Configuration\DbEngineConfigurationSection.cs" />
+    <Compile Include="Common\Util\ConnectionLocatorManager.cs" />
+    <Compile Include="DbEngine\ConnectionString\DefaultConnectionString.cs" />
+    <Compile Include="DbEngine\Connection\ConnectionWrapper.cs" />
+    <Compile Include="DbEngine\DALBootstrap.cs" />
+    <Compile Include="DbEngine\DB\DatabaseBridge.cs" />
+    <Compile Include="DbEngine\DB\DatabaseSetWrapper.cs" />
+    <Compile Include="DbEngine\DB\DatabaseWrapper.cs" />
+    <Compile Include="DbEngine\DB\OperationalDatabases.cs" />
+    <Compile Include="DbEngine\Executor\DefaultExecutor.cs" />
+    <Compile Include="DbEngine\HA\AbstractHA.cs" />
+    <Compile Include="DbEngine\HA\HAFactory.cs" />
+    <Compile Include="DbEngine\HA\IHA.cs" />
+    <Compile Include="DbEngine\HA\MySqlHA.cs" />
+    <Compile Include="DbEngine\HA\SqlServerHA.cs" />
+    <Compile Include="DbEngine\ConnectionString\IConnectionString.cs" />
+    <Compile Include="DbEngine\Executor\IExecutor.cs" />
+    <Compile Include="DbEngine\MarkDown\AutoMarkDown.cs" />
+    <Compile Include="DbEngine\MarkDown\IMarkDown.cs" />
+    <Compile Include="DbEngine\MarkDown\MarkDownMetrics.cs" />
+    <Compile Include="DbEngine\MarkDown\MarkDownSampling.cs" />
+    <Compile Include="DbEngine\MarkDown\MarkUpInfo.cs" />
+    <Compile Include="Common\Enums\MarkDownCategory.cs" />
+    <Compile Include="Common\Enums\MarkDownPolicy.cs" />
+    <Compile Include="DbEngine\MarkDown\MarkUpMetrics.cs" />
+    <Compile Include="DbEngine\MarkDown\MySqlTimeoutMarkDown.cs" />
+    <Compile Include="DbEngine\MarkDown\SqlServerTimeoutMarkDown.cs" />
+    <Compile Include="DbEngine\MarkDown\TimeoutMarkDown.cs" />
+    <Compile Include="DbEngine\Providers\OdbcDatabaseProvider.cs" />
+    <Compile Include="DbEngine\Providers\OleDatabaseProvider.cs" />
+    <Compile Include="DbEngine\Providers\SqlDatabaseProvider.cs" />
+    <Compile Include="DbEngine\RW\DefaultReadWriteSplitting.cs" />
+    <Compile Include="DbEngine\RW\IReadWriteSplitting.cs" />
+    <Compile Include="DbEngine\Sharding\IShardingStrategy.cs" />
+    <Compile Include="DbEngine\Sharding\ModShardingStrategy.cs" />
+    <Compile Include="DbEngine\Sharding\SequenceShardingStrategy.cs" />
+    <Compile Include="DbEngine\Sharding\ShardingExecutor.cs" />
+    <Compile Include="DbEngine\Sharding\ShardingStrategyFactory.cs" />
+    <Compile Include="DbEngine\Sharding\ExecuteParallelHelper.cs" />
+    <Compile Include="Common\Enums\ShardingType.cs" />
+    <Compile Include="DbEngine\Statement\StatementParameterCollection.cs" />
+    <Compile Include="DbEngine\DB\Database.cs" />
+    <Compile Include="DbEngine\DB\DatabaseFactory.cs" />
+    <Compile Include="Common\Enums\DatabaseType.cs" />
+    <Compile Include="DbEngine\Providers\IDatabaseProvider.cs" />
+    <Compile Include="Common\Enums\OperationType.cs" />
+    <Compile Include="DbEngine\Statement\Statement.cs" />
+    <Compile Include="DbEngine\Statement\StatementParameter.cs" />
+    <Compile Include="Common\Enums\StatementType.cs" />
+    <Compile Include="DbEngine\Connection\TransactionConnectionManager.cs" />
+    <Compile Include="Exceptions\DalMarkDownException.cs" />
+    <Compile Include="Common\Util\ExceptionUtil.cs" />
+    <Compile Include="Common\Logging\LogLevel.cs" />
+    <Compile Include="Orm\attribute\ColumnAttribute.cs" />
+    <Compile Include="Orm\attribute\IgnoredAttribute.cs" />
+    <Compile Include="Orm\Dialect\DbDialect.cs" />
+    <Compile Include="Orm\Dialect\IDbDialect.cs" />
+    <Compile Include="Orm\Dialect\MySqlDialect.cs" />
+    <Compile Include="Orm\Dialect\SqlServer2008Dialect.cs" />
+    <Compile Include="Orm\FastInvoker\DynamicCacheFactory.cs" />
+    <Compile Include="Orm\FastInvoker\DynamicConstructorInfo.cs">
+      <DependentUpon>IDynamicConstructorInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Orm\FastInvoker\DynamicFieldInfo.cs">
+      <DependentUpon>IDynamicFieldInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Orm\FastInvoker\DynamicMethodFactory.cs" />
+    <Compile Include="Orm\FastInvoker\DynamicPropertyInfo.cs">
+      <DependentUpon>IDynamicPropertyInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Orm\FastInvoker\DynamicType.cs">
+      <DependentUpon>IDynamicType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Orm\FastInvoker\IDynamicConstructorInfo.cs" />
+    <Compile Include="Orm\FastInvoker\IDynamicFieldInfo.cs" />
+    <Compile Include="Orm\FastInvoker\IDynamicPropertyInfo.cs" />
+    <Compile Include="Orm\FastInvoker\IDynamicType.cs" />
+    <Compile Include="Orm\FastInvoker\OpCodesFactory.cs" />
+    <Compile Include="Orm\FastInvoker\ReflectionManager.cs" />
+    <Compile Include="Orm\FastInvoker\ReflectorHelper.cs" />
+    <Compile Include="Orm\IColumn.cs" />
+    <Compile Include="Orm\IConstraint.cs" />
+    <Compile Include="Orm\IDAttribute.cs" />
+    <Compile Include="Orm\IQuery.cs" />
+    <Compile Include="Orm\ITable.cs" />
+    <Compile Include="Orm\attribute\MapAttribute.cs" />
+    <Compile Include="Orm\partially\ExpressionHelper.cs" />
+    <Compile Include="Orm\partially\IReplacePartial.cs" />
+    <Compile Include="Orm\partially\IUpdatePartial.cs" />
+    <Compile Include="Orm\partially\ReplacePartial.cs" />
+    <Compile Include="Orm\partially\UpdatePartial.cs" />
+    <Compile Include="Orm\sql\RelatedConstraints.cs" />
+    <Compile Include="Orm\sql\FieldBridge.cs" />
+    <Compile Include="Orm\sql\OrmUtil.cs" />
+    <Compile Include="Orm\sql\SqlBuilder.cs" />
+    <Compile Include="Orm\attribute\VersionLockAttribute.cs" />
+    <Compile Include="Orm\attribute\OutPutAttribute.cs" />
+    <Compile Include="Orm\attribute\PKAttribute.cs" />
+    <Compile Include="Orm\attribute\RetrunValueAttribute.cs" />
+    <Compile Include="Orm\attribute\SPResultAttribute.cs" />
+    <Compile Include="Orm\sql\IDataBridge.cs" />
+    <Compile Include="Orm\sql\InConstraint.cs" />
+    <Compile Include="Orm\sql\NullConstraint.cs" />
+    <Compile Include="Orm\sql\PropertyBridge.cs" />
+    <Compile Include="Orm\sql\SqlColumn.cs" />
+    <Compile Include="Orm\sql\SqlConstraint.cs" />
+    <Compile Include="Orm\sql\SqlOrder.cs" />
+    <Compile Include="Orm\sql\SqlQuery.cs" />
+    <Compile Include="Orm\sql\SqlTable.cs" />
+    <Compile Include="Orm\sql\SqlTableFactory.cs" />
+    <Compile Include="Orm\attribute\TableAttribute.cs" />
+    <Compile Include="Orm\attribute\DateTimeLockAttribute.cs" />
+    <Compile Include="Orm\sql\SqlTrigger.cs" />
+    <Compile Include="Orm\sql\SqlUtils.cs" />
+    <Compile Include="Orm\Timing.cs" />
+    <Compile Include="Orm\attribute\TriggerAttribute.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Common\Enums\NumericTypeEnum.cs" />
+    <Compile Include="Common\Util\ParameterUtility.cs" />
+    <Compile Include="Common\Util\ShardingUtil.cs" />
+    <Compile Include="Common\Util\TypeUtils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

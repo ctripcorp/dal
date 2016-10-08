@@ -60,7 +60,7 @@ public class DaoOfDatabaseSet {
     public DatabaseSetEntry getMasterDatabaseSetEntryByDatabaseSetName(String dbName) {
         List<DatabaseSetEntry> list = this.jdbcTemplate.query("select en.id, en.name, en.databaseType, en.sharding, en.connectionString, en.databaseSet_Id, en.update_user_no, en.update_time "
                         + "from databasesetentry as en "
-                        + "join databaseSet as se on en.databaseSet_Id = se.id "
+                        + "join databaseset as se on en.databaseSet_Id = se.id "
                         + "where se.name = '" + dbName + "' and en.databaseType = 'Master' limit 1;",
                 new RowMapper<DatabaseSetEntry>() {
                     @Override

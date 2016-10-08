@@ -1,0 +1,86 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arch.Data.MySqlProvider", "Arch.Data.MySqlProvider\Arch.Data.MySqlProvider.csproj", "{868C7789-2FF7-4DD0-8DF2-F0FC81236039}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arch.Data", "Arch.Data\Arch.Data.csproj", "{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|x86 = Debug|x86
+		FlightRelease|Any CPU = FlightRelease|Any CPU
+		FlightRelease|Mixed Platforms = FlightRelease|Mixed Platforms
+		FlightRelease|x86 = FlightRelease|x86
+		JPRelease|Any CPU = JPRelease|Any CPU
+		JPRelease|Mixed Platforms = JPRelease|Mixed Platforms
+		JPRelease|x86 = JPRelease|x86
+		Performance|Any CPU = Performance|Any CPU
+		Performance|Mixed Platforms = Performance|Mixed Platforms
+		Performance|x86 = Performance|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.FlightRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.FlightRelease|Any CPU.Build.0 = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.FlightRelease|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.FlightRelease|Mixed Platforms.Build.0 = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.FlightRelease|x86.ActiveCfg = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.JPRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.JPRelease|Any CPU.Build.0 = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.JPRelease|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.JPRelease|Mixed Platforms.Build.0 = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.JPRelease|x86.ActiveCfg = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Performance|Any CPU.ActiveCfg = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Performance|Any CPU.Build.0 = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Performance|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Performance|Mixed Platforms.Build.0 = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Performance|x86.ActiveCfg = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Release|Any CPU.Build.0 = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{868C7789-2FF7-4DD0-8DF2-F0FC81236039}.Release|x86.ActiveCfg = Release|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.FlightRelease|Any CPU.ActiveCfg = FlightRelease|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.FlightRelease|Any CPU.Build.0 = FlightRelease|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.FlightRelease|Mixed Platforms.ActiveCfg = FlightRelease|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.FlightRelease|Mixed Platforms.Build.0 = FlightRelease|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.FlightRelease|x86.ActiveCfg = FlightRelease|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.JPRelease|Any CPU.ActiveCfg = JPRelease|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.JPRelease|Any CPU.Build.0 = JPRelease|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.JPRelease|Mixed Platforms.ActiveCfg = JPRelease|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.JPRelease|Mixed Platforms.Build.0 = JPRelease|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.JPRelease|x86.ActiveCfg = JPRelease|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Performance|Any CPU.ActiveCfg = Performance|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Performance|Any CPU.Build.0 = Performance|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Performance|Mixed Platforms.ActiveCfg = Performance|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Performance|Mixed Platforms.Build.0 = Performance|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Performance|x86.ActiveCfg = Performance|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B97CD6E2-93E7-4E80-8DD8-8A2F7B6F71D3}.Release|x86.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = Hotel.Arch.DAL.vsmdi
+	EndGlobalSection
+EndGlobal

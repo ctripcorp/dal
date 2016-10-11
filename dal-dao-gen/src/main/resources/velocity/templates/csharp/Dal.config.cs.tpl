@@ -8,7 +8,7 @@
 		<databaseSet name="$databaseSet.getName()" provider="$databaseSet.getProvider()">
 #end
 #foreach($entry in $host.getDatabaseSetEntry($databaseSet.getId()))
-            <add name="$entry.getName()" databaseType="$entry.getDatabaseType()" sharding="$entry.getSharding()" connectionString="${entry.getConnectionString()}{$DBDataCenter}"/>   
+            <add name="$entry.getName()" databaseType="$entry.getDatabaseType()" sharding="$entry.getSharding()" connectionString="${entry.getConnectionString()}"/>
 #end
 		</databaseSet>
 #end

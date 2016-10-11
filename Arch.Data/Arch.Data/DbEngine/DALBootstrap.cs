@@ -6,7 +6,6 @@ using Arch.Data.DbEngine.Configuration;
 using Arch.Data.DbEngine.DB;
 using Arch.Data.DbEngine.Providers;
 using Arch.Data.DbEngine.Sharding;
-using Arch.Data.Exceptions;
 using Arch.Data.Properties;
 using System;
 using System.Collections.Generic;

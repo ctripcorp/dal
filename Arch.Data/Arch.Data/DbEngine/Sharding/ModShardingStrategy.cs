@@ -2,7 +2,6 @@
 using Arch.Data.Common.Enums;
 using Arch.Data.Common.Util;
 using Arch.Data.DbEngine.Configuration;
-using Arch.Data.Exceptions;
 using Arch.Data.Orm.Dialect;
 using Arch.Data.Orm.sql;
 using System;

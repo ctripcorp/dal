@@ -2,7 +2,6 @@
 using Arch.Data.Common.Enums;
 using Arch.Data.DbEngine;
 using Arch.Data.DbEngine.Sharding;
-using Arch.Data.Exceptions;
 using Arch.Data.Orm.sql;
 using System;
 using System.Collections;

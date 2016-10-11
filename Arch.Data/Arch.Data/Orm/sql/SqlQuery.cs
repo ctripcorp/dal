@@ -1,5 +1,4 @@
 ﻿using Arch.Data.DbEngine;
-using Arch.Data.Exceptions;
 using Arch.Data.Orm.Dialect;
 using Arch.Data.Orm.FastInvoker;
 using System;

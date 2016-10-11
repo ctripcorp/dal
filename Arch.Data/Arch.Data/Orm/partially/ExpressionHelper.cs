@@ -1,5 +1,4 @@
-﻿using Arch.Data.Exceptions;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 

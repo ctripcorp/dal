@@ -1,7 +1,6 @@
 ﻿using Arch.Data.Common.Util;
 using Arch.Data.DbEngine;
 using Arch.Data.DbEngine.DB;
-using Arch.Data.Exceptions;
 using Arch.Data.Orm.partially;
 using Arch.Data.Orm.sql;
 using System;

@@ -4,7 +4,6 @@ using Arch.Data.Common.Util;
 using Arch.Data.DbEngine;
 using Arch.Data.DbEngine.DB;
 using Arch.Data.DbEngine.Sharding;
-using Arch.Data.Exceptions;
 using Arch.Data.Orm;
 using Arch.Data.Orm.partially;
 using Arch.Data.Orm.sql;

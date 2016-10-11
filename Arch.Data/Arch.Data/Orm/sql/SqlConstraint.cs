@@ -1,5 +1,4 @@
 ﻿using Arch.Data.DbEngine;
-using Arch.Data.Exceptions;
 using System;
 using System.Collections;
 using System.Data;

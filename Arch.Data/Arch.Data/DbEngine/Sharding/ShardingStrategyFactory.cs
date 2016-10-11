@@ -1,5 +1,4 @@
 ﻿using Arch.Data.DbEngine.Configuration;
-using Arch.Data.Exceptions;
 using System;
 using System.Collections.Generic;
 

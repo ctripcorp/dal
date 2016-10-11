@@ -1,7 +1,6 @@
 ﻿using Arch.Data.Common.Util;
 using Arch.Data.Common.Vi;
 using Arch.Data.DbEngine.HA;
-using Arch.Data.Exceptions;
 using Arch.Data.Properties;
 using System;
 using System.Data;

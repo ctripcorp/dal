@@ -3,7 +3,6 @@ using Arch.Data.Common.Enums;
 using Arch.Data.Common.Util;
 using Arch.Data.DbEngine;
 using Arch.Data.DbEngine.Sharding;
-using Arch.Data.Exceptions;
 using Arch.Data.Orm.Dialect;
 using Arch.Data.Orm.partially;
 using Arch.Data.Utility;

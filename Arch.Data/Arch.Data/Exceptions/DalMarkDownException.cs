@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Arch.Data.Exceptions
+namespace Arch.Data
 {
     [Serializable]
     public class DalMarkDownException : DalException

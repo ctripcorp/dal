@@ -1,5 +1,4 @@
-﻿using Arch.Data.Exceptions;
-using System;
+﻿using System;
 using System.Data;
 
 namespace Arch.Data.Orm.sql

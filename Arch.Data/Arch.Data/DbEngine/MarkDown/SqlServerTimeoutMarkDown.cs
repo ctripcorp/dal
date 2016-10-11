@@ -1,5 +1,4 @@
 ﻿using Arch.Data.Common.Util;
-using Arch.Data.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;

@@ -393,7 +393,7 @@
                     progress.reportException("generate success return but not ok");
                 }
             }).fail(function (data) {
-                $("#generateCodeProcessErrorMess").html("生成异常！");
+                $("#generateCodeProcessErrorMess").html("生成异常：" + data.info);
                 $("#generateCodeProcessErrorDiv").modal();
                 progress.reportException("exception");
             });

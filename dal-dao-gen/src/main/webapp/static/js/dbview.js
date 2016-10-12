@@ -436,10 +436,12 @@
                 dbport: dbPort,
                 dbuser: dbUser,
                 dbpassword: dbPassword,
-                dbcatalog: dbCatalog
+                dbcatalog: dbCatalog,
+                addtogroup: $("#add_to_group").is(":checked")
             }, function (data) {
                 if (data.code == "OK") {
-                    $("#error_msg").html("保存成功.<br/>请到<a href='dbmanage.jsp' target='_blank'>数据库管理</a>界面将此数据库加入你的组里");
+                    //$("#error_msg").html("保存成功.<br/>请到<a href='dbmanage.jsp' target='_blank'>数据库管理</a>界面将此数据库加入你的组里");
+                    $("#error_msg").html("保存成功。");
                     refreshAllDB();
                 } else {
                     $("#error_msg").html(data.info);

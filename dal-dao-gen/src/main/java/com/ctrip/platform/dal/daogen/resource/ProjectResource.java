@@ -460,16 +460,17 @@ public class ProjectResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Status generateProject(@Context HttpServletRequest request, @FormParam("project_id") int id, @FormParam("regenerate") boolean regen, @FormParam("language") String language, @FormParam("newPojo") boolean newPojo, @FormParam("random") String random) {
         Status status = null;
-        String userNo = RequestUtil.getUserNo(request);
-        Progress progress = ProgressResource.getProgress(userNo, id, random);
-
-        status = validatePermision(userNo, id);
-        if (status.getCode().equals(Status.ERROR.getCode())) {
-            progress.setStatus(ProgressResource.FINISH);
-            return status;
-        }
-
+        Progress progress = null;
         try {
+            String userNo = RequestUtil.getUserNo(request);
+            progress = ProgressResource.getProgress(userNo, id, random);
+
+            status = validatePermision(userNo, id);
+            if (status.getCode().equals(Status.ERROR.getCode())) {
+                progress.setStatus(ProgressResource.FINISH);
+                return status;
+            }
+
             log.info(String.format("begain generate project: [id=%s; regen=%s; language=%s]", id, true, language));
 
             DalGenerator generator = null;

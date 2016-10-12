@@ -136,15 +136,17 @@
                                                      type="text">
                         </div>
                     </div>
-                </div>
-                <div class="row-fluid">
-                    <div class="control-group">
-                        <label id="error_msg" class="control-label popup_label"
-                               style="color: red;"></label>
+                    <div class="row-fluid" style="margin-top: 12px">
+                        <div class="control-group">
+                            <label class="popup_label">
+                                <input id="add_to_group" type="checkbox" checked="checked">保存时添加到我的DAL Team中
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
+                <label id="error_msg" class="control-label popup_label" style="color: red;"></label>
                 <button id="conn_test" type="button" class="btn btn-success">连接测试</button>
                 <button id="add_new_db_next" type="button" class="btn btn-primary">下一步</button>
                 <button id="add_new_db_prev" type="button" class="btn btn-info">上一步</button>

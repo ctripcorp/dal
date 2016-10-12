@@ -32,7 +32,6 @@ public class DalGroupMemberResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("getGroups")
     public List<DalGroup> getGroups(@Context HttpServletRequest request, @QueryParam("root") boolean root) {
         List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
 

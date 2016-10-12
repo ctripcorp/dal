@@ -352,7 +352,7 @@
         var getUserGroups = function () {
             var dalgroup = $("#dalgroup");
             cblock($("body"));
-            $.get("/rest/member/getGroups", function (data) {
+            $.get("/rest/member", function (data) {
                 if (data != undefined && data != null) {
                     if (data.length > 1) {
                         var groups = [];

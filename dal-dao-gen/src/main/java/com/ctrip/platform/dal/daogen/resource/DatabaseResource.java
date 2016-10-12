@@ -121,7 +121,8 @@ public class DatabaseResource {
                                    @FormParam("dbtype") String dbtype, @FormParam("allinonename") String allinonename,
                                    @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
                                    @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
-                                   @FormParam("dbcatalog") String dbcatalog, @FormParam("addtogroup") boolean addToGroup) {
+                                   @FormParam("dbcatalog") String dbcatalog,
+                                   @FormParam("addtogroup") boolean addToGroup, @FormParam("dalgroup") String groupId) {
         Status status = Status.OK;
         DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
 
@@ -141,12 +142,17 @@ public class DatabaseResource {
             groupDb.setDal_group_id(-1);
 
             if (addToGroup) {
-                LoginUser user = RequestUtil.getUserInfo(request);
-                if (user != null) {
-                    int userId = user.getId();
-                    List<UserGroup> list = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(userId);
-                    if (list != null && list.size() > 0) {
-                        groupDb.setDal_group_id(list.get(0).getGroup_id());
+                if (groupId != null && !groupId.isEmpty()) {
+                    int gid = Integer.parseInt(groupId);
+                    groupDb.setDal_group_id(gid);
+                } else {
+                    LoginUser user = RequestUtil.getUserInfo(request);
+                    if (user != null) {
+                        int userId = user.getId();
+                        List<UserGroup> list = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(userId);
+                        if (list != null && list.size() > 0) {
+                            groupDb.setDal_group_id(list.get(0).getGroup_id());
+                        }
                     }
                 }
             }

@@ -140,7 +140,8 @@
                         <div class="control-group">
                             <label class="popup_label">
                                 <input id="add_to_group" type="checkbox" checked="checked">保存时添加到我的DAL Team中
-                            </label>
+                            </label>&nbsp;
+                            <span id="dalgroupspan"><select id="dalgroup" class="span6"></select></span>
                         </div>
                     </div>
                 </div>

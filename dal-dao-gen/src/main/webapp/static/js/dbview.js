@@ -29,10 +29,25 @@
                 $("#add_new_db_next").show();
                 $("#add_new_db_prev").hide();
                 $("#add_new_db_save").hide();
-                if ($("#dbcatalog")[0] != undefined && $("#dbcatalog")[0].selectize != undefined) {
-                    $("#dbcatalog")[0].selectize.clearOptions();
+                var dbcatalog = $("#dbcatalog");
+                if (dbcatalog[0] != undefined && dbcatalog[0].selectize != undefined) {
+                    dbcatalog[0].selectize.clearOptions();
                 } else {
-                    $("#dbcatalog").selectize({
+                    dbcatalog.selectize({
+                        valueField: 'id',
+                        labelField: 'title',
+                        searchField: 'title',
+                        sortField: 'title',
+                        options: [],
+                        create: false
+                    });
+                }
+                var dalgroup = $("#dalgroup");
+                if (dalgroup[0] != undefined && dalgroup[0].selectize != undefined) {
+                    dalgroup[0].selectize.clearOptions();
+                }
+                else {
+                    dalgroup.selectize({
                         valueField: 'id',
                         labelField: 'title',
                         searchField: 'title',
@@ -297,12 +312,14 @@
         };
 
         var getAllCatalog = function (successInfo) {
-            $("#error_msg").html("正在连接数据库，请稍等...");
+            var error_msg = $("#error_msg");
+            error_msg.html("正在连接数据库，请稍等...");
             var dbType = $("#dbtype").val();
             var dbAddress = $("#dbaddress").val();
             var dbPort = $("#dbport").val();
             var dbUser = $("#dbuser").val();
             var dbPassword = $("#dbpassword").val();
+            var dbcatalog = $("#dbcatalog");
             cblock($("body"));
             $.post("/rest/db/connectionTest", {
                 dbtype: dbType,
@@ -318,16 +335,40 @@
                             id: value, title: value
                         });
                     });
-                    $("#dbcatalog")[0].selectize.clearOptions();
-                    $("#dbcatalog")[0].selectize.addOption(allCatalog);
-                    $("#dbcatalog")[0].selectize.refreshOptions(false);
-                    $("#error_msg").html(successInfo);
+                    dbcatalog[0].selectize.clearOptions();
+                    dbcatalog[0].selectize.addOption(allCatalog);
+                    dbcatalog[0].selectize.refreshOptions(false);
+                    error_msg.html(successInfo);
                 } else {
-                    $("#error_msg").html(data.info);
+                    error_msg.html(data.info);
                 }
                 $("body").unblock();
             }).fail(function (data) {
-                $("#error_msg").text(data);
+                error_msg.text(data);
+                $("body").unblock();
+            });
+        };
+
+        var getUserGroups = function () {
+            var dalgroup = $("#dalgroup");
+            cblock($("body"));
+            $.get("/rest/member", function (data) {
+                if (data != undefined && data != null) {
+                    if (data.length > 1) {
+                        var groups = [];
+                        $.each(data, function (index, value) {
+                            groups.push({
+                                id: value.id, title: value.group_name
+                            });
+                        });
+                        dalgroup[0].selectize.clearOptions();
+                        dalgroup[0].selectize.addOption(groups);
+                        dalgroup[0].selectize.refreshOptions(false);
+                    }
+                    else {
+                        $("#dalgroupspan").hide();
+                    }
+                }
                 $("body").unblock();
             });
         };
@@ -374,6 +415,7 @@
             $("#add_new_db_prev").show();
             $("#add_new_db_save").show();
             getAllCatalog("");
+            getUserGroups();
         });
 
         $(document.body).on("click", "#add_new_db_prev", function () {
@@ -398,12 +440,13 @@
             var dbUser = $("#dbuser").val();
             var dbPassword = $("#dbpassword").val();
             var dbCatalog = $("#dbcatalog").val();
+            var dalGroup = $("#dalgroup").val();
 
-            if ("no" == dbType) {
+            if (dbType == "no") {
                 $("#error_msg").html("请选择数据库类型");
                 return;
             }
-            if ("" == all_In_One_Name || null == all_In_One_Name) {
+            if (all_In_One_Name == "" || null == all_In_One_Name) {
                 $("#error_msg").html("请输入All-In-One Name");
                 return;
             }
@@ -436,10 +479,13 @@
                 dbport: dbPort,
                 dbuser: dbUser,
                 dbpassword: dbPassword,
-                dbcatalog: dbCatalog
+                dbcatalog: dbCatalog,
+                addtogroup: $("#add_to_group").is(":checked"),
+                dalgroup: dalGroup == undefined ? "" : dalGroup,
+                gen_default_dbset: $("#gen_default_dbset").is(":checked")
             }, function (data) {
                 if (data.code == "OK") {
-                    $("#error_msg").html("保存成功.<br/>请到<a href='dbmanage.jsp' target='_blank'>数据库管理</a>界面将此数据库加入你的组里");
+                    $("#error_msg").html("保存成功。");
                     refreshAllDB();
                 } else {
                     $("#error_msg").html(data.info);
@@ -449,6 +495,12 @@
                 $("#error_msg").text(data);
                 $("body").unblock();
             });
+        });
+
+        $(document.body).on("click", "#add_to_group", function () {
+            var flag = $(this).is(":checked");
+            var genDefault = $("#gen_default_dbset");
+            genDefault.prop({"checked": flag, "disabled": !flag});
         });
 
         $(document.body).on("change", "#dbtype_up", function () {

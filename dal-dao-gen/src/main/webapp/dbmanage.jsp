@@ -88,13 +88,13 @@
                         <select id="databases" class="span8"></select> <a
                             href="dbview.jsp" target="_blank" class="ctip"
                             data-toggle="tooltip" data-placement="right" html="1"
-                            title="如果没有找到，请到数据库一览界面添加数据库!">没有找到？</a>
+                            title="如果没有找到，请到数据库一览界面添加数据库!">&nbsp;未找到？</a>
                     </div>
                 </div>
                 <div class="row-fluid">
                     <div class="control-group">
                         <label class="control-label popup_label" style="width: 80px;">备
-                            注:</label> <input id="comment" class="span8 input-sm" type="text">
+                            注：</label> <input id="comment" class="span8 input-sm" type="text">
                     </div>
                 </div>
                 <div class="row-fluid" style="margin-top: 12px">

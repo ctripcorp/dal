@@ -135,8 +135,16 @@
                 $("#cud_by_sp").prop("checked", false);
                 $(".mysql_hide").hide();
             } else {
-                $("#cud_by_sp").prop("checked", true);
-                $(".mysql_hide").show();
+                $.get("/rest/user/isDefaultUser", {rand: Math.random()}, function (data) {
+                    if (data == "true") {
+                        $("#cud_by_sp").prop("checked", false);
+                        $(".mysql_hide").hide();
+                    }
+                    else {
+                        $("#cud_by_sp").prop("checked", true);
+                        $(".mysql_hide").show();
+                    }
+                });
             }
 
             $("#table_list").append(tableList).multipleSelect({
@@ -999,8 +1007,8 @@
         var mockValueHtml = '<div class="row-fluid">'
             + '<label class="control-label popup_label span3 text-right">&nbsp;%s&nbsp;</label>'
             + '<input type="text" class="span4" value="%s">' +
-                // '<label class="control-label popup_label">&nbsp;&nbsp;Example
-                // Value:%s</label>' +
+            // '<label class="control-label popup_label">&nbsp;&nbsp;Example
+            // Value:%s</label>' +
             '</div><br>';
         $("#auto_sql_mock_value").html(" ");
         $.post("/rest/task/auto/getMockValue", postData, function (data) {
@@ -1289,8 +1297,6 @@
         var mockValueHtml = '<div class="row-fluid">'
             + '<label class="control-label popup_label span3 text-right">&nbsp;%s&nbsp;</label>'
             + '<input type="text" class="span4" value="%s">' +
-                // '<label class="control-label popup_label">&nbsp;&nbsp;Example
-                // Value:%s</label>' +
             '</div><br>';
         $("#free_sql_mock_value").html(" ");
         $.post("/rest/task/sql/getMockValue", postData, function (data) {

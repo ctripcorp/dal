@@ -140,17 +140,6 @@
                     </select>
                     </div>
                 </div>
-                <!--
-              <div class="row-fluid">
-                 <div class="control-group">
-                       <label class="control-label popup_label">方式：</label>
-                   <select id="regenerate" class="span9 pupup_text">
-                           <option value="regenerate">重新生成</option>
-                        <option value="increment_gen">增量生成，仅生成被修改的DAO</option>
-                    </select>
-                 </div>
-              </div>
-               -->
                 <div class="row-fluid useNewPojo">
                     <label class="popup_label"><input id="newPojo" type="checkbox" checked="checked">生成代码时附带数据库中的类型（DALFx>V1.2.0.6）</label>
                 </div>
@@ -309,7 +298,7 @@
                         </div>
                     </div>
                     <div class="row-fluid mysql_hide">
-                        <label class="popup_label"><input id="cud_by_sp" type="checkbox" checked="true">增删改使用SPA或SP3（SqlServer请勾选，MySql请去除）</label>
+                        <label class="popup_label"><input id="cud_by_sp" type="checkbox">增删改使用SPA或SP3（SqlServer请勾选，MySql请去除）</label>
                     </div>
                     <div class="row-fluid">
                         <label class="popup_label"><input id="pagination" type="checkbox" checked="true">增加分页方法</label>

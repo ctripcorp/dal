@@ -139,9 +139,23 @@
                     <div class="row-fluid" style="margin-top: 12px">
                         <div class="control-group">
                             <label class="popup_label">
-                                <input id="add_to_group" type="checkbox" checked="checked">保存时添加到我的DAL Team中
+                                <input id="add_to_group" type="checkbox" checked="checked"> 保存时添加到我的DAL Team中
                             </label>&nbsp;
                             <span id="dalgroupspan"><select id="dalgroup" class="span6"></select></span>
+                        </div>
+                    </div>
+                    <div class="row-fluid" style="margin-top: 12px">
+                        <div class="control-group">
+                            <label class="popup_label"><input id="gen_default_dbset" type="checkbox" checked="checked">
+                                保存时生成默认的逻辑数据库（databaseSet
+                                和 databaseSet Entry)
+                                <a href="#" class="ctip" data-toggle="tooltip" data-placement="bottom" html="1" title="
+									&lt; databaseSet name='XXX' provider='sqlProvider' shardStrategy=' ' &gt; </br>
+							            &lt; add  name='XXX' databaseType='Master' sharding=' ' connectionString='XXX'/ &gt; </br>
+							        &lt; /databaseSet &gt;</br>其中XXX即为所选择的数据库名">
+                                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                                </a>
+                            </label>
                         </div>
                     </div>
                 </div>

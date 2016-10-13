@@ -481,7 +481,8 @@
                 dbpassword: dbPassword,
                 dbcatalog: dbCatalog,
                 addtogroup: $("#add_to_group").is(":checked"),
-                dalgroup: dalGroup == undefined ? "" : dalGroup
+                dalgroup: dalGroup == undefined ? "" : dalGroup,
+                gen_default_dbset: $("#gen_default_dbset").is(":checked")
             }, function (data) {
                 if (data.code == "OK") {
                     $("#error_msg").html("保存成功。");
@@ -494,6 +495,12 @@
                 $("#error_msg").text(data);
                 $("body").unblock();
             });
+        });
+
+        $(document.body).on("click", "#add_to_group", function () {
+            var flag = $(this).is(":checked");
+            var genDefault = $("#gen_default_dbset");
+            genDefault.prop({"checked": flag, "disabled": !flag});
         });
 
         $(document.body).on("change", "#dbtype_up", function () {

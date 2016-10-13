@@ -326,7 +326,7 @@ public class DalGroupDbResource {
      *
      * @param dbname
      */
-    private void genDefaultDbset(int groupId, String dbname) {
+    public static void genDefaultDbset(int groupId, String dbname) {
         List<DatabaseSet> exist = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname);
         if (exist != null && exist.size() > 0) {
             return;

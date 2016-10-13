@@ -122,7 +122,8 @@ public class DatabaseResource {
                                    @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
                                    @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
                                    @FormParam("dbcatalog") String dbcatalog,
-                                   @FormParam("addtogroup") boolean addToGroup, @FormParam("dalgroup") String groupId) {
+                                   @FormParam("addtogroup") boolean addToGroup, @FormParam("dalgroup") String groupId,
+                                   @FormParam("gen_default_dbset") boolean isGenDefault) {
         Status status = Status.OK;
         DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
 
@@ -141,9 +142,11 @@ public class DatabaseResource {
             groupDb.setDb_providerName(DatabaseType.valueOf(dbtype).getValue());
             groupDb.setDal_group_id(-1);
 
+            //add to current user's group
             if (addToGroup) {
+                int gid = -1;
                 if (groupId != null && !groupId.isEmpty()) {
-                    int gid = Integer.parseInt(groupId);
+                    gid = Integer.parseInt(groupId);
                     groupDb.setDal_group_id(gid);
                 } else {
                     LoginUser user = RequestUtil.getUserInfo(request);
@@ -151,9 +154,15 @@ public class DatabaseResource {
                         int userId = user.getId();
                         List<UserGroup> list = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(userId);
                         if (list != null && list.size() > 0) {
-                            groupDb.setDal_group_id(list.get(0).getGroup_id());
+                            gid = list.get(0).getGroup_id();
+                            groupDb.setDal_group_id(gid);
                         }
                     }
+                }
+
+                //generate default databaseset
+                if (isGenDefault) {
+                    DalGroupDbResource.genDefaultDbset(gid, allinonename);
                 }
             }
 

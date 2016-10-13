@@ -194,4 +194,9 @@ public enum DalHintEnum {
 	 * cloumn names that will be excluded for CUD
 	 */
 	excludedColumns,
+	
+	/**
+	 * Allow partial query fields to be ORM
+	 */
+	allowPartial,
 }

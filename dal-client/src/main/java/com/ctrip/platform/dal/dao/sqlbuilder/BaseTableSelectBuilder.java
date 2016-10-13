@@ -18,6 +18,7 @@ import com.ctrip.platform.dal.dao.helper.DalRangedResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
+import com.ctrip.platform.dal.dao.helper.SupportPartialResultMapping;
 
 /**
  * This builder is only for internal use of DalTableDao
@@ -210,14 +211,27 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 		return count > 0 ? new DalRangedResultMerger((Comparator)hints.getSorter(), count): new DalListMerger((Comparator)hints.getSorter());
 	}
 
-	public <T> DalResultSetExtractor<T> getResultExtractor(DalHints hints) {
+	public <T> DalResultSetExtractor<T> getResultExtractor(DalHints hints) throws SQLException {
 		if(extractor != null)
 			return extractor;
 		
+		DalRowMapper<T> mapper  = checkAllowPartial(hints);
 		if(isRequireSingle() || isRequireFirst())
 			return new DalSingleResultExtractor<>(mapper, isRequireSingle());
 			
 		return count > 0 ? new DalRowMapperExtractor(mapper, count) : new DalRowMapperExtractor(mapper);
+	}
+	
+	private <T> DalRowMapper<T> checkAllowPartial(DalHints hints) throws SQLException {
+		if(selectedColumns == null)
+			return mapper;
+		
+		//Otherwise we assume it is partial. The default implementation of generated code should support this
+		if(mapper instanceof SupportPartialResultMapping)
+			return ((SupportPartialResultMapping)mapper).mapWith(selectedColumns);
+		
+		// We assume user will support it
+		return mapper;
 	}
 	
 	private String buildFirst(String effectiveTableName){

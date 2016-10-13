@@ -16,7 +16,7 @@ public class DalException extends SQLException{
 	}
 
 	public DalException(ErrorCode error, Throwable e){
-		super(error.getMessage(), e);
+		super(error.getMessage() + e.getMessage(), e);
 		this.errorCode = error;
 	}
 	public DalException(ErrorCode error, Object... args) {
@@ -35,7 +35,7 @@ public class DalException extends SQLException{
 	}
 	
 	public static DalException wrap(Throwable e) {
-		return e instanceof DalException ? (DalException)e: new DalException(ErrorCode.Unknown, e);
+		return e instanceof DalException ? (DalException)e: new DalException(ErrorCode.Unknown, e, e.getMessage());
 	}
 	
 	public static DalException wrap(ErrorCode defaultError, Throwable e) {

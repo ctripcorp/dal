@@ -112,6 +112,11 @@ public enum ErrorCode {
 	TransactionEnd(ErrorClassify.Transaction, 5603, "Calling endTransaction with empty ConnectionCache"),
 	
 	/**
+	 * Calling endTransaction with empty ConnectionCache
+	 */
+	TransactionNoFound(ErrorClassify.Transaction, 5604, "There is no transaction found"),
+	
+	/**
 	 * Can not get connection from DB %s
 	 */
 	CantGetConnection(ErrorClassify.Connection, 5300, "Can not get connection from DB %s"),
@@ -129,7 +134,7 @@ public enum ErrorCode {
 	 */
 	LogicDbEmpty(ErrorClassify.Connection, 5301, "Logic Db Name is empty!"),
 	
-	Unknown(ErrorClassify.Unknown, 9999 , "Unknown Exception");
+	Unknown(ErrorClassify.Unknown, 9999 , "Unknown Exception, caused by: %s");
 	
 	private final ErrorClassify classify;
 	private final int code;

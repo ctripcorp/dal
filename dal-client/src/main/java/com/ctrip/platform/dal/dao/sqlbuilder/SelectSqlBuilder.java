@@ -156,7 +156,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 	}
 	
 	@Override
-	public <T> DalResultSetExtractor<T> getResultExtractor(DalHints hints) {
+	public <T> DalResultSetExtractor<T> getResultExtractor(DalHints hints) throws SQLException {
 		return queryBuilder.getResultExtractor(hints);
 	}
 	

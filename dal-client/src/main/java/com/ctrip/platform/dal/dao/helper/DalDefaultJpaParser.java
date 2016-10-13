@@ -14,13 +14,13 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
  * 	1.The entity must contain non-parameters constructor.
  *  2.Each field of the entity must declare the SqlType annotation.
  */
-public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
+public class DalDefaultJpaParser<T> extends AbstractDalParser<T> implements SupportPartialResultMapping<T> {
 	
 	private Map<String, Field> fieldsMap;
 	private Class<T> clazz;
 	private Field identity;
 	private boolean autoIncrement;
-	private DalRowMapper<T> rowMapper;
+	private DalDefaultJpaMapper<T> rowMapper;
 	
 	public DalDefaultJpaParser(Class<T> clazz) throws SQLException {
 		EntityManager<T> manager = new EntityManager<T>(clazz);
@@ -110,5 +110,11 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> {
 			}
 		}
 		return map;
+	}
+
+	@Override
+	public DalRowMapper<T> mapWith(String[] selectedColumns)
+			throws SQLException {
+		return rowMapper.mapWith(selectedColumns);
 	}
 }

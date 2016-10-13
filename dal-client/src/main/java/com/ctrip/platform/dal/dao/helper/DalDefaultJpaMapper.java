@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalRowMapper;
 
-public class DalDefaultJpaMapper<T> implements DalRowMapper<T> {
+public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialResultMapping<T> {
 	
 	private Class<T> clazz = null;
 	private String[] columnNames = null;
@@ -67,4 +67,24 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T> {
 		}
 		field.set(entity, val);
 	}
+	
+	@Override
+	public DalRowMapper<T> mapWith(String[] selectedColumns)
+			throws SQLException {
+		return new DalDefaultJpaMapper<T>(this, selectedColumns);
+	}
+	
+	/**
+	 * For map partial result set with given column names.
+	 * Copy fields from rawMapper
+	 * 
+	 * @param rawMapper
+	 * @param clazz
+	 * @throws SQLException
+	 */
+	private DalDefaultJpaMapper(DalDefaultJpaMapper<T> rawMapper, String[] columnNames) throws SQLException {
+		this.clazz = rawMapper.clazz;
+		this.columnNames = columnNames;
+		this.fieldsMap = rawMapper.fieldsMap;
+	}	
 }

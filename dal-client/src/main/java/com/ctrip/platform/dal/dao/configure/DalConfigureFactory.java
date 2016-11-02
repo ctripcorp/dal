@@ -240,7 +240,7 @@ public class DalConfigureFactory {
 			NodeList children = settingsNode.getChildNodes();
 			for(int i = 0; i < children.getLength(); i++) {
 				if(children.item(i).getNodeType() == Node.ELEMENT_NODE)
-					settings.put(children.item(i).getNodeName(), children.item(i).getTextContent());
+					settings.put(children.item(i).getNodeName(), children.item(i).getTextContent().trim());
 			}
 		}
 		return settings;

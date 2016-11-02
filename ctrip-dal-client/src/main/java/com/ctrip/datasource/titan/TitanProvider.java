@@ -12,11 +12,12 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.net.ssl.SSLContext;
-import org.apache.http.client.config.RequestConfig;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.Registry;
@@ -37,6 +38,7 @@ import com.alibaba.fastjson.JSON;
 import com.ctrip.datasource.configure.AllInOneConfigureReader;
 import com.ctrip.datasource.configure.ConnectionStringParser;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
+import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.dianping.cat.Cat;
@@ -67,14 +69,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	
 	public void initialize(Map<String, String> settings) throws Exception {
 		logger.info("Initialize Titan provider");
-		svcUrl = settings.get(SERVICE_ADDRESS);
-		appid = settings.get(APPID);
 		
-		// First try 
-		if(appid == null || appid.isEmpty()) {
-			appid = getPreConfiguredAppId();
-		}
-		logger.info("Appid: " +appid);
+		svcUrl = discoverTitanServiceUrl(settings);
+		appid = discoverAppId(settings);
+		
+		logger.info("Titan Service Url: " + svcUrl);
+		logger.info("Appid: " + appid);
 		
 		useLocal = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
 		logger.info("Use local: " +useLocal);
@@ -83,26 +83,54 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		timeout = timeoutStr == null || timeoutStr.isEmpty() ? DEFAULT_TIMEOUT : Integer.parseInt(timeoutStr);
 		logger.info("Titan connection timeout: " + timeout);
 	}
+
+	private static final Map<String, String> titanMapping = new HashMap<>();
+
+	static {
+		// LPT,FAT/FWS,UAT,PRO
+		titanMapping.put("FAT", "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query");
+		titanMapping.put("FWS", "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query");
+		titanMapping.put("LPT", "https://ws.titan.lpt.qa.nt.ctripcorp.com/titanservice/query");
+		titanMapping.put("UAT", "https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query");
+		titanMapping.put("PRO", "https://ws.titan.ctripcorp.com/titanservice/query");
+	}
+			
+	private String discoverTitanServiceUrl(Map<String, String> settings) {
+		svcUrl = settings.get(SERVICE_ADDRESS);
+		
+		if(svcUrl != null)
+			return svcUrl;
+		
+		if(Foundation.server().getEnvType() == null)
+			return null;
+		
+		String envType = Foundation.server().getEnvType().trim().toUpperCase();
+		return titanMapping.get(envType);
+	}
 	
-	public static String getPreConfiguredAppId() {
-		String appid = LogConfig.getAppID();
+	private String discoverAppId(Map<String, String> settings) {
+		// First try pre-configred settings 
+		String appid = settings.get(APPID);
+		if(!(appid == null || appid.trim().isEmpty())) 
+			return appid;
+		
+		// Try framework foundation
+		appid  = Foundation.app().getAppId();
+		if(!(appid == null || appid.trim().isEmpty())) 
+			return appid;
+		
+		// Try original ;ogic
+		appid = LogConfig.getAppID();
 		if(appid == null || appid.equals(EMPTY_ID))
 			appid = Cat.getManager().getDomain();
+		
 		return appid;
-	}
-	
-	public void setSvcUrl(String svcUrl) {
-		this.svcUrl = svcUrl;
-	}
-
-	public void setAppid(String appid) {
-		this.appid = appid;
 	}
 
 	@Override
 	public void setup(Set<String> dbNames) {
 		// Assume it is local
-		if(svcUrl == null || svcUrl.isEmpty() || useLocal) {
+		if(svcUrl == null || svcUrl.trim().isEmpty() || useLocal) {
 			dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal);
 		} else {
 			// If it is not local dev environment or the AllInOne file does not exist
@@ -185,7 +213,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
             TitanResponse resp = JSON.parseObject(content, TitanResponse.class);
             
             if(!"200".equals(resp.getStatus())) {
-            	logger.error("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s", resp.getStatus(), resp.getMessage());
+            	logger.warn("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s", resp.getStatus(), resp.getMessage());
             	throw new RuntimeException(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s", resp.getStatus(), resp.getMessage()));
             }
             
@@ -193,7 +221,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
             	logger.info("Parsing " + data.getName());
             	//Fail fast
 	            if(data.getErrorCode() != null) {
-	            	logger.error(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
+	            	logger.warn(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
 	            	throw new RuntimeException(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
 	            }
 

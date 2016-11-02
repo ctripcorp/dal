@@ -1,6 +1,8 @@
 package com.ctrip.datasource.configure;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -12,6 +14,17 @@ public class DalDataSourceFactory {
 	private TitanProvider provider = new TitanProvider();
 
 	/**
+	 * Create DataSource for given name. The appid and titan url will be discoved by framework foundation
+	 * @param allInOneKey
+	 * @param svcUrl
+	 * @return
+	 * @throws Exception
+	 */
+	public DataSource createDataSource(String allInOneKey) throws Exception {
+		return createDataSource(allInOneKey, null, null);
+	}
+	
+	/**
 	 * Create DataSource for given name. In case user has clog or cat configured. The name will be same for both PROD and DEV environment
 	 * @param allInOneKey
 	 * @param svcUrl
@@ -19,7 +32,7 @@ public class DalDataSourceFactory {
 	 * @throws Exception
 	 */
 	public DataSource createDataSource(String allInOneKey, String svcUrl) throws Exception {
-		return createDataSource(allInOneKey, svcUrl, TitanProvider.getPreConfiguredAppId());
+		return createDataSource(allInOneKey, svcUrl, null);
 	}
 	
 	/**
@@ -31,8 +44,11 @@ public class DalDataSourceFactory {
 	 * @throws Exception
 	 */
 	public DataSource createDataSource(String allInOneKey, String svcUrl, String appid) throws Exception {
-		provider.setSvcUrl(svcUrl);
-		provider.setAppid(appid);
+		Map<String, String> settings = new HashMap<>();
+		settings.put(TitanProvider.SERVICE_ADDRESS, svcUrl);
+		settings.put(TitanProvider.APPID, appid);
+
+		provider.initialize(settings);
 
 		Set<String> dbNames = new HashSet<>();
 		dbNames.add(allInOneKey);

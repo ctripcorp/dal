@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.client;
 
+import java.sql.SQLException;
+
 /**
  * The listener will be invoked on certain transaction event.
  * No matter the invocation fails or not, the commit or rollback will not be interrupted.
@@ -8,7 +10,7 @@ package com.ctrip.platform.dal.dao.client;
  * @author jhhe
  */
 public interface DalTransactionListener {
-	void beforeCommit();
+	void beforeCommit() throws SQLException;
 	void beforeRollback();
 	void afterCommit();
 	void afterRollback();

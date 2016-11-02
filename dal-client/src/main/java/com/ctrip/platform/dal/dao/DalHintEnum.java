@@ -49,8 +49,15 @@ public enum DalHintEnum {
 	 */
 	parameters,
 	
+	/**
+	 * Explicitly indicate in which database the operation will be performed.
+	 * This is because a logic Db can include multiple physical  Db. So sometimes we need to select the certain Db
+	 * Value should be String
+	 */
+	designatedDatabase,
+	
 	/*
-	 * Explicitly indicate which shard the operation will be performed.
+	 * Explicitly indicate in which shard the operation will be performed.
 	 * Value should be String
 	 */
 	shard,
@@ -124,7 +131,10 @@ public enum DalHintEnum {
 	 */
 	skipResultsProcessing,
 	
-//	skipUndeclaredResults,
+	/*
+	 * Auto processing all result set and update count
+	 */
+	autoRetrieveAllResults,
 	
 	/* 
 	 * Parameter for statement.setMaxRows(maxRows); 

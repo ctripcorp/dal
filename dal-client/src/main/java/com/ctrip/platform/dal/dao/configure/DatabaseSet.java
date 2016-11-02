@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
@@ -163,15 +164,15 @@ public class DatabaseSet {
 		return slaveDbByShard.get(shard);
 	}
 	
-	public String getRandomRealDbName(DalHA ha, String shard, boolean isMaster, boolean isSelect) throws DalException {
-		return getRandomRealDbName(ha, isMaster, isSelect, getMasterDbs(shard), getSlaveDbs(shard));
+	public String getRandomRealDbName(DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
+		return getRandomRealDbName(hints, isMaster, isSelect, getMasterDbs(shard), getSlaveDbs(shard));
 	}
 	
-	public String getRandomRealDbName(DalHA ha, boolean isMaster, boolean isSelect) throws DalException {
-		return getRandomRealDbName(ha, isMaster, isSelect, masterDbs, slaveDbs);
+	public String getRandomRealDbName(DalHints hints, boolean isMaster, boolean isSelect) throws DalException {
+		return getRandomRealDbName(hints, isMaster, isSelect, masterDbs, slaveDbs);
 	}
 	
-	private String getRandomRealDbName(DalHA ha, boolean isMaster, boolean isSelect, List<DataBase> masterCandidates, List<DataBase> slaveCandidates) throws DalException {
-		return new DatabaseSelector(ha, masterCandidates, slaveCandidates, isMaster, isSelect).select();
+	private String getRandomRealDbName(DalHints hints, boolean isMaster, boolean isSelect, List<DataBase> masterCandidates, List<DataBase> slaveCandidates) throws DalException {
+		return new DatabaseSelector(hints, masterCandidates, slaveCandidates, isMaster, isSelect).select();
 	}
 }

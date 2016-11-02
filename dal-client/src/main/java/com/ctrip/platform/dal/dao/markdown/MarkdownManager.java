@@ -115,7 +115,7 @@ public class MarkdownManager {
 			return;
 			
 		ErrorContext ctx = new ErrorContext(
-				conn.getMeta().getAllInOneKey(), 
+				conn.getMeta().getDataBaseKeyName(), 
 				conn.getMeta().getDatabaseCategory(), 
 				System.currentTimeMillis() - start, 
 				(SQLException) e);

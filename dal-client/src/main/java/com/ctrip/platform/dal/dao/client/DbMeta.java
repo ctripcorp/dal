@@ -13,7 +13,7 @@ public class DbMeta {
 	
 	private String databaseName;
 	private DatabaseCategory dbCategory;
-	private String allInOneKey;
+	private String dataBaseKeyName;
 	private String userName;
 	private String shardId;
 	private boolean isMaster;
@@ -28,7 +28,7 @@ public class DbMeta {
 		host = CommonUtil.parseHostFromDBURL(url);
 		userName = meta.getUserName();
 		
-		allInOneKey = realDbName;
+		dataBaseKeyName = realDbName;
 		this.dbCategory = dbCategory;
 		isMaster = master;
 		this.shardId = shardId;
@@ -41,7 +41,7 @@ public class DbMeta {
 		entry.setUserName(userName);
 		entry.setMaster(isMaster);
 		entry.setShardId(shardId);
-		entry.setAllInOneKey(allInOneKey);
+		entry.setDataBaseKeyName(dataBaseKeyName);
 	}
 	
 
@@ -63,8 +63,8 @@ public class DbMeta {
 		return databaseName;
 	}
 
-	public String getAllInOneKey() {
-		return allInOneKey;
+	public String getDataBaseKeyName() {
+		return dataBaseKeyName;
 	}
 	
 	public DatabaseCategory getDatabaseCategory() {

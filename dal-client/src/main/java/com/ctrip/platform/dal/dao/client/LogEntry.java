@@ -18,7 +18,7 @@ public class LogEntry {
 	private boolean transactional;
 	private long duration;
 	private String databaseName;
-	private String allInOneKey;
+	private String dataBaseKeyName;
 	private boolean isMaster;
 	private String shardId;
 	private String serverAddress;
@@ -212,12 +212,12 @@ public class LogEntry {
 		return source;
 	}
 
-	public String getAllInOneKey() {
-		return allInOneKey;
+	public String getDataBaseKeyName() {
+		return dataBaseKeyName;
 	}
 
-	public void setAllInOneKey(String allInOneKey) {
-		this.allInOneKey = allInOneKey;
+	public void setDataBaseKeyName(String dataBaseKeyName) {
+		this.dataBaseKeyName = dataBaseKeyName;
 	}
 
 	public boolean isMaster() {

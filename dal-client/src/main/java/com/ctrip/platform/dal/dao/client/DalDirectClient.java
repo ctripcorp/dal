@@ -23,6 +23,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.exceptions.DalException;
 
 /**
  * The direct connection implementation for DalClient.
@@ -221,7 +222,10 @@ public class DalDirectClient implements DalClient {
 						callParameters.add(parameter);
 					}
 				}
-                
+				
+				if(hints.is(DalHintEnum.autoRetrieveAllResults) && resultParameters.size() > 0)
+					throw new DalException("Dal hint 'retreiveAllResults' should only be used when there is no");
+				
 				conn = getConnection(hints, this);
 				
 				callableStatement = createCallableStatement(conn, callString, parameters, hints);
@@ -273,6 +277,9 @@ public class DalDirectClient implements DalClient {
 		if(hints.is(DalHintEnum.skipResultsProcessing) || resultParameters.size() == 0)
 			return returnedResults;
 
+		if(hints.is(DalHintEnum.autoRetrieveAllResults))
+			return extractReturnedResults(statement, updateCount);
+		
 		boolean moreResults;
 		int index = 0;
 		do {
@@ -281,6 +288,25 @@ public class DalDirectClient implements DalClient {
 			String key = resultParameters.get(index).getName();
 			Object value = updateCount == -1?
 				resultParameters.get(index).getResultSetExtractor().extract(statement.getResultSet()) :
+				updateCount;
+			moreResults = statement.getMoreResults();
+			updateCount = statement.getUpdateCount();
+			index++;
+			returnedResults.put(key, value);
+		}
+		while (moreResults || updateCount != -1);
+
+		return returnedResults;
+	}
+	
+	private Map<String, Object> extractReturnedResults(CallableStatement statement, int updateCount) throws SQLException {
+		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
+		boolean moreResults;
+		int index = 0;
+		DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<>(new DalColumnMapRowMapper());
+		do {
+			String key = (updateCount == -1 ? "UpdateCount_" :"ResultSet_") + index;
+			Object value = updateCount == -1 ? extractor.extract(statement.getResultSet()) :
 				updateCount;
 			moreResults = statement.getMoreResults();
 			updateCount = statement.getUpdateCount();

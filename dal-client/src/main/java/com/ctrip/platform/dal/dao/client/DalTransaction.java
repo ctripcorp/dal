@@ -76,33 +76,36 @@ public class DalTransaction  {
 			throw new DalException(ErrorCode.TransactionLevelMatch, (level - 1), startLevel);
 		}
 		
-		if(--level == 0) {
-			completed = true;
-			cleanup(true);
+		if(level > 1) {
+			level--;
+			return;
 		}
+		
+		// Back to the first transaction, about to commit
+		beforeCommit();
+		completed = true;
+		cleanup(true);
+		afterCommit();
 	}
 	
 	public void rollbackTransaction() throws SQLException {
 		if(rolledBack)
 			return;
 
+		beforeRollback();
 		rolledBack = true;
 		// Even the rollback fails, we still set the flag to true;
 		cleanup(false);
+		afterRollback();
 	}
 	
 	private void cleanup(boolean commit) {
 		Connection conn = connHolder.getConn();
 		try {
-			if(commit){
-				beforeCommit();
+			if(commit)
 				conn.commit();
-				afterCommit();
-			}else {
-				beforeRollback();
+			else
 				conn.rollback();
-				afterRollback();
-			}
 		} catch (Throwable e) {
 			logger.error("Can not commit or rollback on current connection", e);
 		}
@@ -117,17 +120,13 @@ public class DalTransaction  {
 		DalTransactionManager.clearCurrentTransaction();
 	}
 	
-	private void beforeCommit() {
+	private void beforeCommit() throws SQLException {
 		if(listeners == null)
 			return;
 		
-		for(DalTransactionListener listener: listeners) {
-			try{
-				listener.beforeCommit();
-			}catch(Throwable e) {
-				logError(e);
-			}
-		}
+		// The before commit can cause transaction termination by throwing exception
+		for(DalTransactionListener listener: listeners)
+			listener.beforeCommit();
 	}
 
 	private void beforeRollback() {

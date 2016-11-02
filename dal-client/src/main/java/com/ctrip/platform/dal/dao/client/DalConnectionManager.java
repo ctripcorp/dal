@@ -89,9 +89,9 @@ public class DalConnectionManager {
 				throw new DalException(ErrorCode.ShardLocated, logicDbName);
 			dbSet.validate(shardId);
 			
-			allInOneKey = dbSet.getRandomRealDbName(hints.getHA(), shardId, isMaster, isSelect);
+			allInOneKey = dbSet.getRandomRealDbName(hints, shardId, isMaster, isSelect);
 		} else {
-			allInOneKey = dbSet.getRandomRealDbName(hints.getHA(), isMaster, isSelect);
+			allInOneKey = dbSet.getRandomRealDbName(hints, isMaster, isSelect);
 		}
 		
 		if(allInOneKey == null && hints.getHA().isOver()){

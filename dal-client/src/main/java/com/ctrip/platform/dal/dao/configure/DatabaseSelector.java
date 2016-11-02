@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.ctrip.platform.dal.dao.DalHintEnum;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -13,12 +15,16 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
 public class DatabaseSelector {
 	private List<DataBase> masters;
 	private List<DataBase> slaves;
+	private String designatedDatasource;
 	private DalHA ha;
 	private boolean masterOnly;
 	private boolean isSelect;
 	
-	public DatabaseSelector(DalHA ha, List<DataBase> masters, List<DataBase> slaves, boolean masterOnly, boolean isSelect){
-		this.ha = ha;
+	public DatabaseSelector(DalHints hints, List<DataBase> masters, List<DataBase> slaves, boolean masterOnly, boolean isSelect){
+		if(hints != null) {
+			this.ha = hints.getHA();
+			this.designatedDatasource = hints.getString(DalHintEnum.designatedDatabase);
+		}
 		this.masters = masters;
 		this.masterOnly = masterOnly;
 		this.slaves = slaves;
@@ -65,8 +71,7 @@ public class DatabaseSelector {
 	
 	private String getRandomRealDbName(List<String> dbs){
 		if(ha == null || dbs.size() == 1){
-			int index = (int)(Math.random() * dbs.size());	
-			return dbs.get(index);
+			return getWithDesignatedDatasource(dbs);
 		}else{
 			List<String> dbNames = new ArrayList<String>();
 			for (String database : dbs) {
@@ -77,11 +82,19 @@ public class DatabaseSelector {
 				ha.setOver(true);
 				return null;
 			}else{
-				int index = (int)(Math.random() * dbNames.size());
-				ha.addDB(dbNames.get(index));
-				return dbNames.get(index);
+				String selected = getWithDesignatedDatasource(dbNames);
+				ha.addDB(selected);
+				return selected;
 			}
 		}
+	}
+	
+	private String getWithDesignatedDatasource(List<String> dbs) {
+		if(designatedDatasource != null && dbs.contains(designatedDatasource))
+			return designatedDatasource;
+		
+		int index = (int)(Math.random() * dbs.size());	
+		return dbs.get(index);
 	}
 	
 	private List<String> selectNotMarkdownDbNames(List<DataBase> dbs){

@@ -7,11 +7,22 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 
 public class TitanServiceReaderTest {
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		System.setProperty("env", "UAT");
+	}
+	
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+		System.setProperty("env", "");
+	}
 	
 	@Test
 	public void testGetFromTitanServiceSuccess() {
@@ -270,6 +281,7 @@ public class TitanServiceReaderTest {
 	
 	@Test
 	public void testGetFromEnvironmentJvmTitanService() {
+//		You need to rename c:/opt1 to c:/opt if you want to test server.properties
 		System.setProperty("env", "UAT");
 		TitanProvider provider = new TitanProvider();
 		Set<String> dbNames = new HashSet<>();
@@ -298,6 +310,8 @@ public class TitanServiceReaderTest {
 	
 	@Test
 	public void testGetFromEnvironmentPropertiesTitanService() {
+		// You need to rename c:/opt1 to c:/opt
+		System.setProperty("env", "UAT");
 		TitanProvider provider = new TitanProvider();
 		Set<String> dbNames = new HashSet<>();
 		dbNames.add("GSCommunityDB_SELECT_1");

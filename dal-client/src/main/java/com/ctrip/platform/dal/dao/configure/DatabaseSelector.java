@@ -60,7 +60,7 @@ public class DatabaseSelector {
 		return dbName;
 	}
 	
-	private String getAvailableDb(List<DataBase> candidates){
+	private String getAvailableDb(List<DataBase> candidates) throws DalException{
 		if(isNullOrEmpty(candidates))
 			return null;
 		List<String> dbNames = this.selectNotMarkdownDbNames(candidates);
@@ -69,7 +69,7 @@ public class DatabaseSelector {
 		return this.getRandomRealDbName(dbNames);
 	}
 	
-	private String getRandomRealDbName(List<String> dbs){
+	private String getRandomRealDbName(List<String> dbs) throws DalException{
 		if(ha == null || dbs.size() == 1){
 			return getWithDesignatedDatasource(dbs);
 		}else{
@@ -89,9 +89,12 @@ public class DatabaseSelector {
 		}
 	}
 	
-	private String getWithDesignatedDatasource(List<String> dbs) {
-		if(designatedDatasource != null && dbs.contains(designatedDatasource))
-			return designatedDatasource;
+	private String getWithDesignatedDatasource(List<String> dbs) throws DalException {
+		if(designatedDatasource != null)
+			if(dbs.contains(designatedDatasource))
+				return designatedDatasource;
+			else
+				throw new DalException(ErrorCode.InvalidDatabaseKeyName, designatedDatasource);
 		
 		int index = (int)(Math.random() * dbs.size());	
 		return dbs.get(index);

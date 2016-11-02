@@ -132,7 +132,9 @@ public enum ErrorCode {
 	/**
 	 * Logic Db Name is empty!
 	 */
-	LogicDbEmpty(ErrorClassify.Connection, 5301, "Logic Db Name is empty!"),
+	LogicDbEmpty(ErrorClassify.Connection, 5305, "Logic Db Name is empty!"),
+	
+	InvalidDatabaseKeyName(ErrorClassify.Connection, 5306, "The given database key name is not found: %s"),
 	
 	Unknown(ErrorClassify.Unknown, 9999 , "Unknown Exception, caused by: %s");
 	

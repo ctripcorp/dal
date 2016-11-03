@@ -117,7 +117,7 @@ public class AutoMarkdownTest {
 	public DalConnection mockDalConnection(){
 		DalConnection conn = EasyMock.createMock(DalConnection.class);
 		DbMeta meta = EasyMock.createMock(DbMeta.class);
-		EasyMock.expect(meta.getAllInOneKey()).andReturn(dbName).times(1);
+		EasyMock.expect(meta.getDataBaseKeyName()).andReturn(dbName).times(1);
 		EasyMock.expect(meta.getDatabaseCategory()).andReturn(DatabaseCategory.MySql).times(1);
 		
 		EasyMock.expect(conn.getMeta()).andReturn(meta).times(3);

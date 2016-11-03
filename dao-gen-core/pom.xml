@@ -275,6 +275,10 @@
             <id>internal.repo</id>
             <name>Temporary Staging Repository</name>
             <url>file://${project.build.directory}/mvn-repo</url>
+	        <snapshots>
+	            <enabled>true</enabled>
+	            <updatePolicy>always</updatePolicy>
+	        </snapshots>
         </repository>
     </distributionManagement>
 </project>

@@ -94,10 +94,6 @@ public class DalConnectionManager {
 			allInOneKey = dbSet.getRandomRealDbName(hints, isMaster, isSelect);
 		}
 		
-		if(allInOneKey == null && hints.getHA().isOver()){
-			throw new DalException(ErrorCode.NoMoreConnectionToFailOver);
-		}
-		
 		try {	
 			conn = locator.getConnection(allInOneKey);
 			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), shardId, isMaster, conn);

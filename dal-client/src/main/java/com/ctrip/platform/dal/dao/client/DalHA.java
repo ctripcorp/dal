@@ -78,8 +78,9 @@ public class DalHA {
 		return this.retryCount;
 	}
 	
-	public void addDB(String db){
+	public DalHA addDB(String db){
 		this.usedKeys.add(db);
+		return this;
 	}
 	
 	public boolean contains(String db){

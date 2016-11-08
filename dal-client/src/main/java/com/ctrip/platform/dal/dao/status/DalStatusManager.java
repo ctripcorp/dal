@@ -125,4 +125,8 @@ public class DalStatusManager {
 	public static DataSourceStatus getDataSourceStatus(String dbName) {
 		return dataSources.get(dbName);
 	}
+	
+	public static boolean containsDataSourceStatus(String dbName) {
+		return dataSources.containsKey(dbName);
+	}
 }

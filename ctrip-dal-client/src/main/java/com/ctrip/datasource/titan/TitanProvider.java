@@ -41,6 +41,8 @@ import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 import com.dianping.cat.Cat;
 
 public class TitanProvider implements DataSourceConfigureProvider {
@@ -57,6 +59,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	
 	private String svcUrl;
 	private String appid;
+	private String subEnv;
 	private int timeout;
 	private boolean useLocal;
 	private ConnectionStringParser parser = new ConnectionStringParser();
@@ -72,9 +75,11 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		
 		svcUrl = discoverTitanServiceUrl(settings);
 		appid = discoverAppId(settings);
+		subEnv = Foundation.server().getSubEnv();
 		
 		logger.info("Titan Service Url: " + svcUrl);
 		logger.info("Appid: " + appid);
+		logger.info("Sub-environment: " + (subEnv == null ? "N/A" : subEnv));
 		
 		useLocal = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
 		logger.info("Use local: " +useLocal);
@@ -99,7 +104,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		svcUrl = settings.get(SERVICE_ADDRESS);
 		
 		if(svcUrl != null)
-			return svcUrl;
+			return svcUrl.trim();
 		
 		if(Foundation.server().getEnvType() == null)
 			return null;
@@ -108,29 +113,32 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		return titanMapping.get(envType);
 	}
 	
-	private String discoverAppId(Map<String, String> settings) {
+	private String discoverAppId(Map<String, String> settings) throws DalException {
 		// First try pre-configred settings 
 		String appid = settings.get(APPID);
 		if(!(appid == null || appid.trim().isEmpty())) 
-			return appid;
+			return appid.trim();
 		
 		// Try framework foundation
 		appid  = Foundation.app().getAppId();
 		if(!(appid == null || appid.trim().isEmpty())) 
-			return appid;
+			return appid.trim();
 		
-		// Try original ;ogic
+		// Try original logic
 		appid = LogConfig.getAppID();
 		if(appid == null || appid.equals(EMPTY_ID))
 			appid = Cat.getManager().getDomain();
 		
-		return appid;
+		if(!(appid == null || appid.trim().isEmpty())) 
+			return appid.trim();
+		
+		throw new DalException("Can not locate APPID for this application");
 	}
 
 	@Override
 	public void setup(Set<String> dbNames) {
 		// Assume it is local
-		if(svcUrl == null || svcUrl.trim().isEmpty() || useLocal) {
+		if(svcUrl == null || svcUrl.isEmpty() || useLocal) {
 			dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal);
 		} else {
 			// If it is not local dev environment or the AllInOne file does not exist
@@ -199,6 +207,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		logger.info(svcUrl);
 
         URI uri = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid).build();
+        //.addParameter("subEnv", subEnv)
         HttpClient sslClient = initWeakSSLClient();
         if (sslClient != null) {
             HttpGet httpGet = new HttpGet();

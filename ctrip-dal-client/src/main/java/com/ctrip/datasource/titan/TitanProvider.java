@@ -76,6 +76,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		svcUrl = discoverTitanServiceUrl(settings);
 		appid = discoverAppId(settings);
 		subEnv = Foundation.server().getSubEnv();
+		subEnv = subEnv == null ? null : subEnv .trim();
 		
 		logger.info("Titan Service Url: " + svcUrl);
 		logger.info("Appid: " + appid);
@@ -206,8 +207,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		svcUrl = svcUrl.trim();
 		logger.info(svcUrl);
 
-        URI uri = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid).build();
-        //.addParameter("subEnv", subEnv)
+		URIBuilder builder = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid);
+		if(!(subEnv == null || subEnv.isEmpty()))
+			builder.addParameter("evnt", subEnv);
+		
+        URI uri = builder.build();
+
         HttpClient sslClient = initWeakSSLClient();
         if (sslClient != null) {
             HttpGet httpGet = new HttpGet();

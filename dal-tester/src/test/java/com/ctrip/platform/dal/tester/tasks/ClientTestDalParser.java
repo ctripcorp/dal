@@ -9,7 +9,6 @@ import java.util.Map;
 import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 
 public class ClientTestDalParser extends AbstractDalParser<ClientTestModel>{
-	private String databaseName;
 	private static final String tableName= "dal_client_test";
 	private static final String[] columnNames = new String[]{
 		"id","quantity","dbIndex","tableIndex","type","address","last_changed"
@@ -28,9 +27,9 @@ public class ClientTestDalParser extends AbstractDalParser<ClientTestModel>{
 			throws SQLException {
 		ClientTestModel model = new ClientTestModel();
 		model.setId(rs.getInt(1));
-		model.setQuantity(rs.getInt(2));
-		model.setDbIndex(rs.getInt(3));
-		model.setTableIndex(rs.getInt(4));
+		model.setQuantity((Integer)rs.getObject(2));
+		model.setDbIndex((Integer)rs.getObject(3));
+		model.setTableIndex((Integer)rs.getObject(4));
 		model.setType(rs.getShort(5));
 		model.setAddress(rs.getString(6));
 		model.setLastChanged(rs.getTimestamp(7));

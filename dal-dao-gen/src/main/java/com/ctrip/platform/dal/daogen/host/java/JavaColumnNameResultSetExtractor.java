@@ -30,11 +30,19 @@ public class JavaColumnNameResultSetExtractor implements ResultSetExtractor<List
         List<AbstractParameterHost> allColumns = new ArrayList<>();
         Map<String, Integer> columnSqlType = DbUtils.getColumnSqlType(allInOneName, tableName);
         Map<String, Class<?>> typeMapper = DbUtils.getSqlType2JavaTypeMaper(allInOneName, tableName);
+        Map<String, String> columnComment;
+        try {
+            columnComment = DbUtils.getSqlserverColumnComment(allInOneName, tableName);
+        } catch (Exception e) {
+            throw new SQLException(e.getMessage(), e);
+        }
+
         if (columnSqlType != null && columnSqlType.size() > 0) {
             while (rs.next()) {
                 JavaParameterHost host = new JavaParameterHost();
                 String typeName = rs.getString("TYPE_NAME");
-                host.setName(rs.getString("COLUMN_NAME"));
+                String columnName = rs.getString("COLUMN_NAME");
+                host.setName(columnName);
                 host.setSqlType(columnSqlType.get(host.getName()));
                 Class<?> javaClass = null;
                 if (null != typeMapper && typeMapper.containsKey(host.getName())) {
@@ -56,6 +64,13 @@ public class JavaColumnNameResultSetExtractor implements ResultSetExtractor<List
                 host.setJavaClass(javaClass);
                 host.setIndex(rs.getInt("ORDINAL_POSITION"));
                 host.setIdentity(rs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
+                String remarks = rs.getString("REMARKS");
+                if (remarks == null) {
+                    String description = columnComment.get(columnName.toLowerCase());
+                    remarks = description == null ? "" : description;
+                }
+
+                host.setComment(remarks.replace("\n", " "));
                 allColumns.add(host);
             }
         }

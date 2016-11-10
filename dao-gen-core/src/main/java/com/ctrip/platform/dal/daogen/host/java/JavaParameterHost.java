@@ -48,6 +48,8 @@ public class JavaParameterHost extends AbstractParameterHost {
 
     private boolean operator = false; //whether is opearator and,or,not
 
+    private String comment;
+
     public JavaParameterHost() {
     }
 
@@ -67,6 +69,7 @@ public class JavaParameterHost extends AbstractParameterHost {
         this.conditional = host.isConditional();
         this.sensitive = host.isSensitive();
         this.operator = host.isOperator();
+        this.comment = host.getComment();
     }
 
     public boolean isInParameter() {
@@ -183,6 +186,14 @@ public class JavaParameterHost extends AbstractParameterHost {
 
     public void setOperator(boolean operator) {
         this.operator = operator;
+    }
+
+    public String getComment() {
+        return comment == null ? "" : comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment != null ? comment : "";
     }
 
     public String getCapitalizedName() {

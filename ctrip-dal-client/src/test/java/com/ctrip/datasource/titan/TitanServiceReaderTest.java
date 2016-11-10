@@ -11,6 +11,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 
 public class TitanServiceReaderTest {
@@ -304,35 +305,7 @@ public class TitanServiceReaderTest {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Assert.fail();
-		}
-	}
-	
-	@Test
-	public void testGetFromEnvironmentPropertiesTitanService() {
-		// You need to rename c:/opt1 to c:/opt
-		System.setProperty("env", "UAT");
-		TitanProvider provider = new TitanProvider();
-		Set<String> dbNames = new HashSet<>();
-		dbNames.add("GSCommunityDB_SELECT_1");
-		dbNames.add("YouSearchDB");
-		dbNames.add("GSDestDB_SELECT_1");
-		
-		Map<String, String> settings = new HashMap<>();
-		settings.put(TitanProvider.USE_LOCAL_CONFIG, "false");
-		settings.put(TitanProvider.TIMEOUT, "100");
-		try {
-			provider.initialize(settings);
-			provider.setup(dbNames);
-			
-			DataSourceConfigure result = null;
-
-			for(String name: dbNames) {
-				result = provider.getDataSourceConfigure(name);
-				Assert.assertNotNull(result);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(Foundation.server().getEnvType());
 			Assert.fail();
 		}
 	}

@@ -47,7 +47,7 @@ public class ClientTestModel {
 		return type;
 	}
 
-	public void setType(short type) {
+	public void setType(Short type) {
 		this.type = type;
 	}
 

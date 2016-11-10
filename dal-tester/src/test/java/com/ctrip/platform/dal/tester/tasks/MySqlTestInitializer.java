@@ -24,7 +24,7 @@ public class MySqlTestInitializer {
 			+ "dbIndex int,"
 			+ "tableIndex int,"
 			+ "type smallint, "
-			+ "address VARCHAR(64) not null, "
+			+ "address VARCHAR(64) not null,"
 			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
 	
 	private static DalClient clientMySql;

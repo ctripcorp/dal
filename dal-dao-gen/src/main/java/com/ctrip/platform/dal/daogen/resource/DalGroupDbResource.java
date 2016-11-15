@@ -159,7 +159,10 @@ public class DalGroupDbResource {
         }
 
         if (gen_default_dbset) {
-            genDefaultDbset(groupID, dbname);
+            Status status = genDefaultDbset(groupID, dbname);
+            if (status == Status.ERROR) {
+                return status;
+            }
         }
 
         return Status.OK;
@@ -326,10 +329,13 @@ public class DalGroupDbResource {
      *
      * @param dbname
      */
-    public static void genDefaultDbset(int groupId, String dbname) {
+    public static Status genDefaultDbset(int groupId, String dbname) {
+        Status status = Status.OK;
         List<DatabaseSet> exist = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname);
         if (exist != null && exist.size() > 0) {
-            return;
+            status = Status.ERROR;
+            status.setInfo("逻辑数据库" + dbname + "已经存在!");
+            return status;
         }
         DatabaseSet dbset = new DatabaseSet();
         dbset.setName(dbname);
@@ -357,6 +363,7 @@ public class DalGroupDbResource {
 
             SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSetEntry(entry);
         }
+        return status;
     }
 
 }

@@ -130,7 +130,7 @@ public class DalGroupDbResource {
 
         if (!this.validatePermision(userNo, groupID)) {
             Status status = Status.ERROR;
-            status.setInfo("你没有当前DAL Team的操作权限.");
+            status.setInfo("你没有当前DAL Team的操作权限。");
             return status;
         }
 
@@ -148,7 +148,7 @@ public class DalGroupDbResource {
             SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), comment);
         } else {
             Status status = Status.ERROR;
-            status.setInfo(dbname + " 不存在，请先到数据库一览界面添加DB.");
+            status.setInfo(dbname + " 不存在，请先到数据库一览界面添加DB。");
             return status;
         }
         if (ret <= 0) {
@@ -194,7 +194,7 @@ public class DalGroupDbResource {
 
         if (!this.validatePermision(userNo, groupID)) {
             Status status = Status.ERROR;
-            status.setInfo("你没有当前DAL Team的操作权限.");
+            status.setInfo("你没有当前DAL Team的操作权限。");
             return status;
         }
 
@@ -235,7 +235,7 @@ public class DalGroupDbResource {
 
         if (!this.validatePermision(userNo, groupID)) {
             Status status = Status.ERROR;
-            status.setInfo("你没有当前DAL Team的操作权限.");
+            status.setInfo("你没有当前DAL Team的操作权限。");
             return status;
         }
 
@@ -275,7 +275,7 @@ public class DalGroupDbResource {
 
         if (!this.validateTransferPermision(userNo, dbID)) {
             Status status = Status.ERROR;
-            status.setInfo("你没有当前DataBase的操作权限.");
+            status.setInfo("你没有当前DataBase的操作权限。");
             return status;
         }
 
@@ -334,7 +334,7 @@ public class DalGroupDbResource {
         List<DatabaseSet> exist = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname);
         if (exist != null && exist.size() > 0) {
             status = Status.ERROR;
-            status.setInfo("逻辑数据库" + dbname + "已经存在!");
+            status.setInfo("逻辑数据库" + dbname + "已被其他DAL Team添加，请到逻辑数据库管理页面中手动添加一个不同的名称!");
             return status;
         }
         DatabaseSet dbset = new DatabaseSet();

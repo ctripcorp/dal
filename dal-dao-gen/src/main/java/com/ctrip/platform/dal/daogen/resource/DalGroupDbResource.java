@@ -334,7 +334,7 @@ public class DalGroupDbResource {
         List<DatabaseSet> exist = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname);
         if (exist != null && exist.size() > 0) {
             status = Status.ERROR;
-            status.setInfo("逻辑数据库" + dbname + "已被其他DAL Team添加，请到逻辑数据库管理页面中手动添加一个不同的名称!");
+            status.setInfo("数据库" + dbname + "已添加成功。由于已存在名为" + dbname + "的逻辑数据库，所以无法默认生成同名的逻辑库，请到逻辑数据库管理页面中手动添加不同名称的逻辑库。请点击关闭按钮以关闭窗口。");
             return status;
         }
         DatabaseSet dbset = new DatabaseSet();

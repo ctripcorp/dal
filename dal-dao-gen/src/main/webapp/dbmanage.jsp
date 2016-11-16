@@ -118,7 +118,7 @@
             </div>
             <div class="modal-footer">
                 <label id="error_msg" class="control-label popup_label"
-                       style="color: red;"></label>
+                       style="color: red;text-align: left;"></label>
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 <button id="save_db" type="button" class="btn btn-primary">保存</button>
             </div>

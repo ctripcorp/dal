@@ -4,6 +4,7 @@ public class TitanData {
 	private String connectionString;
 	private String providerName;
 	private String name;
+	private String subEnv;
 	private String errorCode;
 	private String errorMessage;
 	

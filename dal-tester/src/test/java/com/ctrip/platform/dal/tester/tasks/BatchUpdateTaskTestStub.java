@@ -7,11 +7,26 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Version;
 
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.DalPojo;
+import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 import com.ctrip.platform.dal.dao.task.BatchUpdateTask;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -40,6 +55,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 			
 			int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
 			assertEquals(3, result.length);
+			assertArrayEquals(new int[]{1, 1 , 1}, result);
 			assertEquals(3, getCount());
 			
 			pojos = getAll();
@@ -180,9 +196,8 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 			}
 			
 			int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
-			assertEquals(3, result.length);
-			assertEquals(3, getCount());
-			
+			assertArrayEquals(new int[]{1, 1 , 1}, result);
+
 			i = 0;
 			pojos = getAll();
 			for(ClientTestModel model: pojos) {
@@ -213,8 +228,282 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 	}
 	
 	@Test
+	public void testVersionNotSet() throws SQLException {
+		BatchUpdateTask<UpdatableVersionModel> test = new BatchUpdateTask<>();
+		DalParser<UpdatableVersionModel> parser = new DalDefaultJpaParser<>(UpdatableVersionModel.class, getDbName());
+		test.initialize(parser);
+		DalTableDao<UpdatableVersionModel> dao = new DalTableDao<UpdatableVersionModel>(parser);
+		
+		DalHints hints = new DalHints();
+		
+		List<UpdatableVersionModel> pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableVersionModel model: pojos){
+			model.setAddress("1122334455");
+			model.setLastChanged(null);
+		}
+		
+		try {
+			test.execute(hints, test.getPojosFieldsMap(pojos));
+			fail();
+		} catch (SQLException e) {
+			assertEquals(ErrorCode.ValidateVersion.getMessage(), e.getMessage());
+		}
+	}
+	
+	@Test
+	public void testVersionIncorrect() throws SQLException {
+		BatchUpdateTask<UpdatableVersionModel> test = new BatchUpdateTask<>();
+		DalParser<UpdatableVersionModel> parser = new DalDefaultJpaParser<>(UpdatableVersionModel.class, getDbName());
+		test.initialize(parser);
+		DalTableDao<UpdatableVersionModel> dao = new DalTableDao<UpdatableVersionModel>(parser);
+		
+		DalHints hints = new DalHints();
+		
+		List<UpdatableVersionModel> pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableVersionModel model: pojos){
+			model.setAddress("1122334455");
+			Timestamp t = model.getLastChanged();
+			t.setTime(t.getTime()+100);
+			model.setLastChanged(t);
+		}
+		
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		assertArrayEquals(new int[]{0, 0 , 0}, result);
+		
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableVersionModel model: pojos)
+			assertEquals("SH INFO", model.getAddress());
+	}
+	
+	@Test
+	public void testUpdatableWithVersion() throws SQLException {
+		BatchUpdateTask<UpdatableVersionModel> test = new BatchUpdateTask<>();
+		DalParser<UpdatableVersionModel> parser = new DalDefaultJpaParser<>(UpdatableVersionModel.class, getDbName());
+		test.initialize(parser);
+		DalTableDao<UpdatableVersionModel> dao = new DalTableDao<UpdatableVersionModel>(parser);
+		
+		DalHints hints = new DalHints();
+		
+		List<UpdatableVersionModel> pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableVersionModel model: pojos){
+			model.setAddress("1122334455");
+		}
+		
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		assertArrayEquals(new int[]{1, 1, 1}, result);
+
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableVersionModel model: pojos)
+			assertEquals("1122334455", model.getAddress());
+	}
+	
+	@Test
+	public void testNotUpdatableVersion() throws SQLException {
+		BatchUpdateTask<NonUpdatableVersionModel> test = new BatchUpdateTask<>();
+		DalParser<NonUpdatableVersionModel> parser = new DalDefaultJpaParser<>(NonUpdatableVersionModel.class, getDbName());
+		test.initialize(parser);
+		DalTableDao<NonUpdatableVersionModel> dao = new DalTableDao<>(parser);
+		
+		DalHints hints = new DalHints();
+		
+		List<NonUpdatableVersionModel> pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(NonUpdatableVersionModel model: pojos){
+			model.setAddress("1122334455");
+		}
+		
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		assertArrayEquals(new int[]{1, 1, 1}, result);
+
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(NonUpdatableVersionModel model: pojos)
+			assertEquals("1122334455", model.getAddress());
+	}
+	
+	@Test
 	public void testCreateMerger() {
 		BatchUpdateTask<ClientTestModel> test = new BatchUpdateTask<>();
 		assertNotNull(test.createMerger());
+	}
+	
+	@Entity
+	@Database(name="MySqlSimpleDbTableShard")
+	@Table(name="dal_client_test")
+	public static class UpdatableVersionModel implements DalPojo {
+		@Id
+		@Column(name="id")
+		@Type(value=Types.INTEGER)
+		private Integer id;
+		
+		@Column(name="quantity")
+		@Type(value=Types.INTEGER)
+		private Integer quantity;
+		
+		@Column(name="dbIndex")
+		@Type(value=Types.INTEGER)
+		private Integer dbIndex;
+		
+		@Column(name="tableIndex")
+		@Type(value=Types.INTEGER)
+		private Integer tableIndex;
+		
+		@Column(name="type")
+		@Type(value=Types.SMALLINT)
+		private Short type;
+		
+		@Column(name="address")
+		@Type(value=Types.VARCHAR)
+		private String address;
+		
+		@Column(name="last_changed")
+		@Type(value=Types.TIMESTAMP)
+		@Version
+		private Timestamp lastChanged;
+
+		public Integer getId() {
+			return id;
+		}
+
+		public void setId(Integer id) {
+			this.id = id;
+		}
+
+		public Integer getQuantity() {
+			return quantity;
+		}
+
+		public void setQuantity(Integer quantity) {
+			this.quantity = quantity;
+		}
+
+		public Integer getDbIndex() {
+			return dbIndex;
+		}
+
+		public void setDbIndex(Integer dbIndex) {
+			this.dbIndex = dbIndex;
+		}
+
+		public Integer getTableIndex() {
+			return tableIndex;
+		}
+
+		public void setTableIndex(Integer tableIndex) {
+			this.tableIndex = tableIndex;
+		}
+		
+		public Short getType() {
+			return type;
+		}
+
+		public void setType(Short type) {
+			this.type = type;
+		}
+
+		public String getAddress() {
+			return address;
+		}
+
+		public void setAddress(String address) {
+			this.address = address;
+		}
+
+		public Timestamp getLastChanged() {
+			return lastChanged;
+		}
+
+		public void setLastChanged(Timestamp lastChanged) {
+			this.lastChanged = lastChanged;
+		}
+	}
+	
+	@Entity
+	@Database(name="MySqlSimpleDbTableShard")
+	@Table(name="dal_client_test")
+	public static class NonUpdatableVersionModel implements DalPojo {
+		@Id
+		@Column(name="id")
+		@Type(value=Types.INTEGER)
+		private Integer id;
+		
+		@Column(name="quantity")
+		@Type(value=Types.INTEGER)
+		private Integer quantity;
+		
+		@Column(name="dbIndex")
+		@Type(value=Types.INTEGER)
+		private Integer dbIndex;
+		
+		@Column(name="tableIndex")
+		@Type(value=Types.INTEGER)
+		private Integer tableIndex;
+		
+		@Column(name="type")
+		@Type(value=Types.SMALLINT)
+		private Short type;
+		
+		@Column(name="address")
+		@Type(value=Types.VARCHAR)
+		private String address;
+		
+		@Column(name="last_changed", updatable=false)
+		@Type(value=Types.TIMESTAMP)
+		@Version
+		private Timestamp lastChanged;
+
+		public Integer getId() {
+			return id;
+		}
+
+		public void setId(Integer id) {
+			this.id = id;
+		}
+
+		public Integer getQuantity() {
+			return quantity;
+		}
+
+		public void setQuantity(Integer quantity) {
+			this.quantity = quantity;
+		}
+
+		public Integer getDbIndex() {
+			return dbIndex;
+		}
+
+		public void setDbIndex(Integer dbIndex) {
+			this.dbIndex = dbIndex;
+		}
+
+		public Integer getTableIndex() {
+			return tableIndex;
+		}
+
+		public void setTableIndex(Integer tableIndex) {
+			this.tableIndex = tableIndex;
+		}
+		
+		public Short getType() {
+			return type;
+		}
+
+		public void setType(Short type) {
+			this.type = type;
+		}
+
+		public String getAddress() {
+			return address;
+		}
+
+		public void setAddress(String address) {
+			this.address = address;
+		}
+
+		public Timestamp getLastChanged() {
+			return lastChanged;
+		}
+
+		public void setLastChanged(Timestamp lastChanged) {
+			this.lastChanged = lastChanged;
+		}
 	}
 }

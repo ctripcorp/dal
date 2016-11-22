@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.parser;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -13,9 +14,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 import junit.framework.Assert;
 
+import org.bouncycastle.jce.provider.asymmetric.EC;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -28,6 +31,7 @@ import com.ctrip.platform.dal.dao.DalPojo;
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.annotation.Type;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DalDefaultJpaParserTest {
 	
@@ -55,18 +59,24 @@ public class DalDefaultJpaParserTest {
 	}
 
 	@Test
-	public void test() {
+	public void testCommon() {
 		Assert.assertEquals("dao_test_M", personParser.getDatabaseName());
 		Assert.assertEquals("person", personParser.getTableName());
-		Assert.assertEquals("[id, name, age]", Arrays.toString(personParser.getColumnNames()));
-		Assert.assertEquals("[4, 12, 4]", Arrays.toString(personParser.getColumnTypes()));
+		Assert.assertEquals("[id, name, age, version]", Arrays.toString(personParser.getColumnNames()));
+		Assert.assertEquals("[4, 12, 4, 4]", Arrays.toString(personParser.getColumnTypes()));
 		Assert.assertEquals("[id]", Arrays.toString(personParser.getPrimaryKeyNames()));
+		Assert.assertEquals("[id, name, age]", Arrays.toString(personParser.getUpdatableColumnNames()));
+		Assert.assertEquals("version", personParser.getVersionColumn());
+		
 		PersonEntity person = new PersonEntity();
 		person.setId(123456);
 		Assert.assertNotNull(personParser.getFields(person));
 		Assert.assertNotNull(personParser.getPrimaryKeys(person));
 		Assert.assertTrue(personParser.getIdentityValue(person).intValue() == 123456);
+	}
 
+	@Test
+	public void testAllType() {
 		Assert.assertEquals("dao_test_S", allTypesParser.getDatabaseName());
 		Assert.assertEquals("All_Types", allTypesParser.getTableName());
 		Assert.assertEquals("[iDCol, intCol, bigIntCol, decimalcol, doubleCol, "
@@ -102,7 +112,110 @@ public class DalDefaultJpaParserTest {
 		parser = new DalDefaultJpaParser(PersonEntity.class, testDbName, testTabeleName);
 		Assert.assertEquals(testDbName, parser.getDatabaseName());
 		Assert.assertEquals(testTabeleName, parser.getTableName());
-}
+	}
+	
+	@Test
+	public void testInvalidColumn() {
+		try {
+			DalParser<InvalidColumnEntity> test = new DalDefaultJpaParser(InvalidColumnEntity.class);
+		} catch (SQLException e) {
+			Assert.assertEquals(ErrorCode.ColumnNameNotDefined.getMessage(), e.getMessage());
+		}
+	}
+
+	@Test
+	public void testDuplicateColumnName() {
+		try {
+			DalParser<DuplicateColumnEntity> test = new DalDefaultJpaParser(DuplicateColumnEntity.class);
+		} catch (SQLException e) {
+			Assert.assertEquals(ErrorCode.DuplicateColumnName.getMessage(), e.getMessage());
+		}
+	}
+
+	@Test
+	public void testDuplicateVersionColumn() {
+		try {
+			DalParser<DuplicateVersionColumnEntity> test = new DalDefaultJpaParser(DuplicateVersionColumnEntity.class);
+		} catch (SQLException e) {
+			Assert.assertEquals(ErrorCode.MoreThanOneVersionColumn.getMessage(), e.getMessage());
+		}
+	}
+
+	@Test
+	public void testTypeNotDefined() {
+		try {
+			DalParser<NoTypeEntity> test = new DalDefaultJpaParser(NoTypeEntity.class);
+		} catch (SQLException e) {
+			Assert.assertEquals(ErrorCode.TypeNotDefined.getMessage(), e.getMessage());
+		}
+	}
+
+	@Entity
+	@Database(name="dao_test_M")
+	@Table(name="person")
+	static class InvalidColumnEntity implements DalPojo {
+		
+		@Id
+		@Column()
+		@GeneratedValue(strategy=GenerationType.AUTO)
+		@Type(value=Types.INTEGER)
+		private int id;
+		
+		@Column(name="name")
+		@Type(value=Types.VARCHAR)
+		private String name;
+	}
+	
+	@Entity
+	@Database(name="dao_test_M")
+	@Table(name="person")
+	static class DuplicateColumnEntity implements DalPojo {
+		
+		@Id
+		@Column(name="name")
+		@GeneratedValue(strategy=GenerationType.AUTO)
+		@Type(value=Types.INTEGER)
+		private int id;
+		
+		@Column(name="name")
+		@Type(value=Types.VARCHAR)
+		@Version
+		private String name;
+	}
+	
+	@Entity
+	@Database(name="dao_test_M")
+	@Table(name="person")
+	static class NoTypeEntity implements DalPojo {
+		
+		@Id
+		@Column(name="name")
+		@GeneratedValue(strategy=GenerationType.AUTO)
+		private int id;
+		
+		@Column(name="name")
+		@Type(value=Types.VARCHAR)
+		@Version
+		private String name;
+	}
+	
+	@Entity
+	@Database(name="dao_test_M")
+	@Table(name="person")
+	static class DuplicateVersionColumnEntity implements DalPojo {
+		
+		@Id
+		@Column(name="id")
+		@GeneratedValue(strategy=GenerationType.AUTO)
+		@Type(value=Types.INTEGER)
+		@Version
+		private int id;
+		
+		@Column(name="name")
+		@Type(value=Types.VARCHAR)
+		@Version
+		private String name;
+	}
 	
 	@Entity
 	@Database(name="dao_test_M")
@@ -110,6 +223,7 @@ public class DalDefaultJpaParserTest {
 	static class PersonEntity implements DalPojo {
 		
 		@Id
+		@Column(name="id")
 		@GeneratedValue(strategy=GenerationType.AUTO)
 		@Type(value=Types.INTEGER)
 		private int id;
@@ -122,6 +236,11 @@ public class DalDefaultJpaParserTest {
 		@Type(value=Types.INTEGER)
 		private Integer age;
 
+		@Column(name="version", updatable=false)
+		@Type(value=Types.INTEGER)
+		@Version
+		private Integer version;
+		
 		public int getId() {
 			return id;
 		}
@@ -154,6 +273,7 @@ public class DalDefaultJpaParserTest {
 	static class AllTypesEntity implements DalPojo {
 		
 		@Id
+		@Column(name="iDCol")
 		@GeneratedValue(strategy = GenerationType.AUTO)
 		@Type(value=Types.INTEGER)
 		private Long iDCol;

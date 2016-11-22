@@ -22,6 +22,10 @@ public class TaskTestStub {
 		client = DalClientFactory.getClient(dbName);
 	}
 
+	public String getDbName() {
+		return dbName;
+	}
+
 	public DalParser<ClientTestModel> getParser() {
 		return new ClientTestDalParser(dbName);
 	}

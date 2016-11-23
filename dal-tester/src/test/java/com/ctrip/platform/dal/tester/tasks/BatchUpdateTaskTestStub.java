@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.tester.tasks;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -17,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalHints;
@@ -31,9 +31,13 @@ import com.ctrip.platform.dal.dao.task.BatchUpdateTask;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class BatchUpdateTaskTestStub extends TaskTestStub {
-	
+	private boolean isMySql;
 	public BatchUpdateTaskTestStub (String dbName) {
 		super(dbName);
+	}
+	
+	public void setMySql(boolean value) {
+		isMySql = value;
 	}
 
 	@Test
@@ -323,6 +327,11 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 	public void testCreateMerger() {
 		BatchUpdateTask<ClientTestModel> test = new BatchUpdateTask<>();
 		assertNotNull(test.createMerger());
+	}
+	
+	private void assertArrayEquals(int[] exp, int[] actual) {
+		if(isMySql)
+			Assert.assertArrayEquals(exp, actual);
 	}
 	
 	@Entity

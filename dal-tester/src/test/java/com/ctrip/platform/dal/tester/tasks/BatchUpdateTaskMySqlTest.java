@@ -8,6 +8,7 @@ import org.junit.BeforeClass;
 public class BatchUpdateTaskMySqlTest extends BatchUpdateTaskTestStub {
 	public BatchUpdateTaskMySqlTest() {
 		super(MySqlTestInitializer.DATABASE_NAME_MYSQL);
+		setMySql(true);
 	}
 	
 	@BeforeClass

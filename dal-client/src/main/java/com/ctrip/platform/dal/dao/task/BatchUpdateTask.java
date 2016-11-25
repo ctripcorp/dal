@@ -10,32 +10,13 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
-	
-	private String SET_VALUE_TMPL;
-
-	private Map<String, Boolean> defaultUpdateColumnNames;
-	public void initialize(DalParser<T> parser) {
-		super.initialize(parser);
-		initUpdateColumns();
-		switch (dbCategory) {
-		case MySql:
-			SET_VALUE_TMPL = "%s=IFNULL(?,%s) ";
-			break;
-		case SqlServer:
-			SET_VALUE_TMPL = "%s=ISNULL(?,%s) ";
-			break;
-		default:
-			SET_VALUE_TMPL = "";
-			break;
-		}
-	}
 
 	@Override
 	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
@@ -43,6 +24,8 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		int i = 0;
 
 		Map<String, Boolean> pojoFieldStatus = filterUpdateColumnNames(hints, daoPojos);
+		if(pojoFieldStatus.size() == 0)
+			throw new DalException(ErrorCode.ValidateFieldCount);
 		
 		String[] updateColumnNames = pojoFieldStatus.keySet().toArray(new String[pojoFieldStatus.size()]);
 		
@@ -52,6 +35,7 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 
 			addParameters(parameters, pojo, updateColumnNames);
 			addParameters(parameters, pojo, parser.getPrimaryKeyNames());
+			addVersion(parameters, pojo);
 			
 			parametersList[i++] = parameters;
 		}
@@ -62,20 +46,8 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		return result;
 	}
 	
-	private void initUpdateColumns() {
-		defaultUpdateColumnNames = new LinkedHashMap<>();
-		
-		for(String column: parser.getColumnNames()) {
-			defaultUpdateColumnNames.put(column, false);
-		}
-		
-		for (String column : parser.getPrimaryKeyNames()) {
-			defaultUpdateColumnNames.remove(column);
-		}
-	}
-	
-	private Map<String, Boolean> filterUpdateColumnNames(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) {
-		if(hints.is(DalHintEnum.updateNullField))
+	private Map<String, Boolean> filterUpdateColumnNames(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws DalException {
+		if(hints.isUpdateNullField())
 			return defaultUpdateColumnNames;
 		
 		String[] columnsToCheck = defaultUpdateColumnNames.keySet().toArray(new String[defaultUpdateColumnNames.size()]);
@@ -89,7 +61,9 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 			Map<String, ?> pojo = daoPojos.get(index);
 			for (int i = 0; i < columnsToCheck.length; i++) {
 				String colName = columnsToCheck[i];
-				Set<String> check = pojo.get(colName) == null ? notNullFields : nullFields;
+				boolean isNull = pojo.get(colName) == null;
+				
+				Set<String> check = isNull ? notNullFields : nullFields;
 				
 				if(!check.isEmpty() && check.contains(colName))
 					check.remove(colName);
@@ -113,15 +87,31 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		List<String> updateColumnTmpls = new ArrayList<>(pojoFieldStatus.size());
 
 		for(Map.Entry<String, Boolean> fieldStatus: pojoFieldStatus.entrySet()) {
-			String columnName = quote(fieldStatus.getKey());
+			String columnName = fieldStatus.getKey();
+			String quotedColumnName = quote(columnName);
+			
 			// If the field contains null value
 			if(fieldStatus.getValue())
-				updateColumnTmpls.add(String.format(SET_VALUE_TMPL, columnName, columnName));
+				updateColumnTmpls.add(String.format(setValueTmpl, quotedColumnName, quotedColumnName));
 			else
-				updateColumnTmpls.add(String.format(TMPL_SET_VALUE, columnName));
+				updateColumnTmpls.add(String.format(TMPL_SET_VALUE, quotedColumnName));
 		}
 		
+		if(isVersionUpdatable)
+			updateColumnTmpls.add(setVersionValueTmpl);
+		
 		String updateColumnsTmpl = StringUtils.join(updateColumnTmpls, COLUMN_SEPARATOR);
-		return String.format(TMPL_SQL_UPDATE, tableName, updateColumnsTmpl, pkSql);
+		return String.format(TMPL_SQL_UPDATE, tableName, updateColumnsTmpl, updateCriteriaTmpl);
 	}
+	
+	private void addVersion(StatementParameters parameters, Map<String, ?> pojo) throws DalException {
+		if(!hasVersion)
+			return;
+		
+		Object version = pojo.get(parser.getVersionColumn());
+		if(version == null)
+			throw new DalException(ErrorCode.ValidateVersion);
+		
+		addParameter(parameters, parameters.size() + 1, parser.getVersionColumn(), version);
+	}	
 }

@@ -30,4 +30,15 @@ public interface DalParser<T> extends DalRowMapper<T> {
 	 * For insert/update/delete operation
 	 */
 	Map<String, ?> getFields(T pojo);
+	
+	/**
+	 * The version column, can be number or time stamp 
+	 */
+	String getVersionColumn();
+	
+	/**
+	 * 
+	 * Column can be included in update sql
+	 */
+	String[] getUpdatableColumnNames();
 }

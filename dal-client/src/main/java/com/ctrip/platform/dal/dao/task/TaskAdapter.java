@@ -6,6 +6,7 @@ import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardin
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.locateTableShardId;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,11 +25,6 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-/**
- * TODO do we need query task?
- * @author jhhe
- *
- */
 public class TaskAdapter<T> implements DaoTask<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
 
@@ -56,6 +52,14 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	protected Character startDelimiter;
 	protected Character endDelimiter;
 	
+	protected String updateCriteriaTmpl;
+	protected String setValueTmpl;
+	protected String setVersionValueTmpl;
+	protected boolean hasVersion;
+	protected boolean isVersionUpdatable;
+	protected Map<String, Boolean> defaultUpdateColumnNames;
+
+	
 	public boolean tableShardingEnabled;
 	protected String rawTableName;
 
@@ -76,6 +80,78 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	
 	public void initDbSpecific() {
 		pkSql = initPkSql();
+		initUpdateColumns();
+		initNullableColumneUpdateTemplate();
+		initVersionColumnUpdateTemplate();
+	}
+	
+	private void initUpdateColumns() {
+		defaultUpdateColumnNames = new LinkedHashMap<>();
+		
+		for(String column: parser.getUpdatableColumnNames()) {
+			defaultUpdateColumnNames.put(column, false);
+		}
+		
+		for (String column : parser.getPrimaryKeyNames()) {
+			defaultUpdateColumnNames.remove(column);
+		}
+		
+		hasVersion = parser.getVersionColumn() != null;
+		isVersionUpdatable = hasVersion ? defaultUpdateColumnNames.containsKey(parser.getVersionColumn()) : false;
+
+		// Remove Version from updatable columns
+		if(hasVersion)
+			defaultUpdateColumnNames.remove(parser.getVersionColumn());
+	}
+	
+	private void initNullableColumneUpdateTemplate() {
+		switch (dbCategory) {
+		case MySql:
+			setValueTmpl = "%s=IFNULL(?,%s) ";
+			break;
+		case SqlServer:
+			setValueTmpl = "%s=ISNULL(?,%s) ";
+			break;
+		default:
+			throw new RuntimeException("This type of database is NOT supported."); 
+		}
+	}
+	
+	/**
+	 * If there is version column and it is updatable, the column can not be null and it will always use the update version template.
+	 */
+	private void initVersionColumnUpdateTemplate() {
+		String versionColumn = parser.getVersionColumn();
+		updateCriteriaTmpl = pkSql;
+
+		if(versionColumn == null)
+			return;
+		
+		String quotedVersionColumn = quote(parser.getVersionColumn());
+		updateCriteriaTmpl += AND + String.format(TMPL_SET_VALUE, quotedVersionColumn);
+		
+		if(!isVersionUpdatable)
+			return;
+
+		int versionType = getColumnType(versionColumn);
+
+		String valueTmpl = null;
+		if(versionType == Types.TIMESTAMP){
+			switch (dbCategory) {
+			case MySql:
+				valueTmpl = "CURRENT_TIMESTAMP";
+				break;
+			case SqlServer:
+				valueTmpl = "getDate()";
+				break;
+			default:
+				throw new RuntimeException("This type of database is NOT supported."); 
+			}
+		}else{
+			valueTmpl = quote(parser.getVersionColumn()) + "+1";
+		}
+		
+		setVersionValueTmpl = quotedVersionColumn + "=" + valueTmpl;
 	}
 	
 	/**
@@ -180,7 +256,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 		}
 	}
 
-	private void addParameter(StatementParameters parameters, int index, String columnName, Object value) {
+	public void addParameter(StatementParameters parameters, int index, String columnName, Object value) {
 		if(isSensitive(columnName))
 			parameters.setSensitive(index, columnName, getColumnType(columnName), value);
 		else

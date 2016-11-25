@@ -9,6 +9,8 @@ public abstract class AbstractDalParser<T> implements DalParser<T> {
 	protected String[] primaryKeyColumns;
 	protected int[] columnTypes;
 	protected String[] sensitiveColumnNames;
+	protected String versionColumn;
+	protected String[] updatableColumnNames;
 	
 	public AbstractDalParser(){}
 	
@@ -21,6 +23,7 @@ public abstract class AbstractDalParser<T> implements DalParser<T> {
 		this.dataBaseName = dataBaseName;
 		this.tableName = tableName;
 		this.columns = columns;
+		this.updatableColumnNames = columns;
 		this.primaryKeyColumns = primaryKeyColumns;
 		this.columnTypes = columnTypes;
 	}
@@ -38,6 +41,25 @@ public abstract class AbstractDalParser<T> implements DalParser<T> {
 				primaryKeyColumns,
 				columnTypes);
 		this.sensitiveColumnNames = sensitiveColumnNames;
+	}
+	
+	public AbstractDalParser(
+			String dataBaseName,
+			String tableName,
+			String[] columns,
+			String[] primaryKeyColumns,
+			int[] columnTypes,
+			String[] sensitiveColumnNames,
+			String versionColumn,
+			String[] updatableColumnNames) {
+		this(dataBaseName,
+				tableName,
+				columns,
+				primaryKeyColumns,
+				columnTypes,
+				sensitiveColumnNames);
+		this.versionColumn = versionColumn;
+		this.updatableColumnNames = updatableColumnNames;
 	}
 	
 	@Override
@@ -68,5 +90,13 @@ public abstract class AbstractDalParser<T> implements DalParser<T> {
 	@Override
 	public String[] getSensitiveColumnNames() {
 		return sensitiveColumnNames;
+	}
+	
+	public String getVersionColumn() {
+		return versionColumn;
+	}
+	
+	public String[] getUpdatableColumnNames() {
+		return updatableColumnNames;
 	}
 }

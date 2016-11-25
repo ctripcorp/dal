@@ -83,6 +83,7 @@ public class DalTransaction  {
 		
 		// Back to the first transaction, about to commit
 		beforeCommit();
+		level = 0;
 		completed = true;
 		cleanup(true);
 		afterCommit();

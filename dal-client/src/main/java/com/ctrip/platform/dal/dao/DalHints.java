@@ -355,4 +355,14 @@ public class DalHints {
 	public boolean isIdentityInsertDisabled() {
 		return !is(DalHintEnum.enableIdentityInsert);
 	}
+	
+	public DalHints updateNullField() {
+		set(DalHintEnum.updateNullField);
+		return this;
+	}
+	
+	public boolean isUpdateNullField() {
+		return is(DalHintEnum.updateNullField);
+	}
+
 }

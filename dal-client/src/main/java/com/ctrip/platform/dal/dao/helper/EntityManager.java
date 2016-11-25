@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,52 +14,104 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.annotation.Sensitive;
 import com.ctrip.platform.dal.dao.annotation.Type;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 /**
  * 
  * @author gzxia
  * 
  */
-public class EntityManager<T> {
+public class EntityManager {
+	private static ConcurrentHashMap<Class<?>, EntityManager> registeredManager = new ConcurrentHashMap<>();
 
-	private Class<T> clazz = null;
-	private List<Field> fields = null;
+	private Class<?> clazz; 
+	private Map<String, Field> fieldMap = new HashMap<>();
+	private List<Integer> types = new ArrayList<>();
+	private boolean autoIncremental = false;
+	private List<String> columnNameList = new ArrayList<>();
+	private List<String> sensitiveColumnNameList = new ArrayList<>();
+	private List<String> updatableColumnList = new ArrayList<>();
+	private List<String> primaryKeyNameList = new ArrayList<String>();
+	private List<Field> identityList = new ArrayList<>();
+	private String versionColumn = null;
 	
-	public EntityManager(Class<T> clazz) throws SQLException {
-		this.clazz = clazz;
-		this.fields = getFields(clazz);
+	public static <T> EntityManager getEntityManager(Class<T> clazz) throws SQLException {
+		if(registeredManager.containsKey(clazz))
+			return registeredManager.get(clazz);
+		
+		EntityManager manager = new EntityManager(clazz);
+		EntityManager value = registeredManager.putIfAbsent(clazz, manager);
+		return value == null ? manager : value;
 	}
 	
-	private List<Field> getFields(Class<T> clazz) throws SQLException {
+	private <T> EntityManager(Class<T> clazz) throws SQLException {
+		this.clazz = clazz;
 		Field[] allFields = clazz.getDeclaredFields();
 		if (null == allFields || allFields.length == 0)
 			throw new SQLException("The entity[" + clazz.getName() +"] has no fields.");
-				
-		List<Field> fields = new ArrayList<>();
-		for (Field f: allFields) {
-			if (f.getAnnotation(Type.class) == null) {
-				continue;
-//				throw new SQLException("Each field of entity[" + clazz.getName() +"] must declare it's Type annotation.");
-			}
-			fields.add(f);
-			f.setAccessible(true);
-		}
 
-		return fields;
+		
+		for (Field f: allFields) {
+			Column column = f.getAnnotation(Column.class);
+			Id id =  f.getAnnotation(Id.class);
+			if (column == null && id == null)
+				continue;
+
+			String columnName = (column == null || column.name().trim().length() == 0)? f.getName() : column.name();
+			
+			if(f.getAnnotation(Type.class) == null)
+				throw new DalException(ErrorCode.TypeNotDefined);
+			
+			if(fieldMap.containsKey(columnName))
+				throw new DalException(ErrorCode.DuplicateColumnName);
+				
+			f.setAccessible(true);
+			fieldMap.put(columnName, f);
+			
+			columnNameList.add(columnName);
+			types.add(f.getAnnotation(Type.class).value());
+			
+			if(column == null || column.updatable())
+				updatableColumnList.add(columnName);
+			
+			if(id != null)
+				primaryKeyNameList.add(columnName);
+			
+			GeneratedValue generatedValue = f.getAnnotation(GeneratedValue.class);
+			if (!autoIncremental && null != generatedValue && (generatedValue.strategy() == GenerationType.AUTO 
+					|| generatedValue.strategy() == GenerationType.IDENTITY))
+				autoIncremental = true;
+
+			if (f.getAnnotation(Id.class) != null && generatedValue != null && generatedValue.strategy() == GenerationType.AUTO) {
+				identityList.add(f);
+			}
+
+			
+			if (f.getAnnotation(Sensitive.class) != null)
+				sensitiveColumnNameList.add(columnName);
+			
+			if (f.getAnnotation(Version.class) != null) {
+				if(versionColumn != null)
+					throw new DalException(ErrorCode.MoreThanOneVersionColumn);
+				versionColumn = columnName;
+			}
+		}
 	}
 	
-	public String getDatabaseName() {
+	public String getDatabaseName() throws DalException {
 		Database db = clazz.getAnnotation(Database.class);
 		if (db != null && db.name() != null)
 			return db.name();
-		throw new RuntimeException("The entity must configure Database annotation.");
+		throw new DalException(ErrorCode.NoDatabaseDefined);
 	}
 	
-	public String getTableName() {
+	public <T> String getTableName() {
 		Table table = clazz.getAnnotation(Table.class);
 		if (table != null && table.name() != null)
 			return table.name();
@@ -69,87 +122,43 @@ public class EntityManager<T> {
 	}
 	
 	public boolean isAutoIncrement() throws SQLException {
-		for (Field field : fields) {
-			GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
-			if (null != generatedValue && (generatedValue.strategy() == GenerationType.AUTO 
-					|| generatedValue.strategy() == GenerationType.IDENTITY)) {
-				return true;
-			}
-		}
-		return false;
+		return autoIncremental;
 	}
 	
 	public String[] getSensitiveColumnNames() {
-		List<String> sensitiveColumnNames = new ArrayList<String>();
-		for (Field field: fields) {
-			Sensitive sensitive = field.getAnnotation(Sensitive.class);
-			if (sensitive != null)
-				sensitiveColumnNames.add(getColumnName(field));
-		}
-		String[] scns = new String[sensitiveColumnNames.size()];
-		sensitiveColumnNames.toArray(scns);
-		return scns;
+		return sensitiveColumnNameList.toArray(new String[sensitiveColumnNameList.size()]);
+	}
+	
+	public String getVersionColumn() throws DalException {
+		return versionColumn;
+	}
+	
+	public String[] getUpdatableColumnNames() {
+		return updatableColumnList.toArray(new String[updatableColumnList.size()]);
 	}
 	
 	public String[] getPrimaryKeyNames() throws SQLException {
-		List<String> primaryKeyNames = new ArrayList<String>();
-		for (Field field: fields) {
-			Id id = field.getAnnotation(Id.class);
-			if(id != null)
-				primaryKeyNames.add(getColumnName(field));
-		}
-		String[] primaryKeys = new String[primaryKeyNames.size()];
-		primaryKeyNames.toArray(primaryKeys);
-		return primaryKeys;
+		return primaryKeyNameList.toArray(new String[primaryKeyNameList.size()]);
 	}
 	
 	public Field[] getIdentity() {
-		List<Field> identities = new ArrayList<Field>();
-		for (Field field: fields) {
-			Id id = field.getAnnotation(Id.class);
-			GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
-			if (id != null && generatedValue != null && generatedValue.strategy() == GenerationType.AUTO) {
-				identities.add(field);
-			}
-		}
-		Field[] result = new Field[identities.size()];
-		identities.toArray(result);
-		return result;
+		return identityList.toArray(new Field[identityList.size()]);
 	}
 	
 	public Map<String, Field> getFieldMap() throws SQLException {
-		Map<String, Field> fieldsMap = new HashMap<String, Field>();
-		for (Field field: fields) {
-			String columnName = getColumnName(field);
-			if(!fieldsMap.containsKey(columnName))
-				fieldsMap.put(columnName, field);
-		}
-		return fieldsMap;
+		return fieldMap;
 	}
 	
 	public String[] getColumnNames() {
-		String[] columnNames = new String[fields.size()];
-		int i = 0;
-		for (Field field: fields) {
-			columnNames[i++] = getColumnName(field);
-		}
-		return columnNames;
+		return columnNameList.toArray(new String[columnNameList.size()]);
 	}
 	
 	public int[] getColumnTypes() throws SQLException {
-		int[] columnTypes = new int[fields.size()];
-		int i = 0;
-		for (Field field: fields) {
-			Type sqlType = field.getAnnotation(Type.class);
-			columnTypes[i++] = sqlType.value();
-		}
+		int[] columnTypes = new int[types.size()];
+		
+		for(int i = 0; i < types.size(); i++)
+			columnTypes[i] = types.get(i);
+
 		return columnTypes;
-	}
-	
-	private String getColumnName(Field field) {
-		Column column = field.getAnnotation(Column.class);
-		if (null != column && column.name() != null)
-			return column.name().isEmpty() ? field.getName() : column.name();
-		return field.getName();
-	}
+	}	
 }

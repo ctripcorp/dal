@@ -15,7 +15,7 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialRe
 	
 	public DalDefaultJpaMapper(Class<T> clazz) throws SQLException {
 		this.clazz = clazz;
-		EntityManager<T> manager = new EntityManager<T>(clazz);
+		EntityManager manager = EntityManager.getEntityManager(clazz);
 		this.columnNames = manager.getColumnNames();
 		this.fieldsMap = manager.getFieldMap();
 	}

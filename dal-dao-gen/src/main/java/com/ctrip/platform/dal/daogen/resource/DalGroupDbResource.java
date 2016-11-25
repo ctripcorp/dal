@@ -130,7 +130,7 @@ public class DalGroupDbResource {
 
         if (!this.validatePermision(userNo, groupID)) {
             Status status = Status.ERROR;
-            status.setInfo("你没有当前DAL Team的操作权限.");
+            status.setInfo("你没有当前DAL Team的操作权限。");
             return status;
         }
 
@@ -148,7 +148,7 @@ public class DalGroupDbResource {
             SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), comment);
         } else {
             Status status = Status.ERROR;
-            status.setInfo(dbname + " 不存在，请先到数据库一览界面添加DB.");
+            status.setInfo(dbname + " 不存在，请先到数据库一览界面添加DB。");
             return status;
         }
         if (ret <= 0) {
@@ -159,7 +159,10 @@ public class DalGroupDbResource {
         }
 
         if (gen_default_dbset) {
-            genDefaultDbset(groupID, dbname);
+            Status status = genDefaultDbset(groupID, dbname);
+            if (status == Status.ERROR) {
+                return status;
+            }
         }
 
         return Status.OK;
@@ -191,7 +194,7 @@ public class DalGroupDbResource {
 
         if (!this.validatePermision(userNo, groupID)) {
             Status status = Status.ERROR;
-            status.setInfo("你没有当前DAL Team的操作权限.");
+            status.setInfo("你没有当前DAL Team的操作权限。");
             return status;
         }
 
@@ -232,7 +235,7 @@ public class DalGroupDbResource {
 
         if (!this.validatePermision(userNo, groupID)) {
             Status status = Status.ERROR;
-            status.setInfo("你没有当前DAL Team的操作权限.");
+            status.setInfo("你没有当前DAL Team的操作权限。");
             return status;
         }
 
@@ -272,7 +275,7 @@ public class DalGroupDbResource {
 
         if (!this.validateTransferPermision(userNo, dbID)) {
             Status status = Status.ERROR;
-            status.setInfo("你没有当前DataBase的操作权限.");
+            status.setInfo("你没有当前DataBase的操作权限。");
             return status;
         }
 
@@ -326,10 +329,13 @@ public class DalGroupDbResource {
      *
      * @param dbname
      */
-    public static void genDefaultDbset(int groupId, String dbname) {
+    public static Status genDefaultDbset(int groupId, String dbname) {
+        Status status = Status.OK;
         List<DatabaseSet> exist = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname);
         if (exist != null && exist.size() > 0) {
-            return;
+            status = Status.ERROR;
+            status.setInfo("数据库" + dbname + "已添加成功。由于已存在名为" + dbname + "的逻辑数据库，所以无法默认生成同名的逻辑库，请到逻辑数据库管理页面中手动添加不同名称的逻辑库。请点击关闭按钮以关闭窗口。");
+            return status;
         }
         DatabaseSet dbset = new DatabaseSet();
         dbset.setName(dbname);
@@ -357,6 +363,7 @@ public class DalGroupDbResource {
 
             SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSetEntry(entry);
         }
+        return status;
     }
 
 }

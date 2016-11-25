@@ -162,7 +162,7 @@ public class DatabaseResource {
 
                 //generate default databaseset
                 if (isGenDefault) {
-                    DalGroupDbResource.genDefaultDbset(gid, allinonename);
+                    status = DalGroupDbResource.genDefaultDbset(gid, allinonename);
                 }
             }
 

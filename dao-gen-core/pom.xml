@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dao-gen-core</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
         <spring-version>4.0.0.RELEASE</spring-version>
@@ -218,35 +218,36 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>2.8.1</version>
                 <configuration>
-                    <altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
+                    <altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo
+                    </altDeploymentRepository>
                 </configuration>
             </plugin>
             <plugin>
-                 <groupId>com.github.github</groupId>
-                 <artifactId>site-maven-plugin</artifactId>
-                 <version>0.11</version>
-                 <configuration>
-                     <message>Maven artifacts for ${project.artifactId}, ${project.version}</message>
-                     <noJekyll>true</noJekyll>
-                     <outputDirectory>${project.build.directory}/mvn-repo
-                     </outputDirectory>
-                     <branch>refs/heads/mvn-repo</branch>
-                     <includes>
-                         <include>**/*</include>
-                     </includes>
-                     <repositoryName>dal</repositoryName>
-                     <repositoryOwner>ctripcorp</repositoryOwner>
-                     <server>github</server>
-                     <merge>true</merge>
-                 </configuration>
-                 <executions>
-                     <execution>
-                         <goals>
-                             <goal>site</goal>
-                         </goals>
-                     <phase>deploy</phase>
-                     </execution>
-                 </executions>
+                <groupId>com.github.github</groupId>
+                <artifactId>site-maven-plugin</artifactId>
+                <version>0.11</version>
+                <configuration>
+                    <message>Maven artifacts for ${project.artifactId}, ${project.version}</message>
+                    <noJekyll>true</noJekyll>
+                    <outputDirectory>${project.build.directory}/mvn-repo
+                    </outputDirectory>
+                    <branch>refs/heads/mvn-repo</branch>
+                    <includes>
+                        <include>**/*</include>
+                    </includes>
+                    <repositoryName>dal</repositoryName>
+                    <repositoryOwner>ctripcorp</repositoryOwner>
+                    <server>github</server>
+                    <merge>true</merge>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -275,10 +276,10 @@
             <id>internal.repo</id>
             <name>Temporary Staging Repository</name>
             <url>file://${project.build.directory}/mvn-repo</url>
-	        <snapshots>
-	            <enabled>true</enabled>
-	            <updatePolicy>always</updatePolicy>
-	        </snapshots>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
         </repository>
     </distributionManagement>
 </project>

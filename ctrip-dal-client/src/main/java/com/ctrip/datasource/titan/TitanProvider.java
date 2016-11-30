@@ -42,7 +42,6 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.ctrip.platform.dal.exceptions.DalException;
-import com.ctrip.platform.dal.exceptions.ErrorCode;
 import com.dianping.cat.Cat;
 
 public class TitanProvider implements DataSourceConfigureProvider {
@@ -102,7 +101,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	}
 			
 	private String discoverTitanServiceUrl(Map<String, String> settings) {
-		svcUrl = settings.get(SERVICE_ADDRESS);
+		String svcUrl = settings.get(SERVICE_ADDRESS);
 		
 		if(svcUrl != null)
 			return svcUrl.trim();
@@ -144,18 +143,21 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		} else {
 			// If it is not local dev environment or the AllInOne file does not exist
 			try {
-				Map<String, String> rawConnStrings = getConnectionStrings(dbNames);
-				dataSourceConfigures = getDataSourceConfigures(rawConnStrings);
+				Map<String, TitanData> rawConnData = getConnectionStrings(dbNames);
+				dataSourceConfigures = getDataSourceConfigures(rawConnData);
 				return;
 			} catch (Throwable e) {
-				logger.warn("Cannot found config from Titan service for " + dbNames);
-				logger.warn("This is normal for production. Dal will try to reloacte with \"_SH\"");
+				if(!svcUrl.equals(titanMapping.get("PRO")))
+					throw new RuntimeException(e);
 			}
 			
+			logger.warn("Cannot found config from Titan service for " + dbNames);
+			logger.warn("This is normal for production. Dal will try to reloacte with \"_SH\"");
 			logger.info("Try to reloacte with \"_SH\"");
-			Map<String, String> rawConnStrings = new HashMap<>();
+			
+			Map<String, TitanData> rawConnStrings = new HashMap<>();
 			try {
-				Map<String, String> tmpRawConnStrings = getConnectionStrings(getProdDbNames(dbNames));
+				Map<String, TitanData> tmpRawConnStrings = getConnectionStrings(getProdDbNames(dbNames));
 				for(String name: dbNames)
 					rawConnStrings.put(name, tmpRawConnStrings.get(name + PROD_SUFFIX));
 				dataSourceConfigures = getDataSourceConfigures(rawConnStrings);
@@ -183,17 +185,19 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		return prodDbNames;
 	}
 	
-	private Map<String, DataSourceConfigure> getDataSourceConfigures(Map<String, String> rawConnStrings) throws Exception{
+	private Map<String, DataSourceConfigure> getDataSourceConfigures(Map<String, TitanData> rawConnData) throws Exception{
 		Map<String, DataSourceConfigure> configures = new HashMap<>();
-		for(Map.Entry<String, String> entry: rawConnStrings.entrySet()) {
-			configures.put(entry.getKey(), parseConfig(entry.getKey(), decrypt(entry.getValue())));
+		for(Map.Entry<String, TitanData> entry: rawConnData.entrySet()) {
+			configures.put(entry.getKey(), parseConfig(entry.getKey(), decrypt(entry.getValue().getConnectionString())));
 		}
 		
 		return configures;
 	}
 	
-	private Map<String, String> getConnectionStrings(Set<String> dbNames) throws Exception{
+	private Map<String, TitanData> getConnectionStrings(Set<String> dbNames) throws Exception{
 		logger.info("Start getting all in one connection string from titan service.");
+		logger.info("Database key names are " + dbNames);
+		
 		long start = System.currentTimeMillis();
 		
 		StringBuilder sb = new StringBuilder();
@@ -201,15 +205,14 @@ public class TitanProvider implements DataSourceConfigureProvider {
 			sb.append(name.trim()).append(",");
 
 		String ids = sb.substring(0, sb.length()-1);
-        Map<String, String> result = new HashMap<>();
+        Map<String, TitanData> result = new HashMap<>();
 
-		// In case the white space like " " or enter is appended
-		svcUrl = svcUrl.trim();
 		logger.info(svcUrl);
 
 		URIBuilder builder = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid);
+		subEnv = "FAT7";
 		if(!(subEnv == null || subEnv.isEmpty()))
-			builder.addParameter("evnt", subEnv);
+			builder.addParameter("envt", subEnv);
 		
         URI uri = builder.build();
 
@@ -240,7 +243,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	            }
 
             	//Decrypt raw connection string
-            	result.put(data.getName(), data.getConnectionString());
+            	result.put(data.getName(), data);
             }
         }
 	    

@@ -4,7 +4,7 @@ public class TitanData {
 	private String connectionString;
 	private String providerName;
 	private String name;
-	private String subEnv;
+	private String env;
 	private String errorCode;
 	private String errorMessage;
 	
@@ -37,5 +37,11 @@ public class TitanData {
 	}
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
+	}
+	public String getEnv() {
+		return env;
+	}
+	public void setEnv(String env) {
+		this.env = env;
 	}
 }

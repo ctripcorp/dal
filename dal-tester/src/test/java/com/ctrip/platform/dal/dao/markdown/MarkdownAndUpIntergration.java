@@ -22,7 +22,8 @@ public class MarkdownAndUpIntergration {
 	public static void setUpBeforeClass() {
 		try {
 			DalClientFactory.initClientFactory();
-			DalStatusManager.getMarkdownStatus().setAutoMarkupDelay(1);
+			DalStatusManager.getMarkdownStatus().setAutoMarkupDelay(2);
+			DalStatusManager.getHaStatus().setEnabled(false);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
@@ -51,7 +52,7 @@ public class MarkdownAndUpIntergration {
 		}
 		
 		//Mark up
-		Thread.sleep(1000 * 1);
+		Thread.sleep(1000 * 2);
 		
 		try{
 			this.testQuery(logicName);		

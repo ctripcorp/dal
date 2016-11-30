@@ -50,6 +50,7 @@ public class HATest {
 	public static void tearDownAfterClass() throws Exception {
 		database.drop();
 		//database2.drop();
+		DalStatusManager.getHaStatus().setEnabled(false);
 	}
 	
 	@Before
@@ -172,7 +173,7 @@ public class HATest {
 				});
 		}catch(SQLException e){ }
 		Assert.assertEquals(0, count ==null ? 0 : count.intValue());
-		Assert.assertEquals(2, hints.getHA().getRetryCount()); //There is no more connection to fail over
+		Assert.assertEquals(3, hints.getHA().getRetryCount());
 	}
 	
 	@Test

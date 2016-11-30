@@ -291,7 +291,7 @@ public class DatabaseSelectorTest {
 		assertSelector(selector, M2);
 
 		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M2)), ms, ss, true, true);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		assertSelector(selector, M2);
 		autoMarkup(M1);
 		
 		autoMarkdown(M2);
@@ -299,7 +299,7 @@ public class DatabaseSelectorTest {
 		assertSelector(selector, M1);
 
 		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M1)), ms, ss, true, true);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		assertSelector(selector, M1);
 		
 		autoMarkdown(M1);
 		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M1)), ms, ss, true, true);
@@ -435,7 +435,7 @@ public class DatabaseSelectorTest {
 		assertSelector(selector, M2);
 
 		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		assertSelector(selector, M2);
 	}
 
 	@Test
@@ -603,7 +603,7 @@ public class DatabaseSelectorTest {
 		assertSelector(selector, M2);
 		
 		selector = new DatabaseSelector(hints, ms, ss, true, false);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		assertSelector(selector, M2);
 		
 		// reset
 		hints = new DalHints().setHA(new DalHA());
@@ -748,30 +748,30 @@ public class DatabaseSelectorTest {
 
 		autoMarkdown(M1);
 		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false, false);
-		Assert.assertEquals(M2, selector.select());
+		assertSelector(selector, M2);
 
 		selector = new DatabaseSelector(null, dbs, null, false, true);
-		Assert.assertEquals(M2, selector.select());
+		assertSelector(selector, M2);
 
 		// masterOnly
 		selector = new DatabaseSelector(null, dbs, null, true, false);
-		Assert.assertEquals(M2, selector.select());
+		assertSelector(selector, M2);
 		
 		selector = new DatabaseSelector(new DalHints().inDatabase(M2), dbs, null, true, false);
-		Assert.assertEquals(M2, selector.select());
+		assertSelector(selector, M2);
 		
 		selector = new DatabaseSelector(null, dbs, null, true, true);
-		Assert.assertEquals(M2, selector.select());
+		assertSelector(selector, M2);
 		
 		selector = new DatabaseSelector(new DalHints().inDatabase(M2), dbs, null, true, true);
-		Assert.assertEquals(M2, selector.select());
+		assertSelector(selector, M2);
 		
 		// test pointed db
 		selector = new DatabaseSelector(new DalHints().inDatabase(M1), dbs, null, true, false);
 		assertSelector(selector, ErrorCode.MarkdownConnection);
 		
 		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M2)), dbs, null, true, false);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		assertSelector(selector, M2);
 	}
 
 	@Test
@@ -1059,7 +1059,7 @@ public class DatabaseSelectorTest {
 		ha.addDB(M1);
 		autoMarkdown(M2);
 		selector = new DatabaseSelector(new DalHints().setHA(ha), ms, ss, false, false);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		Assert.assertEquals(M1, selector.select());
 	}
 
 	@Test

@@ -18,7 +18,6 @@ import javax.persistence.Version;
 
 import junit.framework.Assert;
 
-import org.bouncycastle.jce.provider.asymmetric.EC;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -118,8 +117,11 @@ public class DalDefaultJpaParserTest {
 	public void testInvalidColumn() {
 		try {
 			DalParser<InvalidColumnEntity> test = new DalDefaultJpaParser(InvalidColumnEntity.class);
+			Assert.assertEquals(2, test.getColumnNames().length);
+			Assert.assertEquals("id", test.getColumnNames()[0]);
+			Assert.assertEquals("name", test.getColumnNames()[1]);
 		} catch (SQLException e) {
-			Assert.assertEquals(ErrorCode.ColumnNameNotDefined.getMessage(), e.getMessage());
+			Assert.fail();
 		}
 	}
 
@@ -156,7 +158,7 @@ public class DalDefaultJpaParserTest {
 	static class InvalidColumnEntity implements DalPojo {
 		
 		@Id
-		@Column()
+		@Column
 		@GeneratedValue(strategy=GenerationType.AUTO)
 		@Type(value=Types.INTEGER)
 		private int id;
@@ -164,6 +166,9 @@ public class DalDefaultJpaParserTest {
 		@Column(name="name")
 		@Type(value=Types.VARCHAR)
 		private String name;
+		
+		private String anotherName;
+
 	}
 	
 	@Entity

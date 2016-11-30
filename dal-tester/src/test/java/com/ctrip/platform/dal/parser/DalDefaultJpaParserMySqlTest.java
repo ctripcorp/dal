@@ -127,6 +127,7 @@ public class DalDefaultJpaParserMySqlTest {
 	@Entity(name="123")
 	public static class ClientTestModel {
 		@Id
+		@Column(name="id")
 		@GeneratedValue(strategy = GenerationType.AUTO)
 		@Type(value=Types.INTEGER)
 		private Integer id;

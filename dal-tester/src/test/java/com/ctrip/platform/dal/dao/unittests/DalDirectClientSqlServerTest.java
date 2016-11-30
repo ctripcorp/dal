@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
@@ -35,6 +36,7 @@ public class DalDirectClientSqlServerTest {
 	private final static String SP_I_NAME = "dal_client_test_i";
 	private final static String SP_D_NAME="dal_client_test_d";
 	private final static String SP_U_NAME = "dal_client_test_u";
+	private final static String MULTIPLE_RESULT_SP_SQL = "MULTIPLE_RESULT_SP_SQL";
 	
 	private final static String DROP_TABLE_SQL = "IF EXISTS ("
 			+ "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
@@ -79,13 +81,34 @@ public class DalDirectClientSqlServerTest {
 			+ "WHERE [id]=@dal_id;"
 			+ "RETURN @@ROWCOUNT;"
 			+ "END";
-	
+
+	//auto get all result parameters store procedure
+	private static final String CREATE_MULTIPLE_RESULT_SP_SQL = "CREATE PROCEDURE MULTIPLE_RESULT_SP_SQL("
+			+ "@dal_id int,"
+			+ "@quantity int,"
+			+ "@type smallint,"
+			+ "@address VARCHAR(64) OUTPUT)"
+			+ "AS BEGIN UPDATE dal_client_test "
+			+ "SET [quantity] = @quantity, [type]=@type, [address]=@address "
+			+ "WHERE [id]=@dal_id;"
+			+ "SELECT @@ROWCOUNT AS result;"
+			+ "SELECT 1 AS result2;"
+			+ "UPDATE dal_client_test "
+			+ "SET [quantity] = @quantity + 1, [type]=@type + 1, [address]='aaa';"
+			+ "SELECT 'abc' AS result3, 456 AS count2;"
+			+ "SELECT * from dal_client_test;"
+			+ "SELECT @address='output';"
+			+ "RETURN @@ROWCOUNT;"
+			+ "END";
+
 	private static final String DROP_I_SP_SQL = "IF OBJECT_ID('dbo." + SP_I_NAME + "') IS NOT NULL "
 			+ "DROP PROCEDURE dbo." + SP_I_NAME;
 	private static final String DROP_D_SP_SQL = "IF OBJECT_ID('dbo." + SP_D_NAME + "') IS NOT NULL "
 			+ "DROP PROCEDURE dbo." + SP_D_NAME;
 	private static final String DROP_U_SP_SQL = "IF OBJECT_ID('dbo." + SP_U_NAME + "') IS NOT NULL "
 			+ "DROP PROCEDURE dbo." + SP_U_NAME;
+	private static final String DROP__MULTIPLE_RESULT_SP_SQL = "IF OBJECT_ID('dbo." + MULTIPLE_RESULT_SP_SQL + "') IS NOT NULL "
+			+ "DROP PROCEDURE dbo." + MULTIPLE_RESULT_SP_SQL;
 	
 	private static DalClient client = null;
 	private static ClientTestDalRowMapper mapper = null;
@@ -106,7 +129,8 @@ public class DalDirectClientSqlServerTest {
 		String[] sqls = new String[] { DROP_TABLE_SQL, CREATE_TABLE_SQL, 
 				DROP_I_SP_SQL, CREATE_I_SP_SQL,
 				DROP_D_SP_SQL, CREATE_D_SP_SQL,
-				DROP_U_SP_SQL, CREATE_U_SP_SQL };
+				DROP_U_SP_SQL, CREATE_U_SP_SQL,
+				DROP__MULTIPLE_RESULT_SP_SQL, CREATE_MULTIPLE_RESULT_SP_SQL};
 		for (int i = 0; i < sqls.length; i++) {
 			client.update(sqls[i], parameters, hints);
 		}
@@ -116,7 +140,7 @@ public class DalDirectClientSqlServerTest {
 	public static void tearDownAfterClass() throws Exception {
 		DalHints hints = new DalHints();
 		StatementParameters parameters = new StatementParameters();
-		String[] sqls = new String[] { DROP_TABLE_SQL, DROP_I_SP_SQL, DROP_D_SP_SQL, DROP_U_SP_SQL};
+		String[] sqls = new String[] { DROP_TABLE_SQL, DROP_I_SP_SQL, DROP_D_SP_SQL, DROP_U_SP_SQL, DROP__MULTIPLE_RESULT_SP_SQL};
 		for (int i = 0; i < sqls.length; i++) {
 			client.update(sqls[i], parameters, hints);
 		}
@@ -661,6 +685,33 @@ public class DalDirectClientSqlServerTest {
 		
 		List<ClientTestModel> models = this.queryModelsByIds();
 		Assert.assertEquals(4, models.size());
+	}
+	
+	/**
+	 * Test the call function with retrieveAllResultsFromSp parameters
+	 * @throws SQLException
+	 */
+	@Test
+	public void callTestWithAutoParameters() throws SQLException{
+		String callSql = "{call " + MULTIPLE_RESULT_SP_SQL + "(?,?,?,?)}";
+		StatementParameters parameters = new StatementParameters();
+		parameters.set("dal_id", Types.INTEGER, 1);
+		parameters.set("quantity", Types.INTEGER, 10);
+		parameters.set("type", Types.SMALLINT, 3);
+		parameters.registerInOut("address", Types.VARCHAR, "SZ INFO");
+		
+		DalHints hints = new DalHints().retrieveAllResultsFromSp();
+		Map<String, ?> res = client.call(callSql, parameters, hints);
+		System.out.println(res);
+		Assert.assertTrue(null != res);
+		Assert.assertEquals(5, res.size());
+		Assert.assertTrue(res.containsKey("address"));
+		Assert.assertEquals("output", res.get("address"));
+		Assert.assertEquals("output", parameters.get("address", ParameterDirection.InputOutput).getValue());
+		
+		List<ClientTestModel> models = this.queryModelsByIds(1);
+		Assert.assertEquals(1, models.size());
+		Assert.assertEquals("aaa", models.get(0).getAddress());
 	}
 	
 	/**

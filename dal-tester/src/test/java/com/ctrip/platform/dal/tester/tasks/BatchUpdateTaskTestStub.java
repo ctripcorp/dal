@@ -90,7 +90,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 				model.setTableIndex(null);
 			}
 			
-			int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+			test.execute(hints, test.getPojosFieldsMap(pojos));
 			fail();
 		} catch (SQLException e) {
 			assertEquals(e.getMessage(), ErrorCode.ValidateFieldCount.getMessage());
@@ -289,16 +289,50 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 		DalHints hints = new DalHints();
 		
 		List<UpdatableVersionModel> pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		long[] oldVer = new long[3];
+		int i = 0;
 		for(UpdatableVersionModel model: pojos){
 			model.setAddress("1122334455");
+			oldVer[i++] = model.getLastChanged().getTime();
 		}
 		
 		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
 		assertArrayEquals(new int[]{1, 1, 1}, result);
 
 		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
-		for(UpdatableVersionModel model: pojos)
+		i = 0;
+		for(UpdatableVersionModel model: pojos){
 			assertEquals("1122334455", model.getAddress());
+			Assert.assertTrue(oldVer[i++] <= model.getLastChanged().getTime());
+		}
+	}
+	
+	@Test
+	public void testUpdatableWithIntVersion() throws SQLException {
+		BatchUpdateTask<UpdatableIntVersionModel> test = new BatchUpdateTask<>();
+		DalParser<UpdatableIntVersionModel> parser = new DalDefaultJpaParser<>(UpdatableIntVersionModel.class, getDbName());
+		test.initialize(parser);
+		DalTableDao<UpdatableIntVersionModel> dao = new DalTableDao<>(parser);
+		
+		DalHints hints = new DalHints();
+		
+		Integer[] oldValue = new Integer[3];
+		List<UpdatableIntVersionModel> pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		int i = 0;
+		for(UpdatableIntVersionModel model: pojos){
+			model.setAddress("1122334455");
+			oldValue[i++] = model.getTableIndex();
+		}
+		
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		assertArrayEquals(new int[]{1, 1, 1}, result);
+
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		i = 0;
+		for(UpdatableIntVersionModel model: pojos) {
+			assertEquals("1122334455", model.getAddress());
+			Assert.assertTrue(oldValue[i++]+1 == model.getTableIndex());
+		}
 	}
 	
 	@Test
@@ -457,6 +491,96 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 		@Column(name="last_changed", updatable=false)
 		@Type(value=Types.TIMESTAMP)
 		@Version
+		private Timestamp lastChanged;
+
+		public Integer getId() {
+			return id;
+		}
+
+		public void setId(Integer id) {
+			this.id = id;
+		}
+
+		public Integer getQuantity() {
+			return quantity;
+		}
+
+		public void setQuantity(Integer quantity) {
+			this.quantity = quantity;
+		}
+
+		public Integer getDbIndex() {
+			return dbIndex;
+		}
+
+		public void setDbIndex(Integer dbIndex) {
+			this.dbIndex = dbIndex;
+		}
+
+		public Integer getTableIndex() {
+			return tableIndex;
+		}
+
+		public void setTableIndex(Integer tableIndex) {
+			this.tableIndex = tableIndex;
+		}
+		
+		public Short getType() {
+			return type;
+		}
+
+		public void setType(Short type) {
+			this.type = type;
+		}
+
+		public String getAddress() {
+			return address;
+		}
+
+		public void setAddress(String address) {
+			this.address = address;
+		}
+
+		public Timestamp getLastChanged() {
+			return lastChanged;
+		}
+
+		public void setLastChanged(Timestamp lastChanged) {
+			this.lastChanged = lastChanged;
+		}
+	}
+	@Entity
+	@Database(name="MySqlSimpleDbTableShard")
+	@Table(name="dal_client_test")
+	public static class UpdatableIntVersionModel implements DalPojo {
+		@Id
+		@Column(name="id")
+		@Type(value=Types.INTEGER)
+		private Integer id;
+		
+		@Column(name="quantity")
+		@Type(value=Types.INTEGER)
+		private Integer quantity;
+		
+		@Column(name="dbIndex")
+		@Type(value=Types.INTEGER)
+		private Integer dbIndex;
+		
+		@Column(name="tableIndex")
+		@Type(value=Types.INTEGER)
+		@Version
+		private Integer tableIndex;
+		
+		@Column(name="type")
+		@Type(value=Types.SMALLINT)
+		private Short type;
+		
+		@Column(name="address")
+		@Type(value=Types.VARCHAR)
+		private String address;
+		
+		@Column(name="last_changed")
+		@Type(value=Types.TIMESTAMP)
 		private Timestamp lastChanged;
 
 		public Integer getId() {

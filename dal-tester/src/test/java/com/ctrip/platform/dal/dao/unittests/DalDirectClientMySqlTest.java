@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
@@ -40,6 +41,7 @@ public class DalDirectClientMySqlTest {
 	private final static String SP_I_NAME = "dal_client_test_i";
 	private final static String SP_D_NAME="dal_client_test_d";
 	private final static String SP_U_NAME = "dal_client_test_u";
+	private final static String MULTIPLE_RESULT_SP_SQL = "MULTIPLE_RESULT_SP_SQL";
 	
 	private final static String DROP_TABLE_SQL = "DROP TABLE IF EXISTS " + TABLE_NAME;
 	
@@ -82,9 +84,28 @@ public class DalDirectClientMySqlTest {
 			+ "SELECT ROW_COUNT() AS result;"
 			+ "END";
 	
+	//auto get all result parameters store procedure
+	private static final String CREATE_MULTIPLE_RESULT_SP_SQL = "CREATE PROCEDURE MULTIPLE_RESULT_SP_SQL("
+			+ "dal_id int,"
+			+ "quantity int,"
+			+ "type smallint,"
+			+ "INOUT address VARCHAR(64))"
+			+ "BEGIN UPDATE dal_client_test "
+			+ "SET quantity = quantity, type=type, address=address "
+			+ "WHERE id=dal_id;"
+			+ "SELECT ROW_COUNT() AS result;"
+			+ "SELECT 1 AS result2;"
+			+ "UPDATE dal_client_test "
+			+ "SET `quantity` = quantity + 1, `type`=type + 1, `address`='aaa';"
+			+ "SELECT 'abc' AS result3, 456 AS count2;"
+			+ "SELECT * from dal_client_test;"
+			+ "SELECT 'output' INTO address;"
+			+ "END";
+	
 	private static final String DROP_I_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_i";
 	private static final String DROP_D_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_d";
 	private static final String DROP_U_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_u";
+	private static final String DROP__MULTIPLE_RESULT_SP_SQL = "DROP PROCEDURE  IF  EXISTS MULTIPLE_RESULT_SP_SQL";
 	
 	private static DalClient client = null;
 	private static ClientTestDalRowMapper mapper = null;
@@ -105,7 +126,8 @@ public class DalDirectClientMySqlTest {
 		String[] sqls = new String[] { DROP_TABLE_SQL, CREATE_TABLE_SQL, 
 				DROP_I_SP_SQL, CREATE_I_SP_SQL, 
 				DROP_D_SP_SQL, CREATE_D_SP_SQL,
-				DROP_U_SP_SQL, CREATE_U_SP_SQL};
+				DROP_U_SP_SQL, CREATE_U_SP_SQL,
+				CREATE_MULTIPLE_RESULT_SP_SQL};
 		client.batchUpdate(sqls, hints);
 	}
 
@@ -113,7 +135,7 @@ public class DalDirectClientMySqlTest {
 	public static void tearDownAfterClass() throws Exception {
 		DalHints hints = new DalHints();
 		String[] sqls = new String[] { DROP_TABLE_SQL, DROP_I_SP_SQL,
-				DROP_D_SP_SQL, DROP_U_SP_SQL};
+				DROP_D_SP_SQL, DROP_U_SP_SQL, DROP__MULTIPLE_RESULT_SP_SQL};
 		client.batchUpdate(sqls, hints);
 	}
 
@@ -654,6 +676,34 @@ public class DalDirectClientMySqlTest {
 		List<ClientTestModel> models = this.queryModelsByIds(4);
 		Assert.assertEquals(1, models.size());
 		Assert.assertEquals("SZ INFO", models.get(0).getAddress());
+	}
+	
+	/**
+	 * Test the call function with retrieveAllResultsFromSp parameters
+	 * @throws SQLException
+	 */
+	@Test
+	public void callTestWithAutoParameters() throws SQLException{
+		String callSql = "call " + MULTIPLE_RESULT_SP_SQL + "(?,?,?,?)";
+		StatementParameters parameters = new StatementParameters();
+		parameters.set("dal_id", Types.INTEGER, 1);
+		parameters.set("quantity", Types.INTEGER, 10);
+		parameters.set("type", Types.SMALLINT, 3);
+		//parameters.set("address", Types.VARCHAR, "SZ INFO");
+		parameters.registerInOut("address", Types.VARCHAR, "SZ INFO");
+		
+		DalHints hints = new DalHints().retrieveAllResultsFromSp();
+		Map<String, ?> res = client.call(callSql, parameters, hints);
+		System.out.println(res);
+		Assert.assertTrue(null != res);
+		Assert.assertEquals(6, res.size());
+		Assert.assertTrue(res.containsKey("address"));
+		Assert.assertEquals("output", res.get("address"));
+		Assert.assertEquals("output", parameters.get("address", ParameterDirection.InputOutput).getValue());
+		
+		List<ClientTestModel> models = this.queryModelsByIds(1);
+		Assert.assertEquals(1, models.size());
+		Assert.assertEquals("aaa", models.get(0).getAddress());
 	}
 	
 	/**

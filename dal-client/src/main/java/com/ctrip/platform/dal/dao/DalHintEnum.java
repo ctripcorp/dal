@@ -134,7 +134,7 @@ public enum DalHintEnum {
 	/*
 	 * Auto processing all result set and update count
 	 */
-	autoRetrieveAllResults,
+	retrieveAllSpResults,
 	
 	/* 
 	 * Parameter for statement.setMaxRows(maxRows); 
@@ -199,14 +199,14 @@ public enum DalHintEnum {
 	 * allow insert incremental id. So DAL will not remove id from pojo before any of the inser operation
 	 */
 	enableIdentityInsert,
-	
-	/**
-	 * cloumn names that will be excluded for CUD
-	 */
-	excludedColumns,
-	
-	/**
-	 * Allow partial query fields to be ORM
-	 */
-	allowPartial,
+//	
+//	/**
+//	 * cloumn names that will be excluded for CUD
+//	 */
+//	excludedColumns,
+//	
+//	/**
+//	 * Allow partial query fields to be ORM
+//	 */
+//	allowPartial,
 }

@@ -8,6 +8,13 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalRowMapper;
 
+/**
+ * IMPORTANT NOTE:
+ * This class is stateful and not thread safe, it will cache the first result set's mata data to speed up processing.
+ * If you want to use it in several result set but different columns, you must re-create new instance for each of the result set. 
+ * @author jhhe
+ *
+ */
 public class DalColumnMapRowMapper implements DalRowMapper<Map<String, Object>> {
 	private String[] columns;
 	

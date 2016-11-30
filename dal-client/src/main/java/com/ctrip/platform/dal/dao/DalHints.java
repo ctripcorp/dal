@@ -364,5 +364,8 @@ public class DalHints {
 	public boolean isUpdateNullField() {
 		return is(DalHintEnum.updateNullField);
 	}
-
+	
+	public DalHints retrieveAllResultsFromSp() {
+		return set(DalHintEnum.retrieveAllSpResults);
+	}	
 }

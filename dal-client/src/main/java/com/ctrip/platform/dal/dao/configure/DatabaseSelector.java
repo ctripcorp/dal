@@ -94,7 +94,7 @@ public class DatabaseSelector {
 	}
 	
 	private String getRandomRealDbName(List<String> dbs) throws DalException{
-		if(ha == null){
+		if(ha == null|| dbs.size() == 1){
 			return choseByRandom(dbs);
 		}else{
 			List<String> dbNames = new ArrayList<String>();
@@ -103,7 +103,6 @@ public class DatabaseSelector {
 					dbNames.add(database);
 			}
 			if(dbNames.isEmpty()){
-				ha.setOver(true);
 				return null;
 			}else{
 				String selected = choseByRandom(dbNames);
@@ -123,8 +122,6 @@ public class DatabaseSelector {
 		if(!this.isNullOrEmpty(dbs)){
 			for (DataBase database : dbs) {
 				if(MarkdownManager.isMarkdown(database.getConnectionString()))
-					continue;
-				if(ha != null && ha.contains(database.getConnectionString()))
 					continue;
 
 				dbNames.add(database.getConnectionString());

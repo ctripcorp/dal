@@ -223,8 +223,8 @@ public class DalDirectClient implements DalClient {
 					}
 				}
 				
-				if(hints.is(DalHintEnum.autoRetrieveAllResults) && resultParameters.size() > 0)
-					throw new DalException("Dal hint 'retreiveAllResults' should only be used when there is no");
+				if(hints.is(DalHintEnum.retrieveAllSpResults) && resultParameters.size() > 0)
+					throw new DalException("Dal hint 'autoRetrieveAllResults' should only be used when there is no special result parameter specified");
 				
 				conn = getConnection(hints, this);
 				
@@ -274,11 +274,14 @@ public class DalDirectClient implements DalClient {
 	
 	private Map<String, Object> extractReturnedResults(CallableStatement statement, List<StatementParameter> resultParameters, int updateCount, DalHints hints) throws SQLException {
 		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
-		if(hints.is(DalHintEnum.skipResultsProcessing) || resultParameters.size() == 0)
+		if(hints.is(DalHintEnum.skipResultsProcessing))
 			return returnedResults;
 
-		if(hints.is(DalHintEnum.autoRetrieveAllResults))
-			return extractReturnedResults(statement, updateCount);
+		if(hints.is(DalHintEnum.retrieveAllSpResults))
+			return autoExtractReturnedResults(statement, updateCount);
+		
+		if(resultParameters.size() == 0)
+			return returnedResults;
 		
 		boolean moreResults;
 		int index = 0;
@@ -299,13 +302,14 @@ public class DalDirectClient implements DalClient {
 		return returnedResults;
 	}
 	
-	private Map<String, Object> extractReturnedResults(CallableStatement statement, int updateCount) throws SQLException {
+	private Map<String, Object> autoExtractReturnedResults(CallableStatement statement, int updateCount) throws SQLException {
 		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
 		boolean moreResults;
 		int index = 0;
-		DalRowMapperExtractor<Map<String, Object>> extractor = new DalRowMapperExtractor<>(new DalColumnMapRowMapper());
+		DalRowMapperExtractor<Map<String, Object>> extractor;
 		do {
-			String key = (updateCount == -1 ? "UpdateCount_" :"ResultSet_") + index;
+			extractor = new DalRowMapperExtractor<>(new DalColumnMapRowMapper());
+			String key = (updateCount == -1 ? "ResultSet_" : "UpdateCount_") + index;
 			Object value = updateCount == -1 ? extractor.extract(statement.getResultSet()) :
 				updateCount;
 			moreResults = statement.getMoreResults();

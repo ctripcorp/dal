@@ -4,11 +4,14 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.helper.CommonUtil;
 
 public class DbMeta {
+    private static Pattern hostRegxPattern = null;
+
 	private static ConcurrentHashMap<String, DbMeta> metaMap = new ConcurrentHashMap<String, DbMeta>();
 	
 	private String databaseName;
@@ -20,12 +23,17 @@ public class DbMeta {
 	private String url;
 	private String host;
 
+	static {
+		String regEx = "(?<=://)[\\w\\-_]+(\\.[\\w\\-_]+)+(?=[,|:|;])";
+		hostRegxPattern = Pattern.compile(regEx);
+	}
+	
 	private DbMeta(Connection conn, String realDbName, DatabaseCategory dbCategory, String shardId, boolean master) throws SQLException {
 		DatabaseMetaData meta = conn.getMetaData();
 
 		databaseName = conn.getCatalog();
 		url = meta.getURL();
-		host = CommonUtil.parseHostFromDBURL(url);
+		host = parseHostFromDBURL(url);
 		userName = meta.getUserName();
 		
 		dataBaseKeyName = realDbName;
@@ -73,5 +81,15 @@ public class DbMeta {
 
 	public String getShardId() {
 		return shardId;
+	}
+	
+	private String parseHostFromDBURL(String url) {
+		Matcher m = hostRegxPattern.matcher(url);
+		String host = "NA";
+		while (m.find()) {
+			host = m.group();
+			break;
+		}
+		return host;
 	}
 }

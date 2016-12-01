@@ -31,10 +31,11 @@ import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 
 public class DalDefaultJpaParserMySqlTest2 {
 	private final static int ROW_COUNT = 100;
-	private final static String DROP_TABLE_SQL = "DROP TABLE IF EXISTS %s";
-	private final static String CREATE_TABLE_SQL = "CREATE TABLE %s("
+	private final static String DROP_TABLE_SQL = "DROP TABLE IF EXISTS `%s`";
+	private final static String CREATE_TABLE_SQL = "CREATE TABLE `%s`("
 			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
 			+ "quantity int,"
+			+ "`order` int,"
 			+ "type smallint, "
 			+ "address VARCHAR(64) not null, "
 			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
@@ -125,7 +126,7 @@ public class DalDefaultJpaParserMySqlTest2 {
 
 	@Entity
 	@Database(name="dao_test")
-	@Table(name="dal_client_test")
+	@Table(name="order")
 	public static class ClientTestModel {
 		@Id
 		@GeneratedValue(strategy = GenerationType.AUTO)
@@ -135,6 +136,10 @@ public class DalDefaultJpaParserMySqlTest2 {
 		@Column(name="quantity")
 		@Type(value=Types.INTEGER)
 		private Integer quan;
+		
+		@Column(name="order")
+		@Type(value=Types.INTEGER)
+		private Integer order;
 		
 		@Column
 		@Type(value=Types.SMALLINT)

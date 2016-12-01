@@ -207,13 +207,16 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		String ids = sb.substring(0, sb.length()-1);
         Map<String, TitanData> result = new HashMap<>();
 
-		logger.info(svcUrl);
+		logger.info("Titan service URL: " + svcUrl);
 
 		URIBuilder builder = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid);
-		if(!(subEnv == null || subEnv.isEmpty()))
+		if(!(subEnv == null || subEnv.isEmpty())) {
 			builder.addParameter("envt", subEnv);
+			logger.info("Sub environment: " + subEnv);
+		}
 		
         URI uri = builder.build();
+        logger.info(uri.toURL().toString());
 
         HttpClient sslClient = initWeakSSLClient();
         if (sslClient != null) {
@@ -243,6 +246,10 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
             	//Decrypt raw connection string
             	result.put(data.getName(), data);
+            	logger.info(data.getName()+ " loaded");
+            	if(data.getEnv() != null) {
+            		logger.info(String.format("Sub environment %s detected.", data.getEnv()));
+            	}
             }
         }
 	    

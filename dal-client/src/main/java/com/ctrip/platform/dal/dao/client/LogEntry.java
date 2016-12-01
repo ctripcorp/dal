@@ -1,12 +1,9 @@
 package com.ctrip.platform.dal.dao.client;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.ctrip.platform.dal.dao.DalEventEnum;
 
 public class LogEntry {
-	private static Set<String> execludedClasses = null;
+	private static String execludedPackageSpace = "com.ctrip.platform.dal.dao";
 	
 	private boolean sensitive;
 	private String[] sqls;
@@ -35,21 +32,11 @@ public class LogEntry {
 	
 	private long createTime = System.currentTimeMillis();
 	
-	static {
-		execludedClasses = new HashSet<String>();
-		execludedClasses.add("com.ctrip.platform.dal.dao.client.ConnectionAction");
-		execludedClasses.add("com.ctrip.platform.dal.dao.client.DalConnectionManager");
-		execludedClasses.add("com.ctrip.platform.dal.dao.client.DalTransactionManager");
-		execludedClasses.add("com.ctrip.platform.dal.dao.client.DalDirectClient");
-		execludedClasses.add("com.ctrip.platform.dal.dao.DalTableDao");
-		execludedClasses.add("com.ctrip.platform.dal.dao.DalQueryDao");
-	}
-	
 	public LogEntry(){
 		StackTraceElement[] callers = Thread.currentThread().getStackTrace();
 		for (int i = 4; i < callers.length; i++) {
 			StackTraceElement caller = callers[i];
-			if (execludedClasses.contains(caller.getClassName()))
+			if (caller.getClassName().startsWith(execludedPackageSpace))
 				continue;
 			
 			dao = caller.getClassName();

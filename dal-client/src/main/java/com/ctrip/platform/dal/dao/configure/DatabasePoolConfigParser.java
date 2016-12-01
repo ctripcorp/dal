@@ -50,6 +50,7 @@ public class DatabasePoolConfigParser {
 	private static final String MINEVICTABLEIDLETIMEMILLIS = "minEvictableIdleTimeMillis";
 	private static final String CONNECTIONPROPERTIES = "connectionProperties";
 	private static final String INIT_SQL = "initSql";
+	private static final String INIT_SQL2 = "initSQL";
 	private static final String OPTION = "option";
 	
 	public static final boolean DEFAULT_TESTWHILEIDLE = true;
@@ -216,6 +217,9 @@ public class DatabasePoolConfigParser {
 		}
 		if (hasAttribute(resource, INIT_SQL)) {
 			prop.setInitSQL(getAttribute(resource, INIT_SQL));
+		}		
+		if (hasAttribute(resource, INIT_SQL2)) {
+			prop.setInitSQL(getAttribute(resource, INIT_SQL2));
 		}		
 		if (hasAttribute(resource, OPTION)) {
 			poolConfig.setOption(getAttribute(resource, OPTION));

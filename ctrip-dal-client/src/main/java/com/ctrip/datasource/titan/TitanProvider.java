@@ -210,7 +210,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		logger.info(svcUrl);
 
 		URIBuilder builder = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid);
-		subEnv = "FAT7";
 		if(!(subEnv == null || subEnv.isEmpty()))
 			builder.addParameter("envt", subEnv);
 		

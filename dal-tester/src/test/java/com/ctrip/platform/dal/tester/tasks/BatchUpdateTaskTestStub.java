@@ -356,7 +356,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 		for(NonUpdatableVersionModel model: pojos)
 			assertEquals("1122334455", model.getAddress());
 	}
-	
+
 	@Test
 	public void testCreateMerger() {
 		BatchUpdateTask<ClientTestModel> test = new BatchUpdateTask<>();

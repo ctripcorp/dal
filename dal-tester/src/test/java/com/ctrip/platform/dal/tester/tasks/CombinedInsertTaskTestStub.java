@@ -13,17 +13,18 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 import com.ctrip.platform.dal.dao.task.CombinedInsertTask;
 
 //TODO handle keyholder and set nocount on issue
 public class CombinedInsertTaskTestStub extends TaskTestStub {
-	private String dbName;
 	private boolean enableKeyHolder;
 	
 	public CombinedInsertTaskTestStub (String dbName, boolean enableKeyHolder) {
 		super(dbName);
-		this.dbName = dbName;
 		this.enableKeyHolder = enableKeyHolder;
 	}
 	
@@ -36,7 +37,7 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 	@Test
 	public void testExecute() {
 		CombinedInsertTask<ClientTestModel> test = new CombinedInsertTask<>();
-		test.initialize(new ClientTestDalParser(dbName));
+		test.initialize(new ClientTestDalParser(getDbName()));
 		DalHints hints = new DalHints();
 		if(enableKeyHolder)
 			hints.setKeyHolder(new KeyHolder());
@@ -56,7 +57,7 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 	@Test
 	public void testExecuteWithId() {
 		CombinedInsertTask<ClientTestModel> test = new CombinedInsertTask<>();
-		test.initialize(new ClientTestDalParser(dbName));
+		test.initialize(new ClientTestDalParser(getDbName()));
 		DalHints hints = new DalHints().enableIdentityInsert();
 		if(enableKeyHolder)
 			hints.setKeyHolder(new KeyHolder());
@@ -95,6 +96,33 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
+		}
+	}
+	
+	@Test
+	public void testExecuteWithNonInsertable() throws SQLException {
+		CombinedInsertTask<NonInsertableVersionModel> test = new CombinedInsertTask<>();
+		DalParser<NonInsertableVersionModel> parser = new DalDefaultJpaParser<>(NonInsertableVersionModel.class, getDbName());
+		test.initialize(parser);
+		
+		DalHints hints = new DalHints();
+		if(enableKeyHolder)
+			hints.setKeyHolder(new KeyHolder());
+		try {
+			test.execute(hints, getAllMap());
+			if(enableKeyHolder){
+				// You have to merge before get size
+				assertEquals(3, hints.getKeyHolder().size());
+			}
+			assertEquals(3+3, getCount());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+		
+		Map<Integer, Map<String, ?>> pojos = getAllMap();
+		for(Map<String, ?> pojo: pojos.values()) {
+			assertNotNull(pojo.get("last_changed"));
 		}
 	}
 	

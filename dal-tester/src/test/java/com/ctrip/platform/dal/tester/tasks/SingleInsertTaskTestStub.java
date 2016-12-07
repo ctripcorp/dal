@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.tester.tasks;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -12,6 +13,9 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.task.BatchInsertTask;
 import com.ctrip.platform.dal.dao.task.SingleInsertTask;
 
 public class SingleInsertTaskTestStub extends TaskTestStub {
@@ -65,6 +69,23 @@ public class SingleInsertTaskTestStub extends TaskTestStub {
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
+		}
+	}
+	
+	@Test
+	public void testExecuteWithNonInsertable() throws SQLException {
+		SingleInsertTask<NonInsertableVersionModel> test = new SingleInsertTask<>();
+		DalParser<NonInsertableVersionModel> parser = new DalDefaultJpaParser<>(NonInsertableVersionModel.class, getDbName());
+		test.initialize(parser);
+		
+		DalHints hints = new DalHints();
+		int result = test.execute(hints, getAllMap().get(0));
+
+		assertEquals(3+1, getCount());
+		
+		Map<Integer, Map<String, ?>> pojos = getAllMap();
+		for(Map<String, ?> pojo: pojos.values()) {
+			assertNotNull(pojo.get("last_changed"));
 		}
 	}
 }

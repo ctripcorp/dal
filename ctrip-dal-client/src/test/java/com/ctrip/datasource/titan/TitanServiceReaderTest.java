@@ -5,25 +5,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.Assert;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 
 public class TitanServiceReaderTest {
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		System.setProperty("env", "UAT");
-	}
-	
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		System.setProperty("env", "");
-	}
 	
 	@Test
 	public void testGetFromTitanServiceSuccess() {
@@ -263,7 +251,7 @@ public class TitanServiceReaderTest {
 		Map<String, String> settings = new HashMap<>();
 		settings.put(TitanProvider.SERVICE_ADDRESS, uat);
 		settings.put(TitanProvider.USE_LOCAL_CONFIG, "false");
-		settings.put(TitanProvider.TIMEOUT, "100");
+		settings.put(TitanProvider.TIMEOUT, "1000");
 		try {
 			provider.initialize(settings);
 			provider.setup(dbNames);
@@ -292,7 +280,7 @@ public class TitanServiceReaderTest {
 		
 		Map<String, String> settings = new HashMap<>();
 		settings.put(TitanProvider.USE_LOCAL_CONFIG, "false");
-		settings.put(TitanProvider.TIMEOUT, "100");
+		settings.put(TitanProvider.TIMEOUT, "1000");
 		try {
 			provider.initialize(settings);
 			provider.setup(dbNames);
@@ -312,15 +300,14 @@ public class TitanServiceReaderTest {
 	
 	@Test
 	public void testSubEnvironmentService() {
-		String fws = "http://10.3.2.218:8080/datasource/query";
 		TitanProvider provider = new TitanProvider();
 		Set<String> dbNames = new HashSet<>();
 		dbNames.add("mysqldbatestshard01db_W");
+		dbNames.add("mysqldbatestshard01db_R");
 		
 		Map<String, String> settings = new HashMap<>();
-		settings.put(TitanProvider.SERVICE_ADDRESS, fws);
 		settings.put(TitanProvider.USE_LOCAL_CONFIG, "false");
-		settings.put(TitanProvider.TIMEOUT, "100");
+		settings.put(TitanProvider.TIMEOUT, "1000");
 		try {
 			provider.initialize(settings);
 			provider.setup(dbNames);

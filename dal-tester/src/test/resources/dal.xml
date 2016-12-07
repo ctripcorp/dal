@@ -116,6 +116,7 @@
   <ConnectionLocator>
       <locator>com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator</locator>
       <settings>
+         <useLocalConfig>true</useLocalConfig>
 		 <dataSourceConfigureProvider>com.ctrip.datasource.titan.TitanProvider</dataSourceConfigureProvider>
 	  </settings>
   </ConnectionLocator>

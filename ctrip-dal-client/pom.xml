@@ -1,7 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.ctrip.platform</groupId>
+    <parent>
+        <groupId>com.ctrip.framework</groupId>
+        <artifactId>framework-parent</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
+    </parent>
+    <groupId>com.ctrip.platform</groupId>
 	<artifactId>ctrip-dal-client</artifactId>
 	<version>1.2.0</version>
 	<name>ctrip-dal-client</name>
@@ -12,7 +17,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -51,11 +55,15 @@
 			<artifactId>httpclient</artifactId>
 			<version>4.5.2</version>
 		</dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.4.4</version>
+        </dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.7</version>
-		</dependency>
+			</dependency>
 		<dependency>
 			<groupId>com.ctrip.framework</groupId>
 			<artifactId>vi</artifactId>
@@ -87,7 +95,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.7.2</version>
 				<configuration>
 					<forkMode>never</forkMode>
 					<argLine>-Dfile.encoding=UTF-8</argLine>

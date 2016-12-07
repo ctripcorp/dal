@@ -36,6 +36,7 @@ public class EntityManager {
 	private boolean autoIncremental = false;
 	private List<String> columnNameList = new ArrayList<>();
 	private List<String> sensitiveColumnNameList = new ArrayList<>();
+	private List<String> insertableColumnList = new ArrayList<>();
 	private List<String> updatableColumnList = new ArrayList<>();
 	private List<String> primaryKeyNameList = new ArrayList<String>();
 	private List<Field> identityList = new ArrayList<>();
@@ -80,6 +81,9 @@ public class EntityManager {
 			if(column == null || column.updatable())
 				updatableColumnList.add(columnName);
 			
+			if(column == null || column.insertable())
+				insertableColumnList.add(columnName);
+			
 			if(id != null)
 				primaryKeyNameList.add(columnName);
 			
@@ -91,7 +95,6 @@ public class EntityManager {
 			if (f.getAnnotation(Id.class) != null && generatedValue != null && generatedValue.strategy() == GenerationType.AUTO) {
 				identityList.add(f);
 			}
-
 			
 			if (f.getAnnotation(Sensitive.class) != null)
 				sensitiveColumnNameList.add(columnName);
@@ -135,6 +138,10 @@ public class EntityManager {
 	
 	public String[] getUpdatableColumnNames() {
 		return updatableColumnList.toArray(new String[updatableColumnList.size()]);
+	}
+	
+	public String[] getInsertableColumnNames() {
+		return insertableColumnList.toArray(new String[insertableColumnList.size()]);
 	}
 	
 	public String[] getPrimaryKeyNames() throws SQLException {

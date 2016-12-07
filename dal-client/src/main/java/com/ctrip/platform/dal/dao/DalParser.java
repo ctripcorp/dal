@@ -37,8 +37,12 @@ public interface DalParser<T> extends DalRowMapper<T> {
 	String getVersionColumn();
 	
 	/**
-	 * 
 	 * Column can be included in update sql
 	 */
 	String[] getUpdatableColumnNames();
+	
+	/**
+	 * Column can be included in insert sql
+	 */
+	String[] getInsertableColumnNames();
 }

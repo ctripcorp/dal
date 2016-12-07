@@ -38,6 +38,7 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> implements Supp
 		this.sensitiveColumnNames = manager.getSensitiveColumnNames();
 		this.versionColumn = manager.getVersionColumn();
 		this.updatableColumnNames = manager.getUpdatableColumnNames();
+		this.insertableColumnNames = manager.getInsertableColumnNames();
 	}
 	
 	/**

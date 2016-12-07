@@ -295,8 +295,8 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	}
 
 	public Map<String, ?> removeAutoIncrementPrimaryFields(Map<String, ?> fields){
-		// This is bug here, for My Sql, auto incremental id and be part of the joint primary key.
-		// But for Ctrip, a table must have a pk defined by sigle column as mandatory, so we don't have problem here
+		// This is bug here, for My Sql, auto incremental id can be part of the joint primary key.
+		// But for Ctrip, a table must have a pk defined by single column as mandatory, so we don't have problem here
 		if(parser.isAutoIncrement())
 			fields.remove(parser.getPrimaryKeyNames()[0]);
 		return fields;

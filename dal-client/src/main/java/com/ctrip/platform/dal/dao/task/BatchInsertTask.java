@@ -25,6 +25,8 @@ public class BatchInsertTask<T> extends InsertTaskAdapter<T> implements BulkTask
 			if(hints.isIdentityInsertDisabled())
 				removeAutoIncrementPrimaryFields(pojo);
 			
+			removeNotInsertableColumns(pojo);
+			
 			StatementParameters parameters = new StatementParameters();
 			addParameters(parameters, pojo);
 			parametersList[i++] = parameters;
@@ -34,9 +36,18 @@ public class BatchInsertTask<T> extends InsertTaskAdapter<T> implements BulkTask
 		int[] result = client.batchUpdate(batchInsertSql, parametersList, hints);
 		return result;
 	}
-
+	
+	private void removeNotInsertableColumns(Map<String, ?> pojo) {
+		if(notInsertableColumns.size() == 0)
+			return;
+		
+		for(String columName: notInsertableColumns) {
+			pojo.remove(columName);
+		}
+	}
+	
 	private String buildBatchInsertSql(String tableName, DalHints hints) {
-		int validColumnsSize = parser.getColumnNames().length;
+		int validColumnsSize = parser.getInsertableColumnNames().length;
 		if(parser.isAutoIncrement() && hints.isIdentityInsertDisabled())
 			validColumnsSize--;
 		

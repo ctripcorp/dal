@@ -1,13 +1,20 @@
 package com.ctrip.platform.dal.dao.task;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalParser;
 
 public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 	public static final String TMPL_SQL_INSERT = "INSERT INTO %s (%s) VALUES(%s)";
 
+	protected Set<String> insertableColumns;
+	protected Set<String> notInsertableColumns;
 	protected String columnsForInsert;
 	protected String columnsForInsertWithId;
 	protected List<String> validColumnsForInsert;
@@ -15,6 +22,14 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 
 	public void initialize(DalParser<T> parser) {
 		super.initialize(parser);
+		
+		insertableColumns = new HashSet<>();
+		Collections.addAll(insertableColumns, parser.getInsertableColumnNames());
+		
+		notInsertableColumns = new HashSet<>();
+		Collections.addAll(notInsertableColumns, parser.getColumnNames());
+		notInsertableColumns.removeAll(insertableColumns);
+		
 		validColumnsForInsert = buildValidColumnsForInsert();
 		validColumnsForInsertWithId = buildValidColumnsForInsertWithId();
 		
@@ -23,21 +38,15 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 	}
 	
 	private List<String> buildValidColumnsForInsert() {
-		List<String> validColumns = new ArrayList<String>();
-		for(String s : parser.getColumnNames()){
-			if(!(parser.isAutoIncrement() && isPrimaryKey(s)))
-				validColumns.add(s);
-		}
+		List<String> validColumns = new LinkedList<>(buildValidColumnsForInsertWithId());
+		
+		if(parser.isAutoIncrement())
+			validColumns.remove(parser.getPrimaryKeyNames()[0]);
 		
 		return validColumns;
 	}	
 
 	private List<String> buildValidColumnsForInsertWithId() {
-		List<String> validColumns = new ArrayList<String>();
-		for(String s : parser.getColumnNames()){
-			validColumns.add(s);
-		}
-		
-		return validColumns;
+		return Arrays.asList(parser.getInsertableColumnNames());
 	}	
 }

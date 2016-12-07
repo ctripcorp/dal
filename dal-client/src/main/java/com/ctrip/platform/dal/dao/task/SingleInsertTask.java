@@ -23,7 +23,7 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 	}
 	
 	private String buildInsertSql(DalHints hints, Map<String, ?> fields) throws SQLException {
-		filterNullFileds(fields);
+		filterFileds(fields);
 		Set<String> remainedColumns = fields.keySet();
 		String cloumns = combineColumns(remainedColumns, COLUMN_SEPARATOR);
 		String values = combine(PLACE_HOLDER, remainedColumns.size(),
@@ -32,4 +32,21 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 		return String.format(TMPL_SQL_INSERT, getTableName(hints, fields), cloumns,
 				values);
 	}
+	
+	private Map<String, ?> filterFileds(Map<String, ?> fields) {
+		for (String columnName : parser.getColumnNames()) {
+			if (fields.get(columnName) == null)
+				fields.remove(columnName);
+		}
+		
+		if(notInsertableColumns.size() == 0)
+			return fields;
+		
+		for(String columnName: notInsertableColumns) {
+			fields.remove(columnName);
+		}
+		
+		return fields;
+	}
+
 }

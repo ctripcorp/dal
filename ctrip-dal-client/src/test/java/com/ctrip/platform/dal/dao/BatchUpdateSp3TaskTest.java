@@ -79,6 +79,53 @@ public class BatchUpdateSp3TaskTest {
 		try {
 			DalHints hints = new DalHints();
 			test.execute(hints.inShard(0), getPojosFields(p, parser));
+			
+			DalTableDao<People> dao = new DalTableDao<>(parser);
+			p = dao.query("1=1", new StatementParameters(), new DalHints().inAllShards());
+			
+			for(People pe: p) {
+				Assert.assertTrue(-1==pe.getProvinceID());
+				Assert.assertTrue(-1==pe.getCityID());
+				Assert.assertTrue(-1==pe.getCountryID());
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
+	@Test
+	public void testExecuteNullFields() {
+		BatchUpdateSp3Task<People> test = new BatchUpdateSp3Task<>();
+		PeopleParser parser = new PeopleParser();
+		test.initialize(parser);
+		
+		List<People> p = new ArrayList<>();
+		
+		for(int i = 0; i < 3; i++) {
+			People p1 = new People();
+		 	p1.setPeopleID((long)i);
+		 	p1.setName("test");
+		 	p1.setCityID(null);
+		 	p1.setProvinceID(null);
+		 	p1.setCountryID(null);
+		 	p.add(p1);
+		}
+		
+		try {
+			DalHints hints = new DalHints();
+			test.execute(hints.inShard(0), getPojosFields(p, parser));
+			
+			DalTableDao<People> dao = new DalTableDao<>(parser);
+			p = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
+			
+			for(People pe: p) {
+				Assert.assertTrue(1==pe.getProvinceID());
+				Assert.assertTrue(1==pe.getCityID());
+				Assert.assertTrue(1==pe.getCountryID());
+			}
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Assert.fail();

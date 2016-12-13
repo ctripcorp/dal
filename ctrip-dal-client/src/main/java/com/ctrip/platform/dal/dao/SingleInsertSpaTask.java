@@ -25,7 +25,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		String insertSPA = String.format(INSERT_SPA_TPL, getTableName(hints, fields));
+		String insertSPA = String.format(INSERT_SPA_TPL, getRawTableName(hints, fields));
 		
 		StatementParameters parameters = new StatementParameters();
 		String callSql = prepareSpCall(insertSPA, parameters, fields);

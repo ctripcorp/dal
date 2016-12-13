@@ -10,7 +10,7 @@ public class BatchDeleteSp3Task<T> extends AbstractIntArrayBulkTask<T> {
 
 	@Override
 	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
-		String deleteSP3 = String.format(DELETE_SP3_TPL, getTableName(hints));
+		String deleteSP3 = String.format(DELETE_SP3_TPL, getRawTableName(hints));
 		
 		String callSql = buildCallSql(deleteSP3, parser.getPrimaryKeyNames().length);
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];

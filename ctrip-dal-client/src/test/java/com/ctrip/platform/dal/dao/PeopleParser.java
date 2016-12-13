@@ -35,6 +35,10 @@ public class PeopleParser extends AbstractDalParser<People> {
 		super(DATABASE_NAME, TABLE_NAME, COLUMNS, PRIMARY_KEYS, COLUMN_TYPES);
 	}
 	
+	public PeopleParser(String logicDbName) {
+		super(logicDbName, TABLE_NAME, COLUMNS, PRIMARY_KEYS, COLUMN_TYPES);
+	}
+	
 	@Override
 	public People map(ResultSet rs, int rowNum) throws SQLException {
 		People pojo = new People();

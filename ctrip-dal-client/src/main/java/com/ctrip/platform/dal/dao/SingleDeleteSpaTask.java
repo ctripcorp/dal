@@ -12,7 +12,7 @@ public class SingleDeleteSpaTask<T> extends CtripSpaTask<T> {
 		
 		hints = DalHints.createIfAbsent(hints);
 
-		String deleteSPA = String.format(DELETE_SPA_TPL, getTableName(hints, fields));
+		String deleteSPA = String.format(DELETE_SPA_TPL, getRawTableName(hints, fields));
 		
 		StatementParameters parameters = new StatementParameters();
 		String callSql = prepareSpCall(deleteSPA, parameters, getPrimaryKeys(fields));

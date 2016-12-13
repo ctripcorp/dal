@@ -10,7 +10,7 @@ public class BatchUpdateSp3Task<T> extends AbstractIntArrayBulkTask<T> {
 	
 	@Override
 	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
-		String updateSP3 = String.format(UPDATE_SP3_TPL, getTableName(hints));
+		String updateSP3 = String.format(UPDATE_SP3_TPL, getRawTableName(hints));
 		
 		String callSql = buildCallSql(updateSP3, parser.getColumnNames().length);
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];

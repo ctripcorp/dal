@@ -12,7 +12,7 @@ public class SingleUpdateSpaTask<T> extends CtripSpaTask<T> {
 		
 		hints = DalHints.createIfAbsent(hints);
 
-		String updateSPA = String.format(UPDATE_SPA_TPL, getTableName(hints, fields));
+		String updateSPA = String.format(UPDATE_SPA_TPL, getRawTableName(hints, fields));
 		
 		StatementParameters parameters = new StatementParameters();
 		String callSql = prepareSpCall(updateSPA, parameters, fields);

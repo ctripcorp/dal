@@ -7,17 +7,11 @@ import com.ctrip.platform.dal.dao.task.AbstractIntArrayBulkTask;
 
 public class BatchUpdateSp3Task<T> extends AbstractIntArrayBulkTask<T> {
 	private static final String UPDATE_SP3_TPL = "sp3_%s_u";
-
-	private String updateSP3;
 	
-	public void initialize(DalParser<T> parser) {
-		super.initialize(parser);
-		String tableName = parser.getTableName();
-		updateSP3 = String.format(UPDATE_SP3_TPL, tableName);
-	}
-
 	@Override
 	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
+		String updateSP3 = String.format(UPDATE_SP3_TPL, getTableName(hints));
+		
 		String callSql = buildCallSql(updateSP3, parser.getColumnNames().length);
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		

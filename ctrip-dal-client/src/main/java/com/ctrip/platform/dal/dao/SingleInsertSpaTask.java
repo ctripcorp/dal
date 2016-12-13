@@ -9,7 +9,6 @@ import com.ctrip.platform.dal.common.enums.ParameterDirection;
 public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	private static final String INSERT_SPA_TPL = "spA_%s_i";
 
-	private String insertSPA;
 	private String outputIdName;
 	
 	private static final String RET_CODE = "retcode";
@@ -19,8 +18,6 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 
 	public void initialize(DalParser<T> parser) {
 		super.initialize(parser);
-		String tableName = parser.getTableName();
-		insertSPA = String.format(INSERT_SPA_TPL, tableName);
 		this.outputIdName = parser.isAutoIncrement() ? parser.getPrimaryKeyNames()[0] : null;
 	}
 	
@@ -28,6 +25,8 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
+		String insertSPA = String.format(INSERT_SPA_TPL, getTableName(hints, fields));
+		
 		StatementParameters parameters = new StatementParameters();
 		String callSql = prepareSpCall(insertSPA, parameters, fields);
 		

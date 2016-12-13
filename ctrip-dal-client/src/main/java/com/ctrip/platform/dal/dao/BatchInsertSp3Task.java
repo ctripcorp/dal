@@ -8,16 +8,10 @@ import com.ctrip.platform.dal.dao.task.AbstractIntArrayBulkTask;
 public class BatchInsertSp3Task<T> extends AbstractIntArrayBulkTask<T> {
 	private static final String INSERT_SP3_TPL = "sp3_%s_i";
 
-	private String insertSP3;
-
-	public void initialize(DalParser<T> parser) {
-		super.initialize(parser);
-		String tableName = parser.getTableName();
-		insertSP3 = String.format(INSERT_SP3_TPL, tableName);
-	}
-	
 	@Override
 	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
+		String insertSP3 = String.format(INSERT_SP3_TPL, getTableName(hints));
+
 		String callSql = buildCallSql(insertSP3, parser.getColumnNames().length);
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		

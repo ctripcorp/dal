@@ -51,11 +51,47 @@ public class BatchUpdateSp3TaskTest {
 		}
 		insertSqls[5] = "SET IDENTITY_INSERT "+ TABLE_NAME + " OFF";
 		client.batchUpdate(insertSqls, hints.inShard(0));
+		setUpShard();
 	}
 
+	public void setUpShard(){
+		try {
+			for(int i = 0; i < 2; i++) {
+				for(int j = 0; j < 2; j++) {
+					String tableName = TABLE_NAME + "_" + j;
+					DalHints hints = new DalHints().inShard(i);
+					String[] insertSqls = null;
+					insertSqls = new String[6];
+					insertSqls[0] = "SET IDENTITY_INSERT "+ tableName + " ON";
+					insertSqls[1] = "DELETE FROM " + tableName;
+					for(int k = 0; k < 3; k ++) {
+						int id = k;
+						insertSqls[k+2] = "INSERT INTO " + tableName +" ([PeopleID], [Name], [CityID], [ProvinceID], [CountryID])"
+								+ " VALUES(" + id + ", " + "'test name' , " + j + ", 1, " + i + ")";
+					}
+					insertSqls[5] = "SET IDENTITY_INSERT "+ tableName + " OFF";
+					client.batchUpdate(insertSqls, hints);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	@After
 	public void tearDown() throws Exception {
 		client.update("DELETE FROM " + TABLE_NAME, new StatementParameters(), new DalHints().inShard(0));
+		tearDownShard();
+	}
+	
+	public void tearDownShard() throws Exception {
+		for(int i = 0; i < 2; i++) {
+			for(int j = 0; j < 2; j++) {
+				String tableName = TABLE_NAME + "_" + j;
+				client.update("DELETE FROM " + tableName, new StatementParameters(), new DalHints().inShard(i));
+			}
+		}
 	}
 	
 	@Test
@@ -126,6 +162,71 @@ public class BatchUpdateSp3TaskTest {
 				Assert.assertTrue(1==pe.getCountryID());
 			}
 			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
+	@Test
+	public void testExecuteShard() {
+		BatchUpdateSp3Task<People> test = new BatchUpdateSp3Task<>();
+		PeopleParser parser = new PeopleParser("SimpleDbTableShard");
+		DalTableDao<People> dao = new DalTableDao<>(parser);
+		test.initialize(parser);
+		
+		try {
+			for(int i = 0; i < 2; i++) {
+				for(int j = 0; j < 2; j++) {
+					DalHints hints = new DalHints().inShard(i).inTableShard(j);
+					List<People> p = dao.query("1=1", new StatementParameters(), hints);
+					for(People p1: p) {
+					 	p1.setName("test123");
+					 	p1.setProvinceID(-100);
+					}
+					
+					hints = new DalHints().inShard(i).inTableShard(j);
+					test.execute(hints, getPojosFields(p, parser));
+					
+					p = dao.query("1=1", new StatementParameters(), hints);
+					for(People p1: p) {
+						Assert.assertEquals(p1.getName(), "test123");
+						Assert.assertEquals(p1.getProvinceID().intValue(), -100);
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
+	@Test
+	public void testExecuteShardByDao() {
+		PeopleParser parser = new PeopleParser("SimpleDbTableShard");
+		DalTableDao<People> dao = new DalTableDao<>(parser);
+		
+		try {
+			for(int i = 0; i < 2; i++) {
+				for(int j = 0; j < 2; j++) {
+					DalHints hints = new DalHints().inShard(i).inTableShard(j);
+					List<People> p = dao.query("1=1", new StatementParameters(), hints);
+					for(People p1: p) {
+					 	p1.setName("test123");
+					 	p1.setProvinceID(-100);
+					}
+					
+					hints = new DalHints().inShard(i).inTableShard(j);
+					dao.batchUpdate(new DalHints(), p);
+					
+					hints = new DalHints().inShard(i).inTableShard(j);
+					p = dao.query("1=1", new StatementParameters(), hints);
+					for(People p1: p) {
+						Assert.assertEquals(p1.getName(), "test123");
+						Assert.assertEquals(p1.getProvinceID().intValue(), -100);
+					}
+				}
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Assert.fail();

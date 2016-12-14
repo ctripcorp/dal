@@ -1,6 +1,9 @@
 package com.ctrip.platform.dal.dao;
 
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -41,11 +44,47 @@ public class SingleUpdateSpaTaskTest {
 					+ " VALUES(" + 1 + ", " + "'test name' , 1, 1, 1)";
 		insertSqls[3] = "SET IDENTITY_INSERT "+ TABLE_NAME + " OFF";
 		client.batchUpdate(insertSqls, new DalHints().inShard(0));
+		setUpShard();
+	}
+
+	public void setUpShard(){
+		try {
+			for(int i = 0; i < 2; i++) {
+				for(int j = 0; j < 2; j++) {
+					String tableName = TABLE_NAME + "_" + j;
+					DalHints hints = new DalHints().inShard(i);
+					String[] insertSqls = null;
+					insertSqls = new String[6];
+					insertSqls[0] = "SET IDENTITY_INSERT "+ tableName + " ON";
+					insertSqls[1] = "DELETE FROM " + tableName;
+					for(int k = 0; k < 3; k ++) {
+						int id = k;
+						insertSqls[k+2] = "INSERT INTO " + tableName +" ([PeopleID], [Name], [CityID], [ProvinceID], [CountryID])"
+								+ " VALUES(" + id + ", " + "'test name' , " + j + ", 1, " + i + ")";
+					}
+					insertSqls[5] = "SET IDENTITY_INSERT "+ tableName + " OFF";
+					client.batchUpdate(insertSqls, hints);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		client.update("DELETE FROM " + TABLE_NAME, new StatementParameters(), new DalHints().inShard(0));
+		tearDownShard();
+	}
+	
+	public void tearDownShard() throws Exception {
+		for(int i = 0; i < 2; i++) {
+			for(int j = 0; j < 2; j++) {
+				String tableName = TABLE_NAME + "_" + j;
+				client.update("DELETE FROM " + tableName, new StatementParameters(), new DalHints().inShard(i));
+			}
+		}
 	}
 	
 	@Test
@@ -67,5 +106,81 @@ public class SingleUpdateSpaTaskTest {
 			e.printStackTrace();
 			Assert.fail();
 		}
+	}
+
+	@Test
+	public void testExecuteShard() {
+		SingleUpdateSpaTask<People> test = new SingleUpdateSpaTask<>();
+		PeopleParser parser = new PeopleParser("SimpleDbTableShard");
+		DalTableDao<People> dao = new DalTableDao<>(parser);
+		test.initialize(parser);
+		
+		try {
+			for(int i = 0; i < 2; i++) {
+				for(int j = 0; j < 2; j++) {
+					DalHints hints = new DalHints().inShard(i).inTableShard(j);
+					List<People> p = dao.query("1=1", new StatementParameters(), hints);
+					for(People p1: p) {
+					 	p1.setName("test123");
+					 	p1.setProvinceID(-100);
+						test.execute(new DalHints(), parser.getFields(p1));
+					}
+					
+					p = dao.query("1=1", new StatementParameters(), hints);
+					for(People p1: p) {
+						Assert.assertEquals(p1.getName(), "test123");
+						Assert.assertEquals(p1.getProvinceID().intValue(), -100);
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
+	@Test
+	public void testExecuteShardByDao() {
+		PeopleParser parser = new PeopleParser("SimpleDbTableShard");
+		DalTableDao<People> dao = new DalTableDao<>(parser);
+		
+		try {
+			for(int i = 0; i < 2; i++) {
+				for(int j = 0; j < 2; j++) {
+					DalHints hints = new DalHints().inShard(i).inTableShard(j);
+					List<People> p = dao.query("1=1", new StatementParameters(), hints);
+					for(People p1: p) {
+					 	p1.setName("test123");
+					 	p1.setProvinceID(-100);
+					}
+					
+					hints = new DalHints().inShard(i).inTableShard(j);
+					dao.update(new DalHints(), p);
+					
+					hints = new DalHints().inShard(i).inTableShard(j);
+					p = dao.query("1=1", new StatementParameters(), hints);
+					for(People p1: p) {
+						Assert.assertEquals(p1.getName(), "test123");
+						Assert.assertEquals(p1.getProvinceID().intValue(), -100);
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
+	private <T> Map<Integer, Map<String, ?>> getPojosFields(List<T> daoPojos, DalParser<T> parser) {
+		Map<Integer, Map<String, ?>> pojoFields = new HashMap<>();
+		if (null == daoPojos || daoPojos.size() < 1)
+			return pojoFields;
+		
+		int i = 0;
+		for (T pojo: daoPojos){
+			pojoFields.put(i++, parser.getFields(pojo));
+		}
+		
+		return pojoFields;
 	}
 }

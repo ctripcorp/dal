@@ -185,11 +185,27 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	}
 	
 	public String getTableName(DalHints hints, StatementParameters parameters, Map<String, ?> fields) throws SQLException {
+		return quote(getRawTableName(hints, parameters, fields));
+	}
+	
+	public String getRawTableName(DalHints hints) throws SQLException {
+		return getRawTableName(hints, null, null);
+	}
+	
+	public String getRawTableName(DalHints hints, StatementParameters parameters) throws SQLException {
+		return getRawTableName(hints, parameters, null);
+	}
+	
+	public String getRawTableName(DalHints hints, Map<String, ?> fields) throws SQLException {
+		return getRawTableName(hints, null, fields);
+	}
+	
+	public String getRawTableName(DalHints hints, StatementParameters parameters, Map<String, ?> fields) throws SQLException {
 		if(tableShardingEnabled == false)
-			return quote(rawTableName);
+			return rawTableName;
 		
 		hints.cleanUp();
-		return quote(rawTableName + buildShardStr(logicDbName, locateTableShardId(logicDbName, hints, parameters, fields)));
+		return rawTableName + buildShardStr(logicDbName, locateTableShardId(logicDbName, hints, parameters, fields));
 	}
 	
 	/**

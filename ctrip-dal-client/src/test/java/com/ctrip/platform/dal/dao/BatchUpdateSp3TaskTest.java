@@ -233,6 +233,44 @@ public class BatchUpdateSp3TaskTest {
 		}
 	}
 	
+	@Test
+	public void testExecuteShardByDao2() {
+		PeopleParser parser = new PeopleParser("SimpleDbTableShard");
+		DalTableDao<People> dao = new DalTableDao<>(parser);
+		
+		try {
+			List<People> pAll = new ArrayList<>();
+			for(int i = 0; i < 2; i++) {
+				for(int j = 0; j < 2; j++) {
+					DalHints hints = new DalHints().inShard(i).inTableShard(j);
+					List<People> p = dao.query("1=1", new StatementParameters(), hints);
+					for(People p1: p) {
+					 	p1.setName("test123");
+					 	p1.setProvinceID(-100);
+					}
+					
+					pAll.addAll(p);
+				}
+			}
+					
+			dao.batchUpdate(new DalHints(), pAll);
+			
+			for(int i = 0; i < 2; i++) {
+				for(int j = 0; j < 2; j++) {
+					DalHints hints = new DalHints().inShard(i).inTableShard(j);
+					List<People> p = dao.query("1=1", new StatementParameters(), hints);
+					for(People p1: p) {
+						Assert.assertEquals(p1.getName(), "test123");
+						Assert.assertEquals(p1.getProvinceID().intValue(), -100);
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
 	private <T> Map<Integer, Map<String, ?>> getPojosFields(List<T> daoPojos, DalParser<T> parser) {
 		Map<Integer, Map<String, ?>> pojoFields = new HashMap<>();
 		if (null == daoPojos || daoPojos.size() < 1)

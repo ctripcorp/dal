@@ -4,9 +4,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -178,6 +181,58 @@ public class SingleInsertSpaTaskTest {
 					hints = new DalHints().inShard(i).inTableShard(j);
 					c = dao.count("1=1", new StatementParameters(), hints).intValue();
 					assertTrue(c == 2);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testExecuteShardByDao2() {
+		PeopleParser parser = new PeopleParser("SimpleDbTableShard");
+		DalTableDao<People> dao = new DalTableDao<>(parser);
+
+		try {
+			List<People> pAll = new ArrayList<>();
+			for(int i = 0; i < 2; i++) {
+				for(int j = 0; j < 2; j++) {
+					DalHints hints = new DalHints().inShard(i).inTableShard(j);
+					int c = dao.count("1=1", new StatementParameters(), hints).intValue();
+					assertTrue(c == 0);
+					
+					for(int k = 0; k < 3; k++) {
+						People p1 = new People();
+					 	p1.setPeopleID((long)i);
+					 	p1.setName("test");
+					 	p1.setCityID(j);
+					 	p1.setProvinceID(-1);
+					 	p1.setCountryID(i);
+					 	pAll.add(p1);
+					}
+				}
+			}
+
+			KeyHolder keyHolder = new KeyHolder();
+			DalHints hints = new DalHints();
+			hints.setKeyHolder(keyHolder);
+			dao.insert(hints, pAll);
+			
+			assertTrue(keyHolder.size() == 12);
+
+			int prev = -1;
+			int index = 0;
+			for(int i = 0; i < 2; i++) {
+				for(int j = 0; j < 2; j++) {
+					hints = new DalHints().inShard(i).inTableShard(j);
+					int c = dao.count("1=1", new StatementParameters(), hints).intValue();
+					Assert.assertTrue(c == 3);
+					
+					for(int k = 0; k < 3; k++) {
+//						assertTrue(keyHolder.getKey(index).intValue() > prev);
+						prev= keyHolder.getKey(index++).intValue();
+					}
 				}
 			}
 		} catch (SQLException e) {

@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
@@ -148,6 +149,36 @@ public class SingleDeleteSpaTaskTest {
 					dao.delete(hints, p);
 					
 					hints = new DalHints().inShard(i).inTableShard(j);
+					int c = dao.count("1=1", new StatementParameters(), hints).intValue();
+					Assert.assertTrue(c == 0);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
+	@Test
+	public void testExecuteShardByDao2() {
+		PeopleParser parser = new PeopleParser("SimpleDbTableShard");
+		DalTableDao<People> dao = new DalTableDao<>(parser);
+		
+		try {
+			List<People> pAll = new ArrayList<>();
+			for(int i = 0; i < 2; i++) {
+				for(int j = 0; j < 2; j++) {
+					DalHints hints = new DalHints().inShard(i).inTableShard(j);
+					List<People> p = dao.query("1=1", new StatementParameters(), hints);
+					Assert.assertTrue(p.size() == 3);
+					pAll.addAll(p);
+				}
+			}
+			dao.delete(new DalHints(), pAll);
+					
+			for(int i = 0; i < 2; i++) {
+				for(int j = 0; j < 2; j++) {
+					DalHints hints = new DalHints().inShard(i).inTableShard(j);
 					int c = dao.count("1=1", new StatementParameters(), hints).intValue();
 					Assert.assertTrue(c == 0);
 				}

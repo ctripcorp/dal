@@ -191,13 +191,13 @@ public class PeoplePortal extends HttpServlet {
 
 	private void getAll(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		DalHints hints = readHints(request);
-		List<People> pList = dao.getAll(hints);
+		List<People> pList = dao.queryAll(hints);
 		buildResponse(pList, hints, response);
 	}
 	
 	private void deleteAll(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		DalHints hints = readHints(request);
-		List<People> pList = dao.getAll(hints);
+		List<People> pList = dao.queryAll(hints);
 		int[] num = dao.delete(hints, pList);
 		buildResponse(num, hints, response);
 	}
@@ -206,7 +206,7 @@ public class PeoplePortal extends HttpServlet {
 		DalHints hints = readHints(request);
 		int pageSize = getInt(request, "pageSize"); 
 		int pageNo = getInt(request, "pageNo");
-		List<People> pList = dao.queryByPage(pageSize, pageNo, hints);
+		List<People> pList = dao.queryAllByPage(pageSize, pageNo, hints);
 		buildResponse(pList, hints, response);
 	}
 

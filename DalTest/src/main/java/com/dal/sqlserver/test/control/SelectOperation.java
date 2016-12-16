@@ -24,18 +24,18 @@ public class SelectOperation implements Processor {
 				value = dao.queryByPk(context.readPeople(), hints);
 				break;
 			case "getAll":
-				value = dao.getAll(hints);
+				value = dao.queryAll(hints);
 				break;
 			case "queryByPage":
 				int pageSize = context.getInt("pageSize"); 
 				int pageNo = context.getInt("pageNo");
-				value  = dao.queryByPage(pageSize, pageNo, hints);
+				value  = dao.queryAllByPage(pageSize, pageNo, hints);
 				break;
 			case "count":
 				value = dao.count(hints);
 				break;
 			case "deleteAll":
-				List<People> pList = dao.getAll(hints);
+				List<People> pList = dao.queryAll(hints);
 				value = dao.delete(hints, pList);
 				break;
 			default:

@@ -114,22 +114,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<!--<configuration>
-					<encoding>${file_encoding}</encoding>
-				</configuration>-->
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<phase>install</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
 					<encoding>${file_encoding}</encoding>

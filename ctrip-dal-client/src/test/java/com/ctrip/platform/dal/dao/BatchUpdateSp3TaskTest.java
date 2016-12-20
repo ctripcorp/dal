@@ -117,7 +117,7 @@ public class BatchUpdateSp3TaskTest {
 			test.execute(hints.inShard(0), getPojosFields(p, parser));
 			
 			DalTableDao<People> dao = new DalTableDao<>(parser);
-			p = dao.query("1=1", new StatementParameters(), new DalHints().inAllShards());
+			p = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
 			
 			for(People pe: p) {
 				Assert.assertTrue(-1==pe.getProvinceID());

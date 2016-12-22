@@ -70,6 +70,14 @@ public class Metrics {
 		metric.log(SQLInfo.COUNT, 1, info.toTag());
 	}
 	
+	public static void reportTitanAccess(String subEnv, long cost) {
+		Map<String, String> tag = new HashMap<String, String>();
+		tag.put(SQLInfo.SUB_ENV, subEnv);
+		tag.put(SQLInfo.TITAN_COST, String.valueOf(cost));
+		MetricManager.getMetricer().log(SQLInfo.TITAN, 1, tag);
+
+	}
+	
 	private static void report(String databaseSet, String version, String databaseType,String operationType){
 		OptInfo info = new OptInfo(databaseSet,version, databaseType, operationType);
 		metric.log(OptInfo.KEY, 1, info.toTag());

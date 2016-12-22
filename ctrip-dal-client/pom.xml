@@ -8,7 +8,7 @@
     </parent>
     <groupId>com.ctrip.platform</groupId>
 	<artifactId>ctrip-dal-client</artifactId>
-	<version>1.2.0</version>
+	<version>1.2.1</version>
 	<name>ctrip-dal-client</name>
 	<properties>
 		<file_encoding>UTF-8</file_encoding>
@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>com.ctrip.platform</groupId>
 			<artifactId>dal-client</artifactId>
-			<version>1.6.0</version>
+			<version>1.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -92,17 +92,6 @@
 				<configuration>
 					<forkMode>never</forkMode>
 					<argLine>-Dfile.encoding=UTF-8</argLine>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-					<encoding>${file_encoding}</encoding>
-					<showDeprecation>true</showDeprecation>
-					<showWarnings>true</showWarnings>
 				</configuration>
 			</plugin>
 			<plugin>

@@ -38,10 +38,13 @@ import com.alibaba.fastjson.JSON;
 import com.ctrip.datasource.configure.AllInOneConfigureReader;
 import com.ctrip.datasource.configure.ConnectionStringParser;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
+import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.sql.logging.DalCatLogger;
+import com.ctrip.platform.dal.sql.logging.Metrics;
 import com.dianping.cat.Cat;
 
 public class TitanProvider implements DataSourceConfigureProvider {
@@ -255,7 +258,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	    
 	    long cost = System.currentTimeMillis() - start;
 		logger.info("Time costed by getting all in one connection string from titan service(ms): " + cost);
-		Cat.logSizeEvent("Accessing Titan cost[Dal Java]", cost);
+		DalCatLogger.reportTitanAccess(subEnv, cost);
+		Metrics.reportTitanAccess(subEnv, cost);
 
 	    return result;
 	}

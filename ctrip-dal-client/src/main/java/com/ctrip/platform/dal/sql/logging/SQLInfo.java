@@ -6,6 +6,10 @@ import java.util.Map;
 public class SQLInfo {
 	public static final String COUNT = "arch.dal.sql.count";
 	public static final String COST = "arch.dal.sql.cost";
+	public static final String TITAN = "arch.dal.titan.access";
+	public static final String ENV = "environment";
+	public static final String SUB_ENV = "subEnvironment";
+	public static final String TITAN_COST = "cost";
 	
 	public static final String CLIENT = "Client";
 	private String version;

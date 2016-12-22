@@ -271,7 +271,7 @@ public class TitanServiceReaderTest {
 	@Test
 	public void testGetFromEnvironmentJvmTitanService() {
 //		You need to rename c:/opt1 to c:/opt if you want to test server.properties
-		System.setProperty("env", "UAT");
+//		System.setProperty("env", "UAT");
 		TitanProvider provider = new TitanProvider();
 		Set<String> dbNames = new HashSet<>();
 		dbNames.add("GSCommunityDB_SELECT_1");

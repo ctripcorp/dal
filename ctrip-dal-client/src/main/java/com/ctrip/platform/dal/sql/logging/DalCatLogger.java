@@ -54,5 +54,15 @@ public class DalCatLogger {
 			e1.printStackTrace();
 		}
 	}
-	
+
+	public static void reportTitanAccess(String subEnv, long cost) {
+		try {
+			if(subEnv != null)
+				Cat.logEvent("Accessing Titan sub environment[Dal Java]", subEnv);
+			
+			Cat.logSizeEvent("Accessing Titan cost[Dal Java]", cost);
+		} catch (Throwable e1) {
+			e1.printStackTrace();
+		}
+	}
 }

@@ -15,5 +15,6 @@ import org.junit.runners.Suite.SuiteClasses;
 	DatabaseSelectorTest.class,
 	DalClientFactoryTest.class,
 	DalClientFactoryLazeLoadTest.class,
+	DalStatusManagerTest.class,
 })
 public class AllTest {}

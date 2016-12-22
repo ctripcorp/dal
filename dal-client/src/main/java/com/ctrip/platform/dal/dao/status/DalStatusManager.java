@@ -10,6 +10,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 
@@ -19,6 +23,8 @@ import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
  *
  */
 public class DalStatusManager {
+	private static Logger logger = LoggerFactory.getLogger(Version.getLoggerName());
+	
 	private static final String GLOBAL_CONFIG_DOMAIN_PREFIX = "com.ctrip.dal.client";
 	private static final String TYPE = "type";
 	private static final String LOGIC_DB_CONFIG_DOMAIN_PREFIX = "com.ctrip.dal.client.DatabaseSet";
@@ -39,6 +45,7 @@ public class DalStatusManager {
 			if(initialized.get() == true)
 				return;
 
+			verifyRegistration();
 			registerGlobal();
 			registerDatabaseSets(config.getDatabaseSetNames());
 			registerDataSources(config.getDataSourceNames());
@@ -48,58 +55,72 @@ public class DalStatusManager {
 		}
 	}
 	
-	private static void registerGlobal() throws Exception{
+	private static void verifyRegistration() throws Exception{
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		
+		if(mbs.isRegistered(getGlobalName(HAStatus.class))){
+			logger.warn("DAL Management Bean has already been initialized. Please make remove your application's Context registration in server.xml under Tomcat conf folder.");
+		};
+	}
+	
+	private static void registerMBean(Object mBean, ObjectName name) throws Exception{
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		if(mbs.isRegistered(name))
+			mbs.unregisterMBean(name);
+
+		mbs.registerMBean(mBean, name);
+	}
+	
+	private static void registerGlobal() throws Exception{
 		haStatusRef.set(new HAStatus());
-		mbs.registerMBean(haStatusRef.get(), getGlobalName(HAStatus.class));
+		registerMBean(haStatusRef.get(), getGlobalName(HAStatus.class));
 		
 		timeoutMarkDownRef.set(new TimeoutMarkdown());
-		mbs.registerMBean(timeoutMarkDownRef.get(), getGlobalName(TimeoutMarkdown.class));
+		registerMBean(timeoutMarkDownRef.get(), getGlobalName(TimeoutMarkdown.class));
 		
 		markdownStatusRef.set(new MarkdownStatus());
-		mbs.registerMBean(markdownStatusRef.get(), getGlobalName(MarkdownStatus.class));
+		registerMBean(markdownStatusRef.get(), getGlobalName(MarkdownStatus.class));
 	}
 
 	private static void registerDatabaseSets(Set<String> logicDbNames) throws Exception {
-		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-		
 		for(String name: logicDbNames) {
 			DatabaseSetStatus status = new DatabaseSetStatus(name);
-			mbs.registerMBean(status, new ObjectName(LOGIC_DB_CONFIG_DOMAIN_PREFIX, TYPE, name));
+			registerMBean(status, new ObjectName(LOGIC_DB_CONFIG_DOMAIN_PREFIX, TYPE, name));
 			logicDbs.put(name, status);
 		}
 	}
 
 	private static void registerDataSources(Set<String> datasourceNames) throws Exception {
-		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-		
 		for(String name: datasourceNames) {
 			DataSourceStatus status = new DataSourceStatus(name);
-			mbs.registerMBean(status, new ObjectName(DATASOURCE_CONFIG_DOMAIN_PREFIX, TYPE, name));
+			registerMBean(status, new ObjectName(DATASOURCE_CONFIG_DOMAIN_PREFIX, TYPE, name));
 			dataSources.put(name, status);
 		}
 	}
 	
-	public static synchronized void shutdown() throws Exception {
+	public static void shutdown() throws Exception {
 		if(initialized.get() == false)
 			return;
 		
-		MarkdownManager.shutdown();
-		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-		mbs.unregisterMBean(getGlobalName(HAStatus.class));
-		mbs.unregisterMBean(getGlobalName(TimeoutMarkdown.class));
-		mbs.unregisterMBean(getGlobalName(MarkdownStatus.class));
-		
-		for(String name: dataSources.keySet())
-			mbs.unregisterMBean(new ObjectName(DATASOURCE_CONFIG_DOMAIN_PREFIX, TYPE, name));
-		dataSources.clear();
-		
-		for(String name: logicDbs.keySet())
-			mbs.unregisterMBean(new ObjectName(LOGIC_DB_CONFIG_DOMAIN_PREFIX, TYPE, name));
-		logicDbs.clear();
-		
-		initialized.set(false);
+		synchronized (DalStatusManager.class) {
+			if(initialized.get() == false)
+				return;
+			MarkdownManager.shutdown();
+			MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+			mbs.unregisterMBean(getGlobalName(HAStatus.class));
+			mbs.unregisterMBean(getGlobalName(TimeoutMarkdown.class));
+			mbs.unregisterMBean(getGlobalName(MarkdownStatus.class));
+			
+			for(String name: dataSources.keySet())
+				mbs.unregisterMBean(new ObjectName(DATASOURCE_CONFIG_DOMAIN_PREFIX, TYPE, name));
+			dataSources.clear();
+			
+			for(String name: logicDbs.keySet())
+				mbs.unregisterMBean(new ObjectName(LOGIC_DB_CONFIG_DOMAIN_PREFIX, TYPE, name));
+			logicDbs.clear();
+			
+			initialized.set(false);
+		}
 	}
 	
 	private static ObjectName getGlobalName(Class clazz) throws Exception {

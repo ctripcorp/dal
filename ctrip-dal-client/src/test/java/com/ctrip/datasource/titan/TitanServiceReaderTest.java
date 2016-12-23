@@ -349,4 +349,16 @@ public class TitanServiceReaderTest {
 //			Assert.fail();
 //		}
 //	}
+	
+	public static void main(String[] args) {
+		TitanServiceReaderTest test = new TitanServiceReaderTest();
+		for(int i = 0; i < 100; i ++) {
+			test.testSubEnvironmentService();
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+	
 }

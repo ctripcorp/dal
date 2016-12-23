@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.sql.logging;
 
+import java.util.HashMap;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.dianping.cat.Cat;
@@ -55,11 +57,16 @@ public class DalCatLogger {
 		}
 	}
 
-	public static void reportTitanAccess(String subEnv, long cost) {
+	public static void reportTitanAccessSunEnv(String subEnv, String allInOneKey) {
 		try {
-			if(subEnv != null)
-				Cat.logEvent("Accessing Titan sub environment[Dal Java]", subEnv);
-			
+			Cat.logEvent("Accessing Titan sub environment[Dal Java]", subEnv, "0", SQLInfo.DB_NAME+ "="+allInOneKey );
+		} catch (Throwable e1) {
+			e1.printStackTrace();
+		}
+	}
+	
+	public static void reportTitanAccessCost(long cost) {
+		try {
 			Cat.logSizeEvent("Accessing Titan cost[Dal Java]", cost);
 		} catch (Throwable e1) {
 			e1.printStackTrace();

@@ -70,10 +70,13 @@ public class Metrics {
 		metric.log(SQLInfo.COUNT, 1, info.toTag());
 	}
 	
-	public static void reportTitanAccess(String subEnv, long cost) {
+	public static void reportTitanAccessSunEnv(String subEnv, String allInOneKey) {
+		if(subEnv == null)
+			return;
+		
 		Map<String, String> tag = new HashMap<String, String>();
 		tag.put(SQLInfo.SUB_ENV, subEnv);
-		tag.put(SQLInfo.TITAN_COST, String.valueOf(cost));
+		tag.put(SQLInfo.DB_NAME, allInOneKey);
 		MetricManager.getMetricer().log(SQLInfo.TITAN, 1, tag);
 
 	}

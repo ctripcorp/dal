@@ -252,14 +252,15 @@ public class TitanProvider implements DataSourceConfigureProvider {
             	logger.info(data.getName()+ " loaded");
             	if(data.getEnv() != null) {
             		logger.info(String.format("Sub environment %s detected.", data.getEnv()));
+            		DalCatLogger.reportTitanAccessSunEnv(subEnv, data.getName());
+            		Metrics.reportTitanAccessSunEnv(subEnv, data.getName());
             	}
             }
         }
 	    
 	    long cost = System.currentTimeMillis() - start;
 		logger.info("Time costed by getting all in one connection string from titan service(ms): " + cost);
-		DalCatLogger.reportTitanAccess(subEnv, cost);
-		Metrics.reportTitanAccess(subEnv, cost);
+		DalCatLogger.reportTitanAccessCost(cost);
 
 	    return result;
 	}

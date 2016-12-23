@@ -352,13 +352,15 @@ public class TitanServiceReaderTest {
 	
 	public static void main(String[] args) {
 		TitanServiceReaderTest test = new TitanServiceReaderTest();
-		for(int i = 0; i < 100; i ++) {
+		for(int i = 0; i < 200; i ++) {
 			test.testSubEnvironmentService();
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-			}
+			System.out.println("*");
+//			try {
+//				Thread.sleep(100);
+//			} catch (InterruptedException e) {
+//			}
 		}
+		System.out.println("done");
 	}
 	
 }

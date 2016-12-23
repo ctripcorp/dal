@@ -33,16 +33,16 @@ public class ${host.getPojoClassName()} implements DalPojo {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 #end
 	@Type(value=${field.getJavaTypeDisplay()})
-	private ${field.getClassDisplayName()} ${field.getUncapitalizedName()};
+	private ${field.getClassDisplayName()} ${field.getCamelCaseUncapitalizedName()};
 #end
 
 #foreach( $field in ${host.getFields()} )
-	public ${field.getClassDisplayName()} get${field.getCapitalizedName()}() {
-		return ${field.getUncapitalizedName()};
+	public ${field.getClassDisplayName()} get${field.getCamelCaseCapitalizedName()}() {
+		return ${field.getCamelCaseUncapitalizedName()};
 	}
 
-	public void set${field.getCapitalizedName()}(${field.getClassDisplayName()} ${field.getUncapitalizedName()}) {
-		this.${field.getUncapitalizedName()} = ${field.getUncapitalizedName()};
+	public void set${field.getCamelCaseCapitalizedName()}(${field.getClassDisplayName()} ${field.getCamelCaseUncapitalizedName()}) {
+		this.${field.getCamelCaseUncapitalizedName()} = ${field.getCamelCaseUncapitalizedName()};
 	}
 
 #end

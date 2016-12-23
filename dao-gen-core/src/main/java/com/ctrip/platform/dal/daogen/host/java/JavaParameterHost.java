@@ -198,20 +198,34 @@ public class JavaParameterHost extends AbstractParameterHost {
 
     public String getCapitalizedName() {
         String tempName = name.replace("@", "");
-        // if (tempName.contains("_")) {
-        // tempName = WordUtils.capitalizeFully(tempName.replace('_', ' '))
-        // .replace(" ", "");
-        // }
+//        if (tempName.contains("_")) {
+//            tempName = WordUtils.capitalizeFully(tempName.replace('_', ' ')).replace(" ", "");
+//        }
         return WordUtils.capitalize(tempName);
+    }
+
+    public String getCamelCaseCapitalizedName() {
+        String temp = name.replace("@", "");
+        if (temp.contains("_")) {
+            temp = WordUtils.capitalizeFully(temp.replace('_', ' ')).replace(" ", "");
+        }
+        return WordUtils.capitalize(temp);
     }
 
     public String getUncapitalizedName() {
         String tempName = name.replace("@", "");
-        // if (tempName.contains("_")) {
-        // tempName = WordUtils.capitalizeFully(tempName.replace('_', ' '))
-        // .replace(" ", "");
-        // }
+//        if (tempName.contains("_")) {
+//            tempName = WordUtils.capitalizeFully(tempName.replace('_', ' ')).replace(" ", "");
+//        }
         return WordUtils.uncapitalize(tempName);
+    }
+
+    public String getCamelCaseUncapitalizedName() {
+        String temp = name.replace("@", "");
+        if (temp.contains("_")) {
+            temp = WordUtils.capitalizeFully(temp.replace('_', ' ')).replace(" ", "");
+        }
+        return WordUtils.uncapitalize(temp);
     }
 
     public String getClassDisplayName() {

@@ -265,11 +265,11 @@ public class DalHints {
 		return this;
 	}
 
-	public DalHints slaveOnly() {
-		set(DalHintEnum.masterOnly, false);
-		return this;
-	}
-	
+//	public DalHints slaveOnly() {
+//		set(DalHintEnum.masterOnly, false);
+//		return this;
+//	}
+//	
 	public DalHints continueOnError() {
 		set(DalHintEnum.continueOnError);
 		return this;

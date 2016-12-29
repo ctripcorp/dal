@@ -53,14 +53,14 @@ public class DatabasePoolConfigParser {
 	private static final String INIT_SQL2 = "initSQL";
 	private static final String OPTION = "option";
 	
-	public static final boolean DEFAULT_TESTWHILEIDLE = true;
+	public static final boolean DEFAULT_TESTWHILEIDLE = false;
 	public static final boolean DEFAULT_TESTONBORROW = false;
 	public static final boolean DEFAULT_TESTONRETURN = false;
 	public static final String DEFAULT_VALIDATIONQUERY = "SELECT 1";
 	public static final long DEFAULT_VALIDATIONINTERVAL = 30000L;
 	public static final int DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS = 30000;
 	public static final int DEFAULT_MAXACTIVE = 100;
-	public static final int DEFAULT_MINIDLE = 10;
+	public static final int DEFAULT_MINIDLE = 0;
 	public static final int DEFAULT_MAXWAIT = 10000;
 	public static final int DEFAULT_INITIALSIZE = 10;
 	public static final int DEFAULT_REMOVEABANDONEDTIMEOUT = 60;

@@ -6,8 +6,10 @@ import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
+import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import org.apache.log4j.Logger;
 
@@ -83,7 +85,13 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
         tableViewSp.setPrefix("");
         tableViewSp.setSuffix("Gen");
 
-        return buildTableHost(codeGenCtx, tableViewSp, sqlBuilder.getTable_name());
+        DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
+        String dbType = DbUtils.getDbType(sqlBuilder.getAllInOneName());
+        if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
+            dbCategory = DatabaseCategory.MySql;
+        }
+
+        return buildTableHost(codeGenCtx, tableViewSp, sqlBuilder.getTable_name(), dbCategory);
     }
 
 }

@@ -1,12 +1,12 @@
 package com.ctrip.platform.dal.daogen.host.csharp;
 
 import com.ctrip.platform.dal.daogen.enums.ConditionType;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.DbType;
 import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 
 public class CSharpParameterHost extends AbstractParameterHost implements Comparable<CSharpParameterHost> {
-
     private String name;
 
     private String comment;
@@ -37,6 +37,11 @@ public class CSharpParameterHost extends AbstractParameterHost implements Compar
     //sql语句中以@开头的参数名称
     private String sqlParamName;
 
+    //列的默认值
+    private String defaultValue;
+
+    private DatabaseCategory dbCategory;
+
     public CSharpParameterHost() {
     }
 
@@ -52,6 +57,8 @@ public class CSharpParameterHost extends AbstractParameterHost implements Compar
         this.nullable = host.isNullable();
         this.valueType = host.isValueType();
         this.comment = host.getComment();
+        this.defaultValue = host.getDefaultValue();
+        this.dbCategory = host.getDbCategory();
     }
 
     public ConditionType getConditionType() {
@@ -189,6 +196,42 @@ public class CSharpParameterHost extends AbstractParameterHost implements Compar
 
     public void setSqlParamName(String sqlParamName) {
         this.sqlParamName = sqlParamName;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    public DatabaseCategory getDbCategory() {
+        return dbCategory;
+    }
+
+    public void setDbCategory(DatabaseCategory dbCategory) {
+        this.dbCategory = dbCategory;
+    }
+
+    public boolean isDataChangeLastTimeField() {
+        boolean result = true;
+        result &= isDataChangeLastTime();
+        result &= isMySql();
+        result &= isDefaultValueDefined();
+        return result;
+    }
+
+    private boolean isDataChangeLastTime() {
+        return name.toUpperCase().equals(DATACHANGE_LASTTIME);
+    }
+
+    private boolean isMySql() {
+        return dbCategory == DatabaseCategory.MySql;
+    }
+
+    private boolean isDefaultValueDefined() {
+        return defaultValue != null;
     }
 
     @Override

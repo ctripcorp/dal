@@ -15,6 +15,15 @@ import java.util.List;
 import java.util.Map;
 
 public class CsharpColumnNameResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
+    private final String COLUMN_NAME = "COLUMN_NAME";
+    private final String TYPE_NAME = "TYPE_NAME";
+    private final String DATA_TYPE = "DATA_TYPE";
+    private final String COLUMN_SIZE = "COLUMN_SIZE";
+    private final String REMARKS = "REMARKS";
+    private final String IS_AUTOINCREMENT = "IS_AUTOINCREMENT";
+    private final String NULLABLE = "NULLABLE";
+    private final String COLUMN_DEF = "COLUMN_DEF";
+
     private String allInOneName;
     private String tableName;
     private DatabaseCategory dbCategory;
@@ -42,16 +51,16 @@ public class CsharpColumnNameResultSetExtractor implements ResultSetExtractor<Li
 
         while (rs.next()) {
             CSharpParameterHost host = new CSharpParameterHost();
-            String columnName = rs.getString("COLUMN_NAME");
+            String columnName = rs.getString(COLUMN_NAME);
             host.setName(columnName);
-            String typeName = rs.getString("TYPE_NAME");
+            String typeName = rs.getString(TYPE_NAME);
             boolean isUnsigned = DbUtils.isColumnUnsigned(typeName);
-            int dataType = rs.getInt("DATA_TYPE");
-            int length = rs.getInt("COLUMN_SIZE");
+            int dataType = rs.getInt(DATA_TYPE);
+            int length = rs.getInt(COLUMN_SIZE);
             // 特殊处理
             DbType dbType = DbUtils.getDotNetDbType(typeName, dataType, length, isUnsigned, dbCategory);
             host.setDbType(dbType);
-            String remark = rs.getString("REMARKS");
+            String remark = rs.getString(REMARKS);
             if (remark == null) {
                 String description = columnComment.get(columnName.toLowerCase());
                 remark = description == null ? "" : description;
@@ -59,13 +68,15 @@ public class CsharpColumnNameResultSetExtractor implements ResultSetExtractor<Li
             host.setComment(remark.replace("\n", " "));
             String type = DbType.getCSharpType(host.getDbType());
             host.setType(type);
-            host.setIdentity(rs.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES"));
-            host.setNullable(rs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
+            host.setIdentity(rs.getString(IS_AUTOINCREMENT).equalsIgnoreCase("YES"));
+            host.setNullable(rs.getShort(NULLABLE) == DatabaseMetaData.columnNullable);
             host.setValueType(Consts.CSharpValueTypes.contains(host.getType()));
             // 仅获取String类型的长度
             if ("string".equalsIgnoreCase(host.getType()))
                 host.setLength(length);
 
+            host.setDefaultValue(rs.getString(COLUMN_DEF));
+            host.setDbCategory(dbCategory);
             allColumns.add(host);
         }
         return allColumns;

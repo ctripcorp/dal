@@ -87,7 +87,7 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
 
         DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
         String dbType = DbUtils.getDbType(sqlBuilder.getAllInOneName());
-        if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
+        if (dbType != null && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
             dbCategory = DatabaseCategory.MySql;
         }
 

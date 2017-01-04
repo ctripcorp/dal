@@ -53,7 +53,7 @@ public class AbstractJavaDataPreparer {
         }
     }
 
-    protected JavaTableHost buildTableHost(CodeGenContext codeGenCtx, GenTaskByTableViewSp tableViewSp, String tableName) throws Exception {
+    protected JavaTableHost buildTableHost(CodeGenContext codeGenCtx, GenTaskByTableViewSp tableViewSp, String tableName, DatabaseCategory dbCategory) throws Exception {
         JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
         if (!DbUtils.tableExists(tableViewSp.getAllInOneName(), tableName)) {
             throw new Exception(String.format("The table[%s,%s] doesn't exist, pls check", tableViewSp.getAllInOneName(), tableName));
@@ -69,7 +69,7 @@ public class AbstractJavaDataPreparer {
 
         // 主键及所有列
         List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(tableViewSp.getAllInOneName(), tableName);
-        List<AbstractParameterHost> allColumnsAbstract = DbUtils.getAllColumnNames(tableViewSp.getAllInOneName(), tableName, new JavaColumnNameResultSetExtractor(tableViewSp.getAllInOneName(), tableName));
+        List<AbstractParameterHost> allColumnsAbstract = DbUtils.getAllColumnNames(tableViewSp.getAllInOneName(), tableName, new JavaColumnNameResultSetExtractor(tableViewSp.getAllInOneName(), tableName, dbCategory));
         if (null == allColumnsAbstract) {
             throw new Exception(String.format("The column names of tabel[%s, %s] is null", tableViewSp.getAllInOneName(), tableName));
         }

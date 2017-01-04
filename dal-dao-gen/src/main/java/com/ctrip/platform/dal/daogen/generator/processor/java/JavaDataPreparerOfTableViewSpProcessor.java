@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
 import com.ctrip.platform.dal.daogen.entity.Progress;
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.java.*;
@@ -97,8 +98,16 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
             final String[] tableNames = StringUtils.split(tableViewSp.getTable_names(), ",");
             final String[] spNames = StringUtils.split(tableViewSp.getSp_names(), ",");
 
-            results.addAll(prepareTable(ctx, progress, _tableHosts, tableViewSp, tableNames));
-            results.addAll(prepareView(ctx, progress, _viewHosts, tableViewSp, viewNames));
+            final DatabaseCategory dbCategory;
+            String dbType = DbUtils.getDbType(tableViewSp.getAllInOneName());
+            if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
+                dbCategory = DatabaseCategory.MySql;
+            } else {
+                dbCategory = DatabaseCategory.SqlServer;
+            }
+
+            results.addAll(prepareTable(ctx, progress, _tableHosts, tableViewSp, tableNames, dbCategory));
+            results.addAll(prepareView(ctx, progress, _viewHosts, tableViewSp, viewNames, dbCategory));
             results.addAll(prepareSp(ctx, progress, _spHosts, _spHostMaps, tableViewSp, spNames));
         }
 
@@ -138,7 +147,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
         return results;
     }
 
-    private List<Callable<ExecuteResult>> prepareView(final JavaCodeGenContext ctx, final Progress progress, final Queue<ViewHost> _viewHosts, final GenTaskByTableViewSp tableViewSp, final String[] viewNames) {
+    private List<Callable<ExecuteResult>> prepareView(final JavaCodeGenContext ctx, final Progress progress, final Queue<ViewHost> _viewHosts, final GenTaskByTableViewSp tableViewSp, final String[] viewNames, final DatabaseCategory dbCategory) {
         List<Callable<ExecuteResult>> results = new ArrayList<>();
         for (final String view : viewNames) {
             Callable<ExecuteResult> viewWorker = new Callable<ExecuteResult>() {
@@ -149,7 +158,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
                     ExecuteResult result = new ExecuteResult("Build View[" + tableViewSp.getAllInOneName() + "." + view + "] Host");
                     progress.setOtherMessage(result.getTaskName());
                     try {
-                        ViewHost vhost = buildViewHost(ctx, tableViewSp, view);
+                        ViewHost vhost = buildViewHost(ctx, tableViewSp, dbCategory, view);
                         if (null != vhost)
                             _viewHosts.add(vhost);
                         result.setSuccessal(true);
@@ -164,18 +173,18 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
         return results;
     }
 
-    private List<Callable<ExecuteResult>> prepareTable(final JavaCodeGenContext ctx, final Progress progress, final Queue<JavaTableHost> _tableHosts, final GenTaskByTableViewSp tableViewSp, final String[] tableNames) {
+    private List<Callable<ExecuteResult>> prepareTable(final JavaCodeGenContext ctx, final Progress progress, final Queue<JavaTableHost> _tableHosts, final GenTaskByTableViewSp tableViewSp, final String[] tableNames, final DatabaseCategory dbCategory) {
         List<Callable<ExecuteResult>> results = new ArrayList<>();
         for (final String tableName : tableNames) {
             Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
                 @Override
                 public ExecuteResult call() throws Exception {
                     /*progress.setOtherMessage("正在为所有表/存储过程生成DAO准备数据.<br/>buildTable:"
-							+ table);*/
+                            + table);*/
                     ExecuteResult result = new ExecuteResult("Build Table[" + tableViewSp.getAllInOneName() + "." + tableName + "] Host");
                     progress.setOtherMessage(result.getTaskName());
                     try {
-                        JavaTableHost tableHost = buildTableHost(ctx, tableViewSp, tableName);
+                        JavaTableHost tableHost = buildTableHost(ctx, tableViewSp, tableName, dbCategory);
                         result.setSuccessal(true);
                         if (null != tableHost)
                             _tableHosts.add(tableHost);
@@ -200,7 +209,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
         }
     }
 
-    private ViewHost buildViewHost(CodeGenContext codeGenCtx, GenTaskByTableViewSp tableViewSp, String viewName) throws Exception {
+    private ViewHost buildViewHost(CodeGenContext codeGenCtx, GenTaskByTableViewSp tableViewSp, DatabaseCategory dbCategory, String viewName) throws Exception {
         JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
         if (!DbUtils.viewExists(tableViewSp.getAllInOneName(), viewName)) {
             log.error(String.format("The view[%s] doesn't exist, pls check", viewName));
@@ -218,7 +227,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
         vhost.setViewName(viewName);
 
         List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(tableViewSp.getAllInOneName(), viewName);
-        List<AbstractParameterHost> params = DbUtils.getAllColumnNames(tableViewSp.getAllInOneName(), viewName, new JavaColumnNameResultSetExtractor(tableViewSp.getAllInOneName(), viewName));
+        List<AbstractParameterHost> params = DbUtils.getAllColumnNames(tableViewSp.getAllInOneName(), viewName, new JavaColumnNameResultSetExtractor(tableViewSp.getAllInOneName(), viewName, dbCategory));
         List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
         if (null == params) {
             throw new Exception(String.format("The column names of view[%s, %s] is null", tableViewSp.getAllInOneName(), viewName));

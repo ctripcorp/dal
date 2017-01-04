@@ -16,6 +16,9 @@ namespace ${host.getNameSpace()}.Entity.DataModel
 		/// $!column.getComment()
 #end
         /// </summary>
+#if($column.isDataChangeLastTimeField())
+        [Ignored]
+#end
         [Column(Name = "${column.getName()}"#if($column.getLength() > 0),Length=${column.getLength()}#end)#if($column.isIdentity()),ID#end#if($column.isPrimary()),PK#end]
         public ${column.getType()}#if($column.isNullable() && $column.isValueType() && $column.getType() != "string")?#end #if($WordUtils.capitalize($column.getName()) == $host.getClassName())${host.getClassName()}_Gen#{else}${WordUtils.capitalize($column.getName())}#end { get; set; }
 #end

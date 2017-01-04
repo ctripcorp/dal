@@ -186,7 +186,7 @@ public class GenTaskBySqlBuilderResource {
     @Path("getMockValue")
     public Status getMockValue(@FormParam("db_name") String set_name, @FormParam("table_name") String table_name,
                                @FormParam("crud_type") String crud_type, @FormParam("fields") String fields,
-                               @FormParam("condition") String condition, @FormParam("pagination") boolean pagination) {
+                               @FormParam("condition") String condition, @FormParam("pagination") boolean pagination) throws Exception {
         Status status = Status.OK;
         int[] sqlTypes = getSqlTypes(set_name, table_name, crud_type, fields, condition);
         Object[] values = SQLValidation.mockStringValues(sqlTypes);
@@ -199,7 +199,7 @@ public class GenTaskBySqlBuilderResource {
         return status;
     }
 
-    private int[] getSqlTypes(String set_name, String table_name, String crud_type, String fields, String condition) {
+    private int[] getSqlTypes(String set_name, String table_name, String crud_type, String fields, String condition) throws Exception {
         if ("select".equalsIgnoreCase(crud_type)) {
             return getSelectSqlTypes(set_name, table_name, condition);
         } else if ("insert".equalsIgnoreCase(crud_type)) {
@@ -212,11 +212,11 @@ public class GenTaskBySqlBuilderResource {
         return new int[0];
     }
 
-    private int[] getDeleteSqlTypes(String set_name, String table_name, String condition) {
+    private int[] getDeleteSqlTypes(String set_name, String table_name, String condition) throws Exception {
         return getWhereConditionSqlTypes(set_name, table_name, condition);
     }
 
-    private int[] getUpdateSqlTypes(String set_name, String table_name, String fields, String condition) {
+    private int[] getUpdateSqlTypes(String set_name, String table_name, String fields, String condition) throws Exception {
         int[] fieldSqlTypes = getFieldSqlTypes(set_name, table_name, fields);
         int[] whereConditionSqlTypes = getWhereConditionSqlTypes(set_name, table_name, condition);
         int[] mergeSqlTypes = new int[fieldSqlTypes.length + whereConditionSqlTypes.length];
@@ -229,15 +229,15 @@ public class GenTaskBySqlBuilderResource {
         return mergeSqlTypes;
     }
 
-    private int[] getInsertSqlTypes(String set_name, String table_name, String fields) {
+    private int[] getInsertSqlTypes(String set_name, String table_name, String fields) throws Exception {
         return getFieldSqlTypes(set_name, table_name, fields);
     }
 
-    private int[] getSelectSqlTypes(String set_name, String table_name, String condition) {
+    private int[] getSelectSqlTypes(String set_name, String table_name, String condition) throws Exception {
         return getWhereConditionSqlTypes(set_name, table_name, condition);
     }
 
-    private int[] getFieldSqlTypes(String set_name, String table_name, String fields) {
+    private int[] getFieldSqlTypes(String set_name, String table_name, String fields) throws Exception {
         if (fields == null || "".equals(fields)) {
             return new int[0];
         }
@@ -251,7 +251,7 @@ public class GenTaskBySqlBuilderResource {
         return insertFieldSqlTypes;
     }
 
-    private int[] getWhereConditionSqlTypes(String set_name, String table_name, String condition) {
+    private int[] getWhereConditionSqlTypes(String set_name, String table_name, String condition) throws Exception {
         int whereConditionCount = 0;
         if (condition != null && !condition.isEmpty()) {
             String[] whereConditions = condition.split(";");
@@ -287,10 +287,11 @@ public class GenTaskBySqlBuilderResource {
      * @param table_name
      * @return <column alias, sqltype>
      */
-    private Map<String, Integer> getTableColumnSqlType(String set_name, String table_name) {
+    private Map<String, Integer> getTableColumnSqlType(String set_name, String table_name) throws Exception {
         DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
         String dbName = databaseSetEntry.getConnectionString();
-        List<AbstractParameterHost> paramsHost = DbUtils.getAllColumnNames(dbName, table_name, new JavaColumnNameResultSetExtractor(dbName, table_name));
+        DatabaseCategory dbCategory = DbUtils.getDatabaseCategory(dbName);
+        List<AbstractParameterHost> paramsHost = DbUtils.getAllColumnNames(dbName, table_name, new JavaColumnNameResultSetExtractor(dbName, table_name, dbCategory));
         Map<String, Integer> map = new HashMap<>();
         if (paramsHost != null) {
             for (int i = 0; i < paramsHost.size(); i++) {
@@ -307,7 +308,7 @@ public class GenTaskBySqlBuilderResource {
     public Status validateSQL(@FormParam("db_name") String set_name, @FormParam("table_name") String table_name,
                               @FormParam("crud_type") String crud_type, @FormParam("fields") String fields,
                               @FormParam("condition") String condition, @FormParam("sql_content") String sql_content,
-                              @FormParam("pagination") boolean pagination, @FormParam("mockValues") String mockValues) {
+                              @FormParam("pagination") boolean pagination, @FormParam("mockValues") String mockValues) throws Exception {
         Status status = Status.OK;
         sql_content = sql_content.replaceAll("[@:]\\w+", "?");
         int[] sqlTypes = getSqlTypes(set_name, table_name, crud_type, fields, condition);

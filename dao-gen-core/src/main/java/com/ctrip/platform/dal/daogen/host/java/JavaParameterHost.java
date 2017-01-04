@@ -54,6 +54,8 @@ public class JavaParameterHost extends AbstractParameterHost {
 
     private DatabaseCategory dbCategory;
 
+    private int dataType;
+
     public JavaParameterHost() {
     }
 
@@ -76,6 +78,7 @@ public class JavaParameterHost extends AbstractParameterHost {
         this.comment = host.getComment();
         this.defaultValue = host.getDefaultValue();
         this.dbCategory = host.getDbCategory();
+        this.dataType = host.getDataType();
     }
 
     public boolean isInParameter() {
@@ -284,20 +287,33 @@ public class JavaParameterHost extends AbstractParameterHost {
         this.dbCategory = dbCategory;
     }
 
+    public int getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(int dataType) {
+        this.dataType = dataType;
+    }
+
     public boolean isDataChangeLastTimeField() {
         boolean result = true;
-        result &= isDataChangeLastTime();
         result &= isMySql();
+        result &= isDataChangeLastTime();
+        result &= isTimestampType();
         result &= isDefaultValueDefined();
         return result;
+    }
+
+    private boolean isMySql() {
+        return dbCategory == DatabaseCategory.MySql;
     }
 
     private boolean isDataChangeLastTime() {
         return name.toUpperCase().equals(DATACHANGE_LASTTIME);
     }
 
-    private boolean isMySql() {
-        return dbCategory == DatabaseCategory.MySql;
+    private boolean isTimestampType() {
+        return dataType == Types.TIMESTAMP;
     }
 
     private boolean isDefaultValueDefined() {

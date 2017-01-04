@@ -56,6 +56,7 @@ public class CsharpColumnNameResultSetExtractor implements ResultSetExtractor<Li
             String typeName = rs.getString(TYPE_NAME);
             boolean isUnsigned = DbUtils.isColumnUnsigned(typeName);
             int dataType = rs.getInt(DATA_TYPE);
+            host.setDataType(dataType);
             int length = rs.getInt(COLUMN_SIZE);
             // 特殊处理
             DbType dbType = DbUtils.getDotNetDbType(typeName, dataType, length, isUnsigned, dbCategory);

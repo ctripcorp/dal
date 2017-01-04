@@ -21,6 +21,7 @@ public class JavaColumnNameResultSetExtractor implements ResultSetExtractor<List
     private final String IS_AUTOINCREMENT = "IS_AUTOINCREMENT";
     private final String REMARKS = "REMARKS";
     private final String COLUMN_DEF = "COLUMN_DEF";
+    private final String DATA_TYPE = "DATA_TYPE";
 
     private static Logger log = Logger.getLogger(JavaColumnNameResultSetExtractor.class);
 
@@ -83,6 +84,8 @@ public class JavaColumnNameResultSetExtractor implements ResultSetExtractor<List
                 host.setComment(remarks.replace("\n", " "));
                 host.setDefaultValue(rs.getString(COLUMN_DEF));
                 host.setDbCategory(dbCategory);
+                int dataType = rs.getInt(DATA_TYPE);
+                host.setDataType(dataType);
                 allColumns.add(host);
             }
         }

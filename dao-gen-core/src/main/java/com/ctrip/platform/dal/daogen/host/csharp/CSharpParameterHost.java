@@ -6,6 +6,8 @@ import com.ctrip.platform.dal.daogen.enums.DbType;
 import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 
+import java.sql.Types;
+
 public class CSharpParameterHost extends AbstractParameterHost implements Comparable<CSharpParameterHost> {
     private String name;
 
@@ -42,6 +44,8 @@ public class CSharpParameterHost extends AbstractParameterHost implements Compar
 
     private DatabaseCategory dbCategory;
 
+    private int dataType;
+
     public CSharpParameterHost() {
     }
 
@@ -59,6 +63,7 @@ public class CSharpParameterHost extends AbstractParameterHost implements Compar
         this.comment = host.getComment();
         this.defaultValue = host.getDefaultValue();
         this.dbCategory = host.getDbCategory();
+        this.dataType = host.getDataType();
     }
 
     public ConditionType getConditionType() {
@@ -214,16 +219,29 @@ public class CSharpParameterHost extends AbstractParameterHost implements Compar
         this.dbCategory = dbCategory;
     }
 
+    public int getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(int dataType) {
+        this.dataType = dataType;
+    }
+
     public boolean isDataChangeLastTimeField() {
         boolean result = true;
-        result &= isDataChangeLastTime();
         result &= isMySql();
+        result &= isDataChangeLastTime();
+        result &= isTimestampType();
         result &= isDefaultValueDefined();
         return result;
     }
 
     private boolean isDataChangeLastTime() {
         return name.toUpperCase().equals(DATACHANGE_LASTTIME);
+    }
+
+    private boolean isTimestampType() {
+        return dataType == Types.TIMESTAMP;
     }
 
     private boolean isMySql() {

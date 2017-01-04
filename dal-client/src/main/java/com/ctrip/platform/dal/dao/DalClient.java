@@ -88,7 +88,7 @@ public interface DalClient {
 	
 	/**
 	 * Execute list of commands in the same transaction. This is useful when you have several
-	 * commands and you want to combine them in the flexible way.
+	 * commands and you want to combine them in a flexible way.
 	 * 
 	 * @param commands Container that holds commands
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.

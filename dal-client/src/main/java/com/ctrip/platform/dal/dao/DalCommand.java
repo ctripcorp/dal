@@ -4,7 +4,7 @@ import java.sql.SQLException;
 
 /**
  * Wrapper for all the transaction operation. All the actions executed in 
- * the execute method will be treated as on transaction.
+ * the execute method will be executed in the same transaction.
  * @author jhhe
  */
 public interface DalCommand {

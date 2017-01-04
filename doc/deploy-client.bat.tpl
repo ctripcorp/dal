@@ -1,7 +1,7 @@
 @echo off
 set pomPath=dal-client project path
 set targetPath=%pomPath%\target\
-set version=1.5.0
+set version=dal version here, e.g. 1.5.0
 set nexusUrl=your nexus url
 set repoId=your repo id
 

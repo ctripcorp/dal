@@ -35,15 +35,8 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 	
 	private Map<String, ?> filterFileds(Map<String, ?> fields) {
 		for (String columnName : parser.getColumnNames()) {
-			if (fields.get(columnName) == null)
+			if (fields.get(columnName) == null || notInsertableColumns.contains(columnName))
 				fields.remove(columnName);
-		}
-		
-		if(notInsertableColumns.size() == 0)
-			return fields;
-		
-		for(String columnName: notInsertableColumns) {
-			fields.remove(columnName);
 		}
 		
 		return fields;

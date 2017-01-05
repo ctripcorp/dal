@@ -139,6 +139,30 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 		assertEquals("1122334455", model.getAddress());
 	}
 		
+	@Test
+	public void testNotUpdatableField() throws SQLException {
+		//Table Index and Address is not updatable
+		SingleUpdateTask<NonUpdatableModel> test = new SingleUpdateTask<>();
+		DalParser<NonUpdatableModel> parser = new DalDefaultJpaParser<>(NonUpdatableModel.class, getDbName());
+		test.initialize(parser);
+		DalHints hints = new DalHints();
+		
+		ClientTestModel model = getAll().get(0);
+		String oldAddr = model.getAddress();
+		Integer oldTableIndex = model.getTableIndex();
+		
+		model.setDbIndex(-100);
+		model.setAddress("1122334455");
+		model.setTableIndex(100);
+		
+		int result = test.execute(hints, getParser().getFields(model));
+		assertIntEquals(1, result);
+		model = getDao().queryByPk(model, new DalHints());
+		assertEquals(oldAddr, model.getAddress());
+		assertEquals(oldTableIndex, model.getTableIndex());
+		assertEquals(-100, model.getDbIndex().intValue());
+	}
+		
 	@Entity
 	@Database(name="MySqlSimpleDbTableShard")
 	@Table(name="dal_client_test")
@@ -262,6 +286,96 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 		@Column(name="last_changed", updatable=false)
 		@Type(value=Types.TIMESTAMP)
 		@Version
+		private Timestamp lastChanged;
+
+		public Integer getId() {
+			return id;
+		}
+
+		public void setId(Integer id) {
+			this.id = id;
+		}
+
+		public Integer getQuantity() {
+			return quantity;
+		}
+
+		public void setQuantity(Integer quantity) {
+			this.quantity = quantity;
+		}
+
+		public Integer getDbIndex() {
+			return dbIndex;
+		}
+
+		public void setDbIndex(Integer dbIndex) {
+			this.dbIndex = dbIndex;
+		}
+
+		public Integer getTableIndex() {
+			return tableIndex;
+		}
+
+		public void setTableIndex(Integer tableIndex) {
+			this.tableIndex = tableIndex;
+		}
+		
+		public Short getType() {
+			return type;
+		}
+
+		public void setType(Short type) {
+			this.type = type;
+		}
+
+		public String getAddress() {
+			return address;
+		}
+
+		public void setAddress(String address) {
+			this.address = address;
+		}
+
+		public Timestamp getLastChanged() {
+			return lastChanged;
+		}
+
+		public void setLastChanged(Timestamp lastChanged) {
+			this.lastChanged = lastChanged;
+		}
+	}
+	
+	@Entity
+	@Database(name="MySqlSimpleDbTableShard")
+	@Table(name="dal_client_test")
+	public static class NonUpdatableModel implements DalPojo {
+		@Id
+		@Column(name="id")
+		@Type(value=Types.INTEGER)
+		private Integer id;
+		
+		@Column(name="quantity")
+		@Type(value=Types.INTEGER)
+		private Integer quantity;
+		
+		@Column(name="dbIndex")
+		@Type(value=Types.INTEGER)
+		private Integer dbIndex;
+		
+		@Column(name="tableIndex", updatable=false)
+		@Type(value=Types.INTEGER)
+		private Integer tableIndex;
+		
+		@Column(name="type")
+		@Type(value=Types.SMALLINT)
+		private Short type;
+		
+		@Column(name="address", updatable=false)
+		@Type(value=Types.VARCHAR)
+		private String address;
+		
+		@Column(name="last_changed")
+		@Type(value=Types.TIMESTAMP)
 		private Timestamp lastChanged;
 
 		public Integer getId() {

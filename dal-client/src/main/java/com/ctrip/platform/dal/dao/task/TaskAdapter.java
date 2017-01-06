@@ -7,11 +7,13 @@ import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.locateTableSha
 
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -20,10 +22,12 @@ import java.util.Set;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.exceptions.DalException;
 
 public class TaskAdapter<T> implements DaoTask<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
@@ -57,7 +61,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	protected String setVersionValueTmpl;
 	protected boolean hasVersion;
 	protected boolean isVersionUpdatable;
-	protected Map<String, Boolean> defaultUpdateColumnNames;
+	protected Set<String> defaultUpdateColumnNames;
 
 	
 	public boolean tableShardingEnabled;
@@ -86,18 +90,14 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	}
 	
 	private void initUpdateColumns() {
-		defaultUpdateColumnNames = new LinkedHashMap<>();
-		
-		for(String column: parser.getUpdatableColumnNames()) {
-			defaultUpdateColumnNames.put(column, false);
-		}
+		defaultUpdateColumnNames = new LinkedHashSet<>(Arrays.asList(parser.getUpdatableColumnNames()));
 		
 		for (String column : parser.getPrimaryKeyNames()) {
 			defaultUpdateColumnNames.remove(column);
 		}
 		
 		hasVersion = parser.getVersionColumn() != null;
-		isVersionUpdatable = hasVersion ? defaultUpdateColumnNames.containsKey(parser.getVersionColumn()) : false;
+		isVersionUpdatable = hasVersion ? defaultUpdateColumnNames.contains(parser.getVersionColumn()) : false;
 
 		// Remove Version from updatable columns
 		if(hasVersion)
@@ -308,6 +308,17 @@ public class TaskAdapter<T> implements DaoTask<T> {
 				fields.remove(columnName);
 		}
 		return fields;
+	}
+
+	public Set<String> filterColumns(DalHints hints) {
+		Set<String> qulifiedColumns = new HashSet<>(defaultUpdateColumnNames);
+		if(hints.is(DalHintEnum.includedColumns))
+			qulifiedColumns.retainAll(hints.getIncluded());
+			
+		if(hints.is(DalHintEnum.excludedColumns))
+			qulifiedColumns.removeAll(hints.getExcluded());
+			
+		return qulifiedColumns;
 	}
 
 	public Map<String, ?> removeAutoIncrementPrimaryFields(Map<String, ?> fields){

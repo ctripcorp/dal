@@ -2,8 +2,8 @@ package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,13 +45,19 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		int[] result = client.batchUpdate(batchUpdateSql, parametersList, hints);
 		return result;
 	}
-	
+
 	private Map<String, Boolean> filterUpdateColumnNames(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws DalException {
-		if(hints.isUpdateNullField())
-			return defaultUpdateColumnNames;
+		Set<String> qualifiedColumns = filterColumns(hints);
+		Map<String, Boolean> columnStatus = new HashMap<String, Boolean>();
+		for(String column: qualifiedColumns)
+			columnStatus.put(column, false);
 		
-		String[] columnsToCheck = defaultUpdateColumnNames.keySet().toArray(new String[defaultUpdateColumnNames.size()]);
-		Set<String> nullFields = new HashSet<>(defaultUpdateColumnNames.keySet());
+		if(hints.isUpdateNullField()) {
+			return columnStatus;
+		}
+		
+		String[] columnsToCheck = qualifiedColumns.toArray(new String[qualifiedColumns.size()]);
+		Set<String> nullFields = new HashSet<>(qualifiedColumns);
 		Set<String> notNullFields = new HashSet<>(nullFields);
 		
 		for (Integer index :daoPojos.keySet()) {
@@ -70,17 +76,16 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 			}
 		}
 		
-		Map<String, Boolean> updateColumnNames = new LinkedHashMap<>(defaultUpdateColumnNames);
 		for(String nullField: nullFields)
-			updateColumnNames.remove(nullField);
+			columnStatus.remove(nullField);
 		
-		Set<String> remain = new HashSet<>(updateColumnNames.keySet());
+		Set<String> remain = new HashSet<>(columnStatus.keySet());
 		remain.removeAll(notNullFields);
 		
 		for(String maybeNullField: remain)
-			updateColumnNames.put(maybeNullField, true);
+			columnStatus.put(maybeNullField, true);
 
-		return updateColumnNames;
+		return columnStatus;
 	}
 
 	private String buildBatchUpdateSql(String tableName, Map<String, Boolean> pojoFieldStatus) {

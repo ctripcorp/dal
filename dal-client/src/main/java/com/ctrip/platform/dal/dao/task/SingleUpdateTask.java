@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -41,13 +42,15 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 
 		return version;
 	}
-
+	
 	private void filterUpdatableFields(DalHints hints, Map<String, ?> fields) throws DalException {
+		Set<String> updatableColumns = filterColumns(hints);
+			
 		// Remove null value when hints is not DalHintEnum.updateNullField or
 		// primary key or not updatable
 		for (String column : parser.getColumnNames()) {
 			if ((fields.get(column) == null && !hints.isUpdateNullField())
-					|| isPrimaryKey(column) || !defaultUpdateColumnNames.containsKey(column))
+					|| isPrimaryKey(column) || !updatableColumns.contains(column))
 				fields.remove(column);
 		}
 	}

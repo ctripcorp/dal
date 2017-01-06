@@ -1,7 +1,9 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,8 +117,8 @@ public class DalHints {
 		return value.toString();
 	}
 
-	public String[] getStrings(DalHintEnum hint) {
-		return (String[])hints.get(hint);
+	public Set<String> getStringSet(DalHintEnum hint) {
+		return (Set<String>)hints.get(hint);
 	}
 	
 	public DalHints set(DalHintEnum hint) {
@@ -367,5 +369,29 @@ public class DalHints {
 	
 	public DalHints retrieveAllResultsFromSp() {
 		return set(DalHintEnum.retrieveAllSpResults);
-	}	
+	}
+	
+	public DalHints include(Set<String> columns) {
+		return set(DalHintEnum.includedColumns, columns);
+	}
+
+	public DalHints exclude(Set<String> columns) {
+		return set(DalHintEnum.excludedColumns, columns);
+	}
+
+	public DalHints include(String... columns) {
+		return set(DalHintEnum.includedColumns, new HashSet<>(Arrays.asList(columns)));
+	}
+
+	public DalHints exclude(String... columns) {
+		return set(DalHintEnum.excludedColumns, new HashSet<>(Arrays.asList(columns)));
+	}
+
+	public Set<String> getIncluded() {
+		return getStringSet(DalHintEnum.includedColumns);
+	}
+
+	public Set<String> getExcluded() {
+		return getStringSet(DalHintEnum.excludedColumns);
+	}
 }

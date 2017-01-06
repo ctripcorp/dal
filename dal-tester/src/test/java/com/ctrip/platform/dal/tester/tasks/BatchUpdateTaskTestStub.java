@@ -358,6 +358,87 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 	}
 
 	@Test
+	public void testIncludeColumns() throws SQLException {
+		BatchUpdateTask<UpdatableIntVersionModel> test = new BatchUpdateTask<>();
+		DalParser<UpdatableIntVersionModel> parser = new DalDefaultJpaParser<>(UpdatableIntVersionModel.class, getDbName());
+		test.initialize(parser);
+		DalTableDao<UpdatableIntVersionModel> dao = new DalTableDao<>(parser);
+		
+		DalHints hints = new DalHints().include("address", "quantity");
+		
+		List<UpdatableIntVersionModel> pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableIntVersionModel model: pojos){
+			model.setQuantity(500);
+			model.setDbIndex(100);
+			model.setAddress("1122334455");
+		}
+		
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		assertArrayEquals(new int[]{1, 1, 1}, result);
+
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableIntVersionModel model: pojos) {
+			assertEquals("1122334455", model.getAddress());
+			assertEquals(500, model.getQuantity().intValue());
+			assertEquals(0, model.getDbIndex().intValue());
+		}
+	}
+
+	@Test
+	public void testExcludeColumns() throws SQLException {
+		BatchUpdateTask<UpdatableIntVersionModel> test = new BatchUpdateTask<>();
+		DalParser<UpdatableIntVersionModel> parser = new DalDefaultJpaParser<>(UpdatableIntVersionModel.class, getDbName());
+		test.initialize(parser);
+		DalTableDao<UpdatableIntVersionModel> dao = new DalTableDao<>(parser);
+		
+		DalHints hints = new DalHints().exclude("dbIndex");
+		
+		List<UpdatableIntVersionModel> pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableIntVersionModel model: pojos){
+			model.setQuantity(500);
+			model.setDbIndex(100);
+			model.setAddress("1122334455");
+		}
+		
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		assertArrayEquals(new int[]{1, 1, 1}, result);
+
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableIntVersionModel model: pojos) {
+			assertEquals("1122334455", model.getAddress());
+			assertEquals(500, model.getQuantity().intValue());
+			assertEquals(0, model.getDbIndex().intValue());
+		}
+	}
+
+	@Test
+	public void testIncludeExcludeColumns() throws SQLException {
+		BatchUpdateTask<UpdatableIntVersionModel> test = new BatchUpdateTask<>();
+		DalParser<UpdatableIntVersionModel> parser = new DalDefaultJpaParser<>(UpdatableIntVersionModel.class, getDbName());
+		test.initialize(parser);
+		DalTableDao<UpdatableIntVersionModel> dao = new DalTableDao<>(parser);
+		
+		DalHints hints = new DalHints().exclude("dbIndex").include("quantity", "dbIndex", "address");
+		
+		List<UpdatableIntVersionModel> pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableIntVersionModel model: pojos){
+			model.setQuantity(500);
+			model.setDbIndex(100);
+			model.setAddress("1122334455");
+		}
+		
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		assertArrayEquals(new int[]{1, 1, 1}, result);
+
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableIntVersionModel model: pojos) {
+			assertEquals("1122334455", model.getAddress());
+			assertEquals(500, model.getQuantity().intValue());
+			assertEquals(0, model.getDbIndex().intValue());
+		}
+	}
+
+	@Test
 	public void testCreateMerger() {
 		BatchUpdateTask<ClientTestModel> test = new BatchUpdateTask<>();
 		assertNotNull(test.createMerger());

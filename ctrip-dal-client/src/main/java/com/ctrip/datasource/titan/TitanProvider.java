@@ -145,28 +145,24 @@ public class TitanProvider implements DataSourceConfigureProvider {
 			dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal);
 		} else {
 			// If it is not local dev environment or the AllInOne file does not exist
-			try {
-				Map<String, TitanData> rawConnData = getConnectionStrings(dbNames);
-				dataSourceConfigures = getDataSourceConfigures(rawConnData);
-				return;
-			} catch (Throwable e) {
-				if(!svcUrl.equals(titanMapping.get("PRO")))
-					throw new RuntimeException(e);
-			}
+			boolean isProdEnv = svcUrl.equals(titanMapping.get("PRO"));
+			boolean sameName = !isProdEnv || isProdEnv && isProdQualifiedName(dbNames);
 			
-			logger.warn("Cannot found config from Titan service for " + dbNames);
-			logger.warn("This is normal for production. Dal will try to reloacte with \"_SH\"");
-			logger.info("Try to reloacte with \"_SH\"");
-			
-			Map<String, TitanData> rawConnStrings = new HashMap<>();
+			Set<String> queryNames = sameName ? dbNames : getProdDbNames(dbNames);
+
 			try {
-				Map<String, TitanData> tmpRawConnStrings = getConnectionStrings(getProdDbNames(dbNames));
-				for(String name: dbNames)
-					rawConnStrings.put(name, tmpRawConnStrings.get(name + PROD_SUFFIX));
+				Map<String, TitanData> rawConnStrings = new HashMap<>();
+				Map<String, TitanData> tmpRawConnStrings = getConnectionStrings(queryNames);
+				
+				if(sameName) {
+					rawConnStrings = tmpRawConnStrings;
+				}else{
+					for(String name: dbNames)
+						rawConnStrings.put(name, tmpRawConnStrings.get(name + PROD_SUFFIX));
+				}
 				dataSourceConfigures = getDataSourceConfigures(rawConnStrings);
 			} catch (Exception e) {
-				logger.error("Failed to retrieve config with \"_SH\"", e);
-				throw new RuntimeException("Failed to retrieve config with \"_SH\"", e);
+				throw new RuntimeException(e);
 			}
 		}
 	}
@@ -176,12 +172,17 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		return dataSourceConfigures.get(dbName);
 	}
 	
+	private boolean isProdQualifiedName(Set<String> dbNames) {
+		return dbNames.iterator().next().endsWith(PROD_SUFFIX);
+	}
+	
 	private Set<String> getProdDbNames(Set<String> dbNames) {
 		/*
 		 * Ctrip all in one key is not consist in between PROD and non PROD environment.
 		 * In PROD, the all in one name will be added with '_SH' suffix. To simplify suer
 		 * end configuration, we auto add the '_SH' to name to get config.
 		 */
+		logger.info("It is production environment and titan key will be appended with _SH suffix");
 		Set<String> prodDbNames = new HashSet<>();
 		for(String name: dbNames)
 			prodDbNames.add(name + PROD_SUFFIX);

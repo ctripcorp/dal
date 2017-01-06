@@ -163,6 +163,93 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 		assertEquals(-100, model.getDbIndex().intValue());
 	}
 		
+	@Test
+	public void testIncludeColumns() throws SQLException {
+		//Table Index and Address is not updatable
+		SingleUpdateTask<NonUpdatableModel> test = new SingleUpdateTask<>();
+		DalParser<NonUpdatableModel> parser = new DalDefaultJpaParser<>(NonUpdatableModel.class, getDbName());
+		test.initialize(parser);
+		DalHints hints = new DalHints();
+		
+		ClientTestModel model = getAll().get(0);
+		String oldAddr = model.getAddress();
+		Integer oldTableIndex = model.getTableIndex();
+		Integer oldQuantity= model.getQuantity();
+		
+		model.setDbIndex(-100);
+		model.setAddress("1122334455");
+		model.setTableIndex(100);
+		model.setQuantity(500);
+		model.setType((short)8);
+		
+		int result = test.execute(hints.include("dbIndex", "type"), getParser().getFields(model));
+		assertIntEquals(1, result);
+		model = getDao().queryByPk(model, new DalHints());
+		assertEquals(oldAddr, model.getAddress());
+		assertEquals(oldTableIndex, model.getTableIndex());
+		assertEquals(oldQuantity, model.getQuantity());
+		assertEquals(-100, model.getDbIndex().intValue());
+		assertEquals(8, model.getType().shortValue());
+	}
+		
+	@Test
+	public void testExcludeColumns() throws SQLException {
+		//Table Index and Address is not updatable
+		SingleUpdateTask<NonUpdatableModel> test = new SingleUpdateTask<>();
+		DalParser<NonUpdatableModel> parser = new DalDefaultJpaParser<>(NonUpdatableModel.class, getDbName());
+		test.initialize(parser);
+		DalHints hints = new DalHints();
+		
+		ClientTestModel model = getAll().get(0);
+		String oldAddr = model.getAddress();
+		Integer oldTableIndex = model.getTableIndex();
+		Integer oldQuantity= model.getQuantity();
+		
+		model.setDbIndex(-100);
+		model.setAddress("1122334455");
+		model.setTableIndex(100);
+		model.setQuantity(500);
+		model.setType((short)8);
+		
+		int result = test.execute(hints.exclude("quantity"), getParser().getFields(model));
+		assertIntEquals(1, result);
+		model = getDao().queryByPk(model, new DalHints());
+		assertEquals(oldAddr, model.getAddress());
+		assertEquals(oldTableIndex, model.getTableIndex());
+		assertEquals(oldQuantity, model.getQuantity());
+		assertEquals(-100, model.getDbIndex().intValue());
+		assertEquals(8, model.getType().shortValue());
+	}
+		
+	@Test
+	public void testIncludeExcludeColumns() throws SQLException {
+		//Table Index and Address is not updatable
+		SingleUpdateTask<NonUpdatableModel> test = new SingleUpdateTask<>();
+		DalParser<NonUpdatableModel> parser = new DalDefaultJpaParser<>(NonUpdatableModel.class, getDbName());
+		test.initialize(parser);
+		DalHints hints = new DalHints();
+		
+		ClientTestModel model = getAll().get(0);
+		String oldAddr = model.getAddress();
+		Integer oldTableIndex = model.getTableIndex();
+		Integer oldQuantity= model.getQuantity();
+		
+		model.setDbIndex(-100);
+		model.setAddress("1122334455");
+		model.setTableIndex(100);
+		model.setQuantity(500);
+		model.setType((short)8);
+		
+		int result = test.execute(hints.include("dbIndex", "type", "quantity").exclude("quantity"), getParser().getFields(model));
+		assertIntEquals(1, result);
+		model = getDao().queryByPk(model, new DalHints());
+		assertEquals(oldAddr, model.getAddress());
+		assertEquals(oldTableIndex, model.getTableIndex());
+		assertEquals(oldQuantity, model.getQuantity());
+		assertEquals(-100, model.getDbIndex().intValue());
+		assertEquals(8, model.getType().shortValue());
+	}
+		
 	@Entity
 	@Database(name="MySqlSimpleDbTableShard")
 	@Table(name="dal_client_test")

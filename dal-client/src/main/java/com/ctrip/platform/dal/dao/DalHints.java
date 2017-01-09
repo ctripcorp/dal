@@ -394,4 +394,8 @@ public class DalHints {
 	public Set<String> getExcluded() {
 		return getStringSet(DalHintEnum.excludedColumns);
 	}
+	
+	public DalHints ignorMissingFields() {
+		return set(DalHintEnum.ignorMissingFields, true);
+	}
 }

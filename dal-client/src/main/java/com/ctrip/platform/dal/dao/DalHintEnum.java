@@ -204,9 +204,14 @@ public enum DalHintEnum {
 	 * cloumns that will be included
 	 */
 	includedColumns,
+	
+	/**
+	 * If it is OK to allow some column not defined in pojo
+	 */
+	ignorMissingFields,
 //	
 //	/**
-//	 * Allow partial query fields to be ORM
+//	 * Allow partial query fields to be ORM. This is used DalQueryDao mostly 
 //	 */
 //	allowPartial,
 }

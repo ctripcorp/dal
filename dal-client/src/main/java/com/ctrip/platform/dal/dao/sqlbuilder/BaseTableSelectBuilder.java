@@ -228,7 +228,7 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 		
 		//Otherwise we assume it is partial. The default implementation of generated code should support this
 		if(mapper instanceof SupportPartialResultMapping)
-			return ((SupportPartialResultMapping)mapper).mapWith(selectedColumns);
+			return ((SupportPartialResultMapping)mapper).mapWith(selectedColumns, hints.is(DalHintEnum.ignorMissingFields));
 		
 		// We assume user will support it
 		return mapper;

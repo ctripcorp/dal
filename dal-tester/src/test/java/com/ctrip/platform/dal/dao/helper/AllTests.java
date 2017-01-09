@@ -8,5 +8,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	DalFirstResultMergerTest.class,
 	DalSingleResultMergerTest.class,
+	DalTableDaoUnitTest.class,
+	DalQueryDaoUnitTest.class,
 })
 public class AllTests {}

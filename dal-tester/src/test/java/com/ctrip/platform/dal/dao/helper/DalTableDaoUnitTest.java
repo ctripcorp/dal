@@ -37,7 +37,7 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
  * JUnit test of PersonDao class.
  * Before run the unit test, you should initiate the test data and change all the asserts correspond to you case.
 **/
-public class TableDaoUnitTest {
+public class DalTableDaoUnitTest {
 
 	private static final String DATA_BASE = "MySqlSimpleShard";
 	//ShardColModShardStrategy;columns=CountryID;mod=2;tableColumns=CityID;tableMod=4;separator=_;shardedTables=person

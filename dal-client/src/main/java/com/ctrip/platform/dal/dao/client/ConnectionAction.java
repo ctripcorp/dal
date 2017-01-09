@@ -18,6 +18,7 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.Version;
+import com.ctrip.platform.dal.exceptions.DalException;
 
 public abstract class ConnectionAction<T> {
 	public DalEventEnum operation;
@@ -202,7 +203,7 @@ public abstract class ConnectionAction<T> {
 
 	private void handleException(Throwable e) throws SQLException {
 		if(e != null)
-			throw e instanceof SQLException ? (SQLException)e : new SQLException(e);
+			throw DalException.wrap(e);
 	}
 
 	private String wrapAPPID(String sql){

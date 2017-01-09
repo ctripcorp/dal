@@ -62,6 +62,11 @@ public enum ErrorCode {
 	KeyGenerationFailOrNotCompleted(ErrorClassify.Validate, 5105, "The insertion is fail or not completed yet."),
 	
 	/**
+	 * The insertion is fail or not completed yet.
+	 */
+	FieldNotExists(ErrorClassify.Validate, 5106, "There is no field defined in pojo %s for column %s."),
+	
+	/**
 	 * Sql cannot be null
 	 */
 	ValidateSql(ErrorClassify.Validate, 5200, "The given sql is null"),

@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalRowMapper;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialResultMapping<T> {
 	
@@ -26,11 +28,13 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialRe
 			T instance = this.clazz.newInstance();
 			for (int i = 0; i < columnNames.length; i++) {
 				Field field = fieldsMap.get(columnNames[i]);
+				if(field == null)
+					throw new DalException(ErrorCode.FieldNotExists, clazz.getName(), columnNames[i]);
 				setValue(field, instance, rs.getObject(columnNames[i]));
 			}
 			return instance;
 		} catch (Throwable e) {
-			throw new SQLException(e);
+			throw DalException.wrap(e);
 		}
 	}
 

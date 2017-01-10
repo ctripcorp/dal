@@ -23,10 +23,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.codegen.Person;
-import com.ctrip.platform.dal.codegen.PersonDao;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalPojo;
 import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.annotation.Type;
 import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
@@ -39,28 +39,13 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
 **/
 public class DalTableDaoUnitTest {
 
-	private static final String DATA_BASE = "MySqlSimpleShard";
-	//ShardColModShardStrategy;columns=CountryID;mod=2;tableColumns=CityID;tableMod=4;separator=_;shardedTables=person
-
-	private static PersonDao dao = null;
+	private static DalTableDao<Person> dao = null;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		/**
-		* Initialize DalClientFactory.
-		* The Dal.config can be specified from class-path or local file path.
-		* One of follow three need to be enabled.
-		**/
-//		DalClientFactory.initClientFactory(); // load from class-path Dal.config
-//		DalClientFactory.warmUpConnections();
-		dao = new PersonDao();
+		dao = new DalTableDao<>(new DalDefaultJpaParser<>(Person.class));
 	}
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		
-	}
-	
 	@Before
 	public void setUp() throws Exception {
 		tearDown();
@@ -128,7 +113,7 @@ public class DalTableDaoUnitTest {
 	public void tearDown() throws Exception {
 		for(int i = 0; i < 2; i++) {
 			for(int j = 0; j < 4; j++) {
-				dao.delete(new DalHints().inShard(i).inTableShard(j), dao.queryAll(new DalHints().inShard(i).inTableShard(j)));
+				dao.delete(new DalHints().inShard(i).inTableShard(j), dao.query("1=1", new StatementParameters(), new DalHints().inShard(i).inTableShard(j)));
 			}
 		}
 	}
@@ -162,7 +147,7 @@ public class DalTableDaoUnitTest {
 	}
 	
 	@Test
-	public void testFindByPartial() throws Exception {
+	public void testFindBySelectedField() throws Exception {
 		DalTableDao<Person> client = new DalTableDao<>(new DalDefaultJpaParser<>(Person.class));
 		List<Integer> peopleIds = new ArrayList<>();
 		peopleIds.add(1);
@@ -187,6 +172,51 @@ public class DalTableDaoUnitTest {
 		} catch (DalException e) {
 			Assert.fail();
 		}
+	}
+	
+	@Test
+	public void testFindByPartial() throws Exception {
+		DalTableDao<Person> client = new DalTableDao<>(new DalDefaultJpaParser<>(Person.class));
+		List<Person> pl;
+		
+		pl = client.query("1=1", new StatementParameters(), new DalHints().partialQuery("Name","CountryID").inShard(1).inTableShard(1));
+		assertPersonList(pl);
+		
+		pl = client.queryFrom("1=1", new StatementParameters(), new DalHints().partialQuery("Name","CountryID").inAllShards().inTableShard(1), 1, 10);
+		assertPersonList(pl);
+
+		Person sample = new Person();
+		sample.setCountryID(1);
+		pl = client.queryLike(sample, new DalHints().partialQuery("Name","CountryID").inAllShards().inTableShard(1));
+		assertPersonList(pl);
+		
+		pl = client.queryTop("1=1", new StatementParameters(), new DalHints().partialQuery("Name","CountryID").inAllShards().inTableShard(1), 100);
+		assertPersonList(pl);
+		
+		Person test = client.queryByPk(1, new DalHints().partialQuery("Name","CountryID").inShard(1).inTableShard(1));
+		assertPerson(test);
+		
+		test.setPeopleID(1);
+		test = client.queryByPk(test, new DalHints().partialQuery("Name","CountryID").inShard(1).inTableShard(1));
+		assertPerson(test);
+		
+		test = client.queryFirst("1=1", new StatementParameters(), new DalHints().partialQuery("Name","CountryID").inShard(1).inTableShard(1));
+		assertPerson(test);
+	}
+	
+	private void assertPersonList(List<Person> pl) {
+		for(Person p : pl)
+			assertPerson(p);
+	}
+	
+	private void assertPerson(Person p) {
+		Assert.assertNotNull(p.getName());
+		Assert.assertNotNull(p.getCountryID());
+		
+		Assert.assertNull(p.getProvinceID());
+		Assert.assertNull(p.getPeopleID());
+		Assert.assertNull(p.getDataChange_LastTime());
+		Assert.assertNull(p.getCityID());
 	}
 	
 	@Entity

@@ -20,8 +20,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.ctrip.platform.dal.codegen.FreeEntityPojo;
-import com.ctrip.platform.dal.codegen.Person;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -125,7 +123,7 @@ public class DalQueryDaoUnitTest {
 		builder.mapWith(freeEntityPojoRowMapper).requireFirst().nullable();
 
 		return (FreeEntityPojo) queryDao.query(builder, parameters,
-				hints.include("PeopleID", "Name", "CityID"));
+				hints.partialQuery("PeopleID", "Name", "CityID"));
 	}
 
 	public FreeEntityPartialPojo findFreeFirstMissingFields(String name,
@@ -146,7 +144,7 @@ public class DalQueryDaoUnitTest {
 				cityIds);
 		builder.mapWith(freeEntityPojoRowMapper).requireFirst().nullable();
 
-		return (FreeEntityPartialPojo) queryDao.query(builder, parameters, hints.include("PeopleID", "Name", "", "CityID", "ProvinceID"));
+		return (FreeEntityPartialPojo) queryDao.query(builder, parameters, hints.partialQuery("PeopleID", "Name", "", "CityID", "ProvinceID"));
 	}
 
 	@Test

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dao-gen-core</artifactId>
-    <version>1.0.9</version>
+    <version>1.1.0</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
         <spring-version>4.0.0.RELEASE</spring-version>
@@ -44,6 +44,8 @@
         <junit-version>4.4</junit-version>
         <sqljdbc-version>4.0.2206</sqljdbc-version>
         <tomcat-jdbc-version>7.0.52</tomcat-jdbc-version>
+        <httpclient-version>4.5.2</httpclient-version>
+        <fastjson-version>1.2.23</fastjson-version>
     </properties>
     <dependencies>
         <dependency>
@@ -210,6 +212,16 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson-version}</version>
         </dependency>
     </dependencies>
     <build>

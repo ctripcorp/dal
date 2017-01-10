@@ -5,10 +5,7 @@ import com.ctrip.platform.dal.daogen.domain.ColumnMetaData;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.domain.TableSpNames;
-import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
-import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
-import com.ctrip.platform.dal.daogen.entity.LoginUser;
-import com.ctrip.platform.dal.daogen.entity.UserGroup;
+import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.utils.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -470,7 +467,29 @@ public class DatabaseResource {
         return result;
     }
 
-    public static void main(String[] args) {
-        System.out.println("123".indexOf("12"));
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("validation")
+    public Status validationKey(@QueryParam("key") String key) throws Exception {
+        Status status = Status.ERROR;
+        Response res = WebUtil.getAllInOneResponse(key, null);
+        String httpCode = res.getStatus();
+        if (!httpCode.equals(WebUtil.HTTP_CODE)) {
+            status.setInfo("Access error.");
+            return status;
+        }
+
+        status = status.OK;
+        ResponseData[] data = res.getData();
+        if (data != null && data.length > 0) {
+            String error = data[0].getErrorMessage();
+            if (error != null && !error.isEmpty()) {
+                status.setInfo(error);
+            } else {
+                status.setInfo(key + " 有效。");
+            }
+        }
+
+        return status;
     }
 }

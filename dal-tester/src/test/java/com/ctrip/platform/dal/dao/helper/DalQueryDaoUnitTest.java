@@ -114,7 +114,7 @@ public class DalQueryDaoUnitTest {
 
 		FreeSelectSqlBuilder<FreeEntityPojo> builder = new FreeSelectSqlBuilder<>(
 				dbCategory);
-		builder.setTemplate("SELECT PeopleID, Name, CityID FROM Person WHERE name LIKE ? and CityId in (?) ORDER BY name");
+		builder.setTemplate("SELECT PeopleID, Name, CityID, ProvinceID, CountryID, DataChange_LastTime FROM Person WHERE name LIKE ? and CityId in (?) ORDER BY name");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;
 		parameters.setSensitive(i++, "name", Types.VARCHAR, name);

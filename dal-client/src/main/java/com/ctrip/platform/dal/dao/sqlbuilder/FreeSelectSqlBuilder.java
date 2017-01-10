@@ -166,15 +166,14 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 	}
 	
 	private <T> DalRowMapper<T> checkAllowPartial(DalHints hints) throws SQLException {
-		if(!hints.is(DalHintEnum.includedColumns))
+		if(!(mapper instanceof SupportPartialResultMapping))
+			return mapper;
+		
+		if(!hints.is(DalHintEnum.partialQuery))
 			return mapper;
 		
 		//Otherwise we assume it is partial. The default implementation of generated code should support this
-		if(mapper instanceof SupportPartialResultMapping)
-			return ((SupportPartialResultMapping)mapper).mapWith(hints.getIncluded().toArray(new String[hints.getIncluded().size()]), hints.is(DalHintEnum.ignorMissingFields));
-
-		// We assume user will support it
-		return mapper;
+		return ((SupportPartialResultMapping)mapper).mapWith(hints.getPartialQueryColumns(), hints.is(DalHintEnum.ignorMissingFields));
 	}
 
 }

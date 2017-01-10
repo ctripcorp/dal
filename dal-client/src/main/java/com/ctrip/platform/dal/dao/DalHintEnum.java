@@ -196,12 +196,12 @@ public enum DalHintEnum {
 	enableIdentityInsert,
 	
 	/**
-	 * cloumns that will be excluded
+	 * Columns that will be excluded for update
 	 */
 	excludedColumns,
 	
 	/**
-	 * cloumns that will be included
+	 * Columns that will be included for update
 	 */
 	includedColumns,
 	
@@ -209,9 +209,9 @@ public enum DalHintEnum {
 	 * If it is OK to allow some column not defined in pojo
 	 */
 	ignorMissingFields,
-//	
-//	/**
-//	 * Allow partial query fields to be ORM. This is used DalQueryDao mostly 
-//	 */
-//	allowPartial,
+	
+	/**
+	 * Columns that will be included for query
+	 */
+	partialQuery,
 }

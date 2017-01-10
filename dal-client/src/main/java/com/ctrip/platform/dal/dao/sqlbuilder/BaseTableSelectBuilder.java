@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.sqlbuilder;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -223,15 +224,20 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	}
 	
 	private <T> DalRowMapper<T> checkAllowPartial(DalHints hints) throws SQLException {
-		if(selectedColumns == null)
+		if(!(mapper instanceof SupportPartialResultMapping))
 			return mapper;
 		
-		//Otherwise we assume it is partial. The default implementation of generated code should support this
-		if(mapper instanceof SupportPartialResultMapping)
-			return ((SupportPartialResultMapping)mapper).mapWith(selectedColumns, hints.is(DalHintEnum.ignorMissingFields));
+		// If it is COUNT case, we do nothing here
+		if(customized == COUNT)
+			return mapper;
 		
-		// We assume user will support it
-		return mapper;
+		if(customized == ALL_COLUMNS && !hints.is(DalHintEnum.partialQuery))
+			return mapper;
+		
+		String[] queryColumns = hints.is(DalHintEnum.partialQuery) ? hints.getPartialQueryColumns() : selectedColumns;
+				
+		//It is partial query, we need to create another mapper for this.
+		return ((SupportPartialResultMapping)mapper).mapWith(queryColumns, hints.is(DalHintEnum.ignorMissingFields));
 	}
 	
 	private String buildFirst(String effectiveTableName){

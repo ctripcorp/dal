@@ -394,4 +394,20 @@ public class DalHints {
 	public Set<String> getExcluded() {
 		return getStringSet(DalHintEnum.excludedColumns);
 	}
+	
+	public DalHints ignorMissingFields() {
+		return set(DalHintEnum.ignorMissingFields, true);
+	}
+	
+	public DalHints partialQuery(Set<String> columns) {
+		return set(DalHintEnum.partialQuery, columns);
+	}
+	
+	public DalHints partialQuery(String... columns) {
+		return set(DalHintEnum.partialQuery, new HashSet<>(Arrays.asList(columns)));
+	}
+	
+	public String[] getPartialQueryColumns() {
+		return getStringSet(DalHintEnum.partialQuery).toArray(new String[getStringSet(DalHintEnum.partialQuery).size()]);
+	}
 }

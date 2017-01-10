@@ -6,12 +6,15 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.DalRowMapper;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialResultMapping<T> {
 	
 	private Class<T> clazz = null;
 	private String[] columnNames = null;
 	private Map<String, Field> fieldsMap = null;
+	private boolean ignorMissingFields = false;
 	
 	public DalDefaultJpaMapper(Class<T> clazz) throws SQLException {
 		this.clazz = clazz;
@@ -26,11 +29,16 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialRe
 			T instance = this.clazz.newInstance();
 			for (int i = 0; i < columnNames.length; i++) {
 				Field field = fieldsMap.get(columnNames[i]);
+				if(field == null)
+					if(ignorMissingFields)
+						continue;
+					else
+						throw new DalException(ErrorCode.FieldNotExists, clazz.getName(), columnNames[i]);
 				setValue(field, instance, rs.getObject(columnNames[i]));
 			}
 			return instance;
 		} catch (Throwable e) {
-			throw new SQLException(e);
+			throw DalException.wrap(e);
 		}
 	}
 
@@ -69,9 +77,9 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialRe
 	}
 	
 	@Override
-	public DalRowMapper<T> mapWith(String[] selectedColumns)
+	public DalRowMapper<T> mapWith(String[] selectedColumns, boolean ignorMissingFields)
 			throws SQLException {
-		return new DalDefaultJpaMapper<T>(this, selectedColumns);
+		return new DalDefaultJpaMapper<T>(this, selectedColumns, ignorMissingFields);
 	}
 	
 	/**
@@ -82,9 +90,10 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialRe
 	 * @param clazz
 	 * @throws SQLException
 	 */
-	private DalDefaultJpaMapper(DalDefaultJpaMapper<T> rawMapper, String[] columnNames) throws SQLException {
+	private DalDefaultJpaMapper(DalDefaultJpaMapper<T> rawMapper, String[] columnNames, boolean ignorMissingFields) throws SQLException {
 		this.clazz = rawMapper.clazz;
 		this.columnNames = columnNames;
 		this.fieldsMap = rawMapper.fieldsMap;
+		this.ignorMissingFields = ignorMissingFields;
 	}	
 }

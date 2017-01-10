@@ -112,8 +112,8 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> implements Supp
 	}
 
 	@Override
-	public DalRowMapper<T> mapWith(String[] selectedColumns)
+	public DalRowMapper<T> mapWith(String[] selectedColumns, boolean ignorMissingFields)
 			throws SQLException {
-		return rowMapper.mapWith(selectedColumns);
+		return rowMapper.mapWith(selectedColumns, ignorMissingFields);
 	}
 }

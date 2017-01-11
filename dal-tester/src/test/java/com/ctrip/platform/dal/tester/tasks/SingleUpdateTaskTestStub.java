@@ -124,6 +124,30 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 	}
 	
 	@Test
+	public void testUpdatableWithVersionByDao() throws SQLException {
+		DalParser<UpdatableVersionModel> parser = new DalDefaultJpaParser<>(UpdatableVersionModel.class, getDbName());
+		DalTableDao<UpdatableVersionModel> dao = new DalTableDao<>(parser);
+		DalHints hints = new DalHints();
+		
+		UpdatableVersionModel model = dao.query("1=1", new StatementParameters(), new DalHints()).get(0);
+		model.setAddress("1122334455");
+		model.getLastChanged().setTime(model.getLastChanged().getTime()+100);
+		
+		int result = dao.update(hints, model);
+		assertIntEquals(0, result);
+		model = dao.queryByPk(model, new DalHints());
+		assertEquals("SH INFO", model.getAddress());
+		
+		model = dao.query("1=1", new StatementParameters(), new DalHints()).get(0);
+		model.setAddress("1122334455");
+		result = dao.update(hints, model);
+		assertIntEquals(1, result);
+		
+		model = dao.queryByPk(model, new DalHints());
+		assertEquals("1122334455", model.getAddress());
+	}
+	
+	@Test
 	public void testNotUpdatableVersion() throws SQLException {
 		SingleUpdateTask<NonUpdatableVersionModel> test = new SingleUpdateTask<>();
 		DalParser<NonUpdatableVersionModel> parser = new DalDefaultJpaParser<>(NonUpdatableVersionModel.class, getDbName());

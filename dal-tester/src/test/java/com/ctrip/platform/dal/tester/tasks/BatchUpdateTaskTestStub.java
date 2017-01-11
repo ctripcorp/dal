@@ -308,6 +308,48 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 	}
 	
 	@Test
+	public void testUpdatableWithVersionByDao() throws SQLException {
+		DalParser<UpdatableVersionModel> parser = new DalDefaultJpaParser<>(UpdatableVersionModel.class, getDbName());
+		DalTableDao<UpdatableVersionModel> dao = new DalTableDao<UpdatableVersionModel>(parser);
+		
+		DalHints hints = new DalHints();
+		
+		List<UpdatableVersionModel> pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableVersionModel model: pojos){
+			model.setAddress("1122334455");//Old value is SH INFO
+			Timestamp t = model.getLastChanged();
+			t.setTime(t.getTime()+100);
+			model.setLastChanged(t);
+		}
+		
+		int[] result = dao.batchUpdate(hints, pojos);
+		assertArrayEquals(new int[]{0, 0 , 0}, result);
+		
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableVersionModel model: pojos)
+			assertEquals("SH INFO", model.getAddress());//Still old value because version is incorrect
+
+		// Now the right case
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		long[] oldVer = new long[3];
+		int i = 0;
+		for(UpdatableVersionModel model: pojos){
+			model.setAddress("1122334455");
+			oldVer[i++] = model.getLastChanged().getTime();
+		}
+		
+		result = dao.batchUpdate(hints, pojos);
+		assertArrayEquals(new int[]{1, 1, 1}, result);
+
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		i = 0;
+		for(UpdatableVersionModel model: pojos){
+			assertEquals("1122334455", model.getAddress());
+			Assert.assertTrue(oldVer[i++] <= model.getLastChanged().getTime());
+		}
+	}
+	
+	@Test
 	public void testUpdatableWithIntVersion() throws SQLException {
 		BatchUpdateTask<UpdatableIntVersionModel> test = new BatchUpdateTask<>();
 		DalParser<UpdatableIntVersionModel> parser = new DalDefaultJpaParser<>(UpdatableIntVersionModel.class, getDbName());
@@ -325,6 +367,47 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 		}
 		
 		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		assertArrayEquals(new int[]{1, 1, 1}, result);
+
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		i = 0;
+		for(UpdatableIntVersionModel model: pojos) {
+			assertEquals("1122334455", model.getAddress());
+			Assert.assertTrue(oldValue[i++]+1 == model.getTableIndex());
+		}
+	}
+	
+	@Test
+	public void testUpdatableWithIntVersionByDao() throws SQLException {
+		DalParser<UpdatableIntVersionModel> parser = new DalDefaultJpaParser<>(UpdatableIntVersionModel.class, getDbName());
+		DalTableDao<UpdatableIntVersionModel> dao = new DalTableDao<>(parser);
+		
+		DalHints hints = new DalHints();
+		
+		List<UpdatableIntVersionModel> pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		int i = 0;
+		for(UpdatableIntVersionModel model: pojos){
+			model.setAddress("1122334455");
+			model.setTableIndex(-1);// Make the version incorrect
+		}
+		
+		int[] result = dao.batchUpdate(hints, pojos);
+		assertArrayEquals(new int[]{0, 0, 0}, result);
+		
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		for(UpdatableIntVersionModel model: pojos)
+			assertEquals("SH INFO", model.getAddress());//Still old value because version is incorrect
+
+		// Now the right case
+		Integer[] oldValue = new Integer[3];
+		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
+		i = 0;
+		for(UpdatableIntVersionModel model: pojos){
+			model.setAddress("1122334455");
+			oldValue[i++] = model.getTableIndex();
+		}
+		
+		result = dao.batchUpdate(hints, pojos);
 		assertArrayEquals(new int[]{1, 1, 1}, result);
 
 		pojos = dao.query("1=1", new StatementParameters(), new DalHints());

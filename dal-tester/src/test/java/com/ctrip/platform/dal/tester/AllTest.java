@@ -22,5 +22,6 @@ import org.junit.runners.Suite.SuiteClasses;
 	com.ctrip.platform.dal.tester.crossShard.AllTest.class,
 	com.ctrip.platform.dal.tester.datasource.AllTests.class,
 	com.ctrip.platform.dal.codegen.AllTests.class,
+	com.ctrip.platform.dal.codegen.v141.AllTests.class,
 })
 public class AllTest {}

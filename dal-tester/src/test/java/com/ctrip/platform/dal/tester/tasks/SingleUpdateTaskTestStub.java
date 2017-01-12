@@ -217,6 +217,35 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 	}
 		
 	@Test
+	public void testIncludeColumnsByDao() throws SQLException {
+		//Table Index and Address is not updatable
+		DalParser<NonUpdatableModel> parser = new DalDefaultJpaParser<>(NonUpdatableModel.class, getDbName());
+		DalHints hints = new DalHints();
+		DalTableDao<NonUpdatableModel> dao = new DalTableDao<>(parser);
+		
+		NonUpdatableModel model = dao.query("1=1", new StatementParameters(), new DalHints()).get(0);
+		String oldAddr = model.getAddress();
+		Integer oldTableIndex = model.getTableIndex();
+		Integer oldQuantity= model.getQuantity();
+		
+		model.setDbIndex(-100);
+		model.setAddress("1122334455");
+		model.setTableIndex(100);
+		model.setQuantity(500);
+		model.setType((short)8);
+		
+		int result = dao.update(hints.include("dbIndex", "type"), model);
+		assertIntEquals(1, result);
+		
+		model = dao.queryByPk(model, new DalHints());
+		assertEquals(oldAddr, model.getAddress());
+		assertEquals(oldTableIndex, model.getTableIndex());
+		assertEquals(oldQuantity, model.getQuantity());
+		assertEquals(-100, model.getDbIndex().intValue());
+		assertEquals(8, model.getType().shortValue());
+	}
+		
+	@Test
 	public void testExcludeColumns() throws SQLException {
 		//Table Index and Address is not updatable
 		SingleUpdateTask<NonUpdatableModel> test = new SingleUpdateTask<>();

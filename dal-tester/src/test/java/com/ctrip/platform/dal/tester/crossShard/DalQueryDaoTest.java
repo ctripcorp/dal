@@ -35,6 +35,7 @@ import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.annotation.Type;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
 import com.ctrip.platform.dal.dao.helper.DalListMerger;
 import com.ctrip.platform.dal.dao.helper.SQLParser;
 import com.ctrip.platform.dal.dao.helper.ShortRowMapper;
@@ -710,6 +711,27 @@ public abstract class DalQueryDaoTest {
 				new ClientTestDalRowMapper());
 	}
 	
+	/**
+	 * The template method under test
+	 * @throws SQLException 
+	 */
+	private ClientTestModel queryForObjectInAllShardPartial(DalHints hints) throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		parameters.set(1, 1);
+		return new DalQueryDao(DATABASE_NAME).queryForObject(
+				sqlObject, parameters, 
+				hints.inAllShards(), 
+				new DalDefaultJpaMapper<>(ClientTestModel.class));
+	}
+	
+	private void assertPartial(ClientTestModel result) {
+		assertEquals(0, result.getId());
+		assertEquals(0, result.getType());
+		assertNull(result.getLastChanged());
+		assertNotNull(result.getQuantity());
+		assertEquals("SH INFO", result.getAddress());
+	}
+	
 	@Test
 	public void testQueryForObjectAllShards() {
 		try {
@@ -722,6 +744,17 @@ public abstract class DalQueryDaoTest {
 		}
 	}
 	
+	@Test
+	public void testQueryForObjectAllShardsPartial() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result = queryForObjectInAllShardPartial(hints.partialQuery("quantity", "address"));
+			assertPartial(result);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+
 	@Test
 	public void testQueryForObjectAllShardsFail() {
 		try {
@@ -746,6 +779,20 @@ public abstract class DalQueryDaoTest {
 			Future<ClientTestModel> fr = (Future<ClientTestModel>)hints.getAsyncResult();
 			assertNotNull(fr.get());
 			assertEquals(1, fr.get().id);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryForObjectAllShardsAsyncPartial() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result = queryForObjectInAllShardPartial(hints.asyncExecution().partialQuery("quantity", "address"));
+			assertNull(result);
+			Future<ClientTestModel> fr = (Future<ClientTestModel>)hints.getAsyncResult();
+			result = fr.get();
+			assertPartial(result);
 		} catch (Exception e) {
 			fail();
 		}
@@ -1017,7 +1064,7 @@ public abstract class DalQueryDaoTest {
 					new ClientTestDalRowMapper());
 			assertNull(result);
 			Future<ClientTestModel> fr = (Future<ClientTestModel>)hints.getAsyncResult();
-			fr.get();
+			result = fr.get();
 			fail();
 		} catch (Exception e) {
 		}

@@ -132,8 +132,13 @@
                     <div class="row-fluid">
                         <div class="control-group">
                             <label class="control-label popup_label" style="width: 130px;">All-In-One
-                                Name:</label> <input id="allinonename" class="span8 input-sm"
-                                                     type="text">
+                                Name:</label> <input id="allinonename" class="span5 input-sm"
+                                                     type="text"><a id="validateKeyname"
+                                                                    class="ctip"
+                                                                    data-toggle="tooltip" data-placement="right"
+                                                                    html="1"
+                                                                    title="检查All-In-One Name有效性">
+                            &nbsp;检查有效性</a>
                         </div>
                     </div>
                     <div class="row-fluid" style="margin-top: 12px">

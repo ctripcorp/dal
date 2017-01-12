@@ -1,8 +1,8 @@
-(function (window, undefined) {
+(function ($, window, document, undefined) {
     var Render = function () {
     };
 
-    var refreshAllDB = function () {
+    function refreshAllDB() {
         w2ui['grid'].clear();
         cblock($("body"));
         $.get("/rest/groupdb/allgroupdbs", {rand: Math.random()}, function (data) {
@@ -19,7 +19,7 @@
         });
     };
 
-    var addDB = function () {
+    function addDB() {
         $.get("/rest/project/userGroups", {root: true, rand: Math.random()}).done(function (data) {
             if (data.length > 0 && data[0]['id'] > 0) {
                 $("#error_msg").html('');
@@ -67,7 +67,7 @@
         });
     };
 
-    var editDB = function () {
+    function editDB() {
         $("#update_error_msg").html('');
         $("#update_db_step1").show();
         $("#update_db_step2").hide();
@@ -115,7 +115,7 @@
         });
     };
 
-    var delDB = function () {
+    function delDB() {
         var records = w2ui['grid'].getSelection();
         var record = w2ui['grid'].get(records[0]);
         if (record != null) {
@@ -136,6 +136,16 @@
             alert('请选择一个database！');
         }
     };
+
+    function isDefaultUser() {
+        cblock($("body"));
+        $.get("/rest/user/isDefaultUser", {rand: Math.random()}, function (data) {
+            if (data == "true") {
+                $("#validateKeyname").hide();
+            }
+            $("body").unblock();
+        });
+    }
 
     Render.prototype = {
         render_layout: function (render_obj) {
@@ -674,5 +684,22 @@
                 $("body").unblock();
             });
         });
+
+        $(document.body).on("click", "#validateKeyname", function () {
+            var key = $("#allinonename").val();
+            if (key.length == 0)
+                return false;
+            $.getJSON("/rest/db/validation", {
+                    "key": key
+                },
+                function (data) {
+                    if (data.info.length > 0) {
+                        $("#error_msg").html(data.info);
+                    }
+                }
+            );
+        });
+
+        isDefaultUser();
     });
-})(window);
+})(jQuery, window, document);

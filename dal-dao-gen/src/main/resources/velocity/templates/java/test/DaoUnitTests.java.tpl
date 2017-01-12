@@ -100,7 +100,11 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	public void testDelete1() throws Exception {
 	    DalHints hints = new DalHints();
 		${host.getPojoClassName()} daoPojo = createPojo(1);
-		int affected = dao.delete(hints, daoPojo); 
+		/**
+		 * WARNING !!!
+		 * To test delete, please make sure you can easily restore all the data. otherwise data will not be revovered.
+		 */
+		//int affected = dao.delete(hints, daoPojo); 
 		assertEquals(1, affected);
 	}
 #end
@@ -110,7 +114,12 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	public void testDelete2() throws Exception {
 		DalHints hints = new DalHints();
 		List<${host.getPojoClassName()}> daoPojos = dao.queryAll(null);
-		int[] affected = dao.delete(hints, daoPojos);
+		/**
+		 * WARNING !!!
+		 * To test delete, please make sure you can easily restore all the data. otherwise data will not be revovered.
+		 */
+
+//		int[] affected = dao.delete(hints, daoPojos);
 		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  affected);
 	}
 #end
@@ -120,7 +129,11 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	public void testBatchDelete() throws Exception {
 		DalHints hints = new DalHints();
 		List<${host.getPojoClassName()}> daoPojos = dao.queryAll(null);
-		int[] affected = dao.batchDelete(hints, daoPojos);
+		/**
+		 * WARNING !!!
+		 * To test batchDelete, please make sure you can easily restore all the data. otherwise data will not be revovered.
+		 */
+//		int[] affected = dao.batchDelete(hints, daoPojos);
 		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  affected);
 	}
 #end

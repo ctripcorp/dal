@@ -91,7 +91,7 @@ public final class DalQueryDao {
 	 */
 	public void query(String sql, StatementParameters parameters, DalHints hints, DalRowCallback callback) 
 			throws SQLException {
-		query(new FreeSelectSqlBuilder<>(dbCategory).setTemplate(sql).extractorWith(new DalRowCallbackExtractor(callback)), parameters, hints);
+		query(new FreeSelectSqlBuilder<>(dbCategory).setTemplate(sql).extractorWith(new DalRowCallbackExtractor(callback)).nullable(), parameters, hints);
 	}
 	
 	/**

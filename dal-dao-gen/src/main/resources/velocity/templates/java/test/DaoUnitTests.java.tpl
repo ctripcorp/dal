@@ -104,8 +104,8 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 		 * WARNING !!!
 		 * To test delete, please make sure you can easily restore all the data. otherwise data will not be revovered.
 		 */
-		//int affected = dao.delete(hints, daoPojo); 
-		assertEquals(1, affected);
+//		int affected = dao.delete(hints, daoPojo); 
+//		assertEquals(1, affected);
 	}
 #end
 #if($host.generateAPI(86,87))
@@ -113,14 +113,14 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	@Test
 	public void testDelete2() throws Exception {
 		DalHints hints = new DalHints();
-		List<${host.getPojoClassName()}> daoPojos = dao.queryAll(null);
+//		List<${host.getPojoClassName()}> daoPojos = dao.queryAll(null);
 		/**
 		 * WARNING !!!
 		 * To test delete, please make sure you can easily restore all the data. otherwise data will not be revovered.
 		 */
 
 //		int[] affected = dao.delete(hints, daoPojos);
-		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  affected);
+//		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  affected);
 	}
 #end
 #if($host.generateAPI(88,89))
@@ -128,21 +128,21 @@ public class ${host.getPojoClassName()}DaoUnitTest {
 	@Test
 	public void testBatchDelete() throws Exception {
 		DalHints hints = new DalHints();
-		List<${host.getPojoClassName()}> daoPojos = dao.queryAll(null);
+//		List<${host.getPojoClassName()}> daoPojos = dao.queryAll(null);
 		/**
 		 * WARNING !!!
 		 * To test batchDelete, please make sure you can easily restore all the data. otherwise data will not be revovered.
 		 */
 //		int[] affected = dao.batchDelete(hints, daoPojos);
-		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  affected);
+//		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  affected);
 	}
 #end
 #if($host.generateAPI(6,18))
 	
 	@Test
 	public void testQueryAll() throws Exception {
-		List<${host.getPojoClassName()}> list = dao.queryAll(new DalHints());
-		assertEquals(10, list.size());
+//		List<${host.getPojoClassName()}> list = dao.queryAll(new DalHints());
+//		assertEquals(10, list.size());
 	}
 #end
 #if($host.generateAPI(7,19))

@@ -97,6 +97,11 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 		return this;
 	}
 	
+	public FreeSelectSqlBuilder<K> setNullable(boolean nullable) {
+		this.nullable = nullable;
+		return this;
+	}
+	
 	public boolean isRequireFirst () {
 		return requireFirst;
 	}

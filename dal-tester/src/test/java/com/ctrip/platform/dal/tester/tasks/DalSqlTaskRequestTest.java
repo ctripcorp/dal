@@ -22,6 +22,7 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.sqlbuilder.SqlBuilder;
 import com.ctrip.platform.dal.dao.task.DalSqlTaskRequest;
 import com.ctrip.platform.dal.dao.task.SqlTask;
 
@@ -46,15 +47,40 @@ public class DalSqlTaskRequestTest {
 			return i;
 		}
 	}
+	
+	private class TestSqlBuilder implements SqlBuilder {
+		String sql;
+		StatementParameters p;
+		TestSqlBuilder(String sql, StatementParameters p) {
+			this.sql = sql;
+			this.p = p;
+		}
+		TestSqlBuilder() {
+			this(new StatementParameters());
+		}
+		
+		TestSqlBuilder(StatementParameters p) {
+			this.p = p;
+		}
+		@Override
+		public String build() {
+			return sql;
+		}
+
+		@Override
+		public StatementParameters buildParameters() {
+			return p;
+		}
+	}
 
 	@Test
 	public void testValidate() {
 		DalSqlTaskRequest<Integer> test = null;
 		try {
-			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", null, new StatementParameters(), new DalHints(), null, null);
+			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), new DalHints(), null, null);
 			test.validate();
-			fail();
 		} catch (SQLException e) {
+			fail();
 		}
 	}
 
@@ -63,12 +89,12 @@ public class DalSqlTaskRequestTest {
 		DalSqlTaskRequest<Integer> test = null;
 		
 		DalHints hints = new DalHints();
-		test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "", new StatementParameters(), hints, null, null);
+		test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, null, null);
 		assertFalse(test.isCrossShard());
 			
 		hints = new DalHints();
 		hints.inAllShards();
-		test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "", new StatementParameters(), hints, null, null);
+		test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, null, null);
 		assertTrue(test.isCrossShard());
 		
 		hints = new DalHints();
@@ -76,7 +102,7 @@ public class DalSqlTaskRequestTest {
 		shards.add("0");
 		shards.add("1");
 		hints.inAllShards();
-		test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "", new StatementParameters(), hints, null, null);
+		test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, null, null);
 		assertTrue(test.isCrossShard());
 	}
 
@@ -85,7 +111,7 @@ public class DalSqlTaskRequestTest {
 		DalSqlTaskRequest<Integer> test = null;
 		
 		DalHints hints = new DalHints();
-		test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "", new StatementParameters(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
+		test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
 		try {
 			Callable<Integer> task = test.createTask();
 			assertEquals(1, task.call().intValue());
@@ -103,7 +129,7 @@ public class DalSqlTaskRequestTest {
 			DalHints hints = new DalHints();
 			hints = new DalHints();
 			hints.inAllShards();
-			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "", new StatementParameters(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
+			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
 			Map<String, Callable<Integer>> tasks = test.createTasks();
 			int i = 0;
 			for(Callable<Integer> task: tasks.values()){
@@ -128,7 +154,7 @@ public class DalSqlTaskRequestTest {
 			shards.add("0");
 			shards.add("1");
 			hints.inShards(shards);
-			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "", new StatementParameters(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
+			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
 			Map<String, Callable<Integer>> tasks = test.createTasks();
 			int i = 0;
 			for(Callable<Integer> task: tasks.values()){
@@ -161,7 +187,7 @@ public class DalSqlTaskRequestTest {
 			p.setInParameter(2, "index", Types.INTEGER, l);
 			p.set(3, 1);
 			
-			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "select * from tablea where id = ? and id in (?) and id = ?", p, hints, new TestSqlTask(1), new ResultMerger.IntSummary());
+			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder("select * from tablea where id = ? and id in (?) and id = ?", p), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
 			Map<String, Callable<Integer>> tasks = test.createTasks();
 			int i = 0;
 			for(Callable<Integer> task: tasks.values()){
@@ -181,7 +207,7 @@ public class DalSqlTaskRequestTest {
 		DalSqlTaskRequest<Integer> test = null;
 		
 		DalHints hints = new DalHints();
-		test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", "", new StatementParameters(), hints, null, new ResultMerger.IntSummary());
+		test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, null, new ResultMerger.IntSummary());
 		assertNotNull(test.getMerger());
 	}
 

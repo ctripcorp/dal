@@ -21,8 +21,8 @@ public class SQLParserTests {
 	
 	@Test
 	public void testContainOneIn1() throws SQLException{
-		String sql = "SELECT * FROM Person WHERE ID In ? And Age BETWEEN ? AND ?";
-		String expected_sql = "SELECT * FROM Person WHERE ID In (?,?) And Age BETWEEN ? AND ?";
+		String sql = "insert * FROM Person WHERE ID In ? And Age BETWEEN ? AND ?";
+		String expected_sql = "insert * FROM Person WHERE ID In (?,?) And Age BETWEEN ? AND ?";
 		List<Integer> ids = new ArrayList<Integer>();
 		ids.add(1);
 		ids.add(2);
@@ -35,8 +35,8 @@ public class SQLParserTests {
 	
 	@Test
 	public void testContainOneIn2() throws SQLException{
-		String sql = "SELECT * FROM Person WHERE ID In (?) And Age BETWEEN ? AND ?";
-		String expected_sql = "SELECT * FROM Person WHERE ID In (?,?)  And Age BETWEEN ? AND ?";
+		String sql = "delete * FROM Person WHERE ID In (?) And Age BETWEEN ? AND ?";
+		String expected_sql = "delete * FROM Person WHERE ID In (?,?)  And Age BETWEEN ? AND ?";
 		List<Integer> ids = new ArrayList<Integer>();
 		ids.add(1);
 		ids.add(2);
@@ -49,8 +49,8 @@ public class SQLParserTests {
 	
 	@Test
 	public void testContainOneIn3() throws SQLException{
-		String sql = "SELECT * FROM Person WHERE ID In( ?) And Age BETWEEN ? AND ?";
-		String expected_sql = "SELECT * FROM Person WHERE ID In (?,?)  And Age BETWEEN ? AND ?";
+		String sql = "UPDATE * FROM Person WHERE ID In( ?) And Age BETWEEN ? AND ?";
+		String expected_sql = "UPDATE * FROM Person WHERE ID In (?,?)  And Age BETWEEN ? AND ?";
 		List<Integer> ids = new ArrayList<Integer>();
 		ids.add(1);
 		ids.add(2);
@@ -63,8 +63,8 @@ public class SQLParserTests {
 	
 	@Test
 	public void testContainMultipleIn() throws SQLException{
-		String sql = "SELECT * FROM Person WHERE ID In (?) And Name in( ?) Age BETWEEN ? AND ?";
-		String expected_sql = "SELECT * FROM Person WHERE ID In (?,?)  And Name In (?)  Age BETWEEN ? AND ?";
+		String sql = "UPDATE * FROM Person WHERE ID In (?) And Name in( ?) Age BETWEEN ? AND ?";
+		String expected_sql = "UPDATE * FROM Person WHERE ID In (?,?)  And Name In (?)  Age BETWEEN ? AND ?";
 		List<Integer> ids = new ArrayList<Integer>();
 		ids.add(1);
 		ids.add(2);

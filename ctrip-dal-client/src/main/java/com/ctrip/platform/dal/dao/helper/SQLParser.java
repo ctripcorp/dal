@@ -11,9 +11,32 @@ import org.apache.commons.lang.StringUtils;
 public class SQLParser {
 	private static String regEx = null;
 	private static Pattern inRegxPattern = null;
+	private static String[] UPDATES = new String[]{
+		"update ", "insert ", "delete "
+	};
+	
 	static{
 		 regEx="(?i)In *\\(? *\\? *\\)?";
 		 inRegxPattern = Pattern.compile(regEx);
+	}
+	
+	/**
+	 * To work with new DalQueryDao. we don't need to parse sql before invoke DalQueryDao.
+	 * If you see this get called, please make sure to regenerated code with code gen
+	 * @param original
+	 * @param parms
+	 * @return
+	 * @deprecated if you see this, please regenerated your code with code gen
+	 * @throws SQLException
+	 */
+	public static String parse(String original, List... parms) throws SQLException
+	{
+		String test = original.toLowerCase();
+		for(String pattern: UPDATES)
+			if(test.contains(pattern))
+				return parseBakup(original, parms);
+		
+		return original;
 	}
 	
 	/**
@@ -26,9 +49,8 @@ public class SQLParser {
 	 * @return
 	 * 		Combined SQL
 	 * @throws SQLException
-	 * @deprecated if you see this, please regenerated your code with code gen
 	 */
-	public static String parse(String original, List... parms) throws SQLException
+	private static String parseBakup(String original, List... parms) throws SQLException
 	{
 		if(null == parms || parms.length == 0)
 			return original;

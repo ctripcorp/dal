@@ -98,6 +98,11 @@ public class ShardColModShardStrategyTest {
 		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardValue(1)));
 		assertEquals("0", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardValue(2)));
 		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardValue(3)));
+		
+		assertEquals("0", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardValue(100000000000L)));
+		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardValue(100000000001L)));
+		assertEquals("0", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardValue(100000000002L)));
+		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardValue(100000000003L)));
 	}
 
 	@Test
@@ -141,6 +146,13 @@ public class ShardColModShardStrategyTest {
 		parameters.set(3, "def", Types.INTEGER, 1);
 		
 		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setParameters(parameters)));
+		
+		parameters = new StatementParameters();
+		parameters.set(1, "id", Types.BIGINT, 100000000003L);
+		parameters.set(2, "abc", Types.INTEGER, 1);
+		parameters.set(3, "def", Types.INTEGER, 1);
+		
+		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setParameters(parameters)));
 	}
 
 	@Test
@@ -158,6 +170,12 @@ public class ShardColModShardStrategyTest {
 		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardColValue("id", 1)));
 		assertEquals("0", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardColValue("id", 2)));
 		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardColValue("id", 3)));
+		
+		assertEquals("0", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardColValue("id", 100000000000L)));
+		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardColValue("id", 100000000001L)));
+		assertEquals("0", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardColValue("id", 100000000002L)));
+		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setShardColValue("id", 100000000003L)));
+
 	}
 	
 	@Test
@@ -182,6 +200,18 @@ public class ShardColModShardStrategyTest {
 		assertEquals("0", strategy.locateDbShard(configure, logicDbName, new DalHints().setFields(fields)));
 		
 		fields.put("id", 3);
+		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setFields(fields)));
+		// Test long
+		fields.put("id", 100000000000L);
+		assertEquals("0", strategy.locateDbShard(configure, logicDbName, new DalHints().setFields(fields)));
+		
+		fields.put("id", 100000000001L);
+		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setFields(fields)));
+		
+		fields.put("id", 100000000002L);
+		assertEquals("0", strategy.locateDbShard(configure, logicDbName, new DalHints().setFields(fields)));
+		
+		fields.put("id", 100000000003L);
 		assertEquals("1", strategy.locateDbShard(configure, logicDbName, new DalHints().setFields(fields)));
 	}
 	
@@ -234,6 +264,11 @@ public class ShardColModShardStrategyTest {
 		assertEquals("1", strategy.locateTableShard(configure, logicDbName, new DalHints().setTableShardValue(5)));
 		assertEquals("2", strategy.locateTableShard(configure, logicDbName, new DalHints().setTableShardValue(6)));
 		assertEquals("3", strategy.locateTableShard(configure, logicDbName, new DalHints().setTableShardValue(7)));
+		
+		assertEquals("0", strategy.locateTableShard(configure, logicDbName, new DalHints().setTableShardValue(100000000004L)));
+		assertEquals("1", strategy.locateTableShard(configure, logicDbName, new DalHints().setTableShardValue(100000000005L)));
+		assertEquals("2", strategy.locateTableShard(configure, logicDbName, new DalHints().setTableShardValue(100000000006L)));
+		assertEquals("3", strategy.locateTableShard(configure, logicDbName, new DalHints().setTableShardValue(100000000007L)));
 	}
 
 	@Test
@@ -257,6 +292,11 @@ public class ShardColModShardStrategyTest {
 		
 		assertEquals("0", strategy.locateTableShard(configure, logicDbName, new DalHints().setParameters(parameters)));
 
+		parameters.set(1, "index", Types.INTEGER, 100000000004L);
+		parameters.set(1, "abc", Types.INTEGER, 1);
+		parameters.set(1, "def", Types.INTEGER, 1);
+		
+		assertEquals("0", strategy.locateTableShard(configure, logicDbName, new DalHints().setParameters(parameters)));
 		
 		parameters = new StatementParameters();
 		parameters.set(1, "index", Types.INTEGER, 1);
@@ -265,6 +305,13 @@ public class ShardColModShardStrategyTest {
 		
 		assertEquals("1", strategy.locateTableShard(configure, logicDbName, new DalHints().setParameters(parameters)));
 
+		parameters = new StatementParameters();
+		parameters.set(1, "index", Types.INTEGER, 100000000001L);
+		parameters.set(1, "abc", Types.INTEGER, 1);
+		parameters.set(1, "def", Types.INTEGER, 1);
+		
+		assertEquals("1", strategy.locateTableShard(configure, logicDbName, new DalHints().setParameters(parameters)));
+		
 		parameters = new StatementParameters();
 		parameters.set(1, "index", Types.INTEGER, 2);
 		parameters.set(2, "abc", Types.INTEGER, 1);
@@ -359,6 +406,11 @@ public class ShardColModShardStrategyTest {
 		assertEquals("1", strategy.locateTableShard(configure, logicDbName, new DalHints().setShardColValue("index1", 5)));
 		assertEquals("2", strategy.locateTableShard(configure, logicDbName, new DalHints().setShardColValue("index", 6)));
 		assertEquals("3", strategy.locateTableShard(configure, logicDbName, new DalHints().setShardColValue("index1", 7)));
+		
+		assertEquals("0", strategy.locateTableShard(configure, logicDbName, new DalHints().setShardColValue("index", 100000000004L)));
+		assertEquals("1", strategy.locateTableShard(configure, logicDbName, new DalHints().setShardColValue("index1", 100000000005L)));
+		assertEquals("2", strategy.locateTableShard(configure, logicDbName, new DalHints().setShardColValue("index", 100000000006L)));
+		assertEquals("3", strategy.locateTableShard(configure, logicDbName, new DalHints().setShardColValue("index1", 100000000007L)));
 	}
 	
 	@Test
@@ -405,6 +457,10 @@ public class ShardColModShardStrategyTest {
 		
 		fields = new HashMap<String, Object>();
 		fields.put("index1", 7);
+		assertEquals("3", strategy.locateTableShard(configure, logicDbName, new DalHints().setFields(fields)));
+		
+		fields = new HashMap<String, Object>();
+		fields.put("index1", 100000000007L);
 		assertEquals("3", strategy.locateTableShard(configure, logicDbName, new DalHints().setFields(fields)));
 	}
 }

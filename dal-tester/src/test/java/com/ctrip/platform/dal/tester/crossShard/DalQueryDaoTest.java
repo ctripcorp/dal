@@ -41,7 +41,6 @@ import com.ctrip.platform.dal.dao.helper.SQLParser;
 import com.ctrip.platform.dal.dao.helper.ShortRowMapper;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.MultipleSqlBuilder;
-import com.ctrip.platform.dal.tester.baseDao.DalQueryDaoTest.ClientTestModel;
 
 public abstract class DalQueryDaoTest {
 	private String DATABASE_NAME;
@@ -57,8 +56,7 @@ public abstract class DalQueryDaoTest {
 	
 	public abstract void insertBack();
 	
-	private StatementParameters parameters = new StatementParameters();
-	private String sqlList = "select * from " + TABLE_NAME;
+	private String sqlList = "select * from " + TABLE_NAME + " order by id";
 	private String sqlListQuantity = "select quantity from " + TABLE_NAME;
 	private String sqlObject = "select * from " + TABLE_NAME + " where id = ? and type=0";
 	private String sqlFirst = "select * from " + TABLE_NAME + " where id = ?";
@@ -105,13 +103,15 @@ public abstract class DalQueryDaoTest {
 	
 	//Factors: sync/async; merger/no merger; sorter/no sorter, callback/no callback
 	
+	private StatementParameters parameters() {return new StatementParameters();}
+	
 	/**
 	 * The template method under test
 	 * @throws SQLException 
 	 */
 	 private List<Short> queryListInAllShard(DalHints hints) throws SQLException {
-		return new DalQueryDao(DATABASE_NAME).query(
-				sqlList, parameters, 
+		return dao.query(
+				sqlList, parameters(), 
 				hints.inAllShards(), 
 				new ShortRowMapper());
 	}
@@ -124,6 +124,31 @@ public abstract class DalQueryDaoTest {
 			assertEquals(6, result.size());
 			Short t = result.get(0);
 			assertEquals(new Short((short)1), t);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	private DalDefaultJpaMapper<ClientTestModel> jpaMapper() throws SQLException{
+		return new DalDefaultJpaMapper<>(ClientTestModel.class);
+	}
+	
+	@Test
+	public void testQueryPartialAllShards() {
+		try {
+			assertListPartial(dao.query(sqlList, parameters(),new DalHints().inAllShards().partialQuery("quantity", "address"),jpaMapper()));
+
+			assertPartial(dao.queryFirst(sqlList, parameters(),new DalHints().inAllShards().partialQuery("quantity", "address"),jpaMapper()));
+			
+			assertPartial(dao.queryFirstNullable(sqlList, parameters(),new DalHints().inAllShards().partialQuery("quantity", "address"),jpaMapper()));
+			
+			assertPartial(dao.queryForObject(sqlObject, parameters().set(1, Types.INTEGER, 1),new DalHints().inAllShards().partialQuery("quantity", "address"),jpaMapper()));
+			
+			assertPartial(dao.queryForObjectNullable(sqlObject, parameters().set(1, Types.INTEGER, 1),new DalHints().inAllShards().partialQuery("quantity", "address"),jpaMapper()));
+			
+			assertListPartial(dao.queryFrom(sqlList, parameters(),new DalHints().inAllShards().partialQuery("quantity", "address"),jpaMapper(), 1 ,10));
+			
+			assertListPartial(dao.queryTop(sqlList, parameters(),new DalHints().inAllShards().partialQuery("quantity", "address"),jpaMapper(), 10));
 		} catch (Exception e) {
 			fail();
 		}
@@ -234,7 +259,7 @@ public abstract class DalQueryDaoTest {
 		parameters.setInParameter(1, "type", Types.INTEGER, inParam);
 		
 		String sql = SQLParser.parse(sqlInParam, inParam);
-		return new DalQueryDao(DATABASE_NAME).query(
+		return dao.query(
 				sql, parameters, 
 				hints.inAllShards(), 
 				new ShortRowMapper());
@@ -255,7 +280,7 @@ public abstract class DalQueryDaoTest {
 		FreeSelectSqlBuilder<List<Short>> builder = new FreeSelectSqlBuilder<>(dbCategory);
 		builder.setTemplate(sqlInParam);
 		builder.mapWith(new ShortRowMapper());
-		return new DalQueryDao(DATABASE_NAME).query(
+		return dao.query(
 				builder, parameters, 
 				hints.shardBy("type"));
 	}
@@ -496,8 +521,6 @@ public abstract class DalQueryDaoTest {
 	}
 
 	private List queryMultipleAllShards(DalHints hints) throws SQLException {
-		DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
-		
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, Types.INTEGER, 1);
 		
@@ -509,6 +532,8 @@ public abstract class DalQueryDaoTest {
 		builder.addQuery(sqlListQuantity, new StatementParameters(), Integer.class, new DalListMerger<Integer>());//merger
 		builder.addQuery(sqlObject, parameters, Integer.class, new InteregrComparator());//soter
 		builder.addQuery(sqlNoResult, new StatementParameters(), new TestDalRowCallback3());//callback
+		
+		parameters = new StatementParameters();
 		List<Integer> inParam = new ArrayList<>();
 		inParam.add(0);
 		inParam.add(1);
@@ -516,7 +541,7 @@ public abstract class DalQueryDaoTest {
 		inParam.add(3);
 		inParam.add(4);
 		parameters.setInParameter(1, "type", Types.INTEGER, inParam);
-		builder.addQuery(sqlIdInParam, new StatementParameters(), ClientTestModel.class);
+		builder.addQuery(sqlIdInParam, parameters, ClientTestModel.class);
 
 		return dao.query(builder, hints.inAllShards());
 	}
@@ -575,8 +600,8 @@ public abstract class DalQueryDaoTest {
 	public void testQueryListAllShardsWithClass() {
 		try {
 			DalHints hints = new DalHints();
-			List<Integer> result = new DalQueryDao(DATABASE_NAME).query(
-					sqlListQuantity, parameters, 
+			List<Integer> result = dao.query(
+					sqlListQuantity, parameters(), 
 					hints.inAllShards(), 
 					Integer.class);
 			assertEquals(6, result.size());
@@ -591,8 +616,8 @@ public abstract class DalQueryDaoTest {
 	public void testQueryListAllShardsAsyncWithClass() {
 		try {
 			DalHints hints = new DalHints();
-			List<Integer> result = new DalQueryDao(DATABASE_NAME).query(
-					sqlListQuantity, parameters, 
+			List<Integer> result = dao.query(
+					sqlListQuantity, parameters(), 
 					hints.inAllShards().asyncExecution(), 
 					Integer.class);
 
@@ -613,8 +638,8 @@ public abstract class DalQueryDaoTest {
 		try {
 			DalHints hints = new DalHints();
 			TestDalRowCallback callback = new TestDalRowCallback();
-			new DalQueryDao(DATABASE_NAME).query(
-					sqlListQuantity, parameters, 
+			dao.query(
+					sqlListQuantity, parameters(), 
 					hints.inAllShards(), 
 					callback);
 			// 66 = (10 + 11 + 12)*2
@@ -629,8 +654,8 @@ public abstract class DalQueryDaoTest {
 		try {
 			DalHints hints = new DalHints();
 			TestDalRowCallback callback = new TestDalRowCallback();
-			new DalQueryDao(DATABASE_NAME).query(
-					sqlListQuantity, parameters, 
+			dao.query(
+					sqlListQuantity, parameters(), 
 					hints.inAllShards().asyncExecution(), 
 					callback);
 
@@ -649,8 +674,8 @@ public abstract class DalQueryDaoTest {
 		try {
 			DalHints hints = new DalHints();
 			TestDalRowCallback callback = new TestDalRowCallback();
-			new DalQueryDao(DATABASE_NAME).query(
-					sqlListQuantity, parameters, 
+			dao.query(
+					sqlListQuantity, parameters(), 
 					hints.inAllShards().sequentialExecute(), 
 					callback);
 			// 66 = (10 + 11 + 12)*2
@@ -665,8 +690,8 @@ public abstract class DalQueryDaoTest {
 		try {
 			DalHints hints = new DalHints();
 			TestDalRowCallback callback = new TestDalRowCallback();
-			new DalQueryDao(DATABASE_NAME).query(
-					sqlListQuantity, parameters, 
+			dao.query(
+					sqlListQuantity, parameters(), 
 					hints.inAllShards().sequentialExecute().asyncExecution(), 
 					callback);
 			
@@ -705,7 +730,7 @@ public abstract class DalQueryDaoTest {
 	private ClientTestModel queryForObjectInAllShard(DalHints hints) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, 1);
-		return new DalQueryDao(DATABASE_NAME).queryForObject(
+		return dao.queryForObject(
 				sqlObject, parameters, 
 				hints.inAllShards(), 
 				new ClientTestDalRowMapper());
@@ -718,10 +743,15 @@ public abstract class DalQueryDaoTest {
 	private ClientTestModel queryForObjectInAllShardPartial(DalHints hints) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, 1);
-		return new DalQueryDao(DATABASE_NAME).queryForObject(
+		return dao.queryForObject(
 				sqlObject, parameters, 
 				hints.inAllShards(), 
 				new DalDefaultJpaMapper<>(ClientTestModel.class));
+	}
+	
+	private void assertListPartial(List<ClientTestModel> result) {
+		for(ClientTestModel model: result)
+			assertPartial(model);
 	}
 	
 	private void assertPartial(ClientTestModel result) {
@@ -761,9 +791,24 @@ public abstract class DalQueryDaoTest {
 			DalHints hints = new DalHints();
 			StatementParameters parameters = new StatementParameters();
 			parameters.set(1, 1);
-			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryForObject(
+			ClientTestModel result = dao.queryForObject(
 					sqlFirst, parameters, 
 					hints.inAllShards(), 
+					new ClientTestDalRowMapper());
+			fail();
+		} catch (Exception e) {
+		}
+	}
+	
+	@Test
+	public void testQueryForObjectAllShardsFailPartial() {
+		try {
+			DalHints hints = new DalHints();
+			StatementParameters parameters = new StatementParameters();
+			parameters.set(1, 1);
+			ClientTestModel result = dao.queryForObject(
+					sqlFirst, parameters, 
+					hints.inAllShards().partialQuery("quantity", "address"), 
 					new ClientTestDalRowMapper());
 			fail();
 		} catch (Exception e) {
@@ -802,9 +847,25 @@ public abstract class DalQueryDaoTest {
 	public void testQueryForObjectAllShardsAsyncFail() {
 		try {
 			DalHints hints = new DalHints();
-			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryForObject(
-					sqlFirst, parameters, 
+			ClientTestModel result = dao.queryForObject(
+					sqlFirst, parameters(), 
 					hints.inAllShards().asyncExecution(), 
+					new ClientTestDalRowMapper());
+			assertNull(result);
+			Future<ClientTestModel> fr = (Future<ClientTestModel>)hints.getAsyncResult();
+			fr.get();
+			fail();
+		} catch (Exception e) {
+		}
+	}
+	
+	@Test
+	public void testQueryForObjectAllShardsAsyncFailPartial() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result = dao.queryForObject(
+					sqlFirst, parameters(), 
+					hints.inAllShards().asyncExecution().partialQuery("quantity", "address"), 
 					new ClientTestDalRowMapper());
 			assertNull(result);
 			Future<ClientTestModel> fr = (Future<ClientTestModel>)hints.getAsyncResult();
@@ -842,6 +903,19 @@ public abstract class DalQueryDaoTest {
 	}
 	
 	@Test
+	public void testQueryForObjectAllShardsWithMergerPartial() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result = queryForObjectInAllShard(hints.mergeBy(new TestSingleResultMerger()).partialQuery("quantity", "address"));
+			assertNotNull(result);
+			assertEquals(1, result.id);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
 	public void testQueryForObjectAllShardsWithMergerAsync() {
 		try {
 			DalHints hints = new DalHints();
@@ -864,9 +938,25 @@ public abstract class DalQueryDaoTest {
 		try {
 			DalHints hints = new DalHints();
 			StatementParameters parameters = new StatementParameters();
-			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryForObjectNullable(
-					sqlNoResult, parameters, 
+			ClientTestModel result = dao.queryForObjectNullable(
+					sqlNoResult, parameters(), 
 					hints.inAllShards(), 
+					new ClientTestDalRowMapper());
+			assertNull(result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testQueryForObjectAllShardsNullablePartial() {
+		try {
+			DalHints hints = new DalHints();
+			StatementParameters parameters = new StatementParameters();
+			ClientTestModel result = dao.queryForObjectNullable(
+					sqlNoResult, parameters(), 
+					hints.inAllShards().partialQuery("quantity", "address"), 
 					new ClientTestDalRowMapper());
 			assertNull(result);
 		} catch (Exception e) {
@@ -880,8 +970,8 @@ public abstract class DalQueryDaoTest {
 		try {
 			DalHints hints = new DalHints();
 			StatementParameters parameters = new StatementParameters();
-			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryForObjectNullable(
-					sqlNoResult, parameters, 
+			ClientTestModel result = dao.queryForObjectNullable(
+					sqlNoResult, parameters(), 
 					hints.inAllShards().asyncExecution(), 
 					new ClientTestDalRowMapper());
 			
@@ -915,6 +1005,16 @@ public abstract class DalQueryDaoTest {
 			TestQueryCallback2 callback = new TestQueryCallback2();
 			DalHints hints = new DalHints();
 			ClientTestModel result = queryForObjectInAllShard(hints.callbackWith(callback));
+			assertNull(result);
+			assertEquals(result, callback.result);
+		} catch (Exception e) {
+			fail();
+		}
+		
+		try {
+			TestQueryCallback2 callback = new TestQueryCallback2();
+			DalHints hints = new DalHints();
+			ClientTestModel result = queryForObjectInAllShard(hints.callbackWith(callback).partialQuery("quantity", "address"));
 			assertNull(result);
 			assertEquals(result, callback.result);
 		} catch (Exception e) {
@@ -967,7 +1067,7 @@ public abstract class DalQueryDaoTest {
 			DalHints hints = new DalHints();
 			StatementParameters parameters = new StatementParameters();
 			Integer result = dao.queryForObjectNullable(
-					sqlNoResult, parameters, 
+					sqlNoResult, parameters(), 
 					hints.inAllShards(), 
 					Integer.class);
 			assertNull(result);
@@ -982,7 +1082,7 @@ public abstract class DalQueryDaoTest {
 			DalHints hints = new DalHints();
 			StatementParameters parameters = new StatementParameters();
 			Integer result = dao.queryForObjectNullable(
-					sqlNoResult, parameters, 
+					sqlNoResult, parameters(), 
 					hints.inAllShards().asyncExecution(), 
 					Integer.class);
 
@@ -1007,10 +1107,19 @@ public abstract class DalQueryDaoTest {
 	private ClientTestModel queryFirstInAllShard(DalHints hints) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, 1);
-		return new DalQueryDao(DATABASE_NAME).queryFirst(
+		return dao.queryFirst(
 				sqlFirst, parameters, 
 				hints.inAllShards(), 
 				new ClientTestDalRowMapper());
+	}
+	
+	private ClientTestModel queryFirstInAllShardPartial(DalHints hints) throws SQLException {
+		StatementParameters parameters = new StatementParameters();
+		parameters.set(1, 1);
+		return dao.queryFirst(
+				sqlFirst, parameters, 
+				hints.inAllShards().partialQuery("quantity", "address"), 
+				new DalDefaultJpaMapper<>(ClientTestModel.class));
 	}
 	
 	@Test
@@ -1026,13 +1135,24 @@ public abstract class DalQueryDaoTest {
 	}
 	
 	@Test
+	public void testQueryFirstAllShardsPartial() {
+		try {
+			DalHints hints = new DalHints();
+			ClientTestModel result = queryFirstInAllShardPartial(hints);
+			assertPartial(result);
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
+	@Test
 	public void testQueryFirstAllShardsFail() {
 		try {
 			DalHints hints = new DalHints();
 			StatementParameters parameters = new StatementParameters();
 			parameters.set(1, 1);
-			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryFirst(
-					sqlNoResult, parameters, 
+			ClientTestModel result = dao.queryFirst(
+					sqlNoResult, parameters(), 
 					hints.inAllShards(), 
 					new ClientTestDalRowMapper());
 			fail();
@@ -1058,8 +1178,8 @@ public abstract class DalQueryDaoTest {
 	public void testQueryFirstAllShardsAsyncFail() {
 		try {
 			DalHints hints = new DalHints();
-			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryForObject(
-					sqlNoResult, parameters, 
+			ClientTestModel result = dao.queryForObject(
+					sqlNoResult, parameters(), 
 					hints.inAllShards().asyncExecution(), 
 					new ClientTestDalRowMapper());
 			assertNull(result);
@@ -1106,8 +1226,8 @@ public abstract class DalQueryDaoTest {
 		try {
 			DalHints hints = new DalHints();
 			StatementParameters parameters = new StatementParameters();
-			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryFirstNullable(
-					sqlNoResult, parameters, 
+			ClientTestModel result = dao.queryFirstNullable(
+					sqlNoResult, parameters(), 
 					hints.inAllShards(), 
 					new ClientTestDalRowMapper());
 			assertNull(result);
@@ -1122,8 +1242,8 @@ public abstract class DalQueryDaoTest {
 		try {
 			DalHints hints = new DalHints();
 			StatementParameters parameters = new StatementParameters();
-			ClientTestModel result = new DalQueryDao(DATABASE_NAME).queryFirstNullable(
-					sqlNoResult, parameters, 
+			ClientTestModel result = dao.queryFirstNullable(
+					sqlNoResult, parameters(), 
 					hints.inAllShards().asyncExecution(), 
 					new ClientTestDalRowMapper());
 
@@ -1231,8 +1351,8 @@ public abstract class DalQueryDaoTest {
 	 * @throws SQLException 
 	 */
 	 private List<Short> queryTopInAllShard(DalHints hints) throws SQLException {
-		return new DalQueryDao(DATABASE_NAME).queryTop(
-				sqlList, parameters, 
+		return dao.queryTop(
+				sqlList, parameters(), 
 				hints.inAllShards(), 
 				new ShortRowMapper(), 4);
 	}
@@ -1337,8 +1457,8 @@ public abstract class DalQueryDaoTest {
 	public void testQueryTopAllShardsWithClass() {
 		try {
 			DalHints hints = new DalHints();
-			List<Integer> result = new DalQueryDao(DATABASE_NAME).queryTop(
-					sqlListQuantity, parameters, 
+			List<Integer> result = dao.queryTop(
+					sqlListQuantity, parameters(), 
 					hints.inAllShards(), 
 					Integer.class, 4);
 			assertEquals(4, result.size());
@@ -1353,8 +1473,8 @@ public abstract class DalQueryDaoTest {
 	public void testQueryTopAllShardsWithClassAsync() {
 		try {
 			DalHints hints = new DalHints();
-			List<Integer> result = new DalQueryDao(DATABASE_NAME).queryTop(
-					sqlListQuantity, parameters, 
+			List<Integer> result = dao.queryTop(
+					sqlListQuantity, parameters(), 
 					hints.inAllShards().asyncExecution(), 
 					Integer.class, 4);
 
@@ -1378,8 +1498,8 @@ public abstract class DalQueryDaoTest {
 	 * @throws SQLException 
 	 */
 	 private List<Short> queryFromInAllShard(DalHints hints) throws SQLException {
-		return new DalQueryDao(DATABASE_NAME).queryFrom(
-				sqlList, parameters, 
+		return dao.queryFrom(
+				sqlList, parameters(), 
 				hints.inAllShards(), 
 				new ShortRowMapper(), 2, 4);
 	}
@@ -1494,8 +1614,8 @@ public abstract class DalQueryDaoTest {
 	public void testQueryFromAllShardsWithClass() {
 		try {
 			DalHints hints = new DalHints();
-			List<Integer> result = new DalQueryDao(DATABASE_NAME).queryFrom(
-					sqlListQuantity, parameters, 
+			List<Integer> result = dao.queryFrom(
+					sqlListQuantity, parameters(), 
 					hints.inAllShards(), 
 					Integer.class, 2, 4);
 			assertEquals(4, result.size());
@@ -1513,8 +1633,8 @@ public abstract class DalQueryDaoTest {
 	public void testQueryFromAllShardsWithClassAsync() {
 		try {
 			DalHints hints = new DalHints();
-			List<Integer> result = new DalQueryDao(DATABASE_NAME).queryFrom(
-					sqlListQuantity, parameters, 
+			List<Integer> result = dao.queryFrom(
+					sqlListQuantity, parameters(), 
 					hints.inAllShards().asyncExecution(), 
 					Integer.class, 2, 4);
 

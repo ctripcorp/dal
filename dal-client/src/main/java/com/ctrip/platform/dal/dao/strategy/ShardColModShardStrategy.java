@@ -108,7 +108,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		// Shard value take the highest priority
 		if(hints.is(DalHintEnum.shardValue)) {
-			Integer id = getIntValue(hints.get(DalHintEnum.shardValue));
+			Long id = getLongValue(hints.get(DalHintEnum.shardValue));
 			return String.valueOf(id%mod);
 		}
 		
@@ -144,7 +144,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		// Shard value take the highest priority
 		if(hints.is(DalHintEnum.tableShardValue)) {
-			Integer id = getIntValue(hints.get(DalHintEnum.tableShardValue));
+			Long id = getLongValue(hints.get(DalHintEnum.tableShardValue));
 			return String.valueOf(id%tableMod);
 		}
 		
@@ -169,7 +169,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 			for(String column: columns) {
 				StatementParameter param = parameters.get(column, ParameterDirection.Input);
 				if(param != null && param.getValue() != null) {
-					Integer id = getIntValue(param.getValue());
+					Long id = getLongValue(param.getValue());
 					if(id != null) {
 						return String.valueOf(id%mod);
 					}
@@ -184,7 +184,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		if(shardColValues != null) {
 			for(String column: columns) {
-				Integer id = getIntValue(shardColValues.get(column));
+				Long  id = getLongValue(shardColValues.get(column));
 				if(id != null) {
 					return String.valueOf(id%mod);
 				}
@@ -198,7 +198,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		if(shardColValues != null) {
 			for(String column: columns) {
-				Integer id = getIntValue(shardColValues.get(column));
+				Long id = getLongValue(shardColValues.get(column));
 				if(id != null) {
 					return String.valueOf(id%mod);
 				}
@@ -207,18 +207,18 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		return null;
 	}
 	
-	private Integer getIntValue(Object value) {
+	private Long getLongValue(Object value) {
 		if(value == null)
 			return null;
 		
-		if(value instanceof Integer)
-			return (Integer)value;
+		if(value instanceof Long)
+			return (Long)value;
 		
 		if(value instanceof Number)
-			return ((Number)value).intValue();
+			return ((Number)value).longValue();
 		
 		if(value instanceof String)
-			return new Integer((String)value);
+			return new Long((String)value);
 		
 		throw new RuntimeException(String.format("Shard value: %s can not be recoganized as int value", value.toString()));
 	}

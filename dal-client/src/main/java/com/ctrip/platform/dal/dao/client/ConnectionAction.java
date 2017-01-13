@@ -203,7 +203,7 @@ public abstract class ConnectionAction<T> {
 
 	private void handleException(Throwable e) throws SQLException {
 		if(e != null)
-			throw DalException.wrap(e);
+			throw e instanceof SQLException ? (SQLException)e : DalException.wrap(e);
 	}
 
 	private String wrapAPPID(String sql){

@@ -163,14 +163,14 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 		if(extractor != null)
 			return extractor;
 
-		DalRowMapper<T> mapper  = checkAllowPartial(hints);
+		DalRowMapper<T> mapper  = checkAllowPartial(hints, this.mapper);
 		if(isRequireSingle() || isRequireFirst())
 			return new DalSingleResultExtractor<>(mapper, isRequireSingle());
 			
 		return count > 0 ? new DalRowMapperExtractor(mapper, count) : new DalRowMapperExtractor(mapper);
 	}
 	
-	private <T> DalRowMapper<T> checkAllowPartial(DalHints hints) throws SQLException {
+	public static <T> DalRowMapper<T> checkAllowPartial(DalHints hints, DalRowMapper<T> mapper) throws SQLException {
 		if(!(mapper instanceof SupportPartialResultMapping))
 			return mapper;
 		

@@ -238,7 +238,7 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 		select(queryColumns);
 				
 		//It is partial query, we need to create another mapper for this.
-		return ((SupportPartialResultMapping)mapper).mapWith(queryColumns, hints.is(DalHintEnum.ignorMissingFields));
+		return ((SupportPartialResultMapping)mapper).mapWith(queryColumns, hints.is(DalHintEnum.ignoreMissingFields));
 	}
 	
 	private String buildFirst(String effectiveTableName){

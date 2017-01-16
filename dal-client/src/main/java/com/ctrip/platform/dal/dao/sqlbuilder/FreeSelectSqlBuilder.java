@@ -178,7 +178,7 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 			return mapper;
 		
 		//Otherwise we assume it is partial. The default implementation of generated code should support this
-		return ((SupportPartialResultMapping)mapper).mapWith(hints.getPartialQueryColumns(), hints.is(DalHintEnum.ignorMissingFields));
+		return ((SupportPartialResultMapping)mapper).mapWith(hints.getPartialQueryColumns(), hints.is(DalHintEnum.ignoreMissingFields));
 	}
 
 }

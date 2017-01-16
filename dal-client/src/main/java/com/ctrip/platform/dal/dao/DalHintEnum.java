@@ -208,7 +208,7 @@ public enum DalHintEnum {
 	/**
 	 * If it is OK to allow some column not defined in pojo
 	 */
-	ignorMissingFields,
+	ignoreMissingFields,
 	
 	/**
 	 * Columns that will be included for query

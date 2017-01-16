@@ -395,8 +395,8 @@ public class DalHints {
 		return getStringSet(DalHintEnum.excludedColumns);
 	}
 	
-	public DalHints ignorMissingFields() {
-		return set(DalHintEnum.ignorMissingFields, true);
+	public DalHints ignoreMissingFields() {
+		return set(DalHintEnum.ignoreMissingFields, true);
 	}
 	
 	public DalHints partialQuery(Set<String> columns) {

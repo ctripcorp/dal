@@ -185,11 +185,11 @@ public class DalQueryDaoUnitTest {
 			Assert.assertEquals(ErrorCode.FieldNotExists.getCode(), e.getErrorCode());
 		}
 
-		hints = new DalHints().ignorMissingFields();
+		hints = new DalHints().ignoreMissingFields();
 		ret = findFreeFirstMissingFields(name, cityIds, hints.inShard(1));
 		assertNotNull(ret);
 
-		hints = new DalHints().ignorMissingFields();
+		hints = new DalHints().ignoreMissingFields();
 		ret = findFreeFirstMissingFields(name, cityIds, hints.inAllShards());
 		assertNotNull(ret);
 	}

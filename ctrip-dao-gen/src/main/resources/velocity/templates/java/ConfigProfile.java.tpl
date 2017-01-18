@@ -23,7 +23,6 @@
 		<appInternals.appInfoUrl>http://ws.fx.fws.qa.nt.ctripcorp.com/appinfo/appinfo/Send</appInternals.appInfoUrl>
 		<appInternals.permissions.write>10.32.21.21</appInternals.permissions.write>
 		<appInternals.permissions.read>10.32.21.21</appInternals.permissions.read>
-		<CFX_DataSource_ServiceUrl></CFX_DataSource_ServiceUrl>
 	</dev>
 	<fat>
 		<LoggingServer.V2.IP>collector.logging.fws.qa.nt.ctripcorp.com</LoggingServer.V2.IP>
@@ -31,14 +30,12 @@
 		<appInternals.appInfoUrl>http://ws.fx.fws.qa.nt.ctripcorp.com/appinfo/appinfo/Send</appInternals.appInfoUrl>
 		<appInternals.permissions.write>10.32.21.21</appInternals.permissions.write>
 		<appInternals.permissions.read>10.32.21.21</appInternals.permissions.read>
-		<CFX_DataSource_ServiceUrl>https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query</CFX_DataSource_ServiceUrl>
 	</fat>
 	<lpt>
 		<LoggingServer.V2.IP>collector.logging.lpt.qa.nt.ctripcorp.com</LoggingServer.V2.IP>
 		<LoggingServer.V2.Port>63100</LoggingServer.V2.Port>
 		<appInternals.appInfoUrl>http://ws.fx.fws.qa.nt.ctripcorp.com/appinfo/appinfo/Send</appInternals.appInfoUrl>
 		<appInternals.permissions.write>10.2.4.42</appInternals.permissions.write>
-		<CFX_DataSource_ServiceUrl>https://ws.titan.lpt.qa.nt.ctripcorp.com/titanservice/query</CFX_DataSource_ServiceUrl>
 	</lpt>
 	<fws>
 		<LoggingServer.V2.IP>collector.logging.fws.qa.nt.ctripcorp.com</LoggingServer.V2.IP>
@@ -46,18 +43,15 @@
 		<appInternals.appInfoUrl>http://ws.fx.fws.qa.nt.ctripcorp.com/appinfo/appinfo/Send</appInternals.appInfoUrl>
 		<appInternals.permissions.read>10.32.21.21</appInternals.permissions.read>
 		<appInternals.permissions.write>10.32.21.21</appInternals.permissions.write>
-		<CFX_DataSource_ServiceUrl>https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query</CFX_DataSource_ServiceUrl>
 	</fws>
 	<uat_nt>
 		<LoggingServer.V2.IP>collector.logging.uat.qa.nt.ctripcorp.com</LoggingServer.V2.IP>
 		<LoggingServer.V2.Port>63100</LoggingServer.V2.Port>
 		<appInternals.permissions.write>10.2.24.129</appInternals.permissions.write>
-		<CFX_DataSource_ServiceUrl>https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query</CFX_DataSource_ServiceUrl>
 	</uat_nt>
 	<prd>
 		<LoggingServer.V2.IP>collector.logging.sh.ctriptravel.com</LoggingServer.V2.IP>
 		<LoggingServer.V2.Port>63100</LoggingServer.V2.Port>
 		<appInternals.permissions.write>192.168.79.237,192.168.79.236,192.168.79.235,192.168.79.234</appInternals.permissions.write>
-		<CFX_DataSource_ServiceUrl>https://ws.titan.ctripcorp.com/titanservice/query</CFX_DataSource_ServiceUrl>
 	</prd>
 </profile>

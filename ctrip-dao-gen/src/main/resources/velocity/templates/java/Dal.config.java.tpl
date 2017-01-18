@@ -18,7 +18,6 @@
 	</LogListener>
 	<ConnectionLocator>
 		<settings>
-			<serviceAddress>{$CFX_DataSource_ServiceUrl}</serviceAddress>
 			<dataSourceConfigureProvider>com.ctrip.datasource.titan.TitanProvider</dataSourceConfigureProvider>
 		</settings>
 	</ConnectionLocator>

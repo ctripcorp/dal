@@ -17,7 +17,7 @@ public class CtripJavaCodeGeneratorOfOthersProcessor implements DalProcessor {
 
         VelocityContext vltCcontext = GenUtils.buildDefaultVelocityContext();
         vltCcontext.put("host", ctx.getDalConfigHost());
-        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/Dal.config.tpl", dir.getAbsolutePath()), "templates/java/Dal.config.java.tpl");
+        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/Dal.config", dir.getAbsolutePath()), "templates/java/Dal.config.java.tpl");
 
         GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/Database.Config", dir.getAbsolutePath()), "templates/java/Database.config.java.tpl");
 

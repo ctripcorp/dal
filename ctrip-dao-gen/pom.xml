@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <packaging>war</packaging>
     <properties>
         <environment>local</environment>

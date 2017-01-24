@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 import com.ctrip.platform.dal.dao.sqlbuilder.BaseTableSelectBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
@@ -57,6 +58,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 			
 	public DalTableDao(DalParser<T> parser) {
 		this(parser, DalClientFactory.getTaskFactory());
+	}
+	
+	public DalTableDao(Class<T> entityType) throws SQLException {
+		this(new DalDefaultJpaParser<>(entityType));
 	}
 	
 	public DalTableDao(DalParser<T> parser, DalTaskFactory factory) {

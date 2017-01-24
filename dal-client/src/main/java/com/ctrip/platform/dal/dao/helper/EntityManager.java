@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.annotation.Sensitive;
 import com.ctrip.platform.dal.dao.annotation.Type;
@@ -50,6 +51,10 @@ public class EntityManager {
 		EntityManager value = registeredManager.putIfAbsent(clazz, manager);
 		return value == null ? manager : value;
 	}
+	
+	public static <T> DalRowMapper<T> getMapper(Class<T> clazz) throws SQLException {
+		return clazz.getAnnotation(Entity.class) == null ? new DalObjectRowMapper<T>() : new DalDefaultJpaMapper<T>(clazz);
+	}	
 	
 	private <T> EntityManager(Class<T> clazz) throws SQLException {
 		this.clazz = clazz;

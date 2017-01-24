@@ -1,12 +1,13 @@
 package com.ctrip.platform.dal.dao;
 
+import static com.ctrip.platform.dal.dao.helper.EntityManager.getMapper;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.List;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRangedResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
@@ -77,7 +78,7 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> query(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		return query(new FreeSelectSqlBuilder<List<T>>(dbCategory).setTemplate(sql).mapWith(new DalObjectRowMapper<T>()), parameters, hints);
+		return query(new FreeSelectSqlBuilder<List<T>>(dbCategory).setTemplate(sql).mapWith(getMapper(clazz)), parameters, hints);
 	}
 
 	/**
@@ -179,7 +180,7 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		return queryForObject(sql, parameters, hints, new DalObjectRowMapper<T>(), !NULLABLE);
+		return queryForObject(sql, parameters, hints, getMapper(clazz), !NULLABLE);
 	}
 
 	/**
@@ -196,7 +197,7 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryForObjectNullable(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		return queryForObject(sql, parameters, hints, new DalObjectRowMapper<T>(), NULLABLE);
+		return queryForObject(sql, parameters, hints, getMapper(clazz), NULLABLE);
 	}
 	
 	/**
@@ -247,7 +248,7 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		return queryFirst(sql, parameters, hints, new DalObjectRowMapper<T>(), !NULLABLE);
+		return queryFirst(sql, parameters, hints, getMapper(clazz), !NULLABLE);
 	}
 
 	/**
@@ -264,7 +265,7 @@ public final class DalQueryDao {
 	 */
 	public <T> T queryFirstNullable(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
-		return queryFirst(sql, parameters, hints, new DalObjectRowMapper<T>(), NULLABLE);
+		return queryFirst(sql, parameters, hints, getMapper(clazz), NULLABLE);
 	}
 
 	/**
@@ -300,7 +301,7 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> queryTop(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int count) 
 			throws SQLException {
-		return queryRange(sql, parameters, hints,  new DalObjectRowMapper<T>(), 0, count);
+		return queryRange(sql, parameters, hints,  getMapper(clazz), 0, count);
 	}
 
 	/**
@@ -337,7 +338,7 @@ public final class DalQueryDao {
 	 */
 	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int start, int count) throws SQLException {
 		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
-		return queryRange(sql, parameters, hints, new DalObjectRowMapper<T>(), start, count);
+		return queryRange(sql, parameters, hints, getMapper(clazz), start, count);
 	}
 	
 	/**
@@ -383,5 +384,5 @@ public final class DalQueryDao {
 		}
 
 		return query(builder, parameters, hints);
-	}
+	}	
 }

@@ -5,18 +5,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.persistence.Table;
-
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowCallback;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
 import com.ctrip.platform.dal.dao.helper.DalListMerger;
-import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.dao.helper.EntityManager;
 import com.ctrip.platform.dal.dao.helper.MultipleResultMerger;
 
 public class MultipleSqlBuilder implements SqlBuilder {
@@ -86,12 +83,7 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	 * @throws SQLException
 	 */
 	public <T> MultipleSqlBuilder addQuery(String sql, StatementParameters parameters, Class<T> clazz, ResultMerger<List<T>> merger) throws SQLException {
-		Table table = clazz.getAnnotation(Table.class);
-		// If it is annotated DAL POJO
-		if (table != null)
-			return addQuery(sql, parameters, new DalRowMapperExtractor<T>(new DalDefaultJpaMapper<T>(clazz)), merger);
-		
-		return addQuery(sql, parameters, new DalRowMapperExtractor<T>(new DalObjectRowMapper<T>()), merger);
+		return addQuery(sql, parameters, new DalRowMapperExtractor<T>(EntityManager.getMapper(clazz)), merger);
 	}
 	
 	/**

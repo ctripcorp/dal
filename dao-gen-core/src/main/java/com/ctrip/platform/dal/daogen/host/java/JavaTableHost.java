@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.daogen.host.java;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import org.apache.commons.lang.StringUtils;
 
+import java.math.BigInteger;
 import java.util.*;
 
 public class JavaTableHost {
@@ -174,7 +175,9 @@ public class JavaTableHost {
     }
 
     public boolean isIntegerPk() {
-        return primaryKeys.size() == 1 && (primaryKeys.get(0).getJavaClass().equals(Integer.class) || primaryKeys.get(0).getJavaClass().equals(Long.class));
+        Class<?> clazz = primaryKeys.get(0).getJavaClass();
+        return primaryKeys.size() == 1 &&
+                (clazz.equals(Integer.class) || clazz.equals(Long.class) || clazz.equals(BigInteger.class));
     }
 
     public String pageBegain() {

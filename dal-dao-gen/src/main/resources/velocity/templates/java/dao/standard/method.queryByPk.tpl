@@ -21,7 +21,7 @@
 		hints = DalHints.createIfAbsent(hints);
 		${host.getPojoClassName()} pk = new ${host.getPojoClassName()}();		
 #foreach( $field in ${host.getPrimaryKeys()} )
-		pk.set${field.getCapitalizedName()}(${field.getUncapitalizedName()});
+		pk.set${field.getCamelCaseCapitalizedName()}(${field.getCamelCaseUncapitalizedName()});
 #end
 		return client.queryByPk(pk, hints);
 	}

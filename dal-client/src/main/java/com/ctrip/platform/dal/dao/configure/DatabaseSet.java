@@ -9,7 +9,6 @@ import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -34,7 +33,6 @@ public class DatabaseSet {
 
 	private List<DataBase> masterDbs = new ArrayList<DataBase>();
 	private List<DataBase> slaveDbs = new ArrayList<DataBase>();
-	private DalLogger logger;
 	
 	/**
 	 * The target DB set does not support shard
@@ -43,16 +41,15 @@ public class DatabaseSet {
 	 * @param databases
 	 * @throws Exception
 	 */
-	public DatabaseSet(String name, String provider, Map<String, DataBase> databases, DalLogger logger) throws Exception {
-		this(name, provider, null, databases, logger);
+	public DatabaseSet(String name, String provider, Map<String, DataBase> databases) throws Exception {
+		this(name, provider, null, databases);
 	}
 	
-	public DatabaseSet(String name, String provider, String shardStrategy, Map<String, DataBase> databases, DalLogger logger) throws Exception {
+	public DatabaseSet(String name, String provider, String shardStrategy, Map<String, DataBase> databases) throws Exception {
 		this.name = name;
 		this.provider = provider;
 		initDbCategory();
 		this.databases = databases;
-		this.logger = logger;
 
 		initStrategy(shardStrategy);
 		initShards();

@@ -192,18 +192,18 @@ public class DalConfigureFactory {
 					getAttribute(databaseSetNode, NAME),
 					getAttribute(databaseSetNode, PROVIDER),
 					getAttribute(databaseSetNode, SHARD_STRATEGY),
-					databases, logger);
+					databases);
 		else if(hasAttribute(databaseSetNode, SHARDING_STRATEGY))
 			return new DatabaseSet(
 					getAttribute(databaseSetNode, NAME),
 					getAttribute(databaseSetNode, PROVIDER),
 					getAttribute(databaseSetNode, SHARDING_STRATEGY),
-					databases, logger);
+					databases);
 		else
 			return new DatabaseSet(
 					getAttribute(databaseSetNode, NAME),
 					getAttribute(databaseSetNode, PROVIDER),
-					databases, logger);
+					databases);
 	}
 	
 	private DataBase readDataBase(Node dataBaseNode) {

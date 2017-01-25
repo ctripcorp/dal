@@ -3,11 +3,9 @@ package com.ctrip.platform.dal.dao.markdown;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.status.TimeoutMarkdown;
-import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public class TimeoutDetector implements ErrorDetector{
 	private Map<String, DetectorCounter> data = new ConcurrentHashMap<String, DetectorCounter>();
@@ -61,15 +59,6 @@ public class TimeoutDetector implements ErrorDetector{
 	}
 
 	public static boolean isTimeOutException(ErrorContext ctx){
-		if(ctx.getDbCategory() == DatabaseCategory.SqlServer){
-			if(ctx.getMsg().startsWith("The query has timed out") || ctx.getMsg().startsWith("查询超时")){
-				return true;
-			}
-		} else{
-			if(ctx.getExType().toString().equalsIgnoreCase(MySQLTimeoutException.class.toString())){
-				return true;
-			}
-		}
-		return false;
+		return ctx.getDbCategory().isTimeOutException(ctx);
 	}
 }

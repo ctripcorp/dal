@@ -35,19 +35,10 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	private static final String DESC = " DESC";
 	private static final String QUERY_ALL_CRITERIA = "1=1";
 	
-	private static final String MYSQL_QUERY_TPL= "SELECT %s FROM %s WHERE %s";
-	private static final String SQLSVR_QUERY_TPL= "SELECT %s FROM %s WITH (NOLOCK) WHERE %s";
-	
 	/**
 	 * 对于select first，会在语句中追加limit 0,1(MySQL)或者top 1(SQL Server)：
 	 * @return
 	 */
-	private static final String MYSQL_QUERY_TOP_TPL= "SELECT %s FROM %s WHERE %s LIMIT %d";
-	private static final String SQLSVR_QUERY_TOP_TPL= "SELECT TOP %d %s FROM %s WITH (NOLOCK) WHERE %s";
-	
-	private static final String MYSQL_QUERY_PAGE_TPL= "SELECT %s FROM %s WHERE %s LIMIT %d, %d";
-	private static final String SQLSVR_QUERY_PAGE_TPL= "SELECT %s FROM %s WITH (NOLOCK) WHERE %s OFFSET %d ROWS FETCH NEXT %d ROWS ONLY";
-	
 	private String tableName;
 	private DatabaseCategory dbCategory;
 	
@@ -247,20 +238,15 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	}
 	
 	private String buildTop(String effectiveTableName){
-		if(DatabaseCategory.SqlServer == dbCategory)
-			return String.format(SQLSVR_QUERY_TOP_TPL, count, buildColumns(), effectiveTableName, getCompleteWhereExp());
-		else
-			return String.format(MYSQL_QUERY_TOP_TPL, buildColumns(), effectiveTableName, getCompleteWhereExp(), count);
+		return dbCategory.buildTop(effectiveTableName, buildColumns(), getCompleteWhereExp(), count);
 	}
 
 	private String buildPage(String effectiveTableName){
-		String tpl = DatabaseCategory.SqlServer == dbCategory ? SQLSVR_QUERY_PAGE_TPL : MYSQL_QUERY_PAGE_TPL;
-		return String.format(tpl, buildColumns(), effectiveTableName, getCompleteWhereExp(), start, count);
+		return dbCategory.buildPage(effectiveTableName, buildColumns(), getCompleteWhereExp(), start, count);
 	}
 	
 	private String buildList(String effectiveTableName){
-		String tpl = DatabaseCategory.SqlServer == dbCategory ? SQLSVR_QUERY_TPL : MYSQL_QUERY_TPL;
-		return String.format(tpl, buildColumns(), effectiveTableName, getCompleteWhereExp());
+		return dbCategory.buildList(effectiveTableName, buildColumns(), getCompleteWhereExp());
 	}
 	
 	private String buildColumns() {

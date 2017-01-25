@@ -85,7 +85,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	public void initDbSpecific() {
 		pkSql = initPkSql();
 		initUpdateColumns();
-		initNullableColumneUpdateTemplate();
+		setValueTmpl = dbCategory.getNullableUpdateTpl();
 		initVersionColumnUpdateTemplate();
 	}
 	
@@ -102,19 +102,6 @@ public class TaskAdapter<T> implements DaoTask<T> {
 		// Remove Version from updatable columns
 		if(hasVersion)
 			defaultUpdateColumnNames.remove(parser.getVersionColumn());
-	}
-	
-	private void initNullableColumneUpdateTemplate() {
-		switch (dbCategory) {
-		case MySql:
-			setValueTmpl = "%s=IFNULL(?,%s) ";
-			break;
-		case SqlServer:
-			setValueTmpl = "%s=ISNULL(?,%s) ";
-			break;
-		default:
-			throw new RuntimeException("This type of database is NOT supported."); 
-		}
 	}
 	
 	/**
@@ -137,16 +124,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 
 		String valueTmpl = null;
 		if(versionType == Types.TIMESTAMP){
-			switch (dbCategory) {
-			case MySql:
-				valueTmpl = "CURRENT_TIMESTAMP";
-				break;
-			case SqlServer:
-				valueTmpl = "getDate()";
-				break;
-			default:
-				throw new RuntimeException("This type of database is NOT supported."); 
-			}
+			valueTmpl = dbCategory.getTimestampExp();
 		}else{
 			valueTmpl = quote(parser.getVersionColumn()) + "+1";
 		}

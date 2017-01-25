@@ -3,23 +3,23 @@ package com.ctrip.platform.dal.dao.status;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+
 public class HAStatus extends BaseStatus implements HAStatusMBean {
 
 	private volatile boolean enabled = false;
 
 	private volatile int retryCount = 1;
 
-	private volatile String sqlserverErrorCodes = "-2,233,845,846,847,1421,2,53,701,802,945,1204,1222";
-
-	private volatile String mysqlErrorCodes = "1043,1159,1161,1021,1037,1038,1039,1040,1041,1154,1158,1160,1189,1190,1205,1218,1219,1220";
-	
 	private volatile Set<Integer> sqlservercodes = new HashSet<Integer>();
 
 	private volatile Set<Integer> mysqlcodes = new HashSet<Integer>();
 	
 	public HAStatus() {
-		sqlservercodes = parseErrorCodes(sqlserverErrorCodes);
-		mysqlcodes = parseErrorCodes(mysqlErrorCodes);
+		sqlservercodes = DatabaseCategory.SqlServer.getDefaultErrorCodes();
+		mysqlcodes = DatabaseCategory.MySql.getDefaultErrorCodes();
 	}
 	
 	public boolean isEnabled() {
@@ -41,22 +41,20 @@ public class HAStatus extends BaseStatus implements HAStatusMBean {
 	}
 	
 	public String getSqlserverErrorCodes() {
-		return sqlserverErrorCodes;
+		return StringUtils.join(sqlservercodes, ',');
 	}
 	
 	public void setSqlserverErrorCodes(String sqlserverErrorCodes) {
 		sqlservercodes = parseErrorCodes(sqlserverErrorCodes);
-		this.sqlserverErrorCodes = sqlserverErrorCodes;
 		changed();
 	}
 
 	public String getMysqlErrorCodes() {
-		return mysqlErrorCodes;
+		return StringUtils.join(mysqlcodes, ',');
 	}
 	
 	public void setMysqlErrorCodes(String mysqlErrorCodes) {
 		mysqlcodes = parseErrorCodes(mysqlErrorCodes);
-		this.mysqlErrorCodes = mysqlErrorCodes;
 		changed();
 	}
 

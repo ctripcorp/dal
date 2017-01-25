@@ -12,7 +12,6 @@ import com.ctrip.platform.dal.dao.sqlbuilder.BaseTableSelectBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.InsertSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.SelectBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.SqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.TableSelectBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.TableSqlBuilder;

@@ -20,9 +20,6 @@ import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
 import com.ctrip.platform.dal.dao.helper.SupportPartialResultMapping;
 
 public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
-	private static final String MYSQL_PAGE_SUFFIX_TPL= " limit %d, %d";
-	private static final String SQLSVR_PAGE_SUFFIX_TPL= " OFFSET %d ROWS FETCH NEXT %d ROWS ONLY";
-
 	private String selectSqlTemplate;
 	private DatabaseCategory dbCategory;
 	private StatementParameters parameters;
@@ -67,7 +64,7 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 		if(count  == 0)
 			return selectSqlTemplate;
 		
-		String suffix = DatabaseCategory.SqlServer == dbCategory ? SQLSVR_PAGE_SUFFIX_TPL : MYSQL_PAGE_SUFFIX_TPL;
+		String suffix = dbCategory.getPageSuffixTpl();
 		String sql = selectSqlTemplate + suffix;
 		
 		return String.format(sql, start, count);

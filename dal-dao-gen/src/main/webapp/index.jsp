@@ -309,13 +309,13 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
-                                    <input id="SelectAllCreateMethodAPIChk" type="checkbox" checked="true"> <a
+                                    <input id="selectAllCreateMethodAPIChk" type="checkbox" checked="true"> <a
                                         data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
                                         style="font-size: 15px"> Create Method </a>
                                 </h4>
                             </div>
                             <div id="collapseOne" class="panel-collapse collapse in">
-                                <div class="panel-body" id="CreateMethodListDiv"
+                                <div class="panel-body" id="createMethodListDiv"
                                      style="max-height: 300px; overflow-y: auto">Create Method list here.
                                 </div>
                             </div>
@@ -323,13 +323,13 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
-                                    <input id="SelectAllRetrieveMethodAPIChk" type="checkbox" checked="true"> <a
+                                    <input id="selectAllRetrieveMethodAPIChk" type="checkbox" checked="true"> <a
                                         data-toggle="collapse" data-parent="#accordion" href="#collapseTwo"
                                         style="font-size: 15px"> Retrieve Method </a>
                                 </h4>
                             </div>
                             <div id="collapseTwo" class="panel-collapse collapse">
-                                <div class="panel-body" id="RetrieveMethodListDiv"
+                                <div class="panel-body" id="retrieveMethodListDiv"
                                      style="max-height: 300px; overflow-y: auto">Retrieve Method list here.
                                 </div>
                             </div>
@@ -337,13 +337,13 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
-                                    <input id="SelectAllUpdateMethodAPIChk" type="checkbox" checked="true"> <a
+                                    <input id="selectAllUpdateMethodAPIChk" type="checkbox" checked="true"> <a
                                         data-toggle="collapse" data-parent="#accordion" href="#collapseThree"
                                         style="font-size: 15px"> Update Method </a>
                                 </h4>
                             </div>
                             <div id="collapseThree" class="panel-collapse collapse">
-                                <div class="panel-body" id="UpdateMethodListDiv"
+                                <div class="panel-body" id="updateMethodListDiv"
                                      style="max-height: 300px; overflow-y: auto">Update Method list here.
                                 </div>
                             </div>
@@ -351,13 +351,13 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
-                                    <input id="SelectAllDeleteMethodAPIChk" type="checkbox" checked="true"> <a
+                                    <input id="selectAllDeleteMethodAPIChk" type="checkbox" checked="true"> <a
                                         data-toggle="collapse" data-parent="#accordion" href="#collapseFour"
                                         style="font-size: 15px"> Delete Method </a>
                                 </h4>
                             </div>
                             <div id="collapseFour" class="panel-collapse collapse">
-                                <div class="panel-body" id="DeleteMethodListDiv"
+                                <div class="panel-body" id="deleteMethodListDiv"
                                      style="max-height: 300px; overflow-y: auto">Delete Method list here.
                                 </div>
                             </div>

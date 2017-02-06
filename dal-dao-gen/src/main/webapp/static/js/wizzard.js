@@ -6,15 +6,16 @@
     var wizzard = function () {
     };
 
-    var variableHtmlOrigin = '<div class="row-fluid"><input type="text" class="span3" value="%s">';
+    var variableHtmlOrigin = "<div class='row-fluid'><input type='text' class='span3' value='%s'>";
 
-    var variableHtml = '<div class="row-fluid"><input type="text" class="span3" value="%s">' + ' <label class="popup_label">&nbsp;<input type="checkbox" %s >允许NULL值</label>';
+    var variableHtml = "<div class='row-fluid'><input type='text' class='span3' value='%s'>"
+        + " <label class='popup_label'>&nbsp;<input type='checkbox' %s >允许NULL值</label>";
 
-    var variableHtml_ForJAVA = '<div class="row-fluid"><input type="text" class="span3" value="%s">'
-        + ' <label class="popup_label">&nbsp;<input type="checkbox" %s >允许NULL值</label>'
-        + ' <label class="popup_label">&nbsp;&nbsp;<input type="checkbox" %s >参数敏感</label>';
+    var variableHtml_ForJAVA = "<div class='row-fluid'><input type='text' class='span3' value='%s'>"
+        + " <label class='popup_label'>&nbsp;<input type='checkbox' %s >允许NULL值</label>"
+        + " <label class='popup_label'>&nbsp;&nbsp;<input type='checkbox' %s >参数敏感</label>";
 
-    var variable_typesHtml_ForJAVA = '<select %s class="span5">'
+    var variable_typesHtml_ForJAVA = "<select %s class='span5'>"
         + "<option value='_please_select'>--参数类型--</option>"
         + "<option value='-7'>Bit----Boolean</option>"
         + "<option value='-6'>TinyInt----Byte</option>"
@@ -40,7 +41,7 @@
         + "<option value='10001'>uniqueidentifier----Guid</option>"
         + "</select><div>&nbsp;&nbsp;&nbsp;&nbsp;参数敏感：<input type='checkbox' checked='checked'></div></div><br>";
 
-    var variable_typesHtml = '<select %s class="span5">'
+    var variable_typesHtml = "<select %s class='span5'>"
         + "<option value='_please_select'>--参数类型--</option>"
         + "<option value='-7'>Bit----Boolean</option>"
         + "<option value='-6'>TinyInt----Byte</option>"
@@ -67,15 +68,17 @@
         + "</select></div><br>";
 
     var step1 = function (record, current) {
-        if ($("#databases").val() == "") {
-            $("#error_msg").text("请选择逻辑数据库！");
+        var errorMsg = $("#error_msg");
+
+        if ($("#databases").val().length == 0) {
+            errorMsg.text("请选择逻辑数据库！");
             return;
         }
-        if ($("#comment").val() == "") {
-            $("#error_msg").text("请输入方法功能描述！");
+        if ($("#comment").val().length == 0) {
+            errorMsg.text("请输入方法功能描述！");
             return;
         }
-        $("#error_msg").text("");
+        errorMsg.text("");
 
         // 首先蒙板化整个body,在后续get成功或者失败时，取消蒙板化
         var gen_style = $("#gen_style").val();
@@ -94,142 +97,156 @@
 
     var step1_table_view_sp = function (record, current) {
         cblock($("body"));
-        $("#next_step").attr("disabled", "true");
-        $("#next_step").text("正在加载...");
-        $("#next_step").removeClass("btn-primary");
+        var nextStep = $("#next_step");
+        nextStep.attr("disabled", "true");
+        nextStep.text("正在加载...");
+        nextStep.removeClass("btn-primary");
         $.get("/rest/db/table_sps", {
             db_name: $("#databases").val(),
             rand: Math.random()
-        }).done(function (retValue) {
-            if (retValue.code != 'OK') {
-                $("#error_msg").text(retValue.info);
-                $("#next_step").removeAttr("disabled");
-                $("#next_step").addClass("btn-primary");
-                $("#next_step").text("下一步");
+        }).done(function (result) {
+            if (result.code != 'OK') {
+                $("#error_msg").text(result.info);
+                nextStep.removeAttr("disabled");
+                nextStep.addClass("btn-primary");
+                nextStep.text("下一步");
                 $("body").unblock();
                 return;
             }
-            var data = $.parseJSON(retValue.info);
+            var data = $.parseJSON(result.info);
             $("select[id$=table_list] > option").remove();
             $("select[id$=view_list] > option").remove();
             $("select[id$=sp_list] > option").remove();
-            var tableList = [];
-            var viewList = [];
-            var spList = [];
+            var tableArray = [];
+            var viewArray = [];
+            var spArray = [];
             $.each(data.tables, function (index, value) {
-                tableList.push($('<option>', {
+                tableArray.push($("<option>", {
                     value: value, text: value
                 }));
             });
             $.each(data.views, function (index, value) {
-                viewList.push($('<option>', {
+                viewArray.push($("<option>", {
                     value: value, text: value
                 }));
             });
             $.each(data.sps, function (index, value) {
-                spList.push($('<option>', {
+                spArray.push($("<option>", {
                     value: value.schema + "." + value.name, text: value.schema + "." + value.name
                 }));
             });
+
+            var cudBySp = $("#cud_by_sp");
+            var mysqlHide = $(".mysql_hide");
             if (data.dbType == "MySQL") {
-                $("#cud_by_sp").prop("checked", false);
-                $(".mysql_hide").hide();
+                cudBySp.prop("checked", false);
+                mysqlHide.hide();
             } else {
                 $.get("/rest/user/isDefaultUser", {rand: Math.random()}, function (data) {
                     if (data == "true") {
-                        $("#cud_by_sp").prop("checked", false);
-                        $(".mysql_hide").hide();
+                        cudBySp.prop("checked", false);
+                        mysqlHide.hide();
                     }
                     else {
-                        $("#cud_by_sp").prop("checked", true);
-                        $(".mysql_hide").show();
+                        cudBySp.prop("checked", true);
+                        mysqlHide.show();
                     }
                 });
             }
 
-            $("#table_list").append(tableList).multipleSelect({
+            var step = $(".step2-1");
+            var tableList = $("#table_list");
+            tableList.append(tableArray).multipleSelect({
                 "refresh": true,
                 onOpen: function () {
-                    $(".step2-1").height(330);
+                    step.height(330);
                 },
                 onClose: function () {
-                    $(".step2-1").height(245);
-                }
-            });
-            $("#view_list").append(viewList).multipleSelect({
-                "refresh": true,
-                onOpen: function () {
-                    $(".step2-1").height(330);
-                },
-                onClose: function () {
-                    $(".step2-1").height(245);
-                }
-            });
-            $("#sp_list").append(spList).multipleSelect({
-                "refresh": true,
-                onOpen: function () {
-                    $(".step2-1").height(330);
-                },
-                onClose: function () {
-                    $(".step2-1").height(245);
+                    step.height(245);
                 }
             });
 
-            if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "table_view_sp") {
+            var viewList = $("#view_list");
+            viewList.append(viewArray).multipleSelect({
+                "refresh": true,
+                onOpen: function () {
+                    step.height(330);
+                },
+                onClose: function () {
+                    step.height(245);
+                }
+            });
+
+            var spList = $("#sp_list");
+            spList.append(spArray).multipleSelect({
+                "refresh": true,
+                onOpen: function () {
+                    step.height(330);
+                },
+                onClose: function () {
+                    step.height(245);
+                }
+            });
+
+            if ($("#page1").attr("is_update") == "1"
+                && record != undefined
+                && record.task_type == "table_view_sp") {
                 if (record.table_names != undefined) {
-                    $('#table_list').multipleSelect('setSelects', record.table_names.split(","));
+                    tableList.multipleSelect("setSelects", record.table_names.split(","));
                 }
                 if (record.view_names != undefined) {
-                    $('#view_list').multipleSelect('setSelects', record.view_names.split(","));
+                    viewList.multipleSelect("setSelects", record.view_names.split(","));
                 }
                 if (record.sp_names != undefined) {
-                    $('#sp_list').multipleSelect('setSelects', record.sp_names.split(","));
+                    spList.multipleSelect("setSelects", record.sp_names.split(","));
                 }
                 if (record.suffix != undefined) {
-                    $('#prefix').val(record.prefix);
+                    $("#prefix").val(record.prefix);
                 }
                 if (record.suffix != undefined) {
-                    $('#suffix').val(record.suffix);
+                    $("#suffix").val(record.suffix);
                 }
             }
             current.hide();
 
-            $(".step2-1").show();
-            $("#next_step").removeAttr("disabled");
-            $("#next_step").addClass("btn-primary");
-            $("#next_step").text("下一步");
+            step.show();
+            nextStep.removeAttr("disabled");
+            nextStep.addClass("btn-primary");
+            nextStep.text("下一步");
             $("body").unblock();
         }).fail(function (data) {
             $("#error_msg").text("获取表/视图列表失败, 请检查是否有权限, 或者数据库已被删除!");
-            $("#next_step").removeAttr("disabled");
-            $("#next_step").addClass("btn-primary");
-            $("#next_step").text("下一步");
+            nextStep.removeAttr("disabled");
+            nextStep.addClass("btn-primary");
+            nextStep.text("下一步");
             $("body").unblock();
         });
     };
 
     var step1_auto = function (record, current) {
+        var table = $("#tables")[0];
+
         // 在显示下一页之前，清空下一页的信息
-        if ($("#tables")[0] != undefined && $("#tables")[0].selectize != undefined) {
-            $("#tables")[0].selectize.clearOptions();
+        if (table != undefined && table.selectize != undefined) {
+            table.selectize.clearOptions();
         } else {
             $("#tables").selectize({
-                // maxItems: null,
-                valueField: 'id',
-                labelField: 'title',
-                searchField: 'title',
-                sortField: 'title',
+                valueField: "id",
+                labelField: "title",
+                searchField: "title",
+                sortField: "title",
                 options: [],
                 create: false
             });
         }
 
-        $("#tables")[0].selectize.on('dropdown_open', function (dropdown) {
-            $(".step2-2").height(240);
+        var step = $(".step2-2");
+        table.selectize.on("dropdown_open", function (dropdown) {
+            step.height(240);
         });
 
-        $("#tables")[0].selectize.on('dropdown_close', function (dropdown) {
-            $(".step2-2").height(145);
+        table.selectize.on("dropdown_close", function (dropdown) {
+            step.height(145);
         });
 
         cblock($("body"));
@@ -244,15 +261,17 @@
                     title: value
                 });
             });
-            $("#tables")[0].selectize.addOption(results);
-            $("#tables")[0].selectize.refreshOptions(false);
-            if ($("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "auto") {
-                $("#tables")[0].selectize.setValue(record.table_name);
+            table.selectize.addOption(results);
+            table.selectize.refreshOptions(false);
+            if ($("#page1").attr("is_update") == "1"
+                && record != undefined
+                && record.task_type == "auto") {
+                table.selectize.setValue(record.table_name);
                 $("#method_name").val(record.method_name);
                 $("#crud_option").val(record.crud_type);
             }
             current.hide();
-            $(".step2-2").show();
+            step.show();
             $("body").unblock();
         }).fail(function (data) {
             $("#error_msg").text("获取所有表失败!");
@@ -262,43 +281,46 @@
     };
 
     var step1_sql = function (record, current) {
-        if ($("#sql_class_name")[0] != undefined && $("#sql_class_name")[0].selectize != undefined) {
-            $("#sql_class_name")[0].selectize.clearOptions();
+        var sqlClassName = $("#sql_class_name")[0];
+        if (sqlClassName != undefined && sqlClassName.selectize != undefined) {
+            sqlClassName.selectize.clearOptions();
         } else {
             $("#sql_class_name").selectize({
-                // maxItems: null,
-                valueField: 'value',
-                labelField: 'title',
-                searchField: 'title',
-                sortField: 'value',
+                valueField: "value",
+                labelField: "title",
+                searchField: "title",
+                sortField: "value",
                 options: [],
                 create: true
             });
         }
-        if ($("#sql_pojo_name")[0] != undefined && $("#sql_pojo_name")[0].selectize != undefined) {
-            $("#sql_pojo_name")[0].selectize.clearOptions();
+
+        var sqlPojoName = $("#sql_pojo_name")[0];
+        if (sqlPojoName != undefined && sqlPojoName.selectize != undefined) {
+            sqlPojoName.selectize.clearOptions();
         } else {
             $("#sql_pojo_name").selectize({
-                // maxItems: null,
-                valueField: 'value',
-                labelField: 'title',
-                searchField: 'title',
-                sortField: 'value',
+                valueField: "value",
+                labelField: "title",
+                searchField: "title",
+                sortField: "value",
                 options: [],
                 create: true
             });
         }
         // 在显示下一页之前，清空下一页的信息
         $.get("/rest/task/sql_class", {
-            project_id: w2ui['grid'].current_project,
+            project_id: w2ui["grid"].current_project,
             db_name: $("#databases").val(),
             rand: Math.random()
         }, function (data) {
-            var update = $("#page1").attr('is_update') == "1" && record != undefined && record.task_type == "sql";
+            var update = $("#page1").attr("is_update") == "1"
+                && record != undefined
+                && record.task_type == "sql";
             var clazz = [];
             var pojos = [{
-                value: '简单类型',
-                title: '简单类型'
+                value: "简单类型",
+                title: "简单类型"
             }];
             $.each(data.classes, function (index, value) {
                 clazz.push({
@@ -312,29 +334,32 @@
                     title: value
                 });
             });
-            $("#sql_class_name")[0].selectize.addOption(clazz);
-            $("#sql_pojo_name")[0].selectize.addOption(pojos);
-            $("#sql_class_name")[0].selectize.refreshOptions(false);
-            $("#sql_pojo_name")[0].selectize.refreshOptions(false);
+            sqlClassName.selectize.addOption(clazz);
+            sqlClassName.selectize.refreshOptions(false);
+            sqlPojoName.selectize.addOption(pojos);
+            sqlPojoName.selectize.refreshOptions(false);
 
             if (update) {
+                var className = record.class_name;
                 if (data.classes.length != 0) {
-                    $("#sql_class_name")[0].selectize.setValue(record['class_name']);
+                    sqlClassName.selectize.setValue(className);
                 } else {
-                    $("#sql_class_name")[0].selectize.addOption({
-                        value: record['class_name'],
-                        title: record['class_name']
+                    sqlClassName.selectize.addOption({
+                        value: className,
+                        title: className
                     });
-                    $("#sql_class_name")[0].selectize.setValue(record['class_name']);
+                    sqlClassName.selectize.setValue(className);
                 }
+
+                var pojoName = record.pojo_name;
                 if (data.pojos.length != 0) {
-                    $("#sql_pojo_name")[0].selectize.setValue(record['pojo_name']);
+                    sqlPojoName.selectize.setValue(pojoName);
                 } else {
-                    $("#sql_pojo_name")[0].selectize.addOption({
-                        value: record['pojo_name'],
-                        title: record['pojo_name']
+                    sqlPojoName.selectize.addOption({
+                        value: pojoName,
+                        title: pojoName
                     });
-                    $("#sql_pojo_name")[0].selectize.setValue(record['pojo_name']);
+                    sqlPojoName.selectize.setValue(pojoName);
                 }
 
                 $("#sql_method_name").val(record.method_name);
@@ -342,15 +367,15 @@
                 editor.setTheme("ace/theme/monokai");
                 editor.getSession().setMode("ace/mode/sql");
                 editor.setValue(record.sql_content);
-                if (record['scalarType']) {
-                    $("#free_sql_scalarType").val(record['scalarType']);
+                if (record.scalarType) {
+                    $("#free_sql_scalarType").val(record.scalarType);
                 } else {
                     $("#free_sql_scalarType").val("List");
                 }
-                $("#free_sql_pagination").prop('checked', record['pagination']);
-                $("#free_sql_crud_option").val(record['crud_type']);
+                $("#free_sql_pagination").prop("checked", record.pagination);
+                $("#free_sql_crud_option").val(record.crud_type);
                 $("#free_sql_crud_option").trigger("change");
-                if ('select' == record['crud_type']) {
+                if (record.crud_type == "select") {
                     $("#free_sql_scalarType").trigger("change");
                 }
             }
@@ -364,10 +389,10 @@
     };
 
     var append_api = function (id, value) {
-        $("#" + id).append($('<input>', {
+        $("#" + id).append($("<input>", {
             type: "checkbox",
-            id: 'dal_api_' + value['id'],
-            checked: 'checked'
+            id: "dal_api_" + value.id,
+            checked: "checked"
         }));
         var temp = "<a href='#' class='ctip' data-toggle='tooltip' data-placement='top' style='float:right'"
             + " title='' data-original-title='"
@@ -375,8 +400,8 @@
             + "'>"
             + "<span class='glyphicon glyphicon-question-sign'></span></a>";
 
-        $("#dal_api_" + value['id']).wrap("<label class='popup_label'></label>").after(value['method_declaration']);
-        $("#dal_api_" + value['id']).parent().append($(temp));
+        $("#dal_api_" + value.id).wrap("<label class='popup_label'></label>").after(value['method_declaration']);
+        $("#dal_api_" + value.id).parent().append($(temp));
         $("#" + id + " > label[class='popup_label']").wrapAll("<div class='row-fluid'></div>");
     };
 
@@ -387,21 +412,21 @@
     var checkDaoNameConflict = function (daoName, data) {
         var checkDaoNameConflictResult = false;
         cblock($("body"));
-        var current_project = w2ui['grid'].current_project;
+        var current_project = w2ui["grid"].current_project;
         var postData = {
             "prefix": "",
             "suffix": "",
             "dao_id": "-1"
         };
         postData = $.extend(postData, data);
-        postData["project_id"] = current_project;
-        postData["db_set_name"] = $("#databases").val();
-        postData["daoName"] = daoName;
-        postData["is_update"] = $("#page1").attr('is_update');
-        if (postData["is_update"] == '1') {
-            var records = w2ui['grid'].getSelection();
-            var record = w2ui['grid'].get(records[0]);
-            postData["dao_id"] = record["id"];
+        postData.project_id = current_project;
+        postData.db_set_name = $("#databases").val();
+        postData.daoName = daoName;
+        postData.is_update = $("#page1").attr("is_update");
+        if (postData["is_update"] == "1") {
+            var records = w2ui["grid"].getSelection();
+            var record = w2ui["grid"].get(records[0]);
+            postData["dao_id"] = record.id;
         }
         $.ajax({
             type: "POST",
@@ -411,7 +436,7 @@
             dataType: "json",
             success: function (data) {
                 if (data.code != "OK") {
-                    $.showMsg("error_msg", data['info']);
+                    $.showMsg("error_msg", data.info);
                     checkDaoNameConflictResult = true;
                 }
                 $("body").unblock();
@@ -421,64 +446,69 @@
     };
 
     var step2_1 = function (record, current) {
-        if ($('#table_list').multipleSelect('getSelects').length < 1) {
-            $.showMsg("error_msg", "请选择表!");
+        var tableList = $("#table_list").multipleSelect("getSelects");
+        var viewList = $("#view_list").multipleSelect("getSelects");
+        if (tableList.length == 0 && viewList.length == 0) {
+            $.showMsg("error_msg", "请选择表或视图!");
             return;
         }
-        if (checkDaoNameConflict($('#table_list').multipleSelect('getSelects').join(","), {
+
+        if (checkDaoNameConflict(tableList.join(","), {
                 "prefix": $("#prefix").val(),
                 "suffix": $("#suffix").val()
             })) {
             return;
         }
         cblock($("body"));
-        $("#next_step").attr("disabled", "true");
-        $("#next_step").text("正在加载...");
-        $("#next_step").removeClass("btn-primary");
+        var nextStep = $("#next_step");
+        nextStep.attr("disabled", "true");
+        nextStep.text("正在加载...");
+        nextStep.removeClass("btn-primary");
         var data = undefined;
         $.get("/rest/task/table/apiList", {
             db_name: $("#databases").val(),
-            table_names: $('#table_list').multipleSelect(
-                'getSelects').join(","),
+            table_names: tableList.join(","),
             sql_style: $("#sql_style").val(),
             rand: Math.random()
-        }).done(function (retValue) {
-            if (retValue.code != 'OK') {
-                $("#error_msg").text(retValue.info);
-                $("#next_step").removeAttr("disabled");
-                $("#next_step").addClass("btn-primary");
-                $("#next_step").text("下一步");
+        }).done(function (result) {
+            if (result.code != 'OK') {
+                $("#error_msg").text(result.info);
+                nextStep.removeAttr("disabled");
+                nextStep.addClass("btn-primary");
+                nextStep.text("下一步");
                 $("body").unblock();
                 return;
             }
-            data = $.parseJSON(retValue.info);
-            $("#RetrieveMethodListDiv").empty();
-            $("#UpdateMethodListDiv").empty();
-            $("#DeleteMethodListDiv").empty();
-            $("#CreateMethodListDiv").empty();
+
+            data = $.parseJSON(result.info);
+            $("#retrieveMethodListDiv").empty();
+            $("#updateMethodListDiv").empty();
+            $("#deleteMethodListDiv").empty();
+            $("#createMethodListDiv").empty();
             $.each(data, function (index, value) {
-                if (value['crud_type'].toLowerCase() == 'select') {
-                    append_api("RetrieveMethodListDiv", value);
-                } else if (value['crud_type'].toLowerCase() == 'update') {
-                    append_api("UpdateMethodListDiv", value);
-                } else if (value['crud_type'].toLowerCase() == 'delete') {
-                    append_api("DeleteMethodListDiv", value);
-                } else if (value['crud_type'].toLowerCase() == 'insert') {
-                    append_api("CreateMethodListDiv", value);
+                var crudType = value.crud_type.toLowerCase();
+                if (crudType == "select") {
+                    append_api("retrieveMethodListDiv", value);
+                } else if (crudType == "update") {
+                    append_api("updateMethodListDiv", value);
+                } else if (crudType == "delete") {
+                    append_api("deleteMethodListDiv", value);
+                } else if (crudType == "insert") {
+                    append_api("createMethodListDiv", value);
                 }
             });
 
-            if ($("#page1").attr('is_update') == "1"
+            if ($("#page1").attr("is_update") == "1"
                 && record != undefined
                 && record.task_type == "table_view_sp"
-                && record['api_list'] != 'all'
-                && record['api_list'] != ''
-                && record['api_list'] != undefined
+                && record.api_list != "all"
+                && record.api_list != ""
+                && record.api_list != undefined
                 && data != undefined) {
-                var tempArr = record['api_list'].split(',');
+                var tempArr = record.api_list.split(',');
                 $.each(data, function (index, value) {
-                    if ($.inArray('dal_api_' + value['id'], tempArr) == -1) {
-                        $("#dal_api_" + value['id']).prop("checked", false);
+                    if ($.inArray("dal_api_" + value.id, tempArr) == -1) {
+                        $("#dal_api_" + value.id).prop("checked", false);
                     }
                 });
             }
@@ -488,24 +518,24 @@
 
             $.showMsg("error_msg", "");
             $(".step2-1-2").show();
-            $("#next_step").removeAttr("disabled");
-            $("#next_step").addClass("btn-primary");
-            $("#next_step").text("下一步");
+            nextStep.removeAttr("disabled");
+            nextStep.addClass("btn-primary");
+            nextStep.text("下一步");
             $("body").unblock();
         }).fail(function (data) {
             $("#error_msg").text("获取表/视图列表失败, 请检查是否有权限, 或者数据库已被删除!");
-            $("#next_step").removeAttr("disabled");
-            $("#next_step").addClass("btn-primary");
-            $("#next_step").text("下一步");
+            nextStep.removeAttr("disabled");
+            nextStep.addClass("btn-primary");
+            nextStep.text("下一步");
             $("body").unblock();
         });
     };
 
     var methodApiClickHandler = function () {
-        bindSelectAllCheck("CreateMethodListDiv", "SelectAllCreateMethodAPIChk");
-        bindSelectAllCheck("RetrieveMethodListDiv", "SelectAllRetrieveMethodAPIChk");
-        bindSelectAllCheck("UpdateMethodListDiv", "SelectAllUpdateMethodAPIChk");
-        bindSelectAllCheck("DeleteMethodListDiv", "SelectAllDeleteMethodAPIChk");
+        bindSelectAllCheck("createMethodListDiv", "selectAllCreateMethodAPIChk");
+        bindSelectAllCheck("retrieveMethodListDiv", "selectAllRetrieveMethodAPIChk");
+        bindSelectAllCheck("updateMethodListDiv", "selectAllUpdateMethodAPIChk");
+        bindSelectAllCheck("deleteMethodListDiv", "selectAllDeleteMethodAPIChk");
     };
 
     var apiMethodChkValidate = function (methodListDiv, selectAllMethodCheckbox) {
@@ -564,18 +594,20 @@
     };
 
     var step2_2 = function (record, current) {
-        if ($("#tables").val() == "") {
-            $("#error_msg").text("请选择一个表！");
+        var tables = $("#tables");
+        var errorMsg = $("#error_msg");
+        if (tables.val().length == 0) {
+            errorMsg.text("请选择一个表！");
             return;
         }
-        if (checkDaoNameConflict($("#tables").val())) {
+        if (checkDaoNameConflict(tables.val())) {
             return;
         }
-        if ($("#method_name").val() == "") {
-            $("#error_msg").text("请填写方法名！");
+        if ($("#method_name").val().length == 0) {
+            errorMsg.text("请填写方法名！");
             return;
         }
-        $("#error_msg").text("");
+        errorMsg.text("");
 
         $("select[id$=fields] > option").remove();
         $("select[id$=selected_condition] > option").remove();
@@ -584,7 +616,7 @@
 
         cblock($("body"));
         $.get("/rest/db/fields", {
-            table_name: $("#tables").val(),
+            table_name: tables.val(),
             db_name: $("#databases").val(),
             rand: Math.random()
         }, function (data) {
@@ -592,23 +624,21 @@
             var values = [];
             $.each(data, function (index, value) {
                 values.push(value.name);
-                fieldList.push($(
-                    '<option>',
-                    {
+                fieldList.push(
+                    $("<option>", {
                         value: value.name,
                         text: sprintf("%s%s%s", value.name, value.indexed ? "(索引)" : "", value.primary ? "(主键)" : "")
                     }));
                 $("#conditions").append(
-                    $('<option>', {
-                        value: value.name, text: value.name
+                    $("<option>", {
+                        value: value.name,
+                        text: value.name
                     }));
                 $("#orderby_field").append(
-                    $(
-                        '<option>',
-                        {
-                            value: value.name,
-                            text: sprintf("%s%s%s", value.name, value.indexed ? "(索引)" : "", value.primary ? "(主键)" : "")
-                        }));
+                    $("<option>", {
+                        value: value.name,
+                        text: sprintf("%s%s%s", value.name, value.indexed ? "(索引)" : "", value.primary ? "(主键)" : "")
+                    }));
             });
 
             $("#fields").append(fieldList).multipleSelect({
@@ -620,30 +650,22 @@
                     ace.edit("sql_builder").setValue("");
                 },
                 onClick: function (option) {
-                    var tempValue = $('#fields').multipleSelect('getSelects');
-                    if (tempValue.length > 1 && $("#crud_option").val() == "select") {
-                        alert('只能选择一个字段，或者选择全部字段');
-                        $.each(tempValue, function (index, value) {
-                            if (option['value'] != value) {
-                                $('#fields').multipleSelect('setSelects', [value]);
-                            }
-                        });
-                    }
                     window.sql_builder.build();
                 }
             });
-            if ($("#page1").attr('is_update') == "1") {
-                if (!$.isEmpty(record["orderby"])) {
-                    $("#orderby_field").val(record["orderby"].split(",")[0]);
-                    $("#orderby_sort").val(record["orderby"].split(",")[1]);
+            if ($("#page1").attr("is_update") == "1") {
+                var orderBy = record.orderby;
+                if (!$.isEmpty(orderBy)) {
+                    $("#orderby_field").val(orderBy.split(",")[0]);
+                    $("#orderby_sort").val(orderBy.split(",")[1]);
                 }
-                if (record["scalarType"]) {
-                    $("#auto_sql_scalarType").val(record["scalarType"]);
+                if (record.scalarType) {
+                    $("#auto_sql_scalarType").val(record.scalarType);
                 } else {
                     $("#auto_sql_scalarType").val("List");
                 }
-                $("#auto_sql_pagination").prop('checked', record['pagination']);
-                $('#fields').multipleSelect('setSelects', record.fields.split(","));
+                $("#auto_sql_pagination").prop("checked", record.pagination);
+                $("#fields").multipleSelect("setSelects", record.fields.split(","));
                 if (record.condition != undefined && record.condition.length > 0) {
                     var selectedConditions = record.condition.split(";");
                     if (selectedConditions != undefined && selectedConditions.length > 0) {
@@ -672,12 +694,14 @@
             current.hide();
             $(".step2-2-1").show();
 
+            var step1 = $(".step2-2-1-1");
+            var step2 = $(".step2-2-1-2");
             var op_type = $("#crud_option").val();
             $("#auto_sql_scalarTypeDiv").hide();
             $("#orderby").hide();
             if (op_type == "select") {
-                $(".step2-2-1-1").show();
-                $(".step2-2-1-2").show();
+                step1.show();
+                step2.show();
                 $("#auto_sql_scalarTypeDiv").show();
                 $("#auto_sql_scalarType").trigger("change");
                 $("#orderby").show();
@@ -687,14 +711,14 @@
                     $("#auto_sql_scalarType option[value='Single']").show();
                 }
             } else if (op_type == "update") {
-                $(".step2-2-1-1").show();
-                $(".step2-2-1-2").show();
+                step1.show();
+                step2.show();
             } else if (op_type == "insert") {
-                $(".step2-2-1-1").show();
-                $(".step2-2-1-2").hide();
+                step1.show();
+                step2.hide();
             } else {
-                $(".step2-2-1-1").hide();
-                $(".step2-2-1-2").show();
+                step1.hide();
+                step2.show();
             }
             $("body").unblock();
         }).fail(function (data) {
@@ -720,13 +744,13 @@
         if (array != undefined) {
             if (array.length == 1) {
                 $("#selected_condition").append(
-                    $('<option>', {
+                    $("<option>", {
                         value: value,
                         text: $(sprintf("#condition_values > option[value='%s']", value)).text()
                     }));
             } else if (array.length > 1) {
                 $("#selected_condition").append(
-                    $('<option>', {
+                    $("<option>", {
                         value: value,
                         text: sprintf("%s %s", array[0], $(sprintf("#condition_values > option[value='%s']", array[1])).text())
                     }));
@@ -736,11 +760,13 @@
 
     var step2_2_1 = function (record, current) {
         var crud_option = $("#crud_option").val();
-        if (crud_option != "delete" && $('#fields').multipleSelect('getSelects').length < 1) {
+        if (crud_option != "delete" && $("#fields").multipleSelect("getSelects").length < 1) {
             $("#error_msg").text("请选择至少一个字段！");
             return;
         }
-        if ($("#auto_sql_pagination").is(":checked") == true && $("#orderby_field").val() == '-1' && $("#crud_option").val() == "select") {
+        if ($("#auto_sql_pagination").is(":checked") == true
+            && $("#orderby_field").val() == "-1"
+            && $("#crud_option").val() == "select") {
             $("#error_msg").html("请选择排序(Order by)的字段");
             return;
         }
@@ -758,29 +784,30 @@
             }
         }
 
+        var paramListAuto = $("#param_list_auto");
         if (paramHtml.length == 0) {
             $("#param_list_auto_div").hide();
-            $("#param_list_auto").empty();
+            paramListAuto.empty();
         } else {
             $("#param_list_auto_div").show();
-            $("#param_list_auto").show();
-            $("#param_list_auto").html(paramHtml);
+            paramListAuto.show();
+            paramListAuto.html(paramHtml);
         }
 
         // bind java hints
-        if ($("#page1").attr('is_update') == "1") {
+        if ($("#page1").attr("is_update") == "1") {
             if (record.hints != undefined && record.hints.length > 0) {
                 var array = record.hints.split(";");
                 if (array != undefined && array.length > 0) {
                     // clear checkboxes
                     var cbHints = $("#buildJavaHints :checkbox");
                     if (cbHints != undefined && cbHints.length > 0) {
-                        $.each(cbHints, function (i, n) {
-                            $(cbHints[i]).prop("checked", false);
+                        $.each(cbHints, function (index, value) {
+                            $(cbHints[index]).prop("checked", false);
                         });
                     }
-                    $.each(array, function (i, n) {
-                        $("#chk_build_" + n).prop("checked", true);
+                    $.each(array, function (index, value) {
+                        $("#chk_build_" + value).prop("checked", true);
                     });
                 }
             }
@@ -795,8 +822,8 @@
 
     var step2_2_1_getSelectedConditionParamCount = function () {
         var count = 0;
-        $('#selected_condition>option').each(function (index, value) {
-            var array = value["value"].split(",");
+        $("#selected_condition>option").each(function (index, value) {
+            var array = value.value.split(",");
             if (array.length == 1) {
                 return; // continue
             }
@@ -824,7 +851,7 @@
         if ($("#page1").attr('is_update') == "1") {
             // 模式：
             // Age,6,aa,bb,nullable,sensitive;Name,1,param2,nullable,sensitive;
-            var conditions = record['condition'].split(";");
+            var conditions = record.condition.split(";");
             for (var j = 0; j < conditions.length; j++) {
                 var condition = conditions[j];
                 var array = condition.split(",");
@@ -858,11 +885,11 @@
             i++;
             var name = names.shift();
             var nullable = nullables.shift();
-            nullable = nullable != undefined ? nullable : 'false';
-            nullable = nullable != 'false' ? 'checked="checked"' : "";
+            nullable = nullable != undefined ? nullable : "false";
+            nullable = nullable != "false" ? "checked='checked'" : "";
             var sensitive = sensitives.shift();
-            sensitive = sensitive != undefined ? sensitive : 'false';
-            sensitive = sensitive != 'false' ? 'checked="checked"' : "";
+            sensitive = sensitive != undefined ? sensitive : "false";
+            sensitive = sensitive != "false" ? "checked='checked'" : "";
             if (name != null && name != "") {
                 html = html + sprintf(variableHtml_ForJAVA, name, nullable, sensitive) + "</div><br/>";
             } else {
@@ -872,17 +899,17 @@
         return html;
     };
 
-    var variableHtml_ForJAVA_Insert = '<div class="row-fluid"><input type="text" class="span3" value="%s" disabled>'
-        + ' <input type="checkbox" style="display:none">&nbsp;&nbsp;参数敏感：<input type="checkbox" %s ></div><br/>';
+    var variableHtml_ForJAVA_Insert = "<div class='row-fluid'><input type='text' class='span3' value='%s' disabled>"
+        + " <input type='checkbox' style='display:none'>&nbsp;&nbsp;参数敏感：<input type='checkbox' %s ></div><br/>";
 
     var step2_2_1_java_insert = function (record, current, crud_option) {
         var html = "";
         var names = new Array();
         var nullables = new Array();
         var sensitives = new Array();
-        if ($("#page1").attr('is_update') == "1") {
+        if ($("#page1").attr("is_update") == "1") {
             // 模式： Age,6,aa,nullable,sensitive;Name,1,param2,nullable,sensitive;
-            var conditions = record['condition'].split(";");
+            var conditions = record.condition.split(";");
             for (var j = 0; j < conditions.length; j++) {
                 var condition = conditions[j];
                 var array = condition.split(",");
@@ -892,12 +919,12 @@
             }
         }
 
-        var fields = $('#fields').multipleSelect('getSelects');
+        var fields = $("#fields").multipleSelect("getSelects");
         for (var i = 0; i < fields.length; i++) {
             var name = names.shift();
             var sensitive = sensitives.shift();
-            sensitive = sensitive != undefined ? sensitive : 'false';
-            sensitive = sensitive != 'false' ? 'checked="checked"' : "";
+            sensitive = sensitive != undefined ? sensitive : "false";
+            sensitive = sensitive != "false" ? "checked='checked'" : "";
             if (name != null && name != "" && name != "undefined") {
                 html = html + sprintf(variableHtml_ForJAVA_Insert, name, sensitive);
             } else {
@@ -916,9 +943,9 @@
         var count = step2_2_1_getSelectedConditionParamCount();
         var names = new Array();
         var nullables = new Array();
-        if ($("#page1").attr('is_update') == "1") {
+        if ($("#page1").attr("is_update") == "1") {
             // 模式： Age,6,aa,bb;Name,1,param2;
-            var conditions = record['condition'].split(";");
+            var conditions = record.condition.split(";");
             for (var j = 0; j < conditions.length; j++) {
                 var condition = conditions[j];
                 var array = condition.split(",");
@@ -959,8 +986,8 @@
             i++;
             var temp = names.shift();
             var nullable = nullables.shift();
-            nullable = nullable != undefined ? nullable : 'false';
-            nullable = nullable != 'false' ? 'checked="checked"' : "";
+            nullable = nullable != undefined ? nullable : "false";
+            nullable = nullable != "false" ? "checked='checked'" : "";
             if (temp != null && temp != "") {
                 namesStack.shift();
                 html = html + sprintf(variableHtml, temp, nullable) + "</div><br/>";
@@ -974,11 +1001,11 @@
 
     var step2_2_2 = function (record, current) {
         var postData = {};
-        postData["db_name"] = $("#databases").val();
-        postData["table_name"] = $("#tables").val();
-        postData["crud_type"] = $("#crud_option").val();
-        postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
-        postData["pagination"] = $("#auto_sql_pagination").is(":checked");
+        postData.db_name = $("#databases").val();
+        postData.table_name = $("#tables").val();
+        postData.crud_type = $("#crud_option").val();
+        postData.fields = $('#fields').multipleSelect("getSelects").join(",");
+        postData.pagination = $("#auto_sql_pagination").is(":checked");
 
         var paramValues = [];
         $.each($("#param_list_auto").children("div"), function (i, n) {
@@ -1003,13 +1030,11 @@
             }
         });
 
-        postData["condition"] = selectedConditions.join(";");
-        var mockValueHtml = '<div class="row-fluid">'
-            + '<label class="control-label popup_label span3 text-right">&nbsp;%s&nbsp;</label>'
-            + '<input type="text" class="span4" value="%s">' +
-            // '<label class="control-label popup_label">&nbsp;&nbsp;Example
-            // Value:%s</label>' +
-            '</div><br>';
+        postData.condition = selectedConditions.join(";");
+        var mockValueHtml = "<div class='row-fluid'>"
+            + "<label class='control-label popup_label span3 text-right'>&nbsp;%s&nbsp;</label>"
+            + "<input type='text' class='span4' value='%s'>"
+            + "</div><br>";
         $("#auto_sql_mock_value").html(" ");
         $.post("/rest/task/auto/getMockValue", postData, function (data) {
             if (data.code == "OK") {
@@ -1036,15 +1061,16 @@
 
     var getAutoSqlParamName = function () {
         var paramList = [];
-        if ($("#crud_option").val() == 'select' || $("#crud_option").val() == 'delete') {
+        var crudOption = $("#crud_option").val();
+        if (crudOption == "select" || crudOption == "delete") {
             $.each($("#param_list_auto").children("div"), function (index, value) {
                 var first = $(value).children("input").eq(0);
                 paramList.push($(first).val());
             });
-        } else if ($("#crud_option").val() == 'insert') {
-            paramList = $('#fields').multipleSelect('getSelects');
-        } else if ($("#crud_option").val() == 'update') {
-            paramList = $('#fields').multipleSelect('getSelects');
+        } else if (crudOption == "insert") {
+            paramList = $("#fields").multipleSelect("getSelects");
+        } else if (crudOption == "update") {
+            paramList = $("#fields").multipleSelect("getSelects");
             $.each($("#param_list_auto").children("div"), function (index, value) {
                 var first = $(value).children("input").eq(0);
                 paramList.push($(first).val());
@@ -1055,10 +1081,10 @@
 
     var step2_2_3 = function (record, current) {
         var postData = {};
-        postData["db_name"] = $("#databases").val();
-        postData["table_name"] = $("#tables").val();
-        postData["crud_type"] = $("#crud_option").val();
-        postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
+        postData.db_name = $("#databases").val();
+        postData.table_name = $("#tables").val();
+        postData.crud_type = $("#crud_option").val();
+        postData.fields = $('#fields').multipleSelect("getSelects").join(",");
 
         var paramValues = [];
         $.each($("#param_list_auto").children("div"), function (index, value) {
@@ -1083,13 +1109,13 @@
                 count++;
             }
         });
-        postData["condition"] = selectedConditions.join(";");
-        postData["sql_content"] = ace.edit("sql_builder").getValue();
+        postData.condition = selectedConditions.join(";");
+        postData.sql_content = ace.edit("sql_builder").getValue();
 
-        if ("select" == postData["crud_type"]) {
-            postData["pagination"] = $("#auto_sql_pagination").is(":checked");
+        if (postData.crud_type == "select") {
+            postData.pagination = $("#auto_sql_pagination").is(":checked");
         } else {
-            postData["pagination"] = false;
+            postData.pagination = false;
         }
 
         var mockValues = [];
@@ -1105,13 +1131,13 @@
                 if ($("#crud_option").val() == "select" && $(".step2-2-1").attr("dbCatalog") == "MySql") {
                     $("#auto_sql_validate_result").html(data.info + ". And below is the sql execution plan.");
 
-                    var explanJson = $.parseJSON(data['explanJson']);
-                    $("#auto_select_type").html(explanJson[0]['select_type']);
-                    $("#auto_type").html(explanJson[0]['type']);
-                    $("#auto_possible_keys").html(explanJson[0]['possible_keys']);
-                    $("#auto_key").html(explanJson[0]['key']);
-                    $("#auto_rows").html(explanJson[0]['rows']);
-                    $("#auto_extra").html(explanJson[0]['extra']);
+                    var explanJson = $.parseJSON(data.explanJson);
+                    $("#auto_select_type").html(explanJson[0]["select_type"]);
+                    $("#auto_type").html(explanJson[0]["type"]);
+                    $("#auto_possible_keys").html(explanJson[0]["possible_keys"]);
+                    $("#auto_key").html(explanJson[0]["key"]);
+                    $("#auto_rows").html(explanJson[0]["rows"]);
+                    $("#auto_extra").html(explanJson[0]["extra"]);
                     $("#auto_sql_validate_result_div > table").show();
                 } else {
                     $("#auto_sql_validate_result").html(data.info);
@@ -1139,7 +1165,7 @@
 
     var step2_3_1 = function (record, current) {
         var sql_method_name = $.trim($("#sql_method_name").val());
-        if (sql_method_name == null || sql_method_name == "") {
+        if (sql_method_name == null || sql_method_name.length == 0) {
             $("#error_msg").html("请输入方法名");
             return;
         }
@@ -1153,7 +1179,9 @@
     };
 
     var existKeyword_Nolock = function () {
-        if ($("#free_sql_crud_option").val() == "select" && ace.edit("sql_editor").getValue().toLowerCase().indexOf("nolock") == -1 && $(".step2-2-1").attr("dbCatalog") != "MySql") {
+        if ($("#free_sql_crud_option").val() == "select"
+            && ace.edit("sql_editor").getValue().toLowerCase().indexOf("nolock") == -1
+            && $(".step2-2-1").attr("dbCatalog") != "MySql") {
             $.showMsg("error_msg", "select语句中必须含有with (nolock)");
             return false;
         }
@@ -1179,9 +1207,8 @@
         var i = 0;
 
         var conVal = new Array();
-        if ($("#page1").attr('is_update') == "1") {
+        if ($("#page1").attr("is_update") == "1") {
             var splitedParams = record.parameters.split(";");
-
             $.each(splitedParams, function (index, value) {
                 var resultParams = value.split(",");
                 conVal.push(resultParams[0]);
@@ -1205,6 +1232,7 @@
                 }
             }
         }
+
         if (htmls.length == 0) {
             while ((result = regexNames.exec(sqlContent))) {
                 i++;
@@ -1239,7 +1267,7 @@
             $("#customJavaHints").hide();
         }
 
-        if ($("#page1").attr('is_update') == "1") {
+        if ($("#page1").attr("is_update") == "1") {
             splitedParams = record.parameters.split(";");
             $.each(splitedParams, function (index, value) {
                 if (index <= i) {
@@ -1247,10 +1275,10 @@
                     var paramIndex = index + 1;
                     $("#db_type_param" + paramIndex).val(resultParams[1]);
                     if ($("#sql_style").val() != "csharp") {
-                        var chk = $("#db_type_param" + paramIndex).siblings('div').children(":checkbox");
+                        var chk = $("#db_type_param" + paramIndex).siblings("div").children(":checkbox");
                         var sensitive = resultParams[2];
-                        sensitive = sensitive != undefined ? sensitive : 'false';
-                        if (sensitive == 'false') {
+                        sensitive = sensitive != undefined ? sensitive : "false";
+                        if (sensitive == "false") {
                             chk.prop("checked", false);
                         }
                     }
@@ -1292,12 +1320,13 @@
             var second = $(value).children("select").eq(0);
             paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
         });
-        postData["params"] = paramList.join(";");
+        postData.params = paramList.join(";");
 
-        var mockValueHtml = '<div class="row-fluid">'
-            + '<label class="control-label popup_label span3 text-right">&nbsp;%s&nbsp;</label>'
-            + '<input type="text" class="span4" value="%s">' +
-            '</div><br>';
+        var mockValueHtml = "<div class='row-fluid'>"
+            + "<label class='control-label popup_label span3 text-right'>&nbsp;%s&nbsp;</label>"
+            + "<input type='text' class='span4' value='%s'>"
+            + "</div><br>";
+
         $("#free_sql_mock_value").html(" ");
         $.post("/rest/task/sql/getMockValue", postData, function (data) {
             if (data.code == "OK") {
@@ -1350,10 +1379,11 @@
     };
 
     var step2_3_4 = function (record, current) {
+        var crudOption = $("#free_sql_crud_option").val();
         var postData = {};
-        postData["db_name"] = $("#databases").val();
-        postData["crud_type"] = $("#free_sql_crud_option").val();
-        postData["sql_content"] = ace.edit("sql_editor").getValue();
+        postData.db_name = $("#databases").val();
+        postData.crud_type = crudOption;
+        postData.sql_content = ace.edit("sql_editor").getValue();
 
         var paramList = [];
         $.each($("#param_list").children("div"), function (index, value) {
@@ -1361,12 +1391,12 @@
             var second = $(value).children("select").eq(0);
             paramList.push(sprintf("%s,%s", $(first).val(), $(second).val()));
         });
-        postData["params"] = paramList.join(";");
+        postData.params = paramList.join(";");
 
-        if ($("#free_sql_crud_option").val() == "select") {
-            postData["pagination"] = $("#free_sql_pagination").is(":checked");
+        if (crudOption == "select") {
+            postData.pagination = $("#free_sql_pagination").is(":checked");
         } else {
-            postData["pagination"] = false;
+            postData.pagination = false;
         }
 
         var mockValues = [];
@@ -1374,7 +1404,7 @@
             var first = $(value).children("input").eq(0);
             mockValues.push($(first).val());
         });
-        postData["mockValues"] = mockValues.join(";");
+        postData.mockValues = mockValues.join(";");
 
         $("#free_sql_validate_result").empty();
         $.post("/rest/task/sql/sqlValidate", postData).done(function (data) {
@@ -1382,7 +1412,8 @@
                 $("#error_msg").empty();
                 if ($("#free_sql_crud_option").val() == "select" && $(".step2-2-1").attr("dbCatalog") == "MySql") {
                     $("#free_sql_validate_result").html(data.info + ". And below is the sql execution plan.");
-                    var explanJson = $.parseJSON(data['explanJson']);
+
+                    var explanJson = $.parseJSON(data.explanJson);
                     $("#free_select_type").html(explanJson[0]['select_type']);
                     $("#free_type").html(explanJson[0]['type']);
                     $("#free_possible_keys").html(explanJson[0]['possible_keys']);
@@ -1415,6 +1446,7 @@
 
     wizzard.prototype = {
         clear: function () {
+            $("#comment").val("");
             $("#error_msg").html("");
 
             $("#prefix").val("");
@@ -1437,15 +1469,15 @@
             editor.getSession().setMode("ace/mode/sql");
             editor.setValue(null);
 
-            $("#free_sql_pagination").prop('checked', false);
-            $("#auto_sql_pagination").prop('checked', false);
+            $("#free_sql_pagination").prop("checked", false);
+            $("#auto_sql_pagination").prop("checked", false);
         },
         next: function (current) {
             // 首先获取当前Grid选中的行,records是id数组
-            var records = w2ui['grid'].getSelection();
+            var records = w2ui["grid"].getSelection();
             var record = null;
             if (records.length > 0) {
-                record = w2ui['grid'].get(records[0]);
+                record = w2ui["grid"].get(records[0]);
             }
 
             $("#error_msg").css("color", "red");

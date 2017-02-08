@@ -15,18 +15,18 @@
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dao-gen-core</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-dao-gen</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-dao-gen</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
             <type>warpath</type>
         </dependency>
         <dependency>

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.status;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -67,7 +68,7 @@ public class HAStatus extends BaseStatus implements HAStatusMBean {
 	}
 	
 	private Set<Integer> parseErrorCodes(String codes){
-		Set<Integer> temp = new HashSet<Integer>();
+		Set<Integer> temp = new TreeSet<Integer>();
 		String[] tokens = codes.split(",");
 		for (String code : tokens) {
 			temp.add(Integer.valueOf(code));

@@ -27,7 +27,6 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.exceptions.DalException;
 
 public class TaskAdapter<T> implements DaoTask<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
@@ -53,8 +52,6 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	protected Set<String> pkColumns;
 	protected Set<String> sensitiveColumns;
 	protected Map<String, Integer> columnTypes = new HashMap<String, Integer>();
-	protected Character startDelimiter;
-	protected Character endDelimiter;
 	
 	protected String updateCriteriaTmpl;
 	protected String setValueTmpl;
@@ -78,7 +75,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 		initColumnTypes();
 		
 		dbCategory = getDatabaseSet(logicDbName).getDatabaseCategory();
-		setDatabaseCategory(dbCategory);
+		initDbSpecific();
 		initSensitiveColumns();
 	}
 	
@@ -130,24 +127,6 @@ public class TaskAdapter<T> implements DaoTask<T> {
 		}
 		
 		setVersionValueTmpl = quotedVersionColumn + "=" + valueTmpl;
-	}
-	
-	/**
-	 * This is to set DatabaseCategory to initialize startDelimiter/endDelimiter and findtmp.
-	 * This will apply db specific settings. So the dao is no longer reusable across different dbs.
-	 * @param dBCategory The target Db category
-	 */
-	public void setDatabaseCategory(DatabaseCategory dbCategory) {
-		if(DatabaseCategory.MySql == dbCategory) {
-			startDelimiter = '`';
-			endDelimiter = startDelimiter;
-		} else if(DatabaseCategory.SqlServer == dbCategory ) {
-			startDelimiter = '[';
-			endDelimiter = ']';
-			findtmp = "SELECT * FROM %s WITH (NOLOCK) WHERE %s";
-		} else
-			throw new RuntimeException("Such Db category not suported yet");
-		initDbSpecific();
 	}
 	
 	public String getTableName(DalHints hints) throws SQLException {
@@ -408,21 +387,14 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	}
 	
 	public String quote(String column) {
-		if(startDelimiter == null)
-			return column;
-		return new StringBuilder().append(startDelimiter).append(column).append(endDelimiter).toString();
+		return dbCategory.quote(column);
 	}
 
 	public StringBuilder quote(StringBuilder sb, String column) {
-		if(startDelimiter == null)
-			return sb.append(column);
-		return sb.append(startDelimiter).append(column).append(endDelimiter);
+		return sb.append(dbCategory.quote(column));
 	}
 	
 	public Object[] quote(Set<String> columns) {
-		if(startDelimiter == null)
-			return columns.toArray();
-		
 		Object[] quatedColumns = columns.toArray();
 		for(int i = 0; i < quatedColumns.length; i++)
 			quatedColumns[i] = quote((String)quatedColumns[i]);
@@ -430,8 +402,6 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	}
 	
 	public String[] quote(String[] columns) {
-		if(startDelimiter == null)
-			return columns;
 		String[] quatedColumns = new String[columns.length];
 		for(int i = 0; i < columns.length; i++)
 			quatedColumns[i] = quote(columns[i]);

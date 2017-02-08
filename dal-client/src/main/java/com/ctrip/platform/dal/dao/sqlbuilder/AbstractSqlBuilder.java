@@ -13,7 +13,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 
 public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 	
-	protected DatabaseCategory dbCategory = DatabaseCategory.MySql;
+	protected DatabaseCategory dbCategory;
 	
 	protected StatementParameters parameters = new StatementParameters();
 	
@@ -102,7 +102,7 @@ public abstract class AbstractSqlBuilder implements TableSqlBuilder {
 			return fieldName;
 		}
 
-		return dbCategory.wrapField(fieldName);
+		return dbCategory.quote(fieldName);
 	}
 	
 	/**

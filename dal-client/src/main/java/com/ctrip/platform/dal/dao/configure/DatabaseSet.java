@@ -9,14 +9,10 @@ import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.exceptions.DalException;
 
 public class DatabaseSet {
-	public static final String SQL_PROVIDER = "sqlProvider";
-	public static final String MYSQL_PROVIDER = "mySqlProvider";
-
 	private static final String CLASS = "class";
 	private static final String ENTRY_SEPARATOR = ";";
 	private static final String KEY_VALUE_SEPARATOR = "=";
@@ -48,28 +44,11 @@ public class DatabaseSet {
 	public DatabaseSet(String name, String provider, String shardStrategy, Map<String, DataBase> databases) throws Exception {
 		this.name = name;
 		this.provider = provider;
-		initDbCategory();
+		dbCategory = DatabaseCategory.matchWith(provider);
 		this.databases = databases;
 
 		initStrategy(shardStrategy);
 		initShards();
-	}
-	
-	private void initDbCategory() {
-		if(provider == null)
-			throw new RuntimeException("The provider is NULL in Dal.config for databaseSet:" + name);
-		
-		if(provider.equals(SQL_PROVIDER)) {
-			dbCategory = DatabaseCategory.SqlServer;
-			return;
-		}
-		
-		if(provider.equals(MYSQL_PROVIDER)) {
-			dbCategory = DatabaseCategory.MySql;
-			return;
-		}
-		
-		throw new RuntimeException("The provider: " + provider + " is not recoganized in Dal.config for databaseSet:" + name);
 	}
 	
 	private void initStrategy(String shardStrategy) throws Exception {

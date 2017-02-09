@@ -16,8 +16,7 @@ public class DalDataSourceFactory {
 	/**
 	 * Create DataSource for given name. The appid and titan url will be discoved by framework foundation
 	 * @param allInOneKey
-	 * @param svcUrl
-	 * @return
+	 * @return DataSource
 	 * @throws Exception
 	 */
 	public DataSource createDataSource(String allInOneKey) throws Exception {
@@ -28,7 +27,7 @@ public class DalDataSourceFactory {
 	 * Create DataSource for given name. In case user has clog or cat configured. The name will be same for both PROD and DEV environment
 	 * @param allInOneKey
 	 * @param svcUrl
-	 * @return
+	 * @return DataSource
 	 * @throws Exception
 	 */
 	public DataSource createDataSource(String allInOneKey, String svcUrl) throws Exception {
@@ -40,7 +39,7 @@ public class DalDataSourceFactory {
 	 * @param allInOneKey
 	 * @param svcUrl
 	 * @param appid
-	 * @return
+	 * @return DataSource
 	 * @throws Exception
 	 */
 	public DataSource createDataSource(String allInOneKey, String svcUrl, String appid) throws Exception {

@@ -101,7 +101,7 @@ public class HATest {
 		}catch(SQLException e){}
 
 		Assert.assertEquals(0, count ==null ? 0 : count.intValue());
-		Assert.assertEquals(DalHAManager.getRetryCount(), hints.getHA()
+		Assert.assertEquals(DalStatusManager.getHaStatus().getRetryCount(), hints.getHA()
 				.getRetryCount());
 	}
 

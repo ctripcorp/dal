@@ -25,7 +25,7 @@ public class SQLParser {
 	 * If you see this get called, please make sure to regenerated code with code gen
 	 * @param original
 	 * @param parms
-	 * @return
+	 * @return Combined SQL
 	 * @deprecated if you see this, please regenerated your code with code gen
 	 * @throws SQLException
 	 */

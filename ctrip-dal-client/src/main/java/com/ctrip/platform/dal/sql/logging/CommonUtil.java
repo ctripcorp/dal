@@ -70,7 +70,7 @@ public class CommonUtil {
 	/**
      * For encrypt input/output parameters
      * @param encryptString
-     * @return
+     * @return encrypted value
      */
 	public static String desEncrypt(String encryptString) {
 		if (encryptString == null)
@@ -89,7 +89,7 @@ public class CommonUtil {
 	/**
      * For decrypt input/output parameters
      * @param encryptString
-     * @return
+     * @return dcrypted value
      */
 	public static String desDecrypt(String encryptString) {
 		if (encryptString == null)

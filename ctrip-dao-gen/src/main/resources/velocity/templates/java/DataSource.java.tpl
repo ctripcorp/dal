@@ -10,6 +10,7 @@
               maxActive="100"
               minIdle="0"
               maxWait="10000"
+              maxAge="30000"
               initialSize="1"
               removeAbandonedTimeout="60"
               removeAbandoned="true"

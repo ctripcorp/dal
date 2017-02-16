@@ -229,7 +229,9 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
             dbCategory = DatabaseCategory.MySql;
         }
 
-        for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(task.getAllInOneName(), task.getSql_content(), task.getParameters(), new CsharpGivenSqlResultSetExtractor(dbCategory))) {
+        List<AbstractParameterHost> list = DbUtils.testAQuerySql(task.getAllInOneName(), task.getSql_content(), task.getParameters(), new CsharpGivenSqlResultSetExtractor(dbCategory));
+
+        for (AbstractParameterHost _ahost : list) {
             pHosts.add((CSharpParameterHost) _ahost);
         }
 

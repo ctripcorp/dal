@@ -19,8 +19,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.sql.Timestamp;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 复杂查询（额外生成实体类）
@@ -187,6 +188,41 @@ public class GenTaskByFreeSqlResource {
         return sqlTypes;
     }
 
+    private int[] getTypes(List<Parameter> list) {
+        int length = list.size();
+        if (list == null || length == 0) {
+            return null;
+        }
+
+        int[] array = new int[length];
+        int index = 0;
+        for (Parameter p : list) {
+            array[index] = p.getType();
+            index++;
+        }
+
+        return array;
+    }
+
+    private String[] getValues(List<Parameter> list) {
+        int length = list.size();
+        if (list == null || length == 0) {
+            return null;
+        }
+
+        String[] array = new String[length];
+        int index = 0;
+        for (Parameter p : list) {
+            array[index] = p.getValue();
+            index++;
+        }
+
+        return array;
+    }
+
+    private static final String expression = "[@:]\\w+";
+    private static final Pattern pattern = Pattern.compile(expression);
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("sqlValidate")
@@ -194,9 +230,56 @@ public class GenTaskByFreeSqlResource {
         Status status = Status.OK;
 
         try {
-            sql_content = sql_content.replaceAll("[@:]\\w+", "?");
-            int[] sqlTypes = getSqlTypes(params);
-            String[] vals = mockValues.split(";");
+            Map<String, Parameter> map = new HashMap<>();
+            List<Parameter> list = new ArrayList<>();
+            Matcher matcher = pattern.matcher(sql_content);
+            while (matcher.find()) {
+                String parameter = matcher.group();
+                Parameter p = new Parameter();
+                p.setName(parameter.substring(1));  //trim @
+                list.add(p);
+            }
+
+            String[] values = mockValues.split(";");
+            String[] parameters = params.split(";");
+            if (parameters != null && parameters.length > 0) {
+                for (int i = 0; i < parameters.length; i++) {
+                    String[] array = parameters[i].split(",");
+                    if (array != null && array.length > 0) {
+                        String name = array[0];
+                        int type = Integer.valueOf(array[1]);
+                        if (!map.containsKey(name)) {
+                            Parameter p = new Parameter();
+                            p.setType(type);
+                            p.setValue(values[i]);
+                            map.put(name, p);
+                        }
+                    }
+                }
+            }
+
+            if (list.size() > 0) {
+                for (Parameter p : list) {
+                    String name = p.getName();
+                    Parameter temp = map.get(name);
+                    if (temp != null) {
+                        p.setType(temp.getType());
+                        p.setValue(temp.getValue());
+                    }
+                }
+            } else {
+                for (Map.Entry<String, Parameter> entry : map.entrySet()) {
+                    Parameter p = new Parameter();
+                    Parameter temp = entry.getValue();
+                    p.setType(temp.getType());
+                    p.setValue(temp.getValue());
+                    list.add(p);
+                }
+            }
+
+            sql_content = sql_content.replaceAll(expression, "?");
+            int[] sqlTypes = getTypes(list);
+            values = getValues(list);
 
             DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
             String dbName = databaseSetEntry.getConnectionString();
@@ -209,10 +292,10 @@ public class GenTaskByFreeSqlResource {
             }
 
             if ("select".equalsIgnoreCase(crud_type)) {
-                validResult = SQLValidation.queryValidate(dbName, sql_content, sqlTypes, vals);
+                validResult = SQLValidation.queryValidate(dbName, sql_content, sqlTypes, values);
                 resultPrefix = "The result count is ";
             } else {
-                validResult = SQLValidation.updateValidate(dbName, sql_content, sqlTypes, vals);
+                validResult = SQLValidation.updateValidate(dbName, sql_content, sqlTypes, values);
             }
 
             if (validResult != null && validResult.isPassed()) {

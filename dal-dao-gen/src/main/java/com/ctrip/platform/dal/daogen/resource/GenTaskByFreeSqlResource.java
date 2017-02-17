@@ -247,6 +247,9 @@ public class GenTaskByFreeSqlResource {
                     String[] array = parameters[i].split(",");
                     if (array != null && array.length > 0) {
                         String name = array[0];
+                        if (name.isEmpty()) {
+                            continue;
+                        }
                         int type = Integer.valueOf(array[1]);
                         if (!map.containsKey(name)) {
                             Parameter p = new Parameter();

@@ -307,9 +307,11 @@ public class AbstractCSharpDataPreparer {
         for (String condition : conditions) {
             String[] tokens = StringUtils.split(condition, ",");
             if (tokens.length == 1) {
-                CSharpParameterHost host = new CSharpParameterHost();
-                host.setConditionType(ConditionType.valueOf(Integer.parseInt(tokens[0])));
-                parameters.add(host);
+                if (builder.getCrud_type().equals("select")) {
+                    CSharpParameterHost host = new CSharpParameterHost();
+                    host.setConditionType(ConditionType.valueOf(Integer.parseInt(tokens[0])));
+                    parameters.add(host);
+                }
                 continue;
             }
             String name = tokens[0];

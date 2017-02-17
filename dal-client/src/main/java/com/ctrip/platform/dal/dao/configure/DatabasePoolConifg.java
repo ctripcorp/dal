@@ -19,6 +19,7 @@ public class DatabasePoolConifg {
 		poolProperties.setMaxActive(DatabasePoolConfigParser.DEFAULT_MAXACTIVE);
 		poolProperties.setMinIdle(DatabasePoolConfigParser.DEFAULT_MINIDLE);
 		poolProperties.setMaxWait(DatabasePoolConfigParser.DEFAULT_MAXWAIT);
+		poolProperties.setMaxAge(DatabasePoolConfigParser.DEFAULT_MAXAGE);
 		poolProperties.setInitialSize(DatabasePoolConfigParser.DEFAULT_INITIALSIZE);
 		poolProperties.setRemoveAbandonedTimeout(DatabasePoolConfigParser.DEFAULT_REMOVEABANDONEDTIMEOUT);
 		poolProperties.setRemoveAbandoned(DatabasePoolConfigParser.DEFAULT_REMOVEABANDONED);

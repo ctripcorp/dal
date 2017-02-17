@@ -62,6 +62,7 @@ public class DatabasePoolConfigParser {
 	public static final int DEFAULT_MAXACTIVE = 100;
 	public static final int DEFAULT_MINIDLE = 0;
 	public static final int DEFAULT_MAXWAIT = 10000;
+	public static final int DEFAULT_MAXAGE = 30000;
 	public static final int DEFAULT_INITIALSIZE = 10;
 	public static final int DEFAULT_REMOVEABANDONEDTIMEOUT = 60;
 	public static final boolean DEFAULT_REMOVEABANDONED = true;

@@ -64,10 +64,7 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 		if(count  == 0)
 			return selectSqlTemplate;
 		
-		String suffix = dbCategory.getPageSuffixTpl();
-		String sql = selectSqlTemplate + suffix;
-		
-		return String.format(sql, start, count);
+		return dbCategory.buildPage(selectSqlTemplate, start, count);
 	}
 
 	public <T> FreeSelectSqlBuilder<K> mapWith(DalRowMapper<T> mapper) {

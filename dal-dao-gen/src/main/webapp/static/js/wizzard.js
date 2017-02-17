@@ -1207,13 +1207,15 @@
         var i = 0;
 
         var conVal = new Array();
-        if ($("#page1").attr("is_update") == "1") {
-            var splitedParams = record.parameters.split(";");
-            $.each(splitedParams, function (index, value) {
-                var resultParams = value.split(",");
-                conVal.push(resultParams[0]);
-            });
-        }
+        /*
+         if ($("#page1").attr("is_update") == "1") {
+         var splitedParams = record.parameters.split(";");
+         $.each(splitedParams, function (index, value) {
+         var resultParams = value.split(",");
+         conVal.push(resultParams[0]);
+         });
+         }
+         */
 
         while ((result = regexIndex.exec(sqlContent))) {
             i++;
@@ -1234,14 +1236,26 @@
         }
 
         if (htmls.length == 0) {
+            var paramArray = new Array();
             while ((result = regexNames.exec(sqlContent))) {
                 i++;
                 var temp = conVal.shift();
                 if ($("#sql_style").val() == "csharp") {
                     if (temp != null && temp != "") {
+                        if ($.inArray(temp, paramArray) == -1) {
+                            paramArray.push(temp);
+                        }
+
                         htmls = htmls + sprintf(variableHtmlOrigin, temp) + sprintf(variable_typesHtml, sprintf("id='db_type_%s'", sprintf("param%s", i)));
                     } else {
                         var realName = result[1];
+                        if ($.inArray(realName, paramArray) > -1) {
+                            continue;
+                        }
+                        else {
+                            paramArray.push(realName);
+                        }
+
                         htmls = htmls + sprintf(variableHtmlOrigin, realName) + sprintf(variable_typesHtml, sprintf("id='db_type_%s'", realName));
                     }
                 } else {

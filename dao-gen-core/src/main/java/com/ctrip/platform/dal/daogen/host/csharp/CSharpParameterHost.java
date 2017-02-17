@@ -254,12 +254,16 @@ public class CSharpParameterHost extends AbstractParameterHost implements Compar
 
     @Override
     public String toString() {
-        return this.getName().toString();
+        String n = getName();
+        return n.equals(null) ? "" : n.toString();
     }
 
     @Override
     public int compareTo(CSharpParameterHost o) {
-        return this.getName().toLowerCase().compareTo(o.getName().toLowerCase());
+        String n = getName();
+        if (n.equals(null))
+            n = "";
+        return n.toLowerCase().compareTo(o.getName().toLowerCase());
     }
 
 }

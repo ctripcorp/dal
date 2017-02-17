@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.utils;
 
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
+import com.ctrip.platform.dal.daogen.entity.Parameter;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.DbType;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
@@ -372,37 +373,91 @@ public class DbUtils {
         return new ArrayList<>();
     }
 
-    public static List<AbstractParameterHost> testAQuerySql(String allInOneName, final String sql, final String params, final ResultSetExtractor<List<AbstractParameterHost>> extractor) throws Exception {
+    public static List<AbstractParameterHost> testAQuerySql(String allInOneName, final String sql,
+                                                            final String params, final ResultSetExtractor<List<AbstractParameterHost>> extractor) throws Exception {
         return execute(allInOneName, new ConnectionCallback<List<AbstractParameterHost>>() {
             @Override
             public List<AbstractParameterHost> doInConnection(Connection connection) throws SQLException, DataAccessException {
+                List<Parameter> list = new ArrayList<>();
                 String[] parameters = params.split(";");
+                if (parameters != null && parameters.length > 0) {
+                    for (String p : parameters) {
+                        String[] tuple = p.split(",");
+                        if (tuple != null && tuple.length > 0) {
+                            Parameter parameter = new Parameter();
+                            parameter.setName(tuple[0]);
+                            parameter.setType(Integer.valueOf(tuple[1]));
+                            list.add(parameter);
+                        }
+                    }
+                }
+
+                Matcher matcher = pattern.matcher(sql);
+                //Match C# parameters
+                if (matcher.find()) {
+                    list = getActualParameters(sql, list);
+                }
+
                 Matcher m = inRegxPattern.matcher(sql);
                 String temp = sql;
                 while (m.find()) {
                     temp = temp.replace(m.group(1), String.format("(?) "));
                 }
-                String replacedSql = temp.replaceAll("[@:]\\w+", "?");
+                String replacedSql = temp.replaceAll(expression, "?");
                 PreparedStatement ps = connection.prepareStatement(replacedSql);
                 int index = 0;
-                for (String param : parameters) {
-                    if (param != null && !param.isEmpty()) {
-                        String[] tuple = param.split(",");
-                        try {
-                            index = Integer.valueOf(tuple[0]);
-                        } catch (NumberFormatException ex) {
-                            index++;
-                        }
-                        if (Integer.valueOf(tuple[1]) == 10001)
-                            ps.setObject(index, mockATest(Integer.valueOf(tuple[1])), Types.BINARY);
-                        else
-                            ps.setObject(index, mockATest(Integer.valueOf(tuple[1])), Integer.valueOf(tuple[1]));
+                for (Parameter parameter : list) {
+                    String name = parameter.getName();
+                    int type = parameter.getType();
+                    try {
+                        index = Integer.valueOf(name);
+                    } catch (NumberFormatException ex) {
+                        index++;
+                    }
+                    if (type == 10001) {
+                        ps.setObject(index, mockATest(type), Types.BINARY);
+                    } else {
+                        ps.setObject(index, mockATest(type), type);
                     }
                 }
                 ResultSet rs = ps.executeQuery();
                 return extractor.extractData(rs);
             }
         });
+    }
+
+    private static final String expression = "[@:]\\w+";
+    private static final Pattern pattern = Pattern.compile(expression);
+
+    private static List<Parameter> getActualParameters(final String sql, List<Parameter> parameters) {
+        List<Parameter> list = new ArrayList<>();
+        Matcher matcher = pattern.matcher(sql);
+        while (matcher.find()) {
+            String parameter = matcher.group();
+            Parameter p = new Parameter();
+            p.setName(parameter.substring(1));
+            list.add(p);
+        }
+
+        Map<String, Parameter> map = new HashMap<>();
+        if (parameters != null && parameters.size() > 0) {
+            for (Parameter p : parameters) {
+                String name = p.getName();
+                if (!map.containsKey(name)) {
+                    map.put(name, p);
+                }
+            }
+        }
+
+        for (Parameter p : list) {
+            String name = p.getName();
+            Parameter temp = map.get(name);
+            if (temp != null) {
+                p.setType(temp.getType());
+            }
+        }
+
+        return list;
     }
 
     public static Object mockATest(int javaSqlTypes) {
